@@ -245,12 +245,16 @@ def _candidate_gate_violations_v1(metric: dict, policy: dict) -> dict:
             finite = False
             excess = float("inf")
         elif sense == "MAX":
-            if threshold <= 0:
+            if threshold < 0:
                 raise QualificationError(
-                    "CLOSEST_CANDIDATE_MAX_THRESHOLD_NONPOSITIVE:"
+                    "CLOSEST_CANDIDATE_MAX_THRESHOLD_NEGATIVE:"
                     + metric_name
                 )
-            excess = max(0.0, value / threshold - 1.0)
+            excess = (
+                max(0.0, value)
+                if threshold == 0.0
+                else max(0.0, value / threshold - 1.0)
+            )
         elif sense == "MIN":
             if threshold <= 0:
                 raise QualificationError(

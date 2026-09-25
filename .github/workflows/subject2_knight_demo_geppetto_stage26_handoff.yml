@@ -98,16 +98,28 @@ jobs:
           version='4.5.14'
           base="https://download.blender.org/release/Blender4.5"
           archive="blender-${version}-linux-x64.tar.xz"
-          install_root="$RUNNER_TEMP/realsas_blender"
-          mkdir -p "$install_root"
-          curl --fail --location --retry 3 --retry-delay 2 "$base/$archive" --output "$RUNNER_TEMP/$archive"
-          curl --fail --location --retry 3 --retry-delay 2 "$base/blender-${version}.sha256" --output "$RUNNER_TEMP/blender.sha256"
-          (cd "$RUNNER_TEMP" && grep "  $archive\$" blender.sha256 | sha256sum --check -)
-          tar -xJf "$RUNNER_TEMP/$archive" -C "$install_root"
-          exe="$install_root/blender-${version}-linux-x64/blender"
-          test -x "$exe"
-          echo "BLENDER_EXE=$exe" >> "$GITHUB_ENV"
-          "$exe" --version | head -n 2
+          cache_root="$REALSAS_AUTHORITY_ROOT/tools/blender-${version}-linux-x64"
+          cached_exe="$cache_root/blender"
+          if test -x "$cached_exe"; then
+            echo "BLENDER_CACHE_HIT=1"
+            echo "BLENDER_EXE=$cached_exe" >> "$GITHUB_ENV"
+            "$cached_exe" --version | head -n 2
+            exit 0
+          fi
+          tmp_root="$RUNNER_TEMP/realsas_blender_${version}_$"
+          mkdir -p "$tmp_root"
+          curl --fail --location --retry 3 --retry-delay 2 "$base/$archive" --output "$tmp_root/$archive"
+          curl --fail --location --retry 3 --retry-delay 2 "$base/blender-${version}.sha256" --output "$tmp_root/blender.sha256"
+          (cd "$tmp_root" && grep "  $archive\$" blender.sha256 | sha256sum --check -)
+          tar -xJf "$tmp_root/$archive" -C "$tmp_root"
+          extracted="$tmp_root/blender-${version}-linux-x64"
+          test -x "$extracted/blender"
+          mkdir -p "$(dirname "$cache_root")"
+          rm -rf "$cache_root.tmp"
+          mv "$extracted" "$cache_root.tmp"
+          mv "$cache_root.tmp" "$cache_root"
+          echo "BLENDER_EXE=$cached_exe" >> "$GITHUB_ENV"
+          "$cached_exe" --version | head -n 2
 
       - name: Stage exact pinned Knight FBX
         shell: bash

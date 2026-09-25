@@ -1,0 +1,14 @@
+{
+  "schema": "RealSaS.KnightDemoStage16_19RerunTrigger.v1",
+  "status": "REQUESTED",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "reason": "RERUN_LATEST_HEAD_AFTER_STAGE15_GATE_SCOPE_FIX_AND_PREREGISTERED_STAGE18_FALLBACK",
+  "required_branch_head_features": [
+    "STALE_FAILURE_IDENTITY_REOPEN",
+    "STAGE18_RELATION_BASELINE_DEMO_FALLBACK_PREREGISTERED_BEFORE_METRICS",
+    "STAGE15_GATE_SCOPED_TO_ORDINALS_1_THROUGH_15"
+  ],
+  "observed_prior_stage18_blocker": "CDT_PARENT_MIN_ANGLE_UNREPAIRABLE_WITHOUT_BOUNDARY_SPLIT",
+  "product_authority_claimed": false,
+  "product_pass_forbidden": true
+}

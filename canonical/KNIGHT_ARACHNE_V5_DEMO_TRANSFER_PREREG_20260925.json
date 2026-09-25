@@ -18,13 +18,17 @@
     "qualified_skeleton_lineage_hash": "c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce",
     "qualified_skeleton_joint_count": 28,
     "teacher_target_npz_sha256": "26d4d5411b14b23b894f0351ab08fc2da2b18d8fb3ac4776b25b8b2434b4bbc1",
-    "source_fbx_sha256": "b25e35cc7eaaa3c7c103f10a4f41fde1cbd81936fede9aa9ae4efbd29d40ba1b"
+    "source_fbx_sha256": "b25e35cc7eaaa3c7c103f10a4f41fde1cbd81936fede9aa9ae4efbd29d40ba1b",
+    "teacher_projection_semantics_revision": "COVERAGE_MASK_V2_BEFORE_OPTIMIZER"
   },
   "teacher_boundary": "OBJECTIVE_AND_EVALUATION_ONLY__NEVER_PREDICTOR_INPUT",
   "teacher_projection": {
     "rule": "EXACT_SOURCE_TRIANGLE_CLOSEST_POINT_BARYCENTRIC_WITH_COMPONENT_MECHANICAL_ATTACHMENT",
-    "p95_distance_over_source_bbox_diag_max": 0.05,
-    "max_distance_over_source_bbox_diag_max": 0.15,
+    "clean_distance_over_source_bbox_diag_max": 0.05,
+    "minimum_clean_rows_required": 192,
+    "coverage_warn_below": 0.9,
+    "coverage_semantics": "TEACHER_OBJECTIVE_AND_EVALUATION_MASK_ONLY__NOT_PRODUCT_GEOMETRY_GATE",
+    "free_running_prediction_required_for_all_surface_rows": true,
     "target_proposal_order_must_match_hungarian_assignment": true
   },
   "training": {

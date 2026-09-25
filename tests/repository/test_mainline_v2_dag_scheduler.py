@@ -5,6 +5,7 @@ from pathlib import Path
 
 from compiler.realsas_compiler_services.orchestrator.mainline import (
     _fingerprint,
+    _manifest_subset,
     _outputs_verify,
     _seal_outputs,
     _target_closure,
@@ -173,3 +174,66 @@ def test_existing_output_verification_rejects_size_and_schema_drift(tmp_path):
     row["outputs"][0]["bytes"] = 3
     row["outputs"][0]["schema"] = "UNSPECIFIED"
     assert not _outputs_verify(row, allowed_root=tmp_path)
+
+
+def test_geppetto_prereg_fingerprint_subset_ignores_future_execution_refs():
+    stage = {
+        "id": "26_GEPPETTO_FIT_PREREGISTERED",
+        "manifest_keys": ["geppetto_fit"],
+    }
+    manifest = {
+        "geppetto_fit": {
+            "preregistration": {"path": "/authority/prereg.json", "sha256": "a" * 64},
+            "execution_receipt": None,
+            "checkpoint": None,
+            "result": None,
+            "proposal": None,
+        }
+    }
+    before = _manifest_subset(manifest, stage)
+    manifest["geppetto_fit"].update(
+        execution_receipt={"path": "/authority/receipt.json", "sha256": "b" * 64},
+        checkpoint={"path": "/authority/model.pt", "sha256": "c" * 64},
+        result={"path": "/authority/result.json", "sha256": "d" * 64},
+        proposal={"path": "/authority/proposal.json", "sha256": "e" * 64},
+    )
+    after = _manifest_subset(manifest, stage)
+    assert before == after
+    assert before == {
+        "geppetto_fit": {
+            "preregistration": {"path": "/authority/prereg.json", "sha256": "a" * 64}
+        }
+    }
+
+
+def test_geppetto_execution_fingerprint_subset_binds_execution_refs():
+    stage = {"id": "27_GEPPETTO_FIT", "manifest_keys": ["geppetto_fit"]}
+    manifest = {
+        "geppetto_fit": {
+            "preregistration": {"path": "/authority/prereg.json", "sha256": "a" * 64},
+            "checkpoint": {"path": "/authority/model.pt", "sha256": "c" * 64},
+        }
+    }
+    before = _manifest_subset(manifest, stage)
+    manifest["geppetto_fit"]["checkpoint"]["sha256"] = "f" * 64
+    after = _manifest_subset(manifest, stage)
+    assert before != after
+
+
+def test_arachne_prereg_fingerprint_subset_ignores_future_execution_refs():
+    stage = {
+        "id": "30_ARACHNE_FIT_PREREGISTERED",
+        "manifest_keys": ["arachne_fit"],
+    }
+    manifest = {
+        "arachne_fit": {
+            "preregistration": {"path": "/authority/prereg.json", "sha256": "1" * 64},
+            "checkpoint": None,
+        }
+    }
+    before = _manifest_subset(manifest, stage)
+    manifest["arachne_fit"]["checkpoint"] = {
+        "path": "/authority/skin.pt",
+        "sha256": "2" * 64,
+    }
+    assert _manifest_subset(manifest, stage) == before

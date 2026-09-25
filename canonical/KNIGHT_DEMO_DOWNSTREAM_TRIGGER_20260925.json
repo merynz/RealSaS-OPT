@@ -1,0 +1,14 @@
+{
+  "schema": "RealSaS.KnightDemoDownstreamTrigger.v1",
+  "status": "REQUESTED_AFTER_SEALED_STAGE15",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "execution_class": "DEMO_WITNESS",
+  "stage15_receipt": "canonical/KNIGHT_DEMO_STAGE15_RECEIPT_20260925.json",
+  "trigger_scope": [
+    "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED_THROUGH_19_STATIC_CANONICAL_MESH_QUALIFIED",
+    "26_GEPPETTO_FIT_PREREGISTERED_AND_STAGE27_HANDOFF"
+  ],
+  "product_authority_claimed": false,
+  "product_pass_forbidden": true
+}

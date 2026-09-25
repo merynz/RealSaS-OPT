@@ -567,6 +567,114 @@ def decode_zero_surface_stage(ctx: dict) -> dict:
         )
     )
 
+    demo = _demo_frozen_iris_import_cfg(ctx)
+    if demo is not None:
+        npz_ref = dict(demo.get("zero_surface_npz") or {})
+        decoder_ref = dict(demo.get("decoder_result") or {})
+        npz_path = load_file_ref(npz_ref, json_required=False)
+        decoder_path, decoder_sha, decoder = _demo_ref_payload(decoder_ref)
+        npz_sha = sha256_file(npz_path)
+        if str(decoder.get("arm") or "") != "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE":
+            raise QualificationError("DEMO_ZERO_SURFACE_ARM_DRIFT")
+        if str(decoder.get("decoder_id") or "") != (
+            "RealSaS.ZeroSurfaceDecoder.SparseRegularT512T1024IndexedMT."
+            "ExactShellContainment.v5_1"
+        ):
+            raise QualificationError("DEMO_ZERO_SURFACE_DECODER_DRIFT")
+        containment = dict(decoder.get("containment") or {})
+        if containment.get("passed") is not True:
+            raise QualificationError("DEMO_ZERO_SURFACE_CONTAINMENT_NOT_PASS")
+        mesh = dict(decoder.get("mesh") or {})
+        if str(mesh.get("npz_sha256") or "") != npz_sha:
+            raise QualificationError("DEMO_ZERO_SURFACE_NPZ_BINDING_DRIFT")
+        diagnostics = dict(mesh.get("diagnostics") or {})
+        normal_diag = dict(diagnostics.get("implicit_normal_diagnostics") or {})
+        if bool(normal_diag.get("teacher_truth_used", True)):
+            raise QualificationError("DEMO_ZERO_SURFACE_TEACHER_TRUTH_USED")
+
+        with np.load(npz_path, allow_pickle=False) as data:
+            required = {"vertices_normalized", "faces", "implicit_normals"}
+            if not required.issubset(set(data.files)):
+                raise QualificationError("ZERO_SURFACE_NPZ_ARRAYS_MISSING")
+            vertices = np.asarray(data["vertices_normalized"]).copy()
+            faces = np.asarray(data["faces"]).copy()
+            normals = np.asarray(data["implicit_normals"]).copy()
+        if (
+            vertices.ndim != 2
+            or vertices.shape[1] != 3
+            or not np.isfinite(vertices).all()
+            or faces.ndim != 2
+            or faces.shape[1] != 3
+            or not np.issubdtype(faces.dtype, np.integer)
+            or np.any(faces < 0)
+            or np.any(faces >= len(vertices))
+            or normals.shape != vertices.shape
+            or not np.isfinite(normals).all()
+        ):
+            raise QualificationError("DEMO_ZERO_SURFACE_ARRAYS_INVALID")
+        vertices_sha = _array_hash(vertices)
+        faces_sha = _array_hash(faces)
+        normals_sha = _array_hash(normals)
+        expected_arrays = {
+            "vertex_count": int(len(vertices)),
+            "face_count": int(len(faces)),
+            "vertices_sha256": vertices_sha,
+            "faces_sha256": faces_sha,
+            "implicit_normals_sha256": normals_sha,
+        }
+        for key, actual in expected_arrays.items():
+            expected = mesh.get(key)
+            if isinstance(actual, int):
+                if int(expected or -1) != actual:
+                    raise QualificationError(f"DEMO_ZERO_SURFACE_MESH_DRIFT:{key}")
+            elif str(expected or "") != actual:
+                raise QualificationError(f"DEMO_ZERO_SURFACE_MESH_DRIFT:{key}")
+
+        value = SignedZeroSurfaceSealIR(
+            checkpoint.checkpoint_seal_hash,
+            observation.observation_set_hash,
+            normalization.normalization_hash,
+            str(npz_path),
+            npz_sha,
+            str(decoder_path),
+            decoder_sha,
+            int(len(vertices)),
+            int(len(faces)),
+            vertices_sha,
+            faces_sha,
+            normals_sha,
+            "",
+            metadata={
+                "decoder_id": str(decoder["decoder_id"]),
+                "teacher_truth_used": False,
+                "historical_demo_import": True,
+                "decoder_evidence_schema": "V5_LONG_HORIZON_DECODER_RESULT",
+                "exact_containment_passed": True,
+                "normalized_coordinate_domain": "[-1,1]^3",
+                "v2_role": "DENSE_GEOMETRY_EVIDENCE",
+                "product_authority_claimed": False,
+            },
+        )
+        value = replace(value, zero_surface_hash=signed_zero_surface_hash(value))
+        root = ctx["run_root"] / "artifacts" / "12_ZERO_SURFACE_DECODED"
+        return {
+            "status": "PASS",
+            "outputs": [
+                write_ir(
+                    root / "signed_zero_surface_seal.json",
+                    value,
+                    authority_class="DEMO_IRIS_SIGNED_ZERO_SURFACE_SEAL",
+                )
+            ],
+            "diagnostics": {
+                "zero_surface_hash": value.zero_surface_hash,
+                "vertex_count": value.vertex_count,
+                "face_count": value.face_count,
+                "historical_demo_import": True,
+                "product_authority_claimed": False,
+            },
+        }
+
     cfg = dict(ctx["run_manifest"].get("geometry_decode") or {})
     npz_ref = dict(cfg.get("zero_surface_npz") or {})
     metadata_ref = dict(cfg.get("zero_surface_metadata") or {})

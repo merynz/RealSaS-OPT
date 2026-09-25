@@ -412,7 +412,6 @@ jobs:
           PY
           command -v rclone
           remote='gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/GEPPETTO_STAGE27_HANDOFF'
-          rclone sync "$handoff" "$remote" --checksum
           echo "GEPPETTO_HANDOFF_ROOT=$handoff" >> "$GITHUB_ENV"
           echo "GEPPETTO_HANDOFF_REMOTE=$remote" >> "$GITHUB_ENV"
 
@@ -439,10 +438,7 @@ jobs:
               --preflight-only
           test -s "$out/GEPPETTO_KNIGHT_PREFLIGHT.json"
           cp "$out/GEPPETTO_KNIGHT_PREFLIGHT.json" "$handoff/GEPPETTO_KNIGHT_PREFLIGHT.json"
-          rclone copyto \
-            "$handoff/GEPPETTO_KNIGHT_PREFLIGHT.json" \
-            "$GEPPETTO_HANDOFF_REMOTE/GEPPETTO_KNIGHT_PREFLIGHT.json" \
-            --checksum
+          rclone sync "$handoff" "$GEPPETTO_HANDOFF_REMOTE" --checksum
 
       - name: Seal Stage26 handoff receipt into branch
         shell: bash

@@ -8,6 +8,10 @@ on:
     paths:
       - 'canonical/KNIGHT_DEMO_TRANSFER_PROBE_TRIGGER_20260924.json'
 
+concurrency:
+  group: subject2-knight-demo-v2-run
+  cancel-in-progress: false
+
 permissions:
   contents: write
 

@@ -1,0 +1,12 @@
+{
+  "schema": "RealSaS.KnightGeppettoStage26Trigger.v1",
+  "status": "REQUESTED_FIRST_PASS_DEMO_REVISION_RERUN_AFTER_STAGE15_GATE_FIX",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "execution_class": "DEMO_WITNESS",
+  "geppetto_stop_policy": "FIRST_CHECK_WHERE_ALL_FOUR_FROZEN_DIFFUSION_SEEDS_PASS",
+  "terminal_checks": 1,
+  "thresholds_changed": false,
+  "product_authority_claimed": false,
+  "product_pass_forbidden": true
+}

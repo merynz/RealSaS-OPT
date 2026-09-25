@@ -452,7 +452,11 @@ jobs:
               --preflight-only
           test -s "$out/GEPPETTO_KNIGHT_PREFLIGHT.json"
           cp "$out/GEPPETTO_KNIGHT_PREFLIGHT.json" "$handoff/GEPPETTO_KNIGHT_PREFLIGHT.json"
-          rclone sync "$handoff" "$GEPPETTO_HANDOFF_REMOTE" --checksum
+          rclone sync "$handoff" "$GEPPETTO_HANDOFF_REMOTE" \
+            --checksum \
+            --transfers 8 \
+            --checkers 8 \
+            --drive-chunk-size 64M
 
       - name: Seal Stage26 handoff receipt into branch
         shell: bash

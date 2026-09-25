@@ -5,9 +5,7 @@ on:
     branches:
       - research/vf11-certified-adaptive-20260921
     paths:
-      - 'canonical/KNIGHT_DEMO_STAGE15_RECEIPT_20260925.json'
       - 'canonical/KNIGHT_DEMO_STAGE19_RECEIPT_20260925.json'
-      - 'canonical/KNIGHT_DEMO_DOWNSTREAM_TRIGGER_20260925.json'
   workflow_dispatch:
 
 concurrency:

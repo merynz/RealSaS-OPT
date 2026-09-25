@@ -81,31 +81,62 @@ def robust_zero_surface_normals_v1(points, orientation_hints, *, k: int = 64) ->
     return out.astype(np.float32)
 
 
-def _mesh_connected_component_labels(vertex_count:int, faces:np.ndarray)->np.ndarray:
-    parent=np.arange(int(vertex_count),dtype=np.int64)
-    rank=np.zeros(int(vertex_count),dtype=np.int8)
+def mesh_connected_component_labels_v1(
+    vertex_count: int,
+    faces: np.ndarray,
+    *,
+    face_chunk_size: int = 524288,
+) -> np.ndarray:
+    """Exact mesh connectivity partition without Python per-face union loops.
 
-    def find(x:int)->int:
-        while parent[x]!=x:
-            parent[x]=parent[parent[x]]
-            x=int(parent[x])
-        return x
+    Labels are canonicalized by the minimum vertex id in each connected component.
+    Only the partition is authority; union traversal order is deliberately not.
+    """
+    n = int(vertex_count)
+    f = np.asarray(faces, dtype=np.int64)
+    if n < 1 or f.ndim != 2 or f.shape[1] != 3:
+        raise QualificationError("MESH_COMPONENT_LABEL_INPUT_INVALID")
+    if np.any(f < 0) or np.any(f >= n):
+        raise QualificationError("MESH_COMPONENT_LABEL_FACE_INDEX_INVALID")
+    chunk = int(face_chunk_size)
+    if chunk < 1:
+        raise QualificationError("MESH_COMPONENT_LABEL_CHUNK_INVALID")
 
-    def union(a:int,b:int)->None:
-        ra,rb=find(a),find(b)
-        if ra==rb:
-            return
-        if rank[ra]<rank[rb]:
-            ra,rb=rb,ra
-        parent[rb]=ra
-        if rank[ra]==rank[rb]:
-            rank[ra]+=1
+    parent = np.arange(n, dtype=np.int64)
 
-    for a,b,c in np.asarray(faces,dtype=np.int64):
-        union(int(a),int(b)); union(int(b),int(c)); union(int(c),int(a))
-    roots=np.asarray([find(i) for i in range(int(vertex_count))],dtype=np.int64)
-    _,labels=np.unique(roots,return_inverse=True)
+    def compress() -> None:
+        nonlocal parent
+        while True:
+            nxt = parent[parent]
+            if np.array_equal(nxt, parent):
+                return
+            parent = nxt
+
+    while True:
+        compress()
+        changed = False
+        for start in range(0, len(f), chunk):
+            rows = f[start : start + chunk]
+            for left, right in ((0, 1), (1, 2), (2, 0)):
+                ra = parent[rows[:, left]]
+                rb = parent[rows[:, right]]
+                hi = np.maximum(ra, rb)
+                lo = np.minimum(ra, rb)
+                active = hi != lo
+                if np.any(active):
+                    changed = True
+                    np.minimum.at(parent, hi[active], lo[active])
+        if not changed:
+            break
+
+    compress()
+    roots = parent
+    _, labels = np.unique(roots, return_inverse=True)
     return labels.astype(np.int64)
+
+
+def _mesh_connected_component_labels(vertex_count:int, faces:np.ndarray)->np.ndarray:
+    return mesh_connected_component_labels_v1(vertex_count, faces)
 
 
 def _adaptive_voxel_compact(points, faces, dense_normals, *, target_nodes: int, preserve_connected_components: bool=False):

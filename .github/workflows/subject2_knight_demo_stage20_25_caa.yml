@@ -164,6 +164,10 @@ jobs:
           git config user.name 'realsas-self-hosted-runner'
           git config user.email 'runner@realsas.local'
           git add canonical/KNIGHT_DEMO_CAA_STAGE25_RECEIPT_20260925.json
+          if git diff --cached --quiet; then
+            echo "CAA_STAGE25_RECEIPT_ALREADY_CURRENT=1"
+            exit 0
+          fi
           git commit -m 'demo: seal Knight CAA Stage25 evidence'
           git fetch origin research/vf11-certified-adaptive-20260921
           git rebase origin/research/vf11-certified-adaptive-20260921

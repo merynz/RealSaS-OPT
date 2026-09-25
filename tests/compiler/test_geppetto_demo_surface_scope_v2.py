@@ -53,7 +53,10 @@ def test_geppetto_accepts_explicit_demo_surface_scope():
 
 
 def test_geppetto_rejects_demo_surface_in_product_witness():
-    with pytest.raises(QualificationError, match="GEPPETTO_STAGE15_SURFACE_NOT_ADMISSIBLE"):
+    with pytest.raises(
+        QualificationError,
+        match="GEPPETTO_PRODUCT_SURFACE_QUALIFICATION_STATUS_DRIFT",
+    ):
         _assert_geppetto_surface_scope(
             _ctx(execution_class="WITNESS", ledger_status="PASS"),
             _qualification(

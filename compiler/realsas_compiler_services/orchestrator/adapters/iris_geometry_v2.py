@@ -211,6 +211,20 @@ def _demo_frozen_iris_import_cfg(ctx: dict) -> dict | None:
     return demo
 
 
+def _demo_frozen_zero_import_cfg(ctx: dict) -> dict | None:
+    if str(ctx["ledger"].get("execution_class") or "") != "DEMO_WITNESS":
+        return None
+    cfg = dict(ctx["run_manifest"].get("geometry_decode") or {})
+    demo = dict(cfg.get("demo_frozen_import") or {})
+    if not demo:
+        return None
+    if demo.get("enabled") is not True:
+        raise QualificationError("DEMO_ZERO_IMPORT_NOT_EXPLICITLY_ENABLED")
+    if demo.get("product_authority_claimed") is not False:
+        raise QualificationError("DEMO_ZERO_IMPORT_PRODUCT_AUTHORITY_FORBIDDEN")
+    return demo
+
+
 def _demo_ref_payload(ref: dict, *, expected_schema: str | None = None):
     payload = load_file_ref(
         dict(ref),
@@ -567,7 +581,7 @@ def decode_zero_surface_stage(ctx: dict) -> dict:
         )
     )
 
-    demo = _demo_frozen_iris_import_cfg(ctx)
+    demo = _demo_frozen_zero_import_cfg(ctx)
     if demo is not None:
         npz_ref = dict(demo.get("zero_surface_npz") or {})
         decoder_ref = dict(demo.get("decoder_result") or {})

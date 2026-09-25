@@ -1,0 +1,127 @@
+name: subject2-knight-caa-adaptive-tile-diagnostic
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_CAA_ADAPTIVE_TILE_DIAGNOSTIC_TRIGGER_20260925.json'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-demo-v2-run
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  diagnostic:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Gate adaptive tile evidence code
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m py_compile compiler/realsas_compiler_core/appearance_compile_v2.py
+
+      - name: Measure per-face source-density demand
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+
+          from compiler.realsas_compiler_core.appearance_compile_v2 import (
+              projected_adaptive_face_tile_evidence,
+          )
+          from compiler.realsas_compiler_core.artifact_codec_v2 import (
+              canonical_mesh_candidate_from_dict,
+              qualified_camera_set_from_dict,
+              qualified_observation_set_from_dict,
+          )
+          from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
+              stage_output_payload,
+          )
+          from compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2 import (
+              _load_policy_document,
+              _load_source_inputs,
+          )
+
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          manifest=json.loads((root/"run_manifest.json").read_text())
+          ctx={"ledger":ledger,"run_manifest":manifest,"run_root":root}
+          observation=qualified_observation_set_from_dict(
+              stage_output_payload(
+                  ctx,"07_OBSERVATION_CONTRACT_QUALIFIED",
+                  "RealSaS.QualifiedObservationSetIR.v1",
+              )
+          )
+          cameras=qualified_camera_set_from_dict(
+              stage_output_payload(
+                  ctx,"05_CAMERA_CONTRACT_SOLVED",
+                  "RealSaS.QualifiedCameraSetIR.v1",
+              )
+          )
+          candidate=canonical_mesh_candidate_from_dict(
+              stage_output_payload(
+                  ctx,"18_CANONICAL_MESH_ADDRESSING_BUILD",
+                  "RealSaS.CanonicalMeshCandidateIR.v1",
+              )
+          )
+          _rgba,masks=_load_source_inputs(ctx,observation)
+          policy=_load_policy_document(ctx)
+          compile_policy=dict(policy["compile_policy"])
+          evidence=projected_adaptive_face_tile_evidence(
+              candidate=candidate,
+              cameras=cameras.cameras,
+              foreground_mask_by_view=masks,
+              candidate_resolutions=tuple(
+                  int(v) for v in compile_policy["tile_resolution_candidates"]
+              ),
+              max_source_pixels_per_atlas_texel=float(
+                  compile_policy["max_source_pixels_per_atlas_texel"]
+              ),
+              bleed_px=int(compile_policy["bleed_px"]),
+              max_atlas_resolution=int(compile_policy["max_atlas_resolution"]),
+          )
+          payload={
+              **evidence,
+              "run_id":os.environ["RUN_ID"],
+              "candidate_lineage_hash":candidate.candidate_lineage_hash,
+              "product_authority_claimed":False,
+              "quality_thresholds_changed":False,
+          }
+          out=Path("canonical/KNIGHT_CAA_ADAPTIVE_TILE_DIAGNOSTIC_20260925.json")
+          out.write_text(json.dumps(payload,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          print(json.dumps(payload,sort_keys=True))
+          PY
+
+      - name: Seal adaptive tile evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'realsas-self-hosted-runner'
+          git config user.email 'runner@realsas.local'
+          git add canonical/KNIGHT_CAA_ADAPTIVE_TILE_DIAGNOSTIC_20260925.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'appearance: seal Knight adaptive tile density evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

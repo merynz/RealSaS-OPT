@@ -3,7 +3,7 @@
   "status": "RERUN_REQUESTED",
   "date_utc": "2026-09-25",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
-  "probe_revision": 14,
+  "probe_revision": 15,
   "probe_scope": "FROZEN_C_STAGE14_15__PREREGISTERED_DEMO_CLOSEST_CARRIER",
   "expected_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
   "expected_zero_surface_sha256": "adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c",
@@ -34,5 +34,6 @@
     "product_policy_mutated": false,
     "selection_rule": "MIN_FAILED_GATES__MIN_MAX_RELATIVE_EXCESS__MIN_SUM_RELATIVE_EXCESS__MAX_ACTUAL_NODES__MIN_TARGET_CAP_V1",
     "full_failure_diagnostics_persistence_required": true
-  }
+  },
+  "last_gate_fix": "ZERO_MAX_THRESHOLD_DIAGNOSTIC_EXCESS_IS_ABSOLUTE__PRODUCT_POLICY_UNCHANGED"
 }

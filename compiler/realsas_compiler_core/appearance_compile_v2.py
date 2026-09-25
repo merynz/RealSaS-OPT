@@ -312,6 +312,160 @@ def projected_tile_resolution_evidence(
     }
 
 
+
+def projected_adaptive_face_tile_evidence(
+    *,
+    candidate,
+    cameras,
+    foreground_mask_by_view: Mapping[int, np.ndarray],
+    candidate_resolutions: tuple[int, ...],
+    max_source_pixels_per_atlas_texel: float,
+    bleed_px: int,
+    max_atlas_resolution: int,
+) -> dict:
+    """Measure per-face source-density requirements and deterministic page demand.
+
+    This is evidence only. It does not change compile sampling or asset layout.
+    Every face receives the smallest frozen candidate resolution whose projected
+    source footprint satisfies the same source-pixels-per-texel limit. Faces not
+    directly visible in the source observation set receive the minimum candidate
+    resolution and are reported separately.
+    """
+    resolutions=tuple(sorted(set(int(x) for x in candidate_resolutions)))
+    if not resolutions or resolutions[0]<4:
+        raise QualificationError("CAA_ADAPTIVE_TILE_CANDIDATES_INVALID")
+    limit=float(max_source_pixels_per_atlas_texel)
+    max_res=int(max_atlas_resolution)
+    bleed=int(bleed_px)
+    if not math.isfinite(limit) or limit<=0.0 or max_res<256 or bleed<1:
+        raise QualificationError("CAA_ADAPTIVE_TILE_POLICY_INVALID")
+
+    vertex_ids=[_candidate_vertex_id(vertex) for vertex in candidate.vertices]
+    index={vertex_id:i for i,vertex_id in enumerate(vertex_ids)}
+    xyz=np.asarray([vertex.P for vertex in candidate.vertices],dtype=np.float64)
+    face_count=len(candidate.faces)
+    per_face_sigma=np.zeros(face_count,dtype=np.float64)
+    observed=np.zeros(face_count,dtype=bool)
+
+    by_view={int(camera.view_index):camera for camera in cameras}
+    if set(by_view)!=set(range(8)):
+        raise QualificationError("CAA_ADAPTIVE_TILE_REQUIRES_V0_V7_CAMERAS")
+    for view in range(8):
+        mask=np.asarray(foreground_mask_by_view[view],dtype=bool)
+        camera=by_view[view]
+        visibility=rasterize_visible_owner(
+            candidate,camera,width=mask.shape[1],height=mask.shape[0]
+        )
+        owner=visibility.owner_face_index
+        face_ids=np.unique(owner[mask & (owner>=0)]).astype(np.int64)
+        if not len(face_ids):
+            continue
+        projected=np.asarray(project_points_xyz_v3(xyz,camera),dtype=np.float64)
+        for face_index in face_ids:
+            face=candidate.faces[int(face_index)]
+            ids=[index[str(vertex_id)] for vertex_id in face]
+            tri=projected[ids,:2]
+            matrix=np.asarray(
+                [
+                    [tri[1,0]-tri[0,0],tri[2,0]-tri[0,0]],
+                    [tri[1,1]-tri[0,1],tri[2,1]-tri[0,1]],
+                ],
+                dtype=np.float64,
+            )
+            sigma=float(np.max(np.linalg.svd(matrix,compute_uv=False)))
+            if not math.isfinite(sigma):
+                raise QualificationError("CAA_ADAPTIVE_TILE_PROJECTED_SCALE_NONFINITE")
+            observed[int(face_index)]=True
+            if sigma>per_face_sigma[int(face_index)]:
+                per_face_sigma[int(face_index)]=sigma
+
+    selected=np.full(face_count,-1,dtype=np.int32)
+    unsatisfied=np.zeros(face_count,dtype=bool)
+    minimum=resolutions[0]
+    for face_index in range(face_count):
+        if not observed[face_index]:
+            selected[face_index]=minimum
+            continue
+        sigma=float(per_face_sigma[face_index])
+        choice=None
+        for resolution in resolutions:
+            if sigma/float(resolution-1)<=limit:
+                choice=resolution
+                break
+        if choice is None:
+            unsatisfied[face_index]=True
+            selected[face_index]=resolutions[-1]
+        else:
+            selected[face_index]=int(choice)
+
+    histogram={str(res):int(np.count_nonzero(selected==res)) for res in resolutions}
+    stride_by_resolution={res:int(res+2*bleed) for res in resolutions}
+    tiles=[
+        (stride_by_resolution[int(selected[i])],int(i),int(selected[i]))
+        for i in range(face_count)
+    ]
+    # Deterministic decreasing-size shelf packing. Evidence only; exact asset
+    # packing can later use the same order or a stronger deterministic packer.
+    tiles.sort(key=lambda row:(-row[0],row[1]))
+    page=0
+    x=0
+    y=0
+    row_height=0
+    placements=[]
+    for stride,face_index,resolution in tiles:
+        if stride>max_res:
+            raise QualificationError("CAA_ADAPTIVE_TILE_EXCEEDS_PAGE")
+        if x+stride>max_res:
+            x=0
+            y+=row_height
+            row_height=0
+        if y+stride>max_res:
+            page+=1
+            x=0
+            y=0
+            row_height=0
+        placements.append((face_index,page,x,y,stride,resolution))
+        x+=stride
+        row_height=max(row_height,stride)
+    page_count=0 if not placements else 1+max(row[1] for row in placements)
+    total_tile_area=int(sum(row[0]*row[0] for row in tiles))
+    lower_bound_pages=int(math.ceil(total_tile_area/float(max_res*max_res)))
+
+    return {
+        "schema":"RealSaS.CAAAdaptiveFaceTileEvidence.v1",
+        "mode":"PROJECTED_SOURCE_DENSITY_PER_FACE_V1",
+        "face_count":int(face_count),
+        "observed_face_count":int(np.count_nonzero(observed)),
+        "unobserved_face_count":int(np.count_nonzero(~observed)),
+        "unsatisfied_face_count":int(np.count_nonzero(unsatisfied)),
+        "candidate_resolutions":list(resolutions),
+        "selected_resolution_histogram":histogram,
+        "max_source_pixels_per_atlas_texel":limit,
+        "bleed_px":bleed,
+        "max_page_resolution":max_res,
+        "total_allocated_tile_area_texels":total_tile_area,
+        "page_area_texels":int(max_res*max_res),
+        "area_lower_bound_page_count":lower_bound_pages,
+        "deterministic_shelf_page_count":int(page_count),
+        "packing_efficiency_vs_page_area":(
+            0.0 if page_count<=0 else float(total_tile_area)/(page_count*max_res*max_res)
+        ),
+        "maximum_observed_sigma_px":float(np.max(per_face_sigma,initial=0.0)),
+        "maximum_required_resolution":int(np.max(selected,initial=minimum)),
+        "placement_hash":content_sha256([
+            {
+                "face_index":face_index,
+                "page_index":page_index,
+                "x":x0,
+                "y":y0,
+                "stride":stride,
+                "tile_resolution":resolution,
+            }
+            for face_index,page_index,x0,y0,stride,resolution in placements
+        ]),
+    }
+
+
 def resolve_projected_tile_resolution(
     *,
     candidate,

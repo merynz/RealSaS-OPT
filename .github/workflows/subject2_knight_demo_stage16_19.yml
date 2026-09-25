@@ -119,7 +119,21 @@ jobs:
               if event.get("event") in {"STAGE_EXCEPTION","STAGE_FAILED","STAGE_BLOCKED"}:
                   print("STAGE16_19_HISTORY",json.dumps(event,sort_keys=True))
           PY
-          if test "$rc" -ne 0; then exit "$rc"; fi
+          if test "$rc" -ne 0; then
+            python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          for row in ledger["stages"]:
+              if row["status"] not in {"FAIL","ABSTAIN","BLOCKED"}:
+                  continue
+              p=root/"artifacts"/row["id"]/"failure_diagnostics.json"
+              if p.is_file():
+                  print("FULL_FAILURE_DIAGNOSTICS",row["id"],p.read_text())
+          PY
+            exit "$rc"
+          fi
           python - <<'PY'
           import json,os
           from pathlib import Path

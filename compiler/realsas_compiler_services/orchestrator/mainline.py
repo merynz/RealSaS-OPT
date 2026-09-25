@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import ast
 import hashlib
 import importlib
@@ -682,8 +683,8 @@ def _manifest_subset(manifest: dict, stage: dict) -> dict:
                 {"preregistration": cfg.get("preregistration")}
             )
         else:
-            subset[key] = _canon(value)
-    return subset
+            subset[key] = copy.deepcopy(_canon(value))
+    return copy.deepcopy(subset)
 
 
 def _path_within(path: Path, root: Path) -> bool:

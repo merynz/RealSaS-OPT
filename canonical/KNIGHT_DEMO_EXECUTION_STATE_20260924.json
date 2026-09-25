@@ -1,118 +1,59 @@
 {
-  "schema": "RealSaS.KnightDemoExecutionState.v1",
-  "status": "PAUSED_AT_STAGE08__MESHLRM_MESH_GRAD_RATIO_SWEEP_V10_400STEP_AUDITED_READY",
-  "date_utc": "2026-09-24",
+  "schema": "RealSaS.KnightDemoExecutionState.v2",
+  "status": "DEMO_ONLY_CONTINUED_THROUGH_STAGE15__DOWNSTREAM_PENDING",
+  "date_utc": "2026-09-25",
   "branch": "research/vf11-certified-adaptive-20260921",
   "run": {
     "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
     "subject_id": "SUBJECT2_KNIGHT",
     "execution_class": "DEMO_WITNESS",
     "product_authority_claimed": false,
-    "product_pass_forbidden": true,
-    "stage13_scientific_pass": false
+    "product_pass_forbidden": true
   },
-  "geometry": {
-    "scientific_state": "STAGE13_FAIL",
-    "demo_choice": "FROZEN_C_FALLBACK",
+  "exact_frozen_c": {
     "checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
     "zero_surface_sha256": "adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c",
-    "spatial_risk_demo_closure": "canonical/IRIS_V5_C_SPATIAL_RISK_REPLAY_DEMO_CLOSURE_20260924.json",
-    "demo_authority": "canonical/KNIGHT_DEMO_EXECUTION_AUTHORITY_20260924.json"
-  },
-  "fresh_demo_preflight": {
-    "workflow_run_id": 36022491562,
-    "conclusion": "success",
-    "completed_count": 8,
-    "stages_01_08": "PASS",
-    "artifact_id": 10817631769,
-    "artifact_digest_sha256": "62b903544c7541b10f028f9e640fffeeff24a2eec99af4cebc365325b672fe39",
-    "disposition": "PREFLIGHT_PASS__NOT_FROZEN_C_UPSTREAM",
-    "reason": "Fresh self-hosted render is semantically close but not byte/numeric identical to the historical Stage08 observation set used by frozen C."
-  },
-  "exact_frozen_c_upstream": {
-    "historical_workflow_run_id": 35447124607,
-    "historical_head_sha": "f45aed3655a2e974f20b343e8b379abeb0de209a",
-    "historical_artifact_id": 10586270615,
-    "historical_artifact_name": "subject2-knight-prefit-stage08",
-    "historical_artifact_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
-    "artifact_expires_at": "2026-10-03T13:58:50Z",
+    "historical_stage08_artifact_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
     "camera_set_hash": "2485d184c7fef6c453b6ff817d3eac525e438fe023350b294436589d62d75cca",
     "observation_set_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa",
-    "normalization_hash": "81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e",
-    "import_required_before_frozen_c_stage09_15": true
+    "normalization_hash": "81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23"
   },
-  "runner_transfer_probe": {
-    "workflow_run_id": 36022833231,
-    "conclusion": "success",
-    "runner_local_frozen_c_artifact_count": 0,
-    "rclone_installed": false,
-    "gdrive_cli_installed": false
+  "scientific_state": {
+    "stage13_pass": false,
+    "stage13_status": "FAIL_GEOMETRY_SUBSTRATE",
+    "stage14_product_adequacy_pass": false,
+    "stage14_status": "FAIL",
+    "demo_fallback_used": true,
+    "fallback_preregistration": "canonical/KNIGHT_DEMO_STAGE14_FALLBACK_PREREG_20260925.json",
+    "claim_boundary": "Stage13 and Stage14 remain scientific/product FAIL. Demo continuation does not convert either into PASS."
   },
-  "next_actions": [
-    "DO_NOT_RUN_SUPERSEDED_RATIO_SWEEP_NOTEBOOK_SHA_506314A949498218BCD41E3C6DC3C012D71F35141B553A3B7C3D647EDFFD51C8",
-    "USER_RUN_REALSaS_V5_MESHLRM_MESH_GRAD_RATIO_SWEEP_RUN_ALL_V10_400STEP_AUDITED_ON_FRESH_A100_RUNTIME",
-    "REQUIRE_V4_LR_SCHEDULE_PARITY_PASS",
-    "REQUIRE_SHARED_PROXY_AND_RUNTIME_PREFLIGHTS",
-    "COMPARE_M0_10_AND_M0_25_AT_STEPS_100_200_300_400",
-    "PRODUCT_DECODE_AND_FROZEN_P999_STAGE13_ONLY_ELIGIBLE_SELECTED_ARMS",
-    "IF_ANY_PASS_PROMOTE_PREREGISTERED_BEST_PASSING_ARM",
-    "OTHERWISE_BIND_FROZEN_C_FALLBACK_AND_RESUME_SAME_KNIGHT_RUN"
+  "execution_evidence": {
+    "stage15_receipt": "canonical/KNIGHT_DEMO_STAGE15_RECEIPT_20260925.json",
+    "stage15_receipt_status": "PASS_DEMO_ONLY",
+    "completed_through_stage": 15,
+    "stage15_node_count": 12090,
+    "stage15_edge_count": 36469,
+    "stage15_qualification_hash": "331c888920ef7e73a1cc2e4229ad3ae26127761902efb8fe3dbaf5e742caf5ae",
+    "stage15_tensorization_hash": "fb5e8afa1c7d489bb0aedd0c79eb1c3267d7ad8b256734862cd3fb6b8bd905e8",
+    "stage15_certificate_hash": "3693024797ff0938deb9abc5db314e082ab596969a960ea5911860fd658d2f23",
+    "last_sealed_workflow_run_id": 36133111968,
+    "last_sealed_tested_commit": "66845a6f52c94006ceaca609a295ba8fc3a4c80c"
+  },
+  "next_ready_stages": [
+    "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+    "17_MECHANICAL_PARTITION_QUALIFIED",
+    "26_GEPPETTO_FIT_PREREGISTERED"
   ],
-  "continuation_rule": "On a future chat, read this file first. While pause is active, do not execute Stage09+ demo stages. Complete/reject the MeshLRM-style oracle, then resume the same run_id unless explicitly superseded.",
-  "pause": {
-    "reason": "USER_REQUESTED_SHORT_PAUSE_TO_TEST_MESHLRM_STYLE_DIFFERENTIABLE_MESH_RENDER_FINE_TUNING",
-    "date_utc": "2026-09-24",
-    "resume_same_run_id": true,
-    "downstream_demo_stage_execution_authorized_during_pause": false,
-    "fallback_geometry_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
-    "fallback_scientific_state": "STAGE13_FAIL__DEMO_ONLY"
+  "downstream_plan": [
+    "Execute Stage16-19 on the same DEMO_WITNESS ledger and seal measured Stage19 evidence.",
+    "Execute deterministic CAA Stage20-25 after Stage19 evidence.",
+    "Build and CPU-preflight the exact Stage26 Geppetto handoff.",
+    "User runs the sealed Geppetto Stage27 Colab Run-All notebook only after Stage26 handoff PASS_DEMO_ONLY.",
+    "Ingest Geppetto output and execute Stage27-29 before constructing the Knight-specific Arachne Stage30-31 apparatus."
+  ],
+  "research_policy": {
+    "meshlrm_ratio_sweep": "CLOSED_FOR_DEMO_DECISION__FROZEN_C_FALLBACK_SELECTED",
+    "reopen_geometry_research_before_demo": false
   },
-  "mesh_render_aware_oracle": {
-    "status": "USER_ACTION_REQUIRED__RUN_A100_RATIO_SWEEP_V10",
-    "notebook_filename": "RealSaS_V5_MESHLRM_MESH_GRAD_RATIO_SWEEP_RUN_ALL_V10_400STEP_AUDITED.ipynb",
-    "notebook_sha256": "e9ea79d3ad5b2f32c84537694ff29810e77fa7dde92ed5cfbdb745fa0562cc41",
-    "repo_commit_used_by_notebook": "7bc4085cb6b43da13027d6f21df25cb081a035b8",
-    "start_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
-    "arms": [
-      {
-        "name": "M0_10",
-        "mesh_to_base_grad_ratio": 0.1,
-        "steps": 400
-      },
-      {
-        "name": "M0_25",
-        "mesh_to_base_grad_ratio": 0.25,
-        "steps": 400
-      }
-    ],
-    "eval_steps": [
-      100,
-      200,
-      300,
-      400
-    ],
-    "warmup_steps": 100,
-    "scheduler_reference_horizon_steps": 1200,
-    "lr_schedule": "EXACT_V4_1200_STEP_TRAJECTORY_TRUNCATED_AFTER_ACTIVE_STEP_400__NOT_COMPRESSED",
-    "eligibility_guard": {
-      "sign_disagreement_count_max": 10376,
-      "mae_max": 0.0017956909141503277
-    },
-    "audit": {
-      "all_code_cells_compile": true,
-      "combined_ast_parse": true,
-      "stored_outputs": 0,
-      "active_300_step_assignment_absent": true,
-      "active_warmup_50_absent": true,
-      "old_compressed_cosine_denominator_absent": true,
-      "numeric_lr_parity_v4_steps_1_400_max_abs_error": 0,
-      "stale_v8_active_assertions_removed": true,
-      "final_eval_uses_eligible_arms_only": true,
-      "empty_eligible_set_fallback_safe": true
-    },
-    "training_stage13_feedback": false,
-    "final_gate": "UNCHANGED_CONTAINED_T512_T1024_PLUS_FROZEN_P999_STAGE13_ON_ELIGIBLE_SELECTED_ARMS_ONLY",
-    "pass_action": "PROMOTE_BEST_PASSING_RATIO_ARM_FOR_DEMO_ONLY_AND_RESUME_SAME_KNIGHT_RUN",
-    "fail_action": "RESUME_SAME_KNIGHT_RUN_WITH_FROZEN_C_FALLBACK"
-  }
+  "continuation_rule": "Read this file and the Stage15 receipt first. Do not return to the superseded Stage08 MeshLRM pause. Continue the same DEMO_WITNESS run from the sealed Stage15 boundary while preserving demo-only taint and product-pass prohibition."
 }

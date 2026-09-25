@@ -56,7 +56,10 @@ def stage_output_payload(ctx: dict, stage_id: str, schema: str) -> dict:
         (row for row in ctx["ledger"]["stages"] if row["id"] == stage_id),
         None,
     )
-    if row is None or row.get("status") not in {"PASS", "CACHE_HIT"}:
+    allowed_statuses = {"PASS", "CACHE_HIT"}
+    if str(ctx["ledger"].get("execution_class") or "") == "DEMO_WITNESS":
+        allowed_statuses.add("PASS_DEMO_ONLY")
+    if row is None or row.get("status") not in allowed_statuses:
         raise QualificationError(f"ADAPTER_UPSTREAM_NOT_PASS:{stage_id}")
     matches = [
         output

@@ -46,7 +46,9 @@ jobs:
           python -m py_compile \
             compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py \
             compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py
-          python -m pytest -q tests/compiler/test_demo_stage18_mesh_fallback_v2.py
+          python -m pytest -q \
+            tests/repository/test_mainline_v2_dag_scheduler.py \
+            tests/compiler/test_demo_stage18_mesh_fallback_v2.py
 
       - name: Verify sealed Stage15 authority and live ledger
         shell: bash

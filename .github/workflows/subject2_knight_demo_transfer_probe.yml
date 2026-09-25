@@ -54,7 +54,8 @@ jobs:
             tools/demo_exact_artifact_import_v2.py
           python -m pytest -q \
             tests/repository/test_demo_only_status_semantics.py \
-            tests/repository/test_mainline_v2_dag_scheduler.py
+            tests/repository/test_mainline_v2_dag_scheduler.py \
+            tests/compiler/test_geometry_substrate_evidence_v2.py
 
       - name: Verify authenticated Drive and refresh exact Frozen C import
         shell: bash

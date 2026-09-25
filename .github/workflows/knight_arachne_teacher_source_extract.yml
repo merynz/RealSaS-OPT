@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - demo/knight-arachne-v5-20260925
+    paths:
+      - '.github/workflows/knight_arachne_teacher_source_extract.yml'
+      - 'experiments/post_corpus_audit/realsas_blender_evaluated_extract_v1.py'
   workflow_dispatch:
 
 permissions:

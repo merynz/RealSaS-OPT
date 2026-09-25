@@ -1,10 +1,10 @@
 {
   "schema": "RealSaS.KnightDemoTransferProbeTrigger.v1",
-  "status": "RETRY_STAGE15_WITH_FAILURE_EVIDENCE",
+  "status": "RETRY_STAGE15_WITH_GEOMETRY_EVIDENCE_DECODER",
   "date_utc": "2026-09-25",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
-  "probe_revision": 9,
-  "probe_scope": "DEMO_EXACT_STAGE08_IMPORT__FROZEN_C_STAGE09_15_CONTINUATION",
+  "probe_revision": 10,
+  "probe_scope": "DEMO_STAGE13_MEASUREMENT_EVIDENCE__STAGE14_GSA__STAGE15",
   "expected_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
   "expected_zero_surface_sha256": "adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c",
   "expected_observation_set_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa",

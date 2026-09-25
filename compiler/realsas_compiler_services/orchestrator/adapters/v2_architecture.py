@@ -306,6 +306,37 @@ def _evaluate_candidate_source_fidelity_v1(
     return all(bool(row["passed"]) for row in rows), rows
 
 
+def _static_geometry_evidence(ctx: dict):
+    payload = stage_output_payload(
+        ctx,
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+        "RealSaS.GeometrySubstrateQualificationIR.v2",
+    )
+    stage13 = next(
+        (
+            row
+            for row in ctx["ledger"].get("stages") or ()
+            if str(row.get("id") or "") == "13_GEOMETRY_SUBSTRATE_QUALIFIED"
+        ),
+        None,
+    )
+    if (
+        str(ctx["ledger"].get("execution_class") or "") == "DEMO_WITNESS"
+        and stage13 is not None
+        and str(stage13.get("status") or "") == "PASS_DEMO_ONLY"
+    ):
+        value = geometry_substrate_evidence_from_dict(payload)
+        demo = dict(ctx["run_manifest"].get("demo_execution") or {})
+        if (
+            value.qualification_report.get("every_view_passed") is not False
+            or demo.get("stage13_scientific_pass") is not False
+            or demo.get("product_authority_claimed") is not False
+        ):
+            raise QualificationError("STATIC_MESH_DEMO_GEOMETRY_SCOPE_DRIFT")
+        return value, True
+    return geometry_substrate_from_dict(payload), False
+
+
 def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
     candidate = canonical_mesh_candidate_from_dict(
         stage_output_payload(
@@ -328,13 +359,7 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
             "RealSaS.AppearanceDomainIR.v1",
         )
     )
-    geometry = geometry_substrate_from_dict(
-        stage_output_payload(
-            ctx,
-            "13_GEOMETRY_SUBSTRATE_QUALIFIED",
-            "RealSaS.GeometrySubstrateQualificationIR.v2",
-        )
-    )
+    geometry, demo_geometry_lineage = _static_geometry_evidence(ctx)
     partition = mechanical_partition_from_dict(
         stage_output_payload(
             ctx,
@@ -383,7 +408,7 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
         raise QualificationError("STATIC_MESH_VERTEX_ADDRESSABILITY_INCOMPLETE")
     if len(addressing.face_address_ids) != len(candidate.faces):
         raise QualificationError("STATIC_MESH_FACE_ADDRESSABILITY_INCOMPLETE")
-    if not all(view.passed for view in geometry.views):
+    if not all(view.passed for view in geometry.views) and not demo_geometry_lineage:
         raise QualificationError("STATIC_MESH_GEOMETRY_SUBSTRATE_NOT_PASS")
 
     source_foreground = _source_foreground_masks_v1(ctx, observation)
@@ -394,7 +419,7 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
         observation=observation,
         source_foreground=source_foreground,
     )
-    if not source_fidelity_passed:
+    if not source_fidelity_passed and not demo_geometry_lineage:
         return {
             "status": "FAIL",
             "blockers": ["STATIC_MESH_SOURCE_FIDELITY_FAILED"],
@@ -407,15 +432,24 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
         }
 
     report = {
-        "status": "PASS_STATIC_CANONICAL_CARRIER",
+        "status": (
+            "PASS_STATIC_CANONICAL_CARRIER"
+            if source_fidelity_passed
+            else "DEMO_ONLY_MEASURED_STATIC_CANONICAL_CARRIER__P999_FAIL"
+        ),
         "vertex_count": len(candidate.vertices),
         "face_count": len(candidate.faces),
         "degenerate_face_count": 0,
         "surface_addressability_fraction": 1.0,
         "stage13_geometry_substrate_inherited": False,
         "stage13_policy_replayed_on_actual_candidate_mesh": True,
-        "actual_candidate_source_fidelity_passed": True,
+        "actual_candidate_source_fidelity_passed": bool(source_fidelity_passed),
         "actual_candidate_source_fidelity_views": source_fidelity_rows,
+        "demo_geometry_lineage": bool(demo_geometry_lineage),
+        "product_authority_claimed": False if demo_geometry_lineage else True,
+        "product_source_fidelity_qualification_claimed": (
+            bool(source_fidelity_passed) and not demo_geometry_lineage
+        ),
         "silhouette_is_geometry_authority_not_caa": True,
         "unknown_boundary_policy": (
             "CONSERVATIVE_UNTIL_STAGE35__NO_POST_SKIN_PARTITION_MUTATION_V1"
@@ -439,7 +473,7 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
     value = replace(value, qualification_hash=static_mesh_qualification_hash(value))
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     return {
-        "status": "PASS",
+        "status": "PASS_DEMO_ONLY" if demo_geometry_lineage else "PASS",
         "outputs": [
             write_ir(
                 root / "static_canonical_mesh_qualification.json",

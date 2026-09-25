@@ -321,6 +321,72 @@ def _relation_parent_quality_report(candidate, policy)->dict:
     }
 
 
+_DEMO_STAGE18_FALLBACK_SCHEMA = (
+    "RealSaS.KnightDemoStage18MeshFallbackPreregistration.v1"
+)
+_DEMO_STAGE18_FALLBACK_STATUS = (
+    "FROZEN_BEFORE_KNIGHT_STAGE18_PARENT_QUALITY_METRICS_INSPECTION"
+)
+_DEMO_STAGE18_FALLBACK_RULE = (
+    "RELATION_BASELINE_IF_AND_ONLY_IF_CDT_PARENT_MIN_ANGLE_UNREPAIRABLE_V1"
+)
+
+
+def _demo_stage18_fallback_prereg(ctx: dict) -> tuple[dict, str] | None:
+    if str(ctx["ledger"].get("execution_class") or "") != "DEMO_WITNESS":
+        return None
+    demo = dict(ctx["run_manifest"].get("demo_execution") or {})
+    ref = dict(demo.get("stage18_mesh_fallback_preregistration") or {})
+    if not ref:
+        return None
+    payload = _load_file_ref(ref, expected_schema=_DEMO_STAGE18_FALLBACK_SCHEMA)
+    if (
+        str(payload.get("status") or "") != _DEMO_STAGE18_FALLBACK_STATUS
+        or str(payload.get("run_id") or "") != str(ctx["ledger"].get("run_id") or "")
+        or str(payload.get("subject_id") or "") != str(ctx["ledger"].get("subject_id") or "")
+        or str(payload.get("execution_class") or "") != "DEMO_WITNESS"
+        or demo.get("product_authority_claimed") is not False
+    ):
+        raise QualificationError("DEMO_STAGE18_FALLBACK_SCOPE_DRIFT")
+    eligibility = dict(payload.get("eligibility") or {})
+    rule = dict(payload.get("fallback_rule") or {})
+    semantics = dict(payload.get("demo_admission_semantics") or {})
+    if (
+        eligibility.get("stage15_ledger_status_required") != "PASS_DEMO_ONLY"
+        or eligibility.get("product_authority_claimed_required") is not False
+        or eligibility.get("requested_backend_required") != "CANONICAL_CDT_LOCAL_CHART_V1"
+        or eligibility.get("only_admissible_precondition_failure")
+        != "RELATION_PARENT_MIN_ANGLE_BELOW_FROZEN_G3_TARGET"
+        or eligibility.get("boundary_split_must_remain_forbidden") is not True
+        or eligibility.get("teacher_truth_allowed") is not False
+        or eligibility.get("source_rig_labels_allowed") is not False
+        or eligibility.get("source_skin_labels_allowed") is not False
+        or eligibility.get("appearance_quality_allowed_for_selection") is not False
+        or eligibility.get("future_geppetto_result_allowed_for_selection") is not False
+        or eligibility.get("future_arachne_result_allowed_for_selection") is not False
+        or rule.get("rule_id") != _DEMO_STAGE18_FALLBACK_RULE
+        or rule.get("producer") != "CANONICAL_RELATION_BASELINE_V1"
+        or rule.get("candidate_choice") != "EXACT_CURRENT_RELATION_BASELINE"
+        or rule.get("no_candidate_ranking") is not True
+        or rule.get("no_threshold_relaxation") is not True
+        or rule.get("stage19_remeasurement_required") is not True
+        or semantics.get("product_pass_forbidden") is not True
+        or semantics.get("stage19_actual_candidate_source_fidelity_replay_required") is not True
+    ):
+        raise QualificationError("DEMO_STAGE18_FALLBACK_PREREG_DRIFT")
+    row = next(
+        (
+            item
+            for item in ctx["ledger"].get("stages") or ()
+            if str(item.get("id") or "") == "15_RIGGING_SURFACE_QUALIFIED"
+        ),
+        None,
+    )
+    if row is None or str(row.get("status") or "") != "PASS_DEMO_ONLY":
+        raise QualificationError("DEMO_STAGE18_FALLBACK_STAGE15_STATUS_DRIFT")
+    return payload, str(ref.get("sha256") or "")
+
+
 def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
     surface=_load_surface(ctx)
     partition,carrier=_load_partition_and_carrier(ctx)
@@ -352,36 +418,62 @@ def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
         schema=parent_quality["schema"],
     )
 
+    demo_fallback = _demo_stage18_fallback_prereg(ctx)
+    demo_fallback_used = False
+    demo_fallback_prereg_sha256 = ""
     if backend=="CANONICAL_RELATION_BASELINE_V1":
         candidate=baseline
     elif backend=="CANONICAL_CDT_LOCAL_CHART_V1":
         if int(parent_quality["below_min_angle_face_count"])>0:
-            return {
-                "status":"FAIL",
-                "blockers":["CDT_PARENT_MIN_ANGLE_UNREPAIRABLE_WITHOUT_BOUNDARY_SPLIT"],
-                "diagnostics":{
-                    "backend":backend,
-                    "relation_parent_quality_sha256":parent_quality_artifact["sha256"],
-                    **parent_quality,
-                },
-            }
-        candidate=build_canonical_cdt_candidate(
-            surface,partition,carrier,policy,
-            relation_baseline_policy_hash=baseline_policy_hash,
-            max_constraint_recovery_iterations=int(mesh_cfg.get("max_constraint_recovery_iterations",96)),
-            max_quality_iterations=int(mesh_cfg.get("max_quality_iterations",96)),
-        )
+            if demo_fallback is None:
+                return {
+                    "status":"FAIL",
+                    "blockers":["CDT_PARENT_MIN_ANGLE_UNREPAIRABLE_WITHOUT_BOUNDARY_SPLIT"],
+                    "diagnostics":{
+                        "backend":backend,
+                        "relation_parent_quality_sha256":parent_quality_artifact["sha256"],
+                        **parent_quality,
+                    },
+                }
+            prereg, demo_fallback_prereg_sha256 = demo_fallback
+            if (
+                str(dict(prereg.get("fallback_rule") or {}).get("rule_id") or "")
+                != _DEMO_STAGE18_FALLBACK_RULE
+            ):
+                raise QualificationError("DEMO_STAGE18_FALLBACK_RULE_DRIFT")
+            candidate=baseline
+            demo_fallback_used=True
+        else:
+            candidate=build_canonical_cdt_candidate(
+                surface,partition,carrier,policy,
+                relation_baseline_policy_hash=baseline_policy_hash,
+                max_constraint_recovery_iterations=int(mesh_cfg.get("max_constraint_recovery_iterations",96)),
+                max_quality_iterations=int(mesh_cfg.get("max_quality_iterations",96)),
+            )
     else:
         return {"status":"BLOCKED","blockers":["MESH_BACKEND_NOT_EXPLICIT_OR_UNSUPPORTED"],"diagnostics":{"backend":backend}}
     return {
-        "status":"PASS",
+        "status":"PASS_DEMO_ONLY" if demo_fallback_used else "PASS",
         "outputs":[
-            _write_ir(root/"canonical_mesh_candidate.json",candidate,authority_class="DERIVED_MESH_CANDIDATE"),
+            _write_ir(
+                root/"canonical_mesh_candidate.json",
+                candidate,
+                authority_class=(
+                    "DEMO_ONLY_DERIVED_MESH_CANDIDATE"
+                    if demo_fallback_used
+                    else "DERIVED_MESH_CANDIDATE"
+                ),
+            ),
             _write_ir(root/"mesh_qualification_policy.json",policy,authority_class="FROZEN_MESH_QUALIFICATION_POLICY"),
             parent_quality_artifact,
         ],
         "diagnostics":{
             "backend":backend,
+            "effective_backend":(
+                "CANONICAL_RELATION_BASELINE_V1"
+                if demo_fallback_used
+                else backend
+            ),
             "vertex_count":len(candidate.vertices),
             "face_count":len(candidate.faces),
             "candidate_lineage_hash":candidate.candidate_lineage_hash,
@@ -390,6 +482,15 @@ def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
             "relation_parent_below_min_angle_face_count":parent_quality["below_min_angle_face_count"],
             "relation_parent_above_max_aspect_face_count":parent_quality["above_max_aspect_face_count"],
             "relation_parent_policy_violating_face_count":parent_quality["policy_violating_face_count"],
+            "stage18_demo_fallback_used":demo_fallback_used,
+            "stage18_demo_fallback_rule":(
+                _DEMO_STAGE18_FALLBACK_RULE if demo_fallback_used else None
+            ),
+            "stage18_demo_fallback_preregistration_sha256":(
+                demo_fallback_prereg_sha256 if demo_fallback_used else None
+            ),
+            "product_authority_claimed":False if demo_fallback_used else None,
+            "stage19_remeasurement_required":bool(demo_fallback_used),
         },
     }
 

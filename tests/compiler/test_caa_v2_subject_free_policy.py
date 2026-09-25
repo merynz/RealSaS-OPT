@@ -9,6 +9,7 @@ import pytest
 
 from compiler.realsas_compiler_core.appearance_compile_v2 import (
     face_atlas_layout,
+    projected_tile_resolution_evidence,
     resolve_projected_tile_resolution,
     triangular_barycentric_samples,
 )
@@ -94,6 +95,35 @@ def test_caa_policy_is_refrozen_and_tile_density_is_art_quality_driven():
     for row in evidence["candidates"]:
         if row["tile_resolution"] < evidence["selected_tile_resolution"]:
             assert not (row["density_passed"] and row["capacity_passed"])
+
+def test_tile_resolution_unsatisfied_evidence_is_preserved():
+    candidate = SimpleNamespace(
+        vertices=(
+            SimpleNamespace(candidate_vertex_id="v0", P=(-0.9, -0.9, 0.0), component_id="c0"),
+            SimpleNamespace(candidate_vertex_id="v1", P=(0.9, -0.9, 0.0), component_id="c0"),
+            SimpleNamespace(candidate_vertex_id="v2", P=(-0.9, 0.9, 0.0), component_id="c0"),
+        ),
+        faces=(("v0", "v1", "v2"),) * 20000,
+    )
+    masks = {view: np.ones((64, 64), dtype=bool) for view in range(8)}
+    evidence = projected_tile_resolution_evidence(
+        candidate=candidate,
+        cameras=tuple(_camera(view, 64) for view in range(8)),
+        foreground_mask_by_view=masks,
+        candidate_resolutions=(8, 12),
+        max_source_pixels_per_atlas_texel=0.01,
+        bleed_px=2,
+        max_atlas_resolution=256,
+    )
+    assert evidence["selected_tile_resolution"] is None
+    assert evidence["face_count"] == 20000
+    assert evidence["worst_projected_barycentric_sigma_px"] > 0.0
+    assert len(evidence["candidates"]) == 2
+    assert not any(
+        row["density_passed"] and row["capacity_passed"]
+        for row in evidence["candidates"]
+    )
+
 
 def _holdout_fixture(*, adversarial: bool):
     tile_resolution = 8

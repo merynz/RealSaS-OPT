@@ -131,6 +131,25 @@ jobs:
               --normalization-domain "$norm" \
               --output-npz "$GEPPETTO_TEACHER_ROOT/KNIGHT_GEPPETTO_MECHANICAL_CORE_TARGET.npz" \
               --output-report "$GEPPETTO_TEACHER_ROOT/KNIGHT_GEPPETTO_MECHANICAL_CORE_TARGET_REPORT.json"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          report=json.loads(
+              (Path(os.environ["GEPPETTO_TEACHER_ROOT"])/
+               "KNIGHT_GEPPETTO_MECHANICAL_CORE_TARGET_REPORT.json").read_text()
+          )
+          assert report["status"]=="PASS",report
+          assert int(report["root_count"])==1,report
+          assert 1 <= int(report["target_count"]) <= 128,report
+          assert report["teacher_feedback_during_free_running_inference_allowed"] is False
+          assert report["product_authority_claimed"] is False
+          print("GEPPETTO_KNIGHT_TARGET_FIT_PREFLIGHT_PASS",json.dumps({
+              "target_count":report["target_count"],
+              "root_count":report["root_count"],
+              "selected_non_deform_bridge_count":report["selected_non_deform_bridge_count"],
+              "target_content_sha256":report["target_content_sha256"],
+          },sort_keys=True))
+          PY
 
       - name: Freeze Stage26 orchestration and experiment preregistrations
         shell: bash

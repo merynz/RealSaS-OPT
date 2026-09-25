@@ -1,24 +1,43 @@
 name: subject2-knight-demo-transfer-probe
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - research/vf11-certified-adaptive-20260921
     paths:
       - 'canonical/KNIGHT_DEMO_TRANSFER_PROBE_TRIGGER_20260924.json'
-  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  probe:
+  resume-through-stage15:
     runs-on: [self-hosted, linux, x64, realsas]
-    timeout-minutes: 30
+    timeout-minutes: 120
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      SUBJECT_ID: SUBJECT2_KNIGHT
+      HISTORICAL_STAGE08_SHA256: 5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7
+      OBSERVATION_SET_HASH: 87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa
+      NORMALIZATION_HASH: 81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23
+      CAMERA_SET_HASH: 2485d184c7fef6c453b6ff817d3eac525e438fe023350b294436589d62d75cca
+      FROZEN_C_CHECKPOINT_SHA256: 222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0
+      FROZEN_C_ZERO_SHA256: adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c
+      PYTHONHASHSEED: '0'
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
-      - name: Verify current demo-only orchestration semantics
+      - name: Install pinned mainline dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Gate current demo-only orchestration semantics
         shell: bash
         run: |
           set -euo pipefail
@@ -26,80 +45,431 @@ jobs:
             compiler/realsas_compiler_services/orchestrator/status_semantics.py \
             compiler/realsas_compiler_services/orchestrator/mainline.py \
             compiler/realsas_compiler_services/orchestrator/adapters/adapter_io.py \
-            compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py
+            compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py \
+            compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py \
+            tools/demo_exact_artifact_import_v2.py
           python -m pytest -q \
             tests/repository/test_demo_only_status_semantics.py \
             tests/repository/test_mainline_v2_dag_scheduler.py
 
-      - name: Verify authenticated Google Drive and exact Frozen C bytes
+      - name: Verify authenticated Drive and refresh exact Frozen C import
         shell: bash
-        env:
-          CHECKPOINT_SHA: '222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0'
-          ZERO_SHA: 'adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c'
         run: |
           set -euo pipefail
           command -v rclone
           rclone listremotes | grep -Fx 'gdrive:'
-          rclone lsf 'gdrive:RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1' --dirs-only --max-depth 1 >/dev/null
-          d="$HOME/realsas_authority/imports/frozen_c_20260924T115953Z"
-          required=(
-            SELECTED_CHECKPOINT.pt
-            IRIS_SIGNED_ZERO_SURFACE.npz
-            SELECTED_CHECKPOINT_REPORT.json
-            DECODER_RESULT.json
-            FROZEN_STAGE13_RESULT.json
+          frozen="$HOME/realsas_authority/imports/frozen_c_20260924T115953Z"
+          mkdir -p "$frozen"
+          src='gdrive:RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1/20260924T115953Z/V5_TP64_LONG_HORIZON_LOW_LR'
+          rclone copy "$src/arms/C" "$frozen" \
+            --include 'SELECTED_CHECKPOINT.pt' \
+            --include 'IRIS_SIGNED_ZERO_SURFACE.npz' \
+            --include 'SELECTED_CHECKPOINT_REPORT.json' \
+            --include 'DECODER_RESULT.json' \
+            --include 'FROZEN_STAGE13_RESULT.json'
+          rclone copy "$src" "$frozen" \
+            --include 'V5_TP64_LONG_HORIZON_LOW_LR_RESULT.json' \
+            --max-depth 1
+          printf '%s  %s\n' "$FROZEN_C_CHECKPOINT_SHA256" "$frozen/SELECTED_CHECKPOINT.pt" | sha256sum -c -
+          printf '%s  %s\n' "$FROZEN_C_ZERO_SHA256" "$frozen/IRIS_SIGNED_ZERO_SURFACE.npz" | sha256sum -c -
+          for name in \
+            SELECTED_CHECKPOINT_REPORT.json \
+            DECODER_RESULT.json \
+            FROZEN_STAGE13_RESULT.json \
             V5_TP64_LONG_HORIZON_LOW_LR_RESULT.json
-          )
-          for name in "${required[@]}"; do test -s "$d/$name"; done
-          printf '%s  %s\n' "$CHECKPOINT_SHA" "$d/SELECTED_CHECKPOINT.pt" | sha256sum -c -
-          printf '%s  %s\n' "$ZERO_SHA" "$d/IRIS_SIGNED_ZERO_SURFACE.npz" | sha256sum -c -
+          do
+            test -s "$frozen/$name"
+          done
+          echo "FROZEN_C_ROOT=$frozen" >> "$GITHUB_ENV"
 
-      - name: Seal verified resume gate
+      - name: Pull and verify exact historical Stage08 authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          import_root="$HOME/realsas_authority/imports/knight_frozen_stage08_20260919"
+          zip="$import_root/SUBJECT2_KNIGHT_V1_STAGE08_PREFIT_EVIDENCE.zip"
+          extracted="$import_root/extracted"
+          rm -rf "$import_root"
+          mkdir -p "$extracted"
+          rclone copyto \
+            'gdrive:RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1/SUBJECT2_KNIGHT_V1_STAGE08_PREFIT_EVIDENCE.zip' \
+            "$zip"
+          printf '%s  %s\n' "$HISTORICAL_STAGE08_SHA256" "$zip" | sha256sum -c -
+          python - <<'PY'
+          import os, zipfile
+          from pathlib import Path
+          root=Path.home()/"realsas_authority"/"imports"/"knight_frozen_stage08_20260919"
+          with zipfile.ZipFile(root/"SUBJECT2_KNIGHT_V1_STAGE08_PREFIT_EVIDENCE.zip") as z:
+              z.extractall(root/"extracted")
+          PY
+          echo "STAGE08_ROOT=$extracted" >> "$GITHUB_ENV"
+
+      - name: Verify exact Stage01-08 bytes and semantic bindings
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           import hashlib, json, os
           from pathlib import Path
-
-          d=Path.home()/"realsas_authority"/"imports"/"frozen_c_20260924T115953Z"
+          root=Path(os.environ["STAGE08_ROOT"])
+          expected={
+            "01_SOURCE_BYTES_SEALED/source_byte_seal.json":"d6f517b56f865da87970b13b4a119030e67203cb572e755212addec82fcd39b0",
+            "02_SOURCE_LICENSE_PROVENANCE/source_license_seal.json":"bf644396b1b38506a4fc6facf0f2fff13bb783a5ebb2ead748930bdde8dcd310",
+            "03_SOURCE_MECHANICAL_AUDIT/source_mechanical_audit.json":"4b09a6dbba56ab7fd88c2bb59f890527974a9ab5638710590ca479a3e4127628",
+            "04_FULL_SUBJECT_ADMISSION/full_subject_admission.json":"dd268d9169a42ff60bb09c8a5460584e152cdc9a39110f502a348467c783514f",
+            "05_CAMERA_CONTRACT_SOLVED/qualified_camera_set.json":"e11ab0fe32378eb1cd06fbebd8d1827e71eaa7b3fbe31b78248f7f3f9ab91920",
+            "06_OBSERVATION_RENDER_8VIEW/observation_render_set.json":"9faf223d75f790f0a4cdb3bee7ed83847e516036ca0e95c00eee209d1fa6de4c",
+            "07_OBSERVATION_CONTRACT_QUALIFIED/qualified_observation_set.json":"f9ac32cf15ff8116d89827c32a961f06bc39582ee49e9854f7d5cdd42b24d87a",
+            "08_NORMALIZATION_DOMAIN_QUALIFIED/normalization_domain.json":"5f5a803a33b56e3737e88fd802f6e79684da996e2134455a4b9f33cc8594bcac",
+          }
           def sha(p):
               h=hashlib.sha256()
               with Path(p).open("rb") as f:
-                  for chunk in iter(lambda:f.read(1<<20),b""): h.update(chunk)
+                  for b in iter(lambda:f.read(1<<20),b""): h.update(b)
               return h.hexdigest()
-          files={}
-          for name in (
-              "SELECTED_CHECKPOINT.pt",
-              "IRIS_SIGNED_ZERO_SURFACE.npz",
-              "SELECTED_CHECKPOINT_REPORT.json",
-              "DECODER_RESULT.json",
-              "FROZEN_STAGE13_RESULT.json",
-              "V5_TP64_LONG_HORIZON_LOW_LR_RESULT.json",
-          ):
-              p=d/name
-              files[name]={"sha256":sha(p),"bytes":p.stat().st_size}
-          payload={
-              "schema":"RealSaS.KnightDemoResumeGateReceipt.v1",
-              "status":"PASS",
-              "tested_commit":os.environ["GITHUB_SHA"],
-              "runner_name":os.environ.get("RUNNER_NAME",""),
-              "runner_os":os.environ.get("RUNNER_OS",""),
-              "demo_only_status_semantics":"PASS",
-              "rclone_google_drive_access":"PASS",
-              "frozen_c_checkpoint_sha256":files["SELECTED_CHECKPOINT.pt"]["sha256"],
-              "frozen_c_zero_surface_sha256":files["IRIS_SIGNED_ZERO_SURFACE.npz"]["sha256"],
-              "files":files,
-              "product_authority_claimed":False,
+          for rel,want in expected.items():
+              got=sha(root/rel)
+              if got!=want: raise SystemExit(f"STAGE08_FILE_SHA_DRIFT:{rel}:{got}!={want}")
+          camera=json.loads((root/"05_CAMERA_CONTRACT_SOLVED/qualified_camera_set.json").read_text())
+          obs=json.loads((root/"07_OBSERVATION_CONTRACT_QUALIFIED/qualified_observation_set.json").read_text())
+          norm=json.loads((root/"08_NORMALIZATION_DOMAIN_QUALIFIED/normalization_domain.json").read_text())
+          checks={
+              "camera_set_hash":(camera["camera_set_hash"],os.environ["CAMERA_SET_HASH"]),
+              "observation_set_hash":(obs["observation_set_hash"],os.environ["OBSERVATION_SET_HASH"]),
+              "normalization_hash":(norm["normalization_hash"],os.environ["NORMALIZATION_HASH"]),
           }
-          out=Path("canonical/KNIGHT_DEMO_RESUME_GATE_RECEIPT_20260925.json")
-          out.write_text(json.dumps(payload,indent=2,sort_keys=True)+"\n",encoding="utf-8")
-          print(json.dumps(payload,sort_keys=True))
+          for name,(got,want) in checks.items():
+              if got!=want: raise SystemExit(f"{name.upper()}_DRIFT:{got}!={want}")
+          print("EXACT_STAGE08_AUTHORITY_PASS")
           PY
-          git config user.name "realsas-self-hosted-runner"
-          git config user.email "runner@realsas.local"
-          git add canonical/KNIGHT_DEMO_RESUME_GATE_RECEIPT_20260925.json
-          if ! git diff --cached --quiet; then
-            git commit -m 'demo: seal verified Frozen C resume gate'
-            git push origin HEAD:research/vf11-certified-adaptive-20260921
+
+      - name: Materialize demo run manifest from exact evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          export REALSAS_AUTHORITY_ROOT="$HOME/realsas_authority"
+          run_root="$REALSAS_AUTHORITY_ROOT/runs/$RUN_ID"
+          mkdir -p "$run_root"
+          echo "REALSAS_AUTHORITY_ROOT=$REALSAS_AUTHORITY_ROOT" >> "$GITHUB_ENV"
+          echo "RUN_ROOT=$run_root" >> "$GITHUB_ENV"
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+
+          repo=Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+          stage08=Path(os.environ["STAGE08_ROOT"]).resolve()
+          frozen=Path(os.environ["FROZEN_C_ROOT"]).resolve()
+          run_root=Path(os.environ["RUN_ROOT"]).resolve()
+          historical=json.loads((stage08/"run_manifest.json").read_text(encoding="utf-8"))
+
+          def sha(p):
+              h=hashlib.sha256()
+              with Path(p).open("rb") as f:
+                  for b in iter(lambda:f.read(1<<20),b""): h.update(b)
+              return h.hexdigest()
+          def ref(p):
+              p=Path(p).resolve()
+              return {"path":str(p),"sha256":sha(p)}
+
+          observation=dict(historical["observation"])
+          observation["camera_bundle"]=ref(stage08/"observations/camera_bundle.json")
+          rasters=[]; masks=[]
+          for vi in range(8):
+              rp=stage08/f"observations/V{vi}.png"
+              mp=stage08/f"observations/V{vi}.mask.bin"
+              rasters.append({"view_index":vi,"image":ref(rp)})
+              masks.append({"view_index":vi,"mask":ref(mp)})
+          observation["source_rasters"]=rasters
+          observation["source_foreground_masks"]=masks
+
+          stage13_policy=json.loads(
+              (repo/"canonical/STAGE13_REST_REPROJECTION_POLICY_V2_20260919.json").read_text()
+          )
+          stage14_policy_path=repo/"canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V2_20260920.json"
+          stage14_policy=json.loads(stage14_policy_path.read_text())
+          gsa=dict(stage14_policy["gsa"])
+
+          authority_path=repo/"canonical/KNIGHT_DEMO_EXECUTION_AUTHORITY_20260924.json"
+          prereg_path=repo/"canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_PREREG_20260924.json"
+          closure_path=repo/"canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_CLOSURE_20260924.json"
+
+          geometry_gate=dict(stage13_policy["thresholds"])
+          geometry_gate["demo_frozen_stage13_import"]={
+              "enabled":True,
+              "product_authority_claimed":False,
+              "zero_surface_npz_sha256":os.environ["FROZEN_C_ZERO_SHA256"],
+              "evidence":ref(frozen/"FROZEN_STAGE13_RESULT.json"),
+          }
+
+          payload={
+              "schema":"RealSaS.RunManifest.v1",
+              "run_id":os.environ["RUN_ID"],
+              "subject_id":os.environ["SUBJECT_ID"],
+              "source_files":historical.get("source_files",[]),
+              "source_license":historical.get("source_license",{}),
+              "source_audit":historical.get("source_audit",{"minimum_border_margin_px":8}),
+              "admission":historical.get("admission",{"mode":"CONTROLLED_FULL_SUBJECT_8VIEW_V1"}),
+              "observation":observation,
+              "normalization":historical["normalization"],
+              "demo_execution":{
+                  "schema":"RealSaS.DemoExecutionAuthorization.v1",
+                  "mode":"DEMO_ONLY",
+                  "explicit_user_approval":True,
+                  "product_authority_claimed":False,
+                  "stage13_scientific_pass":False,
+                  "allow_stage13_scientific_fail_for_demo":True,
+                  "authority":{
+                      "path":"canonical/KNIGHT_DEMO_EXECUTION_AUTHORITY_20260924.json",
+                      "sha256":sha(authority_path),
+                  },
+              },
+              "iris_fit":{
+                  "demo_frozen_import":{
+                      "enabled":True,
+                      "product_authority_claimed":False,
+                      "research_preregistration":ref(prereg_path),
+                      "research_closure":ref(closure_path),
+                      "checkpoint":{
+                          "path":str((frozen/"SELECTED_CHECKPOINT.pt").resolve()),
+                          "sha256":os.environ["FROZEN_C_CHECKPOINT_SHA256"],
+                      },
+                      "result":ref(frozen/"V5_TP64_LONG_HORIZON_LOW_LR_RESULT.json"),
+                      "selected_checkpoint_report":ref(frozen/"SELECTED_CHECKPOINT_REPORT.json"),
+                  },
+              },
+              "geometry_decode":{
+                  "demo_frozen_import":{
+                      "enabled":True,
+                      "product_authority_claimed":False,
+                      "zero_surface_npz":{
+                          "path":str((frozen/"IRIS_SIGNED_ZERO_SURFACE.npz").resolve()),
+                          "sha256":os.environ["FROZEN_C_ZERO_SHA256"],
+                      },
+                      "decoder_result":ref(frozen/"DECODER_RESULT.json"),
+                  },
+              },
+              "geometry_gate":geometry_gate,
+              "gsa":{
+                  "policy_document":ref(stage14_policy_path),
+                  "normal_k":gsa["normal_k"],
+                  "visibility_depth_tolerance_norm":gsa["visibility_depth_tolerance_norm"],
+                  "adequacy_policy":gsa["adequacy_policy"],
+              },
+              "appearance":{"backend":"DETERMINISTIC_V1"},
+          }
+          out=run_root/"run_manifest.json"
+          out.write_text(json.dumps(payload,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          print("RUN_MANIFEST_SHA256",sha(out))
+          PY
+
+      - name: Initialize clean DEMO_WITNESS ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          if test -f "$RUN_ROOT/ACTIVE_RUN_V2.json"; then
+            stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+            cp "$RUN_ROOT/ACTIVE_RUN_V2.json" "$RUN_ROOT/ACTIVE_RUN_V2.before_frozen_c.$stamp.json"
           fi
+          rm -f "$RUN_ROOT/ACTIVE_RUN_V2.json"
+          python -m compiler.realsas_compiler_services.orchestrator.mainline init-run \
+            --run-id "$RUN_ID" \
+            --subject-id "$SUBJECT_ID" \
+            --architecture-scope REALSAS_V2_KNIGHT_DEMO_FROZEN_C \
+            --execution-class DEMO_WITNESS
+
+      - name: Import exact historical Stage01-08 as explicit demo-only lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          spec="$RUN_ROOT/demo_stage08_import_spec.json"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["STAGE08_ROOT"]).resolve()
+          run_root=Path(os.environ["RUN_ROOT"]).resolve()
+          entries={
+            "01_SOURCE_BYTES_SEALED":(
+              "01_SOURCE_BYTES_SEALED/source_byte_seal.json",
+              "d6f517b56f865da87970b13b4a119030e67203cb572e755212addec82fcd39b0",
+              "RealSaS.SourceByteSeal.v1","SEALED_SOURCE_EVIDENCE"),
+            "02_SOURCE_LICENSE_PROVENANCE":(
+              "02_SOURCE_LICENSE_PROVENANCE/source_license_seal.json",
+              "bf644396b1b38506a4fc6facf0f2fff13bb783a5ebb2ead748930bdde8dcd310",
+              "RealSaS.SourceLicenseSeal.v1","SEALED_SOURCE_EVIDENCE"),
+            "03_SOURCE_MECHANICAL_AUDIT":(
+              "03_SOURCE_MECHANICAL_AUDIT/source_mechanical_audit.json",
+              "4b09a6dbba56ab7fd88c2bb59f890527974a9ab5638710590ca479a3e4127628",
+              "RealSaS.SourceMechanicalAuditIR.v1","SOURCE_MECHANICAL_AUDIT"),
+            "04_FULL_SUBJECT_ADMISSION":(
+              "04_FULL_SUBJECT_ADMISSION/full_subject_admission.json",
+              "dd268d9169a42ff60bb09c8a5460584e152cdc9a39110f502a348467c783514f",
+              "RealSaS.FullSubjectAdmissionIR.v1","FULL_SUBJECT_ADMISSION"),
+            "05_CAMERA_CONTRACT_SOLVED":(
+              "05_CAMERA_CONTRACT_SOLVED/qualified_camera_set.json",
+              "e11ab0fe32378eb1cd06fbebd8d1827e71eaa7b3fbe31b78248f7f3f9ab91920",
+              "RealSaS.QualifiedCameraSetIR.v1","QUALIFIED_CAMERA_SET"),
+            "06_OBSERVATION_RENDER_8VIEW":(
+              "06_OBSERVATION_RENDER_8VIEW/observation_render_set.json",
+              "9faf223d75f790f0a4cdb3bee7ed83847e516036ca0e95c00eee209d1fa6de4c",
+              "RealSaS.ObservationRenderSetIR.v1","EXACT_OBSERVATION_RENDER_SET"),
+            "07_OBSERVATION_CONTRACT_QUALIFIED":(
+              "07_OBSERVATION_CONTRACT_QUALIFIED/qualified_observation_set.json",
+              "f9ac32cf15ff8116d89827c32a961f06bc39582ee49e9854f7d5cdd42b24d87a",
+              "RealSaS.QualifiedObservationSetIR.v1","QUALIFIED_OBSERVATION_SET"),
+            "08_NORMALIZATION_DOMAIN_QUALIFIED":(
+              "08_NORMALIZATION_DOMAIN_QUALIFIED/normalization_domain.json",
+              "5f5a803a33b56e3737e88fd802f6e79684da996e2134455a4b9f33cc8594bcac",
+              "RealSaS.NormalizationDomainIR.v1","QUALIFIED_NORMALIZATION_DOMAIN"),
+          }
+          stages={}
+          for sid,(rel,digest,schema,authority) in entries.items():
+              stages[sid]={
+                  "outputs":[{
+                      "source_path":str((root/rel).resolve()),
+                      "expected_sha256":digest,
+                      "target_name":Path(rel).name,
+                      "schema":schema,
+                      "authority_class":authority,
+                  }],
+                  "evidence":{
+                      "historical_run_id":"SUBJECT2_KNIGHT_V1",
+                      "exact_semantic_authority":True,
+                  },
+              }
+          payload={
+              "schema":"RealSaS.DemoExactStageArtifactImportSpec.v1",
+              "run_id":os.environ["RUN_ID"],
+              "subject_id":os.environ["SUBJECT_ID"],
+              "product_authority_claimed":False,
+              "source_artifact":{
+                  "historical_workflow_run_id":35447124607,
+                  "historical_artifact_id":10586270615,
+                  "historical_artifact_name":"subject2-knight-prefit-stage08",
+                  "artifact_sha256":os.environ["HISTORICAL_STAGE08_SHA256"],
+                  "camera_set_hash":os.environ["CAMERA_SET_HASH"],
+                  "observation_set_hash":os.environ["OBSERVATION_SET_HASH"],
+                  "normalization_hash":os.environ["NORMALIZATION_HASH"],
+              },
+              "stages":stages,
+          }
+          (run_root/"demo_stage08_import_spec.json").write_text(
+              json.dumps(payload,indent=2,sort_keys=True)+"\n",encoding="utf-8"
+          )
+          PY
+          python tools/demo_exact_artifact_import_v2.py \
+            --run-id "$RUN_ID" \
+            --import-spec "$spec"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          run_root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((run_root/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+          expected=[
+              "01_SOURCE_BYTES_SEALED","02_SOURCE_LICENSE_PROVENANCE",
+              "03_SOURCE_MECHANICAL_AUDIT","04_FULL_SUBJECT_ADMISSION",
+              "05_CAMERA_CONTRACT_SOLVED","06_OBSERVATION_RENDER_8VIEW",
+              "07_OBSERVATION_CONTRACT_QUALIFIED","08_NORMALIZATION_DOMAIN_QUALIFIED",
+          ]
+          for sid in expected:
+              assert by[sid]["status"]=="PASS_DEMO_ONLY",(sid,by[sid]["status"])
+              assert by[sid].get("execution_mode")=="DEMO_EXACT_ARTIFACT_IMPORT",sid
+          assert "09_IRIS_FIT_PREREGISTERED" in ledger["ready_stage_ids"],ledger["ready_stage_ids"]
+          print("DEMO_EXACT_STAGE08_IMPORT_PASS")
+          PY
+
+      - name: Execute Frozen C continuation through Stage15
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m compiler.realsas_compiler_services.orchestrator.mainline execute \
+            --run-id "$RUN_ID" \
+            --target 15_RIGGING_SURFACE_QUALIFIED
+          python -m compiler.realsas_compiler_services.orchestrator.mainline status \
+            --run-id "$RUN_ID"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          ledger=json.loads((Path(os.environ["RUN_ROOT"])/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+          for ordinal in range(1,16):
+              sid=next(row["id"] for row in ledger["stages"] if row["ordinal"]==ordinal)
+              if by[sid]["status"]!="PASS_DEMO_ONLY":
+                  raise SystemExit(f"DEMO_STAGE_NOT_PASS_DEMO_ONLY:{sid}:{by[sid]['status']}:{by[sid].get('blockers')}")
+          if ledger["failed_count"] != 0:
+              raise SystemExit("DEMO_STAGE15_LEDGER_HAS_FAILURE")
+          print("KNIGHT_DEMO_STAGE15_PASS_DEMO_ONLY")
+          PY
+
+      - name: Seal Stage15 continuation receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          run_root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((run_root/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+
+          def payload_for(stage_id,schema):
+              matches=[o for o in by[stage_id]["outputs"] if o["schema"]==schema]
+              if len(matches)!=1: raise SystemExit(f"OUTPUT_CARDINALITY:{stage_id}:{schema}")
+              return json.loads(Path(matches[0]["path"]).read_text())
+
+          stage13=payload_for("13_GEOMETRY_SUBSTRATE_QUALIFIED","RealSaS.GeometrySubstrateQualificationIR.v2")
+          stage14_report=payload_for("14_GSA_BUILD","RealSaS.SubstrateAdequacyReport.v1")
+          stage15=payload_for("15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceQualificationIR.v1")
+          receipt={
+              "schema":"RealSaS.KnightDemoStage15Receipt.v1",
+              "status":"PASS_DEMO_ONLY",
+              "tested_commit":os.environ["GITHUB_SHA"],
+              "run_id":os.environ["RUN_ID"],
+              "subject_id":os.environ["SUBJECT_ID"],
+              "execution_class":"DEMO_WITNESS",
+              "completed_through_stage":15,
+              "stage_statuses":{
+                  row["id"]:row["status"] for row in ledger["stages"][:15]
+              },
+              "exact_frozen_stage08":{
+                  "artifact_sha256":os.environ["HISTORICAL_STAGE08_SHA256"],
+                  "camera_set_hash":os.environ["CAMERA_SET_HASH"],
+                  "observation_set_hash":os.environ["OBSERVATION_SET_HASH"],
+                  "normalization_hash":os.environ["NORMALIZATION_HASH"],
+              },
+              "frozen_c":{
+                  "checkpoint_sha256":os.environ["FROZEN_C_CHECKPOINT_SHA256"],
+                  "zero_surface_npz_sha256":os.environ["FROZEN_C_ZERO_SHA256"],
+              },
+              "stage13":{
+                  "scientific_pass":False,
+                  "demo_admitted":True,
+                  "substrate_hash":stage13["substrate_hash"],
+                  "qualification_report":stage13["qualification_report"],
+              },
+              "stage14":{
+                  "status":stage14_report["status"],
+                  "adequacy_report_hash":stage14_report["adequacy_report_hash"],
+                  "selected_actual_node_count":stage14_report["selected_actual_node_count"],
+                  "selected_surface_lineage_hash":stage14_report["selected_surface_lineage_hash"],
+              },
+              "stage15":{
+                  "status":stage15["qualification_report"]["status"],
+                  "qualification_hash":stage15["qualification_hash"],
+                  "tensorization_hash":stage15["tensorization_hash"],
+                  "certificate_hash":stage15["certificate_hash"],
+                  "node_count":stage15["node_count"],
+                  "edge_count":stage15["edge_count"],
+              },
+              "product_authority_claimed":False,
+              "product_pass_forbidden":True,
+          }
+          out=Path("canonical/KNIGHT_DEMO_STAGE15_RECEIPT_20260925.json")
+          out.write_text(json.dumps(receipt,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          print(json.dumps(receipt,sort_keys=True))
+          PY
+          git config user.name 'realsas-self-hosted-runner'
+          git config user.email 'runner@realsas.local'
+          git add canonical/KNIGHT_DEMO_STAGE15_RECEIPT_20260925.json
+          git commit -m 'demo: seal Knight Frozen C Stage15 evidence'
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

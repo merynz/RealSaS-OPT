@@ -799,7 +799,7 @@ def run(args) -> dict:
         "loss_config": asdict(loss_cfg),
         "closure_step": closure_step,
         "terminal_streak": terminal_streak,
-        "required_terminal_checks": TERMINAL_CHECKS,
+        "required_terminal_checks": TERMINAL_CHECKS,\n        "trace": trace,
         "diffusion_eval_seeds": list(DIFFUSION_SEEDS),
         "selected_proposal_seed": SELECTED_PROPOSAL_SEED,
         "all_diffusion_seeds_passed": True,

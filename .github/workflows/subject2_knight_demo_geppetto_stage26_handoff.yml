@@ -1,0 +1,411 @@
+name: subject2-knight-demo-geppetto-stage26-handoff
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_DEMO_STAGE15_RECEIPT_20260925.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-stage26-handoff:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      SUBJECT_ID: SUBJECT2_KNIGHT
+      REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      KAYKIT_COMMIT: '672074b73ba276876a19e8816ecdc5241817ab47'
+      KNIGHT_FBX_SHA256: 'b25e35cc7eaaa3c7c103f10a4f41fde1cbd81936fede9aa9ae4efbd29d40ba1b'
+      GEPPETTO_ARCHITECTURE_ID: 'RealSaS.Geppetto.ReferenceStrength.DirectSurfaceCausalDiffusion.DeterministicViewDirection.v1'
+      PYTHONHASHSEED: '0'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned Python dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m py_compile \
+            tools/training/build_geppetto_teacher_target_v1.py \
+            tools/training/run_knight_geppetto_demo_fit_v1.py \
+            compiler/realsas_compiler_services/orchestrator/mainline.py
+          python -m pytest -q tests/repository/test_mainline_v2_dag_scheduler.py
+
+      - name: Verify sealed Stage15 demo authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s canonical/KNIGHT_DEMO_STAGE15_RECEIPT_20260925.json
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          receipt=json.loads(Path("canonical/KNIGHT_DEMO_STAGE15_RECEIPT_20260925.json").read_text())
+          assert receipt["schema"]=="RealSaS.KnightDemoStage15Receipt.v1"
+          assert receipt["status"]=="PASS_DEMO_ONLY"
+          assert receipt["run_id"]==os.environ["RUN_ID"]
+          assert receipt["product_authority_claimed"] is False
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          assert ledger["execution_class"]=="DEMO_WITNESS"
+          assert ledger["failed_count"]==0,ledger["failed_stage_ids"]
+          by={row["id"]:row for row in ledger["stages"]}
+          assert by["15_RIGGING_SURFACE_QUALIFIED"]["status"]=="PASS_DEMO_ONLY"
+          print("GEPPETTO_STAGE15_AUTHORITY_PASS")
+          PY
+
+      - name: Resolve or bootstrap pinned Blender
+        shell: bash
+        run: |
+          set -euo pipefail
+          if command -v blender >/dev/null 2>&1; then
+            echo "BLENDER_EXE=$(command -v blender)" >> "$GITHUB_ENV"
+            blender --version | head -n 2
+            exit 0
+          fi
+          version='4.5.14'
+          base="https://download.blender.org/release/Blender4.5"
+          archive="blender-${version}-linux-x64.tar.xz"
+          install_root="$RUNNER_TEMP/realsas_blender"
+          mkdir -p "$install_root"
+          curl --fail --location --retry 3 --retry-delay 2 "$base/$archive" --output "$RUNNER_TEMP/$archive"
+          curl --fail --location --retry 3 --retry-delay 2 "$base/blender-${version}.sha256" --output "$RUNNER_TEMP/blender.sha256"
+          (cd "$RUNNER_TEMP" && grep "  $archive\$" blender.sha256 | sha256sum --check -)
+          tar -xJf "$RUNNER_TEMP/$archive" -C "$install_root"
+          exe="$install_root/blender-${version}-linux-x64/blender"
+          test -x "$exe"
+          echo "BLENDER_EXE=$exe" >> "$GITHUB_ENV"
+          "$exe" --version | head -n 2
+
+      - name: Stage exact pinned Knight FBX
+        shell: bash
+        run: |
+          set -euo pipefail
+          teacher_root="$RUN_ROOT/training/geppetto_teacher"
+          mkdir -p "$teacher_root"
+          source="$teacher_root/Knight.fbx"
+          base="https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/$KAYKIT_COMMIT"
+          curl --fail --location --retry 3 \
+            "$base/addons/kaykit_character_pack_adventures/Characters/fbx/Knight.fbx" \
+            -o "$source"
+          printf '%s  %s\n' "$KNIGHT_FBX_SHA256" "$source" | sha256sum --check -
+          echo "GEPPETTO_TEACHER_ROOT=$teacher_root" >> "$GITHUB_ENV"
+          echo "KNIGHT_FBX=$source" >> "$GITHUB_ENV"
+
+      - name: Extract exact REST skeleton and source skin teacher arrays
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$BLENDER_EXE" --background --factory-startup \
+            --python tools/training/blender_geppetto_teacher_source_v1.py -- \
+            --source-fbx "$KNIGHT_FBX" \
+            --output-npz "$GEPPETTO_TEACHER_ROOT/KNIGHT_GEPPETTO_TEACHER_SOURCE.npz" \
+            --output-audit "$GEPPETTO_TEACHER_ROOT/KNIGHT_GEPPETTO_TEACHER_SOURCE_AUDIT.json" \
+            --expected-source-sha256 "$KNIGHT_FBX_SHA256"
+          test -s "$GEPPETTO_TEACHER_ROOT/KNIGHT_GEPPETTO_TEACHER_SOURCE.npz"
+          test -s "$GEPPETTO_TEACHER_ROOT/KNIGHT_GEPPETTO_TEACHER_SOURCE_AUDIT.json"
+
+      - name: Build anonymous frozen-rule mechanical-core teacher target
+        shell: bash
+        run: |
+          set -euo pipefail
+          norm="$RUN_ROOT/artifacts/08_NORMALIZATION_DOMAIN_QUALIFIED/normalization_domain.json"
+          test -s "$norm"
+          PYTHONPATH="$GITHUB_WORKSPACE${PYTHONPATH:+:$PYTHONPATH}" \
+            python tools/training/build_geppetto_teacher_target_v1.py \
+              --teacher-source-npz "$GEPPETTO_TEACHER_ROOT/KNIGHT_GEPPETTO_TEACHER_SOURCE.npz" \
+              --teacher-source-audit "$GEPPETTO_TEACHER_ROOT/KNIGHT_GEPPETTO_TEACHER_SOURCE_AUDIT.json" \
+              --normalization-domain "$norm" \
+              --output-npz "$GEPPETTO_TEACHER_ROOT/KNIGHT_GEPPETTO_MECHANICAL_CORE_TARGET.npz" \
+              --output-report "$GEPPETTO_TEACHER_ROOT/KNIGHT_GEPPETTO_MECHANICAL_CORE_TARGET_REPORT.json"
+
+      - name: Freeze Stage26 orchestration and experiment preregistrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os,shutil
+          from pathlib import Path
+
+          repo=Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+          run_root=Path(os.environ["RUN_ROOT"]).resolve()
+          teacher=Path(os.environ["GEPPETTO_TEACHER_ROOT"]).resolve()
+          stage15=run_root/"artifacts/15_RIGGING_SURFACE_QUALIFIED"
+          surface=stage15/"qualified_rigging_surface.json"
+          qualification=stage15/"rigging_surface_qualification.json"
+          target_report=teacher/"KNIGHT_GEPPETTO_MECHANICAL_CORE_TARGET_REPORT.json"
+          target_npz=teacher/"KNIGHT_GEPPETTO_MECHANICAL_CORE_TARGET.npz"
+          inputs=run_root/"inputs/geppetto"
+          inputs.mkdir(parents=True,exist_ok=True)
+
+          def sha(p):
+              h=hashlib.sha256()
+              with Path(p).open("rb") as f:
+                  for b in iter(lambda:f.read(1<<20),b""): h.update(b)
+              return h.hexdigest()
+          def ref(p):
+              p=Path(p).resolve()
+              return {"path":str(p),"sha256":sha(p)}
+
+          surface_payload=json.loads(surface.read_text())
+          qual_payload=json.loads(qualification.read_text())
+          target=json.loads(target_report.read_text())
+
+          model_source_repo=repo/"models/geppetto/reference_strength_v1/geppetto_reference_strength_no_learned_slot_v1.py"
+          model_source=inputs/"geppetto_reference_strength_no_learned_slot_v1.py"
+          shutil.copyfile(model_source_repo,model_source)
+
+          experiment={
+              "schema":"RealSaS.KnightGeppettoDemoFitPreregistration.v1",
+              "status":"FROZEN_BEFORE_OPTIMIZER_STEP_1",
+              "run_id":os.environ["RUN_ID"],
+              "subject_id":os.environ["SUBJECT_ID"],
+              "execution_class":"DEMO_WITNESS",
+              "bindings":{
+                  "rigging_surface_lineage_hash":surface_payload["geometry_lineage_hash"],
+                  "rigging_surface_qualification_hash":qual_payload["qualification_hash"],
+                  "tensorization_hash":qual_payload["tensorization_hash"],
+                  "certificate_hash":qual_payload["certificate_hash"],
+                  "teacher_target_content_sha256":target["target_content_sha256"],
+                  "teacher_target_npz_sha256":sha(target_npz),
+                  "teacher_target_report_sha256":sha(target_report),
+                  "source_fbx_sha256":os.environ["KNIGHT_FBX_SHA256"],
+              },
+              "apparatus":{
+                  "architecture_id":os.environ["GEPPETTO_ARCHITECTURE_ID"],
+                  "seed":20260907,
+                  "fresh_from_scratch":True,
+                  "historical_checkpoint_loaded":False,
+                  "max_steps":16384,
+                  "check_every":64,
+                  "terminal_checks":48,
+                  "learning_rate":0.0001,
+                  "weight_decay":0.0001,
+                  "gradient_clip_norm":1.0,
+                  "resource_step_limit_execution_only":128,
+                  "diffusion_eval_seeds":[11,23,47,89],
+                  "all_diffusion_seeds_must_pass":True,
+                  "selected_proposal_seed_predeclared":11,
+                  "matched_mae_norm_max":0.03,
+                  "matched_p95_norm_max":0.05,
+                  "root_accuracy_required":1.0,
+                  "parent_accuracy_required":1.0,
+                  "teacher_supervision_during_training":True,
+                  "teacher_feedback_during_free_running_inference":False,
+                  "teacher_inference_inputs_allowed":False,
+              },
+              "selection_rule":"ALL_FOUR_FROZEN_DIFFUSION_SEEDS_PASS_FOR_48_CONSECUTIVE_CHECKS__EXPORT_PREDECLARED_SEED_11",
+              "thresholds_changed_after_knight_result":False,
+              "product_authority_claimed":False,
+              "generalization_claimed":False,
+          }
+          experiment_path=inputs/"GEPPETTO_KNIGHT_EXPERIMENT_PREREG.json"
+          experiment_path.write_text(json.dumps(experiment,indent=2,sort_keys=True)+"\n")
+
+          spec={
+              "schema":"RealSaS.ModelFitPreregistrationSpec.v1",
+              "lane":"GEPPETTO",
+              "architecture_id":os.environ["GEPPETTO_ARCHITECTURE_ID"],
+              "executor_kind":"EXTERNAL_GPU_JOB_V1",
+              "random_seed":20260907,
+              "model_source":ref(model_source),
+              "upstream_bindings":{
+                  "rigging_surface":surface_payload["geometry_lineage_hash"],
+                  "rigging_surface_qualification":qual_payload["qualification_hash"],
+              },
+              "expected_output_contract":[
+                  "CHECKPOINT","RESULT","SKELETON_PROPOSAL"
+              ],
+              "qualification_policy":{"run_ilp_shadow":False},
+              "teacher_inference_inputs_allowed":False,
+              "metadata":{
+                  "experiment_preregistration":ref(experiment_path),
+                  "fresh_from_scratch":True,
+                  "historical_checkpoint_loaded":False,
+                  "demo_witness_only":True,
+                  "product_authority_claimed":False,
+              },
+          }
+          spec_path=inputs/"GEPPETTO_KNIGHT_MODEL_FIT_PREREG_SPEC.json"
+          spec_path.write_text(json.dumps(spec,indent=2,sort_keys=True)+"\n")
+
+          manifest_path=run_root/"run_manifest.json"
+          manifest=json.loads(manifest_path.read_text())
+          manifest["geppetto_fit"]={"preregistration":ref(spec_path)}
+          manifest_path.write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n")
+          print("GEPPETTO_EXPERIMENT_PREREG_SHA256",sha(experiment_path))
+          print("GEPPETTO_MODEL_FIT_PREREG_SPEC_SHA256",sha(spec_path))
+          print("GEPPETTO_MODEL_SOURCE_SHA256",sha(model_source))
+          PY
+
+      - name: Execute Stage26 preregistration
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m compiler.realsas_compiler_services.orchestrator.mainline execute \
+            --run-id "$RUN_ID" \
+            --target 26_GEPPETTO_FIT_PREREGISTERED
+          python -m compiler.realsas_compiler_services.orchestrator.mainline status \
+            --run-id "$RUN_ID"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+          row=by["26_GEPPETTO_FIT_PREREGISTERED"]
+          assert row["status"]=="PASS_DEMO_ONLY",(row["status"],row.get("blockers"))
+          matches=[x for x in row["outputs"] if x["schema"]=="RealSaS.ModelFitPreregistrationIR.v1"]
+          assert len(matches)==1,matches
+          print("KNIGHT_GEPPETTO_STAGE26_PASS_DEMO_ONLY",matches[0]["sha256"])
+          PY
+
+      - name: Materialize exact Stage27 handoff and sync to Drive
+        shell: bash
+        run: |
+          set -euo pipefail
+          handoff="$RUN_ROOT/handoff/GEPPETTO_STAGE27"
+          rm -rf "$handoff"
+          mkdir -p "$handoff/observations"
+          python - <<'PY'
+          import hashlib,json,os,shutil
+          from pathlib import Path
+
+          root=Path(os.environ["RUN_ROOT"]).resolve()
+          handoff=root/"handoff/GEPPETTO_STAGE27"
+          teacher=Path(os.environ["GEPPETTO_TEACHER_ROOT"]).resolve()
+          inputs=root/"inputs/geppetto"
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+
+          def one(stage,schema):
+              rows=[x for x in by[stage]["outputs"] if x["schema"]==schema]
+              if len(rows)!=1: raise SystemExit(f"OUTPUT_CARDINALITY:{stage}:{schema}:{len(rows)}")
+              return Path(rows[0]["path"]).resolve()
+          def copy(src,name):
+              dst=handoff/name
+              dst.parent.mkdir(parents=True,exist_ok=True)
+              shutil.copyfile(src,dst)
+              return dst
+          def sha(p):
+              h=hashlib.sha256()
+              with Path(p).open("rb") as f:
+                  for b in iter(lambda:f.read(1<<20),b""): h.update(b)
+              return h.hexdigest()
+
+          files={}
+          mapping=[
+              (one("15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1"),"qualified_rigging_surface.json"),
+              (one("15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceQualificationIR.v1"),"rigging_surface_qualification.json"),
+              (one("26_GEPPETTO_FIT_PREREGISTERED","RealSaS.ModelFitPreregistrationIR.v1"),"model_fit_preregistration.json"),
+              (teacher/"KNIGHT_GEPPETTO_MECHANICAL_CORE_TARGET.npz","teacher_target.npz"),
+              (teacher/"KNIGHT_GEPPETTO_MECHANICAL_CORE_TARGET_REPORT.json","teacher_target_report.json"),
+              (teacher/"KNIGHT_GEPPETTO_TEACHER_SOURCE.npz","teacher_source.npz"),
+              (teacher/"KNIGHT_GEPPETTO_TEACHER_SOURCE_AUDIT.json","teacher_source_audit.json"),
+              (inputs/"GEPPETTO_KNIGHT_EXPERIMENT_PREREG.json","experiment_preregistration.json"),
+              (inputs/"geppetto_reference_strength_no_learned_slot_v1.py","model_source.py"),
+              (one("05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1"),"qualified_camera_set.json"),
+          ]
+          for src,name in mapping:
+              dst=copy(src,name)
+              files[name]={"sha256":sha(dst),"bytes":dst.stat().st_size}
+
+          manifest=json.loads((root/"run_manifest.json").read_text())
+          for row in manifest["observation"]["source_rasters"]:
+              vi=int(row["view_index"])
+              src=Path(row["image"]["path"]).resolve()
+              dst=copy(src,f"observations/V{vi}.png")
+              if sha(dst)!=str(row["image"]["sha256"]):
+                  raise SystemExit(f"OBSERVATION_SHA_DRIFT:V{vi}")
+              files[f"observations/V{vi}.png"]={"sha256":sha(dst),"bytes":dst.stat().st_size}
+
+          payload={
+              "schema":"RealSaS.KnightGeppettoStage27Handoff.v1",
+              "status":"PASS",
+              "run_id":os.environ["RUN_ID"],
+              "subject_id":os.environ["SUBJECT_ID"],
+              "execution_class":"DEMO_WITNESS",
+              "execution_repo_commit":os.environ["GITHUB_SHA"],
+              "files":files,
+              "colab_runner":"tools/training/run_knight_geppetto_demo_fit_v1.py",
+              "output_contract":{
+                  "checkpoint":"GEPPETTO_KNIGHT_CHECKPOINT.pt",
+                  "result":"GEPPETTO_KNIGHT_RESULT.json",
+                  "proposal":"GEPPETTO_KNIGHT_SKELETON_PROPOSAL.json",
+                  "execution_receipt":"GEPPETTO_KNIGHT_EXECUTION_RECEIPT.json",
+                  "output_manifest":"GEPPETTO_KNIGHT_OUTPUT_MANIFEST.json",
+              },
+              "product_authority_claimed":False,
+              "generalization_claimed":False,
+          }
+          out=handoff/"HANDOFF_MANIFEST.json"
+          out.write_text(json.dumps(payload,indent=2,sort_keys=True)+"\n")
+          print("HANDOFF_MANIFEST_SHA256",sha(out))
+          PY
+          command -v rclone
+          remote='gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/GEPPETTO_STAGE27_HANDOFF'
+          rclone sync "$handoff" "$remote" --checksum
+          echo "GEPPETTO_HANDOFF_ROOT=$handoff" >> "$GITHUB_ENV"
+          echo "GEPPETTO_HANDOFF_REMOTE=$remote" >> "$GITHUB_ENV"
+
+      - name: Seal Stage26 handoff receipt into branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          handoff=Path(os.environ["GEPPETTO_HANDOFF_ROOT"])
+          def sha(p):
+              h=hashlib.sha256()
+              with Path(p).open("rb") as f:
+                  for b in iter(lambda:f.read(1<<20),b""): h.update(b)
+              return h.hexdigest()
+          target=json.loads((handoff/"teacher_target_report.json").read_text())
+          prereg=json.loads((handoff/"model_fit_preregistration.json").read_text())
+          exp=json.loads((handoff/"experiment_preregistration.json").read_text())
+          receipt={
+              "schema":"RealSaS.KnightGeppettoStage26HandoffReceipt.v1",
+              "status":"PASS_DEMO_ONLY",
+              "run_id":os.environ["RUN_ID"],
+              "subject_id":os.environ["SUBJECT_ID"],
+              "execution_repo_commit":os.environ["GITHUB_SHA"],
+              "stage26_preregistration_hash":prereg["preregistration_hash"],
+              "stage26_preregistration_file_sha256":sha(handoff/"model_fit_preregistration.json"),
+              "experiment_preregistration_sha256":sha(handoff/"experiment_preregistration.json"),
+              "teacher_target_content_sha256":target["target_content_sha256"],
+              "teacher_target_count":target["target_count"],
+              "teacher_target_root_count":target["root_count"],
+              "handoff_manifest_sha256":sha(handoff/"HANDOFF_MANIFEST.json"),
+              "drive_path":"RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/GEPPETTO_STAGE27_HANDOFF",
+              "next_stage":"27_GEPPETTO_FIT",
+              "user_action_required":"RUN_COLAB_RUN_ALL",
+              "product_authority_claimed":False,
+              "product_pass_forbidden":True,
+          }
+          Path("canonical/KNIGHT_DEMO_GEPPETTO_STAGE26_HANDOFF_RECEIPT_20260925.json").write_text(
+              json.dumps(receipt,indent=2,sort_keys=True)+"\n"
+          )
+          print(json.dumps(receipt,sort_keys=True))
+          PY
+          git config user.name 'realsas-self-hosted-runner'
+          git config user.email 'runner@realsas.local'
+          git add canonical/KNIGHT_DEMO_GEPPETTO_STAGE26_HANDOFF_RECEIPT_20260925.json
+          git commit -m 'demo: seal Knight Geppetto Stage26 handoff'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

@@ -672,7 +672,7 @@ def repair_candidate_projected_relaxation_v1(
     *,
     protected_surface_ids: set[str] | frozenset[str] = frozenset(),
     max_moves: int = 256,
-    relaxation_fractions: tuple[float,...] = (0.25,0.5,0.75,1.0),
+    relaxation_fractions: tuple[float,...] = (0.125,0.25,0.5,0.75,1.0),
 ) -> tuple[CanonicalMeshCandidateIR, dict]:
     """Quality-targeted tangential relaxation projected to immutable source mesh.
 

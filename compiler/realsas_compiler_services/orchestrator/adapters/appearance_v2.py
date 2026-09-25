@@ -34,7 +34,7 @@ from compiler.realsas_compiler_core.appearance_bake_v2 import (
 )
 from compiler.realsas_compiler_core.appearance_compile_v2 import (
     compile_deterministic_caa,
-    resolve_projected_tile_resolution,
+    projected_tile_resolution_evidence,
 )
 from compiler.realsas_compiler_core.appearance_color_v2 import (
     source_sample_roundtrip_pm_error,
@@ -289,7 +289,7 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
     if str(compile_policy.get("tile_resolution_mode") or "") != "PROJECTED_SOURCE_DENSITY_V1":
         raise QualificationError("CAA_TILE_RESOLUTION_MODE_UNSUPPORTED")
     _source_rgba, source_masks = _load_source_inputs(ctx, observation)
-    tile_evidence = resolve_projected_tile_resolution(
+    tile_evidence = projected_tile_resolution_evidence(
         candidate=candidate,
         cameras=cameras.cameras,
         foreground_mask_by_view=source_masks,
@@ -303,6 +303,21 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
         bleed_px=int(compile_policy["bleed_px"]),
         max_atlas_resolution=int(compile_policy["max_atlas_resolution"]),
     )
+    if tile_evidence["selected_tile_resolution"] is None:
+        return {
+            "status": "FAIL",
+            "blockers": ["CAA_TILE_DENSITY_OR_CAPACITY_UNSATISFIED"],
+            "diagnostics": {
+                "backend_id": backend,
+                "shipping_eligible": False,
+                "contract_sha256": contract_sha,
+                "policy_document_sha256": str(
+                    dict(cfg.get("policy_document") or {}).get("sha256") or ""
+                ),
+                "raster_correspondence_prerequisite": "PASS",
+                "tile_resolution_evidence": tile_evidence,
+            },
+        }
     compile_policy["tile_resolution"] = int(
         tile_evidence["selected_tile_resolution"]
     )

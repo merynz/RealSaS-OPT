@@ -45,6 +45,18 @@ jobs:
             tools/training/run_knight_geppetto_demo_fit_v1.py \
             compiler/realsas_compiler_services/orchestrator/mainline.py
           python -m pytest -q tests/repository/test_mainline_v2_dag_scheduler.py
+          python - <<'PY'
+          import ast, json
+          from pathlib import Path
+          p=Path("notebooks/RealSaS_KNIGHT_GEPPETTO_STAGE27_RUN_ALL.ipynb")
+          nb=json.loads(p.read_text(encoding="utf-8"))
+          assert nb["nbformat"]==4
+          assert all(cell.get("outputs",[])==[] for cell in nb["cells"] if cell.get("cell_type")=="code")
+          for i,cell in enumerate(nb["cells"]):
+              if cell.get("cell_type")!="code": continue
+              ast.parse("".join(cell.get("source") or []), filename=f"{p}#cell{i}")
+          print("GEPPETTO_COLAB_NOTEBOOK_STATIC_AUDIT_PASS")
+          PY
 
       - name: Verify sealed Stage15 demo authority
         shell: bash
@@ -353,6 +365,7 @@ jobs:
               (teacher/"KNIGHT_GEPPETTO_TEACHER_SOURCE_AUDIT.json","teacher_source_audit.json"),
               (inputs/"GEPPETTO_KNIGHT_EXPERIMENT_PREREG.json","experiment_preregistration.json"),
               (inputs/"geppetto_reference_strength_no_learned_slot_v1.py","model_source.py"),
+              (repo/"notebooks/RealSaS_KNIGHT_GEPPETTO_STAGE27_RUN_ALL.ipynb","RealSaS_KNIGHT_GEPPETTO_STAGE27_RUN_ALL.ipynb"),
               (one("05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1"),"qualified_camera_set.json"),
           ]
           for src,name in mapping:
@@ -377,6 +390,7 @@ jobs:
               "execution_repo_commit":os.environ["GITHUB_SHA"],
               "files":files,
               "colab_runner":"tools/training/run_knight_geppetto_demo_fit_v1.py",
+              "colab_notebook":"RealSaS_KNIGHT_GEPPETTO_STAGE27_RUN_ALL.ipynb",
               "output_contract":{
                   "checkpoint":"GEPPETTO_KNIGHT_CHECKPOINT.pt",
                   "result":"GEPPETTO_KNIGHT_RESULT.json",

@@ -118,5 +118,7 @@ jobs:
           git add canonical/KNIGHT_DEMO_STAGE15_RECEIPT_20260925.json
           if ! git diff --cached --quiet; then
             git commit -m 'demo: recover Knight Frozen C Stage15 receipt'
+            git fetch origin research/vf11-certified-adaptive-20260921
+            git rebase origin/research/vf11-certified-adaptive-20260921
             git push origin HEAD:research/vf11-certified-adaptive-20260921
           fi

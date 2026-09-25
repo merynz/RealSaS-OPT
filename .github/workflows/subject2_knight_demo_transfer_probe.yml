@@ -31,6 +31,10 @@ jobs:
         with:
           fetch-depth: 1
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
       - name: Install pinned mainline dependencies
         shell: bash
         run: |

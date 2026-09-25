@@ -477,7 +477,11 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
             write_ir(
                 root / "static_canonical_mesh_qualification.json",
                 value,
-                authority_class="STATIC_CANONICAL_MESH_QUALIFICATION",
+                authority_class=(
+                    "DEMO_ONLY_STATIC_CANONICAL_MESH_MEASUREMENT"
+                    if demo_geometry_lineage
+                    else "STATIC_CANONICAL_MESH_QUALIFICATION"
+                ),
             )
         ],
         "diagnostics": {"qualification_hash": value.qualification_hash, **report},

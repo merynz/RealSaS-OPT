@@ -191,6 +191,39 @@ def _validate_dense_coverage_execution_metadata(
 
 
 
+_DEMO_IRIS_PREREG_SCHEMA = "RealSaS.DemoHistoricalIrisPreregEvidence.v1"
+_DEMO_IRIS_EXEC_SCHEMA = "RealSaS.DemoHistoricalIrisExecutionEvidence.v1"
+
+
+def _demo_frozen_iris_import_cfg(ctx: dict) -> dict | None:
+    if str(ctx["ledger"].get("execution_class") or "") != "DEMO_WITNESS":
+        return None
+    cfg = dict(ctx["run_manifest"].get("iris_fit") or {})
+    demo = dict(cfg.get("demo_frozen_import") or {})
+    if not demo:
+        return None
+    if demo.get("enabled") is not True:
+        raise QualificationError("DEMO_IRIS_IMPORT_NOT_EXPLICITLY_ENABLED")
+    if demo.get("product_authority_claimed") is not False:
+        raise QualificationError("DEMO_IRIS_IMPORT_PRODUCT_AUTHORITY_FORBIDDEN")
+    return demo
+
+
+def _demo_ref_payload(ref: dict, *, expected_schema: str | None = None):
+    payload = load_file_ref(
+        dict(ref),
+        expected_schema=expected_schema,
+    )
+    path = resolved_path(str(ref.get("path") or ""))
+    return path, sha256_file(path), payload
+
+
+def _demo_evidence_hash(payload: dict, field: str) -> str:
+    body = dict(payload)
+    body.pop(field, None)
+    return content_sha256(body)
+
+
 def preregister_iris_fit_stage(ctx: dict) -> dict:
     observation = qualified_observation_set_from_dict(
         stage_output_payload(
@@ -206,6 +239,73 @@ def preregister_iris_fit_stage(ctx: dict) -> dict:
             "RealSaS.NormalizationDomainIR.v1",
         )
     )
+
+    demo = _demo_frozen_iris_import_cfg(ctx)
+    if demo is not None:
+        prereg_ref = dict(demo.get("research_preregistration") or {})
+        closure_ref = dict(demo.get("research_closure") or {})
+        prereg_path, prereg_sha, research = _demo_ref_payload(
+            prereg_ref,
+            expected_schema="RealSaS.IRIS.V5TP64LongHorizonLowLRPreregistration.v1",
+        )
+        closure_path, closure_sha, closure = _demo_ref_payload(
+            closure_ref,
+            expected_schema="RealSaS.IRIS.V5TP64LongHorizonLowLRClosure.v1",
+        )
+        frozen = dict(research.get("frozen_inputs") or {})
+        if str(frozen.get("observation_set_binding_hash") or "") != observation.observation_set_hash:
+            raise QualificationError("DEMO_IRIS_IMPORT_OBSERVATION_BINDING_DRIFT")
+        if str(frozen.get("normalization_binding_hash") or "") != normalization.normalization_hash:
+            raise QualificationError("DEMO_IRIS_IMPORT_NORMALIZATION_BINDING_DRIFT")
+        architecture = str((research.get("architecture") or {}).get("id") or "")
+        if not architecture:
+            raise QualificationError("DEMO_IRIS_IMPORT_ARCHITECTURE_MISSING")
+        arm = dict((closure.get("arms") or {}).get("C") or {})
+        selected = str(arm.get("selected_checkpoint_sha256") or "")
+        expected_checkpoint = str((demo.get("checkpoint") or {}).get("sha256") or "")
+        if selected != expected_checkpoint or len(selected) != 64:
+            raise QualificationError("DEMO_IRIS_IMPORT_SELECTED_CHECKPOINT_DRIFT")
+
+        payload = {
+            "schema": _DEMO_IRIS_PREREG_SCHEMA,
+            "lane": "IRIS",
+            "status": "PASS_DEMO_ONLY",
+            "research_preregistration_path": str(prereg_path),
+            "research_preregistration_sha256": prereg_sha,
+            "research_closure_path": str(closure_path),
+            "research_closure_sha256": closure_sha,
+            "architecture_id": architecture,
+            "historical_run_id": str(closure.get("run_id") or ""),
+            "selected_arm": "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
+            "selected_checkpoint_sha256": selected,
+            "observation_set_binding_hash": observation.observation_set_hash,
+            "normalization_binding_hash": normalization.normalization_hash,
+            "stage08_evidence_sha256": str(frozen.get("stage08_evidence_sha256") or ""),
+            "preexecution_research_preregistration_verified": True,
+            "current_product_fit_preregistration_claimed": False,
+            "product_authority_claimed": False,
+            "evidence_hash": "",
+        }
+        payload["evidence_hash"] = _demo_evidence_hash(payload, "evidence_hash")
+        root = ctx["run_root"] / "artifacts" / "09_IRIS_FIT_PREREGISTERED"
+        return {
+            "status": "PASS",
+            "outputs": [
+                write_json(
+                    root / "demo_historical_iris_prereg_evidence.json",
+                    payload,
+                    authority_class="DEMO_HISTORICAL_IRIS_PREREG_EVIDENCE",
+                    schema=_DEMO_IRIS_PREREG_SCHEMA,
+                )
+            ],
+            "diagnostics": {
+                "demo_historical_import": True,
+                "evidence_hash": payload["evidence_hash"],
+                "selected_checkpoint_sha256": selected,
+                "product_authority_claimed": False,
+            },
+        }
+
     _dense_ref, dense_policy_sha, dense_policy = _iris_dense_coverage_policy(ctx)
     prereg, output = build_fit_preregistration(
         ctx,
@@ -237,6 +337,89 @@ def preregister_iris_fit_stage(ctx: dict) -> dict:
 
 
 def execute_iris_fit_stage(ctx: dict) -> dict:
+    demo = _demo_frozen_iris_import_cfg(ctx)
+    if demo is not None:
+        prereg = stage_output_payload(
+            ctx,
+            "09_IRIS_FIT_PREREGISTERED",
+            _DEMO_IRIS_PREREG_SCHEMA,
+        )
+        if prereg.get("evidence_hash") != _demo_evidence_hash(prereg, "evidence_hash"):
+            raise QualificationError("DEMO_IRIS_PREREG_EVIDENCE_HASH_DRIFT")
+
+        checkpoint_ref = dict(demo.get("checkpoint") or {})
+        result_ref = dict(demo.get("result") or {})
+        selected_ref = dict(demo.get("selected_checkpoint_report") or {})
+        checkpoint_path = load_file_ref(checkpoint_ref, json_required=False)
+        result_path, result_sha, result = _demo_ref_payload(
+            result_ref,
+            expected_schema="RealSaS.IRIS.V5TP64LongHorizonLowLR.v1",
+        )
+        selected_path, selected_sha, selected = _demo_ref_payload(selected_ref)
+        checkpoint_sha = sha256_file(checkpoint_path)
+        if checkpoint_sha != str(prereg.get("selected_checkpoint_sha256") or ""):
+            raise QualificationError("DEMO_IRIS_EXECUTION_CHECKPOINT_DRIFT")
+        if str(selected.get("selected_checkpoint_sha256") or "") != checkpoint_sha:
+            raise QualificationError("DEMO_IRIS_SELECTED_REPORT_CHECKPOINT_DRIFT")
+        if int(selected.get("selected_absolute_effective_step", -1)) != 19200:
+            raise QualificationError("DEMO_IRIS_SELECTED_REPORT_STEP_DRIFT")
+        if str(result.get("run_id") or "") != str(prereg.get("historical_run_id") or ""):
+            raise QualificationError("DEMO_IRIS_RESULT_RUN_ID_DRIFT")
+        if str((result.get("foundation") or {}).get("architecture_id") or "") != str(
+            prereg.get("architecture_id") or ""
+        ):
+            raise QualificationError("DEMO_IRIS_RESULT_ARCHITECTURE_DRIFT")
+        arm = dict((result.get("arms") or {}).get("C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE") or {})
+        if str(arm.get("selected_checkpoint_sha256") or "") != checkpoint_sha:
+            raise QualificationError("DEMO_IRIS_RESULT_SELECTED_CHECKPOINT_DRIFT")
+
+        payload = {
+            "schema": _DEMO_IRIS_EXEC_SCHEMA,
+            "lane": "IRIS",
+            "status": "PASS_DEMO_ONLY",
+            "prereg_evidence_hash": str(prereg["evidence_hash"]),
+            "architecture_id": str(prereg["architecture_id"]),
+            "historical_run_id": str(prereg["historical_run_id"]),
+            "selected_arm": str(prereg["selected_arm"]),
+            "checkpoint_path": str(checkpoint_path),
+            "checkpoint_sha256": checkpoint_sha,
+            "result_path": str(result_path),
+            "result_sha256": result_sha,
+            "selected_checkpoint_report_path": str(selected_path),
+            "selected_checkpoint_report_sha256": selected_sha,
+            "selected_absolute_effective_step": int(selected["selected_absolute_effective_step"]),
+            "optimizer_state_saved": bool(selected.get("optimizer_state_saved", False)),
+            "scheduler_state_saved": bool(selected.get("scheduler_state_saved", False)),
+            "teacher_training_supervision_used": True,
+            "teacher_inference_inputs_used": False,
+            "current_adapter_fit_executed": False,
+            "historical_external_gpu_fit_evidence_admitted": True,
+            "product_authority_claimed": False,
+            "evidence_hash": "",
+        }
+        if not payload["optimizer_state_saved"] or not payload["scheduler_state_saved"]:
+            raise QualificationError("DEMO_IRIS_SELECTED_STATE_NOT_FULLY_SEALED")
+        payload["evidence_hash"] = _demo_evidence_hash(payload, "evidence_hash")
+        root = ctx["run_root"] / "artifacts" / "10_IRIS_FIT"
+        return {
+            "status": "PASS",
+            "outputs": [
+                write_json(
+                    root / "demo_historical_iris_execution_evidence.json",
+                    payload,
+                    authority_class="DEMO_HISTORICAL_IRIS_EXECUTION_EVIDENCE",
+                    schema=_DEMO_IRIS_EXEC_SCHEMA,
+                )
+            ],
+            "diagnostics": {
+                "demo_historical_import": True,
+                "checkpoint_sha256": checkpoint_sha,
+                "result_sha256": result_sha,
+                "evidence_hash": payload["evidence_hash"],
+                "product_authority_claimed": False,
+            },
+        }
+
     _dense_ref, dense_policy_sha, dense_policy = _iris_dense_coverage_policy(ctx)
     prereg = model_fit_preregistration_from_dict(
         stage_output_payload(
@@ -278,6 +461,64 @@ def execute_iris_fit_stage(ctx: dict) -> dict:
 
 
 def seal_iris_checkpoint_stage(ctx: dict) -> dict:
+    demo = _demo_frozen_iris_import_cfg(ctx)
+    if demo is not None:
+        execution = stage_output_payload(
+            ctx,
+            "10_IRIS_FIT",
+            _DEMO_IRIS_EXEC_SCHEMA,
+        )
+        if execution.get("evidence_hash") != _demo_evidence_hash(execution, "evidence_hash"):
+            raise QualificationError("DEMO_IRIS_EXECUTION_EVIDENCE_HASH_DRIFT")
+        checkpoint_path = resolved_path(str(execution.get("checkpoint_path") or ""))
+        result_path = resolved_path(str(execution.get("result_path") or ""))
+        if (
+            not checkpoint_path.is_file()
+            or sha256_file(checkpoint_path) != str(execution.get("checkpoint_sha256") or "")
+        ):
+            raise QualificationError("DEMO_IRIS_CHECKPOINT_BYTES_DRIFT")
+        if (
+            not result_path.is_file()
+            or sha256_file(result_path) != str(execution.get("result_sha256") or "")
+        ):
+            raise QualificationError("DEMO_IRIS_RESULT_BYTES_DRIFT")
+        value = ModelCheckpointSealIR(
+            "IRIS",
+            str(execution["evidence_hash"]),
+            str(checkpoint_path),
+            str(execution["checkpoint_sha256"]),
+            str(execution["result_sha256"]),
+            None,
+            "",
+            metadata={
+                "architecture_id": str(execution["architecture_id"]),
+                "historical_demo_import": True,
+                "current_adapter_fit_executed": False,
+                "product_authority_claimed": False,
+                "historical_external_gpu_fit_evidence_hash": str(execution["evidence_hash"]),
+            },
+        )
+        value = replace(
+            value,
+            checkpoint_seal_hash=model_checkpoint_seal_hash(value),
+        )
+        root = ctx["run_root"] / "artifacts" / "11_IRIS_CHECKPOINT_SEALED"
+        output = write_ir(
+            root / "model_checkpoint_seal.json",
+            value,
+            authority_class="DEMO_IRIS_CHECKPOINT_SEAL",
+        )
+        return {
+            "status": "PASS",
+            "outputs": [output],
+            "diagnostics": {
+                "checkpoint_seal_hash": value.checkpoint_seal_hash,
+                "checkpoint_sha256": value.checkpoint_sha256,
+                "historical_demo_import": True,
+                "product_authority_claimed": False,
+            },
+        }
+
     execution = model_fit_execution_from_dict(
         stage_output_payload(
             ctx,

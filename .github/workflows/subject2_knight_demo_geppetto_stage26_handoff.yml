@@ -313,9 +313,10 @@ jobs:
           rm -rf "$handoff"
           mkdir -p "$handoff/observations"
           python - <<'PY'
-          import hashlib,json,os,shutil
+          import hashlib,json,os,shutil,subprocess
           from pathlib import Path
 
+          repo=Path(os.environ["GITHUB_WORKSPACE"]).resolve()
           root=Path(os.environ["RUN_ROOT"]).resolve()
           handoff=root/"handoff/GEPPETTO_STAGE27"
           teacher=Path(os.environ["GEPPETTO_TEACHER_ROOT"]).resolve()

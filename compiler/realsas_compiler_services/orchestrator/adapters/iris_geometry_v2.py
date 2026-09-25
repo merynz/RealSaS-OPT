@@ -385,9 +385,19 @@ def execute_iris_fit_stage(ctx: dict) -> dict:
             prereg.get("architecture_id") or ""
         ):
             raise QualificationError("DEMO_IRIS_RESULT_ARCHITECTURE_DRIFT")
-        arm = dict((result.get("arms") or {}).get("C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE") or {})
-        if str(arm.get("selected_checkpoint_sha256") or "") != checkpoint_sha:
+        arm = dict(
+            (result.get("arms") or {}).get(
+                "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE"
+            )
+            or {}
+        )
+        selection = dict(arm.get("selection") or {})
+        if str(selection.get("selected_checkpoint_sha256") or "") != checkpoint_sha:
             raise QualificationError("DEMO_IRIS_RESULT_SELECTED_CHECKPOINT_DRIFT")
+        if int(selection.get("selected_absolute_effective_step", -1)) != int(
+            selected.get("selected_absolute_effective_step", -2)
+        ):
+            raise QualificationError("DEMO_IRIS_RESULT_SELECTED_STEP_DRIFT")
 
         payload = {
             "schema": _DEMO_IRIS_EXEC_SCHEMA,

@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.KnightDemoCAATrigger.v1",
-  "status": "REQUESTED_AFTER_STAGE26_HANDOFF",
+  "status": "RERUN_FOR_TILE_CAPACITY_EVIDENCE",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
   "subject_id": "SUBJECT2_KNIGHT",
   "execution_class": "DEMO_WITNESS",
@@ -8,5 +8,7 @@
   "stage26_handoff_receipt": "canonical/KNIGHT_DEMO_GEPPETTO_STAGE26_HANDOFF_RECEIPT_20260925.json",
   "target": "25_CAA_REFERENCE_REST_RENDER_PROOF",
   "product_authority_claimed": false,
-  "product_pass_forbidden": true
+  "product_pass_forbidden": true,
+  "revision": 1,
+  "previous_failure": "CAA_TILE_DENSITY_OR_CAPACITY_UNSATISFIED"
 }

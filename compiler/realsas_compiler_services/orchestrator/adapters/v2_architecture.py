@@ -10,6 +10,7 @@ from compiler.realsas_compiler_core.output_presentation_v1 import (
     output_direction_set_from_dict,
 )
 from compiler.realsas_compiler_core.geometry_substrate_v2 import (
+    geometry_substrate_evidence_from_dict,
     geometry_substrate_from_dict,
 )
 from compiler.realsas_compiler_core.artifact_codec_v2 import (

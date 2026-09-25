@@ -1,10 +1,10 @@
 {
   "schema": "RealSaS.KnightDemoTransferProbeTrigger.v1",
-  "status": "RESUME_THROUGH_STAGE15_RETRY_RUN_ROOT_EXPORTED",
+  "status": "RETRY_STAGE15_AFTER_REPO_ROOT_IMPORT_FIX",
   "date_utc": "2026-09-25",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
-  "probe_revision": 7,
-  "probe_scope": "RCLONE_EXACT_STAGE08_IMPORT__FROZEN_C_HISTORICAL_EVIDENCE__STAGE14_15_REAL_EXECUTION",
+  "probe_revision": 8,
+  "probe_scope": "DEMO_EXACT_STAGE08_IMPORT__FROZEN_C_STAGE09_15_CONTINUATION",
   "expected_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
   "expected_zero_surface_sha256": "adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c",
   "expected_observation_set_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa",

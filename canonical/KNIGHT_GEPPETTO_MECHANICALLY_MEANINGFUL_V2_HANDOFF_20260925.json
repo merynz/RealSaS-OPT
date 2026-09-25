@@ -1,0 +1,78 @@
+{
+  "base_execution_commit": "249bb6c69c66572ad96c221a807b773fb4ac3fbf",
+  "base_handoff_manifest_sha256": "7996bf007d41a2c2eaff30011730d68f9a6258790f72e27a60831b0bf6aec890",
+  "check_every_steps": 64,
+  "diffusion_eval_seeds": [
+    11,
+    23,
+    47,
+    89
+  ],
+  "execution_class": "DEMO_WITNESS",
+  "execution_repo_commit": "1cec9a7cbdbe84e22443ffe89df5934391aa5192",
+  "files": {
+    "GEPPETTO_MECHANICALLY_MEANINGFUL_RIG_POLICY_V1_20260925.json": {
+      "bytes": 1842,
+      "sha256": "b5758ff3fe715ec8b2dd1679e62270a8cabc01ea8004aaefbc3b0952f1d13d66"
+    },
+    "RealSaS_KNIGHT_GEPPETTO_STAGE27_MECHANICALLY_MEANINGFUL_V2_RUN_ALL.ipynb": {
+      "bytes": 15182,
+      "sha256": "d927173be0cda5472000d60c710a27d102b7165b77ae582dd6911106ba621aab"
+    },
+    "experiment_preregistration_v2.json": {
+      "bytes": 2986,
+      "sha256": "1d1ecdcb0bcbb76ceba50b70800cd48b29d68fdd0c31ac52f79cc9812b48852f"
+    },
+    "mechanically_meaningful_target_v2.py": {
+      "bytes": 16883,
+      "sha256": "7457bd772638ddf6f6a3a5a2a0dffd9e3199c1fcd049b06ae4a5ecb474e776c7"
+    },
+    "teacher_target_v2.npz": {
+      "bytes": 1728,
+      "sha256": "26d4d5411b14b23b894f0351ab08fc2da2b18d8fb3ac4776b25b8b2434b4bbc1"
+    },
+    "teacher_target_v2_report.json": {
+      "bytes": 2006,
+      "sha256": "c629a40c6f357f30f143d57752a442185bed68ac3cabc473255a88e9b6acb1b7"
+    }
+  },
+  "generalization_claimed": false,
+  "notes": [
+    "Aesthetic minimalism/clean skeleton is explicitly not an objective.",
+    "No fixed target joint count is used by the target builder; Knight resolves to 28 from mechanical rules.",
+    "Every full check requires all four frozen diffusion seeds; terminal closure requires three consecutive full checks.",
+    "The final result persists the training check trace so the three-pass claim is auditable."
+  ],
+  "product_authority_claimed": false,
+  "repair_branch": "repair/geppetto-mechanically-meaningful-rig-v2-20260925",
+  "required_consecutive_full_passes": 3,
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "schema": "RealSaS.KnightGeppettoMechanicallyMeaningfulStage27Handoff.v2",
+  "self_hosted_ci_conclusion": "success",
+  "self_hosted_ci_run_id": 36164993541,
+  "source_reuse": {
+    "base_handoff": "GEPPETTO_STAGE27_HANDOFF",
+    "historical_checkpoint_reused": false,
+    "reused_exactly": [
+      "qualified rigging surface",
+      "rigging surface qualification",
+      "model source",
+      "model-fit preregistration IR",
+      "qualified camera set",
+      "8 observations"
+    ]
+  },
+  "status": "PASS",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "target_count": 28,
+  "target_role_counts": {
+    "ROOT_MOTION_ANCHOR": 1,
+    "SKIN_SUPPORTED_ARTICULATION": 20,
+    "STRUCTURAL_BRIDGE": 0,
+    "TERMINAL_EXTENSION_SOURCE": 2,
+    "TERMINAL_TIP_SYNTHETIC": 5
+  },
+  "target_rule": "SKIN_SUPPORTED_PLUS_STRUCTURAL_BRIDGES_PLUS_ROOT_MOTION_ANCHOR_PLUS_TERMINAL_EXTENSIONS_AND_TIPS",
+  "target_schema": "RealSaS.GeppettoMechanicallyMeaningfulRigTarget.v2",
+  "terminal_trace_persisted_in_result": true
+}

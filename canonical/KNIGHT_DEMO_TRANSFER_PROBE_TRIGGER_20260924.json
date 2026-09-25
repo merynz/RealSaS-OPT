@@ -3,16 +3,23 @@
   "status": "RERUN_REQUESTED",
   "date_utc": "2026-09-25",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
-  "probe_revision": 11,
-  "probe_scope": "FROZEN_C_STAGE14_15__VECTORIZED_EXACT_COMPONENT_PARTITION",
+  "probe_revision": 12,
+  "probe_scope": "FROZEN_C_STAGE14_15__EXACT_CACHED_DENSE_OPERATORS",
   "expected_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
   "expected_zero_surface_sha256": "adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c",
   "expected_observation_set_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa",
   "expected_normalization_hash": "81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23",
   "performance_repair": {
     "scientific_semantics_changed": false,
-    "partition_semantics": "EXACT_CONNECTED_COMPONENT_PARTITION",
-    "python_per_face_union_loop_removed": true,
-    "current_component_label_test": "tests/compiler/test_mesh_component_labels_v1.py"
+    "geometry_evidence_policy_changed": false,
+    "dense_normal_operator": "UNCHANGED_ROBUST_LOCAL_PCA_K64",
+    "dense_normal_query": "EXACT_CHUNKED_CKDTREE_QUERY",
+    "dense_normal_candidate_reuse": true,
+    "connected_component_partition": "EXACT_CACHED_PARTITION",
+    "adequacy_metric_normal_authority": "UNCHANGED_IMPLICIT_DECODER_NORMALS",
+    "regression_tests": [
+      "tests/compiler/test_mesh_component_labels_v1.py",
+      "tests/compiler/test_substrate_adequacy_v1.py"
+    ]
   }
 }

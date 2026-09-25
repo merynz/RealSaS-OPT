@@ -5,6 +5,7 @@ from dataclasses import replace
 from compiler.realsas_compiler_core.canonical_mesh_quality_repair_v1 import (
     repair_candidate_endpoint_collapses_v1,
     repair_candidate_fixed_vertex_flips_v1,
+    repair_candidate_projected_relaxation_v1,
 )
 from compiler.realsas_compiler_core.product_authority_v1 import (
     CanonicalMeshCandidateIR,
@@ -127,3 +128,50 @@ def test_endpoint_collapse_removes_short_edge_slivers_with_link_condition():
         vertex.support_binding in tuple(v.support_binding for v in candidate.vertices)
         for vertex in repaired.vertices
     )
+
+
+def test_projected_relaxation_moves_interior_vertex_on_reference_surface_with_convex_support():
+    pts={
+        "v":(0.9,0.0,0.0),
+        "a":(1.0,0.0,0.0),
+        "b":(0.0,1.0,0.0),
+        "c":(-1.0,0.0,0.0),
+        "d":(0.0,-1.0,0.0),
+    }
+    vertices=tuple(
+        CanonicalMeshVertexCandidateIR(
+            vid,
+            SurfaceSupportBinding("IDENTITY_SURFACE_NODE",((f"s{vid}",1.0),)),
+            "c0",
+            pts[vid],
+        )
+        for vid in ("v","a","b","c","d")
+    )
+    faces=(
+        ("v","a","b"),
+        ("v","b","c"),
+        ("v","c","d"),
+        ("v","d","a"),
+    )
+    edges=tuple(sorted({
+        tuple(sorted((face[i],face[j])))
+        for face in faces for i,j in ((0,1),(1,2),(2,0))
+    }))
+    candidate=CanonicalMeshCandidateIR(
+        vertices,faces,edges,
+        "surface","partition","carrier",
+        "fixture","fixture-policy","",
+    )
+    candidate=replace(
+        candidate,
+        candidate_lineage_hash=canonical_mesh_candidate_lineage_hash(candidate),
+    )
+    repaired,report=repair_candidate_projected_relaxation_v1(
+        candidate,candidate,_policy(),max_moves=8
+    )
+    assert report["accepted_move_count"]>=1
+    assert report["after"]["policy_violating_face_count"] < report["before"]["policy_violating_face_count"]
+    moved=next(v for v in repaired.vertices if v.candidate_vertex_id=="v")
+    assert moved.support_binding.mode=="LOCAL_CONVEX_INTERPOLATION"
+    assert abs(sum(coeff for _,coeff in moved.support_binding.coefficients)-1.0)<1e-9
+    assert moved.P != pts["v"]

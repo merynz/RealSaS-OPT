@@ -76,7 +76,7 @@ def seal_output_presentation_directions_stage(ctx: dict) -> dict:
 
 def build_canonical_mesh_addressing_stage(ctx: dict) -> dict:
     base = build_canonical_mesh_candidate_stage(ctx)
-    if str(base.get("status")) != "PASS":
+    if str(base.get("status")) not in {"PASS", "PASS_DEMO_ONLY"}:
         return base
     by_schema = {str(o.get("schema")): o for o in base.get("outputs") or ()}
     candidate = canonical_mesh_candidate_from_dict(
@@ -114,7 +114,11 @@ def build_canonical_mesh_addressing_stage(ctx: dict) -> dict:
             "appearance_domain_face_count": domain.renderable_face_count,
         }
     )
-    return {"status": "PASS", "outputs": outputs, "diagnostics": diagnostics}
+    return {
+        "status": str(base.get("status") or "PASS"),
+        "outputs": outputs,
+        "diagnostics": diagnostics,
+    }
 
 
 def _double_area(a, b, c) -> float:

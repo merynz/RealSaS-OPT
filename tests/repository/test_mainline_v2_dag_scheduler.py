@@ -1,12 +1,15 @@
 from __future__ import annotations
 
-import pytest
+import json
 from pathlib import Path
+
+import pytest
 
 from compiler.realsas_compiler_services.orchestrator.mainline import (
     _fingerprint,
     _manifest_subset,
     _outputs_verify,
+    _persist_failure_diagnostics,
     _seal_outputs,
     _target_closure,
     dependency_failure_ids,
@@ -237,3 +240,33 @@ def test_arachne_prereg_fingerprint_subset_ignores_future_execution_refs():
         "sha256": "2" * 64,
     }
     assert _manifest_subset(manifest, stage) == before
+
+
+def test_failure_diagnostics_are_persisted_with_hash_bound_reference(tmp_path, monkeypatch):
+    monkeypatch.setenv("REALSAS_AUTHORITY_ROOT", str(tmp_path))
+    diagnostics = {
+        "status": "FAIL",
+        "evaluated_candidates": [
+            {"cap": 128, "passed": False, "p95": 0.12},
+            {"cap": 256, "passed": False, "p95": 0.08},
+        ],
+    }
+    ref = _persist_failure_diagnostics(
+        run_id="RUN",
+        stage_id="14_GSA_BUILD",
+        diagnostics=diagnostics,
+    )
+    path = Path(ref["path"])
+    assert path == (
+        tmp_path / "runs" / "RUN" / "artifacts" / "14_GSA_BUILD"
+        / "failure_diagnostics.json"
+    ).resolve()
+    assert path.is_file()
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["schema"] == "RealSaS.StageFailureDiagnostics.v1"
+    assert payload["run_id"] == "RUN"
+    assert payload["stage_id"] == "14_GSA_BUILD"
+    assert payload["diagnostics"] == diagnostics
+    assert ref["bytes"] == path.stat().st_size
+    assert len(ref["sha256"]) == 64
+    assert len(ref["diagnostics_hash"]) == 64

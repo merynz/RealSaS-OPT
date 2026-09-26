@@ -1,0 +1,152 @@
+name: subject2-knight-demo-geppetto-v2-reconcile
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_DEMO_GEPPETTO_V2_RECONCILE_TRIGGER_20260926.json'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-demo-v2-run
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      GEPPETTO_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/GEPPETTO_STAGE27_MECHANICALLY_MEANINGFUL_V2_OUTPUT
+      EXPECTED_SKELETON_LINEAGE: c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce
+      PYTHONHASHSEED: '0'
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install mainline dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m py_compile compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py
+
+      - name: Pull exact Geppetto V2 output
+        shell: bash
+        run: |
+          set -euo pipefail
+          local="$RUN_ROOT/imports/geppetto_stage27_mechanically_meaningful_v2"
+          rm -rf "$local"; mkdir -p "$local"
+          rclone copy "$GEPPETTO_REMOTE" "$local" --checksum
+          for f in RUN_ALL_COMPLETE.json GEPPETTO_KNIGHT_EXECUTION_RECEIPT.json GEPPETTO_KNIGHT_CHECKPOINT.pt GEPPETTO_KNIGHT_RESULT.json GEPPETTO_KNIGHT_SKELETON_PROPOSAL.json; do
+            test -s "$local/$f"
+          done
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])/"imports"/"geppetto_stage27_mechanically_meaningful_v2"
+          complete=json.loads((root/"RUN_ALL_COMPLETE.json").read_text())
+          receipt=json.loads((root/"GEPPETTO_KNIGHT_EXECUTION_RECEIPT.json").read_text())
+          assert complete["schema"]=="RealSaS.KnightGeppettoMechanicallyMeaningfulV2RunAllComplete.v1"
+          assert complete["status"]=="PASS" and complete["target_count"]==28
+          assert complete["terminal_check_steps"]==[768,832,896]
+          assert receipt["schema"]=="RealSaS.ModelFitExecutionReceipt.v1"
+          assert receipt["status"]=="PASS" and receipt["lane"]=="GEPPETTO"
+          assert receipt["preregistration_binding_hash"]=="65ab4cdd080eb4d08cdf5f96cf3a039df8a74fef2eedd9747de40ba4f02d0a66"
+          assert receipt["teacher_inference_inputs_used"] is False
+          print("GEPPETTO_V2_EXTERNAL_OUTPUT_PASS")
+          PY
+          echo "GEPPETTO_LOCAL=$local" >> "$GITHUB_ENV"
+
+      - name: Rebind Stage27 external execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          imported=Path(os.environ["GEPPETTO_LOCAL"])
+          p=root/"run_manifest.json"
+          manifest=json.loads(p.read_text())
+          old=dict(manifest.get("geppetto_fit") or {})
+          prereg=dict(old.get("preregistration") or {})
+          assert prereg
+          def ref(path):
+              path=Path(path).resolve()
+              h=hashlib.sha256()
+              with path.open("rb") as f:
+                  for b in iter(lambda:f.read(1<<20),b""): h.update(b)
+              return {"path":str(path),"sha256":h.hexdigest()}
+          manifest["geppetto_fit"]={
+              "preregistration":prereg,
+              "execution_receipt":ref(imported/"GEPPETTO_KNIGHT_EXECUTION_RECEIPT.json"),
+              "checkpoint":ref(imported/"GEPPETTO_KNIGHT_CHECKPOINT.pt"),
+              "result":ref(imported/"GEPPETTO_KNIGHT_RESULT.json"),
+              "proposal":ref(imported/"GEPPETTO_KNIGHT_SKELETON_PROPOSAL.json"),
+          }
+          p.write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n")
+          print("GEPPETTO_V2_RUN_MANIFEST_REBOUND")
+          PY
+
+      - name: Re-execute Stage27 through Stage29
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m compiler.realsas_compiler_services.orchestrator.mainline execute --run-id "$RUN_ID" --target 29_GEPPETTO_CHECKPOINT_SEALED
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={x["id"]:x for x in ledger["stages"]}
+          for sid in ("27_GEPPETTO_FIT","28_SKELETON_QUALIFIED","29_GEPPETTO_CHECKPOINT_SEALED"):
+              assert by[sid]["status"]=="PASS_DEMO_ONLY",(sid,by[sid]["status"],by[sid].get("blockers"))
+          rows=[x for x in by["28_SKELETON_QUALIFIED"]["outputs"] if x["schema"]=="RealSaS.QualifiedSkeletonIR.v1"]
+          assert len(rows)==1
+          skeleton=json.loads(Path(rows[0]["path"]).read_text())
+          assert len(skeleton["joints"])==28,len(skeleton["joints"])
+          assert skeleton["skeleton_lineage_hash"]==os.environ["EXPECTED_SKELETON_LINEAGE"],skeleton["skeleton_lineage_hash"]
+          print("GEPPETTO_V2_STAGE29_RECONCILED",skeleton["skeleton_lineage_hash"])
+          PY
+
+      - name: Seal reconciliation receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={x["id"]:x for x in ledger["stages"]}
+          sk=[x for x in by["28_SKELETON_QUALIFIED"]["outputs"] if x["schema"]=="RealSaS.QualifiedSkeletonIR.v1"][0]
+          seal=[x for x in by["29_GEPPETTO_CHECKPOINT_SEALED"]["outputs"] if x["schema"]=="RealSaS.ModelCheckpointSealIR.v1"][0]
+          skeleton=json.loads(Path(sk["path"]).read_text())
+          checkpoint=json.loads(Path(seal["path"]).read_text())
+          receipt={
+            "schema":"RealSaS.KnightGeppettoStage29ReconciledV2.v1",
+            "status":"PASS_DEMO_ONLY",
+            "run_id":os.environ["RUN_ID"],
+            "qualified_joint_count":len(skeleton["joints"]),
+            "qualified_skeleton_lineage_hash":skeleton["skeleton_lineage_hash"],
+            "checkpoint_seal_hash":checkpoint["checkpoint_seal_hash"],
+            "execution_repo_commit":os.environ["GITHUB_SHA"],
+            "product_authority_claimed":False,
+          }
+          Path("canonical/KNIGHT_DEMO_GEPPETTO_STAGE29_V2_RECEIPT_20260926.json").write_text(json.dumps(receipt,indent=2,sort_keys=True)+"\n")
+          PY
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_DEMO_GEPPETTO_STAGE29_V2_RECEIPT_20260926.json
+          git commit -m 'demo: seal reconciled 28-joint Geppetto Stage29'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

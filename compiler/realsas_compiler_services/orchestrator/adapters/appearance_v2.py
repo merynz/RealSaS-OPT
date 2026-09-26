@@ -277,7 +277,6 @@ def _load_compile_arrays(
         raise QualificationError("CAA_COMPILE_DIRECT_PM_STORAGE_MODE_UNSUPPORTED")
 
     full_required = {
-        "barycentric",
         "sample_positions",
         "sample_face_index",
         "sample_component_index",
@@ -293,6 +292,25 @@ def _load_compile_arrays(
         metadata.get("sample_count_mode")
         or "UNIFORM_FACE_LATTICE_V1"
     )
+    barycentric_storage_mode = str(
+        metadata.get("barycentric_storage_mode")
+        or (
+            "UNIFORM_PATTERN_EXPLICIT_V1"
+            if sample_mode == "UNIFORM_FACE_LATTICE_V1"
+            else "PER_SAMPLE_EXPLICIT_LEGACY_V1"
+        )
+    )
+    if barycentric_storage_mode in {
+        "UNIFORM_PATTERN_EXPLICIT_V1",
+        "PER_SAMPLE_EXPLICIT_LEGACY_V1",
+    }:
+        full_required.add("barycentric")
+    elif barycentric_storage_mode != (
+        "RECONSTRUCT_FROM_FACE_RESOLUTION_AND_OFFSETS_V1"
+    ):
+        raise QualificationError(
+            "CAA_COMPILE_BARYCENTRIC_STORAGE_MODE_UNSUPPORTED"
+        )
     adaptive_required = {"face_sample_offsets", "face_tile_resolutions"}
     requested = None if required_names is None else set(map(str, required_names))
 
@@ -607,22 +625,29 @@ def compile_caa_stage(ctx: dict) -> dict:
 
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     npz_path = root / "caa_compile.npz"
-    npz_sha = _save_npz(
-        npz_path,
-        barycentric=result["barycentric"],
-        sample_positions=result["sample_positions"],
-        sample_face_index=result["sample_face_index"],
-        face_sample_offsets=np.asarray(result["face_sample_offsets"], dtype=np.int64),
-        face_tile_resolutions=np.asarray(result["face_tile_resolutions"], dtype=np.int32),
-        sample_component_index=sample_component_index,
-        direct_valid=result["direct_valid"],
-        direct_rgba=result["direct_rgba"],
-        direct_pm_linear_packed=result["direct_pm_linear_packed"],
-        source_xy=result["source_xy"],
-        rgba=result["rgba"],
-        provenance=result["provenance"],
-        source_view=result["source_view"],
-    )
+    npz_arrays = {
+        "sample_positions": result["sample_positions"],
+        "sample_face_index": result["sample_face_index"],
+        "face_sample_offsets": np.asarray(
+            result["face_sample_offsets"], dtype=np.int64
+        ),
+        "face_tile_resolutions": np.asarray(
+            result["face_tile_resolutions"], dtype=np.int32
+        ),
+        "sample_component_index": sample_component_index,
+        "direct_valid": result["direct_valid"],
+        "direct_rgba": result["direct_rgba"],
+        "direct_pm_linear_packed": result["direct_pm_linear_packed"],
+        "source_xy": result["source_xy"],
+        "rgba": result["rgba"],
+        "provenance": result["provenance"],
+        "source_view": result["source_view"],
+    }
+    if result["barycentric"] is not None:
+        npz_arrays["barycentric"] = np.asarray(
+            result["barycentric"], dtype=np.float64
+        )
+    npz_sha = _save_npz(npz_path, **npz_arrays)
     counts = result["counts"]
     total = int(result["rgba"].shape[0] * result["rgba"].shape[1])
     artifact = CAACompileArtifactIR(
@@ -664,6 +689,10 @@ def compile_caa_stage(ctx: dict) -> dict:
             "direct_pm_linear_storage_mode": str(
                 result["direct_pm_linear_storage_mode"]
             ),
+            "barycentric_storage_mode": str(
+                result["barycentric_storage_mode"]
+            ),
+            "compile_array_schema": "RealSaS.CAACompileArrays.v3",
             "selected_resolution_histogram": {
                 str(int(resolution)): int(
                     np.count_nonzero(
@@ -717,6 +746,10 @@ def compile_caa_stage(ctx: dict) -> dict:
             "direct_pm_linear_storage_mode": str(
                 result["direct_pm_linear_storage_mode"]
             ),
+            "barycentric_storage_mode": str(
+                result["barycentric_storage_mode"]
+            ),
+            "compile_array_schema": "RealSaS.CAACompileArrays.v3",
             **{f"provenance_{key.lower()}": int(value) for key, value in counts.items()},
         },
     }

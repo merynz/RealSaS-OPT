@@ -40,11 +40,15 @@ jobs:
           set -euo pipefail
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
           python -m py_compile \
+            compiler/realsas_compiler_core/appearance_authority_v2.py \
+            compiler/realsas_compiler_core/appearance_completion_v2.py \
             compiler/realsas_compiler_core/appearance_compile_v2.py \
             compiler/realsas_compiler_core/appearance_bake_v2.py \
+            compiler/realsas_compiler_core/appearance_quality_v2.py \
             compiler/realsas_compiler_core/appearance_render_v2.py \
             compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py
           python -m pytest -q \
+            tests/compiler/test_caa_adaptive_paging_v2.py \
             tests/compiler/test_caa_demo_static_mesh_admission_v2.py \
             tests/compiler/test_caa_v2_subject_free_policy.py::test_caa_policy_is_refrozen_and_tile_density_is_art_quality_driven \
             tests/compiler/test_caa_v2_subject_free_policy.py::test_tile_resolution_unsatisfied_evidence_is_preserved \
@@ -150,6 +154,17 @@ jobs:
           assert ledger["failed_count"]==0,ledger["failed_stage_ids"]
           print("KNIGHT_DEMO_CAA_STAGE25_PASS_DEMO_ONLY")
           PY
+
+      - name: Upload CAA failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: knight-caa-stage20-25-failure-${{ github.run_id }}
+          path: |
+            ${{ env.RUN_ROOT }}/ACTIVE_RUN_V2.json
+            ${{ env.RUN_ROOT }}/artifacts/*/failure_diagnostics.json
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Seal CAA Stage25 receipt
         shell: bash

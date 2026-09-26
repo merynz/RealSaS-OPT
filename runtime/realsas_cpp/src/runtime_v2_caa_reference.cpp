@@ -444,7 +444,7 @@ std::uint8_t sample_provenance(const ProvenanceSet& p,std::uint32_t view,std::ui
 std::int16_t source_view_texel(const ProvenanceSet& p,std::uint32_t view,std::uint32_t page,int x,int y) {
     x=std::max(0,std::min(x,static_cast<int>(p.width)-1));
     y=std::max(0,std::min(y,static_cast<int>(p.height)-1));
-    const auto idx=((static_cast<std::size_t>(view)*p.height)+static_cast<std::size_t>(y))*p.width+static_cast<std::size_t>(x);
+    const auto idx=(((static_cast<std::size_t>(view)*p.pages)+page)*p.height+static_cast<std::size_t>(y))*p.width+static_cast<std::size_t>(x);
     return p.source_view[idx];
 }
 std::int16_t sample_source_view(const ProvenanceSet& p,std::uint32_t view,std::uint32_t page,double u,double v) {

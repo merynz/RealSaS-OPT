@@ -454,6 +454,8 @@ def cross_view_source_compatibility_metrics(
         raise QualificationError("CAA_CROSS_VIEW_CONFLICT_CUT_INVALID")
 
     def summarize(errors: np.ndarray, alpha: np.ndarray) -> dict:
+        errors = np.asarray(errors, dtype=np.float64)
+        alpha = np.asarray(alpha, dtype=np.float64)
         count = int(len(errors))
         return {
             "shared_direct_sample_count": count,
@@ -475,8 +477,10 @@ def cross_view_source_compatibility_metrics(
 
     pair_rows = []
     component_rows = []
-    all_errors = []
-    all_alpha = []
+    all_error_chunks: list[np.ndarray] = []
+    all_alpha_chunks: list[np.ndarray] = []
+    component_ids = np.unique(component).astype(np.int32, copy=False)
+
     for left in range(8):
         right = (left + 1) % 8
         shared = valid[left] & valid[right]
@@ -490,41 +494,52 @@ def cross_view_source_compatibility_metrics(
                 rgba[left, indices, 3].astype(np.float64)
                 - rgba[right, indices, 3].astype(np.float64)
             ) / 255.0
-            all_errors.extend(map(float, errors))
-            all_alpha.extend(map(float, alpha))
+            errors = np.asarray(errors, dtype=np.float64)
+            alpha = np.asarray(alpha, dtype=np.float64)
+            all_error_chunks.append(errors)
+            all_alpha_chunks.append(alpha)
+            shared_component = component[indices]
         else:
-            errors = np.asarray([], dtype=np.float64)
-            alpha = np.asarray([], dtype=np.float64)
-        row = {
-            "left_view_index": left,
-            "right_view_index": right,
-            **summarize(errors, alpha),
-        }
-        pair_rows.append(row)
-        for component_id in sorted(set(map(int, component))):
-            local = shared & (component == component_id)
-            local_indices = np.flatnonzero(local)
-            if not len(local_indices):
+            errors = np.empty((0,), dtype=np.float64)
+            alpha = np.empty((0,), dtype=np.float64)
+            shared_component = np.empty((0,), dtype=np.int32)
+
+        pair_rows.append(
+            {
+                "left_view_index": left,
+                "right_view_index": right,
+                **summarize(errors, alpha),
+            }
+        )
+
+        for component_id in component_ids:
+            local = shared_component == int(component_id)
+            if not np.any(local):
                 continue
-            local_error = rgba_l1_premultiplied(
-                rgba[left, local_indices],
-                rgba[right, local_indices],
-            )
-            local_alpha = np.abs(
-                rgba[left, local_indices, 3].astype(np.float64)
-                - rgba[right, local_indices, 3].astype(np.float64)
-            ) / 255.0
+            # Reuse the already-measured pair arrays. Component qualification is
+            # a partition of the same canonical shared-direct evidence, not a
+            # second color measurement pass.
+            local_error = errors[local]
+            local_alpha = alpha[local]
             component_rows.append(
                 {
                     "left_view_index": left,
                     "right_view_index": right,
-                    "component_index": component_id,
+                    "component_index": int(component_id),
                     **summarize(local_error, local_alpha),
                 }
             )
 
-    values = np.asarray(all_errors, dtype=np.float64)
-    alpha_values = np.asarray(all_alpha, dtype=np.float64)
+    values = (
+        np.concatenate(all_error_chunks)
+        if all_error_chunks
+        else np.empty((0,), dtype=np.float64)
+    )
+    alpha_values = (
+        np.concatenate(all_alpha_chunks)
+        if all_alpha_chunks
+        else np.empty((0,), dtype=np.float64)
+    )
     return {
         "mode": "ADJACENT_8VIEW_SHARED_CANONICAL_DIRECT_SOURCE_V2",
         "pair_count": 8,
@@ -535,6 +550,7 @@ def cross_view_source_compatibility_metrics(
         "alpha_conflict_cut": alpha_cut,
         "raw_rgb_equality_required": False,
         "measurement_is_compatibility_not_color_authority": True,
+        "storage_mode": "NUMPY_CHUNKS_NO_PYTHON_FLOAT_EXPANSION",
     }
 
 def adjacent_direction_transition_metrics(

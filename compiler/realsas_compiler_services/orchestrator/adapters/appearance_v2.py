@@ -473,12 +473,28 @@ def compile_caa_stage(ctx: dict) -> dict:
     rgba, masks = _load_source_inputs(ctx, observation)
 
     compile_policy = dict(prereg.compile_policy)
+    strategy = str(
+        compile_policy.get("tile_resolution_strategy")
+        or "UNIFORM_FACE_LATTICE_V1"
+    )
+    face_tile_resolutions = None
+    if strategy == "PER_FACE_ADAPTIVE_V1":
+        face_tile_resolutions = np.asarray(
+            compile_policy.get("face_tile_resolutions") or (),
+            dtype=np.int32,
+        )
+        if face_tile_resolutions.shape != (len(candidate.faces),):
+            raise QualificationError("CAA_ADAPTIVE_FACE_RESOLUTION_BINDING_DRIFT")
+    elif strategy != "UNIFORM_FACE_LATTICE_V1":
+        raise QualificationError("CAA_TILE_RESOLUTION_STRATEGY_UNSUPPORTED")
+
     result = compile_deterministic_caa(
         candidate=candidate,
         cameras=cameras.cameras,
         source_rgba_by_view=rgba,
         foreground_mask_by_view=masks,
         tile_resolution=int(compile_policy["tile_resolution"]),
+        face_tile_resolutions=face_tile_resolutions,
         source_lock_policy=prereg.source_lock_policy,
         completion_quality_policy=prereg.completion_quality_policy,
     )
@@ -496,6 +512,8 @@ def compile_caa_stage(ctx: dict) -> dict:
         barycentric=result["barycentric"],
         sample_positions=result["sample_positions"],
         sample_face_index=result["sample_face_index"],
+        face_sample_offsets=np.asarray(result["face_sample_offsets"], dtype=np.int64),
+        face_tile_resolutions=np.asarray(result["face_tile_resolutions"], dtype=np.int32),
         sample_component_index=sample_component_index,
         direct_valid=result["direct_valid"],
         direct_rgba=result["direct_rgba"],
@@ -536,6 +554,30 @@ def compile_caa_stage(ctx: dict) -> dict:
             "completion_mode": "BOUNDED_CANONICAL_SURFACE_HARMONIC",
             "completion_rows": list(result["completion_rows"]),
             "global_surface_fill_used": False,
+            "sample_count_mode": str(result["sample_count_mode"]),
+            "sample_count_per_direction": int(result["sample_count_per_direction"]),
+            "maximum_tile_resolution": int(result["maximum_tile_resolution"]),
+            "selected_resolution_histogram": {
+                str(int(resolution)): int(
+                    np.count_nonzero(
+                        np.asarray(result["face_tile_resolutions"], dtype=np.int32)
+                        == int(resolution)
+                    )
+                )
+                for resolution in sorted(
+                    set(
+                        map(
+                            int,
+                            np.asarray(
+                                result["face_tile_resolutions"], dtype=np.int32
+                            ).tolist(),
+                        )
+                    )
+                )
+            },
+            "adaptive_atlas_placement_hash": str(
+                compile_policy.get("adaptive_atlas_placement_hash") or ""
+            ),
         },
     )
     artifact = replace(artifact, compile_hash=caa_compile_hash(artifact))
@@ -558,6 +600,9 @@ def compile_caa_stage(ctx: dict) -> dict:
         "diagnostics": {
             "compile_hash": artifact.compile_hash,
             "total_sample_count": total,
+            "sample_count_per_direction": int(result["sample_count_per_direction"]),
+            "sample_count_mode": str(result["sample_count_mode"]),
+            "maximum_tile_resolution": int(result["maximum_tile_resolution"]),
             **{f"provenance_{key.lower()}": int(value) for key, value in counts.items()},
         },
     }

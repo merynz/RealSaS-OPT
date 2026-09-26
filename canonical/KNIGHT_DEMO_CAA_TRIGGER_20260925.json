@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.KnightDemoCAATrigger.v1",
-  "status": "RERUN_AFTER_STAGE19_GATE_SCOPE_FIX",
+  "status": "RERUN_AFTER_PAGED_CAA_PRODUCTION_IMPLEMENTATION",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
   "subject_id": "SUBJECT2_KNIGHT",
   "execution_class": "DEMO_WITNESS",
@@ -9,7 +9,9 @@
   "target": "25_CAA_REFERENCE_REST_RENDER_PROOF",
   "product_authority_claimed": false,
   "product_pass_forbidden": true,
-  "revision": 4,
+  "revision": 5,
   "previous_failure": "CAA_TILE_DENSITY_OR_CAPACITY_UNSATISFIED",
-  "test_fixture_repair": "CONSTANT_TIME_SINGLE_FACE_UNSATISFIED_CAPACITY"
+  "test_fixture_repair": "CONSTANT_TIME_SINGLE_FACE_UNSATISFIED_CAPACITY",
+  "production_repair": "FIXED_TILE_DENSITY_WITH_BOUNDED_2048_PHYSICAL_PAGES_V1",
+  "quality_thresholds_changed": false
 }

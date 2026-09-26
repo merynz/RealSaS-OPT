@@ -39,11 +39,16 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
-          python -m py_compile compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py
+          python -m py_compile \
+            compiler/realsas_compiler_core/appearance_compile_v2.py \
+            compiler/realsas_compiler_core/appearance_bake_v2.py \
+            compiler/realsas_compiler_core/appearance_render_v2.py \
+            compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py
           python -m pytest -q \
             tests/compiler/test_caa_demo_static_mesh_admission_v2.py \
             tests/compiler/test_caa_v2_subject_free_policy.py::test_caa_policy_is_refrozen_and_tile_density_is_art_quality_driven \
-            tests/compiler/test_caa_v2_subject_free_policy.py::test_tile_resolution_unsatisfied_evidence_is_preserved
+            tests/compiler/test_caa_v2_subject_free_policy.py::test_tile_resolution_unsatisfied_evidence_is_preserved \
+            tests/compiler/test_visibility_and_caa_v2.py::test_paged_atlas_preserves_density_and_page_local_sampling
 
       - name: Verify Stage19 measured demo authority
         shell: bash

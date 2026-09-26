@@ -684,38 +684,18 @@ def projected_adaptive_face_tile_evidence(
             selected[face_index]=int(choice)
 
     histogram={str(res):int(np.count_nonzero(selected==res)) for res in resolutions}
-    stride_by_resolution={res:int(res+2*bleed) for res in resolutions}
-    tiles=[
-        (stride_by_resolution[int(selected[i])],int(i),int(selected[i]))
-        for i in range(face_count)
-    ]
-    # Deterministic decreasing-size shelf packing. Evidence only; exact asset
-    # packing can later use the same order or a stronger deterministic packer.
-    tiles.sort(key=lambda row:(-row[0],row[1]))
-    page=0
-    x=0
-    y=0
-    row_height=0
-    placements=[]
-    for stride,face_index,resolution in tiles:
-        if stride>max_res:
-            raise QualificationError("CAA_ADAPTIVE_TILE_EXCEEDS_PAGE")
-        if x+stride>max_res:
-            x=0
-            y+=row_height
-            row_height=0
-        if y+stride>max_res:
-            page+=1
-            x=0
-            y=0
-            row_height=0
-        placements.append((face_index,page,x,y,stride,resolution))
-        x+=stride
-        row_height=max(row_height,stride)
-    page_count=0 if not placements else 1+max(row[1] for row in placements)
-    total_tile_area=int(sum(row[0]*row[0] for row in tiles))
-    lower_bound_pages=int(math.ceil(total_tile_area/float(max_res*max_res)))
-
+    plan=adaptive_face_atlas_plan(
+        selected,
+        bleed_px=bleed,
+        max_page_resolution=max_res,
+    )
+    layout=dict(plan["layout"])
+    offsets=adaptive_face_sample_offsets(selected)
+    adaptive_samples=int(offsets[-1])
+    worst_resolution=int(np.max(selected,initial=minimum))
+    uniform_worst_samples=int(
+        face_count * worst_resolution * (worst_resolution + 1) // 2
+    )
     return {
         "schema":"RealSaS.CAAAdaptiveFaceTileEvidence.v1",
         "mode":"PROJECTED_SOURCE_DENSITY_PER_FACE_V1",
@@ -725,31 +705,34 @@ def projected_adaptive_face_tile_evidence(
         "unsatisfied_face_count":int(np.count_nonzero(unsatisfied)),
         "candidate_resolutions":list(resolutions),
         "selected_resolution_histogram":histogram,
+        "selected_resolution_by_face":[int(value) for value in selected],
         "max_source_pixels_per_atlas_texel":limit,
         "bleed_px":bleed,
         "max_page_resolution":max_res,
-        "total_allocated_tile_area_texels":total_tile_area,
+        "total_allocated_tile_area_texels":int(
+            layout["total_allocated_tile_area_texels"]
+        ),
         "page_area_texels":int(max_res*max_res),
-        "area_lower_bound_page_count":lower_bound_pages,
-        "deterministic_shelf_page_count":int(page_count),
-        "packing_efficiency_vs_page_area":(
-            0.0 if page_count<=0 else float(total_tile_area)/(page_count*max_res*max_res)
+        "area_lower_bound_page_count":int(
+            math.ceil(
+                float(layout["total_allocated_tile_area_texels"])
+                / float(max_res*max_res)
+            )
+        ),
+        "deterministic_shelf_page_count":int(layout["page_count"]),
+        "packing_efficiency_vs_page_area":float(
+            layout["packing_efficiency_vs_page_area"]
         ),
         "maximum_observed_sigma_px":float(np.max(per_face_sigma,initial=0.0)),
-        "maximum_required_resolution":int(np.max(selected,initial=minimum)),
-        "placement_hash":content_sha256([
-            {
-                "face_index":face_index,
-                "page_index":page_index,
-                "x":x0,
-                "y":y0,
-                "stride":stride,
-                "tile_resolution":resolution,
-            }
-            for face_index,page_index,x0,y0,stride,resolution in placements
-        ]),
+        "maximum_required_resolution":worst_resolution,
+        "minimum_required_resolution":int(np.min(selected,initial=minimum)),
+        "placement_hash":str(layout["placement_hash"]),
+        "sample_count_per_direction":adaptive_samples,
+        "uniform_worst_case_sample_count_per_direction":uniform_worst_samples,
+        "adaptive_sample_fraction_of_uniform_worst_case":float(
+            adaptive_samples / float(max(uniform_worst_samples,1))
+        ),
     }
-
 
 def resolve_projected_tile_resolution(
     *,

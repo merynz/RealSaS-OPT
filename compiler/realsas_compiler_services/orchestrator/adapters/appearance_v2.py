@@ -1060,6 +1060,17 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         else None
     )
 
+    candidate = canonical_mesh_candidate_from_dict(
+        stage_output_payload(
+            ctx,
+            "18_CANONICAL_MESH_ADDRESSING_BUILD",
+            "RealSaS.CanonicalMeshCandidateIR.v1",
+        )
+    )
+    if len(candidate.faces) != artifact.face_count:
+        raise QualificationError("CAA_QUALIFICATION_FACE_TOPOLOGY_BINDING_DRIFT")
+    face_vertex_ids = tuple(tuple(map(str, face)) for face in candidate.faces)
+
     holdout = structured_holdout_metrics(
         direct_valid=arrays["direct_valid"],
         direct_rgba=arrays["direct_rgba"],
@@ -1074,6 +1085,7 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         max_graph_hops=int(policy["max_local_harmonic_graph_hops"]),
         face_sample_offsets=adaptive_offsets,
         face_tile_resolutions=adaptive_resolutions,
+        face_vertex_ids=face_vertex_ids,
     )
     seam = provenance_boundary_metrics(
         rgba=arrays["rgba"],
@@ -1085,6 +1097,7 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         tile_resolution=artifact.tile_resolution,
         face_sample_offsets=adaptive_offsets,
         face_tile_resolutions=adaptive_resolutions,
+        face_vertex_ids=face_vertex_ids,
     )
     cross_view = cross_view_source_compatibility_metrics(
         direct_valid=arrays["direct_valid"],

@@ -271,6 +271,7 @@ def structured_holdout_metrics(
     face_sample_offsets: np.ndarray | None = None,
     face_tile_resolutions: np.ndarray | None = None,
     face_vertex_ids: tuple[tuple[str, str, str], ...] | None = None,
+    surface_graph: SurfaceSampleGraph | None = None,
 ) -> dict:
     direct_valid = np.asarray(direct_valid, dtype=bool)
     direct_rgba = np.asarray(direct_rgba, dtype=np.uint8)
@@ -308,24 +309,34 @@ def structured_holdout_metrics(
             or np.any(resolutions < 4)
         ):
             raise QualificationError("CAA_HOLDOUT_ADAPTIVE_LAYOUT_INVALID")
-        neighbors = surface_sample_neighbors(
-            positions=positions,
-            face_count=int(face_count),
-            face_sample_offsets=offsets,
-            face_tile_resolutions=resolutions,
-            face_vertex_ids=face_vertex_ids,
+        neighbors = (
+            surface_graph
+            if surface_graph is not None
+            else surface_sample_neighbors(
+                positions=positions,
+                face_count=int(face_count),
+                face_sample_offsets=offsets,
+                face_tile_resolutions=resolutions,
+                face_vertex_ids=face_vertex_ids,
+            )
         )
     else:
         if tile_resolution is None or int(tile_resolution) < 4:
             raise QualificationError("CAA_HOLDOUT_SURFACE_POLICY_INVALID")
         if n != int(face_count) * int(tile_resolution) * (int(tile_resolution) + 1) // 2:
             raise QualificationError("CAA_HOLDOUT_FACE_SAMPLE_ACCOUNTING_DRIFT")
-        neighbors = surface_sample_neighbors(
-            positions=positions,
-            face_count=int(face_count),
-            tile_resolution=int(tile_resolution),
-            face_vertex_ids=face_vertex_ids,
+        neighbors = (
+            surface_graph
+            if surface_graph is not None
+            else surface_sample_neighbors(
+                positions=positions,
+                face_count=int(face_count),
+                tile_resolution=int(tile_resolution),
+                face_vertex_ids=face_vertex_ids,
+            )
         )
+    if len(neighbors) != n:
+        raise QualificationError("CAA_HOLDOUT_SURFACE_GRAPH_CARDINALITY_DRIFT")
     sample_component = tuple(str(int(value)) for value in component)
 
     errors = []
@@ -677,6 +688,7 @@ def provenance_boundary_metrics(
     face_sample_offsets: np.ndarray | None = None,
     face_tile_resolutions: np.ndarray | None = None,
     face_vertex_ids: tuple[tuple[str, str, str], ...] | None = None,
+    surface_graph: SurfaceSampleGraph | None = None,
 ) -> dict:
     """Measure exact surface seams without Python graph duplication.
 
@@ -733,14 +745,20 @@ def provenance_boundary_metrics(
             dtype=np.int32,
         )
 
-    graph = surface_sample_neighbors(
-        positions=positions,
-        face_count=int(face_count),
-        tile_resolution=None if adaptive else int(tile_resolution),
-        face_sample_offsets=offsets if adaptive else None,
-        face_tile_resolutions=resolutions if adaptive else None,
-        face_vertex_ids=face_vertex_ids,
+    graph = (
+        surface_graph
+        if surface_graph is not None
+        else surface_sample_neighbors(
+            positions=positions,
+            face_count=int(face_count),
+            tile_resolution=None if adaptive else int(tile_resolution),
+            face_sample_offsets=offsets if adaptive else None,
+            face_tile_resolutions=resolutions if adaptive else None,
+            face_vertex_ids=face_vertex_ids,
+        )
     )
+    if len(graph) != n:
+        raise QualificationError("CAA_SEAM_SURFACE_GRAPH_CARDINALITY_DRIFT")
     edge_a = np.asarray(graph.edge_a, dtype=np.int32)
     edge_b = np.asarray(graph.edge_b, dtype=np.int32)
     if (

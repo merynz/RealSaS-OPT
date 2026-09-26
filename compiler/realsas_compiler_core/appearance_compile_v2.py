@@ -75,6 +75,78 @@ def face_atlas_layout(
     }
 
 
+
+def face_atlas_paged_layout(
+    face_count: int,
+    *,
+    tile_resolution: int,
+    bleed_px: int,
+    max_page_resolution: int,
+) -> dict:
+    """Deterministic fixed-resolution paging for the unique-face atlas.
+
+    The numerical/art-quality tile resolution is preserved exactly. Paging is
+    only a storage/layout operation: every physical page remains within the
+    frozen max_page_resolution and no face silently receives a smaller tile.
+    """
+    faces = int(face_count)
+    resolution = int(tile_resolution)
+    bleed = int(bleed_px)
+    page_resolution = int(max_page_resolution)
+    if faces <= 0 or resolution < 4 or bleed < 1 or page_resolution < 1:
+        raise QualificationError("CAA_PAGED_ATLAS_LAYOUT_DIMENSION_INVALID")
+    stride = resolution + 2 * bleed
+    tiles_per_axis = page_resolution // stride
+    if tiles_per_axis <= 0:
+        raise QualificationError("CAA_PAGED_ATLAS_TILE_EXCEEDS_PAGE")
+    faces_per_page = int(tiles_per_axis * tiles_per_axis)
+    page_count = int(math.ceil(faces / float(faces_per_page)))
+    return {
+        "layout": "UNIQUE_FACE_BARYCENTRIC_PAGED_V1",
+        "face_count": faces,
+        "tile_resolution": resolution,
+        "bleed_px": bleed,
+        "tile_stride": stride,
+        "page_width": page_resolution,
+        "page_height": page_resolution,
+        "tiles_per_axis": int(tiles_per_axis),
+        "faces_per_page": faces_per_page,
+        "page_count": page_count,
+        "uv_origin": "TOP_LEFT",
+        "sampling": "BILINEAR_PREMULTIPLIED_INTERNAL",
+        "paging": "FIXED_RESOLUTION_PHYSICAL_PAGES",
+    }
+
+
+def face_paged_uv_array(layout: Mapping[str, int]) -> tuple[np.ndarray, np.ndarray]:
+    faces = int(layout["face_count"])
+    resolution = int(layout["tile_resolution"])
+    bleed = int(layout["bleed_px"])
+    stride = int(layout["tile_stride"])
+    tiles_per_axis = int(layout["tiles_per_axis"])
+    faces_per_page = int(layout["faces_per_page"])
+    width = float(layout["page_width"])
+    height = float(layout["page_height"])
+    if min(tiles_per_axis, faces_per_page) <= 0:
+        raise QualificationError("CAA_PAGED_ATLAS_LAYOUT_INVALID")
+    uv = np.zeros((faces, 3, 2), dtype=np.float64)
+    page_index = np.zeros((faces,), dtype=np.int32)
+    for face_index in range(faces):
+        page = face_index // faces_per_page
+        local_face = face_index % faces_per_page
+        tx = (local_face % tiles_per_axis) * stride
+        ty = (local_face // tiles_per_axis) * stride
+        page_index[face_index] = int(page)
+        points = (
+            (tx + bleed + 0.5, ty + bleed + 0.5),
+            (tx + bleed + resolution - 0.5, ty + bleed + 0.5),
+            (tx + bleed + 0.5, ty + bleed + resolution - 0.5),
+        )
+        for corner, (x, y) in enumerate(points):
+            uv[face_index, corner, 0] = float(x / width)
+            uv[face_index, corner, 1] = float(y / height)
+    return uv, page_index
+
 def face_uv_array(layout: Mapping[str, int]) -> np.ndarray:
     faces = int(layout["face_count"])
     resolution = int(layout["tile_resolution"])
@@ -195,12 +267,22 @@ def projected_tile_resolution_evidence(
     bleed_px: int,
     max_atlas_resolution: int,
 ) -> dict:
+    """Resolve art-quality tile density independently from physical page count.
+
+    max_atlas_resolution is a physical page ceiling, not a reason to lower
+    source-preserving tile density. When a single atlas would exceed the cap,
+    deterministic fixed-resolution pages are used.
+    """
     resolutions = tuple(sorted(set(int(value) for value in candidate_resolutions)))
     if not resolutions or resolutions[0] < 4:
         raise QualificationError("CAA_TILE_CANDIDATES_INVALID")
     limit = float(max_source_pixels_per_atlas_texel)
+    page_resolution = int(max_atlas_resolution)
+    bleed = int(bleed_px)
     if not math.isfinite(limit) or limit <= 0.0:
         raise QualificationError("CAA_TILE_DENSITY_LIMIT_INVALID")
+    if page_resolution < 1 or bleed < 1:
+        raise QualificationError("CAA_TILE_PAGE_POLICY_INVALID")
 
     vertex_ids = [_candidate_vertex_id(vertex) for vertex in candidate.vertices]
     index = {vertex_id: i for i, vertex_id in enumerate(vertex_ids)}
@@ -259,50 +341,65 @@ def projected_tile_resolution_evidence(
 
     rows = []
     selected = None
+    selected_layout = None
     face_count = len(candidate.faces)
     for resolution in resolutions:
         source_pixels_per_atlas_texel = worst_sigma / float(resolution - 1)
-        layout = face_atlas_layout(
+        single_layout = face_atlas_layout(
             face_count,
             tile_resolution=resolution,
-            bleed_px=int(bleed_px),
+            bleed_px=bleed,
         )
+        stride = int(resolution + 2 * bleed)
+        tiles_per_axis = page_resolution // stride
+        capacity_passed = tiles_per_axis > 0
+        page_count = None
+        faces_per_page = 0
+        if capacity_passed:
+            paged = face_atlas_paged_layout(
+                face_count,
+                tile_resolution=resolution,
+                bleed_px=bleed,
+                max_page_resolution=page_resolution,
+            )
+            page_count = int(paged["page_count"])
+            faces_per_page = int(paged["faces_per_page"])
         density_passed = source_pixels_per_atlas_texel <= limit
-        capacity_passed = (
-            int(layout["width"]) <= int(max_atlas_resolution)
-            and int(layout["height"]) <= int(max_atlas_resolution)
-        )
         rows.append(
             {
                 "tile_resolution": resolution,
                 "worst_source_pixels_per_atlas_texel": source_pixels_per_atlas_texel,
                 "density_passed": bool(density_passed),
-                "atlas_width": int(layout["width"]),
-                "atlas_height": int(layout["height"]),
+                "single_page_atlas_width": int(single_layout["width"]),
+                "single_page_atlas_height": int(single_layout["height"]),
+                "physical_page_width": page_resolution,
+                "physical_page_height": page_resolution,
+                "page_count": page_count,
+                "faces_per_page": faces_per_page,
                 "capacity_passed": bool(capacity_passed),
             }
         )
         if selected is None and density_passed and capacity_passed:
             selected = resolution
+            selected_layout = paged
 
     max_supported_face_count = 0
-    if selected is not None:
-        selected_layout = face_atlas_layout(
-            face_count,
-            tile_resolution=selected,
-            bleed_px=int(bleed_px),
+    selected_page_count = 0
+    if selected is not None and selected_layout is not None:
+        selected_page_count = int(selected_layout["page_count"])
+        max_supported_face_count = int(
+            selected_layout["faces_per_page"] * selected_layout["page_count"]
         )
-        stride = int(selected_layout["tile_stride"])
-        per_axis = int(max_atlas_resolution) // stride
-        max_supported_face_count = int(per_axis * per_axis)
 
     return {
         "mode": "PROJECTED_SOURCE_DENSITY_V1",
+        "paging_mode": "FIXED_MAX_RESOLUTION_PAGES_V1",
         "selected_tile_resolution": (
             None if selected is None else int(selected)
         ),
+        "selected_page_count": selected_page_count,
         "max_source_pixels_per_atlas_texel": limit,
-        "max_atlas_resolution": int(max_atlas_resolution),
+        "max_atlas_resolution": page_resolution,
         "face_count": int(face_count),
         "worst_projected_barycentric_sigma_px": worst_sigma,
         "worst_view_index": int(worst_view),
@@ -311,8 +408,6 @@ def projected_tile_resolution_evidence(
         "max_supported_face_count": int(max_supported_face_count),
         "candidates": rows,
     }
-
-
 
 def projected_adaptive_face_tile_evidence(
     *,

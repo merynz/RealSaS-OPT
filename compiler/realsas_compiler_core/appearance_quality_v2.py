@@ -7,6 +7,7 @@ import math
 import numpy as np
 from .appearance_authority_v2 import CAA_PROVENANCE
 from .appearance_completion_v2 import (
+    SurfaceSampleGraph,
     bounded_surface_harmonic_fill,
     surface_sample_neighbors,
 )
@@ -215,7 +216,7 @@ def _structured_band_mask(
 def _bounded_edge_holdout_mask(
     *,
     candidate_mask: np.ndarray,
-    neighbors: tuple[tuple[int, ...], ...],
+    neighbors: SurfaceSampleGraph,
     max_region_samples: int,
     max_graph_hops: int,
 ) -> np.ndarray:
@@ -677,6 +678,13 @@ def provenance_boundary_metrics(
     face_tile_resolutions: np.ndarray | None = None,
     face_vertex_ids: tuple[tuple[str, str, str], ...] | None = None,
 ) -> dict:
+    """Measure exact surface seams without Python graph duplication.
+
+    Metric semantics are unchanged from the tuple/set implementation. The
+    surface graph itself is compact CSR and the undirected edge list is consumed
+    directly in chunks, so adaptive multi-million-sample CAA does not materialize
+    a second Python set/dict graph during Stage24.
+    """
     rgba = np.asarray(rgba, dtype=np.uint8)
     provenance = np.asarray(provenance, dtype=np.uint8)
     donor_view = (
@@ -689,10 +697,15 @@ def provenance_boundary_metrics(
     if rgba.ndim != 3 or rgba.shape[0] != 8 or rgba.shape[2] != 4:
         raise QualificationError("CAA_SEAM_RGBA_SHAPE_INVALID")
     n = rgba.shape[1]
-    if provenance.shape != (8, n) or positions.shape != (n, 3) or face_index.shape != (n,):
+    if (
+        provenance.shape != (8, n)
+        or positions.shape != (n, 3)
+        or face_index.shape != (n,)
+    ):
         raise QualificationError("CAA_SEAM_ARRAY_SHAPE_DRIFT")
     if donor_view is not None and donor_view.shape != (8, n):
         raise QualificationError("CAA_SEAM_SOURCE_VIEW_SHAPE_DRIFT")
+
     adaptive = face_sample_offsets is not None or face_tile_resolutions is not None
     if adaptive:
         if face_sample_offsets is None or face_tile_resolutions is None:
@@ -714,7 +727,11 @@ def provenance_boundary_metrics(
         if n != int(face_count) * per_face:
             raise QualificationError("CAA_SEAM_FACE_SAMPLE_ACCOUNTING_DRIFT")
         offsets = np.arange(int(face_count) + 1, dtype=np.int64) * per_face
-        resolutions = np.full((int(face_count),), int(tile_resolution), dtype=np.int32)
+        resolutions = np.full(
+            (int(face_count),),
+            int(tile_resolution),
+            dtype=np.int32,
+        )
 
     graph = surface_sample_neighbors(
         positions=positions,
@@ -724,114 +741,157 @@ def provenance_boundary_metrics(
         face_tile_resolutions=resolutions if adaptive else None,
         face_vertex_ids=face_vertex_ids,
     )
-    pair_set: set[tuple[int, int]] = set()
-    shared_edge_pair_set: set[tuple[int, int]] = set()
-    for a, row in enumerate(graph):
-        for b in row:
-            b = int(b)
-            if b == a:
-                raise QualificationError("CAA_SEAM_SELF_GRAPH_EDGE")
-            pair = (min(int(a), b), max(int(a), b))
-            pair_set.add(pair)
-            if int(face_index[pair[0]]) != int(face_index[pair[1]]):
-                shared_edge_pair_set.add(pair)
+    edge_a = np.asarray(graph.edge_a, dtype=np.int32)
+    edge_b = np.asarray(graph.edge_b, dtype=np.int32)
+    if (
+        edge_a.shape != edge_b.shape
+        or edge_a.ndim != 1
+        or len(edge_a) != graph.edge_count
+        or np.any(edge_a == edge_b)
+    ):
+        raise QualificationError("CAA_SEAM_COMPACT_GRAPH_EDGE_DRIFT")
+    shared_edge_mask = face_index[edge_a] != face_index[edge_b]
+    edge_count = int(len(edge_a))
+    chunk_size = 250_000
 
-    adjacency: dict[int, set[int]] = {index: set() for index in range(n)}
-    for a, b in pair_set:
-        adjacency[a].add(b)
-        adjacency[b].add(a)
+    def edge_error_vector(view: int) -> np.ndarray:
+        out = np.empty(edge_count, dtype=np.float64)
+        for cursor in range(0, edge_count, chunk_size):
+            stop = min(edge_count, cursor + chunk_size)
+            aa = edge_a[cursor:stop]
+            bb = edge_b[cursor:stop]
+            out[cursor:stop] = rgba_l1_premultiplied(
+                rgba[view, aa],
+                rgba[view, bb],
+            )
+        return out
 
-    errors = []
-    gradient_jumps = []
+    global_error_chunks: list[np.ndarray] = []
+    global_gradient_chunks: list[np.ndarray] = []
     pairs_by_view = []
-    for view in range(8):
-        count = 0
-        values = []
-        view_gradient_jumps = []
-        donor_switch_count = 0
-        shared_edge_count = 0
-        shared_edge_errors = []
-        for a, b in pair_set:
-            shared_edge = (a, b) in shared_edge_pair_set
-            provenance_differs = provenance[view, a] != provenance[view, b]
-            donor_differs = bool(
-                donor_view is not None
-                and int(donor_view[view, a]) != int(donor_view[view, b])
-            )
-            if not shared_edge and not provenance_differs and not donor_differs:
-                continue
-            error = float(
-                rgba_l1_premultiplied(
-                    rgba[view, [a]],
-                    rgba[view, [b]],
-                )[0]
-            )
-            values.append(error)
-            errors.append(error)
-            count += 1
-            if shared_edge:
-                shared_edge_count += 1
-                shared_edge_errors.append(error)
-            if donor_differs:
-                donor_switch_count += 1
 
-            same_a = [
-                neighbor
-                for neighbor in adjacency[a]
-                if neighbor != b
-                and provenance[view, neighbor] == provenance[view, a]
-            ]
-            same_b = [
-                neighbor
-                for neighbor in adjacency[b]
-                if neighbor != a
-                and provenance[view, neighbor] == provenance[view, b]
-            ]
-            if same_a and same_b:
-                grad_a = float(
-                    np.mean(
-                        rgba_l1_premultiplied(
-                            np.repeat(rgba[view, [a]], len(same_a), axis=0),
-                            rgba[view, same_a],
-                        )
-                    )
-                )
-                grad_b = float(
-                    np.mean(
-                        rgba_l1_premultiplied(
-                            np.repeat(rgba[view, [b]], len(same_b), axis=0),
-                            rgba[view, same_b],
-                        )
-                    )
-                )
-                jump = abs(grad_a - grad_b)
-                view_gradient_jumps.append(jump)
-                gradient_jumps.append(jump)
+    for view in range(8):
+        prov_a = provenance[view, edge_a]
+        prov_b = provenance[view, edge_b]
+        provenance_same = prov_a == prov_b
+        donor_differs = (
+            np.zeros(edge_count, dtype=bool)
+            if donor_view is None
+            else donor_view[view, edge_a] != donor_view[view, edge_b]
+        )
+        active = shared_edge_mask | (~provenance_same) | donor_differs
+        errors = edge_error_vector(view)
+
+        # Old semantics: gradient around endpoint A/B uses same-provenance
+        # neighbours and explicitly excludes the active pair's opposite endpoint.
+        # Accumulate all same-provenance edge gradients once, then subtract this
+        # edge contribution when the active pair itself is same-provenance.
+        gradient_sum = np.zeros(n, dtype=np.float64)
+        gradient_count = np.zeros(n, dtype=np.int32)
+        for cursor in range(0, edge_count, chunk_size):
+            stop = min(edge_count, cursor + chunk_size)
+            same = provenance_same[cursor:stop]
+            if not np.any(same):
+                continue
+            aa = edge_a[cursor:stop][same]
+            bb = edge_b[cursor:stop][same]
+            ee = errors[cursor:stop][same]
+            np.add.at(gradient_sum, aa, ee)
+            np.add.at(gradient_sum, bb, ee)
+            np.add.at(gradient_count, aa, 1)
+            np.add.at(gradient_count, bb, 1)
+
+        active_a = edge_a[active]
+        active_b = edge_b[active]
+        active_error = errors[active]
+        active_same = provenance_same[active]
+        subtract = active_error * active_same.astype(np.float64)
+
+        count_a = (
+            gradient_count[active_a].astype(np.int64)
+            - active_same.astype(np.int64)
+        )
+        count_b = (
+            gradient_count[active_b].astype(np.int64)
+            - active_same.astype(np.int64)
+        )
+        sum_a = gradient_sum[active_a] - subtract
+        sum_b = gradient_sum[active_b] - subtract
+        gradient_valid = (count_a > 0) & (count_b > 0)
+        if np.any(gradient_valid):
+            mean_a = np.zeros(len(active_error), dtype=np.float64)
+            mean_b = np.zeros(len(active_error), dtype=np.float64)
+            np.divide(sum_a, count_a, out=mean_a, where=count_a > 0)
+            np.divide(sum_b, count_b, out=mean_b, where=count_b > 0)
+            gradient_jump = np.abs(
+                mean_a[gradient_valid] - mean_b[gradient_valid]
+            )
+        else:
+            gradient_jump = np.empty((0,), dtype=np.float64)
+
+        shared_active = active & shared_edge_mask
+        shared_errors = errors[shared_active]
+        values = active_error
+        global_error_chunks.append(values)
+        global_gradient_chunks.append(gradient_jump)
 
         pairs_by_view.append(
             {
                 "view_index": view,
-                "boundary_pair_count": count,
-                "mean_rgba_l1": float(np.mean(values)) if values else 0.0,
-                "p95_rgba_l1": float(np.quantile(values, 0.95)) if values else 0.0,
-                "gradient_pair_count": int(len(view_gradient_jumps)),
-                "shared_edge_pair_count": int(shared_edge_count),
-                "shared_edge_mean_rgba_l1": float(np.mean(shared_edge_errors)) if shared_edge_errors else 0.0,
-                "shared_edge_p95_rgba_l1": float(np.quantile(shared_edge_errors, 0.95)) if shared_edge_errors else 0.0,
-                "donor_view_switch_pair_count": int(donor_switch_count),
-                "mean_gradient_jump": float(np.mean(view_gradient_jumps)) if view_gradient_jumps else 0.0,
-                "p95_gradient_jump": float(np.quantile(view_gradient_jumps, 0.95)) if view_gradient_jumps else 0.0,
+                "boundary_pair_count": int(len(values)),
+                "mean_rgba_l1": (
+                    float(np.mean(values)) if len(values) else 0.0
+                ),
+                "p95_rgba_l1": (
+                    float(np.quantile(values, 0.95)) if len(values) else 0.0
+                ),
+                "gradient_pair_count": int(len(gradient_jump)),
+                "shared_edge_pair_count": int(len(shared_errors)),
+                "shared_edge_mean_rgba_l1": (
+                    float(np.mean(shared_errors))
+                    if len(shared_errors)
+                    else 0.0
+                ),
+                "shared_edge_p95_rgba_l1": (
+                    float(np.quantile(shared_errors, 0.95))
+                    if len(shared_errors)
+                    else 0.0
+                ),
+                "donor_view_switch_pair_count": int(
+                    np.count_nonzero(donor_differs)
+                ),
+                "mean_gradient_jump": (
+                    float(np.mean(gradient_jump))
+                    if len(gradient_jump)
+                    else 0.0
+                ),
+                "p95_gradient_jump": (
+                    float(np.quantile(gradient_jump, 0.95))
+                    if len(gradient_jump)
+                    else 0.0
+                ),
             }
         )
-    arr = np.asarray(errors, dtype=np.float64)
-    grad = np.asarray(gradient_jumps, dtype=np.float64)
+
+    arr = (
+        np.concatenate(global_error_chunks)
+        if any(len(row) for row in global_error_chunks)
+        else np.empty((0,), dtype=np.float64)
+    )
+    grad = (
+        np.concatenate(global_gradient_chunks)
+        if any(len(row) for row in global_gradient_chunks)
+        else np.empty((0,), dtype=np.float64)
+    )
     return {
         "boundary_pair_count": int(len(arr)),
         "mean_rgba_l1": float(np.mean(arr)) if len(arr) else 0.0,
         "p95_rgba_l1": float(np.quantile(arr, 0.95)) if len(arr) else 0.0,
         "gradient_pair_count": int(len(grad)),
         "mean_gradient_jump": float(np.mean(grad)) if len(grad) else 0.0,
-        "p95_gradient_jump": float(np.quantile(grad, 0.95)) if len(grad) else 0.0,
+        "p95_gradient_jump": (
+            float(np.quantile(grad, 0.95)) if len(grad) else 0.0
+        ),
         "per_view": pairs_by_view,
         "includes_shared_face_edges": True,
         "shared_face_edges_are_compared_even_when_provenance_matches": True,
@@ -839,4 +899,10 @@ def provenance_boundary_metrics(
         "donor_view_switch_pair_count": int(
             sum(row["donor_view_switch_pair_count"] for row in pairs_by_view)
         ),
+        "surface_graph_edge_count": int(graph.edge_count),
+        "surface_graph_storage_bytes": int(graph.storage_nbytes),
+        "surface_graph_storage": (
+            "CSR_INT64_OFFSETS_INT32_INDICES_WITH_UNDIRECTED_EDGE_INDEX"
+        ),
     }
+

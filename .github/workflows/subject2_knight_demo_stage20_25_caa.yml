@@ -193,7 +193,7 @@ jobs:
               "subject_id":os.environ["SUBJECT_ID"],
               "execution_repo_commit":os.environ["GITHUB_SHA"],
               "completed_through_stage":25,
-              "caa_production_semantic_version":"PER_FACE_ADAPTIVE_TOPOLOGY_BOUND_PAGED_V1",
+              "caa_production_semantic_version":"PER_FACE_ADAPTIVE_TOPOLOGY_PARAMETRIC_PAGED_V1",
               "adaptive_sampling_required":True,
               "topology_bound_cross_face_completion_required":True,
               "bounded_physical_page_transport_required":True,

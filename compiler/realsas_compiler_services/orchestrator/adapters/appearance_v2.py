@@ -268,7 +268,25 @@ def _load_compile_arrays(artifact: CAACompileArtifactIR) -> dict:
         }
         if not required.issubset(set(data.files)):
             raise QualificationError("CAA_COMPILE_NPZ_ARRAYS_MISSING")
-        return {name: np.asarray(data[name]).copy() for name in required}
+        arrays = {name: np.asarray(data[name]).copy() for name in data.files}
+    sample_mode = str(
+        dict(artifact.metadata or {}).get("sample_count_mode")
+        or "UNIFORM_FACE_LATTICE_V1"
+    )
+    if sample_mode == "PER_FACE_ADAPTIVE_V1":
+        adaptive_required = {"face_sample_offsets", "face_tile_resolutions"}
+        if not adaptive_required.issubset(arrays):
+            raise QualificationError("CAA_COMPILE_ADAPTIVE_ARRAYS_MISSING")
+        offsets = np.asarray(arrays["face_sample_offsets"], dtype=np.int64)
+        resolutions = np.asarray(arrays["face_tile_resolutions"], dtype=np.int32)
+        if (
+            offsets.shape != (artifact.face_count + 1,)
+            or resolutions.shape != (artifact.face_count,)
+            or offsets[0] != 0
+            or offsets[-1] != arrays["sample_positions"].shape[0]
+        ):
+            raise QualificationError("CAA_COMPILE_ADAPTIVE_ARRAY_BINDING_DRIFT")
+    return arrays
 
 
 def preregister_caa_backend_stage(ctx: dict) -> dict:
@@ -700,6 +718,21 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
     bleed = int(prereg.compile_policy["bleed_px"])
     tile_resolution = int(prereg.compile_policy["tile_resolution"])
     max_page_resolution = int(prereg.compile_policy["max_atlas_resolution"])
+    sample_mode = str(
+        dict(artifact.metadata or {}).get("sample_count_mode")
+        or "UNIFORM_FACE_LATTICE_V1"
+    )
+    adaptive = sample_mode == "PER_FACE_ADAPTIVE_V1"
+    if adaptive:
+        face_tile_resolutions = np.asarray(
+            arrays["face_tile_resolutions"], dtype=np.int32
+        )
+        face_sample_offsets = np.asarray(
+            arrays["face_sample_offsets"], dtype=np.int64
+        )
+    else:
+        face_tile_resolutions = None
+        face_sample_offsets = None
 
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     root.mkdir(parents=True, exist_ok=True)
@@ -712,20 +745,44 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
     reference_layout = None
 
     for direction in range(8):
-        pages, provenance_pages, uv, face_page_index, layout = (
-            bake_direction_atlas_pages(
-                face_sample_rgba=arrays["rgba"][direction],
-                face_sample_provenance=arrays["provenance"][direction],
-                face_count=artifact.face_count,
-                tile_resolution=tile_resolution,
-                bleed_px=bleed,
-                max_page_resolution=max_page_resolution,
+        if adaptive:
+            pages, provenance_pages, uv, face_page_index, layout = (
+                bake_direction_adaptive_atlas_pages(
+                    face_sample_rgba=arrays["rgba"][direction],
+                    face_sample_provenance=arrays["provenance"][direction],
+                    face_tile_resolutions=face_tile_resolutions,
+                    face_sample_offsets=face_sample_offsets,
+                    bleed_px=bleed,
+                    max_page_resolution=max_page_resolution,
+                )
             )
-        )
+        else:
+            pages, provenance_pages, uv, face_page_index, layout = (
+                bake_direction_atlas_pages(
+                    face_sample_rgba=arrays["rgba"][direction],
+                    face_sample_provenance=arrays["provenance"][direction],
+                    face_count=artifact.face_count,
+                    tile_resolution=tile_resolution,
+                    bleed_px=bleed,
+                    max_page_resolution=max_page_resolution,
+                )
+            )
         if reference_uv is None:
             reference_uv = uv
             reference_page_index = face_page_index
             reference_layout = layout
+            if adaptive:
+                expected_placement_hash = str(
+                    prereg.compile_policy.get("adaptive_atlas_placement_hash") or ""
+                )
+                if (
+                    not expected_placement_hash
+                    or str(layout.get("placement_hash") or "")
+                    != expected_placement_hash
+                ):
+                    raise QualificationError(
+                        "CAA_ADAPTIVE_BAKE_PLACEMENT_HASH_DRIFT"
+                    )
         elif (
             not np.array_equal(reference_uv, uv)
             or not np.array_equal(reference_page_index, face_page_index)
@@ -784,15 +841,26 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
             )
         )
         provenance_atlases.append(provenance_pages)
-        source_view_atlases.append(
-            bake_direction_source_view_atlas_pages(
-                face_sample_source_view=arrays["source_view"][direction],
-                face_count=artifact.face_count,
-                tile_resolution=tile_resolution,
-                bleed_px=bleed,
-                max_page_resolution=max_page_resolution,
+        if adaptive:
+            source_view_atlases.append(
+                bake_direction_adaptive_source_view_atlas_pages(
+                    face_sample_source_view=arrays["source_view"][direction],
+                    face_tile_resolutions=face_tile_resolutions,
+                    face_sample_offsets=face_sample_offsets,
+                    bleed_px=bleed,
+                    max_page_resolution=max_page_resolution,
+                )
             )
-        )
+        else:
+            source_view_atlases.append(
+                bake_direction_source_view_atlas_pages(
+                    face_sample_source_view=arrays["source_view"][direction],
+                    face_count=artifact.face_count,
+                    tile_resolution=tile_resolution,
+                    bleed_px=bleed,
+                    max_page_resolution=max_page_resolution,
+                )
+            )
 
     provenance_stack = np.stack(provenance_atlases, axis=0).astype(np.uint8)
     source_view_stack = np.stack(source_view_atlases, axis=0).astype(np.int16)
@@ -828,11 +896,15 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
         raise QualificationError("CAA_BAKE_PROVENANCE_CLASS_INVALID")
 
     uv_path = root / "surface_uv.npz"
-    uv_sha = _save_npz(
-        uv_path,
-        face_uv=np.asarray(reference_uv, dtype=np.float64),
-        face_page_index=np.asarray(reference_page_index, dtype=np.int32),
-    )
+    uv_payload = {
+        "face_uv": np.asarray(reference_uv, dtype=np.float64),
+        "face_page_index": np.asarray(reference_page_index, dtype=np.int32),
+    }
+    if adaptive:
+        uv_payload["face_tile_resolution"] = np.asarray(
+            face_tile_resolutions, dtype=np.int32
+        )
+    uv_sha = _save_npz(uv_path, **uv_payload)
     provenance_path = root / "provenance_atlas.npz"
     provenance_sha = _save_npz(
         provenance_path,
@@ -857,6 +929,8 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
             "total_appearance_asset": True,
             "unique_face_barycentric_atlas": True,
             "paged_physical_atlas": True,
+            "adaptive_face_sampling": bool(adaptive),
+            "sample_count_mode": sample_mode,
             "physical_page_resolution_cap": max_page_resolution,
             "page_count": int(reference_layout["page_count"]),
             "internal_alpha": "PREMULTIPLIED",
@@ -901,6 +975,8 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
             "physical_page_height": int(reference_layout["page_height"]),
             "page_count": int(reference_layout["page_count"]),
             "tile_resolution": tile_resolution,
+            "sample_count_mode": sample_mode,
+            "adaptive_face_sampling": bool(adaptive),
             "bleed_px": bleed,
             "direction_count": 8,
         },

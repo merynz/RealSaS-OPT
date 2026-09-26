@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: subject2-knight-demo-v2-run
+  group: subject2-knight-demo-motion-retarget-preflight
   cancel-in-progress: false
 
 permissions:
@@ -106,7 +106,7 @@ jobs:
           rclone copyto "$MOTION_FBX_REMOTE" "$source_fbx" --checksum
           printf '%s  %s\n' "$EXPECTED_FBX_SHA256" "$source_fbx" | sha256sum --check -
           rm -rf "$out_root"
-          python tools/motion/materialize_quaternius_preset_v1.py             --source-fbx "$source_fbx"             --out-dir "$out_root"             --run-id "$RUN_ID"             --patch-run-manifest "$RUN_ROOT/run_manifest.json"             --replace-motion
+          python tools/motion/materialize_quaternius_preset_v1.py             --source-fbx "$source_fbx"             --out-dir "$out_root"             --run-id "$RUN_ID"
           for f in demo_idle_v1.motion.json demo_run_v1.motion.json demo_slash_v1.motion.json MOTION_RUN_MANIFEST_FRAGMENT.json MATERIALIZATION_RECEIPT.json; do
             test -s "$out_root/$f"
           done
@@ -128,9 +128,13 @@ jobs:
               "demo_run_v1":"RUN",
               "demo_slash_v1":"SLASH",
           }
+          import hashlib
+          def sha256(path):
+              return hashlib.sha256(Path(path).read_bytes()).hexdigest()
           reports=[]
           for clip_id,kind in expected.items():
-              payload=json.loads((root/f"{clip_id}.motion.json").read_text())
+              clip_path=root/f"{clip_id}.motion.json"
+              payload=json.loads(clip_path.read_text())
               assert payload["schema"]=="RealSaS.MotionSourceClip.v2"
               assert payload["clip_id"]==clip_id
               assert payload["clip_kind"]==kind
@@ -142,8 +146,13 @@ jobs:
               reports.append({
                   "clip_id":clip_id,
                   "clip_kind":kind,
+                  "motion_json_sha256":sha256(clip_path),
                   "report":report,
               })
+          fragment_path=root/"MOTION_RUN_MANIFEST_FRAGMENT.json"
+          materialization_path=root/"MATERIALIZATION_RECEIPT.json"
+          assert fragment_path.is_file()
+          assert materialization_path.is_file()
           out={
               "schema":"RealSaS.KnightMotionRetargetPreflight.v1",
               "status":"PASS",
@@ -151,6 +160,9 @@ jobs:
               "skeleton_lineage_hash":skeleton.skeleton_lineage_hash,
               "target_joint_count":28,
               "clip_count":3,
+              "source_fbx_sha256":os.environ["EXPECTED_FBX_SHA256"],
+              "motion_manifest_fragment_sha256":sha256(fragment_path),
+              "materialization_receipt_sha256":sha256(materialization_path),
               "clips":reports,
               "manual_retarget_used":False,
               "source_rig_is_final_skeleton_authority":False,

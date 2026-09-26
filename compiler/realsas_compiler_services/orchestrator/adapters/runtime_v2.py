@@ -91,6 +91,47 @@ def _projection_arrays(projection):
         return {name: np.asarray(data[name]).copy() for name in data.files}
 
 
+
+def _runtime_view_page_rows(view) -> tuple[dict, ...]:
+    metadata = dict(view.metadata or {})
+    rows = tuple(metadata.get("texture_pages") or ())
+    if not rows:
+        return (
+            {
+                "page_index": 0,
+                "path": str(view.texture_path),
+                "sha256": str(view.texture_sha256),
+            },
+        )
+    ordered = tuple(
+        sorted((dict(row) for row in rows), key=lambda row: int(row["page_index"]))
+    )
+    if tuple(int(row["page_index"]) for row in ordered) != tuple(range(len(ordered))):
+        raise QualificationError("RUNTIME_V2_TEXTURE_PAGE_INDEX_DRIFT")
+    if (
+        str(ordered[0]["path"]) != str(view.texture_path)
+        or str(ordered[0]["sha256"]) != str(view.texture_sha256)
+    ):
+        raise QualificationError("RUNTIME_V2_PRIMARY_TEXTURE_PAGE_DRIFT")
+    return ordered
+
+
+def _load_runtime_view_texture(view) -> np.ndarray:
+    rows = _runtime_view_page_rows(view)
+    images = []
+    for row in rows:
+        path = resolved_path(str(row["path"]))
+        if not path.is_file() or sha256_file(path) != str(row["sha256"]):
+            raise QualificationError("RUNTIME_V2_TEXTURE_PAGE_BYTES_DRIFT")
+        images.append(np.asarray(Image.open(path).convert("RGBA"), dtype=np.uint8))
+    if len({image.shape for image in images}) != 1:
+        raise QualificationError("RUNTIME_V2_TEXTURE_PAGE_SHAPE_DRIFT")
+    if bool(dict(view.metadata or {}).get("paged_atlas")):
+        return np.stack(images, axis=0)
+    if len(images) != 1:
+        raise QualificationError("RUNTIME_V2_LEGACY_TEXTURE_PAGE_COUNT_DRIFT")
+    return images[0]
+
 def _largest_connected_fraction(mask: np.ndarray, *, denominator: int) -> float:
     grid = np.asarray(mask, dtype=bool)
     if grid.ndim != 2:
@@ -230,13 +271,24 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
         if "face_uv" not in data.files:
             raise QualificationError("RUNTIME_V2_CAA_FACE_UV_MISSING")
         face_uv = np.asarray(data["face_uv"], dtype=np.float64)
+        face_page_index = (
+            np.asarray(data["face_page_index"], dtype=np.int32)
+            if "face_page_index" in data.files
+            else np.zeros((len(mesh.faces),), dtype=np.int32)
+        )
     if face_uv.shape != (len(mesh.faces), 3, 2):
         raise QualificationError("RUNTIME_V2_FACE_UV_TOPOLOGY_DRIFT")
+    if (
+        face_page_index.shape != (len(mesh.faces),)
+        or np.any(face_page_index < 0)
+    ):
+        raise QualificationError("RUNTIME_V2_FACE_PAGE_INDEX_INVALID")
 
     arrays = {
         "vertices": vertices,
         "faces": faces,
         "face_uv": face_uv,
+        "face_page_index": face_page_index,
     }
     clips = []
     for clip_index, clip in enumerate(dynamic.clips):
@@ -279,20 +331,46 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
     views = []
     for camera in sorted(cameras.cameras, key=lambda row: row.view_index):
         texture = by_texture[int(camera.view_index)]
-        path = resolved_path(texture.transport_png_path)
-        if not path.is_file() or sha256_file(path) != texture.transport_png_sha256:
-            raise QualificationError("RUNTIME_V2_TEXTURE_BYTES_DRIFT")
+        metadata = dict(texture.metadata or {})
+        raw_pages = tuple(metadata.get("pages") or ())
+        if raw_pages:
+            page_rows = tuple(
+                sorted((dict(row) for row in raw_pages), key=lambda row: int(row["page_index"]))
+            )
+        else:
+            page_rows = (
+                {
+                    "page_index": 0,
+                    "path": str(texture.transport_png_path),
+                    "sha256": str(texture.transport_png_sha256),
+                    "width": int(texture.width),
+                    "height": int(texture.height),
+                },
+            )
+        if tuple(int(row["page_index"]) for row in page_rows) != tuple(range(len(page_rows))):
+            raise QualificationError("RUNTIME_V2_TEXTURE_PAGE_INDEX_DRIFT")
+        for row in page_rows:
+            page_path = resolved_path(str(row["path"]))
+            if not page_path.is_file() or sha256_file(page_path) != str(row["sha256"]):
+                raise QualificationError("RUNTIME_V2_TEXTURE_PAGE_BYTES_DRIFT")
+        if np.any(face_page_index >= len(page_rows)):
+            raise QualificationError("RUNTIME_V2_FACE_PAGE_OUT_OF_RANGE")
+        primary = page_rows[0]
+        path = resolved_path(str(primary["path"]))
         views.append(
             RuntimeViewV2IR(
                 view_index=int(camera.view_index),
                 view_id=str(camera.view_id),
                 camera=asdict(camera),
                 texture_path=str(path),
-                texture_sha256=texture.transport_png_sha256,
+                texture_sha256=str(primary["sha256"]),
                 metadata={
                     "visibility": "CANONICAL_POSED_XYZ_ZBUFFER",
                     "appearance": "SEALED_CAA_V2",
                     "runtime_generation": False,
+                    "paged_atlas": bool(metadata.get("paged_atlas", False)),
+                    "page_count": len(page_rows),
+                    "texture_pages": [dict(row) for row in page_rows],
                 },
             )
         )
@@ -333,6 +411,8 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
             "playback_sampling_contract": "SEALED_FRAME_INDEX_ONLY",
             "host_interpolation_authorized": False,
             "geometry_uv_position_precision": "IEEE754_FLOAT64",
+            "appearance_paging_contract": "FACE_INDEX_TO_FIXED_PHYSICAL_PAGE_V1",
+            "appearance_page_count": int(np.max(face_page_index) + 1) if len(face_page_index) else 1,
         },
     )
     projection = replace(
@@ -379,8 +459,7 @@ def materialize_runtime_package_stage(ctx: dict) -> dict:
     if sha256_file(provenance) != projection.provenance_npz_sha256:
         raise QualificationError("RUNTIME_V2_PACKAGE_PROVENANCE_BYTES_DRIFT")
     for view in projection.views:
-        if sha256_file(resolved_path(view.texture_path)) != view.texture_sha256:
-            raise QualificationError("RUNTIME_V2_PACKAGE_TEXTURE_BYTES_DRIFT")
+        _load_runtime_view_texture(view)
 
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     archive = root / "product_runtime_v2.rss"
@@ -503,18 +582,20 @@ def _reference_frame(projection, arrays, *, clip, view, frame_index):
     camera = qualify_camera_v3(
         dict(view.camera), view_id=view.view_id, view_index=view.view_index
     )
-    texture = np.asarray(
-        Image.open(resolved_path(view.texture_path)).convert("RGBA"),
-        dtype=np.uint8,
-    )
+    texture = _load_runtime_view_texture(view)
     with np.load(projection.provenance_npz_path, allow_pickle=False) as data:
         provenance = np.asarray(data["provenance"][view.view_index], dtype=np.uint8)
+    face_page_index = np.asarray(
+        arrays.get("face_page_index", np.zeros((len(mesh.faces),), dtype=np.int32)),
+        dtype=np.int32,
+    )
     return render_caa_reference(
         mesh=mesh,
         camera=camera,
         face_uv=np.asarray(arrays["face_uv"], dtype=np.float64),
         texture_rgba_u8=texture,
         provenance_atlas=provenance,
+        face_page_index=face_page_index,
         positions=positions,
     )
 

@@ -84,7 +84,7 @@ def _surface_graph_from_edge_key_chunks(
     edge_key_chunks: list[np.ndarray],
 ) -> SurfaceSampleGraph:
     count = int(node_count)
-    if count <= 0 or count >= (1 << 32):
+    if count <= 0 or count >= (1 << 31):
         raise QualificationError("CAA_SURFACE_GRAPH_NODE_COUNT_UNSUPPORTED")
     chunks = [
         np.asarray(chunk, dtype=np.uint64).reshape(-1)
@@ -93,7 +93,11 @@ def _surface_graph_from_edge_key_chunks(
     ]
     if not chunks:
         raise QualificationError("CAA_SURFACE_GRAPH_EDGE_SET_EMPTY")
-    keys = np.unique(np.concatenate(chunks, axis=0))
+    packed = np.concatenate(chunks, axis=0)
+    # Drop per-chunk arrays before the sort/unique working set is allocated.
+    chunks.clear()
+    keys = np.unique(packed)
+    del packed
     low_mask = np.uint64(0xFFFFFFFF)
     edge_a = (keys >> np.uint64(32)).astype(np.int32, copy=False)
     edge_b = (keys & low_mask).astype(np.int32, copy=False)

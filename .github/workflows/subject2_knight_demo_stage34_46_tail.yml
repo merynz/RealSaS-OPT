@@ -5,13 +5,12 @@ on:
     branches:
       - research/vf11-certified-adaptive-20260921
     paths:
-      - '.github/workflows/subject2_knight_demo_stage34_46_tail.yml'
       - 'canonical/KNIGHT_DEMO_CAA_STAGE25_RECEIPT_20260925.json'
       - 'canonical/KNIGHT_DEMO_ARACHNE_STAGE33_V6_RECEIPT_20260926.json'
   workflow_dispatch:
 
 concurrency:
-  group: subject2-knight-demo-v2-run
+  group: subject2-knight-demo-v2-tail
   cancel-in-progress: false
 
 permissions:

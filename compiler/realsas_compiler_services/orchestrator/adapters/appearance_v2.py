@@ -576,6 +576,10 @@ def compile_caa_stage(ctx: dict) -> dict:
             "sample_count_mode": str(result["sample_count_mode"]),
             "sample_count_per_direction": int(result["sample_count_per_direction"]),
             "maximum_tile_resolution": int(result["maximum_tile_resolution"]),
+            "source_xy_storage_dtype": str(result["source_xy_storage_dtype"]),
+            "direct_pm_linear_storage_dtype": str(
+                result["direct_pm_linear_storage_dtype"]
+            ),
             "selected_resolution_histogram": {
                 str(int(resolution)): int(
                     np.count_nonzero(
@@ -622,6 +626,10 @@ def compile_caa_stage(ctx: dict) -> dict:
             "sample_count_per_direction": int(result["sample_count_per_direction"]),
             "sample_count_mode": str(result["sample_count_mode"]),
             "maximum_tile_resolution": int(result["maximum_tile_resolution"]),
+            "source_xy_storage_dtype": str(result["source_xy_storage_dtype"]),
+            "direct_pm_linear_storage_dtype": str(
+                result["direct_pm_linear_storage_dtype"]
+            ),
             **{f"provenance_{key.lower()}": int(value) for key, value in counts.items()},
         },
     }

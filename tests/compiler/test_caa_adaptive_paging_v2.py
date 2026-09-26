@@ -142,7 +142,9 @@ def test_adaptive_surface_graph_keeps_local_lattices_and_shared_vertices():
     assert len(neighbors) == int(offsets[-1])
     # Every sample has a local or shared canonical neighbour.
     assert all(len(row) > 0 for row in neighbors)
-    # At least the two shared edge vertices must create cross-face links.
+    # Every sample on the true shared edge must couple across the face
+    # boundary, even though r=4 (thirds) and r=8 (sevenths) have no compatible
+    # interior sample fractions.
     split = int(offsets[1])
     cross = {
         (left, right)
@@ -151,6 +153,13 @@ def test_adaptive_surface_graph_keeps_local_lattices_and_shared_vertices():
         if right >= split
     }
     assert len(cross) >= 2
+    edge_mask = np.isclose(positions[:, 0] + positions[:, 1], 1.0, atol=1e-12)
+    for sample_index in np.flatnonzero(edge_mask):
+        row = neighbors[int(sample_index)]
+        if int(sample_index) < split:
+            assert any(int(neighbor) >= split for neighbor in row)
+        else:
+            assert any(int(neighbor) < split for neighbor in row)
 
 
 def _adaptive_artifact() -> CAACompileArtifactIR:

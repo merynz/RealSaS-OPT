@@ -1,0 +1,14 @@
+{
+  "schema": "RealSaS.KnightDemoGeppettoV2ReconcileTrigger.v1",
+  "status": "RECONCILE_LATEST_MECHANICALLY_MEANINGFUL_28_JOINT_EXECUTION",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "execution_class": "DEMO_WITNESS",
+  "source_remote": "gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/GEPPETTO_STAGE27_MECHANICALLY_MEANINGFUL_V2_OUTPUT",
+  "expected_target_count": 28,
+  "expected_qualified_skeleton_lineage_hash": "c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce",
+  "historical_checkpoint_reused": false,
+  "teacher_inference_inputs_used": false,
+  "product_authority_claimed": false,
+  "product_pass_forbidden": true,
+  "revision": 1
+}

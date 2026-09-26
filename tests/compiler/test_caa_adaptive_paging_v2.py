@@ -19,6 +19,7 @@ from compiler.realsas_compiler_core.appearance_compile_v2 import (
     adaptive_face_sample_offsets,
 )
 from compiler.realsas_compiler_core.appearance_completion_v2 import (
+    SurfaceSampleGraph,
     surface_sample_neighbors,
 )
 from compiler.realsas_compiler_core.types import QualificationError
@@ -143,7 +144,10 @@ def test_adaptive_surface_graph_keeps_local_lattices_and_shared_vertices():
             ("shared0", "b1", "shared1"),
         ),
     )
+    assert isinstance(neighbors, SurfaceSampleGraph)
     assert len(neighbors) == int(offsets[-1])
+    assert neighbors.edge_count > 0
+    assert neighbors.storage_nbytes > 0
     # Every sample has a local or shared canonical neighbour.
     assert all(len(row) > 0 for row in neighbors)
     # Every sample on the true shared edge must couple across the face
@@ -164,6 +168,34 @@ def test_adaptive_surface_graph_keeps_local_lattices_and_shared_vertices():
             assert any(int(neighbor) >= split for neighbor in row)
         else:
             assert any(int(neighbor) < split for neighbor in row)
+
+
+
+def test_compact_surface_graph_storage_scales_linearly_without_python_sets():
+    face_count = 128
+    resolution = 32
+    per_face = resolution * (resolution + 1) // 2
+    sample_count = face_count * per_face
+    positions = np.zeros((sample_count, 3), dtype=np.float64)
+    topology = tuple(
+        (f"f{face}_v0", f"f{face}_v1", f"f{face}_v2")
+        for face in range(face_count)
+    )
+    graph = surface_sample_neighbors(
+        positions=positions,
+        face_count=face_count,
+        tile_resolution=resolution,
+        face_vertex_ids=topology,
+    )
+    assert isinstance(graph, SurfaceSampleGraph)
+    assert len(graph) == sample_count
+    assert graph.edge_count > sample_count
+    # A Python set/list graph at this scale costs many hundreds of bytes per
+    # sample. CSR should remain comfortably below 96 bytes/sample including
+    # the undirected edge index retained for Stage24 seam evaluation.
+    assert graph.storage_nbytes < sample_count * 96
+    assert int(graph.offsets[-1]) == 2 * graph.edge_count
+
 
 
 def _adaptive_artifact() -> CAACompileArtifactIR:

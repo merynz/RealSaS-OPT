@@ -559,11 +559,17 @@ def compile_caa_stage(ctx: dict) -> dict:
         completion_quality_policy=prereg.completion_quality_policy,
     )
     component_ids = tuple(result["component_ids"])
-    component_index = {component_id: index for index, component_id in enumerate(component_ids)}
     sample_component_index = np.asarray(
-        [component_index[value] for value in result["sample_component"]],
+        result["sample_component_index"],
         dtype=np.int32,
     )
+    if (
+        sample_component_index.shape
+        != (int(result["sample_count_per_direction"]),)
+        or np.any(sample_component_index < 0)
+        or np.any(sample_component_index >= len(component_ids))
+    ):
+        raise QualificationError("CAA_STAGE21_COMPONENT_INDEX_DRIFT")
 
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     npz_path = root / "caa_compile.npz"

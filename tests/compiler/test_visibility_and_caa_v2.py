@@ -205,6 +205,11 @@ def test_safe_transparent_source_background_is_defined_direct_source_not_unseen(
     )
     assert result["source_xy"].dtype == np.float32
     assert result["direct_pm_linear"].dtype == np.float64
+    assert result["sample_component_index"].dtype == np.int32
+    assert result["sample_component_index"].shape == (
+        result["sample_count_per_direction"],
+    )
+    assert len(result["component_ids"]) >= 1
     assert not np.any(result["provenance"] == 255)
     direct = result["provenance"] == 0
     assert np.any(direct)

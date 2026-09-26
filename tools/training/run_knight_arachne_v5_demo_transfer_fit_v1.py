@@ -52,17 +52,21 @@ EXPECTED_JOINTS = 28
 EXPECTED_PARAMETER_COUNT = 138_378_466
 
 SEED = 20260925
-MAX_STEPS = 8192
+MAX_STEPS = 16384
 CHECK_EVERY = 256
 REQUIRED_STABLE = 3
-MIN_FINETUNE_GATE_STEP = 256
+MIN_FINETUNE_GATE_STEP = 2048
+PROGRESS_EVERY = 1024
 ROWS_PER_STEP = 384
-BACKBONE_LR = 1.0e-5
-DECODER_LR = 5.0e-5
-WARMUP_STEPS = 256
-LR_FLOOR = 0.05
+BACKBONE_LR = 5.0e-5
+DECODER_LR = 3.0e-4
+BACKBONE_WARMUP_STEPS = 512
+BACKBONE_LR_FLOOR = 0.10
+DECODER_LR_FLOOR = 0.03
 WEIGHT_DECAY = 1.0e-4
 GRAD_CLIP = 1.0
+
+TRAINING_APPARATUS_ID = "KNIGHT_ARACHNE_V5_TRANSFER_SEALED_FIT2_OBJECTIVE_V2"
 
 ROW_L1_P95_MAX = 0.05
 LEGACY_DEFORM_MAX = 0.05
@@ -427,57 +431,77 @@ def _evaluate(model, ci, truth, valid_mask, surface, skeleton, conditioning, wor
     }, pred, qualified
 
 
-def _lr_factor(step: int) -> float:
-    s = max(1,int(step))
-    if s <= WARMUP_STEPS:
-        return float(s)/float(WARMUP_STEPS)
-    q = (s-WARMUP_STEPS)/float(max(1,MAX_STEPS-WARMUP_STEPS))
-    q = min(max(q,0.0),1.0)
-    return LR_FLOOR + (1.0-LR_FLOOR)*0.5*(1.0+math.cos(math.pi*q))
+def _backbone_lr_factor(step: int) -> float:
+    s=max(1,int(step))
+    if s<=BACKBONE_WARMUP_STEPS:
+        return float(s)/float(BACKBONE_WARMUP_STEPS)
+    q=min(max((s-BACKBONE_WARMUP_STEPS)/float(MAX_STEPS-BACKBONE_WARMUP_STEPS),0.0),1.0)
+    return BACKBONE_LR_FLOOR + (1.0-BACKBONE_LR_FLOOR)*0.5*(1.0+math.cos(math.pi*q))
+
+
+def _decoder_lr_factor(step: int) -> float:
+    s=max(1,int(step))
+    q=min(max(s/float(MAX_STEPS),0.0),1.0)
+    return DECODER_LR_FLOOR + (1.0-DECODER_LR_FLOOR)*0.5*(1.0+math.cos(math.pi*q))
 
 
 def _sample_loss(model, ci, truth_np, valid_mask_np, surface_world_np, articulated_transforms, rng, device):
-    clean = np.flatnonzero(np.asarray(valid_mask_np, dtype=bool))
-    if len(clean) < 1:
+    clean=np.flatnonzero(np.asarray(valid_mask_np,dtype=bool))
+    if len(clean)<1:
         raise RuntimeError("ARACHNE_TEACHER_VALID_MASK_EMPTY")
-    idx_np = rng.choice(clean, size=min(ROWS_PER_STEP,len(clean)), replace=False)
-    idx = torch.as_tensor(idx_np,device=device,dtype=torch.long)
-    raw = model.backbone(**ci)
-    geom_all = model.geometry7_from_surface(
+    idx_np=rng.choice(clean,size=min(ROWS_PER_STEP,len(clean)),replace=False)
+    idx=torch.as_tensor(idx_np,device=device,dtype=torch.long)
+    raw=model.backbone(**ci)
+    geom_all=model.geometry7_from_surface(
         ci["surface_positions_normalized"],ci["surface_normals"],ci["surface_normal_valid"]
     )
-    legal_all = ci["pair_mask"].bool() & ci["surface_mask"][:,:,None].bool() & ci["joint_mask"][:,None,:].bool()
-    logits, pred = model.decoder(
+    legal_all=ci["pair_mask"].bool() & ci["surface_mask"][:,:,None].bool() & ci["joint_mask"][:,None,:].bool()
+    logits,pred=model.decoder(
         geom_all[:,idx],
         ci["pair_geometry"][:,idx],
         legal_all[:,idx],
         raw.field_tokens,
     )
-    truth = torch.as_tensor(truth_np[idx_np][None],device=device,dtype=torch.float32)
-    p = pred.float().clamp_min(1e-8)
-    row_l1 = (p-truth).abs().sum(-1)
-    l1 = row_l1.mean()
-    k = max(1,(row_l1.numel()+9)//10)
-    hard = torch.topk(row_l1.reshape(-1),k=k,largest=True).values.mean()
-    mse = F.mse_loss(p,truth)
-    ce = -(truth*p.log()).sum(-1).mean()
-    rest = torch.as_tensor(surface_world_np[idx_np][None],device=device,dtype=torch.float32)
-    mask = torch.ones((1,len(idx_np)),device=device,dtype=torch.bool)
-    art, motion, err = articulated_deformation_ratio_loss(
-        p,truth,rest,articulated_transforms,mask
+
+    # Exact direct-simplex loss semantics from the sealed Mage FIT2 V5 closure.
+    # The previous Knight runner accidentally removed dice + blend-boundary terms
+    # and downweighted categorical CE 10x; this is a causal apparatus correction,
+    # not a gate relaxation.
+    t=torch.as_tensor(truth_np[idx_np],device=device,dtype=torch.float32)
+    p=pred[0].float()
+    z=logits[0].float()
+    rm=torch.ones((len(idx_np),),device=device,dtype=torch.bool)
+    logp=torch.log_softmax(z,-1)
+    ce=(-(t*logp).sum(-1)[rm]).mean()
+    mse=F.mse_loss(p[rm],t[rm])
+    numer=2*(p*t).sum(0)+1e-4
+    denom=p.square().sum(0)+t.square().sum(0)+1e-4
+    dice=(1-numer/denom).mean()
+    row=(p-t).abs().sum(-1)
+    rv=row[rm]
+    coupled=rv.mean()
+    k=max(1,int((rv.numel()+9)//10))
+    hard=torch.topk(rv,k=k,largest=True).values.mean()
+    blend=(1-t.max(-1).values).clamp_min(0)
+    bw=blend[rm]
+    boundary=(rv*bw).sum()/bw.sum().clamp_min(1e-8) if bool((bw>0).any()) else rv.new_zeros(())
+    rest=torch.as_tensor(surface_world_np[idx_np][None],device=device,dtype=torch.float32)
+    art,motion,err=articulated_deformation_ratio_loss(
+        p[None],t[None],rest,articulated_transforms,rm[None]
     )
-    total = l1 + 0.5*hard + 0.1*mse + 0.1*ce + 0.25*art
+    total=ce + 0.1*mse + dice + coupled + 0.5*hard + 0.5*boundary + 0.25*art
     return {
         "total":total,
-        "row_l1":l1,
-        "hard_tail_cvar10":hard,
+        "categorical_ce":ce,
         "mse":mse,
-        "cross_entropy":ce,
+        "dice":dice,
+        "normalized_row_l1":coupled,
+        "hard_tail_cvar10":hard,
+        "blend_boundary_l1":boundary,
         "articulated_deformation_ratio":art,
         "articulated_teacher_motion_rms":motion,
-        "articulated_error_rms":err,
+        "articulated_deformation_error_rms":err,
     }
-
 
 def run(args) -> dict:
     prereg_path=Path(args.prereg).resolve()
@@ -490,8 +514,10 @@ def run(args) -> dict:
 
     print("ARACHNE_KNIGHT_STAGE=PREREG_BEGIN", flush=True)
     prereg=_read_json(prereg_path)
-    if prereg.get("schema")!="RealSaS.KnightArachneV5DemoTransferPreregistration.v1" or prereg.get("status")!="FROZEN_BEFORE_KNIGHT_ARACHNE_OPTIMIZER_STEP_1":
+    if prereg.get("schema")!="RealSaS.KnightArachneV5DemoTransferPreregistration.v2" or prereg.get("status")!="FROZEN_BEFORE_KNIGHT_ARACHNE_OPTIMIZER_STEP_1":
         raise RuntimeError("ARACHNE_KNIGHT_PREREG_DRIFT")
+    if prereg.get("training",{}).get("apparatus_id")!=TRAINING_APPARATUS_ID:
+        raise RuntimeError("ARACHNE_KNIGHT_TRAINING_APPARATUS_DRIFT")
 
     print("ARACHNE_KNIGHT_STAGE=PREREG_PASS", flush=True)
     surface=rigging_surface_from_dict(_read_json(surface_path))
@@ -544,6 +570,8 @@ def run(args) -> dict:
         "joint_count":EXPECTED_JOINTS,
         "architecture_id":ARCHITECTURE_ID,
         "parameter_count":model.parameter_count,
+        "training_apparatus_id":TRAINING_APPARATUS_ID,
+        "training_apparatus_id":TRAINING_APPARATUS_ID,
         "initialization":init_report,
         "teacher_binding":teacher_binding,
         "teacher_boundary":"OBJECTIVE_AND_EVALUATION_ONLY__NEVER_PREDICTOR_INPUT",
@@ -576,8 +604,29 @@ def run(args) -> dict:
             {"params":model.backbone.parameters(),"lr":BACKBONE_LR},
             {"params":model.decoder.parameters(),"lr":DECODER_LR},
         ],weight_decay=WEIGHT_DECAY)
-        rng=np.random.default_rng(SEED)
-        for step in range(1,MAX_STEPS+1):
+        progress_path=outdir/"ARACHNE_KNIGHT_PROGRESS.pt"
+        fingerprint=sha256(json.dumps({
+            "apparatus":TRAINING_APPARATUS_ID,
+            "prereg_sha256":_sha(prereg_path),
+            "teacher_bank_sha256":_sha(bank_path),
+            "init_checkpoint_sha256":_sha(init_path),
+            "surface_lineage":surface.geometry_lineage_hash,
+            "skeleton_lineage":skeleton.skeleton_lineage_hash,
+        },sort_keys=True,separators=(",",":")).encode()).hexdigest()
+        start_step=0
+        if progress_path.is_file():
+            prog=torch.load(progress_path,map_location="cpu",weights_only=False)
+            if prog.get("fingerprint")!=fingerprint:
+                raise RuntimeError("ARACHNE_KNIGHT_PROGRESS_FINGERPRINT_DRIFT")
+            model.load_state_dict(prog["model"],strict=True)
+            optimizer.load_state_dict(prog["optimizer"])
+            start_step=int(prog["step"])
+            stable=int(prog.get("stable",0))
+            trace=list(prog.get("trace",trace))
+            print(f"ARACHNE_KNIGHT_RESUME_FROM_STEP={start_step}",flush=True)
+
+        rng=np.random.default_rng(SEED + start_step*1009)
+        for step in range(start_step+1,MAX_STEPS+1):
             model.train()
             optimizer.zero_grad(set_to_none=True)
             with torch.autocast(device_type="cuda",dtype=torch.bfloat16,enabled=True):
@@ -587,31 +636,56 @@ def run(args) -> dict:
             if not math.isfinite(grad):
                 raise FloatingPointError("ARACHNE_KNIGHT_NONFINITE_GRADIENT")
             optimizer.step()
-            factor=_lr_factor(step)
-            optimizer.param_groups[0]["lr"]=BACKBONE_LR*factor
-            optimizer.param_groups[1]["lr"]=DECODER_LR*factor
+            optimizer.param_groups[0]["lr"]=BACKBONE_LR*_backbone_lr_factor(step)
+            optimizer.param_groups[1]["lr"]=DECODER_LR*_decoder_lr_factor(step)
 
-            if step % CHECK_EVERY:
-                continue
-            row,pred,qualified=_evaluate(
-                model,ci,truth,teacher_valid,surface,skeleton,conditioning,world,joint_world,parent,joint_mask,
-                device,step,"KNIGHT_ARACHNE_V5_TRANSFER_FINETUNE"
-            )
-            stable=stable+1 if row["full_gate"] and step>=MIN_FINETUNE_GATE_STEP else 0
-            row["stable_streak"]=stable
-            row["grad_norm"]=grad
-            row["lr_backbone"]=float(optimizer.param_groups[0]["lr"])
-            row["lr_decoder"]=float(optimizer.param_groups[1]["lr"])
-            row["losses"]={k:float(v.detach().cpu()) for k,v in losses.items()}
-            trace.append(row)
-            final_pred=pred
-            final_qualified=qualified
-            print("ARACHNE_KNIGHT_CHECK="+json.dumps(row,sort_keys=True),flush=True)
-            _write_json(outdir/"ARACHNE_KNIGHT_TRACE.json",{"schema":SCHEMA+".Trace.v1","rows":trace})
-            if stable>=REQUIRED_STABLE:
-                closure_mode="TRANSFER_FINETUNE_PASS"
-                closure_step=step
-                break
+            if step % 64 == 0:
+                print(
+                    "ARACHNE_KNIGHT_TRAIN="
+                    +json.dumps({
+                        "step":step,
+                        "loss":float(losses["total"].detach().cpu()),
+                        "grad_norm":grad,
+                        "lr_backbone":float(optimizer.param_groups[0]["lr"]),
+                        "lr_decoder":float(optimizer.param_groups[1]["lr"]),
+                    },sort_keys=True),
+                    flush=True,
+                )
+
+            if step % CHECK_EVERY == 0:
+                row,pred,qualified=_evaluate(
+                    model,ci,truth,teacher_valid,surface,skeleton,conditioning,world,joint_world,parent,joint_mask,
+                    device,step,"KNIGHT_ARACHNE_V5_TRANSFER_FINETUNE"
+                )
+                stable=stable+1 if row["full_gate"] and step>=MIN_FINETUNE_GATE_STEP else 0
+                row["stable_streak"]=stable
+                row["grad_norm"]=grad
+                row["lr_backbone"]=float(optimizer.param_groups[0]["lr"])
+                row["lr_decoder"]=float(optimizer.param_groups[1]["lr"])
+                row["losses"]={k:float(v.detach().cpu()) for k,v in losses.items()}
+                trace.append(row)
+                final_pred=pred
+                final_qualified=qualified
+                print("ARACHNE_KNIGHT_CHECK="+json.dumps(row,sort_keys=True),flush=True)
+                _write_json(outdir/"ARACHNE_KNIGHT_TRACE.json",{"schema":SCHEMA+".Trace.v2","rows":trace})
+                if stable>=REQUIRED_STABLE:
+                    closure_mode="TRANSFER_FINETUNE_PASS"
+                    closure_step=step
+                    break
+
+            if step % PROGRESS_EVERY == 0 and step < MAX_STEPS:
+                tmp=Path(str(progress_path)+".tmp")
+                torch.save({
+                    "schema":SCHEMA+".Progress.v2",
+                    "fingerprint":fingerprint,
+                    "step":step,
+                    "stable":stable,
+                    "trace":trace,
+                    "model":model.state_dict(),
+                    "optimizer":optimizer.state_dict(),
+                },tmp)
+                tmp.replace(progress_path)
+                print(f"ARACHNE_KNIGHT_PROGRESS_SAVED={step}",flush=True)
 
     if closure_mode is None:
         result={

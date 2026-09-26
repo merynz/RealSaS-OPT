@@ -194,6 +194,57 @@ def _save_npz(path: Path, **arrays) -> str:
     return sha256_file(path)
 
 
+
+def _texture_page_rows(texture: AppearanceTextureIR) -> tuple[dict, ...]:
+    metadata = dict(texture.metadata or {})
+    raw = tuple(metadata.get("pages") or ())
+    if not raw:
+        return (
+            {
+                "page_index": 0,
+                "path": str(texture.transport_png_path),
+                "sha256": str(texture.transport_png_sha256),
+                "width": int(texture.width),
+                "height": int(texture.height),
+            },
+        )
+    rows = tuple(sorted((dict(row) for row in raw), key=lambda row: int(row["page_index"])))
+    if tuple(int(row["page_index"]) for row in rows) != tuple(range(len(rows))):
+        raise QualificationError("CAA_TEXTURE_PAGE_INDEX_SEQUENCE_INVALID")
+    if int(metadata.get("page_count", len(rows))) != len(rows):
+        raise QualificationError("CAA_TEXTURE_PAGE_COUNT_DRIFT")
+    first = rows[0]
+    if (
+        str(first["path"]) != str(texture.transport_png_path)
+        or str(first["sha256"]) != str(texture.transport_png_sha256)
+    ):
+        raise QualificationError("CAA_TEXTURE_PRIMARY_PAGE_BINDING_DRIFT")
+    dimensions = {
+        (int(row["width"]), int(row["height"]))
+        for row in rows
+    }
+    if len(dimensions) != 1:
+        raise QualificationError("CAA_TEXTURE_PAGE_DIMENSION_DRIFT")
+    return rows
+
+
+def _load_texture_pages(texture: AppearanceTextureIR) -> np.ndarray:
+    rows = _texture_page_rows(texture)
+    pages = []
+    for row in rows:
+        path = resolved_path(str(row["path"]))
+        if not path.is_file() or sha256_file(path) != str(row["sha256"]):
+            raise QualificationError("CAA_QUALIFICATION_TEXTURE_PAGE_BYTES_DRIFT")
+        image = np.asarray(Image.open(path).convert("RGBA"), dtype=np.uint8)
+        if image.shape != (int(row["height"]), int(row["width"]), 4):
+            raise QualificationError("CAA_TEXTURE_PAGE_DIMENSION_BYTES_DRIFT")
+        pages.append(image)
+    if bool(dict(texture.metadata or {}).get("paged_atlas")):
+        return np.stack(pages, axis=0)
+    if len(pages) != 1:
+        raise QualificationError("CAA_LEGACY_TEXTURE_HAS_MULTIPLE_PAGES")
+    return pages[0]
+
 def _load_compile_arrays(artifact: CAACompileArtifactIR) -> dict:
     path = resolved_path(artifact.compile_npz_path)
     if not path.is_file() or sha256_file(path) != artifact.compile_npz_sha256:
@@ -821,9 +872,7 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
     if asset.candidate_mesh_binding_hash != artifact.candidate_mesh_binding_hash:
         raise QualificationError("CAA_QUALIFICATION_MESH_BINDING_DRIFT")
     for texture in asset.textures:
-        path = resolved_path(texture.transport_png_path)
-        if not path.is_file() or sha256_file(path) != texture.transport_png_sha256:
-            raise QualificationError("CAA_QUALIFICATION_TEXTURE_BYTES_DRIFT")
+        _load_texture_pages(texture)
 
     arrays = _load_compile_arrays(artifact)
     direct = arrays["direct_valid"]
@@ -1144,6 +1193,7 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
 
     source_rgba, source_masks = _load_source_inputs(ctx, observation)
     face_uv = load_face_uv(asset)
+    face_page_index = load_face_page_index(asset)
     provenance_all = load_provenance_atlas(asset)
     by_camera = {int(camera.view_index): camera for camera in cameras.cameras}
     by_texture = {int(row.direction_index): row for row in asset.textures}
@@ -1196,14 +1246,14 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
     all_pass = True
     for direction in range(8):
         texture_row = by_texture[direction]
-        texture_path = resolved_path(texture_row.transport_png_path)
-        texture = np.asarray(Image.open(texture_path).convert("RGBA"), dtype=np.uint8)
+        texture = _load_texture_pages(texture_row)
         render = render_caa_reference(
             mesh=candidate,
             camera=by_camera[direction],
             face_uv=face_uv,
             texture_rgba_u8=texture,
             provenance_atlas=provenance_all[direction],
+            face_page_index=face_page_index,
         )
         projected_screen = project_points_xyz_v3(
             candidate_xyz,
@@ -1225,8 +1275,8 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
                 screen_triangle=projected_screen[
                     face_indices[int(face_index)]
                 ],
-                texture_width=int(texture.shape[1]),
-                texture_height=int(texture.shape[0]),
+                texture_width=int(texture.shape[2] if texture.ndim == 4 else texture.shape[1]),
+                texture_height=int(texture.shape[1] if texture.ndim == 4 else texture.shape[0]),
             )
             maximum_texture_texels_per_output_pixel = max(
                 maximum_texture_texels_per_output_pixel,

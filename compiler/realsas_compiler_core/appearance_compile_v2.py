@@ -928,7 +928,11 @@ def compile_deterministic_caa(
 
     direct_valid = np.zeros((8, sample_count), dtype=bool)
     direct_rgba = np.zeros((8, sample_count, 4), dtype=np.uint8)
-    direct_pm_linear = np.zeros((8, sample_count, 4), dtype=np.float64)
+    # Premultiplied-linear truth is required only where direct source evidence
+    # exists. Keep exact float64 values packed in deterministic view-major order
+    # instead of allocating a dense 8 x sample_count x 4 tensor dominated by
+    # unused zeros.
+    direct_pm_linear_chunks: list[np.ndarray] = []
     # Stage24 structured holdout authority consumes source_xy as float32.
     # Store it in that canonical consumer precision instead of carrying a
     # redundant float64 copy across the multi-million-sample compile artifact.
@@ -1007,7 +1011,19 @@ def compile_deterministic_caa(
                 return_premultiplied_linear=True,
             )
             direct_rgba[view, valid] = sampled_rgba
-            direct_pm_linear[view, valid] = sampled_pm
+            direct_pm_linear_chunks.append(
+                np.asarray(sampled_pm, dtype=np.float64).copy()
+            )
+
+    direct_pm_linear_packed = (
+        np.concatenate(direct_pm_linear_chunks, axis=0)
+        if direct_pm_linear_chunks
+        else np.empty((0, 4), dtype=np.float64)
+    )
+    direct_count = int(np.count_nonzero(direct_valid))
+    if direct_pm_linear_packed.shape != (direct_count, 4):
+        raise QualificationError("CAA_DIRECT_PM_PACKED_ACCOUNTING_DRIFT")
+    direct_pm_linear_chunks.clear()
 
     rgba = np.zeros_like(direct_rgba)
     provenance = np.full((8, sample_count), 255, dtype=np.uint8)
@@ -1101,7 +1117,7 @@ def compile_deterministic_caa(
         "face_tile_resolutions": resolutions,
         "direct_valid": direct_valid,
         "direct_rgba": direct_rgba,
-        "direct_pm_linear": direct_pm_linear,
+        "direct_pm_linear_packed": direct_pm_linear_packed,
         "source_xy": source_xy,
         "rgba": rgba,
         "provenance": provenance,
@@ -1117,5 +1133,6 @@ def compile_deterministic_caa(
         "maximum_tile_resolution": int(max_resolution),
         "source_xy_storage_dtype": "float32",
         "direct_pm_linear_storage_dtype": "float64",
+        "direct_pm_linear_storage_mode": "PACKED_DIRECT_VALID_VIEW_MAJOR_V1",
     }
 

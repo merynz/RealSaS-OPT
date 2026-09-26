@@ -337,7 +337,10 @@ def structured_holdout_metrics(
         )
     if len(neighbors) != n:
         raise QualificationError("CAA_HOLDOUT_SURFACE_GRAPH_CARDINALITY_DRIFT")
-    sample_component = tuple(str(int(value)) for value in component)
+    # Preserve compact compiler-native component ownership. The harmonic
+    # solver accepts numeric or textual component ids; Stage24 therefore avoids
+    # materializing a multi-million-element Python string tuple.
+    sample_component = component
 
     errors = []
     per_view = []

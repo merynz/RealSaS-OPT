@@ -441,7 +441,6 @@ def _surface_sample_geometry_adaptive(
     ) = _candidate_face_geometry_authority(candidate)
 
     positions = np.empty((sample_count, 3), dtype=np.float64)
-    all_barycentric = np.empty((sample_count, 3), dtype=np.float64)
     face_indices = np.empty((sample_count,), dtype=np.int32)
     sample_component_index = np.empty((sample_count,), dtype=np.int32)
     normals = np.empty((len(face_rows), 3), dtype=np.float64)
@@ -466,14 +465,12 @@ def _surface_sample_geometry_adaptive(
                 "CAA_ADAPTIVE_GEOMETRY_SAMPLE_ACCOUNTING_DRIFT"
             )
         positions[base:stop] = barycentric @ xyz
-        all_barycentric[base:stop] = barycentric
         face_indices[base:stop] = face_index
         sample_component_index[base:stop] = face_component_index[face_index]
         normals[face_index] = normal / norm
 
     return (
         positions,
-        all_barycentric,
         face_indices,
         sample_component_index,
         component_ids,
@@ -880,13 +877,16 @@ def compile_deterministic_caa(
             raise QualificationError("CAA_ADAPTIVE_COMPILE_RESOLUTION_INVALID")
         (
             positions,
-            barycentric,
             sample_face,
             sample_component_index,
             component_ids,
             face_normals,
             face_sample_offsets,
         ) = _surface_sample_geometry_adaptive(candidate, resolutions)
+        barycentric = None
+        barycentric_storage_mode = (
+            "RECONSTRUCT_FROM_FACE_RESOLUTION_AND_OFFSETS_V1"
+        )
         sample_count = len(positions)
         max_resolution = int(np.max(resolutions))
         max_samples_per_face = max_resolution * (max_resolution + 1) // 2
@@ -912,6 +912,7 @@ def compile_deterministic_caa(
         max_resolution = resolution
         max_samples_per_face = per_face_samples
         sample_count_mode = "UNIFORM_FACE_LATTICE_V1"
+        barycentric_storage_mode = "UNIFORM_PATTERN_EXPLICIT_V1"
 
     min_cos = float(source_lock_policy["min_abs_normal_camera_cos"])
     erosion = int(source_lock_policy["boundary_safe_erosion_px"])
@@ -1134,5 +1135,6 @@ def compile_deterministic_caa(
         "source_xy_storage_dtype": "float32",
         "direct_pm_linear_storage_dtype": "float64",
         "direct_pm_linear_storage_mode": "PACKED_DIRECT_VALID_VIEW_MAJOR_V1",
+        "barycentric_storage_mode": barycentric_storage_mode,
     }
 

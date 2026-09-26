@@ -254,15 +254,27 @@ def _load_compile_arrays(
     *,
     required_names: set[str] | frozenset[str] | tuple[str, ...] | None = None,
 ) -> dict:
-    """Load only the compile arrays required by the current stage.
+    """Load only arrays required by the current stage from a sealed CAA NPZ.
 
-    The sealed NPZ SHA and complete schema are always checked. Selective loading
-    changes memory residency only; it does not relax artifact completeness or
-    adaptive layout validation.
+    Current artifacts pack premultiplied-linear source truth only for direct
+    samples. Legacy dense truth remains readable so historical sealed artifacts
+    fail only on actual authority drift, not on a representation upgrade.
     """
     path = resolved_path(artifact.compile_npz_path)
     if not path.is_file() or sha256_file(path) != artifact.compile_npz_sha256:
         raise QualificationError("CAA_COMPILE_NPZ_BYTES_DRIFT")
+
+    metadata = dict(artifact.metadata or {})
+    pm_mode = str(
+        metadata.get("direct_pm_linear_storage_mode")
+        or "DENSE_ALL_SAMPLES_V1"
+    )
+    if pm_mode == "PACKED_DIRECT_VALID_VIEW_MAJOR_V1":
+        pm_name = "direct_pm_linear_packed"
+    elif pm_mode == "DENSE_ALL_SAMPLES_V1":
+        pm_name = "direct_pm_linear"
+    else:
+        raise QualificationError("CAA_COMPILE_DIRECT_PM_STORAGE_MODE_UNSUPPORTED")
 
     full_required = {
         "barycentric",
@@ -271,14 +283,14 @@ def _load_compile_arrays(
         "sample_component_index",
         "direct_valid",
         "direct_rgba",
-        "direct_pm_linear",
+        pm_name,
         "source_xy",
         "rgba",
         "provenance",
         "source_view",
     }
     sample_mode = str(
-        dict(artifact.metadata or {}).get("sample_count_mode")
+        metadata.get("sample_count_mode")
         or "UNIFORM_FACE_LATTICE_V1"
     )
     adaptive_required = {"face_sample_offsets", "face_tile_resolutions"}
@@ -320,15 +332,37 @@ def _load_compile_arrays(
         ):
             raise QualificationError("CAA_COMPILE_ADAPTIVE_ARRAY_BINDING_DRIFT")
 
-    metadata = dict(artifact.metadata or {})
     if "source_xy" in arrays:
         expected = str(metadata.get("source_xy_storage_dtype") or "")
         if expected and str(arrays["source_xy"].dtype) != expected:
             raise QualificationError("CAA_COMPILE_SOURCE_XY_DTYPE_DRIFT")
-    if "direct_pm_linear" in arrays:
-        expected = str(metadata.get("direct_pm_linear_storage_dtype") or "")
-        if expected and str(arrays["direct_pm_linear"].dtype) != expected:
+
+    expected_pm_dtype = str(
+        metadata.get("direct_pm_linear_storage_dtype") or ""
+    )
+    if pm_name in arrays:
+        if expected_pm_dtype and str(arrays[pm_name].dtype) != expected_pm_dtype:
             raise QualificationError("CAA_COMPILE_DIRECT_PM_DTYPE_DRIFT")
+        if pm_mode == "PACKED_DIRECT_VALID_VIEW_MAJOR_V1":
+            if arrays[pm_name].shape != (
+                artifact.direct_source_sample_count,
+                4,
+            ):
+                raise QualificationError(
+                    "CAA_COMPILE_DIRECT_PM_PACKED_SHAPE_DRIFT"
+                )
+        else:
+            if artifact.direction_count <= 0:
+                raise QualificationError("CAA_COMPILE_DIRECTION_COUNT_INVALID")
+            per_direction = artifact.total_sample_count // artifact.direction_count
+            if arrays[pm_name].shape != (
+                artifact.direction_count,
+                per_direction,
+                4,
+            ):
+                raise QualificationError(
+                    "CAA_COMPILE_DIRECT_PM_DENSE_SHAPE_DRIFT"
+                )
     return arrays
 
 def preregister_caa_backend_stage(ctx: dict) -> dict:
@@ -583,7 +617,7 @@ def compile_caa_stage(ctx: dict) -> dict:
         sample_component_index=sample_component_index,
         direct_valid=result["direct_valid"],
         direct_rgba=result["direct_rgba"],
-        direct_pm_linear=result["direct_pm_linear"],
+        direct_pm_linear_packed=result["direct_pm_linear_packed"],
         source_xy=result["source_xy"],
         rgba=result["rgba"],
         provenance=result["provenance"],
@@ -627,6 +661,9 @@ def compile_caa_stage(ctx: dict) -> dict:
             "direct_pm_linear_storage_dtype": str(
                 result["direct_pm_linear_storage_dtype"]
             ),
+            "direct_pm_linear_storage_mode": str(
+                result["direct_pm_linear_storage_mode"]
+            ),
             "selected_resolution_histogram": {
                 str(int(resolution)): int(
                     np.count_nonzero(
@@ -664,7 +701,7 @@ def compile_caa_stage(ctx: dict) -> dict:
                 "path": str(npz_path),
                 "sha256": npz_sha,
                 "authority_class": "CAA_COMPILE_ARRAYS",
-                "schema": "RealSaS.CAACompileArrays.v2",
+                "schema": "RealSaS.CAACompileArrays.v3",
             },
         ],
         "diagnostics": {
@@ -676,6 +713,9 @@ def compile_caa_stage(ctx: dict) -> dict:
             "source_xy_storage_dtype": str(result["source_xy_storage_dtype"]),
             "direct_pm_linear_storage_dtype": str(
                 result["direct_pm_linear_storage_dtype"]
+            ),
+            "direct_pm_linear_storage_mode": str(
+                result["direct_pm_linear_storage_mode"]
             ),
             **{f"provenance_{key.lower()}": int(value) for key, value in counts.items()},
         },
@@ -1076,6 +1116,17 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
     for texture in asset.textures:
         _load_texture_pages(texture)
 
+    pm_storage_mode = str(
+        dict(artifact.metadata or {}).get("direct_pm_linear_storage_mode")
+        or "DENSE_ALL_SAMPLES_V1"
+    )
+    if pm_storage_mode == "PACKED_DIRECT_VALID_VIEW_MAJOR_V1":
+        pm_array_name = "direct_pm_linear_packed"
+    elif pm_storage_mode == "DENSE_ALL_SAMPLES_V1":
+        pm_array_name = "direct_pm_linear"
+    else:
+        raise QualificationError("CAA_QUALIFICATION_DIRECT_PM_STORAGE_MODE_UNSUPPORTED")
+
     arrays = _load_compile_arrays(
         artifact,
         required_names={
@@ -1084,7 +1135,7 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
             "sample_component_index",
             "direct_valid",
             "direct_rgba",
-            "direct_pm_linear",
+            pm_array_name,
             "source_xy",
             "rgba",
             "provenance",
@@ -1202,9 +1253,16 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         alpha_conflict_cut=float(policy["cross_view_alpha_conflict_cut"]),
     )
 
+    direct_pm_truth = (
+        arrays["direct_pm_linear_packed"]
+        if pm_storage_mode == "PACKED_DIRECT_VALID_VIEW_MAJOR_V1"
+        else arrays["direct_pm_linear"][direct]
+    )
+    if direct_pm_truth.shape != (direct_count, 4):
+        raise QualificationError("CAA_QUALIFICATION_DIRECT_PM_ACCOUNTING_DRIFT")
     direct_pm_roundtrip = source_sample_roundtrip_pm_error(
         arrays["direct_rgba"][direct],
-        arrays["direct_pm_linear"][direct],
+        direct_pm_truth,
     )
     max_source_pm_roundtrip_error = (
         0.0

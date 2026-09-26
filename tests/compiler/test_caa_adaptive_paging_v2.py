@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import hashlib
 
 import numpy as np
 import pytest
@@ -23,6 +24,9 @@ from compiler.realsas_compiler_core.appearance_completion_v2 import (
     surface_sample_neighbors,
 )
 from compiler.realsas_compiler_core.types import QualificationError
+from compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2 import (
+    _load_compile_arrays,
+)
 
 
 def test_adaptive_sample_offsets_are_exact_for_mixed_triangular_lattices():
@@ -195,6 +199,60 @@ def test_compact_surface_graph_storage_scales_linearly_without_python_sets():
     # the undirected edge index retained for Stage24 seam evaluation.
     assert graph.storage_nbytes < sample_count * 96
     assert int(graph.offsets[-1]) == 2 * graph.edge_count
+
+
+
+
+def test_selective_compile_array_loader_preserves_schema_without_loading_unused_truth(
+    tmp_path,
+):
+    resolutions = np.asarray([4, 8, 4], dtype=np.int32)
+    offsets = adaptive_face_sample_offsets(resolutions)
+    n = int(offsets[-1])
+    path = tmp_path / "compile.npz"
+    np.savez_compressed(
+        path,
+        barycentric=np.zeros((n, 3), dtype=np.float64),
+        sample_positions=np.zeros((n, 3), dtype=np.float64),
+        sample_face_index=np.zeros((n,), dtype=np.int32),
+        sample_component_index=np.zeros((n,), dtype=np.int32),
+        direct_valid=np.ones((8, n), dtype=bool),
+        direct_rgba=np.zeros((8, n, 4), dtype=np.uint8),
+        direct_pm_linear=np.zeros((8, n, 4), dtype=np.float64),
+        source_xy=np.zeros((8, n, 2), dtype=np.float32),
+        rgba=np.zeros((8, n, 4), dtype=np.uint8),
+        provenance=np.zeros((8, n), dtype=np.uint8),
+        source_view=np.zeros((8, n), dtype=np.int16),
+        face_sample_offsets=offsets,
+        face_tile_resolutions=resolutions,
+    )
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    value = _adaptive_artifact()
+    value = replace(
+        value,
+        compile_npz_path=str(path),
+        compile_npz_sha256=digest,
+        metadata={
+            **dict(value.metadata),
+            "source_xy_storage_dtype": "float32",
+            "direct_pm_linear_storage_dtype": "float64",
+        },
+        compile_hash="",
+    )
+    value = replace(value, compile_hash=caa_compile_hash(value))
+    arrays = _load_compile_arrays(
+        value,
+        required_names={"rgba", "provenance"},
+    )
+    assert set(arrays) == {
+        "rgba",
+        "provenance",
+        "face_sample_offsets",
+        "face_tile_resolutions",
+    }
+    assert "direct_pm_linear" not in arrays
+    assert "source_xy" not in arrays
+    assert arrays["face_sample_offsets"].shape == (4,)
 
 
 

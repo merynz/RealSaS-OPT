@@ -96,6 +96,11 @@ jobs:
           assert int(caa["surface_graph_storage_bytes"])>0
           assert int(caa["sample_count_per_direction"])>0
           assert 0.0<float(caa["surface_graph_storage_bytes_per_sample"])<96.0
+          assert caa["compile_array_schema"]=="RealSaS.CAACompileArrays.v3"
+          assert caa["direct_pm_linear_storage_mode"]=="PACKED_DIRECT_VALID_VIEW_MAJOR_V1"
+          assert caa["direct_pm_linear_storage_dtype"]=="float64"
+          assert caa["source_xy_storage_dtype"]=="float32"
+          assert caa["barycentric_storage_mode"]=="RECONSTRUCT_FROM_FACE_RESOLUTION_AND_OFFSETS_V1"
           assert caa["adaptive_sampling_required"] is True
           assert caa["topology_bound_cross_face_completion_required"] is True
           assert caa["bounded_physical_page_transport_required"] is True

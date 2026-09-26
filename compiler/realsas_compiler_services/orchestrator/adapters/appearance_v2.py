@@ -249,46 +249,87 @@ def _load_texture_pages(texture: AppearanceTextureIR) -> np.ndarray:
         raise QualificationError("CAA_LEGACY_TEXTURE_HAS_MULTIPLE_PAGES")
     return pages[0]
 
-def _load_compile_arrays(artifact: CAACompileArtifactIR) -> dict:
+def _load_compile_arrays(
+    artifact: CAACompileArtifactIR,
+    *,
+    required_names: set[str] | frozenset[str] | tuple[str, ...] | None = None,
+) -> dict:
+    """Load only the compile arrays required by the current stage.
+
+    The sealed NPZ SHA and complete schema are always checked. Selective loading
+    changes memory residency only; it does not relax artifact completeness or
+    adaptive layout validation.
+    """
     path = resolved_path(artifact.compile_npz_path)
     if not path.is_file() or sha256_file(path) != artifact.compile_npz_sha256:
         raise QualificationError("CAA_COMPILE_NPZ_BYTES_DRIFT")
-    with np.load(path, allow_pickle=False) as data:
-        required = {
-            "barycentric",
-            "sample_positions",
-            "sample_face_index",
-            "sample_component_index",
-            "direct_valid",
-            "direct_rgba",
-            "direct_pm_linear",
-            "source_xy",
-            "rgba",
-            "provenance",
-            "source_view",
-        }
-        if not required.issubset(set(data.files)):
-            raise QualificationError("CAA_COMPILE_NPZ_ARRAYS_MISSING")
-        arrays = {name: np.asarray(data[name]).copy() for name in data.files}
+
+    full_required = {
+        "barycentric",
+        "sample_positions",
+        "sample_face_index",
+        "sample_component_index",
+        "direct_valid",
+        "direct_rgba",
+        "direct_pm_linear",
+        "source_xy",
+        "rgba",
+        "provenance",
+        "source_view",
+    }
     sample_mode = str(
         dict(artifact.metadata or {}).get("sample_count_mode")
         or "UNIFORM_FACE_LATTICE_V1"
     )
+    adaptive_required = {"face_sample_offsets", "face_tile_resolutions"}
+    requested = None if required_names is None else set(map(str, required_names))
+
+    with np.load(path, allow_pickle=False) as data:
+        available = set(data.files)
+        if not full_required.issubset(available):
+            raise QualificationError("CAA_COMPILE_NPZ_ARRAYS_MISSING")
+        if sample_mode == "PER_FACE_ADAPTIVE_V1":
+            if not adaptive_required.issubset(available):
+                raise QualificationError("CAA_COMPILE_ADAPTIVE_ARRAYS_MISSING")
+            if requested is not None:
+                requested |= adaptive_required
+        elif sample_mode != "UNIFORM_FACE_LATTICE_V1":
+            raise QualificationError("CAA_COMPILE_SAMPLE_COUNT_MODE_UNSUPPORTED")
+
+        names = available if requested is None else requested
+        if not names.issubset(available):
+            raise QualificationError("CAA_COMPILE_REQUESTED_ARRAY_MISSING")
+        arrays = {
+            name: np.asarray(data[name]).copy()
+            for name in sorted(names)
+        }
+
     if sample_mode == "PER_FACE_ADAPTIVE_V1":
-        adaptive_required = {"face_sample_offsets", "face_tile_resolutions"}
-        if not adaptive_required.issubset(arrays):
-            raise QualificationError("CAA_COMPILE_ADAPTIVE_ARRAYS_MISSING")
         offsets = np.asarray(arrays["face_sample_offsets"], dtype=np.int64)
         resolutions = np.asarray(arrays["face_tile_resolutions"], dtype=np.int32)
+        if artifact.direction_count <= 0:
+            raise QualificationError("CAA_COMPILE_DIRECTION_COUNT_INVALID")
+        if artifact.total_sample_count % artifact.direction_count != 0:
+            raise QualificationError("CAA_COMPILE_TOTAL_SAMPLE_DIVISIBILITY_DRIFT")
+        per_direction = artifact.total_sample_count // artifact.direction_count
         if (
             offsets.shape != (artifact.face_count + 1,)
             or resolutions.shape != (artifact.face_count,)
             or offsets[0] != 0
-            or offsets[-1] != arrays["sample_positions"].shape[0]
+            or offsets[-1] != per_direction
         ):
             raise QualificationError("CAA_COMPILE_ADAPTIVE_ARRAY_BINDING_DRIFT")
-    return arrays
 
+    metadata = dict(artifact.metadata or {})
+    if "source_xy" in arrays:
+        expected = str(metadata.get("source_xy_storage_dtype") or "")
+        if expected and str(arrays["source_xy"].dtype) != expected:
+            raise QualificationError("CAA_COMPILE_SOURCE_XY_DTYPE_DRIFT")
+    if "direct_pm_linear" in arrays:
+        expected = str(metadata.get("direct_pm_linear_storage_dtype") or "")
+        if expected and str(arrays["direct_pm_linear"].dtype) != expected:
+            raise QualificationError("CAA_COMPILE_DIRECT_PM_DTYPE_DRIFT")
+    return arrays
 
 def preregister_caa_backend_stage(ctx: dict) -> dict:
     cfg = dict(ctx["run_manifest"].get("appearance") or {})
@@ -650,7 +691,15 @@ def seal_caa_compile_stage(ctx: dict) -> dict:
             "RealSaS.CAACompileArtifactIR.v2",
         )
     )
-    arrays = _load_compile_arrays(artifact)
+    arrays = _load_compile_arrays(
+        artifact,
+        required_names={
+            "provenance",
+            "direct_valid",
+            "rgba",
+            "direct_rgba",
+        },
+    )
     if artifact.preregistration_binding_hash != prereg.preregistration_hash:
         raise QualificationError("CAA_COMPILE_PREREG_BINDING_DRIFT")
     if np.any(arrays["provenance"] == 255):
@@ -723,7 +772,10 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
     )
     if seal.compile_binding_hash != artifact.compile_hash:
         raise QualificationError("CAA_BAKE_COMPILE_SEAL_DRIFT")
-    arrays = _load_compile_arrays(artifact)
+    arrays = _load_compile_arrays(
+        artifact,
+        required_names={"rgba", "provenance", "source_view"},
+    )
     bleed = int(prereg.compile_policy["bleed_px"])
     tile_resolution = int(prereg.compile_policy["tile_resolution"])
     max_page_resolution = int(prereg.compile_policy["max_atlas_resolution"])
@@ -1018,7 +1070,21 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
     for texture in asset.textures:
         _load_texture_pages(texture)
 
-    arrays = _load_compile_arrays(artifact)
+    arrays = _load_compile_arrays(
+        artifact,
+        required_names={
+            "sample_positions",
+            "sample_face_index",
+            "sample_component_index",
+            "direct_valid",
+            "direct_rgba",
+            "direct_pm_linear",
+            "source_xy",
+            "rgba",
+            "provenance",
+            "source_view",
+        },
+    )
     direct = arrays["direct_valid"]
     direct_count = int(np.count_nonzero(direct))
     if direct_count <= 0:

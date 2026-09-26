@@ -187,6 +187,16 @@ jobs:
                   }
                   for x in by[stage]["outputs"]
               ]
+          qrows=[
+              x for x in by["24_COMPLETE_APPEARANCE_QUALIFIED"]["outputs"]
+              if x["schema"]=="RealSaS.CompleteAppearanceQualificationIR.v2"
+          ]
+          assert len(qrows)==1
+          qualification=json.loads(Path(qrows[0]["path"]).read_text())
+          qmeta=dict(qualification.get("metadata") or {})
+          assert qmeta["surface_graph_representation"]=="CSR_INT64_OFFSETS_INT32_INDICES_WITH_UNDIRECTED_EDGE_INDEX"
+          assert int(qmeta["surface_graph_edge_count"])>0
+          assert int(qmeta["surface_graph_storage_bytes"])>0
           receipt={
               "schema":"RealSaS.KnightDemoCAAStage25Receipt.v1",
               "status":"PASS_DEMO_ONLY",
@@ -196,6 +206,8 @@ jobs:
               "completed_through_stage":25,
               "caa_production_semantic_version":"PER_FACE_ADAPTIVE_TOPOLOGY_PARAMETRIC_PAGED_CSR_V1",
               "surface_graph_representation":"CSR_INT64_OFFSETS_INT32_INDICES_WITH_UNDIRECTED_EDGE_INDEX",
+              "surface_graph_edge_count":int(qmeta["surface_graph_edge_count"]),
+              "surface_graph_storage_bytes":int(qmeta["surface_graph_storage_bytes"]),
               "adaptive_sampling_required":True,
               "topology_bound_cross_face_completion_required":True,
               "bounded_physical_page_transport_required":True,

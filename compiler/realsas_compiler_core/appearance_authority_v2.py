@@ -237,6 +237,24 @@ def validate_caa_compile_artifact(value: CAACompileArtifactIR) -> None:
     if source_xy_dtype and source_xy_dtype not in {"float32", "float64"}:
         raise QualificationError("CAA_COMPILE_SOURCE_XY_DTYPE_POLICY_DRIFT")
 
+    compile_array_schema = str(metadata.get("compile_array_schema") or "")
+    if compile_array_schema and compile_array_schema not in {
+        "RealSaS.CAACompileArrays.v2",
+        "RealSaS.CAACompileArrays.v3",
+    }:
+        raise QualificationError("CAA_COMPILE_ARRAY_SCHEMA_UNSUPPORTED")
+    barycentric_storage_mode = str(
+        metadata.get("barycentric_storage_mode") or ""
+    )
+    if barycentric_storage_mode and barycentric_storage_mode not in {
+        "UNIFORM_PATTERN_EXPLICIT_V1",
+        "PER_SAMPLE_EXPLICIT_LEGACY_V1",
+        "RECONSTRUCT_FROM_FACE_RESOLUTION_AND_OFFSETS_V1",
+    }:
+        raise QualificationError(
+            "CAA_COMPILE_BARYCENTRIC_STORAGE_MODE_UNSUPPORTED"
+        )
+
     sample_mode = str(metadata.get("sample_count_mode") or "UNIFORM_FACE_LATTICE_V1")
     if sample_mode == "PER_FACE_ADAPTIVE_V1":
         per_direction = int(metadata.get("sample_count_per_direction") or 0)

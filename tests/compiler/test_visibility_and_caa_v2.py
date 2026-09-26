@@ -6,7 +6,9 @@ import numpy as np
 
 from compiler.realsas_compiler_core.appearance_bake_v2 import (
     bake_direction_atlas,
+    bake_direction_atlas_pages,
     bake_direction_source_view_atlas,
+    bake_direction_source_view_atlas_pages,
     bilinear_premultiplied_rgba,
     conservative_bilinear_provenance,
 )
@@ -363,6 +365,65 @@ def test_face_atlas_bleed_leaves_no_undefined_texel():
     assert uv.shape == (1, 3, 2)
     assert not np.any(prov == 255)
 
+
+
+def test_paged_atlas_preserves_density_and_page_local_sampling():
+    face_count = 5
+    tile_resolution = 4
+    bleed_px = 2
+    per_face = tile_resolution * (tile_resolution + 1) // 2
+    rgba = np.zeros((face_count * per_face, 4), dtype=np.uint8)
+    provenance = np.zeros((face_count * per_face,), dtype=np.uint8)
+    source_view = np.zeros((face_count * per_face,), dtype=np.int16)
+    for face in range(face_count):
+        sl = slice(face * per_face, (face + 1) * per_face)
+        rgba[sl] = (20 + face * 30, 40, 60, 255)
+        source_view[sl] = face % 8
+
+    pages, prov_pages, uv, page_index, layout = bake_direction_atlas_pages(
+        face_sample_rgba=rgba,
+        face_sample_provenance=provenance,
+        face_count=face_count,
+        tile_resolution=tile_resolution,
+        bleed_px=bleed_px,
+        max_page_resolution=16,
+    )
+    donor_pages = bake_direction_source_view_atlas_pages(
+        face_sample_source_view=source_view,
+        face_count=face_count,
+        tile_resolution=tile_resolution,
+        bleed_px=bleed_px,
+        max_page_resolution=16,
+    )
+    assert layout["page_count"] == 2
+    assert layout["faces_per_page"] == 4
+    assert tuple(map(int, page_index)) == (0, 0, 0, 0, 1)
+    assert pages.shape == (2, 16, 16, 4)
+    assert prov_pages.shape == (2, 16, 16)
+    assert donor_pages.shape == (2, 16, 16)
+    assert uv.shape == (face_count, 3, 2)
+    assert np.all((uv >= 0.0) & (uv <= 1.0))
+
+    # Renderer must select the physical page by face identity, not by UV alone.
+    mesh = _overlap_mesh(equal_depth=False)
+    render_uv = np.zeros((2, 3, 2), dtype=np.float64)
+    texture_pages = np.asarray(
+        [
+            [[[255, 0, 0, 0]]],
+            [[[0, 255, 0, 255]]],
+        ],
+        dtype=np.uint8,
+    )
+    provenance_pages = np.zeros((2, 1, 1), dtype=np.uint8)
+    render = render_caa_reference(
+        mesh=mesh,
+        camera=_camera(resolution=32),
+        face_uv=render_uv,
+        face_page_index=np.asarray([0, 1], dtype=np.int32),
+        texture_rgba_u8=texture_pages,
+        provenance_atlas=provenance_pages,
+    )
+    assert tuple(map(int, render.straight_rgba_u8[16, 16])) == (0, 255, 0, 255)
 
 def test_source_view_atlas_preserves_exact_donor_ids_and_harmonic_code():
     per_face = 4 * (4 + 1) // 2

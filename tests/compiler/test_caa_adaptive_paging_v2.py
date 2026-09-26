@@ -111,8 +111,8 @@ def test_adaptive_rgba_provenance_and_source_view_share_one_texel_mapping():
 
 def test_adaptive_surface_graph_keeps_local_lattices_and_shared_vertices():
     # Two triangles share the edge from (1,0,0) to (0,1,0), but use different
-    # face resolutions. Cross-face graph edges may only arise from exact
-    # coincident canonical samples.
+    # face resolutions. Product coupling is topology-parametric: interior edge
+    # fractions need not coincide geometrically across the two lattices.
     r0, r1 = 4, 8
     offsets = adaptive_face_sample_offsets(np.asarray([r0, r1], dtype=np.int32))
 
@@ -138,6 +138,10 @@ def test_adaptive_surface_graph_keeps_local_lattices_and_shared_vertices():
         face_count=2,
         face_sample_offsets=offsets,
         face_tile_resolutions=np.asarray([r0, r1], dtype=np.int32),
+        face_vertex_ids=(
+            ("a0", "shared0", "shared1"),
+            ("shared0", "b1", "shared1"),
+        ),
     )
     assert len(neighbors) == int(offsets[-1])
     # Every sample has a local or shared canonical neighbour.

@@ -204,7 +204,14 @@ def test_safe_transparent_source_background_is_defined_direct_source_not_unseen(
         },
     )
     assert result["source_xy"].dtype == np.float32
-    assert result["direct_pm_linear"].dtype == np.float64
+    assert result["direct_pm_linear_packed"].dtype == np.float64
+    assert result["direct_pm_linear_storage_mode"] == (
+        "PACKED_DIRECT_VALID_VIEW_MAJOR_V1"
+    )
+    assert result["direct_pm_linear_packed"].shape == (
+        int(np.count_nonzero(result["direct_valid"])),
+        4,
+    )
     assert result["sample_component_index"].dtype == np.int32
     assert result["sample_component_index"].shape == (
         result["sample_count_per_direction"],

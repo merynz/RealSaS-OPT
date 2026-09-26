@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.KnightDemoCAATrigger.v1",
-  "status": "RERUN_AFTER_PER_FACE_ADAPTIVE_CAA_PRODUCTION_IMPLEMENTATION",
+  "status": "RERUN_AFTER_TOPOLOGY_BOUND_PER_FACE_ADAPTIVE_CAA",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
   "subject_id": "SUBJECT2_KNIGHT",
   "execution_class": "DEMO_WITNESS",
@@ -9,15 +9,16 @@
   "target": "25_CAA_REFERENCE_REST_RENDER_PROOF",
   "product_authority_claimed": false,
   "product_pass_forbidden": true,
-  "revision": 6,
+  "revision": 7,
   "previous_failure": "GLOBAL_WORST_CASE_TILE32_COMPILE_MEMORY_EXPLOSION_AFTER_FIXED_PAGE_LAYOUT",
   "test_fixture_repair": "CONSTANT_TIME_SINGLE_FACE_UNSATISFIED_CAPACITY",
-  "production_repair": "PER_FACE_ADAPTIVE_LATTICE_PLUS_DETERMINISTIC_BOUNDED_2K_PHYSICAL_PAGES_V1",
+  "production_repair": "PER_FACE_ADAPTIVE_LATTICE_PLUS_TOPOLOGY_BOUND_COMPLETION_PLUS_BOUNDED_2K_PAGES_V1",
   "quality_thresholds_changed": false,
   "source_art_mutation": false,
   "expected_sampling_change": {
     "from": "UNIFORM_WORST_CASE_TILE_RESOLUTION_ON_ALL_FACES",
     "to": "PER_FACE_PROJECTED_SOURCE_DENSITY_RESOLUTION",
     "runtime_addressing": "FACE_INDEX_TO_FIXED_PHYSICAL_PAGE_V1"
-  }
+  },
+  "required_stage25_receipt_semantic_version": "PER_FACE_ADAPTIVE_TOPOLOGY_BOUND_PAGED_V1"
 }

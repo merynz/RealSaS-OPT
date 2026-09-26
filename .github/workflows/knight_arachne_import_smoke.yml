@@ -1,0 +1,44 @@
+name: knight-arachne-import-smoke
+
+on:
+  push:
+    branches: [demo/knight-arachne-v5-20260925]
+    paths:
+      - 'tools/training/run_knight_arachne_v5_demo_transfer_fit_v1.py'
+      - '.github/workflows/knight_arachne_import_smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python/runtime smoke
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 --version
+          python3 - <<'PY'
+          import sys
+          print("sys.path0", sys.path[0])
+          import numpy
+          print("numpy", numpy.__version__)
+          try:
+              import torch
+              print("torch", torch.__version__)
+          except Exception as e:
+              print("TORCH_IMPORT_FAIL", repr(e))
+              raise
+          import compiler.realsas_compiler_core.artifact_codec_v2
+          import compiler.realsas_compiler_core.skin
+          import models.arachne.v3.conditioning_v3
+          import models.arachne.v4.articulated_probe_v1
+          import models.arachne.v4.loss_v4
+          import models.arachne.v5.arachne_candidate_v5
+          import tools.training.run_knight_arachne_v5_demo_transfer_fit_v1
+          print("KNIGHT_ARACHNE_IMPORT_SMOKE_PASS")
+          PY

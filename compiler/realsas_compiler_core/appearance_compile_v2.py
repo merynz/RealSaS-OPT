@@ -975,6 +975,9 @@ def compile_deterministic_caa(
         tile_resolution=None if adaptive else int(max_resolution),
         face_sample_offsets=face_sample_offsets if adaptive else None,
         face_tile_resolutions=resolutions if adaptive else None,
+        face_vertex_ids=tuple(
+            tuple(map(str, face)) for face in candidate.faces
+        ),
     )
     completion_rows = []
 

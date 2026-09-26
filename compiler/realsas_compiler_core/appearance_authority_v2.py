@@ -194,10 +194,29 @@ def validate_caa_compile_artifact(value: CAACompileArtifactIR) -> None:
     )
     if counted != value.total_sample_count:
         raise QualificationError("CAA_COMPILE_PROVENANCE_ACCOUNTING_DRIFT")
-    if value.total_sample_count != (
-        value.face_count * value.direction_count * value.sample_count_per_face
-    ):
-        raise QualificationError("CAA_COMPILE_TOTALITY_ACCOUNTING_DRIFT")
+
+    metadata = dict(value.metadata or {})
+    sample_mode = str(metadata.get("sample_count_mode") or "UNIFORM_FACE_LATTICE_V1")
+    if sample_mode == "PER_FACE_ADAPTIVE_V1":
+        per_direction = int(metadata.get("sample_count_per_direction") or 0)
+        maximum_resolution = int(metadata.get("maximum_tile_resolution") or 0)
+        if (
+            per_direction <= 0
+            or maximum_resolution != int(value.tile_resolution)
+            or value.total_sample_count != value.direction_count * per_direction
+        ):
+            raise QualificationError("CAA_COMPILE_ADAPTIVE_TOTALITY_ACCOUNTING_DRIFT")
+        histogram = dict(metadata.get("selected_resolution_histogram") or {})
+        if not histogram or sum(int(v) for v in histogram.values()) != value.face_count:
+            raise QualificationError("CAA_COMPILE_ADAPTIVE_HISTOGRAM_DRIFT")
+    elif sample_mode == "UNIFORM_FACE_LATTICE_V1":
+        if value.total_sample_count != (
+            value.face_count * value.direction_count * value.sample_count_per_face
+        ):
+            raise QualificationError("CAA_COMPILE_TOTALITY_ACCOUNTING_DRIFT")
+    else:
+        raise QualificationError("CAA_COMPILE_SAMPLE_COUNT_MODE_UNSUPPORTED")
+
     if value.compile_hash != caa_compile_hash(value):
         raise QualificationError("CAA_COMPILE_HASH_MISMATCH")
 

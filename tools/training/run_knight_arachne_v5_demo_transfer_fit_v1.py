@@ -151,14 +151,34 @@ def _load_init(model: ArachneA1V5, path: Path) -> dict:
         payload = torch.load(path, map_location="cpu", weights_only=False, mmap=True)
     except Exception:
         payload = torch.load(path, map_location="cpu", weights_only=False)
-    state = _extract_state(payload)
-    if state and all(str(k).startswith("module.") for k in state):
-        state = {str(k)[7:]: v for k, v in state.items()}
-    model.load_state_dict(state, strict=True)
+
+    # The sealed Mage FIT2 V5 artifact is a ModelOnly payload with separate
+    # backbone/decoder state dicts (not a monolithic ArachneA1V5 state dict).
+    # Preserve that historical serialization exactly; bind it into the current
+    # composite model without rewriting or weakening strict key checks.
+    split_loaded = False
+    if isinstance(payload, dict):
+        b = payload.get("backbone")
+        d = payload.get("decoder")
+        if (
+            isinstance(b, dict) and b and all(torch.is_tensor(v) for v in b.values())
+            and isinstance(d, dict) and d and all(torch.is_tensor(v) for v in d.values())
+        ):
+            model.backbone.load_state_dict(b, strict=True)
+            model.decoder.load_state_dict(d, strict=True)
+            split_loaded = True
+
+    if not split_loaded:
+        state = _extract_state(payload)
+        if state and all(str(k).startswith("module.") for k in state):
+            state = {str(k)[7:]: v for k, v in state.items()}
+        model.load_state_dict(state, strict=True)
+
     return {
         "checkpoint_sha256": EXPECTED_INIT_SHA256,
         "payload_schema": str(payload.get("schema") or "") if isinstance(payload, dict) else "",
         "payload_step": None if not isinstance(payload, dict) else payload.get("step"),
+        "serialization_mode": "SPLIT_BACKBONE_DECODER" if split_loaded else "MONOLITHIC_STATE_DICT",
     }
 
 
@@ -468,10 +488,12 @@ def run(args) -> dict:
     outdir=Path(args.output_dir).resolve()
     outdir.mkdir(parents=True,exist_ok=True)
 
+    print("ARACHNE_KNIGHT_STAGE=PREREG_BEGIN", flush=True)
     prereg=_read_json(prereg_path)
     if prereg.get("schema")!="RealSaS.KnightArachneV5DemoTransferPreregistration.v1" or prereg.get("status")!="FROZEN_BEFORE_KNIGHT_ARACHNE_OPTIMIZER_STEP_1":
         raise RuntimeError("ARACHNE_KNIGHT_PREREG_DRIFT")
 
+    print("ARACHNE_KNIGHT_STAGE=PREREG_PASS", flush=True)
     surface=rigging_surface_from_dict(_read_json(surface_path))
     skeleton=qualified_skeleton_from_dict(_read_json(skeleton_path))
     if surface.geometry_lineage_hash!=EXPECTED_SURFACE_LINEAGE or len(surface.surface_nodes)!=EXPECTED_SURFACE_N or len(surface.local_relations)!=EXPECTED_SURFACE_E:
@@ -492,6 +514,7 @@ def run(args) -> dict:
     torch.backends.cuda.enable_flash_sdp(True)
     torch.backends.cuda.enable_mem_efficient_sdp(True)
 
+    print("ARACHNE_KNIGHT_STAGE=AUTHORITY_PASS", flush=True)
     conditioning=ArachneRichConditioningAdapterV3(require_scene_first=True)([surface],[skeleton])
     if int(conditioning.surface_mask[0].sum())!=EXPECTED_SURFACE_N or int(conditioning.edge_mask[0].sum())!=EXPECTED_SURFACE_E or int(conditioning.joint_mask[0].sum())!=EXPECTED_JOINTS:
         raise RuntimeError("ARACHNE_KNIGHT_CONDITIONING_CARDINALITY_DRIFT")
@@ -501,10 +524,13 @@ def run(args) -> dict:
     joint_world,parent,joint_mask=_joint_world(skeleton,conditioning,device)
     articulated=build_articulated_probe_transforms(joint_world,parent,joint_mask)
 
+    print("ARACHNE_KNIGHT_STAGE=CONDITIONING_PASS", flush=True)
     model=ArachneA1V5().to(device=device,dtype=torch.float32)
     if model.parameter_count!=EXPECTED_PARAMETER_COUNT or model.config.architecture_id!=ARCHITECTURE_ID:
         raise RuntimeError(f"ARACHNE_KNIGHT_MODEL_CONTRACT_DRIFT::{model.parameter_count}")
+    print("ARACHNE_KNIGHT_STAGE=MODEL_CONTRACT_PASS", flush=True)
     init_report=_load_init(model,init_path)
+    print("ARACHNE_KNIGHT_STAGE=INIT_CHECKPOINT_PASS "+json.dumps(init_report,sort_keys=True), flush=True)
     model=model.to(device=device,dtype=torch.float32)
 
     preflight={

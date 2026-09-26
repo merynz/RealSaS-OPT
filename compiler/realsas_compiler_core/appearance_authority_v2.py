@@ -221,6 +221,22 @@ def validate_caa_compile_artifact(value: CAACompileArtifactIR) -> None:
         raise QualificationError("CAA_COMPILE_PROVENANCE_ACCOUNTING_DRIFT")
 
     metadata = dict(value.metadata or {})
+    pm_storage_mode = str(
+        metadata.get("direct_pm_linear_storage_mode")
+        or "DENSE_ALL_SAMPLES_V1"
+    )
+    if pm_storage_mode not in {
+        "DENSE_ALL_SAMPLES_V1",
+        "PACKED_DIRECT_VALID_VIEW_MAJOR_V1",
+    }:
+        raise QualificationError("CAA_COMPILE_DIRECT_PM_STORAGE_MODE_UNSUPPORTED")
+    pm_dtype = str(metadata.get("direct_pm_linear_storage_dtype") or "")
+    if pm_dtype and pm_dtype != "float64":
+        raise QualificationError("CAA_COMPILE_DIRECT_PM_DTYPE_POLICY_DRIFT")
+    source_xy_dtype = str(metadata.get("source_xy_storage_dtype") or "")
+    if source_xy_dtype and source_xy_dtype not in {"float32", "float64"}:
+        raise QualificationError("CAA_COMPILE_SOURCE_XY_DTYPE_POLICY_DRIFT")
+
     sample_mode = str(metadata.get("sample_count_mode") or "UNIFORM_FACE_LATTICE_V1")
     if sample_mode == "PER_FACE_ADAPTIVE_V1":
         per_direction = int(metadata.get("sample_count_per_direction") or 0)

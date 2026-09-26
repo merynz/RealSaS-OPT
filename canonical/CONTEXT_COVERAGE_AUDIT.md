@@ -11,8 +11,8 @@
 - Explained by continuity policy: **344**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **148**
-- Safe-default evidence-only branches: **144**
+- Live branches: **149**
+- Safe-default evidence-only branches: **145**
 
 ### Classification counts
 
@@ -51,7 +51,7 @@ _None._
 | `compiler-runtime-migration-closure-20260901` | `255910d22fea` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `consumer-interlock-v0-20260829` | `81ec9fd98d90` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `demo/investor-single-specimen-e2e` | `47892ffa16b7` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `demo/knight-arachne-v5-20260925` | `5054091cf671` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `demo/knight-arachne-v5-20260925` | `1dc51f4929a3` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `dependabot/pip/numpy-2.4.6` | `c9a1ecae3871` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `dependabot/pip/pillow-12.3.0` | `b7bdee2eda95` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `dependabot/pip/pip-audit-2.10.1` | `add7ffd97461` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -102,7 +102,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `c515671c70ec` | `CANONICAL` | canonical branch |
+| `main` | `33bd30d2ac67` | `CANONICAL` | canonical branch |
 | `motion/quaternius-direct-fbx-gate-v1-20260919` | `47fb1555455b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -153,7 +153,7 @@ _None._
 | `research/stage14-v2-final-calibration-20260920` | `8a502d4bee42` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/stage14-v2-policy-calibration-20260919` | `b399a90c1c3a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/stage14-v2-policy-calibration-fixed-20260919` | `f08716b32db9` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `research/vf11-certified-adaptive-20260921` | `1ddb10b919d8` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `research/vf11-certified-adaptive-20260921` | `cc1973a8d0d6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/compiler-runtime-promotion-v1-20260903` | `83aa411cc06d` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/compiler-runtime-promotion-v1-20260903-directional-binding-firewall` | `800d3ccb042e` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety` | `2eb09fe3e8c6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -173,6 +173,7 @@ _None._
 | `subject2/knight-observation-v1-20260919` | `f45aed3655a2` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `tmp-do-not-use` | `953f2ded4911` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `tmp-noop` | `16ee5cd54a00` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `tmp/alfred-write-probe-20260926` | `b0b5140e3b68` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `tmp/appearance-witness-fetch-20260826` | `ec623d005bdb` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `tmp/runtime-v4-p0-p1-stage` | `e6654c065699` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `tmp_should_not_create` | `a5edb2b23fc4` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

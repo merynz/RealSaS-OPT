@@ -12,8 +12,8 @@
   "explained_high_signal_count": 344,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 148,
-  "safe_default_evidence_only_branch_count": 144,
+  "live_branch_count": 149,
+  "safe_default_evidence_only_branch_count": 145,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -150,7 +150,7 @@
     },
     {
       "name": "demo/knight-arachne-v5-20260925",
-      "sha": "5054091cf6713ac1080a9dd40ec58e443215a8f2",
+      "sha": "1dc51f4929a3ff35edc33f10cd5f8cd2cef0e98e",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -456,7 +456,7 @@
     },
     {
       "name": "main",
-      "sha": "c515671c70ec0c73b210fc50e584bbb1871761df",
+      "sha": "33bd30d2ac6768de90e6e296b0976a41e6ea0b84",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -762,7 +762,7 @@
     },
     {
       "name": "research/vf11-certified-adaptive-20260921",
-      "sha": "1ddb10b919d8682aa16ed25fb6f3c1d759a37220",
+      "sha": "cc1973a8d0d6e7f4f21fa30a4c368ab3d19ff621",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -877,6 +877,12 @@
     {
       "name": "tmp-noop",
       "sha": "16ee5cd54a00cb0dc322101b209566c38b9ee231",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "tmp/alfred-write-probe-20260926",
+      "sha": "b0b5140e3b683d6ae52fb6ff55c27309a95b837f",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

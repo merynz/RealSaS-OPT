@@ -30,7 +30,9 @@ from compiler.realsas_compiler_core.appearance_authority_v2 import (
 )
 from compiler.realsas_compiler_core.appearance_bake_v2 import (
     bake_direction_atlas,
+    bake_direction_atlas_pages,
     bake_direction_source_view_atlas,
+    bake_direction_source_view_atlas_pages,
 )
 from compiler.realsas_compiler_core.appearance_compile_v2 import (
     compile_deterministic_caa,
@@ -47,6 +49,7 @@ from compiler.realsas_compiler_core.appearance_quality_v2 import (
     structured_holdout_metrics,
 )
 from compiler.realsas_compiler_core.appearance_render_v2 import (
+    load_face_page_index,
     load_face_uv,
     load_provenance_atlas,
     render_caa_reference,
@@ -586,106 +589,105 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
     arrays = _load_compile_arrays(artifact)
     bleed = int(prereg.compile_policy["bleed_px"])
     tile_resolution = int(prereg.compile_policy["tile_resolution"])
+    max_page_resolution = int(prereg.compile_policy["max_atlas_resolution"])
 
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     root.mkdir(parents=True, exist_ok=True)
-    from compiler.realsas_compiler_core.appearance_compile_v2 import face_atlas_layout
-    max_supported_face_count = int(prereg.compile_policy["max_supported_face_count"])
-    if artifact.face_count > max_supported_face_count:
-        return {
-            "status": "FAIL",
-            "blockers": ["CAA_FACE_COUNT_EXCEEDS_FROZEN_ATLAS_CAPACITY"],
-            "diagnostics": {
-                "face_count": artifact.face_count,
-                "max_supported_face_count": max_supported_face_count,
-            },
-        }
-    projected_layout = face_atlas_layout(
-        artifact.face_count,
-        tile_resolution=tile_resolution,
-        bleed_px=bleed,
-    )
-    max_atlas_resolution = int(prereg.compile_policy["max_atlas_resolution"])
-    if (
-        int(projected_layout["width"]) > max_atlas_resolution
-        or int(projected_layout["height"]) > max_atlas_resolution
-    ):
-        return {
-            "status": "FAIL",
-            "blockers": ["CAA_ATLAS_EXCEEDS_FROZEN_PRODUCT_RESOLUTION_CAP"],
-            "diagnostics": {
-                "width": int(projected_layout["width"]),
-                "height": int(projected_layout["height"]),
-                "max_atlas_resolution": max_atlas_resolution,
-                "face_count": artifact.face_count,
-                "tile_resolution": tile_resolution,
-                "bleed_px": bleed,
-            },
-        }
     texture_rows = []
     output_rows = []
     provenance_atlases = []
     source_view_atlases = []
     reference_uv = None
+    reference_page_index = None
     reference_layout = None
+
     for direction in range(8):
-        atlas, provenance_atlas, uv, layout = bake_direction_atlas(
-            face_sample_rgba=arrays["rgba"][direction],
-            face_sample_provenance=arrays["provenance"][direction],
-            face_count=artifact.face_count,
-            tile_resolution=tile_resolution,
-            bleed_px=bleed,
+        pages, provenance_pages, uv, face_page_index, layout = (
+            bake_direction_atlas_pages(
+                face_sample_rgba=arrays["rgba"][direction],
+                face_sample_provenance=arrays["provenance"][direction],
+                face_count=artifact.face_count,
+                tile_resolution=tile_resolution,
+                bleed_px=bleed,
+                max_page_resolution=max_page_resolution,
+            )
         )
         if reference_uv is None:
             reference_uv = uv
+            reference_page_index = face_page_index
             reference_layout = layout
-        elif not np.array_equal(reference_uv, uv) or reference_layout != layout:
+        elif (
+            not np.array_equal(reference_uv, uv)
+            or not np.array_equal(reference_page_index, face_page_index)
+            or reference_layout != layout
+        ):
             raise QualificationError("CAA_BAKE_DIRECTION_LAYOUT_DRIFT")
-        path = root / f"V{direction}_appearance.png"
-        Image.fromarray(atlas, mode="RGBA").save(
-            path,
-            format="PNG",
-            optimize=False,
-            compress_level=6,
-        )
-        digest = sha256_file(path)
+
+        page_rows = []
+        for page_index in range(int(layout["page_count"])):
+            page_path = root / f"V{direction}_appearance_p{page_index}.png"
+            Image.fromarray(pages[page_index], mode="RGBA").save(
+                page_path,
+                format="PNG",
+                optimize=False,
+                compress_level=6,
+            )
+            page_sha = sha256_file(page_path)
+            page_rows.append(
+                {
+                    "page_index": int(page_index),
+                    "path": str(page_path),
+                    "sha256": page_sha,
+                    "width": int(pages.shape[2]),
+                    "height": int(pages.shape[1]),
+                }
+            )
+            output_rows.append(
+                {
+                    "path": str(page_path),
+                    "sha256": page_sha,
+                    "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+                    "schema": (
+                        f"RealSaS.CAATransportTexture.V{direction}."
+                        f"P{page_index}.v2"
+                    ),
+                }
+            )
+
+        primary = page_rows[0]
         texture_rows.append(
             AppearanceTextureIR(
                 direction_index=direction,
                 direction_id=f"V{direction}",
-                transport_png_path=str(path),
-                transport_png_sha256=digest,
-                width=int(atlas.shape[1]),
-                height=int(atlas.shape[0]),
+                transport_png_path=str(primary["path"]),
+                transport_png_sha256=str(primary["sha256"]),
+                width=int(primary["width"]),
+                height=int(primary["height"]),
                 metadata={
                     "transport_alpha": "STRAIGHT",
                     "runtime_filtering": "PREMULTIPLIED",
                     "atlas_bleed_px": bleed,
+                    "paged_atlas": True,
+                    "page_count": int(layout["page_count"]),
+                    "pages": page_rows,
                 },
             )
         )
-        output_rows.append(
-            {
-                "path": str(path),
-                "sha256": digest,
-                "authority_class": "CAA_TRANSPORT_TEXTURE",
-                "schema": f"RealSaS.CAATransportTexture.V{direction}.v2",
-            }
-        )
-        provenance_atlases.append(provenance_atlas)
+        provenance_atlases.append(provenance_pages)
         source_view_atlases.append(
-            bake_direction_source_view_atlas(
+            bake_direction_source_view_atlas_pages(
                 face_sample_source_view=arrays["source_view"][direction],
                 face_count=artifact.face_count,
                 tile_resolution=tile_resolution,
                 bleed_px=bleed,
+                max_page_resolution=max_page_resolution,
             )
         )
 
     provenance_stack = np.stack(provenance_atlases, axis=0).astype(np.uint8)
     source_view_stack = np.stack(source_view_atlases, axis=0).astype(np.int16)
     target_view = np.broadcast_to(
-        np.arange(8, dtype=np.int16)[:, None, None],
+        np.arange(8, dtype=np.int16)[:, None, None, None],
         source_view_stack.shape,
     )
     direct_mask = provenance_stack == CAA_PROVENANCE["DIRECT_SOURCE"]
@@ -716,7 +718,11 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
         raise QualificationError("CAA_BAKE_PROVENANCE_CLASS_INVALID")
 
     uv_path = root / "surface_uv.npz"
-    uv_sha = _save_npz(uv_path, face_uv=np.asarray(reference_uv, dtype=np.float64))
+    uv_sha = _save_npz(
+        uv_path,
+        face_uv=np.asarray(reference_uv, dtype=np.float64),
+        face_page_index=np.asarray(reference_page_index, dtype=np.int32),
+    )
     provenance_path = root / "provenance_atlas.npz"
     provenance_sha = _save_npz(
         provenance_path,
@@ -740,6 +746,9 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
         metadata={
             "total_appearance_asset": True,
             "unique_face_barycentric_atlas": True,
+            "paged_physical_atlas": True,
+            "physical_page_resolution_cap": max_page_resolution,
+            "page_count": int(reference_layout["page_count"]),
             "internal_alpha": "PREMULTIPLIED",
             "transport_png_alpha": "STRAIGHT",
             "unpremultiply_export_boundary_count": 1,
@@ -778,13 +787,14 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
         "outputs": output_rows,
         "diagnostics": {
             "asset_hash": asset.asset_hash,
-            "atlas_width": int(reference_layout["width"]),
-            "atlas_height": int(reference_layout["height"]),
+            "physical_page_width": int(reference_layout["page_width"]),
+            "physical_page_height": int(reference_layout["page_height"]),
+            "page_count": int(reference_layout["page_count"]),
+            "tile_resolution": tile_resolution,
             "bleed_px": bleed,
             "direction_count": 8,
         },
     }
-
 
 def qualify_complete_appearance_stage(ctx: dict) -> dict:
     prereg = caa_preregistration_from_dict(

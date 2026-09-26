@@ -29,6 +29,8 @@ from compiler.realsas_compiler_core.appearance_authority_v2 import (
     complete_appearance_qualification_hash,
 )
 from compiler.realsas_compiler_core.appearance_bake_v2 import (
+    bake_direction_adaptive_atlas_pages,
+    bake_direction_adaptive_source_view_atlas_pages,
     bake_direction_atlas,
     bake_direction_atlas_pages,
     bake_direction_source_view_atlas,
@@ -36,6 +38,7 @@ from compiler.realsas_compiler_core.appearance_bake_v2 import (
 )
 from compiler.realsas_compiler_core.appearance_compile_v2 import (
     compile_deterministic_caa,
+    projected_adaptive_face_tile_evidence,
     projected_tile_resolution_evidence,
 )
 from compiler.realsas_compiler_core.appearance_color_v2 import (
@@ -343,7 +346,7 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
     if str(compile_policy.get("tile_resolution_mode") or "") != "PROJECTED_SOURCE_DENSITY_V1":
         raise QualificationError("CAA_TILE_RESOLUTION_MODE_UNSUPPORTED")
     _source_rgba, source_masks = _load_source_inputs(ctx, observation)
-    tile_evidence = projected_tile_resolution_evidence(
+    tile_evidence = projected_adaptive_face_tile_evidence(
         candidate=candidate,
         cameras=cameras.cameras,
         foreground_mask_by_view=source_masks,
@@ -357,10 +360,10 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
         bleed_px=int(compile_policy["bleed_px"]),
         max_atlas_resolution=int(compile_policy["max_atlas_resolution"]),
     )
-    if tile_evidence["selected_tile_resolution"] is None:
+    if int(tile_evidence["unsatisfied_face_count"]) != 0:
         return {
             "status": "FAIL",
-            "blockers": ["CAA_TILE_DENSITY_OR_CAPACITY_UNSATISFIED"],
+            "blockers": ["CAA_ADAPTIVE_TILE_DENSITY_UNSATISFIED"],
             "diagnostics": {
                 "backend_id": backend,
                 "shipping_eligible": False,
@@ -373,11 +376,22 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
             },
         }
     compile_policy["tile_resolution"] = int(
-        tile_evidence["selected_tile_resolution"]
+        tile_evidence["maximum_required_resolution"]
     )
-    compile_policy["max_supported_face_count"] = int(
-        tile_evidence["max_supported_face_count"]
+    compile_policy["tile_resolution_strategy"] = "PER_FACE_ADAPTIVE_V1"
+    compile_policy["face_tile_resolutions"] = list(
+        tile_evidence["selected_resolution_by_face"]
     )
+    compile_policy["sample_count_per_direction"] = int(
+        tile_evidence["sample_count_per_direction"]
+    )
+    compile_policy["adaptive_atlas_page_count"] = int(
+        tile_evidence["deterministic_shelf_page_count"]
+    )
+    compile_policy["adaptive_atlas_placement_hash"] = str(
+        tile_evidence["placement_hash"]
+    )
+    compile_policy["max_supported_face_count"] = int(tile_evidence["face_count"])
     compile_policy["tile_resolution_evidence"] = tile_evidence
 
     prereg = build_caa_preregistration(

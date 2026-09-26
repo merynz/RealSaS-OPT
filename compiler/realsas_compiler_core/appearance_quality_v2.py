@@ -716,56 +716,24 @@ def provenance_boundary_metrics(
         offsets = np.arange(int(face_count) + 1, dtype=np.int64) * per_face
         resolutions = np.full((int(face_count),), int(tile_resolution), dtype=np.int32)
 
+    graph = surface_sample_neighbors(
+        positions=positions,
+        face_count=int(face_count),
+        tile_resolution=None if adaptive else int(tile_resolution),
+        face_sample_offsets=offsets if adaptive else None,
+        face_tile_resolutions=resolutions if adaptive else None,
+        face_vertex_ids=face_vertex_ids,
+    )
     pair_set: set[tuple[int, int]] = set()
     shared_edge_pair_set: set[tuple[int, int]] = set()
-    local_pair_cache: dict[int, tuple[tuple[int, int], ...]] = {}
-    for face in range(int(face_count)):
-        resolution = int(resolutions[face])
-        local_pairs = local_pair_cache.get(resolution)
-        if local_pairs is None:
-            local_pairs = _triangle_lattice_neighbors(resolution)
-            local_pair_cache[resolution] = local_pairs
-        base = int(offsets[face])
-        stop = int(offsets[face + 1])
-        for a, b in local_pairs:
-            aa = base + int(a)
-            bb = base + int(b)
-            if aa >= stop or bb >= stop:
-                raise QualificationError("CAA_SEAM_LOCAL_PAIR_OUT_OF_RANGE")
-            pair_set.add((aa, bb))
-
-    # Shared-face boundary samples require explicit candidate-topology
-    # adjacency. Exact XYZ coincidence alone is not enough for overlapping sheets.
-    topology_sets = None
-    if face_vertex_ids is not None:
-        topology = tuple(tuple(map(str, row)) for row in face_vertex_ids)
-        if len(topology) != int(face_count) or any(len(row) != 3 for row in topology):
-            raise QualificationError("CAA_SEAM_FACE_TOPOLOGY_INVALID")
-        topology_sets = tuple(frozenset(row) for row in topology)
-
-    buckets: dict[tuple[int, int, int], list[int]] = {}
-    scale = 1.0e8
-    for index, point in enumerate(positions):
-        key = tuple(int(round(float(value) * scale)) for value in point)
-        buckets.setdefault(key, []).append(index)
-    for indices in buckets.values():
-        if len(indices) < 2:
-            continue
-        for i in range(len(indices)):
-            for j in range(i + 1, len(indices)):
-                a = indices[i]
-                b = indices[j]
-                face_a = int(face_index[a])
-                face_b = int(face_index[b])
-                if face_a == face_b:
-                    continue
-                if (
-                    topology_sets is not None
-                    and not (topology_sets[face_a] & topology_sets[face_b])
-                ):
-                    continue
-                pair = (min(a, b), max(a, b))
-                pair_set.add(pair)
+    for a, row in enumerate(graph):
+        for b in row:
+            b = int(b)
+            if b == a:
+                raise QualificationError("CAA_SEAM_SELF_GRAPH_EDGE")
+            pair = (min(int(a), b), max(int(a), b))
+            pair_set.add(pair)
+            if int(face_index[pair[0]]) != int(face_index[pair[1]]):
                 shared_edge_pair_set.add(pair)
 
     adjacency: dict[int, set[int]] = {index: set() for index in range(n)}

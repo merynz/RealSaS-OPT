@@ -90,6 +90,31 @@ def validate_caa_preregistration(value: CAACompilePreregistrationIR) -> None:
         raise QualificationError("CAA_ATLAS_POLICY_INVALID")
     if str(compile_policy.get("atlas_layout")) != "UNIQUE_FACE_BARYCENTRIC_V1":
         raise QualificationError("CAA_ATLAS_LAYOUT_UNSUPPORTED")
+    strategy = str(
+        compile_policy.get("tile_resolution_strategy")
+        or "UNIFORM_FACE_LATTICE_V1"
+    )
+    if strategy == "PER_FACE_ADAPTIVE_V1":
+        resolutions = tuple(
+            int(item) for item in (compile_policy.get("face_tile_resolutions") or ())
+        )
+        if (
+            len(resolutions) != max_supported_face_count
+            or any(item < 4 or item > tile_resolution for item in resolutions)
+        ):
+            raise QualificationError("CAA_ADAPTIVE_PREREG_RESOLUTION_VECTOR_DRIFT")
+        expected_samples = sum(item * (item + 1) // 2 for item in resolutions)
+        if int(compile_policy.get("sample_count_per_direction", 0)) != expected_samples:
+            raise QualificationError("CAA_ADAPTIVE_PREREG_SAMPLE_ACCOUNTING_DRIFT")
+        if int(compile_policy.get("adaptive_atlas_page_count", 0)) <= 0:
+            raise QualificationError("CAA_ADAPTIVE_PREREG_PAGE_COUNT_INVALID")
+        placement_hash = str(
+            compile_policy.get("adaptive_atlas_placement_hash") or ""
+        )
+        if len(placement_hash) != 64:
+            raise QualificationError("CAA_ADAPTIVE_PREREG_PLACEMENT_HASH_INVALID")
+    elif strategy != "UNIFORM_FACE_LATTICE_V1":
+        raise QualificationError("CAA_TILE_RESOLUTION_STRATEGY_UNSUPPORTED")
     source_policy = dict(value.source_lock_policy)
     angle = float(source_policy.get("min_abs_normal_camera_cos", -1.0))
     erosion = int(source_policy.get("boundary_safe_erosion_px", -1))

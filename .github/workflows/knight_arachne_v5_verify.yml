@@ -7,7 +7,7 @@ on:
     paths:
       - 'tools/training/run_knight_arachne_v5_demo_transfer_fit_v1.py'
       - 'tools/training/knight_arachne_teacher_projection_v1.py'
-      - 'canonical/KNIGHT_ARACHNE_V5_DEMO_TRANSFER_PREREG_20260925.json'
+      - 'canonical/KNIGHT_ARACHNE_V5_DEMO_TRANSFER_PREREG_V2_20260926.json'
       - '.github/workflows/knight_arachne_v5_verify.yml'
   workflow_dispatch:
 
@@ -26,17 +26,40 @@ jobs:
           set -euo pipefail
           python3 -m py_compile             tools/training/run_knight_arachne_v5_demo_transfer_fit_v1.py             tools/training/knight_arachne_teacher_projection_v1.py
           python3 - <<'PY'
-          import json
+          import json,re
           from pathlib import Path
-          p=Path("canonical/KNIGHT_ARACHNE_V5_DEMO_TRANSFER_PREREG_20260925.json")
+
+          p=Path("canonical/KNIGHT_ARACHNE_V5_DEMO_TRANSFER_PREREG_V2_20260926.json")
           d=json.loads(p.read_text())
+          assert d["schema"]=="RealSaS.KnightArachneV5DemoTransferPreregistration.v2"
           assert d["status"]=="FROZEN_BEFORE_KNIGHT_ARACHNE_OPTIMIZER_STEP_1"
           assert d["architecture_id"]=="RealSaS.Arachne.A1.MinimalK4DirectSimplex.v5"
+          assert d["training"]["apparatus_id"]=="KNIGHT_ARACHNE_V5_TRANSFER_SEALED_FIT2_OBJECTIVE_V2"
+          assert d["training"]["max_steps"]==16384
+          assert d["training"]["minimum_finetune_gate_step"]==2048
+          assert d["training"]["backbone_lr"]==5e-5
+          assert d["training"]["decoder_lr"]==3e-4
           assert d["training"]["stable_consecutive_full_passes_required"]==3
-          assert d["bindings"]["rigging_surface_node_count"]==12090
-          assert d["bindings"]["qualified_skeleton_joint_count"]==28
+          assert d["science_gate"]["row_l1_p95_max"]==0.05
+          assert d["science_gate"]["legacy_deformation_ratio_max"]==0.05
+          assert d["science_gate"]["articulated_deformation_ratio_max"]==0.05
+          assert d["science_gate"]["changed_from_v1"] is False
           assert d["teacher_boundary"]=="OBJECTIVE_AND_EVALUATION_ONLY__NEVER_PREDICTOR_INPUT"
           assert d["output_policy"]["product_authority_claimed"] is False
           assert d["output_policy"]["generalization_claimed"] is False
-          print("KNIGHT_ARACHNE_V5_STATIC_VERIFY_PASS")
+
+          src=Path("tools/training/run_knight_arachne_v5_demo_transfer_fit_v1.py").read_text()
+          required=[
+            'MAX_STEPS = 16384',
+            'BACKBONE_LR = 5.0e-5',
+            'DECODER_LR = 3.0e-4',
+            'MIN_FINETUNE_GATE_STEP = 2048',
+            'dice=(1-numer/denom).mean()',
+            '0.5*boundary',
+            'ce + 0.1*mse + dice + coupled + 0.5*hard + 0.5*boundary + 0.25*art',
+            'ARACHNE_KNIGHT_PROGRESS_SAVED',
+          ]
+          for needle in required:
+              assert needle in src, needle
+          print("KNIGHT_ARACHNE_V5_APPARATUS_V2_STATIC_VERIFY_PASS")
           PY

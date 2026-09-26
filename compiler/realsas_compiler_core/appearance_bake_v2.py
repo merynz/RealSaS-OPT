@@ -6,7 +6,12 @@ import math
 
 import numpy as np
 
-from .appearance_compile_v2 import face_atlas_layout, face_uv_array
+from .appearance_compile_v2 import (
+    face_atlas_layout,
+    face_atlas_paged_layout,
+    face_paged_uv_array,
+    face_uv_array,
+)
 from .appearance_color_v2 import (
     bilinear_premultiplied_linear_rgba,
     straight_srgb_rgba_u8_to_premultiplied_linear,
@@ -90,6 +95,139 @@ def _iter_face_atlas_lattice_samples(
                     sample_map[(ii, jj)],
                 )
 
+
+
+def _iter_face_paged_atlas_lattice_samples(layout):
+    """Yield face/page/texel/sample mapping for fixed-resolution physical pages."""
+    face_count = int(layout["face_count"])
+    tile_resolution = int(layout["tile_resolution"])
+    bleed = int(layout["bleed_px"])
+    stride = int(layout["tile_stride"])
+    tiles_per_axis = int(layout["tiles_per_axis"])
+    faces_per_page = int(layout["faces_per_page"])
+    sample_map = _sample_index_map(tile_resolution)
+    for face_index in range(face_count):
+        page_index = face_index // faces_per_page
+        local_face = face_index % faces_per_page
+        tile_x = (local_face % tiles_per_axis) * stride
+        tile_y = (local_face // tiles_per_axis) * stride
+        for local_y in range(stride):
+            for local_x in range(stride):
+                ii, jj = _nearest_triangle_lattice(
+                    local_x - bleed,
+                    local_y - bleed,
+                    tile_resolution=tile_resolution,
+                )
+                yield (
+                    face_index,
+                    page_index,
+                    tile_y + local_y,
+                    tile_x + local_x,
+                    sample_map[(ii, jj)],
+                )
+
+
+def bake_direction_atlas_pages(
+    *,
+    face_sample_rgba: np.ndarray,
+    face_sample_provenance: np.ndarray,
+    face_count: int,
+    tile_resolution: int,
+    bleed_px: int,
+    max_page_resolution: int,
+):
+    """Bake one direction into deterministic fixed-resolution physical pages."""
+    rgba_samples = np.asarray(face_sample_rgba, dtype=np.uint8)
+    provenance_samples = np.asarray(face_sample_provenance, dtype=np.uint8)
+    face_count = int(face_count)
+    layout = face_atlas_paged_layout(
+        face_count,
+        tile_resolution=int(tile_resolution),
+        bleed_px=int(bleed_px),
+        max_page_resolution=int(max_page_resolution),
+    )
+    sample_count = int(tile_resolution) * (int(tile_resolution) + 1) // 2
+    if rgba_samples.shape != (face_count * sample_count, 4):
+        raise QualificationError("CAA_PAGED_BAKE_RGBA_SAMPLE_SHAPE_INVALID")
+    if provenance_samples.shape != (face_count * sample_count,):
+        raise QualificationError("CAA_PAGED_BAKE_PROVENANCE_SAMPLE_SHAPE_INVALID")
+
+    rgba_samples = rgba_samples.reshape(face_count, sample_count, 4)
+    provenance_samples = provenance_samples.reshape(face_count, sample_count)
+    page_count = int(layout["page_count"])
+    height = int(layout["page_height"])
+    width = int(layout["page_width"])
+    pages = np.zeros((page_count, height, width, 4), dtype=np.uint8)
+    provenance_pages = np.full(
+        (page_count, height, width), 255, dtype=np.uint8
+    )
+    allocated = np.zeros((page_count, height, width), dtype=bool)
+    for face_index, page_index, atlas_y, atlas_x, sample_index in (
+        _iter_face_paged_atlas_lattice_samples(layout)
+    ):
+        allocated[page_index, atlas_y, atlas_x] = True
+        pages[page_index, atlas_y, atlas_x] = rgba_samples[
+            face_index, sample_index
+        ]
+        provenance_pages[page_index, atlas_y, atlas_x] = provenance_samples[
+            face_index, sample_index
+        ]
+
+    if np.any(provenance_pages[allocated] == 255):
+        raise QualificationError("CAA_PAGED_BAKE_ALLOCATED_TILE_UNDEFINED_TEXEL")
+    if np.any((provenance_pages != 255) & ~allocated):
+        raise QualificationError("CAA_PAGED_BAKE_PADDING_CONTAMINATED")
+    uv, face_page_index = face_paged_uv_array(layout)
+    return pages, provenance_pages, uv, face_page_index, layout
+
+
+def bake_direction_source_view_atlas_pages(
+    *,
+    face_sample_source_view: np.ndarray,
+    face_count: int,
+    tile_resolution: int,
+    bleed_px: int,
+    max_page_resolution: int,
+) -> np.ndarray:
+    """Bake exact source-view lineage using the identical paged texel mapping."""
+    source_samples = np.asarray(face_sample_source_view, dtype=np.int16)
+    face_count = int(face_count)
+    layout = face_atlas_paged_layout(
+        face_count,
+        tile_resolution=int(tile_resolution),
+        bleed_px=int(bleed_px),
+        max_page_resolution=int(max_page_resolution),
+    )
+    sample_count = int(tile_resolution) * (int(tile_resolution) + 1) // 2
+    if source_samples.shape != (face_count * sample_count,):
+        raise QualificationError("CAA_PAGED_BAKE_SOURCE_VIEW_SAMPLE_SHAPE_INVALID")
+    valid = ((source_samples >= 0) & (source_samples < 8)) | (source_samples == -2)
+    if not np.all(valid):
+        raise QualificationError("CAA_PAGED_BAKE_SOURCE_VIEW_SAMPLE_VALUE_INVALID")
+    source_samples = source_samples.reshape(face_count, sample_count)
+    padding = np.iinfo(np.int16).min
+    pages = np.full(
+        (
+            int(layout["page_count"]),
+            int(layout["page_height"]),
+            int(layout["page_width"]),
+        ),
+        padding,
+        dtype=np.int16,
+    )
+    allocated = np.zeros(pages.shape, dtype=bool)
+    for face_index, page_index, atlas_y, atlas_x, sample_index in (
+        _iter_face_paged_atlas_lattice_samples(layout)
+    ):
+        allocated[page_index, atlas_y, atlas_x] = True
+        pages[page_index, atlas_y, atlas_x] = source_samples[
+            face_index, sample_index
+        ]
+    if np.any(pages[allocated] == padding):
+        raise QualificationError("CAA_PAGED_BAKE_ALLOCATED_SOURCE_VIEW_UNDEFINED")
+    if np.any((pages != padding) & ~allocated):
+        raise QualificationError("CAA_PAGED_BAKE_SOURCE_VIEW_PADDING_CONTAMINATED")
+    return pages
 
 def bake_direction_atlas(
     *,

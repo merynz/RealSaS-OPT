@@ -206,3 +206,57 @@ def test_adaptive_compile_artifact_rejects_sample_accounting_drift():
         match="CAA_COMPILE_ADAPTIVE_TOTALITY_ACCOUNTING_DRIFT",
     ):
         validate_caa_compile_artifact(tampered)
+
+
+def test_adaptive_surface_graph_does_not_cross_coincident_nonadjacent_sheets():
+    resolutions = np.asarray([4, 4], dtype=np.int32)
+    offsets = adaptive_face_sample_offsets(resolutions)
+
+    tri = np.asarray(
+        ((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0)),
+        dtype=np.float64,
+    )
+
+    def bary(resolution: int):
+        rows = []
+        d = float(resolution - 1)
+        for j in range(resolution):
+            for i in range(resolution - j):
+                rows.append((1.0 - i / d - j / d, i / d, j / d))
+        return np.asarray(rows, dtype=np.float64)
+
+    one = bary(4) @ tri
+    positions = np.concatenate((one, one.copy()), axis=0)
+    split = int(offsets[1])
+
+    topology_bound = surface_sample_neighbors(
+        positions=positions,
+        face_count=2,
+        face_sample_offsets=offsets,
+        face_tile_resolutions=resolutions,
+        face_vertex_ids=(
+            ("a0", "a1", "a2"),
+            ("b0", "b1", "b2"),
+        ),
+    )
+    assert not any(
+        neighbor >= split
+        for row in topology_bound[:split]
+        for neighbor in row
+    )
+
+    shared_edge = surface_sample_neighbors(
+        positions=positions,
+        face_count=2,
+        face_sample_offsets=offsets,
+        face_tile_resolutions=resolutions,
+        face_vertex_ids=(
+            ("shared0", "shared1", "a2"),
+            ("shared0", "shared1", "b2"),
+        ),
+    )
+    assert any(
+        neighbor >= split
+        for row in shared_edge[:split]
+        for neighbor in row
+    )

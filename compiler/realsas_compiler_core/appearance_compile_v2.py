@@ -346,7 +346,7 @@ def _candidate_vertex_id(vertex) -> str:
     return str(value)
 
 
-def _surface_sample_geometry(candidate, barycentric: np.ndarray):
+def _candidate_face_geometry_authority(candidate):
     vertices = {
         _candidate_vertex_id(vertex): np.asarray(vertex.P, dtype=np.float64)
         for vertex in candidate.vertices
@@ -355,35 +355,73 @@ def _surface_sample_geometry(candidate, barycentric: np.ndarray):
         _candidate_vertex_id(vertex): str(vertex.component_id)
         for vertex in candidate.vertices
     }
-    positions = []
-    face_indices = []
-    component_ids = []
-    normals = []
-    for face_index, face in enumerate(candidate.faces):
+    face_rows = []
+    face_component_names = []
+    for face in candidate.faces:
         ids = tuple(map(str, face))
         if len(ids) != 3 or any(vertex_id not in vertices for vertex_id in ids):
             raise QualificationError("CAA_CANDIDATE_FACE_INVALID")
         component_set = {components[vertex_id] for vertex_id in ids}
         if len(component_set) != 1:
             raise QualificationError("CAA_FACE_CROSSES_COMPONENT")
+        face_rows.append(ids)
+        face_component_names.append(next(iter(component_set)))
+    component_ids = tuple(sorted(set(face_component_names)))
+    if not component_ids:
+        raise QualificationError("CAA_COMPONENT_SET_EMPTY")
+    component_index = {
+        component_id: index for index, component_id in enumerate(component_ids)
+    }
+    face_component_index = np.asarray(
+        [component_index[value] for value in face_component_names],
+        dtype=np.int32,
+    )
+    return (
+        vertices,
+        tuple(face_rows),
+        face_component_index,
+        component_ids,
+    )
+
+
+def _surface_sample_geometry(candidate, barycentric: np.ndarray):
+    barycentric = np.asarray(barycentric, dtype=np.float64)
+    if barycentric.ndim != 2 or barycentric.shape[1] != 3:
+        raise QualificationError("CAA_BARYCENTRIC_SAMPLE_SHAPE_INVALID")
+    (
+        vertices,
+        face_rows,
+        face_component_index,
+        component_ids,
+    ) = _candidate_face_geometry_authority(candidate)
+    face_count = len(face_rows)
+    per_face = len(barycentric)
+    sample_count = face_count * per_face
+    positions = np.empty((sample_count, 3), dtype=np.float64)
+    face_indices = np.empty((sample_count,), dtype=np.int32)
+    sample_component_index = np.empty((sample_count,), dtype=np.int32)
+    normals = np.empty((face_count, 3), dtype=np.float64)
+
+    for face_index, ids in enumerate(face_rows):
         xyz = np.stack([vertices[vertex_id] for vertex_id in ids], axis=0)
         normal = np.cross(xyz[1] - xyz[0], xyz[2] - xyz[0])
         norm = float(np.linalg.norm(normal))
         if not math.isfinite(norm) or norm <= 1e-12:
             raise QualificationError("CAA_FACE_DEGENERATE_BEFORE_COMPILE")
-        normal = normal / norm
-        sample_xyz = barycentric @ xyz
-        positions.append(sample_xyz)
-        face_indices.extend([face_index] * len(barycentric))
-        component_ids.extend([next(iter(component_set))] * len(barycentric))
-        normals.append(normal)
-    return (
-        np.concatenate(positions, axis=0).astype(np.float64),
-        np.asarray(face_indices, dtype=np.int32),
-        tuple(component_ids),
-        np.asarray(normals, dtype=np.float64),
-    )
+        base = face_index * per_face
+        stop = base + per_face
+        positions[base:stop] = barycentric @ xyz
+        face_indices[base:stop] = face_index
+        sample_component_index[base:stop] = face_component_index[face_index]
+        normals[face_index] = normal / norm
 
+    return (
+        positions,
+        face_indices,
+        sample_component_index,
+        component_ids,
+        normals,
+    )
 
 
 def _surface_sample_geometry_adaptive(
@@ -394,55 +432,52 @@ def _surface_sample_geometry_adaptive(
     if resolutions.shape != (len(candidate.faces),) or np.any(resolutions < 4):
         raise QualificationError("CAA_ADAPTIVE_GEOMETRY_RESOLUTION_INVALID")
     offsets = adaptive_face_sample_offsets(resolutions)
-    vertices = {
-        _candidate_vertex_id(vertex): np.asarray(vertex.P, dtype=np.float64)
-        for vertex in candidate.vertices
-    }
-    components = {
-        _candidate_vertex_id(vertex): str(vertex.component_id)
-        for vertex in candidate.vertices
-    }
-    positions = []
-    barycentric_rows = []
-    face_indices = []
-    component_ids = []
-    normals = []
+    sample_count = int(offsets[-1])
+    (
+        vertices,
+        face_rows,
+        face_component_index,
+        component_ids,
+    ) = _candidate_face_geometry_authority(candidate)
+
+    positions = np.empty((sample_count, 3), dtype=np.float64)
+    all_barycentric = np.empty((sample_count, 3), dtype=np.float64)
+    face_indices = np.empty((sample_count,), dtype=np.int32)
+    sample_component_index = np.empty((sample_count,), dtype=np.int32)
+    normals = np.empty((len(face_rows), 3), dtype=np.float64)
     barycentric_cache: dict[int, np.ndarray] = {}
-    for face_index, face in enumerate(candidate.faces):
-        ids = tuple(map(str, face))
-        if len(ids) != 3 or any(vertex_id not in vertices for vertex_id in ids):
-            raise QualificationError("CAA_CANDIDATE_FACE_INVALID")
-        component_set = {components[vertex_id] for vertex_id in ids}
-        if len(component_set) != 1:
-            raise QualificationError("CAA_FACE_CROSSES_COMPONENT")
+
+    for face_index, ids in enumerate(face_rows):
         xyz = np.stack([vertices[vertex_id] for vertex_id in ids], axis=0)
         normal = np.cross(xyz[1] - xyz[0], xyz[2] - xyz[0])
         norm = float(np.linalg.norm(normal))
         if not math.isfinite(norm) or norm <= 1e-12:
             raise QualificationError("CAA_FACE_DEGENERATE_BEFORE_COMPILE")
-        normal = normal / norm
         resolution = int(resolutions[face_index])
         barycentric = barycentric_cache.get(resolution)
         if barycentric is None:
             barycentric = triangular_barycentric_samples(resolution)
             barycentric_cache[resolution] = barycentric
-        sample_xyz = barycentric @ xyz
-        positions.append(sample_xyz)
-        barycentric_rows.append(barycentric)
-        face_indices.extend([face_index] * len(barycentric))
-        component_ids.extend([next(iter(component_set))] * len(barycentric))
-        normals.append(normal)
 
-    all_positions = np.concatenate(positions, axis=0).astype(np.float64)
-    all_barycentric = np.concatenate(barycentric_rows, axis=0).astype(np.float64)
-    if len(all_positions) != int(offsets[-1]):
-        raise QualificationError("CAA_ADAPTIVE_GEOMETRY_SAMPLE_ACCOUNTING_DRIFT")
+        base = int(offsets[face_index])
+        stop = int(offsets[face_index + 1])
+        if stop - base != len(barycentric):
+            raise QualificationError(
+                "CAA_ADAPTIVE_GEOMETRY_SAMPLE_ACCOUNTING_DRIFT"
+            )
+        positions[base:stop] = barycentric @ xyz
+        all_barycentric[base:stop] = barycentric
+        face_indices[base:stop] = face_index
+        sample_component_index[base:stop] = face_component_index[face_index]
+        normals[face_index] = normal / norm
+
     return (
-        all_positions,
+        positions,
         all_barycentric,
-        np.asarray(face_indices, dtype=np.int32),
-        tuple(component_ids),
-        np.asarray(normals, dtype=np.float64),
+        face_indices,
+        sample_component_index,
+        component_ids,
+        normals,
         offsets,
     )
 

@@ -218,7 +218,7 @@ def test_selective_compile_array_loader_preserves_schema_without_loading_unused_
         sample_component_index=np.zeros((n,), dtype=np.int32),
         direct_valid=np.ones((8, n), dtype=bool),
         direct_rgba=np.zeros((8, n, 4), dtype=np.uint8),
-        direct_pm_linear=np.zeros((8, n, 4), dtype=np.float64),
+        direct_pm_linear_packed=np.zeros((8 * n, 4), dtype=np.float64),
         source_xy=np.zeros((8, n, 2), dtype=np.float32),
         rgba=np.zeros((8, n, 4), dtype=np.uint8),
         provenance=np.zeros((8, n), dtype=np.uint8),
@@ -236,6 +236,7 @@ def test_selective_compile_array_loader_preserves_schema_without_loading_unused_
             **dict(value.metadata),
             "source_xy_storage_dtype": "float32",
             "direct_pm_linear_storage_dtype": "float64",
+            "direct_pm_linear_storage_mode": "PACKED_DIRECT_VALID_VIEW_MAJOR_V1",
         },
         compile_hash="",
     )
@@ -250,9 +251,16 @@ def test_selective_compile_array_loader_preserves_schema_without_loading_unused_
         "face_sample_offsets",
         "face_tile_resolutions",
     }
-    assert "direct_pm_linear" not in arrays
+    assert "direct_pm_linear_packed" not in arrays
     assert "source_xy" not in arrays
     assert arrays["face_sample_offsets"].shape == (4,)
+
+    truth = _load_compile_arrays(
+        value,
+        required_names={"direct_pm_linear_packed"},
+    )
+    assert truth["direct_pm_linear_packed"].shape == (8 * n, 4)
+    assert truth["direct_pm_linear_packed"].dtype == np.float64
 
 
 

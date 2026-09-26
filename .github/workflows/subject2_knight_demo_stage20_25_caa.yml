@@ -194,6 +194,15 @@ jobs:
           assert len(qrows)==1
           qualification=json.loads(Path(qrows[0]["path"]).read_text())
           qmeta=dict(qualification.get("metadata") or {})
+          crows=[
+              x for x in by["21_CAA_COMPILE"]["outputs"]
+              if x["schema"]=="RealSaS.CAACompileArtifactIR.v2"
+          ]
+          assert len(crows)==1
+          compile_artifact=json.loads(Path(crows[0]["path"]).read_text())
+          cmeta=dict(compile_artifact.get("metadata") or {})
+          sample_count_per_direction=int(cmeta["sample_count_per_direction"])
+          assert sample_count_per_direction>0
           assert qmeta["surface_graph_representation"]=="CSR_INT64_OFFSETS_INT32_INDICES_WITH_UNDIRECTED_EDGE_INDEX"
           assert int(qmeta["surface_graph_edge_count"])>0
           assert int(qmeta["surface_graph_storage_bytes"])>0
@@ -208,6 +217,11 @@ jobs:
               "surface_graph_representation":"CSR_INT64_OFFSETS_INT32_INDICES_WITH_UNDIRECTED_EDGE_INDEX",
               "surface_graph_edge_count":int(qmeta["surface_graph_edge_count"]),
               "surface_graph_storage_bytes":int(qmeta["surface_graph_storage_bytes"]),
+              "sample_count_per_direction":sample_count_per_direction,
+              "surface_graph_storage_bytes_per_sample":(
+                  float(qmeta["surface_graph_storage_bytes"])
+                  / float(sample_count_per_direction)
+              ),
               "adaptive_sampling_required":True,
               "topology_bound_cross_face_completion_required":True,
               "bounded_physical_page_transport_required":True,

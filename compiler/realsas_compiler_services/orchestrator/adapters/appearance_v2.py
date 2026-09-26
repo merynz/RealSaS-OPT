@@ -44,6 +44,7 @@ from compiler.realsas_compiler_core.appearance_compile_v2 import (
 from compiler.realsas_compiler_core.appearance_color_v2 import (
     source_sample_roundtrip_pm_error,
 )
+from compiler.realsas_compiler_core.appearance_completion_v2 import surface_sample_neighbors
 from compiler.realsas_compiler_core.appearance_quality_v2 import (
     cross_view_source_compatibility_metrics,
     provenance_boundary_metrics,
@@ -1070,6 +1071,16 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
     if len(candidate.faces) != artifact.face_count:
         raise QualificationError("CAA_QUALIFICATION_FACE_TOPOLOGY_BINDING_DRIFT")
     face_vertex_ids = tuple(tuple(map(str, face)) for face in candidate.faces)
+    quality_graph = surface_sample_neighbors(
+        positions=arrays["sample_positions"],
+        face_count=artifact.face_count,
+        tile_resolution=(
+            None if adaptive_offsets is not None else artifact.tile_resolution
+        ),
+        face_sample_offsets=adaptive_offsets,
+        face_tile_resolutions=adaptive_resolutions,
+        face_vertex_ids=face_vertex_ids,
+    )
 
     holdout = structured_holdout_metrics(
         direct_valid=arrays["direct_valid"],
@@ -1086,6 +1097,7 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         face_sample_offsets=adaptive_offsets,
         face_tile_resolutions=adaptive_resolutions,
         face_vertex_ids=face_vertex_ids,
+        surface_graph=quality_graph,
     )
     seam = provenance_boundary_metrics(
         rgba=arrays["rgba"],
@@ -1098,6 +1110,7 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         face_sample_offsets=adaptive_offsets,
         face_tile_resolutions=adaptive_resolutions,
         face_vertex_ids=face_vertex_ids,
+        surface_graph=quality_graph,
     )
     cross_view = cross_view_source_compatibility_metrics(
         direct_valid=arrays["direct_valid"],
@@ -1265,6 +1278,9 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
             "seam": seam,
             "cross_view_source_compatibility": cross_view,
             "source_pm_roundtrip_max_abs_error": max_source_pm_roundtrip_error,
+            "surface_graph_edge_count": int(quality_graph.edge_count),
+            "surface_graph_storage_bytes": int(quality_graph.storage_nbytes),
+            "surface_graph_representation": "CSR_INT64_OFFSETS_INT32_INDICES_WITH_UNDIRECTED_EDGE_INDEX",
             "policy": policy,
             "totality_does_not_claim_geometry_or_visibility_correctness": True,
         },
@@ -1296,6 +1312,9 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
             "holdout_p95_rgba_l1": holdout["p95_rgba_l1"],
             "seam_p95_rgba_l1": seam["p95_rgba_l1"],
             "seam_p95_gradient_jump": seam["p95_gradient_jump"],
+            "surface_graph_edge_count": int(quality_graph.edge_count),
+            "surface_graph_storage_bytes": int(quality_graph.storage_nbytes),
+            "surface_graph_representation": "CSR_INT64_OFFSETS_INT32_INDICES_WITH_UNDIRECTED_EDGE_INDEX",
             "cross_view_shared_direct_sample_count": cross_view[
                 "shared_direct_sample_count"
             ],

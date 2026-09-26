@@ -1,0 +1,79 @@
+name: subject2-knight-demo-run-snapshot
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_DEMO_RUN_SNAPSHOT_TRIGGER_20260926.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+    steps:
+      - uses: actions/checkout@v4
+      - name: Snapshot exact active ledger and failure diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          failures={}
+          for row in ledger.get("stages",[]):
+              p=root/"artifacts"/row["id"]/"failure_diagnostics.json"
+              if p.is_file():
+                  try:
+                      failures[row["id"]]=json.loads(p.read_text())
+                  except Exception:
+                      failures[row["id"]]={"raw":p.read_text(errors="replace")}
+          payload={
+              "schema":"RealSaS.KnightDemoRunSnapshot.v1",
+              "run_id":os.environ["RUN_ID"],
+              "captured_by_commit":os.environ["GITHUB_SHA"],
+              "ledger_status":{
+                  "failed_count":ledger.get("failed_count"),
+                  "failed_stage_ids":ledger.get("failed_stage_ids"),
+                  "current_stage":ledger.get("current_stage"),
+                  "execution_class":ledger.get("execution_class"),
+              },
+              "stages":[
+                  {
+                      "ordinal":row.get("ordinal"),
+                      "id":row.get("id"),
+                      "status":row.get("status"),
+                      "blockers":row.get("blockers") or [],
+                      "diagnostics_hash":row.get("diagnostics_hash") or "",
+                      "output_schemas":[x.get("schema") for x in row.get("outputs",[])],
+                  }
+                  for row in ledger.get("stages",[])
+              ],
+              "failure_diagnostics":failures,
+              "history_tail":(ledger.get("history") or [])[-64:],
+          }
+          out=Path("canonical/KNIGHT_DEMO_LIVE_RUN_SNAPSHOT_20260926.json")
+          out.write_text(json.dumps(payload,indent=2,sort_keys=True)+"\n")
+          print(json.dumps(payload["ledger_status"],sort_keys=True))
+          PY
+      - name: Commit snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_DEMO_LIVE_RUN_SNAPSHOT_20260926.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'demo: snapshot Knight active run ledger'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

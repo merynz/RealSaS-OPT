@@ -16,6 +16,7 @@ from compiler.realsas_compiler_core.output_presentation_v1 import (
     output_direction_set_from_dict,
 )
 from compiler.realsas_compiler_core.appearance_render_v2 import (
+    load_face_page_index,
     load_face_uv,
     load_provenance_atlas,
 )
@@ -181,6 +182,7 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
     ):
         raise QualificationError("PRESENTATION_V2_CAA_PROVENANCE_BYTES_DRIFT")
     face_uv = load_face_uv(asset)
+    face_page_index = load_face_page_index(asset)
     provenance = load_provenance_atlas(asset)
     with np.load(provenance_path, allow_pickle=False) as lineage_data:
         if "source_view" not in lineage_data.files:
@@ -215,13 +217,33 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
         )
     textures = {}
     for row in asset.textures:
-        path = resolved_path(row.transport_png_path)
-        if not path.is_file() or sha256_file(path) != row.transport_png_sha256:
-            raise QualificationError("PRESENTATION_V2_CAA_TEXTURE_BYTES_DRIFT")
-        textures[int(row.direction_index)] = np.asarray(
-            Image.open(path).convert("RGBA"),
-            dtype=np.uint8,
+        metadata = dict(row.metadata or {})
+        page_rows = tuple(metadata.get("pages") or ())
+        if not page_rows:
+            page_rows = ({
+                "page_index": 0,
+                "path": row.transport_png_path,
+                "sha256": row.transport_png_sha256,
+            },)
+        ordered = tuple(
+            sorted((dict(item) for item in page_rows), key=lambda item: int(item["page_index"]))
         )
+        if tuple(int(item["page_index"]) for item in ordered) != tuple(range(len(ordered))):
+            raise QualificationError("PRESENTATION_V2_CAA_TEXTURE_PAGE_INDEX_DRIFT")
+        pages = []
+        for item in ordered:
+            path = resolved_path(str(item["path"]))
+            if not path.is_file() or sha256_file(path) != str(item["sha256"]):
+                raise QualificationError("PRESENTATION_V2_CAA_TEXTURE_BYTES_DRIFT")
+            pages.append(np.asarray(Image.open(path).convert("RGBA"), dtype=np.uint8))
+        if bool(metadata.get("paged_atlas")):
+            if len({page.shape for page in pages}) != 1:
+                raise QualificationError("PRESENTATION_V2_CAA_TEXTURE_PAGE_SHAPE_DRIFT")
+            textures[int(row.direction_index)] = np.stack(pages, axis=0)
+        else:
+            if len(pages) != 1:
+                raise QualificationError("PRESENTATION_V2_CAA_LEGACY_MULTIPAGE_DRIFT")
+            textures[int(row.direction_index)] = pages[0]
 
     evidence = build_presentation_partition_evidence(
         mesh=mesh,
@@ -231,6 +253,7 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
         textures_by_direction=textures,
         provenance_by_direction=provenance,
         policy=policy,
+        face_page_index=face_page_index,
     )
     structure = build_presentation_structure_v2(
         skeleton=skeleton,

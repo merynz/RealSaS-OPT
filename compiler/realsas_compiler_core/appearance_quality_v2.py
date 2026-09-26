@@ -477,9 +477,15 @@ def cross_view_source_compatibility_metrics(
 
     pair_rows = []
     component_rows = []
-    all_error_chunks: list[np.ndarray] = []
-    all_alpha_chunks: list[np.ndarray] = []
     component_ids = np.unique(component).astype(np.int32, copy=False)
+    pair_shared_counts = [
+        int(np.count_nonzero(valid[left] & valid[(left + 1) % 8]))
+        for left in range(8)
+    ]
+    total_shared = int(sum(pair_shared_counts))
+    values = np.empty((total_shared,), dtype=np.float64)
+    alpha_values = np.empty((total_shared,), dtype=np.float64)
+    global_cursor = 0
 
     for left in range(8):
         right = (left + 1) % 8
@@ -496,10 +502,21 @@ def cross_view_source_compatibility_metrics(
             ) / 255.0
             errors = np.asarray(errors, dtype=np.float64)
             alpha = np.asarray(alpha, dtype=np.float64)
-            all_error_chunks.append(errors)
-            all_alpha_chunks.append(alpha)
+            expected_count = pair_shared_counts[left]
+            if len(errors) != expected_count or len(alpha) != expected_count:
+                raise QualificationError(
+                    "CAA_CROSS_VIEW_SHARED_COUNT_ACCOUNTING_DRIFT"
+                )
+            stop = global_cursor + expected_count
+            values[global_cursor:stop] = errors
+            alpha_values[global_cursor:stop] = alpha
+            global_cursor = stop
             shared_component = component[indices]
         else:
+            if pair_shared_counts[left] != 0:
+                raise QualificationError(
+                    "CAA_CROSS_VIEW_EMPTY_PAIR_COUNT_DRIFT"
+                )
             errors = np.empty((0,), dtype=np.float64)
             alpha = np.empty((0,), dtype=np.float64)
             shared_component = np.empty((0,), dtype=np.int32)
@@ -530,16 +547,8 @@ def cross_view_source_compatibility_metrics(
                 }
             )
 
-    values = (
-        np.concatenate(all_error_chunks)
-        if all_error_chunks
-        else np.empty((0,), dtype=np.float64)
-    )
-    alpha_values = (
-        np.concatenate(all_alpha_chunks)
-        if all_alpha_chunks
-        else np.empty((0,), dtype=np.float64)
-    )
+    if global_cursor != total_shared:
+        raise QualificationError("CAA_CROSS_VIEW_GLOBAL_ACCOUNTING_DRIFT")
     return {
         "mode": "ADJACENT_8VIEW_SHARED_CANONICAL_DIRECT_SOURCE_V2",
         "pair_count": 8,

@@ -147,6 +147,134 @@ def face_paged_uv_array(layout: Mapping[str, int]) -> tuple[np.ndarray, np.ndarr
             uv[face_index, corner, 1] = float(y / height)
     return uv, page_index
 
+
+def adaptive_face_atlas_plan(
+    face_tile_resolutions: np.ndarray,
+    *,
+    bleed_px: int,
+    max_page_resolution: int,
+) -> dict:
+    """Deterministically pack mixed-resolution triangular face tiles.
+
+    Packing order is decreasing tile stride with face index as the exact tie
+    break. The returned UV/page addressing is complete runtime authority; the
+    per-face resolution remains compile/bake evidence and never changes source
+    art or the qualified mesh.
+    """
+    resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+    if resolutions.ndim != 1 or len(resolutions) <= 0 or np.any(resolutions < 4):
+        raise QualificationError("CAA_ADAPTIVE_ATLAS_RESOLUTION_INVALID")
+    bleed = int(bleed_px)
+    page_size = int(max_page_resolution)
+    if bleed < 1 or page_size < 1:
+        raise QualificationError("CAA_ADAPTIVE_ATLAS_POLICY_INVALID")
+
+    tiles = [
+        (int(resolution) + 2 * bleed, int(face_index), int(resolution))
+        for face_index, resolution in enumerate(resolutions)
+    ]
+    tiles.sort(key=lambda row: (-row[0], row[1]))
+    page = 0
+    x = 0
+    y = 0
+    row_height = 0
+    placements: list[tuple[int, int, int, int, int, int]] = []
+    for stride, face_index, resolution in tiles:
+        if stride > page_size:
+            raise QualificationError("CAA_ADAPTIVE_ATLAS_TILE_EXCEEDS_PAGE")
+        if x + stride > page_size:
+            x = 0
+            y += row_height
+            row_height = 0
+        if y + stride > page_size:
+            page += 1
+            x = 0
+            y = 0
+            row_height = 0
+        placements.append((face_index, page, x, y, stride, resolution))
+        x += stride
+        row_height = max(row_height, stride)
+
+    face_count = len(resolutions)
+    page_index = np.zeros((face_count,), dtype=np.int32)
+    tile_x = np.zeros((face_count,), dtype=np.int32)
+    tile_y = np.zeros((face_count,), dtype=np.int32)
+    tile_stride = np.zeros((face_count,), dtype=np.int32)
+    uv = np.zeros((face_count, 3, 2), dtype=np.float64)
+    placement_rows = []
+    for face_index, page_index_value, x0, y0, stride, resolution in placements:
+        page_index[face_index] = int(page_index_value)
+        tile_x[face_index] = int(x0)
+        tile_y[face_index] = int(y0)
+        tile_stride[face_index] = int(stride)
+        points = (
+            (x0 + bleed + 0.5, y0 + bleed + 0.5),
+            (x0 + bleed + resolution - 0.5, y0 + bleed + 0.5),
+            (x0 + bleed + 0.5, y0 + bleed + resolution - 0.5),
+        )
+        for corner, (px, py) in enumerate(points):
+            uv[face_index, corner, 0] = float(px / float(page_size))
+            uv[face_index, corner, 1] = float(py / float(page_size))
+        placement_rows.append(
+            {
+                "face_index": int(face_index),
+                "page_index": int(page_index_value),
+                "x": int(x0),
+                "y": int(y0),
+                "stride": int(stride),
+                "tile_resolution": int(resolution),
+            }
+        )
+
+    page_count = 1 + int(np.max(page_index, initial=0))
+    histogram = {
+        str(int(resolution)): int(np.count_nonzero(resolutions == int(resolution)))
+        for resolution in sorted(set(map(int, resolutions.tolist())))
+    }
+    total_tile_area = int(np.sum(tile_stride.astype(np.int64) ** 2))
+    layout = {
+        "layout": "UNIQUE_FACE_BARYCENTRIC_ADAPTIVE_PAGED_V1",
+        "face_count": int(face_count),
+        "bleed_px": bleed,
+        "page_width": page_size,
+        "page_height": page_size,
+        "page_count": int(page_count),
+        "maximum_tile_resolution": int(np.max(resolutions)),
+        "minimum_tile_resolution": int(np.min(resolutions)),
+        "selected_resolution_histogram": histogram,
+        "total_allocated_tile_area_texels": total_tile_area,
+        "packing_efficiency_vs_page_area": float(
+            total_tile_area / float(page_count * page_size * page_size)
+        ),
+        "placement_hash": content_sha256(placement_rows),
+        "uv_origin": "TOP_LEFT",
+        "sampling": "BILINEAR_PREMULTIPLIED_INTERNAL",
+        "paging": "PER_FACE_RESOLUTION_FIXED_PHYSICAL_PAGES_V1",
+    }
+    return {
+        "layout": layout,
+        "face_uv": uv,
+        "face_page_index": page_index,
+        "face_tile_x": tile_x,
+        "face_tile_y": tile_y,
+        "face_tile_stride": tile_stride,
+        "face_tile_resolution": resolutions.copy(),
+    }
+
+
+def adaptive_face_sample_offsets(face_tile_resolutions: np.ndarray) -> np.ndarray:
+    resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+    if resolutions.ndim != 1 or len(resolutions) <= 0 or np.any(resolutions < 4):
+        raise QualificationError("CAA_ADAPTIVE_SAMPLE_RESOLUTION_INVALID")
+    counts = (
+        resolutions.astype(np.int64)
+        * (resolutions.astype(np.int64) + 1)
+        // 2
+    )
+    offsets = np.zeros((len(resolutions) + 1,), dtype=np.int64)
+    offsets[1:] = np.cumsum(counts, dtype=np.int64)
+    return offsets
+
 def face_uv_array(layout: Mapping[str, int]) -> np.ndarray:
     faces = int(layout["face_count"])
     resolution = int(layout["tile_resolution"])
@@ -256,6 +384,67 @@ def _surface_sample_geometry(candidate, barycentric: np.ndarray):
         np.asarray(normals, dtype=np.float64),
     )
 
+
+
+def _surface_sample_geometry_adaptive(
+    candidate,
+    face_tile_resolutions: np.ndarray,
+):
+    resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+    if resolutions.shape != (len(candidate.faces),) or np.any(resolutions < 4):
+        raise QualificationError("CAA_ADAPTIVE_GEOMETRY_RESOLUTION_INVALID")
+    offsets = adaptive_face_sample_offsets(resolutions)
+    vertices = {
+        _candidate_vertex_id(vertex): np.asarray(vertex.P, dtype=np.float64)
+        for vertex in candidate.vertices
+    }
+    components = {
+        _candidate_vertex_id(vertex): str(vertex.component_id)
+        for vertex in candidate.vertices
+    }
+    positions = []
+    barycentric_rows = []
+    face_indices = []
+    component_ids = []
+    normals = []
+    barycentric_cache: dict[int, np.ndarray] = {}
+    for face_index, face in enumerate(candidate.faces):
+        ids = tuple(map(str, face))
+        if len(ids) != 3 or any(vertex_id not in vertices for vertex_id in ids):
+            raise QualificationError("CAA_CANDIDATE_FACE_INVALID")
+        component_set = {components[vertex_id] for vertex_id in ids}
+        if len(component_set) != 1:
+            raise QualificationError("CAA_FACE_CROSSES_COMPONENT")
+        xyz = np.stack([vertices[vertex_id] for vertex_id in ids], axis=0)
+        normal = np.cross(xyz[1] - xyz[0], xyz[2] - xyz[0])
+        norm = float(np.linalg.norm(normal))
+        if not math.isfinite(norm) or norm <= 1e-12:
+            raise QualificationError("CAA_FACE_DEGENERATE_BEFORE_COMPILE")
+        normal = normal / norm
+        resolution = int(resolutions[face_index])
+        barycentric = barycentric_cache.get(resolution)
+        if barycentric is None:
+            barycentric = triangular_barycentric_samples(resolution)
+            barycentric_cache[resolution] = barycentric
+        sample_xyz = barycentric @ xyz
+        positions.append(sample_xyz)
+        barycentric_rows.append(barycentric)
+        face_indices.extend([face_index] * len(barycentric))
+        component_ids.extend([next(iter(component_set))] * len(barycentric))
+        normals.append(normal)
+
+    all_positions = np.concatenate(positions, axis=0).astype(np.float64)
+    all_barycentric = np.concatenate(barycentric_rows, axis=0).astype(np.float64)
+    if len(all_positions) != int(offsets[-1]):
+        raise QualificationError("CAA_ADAPTIVE_GEOMETRY_SAMPLE_ACCOUNTING_DRIFT")
+    return (
+        all_positions,
+        all_barycentric,
+        np.asarray(face_indices, dtype=np.int32),
+        tuple(component_ids),
+        np.asarray(normals, dtype=np.float64),
+        offsets,
+    )
 
 def projected_tile_resolution_evidence(
     *,

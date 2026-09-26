@@ -69,7 +69,8 @@ jobs:
             echo "TAIL_WAITING_FOR_ARACHNE_STAGE33=1"
             exit 0
           fi
-          python - <<'PY'
+          rc=0
+          python - <<'PY' || rc=$?
           import json,os
           from pathlib import Path
           caa=json.loads(Path("canonical/KNIGHT_DEMO_CAA_STAGE25_RECEIPT_20260925.json").read_text())
@@ -78,6 +79,17 @@ jobs:
           assert caa["status"]=="PASS_DEMO_ONLY"
           assert caa["run_id"]==os.environ["RUN_ID"]
           assert caa["completed_through_stage"]==25
+          if (
+              caa.get("caa_production_semantic_version")
+              != "PER_FACE_ADAPTIVE_TOPOLOGY_BOUND_PAGED_V1"
+          ):
+              print("TAIL_WAITING_FOR_LATEST_CAA_SEMANTIC_RECEIPT=1")
+              raise SystemExit(75)
+          assert caa["adaptive_sampling_required"] is True
+          assert caa["topology_bound_cross_face_completion_required"] is True
+          assert caa["bounded_physical_page_transport_required"] is True
+          assert caa["quality_thresholds_changed"] is False
+          assert caa["source_art_mutated"] is False
           assert caa["product_authority_claimed"] is False
           assert ara["schema"]=="RealSaS.KnightDemoArachneStage33V6Receipt.v1"
           assert ara["status"]=="PASS_DEMO_ONLY"
@@ -87,6 +99,11 @@ jobs:
           assert ara["product_authority_claimed"] is False
           print("KNIGHT_TAIL_PREREQUISITE_RECEIPTS_PASS")
           PY
+          if test "$rc" -eq 75; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if test "$rc" -ne 0; then exit "$rc"; fi
           echo "ready=true" >> "$GITHUB_OUTPUT"
 
       - name: Verify current run-root authority through Stage33

@@ -128,7 +128,12 @@ def test_native_v2_paged_rss_matches_python_reference_byte_exact(tmp_path: Path)
     provenance = np.zeros((8, 2, 16, 16), dtype=np.uint8)
     source_view = np.zeros((8, 2, 16, 16), dtype=np.int16)
     for vi in range(8):
-        source_view[vi, :, :, :] = vi
+        # Page 0 is exact direct-source evidence. Page 1 deliberately carries
+        # OTHER_VIEW_SOURCE from a different donor so the native test proves
+        # source-view lineage indexing includes the physical page dimension.
+        source_view[vi, 0, :, :] = vi
+        provenance[vi, 1, :, :] = 1
+        source_view[vi, 1, :, :] = (vi + 1) % 8
     provenance_npz = tmp_path / "provenance.npz"
     np.savez_compressed(
         provenance_npz,
@@ -185,6 +190,7 @@ def test_native_v2_paged_rss_matches_python_reference_byte_exact(tmp_path: Path)
     native_rgba = tmp_path / "native.rgba"
     native_prov = tmp_path / "native.prov"
     native_owner = tmp_path / "native.owner"
+    native_source_view = tmp_path / "native.source_view"
     proc = subprocess.run(
         [
             str(player),
@@ -201,6 +207,8 @@ def test_native_v2_paged_rss_matches_python_reference_byte_exact(tmp_path: Path)
             str(native_prov),
             "--out-owner",
             str(native_owner),
+            "--out-source-view",
+            str(native_source_view),
         ],
         check=False,
         text=True,
@@ -251,8 +259,14 @@ def test_native_v2_paged_rss_matches_python_reference_byte_exact(tmp_path: Path)
         native_owner.read_bytes(),
         dtype="<i4",
     ).reshape(32, 32)
+    native_sv = np.frombuffer(
+        native_source_view.read_bytes(),
+        dtype="<i2",
+    ).reshape(32, 32)
     assert np.array_equal(native, reference.straight_rgba_u8)
     assert np.array_equal(native_p, reference.provenance_code)
     assert np.array_equal(native_o, reference.owner_face_index)
     center = tuple(map(int, native[16, 16]))
     assert center == (20, 220, 40, 255)
+    assert int(native_p[16, 16]) == 1
+    assert int(native_sv[16, 16]) == 1

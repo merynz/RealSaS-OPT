@@ -1,0 +1,98 @@
+{
+  "schema": "RealSaS.KnightArachneV5DemoTransferPreregistration.v2",
+  "status": "FROZEN_BEFORE_KNIGHT_ARACHNE_OPTIMIZER_STEP_1",
+  "execution_class": "DEMO_WITNESS",
+  "claim_boundary": "KNIGHT_SINGLE_SUBJECT_SKIN_ONLY__NO_PRODUCT_AUTHORITY__NO_FAMILY_GENERALIZATION",
+  "architecture_id": "RealSaS.Arachne.A1.MinimalK4DirectSimplex.v5",
+  "supersedes": "RealSaS.KnightArachneV5DemoTransferPreregistration.v1",
+  "correction_reason": {
+    "class": "EXECUTION_APPARATUS_BUGFIX__NO_GATE_RELAXATION",
+    "observed_failed_run_status": "NO_TERMINAL_CLOSURE",
+    "observed_trace_rows": 33,
+    "observed_final_step": 8192,
+    "diagnosed_mismatch": [
+      "KNIGHT_RUNNER_OMITTED_SEALED_FIT2_DICE_TERM",
+      "KNIGHT_RUNNER_OMITTED_SEALED_FIT2_BLEND_BOUNDARY_TERM",
+      "KNIGHT_RUNNER_DOWNWEIGHTED_CATEGORICAL_CE_BY_10X",
+      "KNIGHT_RUNNER_USED_BACKBONE_LR_1E-5_INSTEAD_OF_SEALED_FIT2_5E-5",
+      "KNIGHT_RUNNER_USED_DECODER_LR_5E-5_INSTEAD_OF_SEALED_FIT2_3E-4",
+      "KNIGHT_RUNNER_HALVED_MAX_STEPS_16384_TO_8192",
+      "KNIGHT_RUNNER_CHANGED_SEALED_FIT2_LR_SCHEDULE"
+    ],
+    "acceptance_gates_changed": false
+  },
+  "initialization": {
+    "mode": "TRANSFER_INITIALIZATION_FROM_SEALED_MAGE_FIT2_V5",
+    "checkpoint_sha256": "8749843ee673f5c4b84b5d58a6285bd108e9867af5d87bd4afcf2a5e64d98353",
+    "checkpoint_role": "INITIALIZATION_ONLY__NO_KNIGHT_TEACHER_CONTENT",
+    "historical_checkpoint_loaded": true,
+    "serialization_mode": "SPLIT_BACKBONE_DECODER",
+    "zero_shot_evaluation_before_optimizer": true
+  },
+  "bindings": {
+    "rigging_surface_lineage_hash": "452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a",
+    "rigging_surface_node_count": 12090,
+    "rigging_surface_edge_count": 36469,
+    "qualified_skeleton_lineage_hash": "c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce",
+    "qualified_skeleton_joint_count": 28,
+    "teacher_bank_sha256": "26b6891ff81b9bfc3405461394159547fa76b417852a44518425b4e1de7e67d3",
+    "source_fbx_sha256": "b25e35cc7eaaa3c7c103f10a4f41fde1cbd81936fede9aa9ae4efbd29d40ba1b"
+  },
+  "teacher_boundary": "OBJECTIVE_AND_EVALUATION_ONLY__NEVER_PREDICTOR_INPUT",
+  "teacher_projection": {
+    "rule": "EXACT_SOURCE_TRIANGLE_CLOSEST_POINT_BARYCENTRIC_WITH_COMPONENT_MECHANICAL_ATTACHMENT",
+    "clean_distance_over_source_bbox_diag_max": 0.05,
+    "clean_row_count": 10611,
+    "surface_row_count": 12090,
+    "coverage": 0.8776674937965261,
+    "coverage_semantics": "TEACHER_OBJECTIVE_AND_EVALUATION_MASK_ONLY__NOT_PRODUCT_GEOMETRY_GATE",
+    "free_running_prediction_required_for_all_surface_rows": true
+  },
+  "training": {
+    "apparatus_id": "KNIGHT_ARACHNE_V5_TRANSFER_SEALED_FIT2_OBJECTIVE_V2",
+    "seed": 20260925,
+    "max_steps": 16384,
+    "check_every_steps": 256,
+    "stable_consecutive_full_passes_required": 3,
+    "minimum_finetune_gate_step": 2048,
+    "progress_every_steps": 1024,
+    "rows_per_step": 384,
+    "backbone_lr": 0.00005,
+    "decoder_lr": 0.0003,
+    "backbone_warmup_steps": 512,
+    "backbone_lr_floor_ratio": 0.1,
+    "decoder_lr_floor_ratio": 0.03,
+    "weight_decay": 0.0001,
+    "grad_clip_norm": 1,
+    "amp_dtype": "BFLOAT16_ON_SUPPORTED_CUDA",
+    "direct_simplex_loss": {
+      "categorical_ce_weight": 1,
+      "mse_weight": 0.1,
+      "dice_weight": 1,
+      "normalized_row_l1_weight": 1,
+      "hard_tail_cvar10_weight": 0.5,
+      "blend_boundary_l1_weight": 0.5,
+      "articulated_deformation_ratio_weight": 0.25
+    },
+    "lineage": "RESTORE_SEALED_MAGE_FIT2_V5_DIRECT_LOSS_AND_OPTIMIZER_APPARATUS__TRANSFER_INIT_ONLY"
+  },
+  "science_gate": {
+    "row_l1_p95_max": 0.05,
+    "legacy_deformation_ratio_max": 0.05,
+    "articulated_deformation_ratio_max": 0.05,
+    "compiler_total_correction_l1_max": 0.0001,
+    "compiler_max_row_correction_l1": 0.00001,
+    "compiler_row_count_required": 12090,
+    "finite_required": true,
+    "simplex_max_abs_residual_max": 0.000001,
+    "changed_from_v1": false
+  },
+  "output_policy": {
+    "compiler_qualification_required": true,
+    "float64_row_sum_canonicalization_before_compiler": true,
+    "product_authority_claimed": false,
+    "generalization_claimed": false,
+    "mesh_pass_claimed": false,
+    "motion_pass_claimed": false
+  }
+}

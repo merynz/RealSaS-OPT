@@ -7,10 +7,12 @@
 #include <iostream>
 #include <limits>
 #include <map>
+#include <png.h>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <zlib.h>
 
 namespace {
 
@@ -151,14 +153,39 @@ Mesh parse_mesh(const std::vector<std::uint8_t>& data) {
 }
 
 struct TextureSet {
-    std::uint32_t views{}, height{}, width{};
+    std::uint32_t views{}, pages{1}, height{}, width{};
     std::vector<std::uint8_t> rgba;
 };
+
+std::vector<std::uint8_t> decode_png_rgba(
+    const std::vector<std::uint8_t>& payload,
+    std::uint32_t expected_w,
+    std::uint32_t expected_h
+) {
+    png_image image{};
+    image.version = PNG_IMAGE_VERSION;
+    if (!png_image_begin_read_from_memory(&image, payload.data(), payload.size()))
+        throw std::runtime_error("PNG_HEADER_DECODE_FAIL");
+    image.format = PNG_FORMAT_RGBA;
+    if (image.width != expected_w || image.height != expected_h) {
+        png_image_free(&image);
+        throw std::runtime_error("PNG_DIMENSION_DRIFT");
+    }
+    std::vector<std::uint8_t> out(PNG_IMAGE_SIZE(image));
+    if (!png_image_finish_read(&image, nullptr, out.data(), 0, nullptr)) {
+        const std::string message = image.message;
+        png_image_free(&image);
+        throw std::runtime_error("PNG_DECODE_FAIL:" + message);
+    }
+    png_image_free(&image);
+    return out;
+}
 
 TextureSet parse_textures(const std::vector<std::uint8_t>& data) {
     std::size_t off = 0;
     TextureSet t;
     t.views = read_scalar<std::uint32_t>(data, off);
+    t.pages = 1;
     t.height = read_scalar<std::uint32_t>(data, off);
     t.width = read_scalar<std::uint32_t>(data, off);
     const auto need = static_cast<std::size_t>(t.views) * t.height * t.width * 4u;
@@ -167,16 +194,64 @@ TextureSet parse_textures(const std::vector<std::uint8_t>& data) {
     return t;
 }
 
+TextureSet parse_paged_textures(
+    const Entries& entries,
+    const std::unordered_map<std::string, std::string>& manifest
+) {
+    TextureSet t;
+    t.views = static_cast<std::uint32_t>(std::stoul(manifest.at("view_count")));
+    t.pages = static_cast<std::uint32_t>(std::stoul(manifest.at("atlas_page_count")));
+    t.height = static_cast<std::uint32_t>(std::stoul(manifest.at("atlas_page_height")));
+    t.width = static_cast<std::uint32_t>(std::stoul(manifest.at("atlas_page_width")));
+    if (t.views != 8 || t.pages == 0 || t.height == 0 || t.width == 0)
+        throw std::runtime_error("PAGED_TEXTURE_DIMENSION_INVALID");
+    const auto page_bytes = static_cast<std::size_t>(t.height) * t.width * 4u;
+    t.rgba.resize(static_cast<std::size_t>(t.views) * t.pages * page_bytes);
+    for (std::uint32_t view = 0; view < t.views; ++view) {
+        for (std::uint32_t page = 0; page < t.pages; ++page) {
+            const auto key =
+                "texture." + std::to_string(view) + "." + std::to_string(page) + ".entry";
+            const auto entry_name = manifest.at(key);
+            const auto it = entries.find(entry_name);
+            if (it == entries.end()) throw std::runtime_error("PAGED_TEXTURE_ENTRY_MISSING");
+            const auto decoded = decode_png_rgba(it->second, t.width, t.height);
+            if (decoded.size() != page_bytes) throw std::runtime_error("PAGED_TEXTURE_DECODE_SIZE_DRIFT");
+            const auto offset =
+                (static_cast<std::size_t>(view) * t.pages + page) * page_bytes;
+            std::copy(decoded.begin(), decoded.end(), t.rgba.begin() + static_cast<std::ptrdiff_t>(offset));
+        }
+    }
+    return t;
+}
+
 struct ProvenanceSet {
-    std::uint32_t views{}, height{}, width{};
+    std::uint32_t views{}, pages{1}, height{}, width{};
     std::vector<std::uint8_t> value;
     std::vector<std::int16_t> source_view;
 };
+
+void validate_provenance(const ProvenanceSet& p) {
+    const auto count =
+        static_cast<std::size_t>(p.views) * p.pages * p.height * p.width;
+    if (p.value.size() != count || p.source_view.size() != count)
+        throw std::runtime_error("PROVENANCE_CARDINALITY_DRIFT");
+    constexpr auto padding = std::numeric_limits<std::int16_t>::min();
+    for (std::size_t i = 0; i < count; ++i) {
+        const auto donor = p.source_view[i];
+        const bool donor_valid = (donor >= 0 && donor < 8) || donor == -2;
+        if (p.value[i] == 255) {
+            if (donor != padding) throw std::runtime_error("SOURCE_VIEW_PADDING_DRIFT");
+        } else if (!donor_valid) {
+            throw std::runtime_error("SOURCE_VIEW_IDENTITY_INVALID");
+        }
+    }
+}
 
 ProvenanceSet parse_provenance(const std::vector<std::uint8_t>& data) {
     std::size_t off = 0;
     ProvenanceSet p;
     p.views = read_scalar<std::uint32_t>(data, off);
+    p.pages = 1;
     p.height = read_scalar<std::uint32_t>(data, off);
     p.width = read_scalar<std::uint32_t>(data, off);
     const auto count = static_cast<std::size_t>(p.views) * p.height * p.width;
@@ -188,21 +263,62 @@ ProvenanceSet parse_provenance(const std::vector<std::uint8_t>& data) {
     );
     off += count;
     p.source_view.resize(count);
-    for(auto& value : p.source_view) {
-        value = read_scalar<std::int16_t>(data, off);
-    }
-    if(off != data.size()) throw std::runtime_error("PROVENANCE_BYTES_TRAILING");
-    constexpr auto padding = std::numeric_limits<std::int16_t>::min();
-    for(std::size_t i=0;i<count;++i) {
-        const auto donor=p.source_view[i];
-        const bool donor_valid=(donor>=0&&donor<8)||donor==-2;
-        if(p.value[i]==255) {
-            if(donor!=padding) throw std::runtime_error("SOURCE_VIEW_PADDING_DRIFT");
-        } else if(!donor_valid) {
-            throw std::runtime_error("SOURCE_VIEW_IDENTITY_INVALID");
-        }
-    }
+    for (auto& value : p.source_view) value = read_scalar<std::int16_t>(data, off);
+    if (off != data.size()) throw std::runtime_error("PROVENANCE_BYTES_TRAILING");
+    validate_provenance(p);
     return p;
+}
+
+ProvenanceSet parse_paged_provenance(const std::vector<std::uint8_t>& data) {
+    std::size_t off = 0;
+    ProvenanceSet p;
+    p.views = read_scalar<std::uint32_t>(data, off);
+    p.pages = read_scalar<std::uint32_t>(data, off);
+    p.height = read_scalar<std::uint32_t>(data, off);
+    p.width = read_scalar<std::uint32_t>(data, off);
+    const auto uncompressed_bytes = read_scalar<std::uint64_t>(data, off);
+    const auto count =
+        static_cast<std::size_t>(p.views) * p.pages * p.height * p.width;
+    const auto expected = count + count * sizeof(std::int16_t);
+    if (uncompressed_bytes != expected) throw std::runtime_error("PAGED_PROVENANCE_SIZE_HEADER_DRIFT");
+    std::vector<std::uint8_t> raw(expected);
+    uLongf dest_len = static_cast<uLongf>(raw.size());
+    const auto* source = reinterpret_cast<const Bytef*>(data.data() + off);
+    const auto source_len = static_cast<uLong>(data.size() - off);
+    const int rc = uncompress(
+        reinterpret_cast<Bytef*>(raw.data()),
+        &dest_len,
+        source,
+        source_len
+    );
+    if (rc != Z_OK || dest_len != raw.size())
+        throw std::runtime_error("PAGED_PROVENANCE_ZLIB_DECODE_FAIL");
+    p.value.assign(raw.begin(), raw.begin() + static_cast<std::ptrdiff_t>(count));
+    p.source_view.resize(count);
+    std::memcpy(
+        p.source_view.data(),
+        raw.data() + count,
+        count * sizeof(std::int16_t)
+    );
+    validate_provenance(p);
+    return p;
+}
+
+std::vector<std::uint32_t> parse_face_pages(
+    const std::vector<std::uint8_t>& data,
+    std::uint32_t expected_faces,
+    std::uint32_t page_count
+) {
+    std::size_t off = 0;
+    const auto count = read_scalar<std::uint32_t>(data, off);
+    if (count != expected_faces) throw std::runtime_error("FACE_PAGE_COUNT_DRIFT");
+    std::vector<std::uint32_t> pages(count);
+    for (auto& page : pages) {
+        page = read_scalar<std::uint32_t>(data, off);
+        if (page >= page_count) throw std::runtime_error("FACE_PAGE_OUT_OF_RANGE");
+    }
+    if (off != data.size()) throw std::runtime_error("FACE_PAGE_BYTES_TRAILING");
+    return pages;
 }
 
 struct Clip {
@@ -278,10 +394,10 @@ double linear_to_srgb(double x) {
     return 1.055*std::pow(x,1.0/2.4)-0.055;
 }
 
-PM texel_pm(const TextureSet& t, std::uint32_t view, int x, int y) {
+PM texel_pm(const TextureSet& t, std::uint32_t view, std::uint32_t page, int x, int y) {
     x=std::max(0,std::min(x,static_cast<int>(t.width)-1));
     y=std::max(0,std::min(y,static_cast<int>(t.height)-1));
-    const auto idx=((((static_cast<std::size_t>(view)*t.height)+static_cast<std::size_t>(y))*t.width)+static_cast<std::size_t>(x))*4u;
+    const auto idx=(((((static_cast<std::size_t>(view)*t.pages)+page)*t.height+static_cast<std::size_t>(y))*t.width)+static_cast<std::size_t>(x))*4u;
     const double a=static_cast<double>(t.rgba[idx+3])/255.0;
     return {srgb_to_linear(static_cast<double>(t.rgba[idx])/255.0)*a,
             srgb_to_linear(static_cast<double>(t.rgba[idx+1])/255.0)*a,
@@ -290,22 +406,22 @@ PM texel_pm(const TextureSet& t, std::uint32_t view, int x, int y) {
 PM mix(const PM& a,const PM& b,double t) {
     return {a.r+(b.r-a.r)*t,a.g+(b.g-a.g)*t,a.b+(b.b-a.b)*t,a.a+(b.a-a.a)*t};
 }
-PM sample_pm(const TextureSet& t,std::uint32_t view,double u,double v) {
+PM sample_pm(const TextureSet& t,std::uint32_t view,std::uint32_t page,double u,double v) {
     u=std::max(0.0,std::min(1.0,u)); v=std::max(0.0,std::min(1.0,v));
     const double x=u*static_cast<double>(t.width-1), y=v*static_cast<double>(t.height-1);
     const int x0=static_cast<int>(std::floor(x)), y0=static_cast<int>(std::floor(y));
     const int x1=std::min(x0+1,static_cast<int>(t.width)-1), y1=std::min(y0+1,static_cast<int>(t.height)-1);
     const double tx=x-x0, ty=y-y0;
-    return mix(mix(texel_pm(t,view,x0,y0),texel_pm(t,view,x1,y0),tx),
-               mix(texel_pm(t,view,x0,y1),texel_pm(t,view,x1,y1),tx),ty);
+    return mix(mix(texel_pm(t,view,page,x0,y0),texel_pm(t,view,page,x1,y0),tx),
+               mix(texel_pm(t,view,page,x0,y1),texel_pm(t,view,page,x1,y1),tx),ty);
 }
-std::uint8_t provenance_texel(const ProvenanceSet& p,std::uint32_t view,int x,int y) {
+std::uint8_t provenance_texel(const ProvenanceSet& p,std::uint32_t view,std::uint32_t page,int x,int y) {
     x=std::max(0,std::min(x,static_cast<int>(p.width)-1));
     y=std::max(0,std::min(y,static_cast<int>(p.height)-1));
-    const auto idx=((static_cast<std::size_t>(view)*p.height)+static_cast<std::size_t>(y))*p.width+static_cast<std::size_t>(x);
+    const auto idx=(((static_cast<std::size_t>(view)*p.pages)+page)*p.height+static_cast<std::size_t>(y))*p.width+static_cast<std::size_t>(x);
     return p.value[idx];
 }
-std::uint8_t sample_provenance(const ProvenanceSet& p,std::uint32_t view,double u,double v) {
+std::uint8_t sample_provenance(const ProvenanceSet& p,std::uint32_t view,std::uint32_t page,double u,double v) {
     u=std::max(0.0,std::min(1.0,u)); v=std::max(0.0,std::min(1.0,v));
     const double x=u*static_cast<double>(p.width-1), y=v*static_cast<double>(p.height-1);
     const int x0=static_cast<int>(std::floor(x)), y0=static_cast<int>(std::floor(y));
@@ -315,23 +431,23 @@ std::uint8_t sample_provenance(const ProvenanceSet& p,std::uint32_t view,double 
         (1.0-tx)*(1.0-ty), tx*(1.0-ty), (1.0-tx)*ty, tx*ty
     };
     const std::array<std::uint8_t,4> v4{
-        provenance_texel(p,view,x0,y0),
-        provenance_texel(p,view,x1,y0),
-        provenance_texel(p,view,x0,y1),
-        provenance_texel(p,view,x1,y1)
+        provenance_texel(p,view,page,x0,y0),
+        provenance_texel(p,view,page,x1,y0),
+        provenance_texel(p,view,page,x0,y1),
+        provenance_texel(p,view,page,x1,y1)
     };
     int risk=-1;
     for(std::size_t i=0;i<4;++i) if(w[i]>1e-12) risk=std::max(risk,static_cast<int>(v4[i]));
     if(risk<0) throw std::runtime_error("PROVENANCE_BILINEAR_FOOTPRINT_EMPTY");
     return static_cast<std::uint8_t>(risk);
 }
-std::int16_t source_view_texel(const ProvenanceSet& p,std::uint32_t view,int x,int y) {
+std::int16_t source_view_texel(const ProvenanceSet& p,std::uint32_t view,std::uint32_t page,int x,int y) {
     x=std::max(0,std::min(x,static_cast<int>(p.width)-1));
     y=std::max(0,std::min(y,static_cast<int>(p.height)-1));
     const auto idx=((static_cast<std::size_t>(view)*p.height)+static_cast<std::size_t>(y))*p.width+static_cast<std::size_t>(x);
     return p.source_view[idx];
 }
-std::int16_t sample_source_view(const ProvenanceSet& p,std::uint32_t view,double u,double v) {
+std::int16_t sample_source_view(const ProvenanceSet& p,std::uint32_t view,std::uint32_t page,double u,double v) {
     u=std::max(0.0,std::min(1.0,u)); v=std::max(0.0,std::min(1.0,v));
     const double x=u*static_cast<double>(p.width-1), y=v*static_cast<double>(p.height-1);
     const int x0=static_cast<int>(std::floor(x)), y0=static_cast<int>(std::floor(y));
@@ -341,10 +457,10 @@ std::int16_t sample_source_view(const ProvenanceSet& p,std::uint32_t view,double
         (1.0-tx)*(1.0-ty), tx*(1.0-ty), (1.0-tx)*ty, tx*ty
     };
     const std::array<std::int16_t,4> v4{
-        source_view_texel(p,view,x0,y0),
-        source_view_texel(p,view,x1,y0),
-        source_view_texel(p,view,x0,y1),
-        source_view_texel(p,view,x1,y1)
+        source_view_texel(p,view,page,x0,y0),
+        source_view_texel(p,view,page,x1,y0),
+        source_view_texel(p,view,page,x0,y1),
+        source_view_texel(p,view,page,x1,y1)
     };
     constexpr std::int16_t kUnset=std::numeric_limits<std::int16_t>::min();
     constexpr std::int16_t kMixed=-3;
@@ -443,9 +559,30 @@ int main(int argc,char** argv) {
             throw std::runtime_error("SOURCE_VIEW_MIXED_CODE_INVALID");
         const auto mesh=parse_mesh(entries.at("mesh.bin"));
         const auto cameras=parse_cameras(entries.at("cameras.bin"));
-        const auto textures=parse_textures(entries.at("textures.bin"));
-        const auto provenance=parse_provenance(entries.at("provenance.bin"));
-        if(cameras.size()!=8||textures.views!=8||provenance.views!=8) throw std::runtime_error("VIEW_COUNT_INVALID");
+        const auto paging_contract=manifest.at("atlas_paging_contract");
+        TextureSet textures;
+        ProvenanceSet provenance;
+        std::vector<std::uint32_t> face_pages(mesh.face_count,0);
+        if(paging_contract=="LEGACY_SINGLE_PAGE_V1") {
+            textures=parse_textures(entries.at("textures.bin"));
+            provenance=parse_provenance(entries.at("provenance.bin"));
+        } else if(paging_contract=="FACE_INDEX_TO_FIXED_PHYSICAL_PAGE_V1") {
+            textures=parse_paged_textures(entries,manifest);
+            provenance=parse_paged_provenance(entries.at(manifest.at("provenance_entry")));
+            face_pages=parse_face_pages(
+                entries.at(manifest.at("face_page_entry")),
+                mesh.face_count,
+                textures.pages
+            );
+        } else {
+            throw std::runtime_error("ATLAS_PAGING_CONTRACT_INVALID");
+        }
+        if(
+            cameras.size()!=8||textures.views!=8||provenance.views!=8||
+            textures.pages!=provenance.pages||
+            textures.height!=provenance.height||
+            textures.width!=provenance.width
+        ) throw std::runtime_error("VIEW_OR_ATLAS_DIMENSION_INVALID");
         if(view_id.size()!=2||view_id[0]!='V') throw std::runtime_error("VIEW_ID_INVALID");
         const int view=parse_int_exact(view_id.substr(1),"VIEW");
         if(view<0||view>=8) throw std::runtime_error("VIEW_INDEX_INVALID");
@@ -582,7 +719,8 @@ int main(int argc,char** argv) {
                             const auto& w=layer_bary[cidx][layer];
                             const double u=uv[0].x*w[0]+uv[1].x*w[1]+uv[2].x*w[2];
                             const double v=uv[0].y*w[0]+uv[1].y*w[1]+uv[2].y*w[2];
-                            const auto sample=sample_pm(textures,static_cast<std::uint32_t>(view),u,v);
+                            const auto page=face_pages[static_cast<std::size_t>(fi)];
+                            const auto sample=sample_pm(textures,static_cast<std::uint32_t>(view),page,u,v);
                             const double transmission=1.0-std::max(0.0,std::min(1.0,sample_accum.a));
                             if(sample.a*transmission>1e-12) {
                                 sample_risk=std::max(
@@ -590,6 +728,7 @@ int main(int argc,char** argv) {
                                     static_cast<int>(sample_provenance(
                                         provenance,
                                         static_cast<std::uint32_t>(view),
+                                        page,
                                         u,
                                         v
                                     ))
@@ -599,6 +738,7 @@ int main(int argc,char** argv) {
                                     sample_source_view(
                                         provenance,
                                         static_cast<std::uint32_t>(view),
+                                        page,
                                         u,
                                         v
                                     )
@@ -658,6 +798,7 @@ int main(int argc,char** argv) {
         );
         if(!owner_path.empty()) write_file(owner_path,owner.data(),owner.size()*sizeof(std::int32_t));
 
+        std::cout<<"atlas_pages="<<textures.pages<<"\n";
         std::cout<<"renderer=REALSAS_V2_CAA_CANONICAL_DEPTH"
                  <<" clip="<<clip_id<<" view="<<view_id<<" frame="<<frame_index
                  <<" resolution="<<resolution<<" visibility=SEALED_K4_DEPTH_LAYERS"

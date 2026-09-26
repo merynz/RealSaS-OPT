@@ -1049,6 +1049,17 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
     if any(key not in policy for key in required):
         raise QualificationError("CAA_QUALITY_POLICY_INCOMPLETE")
 
+    adaptive_offsets = (
+        np.asarray(arrays["face_sample_offsets"], dtype=np.int64)
+        if "face_sample_offsets" in arrays
+        else None
+    )
+    adaptive_resolutions = (
+        np.asarray(arrays["face_tile_resolutions"], dtype=np.int32)
+        if "face_tile_resolutions" in arrays
+        else None
+    )
+
     holdout = structured_holdout_metrics(
         direct_valid=arrays["direct_valid"],
         direct_rgba=arrays["direct_rgba"],
@@ -1061,6 +1072,8 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         band_fraction=float(policy["holdout_band_fraction"]),
         max_region_samples=int(policy["max_local_harmonic_region_samples"]),
         max_graph_hops=int(policy["max_local_harmonic_graph_hops"]),
+        face_sample_offsets=adaptive_offsets,
+        face_tile_resolutions=adaptive_resolutions,
     )
     seam = provenance_boundary_metrics(
         rgba=arrays["rgba"],
@@ -1070,6 +1083,8 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         sample_face_index=arrays["sample_face_index"],
         face_count=artifact.face_count,
         tile_resolution=artifact.tile_resolution,
+        face_sample_offsets=adaptive_offsets,
+        face_tile_resolutions=adaptive_resolutions,
     )
     cross_view = cross_view_source_compatibility_metrics(
         direct_valid=arrays["direct_valid"],

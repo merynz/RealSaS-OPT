@@ -889,7 +889,10 @@ def compile_deterministic_caa(
     direct_valid = np.zeros((8, sample_count), dtype=bool)
     direct_rgba = np.zeros((8, sample_count, 4), dtype=np.uint8)
     direct_pm_linear = np.zeros((8, sample_count, 4), dtype=np.float64)
-    source_xy = np.full((8, sample_count, 2), np.nan, dtype=np.float64)
+    # Stage24 structured holdout authority consumes source_xy as float32.
+    # Store it in that canonical consumer precision instead of carrying a
+    # redundant float64 copy across the multi-million-sample compile artifact.
+    source_xy = np.full((8, sample_count, 2), np.nan, dtype=np.float32)
     face_support_by_view = np.zeros((8, face_count), dtype=np.float64)
 
     camera_by_view = {int(camera.view_index): camera for camera in cameras}
@@ -1061,5 +1064,7 @@ def compile_deterministic_caa(
         "sample_count_per_face": int(max_samples_per_face),
         "sample_count_per_direction": int(sample_count),
         "maximum_tile_resolution": int(max_resolution),
+        "source_xy_storage_dtype": "float32",
+        "direct_pm_linear_storage_dtype": "float64",
     }
 

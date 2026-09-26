@@ -92,6 +92,10 @@ jobs:
               print("TAIL_WAITING_FOR_LATEST_CAA_SEMANTIC_RECEIPT=1")
               raise SystemExit(75)
           assert caa["surface_graph_representation"]=="CSR_INT64_OFFSETS_INT32_INDICES_WITH_UNDIRECTED_EDGE_INDEX"
+          assert int(caa["surface_graph_edge_count"])>0
+          assert int(caa["surface_graph_storage_bytes"])>0
+          assert int(caa["sample_count_per_direction"])>0
+          assert 0.0<float(caa["surface_graph_storage_bytes_per_sample"])<96.0
           assert caa["adaptive_sampling_required"] is True
           assert caa["topology_bound_cross_face_completion_required"] is True
           assert caa["bounded_physical_page_transport_required"] is True

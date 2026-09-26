@@ -54,6 +54,7 @@ jobs:
             tests/compiler/test_caa_v2_subject_free_policy.py::test_caa_policy_is_refrozen_and_tile_density_is_art_quality_driven \
             tests/compiler/test_caa_v2_subject_free_policy.py::test_tile_resolution_unsatisfied_evidence_is_preserved \
             tests/compiler/test_caa_v2_subject_free_policy.py::test_shared_canonical_edge_is_checked_even_when_provenance_class_matches \
+            tests/compiler/test_caa_v2_subject_free_policy.py::test_cross_view_compatibility_measures_same_canonical_source_without_requiring_rgb_identity \
             tests/compiler/test_visibility_and_caa_v2.py::test_safe_transparent_source_background_is_defined_direct_source_not_unseen \
             tests/compiler/test_visibility_and_caa_v2.py::test_paged_atlas_preserves_density_and_page_local_sampling
 

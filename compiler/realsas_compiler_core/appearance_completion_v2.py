@@ -37,21 +37,76 @@ def surface_sample_neighbors(
     *,
     positions: np.ndarray,
     face_count: int,
-    tile_resolution: int,
+    tile_resolution: int | None = None,
+    face_sample_offsets: np.ndarray | None = None,
+    face_tile_resolutions: np.ndarray | None = None,
 ) -> tuple[tuple[int, ...], ...]:
+    """Build the canonical surface-sample graph for uniform or adaptive faces.
+
+    Adaptive mode is exact, not an approximation: every face keeps its own
+    triangular lattice resolution and shared-edge coupling is recovered from
+    coincident canonical sample positions. This lets CAA preserve source-density
+    requirements without exploding every face to the global worst-case lattice.
+    """
     points = np.asarray(positions, dtype=np.float64)
-    per_face = int(tile_resolution) * (int(tile_resolution) + 1) // 2
-    if points.shape != (int(face_count) * per_face, 3):
-        raise QualificationError("CAA_SURFACE_GRAPH_SAMPLE_ACCOUNTING_DRIFT")
+    faces = int(face_count)
+    if points.ndim != 2 or points.shape[1] != 3 or faces <= 0:
+        raise QualificationError("CAA_SURFACE_GRAPH_INPUT_INVALID")
+
+    adaptive = face_sample_offsets is not None or face_tile_resolutions is not None
+    if adaptive:
+        if face_sample_offsets is None or face_tile_resolutions is None:
+            raise QualificationError("CAA_SURFACE_GRAPH_ADAPTIVE_LAYOUT_INCOMPLETE")
+        offsets = np.asarray(face_sample_offsets, dtype=np.int64)
+        resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+        if (
+            offsets.shape != (faces + 1,)
+            or resolutions.shape != (faces,)
+            or offsets[0] != 0
+            or offsets[-1] != len(points)
+            or np.any(offsets[1:] <= offsets[:-1])
+            or np.any(resolutions < 4)
+        ):
+            raise QualificationError("CAA_SURFACE_GRAPH_ADAPTIVE_LAYOUT_INVALID")
+        expected = (
+            resolutions.astype(np.int64)
+            * (resolutions.astype(np.int64) + 1)
+            // 2
+        )
+        if not np.array_equal(offsets[1:] - offsets[:-1], expected):
+            raise QualificationError("CAA_SURFACE_GRAPH_ADAPTIVE_SAMPLE_ACCOUNTING_DRIFT")
+    else:
+        if tile_resolution is None:
+            raise QualificationError("CAA_SURFACE_GRAPH_TILE_RESOLUTION_MISSING")
+        resolution = int(tile_resolution)
+        per_face = resolution * (resolution + 1) // 2
+        if resolution < 4 or points.shape != (faces * per_face, 3):
+            raise QualificationError("CAA_SURFACE_GRAPH_SAMPLE_ACCOUNTING_DRIFT")
+        offsets = np.arange(faces + 1, dtype=np.int64) * per_face
+        resolutions = np.full((faces,), resolution, dtype=np.int32)
+
     neighbors = [set() for _ in range(len(points))]
-    for face_index in range(int(face_count)):
-        base = face_index * per_face
-        for a, b in triangle_lattice_neighbor_pairs(tile_resolution):
-            aa = base + a
-            bb = base + b
+    pair_cache: dict[int, tuple[tuple[int, int], ...]] = {}
+    for face_index in range(faces):
+        resolution = int(resolutions[face_index])
+        local_pairs = pair_cache.get(resolution)
+        if local_pairs is None:
+            local_pairs = triangle_lattice_neighbor_pairs(resolution)
+            pair_cache[resolution] = local_pairs
+        base = int(offsets[face_index])
+        stop = int(offsets[face_index + 1])
+        for a, b in local_pairs:
+            aa = base + int(a)
+            bb = base + int(b)
+            if aa >= stop or bb >= stop:
+                raise QualificationError("CAA_SURFACE_GRAPH_LOCAL_PAIR_OUT_OF_RANGE")
             neighbors[aa].add(bb)
             neighbors[bb].add(aa)
 
+    # Adjacent faces share exact canonical boundary samples whenever their
+    # lattices place a sample at the same surface position. Different lattice
+    # densities remain safely coupled at their common vertices / compatible
+    # edge fractions without inventing nearest-neighbour cross-face links.
     buckets: dict[tuple[int, int, int], list[int]] = {}
     scale = 1.0e8
     for sample_index, point in enumerate(points):
@@ -65,7 +120,6 @@ def surface_sample_neighbors(
                 neighbors[a].add(b)
                 neighbors[b].add(a)
     return tuple(tuple(sorted(row)) for row in neighbors)
-
 
 def bounded_surface_harmonic_fill(
     *,

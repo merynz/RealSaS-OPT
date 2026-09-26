@@ -267,6 +267,8 @@ def structured_holdout_metrics(
     band_fraction: float,
     max_region_samples: int,
     max_graph_hops: int,
+    face_sample_offsets: np.ndarray | None = None,
+    face_tile_resolutions: np.ndarray | None = None,
 ) -> dict:
     direct_valid = np.asarray(direct_valid, dtype=bool)
     direct_rgba = np.asarray(direct_rgba, dtype=np.uint8)
@@ -288,16 +290,38 @@ def structured_holdout_metrics(
     fraction = float(band_fraction)
     if not math.isfinite(fraction) or not (0.02 <= fraction <= 0.5):
         raise QualificationError("CAA_HOLDOUT_BAND_FRACTION_INVALID")
-    if int(face_count) <= 0 or int(tile_resolution) < 4:
+    if int(face_count) <= 0:
         raise QualificationError("CAA_HOLDOUT_SURFACE_POLICY_INVALID")
-    if n != int(face_count) * int(tile_resolution) * (int(tile_resolution) + 1) // 2:
-        raise QualificationError("CAA_HOLDOUT_FACE_SAMPLE_ACCOUNTING_DRIFT")
-
-    neighbors = surface_sample_neighbors(
-        positions=positions,
-        face_count=int(face_count),
-        tile_resolution=int(tile_resolution),
-    )
+    adaptive = face_sample_offsets is not None or face_tile_resolutions is not None
+    if adaptive:
+        if face_sample_offsets is None or face_tile_resolutions is None:
+            raise QualificationError("CAA_HOLDOUT_ADAPTIVE_LAYOUT_INCOMPLETE")
+        offsets = np.asarray(face_sample_offsets, dtype=np.int64)
+        resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+        if (
+            offsets.shape != (int(face_count) + 1,)
+            or resolutions.shape != (int(face_count),)
+            or offsets[0] != 0
+            or offsets[-1] != n
+            or np.any(resolutions < 4)
+        ):
+            raise QualificationError("CAA_HOLDOUT_ADAPTIVE_LAYOUT_INVALID")
+        neighbors = surface_sample_neighbors(
+            positions=positions,
+            face_count=int(face_count),
+            face_sample_offsets=offsets,
+            face_tile_resolutions=resolutions,
+        )
+    else:
+        if tile_resolution is None or int(tile_resolution) < 4:
+            raise QualificationError("CAA_HOLDOUT_SURFACE_POLICY_INVALID")
+        if n != int(face_count) * int(tile_resolution) * (int(tile_resolution) + 1) // 2:
+            raise QualificationError("CAA_HOLDOUT_FACE_SAMPLE_ACCOUNTING_DRIFT")
+        neighbors = surface_sample_neighbors(
+            positions=positions,
+            face_count=int(face_count),
+            tile_resolution=int(tile_resolution),
+        )
     sample_component = tuple(str(int(value)) for value in component)
 
     errors = []
@@ -645,7 +669,9 @@ def provenance_boundary_metrics(
     sample_positions: np.ndarray,
     sample_face_index: np.ndarray,
     face_count: int,
-    tile_resolution: int,
+    tile_resolution: int | None,
+    face_sample_offsets: np.ndarray | None = None,
+    face_tile_resolutions: np.ndarray | None = None,
 ) -> dict:
     rgba = np.asarray(rgba, dtype=np.uint8)
     provenance = np.asarray(provenance, dtype=np.uint8)
@@ -663,17 +689,46 @@ def provenance_boundary_metrics(
         raise QualificationError("CAA_SEAM_ARRAY_SHAPE_DRIFT")
     if donor_view is not None and donor_view.shape != (8, n):
         raise QualificationError("CAA_SEAM_SOURCE_VIEW_SHAPE_DRIFT")
-    per_face = int(tile_resolution) * (int(tile_resolution) + 1) // 2
-    if n != int(face_count) * per_face:
-        raise QualificationError("CAA_SEAM_FACE_SAMPLE_ACCOUNTING_DRIFT")
+    adaptive = face_sample_offsets is not None or face_tile_resolutions is not None
+    if adaptive:
+        if face_sample_offsets is None or face_tile_resolutions is None:
+            raise QualificationError("CAA_SEAM_ADAPTIVE_LAYOUT_INCOMPLETE")
+        offsets = np.asarray(face_sample_offsets, dtype=np.int64)
+        resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+        if (
+            offsets.shape != (int(face_count) + 1,)
+            or resolutions.shape != (int(face_count),)
+            or offsets[0] != 0
+            or offsets[-1] != n
+            or np.any(resolutions < 4)
+        ):
+            raise QualificationError("CAA_SEAM_ADAPTIVE_LAYOUT_INVALID")
+    else:
+        if tile_resolution is None or int(tile_resolution) < 4:
+            raise QualificationError("CAA_SEAM_TILE_RESOLUTION_INVALID")
+        per_face = int(tile_resolution) * (int(tile_resolution) + 1) // 2
+        if n != int(face_count) * per_face:
+            raise QualificationError("CAA_SEAM_FACE_SAMPLE_ACCOUNTING_DRIFT")
+        offsets = np.arange(int(face_count) + 1, dtype=np.int64) * per_face
+        resolutions = np.full((int(face_count),), int(tile_resolution), dtype=np.int32)
 
-    local_pairs = _triangle_lattice_neighbors(tile_resolution)
     pair_set: set[tuple[int, int]] = set()
     shared_edge_pair_set: set[tuple[int, int]] = set()
+    local_pair_cache: dict[int, tuple[tuple[int, int], ...]] = {}
     for face in range(int(face_count)):
-        base = face * per_face
+        resolution = int(resolutions[face])
+        local_pairs = local_pair_cache.get(resolution)
+        if local_pairs is None:
+            local_pairs = _triangle_lattice_neighbors(resolution)
+            local_pair_cache[resolution] = local_pairs
+        base = int(offsets[face])
+        stop = int(offsets[face + 1])
         for a, b in local_pairs:
-            pair_set.add((base + a, base + b))
+            aa = base + int(a)
+            bb = base + int(b)
+            if aa >= stop or bb >= stop:
+                raise QualificationError("CAA_SEAM_LOCAL_PAIR_OUT_OF_RANGE")
+            pair_set.add((aa, bb))
 
     # Shared-edge samples from adjacent faces occupy identical canonical positions.
     buckets: dict[tuple[int, int, int], list[int]] = {}

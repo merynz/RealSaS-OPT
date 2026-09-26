@@ -40,6 +40,7 @@ def surface_sample_neighbors(
     tile_resolution: int | None = None,
     face_sample_offsets: np.ndarray | None = None,
     face_tile_resolutions: np.ndarray | None = None,
+    face_vertex_ids: tuple[tuple[str, str, str], ...] | None = None,
 ) -> tuple[tuple[int, ...], ...]:
     """Build the canonical surface-sample graph for uniform or adaptive faces.
 
@@ -103,10 +104,25 @@ def surface_sample_neighbors(
             neighbors[aa].add(bb)
             neighbors[bb].add(aa)
 
-    # Adjacent faces share exact canonical boundary samples whenever their
-    # lattices place a sample at the same surface position. Different lattice
-    # densities remain safely coupled at their common vertices / compatible
-    # edge fractions without inventing nearest-neighbour cross-face links.
+    # Cross-face coupling requires BOTH exact canonical position coincidence
+    # and topological adjacency when face topology is provided. Position alone
+    # is insufficient: overlapping/nonmanifold sheets may occupy the same XYZ
+    # while remaining distinct surfaces.
+    topology = None
+    if face_vertex_ids is not None:
+        topology = tuple(tuple(map(str, row)) for row in face_vertex_ids)
+        if len(topology) != faces or any(len(row) != 3 for row in topology):
+            raise QualificationError("CAA_SURFACE_GRAPH_FACE_TOPOLOGY_INVALID")
+        if any(len(set(row)) != 3 for row in topology):
+            raise QualificationError("CAA_SURFACE_GRAPH_FACE_TOPOLOGY_DEGENERATE")
+        topology_sets = tuple(frozenset(row) for row in topology)
+    else:
+        topology_sets = None
+
+    sample_face_index = np.empty((len(points),), dtype=np.int32)
+    for face_index in range(faces):
+        sample_face_index[int(offsets[face_index]) : int(offsets[face_index + 1])] = face_index
+
     buckets: dict[tuple[int, int, int], list[int]] = {}
     scale = 1.0e8
     for sample_index, point in enumerate(points):
@@ -116,7 +132,16 @@ def surface_sample_neighbors(
         if len(indices) < 2:
             continue
         for i, a in enumerate(indices):
+            face_a = int(sample_face_index[a])
             for b in indices[i + 1 :]:
+                face_b = int(sample_face_index[b])
+                if face_a == face_b:
+                    continue
+                if (
+                    topology_sets is not None
+                    and not (topology_sets[face_a] & topology_sets[face_b])
+                ):
+                    continue
                 neighbors[a].add(b)
                 neighbors[b].add(a)
     return tuple(tuple(sorted(row)) for row in neighbors)

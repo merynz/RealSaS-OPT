@@ -395,18 +395,19 @@ def bounded_surface_harmonic_fill(
     provenance: np.ndarray,
     source_view: np.ndarray,
     missing: np.ndarray,
-    sample_component: tuple[str, ...],
+    sample_component,
     neighbors: SurfaceSampleGraph,
     observed_mask: np.ndarray | None = None,
     max_region_samples: int,
     max_graph_hops: int,
 ) -> dict:
     missing = np.asarray(missing, dtype=bool)
+    component = np.asarray(sample_component)
     if rgba.shape != (len(missing), 4):
         raise QualificationError("CAA_HARMONIC_RGBA_SHAPE_INVALID")
     if provenance.shape != (len(missing),) or source_view.shape != (len(missing),):
         raise QualificationError("CAA_HARMONIC_PROVENANCE_SHAPE_INVALID")
-    if len(sample_component) != len(missing) or len(neighbors) != len(missing):
+    if component.shape != (len(missing),) or len(neighbors) != len(missing):
         raise QualificationError("CAA_HARMONIC_GRAPH_SHAPE_INVALID")
     if max_region_samples <= 0 or max_graph_hops <= 0:
         raise QualificationError("CAA_HARMONIC_POLICY_INVALID")
@@ -427,21 +428,22 @@ def bounded_surface_harmonic_fill(
         seed = int(seed)
         if seen[seed]:
             continue
-        component_id = str(sample_component[seed])
+        component_id = component[seed]
         stack = [seed]
         seen[seed] = True
         region = []
         while stack:
             node = stack.pop()
             region.append(node)
-            for nxt in neighbors[node]:
+            for raw_nxt in neighbors[node]:
+                nxt = int(raw_nxt)
                 if (
                     missing[nxt]
                     and not seen[nxt]
-                    and str(sample_component[nxt]) == component_id
+                    and component[nxt] == component_id
                 ):
                     seen[nxt] = True
-                    stack.append(int(nxt))
+                    stack.append(nxt)
         region = tuple(sorted(region))
         region_count += 1
         max_region_seen = max(max_region_seen, len(region))
@@ -450,10 +452,11 @@ def bounded_surface_harmonic_fill(
 
         region_set = set(region)
         boundary = {
-            int(nxt)
+            int(raw_nxt)
             for node in region
-            for nxt in neighbors[node]
-            if observed[nxt] and str(sample_component[nxt]) == component_id
+            for raw_nxt in neighbors[node]
+            if observed[int(raw_nxt)]
+            and component[int(raw_nxt)] == component_id
         }
         if not boundary:
             raise QualificationError("CAA_HARMONIC_REGION_WITHOUT_SOURCE_BOUNDARY")
@@ -461,7 +464,7 @@ def bounded_surface_harmonic_fill(
         hop = {node: None for node in region}
         frontier = []
         for node in region:
-            if any(nxt in boundary for nxt in neighbors[node]):
+            if any(int(nxt) in boundary for nxt in neighbors[node]):
                 hop[node] = 1
                 frontier.append(node)
         cursor = 0
@@ -469,10 +472,11 @@ def bounded_surface_harmonic_fill(
             node = frontier[cursor]
             cursor += 1
             current = int(hop[node])
-            for nxt in neighbors[node]:
+            for raw_nxt in neighbors[node]:
+                nxt = int(raw_nxt)
                 if nxt in region_set and hop[nxt] is None:
                     hop[nxt] = current + 1
-                    frontier.append(int(nxt))
+                    frontier.append(nxt)
         if any(value is None for value in hop.values()):
             raise QualificationError("CAA_HARMONIC_REGION_GRAPH_DISCONNECTED")
         region_hops = max(int(value) for value in hop.values())
@@ -487,10 +491,10 @@ def bounded_surface_harmonic_fill(
         for node in region:
             row = local_index[node]
             valid_neighbors = [
-                int(nxt)
-                for nxt in neighbors[node]
-                if str(sample_component[nxt]) == component_id
-                and (nxt in region_set or observed[nxt])
+                int(raw_nxt)
+                for raw_nxt in neighbors[node]
+                if component[int(raw_nxt)] == component_id
+                and (int(raw_nxt) in region_set or observed[int(raw_nxt)])
             ]
             if not valid_neighbors:
                 raise QualificationError("CAA_HARMONIC_NODE_WITHOUT_NEIGHBOR")
@@ -523,3 +527,4 @@ def bounded_surface_harmonic_fill(
         "maximum_region_samples": int(max_region_seen),
         "maximum_graph_hops": int(max_hops_seen),
     }
+

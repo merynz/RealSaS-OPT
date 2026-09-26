@@ -95,6 +95,7 @@ jobs:
         run: |
           g++ -std=c++17 -O2 -Wall -Wextra -pedantic \
             runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp \
+            -lpng -lz \
             -o "$REALSAS_RUNTIME_V2_PLAYER"
           sha256sum "$REALSAS_RUNTIME_V2_PLAYER"
       - name: Learned source ownership

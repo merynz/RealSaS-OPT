@@ -87,10 +87,11 @@ jobs:
           assert caa["completed_through_stage"]==25
           if (
               caa.get("caa_production_semantic_version")
-              != "PER_FACE_ADAPTIVE_TOPOLOGY_PARAMETRIC_PAGED_V1"
+              != "PER_FACE_ADAPTIVE_TOPOLOGY_PARAMETRIC_PAGED_CSR_V1"
           ):
               print("TAIL_WAITING_FOR_LATEST_CAA_SEMANTIC_RECEIPT=1")
               raise SystemExit(75)
+          assert caa["surface_graph_representation"]=="CSR_INT64_OFFSETS_INT32_INDICES_WITH_UNDIRECTED_EDGE_INDEX"
           assert caa["adaptive_sampling_required"] is True
           assert caa["topology_bound_cross_face_completion_required"] is True
           assert caa["bounded_physical_page_transport_required"] is True

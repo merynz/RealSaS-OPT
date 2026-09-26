@@ -882,7 +882,8 @@ def compile_deterministic_caa(
             positions,
             barycentric,
             sample_face,
-            sample_component,
+            sample_component_index,
+            component_ids,
             face_normals,
             face_sample_offsets,
         ) = _surface_sample_geometry_adaptive(candidate, resolutions)
@@ -895,9 +896,13 @@ def compile_deterministic_caa(
             raise QualificationError("CAA_TILE_RESOLUTION_MISSING")
         resolution = int(tile_resolution)
         barycentric = triangular_barycentric_samples(resolution)
-        positions, sample_face, sample_component, face_normals = _surface_sample_geometry(
-            candidate, barycentric
-        )
+        (
+            positions,
+            sample_face,
+            sample_component_index,
+            component_ids,
+            face_normals,
+        ) = _surface_sample_geometry(candidate, barycentric)
         sample_count = len(positions)
         per_face_samples = len(barycentric)
         if sample_count != face_count * per_face_samples:
@@ -1019,12 +1024,16 @@ def compile_deterministic_caa(
     )
     completion_rows = []
 
-    component_values = np.asarray(sample_component, dtype=object)
-    component_ids = tuple(sorted(set(sample_component)))
-    component_masks = {
-        component_id: component_values == component_id
-        for component_id in component_ids
-    }
+    sample_component_index = np.asarray(
+        sample_component_index, dtype=np.int32
+    )
+    if (
+        sample_component_index.shape != (sample_count,)
+        or np.any(sample_component_index < 0)
+        or np.any(sample_component_index >= len(component_ids))
+    ):
+        raise QualificationError("CAA_SAMPLE_COMPONENT_INDEX_INVALID")
+    component_count = len(component_ids)
 
     for target in range(8):
         direct = direct_valid[target]
@@ -1052,19 +1061,26 @@ def compile_deterministic_caa(
         if not np.any(provenance[target] != 255):
             raise QualificationError("CAA_NO_SOURCE_OBSERVATION_ANYWHERE")
 
-        for component_id in component_ids:
-            component_mask = component_masks[component_id]
-            if np.any(missing & component_mask) and not np.any(
-                (~missing) & component_mask
-            ):
-                raise QualificationError("CAA_COMPONENT_WITHOUT_SOURCE_OBSERVATION")
+        missing_component_count = np.bincount(
+            sample_component_index[missing],
+            minlength=component_count,
+        )
+        observed_component_count = np.bincount(
+            sample_component_index[~missing],
+            minlength=component_count,
+        )
+        if np.any(
+            (missing_component_count > 0)
+            & (observed_component_count == 0)
+        ):
+            raise QualificationError("CAA_COMPONENT_WITHOUT_SOURCE_OBSERVATION")
 
         stats = bounded_surface_harmonic_fill(
             rgba=rgba[target],
             provenance=provenance[target],
             source_view=source_view[target],
             missing=missing,
-            sample_component=sample_component,
+            sample_component=sample_component_index,
             neighbors=surface_neighbors,
             max_region_samples=max_harmonic_region,
             max_graph_hops=max_harmonic_hops,
@@ -1091,7 +1107,7 @@ def compile_deterministic_caa(
         "provenance": provenance,
         "source_view": source_view,
         "component_ids": component_ids,
-        "sample_component": tuple(sample_component),
+        "sample_component_index": sample_component_index,
         "counts": counts,
         "completion_rows": tuple(completion_rows),
         "face_count": face_count,

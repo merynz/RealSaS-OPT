@@ -124,7 +124,7 @@ jobs:
         env:
           REALSAS_RUNTIME_V2_PLAYER: /tmp/realsas_runtime_v2_caa_reference_runtime_gate
         run: |
-          c++ -std=c++17 -O2 -Wall -Wextra -pedantic             runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp             -o "$REALSAS_RUNTIME_V2_PLAYER"
+          c++ -std=c++17 -O2 -Wall -Wextra -pedantic             runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp -lpng -lz -o "$REALSAS_RUNTIME_V2_PLAYER"
           sha256sum "$REALSAS_RUNTIME_V2_PLAYER"
           PYTHONPATH=. python -m pytest -q             tests/compiler/test_runtime_v2_native_smoke.py             tests/compiler/test_v2_tail_authority_fail_closed.py
       - name: Runtime gate summary

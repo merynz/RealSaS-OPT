@@ -1,0 +1,6 @@
+{
+  "schema": "RealSaS.KnightDemoRunSnapshotTrigger.v1",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "reason": "RECOVER_STAGE20_25_EXACT_FAILURE_AFTER_STREAM_TIMEOUT",
+  "revision": 1
+}

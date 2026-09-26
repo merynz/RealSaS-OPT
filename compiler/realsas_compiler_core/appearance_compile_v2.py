@@ -826,19 +826,52 @@ def compile_deterministic_caa(
     cameras,
     source_rgba_by_view: Mapping[int, np.ndarray],
     foreground_mask_by_view: Mapping[int, np.ndarray],
-    tile_resolution: int,
+    tile_resolution: int | None,
     source_lock_policy: Mapping[str, object],
     completion_quality_policy: Mapping[str, object] | None = None,
+    face_tile_resolutions: np.ndarray | None = None,
 ) -> dict:
-    barycentric = triangular_barycentric_samples(tile_resolution)
-    positions, sample_face, sample_component, face_normals = _surface_sample_geometry(
-        candidate, barycentric
-    )
-    sample_count = len(positions)
-    per_face_samples = len(barycentric)
+    """Compile deterministic CAA on uniform or per-face adaptive lattices.
+
+    Adaptive mode changes only sampling density/layout. Source locking, donor
+    selection, bounded harmonic completion and every quality threshold remain
+    identical to the uniform path.
+    """
     face_count = len(candidate.faces)
-    if sample_count != face_count * per_face_samples:
-        raise QualificationError("CAA_SAMPLE_ACCOUNTING_DRIFT")
+    adaptive = face_tile_resolutions is not None
+    if adaptive:
+        resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+        if resolutions.shape != (face_count,) or np.any(resolutions < 4):
+            raise QualificationError("CAA_ADAPTIVE_COMPILE_RESOLUTION_INVALID")
+        (
+            positions,
+            barycentric,
+            sample_face,
+            sample_component,
+            face_normals,
+            face_sample_offsets,
+        ) = _surface_sample_geometry_adaptive(candidate, resolutions)
+        sample_count = len(positions)
+        max_resolution = int(np.max(resolutions))
+        max_samples_per_face = max_resolution * (max_resolution + 1) // 2
+        sample_count_mode = "PER_FACE_ADAPTIVE_V1"
+    else:
+        if tile_resolution is None:
+            raise QualificationError("CAA_TILE_RESOLUTION_MISSING")
+        resolution = int(tile_resolution)
+        barycentric = triangular_barycentric_samples(resolution)
+        positions, sample_face, sample_component, face_normals = _surface_sample_geometry(
+            candidate, barycentric
+        )
+        sample_count = len(positions)
+        per_face_samples = len(barycentric)
+        if sample_count != face_count * per_face_samples:
+            raise QualificationError("CAA_SAMPLE_ACCOUNTING_DRIFT")
+        resolutions = np.full((face_count,), resolution, dtype=np.int32)
+        face_sample_offsets = adaptive_face_sample_offsets(resolutions)
+        max_resolution = resolution
+        max_samples_per_face = per_face_samples
+        sample_count_mode = "UNIFORM_FACE_LATTICE_V1"
 
     min_cos = float(source_lock_policy["min_abs_normal_camera_cos"])
     erosion = int(source_lock_policy["boundary_safe_erosion_px"])
@@ -863,7 +896,6 @@ def compile_deterministic_caa(
     if set(camera_by_view) != set(range(8)):
         raise QualificationError("CAA_DETERMINISTIC_REQUIRES_V0_V7_CAMERAS")
 
-    samples_per_face = per_face_samples
     for view in range(8):
         camera = camera_by_view[view]
         image = np.asarray(source_rgba_by_view[view], dtype=np.uint8)
@@ -917,7 +949,7 @@ def compile_deterministic_caa(
         forward = forward / forward_norm
         face_cos = np.abs(face_normals @ forward)
         face_support_by_view[view] = face_cos
-        angle_safe = np.repeat(face_cos >= min_cos, samples_per_face)
+        angle_safe = face_cos[sample_face] >= min_cos
 
         appearance_support = (
             (foreground_safe & alpha_foreground_safe)
@@ -935,18 +967,23 @@ def compile_deterministic_caa(
             direct_pm_linear[view, valid] = sampled_pm
 
     rgba = np.zeros_like(direct_rgba)
-    provenance = np.full(
-        (8, sample_count),
-        255,
-        dtype=np.uint8,
-    )
+    provenance = np.full((8, sample_count), 255, dtype=np.uint8)
     source_view = np.full((8, sample_count), -1, dtype=np.int16)
     surface_neighbors = surface_sample_neighbors(
         positions=positions,
         face_count=face_count,
-        tile_resolution=tile_resolution,
+        tile_resolution=None if adaptive else int(max_resolution),
+        face_sample_offsets=face_sample_offsets if adaptive else None,
+        face_tile_resolutions=resolutions if adaptive else None,
     )
     completion_rows = []
+
+    component_values = np.asarray(sample_component, dtype=object)
+    component_ids = tuple(sorted(set(sample_component)))
+    component_masks = {
+        component_id: component_values == component_id
+        for component_id in component_ids
+    }
 
     for target in range(8):
         direct = direct_valid[target]
@@ -955,7 +992,7 @@ def compile_deterministic_caa(
         source_view[target, direct] = target
 
         missing = ~direct
-        best_view, best_score = select_other_view_donor_by_support(
+        best_view, _best_score = select_other_view_donor_by_support(
             target_view_index=target,
             missing=missing,
             direct_valid=direct_valid,
@@ -974,17 +1011,12 @@ def compile_deterministic_caa(
         if not np.any(provenance[target] != 255):
             raise QualificationError("CAA_NO_SOURCE_OBSERVATION_ANYWHERE")
 
-        for component_id in sorted(set(sample_component)):
-            component_mask = np.asarray(
-                [value == component_id for value in sample_component],
-                dtype=bool,
-            )
+        for component_id in component_ids:
+            component_mask = component_masks[component_id]
             if np.any(missing & component_mask) and not np.any(
                 (~missing) & component_mask
             ):
-                raise QualificationError(
-                    "CAA_COMPONENT_WITHOUT_SOURCE_OBSERVATION"
-                )
+                raise QualificationError("CAA_COMPONENT_WITHOUT_SOURCE_OBSERVATION")
 
         stats = bounded_surface_harmonic_fill(
             rgba=rgba[target],
@@ -996,12 +1028,7 @@ def compile_deterministic_caa(
             max_region_samples=max_harmonic_region,
             max_graph_hops=max_harmonic_hops,
         )
-        completion_rows.append(
-            {
-                "target_view_index": target,
-                **stats,
-            }
-        )
+        completion_rows.append({"target_view_index": target, **stats})
         if np.any(provenance[target] == 255):
             raise QualificationError("CAA_TOTALITY_FAILURE_AFTER_HARMONIC_COMPILE")
 
@@ -1013,6 +1040,8 @@ def compile_deterministic_caa(
         "barycentric": barycentric,
         "sample_positions": positions,
         "sample_face_index": sample_face,
+        "face_sample_offsets": face_sample_offsets,
+        "face_tile_resolutions": resolutions,
         "direct_valid": direct_valid,
         "direct_rgba": direct_rgba,
         "direct_pm_linear": direct_pm_linear,
@@ -1020,10 +1049,14 @@ def compile_deterministic_caa(
         "rgba": rgba,
         "provenance": provenance,
         "source_view": source_view,
-        "component_ids": tuple(sorted(set(sample_component))),
+        "component_ids": component_ids,
         "sample_component": tuple(sample_component),
         "counts": counts,
         "completion_rows": tuple(completion_rows),
         "face_count": face_count,
-        "sample_count_per_face": per_face_samples,
+        "sample_count_mode": sample_count_mode,
+        "sample_count_per_face": int(max_samples_per_face),
+        "sample_count_per_direction": int(sample_count),
+        "maximum_tile_resolution": int(max_resolution),
     }
+

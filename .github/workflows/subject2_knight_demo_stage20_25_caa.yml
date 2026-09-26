@@ -206,6 +206,11 @@ jobs:
           cmeta=dict(compile_artifact.get("metadata") or {})
           sample_count_per_direction=int(cmeta["sample_count_per_direction"])
           assert sample_count_per_direction>0
+          assert cmeta["compile_array_schema"]=="RealSaS.CAACompileArrays.v3"
+          assert cmeta["direct_pm_linear_storage_mode"]=="PACKED_DIRECT_VALID_VIEW_MAJOR_V1"
+          assert cmeta["direct_pm_linear_storage_dtype"]=="float64"
+          assert cmeta["source_xy_storage_dtype"]=="float32"
+          assert cmeta["barycentric_storage_mode"]=="RECONSTRUCT_FROM_FACE_RESOLUTION_AND_OFFSETS_V1"
           assert qmeta["surface_graph_representation"]=="CSR_INT64_OFFSETS_INT32_INDICES_WITH_UNDIRECTED_EDGE_INDEX"
           assert int(qmeta["surface_graph_edge_count"])>0
           assert int(qmeta["surface_graph_storage_bytes"])>0
@@ -221,6 +226,11 @@ jobs:
               "surface_graph_edge_count":int(qmeta["surface_graph_edge_count"]),
               "surface_graph_storage_bytes":int(qmeta["surface_graph_storage_bytes"]),
               "sample_count_per_direction":sample_count_per_direction,
+              "compile_array_schema":cmeta["compile_array_schema"],
+              "direct_pm_linear_storage_mode":cmeta["direct_pm_linear_storage_mode"],
+              "direct_pm_linear_storage_dtype":cmeta["direct_pm_linear_storage_dtype"],
+              "source_xy_storage_dtype":cmeta["source_xy_storage_dtype"],
+              "barycentric_storage_mode":cmeta["barycentric_storage_mode"],
               "surface_graph_storage_bytes_per_sample":(
                   float(qmeta["surface_graph_storage_bytes"])
                   / float(sample_count_per_direction)

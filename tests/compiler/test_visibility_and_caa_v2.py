@@ -203,6 +203,8 @@ def test_safe_transparent_source_background_is_defined_direct_source_not_unseen(
             "min_source_alpha_u8": 1,
         },
     )
+    assert result["source_xy"].dtype == np.float32
+    assert result["direct_pm_linear"].dtype == np.float64
     assert not np.any(result["provenance"] == 255)
     direct = result["provenance"] == 0
     assert np.any(direct)

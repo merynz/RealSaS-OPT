@@ -269,6 +269,7 @@ def structured_holdout_metrics(
     max_graph_hops: int,
     face_sample_offsets: np.ndarray | None = None,
     face_tile_resolutions: np.ndarray | None = None,
+    face_vertex_ids: tuple[tuple[str, str, str], ...] | None = None,
 ) -> dict:
     direct_valid = np.asarray(direct_valid, dtype=bool)
     direct_rgba = np.asarray(direct_rgba, dtype=np.uint8)
@@ -311,6 +312,7 @@ def structured_holdout_metrics(
             face_count=int(face_count),
             face_sample_offsets=offsets,
             face_tile_resolutions=resolutions,
+            face_vertex_ids=face_vertex_ids,
         )
     else:
         if tile_resolution is None or int(tile_resolution) < 4:
@@ -321,6 +323,7 @@ def structured_holdout_metrics(
             positions=positions,
             face_count=int(face_count),
             tile_resolution=int(tile_resolution),
+            face_vertex_ids=face_vertex_ids,
         )
     sample_component = tuple(str(int(value)) for value in component)
 
@@ -672,6 +675,7 @@ def provenance_boundary_metrics(
     tile_resolution: int | None,
     face_sample_offsets: np.ndarray | None = None,
     face_tile_resolutions: np.ndarray | None = None,
+    face_vertex_ids: tuple[tuple[str, str, str], ...] | None = None,
 ) -> dict:
     rgba = np.asarray(rgba, dtype=np.uint8)
     provenance = np.asarray(provenance, dtype=np.uint8)
@@ -730,7 +734,15 @@ def provenance_boundary_metrics(
                 raise QualificationError("CAA_SEAM_LOCAL_PAIR_OUT_OF_RANGE")
             pair_set.add((aa, bb))
 
-    # Shared-edge samples from adjacent faces occupy identical canonical positions.
+    # Shared-face boundary samples require explicit candidate-topology
+    # adjacency. Exact XYZ coincidence alone is not enough for overlapping sheets.
+    topology_sets = None
+    if face_vertex_ids is not None:
+        topology = tuple(tuple(map(str, row)) for row in face_vertex_ids)
+        if len(topology) != int(face_count) or any(len(row) != 3 for row in topology):
+            raise QualificationError("CAA_SEAM_FACE_TOPOLOGY_INVALID")
+        topology_sets = tuple(frozenset(row) for row in topology)
+
     buckets: dict[tuple[int, int, int], list[int]] = {}
     scale = 1.0e8
     for index, point in enumerate(positions):
@@ -743,10 +755,18 @@ def provenance_boundary_metrics(
             for j in range(i + 1, len(indices)):
                 a = indices[i]
                 b = indices[j]
-                if face_index[a] != face_index[b]:
-                    pair = (min(a, b), max(a, b))
-                    pair_set.add(pair)
-                    shared_edge_pair_set.add(pair)
+                face_a = int(face_index[a])
+                face_b = int(face_index[b])
+                if face_a == face_b:
+                    continue
+                if (
+                    topology_sets is not None
+                    and not (topology_sets[face_a] & topology_sets[face_b])
+                ):
+                    continue
+                pair = (min(a, b), max(a, b))
+                pair_set.add(pair)
+                shared_edge_pair_set.add(pair)
 
     adjacency: dict[int, set[int]] = {index: set() for index in range(n)}
     for a, b in pair_set:

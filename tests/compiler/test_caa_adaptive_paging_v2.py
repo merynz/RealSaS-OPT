@@ -212,7 +212,6 @@ def test_selective_compile_array_loader_preserves_schema_without_loading_unused_
     path = tmp_path / "compile.npz"
     np.savez_compressed(
         path,
-        barycentric=np.zeros((n, 3), dtype=np.float64),
         sample_positions=np.zeros((n, 3), dtype=np.float64),
         sample_face_index=np.zeros((n,), dtype=np.int32),
         sample_component_index=np.zeros((n,), dtype=np.int32),
@@ -237,6 +236,8 @@ def test_selective_compile_array_loader_preserves_schema_without_loading_unused_
             "source_xy_storage_dtype": "float32",
             "direct_pm_linear_storage_dtype": "float64",
             "direct_pm_linear_storage_mode": "PACKED_DIRECT_VALID_VIEW_MAJOR_V1",
+            "barycentric_storage_mode": "RECONSTRUCT_FROM_FACE_RESOLUTION_AND_OFFSETS_V1",
+            "compile_array_schema": "RealSaS.CAACompileArrays.v3",
         },
         compile_hash="",
     )

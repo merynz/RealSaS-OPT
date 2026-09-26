@@ -2,6 +2,8 @@ from __future__ import annotations
 
 """Topology-aware, source-constrained local appearance completion for CAA V2."""
 
+from dataclasses import dataclass
+
 import numpy as np
 
 from .appearance_authority_v2 import CAA_PROVENANCE
@@ -33,6 +35,110 @@ def triangle_lattice_neighbor_pairs(
     return tuple(sorted(pairs))
 
 
+@dataclass(frozen=True)
+class SurfaceSampleGraph:
+    """Compact CSR graph plus one copy of each undirected surface edge."""
+
+    offsets: np.ndarray
+    indices: np.ndarray
+    edge_a: np.ndarray
+    edge_b: np.ndarray
+
+    def __len__(self) -> int:
+        return int(len(self.offsets) - 1)
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            start, stop, step = key.indices(len(self))
+            return tuple(self[index] for index in range(start, stop, step))
+        index = int(key)
+        if index < 0:
+            index += len(self)
+        if not (0 <= index < len(self)):
+            raise IndexError(index)
+        begin = int(self.offsets[index])
+        end = int(self.offsets[index + 1])
+        return self.indices[begin:end]
+
+    def __iter__(self):
+        for index in range(len(self)):
+            yield self[index]
+
+    @property
+    def edge_count(self) -> int:
+        return int(len(self.edge_a))
+
+    @property
+    def storage_nbytes(self) -> int:
+        return int(
+            self.offsets.nbytes
+            + self.indices.nbytes
+            + self.edge_a.nbytes
+            + self.edge_b.nbytes
+        )
+
+
+def _surface_graph_from_edge_key_chunks(
+    *,
+    node_count: int,
+    edge_key_chunks: list[np.ndarray],
+) -> SurfaceSampleGraph:
+    count = int(node_count)
+    if count <= 0 or count >= (1 << 32):
+        raise QualificationError("CAA_SURFACE_GRAPH_NODE_COUNT_UNSUPPORTED")
+    chunks = [
+        np.asarray(chunk, dtype=np.uint64).reshape(-1)
+        for chunk in edge_key_chunks
+        if np.asarray(chunk).size
+    ]
+    if not chunks:
+        raise QualificationError("CAA_SURFACE_GRAPH_EDGE_SET_EMPTY")
+    keys = np.unique(np.concatenate(chunks, axis=0))
+    low_mask = np.uint64(0xFFFFFFFF)
+    edge_a = (keys >> np.uint64(32)).astype(np.int32, copy=False)
+    edge_b = (keys & low_mask).astype(np.int32, copy=False)
+    if (
+        np.any(edge_a < 0)
+        or np.any(edge_b < 0)
+        or np.any(edge_a >= count)
+        or np.any(edge_b >= count)
+        or np.any(edge_a == edge_b)
+    ):
+        raise QualificationError("CAA_SURFACE_GRAPH_EDGE_INVALID")
+
+    edge_count = len(keys)
+    directed = np.empty(edge_count * 2, dtype=np.uint64)
+    directed[:edge_count] = keys
+    directed[edge_count:] = (
+        np.left_shift(keys & low_mask, np.uint64(32))
+        | (keys >> np.uint64(32))
+    )
+    del keys
+    directed.sort()
+
+    sources = (directed >> np.uint64(32)).astype(np.int64, copy=False)
+    counts = np.bincount(sources, minlength=count)
+    if counts.shape != (count,):
+        raise QualificationError("CAA_SURFACE_GRAPH_DEGREE_ACCOUNTING_DRIFT")
+    offsets = np.empty(count + 1, dtype=np.int64)
+    offsets[0] = 0
+    np.cumsum(counts, dtype=np.int64, out=offsets[1:])
+    indices = (directed & low_mask).astype(np.int32, copy=False)
+    del directed, sources, counts
+
+    graph = SurfaceSampleGraph(
+        offsets=offsets,
+        indices=indices,
+        edge_a=edge_a,
+        edge_b=edge_b,
+    )
+    if int(graph.offsets[-1]) != 2 * graph.edge_count:
+        raise QualificationError("CAA_SURFACE_GRAPH_DIRECTED_EDGE_ACCOUNTING_DRIFT")
+    if np.any(graph.offsets[1:] <= graph.offsets[:-1]):
+        raise QualificationError("CAA_SURFACE_GRAPH_ISOLATED_SAMPLE")
+    return graph
+
+
 def surface_sample_neighbors(
     *,
     positions: np.ndarray,
@@ -41,13 +147,12 @@ def surface_sample_neighbors(
     face_sample_offsets: np.ndarray | None = None,
     face_tile_resolutions: np.ndarray | None = None,
     face_vertex_ids: tuple[tuple[str, str, str], ...] | None = None,
-) -> tuple[tuple[int, ...], ...]:
-    """Build the canonical surface-sample graph for uniform or adaptive faces.
+) -> SurfaceSampleGraph:
+    """Build the canonical surface graph in compact CSR form.
 
-    Adaptive mode is exact, not an approximation: every face keeps its own
-    triangular lattice resolution and shared-edge coupling is recovered from
-    coincident canonical sample positions. This lets CAA preserve source-density
-    requirements without exploding every face to the global worst-case lattice.
+    Product mode is topology-parametric: each face keeps its own triangular
+    lattice resolution and true shared vertices/edges are coupled from exact
+    face topology, never from Euclidean-nearest surface proximity.
     """
     points = np.asarray(positions, dtype=np.float64)
     faces = int(face_count)
@@ -75,7 +180,9 @@ def surface_sample_neighbors(
             // 2
         )
         if not np.array_equal(offsets[1:] - offsets[:-1], expected):
-            raise QualificationError("CAA_SURFACE_GRAPH_ADAPTIVE_SAMPLE_ACCOUNTING_DRIFT")
+            raise QualificationError(
+                "CAA_SURFACE_GRAPH_ADAPTIVE_SAMPLE_ACCOUNTING_DRIFT"
+            )
     else:
         if tile_resolution is None:
             raise QualificationError("CAA_SURFACE_GRAPH_TILE_RESOLUTION_MISSING")
@@ -86,29 +193,51 @@ def surface_sample_neighbors(
         offsets = np.arange(faces + 1, dtype=np.int64) * per_face
         resolutions = np.full((faces,), resolution, dtype=np.int32)
 
-    neighbors = [set() for _ in range(len(points))]
-    pair_cache: dict[int, tuple[tuple[int, int], ...]] = {}
-    for face_index in range(faces):
-        resolution = int(resolutions[face_index])
-        local_pairs = pair_cache.get(resolution)
-        if local_pairs is None:
-            local_pairs = triangle_lattice_neighbor_pairs(resolution)
-            pair_cache[resolution] = local_pairs
-        base = int(offsets[face_index])
-        stop = int(offsets[face_index + 1])
-        for a, b in local_pairs:
-            aa = base + int(a)
-            bb = base + int(b)
-            if aa >= stop or bb >= stop:
-                raise QualificationError("CAA_SURFACE_GRAPH_LOCAL_PAIR_OUT_OF_RANGE")
-            neighbors[aa].add(bb)
-            neighbors[bb].add(aa)
+    # Local triangular-lattice edges are vectorized by resolution and encoded
+    # as packed uint64 undirected keys. This avoids millions of Python sets.
+    edge_key_chunks: list[np.ndarray] = []
+    pair_cache: dict[int, np.ndarray] = {}
+    for resolution in sorted(set(map(int, resolutions.tolist()))):
+        raw_pairs = triangle_lattice_neighbor_pairs(resolution)
+        pairs = np.asarray(raw_pairs, dtype=np.uint64)
+        if pairs.ndim != 2 or pairs.shape[1] != 2 or len(pairs) <= 0:
+            raise QualificationError("CAA_SURFACE_GRAPH_LOCAL_PATTERN_INVALID")
+        pair_cache[resolution] = pairs
+        face_ids = np.flatnonzero(resolutions == resolution).astype(np.int64)
+        max_edges_per_chunk = 500_000
+        faces_per_chunk = max(1, max_edges_per_chunk // len(pairs))
+        for cursor in range(0, len(face_ids), faces_per_chunk):
+            ids = face_ids[cursor : cursor + faces_per_chunk]
+            bases = offsets[ids].astype(np.uint64)[:, None]
+            aa = bases + pairs[None, :, 0]
+            bb = bases + pairs[None, :, 1]
+            lo = np.minimum(aa, bb).reshape(-1)
+            hi = np.maximum(aa, bb).reshape(-1)
+            edge_key_chunks.append(
+                np.left_shift(lo, np.uint64(32)) | hi
+            )
 
-    # Cross-face coupling is driven by explicit face topology. For mixed
-    # resolutions, edge sample fractions generally do not coincide (for example
-    # r=4 uses thirds while r=8 uses sevenths), so exact XYZ equality would
-    # under-connect a real shared edge. We therefore couple samples by the
-    # canonical shared-edge parameter, never by Euclidean-nearest surface search.
+    pending_cross: list[int] = []
+
+    def flush_cross() -> None:
+        nonlocal pending_cross
+        if pending_cross:
+            edge_key_chunks.append(np.asarray(pending_cross, dtype=np.uint64))
+            pending_cross = []
+
+    def add_cross_edge(a: int, b: int) -> None:
+        aa = int(a)
+        bb = int(b)
+        if aa == bb:
+            raise QualificationError("CAA_SURFACE_GRAPH_SELF_EDGE")
+        lo = min(aa, bb)
+        hi = max(aa, bb)
+        if lo < 0 or hi >= len(points):
+            raise QualificationError("CAA_SURFACE_GRAPH_CROSS_EDGE_OUT_OF_RANGE")
+        pending_cross.append((lo << 32) | hi)
+        if len(pending_cross) >= 250_000:
+            flush_cross()
+
     if face_vertex_ids is not None:
         topology = tuple(tuple(map(str, row)) for row in face_vertex_ids)
         if len(topology) != faces or any(len(row) != 3 for row in topology):
@@ -117,6 +246,7 @@ def surface_sample_neighbors(
             raise QualificationError("CAA_SURFACE_GRAPH_FACE_TOPOLOGY_DEGENERATE")
 
         bary_cache: dict[int, np.ndarray] = {}
+
         def local_barycentric(resolution: int) -> np.ndarray:
             cached = bary_cache.get(int(resolution))
             if cached is not None:
@@ -141,88 +271,102 @@ def surface_sample_neighbors(
                 raise QualificationError("CAA_SURFACE_GRAPH_CORNER_SAMPLE_MISSING")
             return int(offsets[face_index]) + local
 
-        # All faces incident to the same canonical vertex meet at that vertex.
         vertex_faces: dict[str, list[int]] = {}
         for face_index, row in enumerate(topology):
             for vertex_id in row:
                 vertex_faces.setdefault(vertex_id, []).append(face_index)
         for vertex_id, incident in vertex_faces.items():
-            incident = sorted(set(incident))
+            unique_incident = sorted(set(incident))
             corner_indices = [
-                corner_sample(face_index, vertex_id) for face_index in incident
+                corner_sample(face_index, vertex_id)
+                for face_index in unique_incident
             ]
             for i, a in enumerate(corner_indices):
                 for b in corner_indices[i + 1 :]:
-                    neighbors[a].add(b)
-                    neighbors[b].add(a)
+                    add_cross_edge(a, b)
 
-        # Shared edges get coarse<->fine parametric coupling. Every sample on
-        # either side connects to its bracketing samples on the opposite side,
-        # so mixed lattices remain a single topological surface graph.
         edge_faces: dict[tuple[str, str], list[int]] = {}
         for face_index, row in enumerate(topology):
-            for a, b in ((row[0], row[1]), (row[1], row[2]), (row[2], row[0])):
+            for a, b in (
+                (row[0], row[1]),
+                (row[1], row[2]),
+                (row[2], row[0]),
+            ):
                 edge = tuple(sorted((a, b)))
                 edge_faces.setdefault(edge, []).append(face_index)
+
+        edge_local_cache: dict[
+            tuple[int, int, int],
+            tuple[np.ndarray, np.ndarray],
+        ] = {}
 
         def edge_samples(
             face_index: int,
             edge: tuple[str, str],
-        ) -> list[tuple[float, int]]:
+        ) -> tuple[np.ndarray, np.ndarray]:
             row = topology[face_index]
             try:
                 corner_a = row.index(edge[0])
                 corner_b = row.index(edge[1])
             except ValueError as exc:
-                raise QualificationError("CAA_SURFACE_GRAPH_EDGE_TOPOLOGY_DRIFT") from exc
-            nonshared = ({0, 1, 2} - {corner_a, corner_b}).pop()
-            bary = local_barycentric(int(resolutions[face_index]))
-            local_ids = np.flatnonzero(np.abs(bary[:, nonshared]) <= 1e-12)
-            result = [
-                (
-                    float(bary[int(local), corner_b]),
-                    int(offsets[face_index]) + int(local),
-                )
-                for local in local_ids
-            ]
-            result.sort(key=lambda item: (item[0], item[1]))
-            return result
+                raise QualificationError(
+                    "CAA_SURFACE_GRAPH_EDGE_TOPOLOGY_DRIFT"
+                ) from exc
+            cache_key = (
+                int(resolutions[face_index]),
+                int(corner_a),
+                int(corner_b),
+            )
+            cached = edge_local_cache.get(cache_key)
+            if cached is None:
+                bary = local_barycentric(cache_key[0])
+                nonshared = ({0, 1, 2} - {corner_a, corner_b}).pop()
+                local_ids = np.flatnonzero(
+                    np.abs(bary[:, nonshared]) <= 1e-12
+                ).astype(np.int64)
+                t = bary[local_ids, corner_b].astype(np.float64)
+                order = np.argsort(t, kind="stable")
+                cached = (t[order], local_ids[order])
+                edge_local_cache[cache_key] = cached
+            t, local_ids = cached
+            return t, int(offsets[face_index]) + local_ids
 
         def bracket_indices(
-            rows: list[tuple[float, int]],
+            values: np.ndarray,
+            indices: np.ndarray,
             t: float,
         ) -> tuple[int, ...]:
-            values = [item[0] for item in rows]
-            if not values:
+            if len(values) == 0:
                 raise QualificationError("CAA_SURFACE_GRAPH_SHARED_EDGE_EMPTY")
-            right = int(np.searchsorted(values, t, side="left"))
-            picks = set()
-            if right < len(rows):
-                picks.add(rows[right][1])
+            right = int(np.searchsorted(values, float(t), side="left"))
+            if right < len(values) and abs(float(values[right]) - float(t)) <= 1e-12:
+                return (int(indices[right]),)
+            if right > 0 and abs(float(values[right - 1]) - float(t)) <= 1e-12:
+                return (int(indices[right - 1]),)
+            picks = []
+            if right < len(values):
+                picks.append(int(indices[right]))
             if right > 0:
-                picks.add(rows[right - 1][1])
-            return tuple(sorted(picks))
+                picks.append(int(indices[right - 1]))
+            return tuple(sorted(set(picks)))
 
         for edge, incident in edge_faces.items():
-            incident = sorted(set(incident))
-            if len(incident) < 2:
+            unique_incident = sorted(set(incident))
+            if len(unique_incident) < 2:
                 continue
-            for i, face_a in enumerate(incident):
-                rows_a = edge_samples(face_a, edge)
-                for face_b in incident[i + 1 :]:
-                    rows_b = edge_samples(face_b, edge)
-                    for t, a in rows_a:
-                        for b in bracket_indices(rows_b, t):
-                            neighbors[a].add(b)
-                            neighbors[b].add(a)
-                    for t, b in rows_b:
-                        for a in bracket_indices(rows_a, t):
-                            neighbors[a].add(b)
-                            neighbors[b].add(a)
+            for i, face_a in enumerate(unique_incident):
+                t_a, idx_a = edge_samples(face_a, edge)
+                for face_b in unique_incident[i + 1 :]:
+                    t_b, idx_b = edge_samples(face_b, edge)
+                    for t, a in zip(t_a, idx_a):
+                        for b in bracket_indices(t_b, idx_b, float(t)):
+                            add_cross_edge(int(a), int(b))
+                    for t, b in zip(t_b, idx_b):
+                        for a in bracket_indices(t_a, idx_a, float(t)):
+                            add_cross_edge(int(a), int(b))
     else:
-        # Legacy callers without topology retain exact-coincidence coupling.
-        # Product CAA always supplies topology; this fallback exists only for
-        # backwards-compatible isolated unit tests.
+        # Backwards-compatible isolated-test fallback. Shipping product CAA
+        # always supplies exact face topology.
         buckets: dict[tuple[int, int, int], list[int]] = {}
         scale = 1.0e8
         for sample_index, point in enumerate(points):
@@ -233,9 +377,13 @@ def surface_sample_neighbors(
                 continue
             for i, a in enumerate(indices):
                 for b in indices[i + 1 :]:
-                    neighbors[a].add(b)
-                    neighbors[b].add(a)
-    return tuple(tuple(sorted(row)) for row in neighbors)
+                    add_cross_edge(a, b)
+
+    flush_cross()
+    return _surface_graph_from_edge_key_chunks(
+        node_count=len(points),
+        edge_key_chunks=edge_key_chunks,
+    )
 
 def bounded_surface_harmonic_fill(
     *,
@@ -244,7 +392,7 @@ def bounded_surface_harmonic_fill(
     source_view: np.ndarray,
     missing: np.ndarray,
     sample_component: tuple[str, ...],
-    neighbors: tuple[tuple[int, ...], ...],
+    neighbors: SurfaceSampleGraph,
     observed_mask: np.ndarray | None = None,
     max_region_samples: int,
     max_graph_hops: int,

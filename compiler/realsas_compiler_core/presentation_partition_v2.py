@@ -129,6 +129,7 @@ def build_presentation_partition_evidence(
     textures_by_direction: Mapping[int, np.ndarray],
     provenance_by_direction: np.ndarray,
     policy: Mapping[str, Any],
+    face_page_index: np.ndarray | None = None,
 ) -> PresentationPartitionEvidenceV2IR:
     policy = dict(policy)
     mechanical = dict(policy.get("mechanical_binding_policy") or {})
@@ -162,18 +163,42 @@ def build_presentation_partition_evidence(
     if uv.shape != (len(mesh.faces), 3, 2) or not np.isfinite(uv).all():
         raise QualificationError("PRESENTATION_PARTITION_FACE_UV_INVALID")
     provenance = np.asarray(provenance_by_direction, dtype=np.uint8)
-    if provenance.ndim != 3 or provenance.shape[0] != 8:
+    if provenance.ndim not in (3, 4) or provenance.shape[0] != 8:
         raise QualificationError("PRESENTATION_PARTITION_PROVENANCE_INVALID")
-    textures = {int(key): np.asarray(value, dtype=np.uint8) for key, value in textures_by_direction.items()}
+    textures = {
+        int(key): np.asarray(value, dtype=np.uint8)
+        for key, value in textures_by_direction.items()
+    }
     if set(textures) != set(range(8)):
         raise QualificationError("PRESENTATION_PARTITION_TEXTURE_MATRIX_INCOMPLETE")
-    for direction, texture in textures.items():
-        if (
-            texture.ndim != 3
-            or texture.shape[2] != 4
-            or texture.shape[:2] != provenance[direction].shape
+    if provenance.ndim == 3:
+        page_by_face = np.zeros((len(mesh.faces),), dtype=np.int32)
+        if face_page_index is not None and np.any(
+            np.asarray(face_page_index, dtype=np.int32) != 0
         ):
-            raise QualificationError("PRESENTATION_PARTITION_TEXTURE_SHAPE_INVALID")
+            raise QualificationError("PRESENTATION_PARTITION_LEGACY_PAGE_DRIFT")
+        for direction, texture in textures.items():
+            if (
+                texture.ndim != 3
+                or texture.shape[2] != 4
+                or texture.shape[:2] != provenance[direction].shape
+            ):
+                raise QualificationError("PRESENTATION_PARTITION_TEXTURE_SHAPE_INVALID")
+    else:
+        if face_page_index is None:
+            raise QualificationError("PRESENTATION_PARTITION_FACE_PAGE_INDEX_REQUIRED")
+        page_by_face = np.asarray(face_page_index, dtype=np.int32)
+        if page_by_face.shape != (len(mesh.faces),) or np.any(page_by_face < 0):
+            raise QualificationError("PRESENTATION_PARTITION_FACE_PAGE_INDEX_INVALID")
+        for direction, texture in textures.items():
+            if (
+                texture.ndim != 4
+                or texture.shape[-1] != 4
+                or texture.shape[:3] != provenance[direction].shape
+            ):
+                raise QualificationError("PRESENTATION_PARTITION_TEXTURE_SHAPE_INVALID")
+            if np.any(page_by_face >= texture.shape[0]):
+                raise QualificationError("PRESENTATION_PARTITION_FACE_PAGE_OUT_OF_RANGE")
 
     components = _face_components(mesh)
     shared_rows = _shared_edge_rows(mesh, components)
@@ -196,8 +221,20 @@ def build_presentation_partition_evidence(
         )
         errors = []
         for direction in range(8):
-            prov_a = conservative_bilinear_provenance(provenance[direction], uv_a)
-            prov_b = conservative_bilinear_provenance(provenance[direction], uv_b)
+            if provenance.ndim == 3:
+                prov_image_a = provenance[direction]
+                prov_image_b = provenance[direction]
+                texture_a = textures[direction]
+                texture_b = textures[direction]
+            else:
+                page_a = int(page_by_face[face_a])
+                page_b = int(page_by_face[face_b])
+                prov_image_a = provenance[direction, page_a]
+                prov_image_b = provenance[direction, page_b]
+                texture_a = textures[direction][page_a]
+                texture_b = textures[direction][page_b]
+            prov_a = conservative_bilinear_provenance(prov_image_a, uv_a)
+            prov_b = conservative_bilinear_provenance(prov_image_b, uv_b)
             eligible = np.asarray(
                 [
                     int(a) in source_codes and int(b) in source_codes
@@ -207,8 +244,8 @@ def build_presentation_partition_evidence(
             )
             if not np.any(eligible):
                 continue
-            pm_a = bilinear_premultiplied_rgba(textures[direction], uv_a)
-            pm_b = bilinear_premultiplied_rgba(textures[direction], uv_b)
+            pm_a = bilinear_premultiplied_rgba(texture_a, uv_a)
+            pm_b = bilinear_premultiplied_rgba(texture_b, uv_b)
             l1 = np.mean(np.abs(pm_a - pm_b), axis=1)
             errors.extend(float(value) for value in l1[eligible])
 

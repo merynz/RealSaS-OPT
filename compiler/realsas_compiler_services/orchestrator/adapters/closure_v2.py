@@ -288,14 +288,47 @@ def _build_editable_bundle(ctx: dict, root: Path) -> tuple[Path, str, dict]:
             appearance_asset.textures,
             key=lambda row: row.direction_index,
         ):
-            file_rows.append(
-                _zip_add_file(
-                    archive,
-                    f"appearance/{texture.direction_id}_appearance.png",
-                    Path(texture.transport_png_path),
-                    texture.transport_png_sha256,
+            metadata = dict(texture.metadata or {})
+            raw_pages = tuple(metadata.get("pages") or ())
+            if raw_pages:
+                page_rows = tuple(
+                    sorted(
+                        (dict(row) for row in raw_pages),
+                        key=lambda row: int(row["page_index"]),
+                    )
                 )
-            )
+                if tuple(int(row["page_index"]) for row in page_rows) != tuple(
+                    range(len(page_rows))
+                ):
+                    raise QualificationError(
+                        "V2_AUTHORING_CAA_PAGE_INDEX_SEQUENCE_DRIFT"
+                    )
+                if int(metadata.get("page_count", len(page_rows))) != len(page_rows):
+                    raise QualificationError(
+                        "V2_AUTHORING_CAA_PAGE_COUNT_DRIFT"
+                    )
+                for row in page_rows:
+                    page_index = int(row["page_index"])
+                    file_rows.append(
+                        _zip_add_file(
+                            archive,
+                            (
+                                f"appearance/{texture.direction_id}_appearance_"
+                                f"p{page_index}.png"
+                            ),
+                            Path(str(row["path"])),
+                            str(row["sha256"]),
+                        )
+                    )
+            else:
+                file_rows.append(
+                    _zip_add_file(
+                        archive,
+                        f"appearance/{texture.direction_id}_appearance.png",
+                        Path(texture.transport_png_path),
+                        texture.transport_png_sha256,
+                    )
+                )
 
         bundle_manifest = {
             "schema": "RealSaS.EditablePuppetBundleManifest.v2",
@@ -311,6 +344,7 @@ def _build_editable_bundle(ctx: dict, root: Path) -> tuple[Path, str, dict]:
             "appearance_qualification_hash": appearance_qualification.qualification_hash,
             "motion_hash": motion.motion_lineage_hash,
             "appearance_authority": "COMPLETE_APPEARANCE_AUTHORITY_V2",
+            "appearance_page_transport_complete": True,
             "runtime_generation_required": False,
             "editable": True,
             "qualification_scope": "SEALED_EXPORTED_STATE_ONLY",

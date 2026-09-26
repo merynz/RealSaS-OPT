@@ -477,8 +477,11 @@ def materialize_runtime_package_stage(ctx: dict) -> dict:
         entry_names=tuple(result["entry_names"]),
         package_hash="",
         metadata={
-            "compression": "NONE_V1",
-            "native_reader_dependency_free": True,
+            "container_compression": "NONE_V1",
+            "paged_texture_transport": "PNG_RGBA8",
+            "paged_provenance_transport": "ZLIB_U8_I16_V1",
+            "native_reader_dependency_free": False,
+            "native_reader_dependencies": ["libpng", "zlib"],
             "contains_only_sealed_runtime_authorities": True,
         },
     )

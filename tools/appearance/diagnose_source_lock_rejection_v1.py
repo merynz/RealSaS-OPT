@@ -11,6 +11,7 @@ from compiler.realsas_compiler_core.appearance_authority_v2 import (
     caa_preregistration_from_dict,
 )
 from compiler.realsas_compiler_core.appearance_compile_v2 import (
+    direct_source_and_donor_eligibility,
     erode_binary_mask,
 )
 from compiler.realsas_compiler_core.camera_geometry_v2 import (
@@ -164,11 +165,15 @@ def diagnose(*,authority_root:Path,run_id:str)->dict:
                 visibility.owner_face_index[y,x]==sample_face[ids]
             )
         angle_safe=face_support[view,sample_face]>=min_cos
-        appearance_support=(
-            (fg_safe&alpha_fg)|(bg_safe&alpha_bg)
-        )
-        reconstructed=(
-            in_bounds&first_hit&angle_safe&appearance_support
+        reconstructed, donor_valid = direct_source_and_donor_eligibility(
+            in_bounds=in_bounds,
+            visible=first_hit,
+            source_foreground=source_pixel_fg,
+            safe_foreground=fg_safe,
+            safe_background=bg_safe,
+            alpha_foreground=alpha_fg,
+            alpha_background=alpha_bg,
+            angle_safe=angle_safe,
         )
         if not np.array_equal(reconstructed,direct_valid[view]):
             mismatch=int(np.count_nonzero(reconstructed^direct_valid[view]))
@@ -176,24 +181,26 @@ def diagnose(*,authority_root:Path,run_id:str)->dict:
                 f"CAA_SOURCE_LOCK_RECONSTRUCTION_DRIFT:V{view}:{mismatch}"
             )
 
-        # Exclusive rejection funnel. Ordering is deliberately physical:
-        # projection -> first-hit geometry -> source-safe mask -> alpha -> angle.
+        # Direct-source rejection now answers only whether the exact qualified
+        # source observation exists. Erosion and grazing-angle safety are
+        # donor-only constraints and are reported separately.
         remaining=~direct_valid[view]
         reason=np.full(len(sample_face),"DIRECT",dtype=object)
         take=remaining&~in_bounds
         reason[take]="OUT_OF_BOUNDS_OR_BEHIND"; remaining&=~take
         take=remaining&~first_hit
         reason[take]="NOT_FIRST_HIT"; remaining&=~take
-        safe_region=fg_safe|bg_safe
-        take=remaining&~safe_region
-        reason[take]="BOUNDARY_EROSION_UNSAFE"; remaining&=~take
-        alpha_supported=(fg_safe&alpha_fg)|(bg_safe&alpha_bg)
-        take=remaining&~alpha_supported
-        reason[take]="ALPHA_POLICY_UNSUPPORTED"; remaining&=~take
-        take=remaining&~angle_safe
-        reason[take]="GRAZING_ANGLE_UNSAFE"; remaining&=~take
+        direct_foreground_supported=source_pixel_fg&alpha_fg
+        direct_background_supported=bg_safe&alpha_bg
+        direct_supported=direct_foreground_supported|direct_background_supported
+        take=remaining&~direct_supported
+        reason[take]="DIRECT_APPEARANCE_UNSUPPORTED"; remaining&=~take
         if np.any(remaining):
             reason[remaining]="UNCLASSIFIED"
+
+        donor_candidate=direct_valid[view]&source_pixel_fg&alpha_fg
+        donor_boundary_reject=donor_candidate&~fg_safe
+        donor_grazing_reject=donor_candidate&fg_safe&~angle_safe
 
         direct_count=int(np.count_nonzero(direct_valid[view]))
         visible_count=int(np.count_nonzero(in_bounds&first_hit))
@@ -203,8 +210,7 @@ def diagnose(*,authority_root:Path,run_id:str)->dict:
         reasons={}
         for name in (
             "OUT_OF_BOUNDS_OR_BEHIND","NOT_FIRST_HIT",
-            "BOUNDARY_EROSION_UNSAFE","ALPHA_POLICY_UNSUPPORTED",
-            "GRAZING_ANGLE_UNSAFE","UNCLASSIFIED",
+            "DIRECT_APPEARANCE_UNSUPPORTED","UNCLASSIFIED",
         ):
             m=reason==name
             reasons[name]={
@@ -264,13 +270,24 @@ def diagnose(*,authority_root:Path,run_id:str)->dict:
                 int(np.count_nonzero(source_bg_first_hit)),
             ),
             "rejection_reasons":reasons,
+            "donor_safety": {
+                "eligible_foreground_direct_count": int(
+                    np.count_nonzero(donor_candidate)
+                ),
+                "accepted_donor_count": int(np.count_nonzero(donor_valid)),
+                "boundary_erosion_reject_count": int(
+                    np.count_nonzero(donor_boundary_reject)
+                ),
+                "grazing_angle_reject_count": int(
+                    np.count_nonzero(donor_grazing_reject)
+                ),
+            },
         })
 
     aggregate={}
     reason_names=(
         "OUT_OF_BOUNDS_OR_BEHIND","NOT_FIRST_HIT",
-        "BOUNDARY_EROSION_UNSAFE","ALPHA_POLICY_UNSUPPORTED",
-        "GRAZING_ANGLE_UNSAFE","UNCLASSIFIED",
+        "DIRECT_APPEARANCE_UNSUPPORTED","UNCLASSIFIED",
     )
     for name in reason_names:
         aggregate[name]={
@@ -314,11 +331,11 @@ def diagnose(*,authority_root:Path,run_id:str)->dict:
             "diagnostic_only":True,
             "thresholds_changed":False,
             "direct_valid_reconstructed_exactly":True,
-            "rejection_reason_order":[
+            "direct_rejection_reason_order":[
                 "OUT_OF_BOUNDS_OR_BEHIND","NOT_FIRST_HIT",
-                "BOUNDARY_EROSION_UNSAFE","ALPHA_POLICY_UNSUPPORTED",
-                "GRAZING_ANGLE_UNSAFE",
+                "DIRECT_APPEARANCE_UNSUPPORTED",
             ],
+            "boundary_erosion_and_grazing_are_donor_only":True,
             "product_authority_minted":False,
         },
     }

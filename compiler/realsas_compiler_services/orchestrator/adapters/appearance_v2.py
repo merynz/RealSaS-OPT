@@ -1820,6 +1820,11 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
         unsupported_visible_count = int(
             np.count_nonzero(unsupported_visible)
         )
+        padding_visible_count = int(
+            np.count_nonzero(
+                visible & (render.provenance_code == 255)
+            )
+        )
         exact_depth_ambiguous_count = int(
             np.count_nonzero(render.exact_depth_ambiguity)
         )
@@ -1873,6 +1878,7 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
         )
         view_pass = (
             unsupported_visible_count == 0
+            and padding_visible_count == 0
             and source_lock_fraction
             >= float(policy["rest_min_source_lock_fraction_of_source_foreground"])
             and mean_error <= float(policy["rest_max_source_locked_mean_rgba_l1"])
@@ -1951,6 +1957,12 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
                     ),
                     "unsupported_abstain_visibility_passed": (
                         unsupported_visible_count == 0
+                    ),
+                    "physical_padding_visible_pixel_count": (
+                        padding_visible_count
+                    ),
+                    "physical_padding_visibility_passed": (
+                        padding_visible_count == 0
                     ),
                     "exact_depth_ambiguous_pixel_count": exact_depth_ambiguous_count,
                     "exact_depth_ambiguous_fraction": exact_depth_ambiguous_fraction,

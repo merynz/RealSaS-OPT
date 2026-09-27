@@ -178,3 +178,56 @@ def test_screened_poisson_preserves_sources_and_follows_geodesic_guide():
     assert float(screened[3,0])<float(unscreened[3,0])
     assert stats.guide_weight==4.0
     assert stats.guide_mode=="GEODESIC_NEAREST_SOURCE_V1"
+
+
+def test_parallel_channel_cg_is_bit_exact_with_serial_oracle():
+    node_count = 33
+    graph = _graph(
+        node_count,
+        tuple((i, i + 1) for i in range(node_count - 1))
+        + tuple((i, i + 3) for i in range(node_count - 3)),
+    )
+    positions = np.asarray(
+        [
+            (
+                float(i),
+                0.1 * float((i * 7) % 5),
+                0.05 * float((i * 11) % 3),
+            )
+            for i in range(node_count)
+        ],
+        dtype=np.float64,
+    )
+    values = np.zeros((node_count, 4), dtype=np.float64)
+    values[0] = (0.2, 0.1, 0.05, 0.8)
+    values[-1] = (0.05, 0.3, 0.1, 0.9)
+    values[16] = (0.12, 0.15, 0.22, 0.7)
+    known = np.zeros(node_count, dtype=bool)
+    known[[0, 16, node_count - 1]] = True
+    component = np.zeros(node_count, dtype=np.int32)
+
+    serial, serial_stats = solve_weighted_surface_dirichlet(
+        values=values,
+        known_mask=known,
+        sample_component=component,
+        positions=positions,
+        graph=graph,
+        parallel_channels=False,
+    )
+    parallel, parallel_stats = solve_weighted_surface_dirichlet(
+        values=values,
+        known_mask=known,
+        sample_component=component,
+        positions=positions,
+        graph=graph,
+        parallel_channels=True,
+    )
+    assert np.array_equal(parallel, serial)
+    assert (
+        parallel_stats.channel_iterations
+        == serial_stats.channel_iterations
+    )
+    assert (
+        parallel_stats.channel_relative_residuals
+        == serial_stats.channel_relative_residuals
+    )

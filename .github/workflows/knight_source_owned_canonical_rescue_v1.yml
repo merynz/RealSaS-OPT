@@ -1,0 +1,270 @@
+name: knight-source-owned-canonical-rescue-v1
+
+on:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths:
+      - '.github/workflows/knight_source_owned_canonical_rescue_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-demo-v2-run
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  rescue:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 180
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OUT_DIR: canonical/knight_source_owned_canonical_rescue_v1
+      PLAYER: /tmp/realsas_native_visual_mesh_rescue_v1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install and compile rescue modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m py_compile             compiler/realsas_compiler_services/orchestrator/mainline.py             compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py             compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py             compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py             compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py             compiler/realsas_compiler_core/visual_mesh_arap_v1.py             compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py             tools/demo/render_knight_source_owned_mechanical_binding_v1.py
+
+      - name: Focused source-owned ownership regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pytest -q             tests/compiler/test_visual_mesh_arap_v1.py             tests/repository/test_mainline_execution_plan_v2.py             tests/compiler/test_product_mesh_stage_adapters_v1.py::test_vf23_stage20_to25_uses_unmodified_production_caa_policy             tests/compiler/test_skin_repair_accounting_v1.py
+
+      - name: Safely rebind unchanged historical stage identities to current plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import copy, json, os
+          from compiler.realsas_compiler_services.orchestrator.mainline import (
+              PLAN_PATH, _adapter_impl_hash, _fingerprint, _ledger_map,
+              _refresh, _verify_existing_passes, atomic_json, load_json,
+              run_ledger_path, run_manifest_path, topological_stage_ids,
+              validate_ledger, validate_plan,
+          )
+
+          run_id=os.environ["RUN_ID"]
+          plan=load_json(PLAN_PATH)
+          new_hash=validate_plan(plan)
+          lp=run_ledger_path(run_id)
+          ledger=load_json(lp)
+          manifest=load_json(run_manifest_path(run_id))
+          old_hash=str(ledger["pipeline_plan_sha256"])
+          rebound=[]
+          if old_hash != new_hash:
+              old_view=copy.deepcopy(ledger)
+              old_view["pipeline_plan_sha256"]=old_hash
+              new_view=copy.deepcopy(ledger)
+              new_view["pipeline_plan_sha256"]=new_hash
+              rows=_ledger_map(ledger)
+              old_rows=_ledger_map(old_view)
+              for sid in topological_stage_ids(plan):
+                  row=rows[sid]
+                  if str(row.get("status") or "") not in {"PASS","PASS_DEMO_ONLY"}:
+                      continue
+                  stage=next(x for x in plan["stages"] if x["id"]==sid)
+                  impl=_adapter_impl_hash(stage["adapter"])
+                  if str(row.get("implementation_hash") or "") != impl:
+                      continue
+                  old_fp,policy_hash=_fingerprint(plan,old_view,manifest,stage,impl)
+                  if (
+                      str(row.get("policy_hash") or "") != policy_hash
+                      or str(row.get("input_fingerprint") or "") != old_fp
+                  ):
+                      continue
+                  new_fp,_=_fingerprint(plan,new_view,manifest,stage,impl)
+                  row["input_fingerprint"]=new_fp
+                  rebound.append(sid)
+              ledger["pipeline_plan_sha256"]=new_hash
+              ledger.setdefault("history",[]).append({
+                  "event":"PLAN_HASH_IDENTITY_PRESERVING_REBIND",
+                  "old_plan_sha256":old_hash,
+                  "new_plan_sha256":new_hash,
+                  "rebound_stage_ids":rebound,
+                  "rule":"ONLY_IF_CURRENT_IMPL_POLICY_MANIFEST_DEP_OUTPUTS_REPRODUCE_OLD_FINGERPRINT_UNDER_OLD_PLAN_HASH",
+              })
+              _refresh(plan,ledger)
+              atomic_json(lp,ledger)
+
+          # Invalidate every pass whose exact execution identity really changed.
+          while _verify_existing_passes(plan,ledger,manifest):
+              atomic_json(lp,ledger)
+          _refresh(plan,ledger)
+          atomic_json(lp,ledger)
+          validate_ledger(plan,ledger)
+          print("PLAN_REBIND",json.dumps({
+              "old":old_hash,"new":new_hash,"rebound_count":len(rebound),
+              "rebound":rebound,
+          },sort_keys=True))
+          print("POST_REBIND_STATUS",json.dumps({
+              row["id"]:row["status"] for row in ledger["stages"]
+              if int(row["ordinal"])>=15
+          },sort_keys=True))
+          PY
+
+      - name: Bounded canonical Stage35 repair and source-owned Stage18-25 loop
+        shell: bash
+        run: |
+          set -euo pipefail
+          max_iter=4
+          for iter in $(seq 0 "$max_iter"); do
+            echo "=== RESCUE_ITERATION=$iter ==="
+            rc=0
+            python -m compiler.realsas_compiler_services.orchestrator.mainline execute               --run-id "$RUN_ID"               --target 38_CANONICAL_PUPPET_SEALED || rc=$?
+
+            verdict="$(python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={x["id"]:x for x in ledger["stages"]}
+          s18=by["18_CANONICAL_MESH_ADDRESSING_BUILD"]
+          s23=by["23_COMPLETE_APPEARANCE_ASSET_BAKED"]
+          s35=by["35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"]
+          print(json.dumps({
+              "stage18":s18["status"],
+              "stage18_schemas":[x["schema"] for x in s18.get("outputs") or []],
+              "stage23":s23["status"],
+              "stage35":s35["status"],
+              "stage35_blockers":s35.get("blockers") or [],
+          },sort_keys=True))
+          PY
+            )"
+            echo "RESCUE_VERDICT=$verdict"
+            status="$(python -c 'import json,sys; print(json.loads(sys.argv[1])["stage35"])' "$verdict")"
+            if test "$status" = "PASS" -o "$status" = "PASS_DEMO_ONLY"; then
+              echo "STAGE35_RESCUE_CLOSED_AT=$iter"
+              break
+            fi
+            repair="$(python -c 'import json,sys; print("1" if "G3B_SKIN_TOPOLOGY_COMPATIBILITY_REPAIR_REQUIRED" in json.loads(sys.argv[1])["stage35_blockers"] else "0")' "$verdict")"
+            if test "$repair" != "1"; then
+              echo "NON_REPAIRABLE_RESCUE_FAILURE"
+              exit "$rc"
+            fi
+            if test "$iter" -ge "$max_iter"; then
+              echo "REPAIR_BUDGET_EXHAUSTED"
+              exit 1
+            fi
+            test -s "$RUN_ROOT/artifacts/35_DYNAMIC_MECHANICAL_MESH_QUALIFIED/repaired_stage18_candidate.json"
+            test -s "$RUN_ROOT/artifacts/35_DYNAMIC_MECHANICAL_MESH_QUALIFIED/skin_topology_repair_directive.json"
+            python - <<'PY'
+          import os
+          from compiler.realsas_compiler_services.orchestrator.mainline import (
+              PLAN_PATH,_invalidate_dependents,atomic_json,load_json,run_ledger_path
+          )
+          run_id=os.environ["RUN_ID"]
+          plan=load_json(PLAN_PATH); lp=run_ledger_path(run_id); ledger=load_json(lp)
+          invalid=_invalidate_dependents(
+              plan,ledger,"18_CANONICAL_MESH_ADDRESSING_BUILD",
+              "ADOPT_STAGE35_REPAIR_AND_REBUILD_SOURCE_OWNED_APPEARANCE",
+          )
+          atomic_json(lp,ledger)
+          print("INVALIDATED_FROM_STAGE18",list(invalid))
+          PY
+          done
+
+      - name: Prove canonical source-owned Stage18 and direct-only Stage21-24
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={x["id"]:x for x in ledger["stages"]}
+          def one(stage,schema):
+              rows=[x for x in by[stage]["outputs"] if x["schema"]==schema]
+              assert len(rows)==1,(stage,schema,len(rows))
+              return json.loads(Path(rows[0]["path"]).read_text())
+          assert by["18_CANONICAL_MESH_ADDRESSING_BUILD"]["status"] in {"PASS","PASS_DEMO_ONLY"}
+          assert by["35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"]["status"] in {"PASS","PASS_DEMO_ONLY"}
+          visual=one("18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.VisualMeshSetIR.v1")
+          domain=one("18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.AppearanceDomainIR.v1")
+          compile=one("21_CAA_COMPILE","RealSaS.CAACompileArtifactIR.v2")
+          asset=one("23_COMPLETE_APPEARANCE_ASSET_BAKED","RealSaS.CompleteAppearanceAssetIR.v2")
+          qual=one("24_COMPLETE_APPEARANCE_QUALIFIED","RealSaS.CompleteAppearanceQualificationIR.v2")
+          assert len(visual["views"])==8
+          assert domain["metadata"]["domain"]=="SOURCE_OWNED_VISUAL_MESH_SET_X_DISCRETE_V0_V7"
+          assert domain["metadata"]["mechanical_candidate_render_authority"] is False
+          assert compile["metadata"]["sample_count_mode"]=="SOURCE_RASTER_DIRECT_V1"
+          assert compile["direct_source_sample_count"]==compile["total_sample_count"]
+          assert compile["other_view_source_sample_count"]==0
+          assert compile["compiled_local_harmonic_sample_count"]==0
+          assert int(compile["metadata"].get("canonical_global_completion_sample_count",0))==0
+          assert int(compile["metadata"].get("unsupported_abstain_sample_count",0))==0
+          assert asset["metadata"]["source_owned_visual_mesh_mode"] is True
+          assert asset["metadata"]["mechanical_mesh_render_authority"] is False
+          assert float(qual["total_defined_fraction"])==1.0
+          print("SOURCE_OWNED_CANONICAL_STAGE18_24_PASS",json.dumps({
+              "visual_mesh_set_hash":visual["set_hash"],
+              "visual_views":len(visual["views"]),
+              "direct":compile["direct_source_sample_count"],
+              "total":compile["total_sample_count"],
+              "asset_hash":asset["asset_hash"],
+              "qualification_hash":qual["qualification_hash"],
+          },sort_keys=True))
+          PY
+
+      - name: Build visual renderer and render rescued GIF proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          c++ -std=c++17 -O2 -Wall -Wextra -pedantic             tools/demo/native_visual_mesh_preview_v1.cpp -lpng -lz -o "$PLAYER"
+          rm -rf "$OUT_DIR"
+          python -m tools.demo.render_knight_source_owned_mechanical_binding_v1             --authority-root "$REALSAS_AUTHORITY_ROOT"             --run-id "$RUN_ID"             --out-dir "$OUT_DIR"             --native-player "$PLAYER"             --render-resolution 512
+
+      - name: Seal rescue evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp "$RUN_ROOT/ACTIVE_RUN_V2.json" "$OUT_DIR/ACTIVE_RUN_V2.snapshot.json"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path("canonical/knight_source_owned_canonical_rescue_v1")
+          p=json.loads((root/"REPORT.json").read_text())
+          summary={"schema":"RealSaS.KnightSourceOwnedCanonicalRescueSummary.v1","views":[]}
+          for v in p["views"]:
+              clips={}
+              for clip,rows in v["qa_by_clip"].items():
+                  clips[clip]={
+                      "max_flipped_triangles":max(x["flipped_triangles"] for x in rows),
+                      "max_p95_edge_stretch":max(x["p95_edge_stretch"] for x in rows),
+                      "max_edge_stretch":max(x["max_edge_stretch"] for x in rows),
+                      "max_binding_residual_px":max(x["max_binding_residual_px"] for x in rows),
+                  }
+              summary["views"].append({
+                  "view_index":v["view_index"],
+                  "bound_visual_vertex_fraction":v["bound_visual_vertex_fraction"],
+                  "direct_source_fraction":v["direct_source_fraction"],
+                  "completion_fraction":v["completion_fraction"],
+                  "qa_by_clip":clips,
+              })
+          (root/"RESCUE_SUMMARY.json").write_text(json.dumps(summary,indent=2,sort_keys=True)+"\n")
+          print(json.dumps(summary,sort_keys=True))
+          PY
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add "$OUT_DIR"
+          git commit -m 'rescue: seal canonical source-owned visual proof'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

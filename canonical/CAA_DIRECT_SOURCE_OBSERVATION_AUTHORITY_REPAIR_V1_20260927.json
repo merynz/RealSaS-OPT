@@ -1,0 +1,48 @@
+{
+  "schema": "RealSaS.CAADirectSourceObservationAuthorityRepair.v1",
+  "status": "METHOD_REPAIR__NUMERIC_THRESHOLDS_UNCHANGED",
+  "date": "2026-09-27",
+  "scope": "CAA_SOURCE_LOCK_VS_OTHER_VIEW_DONOR_ELIGIBILITY",
+  "problem": {
+    "direct_source_and_donor_safety_were_conflated": true,
+    "boundary_erosion_was_erasing_exact_source_foreground": true,
+    "grazing_angle_was_erasing_exact_source_foreground": true,
+    "observed_knight_diagnostic": {
+      "source_foreground_first_hit_total": 8037548,
+      "source_foreground_first_hit_direct_before": 6849783,
+      "source_foreground_first_hit_direct_fraction_before": 0.8522229665067008,
+      "boundary_erosion_rejected_foreground_first_hit": 352161,
+      "grazing_angle_rejected_foreground_first_hit": 835604,
+      "alpha_policy_rejected_foreground_first_hit": 0
+    }
+  },
+  "repaired_semantics": {
+    "direct_source_authority": [
+      "EXACT_QUALIFIED_CAMERA_AND_OBSERVATION_BINDING",
+      "IN_BOUNDS_POSITIVE_DEPTH",
+      "GEOMETRY_FIRST_HIT_FACE_MATCH",
+      "SOURCE_FOREGROUND_MASK_AND_NONZERO_ALPHA_OR_SAFE_TRANSPARENT_BACKGROUND"
+    ],
+    "other_view_donor_safety_adds": [
+      "ONE_PIXEL_FOREGROUND_EROSION_SAFETY",
+      "ABS_NORMAL_DOT_CAMERA_FORWARD_GE_COS_80_DEG"
+    ],
+    "rationale": "A directly observed first-hit source pixel remains immutable evidence even when the surface is grazing or lies in the one-pixel silhouette band. Those conditions affect transfer reliability to another view, not whether the source observation exists."
+  },
+  "unchanged_numeric_policy": {
+    "min_abs_normal_camera_cos": 0.17364817766693041,
+    "boundary_safe_erosion_px": 1,
+    "min_source_alpha_u8": 1
+  },
+  "predicted_effect_from_existing_exclusive_diagnostic": {
+    "direct_source_foreground_first_hit_after_if_no_other_blocker": 8037548,
+    "direct_fraction_after_if_no_other_blocker": 1,
+    "note": "Prediction only. Final Knight compile/render must be measured separately."
+  },
+  "constraints": {
+    "source_art_mutation_forbidden": true,
+    "threshold_relaxation_forbidden": true,
+    "product_pass_not_claimed": true,
+    "other_view_donor_safety_preserved": true
+  }
+}

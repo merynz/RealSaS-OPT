@@ -288,6 +288,14 @@ def seam_cut_candidate_v1(candidate,unsafe_face_indices,*,report_hash:str,max_it
     if min(unsafe)<0 or max(unsafe)>=len(candidate.faces):
         raise QualificationError("SKIN_TOPOLOGY_UNSAFE_FACE_INDEX_INVALID")
 
+    previous_iteration=int(dict(candidate.metadata or {}).get("skin_topology_repair_iteration",0))
+    next_iteration=previous_iteration+1
+    if next_iteration>int(max_iterations):
+        raise QualificationError("SKIN_TOPOLOGY_REPAIR_BUDGET_EXHAUSTED")
+    root_lineage=str(
+        dict(candidate.metadata or {}).get("skin_topology_repair_root_candidate_lineage_hash")
+        or candidate.candidate_lineage_hash
+    )
     keep=[i for i in range(len(candidate.faces)) if i not in unsafe]
     if not keep:
         raise QualificationError("SKIN_TOPOLOGY_REPAIR_WOULD_REMOVE_ALL_FACES")
@@ -307,6 +315,9 @@ def seam_cut_candidate_v1(candidate,unsafe_face_indices,*,report_hash:str,max_it
             **dict(candidate.metadata or {}),
             "repair_kind":"SKIN_TOPOLOGY_SEAM_CUT",
             "source_candidate_lineage_hash":candidate.candidate_lineage_hash,
+            "skin_topology_repair_root_candidate_lineage_hash":root_lineage,
+            "skin_topology_repair_iteration":next_iteration,
+            "skin_topology_repair_max_iterations":int(max_iterations),
             "compatibility_report_hash":str(report_hash),
             "removed_face_count":len(unsafe),
             "weight_mutation":False,
@@ -324,6 +335,9 @@ def seam_cut_candidate_v1(candidate,unsafe_face_indices,*,report_hash:str,max_it
         "source_candidate_lineage_hash":candidate.candidate_lineage_hash,
         "repaired_candidate_lineage_hash":repaired.candidate_lineage_hash,
         "compatibility_report_hash":str(report_hash),
+        "repair_root_candidate_lineage_hash":root_lineage,
+        "repair_parent_candidate_lineage_hash":candidate.candidate_lineage_hash,
+        "repair_iteration":next_iteration,
         "removed_face_count":len(unsafe),
         "face_count_before":len(candidate.faces),
         "face_count_after":len(repaired.faces),
@@ -332,7 +346,7 @@ def seam_cut_candidate_v1(candidate,unsafe_face_indices,*,report_hash:str,max_it
         "vertex_position_mutation":False,
         "local_cdt_required":False,
         "max_iterations":int(max_iterations),
-        "iterations_used":1,
+        "iterations_used":next_iteration,
         "downstream_requalification_start":"19_STATIC_CANONICAL_MESH_QUALIFIED",
         "fail_closed_if_requalification_not_completed":True,
     }

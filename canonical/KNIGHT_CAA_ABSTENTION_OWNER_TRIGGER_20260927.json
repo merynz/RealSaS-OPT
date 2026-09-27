@@ -1,0 +1,9 @@
+{
+  "schema": "RealSaS.KnightCAAAbstentionOwnerTrigger.v1",
+  "status": "RUN",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "requested_on": "2026-09-27",
+  "question": "PARTITION_UNSUPPORTED_ABSTAIN_BETWEEN_STRICT_C_P_AND_VISIBILITY_SILHOUETTE_OWNERS",
+  "thresholds_changed": false,
+  "diagnostic_only": true
+}

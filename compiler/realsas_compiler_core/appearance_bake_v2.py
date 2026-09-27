@@ -154,6 +154,187 @@ def _iter_face_adaptive_paged_atlas_lattice_samples(
                 )
 
 
+def prepare_adaptive_paged_scatter(
+    *,
+    face_tile_resolutions: np.ndarray,
+    face_sample_offsets: np.ndarray,
+    bleed_px: int,
+    max_page_resolution: int,
+) -> dict:
+    """Prepare reusable adaptive atlas scatter groups.
+
+    The atlas placement is direction-independent. Build only small per-resolution
+    local lattice maps here; face expansion is chunked during scatter so memory
+    does not scale with the full atlas texel count.
+    """
+    resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+    offsets = np.asarray(face_sample_offsets, dtype=np.int64)
+    plan = adaptive_face_atlas_plan(
+        resolutions,
+        bleed_px=int(bleed_px),
+        max_page_resolution=int(max_page_resolution),
+    )
+    face_count = len(resolutions)
+    if (
+        offsets.shape != (face_count + 1,)
+        or offsets[0] != 0
+        or offsets[-1] <= 0
+    ):
+        raise QualificationError("CAA_ADAPTIVE_SCATTER_OFFSETS_INVALID")
+    groups = []
+    bleed = int(plan["layout"]["bleed_px"])
+    for resolution in sorted(set(map(int, resolutions.tolist()))):
+        faces = np.flatnonzero(resolutions == int(resolution)).astype(np.int32)
+        stride = int(resolution) + 2 * bleed
+        sample_map = _sample_index_map(int(resolution))
+        local_y = np.repeat(
+            np.arange(stride, dtype=np.int32),
+            stride,
+        )
+        local_x = np.tile(
+            np.arange(stride, dtype=np.int32),
+            stride,
+        )
+        local_sample = np.empty(stride * stride, dtype=np.int32)
+        for index, (ly, lx) in enumerate(zip(local_y, local_x)):
+            ii, jj = _nearest_triangle_lattice(
+                int(lx) - bleed,
+                int(ly) - bleed,
+                tile_resolution=int(resolution),
+            )
+            local_sample[index] = int(sample_map[(ii, jj)])
+        groups.append(
+            {
+                "resolution": int(resolution),
+                "faces": faces,
+                "local_y": local_y,
+                "local_x": local_x,
+                "local_sample": local_sample,
+            }
+        )
+    return {
+        "plan": plan,
+        "offsets": offsets,
+        "groups": tuple(groups),
+    }
+
+
+def bake_direction_adaptive_atlas_bundle(
+    *,
+    face_sample_rgba: np.ndarray,
+    face_sample_provenance: np.ndarray,
+    face_sample_source_view: np.ndarray,
+    prepared_scatter: dict,
+    chunk_faces: int = 256,
+):
+    """Bake RGBA, provenance and source-view pages with one shared mapping."""
+    rgba_samples = np.asarray(face_sample_rgba, dtype=np.uint8)
+    provenance_samples = np.asarray(face_sample_provenance, dtype=np.uint8)
+    source_samples = np.asarray(face_sample_source_view, dtype=np.int16)
+    plan = dict(prepared_scatter["plan"])
+    offsets = np.asarray(prepared_scatter["offsets"], dtype=np.int64)
+    groups = tuple(prepared_scatter["groups"])
+    total_samples = int(offsets[-1])
+    if rgba_samples.shape != (total_samples, 4):
+        raise QualificationError(
+            "CAA_ADAPTIVE_BUNDLE_RGBA_SAMPLE_SHAPE_INVALID"
+        )
+    if provenance_samples.shape != (total_samples,):
+        raise QualificationError(
+            "CAA_ADAPTIVE_BUNDLE_PROVENANCE_SAMPLE_SHAPE_INVALID"
+        )
+    if source_samples.shape != (total_samples,):
+        raise QualificationError(
+            "CAA_ADAPTIVE_BUNDLE_SOURCE_SAMPLE_SHAPE_INVALID"
+        )
+    valid_source = (
+        ((source_samples >= 0) & (source_samples < 8))
+        | (source_samples == -2)
+        | (source_samples == -3)
+        | (source_samples == -4)
+    )
+    if not np.all(valid_source):
+        raise QualificationError(
+            "CAA_ADAPTIVE_BUNDLE_SOURCE_VIEW_SAMPLE_VALUE_INVALID"
+        )
+    if int(chunk_faces) <= 0:
+        raise QualificationError("CAA_ADAPTIVE_BUNDLE_CHUNK_INVALID")
+
+    layout = dict(plan["layout"])
+    page_count = int(layout["page_count"])
+    height = int(layout["page_height"])
+    width = int(layout["page_width"])
+    pages = np.zeros((page_count, height, width, 4), dtype=np.uint8)
+    provenance_pages = np.full(
+        (page_count, height, width), 255, dtype=np.uint8
+    )
+    source_padding = np.iinfo(np.int16).min
+    source_pages = np.full(
+        (page_count, height, width),
+        source_padding,
+        dtype=np.int16,
+    )
+    allocated = np.zeros((page_count, height, width), dtype=bool)
+
+    page_index = np.asarray(plan["face_page_index"], dtype=np.int32)
+    tile_x = np.asarray(plan["face_tile_x"], dtype=np.int32)
+    tile_y = np.asarray(plan["face_tile_y"], dtype=np.int32)
+
+    for group in groups:
+        faces = np.asarray(group["faces"], dtype=np.int32)
+        local_y = np.asarray(group["local_y"], dtype=np.int32)
+        local_x = np.asarray(group["local_x"], dtype=np.int32)
+        local_sample = np.asarray(group["local_sample"], dtype=np.int32)
+        local_count = len(local_sample)
+        for start in range(0, len(faces), int(chunk_faces)):
+            chunk = faces[start : start + int(chunk_faces)]
+            count = len(chunk)
+            if count == 0:
+                continue
+            p = np.repeat(page_index[chunk], local_count)
+            y = (
+                np.repeat(tile_y[chunk], local_count)
+                + np.tile(local_y, count)
+            )
+            x = (
+                np.repeat(tile_x[chunk], local_count)
+                + np.tile(local_x, count)
+            )
+            sample = (
+                np.repeat(offsets[chunk], local_count)
+                + np.tile(local_sample, count)
+            )
+            allocated[p, y, x] = True
+            pages[p, y, x] = rgba_samples[sample]
+            provenance_pages[p, y, x] = provenance_samples[sample]
+            source_pages[p, y, x] = source_samples[sample]
+
+    if np.any(provenance_pages[allocated] == 255):
+        raise QualificationError(
+            "CAA_ADAPTIVE_BUNDLE_ALLOCATED_PROVENANCE_UNDEFINED"
+        )
+    if np.any((provenance_pages != 255) & ~allocated):
+        raise QualificationError(
+            "CAA_ADAPTIVE_BUNDLE_PROVENANCE_PADDING_CONTAMINATED"
+        )
+    if np.any(source_pages[allocated] == source_padding):
+        raise QualificationError(
+            "CAA_ADAPTIVE_BUNDLE_ALLOCATED_SOURCE_UNDEFINED"
+        )
+    if np.any((source_pages != source_padding) & ~allocated):
+        raise QualificationError(
+            "CAA_ADAPTIVE_BUNDLE_SOURCE_PADDING_CONTAMINATED"
+        )
+    return (
+        pages,
+        provenance_pages,
+        source_pages,
+        np.asarray(plan["face_uv"], dtype=np.float64),
+        np.asarray(plan["face_page_index"], dtype=np.int32),
+        layout,
+    )
+
+
 def bake_direction_adaptive_atlas_pages(
     *,
     face_sample_rgba: np.ndarray,

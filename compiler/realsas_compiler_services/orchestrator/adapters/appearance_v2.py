@@ -96,6 +96,45 @@ from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import 
 _POLICY_SCHEMA = "RealSaS.CAAQualificationPolicy.v1"
 
 
+def _demo_rest_measurement_admissible(
+    ctx: dict,
+    *,
+    static_mesh,
+    appearance_qualification: dict,
+    proof: CAARestRenderProofIR,
+) -> bool:
+    """Permit measured rest failure to continue only as explicit demo evidence."""
+    if str(ctx["ledger"].get("execution_class") or "") != "DEMO_WITNESS":
+        return False
+    demo = dict(ctx["run_manifest"].get("demo_execution") or {})
+    if (
+        demo.get("stage13_scientific_pass") is not False
+        or demo.get("product_authority_claimed") is not False
+    ):
+        return False
+    report = dict(static_mesh.qualification_report or {})
+    if (
+        report.get("demo_geometry_lineage") is not True
+        or report.get("product_authority_claimed") is not False
+        or report.get("source_fidelity_qualification_passed") is not False
+        or report.get("demo_only_source_fidelity_admission") is not True
+    ):
+        return False
+    appearance_report = dict(
+        appearance_qualification.get("qualification_report") or {}
+    )
+    if appearance_report.get("status") != "PASS_COMPLETE_APPEARANCE":
+        return False
+    proof_report = dict(proof.qualification_report or {})
+    if (
+        proof_report.get("status") != "FAIL_CAA_REFERENCE_REST"
+        or proof_report.get("every_direction_passed") is not False
+        or len(proof.views) != 8
+    ):
+        return False
+    return True
+
+
 def _load_policy_document(ctx: dict) -> dict:
     cfg = dict(ctx["run_manifest"].get("appearance") or {})
     ref = dict(cfg.get("policy_document") or {})
@@ -2203,6 +2242,86 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
         + performance["proof_seal_seconds"]
     )
     if not all_pass:
+        if _demo_rest_measurement_admissible(
+            ctx,
+            static_mesh=static_mesh,
+            appearance_qualification=qualification,
+            proof=proof,
+        ):
+            demo_report = {
+                **dict(proof.qualification_report),
+                "demo_only_measured_failure_admission": True,
+                "strict_rest_proof_passed": False,
+                "product_pass": False,
+                "product_authority_claimed": False,
+                "upstream_static_source_fidelity_passed": False,
+                "downstream_motion_quality_claimed": False,
+            }
+            proof = replace(
+                proof,
+                qualification_report=demo_report,
+                proof_hash="",
+                metadata={
+                    **dict(proof.metadata),
+                    "demo_only_measurement": True,
+                    "product_authority_claimed": False,
+                    "strict_failure_preserved": True,
+                },
+            )
+            proof = replace(
+                proof,
+                proof_hash=caa_rest_render_proof_hash(proof),
+            )
+            outputs.append(
+                write_ir(
+                    root / "caa_reference_rest_proof.json",
+                    proof,
+                    authority_class=(
+                        "DEMO_ONLY_CAA_REFERENCE_REST_MEASUREMENT"
+                    ),
+                )
+            )
+            return {
+                "status": "PASS_DEMO_ONLY",
+                "outputs": outputs,
+                "performance": performance,
+                "diagnostics": {
+                    "proof_hash": proof.proof_hash,
+                    "every_direction_passed": False,
+                    "strict_rest_proof_passed": False,
+                    "demo_only_measured_failure_admission": True,
+                    "product_pass": False,
+                    "product_authority_claimed": False,
+                    "failed_direction_count": int(
+                        sum(
+                            str(row.metadata.get("status") or "")
+                            != "PASS"
+                            for row in rows
+                        )
+                    ),
+                    "unsupported_visible_pixel_count": int(
+                        sum(
+                            int(
+                                row.metadata.get(
+                                    "unsupported_abstain_visible_pixel_count",
+                                    0,
+                                )
+                            )
+                            for row in rows
+                        )
+                    ),
+                    "minimum_source_alpha_recall": min(
+                        row.source_alpha_recall for row in rows
+                    ),
+                    "minimum_source_alpha_precision": min(
+                        row.source_alpha_precision for row in rows
+                    ),
+                    "maximum_source_feature_high_error_fraction": max(
+                        row.source_feature_high_error_fraction
+                        for row in rows
+                    ),
+                },
+            }
         return {
             "status": "FAIL",
             "blockers": ["CAA_REFERENCE_REST_RENDER_PROOF_FAILED"],

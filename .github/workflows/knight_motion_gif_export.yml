@@ -12,6 +12,7 @@ on:
       - 'canonical/knight_demo_motion_preview_v1/KNIGHT_IDLE_DEMO_PREVIEW_V1.png'
       - 'canonical/knight_demo_motion_preview_v1/KNIGHT_RUN_DEMO_PREVIEW_V1.png'
       - 'canonical/knight_demo_motion_preview_v1/KNIGHT_SLASH_DEMO_PREVIEW_V1.png'
+      - 'canonical/KNIGHT_DEMO_MOTION_PREVIEW_BASELINE_V1.json'
   workflow_dispatch:
 
 jobs:
@@ -80,6 +81,14 @@ jobs:
               )
               print(name, out, out.stat().st_size)
           PY
+      - name: Verify byte-exact GIF baseline
+        run: |
+          set -euo pipefail
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_IDLE_DEMO_PREVIEW_V1.gif)" = "31b64edff1da106bc8feb00faede61ffe68dc89c"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_RUN_DEMO_PREVIEW_V1.gif)" = "b8f0e97e74396a0987444bb72ea93db4bb519640"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_SLASH_DEMO_PREVIEW_V1.gif)" = "73a567f3ff17786d3316e3fb02a723ee3c026eca"
+          echo "KNIGHT_GIF_BASELINE_PASS"
+
       - name: Commit GIF previews
         run: |
           set -euo pipefail

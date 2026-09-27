@@ -20,6 +20,9 @@ jobs:
       RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
       - name: Snapshot exact active ledger and failure diagnostics
         shell: bash
         run: |

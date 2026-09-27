@@ -1,0 +1,63 @@
+name: knight-occupancy-native-witness-v2
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/demo/render_knight_occupancy_witness_native_v2.py'
+      - 'runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp'
+      - '.github/workflows/knight_occupancy_native_witness_v2.yml'
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      PLAYER: /tmp/realsas_runtime_v2_caa_reference_knight_witness
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned dependencies
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Build native V2 player
+        run: |
+          set -euo pipefail
+          c++ -std=c++17 -O3 -DNDEBUG \
+            runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp \
+            -lpng -lz -o "$PLAYER"
+      - name: Compile witness
+        run: python -m py_compile tools/demo/render_knight_occupancy_witness_native_v2.py
+      - name: Render native occupancy witness
+        run: |
+          set -euo pipefail
+          rm -rf canonical/knight_occupancy_native_witness_v2
+          PYTHONPATH=. python -m tools.demo.render_knight_occupancy_witness_native_v2 \
+            --authority-root "$AUTHORITY_ROOT" \
+            --run-id "$RUN_ID" \
+            --out-dir canonical/knight_occupancy_native_witness_v2 \
+            --resolution 512 \
+            --native-player "$PLAYER" \
+            --workers 4
+      - name: Seal witness
+        run: |
+          set -euo pipefail
+          rm -rf canonical/knight_occupancy_native_witness_v2/native_frames
+          rm -rf canonical/knight_occupancy_native_witness_v2/occupancy_texture_pages
+          rm -f canonical/knight_occupancy_native_witness_v2/native_witness_projection.npz
+          rm -f canonical/knight_occupancy_native_witness_v2/knight_occupancy_witness.rss
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/knight_occupancy_native_witness_v2
+          git commit -m "demo: seal native Knight occupancy witness v2"
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

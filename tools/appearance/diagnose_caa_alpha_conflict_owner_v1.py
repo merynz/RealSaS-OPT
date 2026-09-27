@@ -11,7 +11,12 @@ from compiler.realsas_compiler_core.appearance_authority_v2 import (
     caa_compile_artifact_from_dict,
 )
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
+    canonical_mesh_candidate_from_dict,
+    qualified_camera_set_from_dict,
     qualified_observation_set_from_dict,
+)
+from compiler.realsas_compiler_core.appearance_compile_v2 import (
+    _surface_sample_geometry_adaptive,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     stage_output_payload,
@@ -70,6 +75,20 @@ def diagnose(*, repo_root: Path, authority_root: Path, run_id: str) -> dict:
         )
     )
     arrays = _load_compile_arrays(artifact)
+    candidate = canonical_mesh_candidate_from_dict(
+        stage_output_payload(
+            ctx,
+            "18_CANONICAL_MESH_ADDRESSING_BUILD",
+            "RealSaS.CanonicalMeshCandidateIR.v1",
+        )
+    )
+    cameras = qualified_camera_set_from_dict(
+        stage_output_payload(
+            ctx,
+            "05_CAMERA_CONTRACT_SOLVED",
+            "RealSaS.QualifiedCameraSetIR.v1",
+        )
+    )
     observation = qualified_observation_set_from_dict(
         stage_output_payload(
             ctx,
@@ -93,7 +112,28 @@ def diagnose(*, repo_root: Path, authority_root: Path, run_id: str) -> dict:
     rgba = np.asarray(arrays["direct_rgba"], dtype=np.uint8)
     source_xy = np.asarray(arrays["source_xy"], dtype=np.float64)
     face_index = np.asarray(arrays["sample_face_index"], dtype=np.int32)
-    support = np.asarray(arrays["face_support_by_view"], dtype=np.float64)
+    resolutions = np.asarray(arrays["face_tile_resolutions"], dtype=np.int32)
+    (
+        _sample_positions,
+        recomputed_face_index,
+        _sample_component,
+        _component_ids,
+        face_normals,
+        _offsets,
+    ) = _surface_sample_geometry_adaptive(candidate, resolutions)
+    recomputed_face_index = np.asarray(recomputed_face_index, dtype=np.int32)
+    if not np.array_equal(recomputed_face_index, face_index):
+        raise RuntimeError("CAA_ALPHA_DIAGNOSTIC_SAMPLE_FACE_RECOMPUTE_DRIFT")
+    support = np.zeros((8, len(candidate.faces)), dtype=np.float64)
+    camera_by_view = {int(camera.view_index): camera for camera in cameras.cameras}
+    if set(camera_by_view) != set(range(8)):
+        raise RuntimeError("CAA_ALPHA_DIAGNOSTIC_CAMERA_SET_INVALID")
+    for view in range(8):
+        forward = np.asarray(camera_by_view[view].forward, dtype=np.float64)
+        norm = float(np.linalg.norm(forward))
+        if not np.isfinite(norm) or norm <= 1.0e-12:
+            raise RuntimeError("CAA_ALPHA_DIAGNOSTIC_CAMERA_FORWARD_INVALID")
+        support[view] = np.abs(face_normals @ (forward / norm))
     if valid.ndim != 2 or valid.shape[0] != 8:
         raise RuntimeError("CAA_ALPHA_DIAGNOSTIC_DIRECT_VALID_SHAPE")
     sample_count = valid.shape[1]
@@ -101,8 +141,7 @@ def diagnose(*, repo_root: Path, authority_root: Path, run_id: str) -> dict:
         rgba.shape != (8, sample_count, 4)
         or source_xy.shape != (8, sample_count, 2)
         or face_index.shape != (sample_count,)
-        or support.ndim != 2
-        or support.shape[0] != 8
+        or support.shape != (8, len(candidate.faces))
     ):
         raise RuntimeError("CAA_ALPHA_DIAGNOSTIC_ARRAY_SHAPE_DRIFT")
 

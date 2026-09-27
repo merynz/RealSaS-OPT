@@ -12,9 +12,11 @@ import numpy as np
 from PIL import Image
 
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
+    canonical_mesh_candidate_from_dict,
     qualified_camera_set_from_dict,
     qualified_observation_set_from_dict,
     qualified_skeleton_from_dict,
+    qualified_skin_from_dict,
 )
 from compiler.realsas_compiler_core.camera_geometry_v2 import project_points_xyz_v3
 from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import _joint_pose_v2
@@ -28,13 +30,14 @@ from compiler.realsas_compiler_core.runtime_package_v2 import (
     build_rss_v2_entries,
     write_rss_v2,
 )
-from compiler.realsas_compiler_core.visibility_v2 import VISIBILITY_CONTRACT_V2_HASH
+from compiler.realsas_compiler_core.visibility_v2 import (
+    VISIBILITY_CONTRACT_V2_HASH,
+    rasterize_visible_owner,
+)
 from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
     Arap2D,
-    bind_points_barycentric,
+    bind_visual_vertex_handles,
     build_visual_mesh_from_mask,
-    evaluate_bone_handles,
-    sample_bone_handles,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     sha256_file,
@@ -43,7 +46,12 @@ from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import 
 from compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2 import (
     _load_source_inputs,
 )
-from tools.demo.render_knight_motion_preview_v1 import _ctx, _tracks_for_clip
+from tools.demo.render_knight_motion_preview_v1 import (
+    _candidate_skin_weights,
+    _ctx,
+    _skin,
+    _tracks_for_clip,
+)
 
 
 def _pixel_to_world(xy: np.ndarray, width: int, height: int) -> np.ndarray:
@@ -82,11 +90,131 @@ def _synthetic_camera(view_index: int, resolution: int) -> dict:
     }
 
 
-def _joint_xy(positions: dict[str, tuple[float, float, float]], camera) -> dict[str, tuple[float, float]]:
-    ids = tuple(positions)
-    xyz = np.asarray([positions[jid] for jid in ids], dtype=np.float64)
-    projected = project_points_xyz_v3(xyz, camera)
-    return {jid: (float(projected[i, 0]), float(projected[i, 1])) for i, jid in enumerate(ids)}
+def _candidate_face_indices(candidate) -> np.ndarray:
+    index = {
+        str(vertex.candidate_vertex_id): i
+        for i, vertex in enumerate(candidate.vertices)
+    }
+    faces = np.asarray(
+        [
+            [index[str(vertex_id)] for vertex_id in face]
+            for face in candidate.faces
+        ],
+        dtype=np.int64,
+    )
+    if faces.shape != (len(candidate.faces), 3):
+        raise RuntimeError("VISUAL_MECHANICAL_FACE_INDEX_DRIFT")
+    return faces
+
+
+def _bind_visual_to_mechanical_surface(
+    *,
+    visual_mesh,
+    candidate,
+    camera,
+    rest_mechanical_xyz: np.ndarray,
+    mechanical_face_indices: np.ndarray,
+    source_mask: np.ndarray,
+    spacing_px: int = 48,
+):
+    visibility = rasterize_visible_owner(
+        candidate,
+        camera,
+        positions=rest_mechanical_xyz,
+        width=int(source_mask.shape[1]),
+        height=int(source_mask.shape[0]),
+        max_layers=4,
+    )
+    positions = np.asarray(visual_mesh.positions, dtype=np.float64)
+    h, w = source_mask.shape
+    x = np.clip(np.rint(positions[:, 0]).astype(np.int64), 0, w - 1)
+    y = np.clip(np.rint(positions[:, 1]).astype(np.int64), 0, h - 1)
+    owner = np.asarray(visibility.owner_face_index[y, x], dtype=np.int64)
+    bary = np.asarray(visibility.barycentric[y, x], dtype=np.float64)
+    valid = (
+        np.asarray(source_mask[y, x], dtype=bool)
+        & (owner >= 0)
+        & np.isfinite(bary).all(axis=1)
+        & (bary.min(axis=1) >= -1.0e-4)
+    )
+
+    # Deterministic spatial thinning: one visual handle per source-raster cell.
+    # This leaves ARAP room to preserve shape instead of over-constraining every
+    # visual vertex to a mechanically imperfect carrier.
+    bins: dict[tuple[int, int], tuple[float, int]] = {}
+    spacing = max(8, int(spacing_px))
+    for vertex_index in np.flatnonzero(valid):
+        px, py = positions[int(vertex_index)]
+        bx = int(px // spacing)
+        by = int(py // spacing)
+        cx = (bx + 0.5) * spacing
+        cy = (by + 0.5) * spacing
+        score = float((px - cx) ** 2 + (py - cy) ** 2)
+        key = (bx, by)
+        previous = bins.get(key)
+        if previous is None or score < previous[0]:
+            bins[key] = (score, int(vertex_index))
+    selected = np.asarray(
+        sorted(row[1] for row in bins.values()),
+        dtype=np.int64,
+    )
+    if len(selected) < 8:
+        raise RuntimeError("VISUAL_MECHANICAL_HANDLE_COVERAGE_TOO_LOW")
+
+    selected_owner = owner[selected]
+    selected_bary = bary[selected]
+    selected_faces = mechanical_face_indices[selected_owner]
+    projected_rest = np.asarray(
+        visibility.projected_vertices,
+        dtype=np.float64,
+    )
+    rest_bound_xy = np.sum(
+        projected_rest[selected_faces, :2]
+        * selected_bary[:, :, None],
+        axis=1,
+    )
+    rest_visual_xy = positions[selected]
+    rest_offset = rest_visual_xy - rest_bound_xy
+    rest_reconstruction = rest_bound_xy + rest_offset
+    residual = np.linalg.norm(rest_reconstruction - rest_visual_xy, axis=1)
+
+    bindings = bind_visual_vertex_handles(visual_mesh, selected)
+    return {
+        "bindings": bindings,
+        "visual_vertex_indices": selected,
+        "mechanical_face_indices": selected_faces,
+        "mechanical_barycentric": selected_bary,
+        "rest_projection_offset_xy": rest_offset,
+        "valid_visual_vertex_count": int(np.count_nonzero(valid)),
+        "unbound_visual_vertex_count": int(len(positions) - np.count_nonzero(valid)),
+        "handle_count": int(len(selected)),
+        "rest_binding_max_residual_px": float(residual.max(initial=0.0)),
+        "visibility_layer_overflow_pixel_count": int(
+            np.count_nonzero(visibility.layer_overflow)
+        ),
+    }
+
+
+def _mechanical_targets(
+    *,
+    binding: dict,
+    posed_mechanical_xyz: np.ndarray,
+    camera,
+) -> np.ndarray:
+    projected = project_points_xyz_v3(
+        posed_mechanical_xyz,
+        camera,
+    )[:, :2]
+    faces = np.asarray(binding["mechanical_face_indices"], dtype=np.int64)
+    bary = np.asarray(binding["mechanical_barycentric"], dtype=np.float64)
+    posed_bound_xy = np.sum(
+        projected[faces] * bary[:, :, None],
+        axis=1,
+    )
+    return posed_bound_xy + np.asarray(
+        binding["rest_projection_offset_xy"],
+        dtype=np.float64,
+    )
 
 
 def _write_direct_provenance(path: Path, height: int, width: int) -> str:
@@ -130,8 +258,18 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
     ctx = _ctx(authority_root, run_id)
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    candidate = canonical_mesh_candidate_from_dict(
+        stage_output_payload(
+            ctx,
+            "18_CANONICAL_MESH_ADDRESSING_BUILD",
+            "RealSaS.CanonicalMeshCandidateIR.v1",
+        )
+    )
     skeleton = qualified_skeleton_from_dict(
         stage_output_payload(ctx, "28_SKELETON_QUALIFIED", "RealSaS.QualifiedSkeletonIR.v1")
+    )
+    skin = qualified_skin_from_dict(
+        stage_output_payload(ctx, "32_SKIN_QUALIFIED", "RealSaS.QualifiedSkinIR.v1")
     )
     camera_set = qualified_camera_set_from_dict(
         stage_output_payload(ctx, "05_CAMERA_CONTRACT_SOLVED", "RealSaS.QualifiedCameraSetIR.v1")
@@ -145,19 +283,17 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
         Path("canonical/KNIGHT_MOTION_SOURCE_ACTION_DIAGNOSTIC_20260927.json").read_text()
     )
 
-    joint_ids = tuple(str(j.canonical_joint_id) for j in skeleton.joints)
-    parent_by_joint = {
-        str(j.canonical_joint_id): (
-            None if j.parent_canonical_id is None else str(j.parent_canonical_id)
-        )
-        for j in skeleton.joints
-    }
-    _skin, rest_joint_positions, _frame_hash = _joint_pose_v2(
-        skeleton=skeleton,
-        tracks={},
-        time_seconds=0.0,
-        cameras=cameras,
+    mechanical_joint_ids, mechanical_weights = _candidate_skin_weights(
+        candidate,
+        skin,
+        skeleton,
     )
+    rest_mechanical_xyz = np.asarray(
+        [vertex.P for vertex in candidate.vertices],
+        dtype=np.float64,
+    )
+    mechanical_face_indices = _candidate_face_indices(candidate)
+
 
     clip_specs = [
         ("demo_idle_v1", "IDLE", 833),
@@ -182,16 +318,41 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
         h, w = mask.shape
 
         mesh = build_visual_mesh_from_mask(mask, target_edge_px=20)
-        rest_xy = _joint_xy(rest_joint_positions, camera)
-        handle_specs = sample_bone_handles(
-            joint_ids=joint_ids,
-            parent_by_joint=parent_by_joint,
-            joint_xy=rest_xy,
-            step=0.25,
+        mechanical_binding = _bind_visual_to_mechanical_surface(
+            visual_mesh=mesh,
+            candidate=candidate,
+            camera=camera,
+            rest_mechanical_xyz=rest_mechanical_xyz,
+            mechanical_face_indices=mechanical_face_indices,
+            source_mask=mask,
+            spacing_px=48,
         )
-        rest_handles = evaluate_bone_handles(handle_specs, rest_xy)
-        bindings = bind_points_barycentric(mesh, rest_handles)
+        bindings = mechanical_binding["bindings"]
         arap = Arap2D(mesh, bindings)
+        print(
+            "VISUAL_MECHANICAL_BINDING",
+            json.dumps(
+                {
+                    "view_index": int(view_index),
+                    "visual_vertex_count": int(len(mesh.positions)),
+                    "valid_visual_vertex_count": int(
+                        mechanical_binding["valid_visual_vertex_count"]
+                    ),
+                    "unbound_visual_vertex_count": int(
+                        mechanical_binding["unbound_visual_vertex_count"]
+                    ),
+                    "handle_count": int(mechanical_binding["handle_count"]),
+                    "rest_binding_max_residual_px": float(
+                        mechanical_binding["rest_binding_max_residual_px"]
+                    ),
+                    "rest_mechanical_visibility_layer_overflow_pixel_count": int(
+                        mechanical_binding["visibility_layer_overflow_pixel_count"]
+                    ),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
 
         view_root = out_dir / f"V{view_index}"
         texture_path = view_root / "source_art.png"
@@ -220,15 +381,22 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
             posed_frames = []
             qa_rows = []
             for time_seconds in times:
-                _skin, posed_joint_positions, _frame_hash = _joint_pose_v2(
+                skin_matrices, _posed_joint_positions, _frame_hash = _joint_pose_v2(
                     skeleton=skeleton,
                     tracks=tracks,
                     time_seconds=float(time_seconds),
                     cameras=cameras,
                 )
-                target_xy = evaluate_bone_handles(
-                    handle_specs,
-                    _joint_xy(posed_joint_positions, camera),
+                posed_mechanical_xyz = _skin(
+                    rest_mechanical_xyz,
+                    mechanical_weights,
+                    mechanical_joint_ids,
+                    skin_matrices,
+                )
+                target_xy = _mechanical_targets(
+                    binding=mechanical_binding,
+                    posed_mechanical_xyz=posed_mechanical_xyz,
+                    camera=camera,
                 )
                 deformed, qa = arap.solve(target_xy, iterations=3)
                 posed_frames.append(_pixel_to_world(deformed, mesh.width, mesh.height))
@@ -392,7 +560,7 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
             "mechanical_mesh": "NOT_RENDERED",
             "visual_mesh": "SOURCE_FOREGROUND_MASK_DERIVED",
             "texture": "ORIGINAL_SOURCE_RGBA_WITH_FOREGROUND_ALPHA",
-            "deformation_driver": "STAGE28_SKELETON_PLUS_PRESET_MOTION",
+            "deformation_driver": "STAGE18_FIRST_HIT_SURFACE_BINDING_PLUS_STAGE32_ARACHNE_LBS_PLUS_STAGE28_MOTION",
             "deformer": "LOCAL_GLOBAL_ARAP_2D",
         },
         "views": report_views,

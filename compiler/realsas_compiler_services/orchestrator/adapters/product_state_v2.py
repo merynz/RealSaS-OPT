@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 """V2 Stage37-38 presentation and complete puppet sealing."""
 
 from PIL import Image

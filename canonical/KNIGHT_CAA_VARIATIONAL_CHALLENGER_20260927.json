@@ -1,0 +1,73 @@
+{
+  "authority": {
+    "cross_component_completion_forbidden": true,
+    "diagnostic_only": true,
+    "learned_pixel_generation_used": false,
+    "product_authority_claimed": false,
+    "shipping_policy_changed": false,
+    "source_only_constraints": true
+  },
+  "completed_alpha_u8": {
+    "maximum": 255,
+    "median": 254.0,
+    "minimum": 9,
+    "p01": 175.0,
+    "p05": 215.0,
+    "p95": 255.0,
+    "zero_alpha_fraction": 0.0
+  },
+  "completed_fraction": 0.6410609824505169,
+  "completed_sample_count": 159996,
+  "component_count": 1,
+  "components": [
+    {
+      "completed_sample_count": 159996,
+      "component_id": "CMP:cea19b0c2c852108312b",
+      "component_index": 0,
+      "known_foreground_anchor_count": 89584,
+      "sample_count": 249580
+    }
+  ],
+  "control_lattice_resolution": 4,
+  "face_count": 24958,
+  "known_foreground_anchor_count": 89584,
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "sample_count": 249580,
+  "schema": "RealSaS.CAAVariationalCompletionChallenger.v1",
+  "solver": {
+    "channel_iterations": [
+      1416,
+      1357,
+      1272,
+      1303
+    ],
+    "channel_relative_residuals": [
+      9.938435389981745e-10,
+      9.980425757423286e-10,
+      9.887320088717536e-10,
+      9.84787591427389e-10
+    ],
+    "cross_component_edges_consumed": false,
+    "edge_count": 746577,
+    "known_count": 89584,
+    "maximum_edge_weight": 32.0,
+    "minimum_edge_weight": 0.5749716126638394,
+    "node_count": 249580,
+    "objective": "WEIGHTED_GRAPH_DIRICHLET_ENERGY",
+    "positive_edge_length_median": 0.015768393921025164,
+    "solver": "SCIPY_CONJUGATE_GRADIENT_JACOBI_PRECONDITIONED",
+    "source_constraints_exact": true,
+    "unknown_count": 159996,
+    "zero_length_topology_edge_count": 297333
+  },
+  "source_anchor_alpha_u8": {
+    "maximum": 255,
+    "median": 255.0,
+    "minimum": 1
+  },
+  "source_constraints": {
+    "maximum_roundtrip_rgba8_delta": 0,
+    "premultiplied_linear_exact": true
+  },
+  "status": "MEASURED"
+}

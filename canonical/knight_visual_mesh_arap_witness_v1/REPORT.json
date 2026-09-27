@@ -22,198 +22,198 @@
       "qa_by_clip": {
         "demo_idle_v1": [
           {
-            "flipped_triangles": 64,
-            "max_edge_stretch": 22.525818989432242,
-            "max_handle_residual_px": 5.14337908975014,
-            "p95_edge_stretch": 3.5583945312897054,
+            "flipped_triangles": 110,
+            "max_edge_stretch": 62.32633768051471,
+            "max_handle_residual_px": 18.513691966758202,
+            "p95_edge_stretch": 2.36927472187726,
             "time_seconds": 0.0
           },
           {
-            "flipped_triangles": 65,
-            "max_edge_stretch": 22.514644052244922,
-            "max_handle_residual_px": 5.142885519014193,
-            "p95_edge_stretch": 3.4599178639623616,
+            "flipped_triangles": 108,
+            "max_edge_stretch": 40.20327879339793,
+            "max_handle_residual_px": 18.508299777581477,
+            "p95_edge_stretch": 2.2872423210408734,
             "time_seconds": 0.8333333333333334
           },
           {
-            "flipped_triangles": 65,
-            "max_edge_stretch": 22.516544536275248,
-            "max_handle_residual_px": 5.143716933141284,
-            "p95_edge_stretch": 3.4558823432168184,
+            "flipped_triangles": 108,
+            "max_edge_stretch": 32.46503314788938,
+            "max_handle_residual_px": 18.51373770678441,
+            "p95_edge_stretch": 2.237611556500045,
             "time_seconds": 1.6666666666666667
           },
           {
-            "flipped_triangles": 63,
-            "max_edge_stretch": 22.513613988058164,
-            "max_handle_residual_px": 5.14300759760541,
-            "p95_edge_stretch": 3.4576215874051752,
+            "flipped_triangles": 109,
+            "max_edge_stretch": 33.06981563905696,
+            "max_handle_residual_px": 18.50841280910854,
+            "p95_edge_stretch": 2.222827596143327,
             "time_seconds": 2.5
           }
         ],
         "demo_run_v1": [
           {
-            "flipped_triangles": 80,
-            "max_edge_stretch": 22.39543486641552,
-            "max_handle_residual_px": 5.1192304268675155,
-            "p95_edge_stretch": 3.448065059048985,
+            "flipped_triangles": 156,
+            "max_edge_stretch": 14.000811495091966,
+            "max_handle_residual_px": 18.206559754160555,
+            "p95_edge_stretch": 2.3435033129912264,
             "time_seconds": 0.0
           },
           {
-            "flipped_triangles": 75,
-            "max_edge_stretch": 23.837159187578134,
-            "max_handle_residual_px": 5.129812750311496,
-            "p95_edge_stretch": 3.343406556304144,
+            "flipped_triangles": 135,
+            "max_edge_stretch": 47.389010339582605,
+            "max_handle_residual_px": 18.42371194780969,
+            "p95_edge_stretch": 2.3028034542919165,
             "time_seconds": 0.20833333333333334
           },
           {
-            "flipped_triangles": 82,
-            "max_edge_stretch": 22.609836337153638,
-            "max_handle_residual_px": 5.159972078430632,
-            "p95_edge_stretch": 3.540980719413281,
+            "flipped_triangles": 114,
+            "max_edge_stretch": 16.593862946176507,
+            "max_handle_residual_px": 18.70025230267568,
+            "p95_edge_stretch": 2.2924274841877152,
             "time_seconds": 0.4166666666666667
           },
           {
-            "flipped_triangles": 72,
-            "max_edge_stretch": 22.440007833634617,
-            "max_handle_residual_px": 5.132790633625684,
-            "p95_edge_stretch": 3.4587242358754806,
+            "flipped_triangles": 108,
+            "max_edge_stretch": 35.28755161629827,
+            "max_handle_residual_px": 18.422948963496548,
+            "p95_edge_stretch": 2.2004691271020675,
             "time_seconds": 0.625
           }
         ],
         "demo_slash_v1": [
           {
-            "flipped_triangles": 76,
-            "max_edge_stretch": 22.38743568567677,
-            "max_handle_residual_px": 5.119955515798779,
-            "p95_edge_stretch": 3.433209239561635,
+            "flipped_triangles": 131,
+            "max_edge_stretch": 14.000268318309804,
+            "max_handle_residual_px": 18.206558380659327,
+            "p95_edge_stretch": 2.231582008701481,
             "time_seconds": 0.0
           },
           {
-            "flipped_triangles": 71,
-            "max_edge_stretch": 23.56280224703871,
-            "max_handle_residual_px": 5.14108404695268,
-            "p95_edge_stretch": 3.3842875129651766,
+            "flipped_triangles": 120,
+            "max_edge_stretch": 81.44174862455509,
+            "max_handle_residual_px": 18.55642010554472,
+            "p95_edge_stretch": 2.2156153177468276,
             "time_seconds": 0.2777777777777778
           },
           {
-            "flipped_triangles": 80,
-            "max_edge_stretch": 22.53253172652566,
-            "max_handle_residual_px": 5.144542193877342,
-            "p95_edge_stretch": 3.594654113963821,
+            "flipped_triangles": 146,
+            "max_edge_stretch": 15.469207265454656,
+            "max_handle_residual_px": 18.556488776089957,
+            "p95_edge_stretch": 2.243087942572308,
             "time_seconds": 0.5555555555555556
           },
           {
-            "flipped_triangles": 77,
-            "max_edge_stretch": 22.37926164590968,
-            "max_handle_residual_px": 5.120314260469794,
-            "p95_edge_stretch": 3.302971213566202,
+            "flipped_triangles": 130,
+            "max_edge_stretch": 15.812450128218723,
+            "max_handle_residual_px": 18.2061227055123,
+            "p95_edge_stretch": 2.1744109358350774,
             "time_seconds": 0.8333333333333334
           }
         ]
       },
       "source_foreground_pixel_count": 174442,
       "view_index": 0,
-      "visual_face_count": 942,
-      "visual_vertex_count": 584
+      "visual_face_count": 2387,
+      "visual_vertex_count": 1956
     },
     {
-      "handle_count": 49,
+      "handle_count": 53,
       "qa_by_clip": {
         "demo_idle_v1": [
           {
-            "flipped_triangles": 62,
-            "max_edge_stretch": 46.48327767537047,
-            "max_handle_residual_px": 0.2830245074985234,
-            "p95_edge_stretch": 4.005310865340086,
+            "flipped_triangles": 84,
+            "max_edge_stretch": 27.973709325504064,
+            "max_handle_residual_px": 1.3435657559500314,
+            "p95_edge_stretch": 2.694207178972385,
             "time_seconds": 0.0
           },
           {
-            "flipped_triangles": 62,
-            "max_edge_stretch": 18.829479756718264,
-            "max_handle_residual_px": 0.2973723933996878,
-            "p95_edge_stretch": 3.9406763475299305,
+            "flipped_triangles": 77,
+            "max_edge_stretch": 27.938468227205256,
+            "max_handle_residual_px": 1.3421546257563222,
+            "p95_edge_stretch": 2.6765252357283362,
             "time_seconds": 0.8333333333333334
           },
           {
-            "flipped_triangles": 56,
-            "max_edge_stretch": 68.64993850620871,
-            "max_handle_residual_px": 0.2984863179854164,
-            "p95_edge_stretch": 3.919666737820194,
+            "flipped_triangles": 81,
+            "max_edge_stretch": 27.975947603245316,
+            "max_handle_residual_px": 1.3417292195729238,
+            "p95_edge_stretch": 2.6763182990973196,
             "time_seconds": 1.6666666666666667
           },
           {
-            "flipped_triangles": 56,
-            "max_edge_stretch": 18.82950935869981,
-            "max_handle_residual_px": 0.2967851138071471,
-            "p95_edge_stretch": 3.8705780436975408,
+            "flipped_triangles": 80,
+            "max_edge_stretch": 27.94010696046191,
+            "max_handle_residual_px": 1.3417313608882813,
+            "p95_edge_stretch": 2.673982668361519,
             "time_seconds": 2.5
           }
         ],
         "demo_run_v1": [
           {
-            "flipped_triangles": 80,
-            "max_edge_stretch": 18.268156372967372,
-            "max_handle_residual_px": 0.455717108050139,
-            "p95_edge_stretch": 4.4111913546615495,
+            "flipped_triangles": 145,
+            "max_edge_stretch": 59.88698953654402,
+            "max_handle_residual_px": 1.3695384581622698,
+            "p95_edge_stretch": 3.2550192098289648,
             "time_seconds": 0.0
           },
           {
-            "flipped_triangles": 79,
-            "max_edge_stretch": 27.862194561366568,
-            "max_handle_residual_px": 0.4636833863713534,
-            "p95_edge_stretch": 4.138878317100759,
+            "flipped_triangles": 137,
+            "max_edge_stretch": 90.18627045235398,
+            "max_handle_residual_px": 1.3467749691157875,
+            "p95_edge_stretch": 3.1176227222292088,
             "time_seconds": 0.20833333333333334
           },
           {
-            "flipped_triangles": 120,
-            "max_edge_stretch": 35.01822189515163,
-            "max_handle_residual_px": 0.6107171567657522,
-            "p95_edge_stretch": 4.9286368108618435,
+            "flipped_triangles": 144,
+            "max_edge_stretch": 57.39772715027141,
+            "max_handle_residual_px": 1.329650809693255,
+            "p95_edge_stretch": 3.595443067238871,
             "time_seconds": 0.4166666666666667
           },
           {
-            "flipped_triangles": 108,
-            "max_edge_stretch": 35.524652410769136,
-            "max_handle_residual_px": 0.6259281894026009,
-            "p95_edge_stretch": 4.920912998786825,
+            "flipped_triangles": 141,
+            "max_edge_stretch": 49.42767363386749,
+            "max_handle_residual_px": 1.32367929846506,
+            "p95_edge_stretch": 3.3685421928250885,
             "time_seconds": 0.625
           }
         ],
         "demo_slash_v1": [
           {
-            "flipped_triangles": 101,
-            "max_edge_stretch": 21.753578622915306,
-            "max_handle_residual_px": 0.4581807390969454,
-            "p95_edge_stretch": 4.07268406420029,
+            "flipped_triangles": 160,
+            "max_edge_stretch": 59.88698182021356,
+            "max_handle_residual_px": 1.3717701373899944,
+            "p95_edge_stretch": 2.9533635919124843,
             "time_seconds": 0.0
           },
           {
-            "flipped_triangles": 84,
-            "max_edge_stretch": 20.59134889590246,
-            "max_handle_residual_px": 0.34839173964243203,
-            "p95_edge_stretch": 3.953763484005987,
+            "flipped_triangles": 121,
+            "max_edge_stretch": 55.356006252770506,
+            "max_handle_residual_px": 1.2901877035241136,
+            "p95_edge_stretch": 2.940630129865994,
             "time_seconds": 0.2777777777777778
           },
           {
-            "flipped_triangles": 100,
-            "max_edge_stretch": 37.234180822112464,
-            "max_handle_residual_px": 0.6503209879701545,
-            "p95_edge_stretch": 4.221617994453778,
+            "flipped_triangles": 124,
+            "max_edge_stretch": 60.8832531922156,
+            "max_handle_residual_px": 1.340606058995081,
+            "p95_edge_stretch": 3.087925011333004,
             "time_seconds": 0.5555555555555556
           },
           {
-            "flipped_triangles": 87,
-            "max_edge_stretch": 21.753358039047487,
-            "max_handle_residual_px": 0.45466792375859416,
-            "p95_edge_stretch": 3.913971671794883,
+            "flipped_triangles": 144,
+            "max_edge_stretch": 60.48859625825457,
+            "max_handle_residual_px": 1.3732854112799588,
+            "p95_edge_stretch": 2.838878563927308,
             "time_seconds": 0.8333333333333334
           }
         ]
       },
       "source_foreground_pixel_count": 144437,
       "view_index": 2,
-      "visual_face_count": 841,
-      "visual_vertex_count": 529
+      "visual_face_count": 1973,
+      "visual_vertex_count": 1606
     }
   ]
 }

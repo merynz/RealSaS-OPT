@@ -209,9 +209,16 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
     unsupported = (
         provenance == CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"]
     )
+    canonical_global = (
+        provenance == CAA_PROVENANCE["CANONICAL_GLOBAL_COMPLETION"]
+    )
     padding_mask = provenance == 255
     valid_provenance = (
-        direct_or_other | harmonic | unsupported | padding_mask
+        direct_or_other
+        | harmonic
+        | unsupported
+        | canonical_global
+        | padding_mask
     )
     if not np.all(valid_provenance):
         raise QualificationError(
@@ -227,6 +234,10 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
     if np.any(harmonic & (source_view != -2)):
         raise QualificationError(
             "PRESENTATION_V2_CAA_HARMONIC_LINEAGE_DRIFT"
+        )
+    if np.any(canonical_global & (source_view != -3)):
+        raise QualificationError(
+            "PRESENTATION_V2_CAA_CANONICAL_GLOBAL_LINEAGE_DRIFT"
         )
     if np.any(unsupported & (source_view != -4)):
         raise QualificationError(

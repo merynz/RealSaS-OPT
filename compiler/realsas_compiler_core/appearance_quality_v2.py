@@ -482,6 +482,7 @@ def structured_holdout_metrics(
     return {
         "mode": "SILHOUETTE_ADJACENT_BOUNDED_OCCLUSION_PATCHES_V4_SOURCE_ANCHORED",
         "band_fraction": fraction,
+        "other_view_donor_selection": "MAX_FACE_SUPPORT_SAME_AS_STAGE21",
         "sample_count": int(len(values)),
         "mean_rgba_l1": float(np.mean(values)) if len(values) else 0.0,
         "p95_rgba_l1": float(np.quantile(values, 0.95)) if len(values) else 0.0,

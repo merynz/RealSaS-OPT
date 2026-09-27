@@ -88,6 +88,8 @@ def diagnose(source_fbx:Path,spec_path:Path):
             "weight_sum":0.0,
             "maximum_weight":0.0,
             "mesh_object_count":0,
+            "weighted_position_sum":np.zeros(3,dtype=np.float64),
+            "weighted_outer_sum":np.zeros((3,3),dtype=np.float64),
         }
         for name in names
     }
@@ -108,7 +110,20 @@ def diagnose(source_fbx:Path,spec_path:Path):
         if not local_groups:
             continue
         touched=set()
+        object_to_armature=(
+            armature.matrix_world.inverted_safe() @ obj.matrix_world
+        )
         for vertex in obj.data.vertices:
+            source_position=object_to_armature @ vertex.co
+            canonical_position=C @ source_position
+            position=np.asarray(
+                (
+                    float(canonical_position.x),
+                    float(canonical_position.y),
+                    float(canonical_position.z),
+                ),
+                dtype=np.float64,
+            )
             for member in vertex.groups:
                 jid=local_groups.get(int(member.group))
                 if jid is None:
@@ -120,9 +135,29 @@ def diagnose(source_fbx:Path,spec_path:Path):
                 row["weighted_vertex_count"]+=1
                 row["weight_sum"]+=weight
                 row["maximum_weight"]=max(row["maximum_weight"],weight)
+                row["weighted_position_sum"]+=weight*position
+                row["weighted_outer_sum"]+=weight*np.outer(position,position)
                 touched.add(jid)
         for jid in touched:
             influence[jid]["mesh_object_count"]+=1
+
+    for jid,row in influence.items():
+        total=float(row["weight_sum"])
+        if total>0.0:
+            centroid=row["weighted_position_sum"]/total
+            second=row["weighted_outer_sum"]/total
+            covariance=second-np.outer(centroid,centroid)
+            covariance=0.5*(covariance+covariance.T)
+            eigenvalues=np.linalg.eigvalsh(covariance)
+            row["weighted_centroid"]=centroid
+            row["weighted_covariance"]=covariance
+            row["weighted_spread_eigenvalues"]=np.maximum(
+                eigenvalues,0.0
+            )
+        else:
+            row["weighted_centroid"]=None
+            row["weighted_covariance"]=None
+            row["weighted_spread_eigenvalues"]=None
 
     reports=[]
     stream_hashes={}
@@ -255,6 +290,32 @@ def diagnose(source_fbx:Path,spec_path:Path):
             ),
             "has_mesh_influence":bool(
                 influence[b.name]["weighted_vertex_count"]>0
+            ),
+            "mesh_influence_centroid":(
+                None
+                if influence[b.name]["weighted_centroid"] is None
+                else [
+                    float(x)
+                    for x in influence[b.name]["weighted_centroid"]
+                ]
+            ),
+            "mesh_influence_covariance":(
+                None
+                if influence[b.name]["weighted_covariance"] is None
+                else [
+                    [float(x) for x in row]
+                    for row in influence[b.name]["weighted_covariance"]
+                ]
+            ),
+            "mesh_influence_spread_eigenvalues":(
+                None
+                if influence[b.name]["weighted_spread_eigenvalues"] is None
+                else [
+                    float(x)
+                    for x in influence[b.name][
+                        "weighted_spread_eigenvalues"
+                    ]
+                ]
             ),
             "rest_position":[
                 float(x)

@@ -22,6 +22,7 @@ from compiler.realsas_compiler_core.playback_full_surface_v3 import CameraProjec
 from compiler.realsas_compiler_core.visibility_v2 import (
     VISIBILITY_CONTRACT_V2,
     VISIBILITY_DEPTH_EQUIVALENCE_EPSILON,
+    _rasterize_visible_owner_legacy,
     rasterize_visible_owner,
 )
 
@@ -569,3 +570,42 @@ def test_face_atlas_allows_unallocated_grid_padding_but_not_surface_undefinednes
         tx = (face % layout["columns"]) * stride
         ty = (face // layout["columns"]) * stride
         assert not np.any(prov[ty : ty + stride, tx : tx + stride] == 255)
+
+
+def test_vectorized_visibility_is_exactly_equivalent_to_legacy_oracle():
+    fixtures = (
+        (_overlap_mesh(equal_depth=False), 1),
+        (_overlap_mesh(equal_depth=True), 1),
+        (_overlap_mesh_with_depth_delta(
+            2.0 * VISIBILITY_DEPTH_EQUIVALENCE_EPSILON
+        ), 2),
+    )
+    for mesh, coverage_scale in fixtures:
+        legacy = _rasterize_visible_owner_legacy(
+            mesh,
+            _camera(resolution=32),
+            coverage_scale=coverage_scale,
+        )
+        vectorized = rasterize_visible_owner(
+            mesh,
+            _camera(resolution=32),
+            coverage_scale=coverage_scale,
+        )
+        for name in (
+            "owner_face_index",
+            "depth",
+            "barycentric",
+            "projected_vertices",
+            "second_owner_face_index",
+            "second_depth",
+            "depth_margin",
+            "layer_owner_face_index",
+            "layer_depth",
+            "layer_barycentric",
+            "layer_overflow",
+        ):
+            assert np.array_equal(
+                getattr(vectorized, name),
+                getattr(legacy, name),
+                equal_nan=True,
+            ), name

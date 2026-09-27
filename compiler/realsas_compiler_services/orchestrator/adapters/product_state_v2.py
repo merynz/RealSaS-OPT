@@ -52,6 +52,9 @@ from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import 
     write_ir,
 )
 from compiler.realsas_compiler_core.hashing import content_sha256
+from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
+    visual_mesh_set_from_dict,
+)
 from compiler.realsas_compiler_core.types import QualificationError
 
 
@@ -583,6 +586,58 @@ def seal_complete_puppet_stage(ctx: dict) -> dict:
     ):
         raise ValueError("COMPLETE_PUPPET_CAA_TOTALITY_NOT_PROVEN")
 
+    source_owned_visual_mode = bool(
+        dict(asset.metadata or {}).get("source_owned_visual_mesh_mode")
+    )
+    visual_mesh_set_hash = ""
+    if source_owned_visual_mode:
+        visual_set = visual_mesh_set_from_dict(
+            stage_output_payload(
+                ctx,
+                "18_CANONICAL_MESH_ADDRESSING_BUILD",
+                "RealSaS.VisualMeshSetIR.v1",
+            )
+        )
+        visual_mesh_set_hash = str(visual_set.set_hash)
+        for label, value in (
+            (
+                "ASSET",
+                dict(asset.metadata or {}).get(
+                    "visual_mesh_set_binding_hash"
+                ),
+            ),
+            (
+                "STRUCTURE",
+                dict(structure.metadata or {}).get(
+                    "visual_mesh_set_binding_hash"
+                ),
+            ),
+            (
+                "PARTITION_EVIDENCE",
+                dict(partition_evidence.metadata or {}).get(
+                    "visual_mesh_set_binding_hash"
+                ),
+            ),
+        ):
+            if str(value or "") != visual_mesh_set_hash:
+                raise ValueError(
+                    "COMPLETE_PUPPET_VISUAL_MESH_BINDING_DRIFT:"
+                    + label
+                )
+        if (
+            dict(asset.metadata or {}).get(
+                "mechanical_mesh_render_authority"
+            )
+            is not False
+            or dict(structure.metadata or {}).get(
+                "mechanical_mesh_render_authority"
+            )
+            is not False
+        ):
+            raise ValueError(
+                "COMPLETE_PUPPET_MECHANICAL_RENDER_AUTHORITY_DRIFT"
+            )
+
     mechanical = build_canonical_puppet_state(
         surface=surface,
         skeleton=skeleton,
@@ -608,6 +663,7 @@ def seal_complete_puppet_stage(ctx: dict) -> dict:
         directions=directions,
         appearance_asset_hash=asset.asset_hash,
         appearance_qualification_hash=appearance.qualification_hash,
+        visual_mesh_set_hash=visual_mesh_set_hash,
     )
     complete = build_complete_puppet_state_v2(
         mechanical_state=mechanical,
@@ -619,6 +675,7 @@ def seal_complete_puppet_stage(ctx: dict) -> dict:
         appearance_asset_hash=asset.asset_hash,
         appearance_qualification_hash=appearance.qualification_hash,
         output_direction_set_hash=directions.direction_set_hash,
+        visual_mesh_set_hash=visual_mesh_set_hash,
     )
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     return {
@@ -646,5 +703,11 @@ def seal_complete_puppet_stage(ctx: dict) -> dict:
             "complete_puppet_hash": complete.complete_puppet_hash,
             "complete_appearance_qualification_hash": appearance.qualification_hash,
             "geometry_mechanics_appearance_coequal": True,
+            "source_owned_visual_mesh_mode": source_owned_visual_mode,
+            "visual_mesh_set_binding_hash": visual_mesh_set_hash,
+            "mechanical_mesh_render_authority": (
+                False if source_owned_visual_mode else True
+            ),
+            "dynamic_visual_composition_authority_claimed": False,
         },
     }

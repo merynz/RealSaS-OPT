@@ -55,7 +55,9 @@ jobs:
             tests/compiler/test_caa_v2_subject_free_policy.py::test_tile_resolution_unsatisfied_evidence_is_preserved \
             tests/compiler/test_caa_v2_subject_free_policy.py::test_shared_canonical_edge_is_checked_even_when_provenance_class_matches \
             tests/compiler/test_caa_v2_subject_free_policy.py::test_cross_view_compatibility_measures_same_canonical_source_without_requiring_rgb_identity \
+            tests/compiler/test_caa_v2_subject_free_policy.py::test_cross_view_appearance_gate_excludes_directional_silhouette_class_transition \
             tests/compiler/test_visibility_and_caa_v2.py::test_safe_transparent_source_background_is_defined_direct_source_not_unseen \
+            tests/compiler/test_visibility_and_caa_v2.py::test_safe_background_direct_source_is_not_cross_view_appearance_donor \
             tests/compiler/test_visibility_and_caa_v2.py::test_paged_atlas_preserves_density_and_page_local_sampling
 
       - name: Verify Stage19 measured demo authority
@@ -127,6 +129,8 @@ jobs:
                   "status":row["status"],
                   "blockers":row.get("blockers") or [],
                   "diagnostics_hash":row.get("diagnostics_hash") or "",
+                  "wall_seconds":row.get("wall_seconds"),
+                  "performance":row.get("performance") or {},
               },sort_keys=True))
           for event in (ledger.get("history") or [])[-24:]:
               if event.get("event") in {"STAGE_EXCEPTION","STAGE_FAILED","STAGE_BLOCKED"}:

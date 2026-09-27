@@ -1,6 +1,318 @@
 {
   "all_requested_takes_pose_distinct": true,
   "body_scale": 4.8632933572573185,
+  "bone_roles": [
+    {
+      "parent_source_joint_id": null,
+      "rest_position": [
+        0.0027436520904302597,
+        -0.1950817108154297,
+        -0.00492025027051568
+      ],
+      "source_joint_id": "Bone",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Bone",
+      "rest_position": [
+        -0.5319820046424866,
+        -0.13667814433574677,
+        0.02537654899060726
+      ],
+      "source_joint_id": "Foot.L",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Bone",
+      "rest_position": [
+        -0.001765321590937674,
+        0.12316793948411942,
+        2.1206552982330322
+      ],
+      "source_joint_id": "Body",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Body",
+      "rest_position": [
+        2.2437920051743276e-05,
+        0.009688363410532475,
+        1.9585143327713013
+      ],
+      "source_joint_id": "Hips",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Hips",
+      "rest_position": [
+        -0.00015302354586310685,
+        -0.066070556640625,
+        2.3445067405700684
+      ],
+      "source_joint_id": "Abdomen",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Abdomen",
+      "rest_position": [
+        -0.00015275966143235564,
+        -0.06595660001039505,
+        3.115182638168335
+      ],
+      "source_joint_id": "Torso",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Torso",
+      "rest_position": [
+        2.190412942582043e-06,
+        0.0009461008012294769,
+        3.796839475631714
+      ],
+      "source_joint_id": "Neck",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Neck",
+      "rest_position": [
+        2.24378800339764e-05,
+        0.009688346646726131,
+        4.121866703033447
+      ],
+      "source_joint_id": "Head",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Torso",
+      "rest_position": [
+        -0.32486477494239807,
+        -0.11084917932748795,
+        3.4889719486236572
+      ],
+      "source_joint_id": "Shoulder.L",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Shoulder.L",
+      "rest_position": [
+        -0.6269686818122864,
+        -0.10903256386518478,
+        3.714759111404419
+      ],
+      "source_joint_id": "UpperArm.L",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "UpperArm.L",
+      "rest_position": [
+        -1.6366329193115234,
+        -0.19991005957126617,
+        3.655707359313965
+      ],
+      "source_joint_id": "LowerArm.L",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "LowerArm.L",
+      "rest_position": [
+        -2.7316253185272217,
+        -0.21497581899166107,
+        3.698211908340454
+      ],
+      "source_joint_id": "Palm.L",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Palm.L",
+      "rest_position": [
+        -2.989206314086914,
+        -0.20279307663440704,
+        3.6981546878814697
+      ],
+      "source_joint_id": "MiddleHand.L",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "MiddleHand.L",
+      "rest_position": [
+        -3.1498429775238037,
+        -0.20242105424404144,
+        3.698154926300049
+      ],
+      "source_joint_id": "Fingers.L",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "LowerArm.L",
+      "rest_position": [
+        -2.517533302307129,
+        0.006798642687499523,
+        3.630450963973999
+      ],
+      "source_joint_id": "Thumb.R",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Thumb.R",
+      "rest_position": [
+        -2.6164395809173584,
+        0.13883718848228455,
+        3.541015148162842
+      ],
+      "source_joint_id": "Thumb2.R",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Torso",
+      "rest_position": [
+        0.3291322588920593,
+        -0.10517620295286179,
+        3.489290237426758
+      ],
+      "source_joint_id": "Shoulder.R",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Shoulder.R",
+      "rest_position": [
+        0.6312414407730103,
+        -0.10475897043943405,
+        3.7150776386260986
+      ],
+      "source_joint_id": "UpperArm.R",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "UpperArm.R",
+      "rest_position": [
+        1.5571271181106567,
+        -0.20011918246746063,
+        3.6560256481170654
+      ],
+      "source_joint_id": "LowerArm.R",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "LowerArm.R",
+      "rest_position": [
+        2.7353837490081787,
+        -0.2204500436782837,
+        3.698530435562134
+      ],
+      "source_joint_id": "Palm.R",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Palm.R",
+      "rest_position": [
+        2.993018388748169,
+        -0.2094605714082718,
+        3.6984732151031494
+      ],
+      "source_joint_id": "MiddleHand.R",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "MiddleHand.R",
+      "rest_position": [
+        3.153656244277954,
+        -0.20983266830444336,
+        3.6984732151031494
+      ],
+      "source_joint_id": "Fingers.R",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "LowerArm.R",
+      "rest_position": [
+        2.5175368785858154,
+        -0.004862870555371046,
+        3.630451202392578
+      ],
+      "source_joint_id": "Thumb.L",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Thumb.L",
+      "rest_position": [
+        2.617053985595703,
+        0.1267160177230835,
+        3.541015625
+      ],
+      "source_joint_id": "Thumb2.L",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Body",
+      "rest_position": [
+        -0.528574526309967,
+        -0.06005265191197395,
+        1.741301417350769
+      ],
+      "source_joint_id": "UpperLeg.L",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "UpperLeg.L",
+      "rest_position": [
+        -0.5282989740371704,
+        0.058927249163389206,
+        0.8018825054168701
+      ],
+      "source_joint_id": "LowerLeg.L",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Body",
+      "rest_position": [
+        0.537383496761322,
+        -0.062056031078100204,
+        1.8354027271270752
+      ],
+      "source_joint_id": "UpperLeg.R",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "UpperLeg.R",
+      "rest_position": [
+        0.5376590490341187,
+        0.05692381039261818,
+        0.8959839344024658
+      ],
+      "source_joint_id": "LowerLeg.R",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Bone",
+      "rest_position": [
+        -0.5208616256713867,
+        1.0561233758926392,
+        0.7096765041351318
+      ],
+      "source_joint_id": "PoleTarget.L",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Bone",
+      "rest_position": [
+        0.5339749455451965,
+        -0.13914702832698822,
+        0.02537655085325241
+      ],
+      "source_joint_id": "Foot.R",
+      "use_deform": true
+    },
+    {
+      "parent_source_joint_id": "Bone",
+      "rest_position": [
+        0.5450964570045471,
+        1.0541200637817383,
+        0.8037778735160828
+      ],
+      "source_joint_id": "PoleTarget.R",
+      "use_deform": true
+    }
+  ],
   "clip_count": 3,
   "clip_reports": [
     {
@@ -209,6 +521,165 @@
       "pose_stream_sha256": "75d03b07b6654cbb40d54c79693752084c9d997e63c46d2eaf8a6f89aac7b176",
       "requested_take": "HumanArmature|Idle",
       "resolved_action_name": "HumanArmature|HumanArmature|Idle",
+      "rotation_amplitude": {
+        "top_bones": [
+          {
+            "maximum_angle_degrees": 77.45581063810408,
+            "maximum_angle_radians": 1.3518589204361664,
+            "source_joint_id": "UpperArm.L"
+          },
+          {
+            "maximum_angle_degrees": 77.37459276368146,
+            "maximum_angle_radians": 1.3504414011160204,
+            "source_joint_id": "UpperArm.R"
+          },
+          {
+            "maximum_angle_degrees": 30.04544204944688,
+            "maximum_angle_radians": 0.524391888980001,
+            "source_joint_id": "Fingers.R"
+          },
+          {
+            "maximum_angle_degrees": 29.488129405276524,
+            "maximum_angle_radians": 0.5146649483762327,
+            "source_joint_id": "Fingers.L"
+          },
+          {
+            "maximum_angle_degrees": 28.758606546335248,
+            "maximum_angle_radians": 0.5019323725191452,
+            "source_joint_id": "Thumb2.R"
+          },
+          {
+            "maximum_angle_degrees": 14.72665164995763,
+            "maximum_angle_radians": 0.2570285590860161,
+            "source_joint_id": "LowerArm.R"
+          },
+          {
+            "maximum_angle_degrees": 12.088777957739955,
+            "maximum_angle_radians": 0.21098897790507815,
+            "source_joint_id": "LowerArm.L"
+          },
+          {
+            "maximum_angle_degrees": 6.50381915646204,
+            "maximum_angle_radians": 0.11351305823454283,
+            "source_joint_id": "LowerLeg.R"
+          },
+          {
+            "maximum_angle_degrees": 6.485491565971517,
+            "maximum_angle_radians": 0.11319318143652601,
+            "source_joint_id": "LowerLeg.L"
+          },
+          {
+            "maximum_angle_degrees": 3.5202835668220596,
+            "maximum_angle_radians": 0.061440538844894754,
+            "source_joint_id": "Head"
+          },
+          {
+            "maximum_angle_degrees": 2.7153654780082648,
+            "maximum_angle_radians": 0.047392067986233896,
+            "source_joint_id": "UpperLeg.R"
+          },
+          {
+            "maximum_angle_degrees": 2.524141298758625,
+            "maximum_angle_radians": 0.044054576448903864,
+            "source_joint_id": "UpperLeg.L"
+          },
+          {
+            "maximum_angle_degrees": 1.411087606659467,
+            "maximum_angle_radians": 0.024628124770294364,
+            "source_joint_id": "Torso"
+          },
+          {
+            "maximum_angle_degrees": 0.44057392275627666,
+            "maximum_angle_radians": 0.007689465550524199,
+            "source_joint_id": "Body"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Abdomen"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Bone"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Hips"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "MiddleHand.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "MiddleHand.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Neck"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Palm.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Palm.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "PoleTarget.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "PoleTarget.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Shoulder.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Shoulder.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Thumb.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Thumb.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Thumb2.L"
+          }
+        ]
+      },
       "sample_frame_count": 81,
       "source_fps": 24.0
     },
@@ -418,6 +889,165 @@
       "pose_stream_sha256": "fc350dfae3900a9f742e193db49196a8eb5e8f75a5332741e451d91e8c12af40",
       "requested_take": "HumanArmature|Run",
       "resolved_action_name": "HumanArmature|HumanArmature|Run",
+      "rotation_amplitude": {
+        "top_bones": [
+          {
+            "maximum_angle_degrees": 120.61104035556063,
+            "maximum_angle_radians": 2.1050597684602854,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "maximum_angle_degrees": 118.15557419864173,
+            "maximum_angle_radians": 2.0622037993507587,
+            "source_joint_id": "UpperArm.L"
+          },
+          {
+            "maximum_angle_degrees": 117.83507216225048,
+            "maximum_angle_radians": 2.0566099835563847,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "maximum_angle_degrees": 107.43353150424826,
+            "maximum_angle_radians": 1.8750688517941887,
+            "source_joint_id": "LowerArm.R"
+          },
+          {
+            "maximum_angle_degrees": 104.69726642866688,
+            "maximum_angle_radians": 1.827312017017962,
+            "source_joint_id": "UpperArm.R"
+          },
+          {
+            "maximum_angle_degrees": 103.53157594204204,
+            "maximum_angle_radians": 1.8069668799671834,
+            "source_joint_id": "LowerLeg.L"
+          },
+          {
+            "maximum_angle_degrees": 101.3941895805502,
+            "maximum_angle_radians": 1.7696624505719294,
+            "source_joint_id": "Fingers.L"
+          },
+          {
+            "maximum_angle_degrees": 94.71660418708963,
+            "maximum_angle_radians": 1.6531165993729613,
+            "source_joint_id": "LowerArm.L"
+          },
+          {
+            "maximum_angle_degrees": 93.38813336559647,
+            "maximum_angle_radians": 1.629930409521232,
+            "source_joint_id": "LowerLeg.R"
+          },
+          {
+            "maximum_angle_degrees": 70.16105921363749,
+            "maximum_angle_radians": 1.2245414899646778,
+            "source_joint_id": "MiddleHand.R"
+          },
+          {
+            "maximum_angle_degrees": 69.10114565242654,
+            "maximum_angle_radians": 1.2060425085350082,
+            "source_joint_id": "UpperLeg.R"
+          },
+          {
+            "maximum_angle_degrees": 66.04321886355025,
+            "maximum_angle_radians": 1.1526716177841796,
+            "source_joint_id": "UpperLeg.L"
+          },
+          {
+            "maximum_angle_degrees": 64.87333457227035,
+            "maximum_angle_radians": 1.1322532850339848,
+            "source_joint_id": "Fingers.R"
+          },
+          {
+            "maximum_angle_degrees": 63.0650719660453,
+            "maximum_angle_radians": 1.100693148814664,
+            "source_joint_id": "MiddleHand.L"
+          },
+          {
+            "maximum_angle_degrees": 41.31310547323574,
+            "maximum_angle_radians": 0.7210497147316537,
+            "source_joint_id": "Thumb2.R"
+          },
+          {
+            "maximum_angle_degrees": 27.085248784038818,
+            "maximum_angle_radians": 0.47272677000326796,
+            "source_joint_id": "Thumb2.L"
+          },
+          {
+            "maximum_angle_degrees": 20.96042048239665,
+            "maximum_angle_radians": 0.3658283500202797,
+            "source_joint_id": "Abdomen"
+          },
+          {
+            "maximum_angle_degrees": 15.577917038102179,
+            "maximum_angle_radians": 0.271885942917406,
+            "source_joint_id": "Torso"
+          },
+          {
+            "maximum_angle_degrees": 8.682535528328833,
+            "maximum_angle_radians": 0.15153883239072352,
+            "source_joint_id": "Head"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Body"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Bone"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Hips"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Neck"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Palm.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Palm.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "PoleTarget.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "PoleTarget.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Shoulder.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Shoulder.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Thumb.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Thumb.R"
+          }
+        ]
+      },
       "sample_frame_count": 21,
       "source_fps": 24.0
     },
@@ -627,12 +1257,173 @@
       "pose_stream_sha256": "935001e8d74ace494fd710166a85e7aa9298b4bb39891fe0cc2acd84c17647d8",
       "requested_take": "HumanArmature|Run_swordAttack",
       "resolved_action_name": "HumanArmature|HumanArmature|Run_swordAttack",
+      "rotation_amplitude": {
+        "top_bones": [
+          {
+            "maximum_angle_degrees": 120.61104035556063,
+            "maximum_angle_radians": 2.1050597684602854,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "maximum_angle_degrees": 118.15557419864173,
+            "maximum_angle_radians": 2.0622037993507587,
+            "source_joint_id": "UpperArm.L"
+          },
+          {
+            "maximum_angle_degrees": 117.83507216225048,
+            "maximum_angle_radians": 2.0566099835563847,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "maximum_angle_degrees": 104.69724054831562,
+            "maximum_angle_radians": 1.827311565320621,
+            "source_joint_id": "UpperArm.R"
+          },
+          {
+            "maximum_angle_degrees": 103.53157594204204,
+            "maximum_angle_radians": 1.8069668799671834,
+            "source_joint_id": "LowerLeg.L"
+          },
+          {
+            "maximum_angle_degrees": 101.3941895805502,
+            "maximum_angle_radians": 1.7696624505719294,
+            "source_joint_id": "Fingers.L"
+          },
+          {
+            "maximum_angle_degrees": 94.71660418708963,
+            "maximum_angle_radians": 1.6531165993729613,
+            "source_joint_id": "LowerArm.L"
+          },
+          {
+            "maximum_angle_degrees": 93.38813336559647,
+            "maximum_angle_radians": 1.629930409521232,
+            "source_joint_id": "LowerLeg.R"
+          },
+          {
+            "maximum_angle_degrees": 73.59562336194259,
+            "maximum_angle_radians": 1.2844859427235567,
+            "source_joint_id": "LowerArm.R"
+          },
+          {
+            "maximum_angle_degrees": 70.1610473294083,
+            "maximum_angle_radians": 1.2245412825457496,
+            "source_joint_id": "MiddleHand.R"
+          },
+          {
+            "maximum_angle_degrees": 69.10114565242654,
+            "maximum_angle_radians": 1.2060425085350082,
+            "source_joint_id": "UpperLeg.R"
+          },
+          {
+            "maximum_angle_degrees": 66.04321886355025,
+            "maximum_angle_radians": 1.1526716177841796,
+            "source_joint_id": "UpperLeg.L"
+          },
+          {
+            "maximum_angle_degrees": 64.87333457227035,
+            "maximum_angle_radians": 1.1322532850339848,
+            "source_joint_id": "Fingers.R"
+          },
+          {
+            "maximum_angle_degrees": 63.0650719660453,
+            "maximum_angle_radians": 1.100693148814664,
+            "source_joint_id": "MiddleHand.L"
+          },
+          {
+            "maximum_angle_degrees": 41.31310547323574,
+            "maximum_angle_radians": 0.7210497147316537,
+            "source_joint_id": "Thumb2.R"
+          },
+          {
+            "maximum_angle_degrees": 30.846464068316646,
+            "maximum_angle_radians": 0.5383723605902505,
+            "source_joint_id": "Palm.R"
+          },
+          {
+            "maximum_angle_degrees": 27.08530711961083,
+            "maximum_angle_radians": 0.4727277881510706,
+            "source_joint_id": "Thumb2.L"
+          },
+          {
+            "maximum_angle_degrees": 20.96042048239665,
+            "maximum_angle_radians": 0.3658283500202797,
+            "source_joint_id": "Abdomen"
+          },
+          {
+            "maximum_angle_degrees": 15.577917038102179,
+            "maximum_angle_radians": 0.271885942917406,
+            "source_joint_id": "Torso"
+          },
+          {
+            "maximum_angle_degrees": 13.578917580323754,
+            "maximum_angle_radians": 0.2369968206335911,
+            "source_joint_id": "Shoulder.R"
+          },
+          {
+            "maximum_angle_degrees": 8.682535528328833,
+            "maximum_angle_radians": 0.15153883239072352,
+            "source_joint_id": "Head"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Body"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Bone"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Hips"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Neck"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Palm.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "PoleTarget.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "PoleTarget.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Shoulder.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Thumb.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Thumb.R"
+          }
+        ]
+      },
       "sample_frame_count": 21,
       "source_fps": 24.0
     }
   ],
+  "deform_bone_count": 31,
   "diagnostic_only": true,
   "distinct_pose_stream_hash_count": 3,
+  "nondeform_bone_count": 0,
   "schema": "RealSaS.MotionSourceActionDiagnostic.v1",
   "source_fbx": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/inputs/motion/quaternius_knight_v1_source/KnightCharacter.fbx",
   "status": "MEASURED",

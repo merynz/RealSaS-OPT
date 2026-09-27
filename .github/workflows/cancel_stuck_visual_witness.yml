@@ -1,0 +1,26 @@
+name: cancel-stuck-visual-witness
+
+permissions:
+  actions: write
+  contents: read
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/cancel_stuck_visual_witness.yml'
+
+jobs:
+  cancel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.cancelWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: 36341141971
+            })

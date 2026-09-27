@@ -1325,6 +1325,7 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
             CAA_PROVENANCE["DIRECT_SOURCE"],
             CAA_PROVENANCE["OTHER_VIEW_SOURCE"],
             CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"],
+            CAA_PROVENANCE["CANONICAL_GLOBAL_COMPLETION"],
         ),
         dtype=np.uint8,
     )

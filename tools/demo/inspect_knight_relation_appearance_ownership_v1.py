@@ -96,6 +96,39 @@ def run(*, authority_root: Path, run_id: str, out_path: Path):
         for sid in component.surface_ids
     }
 
+    face_count = len(candidate.faces)
+    face_sample_count = np.bincount(sample_face, minlength=face_count).astype(np.int64)
+    face_suspicious_count = np.bincount(
+        sample_face,
+        weights=suspicious_opaque.astype(np.int64),
+        minlength=face_count,
+    ).astype(np.int64)
+    face_unseen_count = np.bincount(
+        sample_face,
+        weights=globally_unseen.astype(np.int64),
+        minlength=face_count,
+    ).astype(np.int64)
+    face_fg_count = np.bincount(
+        sample_face,
+        weights=any_fg_donor.astype(np.int64),
+        minlength=face_count,
+    ).astype(np.int64)
+    face_observed_bg_count = np.bincount(
+        sample_face,
+        weights=background_observed.astype(np.int64),
+        minlength=face_count,
+    ).astype(np.int64)
+    face_caa_opaque_any_count = np.bincount(
+        sample_face,
+        weights=(caa_alpha_max > 0).astype(np.int64),
+        minlength=face_count,
+    ).astype(np.int64)
+    face_caa_opaque_all_count = np.bincount(
+        sample_face,
+        weights=(caa_alpha_min > 0).astype(np.int64),
+        minlength=face_count,
+    ).astype(np.int64)
+
     face_rows = []
     signature_agg = defaultdict(lambda: {
         "face_count": 0,
@@ -138,16 +171,15 @@ def run(*, authority_root: Path, run_id: str, out_path: Path):
             relation_scores = [None] * 3
             relation_metadata = [{}, {}, {}]
 
-        mask = sample_face == fi
-        n = int(np.count_nonzero(mask))
+        n = int(face_sample_count[fi])
         if n == 0:
             raise RuntimeError(f"FACE_WITHOUT_SAMPLES:{fi}")
-        suspicious = int(np.count_nonzero(suspicious_opaque[mask]))
-        unseen = int(np.count_nonzero(globally_unseen[mask]))
-        fg = int(np.count_nonzero(any_fg_donor[mask]))
-        observed_bg = int(np.count_nonzero(background_observed[mask]))
-        caa_opaque_any = int(np.count_nonzero(caa_alpha_max[mask] > 0))
-        caa_opaque_all = int(np.count_nonzero(caa_alpha_min[mask] > 0))
+        suspicious = int(face_suspicious_count[fi])
+        unseen = int(face_unseen_count[fi])
+        fg = int(face_fg_count[fi])
+        observed_bg = int(face_observed_bg_count[fi])
+        caa_opaque_any = int(face_caa_opaque_any_count[fi])
+        caa_opaque_all = int(face_caa_opaque_all_count[fi])
 
         signature = "|".join(sorted(relation_kinds))
         row = {

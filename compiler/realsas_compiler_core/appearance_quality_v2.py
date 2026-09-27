@@ -219,39 +219,82 @@ def _bounded_edge_holdout_mask(
     neighbors: SurfaceSampleGraph,
     max_region_samples: int,
     max_graph_hops: int,
+    source_observed_mask: np.ndarray | None = None,
 ) -> np.ndarray:
     candidate = np.asarray(candidate_mask, dtype=bool)
+    source_observed = (
+        candidate.copy()
+        if source_observed_mask is None
+        else np.asarray(source_observed_mask, dtype=bool)
+    )
+    if source_observed.shape != candidate.shape:
+        raise QualificationError("CAA_HOLDOUT_SOURCE_OBSERVED_SHAPE_INVALID")
+    if np.any(candidate & ~source_observed):
+        raise QualificationError("CAA_HOLDOUT_CANDIDATE_NOT_SOURCE_OBSERVED")
+
     selected = np.zeros(len(candidate), dtype=bool)
     blocked = np.zeros(len(candidate), dtype=bool)
+    max_depth_from_seed = max(0, int(max_graph_hops) - 1)
+
     for seed in np.flatnonzero(candidate):
         seed = int(seed)
         if blocked[seed] or selected[seed]:
             continue
+
+        # Every withheld patch keeps one exact source-observed neighbor out of
+        # the patch. Growing at most max_graph_hops-1 edges away from the seed
+        # then proves every selected node remains within the shipping harmonic
+        # hop budget from a preserved source boundary. This is stronger than
+        # merely bounding radius from an arbitrary withheld seed.
+        anchors = sorted(
+            int(raw)
+            for raw in neighbors[seed]
+            if source_observed[int(raw)]
+            and not selected[int(raw)]
+            and not blocked[int(raw)]
+        )
+        if not anchors:
+            continue
+        anchors.sort(key=lambda node: (bool(candidate[node]), node))
+        anchor = int(anchors[0])
+        blocked[anchor] = True
+
         patch = []
         queue = [(seed, 0)]
-        visited = {seed}
+        visited = {seed, anchor}
         cursor = 0
         while cursor < len(queue) and len(patch) < int(max_region_samples):
             node, depth = queue[cursor]
             cursor += 1
-            if not candidate[node] or blocked[node]:
+            if (
+                node == anchor
+                or not candidate[node]
+                or blocked[node]
+                or selected[node]
+            ):
                 continue
             patch.append(node)
-            if depth + 1 >= int(max_graph_hops):
+            if depth >= max_depth_from_seed:
                 continue
-            for nxt in neighbors[node]:
+            for raw_nxt in neighbors[node]:
+                nxt = int(raw_nxt)
                 if nxt not in visited:
-                    visited.add(int(nxt))
-                    queue.append((int(nxt), depth + 1))
+                    visited.add(nxt)
+                    queue.append((nxt, depth + 1))
+
         if not patch:
             continue
         selected[patch] = True
-        # Keep selected regions disconnected so every withheld region respects
-        # the same bounded completion contract as shipping.
+
+        # Keep selected regions disconnected and preserve the explicit source
+        # anchor so the downstream harmonic solve sees the same local bounded
+        # domain that this holdout claims to qualify.
         for node in patch:
-            for nxt in neighbors[node]:
+            for raw_nxt in neighbors[node]:
+                nxt = int(raw_nxt)
                 if not selected[nxt]:
                     blocked[nxt] = True
+
     return selected
 
 
@@ -357,6 +400,7 @@ def structured_holdout_metrics(
             neighbors=neighbors,
             max_region_samples=int(max_region_samples),
             max_graph_hops=int(max_graph_hops),
+            source_observed_mask=direct_valid[target],
         )
         held = np.flatnonzero(holdout)
         if len(held) == 0:
@@ -423,7 +467,7 @@ def structured_holdout_metrics(
 
     values = np.asarray(errors, dtype=np.float64)
     return {
-        "mode": "SILHOUETTE_ADJACENT_BOUNDED_OCCLUSION_PATCHES_V3",
+        "mode": "SILHOUETTE_ADJACENT_BOUNDED_OCCLUSION_PATCHES_V4_SOURCE_ANCHORED",
         "band_fraction": fraction,
         "sample_count": int(len(values)),
         "mean_rgba_l1": float(np.mean(values)) if len(values) else 0.0,

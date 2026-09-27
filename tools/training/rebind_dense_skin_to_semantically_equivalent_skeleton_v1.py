@@ -25,6 +25,10 @@ from compiler.realsas_compiler_core.artifact_codec_v2 import (
     qualified_skeleton_from_dict,
 )
 from compiler.realsas_compiler_core.hashing import content_sha256
+from compiler.realsas_compiler_core.rig import (
+    qualified_skeleton_semantic_identity,
+    qualified_skeleton_semantic_sha256,
+)
 from compiler.realsas_compiler_core.types import QualificationError
 
 
@@ -58,43 +62,6 @@ def _joint_by_source(skeleton):
             )
         rows[source] = joint
     return rows
-
-
-def _semantic_tree(skeleton) -> tuple[dict, ...]:
-    by_source = _joint_by_source(skeleton)
-    source_by_canonical = {
-        str(joint.canonical_joint_id): source
-        for source, joint in by_source.items()
-    }
-    rows = []
-    for source in sorted(by_source):
-        joint = by_source[source]
-        parent_source = None
-        if joint.parent_canonical_id is not None:
-            parent = str(joint.parent_canonical_id)
-            if parent not in source_by_canonical:
-                raise QualificationError(
-                    f"SKIN_REBIND_PARENT_CANONICAL_ID_UNKNOWN:{parent}"
-                )
-            parent_source = source_by_canonical[parent]
-        rows.append(
-            {
-                "source_proposal_id": source,
-                "parent_source_proposal_id": parent_source,
-                "position": [float(value) for value in joint.position],
-                # Support is set-valued authority. Sort for semantic identity.
-                "support_surface_ids": sorted(
-                    map(str, joint.support_surface_ids)
-                ),
-            }
-        )
-    return tuple(rows)
-
-
-def _semantic_tree_hash(skeleton) -> str:
-    # Must match the canonical Geppetto determinism probe contract exactly:
-    # hash the normalized semantic-tree rows and nothing else.
-    return content_sha256(list(_semantic_tree(skeleton)))
 
 
 def _npy_bytes(array: np.ndarray) -> bytes:
@@ -162,14 +129,14 @@ def rebind_dense_skin(
             "SKIN_REBIND_NEW_SKELETON_LINEAGE_DRIFT"
         )
 
-    old_tree = _semantic_tree(old_skeleton)
-    new_tree = _semantic_tree(new_skeleton)
+    old_tree = qualified_skeleton_semantic_identity(old_skeleton)
+    new_tree = qualified_skeleton_semantic_identity(new_skeleton)
     if old_tree != new_tree:
         raise QualificationError(
             "SKIN_REBIND_SKELETON_SEMANTICS_NOT_EQUIVALENT"
         )
-    semantic_hash = _semantic_tree_hash(old_skeleton)
-    if semantic_hash != _semantic_tree_hash(new_skeleton):
+    semantic_hash = qualified_skeleton_semantic_sha256(old_skeleton)
+    if semantic_hash != qualified_skeleton_semantic_sha256(new_skeleton):
         raise QualificationError(
             "SKIN_REBIND_SEMANTIC_TREE_HASH_DRIFT"
         )

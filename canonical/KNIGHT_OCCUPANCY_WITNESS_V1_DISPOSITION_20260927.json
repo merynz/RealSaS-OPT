@@ -1,0 +1,24 @@
+{
+  "schema": "RealSaS.DiagnosticDisposition.v1",
+  "experiment_id": "KNIGHT_OCCUPANCY_WITNESS_V1_20260927",
+  "status": "FALSIFIED_BY_VISUAL_REVIEW",
+  "date": "2026-09-27",
+  "scope": "DEMO_DIAGNOSTIC_ONLY",
+  "findings": {
+    "baseline_render_preferred_over_occupancy_witness": true,
+    "canonical_pipeline_modified": false,
+    "stage21_caa_modified": false,
+    "stage23_asset_modified": false,
+    "product_authority_claimed": false
+  },
+  "forbidden_promotions": [
+    "DIRECT_SOURCE_ALPHA_PLUS_BOUNDED_SURFACE_LOCAL_ALPHA_ONLY_COMPLETION",
+    "SECOND_RENDER_OCCUPANCY_WITNESS_AS_PRODUCT_RULE"
+  ],
+  "retained_learnings": [
+    "Separate occupancy from appearance remains a valid architectural question.",
+    "This specific alpha-only bounded completion witness degraded the visual result and is not promoted.",
+    "Native diagnostic rendering infrastructure may be retained independently."
+  ],
+  "next_baseline": "UNCHANGED_STAGE23_COMPLETE_APPEARANCE_ALPHA"
+}

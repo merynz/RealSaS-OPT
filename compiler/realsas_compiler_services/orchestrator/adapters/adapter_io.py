@@ -5,7 +5,7 @@ import json
 import os
 from pathlib import Path
 
-from compiler.realsas_compiler_core.artifact_codec_v2 import write_ir_json
+from compiler.realsas_compiler_core.artifact_io_v2 import write_ir_json
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.orchestrator.status_semantics import (
     dependency_status_admissible,

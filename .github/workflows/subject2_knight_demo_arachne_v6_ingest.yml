@@ -133,18 +133,58 @@ jobs:
           print("ARACHNE_V6_UPSTREAM_AUTHORITY_PASS",seal["checkpoint_seal_hash"])
           PY
 
+      - name: Losslessly rebind V6 skin field to stable Compiler skeleton IDs
+        shell: bash
+        run: |
+          set -euo pipefail
+          rebound="$ARACHNE_LOCAL/ARACHNE_KNIGHT_V6_CANONICAL_SKIN_WEIGHTS_F64_REBOUND.npz"
+          receipt="$ARACHNE_LOCAL/ARACHNE_KNIGHT_V6_SEMANTIC_ID_REBIND_RECEIPT.json"
+          python tools/training/rebind_dense_skin_to_semantically_equivalent_skeleton_v1.py \
+            --input-npz "$ARACHNE_LOCAL/ARACHNE_KNIGHT_V6_CANONICAL_SKIN_WEIGHTS_F64.npz" \
+            --old-skeleton-json "$ARACHNE_LOCAL/FINAL_QUALIFIED_SKELETON_IR.json" \
+            --new-skeleton-json "$SKELETON_JSON" \
+            --output-npz "$rebound" \
+            --receipt-json "$receipt" \
+            --expected-old-skeleton-lineage "$HISTORICAL_V6_SKELETON_LINEAGE" \
+            --expected-new-skeleton-lineage "$EXPECTED_SKELETON_LINEAGE"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          receipt=json.loads(
+              (Path(os.environ["ARACHNE_LOCAL"])/"ARACHNE_KNIGHT_V6_SEMANTIC_ID_REBIND_RECEIPT.json").read_text()
+          )
+          assert receipt["status"]=="PASS"
+          assert receipt["semantic_tree_hash"]==os.environ["EXPECTED_SEMANTIC_TREE_SHA256"]
+          assert receipt["joint_count"]==28
+          assert receipt["surface_row_count"]==12090
+          assert receipt["numeric_weight_array_unchanged"] is True
+          assert receipt["surface_order_unchanged"] is True
+          assert receipt["column_order_unchanged"] is True
+          assert receipt["only_canonical_joint_identity_changed"] is True
+          assert receipt["teacher_input_used"] is False
+          assert receipt["model_retraining_used"] is False
+          assert receipt["compiler_requalification_required"] is True
+          print(
+              "ARACHNE_V6_SEMANTIC_ID_REBIND_VERIFIED",
+              receipt["mapping_hash"],
+              receipt["weights_f64_raw_sha256_after"],
+          )
+          PY
+          echo "ARACHNE_REBOUND_WEIGHTS=$rebound" >> "$GITHUB_ENV"
+          echo "ARACHNE_REBIND_RECEIPT=$receipt" >> "$GITHUB_ENV"
+
       - name: Reconstruct exact dense V6 proposal through generic bridge
         shell: bash
         run: |
           set -euo pipefail
           proposal="$ARACHNE_LOCAL/ARACHNE_KNIGHT_V6_SKIN_PROPOSAL_REPLAY.json"
           python tools/training/materialize_dense_skin_proposal_v1.py \
-            --weights-npz "$ARACHNE_LOCAL/ARACHNE_KNIGHT_V6_CANONICAL_SKIN_WEIGHTS_F64.npz" \
+            --weights-npz "$ARACHNE_REBOUND_WEIGHTS" \
             --surface-json "$SURFACE_JSON" \
             --skeleton-json "$SKELETON_JSON" \
             --output-json "$proposal" \
-            --model-provenance "KNIGHT_ARACHNE_V6_STEP_8192" \
-            --metadata-json '{"candidate_architecture":"RealSaS.Arachne.A1.RawSurfaceK4AttentionDirectSimplex.v6","backbone_architecture":"RealSaS.Arachne.A1.RichQualifiedBidirectional.v4","field_tokens":4,"surface_memory_direct":true,"point_conditioned_k4_attention":true,"v5_readout_used":false,"dense_proposal":true,"compiler_owns_qualification":true,"teacher_input_used":false,"demo_witness":true}'
+            --model-provenance "KNIGHT_ARACHNE_V6_STEP_8192_SEMANTIC_ID_REBIND" \
+            --metadata-json '{"candidate_architecture":"RealSaS.Arachne.A1.RawSurfaceK4AttentionDirectSimplex.v6","backbone_architecture":"RealSaS.Arachne.A1.RichQualifiedBidirectional.v4","field_tokens":4,"surface_memory_direct":true,"point_conditioned_k4_attention":true,"v5_readout_used":false,"dense_proposal":true,"compiler_owns_qualification":true,"teacher_input_used":false,"demo_witness":true,"semantic_id_rebind":true,"numeric_skin_field_unchanged":true}'
           echo "ARACHNE_PROPOSAL=$proposal" >> "$GITHUB_ENV"
 
       - name: Mint exact Stage30 preregistration spec

@@ -1,0 +1,8 @@
+{
+  "schema": "RealSaS.KnightDemoStage34To38Trigger.v1",
+  "status": "RUN",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "reason": "CONTINUE_E2E_AFTER_DEMO_ONLY_STAGE25_MEASURED_FAILURE",
+  "requested_on": "2026-09-27",
+  "product_authority_claimed": false
+}

@@ -404,3 +404,87 @@ jobs:
           git fetch origin research/vf11-certified-adaptive-20260921
           git rebase origin/research/vf11-certified-adaptive-20260921
           git push origin HEAD:research/vf11-certified-adaptive-20260921
+
+
+      - name: Render byte-exact demo preview baseline
+        if: steps.prereq.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object tools/demo/render_knight_motion_preview_v1.py)" = "7917be02f325ba00b5dcd2b31a786898e45f640f"
+          rm -rf canonical/knight_demo_motion_preview_v1
+          PYTHONPATH=. python -m tools.demo.render_knight_motion_preview_v1 \
+            --authority-root "$REALSAS_AUTHORITY_ROOT" \
+            --run-id "$RUN_ID" \
+            --out-dir canonical/knight_demo_motion_preview_v1
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_DEMO_MOTION_VISUAL_CONTINUATION_REPORT_V1.json)" = "9120723f6bc00142fb6bb992d3ee7a85c601bf4f"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_IDLE_DEMO_PREVIEW_V1.png)" = "cae86d8a04bde6768ac9c3dafed13a2ab318cf29"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_RUN_DEMO_PREVIEW_V1.png)" = "8e9ed58a3bfbbace73f54e3e5593691f90eef4f1"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_SLASH_DEMO_PREVIEW_V1.png)" = "7a87f310473d602c99eb712be964dcd430b47cfb"
+          echo "KNIGHT_E2E_PREVIEW_SHEET_BASELINE_PASS"
+
+      - name: Export byte-exact demo GIF baseline
+        if: steps.prereq.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+
+          root = Path("canonical/knight_demo_motion_preview_v1")
+          specs = [("IDLE", 833), ("RUN", 208), ("SLASH", 278)]
+          for name, duration_ms in specs:
+              sheet = Image.open(root / f"KNIGHT_{name}_DEMO_PREVIEW_V1.png").convert("RGBA")
+              if sheet.width % 4 != 0 or sheet.height % 2 != 0:
+                  raise RuntimeError(f"unexpected sheet geometry: {name} {sheet.size}")
+              cell_w = sheet.width // 4
+              row_h = sheet.height // 2
+              header = 28
+              cell_h = row_h - header
+              frames = []
+              for i in range(4):
+                  v0 = sheet.crop((i * cell_w, header, (i + 1) * cell_w, header + cell_h))
+                  y2 = row_h + header
+                  v2 = sheet.crop((i * cell_w, y2, (i + 1) * cell_w, y2 + cell_h))
+                  combined = Image.new("RGBA", (cell_w * 2, cell_h), (0, 0, 0, 0))
+                  combined.alpha_composite(v0, (0, 0))
+                  combined.alpha_composite(v2, (cell_w, 0))
+                  target_h = min(640, combined.height)
+                  target_w = max(1, round(combined.width * target_h / combined.height))
+                  if (target_w, target_h) != combined.size:
+                      combined = combined.resize((target_w, target_h), Image.Resampling.LANCZOS)
+                  frames.append(combined.convert("P", palette=Image.Palette.ADAPTIVE, colors=255))
+              out = root / f"KNIGHT_{name}_DEMO_PREVIEW_V1.gif"
+              frames[0].save(
+                  out,
+                  save_all=True,
+                  append_images=frames[1:],
+                  duration=duration_ms,
+                  loop=0,
+                  disposal=2,
+                  optimize=False,
+                  transparency=0,
+              )
+          PY
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_IDLE_DEMO_PREVIEW_V1.gif)" = "31b64edff1da106bc8feb00faede61ffe68dc89c"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_RUN_DEMO_PREVIEW_V1.gif)" = "b8f0e97e74396a0987444bb72ea93db4bb519640"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_SLASH_DEMO_PREVIEW_V1.gif)" = "73a567f3ff17786d3316e3fb02a723ee3c026eca"
+          echo "KNIGHT_E2E_GIF_BASELINE_PASS"
+
+      - name: Seal byte-exact E2E demo preview baseline
+        if: steps.prereq.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/knight_demo_motion_preview_v1
+          if git diff --cached --quiet; then
+            echo "KNIGHT_E2E_PREVIEW_BASELINE_UNCHANGED"
+            exit 0
+          fi
+          git commit -m 'demo: seal byte-exact E2E preview baseline'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

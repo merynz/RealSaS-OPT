@@ -7,6 +7,7 @@ from compiler.realsas_compiler_core.appearance_completion_v2 import (
     SurfaceSampleGraph,
 )
 from compiler.realsas_compiler_core.appearance_variational_completion_v1 import (
+    geodesic_source_guidance,
     solve_weighted_surface_dirichlet,
 )
 from compiler.realsas_compiler_core.types import QualificationError
@@ -115,3 +116,65 @@ def test_zero_length_topology_edge_is_strong_but_finite():
     assert stats.zero_length_topology_edge_count==1
     assert stats.maximum_edge_weight==32.0
     assert abs(float(out[1,0])-float(out[2,0]))<0.05
+
+
+def test_geodesic_guidance_is_source_exact_and_tie_breaks_lower_seed():
+    graph=_graph(5,((0,1),(1,2),(2,3),(3,4)))
+    positions=np.asarray([(i,0,0) for i in range(5)],dtype=np.float64)
+    values=np.asarray(
+        [[1.0],[0.0],[0.0],[0.0],[0.0]],
+        dtype=np.float64,
+    )
+    values[4,0]=0.25
+    known=np.asarray([True,False,False,False,True])
+    guidance,donor=geodesic_source_guidance(
+        values=values,
+        known_mask=known,
+        sample_component=np.zeros(5,dtype=np.int32),
+        positions=positions,
+        graph=graph,
+    )
+    assert donor.tolist()==[0,0,0,4,4]
+    assert np.array_equal(guidance[known],values[known])
+    assert float(guidance[2,0])==1.0
+
+
+def test_screened_poisson_preserves_sources_and_follows_geodesic_guide():
+    graph=_graph(5,((0,1),(1,2),(2,3),(3,4)))
+    positions=np.asarray([(i,0,0) for i in range(5)],dtype=np.float64)
+    values=np.asarray(
+        [[1.0],[0.0],[0.0],[0.0],[0.0]],
+        dtype=np.float64,
+    )
+    values[4,0]=0.0
+    known=np.asarray([True,False,False,False,True])
+    component=np.zeros(5,dtype=np.int32)
+    guidance,_=geodesic_source_guidance(
+        values=values,
+        known_mask=known,
+        sample_component=component,
+        positions=positions,
+        graph=graph,
+    )
+    unscreened,_=solve_weighted_surface_dirichlet(
+        values=values,
+        known_mask=known,
+        sample_component=component,
+        positions=positions,
+        graph=graph,
+    )
+    screened,stats=solve_weighted_surface_dirichlet(
+        values=values,
+        known_mask=known,
+        sample_component=component,
+        positions=positions,
+        graph=graph,
+        guide_values=guidance,
+        guide_weight=4.0,
+        guide_mode="GEODESIC_NEAREST_SOURCE_V1",
+    )
+    assert np.array_equal(screened[known],values[known])
+    assert float(screened[1,0])>float(unscreened[1,0])
+    assert float(screened[3,0])<float(unscreened[3,0])
+    assert stats.guide_weight==4.0
+    assert stats.guide_mode=="GEODESIC_NEAREST_SOURCE_V1"

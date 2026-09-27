@@ -727,17 +727,37 @@ def compile_caa_stage(ctx: dict) -> dict:
             "unsupported_abstain_source_view_value": int(
                 result["unsupported_abstain_source_view_value"]
             ),
+            "canonical_global_completion_sample_count": int(
+                counts["CANONICAL_GLOBAL_COMPLETION"]
+            ),
+            "canonical_global_completion_fraction": (
+                float(counts["CANONICAL_GLOBAL_COMPLETION"]) / float(total)
+            ),
+            "canonical_global_completion_source_view_value": int(
+                result["canonical_global_completion_source_view_value"]
+            ),
+            "canonical_global_completion_metadata": dict(
+                result["canonical_global_completion_metadata"]
+            ),
+            "canonical_control_resolution": int(
+                result["canonical_control_resolution"]
+            ),
+            "globally_unseen_dense_sample_count": int(
+                result["globally_unseen_dense_sample_count"]
+            ),
             "appearance_admission_contract": (
-                "SOURCE_OR_BOUNDED_LOCAL_COMPLETION_V1"
+                "SOURCE_OR_BOUNDED_LOCAL_OR_CANONICAL_GLOBAL_COMPLETION_V2"
             ),
             "runtime_generation_used": False,
             "geometry_mutated": False,
             "visibility_authority": "RealSaS.VisibilityContract.v2",
             "completion_mode": (
-                "BOUNDED_CANONICAL_SURFACE_HARMONIC_OR_EXPLICIT_ABSTAIN"
+                "BOUNDED_LOCAL_HARMONIC_PLUS_CONTROL_LATTICE_CANONICAL_C_P"
             ),
             "completion_rows": list(result["completion_rows"]),
-            "global_surface_fill_used": False,
+            "global_surface_fill_used": (
+                int(counts["CANONICAL_GLOBAL_COMPLETION"]) > 0
+            ),
             "sample_count_mode": str(result["sample_count_mode"]),
             "sample_count_per_direction": int(result["sample_count_per_direction"]),
             "maximum_tile_resolution": int(result["maximum_tile_resolution"]),
@@ -1094,6 +1114,9 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
     direct_mask = provenance_stack == CAA_PROVENANCE["DIRECT_SOURCE"]
     other_mask = provenance_stack == CAA_PROVENANCE["OTHER_VIEW_SOURCE"]
     harmonic_mask = provenance_stack == CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"]
+    canonical_global_mask = (
+        provenance_stack == CAA_PROVENANCE["CANONICAL_GLOBAL_COMPLETION"]
+    )
     unsupported_mask = (
         provenance_stack == CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"]
     )
@@ -1111,6 +1134,10 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
         raise QualificationError("CAA_BAKE_OTHER_VIEW_IDENTITY_DRIFT")
     if np.any(harmonic_mask & (source_view_stack != -2)):
         raise QualificationError("CAA_BAKE_HARMONIC_SOURCE_VIEW_IDENTITY_DRIFT")
+    if np.any(canonical_global_mask & (source_view_stack != -3)):
+        raise QualificationError(
+            "CAA_BAKE_CANONICAL_GLOBAL_SOURCE_VIEW_IDENTITY_DRIFT"
+        )
     if np.any(unsupported_mask & (source_view_stack != -4)):
         raise QualificationError("CAA_BAKE_UNSUPPORTED_SOURCE_VIEW_IDENTITY_DRIFT")
     if np.any(padding_mask & (source_view_stack != np.iinfo(np.int16).min)):
@@ -1120,6 +1147,7 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
         & (~direct_mask)
         & (~other_mask)
         & (~harmonic_mask)
+        & (~canonical_global_mask)
         & (~unsupported_mask)
     ):
         raise QualificationError("CAA_BAKE_PROVENANCE_CLASS_INVALID")

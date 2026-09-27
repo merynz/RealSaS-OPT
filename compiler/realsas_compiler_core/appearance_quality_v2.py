@@ -12,6 +12,7 @@ from .appearance_completion_v2 import (
     surface_sample_neighbors,
 )
 from .appearance_bake_v2 import straight_rgba_to_premultiplied_float
+from .appearance_compile_v2 import select_other_view_donor_by_support
 from .types import QualificationError
 
 
@@ -306,6 +307,7 @@ def structured_holdout_metrics(
     sample_positions: np.ndarray,
     sample_component_index: np.ndarray,
     sample_face_index: np.ndarray,
+    face_support_by_view: np.ndarray,
     face_count: int,
     tile_resolution: int,
     band_fraction: float,
@@ -323,6 +325,7 @@ def structured_holdout_metrics(
     positions = np.asarray(sample_positions, dtype=np.float64)
     component = np.asarray(sample_component_index, dtype=np.int32)
     face_index = np.asarray(sample_face_index, dtype=np.int32)
+    face_support = np.asarray(face_support_by_view, dtype=np.float64)
     if direct_valid.ndim != 2 or direct_valid.shape[0] != 8:
         raise QualificationError("CAA_HOLDOUT_DIRECT_VALID_SHAPE_INVALID")
     n = direct_valid.shape[1]
@@ -332,6 +335,8 @@ def structured_holdout_metrics(
         or positions.shape != (n, 3)
         or component.shape != (n,)
         or face_index.shape != (n,)
+        or face_support.shape != (8, int(face_count))
+        or not np.isfinite(face_support).all()
     ):
         raise QualificationError("CAA_HOLDOUT_ARRAY_SHAPE_DRIFT")
     fraction = float(band_fraction)
@@ -418,13 +423,21 @@ def structured_holdout_metrics(
         provenance[available] = CAA_PROVENANCE["DIRECT_SOURCE"]
         source_view[available] = target
 
-        for donor in _view_order(target):
-            take = (~has) & direct_valid[donor]
-            if np.any(take):
-                predicted[take] = direct_rgba[donor, take]
-                provenance[take] = CAA_PROVENANCE["OTHER_VIEW_SOURCE"]
-                source_view[take] = donor
-                has[take] = True
+        best_view, _best_score = select_other_view_donor_by_support(
+            target_view_index=target,
+            missing=~has,
+            direct_valid=direct_valid,
+            sample_face_index=face_index,
+            face_support_by_view=face_support,
+        )
+        take = (~has) & (best_view >= 0)
+        if np.any(take):
+            indices = np.flatnonzero(take)
+            donors = best_view[indices].astype(np.int64)
+            predicted[indices] = direct_rgba[donors, indices]
+            provenance[indices] = CAA_PROVENANCE["OTHER_VIEW_SOURCE"]
+            source_view[indices] = donors.astype(np.int16)
+            has[indices] = True
 
         unresolved = holdout & ~has
         completion_stats = {

@@ -6,6 +6,34 @@ from .hashing import content_sha256
 from .canonical_graph_optimizer_authority import optimize_canonical_graph_v18_98
 from realsas_contracts.technical_part_graph import CanonicalGraphNodeCandidate, CanonicalGraphEdgeCandidate, CanonicalGraphOptimizationRequest
 
+def _optimizer_semantic_identity(res) -> dict:
+    """Stable authority identity for one qualified graph selection.
+
+    Runtime/solver telemetry such as elapsed_seconds and diagnostic shadow
+    payloads must never mint canonical joint IDs or skeleton lineage.
+    """
+    return {
+        "request_id": str(res.request_id),
+        "selected_root_control_id": str(res.selected_root_control_id),
+        "selected_node_ids": tuple(sorted(map(str, res.selected_node_ids))),
+        "selected_edge_keys": tuple(sorted(map(str, res.selected_edge_keys))),
+        "parent_by_child": {
+            str(child): str(parent)
+            for child, parent in sorted(dict(res.parent_by_child).items())
+        },
+        "solver": str(res.solver),
+        "status": str(res.status),
+        "objective_value": float(res.objective_value),
+        "optimality_proven": bool(res.optimality_proven),
+        "feasible": bool(res.feasible),
+        "blockers": tuple(sorted(map(str, res.blockers or ()))),
+    }
+
+
+def _optimizer_semantic_sha256(res) -> str:
+    return content_sha256(_optimizer_semantic_identity(res))
+
+
 def qualify_skeleton(surface:RiggingSurfaceIR, proposal:SkeletonProposalIR, *, run_ilp_shadow:bool=False)->QualifiedSkeletonIR:
     if proposal.surface_binding_hash != surface.geometry_lineage_hash:
         raise QualificationError("stale/mismatched skeleton proposal: surface lineage mismatch")
@@ -47,14 +75,43 @@ def qualify_skeleton(surface:RiggingSurfaceIR, proposal:SkeletonProposalIR, *, r
         raise QualificationError("skeleton qualification failed:"+";".join(res.blockers or (res.status,)))
     if res.optimality_proven is not True:
         raise QualificationError("skeleton qualification failed:CANONICAL_GRAPH_OPTIMALITY_NOT_PROVEN")
-    canonical={cid:"J:"+content_sha256({"qualified_graph":res.content_sha256,"candidate":cid})[:20] for cid in res.selected_node_ids}
+    optimizer_semantic_sha256=_optimizer_semantic_sha256(res)
+    canonical={
+        cid:"J:"+content_sha256(
+            {
+                "qualified_graph_semantic":optimizer_semantic_sha256,
+                "candidate":cid,
+            }
+        )[:20]
+        for cid in res.selected_node_ids
+    }
     q=[]
     for cid in sorted(res.selected_node_ids):
         pid=reverse[cid]; j=joint_by[pid]; pcid=res.parent_by_child.get(cid)
         q.append(QualifiedJoint(canonical[cid],tuple(map(float,j.position)),None if pcid is None else canonical[pcid],tuple(j.support_surface_ids),pid))
     root=canonical[res.selected_root_control_id]
-    report={"solver":res.solver,"status":res.status,"objective":res.objective_value,"optimality_proven":res.optimality_proven,"blockers":res.blockers,"warnings":res.warnings,"optimizer_result_sha256":res.content_sha256,"proposal_to_candidate":internal,"candidate_to_canonical":canonical}
-    lineage=content_sha256({"surface":surface.geometry_lineage_hash,"proposal":proposal.to_dict(),"report":report,"joints":[j.to_dict() for j in q]})
+    report={
+        "solver":res.solver,
+        "status":res.status,
+        "objective":res.objective_value,
+        "optimality_proven":res.optimality_proven,
+        "blockers":res.blockers,
+        "warnings":res.warnings,
+        # Backward field name retained, but its value is now the stable
+        # authority-semantic hash. The optimizer object's raw content hash
+        # includes non-authoritative telemetry and is forbidden from identity.
+        "optimizer_result_sha256":optimizer_semantic_sha256,
+        "optimizer_identity_contract":"GRAPH_SELECTION_SEMANTICS_V1",
+        "optimizer_runtime_telemetry_in_identity":False,
+        "proposal_to_candidate":internal,
+        "candidate_to_canonical":canonical,
+    }
+    lineage=content_sha256({
+        "surface":surface.geometry_lineage_hash,
+        "proposal":proposal.to_dict(),
+        "report":report,
+        "joints":[j.to_dict() for j in q],
+    })
     return QualifiedSkeletonIR(tuple(q),root,report,lineage)
 
 def qualify_skeleton_v2(surface:RiggingSurfaceIR, proposal:SkeletonProposalIR, *, run_ilp_shadow:bool=False)->QualifiedSkeletonIRV2:

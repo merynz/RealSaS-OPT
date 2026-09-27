@@ -1,0 +1,216 @@
+name: knight-stage35-skin-topology-repair-loop-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_STAGE35_SKIN_TOPOLOGY_REPAIR_TRIGGER_20260928.json'
+      - '.github/workflows/knight_stage35_skin_topology_repair_loop_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-demo-v2-run
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  repair-loop:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 120
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install and verify repair implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m py_compile \
+            compiler/realsas_compiler_core/skin.py \
+            compiler/realsas_compiler_core/deformation_envelope_derivation_v1.py \
+            compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py \
+            compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py \
+            compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py \
+            compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py
+          python -m pytest -q \
+            tests/compiler/test_skin_repair_accounting_v1.py \
+            tests/compiler/test_demo_stage18_mesh_fallback_v2.py \
+            tests/repository/test_mainline_execution_plan_v2.py
+
+      - name: Invalidate Stage35 for new compatibility gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os
+          from compiler.realsas_compiler_services.orchestrator.mainline import (
+              PLAN_PATH, _invalidate_dependents, atomic_json, load_json, run_ledger_path
+          )
+          run_id=os.environ["RUN_ID"]
+          plan=load_json(PLAN_PATH)
+          lp=run_ledger_path(run_id)
+          ledger=load_json(lp)
+          _invalidate_dependents(
+              plan,ledger,"35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+              "INSTALL_SKIN_TOPOLOGY_COMPATIBILITY_GATE",
+          )
+          atomic_json(lp,ledger)
+          print("STAGE35_INVALIDATED_FOR_NEW_GATE")
+          PY
+
+      - name: Bounded Stage35 repair loop
+        shell: bash
+        run: |
+          set -euo pipefail
+          max_iter=4
+          for iter in $(seq 0 "$max_iter"); do
+            echo "=== STAGE35_COMPAT_ITERATION=$iter ==="
+            rc=0
+            python -m compiler.realsas_compiler_services.orchestrator.mainline execute \
+              --run-id "$RUN_ID" \
+              --target 35_DYNAMIC_MECHANICAL_MESH_QUALIFIED || rc=$?
+            verdict="$(python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          row=next(x for x in ledger["stages"] if x["id"]=="35_DYNAMIC_MECHANICAL_MESH_QUALIFIED")
+          print(json.dumps({
+              "status":row["status"],
+              "blockers":row.get("blockers") or [],
+              "diagnostics_hash":row.get("diagnostics_hash") or "",
+          },sort_keys=True))
+          PY
+            )"
+            echo "STAGE35_VERDICT=$verdict"
+            status="$(python -c 'import json,sys; print(json.loads(sys.argv[1])["status"])' "$verdict")"
+            if test "$status" = "PASS" -o "$status" = "PASS_DEMO_ONLY"; then
+              echo "STAGE35_COMPATIBILITY_CLOSED_AT_ITERATION=$iter"
+              break
+            fi
+            repair_required="$(python -c 'import json,sys; print("1" if "G3B_SKIN_TOPOLOGY_COMPATIBILITY_REPAIR_REQUIRED" in json.loads(sys.argv[1])["blockers"] else "0")' "$verdict")"
+            if test "$repair_required" != "1"; then
+              echo "NON_REPAIRABLE_STAGE35_FAILURE=$verdict"
+              exit "$rc"
+            fi
+            if test "$iter" -ge "$max_iter"; then
+              echo "STAGE35_REPAIR_BUDGET_EXHAUSTED"
+              exit 1
+            fi
+
+            test -s "$RUN_ROOT/artifacts/35_DYNAMIC_MECHANICAL_MESH_QUALIFIED/repaired_stage18_candidate.json"
+            test -s "$RUN_ROOT/artifacts/35_DYNAMIC_MECHANICAL_MESH_QUALIFIED/skin_topology_repair_directive.json"
+
+            python - <<'PY'
+          import os
+          from compiler.realsas_compiler_services.orchestrator.mainline import (
+              PLAN_PATH, _invalidate_dependents, atomic_json, load_json, run_ledger_path
+          )
+          run_id=os.environ["RUN_ID"]
+          plan=load_json(PLAN_PATH)
+          lp=run_ledger_path(run_id)
+          ledger=load_json(lp)
+          invalidated=_invalidate_dependents(
+              plan,ledger,"18_CANONICAL_MESH_ADDRESSING_BUILD",
+              "STAGE35_SKIN_TOPOLOGY_REPAIR_NEW_STAGE18_LINEAGE",
+          )
+          atomic_json(lp,ledger)
+          print("INVALIDATED_FROM_STAGE18",list(invalidated))
+          PY
+
+            python -m compiler.realsas_compiler_services.orchestrator.mainline execute \
+              --run-id "$RUN_ID" \
+              --target 25_CAA_REFERENCE_REST_RENDER_PROOF
+          done
+
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={x["id"]:x for x in ledger["stages"]}
+          row=by["35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"]
+          assert row["status"] in {"PASS","PASS_DEMO_ONLY"},(row["status"],row.get("blockers"))
+          candidate=next(
+              x for x in by["18_CANONICAL_MESH_ADDRESSING_BUILD"]["outputs"]
+              if x["schema"]=="RealSaS.CanonicalMeshCandidateIR.v1"
+          )
+          print("FINAL_REPAIRED_STAGE18",candidate["sha256"])
+          print("FINAL_STAGE35_STATUS",row["status"])
+          PY
+
+      - name: Requalify puppet tail through Stage38
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m compiler.realsas_compiler_services.orchestrator.mainline execute \
+            --run-id "$RUN_ID" \
+            --target 38_CANONICAL_PUPPET_SEALED
+          python -m compiler.realsas_compiler_services.orchestrator.mainline status \
+            --run-id "$RUN_ID"
+
+      - name: Render canonical repaired motion preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf canonical/knight_stage35_skin_topology_repaired_preview_v1
+          python -m tools.demo.render_knight_motion_preview_v1 \
+            --authority-root "$REALSAS_AUTHORITY_ROOT" \
+            --run-id "$RUN_ID" \
+            --out-dir canonical/knight_stage35_skin_topology_repaired_preview_v1
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          root=Path("canonical/knight_stage35_skin_topology_repaired_preview_v1")
+          for name,duration in (("IDLE",833),("RUN",208),("SLASH",278)):
+              sheet=Image.open(root/f"KNIGHT_{name}_DEMO_PREVIEW_V1.png").convert("RGBA")
+              cell_w=sheet.width//4
+              row_h=sheet.height//2
+              header=28
+              cell_h=row_h-header
+              frames=[]
+              for i in range(4):
+                  v0=sheet.crop((i*cell_w,header,(i+1)*cell_w,header+cell_h))
+                  v2=sheet.crop((i*cell_w,row_h+header,(i+1)*cell_w,row_h+header+cell_h))
+                  combined=Image.new("RGBA",(cell_w*2,cell_h),(0,0,0,0))
+                  combined.alpha_composite(v0,(0,0))
+                  combined.alpha_composite(v2,(cell_w,0))
+                  target_h=min(640,combined.height)
+                  target_w=max(1,round(combined.width*target_h/combined.height))
+                  if combined.size!=(target_w,target_h):
+                      combined=combined.resize((target_w,target_h),Image.Resampling.LANCZOS)
+                  frames.append(combined.convert("P",palette=Image.Palette.ADAPTIVE,colors=255))
+              frames[0].save(
+                  root/f"KNIGHT_{name}_STAGE35_REPAIRED_V1.gif",
+                  save_all=True,append_images=frames[1:],duration=duration,
+                  loop=0,disposal=2,optimize=False,transparency=0,
+              )
+          PY
+
+      - name: Seal repaired preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/knight_stage35_skin_topology_repaired_preview_v1
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'demo: seal Stage35 skin-topology repaired preview'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

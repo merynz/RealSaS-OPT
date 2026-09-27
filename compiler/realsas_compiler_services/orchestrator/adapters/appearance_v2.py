@@ -1405,6 +1405,7 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
             "sample_component_index",
             "face_support_by_view",
             "direct_valid",
+            "direct_foreground_donor_valid",
             "direct_rgba",
             pm_array_name,
             "source_xy",

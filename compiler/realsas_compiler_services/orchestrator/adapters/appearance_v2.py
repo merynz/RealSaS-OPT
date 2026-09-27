@@ -403,6 +403,27 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
         raise QualificationError("CAA_CANONICAL_CONTRACT_MISSING")
     contract_sha = sha256_file(contract_path)
 
+    admission_contract_path = (
+        Path(ctx["repo_root"])
+        / "canonical"
+        / "CAA_V2_RENDERABLE_SUPPORT_ADMISSION_CONTRACT_V1_20260927.json"
+    )
+    if not admission_contract_path.is_file():
+        raise QualificationError("CAA_ADMISSION_CONTRACT_MISSING")
+    admission_contract = json.loads(
+        admission_contract_path.read_text(encoding="utf-8")
+    )
+    if (
+        admission_contract.get("schema")
+        != "RealSaS.CAARenderableSupportAdmissionContract.v1"
+        or admission_contract.get("status")
+        != "FROZEN_SUBJECT_FREE_ARCHITECTURE"
+        or admission_contract.get("subject_identity_used") is not False
+        or admission_contract.get("thresholds_changed") is not False
+    ):
+        raise QualificationError("CAA_ADMISSION_CONTRACT_INVALID")
+    admission_contract_sha = sha256_file(admission_contract_path)
+
     observation = qualified_observation_set_from_dict(
         stage_output_payload(
             ctx,
@@ -505,6 +526,21 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
     )
     compile_policy["max_supported_face_count"] = int(tile_evidence["face_count"])
     compile_policy["tile_resolution_evidence"] = tile_evidence
+    compile_policy["renderable_support_admission_contract"] = (
+        "SOURCE_OR_BOUNDED_LOCAL_COMPLETION_V1"
+    )
+    compile_policy["renderable_support_admission_contract_sha256"] = (
+        admission_contract_sha
+    )
+    compile_policy["unsupported_policy_disqualification_action"] = (
+        "EXPLICIT_COMPILER_ABSTENTION"
+    )
+    compile_policy["unsupported_provenance_code"] = int(
+        CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"]
+    )
+    compile_policy["unsupported_source_view_value"] = -4
+    compile_policy["physical_padding_provenance_code"] = 255
+    compile_policy["thresholds_changed_for_admission"] = False
 
     prereg = build_caa_preregistration(
         backend_id=backend,
@@ -534,6 +570,9 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
             "backend_id": backend,
             "shipping_eligible": prereg.shipping_eligible,
             "contract_sha256": contract_sha,
+            "renderable_support_admission_contract_sha256": (
+                admission_contract_sha
+            ),
             "preregistration_hash": prereg.preregistration_hash,
             "policy_document_sha256": str(
                 dict(cfg.get("policy_document") or {}).get("sha256") or ""

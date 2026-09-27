@@ -89,6 +89,7 @@ from compiler.realsas_compiler_core.surface_addressing_v1 import (
 from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
     load_visual_mesh_view,
     visual_mesh_set_from_dict,
+    source_texel_xy_to_raster_xy,
 )
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
@@ -149,16 +150,12 @@ def _source_visual_rgba(
 
 
 def _visual_mesh_coverage(mesh, *, width: int, height: int) -> bytes:
-    # VisualMesh2D positions live in source texel-center coordinates
-    # (texel x is x, texel y is y) so fixed UV is position/(extent-1).
-    # The canonical rasterizer samples pixel centers at (x+0.5,y+0.5);
-    # shift geometry by +0.5 only for raster coverage.
+    raster_positions = source_texel_xy_to_raster_xy(
+        np.asarray(mesh.positions, dtype=np.float64)
+    )
     triangles = tuple(
         tuple(
-            (
-                float(mesh.positions[int(vertex_index), 0]) + 0.5,
-                float(mesh.positions[int(vertex_index), 1]) + 0.5,
-            )
+            tuple(map(float, raster_positions[int(vertex_index)]))
             for vertex_index in face
         )
         for face in np.asarray(mesh.faces, dtype=np.int64)

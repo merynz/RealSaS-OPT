@@ -27,6 +27,7 @@ EXT10 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V10_20260921.json
 EXT11 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V11_20260921.json")
 EXT12 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V12_20260927.json")
 EXT13 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V13_20260927.json")
+EXT14 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V14_20260927.json")
 
 
 def _blob_sha1(payload: bytes) -> str:
@@ -52,6 +53,7 @@ def verify() -> dict:
     ext11 = json.loads(EXT11.read_text(encoding="utf-8"))
     ext12 = json.loads(EXT12.read_text(encoding="utf-8"))
     ext13 = json.loads(EXT13.read_text(encoding="utf-8"))
+    ext14 = json.loads(EXT14.read_text(encoding="utf-8"))
 
     if ext1["schema"] != "realsas.compiler_runtime_source_extension_seal.v1":
         raise RuntimeError("NATIVE_SOURCE_EXT1_SCHEMA_DRIFT")
@@ -240,6 +242,21 @@ def verify() -> dict:
     if ext13["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME":
         raise RuntimeError("NATIVE_SOURCE_EXT13_SUBTREE_CLOSURE_DRIFT")
 
+    if ext14["schema"] != "realsas.compiler_runtime_source_extension_seal.v14":
+        raise RuntimeError("NATIVE_SOURCE_EXT14_SCHEMA_DRIFT")
+    if ext14["prior_extension"]["path"] != str(EXT13):
+        raise RuntimeError("NATIVE_SOURCE_EXT14_PRIOR_PATH_DRIFT")
+    if _blob_sha1(EXT13.read_bytes()) != ext14["prior_extension"]["git_blob_sha1"]:
+        raise RuntimeError("NATIVE_SOURCE_EXT14_PRIOR_BLOB_DRIFT")
+    if ext14["authority"]["historical_base_seal_mutated"] is not False:
+        raise RuntimeError("NATIVE_SOURCE_EXT14_BASE_MUTATION_CLAIM")
+    if ext14["authority"]["prior_extension_mutated"] is not False:
+        raise RuntimeError("NATIVE_SOURCE_EXT14_PRIOR_MUTATION_CLAIM")
+    if ext14["authority"]["runtime_role"] != "subordinate_deployment_consumer":
+        raise RuntimeError("NATIVE_SOURCE_EXT14_ROLE_DRIFT")
+    if ext14["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME":
+        raise RuntimeError("NATIVE_SOURCE_EXT14_SUBTREE_CLOSURE_DRIFT")
+
     expected = {
         row["path"]: {
             "size_bytes": int(row["size_bytes"]),
@@ -283,6 +300,7 @@ def verify() -> dict:
     apply_extension(ext11, "extension_v11")
     apply_extension(ext12, "extension_v12")
     apply_extension(ext13, "extension_v13")
+    apply_extension(ext14, "extension_v14")
 
     tracked = {
         row.strip()
@@ -305,7 +323,7 @@ def verify() -> dict:
                 sort_keys=True,
             )
         )
-    closure = dict(ext13.get("closure") or {})
+    closure = dict(ext14.get("closure") or {})
     if int(closure.get("runtime_realsas_cpp_blob_count", -1)) != len(tracked):
         raise RuntimeError("NATIVE_SOURCE_LATEST_CLOSURE_COUNT_DRIFT")
     if int(closure.get("resulting_sealed_blob_count", -1)) != len(expected):
@@ -351,6 +369,7 @@ def verify() -> dict:
         "extension_v11_change_count": len(ext11["replacements"]) + len(ext11["additions"]),
         "extension_v12_change_count": len(ext12["replacements"]) + len(ext12["additions"]),
         "extension_v13_change_count": len(ext13["replacements"]) + len(ext13["additions"]),
+        "extension_v14_change_count": len(ext14["replacements"]) + len(ext14["additions"]),
         "subtree_blob_count": len(tracked),
         "verified_paths": verified,
     }
@@ -375,5 +394,6 @@ if __name__ == "__main__":
         f"ext11={result['extension_v11_change_count']} "
         f"ext12={result['extension_v12_change_count']} "
         f"ext13={result['extension_v13_change_count']} "
+        f"ext14={result['extension_v14_change_count']} "
         f"subtree={result['subtree_blob_count']}"
     )

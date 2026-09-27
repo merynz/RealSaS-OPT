@@ -89,6 +89,70 @@ def build_canonical_mesh_addressing_stage(ctx: dict) -> dict:
     candidate = canonical_mesh_candidate_from_dict(
         read_json(by_schema["RealSaS.CanonicalMeshCandidateIR.v1"]["path"])
     )
+    fresh_candidate_lineage = candidate.candidate_lineage_hash
+    repair_adopted = False
+    repair_iteration = 0
+    repair_root = (
+        ctx["run_root"]
+        / "artifacts"
+        / "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+    )
+    repair_candidate_path = repair_root / "repaired_stage18_candidate.json"
+    repair_directive_path = repair_root / "skin_topology_repair_directive.json"
+    if repair_candidate_path.is_file() or repair_directive_path.is_file():
+        if not (repair_candidate_path.is_file() and repair_directive_path.is_file()):
+            raise QualificationError("STAGE18_REPAIR_ARTIFACT_SET_INCOMPLETE")
+        repaired = canonical_mesh_candidate_from_dict(
+            read_json(repair_candidate_path)
+        )
+        directive = read_json(repair_directive_path)
+        meta = dict(repaired.metadata or {})
+        repair_iteration = int(
+            meta.get("skin_topology_repair_iteration", 0)
+        )
+        max_iterations = int(
+            meta.get("skin_topology_repair_max_iterations", 0)
+        )
+        repair_root_lineage = str(
+            meta.get("skin_topology_repair_root_candidate_lineage_hash") or ""
+        )
+        if (
+            repair_root_lineage != fresh_candidate_lineage
+            or repair_iteration < 1
+            or max_iterations < 1
+            or repair_iteration > max_iterations
+        ):
+            raise QualificationError("STAGE18_REPAIR_LINEAGE_OR_BUDGET_DRIFT")
+        if str(directive.get("repaired_candidate_lineage_hash") or "") != repaired.candidate_lineage_hash:
+            raise QualificationError("STAGE18_REPAIR_DIRECTIVE_CANDIDATE_DRIFT")
+        if str(directive.get("repair_root_candidate_lineage_hash") or "") != fresh_candidate_lineage:
+            raise QualificationError("STAGE18_REPAIR_DIRECTIVE_ROOT_DRIFT")
+        if int(directive.get("repair_iteration", -1)) != repair_iteration:
+            raise QualificationError("STAGE18_REPAIR_DIRECTIVE_ITERATION_DRIFT")
+        if (
+            repaired.surface_binding_hash != candidate.surface_binding_hash
+            or repaired.partition_binding_hash != candidate.partition_binding_hash
+            or repaired.carrier_policy_binding_hash != candidate.carrier_policy_binding_hash
+        ):
+            raise QualificationError("STAGE18_REPAIR_UPSTREAM_BINDING_DRIFT")
+        if meta.get("weight_mutation") is not False or meta.get("vertex_position_mutation") is not False:
+            raise QualificationError("STAGE18_REPAIR_ILLEGAL_WEIGHT_OR_POSITION_MUTATION")
+        candidate = repaired
+        root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+        repaired_output = write_ir(
+            root / "canonical_mesh_candidate.json",
+            candidate,
+            authority_class="DERIVED_STAGE35_REPAIRED_MESH_CANDIDATE",
+        )
+        base_outputs = []
+        for output in base.get("outputs") or ():
+            if str(output.get("schema") or "") == "RealSaS.CanonicalMeshCandidateIR.v1":
+                base_outputs.append(repaired_output)
+            else:
+                base_outputs.append(output)
+        base = {**base, "outputs": base_outputs}
+        by_schema = {str(o.get("schema")): o for o in base_outputs}
+        repair_adopted = True
     directions = output_direction_set_from_dict(
         stage_output_payload(
             ctx,
@@ -224,6 +288,10 @@ def build_canonical_mesh_addressing_stage(ctx: dict) -> dict:
             "appearance_domain_hash": domain.domain_hash,
             "appearance_domain_face_count": domain.renderable_face_count,
             "mechanical_candidate_render_authority": False,
+            "stage35_skin_topology_repair_adopted": bool(repair_adopted),
+            "stage35_skin_topology_repair_iteration": int(repair_iteration),
+            "fresh_unrepaired_candidate_lineage_hash": fresh_candidate_lineage,
+            "effective_candidate_lineage_hash": candidate.candidate_lineage_hash,
         }
     )
     return {

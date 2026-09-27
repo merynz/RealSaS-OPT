@@ -119,9 +119,21 @@ def diagnose(*,authority_root:Path,run_id:str)->dict:
         projected=np.asarray(
             project_points_xyz_v3(positions,camera),dtype=np.float64
         )
-        xy=source_xy[view]
+        # Stage21 computes direct validity from float64 projection and only
+        # then stores source_xy as float32 for downstream qualification. Rebuild
+        # the admission decision from the original float64 semantics; separately
+        # measure any storage-precision index drift.
+        xy=projected[:,:2]-0.5
         ix=np.rint(xy[:,0]).astype(np.int64)
         iy=np.rint(xy[:,1]).astype(np.int64)
+        stored_xy=source_xy[view]
+        stored_ix=np.rint(stored_xy[:,0]).astype(np.int64)
+        stored_iy=np.rint(stored_xy[:,1]).astype(np.int64)
+        source_xy_index_drift_count=int(
+            np.count_nonzero(
+                (stored_ix!=ix)|(stored_iy!=iy)
+            )
+        )
         in_bounds=(
             (ix>=0)&(ix<image.shape[1])
             &(iy>=0)&(iy<image.shape[0])
@@ -212,6 +224,9 @@ def diagnose(*,authority_root:Path,run_id:str)->dict:
         rows.append({
             "view_index":view,
             "sample_count":len(sample_face),
+            "source_xy_float32_index_drift_count":(
+                source_xy_index_drift_count
+            ),
             "direct_sample_count":direct_count,
             "direct_fraction_all_samples":_fraction(
                 direct_count,len(sample_face)

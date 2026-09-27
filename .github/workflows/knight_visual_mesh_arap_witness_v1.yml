@@ -21,7 +21,7 @@ on:
 jobs:
   witness:
     runs-on: [self-hosted, linux, x64, realsas]
-    timeout-minutes: 20
+    timeout-minutes: 8
     env:
       RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
       AUTHORITY_ROOT: /home/monster/realsas_authority

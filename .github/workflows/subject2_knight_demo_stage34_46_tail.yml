@@ -26,8 +26,8 @@ jobs:
       SUBJECT_ID: SUBJECT2_KNIGHT
       REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
       RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
-      EXPECTED_SKELETON_LINEAGE: c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce
-      EXPECTED_SKIN_LINEAGE: 3fa8dacae0d52b86193f14f6cb0214ed68d8d40035317e367b335d9c06a48397
+      EXPECTED_SKELETON_LINEAGE: e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850
+      EXPECTED_SEMANTIC_TREE_SHA256: 95f6f224f52ba43dd96296ce877a11851037e939640a4c995e2b9f3e874c7f59
       EXPECTED_MOTION_FBX_SHA256: 41f2616fb4a42f9d35e242bbed1450ededc7537def4bf38cbb11b4e54ff2bf21
       PYTHONHASHSEED: '0'
 
@@ -107,12 +107,19 @@ jobs:
           assert caa["quality_thresholds_changed"] is False
           assert caa["source_art_mutated"] is False
           assert caa["product_authority_claimed"] is False
-          assert ara["schema"]=="RealSaS.KnightDemoArachneStage33V6Receipt.v1"
+          assert ara["schema"]=="RealSaS.KnightDemoArachneStage33V6Receipt.v2"
           assert ara["status"]=="PASS_DEMO_ONLY"
           assert ara["run_id"]==os.environ["RUN_ID"]
-          assert ara["qualified_skin_lineage_hash"]==os.environ["EXPECTED_SKIN_LINEAGE"]
+          assert ara["qualified_skeleton_lineage_hash"]==os.environ["EXPECTED_SKELETON_LINEAGE"]
+          assert ara["semantic_skeleton_tree_sha256"]==os.environ["EXPECTED_SEMANTIC_TREE_SHA256"]
           assert ara["qualified_skin_row_count"]==12090
+          assert ara["numeric_skin_field_semantics_preserved"] is True
+          assert ara["model_retraining_used_for_identity_migration"] is False
+          assert float(ara["max_abs_weight_delta_after_compiler_requalification"]) <= 1e-15
+          assert float(ara["max_row_l1_weight_delta_after_compiler_requalification"]) <= 1e-14
           assert ara["product_authority_claimed"] is False
+          with Path(os.environ["GITHUB_ENV"]).open("a") as env:
+              env.write(f"QUALIFIED_SKIN_LINEAGE={ara['qualified_skin_lineage_hash']}\n")
           assert motion["schema"]=="RealSaS.KnightMotionRetargetPreflight.v1"
           assert motion["status"]=="PASS"
           assert motion["run_id"]==os.environ["RUN_ID"]
@@ -180,7 +187,7 @@ jobs:
           skin=one("32_SKIN_QUALIFIED","RealSaS.QualifiedSkinIR.v1")
           assert len(skeleton["joints"])==28
           assert skeleton["skeleton_lineage_hash"]==os.environ["EXPECTED_SKELETON_LINEAGE"]
-          assert skin["skin_lineage_hash"]==os.environ["EXPECTED_SKIN_LINEAGE"]
+          assert skin["skin_lineage_hash"]==os.environ["QUALIFIED_SKIN_LINEAGE"]
           assert skin["qualification_report"]["corrected_row_count"]==0
           print("KNIGHT_RUN_ROOT_STAGE33_AUTHORITY_PASS")
           PY
@@ -373,7 +380,7 @@ jobs:
               "execution_repo_commit":os.environ["GITHUB_SHA"],
               "completed_through_stage":46,
               "qualified_skeleton_lineage_hash":os.environ["EXPECTED_SKELETON_LINEAGE"],
-              "qualified_skin_lineage_hash":os.environ["EXPECTED_SKIN_LINEAGE"],
+              "qualified_skin_lineage_hash":os.environ["QUALIFIED_SKIN_LINEAGE"],
               "motion_clip_ids":[clip["clip_id"] for clip in motion["clips"]],
               "dynamic_motion_hash":motion["dynamic_motion_hash"],
               "dynamic_visual_integrity_hash":dvi["visual_integrity_hash"],

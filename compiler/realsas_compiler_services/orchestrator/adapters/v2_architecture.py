@@ -37,6 +37,13 @@ from compiler.realsas_compiler_core.surface_addressing_v1 import (
     static_mesh_qualification_hash,
     surface_addressing_from_dict,
 )
+from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
+    VisualMeshSetIR,
+    VisualMeshViewIR,
+    build_visual_mesh_from_mask,
+    visual_mesh_semantic_hash,
+    visual_mesh_set_hash,
+)
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     load_file_ref,
@@ -89,16 +96,110 @@ def build_canonical_mesh_addressing_stage(ctx: dict) -> dict:
             "RealSaS.OutputPresentationDirectionSetIR.v1",
         )
     )
+    observation = qualified_observation_set_from_dict(
+        stage_output_payload(
+            ctx,
+            "07_OBSERVATION_CONTRACT_QUALIFIED",
+            "RealSaS.QualifiedObservationSetIR.v1",
+        )
+    )
+    source_foreground = _source_foreground_masks_v1(ctx, observation)
+    observation_by_view = {
+        int(row.view_index): row for row in observation.views
+    }
+    if set(observation_by_view) != set(range(8)):
+        raise QualificationError("STAGE18_VISUAL_MESH_REQUIRES_V0_V7")
+
+    root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+    visual_root = root / "visual_mesh"
+    visual_root.mkdir(parents=True, exist_ok=True)
+    visual_rows = []
+    for view_index in range(8):
+        authority = observation_by_view[view_index]
+        mask = np.frombuffer(
+            source_foreground[view_index],
+            dtype=np.uint8,
+        ).reshape(
+            int(authority.height),
+            int(authority.width),
+        ).astype(bool)
+        visual_mesh = build_visual_mesh_from_mask(
+            mask,
+            target_edge_px=16,
+        )
+        mesh_path = visual_root / f"V{view_index}.npz"
+        np.savez_compressed(
+            mesh_path,
+            positions=np.asarray(visual_mesh.positions, dtype=np.float64),
+            faces=np.asarray(visual_mesh.faces, dtype=np.uint32),
+            uv=np.asarray(visual_mesh.uv, dtype=np.float64),
+        )
+        mesh_sha = sha256_file(mesh_path)
+        visual_rows.append(
+            VisualMeshViewIR(
+                view_index=view_index,
+                direction_id=f"V{view_index}",
+                width=int(authority.width),
+                height=int(authority.height),
+                vertex_count=int(len(visual_mesh.positions)),
+                face_count=int(len(visual_mesh.faces)),
+                mesh_npz_path=str(mesh_path.resolve()),
+                mesh_npz_sha256=mesh_sha,
+                source_raster_sha256=str(authority.source_raster_sha256),
+                source_foreground_mask_sha256=str(
+                    authority.foreground_mask_sha256
+                ),
+                mesh_hash=visual_mesh_semantic_hash(visual_mesh),
+                metadata={
+                    "ownership": "SOURCE_ART_SILHOUETTE",
+                    "mechanical_render_authority": False,
+                    "uv_authority": "FIXED_SOURCE_RASTER_UV",
+                    "builder": "SOURCE_MASK_DELAUNAY_INSIDE_CONSTRAINED_V1",
+                    "target_edge_px": 16,
+                },
+            )
+        )
+    visual_set = VisualMeshSetIR(
+        observation_set_binding_hash=observation.observation_set_hash,
+        output_direction_set_binding_hash=directions.direction_set_hash,
+        views=tuple(visual_rows),
+        set_hash="",
+        metadata={
+            "visual_geometry_authority": "SOURCE_FOREGROUND_MASK",
+            "mechanical_candidate_render_authority": False,
+            "mechanical_candidate_role": (
+                "MECHANICS_AND_PRESENTATION_DISPLACEMENT_DRIVER_ONLY"
+            ),
+            "texture_authority": "SOURCE_RGBA",
+            "deformation_contract": "BARYCENTRIC_BINDING_PLUS_ARAP_2D",
+            "subject_specific_code_used": False,
+        },
+    )
+    visual_set = replace(
+        visual_set,
+        set_hash=visual_mesh_set_hash(visual_set),
+    )
+
     addressing = build_surface_addressing(candidate)
     domain = build_appearance_domain(
-        candidate, addressing, directions.direction_set_hash
+        candidate,
+        addressing,
+        directions.direction_set_hash,
+        visual_mesh_set_hash=visual_set.set_hash,
+        visual_mesh_face_count=sum(
+            int(row.face_count) for row in visual_set.views
+        ),
     )
-    root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     outputs = list(base["outputs"]) + [
         write_ir(
             root / "surface_addressing.json",
             addressing,
             authority_class="CANONICAL_SURFACE_ADDRESSING",
+        ),
+        write_ir(
+            root / "visual_mesh_set.json",
+            visual_set,
+            authority_class="SOURCE_OWNED_VISUAL_MESH_SET",
         ),
         write_ir(
             root / "appearance_domain.json",
@@ -110,8 +211,17 @@ def build_canonical_mesh_addressing_stage(ctx: dict) -> dict:
     diagnostics.update(
         {
             "surface_addressing_hash": addressing.addressing_hash,
+            "visual_mesh_set_hash": visual_set.set_hash,
+            "visual_mesh_view_count": len(visual_set.views),
+            "visual_mesh_total_vertex_count": sum(
+                int(row.vertex_count) for row in visual_set.views
+            ),
+            "visual_mesh_total_face_count": sum(
+                int(row.face_count) for row in visual_set.views
+            ),
             "appearance_domain_hash": domain.domain_hash,
             "appearance_domain_face_count": domain.renderable_face_count,
+            "mechanical_candidate_render_authority": False,
         }
     )
     return {

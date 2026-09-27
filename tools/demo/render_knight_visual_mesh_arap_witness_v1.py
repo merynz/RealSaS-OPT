@@ -37,8 +37,9 @@ from compiler.realsas_compiler_core.visibility_v2 import (
 )
 from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
     Arap2D,
-    bind_visual_vertex_handles,
+    bind_points_barycentric,
     build_visual_mesh_from_mask,
+    evaluate_bone_handles,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     sha256_file,
@@ -201,6 +202,182 @@ def _mechanical_targets(
     )
 
 
+def _presentation_joint_positions(
+    *,
+    point_xy: np.ndarray,
+    visual_skin_weights: np.ndarray,
+    joint_ids: tuple[str, ...],
+    parent_by_joint: dict[str, str | None],
+    minimum_total_weight: float = 0.05,
+) -> tuple[dict[str, tuple[float, float]], dict[str, float]]:
+    """Fit a per-view 2D character rest rig to source-art support."""
+    points = np.asarray(point_xy, dtype=np.float64)
+    weights = np.asarray(visual_skin_weights, dtype=np.float64)
+    if weights.shape != (len(points), len(joint_ids)):
+        raise RuntimeError("PRESENTATION_JOINT_WEIGHT_SHAPE_DRIFT")
+    result = {}
+    support = {}
+    global_center = tuple(map(float, points.mean(axis=0)))
+    for column, joint_id in enumerate(joint_ids):
+        w = np.maximum(weights[:, column], 0.0)
+        total = float(w.sum())
+        support[joint_id] = total
+        if total >= float(minimum_total_weight):
+            xy = (points * w[:, None]).sum(axis=0) / total
+            result[joint_id] = tuple(map(float, xy))
+    unresolved = set(joint_ids) - set(result)
+    for _ in range(len(joint_ids) + 1):
+        if not unresolved:
+            break
+        progressed = False
+        for joint_id in tuple(unresolved):
+            parent = parent_by_joint.get(joint_id)
+            if parent is None:
+                result[joint_id] = global_center
+                unresolved.remove(joint_id)
+                progressed = True
+            elif parent in result:
+                result[joint_id] = result[parent]
+                unresolved.remove(joint_id)
+                progressed = True
+        if not progressed:
+            break
+    for joint_id in unresolved:
+        result[joint_id] = global_center
+    return result, support
+
+
+def _topological_joint_ids(
+    joint_ids: tuple[str, ...],
+    parent_by_joint: dict[str, str | None],
+) -> tuple[str, ...]:
+    remaining = set(joint_ids)
+    order = []
+    while remaining:
+        progressed = False
+        for joint_id in joint_ids:
+            if joint_id not in remaining:
+                continue
+            parent = parent_by_joint.get(joint_id)
+            if parent is None or parent in order:
+                order.append(joint_id)
+                remaining.remove(joint_id)
+                progressed = True
+        if not progressed:
+            raise RuntimeError("PRESENTATION_SKELETON_NOT_TOPOLOGICAL")
+    return tuple(order)
+
+
+def _project_joint_dict(
+    positions: dict[str, tuple[float, float, float]],
+    camera,
+) -> dict[str, np.ndarray]:
+    ids = tuple(positions)
+    xyz = np.asarray(
+        [positions[joint_id] for joint_id in ids],
+        dtype=np.float64,
+    )
+    xy = project_points_xyz_v3(xyz, camera)[:, :2]
+    return {
+        joint_id: np.asarray(xy[i], dtype=np.float64)
+        for i, joint_id in enumerate(ids)
+    }
+
+
+def _retarget_template_direction_character_length(
+    *,
+    rest_presentation: dict[str, tuple[float, float]],
+    rest_joint_xyz: dict[str, tuple[float, float, float]],
+    posed_joint_xyz: dict[str, tuple[float, float, float]],
+    camera,
+    joint_ids: tuple[str, ...],
+    parent_by_joint: dict[str, str | None],
+) -> dict[str, tuple[float, float]]:
+    """Boneyard-style 2D retargeting principle, implemented independently.
+
+    Character proportions (bone lengths and root anchor) come from the source
+    fitted 2D rest rig. Bone directions come from the projected posed canonical
+    skeleton. This avoids granting the mechanical relation mesh visual position
+    authority while preserving character-specific 2D proportions.
+    """
+    rest_projected = _project_joint_dict(rest_joint_xyz, camera)
+    posed_projected = _project_joint_dict(posed_joint_xyz, camera)
+    order = _topological_joint_ids(joint_ids, parent_by_joint)
+    result = {}
+    for joint_id in order:
+        parent = parent_by_joint.get(joint_id)
+        char_rest = np.asarray(
+            rest_presentation[joint_id],
+            dtype=np.float64,
+        )
+        if parent is None:
+            root_delta = (
+                posed_projected[joint_id]
+                - rest_projected[joint_id]
+            )
+            result[joint_id] = tuple(
+                map(float, char_rest + root_delta)
+            )
+            continue
+        parent_target = np.asarray(result[parent], dtype=np.float64)
+        char_parent = np.asarray(
+            rest_presentation[parent],
+            dtype=np.float64,
+        )
+        char_length = float(np.linalg.norm(char_rest - char_parent))
+        pose_bone = posed_projected[joint_id] - posed_projected[parent]
+        pose_length = float(np.linalg.norm(pose_bone))
+        if char_length <= 1.0e-9 or pose_length <= 1.0e-6:
+            result[joint_id] = tuple(map(float, parent_target))
+            continue
+        direction = pose_bone / pose_length
+        result[joint_id] = tuple(
+            map(float, parent_target + char_length * direction)
+        )
+    return result
+
+
+def _presentation_handle_specs(
+    *,
+    joint_ids: tuple[str, ...],
+    parent_by_joint: dict[str, str | None],
+    rest_joint_xy: dict[str, tuple[float, float]],
+    joint_support: dict[str, float],
+    step: float = 0.25,
+    min_bone_px: float = 2.0,
+    min_support: float = 0.05,
+) -> tuple[tuple[str, str, float], ...]:
+    rows = []
+    root_added = False
+    for joint_id in _topological_joint_ids(joint_ids, parent_by_joint):
+        parent = parent_by_joint.get(joint_id)
+        if parent is None:
+            if float(joint_support.get(joint_id, 0.0)) >= min_support:
+                rows.append((joint_id, joint_id, 1.0))
+                root_added = True
+            continue
+        if float(joint_support.get(joint_id, 0.0)) < min_support:
+            continue
+        a = np.asarray(rest_joint_xy[parent], dtype=np.float64)
+        b = np.asarray(rest_joint_xy[joint_id], dtype=np.float64)
+        if float(np.linalg.norm(b - a)) < float(min_bone_px):
+            continue
+        if (
+            not root_added
+            and float(joint_support.get(parent, 0.0)) >= min_support
+        ):
+            rows.append((joint_id, parent, 0.0))
+            root_added = True
+        t = float(step)
+        while t < 1.0 - 1.0e-9:
+            rows.append((joint_id, parent, t))
+            t += float(step)
+        rows.append((joint_id, parent, 1.0))
+    if not rows:
+        raise RuntimeError("PRESENTATION_HANDLE_SET_EMPTY")
+    return tuple(rows)
+
+
 def _write_direct_provenance(path: Path, height: int, width: int) -> str:
     provenance = np.zeros((8, height, width), dtype=np.uint8)
     source_view = np.broadcast_to(
@@ -335,6 +512,20 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
         dtype=np.float64,
     )
     mechanical_face_indices = _candidate_face_indices(candidate)
+    parent_by_joint = {
+        str(joint.canonical_joint_id): (
+            None
+            if joint.parent_canonical_id is None
+            else str(joint.parent_canonical_id)
+        )
+        for joint in skeleton.joints
+    }
+    _rest_skin_matrices, rest_joint_positions, _rest_frame_hash = _joint_pose_v2(
+        skeleton=skeleton,
+        tracks={},
+        time_seconds=0.0,
+        cameras=cameras,
+    )
 
     clip_specs = [
         ("demo_idle_v1", "IDLE", 833),
@@ -377,11 +568,30 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
             mechanical_weights=mechanical_weights,
             source_mask=mask,
         )
-        visual_handle_indices = np.asarray(
-            mechanical_binding["visual_vertex_indices"],
-            dtype=np.int64,
+        rest_visible_xy = np.asarray(
+            mesh.positions,
+            dtype=np.float64,
+        )[mechanical_binding["visual_vertex_indices"]]
+        rest_presentation_joints, joint_support = _presentation_joint_positions(
+            point_xy=rest_visible_xy,
+            visual_skin_weights=mechanical_binding["visual_skin_weights"],
+            joint_ids=tuple(mechanical_joint_ids),
+            parent_by_joint=parent_by_joint,
         )
-        bindings = bind_visual_vertex_handles(mesh, visual_handle_indices)
+        handle_specs = _presentation_handle_specs(
+            joint_ids=tuple(mechanical_joint_ids),
+            parent_by_joint=parent_by_joint,
+            rest_joint_xy=rest_presentation_joints,
+            joint_support=joint_support,
+            step=0.25,
+            min_bone_px=2.0,
+            min_support=0.05,
+        )
+        rest_handles = evaluate_bone_handles(
+            handle_specs,
+            rest_presentation_joints,
+        )
+        bindings = bind_points_barycentric(mesh, rest_handles)
         arap = Arap2D(mesh, bindings)
         print(
             "VISUAL_MECHANICAL_BINDING",
@@ -396,7 +606,7 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
                         mechanical_binding["unbound_visual_vertex_count"]
                     ),
                     "presentation_handle_count": int(len(bindings)),
-                    "presentation_driver": "DIRECT_POSED_MECHANICAL_SURFACE_TARGETS",
+                    "presentation_driver": "SOURCE_FITTED_2D_BONE_LENGTHS__PROJECTED_CANONICAL_POSE_DIRECTIONS",
                     "rest_mechanical_visibility_layer_overflow_pixel_count": int(
                         mechanical_binding["visibility_layer_overflow_pixel_count"]
                     ),
@@ -429,22 +639,25 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
             posed_pixel_frames = []
             qa_rows = []
             for time_seconds in times:
-                skin_matrices, _posed_joint_positions, _frame_hash = _joint_pose_v2(
+                _skin_matrices, posed_joint_positions, _frame_hash = _joint_pose_v2(
                     skeleton=skeleton,
                     tracks=tracks,
                     time_seconds=float(time_seconds),
                     cameras=cameras,
                 )
-                posed_mechanical_xyz = _skin(
-                    rest_mechanical_xyz,
-                    mechanical_weights,
-                    mechanical_joint_ids,
-                    skin_matrices,
+                posed_presentation_joints = (
+                    _retarget_template_direction_character_length(
+                        rest_presentation=rest_presentation_joints,
+                        rest_joint_xyz=rest_joint_positions,
+                        posed_joint_xyz=posed_joint_positions,
+                        camera=camera,
+                        joint_ids=tuple(mechanical_joint_ids),
+                        parent_by_joint=parent_by_joint,
+                    )
                 )
-                target_xy = _mechanical_targets(
-                    binding=mechanical_binding,
-                    posed_mechanical_xyz=posed_mechanical_xyz,
-                    camera=camera,
+                target_xy = evaluate_bone_handles(
+                    handle_specs,
+                    posed_presentation_joints,
                 )
                 deformed, qa = arap.solve(target_xy, iterations=3)
                 posed_pixel_frames.append(np.asarray(deformed, dtype=np.float64))
@@ -575,7 +788,7 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
             "mechanical_mesh": "NOT_RENDERED",
             "visual_mesh": "SOURCE_FOREGROUND_MASK_DERIVED",
             "texture": "ORIGINAL_SOURCE_RGBA_WITH_FOREGROUND_ALPHA",
-            "deformation_driver": "STAGE18_MECHANICAL_FIRST_HIT_BINDING__STAGE32_ARACHNE_SKIN__STAGE40_POSED_MECHANICAL_SURFACE_PROJECTED_TO_SOURCE_VIEW",
+            "deformation_driver": "STAGE32_SOURCE_FITTED_2D_PROPORTIONS__STAGE28_STAGE40_PROJECTED_CANONICAL_POSE_DIRECTIONS__ARAP",
             "deformer": "LOCAL_GLOBAL_ARAP_2D",
         },
         "views": report_views,

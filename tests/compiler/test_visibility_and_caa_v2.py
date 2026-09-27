@@ -178,6 +178,29 @@ def test_other_view_donor_prefers_geometric_support_over_circular_proximity():
     assert np.allclose(tied_score, 0.90, atol=0.0, rtol=0.0)
 
 
+def test_safe_background_direct_source_is_not_cross_view_appearance_donor():
+    direct_valid = np.zeros((8, 3), dtype=bool)
+    direct_valid[1, :] = True
+    direct_valid[4, :] = True
+    donor_valid = np.zeros_like(direct_valid)
+    # V1 is a valid directional safe-background observation, but it is not
+    # transferable material appearance. V4 is foreground source evidence.
+    donor_valid[4, :] = True
+    face_support = np.zeros((8, 1), dtype=np.float64)
+    face_support[1, 0] = 0.99
+    face_support[4, 0] = 0.60
+    best_view, best_score = select_other_view_donor_by_support(
+        target_view_index=0,
+        missing=np.ones(3, dtype=bool),
+        direct_valid=direct_valid,
+        donor_valid=donor_valid,
+        sample_face_index=np.zeros(3, dtype=np.int32),
+        face_support_by_view=face_support,
+    )
+    assert set(map(int, best_view)) == {4}
+    assert np.allclose(best_score, 0.60, atol=0.0, rtol=0.0)
+
+
 def test_safe_transparent_source_background_is_defined_direct_source_not_unseen():
     candidate = _candidate()
     cameras = tuple(_camera(view, 32) for view in range(8))

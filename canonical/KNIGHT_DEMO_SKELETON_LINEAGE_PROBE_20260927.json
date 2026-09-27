@@ -1,10 +1,10 @@
 {
   "expected_arachne_skeleton_lineage": "c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce",
   "lineage_stability": {
-    "v1_shadow_false": false,
-    "v1_shadow_true": false,
-    "v2_shadow_false": false,
-    "v2_shadow_true": false
+    "v1_shadow_false": true,
+    "v1_shadow_true": true,
+    "v2_shadow_false": true,
+    "v2_shadow_true": true
   },
   "matching_variants": [],
   "product_authority_claimed": false,
@@ -14,8 +14,8 @@
     "v1_shadow_false": [
       {
         "joint_count": 28,
-        "lineage": "25a4380e802a5bc91b0d080a909b9ec6c9a40b969602e4db435dca37111fc09c",
-        "optimizer_result_sha256": "f277229f3d7e1fd0cbbb182487b3c7f8916a286d4addd761ae0f4e212b6b3bfd",
+        "lineage": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+        "optimizer_result_sha256": "d359d45400b13d4366491bd160b87313cd9b2c1aa9d21d11bfbc8912b0877272",
         "repeat": 0,
         "root_source_proposal_ids": [
           "P:GRS:0000"
@@ -559,8 +559,8 @@
       },
       {
         "joint_count": 28,
-        "lineage": "f6502ac128858f68308e7188e24f7babba4e44d5295dfdb39c9da839c1d2d7ff",
-        "optimizer_result_sha256": "a227b2558e6660afcb9c37189adcdce654c2492ac477cbc9476be7f02e94671e",
+        "lineage": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+        "optimizer_result_sha256": "d359d45400b13d4366491bd160b87313cd9b2c1aa9d21d11bfbc8912b0877272",
         "repeat": 1,
         "root_source_proposal_ids": [
           "P:GRS:0000"
@@ -1104,8 +1104,8 @@
       },
       {
         "joint_count": 28,
-        "lineage": "dc1185c06fa90e1492d42403c28850ca9030e324f2c36b5615fb0adf7b203e34",
-        "optimizer_result_sha256": "ec46770457b6981840d52ce4ca713ab04a9b2f2b6ed1201c90c935e32e5c1ef0",
+        "lineage": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+        "optimizer_result_sha256": "d359d45400b13d4366491bd160b87313cd9b2c1aa9d21d11bfbc8912b0877272",
         "repeat": 2,
         "root_source_proposal_ids": [
           "P:GRS:0000"
@@ -1651,8 +1651,8 @@
     "v1_shadow_true": [
       {
         "joint_count": 28,
-        "lineage": "e657a018394ca2d92b7dacabdf36b5295935c0016622d745c47cff1b7fff42fd",
-        "optimizer_result_sha256": "de83a24d44f570c640ac5f1448c888536dc2556539e6eb59b8f8daf945234334",
+        "lineage": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+        "optimizer_result_sha256": "d359d45400b13d4366491bd160b87313cd9b2c1aa9d21d11bfbc8912b0877272",
         "repeat": 0,
         "root_source_proposal_ids": [
           "P:GRS:0000"
@@ -2196,8 +2196,8 @@
       },
       {
         "joint_count": 28,
-        "lineage": "4690fa3f399b244286413c1c51bd3aeca3c85f83dbffa5bfd4aa6f8e8fee72c4",
-        "optimizer_result_sha256": "33541ee781c27d89a0e98b51ce1c9457ef91b653837687afd44c58fc1b1f6d3f",
+        "lineage": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+        "optimizer_result_sha256": "d359d45400b13d4366491bd160b87313cd9b2c1aa9d21d11bfbc8912b0877272",
         "repeat": 1,
         "root_source_proposal_ids": [
           "P:GRS:0000"
@@ -2741,8 +2741,8 @@
       },
       {
         "joint_count": 28,
-        "lineage": "f7313e6958cfaf0278b26598d9e03e6501d1c792253b14ad0340c62c6179c3e0",
-        "optimizer_result_sha256": "7e755e17b341d362d2fae6aee91cc455387acdf677ad93f977aa2102c81ba028",
+        "lineage": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+        "optimizer_result_sha256": "d359d45400b13d4366491bd160b87313cd9b2c1aa9d21d11bfbc8912b0877272",
         "repeat": 2,
         "root_source_proposal_ids": [
           "P:GRS:0000"
@@ -3288,8 +3288,8 @@
     "v2_shadow_false": [
       {
         "joint_count": 28,
-        "lineage": "5af83030ca7e9150c82afe42247318f317e10608d81b1ffb785436b081dc554a",
-        "optimizer_result_sha256": "aa88563d29f6536f68eae6f65b322250296b7d2d3c5e2577af7176563dd42e85",
+        "lineage": "99672f5888de8035fc5acdcd3082faa56d3af6f3a3e730ffda72631326033322",
+        "optimizer_result_sha256": "d359d45400b13d4366491bd160b87313cd9b2c1aa9d21d11bfbc8912b0877272",
         "repeat": 0,
         "root_source_proposal_ids": [
           "P:GRS:0000"
@@ -3833,8 +3833,8 @@
       },
       {
         "joint_count": 28,
-        "lineage": "fe5ef0564d1910a5885854d93d1f8d783af8c0ee3ff6faeaa148a696ec201da4",
-        "optimizer_result_sha256": "e8f1484a2a99fd0c718ec2370ef72d2a00b0671b75d4a5a008ac5a1b19a32a27",
+        "lineage": "99672f5888de8035fc5acdcd3082faa56d3af6f3a3e730ffda72631326033322",
+        "optimizer_result_sha256": "d359d45400b13d4366491bd160b87313cd9b2c1aa9d21d11bfbc8912b0877272",
         "repeat": 1,
         "root_source_proposal_ids": [
           "P:GRS:0000"
@@ -4378,8 +4378,8 @@
       },
       {
         "joint_count": 28,
-        "lineage": "10b432485c54cf8da7930682dee0af7a3b1afb877a81d7c1745acce1fa8b3cf5",
-        "optimizer_result_sha256": "68c473a90aad4c83875224f11c98608893ab27900c4bb7946db3d5b9364af6e6",
+        "lineage": "99672f5888de8035fc5acdcd3082faa56d3af6f3a3e730ffda72631326033322",
+        "optimizer_result_sha256": "d359d45400b13d4366491bd160b87313cd9b2c1aa9d21d11bfbc8912b0877272",
         "repeat": 2,
         "root_source_proposal_ids": [
           "P:GRS:0000"
@@ -4925,8 +4925,8 @@
     "v2_shadow_true": [
       {
         "joint_count": 28,
-        "lineage": "d5c96da03074bac11bb306e4ec76b40c7f12d90828b7f72ae57698904ee0052c",
-        "optimizer_result_sha256": "4902da70ac8a19cb9d822c691e5ea1fb7aee7b850951a8e75247e4585a3aa4db",
+        "lineage": "99672f5888de8035fc5acdcd3082faa56d3af6f3a3e730ffda72631326033322",
+        "optimizer_result_sha256": "d359d45400b13d4366491bd160b87313cd9b2c1aa9d21d11bfbc8912b0877272",
         "repeat": 0,
         "root_source_proposal_ids": [
           "P:GRS:0000"
@@ -5470,8 +5470,8 @@
       },
       {
         "joint_count": 28,
-        "lineage": "bdd2eb1bb813b5a3b5ec148e51f6708aee339b137b9ec24b51a556f76b30e869",
-        "optimizer_result_sha256": "8749ec362f17ac87069e13f48d1637f44f0587deb0152fac385e1fd36925ecb6",
+        "lineage": "99672f5888de8035fc5acdcd3082faa56d3af6f3a3e730ffda72631326033322",
+        "optimizer_result_sha256": "d359d45400b13d4366491bd160b87313cd9b2c1aa9d21d11bfbc8912b0877272",
         "repeat": 1,
         "root_source_proposal_ids": [
           "P:GRS:0000"
@@ -6015,8 +6015,8 @@
       },
       {
         "joint_count": 28,
-        "lineage": "f7e4514622391d5385d3c469f083affd71e5672f517fce0204432e1a22c5240f",
-        "optimizer_result_sha256": "76be3e9959e45b33c422eb17768005d01c0e610f16dfb00d40d5af4a1c260055",
+        "lineage": "99672f5888de8035fc5acdcd3082faa56d3af6f3a3e730ffda72631326033322",
+        "optimizer_result_sha256": "d359d45400b13d4366491bd160b87313cd9b2c1aa9d21d11bfbc8912b0877272",
         "repeat": 2,
         "root_source_proposal_ids": [
           "P:GRS:0000"
@@ -6572,8 +6572,8 @@
   "variants": {
     "v1_shadow_false": {
       "joint_count": 28,
-      "lineage": "25a4380e802a5bc91b0d080a909b9ec6c9a40b969602e4db435dca37111fc09c",
-      "optimizer_result_sha256": "f277229f3d7e1fd0cbbb182487b3c7f8916a286d4addd761ae0f4e212b6b3bfd",
+      "lineage": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+      "optimizer_result_sha256": "d359d45400b13d4366491bd160b87313cd9b2c1aa9d21d11bfbc8912b0877272",
       "repeat": 0,
       "root_source_proposal_ids": [
         "P:GRS:0000"
@@ -7117,8 +7117,8 @@
     },
     "v1_shadow_true": {
       "joint_count": 28,
-      "lineage": "e657a018394ca2d92b7dacabdf36b5295935c0016622d745c47cff1b7fff42fd",
-      "optimizer_result_sha256": "de83a24d44f570c640ac5f1448c888536dc2556539e6eb59b8f8daf945234334",
+      "lineage": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+      "optimizer_result_sha256": "d359d45400b13d4366491bd160b87313cd9b2c1aa9d21d11bfbc8912b0877272",
       "repeat": 0,
       "root_source_proposal_ids": [
         "P:GRS:0000"
@@ -7662,8 +7662,8 @@
     },
     "v2_shadow_false": {
       "joint_count": 28,
-      "lineage": "5af83030ca7e9150c82afe42247318f317e10608d81b1ffb785436b081dc554a",
-      "optimizer_result_sha256": "aa88563d29f6536f68eae6f65b322250296b7d2d3c5e2577af7176563dd42e85",
+      "lineage": "99672f5888de8035fc5acdcd3082faa56d3af6f3a3e730ffda72631326033322",
+      "optimizer_result_sha256": "d359d45400b13d4366491bd160b87313cd9b2c1aa9d21d11bfbc8912b0877272",
       "repeat": 0,
       "root_source_proposal_ids": [
         "P:GRS:0000"
@@ -8207,8 +8207,8 @@
     },
     "v2_shadow_true": {
       "joint_count": 28,
-      "lineage": "d5c96da03074bac11bb306e4ec76b40c7f12d90828b7f72ae57698904ee0052c",
-      "optimizer_result_sha256": "4902da70ac8a19cb9d822c691e5ea1fb7aee7b850951a8e75247e4585a3aa4db",
+      "lineage": "99672f5888de8035fc5acdcd3082faa56d3af6f3a3e730ffda72631326033322",
+      "optimizer_result_sha256": "d359d45400b13d4366491bd160b87313cd9b2c1aa9d21d11bfbc8912b0877272",
       "repeat": 0,
       "root_source_proposal_ids": [
         "P:GRS:0000"

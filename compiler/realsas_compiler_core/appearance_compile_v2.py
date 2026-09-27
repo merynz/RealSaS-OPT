@@ -1256,11 +1256,19 @@ def compile_deterministic_caa(
         ):
             raise QualificationError("CAA_COMPONENT_WITHOUT_SOURCE_OBSERVATION")
 
+        # C(p) is the sole owner for samples with no qualified direct
+        # source support in any input direction. Do not walk those samples
+        # through the bounded local harmonic solver only to overwrite its
+        # abstention immediately afterwards. They are deliberately neither
+        # local-missing nor observed boundary evidence.
+        local_missing = missing & ~globally_unseen_dense
+        local_observed = ~missing
         stats = bounded_surface_harmonic_fill(
             rgba=rgba[target],
             provenance=provenance[target],
             source_view=source_view[target],
-            missing=missing,
+            missing=local_missing,
+            observed_mask=local_observed,
             sample_component=sample_component_index,
             neighbors=surface_neighbors,
             max_region_samples=max_harmonic_region,
@@ -1271,7 +1279,7 @@ def compile_deterministic_caa(
         )
 
         global_take = (
-            (provenance[target] == CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"])
+            (provenance[target] == 255)
             & globally_unseen_dense
         )
         if np.any(global_take):

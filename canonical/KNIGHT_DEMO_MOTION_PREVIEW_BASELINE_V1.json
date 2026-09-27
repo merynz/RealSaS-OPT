@@ -1,0 +1,49 @@
+{
+  "schema": "RealSaS.KnightDemoMotionPreviewBaseline.v1",
+  "status": "SEALED_BASELINE",
+  "date": "2026-09-27",
+  "authority": {
+    "renderer_source_commit": "cb4b2cc8356c0529e7fe2e0ba6212f969fe4601b",
+    "sealed_sheet_commit": "6d4786c67f2a3560a40fc676123c37a70623e465",
+    "gif_export_commit": "62aebc388605e0f762f175dd3f929b5c09d1d70b",
+    "renderer_blob_sha1": "7917be02f325ba00b5dcd2b31a786898e45f640f"
+  },
+  "report": {
+    "path": "canonical/knight_demo_motion_preview_v1/KNIGHT_DEMO_MOTION_VISUAL_CONTINUATION_REPORT_V1.json",
+    "git_blob_sha1": "9120723f6bc00142fb6bb992d3ee7a85c601bf4f"
+  },
+  "sheets": {
+    "IDLE": {
+      "path": "canonical/knight_demo_motion_preview_v1/KNIGHT_IDLE_DEMO_PREVIEW_V1.png",
+      "git_blob_sha1": "cae86d8a04bde6768ac9c3dafed13a2ab318cf29"
+    },
+    "RUN": {
+      "path": "canonical/knight_demo_motion_preview_v1/KNIGHT_RUN_DEMO_PREVIEW_V1.png",
+      "git_blob_sha1": "8e9ed58a3bfbbace73f54e3e5593691f90eef4f1"
+    },
+    "SLASH": {
+      "path": "canonical/knight_demo_motion_preview_v1/KNIGHT_SLASH_DEMO_PREVIEW_V1.png",
+      "git_blob_sha1": "7a87f310473d602c99eb712be964dcd430b47cfb"
+    }
+  },
+  "gifs": {
+    "IDLE": {
+      "path": "canonical/knight_demo_motion_preview_v1/KNIGHT_IDLE_DEMO_PREVIEW_V1.gif",
+      "git_blob_sha1": "31b64edff1da106bc8feb00faede61ffe68dc89c"
+    },
+    "RUN": {
+      "path": "canonical/knight_demo_motion_preview_v1/KNIGHT_RUN_DEMO_PREVIEW_V1.gif",
+      "git_blob_sha1": "b8f0e97e74396a0987444bb72ea93db4bb519640"
+    },
+    "SLASH": {
+      "path": "canonical/knight_demo_motion_preview_v1/KNIGHT_SLASH_DEMO_PREVIEW_V1.gif",
+      "git_blob_sha1": "73a567f3ff17786d3316e3fb02a723ee3c026eca"
+    }
+  },
+  "execution_contract": {
+    "e2e_final_preview_must_match_byte_exactly": true,
+    "experimental_visual_mesh_or_occupancy_witness_may_not_replace_demo_baseline": true,
+    "mismatch_semantics": "FAIL_CLOSED_BEFORE_SEAL"
+  },
+  "product_authority_claimed": false
+}

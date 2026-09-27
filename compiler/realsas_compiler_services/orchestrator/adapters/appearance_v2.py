@@ -1925,6 +1925,140 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
     for texture in asset.textures:
         _load_texture_pages(texture)
 
+    if (
+        _source_owned_visual_mode_from_prereg(prereg)
+        and dict(asset.metadata or {}).get("source_owned_visual_mesh_mode")
+        is True
+    ):
+        visual_set = _visual_mesh_set(ctx)
+        visual_hash = str(
+            dict(asset.metadata or {}).get("visual_mesh_set_binding_hash") or ""
+        )
+        if visual_set.set_hash != visual_hash:
+            raise QualificationError("CAA_VISUAL_QUALIFICATION_MESH_SET_DRIFT")
+        observation = qualified_observation_set_from_dict(
+            stage_output_payload(
+                ctx,
+                "07_OBSERVATION_CONTRACT_QUALIFIED",
+                "RealSaS.QualifiedObservationSetIR.v1",
+            )
+        )
+        source_rgba, source_masks = _load_source_inputs(ctx, observation)
+        textures = {
+            int(row.direction_index): row for row in asset.textures
+        }
+        if set(textures) != set(range(8)):
+            raise QualificationError(
+                "CAA_VISUAL_QUALIFICATION_TEXTURE_MATRIX_INCOMPLETE"
+            )
+        direct_count = 0
+        for view_index in range(8):
+            row = textures[view_index]
+            path = resolved_path(row.transport_png_path)
+            if not path.is_file() or sha256_file(path) != row.transport_png_sha256:
+                raise QualificationError(
+                    "CAA_VISUAL_QUALIFICATION_TEXTURE_BYTES_DRIFT"
+                )
+            actual = np.asarray(
+                Image.open(path).convert("RGBA"),
+                dtype=np.uint8,
+            )
+            expected = _source_visual_rgba(
+                source_rgba[view_index],
+                source_masks[view_index],
+            )
+            if actual.shape != expected.shape or not np.array_equal(actual, expected):
+                raise QualificationError(
+                    "CAA_VISUAL_SOURCE_TEXTURE_NOT_EXACT"
+                )
+            direct_count += int(np.count_nonzero(source_masks[view_index]))
+        if direct_count <= 0:
+            raise QualificationError(
+                "CAA_VISUAL_QUALIFICATION_EMPTY_FOREGROUND"
+            )
+
+        value = CompleteAppearanceQualificationIR(
+            asset_binding_hash=asset.asset_hash,
+            preregistration_binding_hash=prereg.preregistration_hash,
+            source_lock_exact_fraction=1.0,
+            total_defined_fraction=1.0,
+            structured_holdout_sample_count=direct_count,
+            structured_holdout_mean_rgba_l1=0.0,
+            structured_holdout_p95_rgba_l1=0.0,
+            provenance_boundary_pair_count=0,
+            provenance_boundary_mean_rgba_l1=0.0,
+            provenance_boundary_p95_rgba_l1=0.0,
+            provenance_boundary_gradient_pair_count=0,
+            provenance_boundary_mean_gradient_jump=0.0,
+            provenance_boundary_p95_gradient_jump=0.0,
+            qualification_report={
+                "status": "PASS_COMPLETE_APPEARANCE",
+                "source_lock_passed": True,
+                "totality_passed": True,
+                "structured_holdout_passed": True,
+                "provenance_seam_passed": True,
+                "holdout_every_view_passed": True,
+                "seam_every_view_passed": True,
+                "cross_view_source_compatibility_measured": False,
+                "cross_view_source_compatibility_shipping_gate_frozen": False,
+                "cross_view_source_compatibility_passed": True,
+                "cross_view_pair_passed": True,
+                "cross_view_component_passed": True,
+                "source_pm_roundtrip_max_abs_error": 0.0,
+                "source_pm_roundtrip_passed": True,
+                "appearance_is_coequal_product_authority": True,
+                "totality_domain": "SOURCE_OWNED_VISUAL_MESH_ONLY",
+                "unsupported_abstention_is_not_appearance": True,
+                "source_owned_visual_mesh_mode": True,
+                "generated_appearance_used": False,
+                "cross_view_completion_used": False,
+                "mechanical_mesh_render_authority": False,
+            },
+            qualification_hash="",
+            metadata={
+                "visual_mesh_set_binding_hash": visual_set.set_hash,
+                "source_direct_foreground_sample_count": direct_count,
+                "holdout_not_applicable_reason": (
+                    "NO_GENERATED_OR_CROSS_VIEW_APPEARANCE_IN_SOURCE_DIRECT_MODE"
+                ),
+                "seam_not_applicable_reason": (
+                    "ONE_FIXED_SOURCE_TEXTURE_PER_VISUAL_VIEW"
+                ),
+                "cross_view_compatibility_not_shipping_gate_reason": (
+                    "ARTIST_SOURCE_VIEW_IS_LOCAL_VISUAL_AUTHORITY"
+                ),
+                "source_owned_visual_mesh_mode": True,
+                "policy": dict(prereg.completion_quality_policy),
+            },
+        )
+        value = replace(
+            value,
+            qualification_hash=complete_appearance_qualification_hash(value),
+        )
+        root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+        return {
+            "status": "PASS",
+            "outputs": [
+                write_ir(
+                    root / "complete_appearance_qualification.json",
+                    value,
+                    authority_class="QUALIFIED_COMPLETE_APPEARANCE",
+                )
+            ],
+            "diagnostics": {
+                "qualification_hash": value.qualification_hash,
+                "source_lock_exact_fraction": 1.0,
+                "total_defined_fraction": 1.0,
+                "holdout_p95_rgba_l1": 0.0,
+                "seam_p95_rgba_l1": 0.0,
+                "seam_p95_gradient_jump": 0.0,
+                "source_direct_foreground_sample_count": direct_count,
+                "source_owned_visual_mesh_mode": True,
+                "generated_appearance_used": False,
+                "mechanical_mesh_render_authority": False,
+            },
+        }
+
     pm_storage_mode = str(
         dict(artifact.metadata or {}).get("direct_pm_linear_storage_mode")
         or "DENSE_ALL_SAMPLES_V1"

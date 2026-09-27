@@ -12,8 +12,12 @@ from compiler.realsas_compiler_core.appearance_authority_v2 import (
     validate_caa_compile_artifact,
 )
 from compiler.realsas_compiler_core.appearance_bake_v2 import (
+    bake_direction_adaptive_atlas_bundle,
+    bake_direction_adaptive_atlas_pages,
+    bake_direction_adaptive_source_view_atlas_pages,
     bake_direction_atlas,
     bake_direction_source_view_atlas,
+    prepare_adaptive_paged_scatter,
 )
 from compiler.realsas_compiler_core.appearance_completion_v2 import (
     bounded_surface_harmonic_fill,
@@ -270,3 +274,64 @@ def test_compile_accounting_includes_canonical_global_completion():
         match="CAA_COMPILE_PROVENANCE_ACCOUNTING_DRIFT",
     ):
         validate_caa_compile_artifact(drifted)
+
+
+def test_vectorized_adaptive_bundle_is_byte_equivalent_to_legacy_mapping():
+    resolutions = np.asarray([4, 6, 4], dtype=np.int32)
+    offsets = np.zeros(len(resolutions) + 1, dtype=np.int64)
+    offsets[1:] = np.cumsum(
+        resolutions.astype(np.int64)
+        * (resolutions.astype(np.int64) + 1)
+        // 2
+    )
+    count = int(offsets[-1])
+    rgba = np.arange(count * 4, dtype=np.uint8).reshape(count, 4)
+    provenance = np.arange(count, dtype=np.uint8) % 5
+    source_view = np.empty(count, dtype=np.int16)
+    encoding = np.asarray([0, 1, -2, -3, -4], dtype=np.int16)
+    source_view[:] = encoding[np.arange(count) % len(encoding)]
+
+    legacy_pages, legacy_prov, legacy_uv, legacy_face_page, legacy_layout = (
+        bake_direction_adaptive_atlas_pages(
+            face_sample_rgba=rgba,
+            face_sample_provenance=provenance,
+            face_tile_resolutions=resolutions,
+            face_sample_offsets=offsets,
+            bleed_px=2,
+            max_page_resolution=64,
+        )
+    )
+    legacy_source = bake_direction_adaptive_source_view_atlas_pages(
+        face_sample_source_view=source_view,
+        face_tile_resolutions=resolutions,
+        face_sample_offsets=offsets,
+        bleed_px=2,
+        max_page_resolution=64,
+    )
+    prepared = prepare_adaptive_paged_scatter(
+        face_tile_resolutions=resolutions,
+        face_sample_offsets=offsets,
+        bleed_px=2,
+        max_page_resolution=64,
+    )
+    (
+        pages,
+        prov,
+        source,
+        uv,
+        face_page,
+        layout,
+    ) = bake_direction_adaptive_atlas_bundle(
+        face_sample_rgba=rgba,
+        face_sample_provenance=provenance,
+        face_sample_source_view=source_view,
+        prepared_scatter=prepared,
+        chunk_faces=2,
+    )
+
+    assert np.array_equal(pages, legacy_pages)
+    assert np.array_equal(prov, legacy_prov)
+    assert np.array_equal(source, legacy_source)
+    assert np.array_equal(uv, legacy_uv)
+    assert np.array_equal(face_page, legacy_face_page)
+    assert layout == legacy_layout

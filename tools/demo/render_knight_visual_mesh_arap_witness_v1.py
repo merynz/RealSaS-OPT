@@ -36,8 +36,10 @@ from compiler.realsas_compiler_core.visibility_v2 import (
 )
 from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
     Arap2D,
-    bind_visual_vertex_handles,
+    bind_points_barycentric,
     build_visual_mesh_from_mask,
+    evaluate_bone_handles,
+    sample_bone_handles,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     sha256_file,
@@ -114,9 +116,14 @@ def _bind_visual_to_mechanical_surface(
     camera,
     rest_mechanical_xyz: np.ndarray,
     mechanical_face_indices: np.ndarray,
+    mechanical_weights: np.ndarray,
     source_mask: np.ndarray,
-    spacing_px: int = 48,
 ):
+    """Bind source-owned visual vertices to first-hit mechanical surface.
+
+    The mechanical relation mesh never becomes render authority. It contributes
+    only source-view displacement and Arachne skin influence evidence.
+    """
     visibility = rasterize_visible_owner(
         candidate,
         camera,
@@ -137,58 +144,39 @@ def _bind_visual_to_mechanical_surface(
         & np.isfinite(bary).all(axis=1)
         & (bary.min(axis=1) >= -1.0e-4)
     )
-
-    # Deterministic spatial thinning: one visual handle per source-raster cell.
-    # This leaves ARAP room to preserve shape instead of over-constraining every
-    # visual vertex to a mechanically imperfect carrier.
-    bins: dict[tuple[int, int], tuple[float, int]] = {}
-    spacing = max(8, int(spacing_px))
-    for vertex_index in np.flatnonzero(valid):
-        px, py = positions[int(vertex_index)]
-        bx = int(px // spacing)
-        by = int(py // spacing)
-        cx = (bx + 0.5) * spacing
-        cy = (by + 0.5) * spacing
-        score = float((px - cx) ** 2 + (py - cy) ** 2)
-        key = (bx, by)
-        previous = bins.get(key)
-        if previous is None or score < previous[0]:
-            bins[key] = (score, int(vertex_index))
-    selected = np.asarray(
-        sorted(row[1] for row in bins.values()),
-        dtype=np.int64,
-    )
+    selected = np.asarray(np.flatnonzero(valid), dtype=np.int64)
     if len(selected) < 8:
-        raise RuntimeError("VISUAL_MECHANICAL_HANDLE_COVERAGE_TOO_LOW")
+        raise RuntimeError("VISUAL_MECHANICAL_BINDING_COVERAGE_TOO_LOW")
 
     selected_owner = owner[selected]
     selected_bary = bary[selected]
     selected_faces = mechanical_face_indices[selected_owner]
-    projected_rest = np.asarray(
-        visibility.projected_vertices,
-        dtype=np.float64,
-    )
+    projected_rest = np.asarray(visibility.projected_vertices, dtype=np.float64)
     rest_bound_xy = np.sum(
-        projected_rest[selected_faces, :2]
-        * selected_bary[:, :, None],
+        projected_rest[selected_faces, :2] * selected_bary[:, :, None],
         axis=1,
     )
     rest_visual_xy = positions[selected]
     rest_offset = rest_visual_xy - rest_bound_xy
-    rest_reconstruction = rest_bound_xy + rest_offset
-    residual = np.linalg.norm(rest_reconstruction - rest_visual_xy, axis=1)
 
-    bindings = bind_visual_vertex_handles(visual_mesh, selected)
+    point_weights = np.sum(
+        np.asarray(mechanical_weights[selected_faces], dtype=np.float64)
+        * selected_bary[:, :, None],
+        axis=1,
+    )
+    point_weights = np.maximum(point_weights, 0.0)
+    row_sum = point_weights.sum(axis=1, keepdims=True)
+    good = row_sum[:, 0] > 1.0e-12
+    point_weights[good] /= row_sum[good]
+
     return {
-        "bindings": bindings,
         "visual_vertex_indices": selected,
         "mechanical_face_indices": selected_faces,
         "mechanical_barycentric": selected_bary,
         "rest_projection_offset_xy": rest_offset,
-        "valid_visual_vertex_count": int(np.count_nonzero(valid)),
-        "unbound_visual_vertex_count": int(len(positions) - np.count_nonzero(valid)),
-        "handle_count": int(len(selected)),
-        "rest_binding_max_residual_px": float(residual.max(initial=0.0)),
+        "visual_skin_weights": point_weights,
+        "valid_visual_vertex_count": int(len(selected)),
+        "unbound_visual_vertex_count": int(len(positions) - len(selected)),
         "visibility_layer_overflow_pixel_count": int(
             np.count_nonzero(visibility.layer_overflow)
         ),
@@ -201,10 +189,7 @@ def _mechanical_targets(
     posed_mechanical_xyz: np.ndarray,
     camera,
 ) -> np.ndarray:
-    projected = project_points_xyz_v3(
-        posed_mechanical_xyz,
-        camera,
-    )[:, :2]
+    projected = project_points_xyz_v3(posed_mechanical_xyz, camera)[:, :2]
     faces = np.asarray(binding["mechanical_face_indices"], dtype=np.int64)
     bary = np.asarray(binding["mechanical_barycentric"], dtype=np.float64)
     posed_bound_xy = np.sum(
@@ -215,6 +200,55 @@ def _mechanical_targets(
         binding["rest_projection_offset_xy"],
         dtype=np.float64,
     )
+
+
+def _presentation_joint_positions(
+    *,
+    point_xy: np.ndarray,
+    visual_skin_weights: np.ndarray,
+    joint_ids: tuple[str, ...],
+    parent_by_joint: dict[str, str | None],
+    minimum_total_weight: float = 0.05,
+) -> tuple[dict[str, tuple[float, float]], dict[str, float]]:
+    """Derive source-aligned per-view 2D joint controls from Arachne evidence."""
+    points = np.asarray(point_xy, dtype=np.float64)
+    weights = np.asarray(visual_skin_weights, dtype=np.float64)
+    if weights.shape != (len(points), len(joint_ids)):
+        raise RuntimeError("PRESENTATION_JOINT_WEIGHT_SHAPE_DRIFT")
+
+    result: dict[str, tuple[float, float]] = {}
+    support: dict[str, float] = {}
+    global_center = tuple(map(float, points.mean(axis=0)))
+    for column, joint_id in enumerate(joint_ids):
+        w = np.maximum(weights[:, column], 0.0)
+        total = float(w.sum())
+        support[joint_id] = total
+        if total >= float(minimum_total_weight):
+            xy = (points * w[:, None]).sum(axis=0) / total
+            result[joint_id] = tuple(map(float, xy))
+
+    # Unsupported/fully hidden controls inherit their nearest available parent
+    # rather than forcing an off-art projected 3D joint into the 2D solver.
+    unresolved = set(joint_ids) - set(result)
+    for _ in range(len(joint_ids) + 1):
+        if not unresolved:
+            break
+        progressed = False
+        for joint_id in tuple(unresolved):
+            parent = parent_by_joint.get(joint_id)
+            if parent is None:
+                result[joint_id] = global_center
+                unresolved.remove(joint_id)
+                progressed = True
+            elif parent in result:
+                result[joint_id] = result[parent]
+                unresolved.remove(joint_id)
+                progressed = True
+        if not progressed:
+            break
+    for joint_id in unresolved:
+        result[joint_id] = global_center
+    return result, support
 
 
 def _write_direct_provenance(path: Path, height: int, width: int) -> str:
@@ -293,6 +327,14 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
         dtype=np.float64,
     )
     mechanical_face_indices = _candidate_face_indices(candidate)
+    parent_by_joint = {
+        str(joint.canonical_joint_id): (
+            None
+            if joint.parent_canonical_id is None
+            else str(joint.parent_canonical_id)
+        )
+        for joint in skeleton.joints
+    }
 
 
     clip_specs = [
@@ -324,11 +366,33 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
             camera=camera,
             rest_mechanical_xyz=rest_mechanical_xyz,
             mechanical_face_indices=mechanical_face_indices,
+            mechanical_weights=mechanical_weights,
             source_mask=mask,
-            spacing_px=48,
         )
-        bindings = mechanical_binding["bindings"]
+        rest_visible_xy = np.asarray(mesh.positions, dtype=np.float64)[
+            mechanical_binding["visual_vertex_indices"]
+        ]
+        rest_presentation_joints, joint_support = _presentation_joint_positions(
+            point_xy=rest_visible_xy,
+            visual_skin_weights=mechanical_binding["visual_skin_weights"],
+            joint_ids=tuple(mechanical_joint_ids),
+            parent_by_joint=parent_by_joint,
+        )
+        handle_specs = sample_bone_handles(
+            joint_ids=tuple(mechanical_joint_ids),
+            parent_by_joint=parent_by_joint,
+            joint_xy=rest_presentation_joints,
+            step=0.25,
+        )
+        rest_handles = evaluate_bone_handles(
+            handle_specs,
+            rest_presentation_joints,
+        )
+        bindings = bind_points_barycentric(mesh, rest_handles)
         arap = Arap2D(mesh, bindings)
+        supported_joint_count = sum(
+            1 for value in joint_support.values() if float(value) >= 0.05
+        )
         print(
             "VISUAL_MECHANICAL_BINDING",
             json.dumps(
@@ -341,9 +405,9 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
                     "unbound_visual_vertex_count": int(
                         mechanical_binding["unbound_visual_vertex_count"]
                     ),
-                    "handle_count": int(mechanical_binding["handle_count"]),
-                    "rest_binding_max_residual_px": float(
-                        mechanical_binding["rest_binding_max_residual_px"]
+                    "presentation_handle_count": int(len(bindings)),
+                    "supported_presentation_joint_count": int(
+                        supported_joint_count
                     ),
                     "rest_mechanical_visibility_layer_overflow_pixel_count": int(
                         mechanical_binding["visibility_layer_overflow_pixel_count"]
@@ -353,6 +417,7 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
             ),
             flush=True,
         )
+
 
         view_root = out_dir / f"V{view_index}"
         texture_path = view_root / "source_art.png"
@@ -393,10 +458,20 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
                     mechanical_joint_ids,
                     skin_matrices,
                 )
-                target_xy = _mechanical_targets(
+                posed_visible_xy = _mechanical_targets(
                     binding=mechanical_binding,
                     posed_mechanical_xyz=posed_mechanical_xyz,
                     camera=camera,
+                )
+                posed_presentation_joints, _support = _presentation_joint_positions(
+                    point_xy=posed_visible_xy,
+                    visual_skin_weights=mechanical_binding["visual_skin_weights"],
+                    joint_ids=tuple(mechanical_joint_ids),
+                    parent_by_joint=parent_by_joint,
+                )
+                target_xy = evaluate_bone_handles(
+                    handle_specs,
+                    posed_presentation_joints,
                 )
                 deformed, qa = arap.solve(target_xy, iterations=3)
                 posed_frames.append(_pixel_to_world(deformed, mesh.width, mesh.height))
@@ -560,7 +635,7 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
             "mechanical_mesh": "NOT_RENDERED",
             "visual_mesh": "SOURCE_FOREGROUND_MASK_DERIVED",
             "texture": "ORIGINAL_SOURCE_RGBA_WITH_FOREGROUND_ALPHA",
-            "deformation_driver": "STAGE18_FIRST_HIT_SURFACE_BINDING_PLUS_STAGE32_ARACHNE_LBS_PLUS_STAGE28_MOTION",
+            "deformation_driver": "STAGE18_FIRST_HIT_BINDING_PLUS_STAGE32_ARACHNE_WEIGHTED_VIEW_JOINTS_PLUS_STAGE28_MOTION",
             "deformer": "LOCAL_GLOBAL_ARAP_2D",
         },
         "views": report_views,

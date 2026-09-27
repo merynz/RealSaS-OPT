@@ -2974,14 +2974,44 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
                         "status": str(
                             dict(row.metadata or {}).get("status") or ""
                         ),
+                        "source_lock_fraction": float(
+                            row.source_locked_fraction_of_source_foreground
+                        ),
+                        "source_foreground_mean_rgba_l1": float(
+                            row.source_foreground_mean_rgba_l1
+                        ),
+                        "source_foreground_p95_rgba_l1": float(
+                            row.source_foreground_p95_rgba_l1
+                        ),
                         "source_alpha_recall": float(
                             row.source_alpha_recall
                         ),
                         "source_alpha_precision": float(
                             row.source_alpha_precision
                         ),
+                        "largest_coherent_alpha_hole_fraction": float(
+                            row.largest_coherent_alpha_hole_fraction
+                        ),
                         "interior_uncovered_fraction": float(
                             row.alpha_interior_uncovered_fraction
+                        ),
+                        "feature_high_error_fraction": float(
+                            row.source_feature_high_error_fraction
+                        ),
+                        "largest_connected_feature_high_error_fraction": float(
+                            row.largest_connected_feature_high_error_fraction
+                        ),
+                        "feature_p999_rgba_l1": float(
+                            row.source_feature_p999_rgba_l1
+                        ),
+                        "feature_edge_recall_1px": float(
+                            row.source_feature_edge_recall_1px
+                        ),
+                        "feature_edge_precision_1px": float(
+                            row.source_feature_edge_precision_1px
+                        ),
+                        "identity_uv_error": float(
+                            dict(row.metadata or {}).get("identity_uv_error", 0.0)
                         ),
                     }
                     for row in rows

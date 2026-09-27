@@ -1,9 +1,16 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 import numpy as np
 import pytest
 
-from compiler.realsas_compiler_core.appearance_authority_v2 import CAA_PROVENANCE
+from compiler.realsas_compiler_core.appearance_authority_v2 import (
+    CAACompileArtifactIR,
+    CAA_PROVENANCE,
+    caa_compile_hash,
+    validate_caa_compile_artifact,
+)
 from compiler.realsas_compiler_core.appearance_bake_v2 import (
     bake_direction_atlas,
     bake_direction_source_view_atlas,
@@ -220,3 +227,46 @@ def test_global_completion_nodes_are_not_local_harmonic_boundaries():
     assert provenance[2] == 255
     assert source_view[2] == -1
     assert np.all(rgba[2] == 0)
+
+
+def test_compile_accounting_includes_canonical_global_completion():
+    artifact = CAACompileArtifactIR(
+        backend_id="DETERMINISTIC_V1",
+        preregistration_binding_hash="p",
+        candidate_mesh_binding_hash="m",
+        surface_addressing_binding_hash="s",
+        appearance_domain_binding_hash="a",
+        output_direction_set_binding_hash="d",
+        compile_npz_path="/tmp/fixture.npz",
+        compile_npz_sha256="0" * 64,
+        face_count=1,
+        direction_count=8,
+        tile_resolution=4,
+        sample_count_per_face=1,
+        total_sample_count=8,
+        direct_source_sample_count=2,
+        other_view_source_sample_count=1,
+        compiled_local_harmonic_sample_count=1,
+        compile_hash="",
+        metadata={
+            "unsupported_abstain_sample_count": 2,
+            "canonical_global_completion_sample_count": 2,
+            "sample_count_mode": "UNIFORM_FACE_LATTICE_V1",
+        },
+    )
+    artifact = replace(artifact, compile_hash=caa_compile_hash(artifact))
+    validate_caa_compile_artifact(artifact)
+
+    drifted = replace(
+        artifact,
+        metadata={
+            **artifact.metadata,
+            "canonical_global_completion_sample_count": 0,
+        },
+    )
+    drifted = replace(drifted, compile_hash=caa_compile_hash(drifted))
+    with pytest.raises(
+        Exception,
+        match="CAA_COMPILE_PROVENANCE_ACCOUNTING_DRIFT",
+    ):
+        validate_caa_compile_artifact(drifted)

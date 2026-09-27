@@ -70,3 +70,27 @@ def test_rss_v2_keeps_padding_distinct_from_abstention(tmp_path):
     )
     assert int(value[0, 0, 1, 1]) == 3
     assert int(donor[0, 0, 1, 1]) == -4
+
+
+def test_rss_v2_accepts_canonical_global_completion_lineage(tmp_path):
+    provenance, source_view = _base()
+    provenance[4, 1:3, 1:3] = 4
+    source_view[4, 1:3, 1:3] = -3
+    value, donor = _validated_provenance_pages(
+        _projection(tmp_path, provenance, source_view)
+    )
+    assert np.all(value[4, 0, 1:3, 1:3] == 4)
+    assert np.all(donor[4, 0, 1:3, 1:3] == -3)
+
+
+def test_rss_v2_rejects_canonical_global_with_abstain_lineage(tmp_path):
+    provenance, source_view = _base()
+    provenance[4, 1, 1] = 4
+    source_view[4, 1, 1] = -4
+    with pytest.raises(
+        QualificationError,
+        match="RSS_V2_CANONICAL_GLOBAL_SOURCE_VIEW_IDENTITY_DRIFT",
+    ):
+        _validated_provenance_pages(
+            _projection(tmp_path, provenance, source_view)
+        )

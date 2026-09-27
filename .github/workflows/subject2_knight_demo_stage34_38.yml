@@ -1,0 +1,109 @@
+name: subject2-knight-demo-stage34-38
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_DEMO_STAGE34_38_TRIGGER_20260927.json'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-demo-stage34-38
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  mechanics-to-puppet:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned mainline dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Execute exact demo lineage through Stage38
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python -m compiler.realsas_compiler_services.orchestrator.mainline execute \
+            --run-id "$RUN_ID" \
+            --target 38_CANONICAL_PUPPET_SEALED
+          PYTHONPATH=. python -m compiler.realsas_compiler_services.orchestrator.mainline status \
+            --run-id "$RUN_ID"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["AUTHORITY_ROOT"])/"runs"/os.environ["RUN_ID"]
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={r["id"]:r for r in ledger["stages"]}
+          for sid in (
+              "34_DEFORMATION_CAPABILITY_ENVELOPE",
+              "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+              "36_QUALIFIED_MESH_SKIN_TRANSFER",
+              "37_QUALIFIED_PRESENTATION_STRUCTURE",
+              "38_CANONICAL_PUPPET_SEALED",
+          ):
+              row=by[sid]
+              print("KNIGHT_STAGE34_38_ROW",json.dumps({
+                  "id":sid,
+                  "status":row["status"],
+                  "blockers":row.get("blockers") or [],
+                  "wall_seconds":row.get("wall_seconds",0.0),
+                  "performance":row.get("performance") or {},
+              },sort_keys=True))
+              assert row["status"]=="PASS_DEMO_ONLY",(sid,row["status"],row.get("blockers"))
+          receipt={
+              "schema":"RealSaS.KnightDemoStage34To38Receipt.v1",
+              "status":"PASS_DEMO_ONLY",
+              "run_id":os.environ["RUN_ID"],
+              "stage_ids":[
+                  "34_DEFORMATION_CAPABILITY_ENVELOPE",
+                  "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+                  "36_QUALIFIED_MESH_SKIN_TRANSFER",
+                  "37_QUALIFIED_PRESENTATION_STRUCTURE",
+                  "38_CANONICAL_PUPPET_SEALED",
+              ],
+              "rows":[{
+                  "id":sid,
+                  "status":by[sid]["status"],
+                  "outputs":[{
+                      "schema":o.get("schema"),
+                      "sha256":o.get("sha256"),
+                      "authority_class":o.get("authority_class"),
+                  } for o in by[sid].get("outputs") or []],
+              } for sid in (
+                  "34_DEFORMATION_CAPABILITY_ENVELOPE",
+                  "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+                  "36_QUALIFIED_MESH_SKIN_TRANSFER",
+                  "37_QUALIFIED_PRESENTATION_STRUCTURE",
+                  "38_CANONICAL_PUPPET_SEALED",
+              )],
+              "product_authority_claimed":False,
+          }
+          Path("canonical/KNIGHT_DEMO_STAGE34_38_RECEIPT_20260927.json").write_text(
+              json.dumps(receipt,indent=2,sort_keys=True)+"\n"
+          )
+          PY
+      - name: Seal Stage34-38 receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_DEMO_STAGE34_38_RECEIPT_20260927.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'demo: seal Knight Stage34-38 puppet lineage'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

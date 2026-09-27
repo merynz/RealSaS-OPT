@@ -203,8 +203,11 @@ def _validated_provenance_pages(projection: RuntimeProjectionV2IR) -> tuple[np.n
     other = value == 1
     harmonic = value == 2
     unsupported = value == 3
+    canonical_global = value == 4
     padding_mask = value == 255
-    valid_provenance = direct | other | harmonic | unsupported | padding_mask
+    valid_provenance = (
+        direct | other | harmonic | unsupported | canonical_global | padding_mask
+    )
     if not np.all(valid_provenance):
         raise QualificationError("RSS_V2_PROVENANCE_CLASS_INVALID")
     if np.any(
@@ -214,6 +217,10 @@ def _validated_provenance_pages(projection: RuntimeProjectionV2IR) -> tuple[np.n
         raise QualificationError("RSS_V2_SOURCE_VIEW_VALUE_INVALID")
     if np.any(harmonic & (source_view != -2)):
         raise QualificationError("RSS_V2_HARMONIC_SOURCE_VIEW_IDENTITY_DRIFT")
+    if np.any(canonical_global & (source_view != -3)):
+        raise QualificationError(
+            "RSS_V2_CANONICAL_GLOBAL_SOURCE_VIEW_IDENTITY_DRIFT"
+        )
     if np.any(unsupported & (source_view != -4)):
         raise QualificationError("RSS_V2_UNSUPPORTED_SOURCE_VIEW_IDENTITY_DRIFT")
     if np.any(padding_mask & (source_view != padding)):

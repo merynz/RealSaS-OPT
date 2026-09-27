@@ -20,6 +20,10 @@ from compiler.realsas_compiler_core.deformation_envelope_derivation_v1 import de
 from compiler.realsas_compiler_core.mesh.deformation_stress_v2 import (
     run_g3_local_frame_micro_stress_v2,
 )
+from compiler.realsas_compiler_core.mesh.skin_topology_compatibility_v1 import (
+    run_skin_topology_compatibility_v1,
+    seam_cut_candidate_v1,
+)
 from compiler.realsas_compiler_core.mesh.conditioning_v1 import triangle_rest_metric
 from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
     build_g5_coverage_matrix,
@@ -546,6 +550,55 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
         cameras=cameras,
         policy=policy,
     )
+    compatibility=run_skin_topology_compatibility_v1(
+        candidate,
+        surface=surface,
+        skeleton=skeleton,
+        skin=skin,
+        envelope=envelope,
+        cameras=cameras,
+        policy=policy,
+    )
+    root=_artifact_root(ctx,"35_DYNAMIC_MECHANICAL_MESH_QUALIFIED")
+    compatibility_artifact=_write_json(
+        root/"skin_topology_compatibility.json",
+        compatibility,
+        authority_class="DIAGNOSTIC_SKIN_TOPOLOGY_COMPATIBILITY",
+        schema=compatibility["schema"],
+    )
+    if not compatibility["passed"]:
+        repaired,directive=seam_cut_candidate_v1(
+            candidate,
+            compatibility["unsafe_face_indices"],
+            report_hash=compatibility["report_hash"],
+        )
+        repaired_artifact=_write_ir(
+            root/"repaired_stage18_candidate.json",
+            repaired,
+            authority_class="DIAGNOSTIC_NEW_STAGE18_LINEAGE_PROPOSAL",
+        )
+        directive_artifact=_write_json(
+            root/"skin_topology_repair_directive.json",
+            directive,
+            authority_class="DIAGNOSTIC_STAGE35_REPAIR_DIRECTIVE",
+            schema=directive["schema"],
+        )
+        return {
+            "status":"FAIL",
+            "blockers":["G3B_SKIN_TOPOLOGY_COMPATIBILITY_REPAIR_REQUIRED"],
+            "diagnostics":{
+                "g3_report_hash":g3.report_hash,
+                "skin_topology_compatibility_report_hash":compatibility["report_hash"],
+                "unsafe_face_count":compatibility["unsafe_face_count"],
+                "repaired_candidate_lineage_hash":repaired.candidate_lineage_hash,
+                "repair_directive_hash":directive["directive_hash"],
+                "repair_semantics":"NEW_STAGE18_LINEAGE__REQUALIFY_STAGE19_THROUGH_STAGE35",
+                "weight_mutation":False,
+                "compatibility_artifact_sha256":compatibility_artifact["sha256"],
+                "repaired_candidate_artifact_sha256":repaired_artifact["sha256"],
+                "repair_directive_artifact_sha256":directive_artifact["sha256"],
+            },
+        }
     observations,source_foreground_masks,observation_set=_component_observations(
         ctx,surface=surface,partition=partition,carrier=carrier,cameras=cameras
     )
@@ -621,6 +674,7 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
             "G1_SUPPORT_LINEAGE":"PASS",
             "G2_TOPOLOGY":"PASS",
             "G3_DEFORMATION":"PASS",
+            "G3B_SKIN_TOPOLOGY_COMPATIBILITY":"PASS",
             "G4_COMPONENT_BOUNDARY":"PASS",
             "G5_MULTIVIEW_COVERAGE":"PASS",
         },
@@ -633,6 +687,9 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
         "g3_role":"LOCAL_3D_NUMERICAL_CONDITIONING_ONLY",
         "g3_stress_probe_hash":g3.report_hash,
         "g3_stress_probe_status":"PASS",
+        "skin_topology_compatibility_report_hash":compatibility["report_hash"],
+        "skin_topology_compatibility_status":"PASS",
+        "skin_topology_weight_mutation":False,
         "carrier_policy_hash":carrier.carrier_policy_lineage_hash,
         "g5_evidence_hash":g5_payload["evidence_hash"],
         "view_component_coverage":g5_rows,
@@ -649,6 +706,7 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
     outputs=[
         _write_ir(root/"qualified_mesh.json",mesh,authority_class="QUALIFIED_PRODUCT_GEOMETRY"),
         _write_ir(root/"g3_deformation_stress.json",g3,authority_class="QUALIFIED_G3_EVIDENCE"),
+        compatibility_artifact,
         _write_json(root/"g5_coverage_evidence.json",g5_payload,authority_class="QUALIFIED_G5_EVIDENCE",schema=g5_payload["schema"]),
         _write_json(root/"unknown_boundary_analysis.json",unknown_report,authority_class="QUALIFIED_G4_EVIDENCE",schema=unknown_report["schema"]),
     ]
@@ -658,6 +716,7 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
         "diagnostics":{
             "mesh_lineage_hash":mesh.mesh_lineage_hash,
             "g3_report_hash":g3.report_hash,
+            "skin_topology_compatibility_report_hash":compatibility["report_hash"],
             "g5_evidence_hash":g5_payload["evidence_hash"],
             "coverage_cell_count":len(g5_rows),
         },

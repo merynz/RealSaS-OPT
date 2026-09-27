@@ -2544,6 +2544,451 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
     if static_mesh.candidate_mesh_binding_hash != asset.candidate_mesh_binding_hash:
         raise QualificationError("CAA_REST_PROOF_STATIC_MESH_BINDING_DRIFT")
 
+    if (
+        _source_owned_visual_mode_from_prereg(prereg)
+        and dict(asset.metadata or {}).get("source_owned_visual_mesh_mode")
+        is True
+    ):
+        visual_set = _visual_mesh_set(ctx)
+        visual_hash = str(
+            dict(asset.metadata or {}).get("visual_mesh_set_binding_hash") or ""
+        )
+        if visual_set.set_hash != visual_hash:
+            raise QualificationError("CAA_VISUAL_REST_MESH_SET_DRIFT")
+        source_rgba, source_masks = _load_source_inputs(ctx, observation)
+        by_texture = {
+            int(row.direction_index): row for row in asset.textures
+        }
+        by_visual = {
+            int(row.view_index): row for row in visual_set.views
+        }
+        policy = dict(prereg.completion_quality_policy)
+        required = (
+            "rest_min_source_lock_fraction_of_source_foreground",
+            "rest_max_source_locked_mean_rgba_l1",
+            "rest_max_source_locked_p95_rgba_l1",
+            "rest_max_source_foreground_mean_rgba_l1",
+            "rest_max_source_foreground_p95_rgba_l1",
+            "rest_min_source_alpha_recall",
+            "rest_min_source_alpha_precision",
+            "rest_max_largest_coherent_alpha_hole_fraction",
+            "rest_max_alpha_interior_uncovered_fraction",
+            "rest_max_texture_texels_per_output_pixel",
+            "rest_feature_high_error_cut_rgba_l1",
+            "rest_feature_edge_gradient_cut",
+            "rest_max_feature_high_error_fraction",
+            "rest_max_largest_connected_high_error_fraction",
+            "rest_max_feature_p999_rgba_l1",
+            "rest_min_feature_edge_recall_1px",
+            "rest_min_feature_edge_precision_1px",
+        )
+        if any(key not in policy for key in required):
+            raise QualificationError(
+                "CAA_VISUAL_REST_PROOF_POLICY_INCOMPLETE"
+            )
+        root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+        root.mkdir(parents=True, exist_ok=True)
+        rows = []
+        outputs = []
+        all_pass = True
+        direction_seconds = []
+        setup_seconds = perf_counter() - stage_started
+
+        for direction in range(8):
+            direction_started = perf_counter()
+            visual_row = by_visual[direction]
+            mesh = load_visual_mesh_view(visual_row)
+            mask = np.asarray(source_masks[direction], dtype=bool)
+            height, width = mask.shape
+            if (
+                int(mesh.width) != int(width)
+                or int(mesh.height) != int(height)
+            ):
+                raise QualificationError(
+                    "CAA_VISUAL_REST_SOURCE_DIMENSION_DRIFT"
+                )
+            geometry_bytes = _visual_mesh_coverage(
+                mesh,
+                width=width,
+                height=height,
+            )
+            geometry_visible = np.frombuffer(
+                geometry_bytes,
+                dtype=np.uint8,
+            ).reshape(height, width).astype(bool)
+            source_visual = _source_visual_rgba(
+                source_rgba[direction],
+                mask,
+            )
+            texture_row = by_texture[direction]
+            texture_path = resolved_path(
+                texture_row.transport_png_path
+            )
+            if (
+                not texture_path.is_file()
+                or sha256_file(texture_path)
+                != texture_row.transport_png_sha256
+            ):
+                raise QualificationError(
+                    "CAA_VISUAL_REST_TEXTURE_BYTES_DRIFT"
+                )
+            texture_rgba = np.asarray(
+                Image.open(texture_path).convert("RGBA"),
+                dtype=np.uint8,
+            )
+            if not np.array_equal(texture_rgba, source_visual):
+                raise QualificationError(
+                    "CAA_VISUAL_REST_TEXTURE_NOT_SOURCE_EXACT"
+                )
+
+            rendered = source_visual.copy()
+            rendered[~geometry_visible] = 0
+            final_alpha = rendered[..., 3] > 0
+            foreground_count = int(np.count_nonzero(mask))
+            locked = geometry_visible & mask
+            locked_count = int(np.count_nonzero(locked))
+            source_lock_fraction = (
+                0.0
+                if foreground_count <= 0
+                else float(locked_count) / float(foreground_count)
+            )
+            locked_error = rgba_l1_premultiplied(
+                rendered[locked],
+                source_visual[locked],
+            )
+            mean_error = (
+                0.0
+                if len(locked_error) == 0
+                else float(np.mean(locked_error))
+            )
+            p95_error = (
+                0.0
+                if len(locked_error) == 0
+                else float(np.quantile(locked_error, 0.95))
+            )
+            foreground_error = rgba_l1_premultiplied(
+                rendered[mask],
+                source_visual[mask],
+            )
+            foreground_mean_error = (
+                0.0
+                if len(foreground_error) == 0
+                else float(np.mean(foreground_error))
+            )
+            foreground_p95_error = (
+                0.0
+                if len(foreground_error) == 0
+                else float(np.quantile(foreground_error, 0.95))
+            )
+            alpha_metrics = coverage_metrics(
+                bytes(mask.astype(np.uint8).reshape(-1)),
+                bytes(final_alpha.astype(np.uint8).reshape(-1)),
+                width=width,
+                height=height,
+            )
+            geometry_metrics = coverage_metrics(
+                bytes(mask.astype(np.uint8).reshape(-1)),
+                geometry_bytes,
+                width=width,
+                height=height,
+            )
+            feature_metrics = source_feature_preservation_metrics(
+                predicted_rgba=rendered,
+                source_rgba=source_visual,
+                source_foreground=mask,
+                high_error_cut_rgba_l1=float(
+                    policy["rest_feature_high_error_cut_rgba_l1"]
+                ),
+                edge_gradient_cut=float(
+                    policy["rest_feature_edge_gradient_cut"]
+                ),
+            )
+
+            identity_uv_error = float(
+                np.max(
+                    np.abs(
+                        np.asarray(mesh.uv, dtype=np.float64)
+                        - np.column_stack(
+                            (
+                                np.asarray(mesh.positions[:, 0], dtype=np.float64)
+                                / max(1.0, float(width - 1)),
+                                np.asarray(mesh.positions[:, 1], dtype=np.float64)
+                                / max(1.0, float(height - 1)),
+                            )
+                        )
+                    )
+                )
+            )
+            maximum_texture_texels_per_output_pixel = 1.0
+            exact_fraction = 1.0 if locked_count > 0 else 0.0
+            hole = mask & ~final_alpha
+            hole_count = int(np.count_nonzero(hole))
+            view_pass = (
+                locked_count > 0
+                and identity_uv_error <= 1.0e-12
+                and source_lock_fraction
+                >= float(
+                    policy[
+                        "rest_min_source_lock_fraction_of_source_foreground"
+                    ]
+                )
+                and mean_error
+                <= float(policy["rest_max_source_locked_mean_rgba_l1"])
+                and p95_error
+                <= float(policy["rest_max_source_locked_p95_rgba_l1"])
+                and foreground_mean_error
+                <= float(
+                    policy["rest_max_source_foreground_mean_rgba_l1"]
+                )
+                and foreground_p95_error
+                <= float(
+                    policy["rest_max_source_foreground_p95_rgba_l1"]
+                )
+                and float(alpha_metrics["recall"])
+                >= float(policy["rest_min_source_alpha_recall"])
+                and float(alpha_metrics["precision"])
+                >= float(policy["rest_min_source_alpha_precision"])
+                and float(
+                    alpha_metrics["largest_coherent_hole_fraction"]
+                )
+                <= float(
+                    policy[
+                        "rest_max_largest_coherent_alpha_hole_fraction"
+                    ]
+                )
+                and float(alpha_metrics["interior_uncovered_fraction"])
+                <= float(
+                    policy["rest_max_alpha_interior_uncovered_fraction"]
+                )
+                and maximum_texture_texels_per_output_pixel
+                <= float(
+                    policy["rest_max_texture_texels_per_output_pixel"]
+                )
+                and float(feature_metrics["high_error_fraction"])
+                <= float(
+                    policy["rest_max_feature_high_error_fraction"]
+                )
+                and float(
+                    feature_metrics[
+                        "largest_connected_high_error_fraction"
+                    ]
+                )
+                <= float(
+                    policy[
+                        "rest_max_largest_connected_high_error_fraction"
+                    ]
+                )
+                and float(feature_metrics["p999_rgba_l1"])
+                <= float(policy["rest_max_feature_p999_rgba_l1"])
+                and float(feature_metrics["edge_recall_1px"])
+                >= float(policy["rest_min_feature_edge_recall_1px"])
+                and float(feature_metrics["edge_precision_1px"])
+                >= float(policy["rest_min_feature_edge_precision_1px"])
+            )
+            all_pass = all_pass and view_pass
+
+            image_path = root / f"V{direction}_reference_rest.png"
+            Image.fromarray(rendered, mode="RGBA").save(
+                image_path,
+                format="PNG",
+                optimize=False,
+                compress_level=1,
+            )
+            image_sha = sha256_file(image_path)
+            outputs.append(
+                {
+                    "path": str(image_path),
+                    "sha256": image_sha,
+                    "authority_class": "CAA_REFERENCE_REST_RENDER",
+                    "schema": (
+                        f"RealSaS.CAAReferenceRestRender.V{direction}.v2"
+                    ),
+                }
+            )
+            diagnostic_path = root / f"V{direction}_diagnostics.npz"
+            diagnostic_sha = _save_npz(
+                diagnostic_path,
+                geometry_visible=geometry_visible.astype(np.uint8),
+                final_alpha=final_alpha.astype(np.uint8),
+                source_foreground=mask.astype(np.uint8),
+            )
+            outputs.append(
+                {
+                    "path": str(diagnostic_path),
+                    "sha256": diagnostic_sha,
+                    "authority_class": "CAA_REST_DIAGNOSTIC_MASKS",
+                    "schema": (
+                        f"RealSaS.CAARestDiagnosticMasks.V{direction}.v2"
+                    ),
+                }
+            )
+
+            rows.append(
+                CAARestViewProofIR(
+                    direction_index=direction,
+                    rendered_rgba_sha256=image_sha,
+                    rendered_alpha_pixel_count=int(
+                        np.count_nonzero(final_alpha)
+                    ),
+                    source_locked_pixel_count=locked_count,
+                    source_locked_fraction_of_source_foreground=(
+                        source_lock_fraction
+                    ),
+                    source_locked_exact_pixel_count=locked_count,
+                    source_locked_exact_fraction=exact_fraction,
+                    source_locked_mean_rgba_l1=mean_error,
+                    source_locked_p95_rgba_l1=p95_error,
+                    source_foreground_mean_rgba_l1=(
+                        foreground_mean_error
+                    ),
+                    source_foreground_p95_rgba_l1=(
+                        foreground_p95_error
+                    ),
+                    source_feature_p999_rgba_l1=float(
+                        feature_metrics["p999_rgba_l1"]
+                    ),
+                    source_feature_high_error_fraction=float(
+                        feature_metrics["high_error_fraction"]
+                    ),
+                    largest_connected_feature_high_error_fraction=float(
+                        feature_metrics[
+                            "largest_connected_high_error_fraction"
+                        ]
+                    ),
+                    source_feature_edge_recall_1px=float(
+                        feature_metrics["edge_recall_1px"]
+                    ),
+                    source_feature_edge_precision_1px=float(
+                        feature_metrics["edge_precision_1px"]
+                    ),
+                    geometry_visible_pixel_count=int(
+                        np.count_nonzero(geometry_visible)
+                    ),
+                    final_alpha_pixel_count=int(
+                        np.count_nonzero(final_alpha)
+                    ),
+                    geometry_visible_final_alpha_hole_count=hole_count,
+                    geometry_visible_final_alpha_hole_fraction=(
+                        0.0
+                        if foreground_count <= 0
+                        else float(hole_count)
+                        / float(foreground_count)
+                    ),
+                    source_alpha_recall=float(alpha_metrics["recall"]),
+                    source_alpha_precision=float(
+                        alpha_metrics["precision"]
+                    ),
+                    largest_coherent_alpha_hole_fraction=float(
+                        alpha_metrics["largest_coherent_hole_fraction"]
+                    ),
+                    alpha_interior_uncovered_fraction=float(
+                        alpha_metrics["interior_uncovered_fraction"]
+                    ),
+                    metadata={
+                        "status": "PASS" if view_pass else "FAIL",
+                        "source_owned_visual_mesh_mode": True,
+                        "identity_uv_error": identity_uv_error,
+                        "geometry_silhouette_coverage": geometry_metrics,
+                        "source_feature_preservation": feature_metrics,
+                        "exact_depth_ambiguous_pixel_count": 0,
+                        "exact_depth_ambiguous_fraction": 0.0,
+                        "visibility_layer_overflow_pixel_count": 0,
+                        "maximum_texture_texels_per_output_pixel": 1.0,
+                        "mechanical_mesh_render_authority": False,
+                    },
+                )
+            )
+            direction_seconds.append(
+                float(perf_counter() - direction_started)
+            )
+
+        proof = CAARestRenderProofIR(
+            asset_binding_hash=asset.asset_hash,
+            static_mesh_qualification_binding_hash=(
+                static_mesh.qualification_hash
+            ),
+            camera_set_binding_hash=cameras.camera_set_hash,
+            views=tuple(rows),
+            qualification_report={
+                "status": (
+                    "PASS_CAA_REFERENCE_REST"
+                    if all_pass
+                    else "FAIL_CAA_REFERENCE_REST"
+                ),
+                "every_direction_passed": bool(all_pass),
+                "visibility_authority": (
+                    "SOURCE_OWNED_VISUAL_MESH_2D_RASTER"
+                ),
+                "appearance_authority": "SOURCE_RGBA_FIXED_UV",
+                "source_owned_visual_mesh_mode": True,
+                "mechanical_mesh_render_authority": False,
+                "generated_appearance_used": False,
+            },
+            proof_hash="",
+            metadata={
+                "visual_mesh_set_binding_hash": visual_set.set_hash,
+                "identity_uv_proof": True,
+                "depth_layering_not_applicable_at_rest": True,
+                "product_authority_claimed": False,
+            },
+        )
+        proof = replace(
+            proof,
+            proof_hash=caa_rest_render_proof_hash(proof),
+        )
+        outputs.append(
+            write_ir(
+                root / "caa_reference_rest_proof.json",
+                proof,
+                authority_class="CAA_REFERENCE_REST_PROOF",
+            )
+        )
+        result_status = "PASS" if all_pass else "FAIL"
+        return {
+            "status": result_status,
+            "blockers": (
+                []
+                if all_pass
+                else ["CAA_VISUAL_REST_SOURCE_FIDELITY_FAIL"]
+            ),
+            "outputs": outputs,
+            "performance": {
+                "setup_seconds": float(setup_seconds),
+                "direction_proof_seconds_total": float(
+                    sum(direction_seconds)
+                ),
+                "direction_proof_seconds_by_view": direction_seconds,
+                "post_proof_seconds": 0.0,
+                "measured_inner_seconds": float(
+                    perf_counter() - stage_started
+                ),
+            },
+            "diagnostics": {
+                "proof_hash": proof.proof_hash,
+                "every_direction_passed": bool(all_pass),
+                "source_owned_visual_mesh_mode": True,
+                "mechanical_mesh_render_authority": False,
+                "view_status": [
+                    {
+                        "view_index": int(row.direction_index),
+                        "status": str(
+                            dict(row.metadata or {}).get("status") or ""
+                        ),
+                        "source_alpha_recall": float(
+                            row.source_alpha_recall
+                        ),
+                        "source_alpha_precision": float(
+                            row.source_alpha_precision
+                        ),
+                        "interior_uncovered_fraction": float(
+                            row.alpha_interior_uncovered_fraction
+                        ),
+                    }
+                    for row in rows
+                ],
+            },
+        }
+
     source_rgba, source_masks = _load_source_inputs(ctx, observation)
     face_uv = load_face_uv(asset)
     face_page_index = load_face_page_index(asset)

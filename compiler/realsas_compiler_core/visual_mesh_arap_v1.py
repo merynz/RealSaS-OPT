@@ -200,6 +200,46 @@ def bind_points_barycentric(
     return tuple(result)
 
 
+def bind_visual_vertex_handles(
+    mesh: VisualMesh2D,
+    vertex_indices: np.ndarray | list[int] | tuple[int, ...],
+) -> tuple[HandleBinding2D, ...]:
+    """Bind selected visual vertices as exact one-hot ARAP constraints.
+
+    This is used when RealSaS mechanical-surface correspondence, rather than
+    the skeleton itself, owns presentation displacement. Each selected visual
+    vertex is constrained through any incident visual triangle with a one-hot
+    barycentric row, so the ARAP system remains unchanged.
+    """
+    indices = tuple(int(v) for v in vertex_indices)
+    if not indices:
+        raise ValueError("VISUAL_VERTEX_HANDLES_EMPTY")
+    incident: dict[int, tuple[int, int]] = {}
+    for tri_index, face in enumerate(np.asarray(mesh.faces, dtype=np.int64)):
+        for local, vertex_index in enumerate(face.tolist()):
+            incident.setdefault(int(vertex_index), (int(tri_index), int(local)))
+    rows = []
+    seen = set()
+    for vertex_index in indices:
+        if vertex_index in seen:
+            continue
+        seen.add(vertex_index)
+        if vertex_index < 0 or vertex_index >= len(mesh.positions):
+            raise ValueError("VISUAL_VERTEX_HANDLE_INDEX_INVALID")
+        if vertex_index not in incident:
+            raise ValueError("VISUAL_VERTEX_HANDLE_NOT_INCIDENT")
+        tri_index, local = incident[vertex_index]
+        bary = [0.0, 0.0, 0.0]
+        bary[local] = 1.0
+        rows.append(
+            HandleBinding2D(
+                triangle_index=tri_index,
+                barycentric=tuple(bary),
+            )
+        )
+    return tuple(rows)
+
+
 def sample_bone_handles(
     *,
     joint_ids: tuple[str, ...],

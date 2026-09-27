@@ -1186,6 +1186,81 @@ def seal_caa_compile_stage(ctx: dict) -> dict:
             "RealSaS.CAACompileArtifactIR.v2",
         )
     )
+    if artifact.preregistration_binding_hash != prereg.preregistration_hash:
+        raise QualificationError("CAA_COMPILE_PREREG_BINDING_DRIFT")
+
+    if (
+        _source_owned_visual_mode_from_prereg(prereg)
+        and dict(artifact.metadata or {}).get("source_owned_visual_mesh_mode")
+        is True
+    ):
+        compile_path = resolved_path(artifact.compile_npz_path)
+        if (
+            not compile_path.is_file()
+            or sha256_file(compile_path) != artifact.compile_npz_sha256
+        ):
+            raise QualificationError("CAA_VISUAL_COMPILE_BYTES_DRIFT")
+        visual_hash = str(
+            dict(artifact.metadata or {}).get("visual_mesh_set_binding_hash") or ""
+        )
+        if (
+            visual_hash
+            != str(prereg.compile_policy.get("visual_mesh_set_binding_hash") or "")
+        ):
+            raise QualificationError("CAA_VISUAL_COMPILE_SET_BINDING_DRIFT")
+        if (
+            artifact.direct_source_sample_count != artifact.total_sample_count
+            or artifact.other_view_source_sample_count != 0
+            or artifact.compiled_local_harmonic_sample_count != 0
+        ):
+            raise QualificationError("CAA_VISUAL_COMPILE_PROVENANCE_DRIFT")
+        seal = CAACompileSealIR(
+            compile_binding_hash=artifact.compile_hash,
+            preregistration_binding_hash=prereg.preregistration_hash,
+            compile_npz_sha256=artifact.compile_npz_sha256,
+            qualification_report={
+                "status": "PASS_CAA_COMPILE_SEAL",
+                "total_appearance_defined": True,
+                "total_admitted_appearance_defined": True,
+                "unsupported_abstain_sample_count": 0,
+                "unsupported_abstention_is_not_generated_appearance": True,
+                "dynamic_or_rest_exposure_must_fail_closed": True,
+                "direct_source_immutable": True,
+                "runtime_generation_required": False,
+                "geometry_mutation_used": False,
+                "cross_view_completion_used": False,
+                "mechanical_mesh_render_authority": False,
+            },
+            seal_hash="",
+            metadata={
+                "backend_id": artifact.backend_id,
+                "shipping_eligible": prereg.shipping_eligible,
+                "source_owned_visual_mesh_mode": True,
+                "visual_mesh_set_binding_hash": visual_hash,
+            },
+        )
+        seal = replace(seal, seal_hash=caa_compile_seal_hash(seal))
+        root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+        return {
+            "status": "PASS",
+            "outputs": [
+                write_ir(
+                    root / "caa_compile_seal.json",
+                    seal,
+                    authority_class="CAA_COMPILE_SEAL",
+                )
+            ],
+            "diagnostics": {
+                "seal_hash": seal.seal_hash,
+                "direct_source_immutable": True,
+                "admitted_totality": True,
+                "unsupported_abstain_sample_count": 0,
+                "canonical_global_completion_sample_count": 0,
+                "source_owned_visual_mesh_mode": True,
+                "mechanical_mesh_render_authority": False,
+            },
+        }
+
     arrays = _load_compile_arrays(
         artifact,
         required_names={

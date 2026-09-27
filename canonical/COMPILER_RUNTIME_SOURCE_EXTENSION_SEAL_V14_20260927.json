@@ -1,0 +1,34 @@
+{
+  "schema": "realsas.compiler_runtime_source_extension_seal.v14",
+  "sealed_on": "2026-09-27",
+  "prior_extension": {
+    "path": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V13_20260927.json",
+    "git_blob_sha1": "110a393e068767d89bab64bfb4848a1ab2710e35",
+    "role": "IMMUTABLE_PRIOR_EXTENSION_PROVENANCE"
+  },
+  "authority": {
+    "extension_scope": "RUNTIME_V2_REJECT_VISIBLE_UNSUPPORTED_OR_PADDING_BEFORE_ALPHA_COMPOSITING",
+    "historical_base_seal_mutated": false,
+    "prior_extension_mutated": false,
+    "product_pass_claimed": false,
+    "knight_witness_used": false,
+    "runtime_role": "subordinate_deployment_consumer",
+    "subtree_closure": "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME"
+  },
+  "replacements": [
+    {
+      "path": "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp",
+      "size_bytes": 39553,
+      "git_blob_sha1": "424a6b5797ec0ffe6595ed81e1a1eb32cfc56a3b",
+      "reason": "reject geometry-visible unsupported appearance or atlas padding before RGBA compositing, preventing transparent holes from masquerading as successful frames"
+    }
+  ],
+  "additions": [],
+  "closure": {
+    "runtime_realsas_cpp_blob_count": 25,
+    "replacement_count": 1,
+    "addition_count": 0,
+    "resulting_sealed_blob_count": 25,
+    "unsealed_repository_blob_count_under_subtree": 0
+  }
+}

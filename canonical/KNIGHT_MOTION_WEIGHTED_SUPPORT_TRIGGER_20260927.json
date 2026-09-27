@@ -1,0 +1,10 @@
+{
+  "schema": "RealSaS.KnightMotionWeightedSupportTrigger.v1",
+  "status": "RUN",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "requested_on": "2026-09-27",
+  "support_count": 4,
+  "purpose": "DEMO_MOTION_CONTINUATION_AFTER_STAGE35_MEASURED_FAILURE",
+  "diagnostic_only": true,
+  "product_authority_claimed": false
+}

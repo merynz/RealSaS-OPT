@@ -409,6 +409,7 @@ def _render_native(player: Path, package: Path, view_id: str, clip_id: str, fram
         "--view", view_id,
         "--frame", str(int(frame)),
         "--out-rgba", str(rgba),
+        "--allow-layer-overflow-diagnostic",
     ]
     proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     if proc.returncode != 0:

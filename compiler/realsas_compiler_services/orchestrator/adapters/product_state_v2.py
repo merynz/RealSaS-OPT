@@ -22,8 +22,10 @@ from compiler.realsas_compiler_core.appearance_render_v2 import (
     load_provenance_atlas,
 )
 from compiler.realsas_compiler_core.presentation_partition_v2 import (
+    PresentationPartitionEvidenceV2IR,
     build_presentation_partition_evidence,
     presentation_partition_evidence_from_dict,
+    presentation_partition_evidence_hash,
 )
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     component_carrier_policy_from_dict,
@@ -49,6 +51,7 @@ from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import 
     stage_output_payload,
     write_ir,
 )
+from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.types import QualificationError
 
 
@@ -172,6 +175,127 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
         raise QualificationError(
             "PRESENTATION_V2_LEGACY_WEIGHT_THRESHOLD_AUTHORITY_FORBIDDEN"
         )
+
+    if dict(asset.metadata or {}).get("source_owned_visual_mesh_mode") is True:
+        visual_hash = str(
+            dict(asset.metadata or {}).get("visual_mesh_set_binding_hash") or ""
+        )
+        if len(visual_hash) != 64:
+            raise QualificationError(
+                "PRESENTATION_V2_VISUAL_MESH_SET_BINDING_MISSING"
+            )
+        evidence = PresentationPartitionEvidenceV2IR(
+            mesh_binding_hash=str(mesh.mesh_lineage_hash),
+            appearance_asset_binding_hash=str(asset.asset_hash),
+            appearance_qualification_binding_hash=str(
+                appearance.qualification_hash
+            ),
+            policy_hash=content_sha256(policy),
+            evaluated_shared_edge_count=0,
+            source_supported_edge_count=0,
+            cut_face_pairs=(),
+            boundary_measurements=(),
+            evidence_hash="",
+            metadata={
+                "role_free": True,
+                "categorical_recognition_used": False,
+                "conceptual_object_identity_claimed": False,
+                "evidence_supported_visual_partition": True,
+                "appearance_boundary_does_not_mint_appearance": True,
+                "source_owned_visual_mesh_mode": True,
+                "visual_mesh_set_binding_hash": visual_hash,
+                "mechanical_face_appearance_partition_not_applicable": True,
+                "mechanical_mesh_render_authority": False,
+            },
+        )
+        evidence = replace(
+            evidence,
+            evidence_hash=presentation_partition_evidence_hash(evidence),
+        )
+        structure = build_presentation_structure_v2(
+            skeleton=skeleton,
+            mesh=mesh,
+            mesh_skin=mesh_skin,
+            partition=partition,
+            carrier_policy=carrier,
+            min_rigid_owner_weight=float(
+                mechanical_policy["min_rigid_owner_weight"]
+            ),
+            max_rigid_other_mass=float(
+                mechanical_policy["max_rigid_other_mass"]
+            ),
+            rigidity_noop_relative_edge_tolerance=float(
+                mechanical_policy[
+                    "rigidity_noop_relative_edge_tolerance"
+                ]
+            ),
+            rigidity_noop_probe_rotation_degrees=float(
+                mechanical_policy[
+                    "rigidity_noop_probe_rotation_degrees"
+                ]
+            ),
+            presentation_cut_face_pairs=(),
+            presentation_partition_evidence_hash=evidence.evidence_hash,
+        )
+        structure = replace(
+            structure,
+            metadata={
+                **dict(structure.metadata or {}),
+                "source_owned_visual_mesh_mode": True,
+                "visual_mesh_set_binding_hash": visual_hash,
+                "mechanical_mesh_render_authority": False,
+                "visual_partition_authority": (
+                    "STAGE18_SOURCE_OWNED_VISUAL_MESH_SET"
+                ),
+            },
+        )
+        # Metadata participates in the structure hash.
+        from compiler.realsas_compiler_core.product_state_v2 import (
+            presentation_structure_v2_hash,
+        )
+        structure = replace(
+            structure,
+            structure_hash=presentation_structure_v2_hash(structure),
+        )
+        root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+        return {
+            "status": "PASS",
+            "outputs": [
+                write_ir(
+                    root / "presentation_partition_evidence_v2.json",
+                    evidence,
+                    authority_class=(
+                        "QUALIFIED_PRESENTATION_PARTITION_EVIDENCE_V2"
+                    ),
+                ),
+                write_ir(
+                    root / "qualified_presentation_structure_v2.json",
+                    structure,
+                    authority_class=(
+                        "QUALIFIED_PRESENTATION_STRUCTURE_V2"
+                    ),
+                ),
+            ],
+            "diagnostics": {
+                "structure_hash": structure.structure_hash,
+                "slot_count": len(structure.slots),
+                "attachment_count": len(structure.attachments),
+                "presentation_partition_evidence_hash": (
+                    evidence.evidence_hash
+                ),
+                "evaluated_shared_edge_count": 0,
+                "source_supported_edge_count": 0,
+                "appearance_boundary_cut_count": 0,
+                "categorical_recognition_used": False,
+                "conceptual_object_identity_claimed": False,
+                "appearance_authority_minted": False,
+                "source_view_identity_preserved": True,
+                "source_view_identity_is_render_authority": False,
+                "source_owned_visual_mesh_mode": True,
+                "visual_mesh_set_binding_hash": visual_hash,
+                "mechanical_mesh_render_authority": False,
+            },
+        }
 
     uv_path = resolved_path(asset.uv_npz_path)
     provenance_path = resolved_path(asset.provenance_npz_path)

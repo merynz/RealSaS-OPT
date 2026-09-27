@@ -1047,14 +1047,27 @@ def compile_deterministic_caa(
         face_support_by_view[view] = face_cos
         angle_safe = face_cos[sample_face] >= min_cos
 
-        appearance_support = (
-            (foreground_safe & alpha_foreground_safe)
+        # Source-lock and donor eligibility are different authorities.
+        #
+        # If an exact qualified source observation sees this canonical sample
+        # as the first hit and the source foreground/alpha says the pixel
+        # exists, that observation is immutable source evidence. A grazing
+        # normal or a one-pixel silhouette safety band may reduce confidence
+        # when REUSING the observation as an other-view donor, but they cannot
+        # erase the fact that the target source view directly observed it.
+        direct_foreground_support = mask[iy.clip(0, image.shape[0] - 1), ix.clip(0, image.shape[1] - 1)]
+        direct_foreground_support &= alpha_foreground_safe
+        direct_appearance_support = (
+            direct_foreground_support
             | (background_safe & alpha_background_safe)
         )
-        valid = in_bounds & visible & appearance_support & angle_safe
+        valid = in_bounds & visible & direct_appearance_support
         direct_valid[view] = valid
         direct_foreground_donor_valid[view] = (
-            valid & foreground_safe & alpha_foreground_safe
+            valid
+            & foreground_safe
+            & alpha_foreground_safe
+            & angle_safe
         )
         if np.any(valid):
             sampled_rgba, sampled_pm = bilinear_rgba_u8(
@@ -1120,15 +1133,22 @@ def compile_deterministic_caa(
         control_angle_safe = (
             control_face_cos[canonical_control_face] >= min_cos
         )
-        control_appearance_support = (
-            (control_foreground_safe & control_alpha_foreground_safe)
+        control_direct_foreground_support = np.zeros(
+            canonical_control_count, dtype=bool
+        )
+        if len(control_ids):
+            control_direct_foreground_support[control_ids] = (
+                mask[control_iy[control_ids], control_ix[control_ids]]
+                & control_alpha_foreground_safe[control_ids]
+            )
+        control_direct_appearance_support = (
+            control_direct_foreground_support
             | (control_background_safe & control_alpha_background_safe)
         )
         control_valid = (
             control_in_bounds
             & control_visible
-            & control_appearance_support
-            & control_angle_safe
+            & control_direct_appearance_support
         )
         canonical_control_direct_valid[view] = control_valid
         if np.any(control_valid):

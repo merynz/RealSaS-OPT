@@ -432,14 +432,30 @@ jobs:
           execution=payload("31_ARACHNE_FIT","RealSaS.ModelFitExecutionIR.v1")
           skin=payload("32_SKIN_QUALIFIED","RealSaS.QualifiedSkinIR.v1")
           seal=payload("33_ARACHNE_CHECKPOINT_SEALED","RealSaS.ModelCheckpointSealIR.v1")
+          import hashlib
+          def sha(path):
+              return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+          migration=json.loads(Path(os.environ["ARACHNE_REBIND_RECEIPT"]).read_text())
+          verification=json.loads(Path(os.environ["ARACHNE_MIGRATION_VERIFICATION"]).read_text())
           receipt={
-            "schema":"RealSaS.KnightDemoArachneStage33V6Receipt.v1",
+            "schema":"RealSaS.KnightDemoArachneStage33V6Receipt.v2",
             "status":"PASS_DEMO_ONLY",
             "run_id":os.environ["RUN_ID"],
             "architecture_id":execution["architecture_id"],
             "arachne_execution_hash":execution["execution_hash"],
+            "historical_v6_skeleton_lineage_hash":os.environ["HISTORICAL_V6_SKELETON_LINEAGE"],
+            "qualified_skeleton_lineage_hash":os.environ["EXPECTED_SKELETON_LINEAGE"],
+            "semantic_skeleton_tree_sha256":os.environ["EXPECTED_SEMANTIC_TREE_SHA256"],
+            "historical_v6_skin_lineage_hash":os.environ["HISTORICAL_V6_SKIN_LINEAGE"],
             "qualified_skin_lineage_hash":skin["skin_lineage_hash"],
             "qualified_skin_row_count":len(skin["rows"]),
+            "semantic_id_rebind_mapping_hash":migration["mapping_hash"],
+            "semantic_id_rebind_receipt_sha256":sha(Path(os.environ["ARACHNE_REBIND_RECEIPT"])),
+            "semantic_skin_migration_verification_sha256":sha(Path(os.environ["ARACHNE_MIGRATION_VERIFICATION"])),
+            "max_abs_weight_delta_after_compiler_requalification":verification["max_abs_weight_delta_after_compiler_requalification"],
+            "max_row_l1_weight_delta_after_compiler_requalification":verification["max_row_l1_weight_delta_after_compiler_requalification"],
+            "numeric_skin_field_semantics_preserved":True,
+            "model_retraining_used_for_identity_migration":False,
             "checkpoint_seal_hash":seal["checkpoint_seal_hash"],
             "terminal_check_steps":[7680,7936,8192],
             "execution_repo_commit":os.environ["GITHUB_SHA"],

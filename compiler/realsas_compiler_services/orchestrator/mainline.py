@@ -720,6 +720,172 @@ def _outputs_verify(row: dict, *, allowed_root: Path | None = None) -> bool:
     return True
 
 
+def _historical_import_fingerprint(
+    *,
+    ledger: dict,
+    manifest: dict,
+    stage: dict,
+    historical_import: dict,
+) -> tuple[str, str]:
+    policy_hash = content_sha256(stage["policy"])
+    manifest_subset_hash = content_sha256(_manifest_subset(manifest, stage))
+    fingerprint = content_sha256(
+        {
+            "schema": "RealSaS.HistoricalStageInputFingerprint.v1",
+            "run_id": str(ledger["run_id"]),
+            "stage_id": str(stage["id"]),
+            "pipeline_plan_sha256": str(ledger["pipeline_plan_sha256"]),
+            "archive_sha256": str(
+                historical_import.get("archive_sha256") or ""
+            ),
+            "source_output_sha256": str(
+                historical_import.get("source_output_sha256") or ""
+            ),
+            "authority_sha256": str(
+                historical_import.get("authority_sha256") or ""
+            ),
+            "manifest_subset_hash": manifest_subset_hash,
+            "policy_hash": policy_hash,
+        }
+    )
+    return fingerprint, policy_hash
+
+
+def _verify_historical_imported_pass(
+    *,
+    plan: dict,
+    ledger: dict,
+    manifest: dict,
+    stage: dict,
+    row: dict,
+) -> bool:
+    historical_import = dict(row.get("historical_import") or {})
+    if not historical_import:
+        return False
+    if str(ledger.get("execution_class") or "") != "DEMO_WITNESS":
+        return False
+    if (
+        str(historical_import.get("schema") or "")
+        != "RealSaS.HistoricalStageImportIdentity.v1"
+    ):
+        return False
+    if str(historical_import.get("stage_id") or "") != str(stage["id"]):
+        return False
+
+    run_root = (
+        authority_root() / "runs" / str(ledger["run_id"])
+    ).resolve()
+    archive_path = Path(
+        str(historical_import.get("archive_path") or "")
+    ).expanduser().resolve()
+    archive_sha256 = str(
+        historical_import.get("archive_sha256") or ""
+    )
+    if (
+        not _path_within(archive_path, run_root)
+        or not archive_path.is_file()
+        or len(archive_sha256) != 64
+        or sha256_file(archive_path) != archive_sha256
+    ):
+        return False
+
+    authority_rel = str(
+        historical_import.get("authority_path") or ""
+    )
+    authority_path = (ROOT / authority_rel).resolve()
+    authority_sha256 = str(
+        historical_import.get("authority_sha256") or ""
+    )
+    if (
+        not authority_rel
+        or not _path_within(authority_path, ROOT)
+        or not authority_path.is_file()
+        or len(authority_sha256) != 64
+        or sha256_file(authority_path) != authority_sha256
+    ):
+        return False
+    authority = load_json(authority_path)
+    if (
+        str(authority.get("schema") or "")
+        != "RealSaS.DemoHistoricalStageImportAuthority.v1"
+        or str(authority.get("status") or "") != "APPROVED_DEMO_ONLY"
+        or str(authority.get("target_run_id") or "")
+        != str(ledger["run_id"])
+        or str(authority.get("subject_id") or "")
+        != str(ledger.get("subject_id") or "")
+    ):
+        return False
+    scope = dict(authority.get("scope") or {})
+    if (
+        str(scope.get("execution_class") or "") != "DEMO_WITNESS"
+        or scope.get("product_authority_claimed") is not False
+        or scope.get("scientific_product_pass_forbidden") is not True
+        or scope.get("exact_byte_import_required") is not True
+        or scope.get("recomputation_forbidden") is not True
+    ):
+        return False
+
+    stage_id = str(stage["id"])
+    if stage_id not in tuple(
+        map(str, authority.get("imported_stage_ids") or ())
+    ):
+        return False
+    expected_output = dict(
+        (authority.get("exact_outputs") or {}).get(stage_id) or {}
+    )
+    outputs = list(row.get("outputs") or ())
+    if len(outputs) != 1 or not expected_output:
+        return False
+    output = outputs[0]
+    if (
+        str(output.get("sha256") or "")
+        != str(expected_output.get("sha256") or "")
+        or int(output.get("bytes", -1))
+        != int(expected_output.get("bytes", -2))
+        or str(output.get("schema") or "")
+        != str(expected_output.get("schema") or "")
+        or str(output.get("authority_class") or "")
+        != str(expected_output.get("authority_class") or "")
+        or str(historical_import.get("source_output_sha256") or "")
+        != str(expected_output.get("sha256") or "")
+        or str(historical_import.get("source_member") or "")
+        != str(expected_output.get("member") or "")
+        or archive_sha256
+        != str(
+            (
+                authority.get("source_evidence_archive") or {}
+            ).get("sha256")
+            or ""
+        )
+    ):
+        return False
+
+    fingerprint, policy_hash = _historical_import_fingerprint(
+        ledger=ledger,
+        manifest=manifest,
+        stage=stage,
+        historical_import=historical_import,
+    )
+    if (
+        str(row.get("input_fingerprint") or "") != fingerprint
+        or str(row.get("policy_hash") or "") != policy_hash
+        or str(
+            historical_import.get("manifest_subset_hash") or ""
+        )
+        != content_sha256(_manifest_subset(manifest, stage))
+        or str(historical_import.get("policy_hash") or "")
+        != policy_hash
+    ):
+        return False
+
+    return _outputs_verify(
+        row,
+        allowed_root=(
+            run_root / "artifacts" / stage_id
+        ),
+    )
+
+
 def _fingerprint(
     plan: dict,
     ledger: dict,
@@ -919,25 +1085,36 @@ def _verify_existing_passes(plan: dict, ledger: dict, manifest: dict) -> bool:
         row = _ledger_map(ledger)[stage_id]
         if not dependency_status_admissible(ledger, str(row.get("status") or "")):
             continue
-        implementation_hash = _adapter_impl_hash(stage["adapter"])
-        fingerprint, policy_hash = _fingerprint(
-            plan, ledger, manifest, stage, implementation_hash
-        )
-        if (
-            row.get("input_fingerprint") != fingerprint
-            or row.get("implementation_hash") != implementation_hash
-            or row.get("policy_hash") != policy_hash
-            or not _outputs_verify(
-                row,
-                allowed_root=(
-                    authority_root()
-                    / "runs"
-                    / str(ledger["run_id"])
-                    / "artifacts"
-                    / stage_id
-                ),
+
+        if row.get("historical_import"):
+            valid = _verify_historical_imported_pass(
+                plan=plan,
+                ledger=ledger,
+                manifest=manifest,
+                stage=stage,
+                row=row,
             )
-        ):
+        else:
+            implementation_hash = _adapter_impl_hash(stage["adapter"])
+            fingerprint, policy_hash = _fingerprint(
+                plan, ledger, manifest, stage, implementation_hash
+            )
+            valid = (
+                row.get("input_fingerprint") == fingerprint
+                and row.get("implementation_hash") == implementation_hash
+                and row.get("policy_hash") == policy_hash
+                and _outputs_verify(
+                    row,
+                    allowed_root=(
+                        authority_root()
+                        / "runs"
+                        / str(ledger["run_id"])
+                        / "artifacts"
+                        / stage_id
+                    ),
+                )
+            )
+        if not valid:
             _invalidate_dependents(
                 plan, ledger, stage_id, "STALE_PASS_IDENTITY"
             )

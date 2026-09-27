@@ -672,11 +672,28 @@ def compile_caa_stage(ctx: dict) -> dict:
         compile_hash="",
         metadata={
             "component_ids": component_ids,
-            "total_appearance_defined": True,
+            "total_appearance_defined": (
+                int(counts["UNSUPPORTED_ABSTAIN"]) == 0
+            ),
+            "total_admitted_appearance_defined": True,
+            "unsupported_abstain_sample_count": int(
+                counts["UNSUPPORTED_ABSTAIN"]
+            ),
+            "unsupported_abstain_fraction": (
+                float(counts["UNSUPPORTED_ABSTAIN"]) / float(total)
+            ),
+            "unsupported_abstain_source_view_value": int(
+                result["unsupported_abstain_source_view_value"]
+            ),
+            "appearance_admission_contract": (
+                "SOURCE_OR_BOUNDED_LOCAL_COMPLETION_V1"
+            ),
             "runtime_generation_used": False,
             "geometry_mutated": False,
             "visibility_authority": "RealSaS.VisibilityContract.v2",
-            "completion_mode": "BOUNDED_CANONICAL_SURFACE_HARMONIC",
+            "completion_mode": (
+                "BOUNDED_CANONICAL_SURFACE_HARMONIC_OR_EXPLICIT_ABSTAIN"
+            ),
             "completion_rows": list(result["completion_rows"]),
             "global_surface_fill_used": False,
             "sample_count_mode": str(result["sample_count_mode"]),
@@ -781,8 +798,27 @@ def seal_caa_compile_stage(ctx: dict) -> dict:
     )
     if artifact.preregistration_binding_hash != prereg.preregistration_hash:
         raise QualificationError("CAA_COMPILE_PREREG_BINDING_DRIFT")
-    if np.any(arrays["provenance"] == 255):
-        raise QualificationError("CAA_COMPILE_NOT_TOTAL")
+    provenance = np.asarray(arrays["provenance"], dtype=np.uint8)
+    if np.any(provenance == 255):
+        raise QualificationError("CAA_COMPILE_UNCLASSIFIED_SAMPLE")
+    valid_codes = np.asarray(
+        tuple(sorted(CAA_PROVENANCE.values())),
+        dtype=np.uint8,
+    )
+    if np.any(~np.isin(provenance, valid_codes)):
+        raise QualificationError("CAA_COMPILE_PROVENANCE_CLASS_INVALID")
+    unsupported_count = int(
+        np.count_nonzero(
+            provenance == CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"]
+        )
+    )
+    expected_unsupported = int(
+        dict(artifact.metadata or {}).get(
+            "unsupported_abstain_sample_count", 0
+        )
+    )
+    if unsupported_count != expected_unsupported:
+        raise QualificationError("CAA_COMPILE_UNSUPPORTED_COUNT_DRIFT")
     direct = arrays["direct_valid"]
     direct_exact = np.all(
         arrays["rgba"][direct] == arrays["direct_rgba"][direct],
@@ -797,7 +833,11 @@ def seal_caa_compile_stage(ctx: dict) -> dict:
         compile_npz_sha256=artifact.compile_npz_sha256,
         qualification_report={
             "status": "PASS_CAA_COMPILE_SEAL",
-            "total_appearance_defined": True,
+            "total_appearance_defined": unsupported_count == 0,
+            "total_admitted_appearance_defined": True,
+            "unsupported_abstain_sample_count": unsupported_count,
+            "unsupported_abstention_is_not_generated_appearance": True,
+            "dynamic_or_rest_exposure_must_fail_closed": True,
             "direct_source_immutable": True,
             "runtime_generation_required": False,
             "geometry_mutation_used": False,
@@ -822,7 +862,8 @@ def seal_caa_compile_stage(ctx: dict) -> dict:
         "diagnostics": {
             "seal_hash": seal.seal_hash,
             "direct_source_immutable": True,
-            "totality": True,
+            "admitted_totality": True,
+            "unsupported_abstain_sample_count": unsupported_count,
         },
     }
 
@@ -1011,6 +1052,9 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
     direct_mask = provenance_stack == CAA_PROVENANCE["DIRECT_SOURCE"]
     other_mask = provenance_stack == CAA_PROVENANCE["OTHER_VIEW_SOURCE"]
     harmonic_mask = provenance_stack == CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"]
+    unsupported_mask = (
+        provenance_stack == CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"]
+    )
     padding_mask = provenance_stack == 255
     if np.any(direct_mask & (source_view_stack != target_view)):
         raise QualificationError("CAA_BAKE_DIRECT_SOURCE_VIEW_IDENTITY_DRIFT")
@@ -1025,6 +1069,8 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
         raise QualificationError("CAA_BAKE_OTHER_VIEW_IDENTITY_DRIFT")
     if np.any(harmonic_mask & (source_view_stack != -2)):
         raise QualificationError("CAA_BAKE_HARMONIC_SOURCE_VIEW_IDENTITY_DRIFT")
+    if np.any(unsupported_mask & (source_view_stack != -4)):
+        raise QualificationError("CAA_BAKE_UNSUPPORTED_SOURCE_VIEW_IDENTITY_DRIFT")
     if np.any(padding_mask & (source_view_stack != np.iinfo(np.int16).min)):
         raise QualificationError("CAA_BAKE_SOURCE_VIEW_PADDING_DRIFT")
     if np.any(
@@ -1032,6 +1078,7 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
         & (~direct_mask)
         & (~other_mask)
         & (~harmonic_mask)
+        & (~unsupported_mask)
     ):
         raise QualificationError("CAA_BAKE_PROVENANCE_CLASS_INVALID")
 
@@ -1066,7 +1113,15 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
         atlas_layout=dict(reference_layout),
         asset_hash="",
         metadata={
-            "total_appearance_asset": True,
+            "total_appearance_asset": not bool(
+                dict(artifact.metadata or {}).get(
+                    "unsupported_abstain_sample_count", 0
+                )
+            ),
+            "total_admitted_appearance_asset": True,
+            "unsupported_abstention_transport": (
+                "PROVENANCE_3__SOURCE_VIEW_NEG4__RGBA_ZERO"
+            ),
             "unique_face_barycentric_atlas": True,
             "paged_physical_atlas": True,
             "adaptive_face_sampling": bool(adaptive),
@@ -1081,6 +1136,7 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
             "source_view_identity_is_render_authority": False,
             "source_view_identity_encoding": (
                 "INT16_0_TO_7_SOURCE_VIEW__NEG2_COMPILED_HARMONIC"
+                "__NEG4_UNSUPPORTED_ABSTAIN"
             ),
         },
     )
@@ -1184,7 +1240,32 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         axis=-1,
     )
     source_exact_fraction = float(np.mean(direct_exact))
-    total_fraction = float(np.mean(arrays["provenance"] != 255))
+    provenance = np.asarray(arrays["provenance"], dtype=np.uint8)
+    if np.any(provenance == 255):
+        raise QualificationError("CAA_QUALIFICATION_UNCLASSIFIED_SAMPLE")
+    unsupported_code = int(CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"])
+    unsupported_mask = provenance == unsupported_code
+    admitted_mask = ~unsupported_mask
+    admitted_count = int(np.count_nonzero(admitted_mask))
+    if admitted_count <= 0:
+        raise QualificationError("CAA_QUALIFICATION_NO_ADMITTED_APPEARANCE")
+    defined_codes = np.asarray(
+        (
+            CAA_PROVENANCE["DIRECT_SOURCE"],
+            CAA_PROVENANCE["OTHER_VIEW_SOURCE"],
+            CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"],
+        ),
+        dtype=np.uint8,
+    )
+    defined_mask = np.isin(provenance, defined_codes)
+    if np.any(admitted_mask & ~defined_mask):
+        raise QualificationError("CAA_QUALIFICATION_ADMITTED_SAMPLE_UNDEFINED")
+    total_fraction = float(
+        np.count_nonzero(defined_mask & admitted_mask)
+        / float(admitted_count)
+    )
+    potential_surface_defined_fraction = float(np.mean(defined_mask))
+    unsupported_abstain_fraction = float(np.mean(unsupported_mask))
 
     policy = dict(prereg.completion_quality_policy)
     required = (
@@ -1262,6 +1343,10 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         face_tile_resolutions=adaptive_resolutions,
         face_vertex_ids=face_vertex_ids,
         surface_graph=quality_graph,
+        excluded_provenance_codes=(
+            CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"],
+            255,
+        ),
     )
     seam = provenance_boundary_metrics(
         rgba=arrays["rgba"],
@@ -1442,6 +1527,12 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
             "source_pm_roundtrip_max_abs_error": max_source_pm_roundtrip_error,
             "source_pm_roundtrip_passed": source_pm_roundtrip_passed,
             "appearance_is_coequal_product_authority": True,
+            "totality_domain": "ADMITTED_RENDERABLE_SUPPORT_ONLY",
+            "unsupported_abstention_is_not_appearance": True,
+            "potential_surface_defined_fraction": (
+                potential_surface_defined_fraction
+            ),
+            "unsupported_abstain_fraction": unsupported_abstain_fraction,
         },
         qualification_hash="",
         metadata={
@@ -1449,6 +1540,14 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
             "seam": seam,
             "cross_view_source_compatibility": cross_view,
             "source_pm_roundtrip_max_abs_error": max_source_pm_roundtrip_error,
+            "potential_surface_defined_fraction": (
+                potential_surface_defined_fraction
+            ),
+            "unsupported_abstain_fraction": unsupported_abstain_fraction,
+            "unsupported_abstain_sample_count": int(
+                np.count_nonzero(unsupported_mask)
+            ),
+            "admitted_renderable_sample_count": admitted_count,
             "surface_graph_edge_count": int(quality_graph.edge_count),
             "surface_graph_storage_bytes": int(quality_graph.storage_nbytes),
             "surface_graph_representation": "CSR_INT64_OFFSETS_INT32_INDICES_WITH_UNDIRECTED_EDGE_INDEX",
@@ -1480,6 +1579,10 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
             "qualification_hash": value.qualification_hash,
             "source_lock_exact_fraction": source_exact_fraction,
             "total_defined_fraction": total_fraction,
+            "potential_surface_defined_fraction": (
+                potential_surface_defined_fraction
+            ),
+            "unsupported_abstain_fraction": unsupported_abstain_fraction,
             "holdout_p95_rgba_l1": holdout["p95_rgba_l1"],
             "seam_p95_rgba_l1": seam["p95_rgba_l1"],
             "seam_p95_gradient_jump": seam["p95_gradient_jump"],
@@ -1671,6 +1774,13 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
         )
 
         visible_count = int(np.count_nonzero(visible))
+        unsupported_visible = visible & (
+            render.provenance_code
+            == int(CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"])
+        )
+        unsupported_visible_count = int(
+            np.count_nonzero(unsupported_visible)
+        )
         exact_depth_ambiguous_count = int(
             np.count_nonzero(render.exact_depth_ambiguity)
         )
@@ -1723,7 +1833,8 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
             else float(direct_count) / float(source_foreground_count)
         )
         view_pass = (
-            source_lock_fraction
+            unsupported_visible_count == 0
+            and source_lock_fraction
             >= float(policy["rest_min_source_lock_fraction_of_source_foreground"])
             and mean_error <= float(policy["rest_max_source_locked_mean_rgba_l1"])
             and p95_error <= float(policy["rest_max_source_locked_p95_rgba_l1"])
@@ -1796,6 +1907,12 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
                     "source_evidence_available": True,
                     "visibility_and_appearance_masks_separate": True,
                     "geometry_visible_alpha_zero_is_diagnostic_not_undefinedness": True,
+                    "unsupported_abstain_visible_pixel_count": (
+                        unsupported_visible_count
+                    ),
+                    "unsupported_abstain_visibility_passed": (
+                        unsupported_visible_count == 0
+                    ),
                     "exact_depth_ambiguous_pixel_count": exact_depth_ambiguous_count,
                     "exact_depth_ambiguous_fraction": exact_depth_ambiguous_fraction,
                     "exact_depth_ambiguity_passed": (

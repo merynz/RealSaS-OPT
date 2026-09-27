@@ -378,6 +378,87 @@ def _presentation_handle_specs(
     return tuple(rows)
 
 
+def _rig_mask_metrics(
+    joint_xy: dict[str, tuple[float, float] | np.ndarray],
+    parent_by_joint: dict[str, str | None],
+    mask: np.ndarray,
+) -> dict:
+    mask = np.asarray(mask, dtype=bool)
+    h, w = mask.shape
+    joint_total = 0
+    joint_inside = 0
+    bone_total = 0
+    bone_fully_inside = 0
+    bone_inside_samples = 0
+    bone_sample_count = 0
+    for joint_id, point in joint_xy.items():
+        p = np.asarray(point, dtype=np.float64)
+        if not np.isfinite(p).all():
+            continue
+        joint_total += 1
+        x = int(np.clip(np.rint(p[0]), 0, w - 1))
+        y = int(np.clip(np.rint(p[1]), 0, h - 1))
+        if mask[y, x]:
+            joint_inside += 1
+        parent = parent_by_joint.get(joint_id)
+        if parent is None or parent not in joint_xy:
+            continue
+        q = np.asarray(joint_xy[parent], dtype=np.float64)
+        if not np.isfinite(q).all() or float(np.linalg.norm(p - q)) <= 1.0e-9:
+            continue
+        bone_total += 1
+        samples = np.linspace(q, p, 21, dtype=np.float64)
+        sx = np.clip(np.rint(samples[:, 0]).astype(np.int64), 0, w - 1)
+        sy = np.clip(np.rint(samples[:, 1]).astype(np.int64), 0, h - 1)
+        inside = mask[sy, sx]
+        count = int(np.count_nonzero(inside))
+        bone_inside_samples += count
+        bone_sample_count += len(inside)
+        if count == len(inside):
+            bone_fully_inside += 1
+    return {
+        "joint_count": int(joint_total),
+        "joint_inside_count": int(joint_inside),
+        "joint_inside_fraction": (
+            0.0 if joint_total == 0 else float(joint_inside / joint_total)
+        ),
+        "bone_count": int(bone_total),
+        "bone_fully_inside_count": int(bone_fully_inside),
+        "bone_fully_inside_fraction": (
+            0.0 if bone_total == 0 else float(bone_fully_inside / bone_total)
+        ),
+        "bone_sample_inside_fraction": (
+            0.0
+            if bone_sample_count == 0
+            else float(bone_inside_samples / bone_sample_count)
+        ),
+    }
+
+
+def _fit_projected_template_to_visual_bbox(
+    projected: dict[str, np.ndarray],
+    mesh,
+    *,
+    margin_fraction: float = 0.02,
+) -> dict[str, tuple[float, float]]:
+    ids = tuple(projected)
+    src = np.asarray([projected[joint_id] for joint_id in ids], dtype=np.float64)
+    dst = np.asarray(mesh.positions, dtype=np.float64)
+    smin = src.min(axis=0)
+    smax = src.max(axis=0)
+    dmin = dst.min(axis=0)
+    dmax = dst.max(axis=0)
+    sspan = np.maximum(smax - smin, 1.0e-6)
+    dspan = np.maximum(dmax - dmin, 1.0e-6)
+    lo = dmin + float(margin_fraction) * dspan
+    span = dspan * (1.0 - 2.0 * float(margin_fraction))
+    fitted = lo[None, :] + ((src - smin[None, :]) / sspan[None, :]) * span[None, :]
+    return {
+        joint_id: tuple(map(float, fitted[i]))
+        for i, joint_id in enumerate(ids)
+    }
+
+
 def _write_direct_provenance(path: Path, height: int, width: int) -> str:
     provenance = np.zeros((8, height, width), dtype=np.uint8)
     source_view = np.broadcast_to(
@@ -577,6 +658,39 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
             visual_skin_weights=mechanical_binding["visual_skin_weights"],
             joint_ids=tuple(mechanical_joint_ids),
             parent_by_joint=parent_by_joint,
+        )
+        projected_rest_joints = _project_joint_dict(
+            rest_joint_positions,
+            camera,
+        )
+        bbox_fitted_rest_joints = _fit_projected_template_to_visual_bbox(
+            projected_rest_joints,
+            mesh,
+        )
+        print(
+            "VISUAL_RIG_MASK_DIAGNOSTIC",
+            json.dumps(
+                {
+                    "view_index": int(view_index),
+                    "projected_stage28": _rig_mask_metrics(
+                        projected_rest_joints,
+                        parent_by_joint,
+                        mask,
+                    ),
+                    "arachne_weight_centroid_fit": _rig_mask_metrics(
+                        rest_presentation_joints,
+                        parent_by_joint,
+                        mask,
+                    ),
+                    "bbox_fitted_stage28": _rig_mask_metrics(
+                        bbox_fitted_rest_joints,
+                        parent_by_joint,
+                        mask,
+                    ),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
         )
         handle_specs = _presentation_handle_specs(
             joint_ids=tuple(mechanical_joint_ids),

@@ -63,7 +63,7 @@ jobs:
               k=str(rel.relation_kind).upper()
               if any(t in k for t in ("UNKNOWN","AMBIGUOUS","OCCLUDED","UNOBSERVED")): continue
               if float(rel.score)<=0: continue
-              a,b=map(str,rel.endpoints)
+              a,b=str(rel.a_surface_id),str(rel.b_surface_id)
               safe_rel.add(tuple(sorted((a,b))))
           def identity_sid(v):
               coeff=tuple(v.support_binding.coefficients)

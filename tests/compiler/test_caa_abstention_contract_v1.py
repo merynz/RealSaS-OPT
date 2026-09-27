@@ -181,3 +181,42 @@ def test_undefined_support_is_not_scored_as_defined_appearance_seam():
         CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"],
         255,
     )
+
+
+def test_global_completion_nodes_are_not_local_harmonic_boundaries():
+    # 0 is true source evidence, 1 is a local bounded gap, 2 is all-view
+    # unseen and belongs to C(p). Excluding node 2 from local_missing must not
+    # accidentally make it an observed harmonic boundary.
+    rgba = np.zeros((3, 4), dtype=np.uint8)
+    rgba[0] = (32, 64, 96, 255)
+    provenance = np.full((3,), 255, dtype=np.uint8)
+    provenance[0] = CAA_PROVENANCE["DIRECT_SOURCE"]
+    source_view = np.full((3,), -1, dtype=np.int16)
+    source_view[0] = 0
+    original_missing = np.asarray([False, True, True], dtype=bool)
+    globally_unseen = np.asarray([False, False, True], dtype=bool)
+    local_missing = original_missing & ~globally_unseen
+    local_observed = ~original_missing
+    neighbors = ((1,), (0, 2), (1,))
+    component = np.zeros((3,), dtype=np.int32)
+
+    stats = bounded_surface_harmonic_fill(
+        rgba=rgba,
+        provenance=provenance,
+        source_view=source_view,
+        missing=local_missing,
+        observed_mask=local_observed,
+        sample_component=component,
+        neighbors=neighbors,
+        max_region_samples=4,
+        max_graph_hops=2,
+        abstain_on_policy_violation=True,
+        abstain_provenance_code=CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"],
+        abstain_source_view_value=-4,
+    )
+    assert stats["abstained_sample_count"] == 0
+    assert provenance[1] == CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"]
+    assert source_view[1] == -2
+    assert provenance[2] == 255
+    assert source_view[2] == -1
+    assert np.all(rgba[2] == 0)

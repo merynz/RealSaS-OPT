@@ -10,6 +10,7 @@ from scipy.ndimage import binary_erosion
 
 from compiler.realsas_compiler_core.appearance_authority_v2 import (
     CAA_PROVENANCE,
+    caa_compile_artifact_from_dict,
     complete_appearance_asset_from_dict,
 )
 from compiler.realsas_compiler_core.appearance_quality_v2 import (
@@ -30,6 +31,7 @@ from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import 
     stage_output_payload,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2 import (
+    _load_compile_arrays,
     _load_source_inputs,
     _load_texture_pages,
 )
@@ -90,6 +92,20 @@ def diagnose(
             "07_OBSERVATION_CONTRACT_QUALIFIED",
             "RealSaS.QualifiedObservationSetIR.v1",
         )
+    )
+    compile_artifact = caa_compile_artifact_from_dict(
+        stage_output_payload(
+            ctx,
+            "21_CAA_COMPILE",
+            "RealSaS.CAACompileArtifactIR.v2",
+        )
+    )
+    compile_arrays = _load_compile_arrays(
+        compile_artifact,
+        required_names={"provenance"},
+    )
+    compile_provenance = np.asarray(
+        compile_arrays["provenance"], dtype=np.uint8
     )
     asset = complete_appearance_asset_from_dict(
         stage_output_payload(
@@ -181,8 +197,40 @@ def diagnose(
                 }
             )
 
+        compile_codes = compile_provenance[view]
+        atlas_codes = np.asarray(provenance_all[view], dtype=np.uint8)
+        atlas_surface = atlas_codes != 255
+        visible_count = int(np.count_nonzero(visible))
+        compile_count = int(len(compile_codes))
+        atlas_surface_count = int(np.count_nonzero(atlas_surface))
+
+        lineage_counts = {}
+        for name, code in CAA_PROVENANCE.items():
+            code = int(code)
+            lineage_counts[name] = {
+                "stage21_sample_count": int(
+                    np.count_nonzero(compile_codes == code)
+                ),
+                "stage21_fraction": float(
+                    np.count_nonzero(compile_codes == code)
+                ) / float(max(1, compile_count)),
+                "stage23_surface_texel_count": int(
+                    np.count_nonzero(atlas_surface & (atlas_codes == code))
+                ),
+                "stage23_surface_texel_fraction": float(
+                    np.count_nonzero(atlas_surface & (atlas_codes == code))
+                ) / float(max(1, atlas_surface_count)),
+                "stage25_visible_pixel_count": int(
+                    np.count_nonzero(visible & (prov == code))
+                ),
+                "stage25_visible_pixel_fraction": float(
+                    np.count_nonzero(visible & (prov == code))
+                ) / float(max(1, visible_count)),
+            }
+
         row = {
             "view_index": int(view),
+            "provenance_lineage_counts": lineage_counts,
             "source_foreground_pixel_count": int(np.count_nonzero(source_fg)),
             "geometry_visible_pixel_count": int(np.count_nonzero(visible)),
             "final_alpha_pixel_count": int(np.count_nonzero(final_alpha)),

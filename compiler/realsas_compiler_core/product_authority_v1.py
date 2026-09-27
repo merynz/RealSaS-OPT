@@ -853,10 +853,34 @@ def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, carri
     if value.qualification_report.get("intrinsic_audit_hash") != content_sha256(intrinsic):
         raise QualificationError("QUALIFIED_MESH_INTRINSIC_AUDIT_BINDING_MISMATCH")
 
-    required = {"G1_SUPPORT_LINEAGE","G2_TOPOLOGY","G3_DEFORMATION","G4_COMPONENT_BOUNDARY","G5_MULTIVIEW_COVERAGE"}
+    required = {
+        "G1_SUPPORT_LINEAGE",
+        "G2_TOPOLOGY",
+        "G3_DEFORMATION",
+        "G3B_SKIN_TOPOLOGY_COMPATIBILITY",
+        "G4_COMPONENT_BOUNDARY",
+        "G5_MULTIVIEW_COVERAGE",
+    }
     gates = dict(value.qualification_report.get("gates") or {})
     if set(gates) != required or any(gates[k] != "PASS" for k in required):
-        raise QualificationError("QUALIFIED_MESH_REQUIRES_ALL_FIVE_GATES_PASS")
+        raise QualificationError("QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS")
+    if not str(
+        value.qualification_report.get("skin_topology_compatibility_report_hash") or ""
+    ):
+        raise QualificationError(
+            "QUALIFIED_MESH_G3B_SKIN_TOPOLOGY_REPORT_HASH_MISSING"
+        )
+    if (
+        value.qualification_report.get("skin_topology_compatibility_status")
+        != "PASS"
+    ):
+        raise QualificationError(
+            "QUALIFIED_MESH_G3B_SKIN_TOPOLOGY_NOT_PASS"
+        )
+    if value.qualification_report.get("skin_topology_weight_mutation") is not False:
+        raise QualificationError(
+            "QUALIFIED_MESH_G3B_SKIN_WEIGHT_MUTATION_FORBIDDEN"
+        )
     if value.qualification_report.get("single_aggregate_score_authority") is not False:
         raise QualificationError("QUALIFIED_MESH_AGGREGATE_SCORE_AUTHORITY_FORBIDDEN")
     if value.qualification_report.get("g3_envelope_binding_hash") != envelope.envelope_lineage_hash:

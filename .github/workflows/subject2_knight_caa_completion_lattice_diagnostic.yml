@@ -191,6 +191,90 @@ jobs:
           )
           component=np.asarray(sample_component,dtype=np.int32)
 
+          def measure_regions(missing_mask, observed_mask, active_mask):
+              seen_local=np.zeros(sample_count,dtype=bool)
+              rows_local=[]
+              for seed in np.flatnonzero(missing_mask & active_mask):
+                  seed=int(seed)
+                  if seen_local[seed]:
+                      continue
+                  cid=int(component[seed])
+                  stack=[seed]
+                  seen_local[seed]=True
+                  region=[]
+                  while stack:
+                      node=stack.pop()
+                      region.append(node)
+                      for raw in graph[node]:
+                          nxt=int(raw)
+                          if (
+                              active_mask[nxt]
+                              and missing_mask[nxt]
+                              and not seen_local[nxt]
+                              and int(component[nxt])==cid
+                          ):
+                              seen_local[nxt]=True
+                              stack.append(nxt)
+                  region=np.asarray(sorted(region),dtype=np.int64)
+                  region_set=set(map(int,region.tolist()))
+                  boundary=set()
+                  for node in region:
+                      for raw in graph[int(node)]:
+                          nxt=int(raw)
+                          if (
+                              active_mask[nxt]
+                              and observed_mask[nxt]
+                              and int(component[nxt])==cid
+                          ):
+                              boundary.add(nxt)
+                  hops=None
+                  if boundary:
+                      dist={int(node):None for node in region}
+                      q=deque()
+                      for node in region:
+                          node=int(node)
+                          if any(
+                              active_mask[int(n)]
+                              and observed_mask[int(n)]
+                              for n in graph[node]
+                          ):
+                              dist[node]=1
+                              q.append(node)
+                      while q:
+                          node=q.popleft()
+                          cur=int(dist[node])
+                          for raw in graph[node]:
+                              nxt=int(raw)
+                              if (
+                                  active_mask[nxt]
+                                  and nxt in region_set
+                                  and dist[nxt] is None
+                              ):
+                                  dist[nxt]=cur+1
+                                  q.append(nxt)
+                      if all(v is not None for v in dist.values()):
+                          hops=max(map(int,dist.values()))
+                  faces=np.unique(sample_face[region]).astype(np.int32)
+                  rows_local.append({
+                      "sample_count":int(len(region)),
+                      "face_count":int(len(faces)),
+                      "component_index":cid,
+                      "boundary_sample_count":int(len(boundary)),
+                      "maximum_graph_hops":None if hops is None else int(hops),
+                      "passes_region_sample_cap":bool(len(region)<=max_region),
+                      "passes_graph_hop_cap":bool(hops is not None and hops<=max_hops),
+                      "minimum_face_index":int(np.min(faces)),
+                      "maximum_face_index":int(np.max(faces)),
+                  })
+              rows_local.sort(
+                  key=lambda row:(
+                      -row["sample_count"],
+                      row["component_index"],
+                      row["minimum_face_index"],
+                  )
+              )
+              return rows_local
+
           seen=np.zeros(sample_count,dtype=bool)
           region_rows=[]
           for seed in np.flatnonzero(missing):
@@ -259,8 +343,69 @@ jobs:
           face_total_counts=offsets[1:]-offsets[:-1]
           fully_unobserved=face_observed_counts==0
           partially_unobserved=(face_observed_counts>0)&(face_observed_counts<face_total_counts)
+
+          source_observed_face=face_observed_counts>0
+          renderable_sample=source_observed_face[sample_face]
+          renderable_missing=renderable_sample & (~observed_any)
+          renderable_regions=measure_regions(
+              renderable_missing,
+              observed_any,
+              renderable_sample,
+          )
+          renderable_face_indices=np.flatnonzero(source_observed_face).astype(np.int32)
+          renderable_domain={
+              "rule":"FACE_HAS_AT_LEAST_ONE_QUALIFIED_DIRECT_SOURCE_LOCK_SAMPLE_ON_R4_CONTROL_LATTICE",
+              "renderable_face_count":int(len(renderable_face_indices)),
+              "mechanical_only_face_count":int(np.count_nonzero(~source_observed_face)),
+              "renderable_face_fraction":float(np.mean(source_observed_face)),
+              "renderable_sample_count":int(np.count_nonzero(renderable_sample)),
+              "missing_renderable_sample_count":int(np.count_nonzero(renderable_missing)),
+              "missing_renderable_fraction":float(
+                  np.count_nonzero(renderable_missing)
+                  / float(max(1,np.count_nonzero(renderable_sample)))
+              ),
+              "region_count":len(renderable_regions),
+              "maximum_region_samples":max(
+                  (r["sample_count"] for r in renderable_regions),
+                  default=0,
+              ),
+              "maximum_region_faces":max(
+                  (r["face_count"] for r in renderable_regions),
+                  default=0,
+              ),
+              "maximum_graph_hops":max(
+                  (r["maximum_graph_hops"] or 0 for r in renderable_regions),
+                  default=0,
+              ),
+              "region_over_sample_cap_count":sum(
+                  not r["passes_region_sample_cap"]
+                  for r in renderable_regions
+              ),
+              "region_over_hop_cap_count":sum(
+                  not r["passes_graph_hop_cap"]
+                  for r in renderable_regions
+              ),
+              "region_without_qualified_boundary_count":sum(
+                  int(r["boundary_sample_count"])==0
+                  for r in renderable_regions
+              ),
+              "passes_existing_local_harmonic_policy":bool(
+                  all(
+                      r["passes_region_sample_cap"]
+                      and r["passes_graph_hop_cap"]
+                      and int(r["boundary_sample_count"])>0
+                      for r in renderable_regions
+                  )
+              ),
+              "top_regions":renderable_regions[:64],
+              "topology_changed":False,
+              "geometry_changed":False,
+              "excluded_faces_remain_mechanical_carrier":True,
+              "dynamic_exposure_must_fail_closed":True,
+              "product_authority_claimed":False,
+          }
           report={
-              "schema":"RealSaS.CAACompletionControlLatticeDiagnostic.v1",
+              "schema":"RealSaS.CAACompletionControlLatticeDiagnostic.v2",
               "status":"MEASURED",
               "run_id":os.environ["RUN_ID"],
               "completion_control_lattice_resolution":4,
@@ -284,6 +429,7 @@ jobs:
                   "thresholds_changed":False,
               },
               "top_regions":region_rows[:64],
+              "source_observed_renderable_domain":renderable_domain,
               "graph":{
                   "edge_count":int(graph.edge_count),
                   "storage_nbytes":int(graph.storage_nbytes),

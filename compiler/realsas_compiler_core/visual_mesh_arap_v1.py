@@ -380,11 +380,15 @@ def _component_cdt(
         outer,
         hole_loops=holes or None,
         support_points=support or None,
-        target_min_angle_deg=7.5,
+        # Stage18 visual ownership first seals exact source silhouette and
+        # constraints. Triangle-shape repair is a separate bounded local QA
+        # concern; running Ruppert-style quality insertion here repeatedly
+        # rebuilds the full CDT and destroys the fast iteration loop.
+        target_min_angle_deg=0.0,
         max_boundary_vertices=max(512, boundary_vertices * 2 + 64),
         max_support_vertices=max(128, len(support) + 64),
         max_constraint_recovery_iterations=192,
-        max_quality_iterations=96,
+        max_quality_iterations=0,
         min_feature_spacing=1.0e-6,
     )
     if not bool(result.success):

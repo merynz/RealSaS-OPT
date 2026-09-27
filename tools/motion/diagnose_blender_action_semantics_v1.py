@@ -92,6 +92,7 @@ def diagnose(source_fbx:Path,spec_path:Path):
         translations=[]
         top=[]
         per_bone={}
+        per_bone_rotation={}
         for frame in frames:
             scene.frame_set(frame)
             pose_global={}
@@ -116,6 +117,9 @@ def diagnose(source_fbx:Path,spec_path:Path):
                 q.normalize()
                 t=delta.to_translation()
                 normalized=float(t.length)/body_scale
+                rotation_angle=2.0*math.acos(
+                    min(1.0,max(-1.0,abs(float(q.w))))
+                )
                 rows.append([
                     int(frame),jid,
                     float(q.x),float(q.y),float(q.z),float(q.w),
@@ -123,6 +127,10 @@ def diagnose(source_fbx:Path,spec_path:Path):
                     float(t.y)/body_scale,
                     float(t.z)/body_scale,
                 ])
+                per_bone_rotation[jid]=max(
+                    per_bone_rotation.get(jid,0.0),
+                    rotation_angle,
+                )
                 if jid!=root_name:
                     translations.append(normalized)
                     per_bone[jid]=max(per_bone.get(jid,0.0),normalized)
@@ -168,6 +176,19 @@ def diagnose(source_fbx:Path,spec_path:Path):
                         per_bone.items(),
                         key=lambda item:(-item[1],item[0]),
                     )[:16]
+                ],
+            },
+            "rotation_amplitude":{
+                "top_bones":[
+                    {
+                        "source_joint_id":jid,
+                        "maximum_angle_radians":float(value),
+                        "maximum_angle_degrees":float(math.degrees(value)),
+                    }
+                    for jid,value in sorted(
+                        per_bone_rotation.items(),
+                        key=lambda item:(-item[1],item[0]),
+                    )
                 ],
             },
         })

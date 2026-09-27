@@ -101,32 +101,6 @@ def build_all_view_unseen_canonical_completion(
         raise QualificationError(
             "CAA_CANONICAL_COMPLETION_NO_SOURCE_ANCHOR"
         )
-    if not np.any(globally_unseen):
-        empty_rgba=np.zeros((sample_count,4),dtype=np.uint8)
-        empty_source=np.full(sample_count,-1,dtype=np.int16)
-        pm=np.zeros((sample_count,4),dtype=np.float64)
-        pm[anchor_mask]=straight_srgb_rgba_u8_to_premultiplied_linear(
-            rgba[np.argmax(valid[:,anchor_mask],axis=0),np.flatnonzero(anchor_mask)]
-        )
-        solved,stats=solve_weighted_surface_dirichlet(
-            values=pm,
-            known_mask=anchor_mask,
-            sample_component=component,
-            positions=positions,
-            graph=surface_graph,
-        )
-        if not np.array_equal(solved[anchor_mask],pm[anchor_mask]):
-            raise QualificationError(
-                "CAA_CANONICAL_COMPLETION_SOURCE_MUTATION"
-            )
-        return CanonicalUnseenCompletion(
-            rgba=empty_rgba,
-            globally_unseen_mask=globally_unseen,
-            anchor_mask=anchor_mask,
-            anchor_source_view=empty_source,
-            solver_stats=stats,
-        )
-
     best_view=np.full(sample_count,-1,dtype=np.int16)
     best_score=np.full(sample_count,-np.inf,dtype=np.float64)
     for view in range(8):

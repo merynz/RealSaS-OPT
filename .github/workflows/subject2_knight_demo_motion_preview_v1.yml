@@ -1,0 +1,63 @@
+name: subject2-knight-demo-motion-preview-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_DEMO_MOTION_PREVIEW_TRIGGER_20260927.json'
+      - 'tools/demo/render_knight_motion_preview_v1.py'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-demo-motion-preview-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Compile preview renderer
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/demo/render_knight_motion_preview_v1.py
+
+      - name: Render idle run slash demo previews
+        run: |
+          set -euo pipefail
+          rm -rf canonical/knight_demo_motion_preview_v1
+          PYTHONPATH=. python -m tools.demo.render_knight_motion_preview_v1             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --out-dir canonical/knight_demo_motion_preview_v1
+
+      - name: Seal demo previews
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/knight_demo_motion_preview_v1
+          if git diff --cached --quiet; then
+            echo "DEMO_MOTION_PREVIEW_UNCHANGED"
+            exit 0
+          fi
+          git commit -m 'demo: seal Knight idle run slash previews'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

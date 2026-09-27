@@ -3,6 +3,7 @@ from __future__ import annotations
 """Deterministic mesh-domain Complete Appearance Authority compiler."""
 
 import math
+from time import perf_counter
 from typing import Mapping
 
 import numpy as np
@@ -990,6 +991,7 @@ def compile_deterministic_caa(
     if set(camera_by_view) != set(range(8)):
         raise QualificationError("CAA_DETERMINISTIC_REQUIRES_V0_V7_CAMERAS")
 
+    source_projection_started = perf_counter()
     for view in range(8):
         camera = camera_by_view[view]
         image = np.asarray(source_rgba_by_view[view], dtype=np.uint8)
@@ -1134,12 +1136,14 @@ def compile_deterministic_caa(
                 bilinear_rgba_u8(image, control_xy[control_valid])
             )
 
+    source_projection_seconds = perf_counter() - source_projection_started
     direct_pm_linear_packed = (
         np.concatenate(direct_pm_linear_chunks, axis=0)
         if direct_pm_linear_chunks
         else np.empty((0, 4), dtype=np.float64)
     )
 
+    canonical_graph_started = perf_counter()
     canonical_control_graph = surface_sample_neighbors(
         positions=canonical_control_positions,
         face_count=face_count,
@@ -1148,6 +1152,8 @@ def compile_deterministic_caa(
             tuple(map(str, face)) for face in candidate.faces
         ),
     )
+    canonical_graph_build_seconds = perf_counter() - canonical_graph_started
+    canonical_solve_started = perf_counter()
     canonical_completion = build_all_view_unseen_canonical_completion(
         direct_valid=canonical_control_direct_valid,
         direct_rgba=canonical_control_direct_rgba,
@@ -1157,10 +1163,15 @@ def compile_deterministic_caa(
         sample_positions=canonical_control_positions,
         surface_graph=canonical_control_graph,
     )
+    canonical_solve_seconds = perf_counter() - canonical_solve_started
+    canonical_prolongation_started = perf_counter()
     dense_canonical_pm = prolongate_control_pm_to_adaptive_faces(
         control_pm_linear=canonical_completion.solved_pm_linear,
         face_tile_resolutions=resolutions,
         control_resolution=canonical_control_resolution,
+    )
+    canonical_prolongation_seconds = (
+        perf_counter() - canonical_prolongation_started
     )
     if dense_canonical_pm.shape != (sample_count, 4):
         raise QualificationError("CAA_CANONICAL_COMPLETION_DENSE_SHAPE_DRIFT")
@@ -1176,6 +1187,7 @@ def compile_deterministic_caa(
     rgba = np.zeros_like(direct_rgba)
     provenance = np.full((8, sample_count), 255, dtype=np.uint8)
     source_view = np.full((8, sample_count), -1, dtype=np.int16)
+    dense_surface_graph_started = perf_counter()
     surface_neighbors = surface_sample_neighbors(
         positions=positions,
         face_count=face_count,
@@ -1185,6 +1197,9 @@ def compile_deterministic_caa(
         face_vertex_ids=tuple(
             tuple(map(str, face)) for face in candidate.faces
         ),
+    )
+    dense_surface_graph_build_seconds = (
+        perf_counter() - dense_surface_graph_started
     )
     completion_rows = []
 
@@ -1199,6 +1214,7 @@ def compile_deterministic_caa(
         raise QualificationError("CAA_SAMPLE_COMPONENT_INDEX_INVALID")
     component_count = len(component_ids)
 
+    direction_completion_started = perf_counter()
     for target in range(8):
         direct = direct_valid[target]
         rgba[target, direct] = direct_rgba[target, direct]
@@ -1280,11 +1296,34 @@ def compile_deterministic_caa(
         if np.any(~np.isin(provenance[target], valid_codes)):
             raise QualificationError("CAA_PROVENANCE_CLASS_INVALID_AFTER_COMPILE")
 
+    direction_completion_seconds = (
+        perf_counter() - direction_completion_started
+    )
     counts = {
         name: int(np.count_nonzero(provenance == code))
         for name, code in CAA_PROVENANCE.items()
     }
     return {
+        "performance": {
+            "source_projection_and_lock_seconds": float(
+                source_projection_seconds
+            ),
+            "canonical_control_graph_build_seconds": float(
+                canonical_graph_build_seconds
+            ),
+            "canonical_variational_solve_seconds": float(
+                canonical_solve_seconds
+            ),
+            "canonical_prolongation_seconds": float(
+                canonical_prolongation_seconds
+            ),
+            "dense_surface_graph_build_seconds": float(
+                dense_surface_graph_build_seconds
+            ),
+            "directional_donor_and_local_completion_seconds": float(
+                direction_completion_seconds
+            ),
+        },
         "barycentric": barycentric,
         "sample_positions": positions,
         "sample_face_index": sample_face,

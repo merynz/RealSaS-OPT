@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.KnightMotionRetargetPreflightTrigger.v1",
-  "status": "RERUN_AFTER_EXACT_ACTION_NLA_ISOLATION_AND_DISTINCT_TAKE_GATE",
+  "status": "RERUN_AFTER_EXPLICIT_BLENDER45_ACTION_SLOT_BINDING",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
   "subject_id": "SUBJECT2_KNIGHT",
   "expected_skeleton_lineage": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
@@ -10,5 +10,5 @@
     "demo_slash_v1"
   ],
   "product_authority_claimed": false,
-  "revision": 2
+  "revision": 3
 }

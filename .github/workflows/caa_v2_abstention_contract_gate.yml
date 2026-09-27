@@ -1,0 +1,71 @@
+name: caa-v2-abstention-contract-gate
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/CAA_V2_RENDERABLE_SUPPORT_ADMISSION_CONTRACT_V1_20260927.json'
+      - 'compiler/realsas_compiler_core/appearance_authority_v2.py'
+      - 'compiler/realsas_compiler_core/appearance_bake_v2.py'
+      - 'compiler/realsas_compiler_core/appearance_compile_v2.py'
+      - 'compiler/realsas_compiler_core/appearance_completion_v2.py'
+      - 'compiler/realsas_compiler_core/appearance_quality_v2.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py'
+      - 'tests/compiler/test_caa_abstention_contract_v1.py'
+      - '.github/workflows/caa_v2_abstention_contract_gate.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: caa-v2-abstention-contract-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned mainline dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Compile CAA deterministic boundary
+        run: |
+          set -euo pipefail
+          python -m py_compile             compiler/realsas_compiler_core/appearance_authority_v2.py             compiler/realsas_compiler_core/appearance_bake_v2.py             compiler/realsas_compiler_core/appearance_compile_v2.py             compiler/realsas_compiler_core/appearance_completion_v2.py             compiler/realsas_compiler_core/appearance_quality_v2.py             compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py             compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py             compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py
+
+      - name: Run CAA abstention and unchanged quality-policy regressions
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python -m pytest -q             tests/compiler/test_caa_abstention_contract_v1.py             tests/compiler/test_caa_v2_subject_free_policy.py             tests/compiler/test_visibility_and_caa_v2.py             tests/compiler/test_product_mesh_stage_adapters_v1.py
+
+      - name: Verify frozen admission contract
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p=Path("canonical/CAA_V2_RENDERABLE_SUPPORT_ADMISSION_CONTRACT_V1_20260927.json")
+          d=json.loads(p.read_text())
+          assert d["schema"]=="RealSaS.CAARenderableSupportAdmissionContract.v1"
+          assert d["status"]=="FROZEN_SUBJECT_FREE_ARCHITECTURE"
+          assert d["subject_identity_used"] is False
+          assert d["thresholds_changed"] is False
+          assert d["admission"]["unsupported_abstain"]["provenance_code"]==3
+          assert d["admission"]["unsupported_abstain"]["source_view_encoding"]=="INT16_NEGATIVE_4"
+          assert d["admission"]["physical_atlas_padding"]["provenance_code"]==255
+          assert d["completion"]["global_surface_fill_forbidden"] is True
+          assert d["qualification"]["stage25"]=="ANY_REST_VISIBLE_UNSUPPORTED_ABSTENTION_FAILS_CLOSED"
+          assert d["qualification"]["stage45"]=="ANY_DYNAMIC_VISIBLE_UNSUPPORTED_ABSTENTION_FAILS_CLOSED"
+          assert d["product_claims"]["no_hallucination"] is True
+          print("CAA_V2_ADMISSION_CONTRACT_PASS")
+          PY

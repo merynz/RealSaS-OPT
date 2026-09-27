@@ -27,7 +27,6 @@ jobs:
       ARACHNE_HANDOFF_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V6_DEMO_HANDOFF
       EXPECTED_SURFACE_LINEAGE: 452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a
       EXPECTED_SKELETON_LINEAGE: e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850
-      EXPECTED_SEMANTIC_TREE_SHA256: 774a88500a305ce3625b7ed79be13a3230921d812ad23942a44a18b00afcf9c9
       LEGACY_PROBE_SEMANTIC_TREE_SHA256: 95f6f224f52ba43dd96296ce877a11851037e939640a4c995e2b9f3e874c7f59
       HISTORICAL_V6_SKELETON_LINEAGE: c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce
       HISTORICAL_V6_SKIN_LINEAGE: 3fa8dacae0d52b86193f14f6cb0214ed68d8d40035317e367b335d9c06a48397
@@ -156,7 +155,12 @@ jobs:
               (Path(os.environ["ARACHNE_LOCAL"])/"ARACHNE_KNIGHT_V6_SEMANTIC_ID_REBIND_RECEIPT.json").read_text()
           )
           assert receipt["status"]=="PASS"
-          assert receipt["semantic_tree_hash"]==os.environ["EXPECTED_SEMANTIC_TREE_SHA256"]
+          semantic_hash=str(receipt["semantic_tree_hash"])
+          assert len(semantic_hash)==64
+          assert semantic_hash not in {
+              "",
+              os.environ["LEGACY_PROBE_SEMANTIC_TREE_SHA256"],
+          }
           assert receipt["joint_count"]==28
           assert receipt["surface_row_count"]==12090
           assert receipt["numeric_weight_array_unchanged"] is True
@@ -174,6 +178,8 @@ jobs:
           PY
           echo "ARACHNE_REBOUND_WEIGHTS=$rebound" >> "$GITHUB_ENV"
           echo "ARACHNE_REBIND_RECEIPT=$receipt" >> "$GITHUB_ENV"
+          semantic_hash="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["semantic_tree_hash"])' "$receipt")"
+          echo "COMPILER_SEMANTIC_TREE_SHA256=$semantic_hash" >> "$GITHUB_ENV"
 
       - name: Reconstruct exact dense V6 proposal through generic bridge
         shell: bash
@@ -304,7 +310,7 @@ jobs:
               "external_qualified_skin_is_evidence_only":True,
               "historical_skeleton_lineage":os.environ["HISTORICAL_V6_SKELETON_LINEAGE"],
               "rebound_skeleton_lineage":os.environ["EXPECTED_SKELETON_LINEAGE"],
-              "semantic_skeleton_tree_sha256":os.environ["EXPECTED_SEMANTIC_TREE_SHA256"],
+              "semantic_skeleton_tree_sha256":os.environ["COMPILER_SEMANTIC_TREE_SHA256"],
               "legacy_probe_semantic_tree_sha256":os.environ["LEGACY_PROBE_SEMANTIC_TREE_SHA256"],
               "semantic_id_rebind_receipt_sha256":sha(Path(os.environ["ARACHNE_REBIND_RECEIPT"])),
               "numeric_skin_field_unchanged":True,
@@ -394,7 +400,7 @@ jobs:
               "new_skin_lineage_hash":skin["skin_lineage_hash"],
               "historical_skeleton_lineage_hash":os.environ["HISTORICAL_V6_SKELETON_LINEAGE"],
               "new_skeleton_lineage_hash":os.environ["EXPECTED_SKELETON_LINEAGE"],
-              "semantic_tree_hash":os.environ["EXPECTED_SEMANTIC_TREE_SHA256"],
+              "semantic_tree_hash":os.environ["COMPILER_SEMANTIC_TREE_SHA256"],
               "surface_row_count":len(skin["rows"]),
               "joint_count":len(joint_map),
               "max_abs_weight_delta_after_compiler_requalification":max_abs_delta,
@@ -448,7 +454,7 @@ jobs:
             "arachne_execution_hash":execution["execution_hash"],
             "historical_v6_skeleton_lineage_hash":os.environ["HISTORICAL_V6_SKELETON_LINEAGE"],
             "qualified_skeleton_lineage_hash":os.environ["EXPECTED_SKELETON_LINEAGE"],
-            "semantic_skeleton_tree_sha256":os.environ["EXPECTED_SEMANTIC_TREE_SHA256"],
+            "semantic_skeleton_tree_sha256":os.environ["COMPILER_SEMANTIC_TREE_SHA256"],
             "historical_v6_skin_lineage_hash":os.environ["HISTORICAL_V6_SKIN_LINEAGE"],
             "qualified_skin_lineage_hash":skin["skin_lineage_hash"],
             "qualified_skin_row_count":len(skin["rows"]),

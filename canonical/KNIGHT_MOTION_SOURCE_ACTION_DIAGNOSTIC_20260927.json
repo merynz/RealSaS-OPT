@@ -3,6 +3,9 @@
   "body_scale": 4.8632933572573185,
   "bone_roles": [
     {
+      "has_mesh_influence": false,
+      "influenced_mesh_object_count": 0,
+      "maximum_vertex_weight": 0.0,
       "parent_source_joint_id": null,
       "rest_position": [
         0.0027436520904302597,
@@ -10,9 +13,14 @@
         -0.00492025027051568
       ],
       "source_joint_id": "Bone",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 0.0,
+      "weighted_vertex_count": 0
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9926971197128296,
       "parent_source_joint_id": "Bone",
       "rest_position": [
         -0.5319820046424866,
@@ -20,9 +28,14 @@
         0.02537654899060726
       ],
       "source_joint_id": "Foot.L",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 4.905622538179159,
+      "weighted_vertex_count": 12
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9323397874832153,
       "parent_source_joint_id": "Bone",
       "rest_position": [
         -0.001765321590937674,
@@ -30,9 +43,14 @@
         2.1206552982330322
       ],
       "source_joint_id": "Body",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 3.1807763427495956,
+      "weighted_vertex_count": 18
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.5735310316085815,
       "parent_source_joint_id": "Body",
       "rest_position": [
         2.2437920051743276e-05,
@@ -40,9 +58,14 @@
         1.9585143327713013
       ],
       "source_joint_id": "Hips",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 7.049064414575696,
+      "weighted_vertex_count": 49
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.8187048435211182,
       "parent_source_joint_id": "Hips",
       "rest_position": [
         -0.00015302354586310685,
@@ -50,9 +73,14 @@
         2.3445067405700684
       ],
       "source_joint_id": "Abdomen",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 17.028776701539755,
+      "weighted_vertex_count": 64
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.6878320574760437,
       "parent_source_joint_id": "Abdomen",
       "rest_position": [
         -0.00015275966143235564,
@@ -60,9 +88,14 @@
         3.115182638168335
       ],
       "source_joint_id": "Torso",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 9.317742794752121,
+      "weighted_vertex_count": 50
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.8020674586296082,
       "parent_source_joint_id": "Torso",
       "rest_position": [
         2.190412942582043e-06,
@@ -70,9 +103,14 @@
         3.796839475631714
       ],
       "source_joint_id": "Neck",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 3.7090489622205496,
+      "weighted_vertex_count": 27
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9997949004173279,
       "parent_source_joint_id": "Neck",
       "rest_position": [
         2.24378800339764e-05,
@@ -80,9 +118,14 @@
         4.121866703033447
       ],
       "source_joint_id": "Head",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 127.42530310340226,
+      "weighted_vertex_count": 149
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.8358586430549622,
       "parent_source_joint_id": "Torso",
       "rest_position": [
         -0.32486477494239807,
@@ -90,9 +133,14 @@
         3.4889719486236572
       ],
       "source_joint_id": "Shoulder.L",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 13.642425740137696,
+      "weighted_vertex_count": 44
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 1.0,
       "parent_source_joint_id": "Shoulder.L",
       "rest_position": [
         -0.6269686818122864,
@@ -100,9 +148,14 @@
         3.714759111404419
       ],
       "source_joint_id": "UpperArm.L",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 15.805738967843354,
+      "weighted_vertex_count": 37
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9560455679893494,
       "parent_source_joint_id": "UpperArm.L",
       "rest_position": [
         -1.6366329193115234,
@@ -110,9 +163,14 @@
         3.655707359313965
       ],
       "source_joint_id": "LowerArm.L",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 18.498522783629596,
+      "weighted_vertex_count": 36
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.8719865083694458,
       "parent_source_joint_id": "LowerArm.L",
       "rest_position": [
         -2.7316253185272217,
@@ -120,9 +178,14 @@
         3.698211908340454
       ],
       "source_joint_id": "Palm.L",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 6.6889515072107315,
+      "weighted_vertex_count": 24
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9031655788421631,
       "parent_source_joint_id": "Palm.L",
       "rest_position": [
         -2.989206314086914,
@@ -130,9 +193,14 @@
         3.6981546878814697
       ],
       "source_joint_id": "MiddleHand.L",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 3.9314238792285323,
+      "weighted_vertex_count": 22
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9301910400390625,
       "parent_source_joint_id": "MiddleHand.L",
       "rest_position": [
         -3.1498429775238037,
@@ -140,9 +208,14 @@
         3.698154926300049
       ],
       "source_joint_id": "Fingers.L",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 9.355192303657532,
+      "weighted_vertex_count": 19
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9412068128585815,
       "parent_source_joint_id": "LowerArm.L",
       "rest_position": [
         -2.517533302307129,
@@ -150,9 +223,14 @@
         3.630450963973999
       ],
       "source_joint_id": "Thumb.R",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 7.238997804932296,
+      "weighted_vertex_count": 28
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.994488537311554,
       "parent_source_joint_id": "Thumb.R",
       "rest_position": [
         -2.6164395809173584,
@@ -160,9 +238,14 @@
         3.541015148162842
       ],
       "source_joint_id": "Thumb2.R",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 8.623803216964006,
+      "weighted_vertex_count": 17
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.8361420035362244,
       "parent_source_joint_id": "Torso",
       "rest_position": [
         0.3291322588920593,
@@ -170,9 +253,14 @@
         3.489290237426758
       ],
       "source_joint_id": "Shoulder.R",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 15.328683874569833,
+      "weighted_vertex_count": 47
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 1.0,
       "parent_source_joint_id": "Shoulder.R",
       "rest_position": [
         0.6312414407730103,
@@ -180,9 +268,14 @@
         3.7150776386260986
       ],
       "source_joint_id": "UpperArm.R",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 15.75730138644576,
+      "weighted_vertex_count": 36
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9540833234786987,
       "parent_source_joint_id": "UpperArm.R",
       "rest_position": [
         1.5571271181106567,
@@ -190,9 +283,14 @@
         3.6560256481170654
       ],
       "source_joint_id": "LowerArm.R",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 20.10573297715746,
+      "weighted_vertex_count": 48
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.8797783851623535,
       "parent_source_joint_id": "LowerArm.R",
       "rest_position": [
         2.7353837490081787,
@@ -200,9 +298,14 @@
         3.698530435562134
       ],
       "source_joint_id": "Palm.R",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 6.671067867428064,
+      "weighted_vertex_count": 24
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9202732443809509,
       "parent_source_joint_id": "Palm.R",
       "rest_position": [
         2.993018388748169,
@@ -210,9 +313,14 @@
         3.6984732151031494
       ],
       "source_joint_id": "MiddleHand.R",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 4.670639819465578,
+      "weighted_vertex_count": 22
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9346906542778015,
       "parent_source_joint_id": "MiddleHand.R",
       "rest_position": [
         3.153656244277954,
@@ -220,9 +328,14 @@
         3.6984732151031494
       ],
       "source_joint_id": "Fingers.R",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 8.66696012020111,
+      "weighted_vertex_count": 18
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9409603476524353,
       "parent_source_joint_id": "LowerArm.R",
       "rest_position": [
         2.5175368785858154,
@@ -230,9 +343,14 @@
         3.630451202392578
       ],
       "source_joint_id": "Thumb.L",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 7.167040484026074,
+      "weighted_vertex_count": 27
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9944878220558167,
       "parent_source_joint_id": "Thumb.L",
       "rest_position": [
         2.617053985595703,
@@ -240,9 +358,14 @@
         3.541015625
       ],
       "source_joint_id": "Thumb2.L",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 8.619755804538727,
+      "weighted_vertex_count": 16
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9838986992835999,
       "parent_source_joint_id": "Body",
       "rest_position": [
         -0.528574526309967,
@@ -250,9 +373,14 @@
         1.741301417350769
       ],
       "source_joint_id": "UpperLeg.L",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 33.82640748284757,
+      "weighted_vertex_count": 84
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9838001728057861,
       "parent_source_joint_id": "UpperLeg.L",
       "rest_position": [
         -0.5282989740371704,
@@ -260,9 +388,14 @@
         0.8018825054168701
       ],
       "source_joint_id": "LowerLeg.L",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 28.502241961658,
+      "weighted_vertex_count": 49
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9854114651679993,
       "parent_source_joint_id": "Body",
       "rest_position": [
         0.537383496761322,
@@ -270,9 +403,14 @@
         1.8354027271270752
       ],
       "source_joint_id": "UpperLeg.R",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 32.85236983280629,
+      "weighted_vertex_count": 85
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.976041853427887,
       "parent_source_joint_id": "UpperLeg.R",
       "rest_position": [
         0.5376590490341187,
@@ -280,9 +418,14 @@
         0.8959839344024658
       ],
       "source_joint_id": "LowerLeg.R",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 29.008027285337448,
+      "weighted_vertex_count": 54
     },
     {
+      "has_mesh_influence": false,
+      "influenced_mesh_object_count": 0,
+      "maximum_vertex_weight": 0.0,
       "parent_source_joint_id": "Bone",
       "rest_position": [
         -0.5208616256713867,
@@ -290,9 +433,14 @@
         0.7096765041351318
       ],
       "source_joint_id": "PoleTarget.L",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 0.0,
+      "weighted_vertex_count": 0
     },
     {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9557714462280273,
       "parent_source_joint_id": "Bone",
       "rest_position": [
         0.5339749455451965,
@@ -300,9 +448,14 @@
         0.02537655085325241
       ],
       "source_joint_id": "Foot.R",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 6.089802328497171,
+      "weighted_vertex_count": 13
     },
     {
+      "has_mesh_influence": false,
+      "influenced_mesh_object_count": 0,
+      "maximum_vertex_weight": 0.0,
       "parent_source_joint_id": "Bone",
       "rest_position": [
         0.5450964570045471,
@@ -310,7 +463,9 @@
         0.8037778735160828
       ],
       "source_joint_id": "PoleTarget.R",
-      "use_deform": true
+      "use_deform": true,
+      "weight_sum": 0.0,
+      "weighted_vertex_count": 0
     }
   ],
   "clip_count": 3,
@@ -1423,9 +1578,11 @@
   "deform_bone_count": 31,
   "diagnostic_only": true,
   "distinct_pose_stream_hash_count": 3,
+  "mesh_influencing_bone_count": 28,
   "nondeform_bone_count": 0,
   "schema": "RealSaS.MotionSourceActionDiagnostic.v1",
   "source_fbx": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/inputs/motion/quaternius_knight_v1_source/KnightCharacter.fbx",
   "status": "MEASURED",
-  "thresholds_changed": false
+  "thresholds_changed": false,
+  "zero_mesh_influence_bone_count": 3
 }

@@ -586,6 +586,72 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
     if observation_camera_hashes != tuple(cameras.camera_binding_hashes):
         raise QualificationError("CAA_RASTER_CORRESPONDENCE_PREREQUISITE_FAILED")
 
+    if _source_owned_visual_mode_from_domain(domain):
+        visual_set = _visual_mesh_set(ctx)
+        domain_visual_hash = str(
+            dict(domain.metadata or {}).get("visual_mesh_set_binding_hash") or ""
+        )
+        if visual_set.set_hash != domain_visual_hash:
+            raise QualificationError("CAA_VISUAL_DOMAIN_MESH_SET_DRIFT")
+        if (
+            visual_set.observation_set_binding_hash
+            != observation.observation_set_hash
+            or visual_set.output_direction_set_binding_hash
+            != directions.direction_set_hash
+        ):
+            raise QualificationError("CAA_VISUAL_MESH_SET_INPUT_BINDING_DRIFT")
+        compile_policy = dict(policy["compile_policy"])
+        compile_policy["tile_resolution"] = 4
+        compile_policy["tile_resolution_strategy"] = "SOURCE_VISUAL_MESH_V1"
+        compile_policy["max_supported_face_count"] = int(
+            sum(int(row.face_count) for row in visual_set.views)
+        )
+        compile_policy["visual_mesh_set_binding_hash"] = visual_set.set_hash
+        compile_policy["visual_geometry_authority"] = "SOURCE_ART_SILHOUETTE"
+        compile_policy["mechanical_mesh_render_authority"] = False
+        compile_policy["visual_uv_authority"] = "FIXED_SOURCE_RASTER_UV"
+        compile_policy["runtime_generation_forbidden"] = True
+        compile_policy["cross_view_completion_authorized"] = False
+        prereg = build_caa_preregistration(
+            backend_id=backend,
+            contract_sha256=contract_sha,
+            observation_set_hash=observation.observation_set_hash,
+            camera_set_hash=cameras.camera_set_hash,
+            output_direction_set_hash=directions.direction_set_hash,
+            candidate_mesh_hash=candidate.candidate_lineage_hash,
+            surface_addressing_hash=addressing.addressing_hash,
+            appearance_domain_hash=domain.domain_hash,
+            static_mesh_qualification_hash=static_mesh.qualification_hash,
+            compile_policy=compile_policy,
+            source_lock_policy=dict(policy["source_lock_policy"]),
+            completion_quality_policy=dict(policy["completion_quality_policy"]),
+        )
+        root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+        return {
+            "status": "PASS",
+            "outputs": [
+                write_ir(
+                    root / "caa_backend_preregistration.json",
+                    prereg,
+                    authority_class="CAA_BACKEND_PREREGISTRATION",
+                )
+            ],
+            "diagnostics": {
+                "backend_id": backend,
+                "shipping_eligible": prereg.shipping_eligible,
+                "contract_sha256": contract_sha,
+                "preregistration_hash": prereg.preregistration_hash,
+                "raster_correspondence_prerequisite": "PASS",
+                "appearance_domain": "SOURCE_OWNED_VISUAL_MESH",
+                "visual_mesh_set_hash": visual_set.set_hash,
+                "visual_mesh_total_face_count": int(
+                    sum(int(row.face_count) for row in visual_set.views)
+                ),
+                "mechanical_mesh_render_authority": False,
+                "cross_view_completion_authorized": False,
+            },
+        }
+
     compile_policy = dict(policy["compile_policy"])
     if str(compile_policy.get("tile_resolution_mode") or "") != "PROJECTED_SOURCE_DENSITY_V1":
         raise QualificationError("CAA_TILE_RESOLUTION_MODE_UNSUPPORTED")

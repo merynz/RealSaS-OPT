@@ -825,6 +825,7 @@ def compile_caa_stage(ctx: dict) -> dict:
                 deterministic_compile_seconds
             ),
             "npz_seal_seconds": float(npz_seal_seconds),
+            "core_phase_seconds": dict(result.get("performance") or {}),
             "measured_inner_seconds": float(
                 source_prepare_seconds
                 + deterministic_compile_seconds
@@ -848,6 +849,7 @@ def compile_caa_stage(ctx: dict) -> dict:
                 result["barycentric_storage_mode"]
             ),
             "compile_array_schema": "RealSaS.CAACompileArrays.v3",
+            "core_performance": dict(result.get("performance") or {}),
             **{f"provenance_{key.lower()}": int(value) for key, value in counts.items()},
         },
     }

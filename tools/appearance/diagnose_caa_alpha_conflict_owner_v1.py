@@ -182,6 +182,13 @@ def diagnose(*, repo_root: Path, authority_root: Path, run_id: str) -> dict:
             rgba[left, ids, 3].astype(np.float64)
             - rgba[right, ids, 3].astype(np.float64)
         ) / 255.0
+        left_class_all = class_by_view[left, ids]
+        right_class_all = class_by_view[right, ids]
+        same_class_all = left_class_all == right_class_all
+        fg_fg_all = left_class_all & right_class_all
+        bg_bg_all = (~left_class_all) & (~right_class_all)
+        opposite_class_all = ~same_class_all
+
         conflict_local = alpha > alpha_cut
         conflict_ids = ids[conflict_local]
         conflict_alpha = alpha[conflict_local]
@@ -247,6 +254,21 @@ def diagnose(*, repo_root: Path, authority_root: Path, run_id: str) -> dict:
                 "gt_8px": 0.0,
             }
 
+        def category_row(category_mask: np.ndarray) -> dict:
+            category_count = int(np.count_nonzero(category_mask))
+            category_conflicts = int(
+                np.count_nonzero(conflict_local & category_mask)
+            )
+            return {
+                "shared_sample_count": category_count,
+                "alpha_conflict_count": category_conflicts,
+                "alpha_conflict_fraction": (
+                    float(category_conflicts) / float(category_count)
+                    if category_count
+                    else 0.0
+                ),
+            }
+
         pairs.append(
             {
                 "left_view_index": left,
@@ -256,6 +278,12 @@ def diagnose(*, repo_root: Path, authority_root: Path, run_id: str) -> dict:
                 "alpha_conflict_fraction": (
                     float(conflict_count) / float(len(ids))
                 ),
+                "source_silhouette_class_partition": {
+                    "same_class": category_row(same_class_all),
+                    "foreground_foreground": category_row(fg_fg_all),
+                    "background_background": category_row(bg_bg_all),
+                    "opposite_class": category_row(opposite_class_all),
+                },
                 "alpha_conflict_cut": alpha_cut,
                 "conflict_min_silhouette_distance_px": {
                     "median": float(np.median(md)) if len(md) else None,

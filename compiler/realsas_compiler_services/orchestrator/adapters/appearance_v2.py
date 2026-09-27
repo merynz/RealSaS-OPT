@@ -149,9 +149,16 @@ def _source_visual_rgba(
 
 
 def _visual_mesh_coverage(mesh, *, width: int, height: int) -> bytes:
+    # VisualMesh2D positions live in source texel-center coordinates
+    # (texel x is x, texel y is y) so fixed UV is position/(extent-1).
+    # The canonical rasterizer samples pixel centers at (x+0.5,y+0.5);
+    # shift geometry by +0.5 only for raster coverage.
     triangles = tuple(
         tuple(
-            tuple(map(float, mesh.positions[int(vertex_index)]))
+            (
+                float(mesh.positions[int(vertex_index), 0]) + 0.5,
+                float(mesh.positions[int(vertex_index), 1]) + 0.5,
+            )
             for vertex_index in face
         )
         for face in np.asarray(mesh.faces, dtype=np.int64)

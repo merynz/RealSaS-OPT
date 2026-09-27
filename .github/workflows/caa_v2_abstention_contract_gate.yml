@@ -11,10 +11,12 @@ on:
       - 'compiler/realsas_compiler_core/appearance_compile_v2.py'
       - 'compiler/realsas_compiler_core/appearance_completion_v2.py'
       - 'compiler/realsas_compiler_core/appearance_quality_v2.py'
+      - 'compiler/realsas_compiler_core/appearance_variational_completion_v1.py'
       - 'compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py'
       - 'compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py'
       - 'compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py'
       - 'tests/compiler/test_caa_abstention_contract_v1.py'
+      - 'tests/compiler/test_caa_variational_completion_v1.py'
       - '.github/workflows/caa_v2_abstention_contract_gate.yml'
   workflow_dispatch:
 

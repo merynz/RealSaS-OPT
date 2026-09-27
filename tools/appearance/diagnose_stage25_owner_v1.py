@@ -27,7 +27,6 @@ from compiler.realsas_compiler_core.artifact_codec_v2 import (
     qualified_observation_set_from_dict,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
-    read_json,
     stage_output_payload,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2 import (
@@ -44,8 +43,12 @@ def _context(authority_root: Path, run_id: str) -> dict:
         "run_root": run_root,
         "run_id": run_id,
         "run_manifest_path": run_root / "run_manifest.json",
-        "run_manifest": read_json(run_root / "run_manifest.json"),
-        "ledger": read_json(run_root / "ACTIVE_RUN_V2.json"),
+        "run_manifest": json.loads(
+            (run_root / "run_manifest.json").read_text(encoding="utf-8")
+        ),
+        "ledger": json.loads(
+            (run_root / "ACTIVE_RUN_V2.json").read_text(encoding="utf-8")
+        ),
         "stage": {"id": "CAA_STAGE25_OWNER_DIAGNOSTIC"},
     }
 

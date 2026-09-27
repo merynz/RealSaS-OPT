@@ -154,7 +154,9 @@ def build_canonical_mesh_addressing_stage(ctx: dict) -> dict:
                     "ownership": "SOURCE_ART_SILHOUETTE",
                     "mechanical_render_authority": False,
                     "uv_authority": "FIXED_SOURCE_RASTER_UV",
-                    "builder": "SOURCE_MASK_DELAUNAY_INSIDE_CONSTRAINED_V1",
+                    "builder": "SOURCE_MASK_PIXEL_UNION_CONSTRAINED_CDT_V2",
+                    "coordinate_space": "SOURCE_TEXEL_SPACE__INTEGER_IS_TEXEL_CENTER",
+                    "raster_transform": "RASTER_XY_EQUALS_SOURCE_TEXEL_XY_PLUS_0_5",
                     "target_edge_px": 16,
                 },
             )

@@ -1008,6 +1008,10 @@ def test_vf23_stage20_to25_uses_unmodified_production_caa_policy(tmp_path):
     r20 = run("20_CAA_BACKEND_PREREGISTERED", preregister_caa_backend_stage)
     assert r20["diagnostics"]["shipping_eligible"] is True
     r21 = run("21_CAA_COMPILE", compile_caa_stage)
+    assert float(r21["performance"]["source_prepare_seconds"]) >= 0.0
+    assert float(r21["performance"]["deterministic_compile_seconds"]) >= 0.0
+    assert float(r21["performance"]["npz_seal_seconds"]) >= 0.0
+    assert "core_phase_seconds" in r21["performance"]
     compile_artifact = caa_compile_artifact_from_dict(
         read_json(
             next(
@@ -1039,6 +1043,9 @@ def test_vf23_stage20_to25_uses_unmodified_production_caa_policy(tmp_path):
     assert seal.qualification_report["direct_source_immutable"] is True
 
     r23 = run("23_COMPLETE_APPEARANCE_ASSET_BAKED", bake_complete_appearance_stage)
+    assert float(r23["performance"]["array_load_seconds"]) >= 0.0
+    assert float(r23["performance"]["direction_bake_seconds_total"]) >= 0.0
+    assert len(r23["performance"]["direction_bake_seconds_by_view"]) == 8
     asset = complete_appearance_asset_from_dict(
         read_json(
             next(
@@ -1068,6 +1075,9 @@ def test_vf23_stage20_to25_uses_unmodified_production_caa_policy(tmp_path):
     assert qualification.total_defined_fraction == 1.0
 
     r25 = run("25_CAA_REFERENCE_REST_RENDER_PROOF", prove_caa_reference_rest_stage)
+    assert float(r25["performance"]["setup_seconds"]) >= 0.0
+    assert float(r25["performance"]["direction_proof_seconds_total"]) >= 0.0
+    assert len(r25["performance"]["direction_proof_seconds_by_view"]) == 8
     rest = caa_rest_render_proof_from_dict(
         read_json(
             next(

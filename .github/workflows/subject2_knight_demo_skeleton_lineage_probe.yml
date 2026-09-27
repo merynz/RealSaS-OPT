@@ -83,40 +83,88 @@ jobs:
           proposal=_skeleton_proposal(payload)
           assert proposal.surface_binding_hash==surface.geometry_lineage_hash
 
+          def normalized_semantic_tree(value):
+              by_id={j.canonical_joint_id:j for j in value.joints}
+              source_by_id={
+                  j.canonical_joint_id:str(j.source_proposal_id)
+                  for j in value.joints
+              }
+              rows=[]
+              for joint in value.joints:
+                  parent_source=(
+                      None
+                      if joint.parent_canonical_id is None
+                      else source_by_id[str(joint.parent_canonical_id)]
+                  )
+                  rows.append({
+                      "source_proposal_id":str(joint.source_proposal_id),
+                      "parent_source_proposal_id":parent_source,
+                      "position":[float(x) for x in joint.position],
+                      "support_surface_ids":list(map(str,joint.support_surface_ids)),
+                  })
+              rows.sort(key=lambda row:row["source_proposal_id"])
+              return rows
+
           variants={}
+          repeats={}
           for shadow in (False,True):
-              q1=qualify_skeleton(surface,proposal,run_ilp_shadow=shadow)
-              q2=qualify_skeleton_v2(surface,proposal,run_ilp_shadow=shadow)
-              variants[f"v1_shadow_{str(shadow).lower()}"]={
-                  "lineage":q1.skeleton_lineage_hash,
-                  "root":q1.root_id,
-                  "joint_count":len(q1.joints),
-                  "optimizer_result_sha256":str(q1.qualification_report.get("optimizer_result_sha256") or ""),
-                  "solver":str(q1.qualification_report.get("solver") or ""),
-                  "joint_payload_sha256":__import__("hashlib").sha256(
-                      json.dumps([j.to_dict() for j in q1.joints],sort_keys=True,separators=(",",":")).encode()
-                  ).hexdigest(),
-              }
-              variants[f"v2_shadow_{str(shadow).lower()}"]={
-                  "lineage":q2.skeleton_lineage_hash,
-                  "roots":list(q2.deform_root_ids),
-                  "joint_count":len(q2.joints),
-                  "optimizer_result_sha256":str(q2.qualification_report.get("optimizer_result_sha256") or ""),
-                  "solver":str(q2.qualification_report.get("solver") or ""),
-                  "joint_payload_sha256":__import__("hashlib").sha256(
-                      json.dumps([j.to_dict() for j in q2.joints],sort_keys=True,separators=(",",":")).encode()
-                  ).hexdigest(),
-              }
+              for family,fn in (("v1",qualify_skeleton),("v2",qualify_skeleton_v2)):
+                  key=f"{family}_shadow_{str(shadow).lower()}"
+                  run_rows=[]
+                  for repeat in range(3):
+                      value=fn(surface,proposal,run_ilp_shadow=shadow)
+                      semantic_tree=normalized_semantic_tree(value)
+                      report=dict(value.qualification_report or {})
+                      run_rows.append({
+                          "repeat":repeat,
+                          "lineage":value.skeleton_lineage_hash,
+                          "joint_count":len(value.joints),
+                          "semantic_tree_sha256":__import__("hashlib").sha256(
+                              json.dumps(
+                                  semantic_tree,
+                                  sort_keys=True,
+                                  separators=(",",":"),
+                              ).encode()
+                          ).hexdigest(),
+                          "optimizer_result_sha256":str(
+                              report.get("optimizer_result_sha256") or ""
+                          ),
+                          "solver":str(report.get("solver") or ""),
+                          "root_source_proposal_ids":[
+                              str(j.source_proposal_id)
+                              for j in value.joints
+                              if j.parent_canonical_id is None
+                          ],
+                          "semantic_tree":semantic_tree,
+                      })
+                  variants[key]=run_rows[0]
+                  repeats[key]=run_rows
           expected=os.environ["EXPECTED_ARACHNE_SKELETON_LINEAGE"]
-          matches=[name for name,row in variants.items() if row["lineage"]==expected]
+          matches=[
+              f"{name}:repeat{row['repeat']}"
+              for name,rows in repeats.items()
+              for row in rows
+              if row["lineage"]==expected
+          ]
+          semantic_stability={
+              name:len({row["semantic_tree_sha256"] for row in rows})==1
+              for name,rows in repeats.items()
+          }
+          lineage_stability={
+              name:len({row["lineage"] for row in rows})==1
+              for name,rows in repeats.items()
+          }
           result={
-              "schema":"RealSaS.KnightSkeletonLineageProbe.v2",
+              "schema":"RealSaS.KnightSkeletonLineageProbe.v3",
               "status":"PASS",
               "run_id":os.environ["RUN_ID"],
               "proposal_joint_count":len(proposal.joints),
               "expected_arachne_skeleton_lineage":expected,
               "matching_variants":matches,
               "variants":variants,
+              "repeats":repeats,
+              "semantic_stability":semantic_stability,
+              "lineage_stability":lineage_stability,
               "qualifier_source_commit_invariant":True,
               "product_authority_claimed":False,
           }

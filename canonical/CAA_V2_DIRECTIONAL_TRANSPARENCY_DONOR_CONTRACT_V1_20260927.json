@@ -1,0 +1,27 @@
+{
+  "schema": "RealSaS.CAADirectionalTransparencyDonorContract.v1",
+  "status": "FROZEN_SUBJECT_FREE_ARCHITECTURE",
+  "frozen_on": "2026-09-27",
+  "threshold_change": false,
+  "subject_identity_used": false,
+  "principles": {
+    "safe_background_is_directional_source_authority": true,
+    "safe_background_may_define_transparency_for_its_own_view": true,
+    "safe_background_is_not_transferable_cross_view_material_appearance": true,
+    "cross_view_material_donor_requires_qualified_foreground_source": true,
+    "foreground_source_remains_ranked_by_geometric_support": true,
+    "if_no_foreground_donor_exists_completion_owner_must_handle_the_gap": true
+  },
+  "owner_split": {
+    "directional_transparency": "VISIBILITY_DIRECTIONAL_SILHOUETTE",
+    "transferable_material_appearance": "CAA_SOURCE_APPEARANCE",
+    "no_source_support": "CAA_CANONICAL_SURFACE_COMPLETION"
+  },
+  "forbidden": [
+    "USE_SAFE_BACKGROUND_AS_OTHER_VIEW_RGBA_DONOR",
+    "RELAX_SOURCE_ALPHA_OR_CROSS_VIEW_THRESHOLDS_TO_HIDE_DONOR_ERROR",
+    "USE_COMPLETION_TO_HIDE_MATERIAL_STRETCH"
+  ],
+  "subject_free_regression": "tests/compiler/test_visibility_and_caa_v2.py::test_safe_background_direct_source_is_not_cross_view_appearance_donor",
+  "product_authority_claimed": false
+}

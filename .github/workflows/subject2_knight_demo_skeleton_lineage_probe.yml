@@ -83,32 +83,41 @@ jobs:
           proposal=_skeleton_proposal(payload)
           assert proposal.surface_binding_hash==surface.geometry_lineage_hash
 
-          q1=qualify_skeleton(surface,proposal,run_ilp_shadow=False)
-          q2=qualify_skeleton_v2(surface,proposal,run_ilp_shadow=False)
+          variants={}
+          for shadow in (False,True):
+              q1=qualify_skeleton(surface,proposal,run_ilp_shadow=shadow)
+              q2=qualify_skeleton_v2(surface,proposal,run_ilp_shadow=shadow)
+              variants[f"v1_shadow_{str(shadow).lower()}"]={
+                  "lineage":q1.skeleton_lineage_hash,
+                  "root":q1.root_id,
+                  "joint_count":len(q1.joints),
+                  "optimizer_result_sha256":str(q1.qualification_report.get("optimizer_result_sha256") or ""),
+                  "solver":str(q1.qualification_report.get("solver") or ""),
+                  "joint_payload_sha256":__import__("hashlib").sha256(
+                      json.dumps([j.to_dict() for j in q1.joints],sort_keys=True,separators=(",",":")).encode()
+                  ).hexdigest(),
+              }
+              variants[f"v2_shadow_{str(shadow).lower()}"]={
+                  "lineage":q2.skeleton_lineage_hash,
+                  "roots":list(q2.deform_root_ids),
+                  "joint_count":len(q2.joints),
+                  "optimizer_result_sha256":str(q2.qualification_report.get("optimizer_result_sha256") or ""),
+                  "solver":str(q2.qualification_report.get("solver") or ""),
+                  "joint_payload_sha256":__import__("hashlib").sha256(
+                      json.dumps([j.to_dict() for j in q2.joints],sort_keys=True,separators=(",",":")).encode()
+                  ).hexdigest(),
+              }
+          expected=os.environ["EXPECTED_ARACHNE_SKELETON_LINEAGE"]
+          matches=[name for name,row in variants.items() if row["lineage"]==expected]
           result={
-              "schema":"RealSaS.KnightSkeletonLineageProbe.v1",
+              "schema":"RealSaS.KnightSkeletonLineageProbe.v2",
               "status":"PASS",
               "run_id":os.environ["RUN_ID"],
               "proposal_joint_count":len(proposal.joints),
-              "legacy_v1_lineage":q1.skeleton_lineage_hash,
-              "product_v2_lineage":q2.skeleton_lineage_hash,
-              "legacy_root":q1.root_id,
-              "product_v2_roots":list(q2.deform_root_ids),
-              "v1_joint_count":len(q1.joints),
-              "v2_joint_count":len(q2.joints),
-              "joint_payload_equal":(
-                  [j.to_dict() for j in q1.joints]
-                  == [j.to_dict() for j in q2.joints]
-              ),
-              "expected_arachne_skeleton_lineage":os.environ["EXPECTED_ARACHNE_SKELETON_LINEAGE"],
-              "product_v2_matches_arachne":(
-                  q2.skeleton_lineage_hash
-                  == os.environ["EXPECTED_ARACHNE_SKELETON_LINEAGE"]
-              ),
-              "legacy_v1_matches_arachne":(
-                  q1.skeleton_lineage_hash
-                  == os.environ["EXPECTED_ARACHNE_SKELETON_LINEAGE"]
-              ),
+              "expected_arachne_skeleton_lineage":expected,
+              "matching_variants":matches,
+              "variants":variants,
+              "qualifier_source_commit_invariant":True,
               "product_authority_claimed":False,
           }
           print("SKELETON_LINEAGE_PROBE",json.dumps(result,sort_keys=True))

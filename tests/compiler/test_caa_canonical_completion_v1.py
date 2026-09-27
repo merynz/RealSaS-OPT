@@ -4,6 +4,7 @@ import numpy as np
 
 from compiler.realsas_compiler_core.appearance_canonical_completion_v1 import (
     build_all_view_unseen_canonical_completion,
+    prolongate_control_pm_to_adaptive_faces,
 )
 from compiler.realsas_compiler_core.appearance_completion_v2 import (
     SurfaceSampleGraph,
@@ -114,3 +115,40 @@ def test_directional_source_arrays_are_not_mutated():
         surface_graph=_line_graph(3),
     )
     assert np.array_equal(direct_rgba,before)
+
+
+def test_control_field_prolongation_is_affine_exact_and_face_local():
+    control_resolution=4
+    control=[]
+    for face in range(2):
+        denom=float(control_resolution-1)
+        for j in range(control_resolution):
+            for i in range(control_resolution-j):
+                u=float(i)/denom
+                v=float(j)/denom
+                # Affine PM field; second face carries a distinct offset so any
+                # accidental cross-face transfer is immediately visible.
+                base=0.1*face
+                control.append((base+0.2*u,base+0.3*v,base+0.1*u+0.1*v,0.8))
+    control=np.asarray(control,dtype=np.float64)
+    resolutions=np.asarray((7,8),dtype=np.int32)
+    dense=prolongate_control_pm_to_adaptive_faces(
+        control_pm_linear=control,
+        face_tile_resolutions=resolutions,
+        control_resolution=control_resolution,
+    )
+    cursor=0
+    for face,resolution in enumerate(resolutions):
+        denom=float(int(resolution)-1)
+        for j in range(int(resolution)):
+            for i in range(int(resolution)-j):
+                u=float(i)/denom
+                v=float(j)/denom
+                base=0.1*face
+                wanted=np.asarray(
+                    (base+0.2*u,base+0.3*v,base+0.1*u+0.1*v,0.8),
+                    dtype=np.float64,
+                )
+                assert np.allclose(dense[cursor],wanted,atol=1e-12)
+                cursor+=1
+    assert cursor==len(dense)

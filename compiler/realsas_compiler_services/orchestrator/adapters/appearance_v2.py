@@ -1405,10 +1405,44 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
             255,
         ),
     )
+    observation = qualified_observation_set_from_dict(
+        stage_output_payload(
+            ctx,
+            "07_OBSERVATION_CONTRACT_QUALIFIED",
+            "RealSaS.QualifiedObservationSetIR.v1",
+        )
+    )
+    _source_rgba_unused, source_masks = _load_source_inputs(ctx, observation)
+    source_class = np.full(
+        np.asarray(arrays["direct_valid"], dtype=bool).shape,
+        -1,
+        dtype=np.int8,
+    )
+    source_xy = np.asarray(arrays["source_xy"], dtype=np.float64)
+    for view in range(8):
+        valid_ids = np.flatnonzero(arrays["direct_valid"][view])
+        if not len(valid_ids):
+            continue
+        mask = np.asarray(source_masks[view], dtype=bool)
+        xy = source_xy[view, valid_ids]
+        ix = np.rint(xy[:, 0]).astype(np.int64)
+        iy = np.rint(xy[:, 1]).astype(np.int64)
+        if np.any(
+            (ix < 0)
+            | (ix >= mask.shape[1])
+            | (iy < 0)
+            | (iy >= mask.shape[0])
+        ):
+            raise QualificationError(
+                "CAA_CROSS_VIEW_SOURCE_CLASS_COORDINATE_DRIFT"
+            )
+        source_class[view, valid_ids] = mask[iy, ix].astype(np.int8)
+
     cross_view = cross_view_source_compatibility_metrics(
         direct_valid=arrays["direct_valid"],
         direct_rgba=arrays["direct_rgba"],
         sample_component_index=arrays["sample_component_index"],
+        direct_source_silhouette_class=source_class,
         color_conflict_cut_rgba_l1=float(
             policy["cross_view_color_conflict_cut_rgba_l1"]
         ),

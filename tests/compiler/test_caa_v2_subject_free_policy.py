@@ -420,6 +420,49 @@ def test_cross_view_compatibility_measures_same_canonical_source_without_requiri
     ]
 
 
+def test_cross_view_appearance_gate_excludes_directional_silhouette_class_transition():
+    count = 32
+    valid = np.ones((8, count), dtype=bool)
+    rgba = np.zeros((8, count, 4), dtype=np.uint8)
+    rgba[:, :, :3] = 120
+    rgba[:, :, 3] = 255
+    component = np.zeros(count, dtype=np.int32)
+    source_class = np.ones((8, count), dtype=np.int8)
+
+    # Eight canonical samples are legitimately foreground in V0 but
+    # source-safe-background in V1. This is a directional silhouette/visibility
+    # transition, not an appearance-alpha contradiction.
+    rgba[1, 24:, :] = 0
+    source_class[1, 24:] = 0
+
+    legacy = cross_view_source_compatibility_metrics(
+        direct_valid=valid,
+        direct_rgba=rgba,
+        sample_component_index=component,
+    )
+    separated = cross_view_source_compatibility_metrics(
+        direct_valid=valid,
+        direct_rgba=rgba,
+        sample_component_index=component,
+        direct_source_silhouette_class=source_class,
+    )
+
+    pair_legacy = legacy["per_pair"][0]
+    pair = separated["per_pair"][0]
+    assert pair_legacy["alpha_conflict_fraction"] > 0.0
+    assert pair["raw_shared_direct_sample_count"] == count
+    assert pair["directional_silhouette_transition_sample_count"] == 8
+    assert pair["shared_direct_sample_count"] == 24
+    assert pair["alpha_conflict_fraction"] == 0.0
+    assert pair["color_conflict_fraction"] == 0.0
+    assert separated[
+        "directional_silhouette_transition_is_visibility_owner"
+    ] is True
+    assert separated[
+        "appearance_population_requires_same_source_silhouette_class"
+    ] is True
+
+
 def test_adjacent_direction_transition_metric_allows_smooth_artist_variation_and_exposes_single_view_shimmer():
     count = 64
     valid = np.ones((8, count), dtype=bool)

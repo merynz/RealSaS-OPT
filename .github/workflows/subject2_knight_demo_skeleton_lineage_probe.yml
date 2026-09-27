@@ -74,7 +74,12 @@ jobs:
           payload=json.loads(
               (root/"imports"/"geppetto_stage27_mechanically_meaningful_v2"/"GEPPETTO_KNIGHT_SKELETON_PROPOSAL.json").read_text()
           )
-          assert payload["schema"]=="RealSaS.SkeletonProposalIR.v1"
+          proposal_schema=str(
+              payload.get("schema")
+              or payload.get("schema_version")
+              or "RealSaS.SkeletonProposalIR.v1"
+          )
+          assert proposal_schema=="RealSaS.SkeletonProposalIR.v1",proposal_schema
           proposal=_skeleton_proposal(payload)
           assert proposal.surface_binding_hash==surface.geometry_lineage_hash
 

@@ -11,6 +11,8 @@ on:
       - 'compiler/realsas_compiler_core/appearance_authority_v2.py'
       - 'compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py'
       - 'compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py'
+      - 'compiler/realsas_compiler_core/product_state_v2.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py'
       - 'canonical/MAINLINE_EXECUTION_PLAN_V2.json'
       - 'tests/compiler/test_visual_mesh_arap_v1.py'
       - 'tests/repository/test_mainline_execution_plan_v2.py'
@@ -39,10 +41,13 @@ jobs:
             compiler/realsas_compiler_core/surface_addressing_v1.py \
             compiler/realsas_compiler_core/appearance_authority_v2.py \
             compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py \
-            compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py
+            compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py \
+            compiler/realsas_compiler_core/product_state_v2.py \
+            compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py
       - name: Run focused regressions
         run: |
           set -euo pipefail
           PYTHONPATH=. python -m pytest -q \
             tests/compiler/test_visual_mesh_arap_v1.py \
-            tests/repository/test_mainline_execution_plan_v2.py
+            tests/repository/test_mainline_execution_plan_v2.py \
+            tests/compiler/test_product_mesh_stage_adapters_v1.py::test_vf23_stage20_to25_uses_unmodified_production_caa_policy

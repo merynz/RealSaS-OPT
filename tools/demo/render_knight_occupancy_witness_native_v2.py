@@ -31,6 +31,7 @@ from compiler.realsas_compiler_core.artifact_codec_v2 import (
     qualified_skeleton_from_dict,
     qualified_skin_from_dict,
 )
+from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import _joint_pose_v2
 from compiler.realsas_compiler_core.runtime_authority_v2 import (
     RuntimeClipV2IR,
     RuntimeProjectionV2IR,

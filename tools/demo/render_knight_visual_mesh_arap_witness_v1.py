@@ -335,6 +335,30 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
         dtype=np.float64,
     )
     mechanical_face_indices = _candidate_face_indices(candidate)
+
+    clip_specs = [
+        ("demo_idle_v1", "IDLE", 833),
+        ("demo_run_v1", "RUN", 208),
+        ("demo_slash_v1", "SLASH", 278),
+    ]
+    clip_payloads = {}
+    for clip_id, _short, _ms in clip_specs:
+        motion_path = (
+            ctx["run_root"]
+            / "inputs"
+            / "motion"
+            / "quaternius_knight_v1"
+            / f"{clip_id}.motion.json"
+        )
+        payload = json.loads(motion_path.read_text())
+        tracks, mapping = _tracks_for_clip(
+            payload,
+            skeleton,
+            cameras,
+            source_report,
+        )
+        clip_payloads[clip_id] = (payload, tracks, mapping)
+
     render_inputs = {}
     report_views = []
     for view_index in (0, 2):

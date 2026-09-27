@@ -1,11 +1,11 @@
 {
   "schema": "RealSaS.KnightCAASourceLockRejectionTrigger.v1",
-  "status": "RERUN_EXACT_FLOAT64_PROJECTION",
+  "status": "RERUN_AFTER_DIRECT_SOURCE_AUTHORITY_REPAIR",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
   "source_caa_run_id": 36324079057,
   "requested_on": "2026-09-27",
   "diagnostic_only": true,
   "thresholds_changed": false,
   "product_authority_claimed": false,
-  "revision": 2
+  "revision": 3
 }

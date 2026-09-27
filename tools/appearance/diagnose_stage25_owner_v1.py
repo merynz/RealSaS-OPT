@@ -403,6 +403,33 @@ def diagnose(
         "stage13_qualification_report": dict(
             geometry.qualification_report
         ),
+        "stage21_completion_rows": list(
+            dict(compile_artifact.metadata or {}).get(
+                "completion_rows", []
+            )
+        ),
+        "stage21_global_completion": {
+            "sample_count": int(
+                dict(compile_artifact.metadata or {}).get(
+                    "canonical_global_completion_sample_count", 0
+                )
+            ),
+            "fraction": float(
+                dict(compile_artifact.metadata or {}).get(
+                    "canonical_global_completion_fraction", 0.0
+                )
+            ),
+            "globally_unseen_dense_sample_count": int(
+                dict(compile_artifact.metadata or {}).get(
+                    "globally_unseen_dense_sample_count", 0
+                )
+            ),
+            "metadata": dict(
+                dict(compile_artifact.metadata or {}).get(
+                    "canonical_global_completion_metadata", {}
+                )
+            ),
+        },
         "views": view_rows,
         "aggregate": dict(aggregate),
         "interpretation_contract": {

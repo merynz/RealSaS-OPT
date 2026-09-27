@@ -168,6 +168,7 @@ def _holdout_fixture(*, adversarial: bool):
         "sample_positions": positions,
         "sample_component_index": component,
         "sample_face_index": np.asarray(face_index, dtype=np.int32),
+        "face_support_by_view": np.ones((8, face_count), dtype=np.float64),
         "face_count": face_count,
         "tile_resolution": tile_resolution,
     }
@@ -231,6 +232,7 @@ def test_structured_holdout_uses_bounded_surface_completion_and_rejects_view_con
         max_graph_hops=p["max_local_harmonic_graph_hops"],
     )
     assert good["mode"] == "SILHOUETTE_ADJACENT_BOUNDED_OCCLUSION_PATCHES_V4_SOURCE_ANCHORED"
+    assert good["other_view_donor_selection"] == "MAX_FACE_SUPPORT_SAME_AS_STAGE21"
     assert good["sample_count"] >= p["min_structured_holdout_samples"]
     assert all(
         row["holdout_sample_count"] >= p["min_structured_holdout_samples_per_view"]

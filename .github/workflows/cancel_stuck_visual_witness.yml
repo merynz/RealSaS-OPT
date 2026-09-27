@@ -19,8 +19,22 @@ jobs:
       - uses: actions/github-script@v7
         with:
           script: |
-            await github.rest.actions.cancelWorkflowRun({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: 36341214884
-            })
+            const staleRunIds = [
+              36341249332,
+              36341249353,
+              36341282637,
+              36341357632,
+              36341706645
+            ];
+            for (const run_id of staleRunIds) {
+              try {
+                await github.rest.actions.cancelWorkflowRun({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id
+                });
+                core.info(`cancel requested: ${run_id}`);
+              } catch (error) {
+                core.warning(`cancel failed for ${run_id}: ${error.message}`);
+              }
+            }

@@ -231,6 +231,7 @@ def bake_direction_adaptive_source_view_atlas_pages(
     valid = (
         ((source_samples >= 0) & (source_samples < 8))
         | (source_samples == -2)
+        | (source_samples == -3)
         | (source_samples == -4)
     )
     if not np.all(valid):
@@ -462,6 +463,7 @@ def bake_direction_source_view_atlas(
     Stored texels preserve the Stage21 source-view identity:
       0..7 -> exact source/donor view
       -2   -> compiled local harmonic appearance
+      -3   -> canonical global C(p) completion
       -4   -> compiler abstention on source-unsupported potential surface
 
     The global unallocated atlas padding uses int16 minimum and is never a

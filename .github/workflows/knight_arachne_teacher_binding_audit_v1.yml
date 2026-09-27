@@ -27,7 +27,7 @@ jobs:
           for f in ARACHNE_KNIGHT_V6_PREFLIGHT.json ARACHNE_KNIGHT_V6_RESULT.json KNIGHT_ARACHNE_V6_DEMO_CLOSURE_PREREG_V1_20260926.json run_knight_arachne_v6_demo_closure_v1.py; do
             rclone copyto "$REMOTE/$f" "$tmp/$f" --checksum
           done
-          python - "$tmp" <<'PY'
+          python3 - "$tmp" <<'PY'
           import json,re,sys
           from pathlib import Path
           root=Path(sys.argv[1])

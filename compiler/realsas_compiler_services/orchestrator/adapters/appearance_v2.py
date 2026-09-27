@@ -1343,10 +1343,6 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         face_tile_resolutions=adaptive_resolutions,
         face_vertex_ids=face_vertex_ids,
         surface_graph=quality_graph,
-        excluded_provenance_codes=(
-            CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"],
-            255,
-        ),
     )
     seam = provenance_boundary_metrics(
         rgba=arrays["rgba"],
@@ -1360,6 +1356,10 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         face_tile_resolutions=adaptive_resolutions,
         face_vertex_ids=face_vertex_ids,
         surface_graph=quality_graph,
+        excluded_provenance_codes=(
+            CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"],
+            255,
+        ),
     )
     cross_view = cross_view_source_compatibility_metrics(
         direct_valid=arrays["direct_valid"],

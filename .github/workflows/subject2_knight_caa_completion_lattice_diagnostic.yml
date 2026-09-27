@@ -1,0 +1,317 @@
+name: subject2-knight-caa-completion-lattice-diagnostic
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_CAA_COMPLETION_LATTICE_DIAGNOSTIC_TRIGGER_20260927.json'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-caa-completion-lattice-diagnostic
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
+      PYTHONHASHSEED: '0'
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Measure exact r4 completion-control topology
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, math, os
+          from collections import deque
+          from pathlib import Path
+
+          import numpy as np
+
+          from compiler.realsas_compiler_core.artifact_codec_v2 import (
+              canonical_mesh_candidate_from_dict,
+              qualified_camera_set_from_dict,
+              qualified_observation_set_from_dict,
+          )
+          from compiler.realsas_compiler_core.appearance_compile_v2 import (
+              _surface_sample_geometry_adaptive,
+              erode_binary_mask,
+          )
+          from compiler.realsas_compiler_core.appearance_completion_v2 import (
+              surface_sample_neighbors,
+          )
+          from compiler.realsas_compiler_core.playback_full_surface_v3 import (
+              project_points_xyz_v3,
+              rasterize_visible_owner,
+          )
+          from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
+              stage_output_payload,
+          )
+          from compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2 import (
+              _load_source_inputs,
+          )
+
+          root=Path(os.environ["RUN_ROOT"]).resolve()
+          repo=Path.cwd().resolve()
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          manifest=json.loads((root/"run_manifest.json").read_text())
+          ctx={
+              "repo_root":repo,
+              "authority_root":Path(os.environ["REALSAS_AUTHORITY_ROOT"]).resolve(),
+              "run_root":root,
+              "run_id":os.environ["RUN_ID"],
+              "run_manifest_path":root/"run_manifest.json",
+              "run_manifest":manifest,
+              "stage":{"id":"CAA_COMPLETION_LATTICE_DIAGNOSTIC"},
+              "ledger":ledger,
+          }
+          candidate=canonical_mesh_candidate_from_dict(
+              stage_output_payload(
+                  ctx,
+                  "18_CANONICAL_MESH_ADDRESSING_BUILD",
+                  "RealSaS.CanonicalMeshCandidateIR.v1",
+              )
+          )
+          cameras=qualified_camera_set_from_dict(
+              stage_output_payload(
+                  ctx,
+                  "05_CAMERA_CONTRACT_SOLVED",
+                  "RealSaS.QualifiedCameraSetIR.v1",
+              )
+          )
+          observation=qualified_observation_set_from_dict(
+              stage_output_payload(
+                  ctx,
+                  "07_OBSERVATION_CONTRACT_QUALIFIED",
+                  "RealSaS.QualifiedObservationSetIR.v1",
+              )
+          )
+          rgba,masks=_load_source_inputs(ctx,observation)
+          policy=json.loads(
+              (repo/"canonical"/"CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json").read_text()
+          )
+          source_policy=dict(policy["source_lock_policy"])
+          completion_policy=dict(policy["completion_quality_policy"])
+          min_cos=float(source_policy["min_abs_normal_camera_cos"])
+          erosion=int(source_policy["boundary_safe_erosion_px"])
+          min_alpha=int(source_policy["min_source_alpha_u8"])
+          max_region=int(completion_policy["max_local_harmonic_region_samples"])
+          max_hops=int(completion_policy["max_local_harmonic_graph_hops"])
+
+          face_count=len(candidate.faces)
+          resolutions=np.full((face_count,),4,dtype=np.int32)
+          (
+              positions,
+              sample_face,
+              sample_component,
+              component_ids,
+              face_normals,
+              offsets,
+          )=_surface_sample_geometry_adaptive(candidate,resolutions)
+          sample_count=len(positions)
+          direct_valid=np.zeros((8,sample_count),dtype=bool)
+          face_support=np.zeros((8,face_count),dtype=np.float64)
+          camera_by_view={int(c.view_index):c for c in cameras.cameras}
+          assert set(camera_by_view)==set(range(8))
+
+          for view in range(8):
+              camera=camera_by_view[view]
+              image=np.asarray(rgba[view],dtype=np.uint8)
+              mask=np.asarray(masks[view],dtype=bool)
+              safe_fg=erode_binary_mask(mask,erosion)
+              safe_bg=erode_binary_mask(~mask,erosion)
+              visibility=rasterize_visible_owner(
+                  candidate,
+                  camera,
+                  width=image.shape[1],
+                  height=image.shape[0],
+              )
+              projected=np.asarray(project_points_xyz_v3(positions,camera),dtype=np.float64)
+              xy=projected[:,:2]-0.5
+              ix=np.rint(xy[:,0]).astype(np.int64)
+              iy=np.rint(xy[:,1]).astype(np.int64)
+              in_bounds=(
+                  (ix>=0)&(ix<image.shape[1])&
+                  (iy>=0)&(iy<image.shape[0])&
+                  np.isfinite(projected[:,2])&(projected[:,2]>0.0)
+              )
+              fg_safe=np.zeros(sample_count,dtype=bool)
+              bg_safe=np.zeros(sample_count,dtype=bool)
+              visible=np.zeros(sample_count,dtype=bool)
+              alpha_fg=np.zeros(sample_count,dtype=bool)
+              alpha_bg=np.zeros(sample_count,dtype=bool)
+              valid_idx=np.flatnonzero(in_bounds)
+              if len(valid_idx):
+                  x=ix[valid_idx]; y=iy[valid_idx]
+                  fg_safe[valid_idx]=safe_fg[y,x]
+                  bg_safe[valid_idx]=safe_bg[y,x]
+                  visible[valid_idx]=(
+                      visibility.owner_face_index[y,x]
+                      == sample_face[valid_idx]
+                  )
+                  alpha_fg[valid_idx]=image[y,x,3]>=min_alpha
+                  alpha_bg[valid_idx]=image[y,x,3]==0
+              forward=np.asarray(camera.forward,dtype=np.float64)
+              forward=forward/np.linalg.norm(forward)
+              cos=np.abs(face_normals@forward)
+              face_support[view]=cos
+              angle_safe=cos[sample_face]>=min_cos
+              appearance_support=(fg_safe&alpha_fg)|(bg_safe&alpha_bg)
+              direct_valid[view]=in_bounds&visible&appearance_support&angle_safe
+
+          observed_any=np.any(direct_valid,axis=0)
+          missing=~observed_any
+          graph=surface_sample_neighbors(
+              positions=positions,
+              face_count=face_count,
+              face_sample_offsets=offsets,
+              face_tile_resolutions=resolutions,
+              face_vertex_ids=tuple(tuple(map(str,face)) for face in candidate.faces),
+          )
+          component=np.asarray(sample_component,dtype=np.int32)
+
+          seen=np.zeros(sample_count,dtype=bool)
+          region_rows=[]
+          for seed in np.flatnonzero(missing):
+              seed=int(seed)
+              if seen[seed]:
+                  continue
+              cid=int(component[seed])
+              stack=[seed]
+              seen[seed]=True
+              region=[]
+              while stack:
+                  node=stack.pop()
+                  region.append(node)
+                  for raw in graph[node]:
+                      nxt=int(raw)
+                      if missing[nxt] and not seen[nxt] and int(component[nxt])==cid:
+                          seen[nxt]=True
+                          stack.append(nxt)
+              region=np.asarray(sorted(region),dtype=np.int64)
+              region_set=set(map(int,region.tolist()))
+              boundary=set()
+              for node in region:
+                  for raw in graph[int(node)]:
+                      nxt=int(raw)
+                      if observed_any[nxt] and int(component[nxt])==cid:
+                          boundary.add(nxt)
+
+              hops=None
+              if boundary:
+                  dist={int(node):None for node in region}
+                  q=deque()
+                  for node in region:
+                      node=int(node)
+                      if any(int(n) in boundary for n in graph[node]):
+                          dist[node]=1
+                          q.append(node)
+                  while q:
+                      node=q.popleft()
+                      cur=int(dist[node])
+                      for raw in graph[node]:
+                          nxt=int(raw)
+                          if nxt in region_set and dist[nxt] is None:
+                              dist[nxt]=cur+1
+                              q.append(nxt)
+                  if all(v is not None for v in dist.values()):
+                      hops=max(map(int,dist.values()))
+
+              faces=np.unique(sample_face[region]).astype(np.int32)
+              region_rows.append({
+                  "sample_count":int(len(region)),
+                  "face_count":int(len(faces)),
+                  "component_index":cid,
+                  "boundary_sample_count":int(len(boundary)),
+                  "maximum_graph_hops":None if hops is None else int(hops),
+                  "passes_region_sample_cap":bool(len(region)<=max_region),
+                  "passes_graph_hop_cap":bool(hops is not None and hops<=max_hops),
+                  "minimum_face_index":int(np.min(faces)),
+                  "maximum_face_index":int(np.max(faces)),
+              })
+
+          region_rows.sort(
+              key=lambda row:(-row["sample_count"],row["component_index"],row["minimum_face_index"])
+          )
+          face_observed_counts=np.zeros(face_count,dtype=np.int32)
+          np.add.at(face_observed_counts,sample_face,observed_any.astype(np.int32))
+          face_total_counts=offsets[1:]-offsets[:-1]
+          fully_unobserved=face_observed_counts==0
+          partially_unobserved=(face_observed_counts>0)&(face_observed_counts<face_total_counts)
+          report={
+              "schema":"RealSaS.CAACompletionControlLatticeDiagnostic.v1",
+              "status":"MEASURED",
+              "run_id":os.environ["RUN_ID"],
+              "completion_control_lattice_resolution":4,
+              "samples_per_face":10,
+              "face_count":face_count,
+              "sample_count":sample_count,
+              "observed_any_view_sample_count":int(np.count_nonzero(observed_any)),
+              "unobserved_any_view_sample_count":int(np.count_nonzero(missing)),
+              "unobserved_fraction":float(np.mean(missing)),
+              "fully_unobserved_face_count":int(np.count_nonzero(fully_unobserved)),
+              "partially_unobserved_face_count":int(np.count_nonzero(partially_unobserved)),
+              "region_count":len(region_rows),
+              "maximum_region_samples":max((r["sample_count"] for r in region_rows),default=0),
+              "maximum_region_faces":max((r["face_count"] for r in region_rows),default=0),
+              "maximum_graph_hops":max((r["maximum_graph_hops"] or 0 for r in region_rows),default=0),
+              "region_over_sample_cap_count":sum(not r["passes_region_sample_cap"] for r in region_rows),
+              "region_over_hop_cap_count":sum(not r["passes_graph_hop_cap"] for r in region_rows),
+              "policy":{
+                  "max_local_harmonic_region_samples":max_region,
+                  "max_local_harmonic_graph_hops":max_hops,
+                  "thresholds_changed":False,
+              },
+              "top_regions":region_rows[:64],
+              "graph":{
+                  "edge_count":int(graph.edge_count),
+                  "storage_nbytes":int(graph.storage_nbytes),
+                  "topology_parametric":True,
+              },
+              "interpretation":{
+                  "passes_existing_local_harmonic_policy":bool(
+                      all(
+                          r["passes_region_sample_cap"] and r["passes_graph_hop_cap"]
+                          for r in region_rows
+                      )
+                  ),
+                  "diagnostic_only":True,
+                  "product_authority_claimed":False,
+              },
+          }
+          print("CAA_COMPLETION_LATTICE_DIAGNOSTIC",json.dumps(report,sort_keys=True))
+          Path("canonical/KNIGHT_CAA_COMPLETION_LATTICE_DIAGNOSTIC_20260927.json").write_text(
+              json.dumps(report,indent=2,sort_keys=True)+"\n"
+          )
+          PY
+
+      - name: Seal diagnostic evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_CAA_COMPLETION_LATTICE_DIAGNOSTIC_20260927.json
+          git commit -m 'appearance: seal Knight r4 completion lattice diagnostic'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

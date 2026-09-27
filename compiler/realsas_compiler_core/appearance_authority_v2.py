@@ -220,12 +220,20 @@ def validate_caa_compile_artifact(value: CAACompileArtifactIR) -> None:
         raise QualificationError("CAA_COMPILE_DIMENSION_INVALID")
     metadata = dict(value.metadata or {})
     unsupported = int(metadata.get("unsupported_abstain_sample_count") or 0)
+    canonical_global = int(
+        metadata.get("canonical_global_completion_sample_count") or 0
+    )
     if unsupported < 0:
         raise QualificationError("CAA_COMPILE_UNSUPPORTED_COUNT_INVALID")
+    if canonical_global < 0:
+        raise QualificationError(
+            "CAA_COMPILE_CANONICAL_GLOBAL_COUNT_INVALID"
+        )
     counted = (
         value.direct_source_sample_count
         + value.other_view_source_sample_count
         + value.compiled_local_harmonic_sample_count
+        + canonical_global
         + unsupported
     )
     if counted != value.total_sample_count:

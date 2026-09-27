@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 """RealSaS V2 Complete Appearance Authority stages 20-25."""
 
 from dataclasses import replace

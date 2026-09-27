@@ -92,7 +92,7 @@ jobs:
               "proposal_joint_count":len(proposal.joints),
               "legacy_v1_lineage":q1.skeleton_lineage_hash,
               "product_v2_lineage":q2.skeleton_lineage_hash,
-              "legacy_root":q1.root_canonical_id,
+              "legacy_root":q1.root_id,
               "product_v2_roots":list(q2.deform_root_ids),
               "v1_joint_count":len(q1.joints),
               "v2_joint_count":len(q2.joints),

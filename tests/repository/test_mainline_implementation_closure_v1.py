@@ -23,3 +23,14 @@ def test_motion_dynamic_adapter_hash_covers_core_implementation():
     assert "compiler.realsas_compiler_core.motion_dynamic_proof_v1" in rows
     digest=_adapter_impl_hash(module+":prove_dynamic_motion_stage")
     assert len(digest)==64
+
+
+def test_iris_geometry_adapter_closure_excludes_downstream_motion_domain():
+    module="compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2"
+    rows=dict(_local_import_closure(module))
+    assert "compiler.realsas_compiler_core.geometry_artifact_codec_v2" in rows
+    assert "compiler.realsas_compiler_core.artifact_codec_v2" not in rows
+    assert "compiler.realsas_compiler_core.motion_compile_v2" not in rows
+    assert "compiler.realsas_compiler_core.motion_source_v1" not in rows
+    digest=_adapter_impl_hash(module+":preregister_iris_fit_stage")
+    assert len(digest)==64

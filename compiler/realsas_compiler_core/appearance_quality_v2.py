@@ -272,6 +272,7 @@ def structured_holdout_metrics(
     face_tile_resolutions: np.ndarray | None = None,
     face_vertex_ids: tuple[tuple[str, str, str], ...] | None = None,
     surface_graph: SurfaceSampleGraph | None = None,
+    excluded_provenance_codes: tuple[int, ...] = (),
 ) -> dict:
     direct_valid = np.asarray(direct_valid, dtype=bool)
     direct_rgba = np.asarray(direct_rgba, dtype=np.uint8)
@@ -825,7 +826,20 @@ def provenance_boundary_metrics(
             if donor_view is None
             else donor_view[view, edge_a] != donor_view[view, edge_b]
         )
-        active = shared_edge_mask | (~provenance_same) | donor_differs
+        if excluded_provenance_codes:
+            excluded = np.asarray(
+                tuple(map(int, excluded_provenance_codes)),
+                dtype=np.uint8,
+            )
+            eligible = (
+                ~np.isin(prov_a, excluded)
+                & ~np.isin(prov_b, excluded)
+            )
+        else:
+            eligible = np.ones(edge_count, dtype=bool)
+        active = eligible & (
+            shared_edge_mask | (~provenance_same) | donor_differs
+        )
         errors = edge_error_vector(view)
 
         # Old semantics: gradient around endpoint A/B uses same-provenance
@@ -836,7 +850,10 @@ def provenance_boundary_metrics(
         gradient_count = np.zeros(n, dtype=np.int32)
         for cursor in range(0, edge_count, chunk_size):
             stop = min(edge_count, cursor + chunk_size)
-            same = provenance_same[cursor:stop]
+            same = (
+                provenance_same[cursor:stop]
+                & eligible[cursor:stop]
+            )
             if not np.any(same):
                 continue
             aa = edge_a[cursor:stop][same]
@@ -942,6 +959,9 @@ def provenance_boundary_metrics(
         "includes_shared_face_edges": True,
         "shared_face_edges_are_compared_even_when_provenance_matches": True,
         "source_view_identity_consumed": donor_view is not None,
+        "excluded_provenance_codes": tuple(
+            map(int, excluded_provenance_codes)
+        ),
         "donor_view_switch_pair_count": int(
             sum(row["donor_view_switch_pair_count"] for row in pairs_by_view)
         ),

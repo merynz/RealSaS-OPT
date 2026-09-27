@@ -135,21 +135,39 @@ def _mapping(payload: dict, skeleton, source_report: dict):
 
 
 def _same_source_chain_group_sizes(mapping: dict, tpar: dict):
-    # For each target joint, count the maximal contiguous target-tree run that
-    # shares one source support. Separate branches are independent and each
-    # receive a full source delta.
+    # A source delta may be distributed along a denser target chain, but
+    # sibling branches must not dilute one another. For each connected
+    # same-source target subtree, use the maximum root-to-leaf chain length
+    # as the divisor.
+    children = {tid: [] for tid in mapping}
+    for tid, parent in tpar.items():
+        if parent in children:
+            children[parent].append(tid)
+
     cache = {}
+    visited_roots = set()
     for tid, sid in mapping.items():
-        root = tid
-        while tpar.get(root) is not None and mapping.get(tpar[root]) == sid:
-            root = tpar[root]
-        members = [
-            other for other, osid in mapping.items()
-            if osid == sid
-            and _same_source_chain_root(other, sid, mapping, tpar) == root
-        ]
+        root = _same_source_chain_root(tid, sid, mapping, tpar)
+        key = (root, sid)
+        if key in visited_roots:
+            continue
+        visited_roots.add(key)
+
+        members = []
+        max_depth = 0
+        stack = [(root, 1)]
+        while stack:
+            node, depth = stack.pop()
+            if mapping.get(node) != sid:
+                continue
+            members.append(node)
+            max_depth = max(max_depth, depth)
+            for child in children.get(node, ()):
+                if mapping.get(child) == sid:
+                    stack.append((child, depth + 1))
+        divisor = max(1, max_depth)
         for member in members:
-            cache[member] = max(1, len(members))
+            cache[member] = divisor
     return cache
 
 

@@ -1,0 +1,11 @@
+{
+  "schema": "RealSaS.KnightCAAVariationalChallengerTrigger.v1",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "purpose": "MEASURE_TOPOLOGY_BOUND_WEIGHTED_DIRICHLET_COMPLETION_BEFORE_ANY_SHIPPING_POLICY_CHANGE",
+  "control_lattice_resolution": 4,
+  "source_constraints": "FOREGROUND_SOURCE_ONLY_HARD_DIRICHLET",
+  "learned_pixel_generation_used": false,
+  "shipping_policy_changed": false,
+  "product_authority_claimed": false,
+  "revision": 1
+}

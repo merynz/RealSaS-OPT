@@ -32,6 +32,9 @@ def test_iris_geometry_adapter_closure_excludes_downstream_motion_domain():
     assert "compiler.realsas_compiler_core.artifact_codec_v2" not in rows
     assert "compiler.realsas_compiler_core.motion_compile_v2" not in rows
     assert "compiler.realsas_compiler_core.motion_source_v1" not in rows
+    assert "compiler.realsas_compiler_core.appearance_compile_v2" not in rows
+    assert "compiler.realsas_compiler_core.appearance_bake_v2" not in rows
+    assert "compiler.realsas_compiler_core.visibility_v2" not in rows
     digest=_adapter_impl_hash(module+":preregister_iris_fit_stage")
     assert len(digest)==64
 
@@ -44,6 +47,9 @@ def test_preflight_closure_excludes_downstream_motion_domain():
     assert "compiler.realsas_compiler_core.artifact_codec_v2" not in rows
     assert "compiler.realsas_compiler_core.motion_compile_v2" not in rows
     assert "compiler.realsas_compiler_core.motion_source_v1" not in rows
+    assert "compiler.realsas_compiler_core.appearance_compile_v2" not in rows
+    assert "compiler.realsas_compiler_core.appearance_bake_v2" not in rows
+    assert "compiler.realsas_compiler_core.visibility_v2" not in rows
 
 
 def test_adapter_io_closure_is_domain_neutral():

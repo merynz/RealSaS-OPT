@@ -7,6 +7,7 @@ on:
     paths:
       - 'canonical/KNIGHT_DEMO_MOTION_PREVIEW_TRIGGER_20260927.json'
       - 'tools/demo/render_knight_motion_preview_v1.py'
+      - 'canonical/KNIGHT_DEMO_MOTION_PREVIEW_BASELINE_V1.json'
   workflow_dispatch:
 
 concurrency:
@@ -41,11 +42,26 @@ jobs:
           set -euo pipefail
           python -m py_compile tools/demo/render_knight_motion_preview_v1.py
 
+      - name: Verify frozen preview implementation
+        run: |
+          set -euo pipefail
+          test "$(git hash-object tools/demo/render_knight_motion_preview_v1.py)" = "7917be02f325ba00b5dcd2b31a786898e45f640f"
+          echo "KNIGHT_PREVIEW_RENDERER_BASELINE_PASS"
+
       - name: Render idle run slash demo previews
         run: |
           set -euo pipefail
           rm -rf canonical/knight_demo_motion_preview_v1
           PYTHONPATH=. python -m tools.demo.render_knight_motion_preview_v1             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --out-dir canonical/knight_demo_motion_preview_v1
+
+      - name: Verify byte-exact preview baseline
+        run: |
+          set -euo pipefail
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_DEMO_MOTION_VISUAL_CONTINUATION_REPORT_V1.json)" = "9120723f6bc00142fb6bb992d3ee7a85c601bf4f"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_IDLE_DEMO_PREVIEW_V1.png)" = "cae86d8a04bde6768ac9c3dafed13a2ab318cf29"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_RUN_DEMO_PREVIEW_V1.png)" = "8e9ed58a3bfbbace73f54e3e5593691f90eef4f1"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_SLASH_DEMO_PREVIEW_V1.png)" = "7a87f310473d602c99eb712be964dcd430b47cfb"
+          echo "KNIGHT_PREVIEW_SHEET_BASELINE_PASS"
 
       - name: Seal demo previews
         run: |

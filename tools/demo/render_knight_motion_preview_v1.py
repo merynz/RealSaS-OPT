@@ -302,7 +302,7 @@ def _skin(rest, W, joint_ids, skin_matrices):
 def _composite_sheet(images, *, columns: int, label: str) -> Image.Image:
     if not images:
         raise RuntimeError("DEMO_PREVIEW_EMPTY")
-    cell_w, cell_h = images[0].size
+    cell_w, cell_h = images[0][1].size
     rows = math.ceil(len(images) / columns)
     header = 28
     sheet = Image.new("RGBA", (columns * cell_w, rows * (cell_h + header)), (0,0,0,0))

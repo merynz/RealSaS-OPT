@@ -1,0 +1,44 @@
+name: knight-arachne-teacher-binding-audit-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/knight_arachne_teacher_binding_audit_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V6_DEMO_OUTPUT
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect teacher binding metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          for f in ARACHNE_KNIGHT_V6_PREFLIGHT.json ARACHNE_KNIGHT_V6_RESULT.json KNIGHT_ARACHNE_V6_DEMO_CLOSURE_PREREG_V1_20260926.json run_knight_arachne_v6_demo_closure_v1.py; do
+            rclone copyto "$REMOTE/$f" "$tmp/$f" --checksum
+          done
+          python - "$tmp" <<'PY'
+          import json,re,sys
+          from pathlib import Path
+          root=Path(sys.argv[1])
+          for name in ("ARACHNE_KNIGHT_V6_PREFLIGHT.json","ARACHNE_KNIGHT_V6_RESULT.json","KNIGHT_ARACHNE_V6_DEMO_CLOSURE_PREREG_V1_20260926.json"):
+              o=json.loads((root/name).read_text())
+              print("FILE",name)
+              for k,v in o.items():
+                  if any(t in k.lower() for t in ("teacher","bank","truth","source","target","surface","skin")):
+                      print(k,json.dumps(v,sort_keys=True)[:12000])
+          src=(root/"run_knight_arachne_v6_demo_closure_v1.py").read_text()
+          for i,line in enumerate(src.splitlines(),1):
+              if any(t in line.lower() for t in ("teacher-bank","teacher_bank","_teacher_for_conditioning","truth","bank_path")):
+                  print(f"SRC:{i}:{line}")
+          PY

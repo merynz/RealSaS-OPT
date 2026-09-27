@@ -6,6 +6,7 @@ import json
 
 from dataclasses import replace
 from pathlib import Path
+from time import perf_counter
 
 import numpy as np
 from PIL import Image
@@ -586,6 +587,7 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
 
 
 def compile_caa_stage(ctx: dict) -> dict:
+    stage_started = perf_counter()
     prereg = caa_preregistration_from_dict(
         stage_output_payload(
             ctx,
@@ -624,6 +626,7 @@ def compile_caa_stage(ctx: dict) -> dict:
         )
     )
     rgba, masks = _load_source_inputs(ctx, observation)
+    source_prepare_seconds = perf_counter() - stage_started
 
     compile_policy = dict(prereg.compile_policy)
     strategy = str(
@@ -641,6 +644,7 @@ def compile_caa_stage(ctx: dict) -> dict:
     elif strategy != "UNIFORM_FACE_LATTICE_V1":
         raise QualificationError("CAA_TILE_RESOLUTION_STRATEGY_UNSUPPORTED")
 
+    compile_started = perf_counter()
     result = compile_deterministic_caa(
         candidate=candidate,
         cameras=cameras.cameras,
@@ -651,6 +655,7 @@ def compile_caa_stage(ctx: dict) -> dict:
         source_lock_policy=prereg.source_lock_policy,
         completion_quality_policy=prereg.completion_quality_policy,
     )
+    deterministic_compile_seconds = perf_counter() - compile_started
     component_ids = tuple(result["component_ids"])
     sample_component_index = np.asarray(
         result["sample_component_index"],
@@ -689,7 +694,9 @@ def compile_caa_stage(ctx: dict) -> dict:
         npz_arrays["barycentric"] = np.asarray(
             result["barycentric"], dtype=np.float64
         )
+    npz_started = perf_counter()
     npz_sha = _save_npz(npz_path, **npz_arrays)
+    npz_seal_seconds = perf_counter() - npz_started
     counts = result["counts"]
     total = int(result["rgba"].shape[0] * result["rgba"].shape[1])
     artifact = CAACompileArtifactIR(
@@ -812,6 +819,18 @@ def compile_caa_stage(ctx: dict) -> dict:
                 "schema": "RealSaS.CAACompileArrays.v3",
             },
         ],
+        "performance": {
+            "source_prepare_seconds": float(source_prepare_seconds),
+            "deterministic_compile_seconds": float(
+                deterministic_compile_seconds
+            ),
+            "npz_seal_seconds": float(npz_seal_seconds),
+            "measured_inner_seconds": float(
+                source_prepare_seconds
+                + deterministic_compile_seconds
+                + npz_seal_seconds
+            ),
+        },
         "diagnostics": {
             "compile_hash": artifact.compile_hash,
             "total_sample_count": total,
@@ -931,6 +950,7 @@ def seal_caa_compile_stage(ctx: dict) -> dict:
 
 
 def bake_complete_appearance_stage(ctx: dict) -> dict:
+    stage_started = perf_counter()
     prereg = caa_preregistration_from_dict(
         stage_output_payload(
             ctx,
@@ -958,6 +978,7 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
         artifact,
         required_names={"rgba", "provenance", "source_view"},
     )
+    array_load_seconds = perf_counter() - stage_started
     bleed = int(prereg.compile_policy["bleed_px"])
     tile_resolution = int(prereg.compile_policy["tile_resolution"])
     max_page_resolution = int(prereg.compile_policy["max_atlas_resolution"])
@@ -986,8 +1007,10 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
     reference_uv = None
     reference_page_index = None
     reference_layout = None
+    direction_bake_seconds = []
 
     for direction in range(8):
+        direction_started = perf_counter()
         if adaptive:
             pages, provenance_pages, uv, face_page_index, layout = (
                 bake_direction_adaptive_atlas_pages(
@@ -1104,7 +1127,11 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
                     max_page_resolution=max_page_resolution,
                 )
             )
+        direction_bake_seconds.append(
+            float(perf_counter() - direction_started)
+        )
 
+    post_bake_started = perf_counter()
     provenance_stack = np.stack(provenance_atlases, axis=0).astype(np.uint8)
     source_view_stack = np.stack(source_view_atlases, axis=0).astype(np.int16)
     target_view = np.broadcast_to(
@@ -1232,9 +1259,25 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
             ),
         ]
     )
+    post_bake_seal_seconds = perf_counter() - post_bake_started
     return {
         "status": "PASS",
         "outputs": output_rows,
+        "performance": {
+            "array_load_seconds": float(array_load_seconds),
+            "direction_bake_seconds_total": float(
+                sum(direction_bake_seconds)
+            ),
+            "direction_bake_seconds_by_view": [
+                float(value) for value in direction_bake_seconds
+            ],
+            "post_bake_seal_seconds": float(post_bake_seal_seconds),
+            "measured_inner_seconds": float(
+                array_load_seconds
+                + sum(direction_bake_seconds)
+                + post_bake_seal_seconds
+            ),
+        },
         "diagnostics": {
             "asset_hash": asset.asset_hash,
             "physical_page_width": int(reference_layout["page_width"]),

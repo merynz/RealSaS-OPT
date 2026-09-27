@@ -548,6 +548,7 @@ def bake_direction_source_view_atlas_pages(
     valid = (
         ((source_samples >= 0) & (source_samples < 8))
         | (source_samples == -2)
+        | (source_samples == -3)
         | (source_samples == -4)
     )
     if not np.all(valid):
@@ -664,6 +665,7 @@ def bake_direction_source_view_atlas(
     valid = (
         ((source_samples >= 0) & (source_samples < 8))
         | (source_samples == -2)
+        | (source_samples == -3)
         | (source_samples == -4)
     )
     if not np.all(valid):

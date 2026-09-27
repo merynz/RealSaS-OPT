@@ -51,7 +51,12 @@ jobs:
       - name: Render idle run slash demo previews
         run: |
           set -euo pipefail
-          rm -rf canonical/knight_demo_motion_preview_v1
+          mkdir -p canonical/knight_demo_motion_preview_v1
+          rm -f \
+            canonical/knight_demo_motion_preview_v1/KNIGHT_DEMO_MOTION_VISUAL_CONTINUATION_REPORT_V1.json \
+            canonical/knight_demo_motion_preview_v1/KNIGHT_IDLE_DEMO_PREVIEW_V1.png \
+            canonical/knight_demo_motion_preview_v1/KNIGHT_RUN_DEMO_PREVIEW_V1.png \
+            canonical/knight_demo_motion_preview_v1/KNIGHT_SLASH_DEMO_PREVIEW_V1.png
           PYTHONPATH=. python -m tools.demo.render_knight_motion_preview_v1             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --out-dir canonical/knight_demo_motion_preview_v1
 
       - name: Verify byte-exact preview baseline

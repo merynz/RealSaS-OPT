@@ -1,0 +1,12 @@
+{
+  "checkpoint_seal_hash": "bbb195ffcf025fc75a88eaf027a11509c9cb1133940a82523a6dea8ca7c63ca6",
+  "execution_repo_commit": "70da8c7562e6edba6e2324f878a730dff3038845",
+  "optimizer_identity_contract": "GRAPH_SELECTION_SEMANTICS_V1",
+  "product_authority_claimed": false,
+  "qualified_joint_count": 28,
+  "qualified_skeleton_lineage_hash": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "schema": "RealSaS.KnightGeppettoStage29ReconciledV2.v1",
+  "semantic_tree_sha256": "95f6f224f52ba43dd96296ce877a11851037e939640a4c995e2b9f3e874c7f59",
+  "status": "PASS_DEMO_ONLY"
+}

@@ -525,10 +525,11 @@ def conservative_bilinear_provenance(
 ) -> np.ndarray:
     """Conservative provenance for the exact bilinear color footprint.
 
-    Provenance codes are ordered by increasing inference risk in CAA V2:
-    DIRECT_SOURCE < OTHER_VIEW_SOURCE < COMPILED_LOCAL_HARMONIC
-    < UNSUPPORTED_ABSTAIN < 255/padding. Any texel with nonzero
-    bilinear weight contributes to the returned risk class.
+    Numeric provenance identity is frozen independently from risk ordering.
+    The explicit risk order is:
+      DIRECT < OTHER_VIEW < LOCAL_HARMONIC < CANONICAL_GLOBAL
+      < UNSUPPORTED_ABSTAIN < PADDING.
+    Any texel with nonzero bilinear weight contributes to the returned class.
     """
     source = np.asarray(provenance_u8, dtype=np.uint8)
     points = np.asarray(uv, dtype=np.float64)
@@ -562,8 +563,23 @@ def conservative_bilinear_provenance(
         axis=1,
     ).astype(np.int16)
     active = weights > 1.0e-12
-    masked = np.where(active, values, -1)
-    return np.max(masked, axis=1).astype(np.uint8)
+    # Provenance code 4 (canonical global completion) was deliberately added
+    # after the frozen unsupported-abstain code 3, so numeric max is no longer
+    # a valid risk operation. Rank explicitly and then return the original code.
+    rank_lut = np.full((256,), -1, dtype=np.int16)
+    rank_lut[0] = 0
+    rank_lut[1] = 1
+    rank_lut[2] = 2
+    rank_lut[4] = 3
+    rank_lut[3] = 4
+    rank_lut[255] = 5
+    ranks = rank_lut[values.astype(np.uint8)]
+    if np.any(active & (ranks < 0)):
+        raise QualificationError("CAA_PROVENANCE_SAMPLE_CLASS_INVALID")
+    masked_rank = np.where(active, ranks, -1)
+    winner = np.argmax(masked_rank, axis=1)
+    row = np.arange(len(values), dtype=np.int64)
+    return values[row, winner].astype(np.uint8)
 
 
 def bilinear_premultiplied_rgba(

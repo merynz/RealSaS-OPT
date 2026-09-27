@@ -1,6 +1,6 @@
 {
   "candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
-  "candidate_source": "STAGE18_CURRENT",
+  "candidate_source": "STAGE18_CANONICAL_ADOPTED_LINEAGE",
   "outputs": [
     "canonical/knight_source_owned_mechanical_binding_v1/KNIGHT_IDLE_SOURCE_OWNED_MECHANICAL_BINDING_V1.gif",
     "canonical/knight_source_owned_mechanical_binding_v1/KNIGHT_RUN_SOURCE_OWNED_MECHANICAL_BINDING_V1.gif",

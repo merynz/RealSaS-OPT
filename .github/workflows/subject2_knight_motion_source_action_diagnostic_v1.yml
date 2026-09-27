@@ -1,0 +1,73 @@
+name: subject2-knight-motion-source-action-diagnostic-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_MOTION_SOURCE_ACTION_DIAGNOSTIC_TRIGGER_20260927.json'
+      - 'tools/motion/diagnose_blender_action_semantics_v1.py'
+      - '.github/workflows/subject2_knight_motion_source_action_diagnostic_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-motion-source-action-diagnostic-v1
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      MOTION_FBX_REMOTE: 'gdrive:Knight by @Quaternius/FBX/KnightCharacter.fbx'
+      EXPECTED_FBX_SHA256: 41f2616fb4a42f9d35e242bbed1450ededc7537def4bf38cbb11b4e54ff2bf21
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve cached Blender and exact source FBX
+        shell: bash
+        run: |
+          set -euo pipefail
+          blender_path="$HOME/.cache/realsas/blender/blender-4.5.14-linux-x64/blender"
+          test -x "$blender_path"
+          echo "BLENDER_EXE=$blender_path" >> "$GITHUB_ENV"
+          command -v rclone >/dev/null
+          source_root="$RUN_ROOT/inputs/motion/quaternius_knight_v1_source"
+          mkdir -p "$source_root"
+          source_fbx="$source_root/KnightCharacter.fbx"
+          rclone copyto "$MOTION_FBX_REMOTE" "$source_fbx" --checksum --drive-shared-with-me
+          printf '%s  %s\n' "$EXPECTED_FBX_SHA256" "$source_fbx" | sha256sum --check -
+          echo "SOURCE_FBX=$source_fbx" >> "$GITHUB_ENV"
+
+      - name: Measure exact source Actions
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$BLENDER_EXE" --background             --python tools/motion/diagnose_blender_action_semantics_v1.py --             --source-fbx "$SOURCE_FBX"             --spec canonical/MOTION_PRESET_SOURCE_QUATERNIUS_KNIGHT_V1.json             --out canonical/KNIGHT_MOTION_SOURCE_ACTION_DIAGNOSTIC_20260927.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("canonical/KNIGHT_MOTION_SOURCE_ACTION_DIAGNOSTIC_20260927.json").read_text())
+          assert d["schema"]=="RealSaS.MotionSourceActionDiagnostic.v1"
+          assert d["status"]=="MEASURED"
+          assert d["clip_count"]==3
+          print(json.dumps(d,sort_keys=True))
+          PY
+
+      - name: Seal diagnostic
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_MOTION_SOURCE_ACTION_DIAGNOSTIC_20260927.json
+          git commit -m 'diagnostic: seal Knight source Action semantics'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

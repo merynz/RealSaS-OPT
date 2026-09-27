@@ -320,6 +320,9 @@ def verify_extraction_outputs(
         _require(meta.get("motion_semantics_only") is True, f"MOTION_MATERIALIZER_MOTION_ONLY_DRIFT:{clip_id}")
         _assert_in_place_root(payload)
 
+        track_payload_sha256 = hashlib.sha256(
+            canonical_json_bytes(payload["tracks"])
+        ).hexdigest()
         verified.append(
             {
                 "clip_id": clip_id,
@@ -327,9 +330,15 @@ def verify_extraction_outputs(
                 "source_take": str(meta.get("source_take") or ""),
                 "path": str(path),
                 "sha256": digest,
+                "track_payload_sha256": track_payload_sha256,
             }
         )
 
+    track_hashes = [row["track_payload_sha256"] for row in verified]
+    _require(
+        len(set(track_hashes)) == len(track_hashes),
+        "MOTION_MATERIALIZER_DISTINCT_TAKES_COLLAPSED",
+    )
     return verified
 
 

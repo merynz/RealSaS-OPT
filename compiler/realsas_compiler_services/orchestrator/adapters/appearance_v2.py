@@ -1370,41 +1370,6 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         face_vertex_ids=face_vertex_ids,
     )
 
-    holdout = structured_holdout_metrics(
-        direct_valid=arrays["direct_valid"],
-        direct_rgba=arrays["direct_rgba"],
-        source_xy=arrays["source_xy"],
-        sample_positions=arrays["sample_positions"],
-        sample_component_index=arrays["sample_component_index"],
-        sample_face_index=arrays["sample_face_index"],
-        face_support_by_view=arrays["face_support_by_view"],
-        face_count=artifact.face_count,
-        tile_resolution=artifact.tile_resolution,
-        band_fraction=float(policy["holdout_band_fraction"]),
-        max_region_samples=int(policy["max_local_harmonic_region_samples"]),
-        max_graph_hops=int(policy["max_local_harmonic_graph_hops"]),
-        face_sample_offsets=adaptive_offsets,
-        face_tile_resolutions=adaptive_resolutions,
-        face_vertex_ids=face_vertex_ids,
-        surface_graph=quality_graph,
-    )
-    seam = provenance_boundary_metrics(
-        rgba=arrays["rgba"],
-        provenance=arrays["provenance"],
-        source_view=arrays["source_view"],
-        sample_positions=arrays["sample_positions"],
-        sample_face_index=arrays["sample_face_index"],
-        face_count=artifact.face_count,
-        tile_resolution=artifact.tile_resolution,
-        face_sample_offsets=adaptive_offsets,
-        face_tile_resolutions=adaptive_resolutions,
-        face_vertex_ids=face_vertex_ids,
-        surface_graph=quality_graph,
-        excluded_provenance_codes=(
-            CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"],
-            255,
-        ),
-    )
     observation = qualified_observation_set_from_dict(
         stage_output_payload(
             ctx,
@@ -1438,6 +1403,45 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
             )
         source_class[view, valid_ids] = mask[iy, ix].astype(np.int8)
 
+    holdout = structured_holdout_metrics(
+        direct_valid=arrays["direct_valid"],
+        direct_rgba=arrays["direct_rgba"],
+        direct_donor_valid=(
+            np.asarray(arrays["direct_valid"], dtype=bool)
+            & (source_class == 1)
+        ),
+        source_xy=arrays["source_xy"],
+        sample_positions=arrays["sample_positions"],
+        sample_component_index=arrays["sample_component_index"],
+        sample_face_index=arrays["sample_face_index"],
+        face_support_by_view=arrays["face_support_by_view"],
+        face_count=artifact.face_count,
+        tile_resolution=artifact.tile_resolution,
+        band_fraction=float(policy["holdout_band_fraction"]),
+        max_region_samples=int(policy["max_local_harmonic_region_samples"]),
+        max_graph_hops=int(policy["max_local_harmonic_graph_hops"]),
+        face_sample_offsets=adaptive_offsets,
+        face_tile_resolutions=adaptive_resolutions,
+        face_vertex_ids=face_vertex_ids,
+        surface_graph=quality_graph,
+    )
+    seam = provenance_boundary_metrics(
+        rgba=arrays["rgba"],
+        provenance=arrays["provenance"],
+        source_view=arrays["source_view"],
+        sample_positions=arrays["sample_positions"],
+        sample_face_index=arrays["sample_face_index"],
+        face_count=artifact.face_count,
+        tile_resolution=artifact.tile_resolution,
+        face_sample_offsets=adaptive_offsets,
+        face_tile_resolutions=adaptive_resolutions,
+        face_vertex_ids=face_vertex_ids,
+        surface_graph=quality_graph,
+        excluded_provenance_codes=(
+            CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"],
+            255,
+        ),
+    )
     cross_view = cross_view_source_compatibility_metrics(
         direct_valid=arrays["direct_valid"],
         direct_rgba=arrays["direct_rgba"],

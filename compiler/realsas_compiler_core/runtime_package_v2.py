@@ -195,17 +195,6 @@ def _validated_provenance_pages(projection: RuntimeProjectionV2IR) -> tuple[np.n
     if source_view.shape != value.shape:
         raise QualificationError("RSS_V2_SOURCE_VIEW_SHAPE_INVALID")
     padding = np.iinfo(np.int16).min
-    valid_source = (
-        ((source_view >= 0) & (source_view < 8))
-        | (source_view == -2)
-        | (source_view == padding)
-    )
-    if not np.all(valid_source):
-        raise QualificationError("RSS_V2_SOURCE_VIEW_VALUE_INVALID")
-    if np.any((value != 255) & (source_view == padding)):
-        raise QualificationError("RSS_V2_RENDERABLE_SOURCE_VIEW_MISSING")
-    if np.any((value == 255) & (source_view != padding)):
-        raise QualificationError("RSS_V2_SOURCE_VIEW_PADDING_DRIFT")
     target_view = np.broadcast_to(
         np.arange(8, dtype=np.int16)[:, None, None, None],
         source_view.shape,
@@ -213,7 +202,22 @@ def _validated_provenance_pages(projection: RuntimeProjectionV2IR) -> tuple[np.n
     direct = value == 0
     other = value == 1
     harmonic = value == 2
-    defined = value != 255
+    unsupported = value == 3
+    padding_mask = value == 255
+    valid_provenance = direct | other | harmonic | unsupported | padding_mask
+    if not np.all(valid_provenance):
+        raise QualificationError("RSS_V2_PROVENANCE_CLASS_INVALID")
+    if np.any(
+        (direct | other)
+        & ~((source_view >= 0) & (source_view < 8))
+    ):
+        raise QualificationError("RSS_V2_SOURCE_VIEW_VALUE_INVALID")
+    if np.any(harmonic & (source_view != -2)):
+        raise QualificationError("RSS_V2_HARMONIC_SOURCE_VIEW_IDENTITY_DRIFT")
+    if np.any(unsupported & (source_view != -4)):
+        raise QualificationError("RSS_V2_UNSUPPORTED_SOURCE_VIEW_IDENTITY_DRIFT")
+    if np.any(padding_mask & (source_view != padding)):
+        raise QualificationError("RSS_V2_SOURCE_VIEW_PADDING_DRIFT")
     if np.any(direct & (source_view != target_view)):
         raise QualificationError("RSS_V2_DIRECT_SOURCE_VIEW_IDENTITY_DRIFT")
     if np.any(
@@ -225,10 +229,6 @@ def _validated_provenance_pages(projection: RuntimeProjectionV2IR) -> tuple[np.n
         )
     ):
         raise QualificationError("RSS_V2_OTHER_VIEW_IDENTITY_DRIFT")
-    if np.any(harmonic & (source_view != -2)):
-        raise QualificationError("RSS_V2_HARMONIC_SOURCE_VIEW_IDENTITY_DRIFT")
-    if np.any(defined & (~direct) & (~other) & (~harmonic)):
-        raise QualificationError("RSS_V2_PROVENANCE_CLASS_INVALID")
     return value, source_view
 
 
@@ -332,6 +332,8 @@ def build_rss_v2_entries(projection: RuntimeProjectionV2IR) -> OrderedDict[str, 
         "source_view_identity_contract=PER_TEXEL_INT16_PRESERVED__DIAGNOSTIC_ONLY",
         "source_view_identity_render_authority=0",
         "source_view_identity_compiled_harmonic_code=-2",
+        "source_view_identity_unsupported_abstain_code=-4",
+        "source_view_identity_physical_padding_code=INT16_MIN",
         "source_view_identity_mixed_sample_code=-3",
         "geometry_uv_position_precision=IEEE754_FLOAT64",
         f"clip_count={len(projection.clips)}",

@@ -1,0 +1,11 @@
+{
+  "schema": "RealSaS.KnightCAAStage25OwnerDiagnosticTrigger.v1",
+  "status": "RUN",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "source_caa_run_id": 36324079057,
+  "source_caa_head_sha": "df010ec8953fd16cb4db1601d78cc3bbeb6dda7c",
+  "high_error_cut_rgba_l1": 0.1,
+  "requested_on": "2026-09-27",
+  "diagnostic_only": true,
+  "product_authority_claimed": false
+}

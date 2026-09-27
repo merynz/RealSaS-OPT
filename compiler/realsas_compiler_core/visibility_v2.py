@@ -61,7 +61,7 @@ def _vertex_id(vertex) -> str:
     raise QualificationError("VISIBILITY_VERTEX_ID_MISSING")
 
 
-def rasterize_visible_owner(
+def _rasterize_visible_owner_legacy(
     mesh,
     camera,
     *,
@@ -219,6 +219,235 @@ def rasterize_visible_owner(
         layer_barycentric=layer_barycentric,
         layer_overflow=layer_overflow,
     )
+
+
+def rasterize_visible_owner(
+    mesh,
+    camera,
+    *,
+    width: int | None = None,
+    height: int | None = None,
+    positions=None,
+    max_layers: int = 4,
+    coverage_scale: int = 1,
+) -> VisibilityRaster:
+    """Vectorized exact implementation of VisibilityContract.v2.
+
+    Face order remains authoritative. Coverage, barycentrics and K-layer
+    insertion preserve the legacy scalar comparisons exactly while replacing
+    per-pixel Python loops with NumPy batches inside each face bounding box.
+    """
+    base_width = int(camera.resolution if width is None else width)
+    base_height = int(camera.resolution if height is None else height)
+    coverage_scale = int(coverage_scale)
+    width = base_width * coverage_scale
+    height = base_height * coverage_scale
+    max_layers = int(max_layers)
+    if (
+        base_width <= 0
+        or base_height <= 0
+        or coverage_scale <= 0
+        or max_layers < 2
+    ):
+        raise QualificationError("VISIBILITY_DIMENSION_INVALID")
+
+    vertex_ids = tuple(_vertex_id(vertex) for vertex in mesh.vertices)
+    if len(vertex_ids) != len(set(vertex_ids)):
+        raise QualificationError("VISIBILITY_DUPLICATE_VERTEX_ID")
+    xyz = np.asarray(
+        [tuple(map(float, vertex.P)) for vertex in mesh.vertices]
+        if positions is None
+        else positions,
+        dtype=np.float64,
+    )
+    if xyz.shape != (len(vertex_ids), 3) or not np.isfinite(xyz).all():
+        raise QualificationError("VISIBILITY_POSITION_MATRIX_INVALID")
+
+    projected = np.asarray(
+        project_points_xyz_v3(xyz, camera), dtype=np.float64
+    )
+    if (
+        projected.shape != (len(vertex_ids), 3)
+        or not np.isfinite(projected).all()
+    ):
+        raise QualificationError("VISIBILITY_PROJECTED_MATRIX_INVALID")
+    raster_projected = projected.copy()
+    raster_projected[:, :2] *= float(coverage_scale)
+    by_id = {
+        vertex_ids[i]: raster_projected[i]
+        for i in range(len(vertex_ids))
+    }
+
+    layer_owner = np.full(
+        (height, width, max_layers), -1, dtype=np.int32
+    )
+    layer_depth = np.full(
+        (height, width, max_layers), np.inf, dtype=np.float64
+    )
+    layer_barycentric = np.full(
+        (height, width, max_layers, 3), np.nan, dtype=np.float32
+    )
+    layer_overflow = np.zeros((height, width), dtype=bool)
+    eps = VISIBILITY_DEPTH_EQUIVALENCE_EPSILON
+
+    def orient_array(a, b, px, py):
+        return (
+            (float(b[0]) - float(a[0]))
+            * (py - float(a[1]))
+            - (float(b[1]) - float(a[1]))
+            * (px - float(a[0]))
+        )
+
+    def edge_accept_array(edge, top_left: bool):
+        return (edge > eps) | (
+            (np.abs(edge) <= eps) & bool(top_left)
+        )
+
+    for face_index, face in enumerate(mesh.faces):
+        ids = tuple(map(str, face))
+        if (
+            len(ids) != 3
+            or any(vertex_id not in by_id for vertex_id in ids)
+        ):
+            raise QualificationError("VISIBILITY_FACE_INVALID")
+        a, b, c0 = (by_id[vertex_id] for vertex_id in ids)
+        area = _orient2d(a, b, float(c0[0]), float(c0[1]))
+        if abs(area) <= eps:
+            continue
+
+        xs = (float(a[0]), float(b[0]), float(c0[0]))
+        ys = (float(a[1]), float(b[1]), float(c0[1]))
+        minx = max(0, int(math.floor(min(xs) - 0.5)))
+        maxx = min(width - 1, int(math.ceil(max(xs) - 0.5)))
+        miny = max(0, int(math.floor(min(ys) - 0.5)))
+        maxy = min(height - 1, int(math.ceil(max(ys) - 0.5)))
+        if minx > maxx or miny > maxy:
+            continue
+
+        grid_y, grid_x = np.mgrid[
+            miny : maxy + 1,
+            minx : maxx + 1,
+        ]
+        flat_y = grid_y.reshape(-1)
+        flat_x = grid_x.reshape(-1)
+        px = flat_x.astype(np.float64) + 0.5
+        py = flat_y.astype(np.float64) + 0.5
+
+        positive = area > 0.0
+        sign = 1.0 if positive else -1.0
+        e0 = sign * orient_array(b, c0, px, py)
+        e1 = sign * orient_array(c0, a, px, py)
+        e2 = sign * orient_array(a, b, px, py)
+        tl0 = _is_top_left(b, c0) if positive else _is_top_left(c0, b)
+        tl1 = _is_top_left(c0, a) if positive else _is_top_left(a, c0)
+        tl2 = _is_top_left(a, b) if positive else _is_top_left(b, a)
+        covered = (
+            edge_accept_array(e0, tl0)
+            & edge_accept_array(e1, tl1)
+            & edge_accept_array(e2, tl2)
+        )
+        if not np.any(covered):
+            continue
+
+        yy = flat_y[covered]
+        xx = flat_x[covered]
+        covered_px = px[covered]
+        covered_py = py[covered]
+        w0 = orient_array(b, c0, covered_px, covered_py) / area
+        w1 = orient_array(c0, a, covered_px, covered_py) / area
+        w2 = orient_array(a, b, covered_px, covered_py) / area
+        z = (
+            w0 * float(a[2])
+            + w1 * float(b[2])
+            + w2 * float(c0[2])
+        )
+        if not np.isfinite(z).all():
+            raise QualificationError("VISIBILITY_DEPTH_NONFINITE")
+        positive_depth = z > eps
+        if not np.any(positive_depth):
+            continue
+        yy = yy[positive_depth]
+        xx = xx[positive_depth]
+        z = z[positive_depth]
+        bary = np.stack(
+            (
+                w0[positive_depth],
+                w1[positive_depth],
+                w2[positive_depth],
+            ),
+            axis=1,
+        ).astype(np.float32)
+
+        old_owner = layer_owner[yy, xx].copy()
+        old_depth = layer_depth[yy, xx].copy()
+        old_bary = layer_barycentric[yy, xx].copy()
+        face_key = int(face_index)
+        better = (
+            (old_owner < 0)
+            | (z[:, None] < old_depth - eps)
+            | (
+                (np.abs(z[:, None] - old_depth) <= eps)
+                & (face_key < old_owner)
+            )
+        )
+        has_insert = np.any(better, axis=1)
+        insert_at = np.argmax(better, axis=1)
+        layer_overflow[yy, xx] |= old_owner[:, -1] >= 0
+
+        if not np.any(has_insert):
+            continue
+        new_owner = old_owner.copy()
+        new_depth = old_depth.copy()
+        new_bary = old_bary.copy()
+        for layer in range(max_layers):
+            take = has_insert & (insert_at == layer)
+            if not np.any(take):
+                continue
+            if layer < max_layers - 1:
+                new_owner[take, layer + 1 :] = old_owner[
+                    take, layer:-1
+                ]
+                new_depth[take, layer + 1 :] = old_depth[
+                    take, layer:-1
+                ]
+                new_bary[take, layer + 1 :] = old_bary[
+                    take, layer:-1
+                ]
+            new_owner[take, layer] = face_key
+            new_depth[take, layer] = z[take]
+            new_bary[take, layer] = bary[take]
+
+        layer_owner[yy, xx] = new_owner
+        layer_depth[yy, xx] = new_depth
+        layer_barycentric[yy, xx] = new_bary
+
+    owner = layer_owner[:, :, 0].copy()
+    depth = layer_depth[:, :, 0].copy()
+    barycentric = layer_barycentric[:, :, 0].copy()
+    second_owner = layer_owner[:, :, 1].copy()
+    second_depth = layer_depth[:, :, 1].copy()
+    margin = np.full((height, width), np.inf, dtype=np.float64)
+    has_second = second_owner >= 0
+    margin[has_second] = (
+        second_depth[has_second] - depth[has_second]
+    )
+    if np.any(margin[has_second] < -1e-10):
+        raise QualificationError("VISIBILITY_SECOND_DEPTH_ORDER_INVALID")
+
+    return VisibilityRaster(
+        owner_face_index=owner,
+        depth=depth,
+        barycentric=barycentric,
+        projected_vertices=projected,
+        second_owner_face_index=second_owner,
+        second_depth=second_depth,
+        depth_margin=margin,
+        layer_owner_face_index=layer_owner,
+        layer_depth=layer_depth,
+        layer_barycentric=layer_barycentric,
+        layer_overflow=layer_overflow,
+    )
+
 
 def projected_xy_to_source_texel_xy(projected_xy) -> tuple[float, float]:
     """Map target half-integer raster coordinates to index-centered source texels."""

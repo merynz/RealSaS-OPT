@@ -954,9 +954,15 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                         visible & (reference.straight_rgba_u8[:, :, 3] == 0)
                     )
                 )
-                compiled_mask = visible & (
-                    reference.provenance_code
-                    == int(CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"])
+                compiled_mask = visible & np.isin(
+                    reference.provenance_code,
+                    np.asarray(
+                        (
+                            int(CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"]),
+                            int(CAA_PROVENANCE["CANONICAL_GLOBAL_COMPLETION"]),
+                        ),
+                        dtype=np.uint8,
+                    ),
                 )
                 compiled_count = int(np.count_nonzero(compiled_mask))
                 compiled_visible += compiled_count

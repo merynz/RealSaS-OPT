@@ -57,10 +57,8 @@ jobs:
               qualify_skeleton,
               qualify_skeleton_v2,
           )
-          from compiler.realsas_compiler_core.types import (
-              SkeletonEdgeProposal,
-              SkeletonJointProposal,
-              SkeletonProposalIR,
+          from compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2 import (
+              _skeleton_proposal,
           )
 
           root=Path(os.environ["RUN_ROOT"])
@@ -77,36 +75,7 @@ jobs:
               (root/"imports"/"geppetto_stage27_mechanically_meaningful_v2"/"GEPPETTO_KNIGHT_SKELETON_PROPOSAL.json").read_text()
           )
           assert payload["schema"]=="RealSaS.SkeletonProposalIR.v1"
-          joints=tuple(
-              SkeletonJointProposal(
-                  proposal_id=str(row["proposal_id"]),
-                  position=tuple(map(float,row["position"])),
-                  confidence=float(row["confidence"]),
-                  root_score=float(row["root_score"]),
-                  support_surface_ids=tuple(map(str,row["support_surface_ids"])),
-              )
-              for row in payload["joints"]
-          )
-          edges=tuple(
-              SkeletonEdgeProposal(
-                  edge_id=str(row["edge_id"]),
-                  parent_proposal_id=str(row["parent_proposal_id"]),
-                  child_proposal_id=str(row["child_proposal_id"]),
-                  score=float(row["score"]),
-                  confidence=float(row["confidence"]),
-                  reason=str(row.get("reason") or ""),
-                  hard_required=bool(row.get("hard_required",False)),
-                  hard_forbidden=bool(row.get("hard_forbidden",False)),
-              )
-              for row in payload["edges"]
-          )
-          proposal=SkeletonProposalIR(
-              joints,
-              edges,
-              str(payload["surface_binding_hash"]),
-              str(payload.get("model_provenance") or ""),
-              dict(payload.get("metadata") or {}),
-          )
+          proposal=_skeleton_proposal(payload)
           assert proposal.surface_binding_hash==surface.geometry_lineage_hash
 
           q1=qualify_skeleton(surface,proposal,run_ilp_shadow=False)

@@ -1101,10 +1101,19 @@ def compile_deterministic_caa(
             neighbors=surface_neighbors,
             max_region_samples=max_harmonic_region,
             max_graph_hops=max_harmonic_hops,
+            abstain_on_policy_violation=True,
+            abstain_provenance_code=CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"],
+            abstain_source_view_value=-4,
         )
         completion_rows.append({"target_view_index": target, **stats})
         if np.any(provenance[target] == 255):
-            raise QualificationError("CAA_TOTALITY_FAILURE_AFTER_HARMONIC_COMPILE")
+            raise QualificationError("CAA_PROVENANCE_UNCLASSIFIED_AFTER_COMPILE")
+        valid_codes = np.asarray(
+            tuple(sorted(CAA_PROVENANCE.values())),
+            dtype=np.uint8,
+        )
+        if np.any(~np.isin(provenance[target], valid_codes)):
+            raise QualificationError("CAA_PROVENANCE_CLASS_INVALID_AFTER_COMPILE")
 
     counts = {
         name: int(np.count_nonzero(provenance == code))
@@ -1127,6 +1136,7 @@ def compile_deterministic_caa(
         "sample_component_index": sample_component_index,
         "counts": counts,
         "completion_rows": tuple(completion_rows),
+        "unsupported_abstain_source_view_value": -4,
         "face_count": face_count,
         "sample_count_mode": sample_count_mode,
         "sample_count_per_face": int(max_samples_per_face),

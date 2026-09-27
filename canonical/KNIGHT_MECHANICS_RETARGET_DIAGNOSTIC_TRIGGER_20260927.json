@@ -1,0 +1,10 @@
+{
+  "schema": "RealSaS.KnightMechanicsRetargetDiagnosticTrigger.v1",
+  "status": "RUN",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "prerequisite_stage15_receipt": "canonical/KNIGHT_DEMO_STAGE15_RECEIPT_20260925.json",
+  "historical_stage08_receipt": "canonical/KNIGHT_DEMO_STAGE08_HISTORICAL_IMPORT_RECEIPT_20260927.json",
+  "candidate_rule": "MESH_INFLUENCING_OR_UNIQUE_SOURCE_ROOT",
+  "requested_on": "2026-09-27",
+  "product_authority_claimed": false
+}

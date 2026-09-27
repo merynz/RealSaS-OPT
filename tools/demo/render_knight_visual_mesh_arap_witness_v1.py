@@ -112,7 +112,7 @@ def _render_native(player: Path, package: Path, view_id: str, clip_id: str, fram
     ]
     proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     if proc.returncode != 0:
-        raise RuntimeError("VISUAL_WITNESS_NATIVE_RENDER_FAIL\n" + proc.stdout)
+        raise RuntimeError(f"VISUAL_WITNESS_NATIVE_RENDER_FAIL:{view_id}:{clip_id}:{frame}\n" + proc.stdout)
     return rgba
 
 
@@ -253,6 +253,24 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
                 )
             )
             qa_by_clip[clip_id] = qa_rows
+            print(
+                "VISUAL_ARAP_QA",
+                json.dumps(
+                    {
+                        "view_index": int(view_index),
+                        "clip_id": clip_id,
+                        "max_flipped_triangles": max(row["flipped_triangles"] for row in qa_rows),
+                        "max_handle_residual_px": max(row["max_handle_residual_px"] for row in qa_rows),
+                        "max_p95_edge_stretch": max(row["p95_edge_stretch"] for row in qa_rows),
+                        "max_edge_stretch": max(row["max_edge_stretch"] for row in qa_rows),
+                        "visual_vertex_count": int(len(mesh.positions)),
+                        "visual_face_count": int(len(mesh.faces)),
+                        "handle_count": int(len(bindings)),
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
 
         projection_npz = view_root / "projection.npz"
         np.savez(projection_npz, **arrays)

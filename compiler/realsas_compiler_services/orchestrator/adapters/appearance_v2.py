@@ -1755,6 +1755,7 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
 
 
 def prove_caa_reference_rest_stage(ctx: dict) -> dict:
+    stage_started = perf_counter()
     prereg = caa_preregistration_from_dict(
         stage_output_payload(
             ctx,
@@ -1851,10 +1852,13 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
         dtype=np.int64,
     )
 
+    setup_seconds = perf_counter() - stage_started
     rows = []
     outputs = []
     all_pass = True
+    direction_proof_seconds = []
     for direction in range(8):
+        direction_started = perf_counter()
         texture_row = by_texture[direction]
         texture = _load_texture_pages(texture_row)
         render = render_caa_reference(
@@ -2130,7 +2134,11 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
                 "schema": f"RealSaS.CAARestDiagnosticMasks.V{direction}.v2",
             }
         )
+        direction_proof_seconds.append(
+            float(perf_counter() - direction_started)
+        )
 
+    post_proof_started = perf_counter()
     proof = CAARestRenderProofIR(
         asset_binding_hash=asset.asset_hash,
         static_mesh_qualification_binding_hash=static_mesh.qualification_hash,
@@ -2151,10 +2159,28 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
         },
     )
     proof = replace(proof, proof_hash=caa_rest_render_proof_hash(proof))
+    performance = {
+        "setup_seconds": float(setup_seconds),
+        "direction_proof_seconds_total": float(
+            sum(direction_proof_seconds)
+        ),
+        "direction_proof_seconds_by_view": [
+            float(value) for value in direction_proof_seconds
+        ],
+        "proof_seal_seconds": float(
+            perf_counter() - post_proof_started
+        ),
+    }
+    performance["measured_inner_seconds"] = float(
+        performance["setup_seconds"]
+        + performance["direction_proof_seconds_total"]
+        + performance["proof_seal_seconds"]
+    )
     if not all_pass:
         return {
             "status": "FAIL",
             "blockers": ["CAA_REFERENCE_REST_RENDER_PROOF_FAILED"],
+            "performance": performance,
             "diagnostics": proof.to_dict(),
         }
     outputs.append(
@@ -2167,6 +2193,7 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
     return {
         "status": "PASS",
         "outputs": outputs,
+        "performance": performance,
         "diagnostics": {
             "proof_hash": proof.proof_hash,
             "every_direction_passed": True,

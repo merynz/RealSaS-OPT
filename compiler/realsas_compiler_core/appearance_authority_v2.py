@@ -22,6 +22,9 @@ CAA_PROVENANCE = {
     # Explicit Compiler abstention on source-unsupported potential surface.
     # This is a render-fail provenance class, not generated appearance.
     "UNSUPPORTED_ABSTAIN": 3,
+    # View-independent deterministic C(p) for canonical samples with no
+    # qualified source support in any of the eight input directions.
+    "CANONICAL_GLOBAL_COMPLETION": 4,
 }
 CAA_PROVENANCE_BY_CODE = {value: key for key, value in CAA_PROVENANCE.items()}
 

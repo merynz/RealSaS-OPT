@@ -190,6 +190,17 @@ def extract_clip(*,armature,action,source_path,source_sha,license_sha,spec,C):
     for nla_track in tuple(animation_data.nla_tracks):
         nla_track.mute=True
     animation_data.action=action
+    if hasattr(animation_data,"action_suitable_slots"):
+        suitable=tuple(animation_data.action_suitable_slots)
+        if not suitable:
+            raise RuntimeError(
+                "MOTION_EXTRACTOR_ACTION_WITHOUT_SUITABLE_ARMATURE_SLOT:"
+                +action.name
+            )
+        animation_data.action_slot=suitable[0]
+        action_slot_identifier=str(suitable[0].identifier)
+    else:
+        action_slot_identifier="LEGACY_ACTION_NO_SLOT_API"
     if hasattr(animation_data,"action_blend_type"):
         animation_data.action_blend_type="REPLACE"
     if hasattr(animation_data,"action_influence"):
@@ -290,7 +301,8 @@ def extract_clip(*,armature,action,source_path,source_sha,license_sha,spec,C):
             "source_fbx_sha256":source_sha,
             "license_evidence_sha256":license_sha,
             "source_take":action.name,
-            "action_evaluation_mode":"EXACT_ACTION__NLA_DISABLED__REPLACE_1P0",
+            "action_evaluation_mode":"EXACT_ACTION__EXPLICIT_COMPATIBLE_SLOT__NLA_DISABLED__REPLACE_1P0",
+            "action_slot_identifier":action_slot_identifier,
             "source_fps":fps,
             "sample_frame_first":sample_frames[0],
             "sample_frame_last":sample_frames[-1],

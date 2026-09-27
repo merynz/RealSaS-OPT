@@ -100,7 +100,28 @@ def validate_caa_preregistration(value: CAACompilePreregistrationIR) -> None:
         compile_policy.get("tile_resolution_strategy")
         or "UNIFORM_FACE_LATTICE_V1"
     )
-    if strategy == "PER_FACE_ADAPTIVE_V1":
+    if strategy == "SOURCE_VISUAL_MESH_V1":
+        visual_hash = str(
+            compile_policy.get("visual_mesh_set_binding_hash") or ""
+        )
+        if len(visual_hash) != 64:
+            raise QualificationError(
+                "CAA_VISUAL_MESH_SET_BINDING_HASH_INVALID"
+            )
+        if str(
+            compile_policy.get("visual_geometry_authority") or ""
+        ) != "SOURCE_ART_SILHOUETTE":
+            raise QualificationError(
+                "CAA_VISUAL_GEOMETRY_AUTHORITY_INVALID"
+            )
+        if (
+            compile_policy.get("mechanical_mesh_render_authority")
+            is not False
+        ):
+            raise QualificationError(
+                "CAA_VISUAL_MODE_MECHANICAL_RENDER_AUTHORITY_FORBIDDEN"
+            )
+    elif strategy == "PER_FACE_ADAPTIVE_V1":
         resolutions = tuple(
             int(item) for item in (compile_policy.get("face_tile_resolutions") or ())
         )
@@ -169,6 +190,16 @@ def build_caa_preregistration(
             "internal_filtering": "PREMULTIPLIED_ALPHA",
             "transport_png_may_be_straight_alpha": True,
             "appearance_is_coequal_product_authority": True,
+            "source_owned_visual_mesh_mode": (
+                str(dict(compile_policy).get("tile_resolution_strategy") or "")
+                == "SOURCE_VISUAL_MESH_V1"
+            ),
+            "mechanical_mesh_render_authority": (
+                False
+                if str(dict(compile_policy).get("tile_resolution_strategy") or "")
+                == "SOURCE_VISUAL_MESH_V1"
+                else True
+            ),
         },
     )
     value = replace(value, preregistration_hash=caa_preregistration_hash(value))
@@ -259,6 +290,7 @@ def validate_caa_compile_artifact(value: CAACompileArtifactIR) -> None:
     if compile_array_schema and compile_array_schema not in {
         "RealSaS.CAACompileArrays.v2",
         "RealSaS.CAACompileArrays.v3",
+        "RealSaS.VisualAppearanceCompileArrays.v1",
     }:
         raise QualificationError("CAA_COMPILE_ARRAY_SCHEMA_UNSUPPORTED")
     barycentric_storage_mode = str(
@@ -274,7 +306,35 @@ def validate_caa_compile_artifact(value: CAACompileArtifactIR) -> None:
         )
 
     sample_mode = str(metadata.get("sample_count_mode") or "UNIFORM_FACE_LATTICE_V1")
-    if sample_mode == "PER_FACE_ADAPTIVE_V1":
+    if sample_mode == "SOURCE_RASTER_DIRECT_V1":
+        if metadata.get("source_owned_visual_mesh_mode") is not True:
+            raise QualificationError(
+                "CAA_VISUAL_COMPILE_MODE_METADATA_MISSING"
+            )
+        if value.other_view_source_sample_count != 0:
+            raise QualificationError(
+                "CAA_VISUAL_COMPILE_OTHER_VIEW_FORBIDDEN"
+            )
+        if value.compiled_local_harmonic_sample_count != 0:
+            raise QualificationError(
+                "CAA_VISUAL_COMPILE_HARMONIC_FORBIDDEN"
+            )
+        if canonical_global != 0 or unsupported != 0:
+            raise QualificationError(
+                "CAA_VISUAL_COMPILE_COMPLETION_FORBIDDEN"
+            )
+        if value.direct_source_sample_count != value.total_sample_count:
+            raise QualificationError(
+                "CAA_VISUAL_COMPILE_NOT_ALL_DIRECT_SOURCE"
+            )
+        visual_hash = str(
+            metadata.get("visual_mesh_set_binding_hash") or ""
+        )
+        if len(visual_hash) != 64:
+            raise QualificationError(
+                "CAA_VISUAL_COMPILE_MESH_BINDING_INVALID"
+            )
+    elif sample_mode == "PER_FACE_ADAPTIVE_V1":
         per_direction = int(metadata.get("sample_count_per_direction") or 0)
         maximum_resolution = int(metadata.get("maximum_tile_resolution") or 0)
         if (

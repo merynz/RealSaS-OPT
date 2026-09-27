@@ -25,7 +25,8 @@ jobs:
     env:
       RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
       AUTHORITY_ROOT: /home/monster/realsas_authority
-      HISTORICAL_REMOTE: 'gdrive:iris-k input and evidence/SUBJECT2_KNIGHT_V1_STAGE08_PREFIT_EVIDENCE.zip'
+      HISTORICAL_REMOTE: 'gdrive:SUBJECT2_KNIGHT_V1_STAGE08_PREFIT_EVIDENCE.zip'
+      HISTORICAL_PARENT_ID: '1qfoxh3xnHOPuzLfGufMK4i_97zNzZYlO'
       HISTORICAL_SHA256: '5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7'
 
     steps:
@@ -41,7 +42,8 @@ jobs:
           set -euo pipefail
           command -v rclone
           archive="$RUNNER_TEMP/SUBJECT2_KNIGHT_V1_STAGE08_PREFIT_EVIDENCE.zip"
-          rclone copyto "$HISTORICAL_REMOTE" "$archive" --checksum
+          rclone copyto "$HISTORICAL_REMOTE" "$archive" --checksum \
+            --drive-root-folder-id "$HISTORICAL_PARENT_ID"
           printf '%s  %s\n' "$HISTORICAL_SHA256" "$archive" | sha256sum --check -
           echo "HISTORICAL_ARCHIVE=$archive" >> "$GITHUB_ENV"
 

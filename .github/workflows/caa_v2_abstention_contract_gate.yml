@@ -19,6 +19,7 @@ on:
       - 'compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py'
       - 'tests/compiler/test_caa_abstention_contract_v1.py'
       - 'tests/compiler/test_caa_variational_completion_v1.py'
+      - 'tests/compiler/test_caa_v2_subject_free_policy.py'
       - 'tests/compiler/test_runtime_v2_package_abstention_v1.py'
       - '.github/workflows/caa_v2_abstention_contract_gate.yml'
   workflow_dispatch:

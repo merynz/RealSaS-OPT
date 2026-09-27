@@ -1,0 +1,13 @@
+{
+  "schema": "RealSaS.KnightMotionRetargetPreflightTrigger.v1",
+  "status": "RUN",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "expected_skeleton_lineage": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+  "clips": [
+    "demo_idle_v1",
+    "demo_run_v1",
+    "demo_slash_v1"
+  ],
+  "product_authority_claimed": false
+}

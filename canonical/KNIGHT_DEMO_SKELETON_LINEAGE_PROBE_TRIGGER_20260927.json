@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.KnightSkeletonLineageProbeTrigger.v1",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
-  "reason": "RESOLVE_STAGE28_LINEAGE_AFTER_SCHEMA_FIELD_FIX",
+  "reason": "RESOLVE_STAGE28_LINEAGE_AFTER_ROOT_FIELD_FIX",
   "expected_arachne_skeleton_lineage": "c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce",
-  "revision": 3
+  "revision": 4
 }

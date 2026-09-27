@@ -1,0 +1,98 @@
+name: subject2-knight-demo-historical-stage08-recover-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_DEMO_HISTORICAL_STAGE08_RECOVER_TRIGGER_20260927.json'
+      - 'tools/demo/import_historical_stage08_v1.py'
+      - 'canonical/KNIGHT_DEMO_HISTORICAL_STAGE08_IMPORT_AUTHORITY_V1_20260927.json'
+      - '.github/workflows/subject2_knight_demo_historical_stage08_recover_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-demo-historical-stage08-recover-v1
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  recover:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      HISTORICAL_REMOTE: 'gdrive:iris-k input and evidence/SUBJECT2_KNIGHT_V1_STAGE08_PREFIT_EVIDENCE.zip'
+      HISTORICAL_SHA256: '5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Verify runner and fetch exact historical evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v rclone
+          archive="$RUNNER_TEMP/SUBJECT2_KNIGHT_V1_STAGE08_PREFIT_EVIDENCE.zip"
+          rclone copyto "$HISTORICAL_REMOTE" "$archive" --checksum
+          printf '%s  %s\n' "$HISTORICAL_SHA256" "$archive" | sha256sum --check -
+          echo "HISTORICAL_ARCHIVE=$archive" >> "$GITHUB_ENV"
+
+      - name: Restore exact Stage01-08 demo authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python -m tools.demo.import_historical_stage08_v1 \
+            --repo-root . \
+            --authority-root "$AUTHORITY_ROOT" \
+            --run-id "$RUN_ID" \
+            --archive "$HISTORICAL_ARCHIVE" \
+            --import-authority canonical/KNIGHT_DEMO_HISTORICAL_STAGE08_IMPORT_AUTHORITY_V1_20260927.json \
+            --receipt canonical/KNIGHT_DEMO_STAGE08_HISTORICAL_IMPORT_RECEIPT_20260927.json
+
+      - name: Prove frozen IRIS lineage through Stage15
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python -m compiler.realsas_compiler_services.orchestrator.mainline execute \
+            --run-id "$RUN_ID" \
+            --target 15_RIGGING_SURFACE_QUALIFIED
+          PYTHONPATH=. python -m compiler.realsas_compiler_services.orchestrator.mainline status \
+            --run-id "$RUN_ID"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["AUTHORITY_ROOT"])/"runs"/os.environ["RUN_ID"]
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={r["id"]:r for r in ledger["stages"]}
+          for ordinal in range(1,16):
+              row=ledger["stages"][ordinal-1]
+              assert row["status"]=="PASS_DEMO_ONLY",(row["id"],row["status"],row.get("blockers"))
+          s7=json.loads(Path(by["07_OBSERVATION_CONTRACT_QUALIFIED"]["outputs"][0]["path"]).read_text())
+          s8=json.loads(Path(by["08_NORMALIZATION_DOMAIN_QUALIFIED"]["outputs"][0]["path"]).read_text())
+          assert s7["observation_set_hash"]=="87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa"
+          assert s8["normalization_hash"]=="81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23"
+          print("KNIGHT_FROZEN_IRIS_LINEAGE_RESTORED_THROUGH_STAGE15")
+          PY
+
+      - name: Seal recovery receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_DEMO_STAGE08_HISTORICAL_IMPORT_RECEIPT_20260927.json
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'demo: seal restored Knight Stage08 frozen lineage'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

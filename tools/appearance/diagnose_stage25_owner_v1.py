@@ -17,7 +17,7 @@ from compiler.realsas_compiler_core.appearance_quality_v2 import (
     rgba_l1_premultiplied,
 )
 from compiler.realsas_compiler_core.geometry_substrate_v2 import (
-    geometry_substrate_from_dict,
+    geometry_substrate_evidence_from_dict,
 )
 from compiler.realsas_compiler_core.appearance_render_v2 import (
     load_face_page_index,
@@ -75,7 +75,7 @@ def diagnose(
     high_error_cut: float = 0.10,
 ) -> dict:
     ctx = _context(authority_root, run_id)
-    geometry = geometry_substrate_from_dict(
+    geometry = geometry_substrate_evidence_from_dict(
         stage_output_payload(
             ctx,
             "13_GEOMETRY_SUBSTRATE_QUALIFIED",

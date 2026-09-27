@@ -249,17 +249,26 @@ def extract_clip(*,armature,action,source_path,source_sha,license_sha,spec,C):
             F=Matrix(derived[jid].rotation_matrix)
             R_derived=F.transposed() @ R_world_delta @ F
 
-            translation=(0.0,0.0,0.0)
             if jid==root_name:
-                world_delta=pose_global[jid].to_translation()-root_rest_translation
-                local_delta=object_vector_to_joint_local(derived[jid],world_delta)
-                translation=tuple(float(x)/body_scale for x in local_delta)
+                world_delta=(
+                    pose_global[jid].to_translation()
+                    - root_rest_translation
+                )
             else:
+                # delta_local = inv(L_rest) @ L_pose, so its translation is
+                # expressed in the source child's rest-local basis. Convert
+                # that vector back to canonical object space and then into the
+                # geometry-derived RealSaS joint frame. This is the same axis-
+                # convention removal used for rotational deltas above.
                 local_translation=delta_local.to_translation()
-                if local_translation.length/body_scale>1e-5:
-                    raise RuntimeError(
-                        f"MOTION_EXTRACTOR_NONROOT_TRANSLATION_UNSUPPORTED:{jid}:{frame}:{local_translation.length/body_scale}"
-                    )
+                world_delta=R_child_rest @ local_translation
+            local_delta=object_vector_to_joint_local(
+                derived[jid],
+                world_delta,
+            )
+            translation=tuple(
+                float(x)/body_scale for x in local_delta
+            )
             tracks[jid].append({
                 "time_seconds":float(time_seconds),
                 "local_rotation_quat_xyzw":quaternion_xyzw(R_derived),
@@ -308,6 +317,8 @@ def extract_clip(*,armature,action,source_path,source_sha,license_sha,spec,C):
             "sample_frame_last":sample_frames[-1],
             "source_body_scale":body_scale,
             "root_translation_semantics":"LOCAL_DERIVED_JOINT_FRAME_NORMALIZED_BY_SOURCE_BODY_SCALE",
+            "all_joint_translation_semantics":"LOCAL_DERIVED_JOINT_FRAME_NORMALIZED_BY_SOURCE_BODY_SCALE",
+            "nonroot_translation_supported":True,
             "source_mesh_used_as_product_authority":False,
             "source_skin_used_as_product_authority":False,
             "source_material_used_as_product_authority":False,

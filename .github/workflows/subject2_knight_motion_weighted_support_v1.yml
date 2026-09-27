@@ -6,6 +6,7 @@ on:
       - research/vf11-certified-adaptive-20260921
     paths:
       - 'canonical/KNIGHT_MOTION_SOURCE_ACTION_DIAGNOSTIC_20260927.json'
+      - 'canonical/KNIGHT_MOTION_WEIGHTED_SUPPORT_TRIGGER_20260927.json'
   workflow_dispatch:
 
 concurrency:

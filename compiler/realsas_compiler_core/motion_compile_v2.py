@@ -752,14 +752,6 @@ def build_qualified_motion_v2(
                 or keys[-1].time_seconds>asset.duration_seconds+1e-9
             ):
                 raise QualificationError("MOTION_V2_TRACK_TIME_OUT_OF_RANGE")
-            if (
-                target_id!=skeleton.root_id
-                and any(
-                    np.linalg.norm(np.asarray(k.local_translation_xyz,dtype=np.float64))>1e-9
-                    for k in keys
-                )
-            ):
-                raise QualificationError("MOTION_V2_NONROOT_TRANSLATION_FORBIDDEN")
             if any(
                 max(abs(x-1.0) for x in k.local_scale_xyz)>1e-9
                 for k in keys
@@ -784,7 +776,8 @@ def build_qualified_motion_v2(
                         "retargeted":True,
                         "retarget_report_hash":report["report_hash"],
                         "rotation_semantics":"LOCAL_JOINT_FRAME_DELTA_QUATERNION",
-                        "translation_semantics":"LOCAL_JOINT_FRAME_DELTA_TRANSLATION",
+                        "translation_semantics":"LOCAL_DERIVED_JOINT_FRAME_DELTA_TRANSLATION",
+                        "nonroot_translation_supported":True,
                         "translation_units":"TARGET_BODY_SCALE",
                         "interpolation":"SLERP_ROTATION_LINEAR_TRANSLATION_V1",
                     },
@@ -872,6 +865,7 @@ def build_qualified_motion_v2(
             "artist_source_clip_count":len(clips),
             "mechanical_probe_clip_count":0,
             "full_3d_local_quaternion_motion":True,
+            "full_3d_local_translation_motion":True,
             "manual_retarget_used":False,
             "source_rig_is_final_skeleton_authority":False,
             "target_skeleton_is_exact_qualified_skeleton":True,

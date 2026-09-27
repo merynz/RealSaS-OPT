@@ -191,6 +191,27 @@ class ArapQa:
     max_edge_stretch: float
 
 
+SOURCE_TEXEL_TO_RASTER_OFFSET = 0.5
+
+
+def source_texel_xy_to_raster_xy(points_xy) -> np.ndarray:
+    """Convert source texel-coordinate space to runtime raster-coordinate space.
+
+    Source texture convention:
+      texel i center == coordinate i
+    Runtime raster convention:
+      output pixel i center == coordinate i+0.5
+    """
+    value = np.asarray(points_xy, dtype=np.float64)
+    return value + SOURCE_TEXEL_TO_RASTER_OFFSET
+
+
+def raster_xy_to_source_texel_xy(points_xy) -> np.ndarray:
+    """Inverse of source_texel_xy_to_raster_xy."""
+    value = np.asarray(points_xy, dtype=np.float64)
+    return value - SOURCE_TEXEL_TO_RASTER_OFFSET
+
+
 def _signed_area(loop: list[tuple[int, int]]) -> float:
     area = 0.0
     for i, a in enumerate(loop):

@@ -82,8 +82,8 @@ jobs:
           assert result["architecture_id"]=="RealSaS.Arachne.A1.RawSurfaceK4AttentionDirectSimplex.v6"
           assert result["terminal_check_steps"]==[7680,7936,8192]
           assert result["surface_lineage_hash"]==os.environ["EXPECTED_SURFACE_LINEAGE"]
-          assert result["skeleton_lineage_hash"]==os.environ["EXPECTED_SKELETON_LINEAGE"]
-          assert result["skin_lineage_hash"]==os.environ["EXPECTED_SKIN_LINEAGE"]
+          assert result["skeleton_lineage_hash"]==os.environ["HISTORICAL_V6_SKELETON_LINEAGE"]
+          assert result["skin_lineage_hash"]==os.environ["HISTORICAL_V6_SKIN_LINEAGE"]
           assert result["final_evaluation"]["full_gate"] is True
           assert result["final_evaluation"]["compiler"]["pass"] is True
           assert result["final_evaluation"]["metrics"]["row_l1_p95"] <= 0.05
@@ -253,7 +253,7 @@ jobs:
             "metadata":{
               "closure_mode":"V6_FROZEN_BACKBONE_FRESH_READOUT",
               "compiler_qualification_passed_externally":True,
-              "external_qualified_skin_lineage":os.environ["EXPECTED_SKIN_LINEAGE"],
+              "external_qualified_skin_lineage":os.environ["HISTORICAL_V6_SKIN_LINEAGE"],
               "external_qualified_skin_is_evidence_only":True,
               "stage32_requalification_required":True,
               "product_authority_minted":False,

@@ -237,12 +237,22 @@ void validate_provenance(const ProvenanceSet& p) {
         throw std::runtime_error("PROVENANCE_CARDINALITY_DRIFT");
     constexpr auto padding = std::numeric_limits<std::int16_t>::min();
     for (std::size_t i = 0; i < count; ++i) {
+        const auto code = p.value[i];
         const auto donor = p.source_view[i];
-        const bool donor_valid = (donor >= 0 && donor < 8) || donor == -2;
-        if (p.value[i] == 255) {
-            if (donor != padding) throw std::runtime_error("SOURCE_VIEW_PADDING_DRIFT");
-        } else if (!donor_valid) {
-            throw std::runtime_error("SOURCE_VIEW_IDENTITY_INVALID");
+        if (code == 0 || code == 1) {
+            if (!(donor >= 0 && donor < 8))
+                throw std::runtime_error("SOURCE_VIEW_IDENTITY_INVALID");
+        } else if (code == 2) {
+            if (donor != -2)
+                throw std::runtime_error("SOURCE_VIEW_HARMONIC_DRIFT");
+        } else if (code == 3) {
+            if (donor != -4)
+                throw std::runtime_error("SOURCE_VIEW_UNSUPPORTED_ABSTAIN_DRIFT");
+        } else if (code == 255) {
+            if (donor != padding)
+                throw std::runtime_error("SOURCE_VIEW_PADDING_DRIFT");
+        } else {
+            throw std::runtime_error("PROVENANCE_CODE_INVALID");
         }
     }
 }

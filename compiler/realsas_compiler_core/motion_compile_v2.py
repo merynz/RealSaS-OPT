@@ -16,7 +16,8 @@ import math
 from typing import Any, Mapping
 
 import numpy as np
-from scipy.optimize import linear_sum_assignment
+from scipy.optimize import Bounds, LinearConstraint, milp
+from scipy.sparse import coo_matrix
 
 from .canonical_puppet_state_v1 import CanonicalPuppetStateIR, canonical_puppet_state_hash
 from .hashing import content_sha256
@@ -276,6 +277,197 @@ def _is_ancestor(parent,ancestor,node):
     return False
 
 
+def _solve_topology_constrained_retarget(
+    *,
+    cost: np.ndarray,
+    tids: list[str],
+    sids: list[str],
+    tpar: Mapping[str, str | None],
+    spar: Mapping[str, str | None],
+    troot: str,
+    sroot: str,
+) -> tuple[np.ndarray, float, float | None]:
+    """Solve minimum-cost injective target->source tree embedding.
+
+    Target identity remains authoritative. Source joints are motion evidence only.
+    Every target joint receives exactly one unique source joint, the roots are
+    fixed, and each mapped target child must land below its mapped target parent
+    in the source hierarchy. Extra source joints may be skipped.
+    """
+    matrix = np.asarray(cost, dtype=np.float64)
+    target_count, source_count = matrix.shape
+    if target_count != len(tids) or source_count != len(sids):
+        raise QualificationError("MOTION_V2_RETARGET_COST_SHAPE_DRIFT")
+    if target_count <= 0 or source_count < target_count:
+        raise QualificationError("MOTION_V2_RETARGET_ASSIGNMENT_SIZE_INVALID")
+
+    variable_count = target_count * source_count
+
+    def var(target_index: int, source_index: int) -> int:
+        return target_index * source_count + source_index
+
+    rows: list[int] = []
+    cols: list[int] = []
+    data: list[float] = []
+    lower: list[float] = []
+    upper: list[float] = []
+    constraint_index = 0
+
+    # Every target joint is assigned exactly once.
+    for target_index in range(target_count):
+        for source_index in range(source_count):
+            rows.append(constraint_index)
+            cols.append(var(target_index, source_index))
+            data.append(1.0)
+        lower.append(1.0)
+        upper.append(1.0)
+        constraint_index += 1
+
+    # Source evidence is injective: one source joint cannot drive two target joints.
+    for source_index in range(source_count):
+        for target_index in range(target_count):
+            rows.append(constraint_index)
+            cols.append(var(target_index, source_index))
+            data.append(1.0)
+        lower.append(-np.inf)
+        upper.append(1.0)
+        constraint_index += 1
+
+    target_index_by_id = {jid: index for index, jid in enumerate(tids)}
+    source_index_by_id = {jid: index for index, jid in enumerate(sids)}
+
+    # Hard topology constraint:
+    #   x(child, s) <= sum_a x(parent, a), a in Ancestors(s)
+    # This permits extra/twist source joints between mapped target joints while
+    # making ancestry violations impossible inside the optimizer.
+    ancestors_by_source: dict[str, tuple[str, ...]] = {}
+    for source_joint in sids:
+        ancestors_by_source[source_joint] = tuple(
+            candidate
+            for candidate in sids
+            if _is_ancestor(spar, candidate, source_joint)
+        )
+
+    for child_id in tids:
+        parent_id = tpar[child_id]
+        if parent_id is None:
+            continue
+        child_index = target_index_by_id[child_id]
+        parent_index = target_index_by_id[parent_id]
+        for source_child_index, source_child_id in enumerate(sids):
+            rows.append(constraint_index)
+            cols.append(var(child_index, source_child_index))
+            data.append(1.0)
+            for source_parent_id in ancestors_by_source[source_child_id]:
+                rows.append(constraint_index)
+                cols.append(
+                    var(parent_index, source_index_by_id[source_parent_id])
+                )
+                data.append(-1.0)
+            lower.append(-np.inf)
+            upper.append(0.0)
+            constraint_index += 1
+
+    constraint_matrix = coo_matrix(
+        (np.asarray(data, dtype=np.float64), (rows, cols)),
+        shape=(constraint_index, variable_count),
+        dtype=np.float64,
+    ).tocsr()
+    constraints = LinearConstraint(
+        constraint_matrix,
+        np.asarray(lower, dtype=np.float64),
+        np.asarray(upper, dtype=np.float64),
+    )
+
+    bounds_lower = np.zeros(variable_count, dtype=np.float64)
+    bounds_upper = np.ones(variable_count, dtype=np.float64)
+    target_root_index = target_index_by_id[troot]
+    source_root_index = source_index_by_id[sroot]
+    root_variable = var(target_root_index, source_root_index)
+    bounds_lower[root_variable] = 1.0
+    bounds_upper[root_variable] = 1.0
+    for source_index in range(source_count):
+        if source_index != source_root_index:
+            bounds_upper[var(target_root_index, source_index)] = 0.0
+
+    # A tiny stable lexicographic term makes byte-for-byte tie resolution
+    # deterministic without materially changing the geometric objective.
+    objective = matrix.reshape(-1).copy()
+    objective += 1.0e-10 * np.arange(variable_count, dtype=np.float64)
+
+    result = milp(
+        c=objective,
+        integrality=np.ones(variable_count, dtype=np.int8),
+        bounds=Bounds(bounds_lower, bounds_upper),
+        constraints=constraints,
+        options={"presolve": True, "mip_rel_gap": 0.0},
+    )
+    if not bool(result.success) or result.x is None:
+        raise QualificationError("MOTION_V2_RETARGET_TOPOLOGY_INFEASIBLE")
+
+    solution = np.asarray(result.x, dtype=np.float64).reshape(
+        target_count, source_count
+    )
+    source_choice = np.argmax(solution, axis=1).astype(np.int64)
+    if np.any(solution[np.arange(target_count), source_choice] < 0.5):
+        raise QualificationError("MOTION_V2_RETARGET_MILP_NONINTEGRAL")
+
+    selected_variables = np.asarray(
+        [var(i, int(source_choice[i])) for i in range(target_count)],
+        dtype=np.int64,
+    )
+    primary_cost = float(
+        np.sum(matrix[np.arange(target_count), source_choice])
+    )
+
+    # Global constrained ambiguity proof. Any alternative full mapping must
+    # differ in at least one selected assignment. This is more faithful than
+    # comparing raw per-row nearest neighbours that may violate topology.
+    alt_row = coo_matrix(
+        (
+            np.ones(len(selected_variables), dtype=np.float64),
+            (
+                np.zeros(len(selected_variables), dtype=np.int64),
+                selected_variables,
+            ),
+        ),
+        shape=(1, variable_count),
+        dtype=np.float64,
+    ).tocsr()
+    alternative_constraint = LinearConstraint(
+        alt_row,
+        np.asarray([-np.inf], dtype=np.float64),
+        np.asarray([float(target_count - 1)], dtype=np.float64),
+    )
+    alternative = milp(
+        c=objective,
+        integrality=np.ones(variable_count, dtype=np.int8),
+        bounds=Bounds(bounds_lower, bounds_upper),
+        constraints=(constraints, alternative_constraint),
+        options={"presolve": True, "mip_rel_gap": 0.0},
+    )
+    alternative_cost: float | None = None
+    if bool(alternative.success) and alternative.x is not None:
+        alternative_solution = np.asarray(
+            alternative.x, dtype=np.float64
+        ).reshape(target_count, source_count)
+        alternative_choice = np.argmax(
+            alternative_solution, axis=1
+        ).astype(np.int64)
+        alternative_cost = float(
+            np.sum(
+                matrix[
+                    np.arange(target_count),
+                    alternative_choice,
+                ]
+            )
+        )
+        if alternative_cost - primary_cost < 0.01 - 1.0e-12:
+            raise QualificationError("MOTION_V2_RETARGET_AMBIGUOUS")
+
+    return source_choice, primary_cost, alternative_cost
+
+
 def automatic_retarget_map_v2(payload:Mapping[str,Any],skeleton:QualifiedSkeletonIR):
     if str(payload.get("coordinate_frame") or "")!="REALSAS_OBJECT_FRAME_V1":
         raise QualificationError("MOTION_V2_SOURCE_COORDINATE_FRAME_INVALID")
@@ -316,12 +508,21 @@ def automatic_retarget_map_v2(payload:Mapping[str,Any],skeleton:QualifiedSkeleto
             ):
                 c+=4.0
             cost[i,j]=c
-    target_rows_idx,source_cols=linear_sum_assignment(cost)
-    if len(target_rows_idx)!=len(tids):
-        raise QualificationError("MOTION_V2_RETARGET_ASSIGNMENT_INCOMPLETE")
+
+    source_cols,total_assignment_cost,second_best_cost=(
+        _solve_topology_constrained_retarget(
+            cost=cost,
+            tids=tids,
+            sids=sids,
+            tpar=tpar,
+            spar=spar,
+            troot=troot,
+            sroot=sroot,
+        )
+    )
     source_to_target={
         sids[int(source_col)]:tids[int(target_row)]
-        for target_row,source_col in zip(target_rows_idx,source_cols)
+        for target_row,source_col in enumerate(source_cols)
     }
     target_to_source={target:source for source,target in source_to_target.items()}
     if target_to_source.get(troot)!=sroot:
@@ -334,21 +535,20 @@ def automatic_retarget_map_v2(payload:Mapping[str,Any],skeleton:QualifiedSkeleto
         source_parent=target_to_source[target_parent]
         if not _is_ancestor(spar,source_parent,source_child):
             raise QualificationError("MOTION_V2_RETARGET_ANCESTRY_MISMATCH")
-    for target_row,source_col in zip(target_rows_idx,source_cols):
-        row=np.sort(cost[int(target_row)])
-        if len(row)>1 and float(row[1]-row[0])<0.01:
-            raise QualificationError("MOTION_V2_RETARGET_AMBIGUOUS")
+
     report={
         "schema":"RealSaS.AutomaticRetargetReport.v2",
         "source_joint_count":len(sids),
         "target_joint_count":len(tids),
         "mapped_joint_count":len(source_to_target),
         "unused_source_joint_count":len(sids)-len(tids),
-        "total_assignment_cost":float(
-            sum(cost[int(i),int(j)] for i,j in zip(target_rows_idx,source_cols))
+        "total_assignment_cost":float(total_assignment_cost),
+        "second_best_assignment_cost":(
+            None if second_best_cost is None else float(second_best_cost)
         ),
         "source_to_target":tuple(sorted(source_to_target.items())),
-        "topology_rule":"TARGET_PARENT_MAPS_TO_SOURCE_ANCESTOR",
+        "topology_rule":"TARGET_PARENT_MAPS_TO_SOURCE_ANCESTOR_HARD_MILP",
+        "assignment_solver":"SCIPY_MILP_HIGHS_BINARY_V1",
         "coordinate_frame":"REALSAS_OBJECT_FRAME_V1",
     }
     report["report_hash"]=content_sha256(report)

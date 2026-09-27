@@ -61,6 +61,8 @@ jobs:
           )
           from compiler.realsas_compiler_core.playback_full_surface_v3 import (
               project_points_xyz_v3,
+          )
+          from compiler.realsas_compiler_core.visibility_v2 import (
               rasterize_visible_owner,
           )
           from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (

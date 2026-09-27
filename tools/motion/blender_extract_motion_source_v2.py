@@ -181,7 +181,19 @@ def extract_clip(*,armature,action,source_path,source_sha,license_sha,spec,C):
 
     if armature.animation_data is None:
         armature.animation_data_create()
-    armature.animation_data.action=action
+    animation_data=armature.animation_data
+    # FBX imports may carry NLA strips in addition to Actions. Retarget source
+    # extraction must evaluate exactly the requested Action, never an active
+    # NLA strip left behind by the importer.
+    if hasattr(animation_data,"use_nla"):
+        animation_data.use_nla=False
+    for nla_track in tuple(animation_data.nla_tracks):
+        nla_track.mute=True
+    animation_data.action=action
+    if hasattr(animation_data,"action_blend_type"):
+        animation_data.action_blend_type="REPLACE"
+    if hasattr(animation_data,"action_influence"):
+        animation_data.action_influence=1.0
     start,end=(float(action.frame_range[0]),float(action.frame_range[1]))
     scene=bpy.context.scene
     fps=float(scene.render.fps)/float(scene.render.fps_base or 1.0)
@@ -278,6 +290,7 @@ def extract_clip(*,armature,action,source_path,source_sha,license_sha,spec,C):
             "source_fbx_sha256":source_sha,
             "license_evidence_sha256":license_sha,
             "source_take":action.name,
+            "action_evaluation_mode":"EXACT_ACTION__NLA_DISABLED__REPLACE_1P0",
             "source_fps":fps,
             "sample_frame_first":sample_frames[0],
             "sample_frame_last":sample_frames[-1],

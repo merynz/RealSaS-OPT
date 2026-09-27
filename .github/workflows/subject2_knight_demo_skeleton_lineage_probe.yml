@@ -1,0 +1,156 @@
+name: subject2-knight-demo-skeleton-lineage-probe
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_DEMO_SKELETON_LINEAGE_PROBE_TRIGGER_20260927.json'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-demo-skeleton-lineage-probe
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      GEPPETTO_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/GEPPETTO_STAGE27_MECHANICALLY_MEANINGFUL_V2_OUTPUT
+      EXPECTED_ARACHNE_SKELETON_LINEAGE: c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce
+      PYTHONHASHSEED: '0'
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Compare legacy and product-facing skeleton qualifiers
+        shell: bash
+        run: |
+          set -euo pipefail
+          local="$RUN_ROOT/imports/geppetto_stage27_mechanically_meaningful_v2"
+          mkdir -p "$local"
+          if ! test -s "$local/GEPPETTO_KNIGHT_SKELETON_PROPOSAL.json"; then
+            rclone copy "$GEPPETTO_REMOTE" "$local" --checksum
+          fi
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+
+          from compiler.realsas_compiler_core.artifact_codec_v2 import (
+              rigging_surface_from_dict,
+          )
+          from compiler.realsas_compiler_core.rig import (
+              qualify_skeleton,
+              qualify_skeleton_v2,
+          )
+          from compiler.realsas_compiler_core.types import (
+              SkeletonEdgeProposal,
+              SkeletonJointProposal,
+              SkeletonProposalIR,
+          )
+
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+          rows=[
+              row for row in by["15_RIGGING_SURFACE_QUALIFIED"]["outputs"]
+              if row["schema"]=="RealSaS.RiggingSurfaceIR.v1"
+          ]
+          assert len(rows)==1
+          surface=rigging_surface_from_dict(json.loads(Path(rows[0]["path"]).read_text()))
+
+          payload=json.loads(
+              (root/"imports"/"geppetto_stage27_mechanically_meaningful_v2"/"GEPPETTO_KNIGHT_SKELETON_PROPOSAL.json").read_text()
+          )
+          assert payload["schema"]=="RealSaS.SkeletonProposalIR.v1"
+          joints=tuple(
+              SkeletonJointProposal(
+                  proposal_id=str(row["proposal_id"]),
+                  position=tuple(map(float,row["position"])),
+                  confidence=float(row["confidence"]),
+                  root_score=float(row["root_score"]),
+                  support_surface_ids=tuple(map(str,row["support_surface_ids"])),
+              )
+              for row in payload["joints"]
+          )
+          edges=tuple(
+              SkeletonEdgeProposal(
+                  edge_id=str(row["edge_id"]),
+                  parent_proposal_id=str(row["parent_proposal_id"]),
+                  child_proposal_id=str(row["child_proposal_id"]),
+                  score=float(row["score"]),
+                  confidence=float(row["confidence"]),
+                  reason=str(row.get("reason") or ""),
+                  hard_required=bool(row.get("hard_required",False)),
+                  hard_forbidden=bool(row.get("hard_forbidden",False)),
+              )
+              for row in payload["edges"]
+          )
+          proposal=SkeletonProposalIR(
+              joints,
+              edges,
+              str(payload["surface_binding_hash"]),
+              str(payload.get("model_provenance") or ""),
+              dict(payload.get("metadata") or {}),
+          )
+          assert proposal.surface_binding_hash==surface.geometry_lineage_hash
+
+          q1=qualify_skeleton(surface,proposal,run_ilp_shadow=False)
+          q2=qualify_skeleton_v2(surface,proposal,run_ilp_shadow=False)
+          result={
+              "schema":"RealSaS.KnightSkeletonLineageProbe.v1",
+              "status":"PASS",
+              "run_id":os.environ["RUN_ID"],
+              "proposal_joint_count":len(proposal.joints),
+              "legacy_v1_lineage":q1.skeleton_lineage_hash,
+              "product_v2_lineage":q2.skeleton_lineage_hash,
+              "legacy_root":q1.root_canonical_id,
+              "product_v2_roots":list(q2.deform_root_ids),
+              "v1_joint_count":len(q1.joints),
+              "v2_joint_count":len(q2.joints),
+              "joint_payload_equal":(
+                  [j.to_dict() for j in q1.joints]
+                  == [j.to_dict() for j in q2.joints]
+              ),
+              "expected_arachne_skeleton_lineage":os.environ["EXPECTED_ARACHNE_SKELETON_LINEAGE"],
+              "product_v2_matches_arachne":(
+                  q2.skeleton_lineage_hash
+                  == os.environ["EXPECTED_ARACHNE_SKELETON_LINEAGE"]
+              ),
+              "legacy_v1_matches_arachne":(
+                  q1.skeleton_lineage_hash
+                  == os.environ["EXPECTED_ARACHNE_SKELETON_LINEAGE"]
+              ),
+              "product_authority_claimed":False,
+          }
+          print("SKELETON_LINEAGE_PROBE",json.dumps(result,sort_keys=True))
+          Path("canonical/KNIGHT_DEMO_SKELETON_LINEAGE_PROBE_20260927.json").write_text(
+              json.dumps(result,indent=2,sort_keys=True)+"\n"
+          )
+          PY
+
+      - name: Seal probe result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_DEMO_SKELETON_LINEAGE_PROBE_20260927.json
+          git commit -m 'demo: seal Knight skeleton lineage qualifier probe'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

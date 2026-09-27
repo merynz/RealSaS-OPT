@@ -27,7 +27,8 @@ jobs:
       ARACHNE_HANDOFF_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V6_DEMO_HANDOFF
       EXPECTED_SURFACE_LINEAGE: 452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a
       EXPECTED_SKELETON_LINEAGE: e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850
-      EXPECTED_SEMANTIC_TREE_SHA256: 95f6f224f52ba43dd96296ce877a11851037e939640a4c995e2b9f3e874c7f59
+      EXPECTED_SEMANTIC_TREE_SHA256: 774a88500a305ce3625b7ed79be13a3230921d812ad23942a44a18b00afcf9c9
+      LEGACY_PROBE_SEMANTIC_TREE_SHA256: 95f6f224f52ba43dd96296ce877a11851037e939640a4c995e2b9f3e874c7f59
       HISTORICAL_V6_SKELETON_LINEAGE: c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce
       HISTORICAL_V6_SKIN_LINEAGE: 3fa8dacae0d52b86193f14f6cb0214ed68d8d40035317e367b335d9c06a48397
       EXPECTED_MODEL_SHA256: bfd2bd24f55bdce2dc36b0ae6a7afe01b8381c680de545c66a11a3d707fe73ed
@@ -304,6 +305,7 @@ jobs:
               "historical_skeleton_lineage":os.environ["HISTORICAL_V6_SKELETON_LINEAGE"],
               "rebound_skeleton_lineage":os.environ["EXPECTED_SKELETON_LINEAGE"],
               "semantic_skeleton_tree_sha256":os.environ["EXPECTED_SEMANTIC_TREE_SHA256"],
+              "legacy_probe_semantic_tree_sha256":os.environ["LEGACY_PROBE_SEMANTIC_TREE_SHA256"],
               "semantic_id_rebind_receipt_sha256":sha(Path(os.environ["ARACHNE_REBIND_RECEIPT"])),
               "numeric_skin_field_unchanged":True,
               "stage32_requalification_required":True,

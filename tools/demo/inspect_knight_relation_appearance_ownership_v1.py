@@ -74,11 +74,19 @@ def run(*, authority_root: Path, run_id: str, out_path: Path):
     any_direct = np.any(direct_valid, axis=0)
     any_fg_donor = np.any(donor_valid, axis=0)
     direct_alpha_max = np.max(direct_rgba[:, :, 3], axis=0)
+    any_direct_foreground = np.any(
+        direct_valid & (direct_rgba[:, :, 3] > 0),
+        axis=0,
+    )
     caa_alpha_max = np.max(rgba[:, :, 3], axis=0)
     caa_alpha_min = np.min(rgba[:, :, 3], axis=0)
+    caa_opaque_any = caa_alpha_max > 0
     globally_unseen = ~any_direct
-    suspicious_opaque = (~any_fg_donor) & (caa_alpha_max > 0)
-    background_observed = any_direct & (direct_alpha_max == 0)
+    background_observed = any_direct & ~any_direct_foreground
+    donorless_opaque = (~any_fg_donor) & caa_opaque_any
+    ownership_leak_opaque = (~any_direct_foreground) & caa_opaque_any
+    globally_unseen_opaque = globally_unseen & caa_opaque_any
+    background_only_opaque = background_observed & caa_opaque_any
 
     vertices = {str(v.candidate_vertex_id): v for v in candidate.vertices}
     rel_by_pair = {}
@@ -100,7 +108,7 @@ def run(*, authority_root: Path, run_id: str, out_path: Path):
     face_sample_count = np.bincount(sample_face, minlength=face_count).astype(np.int64)
     face_suspicious_count = np.bincount(
         sample_face,
-        weights=suspicious_opaque.astype(np.int64),
+        weights=donorless_opaque.astype(np.int64),
         minlength=face_count,
     ).astype(np.int64)
     face_unseen_count = np.bincount(
@@ -262,19 +270,29 @@ def run(*, authority_root: Path, run_id: str, out_path: Path):
         "sample_summary": {
             "sample_count": int(sample_count),
             "any_direct_sample_count": int(np.count_nonzero(any_direct)),
+            "direct_foreground_observation_sample_count": int(np.count_nonzero(any_direct_foreground)),
             "foreground_donor_evidence_sample_count": int(np.count_nonzero(any_fg_donor)),
             "globally_unseen_sample_count": int(np.count_nonzero(globally_unseen)),
             "observed_background_sample_count": int(np.count_nonzero(background_observed)),
-            "suspicious_opaque_sample_count": int(np.count_nonzero(suspicious_opaque)),
-            "suspicious_opaque_fraction": float(np.mean(suspicious_opaque)),
+            "donorless_opaque_sample_count": int(np.count_nonzero(donorless_opaque)),
+            "donorless_opaque_fraction": float(np.mean(donorless_opaque)),
+            "ownership_leak_opaque_sample_count": int(np.count_nonzero(ownership_leak_opaque)),
+            "ownership_leak_opaque_fraction": float(np.mean(ownership_leak_opaque)),
+            "globally_unseen_opaque_sample_count": int(np.count_nonzero(globally_unseen_opaque)),
+            "globally_unseen_opaque_fraction_of_all_samples": float(np.mean(globally_unseen_opaque)),
+            "background_only_opaque_sample_count": int(np.count_nonzero(background_only_opaque)),
+            "background_only_opaque_fraction_of_all_samples": float(np.mean(background_only_opaque)),
         },
         "relation_signature_aggregate": finalize(signature_agg),
         "component_aggregate": finalize(component_agg),
         "top_suspicious_faces": suspicious_faces[:200],
         "face_rows_omitted_count": max(0, len(face_rows) - 200),
         "diagnostic_definition": {
-            "suspicious_opaque": "NO_DIRECT_FOREGROUND_DONOR_EVIDENCE_IN_ANY_VIEW__BUT_CAA_ALPHA_POSITIVE_IN_AT_LEAST_ONE_DIRECTION",
-            "note": "This diagnoses appearance/occupancy ownership leakage; it does not by itself prove a relation face is semantically invalid.",
+            "donorless_opaque": "NO_QUALIFIED_FOREGROUND_DONOR_IN_ANY_VIEW__BUT_CAA_ALPHA_POSITIVE_IN_AT_LEAST_ONE_DIRECTION",
+            "ownership_leak_opaque": "NO_DIRECT_FOREGROUND_OBSERVATION_IN_ANY_VIEW__BUT_CAA_ALPHA_POSITIVE_IN_AT_LEAST_ONE_DIRECTION",
+            "globally_unseen_opaque": "NO_DIRECT_SOURCE_OBSERVATION_FOREGROUND_OR_BACKGROUND_IN_ANY_VIEW__BUT_CAA_ALPHA_POSITIVE",
+            "background_only_opaque": "DIRECTLY_OBSERVED_ONLY_AS_TRANSPARENT_BACKGROUND__BUT_CAA_ALPHA_POSITIVE_IN_AT_LEAST_ONE_DIRECTION",
+            "note": "Ownership-leak and globally-unseen-opaque are the strict visual-ownership diagnostics. Donorless-opaque is broader because silhouette-boundary or grazing direct foreground may be immutable source authority but unsafe as a cross-view donor.",
         },
     }
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -282,8 +300,9 @@ def run(*, authority_root: Path, run_id: str, out_path: Path):
     print("KNIGHT_RELATION_APPEARANCE_OWNERSHIP_DIAGNOSTIC_PASS", json.dumps({
         "producer": producer,
         "face_count": len(candidate.faces),
-        "suspicious_opaque_sample_count": result["sample_summary"]["suspicious_opaque_sample_count"],
-        "suspicious_opaque_fraction": result["sample_summary"]["suspicious_opaque_fraction"],
+        "donorless_opaque_sample_count": result["sample_summary"]["donorless_opaque_sample_count"],
+        "ownership_leak_opaque_sample_count": result["sample_summary"]["ownership_leak_opaque_sample_count"],
+        "globally_unseen_opaque_sample_count": result["sample_summary"]["globally_unseen_opaque_sample_count"],
     }, sort_keys=True))
 
 

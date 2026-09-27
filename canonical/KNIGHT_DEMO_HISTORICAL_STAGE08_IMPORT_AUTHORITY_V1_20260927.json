@@ -1,0 +1,94 @@
+{
+  "schema": "RealSaS.DemoHistoricalStageImportAuthority.v1",
+  "status": "APPROVED_DEMO_ONLY",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "target_run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "source_run_id": "SUBJECT2_KNIGHT_V1",
+  "source_commit": "b57184f1500d7378c843cc92ca96a83404ceef1d",
+  "source_evidence_archive": {
+    "file_name": "SUBJECT2_KNIGHT_V1_STAGE08_PREFIT_EVIDENCE.zip",
+    "sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "drive_file_id": "1DOFAzCYYE4u1jmuPCUyIjEjGtuKSQD69",
+    "provenance": "CANONICAL_STAGE08_QUALIFICATION_EVIDENCE"
+  },
+  "imported_stage_ids": [
+    "01_SOURCE_BYTES_SEALED",
+    "02_SOURCE_LICENSE_PROVENANCE",
+    "03_SOURCE_MECHANICAL_AUDIT",
+    "04_FULL_SUBJECT_ADMISSION",
+    "05_CAMERA_CONTRACT_SOLVED",
+    "06_OBSERVATION_RENDER_8VIEW",
+    "07_OBSERVATION_CONTRACT_QUALIFIED",
+    "08_NORMALIZATION_DOMAIN_QUALIFIED"
+  ],
+  "exact_outputs": {
+    "01_SOURCE_BYTES_SEALED": {
+      "member": "01_SOURCE_BYTES_SEALED/source_byte_seal.json",
+      "schema": "RealSaS.SourceByteSeal.v1",
+      "authority_class": "SEALED_SOURCE_EVIDENCE",
+      "sha256": "d6f517b56f865da87970b13b4a119030e67203cb572e755212addec82fcd39b0",
+      "bytes": 6252
+    },
+    "02_SOURCE_LICENSE_PROVENANCE": {
+      "member": "02_SOURCE_LICENSE_PROVENANCE/source_license_seal.json",
+      "schema": "RealSaS.SourceLicenseSeal.v1",
+      "authority_class": "SEALED_SOURCE_EVIDENCE",
+      "sha256": "bf644396b1b38506a4fc6facf0f2fff13bb783a5ebb2ead748930bdde8dcd310",
+      "bytes": 607
+    },
+    "03_SOURCE_MECHANICAL_AUDIT": {
+      "member": "03_SOURCE_MECHANICAL_AUDIT/source_mechanical_audit.json",
+      "schema": "RealSaS.SourceMechanicalAuditIR.v1",
+      "authority_class": "SOURCE_MECHANICAL_AUDIT",
+      "sha256": "4b09a6dbba56ab7fd88c2bb59f890527974a9ab5638710590ca479a3e4127628",
+      "bytes": 5221
+    },
+    "04_FULL_SUBJECT_ADMISSION": {
+      "member": "04_FULL_SUBJECT_ADMISSION/full_subject_admission.json",
+      "schema": "RealSaS.FullSubjectAdmissionIR.v1",
+      "authority_class": "FULL_SUBJECT_ADMISSION",
+      "sha256": "dd268d9169a42ff60bb09c8a5460584e152cdc9a39110f502a348467c783514f",
+      "bytes": 676
+    },
+    "05_CAMERA_CONTRACT_SOLVED": {
+      "member": "05_CAMERA_CONTRACT_SOLVED/qualified_camera_set.json",
+      "schema": "RealSaS.QualifiedCameraSetIR.v1",
+      "authority_class": "QUALIFIED_CAMERA_SET",
+      "sha256": "e11ab0fe32378eb1cd06fbebd8d1827e71eaa7b3fbe31b78248f7f3f9ab91920",
+      "bytes": 5419
+    },
+    "06_OBSERVATION_RENDER_8VIEW": {
+      "member": "06_OBSERVATION_RENDER_8VIEW/observation_render_set.json",
+      "schema": "RealSaS.ObservationRenderSetIR.v1",
+      "authority_class": "EXACT_OBSERVATION_RENDER_SET",
+      "sha256": "9faf223d75f790f0a4cdb3bee7ed83847e516036ca0e95c00eee209d1fa6de4c",
+      "bytes": 4257
+    },
+    "07_OBSERVATION_CONTRACT_QUALIFIED": {
+      "member": "07_OBSERVATION_CONTRACT_QUALIFIED/qualified_observation_set.json",
+      "schema": "RealSaS.QualifiedObservationSetIR.v1",
+      "authority_class": "QUALIFIED_OBSERVATION_SET",
+      "sha256": "f9ac32cf15ff8116d89827c32a961f06bc39582ee49e9854f7d5cdd42b24d87a",
+      "bytes": 7662
+    },
+    "08_NORMALIZATION_DOMAIN_QUALIFIED": {
+      "member": "08_NORMALIZATION_DOMAIN_QUALIFIED/normalization_domain.json",
+      "schema": "RealSaS.NormalizationDomainIR.v1",
+      "authority_class": "QUALIFIED_NORMALIZATION_DOMAIN",
+      "sha256": "5f5a803a33b56e3737e88fd802f6e79684da996e2134455a4b9f33cc8594bcac",
+      "bytes": 770
+    }
+  },
+  "semantic_bindings": {
+    "camera_set_hash": "2485d184c7fef6c453b6ff817d3eac525e438fe023350b294436589d62d75cca",
+    "observation_set_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa",
+    "normalization_hash": "81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23"
+  },
+  "scope": {
+    "execution_class": "DEMO_WITNESS",
+    "product_authority_claimed": false,
+    "scientific_product_pass_forbidden": true,
+    "exact_byte_import_required": true,
+    "recomputation_forbidden": true
+  }
+}

@@ -609,3 +609,27 @@ def test_vectorized_visibility_is_exactly_equivalent_to_legacy_oracle():
                 getattr(legacy, name),
                 equal_nan=True,
             ), name
+
+
+def test_source_view_atlas_accepts_canonical_global_completion_code():
+    per_face = 4 * (4 + 1) // 2
+    source_view = np.asarray(
+        [0, 1, 2, 3, 4, 5, 6, 7, -2, -3],
+        dtype=np.int16,
+    )
+    assert len(source_view) == per_face
+    atlas = bake_direction_source_view_atlas(
+        face_sample_source_view=source_view,
+        face_count=1,
+        tile_resolution=4,
+        bleed_px=2,
+    )
+    paged = bake_direction_source_view_atlas_pages(
+        face_sample_source_view=source_view,
+        face_count=1,
+        tile_resolution=4,
+        bleed_px=2,
+        max_page_resolution=16,
+    )
+    assert -3 in set(map(int, np.unique(atlas)))
+    assert -3 in set(map(int, np.unique(paged)))

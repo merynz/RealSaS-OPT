@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/knight_source_owned_canonical_rescue_v1.yml'
       - 'compiler/realsas_compiler_core/product_authority_v1.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py'
   workflow_dispatch:
 
 concurrency:

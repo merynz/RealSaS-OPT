@@ -38,4 +38,8 @@ jobs:
           print("PROPOSAL_KEYS",sorted(o))
           print("PROPOSAL_METADATA",json.dumps(o.get("metadata"),sort_keys=True)[:30000])
           print("INFLUENCE_COUNT",len(o.get("influences") or []))
+          result=json.loads(Path(e["result_path"]).read_text())
+          print("RESULT_KEYS",sorted(result))
+          print("RESULT_FINAL_EVALUATION",json.dumps(result.get("final_evaluation"),sort_keys=True)[:30000])
+          print("RESULT_COVERAGE_RELATED",json.dumps({k:v for k,v in result.items() if any(t in k.lower() for t in ("cover","teacher","valid","mask","confidence","support"))},sort_keys=True)[:30000])
           PY

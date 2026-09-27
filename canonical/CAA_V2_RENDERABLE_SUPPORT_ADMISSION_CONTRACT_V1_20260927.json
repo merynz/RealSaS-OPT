@@ -1,0 +1,70 @@
+{
+  "schema": "RealSaS.CAARenderableSupportAdmissionContract.v1",
+  "status": "FROZEN_SUBJECT_FREE_ARCHITECTURE",
+  "frozen_on": "2026-09-27",
+  "subject_identity_used": false,
+  "thresholds_changed": false,
+  "authority": {
+    "potential_domain": "STAGE18_CANONICAL_MECHANICAL_SURFACE_ADDRESS_DOMAIN",
+    "admitted_renderable_support": "SOURCE_OR_BOUNDED_LOCAL_COMPLETION_V1",
+    "topology_mutation_allowed": false,
+    "geometry_mutation_allowed": false,
+    "runtime_generation_allowed": false,
+    "hidden_art_generation_allowed": false
+  },
+  "admission": {
+    "direct_source": {
+      "provenance_code": 0,
+      "source_view_encoding": "INT16_0_TO_7_EXACT_SOURCE_VIEW",
+      "admitted": true
+    },
+    "other_view_source": {
+      "provenance_code": 1,
+      "source_view_encoding": "INT16_0_TO_7_EXACT_DONOR_VIEW",
+      "admitted": true
+    },
+    "bounded_local_harmonic": {
+      "provenance_code": 2,
+      "source_view_encoding": "INT16_NEGATIVE_2",
+      "admitted": true,
+      "eligibility": "MUST_PASS_FROZEN_MAX_REGION_SAMPLE_AND_GRAPH_HOP_LIMITS_AND_HAVE_SOURCE_BOUNDARY"
+    },
+    "unsupported_abstain": {
+      "provenance_code": 3,
+      "source_view_encoding": "INT16_NEGATIVE_4",
+      "admitted": false,
+      "rgba_transport": "ZERO_ONLY__NOT_APPEARANCE_AUTHORITY",
+      "reasons": [
+        "REGION_EXCEEDS_FROZEN_SAMPLE_CAP",
+        "REGION_EXCEEDS_FROZEN_GRAPH_HOP_CAP",
+        "REGION_HAS_NO_QUALIFIED_SOURCE_BOUNDARY"
+      ]
+    },
+    "physical_atlas_padding": {
+      "provenance_code": 255,
+      "source_view_encoding": "INT16_MIN",
+      "admitted": false,
+      "role": "NON_SURFACE_STORAGE_PADDING_ONLY"
+    }
+  },
+  "completion": {
+    "global_surface_fill_forbidden": true,
+    "policy_disqualification_action": "EXPLICIT_COMPILER_ABSTENTION",
+    "numerical_threshold_owner": "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json",
+    "threshold_mutation_for_witness_forbidden": true
+  },
+  "qualification": {
+    "stage22": "ALL_POTENTIAL_SAMPLES_MUST_BE_CLASSIFIED__ADMITTED_SUPPORT_MUST_BE_TOTAL",
+    "stage24": "QUALITY_METRICS_APPLY_TO_ADMITTED_DEFINED_APPEARANCE__ABSTENTION_BOUNDARY_IS_NOT_A_COLOR_SEAM",
+    "stage25": "ANY_REST_VISIBLE_UNSUPPORTED_ABSTENTION_FAILS_CLOSED",
+    "stage45": "ANY_DYNAMIC_VISIBLE_UNSUPPORTED_ABSTENTION_FAILS_CLOSED",
+    "compiled_local_harmonic_exposure_budget_unchanged": true,
+    "physical_padding_visibility_forbidden": true
+  },
+  "product_claims": {
+    "total_appearance_means": "TOTAL_OVER_ADMITTED_RENDERABLE_SUPPORT",
+    "unsupported_potential_surface_is_not_generated_appearance": true,
+    "no_hallucination": true,
+    "product_pass_claimed": false
+  }
+}

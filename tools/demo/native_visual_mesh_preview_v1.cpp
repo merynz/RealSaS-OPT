@@ -137,6 +137,12 @@ Image load_png(const std::string& path) {
     return image;
 }
 
+inline double source_texel_to_raster(double value) {
+    // Source texel i is centered at coordinate i. Runtime raster pixel i is
+    // centered at coordinate i+0.5. This is the sole half-pixel conversion.
+    return value + 0.5;
+}
+
 inline double orient(
     const std::array<double,2>& a,
     const std::array<double,2>& b,
@@ -224,11 +230,9 @@ int main(int argc,char** argv) {
 
         const double sx=static_cast<double>(out_w)/static_cast<double>(mesh.source_width);
         const double sy=static_cast<double>(out_h)/static_cast<double>(mesh.source_height);
-        // Stored visual positions are source texel-center coordinates.
-        // Raster positions use the half-integer pixel-center convention.
         for(auto& p:positions) {
-            p[0]=(p[0]+0.5)*sx;
-            p[1]=(p[1]+0.5)*sy;
+            p[0]=source_texel_to_raster(p[0])*sx;
+            p[1]=source_texel_to_raster(p[1])*sy;
         }
 
         std::vector<std::array<double,4>> accum(

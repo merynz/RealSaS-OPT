@@ -1127,6 +1127,7 @@ def compile_deterministic_caa(
         "face_tile_resolutions": resolutions,
         "direct_valid": direct_valid,
         "direct_rgba": direct_rgba,
+        "face_support_by_view": face_support_by_view,
         "direct_pm_linear_packed": direct_pm_linear_packed,
         "source_xy": source_xy,
         "rgba": rgba,

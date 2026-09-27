@@ -723,6 +723,9 @@ def compile_caa_stage(ctx: dict) -> dict:
         ),
         "sample_component_index": sample_component_index,
         "direct_valid": result["direct_valid"],
+        "direct_foreground_donor_valid": result[
+            "direct_foreground_donor_valid"
+        ],
         "direct_rgba": result["direct_rgba"],
         "face_support_by_view": result["face_support_by_view"],
         "direct_pm_linear_packed": result["direct_pm_linear_packed"],
@@ -1543,9 +1546,9 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
     holdout = structured_holdout_metrics(
         direct_valid=arrays["direct_valid"],
         direct_rgba=arrays["direct_rgba"],
-        direct_donor_valid=(
-            np.asarray(arrays["direct_valid"], dtype=bool)
-            & (source_class == 1)
+        direct_donor_valid=np.asarray(
+            arrays["direct_foreground_donor_valid"],
+            dtype=bool,
         ),
         source_xy=arrays["source_xy"],
         sample_positions=arrays["sample_positions"],
@@ -1580,7 +1583,7 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         ),
     )
     cross_view = cross_view_source_compatibility_metrics(
-        direct_valid=arrays["direct_valid"],
+        direct_valid=arrays["direct_foreground_donor_valid"],
         direct_rgba=arrays["direct_rgba"],
         sample_component_index=arrays["sample_component_index"],
         direct_source_silhouette_class=source_class,

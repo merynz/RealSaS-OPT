@@ -192,11 +192,26 @@ def diagnose(source_fbx:Path,spec_path:Path):
                 ],
             },
         })
+    bone_roles=[
+        {
+            "source_joint_id":b.name,
+            "parent_source_joint_id":parent[b.name],
+            "use_deform":bool(b.use_deform),
+            "rest_position":[
+                float(x)
+                for x in rest_global[b.name].to_translation()
+            ],
+        }
+        for b in bones
+    ]
     return {
         "schema":"RealSaS.MotionSourceActionDiagnostic.v1",
         "status":"MEASURED",
         "source_fbx":str(source_fbx),
         "body_scale":body_scale,
+        "bone_roles":bone_roles,
+        "deform_bone_count":sum(bool(row["use_deform"]) for row in bone_roles),
+        "nondeform_bone_count":sum(not bool(row["use_deform"]) for row in bone_roles),
         "clip_reports":reports,
         "distinct_pose_stream_hash_count":len(set(stream_hashes.values())),
         "clip_count":len(stream_hashes),

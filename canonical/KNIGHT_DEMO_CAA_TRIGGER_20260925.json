@@ -9,7 +9,7 @@
   "target": "25_CAA_REFERENCE_REST_RENDER_PROOF",
   "product_authority_claimed": false,
   "product_pass_forbidden": true,
-  "revision": 17,
+  "revision": 18,
   "previous_failure": "GLOBAL_WORST_CASE_TILE32_COMPILE_MEMORY_EXPLOSION_AFTER_FIXED_PAGE_LAYOUT",
   "test_fixture_repair": "CONSTANT_TIME_SINGLE_FACE_UNSATISFIED_CAPACITY",
   "production_repair": "PER_FACE_ADAPTIVE_LATTICE_PLUS_TOPOLOGY_PARAMETRIC_EDGE_COUPLING_PLUS_BOUNDED_2K_PAGES_V1",
@@ -58,5 +58,7 @@
     "STAGE21_NPZ_SEAL_SECONDS",
     "STAGE23_DIRECTION_BAKE_SECONDS",
     "STAGE25_DIRECTION_PROOF_SECONDS"
-  ]
+  ],
+  "reason": "RESTORED_STAGE08_AND_STAGE19__PROFILED_CAA_RETRY",
+  "requested_on": "2026-09-27"
 }

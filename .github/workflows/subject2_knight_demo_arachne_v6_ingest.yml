@@ -347,12 +347,72 @@ jobs:
           assert len(rows)==1
           skin=json.loads(Path(rows[0]["path"]).read_text())
           report=skin["qualification_report"]
-          assert skin["skin_lineage_hash"]==os.environ["EXPECTED_SKIN_LINEAGE"],skin["skin_lineage_hash"]
+          assert skin["skeleton_binding_hash"]==os.environ["EXPECTED_SKELETON_LINEAGE"]
           assert len(skin["rows"])==12090
           assert report["corrected_row_count"]==0
           assert float(report["total_correction_l1"]) <= 1e-4
-          assert math.isclose(float(report["total_correction_l1"]),4.4249063704254265e-13,rel_tol=0.0,abs_tol=1e-15)
-          print("ARACHNE_V6_STAGE33_PASS",skin["skin_lineage_hash"])
+
+          local=Path(os.environ["ARACHNE_LOCAL"])
+          historical=json.loads(
+              (local/"ARACHNE_KNIGHT_V6_QUALIFIED_SKIN_IR.json").read_text()
+          )
+          migration=json.loads(Path(os.environ["ARACHNE_REBIND_RECEIPT"]).read_text())
+          joint_map={
+              row["old_canonical_joint_id"]:row["new_canonical_joint_id"]
+              for row in migration["mapping"]
+          }
+          old_rows={row["surface_id"]:row for row in historical["rows"]}
+          new_rows={row["surface_id"]:row for row in skin["rows"]}
+          assert set(old_rows)==set(new_rows)
+          max_abs_delta=0.0
+          max_row_l1=0.0
+          for sid in sorted(old_rows):
+              old_inf={
+                  joint_map[jid]:float(weight)
+                  for jid,weight in old_rows[sid]["influences"]
+              }
+              new_inf={
+                  str(jid):float(weight)
+                  for jid,weight in new_rows[sid]["influences"]
+              }
+              assert set(old_inf)==set(new_inf),(sid,set(old_inf)^set(new_inf))
+              deltas=[
+                  abs(old_inf[jid]-new_inf[jid])
+                  for jid in old_inf
+              ]
+              max_abs_delta=max(max_abs_delta,max(deltas,default=0.0))
+              max_row_l1=max(max_row_l1,sum(deltas))
+          assert max_abs_delta <= 1e-15,max_abs_delta
+          assert max_row_l1 <= 1e-14,max_row_l1
+
+          verification={
+              "schema":"RealSaS.ArachneV6SemanticSkinMigrationVerification.v1",
+              "historical_skin_lineage_hash":historical["skin_lineage_hash"],
+              "new_skin_lineage_hash":skin["skin_lineage_hash"],
+              "historical_skeleton_lineage_hash":os.environ["HISTORICAL_V6_SKELETON_LINEAGE"],
+              "new_skeleton_lineage_hash":os.environ["EXPECTED_SKELETON_LINEAGE"],
+              "semantic_tree_hash":os.environ["EXPECTED_SEMANTIC_TREE_SHA256"],
+              "surface_row_count":len(skin["rows"]),
+              "joint_count":len(joint_map),
+              "max_abs_weight_delta_after_compiler_requalification":max_abs_delta,
+              "max_row_l1_weight_delta_after_compiler_requalification":max_row_l1,
+              "numeric_field_semantics_preserved":True,
+              "compiler_requalification_passed":True,
+              "model_retraining_used":False,
+              "teacher_input_used":False,
+              "product_authority_claimed":False,
+          }
+          verification_path=local/"ARACHNE_V6_SEMANTIC_SKIN_MIGRATION_VERIFICATION.json"
+          verification_path.write_text(json.dumps(verification,indent=2,sort_keys=True)+"\n")
+          with Path(os.environ["GITHUB_ENV"]).open("a") as env:
+              env.write(f"NEW_SKIN_LINEAGE={skin['skin_lineage_hash']}\n")
+              env.write(f"ARACHNE_MIGRATION_VERIFICATION={verification_path}\n")
+          print(
+              "ARACHNE_V6_STAGE33_PASS",
+              skin["skin_lineage_hash"],
+              max_abs_delta,
+              max_row_l1,
+          )
           PY
 
       - name: Seal Stage33 V6 receipt

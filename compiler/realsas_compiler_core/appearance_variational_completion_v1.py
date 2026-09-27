@@ -14,6 +14,7 @@ cross-sheet nearest-neighbor transfer is introduced.
 """
 
 from dataclasses import dataclass
+import heapq
 
 import numpy as np
 from scipy.sparse import coo_matrix
@@ -35,6 +36,8 @@ class VariationalCompletionStats:
     maximum_edge_weight: float
     channel_iterations: tuple[int, ...]
     channel_relative_residuals: tuple[float, ...]
+    guide_weight: float = 0.0
+    guide_mode: str = "NONE"
 
     def to_dict(self) -> dict:
         return {
@@ -58,6 +61,8 @@ class VariationalCompletionStats:
             "cross_component_edges_consumed": False,
             "objective": "WEIGHTED_GRAPH_DIRICHLET_ENERGY",
             "solver": "SCIPY_CONJUGATE_GRADIENT_JACOBI_PRECONDITIONED",
+            "guide_weight": float(self.guide_weight),
+            "guide_mode": str(self.guide_mode),
         }
 
 
@@ -96,6 +101,83 @@ def _edge_weights(
     return weight, scale, int(np.count_nonzero(~positive))
 
 
+def geodesic_source_guidance(
+    *,
+    values: np.ndarray,
+    known_mask: np.ndarray,
+    sample_component: np.ndarray,
+    positions: np.ndarray,
+    graph: SurfaceSampleGraph,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Propagate the nearest same-component source value over surface geodesics.
+
+    The returned donor id is a source node index. Exact distance ties resolve
+    to the lower source node index, making the guidance byte-stable.
+    """
+    source=np.asarray(values,dtype=np.float64)
+    known=np.asarray(known_mask,dtype=bool)
+    component=np.asarray(sample_component,dtype=np.int32)
+    points=np.asarray(positions,dtype=np.float64)
+    node_count=len(known)
+    if (
+        source.ndim!=2
+        or source.shape[0]!=node_count
+        or component.shape!=(node_count,)
+        or points.shape!=(node_count,3)
+        or len(graph)!=node_count
+    ):
+        raise QualificationError("CAA_GEODESIC_GUIDANCE_SHAPE_INVALID")
+    seeds=np.flatnonzero(known).astype(np.int64)
+    if len(seeds)==0:
+        raise QualificationError("CAA_GEODESIC_GUIDANCE_NO_SOURCE")
+
+    edge_a=np.asarray(graph.edge_a,dtype=np.int64)
+    edge_b=np.asarray(graph.edge_b,dtype=np.int64)
+    lengths=np.linalg.norm(points[edge_a]-points[edge_b],axis=1)
+    positive=lengths>1.0e-12
+    if not np.any(positive):
+        raise QualificationError("CAA_GEODESIC_GUIDANCE_NO_POSITIVE_EDGE")
+    scale=float(np.median(lengths[positive]))
+    if not np.isfinite(scale) or scale<=0.0:
+        raise QualificationError("CAA_GEODESIC_GUIDANCE_SCALE_INVALID")
+
+    distance=np.full(node_count,np.inf,dtype=np.float64)
+    donor=np.full(node_count,-1,dtype=np.int64)
+    heap=[]
+    for seed in seeds.tolist():
+        distance[seed]=0.0
+        donor[seed]=seed
+        heapq.heappush(heap,(0.0,int(seed),int(seed)))
+
+    while heap:
+        dist,source_id,node=heapq.heappop(heap)
+        if dist>distance[node]+1.0e-15:
+            continue
+        if abs(dist-distance[node])<=1.0e-15 and source_id!=donor[node]:
+            continue
+        cid=int(component[node])
+        for raw in graph[node]:
+            nxt=int(raw)
+            if int(component[nxt])!=cid:
+                continue
+            step=float(np.linalg.norm(points[node]-points[nxt]))/scale
+            step=max(step,1.0e-6)
+            candidate=dist+step
+            better=candidate<distance[nxt]-1.0e-15
+            tied=abs(candidate-distance[nxt])<=1.0e-15
+            if better or (tied and (donor[nxt]<0 or source_id<donor[nxt])):
+                distance[nxt]=candidate
+                donor[nxt]=source_id
+                heapq.heappush(heap,(candidate,source_id,nxt))
+
+    if np.any(donor<0) or not np.isfinite(distance).all():
+        raise QualificationError("CAA_GEODESIC_GUIDANCE_UNREACHED_NODE")
+    guidance=source[donor].copy()
+    if not np.array_equal(guidance[known],source[known]):
+        raise QualificationError("CAA_GEODESIC_GUIDANCE_SOURCE_DRIFT")
+    return guidance,donor
+
+
 def solve_weighted_surface_dirichlet(
     *,
     values: np.ndarray,
@@ -109,6 +191,9 @@ def solve_weighted_surface_dirichlet(
     rtol: float = 1.0e-9,
     atol: float = 1.0e-11,
     maxiter: int = 2048,
+    guide_values: np.ndarray | None = None,
+    guide_weight: float = 0.0,
+    guide_mode: str = "NONE",
 ) -> tuple[np.ndarray, VariationalCompletionStats]:
     """Fill unknown graph nodes by minimizing weighted Dirichlet energy."""
     source = np.asarray(values, dtype=np.float64)
@@ -130,6 +215,16 @@ def solve_weighted_surface_dirichlet(
         raise QualificationError("CAA_VARIATIONAL_INPUT_NONFINITE")
     if not (0.0 < rtol < 1.0) or atol < 0.0 or maxiter <= 0:
         raise QualificationError("CAA_VARIATIONAL_SOLVER_POLICY_INVALID")
+    lam=float(guide_weight)
+    if not np.isfinite(lam) or lam<0.0:
+        raise QualificationError("CAA_VARIATIONAL_GUIDE_WEIGHT_INVALID")
+    guide=None
+    if lam>0.0:
+        if guide_values is None:
+            raise QualificationError("CAA_VARIATIONAL_GUIDE_MISSING")
+        guide=np.asarray(guide_values,dtype=np.float64)
+        if guide.shape!=source.shape or not np.isfinite(guide).all():
+            raise QualificationError("CAA_VARIATIONAL_GUIDE_INVALID")
 
     unknown = ~known
     unknown_count = int(np.count_nonzero(unknown))
@@ -145,6 +240,8 @@ def solve_weighted_surface_dirichlet(
             maximum_edge_weight=0.0,
             channel_iterations=tuple(0 for _ in range(channel_count)),
             channel_relative_residuals=tuple(0.0 for _ in range(channel_count)),
+            guide_weight=lam,
+            guide_mode=str(guide_mode),
         )
         return source.copy(), stats
 
@@ -210,6 +307,10 @@ def solve_weighted_surface_dirichlet(
 
     consume(edge_a, edge_b, weights)
     consume(edge_b, edge_a, weights)
+
+    if lam>0.0:
+        diagonal += lam
+        rhs += lam * guide[unknown_nodes]
 
     if np.any(diagonal <= 0.0) or not np.isfinite(diagonal).all():
         raise QualificationError("CAA_VARIATIONAL_UNKNOWN_NODE_UNCONSTRAINED")
@@ -306,5 +407,7 @@ def solve_weighted_surface_dirichlet(
         maximum_edge_weight=float(np.max(weights)),
         channel_iterations=tuple(iterations),
         channel_relative_residuals=tuple(residuals),
+        guide_weight=lam,
+        guide_mode=str(guide_mode),
     )
     return output, stats

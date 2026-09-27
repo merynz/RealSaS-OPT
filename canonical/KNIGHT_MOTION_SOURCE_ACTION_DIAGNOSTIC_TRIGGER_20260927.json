@@ -1,0 +1,12 @@
+{
+  "schema": "RealSaS.KnightMotionSourceActionDiagnosticTrigger.v1",
+  "status": "RUN",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "requested_on": "2026-09-27",
+  "questions": [
+    "ARE_IDLE_RUN_SLASH_POSE_STREAMS_DISTINCT",
+    "WHAT_IS_NONROOT_TRANSLATION_MAGNITUDE_BY_CLIP_BONE_FRAME"
+  ],
+  "threshold_change": false,
+  "diagnostic_only": true
+}

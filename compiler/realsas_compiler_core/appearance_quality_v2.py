@@ -718,6 +718,7 @@ def provenance_boundary_metrics(
     face_tile_resolutions: np.ndarray | None = None,
     face_vertex_ids: tuple[tuple[str, str, str], ...] | None = None,
     surface_graph: SurfaceSampleGraph | None = None,
+    excluded_provenance_codes: tuple[int, ...] = (),
 ) -> dict:
     """Measure exact surface seams without Python graph duplication.
 
@@ -921,7 +922,7 @@ def provenance_boundary_metrics(
                     else 0.0
                 ),
                 "donor_view_switch_pair_count": int(
-                    np.count_nonzero(donor_differs)
+                    np.count_nonzero(donor_differs & eligible)
                 ),
                 "mean_gradient_jump": (
                     float(np.mean(gradient_jump))

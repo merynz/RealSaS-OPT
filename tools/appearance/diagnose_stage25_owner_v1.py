@@ -167,12 +167,28 @@ def diagnose(
             )
         high_error = source_fg & (error > float(high_error_cut))
 
+        structure = np.ones((3, 3), dtype=bool)
         interior = binary_erosion(
             source_fg,
-            structure=np.ones((3, 3), dtype=bool),
+            structure=structure,
+            iterations=1,
+            border_value=0,
+        )
+        interior_2px = binary_erosion(
+            source_fg,
+            structure=structure,
+            iterations=2,
+            border_value=0,
+        )
+        interior_3px = binary_erosion(
+            source_fg,
+            structure=structure,
+            iterations=3,
             border_value=0,
         )
         boundary = source_fg & ~interior
+        boundary_2px = source_fg & ~interior_2px
+        boundary_3px = source_fg & ~interior_3px
 
         source_geometry_miss = source_fg & ~visible
         false_positive_alpha = final_alpha & ~source_fg
@@ -289,11 +305,28 @@ def diagnose(
             "boundary_high_error_pixel_count": int(
                 np.count_nonzero(high_error & boundary)
             ),
+            "boundary_2px_high_error_pixel_count": int(
+                np.count_nonzero(high_error & boundary_2px)
+            ),
+            "boundary_3px_high_error_pixel_count": int(
+                np.count_nonzero(high_error & boundary_3px)
+            ),
             "interior_high_error_pixel_count": int(
                 np.count_nonzero(high_error & interior)
             ),
+            "deep_interior_3px_high_error_pixel_count": int(
+                np.count_nonzero(high_error & interior_3px)
+            ),
             "boundary_high_error_fraction_of_high_error": float(
                 np.count_nonzero(high_error & boundary)
+            )
+            / float(max(1, np.count_nonzero(high_error))),
+            "boundary_2px_high_error_fraction_of_high_error": float(
+                np.count_nonzero(high_error & boundary_2px)
+            )
+            / float(max(1, np.count_nonzero(high_error))),
+            "boundary_3px_high_error_fraction_of_high_error": float(
+                np.count_nonzero(high_error & boundary_3px)
             )
             / float(max(1, np.count_nonzero(high_error))),
             "direct_source_foreground_pixel_count": int(
@@ -329,7 +362,10 @@ def diagnose(
             "false_positive_alpha_pixel_count",
             "high_error_pixel_count",
             "boundary_high_error_pixel_count",
+            "boundary_2px_high_error_pixel_count",
+            "boundary_3px_high_error_pixel_count",
             "interior_high_error_pixel_count",
+            "deep_interior_3px_high_error_pixel_count",
             "direct_source_high_error_pixel_count",
             "completed_source_high_error_pixel_count",
             "unsupported_visible_pixel_count",
@@ -344,6 +380,18 @@ def diagnose(
     )
     aggregate["interior_high_error_fraction_of_high_error"] = (
         float(aggregate["interior_high_error_pixel_count"])
+        / float(max(1, high))
+    )
+    aggregate["boundary_2px_high_error_fraction_of_high_error"] = (
+        float(aggregate["boundary_2px_high_error_pixel_count"])
+        / float(max(1, high))
+    )
+    aggregate["boundary_3px_high_error_fraction_of_high_error"] = (
+        float(aggregate["boundary_3px_high_error_pixel_count"])
+        / float(max(1, high))
+    )
+    aggregate["deep_interior_3px_high_error_fraction_of_high_error"] = (
+        float(aggregate["deep_interior_3px_high_error_pixel_count"])
         / float(max(1, high))
     )
     return {

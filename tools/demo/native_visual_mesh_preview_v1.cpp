@@ -224,7 +224,12 @@ int main(int argc,char** argv) {
 
         const double sx=static_cast<double>(out_w)/static_cast<double>(mesh.source_width);
         const double sy=static_cast<double>(out_h)/static_cast<double>(mesh.source_height);
-        for(auto& p:positions) { p[0]*=sx; p[1]*=sy; }
+        // Stored visual positions are source texel-center coordinates.
+        // Raster positions use the half-integer pixel-center convention.
+        for(auto& p:positions) {
+            p[0]=(p[0]+0.5)*sx;
+            p[1]=(p[1]+0.5)*sy;
+        }
 
         std::vector<std::array<double,4>> accum(
             static_cast<std::size_t>(out_w)*out_h,

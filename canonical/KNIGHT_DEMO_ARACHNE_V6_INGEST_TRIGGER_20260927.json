@@ -1,13 +1,13 @@
 {
   "schema": "RealSaS.KnightDemoArachneV6IngestTrigger.v1",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
-  "reason": "MIGRATE_V6_SKIN_FIELD_WITH_COMPILER_OWNED_SEMANTIC_SKELETON_HASH",
+  "reason": "MIGRATE_V6_SKIN_FIELD_WITH_COMPILER_DERIVED_SEMANTIC_IDENTITY",
   "expected_skeleton_lineage": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
   "historical_v6_skeleton_lineage": "c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce",
-  "semantic_tree_sha256": "774a88500a305ce3625b7ed79be13a3230921d812ad23942a44a18b00afcf9c9",
   "numeric_skin_field_mutation_allowed": false,
   "model_retraining_allowed": false,
   "product_authority_claimed": false,
-  "revision": 3,
-  "legacy_probe_semantic_tree_sha256": "95f6f224f52ba43dd96296ce877a11851037e939640a4c995e2b9f3e874c7f59"
+  "revision": 4,
+  "legacy_probe_semantic_tree_sha256": "95f6f224f52ba43dd96296ce877a11851037e939640a4c995e2b9f3e874c7f59",
+  "semantic_tree_hash_owner": "compiler.realsas_compiler_core.rig:qualified_skeleton_semantic_sha256"
 }

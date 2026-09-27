@@ -387,6 +387,18 @@ def test_bilinear_provenance_is_conservative_over_color_footprint():
     assert int(sampled[1]) == 0
 
 
+def test_bilinear_provenance_risk_order_is_not_numeric_code_order():
+    # Canonical global completion is frozen as code 4 while unsupported
+    # abstention remains code 3. Abstention must still dominate a bilinear
+    # footprint because it is undefined, even though its numeric code is lower.
+    provenance = np.asarray([[4, 3]], dtype=np.uint8)
+    sampled = conservative_bilinear_provenance(
+        provenance,
+        np.asarray([[0.5, 0.0]], dtype=np.float64),
+    )
+    assert int(sampled[0]) == 3
+
+
 def test_face_atlas_bleed_leaves_no_undefined_texel():
     # tile_resolution=4 => 10 triangle samples for one face.
     rgba = np.tile(np.asarray([[40, 80, 120, 255]], dtype=np.uint8), (10, 1))

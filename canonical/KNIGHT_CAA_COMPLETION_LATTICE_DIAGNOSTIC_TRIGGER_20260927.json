@@ -1,8 +1,8 @@
 {
   "schema": "RealSaS.CAACompletionControlLatticeDiagnosticTrigger.v1",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
-  "reason": "TEST_SEPARATE_R4_COMPLETION_CONTROL_LATTICE_AGAINST_FROZEN_16_SAMPLE_2_HOP_POLICY",
+  "reason": "TEST_R4_COMPLETION_LATTICE_AFTER_VISIBILITY_IMPORT_FIX",
   "thresholds_changed": false,
   "product_authority_claimed": false,
-  "revision": 1
+  "revision": 2
 }

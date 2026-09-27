@@ -1,0 +1,12 @@
+{
+  "schema": "RealSaS.KnightOwnerDiagnosticsTrigger.v1",
+  "status": "RUN",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "requested_on": "2026-09-27",
+  "diagnostics": [
+    "CAA_ALPHA_CONFLICT_TO_SILHOUETTE_DISTANCE",
+    "MOTION_RETARGET_ANCESTRY_VIOLATION"
+  ],
+  "thresholds_changed": false,
+  "product_authority_claimed": false
+}

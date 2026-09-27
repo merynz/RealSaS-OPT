@@ -895,13 +895,24 @@ def seal_caa_compile_stage(ctx: dict) -> dict:
             provenance == CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"]
         )
     )
-    expected_unsupported = int(
-        dict(artifact.metadata or {}).get(
-            "unsupported_abstain_sample_count", 0
+    canonical_global_count = int(
+        np.count_nonzero(
+            provenance == CAA_PROVENANCE["CANONICAL_GLOBAL_COMPLETION"]
         )
+    )
+    metadata = dict(artifact.metadata or {})
+    expected_unsupported = int(
+        metadata.get("unsupported_abstain_sample_count", 0)
+    )
+    expected_canonical_global = int(
+        metadata.get("canonical_global_completion_sample_count", 0)
     )
     if unsupported_count != expected_unsupported:
         raise QualificationError("CAA_COMPILE_UNSUPPORTED_COUNT_DRIFT")
+    if canonical_global_count != expected_canonical_global:
+        raise QualificationError(
+            "CAA_COMPILE_CANONICAL_GLOBAL_COUNT_DRIFT"
+        )
     direct = arrays["direct_valid"]
     direct_exact = np.all(
         arrays["rgba"][direct] == arrays["direct_rgba"][direct],
@@ -947,6 +958,9 @@ def seal_caa_compile_stage(ctx: dict) -> dict:
             "direct_source_immutable": True,
             "admitted_totality": True,
             "unsupported_abstain_sample_count": unsupported_count,
+            "canonical_global_completion_sample_count": (
+                canonical_global_count
+            ),
         },
     }
 

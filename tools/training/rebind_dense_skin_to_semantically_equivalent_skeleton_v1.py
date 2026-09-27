@@ -92,12 +92,9 @@ def _semantic_tree(skeleton) -> tuple[dict, ...]:
 
 
 def _semantic_tree_hash(skeleton) -> str:
-    return content_sha256(
-        {
-            "schema": "RealSaS.SemanticSkeletonTreeByProposalIdentity.v1",
-            "joints": list(_semantic_tree(skeleton)),
-        }
-    )
+    # Must match the canonical Geppetto determinism probe contract exactly:
+    # hash the normalized semantic-tree rows and nothing else.
+    return content_sha256(list(_semantic_tree(skeleton)))
 
 
 def _npy_bytes(array: np.ndarray) -> bytes:

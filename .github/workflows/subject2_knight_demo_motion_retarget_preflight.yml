@@ -23,7 +23,8 @@ jobs:
       RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
       RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
       REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
-      EXPECTED_SKELETON_LINEAGE: c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce
+      EXPECTED_SKELETON_LINEAGE: e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850
+      EXPECTED_SEMANTIC_TREE_SHA256: 95f6f224f52ba43dd96296ce877a11851037e939640a4c995e2b9f3e874c7f59
       EXPECTED_FBX_SHA256: 41f2616fb4a42f9d35e242bbed1450ededc7537def4bf38cbb11b4e54ff2bf21
       MOTION_FBX_REMOTE: 'gdrive:Knight by @Quaternius/FBX/KnightCharacter.fbx'
       PYTHONHASHSEED: '0'
@@ -53,6 +54,8 @@ jobs:
           assert receipt["status"]=="PASS_DEMO_ONLY"
           assert receipt["qualified_joint_count"]==28
           assert receipt["qualified_skeleton_lineage_hash"]==os.environ["EXPECTED_SKELETON_LINEAGE"]
+          assert receipt["semantic_tree_sha256"]==os.environ["EXPECTED_SEMANTIC_TREE_SHA256"]
+          assert receipt["optimizer_identity_contract"]=="GRAPH_SELECTION_SEMANTICS_V1"
           ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
           by={row["id"]:row for row in ledger["stages"]}
           rows=[x for x in by["28_SKELETON_QUALIFIED"]["outputs"] if x["schema"]=="RealSaS.QualifiedSkeletonIR.v1"]

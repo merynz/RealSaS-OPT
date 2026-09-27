@@ -37,10 +37,8 @@ from compiler.realsas_compiler_core.visibility_v2 import (
 )
 from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
     Arap2D,
-    bind_points_barycentric,
+    bind_visual_vertex_handles,
     build_visual_mesh_from_mask,
-    evaluate_bone_handles,
-    sample_bone_handles,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     sha256_file,
@@ -203,193 +201,6 @@ def _mechanical_targets(
     )
 
 
-def _presentation_joint_positions(
-    *,
-    point_xy: np.ndarray,
-    visual_skin_weights: np.ndarray,
-    joint_ids: tuple[str, ...],
-    parent_by_joint: dict[str, str | None],
-    minimum_total_weight: float = 0.05,
-) -> tuple[dict[str, tuple[float, float]], dict[str, float]]:
-    """Derive source-aligned per-view 2D joint controls from Arachne evidence."""
-    points = np.asarray(point_xy, dtype=np.float64)
-    weights = np.asarray(visual_skin_weights, dtype=np.float64)
-    if weights.shape != (len(points), len(joint_ids)):
-        raise RuntimeError("PRESENTATION_JOINT_WEIGHT_SHAPE_DRIFT")
-
-    result: dict[str, tuple[float, float]] = {}
-    support: dict[str, float] = {}
-    global_center = tuple(map(float, points.mean(axis=0)))
-    for column, joint_id in enumerate(joint_ids):
-        w = np.maximum(weights[:, column], 0.0)
-        total = float(w.sum())
-        support[joint_id] = total
-        if total >= float(minimum_total_weight):
-            xy = (points * w[:, None]).sum(axis=0) / total
-            result[joint_id] = tuple(map(float, xy))
-
-    # Unsupported/fully hidden controls inherit their nearest available parent
-    # rather than forcing an off-art projected 3D joint into the 2D solver.
-    unresolved = set(joint_ids) - set(result)
-    for _ in range(len(joint_ids) + 1):
-        if not unresolved:
-            break
-        progressed = False
-        for joint_id in tuple(unresolved):
-            parent = parent_by_joint.get(joint_id)
-            if parent is None:
-                result[joint_id] = global_center
-                unresolved.remove(joint_id)
-                progressed = True
-            elif parent in result:
-                result[joint_id] = result[parent]
-                unresolved.remove(joint_id)
-                progressed = True
-        if not progressed:
-            break
-    for joint_id in unresolved:
-        result[joint_id] = global_center
-    return result, support
-
-
-def _topological_joint_ids(
-    joint_ids: tuple[str, ...],
-    parent_by_joint: dict[str, str | None],
-) -> tuple[str, ...]:
-    remaining = set(joint_ids)
-    order = []
-    while remaining:
-        progressed = False
-        for joint_id in joint_ids:
-            if joint_id not in remaining:
-                continue
-            parent = parent_by_joint.get(joint_id)
-            if parent is None or parent in order:
-                order.append(joint_id)
-                remaining.remove(joint_id)
-                progressed = True
-        if not progressed:
-            raise RuntimeError("PRESENTATION_SKELETON_NOT_TOPOLOGICAL")
-    return tuple(order)
-
-
-def _project_joint_dict(
-    positions: dict[str, tuple[float, float, float]],
-    camera,
-) -> dict[str, np.ndarray]:
-    ids = tuple(positions)
-    xyz = np.asarray([positions[joint_id] for joint_id in ids], dtype=np.float64)
-    xy = project_points_xyz_v3(xyz, camera)[:, :2]
-    return {
-        joint_id: np.asarray(xy[i], dtype=np.float64)
-        for i, joint_id in enumerate(ids)
-    }
-
-
-def _retarget_presentation_joints(
-    *,
-    rest_presentation: dict[str, tuple[float, float]],
-    rest_joint_xyz: dict[str, tuple[float, float, float]],
-    posed_joint_xyz: dict[str, tuple[float, float, float]],
-    camera,
-    joint_ids: tuple[str, ...],
-    parent_by_joint: dict[str, str | None],
-) -> dict[str, tuple[float, float]]:
-    """Retarget 3D motion deltas onto a source-fitted 2D rest rig.
-
-    Absolute projected 3D joint positions never become presentation authority.
-    For each bone we take only the view-projected angular delta from rest to
-    pose, while preserving the source-fitted 2D bone vector/length. Root
-    translation is transferred as a view-projected delta.
-    """
-    rest_projected = _project_joint_dict(rest_joint_xyz, camera)
-    posed_projected = _project_joint_dict(posed_joint_xyz, camera)
-    order = _topological_joint_ids(joint_ids, parent_by_joint)
-    result: dict[str, tuple[float, float]] = {}
-
-    for joint_id in order:
-        parent = parent_by_joint.get(joint_id)
-        rest_visual = np.asarray(rest_presentation[joint_id], dtype=np.float64)
-        if parent is None:
-            delta = posed_projected[joint_id] - rest_projected[joint_id]
-            target = rest_visual + delta
-            result[joint_id] = tuple(map(float, target))
-            continue
-
-        parent_target = np.asarray(result[parent], dtype=np.float64)
-        parent_rest_visual = np.asarray(rest_presentation[parent], dtype=np.float64)
-        visual_bone = rest_visual - parent_rest_visual
-        visual_length = float(np.linalg.norm(visual_bone))
-        if visual_length <= 1.0e-9:
-            result[joint_id] = tuple(map(float, parent_target))
-            continue
-
-        rest_bone = rest_projected[joint_id] - rest_projected[parent]
-        posed_bone = posed_projected[joint_id] - posed_projected[parent]
-        rest_len = float(np.linalg.norm(rest_bone))
-        posed_len = float(np.linalg.norm(posed_bone))
-        if rest_len <= 1.0e-6 or posed_len <= 1.0e-6:
-            delta_angle = 0.0
-        else:
-            rest_angle = float(np.arctan2(rest_bone[1], rest_bone[0]))
-            posed_angle = float(np.arctan2(posed_bone[1], posed_bone[0]))
-            delta_angle = float(
-                np.arctan2(
-                    np.sin(posed_angle - rest_angle),
-                    np.cos(posed_angle - rest_angle),
-                )
-            )
-        cosine = float(np.cos(delta_angle))
-        sine = float(np.sin(delta_angle))
-        rotated = np.asarray(
-            (
-                cosine * visual_bone[0] - sine * visual_bone[1],
-                sine * visual_bone[0] + cosine * visual_bone[1],
-            ),
-            dtype=np.float64,
-        )
-        result[joint_id] = tuple(map(float, parent_target + rotated))
-    return result
-
-
-def _presentation_handle_specs(
-    *,
-    joint_ids: tuple[str, ...],
-    parent_by_joint: dict[str, str | None],
-    rest_joint_xy: dict[str, tuple[float, float]],
-    joint_support: dict[str, float],
-    step: float = 0.25,
-    min_bone_px: float = 2.0,
-    min_support: float = 0.05,
-) -> tuple[tuple[str, str, float], ...]:
-    rows = []
-    root_added = False
-    for joint_id in _topological_joint_ids(joint_ids, parent_by_joint):
-        parent = parent_by_joint.get(joint_id)
-        if parent is None:
-            if float(joint_support.get(joint_id, 0.0)) >= min_support:
-                rows.append((joint_id, joint_id, 1.0))
-                root_added = True
-            continue
-        if float(joint_support.get(joint_id, 0.0)) < min_support:
-            continue
-        a = np.asarray(rest_joint_xy[parent], dtype=np.float64)
-        b = np.asarray(rest_joint_xy[joint_id], dtype=np.float64)
-        if float(np.linalg.norm(b - a)) < float(min_bone_px):
-            continue
-        if not root_added and float(joint_support.get(parent, 0.0)) >= min_support:
-            rows.append((joint_id, parent, 0.0))
-            root_added = True
-        t = float(step)
-        while t < 1.0 - 1.0e-9:
-            rows.append((joint_id, parent, t))
-            t += float(step)
-        rows.append((joint_id, parent, 1.0))
-    if not rows:
-        raise RuntimeError("PRESENTATION_HANDLE_SET_EMPTY")
-    return tuple(rows)
-
-
 def _write_direct_provenance(path: Path, height: int, width: int) -> str:
     provenance = np.zeros((8, height, width), dtype=np.uint8)
     source_view = np.broadcast_to(
@@ -524,36 +335,6 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
         dtype=np.float64,
     )
     mechanical_face_indices = _candidate_face_indices(candidate)
-    parent_by_joint = {
-        str(joint.canonical_joint_id): (
-            None
-            if joint.parent_canonical_id is None
-            else str(joint.parent_canonical_id)
-        )
-        for joint in skeleton.joints
-    }
-    _rest_skin_matrices, rest_joint_positions, _rest_frame_hash = _joint_pose_v2(
-        skeleton=skeleton,
-        tracks={},
-        time_seconds=0.0,
-        cameras=cameras,
-    )
-
-
-    clip_specs = [
-        ("demo_idle_v1", "IDLE", 833),
-        ("demo_run_v1", "RUN", 208),
-        ("demo_slash_v1", "SLASH", 278),
-    ]
-    clip_payloads = {}
-    for clip_id, _short, _ms in clip_specs:
-        motion_path = (
-            ctx["run_root"] / "inputs" / "motion" / "quaternius_knight_v1" / f"{clip_id}.motion.json"
-        )
-        payload = json.loads(motion_path.read_text())
-        tracks, mapping = _tracks_for_clip(payload, skeleton, cameras, source_report)
-        clip_payloads[clip_id] = (payload, tracks, mapping)
-
     render_inputs = {}
     report_views = []
     for view_index in (0, 2):
@@ -572,33 +353,12 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
             mechanical_weights=mechanical_weights,
             source_mask=mask,
         )
-        rest_visible_xy = np.asarray(mesh.positions, dtype=np.float64)[
-            mechanical_binding["visual_vertex_indices"]
-        ]
-        rest_presentation_joints, joint_support = _presentation_joint_positions(
-            point_xy=rest_visible_xy,
-            visual_skin_weights=mechanical_binding["visual_skin_weights"],
-            joint_ids=tuple(mechanical_joint_ids),
-            parent_by_joint=parent_by_joint,
+        visual_handle_indices = np.asarray(
+            mechanical_binding["visual_vertex_indices"],
+            dtype=np.int64,
         )
-        handle_specs = _presentation_handle_specs(
-            joint_ids=tuple(mechanical_joint_ids),
-            parent_by_joint=parent_by_joint,
-            rest_joint_xy=rest_presentation_joints,
-            joint_support=joint_support,
-            step=0.25,
-            min_bone_px=2.0,
-            min_support=0.05,
-        )
-        rest_handles = evaluate_bone_handles(
-            handle_specs,
-            rest_presentation_joints,
-        )
-        bindings = bind_points_barycentric(mesh, rest_handles)
+        bindings = bind_visual_vertex_handles(mesh, visual_handle_indices)
         arap = Arap2D(mesh, bindings)
-        supported_joint_count = sum(
-            1 for value in joint_support.values() if float(value) >= 0.05
-        )
         print(
             "VISUAL_MECHANICAL_BINDING",
             json.dumps(
@@ -612,9 +372,7 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
                         mechanical_binding["unbound_visual_vertex_count"]
                     ),
                     "presentation_handle_count": int(len(bindings)),
-                    "supported_presentation_joint_count": int(
-                        supported_joint_count
-                    ),
+                    "presentation_driver": "DIRECT_POSED_MECHANICAL_SURFACE_TARGETS",
                     "rest_mechanical_visibility_layer_overflow_pixel_count": int(
                         mechanical_binding["visibility_layer_overflow_pixel_count"]
                     ),
@@ -647,23 +405,22 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
             posed_pixel_frames = []
             qa_rows = []
             for time_seconds in times:
-                _skin_matrices, _posed_joint_positions, _frame_hash = _joint_pose_v2(
+                skin_matrices, _posed_joint_positions, _frame_hash = _joint_pose_v2(
                     skeleton=skeleton,
                     tracks=tracks,
                     time_seconds=float(time_seconds),
                     cameras=cameras,
                 )
-                posed_presentation_joints = _retarget_presentation_joints(
-                    rest_presentation=rest_presentation_joints,
-                    rest_joint_xyz=rest_joint_positions,
-                    posed_joint_xyz=_posed_joint_positions,
-                    camera=camera,
-                    joint_ids=tuple(mechanical_joint_ids),
-                    parent_by_joint=parent_by_joint,
+                posed_mechanical_xyz = _skin(
+                    rest_mechanical_xyz,
+                    mechanical_weights,
+                    mechanical_joint_ids,
+                    skin_matrices,
                 )
-                target_xy = evaluate_bone_handles(
-                    handle_specs,
-                    posed_presentation_joints,
+                target_xy = _mechanical_targets(
+                    binding=mechanical_binding,
+                    posed_mechanical_xyz=posed_mechanical_xyz,
+                    camera=camera,
                 )
                 deformed, qa = arap.solve(target_xy, iterations=3)
                 posed_pixel_frames.append(np.asarray(deformed, dtype=np.float64))
@@ -794,7 +551,7 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
             "mechanical_mesh": "NOT_RENDERED",
             "visual_mesh": "SOURCE_FOREGROUND_MASK_DERIVED",
             "texture": "ORIGINAL_SOURCE_RGBA_WITH_FOREGROUND_ALPHA",
-            "deformation_driver": "STAGE32_ARACHNE_FITS_SOURCE_2D_REST_RIG__STAGE28_VIEW_PROJECTED_ROTATION_DELTAS_RETARGETED_WITH_2D_BONE_LENGTH_PRESERVATION",
+            "deformation_driver": "STAGE18_MECHANICAL_FIRST_HIT_BINDING__STAGE32_ARACHNE_SKIN__STAGE40_POSED_MECHANICAL_SURFACE_PROJECTED_TO_SOURCE_VIEW",
             "deformer": "LOCAL_GLOBAL_ARAP_2D",
         },
         "views": report_views,

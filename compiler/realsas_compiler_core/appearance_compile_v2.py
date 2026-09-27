@@ -7,6 +7,10 @@ from typing import Mapping
 
 import numpy as np
 from .appearance_authority_v2 import CAA_PROVENANCE
+from .appearance_canonical_completion_v1 import (
+    build_all_view_unseen_canonical_completion,
+    prolongate_control_pm_to_adaptive_faces,
+)
 from .appearance_color_v2 import (
     bilinear_premultiplied_linear_rgba,
     premultiplied_linear_to_straight_srgb_u8,
@@ -922,6 +926,37 @@ def compile_deterministic_caa(
         sample_count_mode = "UNIFORM_FACE_LATTICE_V1"
         barycentric_storage_mode = "UNIFORM_PATTERN_EXPLICIT_V1"
 
+    # C(p) is solved once on a fixed low-resolution canonical control lattice
+    # and prolonged onto the exact adaptive per-face transport lattice. This
+    # keeps the global solve independent of atlas density while preserving the
+    # same qualified mesh topology.
+    canonical_control_resolution = 4
+    canonical_control_barycentric = triangular_barycentric_samples(
+        canonical_control_resolution
+    )
+    (
+        canonical_control_positions,
+        canonical_control_face,
+        canonical_control_component,
+        canonical_control_component_ids,
+        canonical_control_face_normals,
+    ) = _surface_sample_geometry(
+        candidate,
+        canonical_control_barycentric,
+    )
+    if tuple(canonical_control_component_ids) != tuple(component_ids):
+        raise QualificationError("CAA_CANONICAL_CONTROL_COMPONENT_DRIFT")
+    canonical_control_count = len(canonical_control_positions)
+    canonical_control_direct_valid = np.zeros(
+        (8, canonical_control_count), dtype=bool
+    )
+    canonical_control_direct_rgba = np.zeros(
+        (8, canonical_control_count, 4), dtype=np.uint8
+    )
+    canonical_control_face_support = np.zeros(
+        (8, face_count), dtype=np.float64
+    )
+
     min_cos = float(source_lock_policy["min_abs_normal_camera_cos"])
     erosion = int(source_lock_policy["boundary_safe_erosion_px"])
     min_alpha = int(source_lock_policy["min_source_alpha_u8"])
@@ -1030,11 +1065,109 @@ def compile_deterministic_caa(
                 np.asarray(sampled_pm, dtype=np.float64).copy()
             )
 
+        # Evaluate the same source/visibility contract on the canonical C(p)
+        # control lattice. The rasterized owner map is reused from the dense
+        # pass, so this adds projection/sampling work but not another geometry
+        # rasterization.
+        control_projected = np.asarray(
+            project_points_xyz_v3(canonical_control_positions, camera),
+            dtype=np.float64,
+        )
+        control_xy = control_projected[:, :2] - 0.5
+        control_ix = np.rint(control_xy[:, 0]).astype(np.int64)
+        control_iy = np.rint(control_xy[:, 1]).astype(np.int64)
+        control_in_bounds = (
+            (control_ix >= 0)
+            & (control_ix < image.shape[1])
+            & (control_iy >= 0)
+            & (control_iy < image.shape[0])
+            & np.isfinite(control_projected[:, 2])
+            & (control_projected[:, 2] > 0.0)
+        )
+        control_foreground_safe = np.zeros(
+            canonical_control_count, dtype=bool
+        )
+        control_background_safe = np.zeros(
+            canonical_control_count, dtype=bool
+        )
+        control_visible = np.zeros(canonical_control_count, dtype=bool)
+        control_alpha_foreground_safe = np.zeros(
+            canonical_control_count, dtype=bool
+        )
+        control_alpha_background_safe = np.zeros(
+            canonical_control_count, dtype=bool
+        )
+        control_ids = np.flatnonzero(control_in_bounds)
+        if len(control_ids):
+            cx = control_ix[control_ids]
+            cy = control_iy[control_ids]
+            control_foreground_safe[control_ids] = safe_foreground[cy, cx]
+            control_background_safe[control_ids] = safe_background[cy, cx]
+            control_visible[control_ids] = (
+                visibility.owner_face_index[cy, cx]
+                == canonical_control_face[control_ids]
+            )
+            control_alpha_foreground_safe[control_ids] = (
+                image[cy, cx, 3] >= min_alpha
+            )
+            control_alpha_background_safe[control_ids] = (
+                image[cy, cx, 3] == 0
+            )
+        control_face_cos = np.abs(canonical_control_face_normals @ forward)
+        canonical_control_face_support[view] = control_face_cos
+        control_angle_safe = (
+            control_face_cos[canonical_control_face] >= min_cos
+        )
+        control_appearance_support = (
+            (control_foreground_safe & control_alpha_foreground_safe)
+            | (control_background_safe & control_alpha_background_safe)
+        )
+        control_valid = (
+            control_in_bounds
+            & control_visible
+            & control_appearance_support
+            & control_angle_safe
+        )
+        canonical_control_direct_valid[view] = control_valid
+        if np.any(control_valid):
+            canonical_control_direct_rgba[view, control_valid] = (
+                bilinear_rgba_u8(image, control_xy[control_valid])
+            )
+
     direct_pm_linear_packed = (
         np.concatenate(direct_pm_linear_chunks, axis=0)
         if direct_pm_linear_chunks
         else np.empty((0, 4), dtype=np.float64)
     )
+
+    canonical_control_graph = surface_sample_neighbors(
+        positions=canonical_control_positions,
+        face_count=face_count,
+        tile_resolution=canonical_control_resolution,
+        face_vertex_ids=tuple(
+            tuple(map(str, face)) for face in candidate.faces
+        ),
+    )
+    canonical_completion = build_all_view_unseen_canonical_completion(
+        direct_valid=canonical_control_direct_valid,
+        direct_rgba=canonical_control_direct_rgba,
+        face_support_by_view=canonical_control_face_support,
+        sample_face_index=canonical_control_face,
+        sample_component_index=canonical_control_component,
+        sample_positions=canonical_control_positions,
+        surface_graph=canonical_control_graph,
+    )
+    dense_canonical_pm = prolongate_control_pm_to_adaptive_faces(
+        control_pm_linear=canonical_completion.solved_pm_linear,
+        face_tile_resolutions=resolutions,
+        control_resolution=canonical_control_resolution,
+    )
+    if dense_canonical_pm.shape != (sample_count, 4):
+        raise QualificationError("CAA_CANONICAL_COMPLETION_DENSE_SHAPE_DRIFT")
+    dense_canonical_rgba = premultiplied_linear_to_straight_srgb_u8(
+        dense_canonical_pm
+    )
+    globally_unseen_dense = ~np.any(direct_valid, axis=0)
     direct_count = int(np.count_nonzero(direct_valid))
     if direct_pm_linear_packed.shape != (direct_count, 4):
         raise QualificationError("CAA_DIRECT_PM_PACKED_ACCOUNTING_DRIFT")
@@ -1120,7 +1253,24 @@ def compile_deterministic_caa(
             abstain_provenance_code=CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"],
             abstain_source_view_value=-4,
         )
-        completion_rows.append({"target_view_index": target, **stats})
+
+        global_take = (
+            (provenance[target] == CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"])
+            & globally_unseen_dense
+        )
+        if np.any(global_take):
+            rgba[target, global_take] = dense_canonical_rgba[global_take]
+            provenance[target, global_take] = CAA_PROVENANCE[
+                "CANONICAL_GLOBAL_COMPLETION"
+            ]
+            source_view[target, global_take] = -3
+        completion_rows.append({
+            "target_view_index": target,
+            **stats,
+            "canonical_global_completion_sample_count": int(
+                np.count_nonzero(global_take)
+            ),
+        })
         if np.any(provenance[target] == 255):
             raise QualificationError("CAA_PROVENANCE_UNCLASSIFIED_AFTER_COMPILE")
         valid_codes = np.asarray(
@@ -1155,6 +1305,12 @@ def compile_deterministic_caa(
         "sample_component_index": sample_component_index,
         "counts": counts,
         "completion_rows": tuple(completion_rows),
+        "canonical_global_completion_metadata": canonical_completion.metadata(),
+        "canonical_global_completion_source_view_value": -3,
+        "canonical_control_resolution": canonical_control_resolution,
+        "globally_unseen_dense_sample_count": int(
+            np.count_nonzero(globally_unseen_dense)
+        ),
         "unsupported_abstain_source_view_value": -4,
         "face_count": face_count,
         "sample_count_mode": sample_count_mode,

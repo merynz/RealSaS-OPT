@@ -1,8 +1,8 @@
 {
   "schema": "RealSaS.CAACompletionControlLatticeDiagnosticTrigger.v1",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
-  "reason": "TEST_R4_COMPLETION_LATTICE_AFTER_VISIBILITY_IMPORT_FIX",
+  "reason": "MEASURE_SOURCE_OBSERVED_RENDERABLE_FACE_DOMAIN_WITHOUT_TOPOLOGY_MUTATION",
   "thresholds_changed": false,
   "product_authority_claimed": false,
-  "revision": 2
+  "revision": 3
 }

@@ -1,0 +1,65 @@
+name: subject2-knight-caa-stage25-owner-diagnostic-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_CAA_STAGE25_OWNER_DIAGNOSTIC_TRIGGER_20260927.json'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-caa-stage25-owner-diagnostic-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Compile diagnostic
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/appearance/diagnose_stage25_owner_v1.py
+
+      - name: Classify Stage25 visual error owners
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python -m tools.appearance.diagnose_stage25_owner_v1 \
+            --authority-root "$AUTHORITY_ROOT" \
+            --run-id "$RUN_ID" \
+            --high-error-cut 0.10 \
+            --out canonical/KNIGHT_CAA_STAGE25_OWNER_DIAGNOSTIC_20260927.json
+
+      - name: Seal diagnostic
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_CAA_STAGE25_OWNER_DIAGNOSTIC_20260927.json
+          if git diff --cached --quiet; then
+            echo "CAA_STAGE25_OWNER_DIAGNOSTIC_UNCHANGED"
+            exit 0
+          fi
+          git commit -m 'diagnostic: seal Knight Stage25 visual error owners'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

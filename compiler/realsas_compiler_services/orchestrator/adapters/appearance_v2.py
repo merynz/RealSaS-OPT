@@ -807,6 +807,145 @@ def compile_caa_stage(ctx: dict) -> dict:
         compile_policy.get("tile_resolution_strategy")
         or "UNIFORM_FACE_LATTICE_V1"
     )
+    if strategy == "SOURCE_VISUAL_MESH_V1":
+        visual_set = _visual_mesh_set(ctx)
+        if (
+            visual_set.set_hash
+            != str(compile_policy.get("visual_mesh_set_binding_hash") or "")
+        ):
+            raise QualificationError("CAA_VISUAL_COMPILE_MESH_SET_DRIFT")
+        if visual_set.observation_set_binding_hash != observation.observation_set_hash:
+            raise QualificationError("CAA_VISUAL_COMPILE_OBSERVATION_DRIFT")
+        rows = tuple(sorted(visual_set.views, key=lambda row: int(row.view_index)))
+        if len(rows) != 8:
+            raise QualificationError("CAA_VISUAL_COMPILE_REQUIRES_V0_V7")
+        foreground_counts = np.asarray(
+            [int(np.count_nonzero(masks[int(row.view_index)])) for row in rows],
+            dtype=np.int64,
+        )
+        vertex_counts = np.asarray(
+            [int(row.vertex_count) for row in rows],
+            dtype=np.int64,
+        )
+        face_counts = np.asarray(
+            [int(row.face_count) for row in rows],
+            dtype=np.int64,
+        )
+        total = int(foreground_counts.sum())
+        if total <= 0:
+            raise QualificationError("CAA_VISUAL_COMPILE_EMPTY_FOREGROUND")
+        root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+        npz_path = root / "visual_appearance_compile.npz"
+        npz_started = perf_counter()
+        npz_sha = _save_npz(
+            npz_path,
+            view_index=np.arange(8, dtype=np.int32),
+            foreground_pixel_count=foreground_counts,
+            visual_vertex_count=vertex_counts,
+            visual_face_count=face_counts,
+            visual_mesh_hash=np.asarray(
+                [str(row.mesh_hash).encode("ascii") for row in rows],
+                dtype="S64",
+            ),
+            source_raster_sha256=np.asarray(
+                [str(row.source_raster_sha256).encode("ascii") for row in rows],
+                dtype="S64",
+            ),
+            source_foreground_mask_sha256=np.asarray(
+                [
+                    str(row.source_foreground_mask_sha256).encode("ascii")
+                    for row in rows
+                ],
+                dtype="S64",
+            ),
+        )
+        npz_seal_seconds = perf_counter() - npz_started
+        artifact = CAACompileArtifactIR(
+            backend_id=prereg.backend_id,
+            preregistration_binding_hash=prereg.preregistration_hash,
+            candidate_mesh_binding_hash=prereg.candidate_mesh_binding_hash,
+            surface_addressing_binding_hash=prereg.surface_addressing_binding_hash,
+            appearance_domain_binding_hash=prereg.appearance_domain_binding_hash,
+            output_direction_set_binding_hash=prereg.output_direction_set_binding_hash,
+            compile_npz_path=str(npz_path),
+            compile_npz_sha256=npz_sha,
+            face_count=int(face_counts.sum()),
+            direction_count=8,
+            tile_resolution=4,
+            sample_count_per_face=1,
+            total_sample_count=total,
+            direct_source_sample_count=total,
+            other_view_source_sample_count=0,
+            compiled_local_harmonic_sample_count=0,
+            compile_hash="",
+            metadata={
+                "source_owned_visual_mesh_mode": True,
+                "visual_mesh_set_binding_hash": visual_set.set_hash,
+                "mechanical_mesh_render_authority": False,
+                "sample_count_mode": "SOURCE_RASTER_DIRECT_V1",
+                "compile_array_schema": (
+                    "RealSaS.VisualAppearanceCompileArrays.v1"
+                ),
+                "unsupported_abstain_sample_count": 0,
+                "canonical_global_completion_sample_count": 0,
+                "total_appearance_defined": True,
+                "total_admitted_appearance_defined": True,
+                "runtime_generation_used": False,
+                "geometry_mutated": False,
+                "cross_view_completion_used": False,
+                "direct_pm_linear_storage_mode": (
+                    "PACKED_DIRECT_VALID_VIEW_MAJOR_V1"
+                ),
+                "direct_pm_linear_storage_dtype": "float64",
+                "source_xy_storage_dtype": "float32",
+                "visual_uv_authority": "FIXED_SOURCE_RASTER_UV",
+                "visual_geometry_authority": "SOURCE_ART_SILHOUETTE",
+                "foreground_pixel_count_by_view": foreground_counts.tolist(),
+                "visual_vertex_count_by_view": vertex_counts.tolist(),
+                "visual_face_count_by_view": face_counts.tolist(),
+            },
+        )
+        artifact = replace(
+            artifact,
+            compile_hash=caa_compile_hash(artifact),
+        )
+        return {
+            "status": "PASS",
+            "outputs": [
+                write_ir(
+                    root / "caa_compile_artifact.json",
+                    artifact,
+                    authority_class="CAA_COMPILE_ARTIFACT",
+                ),
+                {
+                    "path": str(npz_path),
+                    "sha256": npz_sha,
+                    "authority_class": "VISUAL_APPEARANCE_COMPILE_ARRAYS",
+                    "schema": "RealSaS.VisualAppearanceCompileArrays.v1",
+                },
+            ],
+            "performance": {
+                "source_prepare_seconds": float(source_prepare_seconds),
+                "deterministic_compile_seconds": 0.0,
+                "npz_seal_seconds": float(npz_seal_seconds),
+                "core_phase_seconds": {
+                    "visual_mesh_compile": 0.0,
+                    "generated_appearance": 0.0,
+                },
+                "measured_inner_seconds": float(
+                    source_prepare_seconds + npz_seal_seconds
+                ),
+            },
+            "diagnostics": {
+                "compile_hash": artifact.compile_hash,
+                "appearance_domain": "SOURCE_OWNED_VISUAL_MESH",
+                "visual_mesh_set_hash": visual_set.set_hash,
+                "direct_source_sample_count": total,
+                "generated_sample_count": 0,
+                "mechanical_mesh_render_authority": False,
+            },
+        }
+
     face_tile_resolutions = None
     if strategy == "PER_FACE_ADAPTIVE_V1":
         face_tile_resolutions = np.asarray(

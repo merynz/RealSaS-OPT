@@ -1,0 +1,30 @@
+name: inspect-historical-cdt-api
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/inspect_historical_cdt_api.yml'
+
+jobs:
+  inspect:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Inspect historical CDT API
+        run: |
+          PYTHONPATH=. python - <<'PY'
+          import inspect
+          from compiler.realsas_compiler_core.mesh._historical_v05 import load_historical_cdt_module_v05
+          m=load_historical_cdt_module_v05()
+          print("SIG", inspect.signature(m.triangulate_production_cdt))
+          print("SOURCE_BEGIN")
+          print(inspect.getsource(m.triangulate_production_cdt))
+          print("SOURCE_END")
+          PY

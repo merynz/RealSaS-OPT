@@ -565,6 +565,10 @@ int main(int argc,char** argv) {
             throw std::runtime_error("SOURCE_VIEW_IDENTITY_RENDER_AUTHORITY_FORBIDDEN");
         if(manifest.at("source_view_identity_compiled_harmonic_code")!="-2")
             throw std::runtime_error("SOURCE_VIEW_HARMONIC_CODE_INVALID");
+        if(manifest.at("source_view_identity_unsupported_abstain_code")!="-4")
+            throw std::runtime_error("SOURCE_VIEW_UNSUPPORTED_ABSTAIN_CODE_INVALID");
+        if(manifest.at("source_view_identity_physical_padding_code")!="INT16_MIN")
+            throw std::runtime_error("SOURCE_VIEW_PADDING_CODE_INVALID");
         if(manifest.at("source_view_identity_mixed_sample_code")!="-3")
             throw std::runtime_error("SOURCE_VIEW_MIXED_CODE_INVALID");
         const auto mesh=parse_mesh(entries.at("mesh.bin"));
@@ -730,18 +734,23 @@ int main(int argc,char** argv) {
                             const double u=uv[0].x*w[0]+uv[1].x*w[1]+uv[2].x*w[2];
                             const double v=uv[0].y*w[0]+uv[1].y*w[1]+uv[2].y*w[2];
                             const auto page=face_pages[static_cast<std::size_t>(fi)];
+                            const auto sampled_provenance=sample_provenance(
+                                provenance,
+                                static_cast<std::uint32_t>(view),
+                                page,
+                                u,
+                                v
+                            );
+                            if(sampled_provenance==3)
+                                throw std::runtime_error("VISIBLE_UNSUPPORTED_APPEARANCE");
+                            if(sampled_provenance==255)
+                                throw std::runtime_error("VISIBLE_ATLAS_PADDING");
                             const auto sample=sample_pm(textures,static_cast<std::uint32_t>(view),page,u,v);
                             const double transmission=1.0-std::max(0.0,std::min(1.0,sample_accum.a));
                             if(sample.a*transmission>1e-12) {
                                 sample_risk=std::max(
                                     sample_risk,
-                                    static_cast<int>(sample_provenance(
-                                        provenance,
-                                        static_cast<std::uint32_t>(view),
-                                        page,
-                                        u,
-                                        v
-                                    ))
+                                    static_cast<int>(sampled_provenance)
                                 );
                                 sample_source_view_diag=merge_source_view_diagnostic(
                                     sample_source_view_diag,

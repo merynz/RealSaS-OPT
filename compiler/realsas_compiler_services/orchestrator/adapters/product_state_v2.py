@@ -6,6 +6,7 @@ from PIL import Image
 import numpy as np
 
 from compiler.realsas_compiler_core.appearance_authority_v2 import (
+    CAA_PROVENANCE,
     complete_appearance_asset_from_dict,
     complete_appearance_qualification_from_dict,
 )
@@ -198,20 +199,40 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
             "PRESENTATION_V2_CAA_SOURCE_VIEW_LINEAGE_SHAPE_DRIFT"
         )
     padding = np.iinfo(np.int16).min
-    valid_source_view = (
-        ((source_view >= 0) & (source_view < 8))
-        | (source_view == -2)
-        | (source_view == padding)
+    direct_or_other = (
+        (provenance == CAA_PROVENANCE["DIRECT_SOURCE"])
+        | (provenance == CAA_PROVENANCE["OTHER_VIEW_SOURCE"])
     )
-    if not np.all(valid_source_view):
+    harmonic = (
+        provenance == CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"]
+    )
+    unsupported = (
+        provenance == CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"]
+    )
+    padding_mask = provenance == 255
+    valid_provenance = (
+        direct_or_other | harmonic | unsupported | padding_mask
+    )
+    if not np.all(valid_provenance):
         raise QualificationError(
-            "PRESENTATION_V2_CAA_SOURCE_VIEW_LINEAGE_VALUE_INVALID"
+            "PRESENTATION_V2_CAA_PROVENANCE_VALUE_INVALID"
         )
-    if np.any((provenance != 255) & (source_view == padding)):
+    if np.any(
+        direct_or_other
+        & ~((source_view >= 0) & (source_view < 8))
+    ):
         raise QualificationError(
-            "PRESENTATION_V2_CAA_RENDERABLE_SOURCE_VIEW_LINEAGE_MISSING"
+            "PRESENTATION_V2_CAA_SOURCE_VIEW_IDENTITY_DRIFT"
         )
-    if np.any((provenance == 255) & (source_view != padding)):
+    if np.any(harmonic & (source_view != -2)):
+        raise QualificationError(
+            "PRESENTATION_V2_CAA_HARMONIC_LINEAGE_DRIFT"
+        )
+    if np.any(unsupported & (source_view != -4)):
+        raise QualificationError(
+            "PRESENTATION_V2_CAA_UNSUPPORTED_LINEAGE_DRIFT"
+        )
+    if np.any(padding_mask & (source_view != padding)):
         raise QualificationError(
             "PRESENTATION_V2_CAA_SOURCE_VIEW_PADDING_DRIFT"
         )

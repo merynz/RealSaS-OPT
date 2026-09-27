@@ -228,7 +228,11 @@ def bake_direction_adaptive_source_view_atlas_pages(
     total_samples = int(offsets[-1])
     if source_samples.shape != (total_samples,):
         raise QualificationError("CAA_ADAPTIVE_BAKE_SOURCE_VIEW_SAMPLE_SHAPE_INVALID")
-    valid = ((source_samples >= 0) & (source_samples < 8)) | (source_samples == -2)
+    valid = (
+        ((source_samples >= 0) & (source_samples < 8))
+        | (source_samples == -2)
+        | (source_samples == -4)
+    )
     if not np.all(valid):
         raise QualificationError("CAA_ADAPTIVE_BAKE_SOURCE_VIEW_SAMPLE_VALUE_INVALID")
 
@@ -359,7 +363,11 @@ def bake_direction_source_view_atlas_pages(
     sample_count = int(tile_resolution) * (int(tile_resolution) + 1) // 2
     if source_samples.shape != (face_count * sample_count,):
         raise QualificationError("CAA_PAGED_BAKE_SOURCE_VIEW_SAMPLE_SHAPE_INVALID")
-    valid = ((source_samples >= 0) & (source_samples < 8)) | (source_samples == -2)
+    valid = (
+        ((source_samples >= 0) & (source_samples < 8))
+        | (source_samples == -2)
+        | (source_samples == -4)
+    )
     if not np.all(valid):
         raise QualificationError("CAA_PAGED_BAKE_SOURCE_VIEW_SAMPLE_VALUE_INVALID")
     source_samples = source_samples.reshape(face_count, sample_count)
@@ -454,6 +462,7 @@ def bake_direction_source_view_atlas(
     Stored texels preserve the Stage21 source-view identity:
       0..7 -> exact source/donor view
       -2   -> compiled local harmonic appearance
+      -4   -> compiler abstention on source-unsupported potential surface
 
     The global unallocated atlas padding uses int16 minimum and is never a
     renderable surface texel. This lineage is diagnostic/provenance authority
@@ -469,7 +478,11 @@ def bake_direction_source_view_atlas(
     sample_count = tile_resolution * (tile_resolution + 1) // 2
     if source_samples.shape != (face_count * sample_count,):
         raise QualificationError("CAA_BAKE_SOURCE_VIEW_SAMPLE_SHAPE_INVALID")
-    valid = ((source_samples >= 0) & (source_samples < 8)) | (source_samples == -2)
+    valid = (
+        ((source_samples >= 0) & (source_samples < 8))
+        | (source_samples == -2)
+        | (source_samples == -4)
+    )
     if not np.all(valid):
         raise QualificationError("CAA_BAKE_SOURCE_VIEW_SAMPLE_VALUE_INVALID")
 
@@ -514,7 +527,7 @@ def conservative_bilinear_provenance(
 
     Provenance codes are ordered by increasing inference risk in CAA V2:
     DIRECT_SOURCE < OTHER_VIEW_SOURCE < COMPILED_LOCAL_HARMONIC
-    < 255/undefined. Any texel with nonzero
+    < UNSUPPORTED_ABSTAIN < 255/padding. Any texel with nonzero
     bilinear weight contributes to the returned risk class.
     """
     source = np.asarray(provenance_u8, dtype=np.uint8)

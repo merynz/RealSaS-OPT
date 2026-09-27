@@ -248,6 +248,9 @@ void validate_provenance(const ProvenanceSet& p) {
         } else if (code == 3) {
             if (donor != -4)
                 throw std::runtime_error("SOURCE_VIEW_UNSUPPORTED_ABSTAIN_DRIFT");
+        } else if (code == 4) {
+            if (donor != -3)
+                throw std::runtime_error("SOURCE_VIEW_CANONICAL_GLOBAL_DRIFT");
         } else if (code == 255) {
             if (donor != padding)
                 throw std::runtime_error("SOURCE_VIEW_PADDING_DRIFT");

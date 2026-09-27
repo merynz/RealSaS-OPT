@@ -74,29 +74,42 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if python - <<'PY'
-          from tools.motion.materialize_quaternius_preset_v1 import resolve_blender
-          print(resolve_blender(None))
-          PY
-          then
+          version='4.5.14'
+          cache_root="$HOME/.cache/realsas/blender"
+          install_root="$cache_root/blender-${version}-linux-x64"
+          blender_path="$install_root/blender"
+          if test -x "$blender_path"; then
+            echo "BLENDER_EXE=$blender_path" >> "$GITHUB_ENV"
+            "$blender_path" --version | head -n 2
+            echo "MOTION_PREFLIGHT_BLENDER_CACHE_HIT=1"
             exit 0
           fi
-          version='4.5.14'
+          if system_blender="$(command -v blender 2>/dev/null)" && test -x "$system_blender"; then
+            echo "BLENDER_EXE=$system_blender" >> "$GITHUB_ENV"
+            "$system_blender" --version | head -n 2
+            echo "MOTION_PREFLIGHT_SYSTEM_BLENDER=1"
+            exit 0
+          fi
           base="https://download.blender.org/release/Blender4.5"
           archive="blender-${version}-linux-x64.tar.xz"
-          install_root="$RUNNER_TEMP/realsas_blender"
-          mkdir -p "$install_root"
-          curl --fail --location --retry 3 --retry-delay 2             "$base/$archive" --output "$RUNNER_TEMP/$archive"
-          curl --fail --location --retry 3 --retry-delay 2             "$base/blender-${version}.sha256" --output "$RUNNER_TEMP/blender.sha256"
+          download_root="$HOME/.cache/realsas/downloads"
+          archive_path="$download_root/$archive"
+          checksum_path="$download_root/blender-${version}.sha256"
+          mkdir -p "$cache_root" "$download_root"
+          if ! test -s "$archive_path" || ! test -s "$checksum_path"; then
+            curl --fail --location --retry 3 --retry-delay 2 "$base/$archive" --output "$archive_path"
+            curl --fail --location --retry 3 --retry-delay 2 "$base/blender-${version}.sha256" --output "$checksum_path"
+          fi
           (
-            cd "$RUNNER_TEMP"
-            grep "  $archive\$" blender.sha256 | sha256sum --check -
+            cd "$download_root"
+            grep "  $archive\$" "$(basename "$checksum_path")" | sha256sum --check -
           )
-          tar -xJf "$RUNNER_TEMP/$archive" -C "$install_root"
-          blender_path="$install_root/blender-${version}-linux-x64/blender"
+          rm -rf "$install_root"
+          tar -xJf "$archive_path" -C "$cache_root"
           test -x "$blender_path"
           echo "BLENDER_EXE=$blender_path" >> "$GITHUB_ENV"
           "$blender_path" --version | head -n 2
+          echo "MOTION_PREFLIGHT_BLENDER_CACHE_POPULATED=1"
 
       - name: Materialize exact sealed idle run slash source clips
         shell: bash
@@ -107,7 +120,7 @@ jobs:
           out_root="$RUN_ROOT/inputs/motion/quaternius_knight_v1"
           mkdir -p "$source_root"
           source_fbx="$source_root/KnightCharacter.fbx"
-          rclone copyto "$MOTION_FBX_REMOTE" "$source_fbx" --checksum
+          rclone copyto "$MOTION_FBX_REMOTE" "$source_fbx" --checksum --drive-shared-with-me
           printf '%s  %s\n' "$EXPECTED_FBX_SHA256" "$source_fbx" | sha256sum --check -
           rm -rf "$out_root"
           python tools/motion/materialize_quaternius_preset_v1.py             --source-fbx "$source_fbx"             --out-dir "$out_root"             --run-id "$RUN_ID"

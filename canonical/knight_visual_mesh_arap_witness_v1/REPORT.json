@@ -5,7 +5,7 @@
     "canonical/knight_visual_mesh_arap_witness_v1/KNIGHT_SLASH_VISUAL_MESH_ARAP_WITNESS_V1.gif"
   ],
   "ownership_contract": {
-    "deformation_driver": "STAGE32_ARACHNE_FITS_SOURCE_2D_REST_RIG__STAGE28_VIEW_PROJECTED_ROTATION_DELTAS_RETARGETED_WITH_2D_BONE_LENGTH_PRESERVATION",
+    "deformation_driver": "STAGE18_MECHANICAL_FIRST_HIT_BINDING__STAGE32_ARACHNE_SKIN__STAGE40_POSED_MECHANICAL_SURFACE_PROJECTED_TO_SOURCE_VIEW",
     "deformer": "LOCAL_GLOBAL_ARAP_2D",
     "mechanical_mesh": "NOT_RENDERED",
     "texture": "ORIGINAL_SOURCE_RGBA_WITH_FOREGROUND_ALPHA",
@@ -18,95 +18,95 @@
   "status": "MEASURED_DEMO_ONLY",
   "views": [
     {
-      "handle_count": 77,
+      "handle_count": 553,
       "qa_by_clip": {
         "demo_idle_v1": [
           {
-            "flipped_triangles": 0,
-            "max_edge_stretch": 5.348215894308158,
-            "max_handle_residual_px": 1.3028929327220036,
-            "p95_edge_stretch": 1.2803823501951415,
+            "flipped_triangles": 23,
+            "max_edge_stretch": 20.37577302646537,
+            "max_handle_residual_px": 0.06073444581420897,
+            "p95_edge_stretch": 1.2048366974728657,
             "time_seconds": 0.0
           },
           {
-            "flipped_triangles": 0,
-            "max_edge_stretch": 2.4381297691089427,
-            "max_handle_residual_px": 1.3030009299308687,
-            "p95_edge_stretch": 1.2574974319233103,
+            "flipped_triangles": 19,
+            "max_edge_stretch": 21.003832724677,
+            "max_handle_residual_px": 0.06259456995482521,
+            "p95_edge_stretch": 1.2338412343768985,
             "time_seconds": 0.8333333333333334
           },
           {
-            "flipped_triangles": 0,
-            "max_edge_stretch": 1.9975435818879643,
-            "max_handle_residual_px": 1.3030127543085084,
-            "p95_edge_stretch": 1.2333870451668878,
+            "flipped_triangles": 19,
+            "max_edge_stretch": 21.6426503598143,
+            "max_handle_residual_px": 0.06450162878446664,
+            "p95_edge_stretch": 1.193537485297672,
             "time_seconds": 1.6666666666666667
           },
           {
-            "flipped_triangles": 0,
-            "max_edge_stretch": 1.9814450440501061,
-            "max_handle_residual_px": 1.303056434558012,
-            "p95_edge_stretch": 1.2234538792290965,
+            "flipped_triangles": 19,
+            "max_edge_stretch": 21.0038327283448,
+            "max_handle_residual_px": 0.06259456996718613,
+            "p95_edge_stretch": 1.233840216523581,
             "time_seconds": 2.5
           }
         ],
         "demo_run_v1": [
           {
-            "flipped_triangles": 30,
-            "max_edge_stretch": 3.907325281711324,
-            "max_handle_residual_px": 1.285705571527202,
-            "p95_edge_stretch": 1.4485126120878054,
+            "flipped_triangles": 132,
+            "max_edge_stretch": 110.99139938032161,
+            "max_handle_residual_px": 0.3053245212143047,
+            "p95_edge_stretch": 9.904432120620267,
             "time_seconds": 0.0
           },
           {
-            "flipped_triangles": 20,
-            "max_edge_stretch": 7.0724126339335385,
-            "max_handle_residual_px": 1.2931331228158183,
-            "p95_edge_stretch": 1.4136209243972622,
+            "flipped_triangles": 124,
+            "max_edge_stretch": 222.40039596404338,
+            "max_handle_residual_px": 0.30712845522896165,
+            "p95_edge_stretch": 14.26991124561822,
             "time_seconds": 0.20833333333333334
           },
           {
-            "flipped_triangles": 19,
-            "max_edge_stretch": 33.11088672287929,
-            "max_handle_residual_px": 1.3046331838175098,
-            "p95_edge_stretch": 1.4203753806195516,
+            "flipped_triangles": 168,
+            "max_edge_stretch": 184.7578776984233,
+            "max_handle_residual_px": 0.1868040128985487,
+            "p95_edge_stretch": 6.387348187925495,
             "time_seconds": 0.4166666666666667
           },
           {
-            "flipped_triangles": 18,
-            "max_edge_stretch": 19.30477616173167,
-            "max_handle_residual_px": 1.3046333352942057,
-            "p95_edge_stretch": 1.4252731739459734,
+            "flipped_triangles": 171,
+            "max_edge_stretch": 55.15724159468224,
+            "max_handle_residual_px": 0.22328092804925967,
+            "p95_edge_stretch": 9.74407749988503,
             "time_seconds": 0.625
           }
         ],
         "demo_slash_v1": [
           {
-            "flipped_triangles": 50,
-            "max_edge_stretch": 7.664679099529353,
-            "max_handle_residual_px": 1.2857055912397666,
-            "p95_edge_stretch": 1.598575127370136,
+            "flipped_triangles": 205,
+            "max_edge_stretch": 110.99139938032242,
+            "max_handle_residual_px": 0.3053245212143047,
+            "p95_edge_stretch": 14.384761985386595,
             "time_seconds": 0.0
           },
           {
-            "flipped_triangles": 33,
-            "max_edge_stretch": 22.02519071324559,
-            "max_handle_residual_px": 1.2960339670323622,
-            "p95_edge_stretch": 1.578069517246844,
+            "flipped_triangles": 153,
+            "max_edge_stretch": 108.80860750459438,
+            "max_handle_residual_px": 0.29953213709983967,
+            "p95_edge_stretch": 12.96274891125889,
             "time_seconds": 0.2777777777777778
           },
           {
-            "flipped_triangles": 14,
-            "max_edge_stretch": 4.269639973195531,
-            "max_handle_residual_px": 1.3054711420784884,
-            "p95_edge_stretch": 1.2750619210167073,
+            "flipped_triangles": 118,
+            "max_edge_stretch": 40.874175935038785,
+            "max_handle_residual_px": 0.20596285404715603,
+            "p95_edge_stretch": 6.269672850137957,
             "time_seconds": 0.5555555555555556
           },
           {
-            "flipped_triangles": 52,
-            "max_edge_stretch": 6.32740138482681,
-            "max_handle_residual_px": 1.285763285433951,
-            "p95_edge_stretch": 1.6205716647942379,
+            "flipped_triangles": 205,
+            "max_edge_stretch": 110.99139938040872,
+            "max_handle_residual_px": 0.30532452121387005,
+            "p95_edge_stretch": 14.384761986157875,
             "time_seconds": 0.8333333333333334
           }
         ]
@@ -117,95 +117,95 @@
       "visual_vertex_count": 584
     },
     {
-      "handle_count": 49,
+      "handle_count": 505,
       "qa_by_clip": {
         "demo_idle_v1": [
           {
-            "flipped_triangles": 1,
-            "max_edge_stretch": 2.2729803150559666,
-            "max_handle_residual_px": 0.04788020082566013,
-            "p95_edge_stretch": 1.1257275513341782,
+            "flipped_triangles": 122,
+            "max_edge_stretch": 75.11918360184826,
+            "max_handle_residual_px": 0.06375616652006884,
+            "p95_edge_stretch": 7.083304253603331,
             "time_seconds": 0.0
           },
           {
-            "flipped_triangles": 2,
-            "max_edge_stretch": 2.641726408298858,
-            "max_handle_residual_px": 0.04253921437641587,
-            "p95_edge_stretch": 1.1355434859063194,
+            "flipped_triangles": 129,
+            "max_edge_stretch": 140.18370619983963,
+            "max_handle_residual_px": 0.0653223457845666,
+            "p95_edge_stretch": 7.319620753886503,
             "time_seconds": 0.8333333333333334
           },
           {
-            "flipped_triangles": 1,
-            "max_edge_stretch": 2.2419640061614072,
-            "max_handle_residual_px": 0.047552661289410776,
-            "p95_edge_stretch": 1.1154098980571532,
+            "flipped_triangles": 133,
+            "max_edge_stretch": 46.424578644848324,
+            "max_handle_residual_px": 0.06666166523285304,
+            "p95_edge_stretch": 7.201905548694223,
             "time_seconds": 1.6666666666666667
           },
           {
-            "flipped_triangles": 2,
-            "max_edge_stretch": 2.6445941973911804,
-            "max_handle_residual_px": 0.04243413544943975,
-            "p95_edge_stretch": 1.1248785240670436,
+            "flipped_triangles": 129,
+            "max_edge_stretch": 140.18462902625632,
+            "max_handle_residual_px": 0.06532240003641751,
+            "p95_edge_stretch": 7.319629324432439,
             "time_seconds": 2.5
           }
         ],
         "demo_run_v1": [
           {
-            "flipped_triangles": 28,
-            "max_edge_stretch": 45.18543435539943,
-            "max_handle_residual_px": 0.7638570742757347,
-            "p95_edge_stretch": 3.0311128724088454,
+            "flipped_triangles": 201,
+            "max_edge_stretch": 48.0208216595184,
+            "max_handle_residual_px": 0.07779198263875559,
+            "p95_edge_stretch": 6.533671037146811,
             "time_seconds": 0.0
           },
           {
-            "flipped_triangles": 24,
-            "max_edge_stretch": 46.75510088186209,
-            "max_handle_residual_px": 0.8104653905745854,
-            "p95_edge_stretch": 2.795525161312474,
+            "flipped_triangles": 178,
+            "max_edge_stretch": 23.021030246576256,
+            "max_handle_residual_px": 0.0789737423943006,
+            "p95_edge_stretch": 5.847328720109359,
             "time_seconds": 0.20833333333333334
           },
           {
-            "flipped_triangles": 41,
-            "max_edge_stretch": 23.535978481208055,
-            "max_handle_residual_px": 0.3917613480093811,
-            "p95_edge_stretch": 2.8080998675631523,
+            "flipped_triangles": 185,
+            "max_edge_stretch": 50.45174614971725,
+            "max_handle_residual_px": 0.07513027291052486,
+            "p95_edge_stretch": 5.266586323763053,
             "time_seconds": 0.4166666666666667
           },
           {
-            "flipped_triangles": 39,
-            "max_edge_stretch": 11.952791454576815,
-            "max_handle_residual_px": 0.17493036089782696,
-            "p95_edge_stretch": 2.4017900142369806,
+            "flipped_triangles": 178,
+            "max_edge_stretch": 37.864121289417774,
+            "max_handle_residual_px": 0.07034013974315927,
+            "p95_edge_stretch": 4.47652799832057,
             "time_seconds": 0.625
           }
         ],
         "demo_slash_v1": [
           {
-            "flipped_triangles": 35,
-            "max_edge_stretch": 45.18542201013789,
-            "max_handle_residual_px": 0.7638496161221812,
-            "p95_edge_stretch": 3.305642176545253,
+            "flipped_triangles": 195,
+            "max_edge_stretch": 28.535996114812853,
+            "max_handle_residual_px": 0.07626243364261684,
+            "p95_edge_stretch": 5.33824341807549,
             "time_seconds": 0.0
           },
           {
-            "flipped_triangles": 20,
-            "max_edge_stretch": 31.9563180034301,
-            "max_handle_residual_px": 0.55760967367697,
-            "p95_edge_stretch": 2.396269694878161,
+            "flipped_triangles": 181,
+            "max_edge_stretch": 34.227704108379434,
+            "max_handle_residual_px": 0.08327099294805775,
+            "p95_edge_stretch": 4.936035911519987,
             "time_seconds": 0.2777777777777778
           },
           {
-            "flipped_triangles": 22,
-            "max_edge_stretch": 18.98553732237603,
-            "max_handle_residual_px": 0.30138720529418267,
-            "p95_edge_stretch": 1.6699143920654562,
+            "flipped_triangles": 169,
+            "max_edge_stretch": 33.04502611441951,
+            "max_handle_residual_px": 0.06746290577064831,
+            "p95_edge_stretch": 7.267022112794917,
             "time_seconds": 0.5555555555555556
           },
           {
-            "flipped_triangles": 36,
-            "max_edge_stretch": 45.33605286872207,
-            "max_handle_residual_px": 0.7663486466148374,
-            "p95_edge_stretch": 3.328640896497607,
+            "flipped_triangles": 195,
+            "max_edge_stretch": 28.53599611481278,
+            "max_handle_residual_px": 0.07626243364286842,
+            "p95_edge_stretch": 5.3382434180783,
             "time_seconds": 0.8333333333333334
           }
         ]

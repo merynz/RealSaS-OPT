@@ -58,6 +58,11 @@ jobs:
           local="$RUN_ROOT/imports/arachne_stage31_v6"
           rm -rf "$local"; mkdir -p "$local"
           rclone copy "$ARACHNE_REMOTE" "$local" --checksum
+          rclone copyto \
+            "$ARACHNE_HANDOFF_REMOTE/FINAL_QUALIFIED_SKELETON_IR.json" \
+            "$local/FINAL_QUALIFIED_SKELETON_IR.json" \
+            --checksum
+          test -s "$local/FINAL_QUALIFIED_SKELETON_IR.json"
           for f in \
             ARACHNE_KNIGHT_V6_RESULT.json \
             ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt \

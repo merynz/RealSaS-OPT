@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.KnightDemoCAATrigger.v1",
-  "status": "RERUN_AFTER_VISIBILITY_APPEARANCE_OWNER_SEPARATION_AND_FOREGROUND_ONLY_DONOR",
+  "status": "RERUN_WITH_CANONICAL_GLOBAL_C_P_CONTROL_LATTICE_COMPLETION",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
   "subject_id": "SUBJECT2_KNIGHT",
   "execution_class": "DEMO_WITNESS",
@@ -9,7 +9,7 @@
   "target": "25_CAA_REFERENCE_REST_RENDER_PROOF",
   "product_authority_claimed": false,
   "product_pass_forbidden": true,
-  "revision": 15,
+  "revision": 16,
   "previous_failure": "GLOBAL_WORST_CASE_TILE32_COMPILE_MEMORY_EXPLOSION_AFTER_FIXED_PAGE_LAYOUT",
   "test_fixture_repair": "CONSTANT_TIME_SINGLE_FACE_UNSATISFIED_CAPACITY",
   "production_repair": "PER_FACE_ADAPTIVE_LATTICE_PLUS_TOPOLOGY_PARAMETRIC_EDGE_COUPLING_PLUS_BOUNDED_2K_PAGES_V1",
@@ -20,7 +20,7 @@
     "to": "PER_FACE_PROJECTED_SOURCE_DENSITY_RESOLUTION",
     "runtime_addressing": "FACE_INDEX_TO_FIXED_PHYSICAL_PAGE_V1"
   },
-  "required_stage25_receipt_semantic_version": "PER_FACE_ADAPTIVE_TOPOLOGY_PARAMETRIC_PAGED_V1",
+  "required_stage25_receipt_semantic_version": "CANONICAL_C_P_CONTROL_LATTICE_PROLONGATION_V1",
   "required_head_features": [
     "PER_FACE_ADAPTIVE_SAMPLING",
     "TOPOLOGY_BOUND_CROSS_FACE_COMPLETION",
@@ -41,5 +41,13 @@
   "direct_pm_linear_storage_mode": "PACKED_DIRECT_VALID_VIEW_MAJOR_V1",
   "direct_pm_linear_storage_dtype": "float64",
   "source_xy_storage_dtype": "float32",
-  "barycentric_storage_mode": "RECONSTRUCT_FROM_FACE_RESOLUTION_AND_OFFSETS_V1"
+  "barycentric_storage_mode": "RECONSTRUCT_FROM_FACE_RESOLUTION_AND_OFFSETS_V1",
+  "canonical_global_completion": {
+    "provenance_code": 4,
+    "source_view_lineage": -3,
+    "control_resolution": 4,
+    "strict_owner": "ALL_VIEW_UNSEEN_ONLY",
+    "dense_transfer": "FACE_LOCAL_BARYCENTRIC_PROLONGATION_PREMULTIPLIED_LINEAR",
+    "threshold_changes": false
+  }
 }

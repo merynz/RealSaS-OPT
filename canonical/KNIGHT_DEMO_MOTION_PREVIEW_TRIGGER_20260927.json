@@ -1,0 +1,17 @@
+{
+  "schema": "RealSaS.KnightDemoMotionPreviewTrigger.v1",
+  "status": "RUN",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "requested_on": "2026-09-27",
+  "stage35_failure_preserved": true,
+  "product_authority_claimed": false,
+  "clips": [
+    "demo_idle_v1",
+    "demo_run_v1",
+    "demo_slash_v1"
+  ],
+  "views": [
+    0,
+    2
+  ]
+}

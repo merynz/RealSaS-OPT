@@ -576,29 +576,78 @@ def _numeric_mesh(arrays):
     return SimpleNamespace(vertices=vertices, faces=faces)
 
 
-def _reference_frame(projection, arrays, *, clip, view, frame_index):
+def _build_reference_render_context(projection, arrays):
+    """Cache invariant Python reference-render inputs for one Stage44/45 run.
+
+    This is a performance-only transport optimization: mesh topology, CAA pages,
+    provenance and qualified camera objects are immutable across every frame.
+    Keeping them resident avoids repeated PNG/NPZ decode and object reconstruction
+    without changing any rendered bytes or qualification semantics.
+    """
     mesh = _numeric_mesh(arrays)
-    positions = np.asarray(
-        arrays[f"{clip.array_prefix}_positions"][frame_index],
-        dtype=np.float64,
-    )
-    camera = qualify_camera_v3(
-        dict(view.camera), view_id=view.view_id, view_index=view.view_index
-    )
-    texture = _load_runtime_view_texture(view)
-    with np.load(projection.provenance_npz_path, allow_pickle=False) as data:
-        provenance = np.asarray(data["provenance"][view.view_index], dtype=np.uint8)
+    provenance_path = resolved_path(projection.provenance_npz_path)
+    if (
+        not provenance_path.is_file()
+        or sha256_file(provenance_path) != projection.provenance_npz_sha256
+    ):
+        raise QualificationError("RUNTIME_V2_PROVENANCE_BYTES_DRIFT")
+    with np.load(provenance_path, allow_pickle=False) as data:
+        if "provenance" not in data.files:
+            raise QualificationError("RUNTIME_V2_PROVENANCE_ARRAY_MISSING")
+        provenance_all = np.asarray(data["provenance"], dtype=np.uint8).copy()
+
     face_page_index = np.asarray(
         arrays.get("face_page_index", np.zeros((len(mesh.faces),), dtype=np.int32)),
         dtype=np.int32,
     )
+    return {
+        "mesh": mesh,
+        "face_uv": np.asarray(arrays["face_uv"], dtype=np.float64),
+        "face_page_index": face_page_index,
+        "provenance_all": provenance_all,
+        "texture_by_view_id": {
+            view.view_id: _load_runtime_view_texture(view)
+            for view in projection.views
+        },
+        "camera_by_view_id": {
+            view.view_id: qualify_camera_v3(
+                dict(view.camera),
+                view_id=view.view_id,
+                view_index=view.view_index,
+            )
+            for view in projection.views
+        },
+    }
+
+
+def _reference_frame(
+    projection,
+    arrays,
+    *,
+    clip,
+    view,
+    frame_index,
+    reference_context=None,
+):
+    context = (
+        reference_context
+        if reference_context is not None
+        else _build_reference_render_context(projection, arrays)
+    )
+    positions = np.asarray(
+        arrays[f"{clip.array_prefix}_positions"][frame_index],
+        dtype=np.float64,
+    )
     return render_caa_reference(
-        mesh=mesh,
-        camera=camera,
-        face_uv=np.asarray(arrays["face_uv"], dtype=np.float64),
-        texture_rgba_u8=texture,
-        provenance_atlas=provenance,
-        face_page_index=face_page_index,
+        mesh=context["mesh"],
+        camera=context["camera_by_view_id"][view.view_id],
+        face_uv=context["face_uv"],
+        texture_rgba_u8=context["texture_by_view_id"][view.view_id],
+        provenance_atlas=np.asarray(
+            context["provenance_all"][view.view_index],
+            dtype=np.uint8,
+        ),
+        face_page_index=context["face_page_index"],
         positions=positions,
     )
 
@@ -625,6 +674,7 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
         raise QualificationError("RUNTIME_V2_NATIVE_PACKAGE_BYTES_DRIFT")
     player, player_sha = _native_player(ctx)
     arrays = _projection_arrays(projection)
+    reference_context = _build_reference_render_context(projection, arrays)
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
 
     probes = []
@@ -666,6 +716,7 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
                 clip=clip,
                 view=view_by_id[view.view_id],
                 frame_index=frame_index,
+                reference_context=reference_context,
             )
             mismatch_mask = (
                 np.any(native_rgba != reference.straight_rgba_u8, axis=2)
@@ -841,6 +892,7 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         raise QualificationError("RUNTIME_V2_DVI_NATIVE_PLAYER_DRIFT")
     archive = resolved_path(package.archive_path)
     arrays = _projection_arrays(projection)
+    reference_context = _build_reference_render_context(projection, arrays)
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
 
     faces = np.asarray(arrays["faces"], dtype=np.int64)
@@ -940,6 +992,7 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                     clip=clip,
                     view=view,
                     frame_index=frame_index,
+                    reference_context=reference_context,
                 )
                 parity_mismatch = (
                     np.any(rgba != reference.straight_rgba_u8, axis=2)

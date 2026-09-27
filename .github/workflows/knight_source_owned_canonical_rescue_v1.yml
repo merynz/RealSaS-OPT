@@ -5,6 +5,7 @@ on:
     branches: [research/vf11-certified-adaptive-20260921]
     paths:
       - '.github/workflows/knight_source_owned_canonical_rescue_v1.yml'
+      - 'compiler/realsas_compiler_core/product_authority_v1.py'
   workflow_dispatch:
 
 concurrency:

@@ -966,7 +966,16 @@ def test_vf23_stage20_to25_uses_unmodified_production_caa_policy(tmp_path):
         observation_set_binding_hash=observation.observation_set_hash,
         camera_set_binding_hash=cameras.camera_set_hash,
         normalization_binding_hash="n" * 64,
-        policy={"fixture": True},
+        policy={
+            "fixture": True,
+            "min_recall": 1.0,
+            "min_precision": 1.0,
+            "max_largest_coherent_hole_fraction": 0.0,
+            "max_interior_uncovered_fraction": 0.0,
+            "min_component_recall": 1.0,
+            "component_min_foreground_fraction": 0.0,
+            "max_silhouette_edge_p95_px": 0.0,
+        },
         views=geometry_views,
         metadata={"subject_free_fixture": True},
     )

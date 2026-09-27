@@ -9,7 +9,6 @@ on:
       - research/vf11-certified-adaptive-20260921
     paths:
       - 'tools/demo/render_knight_motion_preview_native_v2.py'
-      - '.github/workflows/knight_motion_native_preview_v2.yml'
   workflow_dispatch:
 
 jobs:

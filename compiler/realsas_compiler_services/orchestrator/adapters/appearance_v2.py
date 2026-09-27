@@ -69,7 +69,10 @@ from compiler.realsas_compiler_core.camera_geometry_v2 import (
 from compiler.realsas_compiler_core.dynamic_appearance_conditioning_v2 import (
     screen_to_texture_max_texels_per_pixel,
 )
-from compiler.realsas_compiler_core.mesh.product_coverage_v1 import coverage_metrics
+from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
+    coverage_metrics,
+    rasterize_triangles_half_integer_top_left,
+)
 from compiler.realsas_compiler_core.output_presentation_v1 import (
     output_direction_set_from_dict,
 )
@@ -83,6 +86,10 @@ from compiler.realsas_compiler_core.surface_addressing_v1 import (
     static_mesh_qualification_from_dict,
     surface_addressing_from_dict,
 )
+from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
+    load_visual_mesh_view,
+    visual_mesh_set_from_dict,
+)
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     load_file_ref,
@@ -94,6 +101,66 @@ from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import 
 
 
 _POLICY_SCHEMA = "RealSaS.CAAQualificationPolicy.v1"
+
+
+def _visual_mesh_set(ctx: dict):
+    return visual_mesh_set_from_dict(
+        stage_output_payload(
+            ctx,
+            "18_CANONICAL_MESH_ADDRESSING_BUILD",
+            "RealSaS.VisualMeshSetIR.v1",
+        )
+    )
+
+
+def _source_owned_visual_mode_from_domain(domain) -> bool:
+    metadata = dict(domain.metadata or {})
+    value = metadata.get("visual_mesh_set_binding_hash")
+    return (
+        str(metadata.get("domain") or "")
+        == "SOURCE_OWNED_VISUAL_MESH_SET_X_DISCRETE_V0_V7"
+        and isinstance(value, str)
+        and len(value) == 64
+        and metadata.get("mechanical_candidate_render_authority") is False
+    )
+
+
+def _source_owned_visual_mode_from_prereg(prereg) -> bool:
+    return (
+        str(dict(prereg.compile_policy or {}).get("tile_resolution_strategy") or "")
+        == "SOURCE_VISUAL_MESH_V1"
+    )
+
+
+def _source_visual_rgba(
+    source_rgba: np.ndarray,
+    source_mask: np.ndarray,
+) -> np.ndarray:
+    rgba = np.asarray(source_rgba, dtype=np.uint8)
+    mask = np.asarray(source_mask, dtype=bool)
+    if rgba.ndim != 3 or rgba.shape[2] != 4 or rgba.shape[:2] != mask.shape:
+        raise QualificationError("CAA_VISUAL_SOURCE_SHAPE_DRIFT")
+    out = rgba.copy()
+    out[~mask, :3] = 0
+    out[~mask, 3] = 0
+    inside_zero_alpha = mask & (out[..., 3] == 0)
+    out[inside_zero_alpha, 3] = 255
+    return out
+
+
+def _visual_mesh_coverage(mesh, *, width: int, height: int) -> bytes:
+    triangles = tuple(
+        tuple(
+            tuple(map(float, mesh.positions[int(vertex_index)]))
+            for vertex_index in face
+        )
+        for face in np.asarray(mesh.faces, dtype=np.int64)
+    )
+    return rasterize_triangles_half_integer_top_left(
+        triangles,
+        width=int(width),
+        height=int(height),
+    )
 
 
 def _demo_rest_measurement_admissible(

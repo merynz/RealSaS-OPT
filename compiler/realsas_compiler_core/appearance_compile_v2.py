@@ -1384,6 +1384,7 @@ def compile_deterministic_caa(
         "face_sample_offsets": face_sample_offsets,
         "face_tile_resolutions": resolutions,
         "direct_valid": direct_valid,
+        "direct_foreground_donor_valid": direct_foreground_donor_valid,
         "direct_foreground_donor_valid_count": int(
             np.count_nonzero(direct_foreground_donor_valid)
         ),

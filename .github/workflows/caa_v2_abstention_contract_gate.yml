@@ -6,6 +6,7 @@ on:
       - research/vf11-certified-adaptive-20260921
     paths:
       - 'canonical/CAA_V2_RENDERABLE_SUPPORT_ADMISSION_CONTRACT_V1_20260927.json'
+      - 'canonical/CAA_V2_RENDERABLE_SUPPORT_ADMISSION_CONTRACT_V2_20260927.json'
       - 'compiler/realsas_compiler_core/appearance_authority_v2.py'
       - 'compiler/realsas_compiler_core/appearance_bake_v2.py'
       - 'compiler/realsas_compiler_core/appearance_compile_v2.py'
@@ -82,18 +83,23 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          p=Path("canonical/CAA_V2_RENDERABLE_SUPPORT_ADMISSION_CONTRACT_V1_20260927.json")
+          p=Path("canonical/CAA_V2_RENDERABLE_SUPPORT_ADMISSION_CONTRACT_V2_20260927.json")
           d=json.loads(p.read_text())
-          assert d["schema"]=="RealSaS.CAARenderableSupportAdmissionContract.v1"
+          assert d["schema"]=="RealSaS.CAARenderableSupportAdmissionContract.v2"
           assert d["status"]=="FROZEN_SUBJECT_FREE_ARCHITECTURE"
           assert d["subject_identity_used"] is False
           assert d["thresholds_changed"] is False
           assert d["admission"]["unsupported_abstain"]["provenance_code"]==3
           assert d["admission"]["unsupported_abstain"]["source_view_encoding"]=="INT16_NEGATIVE_4"
+          assert d["admission"]["canonical_global_completion"]["provenance_code"]==4
+          assert d["admission"]["canonical_global_completion"]["source_view_encoding"]=="INT16_NEGATIVE_3"
           assert d["admission"]["physical_atlas_padding"]["provenance_code"]==255
-          assert d["completion"]["global_surface_fill_forbidden"] is True
+          assert d["completion"]["unconstrained_global_surface_fill_forbidden"] is True
+          assert d["completion"]["source_constrained_canonical_global_completion_allowed"] is True
+          assert d["completion"]["learned_rgba_generation_forbidden"] is True
+          assert d["owner_separation"]["completion_may_hide_material_stretch"] is False
           assert d["qualification"]["stage25"]=="ANY_REST_VISIBLE_UNSUPPORTED_ABSTENTION_FAILS_CLOSED"
           assert d["qualification"]["stage45"]=="ANY_DYNAMIC_VISIBLE_UNSUPPORTED_ABSTENTION_FAILS_CLOSED"
-          assert d["product_claims"]["no_hallucination"] is True
+          assert d["product_claims"]["source_backed_art_is_immutable"] is True
           print("CAA_V2_ADMISSION_CONTRACT_PASS")
           PY

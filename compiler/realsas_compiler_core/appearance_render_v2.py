@@ -19,6 +19,52 @@ from .visibility_v2 import VISIBILITY_CONTRACT_V2_HASH, rasterize_visible_owner
 RUNTIME_COVERAGE_SCALE = 2
 RUNTIME_COVERAGE_SAMPLE_COUNT = RUNTIME_COVERAGE_SCALE * RUNTIME_COVERAGE_SCALE
 
+_PROVENANCE_RISK_ORDER = np.asarray(
+    [0, 1, 2, 4, 3, 255], dtype=np.uint8
+)
+_PROVENANCE_RANK_LUT = np.full((256,), -1, dtype=np.int16)
+for _rank, _code in enumerate(_PROVENANCE_RISK_ORDER):
+    _PROVENANCE_RANK_LUT[int(_code)] = int(_rank)
+
+
+def _merge_provenance_risk(
+    current: np.ndarray,
+    incoming: np.ndarray,
+    current_valid: np.ndarray,
+) -> np.ndarray:
+    cur = np.asarray(current, dtype=np.uint8)
+    inc = np.asarray(incoming, dtype=np.uint8)
+    valid = np.asarray(current_valid, dtype=bool)
+    if cur.shape != inc.shape or valid.shape != cur.shape:
+        raise QualificationError("CAA_REFERENCE_PROVENANCE_MERGE_SHAPE")
+    cur_rank = _PROVENANCE_RANK_LUT[cur]
+    inc_rank = _PROVENANCE_RANK_LUT[inc]
+    if np.any(inc_rank < 0) or np.any(valid & (cur_rank < 0)):
+        raise QualificationError("CAA_REFERENCE_PROVENANCE_CLASS_INVALID")
+    take = (~valid) | (inc_rank > cur_rank)
+    return np.where(take, inc, cur).astype(np.uint8)
+
+
+def _worst_provenance_across_samples(
+    codes: np.ndarray,
+    valid: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    value = np.asarray(codes, dtype=np.uint8)
+    mask = np.asarray(valid, dtype=bool)
+    if value.shape != mask.shape:
+        raise QualificationError("CAA_REFERENCE_PROVENANCE_REDUCE_SHAPE")
+    ranks = _PROVENANCE_RANK_LUT[value]
+    if np.any(mask & (ranks < 0)):
+        raise QualificationError("CAA_REFERENCE_PROVENANCE_CLASS_INVALID")
+    masked = np.where(mask, ranks, -1)
+    winner_rank = np.max(masked, axis=(2, 3))
+    has = winner_rank >= 0
+    output = np.full(winner_rank.shape, 255, dtype=np.uint8)
+    output[has] = _PROVENANCE_RISK_ORDER[
+        winner_rank[has].astype(np.int64)
+    ]
+    return output, has
+
 
 @dataclass(frozen=True)
 class ReferenceCAARender:
@@ -205,7 +251,12 @@ def render_caa_reference(
 
     coverage_height, coverage_width = high_owner.shape
     sample_pm = np.zeros((coverage_height, coverage_width, 4), dtype=np.float64)
-    sample_risk = np.zeros((coverage_height, coverage_width), dtype=np.uint8)
+    sample_observed_risk = np.zeros(
+        (coverage_height, coverage_width), dtype=np.uint8
+    )
+    sample_contribution_risk = np.zeros(
+        (coverage_height, coverage_width), dtype=np.uint8
+    )
     sample_has_provenance = np.zeros(
         (coverage_height, coverage_width),
         dtype=bool,
@@ -245,10 +296,10 @@ def render_caa_reference(
         )
 
         prior_provenance = sample_has_provenance[ys, xs]
-        sample_risk[ys, xs] = np.where(
-            prior_provenance,
-            np.maximum(sample_risk[ys, xs], sampled_provenance),
+        sample_observed_risk[ys, xs] = _merge_provenance_risk(
+            sample_observed_risk[ys, xs],
             sampled_provenance,
+            prior_provenance,
         )
         sample_has_provenance[ys, xs] = True
 
@@ -262,10 +313,10 @@ def render_caa_reference(
             cx = xs[contributes]
             codes = sampled_provenance[contributes]
             prior = sample_has_contribution[cy, cx]
-            sample_risk[cy, cx] = np.where(
-                prior,
-                np.maximum(sample_risk[cy, cx], codes),
+            sample_contribution_risk[cy, cx] = _merge_provenance_risk(
+                sample_contribution_risk[cy, cx],
                 codes,
+                prior,
             )
             sample_has_contribution[cy, cx] = True
             sample_contribution_mask[cy, cx, layer] = True
@@ -274,15 +325,22 @@ def render_caa_reference(
     pm = np.mean(pm_grid, axis=(2, 3))
     height, width = pm.shape[:2]
 
+    # Appearance provenance follows layers that actually contribute alpha.
+    # Geometry-only layers still provide a fallback for fully transparent
+    # source-authored pixels so transparent art is never reclassified as
+    # undefined. A hidden layer behind an opaque contributor must not taint
+    # the visible pixel's appearance provenance.
+    sample_effective_risk = np.where(
+        sample_has_contribution,
+        sample_contribution_risk,
+        sample_observed_risk,
+    ).astype(np.uint8)
     provenance_grid = _coverage_reshape(sample_has_provenance)
-    risk_grid = _coverage_reshape(sample_risk)
-    any_provenance = np.any(provenance_grid, axis=(2, 3))
-    conservative_risk = np.max(
-        np.where(provenance_grid, risk_grid, 0),
-        axis=(2, 3),
+    risk_grid = _coverage_reshape(sample_effective_risk)
+    provenance, _any_provenance = _worst_provenance_across_samples(
+        risk_grid,
+        provenance_grid,
     )
-    provenance = np.full((height, width), 255, dtype=np.uint8)
-    provenance[any_provenance] = conservative_risk[any_provenance]
 
     sample_owner = _coverage_reshape(high_owner).reshape(
         height,

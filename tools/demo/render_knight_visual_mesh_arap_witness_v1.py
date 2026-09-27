@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import subprocess
+import struct
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from pathlib import Path
@@ -399,21 +400,78 @@ def _write_direct_provenance(path: Path, height: int, width: int) -> str:
     return sha256_file(path)
 
 
-def _render_native(player: Path, package: Path, view_id: str, clip_id: str, frame: int, root: Path):
+def _write_visual_mesh_binary(path: Path, mesh) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    uv = np.asarray(mesh.uv, dtype="<f8")
+    faces = np.asarray(mesh.faces, dtype="<u4")
+    with path.open("wb") as handle:
+        handle.write(
+            struct.pack(
+                "<8sIIII",
+                b"RSVM1\\0\\0\\0",
+                int(mesh.width),
+                int(mesh.height),
+                int(len(mesh.positions)),
+                int(len(mesh.faces)),
+            )
+        )
+        handle.write(uv.tobytes(order="C"))
+        handle.write(faces.tobytes(order="C"))
+
+
+def _write_visual_positions_binary(path: Path, frames_xy: np.ndarray) -> None:
+    frames = np.asarray(frames_xy, dtype="<f8")
+    if frames.ndim != 3 or frames.shape[2] != 2:
+        raise RuntimeError("VISUAL_POSITIONS_SHAPE_INVALID")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("wb") as handle:
+        handle.write(
+            struct.pack(
+                "<8sII",
+                b"RSVP1\\0\\0\\0",
+                int(frames.shape[0]),
+                int(frames.shape[1]),
+            )
+        )
+        handle.write(frames.tobytes(order="C"))
+
+
+def _render_native(
+    player: Path,
+    *,
+    mesh_path: Path,
+    positions_path: Path,
+    texture_path: Path,
+    clip_id: str,
+    view_index: int,
+    frame: int,
+    root: Path,
+    resolution: int,
+):
     root.mkdir(parents=True, exist_ok=True)
-    stem = f"{view_id}_{clip_id}_{frame}"
+    stem = f"V{view_index}_{clip_id}_{frame}"
     rgba = root / f"{stem}.rgba"
     cmd = [
-        str(player), str(package),
-        "--clip", clip_id,
-        "--view", view_id,
+        str(player),
+        "--mesh", str(mesh_path),
+        "--positions", str(positions_path),
+        "--texture", str(texture_path),
         "--frame", str(int(frame)),
+        "--width", str(int(resolution)),
+        "--height", str(int(resolution)),
         "--out-rgba", str(rgba),
-        "--allow-layer-overflow-diagnostic",
     ]
-    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    proc = subprocess.run(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
     if proc.returncode != 0:
-        raise RuntimeError(f"VISUAL_WITNESS_NATIVE_RENDER_FAIL:{view_id}:{clip_id}:{frame}\n" + proc.stdout)
+        raise RuntimeError(
+            f"VISUAL_WITNESS_NATIVE_RENDER_FAIL:V{view_index}:{clip_id}:{frame}\n"
+            + proc.stdout
+        )
     return rgba
 
 
@@ -496,7 +554,7 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
         tracks, mapping = _tracks_for_clip(payload, skeleton, cameras, source_report)
         clip_payloads[clip_id] = (payload, tracks, mapping)
 
-    packages = {}
+    render_inputs = {}
     report_views = []
     for view_index in (0, 2):
         camera = cameras[view_index]
@@ -570,15 +628,10 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
         view_root = out_dir / f"V{view_index}"
         texture_path = view_root / "source_art.png"
         texture_sha = _clean_source_texture(rgba, mask, texture_path)
-        provenance_path = view_root / "provenance.npz"
-        provenance_sha = _write_direct_provenance(provenance_path, h, w)
-
-        arrays = {
-            "vertices": _pixel_to_world(mesh.positions, mesh.width, mesh.height),
-            "faces": np.asarray(mesh.faces, dtype=np.uint32),
-            "face_uv": np.asarray(mesh.uv[mesh.faces], dtype=np.float64),
-        }
-        runtime_clips = []
+        mesh_binary = view_root / "visual_mesh.bin"
+        _write_visual_mesh_binary(mesh_binary, mesh)
+        clip_position_files = {}
+        clip_frame_counts = {}
         qa_by_clip = {}
         for clip_id, _short, _ms in clip_specs:
             payload, tracks, _mapping = clip_payloads[clip_id]
@@ -591,7 +644,7 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
                 dtype=np.float64,
             )
             arap.reset()
-            posed_frames = []
+            posed_pixel_frames = []
             qa_rows = []
             for time_seconds in times:
                 _skin_matrices, _posed_joint_positions, _frame_hash = _joint_pose_v2(
@@ -613,7 +666,7 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
                     posed_presentation_joints,
                 )
                 deformed, qa = arap.solve(target_xy, iterations=3)
-                posed_frames.append(_pixel_to_world(deformed, mesh.width, mesh.height))
+                posed_pixel_frames.append(np.asarray(deformed, dtype=np.float64))
                 qa_rows.append({
                     "time_seconds": float(time_seconds),
                     "flipped_triangles": int(qa.flipped_triangles),
@@ -621,19 +674,11 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
                     "p95_edge_stretch": float(qa.p95_edge_stretch),
                     "max_edge_stretch": float(qa.max_edge_stretch),
                 })
-            prefix = clip_id.replace("demo_", "").replace("_v1", "")
-            arrays[f"{prefix}_times"] = times
-            arrays[f"{prefix}_positions"] = np.stack(posed_frames, axis=0)
-            runtime_clips.append(
-                RuntimeClipV2IR(
-                    clip_id=clip_id,
-                    duration_seconds=duration,
-                    loop=bool(payload.get("loop")),
-                    frame_count=4,
-                    array_prefix=prefix,
-                    metadata={"visual_mesh_arap_witness": True},
-                )
-            )
+            positions_path = view_root / f"{clip_id}.positions.bin"
+            posed_pixel_array = np.stack(posed_pixel_frames, axis=0)
+            _write_visual_positions_binary(positions_path, posed_pixel_array)
+            clip_position_files[clip_id] = positions_path
+            clip_frame_counts[clip_id] = int(len(posed_pixel_frames))
             qa_by_clip[clip_id] = qa_rows
             print(
                 "VISUAL_ARAP_QA",
@@ -654,84 +699,58 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
                 flush=True,
             )
 
-        projection_npz = view_root / "projection.npz"
-        np.savez(projection_npz, **arrays)
-        projection_sha = sha256_file(projection_npz)
-
-        runtime_views = tuple(
-            RuntimeViewV2IR(
-                view_index=i,
-                view_id=f"V{i}",
-                camera=_synthetic_camera(i, render_resolution),
-                texture_path=str(texture_path.resolve()),
-                texture_sha256=texture_sha,
-                metadata={"visual_mesh_source_view": int(view_index)},
-            )
-            for i in range(8)
-        )
-        projection = RuntimeProjectionV2IR(
-            complete_puppet_binding_hash="visual-witness",
-            mechanical_state_binding_hash="visual-witness",
-            mesh_binding_hash=hashlib.sha256(
-                np.asarray(mesh.positions, dtype="<f8").tobytes()
-                + np.asarray(mesh.faces, dtype="<u4").tobytes()
-            ).hexdigest(),
-            dynamic_motion_binding_hash="visual-witness",
-            appearance_asset_binding_hash=texture_sha,
-            appearance_qualification_binding_hash="visual-witness",
-            camera_set_binding_hash="visual-witness",
-            visibility_contract_hash=VISIBILITY_CONTRACT_V2_HASH,
-            projection_npz_path=str(projection_npz.resolve()),
-            projection_npz_sha256=projection_sha,
-            provenance_npz_path=str(provenance_path.resolve()),
-            provenance_npz_sha256=provenance_sha,
-            views=runtime_views,
-            clips=tuple(runtime_clips),
-            projection_hash="",
-            metadata={
-                "diagnostic_only": True,
-                "source_owned_visual_mesh": True,
-                "mechanical_relation_faces_rendered": False,
-                "product_authority_claimed": False,
-            },
-        )
-        projection = replace(projection, projection_hash=runtime_projection_hash(projection))
-        package = view_root / "visual_mesh_arap_witness.rss"
-        meta = write_rss_v2(package, build_rss_v2_entries(projection))
-        packages[view_index] = (package, runtime_clips)
+        render_inputs[view_index] = {
+            "mesh_path": mesh_binary,
+            "texture_path": texture_path,
+            "clip_position_files": dict(clip_position_files),
+            "clip_frame_counts": dict(clip_frame_counts),
+        }
         report_views.append({
             "view_index": int(view_index),
             "visual_vertex_count": int(len(mesh.positions)),
             "visual_face_count": int(len(mesh.faces)),
             "handle_count": int(len(bindings)),
             "source_foreground_pixel_count": int(np.count_nonzero(mask)),
-            "rss_sha256": str(meta["archive_sha256"]),
             "qa_by_clip": qa_by_clip,
         })
 
     render_root = out_dir / "native_frames"
     jobs = []
-    for view_index, (package, clips) in packages.items():
-        for clip in clips:
-            for frame in range(clip.frame_count):
-                jobs.append((view_index, package, clip.clip_id, frame))
+    for view_index, row in render_inputs.items():
+        for clip_id, frame_count in row["clip_frame_counts"].items():
+            for frame in range(int(frame_count)):
+                jobs.append(
+                    (
+                        int(view_index),
+                        clip_id,
+                        int(frame),
+                        row["mesh_path"],
+                        row["clip_position_files"][clip_id],
+                        row["texture_path"],
+                    )
+                )
     with ThreadPoolExecutor(max_workers=4) as pool:
-        paths = list(pool.map(
-            lambda row: (
-                row[0],
-                row[2],
-                row[3],
-                _render_native(
-                    native_player,
+        paths = list(
+            pool.map(
+                lambda row: (
+                    row[0],
                     row[1],
-                    f"V{row[0]}",
                     row[2],
-                    row[3],
-                    render_root,
+                    _render_native(
+                        native_player,
+                        mesh_path=row[3],
+                        positions_path=row[4],
+                        texture_path=row[5],
+                        clip_id=row[1],
+                        view_index=row[0],
+                        frame=row[2],
+                        root=render_root,
+                        resolution=render_resolution,
+                    ),
                 ),
-            ),
-            jobs,
-        ))
+                jobs,
+            )
+        )
 
     frames = {}
     for view_index, clip_id, frame, path in paths:
@@ -770,6 +789,7 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
         "schema": "RealSaS.KnightVisualMeshArapWitness.v1",
         "status": "MEASURED_DEMO_ONLY",
         "run_id": run_id,
+        "renderer": "CXX_VISUAL_MESH_V1",
         "ownership_contract": {
             "mechanical_mesh": "NOT_RENDERED",
             "visual_mesh": "SOURCE_FOREGROUND_MASK_DERIVED",
@@ -785,7 +805,7 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
     print("KNIGHT_VISUAL_MESH_ARAP_WITNESS_PASS", json.dumps({
         "gif_count": len(outputs),
         "views": [0, 2],
-        "renderer": "CXX_RUNTIME_V2",
+        "renderer": "CXX_VISUAL_MESH_V1",
     }, sort_keys=True))
 
 

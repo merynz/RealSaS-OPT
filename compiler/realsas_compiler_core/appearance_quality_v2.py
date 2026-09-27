@@ -496,12 +496,26 @@ def cross_view_source_compatibility_metrics(
     direct_valid: np.ndarray,
     direct_rgba: np.ndarray,
     sample_component_index: np.ndarray,
+    direct_source_silhouette_class: np.ndarray | None = None,
     color_conflict_cut_rgba_l1: float = 0.35,
     alpha_conflict_cut: float = 0.25,
 ) -> dict:
+    """Measure appearance compatibility only within the same source silhouette class.
+
+    A canonical surface sample may legitimately be source-foreground in one
+    direction and source-safe-background in an adjacent direction. That is a
+    directional silhouette/visibility transition, not an appearance-color
+    contradiction. Opposite-class evidence is therefore counted explicitly but
+    excluded from the appearance compatibility population.
+    """
     valid = np.asarray(direct_valid, dtype=bool)
     rgba = np.asarray(direct_rgba, dtype=np.uint8)
     component = np.asarray(sample_component_index, dtype=np.int32)
+    source_class = (
+        None
+        if direct_source_silhouette_class is None
+        else np.asarray(direct_source_silhouette_class, dtype=np.int8)
+    )
     color_cut = float(color_conflict_cut_rgba_l1)
     alpha_cut = float(alpha_conflict_cut)
     if valid.ndim != 2 or valid.shape[0] != 8:
@@ -509,6 +523,11 @@ def cross_view_source_compatibility_metrics(
     sample_count = valid.shape[1]
     if rgba.shape != (8, sample_count, 4) or component.shape != (sample_count,):
         raise QualificationError("CAA_CROSS_VIEW_ARRAY_SHAPE_DRIFT")
+    if source_class is not None:
+        if source_class.shape != valid.shape:
+            raise QualificationError("CAA_CROSS_VIEW_SOURCE_CLASS_SHAPE_INVALID")
+        if np.any(valid & ~np.isin(source_class, (0, 1))):
+            raise QualificationError("CAA_CROSS_VIEW_SOURCE_CLASS_INVALID")
     if not (0.0 <= color_cut <= 1.0 and 0.0 <= alpha_cut <= 1.0):
         raise QualificationError("CAA_CROSS_VIEW_CONFLICT_CUT_INVALID")
 
@@ -537,18 +556,36 @@ def cross_view_source_compatibility_metrics(
     pair_rows = []
     component_rows = []
     component_ids = np.unique(component).astype(np.int32, copy=False)
-    pair_shared_counts = [
-        int(np.count_nonzero(valid[left] & valid[(left + 1) % 8]))
-        for left in range(8)
-    ]
-    total_shared = int(sum(pair_shared_counts))
+    pair_gate_counts = []
+    pair_raw_counts = []
+    pair_transition_counts = []
+    for left in range(8):
+        right = (left + 1) % 8
+        raw_shared = valid[left] & valid[right]
+        if source_class is None:
+            transition = np.zeros_like(raw_shared)
+            shared = raw_shared
+        else:
+            transition = raw_shared & (source_class[left] != source_class[right])
+            shared = raw_shared & ~transition
+        pair_raw_counts.append(int(np.count_nonzero(raw_shared)))
+        pair_transition_counts.append(int(np.count_nonzero(transition)))
+        pair_gate_counts.append(int(np.count_nonzero(shared)))
+
+    total_shared = int(sum(pair_gate_counts))
     values = np.empty((total_shared,), dtype=np.float64)
     alpha_values = np.empty((total_shared,), dtype=np.float64)
     global_cursor = 0
 
     for left in range(8):
         right = (left + 1) % 8
-        shared = valid[left] & valid[right]
+        raw_shared = valid[left] & valid[right]
+        if source_class is None:
+            transition = np.zeros_like(raw_shared)
+            shared = raw_shared
+        else:
+            transition = raw_shared & (source_class[left] != source_class[right])
+            shared = raw_shared & ~transition
         indices = np.flatnonzero(shared)
         if len(indices):
             errors = rgba_l1_premultiplied(
@@ -561,7 +598,7 @@ def cross_view_source_compatibility_metrics(
             ) / 255.0
             errors = np.asarray(errors, dtype=np.float64)
             alpha = np.asarray(alpha, dtype=np.float64)
-            expected_count = pair_shared_counts[left]
+            expected_count = pair_gate_counts[left]
             if len(errors) != expected_count or len(alpha) != expected_count:
                 raise QualificationError(
                     "CAA_CROSS_VIEW_SHARED_COUNT_ACCOUNTING_DRIFT"
@@ -572,7 +609,7 @@ def cross_view_source_compatibility_metrics(
             global_cursor = stop
             shared_component = component[indices]
         else:
-            if pair_shared_counts[left] != 0:
+            if pair_gate_counts[left] != 0:
                 raise QualificationError(
                     "CAA_CROSS_VIEW_EMPTY_PAIR_COUNT_DRIFT"
                 )
@@ -580,10 +617,19 @@ def cross_view_source_compatibility_metrics(
             alpha = np.empty((0,), dtype=np.float64)
             shared_component = np.empty((0,), dtype=np.int32)
 
+        raw_count = pair_raw_counts[left]
+        transition_count = pair_transition_counts[left]
         pair_rows.append(
             {
                 "left_view_index": left,
                 "right_view_index": right,
+                "raw_shared_direct_sample_count": raw_count,
+                "directional_silhouette_transition_sample_count": transition_count,
+                "directional_silhouette_transition_fraction": (
+                    float(transition_count) / float(raw_count)
+                    if raw_count
+                    else 0.0
+                ),
                 **summarize(errors, alpha),
             }
         )
@@ -592,9 +638,6 @@ def cross_view_source_compatibility_metrics(
             local = shared_component == int(component_id)
             if not np.any(local):
                 continue
-            # Reuse the already-measured pair arrays. Component qualification is
-            # a partition of the same canonical shared-direct evidence, not a
-            # second color measurement pass.
             local_error = errors[local]
             local_alpha = alpha[local]
             component_rows.append(
@@ -608,9 +651,24 @@ def cross_view_source_compatibility_metrics(
 
     if global_cursor != total_shared:
         raise QualificationError("CAA_CROSS_VIEW_GLOBAL_ACCOUNTING_DRIFT")
+    raw_total = int(sum(pair_raw_counts))
+    transition_total = int(sum(pair_transition_counts))
     return {
-        "mode": "ADJACENT_8VIEW_SHARED_CANONICAL_DIRECT_SOURCE_V2",
+        "mode": (
+            "ADJACENT_8VIEW_SHARED_CANONICAL_DIRECT_SOURCE_V3_"
+            "SILHOUETTE_OWNER_SEPARATED"
+        ),
         "pair_count": 8,
+        "raw_shared_direct_sample_count": raw_total,
+        "directional_silhouette_transition_sample_count": transition_total,
+        "directional_silhouette_transition_fraction": (
+            float(transition_total) / float(raw_total)
+            if raw_total
+            else 0.0
+        ),
+        "appearance_population_requires_same_source_silhouette_class": (
+            source_class is not None
+        ),
         **summarize(values, alpha_values),
         "per_pair": pair_rows,
         "per_pair_component": component_rows,
@@ -618,8 +676,10 @@ def cross_view_source_compatibility_metrics(
         "alpha_conflict_cut": alpha_cut,
         "raw_rgb_equality_required": False,
         "measurement_is_compatibility_not_color_authority": True,
+        "directional_silhouette_transition_is_visibility_owner": True,
         "storage_mode": "NUMPY_CHUNKS_NO_PYTHON_FLOAT_EXPANSION",
     }
+
 
 def adjacent_direction_transition_metrics(
     *,

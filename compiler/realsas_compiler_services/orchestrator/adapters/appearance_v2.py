@@ -1381,6 +1381,198 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
     )
     if seal.compile_binding_hash != artifact.compile_hash:
         raise QualificationError("CAA_BAKE_COMPILE_SEAL_DRIFT")
+
+    if (
+        _source_owned_visual_mode_from_prereg(prereg)
+        and dict(artifact.metadata or {}).get("source_owned_visual_mesh_mode")
+        is True
+    ):
+        observation = qualified_observation_set_from_dict(
+            stage_output_payload(
+                ctx,
+                "07_OBSERVATION_CONTRACT_QUALIFIED",
+                "RealSaS.QualifiedObservationSetIR.v1",
+            )
+        )
+        source_rgba, source_masks = _load_source_inputs(ctx, observation)
+        visual_set = _visual_mesh_set(ctx)
+        visual_hash = str(
+            dict(artifact.metadata or {}).get("visual_mesh_set_binding_hash") or ""
+        )
+        if visual_set.set_hash != visual_hash:
+            raise QualificationError("CAA_VISUAL_BAKE_MESH_SET_DRIFT")
+        root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+        root.mkdir(parents=True, exist_ok=True)
+
+        texture_rows = []
+        outputs = []
+        widths = []
+        heights = []
+        for view_index in range(8):
+            authority = observation.views[view_index]
+            expected = _source_visual_rgba(
+                source_rgba[view_index],
+                source_masks[view_index],
+            )
+            path = root / f"V{view_index}_source_visual.png"
+            Image.fromarray(expected, mode="RGBA").save(
+                path,
+                format="PNG",
+                optimize=False,
+                compress_level=1,
+            )
+            digest = sha256_file(path)
+            height, width = expected.shape[:2]
+            widths.append(int(width))
+            heights.append(int(height))
+            texture_rows.append(
+                AppearanceTextureIR(
+                    direction_index=view_index,
+                    direction_id=f"V{view_index}",
+                    transport_png_path=str(path),
+                    transport_png_sha256=digest,
+                    width=int(width),
+                    height=int(height),
+                    metadata={
+                        "transport_alpha": "STRAIGHT",
+                        "runtime_filtering": "PREMULTIPLIED",
+                        "source_visual_direct": True,
+                        "source_raster_sha256": str(
+                            authority.source_raster_sha256
+                        ),
+                        "source_foreground_mask_sha256": str(
+                            authority.foreground_mask_sha256
+                        ),
+                        "alpha_authority": (
+                            "QUALIFIED_FOREGROUND_MASK_WITH_SOURCE_ALPHA_"
+                            "PRESERVED_WHEN_NONZERO"
+                        ),
+                        "visual_mesh_set_binding_hash": visual_set.set_hash,
+                    },
+                )
+            )
+            outputs.append(
+                {
+                    "path": str(path),
+                    "sha256": digest,
+                    "authority_class": "SOURCE_DIRECT_VISUAL_TEXTURE",
+                    "schema": (
+                        f"RealSaS.SourceDirectVisualTexture.V{view_index}.v1"
+                    ),
+                }
+            )
+
+        uv_path = root / "visual_uv_binding.npz"
+        uv_sha = _save_npz(
+            uv_path,
+            view_index=np.arange(8, dtype=np.int32),
+            visual_vertex_count=np.asarray(
+                [int(row.vertex_count) for row in visual_set.views],
+                dtype=np.int64,
+            ),
+            visual_face_count=np.asarray(
+                [int(row.face_count) for row in visual_set.views],
+                dtype=np.int64,
+            ),
+            visual_mesh_hash=np.asarray(
+                [
+                    str(row.mesh_hash).encode("ascii")
+                    for row in visual_set.views
+                ],
+                dtype="S64",
+            ),
+        )
+        provenance_path = root / "visual_source_provenance.npz"
+        provenance_sha = _save_npz(
+            provenance_path,
+            provenance=np.zeros((8,), dtype=np.uint8),
+            source_view=np.arange(8, dtype=np.int16),
+        )
+
+        asset = CompleteAppearanceAssetIR(
+            compile_seal_binding_hash=seal.seal_hash,
+            candidate_mesh_binding_hash=artifact.candidate_mesh_binding_hash,
+            surface_addressing_binding_hash=artifact.surface_addressing_binding_hash,
+            appearance_domain_binding_hash=artifact.appearance_domain_binding_hash,
+            output_direction_set_binding_hash=artifact.output_direction_set_binding_hash,
+            textures=tuple(texture_rows),
+            uv_npz_path=str(uv_path),
+            uv_npz_sha256=uv_sha,
+            provenance_npz_path=str(provenance_path),
+            provenance_npz_sha256=provenance_sha,
+            atlas_layout={
+                "mode": "SOURCE_RASTER_DIRECT_VISUAL_MESH_V1",
+                "page_count": 1,
+                "width": max(widths),
+                "height": max(heights),
+                "visual_mesh_set_binding_hash": visual_set.set_hash,
+                "fixed_source_uv": True,
+                "mechanical_mesh_render_authority": False,
+            },
+            asset_hash="",
+            metadata={
+                "total_appearance_asset": True,
+                "source_owned_visual_mesh_mode": True,
+                "visual_mesh_set_binding_hash": visual_set.set_hash,
+                "visual_geometry_authority": "SOURCE_ART_SILHOUETTE",
+                "visual_uv_authority": "STAGE18_FIXED_SOURCE_RASTER_UV",
+                "texture_authority": "SOURCE_RGBA",
+                "source_wins": True,
+                "runtime_generation_forbidden": True,
+                "cross_view_completion_used": False,
+                "generated_appearance_used": False,
+                "mechanical_mesh_render_authority": False,
+                "transport_alpha": "STRAIGHT",
+                "runtime_filtering": "PREMULTIPLIED",
+            },
+        )
+        asset = replace(
+            asset,
+            asset_hash=complete_appearance_asset_hash(asset),
+        )
+        outputs.extend(
+            [
+                {
+                    "path": str(uv_path),
+                    "sha256": uv_sha,
+                    "authority_class": "VISUAL_MESH_UV_BINDING",
+                    "schema": "RealSaS.VisualMeshUVBinding.v1",
+                },
+                {
+                    "path": str(provenance_path),
+                    "sha256": provenance_sha,
+                    "authority_class": "SOURCE_DIRECT_VISUAL_PROVENANCE",
+                    "schema": "RealSaS.VisualSourceProvenance.v1",
+                },
+                write_ir(
+                    root / "complete_appearance_asset.json",
+                    asset,
+                    authority_class="COMPLETE_APPEARANCE_ASSET",
+                ),
+            ]
+        )
+        return {
+            "status": "PASS",
+            "outputs": outputs,
+            "performance": {
+                "array_load_seconds": 0.0,
+                "direction_bake_seconds_total": 0.0,
+                "direction_bake_seconds_by_view": [0.0] * 8,
+                "post_bake_seal_seconds": 0.0,
+                "measured_inner_seconds": float(
+                    perf_counter() - stage_started
+                ),
+            },
+            "diagnostics": {
+                "asset_hash": asset.asset_hash,
+                "texture_count": 8,
+                "appearance_domain": "SOURCE_OWNED_VISUAL_MESH",
+                "visual_mesh_set_hash": visual_set.set_hash,
+                "generated_appearance_used": False,
+                "mechanical_mesh_render_authority": False,
+            },
+        }
+
     arrays = _load_compile_arrays(
         artifact,
         required_names={"rgba", "provenance", "source_view"},

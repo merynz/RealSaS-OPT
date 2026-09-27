@@ -19,9 +19,11 @@ from compiler.realsas_compiler_core.appearance_color_v2 import (
     straight_srgb_rgba_u8_to_premultiplied_linear,
 )
 from compiler.realsas_compiler_core.appearance_completion_v2 import (
+    SurfaceSampleGraph,
     bounded_surface_harmonic_fill,
 )
 from compiler.realsas_compiler_core.appearance_quality_v2 import (
+    _bounded_edge_holdout_mask,
     adjacent_direction_transition_metrics,
     cross_view_source_compatibility_metrics,
     provenance_boundary_metrics,
@@ -171,6 +173,47 @@ def _holdout_fixture(*, adversarial: bool):
     }
 
 
+def test_source_anchored_holdout_respects_shipping_hop_budget_on_branching_graph():
+    graph = SurfaceSampleGraph(
+        offsets=np.asarray([0, 2, 4, 5, 6], dtype=np.int64),
+        indices=np.asarray([1, 2, 0, 3, 0, 1], dtype=np.int32),
+        edge_a=np.asarray([0, 0, 1], dtype=np.int32),
+        edge_b=np.asarray([1, 2, 3], dtype=np.int32),
+    )
+    candidate = np.asarray([True, True, True, False], dtype=bool)
+    observed = np.ones(4, dtype=bool)
+    selected = _bounded_edge_holdout_mask(
+        candidate_mask=candidate,
+        neighbors=graph,
+        max_region_samples=16,
+        max_graph_hops=2,
+        source_observed_mask=observed,
+    )
+    assert selected[0]
+    assert np.count_nonzero(selected) >= 1
+    assert np.count_nonzero(selected) <= 2
+
+    rgba = np.zeros((4, 4), dtype=np.uint8)
+    rgba[:, 3] = 255
+    provenance = np.zeros(4, dtype=np.uint8)
+    source_view = np.zeros(4, dtype=np.int16)
+    missing = selected.copy()
+    provenance[missing] = 255
+    source_view[missing] = -1
+    stats = bounded_surface_harmonic_fill(
+        rgba=rgba,
+        provenance=provenance,
+        source_view=source_view,
+        missing=missing,
+        observed_mask=~missing,
+        sample_component=np.zeros(4, dtype=np.int32),
+        neighbors=graph,
+        max_region_samples=16,
+        max_graph_hops=2,
+    )
+    assert stats["maximum_graph_hops"] <= 2
+
+
 def test_structured_holdout_uses_bounded_surface_completion_and_rejects_view_conflict():
     p = _policy()["completion_quality_policy"]
     good_args = _holdout_fixture(adversarial=False)
@@ -187,7 +230,7 @@ def test_structured_holdout_uses_bounded_surface_completion_and_rejects_view_con
         max_region_samples=p["max_local_harmonic_region_samples"],
         max_graph_hops=p["max_local_harmonic_graph_hops"],
     )
-    assert good["mode"] == "SILHOUETTE_ADJACENT_BOUNDED_OCCLUSION_PATCHES_V3"
+    assert good["mode"] == "SILHOUETTE_ADJACENT_BOUNDED_OCCLUSION_PATCHES_V4_SOURCE_ANCHORED"
     assert good["sample_count"] >= p["min_structured_holdout_samples"]
     assert all(
         row["holdout_sample_count"] >= p["min_structured_holdout_samples_per_view"]

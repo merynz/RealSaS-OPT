@@ -140,7 +140,7 @@ jobs:
           set -euo pipefail
           rebound="$ARACHNE_LOCAL/ARACHNE_KNIGHT_V6_CANONICAL_SKIN_WEIGHTS_F64_REBOUND.npz"
           receipt="$ARACHNE_LOCAL/ARACHNE_KNIGHT_V6_SEMANTIC_ID_REBIND_RECEIPT.json"
-          python tools/training/rebind_dense_skin_to_semantically_equivalent_skeleton_v1.py \
+          python -m tools.training.rebind_dense_skin_to_semantically_equivalent_skeleton_v1 \
             --input-npz "$ARACHNE_LOCAL/ARACHNE_KNIGHT_V6_CANONICAL_SKIN_WEIGHTS_F64.npz" \
             --old-skeleton-json "$ARACHNE_LOCAL/FINAL_QUALIFIED_SKELETON_IR.json" \
             --new-skeleton-json "$SKELETON_JSON" \
@@ -179,7 +179,7 @@ jobs:
         run: |
           set -euo pipefail
           proposal="$ARACHNE_LOCAL/ARACHNE_KNIGHT_V6_SKIN_PROPOSAL_REPLAY.json"
-          python tools/training/materialize_dense_skin_proposal_v1.py \
+          python -m tools.training.materialize_dense_skin_proposal_v1 \
             --weights-npz "$ARACHNE_REBOUND_WEIGHTS" \
             --surface-json "$SURFACE_JSON" \
             --skeleton-json "$SKELETON_JSON" \

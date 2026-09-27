@@ -21,7 +21,7 @@ jobs:
     env:
       RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
       AUTHORITY_ROOT: /home/monster/realsas_authority
-      PLAYER: /tmp/realsas_runtime_v2_visual_mesh_arap_witness
+      PLAYER: /tmp/realsas_runtime_visual_mesh_v1_witness
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -31,11 +31,11 @@ jobs:
         run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
       - name: Unit test visual mesh ARAP core
         run: PYTHONPATH=. python -m pytest -q tests/compiler/test_visual_mesh_arap_v1.py
-      - name: Build native V2 renderer
+      - name: Build native 2D visual mesh renderer
         run: |
           set -euo pipefail
-          c++ -std=c++17 -O3 -DNDEBUG \
-            runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp \
+          c++ -std=c++17 -O3 -DNDEBUG -Wall -Wextra -pedantic \
+            runtime/realsas_cpp/src/runtime_visual_mesh_v1.cpp \
             -lpng -lz -o "$PLAYER"
       - name: Render source-owned visual mesh witness
         run: |
@@ -51,7 +51,7 @@ jobs:
         run: |
           set -euo pipefail
           find canonical/knight_visual_mesh_arap_witness_v1 -type f \
-            \( -name '*.rss' -o -name '*.npz' -o -name '*.rgba' -o -name 'source_art.png' \) -delete
+            \( -name '*.rss' -o -name '*.npz' -o -name '*.rgba' -o -name '*.bin' -o -name 'source_art.png' \) -delete
           rm -rf canonical/knight_visual_mesh_arap_witness_v1/native_frames
           git config user.name realsas-self-hosted-runner
           git config user.email runner@realsas.local

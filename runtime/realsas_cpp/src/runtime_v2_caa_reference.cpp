@@ -507,6 +507,11 @@ std::string arg_value(int argc,char** argv,const std::string& key,bool required=
     return {};
 }
 
+bool has_flag(int argc,char** argv,const std::string& key) {
+    for(int i=2;i<argc;++i) if(argv[i]==key) return true;
+    return false;
+}
+
 int parse_int_exact(const std::string& raw,const std::string& label) {
     if(raw.empty()) throw std::runtime_error(label+"_INTEGER_EMPTY");
     std::size_t consumed=0;
@@ -533,6 +538,8 @@ int main(int argc,char** argv) {
         const std::string prov_path=arg_value(argc,argv,"--out-provenance",false);
         const std::string source_view_path=arg_value(argc,argv,"--out-source-view",false);
         const std::string owner_path=arg_value(argc,argv,"--out-owner",false);
+        const bool allow_layer_overflow_diagnostic=
+            has_flag(argc,argv,"--allow-layer-overflow-diagnostic");
 
         const auto entries=parse_rss(package_path);
         const auto manifest=parse_manifest(entries.at("manifest.txt"));
@@ -809,7 +816,8 @@ int main(int argc,char** argv) {
         const auto overflow_count=static_cast<std::size_t>(
             std::count(layer_overflow.begin(),layer_overflow.end(),static_cast<std::uint8_t>(1))
         );
-        if(overflow_count>0) throw std::runtime_error("VISIBILITY_LAYER_OVERFLOW");
+        if(overflow_count>0 && !allow_layer_overflow_diagnostic)
+            throw std::runtime_error("VISIBILITY_LAYER_OVERFLOW");
 
         write_file(rgba_path,rgba.data(),rgba.size());
         if(!prov_path.empty()) write_file(prov_path,prov.data(),prov.size());

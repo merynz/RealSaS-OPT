@@ -1,0 +1,19 @@
+{
+  "expected_arachne_skeleton_lineage": "c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce",
+  "joint_payload_equal": false,
+  "legacy_root": "J:7c5c420fc1663cffd506",
+  "legacy_v1_lineage": "ed274f95fceec585a66d593fce049cbb98e9885ba8653a8520464605f7df1889",
+  "legacy_v1_matches_arachne": false,
+  "product_authority_claimed": false,
+  "product_v2_lineage": "bccc4d96ce10414619b1058c4fca1e27faa271bfae7449343f0ddf4c58642df6",
+  "product_v2_matches_arachne": false,
+  "product_v2_roots": [
+    "J:b8216dc93fc86a4a06ae"
+  ],
+  "proposal_joint_count": 28,
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "schema": "RealSaS.KnightSkeletonLineageProbe.v1",
+  "status": "PASS",
+  "v1_joint_count": 28,
+  "v2_joint_count": 28
+}

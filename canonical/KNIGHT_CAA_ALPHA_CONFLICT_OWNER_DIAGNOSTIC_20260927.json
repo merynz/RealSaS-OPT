@@ -34,7 +34,29 @@
       "left_view_index": 0,
       "opposite_foreground_class_fraction": 0.27192393736017895,
       "right_view_index": 1,
-      "shared_direct_sample_count": 565329
+      "shared_direct_sample_count": 565329,
+      "source_silhouette_class_partition": {
+        "background_background": {
+          "alpha_conflict_count": 0,
+          "alpha_conflict_fraction": 0.0,
+          "shared_sample_count": 0
+        },
+        "foreground_foreground": {
+          "alpha_conflict_count": 6509,
+          "alpha_conflict_fraction": 0.011563373826163887,
+          "shared_sample_count": 562898
+        },
+        "opposite_class": {
+          "alpha_conflict_count": 2431,
+          "alpha_conflict_fraction": 1.0,
+          "shared_sample_count": 2431
+        },
+        "same_class": {
+          "alpha_conflict_count": 6509,
+          "alpha_conflict_fraction": 0.011563373826163887,
+          "shared_sample_count": 562898
+        }
+      }
     },
     {
       "alpha_conflict_count": 9941,
@@ -52,7 +74,29 @@
       "left_view_index": 1,
       "opposite_foreground_class_fraction": 0.26093954330550245,
       "right_view_index": 2,
-      "shared_direct_sample_count": 510163
+      "shared_direct_sample_count": 510163,
+      "source_silhouette_class_partition": {
+        "background_background": {
+          "alpha_conflict_count": 0,
+          "alpha_conflict_fraction": 0.0,
+          "shared_sample_count": 8
+        },
+        "foreground_foreground": {
+          "alpha_conflict_count": 7347,
+          "alpha_conflict_fraction": 0.014475107425511417,
+          "shared_sample_count": 507561
+        },
+        "opposite_class": {
+          "alpha_conflict_count": 2594,
+          "alpha_conflict_fraction": 1.0,
+          "shared_sample_count": 2594
+        },
+        "same_class": {
+          "alpha_conflict_count": 7347,
+          "alpha_conflict_fraction": 0.014474879277497247,
+          "shared_sample_count": 507569
+        }
+      }
     },
     {
       "alpha_conflict_count": 10673,
@@ -70,7 +114,29 @@
       "left_view_index": 2,
       "opposite_foreground_class_fraction": 0.303569755457697,
       "right_view_index": 3,
-      "shared_direct_sample_count": 384639
+      "shared_direct_sample_count": 384639,
+      "source_silhouette_class_partition": {
+        "background_background": {
+          "alpha_conflict_count": 0,
+          "alpha_conflict_fraction": 0.0,
+          "shared_sample_count": 0
+        },
+        "foreground_foreground": {
+          "alpha_conflict_count": 7433,
+          "alpha_conflict_fraction": 0.019488776845246053,
+          "shared_sample_count": 381399
+        },
+        "opposite_class": {
+          "alpha_conflict_count": 3240,
+          "alpha_conflict_fraction": 1.0,
+          "shared_sample_count": 3240
+        },
+        "same_class": {
+          "alpha_conflict_count": 7433,
+          "alpha_conflict_fraction": 0.019488776845246053,
+          "shared_sample_count": 381399
+        }
+      }
     },
     {
       "alpha_conflict_count": 6963,
@@ -88,7 +154,29 @@
       "left_view_index": 3,
       "opposite_foreground_class_fraction": 0.2646847623150941,
       "right_view_index": 4,
-      "shared_direct_sample_count": 518258
+      "shared_direct_sample_count": 518258,
+      "source_silhouette_class_partition": {
+        "background_background": {
+          "alpha_conflict_count": 0,
+          "alpha_conflict_fraction": 0.0,
+          "shared_sample_count": 0
+        },
+        "foreground_foreground": {
+          "alpha_conflict_count": 5120,
+          "alpha_conflict_fraction": 0.00991450674360737,
+          "shared_sample_count": 516415
+        },
+        "opposite_class": {
+          "alpha_conflict_count": 1843,
+          "alpha_conflict_fraction": 1.0,
+          "shared_sample_count": 1843
+        },
+        "same_class": {
+          "alpha_conflict_count": 5120,
+          "alpha_conflict_fraction": 0.00991450674360737,
+          "shared_sample_count": 516415
+        }
+      }
     },
     {
       "alpha_conflict_count": 7444,
@@ -106,7 +194,29 @@
       "left_view_index": 4,
       "opposite_foreground_class_fraction": 0.16442772702847933,
       "right_view_index": 5,
-      "shared_direct_sample_count": 554428
+      "shared_direct_sample_count": 554428,
+      "source_silhouette_class_partition": {
+        "background_background": {
+          "alpha_conflict_count": 0,
+          "alpha_conflict_fraction": 0.0,
+          "shared_sample_count": 4
+        },
+        "foreground_foreground": {
+          "alpha_conflict_count": 6220,
+          "alpha_conflict_fraction": 0.011243673174258858,
+          "shared_sample_count": 553200
+        },
+        "opposite_class": {
+          "alpha_conflict_count": 1224,
+          "alpha_conflict_fraction": 1.0,
+          "shared_sample_count": 1224
+        },
+        "same_class": {
+          "alpha_conflict_count": 6220,
+          "alpha_conflict_fraction": 0.011243591875691426,
+          "shared_sample_count": 553204
+        }
+      }
     },
     {
       "alpha_conflict_count": 9201,
@@ -124,7 +234,29 @@
       "left_view_index": 5,
       "opposite_foreground_class_fraction": 0.30431474839691336,
       "right_view_index": 6,
-      "shared_direct_sample_count": 447640
+      "shared_direct_sample_count": 447640,
+      "source_silhouette_class_partition": {
+        "background_background": {
+          "alpha_conflict_count": 0,
+          "alpha_conflict_fraction": 0.0,
+          "shared_sample_count": 0
+        },
+        "foreground_foreground": {
+          "alpha_conflict_count": 6401,
+          "alpha_conflict_fraction": 0.014389443395378114,
+          "shared_sample_count": 444840
+        },
+        "opposite_class": {
+          "alpha_conflict_count": 2800,
+          "alpha_conflict_fraction": 1.0,
+          "shared_sample_count": 2800
+        },
+        "same_class": {
+          "alpha_conflict_count": 6401,
+          "alpha_conflict_fraction": 0.014389443395378114,
+          "shared_sample_count": 444840
+        }
+      }
     },
     {
       "alpha_conflict_count": 9532,
@@ -142,7 +274,29 @@
       "left_view_index": 6,
       "opposite_foreground_class_fraction": 0.27412924884599243,
       "right_view_index": 7,
-      "shared_direct_sample_count": 513440
+      "shared_direct_sample_count": 513440,
+      "source_silhouette_class_partition": {
+        "background_background": {
+          "alpha_conflict_count": 0,
+          "alpha_conflict_fraction": 0.0,
+          "shared_sample_count": 0
+        },
+        "foreground_foreground": {
+          "alpha_conflict_count": 6919,
+          "alpha_conflict_fraction": 0.01354470300121176,
+          "shared_sample_count": 510827
+        },
+        "opposite_class": {
+          "alpha_conflict_count": 2613,
+          "alpha_conflict_fraction": 1.0,
+          "shared_sample_count": 2613
+        },
+        "same_class": {
+          "alpha_conflict_count": 6919,
+          "alpha_conflict_fraction": 0.01354470300121176,
+          "shared_sample_count": 510827
+        }
+      }
     },
     {
       "alpha_conflict_count": 8175,
@@ -160,7 +314,29 @@
       "left_view_index": 7,
       "opposite_foreground_class_fraction": 0.30740061162079513,
       "right_view_index": 0,
-      "shared_direct_sample_count": 554088
+      "shared_direct_sample_count": 554088,
+      "source_silhouette_class_partition": {
+        "background_background": {
+          "alpha_conflict_count": 0,
+          "alpha_conflict_fraction": 0.0,
+          "shared_sample_count": 0
+        },
+        "foreground_foreground": {
+          "alpha_conflict_count": 5662,
+          "alpha_conflict_fraction": 0.010265149798304854,
+          "shared_sample_count": 551575
+        },
+        "opposite_class": {
+          "alpha_conflict_count": 2513,
+          "alpha_conflict_fraction": 1.0,
+          "shared_sample_count": 2513
+        },
+        "same_class": {
+          "alpha_conflict_count": 5662,
+          "alpha_conflict_fraction": 0.010265149798304854,
+          "shared_sample_count": 551575
+        }
+      }
     }
   ],
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",

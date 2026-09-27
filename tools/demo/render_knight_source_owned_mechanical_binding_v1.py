@@ -36,12 +36,11 @@ CLIPS=(("demo_idle_v1","IDLE",833),("demo_run_v1","RUN",208),("demo_slash_v1","S
 
 
 def _load_effective_candidate(ctx):
-    repair = ctx["run_root"]/"artifacts"/"35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"/"repaired_stage18_candidate.json"
-    if repair.is_file():
-        return canonical_mesh_candidate_from_dict(json.loads(repair.read_text())), "STAGE35_REPAIRED_STAGE18_PROPOSAL"
+    # Only the Stage18-adopted lineage is allowed here. A raw Stage35 repair
+    # proposal is not canonical until Stage18 re-adopts it and Stage19+ requalify.
     return canonical_mesh_candidate_from_dict(stage_output_payload(
         ctx,"18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.CanonicalMeshCandidateIR.v1"
-    )), "STAGE18_CURRENT"
+    )), "STAGE18_CANONICAL_ADOPTED_LINEAGE"
 
 
 def _visual_qa(rest, posed, faces):

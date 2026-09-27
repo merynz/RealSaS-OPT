@@ -1,19 +1,48 @@
 {
   "expected_arachne_skeleton_lineage": "c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce",
-  "joint_payload_equal": false,
-  "legacy_root": "J:7c5c420fc1663cffd506",
-  "legacy_v1_lineage": "ed274f95fceec585a66d593fce049cbb98e9885ba8653a8520464605f7df1889",
-  "legacy_v1_matches_arachne": false,
+  "matching_variants": [],
   "product_authority_claimed": false,
-  "product_v2_lineage": "bccc4d96ce10414619b1058c4fca1e27faa271bfae7449343f0ddf4c58642df6",
-  "product_v2_matches_arachne": false,
-  "product_v2_roots": [
-    "J:b8216dc93fc86a4a06ae"
-  ],
   "proposal_joint_count": 28,
+  "qualifier_source_commit_invariant": true,
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
-  "schema": "RealSaS.KnightSkeletonLineageProbe.v1",
+  "schema": "RealSaS.KnightSkeletonLineageProbe.v2",
   "status": "PASS",
-  "v1_joint_count": 28,
-  "v2_joint_count": 28
+  "variants": {
+    "v1_shadow_false": {
+      "joint_count": 28,
+      "joint_payload_sha256": "71dfd053a4bc6a8899e83bbeded5cb7ef6c521ead913f18923f0855070a17f78",
+      "lineage": "a439a8a8ad270655702d4875bc733f52b14f6c66f11a4cbab71a979f8571b5f6",
+      "optimizer_result_sha256": "f4a264d3540067cb147abb079941f96f6d4951f73ff7b0a0728dd36d1efc529b",
+      "root": "J:27364f104041bd5927e3",
+      "solver": "chu_liu_edmonds_maximum_spanning_arborescence"
+    },
+    "v1_shadow_true": {
+      "joint_count": 28,
+      "joint_payload_sha256": "d7565b4cc1484e0d0170b93b9afd27d23d9576fd66a673ca9f093c248bc8979d",
+      "lineage": "dce94c18f33785b040bc139eea0bdaa80a6e588ce6c2d80351d467327ca5e1f9",
+      "optimizer_result_sha256": "433d12a851537190192cc76dacb075be340c8ffab68705f9c5bd9e5d5b70bac9",
+      "root": "J:04bc110e9f5a7ea08307",
+      "solver": "chu_liu_edmonds_maximum_spanning_arborescence"
+    },
+    "v2_shadow_false": {
+      "joint_count": 28,
+      "joint_payload_sha256": "d8cd0e9a92aabc1803994e4f20caca6df2ae0372efc2ec4e54b87ff8ce258f66",
+      "lineage": "1905da6cbbd1bbe7f370335ceaa0a08471e96d20845e9fa25e3da3eb917695e0",
+      "optimizer_result_sha256": "cc5e7a475c8ac01c5080912dac4749b5a1285dac4fe67978741b456ef2d73538",
+      "roots": [
+        "J:c4902bd3fda0596951e3"
+      ],
+      "solver": "chu_liu_edmonds_maximum_spanning_arborescence"
+    },
+    "v2_shadow_true": {
+      "joint_count": 28,
+      "joint_payload_sha256": "d78035facbe165a0a8d0ef77cf77e116c5c0af61e75afc62b214c04cd1058409",
+      "lineage": "df61121507350c79fef4c4dcc26c42ee2efe6a5b02e0833f1862244e62c5a213",
+      "optimizer_result_sha256": "c25137a3ca9b9c9082286e7d5e13cca3a04617b8f7a2087ae94985d0b2870b65",
+      "roots": [
+        "J:ac3e9c05f3080118cb3b"
+      ],
+      "solver": "chu_liu_edmonds_maximum_spanning_arborescence"
+    }
+  }
 }

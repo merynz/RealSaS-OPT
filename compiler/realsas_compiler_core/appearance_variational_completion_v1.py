@@ -39,6 +39,12 @@ class VariationalCompletionStats:
     guide_weight: float = 0.0
     guide_mode: str = "NONE"
 
+    @property
+    def source_constraints_exact(self) -> bool:
+        # The solver treats every known/source value as an exact Dirichlet
+        # boundary condition and never updates those rows.
+        return True
+
     def to_dict(self) -> dict:
         return {
             "node_count": int(self.node_count),
@@ -57,7 +63,7 @@ class VariationalCompletionStats:
             "channel_relative_residuals": list(
                 map(float, self.channel_relative_residuals)
             ),
-            "source_constraints_exact": True,
+            "source_constraints_exact": self.source_constraints_exact,
             "cross_component_edges_consumed": False,
             "objective": "WEIGHTED_GRAPH_DIRICHLET_ENERGY",
             "solver": "SCIPY_CONJUGATE_GRADIENT_JACOBI_PRECONDITIONED",

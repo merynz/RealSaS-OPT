@@ -1,0 +1,41 @@
+name: knight-stage31-proposal-metadata-audit-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/knight_stage31_proposal_metadata_audit_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect Stage31 proposal metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          row=next(x for x in ledger["stages"] if x["id"]=="31_ARACHNE_FIT")
+          exe=next(x for x in row["outputs"] if x["schema"]=="RealSaS.ModelFitExecutionIR.v1")
+          e=json.loads(Path(exe["path"]).read_text())
+          print("EXEC_KEYS",sorted(e))
+          print("EXEC_QUAL_POLICY",json.dumps(e.get("qualification_policy"),sort_keys=True))
+          p=Path(e["proposal_path"])
+          o=json.loads(p.read_text())
+          print("PROPOSAL_KEYS",sorted(o))
+          print("PROPOSAL_METADATA",json.dumps(o.get("metadata"),sort_keys=True)[:30000])
+          print("INFLUENCE_COUNT",len(o.get("influences") or []))
+          PY

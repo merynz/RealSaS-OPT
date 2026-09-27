@@ -13,6 +13,7 @@ conditions. Graph edges are canonical-surface topology edges; no Euclidean
 cross-sheet nearest-neighbor transfer is introduced.
 """
 
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 import heapq
 
@@ -200,6 +201,7 @@ def solve_weighted_surface_dirichlet(
     guide_values: np.ndarray | None = None,
     guide_weight: float = 0.0,
     guide_mode: str = "NONE",
+    parallel_channels: bool = True,
 ) -> tuple[np.ndarray, VariationalCompletionStats]:
     """Fill unknown graph nodes by minimizing weighted Dirichlet energy."""
     source = np.asarray(values, dtype=np.float64)
@@ -360,9 +362,8 @@ def solve_weighted_surface_dirichlet(
         x0[unknown_component == cid] = mean
 
     solved = np.empty_like(x0)
-    iterations = []
-    residuals = []
-    for channel in range(channel_count):
+
+    def solve_channel(channel: int):
         count = 0
 
         def callback(_x):
@@ -393,9 +394,27 @@ def solve_weighted_surface_dirichlet(
             raise QualificationError(
                 "CAA_VARIATIONAL_RESIDUAL_NONFINITE"
             )
+        return int(channel), answer, int(count), relative
+
+    if bool(parallel_channels) and channel_count > 1:
+        with ThreadPoolExecutor(
+            max_workers=min(int(channel_count), 4),
+            thread_name_prefix="realsas-caa-cg",
+        ) as executor:
+            channel_results = list(
+                executor.map(solve_channel, range(channel_count))
+            )
+    else:
+        channel_results = [
+            solve_channel(channel) for channel in range(channel_count)
+        ]
+
+    iterations = [0] * channel_count
+    residuals = [0.0] * channel_count
+    for channel, answer, count, relative in channel_results:
         solved[:, channel] = answer
-        iterations.append(int(count))
-        residuals.append(relative)
+        iterations[channel] = int(count)
+        residuals[channel] = float(relative)
 
     output = source.copy()
     output[unknown_nodes] = solved

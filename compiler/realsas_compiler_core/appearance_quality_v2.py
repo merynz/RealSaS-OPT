@@ -303,6 +303,7 @@ def structured_holdout_metrics(
     *,
     direct_valid: np.ndarray,
     direct_rgba: np.ndarray,
+    direct_donor_valid: np.ndarray | None = None,
     source_xy: np.ndarray,
     sample_positions: np.ndarray,
     sample_component_index: np.ndarray,
@@ -321,6 +322,11 @@ def structured_holdout_metrics(
 ) -> dict:
     direct_valid = np.asarray(direct_valid, dtype=bool)
     direct_rgba = np.asarray(direct_rgba, dtype=np.uint8)
+    direct_donor_valid = (
+        direct_valid
+        if direct_donor_valid is None
+        else np.asarray(direct_donor_valid, dtype=bool)
+    )
     source_xy = np.asarray(source_xy, dtype=np.float32)
     positions = np.asarray(sample_positions, dtype=np.float64)
     component = np.asarray(sample_component_index, dtype=np.int32)
@@ -331,6 +337,8 @@ def structured_holdout_metrics(
     n = direct_valid.shape[1]
     if (
         direct_rgba.shape != (8, n, 4)
+        or direct_donor_valid.shape != direct_valid.shape
+        or np.any(direct_donor_valid & ~direct_valid)
         or source_xy.shape != (8, n, 2)
         or positions.shape != (n, 3)
         or component.shape != (n,)
@@ -427,6 +435,7 @@ def structured_holdout_metrics(
             target_view_index=target,
             missing=~has,
             direct_valid=direct_valid,
+            donor_valid=direct_donor_valid,
             sample_face_index=face_index,
             face_support_by_view=face_support,
         )

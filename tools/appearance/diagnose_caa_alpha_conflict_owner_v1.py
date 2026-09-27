@@ -86,7 +86,7 @@ def diagnose(*, repo_root: Path, authority_root: Path, run_id: str) -> dict:
         ).read_text()
     )
     alpha_cut = float(
-        policy["cross_view_source_compatibility_policy"]["alpha_conflict_cut"]
+        policy["completion_quality_policy"]["cross_view_alpha_conflict_cut"]
     )
 
     valid = np.asarray(arrays["direct_valid"], dtype=bool)

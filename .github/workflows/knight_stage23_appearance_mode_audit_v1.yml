@@ -1,0 +1,46 @@
+name: knight-stage23-appearance-mode-audit-v1
+on:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths: ['.github/workflows/knight_stage23_appearance_mode_audit_v1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect Stage23
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          row=next(x for x in ledger["stages"] if x["id"]=="23_COMPLETE_APPEARANCE_ASSET_BAKED")
+          print("STATUS",row["status"])
+          for x in row["outputs"]:
+              print("OUTPUT",x["schema"],x["path"],x["sha256"])
+              if x["schema"]=="RealSaS.CompleteAppearanceAssetIR.v2":
+                  o=json.loads(Path(x["path"]).read_text())
+                  print("ASSET_METADATA",json.dumps(o.get("metadata"),sort_keys=True))
+                  print("TEXTURE_COUNT",len(o.get("textures") or []))
+                  print("FACE_UV",o.get("face_uv_npz_path"))
+                  print("PROVENANCE",o.get("provenance_npz_path"))
+          row2=next(x for x in ledger["stages"] if x["id"]=="21_CAA_COMPILE")
+          for x in row2["outputs"]:
+              if x["schema"]=="RealSaS.CAACompileArtifactIR.v2":
+                  o=json.loads(Path(x["path"]).read_text())
+                  print("COMPILE_COUNTS",json.dumps({
+                    "face_count":o["face_count"],"direction_count":o["direction_count"],
+                    "direct":o["direct_source_sample_count"],"other":o["other_view_source_sample_count"],
+                    "harmonic":o["compiled_local_harmonic_sample_count"],
+                    "metadata":o.get("metadata")
+                  },sort_keys=True)[:30000])
+          PY

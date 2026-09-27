@@ -807,6 +807,37 @@ def _circular_view_order(target: int) -> tuple[int, ...]:
     )
 
 
+def direct_source_and_donor_eligibility(
+    *,
+    in_bounds: np.ndarray,
+    visible: np.ndarray,
+    source_foreground: np.ndarray,
+    safe_foreground: np.ndarray,
+    safe_background: np.ndarray,
+    alpha_foreground: np.ndarray,
+    alpha_background: np.ndarray,
+    angle_safe: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Separate immutable direct observation from transferable donor safety.
+
+    Exact first-hit source foreground is direct authority even at a one-pixel
+    silhouette boundary or a grazing face angle. Erosion and normal support
+    remain donor-safety constraints for cross-view reuse. Safe transparent
+    background remains a defined direct observation but is never an appearance
+    donor.
+    """
+    direct_foreground = source_foreground & alpha_foreground
+    direct_background = safe_background & alpha_background
+    direct = in_bounds & visible & (direct_foreground | direct_background)
+    donor = (
+        direct
+        & safe_foreground
+        & alpha_foreground
+        & angle_safe
+    )
+    return direct, donor
+
+
 def select_other_view_donor_by_support(
     *,
     target_view_index: int,
@@ -1047,28 +1078,21 @@ def compile_deterministic_caa(
         face_support_by_view[view] = face_cos
         angle_safe = face_cos[sample_face] >= min_cos
 
-        # Source-lock and donor eligibility are different authorities.
-        #
-        # If an exact qualified source observation sees this canonical sample
-        # as the first hit and the source foreground/alpha says the pixel
-        # exists, that observation is immutable source evidence. A grazing
-        # normal or a one-pixel silhouette safety band may reduce confidence
-        # when REUSING the observation as an other-view donor, but they cannot
-        # erase the fact that the target source view directly observed it.
-        direct_foreground_support = mask[iy.clip(0, image.shape[0] - 1), ix.clip(0, image.shape[1] - 1)]
-        direct_foreground_support &= alpha_foreground_safe
-        direct_appearance_support = (
-            direct_foreground_support
-            | (background_safe & alpha_background_safe)
+        source_foreground = np.zeros(sample_count, dtype=bool)
+        if len(valid_index):
+            source_foreground[valid_index] = mask[y, x]
+        valid, donor_valid = direct_source_and_donor_eligibility(
+            in_bounds=in_bounds,
+            visible=visible,
+            source_foreground=source_foreground,
+            safe_foreground=foreground_safe,
+            safe_background=background_safe,
+            alpha_foreground=alpha_foreground_safe,
+            alpha_background=alpha_background_safe,
+            angle_safe=angle_safe,
         )
-        valid = in_bounds & visible & direct_appearance_support
         direct_valid[view] = valid
-        direct_foreground_donor_valid[view] = (
-            valid
-            & foreground_safe
-            & alpha_foreground_safe
-            & angle_safe
-        )
+        direct_foreground_donor_valid[view] = donor_valid
         if np.any(valid):
             sampled_rgba, sampled_pm = bilinear_rgba_u8(
                 image,
@@ -1133,22 +1157,24 @@ def compile_deterministic_caa(
         control_angle_safe = (
             control_face_cos[canonical_control_face] >= min_cos
         )
-        control_direct_foreground_support = np.zeros(
+        control_source_foreground = np.zeros(
             canonical_control_count, dtype=bool
         )
         if len(control_ids):
-            control_direct_foreground_support[control_ids] = (
-                mask[control_iy[control_ids], control_ix[control_ids]]
-                & control_alpha_foreground_safe[control_ids]
+            control_source_foreground[control_ids] = mask[
+                control_iy[control_ids], control_ix[control_ids]
+            ]
+        control_valid, _control_donor_valid = (
+            direct_source_and_donor_eligibility(
+                in_bounds=control_in_bounds,
+                visible=control_visible,
+                source_foreground=control_source_foreground,
+                safe_foreground=control_foreground_safe,
+                safe_background=control_background_safe,
+                alpha_foreground=control_alpha_foreground_safe,
+                alpha_background=control_alpha_background_safe,
+                angle_safe=control_angle_safe,
             )
-        control_direct_appearance_support = (
-            control_direct_foreground_support
-            | (control_background_safe & control_alpha_background_safe)
-        )
-        control_valid = (
-            control_in_bounds
-            & control_visible
-            & control_direct_appearance_support
         )
         canonical_control_direct_valid[view] = control_valid
         if np.any(control_valid):

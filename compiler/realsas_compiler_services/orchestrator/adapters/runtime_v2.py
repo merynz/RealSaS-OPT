@@ -2,6 +2,7 @@ from __future__ import annotations
 
 """V2 Stage42-45 deterministic runtime projection, package, native proof and DVI."""
 
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, replace
 import hashlib
 from pathlib import Path
@@ -564,6 +565,52 @@ def _run_native(
     return rgba, provenance, owner, completed.stdout
 
 
+def _native_parallel_workers(ctx: dict) -> int:
+    """Bound native proof concurrency without changing render semantics."""
+    cfg = dict(ctx["run_manifest"].get("runtime") or {})
+    raw = int(cfg.get("native_parallel_workers", 2))
+    return max(1, min(raw, 8))
+
+
+def _run_native_many(
+    *,
+    player: Path,
+    package: Path,
+    requests,
+    root: Path,
+    max_workers: int,
+):
+    rows = tuple(dict(row) for row in requests)
+    if not rows:
+        return []
+    workers = max(1, min(int(max_workers), len(rows)))
+    if workers == 1:
+        return [
+            _run_native(
+                player=player,
+                package=package,
+                clip_id=row["clip_id"],
+                view_id=row["view_id"],
+                frame_index=int(row["frame_index"]),
+                root=root,
+            )
+            for row in rows
+        ]
+
+    def invoke(row):
+        return _run_native(
+            player=player,
+            package=package,
+            clip_id=row["clip_id"],
+            view_id=row["view_id"],
+            frame_index=int(row["frame_index"]),
+            root=root,
+        )
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        return list(pool.map(invoke, rows))
+
+
 def _numeric_mesh(arrays):
     vertices = [
         SimpleNamespace(canonical_mesh_vertex_id=f"v{index}", P=tuple(map(float, xyz)))
@@ -679,18 +726,26 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
 
     probes = []
     outputs = []
+    native_workers = _native_parallel_workers(ctx)
     view_by_id = {view.view_id: view for view in projection.views}
     for clip in projection.clips:
         frame_index = int(clip.frame_count // 2)
-        for view in projection.views:
-            rgba, provenance, owner, stdout = _run_native(
-                player=player,
-                package=archive,
-                clip_id=clip.clip_id,
-                view_id=view.view_id,
-                frame_index=frame_index,
-                root=root / "probes",
-            )
+        views = tuple(projection.views)
+        native_rows = _run_native_many(
+            player=player,
+            package=archive,
+            requests=(
+                {
+                    "clip_id": clip.clip_id,
+                    "view_id": view.view_id,
+                    "frame_index": frame_index,
+                }
+                for view in views
+            ),
+            root=root / "probes",
+            max_workers=native_workers,
+        )
+        for view, (rgba, provenance, owner, stdout) in zip(views, native_rows):
             resolution = int(view.camera["resolution"])
             if rgba.stat().st_size != resolution * resolution * 4:
                 raise QualificationError("RUNTIME_V2_NATIVE_RGBA_SIZE_DRIFT")
@@ -772,6 +827,7 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
             "native_package_opened_directly": True,
             "midpoint_probe_per_clip_view": True,
             "python_reference_byte_parity": True,
+            "native_parallel_workers": native_workers,
         },
     )
     playback = replace(playback, playback_hash=native_playback_hash(playback))
@@ -791,6 +847,7 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
             "probe_count": len(probes),
             "native_reference_mismatch_pixels": 0,
             "native_player_sha256": player_sha,
+            "native_parallel_workers": native_workers,
         },
     }
 
@@ -894,6 +951,7 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     arrays = _projection_arrays(projection)
     reference_context = _build_reference_render_context(projection, arrays)
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+    native_workers = _native_parallel_workers(ctx)
 
     faces = np.asarray(arrays["faces"], dtype=np.int64)
     rest_vertices = np.asarray(arrays["vertices"], dtype=np.float64)
@@ -967,15 +1025,25 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             previous_vertices = (
                 None if frame_index <= 0 else positions_all[frame_index - 1]
             )
-            for view in projection.views:
-                rgba_path, prov_path, owner_path, _stdout = _run_native(
-                    player=player,
-                    package=archive,
-                    clip_id=clip.clip_id,
-                    view_id=view.view_id,
-                    frame_index=frame_index,
-                    root=root / "frames",
-                )
+            views = tuple(projection.views)
+            native_rows = _run_native_many(
+                player=player,
+                package=archive,
+                requests=(
+                    {
+                        "clip_id": clip.clip_id,
+                        "view_id": view.view_id,
+                        "frame_index": frame_index,
+                    }
+                    for view in views
+                ),
+                root=root / "frames",
+                max_workers=native_workers,
+            )
+            for view, (rgba_path, prov_path, owner_path, _stdout) in zip(
+                views,
+                native_rows,
+            ):
                 resolution = int(view.camera["resolution"])
                 rgba = np.frombuffer(rgba_path.read_bytes(), dtype=np.uint8).reshape(
                     resolution, resolution, 4
@@ -1459,6 +1527,7 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             ),
             "raw_owner_negative_background_area_gated_as_crack": False,
             "cross_component_non_detachability_authority_claimed": False,
+            "native_parallel_workers": native_workers,
         },
     )
     value = replace(

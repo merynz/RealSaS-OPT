@@ -27,8 +27,11 @@
     }
   ],
   "diagnostic_definition": {
-    "note": "This diagnoses appearance/occupancy ownership leakage; it does not by itself prove a relation face is semantically invalid.",
-    "suspicious_opaque": "NO_DIRECT_FOREGROUND_DONOR_EVIDENCE_IN_ANY_VIEW__BUT_CAA_ALPHA_POSITIVE_IN_AT_LEAST_ONE_DIRECTION"
+    "background_only_opaque": "DIRECTLY_OBSERVED_ONLY_AS_TRANSPARENT_BACKGROUND__BUT_CAA_ALPHA_POSITIVE_IN_AT_LEAST_ONE_DIRECTION",
+    "donorless_opaque": "NO_QUALIFIED_FOREGROUND_DONOR_IN_ANY_VIEW__BUT_CAA_ALPHA_POSITIVE_IN_AT_LEAST_ONE_DIRECTION",
+    "globally_unseen_opaque": "NO_DIRECT_SOURCE_OBSERVATION_FOREGROUND_OR_BACKGROUND_IN_ANY_VIEW__BUT_CAA_ALPHA_POSITIVE",
+    "note": "Ownership-leak and globally-unseen-opaque are the strict visual-ownership diagnostics. Donorless-opaque is broader because silhouette-boundary or grazing direct foreground may be immutable source authority but unsafe as a cross-view donor.",
+    "ownership_leak_opaque": "NO_DIRECT_FOREGROUND_OBSERVATION_IN_ANY_VIEW__BUT_CAA_ALPHA_POSITIVE_IN_AT_LEAST_ONE_DIRECTION"
   },
   "face_rows_omitted_count": 24758,
   "relation_kind_histogram": {
@@ -50,12 +53,19 @@
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
   "sample_summary": {
     "any_direct_sample_count": 3100994,
+    "background_only_opaque_fraction_of_all_samples": 0.0004793263785212934,
+    "background_only_opaque_sample_count": 1884,
+    "direct_foreground_observation_sample_count": 3094575,
+    "donorless_opaque_fraction": 0.29827864840138035,
+    "donorless_opaque_sample_count": 1172389,
     "foreground_donor_evidence_sample_count": 2753419,
+    "globally_unseen_opaque_fraction_of_all_samples": 0.21100257574323575,
+    "globally_unseen_opaque_sample_count": 829349,
     "globally_unseen_sample_count": 829522,
     "observed_background_sample_count": 6419,
-    "sample_count": 3930516,
-    "suspicious_opaque_fraction": 0.29827864840138035,
-    "suspicious_opaque_sample_count": 1172389
+    "ownership_leak_opaque_fraction": 0.21148190212175705,
+    "ownership_leak_opaque_sample_count": 831233,
+    "sample_count": 3930516
   },
   "schema": "RealSaS.KnightRelationAppearanceOwnershipDiagnostic.v1",
   "top_suspicious_faces": [

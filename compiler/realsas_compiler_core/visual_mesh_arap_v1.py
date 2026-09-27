@@ -20,6 +20,7 @@ from scipy.sparse import coo_matrix, eye
 from scipy.sparse.linalg import factorized
 
 from .hashing import content_sha256
+from .mesh._historical_v05 import triangulate_production_cdt
 from .types import QualificationError
 
 
@@ -190,11 +191,192 @@ class ArapQa:
     max_edge_stretch: float
 
 
-def _sample_binary_field(mask: np.ndarray, xy: np.ndarray) -> np.ndarray:
+def _signed_area(loop: list[tuple[int, int]]) -> float:
+    area = 0.0
+    for i, a in enumerate(loop):
+        b = loop[(i + 1) % len(loop)]
+        area += float(a[0] * b[1] - b[0] * a[1])
+    return 0.5 * area
+
+
+def _simplify_axis_aligned_loop(
+    loop: list[tuple[int, int]],
+) -> list[tuple[int, int]]:
+    """Remove only exactly collinear pixel-union boundary vertices.
+
+    Coordinates are integer half-pixel units (2*x), so this operation is exact
+    and cannot move the source silhouette.
+    """
+    if len(loop) < 3:
+        return loop
+    changed = True
+    out = list(loop)
+    while changed and len(out) >= 3:
+        changed = False
+        keep = []
+        n = len(out)
+        for i in range(n):
+            a = out[(i - 1) % n]
+            b = out[i]
+            d = out[(i + 1) % n]
+            ab = (b[0] - a[0], b[1] - a[1])
+            bd = (d[0] - b[0], d[1] - b[1])
+            if ab[0] * bd[1] - ab[1] * bd[0] == 0:
+                # Same axis and same direction only. Never collapse a 180-degree
+                # cusp because that would alter topology.
+                if ab[0] * bd[0] + ab[1] * bd[1] > 0:
+                    changed = True
+                    continue
+            keep.append(b)
+        out = keep
+    return out
+
+
+def _trace_pixel_union_loops(mask: np.ndarray) -> list[list[tuple[int, int]]]:
+    """Exact closed loops of the union of foreground pixel cells.
+
+    Pixel (x,y) is represented by a unit square centered at source-raster
+    coordinate (x,y), hence corners are (x±0.5,y±0.5). We store doubled integer
+    coordinates while tracing to avoid floating-point topology drift.
+    """
+    mask = np.asarray(mask, dtype=bool)
     h, w = mask.shape
-    x = np.clip(np.rint(xy[:, 0]).astype(np.int64), 0, w - 1)
-    y = np.clip(np.rint(xy[:, 1]).astype(np.int64), 0, h - 1)
-    return mask[y, x]
+    edges: set[tuple[tuple[int, int], tuple[int, int]]] = set()
+    ys, xs = np.nonzero(mask)
+    for y, x in zip(ys.tolist(), xs.tolist()):
+        x0, x1 = 2 * x - 1, 2 * x + 1
+        y0, y1 = 2 * y - 1, 2 * y + 1
+        if y == 0 or not mask[y - 1, x]:
+            edges.add(((x0, y0), (x1, y0)))  # east
+        if x + 1 >= w or not mask[y, x + 1]:
+            edges.add(((x1, y0), (x1, y1)))  # south
+        if y + 1 >= h or not mask[y + 1, x]:
+            edges.add(((x1, y1), (x0, y1)))  # west
+        if x == 0 or not mask[y, x - 1]:
+            edges.add(((x0, y1), (x0, y0)))  # north
+
+    if not edges:
+        raise ValueError("VISUAL_MESH_BOUNDARY_EMPTY")
+
+    outgoing: dict[tuple[int, int], set[tuple[int, int]]] = {}
+    for a, b in edges:
+        outgoing.setdefault(a, set()).add(b)
+
+    direction_code = {
+        (2, 0): 0,   # east
+        (0, 2): 1,   # south
+        (-2, 0): 2,  # west
+        (0, -2): 3,  # north
+    }
+
+    remaining = set(edges)
+    loops: list[list[tuple[int, int]]] = []
+    while remaining:
+        first = min(remaining)
+        start, nxt = first
+        loop = [start]
+        remaining.remove(first)
+        cur = nxt
+        prev = start
+        guard = 0
+        while cur != start:
+            loop.append(cur)
+            candidates = [
+                b for b in outgoing.get(cur, ())
+                if (cur, b) in remaining
+            ]
+            if not candidates:
+                raise ValueError("VISUAL_MESH_BOUNDARY_OPEN_LOOP")
+            incoming = (cur[0] - prev[0], cur[1] - prev[1])
+            code = direction_code.get(incoming)
+            if code is None:
+                raise ValueError("VISUAL_MESH_BOUNDARY_NON_AXIS_EDGE")
+            by_priority = []
+            for b in candidates:
+                delta = (b[0] - cur[0], b[1] - cur[1])
+                out_code = direction_code.get(delta)
+                if out_code is None:
+                    continue
+                turn = (out_code - code) % 4
+                # Interior is on the right: prefer right turn, then straight,
+                # then left, then back at a diagonal-touch ambiguity.
+                rank = {1: 0, 0: 1, 3: 2, 2: 3}[turn]
+                by_priority.append((rank, b))
+            if not by_priority:
+                raise ValueError("VISUAL_MESH_BOUNDARY_TRACE_FAILED")
+            _, chosen = min(by_priority)
+            remaining.remove((cur, chosen))
+            prev, cur = cur, chosen
+            guard += 1
+            if guard > len(edges) + 4:
+                raise ValueError("VISUAL_MESH_BOUNDARY_TRACE_GUARD")
+        simplified = _simplify_axis_aligned_loop(loop)
+        if len(simplified) >= 3 and abs(_signed_area(simplified)) > 0.0:
+            loops.append(simplified)
+
+    if not loops:
+        raise ValueError("VISUAL_MESH_NO_CLOSED_BOUNDARY_LOOP")
+    return loops
+
+
+def _component_cdt(
+    component_mask: np.ndarray,
+    *,
+    target_edge_px: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    loops_i2 = _trace_pixel_union_loops(component_mask)
+    # For the directed pixel-union edges used above, the outer loop has the
+    # largest absolute area. Treat every other enclosed loop as a hole and
+    # normalize winding for the numerical kernel.
+    outer_i2 = max(loops_i2, key=lambda row: abs(_signed_area(row)))
+    holes_i2 = [row for row in loops_i2 if row is not outer_i2]
+
+    def as_float(row):
+        return [(0.5 * float(x), 0.5 * float(y)) for x, y in row]
+
+    outer = as_float(outer_i2)
+    if _signed_area(outer_i2) < 0.0:
+        outer = list(reversed(outer))
+
+    holes = []
+    for row in holes_i2:
+        value = as_float(row)
+        if _signed_area(row) > 0.0:
+            value = list(reversed(value))
+        holes.append(value)
+
+    h, w = component_mask.shape
+    step = max(4, int(target_edge_px))
+    support = []
+    # Interior source-pixel centers are exact visual sample coordinates.
+    for y in range(step // 2, h, step):
+        for x in range(step // 2, w, step):
+            if component_mask[y, x]:
+                support.append((float(x), float(y)))
+
+    boundary_vertices = sum(len(row) for row in (outer, *holes))
+    result = triangulate_production_cdt(
+        outer,
+        hole_loops=holes or None,
+        support_points=support or None,
+        target_min_angle_deg=7.5,
+        max_boundary_vertices=max(512, boundary_vertices * 2 + 64),
+        max_support_vertices=max(128, len(support) + 64),
+        max_constraint_recovery_iterations=192,
+        max_quality_iterations=96,
+        min_feature_spacing=1.0e-6,
+    )
+    if not bool(result.success):
+        raise ValueError(f"VISUAL_MESH_CDT_FAIL:{result.reason}")
+    if int(result.missing_constraint_count) != 0:
+        raise ValueError("VISUAL_MESH_CDT_MISSING_CONSTRAINT")
+    vertices = np.asarray(result.vertices, dtype=np.float64)
+    faces = np.asarray(result.triangles, dtype=np.int64)
+    if vertices.ndim != 2 or vertices.shape[1] != 2 or faces.ndim != 2 or faces.shape[1] != 3:
+        raise ValueError("VISUAL_MESH_CDT_RESULT_SHAPE_INVALID")
+    if len(vertices) < 3 or len(faces) < 1:
+        raise ValueError("VISUAL_MESH_CDT_EMPTY")
+    return vertices, faces
 
 
 def build_visual_mesh_from_mask(
@@ -202,93 +384,47 @@ def build_visual_mesh_from_mask(
     *,
     target_edge_px: int = 20,
 ) -> VisualMesh2D:
-    """Build a source-art-owned 2D mesh without borrowing mechanical faces.
+    """Build a source-owned visual mesh with exact silhouette constraints.
 
-    A dense-enough silhouette boundary plus an interior grid is Delaunay
-    triangulated. Triangles are admitted only when vertices, edge interior
-    probes and centroid remain inside the source foreground. This gives a
-    silhouette-constrained visual carrier while keeping dependencies limited to
-    SciPy already frozen in mainline CI.
+    The source foreground mask is interpreted as a union of pixel cells.
+    Closed outer/hole loops are extracted exactly, then triangulated by the
+    hash-sealed historical RealSaS production CDT kernel. Mechanical relation
+    faces are never used as visual topology.
     """
     mask = np.asarray(mask, dtype=bool)
     if mask.ndim != 2 or not np.any(mask):
         raise ValueError("VISUAL_MESH_MASK_EMPTY_OR_INVALID")
     h, w = map(int, mask.shape)
-    step = max(4, int(target_edge_px))
 
-    eroded = ndimage.binary_erosion(mask, structure=np.ones((3, 3), dtype=bool))
-    boundary = mask & ~eroded
-    by, bx = np.nonzero(boundary)
-    if len(bx) < 3:
-        raise ValueError("VISUAL_MESH_BOUNDARY_TOO_SMALL")
-
-    # One representative boundary sample per step-sized raster bin.
-    bins: dict[tuple[int, int], list[float]] = {}
-    for x, y in zip(bx.tolist(), by.tolist()):
-        key = (x // step, y // step)
-        row = bins.setdefault(key, [0.0, 0.0, 0.0])
-        row[0] += float(x)
-        row[1] += float(y)
-        row[2] += 1.0
-    boundary_points = np.asarray(
-        [[sx / n, sy / n] for sx, sy, n in bins.values()],
-        dtype=np.float64,
-    )
-
-    ys = np.arange(step // 2, h, step, dtype=np.int64)
-    xs = np.arange(step // 2, w, step, dtype=np.int64)
-    grid_x, grid_y = np.meshgrid(xs, ys)
-    interior_xy = np.stack((grid_x.ravel(), grid_y.ravel()), axis=1)
-    keep = mask[interior_xy[:, 1], interior_xy[:, 0]]
-    interior_points = interior_xy[keep].astype(np.float64)
-
-    points = np.concatenate((boundary_points, interior_points), axis=0)
-    # Stable de-duplication after subpixel boundary averaging.
-    quant = np.rint(points * 16.0).astype(np.int64)
-    _, unique_idx = np.unique(quant, axis=0, return_index=True)
-    points = points[np.sort(unique_idx)]
-    if len(points) < 3:
-        raise ValueError("VISUAL_MESH_POINT_SET_TOO_SMALL")
-
-    tri = Delaunay(points)
-    faces = np.asarray(tri.simplices, dtype=np.int64)
-    p = points[faces]
-
-    probes = np.stack(
-        (
-            p[:, 0, :],
-            p[:, 1, :],
-            p[:, 2, :],
-            (p[:, 0, :] + p[:, 1, :]) * 0.5,
-            (p[:, 1, :] + p[:, 2, :]) * 0.5,
-            (p[:, 2, :] + p[:, 0, :]) * 0.5,
-            p.mean(axis=1),
-            p[:, 0, :] * 0.25 + p[:, 1, :] * 0.75,
-            p[:, 1, :] * 0.25 + p[:, 2, :] * 0.75,
-            p[:, 2, :] * 0.25 + p[:, 0, :] * 0.75,
+    labels, count = ndimage.label(
+        mask,
+        structure=np.asarray(
+            [[0, 1, 0], [1, 1, 1], [0, 1, 0]],
+            dtype=np.uint8,
         ),
-        axis=1,
     )
-    admitted = np.ones(len(faces), dtype=bool)
-    for k in range(probes.shape[1]):
-        admitted &= _sample_binary_field(mask, probes[:, k, :])
-    faces = faces[admitted]
-    if len(faces) == 0:
-        raise ValueError("VISUAL_MESH_NO_ADMITTED_TRIANGLES")
+    all_vertices = []
+    all_faces = []
+    offset = 0
+    for label in range(1, int(count) + 1):
+        component = labels == label
+        vertices, faces = _component_cdt(
+            component,
+            target_edge_px=target_edge_px,
+        )
+        all_vertices.append(vertices)
+        all_faces.append(faces + offset)
+        offset += len(vertices)
 
-    used = np.unique(faces.ravel())
-    remap = np.full(len(points), -1, dtype=np.int64)
-    remap[used] = np.arange(len(used), dtype=np.int64)
-    points = points[used]
-    faces = remap[faces]
-
+    points = np.concatenate(all_vertices, axis=0)
+    faces = np.concatenate(all_faces, axis=0)
     uv = np.empty_like(points, dtype=np.float64)
     uv[:, 0] = points[:, 0] / max(1.0, float(w - 1))
     uv[:, 1] = points[:, 1] / max(1.0, float(h - 1))
     return VisualMesh2D(
         positions=points,
         faces=faces.astype(np.uint32),
-        uv=np.clip(uv, 0.0, 1.0),
+        uv=uv,
         width=w,
         height=h,
     )

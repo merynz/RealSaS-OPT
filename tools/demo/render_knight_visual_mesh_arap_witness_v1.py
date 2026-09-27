@@ -40,6 +40,8 @@ from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
     bind_points_barycentric,
     build_visual_mesh_from_mask,
     evaluate_bone_handles,
+    raster_xy_to_source_texel_xy,
+    source_texel_xy_to_raster_xy,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     sha256_file,
@@ -151,13 +153,19 @@ def _bind_visual_to_mechanical_surface(
     selected_owner = owner[selected]
     selected_bary = bary[selected]
     selected_faces = mechanical_face_indices[selected_owner]
-    projected_rest = np.asarray(visibility.projected_vertices, dtype=np.float64)
-    rest_bound_xy = np.sum(
+    projected_rest = np.asarray(
+        visibility.projected_vertices,
+        dtype=np.float64,
+    )
+    rest_bound_raster_xy = np.sum(
         projected_rest[selected_faces, :2] * selected_bary[:, :, None],
         axis=1,
     )
+    rest_bound_texel_xy = raster_xy_to_source_texel_xy(
+        rest_bound_raster_xy
+    )
     rest_visual_xy = positions[selected]
-    rest_offset = rest_visual_xy - rest_bound_xy
+    rest_offset = rest_visual_xy - rest_bound_texel_xy
 
     point_weights = np.sum(
         np.asarray(mechanical_weights[selected_faces], dtype=np.float64)
@@ -192,11 +200,14 @@ def _mechanical_targets(
     projected = project_points_xyz_v3(posed_mechanical_xyz, camera)[:, :2]
     faces = np.asarray(binding["mechanical_face_indices"], dtype=np.int64)
     bary = np.asarray(binding["mechanical_barycentric"], dtype=np.float64)
-    posed_bound_xy = np.sum(
+    posed_bound_raster_xy = np.sum(
         projected[faces] * bary[:, :, None],
         axis=1,
     )
-    return posed_bound_xy + np.asarray(
+    posed_bound_texel_xy = raster_xy_to_source_texel_xy(
+        posed_bound_raster_xy
+    )
+    return posed_bound_texel_xy + np.asarray(
         binding["rest_projection_offset_xy"],
         dtype=np.float64,
     )
@@ -277,7 +288,8 @@ def _project_joint_dict(
         [positions[joint_id] for joint_id in ids],
         dtype=np.float64,
     )
-    xy = project_points_xyz_v3(xyz, camera)[:, :2]
+    raster_xy = project_points_xyz_v3(xyz, camera)[:, :2]
+    xy = raster_xy_to_source_texel_xy(raster_xy)
     return {
         joint_id: np.asarray(xy[i], dtype=np.float64)
         for i, joint_id in enumerate(ids)

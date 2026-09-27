@@ -88,7 +88,8 @@ def test_anchor_donor_is_max_support_not_first_view():
         surface_graph=_line_graph(2),
     )
     assert result.globally_unseen_mask.tolist()==[False,False]
-    assert result.anchor_source_view.tolist()==[-1,-1] or np.all(result.rgba==0)
+    assert result.anchor_source_view.tolist()==[3,1]
+    assert np.all(result.rgba==0)
 
 
 def test_directional_source_arrays_are_not_mutated():

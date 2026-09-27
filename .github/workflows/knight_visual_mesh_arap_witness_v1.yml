@@ -35,7 +35,7 @@ jobs:
         run: |
           set -euo pipefail
           c++ -std=c++17 -O3 -DNDEBUG -Wall -Wextra -pedantic \
-            runtime/realsas_cpp/src/runtime_visual_mesh_v1.cpp \
+            tools/demo/native_visual_mesh_preview_v1.cpp \
             -lpng -lz -o "$PLAYER"
       - name: Render source-owned visual mesh witness
         run: |

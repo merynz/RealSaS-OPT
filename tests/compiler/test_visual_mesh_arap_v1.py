@@ -6,6 +6,7 @@ from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
     Arap2D,
     bind_points_barycentric,
     build_visual_mesh_from_mask,
+    source_texel_xy_to_raster_xy,
 )
 
 
@@ -25,12 +26,10 @@ def test_visual_mesh_arap_preserves_simple_mask_and_moves_handle():
 
 
 def _visual_coverage(mesh):
+    raster_positions = source_texel_xy_to_raster_xy(mesh.positions)
     triangles = tuple(
         tuple(
-            (
-                float(mesh.positions[int(vertex_index), 0]) + 0.5,
-                float(mesh.positions[int(vertex_index), 1]) + 0.5,
-            )
+            tuple(map(float, raster_positions[int(vertex_index)]))
             for vertex_index in face
         )
         for face in np.asarray(mesh.faces, dtype=np.int64)
@@ -58,3 +57,15 @@ def test_visual_mesh_cdt_matches_disconnected_mask_and_hole_exactly():
         )
     )
     assert np.max(np.abs(mesh.uv - expected_uv)) <= 1.0e-12
+
+
+def test_visual_texel_to_raster_transform_is_exact_half_pixel_contract():
+    points = np.asarray(
+        [[0.0, 0.0], [3.0, 7.0], [-0.5, 12.5]],
+        dtype=np.float64,
+    )
+    raster = source_texel_xy_to_raster_xy(points)
+    assert np.array_equal(
+        raster,
+        points + np.asarray([0.5, 0.5], dtype=np.float64),
+    )

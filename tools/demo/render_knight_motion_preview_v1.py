@@ -372,7 +372,12 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path):
             payload, skeleton, cameras, source_report
         )
         duration = float(payload["duration_seconds"])
-        sample_times = np.linspace(0.0, duration, 6)
+        sample_times = np.linspace(
+            0.0,
+            duration,
+            4,
+            endpoint=not bool(payload.get("loop")),
+        )
         frames = []
         metrics = []
         for view in (0, 2):
@@ -416,7 +421,7 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path):
                         )
                     ),
                 })
-        sheet = _composite_sheet(frames, columns=6, label=short)
+        sheet = _composite_sheet(frames, columns=4, label=short)
         out_path = out_dir / f"KNIGHT_{short.upper()}_DEMO_PREVIEW_V1.png"
         sheet.save(out_path)
         report["clips"].append({

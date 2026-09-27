@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import subprocess
+from time import perf_counter
 import struct
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
@@ -651,7 +652,22 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
         mask = np.asarray(mask_by_view[view_index], dtype=bool)
         h, w = mask.shape
 
+        t_mesh0 = perf_counter()
         mesh = build_visual_mesh_from_mask(mask, target_edge_px=20)
+        print(
+            "VISUAL_TIMING",
+            json.dumps(
+                {
+                    "view_index": int(view_index),
+                    "phase": "source_mask_to_visual_mesh_cdt",
+                    "seconds": float(perf_counter() - t_mesh0),
+                    "visual_vertex_count": int(len(mesh.positions)),
+                    "visual_face_count": int(len(mesh.faces)),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
         mechanical_binding = _bind_visual_to_mechanical_surface(
             visual_mesh=mesh,
             candidate=candidate,
@@ -764,6 +780,7 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
             arap.reset()
             posed_pixel_frames = []
             qa_rows = []
+            t_clip0 = perf_counter()
             for time_seconds in times:
                 _skin_matrices, posed_joint_positions, _frame_hash = _joint_pose_v2(
                     skeleton=skeleton,
@@ -800,6 +817,19 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
             clip_position_files[clip_id] = positions_path
             clip_frame_counts[clip_id] = int(len(posed_pixel_frames))
             qa_by_clip[clip_id] = qa_rows
+            print(
+                "VISUAL_TIMING",
+                json.dumps(
+                    {
+                        "view_index": int(view_index),
+                        "clip_id": clip_id,
+                        "phase": "pose_plus_arap_4_frames",
+                        "seconds": float(perf_counter() - t_clip0),
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
             print(
                 "VISUAL_ARAP_QA",
                 json.dumps(
@@ -849,6 +879,7 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
                         row["texture_path"],
                     )
                 )
+    t_native0 = perf_counter()
     with ThreadPoolExecutor(max_workers=4) as pool:
         paths = list(
             pool.map(
@@ -871,6 +902,19 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path, native_player: Path
                 jobs,
             )
         )
+
+    print(
+        "VISUAL_TIMING",
+        json.dumps(
+            {
+                "phase": "native_render_all_frames",
+                "seconds": float(perf_counter() - t_native0),
+                "frame_count": int(len(paths)),
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
 
     frames = {}
     for view_index, clip_id, frame, path in paths:

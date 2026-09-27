@@ -1,0 +1,640 @@
+{
+  "all_requested_takes_pose_distinct": true,
+  "body_scale": 4.8632933572573185,
+  "clip_count": 3,
+  "clip_reports": [
+    {
+      "action_slot_identifier": "OBHumanArmature|HumanArmature|Idle",
+      "clip_id": "demo_idle_v1",
+      "clip_kind": "IDLE",
+      "frame_first": 1,
+      "frame_last": 81,
+      "nonroot_translation": {
+        "fraction_gt_1e_3": 0.02551440329218107,
+        "fraction_gt_1e_4": 0.03209876543209877,
+        "fraction_gt_1e_5": 0.03251028806584362,
+        "maximum": 0.00606463790978346,
+        "p95": 2.259777936203308e-07,
+        "p99": 0.005034821472836887,
+        "sample_count": 2430,
+        "top_bones": [
+          {
+            "maximum": 0.00606463790978346,
+            "source_joint_id": "Body"
+          },
+          {
+            "maximum": 2.7497500382236726e-07,
+            "source_joint_id": "Thumb2.R"
+          },
+          {
+            "maximum": 2.5125837067762806e-07,
+            "source_joint_id": "Thumb2.L"
+          },
+          {
+            "maximum": 2.3480914472977173e-07,
+            "source_joint_id": "Palm.L"
+          },
+          {
+            "maximum": 2.294716481847511e-07,
+            "source_joint_id": "Head"
+          },
+          {
+            "maximum": 2.2519305952270813e-07,
+            "source_joint_id": "Thumb.L"
+          },
+          {
+            "maximum": 2.0912267190450936e-07,
+            "source_joint_id": "Torso"
+          },
+          {
+            "maximum": 2.0162184598327062e-07,
+            "source_joint_id": "LowerArm.R"
+          },
+          {
+            "maximum": 1.8960719612664533e-07,
+            "source_joint_id": "Shoulder.L"
+          },
+          {
+            "maximum": 1.773408900844661e-07,
+            "source_joint_id": "Shoulder.R"
+          },
+          {
+            "maximum": 1.7429661733656182e-07,
+            "source_joint_id": "UpperArm.R"
+          },
+          {
+            "maximum": 1.7302722197295616e-07,
+            "source_joint_id": "MiddleHand.L"
+          },
+          {
+            "maximum": 1.6920792875967862e-07,
+            "source_joint_id": "LowerArm.L"
+          },
+          {
+            "maximum": 1.5592112161939845e-07,
+            "source_joint_id": "UpperArm.L"
+          },
+          {
+            "maximum": 1.476901156554455e-07,
+            "source_joint_id": "Palm.R"
+          },
+          {
+            "maximum": 1.3660677334357726e-07,
+            "source_joint_id": "Thumb.R"
+          }
+        ],
+        "top_samples": [
+          {
+            "frame": 20,
+            "normalized_translation": 0.00606463790978346,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 60,
+            "normalized_translation": 0.00606463790978346,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 19,
+            "normalized_translation": 0.006029542875442183,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 59,
+            "normalized_translation": 0.006029542875442183,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 18,
+            "normalized_translation": 0.0059969757226818726,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 58,
+            "normalized_translation": 0.0059969757226818726,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 21,
+            "normalized_translation": 0.005977437022648771,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 61,
+            "normalized_translation": 0.005977437022648771,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 17,
+            "normalized_translation": 0.005909000547912405,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 57,
+            "normalized_translation": 0.005909000547912405,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 22,
+            "normalized_translation": 0.005890331717353127,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 62,
+            "normalized_translation": 0.005890331717353127,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 23,
+            "normalized_translation": 0.005803366055242265,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 63,
+            "normalized_translation": 0.005803366055242265,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 16,
+            "normalized_translation": 0.005790921499084173,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 56,
+            "normalized_translation": 0.005790921499084173,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 24,
+            "normalized_translation": 0.005716444161075661,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 64,
+            "normalized_translation": 0.005716444161075661,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 25,
+            "normalized_translation": 0.0055258419423576885,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 65,
+            "normalized_translation": 0.0055258419423576885,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 15,
+            "normalized_translation": 0.005367379079784373,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 55,
+            "normalized_translation": 0.0053673748384857846,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 26,
+            "normalized_translation": 0.005296988964348048,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 66,
+            "normalized_translation": 0.005296988964348048,
+            "source_joint_id": "Body"
+          }
+        ]
+      },
+      "pose_stream_sha256": "75d03b07b6654cbb40d54c79693752084c9d997e63c46d2eaf8a6f89aac7b176",
+      "requested_take": "HumanArmature|Idle",
+      "resolved_action_name": "HumanArmature|HumanArmature|Idle",
+      "sample_frame_count": 81,
+      "source_fps": 24.0
+    },
+    {
+      "action_slot_identifier": "OBHumanArmature|HumanArmature|Run",
+      "clip_id": "demo_run_v1",
+      "clip_kind": "RUN",
+      "frame_first": 1,
+      "frame_last": 21,
+      "nonroot_translation": {
+        "fraction_gt_1e_3": 0.09206349206349207,
+        "fraction_gt_1e_4": 0.09206349206349207,
+        "fraction_gt_1e_5": 0.09206349206349207,
+        "maximum": 0.45293144466500207,
+        "p95": 0.15983973725154998,
+        "p99": 0.3936773338100505,
+        "sample_count": 630,
+        "top_bones": [
+          {
+            "maximum": 0.45293144466500207,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "maximum": 0.4348348626084729,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "maximum": 0.07145609996465135,
+            "source_joint_id": "Body"
+          },
+          {
+            "maximum": 3.092735476505805e-07,
+            "source_joint_id": "Thumb2.R"
+          },
+          {
+            "maximum": 2.794144909990145e-07,
+            "source_joint_id": "Thumb.L"
+          },
+          {
+            "maximum": 2.483731145556653e-07,
+            "source_joint_id": "Palm.R"
+          },
+          {
+            "maximum": 2.4760973612226643e-07,
+            "source_joint_id": "Thumb2.L"
+          },
+          {
+            "maximum": 2.3461863657522952e-07,
+            "source_joint_id": "Shoulder.L"
+          },
+          {
+            "maximum": 2.1825401840787056e-07,
+            "source_joint_id": "Head"
+          },
+          {
+            "maximum": 2.0482861609199323e-07,
+            "source_joint_id": "Palm.L"
+          },
+          {
+            "maximum": 2.0107915515875023e-07,
+            "source_joint_id": "Torso"
+          },
+          {
+            "maximum": 1.9075249647074813e-07,
+            "source_joint_id": "MiddleHand.L"
+          },
+          {
+            "maximum": 1.8090544284421937e-07,
+            "source_joint_id": "Thumb.R"
+          },
+          {
+            "maximum": 1.730815842670561e-07,
+            "source_joint_id": "UpperArm.L"
+          },
+          {
+            "maximum": 1.5578182571643017e-07,
+            "source_joint_id": "MiddleHand.R"
+          },
+          {
+            "maximum": 1.4701686726129187e-07,
+            "source_joint_id": "Fingers.L"
+          }
+        ],
+        "top_samples": [
+          {
+            "frame": 11,
+            "normalized_translation": 0.45293144466500207,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 12,
+            "normalized_translation": 0.43897584440915627,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 1,
+            "normalized_translation": 0.4348348626084729,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 21,
+            "normalized_translation": 0.4348348626084729,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 2,
+            "normalized_translation": 0.4247911915250983,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 13,
+            "normalized_translation": 0.39766369721058953,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 3,
+            "normalized_translation": 0.3956914791388321,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 10,
+            "normalized_translation": 0.3887461504188946,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 4,
+            "normalized_translation": 0.35538464935789676,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 14,
+            "normalized_translation": 0.338142021972728,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 5,
+            "normalized_translation": 0.3142999979579574,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 1,
+            "normalized_translation": 0.29166004174899895,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 21,
+            "normalized_translation": 0.29166004174899895,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 2,
+            "normalized_translation": 0.28644099808000845,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 20,
+            "normalized_translation": 0.2842043749340241,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 6,
+            "normalized_translation": 0.277640598000446,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 15,
+            "normalized_translation": 0.27422844454877804,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 3,
+            "normalized_translation": 0.26930432230660367,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 20,
+            "normalized_translation": 0.2631428003854394,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 11,
+            "normalized_translation": 0.2500016763925608,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 9,
+            "normalized_translation": 0.24699970545682706,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 12,
+            "normalized_translation": 0.24435064674086757,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 4,
+            "normalized_translation": 0.23978831412038823,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 13,
+            "normalized_translation": 0.231448137801756,
+            "source_joint_id": "Foot.L"
+          }
+        ]
+      },
+      "pose_stream_sha256": "fc350dfae3900a9f742e193db49196a8eb5e8f75a5332741e451d91e8c12af40",
+      "requested_take": "HumanArmature|Run",
+      "resolved_action_name": "HumanArmature|HumanArmature|Run",
+      "sample_frame_count": 21,
+      "source_fps": 24.0
+    },
+    {
+      "action_slot_identifier": "OBHumanArmature|HumanArmature|Run_swordAttack",
+      "clip_id": "demo_slash_v1",
+      "clip_kind": "SLASH",
+      "frame_first": 1,
+      "frame_last": 21,
+      "nonroot_translation": {
+        "fraction_gt_1e_3": 0.09206349206349207,
+        "fraction_gt_1e_4": 0.09206349206349207,
+        "fraction_gt_1e_5": 0.09206349206349207,
+        "maximum": 0.45293144466500207,
+        "p95": 0.15983973725154998,
+        "p99": 0.3936773338100505,
+        "sample_count": 630,
+        "top_bones": [
+          {
+            "maximum": 0.45293144466500207,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "maximum": 0.4348348626084729,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "maximum": 0.07145609996465135,
+            "source_joint_id": "Body"
+          },
+          {
+            "maximum": 3.092735476505805e-07,
+            "source_joint_id": "Thumb2.R"
+          },
+          {
+            "maximum": 2.3461863657522952e-07,
+            "source_joint_id": "Shoulder.L"
+          },
+          {
+            "maximum": 2.1950163647357705e-07,
+            "source_joint_id": "Thumb.L"
+          },
+          {
+            "maximum": 2.1825401840787056e-07,
+            "source_joint_id": "Head"
+          },
+          {
+            "maximum": 2.0851716635672492e-07,
+            "source_joint_id": "Thumb2.L"
+          },
+          {
+            "maximum": 2.0482861609199323e-07,
+            "source_joint_id": "Palm.L"
+          },
+          {
+            "maximum": 2.0107915515875023e-07,
+            "source_joint_id": "Torso"
+          },
+          {
+            "maximum": 1.9075249647074813e-07,
+            "source_joint_id": "MiddleHand.L"
+          },
+          {
+            "maximum": 1.8090544284421937e-07,
+            "source_joint_id": "Thumb.R"
+          },
+          {
+            "maximum": 1.730815842670561e-07,
+            "source_joint_id": "UpperArm.L"
+          },
+          {
+            "maximum": 1.679383603731619e-07,
+            "source_joint_id": "UpperArm.R"
+          },
+          {
+            "maximum": 1.4701686726129187e-07,
+            "source_joint_id": "Fingers.L"
+          },
+          {
+            "maximum": 1.3877509452559217e-07,
+            "source_joint_id": "LowerArm.L"
+          }
+        ],
+        "top_samples": [
+          {
+            "frame": 11,
+            "normalized_translation": 0.45293144466500207,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 12,
+            "normalized_translation": 0.43897584440915627,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 1,
+            "normalized_translation": 0.4348348626084729,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 21,
+            "normalized_translation": 0.4348348626084729,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 2,
+            "normalized_translation": 0.4247911915250983,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 13,
+            "normalized_translation": 0.39766369721058953,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 3,
+            "normalized_translation": 0.3956914791388321,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 10,
+            "normalized_translation": 0.3887461504188946,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 4,
+            "normalized_translation": 0.35538464935789676,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 14,
+            "normalized_translation": 0.338142021972728,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 5,
+            "normalized_translation": 0.3142999979579574,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 1,
+            "normalized_translation": 0.29166004174899895,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 21,
+            "normalized_translation": 0.29166004174899895,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 2,
+            "normalized_translation": 0.28644099808000845,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 20,
+            "normalized_translation": 0.2842043749340241,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 6,
+            "normalized_translation": 0.277640598000446,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 15,
+            "normalized_translation": 0.27422844454877804,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 3,
+            "normalized_translation": 0.26930432230660367,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 20,
+            "normalized_translation": 0.2631428003854394,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 11,
+            "normalized_translation": 0.2500016763925608,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 9,
+            "normalized_translation": 0.24699970545682706,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 12,
+            "normalized_translation": 0.24435064674086757,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 4,
+            "normalized_translation": 0.23978831412038823,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 13,
+            "normalized_translation": 0.231448137801756,
+            "source_joint_id": "Foot.L"
+          }
+        ]
+      },
+      "pose_stream_sha256": "935001e8d74ace494fd710166a85e7aa9298b4bb39891fe0cc2acd84c17647d8",
+      "requested_take": "HumanArmature|Run_swordAttack",
+      "resolved_action_name": "HumanArmature|HumanArmature|Run_swordAttack",
+      "sample_frame_count": 21,
+      "source_fps": 24.0
+    }
+  ],
+  "diagnostic_only": true,
+  "distinct_pose_stream_hash_count": 3,
+  "schema": "RealSaS.MotionSourceActionDiagnostic.v1",
+  "source_fbx": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/inputs/motion/quaternius_knight_v1_source/KnightCharacter.fbx",
+  "status": "MEASURED",
+  "thresholds_changed": false
+}

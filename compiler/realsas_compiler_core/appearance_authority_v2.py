@@ -19,6 +19,9 @@ CAA_PROVENANCE = {
     "DIRECT_SOURCE": 0,
     "OTHER_VIEW_SOURCE": 1,
     "COMPILED_LOCAL_HARMONIC": 2,
+    # Explicit Compiler abstention on source-unsupported potential surface.
+    # This is a render-fail provenance class, not generated appearance.
+    "UNSUPPORTED_ABSTAIN": 3,
 }
 CAA_PROVENANCE_BY_CODE = {value: key for key, value in CAA_PROVENANCE.items()}
 
@@ -212,15 +215,19 @@ def validate_caa_compile_artifact(value: CAACompileArtifactIR) -> None:
         or value.sample_count_per_face <= 0
     ):
         raise QualificationError("CAA_COMPILE_DIMENSION_INVALID")
+    metadata = dict(value.metadata or {})
+    unsupported = int(metadata.get("unsupported_abstain_sample_count") or 0)
+    if unsupported < 0:
+        raise QualificationError("CAA_COMPILE_UNSUPPORTED_COUNT_INVALID")
     counted = (
         value.direct_source_sample_count
         + value.other_view_source_sample_count
         + value.compiled_local_harmonic_sample_count
+        + unsupported
     )
     if counted != value.total_sample_count:
         raise QualificationError("CAA_COMPILE_PROVENANCE_ACCOUNTING_DRIFT")
 
-    metadata = dict(value.metadata or {})
     pm_storage_mode = str(
         metadata.get("direct_pm_linear_storage_mode")
         or "DENSE_ALL_SAMPLES_V1"

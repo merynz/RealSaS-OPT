@@ -16,6 +16,9 @@ from compiler.realsas_compiler_core.appearance_authority_v2 import (
 from compiler.realsas_compiler_core.appearance_quality_v2 import (
     rgba_l1_premultiplied,
 )
+from compiler.realsas_compiler_core.geometry_substrate_v2 import (
+    geometry_substrate_from_dict,
+)
 from compiler.realsas_compiler_core.appearance_render_v2 import (
     load_face_page_index,
     load_face_uv,
@@ -72,6 +75,16 @@ def diagnose(
     high_error_cut: float = 0.10,
 ) -> dict:
     ctx = _context(authority_root, run_id)
+    geometry = geometry_substrate_from_dict(
+        stage_output_payload(
+            ctx,
+            "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+            "RealSaS.GeometrySubstrateQualificationIR.v2",
+        )
+    )
+    geometry_by_view = {
+        int(row.view_index): row for row in geometry.views
+    }
     candidate = canonical_mesh_candidate_from_dict(
         stage_output_payload(
             ctx,
@@ -228,8 +241,24 @@ def diagnose(
                 ) / float(max(1, visible_count)),
             }
 
+        g = geometry_by_view[view]
         row = {
             "view_index": int(view),
+            "stage13_geometry": {
+                "silhouette_recall": float(g.silhouette_recall),
+                "silhouette_precision": float(g.silhouette_precision),
+                "largest_coherent_hole_fraction": float(
+                    g.largest_coherent_hole_fraction
+                ),
+                "interior_uncovered_fraction": float(
+                    g.interior_uncovered_fraction
+                ),
+                "component_recall": float(g.component_recall),
+                "silhouette_edge_p95_px": float(
+                    g.silhouette_edge_p95_px
+                ),
+                "passed": bool(g.passed),
+            },
             "provenance_lineage_counts": lineage_counts,
             "source_foreground_pixel_count": int(np.count_nonzero(source_fg)),
             "geometry_visible_pixel_count": int(np.count_nonzero(visible)),
@@ -322,6 +351,10 @@ def diagnose(
         "status": "MEASURED",
         "run_id": run_id,
         "high_error_cut_rgba_l1": float(high_error_cut),
+        "stage13_policy": dict(geometry.policy),
+        "stage13_qualification_report": dict(
+            geometry.qualification_report
+        ),
         "views": view_rows,
         "aggregate": dict(aggregate),
         "interpretation_contract": {

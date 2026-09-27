@@ -1,0 +1,49 @@
+name: knight-occupancy-witness-v1
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/demo/render_knight_occupancy_witness_v1.py'
+      - '.github/workflows/knight_occupancy_witness_v1.yml'
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned dependencies
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Compile witness
+        run: python -m py_compile tools/demo/render_knight_occupancy_witness_v1.py
+      - name: Render fast occupancy witness
+        run: |
+          set -euo pipefail
+          rm -rf canonical/knight_occupancy_witness_v1
+          PYTHONPATH=. python -m tools.demo.render_knight_occupancy_witness_v1 \
+            --authority-root "$AUTHORITY_ROOT" \
+            --run-id "$RUN_ID" \
+            --out-dir canonical/knight_occupancy_witness_v1 \
+            --resolution 512
+      - name: Seal witness
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/knight_occupancy_witness_v1
+          git commit -m "demo: seal Knight occupancy witness"
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

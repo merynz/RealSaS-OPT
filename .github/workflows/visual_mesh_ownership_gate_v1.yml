@@ -1,4 +1,8 @@
 name: visual-mesh-ownership-gate-v1
+
+concurrency:
+  group: visual-mesh-ownership-gate-v1
+  cancel-in-progress: true
 # stage18-38-e2e-rerun
 # rerun-after-ledger-rebind
 

@@ -90,19 +90,29 @@ def qualify_skeleton(surface:RiggingSurfaceIR, proposal:SkeletonProposalIR, *, r
         pid=reverse[cid]; j=joint_by[pid]; pcid=res.parent_by_child.get(cid)
         q.append(QualifiedJoint(canonical[cid],tuple(map(float,j.position)),None if pcid is None else canonical[pcid],tuple(j.support_surface_ids),pid))
     root=canonical[res.selected_root_control_id]
+    diagnostic_warning_prefixes=(
+        "ilp_shadow_",
+        "arborescence_ilp_shadow_",
+    )
+    authority_warnings=tuple(
+        warning
+        for warning in (res.warnings or ())
+        if not str(warning).startswith(diagnostic_warning_prefixes)
+    )
     report={
         "solver":res.solver,
         "status":res.status,
         "objective":res.objective_value,
         "optimality_proven":res.optimality_proven,
         "blockers":res.blockers,
-        "warnings":res.warnings,
+        "warnings":authority_warnings,
         # Backward field name retained, but its value is now the stable
         # authority-semantic hash. The optimizer object's raw content hash
         # includes non-authoritative telemetry and is forbidden from identity.
         "optimizer_result_sha256":optimizer_semantic_sha256,
         "optimizer_identity_contract":"GRAPH_SELECTION_SEMANTICS_V1",
         "optimizer_runtime_telemetry_in_identity":False,
+        "ilp_shadow_diagnostics_in_identity":False,
         "proposal_to_candidate":internal,
         "candidate_to_canonical":canonical,
     }

@@ -1,0 +1,178 @@
+{
+  "schema": "RealSaS.KnightSkinTopologyCompatibilityDiagnosis.v1",
+  "date": "2026-09-27",
+  "status": "DIAGNOSIS_SEALED__NO_REPAIR_APPLIED",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "product_authority_claimed": false,
+  "repair_attempted": false,
+  "evidence": {
+    "rigging_surface": {
+      "sha256": "7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182",
+      "surface_node_count": 12090,
+      "local_relation_count": 36469
+    },
+    "teacher_bank": {
+      "filename": "ARACHNE_KNIGHT_TEACHER_BANK_FIX2.npz",
+      "sha256": "26b6891ff81b9bfc3405461394159547fa76b417852a44518425b4e1de7e67d3",
+      "row_count": 12090,
+      "clean_row_count": 10611,
+      "coverage": 0.8776674937965261
+    },
+    "teacher_source_mesh": {
+      "filename": "KNIGHT_EVALUATED_TEACHER_SOURCE.npz",
+      "sha256": "96435646a0084a0a038040ee748cb33d3bfa0b1ed550661befd3b18539e28e6f",
+      "vertex_count": 3665,
+      "face_count": 6952
+    },
+    "arachne_v6_predicted_weights": {
+      "filename": "ARACHNE_KNIGHT_V6_CANONICAL_SKIN_WEIGHTS_F64.npz",
+      "sha256": "a0a3e652e323c6f2042354eb2095f3f66ff6168bf5ab51b53c83f728b8a00499",
+      "row_count": 12090
+    },
+    "causal_face_ablation": "canonical/knight_smear_face_causality_v1/REPORT.json",
+    "causal_skin_counterfactual": "canonical/knight_smear_topface_skin_counterfactual_v1/REPORT.json"
+  },
+  "causal_findings": {
+    "static_quality_violating_face_ablation": {
+      "violating_face_count": 109,
+      "changed_full_alpha_fraction": {
+        "idle_v2_f0": 0.00011356135507086939,
+        "run_v2_f0": 0.00026615663627529263,
+        "slash_v0_f0": 0.000622599773110275
+      },
+      "verdict": "STATIC_SLIVER_QUALITY_NOT_ROOT_CAUSE_OF_GRAY_SMEAR"
+    },
+    "top_face_skin_homogenization": {
+      "idle_v2_f0": {
+        "face_index": 253,
+        "rest_min_angle_deg": 39.88347307198143,
+        "rest_aspect": 2.2040001088325583,
+        "original_edge_stretch": 11.889493342438511,
+        "homogenized_edge_stretch": 0.9805412704693924,
+        "original_area_ratio": 11.440059579444789,
+        "homogenized_area_ratio": 0.7809573533870644,
+        "original_alpha_pixels": 936,
+        "homogenized_alpha_pixels": 51
+      },
+      "run_v2_f0": {
+        "face_index": 3829,
+        "rest_min_angle_deg": 45.304455584439644,
+        "rest_aspect": 1.9643351724910652,
+        "original_edge_stretch": 41.064263875277,
+        "homogenized_edge_stretch": 0.8231716134605002,
+        "original_area_ratio": 104.02945802725284,
+        "homogenized_area_ratio": 0.5164473328401953,
+        "original_alpha_pixels": 5781,
+        "homogenized_alpha_pixels": 10
+      },
+      "slash_v0_f0": {
+        "face_index": 3573,
+        "rest_min_angle_deg": 44.96138397218184,
+        "rest_aspect": 1.9836060069894181,
+        "original_edge_stretch": 41.34663134441607,
+        "homogenized_edge_stretch": 0.6793151231820596,
+        "original_area_ratio": 829.6997656680883,
+        "homogenized_area_ratio": 0.26236187847554343,
+        "original_alpha_pixels": 32739,
+        "homogenized_alpha_pixels": 20
+      },
+      "verdict": "SKIN_WEIGHT_DISCONTINUITY_CAUSALLY_DRIVES_SMEAR"
+    }
+  },
+  "graph_findings": {
+    "stage18_identity_endpoint_edges": 36424,
+    "stage18_edges_that_are_stage15_safe_relations": 36424,
+    "stage18_edges_outside_stage15_safe_relations": 0,
+    "safe_relation_predicted_skin_l1": {
+      "count": 36469,
+      "mean": 0.0902654,
+      "p50": 2.1e-11,
+      "p90": 0.123002,
+      "p95": 0.455943,
+      "p99": 1.977188,
+      "gt_0_5": 1746,
+      "gt_1_0": 1263,
+      "gt_1_5": 1062,
+      "gt_1_9": 712
+    },
+    "verdict": "STAGE18_RELATION_BASELINE_INHERITS_STAGE15_RELATION_GRAPH__DOES_NOT_INVENT_OFFENDER_ADJACENCY"
+  },
+  "teacher_validity_and_topology_findings": {
+    "edge_validity_counts": {
+      "both_teacher_valid": 31810,
+      "mixed_validity": 480,
+      "both_teacher_invalid": 4179
+    },
+    "both_valid_predicted_l1_gt_1_9": 667,
+    "both_valid_predicted_l1_gt_1_9_also_teacher_gt_1_9": 659,
+    "both_valid_teacher_l1_gt_1_9": 931,
+    "both_valid_teacher_l1_gt_1_9_source_topology": {
+      "same_source_face": 0,
+      "source_faces_share_edge": 0,
+      "source_faces_share_vertex_only": 0,
+      "source_faces_nonincident": 931
+    },
+    "idle_offender": {
+      "all_rows_teacher_valid": true,
+      "edges": [
+        {
+          "predicted_l1": 1.9978838030158588,
+          "teacher_l1": 2,
+          "source_face_a": 6884,
+          "source_face_b": 3267,
+          "source_topology": "NONINCIDENT"
+        },
+        {
+          "predicted_l1": 1.9979355379702102,
+          "teacher_l1": 2,
+          "source_face_a": 3267,
+          "source_face_b": 6884,
+          "source_topology": "NONINCIDENT"
+        },
+        {
+          "predicted_l1": 0.00005173495437089545,
+          "teacher_l1": 0,
+          "source_face_a": 6884,
+          "source_face_b": 6884,
+          "source_topology": "SAME_FACE"
+        }
+      ],
+      "verdict": "DIRECT_PROOF_OF_TEACHER_FAITHFUL_SKIN_SEAM_BRIDGED_BY_REALSAS_SURFACE_RELATION"
+    },
+    "run_offender": {
+      "all_rows_teacher_valid": false,
+      "source_projection_distances": [
+        0.7114333,
+        0.7175154,
+        0.664281
+      ],
+      "verdict": "OUTSIDE_TEACHER_CLEAN_COVERAGE__ARACHNE_ACCURACY_METRIC_DOES_NOT_COVER_THIS_FACE"
+    },
+    "slash_offender": {
+      "all_rows_teacher_valid": false,
+      "source_projection_distances": [
+        0.46950838,
+        0.50709903,
+        0.5023045
+      ],
+      "verdict": "OUTSIDE_TEACHER_CLEAN_COVERAGE__ARACHNE_ACCURACY_METRIC_DOES_NOT_COVER_THIS_FACE"
+    }
+  },
+  "diagnosis": {
+    "direct_physical_mechanism": "SKIN_WEIGHT_DISCONTINUITY_ACROSS_A_CONNECTED_FACE__DIFFERENTIAL_LBS__EXTREME_FACE_EXPANSION__CAA_TEXTURE_SMEAR",
+    "root_failure_class_valid_teacher_region": "TOPOLOGY_X_SKIN_COMPATIBILITY_GAP__GEOMETRIC_SURFACE_RELATION_BRIDGES_NONINCIDENT_ARTIST_SOURCE_TOPOLOGY_WITH_A_REAL_TEACHER_SKIN_SEAM",
+    "secondary_failure_class_uncovered_region": "UNSUPERVISED_ARACHNE_ROWS_ARE_ACCEPTED_WITHOUT_STRONG_ENOUGH_COMPATIBILITY_OR_ABSTENTION_GATE",
+    "stage15_role": "PRODUCES_GEOMETRIC_RIGGING_SURFACE_LOCAL_RELATIONS",
+    "stage18_role": "MATERIALIZES_STAGE15_RELATIONS_AS_MECHANICAL_MESH_CANDIDATE",
+    "stage32_role": "QUALIFIES_PER_SURFACE_NODE_SKIN_FIELD",
+    "architectural_compatibility_owner": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+    "reason": "STAGE35_IS_FIRST_FROZEN_STAGE_WITH_STAGE18_MESH_PLUS_STAGE28_SKELETON_PLUS_STAGE32_SKIN_PLUS_STAGE34_DEFORMATION_ENVELOPE",
+    "existing_repair_semantics": "STAGE35_GEOMETRY_REPAIR_CREATES_NEW_STAGE18_LINEAGE_NO_IN_PLACE_FROZEN_MESH_MUTATION"
+  },
+  "retraining_verdict": {
+    "arachne_retrain_required_for_valid_teacher_seam_failure": false,
+    "rationale": "IDLE_OFFENDER_IS_TEACHER_VALID_AND_ARACHNE_MATCHES_THE_TEACHER_DISCONTINUITY_NEAR_EXACTLY; SMOOTHING_OR_RETRAINING_IT_AWAY_WOULD REDUCE TEACHER FIDELITY",
+    "arachne_retrain_decision_for_teacher_invalid_rows": "NOT_YET_JUSTIFIED",
+    "required_before_retrain_decision": "OBTAIN_VALID_TARGET_OR_CALIBRATED_UNCERTAINTY_FOR_UNCOVERED_ROWS_AND RE-EVALUATE; RETRAINING ON THE SAME 87.77_PERCENT TEACHER MASK CANNOT ESTABLISH THE MISSING GROUND TRUTH"
+  }
+}

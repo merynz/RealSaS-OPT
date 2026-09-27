@@ -54,7 +54,10 @@ def _face_indices(candidate):
 
 
 def _skin_l1_per_face(weights,faces):
-    wf=weights[faces]
+    face_array=np.asarray(faces,dtype=np.int64)
+    if face_array.ndim!=2 or face_array.shape[1]!=3:
+        raise QualificationError("SKIN_TOPOLOGY_FACE_INDEX_ARRAY_INVALID")
+    wf=weights[face_array]
     d01=np.abs(wf[:,0]-wf[:,1]).sum(axis=1)
     d12=np.abs(wf[:,1]-wf[:,2]).sum(axis=1)
     d20=np.abs(wf[:,2]-wf[:,0]).sum(axis=1)

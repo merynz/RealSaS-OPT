@@ -807,6 +807,7 @@ def select_other_view_donor_by_support(
     target_view_index: int,
     missing: np.ndarray,
     direct_valid: np.ndarray,
+    donor_valid: np.ndarray | None = None,
     sample_face_index: np.ndarray,
     face_support_by_view: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
@@ -819,6 +820,11 @@ def select_other_view_donor_by_support(
     target = int(target_view_index)
     missing = np.asarray(missing, dtype=bool)
     direct_valid = np.asarray(direct_valid, dtype=bool)
+    donor_valid = (
+        direct_valid
+        if donor_valid is None
+        else np.asarray(donor_valid, dtype=bool)
+    )
     sample_face = np.asarray(sample_face_index, dtype=np.int32)
     support = np.asarray(face_support_by_view, dtype=np.float64)
     if (
@@ -827,6 +833,8 @@ def select_other_view_donor_by_support(
         or direct_valid.ndim != 2
         or direct_valid.shape[0] != 8
         or direct_valid.shape[1] != len(missing)
+        or donor_valid.shape != direct_valid.shape
+        or np.any(donor_valid & ~direct_valid)
         or sample_face.shape != (len(missing),)
         or support.ndim != 2
         or support.shape[0] != 8
@@ -841,7 +849,7 @@ def select_other_view_donor_by_support(
     for donor in _circular_view_order(target):
         if donor == target:
             continue
-        eligible = missing & direct_valid[donor]
+        eligible = missing & donor_valid[donor]
         if not np.any(eligible):
             continue
         candidate_support = support[donor, sample_face]
@@ -928,6 +936,9 @@ def compile_deterministic_caa(
         raise QualificationError("CAA_COMPLETION_POLICY_INVALID")
 
     direct_valid = np.zeros((8, sample_count), dtype=bool)
+    direct_foreground_donor_valid = np.zeros(
+        (8, sample_count), dtype=bool
+    )
     direct_rgba = np.zeros((8, sample_count, 4), dtype=np.uint8)
     # Premultiplied-linear truth is required only where direct source evidence
     # exists. Keep exact float64 values packed in deterministic view-major order
@@ -1005,6 +1016,9 @@ def compile_deterministic_caa(
         )
         valid = in_bounds & visible & appearance_support & angle_safe
         direct_valid[view] = valid
+        direct_foreground_donor_valid[view] = (
+            valid & foreground_safe & alpha_foreground_safe
+        )
         if np.any(valid):
             sampled_rgba, sampled_pm = bilinear_rgba_u8(
                 image,
@@ -1063,6 +1077,7 @@ def compile_deterministic_caa(
             target_view_index=target,
             missing=missing,
             direct_valid=direct_valid,
+            donor_valid=direct_foreground_donor_valid,
             sample_face_index=sample_face,
             face_support_by_view=face_support_by_view,
         )
@@ -1126,6 +1141,9 @@ def compile_deterministic_caa(
         "face_sample_offsets": face_sample_offsets,
         "face_tile_resolutions": resolutions,
         "direct_valid": direct_valid,
+        "direct_foreground_donor_valid_count": int(
+            np.count_nonzero(direct_foreground_donor_valid)
+        ),
         "direct_rgba": direct_rgba,
         "face_support_by_view": face_support_by_view,
         "direct_pm_linear_packed": direct_pm_linear_packed,

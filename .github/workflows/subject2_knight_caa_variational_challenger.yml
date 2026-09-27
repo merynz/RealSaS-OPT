@@ -1,0 +1,75 @@
+name: subject2-knight-caa-variational-challenger
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_CAA_VARIATIONAL_CHALLENGER_TRIGGER_20260927.json'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-caa-variational-challenger
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 60
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Run topology-bound variational challenger
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python -m tools.appearance.diagnose_variational_caa_completion_v1             --repo-root .             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --out canonical/KNIGHT_CAA_VARIATIONAL_CHALLENGER_20260927.json
+
+      - name: Verify diagnostic-only authority
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("canonical/KNIGHT_CAA_VARIATIONAL_CHALLENGER_20260927.json")
+          d=json.loads(p.read_text())
+          assert d["schema"]=="RealSaS.CAAVariationalCompletionChallenger.v1"
+          assert d["status"]=="MEASURED"
+          assert d["authority"]["diagnostic_only"] is True
+          assert d["authority"]["shipping_policy_changed"] is False
+          assert d["authority"]["product_authority_claimed"] is False
+          assert d["authority"]["source_only_constraints"] is True
+          assert d["source_constraints"]["premultiplied_linear_exact"] is True
+          assert d["solver"]["source_constraints_exact"] is True
+          assert d["solver"]["cross_component_edges_consumed"] is False
+          print("CAA_VARIATIONAL_CHALLENGER_DIAGNOSTIC_PASS")
+          PY
+
+      - name: Seal diagnostic evidence
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_CAA_VARIATIONAL_CHALLENGER_20260927.json
+          git commit -m 'appearance: seal Knight variational completion challenger'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

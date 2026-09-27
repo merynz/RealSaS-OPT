@@ -15,6 +15,7 @@ from compiler.realsas_compiler_core.appearance_bake_v2 import (
 from compiler.realsas_compiler_core.appearance_compile_v2 import (
     bilinear_rgba_u8,
     compile_deterministic_caa,
+    direct_source_and_donor_eligibility,
     select_other_view_donor_by_support,
 )
 from compiler.realsas_compiler_core.appearance_render_v2 import render_caa_reference
@@ -633,3 +634,33 @@ def test_source_view_atlas_accepts_canonical_global_completion_code():
     )
     assert -3 in set(map(int, np.unique(atlas)))
     assert -3 in set(map(int, np.unique(paged)))
+
+
+def test_direct_source_keeps_grazing_first_hit_but_donor_rejects_it():
+    direct, donor = direct_source_and_donor_eligibility(
+        in_bounds=np.asarray([True]),
+        visible=np.asarray([True]),
+        source_foreground=np.asarray([True]),
+        safe_foreground=np.asarray([True]),
+        safe_background=np.asarray([False]),
+        alpha_foreground=np.asarray([True]),
+        alpha_background=np.asarray([False]),
+        angle_safe=np.asarray([False]),
+    )
+    assert bool(direct[0]) is True
+    assert bool(donor[0]) is False
+
+
+def test_direct_source_keeps_foreground_boundary_but_donor_requires_erosion():
+    direct, donor = direct_source_and_donor_eligibility(
+        in_bounds=np.asarray([True]),
+        visible=np.asarray([True]),
+        source_foreground=np.asarray([True]),
+        safe_foreground=np.asarray([False]),
+        safe_background=np.asarray([False]),
+        alpha_foreground=np.asarray([True]),
+        alpha_background=np.asarray([False]),
+        angle_safe=np.asarray([True]),
+    )
+    assert bool(direct[0]) is True
+    assert bool(donor[0]) is False

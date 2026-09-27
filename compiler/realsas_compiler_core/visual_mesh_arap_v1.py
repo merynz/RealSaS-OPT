@@ -8,13 +8,19 @@ principles and the source-silhouette -> visual-mesh separation used by mature
 2D skeletal animation systems, but is implemented independently for RealSaS.
 """
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, field, replace
+import hashlib
+from pathlib import Path
+from typing import Any, Mapping
 
 import numpy as np
 from scipy import ndimage
 from scipy.spatial import Delaunay, cKDTree
 from scipy.sparse import coo_matrix, eye
 from scipy.sparse.linalg import factorized
+
+from .hashing import content_sha256
+from .types import QualificationError
 
 
 @dataclass(frozen=True)
@@ -24,6 +30,150 @@ class VisualMesh2D:
     uv: np.ndarray         # [N,2] normalized source texture coordinates
     width: int
     height: int
+
+
+def visual_mesh_semantic_hash(mesh: VisualMesh2D) -> str:
+    positions = np.asarray(mesh.positions, dtype="<f8")
+    faces = np.asarray(mesh.faces, dtype="<u4")
+    uv = np.asarray(mesh.uv, dtype="<f8")
+    h = hashlib.sha256()
+    h.update(b"RealSaS.VisualMesh2D.semantic.v1\0")
+    h.update(np.asarray((int(mesh.width), int(mesh.height)), dtype="<u4").tobytes())
+    h.update(positions.tobytes(order="C"))
+    h.update(faces.tobytes(order="C"))
+    h.update(uv.tobytes(order="C"))
+    return h.hexdigest()
+
+
+@dataclass(frozen=True)
+class VisualMeshViewIR:
+    view_index: int
+    direction_id: str
+    width: int
+    height: int
+    vertex_count: int
+    face_count: int
+    mesh_npz_path: str
+    mesh_npz_sha256: str
+    source_raster_sha256: str
+    source_foreground_mask_sha256: str
+    mesh_hash: str
+    schema_version: str = "RealSaS.VisualMeshViewIR.v1"
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self):
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class VisualMeshSetIR:
+    observation_set_binding_hash: str
+    output_direction_set_binding_hash: str
+    views: tuple[VisualMeshViewIR, ...]
+    set_hash: str
+    schema_version: str = "RealSaS.VisualMeshSetIR.v1"
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self):
+        return asdict(self)
+
+
+def visual_mesh_set_hash(value: VisualMeshSetIR) -> str:
+    payload = value.to_dict()
+    payload.pop("set_hash", None)
+    return content_sha256(payload)
+
+
+def validate_visual_mesh_set(value: VisualMeshSetIR) -> None:
+    rows = tuple(sorted(value.views, key=lambda row: int(row.view_index)))
+    if len(rows) != 8 or tuple(int(row.view_index) for row in rows) != tuple(range(8)):
+        raise QualificationError("VISUAL_MESH_SET_REQUIRES_V0_V7")
+    if tuple(str(row.direction_id) for row in rows) != tuple(f"V{i}" for i in range(8)):
+        raise QualificationError("VISUAL_MESH_SET_DIRECTION_ID_DRIFT")
+    for row in rows:
+        if (
+            row.width <= 0
+            or row.height <= 0
+            or row.vertex_count < 3
+            or row.face_count < 1
+        ):
+            raise QualificationError("VISUAL_MESH_VIEW_CARDINALITY_INVALID")
+        for digest in (
+            row.mesh_npz_sha256,
+            row.source_raster_sha256,
+            row.source_foreground_mask_sha256,
+            row.mesh_hash,
+        ):
+            if len(str(digest)) != 64:
+                raise QualificationError("VISUAL_MESH_VIEW_HASH_INVALID")
+    if value.set_hash != visual_mesh_set_hash(value):
+        raise QualificationError("VISUAL_MESH_SET_HASH_MISMATCH")
+
+
+def visual_mesh_set_from_dict(payload: Mapping[str, Any]) -> VisualMeshSetIR:
+    views = tuple(
+        VisualMeshViewIR(
+            view_index=int(row["view_index"]),
+            direction_id=str(row["direction_id"]),
+            width=int(row["width"]),
+            height=int(row["height"]),
+            vertex_count=int(row["vertex_count"]),
+            face_count=int(row["face_count"]),
+            mesh_npz_path=str(row["mesh_npz_path"]),
+            mesh_npz_sha256=str(row["mesh_npz_sha256"]),
+            source_raster_sha256=str(row["source_raster_sha256"]),
+            source_foreground_mask_sha256=str(row["source_foreground_mask_sha256"]),
+            mesh_hash=str(row["mesh_hash"]),
+            schema_version=str(row.get("schema_version") or "RealSaS.VisualMeshViewIR.v1"),
+            metadata=dict(row.get("metadata") or {}),
+        )
+        for row in payload.get("views") or ()
+    )
+    value = VisualMeshSetIR(
+        observation_set_binding_hash=str(payload["observation_set_binding_hash"]),
+        output_direction_set_binding_hash=str(payload["output_direction_set_binding_hash"]),
+        views=views,
+        set_hash=str(payload["set_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.VisualMeshSetIR.v1"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+    validate_visual_mesh_set(value)
+    return value
+
+
+def load_visual_mesh_view(value: VisualMeshViewIR) -> VisualMesh2D:
+    path = Path(value.mesh_npz_path)
+    if not path.is_file():
+        raise QualificationError("VISUAL_MESH_VIEW_NPZ_MISSING")
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    if digest != value.mesh_npz_sha256:
+        raise QualificationError("VISUAL_MESH_VIEW_NPZ_BYTES_DRIFT")
+    with np.load(path, allow_pickle=False) as data:
+        required = {"positions", "faces", "uv"}
+        if not required.issubset(data.files):
+            raise QualificationError("VISUAL_MESH_VIEW_NPZ_ARRAY_MISSING")
+        positions = np.asarray(data["positions"], dtype=np.float64)
+        faces = np.asarray(data["faces"], dtype=np.uint32)
+        uv = np.asarray(data["uv"], dtype=np.float64)
+    mesh = VisualMesh2D(
+        positions=positions,
+        faces=faces,
+        uv=uv,
+        width=int(value.width),
+        height=int(value.height),
+    )
+    if (
+        positions.shape != (value.vertex_count, 2)
+        or faces.shape != (value.face_count, 3)
+        or uv.shape != (value.vertex_count, 2)
+        or not np.isfinite(positions).all()
+        or not np.isfinite(uv).all()
+        or np.any(faces >= value.vertex_count)
+    ):
+        raise QualificationError("VISUAL_MESH_VIEW_ARRAY_SHAPE_DRIFT")
+    if visual_mesh_semantic_hash(mesh) != value.mesh_hash:
+        raise QualificationError("VISUAL_MESH_VIEW_SEMANTIC_HASH_DRIFT")
+    return mesh
 
 
 @dataclass(frozen=True)

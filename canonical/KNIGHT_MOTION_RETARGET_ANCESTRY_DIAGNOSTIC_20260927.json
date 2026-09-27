@@ -1,0 +1,934 @@
+{
+  "ancestry_violation_count": 9,
+  "ancestry_violations": [
+    {
+      "lowest_cost_unused_valid_descendants": [],
+      "mapped_source_child_joint_id": "Shoulder.L",
+      "mapped_source_parent_is_ancestor": false,
+      "mapped_source_parent_joint_id": "Foot.L",
+      "target_child_cost": 1.7006917167695739,
+      "target_child_joint_id": "J:7e87e97fc9fe89cbd718",
+      "target_parent_joint_id": "J:362735eeec6ee5a3d46f"
+    },
+    {
+      "lowest_cost_unused_valid_descendants": [
+        {
+          "cost": 1.3495544249235625,
+          "source_joint_id": "Shoulder.R"
+        },
+        {
+          "cost": 1.8775197930326615,
+          "source_joint_id": "Thumb2.L"
+        },
+        {
+          "cost": 6.125027049396914,
+          "source_joint_id": "Thumb2.R"
+        }
+      ],
+      "mapped_source_child_joint_id": "PoleTarget.R",
+      "mapped_source_parent_is_ancestor": false,
+      "mapped_source_parent_joint_id": "Abdomen",
+      "target_child_cost": 0.7659603759274703,
+      "target_child_joint_id": "J:ab16ff2ffc7408c862ae",
+      "target_parent_joint_id": "J:ee24577789f0235b8186"
+    },
+    {
+      "lowest_cost_unused_valid_descendants": [],
+      "mapped_source_child_joint_id": "Foot.R",
+      "mapped_source_parent_is_ancestor": false,
+      "mapped_source_parent_joint_id": "PoleTarget.R",
+      "target_child_cost": 0.48247436163504,
+      "target_child_joint_id": "J:f5cf9181e27d0f791f7d",
+      "target_parent_joint_id": "J:ab16ff2ffc7408c862ae"
+    },
+    {
+      "lowest_cost_unused_valid_descendants": [
+        {
+          "cost": 0.3159637385323738,
+          "source_joint_id": "Thumb2.L"
+        }
+      ],
+      "mapped_source_child_joint_id": "Palm.R",
+      "mapped_source_parent_is_ancestor": false,
+      "mapped_source_parent_joint_id": "Thumb.L",
+      "target_child_cost": 0.15653416095612008,
+      "target_child_joint_id": "J:5428a88dad4d4d8d5c4d",
+      "target_parent_joint_id": "J:4c9f9eace712daf31538"
+    },
+    {
+      "lowest_cost_unused_valid_descendants": [
+        {
+          "cost": 0.3610195024084249,
+          "source_joint_id": "Thumb2.R"
+        }
+      ],
+      "mapped_source_child_joint_id": "Palm.L",
+      "mapped_source_parent_is_ancestor": false,
+      "mapped_source_parent_joint_id": "Thumb.R",
+      "target_child_cost": 0.12744628795827562,
+      "target_child_joint_id": "J:33c7075f501c9af4cd0d",
+      "target_parent_joint_id": "J:75a17a4287b28cd7f57f"
+    },
+    {
+      "lowest_cost_unused_valid_descendants": [],
+      "mapped_source_child_joint_id": "LowerLeg.R",
+      "mapped_source_parent_is_ancestor": false,
+      "mapped_source_parent_joint_id": "Foot.R",
+      "target_child_cost": 0.6714047201184266,
+      "target_child_joint_id": "J:7d9e31e2d0bd48f88ecb",
+      "target_parent_joint_id": "J:f5cf9181e27d0f791f7d"
+    },
+    {
+      "lowest_cost_unused_valid_descendants": [],
+      "mapped_source_child_joint_id": "PoleTarget.L",
+      "mapped_source_parent_is_ancestor": false,
+      "mapped_source_parent_joint_id": "LowerLeg.L",
+      "target_child_cost": 0.7622805236721708,
+      "target_child_joint_id": "J:cf05f36e919ff69a9d8e",
+      "target_parent_joint_id": "J:73295dbdbb50d303e597"
+    },
+    {
+      "lowest_cost_unused_valid_descendants": [],
+      "mapped_source_child_joint_id": "Foot.L",
+      "mapped_source_parent_is_ancestor": false,
+      "mapped_source_parent_joint_id": "PoleTarget.L",
+      "target_child_cost": 0.40659342489016087,
+      "target_child_joint_id": "J:362735eeec6ee5a3d46f",
+      "target_parent_joint_id": "J:cf05f36e919ff69a9d8e"
+    },
+    {
+      "lowest_cost_unused_valid_descendants": [],
+      "mapped_source_child_joint_id": "Abdomen",
+      "mapped_source_parent_is_ancestor": false,
+      "mapped_source_parent_joint_id": "UpperLeg.R",
+      "target_child_cost": 0.8415660176059315,
+      "target_child_joint_id": "J:ee24577789f0235b8186",
+      "target_parent_joint_id": "J:f50f39d42ef3820824ef"
+    }
+  ],
+  "assignments": [
+    {
+      "cost": 0.23333333333333334,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.23333333333333334,
+          "source_joint_id": "Bone"
+        },
+        {
+          "cost": 1000.7204027273029,
+          "source_joint_id": "Foot.R"
+        },
+        {
+          "cost": 1000.7219373995086,
+          "source_joint_id": "Foot.L"
+        },
+        {
+          "cost": 1001.001097177143,
+          "source_joint_id": "LowerLeg.L"
+        },
+        {
+          "cost": 1001.033541964263,
+          "source_joint_id": "LowerLeg.R"
+        }
+      ],
+      "source_joint_id": "Bone",
+      "source_parent_id": null,
+      "target_joint_id": "J:54e751020afdb32b5ec5",
+      "target_parent_id": null
+    },
+    {
+      "cost": 1.7006917167695739,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.6116771317630436,
+          "source_joint_id": "Foot.L"
+        },
+        {
+          "cost": 0.7054434059820822,
+          "source_joint_id": "LowerLeg.L"
+        },
+        {
+          "cost": 1.094740310918775,
+          "source_joint_id": "UpperLeg.L"
+        },
+        {
+          "cost": 1.1430157687240043,
+          "source_joint_id": "PoleTarget.L"
+        },
+        {
+          "cost": 1.4465855564406362,
+          "source_joint_id": "Hips"
+        }
+      ],
+      "source_joint_id": "Shoulder.L",
+      "source_parent_id": "Torso",
+      "target_joint_id": "J:7e87e97fc9fe89cbd718",
+      "target_parent_id": "J:362735eeec6ee5a3d46f"
+    },
+    {
+      "cost": 0.7659603759274703,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.37324048737202953,
+          "source_joint_id": "LowerLeg.R"
+        },
+        {
+          "cost": 0.5047419906119381,
+          "source_joint_id": "Foot.R"
+        },
+        {
+          "cost": 0.7159442846858205,
+          "source_joint_id": "UpperLeg.R"
+        },
+        {
+          "cost": 0.7659603759274703,
+          "source_joint_id": "PoleTarget.R"
+        },
+        {
+          "cost": 0.9803741167955217,
+          "source_joint_id": "Hips"
+        }
+      ],
+      "source_joint_id": "PoleTarget.R",
+      "source_parent_id": "Bone",
+      "target_joint_id": "J:ab16ff2ffc7408c862ae",
+      "target_parent_id": "J:ee24577789f0235b8186"
+    },
+    {
+      "cost": 0.2054681713865518,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.2054681713865518,
+          "source_joint_id": "Fingers.R"
+        },
+        {
+          "cost": 0.2925199639891659,
+          "source_joint_id": "MiddleHand.R"
+        },
+        {
+          "cost": 0.32423753460820076,
+          "source_joint_id": "Thumb2.L"
+        },
+        {
+          "cost": 0.3334691169290251,
+          "source_joint_id": "Palm.R"
+        },
+        {
+          "cost": 0.42095393817100324,
+          "source_joint_id": "Thumb.L"
+        }
+      ],
+      "source_joint_id": "Fingers.R",
+      "source_parent_id": "MiddleHand.R",
+      "target_joint_id": "J:c9cdb266f7c167a620a9",
+      "target_parent_id": "J:e5441b559f1c34b41aa2"
+    },
+    {
+      "cost": 0.17678234026097459,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.17678234026097459,
+          "source_joint_id": "LowerArm.R"
+        },
+        {
+          "cost": 0.4085321751602823,
+          "source_joint_id": "UpperArm.R"
+        },
+        {
+          "cost": 0.543465333747834,
+          "source_joint_id": "Shoulder.R"
+        },
+        {
+          "cost": 0.6563827976179247,
+          "source_joint_id": "Thumb.L"
+        },
+        {
+          "cost": 0.6999964582944547,
+          "source_joint_id": "Neck"
+        }
+      ],
+      "source_joint_id": "LowerArm.R",
+      "source_parent_id": "UpperArm.R",
+      "target_joint_id": "J:932628adf7f0d5936426",
+      "target_parent_id": "J:42d181ebf3515959283a"
+    },
+    {
+      "cost": 0.2029030249075255,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.2029030249075255,
+          "source_joint_id": "Thumb.L"
+        },
+        {
+          "cost": 0.28310195332574495,
+          "source_joint_id": "Palm.R"
+        },
+        {
+          "cost": 0.3950119733158039,
+          "source_joint_id": "LowerArm.R"
+        },
+        {
+          "cost": 0.3998298724984415,
+          "source_joint_id": "Thumb2.L"
+        },
+        {
+          "cost": 0.43981849964899195,
+          "source_joint_id": "MiddleHand.R"
+        }
+      ],
+      "source_joint_id": "Thumb.L",
+      "source_parent_id": "LowerArm.R",
+      "target_joint_id": "J:4c9f9eace712daf31538",
+      "target_parent_id": "J:932628adf7f0d5936426"
+    },
+    {
+      "cost": 0.48247436163504,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.48247436163504,
+          "source_joint_id": "Foot.R"
+        },
+        {
+          "cost": 0.6238222174056915,
+          "source_joint_id": "LowerLeg.R"
+        },
+        {
+          "cost": 0.9250925689915138,
+          "source_joint_id": "UpperLeg.R"
+        },
+        {
+          "cost": 1.018328891422289,
+          "source_joint_id": "PoleTarget.R"
+        },
+        {
+          "cost": 1.2126954553327616,
+          "source_joint_id": "Hips"
+        }
+      ],
+      "source_joint_id": "Foot.R",
+      "source_parent_id": "Bone",
+      "target_joint_id": "J:f5cf9181e27d0f791f7d",
+      "target_parent_id": "J:ab16ff2ffc7408c862ae"
+    },
+    {
+      "cost": 0.19833878296620702,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.19833878296620702,
+          "source_joint_id": "Thumb.R"
+        },
+        {
+          "cost": 0.2583591034997136,
+          "source_joint_id": "Palm.L"
+        },
+        {
+          "cost": 0.38095832186434225,
+          "source_joint_id": "LowerArm.L"
+        },
+        {
+          "cost": 0.39871253461234796,
+          "source_joint_id": "Thumb2.R"
+        },
+        {
+          "cost": 0.41611854426337797,
+          "source_joint_id": "MiddleHand.L"
+        }
+      ],
+      "source_joint_id": "Thumb.R",
+      "source_parent_id": "LowerArm.L",
+      "target_joint_id": "J:75a17a4287b28cd7f57f",
+      "target_parent_id": "J:7cf59fbe52c53280546a"
+    },
+    {
+      "cost": 0.1507628779714688,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.1507628779714688,
+          "source_joint_id": "UpperLeg.R"
+        },
+        {
+          "cost": 0.49685610634347954,
+          "source_joint_id": "Hips"
+        },
+        {
+          "cost": 0.5515226398862194,
+          "source_joint_id": "LowerLeg.R"
+        },
+        {
+          "cost": 0.5972444691234906,
+          "source_joint_id": "Abdomen"
+        },
+        {
+          "cost": 0.6875561724195363,
+          "source_joint_id": "Body"
+        }
+      ],
+      "source_joint_id": "UpperLeg.R",
+      "source_parent_id": "Body",
+      "target_joint_id": "J:f50f39d42ef3820824ef",
+      "target_parent_id": "J:237d229c33bc9eb9bf91"
+    },
+    {
+      "cost": 0.15738848284903773,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.15738848284903773,
+          "source_joint_id": "MiddleHand.L"
+        },
+        {
+          "cost": 0.2182245988227146,
+          "source_joint_id": "Palm.L"
+        },
+        {
+          "cost": 0.2796765660744161,
+          "source_joint_id": "Thumb.R"
+        },
+        {
+          "cost": 0.31481081020505347,
+          "source_joint_id": "Thumb2.R"
+        },
+        {
+          "cost": 0.3196163045564517,
+          "source_joint_id": "Fingers.L"
+        }
+      ],
+      "source_joint_id": "MiddleHand.L",
+      "source_parent_id": "Palm.L",
+      "target_joint_id": "J:8455bf4c0a38867b7d9b",
+      "target_parent_id": "J:33c7075f501c9af4cd0d"
+    },
+    {
+      "cost": 0.15653416095612008,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.12566026834671604,
+          "source_joint_id": "Thumb.L"
+        },
+        {
+          "cost": 0.15653416095612008,
+          "source_joint_id": "Palm.R"
+        },
+        {
+          "cost": 0.311416768292497,
+          "source_joint_id": "MiddleHand.R"
+        },
+        {
+          "cost": 0.3159637385323738,
+          "source_joint_id": "Thumb2.L"
+        },
+        {
+          "cost": 0.49040695653881844,
+          "source_joint_id": "LowerArm.R"
+        }
+      ],
+      "source_joint_id": "Palm.R",
+      "source_parent_id": "LowerArm.R",
+      "target_joint_id": "J:5428a88dad4d4d8d5c4d",
+      "target_parent_id": "J:4c9f9eace712daf31538"
+    },
+    {
+      "cost": 0.12744628795827562,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.12744628795827562,
+          "source_joint_id": "Palm.L"
+        },
+        {
+          "cost": 0.17729832396772957,
+          "source_joint_id": "Thumb.R"
+        },
+        {
+          "cost": 0.2871940563386058,
+          "source_joint_id": "MiddleHand.L"
+        },
+        {
+          "cost": 0.3610195024084249,
+          "source_joint_id": "Thumb2.R"
+        },
+        {
+          "cost": 0.4768005403061674,
+          "source_joint_id": "LowerArm.L"
+        }
+      ],
+      "source_joint_id": "Palm.L",
+      "source_parent_id": "LowerArm.L",
+      "target_joint_id": "J:33c7075f501c9af4cd0d",
+      "target_parent_id": "J:75a17a4287b28cd7f57f"
+    },
+    {
+      "cost": 0.21451150060948782,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.21451150060948782,
+          "source_joint_id": "Neck"
+        },
+        {
+          "cost": 0.3102178824405303,
+          "source_joint_id": "Head"
+        },
+        {
+          "cost": 0.38801335599016445,
+          "source_joint_id": "Shoulder.L"
+        },
+        {
+          "cost": 0.422252122343879,
+          "source_joint_id": "Shoulder.R"
+        },
+        {
+          "cost": 0.43609061190497017,
+          "source_joint_id": "UpperArm.L"
+        }
+      ],
+      "source_joint_id": "Neck",
+      "source_parent_id": "Torso",
+      "target_joint_id": "J:1008208d141ae248de43",
+      "target_parent_id": "J:2ff965d6dbe4efc2d5d4"
+    },
+    {
+      "cost": 0.22331652895761903,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.22331652895761903,
+          "source_joint_id": "Fingers.L"
+        },
+        {
+          "cost": 0.341721580563024,
+          "source_joint_id": "MiddleHand.L"
+        },
+        {
+          "cost": 0.4128826817173956,
+          "source_joint_id": "Thumb2.R"
+        },
+        {
+          "cost": 0.4255351381253574,
+          "source_joint_id": "Palm.L"
+        },
+        {
+          "cost": 0.5211133034974057,
+          "source_joint_id": "Thumb.R"
+        }
+      ],
+      "source_joint_id": "Fingers.L",
+      "source_parent_id": "MiddleHand.L",
+      "target_joint_id": "J:136e20712bbd1481596e",
+      "target_parent_id": "J:8455bf4c0a38867b7d9b"
+    },
+    {
+      "cost": 0.1753136842084541,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.1753136842084541,
+          "source_joint_id": "MiddleHand.R"
+        },
+        {
+          "cost": 0.2033041789185967,
+          "source_joint_id": "Palm.R"
+        },
+        {
+          "cost": 0.2412660819533533,
+          "source_joint_id": "Thumb.L"
+        },
+        {
+          "cost": 0.27509869586329366,
+          "source_joint_id": "Thumb2.L"
+        },
+        {
+          "cost": 0.348264730518941,
+          "source_joint_id": "Fingers.R"
+        }
+      ],
+      "source_joint_id": "MiddleHand.R",
+      "source_parent_id": "Palm.R",
+      "target_joint_id": "J:e5441b559f1c34b41aa2",
+      "target_parent_id": "J:5428a88dad4d4d8d5c4d"
+    },
+    {
+      "cost": 0.1542952449768342,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.1542952449768342,
+          "source_joint_id": "UpperLeg.L"
+        },
+        {
+          "cost": 0.521825399970232,
+          "source_joint_id": "Hips"
+        },
+        {
+          "cost": 0.5719122577153577,
+          "source_joint_id": "LowerLeg.L"
+        },
+        {
+          "cost": 0.6247742962808627,
+          "source_joint_id": "Abdomen"
+        },
+        {
+          "cost": 0.7133177042453228,
+          "source_joint_id": "Body"
+        }
+      ],
+      "source_joint_id": "UpperLeg.L",
+      "source_parent_id": "Body",
+      "target_joint_id": "J:063ee183f601e19a8ca9",
+      "target_parent_id": "J:237d229c33bc9eb9bf91"
+    },
+    {
+      "cost": 0.24521820132730113,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.24521820132730113,
+          "source_joint_id": "LowerLeg.L"
+        },
+        {
+          "cost": 0.5053838222620202,
+          "source_joint_id": "UpperLeg.L"
+        },
+        {
+          "cost": 0.6000577796889119,
+          "source_joint_id": "Foot.L"
+        },
+        {
+          "cost": 0.735956511648254,
+          "source_joint_id": "PoleTarget.L"
+        },
+        {
+          "cost": 0.8212067602194628,
+          "source_joint_id": "Hips"
+        }
+      ],
+      "source_joint_id": "LowerLeg.L",
+      "source_parent_id": "UpperLeg.L",
+      "target_joint_id": "J:73295dbdbb50d303e597",
+      "target_parent_id": "J:063ee183f601e19a8ca9"
+    },
+    {
+      "cost": 0.18366720483839166,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.18366720483839166,
+          "source_joint_id": "UpperArm.R"
+        },
+        {
+          "cost": 0.2331092975233877,
+          "source_joint_id": "Shoulder.R"
+        },
+        {
+          "cost": 0.4186772264634154,
+          "source_joint_id": "Neck"
+        },
+        {
+          "cost": 0.5159234889960999,
+          "source_joint_id": "LowerArm.R"
+        },
+        {
+          "cost": 0.5909509434777839,
+          "source_joint_id": "Torso"
+        }
+      ],
+      "source_joint_id": "UpperArm.R",
+      "source_parent_id": "Shoulder.R",
+      "target_joint_id": "J:42d181ebf3515959283a",
+      "target_parent_id": "J:2ff965d6dbe4efc2d5d4"
+    },
+    {
+      "cost": 0.6714047201184266,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.5902787916544152,
+          "source_joint_id": "Foot.R"
+        },
+        {
+          "cost": 0.6714047201184266,
+          "source_joint_id": "LowerLeg.R"
+        },
+        {
+          "cost": 1.062111168933784,
+          "source_joint_id": "UpperLeg.R"
+        },
+        {
+          "cost": 1.1150923866322622,
+          "source_joint_id": "PoleTarget.R"
+        },
+        {
+          "cost": 1.3658634181248934,
+          "source_joint_id": "Hips"
+        }
+      ],
+      "source_joint_id": "LowerLeg.R",
+      "source_parent_id": "UpperLeg.R",
+      "target_joint_id": "J:7d9e31e2d0bd48f88ecb",
+      "target_parent_id": "J:f5cf9181e27d0f791f7d"
+    },
+    {
+      "cost": 0.338657132190124,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.338657132190124,
+          "source_joint_id": "Head"
+        },
+        {
+          "cost": 0.5510856632138917,
+          "source_joint_id": "Neck"
+        },
+        {
+          "cost": 0.6850521635663624,
+          "source_joint_id": "UpperArm.R"
+        },
+        {
+          "cost": 0.7056098423084175,
+          "source_joint_id": "UpperArm.L"
+        },
+        {
+          "cost": 0.7487626916567958,
+          "source_joint_id": "Shoulder.R"
+        }
+      ],
+      "source_joint_id": "Head",
+      "source_parent_id": "Neck",
+      "target_joint_id": "J:eafe286e7d84499e5257",
+      "target_parent_id": "J:1008208d141ae248de43"
+    },
+    {
+      "cost": 0.1615942399702586,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.1615942399702586,
+          "source_joint_id": "LowerArm.L"
+        },
+        {
+          "cost": 0.45709510248575125,
+          "source_joint_id": "UpperArm.L"
+        },
+        {
+          "cost": 0.5964793959977143,
+          "source_joint_id": "Shoulder.L"
+        },
+        {
+          "cost": 0.6055430497146866,
+          "source_joint_id": "Thumb.R"
+        },
+        {
+          "cost": 0.6845648690396425,
+          "source_joint_id": "Palm.L"
+        }
+      ],
+      "source_joint_id": "LowerArm.L",
+      "source_parent_id": "UpperArm.L",
+      "target_joint_id": "J:7cf59fbe52c53280546a",
+      "target_parent_id": "J:a80d2c086e86a4cc08b5"
+    },
+    {
+      "cost": 0.7622805236721708,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.37056767662637935,
+          "source_joint_id": "LowerLeg.L"
+        },
+        {
+          "cost": 0.4647284720520398,
+          "source_joint_id": "Foot.L"
+        },
+        {
+          "cost": 0.7160193892252141,
+          "source_joint_id": "UpperLeg.L"
+        },
+        {
+          "cost": 0.7622805236721708,
+          "source_joint_id": "PoleTarget.L"
+        },
+        {
+          "cost": 1.0246657886252837,
+          "source_joint_id": "Hips"
+        }
+      ],
+      "source_joint_id": "PoleTarget.L",
+      "source_parent_id": "Bone",
+      "target_joint_id": "J:cf05f36e919ff69a9d8e",
+      "target_parent_id": "J:73295dbdbb50d303e597"
+    },
+    {
+      "cost": 0.40659342489016087,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.40659342489016087,
+          "source_joint_id": "Foot.L"
+        },
+        {
+          "cost": 0.6154678629286205,
+          "source_joint_id": "LowerLeg.L"
+        },
+        {
+          "cost": 0.9410947470393511,
+          "source_joint_id": "UpperLeg.L"
+        },
+        {
+          "cost": 0.9701986242764973,
+          "source_joint_id": "PoleTarget.L"
+        },
+        {
+          "cost": 1.271167014616031,
+          "source_joint_id": "Hips"
+        }
+      ],
+      "source_joint_id": "Foot.L",
+      "source_parent_id": "Bone",
+      "target_joint_id": "J:362735eeec6ee5a3d46f",
+      "target_parent_id": "J:cf05f36e919ff69a9d8e"
+    },
+    {
+      "cost": 0.5383114087285982,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.5383114087285982,
+          "source_joint_id": "Body"
+        },
+        {
+          "cost": 0.693192900090975,
+          "source_joint_id": "Hips"
+        },
+        {
+          "cost": 0.8975660864828616,
+          "source_joint_id": "UpperLeg.L"
+        },
+        {
+          "cost": 0.9018036604189762,
+          "source_joint_id": "Abdomen"
+        },
+        {
+          "cost": 0.9621848418483545,
+          "source_joint_id": "UpperLeg.R"
+        }
+      ],
+      "source_joint_id": "Body",
+      "source_parent_id": "Bone",
+      "target_joint_id": "J:237d229c33bc9eb9bf91",
+      "target_parent_id": "J:54e751020afdb32b5ec5"
+    },
+    {
+      "cost": 0.1952579664472978,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.1952579664472978,
+          "source_joint_id": "UpperArm.L"
+        },
+        {
+          "cost": 0.25572078846434404,
+          "source_joint_id": "Shoulder.L"
+        },
+        {
+          "cost": 0.44300903093883864,
+          "source_joint_id": "Neck"
+        },
+        {
+          "cost": 0.5225207523685436,
+          "source_joint_id": "LowerArm.L"
+        },
+        {
+          "cost": 0.6061907713161091,
+          "source_joint_id": "Torso"
+        }
+      ],
+      "source_joint_id": "UpperArm.L",
+      "source_parent_id": "Shoulder.L",
+      "target_joint_id": "J:a80d2c086e86a4cc08b5",
+      "target_parent_id": "J:2ff965d6dbe4efc2d5d4"
+    },
+    {
+      "cost": 0.2208842181998788,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.2208842181998788,
+          "source_joint_id": "Torso"
+        },
+        {
+          "cost": 0.6520160579394874,
+          "source_joint_id": "Abdomen"
+        },
+        {
+          "cost": 0.6528449638797398,
+          "source_joint_id": "Shoulder.L"
+        },
+        {
+          "cost": 0.6590114340580089,
+          "source_joint_id": "Shoulder.R"
+        },
+        {
+          "cost": 0.7732810376730657,
+          "source_joint_id": "Body"
+        }
+      ],
+      "source_joint_id": "Torso",
+      "source_parent_id": "Abdomen",
+      "target_joint_id": "J:2ff965d6dbe4efc2d5d4",
+      "target_parent_id": "J:b9e5c0d23f688f672060"
+    },
+    {
+      "cost": 0.8415660176059315,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.2598771637136827,
+          "source_joint_id": "LowerLeg.R"
+        },
+        {
+          "cost": 0.4990601726171502,
+          "source_joint_id": "UpperLeg.R"
+        },
+        {
+          "cost": 0.6432948365564474,
+          "source_joint_id": "Foot.R"
+        },
+        {
+          "cost": 0.7536128406590337,
+          "source_joint_id": "Hips"
+        },
+        {
+          "cost": 0.7566972391170053,
+          "source_joint_id": "PoleTarget.R"
+        }
+      ],
+      "source_joint_id": "Abdomen",
+      "source_parent_id": "Hips",
+      "target_joint_id": "J:ee24577789f0235b8186",
+      "target_parent_id": "J:f50f39d42ef3820824ef"
+    },
+    {
+      "cost": 0.16516790065247416,
+      "five_lowest_cost_sources": [
+        {
+          "cost": 0.16516790065247416,
+          "source_joint_id": "Hips"
+        },
+        {
+          "cost": 0.3150452870805952,
+          "source_joint_id": "Abdomen"
+        },
+        {
+          "cost": 0.3935004379856131,
+          "source_joint_id": "Body"
+        },
+        {
+          "cost": 0.4501419853318671,
+          "source_joint_id": "UpperLeg.L"
+        },
+        {
+          "cost": 0.4630517052637517,
+          "source_joint_id": "UpperLeg.R"
+        }
+      ],
+      "source_joint_id": "Hips",
+      "source_parent_id": "Body",
+      "target_joint_id": "J:b9e5c0d23f688f672060",
+      "target_parent_id": "J:237d229c33bc9eb9bf91"
+    }
+  ],
+  "clip_id": "demo_idle_v1",
+  "diagnostic_only": true,
+  "root_mapping_correct": true,
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "schema": "RealSaS.MotionRetargetAncestryDiagnostic.v1",
+  "source_joint_count": 31,
+  "source_root": "Bone",
+  "status": "MEASURED",
+  "target_joint_count": 28,
+  "target_root": "J:54e751020afdb32b5ec5",
+  "unconstrained_assignment_total_cost": 10.056123834314988
+}

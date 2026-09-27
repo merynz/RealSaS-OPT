@@ -138,6 +138,8 @@ jobs:
             "run_id":os.environ["RUN_ID"],
             "qualified_joint_count":len(skeleton["joints"]),
             "qualified_skeleton_lineage_hash":skeleton["skeleton_lineage_hash"],
+            "semantic_tree_sha256":os.environ["EXPECTED_SEMANTIC_TREE_SHA256"],
+            "optimizer_identity_contract":"GRAPH_SELECTION_SEMANTICS_V1",
             "checkpoint_seal_hash":checkpoint["checkpoint_seal_hash"],
             "execution_repo_commit":os.environ["GITHUB_SHA"],
             "product_authority_claimed":False,

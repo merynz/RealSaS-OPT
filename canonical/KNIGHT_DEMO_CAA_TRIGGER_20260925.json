@@ -9,7 +9,7 @@
   "target": "25_CAA_REFERENCE_REST_RENDER_PROOF",
   "product_authority_claimed": false,
   "product_pass_forbidden": true,
-  "revision": 21,
+  "revision": 22,
   "previous_failure": "GLOBAL_WORST_CASE_TILE32_COMPILE_MEMORY_EXPLOSION_AFTER_FIXED_PAGE_LAYOUT",
   "test_fixture_repair": "CONSTANT_TIME_SINGLE_FACE_UNSATISFIED_CAPACITY",
   "production_repair": "PER_FACE_ADAPTIVE_LATTICE_PLUS_TOPOLOGY_PARAMETRIC_EDGE_COUPLING_PLUS_BOUNDED_2K_PAGES_V1",
@@ -59,6 +59,11 @@
     "STAGE23_DIRECTION_BAKE_SECONDS",
     "STAGE25_DIRECTION_PROOF_SECONDS"
   ],
-  "reason": "DEMO_ONLY_MEASURED_STAGE25_CONTINUATION",
-  "requested_on": "2026-09-27"
+  "reason": "DIRECT_SOURCE_AUTHORITY_REPAIR__REBUILD_CAA_BEFORE_FINAL_MOTION_PREVIEW",
+  "requested_on": "2026-09-27",
+  "expected_semantic_change": {
+    "grazing_angle": "DONOR_ONLY_NOT_DIRECT_SOURCE_REJECTION",
+    "boundary_erosion": "DONOR_ONLY_NOT_DIRECT_SOURCE_REJECTION",
+    "numeric_thresholds_changed": false
+  }
 }

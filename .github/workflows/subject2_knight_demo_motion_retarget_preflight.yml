@@ -42,6 +42,7 @@ jobs:
           set -euo pipefail
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
           python -m py_compile             tools/motion/materialize_quaternius_preset_v1.py             tools/motion/blender_extract_motion_source_v2.py             compiler/realsas_compiler_core/motion_compile_v2.py
+          pytest -q tests/compiler/test_quaternius_motion_materializer_v1.py tests/compiler/test_motion_compile_v2.py
 
       - name: Verify exact reconciled 28-joint skeleton
         shell: bash

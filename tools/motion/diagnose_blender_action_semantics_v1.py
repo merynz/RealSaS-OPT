@@ -78,6 +78,52 @@ def diagnose(source_fbx:Path,spec_path:Path):
     scene=bpy.context.scene
     fps=float(scene.render.fps)/float(scene.render.fps_base or 1.0)
 
+    # Blender's use_deform flag is advisory and this source FBX marks even
+    # controller-style bones as deformable. Measure actual mesh influence
+    # instead: controls with no bound vertex weight must not become primary
+    # anatomical correspondence evidence merely because they exist in the rig.
+    influence={
+        name:{
+            "weighted_vertex_count":0,
+            "weight_sum":0.0,
+            "maximum_weight":0.0,
+            "mesh_object_count":0,
+        }
+        for name in names
+    }
+    for obj in bpy.data.objects:
+        if obj.type!="MESH":
+            continue
+        modifiers=[
+            mod for mod in obj.modifiers
+            if mod.type=="ARMATURE" and getattr(mod,"object",None)==armature
+        ]
+        if not modifiers and getattr(obj,"parent",None)!=armature:
+            continue
+        local_groups={
+            int(group.index):str(group.name)
+            for group in obj.vertex_groups
+            if str(group.name) in names
+        }
+        if not local_groups:
+            continue
+        touched=set()
+        for vertex in obj.data.vertices:
+            for member in vertex.groups:
+                jid=local_groups.get(int(member.group))
+                if jid is None:
+                    continue
+                weight=float(member.weight)
+                if weight<=0.0:
+                    continue
+                row=influence[jid]
+                row["weighted_vertex_count"]+=1
+                row["weight_sum"]+=weight
+                row["maximum_weight"]=max(row["maximum_weight"],weight)
+                touched.add(jid)
+        for jid in touched:
+            influence[jid]["mesh_object_count"]+=1
+
     reports=[]
     stream_hashes={}
     for clip in spec["clips"]:
@@ -197,6 +243,19 @@ def diagnose(source_fbx:Path,spec_path:Path):
             "source_joint_id":b.name,
             "parent_source_joint_id":parent[b.name],
             "use_deform":bool(b.use_deform),
+            "weighted_vertex_count":int(
+                influence[b.name]["weighted_vertex_count"]
+            ),
+            "weight_sum":float(influence[b.name]["weight_sum"]),
+            "maximum_vertex_weight":float(
+                influence[b.name]["maximum_weight"]
+            ),
+            "influenced_mesh_object_count":int(
+                influence[b.name]["mesh_object_count"]
+            ),
+            "has_mesh_influence":bool(
+                influence[b.name]["weighted_vertex_count"]>0
+            ),
             "rest_position":[
                 float(x)
                 for x in rest_global[b.name].to_translation()
@@ -212,6 +271,12 @@ def diagnose(source_fbx:Path,spec_path:Path):
         "bone_roles":bone_roles,
         "deform_bone_count":sum(bool(row["use_deform"]) for row in bone_roles),
         "nondeform_bone_count":sum(not bool(row["use_deform"]) for row in bone_roles),
+        "mesh_influencing_bone_count":sum(
+            bool(row["has_mesh_influence"]) for row in bone_roles
+        ),
+        "zero_mesh_influence_bone_count":sum(
+            not bool(row["has_mesh_influence"]) for row in bone_roles
+        ),
         "clip_reports":reports,
         "distinct_pose_stream_hash_count":len(set(stream_hashes.values())),
         "clip_count":len(stream_hashes),

@@ -1,0 +1,33 @@
+{
+  "schema": "RealSaS.CAACrossViewSilhouetteOwnerCorrection.v1",
+  "status": "FROZEN_ARCHITECTURE_OWNER_CORRECTION",
+  "frozen_on": "2026-09-27",
+  "subject_specific_threshold_change": false,
+  "frozen_thresholds_changed": false,
+  "product_authority_claimed": false,
+  "principle": {
+    "visibility_and_appearance_are_separate_authorities": true,
+    "source_foreground_to_source_safe_background_transition_is_directional_silhouette_evidence": true,
+    "directional_silhouette_transition_is_not_cross_view_appearance_contradiction": true,
+    "same_source_silhouette_class_required_for_cross_view_appearance_gate": true
+  },
+  "cross_view_appearance_population": [
+    "FOREGROUND_TO_FOREGROUND_SHARED_DIRECT_SOURCE",
+    "SAFE_BACKGROUND_TO_SAFE_BACKGROUND_SHARED_DIRECT_SOURCE"
+  ],
+  "excluded_from_appearance_population": [
+    "FOREGROUND_TO_SAFE_BACKGROUND",
+    "SAFE_BACKGROUND_TO_FOREGROUND"
+  ],
+  "excluded_population_owner": "VISIBILITY_DIRECTIONAL_SILHOUETTE_CORRESPONDENCE",
+  "unchanged_thresholds": {
+    "alpha_conflict_cut": 0.25,
+    "max_pair_alpha_conflict_fraction": 0.02,
+    "max_component_alpha_conflict_fraction": 0.05,
+    "color_conflict_cut_rgba_l1": 0.4,
+    "max_pair_color_conflict_fraction": 0.05
+  },
+  "subject_free_regression": "tests/compiler/test_caa_v2_subject_free_policy.py::test_cross_view_appearance_gate_excludes_directional_silhouette_class_transition",
+  "implementation_semantics": "Stage24 derives source silhouette class deterministically from the exact qualified observation mask and the sealed Stage21 source_xy/direct_valid arrays; no new learned signal or threshold is introduced.",
+  "witness_note": "Knight may verify the correction but does not select or relax any numerical threshold."
+}

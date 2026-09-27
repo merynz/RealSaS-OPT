@@ -73,6 +73,52 @@ def test_retarget_allows_extra_source_joints_but_preserves_target_tree():
     assert report["unused_source_joint_count"]==2
 
 
+
+class SChain:
+    def __init__(self):
+        self.joints=(
+            J("root",(0,0,0),None),
+            J("parent",(0,0,-.4),"root"),
+            J("child",(0,0,-1.0),"parent"),
+        )
+        self.root_id="root"
+        self.skeleton_lineage_hash="sk-chain"
+
+
+def test_retarget_optimizer_enforces_ancestry_inside_assignment():
+    payload={
+        "coordinate_frame":"REALSAS_OBJECT_FRAME_V1",
+        "source_skeleton":[
+            {
+                "source_joint_id":"root",
+                "parent_source_joint_id":None,
+                "rest_position":[0,0,0],
+            },
+            {
+                # Deliberately position the source parent where the target child
+                # lives, and the source child where the target parent lives.
+                # A geometry-only assignment prefers the inverted mapping.
+                "source_joint_id":"source_parent",
+                "parent_source_joint_id":"root",
+                "rest_position":[0,0,-1.0],
+            },
+            {
+                "source_joint_id":"source_child",
+                "parent_source_joint_id":"source_parent",
+                "rest_position":[0,0,-.4],
+            },
+        ],
+    }
+    mapping,report=automatic_retarget_map_v2(payload,SChain())
+    assert mapping["root"]=="root"
+    assert mapping["source_parent"]=="parent"
+    assert mapping["source_child"]=="child"
+    assert report["assignment_solver"]=="SCIPY_MILP_HIGHS_BINARY_V1"
+    assert (
+        report["topology_rule"]
+        =="TARGET_PARENT_MAPS_TO_SOURCE_ANCESTOR_HARD_MILP"
+    )
+
 def test_object_vector_to_joint_local_roundtrips_nonidentity_root_frame():
     frames=derive_joint_frames_from_rows(
         (

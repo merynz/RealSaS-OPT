@@ -1,5 +1,9 @@
 name: knight-visual-mesh-arap-witness-v1
 
+concurrency:
+  group: knight-visual-mesh-arap-witness-v1
+  cancel-in-progress: true
+
 permissions:
   contents: write
 

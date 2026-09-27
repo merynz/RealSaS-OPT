@@ -6,6 +6,7 @@ on:
       - research/vf11-certified-adaptive-20260921
     paths:
       - 'canonical/KNIGHT_DEMO_GEPPETTO_STAGE29_V2_RECEIPT_20260926.json'
+      - 'canonical/KNIGHT_DEMO_ARACHNE_V6_INGEST_TRIGGER_20260927.json'
   workflow_dispatch:
 
 concurrency:

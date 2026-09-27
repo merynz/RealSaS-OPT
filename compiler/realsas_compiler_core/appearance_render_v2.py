@@ -206,6 +206,10 @@ def render_caa_reference(
     coverage_height, coverage_width = high_owner.shape
     sample_pm = np.zeros((coverage_height, coverage_width, 4), dtype=np.float64)
     sample_risk = np.zeros((coverage_height, coverage_width), dtype=np.uint8)
+    sample_has_provenance = np.zeros(
+        (coverage_height, coverage_width),
+        dtype=bool,
+    )
     sample_has_contribution = np.zeros(
         (coverage_height, coverage_width),
         dtype=bool,
@@ -240,6 +244,14 @@ def render_caa_reference(
             page_by_face[face_index],
         )
 
+        prior_provenance = sample_has_provenance[ys, xs]
+        sample_risk[ys, xs] = np.where(
+            prior_provenance,
+            np.maximum(sample_risk[ys, xs], sampled_provenance),
+            sampled_provenance,
+        )
+        sample_has_provenance[ys, xs] = True
+
         existing_alpha = sample_pm[ys, xs, 3]
         transmission = 1.0 - np.clip(existing_alpha, 0.0, 1.0)
         contribution = sampled * transmission[:, None]
@@ -262,15 +274,15 @@ def render_caa_reference(
     pm = np.mean(pm_grid, axis=(2, 3))
     height, width = pm.shape[:2]
 
-    has_grid = _coverage_reshape(sample_has_contribution)
+    provenance_grid = _coverage_reshape(sample_has_provenance)
     risk_grid = _coverage_reshape(sample_risk)
-    any_contribution = np.any(has_grid, axis=(2, 3))
+    any_provenance = np.any(provenance_grid, axis=(2, 3))
     conservative_risk = np.max(
-        np.where(has_grid, risk_grid, 0),
+        np.where(provenance_grid, risk_grid, 0),
         axis=(2, 3),
     )
     provenance = np.full((height, width), 255, dtype=np.uint8)
-    provenance[any_contribution] = conservative_risk[any_contribution]
+    provenance[any_provenance] = conservative_risk[any_provenance]
 
     sample_owner = _coverage_reshape(high_owner).reshape(
         height,

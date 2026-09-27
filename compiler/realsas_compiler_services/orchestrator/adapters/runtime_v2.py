@@ -873,6 +873,8 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     alpha_transparent = 0
     compiled_visible = 0
     undefined_visible = 0
+    unsupported_abstain_visible_pixels = 0
+    padding_visible_pixels = 0
     mismatch_pixels = 0
     max_mismatch_fraction = 0.0
     max_frame_compiled_fraction = 0.0
@@ -970,10 +972,23 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                             denominator=visible_count,
                         ),
                     )
-                undefined_visible += int(
-                    np.count_nonzero(
-                        visible & (reference.provenance_code == 255)
-                    )
+                unsupported_visible_mask = visible & (
+                    reference.provenance_code
+                    == int(CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"])
+                )
+                padding_visible_mask = visible & (
+                    reference.provenance_code == 255
+                )
+                unsupported_visible_count = int(
+                    np.count_nonzero(unsupported_visible_mask)
+                )
+                padding_visible_count = int(
+                    np.count_nonzero(padding_visible_mask)
+                )
+                unsupported_abstain_visible_pixels += unsupported_visible_count
+                padding_visible_pixels += padding_visible_count
+                undefined_visible += (
+                    unsupported_visible_count + padding_visible_count
                 )
 
                 exact_depth_count = int(
@@ -1309,6 +1324,12 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                 else "FAIL_DYNAMIC_VISUAL_INTEGRITY"
             ),
             "undefined_visible_pixel_count": undefined_visible,
+            "unsupported_abstain_visible_pixel_count": int(
+                unsupported_abstain_visible_pixels
+            ),
+            "padding_visible_pixel_count": int(
+                padding_visible_pixels
+            ),
             "compiled_unobserved_exposure_budget": exposure_budget,
             "compiled_unobserved_exposure_passed": exposure_passed,
             "maximum_frame_compiled_unobserved_visible_fraction": max_frame_compiled_fraction,
@@ -1361,6 +1382,8 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                 unmeasurable_visible_face_count
             ),
             "alpha_transparency_is_diagnostic_not_undefinedness": True,
+            "unsupported_abstention_is_hard_undefined_visibility": True,
+            "physical_padding_is_hard_undefined_visibility": True,
             "renderer": "REALSAS_V2_CAA_CANONICAL_DEPTH",
         },
         visual_integrity_hash="",

@@ -1015,6 +1015,7 @@ def _invalidate_dependents(
     for row in ledger["stages"]:
         if row["id"] not in invalid:
             continue
+        row.pop("historical_import", None)
         row.update(
             status="PENDING",
             input_fingerprint="",
@@ -1205,6 +1206,7 @@ def _run_stage(
 
     module_name, _, function_name = stage["adapter"].partition(":")
     function = getattr(importlib.import_module(module_name), function_name)
+    row.pop("historical_import", None)
     row.update(
         status="RUNNING",
         attempts=int(row.get("attempts", 0)) + 1,

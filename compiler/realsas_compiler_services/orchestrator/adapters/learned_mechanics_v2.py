@@ -268,9 +268,20 @@ def qualify_skin_stage(ctx:dict)->dict:
         max_influences=None if max_influences is None else int(max_influences),
     )
     root=ctx["run_root"]/"artifacts"/"32_SKIN_QUALIFIED"
+    q=dict(skin.qualification_report or {})
     return {"status":"PASS","outputs":[write_ir(root/"qualified_skin.json",skin,authority_class="QUALIFIED_SKIN")],
-        "diagnostics":{"skin_lineage_hash":skin.skin_lineage_hash,"row_count":len(skin.rows),
-                       "total_correction_l1":skin.qualification_report.get("total_correction_l1")}}
+        "diagnostics":{
+            "skin_lineage_hash":skin.skin_lineage_hash,
+            "row_count":len(skin.rows),
+            "total_correction_l1":q.get("total_correction_l1"),
+            "prediction_surface_coverage":q.get("prediction_surface_coverage"),
+            "supervision_coverage":q.get("supervision_coverage"),
+            "supervision_coverage_semantics":q.get("supervision_coverage_semantics"),
+            "row_confidence_available":q.get("row_confidence_available"),
+            "row_confidence_semantics":q.get("row_confidence_semantics"),
+            "uncovered_row_semantics":q.get("uncovered_row_semantics"),
+            "product_skin_evidence_complete":q.get("product_skin_evidence_complete"),
+        }}
 
 
 def seal_arachne_checkpoint_stage(ctx:dict)->dict:

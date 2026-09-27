@@ -23,9 +23,12 @@ jobs:
       RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
       RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
       ARACHNE_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V6_DEMO_OUTPUT
+      ARACHNE_HANDOFF_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V6_DEMO_HANDOFF
       EXPECTED_SURFACE_LINEAGE: 452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a
-      EXPECTED_SKELETON_LINEAGE: c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce
-      EXPECTED_SKIN_LINEAGE: 3fa8dacae0d52b86193f14f6cb0214ed68d8d40035317e367b335d9c06a48397
+      EXPECTED_SKELETON_LINEAGE: e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850
+      EXPECTED_SEMANTIC_TREE_SHA256: 95f6f224f52ba43dd96296ce877a11851037e939640a4c995e2b9f3e874c7f59
+      HISTORICAL_V6_SKELETON_LINEAGE: c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce
+      HISTORICAL_V6_SKIN_LINEAGE: 3fa8dacae0d52b86193f14f6cb0214ed68d8d40035317e367b335d9c06a48397
       EXPECTED_MODEL_SHA256: bfd2bd24f55bdce2dc36b0ae6a7afe01b8381c680de545c66a11a3d707fe73ed
       EXPECTED_WEIGHTS_SHA256: a0a3e652e323c6f2042354eb2095f3f66ff6168bf5ab51b53c83f728b8a00499
       EXPECTED_QUALIFIED_SKIN_SHA256: 5949af1e54bdc7612520980cb6fd866990f5ab0792e5e1d21fa0ed5f90898329
@@ -45,6 +48,7 @@ jobs:
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
           python -m py_compile \
             tools/training/materialize_dense_skin_proposal_v1.py \
+            tools/training/rebind_dense_skin_to_semantically_equivalent_skeleton_v1.py \
             compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py
 
       - name: Pull and verify exact V6 closure bytes

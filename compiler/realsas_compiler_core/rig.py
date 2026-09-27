@@ -6,6 +6,62 @@ from .hashing import content_sha256
 from .canonical_graph_optimizer_authority import optimize_canonical_graph_v18_98
 from realsas_contracts.technical_part_graph import CanonicalGraphNodeCandidate, CanonicalGraphEdgeCandidate, CanonicalGraphOptimizationRequest
 
+def qualified_skeleton_semantic_identity(value) -> dict:
+    """Canonical skeleton semantics independent of compiler-owned joint IDs.
+
+    Proposal identity, parent relation, position and support ownership define
+    the semantic tree. Compiler-minted canonical IDs, telemetry and diagnostic
+    ordering are intentionally excluded.
+    """
+    source_by_canonical = {}
+    joints_by_source = {}
+    for joint in value.joints:
+        source = str(joint.source_proposal_id)
+        canonical = str(joint.canonical_joint_id)
+        if not source:
+            raise QualificationError("SKELETON_SEMANTIC_SOURCE_ID_MISSING")
+        if source in joints_by_source:
+            raise QualificationError(
+                f"SKELETON_SEMANTIC_SOURCE_ID_DUPLICATE:{source}"
+            )
+        if canonical in source_by_canonical:
+            raise QualificationError(
+                f"SKELETON_SEMANTIC_CANONICAL_ID_DUPLICATE:{canonical}"
+            )
+        joints_by_source[source] = joint
+        source_by_canonical[canonical] = source
+
+    rows = []
+    for source in sorted(joints_by_source):
+        joint = joints_by_source[source]
+        parent_source = None
+        if joint.parent_canonical_id is not None:
+            parent_canonical = str(joint.parent_canonical_id)
+            if parent_canonical not in source_by_canonical:
+                raise QualificationError(
+                    f"SKELETON_SEMANTIC_PARENT_UNKNOWN:{parent_canonical}"
+                )
+            parent_source = source_by_canonical[parent_canonical]
+        rows.append(
+            {
+                "source_proposal_id": source,
+                "parent_source_proposal_id": parent_source,
+                "position": [float(value) for value in joint.position],
+                "support_surface_ids": sorted(
+                    map(str, joint.support_surface_ids)
+                ),
+            }
+        )
+    return {
+        "schema": "RealSaS.SemanticSkeletonTreeByProposalIdentity.v1",
+        "joints": rows,
+    }
+
+
+def qualified_skeleton_semantic_sha256(value) -> str:
+    return content_sha256(qualified_skeleton_semantic_identity(value))
+
+
 def _optimizer_semantic_identity(res) -> dict:
     """Stable authority identity for one qualified graph selection.
 

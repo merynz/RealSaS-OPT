@@ -32,8 +32,10 @@ from compiler.realsas_compiler_core.appearance_authority_v2 import (
     complete_appearance_qualification_hash,
 )
 from compiler.realsas_compiler_core.appearance_bake_v2 import (
+    bake_direction_adaptive_atlas_bundle,
     bake_direction_adaptive_atlas_pages,
     bake_direction_adaptive_source_view_atlas_pages,
+    prepare_adaptive_paged_scatter,
     bake_direction_atlas,
     bake_direction_atlas_pages,
     bake_direction_source_view_atlas,
@@ -1010,9 +1012,16 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
         face_sample_offsets = np.asarray(
             arrays["face_sample_offsets"], dtype=np.int64
         )
+        prepared_adaptive_scatter = prepare_adaptive_paged_scatter(
+            face_tile_resolutions=face_tile_resolutions,
+            face_sample_offsets=face_sample_offsets,
+            bleed_px=bleed,
+            max_page_resolution=max_page_resolution,
+        )
     else:
         face_tile_resolutions = None
         face_sample_offsets = None
+        prepared_adaptive_scatter = None
 
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     root.mkdir(parents=True, exist_ok=True)
@@ -1028,17 +1037,21 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
     for direction in range(8):
         direction_started = perf_counter()
         if adaptive:
-            pages, provenance_pages, uv, face_page_index, layout = (
-                bake_direction_adaptive_atlas_pages(
-                    face_sample_rgba=arrays["rgba"][direction],
-                    face_sample_provenance=arrays["provenance"][direction],
-                    face_tile_resolutions=face_tile_resolutions,
-                    face_sample_offsets=face_sample_offsets,
-                    bleed_px=bleed,
-                    max_page_resolution=max_page_resolution,
-                )
+            (
+                pages,
+                provenance_pages,
+                source_view_pages,
+                uv,
+                face_page_index,
+                layout,
+            ) = bake_direction_adaptive_atlas_bundle(
+                face_sample_rgba=arrays["rgba"][direction],
+                face_sample_provenance=arrays["provenance"][direction],
+                face_sample_source_view=arrays["source_view"][direction],
+                prepared_scatter=prepared_adaptive_scatter,
             )
         else:
+            source_view_pages = None
             pages, provenance_pages, uv, face_page_index, layout = (
                 bake_direction_atlas_pages(
                     face_sample_rgba=arrays["rgba"][direction],
@@ -1124,15 +1137,11 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
         )
         provenance_atlases.append(provenance_pages)
         if adaptive:
-            source_view_atlases.append(
-                bake_direction_adaptive_source_view_atlas_pages(
-                    face_sample_source_view=arrays["source_view"][direction],
-                    face_tile_resolutions=face_tile_resolutions,
-                    face_sample_offsets=face_sample_offsets,
-                    bleed_px=bleed,
-                    max_page_resolution=max_page_resolution,
+            if source_view_pages is None:
+                raise QualificationError(
+                    "CAA_ADAPTIVE_BUNDLE_SOURCE_VIEW_MISSING"
                 )
-            )
+            source_view_atlases.append(source_view_pages)
         else:
             source_view_atlases.append(
                 bake_direction_source_view_atlas_pages(
@@ -1249,6 +1258,7 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
             "source_view_identity_is_render_authority": False,
             "source_view_identity_encoding": (
                 "INT16_0_TO_7_SOURCE_VIEW__NEG2_COMPILED_HARMONIC"
+                "__NEG3_CANONICAL_GLOBAL_COMPLETION"
                 "__NEG4_UNSUPPORTED_ABSTAIN"
             ),
         },

@@ -8,7 +8,11 @@ import math
 import numpy as np
 
 from .hashing import content_sha256
-from .mesh.product_coverage_v1 import _covers_pixel_center, _orient2d
+from .mesh.product_coverage_v1 import (
+    _covers_pixel_center,
+    _is_top_left,
+    _orient2d,
+)
 from .camera_geometry_v2 import project_points_xyz_v3
 from .types import QualificationError
 

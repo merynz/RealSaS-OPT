@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.KnightSkeletonLineageProbeTrigger.v1",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
-  "reason": "RESOLVE_ARACHNE_LINEAGE_ACROSS_V1_V2_AND_SHADOW_POLICY",
+  "reason": "DIAGNOSE_SOLVER_SEMANTIC_VS_IDENTITY_DETERMINISM",
   "expected_arachne_skeleton_lineage": "c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce",
-  "revision": 5
+  "revision": 6
 }

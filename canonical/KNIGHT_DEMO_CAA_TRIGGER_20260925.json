@@ -9,7 +9,7 @@
   "target": "25_CAA_REFERENCE_REST_RENDER_PROOF",
   "product_authority_claimed": false,
   "product_pass_forbidden": true,
-  "revision": 22,
+  "revision": 23,
   "previous_failure": "GLOBAL_WORST_CASE_TILE32_COMPILE_MEMORY_EXPLOSION_AFTER_FIXED_PAGE_LAYOUT",
   "test_fixture_repair": "CONSTANT_TIME_SINGLE_FACE_UNSATISFIED_CAPACITY",
   "production_repair": "PER_FACE_ADAPTIVE_LATTICE_PLUS_TOPOLOGY_PARAMETRIC_EDGE_COUPLING_PLUS_BOUNDED_2K_PAGES_V1",
@@ -59,11 +59,12 @@
     "STAGE23_DIRECTION_BAKE_SECONDS",
     "STAGE25_DIRECTION_PROOF_SECONDS"
   ],
-  "reason": "DIRECT_SOURCE_AUTHORITY_REPAIR__REBUILD_CAA_BEFORE_FINAL_MOTION_PREVIEW",
+  "reason": "RERUN_AFTER_STAGE24_DONOR_SAFE_QUALITY_MASK_REPAIR",
   "requested_on": "2026-09-27",
   "expected_semantic_change": {
-    "grazing_angle": "DONOR_ONLY_NOT_DIRECT_SOURCE_REJECTION",
-    "boundary_erosion": "DONOR_ONLY_NOT_DIRECT_SOURCE_REJECTION",
-    "numeric_thresholds_changed": false
+    "direct_source_authority": "UNCHANGED__EXACT_FIRST_HIT_SOURCE",
+    "holdout_donor_eligibility": "DIRECT_FOREGROUND_DONOR_SAFE",
+    "cross_view_compatibility_population": "DIRECT_FOREGROUND_DONOR_SAFE",
+    "thresholds_changed": false
   }
 }

@@ -400,6 +400,9 @@ def bounded_surface_harmonic_fill(
     observed_mask: np.ndarray | None = None,
     max_region_samples: int,
     max_graph_hops: int,
+    abstain_on_policy_violation: bool = False,
+    abstain_provenance_code: int = 3,
+    abstain_source_view_value: int = -4,
 ) -> dict:
     missing = np.asarray(missing, dtype=bool)
     component = np.asarray(sample_component)
@@ -423,6 +426,25 @@ def bounded_surface_harmonic_fill(
     region_count = 0
     max_region_seen = 0
     max_hops_seen = 0
+    abstained_region_count = 0
+    abstained_sample_count = 0
+    abstained_reason_counts = {
+        "REGION_TOO_LARGE": 0,
+        "WITHOUT_SOURCE_BOUNDARY": 0,
+        "REGION_TOO_DEEP": 0,
+    }
+
+    def abstain_region(region, reason: str) -> None:
+        nonlocal abstained_region_count, abstained_sample_count
+        abstained_region_count += 1
+        abstained_sample_count += len(region)
+        abstained_reason_counts[reason] += 1
+        for node in region:
+            provenance[node] = int(abstain_provenance_code)
+            source_view[node] = int(abstain_source_view_value)
+            rgba[node] = 0
+            missing[node] = False
+            observed[node] = False
 
     for seed in np.flatnonzero(missing):
         seed = int(seed)
@@ -448,6 +470,9 @@ def bounded_surface_harmonic_fill(
         region_count += 1
         max_region_seen = max(max_region_seen, len(region))
         if len(region) > int(max_region_samples):
+            if abstain_on_policy_violation:
+                abstain_region(region, "REGION_TOO_LARGE")
+                continue
             raise QualificationError("CAA_HARMONIC_REGION_TOO_LARGE")
 
         region_set = set(region)
@@ -459,6 +484,9 @@ def bounded_surface_harmonic_fill(
             and component[int(raw_nxt)] == component_id
         }
         if not boundary:
+            if abstain_on_policy_violation:
+                abstain_region(region, "WITHOUT_SOURCE_BOUNDARY")
+                continue
             raise QualificationError("CAA_HARMONIC_REGION_WITHOUT_SOURCE_BOUNDARY")
 
         hop = {node: None for node in region}
@@ -482,6 +510,9 @@ def bounded_surface_harmonic_fill(
         region_hops = max(int(value) for value in hop.values())
         max_hops_seen = max(max_hops_seen, region_hops)
         if region_hops > int(max_graph_hops):
+            if abstain_on_policy_violation:
+                abstain_region(region, "REGION_TOO_DEEP")
+                continue
             raise QualificationError("CAA_HARMONIC_REGION_TOO_DEEP")
 
         local_index = {node: i for i, node in enumerate(region)}
@@ -526,5 +557,9 @@ def bounded_surface_harmonic_fill(
         "region_count": int(region_count),
         "maximum_region_samples": int(max_region_seen),
         "maximum_graph_hops": int(max_hops_seen),
+        "abstained_region_count": int(abstained_region_count),
+        "abstained_sample_count": int(abstained_sample_count),
+        "abstained_reason_counts": dict(abstained_reason_counts),
+        "abstention_mode_enabled": bool(abstain_on_policy_violation),
     }
 

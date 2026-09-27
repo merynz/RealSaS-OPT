@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.KnightDemoMotionPreviewTrigger.v1",
-  "status": "RERUN_AFTER_DIRECT_SOURCE_CAA_REBUILD",
+  "status": "RERUN_FOR_BYTE_EXACT_BASELINE_REVERIFY",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
   "requested_on": "2026-09-27",
   "stage35_failure_preserved": true,
@@ -14,6 +14,6 @@
     0,
     2
   ],
-  "revision": 1,
-  "requires_fresh_caa_reason": "DIRECT_SOURCE_AUTHORITY_REPAIR"
+  "revision": 2,
+  "requires_fresh_caa_reason": "BYTE_EXACT_FIRST_MOTION_PREVIEW_BASELINE"
 }

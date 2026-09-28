@@ -1,0 +1,47 @@
+name: gsa-normal-topology-adversary-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/audit_gsa_normal_topology_v1.py'
+      - '.github/workflows/gsa_normal_topology_adversary_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: gsa-normal-topology-adversary-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install audit runtime
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off numpy scipy
+      - name: Run GSA normal topology adversary
+        run: |
+          set -euo pipefail
+          python tools/audit_gsa_normal_topology_v1.py | tee /tmp/gsa_normal_topology.txt
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          mkdir -p canonical/gsa_normal_topology_adversary_v1
+          cp /tmp/gsa_normal_topology.txt canonical/gsa_normal_topology_adversary_v1/AUDIT_STDOUT.txt
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/GSA_NORMAL_TOPOLOGY_ADVERSARY_V1_20260928.json canonical/gsa_normal_topology_adversary_v1
+          git commit -m 'audit: seal GSA normal topology adversary'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

@@ -1,11 +1,34 @@
 {
   "architecture_choice_frozen": false,
   "counts": {
-    "P0": 2,
+    "P0": 4,
     "P1": 1,
     "P2": 0
   },
   "findings": [
+    {
+      "class": "AUTHORITY_CARRIER_GAP",
+      "consequence": "Product state knows which VisualMeshSet is authoritative, but runtime projection has no typed visual-geometry input and falls back to the mechanical mesh path.",
+      "design_before_code": "Define a typed runtime visual state carrying exact VisualMeshSet geometry plus a qualified deformation/visibility binding; Stage42 must consume that exact state.",
+      "evidence": {
+        "stage18_declares_mechanical_not_render_authority": true,
+        "stage38_carries_visual_hash": true,
+        "stage42_visual_payload_consumer": false
+      },
+      "id": "P0_VISUAL_AUTHORITY_HASHED_BUT_NOT_EXECUTED_AT_RUNTIME",
+      "severity": "P0"
+    },
+    {
+      "class": "AUTHORING_STATE_GAP",
+      "consequence": "The editable authoring/export state cannot contain or edit the actual declared visual topology.",
+      "design_before_code": "Make render-authoritative visual topology a first-class editable artifact or explicitly reject the dual-topology product architecture.",
+      "evidence": {
+        "stage46_visual_payload_consumer": false,
+        "visual_authority_declared": true
+      },
+      "id": "P0_VISUAL_AUTHORITY_NOT_PRESENT_IN_EDITABLE_EXPORT",
+      "severity": "P0"
+    },
     {
       "class": "SCHEMA_COMPOSITION_GAP",
       "consequence": "Source-owned appearance emits a visual binding contract while runtime still requires per-mechanical-face UVs.",
@@ -41,7 +64,7 @@
     }
   ],
   "repair_applied": false,
-  "repo_head": "13a51a552f674a854fe13cd8e81f7fd68731bb3c",
+  "repo_head": "6336479ec4227b749de0f6ed993a2c8c28cd5e0f",
   "schema": "RealSaS.V2ProductStateWiringAudit.v1",
   "status": "AUDIT_ONLY__NO_REPAIR_APPLIED"
 }

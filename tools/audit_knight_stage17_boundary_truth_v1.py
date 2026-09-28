@@ -21,8 +21,8 @@ def main():
  # Freeze exact candidate surface-id mapping and Stage17 decisions first.
  sid_to_vi={}
  for vi,v in enumerate(cand.vertices):
-  terms=tuple(v.support_binding.terms)
-  if str(v.support_binding.method)!="IDENTITY_SURFACE_NODE" or len(terms)!=1 or abs(float(terms[0][1])-1.0)>1e-12:
+  terms=tuple(v.support_binding.coefficients)
+  if str(v.support_binding.mode)!="IDENTITY_SURFACE_NODE" or len(terms)!=1 or abs(float(terms[0][1])-1.0)>1e-12:
    continue
   sid_to_vi[str(terms[0][0])]=int(vi)
  rows=[]

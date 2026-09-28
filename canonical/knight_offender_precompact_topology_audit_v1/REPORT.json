@@ -1,0 +1,192 @@
+{
+  "bindings": {
+    "candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+    "surface_lineage_hash": "452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a",
+    "zero_surface_npz_sha256": "adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c"
+  },
+  "compaction": {
+    "compact_node_count": 12090,
+    "component_aware": true,
+    "dense_face_count": 12092332,
+    "dense_vertex_count": 6046160,
+    "voxel_divisions": 56
+  },
+  "finding": {
+    "claim_boundary": "Determines whether known smear offender faces are already supported by pre-compaction dense triangles and characterizes compact endpoint buckets. It does not yet map every dense vertex to artist-source topology.",
+    "id": "KNIGHT_OFFENDER_PRECOMPACT_TOPOLOGY_PROVENANCE"
+  },
+  "offenders": {
+    "253": {
+      "candidate_vertex_ids": [
+        "CMV:0028a7b7d5fca4f424806795",
+        "CMV:e462ac77760b3a8bbcd1d3ec",
+        "CMV:835740400e9b2b428c0816ca"
+      ],
+      "compact_buckets": {
+        "9682": {
+          "bbox_extent": [
+            0.0021056383848190308,
+            0.02275228500366211,
+            0.020997673273086548
+          ],
+          "component_ids": [
+            0
+          ],
+          "diameter_upper_proxy": 0.03258821180812373,
+          "member_count": 339
+        },
+        "9688": {
+          "bbox_extent": [
+            0.02322709560394287,
+            0.022895336151123047,
+            0.021800115704536438
+          ],
+          "component_ids": [
+            0
+          ],
+          "diameter_upper_proxy": 0.04090700975636176,
+          "member_count": 865
+        },
+        "9689": {
+          "bbox_extent": [
+            0.023360297083854675,
+            0.022853314876556396,
+            0.02177605777978897
+          ],
+          "component_ids": [
+            0
+          ],
+          "diameter_upper_proxy": 0.0386747029189099,
+          "member_count": 1279
+        }
+      },
+      "compact_indices": [
+        9682,
+        9688,
+        9689
+      ],
+      "supporting_dense_face_count": 1,
+      "supporting_dense_face_indices": [
+        9603124
+      ]
+    },
+    "3573": {
+      "candidate_vertex_ids": [
+        "CMV:70272d8f5b931e373c3d304a",
+        "CMV:cc4e835f79e0798cc86b9391",
+        "CMV:10b522e0dbb8a7cae30b2a35"
+      ],
+      "compact_buckets": {
+        "5905": {
+          "bbox_extent": [
+            0.022402089089155197,
+            0.02290332317352295,
+            0.0014133304357528687
+          ],
+          "component_ids": [
+            0
+          ],
+          "diameter_upper_proxy": 0.03247394513988166,
+          "member_count": 599
+        },
+        "6204": {
+          "bbox_extent": [
+            0.023864258779212832,
+            0.02248169481754303,
+            0.0008893460035324097
+          ],
+          "component_ids": [
+            0
+          ],
+          "diameter_upper_proxy": 0.03307605571259226,
+          "member_count": 578
+        },
+        "6206": {
+          "bbox_extent": [
+            0.02298117324244231,
+            0.02167005091905594,
+            0.0005007535219192505
+          ],
+          "component_ids": [
+            0
+          ],
+          "diameter_upper_proxy": 0.030947102443247117,
+          "member_count": 604
+        }
+      },
+      "compact_indices": [
+        5905,
+        6204,
+        6206
+      ],
+      "supporting_dense_face_count": 1,
+      "supporting_dense_face_indices": [
+        6108590
+      ]
+    },
+    "3829": {
+      "candidate_vertex_ids": [
+        "CMV:d92e1f62e8ade892bf4b9c84",
+        "CMV:5bdd40d11eecb7cc8aa16161",
+        "CMV:78c754c02e9c191c3ef8977f"
+      ],
+      "compact_buckets": {
+        "5889": {
+          "bbox_extent": [
+            0.022951126709813252,
+            0.02251523733139038,
+            0.0012891069054603577
+          ],
+          "component_ids": [
+            0
+          ],
+          "diameter_upper_proxy": 0.031501712841002165,
+          "member_count": 602
+        },
+        "5891": {
+          "bbox_extent": [
+            0.02246571151772514,
+            0.0228709876537323,
+            0.0015781000256538391
+          ],
+          "component_ids": [
+            0
+          ],
+          "diameter_upper_proxy": 0.03075854213113659,
+          "member_count": 636
+        },
+        "6190": {
+          "bbox_extent": [
+            0.02378739952109754,
+            0.022047311067581177,
+            0.0007099136710166931
+          ],
+          "component_ids": [
+            0
+          ],
+          "diameter_upper_proxy": 0.0326178137420706,
+          "member_count": 608
+        }
+      },
+      "compact_indices": [
+        5889,
+        5891,
+        6190
+      ],
+      "supporting_dense_face_count": 1,
+      "supporting_dense_face_indices": [
+        6107016
+      ]
+    }
+  },
+  "schema": "RealSaS.KnightOffenderPrecompactTopologyAudit.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED",
+  "teacher_assets": {
+    "ARACHNE_KNIGHT_TEACHER_BANK_FIX2.npz": {
+      "path": null
+    },
+    "KNIGHT_EVALUATED_TEACHER_SOURCE.npz": {
+      "path": null
+    }
+  }
+}

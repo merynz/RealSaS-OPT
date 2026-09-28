@@ -1,0 +1,29 @@
+name: knight-current-ledger-status-audit-v1
+on:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths: ['.github/workflows/knight_current_ledger_status_audit_v1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+    steps:
+      - uses: actions/checkout@v4
+      - name: Print ledger
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          o=json.loads((Path(os.environ["RUN_ROOT"])/"ACTIVE_RUN_V2.json").read_text())
+          print("PLAN",o["pipeline_plan_sha256"])
+          for r in o["stages"]:
+              print("ROW",r["ordinal"],r["id"],r["status"],r.get("blockers") or [])
+          print("READY",o.get("ready_stage_ids") or [])
+          print("FAILED",o.get("failed_stage_ids") or [])
+          PY

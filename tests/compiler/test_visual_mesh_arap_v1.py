@@ -1,9 +1,11 @@
 import numpy as np
 
 from compiler.realsas_compiler_core.mesh.product_coverage_v1 import rasterize_triangles_half_integer_top_left
+from compiler.realsas_compiler_core.camera_geometry_v2 import CameraProjectionV3
 
 from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
     Arap2D,
+    bind_source_visual_points_to_projected_surface_v1,
     bind_points_barycentric,
     build_visual_mesh_from_mask,
     source_texel_xy_to_raster_xy,
@@ -69,3 +71,60 @@ def test_visual_texel_to_raster_transform_is_exact_half_pixel_contract():
         raster,
         points + np.asarray([0.5, 0.5], dtype=np.float64),
     )
+
+
+def test_continuous_visual_mechanical_binding_handles_half_pixel_boundaries():
+    camera = CameraProjectionV3(
+        view_id="V0",
+        view_index=0,
+        origin=(0.0, 0.0, -2.0),
+        right=(1.0, 0.0, 0.0),
+        screen_up=(0.0, 1.0, 0.0),
+        forward=(0.0, 0.0, 1.0),
+        half_extent=1.0,
+        resolution=16,
+    )
+
+    def world_from_raster(x, y, z):
+        return (
+            float(x) / 8.0 - 1.0,
+            1.0 - float(y) / 8.0,
+            float(z),
+        )
+
+    # Face 0 is farther away but has the same projected triangle as face 1.
+    back = [
+        world_from_raster(2.0, 2.0, 1.0),
+        world_from_raster(10.0, 2.0, 1.0),
+        world_from_raster(2.0, 10.0, 1.0),
+    ]
+    front = [
+        world_from_raster(2.0, 2.0, 0.0),
+        world_from_raster(10.0, 2.0, 0.0),
+        world_from_raster(2.0, 10.0, 0.0),
+    ]
+    xyz = np.asarray(back + front, dtype=np.float64)
+    faces = np.asarray([[0, 1, 2], [3, 4, 5]], dtype=np.int64)
+
+    # Source coordinates are raster coordinates minus the exact +0.5 contract.
+    points = np.asarray(
+        [
+            [1.5, 1.5],  # exact silhouette vertex
+            [5.5, 1.5],  # exact silhouette edge
+            [3.5, 3.5],  # interior
+            [12.0, 12.0],  # outside
+        ],
+        dtype=np.float64,
+    )
+    result = bind_source_visual_points_to_projected_surface_v1(
+        points_source_xy=points,
+        mechanical_positions_xyz=xyz,
+        mechanical_faces=faces,
+        camera=camera,
+    )
+    assert result["owner_face_index"].tolist() == [1, 1, 1, -1]
+    assert result["valid"].tolist() == [True, True, True, False]
+    assert np.isfinite(result["barycentric"][:3]).all()
+    assert np.all(result["barycentric"][:3] >= -1.0e-9)
+    assert np.allclose(result["barycentric"][:3].sum(axis=1), 1.0, atol=1.0e-12)
+    assert np.allclose(result["depth"][:3], 2.0, atol=1.0e-12)

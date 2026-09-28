@@ -76,13 +76,17 @@ jobs:
                 return matches[0]
             raise RuntimeError(f"AMBIGUOUS_SEMANTIC_ARTIFACT:{kind}:{[str(p) for p in candidates]}")
           paths={
-            "stage14":find_semantic("surface"),
-            "stage17":find_semantic("partition"),
-            "stage18":find_semantic("candidate"),
+            "stage14_candidate":root/"artifacts/14_GSA_BUILD/rigging_surface_candidate.json",
+            "stage15_surface":root/"artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json",
+            "stage17":root/"artifacts/17_MECHANICAL_PARTITION_QUALIFIED/mechanical_partition.json",
+            "stage18":root/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json",
           }
+          for k,p in paths.items():
+            if not p.is_file():
+              raise RuntimeError(f"MISSING_EXACT_ARTIFACT:{k}:{p}")
           print("RESOLVED_ARTIFACTS",json.dumps({k:str(v) for k,v in paths.items()},sort_keys=True))
 
-          j14=json.loads(paths["stage14"].read_text())
+          j14=json.loads(paths["stage15_surface"].read_text())
           j17=json.loads(paths["stage17"].read_text())
           j18=json.loads(paths["stage18"].read_text())
 

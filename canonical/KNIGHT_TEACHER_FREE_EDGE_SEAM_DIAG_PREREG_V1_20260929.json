@@ -1,0 +1,16 @@
+{
+  "schema": "RealSaS.KnightTeacherFreeEdgeSeamDiagnosisPrereg.v1",
+  "status": "FROZEN_BEFORE_EDGE_SEAM_DIAGNOSIS_RESULT",
+  "date": "2026-09-29",
+  "question": "Can topology-blind local edge mechanics recover the cross-region boundaries hidden inside the giant Stage35 unsafe patches?",
+  "candidate_rules": {
+    "STRETCH_GT4": "maximum synthetic controlled-probe edge expansion ratio > 4.0, identical to the existing Stage35 edge criterion",
+    "WEIGHT_L1_GT1": "Arachne endpoint skin-distribution L1 distance > 1.0 (total-variation distance > 0.5)",
+    "STRETCH_GT4_AND_WEIGHT_L1_GT1": "both rules",
+    "STRETCH_GT4_OR_WEIGHT_L1_GT1": "either rule"
+  },
+  "scope": "Dense canonical face edges incident to at least one Stage35 unsafe face.",
+  "teacher_policy": "Teacher source topology is evaluation-only after all edge scores and candidate rules are frozen.",
+  "no_threshold_search": true,
+  "no_product_mutation": true
+}

@@ -6,6 +6,8 @@ from compiler.realsas_compiler_core.camera_geometry_v2 import CameraProjectionV3
 from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
     Arap2D,
     bind_source_visual_points_to_projected_surface_v1,
+    bind_region_visual_vertices_to_mechanical_affine_v1,
+    evaluate_region_visual_binding_v1,
     build_visual_mesh_from_region_labels_v1,
     partition_source_mask_by_face_components_v1,
     partition_source_mask_by_safe_face_adjacency_v1,
@@ -228,3 +230,75 @@ def test_safe_face_adjacency_charts_cut_screen_occlusion_even_inside_one_global_
     for face_index, face in enumerate(np.asarray(region_mesh.mesh.faces, dtype=np.int64)):
         rid = int(region_mesh.face_region_id[face_index])
         assert np.all(region_mesh.vertex_region_id[face] == rid)
+
+
+def test_region_affine_binding_reconstructs_boundary_and_follows_face_motion():
+    camera = CameraProjectionV3(
+        view_id="V0",
+        view_index=0,
+        origin=(0.0, 0.0, -2.0),
+        right=(1.0, 0.0, 0.0),
+        screen_up=(0.0, 1.0, 0.0),
+        forward=(0.0, 0.0, 1.0),
+        half_extent=1.0,
+        resolution=16,
+    )
+
+    def world_from_raster(x, y, z=0.0):
+        return (
+            float(x) / 8.0 - 1.0,
+            1.0 - float(y) / 8.0,
+            float(z),
+        )
+
+    xyz = np.asarray(
+        [
+            world_from_raster(2.0, 2.0),
+            world_from_raster(10.0, 2.0),
+            world_from_raster(2.0, 10.0),
+        ],
+        dtype=np.float64,
+    )
+    faces = np.asarray([[0, 1, 2]], dtype=np.int64)
+    owner = np.full((16, 16), -1, dtype=np.int64)
+    seed = np.full((16, 16), -1, dtype=np.int32)
+    # Safe source seed pixels inside the projected triangle.
+    for y in range(2, 9):
+        for x in range(2, 11 - (y - 2)):
+            owner[y, x] = 0
+            seed[y, x] = 7
+
+    points = np.asarray(
+        [
+            [1.5, 1.5],   # exact half-pixel silhouette boundary
+            [5.5, 1.5],
+            [3.5, 3.5],
+        ],
+        dtype=np.float64,
+    )
+    regions = np.asarray([7, 7, 7], dtype=np.int32)
+    binding = bind_region_visual_vertices_to_mechanical_affine_v1(
+        points_source_xy=points,
+        vertex_region_id=regions,
+        seed_region_labels=seed,
+        owner_face_index=owner,
+        mechanical_positions_xyz=xyz,
+        mechanical_faces=faces,
+        camera=camera,
+        max_seed_distance_px=8.0,
+    )
+    rest = evaluate_region_visual_binding_v1(
+        binding,
+        posed_mechanical_positions_xyz=xyz,
+        camera=camera,
+    )
+    assert np.max(np.abs(rest - points)) <= 1.0e-9
+
+    moved = xyz.copy()
+    moved[:, 0] += 0.125  # exactly one raster pixel to the right at this camera
+    posed = evaluate_region_visual_binding_v1(
+        binding,
+        posed_mechanical_positions_xyz=moved,
+        camera=camera,
+    )
+    assert np.allclose(posed - points, np.asarray([1.0, 0.0]), atol=1.0e-9)

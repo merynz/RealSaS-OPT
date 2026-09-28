@@ -1,6 +1,6 @@
 {
   "finding": {
-    "claim_boundary": "Remote provenance discovery only. Array-level semantics are inspected in the next step for any located teacher/source NPZ.",
+    "claim_boundary": "Fast remote provenance discovery plus exact array inventory for direct teacher/source NPZ members. No repair applied.",
     "id": "KNIGHT_TEACHER_BANK_TOPOLOGY_PROVENANCE"
   },
   "npz_inventory": {
@@ -12,7 +12,7 @@
     }
   },
   "remote_npz_candidates": [],
-  "schema": "RealSaS.KnightTeacherBankTopologyProvenanceAudit.v1",
+  "schema": "RealSaS.KnightTeacherBankTopologyProvenanceAudit.v2",
   "status": "AUDIT_ONLY__NO_REPAIR_APPLIED",
   "textual_provenance_hits": [
     {

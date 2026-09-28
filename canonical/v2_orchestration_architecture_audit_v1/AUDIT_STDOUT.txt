@@ -1,0 +1,123 @@
+{
+  "claim_boundary": "Architecture recommendation only. Hidden read-set/fingerprint gaps and all semantic audit findings must be closed before relying on minimal incremental rerun.",
+  "declared_graph": {
+    "is_dag": true,
+    "stage_count": 46
+  },
+  "evidence": {
+    "declared_46_stage_plan_is_dag": true,
+    "mainline_descendant_invalidation_present": true,
+    "mainline_pass_fingerprint_revalidation_present": true,
+    "repair_parent_child_state_hash_present": true,
+    "repair_same_probe_reproof_present": true,
+    "stage18_reads_stage35_repair_artifacts": true,
+    "transaction_fork_present": true,
+    "transaction_immutable_attempt_identity_present": true,
+    "transaction_slot_rebind_forbidden": true
+  },
+  "implementation_authorized": false,
+  "pure_static_dag_exact_for_current_system": false,
+  "recommendation": {
+    "architecture_id": "TRANSACTIONAL_VERSIONED_DAG_ATTEMPTS_V1",
+    "incremental_expectation": [
+      "Within an attempt: changed stage identity invalidates only declared descendants.",
+      "Across repair attempts: carry only artifacts proven unaffected by the directive owner/scope; re-run repaired owner and its true descendants.",
+      "Full Stage01-46 rerun is required only when a changed authority is an ancestor of all later stages or when input/policy/compiler semantic version changes globally."
+    ],
+    "shape": {
+      "carry_forward": "unchanged exact artifact bindings may be carried by hash into child attempt",
+      "inner": "IMMUTABLE_ACYCLIC_STAGE_DAG_PER_ATTEMPT",
+      "mutation": "in-place upstream mutation and downstream filesystem back-edges forbidden",
+      "outer": "COMPILE_TRANSACTION_STATE_MACHINE",
+      "repair": "FAIL/ABSTAIN -> typed RepairDirective -> fork child attempt"
+    },
+    "why_hybrid_is_preferred": [
+      "Preserves DAG parallelism and minimal recompute inside each immutable attempt.",
+      "Represents repair feedback explicitly as parent->child transaction lineage rather than a cycle.",
+      "Matches existing CompileTransactionIR fork semantics and bounded repair parent/child hashes."
+    ],
+    "why_not_general_mutable_state_machine": [
+      "Would weaken exact dependency identities, parallelism, cacheability, and local invalidation.",
+      "Current mainline DAG already has useful descendant invalidation and per-stage fingerprints."
+    ],
+    "why_not_single_static_dag": [
+      "Stage35 qualification can legitimately request a Stage18-owned topology change, which is feedback.",
+      "Encoding that feedback as Stage18 reading Stage35 files creates a hidden cycle and invalidates DAG fingerprints."
+    ]
+  },
+  "repo_head": "040597553057ae8170ae6faa29c1ee6caa028dd7",
+  "representative_declared_invalidation_sets": {
+    "14_GSA_BUILD": [
+      "14_GSA_BUILD",
+      "15_RIGGING_SURFACE_QUALIFIED",
+      "17_MECHANICAL_PARTITION_QUALIFIED",
+      "18_CANONICAL_MESH_ADDRESSING_BUILD",
+      "19_STATIC_CANONICAL_MESH_QUALIFIED",
+      "20_CAA_BACKEND_PREREGISTERED",
+      "21_CAA_COMPILE",
+      "22_CAA_COMPILE_SEALED",
+      "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+      "24_COMPLETE_APPEARANCE_QUALIFIED",
+      "25_CAA_REFERENCE_REST_RENDER_PROOF",
+      "26_GEPPETTO_FIT_PREREGISTERED",
+      "27_GEPPETTO_FIT",
+      "28_SKELETON_QUALIFIED",
+      "29_GEPPETTO_CHECKPOINT_SEALED",
+      "30_ARACHNE_FIT_PREREGISTERED",
+      "31_ARACHNE_FIT",
+      "32_SKIN_QUALIFIED",
+      "33_ARACHNE_CHECKPOINT_SEALED",
+      "34_DEFORMATION_CAPABILITY_ENVELOPE",
+      "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+      "36_QUALIFIED_MESH_SKIN_TRANSFER",
+      "37_QUALIFIED_PRESENTATION_STRUCTURE",
+      "38_CANONICAL_PUPPET_SEALED",
+      "39_MOTION_SOURCE_OR_PRESET_SEAL",
+      "40_MOTION_COMPILE_RUN",
+      "41_MOTION_DYNAMIC_PROOF",
+      "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+      "43_RSS_MATERIALIZE_COMPACT",
+      "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+      "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+      "46_PRODUCT_CLOSURE_SEAL"
+    ],
+    "18_CANONICAL_MESH_ADDRESSING_BUILD": [
+      "18_CANONICAL_MESH_ADDRESSING_BUILD",
+      "19_STATIC_CANONICAL_MESH_QUALIFIED",
+      "20_CAA_BACKEND_PREREGISTERED",
+      "21_CAA_COMPILE",
+      "22_CAA_COMPILE_SEALED",
+      "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+      "24_COMPLETE_APPEARANCE_QUALIFIED",
+      "25_CAA_REFERENCE_REST_RENDER_PROOF",
+      "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+      "36_QUALIFIED_MESH_SKIN_TRANSFER",
+      "37_QUALIFIED_PRESENTATION_STRUCTURE",
+      "38_CANONICAL_PUPPET_SEALED",
+      "39_MOTION_SOURCE_OR_PRESET_SEAL",
+      "40_MOTION_COMPILE_RUN",
+      "41_MOTION_DYNAMIC_PROOF",
+      "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+      "43_RSS_MATERIALIZE_COMPACT",
+      "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+      "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+      "46_PRODUCT_CLOSURE_SEAL"
+    ],
+    "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED": [
+      "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+      "36_QUALIFIED_MESH_SKIN_TRANSFER",
+      "37_QUALIFIED_PRESENTATION_STRUCTURE",
+      "38_CANONICAL_PUPPET_SEALED",
+      "39_MOTION_SOURCE_OR_PRESET_SEAL",
+      "40_MOTION_COMPILE_RUN",
+      "41_MOTION_DYNAMIC_PROOF",
+      "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+      "43_RSS_MATERIALIZE_COMPACT",
+      "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+      "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+      "46_PRODUCT_CLOSURE_SEAL"
+    ]
+  },
+  "schema": "RealSaS.OrchestrationArchitectureAudit.v1",
+  "status": "AUDIT_DECISION__NO_IMPLEMENTATION_APPLIED"
+}

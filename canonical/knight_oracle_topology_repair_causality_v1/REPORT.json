@@ -1,0 +1,5819 @@
+{
+  "aggregate": {
+    "baseline_catastrophic_owned_pixels": 2837661,
+    "baseline_final_alpha_pixels": 6226860,
+    "baseline_max_edge_ratio_p95": 2.6537117892543667,
+    "baseline_median_flipped_faces": 5212.0,
+    "catastrophic_owned_pixel_reduction": 0.2264992188989453,
+    "max_edge_ratio_p95_reduction": 0.5851941406296679,
+    "median_flipped_face_reduction": 0.24520337682271676,
+    "oracle_catastrophic_owned_pixels": 2194933,
+    "oracle_final_alpha_pixels": 5873047,
+    "oracle_final_alpha_retention": 0.943179547958361,
+    "oracle_max_edge_ratio_p95": 1.1007751992628392,
+    "oracle_median_flipped_faces": 3934.0
+  },
+  "authorities": {
+    "motion_input_sha256": {
+      "demo_idle_v1": "b8f7fa059efc13c2a398e26242911e1c272baecdee99df7b7eee7f951e18dd91",
+      "demo_run_v1": "bfcfc1e44f4960e498f6f5183e224b72ed74e0352906c94f09989abab41b1b89",
+      "demo_slash_v1": "9038a31d07d3f08cb7fd3d4638f7d4d66456ee5047620317e86fc23641403171"
+    },
+    "oracle_candidate_lineage_hash": "3f958685e904f7b5898a2bba3435fea2417c159d0bdebdb8aabeef67263dfee0",
+    "rest_vertex_positions_sha256": "8c12cfa6e83968fbb2c8b2db43fad31e9db2dc61bcd427c0f6ec831238cad934",
+    "skeleton_lineage_hash": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+    "skin_lineage_hash": "b30417b9375a52c646618f0fb94ea8ddd7285fea959e460522dd5f8b6b70cb2a",
+    "skin_weight_matrix_sha256": "4917e9e15b6029ada4f5b83db551f30cacbf0c60442ef90aa3e9bd7515c84733",
+    "source_candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+    "teacher_bank_sha256": "26b6891ff81b9bfc3405461394159547fa76b417852a44518425b4e1de7e67d3",
+    "teacher_source_sha256": "96435646a0084a0a038040ee748cb33d3bfa0b1ed550661befd3b18539e28e6f"
+  },
+  "claim_boundary": "Teacher topology is used only as a causal oracle. Confirmation means the current canonical topology is a causal owner of the measured smear class with skin/skeleton/motion/vertices/appearance held fixed; it does not authorize teacher topology at product inference and does not define the generic repair operator.",
+  "intervention": {
+    "appearance_pixel_mutation": false,
+    "face_count_after": 20620,
+    "face_count_before": 24958,
+    "known_smear_face_253_removed": true,
+    "motion_mutation": false,
+    "removed_face_count": 4338,
+    "removed_face_examples": [
+      {
+        "face_index": 44,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          680,
+          44,
+          680
+        ],
+        "vertex_ids": [
+          "CMV:d2a7688dfcd6ea3a7081cd44",
+          "CMV:71009b242a62ff50e5a85c41",
+          "CMV:30c8e9a3139262c35fcc53a6"
+        ]
+      },
+      {
+        "face_index": 45,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          680,
+          44,
+          44
+        ],
+        "vertex_ids": [
+          "CMV:d2a7688dfcd6ea3a7081cd44",
+          "CMV:71009b242a62ff50e5a85c41",
+          "CMV:c36a2cb95d6d4679f5537bfa"
+        ]
+      },
+      {
+        "face_index": 46,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          680,
+          3,
+          839
+        ],
+        "vertex_ids": [
+          "CMV:d2a7688dfcd6ea3a7081cd44",
+          "CMV:1cab91a4d16f7a70b63ed7df",
+          "CMV:27901b8702d628de508b38b8"
+        ]
+      },
+      {
+        "face_index": 47,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          680,
+          3,
+          44
+        ],
+        "vertex_ids": [
+          "CMV:d2a7688dfcd6ea3a7081cd44",
+          "CMV:1cab91a4d16f7a70b63ed7df",
+          "CMV:c36a2cb95d6d4679f5537bfa"
+        ]
+      },
+      {
+        "face_index": 51,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          3528,
+          3528,
+          4937
+        ],
+        "vertex_ids": [
+          "CMV:92deac6b85764225fdf5e9ae",
+          "CMV:c0e3a33579d1d9fa6bd1b511",
+          "CMV:9e23b127b7f08cf21d62f894"
+        ]
+      },
+      {
+        "face_index": 53,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          3528,
+          6346,
+          3528
+        ],
+        "vertex_ids": [
+          "CMV:92deac6b85764225fdf5e9ae",
+          "CMV:51f36939d38208631741622a",
+          "CMV:314e979256cffef870acd7b8"
+        ]
+      },
+      {
+        "face_index": 54,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          3528,
+          6346,
+          6346
+        ],
+        "vertex_ids": [
+          "CMV:92deac6b85764225fdf5e9ae",
+          "CMV:51f36939d38208631741622a",
+          "CMV:fc8449335b3d1af93179687c"
+        ]
+      },
+      {
+        "face_index": 56,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          3528,
+          4937,
+          6346
+        ],
+        "vertex_ids": [
+          "CMV:92deac6b85764225fdf5e9ae",
+          "CMV:9e23b127b7f08cf21d62f894",
+          "CMV:fc8449335b3d1af93179687c"
+        ]
+      },
+      {
+        "face_index": 57,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          3518,
+          3518,
+          1340
+        ],
+        "vertex_ids": [
+          "CMV:b6dc8e6f92a3052072be460f",
+          "CMV:28819171ae62c38e9946cb78",
+          "CMV:b14a53aa96cc79f7242219f9"
+        ]
+      },
+      {
+        "face_index": 60,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          3518,
+          3518,
+          1340
+        ],
+        "vertex_ids": [
+          "CMV:b6dc8e6f92a3052072be460f",
+          "CMV:495327fcdebe4ad8fae71531",
+          "CMV:b14a53aa96cc79f7242219f9"
+        ]
+      },
+      {
+        "face_index": 83,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          5274,
+          5424,
+          5305
+        ],
+        "vertex_ids": [
+          "CMV:47f9c9a196e19de1f44d94fb",
+          "CMV:98932280525fe31bd0334e99",
+          "CMV:9cb23bff2d31afec0e355a9f"
+        ]
+      },
+      {
+        "face_index": 85,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          2611,
+          2536,
+          2611
+        ],
+        "vertex_ids": [
+          "CMV:31ff1823bb817c45e8b08714",
+          "CMV:99f3600ce4e22485bc32344a",
+          "CMV:213e78af1a5e85cc006db758"
+        ]
+      },
+      {
+        "face_index": 86,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          2611,
+          2536,
+          2612
+        ],
+        "vertex_ids": [
+          "CMV:31ff1823bb817c45e8b08714",
+          "CMV:99f3600ce4e22485bc32344a",
+          "CMV:9c8a9eca32d9b1ee37fb1833"
+        ]
+      },
+      {
+        "face_index": 116,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          356,
+          356,
+          90
+        ],
+        "vertex_ids": [
+          "CMV:22704549e57be321edbb4fb8",
+          "CMV:e9012d3d3c5f0407a13ca87c",
+          "CMV:2b24873be22d37ebfd7bd3fb"
+        ]
+      },
+      {
+        "face_index": 118,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          356,
+          90,
+          630
+        ],
+        "vertex_ids": [
+          "CMV:22704549e57be321edbb4fb8",
+          "CMV:2b24873be22d37ebfd7bd3fb",
+          "CMV:b8e717b0358382724bf80046"
+        ]
+      },
+      {
+        "face_index": 119,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          356,
+          630,
+          379
+        ],
+        "vertex_ids": [
+          "CMV:22704549e57be321edbb4fb8",
+          "CMV:b8e717b0358382724bf80046",
+          "CMV:28e1399e590e2058fed4b0b8"
+        ]
+      },
+      {
+        "face_index": 122,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6329,
+          6329,
+          6577
+        ],
+        "vertex_ids": [
+          "CMV:3161a2e1d98fee89bce80dfd",
+          "CMV:5411bc9094d1a39b446c1033",
+          "CMV:d8118f934e245a3eeeaf9a40"
+        ]
+      },
+      {
+        "face_index": 124,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6329,
+          6329,
+          6577
+        ],
+        "vertex_ids": [
+          "CMV:3161a2e1d98fee89bce80dfd",
+          "CMV:72e01daa1cd0949bdb2a1689",
+          "CMV:d4ca8c434f08e8d3d7e19f97"
+        ]
+      },
+      {
+        "face_index": 125,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6329,
+          6577,
+          6577
+        ],
+        "vertex_ids": [
+          "CMV:3161a2e1d98fee89bce80dfd",
+          "CMV:d4ca8c434f08e8d3d7e19f97",
+          "CMV:d8118f934e245a3eeeaf9a40"
+        ]
+      },
+      {
+        "face_index": 126,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6094,
+          6094,
+          1479
+        ],
+        "vertex_ids": [
+          "CMV:537e8dda609ee3b6d91a9e63",
+          "CMV:e4c25f55836a142b108bbc5f",
+          "CMV:57e93c0f347399d13429b2db"
+        ]
+      },
+      {
+        "face_index": 128,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6094,
+          6806,
+          1479
+        ],
+        "vertex_ids": [
+          "CMV:537e8dda609ee3b6d91a9e63",
+          "CMV:6e619cda26c972d9d021580b",
+          "CMV:57e93c0f347399d13429b2db"
+        ]
+      },
+      {
+        "face_index": 129,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6094,
+          6806,
+          6094
+        ],
+        "vertex_ids": [
+          "CMV:537e8dda609ee3b6d91a9e63",
+          "CMV:6e619cda26c972d9d021580b",
+          "CMV:d78375812b279cf69cbb5de0"
+        ]
+      },
+      {
+        "face_index": 152,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          2622,
+          6727,
+          6732
+        ],
+        "vertex_ids": [
+          "CMV:c8a2c9d1e16f4f92ca247227",
+          "CMV:50cc71915996c2eac0d88492",
+          "CMV:eea922ce5a7740ff8438168e"
+        ]
+      },
+      {
+        "face_index": 153,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          2622,
+          6727,
+          2622
+        ],
+        "vertex_ids": [
+          "CMV:c8a2c9d1e16f4f92ca247227",
+          "CMV:50cc71915996c2eac0d88492",
+          "CMV:4a7d59a25a48311412c63f5f"
+        ]
+      },
+      {
+        "face_index": 154,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          2622,
+          2622,
+          6732
+        ],
+        "vertex_ids": [
+          "CMV:c8a2c9d1e16f4f92ca247227",
+          "CMV:2edf3d047f57d0c70320bd0d",
+          "CMV:eea922ce5a7740ff8438168e"
+        ]
+      },
+      {
+        "face_index": 162,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6700,
+          6700,
+          3335
+        ],
+        "vertex_ids": [
+          "CMV:70e37d7b72e53c257eb02d86",
+          "CMV:1c035a8b031d066a30c1b9b3",
+          "CMV:2ae7793badbe7288eb8cf5d5"
+        ]
+      },
+      {
+        "face_index": 164,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6700,
+          3335,
+          3680
+        ],
+        "vertex_ids": [
+          "CMV:70e37d7b72e53c257eb02d86",
+          "CMV:2ae7793badbe7288eb8cf5d5",
+          "CMV:fc9ce33e1778384edb518ae3"
+        ]
+      },
+      {
+        "face_index": 165,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6700,
+          3680,
+          6700
+        ],
+        "vertex_ids": [
+          "CMV:70e37d7b72e53c257eb02d86",
+          "CMV:fc9ce33e1778384edb518ae3",
+          "CMV:0e6956d803c6add80564245a"
+        ]
+      },
+      {
+        "face_index": 169,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1333,
+          6586,
+          6586
+        ],
+        "vertex_ids": [
+          "CMV:2368f0d3b3e9d3e73cdb87de",
+          "CMV:1d77ad0273a56c39d4f6cc57",
+          "CMV:850e83df3a978b37083f46a9"
+        ]
+      },
+      {
+        "face_index": 170,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          1333,
+          6586,
+          1333
+        ],
+        "vertex_ids": [
+          "CMV:2368f0d3b3e9d3e73cdb87de",
+          "CMV:1d77ad0273a56c39d4f6cc57",
+          "CMV:9a184ea4b242c0d0a477cc3a"
+        ]
+      },
+      {
+        "face_index": 171,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1333,
+          6586,
+          6586
+        ],
+        "vertex_ids": [
+          "CMV:2368f0d3b3e9d3e73cdb87de",
+          "CMV:850e83df3a978b37083f46a9",
+          "CMV:733cec678b88c8067f9ecbae"
+        ]
+      },
+      {
+        "face_index": 172,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1333,
+          1333,
+          6586
+        ],
+        "vertex_ids": [
+          "CMV:2368f0d3b3e9d3e73cdb87de",
+          "CMV:ec5518f660b66cbe9353c31f",
+          "CMV:733cec678b88c8067f9ecbae"
+        ]
+      },
+      {
+        "face_index": 174,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6725,
+          6728,
+          2614
+        ],
+        "vertex_ids": [
+          "CMV:face326e3da4e1355a41b834",
+          "CMV:8e5a12f84f00ece4c68ef13a",
+          "CMV:4bf89020ce75dd0ceb38ca2c"
+        ]
+      },
+      {
+        "face_index": 177,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6725,
+          6726,
+          2608
+        ],
+        "vertex_ids": [
+          "CMV:face326e3da4e1355a41b834",
+          "CMV:4460b72c60e5ec4c26ec05a3",
+          "CMV:386e802ce0baad0b22c5adc0"
+        ]
+      },
+      {
+        "face_index": 179,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6725,
+          2608,
+          2614
+        ],
+        "vertex_ids": [
+          "CMV:face326e3da4e1355a41b834",
+          "CMV:386e802ce0baad0b22c5adc0",
+          "CMV:4bf89020ce75dd0ceb38ca2c"
+        ]
+      },
+      {
+        "face_index": 191,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          3543,
+          3506,
+          3557
+        ],
+        "vertex_ids": [
+          "CMV:ed33f189e0b5c08c2022ddfc",
+          "CMV:209c4a48f70427981142cce8",
+          "CMV:f284a361f9e7e537e66bf003"
+        ]
+      },
+      {
+        "face_index": 193,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          2259,
+          2259,
+          2263
+        ],
+        "vertex_ids": [
+          "CMV:37d8453d70d5c4d2df383476",
+          "CMV:714b7e5b5be969cd5582e0fe",
+          "CMV:7b4bf40cacab03b6b94b4b45"
+        ]
+      },
+      {
+        "face_index": 195,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          2259,
+          2007,
+          2263
+        ],
+        "vertex_ids": [
+          "CMV:37d8453d70d5c4d2df383476",
+          "CMV:7dbf54a54a81ae4016d70360",
+          "CMV:7b4bf40cacab03b6b94b4b45"
+        ]
+      },
+      {
+        "face_index": 196,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          2259,
+          2007,
+          1995
+        ],
+        "vertex_ids": [
+          "CMV:37d8453d70d5c4d2df383476",
+          "CMV:7dbf54a54a81ae4016d70360",
+          "CMV:e32182213ce44efebab523d7"
+        ]
+      },
+      {
+        "face_index": 197,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4958,
+          4807,
+          4965
+        ],
+        "vertex_ids": [
+          "CMV:dfce35fac19bcdc159a6e1e8",
+          "CMV:95b8b9c1f810a22e51f744be",
+          "CMV:5f1fe4756d95530ba75a9708"
+        ]
+      },
+      {
+        "face_index": 198,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4958,
+          4807,
+          1357
+        ],
+        "vertex_ids": [
+          "CMV:dfce35fac19bcdc159a6e1e8",
+          "CMV:95b8b9c1f810a22e51f744be",
+          "CMV:62c41960b682c4e9adc98658"
+        ]
+      },
+      {
+        "face_index": 199,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4958,
+          4919,
+          1357
+        ],
+        "vertex_ids": [
+          "CMV:dfce35fac19bcdc159a6e1e8",
+          "CMV:82d65f60fbcc3d3f1571e4c1",
+          "CMV:62c41960b682c4e9adc98658"
+        ]
+      },
+      {
+        "face_index": 200,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4958,
+          4919,
+          4986
+        ],
+        "vertex_ids": [
+          "CMV:dfce35fac19bcdc159a6e1e8",
+          "CMV:82d65f60fbcc3d3f1571e4c1",
+          "CMV:2561e4c504f63b153ba75c44"
+        ]
+      },
+      {
+        "face_index": 201,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4958,
+          4965,
+          4813
+        ],
+        "vertex_ids": [
+          "CMV:dfce35fac19bcdc159a6e1e8",
+          "CMV:5f1fe4756d95530ba75a9708",
+          "CMV:42cf822a5fb0490c4ce50e43"
+        ]
+      },
+      {
+        "face_index": 202,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4958,
+          4813,
+          4986
+        ],
+        "vertex_ids": [
+          "CMV:dfce35fac19bcdc159a6e1e8",
+          "CMV:42cf822a5fb0490c4ce50e43",
+          "CMV:2561e4c504f63b153ba75c44"
+        ]
+      },
+      {
+        "face_index": 247,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          6884,
+          3266,
+          6899
+        ],
+        "vertex_ids": [
+          "CMV:0028a7b7d5fca4f424806795",
+          "CMV:b70d5c59d07f7c76d1d2b784",
+          "CMV:6789a7515af0bc3435eadf77"
+        ]
+      },
+      {
+        "face_index": 248,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6884,
+          3266,
+          1520
+        ],
+        "vertex_ids": [
+          "CMV:0028a7b7d5fca4f424806795",
+          "CMV:b70d5c59d07f7c76d1d2b784",
+          "CMV:0a21610c87f1bdadba289890"
+        ]
+      },
+      {
+        "face_index": 249,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6884,
+          3267,
+          1520
+        ],
+        "vertex_ids": [
+          "CMV:0028a7b7d5fca4f424806795",
+          "CMV:5f213d7379a94feae4e6a497",
+          "CMV:0a21610c87f1bdadba289890"
+        ]
+      },
+      {
+        "face_index": 250,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6884,
+          3267,
+          3267
+        ],
+        "vertex_ids": [
+          "CMV:0028a7b7d5fca4f424806795",
+          "CMV:5f213d7379a94feae4e6a497",
+          "CMV:e462ac77760b3a8bbcd1d3ec"
+        ]
+      },
+      {
+        "face_index": 253,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6884,
+          3267,
+          6884
+        ],
+        "vertex_ids": [
+          "CMV:0028a7b7d5fca4f424806795",
+          "CMV:e462ac77760b3a8bbcd1d3ec",
+          "CMV:835740400e9b2b428c0816ca"
+        ]
+      },
+      {
+        "face_index": 288,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          1473,
+          6825,
+          1472
+        ],
+        "vertex_ids": [
+          "CMV:f9c4b08ffbceda092542533a",
+          "CMV:66c26c38e30e1392d1106259",
+          "CMV:585e6ed99cfa32a73f723d8b"
+        ]
+      },
+      {
+        "face_index": 289,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1473,
+          6825,
+          6836
+        ],
+        "vertex_ids": [
+          "CMV:f9c4b08ffbceda092542533a",
+          "CMV:66c26c38e30e1392d1106259",
+          "CMV:2499d0b7493002cd4307852d"
+        ]
+      },
+      {
+        "face_index": 292,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          1473,
+          6873,
+          1471
+        ],
+        "vertex_ids": [
+          "CMV:f9c4b08ffbceda092542533a",
+          "CMV:986620146dcc45647183d379",
+          "CMV:65e0323f10b3d2e74a7f78a9"
+        ]
+      },
+      {
+        "face_index": 293,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1473,
+          6873,
+          6877
+        ],
+        "vertex_ids": [
+          "CMV:f9c4b08ffbceda092542533a",
+          "CMV:986620146dcc45647183d379",
+          "CMV:2e3fbc95b8e7303fbd7d7fce"
+        ]
+      },
+      {
+        "face_index": 294,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1473,
+          6877,
+          6873
+        ],
+        "vertex_ids": [
+          "CMV:f9c4b08ffbceda092542533a",
+          "CMV:2e3fbc95b8e7303fbd7d7fce",
+          "CMV:b1ee7741bcff665be20c16b6"
+        ]
+      },
+      {
+        "face_index": 295,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1473,
+          6873,
+          6825
+        ],
+        "vertex_ids": [
+          "CMV:f9c4b08ffbceda092542533a",
+          "CMV:b1ee7741bcff665be20c16b6",
+          "CMV:10bb4b16834953249c26f824"
+        ]
+      },
+      {
+        "face_index": 296,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1473,
+          6825,
+          6836
+        ],
+        "vertex_ids": [
+          "CMV:f9c4b08ffbceda092542533a",
+          "CMV:10bb4b16834953249c26f824",
+          "CMV:2499d0b7493002cd4307852d"
+        ]
+      },
+      {
+        "face_index": 360,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          3677,
+          6369,
+          6369
+        ],
+        "vertex_ids": [
+          "CMV:3be9379c2a2a707c9af0486b",
+          "CMV:c9289f7814ab24e50d361e67",
+          "CMV:dd8c06be22d8248075da1d8b"
+        ]
+      },
+      {
+        "face_index": 361,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          3677,
+          6369,
+          6369
+        ],
+        "vertex_ids": [
+          "CMV:3be9379c2a2a707c9af0486b",
+          "CMV:c9289f7814ab24e50d361e67",
+          "CMV:5a235b333ec2f389e639e53c"
+        ]
+      },
+      {
+        "face_index": 362,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          3677,
+          6369,
+          3678
+        ],
+        "vertex_ids": [
+          "CMV:3be9379c2a2a707c9af0486b",
+          "CMV:c9289f7814ab24e50d361e67",
+          "CMV:2721e0d488c0e59e0359e243"
+        ]
+      },
+      {
+        "face_index": 363,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          3677,
+          6369,
+          6369
+        ],
+        "vertex_ids": [
+          "CMV:3be9379c2a2a707c9af0486b",
+          "CMV:82dc9cb953df92e06f3e234c",
+          "CMV:5a235b333ec2f389e639e53c"
+        ]
+      },
+      {
+        "face_index": 364,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          3677,
+          6369,
+          3677
+        ],
+        "vertex_ids": [
+          "CMV:3be9379c2a2a707c9af0486b",
+          "CMV:dd8c06be22d8248075da1d8b",
+          "CMV:c8b669d97dc26ff533e9f7df"
+        ]
+      },
+      {
+        "face_index": 378,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          5655,
+          5290,
+          5657
+        ],
+        "vertex_ids": [
+          "CMV:56a6052027258f187b6f2bee",
+          "CMV:0bbcfb10d060c6b212191653",
+          "CMV:0c052b96ff1c813211f2d5bb"
+        ]
+      },
+      {
+        "face_index": 379,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          5655,
+          5290,
+          5288
+        ],
+        "vertex_ids": [
+          "CMV:56a6052027258f187b6f2bee",
+          "CMV:0bbcfb10d060c6b212191653",
+          "CMV:7d4ea365f528ca3b6b54bbd8"
+        ]
+      },
+      {
+        "face_index": 383,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          5655,
+          5288,
+          5319
+        ],
+        "vertex_ids": [
+          "CMV:56a6052027258f187b6f2bee",
+          "CMV:7d4ea365f528ca3b6b54bbd8",
+          "CMV:e8b303f826326b4c9df24ccf"
+        ]
+      },
+      {
+        "face_index": 424,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          56,
+          56,
+          487
+        ],
+        "vertex_ids": [
+          "CMV:e3ce604a8b2c7c78f26dbe66",
+          "CMV:ce7622bd411e6b3c934e0542",
+          "CMV:0ff1841475b4381aa23c70cb"
+        ]
+      },
+      {
+        "face_index": 425,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          56,
+          487,
+          25
+        ],
+        "vertex_ids": [
+          "CMV:e3ce604a8b2c7c78f26dbe66",
+          "CMV:0ff1841475b4381aa23c70cb",
+          "CMV:47f22570167b53a9464910bb"
+        ]
+      },
+      {
+        "face_index": 482,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          4909,
+          4983,
+          4952
+        ],
+        "vertex_ids": [
+          "CMV:ccfebb753b76bd57c33086bf",
+          "CMV:9b5e7033df96756a37b31c72",
+          "CMV:65ed62343d1dcdeca2a12a56"
+        ]
+      },
+      {
+        "face_index": 483,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          4909,
+          4983,
+          5001
+        ],
+        "vertex_ids": [
+          "CMV:ccfebb753b76bd57c33086bf",
+          "CMV:9b5e7033df96756a37b31c72",
+          "CMV:d75bf2a20774989475e46d76"
+        ]
+      },
+      {
+        "face_index": 490,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          435,
+          429,
+          434
+        ],
+        "vertex_ids": [
+          "CMV:1121e584be22fd0ad7001ab7",
+          "CMV:0de571a227709b95e13a1a12",
+          "CMV:5292e851fadb80ba16e25f52"
+        ]
+      },
+      {
+        "face_index": 491,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          435,
+          429,
+          362
+        ],
+        "vertex_ids": [
+          "CMV:1121e584be22fd0ad7001ab7",
+          "CMV:0de571a227709b95e13a1a12",
+          "CMV:50c1ebc4ca844473298a255a"
+        ]
+      },
+      {
+        "face_index": 492,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          435,
+          988,
+          991
+        ],
+        "vertex_ids": [
+          "CMV:1121e584be22fd0ad7001ab7",
+          "CMV:d1656c45952638eff1313902",
+          "CMV:fedb9436fbe51c5c96c31078"
+        ]
+      },
+      {
+        "face_index": 493,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          435,
+          988,
+          246
+        ],
+        "vertex_ids": [
+          "CMV:1121e584be22fd0ad7001ab7",
+          "CMV:d1656c45952638eff1313902",
+          "CMV:4079070fc9bb90e09fb7a364"
+        ]
+      },
+      {
+        "face_index": 494,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          435,
+          434,
+          245
+        ],
+        "vertex_ids": [
+          "CMV:1121e584be22fd0ad7001ab7",
+          "CMV:5292e851fadb80ba16e25f52",
+          "CMV:c26552218fd16c8637d23d96"
+        ]
+      },
+      {
+        "face_index": 495,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          435,
+          991,
+          362
+        ],
+        "vertex_ids": [
+          "CMV:1121e584be22fd0ad7001ab7",
+          "CMV:fedb9436fbe51c5c96c31078",
+          "CMV:50c1ebc4ca844473298a255a"
+        ]
+      },
+      {
+        "face_index": 496,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          435,
+          245,
+          246
+        ],
+        "vertex_ids": [
+          "CMV:1121e584be22fd0ad7001ab7",
+          "CMV:c26552218fd16c8637d23d96",
+          "CMV:4079070fc9bb90e09fb7a364"
+        ]
+      },
+      {
+        "face_index": 501,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6586,
+          1333,
+          6586
+        ],
+        "vertex_ids": [
+          "CMV:792fe06abba1162eee297212",
+          "CMV:496c3048e4127fbaf5c53fe5",
+          "CMV:adff740adb49c93d40345195"
+        ]
+      },
+      {
+        "face_index": 502,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6586,
+          1333,
+          1333
+        ],
+        "vertex_ids": [
+          "CMV:792fe06abba1162eee297212",
+          "CMV:496c3048e4127fbaf5c53fe5",
+          "CMV:51d56266bc135505f3ffa2a3"
+        ]
+      },
+      {
+        "face_index": 507,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6586,
+          6586,
+          1333
+        ],
+        "vertex_ids": [
+          "CMV:792fe06abba1162eee297212",
+          "CMV:1f6c161a7e922be3623d0c01",
+          "CMV:51d56266bc135505f3ffa2a3"
+        ]
+      },
+      {
+        "face_index": 514,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6349,
+          6278,
+          6349
+        ],
+        "vertex_ids": [
+          "CMV:f99ef9ad0336702254820eb8",
+          "CMV:9e0f4b2f10726e2ec0d351b7",
+          "CMV:893d36b107ed57636b96a120"
+        ]
+      },
+      {
+        "face_index": 515,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6349,
+          6278,
+          6278
+        ],
+        "vertex_ids": [
+          "CMV:f99ef9ad0336702254820eb8",
+          "CMV:9e0f4b2f10726e2ec0d351b7",
+          "CMV:51a35c44ea1d947d92caa230"
+        ]
+      },
+      {
+        "face_index": 520,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6349,
+          6278,
+          6349
+        ],
+        "vertex_ids": [
+          "CMV:f99ef9ad0336702254820eb8",
+          "CMV:51a35c44ea1d947d92caa230",
+          "CMV:d7e27592247384ca57703f11"
+        ]
+      },
+      {
+        "face_index": 557,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6300,
+          6393,
+          1343
+        ],
+        "vertex_ids": [
+          "CMV:affa0650c539dacbc31b0525",
+          "CMV:c100c97d5d0374af0dd7cf60",
+          "CMV:ae86f40efd02bfdf811b53ba"
+        ]
+      },
+      {
+        "face_index": 559,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6300,
+          6300,
+          1394
+        ],
+        "vertex_ids": [
+          "CMV:affa0650c539dacbc31b0525",
+          "CMV:40e1c8dd656f118b7b72d56f",
+          "CMV:3c7e8cfefe0ddf88a818ad6b"
+        ]
+      },
+      {
+        "face_index": 561,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6300,
+          1394,
+          1343
+        ],
+        "vertex_ids": [
+          "CMV:affa0650c539dacbc31b0525",
+          "CMV:3c7e8cfefe0ddf88a818ad6b",
+          "CMV:ae86f40efd02bfdf811b53ba"
+        ]
+      },
+      {
+        "face_index": 570,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          958,
+          319,
+          320
+        ],
+        "vertex_ids": [
+          "CMV:16ca8ea6ac39e1c55cf0b88b",
+          "CMV:4f0f5d46c731f6aa368ba43f",
+          "CMV:1677fdd4f12b078b02189dc5"
+        ]
+      },
+      {
+        "face_index": 571,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          958,
+          319,
+          956
+        ],
+        "vertex_ids": [
+          "CMV:16ca8ea6ac39e1c55cf0b88b",
+          "CMV:4f0f5d46c731f6aa368ba43f",
+          "CMV:f266fa4f64b873c56ff5e3db"
+        ]
+      },
+      {
+        "face_index": 574,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          958,
+          959,
+          320
+        ],
+        "vertex_ids": [
+          "CMV:16ca8ea6ac39e1c55cf0b88b",
+          "CMV:d4c457e013777aaee5f07b36",
+          "CMV:1677fdd4f12b078b02189dc5"
+        ]
+      },
+      {
+        "face_index": 576,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          958,
+          954,
+          320
+        ],
+        "vertex_ids": [
+          "CMV:16ca8ea6ac39e1c55cf0b88b",
+          "CMV:99b4f566049e8d2df3077a39",
+          "CMV:1677fdd4f12b078b02189dc5"
+        ]
+      },
+      {
+        "face_index": 578,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          958,
+          959,
+          320
+        ],
+        "vertex_ids": [
+          "CMV:16ca8ea6ac39e1c55cf0b88b",
+          "CMV:5990de12e181a0b922e64c4f",
+          "CMV:1677fdd4f12b078b02189dc5"
+        ]
+      },
+      {
+        "face_index": 619,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6591,
+          6591,
+          1329
+        ],
+        "vertex_ids": [
+          "CMV:745d999ee185044eb60a746f",
+          "CMV:31ac5cd4a86cedbbd56a8bc5",
+          "CMV:cb42d06f5682214924733208"
+        ]
+      },
+      {
+        "face_index": 622,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6591,
+          6591,
+          1329
+        ],
+        "vertex_ids": [
+          "CMV:745d999ee185044eb60a746f",
+          "CMV:122958696974b5526c36cd87",
+          "CMV:5e7f354230094dd599b85a11"
+        ]
+      },
+      {
+        "face_index": 624,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6591,
+          1329,
+          6591
+        ],
+        "vertex_ids": [
+          "CMV:745d999ee185044eb60a746f",
+          "CMV:cb42d06f5682214924733208",
+          "CMV:5fb8cd78f566b7b7700bcae9"
+        ]
+      },
+      {
+        "face_index": 625,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6591,
+          1329,
+          1329
+        ],
+        "vertex_ids": [
+          "CMV:745d999ee185044eb60a746f",
+          "CMV:cb42d06f5682214924733208",
+          "CMV:5e7f354230094dd599b85a11"
+        ]
+      },
+      {
+        "face_index": 626,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6591,
+          6591,
+          1329
+        ],
+        "vertex_ids": [
+          "CMV:745d999ee185044eb60a746f",
+          "CMV:ab76b8e184c191e9157e3d6e",
+          "CMV:5e7f354230094dd599b85a11"
+        ]
+      },
+      {
+        "face_index": 627,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6591,
+          6591,
+          1329
+        ],
+        "vertex_ids": [
+          "CMV:745d999ee185044eb60a746f",
+          "CMV:5fb8cd78f566b7b7700bcae9",
+          "CMV:5e7f354230094dd599b85a11"
+        ]
+      },
+      {
+        "face_index": 635,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          238,
+          43,
+          43
+        ],
+        "vertex_ids": [
+          "CMV:ce75ec6f87c60ab9745c18a6",
+          "CMV:7d42b3d0f77d9aeac4939a51",
+          "CMV:ec2c01b046af8c64a3bf7731"
+        ]
+      },
+      {
+        "face_index": 636,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          238,
+          43,
+          293
+        ],
+        "vertex_ids": [
+          "CMV:ce75ec6f87c60ab9745c18a6",
+          "CMV:7d42b3d0f77d9aeac4939a51",
+          "CMV:43da46eb53792725b6c934bc"
+        ]
+      },
+      {
+        "face_index": 637,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          238,
+          43,
+          43
+        ],
+        "vertex_ids": [
+          "CMV:ce75ec6f87c60ab9745c18a6",
+          "CMV:7d42b3d0f77d9aeac4939a51",
+          "CMV:a0c5b956223b7f52e76d5ec6"
+        ]
+      },
+      {
+        "face_index": 640,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          238,
+          43,
+          923
+        ],
+        "vertex_ids": [
+          "CMV:ce75ec6f87c60ab9745c18a6",
+          "CMV:ec2c01b046af8c64a3bf7731",
+          "CMV:1da85e3e186bb4a870883705"
+        ]
+      },
+      {
+        "face_index": 641,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          238,
+          293,
+          43
+        ],
+        "vertex_ids": [
+          "CMV:ce75ec6f87c60ab9745c18a6",
+          "CMV:43da46eb53792725b6c934bc",
+          "CMV:a0c5b956223b7f52e76d5ec6"
+        ]
+      },
+      {
+        "face_index": 642,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          238,
+          87,
+          923
+        ],
+        "vertex_ids": [
+          "CMV:ce75ec6f87c60ab9745c18a6",
+          "CMV:e82eedce524287e96214a41f",
+          "CMV:1da85e3e186bb4a870883705"
+        ]
+      },
+      {
+        "face_index": 648,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          4807,
+          4965,
+          4806
+        ],
+        "vertex_ids": [
+          "CMV:95b8b9c1f810a22e51f744be",
+          "CMV:5f1fe4756d95530ba75a9708",
+          "CMV:6c841afc14537a247ac90b2b"
+        ]
+      },
+      {
+        "face_index": 649,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4807,
+          1357,
+          1381
+        ],
+        "vertex_ids": [
+          "CMV:95b8b9c1f810a22e51f744be",
+          "CMV:62c41960b682c4e9adc98658",
+          "CMV:8ed63b8256f55e2809b655b7"
+        ]
+      },
+      {
+        "face_index": 650,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          4807,
+          1381,
+          5003
+        ],
+        "vertex_ids": [
+          "CMV:95b8b9c1f810a22e51f744be",
+          "CMV:8ed63b8256f55e2809b655b7",
+          "CMV:131e96be4d02ad4dba5341cf"
+        ]
+      },
+      {
+        "face_index": 651,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          4807,
+          4806,
+          5003
+        ],
+        "vertex_ids": [
+          "CMV:95b8b9c1f810a22e51f744be",
+          "CMV:6c841afc14537a247ac90b2b",
+          "CMV:131e96be4d02ad4dba5341cf"
+        ]
+      },
+      {
+        "face_index": 658,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          545,
+          341,
+          297
+        ],
+        "vertex_ids": [
+          "CMV:ea3446f5ed0a8635daedc761",
+          "CMV:72aa853ba8190ea91c8052ed",
+          "CMV:cae9ca134e3e3daa859922f2"
+        ]
+      },
+      {
+        "face_index": 660,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          545,
+          297,
+          593
+        ],
+        "vertex_ids": [
+          "CMV:ea3446f5ed0a8635daedc761",
+          "CMV:cae9ca134e3e3daa859922f2",
+          "CMV:ec643d71a4ea9a0f88b32b63"
+        ]
+      },
+      {
+        "face_index": 669,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          3518,
+          1340,
+          1340
+        ],
+        "vertex_ids": [
+          "CMV:28819171ae62c38e9946cb78",
+          "CMV:b14a53aa96cc79f7242219f9",
+          "CMV:2824b5c14eadbed018490c50"
+        ]
+      },
+      {
+        "face_index": 670,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          3518,
+          1340,
+          3518
+        ],
+        "vertex_ids": [
+          "CMV:28819171ae62c38e9946cb78",
+          "CMV:2824b5c14eadbed018490c50",
+          "CMV:6018d820c299db42165f6ebc"
+        ]
+      },
+      {
+        "face_index": 678,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6577,
+          6577,
+          1341
+        ],
+        "vertex_ids": [
+          "CMV:1a197834ba6125ee9b6ef6e4",
+          "CMV:90c411c2265b93b68a8e288e",
+          "CMV:96db9ff3e0f6009732b9ab14"
+        ]
+      },
+      {
+        "face_index": 680,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6577,
+          1341,
+          1341
+        ],
+        "vertex_ids": [
+          "CMV:1a197834ba6125ee9b6ef6e4",
+          "CMV:96db9ff3e0f6009732b9ab14",
+          "CMV:e14cbc034ab782e8fc5bbe00"
+        ]
+      },
+      {
+        "face_index": 682,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6577,
+          1341,
+          1341
+        ],
+        "vertex_ids": [
+          "CMV:1a197834ba6125ee9b6ef6e4",
+          "CMV:d41bf558608b025726638998",
+          "CMV:e14cbc034ab782e8fc5bbe00"
+        ]
+      },
+      {
+        "face_index": 683,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6577,
+          1341,
+          6577
+        ],
+        "vertex_ids": [
+          "CMV:1a197834ba6125ee9b6ef6e4",
+          "CMV:d41bf558608b025726638998",
+          "CMV:6d159fa5155f7b551898208a"
+        ]
+      },
+      {
+        "face_index": 692,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6577,
+          1420,
+          1420
+        ],
+        "vertex_ids": [
+          "CMV:a7ded0c07d2c85a7a584a6ab",
+          "CMV:6a17d1e31d99845f7f64725f",
+          "CMV:c7ceebd18d4c1e1348c2f78b"
+        ]
+      },
+      {
+        "face_index": 693,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6577,
+          1420,
+          1435
+        ],
+        "vertex_ids": [
+          "CMV:a7ded0c07d2c85a7a584a6ab",
+          "CMV:6a17d1e31d99845f7f64725f",
+          "CMV:11f9804c5a95d85ad483b45b"
+        ]
+      },
+      {
+        "face_index": 696,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          6577,
+          1420,
+          6628
+        ],
+        "vertex_ids": [
+          "CMV:a7ded0c07d2c85a7a584a6ab",
+          "CMV:c7ceebd18d4c1e1348c2f78b",
+          "CMV:53431b4e3def51235dacedd7"
+        ]
+      },
+      {
+        "face_index": 697,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6577,
+          6577,
+          1435
+        ],
+        "vertex_ids": [
+          "CMV:a7ded0c07d2c85a7a584a6ab",
+          "CMV:ca960a041d38b6f45045286e",
+          "CMV:11f9804c5a95d85ad483b45b"
+        ]
+      },
+      {
+        "face_index": 710,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          2320,
+          1954,
+          2266
+        ],
+        "vertex_ids": [
+          "CMV:80661045569d7371e50e8445",
+          "CMV:8049633453bfacdb1898d74d",
+          "CMV:fa42e89d9e66568c61102359"
+        ]
+      },
+      {
+        "face_index": 715,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          2320,
+          2266,
+          1948
+        ],
+        "vertex_ids": [
+          "CMV:80661045569d7371e50e8445",
+          "CMV:fa42e89d9e66568c61102359",
+          "CMV:674a5682a430d74df794728a"
+        ]
+      },
+      {
+        "face_index": 725,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6895,
+          6880,
+          6156
+        ],
+        "vertex_ids": [
+          "CMV:49361e4e5356c0dc2ba331b0",
+          "CMV:569fac76ee9c0215e0d1e0c5",
+          "CMV:ed7d1cd69c8b797acd12bcf5"
+        ]
+      },
+      {
+        "face_index": 727,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6895,
+          6895,
+          6156
+        ],
+        "vertex_ids": [
+          "CMV:49361e4e5356c0dc2ba331b0",
+          "CMV:c30a818ddc0d8f54c05436dc",
+          "CMV:ed7d1cd69c8b797acd12bcf5"
+        ]
+      },
+      {
+        "face_index": 746,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          3474,
+          5192,
+          3474
+        ],
+        "vertex_ids": [
+          "CMV:29655e09215f649ebb97cf4f",
+          "CMV:01534ad75bb9adf9a71b3629",
+          "CMV:1c7c59f848aef43b48242b79"
+        ]
+      },
+      {
+        "face_index": 747,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          3474,
+          5192,
+          5123
+        ],
+        "vertex_ids": [
+          "CMV:29655e09215f649ebb97cf4f",
+          "CMV:01534ad75bb9adf9a71b3629",
+          "CMV:ce4585ea7da5d382311fc6ef"
+        ]
+      },
+      {
+        "face_index": 748,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          3474,
+          5122,
+          3474
+        ],
+        "vertex_ids": [
+          "CMV:29655e09215f649ebb97cf4f",
+          "CMV:1214df8369ee93fac5e0fabf",
+          "CMV:835c86ab1bb0c4d78ce2a8e5"
+        ]
+      },
+      {
+        "face_index": 749,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          3474,
+          5122,
+          5123
+        ],
+        "vertex_ids": [
+          "CMV:29655e09215f649ebb97cf4f",
+          "CMV:1214df8369ee93fac5e0fabf",
+          "CMV:ce4585ea7da5d382311fc6ef"
+        ]
+      },
+      {
+        "face_index": 765,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          2059,
+          348,
+          349
+        ],
+        "vertex_ids": [
+          "CMV:f24459c5d80a96a62cb694ab",
+          "CMV:0e0b54abc9dd1f7b0d04377f",
+          "CMV:9f5c014d798c24d12902d1ca"
+        ]
+      },
+      {
+        "face_index": 766,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          2059,
+          348,
+          2058
+        ],
+        "vertex_ids": [
+          "CMV:f24459c5d80a96a62cb694ab",
+          "CMV:0e0b54abc9dd1f7b0d04377f",
+          "CMV:4223d708b119b58b7f2d5a3a"
+        ]
+      },
+      {
+        "face_index": 767,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          2059,
+          349,
+          2179
+        ],
+        "vertex_ids": [
+          "CMV:f24459c5d80a96a62cb694ab",
+          "CMV:9f5c014d798c24d12902d1ca",
+          "CMV:6a4e5a08d9e89b0ed8b3d13f"
+        ]
+      },
+      {
+        "face_index": 783,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          348,
+          348,
+          2058
+        ],
+        "vertex_ids": [
+          "CMV:0e0b54abc9dd1f7b0d04377f",
+          "CMV:89054ed89f4df3eac013f316",
+          "CMV:4223d708b119b58b7f2d5a3a"
+        ]
+      },
+      {
+        "face_index": 921,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1832,
+          1832,
+          6033
+        ],
+        "vertex_ids": [
+          "CMV:ac5158bf35c8a822c7100109",
+          "CMV:75034fb34adcfca8bda81a0e",
+          "CMV:4e55cec9690adee9cc893c54"
+        ]
+      },
+      {
+        "face_index": 924,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1832,
+          1832,
+          6033
+        ],
+        "vertex_ids": [
+          "CMV:ac5158bf35c8a822c7100109",
+          "CMV:e11e9bef9b0c40bb2e929d20",
+          "CMV:4e55cec9690adee9cc893c54"
+        ]
+      },
+      {
+        "face_index": 925,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4670,
+          4824,
+          5122
+        ],
+        "vertex_ids": [
+          "CMV:a4737d3702ae6e412a9bd1a8",
+          "CMV:39f4d48aa535b107af17bb51",
+          "CMV:be3a2502937d929919d584fa"
+        ]
+      },
+      {
+        "face_index": 927,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4670,
+          5123,
+          5122
+        ],
+        "vertex_ids": [
+          "CMV:a4737d3702ae6e412a9bd1a8",
+          "CMV:39edbbc98a7e89a6934f2e52",
+          "CMV:be3a2502937d929919d584fa"
+        ]
+      },
+      {
+        "face_index": 928,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          4670,
+          5123,
+          4671
+        ],
+        "vertex_ids": [
+          "CMV:a4737d3702ae6e412a9bd1a8",
+          "CMV:39edbbc98a7e89a6934f2e52",
+          "CMV:1da636de47e95330b91948b8"
+        ]
+      },
+      {
+        "face_index": 1035,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1564,
+          6716,
+          6715
+        ],
+        "vertex_ids": [
+          "CMV:8a408edd1304108a9d1cdf24",
+          "CMV:78ab6ea98226e46e6e39a824",
+          "CMV:194a4b6b1e5cd1ecb3af010c"
+        ]
+      },
+      {
+        "face_index": 1036,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          1564,
+          6716,
+          1565
+        ],
+        "vertex_ids": [
+          "CMV:8a408edd1304108a9d1cdf24",
+          "CMV:78ab6ea98226e46e6e39a824",
+          "CMV:d0c159f915b3be71edd43371"
+        ]
+      },
+      {
+        "face_index": 1037,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1564,
+          6715,
+          6715
+        ],
+        "vertex_ids": [
+          "CMV:8a408edd1304108a9d1cdf24",
+          "CMV:194a4b6b1e5cd1ecb3af010c",
+          "CMV:c13377f565e285b3ed54e229"
+        ]
+      },
+      {
+        "face_index": 1038,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1564,
+          1564,
+          6715
+        ],
+        "vertex_ids": [
+          "CMV:8a408edd1304108a9d1cdf24",
+          "CMV:8a21fa6a76f7f884716b03a7",
+          "CMV:c13377f565e285b3ed54e229"
+        ]
+      },
+      {
+        "face_index": 1069,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          3680,
+          6700,
+          3681
+        ],
+        "vertex_ids": [
+          "CMV:fda18809bd444def6c73e2b1",
+          "CMV:bb33b934126616b75a06664c",
+          "CMV:7501c09e914b11b94fffc901"
+        ]
+      },
+      {
+        "face_index": 1070,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          3680,
+          6700,
+          6700
+        ],
+        "vertex_ids": [
+          "CMV:fda18809bd444def6c73e2b1",
+          "CMV:bb33b934126616b75a06664c",
+          "CMV:aa635acd92bebbb8d59c4664"
+        ]
+      },
+      {
+        "face_index": 1071,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          3680,
+          3335,
+          6700
+        ],
+        "vertex_ids": [
+          "CMV:fda18809bd444def6c73e2b1",
+          "CMV:8138f8d50482bcc75f9fc631",
+          "CMV:aa635acd92bebbb8d59c4664"
+        ]
+      },
+      {
+        "face_index": 1073,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          2833,
+          3324,
+          3388
+        ],
+        "vertex_ids": [
+          "CMV:449a511472a073e76fe7e3ed",
+          "CMV:0589e6447e27dcedf245c610",
+          "CMV:1325014f5a1c32b80b4680c2"
+        ]
+      },
+      {
+        "face_index": 1074,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          2833,
+          3324,
+          2832
+        ],
+        "vertex_ids": [
+          "CMV:449a511472a073e76fe7e3ed",
+          "CMV:0589e6447e27dcedf245c610",
+          "CMV:fbd576217775cadaaa7fcc93"
+        ]
+      },
+      {
+        "face_index": 1075,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          2833,
+          3388,
+          3111
+        ],
+        "vertex_ids": [
+          "CMV:449a511472a073e76fe7e3ed",
+          "CMV:1325014f5a1c32b80b4680c2",
+          "CMV:8c73666c2231e3cc4c042779"
+        ]
+      },
+      {
+        "face_index": 1076,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          2833,
+          1705,
+          3111
+        ],
+        "vertex_ids": [
+          "CMV:449a511472a073e76fe7e3ed",
+          "CMV:c30d11bfc6accf04d966d47f",
+          "CMV:8c73666c2231e3cc4c042779"
+        ]
+      },
+      {
+        "face_index": 1077,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          2833,
+          1705,
+          1730
+        ],
+        "vertex_ids": [
+          "CMV:449a511472a073e76fe7e3ed",
+          "CMV:c30d11bfc6accf04d966d47f",
+          "CMV:d20fd79129e3255b0c69b804"
+        ]
+      },
+      {
+        "face_index": 1078,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          2833,
+          2832,
+          1730
+        ],
+        "vertex_ids": [
+          "CMV:449a511472a073e76fe7e3ed",
+          "CMV:fbd576217775cadaaa7fcc93",
+          "CMV:d20fd79129e3255b0c69b804"
+        ]
+      },
+      {
+        "face_index": 1093,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          6439,
+          6440,
+          6471
+        ],
+        "vertex_ids": [
+          "CMV:e64386fe8963e16290a151b7",
+          "CMV:c8807af82d57faff47052595",
+          "CMV:c1e194bc69881f6336abf0ec"
+        ]
+      },
+      {
+        "face_index": 1095,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6439,
+          6471,
+          6469
+        ],
+        "vertex_ids": [
+          "CMV:e64386fe8963e16290a151b7",
+          "CMV:c1e194bc69881f6336abf0ec",
+          "CMV:470d935de90578482f0c4872"
+        ]
+      },
+      {
+        "face_index": 1096,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6439,
+          6415,
+          6456
+        ],
+        "vertex_ids": [
+          "CMV:e64386fe8963e16290a151b7",
+          "CMV:dcabe56c17e0f57a841e136a",
+          "CMV:b6733bad66847561debaa40c"
+        ]
+      },
+      {
+        "face_index": 1097,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          6439,
+          6469,
+          6441
+        ],
+        "vertex_ids": [
+          "CMV:e64386fe8963e16290a151b7",
+          "CMV:470d935de90578482f0c4872",
+          "CMV:c70f79b892a7764cbfef6118"
+        ]
+      },
+      {
+        "face_index": 1098,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          6439,
+          6456,
+          6423
+        ],
+        "vertex_ids": [
+          "CMV:e64386fe8963e16290a151b7",
+          "CMV:b6733bad66847561debaa40c",
+          "CMV:bfeb142c69d68d0ee0426d06"
+        ]
+      },
+      {
+        "face_index": 1102,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6314,
+          6278,
+          6598
+        ],
+        "vertex_ids": [
+          "CMV:8319b470dd05d388fc50281c",
+          "CMV:681be98d9b20adb43ef35c50",
+          "CMV:463abb32e5905cb4b3447e72"
+        ]
+      },
+      {
+        "face_index": 1103,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6314,
+          6612,
+          6598
+        ],
+        "vertex_ids": [
+          "CMV:8319b470dd05d388fc50281c",
+          "CMV:afefe7069992e088455b27e5",
+          "CMV:463abb32e5905cb4b3447e72"
+        ]
+      },
+      {
+        "face_index": 1104,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          6314,
+          6612,
+          6313
+        ],
+        "vertex_ids": [
+          "CMV:8319b470dd05d388fc50281c",
+          "CMV:afefe7069992e088455b27e5",
+          "CMV:ad3b27fe8066e44fb0459dfd"
+        ]
+      },
+      {
+        "face_index": 1130,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          6849,
+          6828,
+          6866
+        ],
+        "vertex_ids": [
+          "CMV:69496545136d8afcf4188731",
+          "CMV:28e66fd53a0eb26cc50724d5",
+          "CMV:03f4e336941599bbb7b8c833"
+        ]
+      },
+      {
+        "face_index": 1138,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          5600,
+          5314,
+          5672
+        ],
+        "vertex_ids": [
+          "CMV:d5600a1965177bdaf0cf04f3",
+          "CMV:f1f5c3ef71728cde58267cf2",
+          "CMV:4a45797dba6d6b3841630f82"
+        ]
+      },
+      {
+        "face_index": 1139,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          5600,
+          5314,
+          5438
+        ],
+        "vertex_ids": [
+          "CMV:d5600a1965177bdaf0cf04f3",
+          "CMV:f1f5c3ef71728cde58267cf2",
+          "CMV:578d0ae26905ba46d41d5ac3"
+        ]
+      },
+      {
+        "face_index": 1140,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          5600,
+          5672,
+          5434
+        ],
+        "vertex_ids": [
+          "CMV:d5600a1965177bdaf0cf04f3",
+          "CMV:4a45797dba6d6b3841630f82",
+          "CMV:ee5869bf241b31740c099af1"
+        ]
+      },
+      {
+        "face_index": 1141,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          5600,
+          5618,
+          5627
+        ],
+        "vertex_ids": [
+          "CMV:d5600a1965177bdaf0cf04f3",
+          "CMV:0fcf091db6c7c701a62b0122",
+          "CMV:2dc54269c431ee073eef1d76"
+        ]
+      },
+      {
+        "face_index": 1142,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          5600,
+          5618,
+          5434
+        ],
+        "vertex_ids": [
+          "CMV:d5600a1965177bdaf0cf04f3",
+          "CMV:0fcf091db6c7c701a62b0122",
+          "CMV:ee5869bf241b31740c099af1"
+        ]
+      },
+      {
+        "face_index": 1143,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          5600,
+          5627,
+          5438
+        ],
+        "vertex_ids": [
+          "CMV:d5600a1965177bdaf0cf04f3",
+          "CMV:2dc54269c431ee073eef1d76",
+          "CMV:578d0ae26905ba46d41d5ac3"
+        ]
+      },
+      {
+        "face_index": 1233,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6716,
+          6702,
+          1565
+        ],
+        "vertex_ids": [
+          "CMV:78ab6ea98226e46e6e39a824",
+          "CMV:8c2341da0e32555c0a695644",
+          "CMV:d0c159f915b3be71edd43371"
+        ]
+      },
+      {
+        "face_index": 1236,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1101,
+          1034,
+          1034
+        ],
+        "vertex_ids": [
+          "CMV:b157555538e063ebc593b8dd",
+          "CMV:2bf3c1e36745cc93b57491f9",
+          "CMV:c55d0a145df6569be61cee4e"
+        ]
+      },
+      {
+        "face_index": 1237,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1101,
+          1034,
+          623
+        ],
+        "vertex_ids": [
+          "CMV:b157555538e063ebc593b8dd",
+          "CMV:2bf3c1e36745cc93b57491f9",
+          "CMV:715e90724a5c76cfaa61410f"
+        ]
+      },
+      {
+        "face_index": 1238,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          1101,
+          1034,
+          1103
+        ],
+        "vertex_ids": [
+          "CMV:b157555538e063ebc593b8dd",
+          "CMV:c55d0a145df6569be61cee4e",
+          "CMV:22099f6e59820197f6b947bb"
+        ]
+      },
+      {
+        "face_index": 1239,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1101,
+          1120,
+          623
+        ],
+        "vertex_ids": [
+          "CMV:b157555538e063ebc593b8dd",
+          "CMV:6918a812da56d7614702dab4",
+          "CMV:79a9c21b862638ac1b89c48a"
+        ]
+      },
+      {
+        "face_index": 1240,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1101,
+          623,
+          623
+        ],
+        "vertex_ids": [
+          "CMV:b157555538e063ebc593b8dd",
+          "CMV:715e90724a5c76cfaa61410f",
+          "CMV:79a9c21b862638ac1b89c48a"
+        ]
+      },
+      {
+        "face_index": 1244,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          272,
+          272,
+          920
+        ],
+        "vertex_ids": [
+          "CMV:983b3dd69cee6b26123c6d04",
+          "CMV:d05425f3fb15a2028061beb1",
+          "CMV:bf7202a2ec182e25b927537e"
+        ]
+      },
+      {
+        "face_index": 1245,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          272,
+          272,
+          920
+        ],
+        "vertex_ids": [
+          "CMV:983b3dd69cee6b26123c6d04",
+          "CMV:369bbc1270a82fd008438c3b",
+          "CMV:bf7202a2ec182e25b927537e"
+        ]
+      },
+      {
+        "face_index": 1286,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          91,
+          5612,
+          91
+        ],
+        "vertex_ids": [
+          "CMV:b26ce41617a0f42781fc989e",
+          "CMV:ca1a36aaab173a0ca62404fa",
+          "CMV:566d4fdc4f48d9022fdcd881"
+        ]
+      },
+      {
+        "face_index": 1287,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          91,
+          5612,
+          5612
+        ],
+        "vertex_ids": [
+          "CMV:b26ce41617a0f42781fc989e",
+          "CMV:ca1a36aaab173a0ca62404fa",
+          "CMV:0abbd49d406b3c2ba2f6081e"
+        ]
+      },
+      {
+        "face_index": 1290,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          91,
+          5611,
+          5574
+        ],
+        "vertex_ids": [
+          "CMV:b26ce41617a0f42781fc989e",
+          "CMV:c5da1e27cd8f053cd4512f36",
+          "CMV:4fdd70ced7ea7e6559e7bd57"
+        ]
+      },
+      {
+        "face_index": 1291,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          91,
+          5611,
+          5612
+        ],
+        "vertex_ids": [
+          "CMV:b26ce41617a0f42781fc989e",
+          "CMV:c5da1e27cd8f053cd4512f36",
+          "CMV:0abbd49d406b3c2ba2f6081e"
+        ]
+      },
+      {
+        "face_index": 1292,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          91,
+          91,
+          5574
+        ],
+        "vertex_ids": [
+          "CMV:b26ce41617a0f42781fc989e",
+          "CMV:3f8b665f2456bcf8b5af32ee",
+          "CMV:4fdd70ced7ea7e6559e7bd57"
+        ]
+      },
+      {
+        "face_index": 1296,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          2560,
+          2540,
+          2580
+        ],
+        "vertex_ids": [
+          "CMV:1d3bd2a8a859f011a5b36ed1",
+          "CMV:1ce49d6b57cdcc04f9a913c1",
+          "CMV:c02711c42aae87741bdd02c3"
+        ]
+      },
+      {
+        "face_index": 1298,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          2560,
+          2580,
+          2559
+        ],
+        "vertex_ids": [
+          "CMV:1d3bd2a8a859f011a5b36ed1",
+          "CMV:c02711c42aae87741bdd02c3",
+          "CMV:6a6ed68294ff2682f201d609"
+        ]
+      },
+      {
+        "face_index": 1299,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          5412,
+          5272,
+          5559
+        ],
+        "vertex_ids": [
+          "CMV:59203b1c29ef7f67dcd16c25",
+          "CMV:99ef130f3435cadad7f70fd2",
+          "CMV:8c14dfff395a22f96b071405"
+        ]
+      },
+      {
+        "face_index": 1301,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          5412,
+          5559,
+          5281
+        ],
+        "vertex_ids": [
+          "CMV:59203b1c29ef7f67dcd16c25",
+          "CMV:8c14dfff395a22f96b071405",
+          "CMV:a6d10106048a4a0a346e24b7"
+        ]
+      },
+      {
+        "face_index": 1302,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          5412,
+          5410,
+          5281
+        ],
+        "vertex_ids": [
+          "CMV:59203b1c29ef7f67dcd16c25",
+          "CMV:3fe0d6a0e51c63b5ac381bb2",
+          "CMV:a6d10106048a4a0a346e24b7"
+        ]
+      },
+      {
+        "face_index": 1316,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          5607,
+          5565,
+          5584
+        ],
+        "vertex_ids": [
+          "CMV:20c9416dfd4567eaa4e97a3e",
+          "CMV:4bcbebeca60577ebacd9ed81",
+          "CMV:2d2178553b8c7ba789097341"
+        ]
+      },
+      {
+        "face_index": 1327,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6100,
+          6100,
+          1472
+        ],
+        "vertex_ids": [
+          "CMV:116f56368ac63d90a3ffb572",
+          "CMV:ef4ac72fd59b1bddef7b5523",
+          "CMV:aa850feb2e071b81506da917"
+        ]
+      },
+      {
+        "face_index": 1328,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          6100,
+          1577,
+          6080
+        ],
+        "vertex_ids": [
+          "CMV:116f56368ac63d90a3ffb572",
+          "CMV:9a65e71b12f58a8576f5aede",
+          "CMV:f3297742d3ba873dec3b0adf"
+        ]
+      },
+      {
+        "face_index": 1329,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6100,
+          1577,
+          6100
+        ],
+        "vertex_ids": [
+          "CMV:116f56368ac63d90a3ffb572",
+          "CMV:9a65e71b12f58a8576f5aede",
+          "CMV:4d8b34d0429aea8b1564cfad"
+        ]
+      },
+      {
+        "face_index": 1332,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6100,
+          1472,
+          6100
+        ],
+        "vertex_ids": [
+          "CMV:116f56368ac63d90a3ffb572",
+          "CMV:aa850feb2e071b81506da917",
+          "CMV:4d8b34d0429aea8b1564cfad"
+        ]
+      },
+      {
+        "face_index": 1341,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6880,
+          6230,
+          6880
+        ],
+        "vertex_ids": [
+          "CMV:601faeb442d35632559a5b2f",
+          "CMV:ec18355877b1da070d16201c",
+          "CMV:84ad5b939384e7d660a9d5d4"
+        ]
+      },
+      {
+        "face_index": 1342,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6880,
+          6230,
+          6249
+        ],
+        "vertex_ids": [
+          "CMV:601faeb442d35632559a5b2f",
+          "CMV:ec18355877b1da070d16201c",
+          "CMV:123cd1f6b074f94df79868ab"
+        ]
+      },
+      {
+        "face_index": 1345,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6880,
+          6249,
+          6880
+        ],
+        "vertex_ids": [
+          "CMV:601faeb442d35632559a5b2f",
+          "CMV:123cd1f6b074f94df79868ab",
+          "CMV:eee1ecf562971b71c422657e"
+        ]
+      },
+      {
+        "face_index": 1372,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1750,
+          1457,
+          6696
+        ],
+        "vertex_ids": [
+          "CMV:36b5853c52da281c1a8bdb60",
+          "CMV:cae3c62976344495d80d3d13",
+          "CMV:4dfdfda478b9c16d23266d48"
+        ]
+      },
+      {
+        "face_index": 1373,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          1750,
+          6696,
+          1785
+        ],
+        "vertex_ids": [
+          "CMV:36b5853c52da281c1a8bdb60",
+          "CMV:4dfdfda478b9c16d23266d48",
+          "CMV:46b8de7d4bfcd59b023a9c8e"
+        ]
+      },
+      {
+        "face_index": 1385,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          1127,
+          590,
+          1099
+        ],
+        "vertex_ids": [
+          "CMV:1fb9a4979408c63a69e90039",
+          "CMV:1f093b9e72045a058d717ddf",
+          "CMV:bd7a9905c2fd5f0539c7805e"
+        ]
+      },
+      {
+        "face_index": 1386,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1127,
+          590,
+          601
+        ],
+        "vertex_ids": [
+          "CMV:1fb9a4979408c63a69e90039",
+          "CMV:1f093b9e72045a058d717ddf",
+          "CMV:9d779a316f3508a7377573c8"
+        ]
+      },
+      {
+        "face_index": 1387,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          1127,
+          1099,
+          1126
+        ],
+        "vertex_ids": [
+          "CMV:1fb9a4979408c63a69e90039",
+          "CMV:bd7a9905c2fd5f0539c7805e",
+          "CMV:9a334fe018a9a6fc9f53c043"
+        ]
+      },
+      {
+        "face_index": 1388,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1127,
+          1126,
+          601
+        ],
+        "vertex_ids": [
+          "CMV:1fb9a4979408c63a69e90039",
+          "CMV:9a334fe018a9a6fc9f53c043",
+          "CMV:3636043808f1f37ec5688274"
+        ]
+      },
+      {
+        "face_index": 1389,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1127,
+          601,
+          601
+        ],
+        "vertex_ids": [
+          "CMV:1fb9a4979408c63a69e90039",
+          "CMV:9d779a316f3508a7377573c8",
+          "CMV:3636043808f1f37ec5688274"
+        ]
+      },
+      {
+        "face_index": 1402,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6838,
+          6800,
+          5880
+        ],
+        "vertex_ids": [
+          "CMV:08fbaf1c3c0c5d5b62b810c7",
+          "CMV:a9c8cb4fdfd012db0e6d8a7c",
+          "CMV:42905e7311e652788440aa66"
+        ]
+      },
+      {
+        "face_index": 1404,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6838,
+          6838,
+          5880
+        ],
+        "vertex_ids": [
+          "CMV:08fbaf1c3c0c5d5b62b810c7",
+          "CMV:0b871b83a995a466022bcef1",
+          "CMV:42905e7311e652788440aa66"
+        ]
+      },
+      {
+        "face_index": 1411,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6586,
+          1333,
+          6586
+        ],
+        "vertex_ids": [
+          "CMV:c46f4bfc7ae0fa49625fc04e",
+          "CMV:7a44ad2192b48593fb120156",
+          "CMV:0ee0a83181772cff1e8dc967"
+        ]
+      },
+      {
+        "face_index": 1412,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6586,
+          1333,
+          1333
+        ],
+        "vertex_ids": [
+          "CMV:c46f4bfc7ae0fa49625fc04e",
+          "CMV:7a44ad2192b48593fb120156",
+          "CMV:c3e37905b4939f62a2db4aa0"
+        ]
+      },
+      {
+        "face_index": 1413,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6586,
+          1333,
+          6586
+        ],
+        "vertex_ids": [
+          "CMV:c46f4bfc7ae0fa49625fc04e",
+          "CMV:7a44ad2192b48593fb120156",
+          "CMV:a0788be1170e5ed50e33a6e8"
+        ]
+      },
+      {
+        "face_index": 1418,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6586,
+          1333,
+          6586
+        ],
+        "vertex_ids": [
+          "CMV:c46f4bfc7ae0fa49625fc04e",
+          "CMV:c3e37905b4939f62a2db4aa0",
+          "CMV:a0788be1170e5ed50e33a6e8"
+        ]
+      },
+      {
+        "face_index": 1542,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          180,
+          2231,
+          180
+        ],
+        "vertex_ids": [
+          "CMV:cc8ac760aaaa258e2b6a514c",
+          "CMV:5b4c544155aac86eb8d73847",
+          "CMV:92d45dbd80b479cffa5a7f7f"
+        ]
+      },
+      {
+        "face_index": 1543,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          180,
+          2231,
+          2252
+        ],
+        "vertex_ids": [
+          "CMV:cc8ac760aaaa258e2b6a514c",
+          "CMV:5b4c544155aac86eb8d73847",
+          "CMV:28eedbf1c1f071e3fac27b84"
+        ]
+      },
+      {
+        "face_index": 1547,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          180,
+          179,
+          2252
+        ],
+        "vertex_ids": [
+          "CMV:cc8ac760aaaa258e2b6a514c",
+          "CMV:7ad3777302115ad723b96a10",
+          "CMV:28eedbf1c1f071e3fac27b84"
+        ]
+      },
+      {
+        "face_index": 1548,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          38,
+          964,
+          8
+        ],
+        "vertex_ids": [
+          "CMV:68692ad2a068e121bec0131e",
+          "CMV:ce768675761950b3247fb942",
+          "CMV:559362023bdcb18dda41334a"
+        ]
+      },
+      {
+        "face_index": 1549,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          38,
+          964,
+          38
+        ],
+        "vertex_ids": [
+          "CMV:68692ad2a068e121bec0131e",
+          "CMV:ce768675761950b3247fb942",
+          "CMV:1e5ea451d0a1a976461dfb1e"
+        ]
+      },
+      {
+        "face_index": 1569,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4414,
+          4399,
+          4393
+        ],
+        "vertex_ids": [
+          "CMV:637cf3c2addfdbbb27981019",
+          "CMV:bc3c6aca031db2fcd2a131ad",
+          "CMV:6d2f575102a8457c1eb666c0"
+        ]
+      },
+      {
+        "face_index": 1571,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4414,
+          4398,
+          4393
+        ],
+        "vertex_ids": [
+          "CMV:637cf3c2addfdbbb27981019",
+          "CMV:d1943e05fef5bfa90892e7cb",
+          "CMV:6d2f575102a8457c1eb666c0"
+        ]
+      },
+      {
+        "face_index": 1572,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4414,
+          4413,
+          3336
+        ],
+        "vertex_ids": [
+          "CMV:637cf3c2addfdbbb27981019",
+          "CMV:e6282285277d1c272fa59db6",
+          "CMV:0efec56c39468deead267dbb"
+        ]
+      },
+      {
+        "face_index": 1574,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4414,
+          4436,
+          4393
+        ],
+        "vertex_ids": [
+          "CMV:637cf3c2addfdbbb27981019",
+          "CMV:d2004c3d8eebac7fbcf07d6c",
+          "CMV:6d2f575102a8457c1eb666c0"
+        ]
+      },
+      {
+        "face_index": 1575,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4414,
+          4436,
+          3336
+        ],
+        "vertex_ids": [
+          "CMV:637cf3c2addfdbbb27981019",
+          "CMV:d2004c3d8eebac7fbcf07d6c",
+          "CMV:0efec56c39468deead267dbb"
+        ]
+      },
+      {
+        "face_index": 1577,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4414,
+          4430,
+          4432
+        ],
+        "vertex_ids": [
+          "CMV:637cf3c2addfdbbb27981019",
+          "CMV:188ed96d3f4cfc1e309c2a6e",
+          "CMV:a53034cb6fe37e10c1161a9a"
+        ]
+      },
+      {
+        "face_index": 1578,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4414,
+          4393,
+          3336
+        ],
+        "vertex_ids": [
+          "CMV:637cf3c2addfdbbb27981019",
+          "CMV:6d2f575102a8457c1eb666c0",
+          "CMV:0efec56c39468deead267dbb"
+        ]
+      },
+      {
+        "face_index": 1579,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4414,
+          4388,
+          3783
+        ],
+        "vertex_ids": [
+          "CMV:637cf3c2addfdbbb27981019",
+          "CMV:32f2017722b9243fff6c6e14",
+          "CMV:6f4f4894af2a3d09dfb6be23"
+        ]
+      },
+      {
+        "face_index": 1580,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          4414,
+          3783,
+          4388
+        ],
+        "vertex_ids": [
+          "CMV:637cf3c2addfdbbb27981019",
+          "CMV:6f4f4894af2a3d09dfb6be23",
+          "CMV:a0b8b391b3692d925fb10584"
+        ]
+      },
+      {
+        "face_index": 1581,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4414,
+          3783,
+          4432
+        ],
+        "vertex_ids": [
+          "CMV:637cf3c2addfdbbb27981019",
+          "CMV:6f4f4894af2a3d09dfb6be23",
+          "CMV:a53034cb6fe37e10c1161a9a"
+        ]
+      },
+      {
+        "face_index": 1582,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4414,
+          4388,
+          4432
+        ],
+        "vertex_ids": [
+          "CMV:637cf3c2addfdbbb27981019",
+          "CMV:a0b8b391b3692d925fb10584",
+          "CMV:a53034cb6fe37e10c1161a9a"
+        ]
+      },
+      {
+        "face_index": 1590,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          5230,
+          5140,
+          4666
+        ],
+        "vertex_ids": [
+          "CMV:5ddcb83b4a8717a4f820f05d",
+          "CMV:a2182da862002335304418d1",
+          "CMV:925bb93999a69e49b44a2f49"
+        ]
+      },
+      {
+        "face_index": 1594,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          5230,
+          4666,
+          4702
+        ],
+        "vertex_ids": [
+          "CMV:5ddcb83b4a8717a4f820f05d",
+          "CMV:925bb93999a69e49b44a2f49",
+          "CMV:48597ead2c1f213efb5ce411"
+        ]
+      },
+      {
+        "face_index": 1595,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          5230,
+          4702,
+          5127
+        ],
+        "vertex_ids": [
+          "CMV:5ddcb83b4a8717a4f820f05d",
+          "CMV:48597ead2c1f213efb5ce411",
+          "CMV:8ed95a110d721f7a607855c5"
+        ]
+      },
+      {
+        "face_index": 1656,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          305,
+          63,
+          63
+        ],
+        "vertex_ids": [
+          "CMV:0560dadb4b53735b3801d88a",
+          "CMV:5b523c154b7fcdd44e73c772",
+          "CMV:0cc003cd8a4ce424f4035b06"
+        ]
+      },
+      {
+        "face_index": 1657,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          305,
+          63,
+          305
+        ],
+        "vertex_ids": [
+          "CMV:0560dadb4b53735b3801d88a",
+          "CMV:5b523c154b7fcdd44e73c772",
+          "CMV:a024417073be86db0b1535f0"
+        ]
+      },
+      {
+        "face_index": 1658,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          305,
+          63,
+          63
+        ],
+        "vertex_ids": [
+          "CMV:0560dadb4b53735b3801d88a",
+          "CMV:0cc003cd8a4ce424f4035b06",
+          "CMV:9672f2b9dc5749c7d4e7d0ad"
+        ]
+      },
+      {
+        "face_index": 1659,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          305,
+          63,
+          94
+        ],
+        "vertex_ids": [
+          "CMV:0560dadb4b53735b3801d88a",
+          "CMV:9672f2b9dc5749c7d4e7d0ad",
+          "CMV:47740e9beb33f3981ab8394a"
+        ]
+      },
+      {
+        "face_index": 1665,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          3266,
+          3266,
+          1520
+        ],
+        "vertex_ids": [
+          "CMV:b70d5c59d07f7c76d1d2b784",
+          "CMV:59f84aa36230a89ce5c2bc2b",
+          "CMV:0a21610c87f1bdadba289890"
+        ]
+      },
+      {
+        "face_index": 1668,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          3266,
+          6899,
+          3322
+        ],
+        "vertex_ids": [
+          "CMV:b70d5c59d07f7c76d1d2b784",
+          "CMV:6789a7515af0bc3435eadf77",
+          "CMV:0306a97cd0fa9d90c63deead"
+        ]
+      },
+      {
+        "face_index": 1692,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          5125,
+          5125,
+          1346
+        ],
+        "vertex_ids": [
+          "CMV:50cd1965d688f4920121a68a",
+          "CMV:a27cab38d4a7009b26f25bc2",
+          "CMV:c1da3a9a595bcf22623360bd"
+        ]
+      },
+      {
+        "face_index": 1694,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          5125,
+          1346,
+          1346
+        ],
+        "vertex_ids": [
+          "CMV:50cd1965d688f4920121a68a",
+          "CMV:c1da3a9a595bcf22623360bd",
+          "CMV:184bc0f2c6bcdb1d3d09bf71"
+        ]
+      },
+      {
+        "face_index": 1696,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          5125,
+          5125,
+          1346
+        ],
+        "vertex_ids": [
+          "CMV:50cd1965d688f4920121a68a",
+          "CMV:85ecf9dc064a76b8b68754b7",
+          "CMV:184bc0f2c6bcdb1d3d09bf71"
+        ]
+      },
+      {
+        "face_index": 1701,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          323,
+          2205,
+          2205
+        ],
+        "vertex_ids": [
+          "CMV:a5f55d8d0da2e92b030f9989",
+          "CMV:b066f7ffec58e473c7f48c6e",
+          "CMV:c967b09b7e472575d5e42faa"
+        ]
+      },
+      {
+        "face_index": 1702,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          323,
+          2205,
+          323
+        ],
+        "vertex_ids": [
+          "CMV:a5f55d8d0da2e92b030f9989",
+          "CMV:b066f7ffec58e473c7f48c6e",
+          "CMV:0eab0d6c992f5e3e67fa6ba2"
+        ]
+      },
+      {
+        "face_index": 1705,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          323,
+          2205,
+          2220
+        ],
+        "vertex_ids": [
+          "CMV:a5f55d8d0da2e92b030f9989",
+          "CMV:c967b09b7e472575d5e42faa",
+          "CMV:2d76b6711de39a74838fb1ab"
+        ]
+      },
+      {
+        "face_index": 1707,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          323,
+          941,
+          2220
+        ],
+        "vertex_ids": [
+          "CMV:a5f55d8d0da2e92b030f9989",
+          "CMV:d1ff147c4861b91319d2112b",
+          "CMV:2d76b6711de39a74838fb1ab"
+        ]
+      },
+      {
+        "face_index": 1803,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          56,
+          6889,
+          56
+        ],
+        "vertex_ids": [
+          "CMV:5b0b243d84fe7d1ed16b7c91",
+          "CMV:53dca2c0ad81ab22b074c853",
+          "CMV:d56946f2631784d290491a55"
+        ]
+      },
+      {
+        "face_index": 1804,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          56,
+          6889,
+          56
+        ],
+        "vertex_ids": [
+          "CMV:5b0b243d84fe7d1ed16b7c91",
+          "CMV:53dca2c0ad81ab22b074c853",
+          "CMV:a3deb87b8267eec30329439a"
+        ]
+      },
+      {
+        "face_index": 1809,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          5198,
+          542,
+          586
+        ],
+        "vertex_ids": [
+          "CMV:b19badbad26772bf9508f0fc",
+          "CMV:880a4651d0e6ff5cdd925da2",
+          "CMV:09817802fbf0fa6ca4da8dcd"
+        ]
+      },
+      {
+        "face_index": 1810,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          5198,
+          542,
+          5135
+        ],
+        "vertex_ids": [
+          "CMV:b19badbad26772bf9508f0fc",
+          "CMV:880a4651d0e6ff5cdd925da2",
+          "CMV:96a270a86bbf998a57babc6b"
+        ]
+      },
+      {
+        "face_index": 1811,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          5198,
+          4688,
+          5135
+        ],
+        "vertex_ids": [
+          "CMV:b19badbad26772bf9508f0fc",
+          "CMV:3b66fabbde7283bf310335f2",
+          "CMV:96a270a86bbf998a57babc6b"
+        ]
+      },
+      {
+        "face_index": 1812,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          5198,
+          4688,
+          5131
+        ],
+        "vertex_ids": [
+          "CMV:b19badbad26772bf9508f0fc",
+          "CMV:3b66fabbde7283bf310335f2",
+          "CMV:6458e8774be514193b0e68a6"
+        ]
+      },
+      {
+        "face_index": 1813,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          5198,
+          586,
+          586
+        ],
+        "vertex_ids": [
+          "CMV:b19badbad26772bf9508f0fc",
+          "CMV:09817802fbf0fa6ca4da8dcd",
+          "CMV:82ddac999685397bf12c2660"
+        ]
+      },
+      {
+        "face_index": 1814,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          5198,
+          586,
+          5124
+        ],
+        "vertex_ids": [
+          "CMV:b19badbad26772bf9508f0fc",
+          "CMV:82ddac999685397bf12c2660",
+          "CMV:cda81eb5f140847fbf19d6f0"
+        ]
+      },
+      {
+        "face_index": 1815,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          5198,
+          586,
+          5198
+        ],
+        "vertex_ids": [
+          "CMV:b19badbad26772bf9508f0fc",
+          "CMV:82ddac999685397bf12c2660",
+          "CMV:147f02b46891926b892fe317"
+        ]
+      },
+      {
+        "face_index": 1844,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6887,
+          2368,
+          2372
+        ],
+        "vertex_ids": [
+          "CMV:39ae76de056ee033e384ef8f",
+          "CMV:1436a4fa6132001ff937e9c9",
+          "CMV:c9b1c30cfc7c339ec1f34ccf"
+        ]
+      },
+      {
+        "face_index": 1845,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6887,
+          2368,
+          6887
+        ],
+        "vertex_ids": [
+          "CMV:39ae76de056ee033e384ef8f",
+          "CMV:1436a4fa6132001ff937e9c9",
+          "CMV:fa0ffa321effeb4c0cb4c9a4"
+        ]
+      },
+      {
+        "face_index": 1846,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6887,
+          2372,
+          6887
+        ],
+        "vertex_ids": [
+          "CMV:39ae76de056ee033e384ef8f",
+          "CMV:c9b1c30cfc7c339ec1f34ccf",
+          "CMV:c6482c19b67bce0556e85a8b"
+        ]
+      },
+      {
+        "face_index": 1862,
+        "pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          5004,
+          5004,
+          4907
+        ],
+        "vertex_ids": [
+          "CMV:90286dc9202b2d066e40cd9c",
+          "CMV:7cb7c60017d887605e3141f4",
+          "CMV:449b74afaf6a035e2101625c"
+        ]
+      },
+      {
+        "face_index": 1864,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          5004,
+          4907,
+          5005
+        ],
+        "vertex_ids": [
+          "CMV:90286dc9202b2d066e40cd9c",
+          "CMV:449b74afaf6a035e2101625c",
+          "CMV:cc7f75aa64b5e3cf65012b82"
+        ]
+      },
+      {
+        "face_index": 1867,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6709,
+          6696,
+          1785
+        ],
+        "vertex_ids": [
+          "CMV:0e0e28a8fbf61da383a93dd3",
+          "CMV:335912e5bde78de5ed89fdba",
+          "CMV:707850b35ce165ce39c60fe0"
+        ]
+      },
+      {
+        "face_index": 1870,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6709,
+          1785,
+          6709
+        ],
+        "vertex_ids": [
+          "CMV:0e0e28a8fbf61da383a93dd3",
+          "CMV:707850b35ce165ce39c60fe0",
+          "CMV:ce09d64621bb104071342120"
+        ]
+      },
+      {
+        "face_index": 1874,
+        "pair_categories": [
+          "SHARE_EDGE",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          2286,
+          2287,
+          1923
+        ],
+        "vertex_ids": [
+          "CMV:5c74cefda95d2ba711d8e393",
+          "CMV:fe4f405a1f71f211c5885460",
+          "CMV:06b04b201526a46536b1b8c3"
+        ]
+      },
+      {
+        "face_index": 1879,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          2286,
+          1923,
+          2287
+        ],
+        "vertex_ids": [
+          "CMV:5c74cefda95d2ba711d8e393",
+          "CMV:06b04b201526a46536b1b8c3",
+          "CMV:6c45b26ced0e9dc3b7c29b25"
+        ]
+      },
+      {
+        "face_index": 1905,
+        "pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          6653,
+          6656,
+          6664
+        ],
+        "vertex_ids": [
+          "CMV:7d10fbc16d7778b47dbd7472",
+          "CMV:d4120bb95c60ea763d7fe3b8",
+          "CMV:c30546b7f142690ae940414a"
+        ]
+      },
+      {
+        "face_index": 1906,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6653,
+          6656,
+          1214
+        ],
+        "vertex_ids": [
+          "CMV:7d10fbc16d7778b47dbd7472",
+          "CMV:d4120bb95c60ea763d7fe3b8",
+          "CMV:040806e519c81328243c686a"
+        ]
+      },
+      {
+        "face_index": 1907,
+        "pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6653,
+          6664,
+          6661
+        ],
+        "vertex_ids": [
+          "CMV:7d10fbc16d7778b47dbd7472",
+          "CMV:c30546b7f142690ae940414a",
+          "CMV:8d59cf6e0bd3f257983227b9"
+        ]
+      },
+      {
+        "face_index": 1908,
+        "pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          6653,
+          1214,
+          6416
+        ],
+        "vertex_ids": [
+          "CMV:7d10fbc16d7778b47dbd7472",
+          "CMV:040806e519c81328243c686a",
+          "CMV:8c3f3e12281d3ee4e24700ac"
+        ]
+      }
+    ],
+    "removed_face_fraction": 0.17381200416700057,
+    "rule": "DROP_FACE_IF_ANY_VERTEX_PAIR_SOURCE_TRIANGLES_NONINCIDENT",
+    "skeleton_mutation": false,
+    "skin_weight_mutation": false,
+    "source_pair_category_counts": {
+      "NONINCIDENT": 8418,
+      "SAME_FACE": 35827,
+      "SHARE_EDGE": 20703,
+      "SHARE_VERTEX_ONLY": 9926
+    },
+    "teacher_topology_shipping_authority": false,
+    "vertex_count_unchanged": true,
+    "vertex_position_mutation": false
+  },
+  "preregistered_verdict": {
+    "dominant_owner_confirmed": false,
+    "material_owner_confirmed": false,
+    "verdict": "INCONCLUSIVE_OR_NOT_OWNER"
+  },
+  "preregistration": "canonical/KNIGHT_ORACLE_TOPOLOGY_REPAIR_CAUSAL_PREREG_V1_20260928.json",
+  "previews": [
+    {
+      "clip_id": "demo_idle_v1",
+      "gif_path": "canonical/knight_oracle_topology_repair_causality_v1/KNIGHT_IDLE_ORACLE_TOPOLOGY_COMPARE_V1.gif",
+      "mapping": [
+        {
+          "cost": 0.6116771317630436,
+          "next_cost": 0.7054434059820822,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:7e87e97fc9fe89cbd718"
+        },
+        {
+          "cost": 0.37324048737202953,
+          "next_cost": 0.5047419906119381,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ab16ff2ffc7408c862ae"
+        },
+        {
+          "cost": 0.2054681713865518,
+          "next_cost": 0.2925199639891659,
+          "source_joint_id": "Fingers.R",
+          "target_joint_id": "J:c9cdb266f7c167a620a9"
+        },
+        {
+          "cost": 0.17678234026097459,
+          "next_cost": 0.4085321751602823,
+          "source_joint_id": "LowerArm.R",
+          "target_joint_id": "J:932628adf7f0d5936426"
+        },
+        {
+          "cost": 0.2029030249075255,
+          "next_cost": 0.28310195332574495,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:4c9f9eace712daf31538"
+        },
+        {
+          "cost": 0.48247436163504,
+          "next_cost": 0.6238222174056915,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:f5cf9181e27d0f791f7d"
+        },
+        {
+          "cost": 0.19833878296620702,
+          "next_cost": 0.2583591034997136,
+          "source_joint_id": "Thumb.R",
+          "target_joint_id": "J:75a17a4287b28cd7f57f"
+        },
+        {
+          "cost": 0.1507628779714688,
+          "next_cost": 0.49685610634347954,
+          "source_joint_id": "UpperLeg.R",
+          "target_joint_id": "J:f50f39d42ef3820824ef"
+        },
+        {
+          "cost": 0.15738848284903773,
+          "next_cost": 0.2182245988227146,
+          "source_joint_id": "MiddleHand.L",
+          "target_joint_id": "J:8455bf4c0a38867b7d9b"
+        },
+        {
+          "cost": 0.12566026834671604,
+          "next_cost": 0.15653416095612008,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:5428a88dad4d4d8d5c4d"
+        },
+        {
+          "cost": 0.12744628795827562,
+          "next_cost": 0.17729832396772957,
+          "source_joint_id": "Palm.L",
+          "target_joint_id": "J:33c7075f501c9af4cd0d"
+        },
+        {
+          "cost": 0.21451150060948782,
+          "next_cost": 0.3102178824405303,
+          "source_joint_id": "Neck",
+          "target_joint_id": "J:1008208d141ae248de43"
+        },
+        {
+          "cost": 0.22331652895761903,
+          "next_cost": 0.341721580563024,
+          "source_joint_id": "Fingers.L",
+          "target_joint_id": "J:136e20712bbd1481596e"
+        },
+        {
+          "cost": 0.1753136842084541,
+          "next_cost": 0.2033041789185967,
+          "source_joint_id": "MiddleHand.R",
+          "target_joint_id": "J:e5441b559f1c34b41aa2"
+        },
+        {
+          "cost": 0.1542952449768342,
+          "next_cost": 0.521825399970232,
+          "source_joint_id": "UpperLeg.L",
+          "target_joint_id": "J:063ee183f601e19a8ca9"
+        },
+        {
+          "cost": 0.24521820132730113,
+          "next_cost": 0.5053838222620202,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:73295dbdbb50d303e597"
+        },
+        {
+          "cost": 0.18366720483839166,
+          "next_cost": 0.2331092975233877,
+          "source_joint_id": "UpperArm.R",
+          "target_joint_id": "J:42d181ebf3515959283a"
+        },
+        {
+          "cost": 0.5902787916544152,
+          "next_cost": 0.6714047201184266,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:7d9e31e2d0bd48f88ecb"
+        },
+        {
+          "cost": 0.338657132190124,
+          "next_cost": 0.5510856632138917,
+          "source_joint_id": "Head",
+          "target_joint_id": "J:eafe286e7d84499e5257"
+        },
+        {
+          "cost": 0.1615942399702586,
+          "next_cost": 0.45709510248575125,
+          "source_joint_id": "LowerArm.L",
+          "target_joint_id": "J:7cf59fbe52c53280546a"
+        },
+        {
+          "cost": 0.37056767662637935,
+          "next_cost": 0.4647284720520398,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:cf05f36e919ff69a9d8e"
+        },
+        {
+          "cost": 0.40659342489016087,
+          "next_cost": 0.6154678629286205,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:362735eeec6ee5a3d46f"
+        },
+        {
+          "cost": 0.5383114087285982,
+          "next_cost": 0.693192900090975,
+          "source_joint_id": "Body",
+          "target_joint_id": "J:237d229c33bc9eb9bf91"
+        },
+        {
+          "cost": 0.1952579664472978,
+          "next_cost": 0.25572078846434404,
+          "source_joint_id": "UpperArm.L",
+          "target_joint_id": "J:a80d2c086e86a4cc08b5"
+        },
+        {
+          "cost": 0.2208842181998788,
+          "next_cost": 0.6520160579394874,
+          "source_joint_id": "Torso",
+          "target_joint_id": "J:2ff965d6dbe4efc2d5d4"
+        },
+        {
+          "cost": 0.2598771637136827,
+          "next_cost": 0.4990601726171502,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ee24577789f0235b8186"
+        },
+        {
+          "cost": 0.16516790065247416,
+          "next_cost": 0.3150452870805952,
+          "source_joint_id": "Hips",
+          "target_joint_id": "J:b9e5c0d23f688f672060"
+        }
+      ],
+      "sheet_path": "canonical/knight_oracle_topology_repair_causality_v1/KNIGHT_IDLE_ORACLE_TOPOLOGY_COMPARE_V1.png"
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "gif_path": "canonical/knight_oracle_topology_repair_causality_v1/KNIGHT_RUN_ORACLE_TOPOLOGY_COMPARE_V1.gif",
+      "mapping": [
+        {
+          "cost": 0.6116771317630436,
+          "next_cost": 0.7054434059820822,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:7e87e97fc9fe89cbd718"
+        },
+        {
+          "cost": 0.37324048737202953,
+          "next_cost": 0.5047419906119381,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ab16ff2ffc7408c862ae"
+        },
+        {
+          "cost": 0.2054681713865518,
+          "next_cost": 0.2925199639891659,
+          "source_joint_id": "Fingers.R",
+          "target_joint_id": "J:c9cdb266f7c167a620a9"
+        },
+        {
+          "cost": 0.17678234026097459,
+          "next_cost": 0.4085321751602823,
+          "source_joint_id": "LowerArm.R",
+          "target_joint_id": "J:932628adf7f0d5936426"
+        },
+        {
+          "cost": 0.2029030249075255,
+          "next_cost": 0.28310195332574495,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:4c9f9eace712daf31538"
+        },
+        {
+          "cost": 0.48247436163504,
+          "next_cost": 0.6238222174056915,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:f5cf9181e27d0f791f7d"
+        },
+        {
+          "cost": 0.19833878296620702,
+          "next_cost": 0.2583591034997136,
+          "source_joint_id": "Thumb.R",
+          "target_joint_id": "J:75a17a4287b28cd7f57f"
+        },
+        {
+          "cost": 0.1507628779714688,
+          "next_cost": 0.49685610634347954,
+          "source_joint_id": "UpperLeg.R",
+          "target_joint_id": "J:f50f39d42ef3820824ef"
+        },
+        {
+          "cost": 0.15738848284903773,
+          "next_cost": 0.2182245988227146,
+          "source_joint_id": "MiddleHand.L",
+          "target_joint_id": "J:8455bf4c0a38867b7d9b"
+        },
+        {
+          "cost": 0.12566026834671604,
+          "next_cost": 0.15653416095612008,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:5428a88dad4d4d8d5c4d"
+        },
+        {
+          "cost": 0.12744628795827562,
+          "next_cost": 0.17729832396772957,
+          "source_joint_id": "Palm.L",
+          "target_joint_id": "J:33c7075f501c9af4cd0d"
+        },
+        {
+          "cost": 0.21451150060948782,
+          "next_cost": 0.3102178824405303,
+          "source_joint_id": "Neck",
+          "target_joint_id": "J:1008208d141ae248de43"
+        },
+        {
+          "cost": 0.22331652895761903,
+          "next_cost": 0.341721580563024,
+          "source_joint_id": "Fingers.L",
+          "target_joint_id": "J:136e20712bbd1481596e"
+        },
+        {
+          "cost": 0.1753136842084541,
+          "next_cost": 0.2033041789185967,
+          "source_joint_id": "MiddleHand.R",
+          "target_joint_id": "J:e5441b559f1c34b41aa2"
+        },
+        {
+          "cost": 0.1542952449768342,
+          "next_cost": 0.521825399970232,
+          "source_joint_id": "UpperLeg.L",
+          "target_joint_id": "J:063ee183f601e19a8ca9"
+        },
+        {
+          "cost": 0.24521820132730113,
+          "next_cost": 0.5053838222620202,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:73295dbdbb50d303e597"
+        },
+        {
+          "cost": 0.18366720483839166,
+          "next_cost": 0.2331092975233877,
+          "source_joint_id": "UpperArm.R",
+          "target_joint_id": "J:42d181ebf3515959283a"
+        },
+        {
+          "cost": 0.5902787916544152,
+          "next_cost": 0.6714047201184266,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:7d9e31e2d0bd48f88ecb"
+        },
+        {
+          "cost": 0.338657132190124,
+          "next_cost": 0.5510856632138917,
+          "source_joint_id": "Head",
+          "target_joint_id": "J:eafe286e7d84499e5257"
+        },
+        {
+          "cost": 0.1615942399702586,
+          "next_cost": 0.45709510248575125,
+          "source_joint_id": "LowerArm.L",
+          "target_joint_id": "J:7cf59fbe52c53280546a"
+        },
+        {
+          "cost": 0.37056767662637935,
+          "next_cost": 0.4647284720520398,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:cf05f36e919ff69a9d8e"
+        },
+        {
+          "cost": 0.40659342489016087,
+          "next_cost": 0.6154678629286205,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:362735eeec6ee5a3d46f"
+        },
+        {
+          "cost": 0.5383114087285982,
+          "next_cost": 0.693192900090975,
+          "source_joint_id": "Body",
+          "target_joint_id": "J:237d229c33bc9eb9bf91"
+        },
+        {
+          "cost": 0.1952579664472978,
+          "next_cost": 0.25572078846434404,
+          "source_joint_id": "UpperArm.L",
+          "target_joint_id": "J:a80d2c086e86a4cc08b5"
+        },
+        {
+          "cost": 0.2208842181998788,
+          "next_cost": 0.6520160579394874,
+          "source_joint_id": "Torso",
+          "target_joint_id": "J:2ff965d6dbe4efc2d5d4"
+        },
+        {
+          "cost": 0.2598771637136827,
+          "next_cost": 0.4990601726171502,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ee24577789f0235b8186"
+        },
+        {
+          "cost": 0.16516790065247416,
+          "next_cost": 0.3150452870805952,
+          "source_joint_id": "Hips",
+          "target_joint_id": "J:b9e5c0d23f688f672060"
+        }
+      ],
+      "sheet_path": "canonical/knight_oracle_topology_repair_causality_v1/KNIGHT_RUN_ORACLE_TOPOLOGY_COMPARE_V1.png"
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "gif_path": "canonical/knight_oracle_topology_repair_causality_v1/KNIGHT_SLASH_ORACLE_TOPOLOGY_COMPARE_V1.gif",
+      "mapping": [
+        {
+          "cost": 0.6116771317630436,
+          "next_cost": 0.7054434059820822,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:7e87e97fc9fe89cbd718"
+        },
+        {
+          "cost": 0.37324048737202953,
+          "next_cost": 0.5047419906119381,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ab16ff2ffc7408c862ae"
+        },
+        {
+          "cost": 0.2054681713865518,
+          "next_cost": 0.2925199639891659,
+          "source_joint_id": "Fingers.R",
+          "target_joint_id": "J:c9cdb266f7c167a620a9"
+        },
+        {
+          "cost": 0.17678234026097459,
+          "next_cost": 0.4085321751602823,
+          "source_joint_id": "LowerArm.R",
+          "target_joint_id": "J:932628adf7f0d5936426"
+        },
+        {
+          "cost": 0.2029030249075255,
+          "next_cost": 0.28310195332574495,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:4c9f9eace712daf31538"
+        },
+        {
+          "cost": 0.48247436163504,
+          "next_cost": 0.6238222174056915,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:f5cf9181e27d0f791f7d"
+        },
+        {
+          "cost": 0.19833878296620702,
+          "next_cost": 0.2583591034997136,
+          "source_joint_id": "Thumb.R",
+          "target_joint_id": "J:75a17a4287b28cd7f57f"
+        },
+        {
+          "cost": 0.1507628779714688,
+          "next_cost": 0.49685610634347954,
+          "source_joint_id": "UpperLeg.R",
+          "target_joint_id": "J:f50f39d42ef3820824ef"
+        },
+        {
+          "cost": 0.15738848284903773,
+          "next_cost": 0.2182245988227146,
+          "source_joint_id": "MiddleHand.L",
+          "target_joint_id": "J:8455bf4c0a38867b7d9b"
+        },
+        {
+          "cost": 0.12566026834671604,
+          "next_cost": 0.15653416095612008,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:5428a88dad4d4d8d5c4d"
+        },
+        {
+          "cost": 0.12744628795827562,
+          "next_cost": 0.17729832396772957,
+          "source_joint_id": "Palm.L",
+          "target_joint_id": "J:33c7075f501c9af4cd0d"
+        },
+        {
+          "cost": 0.21451150060948782,
+          "next_cost": 0.3102178824405303,
+          "source_joint_id": "Neck",
+          "target_joint_id": "J:1008208d141ae248de43"
+        },
+        {
+          "cost": 0.22331652895761903,
+          "next_cost": 0.341721580563024,
+          "source_joint_id": "Fingers.L",
+          "target_joint_id": "J:136e20712bbd1481596e"
+        },
+        {
+          "cost": 0.1753136842084541,
+          "next_cost": 0.2033041789185967,
+          "source_joint_id": "MiddleHand.R",
+          "target_joint_id": "J:e5441b559f1c34b41aa2"
+        },
+        {
+          "cost": 0.1542952449768342,
+          "next_cost": 0.521825399970232,
+          "source_joint_id": "UpperLeg.L",
+          "target_joint_id": "J:063ee183f601e19a8ca9"
+        },
+        {
+          "cost": 0.24521820132730113,
+          "next_cost": 0.5053838222620202,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:73295dbdbb50d303e597"
+        },
+        {
+          "cost": 0.18366720483839166,
+          "next_cost": 0.2331092975233877,
+          "source_joint_id": "UpperArm.R",
+          "target_joint_id": "J:42d181ebf3515959283a"
+        },
+        {
+          "cost": 0.5902787916544152,
+          "next_cost": 0.6714047201184266,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:7d9e31e2d0bd48f88ecb"
+        },
+        {
+          "cost": 0.338657132190124,
+          "next_cost": 0.5510856632138917,
+          "source_joint_id": "Head",
+          "target_joint_id": "J:eafe286e7d84499e5257"
+        },
+        {
+          "cost": 0.1615942399702586,
+          "next_cost": 0.45709510248575125,
+          "source_joint_id": "LowerArm.L",
+          "target_joint_id": "J:7cf59fbe52c53280546a"
+        },
+        {
+          "cost": 0.37056767662637935,
+          "next_cost": 0.4647284720520398,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:cf05f36e919ff69a9d8e"
+        },
+        {
+          "cost": 0.40659342489016087,
+          "next_cost": 0.6154678629286205,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:362735eeec6ee5a3d46f"
+        },
+        {
+          "cost": 0.5383114087285982,
+          "next_cost": 0.693192900090975,
+          "source_joint_id": "Body",
+          "target_joint_id": "J:237d229c33bc9eb9bf91"
+        },
+        {
+          "cost": 0.1952579664472978,
+          "next_cost": 0.25572078846434404,
+          "source_joint_id": "UpperArm.L",
+          "target_joint_id": "J:a80d2c086e86a4cc08b5"
+        },
+        {
+          "cost": 0.2208842181998788,
+          "next_cost": 0.6520160579394874,
+          "source_joint_id": "Torso",
+          "target_joint_id": "J:2ff965d6dbe4efc2d5d4"
+        },
+        {
+          "cost": 0.2598771637136827,
+          "next_cost": 0.4990601726171502,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ee24577789f0235b8186"
+        },
+        {
+          "cost": 0.16516790065247416,
+          "next_cost": 0.3150452870805952,
+          "source_joint_id": "Hips",
+          "target_joint_id": "J:b9e5c0d23f688f672060"
+        }
+      ],
+      "sheet_path": "canonical/knight_oracle_topology_repair_causality_v1/KNIGHT_SLASH_ORACLE_TOPOLOGY_COMPARE_V1.png"
+    }
+  ],
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "samples": [
+    {
+      "baseline": {
+        "area_ratio_max": 31.021523615710166,
+        "area_ratio_min": 0.07135227240548246,
+        "area_ratio_p95": 1.0050696414740752,
+        "area_ratio_p99": 6.671623304109939,
+        "catastrophic_face_count": 534,
+        "condition_max": 167.9554236066057,
+        "condition_p95": 1.046793886583513,
+        "condition_p99": 8.469578147340435,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 24.952764249595408,
+        "edge_ratio_p95": 1.0099668216412774,
+        "edge_ratio_p99": 7.343719824109237,
+        "face_count": 24958,
+        "flipped_face_count": 205
+      },
+      "clip_id": "demo_idle_v1",
+      "frame_index": 0,
+      "oracle": {
+        "area_ratio_max": 16.026179616174264,
+        "area_ratio_min": 0.45523345664138326,
+        "area_ratio_p95": 1.0004935034807523,
+        "area_ratio_p99": 1.4998848733650372,
+        "catastrophic_face_count": 111,
+        "condition_max": 154.60082003199244,
+        "condition_p95": 1.0045983352057761,
+        "condition_p99": 1.7793176575551661,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 22.290252730955526,
+        "edge_ratio_p95": 1.0009675325992566,
+        "edge_ratio_p99": 1.5273624032040731,
+        "face_count": 20620,
+        "flipped_face_count": 34
+      },
+      "renders": [
+        {
+          "baseline_catastrophic_owned_pixels": 15231,
+          "baseline_final_alpha_pixels": 160217,
+          "oracle_catastrophic_owned_pixels": 5219,
+          "oracle_final_alpha_pixels": 153845,
+          "view_index": 0
+        },
+        {
+          "baseline_catastrophic_owned_pixels": 31309,
+          "baseline_final_alpha_pixels": 281786,
+          "oracle_catastrophic_owned_pixels": 2957,
+          "oracle_final_alpha_pixels": 258909,
+          "view_index": 2
+        }
+      ],
+      "time_seconds": 0.0
+    },
+    {
+      "baseline": {
+        "area_ratio_max": 31.526872906995244,
+        "area_ratio_min": 0.040417538847243285,
+        "area_ratio_p95": 1.0358178715387283,
+        "area_ratio_p99": 6.765383598066402,
+        "catastrophic_face_count": 520,
+        "condition_max": 163.76659839850694,
+        "condition_p95": 1.136176369994356,
+        "condition_p99": 8.740917859921474,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 25.77471290957917,
+        "edge_ratio_p95": 1.046655777247053,
+        "edge_ratio_p99": 7.554886207685968,
+        "face_count": 24958,
+        "flipped_face_count": 214
+      },
+      "clip_id": "demo_idle_v1",
+      "frame_index": 1,
+      "oracle": {
+        "area_ratio_max": 15.510154911585788,
+        "area_ratio_min": 0.3957390084544909,
+        "area_ratio_p95": 1.0059672006760327,
+        "area_ratio_p99": 1.4858808164911566,
+        "catastrophic_face_count": 100,
+        "condition_max": 163.76659839850694,
+        "condition_p95": 1.0196056960133086,
+        "condition_p99": 1.7390491225696934,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 21.535820032357236,
+        "edge_ratio_p95": 1.007549801859741,
+        "edge_ratio_p99": 1.5326754553240982,
+        "face_count": 20620,
+        "flipped_face_count": 37
+      },
+      "renders": [
+        {
+          "baseline_catastrophic_owned_pixels": 14725,
+          "baseline_final_alpha_pixels": 158323,
+          "oracle_catastrophic_owned_pixels": 4675,
+          "oracle_final_alpha_pixels": 152118,
+          "view_index": 0
+        },
+        {
+          "baseline_catastrophic_owned_pixels": 32411,
+          "baseline_final_alpha_pixels": 283213,
+          "oracle_catastrophic_owned_pixels": 2681,
+          "oracle_final_alpha_pixels": 259875,
+          "view_index": 2
+        }
+      ],
+      "time_seconds": 0.8333333333333334
+    },
+    {
+      "baseline": {
+        "area_ratio_max": 32.022306445710846,
+        "area_ratio_min": 0.03593237951589166,
+        "area_ratio_p95": 1.004748075455258,
+        "area_ratio_p99": 6.692942582188261,
+        "catastrophic_face_count": 515,
+        "condition_max": 186.30736389948873,
+        "condition_p95": 1.0441266778719251,
+        "condition_p99": 9.042735299971136,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 26.54199214819158,
+        "edge_ratio_p95": 1.0095403525137778,
+        "edge_ratio_p99": 7.730558651819602,
+        "face_count": 24958,
+        "flipped_face_count": 224
+      },
+      "clip_id": "demo_idle_v1",
+      "frame_index": 2,
+      "oracle": {
+        "area_ratio_max": 15.135168716860775,
+        "area_ratio_min": 0.4610958284586294,
+        "area_ratio_p95": 1.0005099361364023,
+        "area_ratio_p99": 1.4907717949321004,
+        "catastrophic_face_count": 98,
+        "condition_max": 174.48140612217497,
+        "condition_p95": 1.0044818450797997,
+        "condition_p99": 1.7061089375203122,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 20.769692205306747,
+        "edge_ratio_p95": 1.0008607155282199,
+        "edge_ratio_p99": 1.527441844002186,
+        "face_count": 20620,
+        "flipped_face_count": 44
+      },
+      "renders": [
+        {
+          "baseline_catastrophic_owned_pixels": 14529,
+          "baseline_final_alpha_pixels": 155830,
+          "oracle_catastrophic_owned_pixels": 4243,
+          "oracle_final_alpha_pixels": 149382,
+          "view_index": 0
+        },
+        {
+          "baseline_catastrophic_owned_pixels": 33154,
+          "baseline_final_alpha_pixels": 283945,
+          "oracle_catastrophic_owned_pixels": 2242,
+          "oracle_final_alpha_pixels": 260282,
+          "view_index": 2
+        }
+      ],
+      "time_seconds": 1.6666666666666667
+    },
+    {
+      "baseline": {
+        "area_ratio_max": 31.52685667306125,
+        "area_ratio_min": 0.04041754158578821,
+        "area_ratio_p95": 1.035817880544503,
+        "area_ratio_p99": 6.765387851314732,
+        "catastrophic_face_count": 520,
+        "condition_max": 163.7677567097957,
+        "condition_p95": 1.1361763699984384,
+        "condition_p99": 8.740915346914313,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 25.774743880540154,
+        "edge_ratio_p95": 1.0466557638172,
+        "edge_ratio_p99": 7.554886216779288,
+        "face_count": 24958,
+        "flipped_face_count": 214
+      },
+      "clip_id": "demo_idle_v1",
+      "frame_index": 3,
+      "oracle": {
+        "area_ratio_max": 15.510170865843975,
+        "area_ratio_min": 0.3957389821073823,
+        "area_ratio_p95": 1.0059671986475398,
+        "area_ratio_p99": 1.4858809418258947,
+        "catastrophic_face_count": 100,
+        "condition_max": 163.7677567097957,
+        "condition_p95": 1.0196056903800477,
+        "condition_p99": 1.7390492633079204,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 21.53583088051618,
+        "edge_ratio_p95": 1.0075498025870495,
+        "edge_ratio_p99": 1.5326762947019994,
+        "face_count": 20620,
+        "flipped_face_count": 37
+      },
+      "renders": [
+        {
+          "baseline_catastrophic_owned_pixels": 14725,
+          "baseline_final_alpha_pixels": 158323,
+          "oracle_catastrophic_owned_pixels": 4675,
+          "oracle_final_alpha_pixels": 152117,
+          "view_index": 0
+        },
+        {
+          "baseline_catastrophic_owned_pixels": 32411,
+          "baseline_final_alpha_pixels": 283213,
+          "oracle_catastrophic_owned_pixels": 2681,
+          "oracle_final_alpha_pixels": 259875,
+          "view_index": 2
+        }
+      ],
+      "time_seconds": 2.5
+    },
+    {
+      "baseline": {
+        "area_ratio_max": 398.9841584844452,
+        "area_ratio_min": 0.04939929993051321,
+        "area_ratio_p95": 2.1520129789468347,
+        "area_ratio_p99": 20.5099820413428,
+        "catastrophic_face_count": 7814,
+        "condition_max": 980.5806560922342,
+        "condition_p95": 4.234497036203227,
+        "condition_p99": 30.609022766225102,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 191.99772323243644,
+        "edge_ratio_p95": 2.6537117892543667,
+        "edge_ratio_p99": 20.1894076302892,
+        "face_count": 24958,
+        "flipped_face_count": 7156
+      },
+      "clip_id": "demo_run_v1",
+      "frame_index": 0,
+      "oracle": {
+        "area_ratio_max": 398.9841584844452,
+        "area_ratio_min": 0.04939929993051321,
+        "area_ratio_p95": 1.0640164728565455,
+        "area_ratio_p99": 7.605035717799874,
+        "catastrophic_face_count": 5682,
+        "condition_max": 980.5806560922342,
+        "condition_p95": 1.364997819626882,
+        "condition_p99": 12.812520728847856,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 191.99772323243644,
+        "edge_ratio_p95": 1.0926895389346343,
+        "edge_ratio_p99": 8.850734228182679,
+        "face_count": 20620,
+        "flipped_face_count": 5512
+      },
+      "renders": [
+        {
+          "baseline_catastrophic_owned_pixels": 104233,
+          "baseline_final_alpha_pixels": 245616,
+          "oracle_catastrophic_owned_pixels": 83283,
+          "oracle_final_alpha_pixels": 235680,
+          "view_index": 0
+        },
+        {
+          "baseline_catastrophic_owned_pixels": 196400,
+          "baseline_final_alpha_pixels": 323118,
+          "oracle_catastrophic_owned_pixels": 151615,
+          "oracle_final_alpha_pixels": 296246,
+          "view_index": 2
+        }
+      ],
+      "time_seconds": 0.0
+    },
+    {
+      "baseline": {
+        "area_ratio_max": 664.5968838651902,
+        "area_ratio_min": 0.01106316603189965,
+        "area_ratio_p95": 1.7264722570602073,
+        "area_ratio_p99": 21.2710387370547,
+        "catastrophic_face_count": 7243,
+        "condition_max": 815.8067052706804,
+        "condition_p95": 3.094481030043226,
+        "condition_p99": 27.589355476628285,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 163.50091675860156,
+        "edge_ratio_p95": 2.0824480048684175,
+        "edge_ratio_p99": 23.263803204255634,
+        "face_count": 24958,
+        "flipped_face_count": 6601
+      },
+      "clip_id": "demo_run_v1",
+      "frame_index": 1,
+      "oracle": {
+        "area_ratio_max": 664.5968838651902,
+        "area_ratio_min": 0.11290129966354148,
+        "area_ratio_p95": 1.0408153216113332,
+        "area_ratio_p99": 7.772184199508661,
+        "catastrophic_face_count": 5329,
+        "condition_max": 815.8067052706804,
+        "condition_p95": 1.265654023513957,
+        "condition_p99": 9.529122434912088,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 163.50091675860156,
+        "edge_ratio_p95": 1.0709477505160976,
+        "edge_ratio_p99": 7.991105731574025,
+        "face_count": 20620,
+        "flipped_face_count": 5161
+      },
+      "renders": [
+        {
+          "baseline_catastrophic_owned_pixels": 234736,
+          "baseline_final_alpha_pixels": 322530,
+          "oracle_catastrophic_owned_pixels": 207156,
+          "oracle_final_alpha_pixels": 311052,
+          "view_index": 0
+        },
+        {
+          "baseline_catastrophic_owned_pixels": 171941,
+          "baseline_final_alpha_pixels": 287269,
+          "oracle_catastrophic_owned_pixels": 124928,
+          "oracle_final_alpha_pixels": 264972,
+          "view_index": 2
+        }
+      ],
+      "time_seconds": 0.20833333333333334
+    },
+    {
+      "baseline": {
+        "area_ratio_max": 366.26899375465837,
+        "area_ratio_min": 0.007818880762564194,
+        "area_ratio_p95": 2.151116439055909,
+        "area_ratio_p99": 18.070032080818432,
+        "catastrophic_face_count": 7810,
+        "condition_max": 565.8220441830152,
+        "condition_p95": 3.958237682268774,
+        "condition_p99": 35.84656917208999,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 209.99843678211477,
+        "edge_ratio_p95": 2.539504140773905,
+        "edge_ratio_p99": 20.63724991542022,
+        "face_count": 24958,
+        "flipped_face_count": 7228
+      },
+      "clip_id": "demo_run_v1",
+      "frame_index": 2,
+      "oracle": {
+        "area_ratio_max": 366.26899375465837,
+        "area_ratio_min": 0.030304699278984853,
+        "area_ratio_p95": 1.0460099924138078,
+        "area_ratio_p99": 6.352137445249248,
+        "catastrophic_face_count": 5690,
+        "condition_max": 565.8220441830152,
+        "condition_p95": 1.342327248336046,
+        "condition_p99": 14.284402963778009,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 209.99843678211477,
+        "edge_ratio_p95": 1.076648218743344,
+        "edge_ratio_p99": 9.506040585755999,
+        "face_count": 20620,
+        "flipped_face_count": 5539
+      },
+      "renders": [
+        {
+          "baseline_catastrophic_owned_pixels": 114530,
+          "baseline_final_alpha_pixels": 212933,
+          "oracle_catastrophic_owned_pixels": 93471,
+          "oracle_final_alpha_pixels": 207487,
+          "view_index": 0
+        },
+        {
+          "baseline_catastrophic_owned_pixels": 182799,
+          "baseline_final_alpha_pixels": 289385,
+          "oracle_catastrophic_owned_pixels": 136297,
+          "oracle_final_alpha_pixels": 263823,
+          "view_index": 2
+        }
+      ],
+      "time_seconds": 0.4166666666666667
+    },
+    {
+      "baseline": {
+        "area_ratio_max": 400.68303747467644,
+        "area_ratio_min": 0.037631810751775296,
+        "area_ratio_p95": 1.7163268161560474,
+        "area_ratio_p99": 17.630863187035157,
+        "catastrophic_face_count": 7131,
+        "condition_max": 1047.06670677674,
+        "condition_p95": 3.053624050951728,
+        "condition_p99": 30.191106455637126,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 197.13953775143932,
+        "edge_ratio_p95": 1.9502725525707831,
+        "edge_ratio_p99": 19.696131629873108,
+        "face_count": 24958,
+        "flipped_face_count": 6539
+      },
+      "clip_id": "demo_run_v1",
+      "frame_index": 3,
+      "oracle": {
+        "area_ratio_max": 400.68303747467644,
+        "area_ratio_min": 0.037631810751775296,
+        "area_ratio_p95": 1.0370202194473865,
+        "area_ratio_p99": 6.692216486456558,
+        "catastrophic_face_count": 5290,
+        "condition_max": 259.50263494411536,
+        "condition_p95": 1.2748746129891169,
+        "condition_p99": 11.962432529019852,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 197.13953775143932,
+        "edge_ratio_p95": 1.058937576512759,
+        "edge_ratio_p99": 8.179822981542285,
+        "face_count": 20620,
+        "flipped_face_count": 5130
+      },
+      "renders": [
+        {
+          "baseline_catastrophic_owned_pixels": 194197,
+          "baseline_final_alpha_pixels": 277130,
+          "oracle_catastrophic_owned_pixels": 171879,
+          "oracle_final_alpha_pixels": 267042,
+          "view_index": 0
+        },
+        {
+          "baseline_catastrophic_owned_pixels": 183352,
+          "baseline_final_alpha_pixels": 298520,
+          "oracle_catastrophic_owned_pixels": 142645,
+          "oracle_final_alpha_pixels": 275863,
+          "view_index": 2
+        }
+      ],
+      "time_seconds": 0.625
+    },
+    {
+      "baseline": {
+        "area_ratio_max": 829.6997656680879,
+        "area_ratio_min": 0.060234501006563766,
+        "area_ratio_p95": 2.137160877200766,
+        "area_ratio_p99": 21.844359663047847,
+        "catastrophic_face_count": 4419,
+        "condition_max": 2670.9829577518103,
+        "condition_p95": 4.00096781435008,
+        "condition_p99": 29.85462817372992,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 125.2025537996953,
+        "edge_ratio_p95": 2.583867249606783,
+        "edge_ratio_p99": 23.24770546429207,
+        "face_count": 24958,
+        "flipped_face_count": 3885
+      },
+      "clip_id": "demo_slash_v1",
+      "frame_index": 0,
+      "oracle": {
+        "area_ratio_max": 829.6997656680879,
+        "area_ratio_min": 0.060234501006563766,
+        "area_ratio_p95": 1.061326417817428,
+        "area_ratio_p99": 5.683904381482554,
+        "catastrophic_face_count": 2835,
+        "condition_max": 2670.9829577518103,
+        "condition_p95": 1.3584988692619953,
+        "condition_p99": 9.421661566832906,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 125.2025537996953,
+        "edge_ratio_p95": 1.0890790320652748,
+        "edge_ratio_p99": 7.095742145864765,
+        "face_count": 20620,
+        "flipped_face_count": 2738
+      },
+      "renders": [
+        {
+          "baseline_catastrophic_owned_pixels": 235619,
+          "baseline_final_alpha_pixels": 334083,
+          "oracle_catastrophic_owned_pixels": 198693,
+          "oracle_final_alpha_pixels": 322006,
+          "view_index": 0
+        },
+        {
+          "baseline_catastrophic_owned_pixels": 93869,
+          "baseline_final_alpha_pixels": 251195,
+          "oracle_catastrophic_owned_pixels": 58200,
+          "oracle_final_alpha_pixels": 233012,
+          "view_index": 2
+        }
+      ],
+      "time_seconds": 0.0
+    },
+    {
+      "baseline": {
+        "area_ratio_max": 844.6157911421643,
+        "area_ratio_min": 0.008638383639551009,
+        "area_ratio_p95": 1.4833627952141317,
+        "area_ratio_p99": 21.790743191950565,
+        "catastrophic_face_count": 7466,
+        "condition_max": 991.1720083686605,
+        "condition_p95": 2.587584867791707,
+        "condition_p99": 33.447028478706144,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 200.27233842960499,
+        "edge_ratio_p95": 1.6666807512531252,
+        "edge_ratio_p99": 24.747346807152955,
+        "face_count": 24958,
+        "flipped_face_count": 6909
+      },
+      "clip_id": "demo_slash_v1",
+      "frame_index": 1,
+      "oracle": {
+        "area_ratio_max": 844.6157911421643,
+        "area_ratio_min": 0.03576791772527205,
+        "area_ratio_p95": 1.057544360828021,
+        "area_ratio_p99": 6.357257507484697,
+        "catastrophic_face_count": 5590,
+        "condition_max": 991.1720083686605,
+        "condition_p95": 1.2399531914329252,
+        "condition_p99": 11.56725487134343,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 200.27233842960499,
+        "edge_ratio_p95": 1.1007751992628392,
+        "edge_ratio_p99": 9.02806921316312,
+        "face_count": 20620,
+        "flipped_face_count": 5428
+      },
+      "renders": [
+        {
+          "baseline_catastrophic_owned_pixels": 179060,
+          "baseline_final_alpha_pixels": 298368,
+          "oracle_catastrophic_owned_pixels": 171484,
+          "oracle_final_alpha_pixels": 291799,
+          "view_index": 0
+        },
+        {
+          "baseline_catastrophic_owned_pixels": 139687,
+          "baseline_final_alpha_pixels": 251495,
+          "oracle_catastrophic_owned_pixels": 125921,
+          "oracle_final_alpha_pixels": 241288,
+          "view_index": 2
+        }
+      ],
+      "time_seconds": 0.2777777777777778
+    },
+    {
+      "baseline": {
+        "area_ratio_max": 221.82652441236561,
+        "area_ratio_min": 0.08082805786228084,
+        "area_ratio_p95": 1.8667447256353282,
+        "area_ratio_p99": 16.627936074675286,
+        "catastrophic_face_count": 10736,
+        "condition_max": 486.6355034987018,
+        "condition_p95": 3.261884412891857,
+        "condition_p99": 24.868370204793496,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 155.60277105836937,
+        "edge_ratio_p95": 2.1865704527530365,
+        "edge_ratio_p99": 17.364378685546242,
+        "face_count": 24958,
+        "flipped_face_count": 10037
+      },
+      "clip_id": "demo_slash_v1",
+      "frame_index": 2,
+      "oracle": {
+        "area_ratio_max": 221.82652441236561,
+        "area_ratio_min": 0.08082805786228084,
+        "area_ratio_p95": 1.0338231286369521,
+        "area_ratio_p99": 6.079777900229207,
+        "catastrophic_face_count": 8176,
+        "condition_max": 383.8405054434519,
+        "condition_p95": 1.2440257150511107,
+        "condition_p99": 10.904861046875466,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 155.60277105836937,
+        "edge_ratio_p95": 1.0619191822538563,
+        "edge_ratio_p99": 7.208954499600636,
+        "face_count": 20620,
+        "flipped_face_count": 7956
+      },
+      "renders": [
+        {
+          "baseline_catastrophic_owned_pixels": 130545,
+          "baseline_final_alpha_pixels": 235976,
+          "oracle_catastrophic_owned_pixels": 114879,
+          "oracle_final_alpha_pixels": 229534,
+          "view_index": 0
+        },
+        {
+          "baseline_catastrophic_owned_pixels": 158710,
+          "baseline_final_alpha_pixels": 249114,
+          "oracle_catastrophic_owned_pixels": 128216,
+          "oracle_final_alpha_pixels": 231822,
+          "view_index": 2
+        }
+      ],
+      "time_seconds": 0.5555555555555556
+    },
+    {
+      "baseline": {
+        "area_ratio_max": 829.6997656680879,
+        "area_ratio_min": 0.060234501006563766,
+        "area_ratio_p95": 2.137160877200766,
+        "area_ratio_p99": 21.844359663047847,
+        "catastrophic_face_count": 4419,
+        "condition_max": 2670.9829577518103,
+        "condition_p95": 4.00096781435008,
+        "condition_p99": 29.85462817372992,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 125.2025537996953,
+        "edge_ratio_p95": 2.583867249606783,
+        "edge_ratio_p99": 23.24770546429207,
+        "face_count": 24958,
+        "flipped_face_count": 3885
+      },
+      "clip_id": "demo_slash_v1",
+      "frame_index": 3,
+      "oracle": {
+        "area_ratio_max": 829.6997656680879,
+        "area_ratio_min": 0.060234501006563766,
+        "area_ratio_p95": 1.061326417817428,
+        "area_ratio_p99": 5.683904381482554,
+        "catastrophic_face_count": 2835,
+        "condition_max": 2670.9829577518103,
+        "condition_p95": 1.3584988692619953,
+        "condition_p99": 9.421661566832906,
+        "degenerate_face_count": 0,
+        "edge_ratio_max": 125.2025537996953,
+        "edge_ratio_p95": 1.0890790320652748,
+        "edge_ratio_p99": 7.095742145864765,
+        "face_count": 20620,
+        "flipped_face_count": 2738
+      },
+      "renders": [
+        {
+          "baseline_catastrophic_owned_pixels": 235619,
+          "baseline_final_alpha_pixels": 334083,
+          "oracle_catastrophic_owned_pixels": 198693,
+          "oracle_final_alpha_pixels": 322006,
+          "view_index": 0
+        },
+        {
+          "baseline_catastrophic_owned_pixels": 93869,
+          "baseline_final_alpha_pixels": 251195,
+          "oracle_catastrophic_owned_pixels": 58200,
+          "oracle_final_alpha_pixels": 233012,
+          "view_index": 2
+        }
+      ],
+      "time_seconds": 0.8333333333333334
+    }
+  ],
+  "schema": "RealSaS.KnightOracleTopologyRepairCausality.v1",
+  "status": "DIAGNOSTIC_ORACLE_ONLY__NO_PRODUCT_REPAIR"
+}

@@ -1,0 +1,1 @@
+KNIGHT_ORACLE_TOPOLOGY_CAUSAL_EXPERIMENT_PASS {"alpha_retention": 0.943179547958361, "catastrophic_pixel_reduction": 0.2264992188989453, "max_edge_p95_reduction": 0.5851941406296679, "median_flip_reduction": 0.24520337682271676, "removed_face_count": 4338, "verdict": "INCONCLUSIVE_OR_NOT_OWNER"}

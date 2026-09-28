@@ -751,6 +751,143 @@ def bind_source_visual_points_to_projected_surface_v1(
     }
 
 
+def bind_region_visual_vertices_to_mechanical_affine_v1(
+    *,
+    points_source_xy,
+    vertex_region_id,
+    seed_region_labels,
+    owner_face_index,
+    mechanical_positions_xyz,
+    mechanical_faces,
+    camera,
+    candidate_seed_count: int = 16,
+    max_seed_distance_px: float = 8.0,
+) -> dict[str, np.ndarray]:
+    """Bind every seam-aware visual vertex to a nearby safe mechanical face.
+
+    Region/chart topology is already qualified by the safe-face adjacency
+    partition. For each visual vertex we search safe seed pixels from the same
+    chart, consider their first-hit mechanical faces, and choose the face
+    requiring the least affine extrapolation. Unclamped barycentric coordinates
+    are intentional: exact half-pixel source-silhouette boundaries follow local
+    face affine motion instead of carrying a fixed screen-space offset.
+    """
+    points = np.asarray(points_source_xy, dtype=np.float64)
+    vertex_regions = np.asarray(vertex_region_id, dtype=np.int32)
+    seed_regions = np.asarray(seed_region_labels, dtype=np.int32)
+    owner = np.asarray(owner_face_index, dtype=np.int64)
+    xyz = np.asarray(mechanical_positions_xyz, dtype=np.float64)
+    faces = np.asarray(mechanical_faces, dtype=np.int64)
+    if points.ndim != 2 or points.shape[1] != 2 or not np.isfinite(points).all():
+        raise QualificationError("VISUAL_AFFINE_BIND_POINTS_INVALID")
+    if vertex_regions.shape != (len(points),):
+        raise QualificationError("VISUAL_AFFINE_BIND_REGION_VECTOR_INVALID")
+    if seed_regions.ndim != 2 or owner.shape != seed_regions.shape:
+        raise QualificationError("VISUAL_AFFINE_BIND_SEED_OWNER_SHAPE_INVALID")
+    if faces.ndim != 2 or faces.shape[1] != 3:
+        raise QualificationError("VISUAL_AFFINE_BIND_FACES_INVALID")
+    if xyz.ndim != 2 or xyz.shape[1] != 3:
+        raise QualificationError("VISUAL_AFFINE_BIND_XYZ_INVALID")
+    k_requested = int(candidate_seed_count)
+    limit = float(max_seed_distance_px)
+    if k_requested < 1 or not np.isfinite(limit) or limit <= 0.0:
+        raise QualificationError("VISUAL_AFFINE_BIND_POLICY_INVALID")
+
+    projected = np.asarray(project_points_xyz_v3(xyz, camera), dtype=np.float64)
+    projected_source = raster_xy_to_source_texel_xy(projected[:, :2])
+    bound_faces = np.empty((len(points), 3), dtype=np.int64)
+    bound_bary = np.empty((len(points), 3), dtype=np.float64)
+    seed_distance = np.empty((len(points),), dtype=np.float64)
+    extrapolation = np.empty((len(points),), dtype=np.float64)
+
+    for region_id in sorted(set(vertex_regions.tolist())):
+        ids = np.flatnonzero(vertex_regions == int(region_id))
+        ys, xs = np.nonzero(seed_regions == int(region_id))
+        if len(xs) == 0:
+            raise QualificationError("VISUAL_AFFINE_BIND_REGION_WITHOUT_SAFE_SEED:" + str(region_id))
+        seed_owner = owner[ys, xs]
+        good = (seed_owner >= 0) & (seed_owner < len(faces))
+        ys = ys[good]
+        xs = xs[good]
+        seed_owner = seed_owner[good]
+        if len(xs) == 0:
+            raise QualificationError("VISUAL_AFFINE_BIND_REGION_WITHOUT_VALID_OWNER:" + str(region_id))
+        seed_xy = np.column_stack((xs.astype(np.float64), ys.astype(np.float64)))
+        tree = cKDTree(seed_xy)
+        k = min(k_requested, len(seed_xy))
+        distances, nearest = tree.query(points[ids], k=k)
+        distances = np.asarray(distances, dtype=np.float64)
+        nearest = np.asarray(nearest, dtype=np.int64)
+        if k == 1:
+            distances = distances[:, None]
+            nearest = nearest[:, None]
+
+        for local_index, vertex_index in enumerate(ids.tolist()):
+            nearest_distance = float(distances[local_index, 0])
+            if nearest_distance > limit + 1.0e-12:
+                raise QualificationError("VISUAL_AFFINE_BIND_SEED_DISTANCE_EXCEEDS_BUDGET:" + str(region_id) + ":" + str(nearest_distance))
+            candidate_faces = []
+            seen = set()
+            for seed_index in nearest[local_index].tolist():
+                face_index = int(seed_owner[int(seed_index)])
+                if face_index not in seen:
+                    seen.add(face_index)
+                    candidate_faces.append(face_index)
+
+            point = points[int(vertex_index)]
+            best = None
+            for face_index in candidate_faces:
+                face_vertices = faces[face_index]
+                tri = projected_source[face_vertices]
+                bary = _barycentric(point, tri)
+                if bary is None or not np.isfinite(bary).all():
+                    continue
+                lower = max(0.0, -float(np.min(bary)))
+                upper = max(0.0, float(np.max(bary)) - 1.0)
+                penalty = max(lower, upper)
+                centroid_distance = float(np.linalg.norm(point - np.mean(tri, axis=0)))
+                key = (penalty, centroid_distance, face_index)
+                if best is None or key < best[0]:
+                    best = (key, face_index, bary)
+            if best is None:
+                raise QualificationError("VISUAL_AFFINE_BIND_NO_NONDEGENERATE_FACE:" + str(region_id))
+            _key, face_index, bary = best
+            bound_faces[int(vertex_index)] = faces[int(face_index)]
+            bound_bary[int(vertex_index)] = bary
+            seed_distance[int(vertex_index)] = nearest_distance
+            extrapolation[int(vertex_index)] = float(best[0][0])
+
+    rest_reconstructed = np.sum(projected_source[bound_faces] * bound_bary[:, :, None], axis=1)
+    rest_error = np.linalg.norm(rest_reconstructed - points, axis=1)
+    if float(np.max(rest_error)) > 1.0e-7:
+        raise QualificationError("VISUAL_AFFINE_BIND_REST_RECONSTRUCTION_DRIFT")
+    return {
+        "mechanical_face_indices": bound_faces,
+        "mechanical_barycentric": bound_bary,
+        "nearest_safe_seed_distance_px": seed_distance,
+        "extrapolation_penalty": extrapolation,
+        "rest_reconstruction_error_px": rest_error,
+    }
+
+
+def evaluate_region_visual_binding_v1(
+    binding: Mapping[str, Any],
+    *,
+    posed_mechanical_positions_xyz,
+    camera,
+) -> np.ndarray:
+    """Evaluate a qualified affine visual-to-mechanical binding in source pixels."""
+    posed = np.asarray(posed_mechanical_positions_xyz, dtype=np.float64)
+    faces = np.asarray(binding["mechanical_face_indices"], dtype=np.int64)
+    bary = np.asarray(binding["mechanical_barycentric"], dtype=np.float64)
+    if posed.ndim != 2 or posed.shape[1] != 3:
+        raise QualificationError("VISUAL_AFFINE_EVAL_POSED_XYZ_INVALID")
+    if faces.ndim != 2 or faces.shape[1] != 3 or bary.shape != faces.shape:
+        raise QualificationError("VISUAL_AFFINE_EVAL_BINDING_SHAPE_INVALID")
+    projected = np.asarray(project_points_xyz_v3(posed, camera), dtype=np.float64)
+    source_xy = raster_xy_to_source_texel_xy(projected[:, :2])
+    return np.sum(source_xy[faces] * bary[:, :, None], axis=1)
+
 def _signed_area(loop: list[tuple[int, int]]) -> float:
     area = 0.0
     for i, a in enumerate(loop):

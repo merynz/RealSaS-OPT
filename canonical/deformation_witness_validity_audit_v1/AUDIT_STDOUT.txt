@@ -1,0 +1,90 @@
+{
+  "authority_rule": {
+    "affected_previous_evidence": [
+      "canonical/G3_ORIENTATION_INVERSION_ADVERSARY_V1_20260928.json",
+      "canonical/G3_ORIENTATION_SIGN_INFORMATION_LOSS_AUDIT_V1_20260928.json",
+      "canonical/STAGE35_ORIENTATION_INVERSION_ADVERSARY_V1_20260928.json",
+      "canonical/knight_baseline_forensic_capsule_v1/BASELINE_FORENSIC_CAPSULE_V1.json projected flipped_face_count fields",
+      "canonical/knight_oracle_topology_repair_causality_v1/REPORT.json flipped_face and flip-derived verdict terms"
+    ],
+    "for_remaining_knight_owner_audit": [
+      "Do not use rest-normal sign as mechanical guilt.",
+      "Do not use fixed-camera projected winding sign as mechanical guilt.",
+      "Use rotation-invariant intrinsic edge/area/condition metrics for stretch/compression.",
+      "Treat screen-space growth as visual consequence evidence, not intrinsic inversion proof.",
+      "Use explicit neighborhood fold/self-intersection evidence if a foldover claim is required."
+    ]
+  },
+  "construction": "A unit triangle undergoes a proper 180-degree rigid rotation around X. No material stretch, compression, reflection, or non-rigid deformation occurs.",
+  "findings": [
+    {
+      "confirmed": true,
+      "consequence": "A face count based only on dot(rest_normal, posed_normal)<0 cannot be used as proof of mechanical inversion in a 3D surface.",
+      "id": "REST_NORMAL_DOT_IS_NOT_INTRINSIC_SURFACE_INVERSION_PROOF",
+      "severity": "P0_AUDIT_WITNESS_CORRECTION"
+    },
+    {
+      "confirmed": true,
+      "consequence": "Projected winding changes are useful visibility/render witnesses, but a rigid 3D rotation through edge-on can flip projected winding without any material deformation.",
+      "id": "FIXED_CAMERA_PROJECTED_WINDING_FLIP_IS_NOT_INTRINSIC_INVERSION_PROOF",
+      "severity": "P0_AUDIT_WITNESS_CORRECTION"
+    },
+    {
+      "confirmed": true,
+      "consequence": "The earlier G3/Stage35 single-triangle 'reflection' adversary proves those scalar metrics are unsigned, but does not prove an intrinsic 3D surface inversion was missed. Any no-foldover contract needs a transported/local-neighborhood or self-intersection definition.",
+      "id": "PRIOR_REFLECTION_ADVERSARY_DOES_NOT_DISTINGUISH_2D_REFLECTION_FROM_3D_PROPER_ROTATION",
+      "severity": "P0_AUDIT_AUTHORITY_CORRECTION"
+    }
+  ],
+  "intrinsic_deformation": {
+    "area_ratio_3d_unsigned": 1.0,
+    "edge_ratios": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_edge_ratio_error_from_one": 0.0
+  },
+  "orientation_witnesses": {
+    "fixed_xy_projection_declares_winding_flip": true,
+    "normal_dot_declares_flip": true,
+    "posed_normal": [
+      0.0,
+      0.0,
+      -1.0
+    ],
+    "posed_xy_signed_area": -0.5,
+    "rest_normal": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "rest_normal_dot_posed_normal": -1.0,
+    "rest_xy_signed_area": 0.5
+  },
+  "proper_rigid_transform": {
+    "corotated_reconstruction_max_abs_error": 0.0,
+    "determinant": 1.0,
+    "matrix": [
+      [
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        -1.0
+      ]
+    ],
+    "orthogonality_error": 0.0
+  },
+  "repo_head": "19e92fa85d2541287d592d3f5bb19fd48b5f6efd",
+  "schema": "RealSaS.DeformationWitnessValidityAudit.v1",
+  "status": "AUDIT_CORRECTION__NO_REPAIR_APPLIED"
+}

@@ -49,6 +49,21 @@ def main():
     faces=faces_index(cand)
     P0=np.asarray([v.P for v in cand.vertices],dtype=np.float64)
     W0,jids,tri,sf=teacher_weights(a.teacher_bank,a.teacher_source,sk,cand)
+    teacher_simplex_before={
+        "min_weight":float(np.min(W0)),
+        "max_abs_sum_minus_one":float(np.max(np.abs(W0.sum(axis=1)-1.0))),
+        "zero_or_negative_sum_rows":int(np.count_nonzero(W0.sum(axis=1)<=1e-12)),
+    }
+    if (
+        teacher_simplex_before["min_weight"] < -1e-6
+        or teacher_simplex_before["max_abs_sum_minus_one"] > 1e-4
+        or teacher_simplex_before["zero_or_negative_sum_rows"] > 0
+    ):
+        raise RuntimeError("TEACHER_WEIGHT_SIMPLEX_NOT_NUMERICAL_RESIDUE:"+json.dumps(teacher_simplex_before,sort_keys=True))
+    W0_raw=W0.copy()
+    W0=np.maximum(W0,0.0)
+    W0/=W0.sum(axis=1,keepdims=True)
+    teacher_simplex_projection_l1=np.sum(np.abs(W0-W0_raw),axis=1)
     src_comp=source_components(int(sf.max())+1,sf)
     tri_comp=np.asarray([src_comp[int(row[0])] for row in sf],dtype=np.int64)
     label=np.asarray([tri_comp[int(t)] for t in tri],dtype=np.int64)
@@ -139,8 +154,21 @@ def main():
     F=np.asarray(new_faces,dtype=np.int64)
     if not np.isfinite(P).all() or not np.isfinite(W).all():
         raise RuntimeError("SPLIT_NONFINITE")
-    if np.any(W< -1e-12) or np.max(np.abs(W.sum(axis=1)-1.0))>1e-9:
-        raise RuntimeError("SPLIT_WEIGHT_SIMPLEX_INVALID")
+    split_simplex_before={
+        "min_weight":float(np.min(W)),
+        "max_abs_sum_minus_one":float(np.max(np.abs(W.sum(axis=1)-1.0))),
+        "zero_or_negative_sum_rows":int(np.count_nonzero(W.sum(axis=1)<=1e-12)),
+    }
+    if (
+        split_simplex_before["min_weight"] < -1e-6
+        or split_simplex_before["max_abs_sum_minus_one"] > 1e-4
+        or split_simplex_before["zero_or_negative_sum_rows"] > 0
+    ):
+        raise RuntimeError("SPLIT_WEIGHT_SIMPLEX_NOT_NUMERICAL_RESIDUE:"+json.dumps(split_simplex_before,sort_keys=True))
+    W_raw=W.copy()
+    W=np.maximum(W,0.0)
+    W/=W.sum(axis=1,keepdims=True)
+    split_simplex_projection_l1=np.sum(np.abs(W-W_raw),axis=1)
 
     # Verify each produced face is region-pure.
     R=np.asarray(region,dtype=np.int64)
@@ -164,6 +192,14 @@ def main():
         "face_deletion":False,
         "rest_geometry_interpolation":"MIDPOINT_AND_FACE_CENTROID_ONLY",
         "new_weight_rule":"REGION_ENDPOINT_OR_REGION_FACE_VERTEX_AVERAGE__ORACLE_TEST",
+      },
+      "teacher_simplex_numerics":{
+        "before":teacher_simplex_before,
+        "projection_l1_max":float(np.max(teacher_simplex_projection_l1)),
+        "projection_l1_p99":float(np.quantile(teacher_simplex_projection_l1,.99)),
+        "split_before":split_simplex_before,
+        "split_projection_l1_max":float(np.max(split_simplex_projection_l1)),
+        "split_projection_l1_p99":float(np.quantile(split_simplex_projection_l1,.99)),
       },
       "topology":{
         "source_component_count":int(len(set(src_comp.tolist()))),

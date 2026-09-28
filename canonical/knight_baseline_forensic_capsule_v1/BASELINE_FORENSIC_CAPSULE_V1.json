@@ -1,0 +1,437 @@
+{
+  "authority": {
+    "camera_set_hash": "79bf4b15bd1ecd1a1ace7a978237a294dddab8ca0b9402917407d2f767bb7224",
+    "candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+    "skeleton_lineage_hash": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+    "skin_lineage_hash": "b30417b9375a52c646618f0fb94ea8ddd7285fea959e460522dd5f8b6b70cb2a",
+    "stage05_hash_fields": {
+      "camera_set_hash": "79bf4b15bd1ecd1a1ace7a978237a294dddab8ca0b9402917407d2f767bb7224",
+      "source_bundle_sha256": "0e00685d7064726bf22dd71a25e872c066eeea4f90b54748c44a3082e74dd0bd"
+    },
+    "stage05_payload_sha256": "901b9739df0b25c32cd9e2fbc8cb394ad0ed78f2ebb5a5c71ebc5a96b57e16ce",
+    "stage18_hash_fields": {
+      "candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+      "carrier_policy_binding_hash": "f368c32f3d3c2d9c2602e18772aa1bde341723f6620e873bf4a5c5759835ef71",
+      "partition_binding_hash": "ba14cb67ff5bdf78a609e56ccddcfd8203075ffe304734df3be8fcf657635dec",
+      "producer_policy_hash": "5159deeaa2134d5e1f591af090e983d894c35291722d1261528f8fb0a77766e2",
+      "surface_binding_hash": "452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a"
+    },
+    "stage18_payload_sha256": "f2451a6e626ae3569c82bc2696f5ec1cc078366dc2dcfc7552671dc10c1c44ee",
+    "stage23_hash_fields": {
+      "appearance_domain_binding_hash": "4a894c35f2fa2d65105a78d8526e62da32393b19b1537cfaaac238bd4528eed8",
+      "asset_hash": "95c0b75dce0198047a8893ad0a45220f50310fd09f18c10454c0b420f4248c24",
+      "candidate_mesh_binding_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+      "compile_seal_binding_hash": "e73d92424d213b3364346b6c3e2e2cc74fa487ee95cc3c825ada20a12fde7e2d",
+      "output_direction_set_binding_hash": "eb3f1955d95d286b522d03f3de97fd6ae90b84718a04b8840d8bf7599fce6fee",
+      "provenance_npz_sha256": "6beca9b5630d24ff2c0d0e3673241293e5768032f4200f72554279f1210a9e1f",
+      "surface_addressing_binding_hash": "9f39ff03ffa006ff2f427c9d9ed588ced9245dff626eef9e2a357d766da9fbd3",
+      "uv_npz_sha256": "a2123876300d6a478a7029114866642e7e7c43148626e2946169b336d6e38b9c"
+    },
+    "stage23_payload_sha256": "a79740091c621a9bb72522fae103a17e5a00a7cdb9be2b408fc1ed971a12786b",
+    "stage28_hash_fields": {
+      "skeleton_lineage_hash": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850"
+    },
+    "stage28_payload_sha256": "e111ff5af7056a73eae92b3e94015dae9222228ac4c04efe9aff35cf0317f068",
+    "stage32_hash_fields": {
+      "skeleton_binding_hash": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+      "skin_lineage_hash": "b30417b9375a52c646618f0fb94ea8ddd7285fea959e460522dd5f8b6b70cb2a",
+      "surface_binding_hash": "452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a"
+    },
+    "stage32_payload_sha256": "4038d240049d88aaa58cfa2261d3e42b0b5334bd591e515b664a2887f38d85e5",
+    "stage35_ledger_row": {
+      "diagnostics_ref": {
+        "bytes": 654,
+        "diagnostics_hash": "bcc8c923c4efc57aa53073ec229a8c7b50476a5d1243dcb599b2c471c61850dc",
+        "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/artifacts/35_DYNAMIC_MECHANICAL_MESH_QUALIFIED/failure_diagnostics.json",
+        "sha256": "291d915bb1d47d033e9a5538d609f0d8d7dfd36f5cb7cc6499f8c1801e16276c"
+      },
+      "event": "STAGE_FAILURE_DIAGNOSTICS_PERSISTED",
+      "stage_id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+    }
+  },
+  "baseline": {
+    "commit": "62aebc388605",
+    "gif_blobs": {
+      "demo_idle_v1": "31b64edff1da106bc8feb00faede61ffe68dc89c",
+      "demo_run_v1": "b8f0e97e74396a0987444bb72ea93db4bb519640",
+      "demo_slash_v1": "73a567f3ff17786d3316e3fb02a723ee3c026eca"
+    },
+    "producer_blob": "7917be02f325ba00b5dcd2b31a786898e45f640f",
+    "report_blob": "9120723f6bc00142fb6bb992d3ee7a85c601bf4f",
+    "sheet_blobs": {
+      "demo_idle_v1": "cae86d8a04bde6768ac9c3dafed13a2ab318cf29",
+      "demo_run_v1": "8e9ed58a3bfbbace73f54e3e5593691f90eef4f1",
+      "demo_slash_v1": "7a87f310473d602c99eb712be964dcd430b47cfb"
+    }
+  },
+  "clips": [
+    {
+      "actual_rgb_blob": "8e9ed58a3bfbbace73f54e3e5593691f90eef4f1",
+      "actual_rgb_path": "/tmp/knight_baseline_forensic_capsule_v1/KNIGHT_RUN_BASELINE_ACTUAL_RGB_V1.png",
+      "clip_id": "demo_run_v1",
+      "expected_baseline_blob": "8e9ed58a3bfbbace73f54e3e5593691f90eef4f1",
+      "frame_metrics": [
+        {
+          "deformation": {
+            "area_ratio_max": 81432.76018111921,
+            "area_ratio_p95": 118.29446838325141,
+            "area_ratio_p99": 751.610972861976,
+            "edge_ratio_max": 5632.4636216774725,
+            "edge_ratio_p95": 22.978546020517406,
+            "edge_ratio_p99": 101.99956018829444,
+            "flipped_face_count": 6382,
+            "valid_rest_face_count": 24958
+          },
+          "final_alpha_pixel_count": 245616,
+          "frame_index": 0,
+          "geometry_visible_pixel_count": 245679,
+          "joint_position_sha256": "70d7068e8fe749dfcf7d45cd8b1380812e3e7e4ca7ebd57bf691e070041d1eb3",
+          "motion_frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "posed_vertex_sha256": "bbe035592c3801c2e54de6a7c4269b9de1e91645c9fb8033f41bd71d54bacc3b",
+          "time_seconds": 0.0,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 0
+        },
+        {
+          "deformation": {
+            "area_ratio_max": 195150.70485845392,
+            "area_ratio_p95": 154.74530183065232,
+            "area_ratio_p99": 1172.7857529107691,
+            "edge_ratio_max": 6986.363860876623,
+            "edge_ratio_p95": 33.934841947087115,
+            "edge_ratio_p99": 123.49251165706592,
+            "flipped_face_count": 6773,
+            "valid_rest_face_count": 24958
+          },
+          "final_alpha_pixel_count": 322530,
+          "frame_index": 1,
+          "geometry_visible_pixel_count": 322532,
+          "joint_position_sha256": "ee311866860ff9f0ee8d657e25f7f3d6c31c1e2e760d8ec1b3f8c4d5e1df848c",
+          "motion_frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "posed_vertex_sha256": "c0f4b3d640e6adf6565e5c2242ea2c78119019c93a9e5102dca32ccc87ed886a",
+          "time_seconds": 0.20833333333333334,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 0
+        },
+        {
+          "deformation": {
+            "area_ratio_max": 154731.82569955516,
+            "area_ratio_p95": 71.63290642737385,
+            "area_ratio_p99": 540.4885433054286,
+            "edge_ratio_max": 5423.507771321099,
+            "edge_ratio_p95": 17.30313229110301,
+            "edge_ratio_p99": 80.74150779689339,
+            "flipped_face_count": 6577,
+            "valid_rest_face_count": 24958
+          },
+          "final_alpha_pixel_count": 212933,
+          "frame_index": 2,
+          "geometry_visible_pixel_count": 212946,
+          "joint_position_sha256": "8a17a27776d255efc0de26ebe16fffeb15f50f02260ebf1cd18b9987fb5edd62",
+          "motion_frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "posed_vertex_sha256": "c61e7a29a5be57bca3521e15c8907515a02fbfe9c1facf0c23fb53c708a3a345",
+          "time_seconds": 0.4166666666666667,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 0
+        },
+        {
+          "deformation": {
+            "area_ratio_max": 178548.13659666115,
+            "area_ratio_p95": 104.2139616387994,
+            "area_ratio_p99": 874.07924138561,
+            "edge_ratio_max": 6963.943945722279,
+            "edge_ratio_p95": 25.639673039789056,
+            "edge_ratio_p99": 94.78322080763017,
+            "flipped_face_count": 7105,
+            "valid_rest_face_count": 24958
+          },
+          "final_alpha_pixel_count": 277130,
+          "frame_index": 3,
+          "geometry_visible_pixel_count": 277152,
+          "joint_position_sha256": "bb03db1c7b195664cac04d8eccacd63d45b65d008ee41a7154659d6f11ecf907",
+          "motion_frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "posed_vertex_sha256": "c3b5aab21fd7fd6e7a2ca106e6942224f09c8c0a66091c495848cdb0b5113f98",
+          "time_seconds": 0.625,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 0
+        },
+        {
+          "deformation": {
+            "area_ratio_max": 379464.5314989013,
+            "area_ratio_p95": 101.51193913033477,
+            "area_ratio_p99": 879.4404075246564,
+            "edge_ratio_max": 24076.782981862063,
+            "edge_ratio_p95": 19.853484866190488,
+            "edge_ratio_p99": 96.34066746178439,
+            "flipped_face_count": 8670,
+            "valid_rest_face_count": 24958
+          },
+          "final_alpha_pixel_count": 323118,
+          "frame_index": 0,
+          "geometry_visible_pixel_count": 323899,
+          "joint_position_sha256": "70d7068e8fe749dfcf7d45cd8b1380812e3e7e4ca7ebd57bf691e070041d1eb3",
+          "motion_frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "posed_vertex_sha256": "bbe035592c3801c2e54de6a7c4269b9de1e91645c9fb8033f41bd71d54bacc3b",
+          "time_seconds": 0.0,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 2
+        },
+        {
+          "deformation": {
+            "area_ratio_max": 768101.6548689681,
+            "area_ratio_p95": 109.1641551074542,
+            "area_ratio_p99": 785.1249503969063,
+            "edge_ratio_max": 10460.31882586524,
+            "edge_ratio_p95": 21.220783388850183,
+            "edge_ratio_p99": 101.53952226986132,
+            "flipped_face_count": 7472,
+            "valid_rest_face_count": 24958
+          },
+          "final_alpha_pixel_count": 287269,
+          "frame_index": 1,
+          "geometry_visible_pixel_count": 288216,
+          "joint_position_sha256": "ee311866860ff9f0ee8d657e25f7f3d6c31c1e2e760d8ec1b3f8c4d5e1df848c",
+          "motion_frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "posed_vertex_sha256": "c0f4b3d640e6adf6565e5c2242ea2c78119019c93a9e5102dca32ccc87ed886a",
+          "time_seconds": 0.20833333333333334,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 2
+        },
+        {
+          "deformation": {
+            "area_ratio_max": 194954.4697605967,
+            "area_ratio_p95": 66.94967127668055,
+            "area_ratio_p99": 696.3063992545755,
+            "edge_ratio_max": 22959.96942023768,
+            "edge_ratio_p95": 14.702200351664176,
+            "edge_ratio_p99": 82.46059941392507,
+            "flipped_face_count": 8834,
+            "valid_rest_face_count": 24958
+          },
+          "final_alpha_pixel_count": 289385,
+          "frame_index": 2,
+          "geometry_visible_pixel_count": 289895,
+          "joint_position_sha256": "8a17a27776d255efc0de26ebe16fffeb15f50f02260ebf1cd18b9987fb5edd62",
+          "motion_frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "posed_vertex_sha256": "c61e7a29a5be57bca3521e15c8907515a02fbfe9c1facf0c23fb53c708a3a345",
+          "time_seconds": 0.4166666666666667,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 2
+        },
+        {
+          "deformation": {
+            "area_ratio_max": 896259.6741372194,
+            "area_ratio_p95": 111.55837055500294,
+            "area_ratio_p99": 840.58848303989,
+            "edge_ratio_max": 15432.79115858777,
+            "edge_ratio_p95": 22.66170264562973,
+            "edge_ratio_p99": 107.78378309581689,
+            "flipped_face_count": 7461,
+            "valid_rest_face_count": 24958
+          },
+          "final_alpha_pixel_count": 298520,
+          "frame_index": 3,
+          "geometry_visible_pixel_count": 299086,
+          "joint_position_sha256": "bb03db1c7b195664cac04d8eccacd63d45b65d008ee41a7154659d6f11ecf907",
+          "motion_frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "posed_vertex_sha256": "c3b5aab21fd7fd6e7a2ca106e6942224f09c8c0a66091c495848cdb0b5113f98",
+          "time_seconds": 0.625,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 2
+        }
+      ],
+      "geometry_owner_blob": "64208a4e6b4bd9f399c19164094c71dc3f736bb2",
+      "geometry_owner_path": "/tmp/knight_baseline_forensic_capsule_v1/KNIGHT_RUN_BASELINE_GEOMETRY_OWNER_V1.png",
+      "mapping": [
+        {
+          "cost": 0.6116771317630436,
+          "next_cost": 0.7054434059820822,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:7e87e97fc9fe89cbd718"
+        },
+        {
+          "cost": 0.37324048737202953,
+          "next_cost": 0.5047419906119381,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ab16ff2ffc7408c862ae"
+        },
+        {
+          "cost": 0.2054681713865518,
+          "next_cost": 0.2925199639891659,
+          "source_joint_id": "Fingers.R",
+          "target_joint_id": "J:c9cdb266f7c167a620a9"
+        },
+        {
+          "cost": 0.17678234026097459,
+          "next_cost": 0.4085321751602823,
+          "source_joint_id": "LowerArm.R",
+          "target_joint_id": "J:932628adf7f0d5936426"
+        },
+        {
+          "cost": 0.2029030249075255,
+          "next_cost": 0.28310195332574495,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:4c9f9eace712daf31538"
+        },
+        {
+          "cost": 0.48247436163504,
+          "next_cost": 0.6238222174056915,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:f5cf9181e27d0f791f7d"
+        },
+        {
+          "cost": 0.19833878296620702,
+          "next_cost": 0.2583591034997136,
+          "source_joint_id": "Thumb.R",
+          "target_joint_id": "J:75a17a4287b28cd7f57f"
+        },
+        {
+          "cost": 0.1507628779714688,
+          "next_cost": 0.49685610634347954,
+          "source_joint_id": "UpperLeg.R",
+          "target_joint_id": "J:f50f39d42ef3820824ef"
+        },
+        {
+          "cost": 0.15738848284903773,
+          "next_cost": 0.2182245988227146,
+          "source_joint_id": "MiddleHand.L",
+          "target_joint_id": "J:8455bf4c0a38867b7d9b"
+        },
+        {
+          "cost": 0.12566026834671604,
+          "next_cost": 0.15653416095612008,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:5428a88dad4d4d8d5c4d"
+        },
+        {
+          "cost": 0.12744628795827562,
+          "next_cost": 0.17729832396772957,
+          "source_joint_id": "Palm.L",
+          "target_joint_id": "J:33c7075f501c9af4cd0d"
+        },
+        {
+          "cost": 0.21451150060948782,
+          "next_cost": 0.3102178824405303,
+          "source_joint_id": "Neck",
+          "target_joint_id": "J:1008208d141ae248de43"
+        },
+        {
+          "cost": 0.22331652895761903,
+          "next_cost": 0.341721580563024,
+          "source_joint_id": "Fingers.L",
+          "target_joint_id": "J:136e20712bbd1481596e"
+        },
+        {
+          "cost": 0.1753136842084541,
+          "next_cost": 0.2033041789185967,
+          "source_joint_id": "MiddleHand.R",
+          "target_joint_id": "J:e5441b559f1c34b41aa2"
+        },
+        {
+          "cost": 0.1542952449768342,
+          "next_cost": 0.521825399970232,
+          "source_joint_id": "UpperLeg.L",
+          "target_joint_id": "J:063ee183f601e19a8ca9"
+        },
+        {
+          "cost": 0.24521820132730113,
+          "next_cost": 0.5053838222620202,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:73295dbdbb50d303e597"
+        },
+        {
+          "cost": 0.18366720483839166,
+          "next_cost": 0.2331092975233877,
+          "source_joint_id": "UpperArm.R",
+          "target_joint_id": "J:42d181ebf3515959283a"
+        },
+        {
+          "cost": 0.5902787916544152,
+          "next_cost": 0.6714047201184266,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:7d9e31e2d0bd48f88ecb"
+        },
+        {
+          "cost": 0.338657132190124,
+          "next_cost": 0.5510856632138917,
+          "source_joint_id": "Head",
+          "target_joint_id": "J:eafe286e7d84499e5257"
+        },
+        {
+          "cost": 0.1615942399702586,
+          "next_cost": 0.45709510248575125,
+          "source_joint_id": "LowerArm.L",
+          "target_joint_id": "J:7cf59fbe52c53280546a"
+        },
+        {
+          "cost": 0.37056767662637935,
+          "next_cost": 0.4647284720520398,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:cf05f36e919ff69a9d8e"
+        },
+        {
+          "cost": 0.40659342489016087,
+          "next_cost": 0.6154678629286205,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:362735eeec6ee5a3d46f"
+        },
+        {
+          "cost": 0.5383114087285982,
+          "next_cost": 0.693192900090975,
+          "source_joint_id": "Body",
+          "target_joint_id": "J:237d229c33bc9eb9bf91"
+        },
+        {
+          "cost": 0.1952579664472978,
+          "next_cost": 0.25572078846434404,
+          "source_joint_id": "UpperArm.L",
+          "target_joint_id": "J:a80d2c086e86a4cc08b5"
+        },
+        {
+          "cost": 0.2208842181998788,
+          "next_cost": 0.6520160579394874,
+          "source_joint_id": "Torso",
+          "target_joint_id": "J:2ff965d6dbe4efc2d5d4"
+        },
+        {
+          "cost": 0.2598771637136827,
+          "next_cost": 0.4990601726171502,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ee24577789f0235b8186"
+        },
+        {
+          "cost": 0.16516790065247416,
+          "next_cost": 0.3150452870805952,
+          "source_joint_id": "Hips",
+          "target_joint_id": "J:b9e5c0d23f688f672060"
+        }
+      ],
+      "mapping_sha256": "6d9e45124443a911f142e8a22c15c51ea455493591e9db26d728a21a1082044f",
+      "motion_json_sha256": "bfcfc1e44f4960e498f6f5183e224b72ed74e0352906c94f09989abab41b1b89",
+      "provenance_blob": "d978793a282a4ecf0ddd76a7a8123fba14dba79a",
+      "provenance_path": "/tmp/knight_baseline_forensic_capsule_v1/KNIGHT_RUN_BASELINE_PROVENANCE_V1.png",
+      "uv_blob": "efbc15574268410ec93889c47b0427a3e27eb3ea",
+      "uv_path": "/tmp/knight_baseline_forensic_capsule_v1/KNIGHT_RUN_BASELINE_UV_V1.png"
+    }
+  ],
+  "contract": {
+    "appearance_authority": "STAGE23_COMPLETE_APPEARANCE",
+    "mechanical_carrier": "STAGE18_CANONICAL_MESH_CANDIDATE",
+    "retarget": "NONINJECTIVE_REST_GEOMETRY_OBJECT_FRAME_REBASE_V1",
+    "samples_per_view": 4,
+    "skeleton_authority": "STAGE28_QUALIFIED_SKELETON",
+    "skin_authority": "STAGE32_QUALIFIED_SKIN",
+    "views": [
+      0,
+      2
+    ]
+  },
+  "execution": {
+    "diagnostic_script_blob": "460053b1016e61a3ead61be0853f19ef73381d57",
+    "git_head": "62aebc388605e0f762f175dd3f929b5c09d1d70b",
+    "producer_blob": "7917be02f325ba00b5dcd2b31a786898e45f640f",
+    "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924"
+  },
+  "schema": "RealSaS.KnightBaselineForensicRenderCapsule.v1",
+  "status": "MEASURED_BASELINE_FORENSIC"
+}

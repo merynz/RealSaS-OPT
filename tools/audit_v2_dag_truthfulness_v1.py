@@ -94,7 +94,7 @@ cycle_witness["cycle_confirmed"]=all(cycle_witness.values())
 
 probes={}
 for sid in [
-    "14_GEOMETRY_SUBSTRATE_ADEQUATE",
+    "14_GSA_BUILD",
     "18_CANONICAL_MESH_ADDRESSING_BUILD",
     "23_COMPLETE_APPEARANCE_ASSET_BAKED",
     "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",

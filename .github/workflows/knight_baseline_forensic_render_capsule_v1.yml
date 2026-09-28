@@ -1,0 +1,105 @@
+name: knight-baseline-forensic-render-capsule-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/demo/render_knight_baseline_forensic_capsule_v1.py'
+      - '.github/workflows/knight_baseline_forensic_render_capsule_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: knight-baseline-forensic-render-capsule-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  forensic:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      BASELINE_COMMIT: 62aebc388605e0f762f175dd3f929b5c09d1d70b
+      BASELINE_PRODUCER_BLOB: 7917be02f325ba00b5dcd2b31a786898e45f640f
+      OUT_DIR: canonical/knight_baseline_forensic_capsule_v1
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Preserve diagnostic script and pin baseline codebase
+        run: |
+          set -euo pipefail
+          cp tools/demo/render_knight_baseline_forensic_capsule_v1.py /tmp/render_knight_baseline_forensic_capsule_v1.py
+          DIAG_BLOB="$(git hash-object /tmp/render_knight_baseline_forensic_capsule_v1.py)"
+          echo "DIAG_BLOB=$DIAG_BLOB" >> "$GITHUB_ENV"
+          git checkout --detach "$BASELINE_COMMIT"
+          test "$(git hash-object tools/demo/render_knight_motion_preview_v1.py)" = "$BASELINE_PRODUCER_BLOB"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_DEMO_MOTION_VISUAL_CONTINUATION_REPORT_V1.json)" = "9120723f6bc00142fb6bb992d3ee7a85c601bf4f"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_IDLE_DEMO_PREVIEW_V1.gif)" = "31b64edff1da106bc8feb00faede61ffe68dc89c"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_RUN_DEMO_PREVIEW_V1.gif)" = "b8f0e97e74396a0987444bb72ea93db4bb519640"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_SLASH_DEMO_PREVIEW_V1.gif)" = "73a567f3ff17786d3316e3fb02a723ee3c026eca"
+          cp /tmp/render_knight_baseline_forensic_capsule_v1.py tools/demo/render_knight_baseline_forensic_capsule_v1.py
+          test "$(git hash-object tools/demo/render_knight_baseline_forensic_capsule_v1.py)" = "$DIAG_BLOB"
+          echo "KNIGHT_BASELINE_CODEBASE_PIN_PASS"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Compile frozen producer and forensic diagnostic
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/demo/render_knight_motion_preview_v1.py
+          python -m py_compile tools/demo/render_knight_baseline_forensic_capsule_v1.py
+
+      - name: Reproduce byte-exact baseline first
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/knight_baseline_repro
+          PYTHONPATH=. python -m tools.demo.render_knight_motion_preview_v1             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --out-dir /tmp/knight_baseline_repro
+          test "$(git hash-object /tmp/knight_baseline_repro/KNIGHT_DEMO_MOTION_VISUAL_CONTINUATION_REPORT_V1.json)" = "9120723f6bc00142fb6bb992d3ee7a85c601bf4f"
+          test "$(git hash-object /tmp/knight_baseline_repro/KNIGHT_IDLE_DEMO_PREVIEW_V1.png)" = "cae86d8a04bde6768ac9c3dafed13a2ab318cf29"
+          test "$(git hash-object /tmp/knight_baseline_repro/KNIGHT_RUN_DEMO_PREVIEW_V1.png)" = "8e9ed58a3bfbbace73f54e3e5593691f90eef4f1"
+          test "$(git hash-object /tmp/knight_baseline_repro/KNIGHT_SLASH_DEMO_PREVIEW_V1.png)" = "7a87f310473d602c99eb712be964dcd430b47cfb"
+          echo "KNIGHT_BYTE_EXACT_BASELINE_REPRO_PASS"
+
+      - name: Run baseline forensic capsule
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/knight_baseline_forensic_capsule_v1
+          PYTHONPATH=. python -m tools.demo.render_knight_baseline_forensic_capsule_v1             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --out-dir /tmp/knight_baseline_forensic_capsule_v1
+          test -f /tmp/knight_baseline_forensic_capsule_v1/BASELINE_FORENSIC_CAPSULE_V1.json
+          echo "KNIGHT_BASELINE_FORENSIC_EXECUTION_PASS"
+
+      - name: Seal forensic capsule on research branch
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/knight_baseline_forensic_capsule_seal
+          cp -a /tmp/knight_baseline_forensic_capsule_v1 /tmp/knight_baseline_forensic_capsule_seal
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git checkout -B research/vf11-certified-adaptive-20260921 origin/research/vf11-certified-adaptive-20260921
+          rm -rf "$OUT_DIR"
+          mkdir -p "$(dirname "$OUT_DIR")"
+          cp -a /tmp/knight_baseline_forensic_capsule_seal "$OUT_DIR"
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add "$OUT_DIR"
+          if git diff --cached --quiet; then
+            echo "KNIGHT_BASELINE_FORENSIC_CAPSULE_UNCHANGED"
+            exit 0
+          fi
+          git commit -m 'diagnostic: seal byte-exact Knight baseline forensic capsule'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

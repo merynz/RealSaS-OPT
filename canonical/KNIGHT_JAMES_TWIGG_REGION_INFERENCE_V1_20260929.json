@@ -1,0 +1,100 @@
+{
+  "claim_boundary": "Teacher source topology is evaluation-only. This experiment tests whether James/Twigg rotation-sequence clustering can replace the teacher component labels used by the successful holeless split oracle. PCA/seed subsampling are acceleration adaptations, so a negative result would not falsify the original 2005 method.",
+  "clustering": {
+    "cluster_count": 5,
+    "core_face_count": 2048,
+    "core_fraction_of_fit": 0.09139593002499108,
+    "fit_face_count": 22408,
+    "mode_distance_max": 0.13513850611680034,
+    "mode_distance_p50": 0.02173407911008174,
+    "mode_distance_p95": 0.05703565231280365,
+    "pca_components": 32,
+    "pca_explained_variance_ratio_sum": 0.9336613510977221,
+    "seed_face_count": 4096
+  },
+  "cutcell_input": {
+    "selected_alpha": 0.0,
+    "selected_variant": "CUT_CELL"
+  },
+  "finding": {
+    "region_inference_labels_all_vertices": false,
+    "teacher_free_holeless_split_reduces_gt10": false,
+    "teacher_free_holeless_split_reduces_gt4": false,
+    "teacher_free_holeless_split_reduces_synthetic_unsafe": false
+  },
+  "holeless_split": {
+    "centroid_copy_count": 0,
+    "face_count_after": 25872,
+    "face_count_before": 24958,
+    "face_deletion_count": 0,
+    "mixed_face_count": 457,
+    "region_pure_output_fraction": 0.990530303030303,
+    "rest_area_error_max": 3.050147677041897e-14,
+    "rest_area_error_p99": 6.26314000877669e-16,
+    "seam_vertex_copy_count": 900,
+    "unsplit_unresolved_face_count": 260,
+    "vertex_count_after": 12949,
+    "vertex_count_before": 12049
+  },
+  "mechanics": {
+    "after_motion": {
+      "max_edge_gt_10": 0,
+      "max_edge_gt_4": 4,
+      "max_edge_p99": 1.7911129629870952,
+      "worst_edge_max": 5.681576249681883
+    },
+    "after_stress": {
+      "max_area_max": 76.34585358420561,
+      "max_condition_max": 763.6021428562843,
+      "max_edge_max": 6.685407796014274,
+      "max_edge_p95": 1.5990707686296934,
+      "min_area_min": 0.0007737771626719704,
+      "unsafe_face_count": 2082
+    },
+    "before_motion": {
+      "max_edge_gt_10": 0,
+      "max_edge_gt_4": 2,
+      "max_edge_p99": 1.796752903593704,
+      "worst_edge_max": 4.516165280365335
+    },
+    "before_stress": {
+      "max_area_max": 76.34588300268402,
+      "max_condition_max": 763.6012678638165,
+      "max_edge_max": 5.350698652757245,
+      "max_edge_p95": 1.5759080919014987,
+      "min_area_min": 0.0007737982694010315,
+      "unsafe_face_count": 2054
+    }
+  },
+  "paper": {
+    "adaptation": "Stage35-style controlled joint probes replace an observed mesh animation sequence. PCA and deterministic seed subsampling accelerate mean-shift while preserving the paper's rotation-sequence feature and epsilon-scale intent.",
+    "authors": "Doug L. James; Christopher D. Twigg",
+    "epsilon": 0.05,
+    "rotation_feature": "polar(F_t)=R_t W_t; concatenate row-major vec(R_t) over probes",
+    "title": "Skinning Mesh Animations",
+    "year": 2005
+  },
+  "probe": {
+    "degrees": 30.0,
+    "probe_count": 168
+  },
+  "schema": "RealSaS.KnightJamesTwiggRegionInferenceCourt.v1",
+  "status": "PAPER_INSPIRED_TEACHER_FREE_REGION_INFERENCE__NO_PRODUCT_MUTATION",
+  "teacher_evaluation_only": {
+    "mixed_face_precision": 0.12472647702407003,
+    "mixed_face_recall": 0.018874172185430464,
+    "predicted_mixed_face_count": 457,
+    "truth_mixed_face_count": 3020,
+    "unsafe_truth_cross_region_face_count": 412,
+    "unsafe_truth_cross_region_recall": 0.024271844660194174,
+    "vertex_ari": 0.0941840697146168,
+    "vertex_nmi": 0.2446127481126168
+  },
+  "teacher_used_by_region_inference": false,
+  "vertex_label_propagation": {
+    "initial_labeled_vertex_count": 2006,
+    "propagated_vertex_count": 9974,
+    "safe_graph_edge_count": 35086,
+    "unresolved_vertex_count": 69
+  }
+}

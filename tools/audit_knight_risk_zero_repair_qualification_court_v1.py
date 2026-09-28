@@ -15,7 +15,10 @@ from compiler.realsas_compiler_core.mesh.product_coverage_v1 import build_g5_cov
 from compiler.realsas_compiler_core.mesh.skin_topology_compatibility_v1 import run_skin_topology_compatibility_v1,seam_cut_candidate_v1
 from compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2 import _component_observations
 from compiler.realsas_compiler_services.orchestrator.adapters.v2_architecture import (
-    _evaluate_candidate_source_fidelity_v1, _source_foreground_masks_v1, _static_geometry_evidence,
+    _evaluate_candidate_source_fidelity_v1, _source_foreground_masks_v1,
+)
+from compiler.realsas_compiler_core.geometry_substrate_v2 import (
+    geometry_substrate_evidence_from_dict,
 )
 from tools.demo.render_knight_motion_preview_v1 import _ctx
 
@@ -39,12 +42,29 @@ def load(rr,rel,codec):
  if not p.is_file():raise RuntimeError("MISSING:"+rel)
  return codec(json.loads(p.read_text()))
 def source_fidelity(ctx,candidate):
- geometry,_demo=_static_geometry_evidence(ctx)
- cameras=exact(ctx["run_root"],"cameras",qualified_camera_set_from_dict)
- obs=qualified_observation_set_from_dict(json.loads((ctx["run_root"]/"artifacts/07_OBSERVATION_CONTRACT_QUALIFIED/qualified_observation_set.json").read_text()))
+ rr=ctx["run_root"]
+ geometry_path=rr/"artifacts/13_GEOMETRY_SUBSTRATE_QUALIFIED/geometry_substrate_qualification.json"
+ if not geometry_path.is_file():
+  raise RuntimeError("STAGE13_GEOMETRY_ARTIFACT_MISSING")
+ stage13=next((row for row in ctx["ledger"].get("stages") or () if str(row.get("id") or "")=="13_GEOMETRY_SUBSTRATE_QUALIFIED"),None)
+ if stage13 is None:
+  raise RuntimeError("STAGE13_LEDGER_ROW_MISSING")
+ expected_rows=[
+  row for row in stage13.get("outputs") or ()
+  if str(row.get("schema") or "")=="RealSaS.GeometrySubstrateQualificationIR.v2"
+ ]
+ if len(expected_rows)!=1:
+  raise RuntimeError(f"STAGE13_OUTPUT_BINDING_AMBIGUOUS:{len(expected_rows)}")
+ expected=str(expected_rows[0].get("sha256") or "")
+ actual=sha(geometry_path)
+ if len(expected)!=64 or actual!=expected:
+  raise RuntimeError(f"STAGE13_GEOMETRY_BYTES_DRIFT:{actual}:{expected}")
+ geometry=geometry_substrate_evidence_from_dict(json.loads(geometry_path.read_text()))
+ cameras=exact(rr,"cameras",qualified_camera_set_from_dict)
+ obs=qualified_observation_set_from_dict(json.loads((rr/"artifacts/07_OBSERVATION_CONTRACT_QUALIFIED/qualified_observation_set.json").read_text()))
  masks=_source_foreground_masks_v1(ctx,obs)
  passed,rows=_evaluate_candidate_source_fidelity_v1(candidate=candidate,geometry=geometry,cameras=cameras,observation=obs,source_foreground=masks)
- return {"passed":bool(passed),"rows":rows}
+ return {"passed":bool(passed),"rows":rows,"stage13_sha256":actual}
 def main():
  p=argparse.ArgumentParser();p.add_argument("--authority-root",type=Path,required=True);p.add_argument("--run-id",required=True);p.add_argument("--out",type=Path,required=True);a=p.parse_args()
  ctx=_ctx(a.authority_root,a.run_id);rr=ctx["run_root"]

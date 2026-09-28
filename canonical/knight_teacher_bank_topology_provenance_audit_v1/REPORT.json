@@ -1,0 +1,51 @@
+{
+  "finding": {
+    "claim_boundary": "Remote provenance discovery only. Array-level semantics are inspected in the next step for any located teacher/source NPZ.",
+    "id": "KNIGHT_TEACHER_BANK_TOPOLOGY_PROVENANCE"
+  },
+  "npz_inventory": {
+    "ARACHNE_KNIGHT_TEACHER_BANK_FIX2.npz": {
+      "present": false
+    },
+    "KNIGHT_EVALUATED_TEACHER_SOURCE.npz": {
+      "present": false
+    }
+  },
+  "remote_npz_candidates": [],
+  "schema": "RealSaS.KnightTeacherBankTopologyProvenanceAudit.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED",
+  "textual_provenance_hits": [
+    {
+      "hits": [
+        {
+          "line": 56,
+          "text": "    \"teacher_bank_sha256\": \"26b6891ff81b9bfc3405461394159547fa76b417852a44518425b4e1de7e67d3\","
+        }
+      ],
+      "path": "KNIGHT_ARACHNE_V6_DEMO_CLOSURE_PREREG_V1_20260926.json",
+      "sha256": "187f5c1bac1e813ebdfd1bbb76fa6def3d6543b4c7abc5609d217b3ece5fd597"
+    },
+    {
+      "hits": [
+        {
+          "line": 377,
+          "text": "    bank_path = Path(args.teacher_bank).resolve()"
+        },
+        {
+          "line": 534,
+          "text": "                \"teacher_bank_sha256\": _sha(bank_path),"
+        },
+        {
+          "line": 684,
+          "text": "        \"teacher_bank_sha256\": _sha(bank_path),"
+        },
+        {
+          "line": 745,
+          "text": "    ap.add_argument(\"--teacher-bank\", required=True)"
+        }
+      ],
+      "path": "run_knight_arachne_v6_demo_closure_v1.py",
+      "sha256": "39ff4f7a2051f0d9c1251a5999f472b9926e83deacbedcedc8e92eea424dce01"
+    }
+  ]
+}

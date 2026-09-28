@@ -494,6 +494,13 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path) -> None:
                         "homogenized_measurable": _summary(
                             homogenized, mask & measurable
                         ),
+                        "original_3d": _summary(original_3d, mask),
+                        "root_translation_only_3d": _summary(
+                            root_translation_only_3d, mask
+                        ),
+                        "face_homogenized_3d": _summary(
+                            homogenized_3d, mask
+                        ),
                     }
                 )
 

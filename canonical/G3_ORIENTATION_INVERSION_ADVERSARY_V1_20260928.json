@@ -1,0 +1,33 @@
+{
+  "construction": "unit right triangle reflected across X axis in its rest tangent plane",
+  "current_g3_triangle_metrics": {
+    "area_ratio": 1.0,
+    "condition_number": 1.0,
+    "max_edge_ratio": 1.0,
+    "min_edge_ratio": 1.0,
+    "sigma_min": 1.0
+  },
+  "finding": {
+    "claim_boundary": "Tiny deterministic reflection adversary. Stage45 may separately catch projected flips, but G3 itself does not implement its frozen no-inversion/foldover invariant.",
+    "class": "IMPLEMENTATION_DEVIATION_FROM_FROZEN_G3_NO_INVERSION_CONTRACT",
+    "confirmed": true,
+    "id": "G3_SVD_METRICS_DO_NOT_DETECT_TRIANGLE_INVERSION"
+  },
+  "orientation": {
+    "inverted": true,
+    "normal_dot": -1.0,
+    "posed_normal": [
+      0.0,
+      0.0,
+      -1.0
+    ],
+    "rest_normal": [
+      0.0,
+      0.0,
+      1.0
+    ]
+  },
+  "repo_head": "5fdf484e774aa7f9387beb72d703ed2a1f95ef06",
+  "schema": "RealSaS.G3OrientationInversionAdversary.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED"
+}

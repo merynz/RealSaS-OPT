@@ -331,8 +331,7 @@ def main():
         priors[alpha]=W
         mot=motion_metrics(P,W,F,jids,sk,cams,rr,source_report)
         alpha_rows.append({"alpha":alpha,"motion":{k:v for k,v in mot.items() if k!="frames"},"score":list(_motion_score(mot))})
-    best_alpha=min(ALPHAS,key=lambda x:_motion_score(next(r["motion"]|{"frames":[]} if False else motion_metrics(P,priors[x],F,jids,sk,cams,rr,source_report) for r in [None])))
-    # Avoid hidden selection logic: recompute from stored rows deterministically.
+    # Teacher-free selection: actual-motion mechanical score only.
     best_row=min(alpha_rows,key=lambda r:tuple(r["score"]))
     best_alpha=float(best_row["alpha"]);Wcut=priors[best_alpha]
 

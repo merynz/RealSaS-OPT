@@ -97,6 +97,187 @@ def safe_face_deformation_components_v1(
     return labels, np.asarray(sizes, dtype=np.int64)
 
 
+def partition_source_mask_by_safe_face_adjacency_v1(
+    source_mask,
+    owner_face_index,
+    mechanical_faces,
+    unsafe_face_indices,
+    *,
+    minimum_seed_pixels: int = 64,
+) -> tuple[np.ndarray, np.ndarray, tuple[dict[str, int], ...]]:
+    """Build source-raster presentation charts from local safe face adjacency.
+
+    Foreground 4-neighbors may share a chart only when their first-hit mechanical
+    owners are the same face or share a Stage35-safe mechanical edge. Therefore
+    neither an occlusion boundary nor a deformation seam can become an interior
+    visual triangle merely because distant faces belong to one global component.
+
+    Pixels whose owner is unsafe/unavailable are filled in rest space from the
+    nearest sufficiently supported safe chart inside the same source connected
+    component. The source foreground itself is never changed.
+    """
+
+    mask = np.asarray(source_mask, dtype=bool)
+    owner = np.asarray(owner_face_index, dtype=np.int64)
+    faces = np.asarray(mechanical_faces, dtype=np.int64)
+    threshold = int(minimum_seed_pixels)
+    if mask.ndim != 2 or owner.shape != mask.shape:
+        raise QualificationError("VISUAL_CHART_SOURCE_OWNER_SHAPE_INVALID")
+    if faces.ndim != 2 or faces.shape[1] != 3 or np.any(faces < 0):
+        raise QualificationError("VISUAL_CHART_MECHANICAL_FACES_INVALID")
+    if threshold < 1:
+        raise QualificationError("VISUAL_CHART_MINIMUM_SEED_PIXELS_INVALID")
+    unsafe = set(map(int, unsafe_face_indices))
+    if any(index < 0 or index >= len(faces) for index in unsafe):
+        raise QualificationError("VISUAL_CHART_UNSAFE_FACE_INDEX_INVALID")
+    if np.any(owner[mask] >= len(faces)):
+        raise QualificationError("VISUAL_CHART_OWNER_FACE_INDEX_INVALID")
+
+    safe_face = np.ones((len(faces),), dtype=bool)
+    if unsafe:
+        safe_face[np.asarray(sorted(unsafe), dtype=np.int64)] = False
+
+    allowed_pairs: set[tuple[int, int]] = set()
+    edge_faces: dict[tuple[int, int], list[int]] = {}
+    for face_index, (a, b, c) in enumerate(faces.tolist()):
+        if not safe_face[face_index]:
+            continue
+        for u, v in ((a, b), (b, c), (c, a)):
+            key = (min(int(u), int(v)), max(int(u), int(v)))
+            edge_faces.setdefault(key, []).append(int(face_index))
+    for rows in edge_faces.values():
+        if len(rows) == 2:
+            a, b = rows
+            allowed_pairs.add((min(a, b), max(a, b)))
+
+    height, width = mask.shape
+    valid = mask & (owner >= 0)
+    if np.any(valid):
+        valid_indices = owner[valid]
+        valid[valid] = safe_face[valid_indices]
+
+    linear = np.arange(height * width, dtype=np.int64).reshape(height, width)
+    parent = np.arange(height * width, dtype=np.int64)
+    rank = np.zeros(height * width, dtype=np.uint8)
+
+    def find(value: int) -> int:
+        x = int(value)
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = int(parent[x])
+        return x
+
+    def union(a: int, b: int) -> None:
+        ra, rb = find(a), find(b)
+        if ra == rb:
+            return
+        if rank[ra] < rank[rb]:
+            ra, rb = rb, ra
+        parent[rb] = ra
+        if rank[ra] == rank[rb]:
+            rank[ra] += 1
+
+    def owners_connect(a: int, b: int) -> bool:
+        if a == b:
+            return True
+        return (min(a, b), max(a, b)) in allowed_pairs
+
+    # Horizontal and vertical pixel adjacency only; diagonal contact must not
+    # silently weld presentation topology.
+    for y in range(height):
+        xs = np.flatnonzero(valid[y])
+        for x in xs.tolist():
+            face_a = int(owner[y, x])
+            if x + 1 < width and valid[y, x + 1]:
+                face_b = int(owner[y, x + 1])
+                if owners_connect(face_a, face_b):
+                    union(int(linear[y, x]), int(linear[y, x + 1]))
+            if y + 1 < height and valid[y + 1, x]:
+                face_b = int(owner[y + 1, x])
+                if owners_connect(face_a, face_b):
+                    union(int(linear[y, x]), int(linear[y + 1, x]))
+
+    seed_chart = np.full(mask.shape, -1, dtype=np.int32)
+    root_to_chart: dict[int, int] = {}
+    chart_seed_count: dict[int, int] = {}
+    for y, x in zip(*np.nonzero(valid)):
+        root = find(int(linear[y, x]))
+        if root not in root_to_chart:
+            root_to_chart[root] = len(root_to_chart)
+        chart = root_to_chart[root]
+        seed_chart[y, x] = chart
+        chart_seed_count[chart] = chart_seed_count.get(chart, 0) + 1
+
+    if not chart_seed_count:
+        raise QualificationError("VISUAL_CHART_NO_SAFE_SEEDS")
+
+    source_cc, source_cc_count = ndimage.label(
+        mask,
+        structure=np.asarray(
+            [[0, 1, 0], [1, 1, 1], [0, 1, 0]],
+            dtype=np.uint8,
+        ),
+    )
+    final = np.full(mask.shape, -1, dtype=np.int32)
+    chart_rows: dict[int, dict[str, int]] = {}
+
+    for source_component in range(1, int(source_cc_count) + 1):
+        component_mask = source_cc == source_component
+        local_seed_values = seed_chart[component_mask]
+        local_seed_values = local_seed_values[local_seed_values >= 0]
+        if len(local_seed_values) == 0:
+            raise QualificationError(
+                "VISUAL_CHART_SOURCE_COMPONENT_WITHOUT_SAFE_DRIVER:"
+                + str(source_component)
+            )
+        values, counts = np.unique(local_seed_values, return_counts=True)
+        selected = [
+            int(value)
+            for value, count in zip(values.tolist(), counts.tolist())
+            if int(count) >= threshold
+        ]
+        if not selected:
+            selected = [int(values[int(np.argmax(counts))])]
+
+        local_seed_mask = component_mask & np.isin(
+            seed_chart,
+            np.asarray(selected, dtype=np.int32),
+        )
+        ys, xs = np.nonzero(local_seed_mask)
+        query_y, query_x = np.nonzero(component_mask)
+        seed_xy = np.column_stack(
+            (xs.astype(np.float64), ys.astype(np.float64))
+        )
+        query_xy = np.column_stack(
+            (query_x.astype(np.float64), query_y.astype(np.float64))
+        )
+        tree = cKDTree(seed_xy)
+        _distance, nearest = tree.query(query_xy, k=1)
+        nearest = np.asarray(nearest, dtype=np.int64)
+        assigned = seed_chart[ys[nearest], xs[nearest]]
+        if np.any(assigned < 0):
+            raise QualificationError("VISUAL_CHART_LOCAL_ASSIGNMENT_INVALID")
+        final[query_y, query_x] = assigned
+
+    if np.any(final[mask] < 0):
+        raise QualificationError("VISUAL_CHART_FOREGROUND_ASSIGNMENT_INCOMPLETE")
+
+    for chart_id in sorted(set(final[mask].tolist())):
+        final_mask = mask & (final == int(chart_id))
+        seed_mask = mask & (seed_chart == int(chart_id))
+        chart_rows[int(chart_id)] = {
+            "region_id": int(chart_id),
+            "pixel_count": int(np.count_nonzero(final_mask)),
+            "safe_seed_pixel_count": int(np.count_nonzero(seed_mask)),
+        }
+
+    return (
+        final,
+        seed_chart,
+        tuple(chart_rows[key] for key in sorted(chart_rows)),
+    )
+
+
 def partition_source_mask_by_face_components_v1(
     source_mask,
     owner_face_index,

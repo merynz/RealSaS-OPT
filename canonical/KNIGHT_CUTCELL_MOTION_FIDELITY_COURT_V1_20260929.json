@@ -1,0 +1,758 @@
+{
+  "claim_boundary": "Teacher weights are used only to evaluate deformation trajectories under identical skeleton and motion. This court detects the trivial failure mode where a low-stretch geometric prior merely rigidifies or otherwise semantically destroys the motion.",
+  "finding": {
+    "cutcell_is_not_rigid_collapse": true,
+    "cutcell_motion_direction_correlates_with_teacher": true,
+    "cutcell_motion_energy_within_2x_teacher": false,
+    "cutcell_trajectory_rmse_better_than_arachne": false
+  },
+  "frames": [
+    {
+      "clip_id": "demo_idle_v1",
+      "frame": 0,
+      "teacher_displacement": {
+        "max": 1.46006930775992,
+        "mean": 0.33354503942765096,
+        "p50": 0.0011205322940141035,
+        "p95": 1.2528915389981186
+      },
+      "time_seconds": 0.0,
+      "variants": {
+        "ARACHNE": {
+          "displacement": {
+            "max": 1.46006930775992,
+            "mean": 0.3348682741247669,
+            "p50": 0.001604394095042223,
+            "p95": 1.2528915389981186
+          },
+          "rmse_xyz": 0.014157448469878335,
+          "vertex_error_max": 0.45363741001238095,
+          "vertex_error_mean": 0.0027752186314955016,
+          "vertex_error_p95": 0.00025068595020375254
+        },
+        "CUT_CELL": {
+          "displacement": {
+            "max": 0.9813829049648224,
+            "mean": 0.30880381176909855,
+            "p50": 0.24503994181133876,
+            "p95": 0.7463093413066829
+          },
+          "rmse_xyz": 0.20039257268006025,
+          "vertex_error_max": 1.018460424722235,
+          "vertex_error_mean": 0.2904501578300083,
+          "vertex_error_p95": 0.6758817640663846
+        },
+        "SELECTED": {
+          "displacement": {
+            "max": 0.9813829049648224,
+            "mean": 0.30880381176909855,
+            "p50": 0.24503994181133876,
+            "p95": 0.7463093413066829
+          },
+          "rmse_xyz": 0.20039257268006025,
+          "vertex_error_max": 1.018460424722235,
+          "vertex_error_mean": 0.2904501578300083,
+          "vertex_error_p95": 0.6758817640663846
+        }
+      }
+    },
+    {
+      "clip_id": "demo_idle_v1",
+      "frame": 1,
+      "teacher_displacement": {
+        "max": 1.5206944735747587,
+        "mean": 0.3525142869052122,
+        "p50": 0.021199659455185774,
+        "p95": 1.2795603846633696
+      },
+      "time_seconds": 0.8333333333333334,
+      "variants": {
+        "ARACHNE": {
+          "displacement": {
+            "max": 1.5206944735747587,
+            "mean": 0.35345273662572824,
+            "p50": 0.02121782262028388,
+            "p95": 1.2795603846566697
+          },
+          "rmse_xyz": 0.013932995100139251,
+          "vertex_error_max": 0.4540229751933241,
+          "vertex_error_mean": 0.002747360648433007,
+          "vertex_error_p95": 0.0005146370927190976
+        },
+        "CUT_CELL": {
+          "displacement": {
+            "max": 1.0137976661922004,
+            "mean": 0.3301951807054194,
+            "p50": 0.26398312384525374,
+            "p95": 0.7915389900800462
+          },
+          "rmse_xyz": 0.20725123199587692,
+          "vertex_error_max": 1.0313991132247593,
+          "vertex_error_mean": 0.30218269667492936,
+          "vertex_error_p95": 0.6857239698587657
+        },
+        "SELECTED": {
+          "displacement": {
+            "max": 1.0137976661922004,
+            "mean": 0.3301951807054194,
+            "p50": 0.26398312384525374,
+            "p95": 0.7915389900800462
+          },
+          "rmse_xyz": 0.20725123199587692,
+          "vertex_error_max": 1.0313991132247593,
+          "vertex_error_mean": 0.30218269667492936,
+          "vertex_error_p95": 0.6857239698587657
+        }
+      }
+    },
+    {
+      "clip_id": "demo_idle_v1",
+      "frame": 2,
+      "teacher_displacement": {
+        "max": 1.565728120947578,
+        "mean": 0.35156792868949305,
+        "p50": 0.0019280129756888411,
+        "p95": 1.2993196310672133
+      },
+      "time_seconds": 1.6666666666666667,
+      "variants": {
+        "ARACHNE": {
+          "displacement": {
+            "max": 1.565728120947578,
+            "mean": 0.35280870955951943,
+            "p50": 0.002498096165291002,
+            "p95": 1.2993196285947053
+          },
+          "rmse_xyz": 0.013577191080653061,
+          "vertex_error_max": 0.46762520101386473,
+          "vertex_error_mean": 0.0026462903348536105,
+          "vertex_error_p95": 0.00021396892527687994
+        },
+        "CUT_CELL": {
+          "displacement": {
+            "max": 1.059414056591503,
+            "mean": 0.3481422489214849,
+            "p50": 0.27869858044157597,
+            "p95": 0.8281672068788042
+          },
+          "rmse_xyz": 0.20996470784534,
+          "vertex_error_max": 0.9985174110345719,
+          "vertex_error_mean": 0.308065559424295,
+          "vertex_error_p95": 0.6771673623862527
+        },
+        "SELECTED": {
+          "displacement": {
+            "max": 1.059414056591503,
+            "mean": 0.3481422489214849,
+            "p50": 0.27869858044157597,
+            "p95": 0.8281672068788042
+          },
+          "rmse_xyz": 0.20996470784534,
+          "vertex_error_max": 0.9985174110345719,
+          "vertex_error_mean": 0.308065559424295,
+          "vertex_error_p95": 0.6771673623862527
+        }
+      }
+    },
+    {
+      "clip_id": "demo_idle_v1",
+      "frame": 3,
+      "teacher_displacement": {
+        "max": 1.5206964261710216,
+        "mean": 0.35251451941056305,
+        "p50": 0.021199659455185774,
+        "p95": 1.2795603420574921
+      },
+      "time_seconds": 2.5,
+      "variants": {
+        "ARACHNE": {
+          "displacement": {
+            "max": 1.5206964261710216,
+            "mean": 0.353452969076836,
+            "p50": 0.02121782262028388,
+            "p95": 1.2795603420507922
+          },
+          "rmse_xyz": 0.01393300359489601,
+          "vertex_error_max": 0.45402293935974136,
+          "vertex_error_mean": 0.002747362417174755,
+          "vertex_error_p95": 0.0005146370927209257
+        },
+        "CUT_CELL": {
+          "displacement": {
+            "max": 1.013797814074956,
+            "mean": 0.3301955404133573,
+            "p50": 0.26398346303647513,
+            "p95": 0.7915401739572463
+          },
+          "rmse_xyz": 0.20725133925242797,
+          "vertex_error_max": 1.0313988857511478,
+          "vertex_error_mean": 0.302182885137737,
+          "vertex_error_p95": 0.6857238121258405
+        },
+        "SELECTED": {
+          "displacement": {
+            "max": 1.013797814074956,
+            "mean": 0.3301955404133573,
+            "p50": 0.26398346303647513,
+            "p95": 0.7915401739572463
+          },
+          "rmse_xyz": 0.20725133925242797,
+          "vertex_error_max": 1.0313988857511478,
+          "vertex_error_mean": 0.302182885137737,
+          "vertex_error_p95": 0.6857238121258405
+        }
+      }
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "frame": 0,
+      "teacher_displacement": {
+        "max": 3.691246509827966,
+        "mean": 0.7669525439201289,
+        "p50": 0.33914509212753763,
+        "p95": 2.967273217426184
+      },
+      "time_seconds": 0.0,
+      "variants": {
+        "ARACHNE": {
+          "displacement": {
+            "max": 3.691246509827933,
+            "mean": 0.7768945576921332,
+            "p50": 0.35896063391586275,
+            "p95": 2.940800508563406
+          },
+          "rmse_xyz": 0.11745428985476397,
+          "vertex_error_max": 3.390493713097801,
+          "vertex_error_mean": 0.023561693134236363,
+          "vertex_error_p95": 0.005883851348881493
+        },
+        "CUT_CELL": {
+          "displacement": {
+            "max": 1.6255104736127821,
+            "mean": 0.7096707036247085,
+            "p50": 0.7122387452260173,
+            "p95": 1.2968725582705876
+          },
+          "rmse_xyz": 0.45606181988499894,
+          "vertex_error_max": 2.44492907303699,
+          "vertex_error_mean": 0.6345750369934627,
+          "vertex_error_p95": 1.7319404171323203
+        },
+        "SELECTED": {
+          "displacement": {
+            "max": 1.6255104736127821,
+            "mean": 0.7096707036247085,
+            "p50": 0.7122387452260173,
+            "p95": 1.2968725582705876
+          },
+          "rmse_xyz": 0.45606181988499894,
+          "vertex_error_max": 2.44492907303699,
+          "vertex_error_mean": 0.6345750369934627,
+          "vertex_error_p95": 1.7319404171323203
+        }
+      }
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "frame": 1,
+      "teacher_displacement": {
+        "max": 3.539429079448718,
+        "mean": 0.7961568768310997,
+        "p50": 0.21676216471027285,
+        "p95": 2.820595938640558
+      },
+      "time_seconds": 0.20833333333333334,
+      "variants": {
+        "ARACHNE": {
+          "displacement": {
+            "max": 3.5394290794486865,
+            "mean": 0.8080028914465113,
+            "p50": 0.24175571141809452,
+            "p95": 2.8059996018072626
+          },
+          "rmse_xyz": 0.11380195752614865,
+          "vertex_error_max": 2.9195296574529968,
+          "vertex_error_mean": 0.02327804183043463,
+          "vertex_error_p95": 0.004446784445310007
+        },
+        "CUT_CELL": {
+          "displacement": {
+            "max": 1.588198046863784,
+            "mean": 0.6848009842022594,
+            "p50": 0.7090947289168179,
+            "p95": 1.2586677880369745
+          },
+          "rmse_xyz": 0.4366866028275672,
+          "vertex_error_max": 2.339237094952758,
+          "vertex_error_mean": 0.6023047494531847,
+          "vertex_error_p95": 1.6384180692692338
+        },
+        "SELECTED": {
+          "displacement": {
+            "max": 1.588198046863784,
+            "mean": 0.6848009842022594,
+            "p50": 0.7090947289168179,
+            "p95": 1.2586677880369745
+          },
+          "rmse_xyz": 0.4366866028275672,
+          "vertex_error_max": 2.339237094952758,
+          "vertex_error_mean": 0.6023047494531847,
+          "vertex_error_p95": 1.6384180692692338
+        }
+      }
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "frame": 2,
+      "teacher_displacement": {
+        "max": 3.703510584674748,
+        "mean": 0.6688200389294535,
+        "p50": 0.36615056815388963,
+        "p95": 2.39109733469893
+      },
+      "time_seconds": 0.4166666666666667,
+      "variants": {
+        "ARACHNE": {
+          "displacement": {
+            "max": 3.6985926541671383,
+            "mean": 0.6716401010419562,
+            "p50": 0.37979725161138944,
+            "p95": 2.3557179745752705
+          },
+          "rmse_xyz": 0.10721633985198348,
+          "vertex_error_max": 3.643102737869168,
+          "vertex_error_mean": 0.020513284397843216,
+          "vertex_error_p95": 0.005411737496011116
+        },
+        "CUT_CELL": {
+          "displacement": {
+            "max": 1.520038900865453,
+            "mean": 0.6938439422072142,
+            "p50": 0.6921693026641669,
+            "p95": 1.213232377671166
+          },
+          "rmse_xyz": 0.43761630062512225,
+          "vertex_error_max": 2.510549072012385,
+          "vertex_error_mean": 0.6309552986411772,
+          "vertex_error_p95": 1.3963439562389808
+        },
+        "SELECTED": {
+          "displacement": {
+            "max": 1.520038900865453,
+            "mean": 0.6938439422072142,
+            "p50": 0.6921693026641669,
+            "p95": 1.213232377671166
+          },
+          "rmse_xyz": 0.43761630062512225,
+          "vertex_error_max": 2.510549072012385,
+          "vertex_error_mean": 0.6309552986411772,
+          "vertex_error_p95": 1.3963439562389808
+        }
+      }
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "frame": 3,
+      "teacher_displacement": {
+        "max": 3.4686184188138833,
+        "mean": 0.6726716525169861,
+        "p50": 0.21777525690864277,
+        "p95": 2.1880089587516194
+      },
+      "time_seconds": 0.625,
+      "variants": {
+        "ARACHNE": {
+          "displacement": {
+            "max": 3.4598621834512726,
+            "mean": 0.677964986953939,
+            "p50": 0.24427565903298665,
+            "p95": 2.1576111651722867
+          },
+          "rmse_xyz": 0.10522959816975504,
+          "vertex_error_max": 3.4294575273696015,
+          "vertex_error_mean": 0.02047619177524476,
+          "vertex_error_p95": 0.0038771590007694646
+        },
+        "CUT_CELL": {
+          "displacement": {
+            "max": 1.3312875336071972,
+            "mean": 0.6290998915551416,
+            "p50": 0.6583227834440379,
+            "p95": 1.0980019571197739
+          },
+          "rmse_xyz": 0.395693120671493,
+          "vertex_error_max": 2.494270886121078,
+          "vertex_error_mean": 0.5485858415976385,
+          "vertex_error_p95": 1.3504828629116898
+        },
+        "SELECTED": {
+          "displacement": {
+            "max": 1.3312875336071972,
+            "mean": 0.6290998915551416,
+            "p50": 0.6583227834440379,
+            "p95": 1.0980019571197739
+          },
+          "rmse_xyz": 0.395693120671493,
+          "vertex_error_max": 2.494270886121078,
+          "vertex_error_mean": 0.5485858415976385,
+          "vertex_error_p95": 1.3504828629116898
+        }
+      }
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "frame": 0,
+      "teacher_displacement": {
+        "max": 3.691246509827966,
+        "mean": 0.873559612331114,
+        "p50": 0.32637221050316856,
+        "p95": 2.996926021833241
+      },
+      "time_seconds": 0.0,
+      "variants": {
+        "ARACHNE": {
+          "displacement": {
+            "max": 3.6912465098279457,
+            "mean": 0.8859292557089675,
+            "p50": 0.3613605327555757,
+            "p95": 2.9861929929109277
+          },
+          "rmse_xyz": 0.11432645548513663,
+          "vertex_error_max": 2.3338176240373256,
+          "vertex_error_mean": 0.02365092269036689,
+          "vertex_error_p95": 0.005900619449855424
+        },
+        "CUT_CELL": {
+          "displacement": {
+            "max": 2.1197600355396595,
+            "mean": 0.7961282060009179,
+            "p50": 0.7313285567517703,
+            "p95": 1.7152944608228744
+          },
+          "rmse_xyz": 0.4429670434291887,
+          "vertex_error_max": 1.8226175330495464,
+          "vertex_error_mean": 0.6579145902339089,
+          "vertex_error_p95": 1.433106404440752
+        },
+        "SELECTED": {
+          "displacement": {
+            "max": 2.1197600355396595,
+            "mean": 0.7961282060009179,
+            "p50": 0.7313285567517703,
+            "p95": 1.7152944608228744
+          },
+          "rmse_xyz": 0.4429670434291887,
+          "vertex_error_max": 1.8226175330495464,
+          "vertex_error_mean": 0.6579145902339089,
+          "vertex_error_p95": 1.433106404440752
+        }
+      }
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "frame": 1,
+      "teacher_displacement": {
+        "max": 3.7486254396531056,
+        "mean": 0.8465258976809636,
+        "p50": 0.10981405268942343,
+        "p95": 2.5845047794147433
+      },
+      "time_seconds": 0.2777777777777778,
+      "variants": {
+        "ARACHNE": {
+          "displacement": {
+            "max": 3.7220024650522525,
+            "mean": 0.8560242431766509,
+            "p50": 0.13028032176536294,
+            "p95": 2.5705871918818346
+          },
+          "rmse_xyz": 0.12221672810502027,
+          "vertex_error_max": 3.508346511371416,
+          "vertex_error_mean": 0.024611649656129147,
+          "vertex_error_p95": 0.0037646422912414163
+        },
+        "CUT_CELL": {
+          "displacement": {
+            "max": 1.6379735355010177,
+            "mean": 0.7160167967219598,
+            "p50": 0.7301065870714462,
+            "p95": 1.3641639960383856
+          },
+          "rmse_xyz": 0.44859578834722746,
+          "vertex_error_max": 2.5209145237226402,
+          "vertex_error_mean": 0.6167986091357502,
+          "vertex_error_p95": 1.5795238299507983
+        },
+        "SELECTED": {
+          "displacement": {
+            "max": 1.6379735355010177,
+            "mean": 0.7160167967219598,
+            "p50": 0.7301065870714462,
+            "p95": 1.3641639960383856
+          },
+          "rmse_xyz": 0.44859578834722746,
+          "vertex_error_max": 2.5209145237226402,
+          "vertex_error_mean": 0.6167986091357502,
+          "vertex_error_p95": 1.5795238299507983
+        }
+      }
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "frame": 2,
+      "teacher_displacement": {
+        "max": 1.9664264844192834,
+        "mean": 0.48633334510141685,
+        "p50": 0.25340079927441833,
+        "p95": 1.448825817103093
+      },
+      "time_seconds": 0.5555555555555556,
+      "variants": {
+        "ARACHNE": {
+          "displacement": {
+            "max": 1.9042327358831421,
+            "mean": 0.4883613658958301,
+            "p50": 0.26950664381425743,
+            "p95": 1.4406063407333367
+          },
+          "rmse_xyz": 0.08263671013305608,
+          "vertex_error_max": 2.7341437494314382,
+          "vertex_error_mean": 0.016145397831298265,
+          "vertex_error_p95": 0.003872855556237509
+        },
+        "CUT_CELL": {
+          "displacement": {
+            "max": 1.0785091699256821,
+            "mean": 0.48867629271398727,
+            "p50": 0.48899445581661044,
+            "p95": 0.8804181652505702
+          },
+          "rmse_xyz": 0.31641184873531464,
+          "vertex_error_max": 1.6288491645029906,
+          "vertex_error_mean": 0.4615239637566404,
+          "vertex_error_p95": 0.9945799189117003
+        },
+        "SELECTED": {
+          "displacement": {
+            "max": 1.0785091699256821,
+            "mean": 0.48867629271398727,
+            "p50": 0.48899445581661044,
+            "p95": 0.8804181652505702
+          },
+          "rmse_xyz": 0.31641184873531464,
+          "vertex_error_max": 1.6288491645029906,
+          "vertex_error_mean": 0.4615239637566404,
+          "vertex_error_p95": 0.9945799189117003
+        }
+      }
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "frame": 3,
+      "teacher_displacement": {
+        "max": 3.691246509827966,
+        "mean": 0.873559612331114,
+        "p50": 0.32637221050316856,
+        "p95": 2.996926021833241
+      },
+      "time_seconds": 0.8333333333333334,
+      "variants": {
+        "ARACHNE": {
+          "displacement": {
+            "max": 3.6912465098279457,
+            "mean": 0.8859292557089675,
+            "p50": 0.3613605327555757,
+            "p95": 2.9861929929109277
+          },
+          "rmse_xyz": 0.11432645548513663,
+          "vertex_error_max": 2.3338176240373256,
+          "vertex_error_mean": 0.02365092269036689,
+          "vertex_error_p95": 0.005900619449855424
+        },
+        "CUT_CELL": {
+          "displacement": {
+            "max": 2.1197600355396595,
+            "mean": 0.7961282060009179,
+            "p50": 0.7313285567517703,
+            "p95": 1.7152944608228744
+          },
+          "rmse_xyz": 0.4429670434291887,
+          "vertex_error_max": 1.8226175330495464,
+          "vertex_error_mean": 0.6579145902339089,
+          "vertex_error_p95": 1.433106404440752
+        },
+        "SELECTED": {
+          "displacement": {
+            "max": 2.1197600355396595,
+            "mean": 0.7961282060009179,
+            "p50": 0.7313285567517703,
+            "p95": 1.7152944608228744
+          },
+          "rmse_xyz": 0.4429670434291887,
+          "vertex_error_max": 1.8226175330495464,
+          "vertex_error_mean": 0.6579145902339089,
+          "vertex_error_p95": 1.433106404440752
+        }
+      }
+    }
+  ],
+  "metrics": {
+    "ARACHNE": {
+      "dominant_joint_count_used": 20,
+      "joint_total_mass_top10": [
+        {
+          "joint_id": "J:1008208d141ae248de43",
+          "mass": 3531.0139745413826
+        },
+        {
+          "joint_id": "J:e5441b559f1c34b41aa2",
+          "mass": 2931.8643769102664
+        },
+        {
+          "joint_id": "J:8455bf4c0a38867b7d9b",
+          "mass": 2394.752833405289
+        },
+        {
+          "joint_id": "J:2ff965d6dbe4efc2d5d4",
+          "mass": 1137.6906283188066
+        },
+        {
+          "joint_id": "J:b9e5c0d23f688f672060",
+          "mass": 657.2946772042667
+        },
+        {
+          "joint_id": "J:237d229c33bc9eb9bf91",
+          "mass": 294.7988710768043
+        },
+        {
+          "joint_id": "J:7cf59fbe52c53280546a",
+          "mass": 143.3871219798043
+        },
+        {
+          "joint_id": "J:362735eeec6ee5a3d46f",
+          "mass": 99.64710843006188
+        },
+        {
+          "joint_id": "J:33c7075f501c9af4cd0d",
+          "mass": 99.16429589778107
+        },
+        {
+          "joint_id": "J:cf05f36e919ff69a9d8e",
+          "mass": 97.74770694710139
+        }
+      ],
+      "largest_dominant_joint_fraction": 0.2933023487426342,
+      "motion_energy_ratio_vs_teacher": 1.0064962707998877,
+      "motion_vector_cosine_vs_teacher": 0.9875569315841495,
+      "trajectory_rmse_over_character_extent": 0.03383169717482611,
+      "trajectory_rmse_xyz": 0.090367245793968,
+      "weight_entropy_mean": 0.1264515459467674
+    },
+    "CUT_CELL": {
+      "dominant_joint_count_used": 26,
+      "joint_total_mass_top10": [
+        {
+          "joint_id": "J:4c9f9eace712daf31538",
+          "mass": 644.0391484473876
+        },
+        {
+          "joint_id": "J:75a17a4287b28cd7f57f",
+          "mass": 591.9955190376713
+        },
+        {
+          "joint_id": "J:932628adf7f0d5936426",
+          "mass": 582.4321945798038
+        },
+        {
+          "joint_id": "J:7cf59fbe52c53280546a",
+          "mass": 579.3748193247011
+        },
+        {
+          "joint_id": "J:c9cdb266f7c167a620a9",
+          "mass": 538.9999199001668
+        },
+        {
+          "joint_id": "J:1008208d141ae248de43",
+          "mass": 535.5745219409582
+        },
+        {
+          "joint_id": "J:eafe286e7d84499e5257",
+          "mass": 530.6364906842646
+        },
+        {
+          "joint_id": "J:42d181ebf3515959283a",
+          "mass": 517.4361172279459
+        },
+        {
+          "joint_id": "J:136e20712bbd1481596e",
+          "mass": 508.18513077192983
+        },
+        {
+          "joint_id": "J:e5441b559f1c34b41aa2",
+          "mass": 503.5060742565038
+        }
+      ],
+      "largest_dominant_joint_fraction": 0.1425844468420616,
+      "motion_energy_ratio_vs_teacher": 0.4795461577798399,
+      "motion_vector_cosine_vs_teacher": 0.7718500463330119,
+      "trajectory_rmse_over_character_extent": 0.13716110881940843,
+      "trajectory_rmse_xyz": 0.3663686030885733,
+      "weight_entropy_mean": 3.031745384649483
+    },
+    "SELECTED": {
+      "dominant_joint_count_used": 26,
+      "joint_total_mass_top10": [
+        {
+          "joint_id": "J:4c9f9eace712daf31538",
+          "mass": 644.0391484473876
+        },
+        {
+          "joint_id": "J:75a17a4287b28cd7f57f",
+          "mass": 591.9955190376713
+        },
+        {
+          "joint_id": "J:932628adf7f0d5936426",
+          "mass": 582.4321945798038
+        },
+        {
+          "joint_id": "J:7cf59fbe52c53280546a",
+          "mass": 579.3748193247011
+        },
+        {
+          "joint_id": "J:c9cdb266f7c167a620a9",
+          "mass": 538.9999199001668
+        },
+        {
+          "joint_id": "J:1008208d141ae248de43",
+          "mass": 535.5745219409582
+        },
+        {
+          "joint_id": "J:eafe286e7d84499e5257",
+          "mass": 530.6364906842646
+        },
+        {
+          "joint_id": "J:42d181ebf3515959283a",
+          "mass": 517.4361172279459
+        },
+        {
+          "joint_id": "J:136e20712bbd1481596e",
+          "mass": 508.18513077192983
+        },
+        {
+          "joint_id": "J:e5441b559f1c34b41aa2",
+          "mass": 503.5060742565038
+        }
+      ],
+      "largest_dominant_joint_fraction": 0.1425844468420616,
+      "motion_energy_ratio_vs_teacher": 0.4795461577798399,
+      "motion_vector_cosine_vs_teacher": 0.7718500463330119,
+      "trajectory_rmse_over_character_extent": 0.13716110881940843,
+      "trajectory_rmse_xyz": 0.3663686030885733,
+      "weight_entropy_mean": 3.031745384649483
+    }
+  },
+  "schema": "RealSaS.KnightCutCellMotionFidelityCourt.v1",
+  "selected_variant": "CUT_CELL",
+  "status": "TEACHER_EVALUATION_ONLY__NO_PRODUCT_MUTATION",
+  "teacher_used_by_cutcell_solver": false
+}

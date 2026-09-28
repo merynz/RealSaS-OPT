@@ -276,7 +276,7 @@ def _face_deformation_metrics(candidate, rest_projected, posed_projected):
     }
 
 
-def run(*, authority_root: Path, run_id: str, out_dir: Path):
+def run(*, authority_root: Path, run_id: str, out_dir: Path, clip_ids: tuple[str, ...] | None = None):
     producer_path = Path("tools/demo/render_knight_motion_preview_v1.py")
     producer_blob = _git_blob(producer_path)
     if producer_blob != BASELINE_PRODUCER_BLOB:
@@ -392,6 +392,14 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path):
         ("demo_run_v1", "run"),
         ("demo_slash_v1", "slash"),
     ]
+    if clip_ids:
+        requested = set(map(str, clip_ids))
+        clips = [row for row in clips if row[0] in requested]
+        missing = requested - {row[0] for row in clips}
+        if missing:
+            raise RuntimeError("BASELINE_FORENSIC_UNKNOWN_CLIP:" + ",".join(sorted(missing)))
+    if not clips:
+        raise RuntimeError("BASELINE_FORENSIC_NO_CLIPS")
 
     for clip_id, short in clips:
         path = (
@@ -600,11 +608,13 @@ def main():
     p.add_argument("--authority-root", required=True)
     p.add_argument("--run-id", required=True)
     p.add_argument("--out-dir", required=True)
+    p.add_argument("--clip-id", action="append", default=[])
     a = p.parse_args()
     run(
         authority_root=Path(a.authority_root).expanduser().resolve(),
         run_id=a.run_id,
         out_dir=Path(a.out_dir),
+        clip_ids=tuple(a.clip_id) if a.clip_id else None,
     )
 
 

@@ -158,21 +158,24 @@ jobs:
               raise RuntimeError("BASELINE_STAGE23_CANDIDATE_BINDING_CARDINALITY:"+str(len(exact)))
           recovered["23_COMPLETE_APPEARANCE_ASSET_BAKED"]=exact[0]
 
-          # Camera/skeleton/skin are recovered by uniqueness first. If historical
-          # copies exist, exact baseline RGB reproduction below is the final oracle.
+          # Camera/skeleton/skin: choose the actual stage output directory,
+          # never imported teacher/model handoff copies.
           for sid,schema in [
               ("05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1"),
               ("28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1"),
               ("32_SKIN_QUALIFIED","RealSaS.QualifiedSkinIR.v1"),
           ]:
-              rows=candidates[schema]
-              # Deduplicate byte-identical copies.
+              stage_fragment = "/artifacts/" + sid + "/"
+              rows=[
+                  row for row in candidates[schema]
+                  if stage_fragment in str(row[0]).replace("\\","/")
+              ]
               by_sha={}
               for row in rows:
                   by_sha.setdefault(row[2],row)
               rows=list(by_sha.values())
               if len(rows) != 1:
-                  raise RuntimeError("BASELINE_RECOVERY_UNIQUE_ARTIFACT_FAIL:"+sid+":"+str(len(rows)))
+                  raise RuntimeError("BASELINE_RECOVERY_STAGE_OUTPUT_FAIL:"+sid+":"+str(len(rows)))
               recovered[sid]=rows[0]
 
           for row in ledger["stages"]:

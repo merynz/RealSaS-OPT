@@ -1,0 +1,60 @@
+name: knight-observable-seam-feature-separability-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/audit_knight_observable_seam_feature_separability_v1.py'
+      - '.github/workflows/knight_observable_seam_feature_separability_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: knight-observable-seam-feature-separability-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      V5_HANDOFF: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V5_DEMO_HANDOFF
+      OUT: canonical/knight_observable_seam_feature_separability_v1
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install exact dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off numpy
+      - name: Fetch teacher diagnostic labels
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          echo "$tmp" > /tmp/seam_sep_tmp
+          rclone copyto "$V5_HANDOFF/ARACHNE_KNIGHT_TEACHER_BANK_FIX2.npz" "$tmp/bank.npz" --checksum
+          rclone copyto "$V5_HANDOFF/KNIGHT_EVALUATED_TEACHER_SOURCE.npz" "$tmp/source.npz" --checksum
+          sha256sum "$tmp/bank.npz" "$tmp/source.npz"
+      - name: Measure separability using shipping GSA features only
+        run: |
+          set -euo pipefail
+          tmp="$(cat /tmp/seam_sep_tmp)"
+          mkdir -p "$OUT"
+          PYTHONPATH=. python tools/audit_knight_observable_seam_feature_separability_v1.py             "$RUN_ROOT/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"             "$tmp/bank.npz"             "$tmp/source.npz"             "$OUT/REPORT.json" | tee /tmp/seam_sep.txt
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          cp /tmp/seam_sep.txt "$OUT/AUDIT_STDOUT.txt"
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add "$OUT"
+          git commit -m 'audit: seal observable seam feature separability evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

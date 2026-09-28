@@ -78,9 +78,7 @@ def main():
  p=argparse.ArgumentParser();p.add_argument("--authority-root",type=Path,required=True);p.add_argument("--run-id",required=True);p.add_argument("--out",type=Path,required=True)
  a=p.parse_args();ctx=_ctx(a.authority_root,a.run_id);rr=ctx["run_root"]
  cand=load(rr,"candidate",canonical_mesh_candidate_from_dict);skel=load(rr,"skeleton",qualified_skeleton_from_dict);skin=load(rr,"skin",qualified_skin_from_dict)
- cams=tuple(sorted(qualified_camera_set_from_dict(load(rr,"cameras",lambda x:x)).cameras,key=lambda c:int(c.view_index))) if False else None
- # decode cameras normally
- cams=tuple(sorted(qualified_camera_set_from_dict(json.loads((rr/EXACT["cameras"][0]).read_text())).cameras,key=lambda c:int(c.view_index)))
+ cams=tuple(sorted(load(rr,"cameras",qualified_camera_set_from_dict).cameras,key=lambda c:int(c.view_index)))
  source_report=json.loads(Path("canonical/KNIGHT_MOTION_SOURCE_ACTION_DIAGNOSTIC_20260927.json").read_text())
  rest=np.asarray([v.P for v in cand.vertices],dtype=np.float64);faces=faces_idx(cand);jids,W=_candidate_skin_weights(cand,skin,skel)
  # Pure measured weight-discontinuity mask, independent of topology labels.

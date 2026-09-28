@@ -14,32 +14,37 @@
     "report_hash": "03cbb6248877676ed179ea9e65b64c632c61019fcc965ea52ff8fded53ed1b82",
     "risk_l1_min": 0.5,
     "risky_face_count": 1820,
-    "stress_angle_deg": 120.0,
+    "stress_angle_deg": 120,
     "unsafe_face_count": 1509
   },
   "known_smear_offenders": [
     {
       "face_index": 253,
-      "risky": false,
+      "risky": true,
       "unsafe": true
     },
     {
       "face_index": 3829,
-      "risky": false,
+      "risky": true,
       "unsafe": true
     },
     {
       "face_index": 3573,
-      "risky": false,
+      "risky": true,
       "unsafe": true
     }
   ],
   "schema": "RealSaS.KnightStage35OffenderCaptureAudit.v1",
   "status": "AUDIT_ONLY__NO_REPAIR_APPLIED",
   "verdict": {
-    "all_known_offenders_risky": false,
+    "all_known_offenders_risky": true,
     "all_known_offenders_unsafe": true,
     "claim_boundary": "Current Stage35 compatibility implementation applied to exact baseline artifacts; no repair applied.",
     "stage35_current_checker_would_block_exact_baseline": true
+  },
+  "correction": {
+    "status": "AUDIT_ARTIFACT_BOOKKEEPING_CORRECTED",
+    "reason": "Original workflow attempted to read non-existent report.risky_face_indices. Stage35 defines unsafe = (skin_l1 > risk_l1_min) AND deformation_limit_violation, therefore every unsafe face is necessarily risky.",
+    "product_checker_changed": false
   }
 }

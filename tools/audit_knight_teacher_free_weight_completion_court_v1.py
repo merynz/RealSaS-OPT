@@ -12,11 +12,13 @@ from compiler.realsas_compiler_core.artifact_codec_v2 import (
     canonical_mesh_candidate_from_dict,
     deformation_envelope_from_dict,
     mesh_policy_from_dict,
-    normalization_domain_from_dict,
     qualified_camera_set_from_dict,
     qualified_skeleton_from_dict,
     qualified_skin_from_dict,
     rigging_surface_from_dict,
+)
+from compiler.realsas_compiler_core.preproduct_authority_v1 import (
+    normalization_domain_from_dict,
     signed_zero_surface_from_dict,
 )
 from compiler.realsas_compiler_core.joint_frames_v1 import derive_joint_frames_from_skeleton

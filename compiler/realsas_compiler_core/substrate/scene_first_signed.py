@@ -215,6 +215,100 @@ def _adaptive_voxel_compact(
     return cp, cn, edges.astype(np.int64), int(divisions), inverse
 
 
+def replay_compacted_face_provenance_v1(
+    vertices_world,
+    faces,
+    surface,
+    *,
+    position_tolerance: float = 1e-9,
+) -> tuple[tuple[str, str, str], ...]:
+    """Replay the exact Stage14 voxel assignment and preserve dense face authority.
+
+    RiggingSurfaceIR historically retains only compact nodes + pairwise relations.
+    Reconstructing triangles later from 3-cliques is not topology preserving: three
+    pairwise edges may originate from three different dense triangles.  This helper
+    replays the frozen compactor from the dense signed-zero surface and returns only
+    compact triangles that have an actual dense-face witness.
+
+    The replay is fail-closed against the existing RiggingSurface node positions and
+    index order, so downstream callers cannot silently mint a second compaction.
+    """
+    p = np.asarray(vertices_world, dtype=np.float64)
+    f = np.asarray(faces, dtype=np.int64)
+    if p.ndim != 2 or p.shape[1] != 3 or len(p) < 4 or not np.isfinite(p).all():
+        raise QualificationError("COMPACT_FACE_REPLAY_POINTS_INVALID")
+    if f.ndim != 2 or f.shape[1] != 3 or np.any(f < 0) or np.any(f >= len(p)):
+        raise QualificationError("COMPACT_FACE_REPLAY_FACES_INVALID")
+    if (
+        not math.isfinite(float(position_tolerance))
+        or float(position_tolerance) < 0.0
+    ):
+        raise QualificationError("COMPACT_FACE_REPLAY_TOLERANCE_INVALID")
+
+    metadata = dict(getattr(surface, "metadata", {}) or {})
+    if "compact_voxel_divisions" not in metadata:
+        raise QualificationError("COMPACT_FACE_REPLAY_DIVISIONS_MISSING")
+    divisions = int(metadata["compact_voxel_divisions"])
+    component_aware = bool(metadata.get("component_aware_compaction", False))
+    if divisions < 0:
+        raise QualificationError("COMPACT_FACE_REPLAY_DIVISIONS_INVALID")
+
+    if divisions == 0:
+        inverse = np.arange(len(p), dtype=np.int64)
+    else:
+        lo = p.min(axis=0)
+        span = np.maximum(p.max(axis=0) - lo, 1e-12)
+        keys = np.floor((p - lo) / span * divisions).astype(np.int64)
+        keys = np.clip(keys, 0, divisions - 1)
+        if component_aware:
+            component_labels = mesh_connected_component_labels_v1(len(p), f)
+            keys = np.column_stack((component_labels, keys))
+        _unique, inverse = np.unique(keys, axis=0, return_inverse=True)
+        inverse = np.asarray(inverse, dtype=np.int64)
+
+    compact_count = int(inverse.max()) + 1
+    counts = np.bincount(inverse, minlength=compact_count).astype(np.float64)
+    compact_points = np.zeros((compact_count, 3), dtype=np.float64)
+    np.add.at(compact_points, inverse, p)
+    compact_points /= counts[:, None]
+
+    nodes = tuple(surface.surface_nodes)
+    if len(nodes) != compact_count:
+        raise QualificationError(
+            f"COMPACT_FACE_REPLAY_NODE_COUNT_DRIFT:{compact_count}:{len(nodes)}"
+        )
+    admitted_points = np.asarray(
+        [tuple(map(float, node.P)) for node in nodes],
+        dtype=np.float64,
+    )
+    position_error = np.linalg.norm(compact_points - admitted_points, axis=1)
+    max_error = float(position_error.max(initial=0.0))
+    if max_error > float(position_tolerance):
+        raise QualificationError(
+            f"COMPACT_FACE_REPLAY_NODE_ORDER_OR_POSITION_DRIFT:{max_error}"
+        )
+
+    mapped = inverse[f]
+    nondegenerate = (
+        (mapped[:, 0] != mapped[:, 1])
+        & (mapped[:, 1] != mapped[:, 2])
+        & (mapped[:, 2] != mapped[:, 0])
+    )
+    mapped = np.unique(np.sort(mapped[nondegenerate], axis=1), axis=0)
+    if len(mapped) == 0:
+        raise QualificationError("COMPACT_FACE_REPLAY_NO_FACE")
+
+    surface_ids = tuple(str(node.surface_id) for node in nodes)
+    return tuple(
+        sorted(
+            {
+                tuple(sorted((surface_ids[int(a)], surface_ids[int(b)], surface_ids[int(c)])))
+                for a, b, c in mapped.tolist()
+            }
+        )
+    )
+
+
 def _camera_arrays(camera: dict):
     required = ("origin", "right", "screen_up", "forward", "half_extent", "resolution")
     if any(k not in camera for k in required):
@@ -475,5 +569,6 @@ __all__ = [
     "zero_surface_normal_operator_identity_v1",
     "zero_surface_normal_operator_hash_v1",
     "robust_zero_surface_normals_v1",
+    "replay_compacted_face_provenance_v1",
     "rigging_surface_from_scene_first_zero_mesh_v1",
 ]

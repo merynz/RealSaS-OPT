@@ -1,0 +1,87 @@
+name: knight-demo-fallback-lineage-audit-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/knight_demo_fallback_lineage_audit_v1.yml'
+
+concurrency:
+  group: knight-demo-fallback-lineage-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - name: Audit exact Knight ledger fallback state
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, hashlib
+          from pathlib import Path
+          root=Path("/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924")
+          candidates=[
+            root/"RUN_LEDGER.json",
+            root/"run_ledger.json",
+            root/"ledger.json",
+            root/"ACTIVE_RUN_V2.json",
+          ]
+          ledger=next((p for p in candidates if p.is_file()),None)
+          if ledger is None:
+              hits=list(root.glob("*ledger*.json"))+list(root.glob("*LEDGER*.json"))
+              ledger=hits[0] if hits else None
+          if ledger is None:
+              raise RuntimeError("RUN_LEDGER_NOT_FOUND")
+          j=json.loads(ledger.read_text())
+          rows=[]
+          for s in j.get("stages") or []:
+              status=str(s.get("status") or "")
+              diag=dict(s.get("diagnostics") or {})
+              outputs=list(s.get("outputs") or [])
+              demo_tokens=[]
+              blob=json.dumps({"diag":diag,"outputs":outputs,"status":status},sort_keys=True).upper()
+              for tok in ("DEMO_ONLY","FALLBACK","PRODUCT_AUTHORITY_CLAIMED"):
+                  if tok in blob: demo_tokens.append(tok)
+              rows.append({
+                "ordinal":s.get("ordinal"),
+                "id":s.get("id"),
+                "status":status,
+                "demo_tokens":demo_tokens,
+                "diagnostics":diag if (status!="PASS" or demo_tokens) else {},
+              })
+          report={
+            "schema":"RealSaS.KnightDemoFallbackLineageAudit.v1",
+            "status":"AUDIT_ONLY__NO_REPAIR_APPLIED",
+            "ledger_path":str(ledger),
+            "ledger_sha256":hashlib.sha256(ledger.read_bytes()).hexdigest(),
+            "execution_class":j.get("execution_class"),
+            "subject_id":j.get("subject_id"),
+            "non_plain_pass_stages":[r for r in rows if r["status"]!="PASS"],
+            "demo_or_fallback_stages":[r for r in rows if r["demo_tokens"]],
+            "all_stages":[{"ordinal":r["ordinal"],"id":r["id"],"status":r["status"]} for r in rows],
+            "claim_boundary":"Exact run-ledger state only; does not infer whether a fallback algorithm is intrinsically invalid."
+          }
+          out=Path("canonical/knight_demo_fallback_lineage_audit_v1")
+          out.mkdir(parents=True,exist_ok=True)
+          (out/"REPORT.json").write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
+          print(json.dumps(report,indent=2,sort_keys=True))
+          PY
+      - name: Seal
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/knight_demo_fallback_lineage_audit_v1/REPORT.json
+          git commit -m 'audit: seal Knight demo fallback lineage state'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

@@ -48,7 +48,7 @@ jobs:
               mesh_policy_from_dict,
           )
           from compiler.realsas_compiler_core.geometry_artifact_codec_v2 import rigging_surface_from_dict
-          from compiler.realsas_compiler_core.mesh.deformation_stress_v1 import run_g3_local_frame_micro_stress_v2
+          from compiler.realsas_compiler_core.mesh.deformation_stress_v2 import run_g3_local_frame_micro_stress_v2
           from compiler.realsas_compiler_core.mesh.skin_topology_compatibility_v1 import run_skin_topology_compatibility_v1
 
           root=Path("/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924")

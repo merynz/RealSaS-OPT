@@ -2,10 +2,11 @@ from __future__ import annotations
 
 """View-independent conservative canonical mesh-candidate producer.
 
-This producer is deliberately simple: it triangulates only 3-cliques already present
-in the immutable RiggingSurfaceIR local-relation graph. Every candidate vertex is an
-IDENTITY_SURFACE_NODE binding. It is a safe baseline and a seam test for stage 26, not
-a claim that relation-clique topology is the final product backend.
+This producer supports two topology authorities. Legacy relation mode triangulates
+3-cliques in RiggingSurfaceIR; product mode supplies exact compacted dense-face
+provenance so pairwise relations cannot invent triangles. Every candidate vertex is
+an IDENTITY_SURFACE_NODE binding. CDT/local-chart backends remain subordinate to
+current qualification.
 
 CDT/local-chart backends must emit the same CanonicalMeshCandidateIR and therefore
 remain subordinate to current qualification.
@@ -63,6 +64,7 @@ def build_canonical_relation_candidate(
     *,
     producer_policy_hash: str,
     min_relative_double_area: float = 1e-8,
+    explicit_face_provenance: tuple[tuple[str, str, str], ...] | None = None,
 ) -> CanonicalMeshCandidateIR:
     """Build a canonical candidate without any view/camera authority.
 
@@ -116,32 +118,67 @@ def build_canonical_relation_candidate(
             unknown_edges.add(pair)
 
     faces_surface: list[tuple[str, str, str]] = []
-    for component_id in sorted(component_members):
-        members = sorted(component_members[component_id])
-        neighbors = {sid: set() for sid in members}
-        for a, b in safe_edges:
-            if a in neighbors and b in neighbors:
-                neighbors[a].add(b)
-                neighbors[b].add(a)
-        for a in members:
-            for b, c in combinations(sorted(neighbors[a]), 2):
-                if _pair(b, c) not in safe_edges:
-                    continue
-                tri = tuple(sorted((a, b, c)))
-                if tri[0] != a:
-                    # Each sorted clique is emitted once.
-                    continue
-                points = [nodes[sid].P for sid in tri]
-                lengths = [
-                    math.dist(tuple(map(float, points[i])), tuple(map(float, points[j])))
-                    for i, j in ((0, 1), (1, 2), (2, 0))
-                ]
-                local_scale = max(lengths)
-                if not math.isfinite(local_scale) or local_scale <= 0.0:
-                    continue
-                relative_area = _triangle_double_area(*points) / (local_scale * local_scale)
-                if relative_area >= float(min_relative_double_area):
-                    faces_surface.append(tri)
+    rejected_explicit_face_count = 0
+    if explicit_face_provenance is None:
+        for component_id in sorted(component_members):
+            members = sorted(component_members[component_id])
+            neighbors = {sid: set() for sid in members}
+            for a, b in safe_edges:
+                if a in neighbors and b in neighbors:
+                    neighbors[a].add(b)
+                    neighbors[b].add(a)
+            for a in members:
+                for b, c in combinations(sorted(neighbors[a]), 2):
+                    if _pair(b, c) not in safe_edges:
+                        continue
+                    tri = tuple(sorted((a, b, c)))
+                    if tri[0] != a:
+                        # Each sorted clique is emitted once.
+                        continue
+                    points = [nodes[sid].P for sid in tri]
+                    lengths = [
+                        math.dist(tuple(map(float, points[i])), tuple(map(float, points[j])))
+                        for i, j in ((0, 1), (1, 2), (2, 0))
+                    ]
+                    local_scale = max(lengths)
+                    if not math.isfinite(local_scale) or local_scale <= 0.0:
+                        continue
+                    relative_area = _triangle_double_area(*points) / (local_scale * local_scale)
+                    if relative_area >= float(min_relative_double_area):
+                        faces_surface.append(tri)
+    else:
+        # Dense-face authority: a triangle is admitted only when the frozen
+        # Stage12->Stage14 compaction replay provides an actual dense face witness.
+        # Pairwise relation support remains mandatory, but can no longer mint a face.
+        for raw_face in explicit_face_provenance:
+            if len(raw_face) != 3:
+                raise QualificationError("CANONICAL_MESH_EXPLICIT_FACE_ARITY_INVALID")
+            tri = tuple(sorted(map(str, raw_face)))
+            if len(set(tri)) != 3 or any(sid not in nodes for sid in tri):
+                raise QualificationError("CANONICAL_MESH_EXPLICIT_FACE_ENDPOINT_INVALID")
+            if len({owner.get(sid) for sid in tri}) != 1 or None in {owner.get(sid) for sid in tri}:
+                raise QualificationError("CANONICAL_MESH_EXPLICIT_FACE_CROSS_COMPONENT")
+            pairs = (_pair(tri[0], tri[1]), _pair(tri[1], tri[2]), _pair(tri[2], tri[0]))
+            if any(pair not in safe_edges for pair in pairs):
+                raise QualificationError("CANONICAL_MESH_EXPLICIT_FACE_RELATION_SUPPORT_MISSING")
+            for pair in pairs:
+                boundary = boundary_by_pair.get(pair)
+                if boundary is not None and boundary.decision == "SEPARATE":
+                    raise QualificationError("CANONICAL_MESH_EXPLICIT_FACE_CROSSES_SEPARATE")
+            points = [nodes[sid].P for sid in tri]
+            lengths = [
+                math.dist(tuple(map(float, points[i])), tuple(map(float, points[j])))
+                for i, j in ((0, 1), (1, 2), (2, 0))
+            ]
+            local_scale = max(lengths)
+            if not math.isfinite(local_scale) or local_scale <= 0.0:
+                rejected_explicit_face_count += 1
+                continue
+            relative_area = _triangle_double_area(*points) / (local_scale * local_scale)
+            if relative_area < float(min_relative_double_area):
+                rejected_explicit_face_count += 1
+                continue
+            faces_surface.append(tri)
 
     faces_surface = sorted(set(faces_surface))
     if not faces_surface:
@@ -185,7 +222,11 @@ def build_canonical_relation_candidate(
         surface_binding_hash=surface.geometry_lineage_hash,
         partition_binding_hash=partition.partition_lineage_hash,
         carrier_policy_binding_hash=carrier_policy.carrier_policy_lineage_hash,
-        producer_id="RealSaS.CanonicalRelationMeshBaseline.v1",
+        producer_id=(
+            "RealSaS.CanonicalDenseFaceProvenanceBaseline.v1"
+            if explicit_face_provenance is not None
+            else "RealSaS.CanonicalRelationMeshBaseline.v1"
+        ),
         producer_policy_hash=str(producer_policy_hash),
         candidate_lineage_hash="",
         metadata={
@@ -196,6 +237,18 @@ def build_canonical_relation_candidate(
             "identity_support_vertex_count": len(vertices),
             "provisional_unknown_edge_count": sum(edge in unknown_edges for edge in edges_surface),
             "rejected_relation_count": rejected_relation_count,
+            "face_provenance_mode": (
+                "EXACT_COMPACTED_DENSE_FACE_REPLAY"
+                if explicit_face_provenance is not None
+                else "RELATION_GRAPH_THREE_CLIQUE"
+            ),
+            "explicit_face_provenance_input_count": (
+                len(explicit_face_provenance)
+                if explicit_face_provenance is not None
+                else 0
+            ),
+            "rejected_explicit_face_count": int(rejected_explicit_face_count),
+            "three_clique_face_minting_allowed": explicit_face_provenance is None,
             "backend_role": "SAFE_BASELINE__NOT_FINAL_CDT_QUALITY_BACKEND",
         },
     )

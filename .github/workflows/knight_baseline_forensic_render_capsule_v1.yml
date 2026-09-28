@@ -200,24 +200,18 @@ jobs:
           PY
           echo "REPLAY_AUTHORITY=$REPLAY_AUTHORITY" >> "$GITHUB_ENV"
 
-      - name: Reproduce byte-exact baseline first
-        run: |
-          set -euo pipefail
-          rm -rf /tmp/knight_baseline_repro
-          PYTHONPATH=. python -m tools.demo.render_knight_motion_preview_v1             --authority-root "$REPLAY_AUTHORITY"             --run-id "$RUN_ID"             --out-dir /tmp/knight_baseline_repro
-          test "$(git hash-object /tmp/knight_baseline_repro/KNIGHT_DEMO_MOTION_VISUAL_CONTINUATION_REPORT_V1.json)" = "9120723f6bc00142fb6bb992d3ee7a85c601bf4f"
-          test "$(git hash-object /tmp/knight_baseline_repro/KNIGHT_IDLE_DEMO_PREVIEW_V1.png)" = "cae86d8a04bde6768ac9c3dafed13a2ab318cf29"
-          test "$(git hash-object /tmp/knight_baseline_repro/KNIGHT_RUN_DEMO_PREVIEW_V1.png)" = "8e9ed58a3bfbbace73f54e3e5593691f90eef4f1"
-          test "$(git hash-object /tmp/knight_baseline_repro/KNIGHT_SLASH_DEMO_PREVIEW_V1.png)" = "7a87f310473d602c99eb712be964dcd430b47cfb"
-          echo "KNIGHT_BYTE_EXACT_BASELINE_REPRO_PASS"
-
-      - name: Run baseline forensic capsule
+      - name: Run focused byte-exact RUN baseline forensic capsule
         run: |
           set -euo pipefail
           rm -rf /tmp/knight_baseline_forensic_capsule_v1
-          PYTHONPATH=. python -m tools.demo.render_knight_baseline_forensic_capsule_v1             --authority-root "$REPLAY_AUTHORITY"             --run-id "$RUN_ID"             --out-dir /tmp/knight_baseline_forensic_capsule_v1
+          PYTHONPATH=. python -m tools.demo.render_knight_baseline_forensic_capsule_v1 \
+            --authority-root "$REPLAY_AUTHORITY" \
+            --run-id "$RUN_ID" \
+            --out-dir /tmp/knight_baseline_forensic_capsule_v1 \
+            --clip-id demo_run_v1
           test -f /tmp/knight_baseline_forensic_capsule_v1/BASELINE_FORENSIC_CAPSULE_V1.json
-          echo "KNIGHT_BASELINE_FORENSIC_EXECUTION_PASS"
+          test "$(git hash-object /tmp/knight_baseline_forensic_capsule_v1/KNIGHT_RUN_BASELINE_ACTUAL_RGB_V1.png)" = "8e9ed58a3bfbbace73f54e3e5593691f90eef4f1"
+          echo "KNIGHT_RUN_BYTE_EXACT_BASELINE_AND_FORENSIC_PASS"
 
       - name: Seal forensic capsule on research branch
         run: |

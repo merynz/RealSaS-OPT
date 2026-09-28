@@ -1,0 +1,19 @@
+{
+  "artifacts": [
+    {
+      "bytes": 21202,
+      "path": "canonical/V2_SEMANTIC_COMPOSITION_AUDIT_V1_20260928.json",
+      "sha256": "6f6c7dd5ff2720c148a26ef50330e7b921887019973e1cb35514b02bd5a2c8ea"
+    },
+    {
+      "bytes": 2651,
+      "path": "canonical/v2_semantic_composition_audit_v1/AUDIT_STDOUT.txt",
+      "sha256": "bd6ccafe9feaa3086393f86640bd260de5609d83a3fa520e934ce8890e6876fb"
+    }
+  ],
+  "optimization_selected": false,
+  "repair_applied": false,
+  "repo_head": "d750129434cc16883d0f722cf3388ecffe86d069",
+  "schema": "RealSaS.V2SemanticCompositionAuditSeal.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED"
+}

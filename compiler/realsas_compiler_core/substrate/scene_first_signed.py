@@ -82,6 +82,89 @@ def robust_zero_surface_normals_v1(points, orientation_hints, *, k: int = 64) ->
     return out.astype(np.float32)
 
 
+ZERO_SURFACE_NORMAL_OPERATOR_V2_ID = "RealSaS.GSA.ZeroSurfaceTopologyAreaNormal.v2"
+
+
+def zero_surface_normal_operator_identity_v2() -> dict:
+    return {
+        "operator_id": ZERO_SURFACE_NORMAL_OPERATOR_V2_ID,
+        "method": "ORIENTED_AREA_WEIGHTED_INCIDENT_FACE_NORMAL",
+        "neighborhood_authority": "DENSE_ZERO_SURFACE_FACE_INCIDENCE_ONLY",
+        "orientation_hint": "MARCHING_CUBES_IMPLICIT_NORMAL_SIGN_ONLY",
+        "euclidean_cross_sheet_neighbors_forbidden": True,
+        "teacher_truth_used": False,
+    }
+
+
+def zero_surface_normal_operator_hash_v2() -> str:
+    return content_sha256(zero_surface_normal_operator_identity_v2())
+
+
+def topology_aware_zero_surface_normals_v2(
+    points,
+    faces,
+    orientation_hints,
+) -> np.ndarray:
+    """Topology-local area-weighted normals on the dense decoded zero surface.
+
+    Unlike V1 Euclidean kNN PCA, the neighborhood is the actual dense triangle
+    incidence graph. Spatially close but mechanically disconnected sheets therefore
+    cannot contaminate one another. Face orientation uses only the decoder's
+    implicit normal sign hint; the hint does not supply normal magnitude/direction.
+    """
+    p = np.asarray(points, dtype=np.float64)
+    f = np.asarray(faces, dtype=np.int64)
+    hint = _normalize_rows(np.asarray(orientation_hints, dtype=np.float64))
+    if p.ndim != 2 or p.shape[1] != 3 or len(p) < 4 or not np.isfinite(p).all():
+        raise QualificationError("TOPOLOGY_NORMAL_POINTS_INVALID")
+    if hint.shape != p.shape:
+        raise QualificationError("TOPOLOGY_NORMAL_HINT_SHAPE_INVALID")
+    if f.ndim != 2 or f.shape[1] != 3 or np.any(f < 0) or np.any(f >= len(p)):
+        raise QualificationError("TOPOLOGY_NORMAL_FACES_INVALID")
+    if len(f) < 1:
+        raise QualificationError("TOPOLOGY_NORMAL_FACE_SET_EMPTY")
+
+    a = p[f[:, 0]]
+    b = p[f[:, 1]]
+    cc = p[f[:, 2]]
+    cross = np.cross(b - a, cc - a)
+    mag = np.linalg.norm(cross, axis=1)
+    valid = np.isfinite(mag) & (mag > 1e-15)
+    if not np.any(valid):
+        raise QualificationError("TOPOLOGY_NORMAL_ALL_FACES_DEGENERATE")
+
+    # Orient each dense face using only the local implicit sign evidence.
+    face_hint = (
+        hint[f[:, 0]]
+        + hint[f[:, 1]]
+        + hint[f[:, 2]]
+    )
+    face_hint_norm = np.linalg.norm(face_hint, axis=1)
+    orientable = valid & np.isfinite(face_hint_norm) & (face_hint_norm > 1e-12)
+    dot = np.einsum("ij,ij->i", cross, face_hint)
+    flip = orientable & (dot < 0.0)
+    cross[flip] *= -1.0
+    cross[~valid] = 0.0
+
+    accum = np.zeros_like(p, dtype=np.float64)
+    np.add.at(accum, f[:, 0], cross)
+    np.add.at(accum, f[:, 1], cross)
+    np.add.at(accum, f[:, 2], cross)
+
+    lengths = np.linalg.norm(accum, axis=1)
+    isolated = (~np.isfinite(lengths)) | (lengths <= 1e-12)
+    if np.any(isolated):
+        # A vertex whose incident oriented areas cancel exactly has no stable
+        # topology-derived direction. Preserve the decoder sign vector as a
+        # bounded fallback rather than borrowing a Euclidean neighbor sheet.
+        accum[isolated] = hint[isolated]
+
+    out = _normalize_rows(accum)
+    flip_vertex = np.einsum("ij,ij->i", out, hint) < 0.0
+    out[flip_vertex] *= -1.0
+    return out.astype(np.float32)
+
+
 def mesh_connected_component_labels_v1(
     vertex_count: int,
     faces: np.ndarray,
@@ -569,6 +652,10 @@ __all__ = [
     "zero_surface_normal_operator_identity_v1",
     "zero_surface_normal_operator_hash_v1",
     "robust_zero_surface_normals_v1",
+    "ZERO_SURFACE_NORMAL_OPERATOR_V2_ID",
+    "zero_surface_normal_operator_identity_v2",
+    "zero_surface_normal_operator_hash_v2",
+    "topology_aware_zero_surface_normals_v2",
     "replay_compacted_face_provenance_v1",
     "rigging_surface_from_scene_first_zero_mesh_v1",
 ]

@@ -53,7 +53,7 @@ jobs:
           cp /tmp/cutcell_repro.txt canonical/knight_cutcell_prior_reproduction_v1/AUDIT_STDOUT.txt
           git config user.name realsas-self-hosted-runner
           git config user.email runner@realsas.local
-          git add canonical/KNIGHT_CUTCELL_PRIOR_REPRODUCTION_V1_20260929.json canonical/knight_cutcell_prior_reproduction_v1
+          git add canonical/KNIGHT_CUTCELL_PRIOR_REPRODUCTION_V1_20260929.json canonical/KNIGHT_CUTCELL_PRIOR_REPRODUCTION_V1_20260929.npz canonical/knight_cutcell_prior_reproduction_v1
           git commit -m 'research: seal Knight cut-cell prior reproduction'
           git fetch origin research/vf11-certified-adaptive-20260921
           git rebase origin/research/vf11-certified-adaptive-20260921

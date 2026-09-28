@@ -1,0 +1,129 @@
+name: knight-stage14-18-structural-information-audit-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/knight_stage14_18_structural_information_audit_v1.yml'
+
+concurrency:
+  group: knight-stage14-18-structural-information-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      OUT: canonical/knight_stage14_18_structural_information_audit_v1
+
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+
+      - name: Audit exact Stage14-18 structural artifacts
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, hashlib
+          from pathlib import Path
+          root=Path("/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924")
+          out=Path("canonical/knight_stage14_18_structural_information_audit_v1")
+          out.mkdir(parents=True,exist_ok=True)
+
+          paths={
+            "stage14":root/"artifacts/14_GSA_BUILD/rigging_surface.json",
+            "stage17":root/"artifacts/17_MECHANICAL_PARTITION_QUALIFIED/mechanical_partition.json",
+            "stage18":root/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json",
+          }
+          for k,p in paths.items():
+            if not p.is_file():
+              raise RuntimeError(f"MISSING:{k}:{p}")
+
+          j14=json.loads(paths["stage14"].read_text())
+          j17=json.loads(paths["stage17"].read_text())
+          j18=json.loads(paths["stage18"].read_text())
+
+          def pick(d,*names):
+            for n in names:
+              if n in d:return d[n]
+            return None
+
+          nodes=pick(j14,"surface_nodes","nodes") or []
+          rels=pick(j14,"local_relations","relations") or []
+          comps=pick(j17,"components","component_regions") or []
+          bounds=pick(j17,"boundary_constraints","boundaries") or []
+          verts=pick(j18,"vertices") or []
+          faces=pick(j18,"faces") or []
+
+          decisions={}
+          for r in bounds:
+            d=str(r.get("decision"))
+            decisions[d]=decisions.get(d,0)+1
+
+          rel_unknown=0
+          rel_scores=[]
+          rel_kinds={}
+          for r in rels:
+            md=dict(r.get("metadata") or {})
+            if bool(md.get("crosses_unknown")) or bool(md.get("unknown_bridge")):
+              rel_unknown+=1
+            try: rel_scores.append(float(r.get("score")))
+            except: pass
+            k=str(r.get("relation_kind"))
+            rel_kinds[k]=rel_kinds.get(k,0)+1
+
+          comp_sizes=sorted([len(c.get("surface_ids") or []) for c in comps],reverse=True)
+          report={
+            "schema":"RealSaS.KnightStage14To18StructuralInformationAudit.v1",
+            "status":"AUDIT_ONLY__NO_REPAIR_APPLIED",
+            "artifact_sha256":{k:hashlib.sha256(p.read_bytes()).hexdigest() for k,p in paths.items()},
+            "stage14":{
+              "node_count":len(nodes),
+              "relation_count":len(rels),
+              "relation_kind_counts":rel_kinds,
+              "relation_unknown_flag_count":rel_unknown,
+              "relation_score_min":min(rel_scores) if rel_scores else None,
+              "relation_score_max":max(rel_scores) if rel_scores else None,
+              "relation_score_unique_count":len(set(rel_scores)),
+            },
+            "stage17":{
+              "component_count":len(comps),
+              "component_sizes_desc":comp_sizes[:32],
+              "largest_component_fraction":(comp_sizes[0]/max(1,len(nodes))) if comp_sizes else None,
+              "boundary_count":len(bounds),
+              "decision_counts":decisions,
+            },
+            "stage18":{
+              "vertex_count":len(verts),
+              "face_count":len(faces),
+            },
+            "finding":{
+              "all_gsa_relations_forced_certain":bool(rels and rel_unknown==0 and len(set(rel_scores))==1 and rel_scores[0]==1.0),
+              "partition_has_no_separate_edges":decisions.get("SEPARATE",0)==0,
+              "partition_single_component":len(comps)==1,
+              "claim_boundary":"Exact Knight artifact audit; no repair or alternative partition is proposed."
+            }
+          }
+          (out/"REPORT.json").write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
+          print(json.dumps(report,indent=2,sort_keys=True))
+          PY
+
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add "$OUT/REPORT.json"
+          git commit -m 'audit: seal Knight Stage14-18 structural information evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

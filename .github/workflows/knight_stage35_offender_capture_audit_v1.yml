@@ -45,13 +45,11 @@ jobs:
               qualified_skeleton_from_dict,
               qualified_skin_from_dict,
               qualified_camera_set_from_dict,
+              deformation_envelope_from_dict,
+              mesh_policy_from_dict,
           )
           from compiler.realsas_compiler_core.geometry_artifact_codec_v2 import (
               rigging_surface_from_dict,
-          )
-          from compiler.realsas_compiler_core.preproduct_authority_v1 import (
-              deformation_capability_envelope_from_dict,
-              mesh_qualification_policy_from_dict,
           )
           from compiler.realsas_compiler_core.mesh.skin_topology_compatibility_v1 import (
               run_skin_topology_compatibility_v1,
@@ -76,10 +74,10 @@ jobs:
 
           surface=rigging_surface_from_dict(json.loads(paths["surface"].read_text()))
           candidate=canonical_mesh_candidate_from_dict(json.loads(paths["candidate"].read_text()))
-          policy=mesh_qualification_policy_from_dict(json.loads(paths["policy"].read_text()))
+          policy=mesh_policy_from_dict(json.loads(paths["policy"].read_text()))
           skeleton=qualified_skeleton_from_dict(json.loads(paths["skeleton"].read_text()))
           skin=qualified_skin_from_dict(json.loads(paths["skin"].read_text()))
-          envelope=deformation_capability_envelope_from_dict(json.loads(paths["envelope"].read_text()))
+          envelope=deformation_envelope_from_dict(json.loads(paths["envelope"].read_text()))
           camera=qualified_camera_set_from_dict(json.loads(paths["camera"].read_text()))
 
           report=run_skin_topology_compatibility_v1(

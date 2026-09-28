@@ -1,32 +1,32 @@
 {
-  "open_count": 3,
+  "open_count": 1,
   "repair_applied": false,
-  "repo_head": "da1f2573fb03cbd18787a8c042dff13d910bde92",
+  "repo_head": "b1af1f55ea93957b05b2459c4e9d607b294cd87e",
   "rows": [
     {
-      "evidence": "new unexpected intersections and worsening rest-existing severity are exceptions",
+      "evidence": "new unexpected intersections and worsening rest-existing intersection persistence are hard QualificationErrors",
       "id": "DYNAMIC_SELF_INTERSECTION",
-      "severity": "P0",
-      "status": "OPEN"
+      "severity": "PASS",
+      "status": "CLOSED_CURRENT_V2"
     },
     {
       "evidence": "PLANT_2D only; full_3d_ground_contact_quality_claimed=false",
       "id": "CONTACT_CLAIM_SCOPE",
-      "severity": "P1",
-      "status": "OPEN"
+      "severity": "PASS",
+      "status": "CLOSED_BY_EXPLICIT_SCOPE"
     },
     {
       "evidence": {
-        "exact_frame_transfer": false,
-        "native_all_frames_views": false,
+        "exact_stage41_times_and_posed_xyz_transfer": true,
+        "native_every_sealed_frame_every_view_parity": true,
         "sealed_frame_playback": true
       },
       "id": "PROOF_RUNTIME_FRAME_IDENTITY",
-      "severity": "P0",
-      "status": "OPEN"
+      "severity": "PASS",
+      "status": "CLOSED_CURRENT_V2"
     },
     {
-      "evidence": "unmeasurable consequential faces enter dynamic_visibility_load_gate",
+      "evidence": "unmeasurable consequential faces enter the dynamic visibility/conditioning gate",
       "id": "UNMEASURABLE_VISIBLE_FACE_LOAD",
       "severity": "PASS",
       "status": "CLOSED_CURRENT_V2"
@@ -34,15 +34,15 @@
     {
       "design_before_code": "Define intentional transparent art versus unintended geometry-visible alpha holes, including coherent and scattered/speckled classes, then calibrate product hard gates.",
       "evidence": {
-        "alpha_in_pass_predicate": true,
+        "alpha_in_final_pass_predicate": false,
         "alpha_measured": true,
-        "pass_predicate_excerpt": "passed = (\n        conditioning_sample_count > 0\n        and unmeasurable_face_passed\n        and max_uv_to_surface_condition\n        <= float(conditioning_policy[\"dynamic_max_uv_to_surface_condition_number\"])\n        and max_relative_surface_condition\n        <= float(conditioning_policy[\"dynamic_max_relative_surface_condition_number\"])\n        and max_relative_surface_principal_stretch\n        <= float(conditioning_policy[\"dynamic_max_relative_surface_principal_stretch\"])\n        and max_adjacent_frame_surface_principal_stretch\n        <= float(\n            conditioning_policy[\"dynamic_max_adjacent_frame_surface_principal_stretch\"]\n        )\n    )\n    minification_passed = (\n        max_texture_texels_per_output_pixel\n        <= float(conditioning_policy[\"dynamic_max_texture_texels_per_output_pixel\"])\n    )\n    exposure_passed = (\n        exposure_fraction <= exposure_budget\n        and max_frame_compiled_fraction <= frame_exposure_budget\n        and max_connected_compiled_fraction <= connected_exposure_budget\n    )\n    exact_depth_ambiguity_passed = (\n        exact_depth_ambiguous_fraction <= exact_depth_ambiguity_budget\n        and max_frame_exact_depth_ambiguous_fraction\n        <= exact_depth_ambiguity_budget\n    )\n    layered_visibility_passed = (\n        visibility_layer_overflow_pixels <= max_layer_overflow_pixels\n    )\n    sidedness_passed = (\n        visible_orientation_flip_faces <= max_orientation_flip_faces\n    )\n    shared_edge_continuity_passed = (\n        mismatched_interior_shared_edge_count == 0\n        and maximum_shared_edge_endpoint_error_px == 0.0\n    )\n    passed = (\n        geometry_visible > 0\n        and undefined_visible == 0\n        and mismatch_pixels == 0\n        and exposure_passed\n        and micro_face_passed\n        and exact_depth_ambiguity_passed\n        and layered_visibility_passed\n        and sidedness_passed\n        and shared_edge_continuity_passed\n        and minification_passed\n        and conditioning_passed\n    )\n    value = DynamicVisualIntegrityV2IR(\n        package_binding_hash=package.package_hash,\n        projection_binding_hash=projection.projection_hash,\n        native_playback_binding_hash=playback.playback_hash,\n        frame_count=frame_count,\n        geometry_visible_pixel_count=geometry_visible,\n        final_alpha_hole_pixel_count=alpha_transparent,\n        final_alpha_hole_fraction=transparent_fraction,\n        compiled_unobserved_visible_pixel_count=compiled_visible,\n        compiled_unobserved_visible_fraction=exposure_fraction,\n        maximum_frame_compiled_unobserved_visible_fraction=max_frame_compiled_fraction,\n        maximum_connected_compiled_unobserved_visible_fraction=max_connected_compiled_fraction,\n        maximum_frame_micro_visible_pixel_fraction=max_frame_micro_visible_fraction,\n        consequential_visible_face_count=consequential_visible_face_count,\n        unmeasurable_consequential_visible_face_count=unmeasurable_visible_face_count,\n        exact_depth_ambiguous_pixel_count=exact_depth_ambiguous_pixels,\n        exact_depth_ambiguous_fraction=exact_depth_ambiguous_fraction,\n        maximum_frame_exact_depth_ambiguous_fraction=max_frame_exact_depth_ambiguous_fraction,\n        visibility_layer_overflow_pixel_count=visibility_layer_overflow_pixels,\n        visible_orientation_flip_face_count=visible_orientation_flip_faces,\n        native_reference_mismatch_pixel_count=mismatch_pixels,\n        maximum_frame_native_reference_mismatch_fraction=max_mismatch_fractio"
+        "final_pass_assignment": "passed = (\n        geometry_visible > 0\n        and undefined_visible == 0\n        and mismatch_pixels == 0\n        and exposure_passed\n        and micro_face_passed\n        and exact_depth_ambiguity_passed\n        and layered_visibility_passed\n        and sidedness_passed\n        and shared_edge_continuity_passed\n        and minification_passed\n        and conditioning_passed\n    )"
       },
       "id": "DYNAMIC_VISIBLE_ALPHA_HOLES",
-      "severity": "PASS",
-      "status": "CLOSED_OR_NOT_PRESENT"
+      "severity": "P1",
+      "status": "OPEN__DIAGNOSTIC_NOT_HARD_GATE"
     }
   ],
-  "schema": "RealSaS.V2MotionRuntimeProofAudit.v1",
+  "schema": "RealSaS.V2MotionRuntimeProofAudit.v2",
   "status": "AUDIT_ONLY__NO_REPAIR_APPLIED"
 }

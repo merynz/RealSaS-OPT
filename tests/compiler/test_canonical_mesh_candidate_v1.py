@@ -112,3 +112,65 @@ def test_no_local_relation_triangle_fails_closed_instead_of_inventing_topology()
         build_canonical_relation_candidate(
             surface, partition, carrier, producer_policy_hash="producer-policy"
         )
+
+
+def test_explicit_dense_face_provenance_forbids_three_edge_clique_minting():
+    # Three real dense faces can support AB, AC and BC independently without
+    # providing an ABC face. A relation-only 3-clique reconstruction cannot
+    # distinguish that case and therefore invents ABC; explicit face provenance must.
+    nodes = (
+        SurfaceNode("a",(0.0,0.0,0.0),(0,),("src",),("o0",)),
+        SurfaceNode("b",(1.0,0.0,0.0),(0,),("src",),("o1",)),
+        SurfaceNode("c",(0.2,1.0,0.0),(0,),("src",),("o2",)),
+        SurfaceNode("d",(0.2,0.2,1.0),(0,),("src",),("o3",)),
+    )
+    edge_pairs = (("a","b"),("a","c"),("b","c"),("a","d"),("b","d"),("c","d"))
+    relations = tuple(
+        SurfaceRelation(f"r:{a}:{b}",a,b,"LOCAL_NEIGHBOR",1.0)
+        for a,b in edge_pairs
+    )
+    surface = RiggingSurfaceIR(nodes, relations, "surface-k4")
+    partition = build_structural_partition(surface)
+    carrier = build_component_carrier_policy(
+        partition=partition,
+        decisions=tuple(
+            ComponentCarrierDecisionIR(component.component_id, "MESH", ("test",))
+            for component in partition.components
+        ),
+    )
+
+    relation_only = build_canonical_relation_candidate(
+        surface, partition, carrier, producer_policy_hash="relation-policy"
+    )
+    explicit = build_canonical_relation_candidate(
+        surface,
+        partition,
+        carrier,
+        producer_policy_hash="dense-face-policy",
+        explicit_face_provenance=(
+            ("a","b","d"),
+            ("a","c","d"),
+            ("b","c","d"),
+        ),
+    )
+
+    def surface_faces(candidate):
+        sid_by_vid = {
+            str(v.candidate_vertex_id): str(v.support_binding.coefficients[0][0])
+            for v in candidate.vertices
+        }
+        return {
+            tuple(sorted(sid_by_vid[str(vid)] for vid in face))
+            for face in candidate.faces
+        }
+
+    assert ("a","b","c") in surface_faces(relation_only)
+    assert ("a","b","c") not in surface_faces(explicit)
+    assert surface_faces(explicit) == {
+        ("a","b","d"), ("a","c","d"), ("b","c","d")
+    }
+    assert explicit.metadata["face_provenance_mode"] == "EXACT_COMPACTED_DENSE_FACE_REPLAY"
+    assert explicit.metadata["three_clique_face_minting_allowed"] is False
+    validate_canonical_mesh_candidate(
+        explicit, surface=surface, partition=partition, carrier_policy=carrier
+    )

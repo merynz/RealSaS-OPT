@@ -237,10 +237,13 @@ def harmonic_complete(weights, unknown_mask, edges):
     }
 
 
-def stress_arbitrary_weights(rest, weights, faces, skeleton, cameras, envelope, policy):
+def stress_arbitrary_weights(rest, weights, faces, joint_ids, skeleton, cameras, envelope, policy):
     stress_angle = _stress_angle(envelope)
     frames = derive_joint_frames_from_skeleton(skeleton, cameras=cameras)
-    joint_ids = tuple(j.canonical_joint_id for j in skeleton.joints)
+    joint_ids = tuple(map(str, joint_ids))
+    skeleton_ids = {str(j.canonical_joint_id) for j in skeleton.joints}
+    if set(joint_ids) != skeleton_ids or len(joint_ids) != len(skeleton_ids):
+        raise RuntimeError("STRESS_WEIGHT_COLUMN_JOINT_BINDING_INVALID")
     max_area = np.ones(len(faces), dtype=np.float64)
     min_area = np.ones(len(faces), dtype=np.float64)
     max_condition = np.ones(len(faces), dtype=np.float64)
@@ -483,10 +486,10 @@ def main():
     )
 
     pred_stress = stress_arbitrary_weights(
-        rest, Wpred, faces, skeleton, cameras, envelope, policy
+        rest, Wpred, faces, joint_ids, skeleton, cameras, envelope, policy
     )
     comp_stress = stress_arbitrary_weights(
-        rest, Wcomp, faces, skeleton, cameras, envelope, policy
+        rest, Wcomp, faces, joint_ids, skeleton, cameras, envelope, policy
     )
 
     # Teacher is evaluation-only. It does not enter contamination detection, graph

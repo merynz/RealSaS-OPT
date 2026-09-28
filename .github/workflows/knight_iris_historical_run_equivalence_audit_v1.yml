@@ -1,0 +1,62 @@
+name: knight-iris-historical-run-equivalence-audit-v1
+on:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths: ['.github/workflows/knight_iris_historical_run_equivalence_audit_v1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      ROOT: /home/monster/realsas_authority
+      CURRENT: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      HIST: 20260924T084959Z
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compare historical and current observation authorities
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,hashlib
+          from pathlib import Path
+          base=Path(os.environ["ROOT"])
+          def runroot(rid): return base/"runs"/rid
+          for rid in (os.environ["CURRENT"],os.environ["HIST"]):
+              r=runroot(rid)
+              print("RUN_EXISTS",rid,r.exists())
+              if r.exists():
+                  print("FILES",rid,(r/"ACTIVE_RUN_V2.json").exists(),(r/"run_manifest.json").exists())
+          cur=runroot(os.environ["CURRENT"])
+          hist=runroot(os.environ["HIST"])
+          assert hist.exists(),hist
+          def stage_payload(root,stage,schema):
+              led=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+              row=next(x for x in led["stages"] if x["id"]==stage)
+              rows=[x for x in row.get("outputs") or [] if x["schema"]==schema]
+              assert len(rows)==1,(root,stage,schema,len(rows),row["status"])
+              return json.loads(Path(rows[0]["path"]).read_text()),row
+          co,cr=stage_payload(cur,"07_OBSERVATION_CONTRACT_QUALIFIED","RealSaS.QualifiedObservationSetIR.v1")
+          cn,_=stage_payload(cur,"08_NORMALIZATION_DOMAIN_QUALIFIED","RealSaS.NormalizationDomainIR.v1")
+          ho,hr=stage_payload(hist,"07_OBSERVATION_CONTRACT_QUALIFIED","RealSaS.QualifiedObservationSetIR.v1")
+          hn,_=stage_payload(hist,"08_NORMALIZATION_DOMAIN_QUALIFIED","RealSaS.NormalizationDomainIR.v1")
+          print("OBS_HASH",ho["observation_set_hash"],co["observation_set_hash"])
+          print("NORM_HASH",hn["normalization_hash"],cn["normalization_hash"])
+          def vmap(o): return {int(v["view_index"]):v for v in o["views"]}
+          a,b=vmap(ho),vmap(co)
+          for i in range(8):
+              keys=("source_raster_sha256","foreground_mask_sha256","camera_binding_hash","width","height")
+              print("VIEW_EQ",i,json.dumps({k:[a[i].get(k),b[i].get(k),a[i].get(k)==b[i].get(k)] for k in keys},sort_keys=True))
+          keys=sorted(set(hn)|set(cn))
+          for k in keys:
+              if k in {"normalization_hash","metadata"}: continue
+              if hn.get(k)!=cn.get(k):
+                  print("NORM_DIFF",k,json.dumps(hn.get(k),sort_keys=True),json.dumps(cn.get(k),sort_keys=True))
+          print("NORM_CORE",json.dumps({
+              "hist":{k:hn.get(k) for k in ("center_xyz","half_extent","camera_set_binding_hash","observation_set_binding_hash")},
+              "cur":{k:cn.get(k) for k in ("center_xyz","half_extent","camera_set_binding_hash","observation_set_binding_hash")}
+          },sort_keys=True))
+          PY

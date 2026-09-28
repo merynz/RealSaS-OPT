@@ -1,0 +1,239 @@
+{
+  "alignment": {
+    "graph_edge_match_count": 28,
+    "graph_edge_total": 28,
+    "max_position_error": 0.06348993057552103
+  },
+  "cases": [
+    {
+      "clip_id": "demo_run_v1",
+      "groups": {
+        "NONINCIDENT": {
+          "predicted": {
+            "area_gt_20": 119,
+            "area_p95": 13.792860372416454,
+            "condition_gt_16": 348,
+            "condition_p95": 24.728480566603306,
+            "count": 4338,
+            "edge_gt_10": 428,
+            "edge_gt_4": 774,
+            "edge_max": 209.99843678211477,
+            "edge_p95": 16.282542909663412,
+            "edge_p99": 38.04622376354928
+          },
+          "teacher_oracle": {
+            "area_gt_20": 221,
+            "area_p95": 20.394268553792635,
+            "condition_gt_16": 451,
+            "condition_p95": 37.196359191944055,
+            "count": 4338,
+            "edge_gt_10": 592,
+            "edge_gt_4": 926,
+            "edge_max": 118.61647437227882,
+            "edge_p95": 21.084343928045545,
+            "edge_p99": 77.0898810482959
+          }
+        },
+        "STRICT_PRED_WEIGHT_L1_GT_1": {
+          "predicted": {
+            "area_gt_20": 70,
+            "area_p95": 154.02894801434135,
+            "condition_gt_16": 98,
+            "condition_p95": 145.3507550127287,
+            "count": 127,
+            "edge_gt_10": 120,
+            "edge_gt_4": 122,
+            "edge_max": 209.99843678211477,
+            "edge_p95": 60.0579749220839,
+            "edge_p99": 160.8444379646207
+          },
+          "teacher_oracle": {
+            "area_gt_20": 0,
+            "area_p95": 1.0000000000000044,
+            "condition_gt_16": 0,
+            "condition_p95": 1.000000000000009,
+            "count": 127,
+            "edge_gt_10": 0,
+            "edge_gt_4": 0,
+            "edge_max": 1.000000027939591,
+            "edge_p95": 1.0000000000000047,
+            "edge_p99": 1.000000020675288
+          }
+        },
+        "STRICT_SOURCE_LOCAL": {
+          "predicted": {
+            "area_gt_20": 90,
+            "area_p95": 1.0193604056790126,
+            "condition_gt_16": 168,
+            "condition_p95": 1.2028266976737378,
+            "count": 15725,
+            "edge_gt_10": 184,
+            "edge_gt_4": 240,
+            "edge_max": 209.99843678211477,
+            "edge_p95": 1.035207344899138,
+            "edge_p99": 13.51800832149664
+          },
+          "teacher_oracle": {
+            "area_gt_20": 0,
+            "area_p95": 1.0000000000000098,
+            "condition_gt_16": 0,
+            "condition_p95": 1.0121322811687072,
+            "count": 15725,
+            "edge_gt_10": 0,
+            "edge_gt_4": 0,
+            "edge_max": 3.210004511733826,
+            "edge_p95": 1.0000006066987415,
+            "edge_p99": 1.017680666047105
+          }
+        },
+        "STRICT_TEACHER_WEIGHT_L1_LE_0_1": {
+          "predicted": {
+            "area_gt_20": 90,
+            "area_p95": 1.0140456828584912,
+            "condition_gt_16": 168,
+            "condition_p95": 1.1166929007722837,
+            "count": 15481,
+            "edge_gt_10": 184,
+            "edge_gt_4": 240,
+            "edge_max": 209.99843678211477,
+            "edge_p95": 1.0294292177028843,
+            "edge_p99": 13.550973444190353
+          },
+          "teacher_oracle": {
+            "area_gt_20": 0,
+            "area_p95": 1.0000000000000087,
+            "condition_gt_16": 0,
+            "condition_p95": 1.0022216591501412,
+            "count": 15481,
+            "edge_gt_10": 0,
+            "edge_gt_4": 0,
+            "edge_max": 1.3111699383097497,
+            "edge_p95": 1.0000000298060128,
+            "edge_p99": 1.0130898921763865
+          }
+        }
+      },
+      "time_seconds": 0.4166666666666667
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "groups": {
+        "NONINCIDENT": {
+          "predicted": {
+            "area_gt_20": 146,
+            "area_p95": 15.00168963796951,
+            "condition_gt_16": 322,
+            "condition_p95": 23.981282274676445,
+            "count": 4338,
+            "edge_gt_10": 373,
+            "edge_gt_4": 645,
+            "edge_max": 200.27233842960499,
+            "edge_p95": 17.462624432031006,
+            "edge_p99": 38.307607521791
+          },
+          "teacher_oracle": {
+            "area_gt_20": 281,
+            "area_p95": 25.02545350608411,
+            "condition_gt_16": 463,
+            "condition_p95": 39.49417209817731,
+            "count": 4338,
+            "edge_gt_10": 520,
+            "edge_gt_4": 784,
+            "edge_max": 115.00103377505665,
+            "edge_p95": 30.269698022610058,
+            "edge_p99": 75.9550615320822
+          }
+        },
+        "STRICT_PRED_WEIGHT_L1_GT_1": {
+          "predicted": {
+            "area_gt_20": 94,
+            "area_p95": 236.46528830988692,
+            "condition_gt_16": 102,
+            "condition_p95": 112.32168859325904,
+            "count": 127,
+            "edge_gt_10": 115,
+            "edge_gt_4": 120,
+            "edge_max": 200.27233842960499,
+            "edge_p95": 58.182425474112,
+            "edge_p99": 154.02171608287472
+          },
+          "teacher_oracle": {
+            "area_gt_20": 0,
+            "area_p95": 1.0000000000000042,
+            "condition_gt_16": 0,
+            "condition_p95": 1.000000000000009,
+            "count": 127,
+            "edge_gt_10": 0,
+            "edge_gt_4": 0,
+            "edge_max": 1.0000000279395913,
+            "edge_p95": 1.0000000000000047,
+            "edge_p99": 1.0000000206752808
+          }
+        },
+        "STRICT_SOURCE_LOCAL": {
+          "predicted": {
+            "area_gt_20": 121,
+            "area_p95": 1.0090505898785924,
+            "condition_gt_16": 173,
+            "condition_p95": 1.1353245075416556,
+            "count": 15725,
+            "edge_gt_10": 185,
+            "edge_gt_4": 239,
+            "edge_max": 200.27233842960499,
+            "edge_p95": 1.0220969194323817,
+            "edge_p99": 17.551478678905145
+          },
+          "teacher_oracle": {
+            "area_gt_20": 0,
+            "area_p95": 1.0000000000000113,
+            "condition_gt_16": 0,
+            "condition_p95": 1.0032678042430905,
+            "count": 15725,
+            "edge_gt_10": 0,
+            "edge_gt_4": 0,
+            "edge_max": 1.7660587519637454,
+            "edge_p95": 1.0002291868177746,
+            "edge_p99": 1.0362225754303591
+          }
+        },
+        "STRICT_TEACHER_WEIGHT_L1_LE_0_1": {
+          "predicted": {
+            "area_gt_20": 121,
+            "area_p95": 1.0045623814752618,
+            "condition_gt_16": 173,
+            "condition_p95": 1.0693429608517089,
+            "count": 15481,
+            "edge_gt_10": 185,
+            "edge_gt_4": 239,
+            "edge_max": 200.27233842960499,
+            "edge_p95": 1.0104325161932721,
+            "edge_p99": 17.814657572851537
+          },
+          "teacher_oracle": {
+            "area_gt_20": 0,
+            "area_p95": 1.0000000000000075,
+            "condition_gt_16": 0,
+            "condition_p95": 1.0005590374256326,
+            "count": 15481,
+            "edge_gt_10": 0,
+            "edge_gt_4": 0,
+            "edge_max": 1.2031448301656815,
+            "edge_p95": 1.0000001395584284,
+            "edge_p99": 1.003573389622158
+          }
+        }
+      },
+      "time_seconds": 0.2777777777777778
+    }
+  ],
+  "schema": "RealSaS.KnightTeacherWeightOracleCausality.v1",
+  "status": "DIAGNOSTIC_ORACLE_ONLY__NO_REPAIR",
+  "weight_error": {
+    "row_l1_max": 1.9999999999996914,
+    "row_l1_p95": 0.06353026943628416,
+    "row_l1_p99": 1.7017007573030505,
+    "rows_gt_0_1": 413,
+    "strict_faces_pred_l1_gt_1": 127,
+    "strict_faces_teacher_l1_gt_1": 0
+  }
+}

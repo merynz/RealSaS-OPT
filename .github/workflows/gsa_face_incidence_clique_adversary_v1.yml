@@ -1,0 +1,43 @@
+name: gsa-face-incidence-clique-adversary-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/audit_gsa_face_incidence_clique_v1.py'
+      - '.github/workflows/gsa_face_incidence_clique_adversary_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: gsa-face-incidence-clique-adversary-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Run GSA face-incidence clique adversary
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python tools/audit_gsa_face_incidence_clique_v1.py | tee /tmp/gsa_face_incidence.txt
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          mkdir -p canonical/gsa_face_incidence_clique_adversary_v1
+          cp /tmp/gsa_face_incidence.txt canonical/gsa_face_incidence_clique_adversary_v1/AUDIT_STDOUT.txt
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/GSA_FACE_INCIDENCE_CLIQUE_ADVERSARY_V1_20260928.json canonical/gsa_face_incidence_clique_adversary_v1
+          git commit -m 'audit: seal GSA face-incidence clique adversary'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

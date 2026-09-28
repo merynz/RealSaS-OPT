@@ -1,0 +1,38 @@
+{
+  "builder_parameters": [
+    "vertices_normalized",
+    "faces",
+    "implicit_normals",
+    "cameras",
+    "normalization_center",
+    "normalization_half_extent",
+    "authority_label",
+    "source_run_id",
+    "source_checkpoint_sha256",
+    "source_zero_surface_sha256",
+    "target_nodes",
+    "normal_k",
+    "visibility_depth_tolerance_norm",
+    "component_aware_compaction",
+    "precomputed_dense_normals",
+    "precomputed_component_labels",
+    "metadata"
+  ],
+  "finding": {
+    "claim_boundary": "Stage13 global silhouette qualification can limit gross false positives but does not make per-node self-visibility identical to exact source observation support.",
+    "class": "EPISTEMIC_SEMANTICS_DRIFT",
+    "confirmed": true,
+    "consequence": "A compact node can be labelled observed because the predicted surface is camera-visible even though no exact source-observation identity is attached. Geppetto treats this label as an input feature.",
+    "design_before_code": "Freeze whether this bit means camera-exposed geometry or source-supported observation. If source-supported, derive it from qualified observation evidence/masks with exact provenance rather than renaming self-visibility as observation.",
+    "id": "GSA_OBSERVED_FLAG_MEANS_GEOMETRICALLY_EXPOSED_NOT_SOURCE_OBSERVED",
+    "severity": "P1"
+  },
+  "geppetto_consumes_observed_completed": true,
+  "observed_flag_from_any_self_zbuffer_support": true,
+  "repo_head": "763933ba8fbd619d8bcdf4490b9910c944fd2336",
+  "schema": "RealSaS.GSAObservationSemanticsAudit.v1",
+  "self_zbuffer_support_used": true,
+  "source_mask_or_observation_parameters": [],
+  "source_observation_ids_for_scene_first_empty": true,
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED"
+}

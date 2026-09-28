@@ -19,6 +19,7 @@ from scipy.spatial import Delaunay, cKDTree
 from scipy.sparse import coo_matrix, eye
 from scipy.sparse.linalg import factorized
 
+from .camera_geometry_v2 import project_points_xyz_v3
 from .hashing import content_sha256
 from .mesh._historical_v05 import triangulate_production_cdt
 from .types import QualificationError
@@ -210,6 +211,114 @@ def raster_xy_to_source_texel_xy(points_xy) -> np.ndarray:
     """Inverse of source_texel_xy_to_raster_xy."""
     value = np.asarray(points_xy, dtype=np.float64)
     return value - SOURCE_TEXEL_TO_RASTER_OFFSET
+
+
+def bind_source_visual_points_to_projected_surface_v1(
+    *,
+    points_source_xy,
+    mechanical_positions_xyz,
+    mechanical_faces,
+    camera,
+    containment_epsilon: float = 1.0e-7,
+    depth_epsilon: float = 1.0e-12,
+) -> dict[str, np.ndarray]:
+    """Continuously bind source-owned 2D points to the first-hit mechanical surface.
+
+    Visual points live in source-texel coordinates, including exact half-pixel
+    silhouette-boundary vertices. Runtime visibility lives in raster coordinates,
+    whose pixel centers are shifted by +0.5. A nearest-pixel owner lookup therefore
+    cannot be an authority for boundary vertices. This routine evaluates the exact
+    projected mechanical triangles at the continuous raster-space point and chooses
+    the nearest positive-depth containing triangle, matching the depth ordering of
+    the V2 visibility contract.
+
+    No nearest-triangle extrapolation is permitted. Points outside every projected
+    triangle remain explicitly unbound.
+    """
+    points = np.asarray(points_source_xy, dtype=np.float64)
+    xyz = np.asarray(mechanical_positions_xyz, dtype=np.float64)
+    faces = np.asarray(mechanical_faces, dtype=np.int64)
+    if points.ndim != 2 or points.shape[1] != 2 or not np.isfinite(points).all():
+        raise QualificationError("VISUAL_MECHANICAL_BIND_POINTS_INVALID")
+    if xyz.ndim != 2 or xyz.shape[1] != 3 or not np.isfinite(xyz).all():
+        raise QualificationError("VISUAL_MECHANICAL_BIND_XYZ_INVALID")
+    if (
+        faces.ndim != 2
+        or faces.shape[1] != 3
+        or np.any(faces < 0)
+        or np.any(faces >= len(xyz))
+    ):
+        raise QualificationError("VISUAL_MECHANICAL_BIND_FACES_INVALID")
+    eps = float(containment_epsilon)
+    zeps = float(depth_epsilon)
+    if not np.isfinite(eps) or eps < 0.0 or not np.isfinite(zeps) or zeps < 0.0:
+        raise QualificationError("VISUAL_MECHANICAL_BIND_TOLERANCE_INVALID")
+
+    projected = np.asarray(project_points_xyz_v3(xyz, camera), dtype=np.float64)
+    tri = projected[faces]
+    a = tri[:, 0, :2]
+    b = tri[:, 1, :2]
+    cc = tri[:, 2, :2]
+    v0 = b - a
+    v1 = cc - a
+    den = v0[:, 0] * v1[:, 1] - v1[:, 0] * v0[:, 1]
+    nondegenerate = np.abs(den) > 1.0e-12
+
+    min_xy = np.minimum(np.minimum(a, b), cc) - eps
+    max_xy = np.maximum(np.maximum(a, b), cc) + eps
+    raster_points = source_texel_xy_to_raster_xy(points)
+
+    owner = np.full((len(points),), -1, dtype=np.int64)
+    bary = np.full((len(points), 3), np.nan, dtype=np.float64)
+    depth = np.full((len(points),), np.inf, dtype=np.float64)
+
+    for pi, point in enumerate(raster_points):
+        in_bbox = (
+            nondegenerate
+            & (min_xy[:, 0] <= point[0])
+            & (point[0] <= max_xy[:, 0])
+            & (min_xy[:, 1] <= point[1])
+            & (point[1] <= max_xy[:, 1])
+        )
+        ids = np.flatnonzero(in_bbox)
+        if len(ids) == 0:
+            continue
+        aa = a[ids]
+        vv0 = v0[ids]
+        vv1 = v1[ids]
+        vv2 = point[None, :] - aa
+        dd = den[ids]
+        u = (vv2[:, 0] * vv1[:, 1] - vv1[:, 0] * vv2[:, 1]) / dd
+        v = (vv0[:, 0] * vv2[:, 1] - vv2[:, 0] * vv0[:, 1]) / dd
+        w = 1.0 - u - v
+        bb = np.stack((w, u, v), axis=1)
+        inside = np.all(bb >= -eps, axis=1) & np.all(bb <= 1.0 + eps, axis=1)
+        if not np.any(inside):
+            continue
+        ids = ids[inside]
+        bb = bb[inside]
+        zz = np.sum(tri[ids, :, 2] * bb, axis=1)
+        positive = np.isfinite(zz) & (zz > zeps)
+        if not np.any(positive):
+            continue
+        ids = ids[positive]
+        bb = bb[positive]
+        zz = zz[positive]
+        # Stable first-hit selection: nearest positive depth, then lower face id.
+        order = np.lexsort((ids, zz))
+        k = int(order[0])
+        owner[pi] = int(ids[k])
+        bary[pi] = bb[k]
+        depth[pi] = float(zz[k])
+
+    return {
+        "owner_face_index": owner,
+        "barycentric": bary,
+        "depth": depth,
+        "valid": owner >= 0,
+        "projected_vertices": projected,
+        "raster_points": raster_points,
+    }
 
 
 def _signed_area(loop: list[tuple[int, int]]) -> float:

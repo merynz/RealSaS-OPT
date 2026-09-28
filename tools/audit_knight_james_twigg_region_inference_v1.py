@@ -18,6 +18,7 @@ from compiler.realsas_compiler_core.artifact_codec_v2 import (
     mesh_policy_from_dict,
     qualified_camera_set_from_dict,
     qualified_skeleton_from_dict,
+    rigging_surface_from_dict,
 )
 from compiler.realsas_compiler_core.joint_frames_v1 import derive_joint_frames_from_skeleton
 from compiler.realsas_compiler_core.mesh.deformation_stress_v2 import _pose_skin_matrices
@@ -347,8 +348,10 @@ def main():
         selected_alpha=float(np.asarray(z["selected_alpha"]).item())
     if W.shape!=(len(P),len(jids)):raise RuntimeError("JAMES_TWIGG_WEIGHT_SHAPE_DRIFT")
 
-    surface=load(rr/"artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json",
-                 __import__("compiler.realsas_compiler_core.artifact_codec_v2",fromlist=["rigging_surface_from_dict"]).rigging_surface_from_dict)
+    surface=load(
+        rr/"artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json",
+        rigging_surface_from_dict,
+    )
     dense=dense_supported_face_mask(rr,cand,surface)
     base_stress=stress_arbitrary_weights(P,W,F,jids,sk,cams,env,policy)
     unsafe=np.zeros(len(F),dtype=bool)

@@ -1,0 +1,35 @@
+{
+  "artifacts": [
+    {
+      "bytes": 447031,
+      "path": "canonical/V2_ARCHITECTURE_INTEGRITY_AUDIT_V1_20260928.json",
+      "sha256": "97753c6a69270c43a8815d52fd7f18deae8ef0b0565ab92dd9a20cf42673ede0"
+    },
+    {
+      "bytes": 11605,
+      "path": "canonical/v2_architecture_integrity_audit_v1/AUDIT_STDOUT.txt",
+      "sha256": "634484c73f51e8ad9e2f352634943fc88f98d2ad3e04bb795e3c3d5639efedad"
+    },
+    {
+      "bytes": 1336,
+      "path": "canonical/v2_architecture_integrity_audit_v1/PYTEST.txt",
+      "sha256": "5b5570c7e9e80227846496f75b8ba94d08d9e76842817486b1b62e3bf1e674fe"
+    },
+    {
+      "bytes": 2,
+      "path": "canonical/v2_architecture_integrity_audit_v1/PYTEST_RC.txt",
+      "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"
+    },
+    {
+      "bytes": 99381,
+      "path": "canonical/v2_architecture_integrity_audit_v1/STATIC_EVIDENCE.txt",
+      "sha256": "d2a7e51695e3afe205516b800c0e64b4f7886dc1e98a4ffa5a6d2ea0fd8bb78a"
+    }
+  ],
+  "optimization_selected": false,
+  "repair_applied": false,
+  "repo_head": "3567ca513bde2d27d446fcb618a16ba245640153",
+  "schema": "RealSaS.V2ArchitectureIntegrityAuditSeal.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED",
+  "threshold_changed": false
+}

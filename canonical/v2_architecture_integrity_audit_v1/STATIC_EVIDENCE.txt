@@ -1,0 +1,767 @@
+=== downstream/back-edge stage refs ===
+compiler/realsas_compiler_services/orchestrator/adapters/product_closure_v1.py:52:    root=ctx["run_root"]/"artifacts"/"40_PRODUCT_CLOSURE_SEAL"
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_projection_v1.py:83:    root=ctx["run_root"]/"artifacts"/"36_RUNTIME_V4_PROJECT"
+compiler/realsas_compiler_services/orchestrator/adapters/motion_dynamic_proof_v1.py:109:    root=ctx["run_root"]/"artifacts"/"35_MOTION_DYNAMIC_PROOF"
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_native_v1.py:104:    root=ctx["run_root"]/"artifacts"/"38_NATIVE_PACKAGE_OPEN_PLAYBACK"
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_native_v1.py:163:    root=ctx["run_root"]/"artifacts"/"39_VISUAL_MOTION_RENDER_BAKE"
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_package_v1.py:32:    root=ctx["run_root"]/"artifacts"/"37_RSS_MATERIALIZE_COMPACT"
+=== demo/fallback/legacy ===
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:140:def _artifact_root(ctx,fallback_stage_id:str):
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:141:    stage_id=str((ctx.get("stage") or {}).get("id") or fallback_stage_id)
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:339:def _demo_stage18_fallback_prereg(ctx: dict) -> tuple[dict, str] | None:
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:343:    ref = dict(demo.get("stage18_mesh_fallback_preregistration") or {})
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:356:    rule = dict(payload.get("fallback_rule") or {})
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:359:        eligibility.get("stage15_ledger_status_required") != "PASS_DEMO_ONLY"
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:389:    if row is None or str(row.get("status") or "") != "PASS_DEMO_ONLY":
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:425:    demo_fallback = _demo_stage18_fallback_prereg(ctx)
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:426:    demo_fallback_used = False
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:427:    demo_fallback_prereg_sha256 = ""
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:432:            if demo_fallback is None:
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:442:            prereg, demo_fallback_prereg_sha256 = demo_fallback
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:444:                str(dict(prereg.get("fallback_rule") or {}).get("rule_id") or "")
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:449:            demo_fallback_used=True
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:460:        "status":"PASS_DEMO_ONLY" if demo_fallback_used else "PASS",
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:466:                    "DEMO_ONLY_DERIVED_MESH_CANDIDATE"
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:467:                    if demo_fallback_used
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:478:                if demo_fallback_used
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:489:            "stage18_demo_fallback_used":demo_fallback_used,
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:490:            "stage18_demo_fallback_rule":(
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:491:                _DEMO_STAGE18_FALLBACK_RULE if demo_fallback_used else None
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:493:            "stage18_demo_fallback_preregistration_sha256":(
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:494:                demo_fallback_prereg_sha256 if demo_fallback_used else None
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:496:            "product_authority_claimed":False if demo_fallback_used else None,
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:497:            "stage19_remeasurement_required":bool(demo_fallback_used),
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:289:            "status": "PASS_DEMO_ONLY",
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:295:            "historical_run_id": str(closure.get("run_id") or ""),
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:312:                    root / "demo_historical_iris_prereg_evidence.json",
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:319:                "demo_historical_import": True,
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:383:        if str(result.get("run_id") or "") != str(prereg.get("historical_run_id") or ""):
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:406:            "status": "PASS_DEMO_ONLY",
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:409:            "historical_run_id": str(prereg["historical_run_id"]),
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:423:            "historical_external_gpu_fit_evidence_admitted": True,
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:435:                    root / "demo_historical_iris_execution_evidence.json",
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:442:                "demo_historical_import": True,
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:522:                "historical_demo_import": True,
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:525:                "historical_external_gpu_fit_evidence_hash": str(execution["evidence_hash"]),
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:544:                "historical_demo_import": True,
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:678:                "historical_demo_import": True,
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:701:                "historical_demo_import": True,
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1017:                        "historical_external_measurement": True,
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1032:                "historical_external_stage13_measurement_import": True,
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1033:                "historical_evidence_path": str(evidence_path),
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1034:                "historical_evidence_sha256": evidence_sha,
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1044:            "status": "PASS_DEMO_ONLY",
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1049:                    authority_class="DEMO_ONLY_GEOMETRY_SUBSTRATE",
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1055:                "historical_external_measurement_import": True,
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1202:                "status": "PASS_DEMO_ONLY",
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1207:                        authority_class="DEMO_ONLY_GEOMETRY_SUBSTRATE",
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1296:        and str(row.get("status") or "") == "PASS_DEMO_ONLY"
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1333:def _demo_stage14_fallback_prereg(ctx: dict) -> tuple[dict, str] | None:
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1337:    ref = dict(demo.get("stage14_fallback_preregistration") or {})
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1355:        eligibility.get("stage13_ledger_status_required") != "PASS_DEMO_ONLY"
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1366:    if stage13 is None or str(stage13.get("status") or "") != "PASS_DEMO_ONLY":
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1428:    demo_fallback = _demo_stage14_fallback_prereg(ctx)
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1443:        return_closest_nonpassing_evidence=demo_fallback is not None,
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1474:        if demo_fallback is None:
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1476:        prereg, prereg_sha = demo_fallback
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1489:                "demo_fallback_admitted": True,
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1490:                "demo_fallback_preregistration_sha256": prereg_sha,
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1491:                "demo_fallback_selection_rule": _DEMO_STAGE14_CLOSEST_RULE,
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1492:                "demo_fallback_target_node_cap": selected_cap,
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1493:                "demo_fallback_actual_node_count": len(surface.surface_nodes),
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1494:                "demo_fallback_surface_lineage_hash": surface.geometry_lineage_hash,
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1510:        authority_surface = "DEMO_ONLY_GSA_RIGGING_SURFACE_CANDIDATE"
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1511:        authority_report = "DEMO_ONLY_SUBSTRATE_ADEQUACY_MEASUREMENT"
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1512:        reported_status = "PASS_DEMO_ONLY"
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1537:            "demo_fallback_admitted": not scientific_pass,
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1562:    demo_fallback_admitted = False
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1574:        prereg = _demo_stage14_fallback_prereg(ctx)
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1580:            or str(stage14.get("status") or "") != "PASS_DEMO_ONLY"
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1581:            or adequacy.get("demo_fallback_admitted") is not True
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1584:            or str(adequacy.get("demo_fallback_selection_rule") or "")
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1586:            or str(adequacy.get("demo_fallback_surface_lineage_hash") or "")
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1590:            or int(adequacy.get("demo_fallback_actual_node_count", -1))
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1594:        demo_fallback_admitted = True
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1616:                "DEMO_ONLY_RIGGING_SURFACE_ADMISSION__SCIENTIFIC_ADEQUACY_FAIL"
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1617:                if demo_fallback_admitted
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1625:            "demo_fallback_admitted": bool(demo_fallback_admitted),
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1626:            "product_authority_claimed": False if demo_fallback_admitted else None,
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1644:        "status": "PASS_DEMO_ONLY" if demo_fallback_admitted else "PASS",
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1650:                    "DEMO_ONLY_RIGGING_SURFACE_MEASUREMENT"
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1651:                    if demo_fallback_admitted
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1659:                    "DEMO_ONLY_RIGGING_SURFACE_QUALIFICATION"
+compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:1660:                    if demo_fallback_admitted
+compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py:154:def _artifact_root(ctx,fallback_stage_id:str):
+compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py:155:    stage_id=str((ctx.get("stage") or {}).get("id") or fallback_stage_id)
+compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py:172:        "legacy_weight_thresholds_final_authority",
+compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py:178:    if bool(mechanical_policy["legacy_weight_thresholds_final_authority"]):
+compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py:116:        or str(stage25.get("status") or "") != "PASS_DEMO_ONLY"
+compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py:188:                else "DEMO_ONLY_MEASURED_CAA_REFERENCE_REST_FAILURE_V2"
+compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py:200:            "legacy_rest_preservation_ir_used": False,
+compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py:213:            "PASS_DEMO_ONLY"
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:290:        and ledger_status == "PASS_DEMO_ONLY"
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:291:        and status == "DEMO_ONLY_MEASURED_STATIC_CANONICAL_CARRIER__P999_FAIL"
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:375:    samples. Legacy dense truth remains readable so historical sealed artifacts
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:3436:                        "DEMO_ONLY_CAA_REFERENCE_REST_MEASUREMENT"
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:3441:                "status": "PASS_DEMO_ONLY",
+compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py:98:        and ledger_status == "PASS_DEMO_ONLY"
+compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py:100:        == "DEMO_ONLY_RIGGING_SURFACE_ADMISSION__SCIENTIFIC_ADEQUACY_FAIL"
+compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py:102:        and report.get("demo_fallback_admitted") is True
+compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py:86:    if str(base.get("status")) not in {"PASS", "PASS_DEMO_ONLY"}:
+compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py:510:        and str(stage13.get("status") or "") == "PASS_DEMO_ONLY"
+compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py:622:            else "DEMO_ONLY_MEASURED_STATIC_CANONICAL_CARRIER__P999_FAIL"
+compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py:659:        "status": "PASS_DEMO_ONLY" if demo_geometry_lineage else "PASS",
+compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py:665:                    "DEMO_ONLY_STATIC_CANONICAL_MESH_MEASUREMENT"
+compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py:379:            "status": "PASS_DEMO_ONLY",
+compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py:390:            "status": "PASS_DEMO_ONLY",
+compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py:395:                    authority_class="DEMO_ONLY_CLOSURE_V2",
+compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py:401:                    "authority_class": "DEMO_ONLY_EDITABLE_PUPPET_ARCHIVE_V2",
+compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py:594:            "legacy_qualified_appearance_set_used": False,
+compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py:625:            "legacy_qualified_appearance_set_used": False,
+compiler/realsas_compiler_core/mesh/_historical_v05/__init__.py:5:The historical source is stored as a compressed ASCII payload so the byte stream can
+compiler/realsas_compiler_core/mesh/_historical_v05/__init__.py:23:_MODULE_NAME = "realsas_compiler_core._historical_v05_cdt_production"
+compiler/realsas_compiler_core/mesh/_historical_v05/__init__.py:26:def historical_cdt_source_bytes() -> bytes:
+compiler/realsas_compiler_core/mesh/_historical_v05/__init__.py:40:def load_historical_cdt_module_v05():
+compiler/realsas_compiler_core/mesh/_historical_v05/__init__.py:44:    raw = historical_cdt_source_bytes()
+compiler/realsas_compiler_core/mesh/_historical_v05/__init__.py:46:    module.__file__ = f"<historical-cdt-v05:{HISTORICAL_CDT_SOURCE_SHA256}>"
+compiler/realsas_compiler_core/mesh/_historical_v05/__init__.py:58:    return load_historical_cdt_module_v05().triangulate_production_cdt(*args, **kwargs)
+compiler/realsas_compiler_core/mesh/_historical_v05/__init__.py:64:    "historical_cdt_source_bytes",
+compiler/realsas_compiler_core/mesh/_historical_v05/__init__.py:65:    "load_historical_cdt_module_v05",
+compiler/realsas_compiler_core/deformation_envelope_derivation_v1.py:53:            "legacy_scalar_to_semantic_sign":1.0,
+compiler/realsas_compiler_core/__init__.py:3:Current typed compiler code is ordinary source. The small historical execution
+compiler/realsas_compiler_core/__init__.py:5:verified, then extracted to a filesystem cache before import. Heavy historical
+compiler/realsas_compiler_core/playback_full_surface_v3.py:5:This module is deliberately independent of the historical coverage-selected mesh
+compiler/realsas_compiler_core/playback_full_surface_v3.py:81:    Screen-space pixel centers live at (x+0.5, y+0.5). Unlike the historical
+compiler/realsas_compiler_core/playback_full_surface_v3.py:82:    dense bridge, no -0.5 legacy raster offset is emitted here.
+compiler/realsas_compiler_core/appearance_render_v2.py:329:    # Geometry-only layers still provide a fallback for fully transparent
+compiler/realsas_compiler_core/complete_appearance_authority_v1.py:74:            "im2surftex_research_only": backend == "IM2SURFTEX_RESEARCH_ONLY",
+compiler/realsas_compiler_core/solver_registry.py:9:    """Raised when code asks current main to execute a historical-only solver."""
+compiler/realsas_compiler_core/solver_registry.py:15:    historical_impl: str
+compiler/realsas_compiler_core/solver_registry.py:27:# The historical modules named below are deliberately outside the current GitHub
+compiler/realsas_compiler_core/solver_registry.py:46:        "normal learned path may not silently synthesize semantic skin; promote only as bounded qualifier or separately typed proposal/fallback after causal need",
+compiler/realsas_compiler_core/solver_registry.py:78:    Merely having historical source provenance is never enough to import or run it.
+compiler/realsas_compiler_core/appearance_completion_v2.py:372:        # Backwards-compatible isolated-test fallback. Shipping product CAA
+compiler/realsas_compiler_core/product.py:50:    not generate mesh topology, synthesize skin semantics, or promote historical
+compiler/realsas_compiler_core/rest_render_v1.py:147:    component_fallback={}
+compiler/realsas_compiler_core/rest_render_v1.py:154:            component_fallback[str(cid)]=max(order,component_fallback.get(str(cid),-1))
+compiler/realsas_compiler_core/rest_render_v1.py:195:        slot_order=int(face_setup.get(fi,component_fallback.get(component_id,0)))
+compiler/realsas_compiler_core/repair_registry.py:5:A historical repair implementation or a populated RepairDirective is never enough
+compiler/realsas_compiler_core/repair_registry.py:28:    historical_reference: str
+compiler/realsas_compiler_core/repair_registry.py:39:# historical semantics but current V4 lacks the exact upstream representation
+compiler/realsas_compiler_core/repair_registry.py:49:        historical_reference="v0.5/realsas_synthesis.causal_repair.apply_repair_directive_to_rig",
+compiler/realsas_compiler_core/repair_registry.py:65:        historical_reference="v0.5/realsas_weight.causal_repair.apply_repair_directive_to_weight_plan",
+compiler/realsas_compiler_core/repair_registry.py:67:            "current qualified skin does not preserve the historical retained alternative portfolio; "
+compiler/realsas_compiler_core/substrate/__init__.py:6:legacy flat module paths are retained.
+compiler/realsas_compiler_core/substrate/local_geometry.py:22:    return {"operator_id":DTB_ND1_OPERATOR_ID,"historical_blob_sha":DTB_ND1_HISTORICAL_OPERATOR_BLOB_SHA,"offsets":OFFSETS.tolist(),"spatial_sigma_px":3.0,"minimum_retained_neighbors":6,"robust_gate":"dist<=median+3*max(1.4826*MAD,0.25*median,1e-6)"}
+compiler/realsas_compiler_core/substrate/local_geometry.py:82:        arr=_unit(normal); metadata=dict(node.metadata); metadata.update({"derived_normal_operator_id":DTB_ND1_OPERATOR_ID,"derived_normal_operator_hash":dtb_nd1_operator_hash(),"derived_normal_historical_blob_sha":DTB_ND1_HISTORICAL_OPERATOR_BLOB_SHA})
+compiler/realsas_compiler_core/substrate/local_geometry.py:85:    metadata=dict(surface.metadata); metadata.update({"derived_local_geometry_operator":DTB_ND1_OPERATOR_ID,"Nd_operator_sha256":dtb_nd1_operator_hash(),"Nd_historical_blob_sha":DTB_ND1_HISTORICAL_OPERATOR_BLOB_SHA})
+compiler/realsas_compiler_core/visibility_v2.py:68:def _rasterize_visible_owner_legacy(
+compiler/realsas_compiler_core/visibility_v2.py:241:    insertion preserve the legacy scalar comparisons exactly while replacing
+compiler/realsas_compiler_core/product_state_v2.py:277:    legacy_rigid = (
+compiler/realsas_compiler_core/product_state_v2.py:290:    if legacy_rigid and not noop_rigid:
+compiler/realsas_compiler_core/product_state_v2.py:306:        bool(legacy_rigid),
+compiler/realsas_compiler_core/product_state_v2.py:307:        bool(noop_rigid and not legacy_rigid),
+compiler/realsas_compiler_core/product_state_v2.py:351:                legacy_rigid,
+compiler/realsas_compiler_core/product_state_v2.py:352:                legacy_false_negative,
+compiler/realsas_compiler_core/product_state_v2.py:426:                        "legacy_weight_threshold_rigid": legacy_rigid,
+compiler/realsas_compiler_core/product_state_v2.py:427:                        "legacy_weight_threshold_false_negative": (
+compiler/realsas_compiler_core/product_state_v2.py:428:                            legacy_false_negative
+compiler/realsas_compiler_core/product_state_v2.py:494:            "legacy_weight_thresholds_are_diagnostic_not_final_authority": True,
+compiler/realsas_compiler_core/product_state_v2.py:692:            "legacy_appearance_set_semantics_used": False,
+compiler/realsas_compiler_core/visual_mesh_arap_v1.py:24:from .mesh._historical_v05 import triangulate_production_cdt
+compiler/realsas_compiler_core/visual_mesh_arap_v1.py:1115:    hash-sealed historical RealSaS production CDT kernel. Mechanical relation
+compiler/realsas_compiler_core/motion_compile_v2.py:844:            "legacy_scalar_envelope_is_not_v2_motion_limit":True,
+compiler/realsas_compiler_core/proof_engine.py:212:    The historical domain name RUNTIME_CONSUMPTION is retained for contract
+compiler/realsas_compiler_core/rig.py:191:    legacy=qualify_skeleton(surface,proposal,run_ilp_shadow=run_ilp_shadow)
+compiler/realsas_compiler_core/rig.py:192:    roots=tuple(sorted(j.canonical_joint_id for j in legacy.joints if j.parent_canonical_id is None))
+compiler/realsas_compiler_core/rig.py:195:    report=dict(legacy.qualification_report)
+compiler/realsas_compiler_core/rig.py:202:    value=QualifiedSkeletonIRV2(tuple(legacy.joints),roots,{},report,"")
+compiler/realsas_compiler_core/motion_presentation_v1.py:179:            "nearest_observed_direction_used_for_fallback":True,
+compiler/realsas_compiler_core/motion_compile_v1.py:531:            "historical_contact_solver_promoted":False,
+compiler/realsas_compiler_core/motion_compile_v1.py:784:            "historical_rotation_only_probe_cannot_mint_quality":True,
+compiler/realsas_compiler_core/motion_compile_v1.py:785:            "historical_arap_xpbd_contact_authority_used":False,
+compiler/realsas_compiler_core/compile_transaction.py:5:This module deliberately restores only the valuable historical orchestrator
+compiler/realsas_compiler_core/compile_transaction.py:8:It does not restore the historical monolithic pipeline or any old semantic owner.
+compiler/realsas_compiler_core/canonical_cdt_adapter_v1.py:3:"""Canonical local-chart adapter for the sealed historical CDT kernel.
+compiler/realsas_compiler_core/canonical_cdt_adapter_v1.py:5:The historical v0.5 CDT is numerical machinery only. This adapter owns all current
+compiler/realsas_compiler_core/canonical_cdt_adapter_v1.py:18:from .mesh._historical_v05 import (
+compiler/realsas_compiler_core/canonical_cdt_adapter_v1.py:159:                    "historical_cdt_source_sha256": HISTORICAL_CDT_SOURCE_SHA256,
+compiler/realsas_compiler_core/canonical_cdt_adapter_v1.py:258:        "historical_cdt_source_sha256": HISTORICAL_CDT_SOURCE_SHA256,
+compiler/realsas_compiler_core/canonical_cdt_adapter_v1.py:281:            "historical_cdt_source_sha256": HISTORICAL_CDT_SOURCE_SHA256,
+compiler/realsas_compiler_core/motion_3d_adapter_v1.py:5:The legacy motion IR supplies authored scalar rotations only. The frozen D0 axis
+compiler/realsas_compiler_core/motion_3d_adapter_v1.py:28:    legacy_scalar_to_semantic_sign: float
+compiler/realsas_compiler_core/motion_3d_adapter_v1.py:66:            sign = float(row.get("legacy_scalar_to_semantic_sign", 1.0))
+compiler/realsas_compiler_core/motion_3d_adapter_v1.py:84:                "legacy_scalar_to_semantic_sign": b.legacy_scalar_to_semantic_sign,
+compiler/realsas_compiler_core/motion_3d_adapter_v1.py:229:            legacy = _sample_track_rotation(track, t)
+compiler/realsas_compiler_core/motion_3d_adapter_v1.py:232:                if abs(legacy) > 1.0e-12:
+compiler/realsas_compiler_core/motion_3d_adapter_v1.py:235:            semantic[jid] = legacy * binding.legacy_scalar_to_semantic_sign
+compiler/realsas_compiler_core/canonical_graph_optimizer_authority.py:5:The historical compiler transport still supplies byte-preserved contract modules
+=== performance/quality knobs ===
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:285:        bool(row["degenerate"]) or float(row["min_angle_deg"]) + 1e-9 < float(policy.g3_min_angle_deg)
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:289:        bool(row["degenerate"]) or float(row["aspect_longest_over_min_altitude"]) - 1e-9 > float(policy.g3_max_aspect_longest_over_min_altitude)
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:294:        or float(row["min_angle_deg"]) + 1e-9 < float(policy.g3_min_angle_deg)
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:295:        or float(row["aspect_longest_over_min_altitude"]) - 1e-9 > float(policy.g3_max_aspect_longest_over_min_altitude)
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:307:        "min_angle_deg":min(float(row["min_angle_deg"]) for row in rows),
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:308:        "max_aspect_longest_over_min_altitude":max(finite_aspects,default=float("inf")),
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:309:        "policy_min_angle_deg":float(policy.g3_min_angle_deg),
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:310:        "policy_max_aspect_longest_over_min_altitude":float(policy.g3_max_aspect_longest_over_min_altitude),
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:311:        "below_min_angle_face_count":int(bad_angle),
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:312:        "above_max_aspect_face_count":int(bad_aspect),
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:314:        "below_min_angle_face_fraction":float(bad_angle/len(rows)),
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:315:        "above_max_aspect_face_fraction":float(bad_aspect/len(rows)),
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:320:        "cdt_v1_min_angle_repairability":(
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:431:        if int(parent_quality["below_min_angle_face_count"])>0:
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:486:            "relation_parent_below_min_angle_face_count":parent_quality["below_min_angle_face_count"],
+compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:487:            "relation_parent_above_max_aspect_face_count":parent_quality["above_max_aspect_face_count"],
+compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py:299:        bool(row["degenerate"]) or float(row["min_angle_deg"]) + 1e-9 < float(policy.g3_min_angle_deg)
+compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py:303:        bool(row["degenerate"]) or float(row["aspect_longest_over_min_altitude"]) - 1e-9 > float(policy.g3_max_aspect_longest_over_min_altitude)
+compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py:308:        or float(row["min_angle_deg"]) + 1e-9 < float(policy.g3_min_angle_deg)
+compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py:309:        or float(row["aspect_longest_over_min_altitude"]) - 1e-9 > float(policy.g3_max_aspect_longest_over_min_altitude)
+compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py:321:        "min_angle_deg":min(float(row["min_angle_deg"]) for row in rows),
+compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py:322:        "max_aspect_longest_over_min_altitude":max(finite_aspects,default=float("inf")),
+compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py:323:        "policy_min_angle_deg":float(policy.g3_min_angle_deg),
+compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py:324:        "policy_max_aspect_longest_over_min_altitude":float(policy.g3_max_aspect_longest_over_min_altitude),
+compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py:325:        "below_min_angle_face_count":int(bad_angle),
+compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py:326:        "above_max_aspect_face_count":int(bad_aspect),
+compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py:328:        "below_min_angle_face_fraction":float(bad_angle/len(rows)),
+compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py:329:        "above_max_aspect_face_fraction":float(bad_aspect/len(rows)),
+compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py:334:        "cdt_v1_min_angle_repairability":(
+compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py:376:        if int(parent_quality["below_min_angle_face_count"])>0:
+compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py:408:            "relation_parent_below_min_angle_face_count":parent_quality["below_min_angle_face_count"],
+compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py:409:            "relation_parent_above_max_aspect_face_count":parent_quality["above_max_aspect_face_count"],
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:940:    min_visible_pixels = int(
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:941:        conditioning_policy["dynamic_min_visible_pixels_per_face"]
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:998:    conditioning_sample_count = 0
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:999:    relative_conditioning_sample_count = 0
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:1000:    temporal_conditioning_sample_count = 0
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:1152:                        != int(reference.coverage_sample_count)
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:1189:                        for index in np.nonzero(counts >= min_visible_pixels)[0]
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:1194:                            contribution_counts >= min_visible_pixels
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:1198:                        (counts > 0) & (counts < min_visible_pixels)
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:1297:                    conditioning_sample_count += 1
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:1303:                        relative_conditioning_sample_count += 1
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:1313:                        temporal_conditioning_sample_count += 1
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:1368:        conditioning_sample_count > 0
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:1440:        dynamic_conditioning_sample_count=conditioning_sample_count,
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:1441:        relative_conditioning_sample_count=relative_conditioning_sample_count,
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:1442:        temporal_conditioning_sample_count=temporal_conditioning_sample_count,
+compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:1564:            "dynamic_conditioning_sample_count": conditioning_sample_count,
+compiler/realsas_compiler_services/orchestrator/adapters/motion_dynamic_proof_v1.py:42:        float(payload["g1_max_normal_refinement_ratio"]),
+compiler/realsas_compiler_services/orchestrator/adapters/motion_dynamic_proof_v1.py:44:        float(payload["g3_min_angle_deg"]),
+compiler/realsas_compiler_services/orchestrator/adapters/motion_dynamic_proof_v1.py:45:        float(payload["g3_max_aspect_longest_over_min_altitude"]),
+compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py:350:        float(payload["g1_max_normal_refinement_ratio"]),
+compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py:352:        float(payload["g3_min_angle_deg"]),
+compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py:353:        float(payload["g3_max_aspect_longest_over_min_altitude"]),
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:47:    projected_tile_resolution_evidence,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:131:        str(dict(prereg.compile_policy or {}).get("tile_resolution_strategy") or "")
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:407:        metadata.get("sample_count_mode")
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:429:    adaptive_required = {"face_sample_offsets", "face_tile_resolutions"}
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:454:        resolutions = np.asarray(arrays["face_tile_resolutions"], dtype=np.int32)
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:457:        if artifact.total_sample_count % artifact.direction_count != 0:
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:459:        per_direction = artifact.total_sample_count // artifact.direction_count
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:481:                artifact.direct_source_sample_count,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:490:            per_direction = artifact.total_sample_count // artifact.direction_count
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:608:        compile_policy["tile_resolution"] = 4
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:609:        compile_policy["tile_resolution_strategy"] = "SOURCE_VISUAL_MESH_V1"
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:660:    if str(compile_policy.get("tile_resolution_mode") or "") != "PROJECTED_SOURCE_DENSITY_V1":
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:669:            for value in compile_policy.get("tile_resolution_candidates") or ()
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:689:                "tile_resolution_evidence": tile_evidence,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:692:    compile_policy["tile_resolution"] = int(
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:695:    compile_policy["tile_resolution_strategy"] = "PER_FACE_ADAPTIVE_V1"
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:696:    compile_policy["face_tile_resolutions"] = list(
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:699:    compile_policy["sample_count_per_direction"] = int(
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:700:        tile_evidence["sample_count_per_direction"]
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:709:    compile_policy["tile_resolution_evidence"] = tile_evidence
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:762:            "tile_resolution_evidence": tile_evidence,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:811:        compile_policy.get("tile_resolution_strategy")
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:878:            tile_resolution=4,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:879:            sample_count_per_face=1,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:880:            total_sample_count=total,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:881:            direct_source_sample_count=total,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:882:            other_view_source_sample_count=0,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:883:            compiled_local_harmonic_sample_count=0,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:889:                "sample_count_mode": "SOURCE_RASTER_DIRECT_V1",
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:893:                "unsupported_abstain_sample_count": 0,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:894:                "canonical_global_completion_sample_count": 0,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:947:                "direct_source_sample_count": total,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:948:                "generated_sample_count": 0,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:953:    face_tile_resolutions = None
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:955:        face_tile_resolutions = np.asarray(
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:956:            compile_policy.get("face_tile_resolutions") or (),
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:959:        if face_tile_resolutions.shape != (len(candidate.faces),):
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:970:        tile_resolution=int(compile_policy["tile_resolution"]),
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:971:        face_tile_resolutions=face_tile_resolutions,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:983:        != (int(result["sample_count_per_direction"]),)
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:997:        "face_tile_resolutions": np.asarray(
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:998:            result["face_tile_resolutions"], dtype=np.int32
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1033:        tile_resolution=int(compile_policy["tile_resolution"]),
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1034:        sample_count_per_face=int(result["sample_count_per_face"]),
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1035:        total_sample_count=total,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1036:        direct_source_sample_count=int(counts["DIRECT_SOURCE"]),
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1037:        other_view_source_sample_count=int(counts["OTHER_VIEW_SOURCE"]),
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1038:        compiled_local_harmonic_sample_count=int(
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1048:            "unsupported_abstain_sample_count": int(
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1057:            "canonical_global_completion_sample_count": int(
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1072:            "globally_unseen_dense_sample_count": int(
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1073:                result["globally_unseen_dense_sample_count"]
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1088:            "sample_count_mode": str(result["sample_count_mode"]),
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1089:            "sample_count_per_direction": int(result["sample_count_per_direction"]),
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1090:            "maximum_tile_resolution": int(result["maximum_tile_resolution"]),
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1105:                        np.asarray(result["face_tile_resolutions"], dtype=np.int32)
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1114:                                result["face_tile_resolutions"], dtype=np.int32
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1157:            "total_sample_count": total,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1158:            "sample_count_per_direction": int(result["sample_count_per_direction"]),
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1159:            "sample_count_mode": str(result["sample_count_mode"]),
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1160:            "maximum_tile_resolution": int(result["maximum_tile_resolution"]),
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1216:            artifact.direct_source_sample_count != artifact.total_sample_count
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1217:            or artifact.other_view_source_sample_count != 0
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1218:            or artifact.compiled_local_harmonic_sample_count != 0
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1229:                "unsupported_abstain_sample_count": 0,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1261:                "unsupported_abstain_sample_count": 0,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1262:                "canonical_global_completion_sample_count": 0,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1300:        metadata.get("unsupported_abstain_sample_count", 0)
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1303:        metadata.get("canonical_global_completion_sample_count", 0)
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1327:            "unsupported_abstain_sample_count": unsupported_count,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1355:            "unsupported_abstain_sample_count": unsupported_count,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1356:            "canonical_global_completion_sample_count": (
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1586:    tile_resolution = int(prereg.compile_policy["tile_resolution"])
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1589:        dict(artifact.metadata or {}).get("sample_count_mode")
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1594:        face_tile_resolutions = np.asarray(
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1595:            arrays["face_tile_resolutions"], dtype=np.int32
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1601:            face_tile_resolutions=face_tile_resolutions,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1607:        face_tile_resolutions = None
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1645:                    tile_resolution=tile_resolution,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1735:                    tile_resolution=tile_resolution,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1798:        uv_payload["face_tile_resolution"] = np.asarray(
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1799:            face_tile_resolutions, dtype=np.int32
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1825:                    "unsupported_abstain_sample_count", 0
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1835:            "sample_count_mode": sample_mode,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1897:            "tile_resolution": tile_resolution,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1898:            "sample_count_mode": sample_mode,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:1989:            structured_holdout_sample_count=direct_count,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2024:                "source_direct_foreground_sample_count": direct_count,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2059:                "source_direct_foreground_sample_count": direct_count,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2165:        np.asarray(arrays["face_tile_resolutions"], dtype=np.int32)
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2166:        if "face_tile_resolutions" in arrays
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2183:        tile_resolution=(
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2184:            None if adaptive_offsets is not None else artifact.tile_resolution
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2187:        face_tile_resolutions=adaptive_resolutions,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2237:        tile_resolution=artifact.tile_resolution,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2242:        face_tile_resolutions=adaptive_resolutions,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2253:        tile_resolution=artifact.tile_resolution,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2255:        face_tile_resolutions=adaptive_resolutions,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2298:            int(row["shared_direct_sample_count"])
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2315:        if int(row["shared_direct_sample_count"]) >= component_min
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2329:            int(row.get("holdout_sample_count", 0))
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2360:        and int(holdout["sample_count"])
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2385:        structured_holdout_sample_count=int(holdout["sample_count"]),
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2401:                int(holdout["sample_count"])
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2447:            "unsupported_abstain_sample_count": int(
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2450:            "admitted_renderable_sample_count": admitted_count,
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2492:            "cross_view_shared_direct_sample_count": cross_view[
+compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:2493:                "shared_direct_sample_count"
+compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py:113:        max_iterations = int(
+compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py:114:            meta.get("skin_topology_repair_max_iterations", 0)
+compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py:122:            or max_iterations < 1
+compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py:123:            or repair_iteration > max_iterations
+compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py:192:            target_edge_px=16,
+compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py:224:                    "target_edge_px": 16,
+compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py:532:    if visual.dynamic_conditioning_sample_count <= 0:
+compiler/realsas_compiler_core/mesh/deformation_stress_v2.py:217:            "micro_stress_angle_deg":G3_LOCAL_MICRO_STRESS_ANGLE_DEG,
+compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py:112:def _stress_angle(envelope):
+compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py:114:    value=meta.get("skin_topology_compatibility_stress_angle_deg",DEFAULT_STRESS_ANGLE_DEG)
+compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py:153:    stress_angle=_stress_angle(envelope)
+compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py:168:                    deg=sign*stress_angle
+compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py:244:        "stress_angle_deg":stress_angle,
+compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py:279:def seam_cut_candidate_v1(candidate,unsafe_face_indices,*,report_hash:str,max_iterations:int=DEFAULT_MAX_REPAIR_ITERATIONS):
+compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py:289:            "max_iterations":int(max_iterations),
+compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py:292:    if max_iterations<1:
+compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py:299:    if next_iteration>int(max_iterations):
+compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py:326:            "skin_topology_repair_max_iterations":int(max_iterations),
+compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py:354:        "max_iterations":int(max_iterations),
+compiler/realsas_compiler_core/mesh/product_policy_v1.py:39:            g1_max_normal_refinement_ratio=float(g1["max_normal_refinement_ratio_of_local_scale"]),
+compiler/realsas_compiler_core/mesh/product_policy_v1.py:41:            g3_min_angle_deg=float(g3["minimum_rest_triangle_angle_deg"]),
+compiler/realsas_compiler_core/mesh/product_policy_v1.py:42:            g3_max_aspect_longest_over_min_altitude=float(g3["maximum_rest_aspect_longest_edge_over_min_altitude"]),
+compiler/realsas_compiler_core/mesh/conditioning_v1.py:29:            "min_angle_deg": 0.0,
+compiler/realsas_compiler_core/mesh/conditioning_v1.py:50:        "min_angle_deg": float(min(angles)),
+compiler/realsas_compiler_core/mesh/conditioning_v1.py:125:        "min_angle_deg": min(float(x["min_angle_deg"]) for x in rows),
+compiler/realsas_compiler_core/mesh/conditioning_v1.py:126:        "max_aspect_longest_over_min_altitude": max(finite_aspect, default=float("inf")),
+compiler/realsas_compiler_core/motion_dynamic_proof_v2.py:49:    sample_count:int
+compiler/realsas_compiler_core/motion_dynamic_proof_v2.py:229:        sample_count=int(payload["sample_count"]),
+compiler/realsas_compiler_core/motion_dynamic_proof_v2.py:816:            "uniform_sample_count":_UNIFORM_SAMPLE_COUNT,
+compiler/realsas_compiler_core/deformation_envelope_derivation_v1.py:110:            "skin_topology_compatibility_stress_angle_deg":120.0,
+compiler/realsas_compiler_core/appearance_quality_v2.py:313:    tile_resolution: int,
+compiler/realsas_compiler_core/appearance_quality_v2.py:318:    face_tile_resolutions: np.ndarray | None = None,
+compiler/realsas_compiler_core/appearance_quality_v2.py:355:    adaptive = face_sample_offsets is not None or face_tile_resolutions is not None
+compiler/realsas_compiler_core/appearance_quality_v2.py:357:        if face_sample_offsets is None or face_tile_resolutions is None:
+compiler/realsas_compiler_core/appearance_quality_v2.py:360:        resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+compiler/realsas_compiler_core/appearance_quality_v2.py:376:                face_tile_resolutions=resolutions,
+compiler/realsas_compiler_core/appearance_quality_v2.py:381:        if tile_resolution is None or int(tile_resolution) < 4:
+compiler/realsas_compiler_core/appearance_quality_v2.py:383:        if n != int(face_count) * int(tile_resolution) * (int(tile_resolution) + 1) // 2:
+compiler/realsas_compiler_core/appearance_quality_v2.py:391:                tile_resolution=int(tile_resolution),
+compiler/realsas_compiler_core/appearance_quality_v2.py:421:                {"view_index": target, "holdout_sample_count": 0}
+compiler/realsas_compiler_core/appearance_quality_v2.py:481:                "holdout_sample_count": int(len(held)),
+compiler/realsas_compiler_core/appearance_quality_v2.py:495:        "sample_count": int(len(values)),
+compiler/realsas_compiler_core/appearance_quality_v2.py:532:    sample_count = valid.shape[1]
+compiler/realsas_compiler_core/appearance_quality_v2.py:533:    if rgba.shape != (8, sample_count, 4) or component.shape != (sample_count,):
+compiler/realsas_compiler_core/appearance_quality_v2.py:548:            "shared_direct_sample_count": count,
+compiler/realsas_compiler_core/appearance_quality_v2.py:635:                "raw_shared_direct_sample_count": raw_count,
+compiler/realsas_compiler_core/appearance_quality_v2.py:636:                "directional_silhouette_transition_sample_count": transition_count,
+compiler/realsas_compiler_core/appearance_quality_v2.py:671:        "raw_shared_direct_sample_count": raw_total,
+compiler/realsas_compiler_core/appearance_quality_v2.py:672:        "directional_silhouette_transition_sample_count": transition_total,
+compiler/realsas_compiler_core/appearance_quality_v2.py:711:    sample_count = int(valid.shape[1])
+compiler/realsas_compiler_core/appearance_quality_v2.py:712:    if rgba.shape != (8, sample_count, 4) or component.shape != (sample_count,):
+compiler/realsas_compiler_core/appearance_quality_v2.py:720:            "shared_triplet_sample_count": count,
+compiler/realsas_compiler_core/appearance_quality_v2.py:816:def _triangle_lattice_neighbors(tile_resolution: int) -> tuple[tuple[int, int], ...]:
+compiler/realsas_compiler_core/appearance_quality_v2.py:817:    resolution = int(tile_resolution)
+compiler/realsas_compiler_core/appearance_quality_v2.py:843:    tile_resolution: int | None,
+compiler/realsas_compiler_core/appearance_quality_v2.py:845:    face_tile_resolutions: np.ndarray | None = None,
+compiler/realsas_compiler_core/appearance_quality_v2.py:878:    adaptive = face_sample_offsets is not None or face_tile_resolutions is not None
+compiler/realsas_compiler_core/appearance_quality_v2.py:880:        if face_sample_offsets is None or face_tile_resolutions is None:
+compiler/realsas_compiler_core/appearance_quality_v2.py:883:        resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+compiler/realsas_compiler_core/appearance_quality_v2.py:893:        if tile_resolution is None or int(tile_resolution) < 4:
+compiler/realsas_compiler_core/appearance_quality_v2.py:895:        per_face = int(tile_resolution) * (int(tile_resolution) + 1) // 2
+compiler/realsas_compiler_core/appearance_quality_v2.py:901:            int(tile_resolution),
+compiler/realsas_compiler_core/appearance_quality_v2.py:911:            tile_resolution=None if adaptive else int(tile_resolution),
+compiler/realsas_compiler_core/appearance_quality_v2.py:913:            face_tile_resolutions=resolutions if adaptive else None,
+compiler/realsas_compiler_core/appearance_render_v2.py:84:    coverage_sample_count: int
+compiler/realsas_compiler_core/appearance_render_v2.py:445:        coverage_sample_count=RUNTIME_COVERAGE_SAMPLE_COUNT,
+compiler/realsas_compiler_core/appearance_completion_v2.py:18:    tile_resolution: int,
+compiler/realsas_compiler_core/appearance_completion_v2.py:20:    resolution = int(tile_resolution)
+compiler/realsas_compiler_core/appearance_completion_v2.py:150:    tile_resolution: int | None = None,
+compiler/realsas_compiler_core/appearance_completion_v2.py:152:    face_tile_resolutions: np.ndarray | None = None,
+compiler/realsas_compiler_core/appearance_completion_v2.py:166:    adaptive = face_sample_offsets is not None or face_tile_resolutions is not None
+compiler/realsas_compiler_core/appearance_completion_v2.py:168:        if face_sample_offsets is None or face_tile_resolutions is None:
+compiler/realsas_compiler_core/appearance_completion_v2.py:171:        resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+compiler/realsas_compiler_core/appearance_completion_v2.py:191:        if tile_resolution is None:
+compiler/realsas_compiler_core/appearance_completion_v2.py:193:        resolution = int(tile_resolution)
+compiler/realsas_compiler_core/appearance_completion_v2.py:430:    abstained_sample_count = 0
+compiler/realsas_compiler_core/appearance_completion_v2.py:438:        nonlocal abstained_region_count, abstained_sample_count
+compiler/realsas_compiler_core/appearance_completion_v2.py:440:        abstained_sample_count += len(region)
+compiler/realsas_compiler_core/appearance_completion_v2.py:561:        "abstained_sample_count": int(abstained_sample_count),
+compiler/realsas_compiler_core/presentation_partition_v2.py:140:    sample_count = int(boundary.get("edge_samples_per_direction", 0))
+compiler/realsas_compiler_core/presentation_partition_v2.py:147:        sample_count < 3
+compiler/realsas_compiler_core/presentation_partition_v2.py:206:        1.0 / float(sample_count + 1),
+compiler/realsas_compiler_core/presentation_partition_v2.py:207:        float(sample_count) / float(sample_count + 1),
+compiler/realsas_compiler_core/presentation_partition_v2.py:208:        sample_count,
+compiler/realsas_compiler_core/appearance_authority_v2.py:86:    tile_resolution = int(compile_policy.get("tile_resolution", 0))
+compiler/realsas_compiler_core/appearance_authority_v2.py:91:        tile_resolution < 4
+compiler/realsas_compiler_core/appearance_authority_v2.py:100:        compile_policy.get("tile_resolution_strategy")
+compiler/realsas_compiler_core/appearance_authority_v2.py:126:            int(item) for item in (compile_policy.get("face_tile_resolutions") or ())
+compiler/realsas_compiler_core/appearance_authority_v2.py:130:            or any(item < 4 or item > tile_resolution for item in resolutions)
+compiler/realsas_compiler_core/appearance_authority_v2.py:134:        if int(compile_policy.get("sample_count_per_direction", 0)) != expected_samples:
+compiler/realsas_compiler_core/appearance_authority_v2.py:194:                str(dict(compile_policy).get("tile_resolution_strategy") or "")
+compiler/realsas_compiler_core/appearance_authority_v2.py:199:                if str(dict(compile_policy).get("tile_resolution_strategy") or "")
+compiler/realsas_compiler_core/appearance_authority_v2.py:222:    tile_resolution: int
+compiler/realsas_compiler_core/appearance_authority_v2.py:223:    sample_count_per_face: int
+compiler/realsas_compiler_core/appearance_authority_v2.py:224:    total_sample_count: int
+compiler/realsas_compiler_core/appearance_authority_v2.py:225:    direct_source_sample_count: int
+compiler/realsas_compiler_core/appearance_authority_v2.py:226:    other_view_source_sample_count: int
+compiler/realsas_compiler_core/appearance_authority_v2.py:227:    compiled_local_harmonic_sample_count: int
+compiler/realsas_compiler_core/appearance_authority_v2.py:248:        or value.tile_resolution < 4
+compiler/realsas_compiler_core/appearance_authority_v2.py:249:        or value.sample_count_per_face <= 0
+compiler/realsas_compiler_core/appearance_authority_v2.py:253:    unsupported = int(metadata.get("unsupported_abstain_sample_count") or 0)
+compiler/realsas_compiler_core/appearance_authority_v2.py:255:        metadata.get("canonical_global_completion_sample_count") or 0
+compiler/realsas_compiler_core/appearance_authority_v2.py:264:        value.direct_source_sample_count
+compiler/realsas_compiler_core/appearance_authority_v2.py:265:        + value.other_view_source_sample_count
+compiler/realsas_compiler_core/appearance_authority_v2.py:266:        + value.compiled_local_harmonic_sample_count
+compiler/realsas_compiler_core/appearance_authority_v2.py:270:    if counted != value.total_sample_count:
+compiler/realsas_compiler_core/appearance_authority_v2.py:308:    sample_mode = str(metadata.get("sample_count_mode") or "UNIFORM_FACE_LATTICE_V1")
+compiler/realsas_compiler_core/appearance_authority_v2.py:314:        if value.other_view_source_sample_count != 0:
+compiler/realsas_compiler_core/appearance_authority_v2.py:318:        if value.compiled_local_harmonic_sample_count != 0:
+compiler/realsas_compiler_core/appearance_authority_v2.py:326:        if value.direct_source_sample_count != value.total_sample_count:
+compiler/realsas_compiler_core/appearance_authority_v2.py:338:        per_direction = int(metadata.get("sample_count_per_direction") or 0)
+compiler/realsas_compiler_core/appearance_authority_v2.py:339:        maximum_resolution = int(metadata.get("maximum_tile_resolution") or 0)
+compiler/realsas_compiler_core/appearance_authority_v2.py:342:            or maximum_resolution != int(value.tile_resolution)
+compiler/realsas_compiler_core/appearance_authority_v2.py:343:            or value.total_sample_count != value.direction_count * per_direction
+compiler/realsas_compiler_core/appearance_authority_v2.py:350:        if value.total_sample_count != (
+compiler/realsas_compiler_core/appearance_authority_v2.py:351:            value.face_count * value.direction_count * value.sample_count_per_face
+compiler/realsas_compiler_core/appearance_authority_v2.py:439:    structured_holdout_sample_count: int
+compiler/realsas_compiler_core/appearance_authority_v2.py:550:        int(payload["tile_resolution"]),
+compiler/realsas_compiler_core/appearance_authority_v2.py:551:        int(payload["sample_count_per_face"]),
+compiler/realsas_compiler_core/appearance_authority_v2.py:552:        int(payload["total_sample_count"]),
+compiler/realsas_compiler_core/appearance_authority_v2.py:553:        int(payload["direct_source_sample_count"]),
+compiler/realsas_compiler_core/appearance_authority_v2.py:554:        int(payload["other_view_source_sample_count"]),
+compiler/realsas_compiler_core/appearance_authority_v2.py:555:        int(payload["compiled_local_harmonic_sample_count"]),
+compiler/realsas_compiler_core/appearance_authority_v2.py:621:        int(payload["structured_holdout_sample_count"]),
+compiler/realsas_compiler_core/product_artifact_codec_v1.py:109:def _refinement(payload: Json | None):
+compiler/realsas_compiler_core/product_artifact_codec_v1.py:115:        refined_position=tuple(map(float, payload["refined_position"])),
+compiler/realsas_compiler_core/product_artifact_codec_v1.py:336:        g1_max_normal_refinement_ratio=float(payload["g1_max_normal_refinement_ratio"]),
+compiler/realsas_compiler_core/product_artifact_codec_v1.py:338:        g3_min_angle_deg=float(payload["g3_min_angle_deg"]),
+compiler/realsas_compiler_core/product_artifact_codec_v1.py:339:        g3_max_aspect_longest_over_min_altitude=float(payload["g3_max_aspect_longest_over_min_altitude"]),
+compiler/realsas_compiler_core/product_artifact_codec_v1.py:368:                refinement=_refinement(row.get("refinement")),
+compiler/realsas_compiler_core/product_artifact_codec_v1.py:396:                refinement=_refinement(row.get("refinement")),
+compiler/realsas_compiler_core/appearance_compile_v2.py:33:def triangular_barycentric_samples(tile_resolution: int) -> np.ndarray:
+compiler/realsas_compiler_core/appearance_compile_v2.py:34:    resolution = int(tile_resolution)
+compiler/realsas_compiler_core/appearance_compile_v2.py:55:    tile_resolution: int,
+compiler/realsas_compiler_core/appearance_compile_v2.py:59:    tile_resolution = int(tile_resolution)
+compiler/realsas_compiler_core/appearance_compile_v2.py:61:    if faces <= 0 or tile_resolution < 4 or bleed_px < 1:
+compiler/realsas_compiler_core/appearance_compile_v2.py:63:    stride = tile_resolution + 2 * bleed_px
+compiler/realsas_compiler_core/appearance_compile_v2.py:71:        "tile_resolution": tile_resolution,
+compiler/realsas_compiler_core/appearance_compile_v2.py:87:    tile_resolution: int,
+compiler/realsas_compiler_core/appearance_compile_v2.py:98:    resolution = int(tile_resolution)
+compiler/realsas_compiler_core/appearance_compile_v2.py:112:        "tile_resolution": resolution,
+compiler/realsas_compiler_core/appearance_compile_v2.py:128:    resolution = int(layout["tile_resolution"])
+compiler/realsas_compiler_core/appearance_compile_v2.py:157:    face_tile_resolutions: np.ndarray,
+compiler/realsas_compiler_core/appearance_compile_v2.py:169:    resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+compiler/realsas_compiler_core/appearance_compile_v2.py:230:                "tile_resolution": int(resolution),
+compiler/realsas_compiler_core/appearance_compile_v2.py:247:        "maximum_tile_resolution": int(np.max(resolutions)),
+compiler/realsas_compiler_core/appearance_compile_v2.py:248:        "minimum_tile_resolution": int(np.min(resolutions)),
+compiler/realsas_compiler_core/appearance_compile_v2.py:266:        "face_tile_resolution": resolutions.copy(),
+compiler/realsas_compiler_core/appearance_compile_v2.py:270:def adaptive_face_sample_offsets(face_tile_resolutions: np.ndarray) -> np.ndarray:
+compiler/realsas_compiler_core/appearance_compile_v2.py:271:    resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+compiler/realsas_compiler_core/appearance_compile_v2.py:285:    resolution = int(layout["tile_resolution"])
+compiler/realsas_compiler_core/appearance_compile_v2.py:404:    sample_count = face_count * per_face
+compiler/realsas_compiler_core/appearance_compile_v2.py:405:    positions = np.empty((sample_count, 3), dtype=np.float64)
+compiler/realsas_compiler_core/appearance_compile_v2.py:406:    face_indices = np.empty((sample_count,), dtype=np.int32)
+compiler/realsas_compiler_core/appearance_compile_v2.py:407:    sample_component_index = np.empty((sample_count,), dtype=np.int32)
+compiler/realsas_compiler_core/appearance_compile_v2.py:434:    face_tile_resolutions: np.ndarray,
+compiler/realsas_compiler_core/appearance_compile_v2.py:436:    resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+compiler/realsas_compiler_core/appearance_compile_v2.py:440:    sample_count = int(offsets[-1])
+compiler/realsas_compiler_core/appearance_compile_v2.py:448:    positions = np.empty((sample_count, 3), dtype=np.float64)
+compiler/realsas_compiler_core/appearance_compile_v2.py:449:    face_indices = np.empty((sample_count,), dtype=np.int32)
+compiler/realsas_compiler_core/appearance_compile_v2.py:450:    sample_component_index = np.empty((sample_count,), dtype=np.int32)
+compiler/realsas_compiler_core/appearance_compile_v2.py:486:def projected_tile_resolution_evidence(
+compiler/realsas_compiler_core/appearance_compile_v2.py:576:            tile_resolution=resolution,
+compiler/realsas_compiler_core/appearance_compile_v2.py:587:                tile_resolution=resolution,
+compiler/realsas_compiler_core/appearance_compile_v2.py:596:                "tile_resolution": resolution,
+compiler/realsas_compiler_core/appearance_compile_v2.py:623:        "selected_tile_resolution": (
+compiler/realsas_compiler_core/appearance_compile_v2.py:767:        "sample_count_per_direction":adaptive_samples,
+compiler/realsas_compiler_core/appearance_compile_v2.py:768:        "uniform_worst_case_sample_count_per_direction":uniform_worst_samples,
+compiler/realsas_compiler_core/appearance_compile_v2.py:774:def resolve_projected_tile_resolution(
+compiler/realsas_compiler_core/appearance_compile_v2.py:784:    evidence = projected_tile_resolution_evidence(
+compiler/realsas_compiler_core/appearance_compile_v2.py:793:    if evidence["selected_tile_resolution"] is None:
+compiler/realsas_compiler_core/appearance_compile_v2.py:905:    tile_resolution: int | None,
+compiler/realsas_compiler_core/appearance_compile_v2.py:908:    face_tile_resolutions: np.ndarray | None = None,
+compiler/realsas_compiler_core/appearance_compile_v2.py:917:    adaptive = face_tile_resolutions is not None
+compiler/realsas_compiler_core/appearance_compile_v2.py:919:        resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+compiler/realsas_compiler_core/appearance_compile_v2.py:934:        sample_count = len(positions)
+compiler/realsas_compiler_core/appearance_compile_v2.py:937:        sample_count_mode = "PER_FACE_ADAPTIVE_V1"
+compiler/realsas_compiler_core/appearance_compile_v2.py:939:        if tile_resolution is None:
+compiler/realsas_compiler_core/appearance_compile_v2.py:941:        resolution = int(tile_resolution)
+compiler/realsas_compiler_core/appearance_compile_v2.py:950:        sample_count = len(positions)
+compiler/realsas_compiler_core/appearance_compile_v2.py:952:        if sample_count != face_count * per_face_samples:
+compiler/realsas_compiler_core/appearance_compile_v2.py:958:        sample_count_mode = "UNIFORM_FACE_LATTICE_V1"
+compiler/realsas_compiler_core/appearance_compile_v2.py:1005:    direct_valid = np.zeros((8, sample_count), dtype=bool)
+compiler/realsas_compiler_core/appearance_compile_v2.py:1007:        (8, sample_count), dtype=bool
+compiler/realsas_compiler_core/appearance_compile_v2.py:1009:    direct_rgba = np.zeros((8, sample_count, 4), dtype=np.uint8)
+compiler/realsas_compiler_core/appearance_compile_v2.py:1012:    # instead of allocating a dense 8 x sample_count x 4 tensor dominated by
+compiler/realsas_compiler_core/appearance_compile_v2.py:1018:    source_xy = np.full((8, sample_count, 2), np.nan, dtype=np.float32)
+compiler/realsas_compiler_core/appearance_compile_v2.py:1054:        foreground_safe = np.zeros(sample_count, dtype=bool)
+compiler/realsas_compiler_core/appearance_compile_v2.py:1055:        background_safe = np.zeros(sample_count, dtype=bool)
+compiler/realsas_compiler_core/appearance_compile_v2.py:1056:        visible = np.zeros(sample_count, dtype=bool)
+compiler/realsas_compiler_core/appearance_compile_v2.py:1057:        alpha_foreground_safe = np.zeros(sample_count, dtype=bool)
+compiler/realsas_compiler_core/appearance_compile_v2.py:1058:        alpha_background_safe = np.zeros(sample_count, dtype=bool)
+compiler/realsas_compiler_core/appearance_compile_v2.py:1081:        source_foreground = np.zeros(sample_count, dtype=bool)
+compiler/realsas_compiler_core/appearance_compile_v2.py:1196:        tile_resolution=canonical_control_resolution,
+compiler/realsas_compiler_core/appearance_compile_v2.py:1216:        face_tile_resolutions=resolutions,
+compiler/realsas_compiler_core/appearance_compile_v2.py:1222:    if dense_canonical_pm.shape != (sample_count, 4):
+compiler/realsas_compiler_core/appearance_compile_v2.py:1234:    provenance = np.full((8, sample_count), 255, dtype=np.uint8)
+compiler/realsas_compiler_core/appearance_compile_v2.py:1235:    source_view = np.full((8, sample_count), -1, dtype=np.int16)
+compiler/realsas_compiler_core/appearance_compile_v2.py:1240:        tile_resolution=None if adaptive else int(max_resolution),
+compiler/realsas_compiler_core/appearance_compile_v2.py:1242:        face_tile_resolutions=resolutions if adaptive else None,
+compiler/realsas_compiler_core/appearance_compile_v2.py:1256:        sample_component_index.shape != (sample_count,)
+compiler/realsas_compiler_core/appearance_compile_v2.py:1340:            "canonical_global_completion_sample_count": int(
+compiler/realsas_compiler_core/appearance_compile_v2.py:1385:        "face_tile_resolutions": resolutions,
+compiler/realsas_compiler_core/appearance_compile_v2.py:1405:        "globally_unseen_dense_sample_count": int(
+compiler/realsas_compiler_core/appearance_compile_v2.py:1410:        "sample_count_mode": sample_count_mode,
+compiler/realsas_compiler_core/appearance_compile_v2.py:1411:        "sample_count_per_face": int(max_samples_per_face),
+compiler/realsas_compiler_core/appearance_compile_v2.py:1412:        "sample_count_per_direction": int(sample_count),
+compiler/realsas_compiler_core/appearance_compile_v2.py:1413:        "maximum_tile_resolution": int(max_resolution),
+compiler/realsas_compiler_core/substrate/adequacy_v1.py:54:        "min_candidate_nodes","max_candidate_nodes","candidate_growth_factor","refinement_rounds",
+compiler/realsas_compiler_core/substrate/adequacy_v1.py:76:    p["refinement_rounds"]=int(p["refinement_rounds"])
+compiler/realsas_compiler_core/substrate/adequacy_v1.py:79:    if p["component_min_dense_fraction"]>1.0 or p["refinement_rounds"]<0 or p["refinement_rounds"]>16:
+compiler/realsas_compiler_core/substrate/adequacy_v1.py:415:        for _ in range(int(policy["refinement_rounds"])):
+compiler/realsas_compiler_core/product_authority_v1.py:99:    g1_max_normal_refinement_ratio: float
+compiler/realsas_compiler_core/product_authority_v1.py:101:    g3_min_angle_deg: float
+compiler/realsas_compiler_core/product_authority_v1.py:102:    g3_max_aspect_longest_over_min_altitude: float
+compiler/realsas_compiler_core/product_authority_v1.py:143:    refined_position: Vec3
+compiler/realsas_compiler_core/product_authority_v1.py:158:    refinement: GeometricRefinementIR | None = None
+compiler/realsas_compiler_core/product_authority_v1.py:186:    refinement: GeometricRefinementIR | None = None
+compiler/realsas_compiler_core/product_authority_v1.py:364:        value.g1_max_normal_refinement_ratio,
+compiler/realsas_compiler_core/product_authority_v1.py:366:        value.g3_min_angle_deg,
+compiler/realsas_compiler_core/product_authority_v1.py:367:        value.g3_max_aspect_longest_over_min_altitude,
+compiler/realsas_compiler_core/product_authority_v1.py:374:    if value.g1_max_normal_refinement_ratio < 0.0 or value.g1_max_tangential_to_normal_ratio < 0.0:
+compiler/realsas_compiler_core/product_authority_v1.py:376:    if value.g3_min_angle_deg + 1e-9 < G3_NUMERICAL_MIN_ANGLE_DEG:
+compiler/realsas_compiler_core/product_authority_v1.py:378:    if value.g3_max_aspect_longest_over_min_altitude - 1e-9 > G3_NUMERICAL_MAX_ASPECT:
+compiler/realsas_compiler_core/product_authority_v1.py:380:    if value.g3_max_aspect_longest_over_min_altitude <= 0.0:
+compiler/realsas_compiler_core/product_authority_v1.py:407:def build_mesh_qualification_policy(*, g1_max_normal_refinement_ratio, g1_max_tangential_to_normal_ratio, g3_min_angle_deg, g3_max_aspect_longest_over_min_altitude, coverage_thresholds, g3_min_dynamic_area_ratio=0.05, g3_max_dynamic_area_ratio=20.0, g3_max_dynamic_condition_number=16.0, metadata=None) -> MeshQualificationPolicyIR:
+compiler/realsas_compiler_core/product_authority_v1.py:409:        float(g1_max_normal_refinement_ratio),
+compiler/realsas_compiler_core/product_authority_v1.py:411:        float(g3_min_angle_deg),
+compiler/realsas_compiler_core/product_authority_v1.py:412:        float(g3_max_aspect_longest_over_min_altitude),
+compiler/realsas_compiler_core/product_authority_v1.py:636:    refinement_count = 0
+compiler/realsas_compiler_core/product_authority_v1.py:637:    max_refinement_normal_ratio = 0.0
+compiler/realsas_compiler_core/product_authority_v1.py:638:    max_refinement_tangent_to_normal = 0.0
+compiler/realsas_compiler_core/product_authority_v1.py:653:        if vertex.refinement is None:
+compiler/realsas_compiler_core/product_authority_v1.py:657:            refinement_count += 1
+compiler/realsas_compiler_core/product_authority_v1.py:658:            r = vertex.refinement
+compiler/realsas_compiler_core/product_authority_v1.py:661:            if not _vec_finite(r.base_position) or not _vec_finite(r.refined_position):
+compiler/realsas_compiler_core/product_authority_v1.py:663:            if not _vec_close(r.base_position, base) or not _vec_close(r.refined_position, vertex.P):
+compiler/realsas_compiler_core/product_authority_v1.py:675:            max_refinement_normal_ratio = max(max_refinement_normal_ratio, abs(normal) / float(r.local_scale))
+compiler/realsas_compiler_core/product_authority_v1.py:677:                max_refinement_tangent_to_normal = max(max_refinement_tangent_to_normal, tangent / abs(normal))
+compiler/realsas_compiler_core/product_authority_v1.py:679:                max_refinement_tangent_to_normal = float("inf")
+compiler/realsas_compiler_core/product_authority_v1.py:686:    min_angle = float("inf")
+compiler/realsas_compiler_core/product_authority_v1.py:687:    max_aspect = 0.0
+compiler/realsas_compiler_core/product_authority_v1.py:705:        min_angle = min(min_angle, float(metric["min_angle_deg"]))
+compiler/realsas_compiler_core/product_authority_v1.py:706:        max_aspect = max(max_aspect, float(metric["aspect_longest_over_min_altitude"]))
+compiler/realsas_compiler_core/product_authority_v1.py:730:    if min_angle + 1e-9 < G3_NUMERICAL_MIN_ANGLE_DEG:
+compiler/realsas_compiler_core/product_authority_v1.py:732:    if max_aspect - 1e-9 > G3_NUMERICAL_MAX_ASPECT:
+compiler/realsas_compiler_core/product_authority_v1.py:772:        "refinement_vertex_count": refinement_count,
+compiler/realsas_compiler_core/product_authority_v1.py:773:        "max_refinement_normal_ratio": max_refinement_normal_ratio,
+compiler/realsas_compiler_core/product_authority_v1.py:774:        "max_refinement_tangent_to_normal": max_refinement_tangent_to_normal,
+compiler/realsas_compiler_core/product_authority_v1.py:775:        "rest_min_angle_deg": min_angle,
+compiler/realsas_compiler_core/product_authority_v1.py:776:        "rest_max_aspect_longest_over_min_altitude": max_aspect,
+compiler/realsas_compiler_core/product_authority_v1.py:777:        "g3_numerical_min_angle_floor_deg": G3_NUMERICAL_MIN_ANGLE_DEG,
+compiler/realsas_compiler_core/product_authority_v1.py:778:        "g3_numerical_max_aspect_ceiling": G3_NUMERICAL_MAX_ASPECT,
+compiler/realsas_compiler_core/product_authority_v1.py:845:    if intrinsic["max_refinement_normal_ratio"] - 1e-12 > policy.g1_max_normal_refinement_ratio:
+compiler/realsas_compiler_core/product_authority_v1.py:847:    if intrinsic["max_refinement_tangent_to_normal"] - 1e-12 > policy.g1_max_tangential_to_normal_ratio:
+compiler/realsas_compiler_core/product_authority_v1.py:849:    if intrinsic["rest_min_angle_deg"] + 1e-9 < policy.g3_min_angle_deg:
+compiler/realsas_compiler_core/product_authority_v1.py:851:    if intrinsic["rest_max_aspect_longest_over_min_altitude"] - 1e-9 > policy.g3_max_aspect_longest_over_min_altitude:
+compiler/realsas_compiler_core/product_authority_v1.py:984:            refinement=vertex.refinement,
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:48:        or float(metric["min_angle_deg"]) + 1e-9 < float(policy.g3_min_angle_deg)
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:50:        > float(policy.g3_max_aspect_longest_over_min_altitude)
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:59:        "min_angle_deg": min(float(m["min_angle_deg"]) for m in metrics),
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:60:        "max_aspect": max(float(m["aspect_longest_over_min_altitude"]) for m in metrics),
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:150:        "below_min_angle_face_count":sum(
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:151:            bool(m["degenerate"]) or float(m["min_angle_deg"])+1e-9<float(policy.g3_min_angle_deg)
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:154:        "above_max_aspect_face_count":sum(
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:155:            bool(m["degenerate"]) or float(m["aspect_longest_over_min_altitude"])-1e-9>float(policy.g3_max_aspect_longest_over_min_altitude)
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:159:        "min_angle_deg":min(float(m["min_angle_deg"]) for m in metrics),
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:160:        "max_aspect_longest_over_min_altitude":max(finite,default=float("inf")),
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:216:                and newq["min_angle_deg"]+1e-9>=oldq["min_angle_deg"]
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:217:                and newq["max_aspect"]<=oldq["max_aspect"]+1e-9
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:221:                or newq["min_angle_deg"]>oldq["min_angle_deg"]+1e-7
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:222:                or newq["max_aspect"]+1e-7<oldq["max_aspect"]
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:231:            allowed=float(policy.g1_max_normal_refinement_ratio)*scale
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:238:                newq["min_angle_deg"]-oldq["min_angle_deg"],
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:239:                oldq["max_aspect"]-newq["max_aspect"],
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:277:                "old_min_angle_deg":row["old_quality"]["min_angle_deg"],
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:278:                "new_min_angle_deg":row["new_quality"]["min_angle_deg"],
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:279:                "old_max_aspect":row["old_quality"]["max_aspect"],
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:280:                "new_max_aspect":row["new_quality"]["max_aspect"],
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:298:        "g1_local_deviation_ratio":float(policy.g1_max_normal_refinement_ratio),
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:458:                oldq["min_angle_deg"]=min(float(m["min_angle_deg"]) for m in oldq["metrics"])
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:459:                oldq["max_aspect"]=max(float(m["aspect_longest_over_min_altitude"]) for m in oldq["metrics"])
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:468:                    "min_angle_deg":min(float(m["min_angle_deg"]) for m in new_metrics),
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:469:                    "max_aspect":max(float(m["aspect_longest_over_min_altitude"]) for m in new_metrics),
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:473:                    and newq["min_angle_deg"]+1e-9>=oldq["min_angle_deg"]
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:474:                    and newq["max_aspect"]<=oldq["max_aspect"]+1e-9
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:478:                    or newq["min_angle_deg"]>oldq["min_angle_deg"]+1e-7
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:479:                    or newq["max_aspect"]+1e-7<oldq["max_aspect"]
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:492:                allowed=float(policy.g1_max_normal_refinement_ratio)*scale
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:518:            -float(row["new_quality"]["min_angle_deg"]-row["old_quality"]["min_angle_deg"]),
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:519:            float(row["new_quality"]["max_aspect"]),
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:541:            "old_min_angle_deg":row["old_quality"]["min_angle_deg"],
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:542:            "new_min_angle_deg":row["new_quality"]["min_angle_deg"],
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:543:            "old_max_aspect":row["old_quality"]["max_aspect"],
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:544:            "new_max_aspect":row["new_quality"]["max_aspect"],
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:567:        "g1_local_deviation_ratio":float(policy.g1_max_normal_refinement_ratio),
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:769:                "min_angle_deg":min(float(m["min_angle_deg"]) for m in old_metrics),
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:770:                "max_aspect":max(float(m["aspect_longest_over_min_altitude"]) for m in old_metrics),
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:813:                allowed_displacement=float(policy.g1_max_normal_refinement_ratio)*local_scale
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:826:                    "min_angle_deg":min(float(m["min_angle_deg"]) for m in new_metrics),
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:827:                    "max_aspect":max(float(m["aspect_longest_over_min_altitude"]) for m in new_metrics),
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:831:                    and newq["min_angle_deg"]+1e-9>=oldq["min_angle_deg"]
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:832:                    and newq["max_aspect"]<=oldq["max_aspect"]+1e-9
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:836:                    or newq["min_angle_deg"]>oldq["min_angle_deg"]+1e-7
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:837:                    or newq["max_aspect"]+1e-7<oldq["max_aspect"]
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:885:            -float(row["new_quality"]["min_angle_deg"]-row["old_quality"]["min_angle_deg"]),
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:886:            float(row["new_quality"]["max_aspect"]),
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:921:            "old_min_angle_deg":row["old_quality"]["min_angle_deg"],
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:922:            "new_min_angle_deg":row["new_quality"]["min_angle_deg"],
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:923:            "old_max_aspect":row["old_quality"]["max_aspect"],
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:924:            "new_max_aspect":row["new_quality"]["max_aspect"],
+compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py:940:        "g1_displacement_ratio":float(policy.g1_max_normal_refinement_ratio),
+compiler/realsas_compiler_core/appearance_canonical_completion_v1.py:43:            "globally_unseen_sample_count": int(
+compiler/realsas_compiler_core/appearance_canonical_completion_v1.py:46:            "anchor_sample_count": int(np.count_nonzero(self.anchor_mask)),
+compiler/realsas_compiler_core/appearance_canonical_completion_v1.py:76:    sample_count=valid.shape[1]
+compiler/realsas_compiler_core/appearance_canonical_completion_v1.py:77:    if rgba.shape!=(8,sample_count,4):
+compiler/realsas_compiler_core/appearance_canonical_completion_v1.py:84:        or sample_face.shape!=(sample_count,)
+compiler/realsas_compiler_core/appearance_canonical_completion_v1.py:85:        or component.shape!=(sample_count,)
+compiler/realsas_compiler_core/appearance_canonical_completion_v1.py:86:        or positions.shape!=(sample_count,3)
+compiler/realsas_compiler_core/appearance_canonical_completion_v1.py:87:        or len(surface_graph)!=sample_count
+compiler/realsas_compiler_core/appearance_canonical_completion_v1.py:108:    best_view=np.full(sample_count,-1,dtype=np.int16)
+compiler/realsas_compiler_core/appearance_canonical_completion_v1.py:109:    best_score=np.full(sample_count,-np.inf,dtype=np.float64)
+compiler/realsas_compiler_core/appearance_canonical_completion_v1.py:124:    pm=np.zeros((sample_count,4),dtype=np.float64)
+compiler/realsas_compiler_core/appearance_canonical_completion_v1.py:144:    output=np.zeros((sample_count,4),dtype=np.uint8)
+compiler/realsas_compiler_core/appearance_canonical_completion_v1.py:228:    face_tile_resolutions: np.ndarray,
+compiler/realsas_compiler_core/appearance_canonical_completion_v1.py:238:    resolutions=np.asarray(face_tile_resolutions,dtype=np.int32)
+compiler/realsas_compiler_core/motion_dynamic_proof_v1.py:53:    sample_count:int
+compiler/realsas_compiler_core/motion_dynamic_proof_v1.py:491:            "uniform_sample_count":_UNIFORM_SAMPLE_COUNT,
+compiler/realsas_compiler_core/motion_dynamic_proof_v1.py:522:                int(raw["sample_count"]),str(raw["status"]),str(raw["proof_hash"]),
+compiler/realsas_compiler_core/appearance_bake_v2.py:24:def _sample_index_map(tile_resolution: int) -> dict[tuple[int, int], int]:
+compiler/realsas_compiler_core/appearance_bake_v2.py:25:    resolution = int(tile_resolution)
+compiler/realsas_compiler_core/appearance_bake_v2.py:39:    tile_resolution: int,
+compiler/realsas_compiler_core/appearance_bake_v2.py:41:    resolution = int(tile_resolution)
+compiler/realsas_compiler_core/appearance_bake_v2.py:66:    tile_resolution: int,
+compiler/realsas_compiler_core/appearance_bake_v2.py:76:        tile_resolution=int(tile_resolution),
+compiler/realsas_compiler_core/appearance_bake_v2.py:79:    sample_map = _sample_index_map(int(tile_resolution))
+compiler/realsas_compiler_core/appearance_bake_v2.py:91:                    tile_resolution=int(tile_resolution),
+compiler/realsas_compiler_core/appearance_bake_v2.py:107:    resolutions = np.asarray(plan["face_tile_resolution"], dtype=np.int32)
+compiler/realsas_compiler_core/appearance_bake_v2.py:145:                    tile_resolution=resolution,
+compiler/realsas_compiler_core/appearance_bake_v2.py:159:    face_tile_resolutions: np.ndarray,
+compiler/realsas_compiler_core/appearance_bake_v2.py:170:    resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+compiler/realsas_compiler_core/appearance_bake_v2.py:203:                tile_resolution=int(resolution),
+compiler/realsas_compiler_core/appearance_bake_v2.py:342:    face_tile_resolutions: np.ndarray,
+compiler/realsas_compiler_core/appearance_bake_v2.py:349:    resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+compiler/realsas_compiler_core/appearance_bake_v2.py:394:    face_tile_resolutions: np.ndarray,
+compiler/realsas_compiler_core/appearance_bake_v2.py:400:    resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+compiler/realsas_compiler_core/appearance_bake_v2.py:447:    tile_resolution = int(layout["tile_resolution"])
+compiler/realsas_compiler_core/appearance_bake_v2.py:452:    sample_map = _sample_index_map(tile_resolution)
+compiler/realsas_compiler_core/appearance_bake_v2.py:463:                    tile_resolution=tile_resolution,
+compiler/realsas_compiler_core/appearance_bake_v2.py:479:    tile_resolution: int,
+compiler/realsas_compiler_core/appearance_bake_v2.py:489:        tile_resolution=int(tile_resolution),
+compiler/realsas_compiler_core/appearance_bake_v2.py:493:    sample_count = int(tile_resolution) * (int(tile_resolution) + 1) // 2
+compiler/realsas_compiler_core/appearance_bake_v2.py:494:    if rgba_samples.shape != (face_count * sample_count, 4):
+compiler/realsas_compiler_core/appearance_bake_v2.py:496:    if provenance_samples.shape != (face_count * sample_count,):
+compiler/realsas_compiler_core/appearance_bake_v2.py:499:    rgba_samples = rgba_samples.reshape(face_count, sample_count, 4)
+compiler/realsas_compiler_core/appearance_bake_v2.py:500:    provenance_samples = provenance_samples.reshape(face_count, sample_count)
+compiler/realsas_compiler_core/appearance_bake_v2.py:532:    tile_resolution: int,
+compiler/realsas_compiler_core/appearance_bake_v2.py:541:        tile_resolution=int(tile_resolution),
+compiler/realsas_compiler_core/appearance_bake_v2.py:545:    sample_count = int(tile_resolution) * (int(tile_resolution) + 1) // 2
+compiler/realsas_compiler_core/appearance_bake_v2.py:546:    if source_samples.shape != (face_count * sample_count,):
+compiler/realsas_compiler_core/appearance_bake_v2.py:556:    source_samples = source_samples.reshape(face_count, sample_count)
+compiler/realsas_compiler_core/appearance_bake_v2.py:586:    tile_resolution: int,
+compiler/realsas_compiler_core/appearance_bake_v2.py:594:        tile_resolution=tile_resolution,
+compiler/realsas_compiler_core/appearance_bake_v2.py:597:    sample_count = tile_resolution * (tile_resolution + 1) // 2
+compiler/realsas_compiler_core/appearance_bake_v2.py:598:    if rgba_samples.shape != (face_count * sample_count, 4):
+compiler/realsas_compiler_core/appearance_bake_v2.py:600:    if provenance_samples.shape != (face_count * sample_count,):
+compiler/realsas_compiler_core/appearance_bake_v2.py:603:    rgba_samples = rgba_samples.reshape(face_count, sample_count, 4)
+compiler/realsas_compiler_core/appearance_bake_v2.py:604:    provenance_samples = provenance_samples.reshape(face_count, sample_count)
+compiler/realsas_compiler_core/appearance_bake_v2.py:618:            tile_resolution=tile_resolution,
+compiler/realsas_compiler_core/appearance_bake_v2.py:640:    tile_resolution: int,
+compiler/realsas_compiler_core/appearance_bake_v2.py:659:        tile_resolution=tile_resolution,
+compiler/realsas_compiler_core/appearance_bake_v2.py:662:    sample_count = tile_resolution * (tile_resolution + 1) // 2
+compiler/realsas_compiler_core/appearance_bake_v2.py:663:    if source_samples.shape != (face_count * sample_count,):
+compiler/realsas_compiler_core/appearance_bake_v2.py:674:    source_samples = source_samples.reshape(face_count, sample_count)
+compiler/realsas_compiler_core/appearance_bake_v2.py:688:            tile_resolution=tile_resolution,
+compiler/realsas_compiler_core/visual_mesh_arap_v1.py:391:    target_edge_px: int = 16,
+compiler/realsas_compiler_core/visual_mesh_arap_v1.py:420:            target_edge_px=int(target_edge_px),
+compiler/realsas_compiler_core/visual_mesh_arap_v1.py:1022:    target_edge_px: int,
+compiler/realsas_compiler_core/visual_mesh_arap_v1.py:1046:    step = max(4, int(target_edge_px))
+compiler/realsas_compiler_core/visual_mesh_arap_v1.py:1063:        target_min_angle_deg=0.0,
+compiler/realsas_compiler_core/visual_mesh_arap_v1.py:1109:    target_edge_px: int = 20,
+compiler/realsas_compiler_core/visual_mesh_arap_v1.py:1137:            target_edge_px=target_edge_px,
+compiler/realsas_compiler_core/artifact_codec_v2.py:365:        g1_max_normal_refinement_ratio=float(
+compiler/realsas_compiler_core/artifact_codec_v2.py:366:            payload["g1_max_normal_refinement_ratio"]
+compiler/realsas_compiler_core/artifact_codec_v2.py:371:        g3_min_angle_deg=float(payload["g3_min_angle_deg"]),
+compiler/realsas_compiler_core/artifact_codec_v2.py:372:        g3_max_aspect_longest_over_min_altitude=float(
+compiler/realsas_compiler_core/artifact_codec_v2.py:373:            payload["g3_max_aspect_longest_over_min_altitude"]
+compiler/realsas_compiler_core/artifact_codec_v2.py:421:def _refinement(payload: Json | None):
+compiler/realsas_compiler_core/artifact_codec_v2.py:427:        refined_position=tuple(map(float, payload["refined_position"])),
+compiler/realsas_compiler_core/artifact_codec_v2.py:445:                refinement=_refinement(row.get("refinement")),
+compiler/realsas_compiler_core/artifact_codec_v2.py:482:                refinement=_refinement(row.get("refinement")),
+compiler/realsas_compiler_core/runtime_package_v2.py:336:        "pixel_coverage_sample_count=4",
+compiler/realsas_compiler_core/canonical_cdt_adapter_v1.py:192:            target_min_angle_deg=float(mesh_policy.g3_min_angle_deg),
+compiler/realsas_compiler_core/canonical_cdt_adapter_v1.py:236:            "min_angle_deg": float(result.min_angle_deg),
+compiler/realsas_compiler_core/canonical_cdt_adapter_v1.py:261:        "target_min_angle_deg": float(mesh_policy.g3_min_angle_deg),
+compiler/realsas_compiler_core/runtime_authority_v2.py:179:    dynamic_conditioning_sample_count: int
+compiler/realsas_compiler_core/runtime_authority_v2.py:180:    relative_conditioning_sample_count: int
+compiler/realsas_compiler_core/runtime_authority_v2.py:181:    temporal_conditioning_sample_count: int
+compiler/realsas_compiler_core/runtime_authority_v2.py:348:        dynamic_conditioning_sample_count=int(payload["dynamic_conditioning_sample_count"]),
+compiler/realsas_compiler_core/runtime_authority_v2.py:349:        relative_conditioning_sample_count=int(payload["relative_conditioning_sample_count"]),
+compiler/realsas_compiler_core/runtime_authority_v2.py:350:        temporal_conditioning_sample_count=int(payload["temporal_conditioning_sample_count"]),
+compiler/realsas_compiler_core/dynamic_appearance_conditioning_v2.py:167:        "dynamic_min_visible_pixels_per_face",
+compiler/realsas_compiler_core/dynamic_appearance_conditioning_v2.py:178:        "dynamic_min_visible_pixels_per_face": int(
+compiler/realsas_compiler_core/dynamic_appearance_conditioning_v2.py:179:            policy["dynamic_min_visible_pixels_per_face"]
+compiler/realsas_compiler_core/dynamic_appearance_conditioning_v2.py:200:    if int(out["dynamic_min_visible_pixels_per_face"]) < 1:

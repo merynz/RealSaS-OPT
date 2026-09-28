@@ -124,7 +124,7 @@ jobs:
             "schema":"RealSaS.KnightStage14To18StructuralInformationAudit.v1",
             "status":"AUDIT_ONLY__NO_REPAIR_APPLIED",
             "artifact_sha256":{k:hashlib.sha256(p.read_bytes()).hexdigest() for k,p in paths.items()},
-            "stage14":{
+            "stage14_surface_preserved_at_stage15":{
               "node_count":len(nodes),
               "relation_count":len(rels),
               "relation_kind_counts":rel_kinds,
@@ -146,6 +146,7 @@ jobs:
             },
             "finding":{
               "all_gsa_relations_forced_certain":bool(rels and rel_unknown==0 and len(set(rel_scores))==1 and rel_scores[0]==1.0),
+              "stage14_surface_read_from_lossless_stage15_qualified_copy":True,
               "partition_has_no_separate_edges":decisions.get("SEPARATE",0)==0,
               "partition_single_component":len(comps)==1,
               "claim_boundary":"Exact Knight artifact audit; no repair or alternative partition is proposed."

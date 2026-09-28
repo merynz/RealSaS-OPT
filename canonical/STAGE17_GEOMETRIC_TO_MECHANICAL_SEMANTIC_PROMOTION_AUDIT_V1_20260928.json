@@ -1,0 +1,70 @@
+{
+  "schema": "RealSaS.Stage17GeometricToMechanicalSemanticPromotionAudit.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED",
+  "classification": "A_IMPLEMENTATION_DEVIATION_FROM_INTENDED",
+  "severity": "P0",
+  "intended_contract": {
+    "rigging_surface_role": "Observation-grounded geometric/mechanical evidence substrate; IRIS/SurfaceBuilder does not own source-rig exact partition or authored mechanical owner identity.",
+    "mechanical_partition_role": "Declares structural membership plus SEPARATE / PRESERVE_CONTINUITY / UNKNOWN.",
+    "preserve_continuity_semantics": "Forbids a semantic cut.",
+    "unknown_semantics": "May be provisionally preserved by a producer but consequential UNKNOWN cannot PASS silently."
+  },
+  "implementation": {
+    "gsa_relation_kind": "SIGNED_ZERO_SURFACE_TOPOLOGY_NEIGHBOR",
+    "stage17_rule": "If relation metadata is not crosses_unknown/unknown_bridge, emit PRESERVE_CONTINUITY; otherwise UNKNOWN.",
+    "manual_boundary_overrides": "FORBIDDEN_IN_CANONICAL_STAGE17_ADAPTER"
+  },
+  "exact_knight": {
+    "surface_node_count": 12090,
+    "gsa_relation_count": 36469,
+    "gsa_relation_unknown_flag_count": 0,
+    "gsa_relation_score_min": 1,
+    "gsa_relation_score_max": 1,
+    "stage17_boundary_count": 36469,
+    "preserve_continuity_count": 36469,
+    "separate_count": 0,
+    "unknown_count": 0,
+    "largest_component_nodes": 12080,
+    "largest_component_fraction": 0.9991728701406121,
+    "teacher_valid_high_seam_edges": {
+      "both_valid_teacher_l1_gt_1p9": 931,
+      "same_source_face": 0,
+      "share_edge": 0,
+      "share_vertex_only": 0,
+      "source_topology_nonincident": 931
+    },
+    "idle_smear_offender": {
+      "teacher_valid": true,
+      "teacher_l1_edges": [
+        2,
+        2,
+        0
+      ],
+      "source_topology_edges": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "verdict": "Teacher-faithful deformation seam is bridged by a relation Stage17 treats as continuity."
+    }
+  },
+  "verdict": {
+    "geometric_adjacency_is_not_sufficient_evidence_for_preserve_continuity": true,
+    "current_stage17_rule_overclaims_mechanical_continuity": true,
+    "stage17_partition_is_effectively_degenerate_on_knight": true,
+    "owner": "Stage17 relation-to-boundary semantic qualification, with Stage14 relation epistemic evidence as an upstream prerequisite.",
+    "stage35_remains_required": true,
+    "rationale": "Even a corrected conservative Stage17 cannot know all skin/deformation seams before Stage32; later cross-qualification must be able to issue a new partition/topology lineage rather than silently mutate weights."
+  },
+  "evidence": [
+    "canonical/OBSERVABLE_RIGGING_SUBSTRATE_CONTRACT_V1.md",
+    "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md",
+    "compiler/realsas_compiler_core/mechanical_partition_v1.py",
+    "canonical/knight_stage14_18_structural_information_audit_v1/REPORT.json",
+    "canonical/KNIGHT_SKIN_TOPOLOGY_COMPATIBILITY_DIAGNOSIS_V1_20260927.json"
+  ],
+  "repair_policy": {
+    "authorized": false,
+    "note": "Audit does not yet choose whether ambiguous geometric relations should become UNKNOWN, whether additional structural evidence should qualify PRESERVE_CONTINUITY, or how Stage35 feedback should revise partition/topology. That design is selected after audit."
+  }
+}

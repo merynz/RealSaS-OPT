@@ -1,0 +1,44 @@
+{
+  "schema": "RealSaS.KnightTeacherFreeTopologyClosurePreregistration.v1",
+  "status": "FROZEN_BEFORE_TEACHER_FREE_TOPOLOGY_ISOLATION_RESULT",
+  "date": "2026-09-29",
+  "purpose": "Test whether teacher-free James-Twigg mechanical-region seeds plus Stage35 unsafe-patch geodesic completion can replace teacher topology labels for the previously successful holeless split, while teacher weights are used only after inference to isolate topology causality.",
+  "inference_forbidden": [
+    "teacher source connected-component labels",
+    "teacher source triangle indices",
+    "teacher skin weights",
+    "teacher_valid_mask"
+  ],
+  "inference_inputs": [
+    "current canonical mesh",
+    "dense-face provenance support mask",
+    "current Arachne skin field",
+    "qualified skeleton",
+    "Stage35 controlled mechanical probes"
+  ],
+  "operator": {
+    "region_seed": "JAMES_TWIGG_ARACHNE_ROTATION_SIGNATURE_CORE_LABELS",
+    "unsafe_patch": "STAGE35_ALL_FACE_UNSAFE_CONNECTED_COMPONENTS",
+    "completion": "PATCH_LOCAL_MULTI_SOURCE_GEODESIC_VORONOI_ON_DENSE_SUPPORTED_EDGES",
+    "abstain": "FEWER_THAN_TWO_DISTINCT_BOUNDARY_REGION_LABELS",
+    "repair": "HOLELESS_VERTEX_DUPLICATION_PLUS_REGION_PURE_SUBDIVISION"
+  },
+  "evaluation_only_oracles": [
+    "teacher source topology for label precision/recall only",
+    "teacher skin weights for post-inference topology-mechanics isolation only"
+  ],
+  "closure_thresholds": {
+    "face_deletion_count_max": 0,
+    "rest_area_error_max": 1e-10,
+    "actual_motion_max_edge_gt_10_max": 5,
+    "actual_motion_max_edge_gt_4_max": 50,
+    "actual_motion_worst_edge_max": 25.0,
+    "synthetic_unsafe_face_count_max": 500,
+    "mixed_face_precision_min": 0.90,
+    "unsafe_cross_region_recall_min": 0.70
+  },
+  "decision": {
+    "pass": "All frozen thresholds pass.",
+    "fail": "Any frozen threshold fails; topology remains open and weight training remains blocked."
+  }
+}

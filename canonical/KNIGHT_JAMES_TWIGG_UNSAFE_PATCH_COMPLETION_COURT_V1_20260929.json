@@ -1,0 +1,862 @@
+{
+  "claim_boundary": "Teacher source topology is evaluation-only. No teacher label participates in clustering, patch discovery, geodesic completion, abstention, or holeless split.",
+  "clustering": {
+    "cluster_count": 8,
+    "core_face_count": 16875,
+    "core_fraction_of_fit": 0.7442445091293993,
+    "fit_face_count": 22674,
+    "mode_distance_max": 0.1272176561417627,
+    "mode_distance_p50": 0.011590911643627551,
+    "mode_distance_p95": 0.058056855183949804,
+    "pca_components": 32,
+    "pca_explained_variance_ratio_sum": 0.9943774734448894,
+    "seed_face_count": 4096
+  },
+  "finding": {
+    "holeless_split_eliminates_gt10": false,
+    "holeless_split_eliminates_gt4": false,
+    "holeless_split_reduces_gt10": true,
+    "holeless_split_reduces_gt4": true,
+    "holeless_split_reduces_synthetic_unsafe": true,
+    "patch_completion_improves_unsafe_cross_region_recall": true
+  },
+  "holeless_split": {
+    "centroid_copy_count": 15,
+    "face_count_after": 26203,
+    "face_count_before": 24958,
+    "face_deletion_count": 0,
+    "mixed_face_count": 615,
+    "region_pure_output_fraction": 0.9656909514177766,
+    "rest_area_error_max": 8.510425874590087e-15,
+    "rest_area_error_p99": 1.4321482459136296e-15,
+    "seam_vertex_copy_count": 1234,
+    "unsplit_unresolved_face_count": 4491,
+    "vertex_count_after": 13298,
+    "vertex_count_before": 12049
+  },
+  "initial_propagation": {
+    "initial_labeled_vertex_count": 8702,
+    "propagated_vertex_count": 790,
+    "safe_graph_edge_count": 34583,
+    "unresolved_vertex_count": 2556
+  },
+  "mechanics": {
+    "after_motion": {
+      "max_edge_gt_10": 465,
+      "max_edge_gt_4": 795,
+      "max_edge_p99": 16.63968296172575,
+      "worst_edge_max": 380.1304999635025
+    },
+    "after_stress": {
+      "max_area_max": 308.9005461590273,
+      "max_condition_max": 6725.896466910909,
+      "max_edge_max": 328.61642875811725,
+      "max_edge_p95": 4.238198676689096,
+      "min_area_min": 0.0020863368927872173,
+      "unsafe_face_count": 1599
+    },
+    "before_motion": {
+      "max_edge_gt_10": 630,
+      "max_edge_gt_4": 1032,
+      "max_edge_p99": 24.747347006229525,
+      "worst_edge_max": 209.9984349009761
+    },
+    "before_stress": {
+      "max_area_max": 185.0437086690865,
+      "max_condition_max": 12997.510682966114,
+      "max_edge_max": 181.98443623410574,
+      "max_edge_p95": 8.075491201970923,
+      "min_area_min": 0.005588670590092759,
+      "unsafe_face_count": 1801
+    }
+  },
+  "operator": {
+    "abstain_rule": "LT2_DISTINCT_BOUNDARY_REGION_LABELS",
+    "completion": "PATCH_LOCAL_MULTI_SOURCE_GEODESIC_VORONOI",
+    "holeless_repair": "VERTEX_DUPLICATION_PLUS_REGION_PURE_SUBDIVISION",
+    "patch_source": "STAGE35_ALL_FACE_UNSAFE_CONNECTED_COMPONENTS",
+    "seed_source": "JAMES_TWIGG_ARACHNE_ROTATION_SIGNATURE_CORE_LABELS",
+    "support_graph": "DENSE_FACE_SUPPORTED_EDGES_ONLY"
+  },
+  "patch_completion": {
+    "abstained_patch_count": 67,
+    "completed_patch_count": 14,
+    "newly_labeled_vertex_count": 614,
+    "partial_patch_count": 0,
+    "unsafe_patch_count": 81
+  },
+  "patches": [
+    {
+      "boundary_label_count": 6,
+      "boundary_seed_count": 1422,
+      "completed_vertex_count": 464,
+      "component_index": 0,
+      "reachable_patch_vertex_count": 1210,
+      "status": "COMPLETED",
+      "unsafe_face_count": 1404,
+      "vertex_count": 1210
+    },
+    {
+      "boundary_label_count": 2,
+      "boundary_seed_count": 151,
+      "completed_vertex_count": 133,
+      "component_index": 1,
+      "reachable_patch_vertex_count": 201,
+      "status": "COMPLETED",
+      "unsafe_face_count": 221,
+      "vertex_count": 201
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 35,
+      "completed_vertex_count": 0,
+      "component_index": 2,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 13,
+      "vertex_count": 12
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 29,
+      "completed_vertex_count": 0,
+      "component_index": 3,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 10,
+      "vertex_count": 11
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 27,
+      "completed_vertex_count": 0,
+      "component_index": 4,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 8,
+      "vertex_count": 10
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 5,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 7,
+      "vertex_count": 8
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 25,
+      "completed_vertex_count": 0,
+      "component_index": 6,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 5,
+      "vertex_count": 7
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 1,
+      "completed_vertex_count": 0,
+      "component_index": 7,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 5,
+      "vertex_count": 6
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 3,
+      "completed_vertex_count": 0,
+      "component_index": 8,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 4,
+      "vertex_count": 6
+    },
+    {
+      "boundary_label_count": 2,
+      "boundary_seed_count": 19,
+      "completed_vertex_count": 0,
+      "component_index": 9,
+      "reachable_patch_vertex_count": 6,
+      "status": "COMPLETED",
+      "unsafe_face_count": 4,
+      "vertex_count": 6
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 3,
+      "completed_vertex_count": 0,
+      "component_index": 10,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 3,
+      "vertex_count": 5
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 5,
+      "completed_vertex_count": 0,
+      "component_index": 11,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 3,
+      "vertex_count": 5
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 12,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 13,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 2,
+      "completed_vertex_count": 0,
+      "component_index": 14,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 1,
+      "completed_vertex_count": 0,
+      "component_index": 15,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "boundary_label_count": 2,
+      "boundary_seed_count": 3,
+      "completed_vertex_count": 4,
+      "component_index": 16,
+      "reachable_patch_vertex_count": 4,
+      "status": "COMPLETED",
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "boundary_label_count": 2,
+      "boundary_seed_count": 7,
+      "completed_vertex_count": 3,
+      "component_index": 17,
+      "reachable_patch_vertex_count": 4,
+      "status": "COMPLETED",
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 1,
+      "completed_vertex_count": 0,
+      "component_index": 18,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 14,
+      "completed_vertex_count": 0,
+      "component_index": 19,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 15,
+      "completed_vertex_count": 0,
+      "component_index": 20,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 12,
+      "completed_vertex_count": 0,
+      "component_index": 21,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 2,
+      "completed_vertex_count": 0,
+      "component_index": 22,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 1,
+      "completed_vertex_count": 0,
+      "component_index": 23,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "boundary_label_count": 2,
+      "boundary_seed_count": 14,
+      "completed_vertex_count": 0,
+      "component_index": 24,
+      "reachable_patch_vertex_count": 4,
+      "status": "COMPLETED",
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 12,
+      "completed_vertex_count": 0,
+      "component_index": 25,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 1,
+      "completed_vertex_count": 0,
+      "component_index": 26,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 2,
+      "completed_vertex_count": 0,
+      "component_index": 27,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 28,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 29,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 30,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 31,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 32,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 6,
+      "completed_vertex_count": 0,
+      "component_index": 33,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 34,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 13,
+      "completed_vertex_count": 0,
+      "component_index": 35,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 2,
+      "completed_vertex_count": 0,
+      "component_index": 36,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 2,
+      "boundary_seed_count": 6,
+      "completed_vertex_count": 2,
+      "component_index": 37,
+      "reachable_patch_vertex_count": 3,
+      "status": "COMPLETED",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 20,
+      "completed_vertex_count": 0,
+      "component_index": 38,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 15,
+      "completed_vertex_count": 0,
+      "component_index": 39,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 40,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 4,
+      "completed_vertex_count": 0,
+      "component_index": 41,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 11,
+      "completed_vertex_count": 0,
+      "component_index": 42,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 43,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 2,
+      "boundary_seed_count": 19,
+      "completed_vertex_count": 0,
+      "component_index": 44,
+      "reachable_patch_vertex_count": 3,
+      "status": "COMPLETED",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 2,
+      "boundary_seed_count": 8,
+      "completed_vertex_count": 1,
+      "component_index": 45,
+      "reachable_patch_vertex_count": 3,
+      "status": "COMPLETED",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 2,
+      "boundary_seed_count": 5,
+      "completed_vertex_count": 3,
+      "component_index": 46,
+      "reachable_patch_vertex_count": 3,
+      "status": "COMPLETED",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 13,
+      "completed_vertex_count": 0,
+      "component_index": 47,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 6,
+      "completed_vertex_count": 0,
+      "component_index": 48,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 2,
+      "boundary_seed_count": 6,
+      "completed_vertex_count": 1,
+      "component_index": 49,
+      "reachable_patch_vertex_count": 3,
+      "status": "COMPLETED",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 50,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 51,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 13,
+      "completed_vertex_count": 0,
+      "component_index": 52,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 19,
+      "completed_vertex_count": 0,
+      "component_index": 53,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 2,
+      "boundary_seed_count": 8,
+      "completed_vertex_count": 1,
+      "component_index": 54,
+      "reachable_patch_vertex_count": 3,
+      "status": "COMPLETED",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 55,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 12,
+      "completed_vertex_count": 0,
+      "component_index": 56,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 2,
+      "completed_vertex_count": 0,
+      "component_index": 57,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 58,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 12,
+      "completed_vertex_count": 0,
+      "component_index": 59,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 2,
+      "boundary_seed_count": 18,
+      "completed_vertex_count": 0,
+      "component_index": 60,
+      "reachable_patch_vertex_count": 3,
+      "status": "COMPLETED",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 61,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 1,
+      "completed_vertex_count": 0,
+      "component_index": 62,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 63,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 15,
+      "completed_vertex_count": 0,
+      "component_index": 64,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 65,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 66,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 1,
+      "completed_vertex_count": 0,
+      "component_index": 67,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 68,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 8,
+      "completed_vertex_count": 0,
+      "component_index": 69,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 19,
+      "completed_vertex_count": 0,
+      "component_index": 70,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 71,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 3,
+      "completed_vertex_count": 0,
+      "component_index": 72,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 6,
+      "completed_vertex_count": 0,
+      "component_index": 73,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 17,
+      "completed_vertex_count": 0,
+      "component_index": 74,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 2,
+      "boundary_seed_count": 6,
+      "completed_vertex_count": 2,
+      "component_index": 75,
+      "reachable_patch_vertex_count": 3,
+      "status": "COMPLETED",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 2,
+      "completed_vertex_count": 0,
+      "component_index": 76,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 12,
+      "completed_vertex_count": 0,
+      "component_index": 77,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 0,
+      "boundary_seed_count": 0,
+      "completed_vertex_count": 0,
+      "component_index": 78,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 8,
+      "completed_vertex_count": 0,
+      "component_index": 79,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "boundary_label_count": 1,
+      "boundary_seed_count": 11,
+      "completed_vertex_count": 0,
+      "component_index": 80,
+      "status": "ABSTAIN_LT2_BOUNDARY_REGIONS",
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    }
+  ],
+  "probe": {
+    "count": 168,
+    "degrees": 30.0
+  },
+  "schema": "RealSaS.KnightJamesTwiggUnsafePatchCompletionCourt.v1",
+  "status": "TEACHER_FREE_REGION_COMPLETION__NO_PRODUCT_MUTATION",
+  "teacher_evaluation_only": {
+    "after_patch_completion": {
+      "mixed_face_precision": 0.751219512195122,
+      "mixed_face_recall": 0.15298013245033112,
+      "predicted_mixed_face_count": 615,
+      "truth_mixed_face_count": 3020,
+      "unsafe_truth_cross_region_face_count": 1178,
+      "unsafe_truth_cross_region_recall": 0.3904923599320883,
+      "vertex_ari": 0.6123576742673197,
+      "vertex_nmi": 0.6636243451357394
+    },
+    "before_patch_completion": {
+      "mixed_face_precision": 0.9261363636363636,
+      "mixed_face_recall": 0.10794701986754966,
+      "predicted_mixed_face_count": 352,
+      "truth_mixed_face_count": 3020,
+      "unsafe_truth_cross_region_face_count": 1178,
+      "unsafe_truth_cross_region_recall": 0.2758913412563667,
+      "vertex_ari": 0.6353533149912199,
+      "vertex_nmi": 0.7061274655538949
+    }
+  },
+  "teacher_used_by_region_inference": false
+}

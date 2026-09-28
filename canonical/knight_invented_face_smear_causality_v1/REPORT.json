@@ -1,0 +1,318 @@
+{
+  "actual_run_3d": {
+    "area_thresholds_invented": {
+      "10": {
+        "count": 9,
+        "fraction": 0.017475728155339806
+      },
+      "100": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "2": {
+        "count": 22,
+        "fraction": 0.04271844660194175
+      },
+      "20": {
+        "count": 3,
+        "fraction": 0.005825242718446602
+      },
+      "4": {
+        "count": 14,
+        "fraction": 0.027184466019417475
+      },
+      "50": {
+        "count": 0,
+        "fraction": 0.0
+      }
+    },
+    "area_thresholds_supported": {
+      "10": {
+        "count": 640,
+        "fraction": 0.026183365380681587
+      },
+      "100": {
+        "count": 21,
+        "fraction": 0.0008591416765536146
+      },
+      "2": {
+        "count": 1487,
+        "fraction": 0.06083541300167737
+      },
+      "20": {
+        "count": 344,
+        "fraction": 0.014073558892116353
+      },
+      "4": {
+        "count": 997,
+        "fraction": 0.04078877388209303
+      },
+      "50": {
+        "count": 56,
+        "fraction": 0.0022910444708096386
+      }
+    },
+    "edge_risk_ratios": [
+      {
+        "invented_rate": 0.027184466019417475,
+        "risk_ratio": 0.6298292918603047,
+        "supported_rate": 0.0431616413697173,
+        "threshold": 4.0
+      },
+      {
+        "invented_rate": 0.017475728155339806,
+        "risk_ratio": 0.6318923421611995,
+        "supported_rate": 0.027656179683344925,
+        "threshold": 10.0
+      },
+      {
+        "invented_rate": 0.005825242718446602,
+        "risk_ratio": 0.4127142254115661,
+        "supported_rate": 0.014114470400523667,
+        "threshold": 20.0
+      },
+      {
+        "invented_rate": 0.0,
+        "risk_ratio": 0.0,
+        "supported_rate": 0.0021273984371803787,
+        "threshold": 50.0
+      },
+      {
+        "invented_rate": 0.0,
+        "risk_ratio": 0.0,
+        "supported_rate": 0.00024546905044388985,
+        "threshold": 100.0
+      }
+    ],
+    "edge_thresholds_invented": {
+      "10": {
+        "count": 9,
+        "fraction": 0.017475728155339806
+      },
+      "100": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "2": {
+        "count": 28,
+        "fraction": 0.05436893203883495
+      },
+      "20": {
+        "count": 3,
+        "fraction": 0.005825242718446602
+      },
+      "4": {
+        "count": 14,
+        "fraction": 0.027184466019417475
+      },
+      "50": {
+        "count": 0,
+        "fraction": 0.0
+      }
+    },
+    "edge_thresholds_supported": {
+      "10": {
+        "count": 676,
+        "fraction": 0.027656179683344925
+      },
+      "100": {
+        "count": 6,
+        "fraction": 0.00024546905044388985
+      },
+      "2": {
+        "count": 1646,
+        "fraction": 0.06734034283844045
+      },
+      "20": {
+        "count": 345,
+        "fraction": 0.014114470400523667
+      },
+      "4": {
+        "count": 1055,
+        "fraction": 0.0431616413697173
+      },
+      "50": {
+        "count": 52,
+        "fraction": 0.0021273984371803787
+      }
+    },
+    "max_area_ratio_invented": {
+      "count": 515,
+      "max": 28.894511598475738,
+      "mean": 1.3960638996358161,
+      "p50": 1.000000000000007,
+      "p95": 1.8130956238248297,
+      "p99": 16.63832346829259
+    },
+    "max_area_ratio_supported": {
+      "count": 24443,
+      "max": 664.59688386519,
+      "mean": 1.9458985624369443,
+      "p50": 1.0000000000000084,
+      "p95": 2.6245517664052347,
+      "p99": 25.286967990370826
+    },
+    "max_edge_ratio_invented": {
+      "count": 515,
+      "max": 31.35173653497224,
+      "mean": 1.4546597424241303,
+      "p50": 1.0000000000021387,
+      "p95": 2.08191152513946,
+      "p99": 17.47978852355105
+    },
+    "max_edge_ratio_supported": {
+      "count": 24443,
+      "max": 209.99843678211477,
+      "mean": 1.8463323850788012,
+      "p50": 1.0000000000041713,
+      "p95": 3.0299617114226582,
+      "p99": 27.115044596852417
+    },
+    "sample_times_seconds": [
+      0.0,
+      0.20833333333333334,
+      0.4166666666666667,
+      0.625
+    ],
+    "top_edge_pathology_enrichment": [
+      {
+        "baseline_invented_fraction": 0.020634666239281993,
+        "enrichment": 0.0,
+        "invented_count": 0,
+        "invented_fraction": 0.0,
+        "k": 50
+      },
+      {
+        "baseline_invented_fraction": 0.020634666239281993,
+        "enrichment": 0.0,
+        "invented_count": 0,
+        "invented_fraction": 0.0,
+        "k": 100
+      },
+      {
+        "baseline_invented_fraction": 0.020634666239281993,
+        "enrichment": 0.1938485436893204,
+        "invented_count": 1,
+        "invented_fraction": 0.004,
+        "k": 250
+      },
+      {
+        "baseline_invented_fraction": 0.020634666239281993,
+        "enrichment": 0.6784699029126214,
+        "invented_count": 7,
+        "invented_fraction": 0.014,
+        "k": 500
+      },
+      {
+        "baseline_invented_fraction": 0.020634666239281993,
+        "enrichment": 0.6784699029126214,
+        "invented_count": 14,
+        "invented_fraction": 0.014,
+        "k": 1000
+      },
+      {
+        "baseline_invented_fraction": 0.020634666239281993,
+        "enrichment": 0.969242718446602,
+        "invented_count": 40,
+        "invented_fraction": 0.02,
+        "k": 2000
+      }
+    ]
+  },
+  "authority": {
+    "candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+    "motion_sha256": "bfcfc1e44f4960e498f6f5183e224b72ed74e0352906c94f09989abab41b1b89",
+    "skeleton_lineage_hash": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+    "skin_lineage_hash": "b30417b9375a52c646618f0fb94ea8ddd7285fea959e460522dd5f8b6b70cb2a",
+    "stage12_npz_sha256": "adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c",
+    "stage15_sha256": "7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182",
+    "stage18_sha256": "0db35bbcdd3565cf42c74127fa33c66d39545e1ec84d1b1c74f1dac5bb6072d3",
+    "stage32_sha256": "f1a937de488ec2a620ee292b3f865a3b2ca97b9466401555beb08b1d2f945a09"
+  },
+  "finding": {
+    "claim_boundary": "Invented-vs-dense-supported comparison holds mesh, skin, skeleton and exact baseline RUN motion fixed. Correlation/enrichment can identify whether incidence invention is a major owner, but does not by itself prove that preserving dense incidence is the only acceptable product discretization.",
+    "id": "KNIGHT_INVENTED_FACE_SMEAR_CAUSAL_CORRELATION"
+  },
+  "population": {
+    "dense_supported_face_count": 24443,
+    "face_count": 24958,
+    "invented_face_count": 515,
+    "invented_fraction": 0.020634666239281993
+  },
+  "schema": "RealSaS.KnightInventedFaceSmearCausality.v1",
+  "skin_discontinuity": {
+    "invented": {
+      "count": 515,
+      "max": 1.9995153842736169,
+      "mean": 0.141578564152936,
+      "p50": 3.0897731936756705e-11,
+      "p95": 0.9990409951564531,
+      "p99": 1.9954004884007899
+    },
+    "risk_ratio_gt_0_5": {
+      "invented_rate": 0.07378640776699029,
+      "risk_ratio": 1.0120994192191601,
+      "supported_rate": 0.0729043079818353,
+      "threshold": 0.5
+    },
+    "risk_ratio_gt_1_9": {
+      "invented_rate": 0.04854368932038835,
+      "risk_ratio": 1.4794930150352275,
+      "supported_rate": 0.032811029742666614,
+      "threshold": 1.9
+    },
+    "supported": {
+      "count": 24443,
+      "max": 1.9999995284083059,
+      "mean": 0.1324302541818035,
+      "p50": 9.159077972638556e-11,
+      "p95": 1.1817617192665368,
+      "p99": 1.9935892538266167
+    },
+    "thresholds_invented": {
+      "0.1": {
+        "count": 78,
+        "fraction": 0.15145631067961166
+      },
+      "0.5": {
+        "count": 38,
+        "fraction": 0.07378640776699029
+      },
+      "1.0": {
+        "count": 26,
+        "fraction": 0.05048543689320388
+      },
+      "1.5": {
+        "count": 25,
+        "fraction": 0.04854368932038835
+      },
+      "1.9": {
+        "count": 25,
+        "fraction": 0.04854368932038835
+      }
+    },
+    "thresholds_supported": {
+      "0.1": {
+        "count": 3769,
+        "fraction": 0.15419547518717014
+      },
+      "0.5": {
+        "count": 1782,
+        "fraction": 0.0729043079818353
+      },
+      "1.0": {
+        "count": 1280,
+        "fraction": 0.052366730761363174
+      },
+      "1.5": {
+        "count": 1093,
+        "fraction": 0.04471627868919527
+      },
+      "1.9": {
+        "count": 802,
+        "fraction": 0.032811029742666614
+      }
+    }
+  },
+  "status": "AUDIT_ONLY__EXACT_BASELINE_CORRELATION"
+}

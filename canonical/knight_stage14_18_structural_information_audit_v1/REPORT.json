@@ -1,0 +1,47 @@
+{
+  "artifact_sha256": {
+    "stage14_candidate": "7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182",
+    "stage15_surface": "7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182",
+    "stage17": "a4416adfb014e94278a3a19bee649c1b6c653cf144997e27a3ce5269ceae4596",
+    "stage18": "0db35bbcdd3565cf42c74127fa33c66d39545e1ec84d1b1c74f1dac5bb6072d3"
+  },
+  "finding": {
+    "all_gsa_relations_forced_certain": true,
+    "claim_boundary": "Exact Knight artifact audit; no repair or alternative partition is proposed.",
+    "partition_has_no_separate_edges": true,
+    "partition_single_component": false
+  },
+  "schema": "RealSaS.KnightStage14To18StructuralInformationAudit.v1",
+  "stage14": {
+    "node_count": 12090,
+    "relation_count": 36469,
+    "relation_kind_counts": {
+      "SIGNED_ZERO_SURFACE_TOPOLOGY_NEIGHBOR": 36469
+    },
+    "relation_score_max": 1.0,
+    "relation_score_min": 1.0,
+    "relation_score_unique_count": 1,
+    "relation_unknown_flag_count": 0
+  },
+  "stage17": {
+    "boundary_count": 36469,
+    "component_count": 6,
+    "component_sizes_desc": [
+      12080,
+      3,
+      2,
+      2,
+      2,
+      1
+    ],
+    "decision_counts": {
+      "PRESERVE_CONTINUITY": 36469
+    },
+    "largest_component_fraction": 0.9991728701406121
+  },
+  "stage18": {
+    "face_count": 24958,
+    "vertex_count": 12049
+  },
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED"
+}

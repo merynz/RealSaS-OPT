@@ -1,0 +1,4990 @@
+{
+  "claim_boundary": "Teacher is evaluation-only. Bone-segment distances and predicted weights are product-available.",
+  "finding": {
+    "bad_rows_predicted_joint_is_generally_nonlocal": true,
+    "teacher_joint_more_local_than_predicted_on_bad_rows": true
+  },
+  "groups": {
+    "bad_l1_gt1": {
+      "count": 154,
+      "pred_bone_distance_p50": 1.175835250536493,
+      "pred_bone_distance_p95": 1.9805075060417825,
+      "pred_nearest_ratio_p50": 1.1854563561352212,
+      "pred_nearest_ratio_p95": 1.3634991868619317,
+      "pred_rank_p50": 17.0,
+      "pred_rank_p95": 25.0,
+      "pred_within_top2": 4,
+      "pred_within_top4": 13,
+      "teacher_bone_distance_p50": 0.9764596872039929,
+      "teacher_bone_distance_p95": 1.9585440584863594,
+      "teacher_rank_p50": 3.0,
+      "teacher_rank_p95": 25.0,
+      "teacher_within_top2": 67,
+      "teacher_within_top4": 110
+    },
+    "good_l1_le0_1": {
+      "count": 11636,
+      "pred_bone_distance_p50": 0.6078948208377689,
+      "pred_bone_distance_p95": 1.6519395539782422,
+      "pred_nearest_ratio_p50": 1.174970177751415,
+      "pred_nearest_ratio_p95": 1.7346458370660554,
+      "pred_rank_p50": 3.0,
+      "pred_rank_p95": 12.0,
+      "pred_within_top2": 5039,
+      "pred_within_top4": 7876,
+      "teacher_bone_distance_p50": 0.6078948208377689,
+      "teacher_bone_distance_p95": 1.6519395539782422,
+      "teacher_rank_p50": 3.0,
+      "teacher_rank_p95": 12.0,
+      "teacher_within_top2": 5041,
+      "teacher_within_top4": 7873
+    },
+    "teacher_invalid_bad_l1_gt1": {
+      "count": 151,
+      "pred_bone_distance_p50": 1.1843675581138104,
+      "pred_bone_distance_p95": 1.9828028234244917,
+      "pred_nearest_ratio_p50": 1.1849210774030223,
+      "pred_nearest_ratio_p95": 1.334560026788079,
+      "pred_rank_p50": 17.0,
+      "pred_rank_p95": 25.0,
+      "pred_within_top2": 3,
+      "pred_within_top4": 11,
+      "teacher_bone_distance_p50": 0.9788926789656742,
+      "teacher_bone_distance_p95": 1.9619460584162753,
+      "teacher_rank_p50": 3.0,
+      "teacher_rank_p95": 25.0,
+      "teacher_within_top2": 66,
+      "teacher_within_top4": 107
+    }
+  },
+  "schema": "RealSaS.KnightBoneLocalitySignalCourt.v1",
+  "status": "DIAGNOSTIC__NO_REPAIR",
+  "top_error_rows": [
+    {
+      "nearest_distance": 0.38929533723322957,
+      "nearest_joint": "J:136e20712bbd1481596e",
+      "position": [
+        -1.2320712822689779,
+        0.05200562056167831,
+        1.0309555541545639
+      ],
+      "pred_distance": 0.3898119300914132,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 2,
+      "pred_to_nearest_distance_ratio": 1.0013269947229657,
+      "teacher_distance": 0.4989468253599746,
+      "teacher_joint": "J:33c7075f501c9af4cd0d",
+      "teacher_l1_error": 1.9999999999996914,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 4689
+    },
+    {
+      "nearest_distance": 0.9055528506200976,
+      "nearest_joint": "J:a80d2c086e86a4cc08b5",
+      "position": [
+        -0.22236132400824518,
+        -0.9176198649453012,
+        0.996305974605086
+      ],
+      "pred_distance": 1.028307325003745,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 14,
+      "pred_to_nearest_distance_ratio": 1.1355574931927923,
+      "teacher_distance": 0.9269649772019369,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999999994915,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 11409
+    },
+    {
+      "nearest_distance": 1.0412719107776132,
+      "nearest_joint": "J:a80d2c086e86a4cc08b5",
+      "position": [
+        -0.12464136345377347,
+        -1.056153629519333,
+        0.9978203411245357
+      ],
+      "pred_distance": 1.1960790696084824,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.1486712137613129,
+      "teacher_distance": 1.0431751969279355,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999999999996241,
+      "teacher_rank": 2,
+      "teacher_valid": false,
+      "vertex_index": 3515
+    },
+    {
+      "nearest_distance": 1.1726776392794886,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.02029129613444303,
+        -1.1953220625981904,
+        0.9976269417947822
+      ],
+      "pred_distance": 1.3907036068536867,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.1859214845335984,
+      "teacher_distance": 1.1726776392794886,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999999999976563,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 2011
+    },
+    {
+      "nearest_distance": 1.1263055422797856,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.02902831335729473,
+        -1.1479316910276822,
+        0.9970452074646476
+      ],
+      "pred_distance": 1.324301801134626,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 19,
+      "pred_to_nearest_distance_ratio": 1.1757926703033625,
+      "teacher_distance": 1.1263055422797856,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999999727243,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 9352
+    },
+    {
+      "nearest_distance": 0.8603242792351943,
+      "nearest_joint": "J:a80d2c086e86a4cc08b5",
+      "position": [
+        -0.2220612828863712,
+        -0.8718533739480464,
+        0.994919376910039
+      ],
+      "pred_distance": 0.9902483497617661,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 14,
+      "pred_to_nearest_distance_ratio": 1.1510175565916505,
+      "teacher_distance": 0.8832621746444507,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999999542055,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 2794
+    },
+    {
+      "nearest_distance": 0.9491068962297344,
+      "nearest_joint": "J:a80d2c086e86a4cc08b5",
+      "position": [
+        -0.1731850175387716,
+        -0.9629099120500224,
+        0.9956777711457354
+      ],
+      "pred_distance": 1.092296113099068,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 14,
+      "pred_to_nearest_distance_ratio": 1.1508673232047344,
+      "teacher_distance": 0.9599221607469258,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999999542053,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 480
+    },
+    {
+      "nearest_distance": 0.9017659851571035,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.27065949754188084,
+        -0.9180363004285913,
+        1.1039672291412554
+      ],
+      "pred_distance": 0.9957378028329815,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.1042086519370171,
+      "teacher_distance": 0.926362765696469,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999999542053,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 8350
+    },
+    {
+      "nearest_distance": 1.0838553838583143,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.07766872433432476,
+        -1.102253339735406,
+        0.9968786406518938
+      ],
+      "pred_distance": 1.2598667681436508,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.1623937906353985,
+      "teacher_distance": 1.0838553838583143,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999999245661,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 8643
+    },
+    {
+      "nearest_distance": 0.9968210548469755,
+      "nearest_joint": "J:a80d2c086e86a4cc08b5",
+      "position": [
+        -0.1256916400947682,
+        -1.0114984250072336,
+        0.9961447832981136
+      ],
+      "pred_distance": 1.1583074056817253,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.1620013442227501,
+      "teacher_distance": 0.9996147981803887,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999999999924501,
+      "teacher_rank": 2,
+      "teacher_valid": false,
+      "vertex_index": 108
+    },
+    {
+      "nearest_distance": 1.073079410581461,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.1148549074241105,
+        -1.1015385384874776,
+        1.1038299046826754
+      ],
+      "pred_distance": 1.278420216456796,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.191356579811804,
+      "teacher_distance": 1.073079410581461,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999999999794763,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 1267
+    },
+    {
+      "nearest_distance": 0.8558913626775283,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.2698759600142478,
+        -0.8720920806678986,
+        1.1036116187088834
+      ],
+      "pred_distance": 0.9562524987843878,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.117259199570486,
+      "teacher_distance": 0.8828016960818781,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999997947624,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 9682
+    },
+    {
+      "nearest_distance": 0.9447319613504052,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.2216073894683744,
+        -0.9638005697542024,
+        1.1052639399483626
+      ],
+      "pred_distance": 1.059702874165497,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.1216968595523664,
+      "teacher_distance": 0.9569522842682694,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999996616205,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 7369
+    },
+    {
+      "nearest_distance": 1.126004554339008,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.02019206957379258,
+        -1.1482636629733711,
+        0.9969861459776682
+      ],
+      "pred_distance": 1.3521427736767933,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.2008324197858453,
+      "teacher_distance": 1.126004554339008,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999995975424,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 10724
+    },
+    {
+      "nearest_distance": 1.038905028779465,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.07814584495721946,
+        -1.05678614301254,
+        0.9970248991940038
+      ],
+      "pred_distance": 1.2217863936816586,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.1760328036115562,
+      "teacher_distance": 1.038905028779465,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999999999442294,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 1033
+    },
+    {
+      "nearest_distance": 1.0758744672129832,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.12475715407785154,
+        -1.1027327630254027,
+        1.1041020973373283
+      ],
+      "pred_distance": 1.2285438796482724,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 12,
+      "pred_to_nearest_distance_ratio": 1.1419026262708643,
+      "teacher_distance": 1.0758744672129832,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999999999442132,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 5780
+    },
+    {
+      "nearest_distance": 0.9035545285953955,
+      "nearest_joint": "J:a80d2c086e86a4cc08b5",
+      "position": [
+        -0.17309376422038944,
+        -0.9172414848230468,
+        0.9966566013245348
+      ],
+      "pred_distance": 1.054255207150423,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 14,
+      "pred_to_nearest_distance_ratio": 1.1667864791616909,
+      "teacher_distance": 0.9153852432486222,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999999999080189,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 2176
+    },
+    {
+      "nearest_distance": 1.16114204171611,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.0286851664543084,
+        -1.1956480834475118,
+        1.1033915023325167
+      ],
+      "pred_distance": 1.3579853744580093,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.1695256270722698,
+      "teacher_distance": 1.16114204171611,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999984950103,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 6564
+    },
+    {
+      "nearest_distance": 1.080176353739298,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.028837093477935408,
+        -1.10137795037632,
+        0.9964004354524341
+      ],
+      "pred_distance": 1.2860656373447703,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 19,
+      "pred_to_nearest_distance_ratio": 1.1906071012318826,
+      "teacher_distance": 1.080176353739298,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999984936505,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 2783
+    },
+    {
+      "nearest_distance": 1.1156983785151755,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.07586033404738834,
+        -1.1476694747511977,
+        1.1042446825775576
+      ],
+      "pred_distance": 1.292302883585642,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 15,
+      "pred_to_nearest_distance_ratio": 1.1582905456091996,
+      "teacher_distance": 1.1156983785151755,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999999998484871,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 4494
+    },
+    {
+      "nearest_distance": 1.11560504818816,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06800670199727235,
+        -1.1482568544144414,
+        1.1034230058194925
+      ],
+      "pred_distance": 1.3429048032282311,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 18,
+      "pred_to_nearest_distance_ratio": 1.2037457211306328,
+      "teacher_distance": 1.11560504818816,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999958852082,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 5356
+    },
+    {
+      "nearest_distance": 1.034549203852385,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.1151373875007538,
+        -1.0565423290469118,
+        0.996707531915082
+      ],
+      "pred_distance": 1.246705624424008,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 20,
+      "pred_to_nearest_distance_ratio": 1.2050713680718224,
+      "teacher_distance": 1.0400713587556805,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999958782204,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 8639
+    },
+    {
+      "nearest_distance": 0.9482876753344864,
+      "nearest_joint": "J:a80d2c086e86a4cc08b5",
+      "position": [
+        -0.12531919098303038,
+        -0.96287206469635,
+        0.9963599790000448
+      ],
+      "pred_distance": 1.1183599134534608,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.1793466714190768,
+      "teacher_distance": 0.9517726198853149,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999999995877703,
+      "teacher_rank": 2,
+      "teacher_valid": false,
+      "vertex_index": 9
+    },
+    {
+      "nearest_distance": 1.0282366365538023,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.11467422381823372,
+        -1.0561465297696913,
+        1.1033416656297586
+      ],
+      "pred_distance": 1.2401983717444438,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.2061410065109566,
+      "teacher_distance": 1.0282366365538023,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999999995877698,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 1131
+    },
+    {
+      "nearest_distance": 0.8088754237382456,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.27057675874090104,
+        -0.8248953222546522,
+        1.1035170927738975
+      ],
+      "pred_distance": 0.9155147348964559,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.1318365078584944,
+      "teacher_distance": 0.8387328934746594,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999932034644,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 4269
+    },
+    {
+      "nearest_distance": 0.899124052191994,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.22168601567130028,
+        -0.9181680782528175,
+        1.1048714063014404
+      ],
+      "pred_distance": 1.020486292417551,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.1349783046395938,
+      "teacher_distance": 0.913122517015635,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999932034642,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 2703
+    },
+    {
+      "nearest_distance": 1.1610799050040943,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.020264899734592515,
+        -1.1958662584632587,
+        1.1036665340701952
+      ],
+      "pred_distance": 1.408769383525582,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 22,
+      "pred_to_nearest_distance_ratio": 1.2133268153672974,
+      "teacher_distance": 1.1610799050040943,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999920959366,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 7081
+    },
+    {
+      "nearest_distance": 0.9898026474414066,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.1736065971086631,
+        -1.00905883859728,
+        1.1061086145250854
+      ],
+      "pred_distance": 1.1230672924690839,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.134637592021157,
+      "teacher_distance": 0.990888257101405,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999887944109,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 1069
+    },
+    {
+      "nearest_distance": 0.38630009010692495,
+      "nearest_joint": "J:136e20712bbd1481596e",
+      "position": [
+        -1.2319449341590312,
+        0.05027912829996171,
+        1.0700988952560313
+      ],
+      "pred_distance": 0.38669553075765095,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 2,
+      "pred_to_nearest_distance_ratio": 1.0010236618133237,
+      "teacher_distance": 0.4920369239812109,
+      "teacher_joint": "J:33c7075f501c9af4cd0d",
+      "teacher_l1_error": 1.9999999880717088,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 8502
+    },
+    {
+      "nearest_distance": 1.0794437828835493,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.02031857387086171,
+        -1.1012809777934707,
+        0.9960393730799828
+      ],
+      "pred_distance": 1.3143612801228721,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.2176282831624459,
+      "teacher_distance": 1.0794437828835493,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999735976657,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 1047
+    },
+    {
+      "nearest_distance": 1.0817103361418658,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06755902839700816,
+        -1.1022978414170694,
+        0.9977090459867611
+      ],
+      "pred_distance": 1.3106354890046288,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.2116325833395194,
+      "teacher_distance": 1.0817103361418658,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999714827892,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 10650
+    },
+    {
+      "nearest_distance": 1.035121704941086,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.029194087206381187,
+        -1.056026883754877,
+        0.9969683616620917
+      ],
+      "pred_distance": 1.2489153317339845,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 19,
+      "pred_to_nearest_distance_ratio": 1.2065396037706182,
+      "teacher_distance": 1.035121704941086,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999700881528,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 8879
+    },
+    {
+      "nearest_distance": 1.1144209151818807,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.029232666575733476,
+        -1.148591901232858,
+        1.1035839391953461
+      ],
+      "pred_distance": 1.3181457486049295,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.1828077978864922,
+      "teacher_distance": 1.1144209151818807,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999697717952,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 11105
+    },
+    {
+      "nearest_distance": 0.9933104587919799,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.07756688835620226,
+        -1.0106750148945107,
+        0.9966346307233839
+      ],
+      "pred_distance": 1.1843675581138104,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.1923437910380867,
+      "teacher_distance": 0.9933104587919799,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999999969550278,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 7077
+    },
+    {
+      "nearest_distance": 1.029167126403503,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.12528866321134435,
+        -1.0554234409077967,
+        1.1055078745470315
+      ],
+      "pred_distance": 1.187854319681514,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 12,
+      "pred_to_nearest_distance_ratio": 1.1541899164934994,
+      "teacher_distance": 1.029167126403503,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999695405546,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 9302
+    },
+    {
+      "nearest_distance": 0.8878957837997355,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.16414483852865008,
+        -0.9177350865949907,
+        1.103912245069572
+      ],
+      "pred_distance": 1.0976734757486222,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 15,
+      "pred_to_nearest_distance_ratio": 1.2362638676480098,
+      "teacher_distance": 0.8989038711487152,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999497800207,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 9243
+    },
+    {
+      "nearest_distance": 0.8586329992004228,
+      "nearest_joint": "J:a80d2c086e86a4cc08b5",
+      "position": [
+        -0.17298575817535353,
+        -0.8720921721789002,
+        0.9965891071613221
+      ],
+      "pred_distance": 1.0174123385063534,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 14,
+      "pred_to_nearest_distance_ratio": 1.1849210774030223,
+      "teacher_distance": 0.8715797812682011,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999497800207,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 10588
+    },
+    {
+      "nearest_distance": 1.070631001643293,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.07656516124771509,
+        -1.1020563193452881,
+        1.1038686563666402
+      ],
+      "pred_distance": 1.2533384283676057,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 15,
+      "pred_to_nearest_distance_ratio": 1.1706539661600293,
+      "teacher_distance": 1.070631001643293,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999172768788,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 5720
+    },
+    {
+      "nearest_distance": 1.0691470163584398,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.0677647143319762,
+        -1.1014436171509716,
+        1.103439062861239
+      ],
+      "pred_distance": 1.3037948152967198,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 18,
+      "pred_to_nearest_distance_ratio": 1.2194719672300076,
+      "teacher_distance": 1.0691470163584398,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999172397986,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 8487
+    },
+    {
+      "nearest_distance": 0.9829701668146246,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.11459068629810963,
+        -1.0103650928969357,
+        1.1034904201279456
+      ],
+      "pred_distance": 1.2020870881583336,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.2229130941519528,
+      "teacher_distance": 0.9829701668146246,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999999917201286,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 915
+    },
+    {
+      "nearest_distance": 0.9438958051414219,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.173827949207155,
+        -0.9631435406491168,
+        1.1052914688239313
+      ],
+      "pred_distance": 1.083929301009046,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.1483569426888631,
+      "teacher_distance": 0.9462631456534436,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999999172012553,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 2391
+    },
+    {
+      "nearest_distance": 0.7627434043971074,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.2704615249811142,
+        -0.7786395621072109,
+        1.102821920147984
+      ],
+      "pred_distance": 0.8766807651082391,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.1493783624404996,
+      "teacher_distance": 0.7956592682330912,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999999917201247,
+      "teacher_rank": 4,
+      "teacher_valid": false,
+      "vertex_index": 1507
+    },
+    {
+      "nearest_distance": 1.0367965057680038,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06712729886446814,
+        -1.056918461684628,
+        0.9964254006537874
+      ],
+      "pred_distance": 1.273633967054891,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.2284319632341456,
+      "teacher_distance": 1.0367965057680038,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999997869836545,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 5608
+    },
+    {
+      "nearest_distance": 0.9892003394026722,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.11579490858572983,
+        -1.0110118590415453,
+        0.9962145384152258
+      ],
+      "pred_distance": 1.2086332398969488,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 20,
+      "pred_to_nearest_distance_ratio": 1.2218285738021288,
+      "teacher_distance": 0.995159929796432,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999999774941344,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 10998
+    },
+    {
+      "nearest_distance": 1.113806096325703,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.020214325245983357,
+        -1.1483962103478076,
+        1.1047137631316843
+      ],
+      "pred_distance": 1.345776079105494,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 19,
+      "pred_to_nearest_distance_ratio": 1.208267833642704,
+      "teacher_distance": 1.113806096325703,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999997015523705,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 4488
+    },
+    {
+      "nearest_distance": 0.9027433308254175,
+      "nearest_joint": "J:a80d2c086e86a4cc08b5",
+      "position": [
+        -0.12542974659942976,
+        -0.9172690700996394,
+        0.9971230885428316
+      ],
+      "pred_distance": 1.081204870057054,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.1976880173331896,
+      "teacher_distance": 0.9069504889158145,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999996289240884,
+      "teacher_rank": 2,
+      "teacher_valid": false,
+      "vertex_index": 586
+    },
+    {
+      "nearest_distance": 0.9842920529632596,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.12513625648889112,
+        -1.0096821910621736,
+        1.1042186202325819
+      ],
+      "pred_distance": 1.149422918139163,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 14,
+      "pred_to_nearest_distance_ratio": 1.1677661266072086,
+      "teacher_distance": 0.9842920529632596,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999996289232,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 11358
+    },
+    {
+      "nearest_distance": 0.8533705888096934,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.22150901395268313,
+        -0.8723902664031652,
+        1.1035669579761345
+      ],
+      "pred_distance": 0.9818670506930349,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.1505752173420603,
+      "teacher_distance": 0.8693564427755607,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999999628921759,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 2267
+    },
+    {
+      "nearest_distance": 1.0337455478781883,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.020009746178138235,
+        -1.055284138867057,
+        0.9960771143762047
+      ],
+      "pred_distance": 1.2775994722838107,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.23589356675455,
+      "teacher_distance": 1.0337455478781883,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999995586736687,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 9231
+    },
+    {
+      "nearest_distance": 1.0245370529592475,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.07734771647268644,
+        -1.0556216797857745,
+        1.1054619556106786
+      ],
+      "pred_distance": 1.2140674202480666,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 15,
+      "pred_to_nearest_distance_ratio": 1.184991227736844,
+      "teacher_distance": 1.0245370529592475,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999993884044975,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 4156
+    },
+    {
+      "nearest_distance": 0.8427624007800906,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.16453632754265982,
+        -0.8725070611716879,
+        1.1031960807572194
+      ],
+      "pred_distance": 1.0605966558961188,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 15,
+      "pred_to_nearest_distance_ratio": 1.2584764755931128,
+      "teacher_distance": 0.8547977107716421,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999989913051563,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 6356
+    },
+    {
+      "nearest_distance": 0.7171639828189902,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.27022551730849803,
+        -0.7329334980485114,
+        1.101112478096118
+      ],
+      "pred_distance": 0.8391559993050582,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.1701033785976651,
+      "teacher_distance": 0.753515423303926,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999989913051475,
+      "teacher_rank": 4,
+      "teacher_valid": false,
+      "vertex_index": 8480
+    },
+    {
+      "nearest_distance": 1.067242604158128,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.028249504164537,
+        -1.101047180754962,
+        1.1031971985723799
+      ],
+      "pred_distance": 1.2792747759787577,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.1986728893641636,
+      "teacher_distance": 1.067242604158128,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999983683936375,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 8284
+    },
+    {
+      "nearest_distance": 0.9901947174093779,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.029967340455889085,
+        -1.0106438834724034,
+        0.9963865746955002
+      ],
+      "pred_distance": 1.212177783195789,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 19,
+      "pred_to_nearest_distance_ratio": 1.224181226059436,
+      "teacher_distance": 0.9901947174093779,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999998348106927,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 10371
+    },
+    {
+      "nearest_distance": 1.023899432840738,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06794676584474249,
+        -1.055820548199733,
+        1.1034659937599764
+      ],
+      "pred_distance": 1.2659440024503708,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 18,
+      "pred_to_nearest_distance_ratio": 1.2363948663767659,
+      "teacher_distance": 1.023899432840738,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999983372362875,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 6203
+    },
+    {
+      "nearest_distance": 0.9464964036289322,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.07796734878634164,
+        -0.963305562709102,
+        0.9969310439588797
+      ],
+      "pred_distance": 1.1459179962825972,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.21069450648631,
+      "teacher_distance": 0.9464964036289322,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999954808777343,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 4403
+    },
+    {
+      "nearest_distance": 0.9359366058232471,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.11444345840461737,
+        -0.9628125032112644,
+        1.1039500399766917
+      ],
+      "pred_distance": 1.1631168343053615,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.2427303591596222,
+      "teacher_distance": 0.9359366058232471,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999954793561663,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 8380
+    },
+    {
+      "nearest_distance": 0.8988896237228786,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.1734784704098425,
+        -0.918108799360019,
+        1.103415819759316
+      ],
+      "pred_distance": 1.0464209775246236,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.1641262173999996,
+      "teacher_distance": 0.9026072724066244,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999954793519363,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 9256
+    },
+    {
+      "nearest_distance": 0.8063000138812256,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.22285769638787298,
+        -0.825247631719247,
+        1.1037763640887517
+      ],
+      "pred_distance": 0.9418565899750632,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.1681217583530963,
+      "teacher_distance": 0.8246756444020924,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999925467216213,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 7899
+    },
+    {
+      "nearest_distance": 1.0671043961375881,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.02046811380201481,
+        -1.1013066720803368,
+        1.1041056102270546
+      ],
+      "pred_distance": 1.330420843770815,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.246757907273466,
+      "teacher_distance": 1.0671043961375881,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999918277665893,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 12041
+    },
+    {
+      "nearest_distance": 1.022532143178225,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.029386463094689553,
+        -1.0559647186550736,
+        1.1031620751989548
+      ],
+      "pred_distance": 1.2417588095979661,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.2143958680245912,
+      "teacher_distance": 1.022532143178225,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999879381329322,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 5678
+    },
+    {
+      "nearest_distance": 0.8123399629542425,
+      "nearest_joint": "J:a80d2c086e86a4cc08b5",
+      "position": [
+        -0.1723052274619086,
+        -0.8256551071064376,
+        0.9974679070567227
+      ],
+      "pred_distance": 0.9804506447966699,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 14,
+      "pred_to_nearest_distance_ratio": 1.2069462164966722,
+      "teacher_distance": 0.8263906573099241,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999877116507638,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 6625
+    },
+    {
+      "nearest_distance": 0.9415300044954256,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.11580005639864945,
+        -0.9631548329327743,
+        0.9962223054188217
+      ],
+      "pred_distance": 1.1695277327047973,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 20,
+      "pred_to_nearest_distance_ratio": 1.2421566249835636,
+      "teacher_distance": 0.9478491560039374,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999797407874025,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 1005
+    },
+    {
+      "nearest_distance": 0.9788926789656742,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.0675338035701604,
+        -1.010392899389334,
+        1.1027747770049323
+      ],
+      "pred_distance": 1.229141536979667,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 18,
+      "pred_to_nearest_distance_ratio": 1.2556448356304113,
+      "teacher_distance": 0.9788926789656742,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999666106349778,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 2336
+    },
+    {
+      "nearest_distance": 0.9391871598652823,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.12541181413066851,
+        -0.9638809246619434,
+        1.1050841417992925
+      ],
+      "pred_distance": 1.1112007450465184,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 14,
+      "pred_to_nearest_distance_ratio": 1.1831515511838022,
+      "teacher_distance": 0.9391871598652823,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999449288936082,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 8265
+    },
+    {
+      "nearest_distance": 0.9907941114298761,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06762612949108744,
+        -1.010423019136105,
+        0.9954583117903882
+      ],
+      "pred_distance": 1.2357169106602093,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 20,
+      "pred_to_nearest_distance_ratio": 1.2471984809002044,
+      "teacher_distance": 0.9907941114298761,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999140903405888,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 6500
+    },
+    {
+      "nearest_distance": 0.9796646910909769,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.0774217121470319,
+        -1.0102179262032054,
+        1.1050881745526233
+      ],
+      "pred_distance": 1.1766156450362042,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 15,
+      "pred_to_nearest_distance_ratio": 1.201039147104402,
+      "teacher_distance": 0.9796646910909769,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999092362260151,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 7988
+    },
+    {
+      "nearest_distance": 0.8573258665189714,
+      "nearest_joint": "J:a80d2c086e86a4cc08b5",
+      "position": [
+        -0.12503561554817139,
+        -0.8715106546890883,
+        0.9940714353336157
+      ],
+      "pred_distance": 1.045397660974191,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.2193702555818755,
+      "teacher_distance": 0.8624362264532411,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9999092046452809,
+      "teacher_rank": 2,
+      "teacher_valid": false,
+      "vertex_index": 10714
+    },
+    {
+      "nearest_distance": 0.7949152523139539,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.16435813389139392,
+        -0.8245542387450266,
+        1.1060141593035322
+      ],
+      "pred_distance": 1.0222938266820651,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 15,
+      "pred_to_nearest_distance_ratio": 1.2860412776157268,
+      "teacher_distance": 0.8076553056234468,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999909204262145,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 11762
+    },
+    {
+      "nearest_distance": 0.988831368481033,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.019872990477593975,
+        -1.010004460887669,
+        0.9955038349720985
+      ],
+      "pred_distance": 1.332103843556518,
+      "pred_joint": "J:362735eeec6ee5a3d46f",
+      "pred_rank": 27,
+      "pred_to_nearest_distance_ratio": 1.3471496617292733,
+      "teacher_distance": 0.988831368481033,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9998777931108438,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 6887
+    },
+    {
+      "nearest_distance": 1.021558791880913,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.019800307951594282,
+        -1.0552494069657983,
+        1.1022189521806038
+      ],
+      "pred_distance": 1.2935359817071803,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.2662374324296086,
+      "teacher_distance": 1.021558791880913,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999835955175599,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 8315
+    },
+    {
+      "nearest_distance": 0.8924134762840796,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.11515985411755304,
+        -0.918600934184849,
+        1.1036512905071956
+      ],
+      "pred_distance": 1.1269788466572424,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.262843823638645,
+      "teacher_distance": 0.8924134762840796,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9997532114081753,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 7583
+    },
+    {
+      "nearest_distance": 0.8534045972850564,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.17284594281537052,
+        -0.8725969843407095,
+        1.1038030949353228
+      ],
+      "pred_distance": 1.0092388189470032,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.1826029788891501,
+      "teacher_distance": 0.8582276563024135,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.99975321084673,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 1660
+    },
+    {
+      "nearest_distance": 0.9429685487620625,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.029447101839154142,
+        -0.9630814734904042,
+        0.9965611032635973
+      ],
+      "pred_distance": 1.175054856036782,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 19,
+      "pred_to_nearest_distance_ratio": 1.2461230627250552,
+      "teacher_distance": 0.9429685487620625,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999597645754905,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 3831
+    },
+    {
+      "nearest_distance": 0.9007375467005917,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.07834682520442648,
+        -0.9170051967816709,
+        0.9974521495571166
+      ],
+      "pred_distance": 1.1089828488729592,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.2311942062759254,
+      "teacher_distance": 0.9007375467005917,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9995932312897158,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 6058
+    },
+    {
+      "nearest_distance": 0.7593880334488651,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.2228880418788209,
+        -0.7783037985898804,
+        1.1040578689945564
+      ],
+      "pred_distance": 0.9034698526558648,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 9,
+      "pred_to_nearest_distance_ratio": 1.189734118606837,
+      "teacher_distance": 0.7800476916650186,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999593146056605,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 8656
+    },
+    {
+      "nearest_distance": 0.9771571486172427,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.02837165058465218,
+        -1.010354146126684,
+        1.103781490658546
+      ],
+      "pred_distance": 1.2056185863602624,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.2338021454034402,
+      "teacher_distance": 0.9771571486172427,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.999333951898795,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 2496
+    },
+    {
+      "nearest_distance": 0.749413566080481,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.16422433084198498,
+        -0.7789016776270787,
+        1.1059431675048408
+      ],
+      "pred_distance": 0.9866466689203943,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 15,
+      "pred_to_nearest_distance_ratio": 1.3165583245052124,
+      "teacher_distance": 0.7631435833044466,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9993292997376169,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 2704
+    },
+    {
+      "nearest_distance": 0.9323568633143111,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06733201222315761,
+        -0.9635053287997388,
+        1.1029930731564155
+      ],
+      "pred_distance": 1.1916276953296343,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 18,
+      "pred_to_nearest_distance_ratio": 1.2780811105885743,
+      "teacher_distance": 0.9323568633143111,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9981782986310335,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 7083
+    },
+    {
+      "nearest_distance": 0.8955652747978645,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.11511262210230151,
+        -0.9170410513361898,
+        0.997051966799276
+      ],
+      "pred_distance": 1.1328012259386884,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 20,
+      "pred_to_nearest_distance_ratio": 1.2649007926243787,
+      "teacher_distance": 0.9021187059002115,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.998178010977971,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 6027
+    },
+    {
+      "nearest_distance": 0.9336963672351448,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.07687409185060418,
+        -0.9638219765724239,
+        1.1053677247364673
+      ],
+      "pred_distance": 1.1392977950508318,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.2202015933986254,
+      "teacher_distance": 0.9336963672351448,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9969983278542447,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 6375
+    },
+    {
+      "nearest_distance": 0.8938938371280133,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.1244222139280872,
+        -0.9179241950847198,
+        1.105186147646869
+      ],
+      "pred_distance": 1.0742062780682347,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 14,
+      "pred_to_nearest_distance_ratio": 1.2017157222154549,
+      "teacher_distance": 0.8938938371280133,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9969976534717646,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 4998
+    },
+    {
+      "nearest_distance": 0.7108022933797719,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.16491390594017402,
+        -0.7326603899255979,
+        0.9956616445376794
+      ],
+      "pred_distance": 0.7289760176730539,
+      "pred_joint": "J:1008208d141ae248de43",
+      "pred_rank": 3,
+      "pred_to_nearest_distance_ratio": 1.025567903286958,
+      "teacher_distance": 0.959431988371273,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.9969976357880805,
+      "teacher_rank": 18,
+      "teacher_valid": false,
+      "vertex_index": 6594
+    },
+    {
+      "nearest_distance": 0.7653254138802212,
+      "nearest_joint": "J:a80d2c086e86a4cc08b5",
+      "position": [
+        -0.17225310496302496,
+        -0.7783284769014952,
+        0.9971628330411568
+      ],
+      "pred_distance": 0.9434196594967256,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 14,
+      "pred_to_nearest_distance_ratio": 1.232703948394398,
+      "teacher_distance": 0.7807690482946559,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9950547537704326,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 1791
+    },
+    {
+      "nearest_distance": 0.4424072412960099,
+      "nearest_joint": "J:a80d2c086e86a4cc08b5",
+      "position": [
+        -0.12460705923825902,
+        -0.4532779374273837,
+        0.9858251395451275
+      ],
+      "pred_distance": 0.6124858973303433,
+      "pred_joint": "J:b9e5c0d23f688f672060",
+      "pred_rank": 9,
+      "pred_to_nearest_distance_ratio": 1.3844391324520289,
+      "teacher_distance": 0.45924279680236646,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9939772989432627,
+      "teacher_rank": 3,
+      "teacher_valid": true,
+      "vertex_index": 5615
+    },
+    {
+      "nearest_distance": 0.6223142863703829,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.2129949006454682,
+        -0.6411539338523494,
+        0.98434337733638
+      ],
+      "pred_distance": 0.6539770375596563,
+      "pred_joint": "J:1008208d141ae248de43",
+      "pred_rank": 3,
+      "pred_to_nearest_distance_ratio": 1.0508790363370009,
+      "teacher_distance": 0.8619693614187776,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.9936546659124803,
+      "teacher_rank": 17,
+      "teacher_valid": false,
+      "vertex_index": 9418
+    },
+    {
+      "nearest_distance": 0.9757622257907431,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.020070562000518852,
+        -1.0091961942287948,
+        1.1027027651253516
+      ],
+      "pred_distance": 1.2566443089467605,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.287859148194013,
+      "teacher_distance": 0.9757622257907431,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.990561750602347,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 7072
+    },
+    {
+      "nearest_distance": 0.9443791606901741,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06720284041985057,
+        -0.9637291540373183,
+        0.9960135308158768
+      ],
+      "pred_distance": 1.1986384880115333,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 20,
+      "pred_to_nearest_distance_ratio": 1.2692343688900765,
+      "teacher_distance": 0.9443791606901741,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9872873609357682,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 1631
+    },
+    {
+      "nearest_distance": 1.3099791752020091,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.020342281770714787,
+        -1.3334610725374139,
+        0.9969306394130588
+      ],
+      "pred_distance": 1.506797146417353,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.1502451145339718,
+      "teacher_distance": 1.5310774190908663,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.9868534754103115,
+      "teacher_rank": 25,
+      "teacher_valid": false,
+      "vertex_index": 2903
+    },
+    {
+      "nearest_distance": 0.8468460177350629,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.11612043143961533,
+        -0.8722731630998862,
+        1.1036097550902846
+      ],
+      "pred_distance": 1.089615595185283,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.286674994468913,
+      "teacher_distance": 0.8468460177350629,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9866143486595809,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 10110
+    },
+    {
+      "nearest_distance": 1.401954660141294,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.019656890402715257,
+        -1.4260577861652153,
+        0.9969312067982744
+      ],
+      "pred_distance": 1.5862045499749717,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.1314235724392887,
+      "teacher_distance": 1.6117991177151554,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.9866143025331813,
+      "teacher_rank": 26,
+      "teacher_valid": false,
+      "vertex_index": 10559
+    },
+    {
+      "nearest_distance": 0.8058266282989953,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.17339969057532906,
+        -0.8250226062967547,
+        1.1048337181264942
+      ],
+      "pred_distance": 0.9703858213595647,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 9,
+      "pred_to_nearest_distance_ratio": 1.2042116595326893,
+      "teacher_distance": 0.8121232583231488,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9866142994618659,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 2871
+    },
+    {
+      "nearest_distance": 1.4466720682575742,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.019592253806913856,
+        -1.47098642445733,
+        0.9961659855806526
+      ],
+      "pred_distance": 1.6254280682434739,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.1235635939257471,
+      "teacher_distance": 1.651349807201121,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.9866142985339434,
+      "teacher_rank": 26,
+      "teacher_valid": false,
+      "vertex_index": 823
+    },
+    {
+      "nearest_distance": 0.6715717095522147,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.26976391302953756,
+        -0.6872574040321232,
+        1.1019082623625107
+      ],
+      "pred_distance": 0.8025457245137777,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 9,
+      "pred_to_nearest_distance_ratio": 1.1950261053267013,
+      "teacher_distance": 0.7113469362638285,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9866142983995816,
+      "teacher_rank": 4,
+      "teacher_valid": false,
+      "vertex_index": 61
+    },
+    {
+      "nearest_distance": 0.5076020337315393,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.5563570291839933,
+        0.5025273130638542,
+        1.1253240560853854
+      ],
+      "pred_distance": 0.584718945452175,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 4,
+      "pred_to_nearest_distance_ratio": 1.1519239612846415,
+      "teacher_distance": 0.7890835928699895,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 1.9760376773743316,
+      "teacher_rank": 8,
+      "teacher_valid": false,
+      "vertex_index": 1473
+    },
+    {
+      "nearest_distance": 0.457967016496698,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.5394277635356033,
+        0.4485007278448361,
+        1.188948774425195
+      ],
+      "pred_distance": 0.5436065131734352,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 4,
+      "pred_to_nearest_distance_ratio": 1.1869992676150614,
+      "teacher_distance": 0.4672902889545055,
+      "teacher_joint": "J:7cf59fbe52c53280546a",
+      "teacher_l1_error": 1.974003228742784,
+      "teacher_rank": 2,
+      "teacher_valid": false,
+      "vertex_index": 1266
+    },
+    {
+      "nearest_distance": 0.9419802434739687,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.019701222866664328,
+        -0.9629083656405333,
+        0.9960834977878567
+      ],
+      "pred_distance": 1.2058948465565604,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.2801699981618404,
+      "teacher_distance": 0.9419802434739687,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9687769859496675,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 5074
+    },
+    {
+      "nearest_distance": 1.2181010923208735,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.019242375720969557,
+        -1.240949398893246,
+        0.996684805222005
+      ],
+      "pred_distance": 1.4281055884804081,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.172403175305761,
+      "teacher_distance": 1.452813025192596,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.968247589015582,
+      "teacher_rank": 25,
+      "teacher_valid": false,
+      "vertex_index": 5524
+    },
+    {
+      "nearest_distance": 1.2629021006413148,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.02017988573211334,
+        -1.2860933800074683,
+        0.997128170992463
+      ],
+      "pred_distance": 1.4664856055469861,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.1612029188979016,
+      "teacher_distance": 1.4905660799809128,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.9682475514928133,
+      "teacher_rank": 25,
+      "teacher_valid": false,
+      "vertex_index": 641
+    },
+    {
+      "nearest_distance": 1.3570481945976314,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.020149820568800353,
+        -1.3807757020423619,
+        0.996316645325312
+      ],
+      "pred_distance": 1.5473218236605257,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.1402114013491695,
+      "teacher_distance": 1.5721336057826953,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.9641149349774614,
+      "teacher_rank": 26,
+      "teacher_valid": false,
+      "vertex_index": 8385
+    },
+    {
+      "nearest_distance": 0.8111163327174956,
+      "nearest_joint": "J:a80d2c086e86a4cc08b5",
+      "position": [
+        -0.12526786548005966,
+        -0.8252446764418362,
+        0.9952002646928202
+      ],
+      "pred_distance": 1.009047054622214,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.2440226067715687,
+      "teacher_distance": 0.8170660489798299,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9640276170838715,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 3279
+    },
+    {
+      "nearest_distance": 0.5062327667509895,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.5475613470824218,
+        0.5002890666758971,
+        1.1564743633487207
+      ],
+      "pred_distance": 0.5861203471078558,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 4,
+      "pred_to_nearest_distance_ratio": 1.1578079998052795,
+      "teacher_distance": 0.7878629921488424,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 1.9534164336877327,
+      "teacher_rank": 10,
+      "teacher_valid": false,
+      "vertex_index": 6597
+    },
+    {
+      "nearest_distance": 0.4772721604379494,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.5598663773585342,
+        0.46972540965214926,
+        1.170606131402674
+      ],
+      "pred_distance": 0.9519307738591606,
+      "pred_joint": "J:b9e5c0d23f688f672060",
+      "pred_rank": 14,
+      "pred_to_nearest_distance_ratio": 1.9945239902232303,
+      "teacher_distance": 0.5540148864817616,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 1.9497339437449819,
+      "teacher_rank": 4,
+      "teacher_valid": false,
+      "vertex_index": 5078
+    },
+    {
+      "nearest_distance": 0.7040579310674039,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.16395910665467217,
+        -0.7333395904978504,
+        1.1042047668980204
+      ],
+      "pred_distance": 0.9520439131770382,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 15,
+      "pred_to_nearest_distance_ratio": 1.3522238315441872,
+      "teacher_distance": 0.7189546312313699,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9413755374870936,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 10708
+    },
+    {
+      "nearest_distance": 0.7140132192704624,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.2219749445873817,
+        -0.7329257288852499,
+        1.1034971244758485
+      ],
+      "pred_distance": 0.8677686044586811,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 9,
+      "pred_to_nearest_distance_ratio": 1.2153396898524051,
+      "teacher_distance": 0.7369690013277518,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9413755374136163,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 1814
+    },
+    {
+      "nearest_distance": 0.1434761902487336,
+      "nearest_joint": "J:c9cdb266f7c167a620a9",
+      "position": [
+        0.8870720740260126,
+        0.09926926287932634,
+        0.9919982838020154
+      ],
+      "pred_distance": 0.2011811999264987,
+      "pred_joint": "J:5428a88dad4d4d8d5c4d",
+      "pred_rank": 3,
+      "pred_to_nearest_distance_ratio": 1.4021922353648113,
+      "teacher_distance": 0.1434761902487336,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.9254292106836137,
+      "teacher_rank": 2,
+      "teacher_valid": true,
+      "vertex_index": 6561
+    },
+    {
+      "nearest_distance": 0.8973129494522543,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.028109653099153822,
+        -0.917220626505057,
+        0.9974451880880492
+      ],
+      "pred_distance": 1.140441778604058,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.270952101271041,
+      "teacher_distance": 0.8973129494522543,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9067934463322924,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 10503
+    },
+    {
+      "nearest_distance": 0.8564556335365507,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.0771819553636822,
+        -0.872165174835243,
+        0.9966183165444602
+      ],
+      "pred_distance": 1.0750369279017113,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.2552161324020672,
+      "teacher_distance": 0.8564556335365507,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9051810461606107,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 3646
+    },
+    {
+      "nearest_distance": 0.8886217682793843,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.07714011530300234,
+        -0.9181485369812027,
+        1.104904852462441
+      ],
+      "pred_distance": 1.102758207525968,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 16,
+      "pred_to_nearest_distance_ratio": 1.2409759099883528,
+      "teacher_distance": 0.8886217682793843,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9051661739663885,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 11899
+    },
+    {
+      "nearest_distance": 0.8490382865747532,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.1245227415409953,
+        -0.8720239107976067,
+        1.1038665284660858
+      ],
+      "pred_distance": 1.0373501332160777,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 12,
+      "pred_to_nearest_distance_ratio": 1.2217942931655352,
+      "teacher_distance": 0.8490382865747532,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.9051487131907605,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 9681
+    },
+    {
+      "nearest_distance": 0.6067216133397347,
+      "nearest_joint": "J:932628adf7f0d5936426",
+      "position": [
+        0.21327482683436702,
+        0.5748445924409262,
+        1.1676431183096012
+      ],
+      "pred_distance": 0.6471182985581385,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 6,
+      "pred_to_nearest_distance_ratio": 1.0665819122480866,
+      "teacher_distance": 0.8257586729681128,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.8968316045226172,
+      "teacher_rank": 10,
+      "teacher_valid": false,
+      "vertex_index": 4084
+    },
+    {
+      "nearest_distance": 0.8510917797534704,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.11602862917044826,
+        -0.872339623349237,
+        0.995960038234987
+      ],
+      "pred_distance": 1.097126656247629,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 19,
+      "pred_to_nearest_distance_ratio": 1.2890814860947497,
+      "teacher_distance": 0.8581955198878964,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.8482950200110404,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 6747
+    },
+    {
+      "nearest_distance": 0.5874229993342961,
+      "nearest_joint": "J:a80d2c086e86a4cc08b5",
+      "position": [
+        -0.2215829685990852,
+        -0.593056848188692,
+        0.9820671852809988
+      ],
+      "pred_distance": 0.7765558126098319,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 13,
+      "pred_to_nearest_distance_ratio": 1.321970391846885,
+      "teacher_distance": 0.6231056540323036,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.848283688788851,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 2689
+    },
+    {
+      "nearest_distance": 0.4193734706696978,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.586945611940504,
+        0.4082896738212686,
+        1.1896072949967977
+      ],
+      "pred_distance": 0.7711341568356831,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.8387766770374347,
+      "teacher_distance": 0.44261977041351336,
+      "teacher_joint": "J:7cf59fbe52c53280546a",
+      "teacher_l1_error": 1.771875838368597,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 5716
+    },
+    {
+      "nearest_distance": 1.2973869015448272,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.020876713997965847,
+        -1.3331519655412791,
+        1.1043289426204235
+      ],
+      "pred_distance": 1.5009909557781358,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 20,
+      "pred_to_nearest_distance_ratio": 1.1569339523860407,
+      "teacher_distance": 1.5253176815135723,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.7716098346757865,
+      "teacher_rank": 23,
+      "teacher_valid": false,
+      "vertex_index": 8950
+    },
+    {
+      "nearest_distance": 0.9306364469915341,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.029048290618633146,
+        -0.9635451450219763,
+        1.1045244498434226
+      ],
+      "pred_distance": 1.1681494599846067,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.2552156792922524,
+      "teacher_distance": 0.9306364469915341,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.7659105669700115,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 7123
+    },
+    {
+      "nearest_distance": 1.389635044020196,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.020160140549849506,
+        -1.4258118479598798,
+        1.102855867201872
+      ],
+      "pred_distance": 1.5807381287291071,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 20,
+      "pred_to_nearest_distance_ratio": 1.1375203407047452,
+      "teacher_distance": 1.6064008302780848,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.7653792254675678,
+      "teacher_rank": 23,
+      "teacher_valid": false,
+      "vertex_index": 383
+    },
+    {
+      "nearest_distance": 0.887041967098592,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06756200467711099,
+        -0.917821915718977,
+        1.103308009742072
+      ],
+      "pred_distance": 1.1554676015570782,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 18,
+      "pred_to_nearest_distance_ratio": 1.3026075928926726,
+      "teacher_distance": 0.887041967098592,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.7616604994874705,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 2711
+    },
+    {
+      "nearest_distance": 0.8000300338190189,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.1160447741225875,
+        -0.8251435260120253,
+        1.10564718185426
+      ],
+      "pred_distance": 1.052970716758206,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 17,
+      "pred_to_nearest_distance_ratio": 1.3161639841591333,
+      "teacher_distance": 0.8001808859202447,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.7615943267605978,
+      "teacher_rank": 2,
+      "teacher_valid": false,
+      "vertex_index": 9045
+    },
+    {
+      "nearest_distance": 0.7207972358352918,
+      "nearest_joint": "J:a80d2c086e86a4cc08b5",
+      "position": [
+        -0.17288245964869237,
+        -0.7332444570475505,
+        0.995135134983097
+      ],
+      "pred_distance": 0.9088584051672638,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 13,
+      "pred_to_nearest_distance_ratio": 1.2609071733107278,
+      "teacher_distance": 0.7378656646088391,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.7615941528257357,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 10638
+    },
+    {
+      "nearest_distance": 1.8558612657989904,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.1161372983212067,
+        -1.8881484839321832,
+        1.0754263108632713
+      ],
+      "pred_distance": 1.9904538813668555,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 20,
+      "pred_to_nearest_distance_ratio": 1.072522994066542,
+      "teacher_distance": 2.0363738749906015,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 1.7615941507518116,
+      "teacher_rank": 25,
+      "teacher_valid": false,
+      "vertex_index": 4662
+    },
+    {
+      "nearest_distance": 0.432383606693194,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.5562178230150898,
+        0.4209933469854088,
+        1.1966278150734206
+      ],
+      "pred_distance": 0.9426117871309347,
+      "pred_joint": "J:b9e5c0d23f688f672060",
+      "pred_rank": 14,
+      "pred_to_nearest_distance_ratio": 2.1800359045521884,
+      "teacher_distance": 0.44636760061788217,
+      "teacher_joint": "J:7cf59fbe52c53280546a",
+      "teacher_l1_error": 1.6368162477334458,
+      "teacher_rank": 2,
+      "teacher_valid": false,
+      "vertex_index": 5965
+    },
+    {
+      "nearest_distance": 0.5324211010869535,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.2612087384805311,
+        -0.547805184005978,
+        0.9893985823938372
+      ],
+      "pred_distance": 0.5839556462894716,
+      "pred_joint": "J:1008208d141ae248de43",
+      "pred_rank": 3,
+      "pred_to_nearest_distance_ratio": 1.0967928301438632,
+      "teacher_distance": 0.7617655741257442,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.5546148193024039,
+      "teacher_rank": 14,
+      "teacher_valid": false,
+      "vertex_index": 3532
+    },
+    {
+      "nearest_distance": 1.250938057625378,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.01971394039143079,
+        -1.2863239964388826,
+        1.1035626067194644
+      ],
+      "pred_distance": 1.460489599824717,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 20,
+      "pred_to_nearest_distance_ratio": 1.1675155223889544,
+      "teacher_distance": 1.485666436039683,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.5105458235368567,
+      "teacher_rank": 22,
+      "teacher_valid": false,
+      "vertex_index": 5993
+    },
+    {
+      "nearest_distance": 1.4356273386464542,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.020410777671398768,
+        -1.4720861376262984,
+        1.1031453182546154
+      ],
+      "pred_distance": 1.6213505290951773,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.129367270634333,
+      "teacher_distance": 1.6470535608421801,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.4810070902131145,
+      "teacher_rank": 23,
+      "teacher_valid": false,
+      "vertex_index": 3109
+    },
+    {
+      "nearest_distance": 1.3441474427094784,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.020563156085705615,
+        -1.3801939230661175,
+        1.104186841028859
+      ],
+      "pred_distance": 1.5413107739148624,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 20,
+      "pred_to_nearest_distance_ratio": 1.1466828153970594,
+      "teacher_distance": 1.5662888264728378,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.469224504634726,
+      "teacher_rank": 23,
+      "teacher_valid": false,
+      "vertex_index": 4824
+    },
+    {
+      "nearest_distance": 1.4039598874313552,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06762877124462477,
+        -1.4267153124898846,
+        0.9957412453677333
+      ],
+      "pred_distance": 1.6108038866651628,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 26,
+      "pred_to_nearest_distance_ratio": 1.1473289949987413,
+      "teacher_distance": 1.5901389922929632,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.4621175201582923,
+      "teacher_rank": 22,
+      "teacher_valid": false,
+      "vertex_index": 8419
+    },
+    {
+      "nearest_distance": 0.7564566970964388,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.16450389836839863,
+        -0.7786689720490355,
+        0.995981999122339
+      ],
+      "pred_distance": 0.7737193391106841,
+      "pred_joint": "J:1008208d141ae248de43",
+      "pred_rank": 3,
+      "pred_to_nearest_distance_ratio": 1.0228203968323708,
+      "teacher_distance": 0.9945064296880389,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.462117497901357,
+      "teacher_rank": 18,
+      "teacher_valid": false,
+      "vertex_index": 3187
+    },
+    {
+      "nearest_distance": 1.44854697296737,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06815810828996392,
+        -1.4716249704004245,
+        0.9959359581491981
+      ],
+      "pred_distance": 1.6496590874921144,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 26,
+      "pred_to_nearest_distance_ratio": 1.1388371369916734,
+      "teacher_distance": 1.6298760276538184,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.4621171551763739,
+      "teacher_rank": 22,
+      "teacher_valid": false,
+      "vertex_index": 7240
+    },
+    {
+      "nearest_distance": 1.495566048555515,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06809323638971582,
+        -1.5189693454382773,
+        0.9957889022064916
+      ],
+      "pred_distance": 1.6906712215837476,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 25,
+      "pred_to_nearest_distance_ratio": 1.1304557382916482,
+      "teacher_distance": 1.6723467454398953,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.462117134485923,
+      "teacher_rank": 22,
+      "teacher_valid": false,
+      "vertex_index": 5699
+    },
+    {
+      "nearest_distance": 1.630908632015092,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06777876963643333,
+        -1.6554674486640215,
+        0.9973354171991518
+      ],
+      "pred_distance": 1.8104379426940278,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 25,
+      "pred_to_nearest_distance_ratio": 1.1100793184576598,
+      "teacher_distance": 1.7960684765508783,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.4621171287951962,
+      "teacher_rank": 22,
+      "teacher_valid": false,
+      "vertex_index": 11757
+    },
+    {
+      "nearest_distance": 1.5415681816749098,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06680054617760633,
+        -1.5654202788623326,
+        0.996384049515289
+      ],
+      "pred_distance": 1.7305823116565582,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 25,
+      "pred_to_nearest_distance_ratio": 1.1226115926810873,
+      "teacher_distance": 1.7147258686372497,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.462117126402216,
+      "teacher_rank": 22,
+      "teacher_valid": false,
+      "vertex_index": 2571
+    },
+    {
+      "nearest_distance": 1.5868312494729044,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06753748813656639,
+        -1.6110043014216093,
+        0.9966189959543285
+      ],
+      "pred_distance": 1.7710157496528283,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 25,
+      "pred_to_nearest_distance_ratio": 1.1160706283299526,
+      "teacher_distance": 1.755715768903643,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.4621171250095566,
+      "teacher_rank": 22,
+      "teacher_valid": false,
+      "vertex_index": 5188
+    },
+    {
+      "nearest_distance": 1.7093969977163994,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06704337408303529,
+        -1.7457480136544272,
+        1.1012919391232887
+      ],
+      "pred_distance": 1.874953587311839,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.096850871866868,
+      "teacher_distance": 1.886186322437032,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 1.4621171241292303,
+      "teacher_rank": 22,
+      "teacher_valid": false,
+      "vertex_index": 3775
+    },
+    {
+      "nearest_distance": 1.6782589590134716,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06794113498861101,
+        -1.7031846717741987,
+        0.9976595587212341
+      ],
+      "pred_distance": 1.8529888920171713,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 25,
+      "pred_to_nearest_distance_ratio": 1.1041138091742475,
+      "teacher_distance": 1.8396541948544574,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.4621171229160925,
+      "teacher_rank": 23,
+      "teacher_valid": false,
+      "vertex_index": 9027
+    },
+    {
+      "nearest_distance": 1.9024545438203733,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.11544115214856511,
+        -1.934254346743986,
+        1.0667432559583228
+      ],
+      "pred_distance": 2.0343504885329136,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.0693293540920439,
+      "teacher_distance": 2.078098571033933,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 1.4621171222152858,
+      "teacher_rank": 25,
+      "teacher_valid": false,
+      "vertex_index": 1533
+    },
+    {
+      "nearest_distance": 1.9334630729668325,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.11511420713204419,
+        -1.964669769728873,
+        1.058422194535486
+      ],
+      "pred_distance": 2.0634201676514374,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.0672146763502395,
+      "teacher_distance": 2.10588725734909,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 1.4621171199227498,
+      "teacher_rank": 25,
+      "teacher_valid": false,
+      "vertex_index": 5020
+    },
+    {
+      "nearest_distance": 1.9360115915219036,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.16347658307139362,
+        -1.965681324420124,
+        1.0443410493049876
+      ],
+      "pred_distance": 2.127744369368724,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 25,
+      "pred_to_nearest_distance_ratio": 1.0990349327898903,
+      "teacher_distance": 2.049603254250647,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.4621171194953584,
+      "teacher_rank": 19,
+      "teacher_valid": false,
+      "vertex_index": 912
+    },
+    {
+      "nearest_distance": 0.1478215413249315,
+      "nearest_joint": "J:136e20712bbd1481596e",
+      "position": [
+        -0.9929025595203214,
+        -0.08591878897132883,
+        0.9818655126472956
+      ],
+      "pred_distance": 0.17867962335474313,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 2,
+      "pred_to_nearest_distance_ratio": 1.2087522681283742,
+      "teacher_distance": 0.2849483770424932,
+      "teacher_joint": "J:33c7075f501c9af4cd0d",
+      "teacher_l1_error": 1.3861764253936981,
+      "teacher_rank": 3,
+      "teacher_valid": true,
+      "vertex_index": 4778
+    },
+    {
+      "nearest_distance": 0.5494696120948189,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.4998119381014734,
+        0.5449090791683154,
+        1.1565503594287903
+      ],
+      "pred_distance": 0.9496461404877715,
+      "pred_joint": "J:b9e5c0d23f688f672060",
+      "pred_rank": 14,
+      "pred_to_nearest_distance_ratio": 1.7282960141641033,
+      "teacher_distance": 0.7850630108682284,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 1.3599252487368456,
+      "teacher_rank": 10,
+      "teacher_valid": false,
+      "vertex_index": 9591
+    },
+    {
+      "nearest_distance": 0.6649024989489244,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.21295072102317802,
+        -0.6861916647517996,
+        0.994969102862169
+      ],
+      "pred_distance": 0.6959264370104951,
+      "pred_joint": "J:1008208d141ae248de43",
+      "pred_rank": 3,
+      "pred_to_nearest_distance_ratio": 1.0466593795490515,
+      "teacher_distance": 0.8936147055765944,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.2449189295275733,
+      "teacher_rank": 15,
+      "teacher_valid": false,
+      "vertex_index": 3639
+    },
+    {
+      "nearest_distance": 0.9295514402806281,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.020900995293916744,
+        -0.9627818025886306,
+        1.103765649910737
+      ],
+      "pred_distance": 0.9295514402806281,
+      "pred_joint": "J:1008208d141ae248de43",
+      "pred_rank": 1,
+      "pred_to_nearest_distance_ratio": 1.0,
+      "teacher_distance": 0.9295514402806281,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 1.203958691343413,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 1218
+    },
+    {
+      "nearest_distance": 0.5648995168802126,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.46274132914784455,
+        0.5605441189490163,
+        1.1672006723978177
+      ],
+      "pred_distance": 0.9457817755523424,
+      "pred_joint": "J:b9e5c0d23f688f672060",
+      "pred_rank": 14,
+      "pred_to_nearest_distance_ratio": 1.6742478038849098,
+      "teacher_distance": 0.7750349446415752,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 1.17020888283187,
+      "teacher_rank": 10,
+      "teacher_valid": false,
+      "vertex_index": 3448
+    },
+    {
+      "nearest_distance": 1.2057362128138966,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.02080684344500289,
+        -1.2407231072877536,
+        1.1028787092419514
+      ],
+      "pred_distance": 1.4226335195578539,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 19,
+      "pred_to_nearest_distance_ratio": 1.179887859748171,
+      "teacher_distance": 1.446283471582715,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.0633891112878442,
+      "teacher_rank": 22,
+      "teacher_valid": false,
+      "vertex_index": 9117
+    },
+    {
+      "nearest_distance": 0.5254315614631836,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.5145176726407166,
+        0.5192513301727613,
+        1.1708008847933826
+      ],
+      "pred_distance": 0.9517836206692726,
+      "pred_joint": "J:b9e5c0d23f688f672060",
+      "pred_rank": 14,
+      "pred_to_nearest_distance_ratio": 1.8114321454516642,
+      "teacher_distance": 0.780652693534777,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 1.0315249649696712,
+      "teacher_rank": 10,
+      "teacher_valid": false,
+      "vertex_index": 5343
+    },
+    {
+      "nearest_distance": 1.3581747807736195,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06784761787031786,
+        -1.3807733005961367,
+        0.9973877835234062
+      ],
+      "pred_distance": 1.5716277706132304,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 26,
+      "pred_to_nearest_distance_ratio": 1.1571616502244488,
+      "teacher_distance": 1.549273942262755,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.009074935432415,
+      "teacher_rank": 22,
+      "teacher_valid": false,
+      "vertex_index": 11893
+    },
+    {
+      "nearest_distance": 1.8536276471280273,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06770369767415593,
+        -1.8882170759860741,
+        1.0745816419950995
+      ],
+      "pred_distance": 2.0162455830933124,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 22,
+      "pred_to_nearest_distance_ratio": 1.0877295589636042,
+      "teacher_distance": 2.0162455830933124,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 1.0000000094038246,
+      "teacher_rank": 22,
+      "teacher_valid": false,
+      "vertex_index": 11233
+    },
+    {
+      "nearest_distance": 1.8061243637375193,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06771396836931927,
+        -1.8413089089748065,
+        1.083492959910908
+      ],
+      "pred_distance": 1.9732860581826615,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 22,
+      "pred_to_nearest_distance_ratio": 1.0925527044545398,
+      "teacher_distance": 1.9732860581826615,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 1.0000000085127199,
+      "teacher_rank": 22,
+      "teacher_valid": false,
+      "vertex_index": 9604
+    },
+    {
+      "nearest_distance": 1.7321338386152367,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06865165876336043,
+        -1.7681891186573417,
+        1.097448753796864
+      ],
+      "pred_distance": 1.9071717079767596,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 22,
+      "pred_to_nearest_distance_ratio": 1.1010533167006644,
+      "teacher_distance": 1.9071717079767596,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 1.0000000036991286,
+      "teacher_rank": 22,
+      "teacher_valid": false,
+      "vertex_index": 11527
+    },
+    {
+      "nearest_distance": 1.759564412330845,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06760495702565902,
+        -1.7953407281429292,
+        1.0924139310312064
+      ],
+      "pred_distance": 1.931351016355046,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 22,
+      "pred_to_nearest_distance_ratio": 1.0976301878012185,
+      "teacher_distance": 1.931351016355046,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 1.0000000034594732,
+      "teacher_rank": 22,
+      "teacher_valid": false,
+      "vertex_index": 4076
+    },
+    {
+      "nearest_distance": 1.9340329281800412,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06853390672065965,
+        -1.9675306733331552,
+        1.0592238875203754
+      ],
+      "pred_distance": 2.0896990741021826,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 24,
+      "pred_to_nearest_distance_ratio": 1.0804878467444843,
+      "teacher_distance": 2.0896990741021826,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 1.0000000033388763,
+      "teacher_rank": 24,
+      "teacher_valid": false,
+      "vertex_index": 1541
+    },
+    {
+      "nearest_distance": 1.8618224742816385,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.11547269180956304,
+        -1.8884010137453908,
+        1.0210694971570233
+      ],
+      "pred_distance": 2.038555056785577,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 25,
+      "pred_to_nearest_distance_ratio": 1.0949245080802499,
+      "teacher_distance": 2.038555056785577,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 1.0000000012726737,
+      "teacher_rank": 25,
+      "teacher_valid": false,
+      "vertex_index": 832
+    },
+    {
+      "nearest_distance": 1.8170704648929954,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.11583547293334627,
+        -1.842963914314253,
+        1.0145620491571872
+      ],
+      "pred_distance": 1.998155944743015,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 25,
+      "pred_to_nearest_distance_ratio": 1.0996579292596027,
+      "teacher_distance": 1.9506060586498892,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.000000001240236,
+      "teacher_rank": 20,
+      "teacher_valid": false,
+      "vertex_index": 4148
+    },
+    {
+      "nearest_distance": 1.79508845462858,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.10919418210196738,
+        -1.820235412472063,
+        1.0096050751704981
+      ],
+      "pred_distance": 1.9751517654821278,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 25,
+      "pred_to_nearest_distance_ratio": 1.1003088791470192,
+      "teacher_distance": 1.9319463012542204,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 1.0000000007093843,
+      "teacher_rank": 22,
+      "teacher_valid": false,
+      "vertex_index": 1449
+    },
+    {
+      "nearest_distance": 0.09624836370829352,
+      "nearest_joint": "J:237d229c33bc9eb9bf91",
+      "position": [
+        0.02049071148862632,
+        -0.11735001170358089,
+        0.32554289697180017
+      ],
+      "pred_distance": 0.09624836370829352,
+      "pred_joint": "J:237d229c33bc9eb9bf91",
+      "pred_rank": 1,
+      "pred_to_nearest_distance_ratio": 1.0,
+      "teacher_distance": 0.09624836370829352,
+      "teacher_joint": "J:237d229c33bc9eb9bf91",
+      "teacher_l1_error": 0.9466155527669642,
+      "teacher_rank": 1,
+      "teacher_valid": true,
+      "vertex_index": 1733
+    },
+    {
+      "nearest_distance": 0.4362692404002254,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.5111656034369509,
+        0.42409327094541005,
+        1.2062469153192017
+      ],
+      "pred_distance": 0.727386516867695,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.6672881090594511,
+      "teacher_distance": 0.727386516867695,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 0.9307768826685413,
+      "teacher_rank": 10,
+      "teacher_valid": false,
+      "vertex_index": 7701
+    },
+    {
+      "nearest_distance": 0.5115640511130282,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.49949279212498526,
+        0.5028067457709184,
+        1.1942987717981397
+      ],
+      "pred_distance": 0.7656204531043661,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.4966267692942425,
+      "teacher_distance": 0.7656204531043661,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 0.8603763948788433,
+      "teacher_rank": 10,
+      "teacher_valid": false,
+      "vertex_index": 1156
+    },
+    {
+      "nearest_distance": 0.11815904597261362,
+      "nearest_joint": "J:136e20712bbd1481596e",
+      "position": [
+        -0.9448800526546363,
+        -0.08544690908307553,
+        0.9762271739690149
+      ],
+      "pred_distance": 0.14786132681443243,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 2,
+      "pred_to_nearest_distance_ratio": 1.2513754287479866,
+      "teacher_distance": 0.14786132681443243,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 0.8549863455867175,
+      "teacher_rank": 2,
+      "teacher_valid": true,
+      "vertex_index": 7847
+    },
+    {
+      "nearest_distance": 0.43515220187713055,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.11644184694450903,
+        -0.45392173965781546,
+        0.9923731496486827
+      ],
+      "pred_distance": 0.4479526829879128,
+      "pred_joint": "J:1008208d141ae248de43",
+      "pred_rank": 2,
+      "pred_to_nearest_distance_ratio": 1.0294161009770015,
+      "teacher_distance": 0.4479526829879128,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 0.776603166489138,
+      "teacher_rank": 2,
+      "teacher_valid": true,
+      "vertex_index": 3492
+    },
+    {
+      "nearest_distance": 0.36507195615152915,
+      "nearest_joint": "J:136e20712bbd1481596e",
+      "position": [
+        -1.2042123110393022,
+        0.05190862813968252,
+        1.0134762102662924
+      ],
+      "pred_distance": 0.47633663166183204,
+      "pred_joint": "J:33c7075f501c9af4cd0d",
+      "pred_rank": 3,
+      "pred_to_nearest_distance_ratio": 1.3047746441091208,
+      "teacher_distance": 0.47633663166183204,
+      "teacher_joint": "J:33c7075f501c9af4cd0d",
+      "teacher_l1_error": 0.7698243031019862,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 9696
+    },
+    {
+      "nearest_distance": 0.8976355115774185,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06762751411626555,
+        -0.9166813954247444,
+        0.9968676804774976
+      ],
+      "pred_distance": 0.8976355115774185,
+      "pred_joint": "J:1008208d141ae248de43",
+      "pred_rank": 1,
+      "pred_to_nearest_distance_ratio": 1.0,
+      "teacher_distance": 0.8976355115774185,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 0.7672241783718059,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 595
+    },
+    {
+      "nearest_distance": 0.19450506032261616,
+      "nearest_joint": "J:4c9f9eace712daf31538",
+      "position": [
+        0.6947121688180855,
+        -0.13155205044126697,
+        0.9787243428451203
+      ],
+      "pred_distance": 0.20914927522161744,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 3,
+      "pred_to_nearest_distance_ratio": 1.0752896344944014,
+      "teacher_distance": 0.20914927522161744,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 0.7657617330551647,
+      "teacher_rank": 3,
+      "teacher_valid": true,
+      "vertex_index": 2474
+    },
+    {
+      "nearest_distance": 0.7590787123415781,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.17297854834025486,
+        -0.7782478612208574,
+        1.1052205456226696
+      ],
+      "pred_distance": 0.7668036017942648,
+      "pred_joint": "J:1008208d141ae248de43",
+      "pred_rank": 3,
+      "pred_to_nearest_distance_ratio": 1.0101766645897068,
+      "teacher_distance": 0.7668036017942648,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 0.7550813653112929,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 4501
+    },
+    {
+      "nearest_distance": 0.538150752560384,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.48111183474509717,
+        0.5314736846064527,
+        1.1837361929829273
+      ],
+      "pred_distance": 0.7701290677304118,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.431065670848427,
+      "teacher_distance": 0.7701290677304118,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 0.6902108723220569,
+      "teacher_rank": 10,
+      "teacher_valid": false,
+      "vertex_index": 1626
+    },
+    {
+      "nearest_distance": 0.5493670338781494,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.5017145233523418,
+        0.5458631823849671,
+        1.130541512397328
+      ],
+      "pred_distance": 0.781341758983858,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 8,
+      "pred_to_nearest_distance_ratio": 1.4222581822358875,
+      "teacher_distance": 0.781341758983858,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 0.6852782906750403,
+      "teacher_rank": 8,
+      "teacher_valid": false,
+      "vertex_index": 9284
+    },
+    {
+      "nearest_distance": 1.265019931752567,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06787683658067793,
+        -1.2867852024355293,
+        0.9960784599606307
+      ],
+      "pred_distance": 1.4672239059281702,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.159842520343113,
+      "teacher_distance": 1.4672239059281702,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 0.6695191389520754,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 10835
+    },
+    {
+      "nearest_distance": 1.311257740673975,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06742803473495931,
+        -1.333487732676678,
+        0.9969990806177833
+      ],
+      "pred_distance": 1.5080049093495473,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.150044619431147,
+      "teacher_distance": 1.5080049093495473,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 0.6695191389520039,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 3786
+    },
+    {
+      "nearest_distance": 0.12201785113112988,
+      "nearest_joint": "J:237d229c33bc9eb9bf91",
+      "position": [
+        -0.029665115009520064,
+        -0.13717325823002957,
+        0.28459642571829474
+      ],
+      "pred_distance": 0.19115455803742906,
+      "pred_joint": "J:063ee183f601e19a8ca9",
+      "pred_rank": 4,
+      "pred_to_nearest_distance_ratio": 1.566611411899063,
+      "teacher_distance": 0.19115455803742906,
+      "teacher_joint": "J:063ee183f601e19a8ca9",
+      "teacher_l1_error": 0.5950849328384111,
+      "teacher_rank": 4,
+      "teacher_valid": true,
+      "vertex_index": 2135
+    },
+    {
+      "nearest_distance": 0.15953222421784227,
+      "nearest_joint": "J:ee24577789f0235b8186",
+      "position": [
+        0.21206495175452184,
+        0.14114893656771646,
+        0.38458413569494354
+      ],
+      "pred_distance": 0.21176854729551417,
+      "pred_joint": "J:f50f39d42ef3820824ef",
+      "pred_rank": 3,
+      "pred_to_nearest_distance_ratio": 1.327434305725863,
+      "teacher_distance": 0.21176854729551417,
+      "teacher_joint": "J:f50f39d42ef3820824ef",
+      "teacher_l1_error": 0.588317590506009,
+      "teacher_rank": 3,
+      "teacher_valid": true,
+      "vertex_index": 11597
+    },
+    {
+      "nearest_distance": 1.4820919499858947,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.02015077642235327,
+        -1.518847856870484,
+        1.1036734047547867
+      ],
+      "pred_distance": 1.6624483424987249,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.1216904204321105,
+      "teacher_distance": 1.6624483424987249,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 0.557201892763335,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 913
+    },
+    {
+      "nearest_distance": 1.5735924899552012,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.02040600904537008,
+        -1.6106861652372997,
+        1.1027247492159606
+      ],
+      "pred_distance": 1.744366293772823,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.1085247959098252,
+      "teacher_distance": 1.744366293772823,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 0.5378830580019862,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 980
+    },
+    {
+      "nearest_distance": 1.6196101887006669,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06773798644982783,
+        -1.6557243326612248,
+        1.1037450501990311
+      ],
+      "pred_distance": 1.791904941719518,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.106380383515045,
+      "teacher_distance": 1.791904941719518,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 0.5378829007846236,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 9160
+    },
+    {
+      "nearest_distance": 1.6676705777734133,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.0676403808802277,
+        -1.7040339550579349,
+        1.1039003695260927
+      ],
+      "pred_distance": 1.8362637787936553,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.1010950263602652,
+      "teacher_distance": 1.8362637787936553,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 0.5378828931039311,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 3844
+    },
+    {
+      "nearest_distance": 1.7262001878064528,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06756773360867345,
+        -1.7516003805135953,
+        0.9987300746327088
+      ],
+      "pred_distance": 1.8961286583615204,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 25,
+      "pred_to_nearest_distance_ratio": 1.098440767041627,
+      "teacher_distance": 1.8961286583615204,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 0.537882889105213,
+      "teacher_rank": 25,
+      "teacher_valid": false,
+      "vertex_index": 617
+    },
+    {
+      "nearest_distance": 1.899762293880433,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06810266551679708,
+        -1.933937435970923,
+        1.0678891885376438
+      ],
+      "pred_distance": 2.0584204633415655,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 22,
+      "pred_to_nearest_distance_ratio": 1.083514748119913,
+      "teacher_distance": 2.0584204633415655,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 0.5378828884133554,
+      "teacher_rank": 22,
+      "teacher_valid": false,
+      "vertex_index": 501
+    },
+    {
+      "nearest_distance": 1.6794203859303627,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.11578043074840282,
+        -1.703804474215076,
+        0.9971345592835323
+      ],
+      "pred_distance": 1.8220453149444884,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.0849250909474428,
+      "teacher_distance": 1.8220453149444884,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 0.5378828865327057,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 11236
+    },
+    {
+      "nearest_distance": 1.726384490054976,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.11509159634679132,
+        -1.7509483270387505,
+        0.9979977333101275
+      ],
+      "pred_distance": 1.8660016670572563,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.0808725853403804,
+      "teacher_distance": 1.8660016670572563,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 0.537882886020378,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 7904
+    },
+    {
+      "nearest_distance": 1.906524391491577,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.11574610913953508,
+        -1.9345055701967178,
+        1.0305795617770892
+      ],
+      "pred_distance": 2.0799052376373255,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 25,
+      "pred_to_nearest_distance_ratio": 1.0909407962046074,
+      "teacher_distance": 2.0799052376373255,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 0.5378828806339611,
+      "teacher_rank": 25,
+      "teacher_valid": false,
+      "vertex_index": 11136
+    },
+    {
+      "nearest_distance": 0.5639778746361206,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.3659208697361165,
+        0.5585980753298001,
+        1.12260101012375
+      ],
+      "pred_distance": 0.7060956855620595,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 6,
+      "pred_to_nearest_distance_ratio": 1.251991819745825,
+      "teacher_distance": 0.7060956855620595,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 0.5334028448368267,
+      "teacher_rank": 6,
+      "teacher_valid": false,
+      "vertex_index": 709
+    },
+    {
+      "nearest_distance": 0.36770514324982706,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.6351226979579425,
+        0.35511357697350193,
+        1.1881602109257445
+      ],
+      "pred_distance": 0.4237610191150626,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 4,
+      "pred_to_nearest_distance_ratio": 1.1524478971651204,
+      "teacher_distance": 0.4237610191150626,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 0.5150184928695807,
+      "teacher_rank": 4,
+      "teacher_valid": true,
+      "vertex_index": 7102
+    },
+    {
+      "nearest_distance": 0.3972998290322424,
+      "nearest_joint": "J:a80d2c086e86a4cc08b5",
+      "position": [
+        -0.0766740890639409,
+        0.3768806230090122,
+        1.102642098878461
+      ],
+      "pred_distance": 0.42166462346937833,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 5,
+      "pred_to_nearest_distance_ratio": 1.0613259625519713,
+      "teacher_distance": 0.42166462346937833,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 0.47898261340103404,
+      "teacher_rank": 5,
+      "teacher_valid": true,
+      "vertex_index": 9844
+    },
+    {
+      "nearest_distance": 0.13425270989443716,
+      "nearest_joint": "J:ab16ff2ffc7408c862ae",
+      "position": [
+        0.11613387087841562,
+        -0.13719225065882415,
+        0.2851435710769017
+      ],
+      "pred_distance": 0.21648195607095655,
+      "pred_joint": "J:f50f39d42ef3820824ef",
+      "pred_rank": 6,
+      "pred_to_nearest_distance_ratio": 1.6124959879109793,
+      "teacher_distance": 0.13452580547054852,
+      "teacher_joint": "J:ee24577789f0235b8186",
+      "teacher_l1_error": 0.4734540426760371,
+      "teacher_rank": 2,
+      "teacher_valid": true,
+      "vertex_index": 6040
+    },
+    {
+      "nearest_distance": 0.566894051293226,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.31798958641010044,
+        0.5579814048562044,
+        1.122666893257547
+      ],
+      "pred_distance": 0.680424993326377,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 6,
+      "pred_to_nearest_distance_ratio": 1.2002683601532926,
+      "teacher_distance": 0.680424993326377,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 0.46586194861750213,
+      "teacher_rank": 6,
+      "teacher_valid": false,
+      "vertex_index": 1377
+    },
+    {
+      "nearest_distance": 0.4775454914380853,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.5088180171913101,
+        0.4675947073697628,
+        1.197988579404076
+      ],
+      "pred_distance": 0.750087289231944,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.5707137910005675,
+      "teacher_distance": 0.750087289231944,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 0.4508611097941655,
+      "teacher_rank": 10,
+      "teacher_valid": false,
+      "vertex_index": 10302
+    },
+    {
+      "nearest_distance": 0.10922724072109782,
+      "nearest_joint": "J:237d229c33bc9eb9bf91",
+      "position": [
+        0.06881720779031501,
+        -0.11476562766080621,
+        0.3255822109304414
+      ],
+      "pred_distance": 0.15499395878896916,
+      "pred_joint": "J:f50f39d42ef3820824ef",
+      "pred_rank": 6,
+      "pred_to_nearest_distance_ratio": 1.4190046161170786,
+      "teacher_distance": 0.15499395878896916,
+      "teacher_joint": "J:f50f39d42ef3820824ef",
+      "teacher_l1_error": 0.44739433913468424,
+      "teacher_rank": 6,
+      "teacher_valid": true,
+      "vertex_index": 6418
+    },
+    {
+      "nearest_distance": 0.5797742202493642,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.4145662386299664,
+        0.5754534896802979,
+        1.1683230736036505
+      ],
+      "pred_distance": 0.7576313117088129,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.3067695755477906,
+      "teacher_distance": 0.7576313117088129,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 0.4473802184021232,
+      "teacher_rank": 10,
+      "teacher_valid": false,
+      "vertex_index": 11221
+    },
+    {
+      "nearest_distance": 0.29618320078938715,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.46324108680586873,
+        -0.27071494263861,
+        0.9933720968080155
+      ],
+      "pred_distance": 0.3857992515282465,
+      "pred_joint": "J:a80d2c086e86a4cc08b5",
+      "pred_rank": 4,
+      "pred_to_nearest_distance_ratio": 1.3025696612772593,
+      "teacher_distance": 0.3857992515282465,
+      "teacher_joint": "J:a80d2c086e86a4cc08b5",
+      "teacher_l1_error": 0.4443521601572713,
+      "teacher_rank": 4,
+      "teacher_valid": true,
+      "vertex_index": 6798
+    },
+    {
+      "nearest_distance": 0.14192689228981695,
+      "nearest_joint": "J:ee24577789f0235b8186",
+      "position": [
+        0.11627651451067784,
+        0.1146064866201015,
+        0.36244753776336075
+      ],
+      "pred_distance": 0.1728616801228831,
+      "pred_joint": "J:f50f39d42ef3820824ef",
+      "pred_rank": 4,
+      "pred_to_nearest_distance_ratio": 1.2179628351890974,
+      "teacher_distance": 0.1728616801228831,
+      "teacher_joint": "J:f50f39d42ef3820824ef",
+      "teacher_l1_error": 0.44353432720670866,
+      "teacher_rank": 4,
+      "teacher_valid": true,
+      "vertex_index": 5407
+    },
+    {
+      "nearest_distance": 0.3474311713171831,
+      "nearest_joint": "J:73295dbdbb50d303e597",
+      "position": [
+        -0.17309786812752984,
+        0.3345085143006703,
+        0.5446133270718215
+      ],
+      "pred_distance": 0.3977409537453017,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 4,
+      "pred_to_nearest_distance_ratio": 1.1448050335765323,
+      "teacher_distance": 0.3977409537453017,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 0.4433123138123849,
+      "teacher_rank": 4,
+      "teacher_valid": true,
+      "vertex_index": 9821
+    },
+    {
+      "nearest_distance": 0.18825983974619453,
+      "nearest_joint": "J:ee24577789f0235b8186",
+      "position": [
+        0.3075041930668948,
+        0.11788258320913456,
+        0.35896622070378165
+      ],
+      "pred_distance": 0.2534791379093617,
+      "pred_joint": "J:f50f39d42ef3820824ef",
+      "pred_rank": 4,
+      "pred_to_nearest_distance_ratio": 1.3464323471808624,
+      "teacher_distance": 0.2534791379093617,
+      "teacher_joint": "J:f50f39d42ef3820824ef",
+      "teacher_l1_error": 0.43815384577801714,
+      "teacher_rank": 4,
+      "teacher_valid": true,
+      "vertex_index": 5422
+    },
+    {
+      "nearest_distance": 0.4856244981031491,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.5314036116618773,
+        0.47715727531423946,
+        1.1850606060606765
+      ],
+      "pred_distance": 0.7685925635432854,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 10,
+      "pred_to_nearest_distance_ratio": 1.582689025255955,
+      "teacher_distance": 0.7685925635432854,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 0.4346826772405614,
+      "teacher_rank": 10,
+      "teacher_valid": false,
+      "vertex_index": 10567
+    },
+    {
+      "nearest_distance": 1.2198075361235872,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06801210123573398,
+        -1.241237641381074,
+        0.9961390403883175
+      ],
+      "pred_distance": 1.4278675466090958,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.170567900528554,
+      "teacher_distance": 1.4278675466090958,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 0.42603181111209554,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 5154
+    },
+    {
+      "nearest_distance": 0.2209878317360058,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.558402568880978,
+        -0.17882444362618768,
+        0.9868915144585795
+      ],
+      "pred_distance": 0.25170227590341954,
+      "pred_joint": "J:7cf59fbe52c53280546a",
+      "pred_rank": 2,
+      "pred_to_nearest_distance_ratio": 1.138987038001737,
+      "teacher_distance": 0.25170227590341954,
+      "teacher_joint": "J:7cf59fbe52c53280546a",
+      "teacher_l1_error": 0.4248051597707598,
+      "teacher_rank": 2,
+      "teacher_valid": true,
+      "vertex_index": 1649
+    },
+    {
+      "nearest_distance": 0.2555154346925546,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.5100753599573589,
+        -0.2248032641098733,
+        0.9929553942821662
+      ],
+      "pred_distance": 0.331781173580279,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 4,
+      "pred_to_nearest_distance_ratio": 1.2984780116296695,
+      "teacher_distance": 0.331781173580279,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 0.42419076438161796,
+      "teacher_rank": 4,
+      "teacher_valid": true,
+      "vertex_index": 2712
+    },
+    {
+      "nearest_distance": 0.2924633088473536,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.452721070105181,
+        0.1913480949818621,
+        0.898558229335156
+      ],
+      "pred_distance": 0.5160754310115203,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 9,
+      "pred_to_nearest_distance_ratio": 1.764581796757546,
+      "teacher_distance": 0.5160754310115203,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 0.4143420276232554,
+      "teacher_rank": 9,
+      "teacher_valid": true,
+      "vertex_index": 11728
+    },
+    {
+      "nearest_distance": 0.254819315660802,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.4636863614260891,
+        -0.22454548609546643,
+        0.9940052037202305
+      ],
+      "pred_distance": 0.3575855032325429,
+      "pred_joint": "J:a80d2c086e86a4cc08b5",
+      "pred_rank": 4,
+      "pred_to_nearest_distance_ratio": 1.4032904150348484,
+      "teacher_distance": 0.3575855032325429,
+      "teacher_joint": "J:a80d2c086e86a4cc08b5",
+      "teacher_l1_error": 0.402428795666715,
+      "teacher_rank": 4,
+      "teacher_valid": true,
+      "vertex_index": 270
+    },
+    {
+      "nearest_distance": 0.3259026668981919,
+      "nearest_joint": "J:ee24577789f0235b8186",
+      "position": [
+        0.2574364968986316,
+        0.30574325336948277,
+        0.43678961358086477
+      ],
+      "pred_distance": 0.42345829843770416,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 8,
+      "pred_to_nearest_distance_ratio": 1.2993397767131112,
+      "teacher_distance": 0.42345829843770416,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 0.390738107251271,
+      "teacher_rank": 8,
+      "teacher_valid": true,
+      "vertex_index": 9579
+    },
+    {
+      "nearest_distance": 0.19038760125471504,
+      "nearest_joint": "J:73295dbdbb50d303e597",
+      "position": [
+        -0.31871258132357927,
+        0.10927734766612654,
+        0.32386493476078404
+      ],
+      "pred_distance": 0.28932842951917115,
+      "pred_joint": "J:063ee183f601e19a8ca9",
+      "pred_rank": 4,
+      "pred_to_nearest_distance_ratio": 1.519681048620837,
+      "teacher_distance": 0.28932842951917115,
+      "teacher_joint": "J:063ee183f601e19a8ca9",
+      "teacher_l1_error": 0.3886090233509574,
+      "teacher_rank": 4,
+      "teacher_valid": true,
+      "vertex_index": 2125
+    },
+    {
+      "nearest_distance": 0.28476205926857334,
+      "nearest_joint": "J:4c9f9eace712daf31538",
+      "position": [
+        0.4542804547621773,
+        0.19073785053583403,
+        0.9009763525204756
+      ],
+      "pred_distance": 0.47750908269777903,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 8,
+      "pred_to_nearest_distance_ratio": 1.6768704508047412,
+      "teacher_distance": 0.47750908269777903,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 0.38829278369930637,
+      "teacher_rank": 8,
+      "teacher_valid": true,
+      "vertex_index": 4893
+    },
+    {
+      "nearest_distance": 0.5853710449309206,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.021608107385747755,
+        0.5449222634713246,
+        1.2504316755723377
+      ],
+      "pred_distance": 0.5853710449309206,
+      "pred_joint": "J:1008208d141ae248de43",
+      "pred_rank": 1,
+      "pred_to_nearest_distance_ratio": 1.0,
+      "teacher_distance": 0.5853710449309206,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 0.38157923000948957,
+      "teacher_rank": 1,
+      "teacher_valid": true,
+      "vertex_index": 7833
+    },
+    {
+      "nearest_distance": 0.841470100361849,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06824794690103647,
+        -0.8719411725826832,
+        1.1045953454856237
+      ],
+      "pred_distance": 0.841470100361849,
+      "pred_joint": "J:1008208d141ae248de43",
+      "pred_rank": 1,
+      "pred_to_nearest_distance_ratio": 1.0,
+      "teacher_distance": 0.841470100361849,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 0.3648965356205606,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 11782
+    },
+    {
+      "nearest_distance": 0.8020408180639719,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.12476056495955397,
+        -0.824095313402953,
+        1.104485006311301
+      ],
+      "pred_distance": 0.8020408180639719,
+      "pred_joint": "J:1008208d141ae248de43",
+      "pred_rank": 1,
+      "pred_to_nearest_distance_ratio": 1.0,
+      "teacher_distance": 0.8020408180639719,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 0.36485422131255435,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 9671
+    },
+    {
+      "nearest_distance": 0.19366457666962947,
+      "nearest_joint": "J:f5cf9181e27d0f791f7d",
+      "position": [
+        0.3545101067166566,
+        -0.08310884768308294,
+        0.14425335257312377
+      ],
+      "pred_distance": 0.21687320670130775,
+      "pred_joint": "J:ab16ff2ffc7408c862ae",
+      "pred_rank": 3,
+      "pred_to_nearest_distance_ratio": 1.119839314090308,
+      "teacher_distance": 0.21687320670130775,
+      "teacher_joint": "J:ab16ff2ffc7408c862ae",
+      "teacher_l1_error": 0.36323798491977277,
+      "teacher_rank": 3,
+      "teacher_valid": true,
+      "vertex_index": 5837
+    },
+    {
+      "nearest_distance": 0.26775857220529753,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.4415704798516256,
+        0.19349306339781236,
+        0.9344341282337124
+      ],
+      "pred_distance": 0.5069535838573551,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 7,
+      "pred_to_nearest_distance_ratio": 1.893323450607066,
+      "teacher_distance": 0.5069535838573551,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 0.3541775557960078,
+      "teacher_rank": 7,
+      "teacher_valid": true,
+      "vertex_index": 10872
+    },
+    {
+      "nearest_distance": 0.2276017161975372,
+      "nearest_joint": "J:ee24577789f0235b8186",
+      "position": [
+        0.3576466609454701,
+        0.11157820867976671,
+        0.3235217763222193
+      ],
+      "pred_distance": 0.3012996370560799,
+      "pred_joint": "J:f50f39d42ef3820824ef",
+      "pred_rank": 4,
+      "pred_to_nearest_distance_ratio": 1.3238021315910455,
+      "teacher_distance": 0.3012996370560799,
+      "teacher_joint": "J:f50f39d42ef3820824ef",
+      "teacher_l1_error": 0.35311571467338576,
+      "teacher_rank": 4,
+      "teacher_valid": true,
+      "vertex_index": 4516
+    },
+    {
+      "nearest_distance": 0.20331504278038212,
+      "nearest_joint": "J:f5cf9181e27d0f791f7d",
+      "position": [
+        0.36565108889595505,
+        0.00495487686472718,
+        0.14561006484211855
+      ],
+      "pred_distance": 0.26578860010776834,
+      "pred_joint": "J:ee24577789f0235b8186",
+      "pred_rank": 4,
+      "pred_to_nearest_distance_ratio": 1.3072746436911173,
+      "teacher_distance": 0.26578860010776834,
+      "teacher_joint": "J:ee24577789f0235b8186",
+      "teacher_l1_error": 0.3530666452116492,
+      "teacher_rank": 4,
+      "teacher_valid": true,
+      "vertex_index": 8930
+    },
+    {
+      "nearest_distance": 0.23200728217495242,
+      "nearest_joint": "J:73295dbdbb50d303e597",
+      "position": [
+        -0.36558456198156186,
+        0.11345190458721242,
+        0.3237430904670302
+      ],
+      "pred_distance": 0.40843328060679573,
+      "pred_joint": "J:b9e5c0d23f688f672060",
+      "pred_rank": 6,
+      "pred_to_nearest_distance_ratio": 1.7604330207997683,
+      "teacher_distance": 0.40843328060679573,
+      "teacher_joint": "J:b9e5c0d23f688f672060",
+      "teacher_l1_error": 0.3392919267336103,
+      "teacher_rank": 6,
+      "teacher_valid": true,
+      "vertex_index": 10930
+    },
+    {
+      "nearest_distance": 0.14807376529629013,
+      "nearest_joint": "J:237d229c33bc9eb9bf91",
+      "position": [
+        0.06829115270363763,
+        0.11624099616248977,
+        0.3606933294198597
+      ],
+      "pred_distance": 0.14807376529629013,
+      "pred_joint": "J:237d229c33bc9eb9bf91",
+      "pred_rank": 1,
+      "pred_to_nearest_distance_ratio": 1.0,
+      "teacher_distance": 0.14807376529629013,
+      "teacher_joint": "J:237d229c33bc9eb9bf91",
+      "teacher_l1_error": 0.3283280148181906,
+      "teacher_rank": 1,
+      "teacher_valid": true,
+      "vertex_index": 1967
+    },
+    {
+      "nearest_distance": 0.5242460298036669,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.31842351521778445,
+        0.5151489617785882,
+        1.1019855965950849
+      ],
+      "pred_distance": 0.6407156055507109,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 6,
+      "pred_to_nearest_distance_ratio": 1.2221658708424794,
+      "teacher_distance": 0.6407156055507109,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 0.3214839776166514,
+      "teacher_rank": 6,
+      "teacher_valid": false,
+      "vertex_index": 6771
+    },
+    {
+      "nearest_distance": 0.13592096773448367,
+      "nearest_joint": "J:237d229c33bc9eb9bf91",
+      "position": [
+        0.01887543597093529,
+        -0.1599228486990752,
+        0.26391368707548807
+      ],
+      "pred_distance": 0.2125520785662518,
+      "pred_joint": "J:ee24577789f0235b8186",
+      "pred_rank": 3,
+      "pred_to_nearest_distance_ratio": 1.563791680629173,
+      "teacher_distance": 0.2125520785662518,
+      "teacher_joint": "J:ee24577789f0235b8186",
+      "teacher_l1_error": 0.31397435393183654,
+      "teacher_rank": 3,
+      "teacher_valid": true,
+      "vertex_index": 5923
+    },
+    {
+      "nearest_distance": 0.1212658933614918,
+      "nearest_joint": "J:ee24577789f0235b8186",
+      "position": [
+        0.09724738394213722,
+        -0.1083260433303272,
+        0.38263827532529826
+      ],
+      "pred_distance": 0.12524879470286202,
+      "pred_joint": "J:237d229c33bc9eb9bf91",
+      "pred_rank": 2,
+      "pred_to_nearest_distance_ratio": 1.0328443656411885,
+      "teacher_distance": 0.12524879470286202,
+      "teacher_joint": "J:237d229c33bc9eb9bf91",
+      "teacher_l1_error": 0.30515096978294304,
+      "teacher_rank": 2,
+      "teacher_valid": true,
+      "vertex_index": 8400
+    },
+    {
+      "nearest_distance": 0.5789487231866899,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.2609925304075536,
+        -0.5937721157329428,
+        0.9810079843360016
+      ],
+      "pred_distance": 0.7961825148813205,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 14,
+      "pred_to_nearest_distance_ratio": 1.3752211258000835,
+      "teacher_distance": 0.7961825148813205,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 0.29609922602911287,
+      "teacher_rank": 14,
+      "teacher_valid": false,
+      "vertex_index": 4444
+    },
+    {
+      "nearest_distance": 0.5414771122052027,
+      "nearest_joint": "J:a80d2c086e86a4cc08b5",
+      "position": [
+        -0.22168974722640802,
+        -0.5477563799100339,
+        0.9907793051084575
+      ],
+      "pred_distance": 0.5807665088531542,
+      "pred_joint": "J:1008208d141ae248de43",
+      "pred_rank": 3,
+      "pred_to_nearest_distance_ratio": 1.072559662749073,
+      "teacher_distance": 0.5807665088531542,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 0.29609756526527004,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 2063
+    },
+    {
+      "nearest_distance": 0.14392183606088005,
+      "nearest_joint": "J:ab16ff2ffc7408c862ae",
+      "position": [
+        0.3068967250510086,
+        -0.037127192751353635,
+        0.2802224906042874
+      ],
+      "pred_distance": 0.28701438103419374,
+      "pred_joint": "J:f50f39d42ef3820824ef",
+      "pred_rank": 5,
+      "pred_to_nearest_distance_ratio": 1.9942379064201519,
+      "teacher_distance": 0.28701438103419374,
+      "teacher_joint": "J:f50f39d42ef3820824ef",
+      "teacher_l1_error": 0.2957613071810265,
+      "teacher_rank": 5,
+      "teacher_valid": true,
+      "vertex_index": 11913
+    },
+    {
+      "nearest_distance": 0.43204863775104924,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.3181021187046225,
+        0.42268068333994385,
+        1.102933588307622
+      ],
+      "pred_distance": 0.5671159880294157,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 6,
+      "pred_to_nearest_distance_ratio": 1.3126207062738005,
+      "teacher_distance": 0.5671159880294157,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 0.29412958751109186,
+      "teacher_rank": 6,
+      "teacher_valid": true,
+      "vertex_index": 884
+    },
+    {
+      "nearest_distance": 0.39081555786781924,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.2685445800261377,
+        0.37772219291058917,
+        1.1024490915566851
+      ],
+      "pred_distance": 0.5031547620033131,
+      "pred_joint": "J:2ff965d6dbe4efc2d5d4",
+      "pred_rank": 6,
+      "pred_to_nearest_distance_ratio": 1.2874481372962356,
+      "teacher_distance": 0.5031547620033131,
+      "teacher_joint": "J:2ff965d6dbe4efc2d5d4",
+      "teacher_l1_error": 0.289264950865516,
+      "teacher_rank": 6,
+      "teacher_valid": true,
+      "vertex_index": 11602
+    },
+    {
+      "nearest_distance": 0.15891636016174235,
+      "nearest_joint": "J:237d229c33bc9eb9bf91",
+      "position": [
+        -0.028929614244417885,
+        0.12701566202889805,
+        0.22594283527033926
+      ],
+      "pred_distance": 0.19622617874576842,
+      "pred_joint": "J:73295dbdbb50d303e597",
+      "pred_rank": 4,
+      "pred_to_nearest_distance_ratio": 1.2347764481017107,
+      "teacher_distance": 0.19622617874576842,
+      "teacher_joint": "J:73295dbdbb50d303e597",
+      "teacher_l1_error": 0.2863301898545722,
+      "teacher_rank": 4,
+      "teacher_valid": true,
+      "vertex_index": 1287
+    },
+    {
+      "nearest_distance": 0.2218399036672996,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.6075826343803785,
+        -0.1778066985285113,
+        0.9849222146158104
+      ],
+      "pred_distance": 0.24480976637092505,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 3,
+      "pred_to_nearest_distance_ratio": 1.1035425201864226,
+      "teacher_distance": 0.24480976637092505,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 0.2825806381837768,
+      "teacher_rank": 3,
+      "teacher_valid": true,
+      "vertex_index": 10656
+    },
+    {
+      "nearest_distance": 0.3503224217413026,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.26943373364889805,
+        0.2834071991197589,
+        1.298959872199155
+      ],
+      "pred_distance": 0.42739107983118535,
+      "pred_joint": "J:1008208d141ae248de43",
+      "pred_rank": 5,
+      "pred_to_nearest_distance_ratio": 1.2199935068580752,
+      "teacher_distance": 0.42739107983118535,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 0.278810067826126,
+      "teacher_rank": 5,
+      "teacher_valid": true,
+      "vertex_index": 2813
+    },
+    {
+      "nearest_distance": 0.3908644658248692,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.5108145320343555,
+        0.37728236842255986,
+        1.2080409318504504
+      ],
+      "pred_distance": 0.39663594187112616,
+      "pred_joint": "J:7cf59fbe52c53280546a",
+      "pred_rank": 2,
+      "pred_to_nearest_distance_ratio": 1.0147659266852949,
+      "teacher_distance": 0.39663594187112616,
+      "teacher_joint": "J:7cf59fbe52c53280546a",
+      "teacher_l1_error": 0.27109623406453526,
+      "teacher_rank": 2,
+      "teacher_valid": false,
+      "vertex_index": 9674
+    },
+    {
+      "nearest_distance": 0.3684953918446772,
+      "nearest_joint": "J:063ee183f601e19a8ca9",
+      "position": [
+        -0.2812564911726276,
+        -0.23464043002709228,
+        0.807773434668571
+      ],
+      "pred_distance": 0.43499059278250896,
+      "pred_joint": "J:b9e5c0d23f688f672060",
+      "pred_rank": 9,
+      "pred_to_nearest_distance_ratio": 1.1804505630449236,
+      "teacher_distance": 0.43499059278250896,
+      "teacher_joint": "J:b9e5c0d23f688f672060",
+      "teacher_l1_error": 0.2696089467273269,
+      "teacher_rank": 9,
+      "teacher_valid": true,
+      "vertex_index": 225
+    },
+    {
+      "nearest_distance": 0.13574170051740628,
+      "nearest_joint": "J:237d229c33bc9eb9bf91",
+      "position": [
+        0.019853347915546146,
+        0.11558954280188766,
+        0.3620245292371403
+      ],
+      "pred_distance": 0.13574170051740628,
+      "pred_joint": "J:237d229c33bc9eb9bf91",
+      "pred_rank": 1,
+      "pred_to_nearest_distance_ratio": 1.0,
+      "teacher_distance": 0.13574170051740628,
+      "teacher_joint": "J:237d229c33bc9eb9bf91",
+      "teacher_l1_error": 0.26911388421379806,
+      "teacher_rank": 1,
+      "teacher_valid": true,
+      "vertex_index": 11492
+    },
+    {
+      "nearest_distance": 0.37692024491452186,
+      "nearest_joint": "J:2ff965d6dbe4efc2d5d4",
+      "position": [
+        -0.21176316064978004,
+        -0.30759653653503416,
+        0.8119380272501822
+      ],
+      "pred_distance": 0.4382415916010744,
+      "pred_joint": "J:b9e5c0d23f688f672060",
+      "pred_rank": 8,
+      "pred_to_nearest_distance_ratio": 1.1626905095014437,
+      "teacher_distance": 0.4382415916010744,
+      "teacher_joint": "J:b9e5c0d23f688f672060",
+      "teacher_l1_error": 0.26067465296274683,
+      "teacher_rank": 8,
+      "teacher_valid": true,
+      "vertex_index": 5736
+    },
+    {
+      "nearest_distance": 0.13858706128034753,
+      "nearest_joint": "J:237d229c33bc9eb9bf91",
+      "position": [
+        -0.02971929930076811,
+        0.11311577753201323,
+        0.36279091474194736
+      ],
+      "pred_distance": 0.13858706128034753,
+      "pred_joint": "J:237d229c33bc9eb9bf91",
+      "pred_rank": 1,
+      "pred_to_nearest_distance_ratio": 1.0,
+      "teacher_distance": 0.13858706128034753,
+      "teacher_joint": "J:237d229c33bc9eb9bf91",
+      "teacher_l1_error": 0.25271245325492947,
+      "teacher_rank": 1,
+      "teacher_valid": true,
+      "vertex_index": 5829
+    },
+    {
+      "nearest_distance": 0.2203045602189494,
+      "nearest_joint": "J:4c9f9eace712daf31538",
+      "position": [
+        0.5985626292165172,
+        -0.17861161742331702,
+        0.9819177944876777
+      ],
+      "pred_distance": 0.2886801170778993,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 4,
+      "pred_to_nearest_distance_ratio": 1.3103683227936587,
+      "teacher_distance": 0.2886801170778993,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 0.24778971276915693,
+      "teacher_rank": 4,
+      "teacher_valid": true,
+      "vertex_index": 11263
+    },
+    {
+      "nearest_distance": 0.31900819279402004,
+      "nearest_joint": "J:ee24577789f0235b8186",
+      "position": [
+        0.3084324020814309,
+        0.2814834547374174,
+        0.4239489998465052
+      ],
+      "pred_distance": 0.42320446858603045,
+      "pred_joint": "J:b9e5c0d23f688f672060",
+      "pred_rank": 5,
+      "pred_to_nearest_distance_ratio": 1.3266257047488708,
+      "teacher_distance": 0.42320446858603045,
+      "teacher_joint": "J:b9e5c0d23f688f672060",
+      "teacher_l1_error": 0.24694676645375202,
+      "teacher_rank": 5,
+      "teacher_valid": true,
+      "vertex_index": 9065
+    },
+    {
+      "nearest_distance": 0.3730262446609999,
+      "nearest_joint": "J:2ff965d6dbe4efc2d5d4",
+      "position": [
+        -0.25807372772861015,
+        -0.25856328825853525,
+        0.8133673157588437
+      ],
+      "pred_distance": 0.43540100483643984,
+      "pred_joint": "J:b9e5c0d23f688f672060",
+      "pred_rank": 8,
+      "pred_to_nearest_distance_ratio": 1.1672127928481952,
+      "teacher_distance": 0.43540100483643984,
+      "teacher_joint": "J:b9e5c0d23f688f672060",
+      "teacher_l1_error": 0.2456159724932102,
+      "teacher_rank": 8,
+      "teacher_valid": true,
+      "vertex_index": 4393
+    },
+    {
+      "nearest_distance": 0.1645211512918238,
+      "nearest_joint": "J:7e87e97fc9fe89cbd718",
+      "position": [
+        -0.2749807643723613,
+        -0.13561778796945273,
+        0.1502300883811395
+      ],
+      "pred_distance": 0.18927369316793224,
+      "pred_joint": "J:362735eeec6ee5a3d46f",
+      "pred_rank": 2,
+      "pred_to_nearest_distance_ratio": 1.1504520341716,
+      "teacher_distance": 0.18927369316793224,
+      "teacher_joint": "J:362735eeec6ee5a3d46f",
+      "teacher_l1_error": 0.24375071156889663,
+      "teacher_rank": 2,
+      "teacher_valid": true,
+      "vertex_index": 2064
+    },
+    {
+      "nearest_distance": 0.1311255709630842,
+      "nearest_joint": "J:237d229c33bc9eb9bf91",
+      "position": [
+        0.020146701112836007,
+        0.10948645803148815,
+        0.32378919968635506
+      ],
+      "pred_distance": 0.165038940809521,
+      "pred_joint": "J:f50f39d42ef3820824ef",
+      "pred_rank": 3,
+      "pred_to_nearest_distance_ratio": 1.2586327716047425,
+      "teacher_distance": 0.165038940809521,
+      "teacher_joint": "J:f50f39d42ef3820824ef",
+      "teacher_l1_error": 0.24112258476502627,
+      "teacher_rank": 3,
+      "teacher_valid": true,
+      "vertex_index": 1269
+    },
+    {
+      "nearest_distance": 0.22977922129982375,
+      "nearest_joint": "J:73295dbdbb50d303e597",
+      "position": [
+        -0.36525334265614606,
+        0.1106891223495402,
+        0.28081657502321894
+      ],
+      "pred_distance": 0.3473522054028888,
+      "pred_joint": "J:063ee183f601e19a8ca9",
+      "pred_rank": 4,
+      "pred_to_nearest_distance_ratio": 1.511678050948096,
+      "teacher_distance": 0.3473522054028888,
+      "teacher_joint": "J:063ee183f601e19a8ca9",
+      "teacher_l1_error": 0.2409437821078646,
+      "teacher_rank": 4,
+      "teacher_valid": true,
+      "vertex_index": 4649
+    },
+    {
+      "nearest_distance": 0.36682149771119,
+      "nearest_joint": "J:4c9f9eace712daf31538",
+      "position": [
+        0.46480650838835164,
+        0.28383464268356434,
+        1.3319179052763332
+      ],
+      "pred_distance": 0.5741536487705816,
+      "pred_joint": "J:1008208d141ae248de43",
+      "pred_rank": 8,
+      "pred_to_nearest_distance_ratio": 1.5652126507117385,
+      "teacher_distance": 0.5741536487705816,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 0.24087796565760797,
+      "teacher_rank": 8,
+      "teacher_valid": true,
+      "vertex_index": 6232
+    },
+    {
+      "nearest_distance": 0.8851867312814651,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.028132032464492255,
+        -0.917693518459677,
+        1.1038084722211754
+      ],
+      "pred_distance": 0.8851867312814651,
+      "pred_joint": "J:1008208d141ae248de43",
+      "pred_rank": 1,
+      "pred_to_nearest_distance_ratio": 1.0,
+      "teacher_distance": 0.8851867312814651,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 0.2401419804148135,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 10925
+    },
+    {
+      "nearest_distance": 1.5284296241579565,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.019799509194031433,
+        -1.5652732057139402,
+        1.1022147596851515
+      ],
+      "pred_distance": 1.703531044839629,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.114562959206015,
+      "teacher_distance": 1.703531044839629,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 0.238597396626965,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 6582
+    },
+    {
+      "nearest_distance": 1.5289644564733833,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06792622636190157,
+        -1.5645217271113783,
+        1.1030004942447649
+      ],
+      "pred_distance": 1.7087492154286599,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.1175859636200813,
+      "teacher_distance": 1.7087492154286599,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 0.2385973708162382,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 10751
+    },
+    {
+      "nearest_distance": 0.8433308933719694,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        -0.07778568284668999,
+        -0.8721465641528053,
+        1.1040724101357238
+      ],
+      "pred_distance": 0.8433308933719694,
+      "pred_joint": "J:1008208d141ae248de43",
+      "pred_rank": 1,
+      "pred_to_nearest_distance_ratio": 1.0,
+      "teacher_distance": 0.8433308933719694,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 0.23850221277736885,
+      "teacher_rank": 1,
+      "teacher_valid": false,
+      "vertex_index": 1969
+    },
+    {
+      "nearest_distance": 0.7647593050815501,
+      "nearest_joint": "J:a80d2c086e86a4cc08b5",
+      "position": [
+        -0.12554371033617473,
+        -0.7787567245751186,
+        0.9955282667836307
+      ],
+      "pred_distance": 0.771674403786059,
+      "pred_joint": "J:1008208d141ae248de43",
+      "pred_rank": 3,
+      "pred_to_nearest_distance_ratio": 1.0090421896910056,
+      "teacher_distance": 0.771674403786059,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 0.23840690191719344,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 5636
+    },
+    {
+      "nearest_distance": 1.5749741778906472,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06756804833435923,
+        -1.6107967665311462,
+        1.1029865811227688
+      ],
+      "pred_distance": 1.750954272646588,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.1117352253937458,
+      "teacher_distance": 1.750954272646588,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 0.23840594253466563,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 9266
+    },
+    {
+      "nearest_distance": 1.61906616792791,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.0204167146936697,
+        -1.656363237043337,
+        1.1027851911851068
+      ],
+      "pred_distance": 1.7854098429026855,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.1027405045388992,
+      "teacher_distance": 1.7854098429026855,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 0.23840588681550112,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 10834
+    },
+    {
+      "nearest_distance": 1.665820436666819,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.02057393911181656,
+        -1.7033143362150895,
+        1.102859795546069
+      ],
+      "pred_distance": 1.827889056109438,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.097290569784884,
+      "teacher_distance": 1.827889056109438,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 0.2384058866573498,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 6046
+    },
+    {
+      "nearest_distance": 1.7100220732972107,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.019871686868121633,
+        -1.7475428681296725,
+        1.1010986847481443
+      ],
+      "pred_distance": 1.8677779498745948,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.092253707739108,
+      "teacher_distance": 1.8677779498745948,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 0.23840588463469947,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 5918
+    },
+    {
+      "nearest_distance": 1.8995329292970315,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.01930222102315749,
+        -1.934453637971563,
+        1.0641580429172985
+      ],
+      "pred_distance": 2.0400244439425905,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.0739610840532,
+      "teacher_distance": 2.0400244439425905,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 0.23840585957492594,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 11958
+    },
+    {
+      "nearest_distance": 1.9281204372064187,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.024106383720600876,
+        -1.9624497230034192,
+        1.0573026564974315
+      ],
+      "pred_distance": 2.0679821674350993,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.0725378599437083,
+      "teacher_distance": 2.0679821674350993,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 0.2384058592643071,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 1392
+    },
+    {
+      "nearest_distance": 1.6322492322045512,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.11550447617769696,
+        -1.6564308327604285,
+        0.9967739170699265
+      ],
+      "pred_distance": 1.7783697584950002,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.0895209649405657,
+      "teacher_distance": 1.7783697584950002,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 0.23840585870661193,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 8570
+    },
+    {
+      "nearest_distance": 1.5872492031909098,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.11557777639839377,
+        -1.6112369296610547,
+        0.9961526663926495
+      ],
+      "pred_distance": 1.7367745925197822,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.0942041042000685,
+      "teacher_distance": 1.7367745925197822,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 0.2384058566850253,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 1006
+    },
+    {
+      "nearest_distance": 1.735848218815054,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.10178091043792922,
+        -1.7703515928335,
+        1.0980342960353957
+      ],
+      "pred_distance": 1.884782727259446,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.0857992691008778,
+      "teacher_distance": 1.884782727259446,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 0.23840585445392695,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 6382
+    },
+    {
+      "nearest_distance": 1.7701731224860626,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06818688605727999,
+        -1.7966507318979736,
+        1.0056915806779096
+      ],
+      "pred_distance": 1.9365059343126445,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 25,
+      "pred_to_nearest_distance_ratio": 1.093964149446005,
+      "teacher_distance": 1.9365059343126445,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 0.2384058538060956,
+      "teacher_rank": 25,
+      "teacher_valid": false,
+      "vertex_index": 5222
+    },
+    {
+      "nearest_distance": 1.7706955837119673,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.11587771970079715,
+        -1.7958886121940925,
+        1.0050915449917928
+      ],
+      "pred_distance": 1.9071316559787033,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.077052246315948,
+      "teacher_distance": 1.9071316559787033,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 0.238405852058102,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 9204
+    },
+    {
+      "nearest_distance": 1.8084233688425824,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.11520269107395362,
+        -1.8414177285729703,
+        1.0856069908106998
+      ],
+      "pred_distance": 1.9466451200421786,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 20,
+      "pred_to_nearest_distance_ratio": 1.0764321859477297,
+      "teacher_distance": 1.9466451200421786,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 0.2384058518851582,
+      "teacher_rank": 20,
+      "teacher_valid": false,
+      "vertex_index": 8699
+    },
+    {
+      "nearest_distance": 1.7914184115274003,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.1362243902437473,
+        -1.8181006423339898,
+        1.0103877250328654
+      ],
+      "pred_distance": 1.9205504333886407,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 20,
+      "pred_to_nearest_distance_ratio": 1.0720836746068383,
+      "teacher_distance": 1.9205504333886407,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 0.23840585151091817,
+      "teacher_rank": 20,
+      "teacher_valid": false,
+      "vertex_index": 4563
+    },
+    {
+      "nearest_distance": 1.8146579800925509,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06829965891039341,
+        -1.8425232064181498,
+        1.0151949144813528
+      ],
+      "pred_distance": 1.9774933826422543,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 25,
+      "pred_to_nearest_distance_ratio": 1.0897333846576414,
+      "teacher_distance": 1.9774933826422543,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 0.2384058514102696,
+      "teacher_rank": 25,
+      "teacher_valid": false,
+      "vertex_index": 8295
+    },
+    {
+      "nearest_distance": 1.792375575543115,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.06396604142272175,
+        -1.819607282267278,
+        1.0096545303071582
+      ],
+      "pred_distance": 1.9552416141161244,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 25,
+      "pred_to_nearest_distance_ratio": 1.0908660220521353,
+      "teacher_distance": 1.9552416141161244,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 0.23840585130897374,
+      "teacher_rank": 25,
+      "teacher_valid": false,
+      "vertex_index": 5955
+    },
+    {
+      "nearest_distance": 0.6687461741288201,
+      "nearest_joint": "J:7cf59fbe52c53280546a",
+      "position": [
+        -0.22149360643544325,
+        -0.6876511013434794,
+        1.1050621526212774
+      ],
+      "pred_distance": 0.6940883485997849,
+      "pred_joint": "J:1008208d141ae248de43",
+      "pred_rank": 3,
+      "pred_to_nearest_distance_ratio": 1.037895057125341,
+      "teacher_distance": 0.6940883485997849,
+      "teacher_joint": "J:1008208d141ae248de43",
+      "teacher_l1_error": 0.23840585023513627,
+      "teacher_rank": 3,
+      "teacher_valid": false,
+      "vertex_index": 9929
+    },
+    {
+      "nearest_distance": 1.9055939333583896,
+      "nearest_joint": "J:42d181ebf3515959283a",
+      "position": [
+        0.1645833794315576,
+        -1.9346753840903128,
+        1.030101235181638
+      ],
+      "pred_distance": 2.0204005894623505,
+      "pred_joint": "J:e5441b559f1c34b41aa2",
+      "pred_rank": 19,
+      "pred_to_nearest_distance_ratio": 1.060247177582911,
+      "teacher_distance": 2.0204005894623505,
+      "teacher_joint": "J:e5441b559f1c34b41aa2",
+      "teacher_l1_error": 0.23840585014038523,
+      "teacher_rank": 19,
+      "teacher_valid": false,
+      "vertex_index": 1455
+    },
+    {
+      "nearest_distance": 1.9336753022930067,
+      "nearest_joint": "J:1008208d141ae248de43",
+      "position": [
+        0.022334348297896097,
+        -1.966760680036057,
+        1.044796894765107
+      ],
+      "pred_distance": 2.071798683889143,
+      "pred_joint": "J:8455bf4c0a38867b7d9b",
+      "pred_rank": 21,
+      "pred_to_nearest_distance_ratio": 1.0714304937506032,
+      "teacher_distance": 2.071798683889143,
+      "teacher_joint": "J:8455bf4c0a38867b7d9b",
+      "teacher_l1_error": 0.23840585001710007,
+      "teacher_rank": 21,
+      "teacher_valid": false,
+      "vertex_index": 10694
+    },
+    {
+      "nearest_distance": 0.23940555580362188,
+      "nearest_joint": "J:75a17a4287b28cd7f57f",
+      "position": [
+        -0.5112494123559358,
+        -0.22473553213371975,
+        1.2146756933056835
+      ],
+      "pred_distance": 0.25447758712575724,
+      "pred_joint": "J:7cf59fbe52c53280546a",
+      "pred_rank": 2,
+      "pred_to_nearest_distance_ratio": 1.06295606328576,
+      "teacher_distance": 0.25447758712575724,
+      "teacher_joint": "J:7cf59fbe52c53280546a",
+      "teacher_l1_error": 0.23817689536909503,
+      "teacher_rank": 2,
+      "teacher_valid": true,
+      "vertex_index": 3781
+    },
+    {
+      "nearest_distance": 0.14557072040839666,
+      "nearest_joint": "J:237d229c33bc9eb9bf91",
+      "position": [
+        -0.027207413093351358,
+        0.11479459473244125,
+        0.24784551975522656
+      ],
+      "pred_distance": 0.18388181296956846,
+      "pred_joint": "J:73295dbdbb50d303e597",
+      "pred_rank": 4,
+      "pred_to_nearest_distance_ratio": 1.2631785599033278,
+      "teacher_distance": 0.18388181296956846,
+      "teacher_joint": "J:73295dbdbb50d303e597",
+      "teacher_l1_error": 0.23537361650714386,
+      "teacher_rank": 4,
+      "teacher_valid": true,
+      "vertex_index": 6007
+    }
+  ],
+  "top_k_court": [
+    {
+      "bad_gt1_count": 154,
+      "bad_gt1_pred_dom_allowed": 1,
+      "bad_gt1_teacher_dom_allowed": 58,
+      "good_count": 11636,
+      "good_pred_dom_allowed": 253,
+      "teacher_valid_count": 10575,
+      "teacher_valid_teacher_dom_allowed": 227,
+      "top_k": 1
+    },
+    {
+      "bad_gt1_count": 154,
+      "bad_gt1_pred_dom_allowed": 4,
+      "bad_gt1_teacher_dom_allowed": 67,
+      "good_count": 11636,
+      "good_pred_dom_allowed": 5039,
+      "teacher_valid_count": 10575,
+      "teacher_valid_teacher_dom_allowed": 4981,
+      "top_k": 2
+    },
+    {
+      "bad_gt1_count": 154,
+      "bad_gt1_pred_dom_allowed": 13,
+      "bad_gt1_teacher_dom_allowed": 110,
+      "good_count": 11636,
+      "good_pred_dom_allowed": 7876,
+      "teacher_valid_count": 10575,
+      "teacher_valid_teacher_dom_allowed": 7715,
+      "top_k": 4
+    },
+    {
+      "bad_gt1_count": 154,
+      "bad_gt1_pred_dom_allowed": 14,
+      "bad_gt1_teacher_dom_allowed": 110,
+      "good_count": 11636,
+      "good_pred_dom_allowed": 9417,
+      "teacher_valid_count": 10575,
+      "teacher_valid_teacher_dom_allowed": 9067,
+      "top_k": 6
+    },
+    {
+      "bad_gt1_count": 154,
+      "bad_gt1_pred_dom_allowed": 14,
+      "bad_gt1_teacher_dom_allowed": 111,
+      "good_count": 11636,
+      "good_pred_dom_allowed": 10481,
+      "teacher_valid_count": 10575,
+      "teacher_valid_teacher_dom_allowed": 10075,
+      "top_k": 8
+    },
+    {
+      "bad_gt1_count": 154,
+      "bad_gt1_pred_dom_allowed": 36,
+      "bad_gt1_teacher_dom_allowed": 116,
+      "good_count": 11636,
+      "good_pred_dom_allowed": 11150,
+      "teacher_valid_count": 10575,
+      "teacher_valid_teacher_dom_allowed": 10429,
+      "top_k": 12
+    }
+  ]
+}

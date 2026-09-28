@@ -1,0 +1,109 @@
+{
+  "classes": {
+    "ProductionTriangulationResult": {
+      "lineno": 36,
+      "methods": [
+        "to_dict"
+      ]
+    }
+  },
+  "runtime_signature": "(outer_loop: 'Iterable[Point]', *, hole_loops: 'Iterable[Iterable[Point]] | None' = None, support_points: 'Iterable[Point] | None' = None, target_min_angle_deg: 'float' = 18.0, max_boundary_vertices: 'int' = 256, max_support_vertices: 'int' = 128, max_constraint_recovery_iterations: 'int' = 96, max_quality_iterations: 'int' = 96, min_feature_spacing: 'float' = 0.0001) -> 'ProductionTriangulationResult'",
+  "schema": "RealSaS.HistoricalCDTV05CapabilityAudit.v1",
+  "source_bytes": 20221,
+  "source_sha256": "dd21ae3fc570b2eb5d3c439a5c31fd25fed2ad0743d34a71119d5b391806854d",
+  "target_function": {
+    "args": [
+      "outer_loop"
+    ],
+    "calls": [
+      "_adaptive_spacing",
+      "_build_domain_delaunay",
+      "_build_vertices_and_constraints",
+      "_circumcenter_triangle",
+      "_count_loop_vertices",
+      "_dedupe_points",
+      "_dist",
+      "_distance_to_loop_boundaries",
+      "_fail",
+      "_mesh_quality",
+      "_missing_constraints",
+      "_nearest_constraint",
+      "_nearest_distance",
+      "_normalize_loop",
+      "_point_in_domain",
+      "_result",
+      "_split_loop_constraint",
+      "_triangle_centroid",
+      "append",
+      "bool",
+      "float",
+      "len",
+      "list",
+      "max",
+      "min",
+      "range",
+      "sorted"
+    ],
+    "end_lineno": 173,
+    "kwonlyargs": [
+      "hole_loops",
+      "support_points",
+      "target_min_angle_deg",
+      "max_boundary_vertices",
+      "max_support_vertices",
+      "max_constraint_recovery_iterations",
+      "max_quality_iterations",
+      "min_feature_spacing"
+    ],
+    "lineno": 58,
+    "source_excerpt": "def triangulate_production_cdt(\n    outer_loop: Iterable[Point],\n    *,\n    hole_loops: Iterable[Iterable[Point]] | None = None,\n    support_points: Iterable[Point] | None = None,\n    target_min_angle_deg: float = 18.0,\n    max_boundary_vertices: int = 256,\n    max_support_vertices: int = 128,\n    max_constraint_recovery_iterations: int = 96,\n    max_quality_iterations: int = 96,\n    min_feature_spacing: float = 1.0e-4,\n) -> ProductionTriangulationResult:\n    \"\"\"Triangulate a 2D polygonal domain with optional holes and support points.\n\n    The result is deterministic for deterministic inputs.  It returns an honest\n    failure report rather than silently dropping constraints.\n    \"\"\"\n\n    holes = list(hole_loops or [])\n    loops = [_normalize_loop(list(outer_loop), want_ccw=True, max_points=max_boundary_vertices)]\n    if len(loops[0]) < 3:\n        return _fail(\"outer loop has fewer than three valid points\")\n    for h in holes:\n        loop = _normalize_loop(list(h), want_ccw=False, max_points=max_boundary_vertices)\n        if len(loop) >= 3:\n            loops.append(loop)\n\n    support = _dedupe_points(list(support_points or []), min_spacing=min_feature_spacing)\n    if len(support) > max_support_vertices:\n        support = support[:max_support_vertices]\n\n    constraint_split_count = 0\n    quality_insert_count = 0\n    triangles: list[Triangle] = []\n    vertices: list[Point] = []\n    constraints: list[Edge] = []\n    boundary_count = 0\n\n    for _ in range(max_constraint_recovery_iterations):\n        vertices, constraints, boundary_count = _build_vertices_and_constraints(loops, support)\n        triangles = _build_domain_delaunay(vertices, constraints, loops)\n        missing = _missing_constraints(triangles, constraints)\n        if not missing:\n            break\n        # Split the longest missing constraints first. This mirrors old SaS'\n        # bounded segment-recovery discipline.\n        split_count = 0\n        for e in sorted(missing, key=lambda ab: _dist(vertices[ab[0]], vertices[ab[1]]), reverse=True)[:8]:\n            if _count_loop_vertices(loops) >= max_boundary_vertices:\n                continue\n            if _split_loop_constraint(loops, vertices[e[0]], vertices[e[1]]):\n                split_count += 1\n        constraint_split_count += split_count\n        if split_count == 0:\n            vertices, constraints, boundary_count = _build_vertices_and_constraints(loops, support)\n            triangles = _build_domain_delaunay(vertices, constraints, loops)\n            missing_count = len(_missing_constraints(triangles, constraints))\n            return _result(\n                False, vertices, triangles, constraints, boundary_count, len(support), 0,\n                constraint_split_count, quality_insert_count, missing_count,\n                f\"failed to recover {missing_count} constrained edges; boundary budget exhausted or segment not found\",\n            )\n\n    vertices, constraints, boundary_count = _build_vertices_and_constraints(loops, support)\n    triangles = _build_domain_delaunay(vertices, constraints, loops)\n    missing = _missing_constraints(triangles, constraints)\n    if missing:\n        return _result(\n            False, vertices, triangles, constraints, boundary_count, len(support), 0,\n            constraint_split_count, quality_insert_count, len(missing),\n            f\"constraint recovery exhausted with {len(missing)} missing edges\",\n        )\n\n    target_min_angle_deg = max(0.0, min(30.0, float(target_min_angle_deg)))\n    for _ in range(max_quality_iterations):\n        if not triangles:\n            break\n        min_angle, worst_ratio, issue_count, worst_tri = _mesh_quality(vertices, triangles, target_min_angle_deg)\n        if issue_count == 0:\n            break\n        p = _circumcenter_triangle(vertices, worst_tri)\n        if p is None or not _point_in_domain(p, loops):\n            # Near-boundary/off-domain circumcenter: split nearest constraint.\n            nearest = _nearest_constraint(vertices, constraints, _triangle_centroid(vertices, worst_tri))\n            if nearest is None or _count_loop_vertices(loops) >= max_boundary_vertices:\n                break\n            if _split_loop_constraint(loops, vertices[nearest[0]], vertices[nearest[1]]):\n                constraint_split_count += 1\n                vertices, constraints, boundary_count = _build_vertices_and_constraints(loops, support)\n                triangles = _build_domain_delaunay(vertices, constraints, loops)\n                continue\n            break\n        if _nearest_distance(p, vertices) < _adaptive_spacing(min_feature_spacing, _distance_to_loop_boundaries(p, loops)):\n            break\n        support.append(p)\n        quality_insert_count += 1\n        vertices, constraints, boundary_count = _build_vertices_and_constraints(loops, support)\n        triangles = _build_domain_delaunay(vertices, constraints, loops)\n        missing = _missing_constraints(triangles, constraints)\n        if missing:\n            # A quality insertion disturbed a constrained edge; split and retry.\n            for e in missing[:4]:\n                if _split_loop_constraint(loops, vertices[e[0]], vertices[e[1]]):\n                    constraint_split_count += 1\n            vertices, constraints, boundary_count = _build_vertices_and_constraints(loops, support)\n            triangles = _build_domain_delaunay(vertices, constraints, loops)\n\n    missing = _missing_constraints(triangles, constraints)\n    min_angle, worst_ratio, issue_count, _ = _mesh_quality(vertices, triangles, target_min_angle_deg)\n    ok = bool(triangles) and not missing\n    reason = \"ok\" if ok else f\"final triangulation has {len(missing)} missing constraints\"\n    return _result(\n        ok, vertices, triangles, constraints, boundary_count, len(support), max(0, len(support) - len(list(support_points or []))),\n        constraint_split_count, quality_insert_count, len(missing), reason,\n        min_angle=min_angle, ratio=worst_ratio, issue_count=issue_count,\n    )",
+    "token_presence": {
+      "Steiner": false,
+      "boundary": true,
+      "boundary_vertex_count": false,
+      "constraint_edges": false,
+      "constraint_split_count": true,
+      "constraints": true,
+      "holes": true,
+      "polygon": true,
+      "segments": false,
+      "steiner": false,
+      "triangles": true,
+      "vertices": true
+    }
+  },
+  "top_level_function_names": [
+    "_adaptive_spacing",
+    "_angle",
+    "_bowyer_watson",
+    "_build_domain_delaunay",
+    "_build_vertices_and_constraints",
+    "_circumcenter",
+    "_circumcenter_triangle",
+    "_count_loop_vertices",
+    "_dedupe_points",
+    "_dist",
+    "_dist_point_segment",
+    "_distance_to_loop_boundaries",
+    "_fail",
+    "_in_circumcircle",
+    "_mesh_quality",
+    "_min_angle",
+    "_missing_constraints",
+    "_nearest_constraint",
+    "_nearest_distance",
+    "_normalize_loop",
+    "_orient",
+    "_point_in_domain",
+    "_point_in_polygon",
+    "_radius_edge_ratio",
+    "_result",
+    "_same_point",
+    "_segments_intersect_strict",
+    "_signed_area",
+    "_split_loop_constraint",
+    "_triangle_centroid",
+    "_triangle_crosses_constraints",
+    "triangulate_production_cdt"
+  ]
+}

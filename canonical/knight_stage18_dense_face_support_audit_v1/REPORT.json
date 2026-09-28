@@ -1,0 +1,450 @@
+{
+  "artifact_sha256": {
+    "stage12_npz": "adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c",
+    "stage12_seal": "9585aeb771ba3fdc4b9aff96f56076b5f538406dc3fa22aa278e03ed4a519186",
+    "stage15_surface": "7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182",
+    "stage18_candidate": "0db35bbcdd3565cf42c74127fa33c66d39545e1ec84d1b1c74f1dac5bb6072d3"
+  },
+  "comparison": {
+    "dense_face_incidence_supported_fraction": 0.979365333760718,
+    "dense_face_incidence_supported_stage18_faces": 24443,
+    "edge_only_invented_by_completed_vertex_count": {
+      "0": 413,
+      "1": 46,
+      "2": 22,
+      "3": 34
+    },
+    "invented_by_completed_vertex_count": {
+      "0": 413,
+      "1": 46,
+      "2": 22,
+      "3": 34
+    },
+    "invented_examples": [
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          1473,
+          1596,
+          1600
+        ],
+        "completed_vertex_count": 0,
+        "surface_ids": [
+          "SFS:000d76027926c84f0a9f",
+          "SFS:33b2ed60d8bc2202258f",
+          "SFS:62f32af25835cdc7de67"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          2124,
+          2125,
+          2142
+        ],
+        "completed_vertex_count": 0,
+        "surface_ids": [
+          "SFS:00bbd419b3d182331cde",
+          "SFS:34181c367f724111aaea",
+          "SFS:50851bbf93fe36d35c33"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          9005,
+          9435,
+          9451
+        ],
+        "completed_vertex_count": 0,
+        "surface_ids": [
+          "SFS:00f1a20f15e38dcbb290",
+          "SFS:2380612e25a8d57aa0cf",
+          "SFS:850fc0e4c70220c6cff2"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          8992,
+          9005,
+          9435
+        ],
+        "completed_vertex_count": 0,
+        "surface_ids": [
+          "SFS:00f1a20f15e38dcbb290",
+          "SFS:2380612e25a8d57aa0cf",
+          "SFS:ca0a25c2a0d1cd3c3ef8"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          8992,
+          9418,
+          9435
+        ],
+        "completed_vertex_count": 0,
+        "surface_ids": [
+          "SFS:00f1a20f15e38dcbb290",
+          "SFS:9732b364032f49281ff6",
+          "SFS:ca0a25c2a0d1cd3c3ef8"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          9051,
+          9490,
+          9507
+        ],
+        "completed_vertex_count": 0,
+        "surface_ids": [
+          "SFS:0119761d1c8fc9870d34",
+          "SFS:1b60cd603d52d6c44943",
+          "SFS:a7077218f97a0754a386"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          3734,
+          3742,
+          4110
+        ],
+        "completed_vertex_count": 0,
+        "surface_ids": [
+          "SFS:01747a4b6b9e6c73f2bb",
+          "SFS:89a250280545d60fd7a4",
+          "SFS:f17320289e9c569b3603"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          2459,
+          2472,
+          2887
+        ],
+        "completed_vertex_count": 0,
+        "surface_ids": [
+          "SFS:01a98ae900ef58b0e49a",
+          "SFS:31ec2830bb8e1174531a",
+          "SFS:a623000cfecde8287bd3"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          2112,
+          2129,
+          2459
+        ],
+        "completed_vertex_count": 0,
+        "surface_ids": [
+          "SFS:01a98ae900ef58b0e49a",
+          "SFS:9d66695925e0b9f5899c",
+          "SFS:ce3f505b1c688ff5b4fe"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          6790,
+          7087,
+          7099
+        ],
+        "completed_vertex_count": 0,
+        "surface_ids": [
+          "SFS:022799229c187c8f3021",
+          "SFS:23533c079113a9f8f38e",
+          "SFS:fe9e038f130820c7ec70"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          7601,
+          7934,
+          7952
+        ],
+        "completed_vertex_count": 0,
+        "surface_ids": [
+          "SFS:02457e12935d26bb901b",
+          "SFS:248d10e8fdfa422a6ae7",
+          "SFS:cb068ab137845bec65ce"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          7582,
+          7601,
+          7934
+        ],
+        "completed_vertex_count": 0,
+        "surface_ids": [
+          "SFS:02457e12935d26bb901b",
+          "SFS:248d10e8fdfa422a6ae7",
+          "SFS:fdca3a5cdf073ec789b2"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          7934,
+          7952,
+          8266
+        ],
+        "completed_vertex_count": 0,
+        "surface_ids": [
+          "SFS:02457e12935d26bb901b",
+          "SFS:a1efc21ac76bd7c96ca5",
+          "SFS:cb068ab137845bec65ce"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          175,
+          178,
+          316
+        ],
+        "completed_vertex_count": 1,
+        "surface_ids": [
+          "SFS:02702ecf7f5613da262f",
+          "SFS:7b0da908d8f9305a2b8a",
+          "SFS:f5a2030590063ec6a557"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          175,
+          312,
+          316
+        ],
+        "completed_vertex_count": 2,
+        "surface_ids": [
+          "SFS:02702ecf7f5613da262f",
+          "SFS:89822d3b3f75cd81155b",
+          "SFS:f5a2030590063ec6a557"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          3966,
+          4330,
+          4342
+        ],
+        "completed_vertex_count": 0,
+        "surface_ids": [
+          "SFS:02b29cb2de211714cc2a",
+          "SFS:4e43fe03061906f33ea4",
+          "SFS:fc7684464c73306c819d"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          11427,
+          11638,
+          11639
+        ],
+        "completed_vertex_count": 1,
+        "surface_ids": [
+          "SFS:02c23e158e876d6b7f3a",
+          "SFS:496e4dcc93f720847392",
+          "SFS:fa6f48553da19ad052f5"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          11428,
+          11634,
+          11639
+        ],
+        "completed_vertex_count": 3,
+        "surface_ids": [
+          "SFS:02c23e158e876d6b7f3a",
+          "SFS:c5cac501bc5b59f7ab67",
+          "SFS:c81b7ed42f95dd7580c0"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          11633,
+          11634,
+          11639
+        ],
+        "completed_vertex_count": 2,
+        "surface_ids": [
+          "SFS:02c23e158e876d6b7f3a",
+          "SFS:c81b7ed42f95dd7580c0",
+          "SFS:d2692e7422ae24cdd258"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          11427,
+          11634,
+          11639
+        ],
+        "completed_vertex_count": 2,
+        "surface_ids": [
+          "SFS:02c23e158e876d6b7f3a",
+          "SFS:c81b7ed42f95dd7580c0",
+          "SFS:fa6f48553da19ad052f5"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          11875,
+          11877,
+          11955
+        ],
+        "completed_vertex_count": 0,
+        "surface_ids": [
+          "SFS:02eea3367cf37601ec99",
+          "SFS:40225e4a6b9bc7d7d4f8",
+          "SFS:a0e583d5319414d8a0be"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          5845,
+          5857,
+          6144
+        ],
+        "completed_vertex_count": 0,
+        "surface_ids": [
+          "SFS:030f0c19e9417778d91d",
+          "SFS:05f8fbe86408fefe6bd9",
+          "SFS:7da48fe3b5f5c4440808"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          2317,
+          2683,
+          2716
+        ],
+        "completed_vertex_count": 0,
+        "surface_ids": [
+          "SFS:0348a852af3331a82645",
+          "SFS:03bea6043b65b1d4958a",
+          "SFS:0f96beba7a57c87afc32"
+        ]
+      },
+      {
+        "all_three_dense_edges_exist": true,
+        "compact_indices": [
+          3452,
+          3490,
+          3824
+        ],
+        "completed_vertex_count": 0,
+        "surface_ids": [
+          "SFS:036dbb1a62549c62b9b3",
+          "SFS:2d9348cee168cc49202e",
+          "SFS:cec16adb60cb4a280c43"
+        ]
+      }
+    ],
+    "missing_at_least_one_dense_edge_count": 0,
+    "stage18_faces_without_dense_face_incidence": 515,
+    "stage18_faces_without_dense_face_incidence_fraction": 0.020634666239281993,
+    "supported_by_completed_vertex_count": {
+      "0": 14230,
+      "1": 1834,
+      "2": 1556,
+      "3": 6823
+    },
+    "supported_examples": [
+      [
+        10238,
+        10244,
+        10412
+      ],
+      [
+        10083,
+        10238,
+        10244
+      ],
+      [
+        10081,
+        10232,
+        10238
+      ],
+      [
+        10081,
+        10083,
+        10238
+      ],
+      [
+        10238,
+        10408,
+        10412
+      ],
+      [
+        10232,
+        10238,
+        10408
+      ],
+      [
+        5509,
+        5510,
+        5832
+      ],
+      [
+        5510,
+        5832,
+        5833
+      ]
+    ],
+    "three_dense_edges_but_no_dense_face_count": 515
+  },
+  "finding": {
+    "claim_boundary": "Exact replay of current Stage14 compaction index partition from sealed Stage12 zero-surface. This measures incidence provenance only; it does not assert every dense zero-surface triangle is already a qualified product face.",
+    "clique_face_invention_observed": true,
+    "id": "KNIGHT_STAGE18_FACE_INCIDENCE_PROVENANCE",
+    "pure_three_edge_clique_invention_observed": true
+  },
+  "replay": {
+    "collapsed_dense_face_count": 12067198,
+    "compact_actual_nodes": 12090,
+    "compact_target_nodes": 12288,
+    "compact_voxel_divisions": 56,
+    "component_aware_compaction": true,
+    "dense_face_count": 12092332,
+    "dense_vertex_count": 6046160,
+    "inverse_replay_normal_independence_verified_from_implementation": true,
+    "unique_compact_dense_edge_count": 36469,
+    "unique_noncollapsed_compact_dense_face_count": 24443
+  },
+  "schema": "RealSaS.KnightStage18DenseFaceSupportAudit.v1",
+  "stage18": {
+    "candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+    "face_count": 24958,
+    "metadata": {
+      "backend_role": "SAFE_BASELINE__NOT_FINAL_CDT_QUALITY_BACKEND",
+      "camera_authority_used": false,
+      "generated_vertex_count": 0,
+      "identity_support_vertex_count": 12049,
+      "provisional_unknown_edge_count": 0,
+      "rejected_relation_count": 0,
+      "source_mesh_used": false,
+      "view_independent": true
+    },
+    "producer_id": "RealSaS.CanonicalRelationMeshBaseline.v1",
+    "vertex_count": 12049
+  },
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED"
+}

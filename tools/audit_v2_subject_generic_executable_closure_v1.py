@@ -11,8 +11,8 @@ PLAN=json.loads((ROOT/"canonical/MAINLINE_EXECUTION_PLAN_V2.json").read_text())
 TOKENS=("KNIGHT","SUBJECT2","QUATERNIUS_KNIGHT","MAGE_FIT","PROMOTED_MAGE")
 DEMO_SCHEMA_MARKERS=("KnightDemoStage14FallbackPreregistration","KnightDemoStage18MeshFallbackPreregistration")
 GUARD_MARKERS=(
-    "NO_KNIGHT","NOT_EMPIRICAL_KNIGHT","BEFORE_ANY_NEW_KNIGHT","PRE_KNIGHT",
-    "thresholds_from_knight","without Knight-dependent tuning","Knight result",
+    "NO_KNIGHT","NOT_EMPIRICAL_KNIGHT","BEFORE_ANY_NEW_KNIGHT","BEFORE_KNIGHT","PRE_KNIGHT",
+    "thresholds_from_knight","without Knight-dependent tuning","No Knight-tuned threshold","Knight result",
     "KNIGHT_RESULT","Knight may not tune","forbidden",
 )
 METADATA_MARKERS=(

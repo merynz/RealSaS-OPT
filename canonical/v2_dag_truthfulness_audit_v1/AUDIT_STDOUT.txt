@@ -1,0 +1,389 @@
+{
+  "augmented_actual_read_graph": {
+    "cyclic_nodes": [
+      "18_CANONICAL_MESH_ADDRESSING_BUILD",
+      "19_STATIC_CANONICAL_MESH_QUALIFIED",
+      "20_CAA_BACKEND_PREREGISTERED",
+      "21_CAA_COMPILE",
+      "22_CAA_COMPILE_SEALED",
+      "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+      "24_COMPLETE_APPEARANCE_QUALIFIED",
+      "25_CAA_REFERENCE_REST_RENDER_PROOF",
+      "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+      "36_QUALIFIED_MESH_SKIN_TRANSFER",
+      "37_QUALIFIED_PRESENTATION_STRUCTURE",
+      "38_CANONICAL_PUPPET_SEALED",
+      "39_MOTION_SOURCE_OR_PRESET_SEAL",
+      "40_MOTION_COMPILE_RUN",
+      "41_MOTION_DYNAMIC_PROOF",
+      "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+      "43_RSS_MATERIALIZE_COMPACT",
+      "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+      "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+      "46_PRODUCT_CLOSURE_SEAL"
+    ],
+    "edge_count": 168,
+    "hidden_edge_count": 14,
+    "hidden_edges": [
+      {
+        "class": "FINGERPRINT_DEPENDENCY_GAP",
+        "consumer": "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "upstream": "05_CAMERA_CONTRACT_SOLVED"
+      },
+      {
+        "class": "FINGERPRINT_DEPENDENCY_GAP",
+        "consumer": "20_CAA_BACKEND_PREREGISTERED",
+        "upstream": "05_CAMERA_CONTRACT_SOLVED"
+      },
+      {
+        "class": "FINGERPRINT_DEPENDENCY_GAP",
+        "consumer": "21_CAA_COMPILE",
+        "upstream": "05_CAMERA_CONTRACT_SOLVED"
+      },
+      {
+        "class": "FINGERPRINT_DEPENDENCY_GAP",
+        "consumer": "21_CAA_COMPILE",
+        "upstream": "07_OBSERVATION_CONTRACT_QUALIFIED"
+      },
+      {
+        "class": "FINGERPRINT_DEPENDENCY_GAP",
+        "consumer": "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "upstream": "07_OBSERVATION_CONTRACT_QUALIFIED"
+      },
+      {
+        "class": "FINGERPRINT_DEPENDENCY_GAP",
+        "consumer": "21_CAA_COMPILE",
+        "upstream": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+      },
+      {
+        "class": "FINGERPRINT_DEPENDENCY_GAP",
+        "consumer": "22_CAA_COMPILE_SEALED",
+        "upstream": "20_CAA_BACKEND_PREREGISTERED"
+      },
+      {
+        "class": "FINGERPRINT_DEPENDENCY_GAP",
+        "consumer": "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "upstream": "20_CAA_BACKEND_PREREGISTERED"
+      },
+      {
+        "class": "FINGERPRINT_DEPENDENCY_GAP",
+        "consumer": "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "upstream": "20_CAA_BACKEND_PREREGISTERED"
+      },
+      {
+        "class": "FINGERPRINT_DEPENDENCY_GAP",
+        "consumer": "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "upstream": "20_CAA_BACKEND_PREREGISTERED"
+      },
+      {
+        "class": "FINGERPRINT_DEPENDENCY_GAP",
+        "consumer": "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "upstream": "21_CAA_COMPILE"
+      },
+      {
+        "class": "FINGERPRINT_DEPENDENCY_GAP",
+        "consumer": "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "upstream": "21_CAA_COMPILE"
+      },
+      {
+        "class": "FINGERPRINT_DEPENDENCY_GAP",
+        "consumer": "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "upstream": "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+      },
+      {
+        "class": "FILESYSTEM_SIDE_CHANNEL",
+        "consumer": "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "upstream": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+      }
+    ],
+    "is_dag": false
+  },
+  "claim_boundary": "Static+plan audit of declared dependencies and scanner-confirmed direct/side-channel reads. It proves graph truthfulness issues, not the optimal repair operator.",
+  "declared_graph": {
+    "edge_count": 154,
+    "is_dag": true,
+    "topological_order": [
+      "01_SOURCE_BYTES_SEALED",
+      "05_CAMERA_CONTRACT_SOLVED",
+      "02_SOURCE_LICENSE_PROVENANCE",
+      "03_SOURCE_MECHANICAL_AUDIT",
+      "04_FULL_SUBJECT_ADMISSION",
+      "06_OBSERVATION_RENDER_8VIEW",
+      "07_OBSERVATION_CONTRACT_QUALIFIED",
+      "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+      "08_NORMALIZATION_DOMAIN_QUALIFIED",
+      "09_IRIS_FIT_PREREGISTERED",
+      "10_IRIS_FIT",
+      "11_IRIS_CHECKPOINT_SEALED",
+      "12_ZERO_SURFACE_DECODED",
+      "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+      "14_GSA_BUILD",
+      "15_RIGGING_SURFACE_QUALIFIED",
+      "17_MECHANICAL_PARTITION_QUALIFIED",
+      "26_GEPPETTO_FIT_PREREGISTERED",
+      "18_CANONICAL_MESH_ADDRESSING_BUILD",
+      "27_GEPPETTO_FIT",
+      "19_STATIC_CANONICAL_MESH_QUALIFIED",
+      "28_SKELETON_QUALIFIED",
+      "20_CAA_BACKEND_PREREGISTERED",
+      "29_GEPPETTO_CHECKPOINT_SEALED",
+      "34_DEFORMATION_CAPABILITY_ENVELOPE",
+      "21_CAA_COMPILE",
+      "30_ARACHNE_FIT_PREREGISTERED",
+      "22_CAA_COMPILE_SEALED",
+      "31_ARACHNE_FIT",
+      "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+      "32_SKIN_QUALIFIED",
+      "24_COMPLETE_APPEARANCE_QUALIFIED",
+      "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+      "33_ARACHNE_CHECKPOINT_SEALED",
+      "25_CAA_REFERENCE_REST_RENDER_PROOF",
+      "36_QUALIFIED_MESH_SKIN_TRANSFER",
+      "37_QUALIFIED_PRESENTATION_STRUCTURE",
+      "38_CANONICAL_PUPPET_SEALED",
+      "39_MOTION_SOURCE_OR_PRESET_SEAL",
+      "40_MOTION_COMPILE_RUN",
+      "41_MOTION_DYNAMIC_PROOF",
+      "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+      "43_RSS_MATERIALIZE_COMPACT",
+      "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+      "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+      "46_PRODUCT_CLOSURE_SEAL"
+    ]
+  },
+  "invalidation_probes": {
+    "14_GSA_BUILD": {
+      "actual_augmented_reachability_count": 32,
+      "actual_augmented_reachability_set": [
+        "14_GSA_BUILD",
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "20_CAA_BACKEND_PREREGISTERED",
+        "21_CAA_COMPILE",
+        "22_CAA_COMPILE_SEALED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "26_GEPPETTO_FIT_PREREGISTERED",
+        "27_GEPPETTO_FIT",
+        "28_SKELETON_QUALIFIED",
+        "29_GEPPETTO_CHECKPOINT_SEALED",
+        "30_ARACHNE_FIT_PREREGISTERED",
+        "31_ARACHNE_FIT",
+        "32_SKIN_QUALIFIED",
+        "33_ARACHNE_CHECKPOINT_SEALED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "39_MOTION_SOURCE_OR_PRESET_SEAL",
+        "40_MOTION_COMPILE_RUN",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ],
+      "declared_invalidation_count": 32,
+      "declared_invalidation_set": [
+        "14_GSA_BUILD",
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "20_CAA_BACKEND_PREREGISTERED",
+        "21_CAA_COMPILE",
+        "22_CAA_COMPILE_SEALED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "26_GEPPETTO_FIT_PREREGISTERED",
+        "27_GEPPETTO_FIT",
+        "28_SKELETON_QUALIFIED",
+        "29_GEPPETTO_CHECKPOINT_SEALED",
+        "30_ARACHNE_FIT_PREREGISTERED",
+        "31_ARACHNE_FIT",
+        "32_SKIN_QUALIFIED",
+        "33_ARACHNE_CHECKPOINT_SEALED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "39_MOTION_SOURCE_OR_PRESET_SEAL",
+        "40_MOTION_COMPILE_RUN",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ]
+    },
+    "18_CANONICAL_MESH_ADDRESSING_BUILD": {
+      "actual_augmented_reachability_count": 20,
+      "actual_augmented_reachability_set": [
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "20_CAA_BACKEND_PREREGISTERED",
+        "21_CAA_COMPILE",
+        "22_CAA_COMPILE_SEALED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "39_MOTION_SOURCE_OR_PRESET_SEAL",
+        "40_MOTION_COMPILE_RUN",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ],
+      "declared_invalidation_count": 20,
+      "declared_invalidation_set": [
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "20_CAA_BACKEND_PREREGISTERED",
+        "21_CAA_COMPILE",
+        "22_CAA_COMPILE_SEALED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "39_MOTION_SOURCE_OR_PRESET_SEAL",
+        "40_MOTION_COMPILE_RUN",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ]
+    },
+    "23_COMPLETE_APPEARANCE_ASSET_BAKED": {
+      "actual_augmented_reachability_count": 13,
+      "actual_augmented_reachability_set": [
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "39_MOTION_SOURCE_OR_PRESET_SEAL",
+        "40_MOTION_COMPILE_RUN",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ],
+      "declared_invalidation_count": 13,
+      "declared_invalidation_set": [
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "39_MOTION_SOURCE_OR_PRESET_SEAL",
+        "40_MOTION_COMPILE_RUN",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ]
+    },
+    "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED": {
+      "actual_augmented_reachability_count": 20,
+      "actual_augmented_reachability_set": [
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "20_CAA_BACKEND_PREREGISTERED",
+        "21_CAA_COMPILE",
+        "22_CAA_COMPILE_SEALED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "39_MOTION_SOURCE_OR_PRESET_SEAL",
+        "40_MOTION_COMPILE_RUN",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ],
+      "declared_invalidation_count": 12,
+      "declared_invalidation_set": [
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "39_MOTION_SOURCE_OR_PRESET_SEAL",
+        "40_MOTION_COMPILE_RUN",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ]
+    },
+    "42_RUNTIME_PROJECTION_AND_CAA_BINDING": {
+      "actual_augmented_reachability_count": 5,
+      "actual_augmented_reachability_set": [
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ],
+      "declared_invalidation_count": 5,
+      "declared_invalidation_set": [
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ]
+    }
+  },
+  "repo_head": "340744303b3ac7f19e17886b920cdc5ddf155dac",
+  "schema": "RealSaS.V2DAGTruthfulnessAudit.v1",
+  "stage18_stage35_cycle_witness": {
+    "actual_hidden_edge_35_to_18": true,
+    "cycle_confirmed": true,
+    "declared_path_18_to_35": true
+  },
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED",
+  "verdict": {
+    "architecture_choice_frozen": false,
+    "candidate_architectures": [
+      "TRANSACTIONAL_VERSIONED_DAG_ATTEMPTS",
+      "EXPLICIT_WORKLIST_OR_FIXPOINT_COMPILER",
+      "TYPED_STATE_MACHINE_WITH_INVALIDATION"
+    ],
+    "declared_dag_valid": true,
+    "incremental_resume_safe_before_dependency_cleanup": false,
+    "proven_fact": "The declared 46-stage graph is acyclic, but current executable dataflow contains hidden reads/back-edges that the declared graph and fingerprints do not fully represent.",
+    "runtime_dataflow_truthfully_represented_by_declared_dag": false,
+    "selection_rule": "Choose architecture only after comparing semantic clarity, exact provenance, minimal recompute, repair convergence, parallelism, cacheability, and implementation complexity. A compiler is not required to be a DAG."
+  }
+}

@@ -85,7 +85,7 @@ add(A,
  id="A06_DEMO_FALLBACK_SCHEMA_INSIDE_CANONICAL_ADAPTERS",
  severity="P1",
  owner="FRONT_HALF_ADAPTER_HYGIENE",
- evidence=subj["violations"],
+ evidence=subj["demo_only_subject_named_apparatus_embedded_in_canonical_adapters"],
  intended="Subject-agnostic product implementation; witness/demo apparatus cannot own canonical truth.",
  actual="No Knight-specific algorithmic branch was found, but canonical adapters retain two named demo fallback schema paths.",
  action_class="SEPARATE_DEMO_APPARATUS_FROM_CANONICAL_IMPLEMENTATION"
@@ -180,7 +180,7 @@ C_promotion_rule={
 add(G,
  id="G01_SUBJECT_ALGORITHMIC_GENERICITY",
  status="PASS_WITH_HYGIENE_EXCEPTIONS",
- evidence={"violation_count":subj["violation_count"],"finding":subj["finding"]},
+ evidence={"algorithmic_subject_contamination_count":subj["algorithmic_subject_contamination_count"],"findings":subj["findings"]},
  note="No Knight-specific algorithmic branch was found in current 46-stage adapters/core/promoted models."
 )
 add(G,

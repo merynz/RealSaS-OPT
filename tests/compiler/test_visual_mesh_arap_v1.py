@@ -8,6 +8,7 @@ from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
     bind_source_visual_points_to_projected_surface_v1,
     build_visual_mesh_from_region_labels_v1,
     partition_source_mask_by_face_components_v1,
+    partition_source_mask_by_safe_face_adjacency_v1,
     safe_face_deformation_components_v1,
     bind_points_barycentric,
     build_visual_mesh_from_mask,
@@ -182,5 +183,48 @@ def test_deformation_region_partition_fills_unsafe_band_without_cross_region_fac
     assert np.array_equal(predicted, mask)
     assert set(region_mesh.face_region_id.tolist()) == {10, 20}
     for face_index, face in enumerate(np.asarray(combined.faces, dtype=np.int64)):
+        rid = int(region_mesh.face_region_id[face_index])
+        assert np.all(region_mesh.vertex_region_id[face] == rid)
+
+
+def test_safe_face_adjacency_charts_cut_screen_occlusion_even_inside_one_global_component():
+    mask = np.zeros((10, 14), dtype=bool)
+    mask[2:8, 2:12] = True
+    # Two mechanical islands are globally part of one conceptual body, but these
+    # raster neighbors do not share a mechanical edge. The chart contract must
+    # not weld them merely because they touch in screen space.
+    faces = np.asarray(
+        [
+            [0, 1, 2],
+            [1, 3, 2],  # adjacent to face 0
+            [4, 5, 6],
+            [5, 7, 6],  # adjacent to face 2
+        ],
+        dtype=np.int64,
+    )
+    owner = np.full(mask.shape, -1, dtype=np.int64)
+    owner[2:8, 2:5] = 0
+    owner[2:8, 5:7] = 1
+    owner[2:8, 7:10] = 2
+    owner[2:8, 10:12] = 3
+
+    final, seed, rows = partition_source_mask_by_safe_face_adjacency_v1(
+        mask,
+        owner,
+        faces,
+        unsafe_face_indices=(),
+        minimum_seed_pixels=4,
+    )
+    assert np.all(final[mask] >= 0)
+    assert len(set(final[mask].tolist())) == 2
+    assert len(rows) == 2
+
+    region_mesh = build_visual_mesh_from_region_labels_v1(
+        mask,
+        final,
+        target_edge_px=4,
+    )
+    assert np.array_equal(_visual_coverage(region_mesh.mesh), mask)
+    for face_index, face in enumerate(np.asarray(region_mesh.mesh.faces, dtype=np.int64)):
         rid = int(region_mesh.face_region_id[face_index])
         assert np.all(region_mesh.vertex_region_id[face] == rid)

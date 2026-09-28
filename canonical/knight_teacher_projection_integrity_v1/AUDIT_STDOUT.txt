@@ -1,0 +1,1 @@
+KNIGHT_TEACHER_PROJECTION_INTEGRITY_AUDIT_PASS {"artist_source_projection_has_large_discontinuities_same_locations": true, "bank_has_large_face_discontinuities": true, "stage32_reproduces_bank_pointwise": false, "strict_local_artist_source_discontinuity_count": 0, "strict_local_bank_discontinuity_count": 0}

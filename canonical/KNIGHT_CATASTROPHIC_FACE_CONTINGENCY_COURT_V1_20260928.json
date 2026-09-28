@@ -60,6 +60,20 @@
           "faces": 515,
           "max": 29.229089334918537
         },
+        "INVENTED_ALL_TEACHER_VALID": {
+          "edge_gt_10": 5,
+          "edge_gt_20": 0,
+          "edge_gt_4": 10,
+          "faces": 485,
+          "max": 17.822127520616753
+        },
+        "INVENTED_ANY_TEACHER_INVALID": {
+          "edge_gt_10": 3,
+          "edge_gt_20": 2,
+          "edge_gt_4": 3,
+          "faces": 30,
+          "max": 29.229089334918537
+        },
         "NONINCIDENT": {
           "edge_gt_10": 391,
           "edge_gt_20": 124,
@@ -88,12 +102,40 @@
           "faces": 2955,
           "max": 191.99772323243644
         },
+        "NONINCIDENT_DENSE_CROSS_SOURCE_COMPONENT_ALL_VALID": {
+          "edge_gt_10": 271,
+          "edge_gt_20": 67,
+          "edge_gt_4": 594,
+          "faces": 2531,
+          "max": 44.50959806790643
+        },
+        "NONINCIDENT_DENSE_CROSS_SOURCE_COMPONENT_ANY_INVALID": {
+          "edge_gt_10": 113,
+          "edge_gt_20": 56,
+          "edge_gt_4": 144,
+          "faces": 424,
+          "max": 191.99772323243644
+        },
         "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT": {
           "edge_gt_10": 0,
           "edge_gt_20": 0,
           "edge_gt_4": 4,
           "faces": 1265,
           "max": 4.494788680832255
+        },
+        "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT_ALL_VALID": {
+          "edge_gt_10": 0,
+          "edge_gt_20": 0,
+          "edge_gt_4": 4,
+          "faces": 1247,
+          "max": 4.494788680832255
+        },
+        "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT_ANY_INVALID": {
+          "edge_gt_10": 0,
+          "edge_gt_20": 0,
+          "edge_gt_4": 0,
+          "faces": 18,
+          "max": 1.0000000000000022
         },
         "NONINCIDENT_DIST_GT_0_05": {
           "edge_gt_10": 366,
@@ -214,6 +256,20 @@
           "faces": 515,
           "max": 25.219579684701948
         },
+        "INVENTED_ALL_TEACHER_VALID": {
+          "edge_gt_10": 3,
+          "edge_gt_20": 1,
+          "edge_gt_4": 9,
+          "faces": 485,
+          "max": 22.449867863375033
+        },
+        "INVENTED_ANY_TEACHER_INVALID": {
+          "edge_gt_10": 3,
+          "edge_gt_20": 2,
+          "edge_gt_4": 3,
+          "faces": 30,
+          "max": 25.219579684701948
+        },
         "NONINCIDENT": {
           "edge_gt_10": 346,
           "edge_gt_20": 151,
@@ -242,12 +298,40 @@
           "faces": 2955,
           "max": 163.50091675860156
         },
+        "NONINCIDENT_DENSE_CROSS_SOURCE_COMPONENT_ALL_VALID": {
+          "edge_gt_10": 228,
+          "edge_gt_20": 87,
+          "edge_gt_4": 533,
+          "faces": 2531,
+          "max": 54.41664253066634
+        },
+        "NONINCIDENT_DENSE_CROSS_SOURCE_COMPONENT_ANY_INVALID": {
+          "edge_gt_10": 113,
+          "edge_gt_20": 62,
+          "edge_gt_4": 146,
+          "faces": 424,
+          "max": 163.50091675860156
+        },
         "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT": {
           "edge_gt_10": 0,
           "edge_gt_20": 0,
           "edge_gt_4": 6,
           "faces": 1265,
           "max": 6.742061551869888
+        },
+        "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT_ALL_VALID": {
+          "edge_gt_10": 0,
+          "edge_gt_20": 0,
+          "edge_gt_4": 6,
+          "faces": 1247,
+          "max": 6.742061551869888
+        },
+        "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT_ANY_INVALID": {
+          "edge_gt_10": 0,
+          "edge_gt_20": 0,
+          "edge_gt_4": 0,
+          "faces": 18,
+          "max": 1.000000000000003
         },
         "NONINCIDENT_DIST_GT_0_05": {
           "edge_gt_10": 320,
@@ -368,6 +452,20 @@
           "faces": 515,
           "max": 31.35173653497224
         },
+        "INVENTED_ALL_TEACHER_VALID": {
+          "edge_gt_10": 6,
+          "edge_gt_20": 1,
+          "edge_gt_4": 10,
+          "faces": 485,
+          "max": 23.29301080379126
+        },
+        "INVENTED_ANY_TEACHER_INVALID": {
+          "edge_gt_10": 3,
+          "edge_gt_20": 1,
+          "edge_gt_4": 3,
+          "faces": 30,
+          "max": 31.35173653497224
+        },
         "NONINCIDENT": {
           "edge_gt_10": 428,
           "edge_gt_20": 139,
@@ -396,12 +494,40 @@
           "faces": 2955,
           "max": 209.99843678211477
         },
+        "NONINCIDENT_DENSE_CROSS_SOURCE_COMPONENT_ALL_VALID": {
+          "edge_gt_10": 301,
+          "edge_gt_20": 73,
+          "edge_gt_4": 611,
+          "faces": 2531,
+          "max": 62.858791787991784
+        },
+        "NONINCIDENT_DENSE_CROSS_SOURCE_COMPONENT_ANY_INVALID": {
+          "edge_gt_10": 119,
+          "edge_gt_20": 65,
+          "edge_gt_4": 145,
+          "faces": 424,
+          "max": 209.99843678211477
+        },
         "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT": {
           "edge_gt_10": 0,
           "edge_gt_20": 0,
           "edge_gt_4": 6,
           "faces": 1265,
           "max": 6.006427539088733
+        },
+        "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT_ALL_VALID": {
+          "edge_gt_10": 0,
+          "edge_gt_20": 0,
+          "edge_gt_4": 6,
+          "faces": 1247,
+          "max": 6.006427539088733
+        },
+        "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT_ANY_INVALID": {
+          "edge_gt_10": 0,
+          "edge_gt_20": 0,
+          "edge_gt_4": 0,
+          "faces": 18,
+          "max": 1.0000000000000029
         },
         "NONINCIDENT_DIST_GT_0_05": {
           "edge_gt_10": 393,
@@ -522,6 +648,20 @@
           "faces": 515,
           "max": 29.429405712551695
         },
+        "INVENTED_ALL_TEACHER_VALID": {
+          "edge_gt_10": 6,
+          "edge_gt_20": 1,
+          "edge_gt_4": 8,
+          "faces": 485,
+          "max": 21.34778747889946
+        },
+        "INVENTED_ANY_TEACHER_INVALID": {
+          "edge_gt_10": 3,
+          "edge_gt_20": 1,
+          "edge_gt_4": 3,
+          "faces": 30,
+          "max": 29.429405712551695
+        },
         "NONINCIDENT": {
           "edge_gt_10": 360,
           "edge_gt_20": 129,
@@ -550,12 +690,40 @@
           "faces": 2955,
           "max": 197.13953775143932
         },
+        "NONINCIDENT_DENSE_CROSS_SOURCE_COMPONENT_ALL_VALID": {
+          "edge_gt_10": 242,
+          "edge_gt_20": 70,
+          "edge_gt_4": 539,
+          "faces": 2531,
+          "max": 59.50198284060591
+        },
+        "NONINCIDENT_DENSE_CROSS_SOURCE_COMPONENT_ANY_INVALID": {
+          "edge_gt_10": 110,
+          "edge_gt_20": 58,
+          "edge_gt_4": 145,
+          "faces": 424,
+          "max": 197.13953775143932
+        },
         "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT": {
           "edge_gt_10": 0,
           "edge_gt_20": 0,
           "edge_gt_4": 6,
           "faces": 1265,
           "max": 5.0641202049762635
+        },
+        "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT_ALL_VALID": {
+          "edge_gt_10": 0,
+          "edge_gt_20": 0,
+          "edge_gt_4": 6,
+          "faces": 1247,
+          "max": 5.0641202049762635
+        },
+        "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT_ANY_INVALID": {
+          "edge_gt_10": 0,
+          "edge_gt_20": 0,
+          "edge_gt_4": 0,
+          "faces": 18,
+          "max": 1.0000000000000036
         },
         "NONINCIDENT_DIST_GT_0_05": {
           "edge_gt_10": 337,
@@ -676,6 +844,20 @@
           "faces": 515,
           "max": 26.202777573345436
         },
+        "INVENTED_ALL_TEACHER_VALID": {
+          "edge_gt_10": 5,
+          "edge_gt_20": 1,
+          "edge_gt_4": 10,
+          "faces": 485,
+          "max": 23.65163354984454
+        },
+        "INVENTED_ANY_TEACHER_INVALID": {
+          "edge_gt_10": 3,
+          "edge_gt_20": 1,
+          "edge_gt_4": 3,
+          "faces": 30,
+          "max": 26.202777573345436
+        },
         "NONINCIDENT": {
           "edge_gt_10": 387,
           "edge_gt_20": 160,
@@ -704,12 +886,40 @@
           "faces": 2955,
           "max": 125.2025537996953
         },
+        "NONINCIDENT_DENSE_CROSS_SOURCE_COMPONENT_ALL_VALID": {
+          "edge_gt_10": 268,
+          "edge_gt_20": 96,
+          "edge_gt_4": 595,
+          "faces": 2531,
+          "max": 61.963132093284536
+        },
+        "NONINCIDENT_DENSE_CROSS_SOURCE_COMPONENT_ANY_INVALID": {
+          "edge_gt_10": 112,
+          "edge_gt_20": 62,
+          "edge_gt_4": 145,
+          "faces": 424,
+          "max": 125.2025537996953
+        },
         "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT": {
           "edge_gt_10": 0,
           "edge_gt_20": 0,
           "edge_gt_4": 4,
           "faces": 1265,
           "max": 4.494788680832255
+        },
+        "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT_ALL_VALID": {
+          "edge_gt_10": 0,
+          "edge_gt_20": 0,
+          "edge_gt_4": 4,
+          "faces": 1247,
+          "max": 4.494788680832255
+        },
+        "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT_ANY_INVALID": {
+          "edge_gt_10": 0,
+          "edge_gt_20": 0,
+          "edge_gt_4": 0,
+          "faces": 18,
+          "max": 1.000000000000002
         },
         "NONINCIDENT_DIST_GT_0_05": {
           "edge_gt_10": 362,
@@ -830,6 +1040,20 @@
           "faces": 515,
           "max": 30.465095402806593
         },
+        "INVENTED_ALL_TEACHER_VALID": {
+          "edge_gt_10": 5,
+          "edge_gt_20": 1,
+          "edge_gt_4": 9,
+          "faces": 485,
+          "max": 26.673325311829913
+        },
+        "INVENTED_ANY_TEACHER_INVALID": {
+          "edge_gt_10": 3,
+          "edge_gt_20": 2,
+          "edge_gt_4": 3,
+          "faces": 30,
+          "max": 30.465095402806593
+        },
         "NONINCIDENT": {
           "edge_gt_10": 373,
           "edge_gt_20": 173,
@@ -858,12 +1082,40 @@
           "faces": 2955,
           "max": 200.27233842960499
         },
+        "NONINCIDENT_DENSE_CROSS_SOURCE_COMPONENT_ALL_VALID": {
+          "edge_gt_10": 258,
+          "edge_gt_20": 104,
+          "edge_gt_4": 485,
+          "faces": 2531,
+          "max": 67.24675663161882
+        },
+        "NONINCIDENT_DENSE_CROSS_SOURCE_COMPONENT_ANY_INVALID": {
+          "edge_gt_10": 108,
+          "edge_gt_20": 67,
+          "edge_gt_4": 143,
+          "faces": 424,
+          "max": 200.27233842960499
+        },
         "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT": {
           "edge_gt_10": 0,
           "edge_gt_20": 0,
           "edge_gt_4": 6,
           "faces": 1265,
           "max": 6.57307726635261
+        },
+        "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT_ALL_VALID": {
+          "edge_gt_10": 0,
+          "edge_gt_20": 0,
+          "edge_gt_4": 6,
+          "faces": 1247,
+          "max": 6.57307726635261
+        },
+        "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT_ANY_INVALID": {
+          "edge_gt_10": 0,
+          "edge_gt_20": 0,
+          "edge_gt_4": 0,
+          "faces": 18,
+          "max": 1.0000000000000013
         },
         "NONINCIDENT_DIST_GT_0_05": {
           "edge_gt_10": 360,
@@ -984,6 +1236,20 @@
           "faces": 515,
           "max": 23.37794889300135
         },
+        "INVENTED_ALL_TEACHER_VALID": {
+          "edge_gt_10": 4,
+          "edge_gt_20": 1,
+          "edge_gt_4": 10,
+          "faces": 485,
+          "max": 20.48978216525422
+        },
+        "INVENTED_ANY_TEACHER_INVALID": {
+          "edge_gt_10": 2,
+          "edge_gt_20": 1,
+          "edge_gt_4": 3,
+          "faces": 30,
+          "max": 23.37794889300135
+        },
         "NONINCIDENT": {
           "edge_gt_10": 356,
           "edge_gt_20": 118,
@@ -1012,12 +1278,40 @@
           "faces": 2955,
           "max": 155.60277105836937
         },
+        "NONINCIDENT_DENSE_CROSS_SOURCE_COMPONENT_ALL_VALID": {
+          "edge_gt_10": 239,
+          "edge_gt_20": 61,
+          "edge_gt_4": 552,
+          "faces": 2531,
+          "max": 48.13792055432295
+        },
+        "NONINCIDENT_DENSE_CROSS_SOURCE_COMPONENT_ANY_INVALID": {
+          "edge_gt_10": 112,
+          "edge_gt_20": 56,
+          "edge_gt_4": 145,
+          "faces": 424,
+          "max": 155.60277105836937
+        },
         "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT": {
           "edge_gt_10": 0,
           "edge_gt_20": 0,
           "edge_gt_4": 0,
           "faces": 1265,
           "max": 3.912515214304109
+        },
+        "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT_ALL_VALID": {
+          "edge_gt_10": 0,
+          "edge_gt_20": 0,
+          "edge_gt_4": 0,
+          "faces": 1247,
+          "max": 3.912515214304109
+        },
+        "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT_ANY_INVALID": {
+          "edge_gt_10": 0,
+          "edge_gt_20": 0,
+          "edge_gt_4": 0,
+          "faces": 18,
+          "max": 1.0000000000000038
         },
         "NONINCIDENT_DIST_GT_0_05": {
           "edge_gt_10": 336,
@@ -1138,6 +1432,20 @@
           "faces": 515,
           "max": 26.202777573345436
         },
+        "INVENTED_ALL_TEACHER_VALID": {
+          "edge_gt_10": 5,
+          "edge_gt_20": 1,
+          "edge_gt_4": 10,
+          "faces": 485,
+          "max": 23.65163354984454
+        },
+        "INVENTED_ANY_TEACHER_INVALID": {
+          "edge_gt_10": 3,
+          "edge_gt_20": 1,
+          "edge_gt_4": 3,
+          "faces": 30,
+          "max": 26.202777573345436
+        },
         "NONINCIDENT": {
           "edge_gt_10": 387,
           "edge_gt_20": 160,
@@ -1166,12 +1474,40 @@
           "faces": 2955,
           "max": 125.2025537996953
         },
+        "NONINCIDENT_DENSE_CROSS_SOURCE_COMPONENT_ALL_VALID": {
+          "edge_gt_10": 268,
+          "edge_gt_20": 96,
+          "edge_gt_4": 595,
+          "faces": 2531,
+          "max": 61.963132093284536
+        },
+        "NONINCIDENT_DENSE_CROSS_SOURCE_COMPONENT_ANY_INVALID": {
+          "edge_gt_10": 112,
+          "edge_gt_20": 62,
+          "edge_gt_4": 145,
+          "faces": 424,
+          "max": 125.2025537996953
+        },
         "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT": {
           "edge_gt_10": 0,
           "edge_gt_20": 0,
           "edge_gt_4": 4,
           "faces": 1265,
           "max": 4.494788680832255
+        },
+        "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT_ALL_VALID": {
+          "edge_gt_10": 0,
+          "edge_gt_20": 0,
+          "edge_gt_4": 4,
+          "faces": 1247,
+          "max": 4.494788680832255
+        },
+        "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT_ANY_INVALID": {
+          "edge_gt_10": 0,
+          "edge_gt_20": 0,
+          "edge_gt_4": 0,
+          "faces": 18,
+          "max": 1.000000000000002
         },
         "NONINCIDENT_DIST_GT_0_05": {
           "edge_gt_10": 362,
@@ -1307,6 +1643,20 @@
         "faces": 515,
         "max": 31.35173653497224
       },
+      "INVENTED_ALL_TEACHER_VALID": {
+        "edge_gt_10": 6,
+        "edge_gt_20": 1,
+        "edge_gt_4": 10,
+        "faces": 485,
+        "max": 23.29301080379126
+      },
+      "INVENTED_ANY_TEACHER_INVALID": {
+        "edge_gt_10": 3,
+        "edge_gt_20": 1,
+        "edge_gt_4": 3,
+        "faces": 30,
+        "max": 31.35173653497224
+      },
       "NONINCIDENT": {
         "edge_gt_10": 428,
         "edge_gt_20": 139,
@@ -1335,12 +1685,40 @@
         "faces": 2955,
         "max": 209.99843678211477
       },
+      "NONINCIDENT_DENSE_CROSS_SOURCE_COMPONENT_ALL_VALID": {
+        "edge_gt_10": 301,
+        "edge_gt_20": 73,
+        "edge_gt_4": 611,
+        "faces": 2531,
+        "max": 62.858791787991784
+      },
+      "NONINCIDENT_DENSE_CROSS_SOURCE_COMPONENT_ANY_INVALID": {
+        "edge_gt_10": 119,
+        "edge_gt_20": 65,
+        "edge_gt_4": 145,
+        "faces": 424,
+        "max": 209.99843678211477
+      },
       "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT": {
         "edge_gt_10": 0,
         "edge_gt_20": 0,
         "edge_gt_4": 6,
         "faces": 1265,
         "max": 6.006427539088733
+      },
+      "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT_ALL_VALID": {
+        "edge_gt_10": 0,
+        "edge_gt_20": 0,
+        "edge_gt_4": 6,
+        "faces": 1247,
+        "max": 6.006427539088733
+      },
+      "NONINCIDENT_DENSE_SAME_SOURCE_COMPONENT_ANY_INVALID": {
+        "edge_gt_10": 0,
+        "edge_gt_20": 0,
+        "edge_gt_4": 0,
+        "faces": 18,
+        "max": 1.0000000000000029
       },
       "NONINCIDENT_DIST_GT_0_05": {
         "edge_gt_10": 393,

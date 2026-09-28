@@ -1,0 +1,58 @@
+{
+  "schema": "RealSaS.KnightOracleTopologyRepairCausalPrereg.v1",
+  "status": "FROZEN_BEFORE_ORACLE_RESULT",
+  "repo_head_at_freeze": "70109254fc22f6686ea99004ee2ac184a7bc6eaa",
+  "hypothesis": "The dominant Knight smear mechanism is canonical topology connecting surface rows that originate from source-topology nonincident regions while the fixed Arachne weight field drives them differently.",
+  "intervention": {
+    "oracle_authority": "Teacher source-triangle topology; diagnostic only, forbidden at shipping inference.",
+    "topology_rule": "Remove an original Stage18 face iff any of its three vertex pairs map to NONINCIDENT source triangles.",
+    "topology_retriangulation": false,
+    "face_replacement": false,
+    "vertex_positions_mutated": false,
+    "skin_weights_mutated": false,
+    "skeleton_mutated": false,
+    "motion_mutated": false,
+    "cameras_mutated": false,
+    "appearance_pixels_mutated": false,
+    "appearance_binding": "Subset original Stage23 face UV/page arrays by retained original face index."
+  },
+  "held_fixed": [
+    "Stage05 cameras",
+    "Stage18 vertex positions and vertex identities",
+    "Stage28 qualified skeleton",
+    "Stage32 qualified skin weights",
+    "exact demo idle/run/slash motion inputs and retarget code",
+    "Stage23 CAA texture/provenance assets"
+  ],
+  "measurements": {
+    "samples": "idle/run/slash, four frozen clip times each; mechanical metrics view-independent; visual metrics views 0 and 2",
+    "mechanical": [
+      "flipped_face_count from signed rest-normal dot posed-normal",
+      "face max-edge-ratio p95/p99/max",
+      "area-ratio p95/p99/max and contraction minimum",
+      "condition-number p95/p99/max",
+      "catastrophic face count using flip OR edge>4 OR area>20 OR area<0.05 OR condition>16"
+    ],
+    "visual": [
+      "final-alpha pixel count",
+      "pixels owned by catastrophic faces",
+      "side-by-side baseline/oracle preview GIFs"
+    ]
+  },
+  "preregistered_interpretation": {
+    "dominant_owner_confirmed_if_all": [
+      "aggregate oracle final-alpha retention >= 0.70 of baseline",
+      "aggregate catastrophic-owned final-alpha pixels reduced by >= 0.75",
+      "median sampled flipped-face count reduced by >= 0.50",
+      "maximum sampled edge-ratio p95 reduced by >= 0.50"
+    ],
+    "material_owner_confirmed_if": [
+      "aggregate oracle final-alpha retention >= 0.70",
+      "aggregate catastrophic-owned pixels reduced by >= 0.50",
+      "and at least one of median flip-count or max edge-p95 reduced by >= 0.25"
+    ],
+    "otherwise": "INCONCLUSIVE_OR_NOT_OWNER; do not promote generic Stage35 repair from this experiment."
+  },
+  "next_step_if_confirmed": "Design generic teacher-free Stage35 partition/topology repair operator using qualified skin/deformation evidence, then requalify affected descendants.",
+  "next_step_if_not_confirmed": "Continue owner search with non-topology authorities held fixed; do not retrain Arachne by default."
+}

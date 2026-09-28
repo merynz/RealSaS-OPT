@@ -66,6 +66,7 @@ jobs:
           mkdir -p canonical/v2_architecture_integrity_audit_v1
           cp /tmp/v2_arch_audit.log canonical/v2_architecture_integrity_audit_v1/AUDIT_STDOUT.txt
           cp /tmp/v2_arch_pytest.log canonical/v2_architecture_integrity_audit_v1/PYTEST.txt
+          cp /tmp/v2_arch_pytest_rc.txt canonical/v2_architecture_integrity_audit_v1/PYTEST_RC.txt
           cp /tmp/v2_arch_static_evidence.log canonical/v2_architecture_integrity_audit_v1/STATIC_EVIDENCE.txt
           python - <<'PY'
           import hashlib, json
@@ -74,6 +75,7 @@ jobs:
             Path("canonical/V2_ARCHITECTURE_INTEGRITY_AUDIT_V1_20260928.json"),
             Path("canonical/v2_architecture_integrity_audit_v1/AUDIT_STDOUT.txt"),
             Path("canonical/v2_architecture_integrity_audit_v1/PYTEST.txt"),
+            Path("canonical/v2_architecture_integrity_audit_v1/PYTEST_RC.txt"),
             Path("canonical/v2_architecture_integrity_audit_v1/STATIC_EVIDENCE.txt"),
           ]
           rows=[]

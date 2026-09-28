@@ -1,0 +1,618 @@
+{
+  "artifacts": {
+    "candidate_sha256": "0db35bbcdd3565cf42c74127fa33c66d39545e1ec84d1b1c74f1dac5bb6072d3",
+    "compatibility_report_hash": "03cbb6248877676ed179ea9e65b64c632c61019fcc965ea52ff8fded53ed1b82",
+    "teacher_bank_sha256": "26b6891ff81b9bfc3405461394159547fa76b417852a44518425b4e1de7e67d3",
+    "teacher_source_sha256": "96435646a0084a0a038040ee748cb33d3bfa0b1ed550661befd3b18539e28e6f"
+  },
+  "compatibility": {
+    "passed": false,
+    "report_hash": "03cbb6248877676ed179ea9e65b64c632c61019fcc965ea52ff8fded53ed1b82",
+    "risky_face_count": 1820,
+    "unsafe_face_count": 1509
+  },
+  "finding": {
+    "claim_boundary": "Source mesh topology is teacher-only diagnostic evidence. This classifies the already-failing exact Stage35 faces; it does not authorize source topology as product inference truth or choose a repair.",
+    "confirmed_known_smear_offenders_have_nonincident_pair": false,
+    "id": "STAGE35_UNSAFE_FACES_EXPLAINED_BY_SOURCE_TOPOLOGY_DISAGREEMENT",
+    "nonincident_explained_count": 1274,
+    "nonincident_explained_fraction": 0.8442677269715043
+  },
+  "schema": "RealSaS.KnightStage35UnsafeSourceTopologyAudit.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED",
+  "unsafe_source_topology": {
+    "all_teacher_valid_counts": {
+      "HAS_NONINCIDENT_PAIR": 1124,
+      "HAS_SHARE_VERTEX_ONLY_PAIR": 17,
+      "SOURCE_EDGE_OR_FACE_COHERENT": 7
+    },
+    "class_counts": {
+      "HAS_NONINCIDENT_PAIR": 1274,
+      "HAS_SHARE_VERTEX_ONLY_PAIR": 35,
+      "SOURCE_EDGE_OR_FACE_COHERENT": 200
+    },
+    "class_fractions": {
+      "HAS_NONINCIDENT_PAIR": 0.8442677269715043,
+      "HAS_SHARE_VERTEX_ONLY_PAIR": 0.023194168323392977,
+      "SOURCE_EDGE_OR_FACE_COHERENT": 0.13253810470510272
+    },
+    "classified_face_count": 1509,
+    "known_smear_offenders": {
+      "253": {
+        "all_teacher_valid": true,
+        "face_index": 253,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6884,
+          3267,
+          6884
+        ],
+        "teacher_skin_l1_max": 2.0
+      },
+      "3573": {
+        "all_teacher_valid": false,
+        "face_index": 3573,
+        "nonincident_pair_count": 0,
+        "source_pair_categories": [
+          "SAME_FACE",
+          "SAME_FACE",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          3335,
+          3335,
+          3335
+        ],
+        "teacher_skin_l1_max": 0.0
+      },
+      "3829": {
+        "all_teacher_valid": false,
+        "face_index": 3829,
+        "nonincident_pair_count": 0,
+        "source_pair_categories": [
+          "SAME_FACE",
+          "SAME_FACE",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          2529,
+          2529,
+          2529
+        ],
+        "teacher_skin_l1_max": 0.0
+      }
+    },
+    "nonincident_examples": [
+      {
+        "all_teacher_valid": true,
+        "face_index": 24582,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          2211,
+          344,
+          2175
+        ],
+        "teacher_skin_l1_max": 2.000000014901161
+      },
+      {
+        "all_teacher_valid": false,
+        "face_index": 24608,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          2528,
+          2529,
+          6586
+        ],
+        "teacher_skin_l1_max": 2.0
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 24615,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1381,
+          1382,
+          5003
+        ],
+        "teacher_skin_l1_max": 1.9999999776482582
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 24616,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          2834,
+          2831,
+          2782
+        ],
+        "teacher_skin_l1_max": 0.5469487905502319
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 44,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          680,
+          44,
+          680
+        ],
+        "teacher_skin_l1_max": 0.6171983480453491
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 45,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          680,
+          44,
+          44
+        ],
+        "teacher_skin_l1_max": 0.6149286031723022
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 46,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          680,
+          3,
+          839
+        ],
+        "teacher_skin_l1_max": 0.6149286031723022
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 47,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          680,
+          3,
+          44
+        ],
+        "teacher_skin_l1_max": 0.6149286031723022
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 51,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          3528,
+          3528,
+          4937
+        ],
+        "teacher_skin_l1_max": 1.9999999701976776
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 53,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          3528,
+          6346,
+          3528
+        ],
+        "teacher_skin_l1_max": 2.0
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 54,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          3528,
+          6346,
+          6346
+        ],
+        "teacher_skin_l1_max": 2.0
+      },
+      {
+        "all_teacher_valid": false,
+        "face_index": 8245,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "SHARE_EDGE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6369,
+          3676,
+          3524
+        ],
+        "teacher_skin_l1_max": 2.0
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 56,
+        "nonincident_pair_count": 3,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          3528,
+          4937,
+          6346
+        ],
+        "teacher_skin_l1_max": 2.0
+      },
+      {
+        "all_teacher_valid": false,
+        "face_index": 8246,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6369,
+          3676,
+          6369
+        ],
+        "teacher_skin_l1_max": 2.0
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 8247,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6369,
+          6369,
+          3524
+        ],
+        "teacher_skin_l1_max": 2.0
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 24636,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          42,
+          42,
+          6443
+        ],
+        "teacher_skin_l1_max": 2.0
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 8270,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          19,
+          298,
+          298
+        ],
+        "teacher_skin_l1_max": 1.979812141507864
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 8271,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_EDGE"
+        ],
+        "source_triangle_indices": [
+          19,
+          298,
+          54
+        ],
+        "teacher_skin_l1_max": 1.979812141507864
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 24658,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1163,
+          1169,
+          4719
+        ],
+        "teacher_skin_l1_max": 2.0
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 83,
+        "nonincident_pair_count": 1,
+        "source_pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          5274,
+          5424,
+          5305
+        ],
+        "teacher_skin_l1_max": 0.9473190791904926
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 16471,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          567,
+          3144,
+          567
+        ],
+        "teacher_skin_l1_max": 1.9999999813735485
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 16486,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4722,
+          4723,
+          6679
+        ],
+        "teacher_skin_l1_max": 2.0000000074505806
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 16487,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4722,
+          4734,
+          4896
+        ],
+        "teacher_skin_l1_max": 1.181368239223957
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 16488,
+        "nonincident_pair_count": 3,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4722,
+          6679,
+          4896
+        ],
+        "teacher_skin_l1_max": 1.9999999850988388
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 16506,
+        "nonincident_pair_count": 3,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1269,
+          6516,
+          4777
+        ],
+        "teacher_skin_l1_max": 2.0
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 16508,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "SAME_FACE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          1269,
+          1269,
+          4770
+        ],
+        "teacher_skin_l1_max": 1.9999999925494194
+      },
+      {
+        "all_teacher_valid": false,
+        "face_index": 16535,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          6700,
+          3681,
+          3681
+        ],
+        "teacher_skin_l1_max": 2.0
+      },
+      {
+        "all_teacher_valid": false,
+        "face_index": 16536,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SAME_FACE"
+        ],
+        "source_triangle_indices": [
+          6700,
+          3681,
+          6700
+        ],
+        "teacher_skin_l1_max": 2.0
+      },
+      {
+        "all_teacher_valid": false,
+        "face_index": 16538,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "NONINCIDENT",
+          "SHARE_VERTEX_ONLY"
+        ],
+        "source_triangle_indices": [
+          6700,
+          3681,
+          6722
+        ],
+        "teacher_skin_l1_max": 2.0
+      },
+      {
+        "all_teacher_valid": false,
+        "face_index": 8389,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "NONINCIDENT",
+          "SAME_FACE",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          2536,
+          3335,
+          3335
+        ],
+        "teacher_skin_l1_max": 2.0
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 198,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "SHARE_VERTEX_ONLY",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4958,
+          4807,
+          1357
+        ],
+        "teacher_skin_l1_max": 2.0000000025029294
+      },
+      {
+        "all_teacher_valid": true,
+        "face_index": 199,
+        "nonincident_pair_count": 2,
+        "source_pair_categories": [
+          "SHARE_EDGE",
+          "NONINCIDENT",
+          "NONINCIDENT"
+        ],
+        "source_triangle_indices": [
+          4958,
+          4919,
+          1357
+        ],
+        "teacher_skin_l1_max": 2.0000000025029294
+      }
+    ],
+    "nonincident_pair_count_histogram": {
+      "0": 235,
+      "1": 14,
+      "2": 1148,
+      "3": 112
+    },
+    "teacher_l1_max_bins": {
+      "0.5-1.0": 98,
+      "1.0-1.5": 76,
+      "1.5-1.9": 36,
+      "<=0.5": 220,
+      ">1.9": 1079
+    }
+  }
+}

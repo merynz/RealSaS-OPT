@@ -1,0 +1,180 @@
+name: knight-stage35-unsafe-source-topology-audit-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/knight_stage35_unsafe_source_topology_audit_v1.yml'
+
+concurrency:
+  group: knight-stage35-unsafe-source-topology-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      V5_HANDOFF: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V5_DEMO_HANDOFF
+      OUT: canonical/knight_stage35_unsafe_source_topology_audit_v1
+
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+
+      - name: Fetch teacher topology truth
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          echo "$tmp" >/tmp/unsafe_topology_tmp
+          rclone copyto "$V5_HANDOFF/ARACHNE_KNIGHT_TEACHER_BANK_FIX2.npz" "$tmp/bank.npz" --checksum
+          rclone copyto "$V5_HANDOFF/KNIGHT_EVALUATED_TEACHER_SOURCE.npz" "$tmp/source.npz" --checksum
+
+      - name: Classify Stage35 unsafe faces by source topology
+        run: |
+          set -euo pipefail
+          tmp="$(cat /tmp/unsafe_topology_tmp)"
+          mkdir -p "$OUT"
+          python - "$tmp" "$OUT" "$RUN_ROOT" <<'PY'
+          import collections, hashlib, json, sys
+          from pathlib import Path
+          import numpy as np
+
+          tmp=Path(sys.argv[1]); out=Path(sys.argv[2]); run=Path(sys.argv[3])
+          candidate_path=run/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json"
+          compat_path=run/"artifacts/35_DYNAMIC_MECHANICAL_MESH_QUALIFIED/skin_topology_compatibility.json"
+          if not candidate_path.is_file(): raise RuntimeError(f"MISSING:{candidate_path}")
+          if not compat_path.is_file(): raise RuntimeError(f"MISSING:{compat_path}")
+          candidate=json.loads(candidate_path.read_text())
+          compat=json.loads(compat_path.read_text())
+
+          with np.load(tmp/"bank.npz",allow_pickle=False) as z:
+              ids=tuple(map(str,z["surface_ids"].tolist()))
+              tri=np.asarray(z["source_triangle_index"],np.int64)
+              valid=np.asarray(z["teacher_valid_mask"],np.uint8).astype(bool)
+              W=np.asarray(z["weights"],np.float64)
+          with np.load(tmp/"source.npz",allow_pickle=False) as z:
+              F=np.asarray(z["faces"],np.int64)
+          row={sid:i for i,sid in enumerate(ids)}
+          fsets=[set(map(int,x)) for x in F.tolist()]
+
+          def pair_cat(a,b):
+              ta,tb=int(tri[a]),int(tri[b])
+              if ta==tb:return "SAME_FACE"
+              n=len(fsets[ta]&fsets[tb])
+              if n==2:return "SHARE_EDGE"
+              if n==1:return "SHARE_VERTEX_ONLY"
+              return "NONINCIDENT"
+
+          vertex_sid={}
+          for v in candidate.get("vertices") or []:
+              md=dict(v.get("metadata") or {})
+              sid=str(md.get("source_surface_id") or "")
+              if sid not in row:
+                  raise RuntimeError(f"CANDIDATE_VERTEX_SURFACE_BINDING_MISSING:{sid}")
+              vertex_sid[str(v["candidate_vertex_id"])]=sid
+
+          unsafe=set(map(int,compat.get("unsafe_face_indices") or []))
+          counts=collections.Counter()
+          valid_counts=collections.Counter()
+          nonincident_pair_counts=collections.Counter()
+          l1_bins=collections.Counter()
+          examples=[]
+          offenders={253,3573,3829}
+          offender_rows={}
+          for fi in unsafe:
+              face=candidate["faces"][fi]
+              rr=[row[vertex_sid[str(v)]] for v in face]
+              cats=[]
+              l1=[]
+              for a,b in ((0,1),(1,2),(2,0)):
+                  cats.append(pair_cat(rr[a],rr[b]))
+                  l1.append(float(np.abs(W[rr[a]]-W[rr[b]]).sum()))
+              noni=sum(c=="NONINCIDENT" for c in cats)
+              all_valid=all(bool(valid[x]) for x in rr)
+              key=(
+                  "HAS_NONINCIDENT_PAIR" if noni else
+                  "HAS_SHARE_VERTEX_ONLY_PAIR" if "SHARE_VERTEX_ONLY" in cats else
+                  "SOURCE_EDGE_OR_FACE_COHERENT"
+              )
+              counts[key]+=1
+              if all_valid: valid_counts[key]+=1
+              nonincident_pair_counts[noni]+=1
+              mx=max(l1)
+              if mx>1.9:l1_bins[">1.9"]+=1
+              elif mx>1.5:l1_bins["1.5-1.9"]+=1
+              elif mx>1.0:l1_bins["1.0-1.5"]+=1
+              elif mx>0.5:l1_bins["0.5-1.0"]+=1
+              else:l1_bins["<=0.5"]+=1
+              rec={
+                  "face_index":fi,
+                  "source_pair_categories":cats,
+                  "nonincident_pair_count":noni,
+                  "all_teacher_valid":all_valid,
+                  "teacher_skin_l1_max":mx,
+                  "source_triangle_indices":[int(tri[x]) for x in rr],
+              }
+              if fi in offenders: offender_rows[str(fi)]=rec
+              if len(examples)<32 and noni: examples.append(rec)
+
+          total=len(unsafe)
+          report={
+            "schema":"RealSaS.KnightStage35UnsafeSourceTopologyAudit.v1",
+            "status":"AUDIT_ONLY__NO_REPAIR_APPLIED",
+            "artifacts":{
+              "candidate_sha256":hashlib.sha256(candidate_path.read_bytes()).hexdigest(),
+              "compatibility_sha256":hashlib.sha256(compat_path.read_bytes()).hexdigest(),
+              "teacher_bank_sha256":hashlib.sha256((tmp/"bank.npz").read_bytes()).hexdigest(),
+              "teacher_source_sha256":hashlib.sha256((tmp/"source.npz").read_bytes()).hexdigest(),
+            },
+            "compatibility":{
+              "report_hash":compat.get("report_hash"),
+              "risky_face_count":int(compat.get("risky_face_count",0)),
+              "unsafe_face_count":int(compat.get("unsafe_face_count",0)),
+              "passed":bool(compat.get("passed")),
+            },
+            "unsafe_source_topology":{
+              "classified_face_count":total,
+              "class_counts":dict(counts),
+              "class_fractions":{k:v/max(total,1) for k,v in counts.items()},
+              "all_teacher_valid_counts":dict(valid_counts),
+              "nonincident_pair_count_histogram":{str(k):v for k,v in sorted(nonincident_pair_counts.items())},
+              "teacher_l1_max_bins":dict(l1_bins),
+              "known_smear_offenders":offender_rows,
+              "nonincident_examples":examples,
+            },
+            "finding":{
+              "id":"STAGE35_UNSAFE_FACES_EXPLAINED_BY_SOURCE_TOPOLOGY_DISAGREEMENT",
+              "nonincident_explained_count":int(counts["HAS_NONINCIDENT_PAIR"]),
+              "nonincident_explained_fraction":float(counts["HAS_NONINCIDENT_PAIR"]/max(total,1)),
+              "confirmed_known_smear_offenders_have_nonincident_pair":all(
+                  offender_rows.get(str(x),{}).get("nonincident_pair_count",0)>0
+                  for x in offenders
+              ),
+              "claim_boundary":"Source mesh topology is teacher-only diagnostic evidence. This classifies the already-failing exact Stage35 faces; it does not authorize source topology as product inference truth or choose a repair.",
+            }
+          }
+          (out/"REPORT.json").write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
+          print(json.dumps(report,indent=2,sort_keys=True))
+          if total!=int(compat.get("unsafe_face_count",0)):
+              raise SystemExit("UNSAFE_FACE_COUNT_DRIFT")
+          PY
+
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add "$OUT/REPORT.json"
+          git commit -m 'audit: seal Stage35 unsafe source-topology evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

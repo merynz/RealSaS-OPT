@@ -360,6 +360,18 @@ def main():
             "invalid":l1_summary(W,Wteach,~valid),
         }
 
+    weights_out=a.out.with_suffix(".npz")
+    np.savez_compressed(
+        weights_out,
+        joint_ids=np.asarray(jids),
+        arachne=Wpred.astype(np.float32),
+        cutcell=Wcut.astype(np.float32),
+        selected=variants[best_variant].astype(np.float32),
+        selected_variant=np.asarray(best_variant),
+        selected_alpha=np.asarray(best_alpha,dtype=np.float64),
+        unsafe_vertex_mask=unsafe_v.astype(np.uint8),
+    )
+
     report={
         "schema":"RealSaS.KnightCutCellPriorReproduction.v1",
         "status":"PAPER_REPRO_DIAGNOSTIC__NO_PRODUCT_MUTATION",
@@ -378,6 +390,7 @@ def main():
         "unsafe_vertex_count_from_baseline_stage35":int(np.count_nonzero(unsafe_v)),
         "variants":variant_rows,
         "selected_variant_by_teacher_free_actual_motion":best_variant,
+        "weights_npz_path":str(weights_out),
         "finding":{
             "cutcell_improves_actual_motion_over_arachne":bool(tuple(variant_rows["CUT_CELL"]["score"])<tuple(variant_rows["ARACHNE"]["score"])),
             "some_cutcell_fusion_improves_actual_motion_over_arachne":bool(tuple(variant_rows[best_variant]["score"])<tuple(variant_rows["ARACHNE"]["score"])),

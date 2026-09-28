@@ -6,6 +6,9 @@ from compiler.realsas_compiler_core.camera_geometry_v2 import CameraProjectionV3
 from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
     Arap2D,
     bind_source_visual_points_to_projected_surface_v1,
+    build_visual_mesh_from_region_labels_v1,
+    partition_source_mask_by_face_components_v1,
+    safe_face_deformation_components_v1,
     bind_points_barycentric,
     build_visual_mesh_from_mask,
     source_texel_xy_to_raster_xy,
@@ -128,3 +131,56 @@ def test_continuous_visual_mechanical_binding_handles_half_pixel_boundaries():
     assert np.all(result["barycentric"][:3] >= -1.0e-9)
     assert np.allclose(result["barycentric"][:3].sum(axis=1), 1.0, atol=1.0e-12)
     assert np.allclose(result["depth"][:3], 2.0, atol=1.0e-12)
+
+
+def test_safe_face_components_split_across_unsafe_bridge():
+    faces = np.asarray(
+        [
+            [0, 1, 2],
+            [1, 3, 2],
+            [1, 4, 3],
+        ],
+        dtype=np.int64,
+    )
+    labels, sizes = safe_face_deformation_components_v1(
+        faces,
+        unsafe_face_indices=(1,),
+    )
+    assert labels.tolist() == [0, -1, 1]
+    assert sizes.tolist() == [1, 1]
+
+
+def test_deformation_region_partition_fills_unsafe_band_without_cross_region_faces():
+    mask = np.zeros((32, 48), dtype=bool)
+    mask[4:28, 4:44] = True
+    # Face 0 owns the left, face 1 is unsafe/unavailable in the central band,
+    # face 2 owns the right.
+    owner = np.full(mask.shape, -1, dtype=np.int64)
+    owner[4:28, 4:21] = 0
+    owner[4:28, 21:27] = 1
+    owner[4:28, 27:44] = 2
+    face_components = np.asarray([10, -1, 20], dtype=np.int32)
+
+    final, seeds, rows = partition_source_mask_by_face_components_v1(
+        mask,
+        owner,
+        face_components,
+        minimum_seed_pixels=16,
+    )
+    assert np.all(final[mask] >= 0)
+    assert set(final[mask].tolist()) == {10, 20}
+    assert set(seeds[mask].tolist()) == {-1, 10, 20}
+    assert sum(row["pixel_count"] for row in rows) == int(mask.sum())
+
+    region_mesh = build_visual_mesh_from_region_labels_v1(
+        mask,
+        final,
+        target_edge_px=8,
+    )
+    combined = region_mesh.mesh
+    predicted = _visual_coverage(combined)
+    assert np.array_equal(predicted, mask)
+    assert set(region_mesh.face_region_id.tolist()) == {10, 20}
+    for face_index, face in enumerate(np.asarray(combined.faces, dtype=np.int64)):
+        rid = int(region_mesh.face_region_id[face_index])
+        assert np.all(region_mesh.vertex_region_id[face] == rid)

@@ -48,9 +48,12 @@ def main():
         Wc=np.asarray(z["cutcell"],dtype=np.float64)
         Ws=np.asarray(z["selected"],dtype=np.float64)
         selected=str(np.asarray(z["selected_variant"]).item())
-    Wt,tjids,_,_=teacher_weights(a.teacher_bank,a.teacher_source,sk,cand)
-    if tuple(jids)!=tuple(tjids):
-        raise RuntimeError("TEACHER_JOINT_ORDER_DRIFT")
+    Wt0,tjids,_,_=teacher_weights(a.teacher_bank,a.teacher_source,sk,cand)
+    tix={str(j):i for i,j in enumerate(tjids)}
+    missing=[j for j in jids if str(j) not in tix]
+    if missing:
+        raise RuntimeError("TEACHER_JOINT_ID_MISSING:"+json.dumps(missing))
+    Wt=np.stack([Wt0[:,tix[str(j)]] for j in jids],axis=1)
 
     source_report=json.loads(Path("canonical/KNIGHT_MOTION_SOURCE_ACTION_DIAGNOSTIC_20260927.json").read_text())
     variants={"ARACHNE":Wa,"CUT_CELL":Wc,"SELECTED":Ws}

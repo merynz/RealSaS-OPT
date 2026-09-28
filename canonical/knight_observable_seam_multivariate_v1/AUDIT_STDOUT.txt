@@ -1,0 +1,257 @@
+{
+  "eligible_relation_count": 5554,
+  "feature_names": [
+    "distance_3d",
+    "normal_angle_deg",
+    "normal_abs_angle_deg",
+    "common_support_count",
+    "support_jaccard",
+    "common_raster_min_distance",
+    "common_raster_mean_distance",
+    "completed_endpoint_count"
+  ],
+  "finding": {
+    "claim_boundary": "Diagnostic only. Teacher topology/weights are labels, not inference inputs. Node-disjoint CV tests whether the already-shipping local GSA feature vector contains enough simple multivariate signal for pre-skin seam qualification; it does not prove impossibility for richer observable models.",
+    "id": "MULTIVARIATE_OBSERVABLE_GSA_SEAM_SEPARABILITY"
+  },
+  "repo_head": "bfd1eac170f0312fdf69c897894cf31a541d2a54",
+  "results": {
+    "NONINCIDENT": {
+      "HIST_GBDT_SHALLOW": {
+        "folds": [
+          {
+            "average_precision": 0.19830097580274333,
+            "fold": 0,
+            "positive_count": 128,
+            "precision_at_recall_ge_0p90": 0.12121212121212122,
+            "recall_at_precision_ge_0p90": 0.0,
+            "roc_auc": 0.6362420029527559,
+            "test_count": 1144
+          },
+          {
+            "average_precision": 0.22181234222978638,
+            "fold": 1,
+            "positive_count": 139,
+            "precision_at_recall_ge_0p90": 0.13533834586466165,
+            "recall_at_precision_ge_0p90": 0.007194244604316547,
+            "roc_auc": 0.6729245406919901,
+            "test_count": 1125
+          },
+          {
+            "average_precision": 0.27053222492840456,
+            "fold": 2,
+            "positive_count": 175,
+            "precision_at_recall_ge_0p90": 0.20466321243523317,
+            "recall_at_precision_ge_0p90": 0.005714285714285714,
+            "roc_auc": 0.6750317460317461,
+            "test_count": 1075
+          },
+          {
+            "average_precision": 0.3162400857718083,
+            "fold": 3,
+            "positive_count": 180,
+            "precision_at_recall_ge_0p90": 0.1845102505694761,
+            "recall_at_precision_ge_0p90": 0.03888888888888889,
+            "roc_auc": 0.6679212421773526,
+            "test_count": 1121
+          },
+          {
+            "average_precision": 0.24607710169820912,
+            "fold": 4,
+            "positive_count": 152,
+            "precision_at_recall_ge_0p90": 0.15838150289017341,
+            "recall_at_precision_ge_0p90": 0.0,
+            "roc_auc": 0.679917008369376,
+            "test_count": 1089
+          }
+        ],
+        "mean_average_precision": 0.2505925460861903,
+        "mean_roc_auc": 0.6664073080446441,
+        "pooled_average_precision": 0.23567443665486543,
+        "pooled_count": 5554,
+        "pooled_positive_rate": 0.1393590205257472,
+        "pooled_roc_auc": 0.6615893905484739
+      },
+      "LOGISTIC": {
+        "folds": [
+          {
+            "average_precision": 0.21871774368014196,
+            "fold": 0,
+            "positive_count": 128,
+            "precision_at_recall_ge_0p90": 0.1286031042128603,
+            "recall_at_precision_ge_0p90": 0.015625,
+            "roc_auc": 0.6541353961614174,
+            "test_count": 1144
+          },
+          {
+            "average_precision": 0.18978569950657637,
+            "fold": 1,
+            "positive_count": 139,
+            "precision_at_recall_ge_0p90": 0.14597701149425288,
+            "recall_at_precision_ge_0p90": 0.0,
+            "roc_auc": 0.648299210530156,
+            "test_count": 1125
+          },
+          {
+            "average_precision": 0.24640225959819045,
+            "fold": 2,
+            "positive_count": 175,
+            "precision_at_recall_ge_0p90": 0.18372093023255814,
+            "recall_at_precision_ge_0p90": 0.0,
+            "roc_auc": 0.6354603174603175,
+            "test_count": 1075
+          },
+          {
+            "average_precision": 0.2627864946362869,
+            "fold": 3,
+            "positive_count": 180,
+            "precision_at_recall_ge_0p90": 0.17802197802197803,
+            "recall_at_precision_ge_0p90": 0.005555555555555556,
+            "roc_auc": 0.6560278663360491,
+            "test_count": 1121
+          },
+          {
+            "average_precision": 0.24637470969968137,
+            "fold": 4,
+            "positive_count": 152,
+            "precision_at_recall_ge_0p90": 0.17885117493472585,
+            "recall_at_precision_ge_0p90": 0.0,
+            "roc_auc": 0.663209852272089,
+            "test_count": 1089
+          }
+        ],
+        "mean_average_precision": 0.23281338142417543,
+        "mean_roc_auc": 0.6514265285520058,
+        "pooled_average_precision": 0.2265656473811825,
+        "pooled_count": 5554,
+        "pooled_positive_rate": 0.1393590205257472,
+        "pooled_roc_auc": 0.6492364287027126
+      }
+    },
+    "SKIN_L1_GT_1": {
+      "HIST_GBDT_SHALLOW": {
+        "folds": [
+          {
+            "average_precision": 0.07736618851928713,
+            "fold": 0,
+            "positive_count": 39,
+            "precision_at_recall_ge_0p90": 0.034759358288770054,
+            "recall_at_precision_ge_0p90": 0.0,
+            "roc_auc": 0.6199211045364892,
+            "test_count": 1144
+          },
+          {
+            "average_precision": 0.13161777549198808,
+            "fold": 1,
+            "positive_count": 36,
+            "precision_at_recall_ge_0p90": 0.04583333333333333,
+            "recall_at_precision_ge_0p90": 0.0,
+            "roc_auc": 0.7711202938475665,
+            "test_count": 1125
+          },
+          {
+            "average_precision": 0.05849140913937953,
+            "fold": 2,
+            "positive_count": 39,
+            "precision_at_recall_ge_0p90": 0.03816046966731898,
+            "recall_at_precision_ge_0p90": 0.0,
+            "roc_auc": 0.6245421245421245,
+            "test_count": 1075
+          },
+          {
+            "average_precision": 0.0969145160057561,
+            "fold": 3,
+            "positive_count": 52,
+            "precision_at_recall_ge_0p90": 0.051142546245919476,
+            "recall_at_precision_ge_0p90": 0.0,
+            "roc_auc": 0.6135496869828021,
+            "test_count": 1121
+          },
+          {
+            "average_precision": 0.10081427608328844,
+            "fold": 4,
+            "positive_count": 54,
+            "precision_at_recall_ge_0p90": 0.060240963855421686,
+            "recall_at_precision_ge_0p90": 0.0,
+            "roc_auc": 0.6609858650921452,
+            "test_count": 1089
+          }
+        ],
+        "mean_average_precision": 0.09304083304793984,
+        "mean_roc_auc": 0.6580238150002254,
+        "pooled_average_precision": 0.08196017981089122,
+        "pooled_count": 5554,
+        "pooled_positive_rate": 0.03961109110550954,
+        "pooled_roc_auc": 0.6466092306643487
+      },
+      "LOGISTIC": {
+        "folds": [
+          {
+            "average_precision": 0.11464242560042359,
+            "fold": 0,
+            "positive_count": 39,
+            "precision_at_recall_ge_0p90": 0.03854389721627409,
+            "recall_at_precision_ge_0p90": 0.0,
+            "roc_auc": 0.6593108249216847,
+            "test_count": 1144
+          },
+          {
+            "average_precision": 0.14006900773011785,
+            "fold": 1,
+            "positive_count": 36,
+            "precision_at_recall_ge_0p90": 0.04782608695652174,
+            "recall_at_precision_ge_0p90": 0.0,
+            "roc_auc": 0.7843332313029282,
+            "test_count": 1125
+          },
+          {
+            "average_precision": 0.05512964930083725,
+            "fold": 2,
+            "positive_count": 39,
+            "precision_at_recall_ge_0p90": 0.03672316384180791,
+            "recall_at_precision_ge_0p90": 0.0,
+            "roc_auc": 0.5844223344223344,
+            "test_count": 1075
+          },
+          {
+            "average_precision": 0.1202442669146412,
+            "fold": 3,
+            "positive_count": 52,
+            "precision_at_recall_ge_0p90": 0.04803921568627451,
+            "recall_at_precision_ge_0p90": 0.019230769230769232,
+            "roc_auc": 0.6414154133985752,
+            "test_count": 1121
+          },
+          {
+            "average_precision": 0.103973154045717,
+            "fold": 4,
+            "positive_count": 54,
+            "precision_at_recall_ge_0p90": 0.05268817204301075,
+            "recall_at_precision_ge_0p90": 0.0,
+            "roc_auc": 0.6302737520128824,
+            "test_count": 1089
+          }
+        ],
+        "mean_average_precision": 0.10681170071834738,
+        "mean_roc_auc": 0.6599511112116809,
+        "pooled_average_precision": 0.09107301668918627,
+        "pooled_count": 5554,
+        "pooled_positive_rate": 0.03961109110550954,
+        "pooled_roc_auc": 0.650814670893411
+      }
+    }
+  },
+  "schema": "RealSaS.KnightObservableSeamMultivariateSeparabilityAudit.v1",
+  "split": "5_FOLD_SURFACE_ID_HASH__ONLY_EDGES_WITH_BOTH_ENDPOINTS_IN_SAME_FOLD__NODE_DISJOINT_TRAIN_TEST",
+  "status": "AUDIT_ONLY__TEACHER_LABELS_DIAGNOSTIC_ONLY",
+  "target_counts": {
+    "NONINCIDENT": {
+      "negative": 4780,
+      "positive": 774
+    },
+    "SKIN_L1_GT_1": {
+      "negative": 5334,
+      "positive": 220
+    }
+  }
+}

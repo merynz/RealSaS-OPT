@@ -18,7 +18,7 @@
     {
       "id": "S02_NORMAL_NEIGHBORHOOD_LOSES_SURFACE_MEMBERSHIP",
       "severity": "P0",
-      "class": "INTENDED_CONTRACT_OPERATOR_GAP",
+      "class": "IMPLEMENTATION_DEVIATION_FROM_FROZEN_DTB_ND1",
       "before": "Dense points belong to distinct surface sheets/components.",
       "after": "Normal PCA neighborhood is global Euclidean kNN.",
       "measured": {
@@ -28,7 +28,21 @@
       },
       "evidence": [
         "canonical/GSA_NORMAL_TOPOLOGY_ADVERSARY_V1_20260928.json"
-      ]
+      ],
+      "intended_operator": {
+        "authority": "DTB_ND1_ROBUST_LOCAL_PLANE_PREREG_V1_1",
+        "neighborhood": "fixed 7x7 stride-2 image-grid offsets",
+        "missing_background_rule": "ignore missing raster rows; no interpolation across absent/background pixels",
+        "weights": "Gaussian image-space weights plus robust 3D distance gate",
+        "minimum_retained_neighbors": 6
+      },
+      "actual_operator": {
+        "id": "RealSaS.GSA.ZeroSurfaceRobustLocalPCA.v1",
+        "neighborhood": "global Euclidean cKDTree k=64 on dense zero-surface",
+        "orientation_hint": "implicit normals sign only"
+      },
+      "owner": "GSA normal operator implementation",
+      "repair_direction": "Restore exact frozen DTB-ND1 semantics or prove an explicitly superseding subject-free operator before changing the contract."
     },
     {
       "id": "S03_COMPACTION_CAN_COLLAPSE_GEODESICALLY_DISTINCT_SHEETS",

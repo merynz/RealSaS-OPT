@@ -1,0 +1,264 @@
+{
+  "edges": [
+    {
+      "actual_stage_parent": null,
+      "bank_col": 0,
+      "bank_parent": -1,
+      "expected_stage_parent": null,
+      "graph_match": true,
+      "position_error": 0.05204788080064558,
+      "stage_joint_id": "J:54e751020afdb32b5ec5"
+    },
+    {
+      "actual_stage_parent": "J:54e751020afdb32b5ec5",
+      "bank_col": 1,
+      "bank_parent": 0,
+      "expected_stage_parent": "J:54e751020afdb32b5ec5",
+      "graph_match": true,
+      "position_error": 0.029605117104946697,
+      "stage_joint_id": "J:237d229c33bc9eb9bf91"
+    },
+    {
+      "actual_stage_parent": "J:237d229c33bc9eb9bf91",
+      "bank_col": 2,
+      "bank_parent": 1,
+      "expected_stage_parent": "J:237d229c33bc9eb9bf91",
+      "graph_match": true,
+      "position_error": 0.022522360380906374,
+      "stage_joint_id": "J:063ee183f601e19a8ca9"
+    },
+    {
+      "actual_stage_parent": "J:063ee183f601e19a8ca9",
+      "bank_col": 3,
+      "bank_parent": 2,
+      "expected_stage_parent": "J:063ee183f601e19a8ca9",
+      "graph_match": true,
+      "position_error": 0.010878032593160213,
+      "stage_joint_id": "J:73295dbdbb50d303e597"
+    },
+    {
+      "actual_stage_parent": "J:73295dbdbb50d303e597",
+      "bank_col": 4,
+      "bank_parent": 3,
+      "expected_stage_parent": "J:73295dbdbb50d303e597",
+      "graph_match": true,
+      "position_error": 0.04236751126463432,
+      "stage_joint_id": "J:cf05f36e919ff69a9d8e"
+    },
+    {
+      "actual_stage_parent": "J:cf05f36e919ff69a9d8e",
+      "bank_col": 5,
+      "bank_parent": 4,
+      "expected_stage_parent": "J:cf05f36e919ff69a9d8e",
+      "graph_match": true,
+      "position_error": 0.04798373998298569,
+      "stage_joint_id": "J:362735eeec6ee5a3d46f"
+    },
+    {
+      "actual_stage_parent": "J:362735eeec6ee5a3d46f",
+      "bank_col": 6,
+      "bank_parent": 5,
+      "expected_stage_parent": "J:362735eeec6ee5a3d46f",
+      "graph_match": true,
+      "position_error": 0.029104273787935044,
+      "stage_joint_id": "J:7e87e97fc9fe89cbd718"
+    },
+    {
+      "actual_stage_parent": "J:237d229c33bc9eb9bf91",
+      "bank_col": 7,
+      "bank_parent": 1,
+      "expected_stage_parent": "J:237d229c33bc9eb9bf91",
+      "graph_match": true,
+      "position_error": 0.024494391134410855,
+      "stage_joint_id": "J:b9e5c0d23f688f672060"
+    },
+    {
+      "actual_stage_parent": "J:b9e5c0d23f688f672060",
+      "bank_col": 8,
+      "bank_parent": 7,
+      "expected_stage_parent": "J:b9e5c0d23f688f672060",
+      "graph_match": true,
+      "position_error": 0.02520098631997827,
+      "stage_joint_id": "J:2ff965d6dbe4efc2d5d4"
+    },
+    {
+      "actual_stage_parent": "J:2ff965d6dbe4efc2d5d4",
+      "bank_col": 9,
+      "bank_parent": 8,
+      "expected_stage_parent": "J:2ff965d6dbe4efc2d5d4",
+      "graph_match": true,
+      "position_error": 0.026482739493556978,
+      "stage_joint_id": "J:a80d2c086e86a4cc08b5"
+    },
+    {
+      "actual_stage_parent": "J:a80d2c086e86a4cc08b5",
+      "bank_col": 10,
+      "bank_parent": 9,
+      "expected_stage_parent": "J:a80d2c086e86a4cc08b5",
+      "graph_match": true,
+      "position_error": 0.025535339115983314,
+      "stage_joint_id": "J:7cf59fbe52c53280546a"
+    },
+    {
+      "actual_stage_parent": "J:7cf59fbe52c53280546a",
+      "bank_col": 11,
+      "bank_parent": 10,
+      "expected_stage_parent": "J:7cf59fbe52c53280546a",
+      "graph_match": true,
+      "position_error": 0.02730887990001874,
+      "stage_joint_id": "J:75a17a4287b28cd7f57f"
+    },
+    {
+      "actual_stage_parent": "J:75a17a4287b28cd7f57f",
+      "bank_col": 12,
+      "bank_parent": 11,
+      "expected_stage_parent": "J:75a17a4287b28cd7f57f",
+      "graph_match": true,
+      "position_error": 0.06348993057552103,
+      "stage_joint_id": "J:33c7075f501c9af4cd0d"
+    },
+    {
+      "actual_stage_parent": "J:33c7075f501c9af4cd0d",
+      "bank_col": 13,
+      "bank_parent": 12,
+      "expected_stage_parent": "J:33c7075f501c9af4cd0d",
+      "graph_match": true,
+      "position_error": 0.04906727128773665,
+      "stage_joint_id": "J:8455bf4c0a38867b7d9b"
+    },
+    {
+      "actual_stage_parent": "J:8455bf4c0a38867b7d9b",
+      "bank_col": 14,
+      "bank_parent": 13,
+      "expected_stage_parent": "J:8455bf4c0a38867b7d9b",
+      "graph_match": true,
+      "position_error": 0.057939816312708836,
+      "stage_joint_id": "J:136e20712bbd1481596e"
+    },
+    {
+      "actual_stage_parent": "J:2ff965d6dbe4efc2d5d4",
+      "bank_col": 15,
+      "bank_parent": 8,
+      "expected_stage_parent": "J:2ff965d6dbe4efc2d5d4",
+      "graph_match": true,
+      "position_error": 0.04492300708031602,
+      "stage_joint_id": "J:1008208d141ae248de43"
+    },
+    {
+      "actual_stage_parent": "J:1008208d141ae248de43",
+      "bank_col": 16,
+      "bank_parent": 15,
+      "expected_stage_parent": "J:1008208d141ae248de43",
+      "graph_match": true,
+      "position_error": 0.05741384387510739,
+      "stage_joint_id": "J:eafe286e7d84499e5257"
+    },
+    {
+      "actual_stage_parent": "J:2ff965d6dbe4efc2d5d4",
+      "bank_col": 17,
+      "bank_parent": 8,
+      "expected_stage_parent": "J:2ff965d6dbe4efc2d5d4",
+      "graph_match": true,
+      "position_error": 0.035191677439537945,
+      "stage_joint_id": "J:42d181ebf3515959283a"
+    },
+    {
+      "actual_stage_parent": "J:42d181ebf3515959283a",
+      "bank_col": 18,
+      "bank_parent": 17,
+      "expected_stage_parent": "J:42d181ebf3515959283a",
+      "graph_match": true,
+      "position_error": 0.021350881108461554,
+      "stage_joint_id": "J:932628adf7f0d5936426"
+    },
+    {
+      "actual_stage_parent": "J:932628adf7f0d5936426",
+      "bank_col": 19,
+      "bank_parent": 18,
+      "expected_stage_parent": "J:932628adf7f0d5936426",
+      "graph_match": true,
+      "position_error": 0.035861352400021966,
+      "stage_joint_id": "J:4c9f9eace712daf31538"
+    },
+    {
+      "actual_stage_parent": "J:4c9f9eace712daf31538",
+      "bank_col": 20,
+      "bank_parent": 19,
+      "expected_stage_parent": "J:4c9f9eace712daf31538",
+      "graph_match": true,
+      "position_error": 0.024024790479564868,
+      "stage_joint_id": "J:5428a88dad4d4d8d5c4d"
+    },
+    {
+      "actual_stage_parent": "J:5428a88dad4d4d8d5c4d",
+      "bank_col": 21,
+      "bank_parent": 20,
+      "expected_stage_parent": "J:5428a88dad4d4d8d5c4d",
+      "graph_match": true,
+      "position_error": 0.033439293414376195,
+      "stage_joint_id": "J:e5441b559f1c34b41aa2"
+    },
+    {
+      "actual_stage_parent": "J:e5441b559f1c34b41aa2",
+      "bank_col": 22,
+      "bank_parent": 21,
+      "expected_stage_parent": "J:e5441b559f1c34b41aa2",
+      "graph_match": true,
+      "position_error": 0.04197995769523707,
+      "stage_joint_id": "J:c9cdb266f7c167a620a9"
+    },
+    {
+      "actual_stage_parent": "J:237d229c33bc9eb9bf91",
+      "bank_col": 23,
+      "bank_parent": 1,
+      "expected_stage_parent": "J:237d229c33bc9eb9bf91",
+      "graph_match": true,
+      "position_error": 0.0469602788211729,
+      "stage_joint_id": "J:f50f39d42ef3820824ef"
+    },
+    {
+      "actual_stage_parent": "J:f50f39d42ef3820824ef",
+      "bank_col": 24,
+      "bank_parent": 23,
+      "expected_stage_parent": "J:f50f39d42ef3820824ef",
+      "graph_match": true,
+      "position_error": 0.02944338716703005,
+      "stage_joint_id": "J:ee24577789f0235b8186"
+    },
+    {
+      "actual_stage_parent": "J:ee24577789f0235b8186",
+      "bank_col": 25,
+      "bank_parent": 24,
+      "expected_stage_parent": "J:ee24577789f0235b8186",
+      "graph_match": true,
+      "position_error": 0.04270384026707803,
+      "stage_joint_id": "J:ab16ff2ffc7408c862ae"
+    },
+    {
+      "actual_stage_parent": "J:ab16ff2ffc7408c862ae",
+      "bank_col": 26,
+      "bank_parent": 25,
+      "expected_stage_parent": "J:ab16ff2ffc7408c862ae",
+      "graph_match": true,
+      "position_error": 0.0536685093183658,
+      "stage_joint_id": "J:f5cf9181e27d0f791f7d"
+    },
+    {
+      "actual_stage_parent": "J:f5cf9181e27d0f791f7d",
+      "bank_col": 27,
+      "bank_parent": 26,
+      "expected_stage_parent": "J:f5cf9181e27d0f791f7d",
+      "graph_match": true,
+      "position_error": 0.06246447700957076,
+      "stage_joint_id": "J:7d9e31e2d0bd48f88ecb"
+    }
+  ],
+  "graph_edge_match_count": 28,
+  "graph_edge_total": 28,
+  "graph_exact": true,
+  "hungarian_total_cost": 1.0634535661309692,
+  "max_position_error": 0.06348993057552103,
+  "minimum_raw_nearest_margin": 0.014235053781742432,
+  "schema": "RealSaS.KnightTeacherTargetAlignmentProof.v1",
+  "status": "MEASURED__NO_REPAIR"
+}

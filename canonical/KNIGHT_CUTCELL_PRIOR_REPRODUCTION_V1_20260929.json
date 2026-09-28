@@ -1,0 +1,349 @@
+{
+  "alpha_sweep": [
+    {
+      "alpha": 0.0,
+      "motion": {
+        "max_edge_gt_10": 0,
+        "max_edge_gt_4": 2,
+        "max_edge_p99": 1.796752819736829,
+        "worst_edge_max": 4.516165811282644
+      },
+      "score": [
+        0,
+        2,
+        1.796752819736829,
+        4.516165811282644
+      ]
+    },
+    {
+      "alpha": 0.25,
+      "motion": {
+        "max_edge_gt_10": 0,
+        "max_edge_gt_4": 4,
+        "max_edge_p99": 1.8417729980221724,
+        "worst_edge_max": 4.684303206545365
+      },
+      "score": [
+        0,
+        4,
+        1.8417729980221724,
+        4.684303206545365
+      ]
+    },
+    {
+      "alpha": 0.5,
+      "motion": {
+        "max_edge_gt_10": 0,
+        "max_edge_gt_4": 6,
+        "max_edge_p99": 1.9100525489750435,
+        "worst_edge_max": 4.961333768312364
+      },
+      "score": [
+        0,
+        6,
+        1.9100525489750435,
+        4.961333768312364
+      ]
+    },
+    {
+      "alpha": 0.75,
+      "motion": {
+        "max_edge_gt_10": 0,
+        "max_edge_gt_4": 13,
+        "max_edge_p99": 2.0294442349437043,
+        "worst_edge_max": 5.5596192074884305
+      },
+      "score": [
+        0,
+        13,
+        2.0294442349437043,
+        5.5596192074884305
+      ]
+    },
+    {
+      "alpha": 1.0,
+      "motion": {
+        "max_edge_gt_10": 0,
+        "max_edge_gt_4": 86,
+        "max_edge_p99": 2.6088938414666805,
+        "worst_edge_max": 9.026805245756162
+      },
+      "score": [
+        0,
+        86,
+        2.6088938414666805,
+        9.026805245756162
+      ]
+    }
+  ],
+  "claim_boundary": "This reproduces the paper's geometric prior and tests simple inference-time fusions. The paper's strongest neural results retrain models with the prior; a negative fusion result does not falsify the paper. Teacher weights are evaluation-only.",
+  "finding": {
+    "best_variant": "CUT_CELL",
+    "cutcell_improves_actual_motion_over_arachne": true,
+    "some_cutcell_fusion_improves_actual_motion_over_arachne": true
+  },
+  "graph": {
+    "candidate_face_count": 24958,
+    "candidate_segment_count": 51475,
+    "classifier": "RAY_PARITY_FALLBACK",
+    "dense_supported_input_face_count": 24443,
+    "graph_edge_count": 62676,
+    "graph_vertex_count": 20454,
+    "gwn_available": false,
+    "interior_segment_count": 14489,
+    "mesh_is_watertight_trimesh": false,
+    "mesh_vertex_count": 12049,
+    "resolution": 32,
+    "surface_link_count": 11763,
+    "unreachable_all_bones_before_fallback": 0
+  },
+  "paper": {
+    "algorithm_1_adaptation": "CUT_CELL_GRAPH_MESH_PLUS_GRID_PLUS_SURFACE_INTERSECTIONS",
+    "algorithm_2": "N5_BONE_SAMPLES_MULTI_SOURCE_DIJKSTRA_TOP3_EUCLIDEAN_ALL_UNREACHABLE_FALLBACK",
+    "arxiv": "2608.11272",
+    "deviation": "Graph interior uses libigl fast winding number when available; deterministic ray-parity fallback otherwise. Input is current dense-face-supported canonical mesh, not teacher topology.",
+    "eq1": "w=1/(((1-alpha)*(d/D)+alpha*(d/D)^2)^2), then partition-of-unity",
+    "title": "A Geodesic Cut-Cell Prior for Neural Skinning"
+  },
+  "schema": "RealSaS.KnightCutCellPriorReproduction.v1",
+  "selected_alpha_by_teacher_free_actual_motion": 0.0,
+  "selected_variant_by_teacher_free_actual_motion": "CUT_CELL",
+  "status": "PAPER_REPRO_DIAGNOSTIC__NO_PRODUCT_MUTATION",
+  "teacher_used_by_solver": false,
+  "unsafe_vertex_count_from_baseline_stage35": 1645,
+  "variants": {
+    "ARACHNE": {
+      "motion": {
+        "max_edge_gt_10": 630,
+        "max_edge_gt_4": 1032,
+        "max_edge_p99": 24.747346807152955,
+        "worst_edge_max": 209.99843678211477
+      },
+      "score": [
+        630,
+        1032,
+        24.747346807152955,
+        209.99843678211477
+      ],
+      "stress": {
+        "max_area_max": 185.04374127600525,
+        "max_condition_max": 12993.44045964446,
+        "max_edge_max": 181.98443687372517,
+        "max_edge_p95": 8.075491289736258,
+        "min_area_min": 0.005589703982245631,
+        "unsafe_face_count": 1801
+      },
+      "teacher_eval_only": {
+        "invalid": {
+          "count": 1474,
+          "gt_0_1": 220,
+          "gt_1_0": 151,
+          "max": 1.9999999999996914,
+          "mean": 0.20686662977786516,
+          "p50": 8.283688594166667e-08,
+          "p95": 1.999594776352532,
+          "p99": 1.9999999994421758
+        },
+        "valid": {
+          "count": 10575,
+          "gt_0_1": 193,
+          "gt_1_0": 3,
+          "max": 1.9939772989432627,
+          "mean": 0.010033037780774872,
+          "p50": 1.8705745944709273e-13,
+          "p95": 0.04694813865076129,
+          "p99": 0.1569858170477163
+        }
+      }
+    },
+    "BLEND_0.25": {
+      "motion": {
+        "max_edge_gt_10": 487,
+        "max_edge_gt_4": 908,
+        "max_edge_p99": 18.57219011661567,
+        "worst_edge_max": 157.56361513606907
+      },
+      "score": [
+        487,
+        908,
+        18.57219011661567,
+        157.56361513606907
+      ],
+      "teacher_eval_only": {
+        "invalid": {
+          "count": 1474,
+          "gt_0_1": 1474,
+          "gt_1_0": 156,
+          "max": 1.9787792709652932,
+          "mean": 0.6290817646474809,
+          "p50": 0.4790278419629357,
+          "p95": 1.9681758141591281,
+          "p99": 1.9708010307967807
+        },
+        "valid": {
+          "count": 10575,
+          "gt_0_1": 10575,
+          "gt_1_0": 6,
+          "max": 1.9567262656193447,
+          "mean": 0.4516126227348323,
+          "p50": 0.4627997776885414,
+          "p95": 0.4776550580040208,
+          "p99": 0.5150686769246529
+        }
+      }
+    },
+    "BLEND_0.50": {
+      "motion": {
+        "max_edge_gt_10": 339,
+        "max_edge_gt_4": 749,
+        "max_edge_p99": 12.578812648829738,
+        "worst_edge_max": 105.1288024437594
+      },
+      "score": [
+        339,
+        749,
+        12.578812648829738,
+        105.1288024437594
+      ],
+      "teacher_eval_only": {
+        "invalid": {
+          "count": 1474,
+          "gt_0_1": 1474,
+          "gt_1_0": 229,
+          "max": 1.960560906142506,
+          "mean": 1.0534195643066098,
+          "p50": 0.957645377266125,
+          "p95": 1.9371127272636122,
+          "p99": 1.9422049831556996
+        },
+        "valid": {
+          "count": 10575,
+          "gt_0_1": 10575,
+          "gt_1_0": 40,
+          "max": 1.9194752322954265,
+          "mean": 0.8982164648112856,
+          "p50": 0.9238246354065524,
+          "p95": 0.9528859739585701,
+          "p99": 0.9652183316666183
+        }
+      }
+    },
+    "BLEND_0.75": {
+      "motion": {
+        "max_edge_gt_10": 107,
+        "max_edge_gt_4": 440,
+        "max_edge_p99": 6.590916937684825,
+        "worst_edge_max": 52.69402543426486
+      },
+      "score": [
+        107,
+        440,
+        6.590916937684825,
+        52.69402543426486
+      ],
+      "teacher_eval_only": {
+        "invalid": {
+          "count": 1474,
+          "gt_0_1": 1474,
+          "gt_1_0": 1474,
+          "max": 1.9470438758481186,
+          "mean": 1.4779347204161106,
+          "p50": 1.436161176312552,
+          "p95": 1.906148950295796,
+          "p99": 1.9134361702616953
+        },
+        "valid": {
+          "count": 10575,
+          "gt_0_1": 10575,
+          "gt_1_0": 10402,
+          "max": 1.882224198971508,
+          "mean": 1.345186525554761,
+          "p50": 1.3849009807307113,
+          "p95": 1.4284092003072886,
+          "p99": 1.442232242302143
+        }
+      }
+    },
+    "CUT_CELL": {
+      "motion": {
+        "max_edge_gt_10": 0,
+        "max_edge_gt_4": 2,
+        "max_edge_p99": 1.796752819736829,
+        "worst_edge_max": 4.516165811282644
+      },
+      "score": [
+        0,
+        2,
+        1.796752819736829,
+        4.516165811282644
+      ],
+      "stress": {
+        "max_area_max": 76.34586403212258,
+        "max_condition_max": 763.6022387781146,
+        "max_edge_max": 5.35069922083655,
+        "max_edge_p95": 1.5759083607884454,
+        "min_area_min": 0.0007737780287431087,
+        "unsafe_face_count": 2054
+      },
+      "teacher_eval_only": {
+        "invalid": {
+          "count": 1474,
+          "gt_0_1": 1474,
+          "gt_1_0": 1474,
+          "max": 1.9438004473641017,
+          "mean": 1.9024498765256113,
+          "p50": 1.9099492162954272,
+          "p95": 1.9355448898059475,
+          "p99": 1.940104234950827
+        },
+        "valid": {
+          "count": 10575,
+          "gt_0_1": 10575,
+          "gt_1_0": 10573,
+          "max": 1.991431054259083,
+          "mean": 1.7923081728302086,
+          "p50": 1.8457424625723748,
+          "p95": 1.9036943613409278,
+          "p99": 1.9204751452494204
+        }
+      }
+    },
+    "UNSAFE_VERTEX_REPLACE": {
+      "motion": {
+        "max_edge_gt_10": 973,
+        "max_edge_gt_4": 2387,
+        "max_edge_p99": 26.536199578316634,
+        "worst_edge_max": 95.80215521534821
+      },
+      "score": [
+        973,
+        2387,
+        26.536199578316634,
+        95.80215521534821
+      ],
+      "teacher_eval_only": {
+        "invalid": {
+          "count": 1474,
+          "gt_0_1": 403,
+          "gt_1_0": 402,
+          "max": 1.9999999999994915,
+          "mean": 0.5210125496854375,
+          "p50": 8.284078038995829e-08,
+          "p95": 1.9367649495603405,
+          "p99": 1.9999999958776993
+        },
+        "valid": {
+          "count": 10575,
+          "gt_0_1": 1304,
+          "gt_1_0": 1279,
+          "max": 1.991431054259083,
+          "mean": 0.2071752624022055,
+          "p50": 1.8705766056269315e-13,
+          "p95": 1.7702032660772347,
+          "p99": 1.9040026254422653
+        }
+      }
+    }
+  },
+  "weights_npz_path": "canonical/KNIGHT_CUTCELL_PRIOR_REPRODUCTION_V1_20260929.npz"
+}

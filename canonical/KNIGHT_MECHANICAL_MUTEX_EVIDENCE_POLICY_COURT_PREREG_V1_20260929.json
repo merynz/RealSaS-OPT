@@ -1,0 +1,44 @@
+{
+  "schema": "RealSaS.KnightMechanicalMutexEvidencePolicyCourtPrereg.v1",
+  "status": "FROZEN_BEFORE_MUTEX_EVIDENCE_POLICY_RESULT",
+  "date": "2026-09-29",
+  "purpose": "Separate mechanical cut-candidate polarity from confidence ordering after the first mutex-watershed court proved global consistency but remained recall/precision limited.",
+  "prior_evidence": {
+    "first_mutex_watershed": {
+      "unsafe_cross_region_recall": 0.9193548387096774,
+      "mixed_face_precision": 0.8452566096423018,
+      "synthetic_unsafe_face_count": 623
+    },
+    "edge_jsd_global_roc_auc": 0.9284476783823845
+  },
+  "variants_frozen_before_this_result": {
+    "STRETCH_ONLY_JSD": {
+      "repulsive": "in-scope dense edge with max_stretch>4",
+      "repulsive_confidence": "JSD/ln2",
+      "attractive_confidence": "1-JSD/ln2"
+    },
+    "STRETCH_OR_L1_JSD": {
+      "repulsive": "in-scope dense edge with max_stretch>4 OR Arachne_L1>1",
+      "repulsive_confidence": "JSD/ln2",
+      "attractive_confidence": "1-JSD/ln2"
+    },
+    "STRETCH_AND_L1_JSD": {
+      "repulsive": "in-scope dense edge with max_stretch>4 AND Arachne_L1>1",
+      "repulsive_confidence": "JSD/ln2",
+      "attractive_confidence": "1-JSD/ln2"
+    }
+  },
+  "solver": "Same deterministic mutex-watershed implementation for every variant.",
+  "teacher_policy": "All three partitions are frozen before any teacher topology is loaded. Teacher topology is evaluation-only; teacher weights are post-inference topology-mechanics isolation only.",
+  "closure_thresholds": {
+    "face_deletion_count_max": 0,
+    "rest_area_error_max": 1e-10,
+    "actual_motion_max_edge_gt_10_max": 5,
+    "actual_motion_max_edge_gt_4_max": 50,
+    "actual_motion_worst_edge_max": 25.0,
+    "synthetic_unsafe_face_count_max": 500,
+    "mixed_face_precision_min": 0.90,
+    "unsafe_cross_region_recall_min": 0.70
+  },
+  "selection_rule": "No post-hoc hidden selection. Every variant and every frozen closure gate is reported."
+}

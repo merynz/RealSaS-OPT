@@ -1,0 +1,113 @@
+{
+  "checks": {
+    "actual_gt10": false,
+    "actual_gt4": false,
+    "actual_worst_edge": false,
+    "mixed_precision": false,
+    "no_face_deletion": true,
+    "rest_area_preserved": true,
+    "synthetic_unsafe": false,
+    "unsafe_cross_region_recall": false
+  },
+  "claim_boundary": "A PASS closes the Knight topology owner under teacher-free inference with teacher weights used only after inference to isolate topology mechanics. It does not close Arachne weight generation or unseen generalization.",
+  "closure_pass": false,
+  "frozen_thresholds": {
+    "actual_motion_max_edge_gt_10_max": 5,
+    "actual_motion_max_edge_gt_4_max": 50,
+    "actual_motion_worst_edge_max": 25.0,
+    "face_deletion_count_max": 0,
+    "mixed_face_precision_min": 0.9,
+    "rest_area_error_max": 1e-10,
+    "synthetic_unsafe_face_count_max": 500,
+    "unsafe_cross_region_recall_min": 0.7
+  },
+  "holeless_split": {
+    "centroid_copy_count": 15,
+    "face_count_after": 26203,
+    "face_count_before": 24958,
+    "face_deletion_count": 0,
+    "mixed_face_count": 615,
+    "region_pure_output_fraction": 0.9656909514177766,
+    "rest_area_error_max": 8.510425874590087e-15,
+    "rest_area_error_p99": 1.4321482459136296e-15,
+    "seam_vertex_copy_count": 1234,
+    "unsplit_unresolved_face_count": 4491,
+    "vertex_count_after": 13298,
+    "vertex_count_before": 12049
+  },
+  "inference": {
+    "clustering": {
+      "cluster_count": 8,
+      "core_face_count": 16875,
+      "core_fraction_of_fit": 0.7442445091293993,
+      "fit_face_count": 22674,
+      "mode_distance_max": 0.1272176561417627,
+      "mode_distance_p50": 0.011590911643627551,
+      "mode_distance_p95": 0.058056855183949804,
+      "pca_components": 32,
+      "pca_explained_variance_ratio_sum": 0.9943774734448894,
+      "seed_face_count": 4096
+    },
+    "initial_propagation": {
+      "initial_labeled_vertex_count": 8702,
+      "propagated_vertex_count": 790,
+      "safe_graph_edge_count": 34583,
+      "unresolved_vertex_count": 2556
+    },
+    "patch_completion": {
+      "abstained_patch_count": 67,
+      "completed_patch_count": 14,
+      "newly_labeled_vertex_count": 614,
+      "partial_patch_count": 0,
+      "unsafe_patch_count": 81
+    },
+    "probe_count": 168,
+    "probe_degrees": 30.0
+  },
+  "preregistration": "canonical/KNIGHT_TEACHER_FREE_TOPOLOGY_CLOSURE_PREREG_V1_20260929.json",
+  "schema": "RealSaS.KnightTeacherFreeTopologyClosureCourt.v1",
+  "status": "FAIL_TOPOLOGY_REMAINS_OPEN",
+  "teacher_evaluation_only": {
+    "mixed_face_precision": 0.751219512195122,
+    "mixed_face_recall": 0.15298013245033112,
+    "predicted_mixed_face_count": 615,
+    "truth_mixed_face_count": 3020,
+    "unsafe_truth_cross_region_face_count": 1178,
+    "unsafe_truth_cross_region_recall": 0.3904923599320883,
+    "vertex_ari": 0.6123576742673197,
+    "vertex_nmi": 0.6636243451357394
+  },
+  "teacher_topology_used_for_evaluation_only": true,
+  "teacher_used_by_region_inference": false,
+  "teacher_weights_used_for_post_inference_mechanical_isolation_only": true,
+  "topology_isolated_mechanics": {
+    "after_motion": {
+      "max_edge_gt_10": 429,
+      "max_edge_gt_4": 667,
+      "max_edge_p99": 15.664714343128926,
+      "worst_edge_max": 238.39151073128744
+    },
+    "after_stress": {
+      "max_area_max": 301.9837009377611,
+      "max_condition_max": 11708.855417316601,
+      "max_edge_max": 202.6162397434125,
+      "max_edge_p95": 2.552380913141267,
+      "min_area_min": 0.00409070782318895,
+      "unsafe_face_count": 1269
+    },
+    "before_motion": {
+      "max_edge_gt_10": 592,
+      "max_edge_gt_4": 926,
+      "max_edge_p99": 27.601949326001453,
+      "worst_edge_max": 118.61647437227882
+    },
+    "before_stress": {
+      "max_area_max": 220.29867764004828,
+      "max_condition_max": 11708.855417316601,
+      "max_edge_max": 101.0908905951972,
+      "max_edge_p95": 6.866182063578426,
+      "min_area_min": 0.00409070782318895,
+      "unsafe_face_count": 1553
+    }
+  }
+}

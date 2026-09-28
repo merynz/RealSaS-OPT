@@ -144,6 +144,9 @@ def run_skin_topology_compatibility_v1(
     rest,weights,faces=_candidate_skin_matrix(
         candidate,surface=surface,skeleton=skeleton,skin=skin
     )
+    faces=np.asarray(faces,dtype=np.int64)
+    if faces.ndim!=2 or faces.shape[1]!=3:
+        raise QualificationError("SKIN_TOPOLOGY_FACE_INDEX_ARRAY_INVALID")
     skin_l1=_skin_l1_per_face(weights,faces)
     risky=np.nonzero(skin_l1>float(risk_l1_min))[0]
 

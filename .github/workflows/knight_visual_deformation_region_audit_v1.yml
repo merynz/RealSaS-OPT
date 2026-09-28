@@ -33,7 +33,7 @@ jobs:
               qualified_observation_set_from_dict,qualified_skeleton_from_dict,qualified_skin_from_dict,
               rigging_surface_from_dict,deformation_envelope_from_dict,
           )
-          from compiler.realsas_compiler_core.mesh.product_authority_codec_v1 import mesh_qualification_policy_from_dict
+          from compiler.realsas_compiler_core.artifact_codec_v2 import mesh_policy_from_dict
           from compiler.realsas_compiler_core.mesh.skin_topology_compatibility_v1 import run_skin_topology_compatibility_v1
           from compiler.realsas_compiler_core.visibility_v2 import rasterize_visible_owner
           root=Path(os.environ["RUN_ROOT"])
@@ -51,7 +51,7 @@ jobs:
               if len(candidates)!=1: raise RuntimeError((stage,schema,len(candidates),[x.name for x in p.glob("*.json")]))
               return candidates[0]
           cand=canonical_mesh_candidate_from_dict(old("18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.CanonicalMeshCandidateIR.v1"))
-          policy=mesh_qualification_policy_from_dict(old("18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.MeshQualificationPolicyIR.v1"))
+          policy=mesh_policy_from_dict(old("18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.MeshQualificationPolicyIR.v1"))
           surf=rigging_surface_from_dict(old("15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1"))
           skel=qualified_skeleton_from_dict(old("28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1"))
           skin=qualified_skin_from_dict(old("32_SKIN_QUALIFIED","RealSaS.QualifiedSkinIR.v1"))

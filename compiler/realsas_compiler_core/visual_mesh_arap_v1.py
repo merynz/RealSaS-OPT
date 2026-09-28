@@ -1080,6 +1080,29 @@ def _component_cdt(
     return vertices, faces
 
 
+def visual_mesh_coverage_mask_v1(mesh: VisualMesh2D) -> np.ndarray:
+    """Rasterize a source-owned visual mesh back to its exact source mask."""
+    from .mesh.product_coverage_v1 import rasterize_triangles_half_integer_top_left
+
+    raster_positions = source_texel_xy_to_raster_xy(
+        np.asarray(mesh.positions, dtype=np.float64)
+    )
+    triangles = tuple(
+        tuple(
+            tuple(map(float, raster_positions[int(vertex_index)]))
+            for vertex_index in face
+        )
+        for face in np.asarray(mesh.faces, dtype=np.int64)
+    )
+    raw = rasterize_triangles_half_integer_top_left(
+        triangles,
+        width=int(mesh.width),
+        height=int(mesh.height),
+    )
+    return np.frombuffer(raw, dtype=np.uint8).reshape(
+        int(mesh.height), int(mesh.width)
+    ).astype(bool)
+
 def build_visual_mesh_from_mask(
     mask: np.ndarray,
     *,

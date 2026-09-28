@@ -1,0 +1,61 @@
+name: knight-oracle-topology-repair-causality-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/demo/oracle_knight_topology_repair_causality_v1.py'
+      - '.github/workflows/knight_oracle_topology_repair_causality_v1.yml'
+      - 'canonical/KNIGHT_ORACLE_TOPOLOGY_REPAIR_CAUSAL_PREREG_V1_20260928.json'
+
+concurrency:
+  group: knight-oracle-topology-repair-causality-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  oracle:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      V5_HANDOFF: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V5_DEMO_HANDOFF
+      OUT: canonical/knight_oracle_topology_repair_causality_v1
+
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install
+        run: python -m pip install --no-input --progress-bar off numpy scipy pillow
+      - name: Fetch sealed teacher topology oracle
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          echo "$tmp" > /tmp/knight_oracle_tmp
+          rclone copyto "$V5_HANDOFF/ARACHNE_KNIGHT_TEACHER_BANK_FIX2.npz" "$tmp/bank.npz" --checksum
+          rclone copyto "$V5_HANDOFF/KNIGHT_EVALUATED_TEACHER_SOURCE.npz" "$tmp/source.npz" --checksum
+          sha256sum "$tmp/bank.npz" "$tmp/source.npz"
+      - name: Run topology-only causal oracle
+        run: |
+          set -euo pipefail
+          tmp="$(cat /tmp/knight_oracle_tmp)"
+          rm -rf "$OUT"
+          PYTHONPATH=. python tools/demo/oracle_knight_topology_repair_causality_v1.py             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --teacher-bank "$tmp/bank.npz"             --teacher-source "$tmp/source.npz"             --out-dir "$OUT" | tee /tmp/knight_oracle_topology.txt
+      - name: Seal causal evidence
+        run: |
+          set -euo pipefail
+          cp /tmp/knight_oracle_topology.txt "$OUT/AUDIT_STDOUT.txt"
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add "$OUT"
+          git commit -m 'audit: seal Knight oracle topology causality evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

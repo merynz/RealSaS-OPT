@@ -1,5 +1,6 @@
 name: knight-source-owned-safe-handles-proof-v1
 # rerun-after-barycentric-index-fix
+# rerun-after-g3b-face-index-fix
 on:
   push:
     branches: [research/vf11-certified-adaptive-20260921]

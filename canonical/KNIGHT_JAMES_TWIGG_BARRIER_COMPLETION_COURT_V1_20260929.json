@@ -1,0 +1,941 @@
+{
+  "barrier": {
+    "barrier_edge_count": 1551,
+    "candidate_edge_count": 36424,
+    "in_scope_edge_count": 3412,
+    "stretch_p95_barrier": 34.68869168385904
+  },
+  "checks": {
+    "actual_gt10": false,
+    "actual_gt4": false,
+    "actual_worst_edge": false,
+    "mixed_precision": false,
+    "no_face_deletion": true,
+    "rest_area_preserved": true,
+    "synthetic_unsafe": false,
+    "unsafe_cross_region_recall": false
+  },
+  "claim_boundary": "Stage35 stretch creates no region labels and directly authorizes no split. It only removes cannot-cross edges from James/Twigg patch propagation. Teacher topology evaluates frozen labels; teacher weights are introduced after inference solely for topology-isolated mechanics.",
+  "closure_pass": false,
+  "closure_preregistration": "canonical/KNIGHT_TEACHER_FREE_TOPOLOGY_CLOSURE_PREREG_V1_20260929.json",
+  "clustering": {
+    "cluster_count": 8,
+    "core_face_count": 16875,
+    "core_fraction_of_fit": 0.7442445091293993,
+    "fit_face_count": 22674,
+    "mode_distance_max": 0.1272176561417627,
+    "mode_distance_p50": 0.011590911643627551,
+    "mode_distance_p95": 0.058056855183949804,
+    "pca_components": 32,
+    "pca_explained_variance_ratio_sum": 0.9943774734448894,
+    "seed_face_count": 4096
+  },
+  "frozen_thresholds": {
+    "actual_motion_max_edge_gt_10_max": 5,
+    "actual_motion_max_edge_gt_4_max": 50,
+    "actual_motion_worst_edge_max": 25.0,
+    "face_deletion_count_max": 0,
+    "mixed_face_precision_min": 0.9,
+    "rest_area_error_max": 1e-10,
+    "synthetic_unsafe_face_count_max": 500,
+    "unsafe_cross_region_recall_min": 0.7
+  },
+  "holeless_split": {
+    "centroid_copy_count": 9,
+    "face_count_after": 25775,
+    "face_count_before": 24958,
+    "face_deletion_count": 0,
+    "mixed_face_count": 404,
+    "region_pure_output_fraction": 0.973113482056256,
+    "rest_area_error_max": 8.510425874590087e-15,
+    "rest_area_error_p99": 9.880361646810622e-16,
+    "seam_vertex_copy_count": 818,
+    "unsplit_unresolved_face_count": 5684,
+    "vertex_count_after": 12876,
+    "vertex_count_before": 12049
+  },
+  "initial_propagation": {
+    "initial_labeled_vertex_count": 8702,
+    "propagated_vertex_count": 790,
+    "safe_graph_edge_count": 34583,
+    "unresolved_vertex_count": 2556
+  },
+  "operator": {
+    "barrier_semantics": "CANNOT_CROSS_ONLY",
+    "barrier_source": "STAGE35_CONTROLLED_EDGE_STRETCH",
+    "barrier_threshold": 4.0,
+    "completion": "PATCH_LOCAL_MULTI_SOURCE_GEODESIC_ON_BARRIER_FILTERED_DENSE_GRAPH",
+    "holeless_repair": "VERTEX_DUPLICATION_PLUS_REGION_PURE_SUBDIVISION",
+    "label_authority": "JAMES_TWIGG_SAFE_ROTATION_SIGNATURES"
+  },
+  "patch_completion": {
+    "abstained_patch_count": 77,
+    "barrier_edge_count": 1551,
+    "completed_patch_count": 3,
+    "kept_dense_edge_count": 34873,
+    "newly_labeled_vertex_count": 37,
+    "partial_patch_count": 1,
+    "unreachable_patch_vertex_count": 427,
+    "unsafe_patch_count": 81
+  },
+  "patches": [
+    {
+      "completed_vertex_count": 37,
+      "component_index": 0,
+      "seed_count": 1420,
+      "seed_label_count": 6,
+      "status": "PARTIAL",
+      "unreachable_patch_vertex_count": 427,
+      "unsafe_face_count": 1404,
+      "vertex_count": 1210
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 1,
+      "seed_count": 149,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 133,
+      "unsafe_face_count": 221,
+      "vertex_count": 201
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 2,
+      "seed_count": 35,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 1,
+      "unsafe_face_count": 13,
+      "vertex_count": 12
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 3,
+      "seed_count": 29,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 1,
+      "unsafe_face_count": 10,
+      "vertex_count": 11
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 4,
+      "seed_count": 27,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 8,
+      "vertex_count": 10
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 5,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 8,
+      "unsafe_face_count": 7,
+      "vertex_count": 8
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 6,
+      "seed_count": 25,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 5,
+      "vertex_count": 7
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 7,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 6,
+      "unsafe_face_count": 5,
+      "vertex_count": 6
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 8,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 6,
+      "unsafe_face_count": 4,
+      "vertex_count": 6
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 9,
+      "seed_count": 19,
+      "seed_label_count": 2,
+      "status": "COMPLETED",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 4,
+      "vertex_count": 6
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 10,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 5,
+      "unsafe_face_count": 3,
+      "vertex_count": 5
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 11,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 5,
+      "unsafe_face_count": 3,
+      "vertex_count": 5
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 12,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 4,
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 13,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 4,
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 14,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 4,
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 15,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 4,
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 16,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 4,
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 17,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 4,
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 18,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 4,
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 19,
+      "seed_count": 14,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 20,
+      "seed_count": 15,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 21,
+      "seed_count": 12,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 22,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 4,
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 23,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 4,
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 24,
+      "seed_count": 13,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 2,
+      "vertex_count": 4
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 25,
+      "seed_count": 12,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 26,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 27,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 28,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 29,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 30,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 31,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 32,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 33,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 34,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 35,
+      "seed_count": 13,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 36,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 37,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 38,
+      "seed_count": 19,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 39,
+      "seed_count": 13,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 40,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 41,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 42,
+      "seed_count": 11,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 43,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 44,
+      "seed_count": 18,
+      "seed_label_count": 2,
+      "status": "COMPLETED",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 45,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 46,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 47,
+      "seed_count": 9,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 48,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 49,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 50,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 51,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 52,
+      "seed_count": 13,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 53,
+      "seed_count": 14,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 54,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 55,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 56,
+      "seed_count": 12,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 57,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 58,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 59,
+      "seed_count": 12,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 60,
+      "seed_count": 17,
+      "seed_label_count": 2,
+      "status": "COMPLETED",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 61,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 62,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 63,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 64,
+      "seed_count": 15,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 65,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 66,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 67,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 68,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 69,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 70,
+      "seed_count": 19,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 71,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 72,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 73,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 74,
+      "seed_count": 17,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 75,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 76,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 77,
+      "seed_count": 9,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 78,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 79,
+      "seed_count": 0,
+      "seed_label_count": 0,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 3,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    },
+    {
+      "completed_vertex_count": 0,
+      "component_index": 80,
+      "seed_count": 11,
+      "seed_label_count": 1,
+      "status": "ABSTAIN_LT2_BARRIER_SEPARATED_LABELS",
+      "unreachable_patch_vertex_count": 0,
+      "unsafe_face_count": 1,
+      "vertex_count": 3
+    }
+  ],
+  "preregistration": "canonical/KNIGHT_JAMES_TWIGG_BARRIER_COMPLETION_PREREG_V1_20260929.json",
+  "probe": {
+    "count": 168,
+    "degrees": 30.0
+  },
+  "schema": "RealSaS.KnightJamesTwiggBarrierCompletionCourt.v1",
+  "status": "FAIL_TOPOLOGY_REMAINS_OPEN",
+  "teacher_evaluation_only": {
+    "mixed_face_precision": 0.8762376237623762,
+    "mixed_face_recall": 0.11721854304635762,
+    "predicted_mixed_face_count": 404,
+    "truth_mixed_face_count": 3020,
+    "unsafe_truth_cross_region_face_count": 1178,
+    "unsafe_truth_cross_region_recall": 0.299660441426146,
+    "vertex_ari": 0.6334833215385703,
+    "vertex_nmi": 0.7047628297224555
+  },
+  "teacher_used_by_inference": false,
+  "topology_isolated_mechanics": {
+    "after_motion": {
+      "max_edge_gt_10": 442,
+      "max_edge_gt_4": 671,
+      "max_edge_p99": 17.180547680813728,
+      "worst_edge_max": 118.61647437227882
+    },
+    "after_stress": {
+      "max_area_max": 220.29867764004828,
+      "max_condition_max": 11708.855417316601,
+      "max_edge_max": 101.0908905951972,
+      "max_edge_p95": 2.5873564431953335,
+      "min_area_min": 0.00409070782318895,
+      "unsafe_face_count": 1259
+    },
+    "before_motion": {
+      "max_edge_gt_10": 592,
+      "max_edge_gt_4": 926,
+      "max_edge_p99": 27.601949326001453,
+      "worst_edge_max": 118.61647437227882
+    },
+    "before_stress": {
+      "max_area_max": 220.29867764004828,
+      "max_condition_max": 11708.855417316601,
+      "max_edge_max": 101.0908905951972,
+      "max_edge_p95": 6.866182063578426,
+      "min_area_min": 0.00409070782318895,
+      "unsafe_face_count": 1553
+    }
+  }
+}

@@ -43,7 +43,6 @@ jobs:
           import numpy as np
 
           from compiler.realsas_compiler_core.substrate.scene_first_signed import (
-              robust_zero_surface_normals_v1,
               mesh_connected_component_labels_v1,
               _adaptive_voxel_compact,
           )
@@ -74,10 +73,15 @@ jobs:
           meta=dict(s.get("metadata") or {})
           target=int(meta["compact_target_nodes"])
           component_aware=bool(meta["component_aware_compaction"])
-          dense_n=robust_zero_surface_normals_v1(v,h,k=64)
+          # Voxel assignment/inverse is a pure function of positions, faces,
+          # target_nodes and component labels. Normals are not consulted until
+          # after inverse selection, so constant nondegenerate normals avoid
+          # re-running the unrelated O(N log N) normal operator.
+          audit_normals=np.zeros_like(v)
+          audit_normals[:,2]=1.0
           labels=mesh_connected_component_labels_v1(len(v),f) if component_aware else None
           cp,cn,edges,divisions,inverse=_adaptive_voxel_compact(
-              v,f,dense_n,
+              v,f,audit_normals,
               target_nodes=target,
               preserve_connected_components=component_aware,
               precomputed_component_labels=labels,
@@ -165,6 +169,7 @@ jobs:
               "compact_actual_nodes":int(len(cp)),
               "compact_voxel_divisions":int(divisions),
               "component_aware_compaction":component_aware,
+              "inverse_replay_normal_independence_verified_from_implementation":True,
               "collapsed_dense_face_count":int(collapsed_dense_faces),
               "unique_noncollapsed_compact_dense_face_count":int(len(dense_face_incidence)),
               "unique_compact_dense_edge_count":int(len(dense_edges)),

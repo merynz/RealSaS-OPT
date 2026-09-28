@@ -1,0 +1,1637 @@
+{
+  "input_artifacts": [
+    {
+      "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json",
+      "sha256": "0db35bbcdd3565cf42c74127fa33c66d39545e1ec84d1b1c74f1dac5bb6072d3"
+    },
+    {
+      "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/mesh_qualification_policy.json",
+      "sha256": "592c83144fccbb004384c02bf3229c286cd258d2213e727b4f62bb299a85c4db"
+    },
+    {
+      "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json",
+      "sha256": "7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182"
+    },
+    {
+      "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/artifacts/28_SKELETON_QUALIFIED/qualified_skeleton.json",
+      "sha256": "e89d0b64cf23b2954f2b30fb37836ee2b3287749a79c90a76185437b9217e987"
+    },
+    {
+      "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/artifacts/32_SKIN_QUALIFIED/qualified_skin.json",
+      "sha256": "f1a937de488ec2a620ee292b3f865a3b2ca97b9466401555beb08b1d2f945a09"
+    },
+    {
+      "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/artifacts/34_DEFORMATION_CAPABILITY_ENVELOPE/deformation_envelope.json",
+      "sha256": "f03cd7bbd06406d7470d4630b2efd083bb2e9df1066b7d3d8578744b20a30b54"
+    },
+    {
+      "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/artifacts/05_CAMERA_CONTRACT_SOLVED/qualified_camera_set.json",
+      "sha256": "312a9b1afe4ea1fcdc481232ac951fb6a6815fee532fbb93646e97e609b5b80a"
+    },
+    {
+      "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/artifacts/07_OBSERVATION_CONTRACT_QUALIFIED/qualified_observation_set.json",
+      "sha256": "940da819b6b5179bf389cede4c9762af422c4b9badc3b822aeb2b703f0ac5e01"
+    }
+  ],
+  "mechanical_compatibility": {
+    "largest_safe_components": [
+      6047,
+      5324,
+      4560,
+      1825,
+      1481,
+      513,
+      438,
+      280,
+      150,
+      109,
+      70,
+      63,
+      49,
+      45,
+      13,
+      8,
+      7,
+      7,
+      6,
+      5,
+      5,
+      5,
+      5,
+      5,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4
+    ],
+    "report_hash": "03cbb6248877676ed179ea9e65b64c632c61019fcc965ea52ff8fded53ed1b82",
+    "safe_component_count": 1357,
+    "unsafe_face_count": 1509
+  },
+  "outputs": [
+    "canonical/knight_source_owned_deformation_regions_v1/KNIGHT_IDLE_SOURCE_OWNED_DEFORMATION_REGIONS_V1.gif",
+    "canonical/knight_source_owned_deformation_regions_v1/KNIGHT_RUN_SOURCE_OWNED_DEFORMATION_REGIONS_V1.gif",
+    "canonical/knight_source_owned_deformation_regions_v1/KNIGHT_SLASH_SOURCE_OWNED_DEFORMATION_REGIONS_V1.gif"
+  ],
+  "ownership": {
+    "appearance_provenance": "DIRECT_SOURCE_ONLY",
+    "arap_used": false,
+    "mechanical_mesh_render_authority": false,
+    "motion_driver": "REGION_LOCAL_SAFE_MECHANICAL_BARYCENTRIC_BINDING",
+    "texture_authority": "ORIGINAL_SOURCE_RGBA",
+    "unsafe_mechanical_faces_rendered": false,
+    "visual_cross_region_faces": 0,
+    "visual_mesh_authority": "SOURCE_FOREGROUND_MASK_X_G3B_SAFE_LOCAL_ADJACENCY_CHART"
+  },
+  "parent_run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "product_authority_claimed": false,
+  "schema": "RealSaS.KnightSourceOwnedDeformationRegionProof.v1",
+  "status": "MEASURED_RESCUE_PROOF",
+  "views": [
+    {
+      "completion_fraction": 0.0,
+      "direct_source_fraction": 1.0,
+      "max_nearest_safe_seed_distance_px": 16.867127793433,
+      "max_rest_reconstruction_error_px": 0.0,
+      "other_view_fraction": 0.0,
+      "p95_nearest_safe_seed_distance_px": 5.522680508593631,
+      "partition_contract": "SOURCE_RASTER_4N_X_STAGE35_SAFE_SHARED_EDGE_V1",
+      "qa_by_clip": {
+        "demo_idle_v1": [
+          {
+            "flipped_triangles": 339,
+            "max_edge_stretch": 21.316235912348027,
+            "p95_edge_stretch": 1.0861133061212673,
+            "p99_edge_stretch": 1.9396387054256705,
+            "time_seconds": 0.0
+          },
+          {
+            "flipped_triangles": 348,
+            "max_edge_stretch": 20.871576971145675,
+            "p95_edge_stretch": 1.0997866737060158,
+            "p99_edge_stretch": 1.9391603265660982,
+            "time_seconds": 0.8333333333333334
+          },
+          {
+            "flipped_triangles": 350,
+            "max_edge_stretch": 20.920092296065746,
+            "p95_edge_stretch": 1.0872705753886875,
+            "p99_edge_stretch": 1.9499349412638989,
+            "time_seconds": 1.6666666666666667
+          },
+          {
+            "flipped_triangles": 348,
+            "max_edge_stretch": 20.87159895325846,
+            "p95_edge_stretch": 1.0997866737060158,
+            "p99_edge_stretch": 1.9391613906825431,
+            "time_seconds": 2.5
+          }
+        ],
+        "demo_run_v1": [
+          {
+            "flipped_triangles": 1582,
+            "max_edge_stretch": 75.0258829977225,
+            "p95_edge_stretch": 2.091523189448634,
+            "p99_edge_stretch": 4.868112465985078,
+            "time_seconds": 0.0
+          },
+          {
+            "flipped_triangles": 1580,
+            "max_edge_stretch": 92.05365182706602,
+            "p95_edge_stretch": 2.4528774128244786,
+            "p99_edge_stretch": 5.433493559920336,
+            "time_seconds": 0.20833333333333334
+          },
+          {
+            "flipped_triangles": 1663,
+            "max_edge_stretch": 65.75073483643895,
+            "p95_edge_stretch": 1.8649174663127335,
+            "p99_edge_stretch": 4.615221455735164,
+            "time_seconds": 0.4166666666666667
+          },
+          {
+            "flipped_triangles": 1626,
+            "max_edge_stretch": 84.27808756955528,
+            "p95_edge_stretch": 2.077705811229235,
+            "p99_edge_stretch": 4.873804773811236,
+            "time_seconds": 0.625
+          }
+        ],
+        "demo_slash_v1": [
+          {
+            "flipped_triangles": 1856,
+            "max_edge_stretch": 80.1238767146026,
+            "p95_edge_stretch": 2.7371826601278215,
+            "p99_edge_stretch": 5.874308608045813,
+            "time_seconds": 0.0
+          },
+          {
+            "flipped_triangles": 1601,
+            "max_edge_stretch": 95.58467012943939,
+            "p95_edge_stretch": 2.6494236382648646,
+            "p99_edge_stretch": 5.576005013883666,
+            "time_seconds": 0.2777777777777778
+          },
+          {
+            "flipped_triangles": 1535,
+            "max_edge_stretch": 77.6177149752949,
+            "p95_edge_stretch": 1.6660731077271183,
+            "p99_edge_stretch": 4.097751480958637,
+            "time_seconds": 0.5555555555555556
+          },
+          {
+            "flipped_triangles": 1856,
+            "max_edge_stretch": 80.1238767146026,
+            "p95_edge_stretch": 2.7371826601278215,
+            "p99_edge_stretch": 5.874308608045813,
+            "time_seconds": 0.8333333333333334
+          }
+        ]
+      },
+      "region_count": 122,
+      "regions": [
+        {
+          "face_count": 3061,
+          "pixel_count": 72748,
+          "region_id": 2,
+          "safe_seed_pixel_count": 67946,
+          "vertex_count": 2692
+        },
+        {
+          "face_count": 17,
+          "pixel_count": 64,
+          "region_id": 19,
+          "safe_seed_pixel_count": 64,
+          "vertex_count": 19
+        },
+        {
+          "face_count": 34,
+          "pixel_count": 89,
+          "region_id": 58,
+          "safe_seed_pixel_count": 68,
+          "vertex_count": 36
+        },
+        {
+          "face_count": 24,
+          "pixel_count": 66,
+          "region_id": 59,
+          "safe_seed_pixel_count": 66,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 25,
+          "pixel_count": 73,
+          "region_id": 60,
+          "safe_seed_pixel_count": 73,
+          "vertex_count": 27
+        },
+        {
+          "face_count": 24,
+          "pixel_count": 73,
+          "region_id": 61,
+          "safe_seed_pixel_count": 73,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 28,
+          "pixel_count": 113,
+          "region_id": 67,
+          "safe_seed_pixel_count": 71,
+          "vertex_count": 29
+        },
+        {
+          "face_count": 44,
+          "pixel_count": 100,
+          "region_id": 70,
+          "safe_seed_pixel_count": 66,
+          "vertex_count": 45
+        },
+        {
+          "face_count": 26,
+          "pixel_count": 116,
+          "region_id": 71,
+          "safe_seed_pixel_count": 72,
+          "vertex_count": 28
+        },
+        {
+          "face_count": 20,
+          "pixel_count": 73,
+          "region_id": 72,
+          "safe_seed_pixel_count": 72,
+          "vertex_count": 22
+        },
+        {
+          "face_count": 26,
+          "pixel_count": 80,
+          "region_id": 73,
+          "safe_seed_pixel_count": 80,
+          "vertex_count": 28
+        },
+        {
+          "face_count": 25,
+          "pixel_count": 76,
+          "region_id": 78,
+          "safe_seed_pixel_count": 76,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 17,
+          "pixel_count": 94,
+          "region_id": 79,
+          "safe_seed_pixel_count": 67,
+          "vertex_count": 18
+        },
+        {
+          "face_count": 22,
+          "pixel_count": 68,
+          "region_id": 81,
+          "safe_seed_pixel_count": 68,
+          "vertex_count": 24
+        },
+        {
+          "face_count": 22,
+          "pixel_count": 64,
+          "region_id": 84,
+          "safe_seed_pixel_count": 64,
+          "vertex_count": 23
+        },
+        {
+          "face_count": 24,
+          "pixel_count": 73,
+          "region_id": 92,
+          "safe_seed_pixel_count": 73,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 24,
+          "pixel_count": 78,
+          "region_id": 93,
+          "safe_seed_pixel_count": 78,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 24,
+          "pixel_count": 102,
+          "region_id": 95,
+          "safe_seed_pixel_count": 66,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 22,
+          "pixel_count": 76,
+          "region_id": 97,
+          "safe_seed_pixel_count": 76,
+          "vertex_count": 24
+        },
+        {
+          "face_count": 23,
+          "pixel_count": 71,
+          "region_id": 98,
+          "safe_seed_pixel_count": 71,
+          "vertex_count": 25
+        },
+        {
+          "face_count": 43,
+          "pixel_count": 125,
+          "region_id": 104,
+          "safe_seed_pixel_count": 79,
+          "vertex_count": 45
+        },
+        {
+          "face_count": 28,
+          "pixel_count": 75,
+          "region_id": 105,
+          "safe_seed_pixel_count": 75,
+          "vertex_count": 29
+        },
+        {
+          "face_count": 20,
+          "pixel_count": 66,
+          "region_id": 106,
+          "safe_seed_pixel_count": 66,
+          "vertex_count": 22
+        },
+        {
+          "face_count": 26,
+          "pixel_count": 78,
+          "region_id": 107,
+          "safe_seed_pixel_count": 78,
+          "vertex_count": 27
+        },
+        {
+          "face_count": 14,
+          "pixel_count": 102,
+          "region_id": 108,
+          "safe_seed_pixel_count": 66,
+          "vertex_count": 16
+        },
+        {
+          "face_count": 27,
+          "pixel_count": 74,
+          "region_id": 111,
+          "safe_seed_pixel_count": 74,
+          "vertex_count": 29
+        },
+        {
+          "face_count": 25,
+          "pixel_count": 72,
+          "region_id": 112,
+          "safe_seed_pixel_count": 72,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 22,
+          "pixel_count": 70,
+          "region_id": 113,
+          "safe_seed_pixel_count": 70,
+          "vertex_count": 24
+        },
+        {
+          "face_count": 25,
+          "pixel_count": 74,
+          "region_id": 114,
+          "safe_seed_pixel_count": 74,
+          "vertex_count": 27
+        },
+        {
+          "face_count": 26,
+          "pixel_count": 77,
+          "region_id": 115,
+          "safe_seed_pixel_count": 77,
+          "vertex_count": 27
+        },
+        {
+          "face_count": 27,
+          "pixel_count": 78,
+          "region_id": 116,
+          "safe_seed_pixel_count": 78,
+          "vertex_count": 29
+        },
+        {
+          "face_count": 25,
+          "pixel_count": 68,
+          "region_id": 120,
+          "safe_seed_pixel_count": 68,
+          "vertex_count": 27
+        },
+        {
+          "face_count": 25,
+          "pixel_count": 74,
+          "region_id": 121,
+          "safe_seed_pixel_count": 74,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 25,
+          "pixel_count": 68,
+          "region_id": 125,
+          "safe_seed_pixel_count": 68,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 30,
+          "pixel_count": 70,
+          "region_id": 127,
+          "safe_seed_pixel_count": 70,
+          "vertex_count": 32
+        },
+        {
+          "face_count": 20,
+          "pixel_count": 70,
+          "region_id": 130,
+          "safe_seed_pixel_count": 70,
+          "vertex_count": 22
+        },
+        {
+          "face_count": 18,
+          "pixel_count": 77,
+          "region_id": 142,
+          "safe_seed_pixel_count": 77,
+          "vertex_count": 20
+        },
+        {
+          "face_count": 36,
+          "pixel_count": 97,
+          "region_id": 143,
+          "safe_seed_pixel_count": 73,
+          "vertex_count": 38
+        },
+        {
+          "face_count": 22,
+          "pixel_count": 74,
+          "region_id": 144,
+          "safe_seed_pixel_count": 74,
+          "vertex_count": 24
+        },
+        {
+          "face_count": 25,
+          "pixel_count": 72,
+          "region_id": 155,
+          "safe_seed_pixel_count": 72,
+          "vertex_count": 27
+        },
+        {
+          "face_count": 23,
+          "pixel_count": 74,
+          "region_id": 156,
+          "safe_seed_pixel_count": 73,
+          "vertex_count": 25
+        },
+        {
+          "face_count": 28,
+          "pixel_count": 94,
+          "region_id": 160,
+          "safe_seed_pixel_count": 73,
+          "vertex_count": 30
+        },
+        {
+          "face_count": 24,
+          "pixel_count": 85,
+          "region_id": 177,
+          "safe_seed_pixel_count": 85,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 27,
+          "pixel_count": 74,
+          "region_id": 178,
+          "safe_seed_pixel_count": 74,
+          "vertex_count": 29
+        },
+        {
+          "face_count": 22,
+          "pixel_count": 64,
+          "region_id": 198,
+          "safe_seed_pixel_count": 64,
+          "vertex_count": 24
+        },
+        {
+          "face_count": 18,
+          "pixel_count": 72,
+          "region_id": 199,
+          "safe_seed_pixel_count": 64,
+          "vertex_count": 20
+        },
+        {
+          "face_count": 34,
+          "pixel_count": 82,
+          "region_id": 212,
+          "safe_seed_pixel_count": 82,
+          "vertex_count": 35
+        },
+        {
+          "face_count": 24,
+          "pixel_count": 71,
+          "region_id": 215,
+          "safe_seed_pixel_count": 71,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 21,
+          "pixel_count": 93,
+          "region_id": 216,
+          "safe_seed_pixel_count": 82,
+          "vertex_count": 22
+        },
+        {
+          "face_count": 29,
+          "pixel_count": 84,
+          "region_id": 223,
+          "safe_seed_pixel_count": 84,
+          "vertex_count": 31
+        },
+        {
+          "face_count": 24,
+          "pixel_count": 79,
+          "region_id": 224,
+          "safe_seed_pixel_count": 79,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 31,
+          "pixel_count": 111,
+          "region_id": 226,
+          "safe_seed_pixel_count": 69,
+          "vertex_count": 32
+        },
+        {
+          "face_count": 20,
+          "pixel_count": 67,
+          "region_id": 227,
+          "safe_seed_pixel_count": 66,
+          "vertex_count": 22
+        },
+        {
+          "face_count": 26,
+          "pixel_count": 83,
+          "region_id": 229,
+          "safe_seed_pixel_count": 71,
+          "vertex_count": 27
+        },
+        {
+          "face_count": 22,
+          "pixel_count": 70,
+          "region_id": 233,
+          "safe_seed_pixel_count": 70,
+          "vertex_count": 24
+        },
+        {
+          "face_count": 34,
+          "pixel_count": 84,
+          "region_id": 237,
+          "safe_seed_pixel_count": 64,
+          "vertex_count": 36
+        },
+        {
+          "face_count": 25,
+          "pixel_count": 73,
+          "region_id": 238,
+          "safe_seed_pixel_count": 73,
+          "vertex_count": 27
+        },
+        {
+          "face_count": 24,
+          "pixel_count": 109,
+          "region_id": 240,
+          "safe_seed_pixel_count": 69,
+          "vertex_count": 25
+        },
+        {
+          "face_count": 22,
+          "pixel_count": 66,
+          "region_id": 241,
+          "safe_seed_pixel_count": 66,
+          "vertex_count": 24
+        },
+        {
+          "face_count": 20,
+          "pixel_count": 64,
+          "region_id": 244,
+          "safe_seed_pixel_count": 64,
+          "vertex_count": 22
+        },
+        {
+          "face_count": 25,
+          "pixel_count": 72,
+          "region_id": 249,
+          "safe_seed_pixel_count": 72,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 20,
+          "pixel_count": 68,
+          "region_id": 251,
+          "safe_seed_pixel_count": 66,
+          "vertex_count": 22
+        },
+        {
+          "face_count": 25,
+          "pixel_count": 82,
+          "region_id": 254,
+          "safe_seed_pixel_count": 82,
+          "vertex_count": 27
+        },
+        {
+          "face_count": 22,
+          "pixel_count": 69,
+          "region_id": 266,
+          "safe_seed_pixel_count": 69,
+          "vertex_count": 24
+        },
+        {
+          "face_count": 718,
+          "pixel_count": 16385,
+          "region_id": 268,
+          "safe_seed_pixel_count": 15004,
+          "vertex_count": 658
+        },
+        {
+          "face_count": 30,
+          "pixel_count": 83,
+          "region_id": 281,
+          "safe_seed_pixel_count": 67,
+          "vertex_count": 32
+        },
+        {
+          "face_count": 31,
+          "pixel_count": 79,
+          "region_id": 284,
+          "safe_seed_pixel_count": 79,
+          "vertex_count": 32
+        },
+        {
+          "face_count": 63,
+          "pixel_count": 532,
+          "region_id": 289,
+          "safe_seed_pixel_count": 295,
+          "vertex_count": 63
+        },
+        {
+          "face_count": 30,
+          "pixel_count": 81,
+          "region_id": 308,
+          "safe_seed_pixel_count": 81,
+          "vertex_count": 32
+        },
+        {
+          "face_count": 23,
+          "pixel_count": 70,
+          "region_id": 311,
+          "safe_seed_pixel_count": 70,
+          "vertex_count": 25
+        },
+        {
+          "face_count": 36,
+          "pixel_count": 90,
+          "region_id": 341,
+          "safe_seed_pixel_count": 72,
+          "vertex_count": 37
+        },
+        {
+          "face_count": 25,
+          "pixel_count": 85,
+          "region_id": 343,
+          "safe_seed_pixel_count": 85,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 28,
+          "pixel_count": 72,
+          "region_id": 345,
+          "safe_seed_pixel_count": 71,
+          "vertex_count": 29
+        },
+        {
+          "face_count": 35,
+          "pixel_count": 86,
+          "region_id": 352,
+          "safe_seed_pixel_count": 71,
+          "vertex_count": 37
+        },
+        {
+          "face_count": 30,
+          "pixel_count": 121,
+          "region_id": 354,
+          "safe_seed_pixel_count": 84,
+          "vertex_count": 31
+        },
+        {
+          "face_count": 40,
+          "pixel_count": 137,
+          "region_id": 359,
+          "safe_seed_pixel_count": 96,
+          "vertex_count": 42
+        },
+        {
+          "face_count": 25,
+          "pixel_count": 81,
+          "region_id": 381,
+          "safe_seed_pixel_count": 81,
+          "vertex_count": 27
+        },
+        {
+          "face_count": 47,
+          "pixel_count": 327,
+          "region_id": 394,
+          "safe_seed_pixel_count": 207,
+          "vertex_count": 49
+        },
+        {
+          "face_count": 198,
+          "pixel_count": 4041,
+          "region_id": 410,
+          "safe_seed_pixel_count": 3523,
+          "vertex_count": 183
+        },
+        {
+          "face_count": 62,
+          "pixel_count": 226,
+          "region_id": 415,
+          "safe_seed_pixel_count": 146,
+          "vertex_count": 62
+        },
+        {
+          "face_count": 27,
+          "pixel_count": 159,
+          "region_id": 463,
+          "safe_seed_pixel_count": 115,
+          "vertex_count": 29
+        },
+        {
+          "face_count": 416,
+          "pixel_count": 9272,
+          "region_id": 488,
+          "safe_seed_pixel_count": 8582,
+          "vertex_count": 376
+        },
+        {
+          "face_count": 340,
+          "pixel_count": 7034,
+          "region_id": 490,
+          "safe_seed_pixel_count": 5831,
+          "vertex_count": 310
+        },
+        {
+          "face_count": 70,
+          "pixel_count": 97,
+          "region_id": 503,
+          "safe_seed_pixel_count": 75,
+          "vertex_count": 72
+        },
+        {
+          "face_count": 112,
+          "pixel_count": 653,
+          "region_id": 611,
+          "safe_seed_pixel_count": 599,
+          "vertex_count": 112
+        },
+        {
+          "face_count": 85,
+          "pixel_count": 415,
+          "region_id": 615,
+          "safe_seed_pixel_count": 346,
+          "vertex_count": 87
+        },
+        {
+          "face_count": 83,
+          "pixel_count": 363,
+          "region_id": 631,
+          "safe_seed_pixel_count": 238,
+          "vertex_count": 85
+        },
+        {
+          "face_count": 22,
+          "pixel_count": 80,
+          "region_id": 652,
+          "safe_seed_pixel_count": 67,
+          "vertex_count": 24
+        },
+        {
+          "face_count": 89,
+          "pixel_count": 259,
+          "region_id": 654,
+          "safe_seed_pixel_count": 168,
+          "vertex_count": 91
+        },
+        {
+          "face_count": 63,
+          "pixel_count": 293,
+          "region_id": 655,
+          "safe_seed_pixel_count": 113,
+          "vertex_count": 65
+        },
+        {
+          "face_count": 67,
+          "pixel_count": 123,
+          "region_id": 656,
+          "safe_seed_pixel_count": 101,
+          "vertex_count": 69
+        },
+        {
+          "face_count": 54,
+          "pixel_count": 465,
+          "region_id": 657,
+          "safe_seed_pixel_count": 412,
+          "vertex_count": 56
+        },
+        {
+          "face_count": 1048,
+          "pixel_count": 36343,
+          "region_id": 668,
+          "safe_seed_pixel_count": 33187,
+          "vertex_count": 896
+        },
+        {
+          "face_count": 32,
+          "pixel_count": 96,
+          "region_id": 677,
+          "safe_seed_pixel_count": 79,
+          "vertex_count": 34
+        },
+        {
+          "face_count": 31,
+          "pixel_count": 83,
+          "region_id": 679,
+          "safe_seed_pixel_count": 66,
+          "vertex_count": 32
+        },
+        {
+          "face_count": 37,
+          "pixel_count": 102,
+          "region_id": 712,
+          "safe_seed_pixel_count": 82,
+          "vertex_count": 38
+        },
+        {
+          "face_count": 22,
+          "pixel_count": 70,
+          "region_id": 725,
+          "safe_seed_pixel_count": 70,
+          "vertex_count": 24
+        },
+        {
+          "face_count": 25,
+          "pixel_count": 75,
+          "region_id": 726,
+          "safe_seed_pixel_count": 75,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 10,
+          "pixel_count": 70,
+          "region_id": 732,
+          "safe_seed_pixel_count": 70,
+          "vertex_count": 12
+        },
+        {
+          "face_count": 44,
+          "pixel_count": 119,
+          "region_id": 733,
+          "safe_seed_pixel_count": 74,
+          "vertex_count": 46
+        },
+        {
+          "face_count": 22,
+          "pixel_count": 67,
+          "region_id": 740,
+          "safe_seed_pixel_count": 67,
+          "vertex_count": 24
+        },
+        {
+          "face_count": 40,
+          "pixel_count": 110,
+          "region_id": 744,
+          "safe_seed_pixel_count": 96,
+          "vertex_count": 41
+        },
+        {
+          "face_count": 38,
+          "pixel_count": 82,
+          "region_id": 745,
+          "safe_seed_pixel_count": 68,
+          "vertex_count": 39
+        },
+        {
+          "face_count": 23,
+          "pixel_count": 67,
+          "region_id": 746,
+          "safe_seed_pixel_count": 67,
+          "vertex_count": 25
+        },
+        {
+          "face_count": 24,
+          "pixel_count": 70,
+          "region_id": 748,
+          "safe_seed_pixel_count": 70,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 34,
+          "pixel_count": 91,
+          "region_id": 749,
+          "safe_seed_pixel_count": 79,
+          "vertex_count": 35
+        },
+        {
+          "face_count": 258,
+          "pixel_count": 4039,
+          "region_id": 771,
+          "safe_seed_pixel_count": 2615,
+          "vertex_count": 242
+        },
+        {
+          "face_count": 376,
+          "pixel_count": 8185,
+          "region_id": 772,
+          "safe_seed_pixel_count": 6214,
+          "vertex_count": 338
+        },
+        {
+          "face_count": 48,
+          "pixel_count": 271,
+          "region_id": 780,
+          "safe_seed_pixel_count": 93,
+          "vertex_count": 49
+        },
+        {
+          "face_count": 32,
+          "pixel_count": 95,
+          "region_id": 786,
+          "safe_seed_pixel_count": 76,
+          "vertex_count": 34
+        },
+        {
+          "face_count": 24,
+          "pixel_count": 76,
+          "region_id": 788,
+          "safe_seed_pixel_count": 76,
+          "vertex_count": 25
+        },
+        {
+          "face_count": 38,
+          "pixel_count": 118,
+          "region_id": 789,
+          "safe_seed_pixel_count": 76,
+          "vertex_count": 40
+        },
+        {
+          "face_count": 72,
+          "pixel_count": 580,
+          "region_id": 790,
+          "safe_seed_pixel_count": 354,
+          "vertex_count": 72
+        },
+        {
+          "face_count": 40,
+          "pixel_count": 100,
+          "region_id": 795,
+          "safe_seed_pixel_count": 66,
+          "vertex_count": 41
+        },
+        {
+          "face_count": 23,
+          "pixel_count": 133,
+          "region_id": 802,
+          "safe_seed_pixel_count": 65,
+          "vertex_count": 24
+        },
+        {
+          "face_count": 18,
+          "pixel_count": 103,
+          "region_id": 804,
+          "safe_seed_pixel_count": 81,
+          "vertex_count": 20
+        },
+        {
+          "face_count": 187,
+          "pixel_count": 3163,
+          "region_id": 805,
+          "safe_seed_pixel_count": 2568,
+          "vertex_count": 172
+        },
+        {
+          "face_count": 52,
+          "pixel_count": 236,
+          "region_id": 820,
+          "safe_seed_pixel_count": 127,
+          "vertex_count": 53
+        },
+        {
+          "face_count": 45,
+          "pixel_count": 224,
+          "region_id": 824,
+          "safe_seed_pixel_count": 73,
+          "vertex_count": 46
+        },
+        {
+          "face_count": 23,
+          "pixel_count": 65,
+          "region_id": 849,
+          "safe_seed_pixel_count": 65,
+          "vertex_count": 24
+        },
+        {
+          "face_count": 22,
+          "pixel_count": 71,
+          "region_id": 851,
+          "safe_seed_pixel_count": 71,
+          "vertex_count": 24
+        },
+        {
+          "face_count": 24,
+          "pixel_count": 81,
+          "region_id": 853,
+          "safe_seed_pixel_count": 81,
+          "vertex_count": 26
+        }
+      ],
+      "source_foreground_pixel_count": 174442,
+      "source_texture_sha256": "f2255e32c15ded74e08def99ef5160935b93c2d58d9c545ae4fc2d67ad2ae885",
+      "unsupported_fraction": 0.0,
+      "view_index": 0,
+      "visual_face_count": 10192,
+      "visual_vertex_count": 9640
+    },
+    {
+      "completion_fraction": 0.0,
+      "direct_source_fraction": 1.0,
+      "max_nearest_safe_seed_distance_px": 11.510864433221338,
+      "max_rest_reconstruction_error_px": 0.0,
+      "other_view_fraction": 0.0,
+      "p95_nearest_safe_seed_distance_px": 4.527692569068709,
+      "partition_contract": "SOURCE_RASTER_4N_X_STAGE35_SAFE_SHARED_EDGE_V1",
+      "qa_by_clip": {
+        "demo_idle_v1": [
+          {
+            "flipped_triangles": 389,
+            "max_edge_stretch": 46.05372786149291,
+            "p95_edge_stretch": 1.663580068175937,
+            "p99_edge_stretch": 4.97054256096982,
+            "time_seconds": 0.0
+          },
+          {
+            "flipped_triangles": 418,
+            "max_edge_stretch": 46.350554961625846,
+            "p95_edge_stretch": 1.682691106830356,
+            "p99_edge_stretch": 4.987558404200926,
+            "time_seconds": 0.8333333333333334
+          },
+          {
+            "flipped_triangles": 429,
+            "max_edge_stretch": 46.465374514389005,
+            "p95_edge_stretch": 1.6813283565837405,
+            "p99_edge_stretch": 5.021069602306659,
+            "time_seconds": 1.6666666666666667
+          },
+          {
+            "flipped_triangles": 418,
+            "max_edge_stretch": 46.35056441069084,
+            "p95_edge_stretch": 1.6826912439175095,
+            "p99_edge_stretch": 4.987553137867985,
+            "time_seconds": 2.5
+          }
+        ],
+        "demo_run_v1": [
+          {
+            "flipped_triangles": 924,
+            "max_edge_stretch": 29.176597526040027,
+            "p95_edge_stretch": 1.6521493872589308,
+            "p99_edge_stretch": 3.651477284734765,
+            "time_seconds": 0.0
+          },
+          {
+            "flipped_triangles": 831,
+            "max_edge_stretch": 30.348194842587528,
+            "p95_edge_stretch": 1.4626360737195476,
+            "p99_edge_stretch": 3.5786815531482348,
+            "time_seconds": 0.20833333333333334
+          },
+          {
+            "flipped_triangles": 1087,
+            "max_edge_stretch": 25.45151493535213,
+            "p95_edge_stretch": 1.591927481112048,
+            "p99_edge_stretch": 3.4936378111743895,
+            "time_seconds": 0.4166666666666667
+          },
+          {
+            "flipped_triangles": 981,
+            "max_edge_stretch": 32.44945867252624,
+            "p95_edge_stretch": 1.6376049282186484,
+            "p99_edge_stretch": 3.698892862268456,
+            "time_seconds": 0.625
+          }
+        ],
+        "demo_slash_v1": [
+          {
+            "flipped_triangles": 958,
+            "max_edge_stretch": 39.040309131857775,
+            "p95_edge_stretch": 1.8205529348212166,
+            "p99_edge_stretch": 4.21425466979178,
+            "time_seconds": 0.0
+          },
+          {
+            "flipped_triangles": 979,
+            "max_edge_stretch": 40.1364320853387,
+            "p95_edge_stretch": 1.7097349543182412,
+            "p99_edge_stretch": 4.440045224034188,
+            "time_seconds": 0.2777777777777778
+          },
+          {
+            "flipped_triangles": 733,
+            "max_edge_stretch": 43.308036806982244,
+            "p95_edge_stretch": 1.8615891229122412,
+            "p99_edge_stretch": 4.804883957150543,
+            "time_seconds": 0.5555555555555556
+          },
+          {
+            "flipped_triangles": 958,
+            "max_edge_stretch": 39.040309131857775,
+            "p95_edge_stretch": 1.8205529348212166,
+            "p99_edge_stretch": 4.21425466979178,
+            "time_seconds": 0.8333333333333334
+          }
+        ]
+      },
+      "region_count": 67,
+      "regions": [
+        {
+          "face_count": 2176,
+          "pixel_count": 66215,
+          "region_id": 0,
+          "safe_seed_pixel_count": 63350,
+          "vertex_count": 1877
+        },
+        {
+          "face_count": 35,
+          "pixel_count": 88,
+          "region_id": 37,
+          "safe_seed_pixel_count": 69,
+          "vertex_count": 37
+        },
+        {
+          "face_count": 24,
+          "pixel_count": 69,
+          "region_id": 38,
+          "safe_seed_pixel_count": 69,
+          "vertex_count": 25
+        },
+        {
+          "face_count": 23,
+          "pixel_count": 71,
+          "region_id": 39,
+          "safe_seed_pixel_count": 71,
+          "vertex_count": 25
+        },
+        {
+          "face_count": 22,
+          "pixel_count": 66,
+          "region_id": 40,
+          "safe_seed_pixel_count": 66,
+          "vertex_count": 24
+        },
+        {
+          "face_count": 34,
+          "pixel_count": 87,
+          "region_id": 59,
+          "safe_seed_pixel_count": 72,
+          "vertex_count": 36
+        },
+        {
+          "face_count": 34,
+          "pixel_count": 83,
+          "region_id": 61,
+          "safe_seed_pixel_count": 68,
+          "vertex_count": 36
+        },
+        {
+          "face_count": 27,
+          "pixel_count": 76,
+          "region_id": 65,
+          "safe_seed_pixel_count": 76,
+          "vertex_count": 28
+        },
+        {
+          "face_count": 23,
+          "pixel_count": 68,
+          "region_id": 66,
+          "safe_seed_pixel_count": 68,
+          "vertex_count": 25
+        },
+        {
+          "face_count": 24,
+          "pixel_count": 71,
+          "region_id": 67,
+          "safe_seed_pixel_count": 71,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 24,
+          "pixel_count": 67,
+          "region_id": 71,
+          "safe_seed_pixel_count": 67,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 22,
+          "pixel_count": 66,
+          "region_id": 79,
+          "safe_seed_pixel_count": 66,
+          "vertex_count": 24
+        },
+        {
+          "face_count": 35,
+          "pixel_count": 81,
+          "region_id": 80,
+          "safe_seed_pixel_count": 67,
+          "vertex_count": 37
+        },
+        {
+          "face_count": 27,
+          "pixel_count": 75,
+          "region_id": 82,
+          "safe_seed_pixel_count": 75,
+          "vertex_count": 29
+        },
+        {
+          "face_count": 25,
+          "pixel_count": 75,
+          "region_id": 83,
+          "safe_seed_pixel_count": 75,
+          "vertex_count": 27
+        },
+        {
+          "face_count": 39,
+          "pixel_count": 102,
+          "region_id": 85,
+          "safe_seed_pixel_count": 71,
+          "vertex_count": 40
+        },
+        {
+          "face_count": 22,
+          "pixel_count": 71,
+          "region_id": 86,
+          "safe_seed_pixel_count": 71,
+          "vertex_count": 24
+        },
+        {
+          "face_count": 28,
+          "pixel_count": 79,
+          "region_id": 87,
+          "safe_seed_pixel_count": 79,
+          "vertex_count": 30
+        },
+        {
+          "face_count": 27,
+          "pixel_count": 79,
+          "region_id": 88,
+          "safe_seed_pixel_count": 79,
+          "vertex_count": 28
+        },
+        {
+          "face_count": 36,
+          "pixel_count": 97,
+          "region_id": 89,
+          "safe_seed_pixel_count": 76,
+          "vertex_count": 38
+        },
+        {
+          "face_count": 33,
+          "pixel_count": 80,
+          "region_id": 90,
+          "safe_seed_pixel_count": 80,
+          "vertex_count": 34
+        },
+        {
+          "face_count": 26,
+          "pixel_count": 76,
+          "region_id": 91,
+          "safe_seed_pixel_count": 76,
+          "vertex_count": 27
+        },
+        {
+          "face_count": 22,
+          "pixel_count": 74,
+          "region_id": 92,
+          "safe_seed_pixel_count": 74,
+          "vertex_count": 24
+        },
+        {
+          "face_count": 22,
+          "pixel_count": 65,
+          "region_id": 94,
+          "safe_seed_pixel_count": 65,
+          "vertex_count": 24
+        },
+        {
+          "face_count": 25,
+          "pixel_count": 67,
+          "region_id": 102,
+          "safe_seed_pixel_count": 67,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 34,
+          "pixel_count": 78,
+          "region_id": 110,
+          "safe_seed_pixel_count": 78,
+          "vertex_count": 36
+        },
+        {
+          "face_count": 35,
+          "pixel_count": 75,
+          "region_id": 114,
+          "safe_seed_pixel_count": 66,
+          "vertex_count": 37
+        },
+        {
+          "face_count": 20,
+          "pixel_count": 64,
+          "region_id": 115,
+          "safe_seed_pixel_count": 64,
+          "vertex_count": 22
+        },
+        {
+          "face_count": 25,
+          "pixel_count": 77,
+          "region_id": 122,
+          "safe_seed_pixel_count": 77,
+          "vertex_count": 27
+        },
+        {
+          "face_count": 25,
+          "pixel_count": 67,
+          "region_id": 125,
+          "safe_seed_pixel_count": 67,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 16,
+          "pixel_count": 67,
+          "region_id": 128,
+          "safe_seed_pixel_count": 67,
+          "vertex_count": 18
+        },
+        {
+          "face_count": 24,
+          "pixel_count": 75,
+          "region_id": 165,
+          "safe_seed_pixel_count": 75,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 34,
+          "pixel_count": 85,
+          "region_id": 180,
+          "safe_seed_pixel_count": 85,
+          "vertex_count": 35
+        },
+        {
+          "face_count": 20,
+          "pixel_count": 82,
+          "region_id": 186,
+          "safe_seed_pixel_count": 66,
+          "vertex_count": 21
+        },
+        {
+          "face_count": 24,
+          "pixel_count": 74,
+          "region_id": 192,
+          "safe_seed_pixel_count": 74,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 20,
+          "pixel_count": 67,
+          "region_id": 193,
+          "safe_seed_pixel_count": 67,
+          "vertex_count": 22
+        },
+        {
+          "face_count": 20,
+          "pixel_count": 65,
+          "region_id": 194,
+          "safe_seed_pixel_count": 65,
+          "vertex_count": 22
+        },
+        {
+          "face_count": 24,
+          "pixel_count": 83,
+          "region_id": 197,
+          "safe_seed_pixel_count": 83,
+          "vertex_count": 26
+        },
+        {
+          "face_count": 25,
+          "pixel_count": 74,
+          "region_id": 199,
+          "safe_seed_pixel_count": 74,
+          "vertex_count": 27
+        },
+        {
+          "face_count": 10,
+          "pixel_count": 72,
+          "region_id": 200,
+          "safe_seed_pixel_count": 71,
+          "vertex_count": 12
+        },
+        {
+          "face_count": 10,
+          "pixel_count": 78,
+          "region_id": 202,
+          "safe_seed_pixel_count": 78,
+          "vertex_count": 12
+        },
+        {
+          "face_count": 16,
+          "pixel_count": 144,
+          "region_id": 204,
+          "safe_seed_pixel_count": 144,
+          "vertex_count": 18
+        },
+        {
+          "face_count": 73,
+          "pixel_count": 306,
+          "region_id": 212,
+          "safe_seed_pixel_count": 221,
+          "vertex_count": 73
+        },
+        {
+          "face_count": 18,
+          "pixel_count": 105,
+          "region_id": 213,
+          "safe_seed_pixel_count": 95,
+          "vertex_count": 20
+        },
+        {
+          "face_count": 612,
+          "pixel_count": 22015,
+          "region_id": 214,
+          "safe_seed_pixel_count": 20980,
+          "vertex_count": 532
+        },
+        {
+          "face_count": 10,
+          "pixel_count": 101,
+          "region_id": 217,
+          "safe_seed_pixel_count": 101,
+          "vertex_count": 12
+        },
+        {
+          "face_count": 49,
+          "pixel_count": 132,
+          "region_id": 221,
+          "safe_seed_pixel_count": 88,
+          "vertex_count": 50
+        },
+        {
+          "face_count": 20,
+          "pixel_count": 82,
+          "region_id": 245,
+          "safe_seed_pixel_count": 64,
+          "vertex_count": 22
+        },
+        {
+          "face_count": 44,
+          "pixel_count": 253,
+          "region_id": 250,
+          "safe_seed_pixel_count": 215,
+          "vertex_count": 45
+        },
+        {
+          "face_count": 50,
+          "pixel_count": 301,
+          "region_id": 300,
+          "safe_seed_pixel_count": 210,
+          "vertex_count": 52
+        },
+        {
+          "face_count": 62,
+          "pixel_count": 204,
+          "region_id": 404,
+          "safe_seed_pixel_count": 139,
+          "vertex_count": 64
+        },
+        {
+          "face_count": 31,
+          "pixel_count": 81,
+          "region_id": 413,
+          "safe_seed_pixel_count": 79,
+          "vertex_count": 32
+        },
+        {
+          "face_count": 439,
+          "pixel_count": 15060,
+          "region_id": 428,
+          "safe_seed_pixel_count": 13756,
+          "vertex_count": 372
+        },
+        {
+          "face_count": 16,
+          "pixel_count": 80,
+          "region_id": 441,
+          "safe_seed_pixel_count": 65,
+          "vertex_count": 18
+        },
+        {
+          "face_count": 44,
+          "pixel_count": 282,
+          "region_id": 470,
+          "safe_seed_pixel_count": 182,
+          "vertex_count": 44
+        },
+        {
+          "face_count": 26,
+          "pixel_count": 100,
+          "region_id": 479,
+          "safe_seed_pixel_count": 75,
+          "vertex_count": 28
+        },
+        {
+          "face_count": 54,
+          "pixel_count": 237,
+          "region_id": 547,
+          "safe_seed_pixel_count": 120,
+          "vertex_count": 56
+        },
+        {
+          "face_count": 212,
+          "pixel_count": 6485,
+          "region_id": 549,
+          "safe_seed_pixel_count": 5113,
+          "vertex_count": 198
+        },
+        {
+          "face_count": 96,
+          "pixel_count": 887,
+          "region_id": 581,
+          "safe_seed_pixel_count": 463,
+          "vertex_count": 94
+        },
+        {
+          "face_count": 30,
+          "pixel_count": 299,
+          "region_id": 583,
+          "safe_seed_pixel_count": 200,
+          "vertex_count": 30
+        },
+        {
+          "face_count": 607,
+          "pixel_count": 19671,
+          "region_id": 589,
+          "safe_seed_pixel_count": 17292,
+          "vertex_count": 526
+        },
+        {
+          "face_count": 36,
+          "pixel_count": 99,
+          "region_id": 609,
+          "safe_seed_pixel_count": 80,
+          "vertex_count": 38
+        },
+        {
+          "face_count": 29,
+          "pixel_count": 68,
+          "region_id": 625,
+          "safe_seed_pixel_count": 68,
+          "vertex_count": 30
+        },
+        {
+          "face_count": 40,
+          "pixel_count": 101,
+          "region_id": 649,
+          "safe_seed_pixel_count": 82,
+          "vertex_count": 41
+        },
+        {
+          "face_count": 270,
+          "pixel_count": 6054,
+          "region_id": 675,
+          "safe_seed_pixel_count": 4572,
+          "vertex_count": 247
+        },
+        {
+          "face_count": 30,
+          "pixel_count": 285,
+          "region_id": 706,
+          "safe_seed_pixel_count": 198,
+          "vertex_count": 32
+        },
+        {
+          "face_count": 102,
+          "pixel_count": 1774,
+          "region_id": 716,
+          "safe_seed_pixel_count": 1582,
+          "vertex_count": 97
+        }
+      ],
+      "source_foreground_pixel_count": 144437,
+      "source_texture_sha256": "0c5700e954039ebee7738e42497575130e74065e2ea98188a1c44a947d00b823",
+      "unsupported_fraction": 0.0,
+      "view_index": 2,
+      "visual_face_count": 6217,
+      "visual_vertex_count": 5743
+    }
+  ]
+}

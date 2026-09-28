@@ -308,9 +308,12 @@ def main():
     dense=dense_supported_face_mask(rr,cand,surface)
     Fgraph=F[dense]
     jids,Wpred=_candidate_skin_weights(cand,skin,sk)
-    sjids,bones=_bone_segments(sk)
-    if tuple(jids)!=tuple(sjids):
-        raise RuntimeError("CUT_CELL_JOINT_ORDER_DRIFT")
+    sjids,bones0=_bone_segments(sk)
+    bone_by_id={str(row[0]):row for row in bones0}
+    missing=[jid for jid in jids if str(jid) not in bone_by_id]
+    if missing:
+        raise RuntimeError("CUT_CELL_BONE_ID_MISSING:"+json.dumps(missing))
+    bones=[bone_by_id[str(jid)] for jid in jids]
     extent=float(np.max(P.max(axis=0)-P.min(axis=0)))
 
     G,nbr,gmeta=_build_cutcell_graph(P,Fgraph,a.resolution)

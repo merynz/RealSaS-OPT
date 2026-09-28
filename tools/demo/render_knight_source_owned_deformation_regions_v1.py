@@ -26,6 +26,8 @@ from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import _joint_pose_v
 from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
     VisualMesh2D,
     build_visual_mesh_from_mask,
+    build_visual_mesh_from_region_labels_v1,
+    partition_source_mask_by_safe_face_adjacency_v1,
     raster_xy_to_source_texel_xy,
 )
 from compiler.realsas_compiler_core.visibility_v2 import rasterize_visible_owner
@@ -128,7 +130,7 @@ def _combine_region_meshes(regions,width,height,target_edge_px=16):
     return out,np.asarray(vertex_region,dtype=np.int32),np.asarray(face_region,dtype=np.int32),rows
 
 
-def _region_bindings(mesh,vertex_region,regions,visibility,mech_faces,face_component):
+def _region_bindings(mesh,vertex_region,regions,visibility,mech_faces,seed_labels):
     pos=np.asarray(mesh.positions,dtype=np.float64)
     owner=np.asarray(visibility.owner_face_index,dtype=np.int64)
     bary=np.asarray(visibility.barycentric,dtype=np.float64)
@@ -145,7 +147,7 @@ def _region_bindings(mesh,vertex_region,regions,visibility,mech_faces,face_compo
         ys,xs=np.nonzero(seed_mask)
         seed_owner=owner[ys,xs]
         good=(seed_owner>=0)
-        good &= face_component[np.maximum(seed_owner,0)]==rid
+        good &= (seed_labels[ys,xs] == int(rid))
         good &= np.isfinite(bary[ys,xs]).all(axis=1)
         ys=ys[good]; xs=xs[good]; seed_owner=seed_owner[good]
         if len(xs)<3:
@@ -237,7 +239,7 @@ def run(*,authority_root:Path,parent_run_id:str,out_dir:Path,native_player:Path,
         "product_authority_claimed":False,
         "ownership":{
             "mechanical_mesh_render_authority":False,
-            "visual_mesh_authority":"SOURCE_FOREGROUND_MASK_X_G3B_SAFE_DEFORMATION_REGION",
+            "visual_mesh_authority":"SOURCE_FOREGROUND_MASK_X_G3B_SAFE_LOCAL_ADJACENCY_CHART",
             "texture_authority":"ORIGINAL_SOURCE_RGBA",
             "appearance_provenance":"DIRECT_SOURCE_ONLY",
             "visual_cross_region_faces":0,
@@ -261,9 +263,31 @@ def run(*,authority_root:Path,parent_run_id:str,out_dir:Path,native_player:Path,
         mask=np.asarray(mask_by_view[vi],dtype=bool)
         h,w=mask.shape
         visibility=rasterize_visible_owner(candidate,camera,positions=rest,width=w,height=h,max_layers=4)
-        final_labels,seed_labels,regions=_partition_source_mask(mask,visibility.owner_face_index,face_component,min_seed_pixels=256)
-        mesh,vertex_region,face_region,region_rows=_combine_region_meshes(regions,w,h,target_edge_px=16)
-        binding=_region_bindings(mesh,vertex_region,regions,visibility,mech_faces,face_component)
+        final_labels,seed_labels,chart_rows=partition_source_mask_by_safe_face_adjacency_v1(
+            mask,
+            visibility.owner_face_index,
+            mech_faces,
+            unsafe,
+            minimum_seed_pixels=64,
+        )
+        region_value=build_visual_mesh_from_region_labels_v1(
+            mask,
+            final_labels,
+            target_edge_px=16,
+        )
+        mesh=region_value.mesh
+        vertex_region=np.asarray(region_value.vertex_region_id,dtype=np.int32)
+        face_region=np.asarray(region_value.face_region_id,dtype=np.int32)
+        region_rows=[]
+        seed_count_by_id={int(r["region_id"]):int(r["safe_seed_pixel_count"]) for r in chart_rows}
+        regions=[]
+        for row0 in region_value.region_rows:
+            rid=int(row0["region_id"])
+            rm=mask & (final_labels==rid)
+            sm=mask & (seed_labels==rid)
+            regions.append((rid,rm,sm))
+            region_rows.append({**dict(row0),"safe_seed_pixel_count":seed_count_by_id[rid]})
+        binding=_region_bindings(mesh,vertex_region,regions,visibility,mech_faces,seed_labels)
         rest_reconstructed=_mechanical_targets(binding=binding,posed_mechanical_xyz=rest,camera=camera)
         rest_error=np.linalg.norm(rest_reconstructed-np.asarray(mesh.positions,float),axis=1)
         view_root=out_dir/f"V{vi}"
@@ -273,6 +297,7 @@ def run(*,authority_root:Path,parent_run_id:str,out_dir:Path,native_player:Path,
             "view_index":vi,
             "source_foreground_pixel_count":int(mask.sum()),
             "region_count":len(regions),
+            "partition_contract":"SOURCE_RASTER_4N_X_STAGE35_SAFE_SHARED_EDGE_V1",
             "regions":region_rows,
             "visual_vertex_count":int(len(mesh.positions)),
             "visual_face_count":int(len(mesh.faces)),

@@ -1,0 +1,26 @@
+{
+  "schema": "RealSaS.KnightStage35TrustedUnsafeTopologyConcentration.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED",
+  "exact_counts": {
+    "unsafe_face_count": 1509,
+    "teacher_valid_unsafe_face_count": 1148,
+    "teacher_valid_nonincident": 1124,
+    "teacher_valid_share_vertex_only": 17,
+    "teacher_valid_edge_or_face_coherent": 7
+  },
+  "rates": {
+    "teacher_valid_fraction_of_unsafe": 0.7607687210072896,
+    "nonincident_fraction_among_teacher_valid_unsafe": 0.9790940766550522,
+    "non_edge_face_coherent_fraction_among_teacher_valid_unsafe": 0.9939024390243902,
+    "edge_or_face_coherent_fraction_among_teacher_valid_unsafe": 0.006097560975609756
+  },
+  "interpretation": {
+    "claim": "In the reliable teacher-covered subset, current Stage35 unsafe faces are overwhelmingly associated with source-topology disagreement rather than ordinary coherent source adjacency.",
+    "source_topology_shipping_authority": false,
+    "repair_selected": false
+  },
+  "evidence": [
+    "canonical/knight_stage35_unsafe_source_topology_audit_v1/REPORT.json",
+    "canonical/knight_s_w_topology_alignment_audit_v1/REPORT.json"
+  ]
+}

@@ -34,6 +34,255 @@ class VisualMesh2D:
     height: int
 
 
+@dataclass(frozen=True)
+class DeformationRegionVisualMesh:
+    """Source-owned visual mesh split by mechanically safe deformation regions."""
+
+    mesh: VisualMesh2D
+    vertex_region_id: np.ndarray
+    face_region_id: np.ndarray
+    region_rows: tuple[dict[str, Any], ...]
+
+
+def safe_face_deformation_components_v1(
+    mechanical_faces,
+    unsafe_face_indices,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Connected safe-face components after removing Stage35-unsafe faces.
+
+    This is presentation evidence only. It never changes mechanical topology,
+    weights, or Stage35 qualification. Faces marked unsafe receive component -1.
+    """
+
+    faces = np.asarray(mechanical_faces, dtype=np.int64)
+    if faces.ndim != 2 or faces.shape[1] != 3 or np.any(faces < 0):
+        raise QualificationError("VISUAL_REGION_MECHANICAL_FACES_INVALID")
+    unsafe = set(map(int, unsafe_face_indices))
+    if any(index < 0 or index >= len(faces) for index in unsafe):
+        raise QualificationError("VISUAL_REGION_UNSAFE_FACE_INDEX_INVALID")
+
+    edge_faces: dict[tuple[int, int], list[int]] = {}
+    for face_index, (a, b, c) in enumerate(faces.tolist()):
+        for u, v in ((a, b), (b, c), (c, a)):
+            key = (min(int(u), int(v)), max(int(u), int(v)))
+            edge_faces.setdefault(key, []).append(int(face_index))
+
+    adjacency: list[list[int]] = [[] for _ in range(len(faces))]
+    for rows in edge_faces.values():
+        if len(rows) != 2:
+            continue
+        a, b = rows
+        if a in unsafe or b in unsafe:
+            continue
+        adjacency[a].append(b)
+        adjacency[b].append(a)
+
+    labels = np.full((len(faces),), -1, dtype=np.int32)
+    sizes: list[int] = []
+    component_id = 0
+    for face_index in range(len(faces)):
+        if face_index in unsafe or labels[face_index] >= 0:
+            continue
+        queue = [face_index]
+        labels[face_index] = component_id
+        count = 0
+        for current in queue:
+            count += 1
+            for neighbor in adjacency[current]:
+                if labels[neighbor] < 0:
+                    labels[neighbor] = component_id
+                    queue.append(neighbor)
+        sizes.append(count)
+        component_id += 1
+    return labels, np.asarray(sizes, dtype=np.int64)
+
+
+def partition_source_mask_by_face_components_v1(
+    source_mask,
+    owner_face_index,
+    face_component_labels,
+    *,
+    minimum_seed_pixels: int = 256,
+) -> tuple[np.ndarray, np.ndarray, tuple[dict[str, int], ...]]:
+    """Partition every source foreground pixel into a safe deformation region.
+
+    Safe first-hit pixels seed their Stage35-safe face component. Pixels whose
+    first-hit face is unsafe/unavailable are assigned in rest space to the nearest
+    safe seed *within the same source connected component*. This fills the narrow
+    seam band without ever inventing cross-region visual triangles.
+
+    A small disconnected source component is never discarded merely because it is
+    below the global seed threshold: its largest safe component becomes a local
+    seed so detached accessories remain independently owned.
+    """
+
+    mask = np.asarray(source_mask, dtype=bool)
+    owner = np.asarray(owner_face_index, dtype=np.int64)
+    labels = np.asarray(face_component_labels, dtype=np.int32)
+    threshold = int(minimum_seed_pixels)
+    if mask.ndim != 2 or owner.shape != mask.shape:
+        raise QualificationError("VISUAL_REGION_SOURCE_OWNER_SHAPE_INVALID")
+    if labels.ndim != 1:
+        raise QualificationError("VISUAL_REGION_FACE_COMPONENT_LABELS_INVALID")
+    if threshold < 1:
+        raise QualificationError("VISUAL_REGION_MINIMUM_SEED_PIXELS_INVALID")
+    if np.any(owner[mask] >= len(labels)):
+        raise QualificationError("VISUAL_REGION_OWNER_FACE_INDEX_INVALID")
+
+    pixel_label = np.full(mask.shape, -1, dtype=np.int32)
+    valid = mask & (owner >= 0)
+    if np.any(valid):
+        pixel_label[valid] = labels[owner[valid]]
+
+    source_cc, source_cc_count = ndimage.label(
+        mask,
+        structure=np.asarray(
+            [[0, 1, 0], [1, 1, 1], [0, 1, 0]],
+            dtype=np.uint8,
+        ),
+    )
+    final = np.full(mask.shape, -1, dtype=np.int32)
+    region_stats: dict[int, dict[str, int]] = {}
+
+    for source_component in range(1, int(source_cc_count) + 1):
+        component_mask = source_cc == source_component
+        safe_values = pixel_label[component_mask]
+        safe_values = safe_values[safe_values >= 0]
+        if len(safe_values) == 0:
+            raise QualificationError(
+                "VISUAL_REGION_SOURCE_COMPONENT_WITHOUT_SAFE_DRIVER:"
+                + str(source_component)
+            )
+        values, counts = np.unique(safe_values, return_counts=True)
+        selected = [
+            int(value)
+            for value, count in zip(values.tolist(), counts.tolist())
+            if int(count) >= threshold
+        ]
+        if not selected:
+            selected = [int(values[int(np.argmax(counts))])]
+
+        seed_mask = component_mask & np.isin(
+            pixel_label,
+            np.asarray(selected, dtype=np.int32),
+        )
+        ys, xs = np.nonzero(seed_mask)
+        if len(xs) == 0:
+            raise QualificationError("VISUAL_REGION_LOCAL_SEED_EMPTY")
+        seed_xy = np.column_stack(
+            (xs.astype(np.float64), ys.astype(np.float64))
+        )
+        query_y, query_x = np.nonzero(component_mask)
+        query_xy = np.column_stack(
+            (query_x.astype(np.float64), query_y.astype(np.float64))
+        )
+        tree = cKDTree(seed_xy)
+        _distance, nearest = tree.query(query_xy, k=1)
+        nearest = np.asarray(nearest, dtype=np.int64)
+        assigned = pixel_label[ys[nearest], xs[nearest]]
+        if np.any(assigned < 0):
+            raise QualificationError("VISUAL_REGION_LOCAL_ASSIGNMENT_INVALID")
+        final[query_y, query_x] = assigned
+
+    if np.any(final[mask] < 0):
+        raise QualificationError("VISUAL_REGION_FOREGROUND_ASSIGNMENT_INCOMPLETE")
+
+    for region_id in sorted(set(final[mask].tolist())):
+        region_mask = mask & (final == int(region_id))
+        seed_mask = mask & (pixel_label == int(region_id))
+        region_stats[int(region_id)] = {
+            "region_id": int(region_id),
+            "pixel_count": int(np.count_nonzero(region_mask)),
+            "safe_seed_pixel_count": int(np.count_nonzero(seed_mask)),
+        }
+
+    return (
+        final,
+        pixel_label,
+        tuple(region_stats[key] for key in sorted(region_stats)),
+    )
+
+
+def build_visual_mesh_from_region_labels_v1(
+    source_mask,
+    region_labels,
+    *,
+    target_edge_px: int = 16,
+) -> DeformationRegionVisualMesh:
+    """Triangulate each deformation region independently while preserving art.
+
+    The union of the region masks is the exact source foreground. No triangle may
+    contain vertices from two deformation regions, so a Stage35 seam cannot turn
+    into a stretched presentation primitive.
+    """
+
+    mask = np.asarray(source_mask, dtype=bool)
+    labels = np.asarray(region_labels, dtype=np.int32)
+    if mask.ndim != 2 or labels.shape != mask.shape:
+        raise QualificationError("VISUAL_REGION_LABEL_SHAPE_INVALID")
+    if np.any(mask & (labels < 0)):
+        raise QualificationError("VISUAL_REGION_LABEL_COVERAGE_INCOMPLETE")
+    height, width = mask.shape
+
+    positions: list[np.ndarray] = []
+    faces: list[np.ndarray] = []
+    uvs: list[np.ndarray] = []
+    vertex_regions: list[int] = []
+    face_regions: list[int] = []
+    rows: list[dict[str, Any]] = []
+    offset = 0
+
+    for region_id in sorted(set(labels[mask].tolist())):
+        region_mask = mask & (labels == int(region_id))
+        mesh = build_visual_mesh_from_mask(
+            region_mask,
+            target_edge_px=int(target_edge_px),
+        )
+        p = np.asarray(mesh.positions, dtype=np.float64)
+        f = np.asarray(mesh.faces, dtype=np.uint32)
+        uv = np.asarray(mesh.uv, dtype=np.float64)
+        positions.append(p)
+        faces.append(f + np.uint32(offset))
+        uvs.append(uv)
+        vertex_regions.extend([int(region_id)] * len(p))
+        face_regions.extend([int(region_id)] * len(f))
+        rows.append(
+            {
+                "region_id": int(region_id),
+                "pixel_count": int(np.count_nonzero(region_mask)),
+                "vertex_count": int(len(p)),
+                "face_count": int(len(f)),
+            }
+        )
+        offset += len(p)
+
+    if not positions:
+        raise QualificationError("VISUAL_REGION_MESH_EMPTY")
+    combined = VisualMesh2D(
+        positions=np.concatenate(positions, axis=0),
+        faces=np.concatenate(faces, axis=0).astype(np.uint32),
+        uv=np.concatenate(uvs, axis=0),
+        width=int(width),
+        height=int(height),
+    )
+    vertex_region_id = np.asarray(vertex_regions, dtype=np.int32)
+    face_region_id = np.asarray(face_regions, dtype=np.int32)
+    if len(vertex_region_id) != len(combined.positions):
+        raise QualificationError("VISUAL_REGION_VERTEX_LABEL_COUNT_DRIFT")
+    if len(face_region_id) != len(combined.faces):
+        raise QualificationError("VISUAL_REGION_FACE_LABEL_COUNT_DRIFT")
+    for face_index, face in enumerate(np.asarray(combined.faces, dtype=np.int64)):
+        rid = int(face_region_id[face_index])
+        if np.any(vertex_region_id[face] != rid):
+            raise QualificationError("VISUAL_REGION_CROSS_REGION_FACE_FORBIDDEN")
+    return DeformationRegionVisualMesh(
+        mesh=combined,
+        vertex_region_id=vertex_region_id,
+        face_region_id=face_region_id,
+        region_rows=tuple(rows),
+    )
+
+
 def visual_mesh_semantic_hash(mesh: VisualMesh2D) -> str:
     positions = np.asarray(mesh.positions, dtype="<f8")
     faces = np.asarray(mesh.faces, dtype="<u4")

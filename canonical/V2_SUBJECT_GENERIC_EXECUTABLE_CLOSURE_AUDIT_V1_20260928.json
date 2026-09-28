@@ -1,0 +1,150 @@
+{
+  "algorithmic_subject_contamination": [],
+  "algorithmic_subject_contamination_count": 0,
+  "claim_boundary": "Text+semantic source audit over current 46-stage adapters, compiler core, promoted IRIS/Geppetto/Arachne. Subject-free guard strings and historical provenance labels are not algorithmic contamination.",
+  "demo_only_embedded_count": 2,
+  "demo_only_subject_named_apparatus_embedded_in_canonical_adapters": [
+    {
+      "classification": "DEMO_ONLY_SUBJECT_NAMED_APPARATUS_EMBEDDED_IN_CANONICAL_ADAPTER",
+      "line": 1311,
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py",
+      "text": "\"RealSaS.KnightDemoStage14FallbackPreregistration.v1\""
+    },
+    {
+      "classification": "DEMO_ONLY_SUBJECT_NAMED_APPARATUS_EMBEDDED_IN_CANONICAL_ADAPTER",
+      "line": 329,
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py",
+      "text": "\"RealSaS.KnightDemoStage18MeshFallbackPreregistration.v1\""
+    }
+  ],
+  "findings": [
+    {
+      "claim": "No current 46-stage/core/promoted-model product behavior may branch on Knight/Mage identity.",
+      "id": "PRODUCT_EXECUTABLE_ALGORITHMIC_SUBJECT_GENERICITY",
+      "passed": true,
+      "severity": "PASS"
+    },
+    {
+      "claim": "Subject-named demo fallback schemas should not live inside canonical generic adapters even when execution_class=DEMO_WITNESS and product authority is forbidden.",
+      "id": "DEMO_APPARATUS_SEPARATION_FROM_CANONICAL_ADAPTERS",
+      "passed": false,
+      "severity": "P1"
+    }
+  ],
+  "non_behavioral_metadata_or_docstring_hits": [
+    {
+      "classification": "NON_BEHAVIORAL_METADATA_OR_DOCSTRING",
+      "line": 76,
+      "path": "compiler/realsas_compiler_core/output_presentation_v1.py",
+      "text": "\"first_knight_v2_reuses_exact_output_camera_geometry\": True,"
+    },
+    {
+      "classification": "NON_BEHAVIORAL_METADATA_OR_DOCSTRING",
+      "line": 16,
+      "path": "models/iris/v5/source_signed_field_v5.py",
+      "text": "The canonical Knight policy fixes eight 1024x1024 source views and a bounded"
+    }
+  ],
+  "repo_head": "e8f3adfd586fe98056f1e0e860e2a523b08271e5",
+  "scanned_file_count": 226,
+  "schema": "RealSaS.SubjectGenericExecutableClosureAudit.v2",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED",
+  "subject_free_guardrail_or_provenance_hits": [
+    {
+      "classification": "SUBJECT_FREE_GUARDRAIL_OR_PROVENANCE",
+      "line": 18,
+      "path": "compiler/realsas_compiler_core/deformation_envelope_derivation_v1.py",
+      "text": "\"status\":\"FROZEN_PRE_KNIGHT_SUBJECT_FREE\","
+    },
+    {
+      "classification": "SUBJECT_FREE_GUARDRAIL_OR_PROVENANCE",
+      "line": 19,
+      "path": "compiler/realsas_compiler_core/mesh/product_policy_v1.py",
+      "text": "if payload.get(\"status\") != \"FROZEN_AFTER_1024_SUBJECT_FREE_G5_MESH_CALIBRATION__BEFORE_ANY_NEW_KNIGHT_QUALIFIED_MESH_PASS\":"
+    },
+    {
+      "classification": "SUBJECT_FREE_GUARDRAIL_OR_PROVENANCE",
+      "line": 21,
+      "path": "compiler/realsas_compiler_core/mesh/product_policy_v1.py",
+      "text": "if payload.get(\"authority\") != \"NORMATIVE_PRODUCT_ADMISSION_POLICY__NOT_EMPIRICAL_KNIGHT_FIT\":"
+    },
+    {
+      "classification": "SUBJECT_FREE_GUARDRAIL_OR_PROVENANCE",
+      "line": 86,
+      "path": "compiler/realsas_compiler_core/rest_preservation_policy_v1.py",
+      "text": "if policy_document.get(\"status\")!=\"FROZEN_AFTER_G5_MESH_V2_REBIND__BEFORE_ANY_NEW_KNIGHT_STAGE32_PASS\":"
+    },
+    {
+      "classification": "SUBJECT_FREE_GUARDRAIL_OR_PROVENANCE",
+      "line": 88,
+      "path": "compiler/realsas_compiler_core/rest_preservation_policy_v1.py",
+      "text": "if policy_document.get(\"authority\")!=\"NORMATIVE_STAGE32_PRODUCT_ADMISSION_POLICY__NOT_EMPIRICAL_KNIGHT_FIT\":"
+    },
+    {
+      "classification": "SUBJECT_FREE_GUARDRAIL_OR_PROVENANCE",
+      "line": 92,
+      "path": "compiler/realsas_compiler_core/rest_preservation_policy_v1.py",
+      "text": "if calibration_result.get(\"authority\")!=\"SUBJECT_FREE_SYNTHETIC_ONLY__NO_KNIGHT_OR_MAGE_INPUT\":"
+    },
+    {
+      "classification": "SUBJECT_FREE_GUARDRAIL_OR_PROVENANCE",
+      "line": 157,
+      "path": "compiler/realsas_compiler_core/rest_preservation_policy_v1.py",
+      "text": "\"knight_result_used_for_threshold_selection\":False,"
+    },
+    {
+      "classification": "SUBJECT_FREE_GUARDRAIL_OR_PROVENANCE",
+      "line": 6,
+      "path": "compiler/realsas_compiler_core/rest_preservation_v1.py",
+      "text": "separate preregistered authority so Knight results cannot tune their own gate."
+    },
+    {
+      "classification": "SUBJECT_FREE_GUARDRAIL_OR_PROVENANCE",
+      "line": 243,
+      "path": "compiler/realsas_compiler_core/rest_preservation_v1.py",
+      "text": "\"thresholds_from_knight_results_forbidden\":True,"
+    },
+    {
+      "classification": "SUBJECT_FREE_GUARDRAIL_OR_PROVENANCE",
+      "line": 102,
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py",
+      "text": "\"IRIS_V2_TRAINING_OBJECTIVE_POLICY__NO_KNIGHT_OR_MAGE_RESULT\""
+    },
+    {
+      "classification": "SUBJECT_FREE_GUARDRAIL_OR_PROVENANCE",
+      "line": 112,
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py",
+      "text": "if str(payload.get(\"status\") or \"\") != \"FROZEN_PRE_KNIGHT_SUBJECT_FREE\":"
+    },
+    {
+      "classification": "SUBJECT_FREE_GUARDRAIL_OR_PROVENANCE",
+      "line": 1314,
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py",
+      "text": "\"FROZEN_BEFORE_KNIGHT_STAGE14_CANDIDATE_METRICS_INSPECTION\""
+    },
+    {
+      "classification": "SUBJECT_FREE_GUARDRAIL_OR_PROVENANCE",
+      "line": 332,
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py",
+      "text": "\"FROZEN_BEFORE_KNIGHT_STAGE18_PARENT_QUALITY_METRICS_INSPECTION\""
+    },
+    {
+      "classification": "SUBJECT_FREE_GUARDRAIL_OR_PROVENANCE",
+      "line": 163,
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py",
+      "text": "if not {\"KNIGHT_RESULT\", \"SUBJECT_ID\", \"CATEGORY_LABEL\"}.issubset(forbidden):"
+    },
+    {
+      "classification": "SUBJECT_FREE_GUARDRAIL_OR_PROVENANCE",
+      "line": 17,
+      "path": "models/iris/v3/dense_source_coverage_v3.py",
+      "text": "an O(1) scale instead of O(1/beta), without Knight-dependent tuning."
+    },
+    {
+      "classification": "SUBJECT_FREE_GUARDRAIL_OR_PROVENANCE",
+      "line": 15,
+      "path": "models/iris/v4/adaptive_hull_constraint_v4_4.py",
+      "text": "No Knight-tuned threshold is introduced. The signed controller statistic uses"
+    }
+  ]
+}

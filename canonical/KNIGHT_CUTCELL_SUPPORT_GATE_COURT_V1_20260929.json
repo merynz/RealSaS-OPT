@@ -1,0 +1,645 @@
+{
+  "claim_boundary": "This is an inference-time paper-inspired augmentation test, not the paper's full neural integration/retraining protocol. Teacher weights are evaluation-only.",
+  "finding": {
+    "best_teacher_free_variant": "TOPK_8",
+    "some_support_gate_eliminates_gt10": false,
+    "some_support_gate_preserves_dominant_joint_under_5pct_change": true,
+    "some_support_gate_reduces_gt4_vs_arachne": true
+  },
+  "operator_families": {
+    "PRODUCT": "normalize(Arachne * CutCell^beta)",
+    "REL": "retain Arachne where CutCell >= tau*row_max, union Arachne dominant joint",
+    "TOPK": "retain Arachne only on CutCell top-k support, union Arachne dominant joint"
+  },
+  "paper_basis": {
+    "principle": "CUT_CELL_IS_GEOMETRIC_PRIOR_TO_AUGMENT_DATA_DRIVEN_SKINNING_NOT_REPLACE_SEMANTICS",
+    "title": "A Geodesic Cut-Cell Prior for Neural Skinning"
+  },
+  "schema": "RealSaS.KnightCutCellSupportGateCourt.v1",
+  "selected_by_teacher_free_mechanical_score": "TOPK_8",
+  "shortlist_stress_evaluated": [
+    "ARACHNE",
+    "CUT_CELL",
+    "TOPK_8",
+    "TOPK_6",
+    "TOPK_4",
+    "TOPK_3",
+    "TOPK_2",
+    "PRODUCT_BETA_0.75"
+  ],
+  "status": "PAPER_INSPIRED_PRIOR_AUGMENTATION__NO_PRODUCT_MUTATION",
+  "teacher_used_by_gate": false,
+  "variants": {
+    "ARACHNE": {
+      "actual_motion": {
+        "max_edge_gt_10": 630,
+        "max_edge_gt_4": 1032,
+        "max_edge_p99": 24.747347006229525,
+        "worst_edge_max": 209.9984349009761
+      },
+      "change_from_arachne": {
+        "dominant_joint_change_fraction": 0.0,
+        "entropy_mean": 0.1264515459467674,
+        "row_l1_change_max": 0.0,
+        "row_l1_change_mean": 0.0,
+        "row_l1_change_p95": 0.0,
+        "row_l1_change_p99": 0.0,
+        "rows_changed_gt_0_1": 0,
+        "rows_changed_gt_0_5": 0
+      },
+      "synthetic_stress": {
+        "max_area_max": 185.0437086690865,
+        "max_condition_max": 12997.510682966114,
+        "max_edge_max": 181.98443623410574,
+        "max_edge_p95": 8.075491201970923,
+        "min_area_min": 0.005588670590092759,
+        "unsafe_face_count": 1801
+      },
+      "teacher_eval_only_motion_fidelity": {
+        "motion_energy_ratio_vs_teacher": 1.0064962707998877,
+        "motion_vector_cosine_vs_teacher": 0.9875569315841495,
+        "trajectory_rmse_over_character_extent": 0.03383169717482611,
+        "trajectory_rmse_xyz": 0.090367245793968
+      },
+      "teacher_free_score": [
+        630,
+        1032,
+        24.747347006229525,
+        0.0,
+        209.9984349009761
+      ]
+    },
+    "CUT_CELL": {
+      "actual_motion": {
+        "max_edge_gt_10": 0,
+        "max_edge_gt_4": 2,
+        "max_edge_p99": 1.796752903593704,
+        "worst_edge_max": 4.516165280365335
+      },
+      "change_from_arachne": {
+        "dominant_joint_change_fraction": 0.9228981658228899,
+        "entropy_mean": 3.031745384649483,
+        "row_l1_change_max": 1.9872119688687688,
+        "row_l1_change_mean": 1.8032954688173686,
+        "row_l1_change_p95": 1.9167351048417074,
+        "row_l1_change_p99": 1.9312895599431403,
+        "rows_changed_gt_0_1": 12049,
+        "rows_changed_gt_0_5": 12049
+      },
+      "synthetic_stress": {
+        "max_area_max": 76.34588300268402,
+        "max_condition_max": 763.6012678638165,
+        "max_edge_max": 5.350698652757245,
+        "max_edge_p95": 1.5759080919014987,
+        "min_area_min": 0.0007737982694010315,
+        "unsafe_face_count": 2054
+      },
+      "teacher_eval_only_motion_fidelity": {
+        "motion_energy_ratio_vs_teacher": 0.4795461577798399,
+        "motion_vector_cosine_vs_teacher": 0.7718500463330119,
+        "trajectory_rmse_over_character_extent": 0.13716110881940843,
+        "trajectory_rmse_xyz": 0.3663686030885733
+      },
+      "teacher_free_score": [
+        0,
+        2,
+        1.796752903593704,
+        1.8032954688173686,
+        4.516165280365335
+      ]
+    },
+    "PRODUCT_BETA_0.05": {
+      "actual_motion": {
+        "max_edge_gt_10": 632,
+        "max_edge_gt_4": 1031,
+        "max_edge_p99": 24.777690648938016,
+        "worst_edge_max": 209.3810119351314
+      },
+      "change_from_arachne": {
+        "dominant_joint_change_fraction": 0.0012449165905884306,
+        "entropy_mean": 0.1263911501823155,
+        "row_l1_change_max": 0.10675993818913052,
+        "row_l1_change_mean": 0.002032395024230465,
+        "row_l1_change_p95": 0.015526762725182622,
+        "row_l1_change_p99": 0.02741579962892278,
+        "rows_changed_gt_0_1": 1,
+        "rows_changed_gt_0_5": 0
+      },
+      "teacher_free_score": [
+        632,
+        1031,
+        24.777690648938016,
+        0.002032395024230465,
+        209.3810119351314
+      ]
+    },
+    "PRODUCT_BETA_0.10": {
+      "actual_motion": {
+        "max_edge_gt_10": 632,
+        "max_edge_gt_4": 1029,
+        "max_edge_p99": 24.80230634928014,
+        "worst_edge_max": 208.7565830987164
+      },
+      "change_from_arachne": {
+        "dominant_joint_change_fraction": 0.0017428832268238028,
+        "entropy_mean": 0.12631378702965787,
+        "row_l1_change_max": 0.21285992585197022,
+        "row_l1_change_mean": 0.004065781794368635,
+        "row_l1_change_p95": 0.03098166281791635,
+        "row_l1_change_p99": 0.0544677475318811,
+        "rows_changed_gt_0_1": 5,
+        "rows_changed_gt_0_5": 0
+      },
+      "teacher_free_score": [
+        632,
+        1029,
+        24.80230634928014,
+        0.004065781794368635,
+        208.7565830987164
+      ]
+    },
+    "PRODUCT_BETA_0.20": {
+      "actual_motion": {
+        "max_edge_gt_10": 631,
+        "max_edge_gt_4": 1031,
+        "max_edge_p99": 24.83444167447888,
+        "worst_edge_max": 207.48675277096967
+      },
+      "change_from_arachne": {
+        "dominant_joint_change_fraction": 0.0033197775749024814,
+        "entropy_mean": 0.1261219884087081,
+        "row_l1_change_max": 0.41393626943399153,
+        "row_l1_change_mean": 0.008134105790653405,
+        "row_l1_change_p95": 0.061763013678189496,
+        "row_l1_change_p99": 0.11047143996182143,
+        "rows_changed_gt_0_1": 166,
+        "rows_changed_gt_0_5": 0
+      },
+      "teacher_free_score": [
+        631,
+        1031,
+        24.83444167447888,
+        0.008134105790653405,
+        207.48675277096967
+      ]
+    },
+    "PRODUCT_BETA_0.35": {
+      "actual_motion": {
+        "max_edge_gt_10": 630,
+        "max_edge_gt_4": 1034,
+        "max_edge_p99": 24.81814432208155,
+        "worst_edge_max": 205.5303627974642
+      },
+      "change_from_arachne": {
+        "dominant_joint_change_fraction": 0.005892605195451905,
+        "entropy_mean": 0.12573864880569274,
+        "row_l1_change_max": 0.6631200141792378,
+        "row_l1_change_mean": 0.01423018259855599,
+        "row_l1_change_p95": 0.10705537750342971,
+        "row_l1_change_p99": 0.19651637186009613,
+        "rows_changed_gt_0_1": 692,
+        "rows_changed_gt_0_5": 1
+      },
+      "teacher_free_score": [
+        630,
+        1034,
+        24.81814432208155,
+        0.01423018259855599,
+        205.5303627974642
+      ]
+    },
+    "PRODUCT_BETA_0.50": {
+      "actual_motion": {
+        "max_edge_gt_10": 635,
+        "max_edge_gt_4": 1042,
+        "max_edge_p99": 24.815458720142065,
+        "worst_edge_max": 203.51331321967984
+      },
+      "change_from_arachne": {
+        "dominant_joint_change_fraction": 0.007137521786040335,
+        "entropy_mean": 0.1252365372532042,
+        "row_l1_change_max": 0.8357798621363322,
+        "row_l1_change_mean": 0.020301879251266575,
+        "row_l1_change_p95": 0.1517086731299859,
+        "row_l1_change_p99": 0.2830431603467449,
+        "rows_changed_gt_0_1": 978,
+        "rows_changed_gt_0_5": 4
+      },
+      "teacher_free_score": [
+        635,
+        1042,
+        24.815458720142065,
+        0.020301879251266575,
+        203.51331321967984
+      ]
+    },
+    "PRODUCT_BETA_0.75": {
+      "actual_motion": {
+        "max_edge_gt_10": 624,
+        "max_edge_gt_4": 1045,
+        "max_edge_p99": 24.82296742891491,
+        "worst_edge_max": 200.02102076463765
+      },
+      "change_from_arachne": {
+        "dominant_joint_change_fraction": 0.01178521039090381,
+        "entropy_mean": 0.12412345277789533,
+        "row_l1_change_max": 0.9877788228083306,
+        "row_l1_change_mean": 0.0303211796009094,
+        "row_l1_change_p95": 0.2254527191999683,
+        "row_l1_change_p99": 0.4321203532949173,
+        "rows_changed_gt_0_1": 1253,
+        "rows_changed_gt_0_5": 63
+      },
+      "synthetic_stress": {
+        "max_area_max": 175.87521892807968,
+        "max_condition_max": 14014.055978100685,
+        "max_edge_max": 173.30756895854904,
+        "max_edge_p95": 7.77154499134235,
+        "min_area_min": 0.007997377596478094,
+        "unsafe_face_count": 1749
+      },
+      "teacher_eval_only_motion_fidelity": {
+        "motion_energy_ratio_vs_teacher": 1.0066111412612435,
+        "motion_vector_cosine_vs_teacher": 0.9876902780543156,
+        "trajectory_rmse_over_character_extent": 0.0336512211855591,
+        "trajectory_rmse_xyz": 0.08988517958257683
+      },
+      "teacher_free_score": [
+        624,
+        1045,
+        24.82296742891491,
+        0.0303211796009094,
+        200.02102076463765
+      ]
+    },
+    "PRODUCT_BETA_1.00": {
+      "actual_motion": {
+        "max_edge_gt_10": 624,
+        "max_edge_gt_4": 1051,
+        "max_edge_p99": 24.799322642793477,
+        "worst_edge_max": 199.43381508035478
+      },
+      "change_from_arachne": {
+        "dominant_joint_change_fraction": 0.017843804465100838,
+        "entropy_mean": 0.12265534022049655,
+        "row_l1_change_max": 1.0462906215838372,
+        "row_l1_change_mean": 0.04014629143627989,
+        "row_l1_change_p95": 0.2933139625971638,
+        "row_l1_change_p99": 0.5756759883702655,
+        "rows_changed_gt_0_1": 1444,
+        "rows_changed_gt_0_5": 183
+      },
+      "teacher_eval_only_motion_fidelity": {
+        "motion_energy_ratio_vs_teacher": 1.0066320001092681,
+        "motion_vector_cosine_vs_teacher": 0.9877312828637618,
+        "trajectory_rmse_over_character_extent": 0.03359537235432589,
+        "trajectory_rmse_xyz": 0.08973600276081478
+      },
+      "teacher_free_score": [
+        624,
+        1051,
+        24.799322642793477,
+        0.04014629143627989,
+        199.43381508035478
+      ]
+    },
+    "REL_0.010": {
+      "actual_motion": {
+        "max_edge_gt_10": 630,
+        "max_edge_gt_4": 1032,
+        "max_edge_p99": 24.747346726241368,
+        "worst_edge_max": 209.99843678211474
+      },
+      "change_from_arachne": {
+        "dominant_joint_change_fraction": 0.0,
+        "entropy_mean": 0.12628294647503854,
+        "row_l1_change_max": 1.0409656788061967,
+        "row_l1_change_mean": 0.0001477056064283752,
+        "row_l1_change_p95": 2.7761331039441268e-08,
+        "row_l1_change_p99": 3.582484921161237e-08,
+        "rows_changed_gt_0_1": 3,
+        "rows_changed_gt_0_5": 1
+      },
+      "teacher_eval_only_motion_fidelity": {
+        "motion_energy_ratio_vs_teacher": 1.0064966824936803,
+        "motion_vector_cosine_vs_teacher": 0.9875569176136346,
+        "trajectory_rmse_over_character_extent": 0.033831720518599145,
+        "trajectory_rmse_xyz": 0.0903673081471058
+      },
+      "teacher_free_score": [
+        630,
+        1032,
+        24.747346726241368,
+        0.0001477056064283752,
+        209.99843678211474
+      ]
+    },
+    "REL_0.025": {
+      "actual_motion": {
+        "max_edge_gt_10": 630,
+        "max_edge_gt_4": 1034,
+        "max_edge_p99": 24.747346726241368,
+        "worst_edge_max": 209.99843678211474
+      },
+      "change_from_arachne": {
+        "dominant_joint_change_fraction": 0.0,
+        "entropy_mean": 0.1259173069255198,
+        "row_l1_change_max": 1.0409656788061967,
+        "row_l1_change_mean": 0.00048150972026668205,
+        "row_l1_change_p95": 2.7972558372794804e-08,
+        "row_l1_change_p99": 3.725290393274964e-08,
+        "rows_changed_gt_0_1": 11,
+        "rows_changed_gt_0_5": 6
+      },
+      "teacher_eval_only_motion_fidelity": {
+        "motion_energy_ratio_vs_teacher": 1.006499325241053,
+        "motion_vector_cosine_vs_teacher": 0.9875566735125255,
+        "trajectory_rmse_over_character_extent": 0.03383208020821694,
+        "trajectory_rmse_xyz": 0.0903682689076592
+      },
+      "teacher_free_score": [
+        630,
+        1034,
+        24.747346726241368,
+        0.00048150972026668205,
+        209.99843678211474
+      ]
+    },
+    "REL_0.050": {
+      "actual_motion": {
+        "max_edge_gt_10": 630,
+        "max_edge_gt_4": 1034,
+        "max_edge_p99": 24.747346726241368,
+        "worst_edge_max": 209.99843678211474
+      },
+      "change_from_arachne": {
+        "dominant_joint_change_fraction": 0.0,
+        "entropy_mean": 0.1254248497335303,
+        "row_l1_change_max": 1.0409656788061967,
+        "row_l1_change_mean": 0.0008715321368721332,
+        "row_l1_change_p95": 2.8642035743737525e-08,
+        "row_l1_change_p99": 4.445737398239772e-08,
+        "rows_changed_gt_0_1": 21,
+        "rows_changed_gt_0_5": 8
+      },
+      "teacher_eval_only_motion_fidelity": {
+        "motion_energy_ratio_vs_teacher": 1.0065032214629777,
+        "motion_vector_cosine_vs_teacher": 0.9875566691102099,
+        "trajectory_rmse_over_character_extent": 0.03383212745386305,
+        "trajectory_rmse_xyz": 0.09036839510466589
+      },
+      "teacher_free_score": [
+        630,
+        1034,
+        24.747346726241368,
+        0.0008715321368721332,
+        209.99843678211474
+      ]
+    },
+    "REL_0.100": {
+      "actual_motion": {
+        "max_edge_gt_10": 632,
+        "max_edge_gt_4": 1040,
+        "max_edge_p99": 24.747346726241368,
+        "worst_edge_max": 209.99843678211474
+      },
+      "change_from_arachne": {
+        "dominant_joint_change_fraction": 0.0,
+        "entropy_mean": 0.12283507690144789,
+        "row_l1_change_max": 1.1275455534142877,
+        "row_l1_change_mean": 0.002870646081740538,
+        "row_l1_change_p95": 3.2791908121146494e-08,
+        "row_l1_change_p99": 0.024022671567466066,
+        "rows_changed_gt_0_1": 78,
+        "rows_changed_gt_0_5": 26
+      },
+      "teacher_free_score": [
+        632,
+        1040,
+        24.747346726241368,
+        0.002870646081740538,
+        209.99843678211474
+      ]
+    },
+    "REL_0.200": {
+      "actual_motion": {
+        "max_edge_gt_10": 632,
+        "max_edge_gt_4": 1049,
+        "max_edge_p99": 24.747346726241368,
+        "worst_edge_max": 209.99843678211474
+      },
+      "change_from_arachne": {
+        "dominant_joint_change_fraction": 0.0,
+        "entropy_mean": 0.10987057813020679,
+        "row_l1_change_max": 1.1275455534142877,
+        "row_l1_change_mean": 0.013646684717377068,
+        "row_l1_change_p95": 0.011196598025596168,
+        "row_l1_change_p99": 0.5626493814898762,
+        "rows_changed_gt_0_1": 402,
+        "rows_changed_gt_0_5": 129
+      },
+      "teacher_free_score": [
+        632,
+        1049,
+        24.747346726241368,
+        0.013646684717377068,
+        209.99843678211474
+      ]
+    },
+    "TOPK_2": {
+      "actual_motion": {
+        "max_edge_gt_10": 571,
+        "max_edge_gt_4": 984,
+        "max_edge_p99": 26.016853421205717,
+        "worst_edge_max": 306.99107220083073
+      },
+      "change_from_arachne": {
+        "dominant_joint_change_fraction": 0.0,
+        "entropy_mean": 0.02903689241091722,
+        "row_l1_change_max": 1.2039586916449643,
+        "row_l1_change_mean": 0.08810260884088664,
+        "row_l1_change_p95": 0.7094099008631946,
+        "row_l1_change_p99": 0.8760449553709022,
+        "rows_changed_gt_0_1": 1868,
+        "rows_changed_gt_0_5": 1182
+      },
+      "synthetic_stress": {
+        "max_area_max": 533.9244209677408,
+        "max_condition_max": 174400.3649363928,
+        "max_edge_max": 266.27319228820716,
+        "max_edge_p95": 8.41830464773835,
+        "min_area_min": 0.01207388769595468,
+        "unsafe_face_count": 1675
+      },
+      "teacher_eval_only_motion_fidelity": {
+        "motion_energy_ratio_vs_teacher": 1.0141900124237213,
+        "motion_vector_cosine_vs_teacher": 0.9850921886762903,
+        "trajectory_rmse_over_character_extent": 0.03712474797835208,
+        "trajectory_rmse_xyz": 0.09916325534195145
+      },
+      "teacher_free_score": [
+        571,
+        984,
+        26.016853421205717,
+        0.08810260884088664,
+        306.99107220083073
+      ]
+    },
+    "TOPK_3": {
+      "actual_motion": {
+        "max_edge_gt_10": 563,
+        "max_edge_gt_4": 937,
+        "max_edge_p99": 26.016853421205717,
+        "worst_edge_max": 306.99107220083073
+      },
+      "change_from_arachne": {
+        "dominant_joint_change_fraction": 0.0,
+        "entropy_mean": 0.041343584565427756,
+        "row_l1_change_max": 1.2039586916449643,
+        "row_l1_change_mean": 0.07857771346027677,
+        "row_l1_change_p95": 0.6777237497502003,
+        "row_l1_change_p99": 0.844565438221605,
+        "rows_changed_gt_0_1": 1749,
+        "rows_changed_gt_0_5": 1013
+      },
+      "synthetic_stress": {
+        "max_area_max": 533.9244209677408,
+        "max_condition_max": 174400.3649363928,
+        "max_edge_max": 266.27319228820716,
+        "max_edge_p95": 7.786807143731149,
+        "min_area_min": 0.008853808203309376,
+        "unsafe_face_count": 1685
+      },
+      "teacher_eval_only_motion_fidelity": {
+        "motion_energy_ratio_vs_teacher": 1.0140667592837675,
+        "motion_vector_cosine_vs_teacher": 0.9851428383557214,
+        "trajectory_rmse_over_character_extent": 0.03706007630974491,
+        "trajectory_rmse_xyz": 0.0989905119958896
+      },
+      "teacher_free_score": [
+        563,
+        937,
+        26.016853421205717,
+        0.07857771346027677,
+        306.99107220083073
+      ]
+    },
+    "TOPK_4": {
+      "actual_motion": {
+        "max_edge_gt_10": 561,
+        "max_edge_gt_4": 920,
+        "max_edge_p99": 26.016853421203482,
+        "worst_edge_max": 306.99107220083073
+      },
+      "change_from_arachne": {
+        "dominant_joint_change_fraction": 0.0,
+        "entropy_mean": 0.06282791842145181,
+        "row_l1_change_max": 1.2039586916449643,
+        "row_l1_change_mean": 0.05745161620586483,
+        "row_l1_change_p95": 0.5773851346112264,
+        "row_l1_change_p99": 0.7802640678514456,
+        "rows_changed_gt_0_1": 1424,
+        "rows_changed_gt_0_5": 701
+      },
+      "synthetic_stress": {
+        "max_area_max": 533.9244209677408,
+        "max_condition_max": 174400.3649363928,
+        "max_edge_max": 266.27319228820716,
+        "max_edge_p95": 8.031730927545434,
+        "min_area_min": 0.008853828005128473,
+        "unsafe_face_count": 1808
+      },
+      "teacher_eval_only_motion_fidelity": {
+        "motion_energy_ratio_vs_teacher": 1.013998573839937,
+        "motion_vector_cosine_vs_teacher": 0.9851594669855847,
+        "trajectory_rmse_over_character_extent": 0.03703845058540069,
+        "trajectory_rmse_xyz": 0.09893274790746129
+      },
+      "teacher_free_score": [
+        561,
+        920,
+        26.016853421203482,
+        0.05745161620586483,
+        306.99107220083073
+      ]
+    },
+    "TOPK_6": {
+      "actual_motion": {
+        "max_edge_gt_10": 553,
+        "max_edge_gt_4": 896,
+        "max_edge_p99": 25.996965875296368,
+        "worst_edge_max": 306.99107220083073
+      },
+      "change_from_arachne": {
+        "dominant_joint_change_fraction": 0.0,
+        "entropy_mean": 0.08846835087459831,
+        "row_l1_change_max": 1.2039586916338343,
+        "row_l1_change_mean": 0.03350527760027088,
+        "row_l1_change_p95": 0.2508069127780432,
+        "row_l1_change_p99": 0.6909157740847973,
+        "rows_changed_gt_0_1": 925,
+        "rows_changed_gt_0_5": 380
+      },
+      "synthetic_stress": {
+        "max_area_max": 533.9244209677408,
+        "max_condition_max": 174400.3649363928,
+        "max_edge_max": 266.27319228820716,
+        "max_edge_p95": 6.9732807135998724,
+        "min_area_min": 0.008853827999209432,
+        "unsafe_face_count": 1613
+      },
+      "teacher_eval_only_motion_fidelity": {
+        "motion_energy_ratio_vs_teacher": 1.0138415028523666,
+        "motion_vector_cosine_vs_teacher": 0.9851666626917904,
+        "trajectory_rmse_over_character_extent": 0.037027383470703265,
+        "trajectory_rmse_xyz": 0.09890318673383987
+      },
+      "teacher_free_score": [
+        553,
+        896,
+        25.996965875296368,
+        0.03350527760027088,
+        306.99107220083073
+      ]
+    },
+    "TOPK_8": {
+      "actual_motion": {
+        "max_edge_gt_10": 550,
+        "max_edge_gt_4": 889,
+        "max_edge_p99": 25.98220364043534,
+        "worst_edge_max": 306.99107220083073
+      },
+      "change_from_arachne": {
+        "dominant_joint_change_fraction": 0.0,
+        "entropy_mean": 0.09819052199598344,
+        "row_l1_change_max": 1.2039586916297673,
+        "row_l1_change_mean": 0.025011698025917024,
+        "row_l1_change_p95": 0.15171665680907404,
+        "row_l1_change_p99": 0.6553957327988953,
+        "rows_changed_gt_0_1": 700,
+        "rows_changed_gt_0_5": 286
+      },
+      "synthetic_stress": {
+        "max_area_max": 533.9244209677408,
+        "max_condition_max": 174400.3649363928,
+        "max_edge_max": 266.27319228820716,
+        "max_edge_p95": 6.799475534287738,
+        "min_area_min": 0.008853827999209432,
+        "unsafe_face_count": 1598
+      },
+      "teacher_eval_only_motion_fidelity": {
+        "motion_energy_ratio_vs_teacher": 1.0137595557411438,
+        "motion_vector_cosine_vs_teacher": 0.98518011440956,
+        "trajectory_rmse_over_character_extent": 0.03700952389772249,
+        "trajectory_rmse_xyz": 0.09885548234546737
+      },
+      "teacher_free_score": [
+        550,
+        889,
+        25.98220364043534,
+        0.025011698025917024,
+        306.99107220083073
+      ]
+    }
+  }
+}

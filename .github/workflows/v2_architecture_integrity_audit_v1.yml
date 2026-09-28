@@ -1,0 +1,103 @@
+name: v2-architecture-integrity-audit-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/audit_v2_architecture_integrity_v1.py'
+      - '.github/workflows/v2_architecture_integrity_audit_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v2-architecture-integrity-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Pin audit head
+        run: |
+          set -euo pipefail
+          echo "AUDIT_HEAD=$(git rev-parse HEAD)"
+          git status --short
+
+      - name: Run architecture integrity audit
+        run: |
+          set -euo pipefail
+          python tools/audit_v2_architecture_integrity_v1.py | tee /tmp/v2_arch_audit.log
+          test -f canonical/V2_ARCHITECTURE_INTEGRITY_AUDIT_V1_20260928.json
+
+      - name: Run current orchestration and compiler tests
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pytest -q tests/repository tests/compiler             --disable-warnings             | tee /tmp/v2_arch_pytest.log
+
+      - name: Static architecture grep evidence
+        run: |
+          set -euo pipefail
+          {
+            echo '=== downstream/back-edge stage refs ==='
+            grep -RIn --include='*.py'               -E 'artifacts.*(3[5-9]|4[0-6])_[A-Z0-9_]+'               compiler/realsas_compiler_services/orchestrator/adapters || true
+            echo '=== demo/fallback/legacy ==='
+            grep -RIn --include='*.py'               -E 'PASS_DEMO_ONLY|DEMO_ONLY|fallback|legacy|historical|research_only|best_effort'               compiler/realsas_compiler_services/orchestrator/adapters               compiler/realsas_compiler_core | head -n 1200 || true
+            echo '=== performance/quality knobs ==='
+            grep -RIn --include='*.py'               -E 'target_edge_px|min_visible_pixels|max_iterations|min_angle|max_aspect|stress_angle|tile_resolution|sample_count|subdivision|refine'               compiler/realsas_compiler_services/orchestrator/adapters               compiler/realsas_compiler_core | head -n 1200 || true
+          } | tee /tmp/v2_arch_static_evidence.log
+
+      - name: Seal audit evidence only
+        run: |
+          set -euo pipefail
+          mkdir -p canonical/v2_architecture_integrity_audit_v1
+          cp /tmp/v2_arch_audit.log canonical/v2_architecture_integrity_audit_v1/AUDIT_STDOUT.txt
+          cp /tmp/v2_arch_pytest.log canonical/v2_architecture_integrity_audit_v1/PYTEST.txt
+          cp /tmp/v2_arch_static_evidence.log canonical/v2_architecture_integrity_audit_v1/STATIC_EVIDENCE.txt
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          paths=[
+            Path("canonical/V2_ARCHITECTURE_INTEGRITY_AUDIT_V1_20260928.json"),
+            Path("canonical/v2_architecture_integrity_audit_v1/AUDIT_STDOUT.txt"),
+            Path("canonical/v2_architecture_integrity_audit_v1/PYTEST.txt"),
+            Path("canonical/v2_architecture_integrity_audit_v1/STATIC_EVIDENCE.txt"),
+          ]
+          rows=[]
+          for p in paths:
+            rows.append({"path":str(p),"sha256":hashlib.sha256(p.read_bytes()).hexdigest(),"bytes":p.stat().st_size})
+          seal={
+            "schema":"RealSaS.V2ArchitectureIntegrityAuditSeal.v1",
+            "status":"AUDIT_ONLY__NO_REPAIR_APPLIED",
+            "repo_head":__import__("subprocess").check_output(["git","rev-parse","HEAD"],text=True).strip(),
+            "artifacts":rows,
+            "repair_applied":False,
+            "threshold_changed":False,
+            "optimization_selected":False,
+          }
+          Path("canonical/v2_architecture_integrity_audit_v1/SEAL.json").write_text(json.dumps(seal,indent=2,sort_keys=True)+"\n")
+          PY
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/V2_ARCHITECTURE_INTEGRITY_AUDIT_V1_20260928.json canonical/v2_architecture_integrity_audit_v1
+          if git diff --cached --quiet; then
+            echo "AUDIT_EVIDENCE_UNCHANGED"
+            exit 0
+          fi
+          git commit -m 'audit: seal V2 architecture integrity evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

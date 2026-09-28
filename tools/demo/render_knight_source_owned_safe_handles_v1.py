@@ -145,7 +145,8 @@ def run(*, authority_root:Path, parent_run_id:str, out_dir:Path, native_player:P
         if len(selected)<32:
             raise RuntimeError("RESCUE_SAFE_VISUAL_HANDLE_COVERAGE_TOO_LOW")
         selected_owner=owner[selected]
-        selected_bary=np.asarray(continuous["barycentric"][selected],dtype=np.float64)
+        bary_all=np.asarray(continuous["barycentric"],dtype=np.float64)
+        selected_bary=np.asarray(bary_all[selected],dtype=np.float64)
         selected_faces=mech_faces[selected_owner]
         projected=np.asarray(continuous["projected_vertices"],dtype=np.float64)
         rest_bound_raster=np.sum(projected[selected_faces,:2]*selected_bary[:,:,None],axis=1)

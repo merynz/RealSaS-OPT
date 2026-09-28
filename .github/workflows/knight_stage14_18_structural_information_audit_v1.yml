@@ -107,17 +107,39 @@ jobs:
             d=str(r.get("decision"))
             decisions[d]=decisions.get(d,0)+1
 
+          node_state={}
+          observed_nodes=0
+          completed_nodes=0
+          source_obs_bound_nodes=0
+          for n in nodes:
+            flags=set(map(str,n.get("validity_flags") or ()))
+            sid=str(n.get("surface_id") or "")
+            state="COMPLETED" if "MODEL_COMPLETED_SIGNED_ZERO_SURFACE" in flags else "OBSERVED"
+            node_state[sid]=state
+            observed_nodes += int(state=="OBSERVED")
+            completed_nodes += int(state=="COMPLETED")
+            source_obs_bound_nodes += int(bool(n.get("source_observation_ids") or ()))
+
           rel_unknown=0
           rel_scores=[]
           rel_kinds={}
+          rel_endpoint_state_counts={}
+          certain_relations_touching_completed=0
           for r in rels:
             md=dict(r.get("metadata") or {})
-            if bool(md.get("crosses_unknown")) or bool(md.get("unknown_bridge")):
+            is_unknown=bool(md.get("crosses_unknown")) or bool(md.get("unknown_bridge"))
+            if is_unknown:
               rel_unknown+=1
             try: rel_scores.append(float(r.get("score")))
             except: pass
             k=str(r.get("relation_kind"))
             rel_kinds[k]=rel_kinds.get(k,0)+1
+            a=node_state[str(r.get("a_surface_id"))]
+            b=node_state[str(r.get("b_surface_id"))]
+            key="-".join(sorted((a,b)))
+            rel_endpoint_state_counts[key]=rel_endpoint_state_counts.get(key,0)+1
+            if "COMPLETED" in (a,b) and not is_unknown and float(r.get("score",0.0))>0.0:
+              certain_relations_touching_completed+=1
 
           comp_sizes=sorted([len(c.get("surface_ids") or []) for c in comps],reverse=True)
           report={
@@ -132,6 +154,11 @@ jobs:
               "relation_score_min":min(rel_scores) if rel_scores else None,
               "relation_score_max":max(rel_scores) if rel_scores else None,
               "relation_score_unique_count":len(set(rel_scores)),
+              "observed_node_count":int(observed_nodes),
+              "completed_node_count":int(completed_nodes),
+              "source_observation_id_bound_node_count":int(source_obs_bound_nodes),
+              "relation_endpoint_state_counts":rel_endpoint_state_counts,
+              "certain_relations_touching_completed_count":int(certain_relations_touching_completed),
             },
             "stage17":{
               "component_count":len(comps),
@@ -149,6 +176,7 @@ jobs:
               "stage14_surface_read_from_lossless_stage15_qualified_copy":True,
               "partition_has_no_separate_edges":decisions.get("SEPARATE",0)==0,
               "partition_single_component":len(comps)==1,
+              "completed_surface_relations_forced_certain":certain_relations_touching_completed>0,
               "claim_boundary":"Exact Knight artifact audit; no repair or alternative partition is proposed."
             }
           }

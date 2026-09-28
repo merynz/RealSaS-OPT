@@ -7,8 +7,6 @@ from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
-from scipy.sparse import csr_matrix
-from scipy.sparse.csgraph import dijkstra as sparse_dijkstra
 from scipy.spatial import cKDTree
 from sklearn.cluster import MeanShift
 from sklearn.decomposition import PCA
@@ -180,21 +178,31 @@ def _vertex_labels_from_faces(P,F,face_labels,core,dense_supported,safe_faces):
             w=float(np.linalg.norm(P[x]-P[y]))
             if w<=1e-15:continue
             edge_w[(x,y)]=min(edge_w.get((x,y),np.inf),w)
-    rows=[];cols=[];data=[]
+    nbr=[[] for _ in range(n)]
     for (a,b),w in edge_w.items():
-        rows.extend((a,b));cols.extend((b,a));data.extend((w,w))
-    G=csr_matrix((data,(rows,cols)),shape=(n,n))
+        nbr[a].append((b,w));nbr[b].append((a,w))
     seeds=np.where(label>=0)[0]
     if not len(seeds):raise RuntimeError("JAMES_TWIGG_NO_VERTEX_SEEDS")
-    # Multi-source label propagation by one virtual source per discovered label would
-    # be expensive; propagate from seed vertices and take nearest seeded vertex.
-    # Core labels only, graph cannot cross already-unsafe faces.
-    D=sparse_dijkstra(G,directed=False,indices=seeds,return_predecessors=False)
-    nearest=np.argmin(D,axis=0)
-    best=np.min(D,axis=0)
+    # Exact multi-source shortest-path propagation on the mechanically-safe graph.
+    # This avoids an O(#seeds * #vertices) distance matrix.
+    import heapq
+    best=np.full(n,np.inf,dtype=np.float64)
+    propagated=np.full(n,-1,dtype=np.int64)
+    heap=[]
+    for s in seeds.tolist():
+        best[int(s)]=0.0;propagated[int(s)]=int(label[int(s)])
+        heapq.heappush(heap,(0.0,int(propagated[int(s)]),int(s)))
+    while heap:
+        d,lab,u=heapq.heappop(heap)
+        if d!=best[u] or lab!=propagated[u]:continue
+        for v,w in nbr[u]:
+            nd=d+w
+            if nd<best[v]-1e-15 or (abs(nd-best[v])<=1e-15 and (propagated[v]<0 or lab<propagated[v])):
+                best[v]=nd;propagated[v]=lab
+                heapq.heappush(heap,(nd,lab,v))
     unresolved=~np.isfinite(best)
     missing=(label<0)&(~unresolved)
-    label[missing]=label[seeds[nearest[missing]]]
+    label[missing]=propagated[missing]
     confidence[missing]=0.5
     return label,confidence,{
         "initial_labeled_vertex_count":int(np.count_nonzero(seeds)),

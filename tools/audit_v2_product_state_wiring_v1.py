@@ -24,8 +24,14 @@ def add(fid,severity,cls,evidence,consequence,design):
       "design_before_code":design,
     })
 
-stage18_visual = has(v2a,'"mechanical_mesh_render_authority":False') or has(v2a,'"mechanical_mesh_render_authority": False')
-stage38_visual_hash = has(ps,"visual_mesh_set_binding_hash")
+stage18_visual = (
+    has(v2a,'"mechanical_candidate_render_authority": False')
+    or has(v2a,'"mechanical_candidate_render_authority":False')
+)
+stage38_visual_hash = (
+    has(ps,"visual_mesh_set_binding_hash")
+    and has(ps,"mechanical_mesh_render_authority")
+)
 stage42_consumes_visual = (
     has(rt,"visual_mesh_set_binding_hash")
     or has(rt,"VisualMeshSet")

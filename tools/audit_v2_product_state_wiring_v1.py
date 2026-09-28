@@ -27,6 +27,8 @@ def add(fid,severity,cls,evidence,consequence,design):
 stage18_visual = (
     has(v2a,'"mechanical_candidate_render_authority": False')
     or has(v2a,'"mechanical_candidate_render_authority":False')
+    or has(v2a,'"mechanical_render_authority": False')
+    or has(v2a,'"mechanical_render_authority":False')
 )
 stage38_visual_hash = (
     has(ps,"visual_mesh_set_binding_hash")
@@ -43,7 +45,7 @@ stage46_consumes_visual = (
     or has(cl,"visual_mesh/")
 )
 
-if stage18_visual and stage38_visual_hash and not stage42_consumes_visual:
+if stage38_visual_hash and has(ps,"mechanical_mesh_render_authority") and not stage42_consumes_visual:
     add(
       "P0_VISUAL_AUTHORITY_HASHED_BUT_NOT_EXECUTED_AT_RUNTIME",
       "P0","AUTHORITY_CARRIER_GAP",
@@ -56,7 +58,7 @@ if stage18_visual and stage38_visual_hash and not stage42_consumes_visual:
       "Define a typed runtime visual state carrying exact VisualMeshSet geometry plus a qualified deformation/visibility binding; Stage42 must consume that exact state."
     )
 
-if stage18_visual and not stage46_consumes_visual:
+if stage38_visual_hash and has(ps,"mechanical_mesh_render_authority") and not stage46_consumes_visual:
     add(
       "P0_VISUAL_AUTHORITY_NOT_PRESENT_IN_EDITABLE_EXPORT",
       "P0","AUTHORING_STATE_GAP",

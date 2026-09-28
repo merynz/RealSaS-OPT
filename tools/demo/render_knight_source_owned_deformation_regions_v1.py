@@ -25,8 +25,10 @@ from compiler.realsas_compiler_core.mesh.skin_topology_compatibility_v1 import (
 from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import _joint_pose_v2
 from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
     VisualMesh2D,
+    bind_region_visual_vertices_to_mechanical_affine_v1,
     build_visual_mesh_from_mask,
     build_visual_mesh_from_region_labels_v1,
+    evaluate_region_visual_binding_v1,
     partition_source_mask_by_safe_face_adjacency_v1,
     raster_xy_to_source_texel_xy,
 )
@@ -244,7 +246,7 @@ def run(*,authority_root:Path,parent_run_id:str,out_dir:Path,native_player:Path,
             "appearance_provenance":"DIRECT_SOURCE_ONLY",
             "visual_cross_region_faces":0,
             "unsafe_mechanical_faces_rendered":False,
-            "motion_driver":"REGION_LOCAL_SAFE_MECHANICAL_BARYCENTRIC_BINDING",
+            "motion_driver":"REGION_LOCAL_SAFE_MECHANICAL_AFFINE_BINDING",
             "arap_used":False,
         },
         "mechanical_compatibility":{
@@ -287,8 +289,22 @@ def run(*,authority_root:Path,parent_run_id:str,out_dir:Path,native_player:Path,
             sm=mask & (seed_labels==rid)
             regions.append((rid,rm,sm))
             region_rows.append({**dict(row0),"safe_seed_pixel_count":seed_count_by_id[rid]})
-        binding=_region_bindings(mesh,vertex_region,regions,visibility,mech_faces,seed_labels)
-        rest_reconstructed=_mechanical_targets(binding=binding,posed_mechanical_xyz=rest,camera=camera)
+        binding=bind_region_visual_vertices_to_mechanical_affine_v1(
+            points_source_xy=mesh.positions,
+            vertex_region_id=vertex_region,
+            seed_region_labels=seed_labels,
+            owner_face_index=visibility.owner_face_index,
+            mechanical_positions_xyz=rest,
+            mechanical_faces=mech_faces,
+            camera=camera,
+            candidate_seed_count=16,
+            max_seed_distance_px=8.0,
+        )
+        rest_reconstructed=evaluate_region_visual_binding_v1(
+            binding,
+            posed_mechanical_positions_xyz=rest,
+            camera=camera,
+        )
         rest_error=np.linalg.norm(rest_reconstructed-np.asarray(mesh.positions,float),axis=1)
         view_root=out_dir/f"V{vi}"
         texture=view_root/"source_art.png"; tex_sha=_clean_source_texture(rgba,mask,texture)
@@ -304,6 +320,8 @@ def run(*,authority_root:Path,parent_run_id:str,out_dir:Path,native_player:Path,
             "max_rest_reconstruction_error_px":float(rest_error.max()),
             "max_nearest_safe_seed_distance_px":float(np.max(binding["nearest_safe_seed_distance_px"])),
             "p95_nearest_safe_seed_distance_px":float(np.quantile(binding["nearest_safe_seed_distance_px"],.95)),
+            "max_affine_extrapolation_penalty":float(np.max(binding["extrapolation_penalty"])),
+            "p95_affine_extrapolation_penalty":float(np.quantile(binding["extrapolation_penalty"],.95)),
             "source_texture_sha256":tex_sha,
             "direct_source_fraction":1.0,"other_view_fraction":0.0,"completion_fraction":0.0,"unsupported_fraction":0.0,
             "qa_by_clip":{},
@@ -315,7 +333,11 @@ def run(*,authority_root:Path,parent_run_id:str,out_dir:Path,native_player:Path,
             for t in times:
                 mats,_,_=_joint_pose_v2(skeleton=skeleton,tracks=tracks,time_seconds=float(t),cameras=cameras)
                 posed=_skin(rest,W,joint_ids,mats)
-                deformed=_mechanical_targets(binding=binding,posed_mechanical_xyz=posed,camera=camera)
+                deformed=evaluate_region_visual_binding_v1(
+                    binding,
+                    posed_mechanical_positions_xyz=posed,
+                    camera=camera,
+                )
                 geom=_visual_qa(mesh.positions,deformed,mesh.faces)
                 qa_rows.append({"time_seconds":float(t),**geom})
                 frames.append(np.asarray(deformed,dtype=np.float64))

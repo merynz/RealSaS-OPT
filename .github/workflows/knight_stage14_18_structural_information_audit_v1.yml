@@ -39,39 +39,46 @@ jobs:
           out=Path("canonical/knight_stage14_18_structural_information_audit_v1")
           out.mkdir(parents=True,exist_ok=True)
 
-          def resolve_unique(filename, preferred_parts=()):
-            rows=sorted((root/"artifacts").glob(f"**/{filename}"))
-            if not rows:
-              raise RuntimeError(f"MISSING_ARTIFACT:{filename}")
-            for part in preferred_parts:
-              match=[p for p in rows if part in str(p)]
-              if len(match)==1:
-                return match[0]
-            if len(rows)==1:
-              return rows[0]
-            # Resolve from ACTIVE_RUN_V2 output paths when historical stage numbering differs.
+          def find_semantic(kind):
+            candidates=[]
+            for p in sorted((root/"artifacts").glob("**/*.json")):
+              try:
+                d=json.loads(p.read_text())
+              except Exception:
+                continue
+              schema=str(d.get("schema") or "")
+              keys=set(d.keys())
+              ok=False
+              if kind=="surface":
+                ok=(schema=="RealSaS.RiggingSurfaceIR.v1" or {"surface_nodes","local_relations"}.issubset(keys))
+              elif kind=="partition":
+                ok=(schema=="RealSaS.MechanicalPartitionIR.v1" or {"components","boundary_constraints"}.issubset(keys))
+              elif kind=="candidate":
+                ok=(schema=="RealSaS.CanonicalMeshCandidateIR.v1" or {"vertices","faces","candidate_lineage_hash"}.issubset(keys))
+              if ok:
+                candidates.append(p)
+            if not candidates:
+              raise RuntimeError(f"MISSING_SEMANTIC_ARTIFACT:{kind}")
+            if len(candidates)==1:
+              return candidates[0]
+            # Prefer the candidate whose absolute path is referenced by ACTIVE_RUN_V2.
             ledger_path=root/"ACTIVE_RUN_V2.json"
             if ledger_path.is_file():
               ledger=json.loads(ledger_path.read_text())
-              ledger_outputs=[]
+              refs=set()
               for row in ledger.get("stages") or []:
                 for o in row.get("outputs") or []:
                   op=Path(str(o.get("path") or ""))
-                  if op.name==filename and op.is_file():
-                    ledger_outputs.append(op)
-              uniq=[]
-              seen=set()
-              for p in ledger_outputs:
-                sp=str(p.resolve())
-                if sp not in seen:
-                  seen.add(sp);uniq.append(p)
-              if len(uniq)==1:
-                return uniq[0]
-            raise RuntimeError(f"AMBIGUOUS_ARTIFACT:{filename}:{[str(p) for p in rows]}")
+                  if op.is_file():
+                    refs.add(str(op.resolve()))
+              matches=[p for p in candidates if str(p.resolve()) in refs]
+              if len(matches)==1:
+                return matches[0]
+            raise RuntimeError(f"AMBIGUOUS_SEMANTIC_ARTIFACT:{kind}:{[str(p) for p in candidates]}")
           paths={
-            "stage14":resolve_unique("rigging_surface.json",("14_GSA_BUILD","15_RIGGING_SURFACE_QUALIFIED")),
-            "stage17":resolve_unique("mechanical_partition.json",("17_MECHANICAL_PARTITION_QUALIFIED",)),
-            "stage18":resolve_unique("canonical_mesh_candidate.json",("18_CANONICAL_MESH_ADDRESSING_BUILD",)),
+            "stage14":find_semantic("surface"),
+            "stage17":find_semantic("partition"),
+            "stage18":find_semantic("candidate"),
           }
           print("RESOLVED_ARTIFACTS",json.dumps({k:str(v) for k,v in paths.items()},sort_keys=True))
 

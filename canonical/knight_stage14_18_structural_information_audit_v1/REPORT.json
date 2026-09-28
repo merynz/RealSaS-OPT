@@ -9,10 +9,11 @@
     "all_gsa_relations_forced_certain": true,
     "claim_boundary": "Exact Knight artifact audit; no repair or alternative partition is proposed.",
     "partition_has_no_separate_edges": true,
-    "partition_single_component": false
+    "partition_single_component": false,
+    "stage14_surface_read_from_lossless_stage15_qualified_copy": true
   },
   "schema": "RealSaS.KnightStage14To18StructuralInformationAudit.v1",
-  "stage14": {
+  "stage14_surface_preserved_at_stage15": {
     "node_count": 12090,
     "relation_count": 36469,
     "relation_kind_counts": {

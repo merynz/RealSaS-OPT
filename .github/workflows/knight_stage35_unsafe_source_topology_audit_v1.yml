@@ -30,6 +30,11 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: '3.11'}
 
+      - name: Install exact mainline runtime
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
       - name: Fetch teacher topology truth
         run: |
           set -euo pipefail
@@ -49,12 +54,45 @@ jobs:
           import numpy as np
 
           tmp=Path(sys.argv[1]); out=Path(sys.argv[2]); run=Path(sys.argv[3])
-          candidate_path=run/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json"
-          compat_path=run/"artifacts/35_DYNAMIC_MECHANICAL_MESH_QUALIFIED/skin_topology_compatibility.json"
-          if not candidate_path.is_file(): raise RuntimeError(f"MISSING:{candidate_path}")
-          if not compat_path.is_file(): raise RuntimeError(f"MISSING:{compat_path}")
-          candidate=json.loads(candidate_path.read_text())
-          compat=json.loads(compat_path.read_text())
+          from compiler.realsas_compiler_core.artifact_codec_v2 import (
+              canonical_mesh_candidate_from_dict,
+              qualified_skeleton_from_dict,
+              qualified_skin_from_dict,
+              qualified_camera_set_from_dict,
+              deformation_envelope_from_dict,
+              mesh_policy_from_dict,
+          )
+          from compiler.realsas_compiler_core.geometry_artifact_codec_v2 import rigging_surface_from_dict
+          from compiler.realsas_compiler_core.mesh.skin_topology_compatibility_v1 import run_skin_topology_compatibility_v1
+
+          paths={
+            "surface":run/"artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json",
+            "candidate":run/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json",
+            "policy":run/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/mesh_qualification_policy.json",
+            "skeleton":run/"artifacts/28_SKELETON_QUALIFIED/qualified_skeleton.json",
+            "skin":run/"artifacts/32_SKIN_QUALIFIED/qualified_skin.json",
+            "envelope":run/"artifacts/34_DEFORMATION_CAPABILITY_ENVELOPE/deformation_envelope.json",
+            "camera":run/"artifacts/05_CAMERA_CONTRACT_SOLVED/qualified_camera_set.json",
+          }
+          for k,p in paths.items():
+              if not p.is_file(): raise RuntimeError(f"MISSING:{k}:{p}")
+          surface=rigging_surface_from_dict(json.loads(paths["surface"].read_text()))
+          candidate_ir=canonical_mesh_candidate_from_dict(json.loads(paths["candidate"].read_text()))
+          policy=mesh_policy_from_dict(json.loads(paths["policy"].read_text()))
+          skeleton=qualified_skeleton_from_dict(json.loads(paths["skeleton"].read_text()))
+          skin=qualified_skin_from_dict(json.loads(paths["skin"].read_text()))
+          envelope=deformation_envelope_from_dict(json.loads(paths["envelope"].read_text()))
+          camera=qualified_camera_set_from_dict(json.loads(paths["camera"].read_text()))
+          compat=run_skin_topology_compatibility_v1(
+              candidate_ir,
+              surface=surface,
+              skeleton=skeleton,
+              skin=skin,
+              envelope=envelope,
+              cameras=camera.cameras,
+              policy=policy,
+          )
+          candidate=json.loads(paths["candidate"].read_text())
 
           with np.load(tmp/"bank.npz",allow_pickle=False) as z:
               ids=tuple(map(str,z["surface_ids"].tolist()))
@@ -130,8 +168,8 @@ jobs:
             "schema":"RealSaS.KnightStage35UnsafeSourceTopologyAudit.v1",
             "status":"AUDIT_ONLY__NO_REPAIR_APPLIED",
             "artifacts":{
-              "candidate_sha256":hashlib.sha256(candidate_path.read_bytes()).hexdigest(),
-              "compatibility_sha256":hashlib.sha256(compat_path.read_bytes()).hexdigest(),
+              "candidate_sha256":hashlib.sha256(paths["candidate"].read_bytes()).hexdigest(),
+              "compatibility_report_hash":str(compat.get("report_hash") or ""),
               "teacher_bank_sha256":hashlib.sha256((tmp/"bank.npz").read_bytes()).hexdigest(),
               "teacher_source_sha256":hashlib.sha256((tmp/"source.npz").read_bytes()).hexdigest(),
             },

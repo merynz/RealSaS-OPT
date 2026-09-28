@@ -1,0 +1,769 @@
+{
+  "artifact_sha256": {
+    "stage12": "9585aeb771ba3fdc4b9aff96f56076b5f538406dc3fa22aa278e03ed4a519186",
+    "stage15": "7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182",
+    "stage18": "0db35bbcdd3565cf42c74127fa33c66d39545e1ec84d1b1c74f1dac5bb6072d3",
+    "stage28": "e89d0b64cf23b2954f2b30fb37836ee2b3287749a79c90a76185437b9217e987",
+    "stage32": "f1a937de488ec2a620ee292b3f865a3b2ca97b9466401555beb08b1d2f945a09"
+  },
+  "bindings": {
+    "candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+    "skeleton_lineage_hash": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+    "skin_lineage_hash": "b30417b9375a52c646618f0fb94ea8ddd7285fea959e460522dd5f8b6b70cb2a",
+    "surface_lineage_hash": "452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a"
+  },
+  "completed_vertex_strata": {
+    "dense_supported": {
+      "0": 14230,
+      "1": 1834,
+      "2": 1556,
+      "3": 6823
+    },
+    "invented": {
+      "0": 413,
+      "1": 46,
+      "2": 22,
+      "3": 34
+    }
+  },
+  "finding": {
+    "claim_boundary": "Observational correlation on the exact sealed Knight Stage18 candidate and Stage32 qualified skin. This does not by itself prove invented-face status caused skin discontinuity; it quantifies whether the two failure domains overlap before targeted causal ablation.",
+    "id": "KNIGHT_INVENTED_FACE_SKIN_DISCONTINUITY_CORRELATION"
+  },
+  "historical_smear_offender_faces": {
+    "253": {
+      "completed_vertex_count": 0,
+      "dense_face_supported": true,
+      "invented": false,
+      "skin_l1_max": 1.99793553797021,
+      "vertex_ids": [
+        "CMV:0028a7b7d5fca4f424806795",
+        "CMV:e462ac77760b3a8bbcd1d3ec",
+        "CMV:835740400e9b2b428c0816ca"
+      ]
+    },
+    "3573": {
+      "completed_vertex_count": 3,
+      "dense_face_supported": true,
+      "invented": false,
+      "skin_l1_max": 1.92251300311386,
+      "vertex_ids": [
+        "CMV:70272d8f5b931e373c3d304a",
+        "CMV:cc4e835f79e0798cc86b9391",
+        "CMV:10b522e0dbb8a7cae30b2a35"
+      ]
+    },
+    "3829": {
+      "completed_vertex_count": 3,
+      "dense_face_supported": true,
+      "invented": false,
+      "skin_l1_max": 1.461660601069884,
+      "vertex_ids": [
+        "CMV:d92e1f62e8ade892bf4b9c84",
+        "CMV:5bdd40d11eecb7cc8aa16161",
+        "CMV:78c754c02e9c191c3ef8977f"
+      ]
+    }
+  },
+  "provenance": {
+    "dense_face_supported_count": 24443,
+    "face_count": 24958,
+    "invented_three_clique_face_count": 515
+  },
+  "schema": "RealSaS.KnightInventedFaceSkinCorrelationAudit.v1",
+  "skin_l1": {
+    "dense_supported": {
+      "count": 24443,
+      "gt_0p5": 1782,
+      "gt_1p0": 1280,
+      "gt_1p5": 1093,
+      "gt_1p9": 802,
+      "max": 1.999999528408306,
+      "mean": 0.1324302541818035,
+      "p50": 9.159077972638556e-11,
+      "p95": 1.181761719266537,
+      "p99": 1.9935892538266167
+    },
+    "invented": {
+      "count": 515,
+      "gt_0p5": 38,
+      "gt_1p0": 26,
+      "gt_1p5": 25,
+      "gt_1p9": 25,
+      "max": 1.999515384273617,
+      "mean": 0.14157856415293596,
+      "p50": 3.0897731936756705e-11,
+      "p95": 0.9990409951564531,
+      "p99": 1.9954004884007897
+    },
+    "threshold_comparison": {
+      "gt_0p5": {
+        "invented_rate": 0.07378640776699029,
+        "rate_difference": 0.0008820997851549939,
+        "risk_ratio": 1.0120994192191601,
+        "supported_rate": 0.0729043079818353
+      },
+      "gt_1p0": {
+        "invented_rate": 0.05048543689320388,
+        "rate_difference": -0.0018812938681592936,
+        "risk_ratio": 0.96407463592233,
+        "supported_rate": 0.052366730761363174
+      },
+      "gt_1p5": {
+        "invented_rate": 0.04854368932038835,
+        "rate_difference": 0.0038274106311930803,
+        "risk_ratio": 1.0855932278666536,
+        "supported_rate": 0.04471627868919527
+      },
+      "gt_1p9": {
+        "invented_rate": 0.04854368932038835,
+        "rate_difference": 0.015732659577721735,
+        "risk_ratio": 1.4794930150352275,
+        "supported_rate": 0.032811029742666614
+      }
+    }
+  },
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED",
+  "top_invented_faces_by_skin_l1": [
+    {
+      "completed_vertex_count": 3,
+      "face_index": 5415,
+      "skin_l1_max": 1.999515384273617,
+      "vertex_ids": [
+        "CMV:0c059ec309f7666f49f34f9c",
+        "CMV:658d808a5d4f299b8b358e54",
+        "CMV:437909779c3731641dae1a4f"
+      ]
+    },
+    {
+      "completed_vertex_count": 1,
+      "face_index": 7296,
+      "skin_l1_max": 1.9988921077132247,
+      "vertex_ids": [
+        "CMV:80161ac95612f9f8e8a1f99e",
+        "CMV:7a05b61c623702b75f29fab1",
+        "CMV:05c215c4ceaf7ecf87688161"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 17852,
+      "skin_l1_max": 1.99864781744634,
+      "vertex_ids": [
+        "CMV:59a1002fc22461116d2ddd28",
+        "CMV:c1371ee5703624fb54cc261a",
+        "CMV:42f4b99d9597926404889c72"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 9741,
+      "skin_l1_max": 1.9971819117503564,
+      "vertex_ids": [
+        "CMV:f1089f761f0659817850510c",
+        "CMV:92b1bd34412cf50c567ab439",
+        "CMV:7843da70923aaae3a7ae6b46"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 20909,
+      "skin_l1_max": 1.9954453012521165,
+      "vertex_ids": [
+        "CMV:64b523d4e4e6e7b67cae1ed9",
+        "CMV:37dcdea64ae31930e047ff1f",
+        "CMV:7d03db8c7a0786de2ee29269"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 24252,
+      "skin_l1_max": 1.9954453012521165,
+      "vertex_ids": [
+        "CMV:b495cde1f0289f932f65eb74",
+        "CMV:37dcdea64ae31930e047ff1f",
+        "CMV:7d03db8c7a0786de2ee29269"
+      ]
+    },
+    {
+      "completed_vertex_count": 2,
+      "face_index": 15340,
+      "skin_l1_max": 1.995125209456925,
+      "vertex_ids": [
+        "CMV:8986e59f6d1d9d19ba3b9b09",
+        "CMV:3751d86d2b9a2ed4c1cf37d7",
+        "CMV:5c64cd5b48d908fda1006d86"
+      ]
+    },
+    {
+      "completed_vertex_count": 2,
+      "face_index": 7475,
+      "skin_l1_max": 1.9897020557164087,
+      "vertex_ids": [
+        "CMV:559362023bdcb18dda41334a",
+        "CMV:d31f34f8e3ba3acd6d3f8745",
+        "CMV:d92e5bb2edb321aa9d0ce23b"
+      ]
+    },
+    {
+      "completed_vertex_count": 2,
+      "face_index": 12354,
+      "skin_l1_max": 1.9897020557164087,
+      "vertex_ids": [
+        "CMV:d31f34f8e3ba3acd6d3f8745",
+        "CMV:54651f6946af4275a69be321",
+        "CMV:d92e5bb2edb321aa9d0ce23b"
+      ]
+    },
+    {
+      "completed_vertex_count": 2,
+      "face_index": 14639,
+      "skin_l1_max": 1.989699535710085,
+      "vertex_ids": [
+        "CMV:54651f6946af4275a69be321",
+        "CMV:7bd986cc11e3123abe578e35",
+        "CMV:d92e5bb2edb321aa9d0ce23b"
+      ]
+    },
+    {
+      "completed_vertex_count": 2,
+      "face_index": 16373,
+      "skin_l1_max": 1.9831087212689569,
+      "vertex_ids": [
+        "CMV:06282aba897763e549a4c923",
+        "CMV:4db7a0b8f0e3519d1e217d4e",
+        "CMV:3242e9aae493b5220fddb3fa"
+      ]
+    },
+    {
+      "completed_vertex_count": 2,
+      "face_index": 16376,
+      "skin_l1_max": 1.9830658550940745,
+      "vertex_ids": [
+        "CMV:06282aba897763e549a4c923",
+        "CMV:da31a321bd06ed9a393fb397",
+        "CMV:3242e9aae493b5220fddb3fa"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 16310,
+      "skin_l1_max": 1.9793206140559196,
+      "vertex_ids": [
+        "CMV:7641f3945141abfb167cb545",
+        "CMV:2956c4e82587d616bccded78",
+        "CMV:259689dd198100d72f8a5986"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 20863,
+      "skin_l1_max": 1.9767440705409538,
+      "vertex_ids": [
+        "CMV:2d9be1af36f281142fd37c60",
+        "CMV:b076c94d2ec2d288cb3a150d",
+        "CMV:83b37e5f1c795e3cd6a179dc"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 23883,
+      "skin_l1_max": 1.9767183026566604,
+      "vertex_ids": [
+        "CMV:97619e42d1d9b7e2a13af237",
+        "CMV:08ee53ecb90f6f2f13f3f417",
+        "CMV:a0b9db624be6bce1cec4a0f3"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 23989,
+      "skin_l1_max": 1.9767183026566604,
+      "vertex_ids": [
+        "CMV:08ee53ecb90f6f2f13f3f417",
+        "CMV:b15dcc16fdd39ef17b302a08",
+        "CMV:a0b9db624be6bce1cec4a0f3"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 17954,
+      "skin_l1_max": 1.967452568320918,
+      "vertex_ids": [
+        "CMV:3f8b665f2456bcf8b5af32ee",
+        "CMV:4fdd70ced7ea7e6559e7bd57",
+        "CMV:fec2bca8140a2a85e160794b"
+      ]
+    },
+    {
+      "completed_vertex_count": 1,
+      "face_index": 1814,
+      "skin_l1_max": 1.9611134665430867,
+      "vertex_ids": [
+        "CMV:b19badbad26772bf9508f0fc",
+        "CMV:82ddac999685397bf12c2660",
+        "CMV:cda81eb5f140847fbf19d6f0"
+      ]
+    },
+    {
+      "completed_vertex_count": 2,
+      "face_index": 15933,
+      "skin_l1_max": 1.9611134665430867,
+      "vertex_ids": [
+        "CMV:82ddac999685397bf12c2660",
+        "CMV:cda81eb5f140847fbf19d6f0",
+        "CMV:4304d9833df78035ccebd9b5"
+      ]
+    },
+    {
+      "completed_vertex_count": 3,
+      "face_index": 17780,
+      "skin_l1_max": 1.9554146004657202,
+      "vertex_ids": [
+        "CMV:663b3d8ab31cf2ff9ac32717",
+        "CMV:f64269d3d042668b42f4f2c3",
+        "CMV:6d3d4c6727be048f45ba7066"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 9710,
+      "skin_l1_max": 1.9549112395628303,
+      "vertex_ids": [
+        "CMV:cc4d10ac245eef489b5d8761",
+        "CMV:df1fbc946f3730615f6e183f",
+        "CMV:c79156dfe281e8612b90bf6a"
+      ]
+    },
+    {
+      "completed_vertex_count": 3,
+      "face_index": 12047,
+      "skin_l1_max": 1.9455138667336287,
+      "vertex_ids": [
+        "CMV:b62032e62ded89ebbbe37110",
+        "CMV:c79b814a6a2cd02d8fe220b7",
+        "CMV:6905afbc92561c49402b71d7"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 21109,
+      "skin_l1_max": 1.942720800289984,
+      "vertex_ids": [
+        "CMV:5b4c544155aac86eb8d73847",
+        "CMV:aefb00f598b37b3d930440e2",
+        "CMV:92d45dbd80b479cffa5a7f7f"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 17275,
+      "skin_l1_max": 1.9407846385747478,
+      "vertex_ids": [
+        "CMV:9f5c014d798c24d12902d1ca",
+        "CMV:8a89b17b5a78fa452ddf8e65",
+        "CMV:de65f66606eaba06c6d37e0b"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 5887,
+      "skin_l1_max": 1.9293745370365765,
+      "vertex_ids": [
+        "CMV:18b64b720b35182f79b8dd1f",
+        "CMV:ae07ac513082b3a86bdafaf3",
+        "CMV:83ec11a486adae1f63d81611"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 4926,
+      "skin_l1_max": 1.0280366188882704,
+      "vertex_ids": [
+        "CMV:487e0f6601b680dfc38e497a",
+        "CMV:c890187d45de706db24d181c",
+        "CMV:7f65110362b3675f653db6fd"
+      ]
+    },
+    {
+      "completed_vertex_count": 1,
+      "face_index": 17711,
+      "skin_l1_max": 0.9866142992713912,
+      "vertex_ids": [
+        "CMV:9d9e3e84b8021d65b1451dcf",
+        "CMV:163f42a2026e9d551a2e21f6",
+        "CMV:782bfd201a7dda80e22122bc"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 20119,
+      "skin_l1_max": 0.8972787425413598,
+      "vertex_ids": [
+        "CMV:478e13c4c61ea76fe1d6cf33",
+        "CMV:a02441d29defd0808fff8305",
+        "CMV:3a95da46baa6fa387573e007"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 16382,
+      "skin_l1_max": 0.8097614499496397,
+      "vertex_ids": [
+        "CMV:01a4b305960362308b75e3c6",
+        "CMV:13a76d0c05a769f034eeb5a7",
+        "CMV:6e091cfc22222c6a69f78cdb"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 21140,
+      "skin_l1_max": 0.775655942842634,
+      "vertex_ids": [
+        "CMV:13a76d0c05a769f034eeb5a7",
+        "CMV:3edfe598f21cffb504ca9f89",
+        "CMV:6e091cfc22222c6a69f78cdb"
+      ]
+    },
+    {
+      "completed_vertex_count": 3,
+      "face_index": 9465,
+      "skin_l1_max": 0.6592410699017837,
+      "vertex_ids": [
+        "CMV:711dc5d248e08e4121c890ba",
+        "CMV:b43855037eb9206fcd056bb4",
+        "CMV:b3faa9fa3d678eaff3e150df"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 7450,
+      "skin_l1_max": 0.6589399602601408,
+      "vertex_ids": [
+        "CMV:7d88c253623f5f9853ff7574",
+        "CMV:6784a63df143e50542ec94c2",
+        "CMV:59dfbd35252f88e83cb78603"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 11461,
+      "skin_l1_max": 0.6589399602601408,
+      "vertex_ids": [
+        "CMV:be91e8ce2861c0118531ddf7",
+        "CMV:6784a63df143e50542ec94c2",
+        "CMV:59dfbd35252f88e83cb78603"
+      ]
+    },
+    {
+      "completed_vertex_count": 1,
+      "face_index": 2265,
+      "skin_l1_max": 0.6585217411995996,
+      "vertex_ids": [
+        "CMV:4f219c498a53a7f15aa6610a",
+        "CMV:db522bcb505bd68e45e28f64",
+        "CMV:7a405772f59c6050fa5942c5"
+      ]
+    },
+    {
+      "completed_vertex_count": 3,
+      "face_index": 22799,
+      "skin_l1_max": 0.6417527733142462,
+      "vertex_ids": [
+        "CMV:bc1ed1a632bcb39454ed7b20",
+        "CMV:d04835afd18cd51a8653e8ec",
+        "CMV:e53a33221cc7e0dabfd9ec18"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 15853,
+      "skin_l1_max": 0.5946742140466235,
+      "vertex_ids": [
+        "CMV:f811f3dd03fe2713fc32859d",
+        "CMV:ca9bf8a8c61bc3e1ede9251b",
+        "CMV:2f545bd577bacd03e528e056"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 15856,
+      "skin_l1_max": 0.5946742140466235,
+      "vertex_ids": [
+        "CMV:f811f3dd03fe2713fc32859d",
+        "CMV:a94a5b0c9f979de856e68344",
+        "CMV:2f545bd577bacd03e528e056"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 6343,
+      "skin_l1_max": 0.5413748952322193,
+      "vertex_ids": [
+        "CMV:4a45797dba6d6b3841630f82",
+        "CMV:8afd2c28729db055e96c1002",
+        "CMV:b25697072d65b5306623f239"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 13279,
+      "skin_l1_max": 0.4954581681269988,
+      "vertex_ids": [
+        "CMV:7949816e9d9d25ed0ed042fa",
+        "CMV:7f65110362b3675f653db6fd",
+        "CMV:41b609c8a0b44592912621e1"
+      ]
+    },
+    {
+      "completed_vertex_count": 2,
+      "face_index": 18453,
+      "skin_l1_max": 0.4767299434165311,
+      "vertex_ids": [
+        "CMV:a1f532e2fd0e50798d176fb8",
+        "CMV:9fd27845da9b4ab371df4420",
+        "CMV:f0cc9a44f25e448b14a93606"
+      ]
+    },
+    {
+      "completed_vertex_count": 3,
+      "face_index": 13152,
+      "skin_l1_max": 0.4566638194340381,
+      "vertex_ids": [
+        "CMV:dfbf17d389732d757c689844",
+        "CMV:e9eceec7f605e9c04bf73eb2",
+        "CMV:a2c088e960eab6f96cc985ce"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 6345,
+      "skin_l1_max": 0.45587309855026226,
+      "vertex_ids": [
+        "CMV:4a45797dba6d6b3841630f82",
+        "CMV:b25697072d65b5306623f239",
+        "CMV:f6c0ba7995ca77c28009b27d"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 23916,
+      "skin_l1_max": 0.45587309855026226,
+      "vertex_ids": [
+        "CMV:b25697072d65b5306623f239",
+        "CMV:3f1231be2617a55d3fea9361",
+        "CMV:f6c0ba7995ca77c28009b27d"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 21145,
+      "skin_l1_max": 0.4507307016847894,
+      "vertex_ids": [
+        "CMV:c4ef86ac4c0d785d2cad09b6",
+        "CMV:1b854b7cd14d95e83be1879c",
+        "CMV:89b90d37bdc20a389b40c793"
+      ]
+    },
+    {
+      "completed_vertex_count": 3,
+      "face_index": 23215,
+      "skin_l1_max": 0.4506399914132966,
+      "vertex_ids": [
+        "CMV:b3faa9fa3d678eaff3e150df",
+        "CMV:d04835afd18cd51a8653e8ec",
+        "CMV:37e38337b7e8b6428f05958c"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 2843,
+      "skin_l1_max": 0.4430865478341128,
+      "vertex_ids": [
+        "CMV:8770d56368b53be963b3a90f",
+        "CMV:6d235e5a476dbc045f5a6904",
+        "CMV:c24b7c782e24884ccfa7d0ad"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 10383,
+      "skin_l1_max": 0.4269984145288894,
+      "vertex_ids": [
+        "CMV:06cdef575d325bee2158c5ed",
+        "CMV:ee13e88081ca219c60cfaef2",
+        "CMV:cc667c9883f1ab26899de7b2"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 2334,
+      "skin_l1_max": 0.3914713986861679,
+      "vertex_ids": [
+        "CMV:1d2ea170250466947fa2cd25",
+        "CMV:91837af22ac87eae69466e88",
+        "CMV:343f4eb8628d47b367187fc8"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 13204,
+      "skin_l1_max": 0.3904853054615848,
+      "vertex_ids": [
+        "CMV:260cf7069a6b2d4f15dca3b1",
+        "CMV:37c6bf1098527332582c0c86",
+        "CMV:77dbf6b33ac61936f75b85b0"
+      ]
+    },
+    {
+      "completed_vertex_count": 3,
+      "face_index": 4366,
+      "skin_l1_max": 0.3792203900460367,
+      "vertex_ids": [
+        "CMV:49149bd7349f43d1bc83c19e",
+        "CMV:a4c636dc15f35de9e8bdea84",
+        "CMV:cd8d90f2c4aea42256ee7c91"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 11459,
+      "skin_l1_max": 0.3635896515426103,
+      "vertex_ids": [
+        "CMV:be91e8ce2861c0118531ddf7",
+        "CMV:338c1e6a6a4b9e3f0c8c8620",
+        "CMV:59dfbd35252f88e83cb78603"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 24817,
+      "skin_l1_max": 0.3489954515571294,
+      "vertex_ids": [
+        "CMV:ff27766c28ebb0ef12f7cd49",
+        "CMV:599cfcbc2a8ad5c418f431f6",
+        "CMV:2ac9509b6653f63cc50eeba7"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 20735,
+      "skin_l1_max": 0.29186105753130875,
+      "vertex_ids": [
+        "CMV:acfb54c39a6d37aca465d31d",
+        "CMV:533ff2a1b86000e81fc18122",
+        "CMV:3d64d8e8cbefa873f0e0a202"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 2915,
+      "skin_l1_max": 0.29068875794816335,
+      "vertex_ids": [
+        "CMV:91837af22ac87eae69466e88",
+        "CMV:260cf7069a6b2d4f15dca3b1",
+        "CMV:343f4eb8628d47b367187fc8"
+      ]
+    },
+    {
+      "completed_vertex_count": 3,
+      "face_index": 23216,
+      "skin_l1_max": 0.28937477891414387,
+      "vertex_ids": [
+        "CMV:d04835afd18cd51a8653e8ec",
+        "CMV:37e38337b7e8b6428f05958c",
+        "CMV:e53a33221cc7e0dabfd9ec18"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 21589,
+      "skin_l1_max": 0.28783638829711106,
+      "vertex_ids": [
+        "CMV:7a864a54a349be4bd252a8e5",
+        "CMV:7cb31f27765c4cd57c2be54f",
+        "CMV:70e2b926804ec010f625ae75"
+      ]
+    },
+    {
+      "completed_vertex_count": 1,
+      "face_index": 3797,
+      "skin_l1_max": 0.2796605854453792,
+      "vertex_ids": [
+        "CMV:eda6de9fbaf80e6774608e49",
+        "CMV:320668487a52cffe47eb20c0",
+        "CMV:d9f35cc86659d8e06ed26757"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 9816,
+      "skin_l1_max": 0.2788098369162653,
+      "vertex_ids": [
+        "CMV:4787caf178cddeb14c8a5b4b",
+        "CMV:8e6fba609e8953f20ed11afb",
+        "CMV:d5ef8439e01be8bbf4ae913c"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 21891,
+      "skin_l1_max": 0.27358451158357777,
+      "vertex_ids": [
+        "CMV:f4b5eb4bb4bc3d08ff8cc2a0",
+        "CMV:17a3ed6864501ed828dafed9",
+        "CMV:48337bb03b05d97cb7029d0a"
+      ]
+    },
+    {
+      "completed_vertex_count": 1,
+      "face_index": 3794,
+      "skin_l1_max": 0.23577321163356835,
+      "vertex_ids": [
+        "CMV:eda6de9fbaf80e6774608e49",
+        "CMV:93162cd35ef2d667f64d639a",
+        "CMV:d9f35cc86659d8e06ed26757"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 18605,
+      "skin_l1_max": 0.22864495654756364,
+      "vertex_ids": [
+        "CMV:294609a4008f42ae2241f3db",
+        "CMV:48824e7c58014304ba801a35",
+        "CMV:dcbb756185029bf8ab8feeee"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 8612,
+      "skin_l1_max": 0.22527488798729192,
+      "vertex_ids": [
+        "CMV:0fe07d64e67550db27b4a07e",
+        "CMV:5c1f3d352657a4199c2db185",
+        "CMV:92df11114fc8bf0a0cc0980c"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 23243,
+      "skin_l1_max": 0.21342835563059506,
+      "vertex_ids": [
+        "CMV:f26d57ef5936d7d62956a7c4",
+        "CMV:4136a443e4006c2c4828dcf9",
+        "CMV:71e5de1adf3793aefbf7e2a2"
+      ]
+    },
+    {
+      "completed_vertex_count": 0,
+      "face_index": 16602,
+      "skin_l1_max": 0.2051347314597693,
+      "vertex_ids": [
+        "CMV:1deea0245e8aad00f12957bd",
+        "CMV:c4129b472394a867b090775c",
+        "CMV:6d0f01cea4f934e058233342"
+      ]
+    }
+  ]
+}

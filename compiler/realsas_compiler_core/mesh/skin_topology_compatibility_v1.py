@@ -129,6 +129,7 @@ def run_skin_topology_compatibility_v1(
     policy,
     risk_l1_min:float=DEFAULT_RISK_L1_MIN,
     max_edge_ratio:float=DEFAULT_MAX_EDGE_RATIO,
+    stress_all_faces:bool=False,
 ):
     validate_mesh_qualification_policy(policy)
     validate_deformation_capability_envelope(
@@ -148,7 +149,12 @@ def run_skin_topology_compatibility_v1(
     if faces.ndim!=2 or faces.shape[1]!=3:
         raise QualificationError("SKIN_TOPOLOGY_FACE_INDEX_ARRAY_INVALID")
     skin_l1=_skin_l1_per_face(weights,faces)
-    risky=np.nonzero(skin_l1>float(risk_l1_min))[0]
+    risk_mask=(
+        np.ones((len(candidate.faces),),dtype=bool)
+        if bool(stress_all_faces)
+        else (skin_l1>float(risk_l1_min))
+    )
+    risky=np.nonzero(risk_mask)[0]
 
     stress_angle=_stress_angle(envelope)
     frames=derive_joint_frames_from_skeleton(skeleton,cameras=cameras)
@@ -213,7 +219,7 @@ def run_skin_topology_compatibility_v1(
                     probe_count+=1
 
     unsafe=(
-        (skin_l1>float(risk_l1_min))
+        risk_mask
         & (
             (max_area>float(policy.g3_max_dynamic_area_ratio))
             | (min_area<float(policy.g3_min_dynamic_area_ratio))
@@ -247,6 +253,7 @@ def run_skin_topology_compatibility_v1(
         "risky_face_count":int(len(risky)),
         "unsafe_face_count":int(len(unsafe_ids)),
         "risk_l1_min":float(risk_l1_min),
+        "stress_all_faces":bool(stress_all_faces),
         "max_edge_ratio_limit":float(max_edge_ratio),
         "max_area_ratio_limit":float(policy.g3_max_dynamic_area_ratio),
         "min_area_ratio_limit":float(policy.g3_min_dynamic_area_ratio),
@@ -270,6 +277,7 @@ def run_skin_topology_compatibility_v1(
             "actual_motion_capability_claimed":False,
             "repair_owner":"STAGE35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
             "skin_weights_are_immutable":True,
+            "risk_prefilter_is_safety_authority":not bool(stress_all_faces),
         },
     }
     report["report_hash"]=content_sha256({k:v for k,v in report.items() if k!="report_hash"})

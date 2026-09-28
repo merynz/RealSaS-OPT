@@ -447,6 +447,83 @@
           }
         }
       ],
+      "root_translation_only_3d": {
+        "area_ratio_max": 377.4832149364327,
+        "area_ratio_p95": 1.8840812037838457,
+        "area_ratio_p99": 20.410261537177586,
+        "edge_ratio_max": 191.99775918045154,
+        "edge_ratio_p95": 2.4887760294357055,
+        "edge_ratio_p99": 20.189411769939557,
+        "face_count": 24958,
+        "flip_count": 0,
+        "flip_rate": 0.0
+      },
+      "root_translation_only_bone_lengths": {
+        "absolute_length_delta_max": 1.6653345369377348e-16,
+        "bone_count": 27,
+        "ratio_max": 1.0000000000000009,
+        "ratio_min": 0.9999999999999973,
+        "ratio_p05": 0.9999999999999993,
+        "ratio_p95": 1.0000000000000009,
+        "worst_bones": [
+          {
+            "joint_id": "J:5428a88dad4d4d8d5c4d",
+            "parent_id": "J:4c9f9eace712daf31538",
+            "posed_length": 0.049696053771738004,
+            "ratio": 0.9999999999999973,
+            "rest_length": 0.049696053771738136
+          },
+          {
+            "joint_id": "J:e5441b559f1c34b41aa2",
+            "parent_id": "J:5428a88dad4d4d8d5c4d",
+            "posed_length": 0.09993469401455876,
+            "ratio": 1.0000000000000009,
+            "rest_length": 0.09993469401455868
+          },
+          {
+            "joint_id": "J:8455bf4c0a38867b7d9b",
+            "parent_id": "J:33c7075f501c9af4cd0d",
+            "posed_length": 0.11558755548832737,
+            "ratio": 1.0000000000000009,
+            "rest_length": 0.11558755548832728
+          },
+          {
+            "joint_id": "J:33c7075f501c9af4cd0d",
+            "parent_id": "J:75a17a4287b28cd7f57f",
+            "posed_length": 0.06088365385072574,
+            "ratio": 0.9999999999999992,
+            "rest_length": 0.06088365385072579
+          },
+          {
+            "joint_id": "J:7e87e97fc9fe89cbd718",
+            "parent_id": "J:362735eeec6ee5a3d46f",
+            "posed_length": 0.21338429189852787,
+            "ratio": 1.0000000000000007,
+            "rest_length": 0.21338429189852773
+          },
+          {
+            "joint_id": "J:75a17a4287b28cd7f57f",
+            "parent_id": "J:7cf59fbe52c53280546a",
+            "posed_length": 0.2702550391825758,
+            "ratio": 0.9999999999999996,
+            "rest_length": 0.27025503918257593
+          },
+          {
+            "joint_id": "J:ee24577789f0235b8186",
+            "parent_id": "J:f50f39d42ef3820824ef",
+            "posed_length": 0.23580595987299485,
+            "ratio": 1.0000000000000004,
+            "rest_length": 0.23580595987299477
+          },
+          {
+            "joint_id": "J:2ff965d6dbe4efc2d5d4",
+            "parent_id": "J:b9e5c0d23f688f672060",
+            "posed_length": 0.3847396744165227,
+            "ratio": 0.9999999999999996,
+            "rest_length": 0.38473967441652285
+          }
+        ]
+      },
       "time_seconds": 0.0,
       "view_index": 0
     },
@@ -889,6 +966,83 @@
           }
         }
       ],
+      "root_translation_only_3d": {
+        "area_ratio_max": 666.9437208271729,
+        "area_ratio_p95": 1.6299496523110215,
+        "area_ratio_p99": 21.271041570392825,
+        "edge_ratio_max": 163.50093472021436,
+        "edge_ratio_p95": 1.949670481115705,
+        "edge_ratio_p99": 23.26380926233231,
+        "face_count": 24958,
+        "flip_count": 0,
+        "flip_rate": 0.0
+      },
+      "root_translation_only_bone_lengths": {
+        "absolute_length_delta_max": 1.6653345369377348e-16,
+        "bone_count": 27,
+        "ratio_max": 1.0000000000000009,
+        "ratio_min": 0.9999999999999971,
+        "ratio_p05": 0.9999999999999994,
+        "ratio_p95": 1.0000000000000004,
+        "worst_bones": [
+          {
+            "joint_id": "J:5428a88dad4d4d8d5c4d",
+            "parent_id": "J:4c9f9eace712daf31538",
+            "posed_length": 0.04969605377173799,
+            "ratio": 0.9999999999999971,
+            "rest_length": 0.049696053771738136
+          },
+          {
+            "joint_id": "J:8455bf4c0a38867b7d9b",
+            "parent_id": "J:33c7075f501c9af4cd0d",
+            "posed_length": 0.11558755548832737,
+            "ratio": 1.0000000000000009,
+            "rest_length": 0.11558755548832728
+          },
+          {
+            "joint_id": "J:1008208d141ae248de43",
+            "parent_id": "J:2ff965d6dbe4efc2d5d4",
+            "posed_length": 0.27978710158556014,
+            "ratio": 0.9999999999999994,
+            "rest_length": 0.2797871015855603
+          },
+          {
+            "joint_id": "J:73295dbdbb50d303e597",
+            "parent_id": "J:063ee183f601e19a8ca9",
+            "posed_length": 0.25064336750899024,
+            "ratio": 0.9999999999999996,
+            "rest_length": 0.25064336750899036
+          },
+          {
+            "joint_id": "J:7e87e97fc9fe89cbd718",
+            "parent_id": "J:362735eeec6ee5a3d46f",
+            "posed_length": 0.2133842918985278,
+            "ratio": 1.0000000000000004,
+            "rest_length": 0.21338429189852773
+          },
+          {
+            "joint_id": "J:33c7075f501c9af4cd0d",
+            "parent_id": "J:75a17a4287b28cd7f57f",
+            "posed_length": 0.06088365385072582,
+            "ratio": 1.0000000000000004,
+            "rest_length": 0.06088365385072579
+          },
+          {
+            "joint_id": "J:e5441b559f1c34b41aa2",
+            "parent_id": "J:5428a88dad4d4d8d5c4d",
+            "posed_length": 0.09993469401455872,
+            "ratio": 1.0000000000000004,
+            "rest_length": 0.09993469401455868
+          },
+          {
+            "joint_id": "J:362735eeec6ee5a3d46f",
+            "parent_id": "J:cf05f36e919ff69a9d8e",
+            "posed_length": 0.15553526139771026,
+            "ratio": 1.0000000000000004,
+            "rest_length": 0.1555352613977102
+          }
+        ]
+      },
       "time_seconds": 0.20833333333333334,
       "view_index": 0
     },
@@ -1331,6 +1485,83 @@
           }
         }
       ],
+      "root_translation_only_3d": {
+        "area_ratio_max": 371.03470483714665,
+        "area_ratio_p95": 1.7884400099485145,
+        "area_ratio_p99": 17.87032913641907,
+        "edge_ratio_max": 209.99846632084302,
+        "edge_ratio_p95": 2.218216680542923,
+        "edge_ratio_p99": 20.63725317940792,
+        "face_count": 24958,
+        "flip_count": 0,
+        "flip_rate": 0.0
+      },
+      "root_translation_only_bone_lengths": {
+        "absolute_length_delta_max": 1.6653345369377348e-16,
+        "bone_count": 27,
+        "ratio_max": 1.0000000000000007,
+        "ratio_min": 0.9999999999999974,
+        "ratio_p05": 0.9999999999999996,
+        "ratio_p95": 1.0000000000000007,
+        "worst_bones": [
+          {
+            "joint_id": "J:5428a88dad4d4d8d5c4d",
+            "parent_id": "J:4c9f9eace712daf31538",
+            "posed_length": 0.04969605377173801,
+            "ratio": 0.9999999999999974,
+            "rest_length": 0.049696053771738136
+          },
+          {
+            "joint_id": "J:e5441b559f1c34b41aa2",
+            "parent_id": "J:5428a88dad4d4d8d5c4d",
+            "posed_length": 0.09993469401455875,
+            "ratio": 1.0000000000000007,
+            "rest_length": 0.09993469401455868
+          },
+          {
+            "joint_id": "J:8455bf4c0a38867b7d9b",
+            "parent_id": "J:33c7075f501c9af4cd0d",
+            "posed_length": 0.11558755548832735,
+            "ratio": 1.0000000000000007,
+            "rest_length": 0.11558755548832728
+          },
+          {
+            "joint_id": "J:73295dbdbb50d303e597",
+            "parent_id": "J:063ee183f601e19a8ca9",
+            "posed_length": 0.25064336750899024,
+            "ratio": 0.9999999999999996,
+            "rest_length": 0.25064336750899036
+          },
+          {
+            "joint_id": "J:2ff965d6dbe4efc2d5d4",
+            "parent_id": "J:b9e5c0d23f688f672060",
+            "posed_length": 0.3847396744165227,
+            "ratio": 0.9999999999999996,
+            "rest_length": 0.38473967441652285
+          },
+          {
+            "joint_id": "J:7cf59fbe52c53280546a",
+            "parent_id": "J:a80d2c086e86a4cc08b5",
+            "posed_length": 0.2430729892512661,
+            "ratio": 1.0000000000000004,
+            "rest_length": 0.243072989251266
+          },
+          {
+            "joint_id": "J:c9cdb266f7c167a620a9",
+            "parent_id": "J:e5441b559f1c34b41aa2",
+            "posed_length": 0.1162405785955599,
+            "ratio": 1.0000000000000004,
+            "rest_length": 0.11624057859555985
+          },
+          {
+            "joint_id": "J:42d181ebf3515959283a",
+            "parent_id": "J:2ff965d6dbe4efc2d5d4",
+            "posed_length": 0.2479294135850538,
+            "ratio": 0.9999999999999996,
+            "rest_length": 0.2479294135850539
+          }
+        ]
+      },
       "time_seconds": 0.4166666666666667,
       "view_index": 0
     },
@@ -1773,6 +2004,83 @@
           }
         }
       ],
+      "root_translation_only_3d": {
+        "area_ratio_max": 398.7125250669279,
+        "area_ratio_p95": 1.5819393116289047,
+        "area_ratio_p99": 17.630874478816327,
+        "edge_ratio_max": 197.13957312953207,
+        "edge_ratio_p95": 1.8004560423112215,
+        "edge_ratio_p99": 19.69613330899793,
+        "face_count": 24958,
+        "flip_count": 0,
+        "flip_rate": 0.0
+      },
+      "root_translation_only_bone_lengths": {
+        "absolute_length_delta_max": 1.6653345369377348e-16,
+        "bone_count": 27,
+        "ratio_max": 1.0000000000000013,
+        "ratio_min": 0.9999999999999973,
+        "ratio_p05": 0.9999999999999994,
+        "ratio_p95": 1.0000000000000009,
+        "worst_bones": [
+          {
+            "joint_id": "J:5428a88dad4d4d8d5c4d",
+            "parent_id": "J:4c9f9eace712daf31538",
+            "posed_length": 0.049696053771738004,
+            "ratio": 0.9999999999999973,
+            "rest_length": 0.049696053771738136
+          },
+          {
+            "joint_id": "J:e5441b559f1c34b41aa2",
+            "parent_id": "J:5428a88dad4d4d8d5c4d",
+            "posed_length": 0.09993469401455882,
+            "ratio": 1.0000000000000013,
+            "rest_length": 0.09993469401455868
+          },
+          {
+            "joint_id": "J:8455bf4c0a38867b7d9b",
+            "parent_id": "J:33c7075f501c9af4cd0d",
+            "posed_length": 0.1155875554883274,
+            "ratio": 1.000000000000001,
+            "rest_length": 0.11558755548832728
+          },
+          {
+            "joint_id": "J:1008208d141ae248de43",
+            "parent_id": "J:2ff965d6dbe4efc2d5d4",
+            "posed_length": 0.27978710158556014,
+            "ratio": 0.9999999999999994,
+            "rest_length": 0.2797871015855603
+          },
+          {
+            "joint_id": "J:c9cdb266f7c167a620a9",
+            "parent_id": "J:e5441b559f1c34b41aa2",
+            "posed_length": 0.11624057859555978,
+            "ratio": 0.9999999999999994,
+            "rest_length": 0.11624057859555985
+          },
+          {
+            "joint_id": "J:75a17a4287b28cd7f57f",
+            "parent_id": "J:7cf59fbe52c53280546a",
+            "posed_length": 0.2702550391825758,
+            "ratio": 0.9999999999999996,
+            "rest_length": 0.27025503918257593
+          },
+          {
+            "joint_id": "J:2ff965d6dbe4efc2d5d4",
+            "parent_id": "J:b9e5c0d23f688f672060",
+            "posed_length": 0.3847396744165227,
+            "ratio": 0.9999999999999996,
+            "rest_length": 0.38473967441652285
+          },
+          {
+            "joint_id": "J:eafe286e7d84499e5257",
+            "parent_id": "J:1008208d141ae248de43",
+            "posed_length": 0.2516752069424698,
+            "ratio": 1.0000000000000004,
+            "rest_length": 0.2516752069424697
+          }
+        ]
+      },
       "time_seconds": 0.625,
       "view_index": 0
     },
@@ -2215,6 +2523,83 @@
           }
         }
       ],
+      "root_translation_only_3d": {
+        "area_ratio_max": 377.4832149364327,
+        "area_ratio_p95": 1.8840812037838457,
+        "area_ratio_p99": 20.410261537177586,
+        "edge_ratio_max": 191.99775918045154,
+        "edge_ratio_p95": 2.4887760294357055,
+        "edge_ratio_p99": 20.189411769939557,
+        "face_count": 24958,
+        "flip_count": 0,
+        "flip_rate": 0.0
+      },
+      "root_translation_only_bone_lengths": {
+        "absolute_length_delta_max": 1.6653345369377348e-16,
+        "bone_count": 27,
+        "ratio_max": 1.0000000000000009,
+        "ratio_min": 0.9999999999999973,
+        "ratio_p05": 0.9999999999999993,
+        "ratio_p95": 1.0000000000000009,
+        "worst_bones": [
+          {
+            "joint_id": "J:5428a88dad4d4d8d5c4d",
+            "parent_id": "J:4c9f9eace712daf31538",
+            "posed_length": 0.049696053771738004,
+            "ratio": 0.9999999999999973,
+            "rest_length": 0.049696053771738136
+          },
+          {
+            "joint_id": "J:e5441b559f1c34b41aa2",
+            "parent_id": "J:5428a88dad4d4d8d5c4d",
+            "posed_length": 0.09993469401455876,
+            "ratio": 1.0000000000000009,
+            "rest_length": 0.09993469401455868
+          },
+          {
+            "joint_id": "J:8455bf4c0a38867b7d9b",
+            "parent_id": "J:33c7075f501c9af4cd0d",
+            "posed_length": 0.11558755548832737,
+            "ratio": 1.0000000000000009,
+            "rest_length": 0.11558755548832728
+          },
+          {
+            "joint_id": "J:33c7075f501c9af4cd0d",
+            "parent_id": "J:75a17a4287b28cd7f57f",
+            "posed_length": 0.06088365385072574,
+            "ratio": 0.9999999999999992,
+            "rest_length": 0.06088365385072579
+          },
+          {
+            "joint_id": "J:7e87e97fc9fe89cbd718",
+            "parent_id": "J:362735eeec6ee5a3d46f",
+            "posed_length": 0.21338429189852787,
+            "ratio": 1.0000000000000007,
+            "rest_length": 0.21338429189852773
+          },
+          {
+            "joint_id": "J:75a17a4287b28cd7f57f",
+            "parent_id": "J:7cf59fbe52c53280546a",
+            "posed_length": 0.2702550391825758,
+            "ratio": 0.9999999999999996,
+            "rest_length": 0.27025503918257593
+          },
+          {
+            "joint_id": "J:ee24577789f0235b8186",
+            "parent_id": "J:f50f39d42ef3820824ef",
+            "posed_length": 0.23580595987299485,
+            "ratio": 1.0000000000000004,
+            "rest_length": 0.23580595987299477
+          },
+          {
+            "joint_id": "J:2ff965d6dbe4efc2d5d4",
+            "parent_id": "J:b9e5c0d23f688f672060",
+            "posed_length": 0.3847396744165227,
+            "ratio": 0.9999999999999996,
+            "rest_length": 0.38473967441652285
+          }
+        ]
+      },
       "time_seconds": 0.0,
       "view_index": 2
     },
@@ -2657,6 +3042,83 @@
           }
         }
       ],
+      "root_translation_only_3d": {
+        "area_ratio_max": 666.9437208271729,
+        "area_ratio_p95": 1.6299496523110215,
+        "area_ratio_p99": 21.271041570392825,
+        "edge_ratio_max": 163.50093472021436,
+        "edge_ratio_p95": 1.949670481115705,
+        "edge_ratio_p99": 23.26380926233231,
+        "face_count": 24958,
+        "flip_count": 0,
+        "flip_rate": 0.0
+      },
+      "root_translation_only_bone_lengths": {
+        "absolute_length_delta_max": 1.6653345369377348e-16,
+        "bone_count": 27,
+        "ratio_max": 1.0000000000000009,
+        "ratio_min": 0.9999999999999971,
+        "ratio_p05": 0.9999999999999994,
+        "ratio_p95": 1.0000000000000004,
+        "worst_bones": [
+          {
+            "joint_id": "J:5428a88dad4d4d8d5c4d",
+            "parent_id": "J:4c9f9eace712daf31538",
+            "posed_length": 0.04969605377173799,
+            "ratio": 0.9999999999999971,
+            "rest_length": 0.049696053771738136
+          },
+          {
+            "joint_id": "J:8455bf4c0a38867b7d9b",
+            "parent_id": "J:33c7075f501c9af4cd0d",
+            "posed_length": 0.11558755548832737,
+            "ratio": 1.0000000000000009,
+            "rest_length": 0.11558755548832728
+          },
+          {
+            "joint_id": "J:1008208d141ae248de43",
+            "parent_id": "J:2ff965d6dbe4efc2d5d4",
+            "posed_length": 0.27978710158556014,
+            "ratio": 0.9999999999999994,
+            "rest_length": 0.2797871015855603
+          },
+          {
+            "joint_id": "J:73295dbdbb50d303e597",
+            "parent_id": "J:063ee183f601e19a8ca9",
+            "posed_length": 0.25064336750899024,
+            "ratio": 0.9999999999999996,
+            "rest_length": 0.25064336750899036
+          },
+          {
+            "joint_id": "J:7e87e97fc9fe89cbd718",
+            "parent_id": "J:362735eeec6ee5a3d46f",
+            "posed_length": 0.2133842918985278,
+            "ratio": 1.0000000000000004,
+            "rest_length": 0.21338429189852773
+          },
+          {
+            "joint_id": "J:33c7075f501c9af4cd0d",
+            "parent_id": "J:75a17a4287b28cd7f57f",
+            "posed_length": 0.06088365385072582,
+            "ratio": 1.0000000000000004,
+            "rest_length": 0.06088365385072579
+          },
+          {
+            "joint_id": "J:e5441b559f1c34b41aa2",
+            "parent_id": "J:5428a88dad4d4d8d5c4d",
+            "posed_length": 0.09993469401455872,
+            "ratio": 1.0000000000000004,
+            "rest_length": 0.09993469401455868
+          },
+          {
+            "joint_id": "J:362735eeec6ee5a3d46f",
+            "parent_id": "J:cf05f36e919ff69a9d8e",
+            "posed_length": 0.15553526139771026,
+            "ratio": 1.0000000000000004,
+            "rest_length": 0.1555352613977102
+          }
+        ]
+      },
       "time_seconds": 0.20833333333333334,
       "view_index": 2
     },
@@ -3099,6 +3561,83 @@
           }
         }
       ],
+      "root_translation_only_3d": {
+        "area_ratio_max": 371.03470483714665,
+        "area_ratio_p95": 1.7884400099485145,
+        "area_ratio_p99": 17.87032913641907,
+        "edge_ratio_max": 209.99846632084302,
+        "edge_ratio_p95": 2.218216680542923,
+        "edge_ratio_p99": 20.63725317940792,
+        "face_count": 24958,
+        "flip_count": 0,
+        "flip_rate": 0.0
+      },
+      "root_translation_only_bone_lengths": {
+        "absolute_length_delta_max": 1.6653345369377348e-16,
+        "bone_count": 27,
+        "ratio_max": 1.0000000000000007,
+        "ratio_min": 0.9999999999999974,
+        "ratio_p05": 0.9999999999999996,
+        "ratio_p95": 1.0000000000000007,
+        "worst_bones": [
+          {
+            "joint_id": "J:5428a88dad4d4d8d5c4d",
+            "parent_id": "J:4c9f9eace712daf31538",
+            "posed_length": 0.04969605377173801,
+            "ratio": 0.9999999999999974,
+            "rest_length": 0.049696053771738136
+          },
+          {
+            "joint_id": "J:e5441b559f1c34b41aa2",
+            "parent_id": "J:5428a88dad4d4d8d5c4d",
+            "posed_length": 0.09993469401455875,
+            "ratio": 1.0000000000000007,
+            "rest_length": 0.09993469401455868
+          },
+          {
+            "joint_id": "J:8455bf4c0a38867b7d9b",
+            "parent_id": "J:33c7075f501c9af4cd0d",
+            "posed_length": 0.11558755548832735,
+            "ratio": 1.0000000000000007,
+            "rest_length": 0.11558755548832728
+          },
+          {
+            "joint_id": "J:73295dbdbb50d303e597",
+            "parent_id": "J:063ee183f601e19a8ca9",
+            "posed_length": 0.25064336750899024,
+            "ratio": 0.9999999999999996,
+            "rest_length": 0.25064336750899036
+          },
+          {
+            "joint_id": "J:2ff965d6dbe4efc2d5d4",
+            "parent_id": "J:b9e5c0d23f688f672060",
+            "posed_length": 0.3847396744165227,
+            "ratio": 0.9999999999999996,
+            "rest_length": 0.38473967441652285
+          },
+          {
+            "joint_id": "J:7cf59fbe52c53280546a",
+            "parent_id": "J:a80d2c086e86a4cc08b5",
+            "posed_length": 0.2430729892512661,
+            "ratio": 1.0000000000000004,
+            "rest_length": 0.243072989251266
+          },
+          {
+            "joint_id": "J:c9cdb266f7c167a620a9",
+            "parent_id": "J:e5441b559f1c34b41aa2",
+            "posed_length": 0.1162405785955599,
+            "ratio": 1.0000000000000004,
+            "rest_length": 0.11624057859555985
+          },
+          {
+            "joint_id": "J:42d181ebf3515959283a",
+            "parent_id": "J:2ff965d6dbe4efc2d5d4",
+            "posed_length": 0.2479294135850538,
+            "ratio": 0.9999999999999996,
+            "rest_length": 0.2479294135850539
+          }
+        ]
+      },
       "time_seconds": 0.4166666666666667,
       "view_index": 2
     },
@@ -3541,6 +4080,83 @@
           }
         }
       ],
+      "root_translation_only_3d": {
+        "area_ratio_max": 398.7125250669279,
+        "area_ratio_p95": 1.5819393116289047,
+        "area_ratio_p99": 17.630874478816327,
+        "edge_ratio_max": 197.13957312953207,
+        "edge_ratio_p95": 1.8004560423112215,
+        "edge_ratio_p99": 19.69613330899793,
+        "face_count": 24958,
+        "flip_count": 0,
+        "flip_rate": 0.0
+      },
+      "root_translation_only_bone_lengths": {
+        "absolute_length_delta_max": 1.6653345369377348e-16,
+        "bone_count": 27,
+        "ratio_max": 1.0000000000000013,
+        "ratio_min": 0.9999999999999973,
+        "ratio_p05": 0.9999999999999994,
+        "ratio_p95": 1.0000000000000009,
+        "worst_bones": [
+          {
+            "joint_id": "J:5428a88dad4d4d8d5c4d",
+            "parent_id": "J:4c9f9eace712daf31538",
+            "posed_length": 0.049696053771738004,
+            "ratio": 0.9999999999999973,
+            "rest_length": 0.049696053771738136
+          },
+          {
+            "joint_id": "J:e5441b559f1c34b41aa2",
+            "parent_id": "J:5428a88dad4d4d8d5c4d",
+            "posed_length": 0.09993469401455882,
+            "ratio": 1.0000000000000013,
+            "rest_length": 0.09993469401455868
+          },
+          {
+            "joint_id": "J:8455bf4c0a38867b7d9b",
+            "parent_id": "J:33c7075f501c9af4cd0d",
+            "posed_length": 0.1155875554883274,
+            "ratio": 1.000000000000001,
+            "rest_length": 0.11558755548832728
+          },
+          {
+            "joint_id": "J:1008208d141ae248de43",
+            "parent_id": "J:2ff965d6dbe4efc2d5d4",
+            "posed_length": 0.27978710158556014,
+            "ratio": 0.9999999999999994,
+            "rest_length": 0.2797871015855603
+          },
+          {
+            "joint_id": "J:c9cdb266f7c167a620a9",
+            "parent_id": "J:e5441b559f1c34b41aa2",
+            "posed_length": 0.11624057859555978,
+            "ratio": 0.9999999999999994,
+            "rest_length": 0.11624057859555985
+          },
+          {
+            "joint_id": "J:75a17a4287b28cd7f57f",
+            "parent_id": "J:7cf59fbe52c53280546a",
+            "posed_length": 0.2702550391825758,
+            "ratio": 0.9999999999999996,
+            "rest_length": 0.27025503918257593
+          },
+          {
+            "joint_id": "J:2ff965d6dbe4efc2d5d4",
+            "parent_id": "J:b9e5c0d23f688f672060",
+            "posed_length": 0.3847396744165227,
+            "ratio": 0.9999999999999996,
+            "rest_length": 0.38473967441652285
+          },
+          {
+            "joint_id": "J:eafe286e7d84499e5257",
+            "parent_id": "J:1008208d141ae248de43",
+            "posed_length": 0.2516752069424698,
+            "ratio": 1.0000000000000004,
+            "rest_length": 0.2516752069424697
+          }
+        ]
+      },
       "time_seconds": 0.625,
       "view_index": 2
     }

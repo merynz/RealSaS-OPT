@@ -1,0 +1,125 @@
+{
+  "actual_motion": {
+    "frames": [
+      {
+        "clip": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.2901336010985545,
+        "frame": 0,
+        "time": 0.0
+      },
+      {
+        "clip": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.320159130148039,
+        "frame": 1,
+        "time": 0.20833333333333334
+      },
+      {
+        "clip": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.659429174123743,
+        "frame": 2,
+        "time": 0.4166666666666667
+      },
+      {
+        "clip": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.4034837139241905,
+        "frame": 3,
+        "time": 0.625
+      },
+      {
+        "clip": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.3289082994087273,
+        "frame": 0,
+        "time": 0.0
+      },
+      {
+        "clip": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.5132166397493525,
+        "frame": 1,
+        "time": 0.2777777777777778
+      },
+      {
+        "clip": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.1079673781141723,
+        "frame": 2,
+        "time": 0.5555555555555556
+      },
+      {
+        "clip": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.3289082994087273,
+        "frame": 3,
+        "time": 0.8333333333333334
+      }
+    ],
+    "max_edge_gt_10": 0,
+    "max_edge_gt_4": 0,
+    "worst_edge_max": 3.659429174123743
+  },
+  "all_face": {
+    "hash": "313589c7e204bf63982c9ec9c7d6037df71df3b5d1c0917c2b30b318cc3488a5",
+    "passed": false,
+    "risky": 24958,
+    "unsafe": 1801
+  },
+  "extra_unsafe": [],
+  "repair": {
+    "directive": {
+      "compatibility_report_hash": "313589c7e204bf63982c9ec9c7d6037df71df3b5d1c0917c2b30b318cc3488a5",
+      "directive_hash": "52d7f2660011b018c9103969d795a49a54f27e9a0f306a2c8c9f170a5c5a0c34",
+      "downstream_requalification_start": "19_STATIC_CANONICAL_MESH_QUALIFIED",
+      "face_count_after": 23157,
+      "face_count_before": 24958,
+      "fail_closed_if_requalification_not_completed": true,
+      "iterations_used": 1,
+      "local_cdt_required": false,
+      "max_iterations": 4,
+      "removed_face_count": 1801,
+      "repair_iteration": 1,
+      "repair_operation": "SEAM_CUT_BY_UNSAFE_FACE_REMOVAL",
+      "repair_parent_candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+      "repair_root_candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+      "repaired_candidate_lineage_hash": "cd470feb5a7a078725a2945532426a00f41bbde7a957cd5004f61b557a9b82bd",
+      "schema": "RealSaS.SkinTopologyRepairDirective.v1",
+      "source_candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+      "status": "REPAIR_PROPOSED__RESTART_FROM_STAGE18_LINEAGE",
+      "vertex_position_mutation": false,
+      "weight_mutation": false
+    },
+    "face_count": 23157,
+    "lineage": "cd470feb5a7a078725a2945532426a00f41bbde7a957cd5004f61b557a9b82bd",
+    "post_repair_compatibility_passed": true,
+    "post_repair_unsafe": 0,
+    "removed": 1801
+  },
+  "risk0": {
+    "hash": "cd58b1c99bb160acb94bcf68d5719508343c2d4f563dbe680362fd60566360c2",
+    "passed": false,
+    "risky": 24863,
+    "unsafe": 1801
+  },
+  "schema": "RealSaS.KnightAllFaceSkinTopologyStressCourt.v1",
+  "static": {
+    "all_face_extra_unsafe": 0,
+    "all_face_unsafe": 1801,
+    "exact_zero_l1_face_count": 11086,
+    "face_count": 24958,
+    "risk0_missing_from_all_face": 0,
+    "risk0_unsafe": 1801
+  },
+  "status": "MEASURED__NO_AUTHORITY_MUTATION"
+}

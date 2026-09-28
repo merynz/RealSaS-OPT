@@ -1,0 +1,119 @@
+{
+  "schema": "RealSaS.StructuralInformationPreservationAudit.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED",
+  "scope": "STAGE12_TO_STAGE18",
+  "findings": [
+    {
+      "id": "S01_FACE_INCIDENCE_DROPPED_THEN_REINVENTED",
+      "severity": "P0",
+      "class": "IMPLEMENTATION_DEVIATION_FROM_INTENDED",
+      "before": "Dense zero-surface carries explicit triangle incidence.",
+      "after": "GSA carries only pairwise local relations.",
+      "downstream": "Stage18 creates a face from an admitted 3-clique.",
+      "evidence": [
+        "canonical/GSA_FACE_INCIDENCE_CLIQUE_ADVERSARY_V1_20260928.json",
+        "canonical/MESH_WEIGHT_BINDING_CONTRACT_V1.md"
+      ]
+    },
+    {
+      "id": "S02_NORMAL_NEIGHBORHOOD_LOSES_SURFACE_MEMBERSHIP",
+      "severity": "P0",
+      "class": "INTENDED_CONTRACT_OPERATOR_GAP",
+      "before": "Dense points belong to distinct surface sheets/components.",
+      "after": "Normal PCA neighborhood is global Euclidean kNN.",
+      "measured": {
+        "current_near_contact_p95_deg": 20.935532383796478,
+        "current_max_deg": 65.62431721101042,
+        "component_aware_oracle_p95_deg": 0
+      },
+      "evidence": [
+        "canonical/GSA_NORMAL_TOPOLOGY_ADVERSARY_V1_20260928.json"
+      ]
+    },
+    {
+      "id": "S03_COMPACTION_CAN_COLLAPSE_GEODESICALLY_DISTINCT_SHEETS",
+      "severity": "P0",
+      "class": "INTENDED_CONTRACT_OPERATOR_GAP",
+      "evidence": [
+        "canonical/GSA_SURFACE_COHERENCE_ADVERSARIES_V1_20260928.json"
+      ]
+    },
+    {
+      "id": "S04_VISIBILITY_REDUCED_FROM_SURFACE_TO_VERTEX_SPLATS",
+      "severity": "P1",
+      "class": "INTENDED_CONTRACT_OPERATOR_GAP",
+      "evidence": [
+        "canonical/GSA_SURFACE_COHERENCE_ADVERSARIES_V1_20260928.json"
+      ]
+    },
+    {
+      "id": "S05_OBSERVED_LABEL_CONFLATES_EXPOSURE_WITH_SOURCE_OBSERVATION",
+      "severity": "P1",
+      "class": "INTENDED_CONTRACT_EPISTEMIC_GAP",
+      "evidence": [
+        "canonical/GSA_OBSERVATION_SEMANTICS_AUDIT_V1_20260928.json"
+      ]
+    },
+    {
+      "id": "S06_RELATION_EPISTEMIC_STATE_COLLAPSES_TO_CERTAIN_CONTINUITY",
+      "severity": "P0",
+      "class": "INTENDED_CONTRACT_EPISTEMIC_GAP",
+      "exact_knight": {
+        "gsa_node_count": 12090,
+        "gsa_relation_count": 36469,
+        "relation_score_min": 1,
+        "relation_score_max": 1,
+        "relation_unknown_flag_count": 0,
+        "stage17_boundary_count": 36469,
+        "preserve_continuity_count": 36469,
+        "separate_count": 0,
+        "unknown_count": 0,
+        "stage17_component_count": 6,
+        "largest_component_nodes": 12080,
+        "largest_component_fraction": 0.9991728701406121
+      },
+      "owner": "Stage14 relation semantics; Stage17 behaves as coded.",
+      "evidence": [
+        "canonical/knight_stage14_18_structural_information_audit_v1/REPORT.json"
+      ]
+    },
+    {
+      "id": "S07_GSA_TO_STAGE18_NODE_COUNT_DELTA",
+      "severity": "REVIEW",
+      "class": "ACCOUNTING_ONLY_NOT_YET_DEFECT",
+      "exact_knight": {
+        "gsa_nodes": 12090,
+        "stage18_vertices": 12049,
+        "delta": 41
+      },
+      "note": "Current G1 requires every product vertex to have S support; it does not require every GSA node to become a product vertex. Do not promote without causal evidence."
+    }
+  ],
+  "guardrails": [
+    {
+      "id": "G01_STAGE15_PRESERVES_GSA_SURFACE_BYTES",
+      "status": "PASS",
+      "evidence": "Knight Stage14 candidate and Stage15 qualified surface sha256 are identical."
+    },
+    {
+      "id": "G02_GEPPETTO_HAS_NO_FIXED_1024_SURFACE_TRUNCATION",
+      "status": "PASS_BY_CODE_AUDIT",
+      "evidence": "RiggingSurfaceTensorV1 tensorizes all surface nodes and all local relations."
+    },
+    {
+      "id": "G03_ARACHNE_V5_CONSUMES_GSA_GRAPH",
+      "status": "PASS_BY_CODE_AUDIT",
+      "evidence": "Arachne V5 consumes surface tensors plus edge_index/edge_features/edge_mask."
+    },
+    {
+      "id": "G04_STAGE19_NODE_DELTA_NOT_PROMOTED",
+      "status": "KEEP_REVIEW",
+      "evidence": "Static mesh qualification checks addressability and source fidelity; not one-to-one GSA-node vertex coverage."
+    }
+  ],
+  "policy": {
+    "repair_authorized": false,
+    "architecture_replacement_authorized": false,
+    "rule": "First restore intended structural information. Only then rerun Knight and causally falsify any intended decision that still fails."
+  }
+}

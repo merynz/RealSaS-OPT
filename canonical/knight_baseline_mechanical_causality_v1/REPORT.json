@@ -160,6 +160,17 @@
       "risk_bins": [
         {
           "face_count": 21111,
+          "face_homogenized_3d": {
+            "area_ratio_max": 1.0000000000002742,
+            "area_ratio_p95": 1.0000000000000038,
+            "area_ratio_p99": 1.0000000000000082,
+            "edge_ratio_max": 1.0000000000000198,
+            "edge_ratio_p95": 1.0000000000000038,
+            "edge_ratio_p99": 1.000000000000007,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 81432.76018067445,
             "area_ratio_p95": 94.80600820813785,
@@ -183,6 +194,17 @@
             "flip_rate": 0.21128948731227343
           },
           "label": "L1_LE_0_10",
+          "original_3d": {
+            "area_ratio_max": 4.680604883458519,
+            "area_ratio_p95": 1.003331030148802,
+            "area_ratio_p99": 1.0793953675842611,
+            "edge_ratio_max": 7.473015605545924,
+            "edge_ratio_p95": 1.0122814836280334,
+            "edge_ratio_p99": 1.1046394075495927,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 81432.76018111921,
             "area_ratio_p95": 93.67741661328171,
@@ -204,10 +226,32 @@
             "face_count": 19310,
             "flip_count": 4097,
             "flip_rate": 0.21216986017607456
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 4.680605994386464,
+            "area_ratio_p95": 1.0032031270019195,
+            "area_ratio_p99": 1.0634812208143554,
+            "edge_ratio_max": 7.4730172245493875,
+            "edge_ratio_p95": 1.0119344738938965,
+            "edge_ratio_p99": 1.0890135251702024,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 2027,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999955727841,
+            "area_ratio_p95": 0.9999906482713697,
+            "area_ratio_p99": 0.9999994688192703,
+            "edge_ratio_max": 0.9999999999814936,
+            "edge_ratio_p95": 0.9999981706855005,
+            "edge_ratio_p99": 0.9999999845746342,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 48838.16645356261,
             "area_ratio_p95": 37.80591344742744,
@@ -231,6 +275,17 @@
             "flip_rate": 0.2584679520583637
           },
           "label": "L1_0_10_TO_0_50",
+          "original_3d": {
+            "area_ratio_max": 31.87413041491775,
+            "area_ratio_p95": 2.169240038037729,
+            "area_ratio_p99": 6.6181743238706225,
+            "edge_ratio_max": 24.20049858634635,
+            "edge_ratio_p95": 2.367278293726642,
+            "edge_ratio_p99": 8.428814454430762,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 20360.15406163133,
             "area_ratio_p95": 52.78440719125405,
@@ -252,10 +307,32 @@
             "face_count": 1919,
             "flip_count": 518,
             "flip_rate": 0.2699322563835331
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 31.87413860153476,
+            "area_ratio_p95": 1.9382278502241763,
+            "area_ratio_p99": 6.57853486994766,
+            "edge_ratio_max": 24.200502949316938,
+            "edge_ratio_p95": 2.24759678649018,
+            "edge_ratio_p99": 8.428815967197785,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 514,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999999843949,
+            "area_ratio_p95": 0.9999995616602138,
+            "area_ratio_p99": 0.9999999991099868,
+            "edge_ratio_max": 0.9999999999994144,
+            "edge_ratio_p95": 0.9999999769504574,
+            "edge_ratio_p99": 0.9999999999802819,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 1159.646190588721,
             "area_ratio_p95": 98.07694908144202,
@@ -279,6 +356,17 @@
             "flip_rate": 0.40748898678414097
           },
           "label": "L1_0_50_TO_1_00",
+          "original_3d": {
+            "area_ratio_max": 94.93642202256865,
+            "area_ratio_p95": 23.000121792981375,
+            "area_ratio_p99": 37.24409563119163,
+            "edge_ratio_max": 98.97554552786187,
+            "edge_ratio_p95": 33.43702352117895,
+            "edge_ratio_p99": 42.11431746096474,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 10469.175353597171,
             "area_ratio_p95": 510.3743556731835,
@@ -300,10 +388,32 @@
             "face_count": 454,
             "flip_count": 233,
             "flip_rate": 0.513215859030837
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 94.93643753567794,
+            "area_ratio_p95": 22.9450592282277,
+            "area_ratio_p99": 36.84714849814856,
+            "edge_ratio_max": 98.97556376998857,
+            "edge_ratio_p95": 33.43702985538921,
+            "edge_ratio_p99": 42.11432597207598,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 188,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999977982293,
+            "area_ratio_p95": 0.9932842904079877,
+            "area_ratio_p99": 0.9996389130549171,
+            "edge_ratio_max": 0.9999999999887121,
+            "edge_ratio_p95": 0.9999593518482254,
+            "edge_ratio_p99": 0.9999970976927541,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 473.74755562837834,
             "area_ratio_p95": 79.9257343243423,
@@ -327,6 +437,17 @@
             "flip_rate": 0.3430232558139535
           },
           "label": "L1_1_00_TO_1_50",
+          "original_3d": {
+            "area_ratio_max": 148.62199850751153,
+            "area_ratio_p95": 50.95057483971792,
+            "area_ratio_p99": 109.54286016253722,
+            "edge_ratio_max": 191.99772323243644,
+            "edge_ratio_p95": 48.296368236578886,
+            "edge_ratio_p99": 83.51837280126972,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 17715.62638618444,
             "area_ratio_p95": 2247.010826134121,
@@ -348,10 +469,32 @@
             "face_count": 172,
             "flip_count": 86,
             "flip_rate": 0.5
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 148.62202177961808,
+            "area_ratio_p95": 46.72293417759676,
+            "area_ratio_p99": 97.34352721176128,
+            "edge_ratio_max": 191.99775918045154,
+            "edge_ratio_p95": 48.29637956619619,
+            "edge_ratio_p99": 83.51838842869815,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 291,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9962097087941653,
+            "area_ratio_p95": 0.9920967396545162,
+            "area_ratio_p99": 0.9952839508277443,
+            "edge_ratio_max": 0.9999959528911491,
+            "edge_ratio_p95": 0.9995767139852255,
+            "edge_ratio_p99": 0.9999863471047433,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 1637.0860928938844,
             "area_ratio_p95": 43.411257744914536,
@@ -375,6 +518,17 @@
             "flip_rate": 0.2765151515151515
           },
           "label": "L1_1_50_TO_1_90",
+          "original_3d": {
+            "area_ratio_max": 398.9841584844452,
+            "area_ratio_p95": 55.83762725251589,
+            "area_ratio_p99": 227.16650333092866,
+            "edge_ratio_max": 191.99772323243644,
+            "edge_ratio_p95": 54.047197141524144,
+            "edge_ratio_p99": 60.342533585365565,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 25248.84375372278,
             "area_ratio_p95": 2066.921250001926,
@@ -396,10 +550,32 @@
             "face_count": 264,
             "flip_count": 127,
             "flip_rate": 0.4810606060606061
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 360.0070157405265,
+            "area_ratio_p95": 53.6202173423085,
+            "area_ratio_p99": 202.3625238761689,
+            "edge_ratio_max": 191.99775918045154,
+            "edge_ratio_p95": 53.86169029116428,
+            "edge_ratio_p99": 60.308319813200946,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 827,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9964674332888556,
+            "area_ratio_p95": 0.9917774281891859,
+            "area_ratio_p99": 0.995705151118725,
+            "edge_ratio_max": 0.9999961889622082,
+            "edge_ratio_p95": 0.9997162052186916,
+            "edge_ratio_p99": 0.9999856420973581,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 852.1077839070873,
             "area_ratio_p95": 31.767077517356107,
@@ -423,6 +599,17 @@
             "flip_rate": 0.29806451612903223
           },
           "label": "L1_GT_1_90",
+          "original_3d": {
+            "area_ratio_max": 379.493519894578,
+            "area_ratio_p95": 27.603193164845333,
+            "area_ratio_p99": 51.34869278079682,
+            "edge_ratio_max": 51.18486738387076,
+            "edge_ratio_p95": 27.41030064804306,
+            "edge_ratio_p99": 40.32185683644257,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 52491.7475445893,
             "area_ratio_p95": 516.2257882336754,
@@ -444,6 +631,17 @@
             "face_count": 775,
             "flip_count": 332,
             "flip_rate": 0.42838709677419357
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 377.4832149364327,
+            "area_ratio_p95": 27.60319825859362,
+            "area_ratio_p99": 51.34866784106709,
+            "edge_ratio_max": 51.00998133799729,
+            "edge_ratio_p95": 27.410305756906457,
+            "edge_ratio_p99": 40.321893097457114,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         }
       ],
@@ -679,6 +877,17 @@
       "risk_bins": [
         {
           "face_count": 21111,
+          "face_homogenized_3d": {
+            "area_ratio_max": 1.000000000000295,
+            "area_ratio_p95": 1.0000000000000038,
+            "area_ratio_p99": 1.0000000000000073,
+            "edge_ratio_max": 1.0000000000000453,
+            "edge_ratio_p95": 1.0000000000000036,
+            "edge_ratio_p99": 1.0000000000000062,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 170517.97676909846,
             "area_ratio_p95": 131.41630066266657,
@@ -702,6 +911,17 @@
             "flip_rate": 0.2479026411185914
           },
           "label": "L1_LE_0_10",
+          "original_3d": {
+            "area_ratio_max": 4.353472777761739,
+            "area_ratio_p95": 1.0015525583673228,
+            "area_ratio_p99": 1.0513644153321895,
+            "edge_ratio_max": 6.235115419128462,
+            "edge_ratio_p95": 1.0046391061976745,
+            "edge_ratio_p99": 1.0788704644503175,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 170517.97676909846,
             "area_ratio_p95": 130.60234193650015,
@@ -723,10 +943,32 @@
             "face_count": 19310,
             "flip_count": 4780,
             "flip_rate": 0.24754013464526153
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 4.353473592426619,
+            "area_ratio_p95": 1.001414241873948,
+            "area_ratio_p99": 1.0413533635073708,
+            "edge_ratio_max": 6.23511625683729,
+            "edge_ratio_p95": 1.0045618988559515,
+            "edge_ratio_p99": 1.0628855268465656,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 2027,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.999999995572783,
+            "area_ratio_p95": 0.9999983439537524,
+            "area_ratio_p99": 0.999999804254735,
+            "edge_ratio_max": 0.999999999981502,
+            "edge_ratio_p95": 0.999999795474126,
+            "edge_ratio_p99": 0.9999999850596569,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 16351.527601143276,
             "area_ratio_p95": 30.05107458839592,
@@ -750,6 +992,17 @@
             "flip_rate": 0.21730067743616466
           },
           "label": "L1_0_10_TO_0_50",
+          "original_3d": {
+            "area_ratio_max": 37.65317532371382,
+            "area_ratio_p95": 1.969075461496708,
+            "area_ratio_p99": 6.547653110058203,
+            "edge_ratio_max": 20.527066218219932,
+            "edge_ratio_p95": 2.212642588374556,
+            "edge_ratio_p99": 6.985783266657437,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 14661.986784515271,
             "area_ratio_p95": 48.96273244683636,
@@ -771,10 +1024,32 @@
             "face_count": 1919,
             "flip_count": 430,
             "flip_rate": 0.22407503908285564
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 37.65318068532591,
+            "area_ratio_p95": 1.950686651945125,
+            "area_ratio_p99": 6.361639007879911,
+            "edge_ratio_max": 20.52706833583057,
+            "edge_ratio_p95": 2.212642735075377,
+            "edge_ratio_p99": 6.9857838806449974,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 514,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999999844086,
+            "area_ratio_p95": 0.9999995565627603,
+            "area_ratio_p99": 0.999999999002635,
+            "edge_ratio_max": 0.9999999999994371,
+            "edge_ratio_p95": 0.9999999721497247,
+            "edge_ratio_p99": 0.9999999999797464,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 1132.4224814230718,
             "area_ratio_p95": 117.41587967243449,
@@ -798,6 +1073,17 @@
             "flip_rate": 0.3832599118942731
           },
           "label": "L1_0_50_TO_1_00",
+          "original_3d": {
+            "area_ratio_max": 85.06421117620205,
+            "area_ratio_p95": 26.236277187224267,
+            "area_ratio_p99": 33.61121278353967,
+            "edge_ratio_max": 84.04765565695378,
+            "edge_ratio_p95": 28.881678508204445,
+            "edge_ratio_p99": 36.36880194857963,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 18226.977442579442,
             "area_ratio_p95": 1447.8335170997734,
@@ -819,10 +1105,32 @@
             "face_count": 454,
             "flip_count": 193,
             "flip_rate": 0.4251101321585903
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 78.19116992857096,
+            "area_ratio_p95": 26.235047421754462,
+            "area_ratio_p99": 33.81297026945534,
+            "edge_ratio_max": 84.04766462735768,
+            "edge_ratio_p95": 28.878679916853915,
+            "edge_ratio_p99": 36.36880618534909,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 188,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999977982427,
+            "area_ratio_p95": 0.9992192205456549,
+            "area_ratio_p99": 0.999638913035953,
+            "edge_ratio_max": 0.9999999999887356,
+            "edge_ratio_p95": 0.9999794744502356,
+            "edge_ratio_p99": 0.9999981593674243,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 3464.4372018930535,
             "area_ratio_p95": 135.54789238737948,
@@ -846,6 +1154,17 @@
             "flip_rate": 0.31976744186046513
           },
           "label": "L1_1_00_TO_1_50",
+          "original_3d": {
+            "area_ratio_max": 151.54297940880815,
+            "area_ratio_p95": 44.79386409084113,
+            "area_ratio_p99": 95.0142002803626,
+            "edge_ratio_max": 163.50091675860156,
+            "edge_ratio_p95": 42.908888355683786,
+            "edge_ratio_p99": 71.08186658450066,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 98996.58294143373,
             "area_ratio_p95": 5303.832591221229,
@@ -867,10 +1186,32 @@
             "face_count": 172,
             "flip_count": 62,
             "flip_rate": 0.36046511627906974
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 151.15845873153594,
+            "area_ratio_p95": 44.41332001692822,
+            "area_ratio_p99": 86.97620417600201,
+            "edge_ratio_max": 163.50093472021436,
+            "edge_ratio_p95": 42.90889403855152,
+            "edge_ratio_p99": 71.08187432957858,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 291,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9997434484256859,
+            "area_ratio_p95": 0.9994661047079608,
+            "area_ratio_p99": 0.9996780852972436,
+            "edge_ratio_max": 0.9999997253337755,
+            "edge_ratio_p95": 0.9999710330638032,
+            "edge_ratio_p99": 0.9999990742876858,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 4124.249318822635,
             "area_ratio_p95": 68.57731494121077,
@@ -894,6 +1235,17 @@
             "flip_rate": 0.2916666666666667
           },
           "label": "L1_1_50_TO_1_90",
+          "original_3d": {
+            "area_ratio_max": 491.5255156898327,
+            "area_ratio_p95": 57.589814688536464,
+            "area_ratio_p99": 292.71505392418385,
+            "edge_ratio_max": 163.50091675860156,
+            "edge_ratio_p95": 47.99305281296188,
+            "edge_ratio_p99": 53.76012015992709,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 195150.70485845392,
             "area_ratio_p95": 4040.104413748509,
@@ -915,10 +1267,32 @@
             "face_count": 264,
             "flip_count": 109,
             "flip_rate": 0.4128787878787879
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 493.5548274671145,
+            "area_ratio_p95": 54.03090112576836,
+            "area_ratio_p99": 271.6325391658883,
+            "edge_ratio_max": 163.50093472021436,
+            "edge_ratio_p95": 47.93182136811019,
+            "edge_ratio_p99": 53.75309131861298,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 827,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9997608591647668,
+            "area_ratio_p95": 0.9994431830537374,
+            "area_ratio_p99": 0.9997092614577348,
+            "edge_ratio_max": 0.9999997415882849,
+            "edge_ratio_p95": 0.9999636087815557,
+            "edge_ratio_p99": 0.9999980630458832,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 1538.4091084517545,
             "area_ratio_p95": 22.81188921883801,
@@ -942,6 +1316,17 @@
             "flip_rate": 0.3329032258064516
           },
           "label": "L1_GT_1_90",
+          "original_3d": {
+            "area_ratio_max": 664.59688386519,
+            "area_ratio_p95": 26.740046244903464,
+            "area_ratio_p99": 52.78526266524723,
+            "edge_ratio_max": 54.41664253066634,
+            "edge_ratio_p95": 27.526050453046754,
+            "edge_ratio_p99": 35.519764805044005,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 23916.260555552984,
             "area_ratio_p95": 432.4985731933153,
@@ -963,6 +1348,17 @@
             "face_count": 775,
             "flip_count": 292,
             "flip_rate": 0.3767741935483871
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 666.9437208271729,
+            "area_ratio_p95": 26.74050359199324,
+            "area_ratio_p99": 52.78528625964872,
+            "edge_ratio_max": 54.41665720663467,
+            "edge_ratio_p95": 27.526059145426668,
+            "edge_ratio_p99": 35.52522354569169,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         }
       ],
@@ -1198,6 +1594,17 @@
       "risk_bins": [
         {
           "face_count": 21111,
+          "face_homogenized_3d": {
+            "area_ratio_max": 1.000000000000097,
+            "area_ratio_p95": 1.0000000000000042,
+            "area_ratio_p99": 1.0000000000000087,
+            "edge_ratio_max": 1.0000000000000413,
+            "edge_ratio_p95": 1.000000000000004,
+            "edge_ratio_p99": 1.0000000000000073,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 154731.82569955516,
             "area_ratio_p95": 53.11591626323284,
@@ -1221,6 +1628,17 @@
             "flip_rate": 0.22817193164163646
           },
           "label": "L1_LE_0_10",
+          "original_3d": {
+            "area_ratio_max": 10.721927780770793,
+            "area_ratio_p95": 1.0027376705498854,
+            "area_ratio_p99": 1.0603673972750725,
+            "edge_ratio_max": 8.696704610221865,
+            "edge_ratio_p95": 1.009268591198964,
+            "edge_ratio_p99": 1.0937918810066087,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 154731.82569955516,
             "area_ratio_p95": 53.21508110135805,
@@ -1242,10 +1660,32 @@
             "face_count": 19310,
             "flip_count": 4441,
             "flip_rate": 0.22998446400828587
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 10.721929042652631,
+            "area_ratio_p95": 1.002864543077354,
+            "area_ratio_p99": 1.055843485770455,
+            "edge_ratio_max": 8.696705887809982,
+            "edge_ratio_p95": 1.0095109646546665,
+            "edge_ratio_p99": 1.083621473457162,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 2027,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999955727789,
+            "area_ratio_p95": 0.9999965748171338,
+            "area_ratio_p99": 0.9999995675613,
+            "edge_ratio_max": 0.9999999999814917,
+            "edge_ratio_p95": 0.9999994549669116,
+            "edge_ratio_p99": 0.9999999787557203,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 69961.78915664591,
             "area_ratio_p95": 25.171527458457707,
@@ -1269,6 +1709,17 @@
             "flip_rate": 0.20010422094841063
           },
           "label": "L1_0_10_TO_0_50",
+          "original_3d": {
+            "area_ratio_max": 37.161047884279604,
+            "area_ratio_p95": 2.246309374197936,
+            "area_ratio_p99": 6.190332938454289,
+            "edge_ratio_max": 25.812005744397094,
+            "edge_ratio_p95": 2.430387997058677,
+            "edge_ratio_p99": 8.817635038105552,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 126527.09684833678,
             "area_ratio_p95": 32.06822939877059,
@@ -1290,10 +1741,32 @@
             "face_count": 1919,
             "flip_count": 429,
             "flip_rate": 0.2235539343408025
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 37.161054825106575,
+            "area_ratio_p95": 2.011897918299876,
+            "area_ratio_p99": 6.1896317537543615,
+            "edge_ratio_max": 25.812009349529653,
+            "edge_ratio_p95": 2.330008754752521,
+            "edge_ratio_p99": 8.817636482879935,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 514,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999999843878,
+            "area_ratio_p95": 0.9999995571410613,
+            "area_ratio_p99": 0.9999999990026271,
+            "edge_ratio_max": 0.9999999999994182,
+            "edge_ratio_p95": 0.9999999731961489,
+            "edge_ratio_p99": 0.999999999979814,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 953.064787310882,
             "area_ratio_p95": 75.98593694263717,
@@ -1317,6 +1790,17 @@
             "flip_rate": 0.3502202643171806
           },
           "label": "L1_0_50_TO_1_00",
+          "original_3d": {
+            "area_ratio_max": 129.05693073048786,
+            "area_ratio_p95": 19.667205095613863,
+            "area_ratio_p99": 37.041580946759844,
+            "edge_ratio_max": 106.34820744455426,
+            "edge_ratio_p95": 35.321143481340265,
+            "edge_ratio_p99": 45.07442132543291,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 14498.525107176518,
             "area_ratio_p95": 476.9394822284354,
@@ -1338,10 +1822,32 @@
             "face_count": 454,
             "flip_count": 213,
             "flip_rate": 0.46916299559471364
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 129.05694147561857,
+            "area_ratio_p95": 19.807567687177468,
+            "area_ratio_p99": 37.10912574563986,
+            "edge_ratio_max": 106.34822254234116,
+            "edge_ratio_p95": 35.32114855548037,
+            "edge_ratio_p99": 45.07442829083862,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 188,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999977982272,
+            "area_ratio_p95": 0.9978548419893043,
+            "area_ratio_p99": 0.9996389131010205,
+            "edge_ratio_max": 0.9999999999887229,
+            "edge_ratio_p95": 0.9999845211716663,
+            "edge_ratio_p99": 0.9999969260172444,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 2817.81847176182,
             "area_ratio_p95": 60.11371325894421,
@@ -1365,6 +1871,17 @@
             "flip_rate": 0.26744186046511625
           },
           "label": "L1_1_00_TO_1_50",
+          "original_3d": {
+            "area_ratio_max": 212.48024247282217,
+            "area_ratio_p95": 34.699736758070095,
+            "area_ratio_p99": 107.53463227171981,
+            "edge_ratio_max": 209.99843678211477,
+            "edge_ratio_p95": 51.28160768695893,
+            "edge_ratio_p99": 90.6625118147715,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 78016.31627805233,
             "area_ratio_p95": 1766.6615524811202,
@@ -1386,10 +1903,32 @@
             "face_count": 172,
             "flip_count": 73,
             "flip_rate": 0.42441860465116277
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 212.48027187080513,
+            "area_ratio_p95": 35.600935085053905,
+            "area_ratio_p99": 107.97671258237101,
+            "edge_ratio_max": 209.99846632084302,
+            "edge_ratio_p95": 51.300024146127676,
+            "edge_ratio_p99": 90.6625246952102,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 291,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9991212027751983,
+            "area_ratio_p95": 0.9981705562547352,
+            "area_ratio_p99": 0.9989023328901674,
+            "edge_ratio_max": 0.9999990591517692,
+            "edge_ratio_p95": 0.9999286166490883,
+            "edge_ratio_p99": 0.9999968298558467,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 2570.8689344002537,
             "area_ratio_p95": 37.36800820014636,
@@ -1413,6 +1952,17 @@
             "flip_rate": 0.20454545454545456
           },
           "label": "L1_1_50_TO_1_90",
+          "original_3d": {
+            "area_ratio_max": 258.7636989021736,
+            "area_ratio_p95": 41.59455389611297,
+            "area_ratio_p99": 180.0306017108037,
+            "edge_ratio_max": 209.99843678211477,
+            "edge_ratio_p95": 55.31000844249469,
+            "edge_ratio_p99": 64.04973582142713,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 119672.476800681,
             "area_ratio_p95": 1968.83699735467,
@@ -1434,10 +1984,32 @@
             "face_count": 264,
             "flip_count": 103,
             "flip_rate": 0.39015151515151514
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 259.6710414904669,
+            "area_ratio_p95": 44.77440418133311,
+            "area_ratio_p99": 189.70598286977813,
+            "edge_ratio_max": 209.99846632084302,
+            "edge_ratio_p95": 55.41265299723975,
+            "edge_ratio_p99": 64.049745614224,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 827,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9991808621505905,
+            "area_ratio_p95": 0.9980947532015441,
+            "area_ratio_p99": 0.9990041191599399,
+            "edge_ratio_max": 0.9999991151425757,
+            "edge_ratio_p95": 0.9998892057107513,
+            "edge_ratio_p99": 0.9999939355084099,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 1862.4054853054395,
             "area_ratio_p95": 18.917917569381174,
@@ -1461,6 +2033,17 @@
             "flip_rate": 0.2812903225806452
           },
           "label": "L1_GT_1_90",
+          "original_3d": {
+            "area_ratio_max": 366.26899375465837,
+            "area_ratio_p95": 28.18462858270451,
+            "area_ratio_p99": 61.528167164319925,
+            "edge_ratio_max": 62.858791787991784,
+            "edge_ratio_p95": 29.300314142846176,
+            "edge_ratio_p99": 41.76440758050366,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 11448.381972668667,
             "area_ratio_p95": 482.01579352506707,
@@ -1482,6 +2065,17 @@
             "face_count": 775,
             "flip_count": 307,
             "flip_rate": 0.3961290322580645
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 371.03470483714665,
+            "area_ratio_p95": 26.9216722882831,
+            "area_ratio_p99": 61.528177897197565,
+            "edge_ratio_max": 62.85880363425938,
+            "edge_ratio_p95": 29.300319707667597,
+            "edge_ratio_p99": 41.7644150475877,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         }
       ],
@@ -1717,6 +2311,17 @@
       "risk_bins": [
         {
           "face_count": 21111,
+          "face_homogenized_3d": {
+            "area_ratio_max": 1.0000000000001725,
+            "area_ratio_p95": 1.000000000000004,
+            "area_ratio_p99": 1.0000000000000078,
+            "edge_ratio_max": 1.0000000000000255,
+            "edge_ratio_p95": 1.0000000000000038,
+            "edge_ratio_p99": 1.0000000000000067,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 144685.94939090317,
             "area_ratio_p95": 85.56911896701416,
@@ -1740,6 +2345,17 @@
             "flip_rate": 0.27037804246504404
           },
           "label": "L1_LE_0_10",
+          "original_3d": {
+            "area_ratio_max": 10.174888576816613,
+            "area_ratio_p95": 1.0014360712575283,
+            "area_ratio_p99": 1.0477550848501425,
+            "edge_ratio_max": 8.142554055997067,
+            "edge_ratio_p95": 1.0047376846385843,
+            "edge_ratio_p99": 1.0743282743869196,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 144685.94939090317,
             "area_ratio_p95": 84.51676069533039,
@@ -1761,10 +2377,32 @@
             "face_count": 19310,
             "flip_count": 5222,
             "flip_rate": 0.27042982910409114
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 10.174890179793747,
+            "area_ratio_p95": 1.0014185046647248,
+            "area_ratio_p99": 1.041456571652272,
+            "edge_ratio_max": 8.142555609478142,
+            "edge_ratio_p95": 1.004756504149847,
+            "edge_ratio_p99": 1.059896720414199,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 2027,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999955727821,
+            "area_ratio_p95": 0.9999986611937262,
+            "area_ratio_p99": 0.9999998065794116,
+            "edge_ratio_max": 0.9999999999814949,
+            "edge_ratio_p95": 0.999999798014642,
+            "edge_ratio_p99": 0.9999999915591631,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 71054.57904174503,
             "area_ratio_p95": 26.78142531969316,
@@ -1788,6 +2426,17 @@
             "flip_rate": 0.18238665971860343
           },
           "label": "L1_0_10_TO_0_50",
+          "original_3d": {
+            "area_ratio_max": 40.65449149781333,
+            "area_ratio_p95": 1.9108316114473878,
+            "area_ratio_p99": 6.422611679959531,
+            "edge_ratio_max": 24.128530860339943,
+            "edge_ratio_p95": 2.149568891958504,
+            "edge_ratio_p99": 8.174571596121883,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 108238.70067639009,
             "area_ratio_p95": 42.43376446520919,
@@ -1809,10 +2458,32 @@
             "face_count": 1919,
             "flip_count": 372,
             "flip_rate": 0.1938509640437728
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 40.65450013173355,
+            "area_ratio_p95": 1.882589004631916,
+            "area_ratio_p99": 6.502388687547056,
+            "edge_ratio_max": 24.128535182256385,
+            "edge_ratio_p95": 2.2399978654669597,
+            "edge_ratio_p99": 8.17457333467946,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 514,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999999844082,
+            "area_ratio_p95": 0.9999995586857606,
+            "area_ratio_p99": 0.9999999990056772,
+            "edge_ratio_max": 0.9999999999994289,
+            "edge_ratio_p95": 0.9999999752821256,
+            "edge_ratio_p99": 0.99999999998011,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 1054.0764238301995,
             "area_ratio_p95": 96.74513414917239,
@@ -1836,6 +2507,17 @@
             "flip_rate": 0.30837004405286345
           },
           "label": "L1_0_50_TO_1_00",
+          "original_3d": {
+            "area_ratio_max": 117.75624273334259,
+            "area_ratio_p95": 24.220782257159083,
+            "area_ratio_p99": 41.47797306981553,
+            "edge_ratio_max": 99.36153990677055,
+            "edge_ratio_p95": 32.95622526627183,
+            "edge_ratio_p99": 42.52234352777228,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 17634.405958186988,
             "area_ratio_p95": 995.2889241020581,
@@ -1857,10 +2539,32 @@
             "face_count": 454,
             "flip_count": 172,
             "flip_rate": 0.3788546255506608
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 117.75625906299737,
+            "area_ratio_p95": 24.198505410126135,
+            "area_ratio_p99": 41.47798033910428,
+            "edge_ratio_max": 99.36155799382166,
+            "edge_ratio_p95": 32.956231535582155,
+            "edge_ratio_p99": 42.52235180705414,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 188,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.999999997798247,
+            "area_ratio_p95": 0.9991671613780168,
+            "area_ratio_p99": 0.9996389130523273,
+            "edge_ratio_max": 0.9999999999887301,
+            "edge_ratio_p95": 0.9999860199950849,
+            "edge_ratio_p99": 0.9999996410931143,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 2753.097301604865,
             "area_ratio_p95": 89.51454134235065,
@@ -1884,6 +2588,17 @@
             "flip_rate": 0.23837209302325582
           },
           "label": "L1_1_00_TO_1_50",
+          "original_3d": {
+            "area_ratio_max": 196.76188607795515,
+            "area_ratio_p95": 38.74751253557668,
+            "area_ratio_p99": 115.3966260264888,
+            "edge_ratio_max": 197.13953775143932,
+            "edge_ratio_p95": 48.7146304346115,
+            "edge_ratio_p99": 85.0007738484627,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 99021.41006920584,
             "area_ratio_p95": 3819.5790653179906,
@@ -1905,10 +2620,32 @@
             "face_count": 172,
             "flip_count": 60,
             "flip_rate": 0.3488372093023256
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 196.7619204105069,
+            "area_ratio_p95": 38.402436489091045,
+            "area_ratio_p99": 115.64034279985982,
+            "edge_ratio_max": 197.13957312953207,
+            "edge_ratio_p95": 48.72987368496324,
+            "edge_ratio_p99": 85.0007892818748,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 291,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9997434484016285,
+            "area_ratio_p95": 0.9994661042428721,
+            "area_ratio_p99": 0.9996781516280977,
+            "edge_ratio_max": 0.9999997247862233,
+            "edge_ratio_p95": 0.9999888288747332,
+            "edge_ratio_p99": 0.9999990742105309,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 2851.12784040576,
             "area_ratio_p95": 45.543380273530744,
@@ -1932,6 +2669,17 @@
             "flip_rate": 0.29924242424242425
           },
           "label": "L1_1_50_TO_1_90",
+          "original_3d": {
+            "area_ratio_max": 308.81213807229784,
+            "area_ratio_p95": 45.61890991652871,
+            "area_ratio_p99": 162.18302710251734,
+            "edge_ratio_max": 197.13953775143932,
+            "edge_ratio_p95": 53.09693763519351,
+            "edge_ratio_p99": 60.21394066553,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 178548.13659666115,
             "area_ratio_p95": 2766.066825446508,
@@ -1953,10 +2701,32 @@
             "face_count": 264,
             "flip_count": 89,
             "flip_rate": 0.3371212121212121
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 307.62311788463023,
+            "area_ratio_p95": 45.62209170328883,
+            "area_ratio_p99": 165.4347307026191,
+            "edge_ratio_max": 197.13957312953207,
+            "edge_ratio_p95": 53.137289171390705,
+            "edge_ratio_p99": 60.22937426068644,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 827,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9997608591444749,
+            "area_ratio_p95": 0.9994433378335148,
+            "area_ratio_p99": 0.9997092613925369,
+            "edge_ratio_max": 0.9999997415836493,
+            "edge_ratio_p95": 0.9999764415386122,
+            "edge_ratio_p99": 0.9999984870462565,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 1834.79557894008,
             "area_ratio_p95": 17.335795074658392,
@@ -1980,6 +2750,17 @@
             "flip_rate": 0.3406451612903226
           },
           "label": "L1_GT_1_90",
+          "original_3d": {
+            "area_ratio_max": 400.68303747467644,
+            "area_ratio_p95": 25.69718508982443,
+            "area_ratio_p99": 52.44372043216967,
+            "edge_ratio_max": 59.50198284060591,
+            "edge_ratio_p95": 27.96731151964946,
+            "edge_ratio_p99": 39.58097432582675,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 15123.124004318854,
             "area_ratio_p95": 461.97663000432766,
@@ -2001,6 +2782,17 @@
             "face_count": 775,
             "flip_count": 307,
             "flip_rate": 0.3961290322580645
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 398.7125250669279,
+            "area_ratio_p95": 25.69718099768367,
+            "area_ratio_p99": 52.44371911551643,
+            "edge_ratio_max": 59.50198890815825,
+            "edge_ratio_p95": 27.967314770134166,
+            "edge_ratio_p99": 39.58097777747077,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         }
       ],
@@ -2236,6 +3028,17 @@
       "risk_bins": [
         {
           "face_count": 21111,
+          "face_homogenized_3d": {
+            "area_ratio_max": 1.0000000000002742,
+            "area_ratio_p95": 1.0000000000000038,
+            "area_ratio_p99": 1.0000000000000082,
+            "edge_ratio_max": 1.0000000000000198,
+            "edge_ratio_p95": 1.0000000000000038,
+            "edge_ratio_p99": 1.000000000000007,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 379464.5314989184,
             "area_ratio_p95": 67.75085304510944,
@@ -2259,6 +3062,17 @@
             "flip_rate": 0.34604578563995836
           },
           "label": "L1_LE_0_10",
+          "original_3d": {
+            "area_ratio_max": 4.680604883458519,
+            "area_ratio_p95": 1.003331030148802,
+            "area_ratio_p99": 1.0793953675842611,
+            "edge_ratio_max": 7.473015605545924,
+            "edge_ratio_p95": 1.0122814836280334,
+            "edge_ratio_p99": 1.1046394075495927,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 379464.5314989013,
             "area_ratio_p95": 68.51026887295166,
@@ -2280,10 +3094,32 @@
             "face_count": 19220,
             "flip_count": 6653,
             "flip_rate": 0.34614984391259107
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 4.680605994386464,
+            "area_ratio_p95": 1.0032031270019195,
+            "area_ratio_p99": 1.0634812208143554,
+            "edge_ratio_max": 7.4730172245493875,
+            "edge_ratio_p95": 1.0119344738938965,
+            "edge_ratio_p99": 1.0890135251702024,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 2027,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999955727841,
+            "area_ratio_p95": 0.9999906482713697,
+            "area_ratio_p99": 0.9999994688192703,
+            "edge_ratio_max": 0.9999999999814936,
+            "edge_ratio_p95": 0.9999981706855005,
+            "edge_ratio_p99": 0.9999999845746342,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 6607.700396312397,
             "area_ratio_p95": 28.766132551731964,
@@ -2307,6 +3143,17 @@
             "flip_rate": 0.12379935965848453
           },
           "label": "L1_0_10_TO_0_50",
+          "original_3d": {
+            "area_ratio_max": 31.87413041491775,
+            "area_ratio_p95": 2.169240038037729,
+            "area_ratio_p99": 6.6181743238706225,
+            "edge_ratio_max": 24.20049858634635,
+            "edge_ratio_p95": 2.367278293726642,
+            "edge_ratio_p99": 8.428814454430762,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 26935.727452864863,
             "area_ratio_p95": 62.73592834501771,
@@ -2328,10 +3175,32 @@
             "face_count": 1874,
             "flip_count": 312,
             "flip_rate": 0.1664887940234792
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 31.87413860153476,
+            "area_ratio_p95": 1.9382278502241763,
+            "area_ratio_p99": 6.57853486994766,
+            "edge_ratio_max": 24.200502949316938,
+            "edge_ratio_p95": 2.24759678649018,
+            "edge_ratio_p99": 8.428815967197785,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 514,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999999843949,
+            "area_ratio_p95": 0.9999995616602138,
+            "area_ratio_p99": 0.9999999991099868,
+            "edge_ratio_max": 0.9999999999994144,
+            "edge_ratio_p95": 0.9999999769504574,
+            "edge_ratio_p99": 0.9999999999802819,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 443.52871341160653,
             "area_ratio_p95": 52.154106647311586,
@@ -2355,6 +3224,17 @@
             "flip_rate": 0.26666666666666666
           },
           "label": "L1_0_50_TO_1_00",
+          "original_3d": {
+            "area_ratio_max": 94.93642202256865,
+            "area_ratio_p95": 23.000121792981375,
+            "area_ratio_p99": 37.24409563119163,
+            "edge_ratio_max": 98.97554552786187,
+            "edge_ratio_p95": 33.43702352117895,
+            "edge_ratio_p99": 42.11431746096474,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 17790.493807693285,
             "area_ratio_p95": 1725.0173479994291,
@@ -2376,10 +3256,32 @@
             "face_count": 480,
             "flip_count": 192,
             "flip_rate": 0.4
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 94.93643753567794,
+            "area_ratio_p95": 22.9450592282277,
+            "area_ratio_p99": 36.84714849814856,
+            "edge_ratio_max": 98.97556376998857,
+            "edge_ratio_p95": 33.43702985538921,
+            "edge_ratio_p99": 42.11432597207598,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 188,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999977982293,
+            "area_ratio_p95": 0.9932842904079877,
+            "area_ratio_p99": 0.9996389130549171,
+            "edge_ratio_max": 0.9999999999887121,
+            "edge_ratio_p95": 0.9999593518482254,
+            "edge_ratio_p99": 0.9999970976927541,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 117.3138748316523,
             "area_ratio_p95": 38.73264951119721,
@@ -2403,6 +3305,17 @@
             "flip_rate": 0.24277456647398843
           },
           "label": "L1_1_00_TO_1_50",
+          "original_3d": {
+            "area_ratio_max": 148.62199850751153,
+            "area_ratio_p95": 50.95057483971792,
+            "area_ratio_p99": 109.54286016253722,
+            "edge_ratio_max": 191.99772323243644,
+            "edge_ratio_p95": 48.296368236578886,
+            "edge_ratio_p99": 83.51837280126972,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 35900.01741170007,
             "area_ratio_p95": 3305.8822278780617,
@@ -2424,10 +3337,32 @@
             "face_count": 173,
             "flip_count": 72,
             "flip_rate": 0.4161849710982659
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 148.62202177961808,
+            "area_ratio_p95": 46.72293417759676,
+            "area_ratio_p99": 97.34352721176128,
+            "edge_ratio_max": 191.99775918045154,
+            "edge_ratio_p95": 48.29637956619619,
+            "edge_ratio_p99": 83.51838842869815,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 291,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9962097087941653,
+            "area_ratio_p95": 0.9920967396545162,
+            "area_ratio_p99": 0.9952839508277443,
+            "edge_ratio_max": 0.9999959528911491,
+            "edge_ratio_p95": 0.9995767139852255,
+            "edge_ratio_p99": 0.9999863471047433,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 689.3839484029435,
             "area_ratio_p95": 39.674319489406194,
@@ -2451,6 +3386,17 @@
             "flip_rate": 0.23255813953488372
           },
           "label": "L1_1_50_TO_1_90",
+          "original_3d": {
+            "area_ratio_max": 398.9841584844452,
+            "area_ratio_p95": 55.83762725251589,
+            "area_ratio_p99": 227.16650333092866,
+            "edge_ratio_max": 191.99772323243644,
+            "edge_ratio_p95": 54.047197141524144,
+            "edge_ratio_p99": 60.342533585365565,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 42950.91244996139,
             "area_ratio_p95": 4750.509019009653,
@@ -2472,10 +3418,32 @@
             "face_count": 258,
             "flip_count": 115,
             "flip_rate": 0.44573643410852715
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 360.0070157405265,
+            "area_ratio_p95": 53.6202173423085,
+            "area_ratio_p99": 202.3625238761689,
+            "edge_ratio_max": 191.99775918045154,
+            "edge_ratio_p95": 53.86169029116428,
+            "edge_ratio_p99": 60.308319813200946,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 827,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9964674332888556,
+            "area_ratio_p95": 0.9917774281891859,
+            "area_ratio_p99": 0.995705151118725,
+            "edge_ratio_max": 0.9999961889622082,
+            "edge_ratio_p95": 0.9997162052186916,
+            "edge_ratio_p99": 0.9999856420973581,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 459.79034590656283,
             "area_ratio_p95": 36.31339241899612,
@@ -2499,6 +3467,17 @@
             "flip_rate": 0.32041343669250644
           },
           "label": "L1_GT_1_90",
+          "original_3d": {
+            "area_ratio_max": 379.493519894578,
+            "area_ratio_p95": 27.603193164845333,
+            "area_ratio_p99": 51.34869278079682,
+            "edge_ratio_max": 51.18486738387076,
+            "edge_ratio_p95": 27.41030064804306,
+            "edge_ratio_p99": 40.32185683644257,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 62001.17220591086,
             "area_ratio_p95": 723.9408673408846,
@@ -2520,6 +3499,17 @@
             "face_count": 774,
             "flip_count": 311,
             "flip_rate": 0.4018087855297158
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 377.4832149364327,
+            "area_ratio_p95": 27.60319825859362,
+            "area_ratio_p99": 51.34866784106709,
+            "edge_ratio_max": 51.00998133799729,
+            "edge_ratio_p95": 27.410305756906457,
+            "edge_ratio_p99": 40.321893097457114,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         }
       ],
@@ -2755,6 +3745,17 @@
       "risk_bins": [
         {
           "face_count": 21111,
+          "face_homogenized_3d": {
+            "area_ratio_max": 1.000000000000295,
+            "area_ratio_p95": 1.0000000000000038,
+            "area_ratio_p99": 1.0000000000000073,
+            "edge_ratio_max": 1.0000000000000453,
+            "edge_ratio_p95": 1.0000000000000036,
+            "edge_ratio_p99": 1.0000000000000062,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 768101.6548690228,
             "area_ratio_p95": 75.76069073993668,
@@ -2778,6 +3779,17 @@
             "flip_rate": 0.29334027055150885
           },
           "label": "L1_LE_0_10",
+          "original_3d": {
+            "area_ratio_max": 4.353472777761739,
+            "area_ratio_p95": 1.0015525583673228,
+            "area_ratio_p99": 1.0513644153321895,
+            "edge_ratio_max": 6.235115419128462,
+            "edge_ratio_p95": 1.0046391061976745,
+            "edge_ratio_p99": 1.0788704644503175,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 768101.6548689681,
             "area_ratio_p95": 75.86247117674333,
@@ -2799,10 +3811,32 @@
             "face_count": 19220,
             "flip_count": 5653,
             "flip_rate": 0.2941207075962539
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 4.353473592426619,
+            "area_ratio_p95": 1.001414241873948,
+            "area_ratio_p99": 1.0413533635073708,
+            "edge_ratio_max": 6.23511625683729,
+            "edge_ratio_p95": 1.0045618988559515,
+            "edge_ratio_p99": 1.0628855268465656,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 2027,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.999999995572783,
+            "area_ratio_p95": 0.9999983439537524,
+            "area_ratio_p99": 0.999999804254735,
+            "edge_ratio_max": 0.999999999981502,
+            "edge_ratio_p95": 0.999999795474126,
+            "edge_ratio_p99": 0.9999999850596569,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 12893.936417423147,
             "area_ratio_p95": 27.31298578162987,
@@ -2826,6 +3860,17 @@
             "flip_rate": 0.08057630736392743
           },
           "label": "L1_0_10_TO_0_50",
+          "original_3d": {
+            "area_ratio_max": 37.65317532371382,
+            "area_ratio_p95": 1.969075461496708,
+            "area_ratio_p99": 6.547653110058203,
+            "edge_ratio_max": 20.527066218219932,
+            "edge_ratio_p95": 2.212642588374556,
+            "edge_ratio_p99": 6.985783266657437,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 29942.374598823673,
             "area_ratio_p95": 62.03471520838968,
@@ -2847,10 +3892,32 @@
             "face_count": 1874,
             "flip_count": 209,
             "flip_rate": 0.11152614727854857
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 37.65318068532591,
+            "area_ratio_p95": 1.950686651945125,
+            "area_ratio_p99": 6.361639007879911,
+            "edge_ratio_max": 20.52706833583057,
+            "edge_ratio_p95": 2.212642735075377,
+            "edge_ratio_p99": 6.9857838806449974,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 514,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999999844086,
+            "area_ratio_p95": 0.9999995565627603,
+            "area_ratio_p99": 0.999999999002635,
+            "edge_ratio_max": 0.9999999999994371,
+            "edge_ratio_p95": 0.9999999721497247,
+            "edge_ratio_p99": 0.9999999999797464,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 574.860100360051,
             "area_ratio_p95": 68.61458619581578,
@@ -2874,6 +3941,17 @@
             "flip_rate": 0.22708333333333333
           },
           "label": "L1_0_50_TO_1_00",
+          "original_3d": {
+            "area_ratio_max": 85.06421117620205,
+            "area_ratio_p95": 26.236277187224267,
+            "area_ratio_p99": 33.61121278353967,
+            "edge_ratio_max": 84.04765565695378,
+            "edge_ratio_p95": 28.881678508204445,
+            "edge_ratio_p99": 36.36880194857963,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 8120.832720212517,
             "area_ratio_p95": 969.7151066077678,
@@ -2895,10 +3973,32 @@
             "face_count": 480,
             "flip_count": 135,
             "flip_rate": 0.28125
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 78.19116992857096,
+            "area_ratio_p95": 26.235047421754462,
+            "area_ratio_p99": 33.81297026945534,
+            "edge_ratio_max": 84.04766462735768,
+            "edge_ratio_p95": 28.878679916853915,
+            "edge_ratio_p99": 36.36880618534909,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 188,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999977982427,
+            "area_ratio_p95": 0.9992192205456549,
+            "area_ratio_p99": 0.999638913035953,
+            "edge_ratio_max": 0.9999999999887356,
+            "edge_ratio_p95": 0.9999794744502356,
+            "edge_ratio_p99": 0.9999981593674243,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 161.5011894469061,
             "area_ratio_p95": 37.358663636719186,
@@ -2922,6 +4022,17 @@
             "flip_rate": 0.20809248554913296
           },
           "label": "L1_1_00_TO_1_50",
+          "original_3d": {
+            "area_ratio_max": 151.54297940880815,
+            "area_ratio_p95": 44.79386409084113,
+            "area_ratio_p99": 95.0142002803626,
+            "edge_ratio_max": 163.50091675860156,
+            "edge_ratio_p95": 42.908888355683786,
+            "edge_ratio_p99": 71.08186658450066,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 19444.349533808807,
             "area_ratio_p95": 1963.8006015800004,
@@ -2943,10 +4054,32 @@
             "face_count": 173,
             "flip_count": 66,
             "flip_rate": 0.3815028901734104
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 151.15845873153594,
+            "area_ratio_p95": 44.41332001692822,
+            "area_ratio_p99": 86.97620417600201,
+            "edge_ratio_max": 163.50093472021436,
+            "edge_ratio_p95": 42.90889403855152,
+            "edge_ratio_p99": 71.08187432957858,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 291,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9997434484256859,
+            "area_ratio_p95": 0.9994661047079608,
+            "area_ratio_p99": 0.9996780852972436,
+            "edge_ratio_max": 0.9999997253337755,
+            "edge_ratio_p95": 0.9999710330638032,
+            "edge_ratio_p99": 0.9999990742876858,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 1255.6249856639893,
             "area_ratio_p95": 34.54328574464232,
@@ -2970,6 +4103,17 @@
             "flip_rate": 0.23255813953488372
           },
           "label": "L1_1_50_TO_1_90",
+          "original_3d": {
+            "area_ratio_max": 491.5255156898327,
+            "area_ratio_p95": 57.589814688536464,
+            "area_ratio_p99": 292.71505392418385,
+            "edge_ratio_max": 163.50091675860156,
+            "edge_ratio_p95": 47.99305281296188,
+            "edge_ratio_p99": 53.76012015992709,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 26270.211523179194,
             "area_ratio_p95": 3749.1698777197207,
@@ -2991,10 +4135,32 @@
             "face_count": 258,
             "flip_count": 114,
             "flip_rate": 0.4418604651162791
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 493.5548274671145,
+            "area_ratio_p95": 54.03090112576836,
+            "area_ratio_p99": 271.6325391658883,
+            "edge_ratio_max": 163.50093472021436,
+            "edge_ratio_p95": 47.93182136811019,
+            "edge_ratio_p99": 53.75309131861298,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 827,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9997608591647668,
+            "area_ratio_p95": 0.9994431830537374,
+            "area_ratio_p99": 0.9997092614577348,
+            "edge_ratio_max": 0.9999997415882849,
+            "edge_ratio_p95": 0.9999636087815557,
+            "edge_ratio_p99": 0.9999980630458832,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 617.3485461657967,
             "area_ratio_p95": 26.67388221864166,
@@ -3018,6 +4184,17 @@
             "flip_rate": 0.27906976744186046
           },
           "label": "L1_GT_1_90",
+          "original_3d": {
+            "area_ratio_max": 664.59688386519,
+            "area_ratio_p95": 26.740046244903464,
+            "area_ratio_p99": 52.78526266524723,
+            "edge_ratio_max": 54.41664253066634,
+            "edge_ratio_p95": 27.526050453046754,
+            "edge_ratio_p99": 35.519764805044005,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 99882.49521670744,
             "area_ratio_p95": 668.8880633133716,
@@ -3039,6 +4216,17 @@
             "face_count": 774,
             "flip_count": 300,
             "flip_rate": 0.3875968992248062
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 666.9437208271729,
+            "area_ratio_p95": 26.74050359199324,
+            "area_ratio_p99": 52.78528625964872,
+            "edge_ratio_max": 54.41665720663467,
+            "edge_ratio_p95": 27.526059145426668,
+            "edge_ratio_p99": 35.52522354569169,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         }
       ],
@@ -3274,6 +4462,17 @@
       "risk_bins": [
         {
           "face_count": 21111,
+          "face_homogenized_3d": {
+            "area_ratio_max": 1.000000000000097,
+            "area_ratio_p95": 1.0000000000000042,
+            "area_ratio_p99": 1.0000000000000087,
+            "edge_ratio_max": 1.0000000000000413,
+            "edge_ratio_p95": 1.000000000000004,
+            "edge_ratio_p99": 1.0000000000000073,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 194954.46976064876,
             "area_ratio_p95": 41.48044618640371,
@@ -3297,6 +4496,17 @@
             "flip_rate": 0.35905306971904266
           },
           "label": "L1_LE_0_10",
+          "original_3d": {
+            "area_ratio_max": 10.721927780770793,
+            "area_ratio_p95": 1.0027376705498854,
+            "area_ratio_p99": 1.0603673972750725,
+            "edge_ratio_max": 8.696704610221865,
+            "edge_ratio_p95": 1.009268591198964,
+            "edge_ratio_p99": 1.0937918810066087,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 194954.4697605967,
             "area_ratio_p95": 42.43023173608484,
@@ -3318,10 +4528,32 @@
             "face_count": 19220,
             "flip_count": 6924,
             "flip_rate": 0.3602497398543184
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 10.721929042652631,
+            "area_ratio_p95": 1.002864543077354,
+            "area_ratio_p99": 1.055843485770455,
+            "edge_ratio_max": 8.696705887809982,
+            "edge_ratio_p95": 1.0095109646546665,
+            "edge_ratio_p99": 1.083621473457162,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 2027,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999955727789,
+            "area_ratio_p95": 0.9999965748171338,
+            "area_ratio_p99": 0.9999995675613,
+            "edge_ratio_max": 0.9999999999814917,
+            "edge_ratio_p95": 0.9999994549669116,
+            "edge_ratio_p99": 0.9999999787557203,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 3521.8808417368987,
             "area_ratio_p95": 21.52025043595011,
@@ -3345,6 +4577,17 @@
             "flip_rate": 0.10405549626467449
           },
           "label": "L1_0_10_TO_0_50",
+          "original_3d": {
+            "area_ratio_max": 37.161047884279604,
+            "area_ratio_p95": 2.246309374197936,
+            "area_ratio_p99": 6.190332938454289,
+            "edge_ratio_max": 25.812005744397094,
+            "edge_ratio_p95": 2.430387997058677,
+            "edge_ratio_p99": 8.817635038105552,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 9574.037810652193,
             "area_ratio_p95": 60.598856343039564,
@@ -3366,10 +4609,32 @@
             "face_count": 1874,
             "flip_count": 251,
             "flip_rate": 0.13393810032017076
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 37.161054825106575,
+            "area_ratio_p95": 2.011897918299876,
+            "area_ratio_p99": 6.1896317537543615,
+            "edge_ratio_max": 25.812009349529653,
+            "edge_ratio_p95": 2.330008754752521,
+            "edge_ratio_p99": 8.817636482879935,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 514,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999999843878,
+            "area_ratio_p95": 0.9999995571410613,
+            "area_ratio_p99": 0.9999999990026271,
+            "edge_ratio_max": 0.9999999999994182,
+            "edge_ratio_p95": 0.9999999731961489,
+            "edge_ratio_p99": 0.999999999979814,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 296.10992315952893,
             "area_ratio_p95": 32.78555727981566,
@@ -3393,6 +4658,17 @@
             "flip_rate": 0.24791666666666667
           },
           "label": "L1_0_50_TO_1_00",
+          "original_3d": {
+            "area_ratio_max": 129.05693073048786,
+            "area_ratio_p95": 19.667205095613863,
+            "area_ratio_p99": 37.041580946759844,
+            "edge_ratio_max": 106.34820744455426,
+            "edge_ratio_p95": 35.321143481340265,
+            "edge_ratio_p99": 45.07442132543291,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 8045.549620534292,
             "area_ratio_p95": 1076.6405173838052,
@@ -3414,10 +4690,32 @@
             "face_count": 480,
             "flip_count": 142,
             "flip_rate": 0.29583333333333334
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 129.05694147561857,
+            "area_ratio_p95": 19.807567687177468,
+            "area_ratio_p99": 37.10912574563986,
+            "edge_ratio_max": 106.34822254234116,
+            "edge_ratio_p95": 35.32114855548037,
+            "edge_ratio_p99": 45.07442829083862,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 188,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999977982272,
+            "area_ratio_p95": 0.9978548419893043,
+            "area_ratio_p99": 0.9996389131010205,
+            "edge_ratio_max": 0.9999999999887229,
+            "edge_ratio_p95": 0.9999845211716663,
+            "edge_ratio_p99": 0.9999969260172444,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 66.83370786429525,
             "area_ratio_p95": 31.157828698575578,
@@ -3441,6 +4739,17 @@
             "flip_rate": 0.20809248554913296
           },
           "label": "L1_1_00_TO_1_50",
+          "original_3d": {
+            "area_ratio_max": 212.48024247282217,
+            "area_ratio_p95": 34.699736758070095,
+            "area_ratio_p99": 107.53463227171981,
+            "edge_ratio_max": 209.99843678211477,
+            "edge_ratio_p95": 51.28160768695893,
+            "edge_ratio_p99": 90.6625118147715,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 13640.638578326847,
             "area_ratio_p95": 2639.1689687178778,
@@ -3462,10 +4771,32 @@
             "face_count": 173,
             "flip_count": 55,
             "flip_rate": 0.3179190751445087
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 212.48027187080513,
+            "area_ratio_p95": 35.600935085053905,
+            "area_ratio_p99": 107.97671258237101,
+            "edge_ratio_max": 209.99846632084302,
+            "edge_ratio_p95": 51.300024146127676,
+            "edge_ratio_p99": 90.6625246952102,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 291,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9991212027751983,
+            "area_ratio_p95": 0.9981705562547352,
+            "area_ratio_p99": 0.9989023328901674,
+            "edge_ratio_max": 0.9999990591517692,
+            "edge_ratio_p95": 0.9999286166490883,
+            "edge_ratio_p99": 0.9999968298558467,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 509.42587922404726,
             "area_ratio_p95": 26.009932872283294,
@@ -3489,6 +4820,17 @@
             "flip_rate": 0.2596899224806202
           },
           "label": "L1_1_50_TO_1_90",
+          "original_3d": {
+            "area_ratio_max": 258.7636989021736,
+            "area_ratio_p95": 41.59455389611297,
+            "area_ratio_p99": 180.0306017108037,
+            "edge_ratio_max": 209.99843678211477,
+            "edge_ratio_p95": 55.31000844249469,
+            "edge_ratio_p99": 64.04973582142713,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 55721.53897393752,
             "area_ratio_p95": 2530.6327465386366,
@@ -3510,10 +4852,32 @@
             "face_count": 258,
             "flip_count": 97,
             "flip_rate": 0.375968992248062
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 259.6710414904669,
+            "area_ratio_p95": 44.77440418133311,
+            "area_ratio_p99": 189.70598286977813,
+            "edge_ratio_max": 209.99846632084302,
+            "edge_ratio_p95": 55.41265299723975,
+            "edge_ratio_p99": 64.049745614224,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 827,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9991808621505905,
+            "area_ratio_p95": 0.9980947532015441,
+            "area_ratio_p99": 0.9990041191599399,
+            "edge_ratio_max": 0.9999991151425757,
+            "edge_ratio_p95": 0.9998892057107513,
+            "edge_ratio_p99": 0.9999939355084099,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 380.8010964374187,
             "area_ratio_p95": 23.29983791377538,
@@ -3537,6 +4901,17 @@
             "flip_rate": 0.31007751937984496
           },
           "label": "L1_GT_1_90",
+          "original_3d": {
+            "area_ratio_max": 366.26899375465837,
+            "area_ratio_p95": 28.18462858270451,
+            "area_ratio_p99": 61.528167164319925,
+            "edge_ratio_max": 62.858791787991784,
+            "edge_ratio_p95": 29.300314142846176,
+            "edge_ratio_p99": 41.76440758050366,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 132436.84367932848,
             "area_ratio_p95": 879.6002378032844,
@@ -3558,6 +4933,17 @@
             "face_count": 774,
             "flip_count": 322,
             "flip_rate": 0.4160206718346253
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 371.03470483714665,
+            "area_ratio_p95": 26.9216722882831,
+            "area_ratio_p99": 61.528177897197565,
+            "edge_ratio_max": 62.85880363425938,
+            "edge_ratio_p95": 29.300319707667597,
+            "edge_ratio_p99": 41.7644150475877,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         }
       ],
@@ -3793,6 +5179,17 @@
       "risk_bins": [
         {
           "face_count": 21111,
+          "face_homogenized_3d": {
+            "area_ratio_max": 1.0000000000001725,
+            "area_ratio_p95": 1.000000000000004,
+            "area_ratio_p99": 1.0000000000000078,
+            "edge_ratio_max": 1.0000000000000255,
+            "edge_ratio_p95": 1.0000000000000038,
+            "edge_ratio_p99": 1.0000000000000067,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 896259.6741372383,
             "area_ratio_p95": 80.22633756357382,
@@ -3816,6 +5213,17 @@
             "flip_rate": 0.29318418314255984
           },
           "label": "L1_LE_0_10",
+          "original_3d": {
+            "area_ratio_max": 10.174888576816613,
+            "area_ratio_p95": 1.0014360712575283,
+            "area_ratio_p99": 1.0477550848501425,
+            "edge_ratio_max": 8.142554055997067,
+            "edge_ratio_p95": 1.0047376846385843,
+            "edge_ratio_p99": 1.0743282743869196,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 896259.6741372194,
             "area_ratio_p95": 81.44076963926881,
@@ -3837,10 +5245,32 @@
             "face_count": 19220,
             "flip_count": 5673,
             "flip_rate": 0.29516129032258065
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 10.174890179793747,
+            "area_ratio_p95": 1.0014185046647248,
+            "area_ratio_p99": 1.041456571652272,
+            "edge_ratio_max": 8.142555609478142,
+            "edge_ratio_p95": 1.004756504149847,
+            "edge_ratio_p99": 1.059896720414199,
+            "face_count": 21111,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 2027,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999955727821,
+            "area_ratio_p95": 0.9999986611937262,
+            "area_ratio_p99": 0.9999998065794116,
+            "edge_ratio_max": 0.9999999999814949,
+            "edge_ratio_p95": 0.999999798014642,
+            "edge_ratio_p99": 0.9999999915591631,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 15505.37359710338,
             "area_ratio_p95": 27.44816198987019,
@@ -3864,6 +5294,17 @@
             "flip_rate": 0.07790821771611527
           },
           "label": "L1_0_10_TO_0_50",
+          "original_3d": {
+            "area_ratio_max": 40.65449149781333,
+            "area_ratio_p95": 1.9108316114473878,
+            "area_ratio_p99": 6.422611679959531,
+            "edge_ratio_max": 24.128530860339943,
+            "edge_ratio_p95": 2.149568891958504,
+            "edge_ratio_p99": 8.174571596121883,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 20885.40371956736,
             "area_ratio_p95": 66.20678958193608,
@@ -3885,10 +5326,32 @@
             "face_count": 1874,
             "flip_count": 197,
             "flip_rate": 0.10512273212379936
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 40.65450013173355,
+            "area_ratio_p95": 1.882589004631916,
+            "area_ratio_p99": 6.502388687547056,
+            "edge_ratio_max": 24.128535182256385,
+            "edge_ratio_p95": 2.2399978654669597,
+            "edge_ratio_p99": 8.17457333467946,
+            "face_count": 2027,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 514,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9999999999844082,
+            "area_ratio_p95": 0.9999995586857606,
+            "area_ratio_p99": 0.9999999990056772,
+            "edge_ratio_max": 0.9999999999994289,
+            "edge_ratio_p95": 0.9999999752821256,
+            "edge_ratio_p99": 0.99999999998011,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 635.5927584113588,
             "area_ratio_p95": 63.15511824960421,
@@ -3912,6 +5375,17 @@
             "flip_rate": 0.21875
           },
           "label": "L1_0_50_TO_1_00",
+          "original_3d": {
+            "area_ratio_max": 117.75624273334259,
+            "area_ratio_p95": 24.220782257159083,
+            "area_ratio_p99": 41.47797306981553,
+            "edge_ratio_max": 99.36153990677055,
+            "edge_ratio_p95": 32.95622526627183,
+            "edge_ratio_p99": 42.52234352777228,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 7164.026134846126,
             "area_ratio_p95": 954.2464957755232,
@@ -3933,10 +5407,32 @@
             "face_count": 480,
             "flip_count": 132,
             "flip_rate": 0.275
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 117.75625906299737,
+            "area_ratio_p95": 24.198505410126135,
+            "area_ratio_p99": 41.47798033910428,
+            "edge_ratio_max": 99.36155799382166,
+            "edge_ratio_p95": 32.956231535582155,
+            "edge_ratio_p99": 42.52235180705414,
+            "face_count": 514,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 188,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.999999997798247,
+            "area_ratio_p95": 0.9991671613780168,
+            "area_ratio_p99": 0.9996389130523273,
+            "edge_ratio_max": 0.9999999999887301,
+            "edge_ratio_p95": 0.9999860199950849,
+            "edge_ratio_p99": 0.9999996410931143,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 123.2762921576912,
             "area_ratio_p95": 32.3828817000017,
@@ -3960,6 +5456,17 @@
             "flip_rate": 0.2023121387283237
           },
           "label": "L1_1_00_TO_1_50",
+          "original_3d": {
+            "area_ratio_max": 196.76188607795515,
+            "area_ratio_p95": 38.74751253557668,
+            "area_ratio_p99": 115.3966260264888,
+            "edge_ratio_max": 197.13953775143932,
+            "edge_ratio_p95": 48.7146304346115,
+            "edge_ratio_p99": 85.0007738484627,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 13117.37911398685,
             "area_ratio_p95": 1912.7142767469686,
@@ -3981,10 +5488,32 @@
             "face_count": 173,
             "flip_count": 48,
             "flip_rate": 0.2774566473988439
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 196.7619204105069,
+            "area_ratio_p95": 38.402436489091045,
+            "area_ratio_p99": 115.64034279985982,
+            "edge_ratio_max": 197.13957312953207,
+            "edge_ratio_p95": 48.72987368496324,
+            "edge_ratio_p99": 85.0007892818748,
+            "face_count": 188,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 291,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9997434484016285,
+            "area_ratio_p95": 0.9994661042428721,
+            "area_ratio_p99": 0.9996781516280977,
+            "edge_ratio_max": 0.9999997247862233,
+            "edge_ratio_p95": 0.9999888288747332,
+            "edge_ratio_p99": 0.9999990742105309,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 1987.1458178907303,
             "area_ratio_p95": 34.12185588494236,
@@ -4008,6 +5537,17 @@
             "flip_rate": 0.22868217054263565
           },
           "label": "L1_1_50_TO_1_90",
+          "original_3d": {
+            "area_ratio_max": 308.81213807229784,
+            "area_ratio_p95": 45.61890991652871,
+            "area_ratio_p99": 162.18302710251734,
+            "edge_ratio_max": 197.13953775143932,
+            "edge_ratio_p95": 53.09693763519351,
+            "edge_ratio_p99": 60.21394066553,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 19955.668315833427,
             "area_ratio_p95": 2990.826688058857,
@@ -4029,10 +5569,32 @@
             "face_count": 258,
             "flip_count": 85,
             "flip_rate": 0.32945736434108525
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 307.62311788463023,
+            "area_ratio_p95": 45.62209170328883,
+            "area_ratio_p99": 165.4347307026191,
+            "edge_ratio_max": 197.13957312953207,
+            "edge_ratio_p95": 53.137289171390705,
+            "edge_ratio_p99": 60.22937426068644,
+            "face_count": 291,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         },
         {
           "face_count": 827,
+          "face_homogenized_3d": {
+            "area_ratio_max": 0.9997608591444749,
+            "area_ratio_p95": 0.9994433378335148,
+            "area_ratio_p99": 0.9997092613925369,
+            "edge_ratio_max": 0.9999997415836493,
+            "edge_ratio_p95": 0.9999764415386122,
+            "edge_ratio_p99": 0.9999984870462565,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "homogenized_all": {
             "area_ratio_max": 665.6043469906682,
             "area_ratio_p95": 25.98402719896952,
@@ -4056,6 +5618,17 @@
             "flip_rate": 0.2661498708010336
           },
           "label": "L1_GT_1_90",
+          "original_3d": {
+            "area_ratio_max": 400.68303747467644,
+            "area_ratio_p95": 25.69718508982443,
+            "area_ratio_p99": 52.44372043216967,
+            "edge_ratio_max": 59.50198284060591,
+            "edge_ratio_p95": 27.96731151964946,
+            "edge_ratio_p99": 39.58097432582675,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
+          },
           "original_all": {
             "area_ratio_max": 87462.49139561021,
             "area_ratio_p95": 768.2085571908376,
@@ -4077,6 +5650,17 @@
             "face_count": 774,
             "flip_count": 319,
             "flip_rate": 0.41214470284237725
+          },
+          "root_translation_only_3d": {
+            "area_ratio_max": 398.7125250669279,
+            "area_ratio_p95": 25.69718099768367,
+            "area_ratio_p99": 52.44371911551643,
+            "edge_ratio_max": 59.50198890815825,
+            "edge_ratio_p95": 27.967314770134166,
+            "edge_ratio_p99": 39.58097777747077,
+            "face_count": 827,
+            "flip_count": 0,
+            "flip_rate": 0.0
           }
         }
       ],

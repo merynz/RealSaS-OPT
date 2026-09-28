@@ -1,0 +1,2769 @@
+{
+  "authority": {
+    "camera_set_hash": "79bf4b15bd1ecd1a1ace7a978237a294dddab8ca0b9402917407d2f767bb7224",
+    "candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+    "skeleton_lineage_hash": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+    "skin_lineage_hash": "b30417b9375a52c646618f0fb94ea8ddd7285fea959e460522dd5f8b6b70cb2a"
+  },
+  "claim_boundary": "FACE_LOCAL_WEIGHT_HOMOGENIZATION_IS_DIAGNOSTIC_ONLY; MOTION, RETARGET, SKELETON, CAMERA, REST_GEOMETRY, AND JOINT TRANSFORMS ARE HELD FIXED.",
+  "face_count": 24958,
+  "frames": [
+    {
+      "frame_index": 0,
+      "homogenized_all": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "homogenized_measurable": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "measurable_flip_eliminated_count": 535,
+      "measurable_flip_elimination_fraction": 0.09920267012794363,
+      "measurable_original_flip_count": 5393,
+      "motion_frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+      "original_all": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "original_measurable": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "risk_bins": [
+        {
+          "face_count": 21111,
+          "homogenized_all": {
+            "area_ratio_max": 81432.76018067445,
+            "area_ratio_p95": 94.80600820813785,
+            "area_ratio_p99": 439.72222684874095,
+            "edge_ratio_max": 2269.9877834514596,
+            "edge_ratio_p95": 58.324497253152416,
+            "edge_ratio_p99": 160.22489362965888,
+            "face_count": 21111,
+            "flip_count": 4929,
+            "flip_rate": 0.23348017621145375
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": 139.8886174256696,
+            "area_ratio_p95": 44.95354644035999,
+            "area_ratio_p99": 98.17966959069062,
+            "edge_ratio_max": 135.7816707211827,
+            "edge_ratio_p95": 37.44123135491041,
+            "edge_ratio_p99": 76.27058641028121,
+            "face_count": 19310,
+            "flip_count": 4080,
+            "flip_rate": 0.21128948731227343
+          },
+          "label": "L1_LE_0_10",
+          "original_all": {
+            "area_ratio_max": 81432.76018111921,
+            "area_ratio_p95": 93.67741661328171,
+            "area_ratio_p99": 441.262554774711,
+            "edge_ratio_max": 2401.4893758778244,
+            "edge_ratio_p95": 58.41692295913366,
+            "edge_ratio_p99": 162.01366025019786,
+            "face_count": 21111,
+            "flip_count": 4948,
+            "flip_rate": 0.23438018094832078
+          },
+          "original_measurable": {
+            "area_ratio_max": 178.40695920962017,
+            "area_ratio_p95": 44.750165317036476,
+            "area_ratio_p99": 97.46527109928037,
+            "edge_ratio_max": 167.7588321588822,
+            "edge_ratio_p95": 37.52398688254076,
+            "edge_ratio_p99": 76.37174021098402,
+            "face_count": 19310,
+            "flip_count": 4097,
+            "flip_rate": 0.21216986017607456
+          }
+        },
+        {
+          "face_count": 2027,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_0_10_TO_0_50",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 514,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_0_50_TO_1_00",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 188,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_1_00_TO_1_50",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 291,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_1_50_TO_1_90",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 827,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_GT_1_90",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        }
+      ],
+      "time_seconds": 0.0,
+      "view_index": 0
+    },
+    {
+      "frame_index": 1,
+      "homogenized_all": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "homogenized_measurable": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "measurable_flip_eliminated_count": 438,
+      "measurable_flip_elimination_fraction": 0.07466757586089329,
+      "measurable_original_flip_count": 5866,
+      "motion_frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+      "original_all": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "original_measurable": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "risk_bins": [
+        {
+          "face_count": 21111,
+          "homogenized_all": {
+            "area_ratio_max": 170517.97676909846,
+            "area_ratio_p95": 131.41630066266657,
+            "area_ratio_p99": 619.9595772447641,
+            "edge_ratio_max": 4101.999121445374,
+            "edge_ratio_p95": 75.60342896864765,
+            "edge_ratio_p99": 197.395188163933,
+            "face_count": 21111,
+            "flip_count": 5570,
+            "flip_rate": 0.26384349391312584
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": 140.58622021851664,
+            "area_ratio_p95": 55.48770757606572,
+            "area_ratio_p99": 97.20990980359332,
+            "edge_ratio_max": 136.48268498621076,
+            "edge_ratio_p95": 48.21429664462537,
+            "edge_ratio_p99": 82.27260890648378,
+            "face_count": 19310,
+            "flip_count": 4787,
+            "flip_rate": 0.2479026411185914
+          },
+          "label": "L1_LE_0_10",
+          "original_all": {
+            "area_ratio_max": 170517.97676909846,
+            "area_ratio_p95": 130.60234193650015,
+            "area_ratio_p99": 615.5338056080798,
+            "edge_ratio_max": 4102.953031282912,
+            "edge_ratio_p95": 75.78518852822452,
+            "edge_ratio_p99": 197.07291640866686,
+            "face_count": 21111,
+            "flip_count": 5564,
+            "flip_rate": 0.26355928189095734
+          },
+          "original_measurable": {
+            "area_ratio_max": 166.88580703715272,
+            "area_ratio_p95": 54.67992888428683,
+            "area_ratio_p99": 96.15587376418328,
+            "edge_ratio_max": 185.13582849452294,
+            "edge_ratio_p95": 48.276834120235605,
+            "edge_ratio_p99": 82.76294121849797,
+            "face_count": 19310,
+            "flip_count": 4780,
+            "flip_rate": 0.24754013464526153
+          }
+        },
+        {
+          "face_count": 2027,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_0_10_TO_0_50",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 514,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_0_50_TO_1_00",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 188,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_1_00_TO_1_50",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 291,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_1_50_TO_1_90",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 827,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_GT_1_90",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        }
+      ],
+      "time_seconds": 0.20833333333333334,
+      "view_index": 0
+    },
+    {
+      "frame_index": 2,
+      "homogenized_all": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "homogenized_measurable": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "measurable_flip_eliminated_count": 590,
+      "measurable_flip_elimination_fraction": 0.10600071864893999,
+      "measurable_original_flip_count": 5566,
+      "motion_frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+      "original_all": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "original_measurable": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "risk_bins": [
+        {
+          "face_count": 21111,
+          "homogenized_all": {
+            "area_ratio_max": 154731.82569955516,
+            "area_ratio_p95": 53.11591626323284,
+            "area_ratio_p99": 278.8358417051683,
+            "edge_ratio_max": 4271.550741673813,
+            "edge_ratio_p95": 40.8523541418337,
+            "edge_ratio_p99": 118.22219717373798,
+            "face_count": 21111,
+            "flip_count": 5287,
+            "flip_rate": 0.25043816020084314
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": 113.63110131739309,
+            "area_ratio_p95": 26.29971660272736,
+            "area_ratio_p99": 65.2626266886685,
+            "edge_ratio_max": 118.94690497484986,
+            "edge_ratio_p95": 27.65409146646731,
+            "edge_ratio_p99": 63.1552031181056,
+            "face_count": 19310,
+            "flip_count": 4406,
+            "flip_rate": 0.22817193164163646
+          },
+          "label": "L1_LE_0_10",
+          "original_all": {
+            "area_ratio_max": 154731.82569955516,
+            "area_ratio_p95": 53.21508110135805,
+            "area_ratio_p99": 278.83541416800693,
+            "edge_ratio_max": 4272.1680527846665,
+            "edge_ratio_p95": 40.94642191874018,
+            "edge_ratio_p99": 118.91608551039255,
+            "face_count": 21111,
+            "flip_count": 5323,
+            "flip_rate": 0.2521434323338544
+          },
+          "original_measurable": {
+            "area_ratio_max": 113.63110131739309,
+            "area_ratio_p95": 26.243328574269402,
+            "area_ratio_p99": 64.61219532663232,
+            "edge_ratio_max": 118.94690497484986,
+            "edge_ratio_p95": 27.7248001930269,
+            "edge_ratio_p99": 63.1978277188379,
+            "face_count": 19310,
+            "flip_count": 4441,
+            "flip_rate": 0.22998446400828587
+          }
+        },
+        {
+          "face_count": 2027,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_0_10_TO_0_50",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 514,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_0_50_TO_1_00",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 188,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_1_00_TO_1_50",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 291,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_1_50_TO_1_90",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 827,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_GT_1_90",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        }
+      ],
+      "time_seconds": 0.4166666666666667,
+      "view_index": 0
+    },
+    {
+      "frame_index": 3,
+      "homogenized_all": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "homogenized_measurable": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "measurable_flip_eliminated_count": 467,
+      "measurable_flip_elimination_fraction": 0.07505625200900032,
+      "measurable_original_flip_count": 6222,
+      "motion_frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+      "original_all": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "original_measurable": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "risk_bins": [
+        {
+          "face_count": 21111,
+          "homogenized_all": {
+            "area_ratio_max": 144685.94939090317,
+            "area_ratio_p95": 85.56911896701416,
+            "area_ratio_p99": 422.7488846745373,
+            "edge_ratio_max": 4616.921743854675,
+            "edge_ratio_p95": 54.83506818457458,
+            "edge_ratio_p99": 141.56428492356363,
+            "face_count": 21111,
+            "flip_count": 5995,
+            "flip_rate": 0.2839751788167306
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": 113.7722386346439,
+            "area_ratio_p95": 35.32123632407496,
+            "area_ratio_p99": 63.32400066289505,
+            "edge_ratio_max": 128.7525978057901,
+            "edge_ratio_p95": 34.443362687494876,
+            "edge_ratio_p99": 68.3558484764774,
+            "face_count": 19310,
+            "flip_count": 5221,
+            "flip_rate": 0.27037804246504404
+          },
+          "label": "L1_LE_0_10",
+          "original_all": {
+            "area_ratio_max": 144685.94939090317,
+            "area_ratio_p95": 84.51676069533039,
+            "area_ratio_p99": 424.19845264727024,
+            "edge_ratio_max": 4616.9075129638295,
+            "edge_ratio_p95": 55.24041511596418,
+            "edge_ratio_p99": 141.74160384612026,
+            "face_count": 21111,
+            "flip_count": 5997,
+            "flip_rate": 0.2840699161574535
+          },
+          "original_measurable": {
+            "area_ratio_max": 131.77128370640733,
+            "area_ratio_p95": 35.101311590937435,
+            "area_ratio_p99": 62.61467625534067,
+            "edge_ratio_max": 128.7525978057901,
+            "edge_ratio_p95": 34.81319785162645,
+            "edge_ratio_p99": 68.49141023605435,
+            "face_count": 19310,
+            "flip_count": 5222,
+            "flip_rate": 0.27042982910409114
+          }
+        },
+        {
+          "face_count": 2027,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_0_10_TO_0_50",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 514,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_0_50_TO_1_00",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 188,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_1_00_TO_1_50",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 291,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_1_50_TO_1_90",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 827,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_GT_1_90",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        }
+      ],
+      "time_seconds": 0.625,
+      "view_index": 0
+    },
+    {
+      "frame_index": 0,
+      "homogenized_all": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "homogenized_measurable": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "measurable_flip_eliminated_count": 518,
+      "measurable_flip_elimination_fraction": 0.06766819072501633,
+      "measurable_original_flip_count": 7655,
+      "motion_frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+      "original_all": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "original_measurable": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "risk_bins": [
+        {
+          "face_count": 21111,
+          "homogenized_all": {
+            "area_ratio_max": 379464.5314989184,
+            "area_ratio_p95": 67.75085304510944,
+            "area_ratio_p99": 316.13148608258405,
+            "edge_ratio_max": 501.0840884056237,
+            "edge_ratio_p95": 38.10980694330931,
+            "edge_ratio_p99": 95.4884419149497,
+            "face_count": 21111,
+            "flip_count": 7551,
+            "flip_rate": 0.3576808298991047
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": 91.58086362636719,
+            "area_ratio_p95": 26.13020109413971,
+            "area_ratio_p99": 58.176820325966055,
+            "edge_ratio_max": 91.07271467184702,
+            "edge_ratio_p95": 24.334558947758822,
+            "edge_ratio_p99": 48.78090904708895,
+            "face_count": 19220,
+            "flip_count": 6651,
+            "flip_rate": 0.34604578563995836
+          },
+          "label": "L1_LE_0_10",
+          "original_all": {
+            "area_ratio_max": 379464.5314989013,
+            "area_ratio_p95": 68.51026887295166,
+            "area_ratio_p99": 319.8497882982487,
+            "edge_ratio_max": 501.08408840557263,
+            "edge_ratio_p95": 38.81216180785951,
+            "edge_ratio_p99": 101.06914716283157,
+            "face_count": 21111,
+            "flip_count": 7562,
+            "flip_rate": 0.3582018852730804
+          },
+          "original_measurable": {
+            "area_ratio_max": 107.37935854088468,
+            "area_ratio_p95": 26.403427107469717,
+            "area_ratio_p99": 60.27485701975441,
+            "edge_ratio_max": 194.50051981494505,
+            "edge_ratio_p95": 24.599127294359327,
+            "edge_ratio_p99": 51.3150911529229,
+            "face_count": 19220,
+            "flip_count": 6653,
+            "flip_rate": 0.34614984391259107
+          }
+        },
+        {
+          "face_count": 2027,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_0_10_TO_0_50",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 514,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_0_50_TO_1_00",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 188,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_1_00_TO_1_50",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 291,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_1_50_TO_1_90",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 827,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_GT_1_90",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        }
+      ],
+      "time_seconds": 0.0,
+      "view_index": 2
+    },
+    {
+      "frame_index": 1,
+      "homogenized_all": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "homogenized_measurable": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "measurable_flip_eliminated_count": 437,
+      "measurable_flip_elimination_fraction": 0.06746950748803458,
+      "measurable_original_flip_count": 6477,
+      "motion_frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+      "original_all": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "original_measurable": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "risk_bins": [
+        {
+          "face_count": 21111,
+          "homogenized_all": {
+            "area_ratio_max": 768101.6548690228,
+            "area_ratio_p95": 75.76069073993668,
+            "area_ratio_p99": 374.4184666481732,
+            "edge_ratio_max": 903.4948335292981,
+            "edge_ratio_p95": 44.29488608972854,
+            "edge_ratio_p99": 113.67200048666116,
+            "face_count": 21111,
+            "flip_count": 6521,
+            "flip_rate": 0.30889109942683907
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": 90.64932764972662,
+            "area_ratio_p95": 32.7489221629475,
+            "area_ratio_p99": 57.00178721379837,
+            "edge_ratio_max": 89.5357631809476,
+            "edge_ratio_p95": 28.677784591730926,
+            "edge_ratio_p99": 50.48820662088938,
+            "face_count": 19220,
+            "flip_count": 5638,
+            "flip_rate": 0.29334027055150885
+          },
+          "label": "L1_LE_0_10",
+          "original_all": {
+            "area_ratio_max": 768101.6548689681,
+            "area_ratio_p95": 75.86247117674333,
+            "area_ratio_p99": 374.60702497155154,
+            "edge_ratio_max": 903.494833530472,
+            "edge_ratio_p95": 45.01835890490004,
+            "edge_ratio_p99": 113.76648779767595,
+            "face_count": 21111,
+            "flip_count": 6548,
+            "flip_rate": 0.3101700535265975
+          },
+          "original_measurable": {
+            "area_ratio_max": 88.12626670993869,
+            "area_ratio_p95": 32.798866431868404,
+            "area_ratio_p99": 57.133028105645934,
+            "edge_ratio_max": 89.5357631809476,
+            "edge_ratio_p95": 28.781921736108263,
+            "edge_ratio_p99": 51.20243192584967,
+            "face_count": 19220,
+            "flip_count": 5653,
+            "flip_rate": 0.2941207075962539
+          }
+        },
+        {
+          "face_count": 2027,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_0_10_TO_0_50",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 514,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_0_50_TO_1_00",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 188,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_1_00_TO_1_50",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 291,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_1_50_TO_1_90",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 827,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_GT_1_90",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        }
+      ],
+      "time_seconds": 0.20833333333333334,
+      "view_index": 2
+    },
+    {
+      "frame_index": 2,
+      "homogenized_all": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "homogenized_measurable": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "measurable_flip_eliminated_count": 435,
+      "measurable_flip_elimination_fraction": 0.055833654216403544,
+      "measurable_original_flip_count": 7791,
+      "motion_frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+      "original_all": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "original_measurable": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "risk_bins": [
+        {
+          "face_count": 21111,
+          "homogenized_all": {
+            "area_ratio_max": 194954.46976064876,
+            "area_ratio_p95": 41.48044618640371,
+            "area_ratio_p99": 195.6448167474014,
+            "edge_ratio_max": 389.53632797065217,
+            "edge_ratio_p95": 27.163488484888646,
+            "edge_ratio_p99": 71.82174549907607,
+            "face_count": 21111,
+            "flip_count": 7818,
+            "flip_rate": 0.37032826488560466
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": 69.99456727259508,
+            "area_ratio_p95": 16.838366023935436,
+            "area_ratio_p99": 41.40895752956488,
+            "edge_ratio_max": 70.80707946150677,
+            "edge_ratio_p95": 17.91054171556235,
+            "edge_ratio_p99": 38.08774746599124,
+            "face_count": 19220,
+            "flip_count": 6901,
+            "flip_rate": 0.35905306971904266
+          },
+          "label": "L1_LE_0_10",
+          "original_all": {
+            "area_ratio_max": 194954.4697605967,
+            "area_ratio_p95": 42.43023173608484,
+            "area_ratio_p99": 207.1644337195876,
+            "edge_ratio_max": 477.1810245971761,
+            "edge_ratio_p95": 28.09401292280229,
+            "edge_ratio_p99": 78.45951335610702,
+            "face_count": 21111,
+            "flip_count": 7842,
+            "flip_rate": 0.3714651129742788
+          },
+          "original_measurable": {
+            "area_ratio_max": 174.1352521503187,
+            "area_ratio_p95": 17.08962773086892,
+            "area_ratio_p99": 43.115350041714464,
+            "edge_ratio_max": 261.06304173411627,
+            "edge_ratio_p95": 18.304430123121712,
+            "edge_ratio_p99": 41.52624201923516,
+            "face_count": 19220,
+            "flip_count": 6924,
+            "flip_rate": 0.3602497398543184
+          }
+        },
+        {
+          "face_count": 2027,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_0_10_TO_0_50",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 514,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_0_50_TO_1_00",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 188,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_1_00_TO_1_50",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 291,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_1_50_TO_1_90",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 827,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_GT_1_90",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        }
+      ],
+      "time_seconds": 0.4166666666666667,
+      "view_index": 2
+    },
+    {
+      "frame_index": 3,
+      "homogenized_all": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "homogenized_measurable": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "measurable_flip_eliminated_count": 409,
+      "measurable_flip_elimination_fraction": 0.06337155252556555,
+      "measurable_original_flip_count": 6454,
+      "motion_frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+      "original_all": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "original_measurable": {
+        "area_ratio_max": null,
+        "area_ratio_p95": null,
+        "area_ratio_p99": null,
+        "edge_ratio_max": null,
+        "edge_ratio_p95": null,
+        "edge_ratio_p99": null,
+        "face_count": 0,
+        "flip_count": 0,
+        "flip_rate": null
+      },
+      "risk_bins": [
+        {
+          "face_count": 21111,
+          "homogenized_all": {
+            "area_ratio_max": 896259.6741372383,
+            "area_ratio_p95": 80.22633756357382,
+            "area_ratio_p99": 409.89534705818426,
+            "edge_ratio_max": 1012.6829922450124,
+            "edge_ratio_p95": 47.40661126946509,
+            "edge_ratio_p99": 123.82017300009201,
+            "face_count": 21111,
+            "flip_count": 6519,
+            "flip_rate": 0.3087963620861162
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": 87.8413822078861,
+            "area_ratio_p95": 34.243343721267514,
+            "area_ratio_p99": 59.06252119082018,
+            "edge_ratio_max": 91.73722765324911,
+            "edge_ratio_p95": 30.59112438561509,
+            "edge_ratio_p99": 53.88501786896394,
+            "face_count": 19220,
+            "flip_count": 5635,
+            "flip_rate": 0.29318418314255984
+          },
+          "label": "L1_LE_0_10",
+          "original_all": {
+            "area_ratio_max": 896259.6741372194,
+            "area_ratio_p95": 81.44076963926881,
+            "area_ratio_p99": 416.65088716226694,
+            "edge_ratio_max": 1012.6829922447132,
+            "edge_ratio_p95": 48.81190085584427,
+            "edge_ratio_p99": 127.53710090322679,
+            "face_count": 21111,
+            "flip_count": 6565,
+            "flip_rate": 0.3109753209227417
+          },
+          "original_measurable": {
+            "area_ratio_max": 148.42120107927943,
+            "area_ratio_p95": 34.531135067020216,
+            "area_ratio_p99": 59.7009501000335,
+            "edge_ratio_max": 214.63915749808444,
+            "edge_ratio_p95": 31.065895396009385,
+            "edge_ratio_p99": 55.54606630785124,
+            "face_count": 19220,
+            "flip_count": 5673,
+            "flip_rate": 0.29516129032258065
+          }
+        },
+        {
+          "face_count": 2027,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_0_10_TO_0_50",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 514,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_0_50_TO_1_00",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 188,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_1_00_TO_1_50",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 291,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_1_50_TO_1_90",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        },
+        {
+          "face_count": 827,
+          "homogenized_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "homogenized_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "label": "L1_GT_1_90",
+          "original_all": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          },
+          "original_measurable": {
+            "area_ratio_max": null,
+            "area_ratio_p95": null,
+            "area_ratio_p99": null,
+            "edge_ratio_max": null,
+            "edge_ratio_p95": null,
+            "edge_ratio_p99": null,
+            "face_count": 0,
+            "flip_count": 0,
+            "flip_rate": null
+          }
+        }
+      ],
+      "time_seconds": 0.625,
+      "view_index": 2
+    }
+  ],
+  "mapping_sha256": "6d9e45124443a911f142e8a22c15c51ea455493591e9db26d728a21a1082044f",
+  "motion_json_sha256": "bfcfc1e44f4960e498f6f5183e224b72ed74e0352906c94f09989abab41b1b89",
+  "schema": "RealSaS.KnightBaselineMechanicalCausality.v1",
+  "skin_discontinuity": {
+    "gt_0_5_count": 1820,
+    "gt_1_0_count": 1306,
+    "gt_1_5_count": 1118,
+    "gt_1_9_count": 827,
+    "mean": 0.1326190265047113,
+    "p95": 1.1801075514949726,
+    "p99": 1.993684910632002
+  },
+  "status": "MEASURED_CAUSAL_COUNTERFACTUAL"
+}

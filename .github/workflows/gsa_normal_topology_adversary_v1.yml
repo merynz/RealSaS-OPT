@@ -32,7 +32,7 @@ jobs:
       - name: Run GSA normal topology adversary
         run: |
           set -euo pipefail
-          python tools/audit_gsa_normal_topology_v1.py | tee /tmp/gsa_normal_topology.txt
+          PYTHONPATH=. python tools/audit_gsa_normal_topology_v1.py | tee /tmp/gsa_normal_topology.txt
       - name: Seal evidence
         run: |
           set -euo pipefail

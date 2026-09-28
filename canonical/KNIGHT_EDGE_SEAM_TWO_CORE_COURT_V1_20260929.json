@@ -1,0 +1,54 @@
+{
+  "claim_boundary": "Raw seam rules and graph 2-core pruning are frozen before teacher topology is loaded. Teacher labels only measure retained precision and unsafe cross-region recall.",
+  "mesh_boundary_vertex_count": 417,
+  "preregistration": "canonical/KNIGHT_EDGE_SEAM_TWO_CORE_PREREG_V1_20260929.json",
+  "results_teacher_eval_only": {
+    "STRETCH_GT4": {
+      "raw": {
+        "edge_count": 1551,
+        "edge_precision": 0.7014829142488717,
+        "mixed_face_precision": 0.7367424242424242,
+        "predicted_mixed_face_count": 1584,
+        "unsafe_truth_cross_region_face_count": 1178,
+        "unsafe_truth_cross_region_recall": 0.9906621392190152,
+        "unsafe_truth_cross_region_recovered": 1167
+      },
+      "removed_edge_count": 496,
+      "retained_fraction": 0.6802063185041909,
+      "two_core": {
+        "edge_count": 1055,
+        "edge_precision": 0.6606635071090048,
+        "mixed_face_precision": 0.7466349960411718,
+        "predicted_mixed_face_count": 1263,
+        "unsafe_truth_cross_region_face_count": 1178,
+        "unsafe_truth_cross_region_recall": 0.8005093378607809,
+        "unsafe_truth_cross_region_recovered": 943
+      }
+    },
+    "STRETCH_GT4_AND_WEIGHT_L1_GT1": {
+      "raw": {
+        "edge_count": 1209,
+        "edge_precision": 0.8279569892473119,
+        "mixed_face_precision": 0.8387351778656127,
+        "predicted_mixed_face_count": 1265,
+        "unsafe_truth_cross_region_face_count": 1178,
+        "unsafe_truth_cross_region_recall": 0.900679117147708,
+        "unsafe_truth_cross_region_recovered": 1061
+      },
+      "removed_edge_count": 515,
+      "retained_fraction": 0.5740281224152192,
+      "two_core": {
+        "edge_count": 694,
+        "edge_precision": 0.8659942363112392,
+        "mixed_face_precision": 0.8852284803400637,
+        "predicted_mixed_face_count": 941,
+        "unsafe_truth_cross_region_face_count": 1178,
+        "unsafe_truth_cross_region_recall": 0.7071307300509337,
+        "unsafe_truth_cross_region_recovered": 833
+      }
+    }
+  },
+  "schema": "RealSaS.KnightEdgeSeamTwoCoreCourt.v1",
+  "status": "DIAGNOSTIC_ONLY__NO_PRODUCT_MUTATION",
+  "teacher_used_by_operator": false
+}

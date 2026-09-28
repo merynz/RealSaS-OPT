@@ -1,0 +1,918 @@
+{
+  "C_promotion_rule": {
+    "conditions": [
+      "IMPLEMENTATION_CONFORMS_TO_THE_INTENDED_CONTRACT",
+      "FAILURE_REPRODUCES_ON_THE_CONFORMANT_IMPLEMENTATION",
+      "FAILURE_IS_CAUSALLY_ATTRIBUTED_TO_THE_INTENDED_DECISION_ITSELF",
+      "COMPETING_DESIGN_REMOVES_THE_FAILURE_WITH_OTHER_AUTHORITIES_HELD_FIXED",
+      "NO_WEAKER_A_OR_B_REPAIR_EXPLAINS_THE_RESULT"
+    ],
+    "current_promoted_count": 0,
+    "note": "No current finding is promoted to C. In particular, the frozen single QualifiedMeshIR mechanics+appearance decision is not falsified merely because an experimental dual-visual-topology branch was introduced.",
+    "required": true
+  },
+  "categories": {
+    "A_IMPLEMENTATION_DEVIATES_FROM_INTENDED": [
+      {
+        "action_class": "RESTORE_IMPLEMENTATION_TO_FROZEN_CONTRACT",
+        "actual": "Dense face incidence collapses to pairwise edges; Stage18 relation baseline can mint any admissible 3-clique as a face.",
+        "evidence": [
+          {
+            "claim_boundary": "This proves pairwise adjacency is insufficient to preserve admitted 2-simplex incidence under the current Stage18 clique rule. It does not prescribe the replacement surface complex or final mesh algorithm.",
+            "class": "INFORMATION_LOSS_AND_HIGHER_ORDER_TOPOLOGY_INVENTION",
+            "confirmed": true,
+            "id": "GSA_FACE_INCIDENCE_LOST_THEN_REINVENTED_AS_CLIQUE"
+          },
+          "canonical/MESH_WEIGHT_BINDING_CONTRACT_V1.md \u00a74.2"
+        ],
+        "id": "A01_STAGE18_CLIQUE_FACE_INVENTION_VIOLATES_MWB",
+        "intended": "A triangle must not become surface evidence merely because a triangulator can connect its vertices.",
+        "owner": "GSA_TO_STAGE18",
+        "severity": "P0"
+      },
+      {
+        "action_class": "QUARANTINE_EXPERIMENTAL_DEVIATION_BEFORE_MAIN",
+        "actual": "Current branch introduced a second VisualMeshSet topology and declares mechanical_mesh_render_authority=False while the frozen architecture says QualifiedMeshIR is the single product geometry authority.",
+        "evidence": [
+          {
+            "class": "AUTHORITY_CARRIER_GAP",
+            "consequence": "Product state knows which VisualMeshSet is authoritative, but runtime projection has no typed visual-geometry input and falls back to the mechanical mesh path.",
+            "design_before_code": "Define a typed runtime visual state carrying exact VisualMeshSet geometry plus a qualified deformation/visibility binding; Stage42 must consume that exact state.",
+            "evidence": {
+              "stage18_declares_mechanical_not_render_authority": true,
+              "stage38_carries_visual_hash": true,
+              "stage42_visual_payload_consumer": false
+            },
+            "id": "P0_VISUAL_AUTHORITY_HASHED_BUT_NOT_EXECUTED_AT_RUNTIME",
+            "severity": "P0"
+          },
+          {
+            "class": "AUTHORING_STATE_GAP",
+            "consequence": "The editable authoring/export state cannot contain or edit the actual declared visual topology.",
+            "design_before_code": "Make render-authoritative visual topology a first-class editable artifact or explicitly reject the dual-topology product architecture.",
+            "evidence": {
+              "stage46_visual_payload_consumer": false,
+              "visual_authority_declared": true
+            },
+            "id": "P0_VISUAL_AUTHORITY_NOT_PRESENT_IN_EDITABLE_EXPORT",
+            "severity": "P0"
+          },
+          {
+            "class": "SCHEMA_COMPOSITION_GAP",
+            "consequence": "Source-owned appearance emits a visual binding contract while runtime still requires per-mechanical-face UVs.",
+            "design_before_code": "Freeze one runtime visual projection IR; do not overload or silently coerce the legacy mechanical face_uv contract.",
+            "evidence": {
+              "stage23_source_uv_binding": "visual_uv_binding.npz",
+              "stage42_legacy_requirement": "face_uv required"
+            },
+            "id": "P0_SOURCE_OWNED_VISUAL_UV_RUNTIME_SCHEMA_DISCONNECT",
+            "severity": "P0"
+          },
+          {
+            "class": "DECLARED_VS_EXECUTABLE_CONTRACT_GAP",
+            "consequence": "VisualMeshSet metadata declares a deformation contract, but the canonical 46-stage path does not materialize or qualify that binding.",
+            "design_before_code": "Introduce an explicit typed visual-to-mechanical deformation binding stage/artifact and prove the exact binding before runtime/export.",
+            "evidence": {
+              "canonical_invocations": [],
+              "declared_contract": "BARYCENTRIC_BINDING_PLUS_ARAP_2D"
+            },
+            "id": "P0_DECLARED_VISUAL_DEFORMATION_CONTRACT_HAS_NO_CANONICAL_EXECUTOR",
+            "severity": "P0"
+          }
+        ],
+        "id": "A02_DUAL_VISUAL_TOPOLOGY_DEVIATES_FROM_SINGLE_QUALIFIED_MESH_AUTHORITY",
+        "intended": "COMMON_CANONICAL_DOMAIN_FOR_MECHANICS_AND_APPEARANCE",
+        "owner": "STAGE18_STAGE23_STAGE38_RUNTIME_EXPORT",
+        "severity": "P0"
+      },
+      {
+        "action_class": "RESTORE_EXPLICIT_LINEAGE_AND_INVALIDATION",
+        "actual": "Stage18 reads Stage35 repair artifacts through a same-run filesystem side-channel not represented by the declared dataflow/fingerprint.",
+        "evidence": {
+          "actual_hidden_edge_35_to_18": true,
+          "cycle_confirmed": true,
+          "declared_path_18_to_35": true
+        },
+        "id": "A03_STAGE35_TO_STAGE18_HIDDEN_FILESYSTEM_FEEDBACK",
+        "intended": "STAGE35_DYNAMIC_FAILURE_REQUIRING_GEOMETRY_CHANGE_CREATES_NEW_STAGE18_LINEAGE",
+        "owner": "ORCHESTRATOR",
+        "severity": "P0"
+      },
+      {
+        "action_class": "RESTORE_EXACT_CONSUMED_AUTHORITY_GRAPH",
+        "actual": "Several adapters consume undeclared stage outputs/manifest sections; some read truth is absent from fingerprints.",
+        "evidence": [
+          {
+            "class": "MANIFEST_FINGERPRINT_GAP",
+            "evidence": {
+              "function": "_demo_frozen_iris_import_cfg",
+              "key": "iris_fit",
+              "line": 204
+            },
+            "id": "FP_UNDECLARED_MANIFEST_KEY__11_IRIS_CHECKPOINT_SEALED__iris_fit",
+            "manifest_key": "iris_fit",
+            "severity": "CRITICAL",
+            "stage": "11_IRIS_CHECKPOINT_SEALED"
+          },
+          {
+            "class": "MANIFEST_FINGERPRINT_GAP",
+            "evidence": {
+              "function": "qualify_geometry_substrate_stage",
+              "key": "demo_execution",
+              "line": 1193
+            },
+            "id": "FP_UNDECLARED_MANIFEST_KEY__13_GEOMETRY_SUBSTRATE_QUALIFIED__demo_execution",
+            "manifest_key": "demo_execution",
+            "severity": "CRITICAL",
+            "stage": "13_GEOMETRY_SUBSTRATE_QUALIFIED"
+          },
+          {
+            "class": "MANIFEST_FINGERPRINT_GAP",
+            "evidence": {
+              "function": "_demo_stage14_fallback_prereg",
+              "key": "demo_execution",
+              "line": 1336
+            },
+            "id": "FP_UNDECLARED_MANIFEST_KEY__14_GSA_BUILD__demo_execution",
+            "manifest_key": "demo_execution",
+            "severity": "CRITICAL",
+            "stage": "14_GSA_BUILD"
+          },
+          {
+            "class": "MANIFEST_FINGERPRINT_GAP",
+            "evidence": {
+              "function": "_geometry_substrate_for_downstream",
+              "key": "demo_execution",
+              "line": 1299
+            },
+            "id": "FP_UNDECLARED_MANIFEST_KEY__14_GSA_BUILD__demo_execution",
+            "manifest_key": "demo_execution",
+            "severity": "CRITICAL",
+            "stage": "14_GSA_BUILD"
+          },
+          {
+            "class": "MANIFEST_FINGERPRINT_GAP",
+            "evidence": {
+              "function": "_demo_stage14_fallback_prereg",
+              "key": "demo_execution",
+              "line": 1336
+            },
+            "id": "FP_UNDECLARED_MANIFEST_KEY__15_RIGGING_SURFACE_QUALIFIED__demo_execution",
+            "manifest_key": "demo_execution",
+            "severity": "CRITICAL",
+            "stage": "15_RIGGING_SURFACE_QUALIFIED"
+          },
+          {
+            "class": "FILESYSTEM_SIDE_CHANNEL",
+            "dependency": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+            "evidence": {
+              "function": "build_canonical_mesh_addressing_stage",
+              "stage_id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+            },
+            "id": "FP_FILESYSTEM_BACK_EDGE__18_CANONICAL_MESH_ADDRESSING_BUILD__35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+            "severity": "CRITICAL",
+            "stage": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+          },
+          {
+            "class": "MANIFEST_FINGERPRINT_GAP",
+            "evidence": {
+              "function": "_source_foreground_masks_v1",
+              "key": "observation",
+              "line": 314
+            },
+            "id": "FP_UNDECLARED_MANIFEST_KEY__18_CANONICAL_MESH_ADDRESSING_BUILD__observation",
+            "manifest_key": "observation",
+            "severity": "CRITICAL",
+            "stage": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+          },
+          {
+            "class": "FINGERPRINT_DEPENDENCY_GAP",
+            "dependency": "05_CAMERA_CONTRACT_SOLVED",
+            "evidence": {
+              "function": "qualify_static_canonical_mesh_stage",
+              "line": 555,
+              "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+            },
+            "id": "FP_UNDECLARED_DIRECT_STAGE_READ__19_STATIC_CANONICAL_MESH_QUALIFIED__05_CAMERA_CONTRACT_SOLVED",
+            "severity": "HIGH",
+            "stage": "19_STATIC_CANONICAL_MESH_QUALIFIED",
+            "transitive_ancestor": true
+          },
+          {
+            "class": "MANIFEST_FINGERPRINT_GAP",
+            "evidence": {
+              "function": "_source_foreground_masks_v1",
+              "key": "observation",
+              "line": 314
+            },
+            "id": "FP_UNDECLARED_MANIFEST_KEY__19_STATIC_CANONICAL_MESH_QUALIFIED__observation",
+            "manifest_key": "observation",
+            "severity": "CRITICAL",
+            "stage": "19_STATIC_CANONICAL_MESH_QUALIFIED"
+          },
+          {
+            "class": "MANIFEST_FINGERPRINT_GAP",
+            "evidence": {
+              "function": "_static_geometry_evidence",
+              "key": "demo_execution",
+              "line": 513
+            },
+            "id": "FP_UNDECLARED_MANIFEST_KEY__19_STATIC_CANONICAL_MESH_QUALIFIED__demo_execution",
+            "manifest_key": "demo_execution",
+            "severity": "CRITICAL",
+            "stage": "19_STATIC_CANONICAL_MESH_QUALIFIED"
+          },
+          {
+            "class": "FINGERPRINT_DEPENDENCY_GAP",
+            "dependency": "05_CAMERA_CONTRACT_SOLVED",
+            "evidence": {
+              "function": "preregister_caa_backend_stage",
+              "line": 550,
+              "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+            },
+            "id": "FP_UNDECLARED_DIRECT_STAGE_READ__20_CAA_BACKEND_PREREGISTERED__05_CAMERA_CONTRACT_SOLVED",
+            "severity": "HIGH",
+            "stage": "20_CAA_BACKEND_PREREGISTERED",
+            "transitive_ancestor": true
+          },
+          {
+            "class": "MANIFEST_FINGERPRINT_GAP",
+            "evidence": {
+              "function": "_load_source_inputs",
+              "key": "observation",
+              "line": 228
+            },
+            "id": "FP_UNDECLARED_MANIFEST_KEY__20_CAA_BACKEND_PREREGISTERED__observation",
+            "manifest_key": "observation",
+            "severity": "CRITICAL",
+            "stage": "20_CAA_BACKEND_PREREGISTERED"
+          },
+          {
+            "class": "MANIFEST_FINGERPRINT_GAP",
+            "evidence": {
+              "function": "_static_mesh_for_appearance",
+              "key": "demo_execution",
+              "line": 296
+            },
+            "id": "FP_UNDECLARED_MANIFEST_KEY__20_CAA_BACKEND_PREREGISTERED__demo_execution",
+            "manifest_key": "demo_execution",
+            "severity": "CRITICAL",
+            "stage": "20_CAA_BACKEND_PREREGISTERED"
+          },
+          {
+            "class": "FINGERPRINT_DEPENDENCY_GAP",
+            "dependency": "18_CANONICAL_MESH_ADDRESSING_BUILD",
+            "evidence": {
+              "function": "_visual_mesh_set",
+              "line": 109,
+              "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+            },
+            "id": "FP_UNDECLARED_DIRECT_STAGE_READ__21_CAA_COMPILE__18_CANONICAL_MESH_ADDRESSING_BUILD",
+            "severity": "HIGH",
+            "stage": "21_CAA_COMPILE",
+            "transitive_ancestor": true
+          },
+          {
+            "class": "FINGERPRINT_DEPENDENCY_GAP",
+            "dependency": "18_CANONICAL_MESH_ADDRESSING_BUILD",
+            "evidence": {
+              "function": "compile_caa_stage",
+              "line": 786,
+              "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+            },
+            "id": "FP_UNDECLARED_DIRECT_STAGE_READ__21_CAA_COMPILE__18_CANONICAL_MESH_ADDRESSING_BUILD",
+            "severity": "HIGH",
+            "stage": "21_CAA_COMPILE",
+            "transitive_ancestor": true
+          },
+          {
+            "class": "FINGERPRINT_DEPENDENCY_GAP",
+            "dependency": "05_CAMERA_CONTRACT_SOLVED",
+            "evidence": {
+              "function": "compile_caa_stage",
+              "line": 793,
+              "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+            },
+            "id": "FP_UNDECLARED_DIRECT_STAGE_READ__21_CAA_COMPILE__05_CAMERA_CONTRACT_SOLVED",
+            "severity": "HIGH",
+            "stage": "21_CAA_COMPILE",
+            "transitive_ancestor": true
+          },
+          {
+            "class": "FINGERPRINT_DEPENDENCY_GAP",
+            "dependency": "07_OBSERVATION_CONTRACT_QUALIFIED",
+            "evidence": {
+              "function": "compile_caa_stage",
+              "line": 800,
+              "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+            },
+            "id": "FP_UNDECLARED_DIRECT_STAGE_READ__21_CAA_COMPILE__07_OBSERVATION_CONTRACT_QUALIFIED",
+            "severity": "HIGH",
+            "stage": "21_CAA_COMPILE",
+            "transitive_ancestor": true
+          },
+          {
+            "class": "MANIFEST_FINGERPRINT_GAP",
+            "evidence": {
+              "function": "_load_source_inputs",
+              "key": "observation",
+              "line": 228
+            },
+            "id": "FP_UNDECLARED_MANIFEST_KEY__21_CAA_COMPILE__observation",
+            "manifest_key": "observation",
+            "severity": "CRITICAL",
+            "stage": "21_CAA_COMPILE"
+          },
+          {
+            "class": "FINGERPRINT_DEPENDENCY_GAP",
+            "dependency": "20_CAA_BACKEND_PREREGISTERED",
+            "evidence": {
+              "function": "seal_caa_compile_stage",
+              "line": 1180,
+              "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+            },
+            "id": "FP_UNDECLARED_DIRECT_STAGE_READ__22_CAA_COMPILE_SEALED__20_CAA_BACKEND_PREREGISTERED",
+            "severity": "HIGH",
+            "stage": "22_CAA_COMPILE_SEALED",
+            "transitive_ancestor": true
+          },
+          {
+            "class": "FINGERPRINT_DEPENDENCY_GAP",
+            "dependency": "20_CAA_BACKEND_PREREGISTERED",
+            "evidence": {
+              "function": "bake_complete_appearance_stage",
+              "line": 1366,
+              "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+            },
+            "id": "FP_UNDECLARED_DIRECT_STAGE_READ__23_COMPLETE_APPEARANCE_ASSET_BAKED__20_CAA_BACKEND_PREREGISTERED",
+            "severity": "HIGH",
+            "stage": "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+            "transitive_ancestor": true
+          },
+          {
+            "class": "FINGERPRINT_DEPENDENCY_GAP",
+            "dependency": "21_CAA_COMPILE",
+            "evidence": {
+              "function": "bake_complete_appearance_stage",
+              "line": 1373,
+              "stage_id": "21_CAA_COMPILE"
+            },
+            "id": "FP_UNDECLARED_DIRECT_STAGE_READ__23_COMPLETE_APPEARANCE_ASSET_BAKED__21_CAA_COMPILE",
+            "severity": "HIGH",
+            "stage": "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+            "transitive_ancestor": true
+          },
+          {
+            "class": "FINGERPRINT_DEPENDENCY_GAP",
+            "dependency": "07_OBSERVATION_CONTRACT_QUALIFIED",
+            "evidence": {
+              "function": "bake_complete_appearance_stage",
+              "line": 1395,
+              "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+            },
+            "id": "FP_UNDECLARED_DIRECT_STAGE_READ__23_COMPLETE_APPEARANCE_ASSET_BAKED__07_OBSERVATION_CONTRACT_QUALIFIED",
+            "severity": "HIGH",
+            "stage": "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+            "transitive_ancestor": true
+          },
+          {
+            "class": "MANIFEST_FINGERPRINT_GAP",
+            "evidence": {
+              "function": "_load_source_inputs",
+              "key": "observation",
+              "line": 228
+            },
+            "id": "FP_UNDECLARED_MANIFEST_KEY__23_COMPLETE_APPEARANCE_ASSET_BAKED__observation",
+            "manifest_key": "observation",
+            "severity": "CRITICAL",
+            "stage": "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+          },
+          {
+            "class": "FINGERPRINT_DEPENDENCY_GAP",
+            "dependency": "20_CAA_BACKEND_PREREGISTERED",
+            "evidence": {
+              "function": "qualify_complete_appearance_stage",
+              "line": 1907,
+              "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+            },
+            "id": "FP_UNDECLARED_DIRECT_STAGE_READ__24_COMPLETE_APPEARANCE_QUALIFIED__20_CAA_BACKEND_PREREGISTERED",
+            "severity": "HIGH",
+            "stage": "24_COMPLETE_APPEARANCE_QUALIFIED",
+            "transitive_ancestor": true
+          },
+          {
+            "class": "FINGERPRINT_DEPENDENCY_GAP",
+            "dependency": "21_CAA_COMPILE",
+            "evidence": {
+              "function": "qualify_complete_appearance_stage",
+              "line": 1914,
+              "stage_id": "21_CAA_COMPILE"
+            },
+            "id": "FP_UNDECLARED_DIRECT_STAGE_READ__24_COMPLETE_APPEARANCE_QUALIFIED__21_CAA_COMPILE",
+            "severity": "HIGH",
+            "stage": "24_COMPLETE_APPEARANCE_QUALIFIED",
+            "transitive_ancestor": true
+          },
+          {
+            "class": "MANIFEST_FINGERPRINT_GAP",
+            "evidence": {
+              "function": "_load_source_inputs",
+              "key": "observation",
+              "line": 228
+            },
+            "id": "FP_UNDECLARED_MANIFEST_KEY__24_COMPLETE_APPEARANCE_QUALIFIED__observation",
+            "manifest_key": "observation",
+            "severity": "CRITICAL",
+            "stage": "24_COMPLETE_APPEARANCE_QUALIFIED"
+          },
+          {
+            "class": "FINGERPRINT_DEPENDENCY_GAP",
+            "dependency": "20_CAA_BACKEND_PREREGISTERED",
+            "evidence": {
+              "function": "prove_caa_reference_rest_stage",
+              "line": 2506,
+              "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+            },
+            "id": "FP_UNDECLARED_DIRECT_STAGE_READ__25_CAA_REFERENCE_REST_RENDER_PROOF__20_CAA_BACKEND_PREREGISTERED",
+            "severity": "HIGH",
+            "stage": "25_CAA_REFERENCE_REST_RENDER_PROOF",
+            "transitive_ancestor": true
+          },
+          {
+            "class": "FINGERPRINT_DEPENDENCY_GAP",
+            "dependency": "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+            "evidence": {
+              "function": "prove_caa_reference_rest_stage",
+              "line": 2513,
+              "stage_id": "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+            },
+            "id": "FP_UNDECLARED_DIRECT_STAGE_READ__25_CAA_REFERENCE_REST_RENDER_PROOF__23_COMPLETE_APPEARANCE_ASSET_BAKED",
+            "severity": "HIGH",
+            "stage": "25_CAA_REFERENCE_REST_RENDER_PROOF",
+            "transitive_ancestor": true
+          },
+          {
+            "class": "MANIFEST_FINGERPRINT_GAP",
+            "evidence": {
+              "function": "_demo_rest_measurement_admissible",
+              "key": "demo_execution",
+              "line": 180
+            },
+            "id": "FP_UNDECLARED_MANIFEST_KEY__25_CAA_REFERENCE_REST_RENDER_PROOF__demo_execution",
+            "manifest_key": "demo_execution",
+            "severity": "CRITICAL",
+            "stage": "25_CAA_REFERENCE_REST_RENDER_PROOF"
+          },
+          {
+            "class": "MANIFEST_FINGERPRINT_GAP",
+            "evidence": {
+              "function": "_load_source_inputs",
+              "key": "observation",
+              "line": 228
+            },
+            "id": "FP_UNDECLARED_MANIFEST_KEY__25_CAA_REFERENCE_REST_RENDER_PROOF__observation",
+            "manifest_key": "observation",
+            "severity": "CRITICAL",
+            "stage": "25_CAA_REFERENCE_REST_RENDER_PROOF"
+          },
+          {
+            "class": "MANIFEST_FINGERPRINT_GAP",
+            "evidence": {
+              "function": "_static_mesh_for_appearance",
+              "key": "demo_execution",
+              "line": 296
+            },
+            "id": "FP_UNDECLARED_MANIFEST_KEY__25_CAA_REFERENCE_REST_RENDER_PROOF__demo_execution",
+            "manifest_key": "demo_execution",
+            "severity": "CRITICAL",
+            "stage": "25_CAA_REFERENCE_REST_RENDER_PROOF"
+          },
+          {
+            "class": "MANIFEST_FINGERPRINT_GAP",
+            "evidence": {
+              "function": "_assert_geppetto_surface_scope",
+              "key": "demo_execution",
+              "line": 105
+            },
+            "id": "FP_UNDECLARED_MANIFEST_KEY__26_GEPPETTO_FIT_PREREGISTERED__demo_execution",
+            "manifest_key": "demo_execution",
+            "severity": "CRITICAL",
+            "stage": "26_GEPPETTO_FIT_PREREGISTERED"
+          },
+          {
+            "class": "MANIFEST_FINGERPRINT_GAP",
+            "evidence": {
+              "function": "_demo_failed_rest_precondition_admissible",
+              "key": "demo_execution",
+              "line": 99
+            },
+            "id": "FP_UNDECLARED_MANIFEST_KEY__39_MOTION_SOURCE_OR_PRESET_SEAL__demo_execution",
+            "manifest_key": "demo_execution",
+            "severity": "CRITICAL",
+            "stage": "39_MOTION_SOURCE_OR_PRESET_SEAL"
+          }
+        ],
+        "id": "A04_FINGERPRINT_READSET_INCOMPLETE",
+        "intended": "Every consumed authority edge is exact and invalidation follows the true dependency subgraph.",
+        "owner": "ORCHESTRATOR",
+        "severity": "P0"
+      },
+      {
+        "action_class": "RESTORE_GATE_TO_RECLOSED_POLICY",
+        "actual": "Alpha-hole metric is computed diagnostically but is not part of the final pass predicate.",
+        "evidence": {
+          "design_before_code": "Define intentional transparent art versus unintended geometry-visible alpha holes, including coherent and scattered/speckled classes, then calibrate product hard gates.",
+          "evidence": {
+            "alpha_in_final_pass_predicate": false,
+            "alpha_measured": true,
+            "final_pass_assignment": "passed = (\n        geometry_visible > 0\n        and undefined_visible == 0\n        and mismatch_pixels == 0\n        and exposure_passed\n        and micro_face_passed\n        and exact_depth_ambiguity_passed\n        and layered_visibility_passed\n        and sidedness_passed\n        and shared_edge_continuity_passed\n        and minification_passed\n        and conditioning_passed\n    )"
+          },
+          "id": "DYNAMIC_VISIBLE_ALPHA_HOLES",
+          "severity": "P1",
+          "status": "OPEN__DIAGNOSTIC_NOT_HARD_GATE"
+        },
+        "id": "A05_DYNAMIC_ALPHA_HOLE_METRIC_NOT_HARD_GATE",
+        "intended": "Reclosed visual-fidelity policy requires consequential visible alpha holes to be shipping-fail evidence.",
+        "owner": "STAGE45",
+        "severity": "P1"
+      },
+      {
+        "action_class": "SEPARATE_DEMO_APPARATUS_FROM_CANONICAL_IMPLEMENTATION",
+        "actual": "No Knight-specific algorithmic branch was found, but canonical adapters retain two named demo fallback schema paths.",
+        "evidence": [
+          {
+            "classification": "DEMO_ONLY_SUBJECT_NAMED_APPARATUS_EMBEDDED_IN_CANONICAL_ADAPTER",
+            "line": 1311,
+            "path": "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py",
+            "text": "\"RealSaS.KnightDemoStage14FallbackPreregistration.v1\""
+          },
+          {
+            "classification": "DEMO_ONLY_SUBJECT_NAMED_APPARATUS_EMBEDDED_IN_CANONICAL_ADAPTER",
+            "line": 329,
+            "path": "compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py",
+            "text": "\"RealSaS.KnightDemoStage18MeshFallbackPreregistration.v1\""
+          }
+        ],
+        "id": "A06_DEMO_FALLBACK_SCHEMA_INSIDE_CANONICAL_ADAPTERS",
+        "intended": "Subject-agnostic product implementation; witness/demo apparatus cannot own canonical truth.",
+        "owner": "FRONT_HALF_ADAPTER_HYGIENE",
+        "severity": "P1"
+      }
+    ],
+    "B_INTENDED_DIRECTION_RETAINED_BUT_CONTRACT_OR_CALIBRATION_INCOMPLETE": [
+      {
+        "action_class": "FREEZE_OPERATOR_SEMANTICS_WITHIN_EXISTING_GSA_ROLE",
+        "demonstrated_failure": "Synthetic close-sheet adversary: current global Euclidean kNN near-contact p95 normal error 20.94 degrees versus 0 degrees for a component-aware same-operator oracle.",
+        "evidence": {
+          "component_aware_same_operator_oracle": {
+            "max_angle_error_deg": 0.0,
+            "mean_angle_error_deg": 0.0,
+            "near_contact_mean_angle_error_deg": 0.0,
+            "near_contact_p95_angle_error_deg": 0.0,
+            "p95_angle_error_deg": 0.0
+          },
+          "construction": {
+            "components_are_distinct": true,
+            "k": 64,
+            "minimum_offset": 0.012,
+            "points_per_sheet": 1089,
+            "relative_tilt_deg": 35.0,
+            "sheet_count": 2,
+            "spacing": 0.04
+          },
+          "current_global_knn": {
+            "max_angle_error_deg": 65.62431721101042,
+            "mean_angle_error_deg": 6.743346698107959,
+            "near_contact_mean_angle_error_deg": 16.98246488314583,
+            "near_contact_p95_angle_error_deg": 20.935532383796478,
+            "p95_angle_error_deg": 20.861637773940913
+          },
+          "finding": {
+            "claim_boundary": "Synthetic falsification of topology-blind Euclidean normal neighbourhoods; does not choose the production repair operator.",
+            "confirmed": true,
+            "id": "GSA_NORMAL_GLOBAL_KNN_CROSS_SHEET_CONTAMINATION"
+          },
+          "repo_head": "a62016abe581452f4feeef65dd1d389f5d34c231",
+          "schema": "RealSaS.GSANormalTopologyAdversary.v1",
+          "status": "AUDIT_ONLY__NO_REPAIR_APPLIED"
+        },
+        "id": "B01_GSA_NORMAL_NEIGHBORHOOD_SEMANTICS_UNDERSPECIFIED",
+        "intended_gap": "Stage14 freezes k=64 and error thresholds but does not require topology/component/geodesic-safe neighborhoods for normal estimation.",
+        "owner": "GSA",
+        "severity": "P0"
+      },
+      {
+        "action_class": "FREEZE_COMPACTION_COHERENCE_INVARIANT",
+        "evidence": {
+          "class": "SURFACE_TOPOLOGY_COLLAPSE",
+          "confirmed": true,
+          "design_before_code": "Compare surface-sampling, cell-aware clustering, geodesic/topological clustering, and projection-back-to-surface variants under the fixed node budget. Connected-component labels alone are insufficient.",
+          "id": "GSA_COMPONENT_AWARE_VOXEL_COMPACTION_CAN_MERGE_GEODESICALLY_DISTINCT_SHEETS",
+          "severity": "P0"
+        },
+        "id": "B02_GSA_COMPACTION_SAME_COMPONENT_SHEET_COHERENCE_UNDERSPECIFIED",
+        "intended_gap": "Component-aware voxel compaction forbids cross-component aliasing but does not state a surface/geodesic coherence invariant for folds/sheets within one connected component.",
+        "owner": "GSA",
+        "severity": "P0"
+      },
+      {
+        "action_class": "FREEZE_VISIBILITY_AND_OBSERVATION_SEMANTICS",
+        "evidence": [
+          {
+            "class": "VISIBILITY_EVIDENCE_APPROXIMATION",
+            "confirmed": true,
+            "design_before_code": "Use a topology-aware surface visibility operator (for example exact admitted-face raster/depth) or calibrate a conservative equivalent; do not infer source support from vertex splats.",
+            "id": "GSA_VERTEX_SPLAT_ZBUFFER_CAN_MISCLASSIFY_OCCLUDED_SURFACE_AS_VISIBLE",
+            "severity": "P1"
+          },
+          {
+            "claim_boundary": "Stage13 global silhouette qualification can limit gross false positives but does not make per-node self-visibility identical to exact source observation support.",
+            "class": "EPISTEMIC_SEMANTICS_DRIFT",
+            "confirmed": true,
+            "consequence": "A compact node can be labelled observed because the predicted surface is camera-visible even though no exact source-observation identity is attached. Geppetto treats this label as an input feature.",
+            "design_before_code": "Freeze whether this bit means camera-exposed geometry or source-supported observation. If source-supported, derive it from qualified observation evidence/masks with exact provenance rather than renaming self-visibility as observation.",
+            "id": "GSA_OBSERVED_FLAG_MEANS_GEOMETRICALLY_EXPOSED_NOT_SOURCE_OBSERVED",
+            "severity": "P1"
+          }
+        ],
+        "id": "B03_GSA_VISIBILITY_AND_OBSERVED_SEMANTICS_UNDERSPECIFIED",
+        "intended_gap": "Contract does not cleanly distinguish source-observed support from self-visible predicted geometry nor fully specify continuous-surface visibility.",
+        "owner": "GSA",
+        "severity": "P1"
+      },
+      {
+        "action_class": "FREEZE_EVIDENCE_COMPLETENESS_AND_ABSTENTION",
+        "evidence": [
+          {
+            "class": "LEARNED_EVIDENCE_TYPE_GAP",
+            "consequence": "Dense weights are typed, but per-surface-row confidence/uncertainty/abstention is not. Stage32 can PASS legal simplex rows while product_skin_evidence_complete=False.",
+            "design_before_code": "Define whether row uncertainty is required product evidence; if yes, type it and define fail/abstain semantics, especially for weak/uncovered rows.",
+            "evidence": {
+              "proposal_builder": "from __future__ import annotations\nimport numpy as np\nfrom compiler.realsas_compiler_core.types import SkinInfluenceProposal, SkinProposalIR\n\n\ndef make_skin_proposal_v4(pred, conditioning, model_provenance: str):\n    p=np.asarray(pred,np.float64); sids=conditioning.surface_ids[0]; jids=conditioning.joint_ids[0]\n    if p.shape!=(len(sids),len(jids)): raise ValueError(\"skin proposal shape drift\")\n    inf=tuple(SkinInfluenceProposal(str(sid),str(jid),float(p[si,ji])) for si,sid in enumerate(sids) for ji,jid in enumerate(jids))\n    return SkinProposalIR(inf,conditioning.source_surface_hashes[0],conditioning.source_skeleton_hashes[0],model_provenance=model_provenance,metadata={\"candidate_architecture\":\"RealSaS.Arachne.A1.RichQualifiedBidirectional.v4\",\"field_tokens\":4,\"dense_proposal\":True,\"compiler_owns_qualification\":True,\"teacher_input_used\":False,\"ordered_latent_alignment_used\":False,\"bidirectional_surface_joint_field_reasoning\":True})\n\n\n__all__=[\"make_skin_proposal_v4\"]\n",
+              "qualifier_optional_confidence": "aise QualificationError(f\"skin aggregate correction exceeds bounded repair budget:{total_corr}\")\n        if corr>1e-12: corrected+=1\n        qualified.append(QualifiedSkinRow(sid,norm,res,corr))\n    proposal_meta=dict(proposal.metadata or {})\n    declared_supervision_coverage=proposal_meta.get(\"supervision_coverage\")\n    if declared_supervision_coverage is None:\n        declared_supervision_coverage=proposal_meta.get(\"teacher_coverage\")\n    if declared_supervision_coverage is not None:\n        declared_supervision_coverage=float(declared_supervision_coverage)\n        if not isfinite(declared_supervision_coverage) or not (0.0 <= declared_supervision_coverage <= 1.0):\n            raise QualificationError(\"skin proposal supervision coverage invalid\")\n    confidence_summary=proposal_meta.get(\"row_confidence_summary\")\n    confidence_semantics=proposal_meta.get(\"row_confidence_semantics\")\n    row_confidence_available=confidence_summary is not None or confidence_semantics is not None\n    report={\n        \"row_count\":len(qualified),\n        \"prediction_surface_coverage\":len(qualified)/max(len(surface_ids),1),\n        \"supervision_coverage\":declared_supervision_coverage,\n        \"supervision_coverage_semantics\":(\n            str(proposal_meta.get(\"supervision_coverage_semantics\"))\n            if proposal_meta.get(\"supervision_coverage_semantics\") is not None\n            else (\"DECLARED_BY_PROPOSAL\" if declared_supervision_coverage is not None else \"NOT_DECLARED_BY_PROPOSAL\")\n        ),\n        \"row_confidence_available\":bool(row_confidence_available),\n        \"row_confidence_semantics\":(\n            str(confidence_semantics) if confidence_semantics is not None else \"NOT_DECLARED_BY_PROPOSAL\"\n        ),\n        \"uncovered_row_semantics\":str(\n            proposal_meta.get(\"uncover",
+              "typed_influence": "_dict(self): return asdict(self)\n\n@dataclass(frozen=True)\nclass SkeletonProposalIR:\n    joints:tuple[SkeletonProposalJoint,...]\n    edges:tuple[SkeletonProposalEdge,...]\n    surface_binding_hash:str\n    model_provenance:str=\"\"\n    schema_version:str=\"RealSaS.SkeletonProposalIR.v1\"\n    metadata:Json=field(default_factory=dict)\n    def to_dict(self): return asdict(self)\n\n@dataclass(frozen=True)\nclass QualifiedJoint:\n    canonical_joint_id:str\n    position:Vec3\n    parent_canonical_id:str|None\n    support_surface_ids:tuple[str,...]=()\n    source_proposal_id:str=\"\"\n    def to_dict(self): return asdict(self)\n\n@dataclass(frozen=True)\nclass QualifiedSkeletonIR:\n    joints:tuple[QualifiedJoint,...]\n    root_id:str\n    qualification_report:Json\n    skeleton_lineage_hash:str\n    schema_version:str=\"RealSaS.QualifiedSkeletonIR.v1\"\n    def to_dict(self): return asdict(self)\n\n@dataclass(frozen=True)\nclass SkinInfluenceProposal:\n    surface_id:str\n    canonical_joint_id:str\n    weight:float\n    def to_dict(self): return asdict(self)\n\n@dataclass(frozen=True)\nclass SkinProposalIR:\n    influences:tuple[SkinInfluenceProposal,...]\n    surface_binding_hash:str\n    skeleton_binding_hash:str\n    model_provenance:str=\"\"\n    schema_version:str=\"RealSaS.SkinProposalIR.v1\"\n    metadata:Json=field(default_factory=dict)\n    def to_dict(self): return asdict(self)\n\n@dataclass(frozen=True)\nclass QualifiedSkinRow:\n    surface_id:str\n    influences:tuple[tuple[str,float],...]\n    simplex_residual_before:float\n    correction_l1:float\n    def to_dict(self): return asdict(self)\n\n@dataclass(frozen=True)\nclass QualifiedSkinIR:\n    rows:tuple[QualifiedSkinRow,...]\n    surface_binding_hash:str\n    skeleton_binding_hash:str\n    qualification_report:Json\n    skin_lineage_hash:str\n    schema_version:str=\"RealSaS"
+            },
+            "id": "P1_ARACHNE_PER_ROW_UNCERTAINTY_NOT_TYPED",
+            "severity": "P1",
+            "status": "CONFIRMED_OPEN"
+          },
+          {
+            "class": "QUALIFICATION_SCOPE_GAP",
+            "consequence": "Legally normalized skin is conflated with evidentially complete skin; later mechanical proof becomes the only guard for unsupported semantic rows.",
+            "design_before_code": "Split LEGAL_SKIN qualification from PRODUCT_EVIDENCE_COMPLETENESS, or make downstream dependency explicit and fail-close at the first product authority point.",
+            "evidence": "Stage32 reports product_skin_evidence_complete diagnostically but returns PASS based on legality/correction only.",
+            "id": "P1_STAGE32_EVIDENCE_INCOMPLETE_CAN_STILL_PASS",
+            "severity": "P1",
+            "status": "CONFIRMED_OPEN"
+          }
+        ],
+        "id": "B05_ARACHNE_ROW_UNCERTAINTY_PRODUCT_SEMANTICS_MISSING",
+        "intended_gap": "Qualified skin legality and mesh-weight transfer are frozen, but per-surface-row learned confidence/abstention/product-evidence completeness are not frozen as typed product semantics.",
+        "owner": "ARACHNE_STAGE32",
+        "severity": "P1"
+      },
+      {
+        "action_class": "FREEZE_UNCERTAINTY_DECISION_SEMANTICS",
+        "evidence": [
+          {
+            "class": "EVIDENCE_DECISION_EFFECTIVENESS_GAP",
+            "consequence": "Geppetto position/existence-derived confidence reaches graph candidates but normal arborescence selects the full proposed node set and does not use node confidence in its objective.",
+            "design_before_code": "Decide explicit confidence/abstention semantics for control admission. Do not silently make Compiler a second cardinality predictor.",
+            "evidence": {
+              "normal_objective": "ent, edge.edge_key),\n        )\n    )\n    selected_pairs = {(edge.parent, edge.child) for edge in selected_real_edges}\n    if not required_edges.issubset(selected_pairs):\n        missing = tuple(sorted(required_edges - selected_pairs))\n        return _Solve(\n            None,\n            (),\n            (),\n            float(\"-inf\"),\n            False,\n            \"required_edge_missing\",\n            tuple(f\"required_edge_missing:{parent}->{child}\" for parent, child in missing),\n            elapsed_seconds=perf_counter() - started,\n        )\n    if len(selected_real_edges) != max(0, len(nodes) - 1):\n        return _Solve(\n            None,\n            (),\n            (),\n            float(\"-inf\"),\n            False,\n            \"edge_cardinality_mismatch\",\n            (\"edge_cardinality_mismatch\",),\n            elapsed_seconds=perf_counter() - started,\n        )\n    objective = (\n        sum(float(edge.weight) for edge in selected_real_edges)\n        + float(root_scores.get(selected_root, 0.0))\n    )\n    return _Solve(\n        root=selected_root,\n        selected_nodes=nodes,\n        edges=selected_real_edges,\n        objective=objective,\n        feasible=True,\n        status=\"optimal_arborescence_super_root\",\n        optimality_proven=True,\n        optimality_gap=0.0,\n        elapsed_seconds=perf_counter() - started,\n    )\n\n\ndef _verify_tree(\n    *,\n    nodes: tuple[str, ...],\n    root: str | None,\n    edges: tuple[_Edge, ...],\n    required_edges: set[tuple[str, str]],\n    forbidden_edges: set[tuple[str, str]],\n) -> tuple[bool, tuple[str, ...], dict[str, str | None]]:\n    blockers: list[str] = []\n    node_set = set(nodes)\n    if root is None or root not in node_set:\n        blockers.append(\"root_missing\")\n    parent_by_child: dict[str, str | None] = {root: None} if root",
+              "normal_solver_fixed_nodes": "        missing = tuple(sorted(required_edges - selected_pairs))\n        return _Solve(\n            None,\n            (),\n            (),\n            float(\"-inf\"),\n            False,\n            \"required_edge_missing\",\n            tuple(f\"required_edge_missing:{parent}->{child}\" for parent, child in missing),\n            elapsed_seconds=perf_counter() - started,\n        )\n    if len(selected_real_edges) != max(0, len(nodes) - 1):\n        return _Solve(\n            None,\n            (),\n            (),\n            float(\"-inf\"),\n            False,\n            \"edge_cardinality_mismatch\",\n            (\"edge_cardinality_mismatch\",),\n            elapsed_seconds=perf_counter() - started,\n        )\n    objective = (\n        sum(float(edge.weight) for edge in selected_real_edges)\n        + float(root_scores.get(selected_root, 0.0))\n    )\n    return _Solve(\n        root=selected_root,\n        selected_nodes=nodes,\n        edges=selected_real_edges,\n        objective=objective,\n        feasible=True,\n        status=\"optimal_arborescence_super_root\",\n        optimality_proven=True,\n        optimality_gap=0.0,\n        elapsed_seconds=perf_counter() - started,\n    )\n\n\ndef _verify_tree(\n    *,\n    nodes: tuple[str, ...],\n    root: str | None,\n    edges: tuple[_Edge, ...],\n    required_edges: set[tuple[str, str]],\n    forbidden_edges: set[tuple[str, str]],\n) -> tuple[bool, tuple[str, ...], dict[str, str | None]]:\n    blockers: list[str] = []\n    node_set = set(nodes)\n    if root is None or root not in node_set:\n        blockers.append(\"root_missing\")\n    parent_by_child: dict[str, str | None] = {root: None} if root is not None else {}\n    for edge in edges:\n        if edge.parent not in node_set or edge.child not in node_set:\n            blockers.append(f\"edge_endpoint_missing:{edg",
+              "proposal_to_candidate": "ce lineage mismatch\")\n    if not proposal.joints: raise QualificationError(\"empty skeleton proposal\")\n    joint_by={j.proposal_id:j for j in proposal.joints}\n    if len(joint_by)!=len(proposal.joints): raise QualificationError(\"duplicate proposal joint id\")\n    surface_ids={n.surface_id for n in surface.surface_nodes}\n    internal={pid:\"CGC:\"+content_sha256({\"proposal_id\":pid,\"position\":joint_by[pid].position,\"surface\":surface.geometry_lineage_hash})[:20] for pid in sorted(joint_by)}\n    reverse={v:k for k,v in internal.items()}\n    nodes=[]\n    for pid in sorted(joint_by):\n        j=joint_by[pid]\n        missing=set(j.support_surface_ids)-surface_ids\n        if missing: raise QualificationError(f\"joint {pid} references unknown surface ids:{sorted(missing)}\")\n        nodes.append(CanonicalGraphNodeCandidate(\n            canonical_control_id=internal[pid],root_score01=float(j.root_score),confidence01=float(j.confidence),\n            uncertainty01=max(0.0,1.0-float(j.confidence)),required=True,\n            provenance={\"source_proposal_id\":pid,\"support_surface_ids\":tuple(j.support_surface_ids)},\n        ))\n    edges=[]\n    for e in sorted(proposal.edges,key=lambda x:x.edge_id):\n        if e.parent_proposal_id not in internal or e.child_proposal_id not in internal:\n            raise QualificationError(f\"edge endpoint missing:{e.edge_id}\")\n        edges.append(CanonicalGraphEdgeCandidate(\n            edge_key=\"CGE:\"+content_sha256(e.to_dict())[:20],\n            parent_control_id=internal[e.parent_proposal_id],child_control_id=internal[e.child_proposal_id],\n            evidence_score01=float(e.score),authority_tier=\"MODEL_PROPOSAL_EVIDENCE\",objective_score=float(e.score),\n            uncertainty01=max(0.0,1.0-float(e.confidence)),reason=e.reason,hard_required=e.hard_required,"
+            },
+            "id": "P1_GEPPETTO_NODE_UNCERTAINTY_INERT_IN_NORMAL_QUALIFICATION",
+            "severity": "P1",
+            "status": "CONFIRMED_OPEN"
+          }
+        ],
+        "id": "B06_GEPPETTO_UNCERTAINTY_ADMISSION_ROLE_MISSING",
+        "intended_gap": "Geppetto uncertainty reaches graph candidates but frozen product contract does not define how it affects node admission/abstention in the normal qualification route.",
+        "owner": "GEPPETTO_STAGE28",
+        "severity": "P1"
+      },
+      {
+        "action_class": "CALIBRATE_BEFORE_IMPLEMENTATION_CHANGE",
+        "evidence": {
+          "classification": "CONTRACT_BOUND__PARETO_CALIBRATION_NOT_FOUND",
+          "design_before_code": "Benchmark convergence/latency distribution on subject-free geometry controls. Select the minimum ceilings that preserve the frozen G3 outcome distribution; do not infer optimum from 96.",
+          "evidence": [
+            "canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json",
+            "compiler/realsas_compiler_core/canonical_cdt_adapter_v1.py"
+          ],
+          "id": "REVIEW_CANONICAL_CDT_ITERATION_BUDGET",
+          "knobs": {
+            "max_constraint_recovery_iterations": 96,
+            "max_quality_iterations": 96
+          },
+          "owner": "CANONICAL_CDT",
+          "performance_role": "Potentially large compile-time multiplier per parent patch.",
+          "quality_role": "Iteration ceilings determine whether the constrained refiner reaches the frozen mesh-quality target before fail-close.",
+          "status": "DESIGN_REQUIRED"
+        },
+        "id": "B_KNOB_REVIEW_CANONICAL_CDT_ITERATION_BUDGET",
+        "intended_gap": "Shipping-relevant numeric value lacks enough calibration/provenance to claim an optimum.",
+        "owner": "CANONICAL_CDT",
+        "severity": "P2"
+      },
+      {
+        "action_class": "CALIBRATE_BEFORE_IMPLEMENTATION_CHANGE",
+        "evidence": {
+          "classification": "UNCALIBRATED_SPEED_SHORTCUT_AFFECTING_QUALITY",
+          "design_before_code": "Calibrate an adaptive tessellation/refinement criterion against source curvature, deformation-field error, dynamic flip/stretch rate and compile latency. Do not choose a replacement count yet.",
+          "evidence": [
+            "compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py",
+            "compiler/realsas_compiler_core/visual_mesh_arap_v1.py"
+          ],
+          "id": "OPEN_VISUAL_MESH_SPEED_SHORTCUTS",
+          "knobs": {
+            "max_constraint_recovery_iterations": 192,
+            "max_quality_iterations": 0,
+            "stage18_target_edge_px": 16,
+            "target_min_angle_deg": 0.0
+          },
+          "owner": "SOURCE_OWNED_VISUAL_MESH",
+          "performance_role": "Code comment explicitly disables quality insertion to keep a fast iteration loop.",
+          "quality_role": "Controls source-owned visual primitive density/shape before deformation; exact silhouette alone does not bound deformation conditioning.",
+          "status": "OPEN"
+        },
+        "id": "B_KNOB_OPEN_VISUAL_MESH_SPEED_SHORTCUTS",
+        "intended_gap": "Shipping-relevant numeric value lacks enough calibration/provenance to claim an optimum.",
+        "owner": "SOURCE_OWNED_VISUAL_MESH",
+        "severity": "P1"
+      },
+      {
+        "action_class": "CALIBRATE_BEFORE_IMPLEMENTATION_CHANGE",
+        "evidence": {
+          "classification": "UNCALIBRATED_HARD_GATE_AND_REPAIR_BUDGET",
+          "design_before_code": "Build subject-free seam/non-seam controls with known artist topology and skin discontinuities. Select thresholds by separation and repair efficacy; repair budget should follow convergence evidence, not an arbitrary count.",
+          "evidence": [
+            "compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py"
+          ],
+          "id": "OPEN_SKIN_TOPOLOGY_COMPATIBILITY_THRESHOLDS",
+          "knobs": {
+            "max_edge_ratio": 4.0,
+            "max_repair_iterations": 4,
+            "risk_l1_min": 0.5,
+            "stress_angle_deg": 120.0
+          },
+          "owner": "STAGE35_G3B",
+          "performance_role": "Probe angle/repair budget directly affect stress-test and recompile cost.",
+          "quality_role": "Determines which topology\u00d7skin discontinuities are attacked and whether a candidate passes.",
+          "status": "OPEN"
+        },
+        "id": "B_KNOB_OPEN_SKIN_TOPOLOGY_COMPATIBILITY_THRESHOLDS",
+        "intended_gap": "Shipping-relevant numeric value lacks enough calibration/provenance to claim an optimum.",
+        "owner": "STAGE35_G3B",
+        "severity": "P1"
+      },
+      {
+        "action_class": "CALIBRATE_BEFORE_IMPLEMENTATION_CHANGE",
+        "evidence": {
+          "classification": "UNEXPLAINED_FAIL_CLOSED_MARGIN",
+          "design_before_code": "Calibrate cost-margin semantics on subject-free skeleton perturbations / known ambiguous controls. Preserve fail-closed behavior while replacing unexplained scale-sensitive constants if needed.",
+          "evidence": [
+            "compiler/realsas_compiler_core/motion_compile_v2.py"
+          ],
+          "id": "REVIEW_MOTION_RETARGET_AMBIGUITY_MARGIN",
+          "knobs": {
+            "global_second_best_cost_margin": 0.01
+          },
+          "owner": "STAGE40_RETARGET",
+          "performance_role": "Requires a second exact MILP solve; still bounded for preset-sized skeletons.",
+          "quality_role": "Fails ambiguous topology-constrained source\u2192target skeleton mappings.",
+          "status": "DESIGN_REVIEW"
+        },
+        "id": "B_KNOB_REVIEW_MOTION_RETARGET_AMBIGUITY_MARGIN",
+        "intended_gap": "Shipping-relevant numeric value lacks enough calibration/provenance to claim an optimum.",
+        "owner": "STAGE40_RETARGET",
+        "severity": "P2"
+      },
+      {
+        "action_class": "CALIBRATE_BEFORE_IMPLEMENTATION_CHANGE",
+        "evidence": {
+          "classification": "PROOF_DENSITY_BUDGET__NOT_OUTPUT_FPS",
+          "design_before_code": "Measure marginal defect detection versus wall time on subject-free high-curvature motion controls. This is proof density, not output frame-rate; optimize only after measurement.",
+          "evidence": [
+            "compiler/realsas_compiler_core/motion_dynamic_proof_v2.py",
+            "compiler/realsas_compiler_core/runtime_package_v2.py"
+          ],
+          "id": "REVIEW_MOTION_EXTRA_UNIFORM_PROOF_DENSITY",
+          "knobs": {
+            "extra_uniform_sample_count": 17
+          },
+          "owner": "STAGE41_DYNAMIC_MOTION_PROOF",
+          "performance_role": "Linear multiplier on FK/LBS/intersection/visibility proof work for extra samples.",
+          "quality_role": "Adds samples beyond all source keyframe and contact-boundary times. Runtime plays sealed frame indices only.",
+          "status": "DESIGN_REVIEW"
+        },
+        "id": "B_KNOB_REVIEW_MOTION_EXTRA_UNIFORM_PROOF_DENSITY",
+        "intended_gap": "Shipping-relevant numeric value lacks enough calibration/provenance to claim an optimum.",
+        "owner": "STAGE41_DYNAMIC_MOTION_PROOF",
+        "severity": "P2"
+      }
+    ],
+    "C_INTENDED_DECISION_ITSELF_FALSIFIED": []
+  },
+  "counts": {
+    "A_P0": 4,
+    "A_P1": 2,
+    "B_P0": 2,
+    "B_P1": 5,
+    "B_P2": 3,
+    "C_total": 0
+  },
+  "policy": {
+    "architecture_replacement_authorized": false,
+    "main_merge_authorized": false,
+    "post_repair_rule": "Only after the implementation is conformant to intended contracts and the exact witness still fails may category C be populated or alternative architecture be considered.",
+    "priority": "FIRST_RESTORE_AND_PROVE_THE_EXISTING_FROZEN_INTENDED_ARCHITECTURE",
+    "repair_authorized": false
+  },
+  "repo_head": "0fca42a8e3c0b33adb48e56521eef5b6448fbe3e",
+  "schema": "RealSaS.IntendedArchitectureConformanceAudit.v2",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED__NO_ARCHITECTURE_REPLACEMENT_AUTHORIZED",
+  "validated_guardrails": [
+    {
+      "evidence": {
+        "algorithmic_subject_contamination_count": 0,
+        "findings": [
+          {
+            "claim": "No current 46-stage/core/promoted-model product behavior may branch on Knight/Mage identity.",
+            "id": "PRODUCT_EXECUTABLE_ALGORITHMIC_SUBJECT_GENERICITY",
+            "passed": true,
+            "severity": "PASS"
+          },
+          {
+            "claim": "Subject-named demo fallback schemas should not live inside canonical generic adapters even when execution_class=DEMO_WITNESS and product authority is forbidden.",
+            "id": "DEMO_APPARATUS_SEPARATION_FROM_CANONICAL_ADAPTERS",
+            "passed": false,
+            "severity": "P1"
+          }
+        ]
+      },
+      "id": "G01_SUBJECT_ALGORITHMIC_GENERICITY",
+      "note": "No Knight-specific algorithmic branch was found in current 46-stage adapters/core/promoted models.",
+      "status": "PASS_WITH_HYGIENE_EXCEPTIONS"
+    },
+    {
+      "evidence": {
+        "edge_count": 154,
+        "is_dag": true,
+        "topological_order": [
+          "01_SOURCE_BYTES_SEALED",
+          "05_CAMERA_CONTRACT_SOLVED",
+          "02_SOURCE_LICENSE_PROVENANCE",
+          "03_SOURCE_MECHANICAL_AUDIT",
+          "04_FULL_SUBJECT_ADMISSION",
+          "06_OBSERVATION_RENDER_8VIEW",
+          "07_OBSERVATION_CONTRACT_QUALIFIED",
+          "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+          "08_NORMALIZATION_DOMAIN_QUALIFIED",
+          "09_IRIS_FIT_PREREGISTERED",
+          "10_IRIS_FIT",
+          "11_IRIS_CHECKPOINT_SEALED",
+          "12_ZERO_SURFACE_DECODED",
+          "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+          "14_GSA_BUILD",
+          "15_RIGGING_SURFACE_QUALIFIED",
+          "17_MECHANICAL_PARTITION_QUALIFIED",
+          "26_GEPPETTO_FIT_PREREGISTERED",
+          "18_CANONICAL_MESH_ADDRESSING_BUILD",
+          "27_GEPPETTO_FIT",
+          "19_STATIC_CANONICAL_MESH_QUALIFIED",
+          "28_SKELETON_QUALIFIED",
+          "20_CAA_BACKEND_PREREGISTERED",
+          "29_GEPPETTO_CHECKPOINT_SEALED",
+          "34_DEFORMATION_CAPABILITY_ENVELOPE",
+          "21_CAA_COMPILE",
+          "30_ARACHNE_FIT_PREREGISTERED",
+          "22_CAA_COMPILE_SEALED",
+          "31_ARACHNE_FIT",
+          "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+          "32_SKIN_QUALIFIED",
+          "24_COMPLETE_APPEARANCE_QUALIFIED",
+          "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+          "33_ARACHNE_CHECKPOINT_SEALED",
+          "25_CAA_REFERENCE_REST_RENDER_PROOF",
+          "36_QUALIFIED_MESH_SKIN_TRANSFER",
+          "37_QUALIFIED_PRESENTATION_STRUCTURE",
+          "38_CANONICAL_PUPPET_SEALED",
+          "39_MOTION_SOURCE_OR_PRESET_SEAL",
+          "40_MOTION_COMPILE_RUN",
+          "41_MOTION_DYNAMIC_PROOF",
+          "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+          "43_RSS_MATERIALIZE_COMPACT",
+          "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+          "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+          "46_PRODUCT_CLOSURE_SEAL"
+        ]
+      },
+      "id": "G02_DECLARED_GRAPH_INCREMENTAL_MECHANISM",
+      "note": "Declared dependency graph is acyclic and supports targeted invalidation, but incremental resume must remain untrusted until A03/A04 close.",
+      "status": "STRUCTURALLY_USEFUL_BUT_NOT_YET_SEMANTICALLY_TRUSTWORTHY"
+    }
+  ]
+}

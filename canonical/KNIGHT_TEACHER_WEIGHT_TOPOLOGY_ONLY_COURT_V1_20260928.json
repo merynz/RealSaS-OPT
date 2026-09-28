@@ -1,0 +1,165 @@
+{
+  "actual_motion": {
+    "frames": [
+      {
+        "clip": "demo_idle_v1",
+        "edge_gt10": 105,
+        "edge_gt4": 436,
+        "edge_max": 24.95389464840371,
+        "edge_p99": 7.928493920678258,
+        "frame": 0,
+        "time": 0.0
+      },
+      {
+        "clip": "demo_idle_v1",
+        "edge_gt10": 114,
+        "edge_gt4": 446,
+        "edge_max": 25.77588073146822,
+        "edge_p99": 8.175581426554412,
+        "frame": 1,
+        "time": 0.8333333333333334
+      },
+      {
+        "clip": "demo_idle_v1",
+        "edge_gt10": 115,
+        "edge_gt4": 448,
+        "edge_max": 26.54319495728598,
+        "edge_p99": 8.374517632229882,
+        "frame": 2,
+        "time": 1.6666666666666667
+      },
+      {
+        "clip": "demo_idle_v1",
+        "edge_gt10": 114,
+        "edge_gt4": 446,
+        "edge_max": 25.775911703888507,
+        "edge_p99": 8.175581441630941,
+        "frame": 3,
+        "time": 2.5
+      },
+      {
+        "clip": "demo_run_v1",
+        "edge_gt10": 556,
+        "edge_gt4": 916,
+        "edge_max": 111.55325510149805,
+        "edge_p99": 19.92028867818938,
+        "frame": 0,
+        "time": 0.0
+      },
+      {
+        "clip": "demo_run_v1",
+        "edge_gt10": 503,
+        "edge_gt4": 858,
+        "edge_max": 96.81835667417255,
+        "edge_p99": 24.565598361634734,
+        "frame": 1,
+        "time": 0.20833333333333334
+      },
+      {
+        "clip": "demo_run_v1",
+        "edge_gt10": 592,
+        "edge_gt4": 926,
+        "edge_max": 118.61647437227882,
+        "edge_p99": 18.955131736237096,
+        "frame": 2,
+        "time": 0.4166666666666667
+      },
+      {
+        "clip": "demo_run_v1",
+        "edge_gt10": 501,
+        "edge_gt4": 856,
+        "edge_max": 112.10236057360154,
+        "edge_p99": 19.936873134755583,
+        "frame": 3,
+        "time": 0.625
+      },
+      {
+        "clip": "demo_slash_v1",
+        "edge_gt10": 552,
+        "edge_gt4": 917,
+        "edge_max": 75.42361159710283,
+        "edge_p99": 27.601949326001453,
+        "frame": 0,
+        "time": 0.0
+      },
+      {
+        "clip": "demo_slash_v1",
+        "edge_gt10": 520,
+        "edge_gt4": 784,
+        "edge_max": 115.00103377505665,
+        "edge_p99": 27.43826641136789,
+        "frame": 1,
+        "time": 0.2777777777777778
+      },
+      {
+        "clip": "demo_slash_v1",
+        "edge_gt10": 511,
+        "edge_gt4": 875,
+        "edge_max": 90.82758000345056,
+        "edge_p99": 16.362354154445477,
+        "frame": 2,
+        "time": 0.5555555555555556
+      },
+      {
+        "clip": "demo_slash_v1",
+        "edge_gt10": 552,
+        "edge_gt4": 917,
+        "edge_max": 75.42361159710283,
+        "edge_p99": 27.601949326001453,
+        "frame": 3,
+        "time": 0.8333333333333334
+      }
+    ],
+    "max_edge_gt10": 592,
+    "max_edge_gt4": 926,
+    "worst_edge_max": 118.61647437227882
+  },
+  "finding": {
+    "correct_weights_still_leave_topology_unsafe_faces": true,
+    "face_deletion_creates_new_open_boundaries": true,
+    "unsafe_is_dominated_by_source_nonincident": true
+  },
+  "schema": "RealSaS.KnightTeacherWeightTopologyOnlyCourt.v1",
+  "seam_cut_topology_consequence": {
+    "boundary_edges_after": 1712,
+    "boundary_edges_before": 282,
+    "deleted_face_count": 1553,
+    "face_count_after_delete": 23405,
+    "face_count_before": 24958,
+    "new_boundary_edges_created": 1453,
+    "retained_vertex_component_count": 14,
+    "retained_vertex_component_sizes": [
+      3515,
+      2919,
+      2134,
+      960,
+      944,
+      344,
+      326,
+      186,
+      178,
+      171,
+      115,
+      114,
+      105,
+      3
+    ]
+  },
+  "status": "ORACLE_DIAGNOSTIC_ONLY__NO_REPAIR",
+  "stress": {
+    "area_max": 220.29867764004828,
+    "area_min": 0.00409069849507017,
+    "condition_max": 11708.855417316601,
+    "edge_max": 101.0908905951972,
+    "edge_p95": 6.866182129077126,
+    "unsafe_face_count": 1553
+  },
+  "teacher_role": "WEIGHT_ORACLE_ONLY",
+  "unsafe_classification": {
+    "candidate_total_source_nonincident": 4338,
+    "sealed_stage18_clique_invented_total": 515,
+    "unsafe_source_local_or_share_vertex": 43,
+    "unsafe_source_nonincident": 1510,
+    "unsafe_total": 1553
+  }
+}

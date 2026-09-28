@@ -15,14 +15,15 @@ from compiler.realsas_compiler_core.artifact_codec_v2 import (
 from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import _joint_pose_v2
 from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
     Arap2D,
+    bind_source_visual_points_to_projected_surface_v1,
     bind_visual_vertex_handles,
     build_visual_mesh_from_mask,
+    raster_xy_to_source_texel_xy,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import stage_output_payload
 from compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2 import _load_source_inputs
 from tools.demo.render_knight_motion_preview_v1 import _candidate_skin_weights, _ctx, _skin, _tracks_for_clip
 from tools.demo.render_knight_visual_mesh_arap_witness_v1 import (
-    _bind_visual_to_mechanical_surface,
     _candidate_face_indices,
     _clean_source_texture,
     _gif_frame,
@@ -106,12 +107,30 @@ def run(*, authority_root:Path, run_id:str, out_dir:Path, native_player:Path, re
         rgba=np.asarray(rgba_by_view[view_index],dtype=np.uint8)
         mask=np.asarray(mask_by_view[view_index],dtype=bool)
         mesh=build_visual_mesh_from_mask(mask,target_edge_px=16)
-        binding=_bind_visual_to_mechanical_surface(
-            visual_mesh=mesh,candidate=candidate,camera=camera,
-            rest_mechanical_xyz=rest,mechanical_face_indices=mech_faces,
-            mechanical_weights=W,source_mask=mask,
+        continuous=bind_source_visual_points_to_projected_surface_v1(
+            points_source_xy=mesh.positions,
+            mechanical_positions_xyz=rest,
+            mechanical_faces=mech_faces,
+            camera=camera,
         )
-        selected=np.asarray(binding["visual_vertex_indices"],dtype=np.int64)
+        selected=np.asarray(np.flatnonzero(continuous["valid"]),dtype=np.int64)
+        if len(selected)<8:
+            raise RuntimeError("SOURCE_OWNED_CONTINUOUS_BINDING_COVERAGE_TOO_LOW")
+        selected_owner=np.asarray(continuous["owner_face_index"][selected],dtype=np.int64)
+        selected_bary=np.asarray(continuous["barycentric"][selected],dtype=np.float64)
+        selected_faces=np.asarray(mech_faces[selected_owner],dtype=np.int64)
+        projected=np.asarray(continuous["projected_vertices"],dtype=np.float64)
+        rest_bound_raster=np.sum(
+            projected[selected_faces,:2]*selected_bary[:,:,None],
+            axis=1,
+        )
+        rest_bound_source=raster_xy_to_source_texel_xy(rest_bound_raster)
+        binding={
+            "visual_vertex_indices":selected,
+            "mechanical_face_indices":selected_faces,
+            "mechanical_barycentric":selected_bary,
+            "rest_projection_offset_xy":np.asarray(mesh.positions,dtype=np.float64)[selected]-rest_bound_source,
+        }
         bindings=bind_visual_vertex_handles(mesh,selected)
         arap=Arap2D(mesh,bindings,constraint_scale=1.0e6)
         view_root=out_dir/f"V{view_index}"
@@ -126,6 +145,8 @@ def run(*, authority_root:Path, run_id:str, out_dir:Path, native_player:Path, re
             "bound_visual_vertex_count":int(len(selected)),
             "unbound_visual_vertex_count":int(len(mesh.positions)-len(selected)),
             "bound_visual_vertex_fraction":float(len(selected)/max(1,len(mesh.positions))),
+            "binding_mode":"CONTINUOUS_FIRST_HIT_PROJECTED_TRIANGLE_V1",
+            "max_rest_binding_offset_px":float(np.max(np.linalg.norm(binding["rest_projection_offset_xy"],axis=1))),
             "source_foreground_pixel_count":int(np.count_nonzero(mask)),
             "source_texture_sha256":texture_sha,
             "direct_source_fraction":1.0,

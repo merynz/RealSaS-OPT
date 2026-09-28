@@ -113,7 +113,7 @@ def _per_face_metrics(
 
 
 def _summary(metric: dict[str, np.ndarray], mask: np.ndarray | None = None) -> dict:
-    select = np.asarray(metric["valid"], dtype=bool)
+    select = np.asarray(metric["valid"], dtype=bool).copy()
     if mask is not None:
         select &= np.asarray(mask, dtype=bool)
     count = int(np.count_nonzero(select))
@@ -143,6 +143,101 @@ def _summary(metric: dict[str, np.ndarray], mask: np.ndarray | None = None) -> d
         "edge_ratio_p99": float(np.nanpercentile(edge, 99.0)),
         "edge_ratio_max": float(np.nanmax(edge)),
     }
+
+
+def _triangle_3d_metrics(
+    rest_tri_xyz: np.ndarray,
+    posed_tri_xyz: np.ndarray,
+) -> dict[str, np.ndarray]:
+    rest = np.asarray(rest_tri_xyz, dtype=np.float64)
+    posed = np.asarray(posed_tri_xyz, dtype=np.float64)
+    rest_cross = np.cross(rest[:, 1] - rest[:, 0], rest[:, 2] - rest[:, 0])
+    posed_cross = np.cross(posed[:, 1] - posed[:, 0], posed[:, 2] - posed[:, 0])
+    rest_double_area = np.linalg.norm(rest_cross, axis=1)
+    posed_double_area = np.linalg.norm(posed_cross, axis=1)
+    valid = rest_double_area > 1.0e-12
+    area_ratio = np.full((len(rest),), np.nan, dtype=np.float64)
+    area_ratio[valid] = posed_double_area[valid] / rest_double_area[valid]
+
+    def edges(tri):
+        return np.stack(
+            [
+                np.linalg.norm(tri[:, 1] - tri[:, 0], axis=1),
+                np.linalg.norm(tri[:, 2] - tri[:, 1], axis=1),
+                np.linalg.norm(tri[:, 0] - tri[:, 2], axis=1),
+            ],
+            axis=1,
+        )
+
+    rest_edge = edges(rest)
+    posed_edge = edges(posed)
+    edge_ratio = posed_edge / np.maximum(rest_edge, 1.0e-12)
+    return {
+        "valid": valid,
+        "measurable": valid.copy(),
+        "flipped": np.zeros((len(rest),), dtype=bool),
+        "area_ratio": area_ratio,
+        "max_edge_ratio": np.max(edge_ratio, axis=1),
+    }
+
+
+def _bone_length_metrics(skeleton, joint_pos: dict) -> dict:
+    rest_by_id = {
+        str(j.canonical_joint_id): np.asarray(j.position, dtype=np.float64)
+        for j in skeleton.joints
+    }
+    parent_by_id = {
+        str(j.canonical_joint_id): (
+            None if j.parent_canonical_id is None else str(j.parent_canonical_id)
+        )
+        for j in skeleton.joints
+    }
+    ratios = []
+    absolute_delta = []
+    rows = []
+    for jid, parent in parent_by_id.items():
+        if parent is None:
+            continue
+        rest_len = float(np.linalg.norm(rest_by_id[jid] - rest_by_id[parent]))
+        posed_len = float(
+            np.linalg.norm(
+                np.asarray(joint_pos[jid], dtype=np.float64)
+                - np.asarray(joint_pos[parent], dtype=np.float64)
+            )
+        )
+        if rest_len <= 1.0e-12:
+            continue
+        ratio = posed_len / rest_len
+        ratios.append(ratio)
+        absolute_delta.append(abs(posed_len - rest_len))
+        rows.append(
+            {
+                "joint_id": jid,
+                "parent_id": parent,
+                "rest_length": rest_len,
+                "posed_length": posed_len,
+                "ratio": ratio,
+            }
+        )
+    a = np.asarray(ratios, dtype=np.float64)
+    d = np.asarray(absolute_delta, dtype=np.float64)
+    order = np.argsort(np.abs(a - 1.0))[::-1] if len(a) else np.asarray([], dtype=np.int64)
+    return {
+        "bone_count": int(len(a)),
+        "ratio_min": float(np.min(a)) if len(a) else None,
+        "ratio_p05": float(np.percentile(a, 5.0)) if len(a) else None,
+        "ratio_p95": float(np.percentile(a, 95.0)) if len(a) else None,
+        "ratio_max": float(np.max(a)) if len(a) else None,
+        "absolute_length_delta_max": float(np.max(d)) if len(d) else None,
+        "worst_bones": [rows[int(i)] for i in order[:8]],
+    }
+
+
+def _dominant_onehot_weights(W: np.ndarray) -> np.ndarray:
+    out = np.zeros_like(W, dtype=np.float64)
+    winner = np.argmax(W, axis=1)
+    out[np.arange(len(W)), winner] = 1.0
+    return out
 
 
 def _skin_discontinuity(W: np.ndarray, face_index: np.ndarray) -> np.ndarray:
@@ -268,6 +363,7 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path) -> None:
         raise RuntimeError("BASELINE_CAUSAL_MAPPING_HASH_DRIFT")
 
     joint_ids, W = _candidate_skin_weights(candidate, skin, skeleton)
+    W_onehot = _dominant_onehot_weights(W)
     rest = np.asarray([v.P for v in candidate.vertices], dtype=np.float64)
     face_index = _face_vertex_indices(candidate)
     discontinuity = _skin_discontinuity(W, face_index)
@@ -308,13 +404,14 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path) -> None:
     for view in (0, 2):
         rest_tri_xy = _project_triangles(rest_face_xyz, cameras[view])
         for frame_index, time_seconds in enumerate(sample_times):
-            skin_mats, _joint_pos, frame_hash = _joint_pose_v2(
+            skin_mats, joint_pos, frame_hash = _joint_pose_v2(
                 skeleton=skeleton,
                 tracks=tracks,
                 time_seconds=float(time_seconds),
                 cameras=cameras,
             )
             posed = _skin(rest, W, joint_ids, skin_mats)
+            posed_onehot = _skin(rest, W_onehot, joint_ids, skin_mats)
             original_tri_xy = _project_triangles(posed[face_index], cameras[view])
 
             homogenized_face_xyz = _face_local_homogenized_triangles(
@@ -331,6 +428,17 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path) -> None:
             original = _per_face_metrics(rest_tri_xy, original_tri_xy)
             homogenized = _per_face_metrics(rest_tri_xy, homogenized_tri_xy)
             measurable = original["measurable"]
+
+            original_3d = _triangle_3d_metrics(
+                rest_face_xyz, posed[face_index]
+            )
+            onehot_3d = _triangle_3d_metrics(
+                rest_face_xyz, posed_onehot[face_index]
+            )
+            homogenized_3d = _triangle_3d_metrics(
+                rest_face_xyz, homogenized_face_xyz
+            )
+            bone_metrics = _bone_length_metrics(skeleton, joint_pos)
 
             bins = []
             for label, mask in _risk_bins(discontinuity):
@@ -368,6 +476,10 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path) -> None:
                     "original_measurable": original_measurable,
                     "homogenized_all": homogenized_all,
                     "homogenized_measurable": homogenized_measurable,
+                    "original_3d": _summary(original_3d),
+                    "dominant_onehot_3d": _summary(onehot_3d),
+                    "face_homogenized_3d": _summary(homogenized_3d),
+                    "posed_skeleton_bone_lengths": bone_metrics,
                     "measurable_flip_eliminated_count": int(
                         np.count_nonzero(flip_eliminated)
                     ),

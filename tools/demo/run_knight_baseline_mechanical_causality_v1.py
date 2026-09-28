@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -233,6 +234,27 @@ def _bone_length_metrics(skeleton, joint_pos: dict) -> dict:
     }
 
 
+def _root_translation_only_tracks(tracks: dict, root_id: str) -> dict:
+    out = {}
+    for jid, track in tracks.items():
+        if str(jid) == str(root_id):
+            out[jid] = track
+            continue
+        keys = tuple(
+            replace(key, local_translation_xyz=(0.0, 0.0, 0.0))
+            for key in track.keyframes
+        )
+        out[jid] = replace(
+            track,
+            keyframes=keys,
+            metadata={
+                **dict(track.metadata or {}),
+                "diagnostic_translation_policy": "ROOT_TRANSLATION_ONLY",
+            },
+        )
+    return out
+
+
 def _dominant_onehot_weights(W: np.ndarray) -> np.ndarray:
     out = np.zeros_like(W, dtype=np.float64)
     winner = np.argmax(W, axis=1)
@@ -358,6 +380,9 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path) -> None:
     tracks, mapping_details = _tracks_for_clip(
         payload, skeleton, cameras, source_report
     )
+    tracks_root_translation_only = _root_translation_only_tracks(
+        tracks, skeleton.root_id
+    )
     mapping_sha = _json_hash(mapping_details)
     if mapping_sha != EXPECTED["mapping_sha256"]:
         raise RuntimeError("BASELINE_CAUSAL_MAPPING_HASH_DRIFT")
@@ -410,7 +435,16 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path) -> None:
                 time_seconds=float(time_seconds),
                 cameras=cameras,
             )
+            root_only_skin_mats, root_only_joint_pos, _root_only_frame_hash = _joint_pose_v2(
+                skeleton=skeleton,
+                tracks=tracks_root_translation_only,
+                time_seconds=float(time_seconds),
+                cameras=cameras,
+            )
             posed = _skin(rest, W, joint_ids, skin_mats)
+            posed_root_translation_only = _skin(
+                rest, W, joint_ids, root_only_skin_mats
+            )
             posed_onehot = _skin(rest, W_onehot, joint_ids, skin_mats)
             original_tri_xy = _project_triangles(posed[face_index], cameras[view])
 
@@ -432,6 +466,9 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path) -> None:
             original_3d = _triangle_3d_metrics(
                 rest_face_xyz, posed[face_index]
             )
+            root_translation_only_3d = _triangle_3d_metrics(
+                rest_face_xyz, posed_root_translation_only[face_index]
+            )
             onehot_3d = _triangle_3d_metrics(
                 rest_face_xyz, posed_onehot[face_index]
             )
@@ -439,6 +476,9 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path) -> None:
                 rest_face_xyz, homogenized_face_xyz
             )
             bone_metrics = _bone_length_metrics(skeleton, joint_pos)
+            root_translation_only_bone_metrics = _bone_length_metrics(
+                skeleton, root_only_joint_pos
+            )
 
             bins = []
             for label, mask in _risk_bins(discontinuity):
@@ -477,9 +517,11 @@ def run(*, authority_root: Path, run_id: str, out_dir: Path) -> None:
                     "homogenized_all": homogenized_all,
                     "homogenized_measurable": homogenized_measurable,
                     "original_3d": _summary(original_3d),
+                    "root_translation_only_3d": _summary(root_translation_only_3d),
                     "dominant_onehot_3d": _summary(onehot_3d),
                     "face_homogenized_3d": _summary(homogenized_3d),
                     "posed_skeleton_bone_lengths": bone_metrics,
+                    "root_translation_only_bone_lengths": root_translation_only_bone_metrics,
                     "measurable_flip_eliminated_count": int(
                         np.count_nonzero(flip_eliminated)
                     ),

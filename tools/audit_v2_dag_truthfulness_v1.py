@@ -98,7 +98,7 @@ for sid in [
     "18_CANONICAL_MESH_ADDRESSING_BUILD",
     "23_COMPLETE_APPEARANCE_ASSET_BAKED",
     "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
-    "42_RUNTIME_V2_PROJECTION_BUILT",
+    "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
 ]:
     probes[sid]={
       "declared_invalidation_set":descendants(sid,declared),
@@ -129,8 +129,14 @@ payload={
     "declared_dag_valid":declared_is_dag,
     "runtime_dataflow_truthfully_represented_by_declared_dag":actual_is_dag and not hidden,
     "incremental_resume_safe_before_dependency_cleanup":False if hidden or not actual_is_dag else True,
-    "recommended_architecture":"EPOCHAL_DAG_WITH_EXPLICIT_REPAIR_DIRECTIVE_EDGES",
-    "reason":"Keep each compile epoch acyclic; a failed Stage35 emits an immutable RepairDirective consumed by Stage18 of the next epoch. Do not let Stage18 read downstream artifacts from the same epoch.",
+    "architecture_choice_frozen":False,
+    "candidate_architectures":[
+      "TRANSACTIONAL_VERSIONED_DAG_ATTEMPTS",
+      "EXPLICIT_WORKLIST_OR_FIXPOINT_COMPILER",
+      "TYPED_STATE_MACHINE_WITH_INVALIDATION",
+    ],
+    "proven_fact":"The declared 46-stage graph is acyclic, but current executable dataflow contains hidden reads/back-edges that the declared graph and fingerprints do not fully represent.",
+    "selection_rule":"Choose architecture only after comparing semantic clarity, exact provenance, minimal recompute, repair convergence, parallelism, cacheability, and implementation complexity. A compiler is not required to be a DAG.",
   },
   "claim_boundary":"Static+plan audit of declared dependencies and scanner-confirmed direct/side-channel reads. It proves graph truthfulness issues, not the optimal repair operator.",
 }

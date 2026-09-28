@@ -1,0 +1,61 @@
+name: v2-performance-quality-knob-audit-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/audit_v2_performance_quality_knobs_v1.py'
+      - '.github/workflows/v2_performance_quality_knob_audit_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v2-performance-quality-knob-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Run performance-quality knob audit
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python tools/audit_v2_performance_quality_knobs_v1.py | tee /tmp/knob_audit.txt
+          test -f canonical/V2_PERFORMANCE_QUALITY_KNOB_AUDIT_V1_20260928.json
+      - name: Seal audit evidence
+        run: |
+          set -euo pipefail
+          mkdir -p canonical/v2_performance_quality_knob_audit_v1
+          cp /tmp/knob_audit.txt canonical/v2_performance_quality_knob_audit_v1/AUDIT_STDOUT.txt
+          python - <<'PY'
+          import hashlib,json,subprocess
+          from pathlib import Path
+          files=[
+            Path("canonical/V2_PERFORMANCE_QUALITY_KNOB_AUDIT_V1_20260928.json"),
+            Path("canonical/v2_performance_quality_knob_audit_v1/AUDIT_STDOUT.txt"),
+          ]
+          seal={
+            "schema":"RealSaS.PerformanceQualityKnobAuditSeal.v1",
+            "status":"AUDIT_ONLY__NO_REPAIR_APPLIED",
+            "repo_head":subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip(),
+            "artifacts":[{"path":str(p),"sha256":hashlib.sha256(p.read_bytes()).hexdigest(),"bytes":p.stat().st_size} for p in files],
+            "repair_applied":False,
+            "new_numeric_value_selected":False,
+          }
+          Path("canonical/v2_performance_quality_knob_audit_v1/SEAL.json").write_text(json.dumps(seal,indent=2,sort_keys=True)+"\n")
+          PY
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/V2_PERFORMANCE_QUALITY_KNOB_AUDIT_V1_20260928.json canonical/v2_performance_quality_knob_audit_v1
+          git commit -m 'audit: seal performance-quality knob evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

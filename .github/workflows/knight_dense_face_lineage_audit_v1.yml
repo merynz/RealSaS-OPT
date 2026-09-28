@@ -1,0 +1,257 @@
+name: knight-dense-face-lineage-audit-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/knight_dense_face_lineage_audit_v1.yml'
+
+concurrency:
+  group: knight-dense-face-lineage-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      OUT: canonical/knight_dense_face_lineage_audit_v1
+
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+
+      - name: Install minimal numeric runtime
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off numpy
+
+      - name: Reconstruct dense-to-GSA face lineage
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python - <<'PY'
+          import json, hashlib
+          from pathlib import Path
+          import numpy as np
+
+          from compiler.realsas_compiler_core.preproduct_authority_v1 import (
+              signed_zero_surface_from_dict,
+              normalization_domain_from_dict,
+          )
+          from compiler.realsas_compiler_core.geometry_artifact_codec_v2 import (
+              rigging_surface_from_dict,
+          )
+          from compiler.realsas_compiler_core.artifact_codec_v2 import (
+              canonical_mesh_candidate_from_dict,
+          )
+          from compiler.realsas_compiler_core.substrate.scene_first_signed import (
+              mesh_connected_component_labels_v1,
+          )
+
+          root=Path("/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924")
+          out=Path("canonical/knight_dense_face_lineage_audit_v1")
+          out.mkdir(parents=True,exist_ok=True)
+
+          p12=root/"artifacts/12_ZERO_SURFACE_DECODED/signed_zero_surface_seal.json"
+          p8=root/"artifacts/08_NORMALIZATION_DOMAIN_QUALIFIED/normalization_domain.json"
+          p14=root/"artifacts/14_GSA_BUILD/rigging_surface_candidate.json"
+          p14r=root/"artifacts/14_GSA_BUILD/substrate_adequacy_report.json"
+          p15=root/"artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"
+          p18=root/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json"
+          for p in (p12,p8,p14,p14r,p15,p18):
+              if not p.is_file():
+                  raise RuntimeError(f"MISSING:{p}")
+
+          zero=signed_zero_surface_from_dict(json.loads(p12.read_text()))
+          norm=normalization_domain_from_dict(json.loads(p8.read_text()))
+          s14=rigging_surface_from_dict(json.loads(p14.read_text()))
+          s15=rigging_surface_from_dict(json.loads(p15.read_text()))
+          adequacy=json.loads(p14r.read_text())
+          candidate=canonical_mesh_candidate_from_dict(json.loads(p18.read_text()))
+
+          if s14.geometry_lineage_hash != s15.geometry_lineage_hash:
+              raise RuntimeError("STAGE14_15_SURFACE_LINEAGE_DRIFT")
+
+          npz=Path(zero.npz_path)
+          if not npz.is_file():
+              raise RuntimeError(f"ZERO_NPZ_MISSING:{npz}")
+          if hashlib.sha256(npz.read_bytes()).hexdigest()!=zero.npz_sha256:
+              raise RuntimeError("ZERO_NPZ_HASH_DRIFT")
+          with np.load(npz,allow_pickle=False) as data:
+              vn=np.asarray(data["vertices_normalized"],dtype=np.float64)
+              dense_faces=np.asarray(data["faces"],dtype=np.int64)
+              hints=np.asarray(data["implicit_normals"],dtype=np.float64)
+
+          world=np.asarray(norm.center_xyz,dtype=np.float64)[None,:]+vn*float(norm.half_extent)
+
+          cap=adequacy.get("selected_target_node_cap")
+          if cap is None:
+              cap=adequacy.get("demo_fallback_target_node_cap")
+          if cap is None:
+              closest=dict(adequacy.get("diagnostic_closest_nonpassing_candidate") or {})
+              cap=closest.get("candidate_target_node_cap")
+          if cap is None:
+              raise RuntimeError("TARGET_NODE_CAP_UNRESOLVED")
+          cap=int(cap)
+
+          policy=dict(adequacy.get("policy") or {})
+          preserve=bool(policy.get("component_aware_voxel_compaction",False))
+          component_labels=mesh_connected_component_labels_v1(len(world),dense_faces) if preserve else None
+
+          # Reproduce exactly the voxel-label stage of _adaptive_voxel_compact.
+          if len(world)<=cap:
+              inverse=np.arange(len(world),dtype=np.int64)
+              divisions=0
+          else:
+              lo=world.min(axis=0)
+              span=np.maximum(world.max(axis=0)-lo,1e-12)
+              def labels_for(divisions):
+                  keys=np.floor((world-lo)/span*divisions).astype(np.int64)
+                  keys=np.clip(keys,0,divisions-1)
+                  if component_labels is not None:
+                      keys=np.column_stack((component_labels,keys))
+                  return np.unique(keys,axis=0,return_inverse=True)
+              low,high=1,512
+              best=None
+              while low<=high:
+                  mid=(low+high)//2
+                  unique,inv=labels_for(mid)
+                  if len(unique)<=cap:
+                      best=(mid,unique,inv)
+                      low=mid+1
+                  else:
+                      high=mid-1
+              if best is None:
+                  raise RuntimeError("COMPACTION_REPRODUCTION_FAILED")
+              divisions,_unique,inverse=best
+
+          compact_count=int(inverse.max())+1
+          if compact_count!=len(s15.surface_nodes):
+              raise RuntimeError(f"COMPACT_COUNT_DRIFT:{compact_count}!={len(s15.surface_nodes)}")
+
+          # Validate compact-index ordering by reconstructing pairwise relation graph.
+          mapped=inverse[dense_faces]
+          dense_edge_rows=np.concatenate(
+              [mapped[:,[0,1]],mapped[:,[1,2]],mapped[:,[2,0]]],axis=0
+          )
+          dense_edge_rows=np.sort(dense_edge_rows,axis=1)
+          dense_edge_rows=np.unique(dense_edge_rows[dense_edge_rows[:,0]!=dense_edge_rows[:,1]],axis=0)
+          dense_edges={tuple(map(int,row)) for row in dense_edge_rows.tolist()}
+
+          sid_to_index={node.surface_id:i for i,node in enumerate(s15.surface_nodes)}
+          relation_edges=set()
+          for rel in s15.local_relations:
+              relation_edges.add(tuple(sorted((
+                  sid_to_index[str(rel.a_surface_id)],
+                  sid_to_index[str(rel.b_surface_id)],
+              ))))
+          relation_graph_exact=(dense_edges==relation_edges)
+          if not relation_graph_exact:
+              raise RuntimeError(
+                  f"RELATION_REPRODUCTION_DRIFT:dense={len(dense_edges)}:gsa={len(relation_edges)}:"
+                  f"missing={len(dense_edges-relation_edges)}:extra={len(relation_edges-dense_edges)}"
+              )
+
+          # Dense mapped 2-simplex incidence after compaction.
+          dense_compact_face_set=set()
+          dense_compact_face_multiplicity={}
+          for row in mapped:
+              tri=tuple(sorted(map(int,row.tolist())))
+              if len(set(tri))<3:
+                  continue
+              dense_compact_face_set.add(tri)
+              dense_compact_face_multiplicity[tri]=dense_compact_face_multiplicity.get(tri,0)+1
+
+          # Stage18 candidate vertices are identity-bound to Stage15 surface nodes.
+          cv_to_compact={}
+          for v in candidate.vertices:
+              coeffs=tuple(v.support_binding.coefficients)
+              if v.support_binding.mode!="IDENTITY_SURFACE_NODE" or len(coeffs)!=1 or abs(float(coeffs[0][1])-1.0)>1e-12:
+                  raise RuntimeError("NON_IDENTITY_STAGE18_VERTEX_IN_BASELINE")
+              sid=str(coeffs[0][0])
+              if sid not in sid_to_index:
+                  raise RuntimeError("STAGE18_SUPPORT_SURFACE_NOT_IN_STAGE15")
+              cv_to_compact[str(v.candidate_vertex_id)]=sid_to_index[sid]
+
+          stage18_triples=[]
+          dense_descendant_flags=[]
+          for face in candidate.faces:
+              tri=tuple(sorted(cv_to_compact[str(x)] for x in face))
+              stage18_triples.append(tri)
+              dense_descendant_flags.append(tri in dense_compact_face_set)
+
+          offender_indices=(253,3829,3573)
+          offenders=[]
+          for idx in offender_indices:
+              if idx>=len(stage18_triples):
+                  raise RuntimeError(f"OFFENDER_FACE_INDEX_OUT_OF_RANGE:{idx}")
+              tri=stage18_triples[idx]
+              offenders.append({
+                  "face_index":idx,
+                  "compact_triangle":tri,
+                  "dense_face_descendant":bool(dense_descendant_flags[idx]),
+                  "dense_face_multiplicity":int(dense_compact_face_multiplicity.get(tri,0)),
+              })
+
+          invented_count=int(sum(not x for x in dense_descendant_flags))
+          inherited_count=int(sum(bool(x) for x in dense_descendant_flags))
+
+          report={
+              "schema":"RealSaS.KnightDenseFaceLineageAudit.v1",
+              "status":"AUDIT_ONLY__NO_REPAIR_APPLIED",
+              "artifact_sha256":{
+                  "stage12":hashlib.sha256(p12.read_bytes()).hexdigest(),
+                  "stage14_surface":hashlib.sha256(p14.read_bytes()).hexdigest(),
+                  "stage15_surface":hashlib.sha256(p15.read_bytes()).hexdigest(),
+                  "stage18_candidate":hashlib.sha256(p18.read_bytes()).hexdigest(),
+                  "zero_npz":zero.npz_sha256,
+              },
+              "reproduction":{
+                  "target_node_cap":cap,
+                  "component_aware_voxel_compaction":preserve,
+                  "divisions":int(divisions),
+                  "dense_vertex_count":int(len(vn)),
+                  "dense_face_count":int(len(dense_faces)),
+                  "compact_node_count":compact_count,
+                  "gsa_relation_count":len(relation_edges),
+                  "relation_graph_exact_reproduction":relation_graph_exact,
+                  "dense_compact_face_count":len(dense_compact_face_set),
+              },
+              "stage18":{
+                  "face_count":len(stage18_triples),
+                  "dense_face_descendant_count":inherited_count,
+                  "clique_invented_face_count":invented_count,
+                  "dense_face_descendant_fraction":inherited_count/max(1,len(stage18_triples)),
+                  "clique_invented_face_fraction":invented_count/max(1,len(stage18_triples)),
+              },
+              "offenders":offenders,
+              "verdict":{
+                  "face_incidence_loss_exists":invented_count>0,
+                  "all_known_smear_offenders_are_clique_inventions":all(not x["dense_face_descendant"] for x in offenders),
+                  "any_known_smear_offender_is_dense_face_descendant":any(x["dense_face_descendant"] for x in offenders),
+                  "claim_boundary":"Classifies Stage18 faces against exact Stage12 dense zero-surface 2-simplex incidence after reproducing the exact Stage14 compact-index map. Does not yet choose a repair."
+              }
+          }
+          (out/"REPORT.json").write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
+          print(json.dumps(report,indent=2,sort_keys=True))
+          PY
+
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add "$OUT/REPORT.json"
+          git commit -m 'audit: seal Knight dense-to-Stage18 face lineage evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

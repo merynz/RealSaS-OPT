@@ -1,0 +1,56 @@
+name: knight-teacher-artifact-inventory-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/audit_knight_teacher_artifact_inventory_v1.py'
+      - '.github/workflows/knight_teacher_artifact_inventory_v1.yml'
+
+concurrency:
+  group: knight-teacher-artifact-inventory-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  inventory:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      V5_HANDOFF: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V5_DEMO_HANDOFF
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install
+        run: python -m pip install --no-input --progress-bar off numpy
+      - name: Fetch exact artifacts
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          echo "$tmp" > /tmp/teacher_inventory_tmp
+          rclone copyto "$V5_HANDOFF/ARACHNE_KNIGHT_TEACHER_BANK_FIX2.npz" "$tmp/bank.npz" --checksum
+          rclone copyto "$V5_HANDOFF/KNIGHT_EVALUATED_TEACHER_SOURCE.npz" "$tmp/source.npz" --checksum
+          sha256sum "$tmp/bank.npz" "$tmp/source.npz"
+      - name: Inventory
+        run: |
+          set -euo pipefail
+          tmp="$(cat /tmp/teacher_inventory_tmp)"
+          PYTHONPATH=. python tools/audit_knight_teacher_artifact_inventory_v1.py             --bank "$tmp/bank.npz"             --source "$tmp/source.npz"             --out canonical/KNIGHT_TEACHER_ARTIFACT_INVENTORY_V1_20260928.json             | tee /tmp/teacher_inventory.txt
+      - name: Seal
+        run: |
+          set -euo pipefail
+          mkdir -p canonical/knight_teacher_artifact_inventory_v1
+          cp /tmp/teacher_inventory.txt canonical/knight_teacher_artifact_inventory_v1/AUDIT_STDOUT.txt
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_TEACHER_ARTIFACT_INVENTORY_V1_20260928.json canonical/knight_teacher_artifact_inventory_v1
+          git commit -m 'audit: seal Knight teacher artifact inventory'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

@@ -28,9 +28,6 @@ from compiler.realsas_compiler_core.product_authority_v1 import (
     canonical_mesh_candidate_lineage_hash,
 )
 from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import _joint_pose_v2
-from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
-    stage_output_payload,
-)
 from compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2 import (
     _load_texture_pages,
 )
@@ -56,6 +53,24 @@ COND_MAX = 16.0
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _read_exact_historical_json(
+    run_root: Path,
+    relative_path: str,
+    expected_sha256: str,
+) -> dict:
+    """Read one byte-sealed historical Knight authority without current-ledger coercion."""
+    path = run_root / relative_path
+    if not path.is_file():
+        raise RuntimeError(f"ORACLE_HISTORICAL_ARTIFACT_MISSING:{relative_path}")
+    actual = _sha256(path)
+    if actual != expected_sha256:
+        raise RuntimeError(
+            "ORACLE_HISTORICAL_ARTIFACT_SHA_DRIFT:"
+            f"{relative_path}:{actual}:{expected_sha256}"
+        )
+    return json.loads(path.read_text())
 
 
 def _array_sha256(a: np.ndarray) -> str:
@@ -341,40 +356,45 @@ def run(
     out_dir: Path,
 ):
     ctx = _ctx(authority_root, run_id)
+    # The preserved Knight run predates the current adapter PASS-status semantics.
+    # Its exact authorities were independently byte-sealed by the forensic capsule;
+    # load those bytes directly and fail closed on any drift. This changes only
+    # experiment plumbing, not the preregistered intervention or held-fixed inputs.
+    run_root = ctx["run_root"]
     candidate = canonical_mesh_candidate_from_dict(
-        stage_output_payload(
-            ctx,
-            "18_CANONICAL_MESH_ADDRESSING_BUILD",
-            "RealSaS.CanonicalMeshCandidateIR.v1",
+        _read_exact_historical_json(
+            run_root,
+            "artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json",
+            "0db35bbcdd3565cf42c74127fa33c66d39545e1ec84d1b1c74f1dac5bb6072d3",
         )
     )
     skeleton = qualified_skeleton_from_dict(
-        stage_output_payload(
-            ctx,
-            "28_SKELETON_QUALIFIED",
-            "RealSaS.QualifiedSkeletonIR.v1",
+        _read_exact_historical_json(
+            run_root,
+            "artifacts/28_SKELETON_QUALIFIED/qualified_skeleton.json",
+            "e89d0b64cf23b2954f2b30fb37836ee2b3287749a79c90a76185437b9217e987",
         )
     )
     skin = qualified_skin_from_dict(
-        stage_output_payload(
-            ctx,
-            "32_SKIN_QUALIFIED",
-            "RealSaS.QualifiedSkinIR.v1",
+        _read_exact_historical_json(
+            run_root,
+            "artifacts/32_SKIN_QUALIFIED/qualified_skin.json",
+            "f1a937de488ec2a620ee292b3f865a3b2ca97b9466401555beb08b1d2f945a09",
         )
     )
     camera_set = qualified_camera_set_from_dict(
-        stage_output_payload(
-            ctx,
-            "05_CAMERA_CONTRACT_SOLVED",
-            "RealSaS.QualifiedCameraSetIR.v1",
+        _read_exact_historical_json(
+            run_root,
+            "artifacts/05_CAMERA_CONTRACT_SOLVED/qualified_camera_set.json",
+            "312a9b1afe4ea1fcdc481232ac951fb6a6815fee532fbb93646e97e609b5b80a",
         )
     )
     cameras = tuple(sorted(camera_set.cameras, key=lambda c: int(c.view_index)))
     appearance = complete_appearance_asset_from_dict(
-        stage_output_payload(
-            ctx,
-            "23_COMPLETE_APPEARANCE_ASSET_BAKED",
-            "RealSaS.CompleteAppearanceAssetIR.v2",
+        _read_exact_historical_json(
+            run_root,
+            "artifacts/23_COMPLETE_APPEARANCE_ASSET_BAKED/complete_appearance_asset.json",
+            "6855a49f597f558509ea18b80bc66eebc91f479bbd03ae9a9ed2eb667c5a0d7e",
         )
     )
     face_uv = load_face_uv(appearance)

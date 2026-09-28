@@ -64,7 +64,7 @@
     }
   ],
   "repair_applied": false,
-  "repo_head": "6336479ec4227b749de0f6ed993a2c8c28cd5e0f",
+  "repo_head": "a2f495cdc523003d72f1a0407b98db0000820b4b",
   "schema": "RealSaS.V2ProductStateWiringAudit.v1",
   "status": "AUDIT_ONLY__NO_REPAIR_APPLIED"
 }

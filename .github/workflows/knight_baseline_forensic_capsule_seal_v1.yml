@@ -1,0 +1,72 @@
+name: knight-baseline-forensic-capsule-seal-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/knight_baseline_forensic_capsule_seal_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: knight-baseline-forensic-capsule-seal-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  seal:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      SRC: /tmp/knight_baseline_forensic_capsule_v1
+      OUT_DIR: canonical/knight_baseline_forensic_capsule_v1
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify preserved capsule
+        run: |
+          set -euo pipefail
+          test -f "$SRC/BASELINE_FORENSIC_CAPSULE_V1.json"
+          test "$(git hash-object "$SRC/KNIGHT_RUN_BASELINE_ACTUAL_RGB_V1.png")" = "8e9ed58a3bfbbace73f54e3e5593691f90eef4f1"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("/tmp/knight_baseline_forensic_capsule_v1/BASELINE_FORENSIC_CAPSULE_V1.json")
+          j=json.loads(p.read_text())
+          print("BASELINE_CAPSULE_AUTHORITY", json.dumps(j["authority"], sort_keys=True))
+          for clip in j["clips"]:
+              for row in clip["frame_metrics"]:
+                  print("BASELINE_CAPSULE_FRAME", json.dumps({
+                      "clip_id":clip["clip_id"],
+                      "view_index":row["view_index"],
+                      "frame_index":row["frame_index"],
+                      "time_seconds":row["time_seconds"],
+                      "geometry_visible_pixel_count":row["geometry_visible_pixel_count"],
+                      "final_alpha_pixel_count":row["final_alpha_pixel_count"],
+                      "undefined_visible_pixel_count":row["undefined_visible_pixel_count"],
+                      "deformation":row["deformation"],
+                  }, sort_keys=True))
+          PY
+          echo "PRESERVED_BASELINE_CAPSULE_PASS"
+
+      - name: Seal capsule
+        run: |
+          set -euo pipefail
+          rm -rf "$OUT_DIR"
+          cp -a "$SRC" "$OUT_DIR"
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add "$OUT_DIR"
+          if git diff --cached --quiet; then
+            echo "BASELINE_CAPSULE_ALREADY_SEALED"
+            exit 0
+          fi
+          git commit -m 'diagnostic: seal byte-exact Knight RUN baseline forensic capsule'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

@@ -8,21 +8,31 @@
   "finding": {
     "all_gsa_relations_forced_certain": true,
     "claim_boundary": "Exact Knight artifact audit; no repair or alternative partition is proposed.",
+    "completed_surface_relations_forced_certain": true,
     "partition_has_no_separate_edges": true,
     "partition_single_component": false,
     "stage14_surface_read_from_lossless_stage15_qualified_copy": true
   },
   "schema": "RealSaS.KnightStage14To18StructuralInformationAudit.v1",
   "stage14_surface_preserved_at_stage15": {
+    "certain_relations_touching_completed_count": 14314,
+    "completed_node_count": 4166,
     "node_count": 12090,
+    "observed_node_count": 7924,
     "relation_count": 36469,
+    "relation_endpoint_state_counts": {
+      "COMPLETED-COMPLETED": 10948,
+      "COMPLETED-OBSERVED": 3366,
+      "OBSERVED-OBSERVED": 22155
+    },
     "relation_kind_counts": {
       "SIGNED_ZERO_SURFACE_TOPOLOGY_NEIGHBOR": 36469
     },
     "relation_score_max": 1.0,
     "relation_score_min": 1.0,
     "relation_score_unique_count": 1,
-    "relation_unknown_flag_count": 0
+    "relation_unknown_flag_count": 0,
+    "source_observation_id_bound_node_count": 0
   },
   "stage17": {
     "boundary_count": 36469,

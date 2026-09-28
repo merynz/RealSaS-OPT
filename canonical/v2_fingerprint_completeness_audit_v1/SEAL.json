@@ -1,0 +1,28 @@
+{
+  "artifacts": [
+    {
+      "bytes": 95784,
+      "path": "canonical/V2_FINGERPRINT_COMPLETENESS_AUDIT_V1_20260928.json",
+      "sha256": "a9ce6947176bdc954d09213a2d55ef663d14a09cb60d2ddb1b36e89ee6f16464"
+    },
+    {
+      "bytes": 13586,
+      "path": "canonical/v2_fingerprint_completeness_audit_v1/AUDIT_STDOUT.txt",
+      "sha256": "37d32729a5003068af47c109761ca875d324ae623515717e78ca134bf932bf1a"
+    },
+    {
+      "bytes": 57409,
+      "path": "canonical/v2_fingerprint_completeness_audit_v1/PYTEST_EXCLUDING_STALE.txt",
+      "sha256": "73370766f101580f89d11b321b3c63005b0a07629cd11a3ebaf462185ac2b4e6"
+    },
+    {
+      "bytes": 2,
+      "path": "canonical/v2_fingerprint_completeness_audit_v1/PYTEST_RC.txt",
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    }
+  ],
+  "repair_applied": false,
+  "repo_head": "dee1709a1617e74deda124c26636d1710a7be4b0",
+  "schema": "RealSaS.V2FingerprintCompletenessAuditSeal.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED"
+}

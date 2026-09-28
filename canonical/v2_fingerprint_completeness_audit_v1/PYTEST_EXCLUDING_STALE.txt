@@ -1,0 +1,876 @@
+......................................F................................. [ 14%]
+........................................................................ [ 29%]
+.......FFF.............................................................. [ 43%]
+........................................................................ [ 58%]
+.........................................................F..FF.F.F.F.... [ 73%]
+...........FFss..................................s.....s................ [ 87%]
+............................................................             [100%]
+=================================== FAILURES ===================================
+_________ test_motion_dynamic_adapter_hash_covers_core_implementation __________
+
+    def test_motion_dynamic_adapter_hash_covers_core_implementation():
+        module="compiler.realsas_compiler_services.orchestrator.adapters.motion_dynamic_proof_v1"
+        rows=dict(_local_import_closure(module))
+>       assert "compiler.realsas_compiler_core.motion_dynamic_proof_v1" in rows
+E       AssertionError: assert 'compiler.realsas_compiler_core.motion_dynamic_proof_v1' in {'compiler.realsas_compiler_core.camera_authority_v1': '0d593a27c3fd9740743db307da334cc7b8c49dc27fc73ec76cd6edcf989cea...as_compiler_core.canonical_mesh_candidate_v1': 'c9368b702c16c3003d3817d847872ff9d819ef7548ae35b8fcd2196bce5c91fc', ...}
+
+tests/repository/test_mainline_implementation_closure_v1.py:23: AssertionError
+____ test_canonical_puppet_state_binds_complete_mechanical_product_identity ____
+
+    def test_canonical_puppet_state_binds_complete_mechanical_product_identity():
+>       args=_fixture()
+             ^^^^^^^^^^
+
+tests/compiler/test_canonical_puppet_state_v1.py:128: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/compiler/test_canonical_puppet_state_v1.py:120: in _fixture
+    mesh_skin=bind_product_mesh_skin(
+compiler/realsas_compiler_core/product_mesh_skin_v1.py:98: in bind_product_mesh_skin
+    validate_qualified_mesh(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = QualifiedMeshIR(vertices=(QualifiedMeshVertexIR(canonical_mesh_vertex_id='v0', support_binding=SurfaceSupportBinding(m...047fae3b3e8eee99839e5db40b68626d03334c7cd52bc45e95007b6c7f7', schema_version='RealSaS.QualifiedMeshIR.v1', metadata={})
+
+    def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, carrier_policy, envelope, policy) -> None:
+        validate_mechanical_partition(partition, surface)
+        validate_component_carrier_policy(carrier_policy, partition)
+        validate_deformation_capability_envelope(envelope)
+        validate_mesh_qualification_policy(policy)
+        if value.surface_binding_hash != surface.geometry_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_SURFACE_LINEAGE_MISMATCH")
+        if value.partition_binding_hash != partition.partition_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_PARTITION_LINEAGE_MISMATCH")
+        if value.carrier_policy_binding_hash != carrier_policy.carrier_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_CARRIER_POLICY_LINEAGE_MISMATCH")
+        if value.envelope_binding_hash != envelope.envelope_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_ENVELOPE_LINEAGE_MISMATCH")
+        if value.qualification_policy_hash != policy.qualification_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_POLICY_BINDING_MISMATCH")
+    
+        intrinsic = qualified_mesh_intrinsic_audit(value, surface=surface, partition=partition)
+        if intrinsic["max_refinement_normal_ratio"] - 1e-12 > policy.g1_max_normal_refinement_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_NORMAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["max_refinement_tangent_to_normal"] - 1e-12 > policy.g1_max_tangential_to_normal_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_TANGENTIAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["rest_min_angle_deg"] + 1e-9 < policy.g3_min_angle_deg:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_MIN_ANGLE_FAIL")
+        if intrinsic["rest_max_aspect_longest_over_min_altitude"] - 1e-9 > policy.g3_max_aspect_longest_over_min_altitude:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_ASPECT_FAIL")
+        if value.qualification_report.get("intrinsic_audit_hash") != content_sha256(intrinsic):
+            raise QualificationError("QUALIFIED_MESH_INTRINSIC_AUDIT_BINDING_MISMATCH")
+    
+        required = {
+            "G1_SUPPORT_LINEAGE",
+            "G2_TOPOLOGY",
+            "G3_DEFORMATION",
+            "G3B_SKIN_TOPOLOGY_COMPATIBILITY",
+            "G4_COMPONENT_BOUNDARY",
+            "G5_MULTIVIEW_COVERAGE",
+        }
+        gates = dict(value.qualification_report.get("gates") or {})
+        if set(gates) != required or any(gates[k] != "PASS" for k in required):
+>           raise QualificationError("QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS")
+E           compiler.realsas_compiler_core.types.QualificationError: QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS
+
+compiler/realsas_compiler_core/product_authority_v1.py:866: QualificationError
+_ test_state_hash_changes_if_policy_identity_changes_even_when_geometry_is_same _
+
+    def test_state_hash_changes_if_policy_identity_changes_even_when_geometry_is_same():
+>       args=_fixture()
+             ^^^^^^^^^^
+
+tests/compiler/test_canonical_puppet_state_v1.py:147: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/compiler/test_canonical_puppet_state_v1.py:120: in _fixture
+    mesh_skin=bind_product_mesh_skin(
+compiler/realsas_compiler_core/product_mesh_skin_v1.py:98: in bind_product_mesh_skin
+    validate_qualified_mesh(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = QualifiedMeshIR(vertices=(QualifiedMeshVertexIR(canonical_mesh_vertex_id='v0', support_binding=SurfaceSupportBinding(m...047fae3b3e8eee99839e5db40b68626d03334c7cd52bc45e95007b6c7f7', schema_version='RealSaS.QualifiedMeshIR.v1', metadata={})
+
+    def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, carrier_policy, envelope, policy) -> None:
+        validate_mechanical_partition(partition, surface)
+        validate_component_carrier_policy(carrier_policy, partition)
+        validate_deformation_capability_envelope(envelope)
+        validate_mesh_qualification_policy(policy)
+        if value.surface_binding_hash != surface.geometry_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_SURFACE_LINEAGE_MISMATCH")
+        if value.partition_binding_hash != partition.partition_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_PARTITION_LINEAGE_MISMATCH")
+        if value.carrier_policy_binding_hash != carrier_policy.carrier_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_CARRIER_POLICY_LINEAGE_MISMATCH")
+        if value.envelope_binding_hash != envelope.envelope_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_ENVELOPE_LINEAGE_MISMATCH")
+        if value.qualification_policy_hash != policy.qualification_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_POLICY_BINDING_MISMATCH")
+    
+        intrinsic = qualified_mesh_intrinsic_audit(value, surface=surface, partition=partition)
+        if intrinsic["max_refinement_normal_ratio"] - 1e-12 > policy.g1_max_normal_refinement_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_NORMAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["max_refinement_tangent_to_normal"] - 1e-12 > policy.g1_max_tangential_to_normal_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_TANGENTIAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["rest_min_angle_deg"] + 1e-9 < policy.g3_min_angle_deg:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_MIN_ANGLE_FAIL")
+        if intrinsic["rest_max_aspect_longest_over_min_altitude"] - 1e-9 > policy.g3_max_aspect_longest_over_min_altitude:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_ASPECT_FAIL")
+        if value.qualification_report.get("intrinsic_audit_hash") != content_sha256(intrinsic):
+            raise QualificationError("QUALIFIED_MESH_INTRINSIC_AUDIT_BINDING_MISMATCH")
+    
+        required = {
+            "G1_SUPPORT_LINEAGE",
+            "G2_TOPOLOGY",
+            "G3_DEFORMATION",
+            "G3B_SKIN_TOPOLOGY_COMPATIBILITY",
+            "G4_COMPONENT_BOUNDARY",
+            "G5_MULTIVIEW_COVERAGE",
+        }
+        gates = dict(value.qualification_report.get("gates") or {})
+        if set(gates) != required or any(gates[k] != "PASS" for k in required):
+>           raise QualificationError("QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS")
+E           compiler.realsas_compiler_core.types.QualificationError: QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS
+
+compiler/realsas_compiler_core/product_authority_v1.py:866: QualificationError
+__________________ test_state_rejects_mixed_mesh_skin_lineage __________________
+
+    def test_state_rejects_mixed_mesh_skin_lineage():
+>       args=_fixture()
+             ^^^^^^^^^^
+
+tests/compiler/test_canonical_puppet_state_v1.py:166: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/compiler/test_canonical_puppet_state_v1.py:120: in _fixture
+    mesh_skin=bind_product_mesh_skin(
+compiler/realsas_compiler_core/product_mesh_skin_v1.py:98: in bind_product_mesh_skin
+    validate_qualified_mesh(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = QualifiedMeshIR(vertices=(QualifiedMeshVertexIR(canonical_mesh_vertex_id='v0', support_binding=SurfaceSupportBinding(m...047fae3b3e8eee99839e5db40b68626d03334c7cd52bc45e95007b6c7f7', schema_version='RealSaS.QualifiedMeshIR.v1', metadata={})
+
+    def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, carrier_policy, envelope, policy) -> None:
+        validate_mechanical_partition(partition, surface)
+        validate_component_carrier_policy(carrier_policy, partition)
+        validate_deformation_capability_envelope(envelope)
+        validate_mesh_qualification_policy(policy)
+        if value.surface_binding_hash != surface.geometry_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_SURFACE_LINEAGE_MISMATCH")
+        if value.partition_binding_hash != partition.partition_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_PARTITION_LINEAGE_MISMATCH")
+        if value.carrier_policy_binding_hash != carrier_policy.carrier_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_CARRIER_POLICY_LINEAGE_MISMATCH")
+        if value.envelope_binding_hash != envelope.envelope_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_ENVELOPE_LINEAGE_MISMATCH")
+        if value.qualification_policy_hash != policy.qualification_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_POLICY_BINDING_MISMATCH")
+    
+        intrinsic = qualified_mesh_intrinsic_audit(value, surface=surface, partition=partition)
+        if intrinsic["max_refinement_normal_ratio"] - 1e-12 > policy.g1_max_normal_refinement_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_NORMAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["max_refinement_tangent_to_normal"] - 1e-12 > policy.g1_max_tangential_to_normal_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_TANGENTIAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["rest_min_angle_deg"] + 1e-9 < policy.g3_min_angle_deg:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_MIN_ANGLE_FAIL")
+        if intrinsic["rest_max_aspect_longest_over_min_altitude"] - 1e-9 > policy.g3_max_aspect_longest_over_min_altitude:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_ASPECT_FAIL")
+        if value.qualification_report.get("intrinsic_audit_hash") != content_sha256(intrinsic):
+            raise QualificationError("QUALIFIED_MESH_INTRINSIC_AUDIT_BINDING_MISMATCH")
+    
+        required = {
+            "G1_SUPPORT_LINEAGE",
+            "G2_TOPOLOGY",
+            "G3_DEFORMATION",
+            "G3B_SKIN_TOPOLOGY_COMPATIBILITY",
+            "G4_COMPONENT_BOUNDARY",
+            "G5_MULTIVIEW_COVERAGE",
+        }
+        gates = dict(value.qualification_report.get("gates") or {})
+        if set(gates) != required or any(gates[k] != "PASS" for k in required):
+>           raise QualificationError("QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS")
+E           compiler.realsas_compiler_core.types.QualificationError: QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS
+
+compiler/realsas_compiler_core/product_authority_v1.py:866: QualificationError
+_ test_qualified_mesh_recomputes_intrinsics_and_binds_exact_carrier_and_mesh_policy _
+
+    def test_qualified_mesh_recomputes_intrinsics_and_binds_exact_carrier_and_mesh_policy():
+        surface, partition, carrier_policy, envelope, policy = _context()
+        mesh = _valid_mesh(surface, partition, carrier_policy, envelope, policy)
+>       validate_qualified_mesh(
+            mesh, surface=surface, partition=partition, carrier_policy=carrier_policy,
+            envelope=envelope, policy=policy,
+        )
+
+tests/compiler/test_product_authority_v1.py:231: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = QualifiedMeshIR(vertices=(QualifiedMeshVertexIR(canonical_mesh_vertex_id='v0', support_binding=SurfaceSupportBinding(m...1629f212048e771087c4af2423cbf352773bafeccad46bb0241b588043e', schema_version='RealSaS.QualifiedMeshIR.v1', metadata={})
+
+    def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, carrier_policy, envelope, policy) -> None:
+        validate_mechanical_partition(partition, surface)
+        validate_component_carrier_policy(carrier_policy, partition)
+        validate_deformation_capability_envelope(envelope)
+        validate_mesh_qualification_policy(policy)
+        if value.surface_binding_hash != surface.geometry_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_SURFACE_LINEAGE_MISMATCH")
+        if value.partition_binding_hash != partition.partition_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_PARTITION_LINEAGE_MISMATCH")
+        if value.carrier_policy_binding_hash != carrier_policy.carrier_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_CARRIER_POLICY_LINEAGE_MISMATCH")
+        if value.envelope_binding_hash != envelope.envelope_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_ENVELOPE_LINEAGE_MISMATCH")
+        if value.qualification_policy_hash != policy.qualification_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_POLICY_BINDING_MISMATCH")
+    
+        intrinsic = qualified_mesh_intrinsic_audit(value, surface=surface, partition=partition)
+        if intrinsic["max_refinement_normal_ratio"] - 1e-12 > policy.g1_max_normal_refinement_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_NORMAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["max_refinement_tangent_to_normal"] - 1e-12 > policy.g1_max_tangential_to_normal_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_TANGENTIAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["rest_min_angle_deg"] + 1e-9 < policy.g3_min_angle_deg:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_MIN_ANGLE_FAIL")
+        if intrinsic["rest_max_aspect_longest_over_min_altitude"] - 1e-9 > policy.g3_max_aspect_longest_over_min_altitude:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_ASPECT_FAIL")
+        if value.qualification_report.get("intrinsic_audit_hash") != content_sha256(intrinsic):
+            raise QualificationError("QUALIFIED_MESH_INTRINSIC_AUDIT_BINDING_MISMATCH")
+    
+        required = {
+            "G1_SUPPORT_LINEAGE",
+            "G2_TOPOLOGY",
+            "G3_DEFORMATION",
+            "G3B_SKIN_TOPOLOGY_COMPATIBILITY",
+            "G4_COMPONENT_BOUNDARY",
+            "G5_MULTIVIEW_COVERAGE",
+        }
+        gates = dict(value.qualification_report.get("gates") or {})
+        if set(gates) != required or any(gates[k] != "PASS" for k in required):
+>           raise QualificationError("QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS")
+E           compiler.realsas_compiler_core.types.QualificationError: QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS
+
+compiler/realsas_compiler_core/product_authority_v1.py:866: QualificationError
+_______ test_g5_cannot_reclassify_component_after_carrier_policy_freeze ________
+
+    def test_g5_cannot_reclassify_component_after_carrier_policy_freeze():
+        surface, partition, carrier_policy, envelope, policy = _context()
+        good = _valid_mesh(surface, partition, carrier_policy, envelope, policy)
+        rows = list(good.qualification_report["view_component_coverage"])
+        rows[0] = {**rows[0], "carrier_class": "PLANAR"}
+        report = {**good.qualification_report, "view_component_coverage": tuple(rows)}
+        bad = replace(good, qualification_report=report, mesh_lineage_hash="")
+        bad = replace(bad, mesh_lineage_hash=qualified_mesh_lineage_hash(bad))
+        with pytest.raises(QualificationError, match="CARRIER_CLASS_DRIFT"):
+>           validate_qualified_mesh(
+                bad, surface=surface, partition=partition, carrier_policy=carrier_policy,
+                envelope=envelope, policy=policy,
+            )
+
+tests/compiler/test_product_authority_v1.py:268: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = QualifiedMeshIR(vertices=(QualifiedMeshVertexIR(canonical_mesh_vertex_id='v0', support_binding=SurfaceSupportBinding(m...ef29421fc041d7e903e0a24059ba217b5369d0bdad6570d12b32134a2c7', schema_version='RealSaS.QualifiedMeshIR.v1', metadata={})
+
+    def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, carrier_policy, envelope, policy) -> None:
+        validate_mechanical_partition(partition, surface)
+        validate_component_carrier_policy(carrier_policy, partition)
+        validate_deformation_capability_envelope(envelope)
+        validate_mesh_qualification_policy(policy)
+        if value.surface_binding_hash != surface.geometry_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_SURFACE_LINEAGE_MISMATCH")
+        if value.partition_binding_hash != partition.partition_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_PARTITION_LINEAGE_MISMATCH")
+        if value.carrier_policy_binding_hash != carrier_policy.carrier_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_CARRIER_POLICY_LINEAGE_MISMATCH")
+        if value.envelope_binding_hash != envelope.envelope_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_ENVELOPE_LINEAGE_MISMATCH")
+        if value.qualification_policy_hash != policy.qualification_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_POLICY_BINDING_MISMATCH")
+    
+        intrinsic = qualified_mesh_intrinsic_audit(value, surface=surface, partition=partition)
+        if intrinsic["max_refinement_normal_ratio"] - 1e-12 > policy.g1_max_normal_refinement_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_NORMAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["max_refinement_tangent_to_normal"] - 1e-12 > policy.g1_max_tangential_to_normal_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_TANGENTIAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["rest_min_angle_deg"] + 1e-9 < policy.g3_min_angle_deg:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_MIN_ANGLE_FAIL")
+        if intrinsic["rest_max_aspect_longest_over_min_altitude"] - 1e-9 > policy.g3_max_aspect_longest_over_min_altitude:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_ASPECT_FAIL")
+        if value.qualification_report.get("intrinsic_audit_hash") != content_sha256(intrinsic):
+            raise QualificationError("QUALIFIED_MESH_INTRINSIC_AUDIT_BINDING_MISMATCH")
+    
+        required = {
+            "G1_SUPPORT_LINEAGE",
+            "G2_TOPOLOGY",
+            "G3_DEFORMATION",
+            "G3B_SKIN_TOPOLOGY_COMPATIBILITY",
+            "G4_COMPONENT_BOUNDARY",
+            "G5_MULTIVIEW_COVERAGE",
+        }
+        gates = dict(value.qualification_report.get("gates") or {})
+        if set(gates) != required or any(gates[k] != "PASS" for k in required):
+>           raise QualificationError("QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS")
+E           compiler.realsas_compiler_core.types.QualificationError: QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS
+
+compiler/realsas_compiler_core/product_authority_v1.py:866: QualificationError
+
+During handling of the above exception, another exception occurred:
+
+    def test_g5_cannot_reclassify_component_after_carrier_policy_freeze():
+        surface, partition, carrier_policy, envelope, policy = _context()
+        good = _valid_mesh(surface, partition, carrier_policy, envelope, policy)
+        rows = list(good.qualification_report["view_component_coverage"])
+        rows[0] = {**rows[0], "carrier_class": "PLANAR"}
+        report = {**good.qualification_report, "view_component_coverage": tuple(rows)}
+        bad = replace(good, qualification_report=report, mesh_lineage_hash="")
+        bad = replace(bad, mesh_lineage_hash=qualified_mesh_lineage_hash(bad))
+>       with pytest.raises(QualificationError, match="CARRIER_CLASS_DRIFT"):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'CARRIER_CLASS_DRIFT'
+E        Input: 'QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS'
+
+tests/compiler/test_product_authority_v1.py:267: AssertionError
+______ test_g5_threshold_is_enforced_from_typed_policy_not_report_status _______
+
+    def test_g5_threshold_is_enforced_from_typed_policy_not_report_status():
+        surface, partition, carrier_policy, envelope, _ = _context()
+        policy = _mesh_policy(mesh_recall=0.99)
+        good = _valid_mesh(surface, partition, carrier_policy, envelope, policy)
+        rows = list(good.qualification_report["view_component_coverage"])
+        rows[0] = {**rows[0], "recall": 0.98, "status": "PASS"}
+        report = {**good.qualification_report, "view_component_coverage": tuple(rows)}
+        bad = replace(good, qualification_report=report, mesh_lineage_hash="")
+        bad = replace(bad, mesh_lineage_hash=qualified_mesh_lineage_hash(bad))
+        with pytest.raises(QualificationError, match="G5_RECALL_FAIL"):
+>           validate_qualified_mesh(
+                bad, surface=surface, partition=partition, carrier_policy=carrier_policy,
+                envelope=envelope, policy=policy,
+            )
+
+tests/compiler/test_product_authority_v1.py:284: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = QualifiedMeshIR(vertices=(QualifiedMeshVertexIR(canonical_mesh_vertex_id='v0', support_binding=SurfaceSupportBinding(m...b2c24de155469fc8405f84046cbea7dfbcc7c9ebd3c697b952919c666a0', schema_version='RealSaS.QualifiedMeshIR.v1', metadata={})
+
+    def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, carrier_policy, envelope, policy) -> None:
+        validate_mechanical_partition(partition, surface)
+        validate_component_carrier_policy(carrier_policy, partition)
+        validate_deformation_capability_envelope(envelope)
+        validate_mesh_qualification_policy(policy)
+        if value.surface_binding_hash != surface.geometry_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_SURFACE_LINEAGE_MISMATCH")
+        if value.partition_binding_hash != partition.partition_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_PARTITION_LINEAGE_MISMATCH")
+        if value.carrier_policy_binding_hash != carrier_policy.carrier_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_CARRIER_POLICY_LINEAGE_MISMATCH")
+        if value.envelope_binding_hash != envelope.envelope_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_ENVELOPE_LINEAGE_MISMATCH")
+        if value.qualification_policy_hash != policy.qualification_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_POLICY_BINDING_MISMATCH")
+    
+        intrinsic = qualified_mesh_intrinsic_audit(value, surface=surface, partition=partition)
+        if intrinsic["max_refinement_normal_ratio"] - 1e-12 > policy.g1_max_normal_refinement_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_NORMAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["max_refinement_tangent_to_normal"] - 1e-12 > policy.g1_max_tangential_to_normal_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_TANGENTIAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["rest_min_angle_deg"] + 1e-9 < policy.g3_min_angle_deg:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_MIN_ANGLE_FAIL")
+        if intrinsic["rest_max_aspect_longest_over_min_altitude"] - 1e-9 > policy.g3_max_aspect_longest_over_min_altitude:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_ASPECT_FAIL")
+        if value.qualification_report.get("intrinsic_audit_hash") != content_sha256(intrinsic):
+            raise QualificationError("QUALIFIED_MESH_INTRINSIC_AUDIT_BINDING_MISMATCH")
+    
+        required = {
+            "G1_SUPPORT_LINEAGE",
+            "G2_TOPOLOGY",
+            "G3_DEFORMATION",
+            "G3B_SKIN_TOPOLOGY_COMPATIBILITY",
+            "G4_COMPONENT_BOUNDARY",
+            "G5_MULTIVIEW_COVERAGE",
+        }
+        gates = dict(value.qualification_report.get("gates") or {})
+        if set(gates) != required or any(gates[k] != "PASS" for k in required):
+>           raise QualificationError("QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS")
+E           compiler.realsas_compiler_core.types.QualificationError: QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS
+
+compiler/realsas_compiler_core/product_authority_v1.py:866: QualificationError
+
+During handling of the above exception, another exception occurred:
+
+    def test_g5_threshold_is_enforced_from_typed_policy_not_report_status():
+        surface, partition, carrier_policy, envelope, _ = _context()
+        policy = _mesh_policy(mesh_recall=0.99)
+        good = _valid_mesh(surface, partition, carrier_policy, envelope, policy)
+        rows = list(good.qualification_report["view_component_coverage"])
+        rows[0] = {**rows[0], "recall": 0.98, "status": "PASS"}
+        report = {**good.qualification_report, "view_component_coverage": tuple(rows)}
+        bad = replace(good, qualification_report=report, mesh_lineage_hash="")
+        bad = replace(bad, mesh_lineage_hash=qualified_mesh_lineage_hash(bad))
+>       with pytest.raises(QualificationError, match="G5_RECALL_FAIL"):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'G5_RECALL_FAIL'
+E        Input: 'QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS'
+
+tests/compiler/test_product_authority_v1.py:283: AssertionError
+___________ test_qualified_mesh_requires_zero_consequential_unknown ____________
+
+    def test_qualified_mesh_requires_zero_consequential_unknown():
+        surface, partition, carrier_policy, envelope, policy = _context()
+        mesh = _valid_mesh(surface, partition, carrier_policy, envelope, policy)
+        report = {**mesh.qualification_report, "consequential_unknown_boundary_count": 1}
+        bad = replace(mesh, qualification_report=report, mesh_lineage_hash="")
+        bad = replace(bad, mesh_lineage_hash=qualified_mesh_lineage_hash(bad))
+        with pytest.raises(QualificationError, match="CONSEQUENTIAL_UNKNOWN"):
+>           validate_qualified_mesh(
+                bad, surface=surface, partition=partition, carrier_policy=carrier_policy,
+                envelope=envelope, policy=policy,
+            )
+
+tests/compiler/test_product_authority_v1.py:311: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = QualifiedMeshIR(vertices=(QualifiedMeshVertexIR(canonical_mesh_vertex_id='v0', support_binding=SurfaceSupportBinding(m...de82bdef3dd8c7b3457e82e3fe93ad1dc0cee9e48162d1939cf80d63209', schema_version='RealSaS.QualifiedMeshIR.v1', metadata={})
+
+    def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, carrier_policy, envelope, policy) -> None:
+        validate_mechanical_partition(partition, surface)
+        validate_component_carrier_policy(carrier_policy, partition)
+        validate_deformation_capability_envelope(envelope)
+        validate_mesh_qualification_policy(policy)
+        if value.surface_binding_hash != surface.geometry_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_SURFACE_LINEAGE_MISMATCH")
+        if value.partition_binding_hash != partition.partition_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_PARTITION_LINEAGE_MISMATCH")
+        if value.carrier_policy_binding_hash != carrier_policy.carrier_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_CARRIER_POLICY_LINEAGE_MISMATCH")
+        if value.envelope_binding_hash != envelope.envelope_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_ENVELOPE_LINEAGE_MISMATCH")
+        if value.qualification_policy_hash != policy.qualification_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_POLICY_BINDING_MISMATCH")
+    
+        intrinsic = qualified_mesh_intrinsic_audit(value, surface=surface, partition=partition)
+        if intrinsic["max_refinement_normal_ratio"] - 1e-12 > policy.g1_max_normal_refinement_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_NORMAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["max_refinement_tangent_to_normal"] - 1e-12 > policy.g1_max_tangential_to_normal_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_TANGENTIAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["rest_min_angle_deg"] + 1e-9 < policy.g3_min_angle_deg:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_MIN_ANGLE_FAIL")
+        if intrinsic["rest_max_aspect_longest_over_min_altitude"] - 1e-9 > policy.g3_max_aspect_longest_over_min_altitude:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_ASPECT_FAIL")
+        if value.qualification_report.get("intrinsic_audit_hash") != content_sha256(intrinsic):
+            raise QualificationError("QUALIFIED_MESH_INTRINSIC_AUDIT_BINDING_MISMATCH")
+    
+        required = {
+            "G1_SUPPORT_LINEAGE",
+            "G2_TOPOLOGY",
+            "G3_DEFORMATION",
+            "G3B_SKIN_TOPOLOGY_COMPATIBILITY",
+            "G4_COMPONENT_BOUNDARY",
+            "G5_MULTIVIEW_COVERAGE",
+        }
+        gates = dict(value.qualification_report.get("gates") or {})
+        if set(gates) != required or any(gates[k] != "PASS" for k in required):
+>           raise QualificationError("QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS")
+E           compiler.realsas_compiler_core.types.QualificationError: QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS
+
+compiler/realsas_compiler_core/product_authority_v1.py:866: QualificationError
+
+During handling of the above exception, another exception occurred:
+
+    def test_qualified_mesh_requires_zero_consequential_unknown():
+        surface, partition, carrier_policy, envelope, policy = _context()
+        mesh = _valid_mesh(surface, partition, carrier_policy, envelope, policy)
+        report = {**mesh.qualification_report, "consequential_unknown_boundary_count": 1}
+        bad = replace(mesh, qualification_report=report, mesh_lineage_hash="")
+        bad = replace(bad, mesh_lineage_hash=qualified_mesh_lineage_hash(bad))
+>       with pytest.raises(QualificationError, match="CONSEQUENTIAL_UNKNOWN"):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'CONSEQUENTIAL_UNKNOWN'
+E        Input: 'QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS'
+
+tests/compiler/test_product_authority_v1.py:310: AssertionError
+_ test_candidate_promotion_is_deterministic_and_compiler_mints_intrinsic_audit _
+
+    def test_candidate_promotion_is_deterministic_and_compiler_mints_intrinsic_audit():
+        surface, partition, carrier_policy, envelope, policy = _context()
+        candidate_vertices = tuple(
+            CanonicalMeshVertexCandidateIR(
+                f"cv{i}",
+                SurfaceSupportBinding("IDENTITY_SURFACE_NODE", ((f"s{i}", 1.0),)),
+                "c0" if i < 3 else "c1",
+                surface.surface_nodes[i].P,
+            )
+            for i in range(6)
+        )
+        candidate = CanonicalMeshCandidateIR(
+            candidate_vertices,
+            (("cv0", "cv1", "cv2"), ("cv3", "cv4", "cv5")),
+            (
+                ("cv0", "cv1"), ("cv1", "cv2"), ("cv0", "cv2"),
+                ("cv3", "cv4"), ("cv4", "cv5"), ("cv3", "cv5"),
+            ),
+            surface.geometry_lineage_hash,
+            partition.partition_lineage_hash,
+            carrier_policy.carrier_policy_lineage_hash,
+            "TEST_CANONICAL_MESH_PRODUCER",
+            "producer-policy-hash",
+            "",
+        )
+        candidate = replace(candidate, candidate_lineage_hash=canonical_mesh_candidate_lineage_hash(candidate))
+        carrier_by_component = {row.component_id: row.carrier_class for row in carrier_policy.decisions}
+        report = {
+            "gates": {
+                "G1_SUPPORT_LINEAGE": "PASS",
+                "G2_TOPOLOGY": "PASS",
+                "G3_DEFORMATION": "PASS",
+                "G4_COMPONENT_BOUNDARY": "PASS",
+                "G5_MULTIVIEW_COVERAGE": "PASS",
+            },
+            "single_aggregate_score_authority": False,
+            "view_component_coverage_matrix_complete": True,
+            "consequential_unknown_boundary_count": 0,
+            "unknown_boundary_analysis_hash": "unknown-analysis-hash",
+            "g3_envelope_binding_hash": envelope.envelope_lineage_hash,
+            "g3_stress_probe_hash": "stress-probe-hash",
+            "g3_stress_probe_status": "PASS",
+            "carrier_policy_hash": carrier_policy.carrier_policy_lineage_hash,
+            "view_component_coverage": tuple(
+                {
+                    "view_index": view,
+                    "component_id": component_id,
+                    "carrier_class": carrier_by_component[component_id],
+                    "recall": 1.0,
+                    "precision": 1.0,
+                    "largest_coherent_hole_fraction": 0.0,
+                    "interior_uncovered_fraction": 0.0,
+                    "status": "PASS",
+                }
+                for view in range(8)
+                for component_id in ("c0", "c1")
+            ),
+            "intrinsic_audit_hash": "CALLER_MUST_NOT_CONTROL_THIS",
+        }
+>       mesh_a = qualify_canonical_mesh_candidate(
+            candidate,
+            surface=surface,
+            partition=partition,
+            carrier_policy=carrier_policy,
+            envelope=envelope,
+            policy=policy,
+            qualification_report=report,
+        )
+
+tests/compiler/test_product_authority_v1.py:400: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+compiler/realsas_compiler_core/product_authority_v1.py:1017: in qualify_canonical_mesh_candidate
+    validate_qualified_mesh(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = QualifiedMeshIR(vertices=(QualifiedMeshVertexIR(canonical_mesh_vertex_id='MV:f46012c4791f1b70b2e90e3d', support_bindin...52f0020', 'source_producer_id': 'TEST_CANONICAL_MESH_PRODUCER', 'source_producer_policy_hash': 'producer-policy-hash'})
+
+    def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, carrier_policy, envelope, policy) -> None:
+        validate_mechanical_partition(partition, surface)
+        validate_component_carrier_policy(carrier_policy, partition)
+        validate_deformation_capability_envelope(envelope)
+        validate_mesh_qualification_policy(policy)
+        if value.surface_binding_hash != surface.geometry_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_SURFACE_LINEAGE_MISMATCH")
+        if value.partition_binding_hash != partition.partition_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_PARTITION_LINEAGE_MISMATCH")
+        if value.carrier_policy_binding_hash != carrier_policy.carrier_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_CARRIER_POLICY_LINEAGE_MISMATCH")
+        if value.envelope_binding_hash != envelope.envelope_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_ENVELOPE_LINEAGE_MISMATCH")
+        if value.qualification_policy_hash != policy.qualification_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_POLICY_BINDING_MISMATCH")
+    
+        intrinsic = qualified_mesh_intrinsic_audit(value, surface=surface, partition=partition)
+        if intrinsic["max_refinement_normal_ratio"] - 1e-12 > policy.g1_max_normal_refinement_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_NORMAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["max_refinement_tangent_to_normal"] - 1e-12 > policy.g1_max_tangential_to_normal_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_TANGENTIAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["rest_min_angle_deg"] + 1e-9 < policy.g3_min_angle_deg:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_MIN_ANGLE_FAIL")
+        if intrinsic["rest_max_aspect_longest_over_min_altitude"] - 1e-9 > policy.g3_max_aspect_longest_over_min_altitude:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_ASPECT_FAIL")
+        if value.qualification_report.get("intrinsic_audit_hash") != content_sha256(intrinsic):
+            raise QualificationError("QUALIFIED_MESH_INTRINSIC_AUDIT_BINDING_MISMATCH")
+    
+        required = {
+            "G1_SUPPORT_LINEAGE",
+            "G2_TOPOLOGY",
+            "G3_DEFORMATION",
+            "G3B_SKIN_TOPOLOGY_COMPATIBILITY",
+            "G4_COMPONENT_BOUNDARY",
+            "G5_MULTIVIEW_COVERAGE",
+        }
+        gates = dict(value.qualification_report.get("gates") or {})
+        if set(gates) != required or any(gates[k] != "PASS" for k in required):
+>           raise QualificationError("QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS")
+E           compiler.realsas_compiler_core.types.QualificationError: QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS
+
+compiler/realsas_compiler_core/product_authority_v1.py:866: QualificationError
+______ test_g5_interior_uncovered_metric_is_a_hard_gate_against_peppering ______
+
+    def test_g5_interior_uncovered_metric_is_a_hard_gate_against_peppering():
+        surface, partition, carrier_policy, envelope, _ = _context()
+        policy = build_mesh_qualification_policy(
+            g1_max_normal_refinement_ratio=0.125,
+            g1_max_tangential_to_normal_ratio=0.25,
+            g3_min_angle_deg=7.5,
+            g3_max_aspect_longest_over_min_altitude=16.0,
+            coverage_thresholds=(
+                CarrierCoverageThresholdIR("MESH", 0.97, 0.995, 0.005, 0.005),
+                CarrierCoverageThresholdIR("PLANAR", 0.99, 0.995, 0.0025, 0.0025),
+            ),
+            metadata={"policy_id": "QUALIFIED_MESH_PRODUCT_POLICY_V1_TEST"},
+        )
+        good = _valid_mesh(surface, partition, carrier_policy, envelope, policy)
+        rows = list(good.qualification_report["view_component_coverage"])
+        rows[0] = {**rows[0], "interior_uncovered_fraction": 0.006, "status": "PASS"}
+        bad = replace(good, qualification_report={**good.qualification_report, "view_component_coverage": tuple(rows)}, mesh_lineage_hash="")
+        bad = replace(bad, mesh_lineage_hash=qualified_mesh_lineage_hash(bad))
+        with pytest.raises(QualificationError, match="INTERIOR_UNCOVERED_FAIL"):
+>           validate_qualified_mesh(
+                bad, surface=surface, partition=partition, carrier_policy=carrier_policy,
+                envelope=envelope, policy=policy,
+            )
+
+tests/compiler/test_product_authority_v1.py:449: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = QualifiedMeshIR(vertices=(QualifiedMeshVertexIR(canonical_mesh_vertex_id='v0', support_binding=SurfaceSupportBinding(m...5c818b3bd36c8c861ed00c467a8a9518770e833674a352c8d56a81a9048', schema_version='RealSaS.QualifiedMeshIR.v1', metadata={})
+
+    def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, carrier_policy, envelope, policy) -> None:
+        validate_mechanical_partition(partition, surface)
+        validate_component_carrier_policy(carrier_policy, partition)
+        validate_deformation_capability_envelope(envelope)
+        validate_mesh_qualification_policy(policy)
+        if value.surface_binding_hash != surface.geometry_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_SURFACE_LINEAGE_MISMATCH")
+        if value.partition_binding_hash != partition.partition_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_PARTITION_LINEAGE_MISMATCH")
+        if value.carrier_policy_binding_hash != carrier_policy.carrier_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_CARRIER_POLICY_LINEAGE_MISMATCH")
+        if value.envelope_binding_hash != envelope.envelope_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_ENVELOPE_LINEAGE_MISMATCH")
+        if value.qualification_policy_hash != policy.qualification_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_POLICY_BINDING_MISMATCH")
+    
+        intrinsic = qualified_mesh_intrinsic_audit(value, surface=surface, partition=partition)
+        if intrinsic["max_refinement_normal_ratio"] - 1e-12 > policy.g1_max_normal_refinement_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_NORMAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["max_refinement_tangent_to_normal"] - 1e-12 > policy.g1_max_tangential_to_normal_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_TANGENTIAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["rest_min_angle_deg"] + 1e-9 < policy.g3_min_angle_deg:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_MIN_ANGLE_FAIL")
+        if intrinsic["rest_max_aspect_longest_over_min_altitude"] - 1e-9 > policy.g3_max_aspect_longest_over_min_altitude:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_ASPECT_FAIL")
+        if value.qualification_report.get("intrinsic_audit_hash") != content_sha256(intrinsic):
+            raise QualificationError("QUALIFIED_MESH_INTRINSIC_AUDIT_BINDING_MISMATCH")
+    
+        required = {
+            "G1_SUPPORT_LINEAGE",
+            "G2_TOPOLOGY",
+            "G3_DEFORMATION",
+            "G3B_SKIN_TOPOLOGY_COMPATIBILITY",
+            "G4_COMPONENT_BOUNDARY",
+            "G5_MULTIVIEW_COVERAGE",
+        }
+        gates = dict(value.qualification_report.get("gates") or {})
+        if set(gates) != required or any(gates[k] != "PASS" for k in required):
+>           raise QualificationError("QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS")
+E           compiler.realsas_compiler_core.types.QualificationError: QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS
+
+compiler/realsas_compiler_core/product_authority_v1.py:866: QualificationError
+
+During handling of the above exception, another exception occurred:
+
+    def test_g5_interior_uncovered_metric_is_a_hard_gate_against_peppering():
+        surface, partition, carrier_policy, envelope, _ = _context()
+        policy = build_mesh_qualification_policy(
+            g1_max_normal_refinement_ratio=0.125,
+            g1_max_tangential_to_normal_ratio=0.25,
+            g3_min_angle_deg=7.5,
+            g3_max_aspect_longest_over_min_altitude=16.0,
+            coverage_thresholds=(
+                CarrierCoverageThresholdIR("MESH", 0.97, 0.995, 0.005, 0.005),
+                CarrierCoverageThresholdIR("PLANAR", 0.99, 0.995, 0.0025, 0.0025),
+            ),
+            metadata={"policy_id": "QUALIFIED_MESH_PRODUCT_POLICY_V1_TEST"},
+        )
+        good = _valid_mesh(surface, partition, carrier_policy, envelope, policy)
+        rows = list(good.qualification_report["view_component_coverage"])
+        rows[0] = {**rows[0], "interior_uncovered_fraction": 0.006, "status": "PASS"}
+        bad = replace(good, qualification_report={**good.qualification_report, "view_component_coverage": tuple(rows)}, mesh_lineage_hash="")
+        bad = replace(bad, mesh_lineage_hash=qualified_mesh_lineage_hash(bad))
+>       with pytest.raises(QualificationError, match="INTERIOR_UNCOVERED_FAIL"):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'INTERIOR_UNCOVERED_FAIL'
+E        Input: 'QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS'
+
+tests/compiler/test_product_authority_v1.py:448: AssertionError
+__ test_product_mesh_skin_is_exact_convex_transfer_without_second_mesh_truth ___
+
+    def test_product_mesh_skin_is_exact_convex_transfer_without_second_mesh_truth():
+        surface,skeleton,skin,partition,carrier,envelope,policy,mesh=_fixture()
+>       bound=bind_product_mesh_skin(
+            surface=surface,skeleton=skeleton,skin=skin,mesh=mesh,
+            partition=partition,carrier_policy=carrier,envelope=envelope,policy=policy,
+        )
+
+tests/compiler/test_product_mesh_skin_v1.py:122: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+compiler/realsas_compiler_core/product_mesh_skin_v1.py:98: in bind_product_mesh_skin
+    validate_qualified_mesh(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = QualifiedMeshIR(vertices=(QualifiedMeshVertexIR(canonical_mesh_vertex_id='v0', support_binding=SurfaceSupportBinding(m...047fae3b3e8eee99839e5db40b68626d03334c7cd52bc45e95007b6c7f7', schema_version='RealSaS.QualifiedMeshIR.v1', metadata={})
+
+    def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, carrier_policy, envelope, policy) -> None:
+        validate_mechanical_partition(partition, surface)
+        validate_component_carrier_policy(carrier_policy, partition)
+        validate_deformation_capability_envelope(envelope)
+        validate_mesh_qualification_policy(policy)
+        if value.surface_binding_hash != surface.geometry_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_SURFACE_LINEAGE_MISMATCH")
+        if value.partition_binding_hash != partition.partition_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_PARTITION_LINEAGE_MISMATCH")
+        if value.carrier_policy_binding_hash != carrier_policy.carrier_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_CARRIER_POLICY_LINEAGE_MISMATCH")
+        if value.envelope_binding_hash != envelope.envelope_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_ENVELOPE_LINEAGE_MISMATCH")
+        if value.qualification_policy_hash != policy.qualification_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_POLICY_BINDING_MISMATCH")
+    
+        intrinsic = qualified_mesh_intrinsic_audit(value, surface=surface, partition=partition)
+        if intrinsic["max_refinement_normal_ratio"] - 1e-12 > policy.g1_max_normal_refinement_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_NORMAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["max_refinement_tangent_to_normal"] - 1e-12 > policy.g1_max_tangential_to_normal_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_TANGENTIAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["rest_min_angle_deg"] + 1e-9 < policy.g3_min_angle_deg:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_MIN_ANGLE_FAIL")
+        if intrinsic["rest_max_aspect_longest_over_min_altitude"] - 1e-9 > policy.g3_max_aspect_longest_over_min_altitude:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_ASPECT_FAIL")
+        if value.qualification_report.get("intrinsic_audit_hash") != content_sha256(intrinsic):
+            raise QualificationError("QUALIFIED_MESH_INTRINSIC_AUDIT_BINDING_MISMATCH")
+    
+        required = {
+            "G1_SUPPORT_LINEAGE",
+            "G2_TOPOLOGY",
+            "G3_DEFORMATION",
+            "G3B_SKIN_TOPOLOGY_COMPATIBILITY",
+            "G4_COMPONENT_BOUNDARY",
+            "G5_MULTIVIEW_COVERAGE",
+        }
+        gates = dict(value.qualification_report.get("gates") or {})
+        if set(gates) != required or any(gates[k] != "PASS" for k in required):
+>           raise QualificationError("QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS")
+E           compiler.realsas_compiler_core.types.QualificationError: QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS
+
+compiler/realsas_compiler_core/product_authority_v1.py:866: QualificationError
+_______ test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle ________
+
+tmp_path = PosixPath('/tmp/pytest-of-monster/pytest-74/test_stage24_to_27_typed_wirin0')
+
+    def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
+        ctx=_fixture(tmp_path)
+    
+        r24=qualify_mechanical_partition_and_carriers(ctx)
+        assert r24["status"]=="PASS"
+        _install_stage_outputs(ctx,"24_MECHANICAL_PARTITION_QUALIFIED",r24)
+        partition=mechanical_partition_from_dict(read_json(r24["outputs"][0]["path"]))
+        carrier=component_carrier_policy_from_dict(read_json(r24["outputs"][1]["path"]))
+        assert len(partition.components)==1
+        assert carrier.decisions[0].carrier_class=="MESH"
+        assert carrier.decisions[0].metadata["automatic"] is True
+    
+        r25=seal_deformation_capability_envelope(ctx)
+        assert r25["status"]=="PASS"
+        _install_stage_outputs(ctx,"25_DEFORMATION_CAPABILITY_ENVELOPE",r25)
+    
+        r26=build_canonical_mesh_candidate_stage(ctx)
+        assert r26["status"]=="PASS"
+        _install_stage_outputs(ctx,"26_MESH_CANDIDATE_BUILD",r26)
+        candidate=canonical_mesh_candidate_from_dict(read_json(r26["outputs"][0]["path"]))
+        assert len(candidate.faces)==1
+    
+        component_id=partition.components[0].component_id
+        assert ctx["run_manifest"]["observation"].get("component_masks")==[]
+    
+>       r27=qualify_canonical_mesh_stage(ctx)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/compiler/test_product_mesh_stage_adapters_v1.py:321: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py:557: in qualify_canonical_mesh_stage
+    mesh=qualify_canonical_mesh_candidate(
+compiler/realsas_compiler_core/product_authority_v1.py:1017: in qualify_canonical_mesh_candidate
+    validate_qualified_mesh(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = QualifiedMeshIR(vertices=(QualifiedMeshVertexIR(canonical_mesh_vertex_id='MV:f5befa05d6b8805536e0fd97', support_bindin...onMeshBaseline.v1', 'source_producer_policy_hash': '877624dfd2c2fa9093d528e52b808762b635b2abcc4010a9f01b89ed2c295aa2'})
+
+    def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, carrier_policy, envelope, policy) -> None:
+        validate_mechanical_partition(partition, surface)
+        validate_component_carrier_policy(carrier_policy, partition)
+        validate_deformation_capability_envelope(envelope)
+        validate_mesh_qualification_policy(policy)
+        if value.surface_binding_hash != surface.geometry_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_SURFACE_LINEAGE_MISMATCH")
+        if value.partition_binding_hash != partition.partition_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_PARTITION_LINEAGE_MISMATCH")
+        if value.carrier_policy_binding_hash != carrier_policy.carrier_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_CARRIER_POLICY_LINEAGE_MISMATCH")
+        if value.envelope_binding_hash != envelope.envelope_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_ENVELOPE_LINEAGE_MISMATCH")
+        if value.qualification_policy_hash != policy.qualification_policy_lineage_hash:
+            raise QualificationError("QUALIFIED_MESH_POLICY_BINDING_MISMATCH")
+    
+        intrinsic = qualified_mesh_intrinsic_audit(value, surface=surface, partition=partition)
+        if intrinsic["max_refinement_normal_ratio"] - 1e-12 > policy.g1_max_normal_refinement_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_NORMAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["max_refinement_tangent_to_normal"] - 1e-12 > policy.g1_max_tangential_to_normal_ratio:
+            raise QualificationError("QUALIFIED_MESH_G1_TANGENTIAL_REFINEMENT_BOUND_FAIL")
+        if intrinsic["rest_min_angle_deg"] + 1e-9 < policy.g3_min_angle_deg:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_MIN_ANGLE_FAIL")
+        if intrinsic["rest_max_aspect_longest_over_min_altitude"] - 1e-9 > policy.g3_max_aspect_longest_over_min_altitude:
+            raise QualificationError("QUALIFIED_MESH_G3_POLICY_ASPECT_FAIL")
+        if value.qualification_report.get("intrinsic_audit_hash") != content_sha256(intrinsic):
+            raise QualificationError("QUALIFIED_MESH_INTRINSIC_AUDIT_BINDING_MISMATCH")
+    
+        required = {
+            "G1_SUPPORT_LINEAGE",
+            "G2_TOPOLOGY",
+            "G3_DEFORMATION",
+            "G3B_SKIN_TOPOLOGY_COMPATIBILITY",
+            "G4_COMPONENT_BOUNDARY",
+            "G5_MULTIVIEW_COVERAGE",
+        }
+        gates = dict(value.qualification_report.get("gates") or {})
+        if set(gates) != required or any(gates[k] != "PASS" for k in required):
+>           raise QualificationError("QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS")
+E           compiler.realsas_compiler_core.types.QualificationError: QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS
+
+compiler/realsas_compiler_core/product_authority_v1.py:866: QualificationError
+=========================== short test summary info ============================
+SKIPPED [1] tests/compiler/test_product_mesh_stage_adapters_v1.py:773: native V2 player is required on self-hosted product integration gate
+SKIPPED [1] tests/compiler/test_product_mesh_stage_adapters_v1.py:1159: native V2 player is required for VF23 exact Stage20-to-46 chain
+SKIPPED [1] tests/compiler/test_runtime_v2_native_smoke.py:30: native V2 player is only required on the self-hosted product gate
+SKIPPED [1] tests/compiler/test_runtime_v2_paged_native_smoke.py:35: native V2 player is only required on the self-hosted product gate
+FAILED tests/repository/test_mainline_implementation_closure_v1.py::test_motion_dynamic_adapter_hash_covers_core_implementation - AssertionError: assert 'compiler.realsas_compiler_core.motion_dynamic_proof_v1' in {'compiler.realsas_compiler_core.camera_authority_v1': '0d593a27c3fd9740743db307da334cc7b8c49dc27fc73ec76cd6edcf989cea...as_compiler_core.canonical_mesh_candidate_v1': 'c9368b702c16c3003d3817d847872ff9d819ef7548ae35b8fcd2196bce5c91fc', ...}
+FAILED tests/compiler/test_canonical_puppet_state_v1.py::test_canonical_puppet_state_binds_complete_mechanical_product_identity - compiler.realsas_compiler_core.types.QualificationError: QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS
+FAILED tests/compiler/test_canonical_puppet_state_v1.py::test_state_hash_changes_if_policy_identity_changes_even_when_geometry_is_same - compiler.realsas_compiler_core.types.QualificationError: QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS
+FAILED tests/compiler/test_canonical_puppet_state_v1.py::test_state_rejects_mixed_mesh_skin_lineage - compiler.realsas_compiler_core.types.QualificationError: QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS
+FAILED tests/compiler/test_product_authority_v1.py::test_qualified_mesh_recomputes_intrinsics_and_binds_exact_carrier_and_mesh_policy - compiler.realsas_compiler_core.types.QualificationError: QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS
+FAILED tests/compiler/test_product_authority_v1.py::test_g5_cannot_reclassify_component_after_carrier_policy_freeze - AssertionError: Regex pattern did not match.
+ Regex: 'CARRIER_CLASS_DRIFT'
+ Input: 'QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS'
+FAILED tests/compiler/test_product_authority_v1.py::test_g5_threshold_is_enforced_from_typed_policy_not_report_status - AssertionError: Regex pattern did not match.
+ Regex: 'G5_RECALL_FAIL'
+ Input: 'QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS'
+FAILED tests/compiler/test_product_authority_v1.py::test_qualified_mesh_requires_zero_consequential_unknown - AssertionError: Regex pattern did not match.
+ Regex: 'CONSEQUENTIAL_UNKNOWN'
+ Input: 'QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS'
+FAILED tests/compiler/test_product_authority_v1.py::test_candidate_promotion_is_deterministic_and_compiler_mints_intrinsic_audit - compiler.realsas_compiler_core.types.QualificationError: QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS
+FAILED tests/compiler/test_product_authority_v1.py::test_g5_interior_uncovered_metric_is_a_hard_gate_against_peppering - AssertionError: Regex pattern did not match.
+ Regex: 'INTERIOR_UNCOVERED_FAIL'
+ Input: 'QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS'
+FAILED tests/compiler/test_product_mesh_skin_v1.py::test_product_mesh_skin_is_exact_convex_transfer_without_second_mesh_truth - compiler.realsas_compiler_core.types.QualificationError: QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS
+FAILED tests/compiler/test_product_mesh_stage_adapters_v1.py::test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle - compiler.realsas_compiler_core.types.QualificationError: QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS
+12 failed, 476 passed, 4 skipped, 2360 warnings in 200.45s (0:03:20)

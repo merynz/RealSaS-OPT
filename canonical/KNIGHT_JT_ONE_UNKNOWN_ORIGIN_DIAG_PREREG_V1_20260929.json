@@ -1,0 +1,14 @@
+{
+  "schema":"RealSaS.KnightJTOneUnknownOriginDiagnosisPrereg.v1",
+  "status":"FROZEN_BEFORE_ONE_UNKNOWN_ORIGIN_RESULT",
+  "date":"2026-09-29",
+  "scope":"Edges in the existing STRETCH_GT4_AND_WEIGHT_L1_GT1 + 2-core seam set whose James/Twigg endpoint state is exactly ONE_UNKNOWN.",
+  "strata":[
+    "KNOWN_CORE_SEED: the known endpoint received its label directly from at least one safe dense James/Twigg core face",
+    "KNOWN_PROPAGATED_ONLY: the known endpoint was unlabeled by core faces and obtained its label only through safe-graph propagation"
+  ],
+  "teacher_policy":"Teacher source topology is evaluation-only after strata are frozen.",
+  "purpose":"Test whether low-precision ONE_UNKNOWN edges are caused by propagated rather than directly observed James/Twigg labels.",
+  "no_product_mutation":true,
+  "no_threshold_search":true
+}

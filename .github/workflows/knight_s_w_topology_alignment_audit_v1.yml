@@ -1,0 +1,237 @@
+name: knight-s-w-topology-alignment-audit-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/knight_s_w_topology_alignment_audit_v1.yml'
+
+concurrency:
+  group: knight-s-w-topology-alignment-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      V5_HANDOFF: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V5_DEMO_HANDOFF
+      V6_OUTPUT: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V6_DEMO_OUTPUT
+      OUT: canonical/knight_s_w_topology_alignment_audit_v1
+
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Fetch sealed teacher topology evidence
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          echo "$tmp" > /tmp/sw_tmp
+          rclone copyto "$V5_HANDOFF/ARACHNE_KNIGHT_TEACHER_BANK_FIX2.npz" "$tmp/bank.npz" --checksum
+          rclone copyto "$V5_HANDOFF/KNIGHT_EVALUATED_TEACHER_SOURCE.npz" "$tmp/source.npz" --checksum
+          rclone copyto "$V6_OUTPUT/run_knight_arachne_v6_demo_closure_v1.py" "$tmp/v6_runner.py" --checksum
+          sha256sum "$tmp/bank.npz" "$tmp/source.npz" "$tmp/v6_runner.py"
+
+      - name: Measure S graph versus artist skin topology
+        run: |
+          set -euo pipefail
+          tmp="$(cat /tmp/sw_tmp)"
+          mkdir -p "$OUT"
+          python - "$tmp" "$OUT" "$RUN_ROOT" <<'PY'
+          import collections, hashlib, json, subprocess, sys
+          from pathlib import Path
+          import numpy as np
+
+          tmp=Path(sys.argv[1]); out=Path(sys.argv[2]); run=Path(sys.argv[3])
+          surface_path=run/"artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"
+          if not surface_path.is_file(): raise RuntimeError(surface_path)
+          surface=json.loads(surface_path.read_text())
+          rels=tuple(surface.get("local_relations") or ())
+
+          bank_path=tmp/"bank.npz"; source_path=tmp/"source.npz"; v6_path=tmp/"v6_runner.py"
+          with np.load(bank_path,allow_pickle=False) as z:
+              ids=tuple(map(str,z["surface_ids"].tolist()))
+              W=np.asarray(z["weights"],np.float64)
+              valid=np.asarray(z["teacher_valid_mask"],np.uint8).astype(bool)
+              tri=np.asarray(z["source_triangle_index"],np.int64)
+              bary=np.asarray(z["source_triangle_barycentric"],np.float64)
+          with np.load(source_path,allow_pickle=False) as z:
+              source_faces=np.asarray(z["faces"],np.int64)
+
+          if len(ids)!=12090 or W.shape[0]!=len(ids) or tri.shape!=(len(ids),):
+              raise RuntimeError("BANK_AXIS_DRIFT")
+          row={sid:i for i,sid in enumerate(ids)}
+          if len(row)!=len(ids): raise RuntimeError("DUPLICATE_SURFACE_ID")
+          face_sets=[set(map(int,f)) for f in source_faces.tolist()]
+
+          def category(a,b):
+              ta,tb=int(tri[a]),int(tri[b])
+              if ta==tb:return "SAME_FACE"
+              common=len(face_sets[ta] & face_sets[tb])
+              if common==2:return "SHARE_EDGE"
+              if common==1:return "SHARE_VERTEX_ONLY"
+              return "NONINCIDENT"
+
+          categories=("SAME_FACE","SHARE_EDGE","SHARE_VERTEX_ONLY","NONINCIDENT")
+          total=collections.Counter(); both=collections.Counter()
+          l1={c:[] for c in categories}
+          thresholds=(0.5,1.0,1.5,1.9)
+          high={str(t):collections.Counter() for t in thresholds}
+          edges_by_cat={c:[] for c in categories}
+          for rel in rels:
+              a=row[str(rel["a_surface_id"])]; b=row[str(rel["b_surface_id"])]
+              c=category(a,b); total[c]+=1; edges_by_cat[c].append((a,b))
+              if valid[a] and valid[b]:
+                  both[c]+=1
+                  d=float(np.abs(W[a]-W[b]).sum())
+                  l1[c].append(d)
+                  for t in thresholds:
+                      if d>t: high[str(t)][c]+=1
+
+          stats={}
+          for c in categories:
+              arr=np.asarray(l1[c],np.float64)
+              stats[c]={
+                  "relation_count":int(total[c]),
+                  "both_teacher_valid_count":int(both[c]),
+                  "teacher_l1_mean":None if not len(arr) else float(arr.mean()),
+                  "teacher_l1_p50":None if not len(arr) else float(np.quantile(arr,.50)),
+                  "teacher_l1_p95":None if not len(arr) else float(np.quantile(arr,.95)),
+                  "teacher_l1_p99":None if not len(arr) else float(np.quantile(arr,.99)),
+                  "teacher_l1_max":None if not len(arr) else float(arr.max()),
+                  "high_l1_counts":{k:int(v[c]) for k,v in high.items()},
+              }
+
+          def component_stats(mode):
+              n=len(ids); parent=np.arange(n,dtype=np.int64)
+              def find(x):
+                  while parent[x]!=x:
+                      parent[x]=parent[parent[x]];x=int(parent[x])
+                  return x
+              def union(a,b):
+                  a,b=find(a),find(b)
+                  if a!=b: parent[b]=a
+              kept=0
+              for c in categories:
+                  allow=(
+                    mode=="ALL_GSA_RELATIONS"
+                    or (mode=="EXCLUDE_SOURCE_NONINCIDENT" and c!="NONINCIDENT")
+                    or (mode=="SAME_FACE_OR_SHARED_EDGE_ONLY" and c in {"SAME_FACE","SHARE_EDGE"})
+                  )
+                  if not allow: continue
+                  for a,b in edges_by_cat[c]:
+                      union(a,b);kept+=1
+              cc=collections.Counter(find(i) for i in range(n))
+              sizes=sorted(cc.values(),reverse=True)
+              return {
+                  "kept_relation_count":kept,
+                  "component_count":len(sizes),
+                  "largest_component_size":sizes[0],
+                  "largest_component_fraction":sizes[0]/n,
+                  "largest_component_sizes":sizes[:24],
+              }
+
+          # Prove that topology provenance exists in the bank but is dropped by
+          # the exact V5 loader and therefore by V6, which imports that helper.
+          v5=subprocess.check_output(
+              ["git","show","1dc51f4929a3ff35edc33f10cd5f8cd2cef0e98e:tools/training/run_knight_arachne_v5_demo_transfer_fit_v1.py"],
+              text=True
+          )
+          projector=subprocess.check_output(
+              ["git","show","1dc51f4929a3ff35edc33f10cd5f8cd2cef0e98e:tools/training/knight_arachne_teacher_projection_v1.py"],
+              text=True
+          )
+          v6=v6_path.read_text()
+          loader_start=v5.index("def _teacher_for_conditioning")
+          loader_end=v5.index("\ndef _joint_world",loader_start)
+          loader=v5[loader_start:loader_end]
+          projection_preserves=(
+              '"source_triangle_index"' in projector
+              and '"source_triangle_barycentric"' in projector
+          )
+          loader_drops=(
+              'required = {"weights","surface_ids","teacher_valid_mask"}' in loader
+              and "source_triangle_index" not in loader
+              and "source_triangle_barycentric" not in loader
+          )
+          v6_reuses=(
+              "base._teacher_for_conditioning" in v6
+              and "source_triangle_index" not in v6
+          )
+
+          report={
+              "schema":"RealSaS.KnightSurfaceSkinTopologyAlignmentAudit.v1",
+              "status":"AUDIT_ONLY__NO_REPAIR_APPLIED",
+              "repo_head":subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip(),
+              "artifacts":{
+                  "surface_sha256":hashlib.sha256(surface_path.read_bytes()).hexdigest(),
+                  "teacher_bank_sha256":hashlib.sha256(bank_path.read_bytes()).hexdigest(),
+                  "teacher_source_sha256":hashlib.sha256(source_path.read_bytes()).hexdigest(),
+                  "v6_runner_sha256":hashlib.sha256(v6_path.read_bytes()).hexdigest(),
+                  "v5_execution_commit":"1dc51f4929a3ff35edc33f10cd5f8cd2cef0e98e",
+              },
+              "surface":{
+                  "node_count":len(ids),
+                  "relation_count":len(rels),
+              },
+              "teacher_projection":{
+                  "teacher_valid_count":int(valid.sum()),
+                  "teacher_coverage":float(valid.mean()),
+                  "source_face_count":int(len(source_faces)),
+                  "source_triangle_provenance_present_in_bank":projection_preserves,
+                  "source_triangle_index_shape":list(tri.shape),
+                  "source_triangle_barycentric_shape":list(bary.shape),
+              },
+              "relation_source_topology":stats,
+              "threshold_totals":{
+                  k:int(sum(v.values())) for k,v in high.items()
+              },
+              "component_counterfactuals":{
+                  mode:component_stats(mode) for mode in (
+                      "ALL_GSA_RELATIONS",
+                      "EXCLUDE_SOURCE_NONINCIDENT",
+                      "SAME_FACE_OR_SHARED_EDGE_ONLY",
+                  )
+              },
+              "training_semantic_drop":{
+                  "v5_teacher_loader_drops_source_triangle_provenance":loader_drops,
+                  "v6_reuses_v5_teacher_loader":v6_reuses,
+                  "v5_loader_required_arrays":["weights","surface_ids","teacher_valid_mask"],
+                  "source_triangle_provenance_used_in_objective":False,
+                  "source_triangle_provenance_used_in_compiler_skin_qualification":False,
+              },
+              "finding":{
+                  "id":"S_GRAPH_AND_W_TEACHER_TOPOLOGY_NOT_MECHANICALLY_ALIGNED",
+                  "confirmed":bool(
+                      projection_preserves and loader_drops and v6_reuses
+                      and int(high["1.9"]["NONINCIDENT"])>0
+                      and sum(high["1.9"][c] for c in categories if c!="NONINCIDENT")==0
+                  ),
+                  "mechanism":"Teacher weights are projected row-wise from exact source triangles. Source-triangle provenance is stored, then discarded by V5/V6 teacher loading. GSA relations can connect rows projected from nonincident source triangles; large weight discontinuities are concentrated entirely on those bridges.",
+                  "claim_boundary":"Teacher source topology is diagnostic/training truth only and is not proposed as shipping inference input. This audit establishes a domain-compatibility failure, not the production repair mechanism.",
+              },
+          }
+          (out/"REPORT.json").write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
+          print(json.dumps(report,indent=2,sort_keys=True))
+          if not report["finding"]["confirmed"]:
+              raise SystemExit("S_W_ALIGNMENT_FINDING_NOT_CONFIRMED")
+          PY
+
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add "$OUT/REPORT.json"
+          git commit -m 'audit: seal Knight S-W topology alignment evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

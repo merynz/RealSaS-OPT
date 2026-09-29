@@ -524,3 +524,37 @@ This 2×2 court identifies whether the catastrophic Knight failure is principall
 Because the invalid-row oracle already shows that those projected bank weights close downstream topology when substituted at inference, `UNIFORM_ALL_PROJECTED` is a particularly important causal arm. It remains demo/FIT evidence; it must not be generalized into a product teacher-transfer policy without cross-subject validation.
 
 Only after this 2×2 court should we add a SkinTokens-like stronger random-pose max-edge consequence objective or a new reliability head.
+
+
+### 9.5 Exact V6 masked-row error regime
+
+The exact V6 final canonical weights were aligned back to the exact teacher bank by:
+
+1. exact `surface_id` lookup, and
+2. the sealed `canonical_joint_to_target_index` mapping from `ARACHNE_KNIGHT_V6_RESULT.json`.
+
+This reproduces the published V6 valid-row p95 to numerical precision and exposes the hidden excluded-row regime.
+
+Teacher-valid 10,611 rows:
+- mean row L1: **0.0100**
+- p95: **0.046917**
+- p99: **0.15736**
+- max: **1.99398**
+- row L1 > 1: **3**
+- dominant-joint accuracy: **0.998775**
+
+Teacher-invalid 1,479 rows:
+- mean row L1: **0.20628**
+- p95: **1.99959**
+- p99: **~2.0**
+- row L1 > 1: **151**
+- dominant-joint accuracy: **0.90264**
+
+All 12,090 rows:
+- p95: **0.06353**
+- p99: **1.65054**
+- row L1 > 1: **154**
+
+For simplex skin rows, L1=2 is the maximum possible distance between two one-hot assignments. Therefore the excluded set contains a distinct near-maximal catastrophic tail that the historical V6 science gate cannot observe because `base._metrics(pred, truth, valid, ...)` is explicitly evaluated through the same teacher-valid mask.
+
+This is consistent with the downstream 12,049-vertex product court where 1,474 surviving invalid rows own essentially all catastrophic missed seams.

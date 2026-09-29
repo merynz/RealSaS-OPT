@@ -21,6 +21,7 @@ from compiler.realsas_compiler_core.canonical_mesh_candidate_v1 import (
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.joint_frames_v1 import derive_joint_frames_from_skeleton
 from compiler.realsas_compiler_core.mechanical_partition_v1 import build_structural_partition
+from compiler.realsas_compiler_core.mechanical_repartition_v2 import _MutexDSU
 from compiler.realsas_compiler_core.mesh.deformation_stress_v1 import _candidate_skin_matrix
 from compiler.realsas_compiler_core.mesh.deformation_stress_v2 import (
     _pose_skin_matrices,
@@ -135,85 +136,150 @@ def build_probe_partition(surface, risk, *, max_edge_ratio):
     if len(edge_pairs) != len(max_ratio):
         raise RuntimeError("PROBE_EDGE_CARDINALITY_DRIFT")
 
+    parent = build_structural_partition(surface)
+    parent_by_pair = {
+        pair(row.a_surface_id, row.b_surface_id): row
+        for row in parent.boundary_constraints
+    }
+    edge_value = {
+        pair(*p): float(max_ratio[i])
+        for i, p in enumerate(edge_pairs)
+    }
+    if set(edge_value) != set(parent_by_pair):
+        missing = set(parent_by_pair) - set(edge_value)
+        extra = set(edge_value) - set(parent_by_pair)
+        raise RuntimeError(
+            f"PROBE_PARENT_RELATION_DRIFT::{len(missing)}::{len(extra)}"
+        )
+
+    direct_unsafe_pairs = tuple(sorted(
+        p for p, value in edge_value.items()
+        if value > float(max_edge_ratio)
+    ))
+    if not direct_unsafe_pairs:
+        raise RuntimeError("PROBE_CONDITIONED_NO_CANNOT_LINK_SEEDS")
+
     ids = tuple(sorted(str(n.surface_id) for n in surface.surface_nodes))
     known = set(ids)
-    adjacency = {sid: set() for sid in ids}
-    edge_value = {}
-    direct_unsafe_pairs = []
+    dsu = _MutexDSU(ids)
 
-    for i, p in enumerate(edge_pairs):
-        a, b = map(str, p)
-        if a not in known or b not in known or a == b:
-            raise RuntimeError("PROBE_EDGE_ENDPOINT_INVALID")
-        value = float(max_ratio[i])
-        edge_value[pair(a, b)] = value
-        if value <= float(max_edge_ratio):
-            adjacency[a].add(b)
-            adjacency[b].add(a)
-        else:
-            direct_unsafe_pairs.append(pair(a, b))
+    for a, b in direct_unsafe_pairs:
+        if a not in known or b not in known:
+            raise RuntimeError("PROBE_CUT_SEED_UNKNOWN_NODE")
+        if not dsu.add_mutex(a, b):
+            raise RuntimeError("PROBE_CUT_SEED_CONTRADICTION")
 
-    component_index = {}
-    groups = []
-    for sid in ids:
-        if sid in component_index:
+    attractive = []
+    for p, row in parent_by_pair.items():
+        if p in set(direct_unsafe_pairs):
             continue
-        ci = len(groups)
-        stack = [sid]
-        component_index[sid] = ci
-        members = []
-        while stack:
-            x = stack.pop()
-            members.append(x)
-            for y in sorted(adjacency[x]):
-                if y not in component_index:
-                    component_index[y] = ci
-                    stack.append(y)
-        groups.append(tuple(sorted(members)))
+        decision = str(row.decision)
+        unknown_flag = 1 if decision == "UNKNOWN" else 0
+        attractive.append((
+            unknown_flag,
+            -float(row.confidence),
+            p[0],
+            p[1],
+        ))
+    attractive.sort()
+
+    blocked = []
+    union_count = 0
+    for _, _, a, b in attractive:
+        already = dsu.find(a) == dsu.find(b)
+        ok = dsu.union(a, b)
+        if not already and ok:
+            union_count += 1
+        elif not ok:
+            blocked.append(pair(a, b))
+
+    labels = {sid: dsu.find(sid) for sid in ids}
+    violated = [
+        p for p in direct_unsafe_pairs
+        if labels[p[0]] == labels[p[1]]
+    ]
+    if violated:
+        raise RuntimeError(f"PROBE_CUT_SEED_VIOLATION::{len(violated)}")
 
     crossing_pairs = tuple(sorted(
-        p for p in edge_pairs
-        if component_index[str(p[0])] != component_index[str(p[1])]
+        p for p in parent_by_pair
+        if labels[p[0]] != labels[p[1]]
     ))
+    if not set(direct_unsafe_pairs).issubset(set(crossing_pairs)):
+        raise RuntimeError("PROBE_CUT_CLOSURE_LOST_SEED")
 
     overrides = []
     for p in crossing_pairs:
-        p = pair(*p)
         value = float(edge_value[p])
+        is_direct = p in set(direct_unsafe_pairs)
+        parent_row = parent_by_pair[p]
         overrides.append(ComponentBoundaryConstraintIR(
             constraint_id="PROBECUT:" + content_sha256({
                 "pair": p,
                 "max_edge_ratio": value,
                 "limit": float(max_edge_ratio),
-                "component_a": int(component_index[p[0]]),
-                "component_b": int(component_index[p[1]]),
+                "direct_probe_seed": bool(is_direct),
             })[:20],
             a_surface_id=p[0],
             b_surface_id=p[1],
             decision="SEPARATE",
-            evidence_refs=(f"CANONICAL_PROBE_MAX_EDGE_RATIO:{value:.17g}",),
-            confidence=min(
-                1.0,
-                max(0.0, value / max(float(max_edge_ratio), 1e-12) - 1.0),
+            evidence_refs=tuple(sorted(set(map(str, parent_row.evidence_refs)) | {
+                (
+                    f"CANONICAL_PROBE_MAX_EDGE_RATIO:{value:.17g}"
+                    if is_direct
+                    else "CANONICAL_PROBE_MUTEX_CUT_CLOSURE"
+                )
+            })),
+            confidence=max(
+                float(parent_row.confidence),
+                min(
+                    1.0,
+                    max(
+                        0.0,
+                        value / max(float(max_edge_ratio), 1e-12) - 1.0,
+                    ),
+                ) if is_direct else 0.0,
             ),
             metadata={
-                "evidence_class": "CANONICAL_PROBE_CONDITIONED_GLOBAL_CUT_CLOSURE",
+                **dict(parent_row.metadata or {}),
+                "evidence_class": (
+                    "CANONICAL_PROBE_CONDITIONED_DIRECT_CANNOT_LINK"
+                    if is_direct
+                    else "CANONICAL_PROBE_CONDITIONED_MUTEX_CUT_CLOSURE"
+                ),
                 "stress_angle_deg": float(risk["stress_angle_deg"]),
                 "max_edge_ratio": value,
                 "edge_ratio_limit": float(max_edge_ratio),
+                "direct_probe_seed": bool(is_direct),
                 "automatic": False,
                 "audit_only": True,
-                "component_a": int(component_index[p[0]]),
-                "component_b": int(component_index[p[1]]),
             },
         ))
 
-    part = build_structural_partition(surface, boundary_overrides=tuple(overrides))
-    if len(part.components) != len(groups):
+    part = build_structural_partition(
+        surface,
+        boundary_overrides=tuple(overrides),
+    )
+
+    component_groups = {}
+    for sid, root in labels.items():
+        component_groups.setdefault(root, []).append(sid)
+    if len(part.components) != len(component_groups):
         raise RuntimeError(
-            f"PROBE_REGION_COUNT_DRIFT::{len(groups)}::{len(part.components)}"
+            f"PROBE_REGION_COUNT_DRIFT::{len(component_groups)}::{len(part.components)}"
         )
-    return part, tuple(sorted(direct_unsafe_pairs)), crossing_pairs
+
+    closure_audit = {
+        "direct_seed_count": len(direct_unsafe_pairs),
+        "attractive_union_count": int(union_count),
+        "attractive_union_blocked_by_mutex": len(blocked),
+        "component_count": len(component_groups),
+        "closure_added_separate_count": len(set(crossing_pairs) - set(direct_unsafe_pairs)),
+        "final_separate_count": len(crossing_pairs),
+        "seed_constraint_violation_count": 0,
+        "closure_policy": "STRUCTURAL_AUTHORITY_MAX_CONTINUITY_WITH_PROBE_CANNOT_LINKS",
+    }
+    return part, direct_unsafe_pairs, crossing_pairs, closure_audit
 
 
 def residual_class_summary(candidate, full, *, surface, skeleton, skin):
@@ -284,7 +350,7 @@ def main():
     sids, jids, W = skin_matrix(surface, skeleton, skin)
 
     risk = probe_edge_risk(surface, skeleton, cameras, envelope, sids, W)
-    part, unsafe_source_edges, crossing_cut_edges = build_probe_partition(
+    part, unsafe_source_edges, crossing_cut_edges, closure_audit = build_probe_partition(
         surface, risk, max_edge_ratio=DEFAULT_MAX_EDGE_RATIO
     )
     carrier = build_component_carrier_policy(
@@ -371,7 +437,7 @@ def main():
             "stress_angle_deg": float(risk["stress_angle_deg"]),
             "probe_count": int(risk["probe_count"]),
             "edge_ratio_limit": float(DEFAULT_MAX_EDGE_RATIO),
-            "edge_rule": "REMOVE_SOURCE_EDGES_EXCEEDING_EXISTING_G3B_EDGE_LIMIT__THEN_EMIT_ALL_CONNECTED_COMPONENT_CROSSING_RELATIONS_AS_SEPARATE",
+            "edge_rule": "PROBE_EDGE_RATIO_GT_EXISTING_G3B_LIMIT_BECOMES_CANNOT_LINK__THEN_EXISTING_STAGE17_MUTEX_DSU_MAXIMIZES_STRUCTURAL_CONTINUITY_AND_EMITS_FULL_CUT",
             "new_numeric_threshold_introduced": False,
         },
         "skin_lineage_hash": skin.skin_lineage_hash,
@@ -380,6 +446,7 @@ def main():
             "edge_count": len(risk["edge_pairs"]),
             "unsafe_source_edge_count": len(unsafe_source_edges),
             "cut_closed_crossing_edge_count": len(crossing_cut_edges),
+            "cut_closure": closure_audit,
             "max_ratio": quantiles(max_ratio),
             "min_ratio": quantiles(min_ratio),
         },

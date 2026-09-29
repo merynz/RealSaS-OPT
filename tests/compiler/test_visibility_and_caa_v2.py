@@ -14,6 +14,7 @@ from compiler.realsas_compiler_core.appearance_bake_v2 import (
 )
 from compiler.realsas_compiler_core.appearance_compile_v2 import (
     bilinear_rgba_u8,
+    compatible_cross_view_foreground_donor_validity,
     compile_deterministic_caa,
     direct_source_and_donor_eligibility,
     select_other_view_donor_by_support,
@@ -201,6 +202,75 @@ def test_safe_background_direct_source_is_not_cross_view_appearance_donor():
     )
     assert set(map(int, best_view)) == {4}
     assert np.allclose(best_score, 0.60, atol=0.0, rtol=0.0)
+
+
+def test_cross_view_donor_rejects_mixed_foreground_background_evidence():
+    direct_valid = np.zeros((8, 1), dtype=bool)
+    donor_valid = np.zeros_like(direct_valid)
+    rgba = np.zeros((8, 1, 4), dtype=np.uint8)
+
+    direct_valid[1, 0] = True
+    rgba[1, 0] = (0, 0, 0, 0)
+
+    direct_valid[4, 0] = True
+    donor_valid[4, 0] = True
+    rgba[4, 0] = (120, 90, 50, 255)
+
+    compatible = compatible_cross_view_foreground_donor_validity(
+        direct_valid=direct_valid,
+        donor_valid=donor_valid,
+        direct_rgba=rgba,
+        color_conflict_cut_rgba_l1=0.4,
+        alpha_conflict_cut=0.25,
+    )
+    assert not np.any(compatible)
+
+
+def test_cross_view_donor_rejects_gross_foreground_conflict():
+    direct_valid = np.zeros((8, 1), dtype=bool)
+    donor_valid = np.zeros_like(direct_valid)
+    rgba = np.zeros((8, 1, 4), dtype=np.uint8)
+
+    direct_valid[1, 0] = True
+    donor_valid[1, 0] = True
+    rgba[1, 0] = (255, 0, 0, 255)
+
+    direct_valid[4, 0] = True
+    donor_valid[4, 0] = True
+    rgba[4, 0] = (0, 0, 255, 255)
+
+    compatible = compatible_cross_view_foreground_donor_validity(
+        direct_valid=direct_valid,
+        donor_valid=donor_valid,
+        direct_rgba=rgba,
+        color_conflict_cut_rgba_l1=0.4,
+        alpha_conflict_cut=0.25,
+    )
+    assert not np.any(compatible)
+
+
+def test_cross_view_donor_accepts_compatible_foreground_evidence():
+    direct_valid = np.zeros((8, 1), dtype=bool)
+    donor_valid = np.zeros_like(direct_valid)
+    rgba = np.zeros((8, 1, 4), dtype=np.uint8)
+
+    direct_valid[1, 0] = True
+    donor_valid[1, 0] = True
+    rgba[1, 0] = (120, 90, 50, 255)
+
+    direct_valid[4, 0] = True
+    donor_valid[4, 0] = True
+    rgba[4, 0] = (125, 92, 52, 255)
+
+    compatible = compatible_cross_view_foreground_donor_validity(
+        direct_valid=direct_valid,
+        donor_valid=donor_valid,
+        direct_rgba=rgba,
+        color_conflict_cut_rgba_l1=0.4,
+        alpha_conflict_cut=0.25,
+    )
+    assert bool(compatible[1, 0]) is True
+    assert bool(compatible[4, 0]) is True
 
 
 def test_safe_transparent_source_background_is_defined_direct_source_not_unseen():

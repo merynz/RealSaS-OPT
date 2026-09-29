@@ -19,6 +19,9 @@ from compiler.realsas_compiler_core.canonical_mesh_candidate_v1 import (
 )
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.mechanical_partition_v1 import build_structural_partition
+from compiler.realsas_compiler_core.mechanical_repartition_v2 import (
+    build_repartitioned_partition_v2,
+)
 from compiler.realsas_compiler_core.deformation_envelope_derivation_v1 import derive_deformation_envelope_v1
 from compiler.realsas_compiler_core.mesh.deformation_stress_v2 import (
     run_g3_local_frame_micro_stress_v2,
@@ -221,7 +224,35 @@ def qualify_mechanical_partition_and_carriers(ctx:dict)->dict:
         return {"status":"BLOCKED","blockers":["MANUAL_CARRIER_AUTHORING_FORBIDDEN"],
                 "diagnostics":{"unsupported_keys":sorted(carrier_cfg)}}
 
-    partition=build_structural_partition(surface,boundary_overrides=())
+    parent_partition=build_structural_partition(surface,boundary_overrides=())
+    repair_cfg=dict(ctx["run_manifest"].get("mechanical_repartition_repair") or {})
+    repair_applied=False
+    repair_directive=None
+    repair_authorization=None
+    if repair_cfg:
+        if set(repair_cfg)!={"directive","authorization"}:
+            return {
+                "status":"BLOCKED",
+                "blockers":["MECHANICAL_REPARTITION_REPAIR_CONTRACT_INVALID"],
+                "diagnostics":{"keys":sorted(repair_cfg)},
+            }
+        repair_directive=_load_file_ref(
+            dict(repair_cfg["directive"]),
+            expected_schema="RealSaS.MechanicalRepartitionDirective.v2",
+        )
+        repair_authorization=_load_file_ref(
+            dict(repair_cfg["authorization"]),
+            expected_schema="RealSaS.TrustworthySkinRepartitionAuthorization.v1",
+        )
+        partition=build_repartitioned_partition_v2(
+            surface=surface,
+            parent_partition=parent_partition,
+            directive=repair_directive,
+            authorization=repair_authorization,
+        )
+        repair_applied=True
+    else:
+        partition=parent_partition
     decisions=tuple(
         ComponentCarrierDecisionIR(
             component.component_id,
@@ -260,6 +291,18 @@ def qualify_mechanical_partition_and_carriers(ctx:dict)->dict:
             "manual_boundary_authoring":False,
             "manual_carrier_authoring":False,
             "all_components_mesh_carrier":True,
+            "mechanical_repartition_repair_applied":repair_applied,
+            "parent_partition_lineage_hash":(
+                parent_partition.partition_lineage_hash if repair_applied else None
+            ),
+            "repair_directive_hash":(
+                str(repair_directive.get("directive_hash") or "")
+                if repair_applied else None
+            ),
+            "repartition_authorization_hash":(
+                str(repair_authorization.get("authorization_hash") or "")
+                if repair_applied else None
+            ),
         },
     }
 

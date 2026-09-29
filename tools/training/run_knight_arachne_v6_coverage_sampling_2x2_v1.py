@@ -133,11 +133,12 @@ def main():
     ap.add_argument("--experiment-prereg", required=True)
     ap.add_argument("--v6-source", required=True)
     ap.add_argument("--v6-prereg", required=True)
-    ap.add_argument("--surface-json", required=True)
-    ap.add_argument("--skeleton-json", required=True)
+    ap.add_argument("--surface-json")
+    ap.add_argument("--skeleton-json")
     ap.add_argument("--teacher-bank", required=True)
-    ap.add_argument("--source-progress", required=True)
+    ap.add_argument("--source-progress")
     ap.add_argument("--output-dir", required=True)
+    ap.add_argument("--preflight-only", action="store_true")
     args = ap.parse_args()
 
     arm = str(args.arm)
@@ -215,6 +216,13 @@ def main():
     mod._sample_schedule = patched
 
     schedule_preview = patched(np.flatnonzero(valid))
+    schedule_sha = schedule_digest(schedule_preview)
+    schedule_prefix_sha = schedule_digest(schedule_preview[:8192])
+    expected_schedule = EXPECTED_SCHEDULES[arm]
+    if schedule_sha != expected_schedule["full_32768"]:
+        raise RuntimeError(f"ARACHNE_2X2_FULL_SCHEDULE_SHA_DRIFT::{arm}::{schedule_sha}")
+    if schedule_prefix_sha != expected_schedule["prefix_8192"]:
+        raise RuntimeError(f"ARACHNE_2X2_PREFIX_SCHEDULE_SHA_DRIFT::{arm}::{schedule_prefix_sha}")
     manifest = {
         "schema": "RealSaS.KnightArachneV6CoverageSampling2x2Arm.v1",
         "status": "FROZEN_ARM_READY_BEFORE_OPTIMIZER_STEP_1",
@@ -222,7 +230,8 @@ def main():
         "exact_v6_source_sha256": sha256(source_path),
         "exact_v6_prereg_sha256": sha256(v6_prereg),
         "teacher_bank_sha256": sha256(bank_path),
-        "schedule_sha256": schedule_digest(schedule_preview),
+        "schedule_sha256": schedule_sha,
+        "schedule_prefix8192_sha256": schedule_prefix_sha,
         "schedule_shape": list(schedule_preview.shape),
         "teacher_valid_count": int(valid.sum()),
         "teacher_invalid_count": int((~valid).sum()),
@@ -231,11 +240,24 @@ def main():
         "model_architecture_mutated": False,
         "objective_mutated": False,
         "compiler_gate_mutated": False,
+        "evaluation_teacher_valid_mask_mutated": False,
         "product_authority_claimed": False,
         "generalization_claimed": False,
     }
     (outdir / "ARACHNE_2X2_ARM_MANIFEST.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
     print("ARACHNE_2X2_ARM_READY=" + json.dumps(manifest, sort_keys=True), flush=True)
+
+    if args.preflight_only:
+        print("ARACHNE_2X2_PREFLIGHT_ONLY_PASS", flush=True)
+        return
+
+    for raw, name in (
+        (args.surface_json, "surface-json"),
+        (args.skeleton_json, "skeleton-json"),
+        (args.source_progress, "source-progress"),
+    ):
+        if not raw:
+            raise RuntimeError(f"ARACHNE_2X2_REQUIRED_ARG_MISSING::{name}")
 
     run_args = SimpleNamespace(
         prereg=str(v6_prereg),

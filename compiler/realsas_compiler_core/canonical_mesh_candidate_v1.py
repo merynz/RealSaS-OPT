@@ -12,8 +12,13 @@ CDT/local-chart backends must emit the same CanonicalMeshCandidateIR and therefo
 remain subordinate to current qualification.
 """
 
+from dataclasses import replace
 from itertools import combinations
 import math
+
+import numpy as np
+from scipy.sparse import csr_matrix
+from scipy.sparse.linalg import spsolve
 
 from .hashing import content_sha256
 from .product_authority_v1 import (
@@ -78,6 +83,11 @@ def build_canonical_relation_candidate(
         raise QualificationError("CANONICAL_MESH_PRODUCER_POLICY_MISSING")
     if not math.isfinite(float(min_relative_double_area)) or min_relative_double_area <= 0.0:
         raise QualificationError("CANONICAL_MESH_MIN_RELATIVE_AREA_INVALID")
+    if mechanical_skin_transfer not in {
+        "OWNER_COPY",
+        "COMPONENT_HARMONIC_DIRICHLET_V1",
+    }:
+        raise QualificationError("CANONICAL_MESH_MECHANICAL_SKIN_TRANSFER_UNSUPPORTED")
 
     nodes = {node.surface_id: node for node in surface.surface_nodes}
     owner = {
@@ -260,6 +270,189 @@ def build_canonical_relation_candidate(
     )
 
 
+def _apply_component_harmonic_skin_support(
+    vertices_by_id: dict[str, CanonicalMeshVertexCandidateIR],
+    out_faces: list[tuple[str, str, str]],
+    *,
+    support_epsilon: float = 1e-14,
+) -> dict:
+    """Replace generated seam owner-copy skin support with component-local harmonic support.
+
+    Geometry support remains unchanged.  Mechanical support is represented only as
+    a convex combination of IDENTITY_SURFACE_NODE anchors from the same mechanical
+    component.  The operator depends on candidate geometry/connectivity and the
+    partition only; QualifiedSkinIR weights are not inputs.
+    """
+    if not math.isfinite(float(support_epsilon)) or support_epsilon < 0.0:
+        raise QualificationError("CANONICAL_MESH_HARMONIC_SUPPORT_EPS_INVALID")
+
+    component_by_vid = {
+        str(vid): str(vertex.component_id)
+        for vid, vertex in vertices_by_id.items()
+    }
+    edge_weights: dict[tuple[str, str], float] = {}
+    for face in out_faces:
+        if len({component_by_vid[str(x)] for x in face}) != 1:
+            raise QualificationError("CANONICAL_MESH_HARMONIC_CROSS_COMPONENT_FACE")
+        for i, j in ((0, 1), (1, 2), (2, 0)):
+            a, b = str(face[i]), str(face[j])
+            pair = _pair(a, b)
+            pa = vertices_by_id[pair[0]].P
+            pb = vertices_by_id[pair[1]].P
+            length = math.sqrt(sum(
+                (float(pa[k]) - float(pb[k])) ** 2
+                for k in range(3)
+            ))
+            if not math.isfinite(length) or length <= 1e-12:
+                raise QualificationError("CANONICAL_MESH_HARMONIC_EDGE_DEGENERATE")
+            edge_weights[pair] = max(edge_weights.get(pair, 0.0), 1.0 / length)
+
+    neighbors: dict[str, list[tuple[str, float]]] = {
+        str(vid): [] for vid in vertices_by_id
+    }
+    for (a, b), weight in edge_weights.items():
+        if component_by_vid[a] != component_by_vid[b]:
+            raise QualificationError("CANONICAL_MESH_HARMONIC_GRAPH_COMPONENT_LEAK")
+        neighbors[a].append((b, float(weight)))
+        neighbors[b].append((a, float(weight)))
+
+    component_vertices: dict[str, list[str]] = {}
+    for vid, component_id in component_by_vid.items():
+        component_vertices.setdefault(component_id, []).append(vid)
+
+    generated_count = 0
+    stored_coefficient_count = 0
+    max_support_count = 0
+    component_solve_count = 0
+
+    for component_id in sorted(component_vertices):
+        vids = tuple(sorted(component_vertices[component_id]))
+        unknown = tuple(
+            vid for vid in vids
+            if str(vertices_by_id[vid].support_binding.mode)
+            == "SEAM_GEOMETRY_INTERPOLATION"
+        )
+        if not unknown:
+            continue
+        anchors = tuple(vid for vid in vids if vid not in set(unknown))
+        if not anchors:
+            raise QualificationError("CANONICAL_MESH_HARMONIC_COMPONENT_NO_ANCHOR")
+
+        anchor_surface_id: dict[str, str] = {}
+        for vid in anchors:
+            binding = vertices_by_id[vid].support_binding
+            coeffs = tuple(binding.coefficients)
+            if (
+                str(binding.mode) != "IDENTITY_SURFACE_NODE"
+                or len(coeffs) != 1
+                or abs(float(coeffs[0][1]) - 1.0) > 1e-12
+            ):
+                raise QualificationError("CANONICAL_MESH_HARMONIC_ANCHOR_INVALID")
+            anchor_surface_id[vid] = str(coeffs[0][0])
+
+        uindex = {vid: i for i, vid in enumerate(unknown)}
+        aindex = {vid: i for i, vid in enumerate(anchors)}
+        rows: list[int] = []
+        cols: list[int] = []
+        vals: list[float] = []
+        boundary = np.zeros((len(unknown), len(anchors)), dtype=np.float64)
+
+        for row_index, vid in enumerate(unknown):
+            total = 0.0
+            for neighbor, weight in neighbors[vid]:
+                if component_by_vid[neighbor] != component_id:
+                    raise QualificationError("CANONICAL_MESH_HARMONIC_GRAPH_COMPONENT_LEAK")
+                total += float(weight)
+                if neighbor in uindex:
+                    rows.append(row_index)
+                    cols.append(uindex[neighbor])
+                    vals.append(-float(weight))
+                elif neighbor in aindex:
+                    boundary[row_index, aindex[neighbor]] += float(weight)
+                else:
+                    raise QualificationError("CANONICAL_MESH_HARMONIC_NEIGHBOR_INVALID")
+            if total <= 0.0:
+                raise QualificationError("CANONICAL_MESH_HARMONIC_ZERO_DEGREE")
+            rows.append(row_index)
+            cols.append(row_index)
+            vals.append(total)
+
+        laplacian = csr_matrix(
+            (vals, (rows, cols)),
+            shape=(len(unknown), len(unknown)),
+        )
+        coordinates = np.asarray(
+            spsolve(laplacian, boundary),
+            dtype=np.float64,
+        )
+        if coordinates.ndim == 1:
+            coordinates = coordinates[:, None]
+        if (
+            coordinates.shape != (len(unknown), len(anchors))
+            or not np.isfinite(coordinates).all()
+        ):
+            raise QualificationError("CANONICAL_MESH_HARMONIC_SOLVE_INVALID")
+        if float(np.min(coordinates)) < -1e-10:
+            raise QualificationError("CANONICAL_MESH_HARMONIC_NEGATIVE_COORDINATE")
+
+        coordinates = np.maximum(coordinates, 0.0)
+        sums = coordinates.sum(axis=1, keepdims=True)
+        if np.any(sums <= 1e-12):
+            raise QualificationError("CANONICAL_MESH_HARMONIC_SIMPLEX_COLLAPSE")
+        coordinates = coordinates / sums
+
+        for local_index, vid in enumerate(unknown):
+            row = coordinates[local_index]
+            retained = np.nonzero(row > float(support_epsilon))[0]
+            if not len(retained):
+                retained = np.asarray([int(np.argmax(row))], dtype=np.int64)
+            retained_total = float(np.sum(row[retained]))
+            if retained_total <= 0.0:
+                raise QualificationError("CANONICAL_MESH_HARMONIC_SUPPORT_EMPTY")
+            support = tuple(sorted(
+                (
+                    anchor_surface_id[anchors[int(index)]],
+                    float(row[int(index)] / retained_total),
+                )
+                for index in retained.tolist()
+            ))
+            if abs(sum(float(weight) for _, weight in support) - 1.0) > 1e-9:
+                raise QualificationError("CANONICAL_MESH_HARMONIC_SUPPORT_SIMPLEX_INVALID")
+
+            vertex = vertices_by_id[vid]
+            binding = vertex.support_binding
+            vertices_by_id[vid] = replace(
+                vertex,
+                support_binding=replace(
+                    binding,
+                    metadata={
+                        **dict(binding.metadata or {}),
+                        "skin_support_coefficients": support,
+                        "mechanical_skin_transfer": "COMPONENT_HARMONIC_DIRICHLET_V1",
+                        "harmonic_component_id": component_id,
+                        "harmonic_support_count": len(support),
+                        "harmonic_support_epsilon": float(support_epsilon),
+                    },
+                ),
+            )
+            generated_count += 1
+            stored_coefficient_count += len(support)
+            max_support_count = max(max_support_count, len(support))
+
+        component_solve_count += 1
+
+    return {
+        "mechanical_skin_transfer": "COMPONENT_HARMONIC_DIRICHLET_V1",
+        "generated_vertex_count": int(generated_count),
+        "component_solve_count": int(component_solve_count),
+        "stored_support_coefficient_count": int(stored_coefficient_count),
+        "max_support_count_per_generated_vertex": int(max_support_count),
+        "support_epsilon": float(support_epsilon),
+        "cross_component_support_allowed": False,
+        "qualified_skin_weights_used": False,
+    }
+
+
 def build_holeless_partitioned_dense_candidate(
     surface: RiggingSurfaceIR,
     partition: MechanicalPartitionIR,
@@ -268,6 +461,7 @@ def build_holeless_partitioned_dense_candidate(
     producer_policy_hash: str,
     explicit_face_provenance: tuple[tuple[str, str, str], ...],
     min_relative_double_area: float = 1e-8,
+    mechanical_skin_transfer: str = "OWNER_COPY",
 ) -> CanonicalMeshCandidateIR:
     """Build dense-face topology after a mechanical repartition without deleting faces.
 
@@ -494,6 +688,22 @@ def build_holeless_partitioned_dense_candidate(
     if area_error > 1e-10:
         raise QualificationError("CANONICAL_MESH_HOLELESS_REST_AREA_NOT_PRESERVED")
 
+    skin_transfer_report = {
+        "mechanical_skin_transfer": "OWNER_COPY",
+        "generated_vertex_count": int(len(seam_cache) + len(centroid_cache)),
+        "component_solve_count": 0,
+        "stored_support_coefficient_count": int(len(seam_cache) + len(centroid_cache)),
+        "max_support_count_per_generated_vertex": 1 if (seam_cache or centroid_cache) else 0,
+        "support_epsilon": None,
+        "cross_component_support_allowed": False,
+        "qualified_skin_weights_used": False,
+    }
+    if mechanical_skin_transfer == "COMPONENT_HARMONIC_DIRICHLET_V1":
+        skin_transfer_report = _apply_component_harmonic_skin_support(
+            vertices_by_id,
+            out_faces,
+        )
+
     edges = tuple(sorted({
         tuple(sorted((str(face[i]), str(face[j]))))
         for face in out_faces
@@ -524,6 +734,10 @@ def build_holeless_partitioned_dense_candidate(
             "generated_centroid_vertex_count": len(centroid_cache),
             "rest_area_relative_error": float(area_error),
             "dual_geometry_skin_support_required": bool(seam_cache or centroid_cache),
+            "mechanical_skin_transfer": str(
+                skin_transfer_report["mechanical_skin_transfer"]
+            ),
+            "mechanical_skin_transfer_report": dict(skin_transfer_report),
         },
     )
     return CanonicalMeshCandidateIR(

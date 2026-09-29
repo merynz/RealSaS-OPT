@@ -10,7 +10,7 @@ on:
 
 concurrency:
   group: knight-harmonic-first-frozen-render-only-v1
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   render:

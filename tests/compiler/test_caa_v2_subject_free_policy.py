@@ -215,7 +215,7 @@ def test_source_anchored_holdout_respects_shipping_hop_budget_on_branching_graph
     assert stats["maximum_graph_hops"] <= 2
 
 
-def test_structured_holdout_uses_bounded_surface_completion_and_rejects_view_conflict():
+def test_structured_holdout_prefers_local_harmonic_before_cross_view_donor():
     p = _policy()["completion_quality_policy"]
     good_args = _holdout_fixture(adversarial=False)
     good = structured_holdout_metrics(
@@ -223,13 +223,17 @@ def test_structured_holdout_uses_bounded_surface_completion_and_rejects_view_con
         band_fraction=p["holdout_band_fraction"],
         max_region_samples=p["max_local_harmonic_region_samples"],
         max_graph_hops=p["max_local_harmonic_graph_hops"],
+        donor_color_conflict_cut_rgba_l1=p["cross_view_color_conflict_cut_rgba_l1"],
+        donor_alpha_conflict_cut=p["cross_view_alpha_conflict_cut"],
     )
-    bad_args = _holdout_fixture(adversarial=True)
-    bad = structured_holdout_metrics(
-        **bad_args,
+    conflicting_donor_args = _holdout_fixture(adversarial=True)
+    conflicting_donor = structured_holdout_metrics(
+        **conflicting_donor_args,
         band_fraction=p["holdout_band_fraction"],
         max_region_samples=p["max_local_harmonic_region_samples"],
         max_graph_hops=p["max_local_harmonic_graph_hops"],
+        donor_color_conflict_cut_rgba_l1=p["cross_view_color_conflict_cut_rgba_l1"],
+        donor_alpha_conflict_cut=p["cross_view_alpha_conflict_cut"],
     )
     assert good["mode"] == "SILHOUETTE_ADJACENT_BOUNDED_OCCLUSION_PATCHES_V4_SOURCE_ANCHORED"
     assert good["other_view_donor_selection"] == "MAX_FACE_SUPPORT_SAME_AS_STAGE21"
@@ -240,9 +244,14 @@ def test_structured_holdout_uses_bounded_surface_completion_and_rejects_view_con
     )
     assert good["mean_rgba_l1"] <= p["max_structured_holdout_mean_rgba_l1"]
     assert good["p95_rgba_l1"] <= p["max_structured_holdout_p95_rgba_l1"]
-    assert (
-        bad["mean_rgba_l1"] > p["max_structured_holdout_mean_rgba_l1"]
-        or bad["p95_rgba_l1"] > p["max_structured_holdout_p95_rgba_l1"]
+
+    # Deliberately contradictory other-view colors must not poison a region
+    # that same-view source-bounded harmonic completion can already solve.
+    assert conflicting_donor["mean_rgba_l1"] <= p["max_structured_holdout_mean_rgba_l1"]
+    assert conflicting_donor["p95_rgba_l1"] <= p["max_structured_holdout_p95_rgba_l1"]
+    assert all(
+        int(row["harmonic_completion"]["donor_fallback_recovered_count"]) == 0
+        for row in conflicting_donor["per_view"]
     )
 
 def _seam_fixture(*, adversarial: bool):

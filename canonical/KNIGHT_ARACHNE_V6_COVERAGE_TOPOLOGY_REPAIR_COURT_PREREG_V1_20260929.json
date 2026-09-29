@@ -47,12 +47,12 @@
     "report_worst_edge_max": true
   },
   "selection_after_court": {
-    "primary": "G3B_PASS",
+    "primary": "G3B_PASS_AND_G3_PASS_REQUIRED",
     "secondary": "MIN_ACTUAL_MOTION_MAX_EDGE_GT_10",
     "tertiary": "MIN_ACTUAL_MOTION_MAX_EDGE_GT_4",
     "quaternary": "MIN_ACTUAL_MOTION_WORST_EDGE_MAX",
     "tie_breaker": "FEWER_REPARTITION_ITERATIONS",
-    "no_selection_if_neither_closes_g3b": true
+    "no_selection_if_neither_closes_g3b_and_g3": true
   },
   "claim_boundary": [
     "This is a demo-witness topology-repair court, not generalization evidence.",

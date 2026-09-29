@@ -11,8 +11,8 @@
 - Explained by continuity policy: **344**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **149**
-- Safe-default evidence-only branches: **145**
+- Live branches: **150**
+- Safe-default evidence-only branches: **146**
 
 ### Classification counts
 
@@ -44,6 +44,7 @@ _None._
 | `audit/geppetto-v2-frozen-base-7f39` | `7f39a846ad05` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `audit/historical-product-power-rebind-20260913` | `2bba9828a3b3` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `audit/iris-architecture-discipline-20260824` | `d7bba01c85e9` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `audit/knight-rest-visual-owner-20260930` | `6ed060351512` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `baseline/h0-first-family-v1-20260904` | `a3cec7021f0d` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `behavioral/geppetto-v2-integrity-v1-20260903` | `2b5d46718683` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `cleanroom/iris-geometry-field-v1-20260904` | `e72636d8366d` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -102,7 +103,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `33bd30d2ac67` | `CANONICAL` | canonical branch |
+| `main` | `3f4dd26c383f` | `CANONICAL` | canonical branch |
 | `motion/quaternius-direct-fbx-gate-v1-20260919` | `47fb1555455b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -153,7 +154,7 @@ _None._
 | `research/stage14-v2-final-calibration-20260920` | `8a502d4bee42` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/stage14-v2-policy-calibration-20260919` | `b399a90c1c3a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/stage14-v2-policy-calibration-fixed-20260919` | `f08716b32db9` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `research/vf11-certified-adaptive-20260921` | `cc1973a8d0d6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `research/vf11-certified-adaptive-20260921` | `6ed060351512` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/compiler-runtime-promotion-v1-20260903` | `83aa411cc06d` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/compiler-runtime-promotion-v1-20260903-directional-binding-firewall` | `800d3ccb042e` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety` | `2eb09fe3e8c6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

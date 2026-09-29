@@ -12,8 +12,8 @@
   "explained_high_signal_count": 344,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 149,
-  "safe_default_evidence_only_branch_count": 145,
+  "live_branch_count": 150,
+  "safe_default_evidence_only_branch_count": 146,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -103,6 +103,12 @@
     {
       "name": "audit/iris-architecture-discipline-20260824",
       "sha": "d7bba01c85e95eba86e29e2194f16b286e405d0a",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "audit/knight-rest-visual-owner-20260930",
+      "sha": "6ed060351512a5f76a206acce011b585f48b1768",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -456,7 +462,7 @@
     },
     {
       "name": "main",
-      "sha": "33bd30d2ac6768de90e6e296b0976a41e6ea0b84",
+      "sha": "3f4dd26c383f91dc620be97a693398c410c69393",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -762,7 +768,7 @@
     },
     {
       "name": "research/vf11-certified-adaptive-20260921",
-      "sha": "cc1973a8d0d6e7f4f21fa30a4c368ab3d19ff621",
+      "sha": "6ed060351512a5f76a206acce011b585f48b1768",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

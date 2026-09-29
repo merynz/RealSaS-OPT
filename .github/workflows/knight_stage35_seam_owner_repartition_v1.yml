@@ -1,0 +1,40 @@
+name: knight-stage35-seam-owner-repartition-v1
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths:
+      - 'tools/audit_knight_stage35_seam_owner_repartition_v1.py'
+      - '.github/workflows/knight_stage35_seam_owner_repartition_v1.yml'
+permissions: {contents: write}
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Audit first repaired children
+        shell: bash
+        run: |
+          set -euo pipefail
+          outroot=canonical/knight_stage35_seam_owner_repartition_v1
+          rm -rf "$outroot"; mkdir -p "$outroot"
+          for arm in UNIFORM_ALL_PROJECTED ACTIVE_BALANCED_ALL_PROJECTED; do
+            PYTHONPATH=. python tools/audit_knight_stage35_seam_owner_repartition_v1.py               --surface "$RUN_ROOT/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"               --partition "canonical/knight_arachne_stage17_stage18_repair_child_v1/$arm/child_partition.json"               --candidate "canonical/knight_arachne_stage17_stage18_repair_child_v1/$arm/child_candidate.json"               --skin "canonical/knight_arachne_v6_2x2_rebound_stage35_v1/$arm.QUALIFIED_SKIN.json"               --skeleton "$RUN_ROOT/artifacts/28_SKELETON_QUALIFIED/qualified_skeleton.json"               --envelope "$RUN_ROOT/artifacts/34_DEFORMATION_CAPABILITY_ENVELOPE/deformation_envelope.json"               --cameras "$RUN_ROOT/artifacts/05_CAMERA_CONTRACT_SOLVED/qualified_camera_set.json"               --policy "$RUN_ROOT/artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/mesh_qualification_policy.json"               --out "$outroot/$arm.json"
+          done
+      - name: Seal
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/knight_stage35_seam_owner_repartition_v1
+          git commit -m 'audit: seal Stage35 seam-owner repairability'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

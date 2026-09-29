@@ -1,0 +1,50 @@
+name: knight-corrected-mechanical-caa-stage23-consumer-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths:
+      - 'tools/demo/consume_knight_corrected_mechanical_caa_stage23_immutable_v1.py'
+      - '.github/workflows/knight_corrected_mechanical_caa_stage23_consumer_v1.yml'
+
+concurrency:
+  group: knight-corrected-mechanical-caa-stage23-consumer-v1
+  cancel-in-progress: false
+
+jobs:
+  consume:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 8
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      SOURCE_RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_IMMUTABLE_V1_20260929_195329Z
+      CONSUMER_RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_RENDER_CONSUMER_V1_20260929_201211Z
+      OUT_DIR: /tmp/knight_corrected_mechanical_caa_immutable_consumer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Verify immutable consumer and frozen renderer
+        run: |
+          set -euo pipefail
+          test "$(git hash-object tools/demo/frozen/render_knight_motion_preview_v1_7917be02.py)" = "7917be02f325ba00b5dcd2b31a786898e45f640f"
+          python -m py_compile tools/demo/consume_knight_corrected_mechanical_caa_stage23_immutable_v1.py
+      - name: Qualify Stage24 and render frozen baseline
+        run: |
+          set -euo pipefail
+          rm -rf "$OUT_DIR"
+          mkdir -p "$OUT_DIR"
+          PYTHONPATH=. python tools/demo/consume_knight_corrected_mechanical_caa_stage23_immutable_v1.py             --authority-root "$AUTHORITY_ROOT"             --source-run-id "$SOURCE_RUN_ID"             --consumer-run-id "$CONSUMER_RUN_ID"             --out-dir "$OUT_DIR"
+      - name: Upload immutable consumer artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: knight-corrected-mechanical-caa-immutable-consumer-v1
+          path: |
+            /tmp/knight_corrected_mechanical_caa_immutable_consumer/*.gif
+            /tmp/knight_corrected_mechanical_caa_immutable_consumer/REPORT.json
+            /tmp/knight_corrected_mechanical_caa_immutable_consumer/frozen_renderer/*.png
+            /tmp/knight_corrected_mechanical_caa_immutable_consumer/frozen_renderer/*.json
+          if-no-files-found: error
+          retention-days: 7

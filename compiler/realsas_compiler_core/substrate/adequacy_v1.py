@@ -19,7 +19,9 @@ from .scene_first_signed import (
     _self_zbuffer_support,
     mesh_connected_component_labels_v1,
     rigging_surface_from_scene_first_zero_mesh_v1,
-    robust_zero_surface_normals_v1,
+    topology_aware_zero_surface_normals_v2,
+    ZERO_SURFACE_NORMAL_OPERATOR_V2_ID,
+    zero_surface_normal_operator_hash_v2,
 )
 
 Json=dict[str,Any]
@@ -366,9 +368,13 @@ def select_adequate_rigging_surface_v1(
     # measurement we use the signed decoder normals as orientation-bearing dense
     # reference; selected S still uses the canonical robust PCA operator.
     metric_dense_normals=hints/np.linalg.norm(hints,axis=1,keepdims=True).clip(min=1e-12)
-    gsa_dense_normals = robust_zero_surface_normals_v1(
-        dense_world, hints, k=int(normal_k)
+    gsa_dense_normals = topology_aware_zero_surface_normals_v2(
+        dense_world,
+        f,
+        hints,
     )
+    gsa_normal_operator_id = ZERO_SURFACE_NORMAL_OPERATOR_V2_ID
+    gsa_normal_operator_hash = zero_surface_normal_operator_hash_v2()
     dense_labels=_dense_component_labels(len(vn),f)
     dense_support,dense_raster,_=_self_zbuffer_support(
         dense_world,dense_world,tuple(cameras),
@@ -393,6 +399,8 @@ def select_adequate_rigging_surface_v1(
             visibility_depth_tolerance_norm=float(visibility_depth_tolerance_norm),
             component_aware_compaction=bool(policy.get("component_aware_voxel_compaction",False)),
             precomputed_dense_normals=gsa_dense_normals,
+            precomputed_normal_operator_id=gsa_normal_operator_id,
+            precomputed_normal_operator_hash=gsa_normal_operator_hash,
             precomputed_component_labels=dense_labels,
             metadata={**dict(metadata or {}),"substrate_adequacy_candidate":True,"candidate_target_node_cap":cap},
         )

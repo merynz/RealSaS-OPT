@@ -11,6 +11,8 @@ from models.iris.v3.zero_surface_decoder_v3 import extract_zero_surface_mesh_v3
 from compiler.realsas_compiler_core.substrate.scene_first_signed import (
     _adaptive_voxel_compact,
     mesh_connected_component_labels_v1,
+    topology_aware_zero_surface_normals_v2,
+    ZERO_SURFACE_NORMAL_OPERATOR_V2_ID,
 )
 
 
@@ -62,6 +64,11 @@ def test_substrate_adequacy_selects_deterministic_passing_n():
     assert ra["selected_actual_node_count"]==len(a.surface_nodes)
     assert 64<=len(a.surface_nodes)<=512
     assert ra["status"]=="PASS"
+    assert a.metadata["Nd_operator"]==ZERO_SURFACE_NORMAL_OPERATOR_V2_ID
+    assert all(
+        node.metadata["normal_operator"]==ZERO_SURFACE_NORMAL_OPERATOR_V2_ID
+        for node in a.surface_nodes
+    )
 
 
 def test_substrate_adequacy_fails_closed_when_no_candidate_meets_policy():
@@ -198,3 +205,30 @@ def test_failed_selector_can_return_demo_evidence_without_mutating_product_statu
     assert closest["actual_node_count"]==len(surface.surface_nodes)
     assert closest["violations"]["finite"] is True
     assert report["adequacy_report_hash"]==substrate_adequacy_report_hash_v1(report)
+
+
+def test_topology_local_normals_ignore_spatially_close_disconnected_sheet():
+    # Sheet A is XY with +Z normal. Sheet B is XZ with +Y normal and is moved
+    # arbitrarily close to A. Face-incidence normals for A must be invariant.
+    a=np.asarray([
+        [-1.0,-1.0,0.0],[1.0,-1.0,0.0],[1.0,1.0,0.0],[-1.0,1.0,0.0],
+    ],dtype=np.float64)
+    fa=np.asarray([[0,1,2],[0,2,3]],dtype=np.int64)
+    ha=np.tile(np.asarray([[0.0,0.0,1.0]]),(4,1))
+
+    def combined(offset_y):
+        b=np.asarray([
+            [-1.0,offset_y,-1.0],[1.0,offset_y,-1.0],
+            [1.0,offset_y,1.0],[-1.0,offset_y,1.0],
+        ],dtype=np.float64)
+        fb=np.asarray([[4,6,5],[4,7,6]],dtype=np.int64)
+        hb=np.tile(np.asarray([[0.0,1.0,0.0]]),(4,1))
+        p=np.concatenate((a,b),axis=0)
+        f=np.concatenate((fa,fb),axis=0)
+        h=np.concatenate((ha,hb),axis=0)
+        return topology_aware_zero_surface_normals_v2(p,f,h)
+
+    near=combined(1e-7)
+    far=combined(5.0)
+    assert np.allclose(near[:4],far[:4],atol=1e-12)
+    assert np.allclose(near[:4],ha,atol=1e-12)

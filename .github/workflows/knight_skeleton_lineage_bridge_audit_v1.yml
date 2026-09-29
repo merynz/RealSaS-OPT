@@ -22,6 +22,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
       - name: Compare Arachne-bound skeleton with current Stage28
         shell: bash
         run: |
@@ -39,7 +41,7 @@ jobs:
           s=json.load(open(sys.argv[3]))
 
           def joints(x):
-              return {str(j["joint_id"]):j for j in x["joints"]}
+              return {str(j["canonical_joint_id"]):j for j in x["joints"]}
 
           A=joints(a); C=joints(c)
           common=sorted(set(A)&set(C))
@@ -68,7 +70,7 @@ jobs:
             "arachne_joint_count":len(A),
             "current_joint_count":len(C),
             "joint_id_sets_equal":set(A)==set(C),
-            "joint_order_equal":[j["joint_id"] for j in a["joints"]]==[j["joint_id"] for j in c["joints"]],
+            "joint_order_equal":[j["canonical_joint_id"] for j in a["joints"]]==[j["canonical_joint_id"] for j in c["joints"]],
             "only_arachne_joint_ids":only_a,
             "only_current_joint_ids":only_c,
             "parent_diff_count":len(parent_diff),

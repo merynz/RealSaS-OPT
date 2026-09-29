@@ -21,6 +21,7 @@ def main():
         valid=np.asarray(z["teacher_valid_mask"],dtype=np.uint8).astype(bool)
         bank_pos=np.asarray(z["target_positions_world"],dtype=np.float64) if "target_positions_world" in z.files else None
         bank_par=np.asarray(z["target_parent_indices"],dtype=np.int64) if "target_parent_indices" in z.files else None
+        bank_roles=np.asarray(z["target_role_codes"],dtype=np.int64) if "target_role_codes" in z.files else None
         bank_keys=sorted(z.files)
 
     with np.load(a.target_npz,allow_pickle=False) as z:
@@ -47,9 +48,11 @@ def main():
                 alignment=idx.astype(int)
                 max_pos_error=float(errs.max(initial=0.0))
 
-    # Collect any role vector from NPZ or report without assuming schema.
-    role_values=None
-    role_source=None
+    # Collect role vector. The mechanically-meaningful target builder seals codes:
+    # 0 skin-supported, 1 structural bridge, 2 root-motion anchor, 3 terminal extension, 4 synthetic tip.
+    role_names={0:"SKIN_SUPPORTED_ARTICULATION",1:"STRUCTURAL_BRIDGE",2:"ROOT_MOTION_ANCHOR",3:"TERMINAL_EXTENSION_SOURCE",4:"TERMINAL_TIP_SYNTHETIC"}
+    role_values=[role_names.get(int(x),f"UNKNOWN_ROLE_{int(x)}") for x in bank_roles.tolist()] if bank_roles is not None else None
+    role_source="teacher_bank:target_role_codes" if bank_roles is not None else None
     for k in ("roles","target_roles","joint_roles","role"):
         if k in target and len(np.asarray(target[k]).reshape(-1))==W.shape[1]:
             role_values=[str(x) for x in np.asarray(target[k]).reshape(-1).tolist()]

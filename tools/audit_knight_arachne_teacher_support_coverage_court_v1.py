@@ -31,7 +31,7 @@ def main():
     # Resolve Geppetto target-column alignment conservatively by exact/near-exact target positions
     # only if a compatible position matrix exists.
     position_key=None
-    for k in ("positions","target_positions_world","joint_positions","target_positions"):
+    for k in ("positions_world","positions","target_positions_world","joint_positions","target_positions"):
         if k in target and np.asarray(target[k]).ndim==2 and np.asarray(target[k]).shape[1]==3:
             position_key=k; break
     alignment=None

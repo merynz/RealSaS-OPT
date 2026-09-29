@@ -1,0 +1,106 @@
+name: knight-arachne-v6-2x2-rebound-stage35-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths:
+      - 'tools/audit_knight_arachne_v6_2x2_rebound_stage35_v1.py'
+      - '.github/workflows/knight_arachne_v6_2x2_rebound_stage35_v1.yml'
+
+concurrency:
+  group: knight-arachne-v6-2x2-rebound-stage35-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      DRIVE_ROOT: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_V6_COVERAGE_SAMPLING_2X2_INDEXSPACE_FIXED_20260929/ARMS
+      OLD_SKEL: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V5_DEMO_HANDOFF/FINAL_QUALIFIED_SKELETON_IR.json
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Syntax
+        run: python -m py_compile tools/audit_knight_arachne_v6_2x2_rebound_stage35_v1.py
+      - name: Rebind, requalify, and diagnose four corrected skins
+        shell: bash
+        run: |
+          set -euo pipefail
+          work="$(mktemp -d)"
+          rclone copyto "$OLD_SKEL" "$work/old_skeleton.json" --checksum
+          mkdir -p canonical/knight_arachne_v6_2x2_rebound_stage35_v1
+          arms=(UNIFORM_VALID ACTIVE_BALANCED_VALID UNIFORM_ALL_PROJECTED ACTIVE_BALANCED_ALL_PROJECTED)
+          for arm in "${arms[@]}"; do
+            mkdir -p "$work/$arm"
+            rclone copyto "$DRIVE_ROOT/$arm/ARACHNE_KNIGHT_V6_CANONICAL_SKIN_WEIGHTS_F64.npz" "$work/$arm/weights.npz" --checksum
+            PYTHONPATH=. python tools/audit_knight_arachne_v6_2x2_rebound_stage35_v1.py               --authority-root "$AUTHORITY_ROOT"               --run-id "$RUN_ID"               --arm "$arm"               --weights-npz "$work/$arm/weights.npz"               --old-skeleton-json "$work/old_skeleton.json"               --work-dir "$work/$arm/artifacts"               --out "$work/$arm/report.json"               | tee "canonical/knight_arachne_v6_2x2_rebound_stage35_v1/$arm.STDOUT.txt"
+            cp "$work/$arm/report.json" "canonical/knight_arachne_v6_2x2_rebound_stage35_v1/$arm.REPORT.json"
+            cp "$work/$arm/artifacts/qualified_skin_rebound.json" "canonical/knight_arachne_v6_2x2_rebound_stage35_v1/$arm.QUALIFIED_SKIN.json"
+            if test -f "$work/$arm/artifacts/mechanical_repartition_directive.json"; then
+              cp "$work/$arm/artifacts/mechanical_repartition_directive.json" "canonical/knight_arachne_v6_2x2_rebound_stage35_v1/$arm.REPARTITION_DIRECTIVE.json"
+            fi
+          done
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path("canonical/knight_arachne_v6_2x2_rebound_stage35_v1")
+          arms=("UNIFORM_VALID","ACTIVE_BALANCED_VALID","UNIFORM_ALL_PROJECTED","ACTIVE_BALANCED_ALL_PROJECTED")
+          rows={}
+          for arm in arms:
+              x=json.loads((root/f"{arm}.REPORT.json").read_text())
+              assert x["status"]=="PASS_DIAGNOSTIC_EXECUTED"
+              rows[arm]={
+                  "source_weights_npz_sha256":x["source_weights_npz_sha256"],
+                  "semantic_tree_hash":x["semantic_tree_hash"],
+                  "compiler_requalification":x["compiler_requalification"],
+                  "g3":x["g3"],
+                  "g3b":x["g3b"],
+                  "repartition":x["repartition"],
+                  "topology_authority":x["topology_authority"],
+              }
+          out={
+              "schema":"RealSaS.KnightArachneV6CoverageSampling2x2ReboundStage35Court.v1",
+              "status":"COMPLETE",
+              "arms":rows,
+              "claim_boundary":[
+                  "All four Arachne numeric skin fields were losslessly semantic-ID rebound to the current Stage28 skeleton.",
+                  "All four rebound proposals were independently requalified by Compiler.qualify_skin.",
+                  "G3/G3B diagnostics use the same current Stage18 candidate, Stage17 partition, Stage34 envelope and camera authority.",
+                  "No product topology state is mutated and repartition directives remain authorization-gated.",
+              ],
+          }
+          Path("canonical/KNIGHT_ARACHNE_V6_2X2_REBOUND_STAGE35_COURT_V1_20260929.json").write_text(json.dumps(out,indent=2,sort_keys=True)+"\n")
+          print("KNIGHT_ARACHNE_V6_2X2_REBOUND_STAGE35_COURT="+json.dumps({
+              a:{
+                  "g3_unsafe":rows[a]["g3"]["unsafe_face_count"],
+                  "g3b_risky":rows[a]["g3b"]["risky_face_count"],
+                  "g3b_unsafe":rows[a]["g3b"]["unsafe_face_count"],
+                  "separate_pairs":None if rows[a]["repartition"] is None else rows[a]["repartition"]["candidate_separate_pair_count"],
+                  "unresolved":None if rows[a]["repartition"] is None else rows[a]["repartition"]["unresolved_unsafe_face_count"],
+                  "max_abs_delta":rows[a]["compiler_requalification"]["max_abs_weight_delta"],
+              } for a in arms
+          },sort_keys=True))
+          PY
+      - name: Seal
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_ARACHNE_V6_2X2_REBOUND_STAGE35_COURT_V1_20260929.json                   canonical/knight_arachne_v6_2x2_rebound_stage35_v1
+          git commit -m 'audit: seal corrected Arachne rebound Stage35 court'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

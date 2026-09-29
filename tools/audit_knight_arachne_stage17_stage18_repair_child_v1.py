@@ -32,6 +32,13 @@ from compiler.realsas_compiler_core.product_authority_v1 import (
     build_component_carrier_policy,
     validate_canonical_mesh_candidate,
 )
+from compiler.realsas_compiler_core.preproduct_authority_v1 import (
+    normalization_domain_from_dict,
+    signed_zero_surface_from_dict,
+)
+from compiler.realsas_compiler_core.substrate.scene_first_signed import (
+    mesh_connected_component_labels_v1,
+)
 from compiler.realsas_compiler_core.mesh.deformation_stress_v1 import _candidate_skin_matrix
 from tools.audit_knight_teacher_free_weight_completion_court_v1 import motion_metrics, stress_arbitrary_weights
 from tools.demo.render_knight_motion_preview_v1 import _ctx
@@ -89,6 +96,77 @@ def face_indices(candidate):
     return np.asarray([[ix[str(x)] for x in face] for face in candidate.faces],dtype=np.int64)
 
 
+def compact_inverse(points: np.ndarray, faces: np.ndarray, *, divisions: int, component_aware: bool):
+    p=np.asarray(points,dtype=np.float64)
+    f=np.asarray(faces,dtype=np.int64)
+    if divisions==0:
+        return np.arange(len(p),dtype=np.int64)
+    lo=p.min(axis=0)
+    span=np.maximum(p.max(axis=0)-lo,1e-12)
+    keys=np.floor((p-lo)/span*int(divisions)).astype(np.int64)
+    keys=np.clip(keys,0,int(divisions)-1)
+    if component_aware:
+        labels=mesh_connected_component_labels_v1(len(p),f)
+        keys=np.column_stack((labels,keys))
+    _,inv=np.unique(keys,axis=0,return_inverse=True)
+    return np.asarray(inv,dtype=np.int64)
+
+
+def compact_points(points: np.ndarray, inv: np.ndarray):
+    n=int(inv.max())+1
+    counts=np.bincount(inv,minlength=n).astype(np.float64)
+    out=np.zeros((n,3),dtype=np.float64)
+    np.add.at(out,inv,np.asarray(points,dtype=np.float64))
+    out/=counts[:,None]
+    return out
+
+
+def mapped_faces(faces: np.ndarray, inv: np.ndarray):
+    mf=inv[np.asarray(faces,dtype=np.int64)]
+    keep=(mf[:,0]!=mf[:,1])&(mf[:,1]!=mf[:,2])&(mf[:,2]!=mf[:,0])
+    mf=np.sort(mf[keep],axis=1)
+    return np.unique(mf,axis=0)
+
+
+def replay_compacted_dense_face_provenance(rr: Path, surface):
+    zero_path=rr/"artifacts/12_ZERO_SURFACE_DECODED/signed_zero_surface_seal.json"
+    norm_path=rr/"artifacts/08_NORMALIZATION_DOMAIN_QUALIFIED/normalization_domain.json"
+    zero=signed_zero_surface_from_dict(load_json(zero_path))
+    norm=normalization_domain_from_dict(load_json(norm_path))
+    npz=Path(zero.npz_path)
+    if not npz.is_file():
+        raise RuntimeError("ZERO_NPZ_MISSING")
+    with np.load(npz,allow_pickle=False) as z:
+        vn=np.asarray(z["vertices_normalized"],dtype=np.float64)
+        dense_faces=np.asarray(z["faces"],dtype=np.int64)
+    world=np.asarray(norm.center_xyz,dtype=np.float64)[None,:]+vn*float(norm.half_extent)
+    md=dict(surface.metadata or {})
+    divisions=int(md.get("compact_voxel_divisions",-1))
+    component_aware=bool(md.get("component_aware_compaction",False))
+    if divisions<0:
+        raise RuntimeError("COMPACTION_DIVISIONS_MISSING")
+    inv=compact_inverse(world,dense_faces,divisions=divisions,component_aware=component_aware)
+    cp=compact_points(world,inv)
+    actual=np.asarray([n.P for n in surface.surface_nodes],dtype=np.float64)
+    if cp.shape!=actual.shape:
+        raise RuntimeError(f"COMPACT_COUNT_DRIFT::{cp.shape}::{actual.shape}")
+    poserr=np.linalg.norm(cp-actual,axis=1)
+    if float(poserr.max(initial=0.0))>=1e-9:
+        raise RuntimeError(f"COMPACT_INDEX_ORDER_DRIFT::{float(poserr.max(initial=0.0))}")
+    mf=mapped_faces(dense_faces,inv)
+    sids=tuple(str(n.surface_id) for n in surface.surface_nodes)
+    explicit=tuple(tuple(sids[int(i)] for i in row) for row in mf.tolist())
+    return explicit,{
+        "dense_vertex_count":int(len(world)),
+        "dense_face_count":int(len(dense_faces)),
+        "compact_face_count":int(len(explicit)),
+        "compact_node_count":int(len(cp)),
+        "component_aware":component_aware,
+        "voxel_divisions":divisions,
+        "position_error_max":float(poserr.max(initial=0.0)),
+    }
+
+
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--authority-root",type=Path,required=True)
@@ -103,7 +181,7 @@ def main():
 
     rr=_ctx(args.authority_root,args.run_id)["run_root"]
     surface=load(stage_output_path(rr,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1"),rigging_surface_from_dict)
-    face_prov=load_json(stage_output_path(rr,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.CompactedDenseFaceProvenance.v1"))
+    explicit_faces,face_provenance_replay=replay_compacted_dense_face_provenance(rr,surface)
     parent=load(stage_output_path(rr,"17_MECHANICAL_PARTITION_QUALIFIED","RealSaS.MechanicalPartitionIR.v1"),mechanical_partition_from_dict)
     parent_candidate=load(stage_output_path(rr,"18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.CanonicalMeshCandidateIR.v1"),canonical_mesh_candidate_from_dict)
     policy=load(stage_output_path(rr,"18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.MeshQualificationPolicyIR.v1"),mesh_policy_from_dict)
@@ -176,7 +254,6 @@ def main():
         metadata={"default_carrier":"MESH","automatic":True,"manual_carrier_authoring_used":False,"clip_is_presentation_only":True},
     )
 
-    explicit_faces=tuple(tuple(map(str,row)) for row in face_prov["compact_faces"])
     producer_policy_hash=content_sha256({
         "schema":"RealSaS.CanonicalRelationBaselinePolicy.v1",
         "mesh_config":{"backend":"CANONICAL_CDT_LOCAL_CHART_V1"},
@@ -215,6 +292,7 @@ def main():
             "vertex_count":len(parent_candidate.vertices),
             "face_count":len(parent_candidate.faces),
         },
+        "face_provenance_replay":face_provenance_replay,
         "child":{
             "partition_lineage_hash":child_partition.partition_lineage_hash,
             "component_count":len(child_partition.components),

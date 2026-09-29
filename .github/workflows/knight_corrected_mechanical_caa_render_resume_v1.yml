@@ -9,7 +9,7 @@ on:
       - '.github/workflows/knight_corrected_mechanical_caa_render_resume_v1.yml'
 
 concurrency:
-  group: knight-corrected-mechanical-caa-render-resume-v1
+  group: knight-corrected-mechanical-caa-frozen-renderer-ab-v1
   cancel-in-progress: true
 
 jobs:

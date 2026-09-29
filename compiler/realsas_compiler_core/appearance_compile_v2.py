@@ -953,6 +953,7 @@ def compile_deterministic_caa(
     face_tile_resolutions: np.ndarray | None = None,
     appearance_face_component_index: np.ndarray | None = None,
     appearance_component_ids: tuple[str, ...] | None = None,
+    appearance_face_vertex_ids: tuple[tuple[str, str, str], ...] | None = None,
 ) -> dict:
     """Compile deterministic CAA on uniform or per-face adaptive lattices.
 
@@ -1253,8 +1254,12 @@ def compile_deterministic_caa(
         positions=canonical_control_positions,
         face_count=face_count,
         tile_resolution=canonical_control_resolution,
-        face_vertex_ids=tuple(
+        face_vertex_ids=(
+            appearance_face_vertex_ids
+            if appearance_face_vertex_ids is not None
+            else tuple(
             tuple(map(str, face)) for face in candidate.faces
+        )
         ),
     )
     canonical_graph_build_seconds = perf_counter() - canonical_graph_started
@@ -1299,8 +1304,12 @@ def compile_deterministic_caa(
         tile_resolution=None if adaptive else int(max_resolution),
         face_sample_offsets=face_sample_offsets if adaptive else None,
         face_tile_resolutions=resolutions if adaptive else None,
-        face_vertex_ids=tuple(
+        face_vertex_ids=(
+            appearance_face_vertex_ids
+            if appearance_face_vertex_ids is not None
+            else tuple(
             tuple(map(str, face)) for face in candidate.faces
+        )
         ),
     )
     dense_surface_graph_build_seconds = (

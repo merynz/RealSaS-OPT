@@ -69,6 +69,7 @@ from compiler.realsas_compiler_core.camera_geometry_v2 import (
 from compiler.realsas_compiler_core.dynamic_appearance_conditioning_v2 import (
     screen_to_texture_max_texels_per_pixel,
 )
+from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
     coverage_metrics,
     rasterize_triangles_half_integer_top_left,
@@ -823,11 +824,39 @@ def _source_topology_appearance_components(ctx: dict, candidate):
         str(vertex.candidate_vertex_id): vertex
         for vertex in candidate.vertices
     }
+    appearance_vertex_key = {}
+    for vertex_id, vertex in vertices.items():
+        coeffs = tuple(
+            sorted(
+                (str(source_id), float(coefficient))
+                for source_id, coefficient
+                in tuple(vertex.support_binding.coefficients)
+            )
+        )
+        if not coeffs:
+            raise QualificationError("CAA_SOURCE_TOPOLOGY_SUPPORT_EMPTY")
+        if (
+            any(source_id not in component_by_source for source_id, _ in coeffs)
+            or abs(sum(weight for _, weight in coeffs) - 1.0) > 1.0e-9
+        ):
+            raise QualificationError("CAA_SOURCE_TOPOLOGY_SUPPORT_INVALID")
+        appearance_vertex_key[vertex_id] = (
+            "APPV:"
+            + content_sha256(
+                {
+                    "geometry_support_coefficients": coeffs,
+                    "rest_position": tuple(map(float, vertex.P)),
+                }
+            )[:24]
+        )
+
     face_component_index = np.empty(
         (len(candidate.faces),), dtype=np.int32
     )
+    appearance_face_vertex_ids = []
     for face_index, face in enumerate(candidate.faces):
         source_components = set()
+        topology_row = []
         for vertex_id in map(str, face):
             vertex = vertices.get(vertex_id)
             if vertex is None:
@@ -835,10 +864,6 @@ def _source_topology_appearance_components(ctx: dict, candidate):
                     "CAA_SOURCE_TOPOLOGY_CANDIDATE_VERTEX_UNKNOWN"
                 )
             coeffs = tuple(vertex.support_binding.coefficients)
-            if not coeffs:
-                raise QualificationError(
-                    "CAA_SOURCE_TOPOLOGY_SUPPORT_EMPTY"
-                )
             for source_id, _coefficient in coeffs:
                 sid = str(source_id)
                 if sid not in component_by_source:
@@ -846,13 +871,23 @@ def _source_topology_appearance_components(ctx: dict, candidate):
                         "CAA_SOURCE_TOPOLOGY_SUPPORT_OUTSIDE_AUTHORITY"
                     )
                 source_components.add(component_by_source[sid])
+            topology_row.append(appearance_vertex_key[vertex_id])
         if len(source_components) != 1:
             raise QualificationError(
                 "CAA_SOURCE_TOPOLOGY_FACE_CROSSES_COMPONENT"
             )
+        if len(set(topology_row)) != 3:
+            raise QualificationError(
+                "CAA_SOURCE_TOPOLOGY_APPEARANCE_FACE_DEGENERATE"
+            )
         face_component_index[face_index] = next(iter(source_components))
+        appearance_face_vertex_ids.append(tuple(topology_row))
 
-    return face_component_index, component_ids
+    return (
+        face_component_index,
+        component_ids,
+        tuple(appearance_face_vertex_ids),
+    )
 
 
 def compile_caa_stage(ctx: dict) -> dict:
@@ -1056,6 +1091,7 @@ def compile_caa_stage(ctx: dict) -> dict:
     (
         appearance_face_component_index,
         appearance_component_ids,
+        appearance_face_vertex_ids,
     ) = _source_topology_appearance_components(ctx, candidate)
     result = compile_deterministic_caa(
         candidate=candidate,
@@ -1068,6 +1104,7 @@ def compile_caa_stage(ctx: dict) -> dict:
         completion_quality_policy=prereg.completion_quality_policy,
         appearance_face_component_index=appearance_face_component_index,
         appearance_component_ids=appearance_component_ids,
+        appearance_face_vertex_ids=appearance_face_vertex_ids,
     )
     deterministic_compile_seconds = perf_counter() - compile_started
     component_ids = tuple(result["component_ids"])

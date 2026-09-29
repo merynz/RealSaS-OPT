@@ -15,6 +15,24 @@ EXPECTED_V6_SOURCE_SHA256 = "39ff4f7a2051f0d9c1251a5999f472b9926e83deacbedcedc8e
 EXPECTED_V6_PREREG_SHA256 = "187f5c1bac1e813ebdfd1bbb76fa6def3d6543b4c7abc5609d217b3ece5fd597"
 EXPECTED_BANK_SHA256 = "26b6891ff81b9bfc3405461394159547fa76b417852a44518425b4e1de7e67d3"
 EXPECTED_UNIFORM_VALID_SCHEDULE_SHA256 = "910e79a11dd70210108e164ed6e2b0c1a4b1fbb69632b80f546c68a9bb5331e9"
+EXPECTED_SCHEDULES = {
+    "UNIFORM_VALID": {
+        "full_32768": "910e79a11dd70210108e164ed6e2b0c1a4b1fbb69632b80f546c68a9bb5331e9",
+        "prefix_8192": "74e2d3fa193acabdde2837394bd460dfc29c3bfd361a38380a987d1a6b031819",
+    },
+    "ACTIVE_BALANCED_VALID": {
+        "full_32768": "abafdbbb11e270725d64e8981932c7b2481344d4b68fea389fec557aabcaa574",
+        "prefix_8192": "cfbbcdb198b7b5f4328118ec665ee1e90abd5c5d9a513c2f287ce8592d900cd6",
+    },
+    "UNIFORM_ALL_PROJECTED": {
+        "full_32768": "f2943931d70134509fbd24826ecd11388ccb5f4ce29a1d801626f6ffcd9ced4b",
+        "prefix_8192": "c1575c6e6260753b68e055873295b5c74da6486fc1911bcd61fef1e626098aa4",
+    },
+    "ACTIVE_BALANCED_ALL_PROJECTED": {
+        "full_32768": "0752250ceab3152444049c917cf910b94894ae8f500fb7265b4eb8db866718e2",
+        "prefix_8192": "91bfe3437f0893d0120395a72c09c982992728ea422937d53da79c12eff3af1b",
+    },
+}
 ARMS = {
     "UNIFORM_VALID",
     "ACTIVE_BALANCED_VALID",
@@ -62,44 +80,50 @@ def active_balanced_schedule(
     *,
     steps: int,
     rows: int,
-    seed: int,
+    decoder_seed: int,
     per_target: int = 4,
 ) -> np.ndarray:
-    pool = np.flatnonzero(np.asarray(pool_mask, dtype=bool))
+    """Exact K4 exposure schedule used by the sealed sampler court."""
+    weights = np.asarray(weights, dtype=np.float64)
+    pool_mask = np.asarray(pool_mask, dtype=bool)
+    pool = np.flatnonzero(pool_mask).astype(np.int64)
     n = min(int(rows), len(pool))
     if n <= 0:
         raise RuntimeError("EMPTY_TRAINING_POOL")
     positive = [
-        np.flatnonzero(np.asarray(pool_mask, dtype=bool) & (weights[:, j] > 0.0))
+        np.flatnonzero(pool_mask & (weights[:, j] > 0.0)).astype(np.int64)
         for j in range(weights.shape[1])
     ]
-    rng = np.random.default_rng(int(seed))
+    rng = np.random.default_rng(int(decoder_seed) + 1000 + int(per_target))
     out = np.empty((int(steps), n), dtype=np.int32)
+    used_mask = np.zeros(len(weights), dtype=bool)
     for step in range(int(steps)):
         chosen = []
-        used = set()
-        for j in rng.permutation(weights.shape[1]).tolist():
-            p = positive[int(j)]
-            if len(p) == 0:
+        touched = []
+        for j in rng.permutation(weights.shape[1]):
+            candidates = positive[int(j)]
+            if len(candidates) == 0:
                 continue
-            order = rng.permutation(p)
             got = 0
-            for x in order.tolist():
+            for x in rng.permutation(candidates):
                 ix = int(x)
-                if ix in used:
+                if used_mask[ix]:
                     continue
                 chosen.append(ix)
-                used.add(ix)
+                used_mask[ix] = True
+                touched.append(ix)
                 got += 1
                 if got >= int(per_target) or len(chosen) >= n:
                     break
             if len(chosen) >= n:
                 break
         if len(chosen) < n:
-            remain = np.asarray([int(x) for x in pool.tolist() if int(x) not in used], dtype=np.int64)
+            remain = pool[~used_mask[pool]]
             need = n - len(chosen)
             chosen.extend(map(int, rng.choice(remain, size=need, replace=False).tolist()))
         out[step] = np.asarray(chosen[:n], dtype=np.int32)
+        if touched:
+            used_mask[np.asarray(touched, dtype=np.int64)] = False
     return out
 
 
@@ -160,7 +184,7 @@ def main():
             weights, valid,
             steps=int(mod.MAX_STEPS),
             rows=int(mod.ROWS_PER_STEP),
-            seed=int(mod.DECODER_SEED),
+            decoder_seed=int(mod.DECODER_SEED),
             per_target=4,
         )
         def patched(clean_arg):
@@ -181,7 +205,7 @@ def main():
             weights, all_mask,
             steps=int(mod.MAX_STEPS),
             rows=int(mod.ROWS_PER_STEP),
-            seed=int(mod.DECODER_SEED),
+            decoder_seed=int(mod.DECODER_SEED),
             per_target=4,
         )
         def patched(clean_arg):

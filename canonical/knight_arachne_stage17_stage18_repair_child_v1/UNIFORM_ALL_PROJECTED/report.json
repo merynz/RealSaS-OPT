@@ -1,0 +1,142 @@
+{
+  "arm": "UNIFORM_ALL_PROJECTED",
+  "authorization": {
+    "authorization_hash": "796b193d286a2ef639b58e78a512561b06f67bd5ba5e515b44f1e0e522ab6076",
+    "directive_hash": "a97456b576971906a96d0dccc7e9704764d24d946638d1ac84e69f47874d163d",
+    "product_authority_claimed": false,
+    "projected_invalid_rows_product_teacher_authority": false,
+    "schema": "RealSaS.TrustworthySkinRepartitionAuthorization.v1",
+    "scope": "DEMO_REPAIR_CHILD_COURT_ONLY",
+    "source_partition_lineage_hash": "ba14cb67ff5bdf78a609e56ccddcfd8203075ffe304734df3be8fcf657635dec",
+    "source_skeleton_lineage_hash": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+    "source_skin_lineage_hash": "4332af4e7ce3bbb1c35d4c6de6014477374a172112c2caf60918aaabdb0060bb",
+    "source_surface_lineage_hash": "452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a",
+    "status": "PASS_TRUSTWORTHY_SKIN_REPARTITION_AUTHORIZATION",
+    "teacher_inputs_used_by_predictor": false,
+    "weight_reliability_closure_passed": true,
+    "weight_reliability_evidence_hash": "9f2ee1ccc43f146ed5a2712ff300577f027a4b90a1b39a5c2d878f596593b581"
+  },
+  "child": {
+    "candidate_lineage_hash": "7c1a064cd9445b42476573265f907947b668a67d694c5041af317a3adda6dac5",
+    "candidate_metadata": {
+      "camera_authority_used": false,
+      "dual_geometry_skin_support_required": true,
+      "face_deletion_count": 0,
+      "face_provenance_mode": "EXACT_COMPACTED_DENSE_FACE_REPLAY_HOLELESS_PARTITIONED",
+      "generated_centroid_vertex_count": 351,
+      "generated_seam_vertex_count": 5042,
+      "mixed_source_face_count": 2487,
+      "output_face_count": 29768,
+      "rest_area_relative_error": 1.3497781130511272e-15,
+      "source_face_count": 24443,
+      "source_mesh_used": false,
+      "three_clique_face_minting_allowed": false,
+      "view_independent": true
+    },
+    "component_count": 81,
+    "face_count": 29768,
+    "partition_lineage_hash": "3fd9d2d383107cd5a9103b9c28ba811c0a7f7efbb6b32a8100e0dc8fdecb3e8f",
+    "separate_boundary_count": 2523,
+    "vertex_count": 17442
+  },
+  "claim_boundary": [
+    "This is an in-memory repair child court; it does not mutate the parent product run.",
+    "Authorization is demo-child scoped and does not promote projected invalid rows to product teacher authority.",
+    "The child partition is built only through mechanical_repartition_v2 and the child candidate only through holeless dense subdivision.",
+    "A product/mainline mutation requires a separate promotion decision after this child court."
+  ],
+  "face_provenance_replay": {
+    "compact_face_count": 24443,
+    "compact_node_count": 12090,
+    "component_aware": true,
+    "dense_face_count": 12092332,
+    "dense_vertex_count": 6046160,
+    "position_error_max": 0.0,
+    "voxel_divisions": 56
+  },
+  "invariants": {
+    "dual_geometry_skin_support_required": true,
+    "face_deletion_count": 0,
+    "parent_state_mutated": false,
+    "rest_area_relative_error": 1.3497781130511272e-15,
+    "skin_weight_mutation": false
+  },
+  "parent": {
+    "candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+    "component_count": 6,
+    "face_count": 24958,
+    "partition_lineage_hash": "ba14cb67ff5bdf78a609e56ccddcfd8203075ffe304734df3be8fcf657635dec",
+    "vertex_count": 12049
+  },
+  "post_repair_actual_motion": {
+    "max_edge_gt_10": 249,
+    "max_edge_gt_4": 362,
+    "max_edge_p99": 6.206206161642485,
+    "worst_edge_max": 354.06058732310305
+  },
+  "post_repair_g3b": {
+    "passed": false,
+    "report_hash": "84d9b0edc528794240f65b66d36887ce17aa035b128484683ec4ec6dcd3ba6ec",
+    "risky_face_count": 652,
+    "unsafe_face_count": 419,
+    "weight_mutation": false
+  },
+  "post_repair_synthetic_stress": {
+    "max_area_max": 458.6821724721922,
+    "max_condition_max": 10009.100266828083,
+    "max_edge_max": 346.63371638269444,
+    "max_edge_p95": 1.938631148826904,
+    "min_area_min": 0.001852655037384328,
+    "unsafe_face_count": 832
+  },
+  "schema": "RealSaS.KnightArachneV6Stage17Stage18RepairChildCourt.v1",
+  "status": "COMPLETE__NO_PARENT_MUTATION",
+  "weight_reliability_evidence": {
+    "a100_final_valid_gate": true,
+    "a100_invalid_diagnostic": {
+      "dominant_joint_accuracy": 0.9972954699121027,
+      "row_count": 1479,
+      "row_l1_gt_0p1": 28,
+      "row_l1_gt_0p5": 9,
+      "row_l1_gt_1": 6,
+      "row_l1_gt_1p5": 2,
+      "row_l1_max": 1.9051497673038846,
+      "row_l1_mean": 0.010440692121971957,
+      "row_l1_p50": 5.751716671647912e-19,
+      "row_l1_p90": 0.0008085118254872065,
+      "row_l1_p95": 0.016345926416762583,
+      "row_l1_p99": 0.2384171627481257
+    },
+    "a100_result_sha256": "0a73240d2278a69fe24d1b6a8ebf185dbe8556a0bd17b7d4c70731ff558be31f",
+    "a100_valid": {
+      "dominant_joint_accuracy": 0.9987748562812176,
+      "row_count": 10611,
+      "row_l1_gt_0p1": 154,
+      "row_l1_gt_0p5": 13,
+      "row_l1_gt_1": 3,
+      "row_l1_gt_1p5": 2,
+      "row_l1_max": 1.9920038221853447,
+      "row_l1_mean": 0.009649421628637628,
+      "row_l1_p50": 2.625993818680774e-15,
+      "row_l1_p90": 0.02854807412926555,
+      "row_l1_p95": 0.04895435291664719,
+      "row_l1_p99": 0.1327317151995243
+    },
+    "a100_weights_sha256": "41ab25238d7901653896daba1b5921a340824561893b581d2fe3aed9811bb7e8",
+    "arm": "UNIFORM_ALL_PROJECTED",
+    "compiler_requalification": {
+      "corrected_row_count": 0,
+      "max_abs_weight_delta": 5.551115123125783e-16,
+      "max_row_l1_weight_delta": 5.551115124164449e-16,
+      "numeric_field_preserved": true,
+      "row_count": 12090,
+      "skin_lineage_hash": "4332af4e7ce3bbb1c35d4c6de6014477374a172112c2caf60918aaabdb0060bb",
+      "total_correction_l1": 3.803060475541516e-13,
+      "total_l1_weight_delta": 3.803060475541516e-13
+    },
+    "projected_rows_are_product_teacher_authority": false,
+    "schema": "RealSaS.KnightArachneWeightReliabilityEvidence.v1",
+    "scope": "DEMO_REPAIR_CHILD_COURT_ONLY",
+    "teacher_inputs_used_by_predictor": false
+  }
+}

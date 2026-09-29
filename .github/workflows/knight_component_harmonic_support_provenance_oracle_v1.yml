@@ -46,3 +46,5 @@ jobs:
           git fetch origin research/vf11-certified-adaptive-20260921
           git rebase origin/research/vf11-certified-adaptive-20260921
           git push origin HEAD:research/vf11-certified-adaptive-20260921
+
+# trigger: workflow existed before this commit

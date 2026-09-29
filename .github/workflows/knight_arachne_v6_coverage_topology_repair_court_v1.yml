@@ -6,6 +6,8 @@ on:
     branches: [research/vf11-certified-adaptive-20260921]
     paths:
       - 'canonical/KNIGHT_ARACHNE_V6_2X2_REBOUND_STAGE35_COURT_V1_20260929.json'
+      - 'canonical/KNIGHT_ARACHNE_V6_COVERAGE_TOPOLOGY_REPAIR_COURT_PREREG_V1_20260929.json'
+      - 'tools/audit_knight_arachne_v6_coverage_topology_repair_court_v1.py'
       - '.github/workflows/knight_arachne_v6_coverage_topology_repair_court_v1.yml'
 
 concurrency:

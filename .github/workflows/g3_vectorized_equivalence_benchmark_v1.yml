@@ -30,3 +30,5 @@ jobs:
           PYTHONPATH=. python tools/audit_g3_vectorized_equivalence_benchmark_v1.py \
             --authority-root "$AUTHORITY_ROOT" --run-id "$RUN_ID" \
             --out /tmp/G3_VECTOR_EQ.json
+
+# dispatch-trigger: workflow existed before this commit

@@ -439,3 +439,88 @@ It is:
 > **make sparse deformation support impossible to disappear from training, and make the skin representation/training contract cover the field that will actually be shipped.**
 
 RealSaS must go one step further because its teacher coverage is incomplete: it needs a learned, auditable completion path or an equivalent total-coverage source of trustworthy targets before uncovered rows can be admitted as product skin.
+
+
+---
+
+## 9. Sealed follow-up courts
+
+### 9.1 Exact V6 sampler exposure court
+
+Authority:
+
+- `canonical/KNIGHT_ARACHNE_V6_SAMPLER_EXPOSURE_COURT_V1_20260929.json`
+- workflow run `36532697901`
+- exact V6 replay: 8,192 steps × 384 teacher-valid rows, seed 20261128.
+
+After excluding six genuinely non-skinned target columns, the uniform-valid V6 schedule materially starves rare deforming supports.
+
+Examples:
+
+- target column 19, a `SKIN_SUPPORTED_ARTICULATION`:
+  - only 18 teacher-valid rows have weight > 0.10;
+  - exact V6 uniform sampling has **51.44%** of steps with zero >0.10 example for that target;
+  - exposure-balanced K4 counterfactual reduces this to **0.95%** under the same row budget.
+- at threshold >0.05, exact V6 has 20/28 columns with at least one zero-active step; after accounting for the six true zero-skin columns, 14 deforming targets suffer at least one zero-active step.
+- exposure-balanced K4 at >0.05 leaves only the six true zero-skin columns with zero-active steps.
+
+This proves a genuine active-support exposure mismatch between SkinTokens-style training and Knight V6. It does **not** prove performance improvement until a matched retrain is run.
+
+### 9.2 Teacher support coverage court
+
+Authority:
+
+- `canonical/KNIGHT_ARACHNE_TEACHER_SUPPORT_COVERAGE_COURT_V1_20260929.json`
+- exact teacher-bank ↔ Geppetto target positional alignment error: 0.
+
+Result at weight >0:
+
+- target columns with any valid positive support: **22**
+- true zero-support target columns: **6**
+- invalid-only-support target columns: **0**
+
+The six true zero-skin columns are exactly:
+
+- 1 × `ROOT_MOTION_ANCHOR`
+- 5 × `TERMINAL_TIP_SYNTHETIC`
+
+Therefore the sampler court's six permanently-zero columns are legitimate non-skinned controls, not Arachne failures.
+
+The remaining 22 positive-support targets correspond exactly to the mechanically relevant skin-bearing side of the 28-target rig (20 skin-supported articulations + 2 terminal extension sources). Sparse-support starvation is therefore a real issue on deforming targets, not an artifact of helper controls.
+
+### 9.3 The 1,479-row hole is cross-topology teacher-transfer coverage
+
+`ARACHNE_KNIGHT_TEACHER_PROJECTION_REPORT_FIX2.json` seals:
+
+- rule: `EXACT_SOURCE_TRIANGLE_CLOSEST_POINT_BARYCENTRIC_WITH_COMPONENT_MECHANICAL_ATTACHMENT`;
+- Stage15 rows: 12,090;
+- clean / teacher-valid rows: 10,611;
+- coverage: 0.87766749;
+- status: `PASS_WITH_COVERAGE_WARNING`;
+- `coverage_is_teacher_supervision_mask_not_product_gate = true`.
+
+The bank actually contains a weight vector for every Stage15 row. The mask rejects rows whose closest-source-surface distance is beyond the frozen clean-distance rule. V6 then removes those rows from optimization and science metrics but still predicts and compiler-qualifies all rows.
+
+This means the strongest training-side owner is more precisely:
+
+`CROSS_TOPOLOGY_TEACHER_TRANSFER_COVERAGE_HOLE + RARE_ACTIVE_SUPPORT_STARVATION`.
+
+SkinTokens' native weighted-mesh setup does not require this RealSaS-specific source-topology → product-surface supervision transfer, so copying its sampler alone cannot close our 12.23% hole.
+
+### 9.4 Updated causal order
+
+The next matched training court should separate two changes rather than combine them:
+
+1. `UNIFORM_VALID` — exact V6 baseline.
+2. `ACTIVE_BALANCED_VALID` — change sampling only; retain the 10,611-row supervision mask.
+3. `UNIFORM_ALL_PROJECTED` — change coverage only; train on all 12,090 projected teacher rows.
+4. `ACTIVE_BALANCED_ALL_PROJECTED` — combine total projected coverage with active-support balancing.
+
+This 2×2 court identifies whether the catastrophic Knight failure is principally caused by:
+- support starvation within trusted rows,
+- the supervision mask itself,
+- or both.
+
+Because the invalid-row oracle already shows that those projected bank weights close downstream topology when substituted at inference, `UNIFORM_ALL_PROJECTED` is a particularly important causal arm. It remains demo/FIT evidence; it must not be generalized into a product teacher-transfer policy without cross-subject validation.
+
+Only after this 2×2 court should we add a SkinTokens-like stronger random-pose max-edge consequence objective or a new reliability head.

@@ -29,7 +29,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          skin="$AUTHORITY_ROOT/$RUN_ID/artifacts/32_SKIN_QUALIFIED/qualified_skin.json"
+          skin="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/32_SKIN_QUALIFIED/qualified_skin.json"
           out="$(mktemp).json"
           PYTHONPATH=. python tools/audit_knight_stage35_exact_skin_replay_v1.py             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --skin-json "$skin"             --out "$out" | tee /tmp/stage35_replay.txt
           python - "$out" <<'PY'

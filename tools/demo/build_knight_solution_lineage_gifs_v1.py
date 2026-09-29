@@ -262,9 +262,10 @@ def main():
     parent_manifest=load_json(parent_root/"run_manifest.json")
     parent_ledger=load_json(parent_root/"ACTIVE_RUN_V2.json")
     manifest=copy.deepcopy(parent_manifest)
-    manifest["run_id"]=a.child_run_id
     ledger=copy.deepcopy(parent_ledger)
-    ledger["run_id"]=a.child_run_id
+    # Preserve the exact parent run identity so the frozen pre-metric demo
+    # preregistration remains byte-for-byte valid. This child directory is a
+    # separate solution-attempt workspace, not a new authority run identity.
     ledger["execution_class"]="DEMO_WITNESS"
     ledger["architecture_scope"]="KNIGHT_SOLVED_WEIGHT_TOPOLOGY_LINEAGE_V1"
 
@@ -293,7 +294,7 @@ def main():
     copy_ir_as_stage32(child_root,ledger,a.skin_json)
     ctx={
         "repo_root":Path(".").resolve(),"authority_root":a.authority_root.resolve(),
-        "run_root":child_root,"run_id":a.child_run_id,
+        "run_root":child_root,"run_id":a.parent_run_id,
         "run_manifest_path":child_root/"run_manifest.json","run_manifest":manifest,
         "ledger":ledger,"stage":{"id":"INIT"},
     }
@@ -436,8 +437,9 @@ def main():
         "scope":"DEMO_SOLUTION_LINEAGE_AND_VISUAL_PROOF_ONLY",
         "product_authority_claimed":False,
         "repo_commit":a.repo_commit,
+        "authority_run_id":a.parent_run_id,
+        "solution_attempt_workspace_id":a.child_run_id,
         "parent_run_id":a.parent_run_id,
-        "child_run_id":a.child_run_id,
         "adopted_parent_upstream":adopted_upstream,
         "corrected_skin":{
             "skin_lineage_hash":skin.skin_lineage_hash,

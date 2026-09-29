@@ -46,7 +46,7 @@ jobs:
         run: |
           set -euo pipefail
           work="$(mktemp -d)"
-          a100_audit="canonical/KNIGHT_ARACHNE_V6_2X2_INDEXSPACE_FIXED_RESULT_AUDIT_V1_20260929.json"
+          a100_audit="$work/KNIGHT_ARACHNE_V6_2X2_INDEXSPACE_FIXED_RESULT_AUDIT_V1_20260929.json"
           rclone copyto "$A100_AUDIT_REMOTE" "$a100_audit" --checksum
           python - "$a100_audit" "$A100_AUDIT_SHA256" <<'PY'
           import hashlib,json,sys
@@ -66,7 +66,7 @@ jobs:
           for arm in "${arms[@]}"; do
             mkdir -p "$work/$arm"
             rclone copyto "$DRIVE_ROOT/$arm/ARACHNE_KNIGHT_V6_CANONICAL_SKIN_WEIGHTS_F64.npz" "$work/$arm/weights.npz" --checksum
-            PYTHONPATH=. python tools/audit_knight_arachne_v6_coverage_topology_repair_court_v1.py               --authority-root "$AUTHORITY_ROOT"               --run-id "$RUN_ID"               --arm "$arm"               --weights-npz "$work/$arm/weights.npz"               --old-skeleton-json "$work/old_skeleton.json"               --a100-audit-json canonical/KNIGHT_ARACHNE_V6_2X2_INDEXSPACE_FIXED_RESULT_AUDIT_V1_20260929.json               --prereg-json canonical/KNIGHT_ARACHNE_V6_COVERAGE_TOPOLOGY_REPAIR_COURT_PREREG_V1_20260929.json               --work-dir "$work/$arm/artifacts"               --out "$work/$arm/report.json"               | tee "canonical/knight_arachne_v6_coverage_topology_repair_court_v1/$arm.STDOUT.txt"
+            PYTHONPATH=. python tools/audit_knight_arachne_v6_coverage_topology_repair_court_v1.py               --authority-root "$AUTHORITY_ROOT"               --run-id "$RUN_ID"               --arm "$arm"               --weights-npz "$work/$arm/weights.npz"               --old-skeleton-json "$work/old_skeleton.json"               --a100-audit-json "$a100_audit"               --prereg-json canonical/KNIGHT_ARACHNE_V6_COVERAGE_TOPOLOGY_REPAIR_COURT_PREREG_V1_20260929.json               --work-dir "$work/$arm/artifacts"               --out "$work/$arm/report.json"               | tee "canonical/knight_arachne_v6_coverage_topology_repair_court_v1/$arm.STDOUT.txt"
             cp "$work/$arm/report.json" "canonical/knight_arachne_v6_coverage_topology_repair_court_v1/$arm.REPORT.json"
           done
 

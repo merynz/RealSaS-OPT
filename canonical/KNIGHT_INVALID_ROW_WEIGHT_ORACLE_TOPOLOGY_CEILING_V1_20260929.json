@@ -1,0 +1,244 @@
+{
+  "ORACLE_NOT_PRODUCT": true,
+  "claim_boundary": "Teacher validity/weights are used only as an explicit causal oracle intervention on rows known invalid. No teacher topology label participates in inference. This cannot be shipped.",
+  "finding": {
+    "any_variant_closes_topology": true
+  },
+  "inference_uses_teacher_region_labels": false,
+  "intervention": {
+    "intervened_fraction": 0.12233380363515645,
+    "teacher_invalid_vertex_count": 1474,
+    "teacher_valid_vertex_count": 10575
+  },
+  "preregistration": "canonical/KNIGHT_INVALID_ROW_WEIGHT_ORACLE_TOPOLOGY_CEILING_PREREG_V1_20260929.json",
+  "schema": "RealSaS.KnightInvalidRowWeightOracleTopologyCeiling.v1",
+  "status": "ORACLE_CEILING__NO_PRODUCT_MUTATION",
+  "variants": {
+    "STRETCH_AND_L1_JSD": {
+      "after_motion": {
+        "max_edge_gt_10": 3,
+        "max_edge_gt_4": 31,
+        "max_edge_p99": 1.5883791478698697,
+        "worst_edge_max": 15.018700328390207
+      },
+      "after_stress": {
+        "max_area_max": 50.79896866924262,
+        "max_condition_max": 2054.01334547334,
+        "max_edge_max": 37.10819026696395,
+        "max_edge_p95": 1.4527204078833873,
+        "min_area_min": 0.008162807818946684,
+        "unsafe_face_count": 392
+      },
+      "checks": {
+        "actual_gt10": true,
+        "actual_gt4": true,
+        "actual_worst_edge": true,
+        "mixed_precision": true,
+        "no_face_deletion": true,
+        "rest_area_preserved": true,
+        "synthetic_unsafe": true,
+        "unsafe_cross_region_recall": true
+      },
+      "closure_pass": true,
+      "holeless_split": {
+        "centroid_copy_count": 57,
+        "face_count_after": 27515,
+        "face_count_before": 24958,
+        "face_deletion_count": 0,
+        "mixed_face_count": 1250,
+        "region_pure_output_fraction": 1.0,
+        "rest_area_error_max": 2.846583144336944e-14,
+        "rest_area_error_p99": 2.2376169907938035e-15,
+        "seam_vertex_copy_count": 2446,
+        "unsplit_unresolved_face_count": 0,
+        "vertex_count_after": 14552,
+        "vertex_count_before": 12049
+      },
+      "solver": {
+        "attractive_union_blocked_by_mutex": 17,
+        "attractive_union_count": 12037,
+        "component_count": 12,
+        "event_count": 36424,
+        "largest_component_sizes": [
+          3515,
+          2919,
+          2137,
+          1140,
+          945,
+          352,
+          329,
+          309,
+          174,
+          114,
+          107,
+          8
+        ],
+        "mutex_constraint_count": 1206,
+        "repulsive_edge_arrived_after_endpoint_merge": 51,
+        "repulsive_edge_count": 1257
+      },
+      "teacher_evaluation_only": {
+        "mixed_face_precision": 0.9968,
+        "mixed_face_recall": 0.41258278145695365,
+        "predicted_mixed_face_count": 1250,
+        "truth_mixed_face_count": 3020,
+        "unsafe_truth_cross_region_face_count": 1294,
+        "unsafe_truth_cross_region_recall": 0.9598145285935085,
+        "vertex_ari": 0.696647847413936,
+        "vertex_nmi": 0.8104097353561239
+      }
+    },
+    "STRETCH_ONLY_JSD": {
+      "after_motion": {
+        "max_edge_gt_10": 1,
+        "max_edge_gt_4": 26,
+        "max_edge_p99": 1.5635158123781105,
+        "worst_edge_max": 15.018700328390207
+      },
+      "after_stress": {
+        "max_area_max": 50.79896866924262,
+        "max_condition_max": 2054.01334547334,
+        "max_edge_max": 37.10819026696395,
+        "max_edge_p95": 1.4517834505065608,
+        "min_area_min": 0.008162807818946684,
+        "unsafe_face_count": 387
+      },
+      "checks": {
+        "actual_gt10": true,
+        "actual_gt4": true,
+        "actual_worst_edge": true,
+        "mixed_precision": true,
+        "no_face_deletion": true,
+        "rest_area_preserved": true,
+        "synthetic_unsafe": true,
+        "unsafe_cross_region_recall": true
+      },
+      "closure_pass": true,
+      "holeless_split": {
+        "centroid_copy_count": 69,
+        "face_count_after": 27531,
+        "face_count_before": 24958,
+        "face_deletion_count": 0,
+        "mixed_face_count": 1252,
+        "region_pure_output_fraction": 1.0,
+        "rest_area_error_max": 2.846583144336944e-14,
+        "rest_area_error_p99": 2.2376169907938035e-15,
+        "seam_vertex_copy_count": 2454,
+        "unsplit_unresolved_face_count": 0,
+        "vertex_count_after": 14572,
+        "vertex_count_before": 12049
+      },
+      "solver": {
+        "attractive_union_blocked_by_mutex": 15,
+        "attractive_union_count": 12035,
+        "component_count": 14,
+        "event_count": 36424,
+        "largest_component_sizes": [
+          3515,
+          2919,
+          2137,
+          1140,
+          946,
+          352,
+          328,
+          309,
+          173,
+          113,
+          107,
+          8,
+          1,
+          1
+        ],
+        "mutex_constraint_count": 1212,
+        "repulsive_edge_arrived_after_endpoint_merge": 122,
+        "repulsive_edge_count": 1334
+      },
+      "teacher_evaluation_only": {
+        "mixed_face_precision": 0.9960063897763578,
+        "mixed_face_recall": 0.41291390728476823,
+        "predicted_mixed_face_count": 1252,
+        "truth_mixed_face_count": 3020,
+        "unsafe_truth_cross_region_face_count": 1294,
+        "unsafe_truth_cross_region_recall": 0.9605873261205564,
+        "vertex_ari": 0.6967025945137139,
+        "vertex_nmi": 0.8105115601353142
+      }
+    },
+    "STRETCH_OR_L1_JSD": {
+      "after_motion": {
+        "max_edge_gt_10": 1,
+        "max_edge_gt_4": 26,
+        "max_edge_p99": 1.5635158123781105,
+        "worst_edge_max": 15.018700328390207
+      },
+      "after_stress": {
+        "max_area_max": 50.79896866924262,
+        "max_condition_max": 2054.01334547334,
+        "max_edge_max": 37.10819026696395,
+        "max_edge_p95": 1.4517834505065608,
+        "min_area_min": 0.008162807818946684,
+        "unsafe_face_count": 387
+      },
+      "checks": {
+        "actual_gt10": true,
+        "actual_gt4": true,
+        "actual_worst_edge": true,
+        "mixed_precision": true,
+        "no_face_deletion": true,
+        "rest_area_preserved": true,
+        "synthetic_unsafe": true,
+        "unsafe_cross_region_recall": true
+      },
+      "closure_pass": true,
+      "holeless_split": {
+        "centroid_copy_count": 69,
+        "face_count_after": 27531,
+        "face_count_before": 24958,
+        "face_deletion_count": 0,
+        "mixed_face_count": 1252,
+        "region_pure_output_fraction": 1.0,
+        "rest_area_error_max": 2.846583144336944e-14,
+        "rest_area_error_p99": 2.2376169907938035e-15,
+        "seam_vertex_copy_count": 2454,
+        "unsplit_unresolved_face_count": 0,
+        "vertex_count_after": 14572,
+        "vertex_count_before": 12049
+      },
+      "solver": {
+        "attractive_union_blocked_by_mutex": 1,
+        "attractive_union_count": 12035,
+        "component_count": 14,
+        "event_count": 36424,
+        "largest_component_sizes": [
+          3515,
+          2919,
+          2137,
+          1140,
+          946,
+          352,
+          328,
+          309,
+          173,
+          113,
+          107,
+          8,
+          1,
+          1
+        ],
+        "mutex_constraint_count": 1226,
+        "repulsive_edge_arrived_after_endpoint_merge": 149,
+        "repulsive_edge_count": 1375
+      },
+      "teacher_evaluation_only": {
+        "mixed_face_precision": 0.9960063897763578,
+        "mixed_face_recall": 0.41291390728476823,
+        "predicted_mixed_face_count": 1252,
+        "truth_mixed_face_count": 3020,
+        "unsafe_truth_cross_region_face_count": 1294,
+        "unsafe_truth_cross_region_recall": 0.9605873261205564,
+        "vertex_ari": 0.6967025945137139,
+        "vertex_nmi": 0.8105115601353142
+      }
+    }
+  }
+}

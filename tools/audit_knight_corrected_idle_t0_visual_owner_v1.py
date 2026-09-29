@@ -20,8 +20,8 @@ from compiler.realsas_compiler_core.artifact_codec_v2 import (
     qualified_camera_set_from_dict,
     qualified_observation_set_from_dict,
     qualified_skeleton_from_dict,
+    qualified_skin_from_dict,
 )
-from compiler.realsas_compiler_core.skinning_v1 import qualified_skin_from_dict
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     stage_output_payload,
 )

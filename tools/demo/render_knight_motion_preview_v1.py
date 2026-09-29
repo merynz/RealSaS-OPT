@@ -41,6 +41,7 @@ from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import (
     _quat_matrix_xyzw,
     _slerp,
 )
+from compiler.realsas_compiler_core.product_mesh_skin_v1 import _skin_support_coefficients
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     stage_output_payload,
 )
@@ -267,7 +268,7 @@ def _candidate_skin_weights(candidate, skin, skeleton):
     W = np.zeros((len(candidate.vertices), len(joint_ids)), dtype=np.float64)
     for vi, vertex in enumerate(candidate.vertices):
         total_support = 0.0
-        for sid, coeff in vertex.support_binding.coefficients:
+        for sid, coeff in _skin_support_coefficients(vertex):
             c = float(coeff)
             total_support += c
             row = skin_by_surface.get(sid)

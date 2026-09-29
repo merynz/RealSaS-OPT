@@ -764,6 +764,97 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
     }
 
 
+def _source_topology_appearance_components(ctx: dict, candidate):
+    """Derive appearance continuity from exact Stage15 source topology.
+
+    Mechanical Stage17 cuts remain deformation authority only. Appearance
+    completion may cross a mechanical seam only when both sides descend from
+    the same exact compacted source-surface connected component.
+    """
+    provenance = stage_output_payload(
+        ctx,
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "RealSaS.CompactedDenseFaceProvenance.v1",
+    )
+    compact_faces = tuple(
+        tuple(map(str, face))
+        for face in provenance.get("compact_faces") or ()
+    )
+    if not compact_faces:
+        raise QualificationError("CAA_SOURCE_TOPOLOGY_FACE_AUTHORITY_EMPTY")
+
+    source_ids = sorted({sid for face in compact_faces for sid in face})
+    parent = {sid: sid for sid in source_ids}
+
+    def find(value: str) -> str:
+        x = value
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def union(a: str, b: str) -> None:
+        ra, rb = find(a), find(b)
+        if ra == rb:
+            return
+        if ra < rb:
+            parent[rb] = ra
+        else:
+            parent[ra] = rb
+
+    for face in compact_faces:
+        if len(face) != 3 or len(set(face)) != 3:
+            raise QualificationError("CAA_SOURCE_TOPOLOGY_FACE_INVALID")
+        union(face[0], face[1])
+        union(face[1], face[2])
+        union(face[2], face[0])
+
+    roots = tuple(sorted({find(sid) for sid in source_ids}))
+    root_index = {root: index for index, root in enumerate(roots)}
+    component_by_source = {
+        sid: root_index[find(sid)] for sid in source_ids
+    }
+    component_ids = tuple(
+        f"SOURCE_TOPOLOGY_CC:{index:04d}:{root}"
+        for index, root in enumerate(roots)
+    )
+
+    vertices = {
+        str(vertex.candidate_vertex_id): vertex
+        for vertex in candidate.vertices
+    }
+    face_component_index = np.empty(
+        (len(candidate.faces),), dtype=np.int32
+    )
+    for face_index, face in enumerate(candidate.faces):
+        source_components = set()
+        for vertex_id in map(str, face):
+            vertex = vertices.get(vertex_id)
+            if vertex is None:
+                raise QualificationError(
+                    "CAA_SOURCE_TOPOLOGY_CANDIDATE_VERTEX_UNKNOWN"
+                )
+            coeffs = tuple(vertex.support_binding.coefficients)
+            if not coeffs:
+                raise QualificationError(
+                    "CAA_SOURCE_TOPOLOGY_SUPPORT_EMPTY"
+                )
+            for source_id, _coefficient in coeffs:
+                sid = str(source_id)
+                if sid not in component_by_source:
+                    raise QualificationError(
+                        "CAA_SOURCE_TOPOLOGY_SUPPORT_OUTSIDE_AUTHORITY"
+                    )
+                source_components.add(component_by_source[sid])
+        if len(source_components) != 1:
+            raise QualificationError(
+                "CAA_SOURCE_TOPOLOGY_FACE_CROSSES_COMPONENT"
+            )
+        face_component_index[face_index] = next(iter(source_components))
+
+    return face_component_index, component_ids
+
+
 def compile_caa_stage(ctx: dict) -> dict:
     stage_started = perf_counter()
     prereg = caa_preregistration_from_dict(
@@ -962,6 +1053,10 @@ def compile_caa_stage(ctx: dict) -> dict:
         raise QualificationError("CAA_TILE_RESOLUTION_STRATEGY_UNSUPPORTED")
 
     compile_started = perf_counter()
+    (
+        appearance_face_component_index,
+        appearance_component_ids,
+    ) = _source_topology_appearance_components(ctx, candidate)
     result = compile_deterministic_caa(
         candidate=candidate,
         cameras=cameras.cameras,
@@ -971,6 +1066,8 @@ def compile_caa_stage(ctx: dict) -> dict:
         face_tile_resolutions=face_tile_resolutions,
         source_lock_policy=prereg.source_lock_policy,
         completion_quality_policy=prereg.completion_quality_policy,
+        appearance_face_component_index=appearance_face_component_index,
+        appearance_component_ids=appearance_component_ids,
     )
     deterministic_compile_seconds = perf_counter() - compile_started
     component_ids = tuple(result["component_ids"])
@@ -1041,6 +1138,10 @@ def compile_caa_stage(ctx: dict) -> dict:
         compile_hash="",
         metadata={
             "component_ids": component_ids,
+            "appearance_component_authority": (
+                "STAGE15_EXACT_COMPACTED_SOURCE_TOPOLOGY_V1"
+            ),
+            "mechanical_partition_is_appearance_boundary": False,
             "total_appearance_defined": (
                 int(counts["UNSUPPORTED_ABSTAIN"]) == 0
             ),
@@ -1170,6 +1271,10 @@ def compile_caa_stage(ctx: dict) -> dict:
             ),
             "compile_array_schema": "RealSaS.CAACompileArrays.v3",
             "core_performance": dict(result.get("performance") or {}),
+            "appearance_component_authority": (
+                "STAGE15_EXACT_COMPACTED_SOURCE_TOPOLOGY_V1"
+            ),
+            "appearance_component_count": int(len(component_ids)),
             **{f"provenance_{key.lower()}": int(value) for key, value in counts.items()},
         },
     }

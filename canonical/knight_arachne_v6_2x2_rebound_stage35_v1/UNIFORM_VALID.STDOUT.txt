@@ -1,0 +1,1 @@
+KNIGHT_ARACHNE_V6_REBOUND_STAGE35_DIAGNOSTIC={"arm": "UNIFORM_VALID", "g3b_passed": false, "g3b_risky": 1820, "g3b_unsafe": 1509, "max_abs_weight_delta": 5.551115123125783e-16, "separate_pairs": 1016, "skin_lineage_hash": "35e4912954bec0acbfbfbe529334e8f31e5d198cb28ae1a0a7481e6e47937640", "unresolved": 0}

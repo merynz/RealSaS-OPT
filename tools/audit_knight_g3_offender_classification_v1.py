@@ -38,8 +38,7 @@ from tools.audit_knight_global_skin_region_sweep_v1 import skin_matrix, threshol
 from tools.demo.render_knight_motion_preview_v1 import _ctx
 
 
-def _face_class(candidate, face_index: int) -> str:
-    by = {str(v.candidate_vertex_id): v for v in candidate.vertices}
+def _face_class(candidate, face_index: int, *, by) -> str:
     modes = [str(by[str(vid)].support_binding.mode) for vid in candidate.faces[int(face_index)]]
     if any(m == "SEAM_GEOMETRY_INTERPOLATION" for m in modes):
         return "HAS_GENERATED_SEAM"

@@ -48,12 +48,40 @@ def load(path: Path, codec):
 
 
 def stage_output_path(rr: Path, stage_id: str, schema: str) -> Path:
-    ledger=load_json(rr/"ACTIVE_RUN_V2.json")
-    row=next(x for x in ledger["stages"] if x["id"]==stage_id)
-    hits=[x for x in row.get("outputs") or () if x.get("schema")==schema]
+    fixed={
+        ("15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1"):
+            rr/"artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json",
+        ("17_MECHANICAL_PARTITION_QUALIFIED","RealSaS.MechanicalPartitionIR.v1"):
+            rr/"artifacts/17_MECHANICAL_PARTITION_QUALIFIED/mechanical_partition.json",
+        ("18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.CanonicalMeshCandidateIR.v1"):
+            rr/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json",
+        ("18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.MeshQualificationPolicyIR.v1"):
+            rr/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/mesh_qualification_policy.json",
+        ("28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1"):
+            rr/"artifacts/28_SKELETON_QUALIFIED/qualified_skeleton.json",
+        ("05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1"):
+            rr/"artifacts/05_CAMERA_CONTRACT_SOLVED/qualified_camera_set.json",
+        ("34_DEFORMATION_CAPABILITY_ENVELOPE","RealSaS.DeformationCapabilityEnvelopeIR.v1"):
+            rr/"artifacts/34_DEFORMATION_CAPABILITY_ENVELOPE/deformation_envelope.json",
+    }
+    p=fixed.get((stage_id,schema))
+    if p is not None and p.is_file():
+        return p.resolve()
+
+    stage_dir=rr/"artifacts"/stage_id
+    hits=[]
+    if stage_dir.is_dir():
+        for q in stage_dir.rglob("*.json"):
+            try:
+                payload=load_json(q)
+            except Exception:
+                continue
+            actual=str(payload.get("schema") or payload.get("schema_version") or "")
+            if actual==schema:
+                hits.append(q.resolve())
     if len(hits)!=1:
-        raise RuntimeError(f"OUTPUT_LOOKUP::{stage_id}::{schema}::{len(hits)}")
-    return Path(hits[0]["path"]).resolve()
+        raise RuntimeError(f"OUTPUT_LOOKUP::{stage_id}::{schema}::{len(hits)}::{[str(x) for x in hits]}")
+    return hits[0]
 
 
 def face_indices(candidate):

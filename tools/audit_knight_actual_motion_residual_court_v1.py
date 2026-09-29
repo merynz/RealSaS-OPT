@@ -89,7 +89,6 @@ def main():
             c.component_id,"MESH",("ACTUAL_MOTION_RESIDUAL_COURT",),
             metadata={"automatic":False,"audit_only":True}) for c in part.components),
         metadata={"audit_only":True})
-    )
     candidate=build_holeless_partitioned_dense_candidate(
         surface,part,carrier,
         producer_policy_hash=content_sha256({

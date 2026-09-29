@@ -8,10 +8,14 @@ from PIL import Image
 
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     canonical_mesh_candidate_from_dict,
+)
+from compiler.realsas_compiler_core.output_presentation_v1 import (
     output_direction_set_from_dict,
+)
+from compiler.realsas_compiler_core.surface_addressing_v1 import (
+    build_appearance_domain,
     surface_addressing_from_dict,
 )
-from compiler.realsas_compiler_core.surface_addressing_v1 import build_appearance_domain
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     sha256_file,
     stage_output_payload,

@@ -1,0 +1,48 @@
+name: knight-component-harmonic-support-provenance-oracle-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths:
+      - 'tools/audit_knight_component_harmonic_support_provenance_oracle_v1.py'
+      - '.github/workflows/knight_component_harmonic_support_provenance_oracle_v1.yml'
+
+concurrency:
+  group: knight-component-harmonic-support-provenance-oracle-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Run harmonic source-support provenance oracle
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python tools/audit_knight_component_harmonic_support_provenance_oracle_v1.py \
+            --authority-root "$AUTHORITY_ROOT" \
+            --run-id "$RUN_ID" \
+            --skin-json canonical/knight_arachne_v6_2x2_rebound_stage35_v1/UNIFORM_ALL_PROJECTED.QUALIFIED_SKIN.json \
+            --out canonical/KNIGHT_COMPONENT_HARMONIC_SUPPORT_PROVENANCE_ORACLE_V1_20260929.json
+      - name: Seal
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_COMPONENT_HARMONIC_SUPPORT_PROVENANCE_ORACLE_V1_20260929.json
+          git commit -m 'audit: seal harmonic seam support provenance oracle'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

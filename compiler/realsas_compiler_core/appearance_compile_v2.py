@@ -941,6 +941,70 @@ def select_other_view_donor_by_support(
     return best_view, best_score
 
 
+def compatible_cross_view_foreground_donor_validity(
+    *,
+    direct_valid: np.ndarray,
+    donor_valid: np.ndarray,
+    direct_rgba: np.ndarray,
+    color_conflict_cut_rgba_l1: float,
+    alpha_conflict_cut: float,
+) -> np.ndarray:
+    """Fail-closed donor safety from already qualified source evidence.
+
+    Cross-view transfer is allowed only when all direct source evidence at the
+    canonical sample agrees that the locus is foreground and the foreground
+    observations are mutually compatible under the frozen cross-view conflict
+    cuts. Mixed foreground/background evidence is a directional silhouette
+    transition and therefore forbids donor transfer.
+    """
+    valid = np.asarray(direct_valid, dtype=bool)
+    donor = np.asarray(donor_valid, dtype=bool)
+    rgba = np.asarray(direct_rgba, dtype=np.uint8)
+    color_cut = float(color_conflict_cut_rgba_l1)
+    alpha_cut = float(alpha_conflict_cut)
+    if (
+        valid.ndim != 2
+        or valid.shape[0] != 8
+        or donor.shape != valid.shape
+        or rgba.shape != (8, valid.shape[1], 4)
+        or np.any(donor & ~valid)
+        or not (0.0 <= color_cut <= 1.0)
+        or not (0.0 <= alpha_cut <= 1.0)
+    ):
+        raise QualificationError("CAA_DONOR_COMPATIBILITY_INPUT_INVALID")
+
+    alpha = rgba[:, :, 3]
+    direct_foreground = valid & (alpha > 0)
+    direct_background = valid & (alpha == 0)
+
+    sample_safe = ~np.any(direct_background, axis=0)
+    for left in range(8):
+        for right in range(left + 1, 8):
+            shared = sample_safe & direct_foreground[left] & direct_foreground[right]
+            ids = np.flatnonzero(shared)
+            if not len(ids):
+                continue
+            left_pm = straight_srgb_rgba_u8_to_premultiplied_linear(
+                rgba[left, ids]
+            )
+            right_pm = straight_srgb_rgba_u8_to_premultiplied_linear(
+                rgba[right, ids]
+            )
+            color_error = np.mean(np.abs(left_pm - right_pm), axis=1)
+            alpha_error = (
+                np.abs(
+                    rgba[left, ids, 3].astype(np.float64)
+                    - rgba[right, ids, 3].astype(np.float64)
+                )
+                / 255.0
+            )
+            bad = (color_error > color_cut) | (alpha_error > alpha_cut)
+            if np.any(bad):
+                sample_safe[ids[bad]] = False
+
+    return donor & sample_safe[None, :]
+
+
 def compile_deterministic_caa(
     *,
     candidate,
@@ -1328,6 +1392,22 @@ def compile_deterministic_caa(
         raise QualificationError("CAA_SAMPLE_COMPONENT_INDEX_INVALID")
     component_count = len(component_ids)
 
+    donor_color_cut = float(
+        completion_policy.get("cross_view_color_conflict_cut_rgba_l1", 1.0)
+    )
+    donor_alpha_cut = float(
+        completion_policy.get("cross_view_alpha_conflict_cut", 1.0)
+    )
+    compatible_foreground_donor_valid = (
+        compatible_cross_view_foreground_donor_validity(
+            direct_valid=direct_valid,
+            donor_valid=direct_foreground_donor_valid,
+            direct_rgba=direct_rgba,
+            color_conflict_cut_rgba_l1=donor_color_cut,
+            alpha_conflict_cut=donor_alpha_cut,
+        )
+    )
+
     direction_completion_started = perf_counter()
     for target in range(8):
         direct = direct_valid[target]
@@ -1335,48 +1415,12 @@ def compile_deterministic_caa(
         provenance[target, direct] = CAA_PROVENANCE["DIRECT_SOURCE"]
         source_view[target, direct] = target
 
+        # Same-view source-bounded harmonic completion owns local gaps first.
+        # Cross-view transfer is a fallback only for regions that cannot be
+        # completed inside the frozen local region/hop budget.
         missing = ~direct
-        best_view, _best_score = select_other_view_donor_by_support(
-            target_view_index=target,
-            missing=missing,
-            direct_valid=direct_valid,
-            donor_valid=direct_foreground_donor_valid,
-            sample_face_index=sample_face,
-            face_support_by_view=face_support_by_view,
-        )
-        source_take = missing & (best_view >= 0)
-        if np.any(source_take):
-            indices = np.flatnonzero(source_take)
-            donors = best_view[indices].astype(np.int64)
-            rgba[target, indices] = direct_rgba[donors, indices]
-            provenance[target, indices] = CAA_PROVENANCE["OTHER_VIEW_SOURCE"]
-            source_view[target, indices] = donors.astype(np.int16)
-            missing[indices] = False
-
-        if not np.any(provenance[target] != 255):
-            raise QualificationError("CAA_NO_SOURCE_OBSERVATION_ANYWHERE")
-
-        missing_component_count = np.bincount(
-            sample_component_index[missing],
-            minlength=component_count,
-        )
-        observed_component_count = np.bincount(
-            sample_component_index[~missing],
-            minlength=component_count,
-        )
-        if np.any(
-            (missing_component_count > 0)
-            & (observed_component_count == 0)
-        ):
-            raise QualificationError("CAA_COMPONENT_WITHOUT_SOURCE_OBSERVATION")
-
-        # C(p) is the sole owner for samples with no qualified direct
-        # source support in any input direction. Do not walk those samples
-        # through the bounded local harmonic solver only to overwrite its
-        # abstention immediately afterwards. They are deliberately neither
-        # local-missing nor observed boundary evidence.
         local_missing = missing & ~globally_unseen_dense
-        local_observed = ~missing
+        local_observed = direct.copy()
         stats = bounded_surface_harmonic_fill(
             rgba=rgba[target],
             provenance=provenance[target],
@@ -1392,6 +1436,43 @@ def compile_deterministic_caa(
             abstain_source_view_value=-4,
         )
 
+        donor_fallback = (
+            provenance[target] == CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"]
+        )
+        donor_fallback_count = int(np.count_nonzero(donor_fallback))
+        if donor_fallback_count:
+            rgba[target, donor_fallback] = 0
+            provenance[target, donor_fallback] = 255
+            source_view[target, donor_fallback] = -1
+
+            best_view, _best_score = select_other_view_donor_by_support(
+                target_view_index=target,
+                missing=donor_fallback,
+                direct_valid=direct_valid,
+                donor_valid=compatible_foreground_donor_valid,
+                sample_face_index=sample_face,
+                face_support_by_view=face_support_by_view,
+            )
+            source_take = donor_fallback & (best_view >= 0)
+            if np.any(source_take):
+                indices = np.flatnonzero(source_take)
+                donors = best_view[indices].astype(np.int64)
+                rgba[target, indices] = direct_rgba[donors, indices]
+                provenance[target, indices] = CAA_PROVENANCE["OTHER_VIEW_SOURCE"]
+                source_view[target, indices] = donors.astype(np.int16)
+
+            donor_rejected = donor_fallback & ~source_take
+            if np.any(donor_rejected):
+                rgba[target, donor_rejected] = 0
+                provenance[target, donor_rejected] = CAA_PROVENANCE[
+                    "UNSUPPORTED_ABSTAIN"
+                ]
+                source_view[target, donor_rejected] = -4
+        else:
+            source_take = np.zeros(sample_count, dtype=bool)
+            donor_rejected = np.zeros(sample_count, dtype=bool)
+
+        # C(p) remains the sole owner for samples unseen in every source view.
         global_take = (
             (provenance[target] == 255)
             & globally_unseen_dense
@@ -1402,9 +1483,13 @@ def compile_deterministic_caa(
                 "CANONICAL_GLOBAL_COMPLETION"
             ]
             source_view[target, global_take] = -3
+
         completion_rows.append({
             "target_view_index": target,
             **stats,
+            "donor_fallback_candidate_count": donor_fallback_count,
+            "donor_fallback_recovered_count": int(np.count_nonzero(source_take)),
+            "donor_fallback_rejected_count": int(np.count_nonzero(donor_rejected)),
             "canonical_global_completion_sample_count": int(
                 np.count_nonzero(global_take)
             ),

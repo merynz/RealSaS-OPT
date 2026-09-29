@@ -27,3 +27,5 @@ jobs:
         run: |
           set -euo pipefail
           PYTHONPATH=. pytest -q tests/compiler/test_canonical_mesh_candidate_v1.py
+
+# trigger: workflow existed before this commit

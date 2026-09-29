@@ -1,0 +1,31 @@
+name: caa-harmonic-first-donor-fallback-gate-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths:
+      - 'compiler/realsas_compiler_core/appearance_compile_v2.py'
+      - 'compiler/realsas_compiler_core/appearance_quality_v2.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py'
+      - 'tests/compiler/test_visibility_and_caa_v2.py'
+      - '.github/workflows/caa_harmonic_first_donor_fallback_gate_v1.yml'
+
+concurrency:
+  group: caa-harmonic-first-donor-fallback-gate-v1
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Compile and test CAA donor fallback
+        run: |
+          set -euo pipefail
+          python -m py_compile             compiler/realsas_compiler_core/appearance_compile_v2.py             compiler/realsas_compiler_core/appearance_quality_v2.py             compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py
+          PYTHONPATH=. python -m pytest -q tests/compiler/test_visibility_and_caa_v2.py

@@ -392,6 +392,85 @@ def replay_compacted_face_provenance_v1(
     )
 
 
+
+COMPACTED_DENSE_FACE_PROVENANCE_SCHEMA = "RealSaS.CompactedDenseFaceProvenance.v1"
+
+
+def compacted_dense_face_provenance_hash_v1(payload: dict) -> str:
+    value = dict(payload)
+    value.pop("provenance_hash", None)
+    return content_sha256(value)
+
+
+def build_compacted_dense_face_provenance_v1(
+    vertices_world,
+    faces,
+    surface,
+    *,
+    source_zero_surface_sha256: str,
+) -> dict:
+    """Seal compact triangles that have an exact dense-face witness."""
+    if not source_zero_surface_sha256 or len(str(source_zero_surface_sha256)) != 64:
+        raise QualificationError("COMPACT_FACE_PROVENANCE_SOURCE_SHA_INVALID")
+    compact_faces = replay_compacted_face_provenance_v1(
+        vertices_world,
+        faces,
+        surface,
+    )
+    payload = {
+        "schema": COMPACTED_DENSE_FACE_PROVENANCE_SCHEMA,
+        "status": "PASS",
+        "surface_lineage_hash": str(surface.geometry_lineage_hash),
+        "source_zero_surface_sha256": str(source_zero_surface_sha256),
+        "source_dense_face_count": int(len(np.asarray(faces))),
+        "compact_face_count": int(len(compact_faces)),
+        "compact_faces": compact_faces,
+        "triangle_authority": "EXACT_DENSE_FACE_WITNESS_AFTER_FROZEN_COMPACTION",
+        "three_clique_face_minting_allowed": False,
+        "face_deletion_claimed": False,
+        "teacher_truth_used": False,
+        "provenance_hash": "",
+    }
+    payload["provenance_hash"] = compacted_dense_face_provenance_hash_v1(payload)
+    validate_compacted_dense_face_provenance_v1(payload, surface=surface)
+    return payload
+
+
+def validate_compacted_dense_face_provenance_v1(payload: dict, *, surface) -> None:
+    if str(payload.get("schema") or "") != COMPACTED_DENSE_FACE_PROVENANCE_SCHEMA:
+        raise QualificationError("COMPACT_FACE_PROVENANCE_SCHEMA_DRIFT")
+    if str(payload.get("status") or "") != "PASS":
+        raise QualificationError("COMPACT_FACE_PROVENANCE_NOT_PASS")
+    if str(payload.get("surface_lineage_hash") or "") != str(surface.geometry_lineage_hash):
+        raise QualificationError("COMPACT_FACE_PROVENANCE_SURFACE_LINEAGE_DRIFT")
+    if len(str(payload.get("source_zero_surface_sha256") or "")) != 64:
+        raise QualificationError("COMPACT_FACE_PROVENANCE_SOURCE_SHA_INVALID")
+    if payload.get("three_clique_face_minting_allowed") is not False:
+        raise QualificationError("COMPACT_FACE_PROVENANCE_CLIQUE_MINTING_FORBIDDEN")
+    if payload.get("teacher_truth_used") is not False:
+        raise QualificationError("COMPACT_FACE_PROVENANCE_TEACHER_TRUTH_FORBIDDEN")
+    faces = tuple(tuple(map(str, row)) for row in tuple(payload.get("compact_faces") or ()))
+    if int(payload.get("compact_face_count", -1)) != len(faces) or not faces:
+        raise QualificationError("COMPACT_FACE_PROVENANCE_FACE_COUNT_INVALID")
+    if len(set(faces)) != len(faces):
+        raise QualificationError("COMPACT_FACE_PROVENANCE_DUPLICATE_FACE")
+    known = {str(node.surface_id) for node in surface.surface_nodes}
+    relation_edges = {
+        tuple(sorted((str(row.a_surface_id), str(row.b_surface_id))))
+        for row in surface.local_relations
+    }
+    for face in faces:
+        if len(face) != 3 or len(set(face)) != 3 or any(sid not in known for sid in face):
+            raise QualificationError("COMPACT_FACE_PROVENANCE_FACE_INVALID")
+        canonical = tuple(sorted(face))
+        if face != canonical:
+            raise QualificationError("COMPACT_FACE_PROVENANCE_FACE_ORDER_NOT_CANONICAL")
+        for a, b in ((face[0], face[1]), (face[1], face[2]), (face[2], face[0])):
+            if tuple(sorted((a, b))) not in relation_edges:
+                raise QualificationError("COMPACT_FACE_PROVENANCE_RELATION_EDGE_MISSING")
+    if str(payload.get("provenance_hash") or "") != compacted_dense_face_provenance_hash_v1(payload):
+        raise QualificationError("COMPACT_FACE_PROVENANCE_HASH_DRIFT")
+
 def _camera_arrays(camera: dict):
     required = ("origin", "right", "screen_up", "forward", "half_extent", "resolution")
     if any(k not in camera for k in required):

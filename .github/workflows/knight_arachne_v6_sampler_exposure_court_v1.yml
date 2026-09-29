@@ -1,0 +1,60 @@
+name: knight-arachne-v6-sampler-exposure-court-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths:
+      - 'tools/audit_knight_arachne_v6_sampler_exposure_court_v1.py'
+      - 'canonical/KNIGHT_ARACHNE_V6_SAMPLER_EXPOSURE_COURT_PREREG_V1_20260929.json'
+      - '.github/workflows/knight_arachne_v6_sampler_exposure_court_v1.yml'
+
+concurrency:
+  group: knight-arachne-v6-sampler-exposure-court-v1
+  cancel-in-progress: true
+
+permissions: {contents: write}
+
+jobs:
+  court:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      V5_HANDOFF: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V5_DEMO_HANDOFF
+      EXPECTED_BANK_SHA256: 26b6891ff81b9bfc3405461394159547fa76b417852a44518425b4e1de7e67d3
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install
+        run: python -m pip install --no-input --progress-bar off numpy
+      - name: Fetch and verify exact teacher bank
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          echo "$tmp" >/tmp/arachne_sampler_exposure_tmp
+          rclone copyto "$V5_HANDOFF/ARACHNE_KNIGHT_TEACHER_BANK_FIX2.npz" "$tmp/bank.npz" --checksum
+          got="$(sha256sum "$tmp/bank.npz" | awk '{print $1}')"
+          test "$got" = "$EXPECTED_BANK_SHA256"
+          echo "ARACHNE_SAMPLER_BANK_SHA_PASS=$got"
+      - name: Run sampler exposure court
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(cat /tmp/arachne_sampler_exposure_tmp)"
+          PYTHONPATH=. python tools/audit_knight_arachne_v6_sampler_exposure_court_v1.py             --teacher-bank "$tmp/bank.npz"             --out canonical/KNIGHT_ARACHNE_V6_SAMPLER_EXPOSURE_COURT_V1_20260929.json             | tee /tmp/arachne_sampler_exposure.txt
+      - name: Seal
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p canonical/knight_arachne_v6_sampler_exposure_court_v1
+          cp /tmp/arachne_sampler_exposure.txt canonical/knight_arachne_v6_sampler_exposure_court_v1/AUDIT_STDOUT.txt
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add             canonical/KNIGHT_ARACHNE_V6_SAMPLER_EXPOSURE_COURT_V1_20260929.json             canonical/knight_arachne_v6_sampler_exposure_court_v1/AUDIT_STDOUT.txt
+          git commit -m 'research: seal Arachne V6 sampler exposure court'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

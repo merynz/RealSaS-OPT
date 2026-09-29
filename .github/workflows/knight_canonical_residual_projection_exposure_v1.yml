@@ -17,6 +17,8 @@ permissions:
 
 jobs:
   audit:
+    # Superseded by KNIGHT_REMAINING_VISUAL_SMEAR_ATTRIBUTION_V1; keep only as audit history.
+    if: ${{ false }}
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 25
     env:

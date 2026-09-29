@@ -70,10 +70,10 @@ def quantiles(values):
 
 def probe_edge_risk(surface, skeleton, cameras, envelope, sids, W):
     idx = {sid: i for i, sid in enumerate(sids)}
-    P = np.asarray(
-        [next(n.P for n in surface.surface_nodes if str(n.surface_id) == sid) for sid in sids],
-        dtype=np.float64,
-    )
+    node_by_id = {str(n.surface_id): n for n in surface.surface_nodes}
+    if set(node_by_id) != set(sids):
+        raise RuntimeError("PROBE_EDGE_SURFACE_ID_DRIFT")
+    P = np.asarray([node_by_id[sid].P for sid in sids], dtype=np.float64)
     edge_pairs = []
     seen = set()
     for rel in surface.local_relations:

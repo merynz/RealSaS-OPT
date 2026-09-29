@@ -217,9 +217,9 @@ def main():
         "stage23_asset_hash": stage23_payload["asset_hash"],
         "stage24_qualification_hash": stage24_payload["qualification_hash"],
         "stage24_report": stage24_payload["qualification_report"],
-        "frozen_renderer_path": "tools/demo/render_knight_motion_preview_v1.py",
+        "frozen_renderer_path": "tools/demo/frozen/render_knight_motion_preview_v1_7917be02.py",
         "frozen_renderer_sha256": sha256_file(
-            repo_root / "tools/demo/render_knight_motion_preview_v1.py"
+            repo_root / "tools/demo/frozen/render_knight_motion_preview_v1_7917be02.py"
         ),
         "counterfactual_invariants": {
             "corrected_stage18_candidate_preserved_byte_exact": True,

@@ -60,6 +60,7 @@ def main():
     ap.add_argument("--source-progress",type=Path,required=True)
     ap.add_argument("--steps",type=int,default=256)
     ap.add_argument("--out",type=Path,required=True)
+    ap.add_argument("--deterministic",action="store_true")
     args=ap.parse_args()
 
     for p,expected,name in (
@@ -73,6 +74,14 @@ def main():
             raise RuntimeError(f"{name.upper()}_SHA_DRIFT::{got}")
 
     mod=load_module(args.v6_source)
+    if args.deterministic:
+        torch.use_deterministic_algorithms(True)
+        try:
+            torch.backends.cuda.enable_flash_sdp(False)
+            torch.backends.cuda.enable_mem_efficient_sdp(False)
+            torch.backends.cuda.enable_math_sdp(True)
+        except Exception:
+            pass
     device=torch.device("cuda")
     if not torch.cuda.is_available():
         raise RuntimeError("CUDA_REQUIRED")
@@ -181,6 +190,7 @@ def main():
             "numpy":np.__version__,
             "pythonhashseed":os.environ.get("PYTHONHASHSEED"),
             "cublas_workspace_config":os.environ.get("CUBLAS_WORKSPACE_CONFIG"),
+            "deterministic_requested":bool(args.deterministic),
             "deterministic_algorithms":bool(torch.are_deterministic_algorithms_enabled()),
             "tf32_matmul":bool(torch.backends.cuda.matmul.allow_tf32),
             "tf32_cudnn":bool(torch.backends.cudnn.allow_tf32),

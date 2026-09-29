@@ -1,85 +1,133 @@
 from __future__ import annotations
 
-import argparse, json
+import argparse
+import json
 from pathlib import Path
 from time import perf_counter
-from PIL import Image
 
-from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import sha256_file
-from tools.demo.frozen.render_knight_motion_preview_v1_7917be02 import run as frozen_preview_run
-
-
-def gif_from_sheet(sheet_path: Path, out_path: Path, duration_ms: int) -> None:
-    sheet = Image.open(sheet_path).convert("RGBA")
-    if sheet.width % 4 != 0 or sheet.height % 2 != 0:
-        raise RuntimeError(f"UNEXPECTED_FROZEN_SHEET_GEOMETRY:{sheet.size}")
-    cell_w = sheet.width // 4
-    row_h = sheet.height // 2
-    header = 28
-    cell_h = row_h - header
-    frames = []
-    for i in range(4):
-        v0 = sheet.crop((i*cell_w, header, (i+1)*cell_w, header+cell_h))
-        y2 = row_h + header
-        v2 = sheet.crop((i*cell_w, y2, (i+1)*cell_w, y2+cell_h))
-        combined = Image.new("RGBA", (cell_w*2, cell_h), (0,0,0,0))
-        combined.alpha_composite(v0, (0,0))
-        combined.alpha_composite(v2, (cell_w,0))
-        target_h = min(640, combined.height)
-        target_w = max(1, round(combined.width * target_h / combined.height))
-        if (target_w, target_h) != combined.size:
-            combined = combined.resize((target_w,target_h), Image.Resampling.LANCZOS)
-        frames.append(combined.convert("P", palette=Image.Palette.ADAPTIVE, colors=255))
-    frames[0].save(
-        out_path, save_all=True, append_images=frames[1:],
-        duration=int(duration_ms), loop=0, disposal=2,
-        optimize=False, transparency=0,
-    )
+from compiler.realsas_compiler_core.appearance_authority_v2 import (
+    complete_appearance_asset_from_dict,
+)
+from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
+    sha256_file,
+    stage_output_payload,
+)
+from tools.demo.frozen.render_knight_motion_preview_v1_7917be02 import (
+    _ctx,
+    run as frozen_preview_run,
+)
+from tools.demo.render_knight_skin_topology_repair_preview_v1 import _gif_from_sheet
 
 
 def main():
-    p=argparse.ArgumentParser()
-    p.add_argument("--authority-root",type=Path,required=True)
-    p.add_argument("--run-id",required=True)
-    p.add_argument("--out-dir",type=Path,required=True)
-    a=p.parse_args()
+    p = argparse.ArgumentParser()
+    p.add_argument("--authority-root", type=Path, required=True)
+    p.add_argument("--source-run-id", required=True)
+    p.add_argument("--qualification-run-id", required=True)
+    p.add_argument("--out-dir", type=Path, required=True)
+    a = p.parse_args()
 
-    out=a.out_dir.resolve()
-    out.mkdir(parents=True,exist_ok=True)
-    preview=out/"frozen_renderer"
-    t=perf_counter()
-    frozen_preview_run(
-        authority_root=a.authority_root.resolve(),
-        run_id=a.run_id,
-        out_dir=preview,
+    authority_root = a.authority_root.resolve()
+    source_root = authority_root / "runs" / a.source_run_id
+    seal_path = source_root / "IMMUTABLE_STAGE23_SEAL.json"
+    if not seal_path.is_file():
+        raise RuntimeError("RENDER_SOURCE_STAGE23_SEAL_MISSING")
+    seal = json.loads(seal_path.read_text())
+    if (
+        seal.get("status") != "SEALED_IMMUTABLE_STAGE23"
+        or seal.get("run_id") != a.source_run_id
+        or seal.get("source_owned_visual_mesh_mode") is not False
+        or seal.get("overwrite_forbidden") is not True
+    ):
+        raise RuntimeError("RENDER_SOURCE_STAGE23_SEAL_INVALID")
+
+    source_ctx = _ctx(authority_root, a.source_run_id)
+    asset = complete_appearance_asset_from_dict(
+        stage_output_payload(
+            source_ctx,
+            "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+            "RealSaS.CompleteAppearanceAssetIR.v2",
+        )
     )
-    render_seconds=perf_counter()-t
+    if asset.asset_hash != seal["stage23_asset_hash"]:
+        raise RuntimeError("RENDER_SOURCE_STAGE23_ASSET_DRIFT")
+    if dict(asset.metadata or {}).get("source_owned_visual_mesh_mode") is True:
+        raise RuntimeError("RENDER_SOURCE_MECHANICAL_CAA_REQUIRED")
 
-    gifs=[]
-    for name,duration in (("IDLE",833),("RUN",208),("SLASH",278)):
-        sheet=preview/f"KNIGHT_{name}_DEMO_PREVIEW_V1.png"
-        gif=out/f"KNIGHT_{name}_HARMONIC_FIRST_CORRECTED_FROZEN_RENDERER.gif"
-        gif_from_sheet(sheet,gif,duration)
-        gifs.append({
-            "name":name,
-            "gif":str(gif),
-            "gif_sha256":sha256_file(gif),
-            "sheet":str(sheet),
-            "sheet_sha256":sha256_file(sheet),
+    qualification_ctx = _ctx(authority_root, a.qualification_run_id)
+    qualification = stage_output_payload(
+        qualification_ctx,
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "RealSaS.CompleteAppearanceQualificationIR.v2",
+    )
+    qualification_report = dict(qualification.get("qualification_report") or {})
+    if (
+        qualification.get("asset_binding_hash") != asset.asset_hash
+        or qualification_report.get("status") != "PASS_COMPLETE_APPEARANCE"
+    ):
+        raise RuntimeError("RENDER_STAGE24_PASS_BINDING_REQUIRED")
+
+    out_dir = a.out_dir.resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    preview_dir = out_dir / "frozen_renderer"
+
+    started = perf_counter()
+    frozen_preview_run(
+        authority_root=authority_root,
+        run_id=a.source_run_id,
+        out_dir=preview_dir,
+    )
+    render_seconds = perf_counter() - started
+
+    gif_rows = []
+    for name, duration_ms in (("IDLE", 833), ("RUN", 208), ("SLASH", 278)):
+        sheet = preview_dir / f"KNIGHT_{name}_DEMO_PREVIEW_V1.png"
+        gif = out_dir / f"KNIGHT_{name}_HARMONIC_FIRST_CORRECTED_FROZEN_RENDERER_V1.gif"
+        _gif_from_sheet(sheet, gif, duration_ms)
+        gif_rows.append({
+            "name": name,
+            "gif": str(gif),
+            "gif_sha256": sha256_file(gif),
+            "sheet": str(sheet),
+            "sheet_sha256": sha256_file(sheet),
         })
 
-    report={
-        "schema":"RealSaS.HarmonicFirstFrozenRendererOnly.v1",
-        "status":"PASS",
-        "run_id":a.run_id,
-        "stage24_qualification_hash":"a6ecf319693a3ad2c37cdba3637e5b0d246ff62f7555b5b635a348805ee0b579",
-        "stage24_status":"PASS",
-        "frozen_renderer_blob":"7917be02f325ba00b5dcd2b31a786898e45f640f",
-        "render_seconds":render_seconds,
-        "gifs":gifs,
+    report = {
+        "schema": "RealSaS.KnightHarmonicFirstCorrectedFrozenRenderer.v1",
+        "status": "PASS",
+        "source_run_id": a.source_run_id,
+        "qualification_run_id": a.qualification_run_id,
+        "stage23_asset_hash": asset.asset_hash,
+        "stage23_seal_sha256": sha256_file(seal_path),
+        "stage24_qualification_hash": qualification["qualification_hash"],
+        "stage24_report": qualification_report,
+        "stage24_holdout_p95_rgba_l1": qualification[
+            "structured_holdout_p95_rgba_l1"
+        ],
+        "frozen_renderer_blob": "7917be02f325ba00b5dcd2b31a786898e45f640f",
+        "source_owned_visual_mesh_arap_used": False,
+        "stage19_to24_recomputed": False,
+        "render_seconds": render_seconds,
+        "gifs": gif_rows,
     }
-    (out/"REPORT.json").write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
-    print("HARMONIC_FIRST_FROZEN_RENDER_PASS="+json.dumps(report,sort_keys=True),flush=True)
+    (out_dir / "REPORT.json").write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n"
+    )
+    print(
+        "HARMONIC_FIRST_FROZEN_RENDER_PASS="
+        + json.dumps(
+            {
+                "stage23": asset.asset_hash,
+                "stage24": qualification["qualification_hash"],
+                "holdout_p95": qualification["structured_holdout_p95_rgba_l1"],
+                "render_seconds": render_seconds,
+                "gifs": {row["name"]: row["gif_sha256"] for row in gif_rows},
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     main()

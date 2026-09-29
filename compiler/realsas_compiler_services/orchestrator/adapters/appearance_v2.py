@@ -2388,6 +2388,12 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         face_tile_resolutions=adaptive_resolutions,
         face_vertex_ids=face_vertex_ids,
         surface_graph=quality_graph,
+        donor_color_conflict_cut_rgba_l1=float(
+            policy["cross_view_color_conflict_cut_rgba_l1"]
+        ),
+        donor_alpha_conflict_cut=float(
+            policy["cross_view_alpha_conflict_cut"]
+        ),
     )
     seam = provenance_boundary_metrics(
         rgba=arrays["rgba"],

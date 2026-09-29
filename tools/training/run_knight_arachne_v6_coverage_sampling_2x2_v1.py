@@ -15,6 +15,9 @@ EXPECTED_V6_SOURCE_SHA256 = "39ff4f7a2051f0d9c1251a5999f472b9926e83deacbedcedc8e
 EXPECTED_V6_PREREG_SHA256 = "187f5c1bac1e813ebdfd1bbb76fa6def3d6543b4c7abc5609d217b3ece5fd597"
 EXPECTED_BANK_SHA256 = "26b6891ff81b9bfc3405461394159547fa76b417852a44518425b4e1de7e67d3"
 EXPECTED_UNIFORM_VALID_SCHEDULE_SHA256 = "910e79a11dd70210108e164ed6e2b0c1a4b1fbb69632b80f546c68a9bb5331e9"
+EXPECTED_MAX_STEPS = 32768
+EXPECTED_ROWS_PER_STEP = 384
+EXPECTED_DECODER_SEED = 20261128
 EXPECTED_SCHEDULES = {
     "UNIFORM_VALID": {
         "full_32768": "910e79a11dd70210108e164ed6e2b0c1a4b1fbb69632b80f546c68a9bb5331e9",
@@ -165,55 +168,45 @@ def main():
     if weights.shape[0] != len(valid):
         raise RuntimeError("ARACHNE_2X2_BANK_SHAPE_DRIFT")
 
-    mod = load_module(source_path)
-    original_sample_schedule = mod._sample_schedule
     all_mask = np.ones_like(valid, dtype=bool)
 
     if arm == "UNIFORM_VALID":
-        clean = np.flatnonzero(valid)
-        sanity = original_sample_schedule(clean)
-        got = schedule_digest(sanity)
-        if got != EXPECTED_UNIFORM_VALID_SCHEDULE_SHA256:
-            raise RuntimeError(f"ARACHNE_2X2_BASELINE_SCHEDULE_DRIFT::{got}")
-        def patched(clean_arg):
-            out = original_sample_schedule(np.asarray(clean_arg, dtype=np.int64))
-            if schedule_digest(out) != EXPECTED_UNIFORM_VALID_SCHEDULE_SHA256:
-                raise RuntimeError("ARACHNE_2X2_BASELINE_RUNTIME_SCHEDULE_DRIFT")
-            return out
+        frozen = uniform_schedule(
+            np.flatnonzero(valid),
+            steps=EXPECTED_MAX_STEPS,
+            rows=EXPECTED_ROWS_PER_STEP,
+            seed=EXPECTED_DECODER_SEED,
+        )
     elif arm == "ACTIVE_BALANCED_VALID":
         frozen = active_balanced_schedule(
-            weights, valid,
-            steps=int(mod.MAX_STEPS),
-            rows=int(mod.ROWS_PER_STEP),
-            decoder_seed=int(mod.DECODER_SEED),
+            weights,
+            valid,
+            steps=EXPECTED_MAX_STEPS,
+            rows=EXPECTED_ROWS_PER_STEP,
+            decoder_seed=EXPECTED_DECODER_SEED,
             per_target=4,
         )
-        def patched(clean_arg):
-            del clean_arg
-            return frozen.copy()
     elif arm == "UNIFORM_ALL_PROJECTED":
         frozen = uniform_schedule(
             np.flatnonzero(all_mask),
-            steps=int(mod.MAX_STEPS),
-            rows=int(mod.ROWS_PER_STEP),
-            seed=int(mod.DECODER_SEED),
+            steps=EXPECTED_MAX_STEPS,
+            rows=EXPECTED_ROWS_PER_STEP,
+            seed=EXPECTED_DECODER_SEED,
         )
-        def patched(clean_arg):
-            del clean_arg
-            return frozen.copy()
     else:
         frozen = active_balanced_schedule(
-            weights, all_mask,
-            steps=int(mod.MAX_STEPS),
-            rows=int(mod.ROWS_PER_STEP),
-            decoder_seed=int(mod.DECODER_SEED),
+            weights,
+            all_mask,
+            steps=EXPECTED_MAX_STEPS,
+            rows=EXPECTED_ROWS_PER_STEP,
+            decoder_seed=EXPECTED_DECODER_SEED,
             per_target=4,
         )
-        def patched(clean_arg):
-            del clean_arg
-            return frozen.copy()
 
-    mod._sample_schedule = patched
+    def patched(clean_arg):
+        del clean_arg
+        return frozen.copy()
+
 
     schedule_preview = patched(np.flatnonzero(valid))
     schedule_sha = schedule_digest(schedule_preview)
@@ -250,6 +243,15 @@ def main():
     if args.preflight_only:
         print("ARACHNE_2X2_PREFLIGHT_ONLY_PASS", flush=True)
         return
+
+    mod = load_module(source_path)
+    if int(mod.MAX_STEPS) != EXPECTED_MAX_STEPS:
+        raise RuntimeError("ARACHNE_2X2_MAX_STEPS_DRIFT")
+    if int(mod.ROWS_PER_STEP) != EXPECTED_ROWS_PER_STEP:
+        raise RuntimeError("ARACHNE_2X2_ROWS_PER_STEP_DRIFT")
+    if int(mod.DECODER_SEED) != EXPECTED_DECODER_SEED:
+        raise RuntimeError("ARACHNE_2X2_DECODER_SEED_DRIFT")
+    mod._sample_schedule = patched
 
     for raw, name in (
         (args.surface_json, "surface-json"),

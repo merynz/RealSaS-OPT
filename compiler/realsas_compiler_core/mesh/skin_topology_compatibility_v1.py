@@ -471,7 +471,10 @@ def propose_mechanical_repartition_directive_v2(
             "ABSTAIN__NO_IDENTITY_BOUNDARY_PROPOSAL"
         ),
         "source_candidate_lineage_hash":candidate.candidate_lineage_hash,
+        "source_surface_lineage_hash":surface.geometry_lineage_hash,
         "source_partition_lineage_hash":partition.partition_lineage_hash,
+        "source_skeleton_lineage_hash":skeleton.skeleton_lineage_hash,
+        "source_skin_lineage_hash":skin.skin_lineage_hash,
         "compatibility_report_hash":report_hash,
         "unsafe_face_count":len(unsafe),
         "candidate_separate_pair_count":len(ordered),

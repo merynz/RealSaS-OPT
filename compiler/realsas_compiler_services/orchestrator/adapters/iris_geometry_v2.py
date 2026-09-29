@@ -50,6 +50,11 @@ from compiler.realsas_compiler_core.substrate.adequacy_v1 import (
     select_adequate_rigging_surface_v1,
     substrate_adequacy_report_hash_v1,
 )
+from compiler.realsas_compiler_core.substrate.scene_first_signed import (
+    build_compacted_dense_face_provenance_v1,
+    compacted_dense_face_provenance_hash_v1,
+    validate_compacted_dense_face_provenance_v1,
+)
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     load_file_ref,
@@ -1465,6 +1470,17 @@ def build_gsa_stage(ctx: dict) -> dict:
             "diagnostics": adequacy,
         }
 
+    dense_world = (
+        np.asarray(normalization.center_xyz, dtype=np.float64)[None, :]
+        + np.asarray(vertices, dtype=np.float64) * float(normalization.half_extent)
+    )
+    face_provenance = build_compacted_dense_face_provenance_v1(
+        dense_world,
+        faces,
+        surface,
+        source_zero_surface_sha256=zero.npz_sha256,
+    )
+
     scientific_pass = str(adequacy.get("status") or "") == "PASS"
     authority_surface = "GSA_RIGGING_SURFACE_CANDIDATE"
     authority_report = "SUBSTRATE_ADEQUACY_REPORT"
@@ -1526,12 +1542,24 @@ def build_gsa_stage(ctx: dict) -> dict:
                 authority_class=authority_report,
                 schema="RealSaS.SubstrateAdequacyReport.v1",
             ),
+            write_json(
+                root / "compacted_dense_face_provenance.json",
+                face_provenance,
+                authority_class=(
+                    "DEMO_ONLY_COMPACTED_DENSE_FACE_PROVENANCE"
+                    if not scientific_pass
+                    else "COMPACTED_DENSE_FACE_PROVENANCE"
+                ),
+                schema="RealSaS.CompactedDenseFaceProvenance.v1",
+            ),
         ],
         "diagnostics": {
             "surface_lineage_hash": surface.geometry_lineage_hash,
             "node_count": len(surface.surface_nodes),
             "relation_count": len(surface.local_relations),
             "adequacy_report_hash": adequacy["adequacy_report_hash"],
+            "compacted_dense_face_provenance_hash": face_provenance["provenance_hash"],
+            "compacted_dense_face_count": face_provenance["compact_face_count"],
             "selected_target_node_cap": selected_cap,
             "stage14_scientific_pass": scientific_pass,
             "demo_fallback_admitted": not scientific_pass,
@@ -1553,6 +1581,19 @@ def qualify_rigging_surface_stage(ctx: dict) -> dict:
         "14_GSA_BUILD",
         "RealSaS.SubstrateAdequacyReport.v1",
     )
+    face_provenance = stage_output_payload(
+        ctx,
+        "14_GSA_BUILD",
+        "RealSaS.CompactedDenseFaceProvenance.v1",
+    )
+    validate_compacted_dense_face_provenance_v1(
+        face_provenance,
+        surface=surface,
+    )
+    if str(face_provenance.get("source_zero_surface_sha256") or "") != str(
+        dict(surface.metadata or {}).get("source_zero_surface_sha256") or ""
+    ):
+        raise QualificationError("RIGGING_SURFACE_FACE_PROVENANCE_SOURCE_DRIFT")
     if (
         adequacy.get("adequacy_report_hash")
         != substrate_adequacy_report_hash_v1(adequacy)
@@ -1625,12 +1666,17 @@ def qualify_rigging_surface_stage(ctx: dict) -> dict:
             "demo_fallback_admitted": bool(demo_fallback_admitted),
             "product_authority_claimed": False if demo_fallback_admitted else None,
             "substrate_adequacy_report_hash": adequacy["adequacy_report_hash"],
+            "compacted_dense_face_provenance_hash": face_provenance["provenance_hash"],
+            "compacted_dense_face_count": int(face_provenance["compact_face_count"]),
+            "triangle_authority": "EXACT_DENSE_FACE_WITNESS_AFTER_FROZEN_COMPACTION",
+            "three_clique_face_minting_allowed": False,
             "appearance_authority_used": False,
         },
         "",
         metadata={
             "tensorization_schema": tensor.schema_version,
             "substrate_adequacy_report_hash": adequacy["adequacy_report_hash"],
+            "compacted_dense_face_provenance_hash": face_provenance["provenance_hash"],
             "geometry_substrate_hash": adequacy["geometry_substrate_hash"],
             "v2_geometry_lane": True,
         },
@@ -1660,6 +1706,16 @@ def qualify_rigging_surface_stage(ctx: dict) -> dict:
                     if demo_fallback_admitted
                     else "RIGGING_SURFACE_QUALIFICATION"
                 ),
+            ),
+            write_json(
+                root / "qualified_compacted_dense_face_provenance.json",
+                face_provenance,
+                authority_class=(
+                    "DEMO_ONLY_QUALIFIED_COMPACTED_DENSE_FACE_PROVENANCE"
+                    if demo_fallback_admitted
+                    else "QUALIFIED_COMPACTED_DENSE_FACE_PROVENANCE"
+                ),
+                schema="RealSaS.CompactedDenseFaceProvenance.v1",
             ),
         ],
         "diagnostics": {

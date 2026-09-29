@@ -100,6 +100,9 @@ def _fixture():
         "g3_envelope_binding_hash":envelope.envelope_lineage_hash,
         "g3_stress_probe_hash":"g3-hash",
         "g3_stress_probe_status":"PASS",
+        "skin_topology_compatibility_report_hash":"skin-topology-test",
+        "skin_topology_compatibility_status":"PASS",
+        "skin_topology_weight_mutation":False,
         "carrier_policy_hash":carrier.carrier_policy_lineage_hash,
         "view_component_coverage":tuple(
             {"view_index":vi,"component_id":"c0","carrier_class":"MESH","recall":1.0,"precision":1.0,

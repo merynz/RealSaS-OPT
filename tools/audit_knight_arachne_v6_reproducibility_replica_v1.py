@@ -73,7 +73,9 @@ def main():
         if got!=expected:
             raise RuntimeError(f"{name.upper()}_SHA_DRIFT::{got}")
 
+    print("REPRO_STAGE=IMPORT_V6_BEGIN", flush=True)
     mod=load_module(args.v6_source)
+    print("REPRO_STAGE=IMPORT_V6_PASS", flush=True)
     if args.deterministic:
         torch.use_deterministic_algorithms(True)
         try:
@@ -90,10 +92,12 @@ def main():
     if free < 24*1024**3 or not torch.cuda.is_bf16_supported():
         raise RuntimeError("A100_24GIB_BF16_REQUIRED")
 
+    print("REPRO_STAGE=AUTHORITY_LOAD_BEGIN", flush=True)
     prereg=json.loads(args.v6_prereg.read_text())
     surface=mod.rigging_surface_from_dict(json.loads(args.surface_json.read_text()))
     skeleton=mod.qualified_skeleton_from_dict(json.loads(args.skeleton_json.read_text()))
     bank_path=args.teacher_bank
+    print("REPRO_STAGE=AUTHORITY_LOAD_PASS", flush=True)
 
     torch.manual_seed(mod.SEED)
     np.random.seed(mod.SEED)
@@ -101,6 +105,7 @@ def main():
     torch.backends.cuda.matmul.allow_tf32=False
     torch.backends.cudnn.allow_tf32=False
 
+    print("REPRO_STAGE=CONDITIONING_BEGIN", flush=True)
     conditioning=mod.ArachneRichConditioningAdapterV3(require_scene_first=True)([surface],[skeleton])
     ci=mod.base._conditioning_to_torch(conditioning,device)
     truth,valid,teacher_binding=mod.base._teacher_for_conditioning(bank_path,conditioning,skeleton)
@@ -109,8 +114,11 @@ def main():
     truth_t=torch.as_tensor(truth,device=device,dtype=torch.float32)
     joint_world,parent,joint_mask=mod.base._joint_world(skeleton,conditioning,device)
     articulated=mod.build_articulated_probe_transforms(joint_world,parent,joint_mask)
+    print("REPRO_STAGE=CONDITIONING_PASS", flush=True)
 
+    print("REPRO_STAGE=BACKBONE_LOAD_BEGIN", flush=True)
     source_model,source_report=mod._load_backbone_from_v5_progress(args.source_progress,device)
+    print("REPRO_STAGE=BACKBONE_LOAD_PASS", flush=True)
     with torch.no_grad(), torch.autocast(device_type="cuda",dtype=torch.bfloat16,enabled=True):
         raw=source_model.backbone(**ci)
         geom=source_model.geometry7_from_surface(
@@ -123,6 +131,7 @@ def main():
     source_model.cpu()
     torch.cuda.empty_cache()
 
+    print("REPRO_STAGE=FEATURE_EXTRACTION_PASS", flush=True)
     feature_hashes={
         "surface_memory":hash_tensor(surface_memory),
         "field_tokens":hash_tensor(field_tokens),
@@ -142,13 +151,16 @@ def main():
         relation_dim=mod.RELATION_DIM,
     ).to(device=device,dtype=torch.float32)
     init_hash=hash_state_dict(decoder.state_dict())
+    print("REPRO_STAGE=DECODER_INIT_PASS", flush=True)
 
     clean=np.flatnonzero(np.asarray(valid,bool))
     schedule=mod._sample_schedule(clean)
     schedule_hash=mod._schedule_digest(schedule)
+    print("REPRO_STAGE=SCHEDULE_PASS", flush=True)
     if schedule_hash!=EXPECTED_SCHEDULE_SHA256:
         raise RuntimeError(f"SCHEDULE_SHA_DRIFT::{schedule_hash}")
 
+    print("REPRO_STAGE=TRAIN_BEGIN", flush=True)
     opt=torch.optim.AdamW(decoder.parameters(),lr=mod.DECODER_LR,weight_decay=mod.WEIGHT_DECAY)
     checkpoints={}
     for step in range(1,int(args.steps)+1):
@@ -172,12 +184,15 @@ def main():
                 "grad_norm":float(grad),
             }
 
+    print("REPRO_STAGE=TRAIN_PASS", flush=True)
+    print("REPRO_STAGE=EVAL_BEGIN", flush=True)
     eval_row,_,_=mod._evaluate(
         decoder,surface_memory,geom,pair_geometry,field_tokens,legal,
         truth,valid,surface,skeleton,conditioning,world,
         joint_world,parent,joint_mask,device,int(args.steps)
     )
 
+    print("REPRO_STAGE=EVAL_PASS", flush=True)
     props=torch.cuda.get_device_properties(0)
     receipt={
         "schema":"RealSaS.KnightArachneV6ReproducibilityReplica.v1",

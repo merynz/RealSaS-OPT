@@ -171,6 +171,21 @@ def main():
 
         donor_rows=[]
         donor_mask=held_prov==CAA_PROVENANCE["OTHER_VIEW_SOURCE"]
+        target_alpha_u8=direct_rgba[target,held,3]
+        target_background=target_alpha_u8==0
+        target_foreground=target_alpha_u8>0
+        donor_target_class={
+            "TARGET_BACKGROUND__DONOR_FOREGROUND": {
+                "error":summarize(err[donor_mask & target_background]),
+                "alpha_abs":summarize(alpha_abs[donor_mask & target_background]),
+                "rgb_pm_l1":summarize(rgb_pm_l1[donor_mask & target_background]),
+            },
+            "TARGET_FOREGROUND__DONOR_FOREGROUND": {
+                "error":summarize(err[donor_mask & target_foreground]),
+                "alpha_abs":summarize(alpha_abs[donor_mask & target_foreground]),
+                "rgb_pm_l1":summarize(rgb_pm_l1[donor_mask & target_foreground]),
+            },
+        }
         for donor in range(8):
             if donor==target: continue
             mask=donor_mask & (held_sv==donor)
@@ -214,6 +229,7 @@ def main():
             "rgb_pm_l1":summarize(rgb_pm_l1),
             "provenance_breakdown":prov_rows,
             "donor_breakdown":donor_rows,
+            "donor_target_class_breakdown":donor_target_class,
             "top_bad_faces":face_rows,
         })
 

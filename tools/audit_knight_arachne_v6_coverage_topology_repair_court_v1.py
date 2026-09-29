@@ -35,6 +35,10 @@ from compiler.realsas_compiler_core.mesh.skin_topology_compatibility_v1 import (
     run_skin_topology_compatibility_v1,
 )
 from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import _joint_pose_v2
+from compiler.realsas_compiler_core.preproduct_authority_v1 import (
+    normalization_domain_from_dict,
+    signed_zero_surface_from_dict,
+)
 from compiler.realsas_compiler_core.product_authority_v1 import (
     ComponentCarrierDecisionIR,
     build_component_carrier_policy,
@@ -43,6 +47,8 @@ from compiler.realsas_compiler_core.product_authority_v1 import (
 )
 from compiler.realsas_compiler_core.skin import qualify_skin
 from compiler.realsas_compiler_core.substrate.scene_first_signed import (
+    build_compacted_dense_face_provenance_v1,
+    replay_compacted_face_provenance_v1,
     validate_compacted_dense_face_provenance_v1,
 )
 from tools.demo.render_knight_motion_preview_v1 import _tracks_for_clip
@@ -305,14 +311,15 @@ def main() -> None:
         raise RuntimeError("ARACHNE_TOPO_REPAIR_WEIGHT_SHA_DRIFT")
 
     rr = (args.authority_root / "runs" / args.run_id).resolve()
-    surface_path = stage_output_path(rr, "15_RIGGING_SURFACE_QUALIFIED", "RealSaS.RiggingSurfaceIR.v1")
-    provenance_path = stage_output_path(rr, "15_RIGGING_SURFACE_QUALIFIED", "RealSaS.CompactedDenseFaceProvenance.v1")
-    partition_path = stage_output_path(rr, "17_MECHANICAL_PARTITION_QUALIFIED", "RealSaS.MechanicalPartitionIR.v1")
-    candidate_path = stage_output_path(rr, "18_CANONICAL_MESH_ADDRESSING_BUILD", "RealSaS.CanonicalMeshCandidateIR.v1")
-    policy_path = stage_output_path(rr, "18_CANONICAL_MESH_ADDRESSING_BUILD", "RealSaS.MeshQualificationPolicyIR.v1")
-    skeleton_path = stage_output_path(rr, "28_SKELETON_QUALIFIED", "RealSaS.QualifiedSkeletonIR.v1")
-    cameras_path = stage_output_path(rr, "05_CAMERA_CONTRACT_SOLVED", "RealSaS.QualifiedCameraSetIR.v1")
-    envelope_path = stage_output_path(rr, "34_DEFORMATION_CAPABILITY_ENVELOPE", "RealSaS.DeformationCapabilityEnvelopeIR.v1")
+    surface_path = rr / "artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"
+    partition_path = rr / "artifacts/17_MECHANICAL_PARTITION_QUALIFIED/mechanical_partition.json"
+    candidate_path = rr / "artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json"
+    policy_path = rr / "artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/mesh_qualification_policy.json"
+    skeleton_path = rr / "artifacts/28_SKELETON_QUALIFIED/qualified_skeleton.json"
+    cameras_path = rr / "artifacts/05_CAMERA_CONTRACT_SOLVED/qualified_camera_set.json"
+    envelope_path = rr / "artifacts/34_DEFORMATION_CAPABILITY_ENVELOPE/deformation_envelope.json"
+    zero_path = rr / "artifacts/12_ZERO_SURFACE_DECODED/signed_zero_surface_seal.json"
+    normalization_path = rr / "artifacts/08_NORMALIZATION_DOMAIN_QUALIFIED/normalization_domain.json"
 
     surface = load(surface_path, rigging_surface_from_dict)
     parent_partition = load(partition_path, mechanical_partition_from_dict)
@@ -321,14 +328,40 @@ def main() -> None:
     skeleton = load(skeleton_path, qualified_skeleton_from_dict)
     cameras = tuple(sorted(load(cameras_path, qualified_camera_set_from_dict).cameras, key=lambda c: int(c.view_index)))
     envelope = load(envelope_path, deformation_envelope_from_dict)
+    zero = load(zero_path, signed_zero_surface_from_dict)
+    normalization = load(normalization_path, normalization_domain_from_dict)
 
-    provenance = json.loads(provenance_path.read_text())
+    zero_npz = Path(zero.npz_path).resolve()
+    if not zero_npz.is_file() or sha256(zero_npz) != str(zero.npz_sha256):
+        raise RuntimeError("ARACHNE_TOPO_REPAIR_ZERO_SURFACE_BYTES_DRIFT")
+    with np.load(zero_npz, allow_pickle=False) as z:
+        vertices_normalized = np.asarray(z["vertices_normalized"], dtype=np.float64)
+        dense_faces = np.asarray(z["faces"], dtype=np.int64)
+    world = (
+        np.asarray(normalization.center_xyz, dtype=np.float64)[None, :]
+        + vertices_normalized * float(normalization.half_extent)
+    )
+    explicit_faces = replay_compacted_face_provenance_v1(
+        world,
+        dense_faces,
+        surface,
+    )
+    provenance = build_compacted_dense_face_provenance_v1(
+        world,
+        dense_faces,
+        surface,
+        source_zero_surface_sha256=str(zero.npz_sha256),
+    )
     validate_compacted_dense_face_provenance_v1(provenance, surface=surface)
-    explicit_faces = tuple(tuple(map(str, x)) for x in provenance["compact_faces"])
+    if tuple(tuple(map(str, x)) for x in provenance["compact_faces"]) != explicit_faces:
+        raise RuntimeError("ARACHNE_TOPO_REPAIR_FACE_PROVENANCE_REPLAY_DRIFT")
     if not explicit_faces:
         raise RuntimeError("ARACHNE_TOPO_REPAIR_FACE_PROVENANCE_EMPTY")
 
     args.work_dir.mkdir(parents=True, exist_ok=True)
+    (args.work_dir / "replayed_compacted_dense_face_provenance.json").write_text(
+        json.dumps(provenance, indent=2, sort_keys=True) + "\n"
+    )
     rebound_npz = args.work_dir / "weights_rebound_to_current_stage28.npz"
     rebind_receipt_path = args.work_dir / "semantic_id_rebind_receipt.json"
     proposal_path = args.work_dir / "skin_proposal_replay.json"

@@ -112,7 +112,7 @@ def main():
         )
 
     report={
-        "schema":"RealSaS.KnightStage35ExactSkinReplay.v1",
+        "schema":"RealSaS.KnightStage35ExactSkinReplay.v1",\n        "harness_revision":"20260929-A",
         "status":"PASS_REPLAY_EXECUTED",
         "run_id":a.run_id,
         "skin_json_sha256":sha256(a.skin_json),

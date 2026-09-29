@@ -1,0 +1,22 @@
+{
+  "schema": "RealSaS.KnightDeterministicWeightReliabilityFeaturePrereg.v1",
+  "status": "FROZEN_BEFORE_RELIABILITY_FEATURE_RESULT",
+  "date": "2026-09-29",
+  "purpose": "Threshold-free diagnostic of product-available deterministic weight reliability features for separating weight-error-driven topology evidence from reliable mechanical evidence.",
+  "partition_policy": "Existing STRETCH_AND_L1_JSD partition is frozen before teacher evaluation.",
+  "features": [
+    "predicted dominant bone geometric rank",
+    "predicted dominant bone distance / nearest-bone distance",
+    "weight-row L1 deviation from one-ring neighbor median",
+    "one-ring neighbor consensus dispersion"
+  ],
+  "evaluation": [
+    "ROC-AUC for face touches teacher-invalid row",
+    "distributions on false-positive splits",
+    "distributions on true-positive cross-region splits",
+    "distributions on unsafe actual-motion >10x false-negative cross-region faces"
+  ],
+  "teacher_policy": "Teacher validity/topology/weights are evaluation-only after product features and partition are frozen.",
+  "no_threshold_selection": true,
+  "no_product_mutation": true
+}

@@ -175,7 +175,7 @@ def main():
             "motion_gt10":int(motion["max_edge_gt_10"]),
             "motion_gt4":int(motion["max_edge_gt_4"]),
             "motion_worst":float(motion["worst_edge_max"]),
-            "motion_p99":float(motion["p99_max_edge_ratio"]),
+            "motion_p99":float(motion["max_edge_p99"]),
         })
         print("GLOBAL_REGION_SWEEP_ROW="+json.dumps(rows[-1],sort_keys=True),flush=True)
 

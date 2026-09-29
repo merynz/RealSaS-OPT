@@ -24,6 +24,12 @@ from compiler.realsas_compiler_core.mesh.skin_topology_compatibility_v1 import p
 from compiler.realsas_compiler_core.product_authority_v1 import (
     ComponentCarrierDecisionIR, build_component_carrier_policy,
 )
+from compiler.realsas_compiler_core.preproduct_authority_v1 import (
+    signed_zero_surface_from_dict, normalization_domain_from_dict,
+)
+from compiler.realsas_compiler_core.substrate.scene_first_signed import (
+    build_compacted_dense_face_provenance_v1,
+)
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     sha256_file, stage_output_payload,
 )
@@ -109,6 +115,44 @@ def adopt_result(ctx: dict, stage_id: str, fn):
     row["diagnostics_hash"]=content_sha256(result.get("diagnostics") or {})
     row["blockers"]=[]
     return result
+
+
+def seal_child_compacted_face_provenance(
+    child_root: Path, parent_root: Path, ledger: dict, surface
+):
+    zero=signed_zero_surface_from_dict(load_json(
+        parent_root/"artifacts"/"12_ZERO_SURFACE_DECODED"/"signed_zero_surface_seal.json"))
+    norm=normalization_domain_from_dict(load_json(
+        parent_root/"artifacts"/"08_NORMALIZATION_DOMAIN_QUALIFIED"/"normalization_domain.json"))
+    npz_path=Path(zero.npz_path)
+    if not npz_path.is_file() or sha256_file(npz_path)!=zero.npz_sha256:
+        raise RuntimeError("CHILD_PROVENANCE_ZERO_NPZ_DRIFT")
+    with np.load(npz_path,allow_pickle=False) as z:
+        vn=np.asarray(z["vertices_normalized"],dtype=np.float64)
+        faces=np.asarray(z["faces"],dtype=np.int64)
+    world=np.asarray(norm.center_xyz,dtype=np.float64)[None,:] + vn*float(norm.half_extent)
+    payload=build_compacted_dense_face_provenance_v1(
+        world,faces,surface,source_zero_surface_sha256=zero.npz_sha256)
+    target=child_root/"artifacts"/"15_RIGGING_SURFACE_QUALIFIED"/"compacted_dense_face_provenance.json"
+    target.parent.mkdir(parents=True,exist_ok=True)
+    target.write_text(json.dumps(payload,indent=2,sort_keys=True)+"\n")
+    row=row_by_id(ledger,"15_RIGGING_SURFACE_QUALIFIED")
+    row["outputs"]=list(row.get("outputs") or ()) + [{
+        "path":str(target.resolve()),
+        "sha256":sha256_file(target),
+        "authority_class":"REPLAYED_EXACT_DENSE_FACE_PROVENANCE__DEMO_SOLUTION_LINEAGE",
+        "schema":"RealSaS.CompactedDenseFaceProvenance.v1",
+    }]
+    return {
+        "stage_id":"15_RIGGING_SURFACE_QUALIFIED",
+        "schema":"RealSaS.CompactedDenseFaceProvenance.v1",
+        "path":str(target.resolve()),
+        "sha256":sha256_file(target),
+        "status":"PASS_DEMO_ONLY",
+        "source_zero_surface_sha256":zero.npz_sha256,
+        "provenance_hash":payload["provenance_hash"],
+        "compact_face_count":payload["compact_face_count"],
+    }
 
 
 def copy_ir_as_stage32(child_root: Path, ledger: dict, skin_path: Path):
@@ -246,14 +290,6 @@ def main():
     ):
         adopted_upstream.append(adopt_upstream_schema(
             ledger,parent_root,stage_id,schema,status=status))
-    adopted_upstream.append(adopt_upstream_schema(
-        ledger,parent_root,
-        "15_RIGGING_SURFACE_QUALIFIED",
-        "RealSaS.CompactedDenseFaceProvenance.v1",
-        status="PASS_DEMO_ONLY",
-        append=True,
-    ))
-
     copy_ir_as_stage32(child_root,ledger,a.skin_json)
     ctx={
         "repo_root":Path(".").resolve(),"authority_root":a.authority_root.resolve(),
@@ -263,6 +299,8 @@ def main():
     }
     surface=rigging_surface_from_dict(stage_output_payload(
         ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1"))
+    adopted_upstream.append(seal_child_compacted_face_provenance(
+        child_root,parent_root,ledger,surface))
     skeleton=qualified_skeleton_from_dict(stage_output_payload(
         ctx,"28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1"))
     cameras=tuple(sorted(qualified_camera_set_from_dict(stage_output_payload(

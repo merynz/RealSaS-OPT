@@ -16,9 +16,6 @@ from compiler.realsas_compiler_core.artifact_codec_v2 import (
     qualified_skeleton_from_dict,
     rigging_surface_from_dict,
 )
-from compiler.realsas_compiler_core.mesh.deformation_stress_v2 import (
-    run_g3_local_frame_micro_stress_v2,
-)
 from compiler.realsas_compiler_core.mesh.skin_topology_compatibility_v1 import (
     propose_mechanical_repartition_directive_v2,
     run_skin_topology_compatibility_v1,
@@ -171,15 +168,6 @@ def main() -> None:
     if skin.surface_binding_hash != surface.geometry_lineage_hash:
         raise RuntimeError("ARACHNE_REBOUND_STAGE35_SKIN_SURFACE_BINDING_DRIFT")
 
-    g3 = run_g3_local_frame_micro_stress_v2(
-        candidate,
-        surface=surface,
-        skeleton=skeleton,
-        skin=skin,
-        envelope=envelope,
-        cameras=cameras,
-        policy=policy,
-    )
     compatibility = run_skin_topology_compatibility_v1(
         candidate,
         surface=surface,
@@ -226,9 +214,8 @@ def main() -> None:
             "envelope_lineage_hash": envelope.envelope_lineage_hash,
         },
         "g3": {
-            "passed": bool(g3.passed),
-            "report_hash": g3.report_hash,
-            "unsafe_face_count": int(len(g3.unsafe_face_indices)),
+            "status": "DEFERRED_TO_REPAIRED_CHILD_COURT",
+            "reason": "G3B owns topology repartition diagnosis; full G3 is reserved for A100-reliability-eligible repaired child candidates.",
         },
         "g3b": {
             "passed": bool(compatibility["passed"]),
@@ -262,7 +249,7 @@ def main() -> None:
         "claim_boundary": [
             "Semantic ID rebind preserves the F64 numeric skin field and changes only compiler joint identities.",
             "Compiler requalification is executed against the current Stage15 surface and current Stage28 skeleton.",
-            "Stage35 G3/G3B diagnostics are measured on the current Stage18 candidate without mutating product state.",
+            "Stage35 G3B topology compatibility is measured on the current Stage18 candidate without mutating product state; full G3 is deferred to repaired child candidates.",
             "Any repartition directive remains authorization-gated; no Stage17/18 mutation is performed here.",
         ],
     }
@@ -271,8 +258,6 @@ def main() -> None:
     print("KNIGHT_ARACHNE_V6_REBOUND_STAGE35_DIAGNOSTIC=" + json.dumps({
         "arm": args.arm,
         "skin_lineage_hash": skin.skin_lineage_hash,
-        "g3_passed": report["g3"]["passed"],
-        "g3_unsafe": report["g3"]["unsafe_face_count"],
         "g3b_passed": report["g3b"]["passed"],
         "g3b_risky": report["g3b"]["risky_face_count"],
         "g3b_unsafe": report["g3b"]["unsafe_face_count"],

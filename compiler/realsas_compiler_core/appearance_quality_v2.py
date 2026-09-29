@@ -12,7 +12,10 @@ from .appearance_completion_v2 import (
     surface_sample_neighbors,
 )
 from .appearance_bake_v2 import straight_rgba_to_premultiplied_float
-from .appearance_compile_v2 import select_other_view_donor_by_support
+from .appearance_compile_v2 import (
+    compatible_cross_view_foreground_donor_validity,
+    select_other_view_donor_by_support,
+)
 from .types import QualificationError
 
 
@@ -319,6 +322,8 @@ def structured_holdout_metrics(
     face_vertex_ids: tuple[tuple[str, str, str], ...] | None = None,
     surface_graph: SurfaceSampleGraph | None = None,
     excluded_provenance_codes: tuple[int, ...] = (),
+    donor_color_conflict_cut_rgba_l1: float = 1.0,
+    donor_alpha_conflict_cut: float = 1.0,
 ) -> dict:
     direct_valid = np.asarray(direct_valid, dtype=bool)
     direct_rgba = np.asarray(direct_rgba, dtype=np.uint8)
@@ -431,42 +436,88 @@ def structured_holdout_metrics(
         provenance[available] = CAA_PROVENANCE["DIRECT_SOURCE"]
         source_view[available] = target
 
-        best_view, _best_score = select_other_view_donor_by_support(
-            target_view_index=target,
-            missing=~has,
-            direct_valid=direct_valid,
-            donor_valid=direct_donor_valid,
-            sample_face_index=face_index,
-            face_support_by_view=face_support,
+        # Mirror shipping semantics exactly: same-view local harmonic first.
+        local_missing = holdout.copy()
+        completion_stats = bounded_surface_harmonic_fill(
+            rgba=predicted,
+            provenance=provenance,
+            source_view=source_view,
+            missing=local_missing,
+            observed_mask=has,
+            sample_component=sample_component,
+            neighbors=neighbors,
+            max_region_samples=int(max_region_samples),
+            max_graph_hops=int(max_graph_hops),
+            abstain_on_policy_violation=True,
+            abstain_provenance_code=CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"],
+            abstain_source_view_value=-4,
         )
-        take = (~has) & (best_view >= 0)
-        if np.any(take):
-            indices = np.flatnonzero(take)
-            donors = best_view[indices].astype(np.int64)
-            predicted[indices] = direct_rgba[donors, indices]
-            provenance[indices] = CAA_PROVENANCE["OTHER_VIEW_SOURCE"]
-            source_view[indices] = donors.astype(np.int16)
-            has[indices] = True
 
-        unresolved = holdout & ~has
-        completion_stats = {
-            "region_count": 0,
-            "maximum_region_samples": 0,
-            "maximum_graph_hops": 0,
-        }
-        if np.any(unresolved):
-            completion_stats = bounded_surface_harmonic_fill(
-                rgba=predicted,
-                provenance=provenance,
-                source_view=source_view,
-                missing=unresolved,
-                observed_mask=has,
-                sample_component=sample_component,
-                neighbors=neighbors,
-                max_region_samples=int(max_region_samples),
-                max_graph_hops=int(max_graph_hops),
+        donor_fallback = holdout & (
+            provenance == CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"]
+        )
+        donor_fallback_count = int(np.count_nonzero(donor_fallback))
+        if donor_fallback_count:
+            predicted[donor_fallback] = 0
+            provenance[donor_fallback] = 255
+            source_view[donor_fallback] = -1
+
+            effective_valid = direct_valid.copy()
+            effective_donor_valid = direct_donor_valid.copy()
+            effective_valid[target, holdout] = False
+            effective_donor_valid[target, holdout] = False
+            compatible_donor_valid = (
+                compatible_cross_view_foreground_donor_validity(
+                    direct_valid=effective_valid,
+                    donor_valid=effective_donor_valid,
+                    direct_rgba=direct_rgba,
+                    color_conflict_cut_rgba_l1=float(
+                        donor_color_conflict_cut_rgba_l1
+                    ),
+                    alpha_conflict_cut=float(donor_alpha_conflict_cut),
+                )
             )
-            has[held] = provenance[held] != 255
+            best_view, _best_score = select_other_view_donor_by_support(
+                target_view_index=target,
+                missing=donor_fallback,
+                direct_valid=effective_valid,
+                donor_valid=compatible_donor_valid,
+                sample_face_index=face_index,
+                face_support_by_view=face_support,
+            )
+            take = donor_fallback & (best_view >= 0)
+            if np.any(take):
+                indices = np.flatnonzero(take)
+                donors = best_view[indices].astype(np.int64)
+                predicted[indices] = direct_rgba[donors, indices]
+                provenance[indices] = CAA_PROVENANCE["OTHER_VIEW_SOURCE"]
+                source_view[indices] = donors.astype(np.int16)
+            donor_rejected = donor_fallback & ~take
+            if np.any(donor_rejected):
+                provenance[donor_rejected] = CAA_PROVENANCE[
+                    "UNSUPPORTED_ABSTAIN"
+                ]
+                source_view[donor_rejected] = -4
+        else:
+            take = np.zeros(n, dtype=bool)
+            donor_rejected = np.zeros(n, dtype=bool)
+
+        has[held] = np.isin(
+            provenance[held],
+            (
+                CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"],
+                CAA_PROVENANCE["OTHER_VIEW_SOURCE"],
+                CAA_PROVENANCE["DIRECT_SOURCE"],
+            ),
+        )
+        completion_stats = {
+            **dict(completion_stats),
+            "donor_fallback_candidate_count": donor_fallback_count,
+            "donor_fallback_recovered_count": int(np.count_nonzero(take)),
+            "donor_fallback_rejected_count": int(
+                np.count_nonzero(donor_rejected)
+            ),
+        }
 
         if not np.all(has[held]):
             raise QualificationError("CAA_HOLDOUT_PREDICTION_NOT_TOTAL")

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+CUT_CLOSURE_OPERATOR_BINDING_V1 = "MECHANICAL_REPARTITION_V2__STRUCTURAL_AUTHORITY_MAX_CONTINUITY"
+
 import argparse
 import hashlib
 import json

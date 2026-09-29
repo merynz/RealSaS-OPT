@@ -2318,7 +2318,11 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
     )
     if len(candidate.faces) != artifact.face_count:
         raise QualificationError("CAA_QUALIFICATION_FACE_TOPOLOGY_BINDING_DRIFT")
-    face_vertex_ids = tuple(tuple(map(str, face)) for face in candidate.faces)
+    (
+        _appearance_face_component_index,
+        _appearance_component_ids,
+        face_vertex_ids,
+    ) = _source_topology_appearance_components(ctx, candidate)
     quality_graph = surface_sample_neighbors(
         positions=arrays["sample_positions"],
         face_count=artifact.face_count,

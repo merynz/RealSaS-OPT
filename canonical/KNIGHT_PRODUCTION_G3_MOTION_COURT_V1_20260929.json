@@ -1,0 +1,191 @@
+{
+  "actual_motion": {
+    "frames": [
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 2.0717520260049898,
+        "edge_p95": 1.0024667686217734,
+        "edge_p99": 1.0511527895584023,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 2.0718892489682235,
+        "edge_p95": 1.0102070216707295,
+        "edge_p99": 1.0543075076831208,
+        "frame": 1,
+        "time_seconds": 0.8333333333333334
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 2.0710169285035835,
+        "edge_p95": 1.0023040583045717,
+        "edge_p99": 1.049255611229444,
+        "frame": 2,
+        "time_seconds": 1.6666666666666667
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 2.071889263481882,
+        "edge_p95": 1.0102070322632812,
+        "edge_p99": 1.054307459913761,
+        "frame": 3,
+        "time_seconds": 2.5
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.2078605613011604,
+        "edge_p95": 1.1175920219823272,
+        "edge_p99": 1.651871861267307,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.472848459704638,
+        "edge_p95": 1.0984336567753692,
+        "edge_p99": 1.5505511812977577,
+        "frame": 1,
+        "time_seconds": 0.20833333333333334
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.6155354868853395,
+        "edge_p95": 1.1119887946290816,
+        "edge_p99": 1.7301390560560046,
+        "frame": 2,
+        "time_seconds": 0.4166666666666667
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.2947035680835377,
+        "edge_p95": 1.0985156066857327,
+        "edge_p99": 1.5995082165378194,
+        "frame": 3,
+        "time_seconds": 0.625
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.2078605613011604,
+        "edge_p95": 1.1172105790996272,
+        "edge_p99": 1.692308258703744,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.467988186153054,
+        "edge_p95": 1.1227492597125412,
+        "edge_p99": 1.5257837989217062,
+        "frame": 1,
+        "time_seconds": 0.2777777777777778
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.167107160012201,
+        "edge_p95": 1.089421182489652,
+        "edge_p99": 1.5237451895192775,
+        "frame": 2,
+        "time_seconds": 0.5555555555555556
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.2078605613011604,
+        "edge_p95": 1.1172105790996272,
+        "edge_p99": 1.692308258703744,
+        "frame": 3,
+        "time_seconds": 0.8333333333333334
+      }
+    ],
+    "max_edge_gt_10": 0,
+    "max_edge_gt_4": 0,
+    "max_edge_p99": 1.7301390560560046,
+    "worst_edge_max": 3.6155354868853395
+  },
+  "claim_boundary": [
+    "All topology, partition and seam-transfer operators are production core implementations.",
+    "The trustworthy-skin authorization is audit-only; no product authority is minted.",
+    "G3 uses the production vectorized local-frame operator.",
+    "Actual motion uses the exact Knight idle/run/slash clip sampling court."
+  ],
+  "face_provenance_replay": {
+    "compact_face_count": 24443,
+    "compact_node_count": 12090,
+    "component_aware": true,
+    "dense_face_count": 12092332,
+    "dense_vertex_count": 6046160,
+    "position_error_max": 0.0,
+    "voxel_divisions": 56
+  },
+  "g3": {
+    "face_count": 28331,
+    "failure_invariants": [],
+    "maximum_area_ratio": 2.467171585548799,
+    "maximum_condition_number": 10.28599372419965,
+    "maximum_edge_ratio": 1.4225654701859263,
+    "minimum_area_ratio": 0.09736510684612798,
+    "minimum_edge_ratio": 0.5960883600551347,
+    "passed": true,
+    "probe_count": 169,
+    "report_hash": "724d2cb5fac936ee8f26c8b14c01f39d47ada14a97f1332f86170dfaea1206b7"
+  },
+  "performance": {
+    "actual_motion_seconds": 1.0213160249986686,
+    "build_stage35_17_18_seconds": 42.21593056397978,
+    "g3_seconds": 22.393320511997445,
+    "total_measured_seconds": 65.6305671009759
+  },
+  "schema": "RealSaS.KnightProductionG3MotionCourt.v1",
+  "stage17": {
+    "closure": {
+      "attractive_union_blocked_by_mutex": 401,
+      "attractive_union_count": 12017,
+      "closure_added_separate_count": 401,
+      "closure_policy": "STRUCTURAL_AUTHORITY_MAX_CONTINUITY",
+      "component_count": 73,
+      "direct_seed_count": 1417,
+      "final_separate_count": 1818,
+      "inherited_separate_count": 0,
+      "must_separate_count": 1417,
+      "seed_constraint_violation_count": 0
+    },
+    "component_count": 73
+  },
+  "stage18": {
+    "candidate_lineage_hash": "b917ee23d842c2a8c205ad03908857ee786b47be9b64413016b80055c8d4d095",
+    "face_count": 28331,
+    "mechanical_skin_transfer": "COMPONENT_HARMONIC_DIRICHLET_V1",
+    "vertex_count": 16031
+  },
+  "stage35_source_edge": {
+    "candidate_separate_pair_count": 1417,
+    "source_edge_probe_hash": "5be0c7122696c97db02e4ade6b7f3ebd1d2b13e593f25869462c3c36dac6d798",
+    "unsafe_source_edge_count": 1417
+  },
+  "status": "PASS__PRODUCTION_MECHANICAL_QUALIFICATION"
+}

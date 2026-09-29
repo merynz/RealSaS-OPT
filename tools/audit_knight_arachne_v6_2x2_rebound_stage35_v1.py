@@ -215,6 +215,8 @@ def main() -> None:
         },
         "g3": {
             "status": "DEFERRED_TO_REPAIRED_CHILD_COURT",
+            "passed": None,
+            "unsafe_face_count": None,
             "reason": "G3B owns topology repartition diagnosis; full G3 is reserved for A100-reliability-eligible repaired child candidates.",
         },
         "g3b": {

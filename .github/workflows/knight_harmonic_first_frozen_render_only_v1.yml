@@ -18,7 +18,8 @@ jobs:
     timeout-minutes: 15
     env:
       AUTHORITY_ROOT: /home/monster/realsas_authority
-      RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671
+      SOURCE_RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671
+      QUALIFICATION_RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_STAGE24_V1_70CBD671
       OUT_DIR: /tmp/knight_harmonic_first_frozen_render_only_v1
     steps:
       - uses: actions/checkout@v4
@@ -35,7 +36,11 @@ jobs:
           set -euo pipefail
           rm -rf "$OUT_DIR"
           mkdir -p "$OUT_DIR"
-          PYTHONPATH=. python tools/demo/render_knight_harmonic_first_frozen_only_v1.py             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --out-dir "$OUT_DIR"
+          PYTHONPATH=. python tools/demo/render_knight_harmonic_first_frozen_only_v1.py \
+            --authority-root "$AUTHORITY_ROOT" \
+            --source-run-id "$SOURCE_RUN_ID" \
+            --qualification-run-id "$QUALIFICATION_RUN_ID" \
+            --out-dir "$OUT_DIR"
       - name: Upload frozen corrected GIFs
         uses: actions/upload-artifact@v4
         with:

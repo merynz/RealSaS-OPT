@@ -8,6 +8,9 @@ from compiler.realsas_compiler_core.canonical_mesh_candidate_v1 import (
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.mechanical_partition_v1 import build_structural_partition
 from compiler.realsas_compiler_core.mesh.deformation_stress_v1 import _candidate_skin_matrix
+from compiler.realsas_compiler_core.mesh.skin_topology_compatibility_v1 import (
+    propose_mechanical_repartition_directive_v2,
+)
 from compiler.realsas_compiler_core.product_authority_v1 import (
     CarrierCoverageThresholdIR,
     ComponentBoundaryConstraintIR,
@@ -220,3 +223,47 @@ def test_stage35_holeless_seam_transfer_uses_mechanical_skin_support():
         # Geometry interpolation crosses the seam; Stage35 mechanical skin must not.
         assert len(v.support_binding.coefficients)==2
         assert tuple(v.support_binding.coefficients)!=support
+
+
+def test_stage35_repartition_can_recover_mechanical_owner_from_holeless_seam_vertex():
+    surface,partition,carrier,candidate=_fixture()
+    skeleton,skin,_,_,_=_qualified_mesh(surface,partition,carrier,candidate)
+    by_id={v.candidate_vertex_id:v for v in candidate.vertices}
+
+    def owner(v):
+        if v.support_binding.mode=="IDENTITY_SURFACE_NODE":
+            return str(v.support_binding.coefficients[0][0])
+        if v.support_binding.mode=="SEAM_GEOMETRY_INTERPOLATION":
+            return str(v.support_binding.metadata["skin_support_coefficients"][0][0])
+        return None
+
+    target=None
+    for fi,face in enumerate(candidate.faces):
+        vs=[by_id[x] for x in face]
+        owners=[owner(v) for v in vs]
+        if (
+            any(v.support_binding.mode=="SEAM_GEOMETRY_INTERPOLATION" for v in vs)
+            and None not in owners
+            and len(set(owners))>=2
+        ):
+            target=fi
+            break
+    assert target is not None
+
+    directive=propose_mechanical_repartition_directive_v2(
+        candidate,
+        surface=surface,
+        skeleton=skeleton,
+        skin=skin,
+        partition=partition,
+        compatibility_report={
+            "unsafe_face_indices":(int(target),),
+            "report_hash":"holeless-seam-owner-compat",
+        },
+    )
+    assert directive["status"]=="REPARTITION_PROPOSED__AWAIT_TRUSTWORTHY_SKIN_AUTHORITY"
+    assert directive["candidate_separate_pair_count"]==1
+    assert directive["unresolved_unsafe_face_count"]==0
+    row=directive["proposed_boundary_overrides"][0]
+    assert row["metadata"]["mechanical_owner_surface_support_required"] is True
+    assert row["metadata"]["identity_or_holeless_seam_owner_supported"] is True

@@ -77,16 +77,33 @@ def main():
         out["preview_candidates"][name]=matches
 
     old_root=a.authority_root/"runs"/"SUBJECT2_KNIGHT_DEMO_V2_20260924"
-    for token in ("18_CANONICAL_MESH_ADDRESSING_BUILD","32_SKIN_QUALIFIED"):
+    schema_targets = {
+        "18_CANONICAL_MESH_ADDRESSING_BUILD":"RealSaS.CanonicalMeshCandidateIR.v1",
+        "32_SKIN_QUALIFIED":"RealSaS.QualifiedSkinIR.v1",
+        "28_SKELETON_QUALIFIED":"RealSaS.QualifiedSkeletonIR.v1",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED":"RealSaS.CompleteAppearanceAssetIR.v2",
+    }
+    for token,schema in schema_targets.items():
         rows=[]
         if old_root.exists():
-            for pth in old_root.rglob("*"):
-                if pth.is_file() and token in pth.name:
-                    rows.append({
-                        "path":str(pth),
-                        "size":pth.stat().st_size,
-                        "sha256":__import__("hashlib").sha256(pth.read_bytes()).hexdigest(),
-                    })
+            for pth in old_root.rglob("*.json"):
+                try:
+                    text=pth.read_text()
+                except Exception:
+                    continue
+                if schema not in text:
+                    continue
+                try:
+                    payload=json.loads(text)
+                    payload_hash=content_sha256(payload)
+                except Exception:
+                    payload_hash=None
+                rows.append({
+                    "path":str(pth),
+                    "size":pth.stat().st_size,
+                    "sha256":__import__("hashlib").sha256(pth.read_bytes()).hexdigest(),
+                    "payload_hash":payload_hash,
+                })
         out["historical_raw_candidates"][token]=rows[:100]
     print("KNIGHT_OLD_VS_CORRECTED_AUDIT="+json.dumps(out,sort_keys=True),flush=True)
 

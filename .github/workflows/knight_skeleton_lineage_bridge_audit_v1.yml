@@ -1,0 +1,98 @@
+name: knight-skeleton-lineage-bridge-audit-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths:
+      - '.github/workflows/knight_skeleton_lineage_bridge_audit_v1.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      V5_SKEL: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V5_DEMO_HANDOFF/FINAL_QUALIFIED_SKELETON_IR.json
+      V6_SKIN: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_V6_COVERAGE_SAMPLING_2X2_INDEXSPACE_FIXED_20260929/ARMS/UNIFORM_ALL_PROJECTED/ARACHNE_KNIGHT_V6_QUALIFIED_SKIN_IR.json
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - name: Compare Arachne-bound skeleton with current Stage28
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          rclone copyto "$V5_SKEL" "$tmp/arachne_skeleton.json" --checksum
+          rclone copyto "$V6_SKIN" "$tmp/coverage_skin.json" --checksum
+          current="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/28_SKELETON_QUALIFIED/qualified_skeleton.json"
+          test -f "$current"
+          python - "$tmp/arachne_skeleton.json" "$current" "$tmp/coverage_skin.json" <<'PY'
+          import json,sys,math,hashlib
+          from pathlib import Path
+          a=json.load(open(sys.argv[1]))
+          c=json.load(open(sys.argv[2]))
+          s=json.load(open(sys.argv[3]))
+
+          def joints(x):
+              return {str(j["joint_id"]):j for j in x["joints"]}
+
+          A=joints(a); C=joints(c)
+          common=sorted(set(A)&set(C))
+          only_a=sorted(set(A)-set(C)); only_c=sorted(set(C)-set(A))
+          parent_diff=[]
+          pos_diff=[]
+          for jid in common:
+              ja,jc=A[jid],C[jid]
+              pa=ja.get("parent_id"); pc=jc.get("parent_id")
+              if pa!=pc: parent_diff.append({"joint_id":jid,"arachne_parent":pa,"current_parent":pc})
+              xa=ja.get("rest_position_world") or ja.get("position_world") or ja.get("position")
+              xc=jc.get("rest_position_world") or jc.get("position_world") or jc.get("position")
+              if xa is not None and xc is not None:
+                  d=math.sqrt(sum((float(u)-float(v))**2 for u,v in zip(xa,xc)))
+                  pos_diff.append((d,jid,xa,xc))
+          pos_diff.sort(reverse=True)
+
+          report={
+            "schema":"RealSaS.KnightSkeletonLineageBridgeAudit.v1",
+            "status":"COMPLETE",
+            "arachne_skin_skeleton_binding_hash":s.get("skeleton_binding_hash"),
+            "arachne_handoff_skeleton_lineage_hash":a.get("skeleton_lineage_hash"),
+            "current_stage28_skeleton_lineage_hash":c.get("skeleton_lineage_hash"),
+            "arachne_root_id":a.get("root_id"),
+            "current_root_id":c.get("root_id"),
+            "arachne_joint_count":len(A),
+            "current_joint_count":len(C),
+            "joint_id_sets_equal":set(A)==set(C),
+            "joint_order_equal":[j["joint_id"] for j in a["joints"]]==[j["joint_id"] for j in c["joints"]],
+            "only_arachne_joint_ids":only_a,
+            "only_current_joint_ids":only_c,
+            "parent_diff_count":len(parent_diff),
+            "parent_diffs":parent_diff[:50],
+            "position_comparable_count":len(pos_diff),
+            "max_position_delta":None if not pos_diff else pos_diff[0][0],
+            "top_position_deltas":[{"joint_id":jid,"delta":d,"arachne":xa,"current":xc} for d,jid,xa,xc in pos_diff[:20]],
+            "exact_json_sha256":{
+              "arachne":hashlib.sha256(Path(sys.argv[1]).read_bytes()).hexdigest(),
+              "current":hashlib.sha256(Path(sys.argv[2]).read_bytes()).hexdigest(),
+              "skin":hashlib.sha256(Path(sys.argv[3]).read_bytes()).hexdigest(),
+            },
+          }
+          out=Path("canonical/KNIGHT_SKELETON_LINEAGE_BRIDGE_AUDIT_V1_20260929.json")
+          out.write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
+          print("KNIGHT_SKELETON_LINEAGE_BRIDGE_AUDIT="+json.dumps(report,sort_keys=True))
+          PY
+      - name: Seal
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_SKELETON_LINEAGE_BRIDGE_AUDIT_V1_20260929.json
+          git commit -m 'audit: seal Knight skeleton lineage bridge'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

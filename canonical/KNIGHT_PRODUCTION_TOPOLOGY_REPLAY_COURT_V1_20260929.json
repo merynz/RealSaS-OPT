@@ -1,0 +1,206 @@
+{
+  "actual_motion": {
+    "frames": [
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 2.0717520260049898,
+        "edge_p95": 1.0024667686217712,
+        "edge_p99": 1.0511527895584065,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 2.0718892489682235,
+        "edge_p95": 1.0102070216707295,
+        "edge_p99": 1.0543075076831208,
+        "frame": 1,
+        "time_seconds": 0.8333333333333334
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 2.0710169285035835,
+        "edge_p95": 1.0023040583045717,
+        "edge_p99": 1.049255611229444,
+        "frame": 2,
+        "time_seconds": 1.6666666666666667
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 2.071889263481882,
+        "edge_p95": 1.0102070322632812,
+        "edge_p99": 1.054307459913761,
+        "frame": 3,
+        "time_seconds": 2.5
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.2078605613011604,
+        "edge_p95": 1.1175920219823277,
+        "edge_p99": 1.6518718612673085,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.472848459704632,
+        "edge_p95": 1.0984336567753692,
+        "edge_p99": 1.5505511812977577,
+        "frame": 1,
+        "time_seconds": 0.20833333333333334
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.6155354868853395,
+        "edge_p95": 1.1119887946290825,
+        "edge_p99": 1.7301390560560046,
+        "frame": 2,
+        "time_seconds": 0.4166666666666667
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.29470356808352,
+        "edge_p95": 1.0985156066857322,
+        "edge_p99": 1.5995082165378194,
+        "frame": 3,
+        "time_seconds": 0.625
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.2078605613011604,
+        "edge_p95": 1.1172105790996225,
+        "edge_p99": 1.692308258703744,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.4679881861530357,
+        "edge_p95": 1.1227492597125412,
+        "edge_p99": 1.5257837989217151,
+        "frame": 1,
+        "time_seconds": 0.2777777777777778
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.167107160012201,
+        "edge_p95": 1.0894211824896576,
+        "edge_p99": 1.5237451895192775,
+        "frame": 2,
+        "time_seconds": 0.5555555555555556
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.2078605613011604,
+        "edge_p95": 1.1172105790996225,
+        "edge_p99": 1.692308258703744,
+        "frame": 3,
+        "time_seconds": 0.8333333333333334
+      }
+    ],
+    "max_edge_gt_10": 0,
+    "max_edge_gt_4": 0,
+    "max_edge_p99": 1.7301390560560046,
+    "worst_edge_max": 3.6155354868853395
+  },
+  "claim_boundary": [
+    "Stage35 source-edge seed selection uses the production core operator.",
+    "Stage17 child partition uses the production mutex/DSU closure operator.",
+    "Stage18 holeless topology and component-harmonic source-support transfer use the production core operator.",
+    "The authorization in this court is audit-only and does not mint product authority.",
+    "No QualifiedSkinIR row is mutated."
+  ],
+  "expected_proven_oracle_signature": {
+    "component_count": 73,
+    "direct_seed_count": 1417,
+    "final_separate_count": 1818,
+    "motion_gt10": 0,
+    "motion_gt4": 0
+  },
+  "face_provenance_replay": {
+    "compact_face_count": 24443,
+    "compact_node_count": 12090,
+    "component_aware": true,
+    "dense_face_count": 12092332,
+    "dense_vertex_count": 6046160,
+    "position_error_max": 0.0,
+    "voxel_divisions": 56
+  },
+  "observed_signature": {
+    "component_count": 73,
+    "direct_seed_count": 1417,
+    "final_separate_count": 1818,
+    "motion_gt10": 0,
+    "motion_gt4": 0
+  },
+  "schema": "RealSaS.KnightProductionTopologyReplayCourt.v1",
+  "signature_matches_proven_oracle": true,
+  "source_edge_directive": {
+    "candidate_separate_pair_count": 1417,
+    "directive_hash": "230b24e24a04740a5912a7860c5de24fd216b0ccf1e3722bd8afb35dddf536d2",
+    "seed_strategy": "SOURCE_EDGE_PROBE_RATIO_V1",
+    "source_edge_count": 36469,
+    "source_edge_probe_hash": "5be0c7122696c97db02e4ade6b7f3ebd1d2b13e593f25869462c3c36dac6d798",
+    "unsafe_source_edge_count": 1417
+  },
+  "stage17": {
+    "child_component_count": 73,
+    "closure": {
+      "attractive_union_blocked_by_mutex": 401,
+      "attractive_union_count": 12017,
+      "closure_added_separate_count": 401,
+      "closure_policy": "STRUCTURAL_AUTHORITY_MAX_CONTINUITY",
+      "component_count": 73,
+      "direct_seed_count": 1417,
+      "final_separate_count": 1818,
+      "inherited_separate_count": 0,
+      "must_separate_count": 1417,
+      "seed_constraint_violation_count": 0
+    },
+    "parent_component_count": 6,
+    "partition_lineage_hash": "d0abd5e5fc9d39b584e76242224164a64b88bef2db3cc7634d2b6fd7b57503ad"
+  },
+  "stage18": {
+    "candidate_lineage_hash": "068d7175f9ca652fd213db7f31578dae620697e2745bbb2996b7c08e2171abd1",
+    "face_count": 28331,
+    "face_deletion_count": 0,
+    "mechanical_skin_transfer": "COMPONENT_HARMONIC_DIRICHLET_V1",
+    "mechanical_skin_transfer_report": {
+      "component_solve_count": 68,
+      "cross_component_support_allowed": false,
+      "generated_vertex_count": 3982,
+      "max_support_count_per_generated_vertex": 49,
+      "mechanical_skin_transfer": "COMPONENT_HARMONIC_DIRICHLET_V1",
+      "qualified_skin_weights_used": false,
+      "stored_support_coefficient_count": 101224,
+      "support_epsilon": 1e-14
+    },
+    "rest_area_relative_error": 2.5308339619708635e-15,
+    "vertex_count": 16031
+  },
+  "status": "PASS__PRODUCTION_OPERATORS_REPLAYED"
+}

@@ -46,7 +46,8 @@
         "positive_weight_mass_valid": 0.0,
         "zero_support_all": true
       },
-      "target_column": 0
+      "target_column": 0,
+      "target_role": "ROOT_MOTION_ANCHOR"
     },
     {
       "0.0": {
@@ -93,7 +94,8 @@
         "positive_weight_mass_valid": 203.063221475482,
         "zero_support_all": false
       },
-      "target_column": 1
+      "target_column": 1,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -140,7 +142,8 @@
         "positive_weight_mass_valid": 47.64847031831742,
         "zero_support_all": false
       },
-      "target_column": 2
+      "target_column": 2,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -187,7 +190,8 @@
         "positive_weight_mass_valid": 69.10221050530672,
         "zero_support_all": false
       },
-      "target_column": 3
+      "target_column": 3,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -234,7 +238,8 @@
         "positive_weight_mass_valid": 71.34329300671817,
         "zero_support_all": false
       },
-      "target_column": 4
+      "target_column": 4,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -281,7 +286,8 @@
         "positive_weight_mass_valid": 78.37368800789119,
         "zero_support_all": false
       },
-      "target_column": 5
+      "target_column": 5,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -328,7 +334,8 @@
         "positive_weight_mass_valid": 0.0,
         "zero_support_all": true
       },
-      "target_column": 6
+      "target_column": 6,
+      "target_role": "TERMINAL_TIP_SYNTHETIC"
     },
     {
       "0.0": {
@@ -375,7 +382,8 @@
         "positive_weight_mass_valid": 531.9109560444952,
         "zero_support_all": false
       },
-      "target_column": 7
+      "target_column": 7,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -422,7 +430,8 @@
         "positive_weight_mass_valid": 957.953020603955,
         "zero_support_all": false
       },
-      "target_column": 8
+      "target_column": 8,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -469,7 +478,8 @@
         "positive_weight_mass_valid": 39.70998094230891,
         "zero_support_all": false
       },
-      "target_column": 9
+      "target_column": 9,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -516,7 +526,8 @@
         "positive_weight_mass_valid": 120.60080526918175,
         "zero_support_all": false
       },
-      "target_column": 10
+      "target_column": 10,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -563,7 +574,8 @@
         "positive_weight_mass_valid": 2.8879468336701395,
         "zero_support_all": false
       },
-      "target_column": 11
+      "target_column": 11,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -610,7 +622,8 @@
         "positive_weight_mass_valid": 82.58186237514019,
         "zero_support_all": false
       },
-      "target_column": 12
+      "target_column": 12,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -657,7 +670,8 @@
         "positive_weight_mass_valid": 1495.8000000000004,
         "zero_support_all": false
       },
-      "target_column": 13
+      "target_column": 13,
+      "target_role": "TERMINAL_EXTENSION_SOURCE"
     },
     {
       "0.0": {
@@ -704,7 +718,8 @@
         "positive_weight_mass_valid": 0.0,
         "zero_support_all": true
       },
-      "target_column": 14
+      "target_column": 14,
+      "target_role": "TERMINAL_TIP_SYNTHETIC"
     },
     {
       "0.0": {
@@ -751,7 +766,8 @@
         "positive_weight_mass_valid": 3105.9,
         "zero_support_all": false
       },
-      "target_column": 15
+      "target_column": 15,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -798,7 +814,8 @@
         "positive_weight_mass_valid": 0.0,
         "zero_support_all": true
       },
-      "target_column": 16
+      "target_column": 16,
+      "target_role": "TERMINAL_TIP_SYNTHETIC"
     },
     {
       "0.0": {
@@ -845,7 +862,8 @@
         "positive_weight_mass_valid": 23.054443722963335,
         "zero_support_all": false
       },
-      "target_column": 17
+      "target_column": 17,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -892,7 +910,8 @@
         "positive_weight_mass_valid": 45.73248427808285,
         "zero_support_all": false
       },
-      "target_column": 18
+      "target_column": 18,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -939,7 +958,8 @@
         "positive_weight_mass_valid": 1.3035995706915855,
         "zero_support_all": false
       },
-      "target_column": 19
+      "target_column": 19,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -986,7 +1006,8 @@
         "positive_weight_mass_valid": 21.13033372759819,
         "zero_support_all": false
       },
-      "target_column": 20
+      "target_column": 20,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -1033,7 +1054,8 @@
         "positive_weight_mass_valid": 2122.2000000000003,
         "zero_support_all": false
       },
-      "target_column": 21
+      "target_column": 21,
+      "target_role": "TERMINAL_EXTENSION_SOURCE"
     },
     {
       "0.0": {
@@ -1080,7 +1102,8 @@
         "positive_weight_mass_valid": 0.0,
         "zero_support_all": true
       },
-      "target_column": 22
+      "target_column": 22,
+      "target_role": "TERMINAL_TIP_SYNTHETIC"
     },
     {
       "0.0": {
@@ -1127,7 +1150,8 @@
         "positive_weight_mass_valid": 45.29134838730097,
         "zero_support_all": false
       },
-      "target_column": 23
+      "target_column": 23,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -1174,7 +1198,8 @@
         "positive_weight_mass_valid": 66.85386327207088,
         "zero_support_all": false
       },
-      "target_column": 24
+      "target_column": 24,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -1221,7 +1246,8 @@
         "positive_weight_mass_valid": 62.66025006175042,
         "zero_support_all": false
       },
-      "target_column": 25
+      "target_column": 25,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -1268,7 +1294,8 @@
         "positive_weight_mass_valid": 75.29566090852023,
         "zero_support_all": false
       },
-      "target_column": 26
+      "target_column": 26,
+      "target_role": "SKIN_SUPPORTED_ARTICULATION"
     },
     {
       "0.0": {
@@ -1315,14 +1342,15 @@
         "positive_weight_mass_valid": 0.0,
         "zero_support_all": true
       },
-      "target_column": 27
+      "target_column": 27,
+      "target_role": "TERMINAL_TIP_SYNTHETIC"
     }
   ],
   "geppetto_alignment": {
     "exact_nearest_alignment_available": true,
     "max_position_error": 0.0,
     "position_key": "positions_world",
-    "role_source": null
+    "role_source": "teacher_bank:target_role_codes"
   },
   "schema": "RealSaS.KnightArachneTeacherSupportCoverageCourt.v1",
   "status": "DIAGNOSTIC_ONLY__NO_PRODUCT_MUTATION",

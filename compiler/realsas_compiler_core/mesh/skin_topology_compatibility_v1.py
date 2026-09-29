@@ -366,3 +366,127 @@ def seam_cut_candidate_v1(candidate,unsafe_face_indices,*,report_hash:str,max_it
     }
     directive["directive_hash"]=content_sha256(directive)
     return repaired,directive
+
+
+def propose_mechanical_repartition_directive_v2(
+    candidate,
+    *,
+    surface,
+    skeleton,
+    skin,
+    partition,
+    compatibility_report: Json,
+) -> Json:
+    """Convert Stage35 unsafe-face evidence into a compiler-owned repartition proposal.
+
+    This function never deletes faces and never mutates weights.  It only proposes
+    candidate SEPARATE boundary pairs from identity-bound unsafe face edges with
+    the strongest skin discontinuity.  Automatic application is deliberately
+    forbidden until an explicit trustworthy-skin/reliability authority exists.
+    """
+    unsafe=tuple(map(int,compatibility_report.get("unsafe_face_indices") or ()))
+    report_hash=str(compatibility_report.get("report_hash") or "")
+    if not report_hash:
+        raise QualificationError("SKIN_TOPOLOGY_REPARTITION_REPORT_HASH_MISSING")
+    if any(i<0 or i>=len(candidate.faces) for i in unsafe):
+        raise QualificationError("SKIN_TOPOLOGY_UNSAFE_FACE_INDEX_INVALID")
+
+    rest,weights,faces=_candidate_skin_matrix(
+        candidate,surface=surface,skeleton=skeleton,skin=skin
+    )
+    del rest
+    faces=np.asarray(faces,dtype=np.int64)
+    vertices=tuple(candidate.vertices)
+
+    existing={
+        tuple(sorted((str(row.a_surface_id),str(row.b_surface_id)))):str(row.decision)
+        for row in partition.boundary_constraints
+    }
+
+    def identity_sid(vertex):
+        coeffs=tuple(vertex.support_binding.coefficients)
+        if (
+            str(vertex.support_binding.mode)=="IDENTITY_SURFACE_NODE"
+            and len(coeffs)==1
+            and abs(float(coeffs[0][1])-1.0)<=1e-12
+        ):
+            return str(coeffs[0][0])
+        return None
+
+    proposals={}
+    unresolved=0
+    for fi in unsafe:
+        idx=tuple(map(int,faces[fi].tolist()))
+        edge_rows=[]
+        for ia,ib in ((0,1),(1,2),(2,0)):
+            a,b=idx[ia],idx[ib]
+            l1=float(np.abs(weights[a]-weights[b]).sum())
+            edge_rows.append((l1,a,b))
+        edge_rows.sort(key=lambda x:(x[0],-min(x[1],x[2]),-max(x[1],x[2])),reverse=True)
+        l1,a,b=edge_rows[0]
+        sa=identity_sid(vertices[a]); sb=identity_sid(vertices[b])
+        if sa is None or sb is None or sa==sb:
+            unresolved+=1
+            continue
+        pair=tuple(sorted((sa,sb)))
+        if existing.get(pair)=="SEPARATE":
+            continue
+        row=proposals.setdefault(pair,{
+            "a_surface_id":pair[0],
+            "b_surface_id":pair[1],
+            "decision":"SEPARATE",
+            "evidence_refs":[],
+            "max_pairwise_skin_l1":0.0,
+            "unsafe_face_indices":[],
+            "confidence":0.0,
+            "metadata":{
+                "evidence_class":"STAGE35_DYNAMIC_SKIN_TOPOLOGY_MECHANICAL",
+                "automatic":True,
+                "manual_authoring_used":False,
+                "identity_surface_support_required":True,
+            },
+        })
+        row["evidence_refs"].append(f"{report_hash}:FACE:{fi}")
+        row["unsafe_face_indices"].append(int(fi))
+        row["max_pairwise_skin_l1"]=max(float(row["max_pairwise_skin_l1"]),l1)
+        row["confidence"]=max(float(row["confidence"]),min(1.0,max(0.0,l1/2.0)))
+
+    ordered=[]
+    for pair in sorted(proposals):
+        row=proposals[pair]
+        row["evidence_refs"]=tuple(sorted(set(row["evidence_refs"])))
+        row["unsafe_face_indices"]=tuple(sorted(set(row["unsafe_face_indices"])))
+        row["constraint_id"]="DYNSEP:"+content_sha256({
+            "report_hash":report_hash,
+            "pair":pair,
+            "faces":row["unsafe_face_indices"],
+        })[:20]
+        ordered.append(row)
+
+    directive={
+        "schema":"RealSaS.MechanicalRepartitionDirective.v2",
+        "status":(
+            "REPARTITION_PROPOSED__AWAIT_TRUSTWORTHY_SKIN_AUTHORITY"
+            if ordered else
+            "ABSTAIN__NO_IDENTITY_BOUNDARY_PROPOSAL"
+        ),
+        "source_candidate_lineage_hash":candidate.candidate_lineage_hash,
+        "source_partition_lineage_hash":partition.partition_lineage_hash,
+        "compatibility_report_hash":report_hash,
+        "unsafe_face_count":len(unsafe),
+        "candidate_separate_pair_count":len(ordered),
+        "unresolved_unsafe_face_count":int(unresolved),
+        "proposed_boundary_overrides":tuple(ordered),
+        "repair_operation":"STAGE17_REPARTITION_THEN_STAGE18_HOLELESS_DENSE_SUBDIVISION",
+        "face_deletion_count":0,
+        "weight_mutation":False,
+        "vertex_position_mutation_at_stage35":False,
+        "restart_from":"17_MECHANICAL_PARTITION_QUALIFIED",
+        "mandatory_requalification_through":"35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "auto_apply_allowed":False,
+        "requires_trustworthy_skin_reliability_authority":True,
+        "fail_closed_if_not_repartitioned":True,
+        "directive_hash":"",
+    }
+    directive["directive_hash"]=content_sha256({k:v for k,v in directive.items() if k!="directive_hash"})
+    return directive

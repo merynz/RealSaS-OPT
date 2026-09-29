@@ -91,6 +91,7 @@ def _fixture():
     report={
         "gates":{
             "G1_SUPPORT_LINEAGE":"PASS","G2_TOPOLOGY":"PASS","G3_DEFORMATION":"PASS",
+            "G3B_SKIN_TOPOLOGY_COMPATIBILITY":"PASS",
             "G4_COMPONENT_BOUNDARY":"PASS","G5_MULTIVIEW_COVERAGE":"PASS",
         },
         "single_aggregate_score_authority":False,

@@ -22,7 +22,7 @@ from compiler.realsas_compiler_core.mesh.deformation_stress_v2 import (
 )
 from compiler.realsas_compiler_core.mesh.skin_topology_compatibility_v1 import (
     run_skin_topology_compatibility_v1,
-    seam_cut_candidate_v1,
+    propose_mechanical_repartition_directive_v2,
 )
 from compiler.realsas_compiler_core.mesh.conditioning_v1 import triangle_rest_metric
 from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
@@ -567,35 +567,35 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
         schema=compatibility["schema"],
     )
     if not compatibility["passed"]:
-        repaired,directive=seam_cut_candidate_v1(
+        directive=propose_mechanical_repartition_directive_v2(
             candidate,
-            compatibility["unsafe_face_indices"],
-            report_hash=compatibility["report_hash"],
-        )
-        repaired_artifact=_write_ir(
-            root/"repaired_stage18_candidate.json",
-            repaired,
-            authority_class="DIAGNOSTIC_NEW_STAGE18_LINEAGE_PROPOSAL",
+            surface=surface,
+            skeleton=skeleton,
+            skin=skin,
+            partition=partition,
+            compatibility_report=compatibility,
         )
         directive_artifact=_write_json(
-            root/"skin_topology_repair_directive.json",
+            root/"mechanical_repartition_directive.json",
             directive,
-            authority_class="DIAGNOSTIC_STAGE35_REPAIR_DIRECTIVE",
+            authority_class="DIAGNOSTIC_STAGE35_MECHANICAL_REPARTITION_DIRECTIVE",
             schema=directive["schema"],
         )
         return {
             "status":"FAIL",
-            "blockers":["G3B_SKIN_TOPOLOGY_COMPATIBILITY_REPAIR_REQUIRED"],
+            "blockers":["G3B_MECHANICAL_REPARTITION_REQUIRED"],
             "diagnostics":{
                 "g3_report_hash":g3.report_hash,
                 "skin_topology_compatibility_report_hash":compatibility["report_hash"],
                 "unsafe_face_count":compatibility["unsafe_face_count"],
-                "repaired_candidate_lineage_hash":repaired.candidate_lineage_hash,
+                "candidate_separate_pair_count":directive["candidate_separate_pair_count"],
                 "repair_directive_hash":directive["directive_hash"],
-                "repair_semantics":"NEW_STAGE18_LINEAGE__REQUALIFY_STAGE19_THROUGH_STAGE35",
+                "repair_semantics":"STAGE17_REPARTITION__STAGE18_HOLELESS_SUBDIVISION__REQUALIFY_THROUGH_STAGE35",
+                "face_deletion_count":0,
                 "weight_mutation":False,
+                "auto_apply_allowed":False,
+                "requires_trustworthy_skin_reliability_authority":True,
                 "compatibility_artifact_sha256":compatibility_artifact["sha256"],
-                "repaired_candidate_artifact_sha256":repaired_artifact["sha256"],
                 "repair_directive_artifact_sha256":directive_artifact["sha256"],
             },
         }

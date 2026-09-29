@@ -65,5 +65,43 @@
     "product_authority_claimed": false,
     "knight_demo_fit_only": true,
     "invalid_projected_teacher_rows_product_authority": false
+  },
+  "historical_control_receipt": {
+    "exact_v6_result_sha256": "42424db07f9e928bdad33a22fc5eed7c5507f4b20627731d62486eeb4f66d995",
+    "exact_v6_trace_sha256": "fa019088504f26ea26a7097dace11aeffda75b8c9e0148b2a5cbbe236aa8600b",
+    "a100_gpu": "NVIDIA A100-SXM4-40GB",
+    "closure_step": 8192,
+    "terminal_check_steps": [
+      7680,
+      7936,
+      8192
+    ],
+    "wall_seconds": 121.81457332699983,
+    "decoder_parameter_count": 1619491,
+    "backbone_parameter_count": 138053153,
+    "backbone_frozen": true
+  },
+  "frozen_schedule_sha256_by_arm": {
+    "UNIFORM_VALID": {
+      "full_32768": "910e79a11dd70210108e164ed6e2b0c1a4b1fbb69632b80f546c68a9bb5331e9",
+      "prefix_8192": "74e2d3fa193acabdde2837394bd460dfc29c3bfd361a38380a987d1a6b031819"
+    },
+    "ACTIVE_BALANCED_VALID": {
+      "full_32768": "abafdbbb11e270725d64e8981932c7b2481344d4b68fea389fec557aabcaa574",
+      "prefix_8192": "cfbbcdb198b7b5f4328118ec665ee1e90abd5c5d9a513c2f287ce8592d900cd6"
+    },
+    "UNIFORM_ALL_PROJECTED": {
+      "full_32768": "f2943931d70134509fbd24826ecd11388ccb5f4ce29a1d801626f6ffcd9ced4b",
+      "prefix_8192": "c1575c6e6260753b68e055873295b5c74da6486fc1911bcd61fef1e626098aa4"
+    },
+    "ACTIVE_BALANCED_ALL_PROJECTED": {
+      "full_32768": "0752250ceab3152444049c917cf910b94894ae8f500fb7265b4eb8db866718e2",
+      "prefix_8192": "91bfe3437f0893d0120395a72c09c982992728ea422937d53da79c12eff3af1b"
+    }
+  },
+  "resource_budget_note": {
+    "user_reported_a100_budget_hours_today": 3,
+    "historical_control_wall_seconds": 121.81457332699983,
+    "scientific_policy": "DO_NOT_CHANGE_ARMS_OR_GATES_FOR_RUNTIME; run all four sequentially if preflight remains healthy, because historical control runtime is far below budget."
   }
 }

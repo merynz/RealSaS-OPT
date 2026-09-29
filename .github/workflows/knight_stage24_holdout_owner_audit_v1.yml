@@ -28,3 +28,5 @@ jobs:
         run: |
           set -euo pipefail
           PYTHONPATH=. python tools/demo/audit_knight_stage24_holdout_owner_v1.py             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"
+
+# trigger: owner audit

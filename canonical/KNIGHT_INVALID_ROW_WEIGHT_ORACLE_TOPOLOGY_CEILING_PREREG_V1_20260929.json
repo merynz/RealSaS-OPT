@@ -1,0 +1,22 @@
+{
+  "schema": "RealSaS.KnightInvalidRowWeightOracleTopologyCeilingPrereg.v1",
+  "status": "FROZEN_BEFORE_INVALID_ROW_WEIGHT_ORACLE_RESULT",
+  "date": "2026-09-29",
+  "purpose": "Causal ceiling: replace only teacher-invalid Arachne rows with teacher weights, then rerun the already-frozen mechanical mutex topology inference policies. Determine whether unreliable weight evidence is sufficient to explain the remaining topology closure failure.",
+  "ORACLE_NOT_PRODUCT": true,
+  "oracle_intervention": "W_infer[v] = teacher_weight[v] iff teacher_valid_mask[v] is false; otherwise exact Arachne weight is retained.",
+  "forbidden_claim": "This court does not authorize teacher data, teacher validity, or weight training in product inference.",
+  "topology_region_labels_used_by_inference": false,
+  "variants": ["STRETCH_ONLY_JSD","STRETCH_OR_L1_JSD","STRETCH_AND_L1_JSD"],
+  "solver": "existing non-preloaded confidence-ordered mechanical mutex solver",
+  "closure_thresholds": {
+    "face_deletion_count_max": 0,
+    "rest_area_error_max": 1e-10,
+    "actual_motion_max_edge_gt_10_max": 5,
+    "actual_motion_max_edge_gt_4_max": 50,
+    "actual_motion_worst_edge_max": 25.0,
+    "synthetic_unsafe_face_count_max": 500,
+    "mixed_face_precision_min": 0.90,
+    "unsafe_cross_region_recall_min": 0.70
+  }
+}

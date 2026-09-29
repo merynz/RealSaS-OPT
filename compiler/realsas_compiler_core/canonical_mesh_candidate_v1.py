@@ -83,12 +83,6 @@ def build_canonical_relation_candidate(
         raise QualificationError("CANONICAL_MESH_PRODUCER_POLICY_MISSING")
     if not math.isfinite(float(min_relative_double_area)) or min_relative_double_area <= 0.0:
         raise QualificationError("CANONICAL_MESH_MIN_RELATIVE_AREA_INVALID")
-    if mechanical_skin_transfer not in {
-        "OWNER_COPY",
-        "COMPONENT_HARMONIC_DIRICHLET_V1",
-    }:
-        raise QualificationError("CANONICAL_MESH_MECHANICAL_SKIN_TRANSFER_UNSUPPORTED")
-
     nodes = {node.surface_id: node for node in surface.surface_nodes}
     owner = {
         sid: component.component_id
@@ -484,6 +478,11 @@ def build_holeless_partitioned_dense_candidate(
         raise QualificationError("CANONICAL_MESH_EXPLICIT_FACE_PROVENANCE_REQUIRED")
     if not math.isfinite(float(min_relative_double_area)) or min_relative_double_area <= 0.0:
         raise QualificationError("CANONICAL_MESH_MIN_RELATIVE_AREA_INVALID")
+    if mechanical_skin_transfer not in {
+        "OWNER_COPY",
+        "COMPONENT_HARMONIC_DIRICHLET_V1",
+    }:
+        raise QualificationError("CANONICAL_MESH_MECHANICAL_SKIN_TRANSFER_UNSUPPORTED")
 
     nodes = {node.surface_id: node for node in surface.surface_nodes}
     owner = {

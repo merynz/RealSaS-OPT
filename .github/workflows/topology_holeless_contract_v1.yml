@@ -10,6 +10,7 @@ on:
       - 'compiler/realsas_compiler_core/substrate/scene_first_signed.py'
       - 'compiler/realsas_compiler_core/substrate/adequacy_v1.py'
       - 'compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py'
+      - 'canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V3_20260929.json'
       - 'compiler/realsas_compiler_core/product_authority_v1.py'
       - 'compiler/realsas_compiler_core/product_mesh_skin_v1.py'
       - 'compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py'
@@ -17,6 +18,7 @@ on:
       - 'tests/compiler/test_holeless_partitioned_dense_candidate_v1.py'
       - 'tests/compiler/test_compacted_dense_face_provenance_v1.py'
       - 'tests/compiler/test_substrate_adequacy_v1.py'
+      - 'tests/compiler/test_stage14_policy_v3.py'
       - 'tests/compiler/test_skin_topology_repartition_directive_v2.py'
       - '.github/workflows/topology_holeless_contract_v1.yml'
 

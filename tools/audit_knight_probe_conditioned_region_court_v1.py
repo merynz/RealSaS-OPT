@@ -130,37 +130,90 @@ def probe_edge_risk(surface, skeleton, cameras, envelope, sids, W):
 
 
 def build_probe_partition(surface, risk, *, max_edge_ratio):
-    edge_pairs = risk["edge_pairs"]
-    max_ratio = risk["max_ratio"]
-    overrides = []
-    unsafe_pairs = []
+    edge_pairs = tuple(risk["edge_pairs"])
+    max_ratio = np.asarray(risk["max_ratio"], dtype=np.float64)
+    if len(edge_pairs) != len(max_ratio):
+        raise RuntimeError("PROBE_EDGE_CARDINALITY_DRIFT")
+
+    ids = tuple(sorted(str(n.surface_id) for n in surface.surface_nodes))
+    known = set(ids)
+    adjacency = {sid: set() for sid in ids}
+    edge_value = {}
+    direct_unsafe_pairs = []
+
     for i, p in enumerate(edge_pairs):
+        a, b = map(str, p)
+        if a not in known or b not in known or a == b:
+            raise RuntimeError("PROBE_EDGE_ENDPOINT_INVALID")
         value = float(max_ratio[i])
+        edge_value[pair(a, b)] = value
         if value <= float(max_edge_ratio):
+            adjacency[a].add(b)
+            adjacency[b].add(a)
+        else:
+            direct_unsafe_pairs.append(pair(a, b))
+
+    component_index = {}
+    groups = []
+    for sid in ids:
+        if sid in component_index:
             continue
-        unsafe_pairs.append(p)
+        ci = len(groups)
+        stack = [sid]
+        component_index[sid] = ci
+        members = []
+        while stack:
+            x = stack.pop()
+            members.append(x)
+            for y in sorted(adjacency[x]):
+                if y not in component_index:
+                    component_index[y] = ci
+                    stack.append(y)
+        groups.append(tuple(sorted(members)))
+
+    crossing_pairs = tuple(sorted(
+        p for p in edge_pairs
+        if component_index[str(p[0])] != component_index[str(p[1])]
+    ))
+
+    overrides = []
+    for p in crossing_pairs:
+        p = pair(*p)
+        value = float(edge_value[p])
         overrides.append(ComponentBoundaryConstraintIR(
             constraint_id="PROBECUT:" + content_sha256({
                 "pair": p,
                 "max_edge_ratio": value,
                 "limit": float(max_edge_ratio),
+                "component_a": int(component_index[p[0]]),
+                "component_b": int(component_index[p[1]]),
             })[:20],
             a_surface_id=p[0],
             b_surface_id=p[1],
             decision="SEPARATE",
             evidence_refs=(f"CANONICAL_PROBE_MAX_EDGE_RATIO:{value:.17g}",),
-            confidence=min(1.0, max(0.0, value / max(float(max_edge_ratio), 1e-12) - 1.0)),
+            confidence=min(
+                1.0,
+                max(0.0, value / max(float(max_edge_ratio), 1e-12) - 1.0),
+            ),
             metadata={
-                "evidence_class": "CANONICAL_PROBE_CONDITIONED_EDGE_COMPATIBILITY",
+                "evidence_class": "CANONICAL_PROBE_CONDITIONED_GLOBAL_CUT_CLOSURE",
                 "stress_angle_deg": float(risk["stress_angle_deg"]),
                 "max_edge_ratio": value,
                 "edge_ratio_limit": float(max_edge_ratio),
                 "automatic": False,
                 "audit_only": True,
+                "component_a": int(component_index[p[0]]),
+                "component_b": int(component_index[p[1]]),
             },
         ))
+
     part = build_structural_partition(surface, boundary_overrides=tuple(overrides))
-    return part, tuple(unsafe_pairs)
+    if len(part.components) != len(groups):
+        raise RuntimeError(
+            f"PROBE_REGION_COUNT_DRIFT::{len(groups)}::{len(part.components)}"
+        )
+    return part, tuple(sorted(direct_unsafe_pairs)), crossing_pairs
 
 
 def residual_class_summary(candidate, full, *, surface, skeleton, skin):
@@ -231,7 +284,7 @@ def main():
     sids, jids, W = skin_matrix(surface, skeleton, skin)
 
     risk = probe_edge_risk(surface, skeleton, cameras, envelope, sids, W)
-    part, unsafe_source_edges = build_probe_partition(
+    part, unsafe_source_edges, crossing_cut_edges = build_probe_partition(
         surface, risk, max_edge_ratio=DEFAULT_MAX_EDGE_RATIO
     )
     carrier = build_component_carrier_policy(
@@ -318,7 +371,7 @@ def main():
             "stress_angle_deg": float(risk["stress_angle_deg"]),
             "probe_count": int(risk["probe_count"]),
             "edge_ratio_limit": float(DEFAULT_MAX_EDGE_RATIO),
-            "edge_rule": "SEPARATE_IF_MAX_CANONICAL_PROBE_EDGE_RATIO_EXCEEDS_EXISTING_G3B_EDGE_LIMIT",
+            "edge_rule": "REMOVE_SOURCE_EDGES_EXCEEDING_EXISTING_G3B_EDGE_LIMIT__THEN_EMIT_ALL_CONNECTED_COMPONENT_CROSSING_RELATIONS_AS_SEPARATE",
             "new_numeric_threshold_introduced": False,
         },
         "skin_lineage_hash": skin.skin_lineage_hash,
@@ -326,6 +379,7 @@ def main():
         "source_edge_audit": {
             "edge_count": len(risk["edge_pairs"]),
             "unsafe_source_edge_count": len(unsafe_source_edges),
+            "cut_closed_crossing_edge_count": len(crossing_cut_edges),
             "max_ratio": quantiles(max_ratio),
             "min_ratio": quantiles(min_ratio),
         },

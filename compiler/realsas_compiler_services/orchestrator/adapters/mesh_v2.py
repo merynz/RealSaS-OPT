@@ -686,6 +686,9 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
             skin=skin,
             partition=partition,
             compatibility_report=compatibility,
+            envelope=envelope,
+            cameras=cameras,
+            seed_strategy="SOURCE_EDGE_PROBE_RATIO_V1",
         )
         directive_artifact=_write_json(
             root/"mechanical_repartition_directive.json",
@@ -701,6 +704,9 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
                 "skin_topology_compatibility_report_hash":compatibility["report_hash"],
                 "unsafe_face_count":compatibility["unsafe_face_count"],
                 "candidate_separate_pair_count":directive["candidate_separate_pair_count"],
+                "repair_seed_strategy":directive.get("seed_strategy"),
+                "unsafe_source_edge_count":directive.get("unsafe_source_edge_count"),
+                "source_edge_probe_hash":directive.get("source_edge_probe_hash"),
                 "repair_directive_hash":directive["directive_hash"],
                 "repair_semantics":"STAGE17_REPARTITION__STAGE18_HOLELESS_SUBDIVISION__REQUALIFY_THROUGH_STAGE35",
                 "face_deletion_count":0,

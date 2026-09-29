@@ -48,3 +48,5 @@ jobs:
             /tmp/knight_corrected_mechanical_caa_ab/frozen_renderer/*.json
           if-no-files-found: error
           retention-days: 7
+
+# trigger: workflow existed before this commit

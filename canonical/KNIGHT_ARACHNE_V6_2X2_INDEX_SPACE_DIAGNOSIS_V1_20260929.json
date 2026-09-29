@@ -1,0 +1,59 @@
+{
+  "schema": "RealSaS.KnightArachneV6CoverageSamplingIndexSpaceDiagnosis.v1",
+  "status": "OWNER_PROVEN__ORIGINAL_2X2_SCHEDULES_INVALIDATED",
+  "date": "2026-09-29",
+  "owner": "2x2 schedule construction used teacher-bank row/column index space instead of V6 conditioning row/column index space",
+  "evidence": {
+    "repro_court_failure": {
+      "stage": "SCHEDULE",
+      "observed_exact_v6_schedule_sha256": "4c5731cf5b2b28a3985458d555c7ef545d78054523cf92ce3edb0e959eee82fb",
+      "old_2x2_expected_control_sha256": "910e79a11dd70210108e164ed6e2b0c1a4b1fbb69632b80f546c68a9bb5331e9",
+      "training_steps_executed_before_failure": 0
+    },
+    "historical_v6_preflight": {
+      "sample_schedule_sha256": "4c5731cf5b2b28a3985458d555c7ef545d78054523cf92ce3edb0e959eee82fb",
+      "teacher_binding_row_reindexed": true,
+      "clean_row_count": 10611
+    },
+    "measured_index_space": {
+      "total_rows": 12090,
+      "conditioning_row_permutation_moved_count": 12087,
+      "raw_vs_reindexed_valid_mask_diff_count": 2612,
+      "raw_vs_reindexed_valid_mask_diff_fraction": 0.21604631927212573,
+      "historical_conditioning_authority_npz_sha256": "a0a3e652e323c6f2042354eb2095f3f66ff6168bf5ab51b53c83f728b8a00499"
+    },
+    "code_path": {
+      "historical_teacher_binding": "_teacher_for_conditioning() maps bank surface_ids to conditioning.surface_ids, then valid = valid0[rows], and reorders target columns",
+      "invalidated_wrapper_behavior": "loaded weights and teacher_valid_mask directly from the bank and constructed schedules before applying the historical row/column permutation"
+    }
+  },
+  "causal_scope": {
+    "UNIFORM_VALID": "INVALIDATED: valid mask indices were in raw bank order; therefore it was not the historical V6 control",
+    "ACTIVE_BALANCED_VALID": "INVALIDATED: both row-valid mask and support weights were in raw bank/target order",
+    "UNIFORM_ALL_PROJECTED": "SCHEDULE HASH NUMERICALLY UNCHANGED because every row is sampled, but it belongs to the invalidated court and must be rerun under the repaired common apparatus",
+    "ACTIVE_BALANCED_ALL_PROJECTED": "INVALIDATED: support weights were in raw bank/target order"
+  },
+  "corrected_schedule_sha256_by_arm": {
+    "UNIFORM_VALID": {
+      "full_32768": "4c5731cf5b2b28a3985458d555c7ef545d78054523cf92ce3edb0e959eee82fb",
+      "prefix_8192": "7c9a91a2e8051d3ff1ce534ccf908d5a0b25ca0620f15f0ab04efdfb228fa5e5"
+    },
+    "ACTIVE_BALANCED_VALID": {
+      "full_32768": "1c055e2ff76b65ead96094eaac613efbeeba1f552488c144d98d0d2bce13a308",
+      "prefix_8192": "5f8216c0e758d8d6830294ea765308ce66ee3648dc72335c6fba79a70fb0b934"
+    },
+    "UNIFORM_ALL_PROJECTED": {
+      "full_32768": "f2943931d70134509fbd24826ecd11388ccb5f4ce29a1d801626f6ffcd9ced4b",
+      "prefix_8192": "c1575c6e6260753b68e055873295b5c74da6486fc1911bcd61fef1e626098aa4"
+    },
+    "ACTIVE_BALANCED_ALL_PROJECTED": {
+      "full_32768": "24eaa6ab7faccf1fdff6bd2fc78b369f7ad19ca7841ef65a9721c775bc597a88",
+      "prefix_8192": "a2a0725af466f4af85bd15faac1236736c7876bd7146967378c80390120ee018"
+    }
+  },
+  "interpretation": {
+    "prior_nondeterminism_claim": "NOT SUPPORTED by this evidence; the failed control used a different schedule than historical V6",
+    "next_required_test": "Run corrected UNIFORM_VALID first. It must match the historical schedule hash and reproduce the historical closure trajectory before experimental arms are admitted.",
+    "product_authority_claimed": false
+  }
+}

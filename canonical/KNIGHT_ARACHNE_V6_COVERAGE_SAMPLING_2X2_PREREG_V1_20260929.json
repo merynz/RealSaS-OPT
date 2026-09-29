@@ -1,0 +1,68 @@
+{
+  "schema": "RealSaS.KnightArachneV6CoverageSampling2x2Preregistration.v1",
+  "status": "FROZEN_BEFORE_ANY_2X2_OPTIMIZER_STEP",
+  "date": "2026-09-29",
+  "purpose": "Separate teacher-coverage-mask effects from sparse active-support sampling effects while preserving the exact Knight V6 model, objective, compiler gate and stop rule.",
+  "frozen_authority": {
+    "exact_v6_source_sha256": "39ff4f7a2051f0d9c1251a5999f472b9926e83deacbedcedc8e92eea424dce01",
+    "exact_v6_prereg_sha256": "187f5c1bac1e813ebdfd1bbb76fa6def3d6543b4c7abc5609d217b3ece5fd597",
+    "teacher_bank_sha256": "26b6891ff81b9bfc3405461394159547fa76b417852a44518425b4e1de7e67d3",
+    "architecture_id": "RealSaS.Arachne.A1.RawSurfaceK4AttentionDirectSimplex.v6",
+    "backbone_frozen": true,
+    "source_progress_step": 15360,
+    "decoder_seed": 20261128,
+    "seed": 20260926,
+    "rows_per_step": 384,
+    "closure_rule": "UNCHANGED_V6_THREE_CONSECUTIVE_FULL_GATE_PASS",
+    "max_steps": 32768,
+    "objective": "UNCHANGED_EXACT_V6_OBJECTIVE",
+    "compiler_qualification": "UNCHANGED_EXACT_V6_QUALIFY_SKIN"
+  },
+  "arms": [
+    {
+      "id": "UNIFORM_VALID",
+      "training_pool": "teacher_valid_mask=true",
+      "schedule": "exact original V6 uniform-without-replacement schedule",
+      "causal_change": "NONE_CONTROL"
+    },
+    {
+      "id": "ACTIVE_BALANCED_VALID",
+      "training_pool": "teacher_valid_mask=true",
+      "schedule": "same 384-row budget; reserve up to 4 unique positive-support rows per target column, then fill uniformly from valid rows",
+      "positive_support_rule": "teacher weight > 0",
+      "causal_change": "SAMPLING_ONLY"
+    },
+    {
+      "id": "UNIFORM_ALL_PROJECTED",
+      "training_pool": "all 12090 projected teacher rows, including teacher_valid_mask=false",
+      "schedule": "uniform without replacement",
+      "causal_change": "COVERAGE_ONLY",
+      "scope_warning": "DEMO_FIT_CAUSAL_ARM_ONLY__PROJECTED_INVALID_ROWS_NOT_PRODUCT_TEACHER_AUTHORITY"
+    },
+    {
+      "id": "ACTIVE_BALANCED_ALL_PROJECTED",
+      "training_pool": "all 12090 projected teacher rows",
+      "schedule": "same 384-row budget; reserve up to 4 unique positive-support rows per target column, then fill uniformly from all rows",
+      "positive_support_rule": "teacher weight > 0",
+      "causal_change": "COVERAGE_PLUS_SAMPLING",
+      "scope_warning": "DEMO_FIT_CAUSAL_ARM_ONLY__PROJECTED_INVALID_ROWS_NOT_PRODUCT_TEACHER_AUTHORITY"
+    }
+  ],
+  "sanity_gates": [
+    "UNIFORM_VALID sample schedule SHA must equal exact V6 schedule SHA when the same valid set is supplied",
+    "UNIFORM_VALID should reproduce the historical closure trajectory within deterministic execution tolerance",
+    "No arm may alter model architecture, backbone checkpoint, loss terms, optimizer family, LR schedule, compiler thresholds, teacher predictor input boundary or random base seed"
+  ],
+  "post_gpu_evaluation": [
+    "valid-row V6 metrics",
+    "all-projected-row and teacher-invalid-row row-L1 diagnostics",
+    "same downstream Stage35/topology courts using each arm's exact canonical weights",
+    "no topology winner may be declared from training loss alone"
+  ],
+  "product_boundary": {
+    "generalization_claimed": false,
+    "product_authority_claimed": false,
+    "knight_demo_fit_only": true,
+    "invalid_projected_teacher_rows_product_authority": false
+  }
+}

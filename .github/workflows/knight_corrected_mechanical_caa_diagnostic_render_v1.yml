@@ -48,3 +48,5 @@ jobs:
             /tmp/knight_corrected_mechanical_caa_diagnostic_render/frozen_renderer/*.json
           if-no-files-found: error
           retention-days: 7
+
+# trigger: diagnostic render v1

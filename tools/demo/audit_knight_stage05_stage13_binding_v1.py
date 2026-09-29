@@ -37,12 +37,12 @@ def main():
             stage13_files.append({"path":str(p.resolve()),"parse_error":str(exc)})
             continue
         schema=str(payload.get("schema") or payload.get("schema_version") or "")
-        row={"path":str(p.resolve()),"sha256":sha256(p),"schema":schema}
+        file_row={"path":str(p.resolve()),"sha256":sha256(p),"schema":schema}
         if schema=="RealSaS.GeometrySubstrateQualificationIR.v2":
             geo_candidates.append((p.resolve(),payload))
-            row["camera_set_binding_hash"]=payload.get("camera_set_binding_hash")
-            row["substrate_hash"]=payload.get("substrate_hash")
-        stage13_files.append(row)
+            file_row["camera_set_binding_hash"]=payload.get("camera_set_binding_hash")
+            file_row["substrate_hash"]=payload.get("substrate_hash")
+        stage13_files.append(file_row)
     if len(geo_candidates)!=1:
         raise RuntimeError(f"STAGE13_SCHEMA_SCAN_CARDINALITY::{len(geo_candidates)}::{stage13_files}")
     geo_path,geo_payload=geo_candidates[0]

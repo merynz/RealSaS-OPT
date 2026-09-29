@@ -6,6 +6,8 @@ on:
     branches: [research/vf11-certified-adaptive-20260921]
     paths:
       - 'tools/audit_knight_arachne_stage17_stage18_repair_child_v1.py'
+      - 'compiler/realsas_compiler_core/mechanical_repartition_v2.py'
+      - 'tests/compiler/test_mechanical_repartition_v2.py'
       - '.github/workflows/knight_arachne_stage17_stage18_repair_child_v1.yml'
 
 concurrency:

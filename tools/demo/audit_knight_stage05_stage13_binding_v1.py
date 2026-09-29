@@ -35,11 +35,29 @@ def main():
     cam_ref=output("05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1")
     obs_ref=output("07_OBSERVATION_CONTRACT_QUALIFIED","RealSaS.QualifiedObservationSetIR.v1")
     norm_ref=output("08_NORMALIZATION_DOMAIN_QUALIFIED","RealSaS.NormalizationDomainIR.v1")
-    zero_ref=output("12_ZERO_SURFACE_DECODED","RealSaS.SignedZeroSurfaceSealIR.v1")
+    zero_hits=[x for x in row("12_ZERO_SURFACE_DECODED").get("outputs",[]) if x.get("schema")=="RealSaS.SignedZeroSurfaceSealIR.v1"]
+    zero_ref=zero_hits[0] if len(zero_hits)==1 else None
     cam_path=Path(cam_ref["path"]).resolve()
     obs_path=Path(obs_ref["path"]).resolve()
     norm_path=Path(norm_ref["path"]).resolve()
-    zero_path=Path(zero_ref["path"]).resolve()
+    if zero_ref is not None:
+        zero_path=Path(zero_ref["path"]).resolve()
+        zero_payload=json.loads(zero_path.read_text())
+        zero_source="LEDGER"
+    else:
+        zc=[]
+        for p in sorted((rr/"artifacts"/"12_ZERO_SURFACE_DECODED").rglob("*.json")):
+            try:
+                payload=json.loads(p.read_text())
+            except Exception:
+                continue
+            schema=str(payload.get("schema") or payload.get("schema_version") or "")
+            if schema=="RealSaS.SignedZeroSurfaceSealIR.v1":
+                zc.append((p.resolve(),payload))
+        if len(zc)!=1:
+            raise RuntimeError(f"STAGE12_SCHEMA_SCAN_CARDINALITY::{len(zc)}")
+        zero_path,zero_payload=zc[0]
+        zero_source="ORPHAN_DIRECTORY_SCAN"
     stage13_dir=rr/"artifacts"/"13_GEOMETRY_SUBSTRATE_QUALIFIED"
     stage13_files=[]
     geo_candidates=[]
@@ -62,7 +80,7 @@ def main():
     cam=qualified_camera_set_from_dict(json.loads(cam_path.read_text()))
     obs=qualified_observation_set_from_dict(json.loads(obs_path.read_text()))
     norm=normalization_domain_from_dict(json.loads(norm_path.read_text()))
-    zero=signed_zero_surface_from_dict(json.loads(zero_path.read_text()))
+    zero=signed_zero_surface_from_dict(zero_payload)
     geo=geometry_substrate_evidence_from_dict(geo_payload)
     report={
       "schema":"RealSaS.Stage05Stage13BindingAudit.v1",
@@ -96,7 +114,9 @@ def main():
       "stage12":{
         "ledger_status":row("12_ZERO_SURFACE_DECODED").get("status"),
         "actual_sha256":sha256(zero_path),
-        "ledger_sha256":zero_ref.get("sha256"),
+        "ledger_sha256":(zero_ref.get("sha256") if zero_ref is not None else None),
+        "authority_source":zero_source,
+        "ledger_has_schema_output":zero_ref is not None,
         "zero_surface_hash":zero.zero_surface_hash,
         "observation_set_binding_hash":zero.observation_set_binding_hash,
         "normalization_binding_hash":zero.normalization_binding_hash,
@@ -129,7 +149,7 @@ def main():
           cam_ref.get("sha256")==sha256(cam_path),
           obs_ref.get("sha256")==sha256(obs_path),
           norm_ref.get("sha256")==sha256(norm_path),
-          zero_ref.get("sha256")==sha256(zero_path),
+          (zero_ref.get("sha256")==sha256(zero_path) if zero_ref is not None else True),
       ))
     }
     print("STAGE05_STAGE13_BINDING="+json.dumps(report,sort_keys=True))

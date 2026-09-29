@@ -22,6 +22,7 @@ from .deformation_stress_v1 import _candidate_skin_matrix
 from .deformation_stress_v2 import _pose_skin_matrices
 from ..hashing import content_sha256
 from ..joint_frames_v1 import derive_joint_frames_from_skeleton
+from ..motion_3d_v1 import apply_lbs_matrix_v1
 from ..product_authority_v1 import (
     canonical_mesh_candidate_lineage_hash,
     validate_deformation_capability_envelope,
@@ -401,6 +402,280 @@ def _mechanical_owner_surface_id(vertex, *, partition_owner:dict[str,str])->str|
     return sid
 
 
+def _source_surface_skin_matrix(surface, skeleton, skin):
+    if skin.surface_binding_hash != surface.geometry_lineage_hash:
+        raise QualificationError("SOURCE_EDGE_PROBE_SKIN_SURFACE_DRIFT")
+    if skin.skeleton_binding_hash != skeleton.skeleton_lineage_hash:
+        raise QualificationError("SOURCE_EDGE_PROBE_SKIN_SKELETON_DRIFT")
+
+    joint_ids = tuple(str(j.canonical_joint_id) for j in skeleton.joints)
+    if len(set(joint_ids)) != len(joint_ids):
+        raise QualificationError("SOURCE_EDGE_PROBE_JOINT_ID_DUPLICATE")
+    joint_index = {jid: i for i, jid in enumerate(joint_ids)}
+
+    rows = {str(row.surface_id): row for row in skin.rows}
+    surface_ids = tuple(str(node.surface_id) for node in surface.surface_nodes)
+    if set(rows) != set(surface_ids):
+        raise QualificationError("SOURCE_EDGE_PROBE_SKIN_ROWS_INCOMPLETE")
+
+    rest = np.asarray(
+        [tuple(map(float, node.P)) for node in surface.surface_nodes],
+        dtype=np.float64,
+    )
+    if rest.shape != (len(surface_ids), 3) or not np.isfinite(rest).all():
+        raise QualificationError("SOURCE_EDGE_PROBE_REST_INVALID")
+
+    weights = np.zeros((len(surface_ids), len(joint_ids)), dtype=np.float64)
+    for i, sid in enumerate(surface_ids):
+        seen = set()
+        for jid, weight in rows[sid].influences:
+            jid = str(jid)
+            if jid in seen or jid not in joint_index:
+                raise QualificationError("SOURCE_EDGE_PROBE_SKIN_INFLUENCE_INVALID")
+            seen.add(jid)
+            value = float(weight)
+            if not math.isfinite(value) or value < 0.0:
+                raise QualificationError("SOURCE_EDGE_PROBE_SKIN_WEIGHT_INVALID")
+            weights[i, joint_index[jid]] = value
+    if not np.allclose(weights.sum(axis=1), 1.0, atol=1e-8, rtol=0.0):
+        raise QualificationError("SOURCE_EDGE_PROBE_SKIN_SIMPLEX_INVALID")
+    return surface_ids, joint_ids, rest, weights
+
+
+def _run_source_edge_probe_ratio_v1(
+    *,
+    surface,
+    skeleton,
+    skin,
+    envelope,
+    cameras,
+    max_edge_ratio: float = DEFAULT_MAX_EDGE_RATIO,
+) -> Json:
+    validate_deformation_capability_envelope(
+        envelope,
+        known_joint_ids={j.canonical_joint_id for j in skeleton.joints},
+    )
+    if envelope.skeleton_lineage_hash != skeleton.skeleton_lineage_hash:
+        raise QualificationError("SOURCE_EDGE_PROBE_ENVELOPE_SKELETON_DRIFT")
+    if not math.isfinite(float(max_edge_ratio)) or float(max_edge_ratio) <= 0.0:
+        raise QualificationError("SOURCE_EDGE_PROBE_RATIO_LIMIT_INVALID")
+
+    surface_ids, joint_ids, rest, weights = _source_surface_skin_matrix(
+        surface, skeleton, skin
+    )
+    index = {sid: i for i, sid in enumerate(surface_ids)}
+
+    edge_pairs = []
+    seen = set()
+    for relation in surface.local_relations:
+        a = str(relation.a_surface_id)
+        b = str(relation.b_surface_id)
+        if a == b or a not in index or b not in index:
+            raise QualificationError("SOURCE_EDGE_PROBE_RELATION_ENDPOINT_INVALID")
+        pair = (a, b) if a < b else (b, a)
+        if pair in seen:
+            continue
+        seen.add(pair)
+        edge_pairs.append(pair)
+    edge_pairs = tuple(sorted(edge_pairs))
+    if not edge_pairs:
+        raise QualificationError("SOURCE_EDGE_PROBE_RELATION_SET_EMPTY")
+
+    ia = np.asarray([index[a] for a, _ in edge_pairs], dtype=np.int64)
+    ib = np.asarray([index[b] for _, b in edge_pairs], dtype=np.int64)
+    rest_length = np.linalg.norm(rest[ib] - rest[ia], axis=1)
+    if np.any(~np.isfinite(rest_length)) or np.any(rest_length <= 1e-12):
+        raise QualificationError("SOURCE_EDGE_PROBE_REST_EDGE_DEGENERATE")
+
+    static_l1 = np.sum(np.abs(weights[ia] - weights[ib]), axis=1)
+    max_ratio = np.ones(len(edge_pairs), dtype=np.float64)
+
+    frames = derive_joint_frames_from_skeleton(skeleton, cameras=cameras)
+    stress_angle = float(_stress_angle(envelope))
+    probe_count = 0
+    for jid in sorted(joint_ids):
+        for axis_index in range(3):
+            for sign in (-1.0, 1.0):
+                skin_by_id = _pose_skin_matrices(
+                    skeleton,
+                    frames,
+                    joint_id=jid,
+                    local_axis_index=axis_index,
+                    degrees=sign * stress_angle,
+                )
+                matrices = np.stack(
+                    [skin_by_id[x] for x in joint_ids],
+                    axis=0,
+                )
+                posed = apply_lbs_matrix_v1(rest, weights, matrices)
+                ratio = (
+                    np.linalg.norm(posed[ib] - posed[ia], axis=1)
+                    / rest_length
+                )
+                if not np.isfinite(ratio).all():
+                    raise QualificationError("SOURCE_EDGE_PROBE_NONFINITE_RATIO")
+                max_ratio = np.maximum(max_ratio, ratio)
+                probe_count += 1
+
+    unsafe = max_ratio > float(max_edge_ratio)
+    rows = tuple(
+        {
+            "a_surface_id": edge_pairs[i][0],
+            "b_surface_id": edge_pairs[i][1],
+            "max_edge_ratio": float(max_ratio[i]),
+            "pairwise_skin_l1": float(static_l1[i]),
+            "unsafe": bool(unsafe[i]),
+        }
+        for i in range(len(edge_pairs))
+    )
+    return {
+        "schema": "RealSaS.SourceEdgeProbeCompatibility.v1",
+        "stress_angle_deg": stress_angle,
+        "max_edge_ratio_limit": float(max_edge_ratio),
+        "probe_count": int(probe_count),
+        "source_edge_count": len(edge_pairs),
+        "unsafe_source_edge_count": int(np.count_nonzero(unsafe)),
+        "rows": rows,
+        "report_hash": content_sha256({
+            "schema": "RealSaS.SourceEdgeProbeCompatibility.v1",
+            "surface_lineage_hash": surface.geometry_lineage_hash,
+            "skeleton_lineage_hash": skeleton.skeleton_lineage_hash,
+            "skin_lineage_hash": skin.skin_lineage_hash,
+            "envelope_lineage_hash": envelope.envelope_lineage_hash,
+            "stress_angle_deg": stress_angle,
+            "max_edge_ratio_limit": float(max_edge_ratio),
+            "probe_count": int(probe_count),
+            "rows": rows,
+        }),
+    }
+
+
+def _propose_source_edge_probe_repartition_directive_v2(
+    candidate,
+    *,
+    surface,
+    skeleton,
+    skin,
+    partition,
+    compatibility_report: Json,
+    envelope,
+    cameras,
+) -> Json:
+    report_hash = str(compatibility_report.get("report_hash") or "")
+    if not report_hash:
+        raise QualificationError("SKIN_TOPOLOGY_REPARTITION_REPORT_HASH_MISSING")
+
+    probe = _run_source_edge_probe_ratio_v1(
+        surface=surface,
+        skeleton=skeleton,
+        skin=skin,
+        envelope=envelope,
+        cameras=cameras,
+        max_edge_ratio=DEFAULT_MAX_EDGE_RATIO,
+    )
+    existing = {
+        tuple(sorted((str(row.a_surface_id), str(row.b_surface_id)))): str(row.decision)
+        for row in partition.boundary_constraints
+    }
+
+    ordered = []
+    for row in probe["rows"]:
+        if not bool(row["unsafe"]):
+            continue
+        pair = tuple(sorted((
+            str(row["a_surface_id"]),
+            str(row["b_surface_id"]),
+        )))
+        if pair not in existing:
+            raise QualificationError("SOURCE_EDGE_PROBE_PAIR_NOT_IN_PARENT_PARTITION")
+        if existing[pair] == "SEPARATE":
+            continue
+        ratio = float(row["max_edge_ratio"])
+        skin_l1 = float(row["pairwise_skin_l1"])
+        ordered.append({
+            "constraint_id": "DYNPROBE:" + content_sha256({
+                "compatibility_report_hash": report_hash,
+                "source_edge_probe_hash": probe["report_hash"],
+                "pair": pair,
+                "max_edge_ratio": ratio,
+            })[:20],
+            "a_surface_id": pair[0],
+            "b_surface_id": pair[1],
+            "decision": "SEPARATE",
+            "evidence_refs": (
+                f"{report_hash}:SOURCE_EDGE_PROBE:{pair[0]}:{pair[1]}",
+                f"{probe['report_hash']}:MAX_EDGE_RATIO:{ratio:.17g}",
+            ),
+            "max_pairwise_skin_l1": skin_l1,
+            "unsafe_face_indices": (),
+            "confidence": min(
+                1.0,
+                max(
+                    0.0,
+                    ratio / max(float(DEFAULT_MAX_EDGE_RATIO), 1e-12) - 1.0,
+                ),
+            ),
+            "metadata": {
+                "evidence_class": "STAGE35_SOURCE_EDGE_PROBE_CANNOT_LINK",
+                "automatic": True,
+                "manual_authoring_used": False,
+                "source_edge_probe_max_ratio": ratio,
+                "source_edge_probe_ratio_limit": float(DEFAULT_MAX_EDGE_RATIO),
+                "source_edge_probe_stress_angle_deg": float(
+                    probe["stress_angle_deg"]
+                ),
+                "pairwise_skin_l1": skin_l1,
+                "direct_probe_seed": True,
+            },
+        })
+    ordered = tuple(sorted(
+        ordered,
+        key=lambda x: (str(x["a_surface_id"]), str(x["b_surface_id"])),
+    ))
+
+    unsafe_face_count = int(compatibility_report.get("unsafe_face_count") or 0)
+    directive = {
+        "schema": "RealSaS.MechanicalRepartitionDirective.v2",
+        "status": (
+            "REPARTITION_PROPOSED__AWAIT_TRUSTWORTHY_SKIN_AUTHORITY"
+            if ordered else
+            "ABSTAIN__NO_MECHANICAL_OWNER_BOUNDARY_PROPOSAL"
+        ),
+        "source_candidate_lineage_hash": candidate.candidate_lineage_hash,
+        "source_surface_lineage_hash": surface.geometry_lineage_hash,
+        "source_partition_lineage_hash": partition.partition_lineage_hash,
+        "source_skeleton_lineage_hash": skeleton.skeleton_lineage_hash,
+        "source_skin_lineage_hash": skin.skin_lineage_hash,
+        "compatibility_report_hash": report_hash,
+        "unsafe_face_count": unsafe_face_count,
+        "candidate_separate_pair_count": len(ordered),
+        "unresolved_unsafe_face_count": 0,
+        "proposed_boundary_overrides": ordered,
+        "seed_strategy": "SOURCE_EDGE_PROBE_RATIO_V1",
+        "source_edge_probe_hash": str(probe["report_hash"]),
+        "source_edge_probe_count": int(probe["source_edge_count"]),
+        "unsafe_source_edge_count": int(probe["unsafe_source_edge_count"]),
+        "source_edge_probe_stress_angle_deg": float(probe["stress_angle_deg"]),
+        "source_edge_probe_max_edge_ratio_limit": float(
+            probe["max_edge_ratio_limit"]
+        ),
+        "repair_operation": "STAGE17_REPARTITION_THEN_STAGE18_HOLELESS_DENSE_SUBDIVISION",
+        "face_deletion_count": 0,
+        "weight_mutation": False,
+        "vertex_position_mutation_at_stage35": False,
+        "restart_from": "17_MECHANICAL_PARTITION_QUALIFIED",
+        "mandatory_requalification_through": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "auto_apply_allowed": False,
+        "requires_trustworthy_skin_reliability_authority": True,
+        "fail_closed_if_not_repartitioned": True,
+        "directive_hash": "",
+    }
+    directive["directive_hash"] = content_sha256({
+        k: v for k, v in directive.items() if k != "directive_hash"
+    })
+    return directive
+
+
 def propose_mechanical_repartition_directive_v2(
     candidate,
     *,
@@ -409,6 +684,9 @@ def propose_mechanical_repartition_directive_v2(
     skin,
     partition,
     compatibility_report: Json,
+    envelope=None,
+    cameras=None,
+    seed_strategy: str = "UNSAFE_FACE_LOCAL_L1_V1",
 ) -> Json:
     """Convert Stage35 unsafe-face evidence into a compiler-owned repartition proposal.
 
@@ -419,6 +697,22 @@ def propose_mechanical_repartition_directive_v2(
     never cross-seam geometry coefficients.  Automatic application is deliberately
     forbidden until an explicit trustworthy-skin/reliability authority exists.
     """
+    if seed_strategy == "SOURCE_EDGE_PROBE_RATIO_V1":
+        if envelope is None or cameras is None:
+            raise QualificationError("SOURCE_EDGE_PROBE_CONTEXT_REQUIRED")
+        return _propose_source_edge_probe_repartition_directive_v2(
+            candidate,
+            surface=surface,
+            skeleton=skeleton,
+            skin=skin,
+            partition=partition,
+            compatibility_report=compatibility_report,
+            envelope=envelope,
+            cameras=cameras,
+        )
+    if seed_strategy != "UNSAFE_FACE_LOCAL_L1_V1":
+        raise QualificationError("MECHANICAL_REPARTITION_SEED_STRATEGY_UNSUPPORTED")
+
     unsafe=tuple(map(int,compatibility_report.get("unsafe_face_indices") or ()))
     report_hash=str(compatibility_report.get("report_hash") or "")
     if not report_hash:

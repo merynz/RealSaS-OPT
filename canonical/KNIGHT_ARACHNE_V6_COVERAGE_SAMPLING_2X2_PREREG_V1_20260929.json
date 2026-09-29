@@ -16,7 +16,8 @@
     "closure_rule": "UNCHANGED_V6_THREE_CONSECUTIVE_FULL_GATE_PASS",
     "max_steps": 32768,
     "objective": "UNCHANGED_EXACT_V6_OBJECTIVE",
-    "compiler_qualification": "UNCHANGED_EXACT_V6_QUALIFY_SKIN"
+    "compiler_qualification": "UNCHANGED_EXACT_V6_QUALIFY_SKIN",
+    "exact_v6_uniform_valid_schedule_sha256": "910e79a11dd70210108e164ed6e2b0c1a4b1fbb69632b80f546c68a9bb5331e9"
   },
   "arms": [
     {

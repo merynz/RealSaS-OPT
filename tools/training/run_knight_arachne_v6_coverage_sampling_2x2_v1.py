@@ -14,26 +14,28 @@ EXPECTED_EXPERIMENT_STATUS = "FROZEN_BEFORE_ANY_2X2_OPTIMIZER_STEP"
 EXPECTED_V6_SOURCE_SHA256 = "39ff4f7a2051f0d9c1251a5999f472b9926e83deacbedcedc8e92eea424dce01"
 EXPECTED_V6_PREREG_SHA256 = "187f5c1bac1e813ebdfd1bbb76fa6def3d6543b4c7abc5609d217b3ece5fd597"
 EXPECTED_BANK_SHA256 = "26b6891ff81b9bfc3405461394159547fa76b417852a44518425b4e1de7e67d3"
-EXPECTED_UNIFORM_VALID_SCHEDULE_SHA256 = "910e79a11dd70210108e164ed6e2b0c1a4b1fbb69632b80f546c68a9bb5331e9"
+EXPECTED_CONDITIONING_AUTHORITY_SHA256 = "a0a3e652e323c6f2042354eb2095f3f66ff6168bf5ab51b53c83f728b8a00499"
+EXPECTED_CANONICAL_TO_TARGET_INDEX = np.asarray([6,27,8,0,12,15,5,3,16,18,1,19,7,13,20,11,23,25,24,22,26,21,9,10,17,4,14,2], dtype=np.int64)
+EXPECTED_UNIFORM_VALID_SCHEDULE_SHA256 = "4c5731cf5b2b28a3985458d555c7ef545d78054523cf92ce3edb0e959eee82fb"
 EXPECTED_MAX_STEPS = 32768
 EXPECTED_ROWS_PER_STEP = 384
 EXPECTED_DECODER_SEED = 20261128
 EXPECTED_SCHEDULES = {
     "UNIFORM_VALID": {
-        "full_32768": "910e79a11dd70210108e164ed6e2b0c1a4b1fbb69632b80f546c68a9bb5331e9",
-        "prefix_8192": "74e2d3fa193acabdde2837394bd460dfc29c3bfd361a38380a987d1a6b031819",
+        "full_32768": "4c5731cf5b2b28a3985458d555c7ef545d78054523cf92ce3edb0e959eee82fb",
+        "prefix_8192": "7c9a91a2e8051d3ff1ce534ccf908d5a0b25ca0620f15f0ab04efdfb228fa5e5",
     },
     "ACTIVE_BALANCED_VALID": {
-        "full_32768": "abafdbbb11e270725d64e8981932c7b2481344d4b68fea389fec557aabcaa574",
-        "prefix_8192": "cfbbcdb198b7b5f4328118ec665ee1e90abd5c5d9a513c2f287ce8592d900cd6",
+        "full_32768": "1c055e2ff76b65ead96094eaac613efbeeba1f552488c144d98d0d2bce13a308",
+        "prefix_8192": "5f8216c0e758d8d6830294ea765308ce66ee3648dc72335c6fba79a70fb0b934",
     },
     "UNIFORM_ALL_PROJECTED": {
         "full_32768": "f2943931d70134509fbd24826ecd11388ccb5f4ce29a1d801626f6ffcd9ced4b",
         "prefix_8192": "c1575c6e6260753b68e055873295b5c74da6486fc1911bcd61fef1e626098aa4",
     },
     "ACTIVE_BALANCED_ALL_PROJECTED": {
-        "full_32768": "0752250ceab3152444049c917cf910b94894ae8f500fb7265b4eb8db866718e2",
-        "prefix_8192": "91bfe3437f0893d0120395a72c09c982992728ea422937d53da79c12eff3af1b",
+        "full_32768": "24eaa6ab7faccf1fdff6bd2fc78b369f7ad19ca7841ef65a9721c775bc597a88",
+        "prefix_8192": "a2a0725af466f4af85bd15faac1236736c7876bd7146967378c80390120ee018",
     },
 }
 ARMS = {
@@ -139,6 +141,7 @@ def main():
     ap.add_argument("--surface-json")
     ap.add_argument("--skeleton-json")
     ap.add_argument("--teacher-bank", required=True)
+    ap.add_argument("--conditioning-authority-npz", required=True)
     ap.add_argument("--source-progress")
     ap.add_argument("--output-dir", required=True)
     ap.add_argument("--preflight-only", action="store_true")
@@ -149,6 +152,7 @@ def main():
     source_path = Path(args.v6_source).resolve()
     v6_prereg = Path(args.v6_prereg).resolve()
     bank_path = Path(args.teacher_bank).resolve()
+    conditioning_authority_path = Path(args.conditioning_authority_npz).resolve()
     outdir = Path(args.output_dir).resolve()
     outdir.mkdir(parents=True, exist_ok=True)
 
@@ -161,13 +165,39 @@ def main():
         raise RuntimeError("ARACHNE_2X2_V6_PREREG_DRIFT")
     if sha256(bank_path) != EXPECTED_BANK_SHA256:
         raise RuntimeError("ARACHNE_2X2_TEACHER_BANK_DRIFT")
+    if sha256(conditioning_authority_path) != EXPECTED_CONDITIONING_AUTHORITY_SHA256:
+        raise RuntimeError("ARACHNE_2X2_CONDITIONING_AUTHORITY_DRIFT")
 
     with np.load(bank_path, allow_pickle=False) as z:
-        weights = np.asarray(z["weights"], dtype=np.float64)
-        valid = np.asarray(z["teacher_valid_mask"], dtype=np.uint8).astype(bool)
-    if weights.shape[0] != len(valid):
+        weights0 = np.asarray(z["weights"], dtype=np.float64)
+        valid0 = np.asarray(z["teacher_valid_mask"], dtype=np.uint8).astype(bool)
+        bank_surface_ids = tuple(map(str, z["surface_ids"].tolist()))
+    if weights0.shape[0] != len(valid0) or len(bank_surface_ids) != len(valid0):
         raise RuntimeError("ARACHNE_2X2_BANK_SHAPE_DRIFT")
 
+    with np.load(conditioning_authority_path, allow_pickle=False) as z:
+        authority_surface_ids = tuple(map(str, z["surface_ids"].tolist()))
+        authority_joint_ids = tuple(map(str, z["canonical_joint_ids"].tolist()))
+    if len(authority_surface_ids) != len(bank_surface_ids) or len(authority_joint_ids) != weights0.shape[1]:
+        raise RuntimeError("ARACHNE_2X2_CONDITIONING_AUTHORITY_SHAPE_DRIFT")
+    row_of = {sid: i for i, sid in enumerate(bank_surface_ids)}
+    if len(row_of) != len(bank_surface_ids) or any(sid not in row_of for sid in authority_surface_ids):
+        raise RuntimeError("ARACHNE_2X2_CONDITIONING_SURFACE_BINDING_DRIFT")
+    rows = np.asarray([row_of[sid] for sid in authority_surface_ids], dtype=np.int64)
+    if sorted(rows.tolist()) != list(range(len(rows))):
+        raise RuntimeError("ARACHNE_2X2_CONDITIONING_ROW_PERMUTATION_DRIFT")
+    cols = EXPECTED_CANONICAL_TO_TARGET_INDEX.copy()
+    if sorted(cols.tolist()) != list(range(weights0.shape[1])):
+        raise RuntimeError("ARACHNE_2X2_CONDITIONING_COLUMN_PERMUTATION_DRIFT")
+
+    weights = np.maximum(weights0[rows][:, cols], 0.0)
+    sums = weights.sum(1, keepdims=True)
+    if np.any(sums <= 1e-12):
+        raise RuntimeError("ARACHNE_2X2_TEACHER_ZERO_ROW_AFTER_REINDEX")
+    weights /= sums
+    valid = valid0[rows]
+    raw_vs_reindexed_valid_diff = int(np.count_nonzero(valid0 != valid))
+    moved_rows = int(np.count_nonzero(rows != np.arange(len(rows), dtype=np.int64)))
     all_mask = np.ones_like(valid, dtype=bool)
 
     if arm == "UNIFORM_VALID":
@@ -223,6 +253,11 @@ def main():
         "exact_v6_source_sha256": sha256(source_path),
         "exact_v6_prereg_sha256": sha256(v6_prereg),
         "teacher_bank_sha256": sha256(bank_path),
+        "conditioning_authority_sha256": sha256(conditioning_authority_path),
+        "teacher_row_reindexed": True,
+        "teacher_column_reindexed": True,
+        "conditioning_row_permutation_moved_count": moved_rows,
+        "raw_vs_reindexed_valid_mask_diff_count": raw_vs_reindexed_valid_diff,
         "schedule_sha256": schedule_sha,
         "schedule_prefix8192_sha256": schedule_prefix_sha,
         "schedule_shape": list(schedule_preview.shape),

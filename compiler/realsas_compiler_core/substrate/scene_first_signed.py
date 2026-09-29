@@ -569,6 +569,8 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
     visibility_depth_tolerance_norm: float = 0.02,
     component_aware_compaction: bool = False,
     precomputed_dense_normals: np.ndarray | None = None,
+    precomputed_normal_operator_id: str | None = None,
+    precomputed_normal_operator_hash: str | None = None,
     precomputed_component_labels: np.ndarray | None = None,
     metadata: dict | None = None,
 ) -> RiggingSurfaceIR:
@@ -597,6 +599,8 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
     world = center[None, :] + vn * half
     if precomputed_dense_normals is None:
         dense_normals = robust_zero_surface_normals_v1(world, hint, k=normal_k)
+        selected_normal_operator_id = ZERO_SURFACE_NORMAL_OPERATOR_ID
+        selected_normal_operator_hash = zero_surface_normal_operator_hash_v1(k=normal_k)
     else:
         dense_normals = np.asarray(precomputed_dense_normals, dtype=np.float32)
         if dense_normals.shape != vn.shape or not np.isfinite(dense_normals).all():
@@ -604,6 +608,15 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
         lengths = np.linalg.norm(dense_normals, axis=1)
         if np.any(lengths <= 1e-12):
             raise QualificationError("PRECOMPUTED_DENSE_NORMALS_DEGENERATE")
+        selected_normal_operator_id = str(
+            precomputed_normal_operator_id or ZERO_SURFACE_NORMAL_OPERATOR_ID
+        )
+        selected_normal_operator_hash = str(
+            precomputed_normal_operator_hash
+            or zero_surface_normal_operator_hash_v1(k=normal_k)
+        )
+        if len(selected_normal_operator_hash) != 64:
+            raise QualificationError("PRECOMPUTED_DENSE_NORMAL_OPERATOR_HASH_INVALID")
     points, normals, edges, divisions, _inverse = _adaptive_voxel_compact(
         world,
         f,
@@ -619,7 +632,7 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
         depth_tolerance=float(visibility_depth_tolerance_norm) * half,
     )
 
-    op_hash = zero_surface_normal_operator_hash_v1(k=normal_k)
+    op_hash = selected_normal_operator_hash
     nodes = []
     for i, (p, n) in enumerate(zip(points, normals)):
         views = tuple(int(v) for v in range(8) if bool(support[i, v]))
@@ -640,7 +653,7 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
                 derived_normal=tuple(map(float, n)),
                 validity_flags=flags,
                 metadata={
-                    "normal_operator": ZERO_SURFACE_NORMAL_OPERATOR_ID,
+                    "normal_operator": selected_normal_operator_id,
                     "normal_operator_hash": op_hash,
                     "normal_implicit_hint_only": True,
                     "teacher_truth_used": False,
@@ -703,7 +716,7 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
         "visibility_support_counts_by_view": visible_counts,
         "raster_coordinate_system": "PIXEL_CENTER_XY",
         "resolution": int(cameras[0]["resolution"]),
-        "Nd_operator": ZERO_SURFACE_NORMAL_OPERATOR_ID,
+        "Nd_operator": selected_normal_operator_id,
         "Nd_operator_sha256": op_hash,
         "normal_implicit_hint_only": True,
         "source_run_id": str(source_run_id),

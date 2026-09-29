@@ -41,7 +41,7 @@ def main():
     p.add_argument("--authority-root",type=Path,required=True)
     p.add_argument("--new-preview-root",type=Path,required=True)
     a=p.parse_args()
-    out={"schema":"RealSaS.KnightOldVsCorrectedLineageAudit.v1","runs":{},"preview_candidates":{}}
+    out={"schema":"RealSaS.KnightOldVsCorrectedLineageAudit.v2","runs":{},"preview_candidates":{},"canonical_old_vs_new":{},"historical_raw_candidates":{}}
     for rid in RUNS:
         root=a.authority_root/"runs"/rid
         row={"exists":root.exists(),"stages":{}}
@@ -60,8 +60,14 @@ def main():
         out["runs"][rid]=row
 
     newroot=a.new_preview_root
+    canonical_old = Path("canonical/knight_demo_motion_preview_v1")
     for name in ("IDLE","RUN","SLASH"):
         newp=newroot/f"KNIGHT_{name}_DEMO_PREVIEW_V1.png"
+        oldp=canonical_old/f"KNIGHT_{name}_DEMO_PREVIEW_V1.png"
+        out["canonical_old_vs_new"][name] = (
+            img_diff(oldp,newp) if oldp.exists() and newp.exists()
+            else {"old_exists":oldp.exists(),"new_exists":newp.exists()}
+        )
         matches=[]
         for rid,row in out["runs"].items():
             for s in row.get("preview_pngs",[]):
@@ -69,6 +75,19 @@ def main():
                 if oldp.name==newp.name and newp.exists():
                     matches.append({"run_id":rid,"path":s,"diff":img_diff(oldp,newp)})
         out["preview_candidates"][name]=matches
+
+    old_root=a.authority_root/"runs"/"SUBJECT2_KNIGHT_DEMO_V2_20260924"
+    for token in ("18_CANONICAL_MESH_ADDRESSING_BUILD","32_SKIN_QUALIFIED"):
+        rows=[]
+        if old_root.exists():
+            for pth in old_root.rglob("*"):
+                if pth.is_file() and token in pth.name:
+                    rows.append({
+                        "path":str(pth),
+                        "size":pth.stat().st_size,
+                        "sha256":__import__("hashlib").sha256(pth.read_bytes()).hexdigest(),
+                    })
+        out["historical_raw_candidates"][token]=rows[:100]
     print("KNIGHT_OLD_VS_CORRECTED_AUDIT="+json.dumps(out,sort_keys=True),flush=True)
 
 if __name__=="__main__":

@@ -83,7 +83,7 @@ def _static_face_rows(candidate, *, surface, skeleton, skin):
         )
         rows.append({
             "face_index": int(fi),
-            "face_class": _face_class(candidate, fi),
+            "face_class": _face_class(candidate, fi, by=by),
             "vertex_ids": vids,
             "support_modes": modes,
             "seam_kinds": seam_kinds,

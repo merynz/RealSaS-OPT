@@ -35,8 +35,10 @@ from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import 
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2 import (
     qualify_mechanical_partition_and_carriers,
+    seal_deformation_capability_envelope,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.v2_architecture import (
+    seal_output_presentation_directions_stage,
     build_canonical_mesh_addressing_stage, qualify_static_canonical_mesh_stage,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2 import (
@@ -103,6 +105,172 @@ def adopt_upstream_schema(
     return {"stage_id":stage_id,"schema":schema,"path":str(path),"sha256":sha256_file(path),"status":status}
 
 
+
+def _copy_verified(source: Path, target: Path, expected_sha256: str) -> dict:
+    source=Path(source).resolve()
+    if not source.is_file():
+        raise RuntimeError(f"AUTHORITY_SOURCE_MISSING::{source}")
+    actual=sha256_file(source)
+    if actual!=str(expected_sha256):
+        raise RuntimeError(
+            f"AUTHORITY_SOURCE_SHA_DRIFT::{source}::{actual}::{expected_sha256}"
+        )
+    target=Path(target).resolve()
+    target.parent.mkdir(parents=True,exist_ok=True)
+    shutil.copy2(source,target)
+    copied=sha256_file(target)
+    if copied!=actual:
+        raise RuntimeError(f"AUTHORITY_COPY_DRIFT::{source}::{target}")
+    return {"path":str(target),"sha256":copied}
+
+
+def restore_frozen_stage08_import(
+    *, authority_root: Path, parent_root: Path, child_root: Path, ledger: dict,
+) -> dict:
+    spec_path=parent_root/"demo_stage08_import_spec.json"
+    spec=load_json(spec_path)
+    if (
+        str(spec.get("schema") or "")!="RealSaS.DemoExactStageArtifactImportSpec.v1"
+        or spec.get("product_authority_claimed") is not False
+    ):
+        raise RuntimeError("FROZEN_STAGE08_IMPORT_SPEC_INVALID")
+    restored=[]
+    for stage_id,stage_spec in sorted(dict(spec.get("stages") or {}).items()):
+        outputs=[]
+        for source in stage_spec.get("outputs") or ():
+            copied=_copy_verified(
+                Path(source["source_path"]),
+                child_root/"artifacts"/stage_id/str(source["target_name"]),
+                str(source["expected_sha256"]),
+            )
+            outputs.append({
+                **copied,
+                "authority_class":str(source["authority_class"]),
+                "schema":str(source["schema"]),
+            })
+        row=row_by_id(ledger,stage_id)
+        row["status"]="PASS_DEMO_ONLY"
+        row["outputs"]=outputs
+        row["blockers"]=[]
+        restored.append({
+            "stage_id":stage_id,
+            "status":"PASS_DEMO_ONLY",
+            "outputs":outputs,
+            "authority_source":"DEMO_EXACT_STAGE_ARTIFACT_IMPORT_SPEC",
+        })
+    return {
+        "spec_path":str(spec_path.resolve()),
+        "spec_sha256":sha256_file(spec_path),
+        "historical_workflow_run_id":spec["source_artifact"]["historical_workflow_run_id"],
+        "historical_artifact_id":spec["source_artifact"]["historical_artifact_id"],
+        "restored":restored,
+    }
+
+
+def restore_historical_geometry_authority(
+    *, parent_root: Path, child_root: Path, ledger: dict,
+) -> dict:
+    snapshot_path=(
+        parent_root/"ACTIVE_RUN_V2.before_frozen_c.20260925T133143Z.json"
+    )
+    historical=load_json(snapshot_path)
+    if str(historical.get("status") or "")!="ACTIVE":
+        raise RuntimeError("HISTORICAL_GEOMETRY_LEDGER_NOT_ACTIVE")
+    by_id={str(row["id"]):row for row in historical.get("stages") or ()}
+    restored=[]
+    for stage_id in (
+        "09_IRIS_FIT_PREREGISTERED",
+        "10_IRIS_FIT",
+        "11_IRIS_CHECKPOINT_SEALED",
+        "12_ZERO_SURFACE_DECODED",
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+        "14_GSA_BUILD",
+        "15_RIGGING_SURFACE_QUALIFIED",
+    ):
+        source_row=by_id.get(stage_id)
+        if source_row is None or str(source_row.get("status") or "")!="PASS_DEMO_ONLY":
+            raise RuntimeError(f"HISTORICAL_STAGE_NOT_PASS_DEMO_ONLY::{stage_id}")
+        outputs=[]
+        for output in source_row.get("outputs") or ():
+            source=Path(output["path"])
+            target=child_root/"artifacts"/stage_id/source.name
+            copied=_copy_verified(source,target,str(output["sha256"]))
+            outputs.append({
+                **copied,
+                "authority_class":str(output.get("authority_class") or "HISTORICAL_DEMO_AUTHORITY"),
+                "schema":str(output["schema"]),
+            })
+        if not outputs:
+            raise RuntimeError(f"HISTORICAL_STAGE_OUTPUTS_EMPTY::{stage_id}")
+        row=row_by_id(ledger,stage_id)
+        row["status"]="PASS_DEMO_ONLY"
+        row["outputs"]=outputs
+        row["blockers"]=[]
+        restored.append({
+            "stage_id":stage_id,
+            "status":"PASS_DEMO_ONLY",
+            "outputs":outputs,
+            "authority_source":"HISTORICAL_ACTIVE_LEDGER_SNAPSHOT",
+        })
+    return {
+        "snapshot_path":str(snapshot_path.resolve()),
+        "snapshot_sha256":sha256_file(snapshot_path),
+        "restored":restored,
+    }
+
+
+def restore_stage28_semantic_authority(
+    *, parent_root: Path, child_root: Path, ledger: dict,
+) -> dict:
+    skeleton_source=parent_root/"artifacts/28_SKELETON_QUALIFIED/qualified_skeleton.json"
+    skeleton_payload=load_json(skeleton_source)
+    skeleton=qualified_skeleton_from_dict(skeleton_payload)
+    stage29_path=parent_root/"artifacts/29_GEPPETTO_CHECKPOINT_SEALED/model_checkpoint_seal.json"
+    stage29=load_json(stage29_path)
+    if (
+        str(stage29.get("qualified_output_binding_hash") or "")
+        != skeleton.skeleton_lineage_hash
+    ):
+        raise RuntimeError("STAGE28_STAGE29_SEMANTIC_BINDING_DRIFT")
+    stage30_path=parent_root/"artifacts/30_ARACHNE_FIT_PREREGISTERED/model_fit_preregistration.json"
+    stage31_path=parent_root/"artifacts/31_ARACHNE_FIT/model_fit_execution.json"
+    stage30=load_json(stage30_path); stage31=load_json(stage31_path)
+    for label,payload in (("STAGE30",stage30),("STAGE31",stage31)):
+        bindings={str(k):str(v) for k,v in payload.get("upstream_bindings") or ()}
+        if bindings.get("qualified_skeleton")!=skeleton.skeleton_lineage_hash:
+            raise RuntimeError(f"{label}_SKELETON_BINDING_DRIFT")
+    rebind_path=parent_root/"imports/arachne_stage31_v6/ARACHNE_KNIGHT_V6_SEMANTIC_ID_REBIND_RECEIPT.json"
+    rebind=load_json(rebind_path)
+    if (
+        str(rebind.get("status") or "")!="PASS"
+        or str(rebind.get("new_skeleton_lineage_hash") or "")
+        != skeleton.skeleton_lineage_hash
+    ):
+        raise RuntimeError("ARACHNE_REBIND_SKELETON_AUTHORITY_DRIFT")
+
+    target=child_root/"artifacts/28_SKELETON_QUALIFIED/qualified_skeleton.json"
+    copied=_copy_verified(
+        skeleton_source,target,sha256_file(skeleton_source)
+    )
+    row=row_by_id(ledger,"28_SKELETON_QUALIFIED")
+    row["status"]="PASS_DEMO_ONLY"
+    row["outputs"]=[{
+        **copied,
+        "authority_class":"SEMANTIC_SKELETON_AUTHORITY_RESTORED_FROM_STAGE29_AND_ARACHNE_BINDINGS",
+        "schema":"RealSaS.QualifiedSkeletonIR.v1",
+    }]
+    row["blockers"]=[]
+    return {
+        "skeleton_lineage_hash":skeleton.skeleton_lineage_hash,
+        "skeleton_file_sha256":copied["sha256"],
+        "stage29_checkpoint_seal_hash":str(stage29["checkpoint_seal_hash"]),
+        "stage29_file_sha256":sha256_file(stage29_path),
+        "stage30_preregistration_hash":str(stage30["preregistration_hash"]),
+        "stage31_execution_hash":str(stage31["execution_hash"]),
+        "arachne_rebind_receipt_sha256":sha256_file(rebind_path),
+    }
+
+
 def adopt_result(ctx: dict, stage_id: str, fn):
     ctx["stage"]={"id":stage_id}
     result=fn(ctx)
@@ -118,12 +286,12 @@ def adopt_result(ctx: dict, stage_id: str, fn):
 
 
 def seal_child_compacted_face_provenance(
-    child_root: Path, parent_root: Path, ledger: dict, surface
+    child_root: Path, ledger: dict, surface
 ):
     zero=signed_zero_surface_from_dict(load_json(
-        parent_root/"artifacts"/"12_ZERO_SURFACE_DECODED"/"signed_zero_surface_seal.json"))
+        child_root/"artifacts"/"12_ZERO_SURFACE_DECODED"/"signed_zero_surface_seal.json"))
     norm=normalization_domain_from_dict(load_json(
-        parent_root/"artifacts"/"08_NORMALIZATION_DOMAIN_QUALIFIED"/"normalization_domain.json"))
+        child_root/"artifacts"/"08_NORMALIZATION_DOMAIN_QUALIFIED"/"normalization_domain.json"))
     npz_path=Path(zero.npz_path)
     if not npz_path.is_file() or sha256_file(npz_path)!=zero.npz_sha256:
         raise RuntimeError("CHILD_PROVENANCE_ZERO_NPZ_DRIFT")
@@ -263,55 +431,72 @@ def main():
     parent_ledger=load_json(parent_root/"ACTIVE_RUN_V2.json")
     manifest=copy.deepcopy(parent_manifest)
     ledger=copy.deepcopy(parent_ledger)
-    # Preserve the exact parent run identity so the frozen pre-metric demo
-    # preregistration remains byte-for-byte valid. This child directory is a
-    # separate solution-attempt workspace, not a new authority run identity.
     ledger["execution_class"]="DEMO_WITNESS"
-    ledger["architecture_scope"]="KNIGHT_SOLVED_WEIGHT_TOPOLOGY_LINEAGE_V1"
+    ledger["architecture_scope"]="KNIGHT_SOLVED_WEIGHT_TOPOLOGY_LINEAGE_V2__EXPLICIT_AUTHORITY_RESTORATION"
 
-    # Two provenance helpers read sealed Stage08/12 bytes directly from run_root.
     artifacts_root=child_root/"artifacts"
     artifacts_root.mkdir(parents=True,exist_ok=True)
-    for stage_name in ("08_NORMALIZATION_DOMAIN_QUALIFIED","12_ZERO_SURFACE_DECODED"):
-        source=parent_root/"artifacts"/stage_name
-        target=artifacts_root/stage_name
-        if not source.is_dir():
-            raise RuntimeError(f"UPSTREAM_DIRECT_STAGE_MISSING::{stage_name}")
-        os.symlink(source,target,target_is_directory=True)
 
-    adopted_upstream=[]
-    for stage_id,schema,status in (
-        ("05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1","PASS"),
-        ("07_OBSERVATION_CONTRACT_QUALIFIED","RealSaS.QualifiedObservationSetIR.v1","PASS"),
-        ("13_GEOMETRY_SUBSTRATE_QUALIFIED","RealSaS.GeometrySubstrateQualificationIR.v2","PASS_DEMO_ONLY"),
-        ("15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1","PASS_DEMO_ONLY"),
-        ("16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED","RealSaS.OutputPresentationDirectionSetIR.v1","PASS"),
-        ("28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1","PASS"),
-        ("34_DEFORMATION_CAPABILITY_ENVELOPE","RealSaS.DeformationCapabilityEnvelopeIR.v1","PASS"),
-    ):
-        adopted_upstream.append(adopt_upstream_schema(
-            ledger,parent_root,stage_id,schema,status=status))
-    copy_ir_as_stage32(child_root,ledger,a.skin_json)
+    frozen_restore=restore_frozen_stage08_import(
+        authority_root=a.authority_root,
+        parent_root=parent_root,
+        child_root=child_root,
+        ledger=ledger,
+    )
+    historical_restore=restore_historical_geometry_authority(
+        parent_root=parent_root,
+        child_root=child_root,
+        ledger=ledger,
+    )
+    stage28_authority=restore_stage28_semantic_authority(
+        parent_root=parent_root,
+        child_root=child_root,
+        ledger=ledger,
+    )
+
     ctx={
         "repo_root":Path(".").resolve(),"authority_root":a.authority_root.resolve(),
         "run_root":child_root,"run_id":a.parent_run_id,
         "run_manifest_path":child_root/"run_manifest.json","run_manifest":manifest,
         "ledger":ledger,"stage":{"id":"INIT"},
     }
+
+    # Recompute camera-derived downstream authorities from the restored frozen camera.
+    stage16_result=adopt_result(
+        ctx,
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        seal_output_presentation_directions_stage,
+    )
+
     surface=rigging_surface_from_dict(stage_output_payload(
         ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1"))
-    adopted_upstream.append(seal_child_compacted_face_provenance(
-        child_root,parent_root,ledger,surface))
+    face_provenance=seal_child_compacted_face_provenance(
+        child_root,ledger,surface
+    )
     skeleton=qualified_skeleton_from_dict(stage_output_payload(
         ctx,"28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1"))
+
+    stage34_result=adopt_result(
+        ctx,
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        seal_deformation_capability_envelope,
+    )
     cameras=tuple(sorted(qualified_camera_set_from_dict(stage_output_payload(
         ctx,"05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1")).cameras,
         key=lambda x:int(x.view_index)))
     envelope=deformation_envelope_from_dict(stage_output_payload(
         ctx,"34_DEFORMATION_CAPABILITY_ENVELOPE","RealSaS.DeformationCapabilityEnvelopeIR.v1"))
-    skin=qualified_skin_from_dict(load_json(a.skin_json))
+
+    copy_ir_as_stage32(child_root,ledger,a.skin_json)
+    skin=qualified_skin_from_dict(stage_output_payload(
+        ctx,"32_SKIN_QUALIFIED","RealSaS.QualifiedSkinIR.v1"))
+    if skin.surface_binding_hash!=surface.geometry_lineage_hash:
+        raise RuntimeError("CORRECTED_SKIN_SURFACE_BINDING_DRIFT")
+    if skin.skeleton_binding_hash!=skeleton.skeleton_lineage_hash:
+        raise RuntimeError("CORRECTED_SKIN_SKELETON_BINDING_DRIFT")
+
     parent_partition=build_structural_partition(surface,boundary_overrides=())
-    explicit,face_replay=replay_compacted_dense_face_provenance(parent_root,surface)
+    explicit,face_replay=replay_compacted_dense_face_provenance(child_root,surface)
 
     parent_carrier=build_component_carrier_policy(
         partition=parent_partition,
@@ -440,7 +625,14 @@ def main():
         "authority_run_id":a.parent_run_id,
         "solution_attempt_workspace_id":a.child_run_id,
         "parent_run_id":a.parent_run_id,
-        "adopted_parent_upstream":adopted_upstream,
+        "authority_restoration":{
+            "frozen_stage01_08":frozen_restore,
+            "historical_stage09_15":historical_restore,
+            "stage28_semantic_authority":stage28_authority,
+            "stage16_recomputed":True,
+            "stage34_recomputed":True,
+            "compacted_face_provenance":face_provenance,
+        },
         "corrected_skin":{
             "skin_lineage_hash":skin.skin_lineage_hash,
             "file_sha256":sha256(a.skin_json),
@@ -492,6 +684,12 @@ def main():
             "same_corrected_skin_used_by_directive_g3_motion_render":True,
             "old_stage23_appearance_reused":False,
             "source_art_regenerated":False,
+            "directory_scan_authority_forbidden":True,
+            "mixed_current_and_frozen_stage08_forbidden":True,
+            "stage01_08_restored_from_exact_import_spec":True,
+            "stage09_15_restored_from_historical_active_ledger":True,
+            "stage16_recomputed_from_restored_camera":True,
+            "stage34_recomputed_from_restored_camera_and_skeleton":True,
         },
     }
     seal_path=out_dir/"KNIGHT_SOLVED_WEIGHT_TOPOLOGY_VISUAL_LINEAGE_SEAL_V1.json"

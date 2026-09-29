@@ -5,6 +5,8 @@ from pathlib import Path
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     qualified_camera_set_from_dict,
     qualified_observation_set_from_dict,
+)
+from compiler.realsas_compiler_core.preproduct_authority_v1 import (
     normalization_domain_from_dict,
     signed_zero_surface_from_dict,
 )

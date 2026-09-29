@@ -13,7 +13,10 @@ from typing import Any, Callable
 
 from compiler.realsas_compiler_core.canonical_cdt_adapter_v1 import build_canonical_cdt_candidate
 from compiler.realsas_compiler_core.canonical_puppet_state_v1 import build_canonical_puppet_state
-from compiler.realsas_compiler_core.canonical_mesh_candidate_v1 import build_canonical_relation_candidate
+from compiler.realsas_compiler_core.canonical_mesh_candidate_v1 import (
+    build_canonical_relation_candidate,
+    build_holeless_partitioned_dense_candidate,
+)
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.mechanical_partition_v1 import build_structural_partition
 from compiler.realsas_compiler_core.deformation_envelope_derivation_v1 import derive_deformation_envelope_v1
@@ -65,6 +68,9 @@ from compiler.realsas_compiler_core.product_authority_v1 import (
     validate_deformation_capability_envelope,
     validate_mechanical_partition,
     validate_mesh_qualification_policy,
+)
+from compiler.realsas_compiler_core.substrate.scene_first_signed import (
+    validate_compacted_dense_face_provenance_v1,
 )
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
@@ -161,6 +167,16 @@ def _load_partition_and_carrier(ctx):
         _stage_output_payload(ctx,stage_id,"RealSaS.ComponentCarrierPolicyIR.v1")
     )
     return partition,carrier
+
+
+def _load_compacted_dense_face_provenance(ctx, *, surface):
+    payload=_stage_output_payload(
+        ctx,
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "RealSaS.CompactedDenseFaceProvenance.v1",
+    )
+    validate_compacted_dense_face_provenance_v1(payload,surface=surface)
+    return payload
 
 
 def _load_envelope(ctx):
@@ -410,9 +426,33 @@ def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
         "mesh_config":mesh_cfg,
         "mesh_policy_hash":policy.qualification_policy_lineage_hash,
     })
-    baseline=build_canonical_relation_candidate(
-        surface,partition,carrier,producer_policy_hash=baseline_policy_hash
+    face_provenance=_load_compacted_dense_face_provenance(ctx,surface=surface)
+    explicit_faces=tuple(
+        tuple(map(str,row))
+        for row in tuple(face_provenance.get("compact_faces") or ())
     )
+    owner={
+        str(sid):str(component.component_id)
+        for component in partition.components
+        for sid in component.surface_ids
+    }
+    mixed_source_face_count=sum(
+        1
+        for face in explicit_faces
+        if len({owner[str(sid)] for sid in face})>1
+    )
+    if mixed_source_face_count:
+        baseline=build_holeless_partitioned_dense_candidate(
+            surface,partition,carrier,
+            producer_policy_hash=baseline_policy_hash,
+            explicit_face_provenance=explicit_faces,
+        )
+    else:
+        baseline=build_canonical_relation_candidate(
+            surface,partition,carrier,
+            producer_policy_hash=baseline_policy_hash,
+            explicit_face_provenance=explicit_faces,
+        )
     parent_quality=_relation_parent_quality_report(baseline,policy)
     root=_artifact_root(ctx,"26_MESH_CANDIDATE_BUILD")
     parent_quality_artifact=_write_json(
@@ -428,7 +468,21 @@ def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
     if backend=="CANONICAL_RELATION_BASELINE_V1":
         candidate=baseline
     elif backend=="CANONICAL_CDT_LOCAL_CHART_V1":
-        if int(parent_quality["below_min_angle_face_count"])>0:
+        if mixed_source_face_count:
+            if int(parent_quality["policy_violating_face_count"])>0:
+                return {
+                    "status":"FAIL",
+                    "blockers":["HOLELESS_PARTITION_PARENT_QUALITY_REFINEMENT_REQUIRED"],
+                    "diagnostics":{
+                        "backend":backend,
+                        "effective_backend":"HOLELESS_PARTITIONED_DENSE_V1",
+                        "mixed_source_face_count":mixed_source_face_count,
+                        "relation_parent_quality_sha256":parent_quality_artifact["sha256"],
+                        **parent_quality,
+                    },
+                }
+            candidate=baseline
+        elif int(parent_quality["below_min_angle_face_count"])>0:
             if demo_fallback is None:
                 return {
                     "status":"FAIL",
@@ -451,6 +505,7 @@ def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
             candidate=build_canonical_cdt_candidate(
                 surface,partition,carrier,policy,
                 relation_baseline_policy_hash=baseline_policy_hash,
+                explicit_face_provenance=explicit_faces,
                 max_constraint_recovery_iterations=int(mesh_cfg.get("max_constraint_recovery_iterations",96)),
                 max_quality_iterations=int(mesh_cfg.get("max_quality_iterations",96)),
             )
@@ -476,10 +531,18 @@ def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
             "effective_backend":(
                 "CANONICAL_RELATION_BASELINE_V1"
                 if demo_fallback_used
-                else backend
+                else (
+                    "HOLELESS_PARTITIONED_DENSE_V1"
+                    if mixed_source_face_count
+                    else backend
+                )
             ),
             "vertex_count":len(candidate.vertices),
             "face_count":len(candidate.faces),
+            "source_compact_face_count":len(explicit_faces),
+            "mixed_source_face_count":mixed_source_face_count,
+            "face_provenance_hash":str(face_provenance.get("provenance_hash") or ""),
+            "three_clique_face_minting_allowed":False,
             "candidate_lineage_hash":candidate.candidate_lineage_hash,
             "mesh_policy_hash":policy.qualification_policy_lineage_hash,
             "relation_parent_quality_sha256":parent_quality_artifact["sha256"],

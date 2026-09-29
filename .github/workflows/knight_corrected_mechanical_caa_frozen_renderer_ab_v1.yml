@@ -29,7 +29,7 @@ jobs:
       - name: Verify frozen smear renderer is unchanged
         run: |
           set -euo pipefail
-          test "$(git hash-object tools/demo/render_knight_motion_preview_v1.py)" = "7917be02f325ba00b5dcd2b31a786898e45f640f"
+          test "$(git hash-object tools/demo/frozen/render_knight_motion_preview_v1_7917be02.py)" = "7917be02f325ba00b5dcd2b31a786898e45f640f"
           echo "FROZEN_SMEAR_RENDERER_HASH_PASS"
       - name: Build corrected mechanical CAA and render frozen A/B
         run: |

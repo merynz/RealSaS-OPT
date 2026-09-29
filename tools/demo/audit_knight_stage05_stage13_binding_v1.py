@@ -2,10 +2,13 @@ from __future__ import annotations
 import argparse, json, hashlib
 from pathlib import Path
 
-from compiler.realsas_compiler_core.artifact_codec_v2 import qualified_camera_set_from_dict
+from compiler.realsas_compiler_core.artifact_codec_v2 import (
+    qualified_camera_set_from_dict,
+    qualified_observation_set_from_dict,
+    normalization_domain_from_dict,
+    signed_zero_surface_from_dict,
+)
 from compiler.realsas_compiler_core.geometry_substrate_v2 import geometry_substrate_evidence_from_dict
-from compiler.realsas_compiler_core.observation_authority_v1 import qualified_observation_set_from_dict
-from compiler.realsas_compiler_core.preproduct_authority_v1 import normalization_domain_from_dict, signed_zero_surface_from_dict
 
 def sha256(path: Path) -> str:
     h=hashlib.sha256()

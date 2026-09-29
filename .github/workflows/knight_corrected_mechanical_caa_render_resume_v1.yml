@@ -1,0 +1,49 @@
+name: knight-corrected-mechanical-caa-render-resume-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths:
+      - 'tools/demo/resume_knight_corrected_mechanical_caa_ab_v1.py'
+      - '.github/workflows/knight_corrected_mechanical_caa_render_resume_v1.yml'
+
+concurrency:
+  group: knight-corrected-mechanical-caa-render-resume-v1
+  cancel-in-progress: true
+
+jobs:
+  resume:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 8
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_AB_V1_20260929
+      OUT_DIR: /tmp/knight_corrected_mechanical_caa_resume
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Verify frozen renderer and resume syntax
+        run: |
+          set -euo pipefail
+          test "$(git hash-object tools/demo/frozen/render_knight_motion_preview_v1_7917be02.py)" = "7917be02f325ba00b5dcd2b31a786898e45f640f"
+          python -m py_compile tools/demo/resume_knight_corrected_mechanical_caa_ab_v1.py
+      - name: Requalify Stage24 and render persisted Stage23
+        run: |
+          set -euo pipefail
+          rm -rf "$OUT_DIR"
+          mkdir -p "$OUT_DIR"
+          PYTHONPATH=. python tools/demo/resume_knight_corrected_mechanical_caa_ab_v1.py             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --out-dir "$OUT_DIR"
+      - name: Upload corrected frozen-renderer GIFs
+        uses: actions/upload-artifact@v4
+        with:
+          name: knight-corrected-mechanical-caa-render-resume-v1
+          path: |
+            /tmp/knight_corrected_mechanical_caa_resume/*.gif
+            /tmp/knight_corrected_mechanical_caa_resume/REPORT.json
+            /tmp/knight_corrected_mechanical_caa_resume/frozen_renderer/*.png
+            /tmp/knight_corrected_mechanical_caa_resume/frozen_renderer/*.json
+          if-no-files-found: error
+          retention-days: 7

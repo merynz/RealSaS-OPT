@@ -17,7 +17,8 @@ def main():
     ledger=json.loads((rr/"ACTIVE_RUN_V2.json").read_text())
     def row(s): return next(x for x in ledger["stages"] if x["id"]==s)
     out={}
-    for sid in ("09_IRIS_FIT_PREREGISTERED","10_IRIS_FIT","11_IRIS_CHECKPOINT_SEALED"):
+    for sid in ("09_IRIS_FIT_PREREGISTERED","10_IRIS_FIT","11_IRIS_CHECKPOINT_SEALED",
+                "28_SKELETON_QUALIFIED","34_DEFORMATION_CAPABILITY_ENVELOPE"):
         r=row(sid)
         rows=[]
         for o in r.get("outputs") or ():
@@ -33,7 +34,9 @@ def main():
                         for k in ("upstream_bindings","preregistration_binding_hash","execution_binding_hash",
                                   "checkpoint_seal_hash","execution_hash","preregistration_hash",
                                   "qualified_output_binding_hash","checkpoint_sha256","result_sha256",
-                                  "observation_set_binding_hash","normalization_binding_hash"):
+                                  "observation_set_binding_hash","normalization_binding_hash",
+                                  "skeleton_lineage_hash","skeleton_binding_hash","surface_binding_hash",
+                                  "camera_binding_hashes","envelope_lineage_hash"):
                             if k in payload: item[k]=payload[k]
                     except Exception as exc:
                         item["parse_error"]=str(exc)

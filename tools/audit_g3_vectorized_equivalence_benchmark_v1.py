@@ -25,6 +25,9 @@ from tools.demo.render_knight_motion_preview_v1 import _ctx
 def vectorized_g3(candidate, *, surface, skeleton, skin, envelope, cameras, policy):
     frames=derive_joint_frames_from_skeleton(skeleton,cameras=cameras)
     rest,weights,faces=_candidate_skin_matrix(candidate,surface=surface,skeleton=skeleton,skin=skin)
+    rest=np.asarray(rest,dtype=np.float64)
+    weights=np.asarray(weights,dtype=np.float64)
+    faces=np.asarray(faces,dtype=np.int64)
     joint_ids=tuple(j.canonical_joint_id for j in skeleton.joints)
     probes=[("REST",None,None,0.0)]
     for jid in sorted(joint_ids):

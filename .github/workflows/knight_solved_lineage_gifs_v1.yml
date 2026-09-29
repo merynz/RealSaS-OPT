@@ -6,6 +6,7 @@ on:
     branches: [research/vf11-certified-adaptive-20260921]
     paths:
       - 'tools/demo/build_knight_solution_lineage_gifs_v1.py'
+      - 'tools/demo/run_knight_solution_lineage_gifs_visual_continuation_v1.py'
       - '.github/workflows/knight_solved_lineage_gifs_v1.yml'
 
 concurrency:
@@ -37,13 +38,13 @@ jobs:
           mkdir -p /tmp/knight_solved_lineage
           rclone copyto "$A100_AUDIT_REMOTE" /tmp/knight_solved_lineage/a100_audit.json --checksum
       - name: Syntax
-        run: python -m py_compile tools/demo/build_knight_solution_lineage_gifs_v1.py
+        run: python -m py_compile tools/demo/build_knight_solution_lineage_gifs_v1.py tools/demo/run_knight_solution_lineage_gifs_visual_continuation_v1.py
       - name: Build exact solved lineage and GIFs
         run: |
           set -euo pipefail
           rm -rf /tmp/knight_solved_lineage/out
           mkdir -p /tmp/knight_solved_lineage/out
-          PYTHONPATH=. python tools/demo/build_knight_solution_lineage_gifs_v1.py \
+          PYTHONPATH=. python tools/demo/run_knight_solution_lineage_gifs_visual_continuation_v1.py \
             --authority-root "$AUTHORITY_ROOT" \
             --parent-run-id "$PARENT_RUN_ID" \
             --child-run-id "$CHILD_RUN_ID" \

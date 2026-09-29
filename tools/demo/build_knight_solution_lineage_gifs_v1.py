@@ -81,17 +81,18 @@ def find_schema_file(stage_dir: Path, schema: str) -> Path:
 
 def adopt_upstream_schema(
     ledger: dict, parent_root: Path, stage_id: str, schema: str, *,
-    status: str="PASS_DEMO_ONLY",
+    status: str="PASS_DEMO_ONLY", append: bool=False,
 ):
     path=find_schema_file(parent_root/"artifacts"/stage_id,schema)
     row=row_by_id(ledger,stage_id)
     row["status"]=status
-    row["outputs"]=[{
+    output={
         "path":str(path),
         "sha256":sha256_file(path),
         "authority_class":"PARENT_EXACT_BYTES__DEMO_SOLUTION_LINEAGE_ADOPTION",
         "schema":schema,
-    }]
+    }
+    row["outputs"]=(list(row.get("outputs") or ()) + [output]) if append else [output]
     row["blockers"]=[]
     return {"stage_id":stage_id,"schema":schema,"path":str(path),"sha256":sha256_file(path),"status":status}
 
@@ -245,6 +246,13 @@ def main():
     ):
         adopted_upstream.append(adopt_upstream_schema(
             ledger,parent_root,stage_id,schema,status=status))
+    adopted_upstream.append(adopt_upstream_schema(
+        ledger,parent_root,
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "RealSaS.CompactedDenseFaceProvenance.v1",
+        status="PASS_DEMO_ONLY",
+        append=True,
+    ))
 
     copy_ir_as_stage32(child_root,ledger,a.skin_json)
     ctx={

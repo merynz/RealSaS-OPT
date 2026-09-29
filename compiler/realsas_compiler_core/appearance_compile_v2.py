@@ -351,7 +351,12 @@ def _candidate_vertex_id(vertex) -> str:
     return str(value)
 
 
-def _candidate_face_geometry_authority(candidate):
+def _candidate_face_geometry_authority(
+    candidate,
+    *,
+    face_component_index_override: np.ndarray | None = None,
+    component_ids_override: tuple[str, ...] | None = None,
+):
     vertices = {
         _candidate_vertex_id(vertex): np.asarray(vertex.P, dtype=np.float64)
         for vertex in candidate.vertices
@@ -371,6 +376,29 @@ def _candidate_face_geometry_authority(candidate):
             raise QualificationError("CAA_FACE_CROSSES_COMPONENT")
         face_rows.append(ids)
         face_component_names.append(next(iter(component_set)))
+
+    if face_component_index_override is not None or component_ids_override is not None:
+        if face_component_index_override is None or component_ids_override is None:
+            raise QualificationError("CAA_APPEARANCE_COMPONENT_OVERRIDE_INCOMPLETE")
+        face_component_index = np.asarray(
+            face_component_index_override, dtype=np.int32
+        )
+        component_ids = tuple(map(str, component_ids_override))
+        if (
+            face_component_index.shape != (len(face_rows),)
+            or not component_ids
+            or len(set(component_ids)) != len(component_ids)
+            or np.any(face_component_index < 0)
+            or np.any(face_component_index >= len(component_ids))
+        ):
+            raise QualificationError("CAA_APPEARANCE_COMPONENT_OVERRIDE_INVALID")
+        return (
+            vertices,
+            tuple(face_rows),
+            face_component_index,
+            component_ids,
+        )
+
     component_ids = tuple(sorted(set(face_component_names)))
     if not component_ids:
         raise QualificationError("CAA_COMPONENT_SET_EMPTY")
@@ -389,7 +417,13 @@ def _candidate_face_geometry_authority(candidate):
     )
 
 
-def _surface_sample_geometry(candidate, barycentric: np.ndarray):
+def _surface_sample_geometry(
+    candidate,
+    barycentric: np.ndarray,
+    *,
+    face_component_index_override: np.ndarray | None = None,
+    component_ids_override: tuple[str, ...] | None = None,
+):
     barycentric = np.asarray(barycentric, dtype=np.float64)
     if barycentric.ndim != 2 or barycentric.shape[1] != 3:
         raise QualificationError("CAA_BARYCENTRIC_SAMPLE_SHAPE_INVALID")
@@ -398,7 +432,11 @@ def _surface_sample_geometry(candidate, barycentric: np.ndarray):
         face_rows,
         face_component_index,
         component_ids,
-    ) = _candidate_face_geometry_authority(candidate)
+    ) = _candidate_face_geometry_authority(
+        candidate,
+        face_component_index_override=face_component_index_override,
+        component_ids_override=component_ids_override,
+    )
     face_count = len(face_rows)
     per_face = len(barycentric)
     sample_count = face_count * per_face
@@ -432,6 +470,9 @@ def _surface_sample_geometry(candidate, barycentric: np.ndarray):
 def _surface_sample_geometry_adaptive(
     candidate,
     face_tile_resolutions: np.ndarray,
+    *,
+    face_component_index_override: np.ndarray | None = None,
+    component_ids_override: tuple[str, ...] | None = None,
 ):
     resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
     if resolutions.shape != (len(candidate.faces),) or np.any(resolutions < 4):
@@ -443,7 +484,11 @@ def _surface_sample_geometry_adaptive(
         face_rows,
         face_component_index,
         component_ids,
-    ) = _candidate_face_geometry_authority(candidate)
+    ) = _candidate_face_geometry_authority(
+        candidate,
+        face_component_index_override=face_component_index_override,
+        component_ids_override=component_ids_override,
+    )
 
     positions = np.empty((sample_count, 3), dtype=np.float64)
     face_indices = np.empty((sample_count,), dtype=np.int32)
@@ -906,6 +951,8 @@ def compile_deterministic_caa(
     source_lock_policy: Mapping[str, object],
     completion_quality_policy: Mapping[str, object] | None = None,
     face_tile_resolutions: np.ndarray | None = None,
+    appearance_face_component_index: np.ndarray | None = None,
+    appearance_component_ids: tuple[str, ...] | None = None,
 ) -> dict:
     """Compile deterministic CAA on uniform or per-face adaptive lattices.
 
@@ -926,7 +973,12 @@ def compile_deterministic_caa(
             component_ids,
             face_normals,
             face_sample_offsets,
-        ) = _surface_sample_geometry_adaptive(candidate, resolutions)
+        ) = _surface_sample_geometry_adaptive(
+            candidate,
+            resolutions,
+            face_component_index_override=appearance_face_component_index,
+            component_ids_override=appearance_component_ids,
+        )
         barycentric = None
         barycentric_storage_mode = (
             "RECONSTRUCT_FROM_FACE_RESOLUTION_AND_OFFSETS_V1"
@@ -946,7 +998,12 @@ def compile_deterministic_caa(
             sample_component_index,
             component_ids,
             face_normals,
-        ) = _surface_sample_geometry(candidate, barycentric)
+        ) = _surface_sample_geometry(
+            candidate,
+            barycentric,
+            face_component_index_override=appearance_face_component_index,
+            component_ids_override=appearance_component_ids,
+        )
         sample_count = len(positions)
         per_face_samples = len(barycentric)
         if sample_count != face_count * per_face_samples:
@@ -975,6 +1032,8 @@ def compile_deterministic_caa(
     ) = _surface_sample_geometry(
         candidate,
         canonical_control_barycentric,
+        face_component_index_override=appearance_face_component_index,
+        component_ids_override=appearance_component_ids,
     )
     if tuple(canonical_control_component_ids) != tuple(component_ids):
         raise QualificationError("CAA_CANONICAL_CONTROL_COMPONENT_DRIFT")

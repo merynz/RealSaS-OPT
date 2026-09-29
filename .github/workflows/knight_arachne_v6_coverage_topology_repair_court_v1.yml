@@ -23,6 +23,8 @@ jobs:
       AUTHORITY_ROOT: /home/monster/realsas_authority
       RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
       DRIVE_ROOT: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_V6_COVERAGE_SAMPLING_2X2_INDEXSPACE_FIXED_20260929/ARMS
+      A100_AUDIT_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_V6_COVERAGE_SAMPLING_2X2_INDEXSPACE_FIXED_20260929/ARACHNE_V6_2X2_INDEXSPACE_FIXED_RESULT_AUDIT.json
+      A100_AUDIT_SHA256: 9c4d6186436494a3cc50c6506a751c239430c3ee15f6efc709a6f849ef9c428f
       OLD_SKEL: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V5_DEMO_HANDOFF/FINAL_QUALIFIED_SKELETON_IR.json
     steps:
       - uses: actions/checkout@v4
@@ -42,6 +44,20 @@ jobs:
         run: |
           set -euo pipefail
           work="$(mktemp -d)"
+          a100_audit="canonical/KNIGHT_ARACHNE_V6_2X2_INDEXSPACE_FIXED_RESULT_AUDIT_V1_20260929.json"
+          rclone copyto "$A100_AUDIT_REMOTE" "$a100_audit" --checksum
+          python - "$a100_audit" "$A100_AUDIT_SHA256" <<'PY'
+          import hashlib,json,sys
+          from pathlib import Path
+          p=Path(sys.argv[1]); expected=sys.argv[2]
+          got=hashlib.sha256(p.read_bytes()).hexdigest()
+          assert got==expected,(got,expected)
+          x=json.loads(p.read_text())
+          assert x["schema"]=="RealSaS.KnightArachneV6CoverageSampling2x2ResultAudit.v1"
+          assert x["status"]=="COMPLETE"
+          assert set(x["arms"])=={"UNIFORM_VALID","ACTIVE_BALANCED_VALID","UNIFORM_ALL_PROJECTED","ACTIVE_BALANCED_ALL_PROJECTED"}
+          print("A100_AUDIT_CANONICAL_RESTORED_PASS",got)
+          PY
           rclone copyto "$OLD_SKEL" "$work/old_skeleton.json" --checksum
           mkdir -p canonical/knight_arachne_v6_coverage_topology_repair_court_v1
           arms=(UNIFORM_ALL_PROJECTED ACTIVE_BALANCED_ALL_PROJECTED)

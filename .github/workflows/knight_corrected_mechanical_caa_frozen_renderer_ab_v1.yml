@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   ab:
+    if: ${{ false }} # superseded by render-resume; avoid recomputing Stage19-23
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 20
     env:

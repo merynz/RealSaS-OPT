@@ -46,7 +46,7 @@ def main():
     ap.add_argument("--out",type=Path,required=True)
     a=ap.parse_args()
 
-    rr=a.authority_root/a.run_id
+    rr=(a.authority_root/"runs"/a.run_id).resolve()
     surface=load(
         rr/"artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json",
         rigging_surface_from_dict,

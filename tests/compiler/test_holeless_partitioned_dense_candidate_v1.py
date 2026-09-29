@@ -132,6 +132,9 @@ def _qualified_mesh(surface, partition, carrier, candidate):
         "g3_envelope_binding_hash":envelope.envelope_lineage_hash,
         "g3_stress_probe_hash":"g3",
         "g3_stress_probe_status":"PASS",
+        "skin_topology_compatibility_report_hash":"skin-topology-test",
+        "skin_topology_compatibility_status":"PASS",
+        "skin_topology_weight_mutation":False,
         "carrier_policy_hash":carrier.carrier_policy_lineage_hash,
         "view_component_coverage":tuple(
             {

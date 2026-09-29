@@ -7,6 +7,7 @@ from compiler.realsas_compiler_core.canonical_mesh_candidate_v1 import (
 )
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.mechanical_partition_v1 import build_structural_partition
+from compiler.realsas_compiler_core.mesh.deformation_stress_v1 import _candidate_skin_matrix
 from compiler.realsas_compiler_core.product_authority_v1 import (
     CarrierCoverageThresholdIR,
     ComponentBoundaryConstraintIR,
@@ -195,5 +196,27 @@ def test_holeless_seam_geometry_does_not_mix_skin_across_components():
         expected="jb" if owned_surface=="c" else "ja"
         assert rows[v.canonical_mesh_vertex_id].influences==((expected,1.0),)
         # Geometry support intentionally spans the seam while skin support does not.
+        assert len(v.support_binding.coefficients)==2
+        assert tuple(v.support_binding.coefficients)!=support
+
+
+def test_stage35_holeless_seam_transfer_uses_mechanical_skin_support():
+    surface,partition,carrier,candidate=_fixture()
+    skeleton,skin,_,_,_=_qualified_mesh(surface,partition,carrier,candidate)
+    _,weights,_=_candidate_skin_matrix(
+        candidate,surface=surface,skeleton=skeleton,skin=skin
+    )
+    joint_ids=tuple(j.canonical_joint_id for j in skeleton.joints)
+    ji={jid:i for i,jid in enumerate(joint_ids)}
+    for vi,v in enumerate(candidate.vertices):
+        if v.support_binding.mode!="SEAM_GEOMETRY_INTERPOLATION":
+            continue
+        support=tuple(v.support_binding.metadata["skin_support_coefficients"])
+        assert len(support)==1
+        owned_surface=str(support[0][0])
+        expected="jb" if owned_surface=="c" else "ja"
+        assert abs(float(weights[vi,ji[expected]])-1.0)<=1e-12
+        assert sum(abs(float(weights[vi,j])) for jid,j in ji.items() if jid!=expected)<=1e-12
+        # Geometry interpolation crosses the seam; Stage35 mechanical skin must not.
         assert len(v.support_binding.coefficients)==2
         assert tuple(v.support_binding.coefficients)!=support

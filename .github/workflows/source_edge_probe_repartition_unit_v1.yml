@@ -28,3 +28,5 @@ jobs:
           set -euo pipefail
           python -m py_compile compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py
           PYTHONPATH=. pytest -q tests/compiler/test_source_edge_probe_repartition_v1.py tests/compiler/test_mechanical_repartition_v2.py
+
+# trigger: workflow existed before this commit

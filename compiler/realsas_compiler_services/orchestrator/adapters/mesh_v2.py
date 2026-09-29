@@ -468,6 +468,7 @@ def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
         "schema":"RealSaS.CanonicalRelationBaselinePolicy.v1",
         "mesh_config":mesh_cfg,
         "mesh_policy_hash":policy.qualification_policy_lineage_hash,
+        "generated_seam_skin_transfer":"COMPONENT_HARMONIC_DIRICHLET_V1",
     })
     face_provenance=_load_compacted_dense_face_provenance(ctx,surface=surface)
     explicit_faces=tuple(
@@ -489,6 +490,7 @@ def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
             surface,partition,carrier,
             producer_policy_hash=baseline_policy_hash,
             explicit_face_provenance=explicit_faces,
+            mechanical_skin_transfer="COMPONENT_HARMONIC_DIRICHLET_V1",
         )
     else:
         baseline=build_canonical_relation_candidate(
@@ -586,6 +588,10 @@ def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
             "mixed_source_face_count":mixed_source_face_count,
             "face_provenance_hash":str(face_provenance.get("provenance_hash") or ""),
             "three_clique_face_minting_allowed":False,
+            "generated_seam_skin_transfer":(
+                candidate.metadata.get("mechanical_skin_transfer")
+                if mixed_source_face_count else None
+            ),
             "candidate_lineage_hash":candidate.candidate_lineage_hash,
             "mesh_policy_hash":policy.qualification_policy_lineage_hash,
             "relation_parent_quality_sha256":parent_quality_artifact["sha256"],

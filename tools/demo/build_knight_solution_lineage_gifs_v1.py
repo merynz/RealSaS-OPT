@@ -63,6 +63,39 @@ def row_by_id(ledger: dict, stage_id: str) -> dict:
     raise RuntimeError(f"LEDGER_STAGE_MISSING::{stage_id}")
 
 
+def find_schema_file(stage_dir: Path, schema: str) -> Path:
+    hits=[]
+    if stage_dir.is_dir():
+        for path in stage_dir.rglob("*.json"):
+            try:
+                payload=load_json(path)
+            except Exception:
+                continue
+            actual=str(payload.get("schema") or payload.get("schema_version") or "")
+            if actual==schema:
+                hits.append(path.resolve())
+    if len(hits)!=1:
+        raise RuntimeError(f"UPSTREAM_SCHEMA_CARDINALITY::{stage_dir.name}::{schema}::{len(hits)}")
+    return hits[0]
+
+
+def adopt_upstream_schema(
+    ledger: dict, parent_root: Path, stage_id: str, schema: str, *,
+    status: str="PASS_DEMO_ONLY",
+):
+    path=find_schema_file(parent_root/"artifacts"/stage_id,schema)
+    row=row_by_id(ledger,stage_id)
+    row["status"]=status
+    row["outputs"]=[{
+        "path":str(path),
+        "sha256":sha256_file(path),
+        "authority_class":"PARENT_EXACT_BYTES__DEMO_SOLUTION_LINEAGE_ADOPTION",
+        "schema":schema,
+    }]
+    row["blockers"]=[]
+    return {"stage_id":stage_id,"schema":schema,"path":str(path),"sha256":sha256_file(path),"status":status}
+
+
 def adopt_result(ctx: dict, stage_id: str, fn):
     ctx["stage"]={"id":stage_id}
     result=fn(ctx)
@@ -190,21 +223,45 @@ def main():
     ledger["execution_class"]="DEMO_WITNESS"
     ledger["architecture_scope"]="KNIGHT_SOLVED_WEIGHT_TOPOLOGY_LINEAGE_V1"
 
-    parent_ctx={
+    # Two provenance helpers read sealed Stage08/12 bytes directly from run_root.
+    artifacts_root=child_root/"artifacts"
+    artifacts_root.mkdir(parents=True,exist_ok=True)
+    for stage_name in ("08_NORMALIZATION_DOMAIN_QUALIFIED","12_ZERO_SURFACE_DECODED"):
+        source=parent_root/"artifacts"/stage_name
+        target=artifacts_root/stage_name
+        if not source.is_dir():
+            raise RuntimeError(f"UPSTREAM_DIRECT_STAGE_MISSING::{stage_name}")
+        os.symlink(source,target,target_is_directory=True)
+
+    adopted_upstream=[]
+    for stage_id,schema,status in (
+        ("05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1","PASS"),
+        ("07_OBSERVATION_CONTRACT_QUALIFIED","RealSaS.QualifiedObservationSetIR.v1","PASS"),
+        ("13_GEOMETRY_SUBSTRATE_QUALIFIED","RealSaS.GeometrySubstrateQualificationIR.v2","PASS_DEMO_ONLY"),
+        ("15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1","PASS_DEMO_ONLY"),
+        ("16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED","RealSaS.OutputPresentationDirectionSetIR.v1","PASS"),
+        ("28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1","PASS"),
+        ("34_DEFORMATION_CAPABILITY_ENVELOPE","RealSaS.DeformationCapabilityEnvelopeIR.v1","PASS"),
+    ):
+        adopted_upstream.append(adopt_upstream_schema(
+            ledger,parent_root,stage_id,schema,status=status))
+
+    copy_ir_as_stage32(child_root,ledger,a.skin_json)
+    ctx={
         "repo_root":Path(".").resolve(),"authority_root":a.authority_root.resolve(),
-        "run_root":parent_root,"run_id":a.parent_run_id,
-        "run_manifest_path":parent_root/"run_manifest.json","run_manifest":parent_manifest,
-        "ledger":parent_ledger,"stage":{"id":"LINEAGE_PARENT"},
+        "run_root":child_root,"run_id":a.child_run_id,
+        "run_manifest_path":child_root/"run_manifest.json","run_manifest":manifest,
+        "ledger":ledger,"stage":{"id":"INIT"},
     }
     surface=rigging_surface_from_dict(stage_output_payload(
-        parent_ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1"))
+        ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1"))
     skeleton=qualified_skeleton_from_dict(stage_output_payload(
-        parent_ctx,"28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1"))
+        ctx,"28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1"))
     cameras=tuple(sorted(qualified_camera_set_from_dict(stage_output_payload(
-        parent_ctx,"05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1")).cameras,
+        ctx,"05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1")).cameras,
         key=lambda x:int(x.view_index)))
     envelope=deformation_envelope_from_dict(stage_output_payload(
-        parent_ctx,"34_DEFORMATION_CAPABILITY_ENVELOPE","RealSaS.DeformationCapabilityEnvelopeIR.v1"))
+        ctx,"34_DEFORMATION_CAPABILITY_ENVELOPE","RealSaS.DeformationCapabilityEnvelopeIR.v1"))
     skin=qualified_skin_from_dict(load_json(a.skin_json))
     parent_partition=build_structural_partition(surface,boundary_overrides=())
     explicit,face_replay=replay_compacted_dense_face_provenance(parent_root,surface)
@@ -285,13 +342,8 @@ def main():
     }
     (child_root/"run_manifest.json").write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n")
 
-    copy_ir_as_stage32(child_root,ledger,a.skin_json)
-    ctx={
-        "repo_root":Path(".").resolve(),"authority_root":a.authority_root.resolve(),
-        "run_root":child_root,"run_id":a.child_run_id,
-        "run_manifest_path":child_root/"run_manifest.json","run_manifest":manifest,
-        "ledger":ledger,"stage":{"id":"INIT"},
-    }
+    # Persist the manifest only after the exact repair refs are bound.
+    (child_root/"run_manifest.json").write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\\n")
 
     stage_results={}
     stage_results["17"]=adopt_result(ctx,"17_MECHANICAL_PARTITION_QUALIFIED",qualify_mechanical_partition_and_carriers)
@@ -340,6 +392,7 @@ def main():
         "repo_commit":a.repo_commit,
         "parent_run_id":a.parent_run_id,
         "child_run_id":a.child_run_id,
+        "adopted_parent_upstream":adopted_upstream,
         "corrected_skin":{
             "skin_lineage_hash":skin.skin_lineage_hash,
             "file_sha256":sha256(a.skin_json),

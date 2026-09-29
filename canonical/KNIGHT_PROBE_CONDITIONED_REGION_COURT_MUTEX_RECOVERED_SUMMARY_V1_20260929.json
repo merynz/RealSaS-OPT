@@ -1,0 +1,50 @@
+{
+  "schema": "RealSaS.KnightProbeConditionedRegionCourtRecoveredSummary.v1",
+  "status": "COMPUTE_STEP_COMPLETE__SEAL_CONFLICT__SUMMARY_RECOVERED_FROM_WORKFLOW_STDOUT",
+  "date": "2026-09-29",
+  "workflow_run": {
+    "id": 36575668345,
+    "workflow": "knight-probe-conditioned-region-court-v1",
+    "source_head_sha": "22723a967a42a50b25908c55524e7a3352795aba",
+    "compute_step_conclusion": "success",
+    "seal_step_conclusion": "failure",
+    "seal_failure": "ADD_ADD_REBASE_CONFLICT_WITH_PRIOR_DIAGNOSTIC_ARTIFACT_PATH"
+  },
+  "operator": {
+    "direct_probe_cannot_link_source_edge_count": 1417,
+    "existing_edge_ratio_limit": 4,
+    "stage17_partition_semantics": "MUTEX_DSU_STRUCTURAL_AUTHORITY_MAX_CONTINUITY"
+  },
+  "result": {
+    "component_count": 73,
+    "candidate_face_count": 28331,
+    "all_face_120deg_unsafe_face_count": 462,
+    "derived_default_g3b_unsafe_face_count": 158,
+    "g3_local_10deg_passed": true,
+    "g3_failure_invariants": [],
+    "actual_motion": {
+      "max_edge_gt_10": 0,
+      "max_edge_gt_4": 15,
+      "worst_edge_max": 6.940668049682473
+    },
+    "residual_classification": {
+      "HAS_GENERATED_SEAM": {
+        "unsafe_face_count": 295,
+        "unsafe_l1_le_0p5_count": 190
+      },
+      "IDENTITY_ONLY": {
+        "unsafe_face_count": 167,
+        "unsafe_l1_le_0p5_count": 114
+      },
+      "OTHER_SUPPORT_MODE": {
+        "unsafe_face_count": 0
+      }
+    }
+  },
+  "claim_boundary": [
+    "This file recovers only values printed by the successfully completed compute step of workflow run 36575668345.",
+    "The full generated report was not promoted because the subsequent git seal step hit an add/add rebase conflict.",
+    "This summary is diagnostic evidence, not product mainline authority.",
+    "A subsequent all-face repair court must independently replay the deterministic partition and measurements before promotion."
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "schema": "RealSaS.KnightPreloadedMutexCausalCourtPrereg.v1",
+  "status": "FROZEN_BEFORE_PRELOADED_MUTEX_RESULT",
+  "date": "2026-09-29",
+  "purpose": "Test whether residual topology failure in the mechanical mutex solver is caused by processing repulsive cannot-link evidence after attractive unions have already merged its endpoints.",
+  "causal_change_only": "All repulsive constraints are installed on singleton vertices before any attractive union is allowed. Evidence masks, JSD ordering, holeless split and frozen closure thresholds remain unchanged.",
+  "variants": [
+    "STRETCH_ONLY_JSD",
+    "STRETCH_OR_L1_JSD",
+    "STRETCH_AND_L1_JSD"
+  ],
+  "teacher_policy": "Every partition is frozen before teacher topology or teacher weights are loaded.",
+  "required_solver_invariant": "repulsive_edge_arrived_after_endpoint_merge == 0",
+  "closure_thresholds": {
+    "face_deletion_count_max": 0,
+    "rest_area_error_max": 1e-10,
+    "actual_motion_max_edge_gt_10_max": 5,
+    "actual_motion_max_edge_gt_4_max": 50,
+    "actual_motion_worst_edge_max": 25.0,
+    "synthetic_unsafe_face_count_max": 500,
+    "mixed_face_precision_min": 0.90,
+    "unsafe_cross_region_recall_min": 0.70
+  },
+  "decision": {
+    "pass": "A variant closes all frozen topology gates and satisfies the solver invariant.",
+    "causal_improvement": "If closure remains open but mechanics improve materially with zero late repulsive edges, event ordering was a proven contributor.",
+    "fail": "No material improvement; residual owner lies elsewhere."
+  }
+}

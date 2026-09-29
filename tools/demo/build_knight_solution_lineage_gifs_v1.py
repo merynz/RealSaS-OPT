@@ -340,10 +340,10 @@ def main():
         "directive":{"path":str(directive_path.resolve()),"sha256":sha256(directive_path)},
         "authorization":{"path":str(auth_path.resolve()),"sha256":sha256(auth_path)},
     }
-    (child_root/"run_manifest.json").write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n")
-
-    # Persist the manifest only after the exact repair refs are bound.
-    (child_root/"run_manifest.json").write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\\n")
+    # Persist only after the exact repair refs are bound.
+    (child_root/"run_manifest.json").write_text(
+        json.dumps(manifest,indent=2,sort_keys=True)+"\n"
+    )
 
     stage_results={}
     stage_results["17"]=adopt_result(ctx,"17_MECHANICAL_PARTITION_QUALIFIED",qualify_mechanical_partition_and_carriers)

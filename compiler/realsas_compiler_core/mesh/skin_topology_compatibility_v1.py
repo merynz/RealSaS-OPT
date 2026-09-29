@@ -368,6 +368,39 @@ def seam_cut_candidate_v1(candidate,unsafe_face_indices,*,report_hash:str,max_it
     return repaired,directive
 
 
+def _mechanical_owner_surface_id(vertex, *, partition_owner:dict[str,str])->str|None:
+    """Resolve the surface node that owns Stage35 mechanical skin transfer.
+
+    Identity vertices own their sole surface node.  Holeless seam vertices use
+    the separately sealed skin_support_coefficients, never their cross-seam
+    geometry interpolation coefficients.
+    """
+    mode=str(vertex.support_binding.mode)
+    if mode=="IDENTITY_SURFACE_NODE":
+        coeffs=tuple(vertex.support_binding.coefficients)
+        if len(coeffs)!=1 or abs(float(coeffs[0][1])-1.0)>1e-12:
+            raise QualificationError("SKIN_TOPOLOGY_IDENTITY_SUPPORT_INVALID")
+        sid=str(coeffs[0][0])
+    elif mode=="SEAM_GEOMETRY_INTERPOLATION":
+        md=dict(vertex.support_binding.metadata or {})
+        support=tuple(md.get("skin_support_coefficients") or ())
+        if len(support)!=1 or abs(float(support[0][1])-1.0)>1e-12:
+            raise QualificationError("SKIN_TOPOLOGY_SEAM_SKIN_OWNER_INVALID")
+        sid=str(support[0][0])
+        declared=str(md.get("mechanical_component_id") or "")
+        if not declared or declared!=str(vertex.component_id):
+            raise QualificationError("SKIN_TOPOLOGY_SEAM_COMPONENT_BINDING_INVALID")
+    else:
+        return None
+
+    owner=str(partition_owner.get(sid) or "")
+    if not owner:
+        raise QualificationError("SKIN_TOPOLOGY_MECHANICAL_OWNER_SURFACE_UNKNOWN")
+    if owner!=str(vertex.component_id):
+        raise QualificationError("SKIN_TOPOLOGY_MECHANICAL_OWNER_COMPONENT_DRIFT")
+    return sid
+
+
 def propose_mechanical_repartition_directive_v2(
     candidate,
     *,
@@ -380,8 +413,10 @@ def propose_mechanical_repartition_directive_v2(
     """Convert Stage35 unsafe-face evidence into a compiler-owned repartition proposal.
 
     This function never deletes faces and never mutates weights.  It only proposes
-    candidate SEPARATE boundary pairs from identity-bound unsafe face edges with
-    the strongest skin discontinuity.  Automatic application is deliberately
+    candidate SEPARATE boundary pairs from mechanically owned unsafe face edges
+    with the strongest admissible skin discontinuity.  Identity vertices use
+    their surface node; holeless seam vertices use skin_support_coefficients,
+    never cross-seam geometry coefficients.  Automatic application is deliberately
     forbidden until an explicit trustworthy-skin/reliability authority exists.
     """
     unsafe=tuple(map(int,compatibility_report.get("unsafe_face_indices") or ()))
@@ -402,16 +437,11 @@ def propose_mechanical_repartition_directive_v2(
         tuple(sorted((str(row.a_surface_id),str(row.b_surface_id)))):str(row.decision)
         for row in partition.boundary_constraints
     }
-
-    def identity_sid(vertex):
-        coeffs=tuple(vertex.support_binding.coefficients)
-        if (
-            str(vertex.support_binding.mode)=="IDENTITY_SURFACE_NODE"
-            and len(coeffs)==1
-            and abs(float(coeffs[0][1])-1.0)<=1e-12
-        ):
-            return str(coeffs[0][0])
-        return None
+    partition_owner={
+        str(sid):str(component.component_id)
+        for component in partition.components
+        for sid in component.surface_ids
+    }
 
     proposals={}
     unresolved=0
@@ -423,14 +453,24 @@ def propose_mechanical_repartition_directive_v2(
             l1=float(np.abs(weights[a]-weights[b]).sum())
             edge_rows.append((l1,a,b))
         edge_rows.sort(key=lambda x:(x[0],-min(x[1],x[2]),-max(x[1],x[2])),reverse=True)
-        l1,a,b=edge_rows[0]
-        sa=identity_sid(vertices[a]); sb=identity_sid(vertices[b])
-        if sa is None or sb is None or sa==sb:
+
+        chosen=None
+        for l1,a,b in edge_rows:
+            sa=_mechanical_owner_surface_id(vertices[a],partition_owner=partition_owner)
+            sb=_mechanical_owner_surface_id(vertices[b],partition_owner=partition_owner)
+            if sa is None or sb is None or sa==sb:
+                continue
+            pair=tuple(sorted((sa,sb)))
+            if pair not in existing:
+                continue
+            if existing.get(pair)=="SEPARATE":
+                continue
+            chosen=(l1,a,b,sa,sb,pair)
+            break
+        if chosen is None:
             unresolved+=1
             continue
-        pair=tuple(sorted((sa,sb)))
-        if existing.get(pair)=="SEPARATE":
-            continue
+        l1,a,b,sa,sb,pair=chosen
         row=proposals.setdefault(pair,{
             "a_surface_id":pair[0],
             "b_surface_id":pair[1],
@@ -443,7 +483,8 @@ def propose_mechanical_repartition_directive_v2(
                 "evidence_class":"STAGE35_DYNAMIC_SKIN_TOPOLOGY_MECHANICAL",
                 "automatic":True,
                 "manual_authoring_used":False,
-                "identity_surface_support_required":True,
+                "mechanical_owner_surface_support_required":True,
+                "identity_or_holeless_seam_owner_supported":True,
             },
         })
         row["evidence_refs"].append(f"{report_hash}:FACE:{fi}")
@@ -468,7 +509,7 @@ def propose_mechanical_repartition_directive_v2(
         "status":(
             "REPARTITION_PROPOSED__AWAIT_TRUSTWORTHY_SKIN_AUTHORITY"
             if ordered else
-            "ABSTAIN__NO_IDENTITY_BOUNDARY_PROPOSAL"
+            "ABSTAIN__NO_MECHANICAL_OWNER_BOUNDARY_PROPOSAL"
         ),
         "source_candidate_lineage_hash":candidate.candidate_lineage_hash,
         "source_surface_lineage_hash":surface.geometry_lineage_hash,

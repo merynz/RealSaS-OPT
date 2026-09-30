@@ -101,24 +101,37 @@ jobs:
           manifest=json.loads(path.read_text())
           motion=dict(manifest.get("motion") or {})
           sources=list(motion.get("sources") or [])
-          if len(sources)!=3:
+          expected={"demo_idle_v1","demo_run_v1","demo_slash_v1"}
+          if len(sources)!=3 or {str(x.get("clip_id")) for x in sources}!=expected:
               donor=None
-              for candidate in sorted((authority/"runs").glob("*KNIGHT*")):
-                  p=candidate/"run_manifest.json"
-                  if not p.is_file():
-                      continue
+              for frag in sorted(authority.rglob("MOTION_RUN_MANIFEST_FRAGMENT.json")):
                   try:
-                      m=json.loads(p.read_text())
+                      payload=json.loads(frag.read_text())
+                      candidate_motion=dict(payload.get("motion") or {})
+                      s=list(candidate_motion.get("sources") or [])
                   except Exception:
                       continue
-                  s=list(dict(m.get("motion") or {}).get("sources") or [])
-                  if len(s)==3 and {str(x.get("clip_id")) for x in s}=={"demo_idle_v1","demo_run_v1","demo_slash_v1"}:
-                      donor=(candidate,dict(m["motion"]))
+                  if len(s)!=3 or {str(x.get("clip_id")) for x in s}!=expected:
+                      continue
+                  valid=True
+                  for row in s:
+                      ref=dict(row.get("file") or {})
+                      raw=str(ref.get("path") or "")
+                      fp=(authority/raw.split("/",1)[1]) if raw.startswith("$REALSAS_AUTHORITY_ROOT/") else Path(raw).expanduser()
+                      if not fp.is_file():
+                          valid=False
+                          break
+                      digest=hashlib.sha256(fp.read_bytes()).hexdigest()
+                      if digest!=str(ref.get("sha256") or ""):
+                          valid=False
+                          break
+                  if valid:
+                      donor=(frag,candidate_motion)
                       break
               if donor is None:
-                  raise RuntimeError("THREE_CLIP_MOTION_INPUT_NOT_FOUND")
+                  raise RuntimeError("THREE_CLIP_MOTION_FRAGMENT_NOT_FOUND")
               manifest["motion"]=donor[1]
-              print("MOTION_INPUT_REUSED_FROM",donor[0].name)
+              print("MOTION_INPUT_REUSED_FROM_FRAGMENT",donor[0])
           player=Path(os.environ["PLAYER"]).resolve()
           sha=hashlib.sha256(player.read_bytes()).hexdigest()
           runtime=dict(manifest.get("runtime") or {})

@@ -50,11 +50,12 @@ def robust_zero_surface_normals_v1(points, orientation_hints, *, k: int = 64) ->
     except ImportError as exc:
         raise RuntimeError("scipy is required for zero-surface local geometry") from exc
     tree = cKDTree(p)
-    _, nn = tree.query(p, k=kk + 1, workers=-1)
-    nn = np.asarray(nn[:, 1:], dtype=np.int64)
     out = np.empty_like(p)
-    for start in range(0, len(p), 8192):
-        rows = nn[start : start + 8192]
+    query_chunk = 8192
+    for start in range(0, len(p), query_chunk):
+        stop = min(len(p), start + query_chunk)
+        _, rows = tree.query(p[start:stop], k=kk + 1, workers=-1)
+        rows = np.asarray(rows[:, 1:], dtype=np.int64)
         x = p[rows]
         center = np.median(x, axis=1, keepdims=True)
         dist = np.linalg.norm(x - center, axis=2)
@@ -74,41 +75,163 @@ def robust_zero_surface_normals_v1(points, orientation_hints, *, k: int = 64) ->
         n = evecs[:, :, 0]
         if not np.isfinite(evals).all() or not np.isfinite(n).all():
             raise QualificationError("non-finite zero-surface local PCA")
-        h = hint[start : start + len(n)]
+        h = hint[start:stop]
         flip = np.sum(n * h, axis=1) < 0.0
         n[flip] *= -1.0
-        out[start : start + len(n)] = _normalize_rows(n)
+        out[start:stop] = _normalize_rows(n)
     return out.astype(np.float32)
 
 
-def _mesh_connected_component_labels(vertex_count:int, faces:np.ndarray)->np.ndarray:
-    parent=np.arange(int(vertex_count),dtype=np.int64)
-    rank=np.zeros(int(vertex_count),dtype=np.int8)
+ZERO_SURFACE_NORMAL_OPERATOR_V2_ID = "RealSaS.GSA.ZeroSurfaceTopologyAreaNormal.v2"
 
-    def find(x:int)->int:
-        while parent[x]!=x:
-            parent[x]=parent[parent[x]]
-            x=int(parent[x])
-        return x
 
-    def union(a:int,b:int)->None:
-        ra,rb=find(a),find(b)
-        if ra==rb:
-            return
-        if rank[ra]<rank[rb]:
-            ra,rb=rb,ra
-        parent[rb]=ra
-        if rank[ra]==rank[rb]:
-            rank[ra]+=1
+def zero_surface_normal_operator_identity_v2() -> dict:
+    return {
+        "operator_id": ZERO_SURFACE_NORMAL_OPERATOR_V2_ID,
+        "method": "ORIENTED_AREA_WEIGHTED_INCIDENT_FACE_NORMAL",
+        "neighborhood_authority": "DENSE_ZERO_SURFACE_FACE_INCIDENCE_ONLY",
+        "orientation_hint": "MARCHING_CUBES_IMPLICIT_NORMAL_SIGN_ONLY",
+        "euclidean_cross_sheet_neighbors_forbidden": True,
+        "teacher_truth_used": False,
+    }
 
-    for a,b,c in np.asarray(faces,dtype=np.int64):
-        union(int(a),int(b)); union(int(b),int(c)); union(int(c),int(a))
-    roots=np.asarray([find(i) for i in range(int(vertex_count))],dtype=np.int64)
-    _,labels=np.unique(roots,return_inverse=True)
+
+def zero_surface_normal_operator_hash_v2() -> str:
+    return content_sha256(zero_surface_normal_operator_identity_v2())
+
+
+def topology_aware_zero_surface_normals_v2(
+    points,
+    faces,
+    orientation_hints,
+) -> np.ndarray:
+    """Topology-local area-weighted normals on the dense decoded zero surface.
+
+    Unlike V1 Euclidean kNN PCA, the neighborhood is the actual dense triangle
+    incidence graph. Spatially close but mechanically disconnected sheets therefore
+    cannot contaminate one another. Face orientation uses only the decoder's
+    implicit normal sign hint; the hint does not supply normal magnitude/direction.
+    """
+    p = np.asarray(points, dtype=np.float64)
+    f = np.asarray(faces, dtype=np.int64)
+    hint = _normalize_rows(np.asarray(orientation_hints, dtype=np.float64))
+    if p.ndim != 2 or p.shape[1] != 3 or len(p) < 4 or not np.isfinite(p).all():
+        raise QualificationError("TOPOLOGY_NORMAL_POINTS_INVALID")
+    if hint.shape != p.shape:
+        raise QualificationError("TOPOLOGY_NORMAL_HINT_SHAPE_INVALID")
+    if f.ndim != 2 or f.shape[1] != 3 or np.any(f < 0) or np.any(f >= len(p)):
+        raise QualificationError("TOPOLOGY_NORMAL_FACES_INVALID")
+    if len(f) < 1:
+        raise QualificationError("TOPOLOGY_NORMAL_FACE_SET_EMPTY")
+
+    a = p[f[:, 0]]
+    b = p[f[:, 1]]
+    cc = p[f[:, 2]]
+    cross = np.cross(b - a, cc - a)
+    mag = np.linalg.norm(cross, axis=1)
+    valid = np.isfinite(mag) & (mag > 1e-15)
+    if not np.any(valid):
+        raise QualificationError("TOPOLOGY_NORMAL_ALL_FACES_DEGENERATE")
+
+    # Orient each dense face using only the local implicit sign evidence.
+    face_hint = (
+        hint[f[:, 0]]
+        + hint[f[:, 1]]
+        + hint[f[:, 2]]
+    )
+    face_hint_norm = np.linalg.norm(face_hint, axis=1)
+    orientable = valid & np.isfinite(face_hint_norm) & (face_hint_norm > 1e-12)
+    dot = np.einsum("ij,ij->i", cross, face_hint)
+    flip = orientable & (dot < 0.0)
+    cross[flip] *= -1.0
+    cross[~valid] = 0.0
+
+    accum = np.zeros_like(p, dtype=np.float64)
+    np.add.at(accum, f[:, 0], cross)
+    np.add.at(accum, f[:, 1], cross)
+    np.add.at(accum, f[:, 2], cross)
+
+    lengths = np.linalg.norm(accum, axis=1)
+    isolated = (~np.isfinite(lengths)) | (lengths <= 1e-12)
+    if np.any(isolated):
+        # A vertex whose incident oriented areas cancel exactly has no stable
+        # topology-derived direction. Preserve the decoder sign vector as a
+        # bounded fallback rather than borrowing a Euclidean neighbor sheet.
+        accum[isolated] = hint[isolated]
+
+    out = _normalize_rows(accum)
+    flip_vertex = np.einsum("ij,ij->i", out, hint) < 0.0
+    out[flip_vertex] *= -1.0
+    return out.astype(np.float32)
+
+
+def mesh_connected_component_labels_v1(
+    vertex_count: int,
+    faces: np.ndarray,
+    *,
+    face_chunk_size: int = 524288,
+) -> np.ndarray:
+    """Exact mesh connectivity partition without Python per-face union loops.
+
+    Labels are canonicalized by the minimum vertex id in each connected component.
+    Only the partition is authority; union traversal order is deliberately not.
+    """
+    n = int(vertex_count)
+    f = np.asarray(faces, dtype=np.int64)
+    if n < 1 or f.ndim != 2 or f.shape[1] != 3:
+        raise QualificationError("MESH_COMPONENT_LABEL_INPUT_INVALID")
+    if np.any(f < 0) or np.any(f >= n):
+        raise QualificationError("MESH_COMPONENT_LABEL_FACE_INDEX_INVALID")
+    chunk = int(face_chunk_size)
+    if chunk < 1:
+        raise QualificationError("MESH_COMPONENT_LABEL_CHUNK_INVALID")
+
+    parent = np.arange(n, dtype=np.int64)
+
+    def compress() -> None:
+        nonlocal parent
+        while True:
+            nxt = parent[parent]
+            if np.array_equal(nxt, parent):
+                return
+            parent = nxt
+
+    while True:
+        compress()
+        changed = False
+        for start in range(0, len(f), chunk):
+            rows = f[start : start + chunk]
+            for left, right in ((0, 1), (1, 2), (2, 0)):
+                ra = parent[rows[:, left]]
+                rb = parent[rows[:, right]]
+                hi = np.maximum(ra, rb)
+                lo = np.minimum(ra, rb)
+                active = hi != lo
+                if np.any(active):
+                    changed = True
+                    np.minimum.at(parent, hi[active], lo[active])
+        if not changed:
+            break
+
+    compress()
+    roots = parent
+    _, labels = np.unique(roots, return_inverse=True)
     return labels.astype(np.int64)
 
 
-def _adaptive_voxel_compact(points, faces, dense_normals, *, target_nodes: int, preserve_connected_components: bool=False):
+def _mesh_connected_component_labels(vertex_count:int, faces:np.ndarray)->np.ndarray:
+    return mesh_connected_component_labels_v1(vertex_count, faces)
+
+
+def _adaptive_voxel_compact(
+    points,
+    faces,
+    dense_normals,
+    *,
+    target_nodes: int,
+    preserve_connected_components: bool=False,
+    precomputed_component_labels: np.ndarray | None = None,
+):
     p = np.asarray(points, dtype=np.float64)
     f = np.asarray(faces, dtype=np.int64)
     n = np.asarray(dense_normals, dtype=np.float64)
@@ -121,11 +244,18 @@ def _adaptive_voxel_compact(points, faces, dense_normals, *, target_nodes: int, 
         lo = p.min(axis=0)
         span = np.maximum(p.max(axis=0) - lo, 1e-12)
 
-        component_labels=(
-            _mesh_connected_component_labels(len(p),f)
-            if bool(preserve_connected_components)
-            else None
-        )
+        component_labels = None
+        if bool(preserve_connected_components):
+            if precomputed_component_labels is None:
+                component_labels = _mesh_connected_component_labels(len(p), f)
+            else:
+                component_labels = np.asarray(
+                    precomputed_component_labels, dtype=np.int64
+                )
+                if component_labels.shape != (len(p),):
+                    raise QualificationError(
+                        "PRECOMPUTED_COMPONENT_LABEL_SHAPE_INVALID"
+                    )
 
         def labels_for(divisions: int):
             keys = np.floor((p - lo) / span * divisions).astype(np.int64)
@@ -167,6 +297,179 @@ def _adaptive_voxel_compact(points, faces, dense_normals, *, target_nodes: int, 
         raise QualificationError("zero-surface compaction removed all topology")
     return cp, cn, edges.astype(np.int64), int(divisions), inverse
 
+
+def replay_compacted_face_provenance_v1(
+    vertices_world,
+    faces,
+    surface,
+    *,
+    position_tolerance: float = 1e-9,
+) -> tuple[tuple[str, str, str], ...]:
+    """Replay the exact Stage14 voxel assignment and preserve dense face authority.
+
+    RiggingSurfaceIR historically retains only compact nodes + pairwise relations.
+    Reconstructing triangles later from 3-cliques is not topology preserving: three
+    pairwise edges may originate from three different dense triangles.  This helper
+    replays the frozen compactor from the dense signed-zero surface and returns only
+    compact triangles that have an actual dense-face witness.
+
+    The replay is fail-closed against the existing RiggingSurface node positions and
+    index order, so downstream callers cannot silently mint a second compaction.
+    """
+    p = np.asarray(vertices_world, dtype=np.float64)
+    f = np.asarray(faces, dtype=np.int64)
+    if p.ndim != 2 or p.shape[1] != 3 or len(p) < 4 or not np.isfinite(p).all():
+        raise QualificationError("COMPACT_FACE_REPLAY_POINTS_INVALID")
+    if f.ndim != 2 or f.shape[1] != 3 or np.any(f < 0) or np.any(f >= len(p)):
+        raise QualificationError("COMPACT_FACE_REPLAY_FACES_INVALID")
+    if (
+        not math.isfinite(float(position_tolerance))
+        or float(position_tolerance) < 0.0
+    ):
+        raise QualificationError("COMPACT_FACE_REPLAY_TOLERANCE_INVALID")
+
+    metadata = dict(getattr(surface, "metadata", {}) or {})
+    if "compact_voxel_divisions" not in metadata:
+        raise QualificationError("COMPACT_FACE_REPLAY_DIVISIONS_MISSING")
+    divisions = int(metadata["compact_voxel_divisions"])
+    component_aware = bool(metadata.get("component_aware_compaction", False))
+    if divisions < 0:
+        raise QualificationError("COMPACT_FACE_REPLAY_DIVISIONS_INVALID")
+
+    if divisions == 0:
+        inverse = np.arange(len(p), dtype=np.int64)
+    else:
+        lo = p.min(axis=0)
+        span = np.maximum(p.max(axis=0) - lo, 1e-12)
+        keys = np.floor((p - lo) / span * divisions).astype(np.int64)
+        keys = np.clip(keys, 0, divisions - 1)
+        if component_aware:
+            component_labels = mesh_connected_component_labels_v1(len(p), f)
+            keys = np.column_stack((component_labels, keys))
+        _unique, inverse = np.unique(keys, axis=0, return_inverse=True)
+        inverse = np.asarray(inverse, dtype=np.int64)
+
+    compact_count = int(inverse.max()) + 1
+    counts = np.bincount(inverse, minlength=compact_count).astype(np.float64)
+    compact_points = np.zeros((compact_count, 3), dtype=np.float64)
+    np.add.at(compact_points, inverse, p)
+    compact_points /= counts[:, None]
+
+    nodes = tuple(surface.surface_nodes)
+    if len(nodes) != compact_count:
+        raise QualificationError(
+            f"COMPACT_FACE_REPLAY_NODE_COUNT_DRIFT:{compact_count}:{len(nodes)}"
+        )
+    admitted_points = np.asarray(
+        [tuple(map(float, node.P)) for node in nodes],
+        dtype=np.float64,
+    )
+    position_error = np.linalg.norm(compact_points - admitted_points, axis=1)
+    max_error = float(position_error.max(initial=0.0))
+    if max_error > float(position_tolerance):
+        raise QualificationError(
+            f"COMPACT_FACE_REPLAY_NODE_ORDER_OR_POSITION_DRIFT:{max_error}"
+        )
+
+    mapped = inverse[f]
+    nondegenerate = (
+        (mapped[:, 0] != mapped[:, 1])
+        & (mapped[:, 1] != mapped[:, 2])
+        & (mapped[:, 2] != mapped[:, 0])
+    )
+    mapped = np.unique(np.sort(mapped[nondegenerate], axis=1), axis=0)
+    if len(mapped) == 0:
+        raise QualificationError("COMPACT_FACE_REPLAY_NO_FACE")
+
+    surface_ids = tuple(str(node.surface_id) for node in nodes)
+    return tuple(
+        sorted(
+            {
+                tuple(sorted((surface_ids[int(a)], surface_ids[int(b)], surface_ids[int(c)])))
+                for a, b, c in mapped.tolist()
+            }
+        )
+    )
+
+
+
+COMPACTED_DENSE_FACE_PROVENANCE_SCHEMA = "RealSaS.CompactedDenseFaceProvenance.v1"
+
+
+def compacted_dense_face_provenance_hash_v1(payload: dict) -> str:
+    value = dict(payload)
+    value.pop("provenance_hash", None)
+    return content_sha256(value)
+
+
+def build_compacted_dense_face_provenance_v1(
+    vertices_world,
+    faces,
+    surface,
+    *,
+    source_zero_surface_sha256: str,
+) -> dict:
+    """Seal compact triangles that have an exact dense-face witness."""
+    if not source_zero_surface_sha256 or len(str(source_zero_surface_sha256)) != 64:
+        raise QualificationError("COMPACT_FACE_PROVENANCE_SOURCE_SHA_INVALID")
+    compact_faces = replay_compacted_face_provenance_v1(
+        vertices_world,
+        faces,
+        surface,
+    )
+    payload = {
+        "schema": COMPACTED_DENSE_FACE_PROVENANCE_SCHEMA,
+        "status": "PASS",
+        "surface_lineage_hash": str(surface.geometry_lineage_hash),
+        "source_zero_surface_sha256": str(source_zero_surface_sha256),
+        "source_dense_face_count": int(len(np.asarray(faces))),
+        "compact_face_count": int(len(compact_faces)),
+        "compact_faces": compact_faces,
+        "triangle_authority": "EXACT_DENSE_FACE_WITNESS_AFTER_FROZEN_COMPACTION",
+        "three_clique_face_minting_allowed": False,
+        "face_deletion_claimed": False,
+        "teacher_truth_used": False,
+        "provenance_hash": "",
+    }
+    payload["provenance_hash"] = compacted_dense_face_provenance_hash_v1(payload)
+    validate_compacted_dense_face_provenance_v1(payload, surface=surface)
+    return payload
+
+
+def validate_compacted_dense_face_provenance_v1(payload: dict, *, surface) -> None:
+    if str(payload.get("schema") or "") != COMPACTED_DENSE_FACE_PROVENANCE_SCHEMA:
+        raise QualificationError("COMPACT_FACE_PROVENANCE_SCHEMA_DRIFT")
+    if str(payload.get("status") or "") != "PASS":
+        raise QualificationError("COMPACT_FACE_PROVENANCE_NOT_PASS")
+    if str(payload.get("surface_lineage_hash") or "") != str(surface.geometry_lineage_hash):
+        raise QualificationError("COMPACT_FACE_PROVENANCE_SURFACE_LINEAGE_DRIFT")
+    if len(str(payload.get("source_zero_surface_sha256") or "")) != 64:
+        raise QualificationError("COMPACT_FACE_PROVENANCE_SOURCE_SHA_INVALID")
+    if payload.get("three_clique_face_minting_allowed") is not False:
+        raise QualificationError("COMPACT_FACE_PROVENANCE_CLIQUE_MINTING_FORBIDDEN")
+    if payload.get("teacher_truth_used") is not False:
+        raise QualificationError("COMPACT_FACE_PROVENANCE_TEACHER_TRUTH_FORBIDDEN")
+    faces = tuple(tuple(map(str, row)) for row in tuple(payload.get("compact_faces") or ()))
+    if int(payload.get("compact_face_count", -1)) != len(faces) or not faces:
+        raise QualificationError("COMPACT_FACE_PROVENANCE_FACE_COUNT_INVALID")
+    if len(set(faces)) != len(faces):
+        raise QualificationError("COMPACT_FACE_PROVENANCE_DUPLICATE_FACE")
+    known = {str(node.surface_id) for node in surface.surface_nodes}
+    relation_edges = {
+        tuple(sorted((str(row.a_surface_id), str(row.b_surface_id))))
+        for row in surface.local_relations
+    }
+    for face in faces:
+        if len(face) != 3 or len(set(face)) != 3 or any(sid not in known for sid in face):
+            raise QualificationError("COMPACT_FACE_PROVENANCE_FACE_INVALID")
+        canonical = tuple(sorted(face))
+        if face != canonical:
+            raise QualificationError("COMPACT_FACE_PROVENANCE_FACE_ORDER_NOT_CANONICAL")
+        for a, b in ((face[0], face[1]), (face[1], face[2]), (face[2], face[0])):
+            if tuple(sorted((a, b))) not in relation_edges:
+                raise QualificationError("COMPACT_FACE_PROVENANCE_RELATION_EDGE_MISSING")
+    if str(payload.get("provenance_hash") or "") != compacted_dense_face_provenance_hash_v1(payload):
+        raise QualificationError("COMPACT_FACE_PROVENANCE_HASH_DRIFT")
 
 def _camera_arrays(camera: dict):
     required = ("origin", "right", "screen_up", "forward", "half_extent", "resolution")
@@ -265,6 +568,10 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
     normal_k: int = 64,
     visibility_depth_tolerance_norm: float = 0.02,
     component_aware_compaction: bool = False,
+    precomputed_dense_normals: np.ndarray | None = None,
+    precomputed_normal_operator_id: str | None = None,
+    precomputed_normal_operator_hash: str | None = None,
+    precomputed_component_labels: np.ndarray | None = None,
     metadata: dict | None = None,
 ) -> RiggingSurfaceIR:
     """Canonical GSA bridge from a predicted signed zero-surface to RiggingSurfaceIR.
@@ -290,10 +597,33 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
         raise QualificationError("visibility tolerance must be positive")
 
     world = center[None, :] + vn * half
-    dense_normals = robust_zero_surface_normals_v1(world, hint, k=normal_k)
+    if precomputed_dense_normals is None:
+        dense_normals = robust_zero_surface_normals_v1(world, hint, k=normal_k)
+        selected_normal_operator_id = ZERO_SURFACE_NORMAL_OPERATOR_ID
+        selected_normal_operator_hash = zero_surface_normal_operator_hash_v1(k=normal_k)
+    else:
+        dense_normals = np.asarray(precomputed_dense_normals, dtype=np.float32)
+        if dense_normals.shape != vn.shape or not np.isfinite(dense_normals).all():
+            raise QualificationError("PRECOMPUTED_DENSE_NORMALS_INVALID")
+        lengths = np.linalg.norm(dense_normals, axis=1)
+        if np.any(lengths <= 1e-12):
+            raise QualificationError("PRECOMPUTED_DENSE_NORMALS_DEGENERATE")
+        selected_normal_operator_id = str(
+            precomputed_normal_operator_id or ZERO_SURFACE_NORMAL_OPERATOR_ID
+        )
+        selected_normal_operator_hash = str(
+            precomputed_normal_operator_hash
+            or zero_surface_normal_operator_hash_v1(k=normal_k)
+        )
+        if len(selected_normal_operator_hash) != 64:
+            raise QualificationError("PRECOMPUTED_DENSE_NORMAL_OPERATOR_HASH_INVALID")
     points, normals, edges, divisions, _inverse = _adaptive_voxel_compact(
-        world, f, dense_normals, target_nodes=int(target_nodes),
+        world,
+        f,
+        dense_normals,
+        target_nodes=int(target_nodes),
         preserve_connected_components=bool(component_aware_compaction),
+        precomputed_component_labels=precomputed_component_labels,
     )
     support, raster, visible_counts = _self_zbuffer_support(
         world,
@@ -302,7 +632,7 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
         depth_tolerance=float(visibility_depth_tolerance_norm) * half,
     )
 
-    op_hash = zero_surface_normal_operator_hash_v1(k=normal_k)
+    op_hash = selected_normal_operator_hash
     nodes = []
     for i, (p, n) in enumerate(zip(points, normals)):
         views = tuple(int(v) for v in range(8) if bool(support[i, v]))
@@ -323,7 +653,7 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
                 derived_normal=tuple(map(float, n)),
                 validity_flags=flags,
                 metadata={
-                    "normal_operator": ZERO_SURFACE_NORMAL_OPERATOR_ID,
+                    "normal_operator": selected_normal_operator_id,
                     "normal_operator_hash": op_hash,
                     "normal_implicit_hint_only": True,
                     "teacher_truth_used": False,
@@ -386,7 +716,7 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
         "visibility_support_counts_by_view": visible_counts,
         "raster_coordinate_system": "PIXEL_CENTER_XY",
         "resolution": int(cameras[0]["resolution"]),
-        "Nd_operator": ZERO_SURFACE_NORMAL_OPERATOR_ID,
+        "Nd_operator": selected_normal_operator_id,
         "Nd_operator_sha256": op_hash,
         "normal_implicit_hint_only": True,
         "source_run_id": str(source_run_id),
@@ -414,5 +744,10 @@ __all__ = [
     "zero_surface_normal_operator_identity_v1",
     "zero_surface_normal_operator_hash_v1",
     "robust_zero_surface_normals_v1",
+    "ZERO_SURFACE_NORMAL_OPERATOR_V2_ID",
+    "zero_surface_normal_operator_identity_v2",
+    "zero_surface_normal_operator_hash_v2",
+    "topology_aware_zero_surface_normals_v2",
+    "replay_compacted_face_provenance_v1",
     "rigging_surface_from_scene_first_zero_mesh_v1",
 ]

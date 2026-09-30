@@ -15,6 +15,7 @@ from compiler.realsas_compiler_core.mechanical_repartition_v2 import (
     repartition_authorization_hash_v1,
 )
 from compiler.realsas_compiler_core.mesh.skin_topology_compatibility_v1 import (
+    _stress_angle,
     propose_mechanical_repartition_directive_v2,
 )
 from compiler.realsas_compiler_core.product_authority_v1 import (
@@ -221,3 +222,14 @@ def test_source_edge_probe_directive_is_consumable_by_existing_stage17_mutex_clo
     assert audit["direct_seed_count"] >= 1
     assert audit["closure_added_separate_count"] >= 1
     assert audit["seed_constraint_violation_count"] == 0
+
+
+def test_g3b_stress_angle_is_bound_to_sealed_envelope_not_metadata_fallback():
+    envelope = SimpleNamespace(
+        metadata={"skin_topology_compatibility_stress_angle_deg": 120.0},
+        joint_ranges=(
+            SimpleNamespace(min_rotation_deg=-10.0, max_rotation_deg=8.0),
+            SimpleNamespace(min_rotation_deg=-6.0, max_rotation_deg=7.0),
+        ),
+    )
+    assert _stress_angle(envelope) == 10.0

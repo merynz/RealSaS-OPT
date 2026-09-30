@@ -1,4 +1,5 @@
 name: final-main-merge-gate-v1
+# rerun after generated-context reconciliation
 on:
   push:
     branches: [integration/generic-main-finalization-20260930]

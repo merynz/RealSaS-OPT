@@ -4,6 +4,7 @@ import pytest
 
 from compiler.realsas_compiler_core.canonical_mesh_candidate_v1 import (
     build_canonical_relation_candidate,
+    build_holeless_partitioned_dense_candidate,
 )
 from compiler.realsas_compiler_core.mechanical_partition_v1 import build_structural_partition
 from compiler.realsas_compiler_core.product_authority_v1 import (
@@ -173,4 +174,101 @@ def test_explicit_dense_face_provenance_forbids_three_edge_clique_minting():
     assert explicit.metadata["three_clique_face_minting_allowed"] is False
     validate_canonical_mesh_candidate(
         explicit, surface=surface, partition=partition, carrier_policy=carrier
+    )
+
+
+def test_holeless_harmonic_skin_support_is_component_local_simplex_and_deterministic():
+    from compiler.realsas_compiler_core.product_authority_v1 import (
+        ComponentBoundaryConstraintIR,
+    )
+
+    nodes = (
+        SurfaceNode("a",(0.0,0.0,0.0),(0,),("src",),("oa",)),
+        SurfaceNode("b",(1.0,0.0,0.0),(0,),("src",),("ob",)),
+        SurfaceNode("c",(0.3,1.0,0.0),(0,),("src",),("oc",)),
+    )
+    relations = (
+        SurfaceRelation("ab","a","b","LOCAL_NEIGHBOR",1.0),
+        SurfaceRelation("bc","b","c","LOCAL_NEIGHBOR",1.0),
+        SurfaceRelation("ca","c","a","LOCAL_NEIGHBOR",1.0),
+    )
+    surface = RiggingSurfaceIR(nodes, relations, "surface-harmonic-seam")
+    partition = build_structural_partition(
+        surface,
+        boundary_overrides=(
+            ComponentBoundaryConstraintIR(
+                "cut:ac","a","c","SEPARATE",("test-cut",),1.0
+            ),
+            ComponentBoundaryConstraintIR(
+                "cut:bc","b","c","SEPARATE",("test-cut",),1.0
+            ),
+        ),
+    )
+    carrier = build_component_carrier_policy(
+        partition=partition,
+        decisions=tuple(
+            ComponentCarrierDecisionIR(component.component_id, "MESH", ("test",))
+            for component in partition.components
+        ),
+    )
+    kwargs = dict(
+        surface=surface,
+        partition=partition,
+        carrier_policy=carrier,
+        producer_policy_hash="harmonic-test-policy",
+        explicit_face_provenance=(("a","b","c"),),
+    )
+    owner_copy = build_holeless_partitioned_dense_candidate(
+        **kwargs,
+        mechanical_skin_transfer="OWNER_COPY",
+    )
+    harmonic = build_holeless_partitioned_dense_candidate(
+        **kwargs,
+        mechanical_skin_transfer="COMPONENT_HARMONIC_DIRICHLET_V1",
+    )
+    harmonic_repeat = build_holeless_partitioned_dense_candidate(
+        **kwargs,
+        mechanical_skin_transfer="COMPONENT_HARMONIC_DIRICHLET_V1",
+    )
+
+    owner_by_sid = {
+        str(sid): str(component.component_id)
+        for component in partition.components
+        for sid in component.surface_ids
+    }
+    seam = [
+        v for v in harmonic.vertices
+        if v.support_binding.mode == "SEAM_GEOMETRY_INTERPOLATION"
+    ]
+    assert seam
+    assert harmonic.metadata["mechanical_skin_transfer"] == "COMPONENT_HARMONIC_DIRICHLET_V1"
+    assert harmonic.candidate_lineage_hash == harmonic_repeat.candidate_lineage_hash
+    assert harmonic.candidate_lineage_hash != owner_copy.candidate_lineage_hash
+
+    support_counts = []
+    for vertex in seam:
+        support = tuple(
+            vertex.support_binding.metadata["skin_support_coefficients"]
+        )
+        support_counts.append(len(support))
+        assert abs(sum(float(w) for _, w in support) - 1.0) < 1e-12
+        assert all(
+            owner_by_sid[str(sid)] == str(vertex.component_id)
+            for sid, _ in support
+        )
+        assert (
+            vertex.support_binding.metadata["mechanical_skin_transfer"]
+            == "COMPONENT_HARMONIC_DIRICHLET_V1"
+        )
+
+    # The two-owner side must no longer collapse every seam vertex to owner-copy.
+    assert max(support_counts) >= 2
+
+    owner_seam = [
+        v for v in owner_copy.vertices
+        if v.support_binding.mode == "SEAM_GEOMETRY_INTERPOLATION"
+    ]
+    assert all(
+        len(tuple(v.support_binding.metadata["skin_support_coefficients"])) == 1
+        for v in owner_seam
     )

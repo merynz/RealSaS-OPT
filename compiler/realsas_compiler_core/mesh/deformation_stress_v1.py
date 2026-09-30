@@ -24,6 +24,7 @@ from ..product_authority_v1 import (
     validate_deformation_capability_envelope,
     validate_mesh_qualification_policy,
 )
+from ..product_mesh_skin_v1 import _skin_support_coefficients
 from ..types import QualificationError, QualifiedSkeletonIR, QualifiedSkinIR, RiggingSurfaceIR
 
 Json = dict[str, Any]
@@ -145,7 +146,7 @@ def _candidate_skin_matrix(candidate, *, surface, skeleton, skin):
 
     for vi, vertex in enumerate(candidate.vertices):
         total_support = 0.0
-        for sid, coeff in vertex.support_binding.coefficients:
+        for sid, coeff in _skin_support_coefficients(vertex):
             if sid not in source:
                 raise QualificationError("G3_CANDIDATE_SUPPORT_NOT_IN_SKIN")
             c = float(coeff)

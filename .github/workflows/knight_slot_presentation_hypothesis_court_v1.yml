@@ -19,6 +19,7 @@ jobs:
     env:
       PYTHONPATH: .
       AUTHORITY_ROOT: /home/monster/realsas_authority
+      REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
       RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
     steps:
       - uses: actions/checkout@v4

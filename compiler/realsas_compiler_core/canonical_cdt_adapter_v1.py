@@ -103,6 +103,7 @@ def build_canonical_cdt_candidate(
     mesh_policy: MeshQualificationPolicyIR,
     *,
     relation_baseline_policy_hash: str,
+    explicit_face_provenance: tuple[tuple[str, str, str], ...] | None = None,
     max_constraint_recovery_iterations: int = 96,
     max_quality_iterations: int = 96,
 ) -> CanonicalMeshCandidateIR:
@@ -123,6 +124,7 @@ def build_canonical_cdt_candidate(
         partition,
         carrier_policy,
         producer_policy_hash=relation_baseline_policy_hash,
+        explicit_face_provenance=explicit_face_provenance,
     )
     baseline_by_id = {vertex.candidate_vertex_id: vertex for vertex in baseline.vertices}
     surface_nodes = {node.surface_id: node for node in surface.surface_nodes}

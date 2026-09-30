@@ -4,6 +4,20 @@ on:
   push:
     branches:
       - integration/generic-main-normalization-v2-20260930
+    paths:
+      - '.github/workflows/generic_main_appearance_candidate_gate_v1.yml'
+      - 'compiler/realsas_compiler_core/appearance_*.py'
+      - 'compiler/realsas_compiler_core/visual_mesh_arap_v1.py'
+      - 'compiler/realsas_compiler_core/visibility_v2.py'
+      - 'compiler/realsas_compiler_core/presentation_partition_v2.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py'
+      - 'canonical/CAA_*.json'
+      - 'canonical/COMPLETE_APPEARANCE_AUTHORITY_*.json'
+      - 'tests/compiler/test_caa_*.py'
+      - 'tests/compiler/test_*appearance*.py'
+      - 'tests/compiler/test_visibility_and_caa_v2.py'
+      - 'tests/compiler/test_visual_mesh_arap_v1.py'
   workflow_dispatch:
 
 concurrency:

@@ -1,5 +1,9 @@
 # RealSaS Structural System Index
 
+## 2026-09-30 normalization note
+
+Current continuation details and the exact Stage42 source-owned visual runtime seam are frozen in `canonical/MAINLINE_NORMALIZATION_HANDOFF_20260930.md`. Do not infer a complete visual runtime consumer from Stage18/38 authority hashes.
+
 > Navigation only. Current continuation authority is `canonical/V2_IMPLEMENTATION_READINESS.json`.
 
 | Product authority | Canonical home | V2 rule |

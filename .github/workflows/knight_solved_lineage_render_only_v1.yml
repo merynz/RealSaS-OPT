@@ -56,3 +56,5 @@ jobs:
             /tmp/knight_solved_lineage_render_only/REPORT.json
           if-no-files-found: error
           retention-days: 7
+
+# manual render retry 2026-09-30

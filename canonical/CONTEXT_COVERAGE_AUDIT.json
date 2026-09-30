@@ -12,8 +12,8 @@
   "explained_high_signal_count": 351,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 155,
-  "safe_default_evidence_only_branch_count": 151,
+  "live_branch_count": 156,
+  "safe_default_evidence_only_branch_count": 152,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -492,7 +492,7 @@
     },
     {
       "name": "main",
-      "sha": "f3762db51ca26ee090b85c982c601dd0e7f667bc",
+      "sha": "0a44ef505e6ec04ba7d361f96cb4a843b22b1357",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -571,6 +571,12 @@
     {
       "name": "ops/knight-stage09-15-continuation-20260919",
       "sha": "a431a35d613b12066d55275c5b036e281f0994d1",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "ops/main-knight-render-20260930",
+      "sha": "0a44ef505e6ec04ba7d361f96cb4a843b22b1357",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

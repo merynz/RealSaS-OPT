@@ -136,6 +136,38 @@ jobs:
           manifest["gsa"]=gsa
           print("CURRENT_MAIN_STAGE14_POLICY_REBOUND",gsa["policy_document"]["sha256"])
 
+          prereg_path=Path(os.environ["GITHUB_WORKSPACE"])/"canonical/CURRENT_MAIN_KNIGHT_STAGE14_FALLBACK_PREREG_20260930.json"
+          prereg={
+              "schema":"RealSaS.KnightDemoStage14FallbackPreregistration.v1",
+              "status":"FROZEN_BEFORE_KNIGHT_STAGE14_CANDIDATE_METRICS_INSPECTION",
+              "run_id":os.environ["RUN_ID"],
+              "subject_id":os.environ["SUBJECT_ID"],
+              "execution_class":"DEMO_WITNESS",
+              "eligibility":{
+                  "stage13_ledger_status_required":"PASS_DEMO_ONLY",
+                  "stage13_scientific_pass_required":False,
+                  "stage14_frozen_product_adequacy_status_required":"FAIL",
+                  "product_authority_claimed_required":False,
+                  "teacher_truth_allowed":False,
+                  "appearance_authority_allowed":False,
+              },
+              "frozen_closest_candidate_rule":{
+                  "rule_id":"MIN_FAILED_GATES__MIN_MAX_RELATIVE_EXCESS__MIN_SUM_RELATIVE_EXCESS__MAX_ACTUAL_NODES__MIN_TARGET_CAP_V1"
+              },
+              "demo_admission_semantics":{"product_pass_forbidden":True},
+          }
+          prereg_path.write_text(json.dumps(prereg,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          demo=dict(manifest.get("demo_execution") or {})
+          demo["allow_stage14_scientific_fail_for_demo"]=True
+          demo["stage13_scientific_pass"]=False
+          demo["product_authority_claimed"]=False
+          demo["stage14_fallback_preregistration"]={
+              "path":"canonical/CURRENT_MAIN_KNIGHT_STAGE14_FALLBACK_PREREG_20260930.json",
+              "sha256":hashlib.sha256(prereg_path.read_bytes()).hexdigest(),
+          }
+          manifest["demo_execution"]=demo
+          print("CURRENT_MAIN_STAGE14_DEMO_FALLBACK_REBOUND",demo["stage14_fallback_preregistration"]["sha256"])
+
           manifest_path.write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n")
           print("EXACT_RUN_ID_PRESERVED",os.environ["RUN_ID"])
           PY

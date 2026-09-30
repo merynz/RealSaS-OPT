@@ -2,6 +2,11 @@ name: subject2-knight-v2-observation-preflight
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - ops/current-main-knight-render-20260930
+    paths:
+      - '.github/workflows/subject2_knight_observation_preflight.yml'
 
 # Manual-only while V2 readiness is reopened. This workflow is not scientific
 # witness authority until canonical/V2_IMPLEMENTATION_READINESS.json is resealed

@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from dataclasses import replace
 """V2 Stage37-38 presentation and complete puppet sealing."""
 
 from PIL import Image
 import numpy as np
 
 from compiler.realsas_compiler_core.appearance_authority_v2 import (
+    CAA_PROVENANCE,
     complete_appearance_asset_from_dict,
     complete_appearance_qualification_from_dict,
 )
@@ -16,12 +18,15 @@ from compiler.realsas_compiler_core.output_presentation_v1 import (
     output_direction_set_from_dict,
 )
 from compiler.realsas_compiler_core.appearance_render_v2 import (
+    load_face_page_index,
     load_face_uv,
     load_provenance_atlas,
 )
 from compiler.realsas_compiler_core.presentation_partition_v2 import (
+    PresentationPartitionEvidenceV2IR,
     build_presentation_partition_evidence,
     presentation_partition_evidence_from_dict,
+    presentation_partition_evidence_hash,
 )
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     component_carrier_policy_from_dict,
@@ -46,6 +51,10 @@ from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import 
     sha256_file,
     stage_output_payload,
     write_ir,
+)
+from compiler.realsas_compiler_core.hashing import content_sha256
+from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
+    visual_mesh_set_from_dict,
 )
 from compiler.realsas_compiler_core.types import QualificationError
 
@@ -171,6 +180,127 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
             "PRESENTATION_V2_LEGACY_WEIGHT_THRESHOLD_AUTHORITY_FORBIDDEN"
         )
 
+    if dict(asset.metadata or {}).get("source_owned_visual_mesh_mode") is True:
+        visual_hash = str(
+            dict(asset.metadata or {}).get("visual_mesh_set_binding_hash") or ""
+        )
+        if len(visual_hash) != 64:
+            raise QualificationError(
+                "PRESENTATION_V2_VISUAL_MESH_SET_BINDING_MISSING"
+            )
+        evidence = PresentationPartitionEvidenceV2IR(
+            mesh_binding_hash=str(mesh.mesh_lineage_hash),
+            appearance_asset_binding_hash=str(asset.asset_hash),
+            appearance_qualification_binding_hash=str(
+                appearance.qualification_hash
+            ),
+            policy_hash=content_sha256(policy),
+            evaluated_shared_edge_count=0,
+            source_supported_edge_count=0,
+            cut_face_pairs=(),
+            boundary_measurements=(),
+            evidence_hash="",
+            metadata={
+                "role_free": True,
+                "categorical_recognition_used": False,
+                "conceptual_object_identity_claimed": False,
+                "evidence_supported_visual_partition": True,
+                "appearance_boundary_does_not_mint_appearance": True,
+                "source_owned_visual_mesh_mode": True,
+                "visual_mesh_set_binding_hash": visual_hash,
+                "mechanical_face_appearance_partition_not_applicable": True,
+                "mechanical_mesh_render_authority": False,
+            },
+        )
+        evidence = replace(
+            evidence,
+            evidence_hash=presentation_partition_evidence_hash(evidence),
+        )
+        structure = build_presentation_structure_v2(
+            skeleton=skeleton,
+            mesh=mesh,
+            mesh_skin=mesh_skin,
+            partition=partition,
+            carrier_policy=carrier,
+            min_rigid_owner_weight=float(
+                mechanical_policy["min_rigid_owner_weight"]
+            ),
+            max_rigid_other_mass=float(
+                mechanical_policy["max_rigid_other_mass"]
+            ),
+            rigidity_noop_relative_edge_tolerance=float(
+                mechanical_policy[
+                    "rigidity_noop_relative_edge_tolerance"
+                ]
+            ),
+            rigidity_noop_probe_rotation_degrees=float(
+                mechanical_policy[
+                    "rigidity_noop_probe_rotation_degrees"
+                ]
+            ),
+            presentation_cut_face_pairs=(),
+            presentation_partition_evidence_hash=evidence.evidence_hash,
+        )
+        structure = replace(
+            structure,
+            metadata={
+                **dict(structure.metadata or {}),
+                "source_owned_visual_mesh_mode": True,
+                "visual_mesh_set_binding_hash": visual_hash,
+                "mechanical_mesh_render_authority": False,
+                "visual_partition_authority": (
+                    "STAGE18_SOURCE_OWNED_VISUAL_MESH_SET"
+                ),
+            },
+        )
+        # Metadata participates in the structure hash.
+        from compiler.realsas_compiler_core.product_state_v2 import (
+            presentation_structure_v2_hash,
+        )
+        structure = replace(
+            structure,
+            structure_hash=presentation_structure_v2_hash(structure),
+        )
+        root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+        return {
+            "status": "PASS",
+            "outputs": [
+                write_ir(
+                    root / "presentation_partition_evidence_v2.json",
+                    evidence,
+                    authority_class=(
+                        "QUALIFIED_PRESENTATION_PARTITION_EVIDENCE_V2"
+                    ),
+                ),
+                write_ir(
+                    root / "qualified_presentation_structure_v2.json",
+                    structure,
+                    authority_class=(
+                        "QUALIFIED_PRESENTATION_STRUCTURE_V2"
+                    ),
+                ),
+            ],
+            "diagnostics": {
+                "structure_hash": structure.structure_hash,
+                "slot_count": len(structure.slots),
+                "attachment_count": len(structure.attachments),
+                "presentation_partition_evidence_hash": (
+                    evidence.evidence_hash
+                ),
+                "evaluated_shared_edge_count": 0,
+                "source_supported_edge_count": 0,
+                "appearance_boundary_cut_count": 0,
+                "categorical_recognition_used": False,
+                "conceptual_object_identity_claimed": False,
+                "appearance_authority_minted": False,
+                "source_view_identity_preserved": True,
+                "source_view_identity_is_render_authority": False,
+                "source_owned_visual_mesh_mode": True,
+                "visual_mesh_set_binding_hash": visual_hash,
+                "mechanical_mesh_render_authority": False,
+            },
+        }
+
     uv_path = resolved_path(asset.uv_npz_path)
     provenance_path = resolved_path(asset.provenance_npz_path)
     if not uv_path.is_file() or sha256_file(uv_path) != asset.uv_npz_sha256:
@@ -181,6 +311,7 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
     ):
         raise QualificationError("PRESENTATION_V2_CAA_PROVENANCE_BYTES_DRIFT")
     face_uv = load_face_uv(asset)
+    face_page_index = load_face_page_index(asset)
     provenance = load_provenance_atlas(asset)
     with np.load(provenance_path, allow_pickle=False) as lineage_data:
         if "source_view" not in lineage_data.files:
@@ -196,32 +327,83 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
             "PRESENTATION_V2_CAA_SOURCE_VIEW_LINEAGE_SHAPE_DRIFT"
         )
     padding = np.iinfo(np.int16).min
-    valid_source_view = (
-        ((source_view >= 0) & (source_view < 8))
-        | (source_view == -2)
-        | (source_view == padding)
+    direct_or_other = (
+        (provenance == CAA_PROVENANCE["DIRECT_SOURCE"])
+        | (provenance == CAA_PROVENANCE["OTHER_VIEW_SOURCE"])
     )
-    if not np.all(valid_source_view):
+    harmonic = (
+        provenance == CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"]
+    )
+    unsupported = (
+        provenance == CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"]
+    )
+    canonical_global = (
+        provenance == CAA_PROVENANCE["CANONICAL_GLOBAL_COMPLETION"]
+    )
+    padding_mask = provenance == 255
+    valid_provenance = (
+        direct_or_other
+        | harmonic
+        | unsupported
+        | canonical_global
+        | padding_mask
+    )
+    if not np.all(valid_provenance):
         raise QualificationError(
-            "PRESENTATION_V2_CAA_SOURCE_VIEW_LINEAGE_VALUE_INVALID"
+            "PRESENTATION_V2_CAA_PROVENANCE_VALUE_INVALID"
         )
-    if np.any((provenance != 255) & (source_view == padding)):
+    if np.any(
+        direct_or_other
+        & ~((source_view >= 0) & (source_view < 8))
+    ):
         raise QualificationError(
-            "PRESENTATION_V2_CAA_RENDERABLE_SOURCE_VIEW_LINEAGE_MISSING"
+            "PRESENTATION_V2_CAA_SOURCE_VIEW_IDENTITY_DRIFT"
         )
-    if np.any((provenance == 255) & (source_view != padding)):
+    if np.any(harmonic & (source_view != -2)):
+        raise QualificationError(
+            "PRESENTATION_V2_CAA_HARMONIC_LINEAGE_DRIFT"
+        )
+    if np.any(canonical_global & (source_view != -3)):
+        raise QualificationError(
+            "PRESENTATION_V2_CAA_CANONICAL_GLOBAL_LINEAGE_DRIFT"
+        )
+    if np.any(unsupported & (source_view != -4)):
+        raise QualificationError(
+            "PRESENTATION_V2_CAA_UNSUPPORTED_LINEAGE_DRIFT"
+        )
+    if np.any(padding_mask & (source_view != padding)):
         raise QualificationError(
             "PRESENTATION_V2_CAA_SOURCE_VIEW_PADDING_DRIFT"
         )
     textures = {}
     for row in asset.textures:
-        path = resolved_path(row.transport_png_path)
-        if not path.is_file() or sha256_file(path) != row.transport_png_sha256:
-            raise QualificationError("PRESENTATION_V2_CAA_TEXTURE_BYTES_DRIFT")
-        textures[int(row.direction_index)] = np.asarray(
-            Image.open(path).convert("RGBA"),
-            dtype=np.uint8,
+        metadata = dict(row.metadata or {})
+        page_rows = tuple(metadata.get("pages") or ())
+        if not page_rows:
+            page_rows = ({
+                "page_index": 0,
+                "path": row.transport_png_path,
+                "sha256": row.transport_png_sha256,
+            },)
+        ordered = tuple(
+            sorted((dict(item) for item in page_rows), key=lambda item: int(item["page_index"]))
         )
+        if tuple(int(item["page_index"]) for item in ordered) != tuple(range(len(ordered))):
+            raise QualificationError("PRESENTATION_V2_CAA_TEXTURE_PAGE_INDEX_DRIFT")
+        pages = []
+        for item in ordered:
+            path = resolved_path(str(item["path"]))
+            if not path.is_file() or sha256_file(path) != str(item["sha256"]):
+                raise QualificationError("PRESENTATION_V2_CAA_TEXTURE_BYTES_DRIFT")
+            pages.append(np.asarray(Image.open(path).convert("RGBA"), dtype=np.uint8))
+        if bool(metadata.get("paged_atlas")):
+            if len({page.shape for page in pages}) != 1:
+                raise QualificationError("PRESENTATION_V2_CAA_TEXTURE_PAGE_SHAPE_DRIFT")
+            textures[int(row.direction_index)] = np.stack(pages, axis=0)
+        else:
+            if len(pages) != 1:
+                raise QualificationError("PRESENTATION_V2_CAA_LEGACY_MULTIPAGE_DRIFT")
+            textures[int(row.direction_index)] = pages[0]
 
     evidence = build_presentation_partition_evidence(
         mesh=mesh,
@@ -231,6 +413,7 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
         textures_by_direction=textures,
         provenance_by_direction=provenance,
         policy=policy,
+        face_page_index=face_page_index,
     )
     structure = build_presentation_structure_v2(
         skeleton=skeleton,
@@ -404,6 +587,58 @@ def seal_complete_puppet_stage(ctx: dict) -> dict:
     ):
         raise ValueError("COMPLETE_PUPPET_CAA_TOTALITY_NOT_PROVEN")
 
+    source_owned_visual_mode = bool(
+        dict(asset.metadata or {}).get("source_owned_visual_mesh_mode")
+    )
+    visual_mesh_set_hash = ""
+    if source_owned_visual_mode:
+        visual_set = visual_mesh_set_from_dict(
+            stage_output_payload(
+                ctx,
+                "18_CANONICAL_MESH_ADDRESSING_BUILD",
+                "RealSaS.VisualMeshSetIR.v1",
+            )
+        )
+        visual_mesh_set_hash = str(visual_set.set_hash)
+        for label, value in (
+            (
+                "ASSET",
+                dict(asset.metadata or {}).get(
+                    "visual_mesh_set_binding_hash"
+                ),
+            ),
+            (
+                "STRUCTURE",
+                dict(structure.metadata or {}).get(
+                    "visual_mesh_set_binding_hash"
+                ),
+            ),
+            (
+                "PARTITION_EVIDENCE",
+                dict(partition_evidence.metadata or {}).get(
+                    "visual_mesh_set_binding_hash"
+                ),
+            ),
+        ):
+            if str(value or "") != visual_mesh_set_hash:
+                raise ValueError(
+                    "COMPLETE_PUPPET_VISUAL_MESH_BINDING_DRIFT:"
+                    + label
+                )
+        if (
+            dict(asset.metadata or {}).get(
+                "mechanical_mesh_render_authority"
+            )
+            is not False
+            or dict(structure.metadata or {}).get(
+                "mechanical_mesh_render_authority"
+            )
+            is not False
+        ):
+            raise ValueError(
+                "COMPLETE_PUPPET_MECHANICAL_RENDER_AUTHORITY_DRIFT"
+            )
+
     mechanical = build_canonical_puppet_state(
         surface=surface,
         skeleton=skeleton,
@@ -429,6 +664,7 @@ def seal_complete_puppet_stage(ctx: dict) -> dict:
         directions=directions,
         appearance_asset_hash=asset.asset_hash,
         appearance_qualification_hash=appearance.qualification_hash,
+        visual_mesh_set_hash=visual_mesh_set_hash,
     )
     complete = build_complete_puppet_state_v2(
         mechanical_state=mechanical,
@@ -440,6 +676,7 @@ def seal_complete_puppet_stage(ctx: dict) -> dict:
         appearance_asset_hash=asset.asset_hash,
         appearance_qualification_hash=appearance.qualification_hash,
         output_direction_set_hash=directions.direction_set_hash,
+        visual_mesh_set_hash=visual_mesh_set_hash,
     )
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     return {
@@ -467,5 +704,11 @@ def seal_complete_puppet_stage(ctx: dict) -> dict:
             "complete_puppet_hash": complete.complete_puppet_hash,
             "complete_appearance_qualification_hash": appearance.qualification_hash,
             "geometry_mechanics_appearance_coequal": True,
+            "source_owned_visual_mesh_mode": source_owned_visual_mode,
+            "visual_mesh_set_binding_hash": visual_mesh_set_hash,
+            "mechanical_mesh_render_authority": (
+                False if source_owned_visual_mode else True
+            ),
+            "dynamic_visual_composition_authority_claimed": False,
         },
     }

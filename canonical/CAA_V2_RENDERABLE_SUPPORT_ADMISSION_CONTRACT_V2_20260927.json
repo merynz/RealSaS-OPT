@@ -1,0 +1,101 @@
+{
+  "schema": "RealSaS.CAARenderableSupportAdmissionContract.v2",
+  "status": "FROZEN_SUBJECT_FREE_ARCHITECTURE",
+  "frozen_on": "2026-09-27",
+  "supersedes": "canonical/CAA_V2_RENDERABLE_SUPPORT_ADMISSION_CONTRACT_V1_20260927.json",
+  "subject_identity_used": false,
+  "thresholds_changed": false,
+  "authority": {
+    "potential_domain": "STAGE18_CANONICAL_MECHANICAL_SURFACE_ADDRESS_DOMAIN",
+    "admitted_renderable_support": "SOURCE_OR_BOUNDED_LOCAL_OR_SOURCE_CONSTRAINED_CANONICAL_COMPLETION_V2",
+    "topology_mutation_allowed": false,
+    "geometry_mutation_allowed": false,
+    "runtime_generation_allowed": false,
+    "learned_rgba_generation_allowed": false,
+    "unconstrained_hidden_art_generation_allowed": false,
+    "deterministic_source_constrained_hidden_surface_completion_allowed": true
+  },
+  "admission": {
+    "direct_source": {
+      "provenance_code": 0,
+      "source_view_encoding": "INT16_0_TO_7_EXACT_SOURCE_VIEW",
+      "admitted": true
+    },
+    "other_view_source": {
+      "provenance_code": 1,
+      "source_view_encoding": "INT16_0_TO_7_EXACT_DONOR_VIEW",
+      "admitted": true
+    },
+    "bounded_local_harmonic": {
+      "provenance_code": 2,
+      "source_view_encoding": "INT16_NEGATIVE_2",
+      "admitted": true,
+      "eligibility": "MUST_PASS_FROZEN_MAX_REGION_SAMPLE_AND_GRAPH_HOP_LIMITS_AND_HAVE_SOURCE_BOUNDARY"
+    },
+    "canonical_global_completion": {
+      "provenance_code": 4,
+      "source_view_encoding": "INT16_NEGATIVE_3",
+      "admitted": true,
+      "owner": "CAA_CANONICAL_SURFACE_COMPLETION__C(p)",
+      "eligibility": "CANONICAL_SURFACE_SAMPLE_HAS_NO_QUALIFIED_DIRECT_SOURCE_SUPPORT_IN_ANY_INPUT_VIEW",
+      "source_constraints": "HARD_SOURCE_CONSTRAINTS__SOURCE_BACKED_A(p,v)_IMMUTABLE",
+      "backend_family": "SOURCE_CONSTRAINED_CANONICAL_GRAPH_VARIATIONAL_OR_PREREGISTERED_SOURCE_ONLY_PATCH_PLUS_POISSON",
+      "view_independent": true,
+      "cross_component_copy_forbidden": true,
+      "runtime_generation_forbidden": true,
+      "learned_rgba_generation_forbidden": true
+    },
+    "unsupported_abstain": {
+      "provenance_code": 3,
+      "source_view_encoding": "INT16_NEGATIVE_4",
+      "admitted": false,
+      "rgba_transport": "ZERO_ONLY__NOT_APPEARANCE_AUTHORITY",
+      "reasons": [
+        "LOCAL_REGION_EXCEEDS_FROZEN_SAMPLE_OR_GRAPH_HOP_CAP",
+        "LOCAL_REGION_HAS_NO_QUALIFIED_SOURCE_BOUNDARY_AND_NO_QUALIFIED_C_P_COMPLETION",
+        "CANONICAL_GLOBAL_COMPLETION_INVARIANT_OR_QUALITY_GATE_FAIL"
+      ]
+    },
+    "physical_atlas_padding": {
+      "provenance_code": 255,
+      "source_view_encoding": "INT16_MIN",
+      "admitted": false,
+      "role": "NON_SURFACE_STORAGE_PADDING_ONLY"
+    }
+  },
+  "completion": {
+    "unconstrained_global_surface_fill_forbidden": true,
+    "arbitrary_euclidean_cross_sheet_copy_forbidden": true,
+    "learned_rgba_generation_forbidden": true,
+    "source_constrained_canonical_global_completion_allowed": true,
+    "canonical_global_owner": "C(p)",
+    "canonical_global_principle_contract": "canonical/CAA_V2_DEFORMATION_VS_DISOCCLUSION_CONTRACT_V1_20260927.json",
+    "canonical_global_preregistration": "canonical/CAA_V2_DETERMINISTIC_COMPLETION_CHALLENGER_PREREG_V1_20260927.json",
+    "observed_source_mutation_forbidden": true,
+    "policy_disqualification_action": "EXPLICIT_COMPILER_ABSTENTION",
+    "numerical_threshold_owner": "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json",
+    "threshold_mutation_for_witness_forbidden": true
+  },
+  "owner_separation": {
+    "material_deformation": "RESAMPLE_EXISTING_CANONICAL_APPEARANCE_ONLY__NO_COMPLETION",
+    "visibility": "CANONICAL_GEOMETRY_PLUS_DEPTH_OWNER",
+    "donor_selection": "QUALIFIED_VISIBLE_SOURCE_SUPPORT_ONLY",
+    "disocclusion_completion": "C(p)_ONLY_FOR_ALL_VIEW_UNSEEN_CANONICAL_SURFACE",
+    "completion_may_hide_material_stretch": false
+  },
+  "qualification": {
+    "stage22": "ALL_POTENTIAL_SAMPLES_MUST_HAVE_EXPLICIT_PROVENANCE_CLASS__C_P_ACCOUNTED_EXPLICITLY",
+    "stage24": "QUALITY_METRICS_APPLY_TO_ADMITTED_DEFINED_APPEARANCE__SOURCE_CONSTRAINTS_IMMUTABLE",
+    "stage25": "ANY_REST_VISIBLE_UNSUPPORTED_ABSTENTION_FAILS_CLOSED",
+    "stage45": "ANY_DYNAMIC_VISIBLE_UNSUPPORTED_ABSTENTION_FAILS_CLOSED",
+    "compiled_local_harmonic_exposure_budget_unchanged": true,
+    "physical_padding_visibility_forbidden": true,
+    "canonical_global_completion_requires_frozen_quality_gates": true
+  },
+  "product_claims": {
+    "total_appearance_means": "TOTAL_OVER_ADMITTED_RENDERABLE_SUPPORT_AFTER_QUALIFIED_SOURCE_CONSTRAINED_C_P",
+    "no_hallucination_means": "NO_LEARNED_OR_UNCONSTRAINED_RGBA_GENERATION__DETERMINISTIC_SOURCE_CONSTRAINED_C_P_IS_EXPLICIT_PROVENANCE",
+    "source_backed_art_is_immutable": true,
+    "product_pass_claimed": false
+  }
+}

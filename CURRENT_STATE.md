@@ -1,5 +1,17 @@
 # RealSaS-OPT — Current State
 
+## 2026-09-30 normalization update
+
+**Canonical continuation:** `main` after final merge  
+**46-stage plan SHA-256:** `be0067d78d5c1ecf51f5a0df2ee14e7a87ff0c44800ca66bbb5d5f8d5ad183cf`  
+**Full candidate gate:** run `36724501505` — PASS at `484c01fca415c849c2b7d8c610294d493b7f219b`  
+**Witness status:** FORBIDDEN  
+**Current product blocker:** source-owned visual runtime presentation carrier/schema seam at Stage42; see `canonical/V2_PRODUCT_STATE_WIRING_AUDIT_V1_20260928.json`.
+
+Mechanics/geometry and Stage20–25 appearance regression closures are green on the normalized candidate. Do not interpret that as Stage46 product readiness: source-owned VisualMeshSet authority is carried through product/presentation state, while the legacy runtime package still lacks a typed visual-geometry/binding consumer. Main fails closed at this seam.
+
+Authoritative handoff: `canonical/MAINLINE_NORMALIZATION_HANDOFF_20260930.md`.
+
 **Date:** 2026-09-21  
 **Canonical branch:** `main`  
 **Current mode:** **V2 APPEARANCE FIDELITY RECLOSURE — WITNESS FORBIDDEN**  

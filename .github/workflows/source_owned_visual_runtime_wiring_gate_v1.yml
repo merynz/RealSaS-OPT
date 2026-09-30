@@ -1,0 +1,29 @@
+name: source-owned-visual-runtime-wiring-gate-v1
+
+on:
+  push:
+    branches:
+      - integration/generic-main-normalization-v2-20260930
+  workflow_dispatch:
+
+concurrency:
+  group: source-owned-visual-runtime-wiring-gate-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  wiring:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run visual-runtime authority wiring gate
+        run: |
+          python -m pytest -q tests/repository/test_source_owned_visual_runtime_wiring_v1.py

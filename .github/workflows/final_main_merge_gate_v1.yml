@@ -1,0 +1,47 @@
+name: final-main-merge-gate-v1
+on:
+  push:
+    branches: [integration/generic-main-finalization-20260930]
+    paths: ['.github/workflows/final_main_merge_gate_v1.yml']
+permissions:
+  contents: read
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env: {PYTHONPATH: .}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install governance dependencies
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Repository governance
+        run: |
+          python -m pytest -q             tests/repository/test_canonical_main_readiness_v1.py             tests/repository/test_current_continuity_authority_v2.py             tests/repository/test_repository_governance_v1.py             tests/repository/test_mainline_execution_plan_v2.py             tests/repository/test_mainline_v2_dag_scheduler.py
+      - name: Verify normalized authority seals
+        run: |
+          python - <<'PY'
+          import json
+          from compiler.realsas_compiler_services.orchestrator.mainline import (
+              PLAN_PATH, LEDGER_PATH, READINESS_PATH, load_json, validate_plan,
+              validate_ledger, implementation_closure_sha256,
+          )
+          plan=load_json(PLAN_PATH)
+          ph=validate_plan(plan)
+          ledger=load_json(LEDGER_PATH)
+          validate_ledger(plan,ledger)
+          readiness=load_json(READINESS_PATH)
+          ch=implementation_closure_sha256(plan)
+          assert readiness["status"]!="READY_FOR_WITNESS_EXECUTION"
+          assert readiness["pipeline_plan_sha256"]==ph
+          assert readiness["implementation_closure_sha256"]==ch
+          assert readiness["readiness_seal"]["witness_execution_allowed"] is False
+          assert ledger["pipeline_plan_sha256"]==ph
+          assert ledger["metadata"]["implementation_closure_sha256"]==ch
+          print("FINAL_MAIN_MERGE_GATE_PASS")
+          print("PLAN_SHA256="+ph)
+          print("CLOSURE_SHA256="+ch)
+          print("READINESS_STATUS="+readiness["status"])
+          PY

@@ -1,5 +1,5 @@
 name: final-mainline-candidate-full-gate-v1
-# rerun after canonical implementation-ledger plan rebind
+# rerun after final contract normalization and runtime fail-closed seam
 
 on:
   push:

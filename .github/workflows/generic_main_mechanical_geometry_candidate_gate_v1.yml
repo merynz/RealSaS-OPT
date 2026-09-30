@@ -4,6 +4,24 @@ on:
   push:
     branches:
       - integration/generic-main-normalization-v2-20260930
+    paths:
+      - '.github/workflows/generic_main_mechanical_geometry_candidate_gate_v1.yml'
+      - 'compiler/realsas_compiler_core/canonical_mesh_candidate_v1.py'
+      - 'compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py'
+      - 'compiler/realsas_compiler_core/mechanical_repartition_v2.py'
+      - 'compiler/realsas_compiler_core/mesh/**'
+      - 'compiler/realsas_compiler_core/product_authority_v1.py'
+      - 'compiler/realsas_compiler_core/product_mesh_skin_v1.py'
+      - 'compiler/realsas_compiler_core/rig.py'
+      - 'compiler/realsas_compiler_core/skin.py'
+      - 'compiler/realsas_compiler_core/substrate/**'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py'
+      - 'tests/compiler/test_*mesh*'
+      - 'tests/compiler/test_*skin*'
+      - 'tests/compiler/test_*geometry*'
+      - 'tests/compiler/test_*repartition*'
+      - 'tests/compiler/test_*deformation*'
   workflow_dispatch:
 
 concurrency:

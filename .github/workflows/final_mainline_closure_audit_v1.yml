@@ -1,0 +1,29 @@
+name: final-mainline-closure-audit-v1
+on:
+  push:
+    branches: [integration/generic-main-finalization-20260930]
+    paths:
+      - 'tools/audit_final_mainline_closure.py'
+      - '.github/workflows/final_mainline_closure_audit_v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env: {PYTHONPATH: .}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Fetch research head
+        run: git fetch --no-tags origin research/vf11-certified-adaptive-20260921
+      - name: Compute exact living closure diff
+        run: |
+          python tools/audit_final_mainline_closure.py             origin/research/vf11-certified-adaptive-20260921             HEAD             /tmp/final_mainline_closure.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: final-mainline-closure-audit-v1
+          path: /tmp/final_mainline_closure.json

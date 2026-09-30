@@ -1,5 +1,9 @@
 # Repository Map
 
+## 2026-09-30 continuation pointer
+
+Read `canonical/MAINLINE_NORMALIZATION_HANDOFF_20260930.md` first. The normalized 46-stage continuation is green through the full repository regression gate, with one explicit P0 source-owned visual runtime presentation seam intentionally fail-closed at Stage42.
+
 RealSaS-OPT is the current RealSaS V2 research/compiler/runtime repository. The sole continuation branch is `main`.
 
 ## Current authority spine

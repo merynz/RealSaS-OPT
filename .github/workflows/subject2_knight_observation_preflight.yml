@@ -18,6 +18,9 @@ jobs:
       REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
       - name: Audit existing Knight V2 run roots against current branch source
         shell: bash
         run: |

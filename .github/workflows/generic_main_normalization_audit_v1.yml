@@ -1,0 +1,61 @@
+name: generic-main-normalization-audit-v1
+
+on:
+  push:
+    branches:
+      - audit/generic-main-normalization-20260930
+  workflow_dispatch:
+
+concurrency:
+  group: generic-main-normalization-audit-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch exact lineage refs
+        run: |
+          git fetch --no-tags origin             main             integration/generic-main-promotion-20260930             research/vf11-certified-adaptive-20260921
+          git rev-parse HEAD
+          git rev-parse origin/main
+          git rev-parse origin/integration/generic-main-promotion-20260930
+          git rev-parse origin/research/vf11-certified-adaptive-20260921
+          git merge-base origin/main origin/research/vf11-certified-adaptive-20260921
+          git rev-list --count $(git merge-base origin/main origin/research/vf11-certified-adaptive-20260921)..origin/research/vf11-certified-adaptive-20260921
+
+      - name: Full 1941-commit mechanical and geometry lineage audit
+        run: |
+          python tools/audit_generic_mechanical_geometry_lineage.py             --baseline-ref origin/main             --research-ref origin/research/vf11-certified-adaptive-20260921             --report mechanical_geometry_lineage_from_main.json
+
+      - name: Integration-to-research closure lineage audit
+        run: |
+          python tools/audit_generic_mechanical_geometry_lineage.py             --baseline-ref origin/integration/generic-main-promotion-20260930             --research-ref origin/research/vf11-certified-adaptive-20260921             --report mechanical_geometry_lineage_from_integration.json
+
+      - name: Current V2 implementation closure dry-run
+        run: |
+          python tools/audit_generic_main_normalization.py             --baseline-ref origin/integration/generic-main-promotion-20260930             --research-ref origin/research/vf11-certified-adaptive-20260921             --report normalization_closure_dry_run.json
+
+      - name: Fail if audit accidentally changed tracked implementation
+        run: |
+          test -z "$(git status --porcelain --untracked-files=no)"
+          echo GENERIC_MAIN_NORMALIZATION_AUDIT_ONLY_PASS
+
+      - name: Upload normalization audit reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: generic-main-normalization-audit-v1
+          path: |
+            mechanical_geometry_lineage_from_main.json
+            mechanical_geometry_lineage_from_integration.json
+            normalization_closure_dry_run.json
+          if-no-files-found: error
+          retention-days: 14

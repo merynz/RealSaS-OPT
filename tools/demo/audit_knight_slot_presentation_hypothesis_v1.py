@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
 from collections import defaultdict
 from pathlib import Path
 
@@ -36,6 +38,35 @@ def _read_json(path: Path):
     if not path.is_file():
         raise RuntimeError(f"SLOT_COURT_ARTIFACT_MISSING:{path}")
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _stage_payload(root: Path, ledger: dict, stage_id: str, schema: str):
+    row=next((x for x in ledger.get("stages") or () if str(x.get("id"))==stage_id),None)
+    if row is None:
+        raise RuntimeError(f"SLOT_COURT_STAGE_MISSING:{stage_id}")
+    matches=[x for x in row.get("outputs") or () if str(x.get("schema"))==schema]
+    if len(matches)!=1:
+        raise RuntimeError(
+            f"SLOT_COURT_SCHEMA_CARDINALITY:{stage_id}:{schema}:{len(matches)}"
+        )
+    ref=matches[0]
+    raw=os.path.expandvars(str(ref.get("path") or ""))
+    path=Path(raw).expanduser().resolve()
+    if not path.is_file():
+        raise RuntimeError(f"SLOT_COURT_LEDGER_OUTPUT_MISSING:{stage_id}:{schema}:{path}")
+    expected=str(ref.get("sha256") or "")
+    actual=hashlib.sha256(path.read_bytes()).hexdigest()
+    if len(expected)!=64 or actual!=expected:
+        raise RuntimeError(
+            f"SLOT_COURT_LEDGER_OUTPUT_SHA_DRIFT:{stage_id}:{schema}"
+        )
+    payload=_read_json(path)
+    embedded=str(payload.get("schema_version") or payload.get("schema") or "")
+    if embedded!=schema:
+        raise RuntimeError(
+            f"SLOT_COURT_EMBEDDED_SCHEMA_DRIFT:{stage_id}:{schema}:{embedded}"
+        )
+    return payload
 
 
 def _slot_face_labels(structure, face_count: int) -> tuple[np.ndarray, dict[int,str]]:
@@ -197,21 +228,27 @@ def _visual_qa(rest,posed,faces):
 def run(*,authority_root:Path,run_id:str,out_path:Path):
     root=authority_root/"runs"/run_id
     manifest=_read_json(root/"run_manifest.json")
+    ledger=_read_json(root/"ACTIVE_RUN_V2.json")
     ctx={"run_manifest":manifest}
-    mesh=qualified_mesh_from_dict(_read_json(
-        root/"artifacts/35_DYNAMIC_MECHANICAL_MESH_QUALIFIED/qualified_mesh.json"
+    mesh=qualified_mesh_from_dict(_stage_payload(
+        root,ledger,"35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "RealSaS.QualifiedMeshIR.v1",
     ))
-    structure=presentation_structure_v2_from_dict(_read_json(
-        root/"artifacts/37_QUALIFIED_PRESENTATION_STRUCTURE/qualified_presentation_structure_v2.json"
+    structure=presentation_structure_v2_from_dict(_stage_payload(
+        root,ledger,"37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "RealSaS.QualifiedPresentationStructureIR.v2",
     ))
-    cameras=qualified_camera_set_from_dict(_read_json(
-        root/"artifacts/05_CAMERA_CONTRACT_SOLVED/qualified_camera_set.json"
+    cameras=qualified_camera_set_from_dict(_stage_payload(
+        root,ledger,"05_CAMERA_CONTRACT_SOLVED",
+        "RealSaS.QualifiedCameraSetIR.v1",
     ))
-    observation=qualified_observation_set_from_dict(_read_json(
-        root/"artifacts/07_OBSERVATION_CONTRACT_QUALIFIED/qualified_observation_set.json"
+    observation=qualified_observation_set_from_dict(_stage_payload(
+        root,ledger,"07_OBSERVATION_CONTRACT_QUALIFIED",
+        "RealSaS.QualifiedObservationSetIR.v1",
     ))
-    dynamic=qualified_dynamic_motion_v2_from_dict(_read_json(
-        root/"artifacts/41_MOTION_DYNAMIC_PROOF/qualified_dynamic_motion.json"
+    dynamic=qualified_dynamic_motion_v2_from_dict(_stage_payload(
+        root,ledger,"41_MOTION_DYNAMIC_PROOF",
+        "RealSaS.QualifiedDynamicMotionIR.v2",
     ))
 
     ordered=tuple(sorted(cameras.cameras,key=lambda c:int(c.view_index)))

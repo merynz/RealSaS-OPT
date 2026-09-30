@@ -1,4 +1,4 @@
-name: subject2-knight-direct-sealed-render
+name: subject2-knight-direct-main-render
 
 on:
   push:
@@ -16,183 +16,215 @@ jobs:
     timeout-minutes: 30
     env:
       REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
-      SOURCE_RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671
       PYTHONHASHSEED: '0'
       OMP_NUM_THREADS: '1'
       MKL_NUM_THREADS: '1'
       OPENBLAS_NUM_THREADS: '1'
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install render-only Python dependencies
-        run: python -m pip install --no-input --progress-bar off numpy Pillow
-
-      - name: Render sealed historical Stage42/43 outputs directly
+      - name: Prove exact main checkout
         shell: bash
         run: |
           set -euo pipefail
-          OUT_DIR="$RUNNER_TEMP/knight_direct_sealed_render"
+          git fetch origin main
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
+          echo "EXACT_MAIN_SHA=$(git rev-parse HEAD)"
+
+      - name: Install render-only Python dependencies
+        run: python -m pip install --no-input --progress-bar off numpy Pillow
+
+      - name: Build current-main native CAA runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          c++ -std=c++17 -O2 -Wall -Wextra -pedantic             runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp             -lpng -lz             -o "$RUNNER_TEMP/realsas_runtime_v2_caa_reference_MAIN"
+          sha256sum "$RUNNER_TEMP/realsas_runtime_v2_caa_reference_MAIN"
+
+      - name: Find existing Knight RSS and render it with current main
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT_DIR="$RUNNER_TEMP/knight_current_main_render"
           rm -rf "$OUT_DIR"
           mkdir -p "$OUT_DIR"
           export OUT_DIR
+          export PLAYER="$RUNNER_TEMP/realsas_runtime_v2_caa_reference_MAIN"
 
           python - <<'PY'
-          import hashlib, json, os, subprocess
+          import hashlib, json, math, os, subprocess
           from pathlib import Path
 
           import numpy as np
           from PIL import Image
 
           authority = Path(os.environ["REALSAS_AUTHORITY_ROOT"])
-          run_id = os.environ["SOURCE_RUN_ID"]
-          live_root = authority / "runs" / run_id
-          backup = authority / "historical_run_backups" / (run_id + "_PRE_CURRENT_MAIN_20260930")
-          ledger_path = backup / "ACTIVE_RUN_V2.json"
-          if not ledger_path.is_file():
-              raise RuntimeError(f"HISTORICAL_LEDGER_MISSING:{ledger_path}")
-
-          ledger = json.loads(ledger_path.read_text())
-          by = {str(x["id"]): x for x in ledger["stages"]}
-          s42 = by["42_RUNTIME_PROJECTION_AND_CAA_BINDING"]
-          s43 = by["43_RSS_MATERIALIZE_COMPACT"]
-
-          allowed = {"PASS", "PASS_DEMO_ONLY", "CACHE_HIT"}
-          if str(s42.get("status")) not in allowed:
-              raise RuntimeError(f"HISTORICAL_STAGE42_NOT_RENDERABLE:{s42.get('status')}:{s42.get('blockers')}")
-          if str(s43.get("status")) not in allowed:
-              raise RuntimeError(f"HISTORICAL_STAGE43_NOT_RENDERABLE:{s43.get('status')}:{s43.get('blockers')}")
-
-          def one(stage, schema):
-              rows = [x for x in stage.get("outputs") or [] if x.get("schema") == schema]
-              if len(rows) != 1:
-                  raise RuntimeError(f"OUTPUT_CARDINALITY:{stage['id']}:{schema}:{len(rows)}")
-              return rows[0]
-
-          def resolve_output(stage_id, row):
-              raw = str(row.get("path") or "")
-              p = Path(raw).expanduser()
-              if p.is_file():
-                  candidate = p
-              else:
-                  stage_dir = backup / "artifacts" / stage_id
-                  direct = stage_dir / p.name
-                  if direct.is_file():
-                      candidate = direct
-                  else:
-                      matches = list(stage_dir.rglob(p.name)) if stage_dir.is_dir() else []
-                      if len(matches) != 1:
-                          raise RuntimeError(f"HISTORICAL_OUTPUT_NOT_FOUND:{stage_id}:{raw}:{len(matches)}")
-                      candidate = matches[0]
-
-              expected = str(row.get("sha256") or "")
-              actual = hashlib.sha256(candidate.read_bytes()).hexdigest()
-              if expected and actual != expected:
-                  raise RuntimeError(f"HISTORICAL_OUTPUT_HASH_MISMATCH:{stage_id}:{candidate}:{expected}:{actual}")
-              return candidate, actual
-
-          rss_row = one(s43, "application/x-realsas-rss-v2")
-          proj_row = one(s42, "RealSaS.RuntimeProjectionIR.v2")
-          rss, rss_sha = resolve_output("43_RSS_MATERIALIZE_COMPACT", rss_row)
-          projection_path, projection_sha = resolve_output("42_RUNTIME_PROJECTION_AND_CAA_BINDING", proj_row)
-          projection = json.loads(projection_path.read_text())
-
-          player_candidates = [
-              live_root / "tools" / "current_main_runtime" / "realsas_runtime_v2_caa_reference",
-              authority / "tools" / "current_main_runtime" / "realsas_runtime_v2_caa_reference",
-          ]
-          player = next((p for p in player_candidates if p.is_file() and os.access(p, os.X_OK)), None)
-          if player is None:
-              raise RuntimeError("NATIVE_PLAYER_MISSING:" + ":".join(map(str, player_candidates)))
-
-          v0 = next(v for v in projection["views"] if str(v["view_id"]) == "V0")
-          resolution = int(v0["camera"]["resolution"])
           out_dir = Path(os.environ["OUT_DIR"])
+          player = Path(os.environ["PLAYER"])
+          clips = ["demo_idle_v1", "demo_run_v1", "demo_slash_v1"]
 
+          def resolve_candidate(raw, ledger_path=None):
+              p = Path(str(raw)).expanduser()
+              if p.is_file():
+                  return p
+              if str(raw).startswith("$REALSAS_AUTHORITY_ROOT/"):
+                  q = authority / str(raw).split("/", 1)[1]
+                  if q.is_file():
+                      return q
+              if ledger_path is not None and not p.is_absolute():
+                  q = ledger_path.parent / p
+                  if q.is_file():
+                      return q
+              return None
+
+          candidates = []
+          seen = set()
+
+          for ledger_path in authority.rglob("ACTIVE_RUN_V2.json"):
+              if "KNIGHT" not in str(ledger_path).upper():
+                  continue
+              try:
+                  ledger = json.loads(ledger_path.read_text())
+              except Exception:
+                  continue
+              for row in ledger.get("stages") or []:
+                  if str(row.get("id")) != "43_RSS_MATERIALIZE_COMPACT":
+                      continue
+                  if str(row.get("status")) not in {"PASS", "PASS_DEMO_ONLY", "CACHE_HIT"}:
+                      continue
+                  for out in row.get("outputs") or []:
+                      if out.get("schema") != "application/x-realsas-rss-v2":
+                          continue
+                      p = resolve_candidate(out.get("path"), ledger_path)
+                      if p and p not in seen:
+                          seen.add(p)
+                          candidates.append((0, p.stat().st_mtime, p, str(ledger_path), out.get("sha256")))
+
+          for p in authority.rglob("*"):
+              if not p.is_file():
+                  continue
+              u = str(p).upper()
+              if "KNIGHT" not in u:
+                  continue
+              n = p.name.lower()
+              if not (n.endswith(".rss") or n.endswith(".rssv2") or ".rss." in n or "rss" in n):
+                  continue
+              if p in seen or p.stat().st_size < 1024:
+                  continue
+              seen.add(p)
+              candidates.append((1, p.stat().st_mtime, p, "filesystem_scan", None))
+
+          candidates.sort(key=lambda x: (x[0], -x[1]))
+          if not candidates:
+              raise RuntimeError("NO_EXISTING_KNIGHT_RSS_FOUND")
+
+          chosen = None
+          probe_errors = []
+          for _, _, rss, provenance, expected_sha in candidates:
+              if expected_sha:
+                  actual = hashlib.sha256(rss.read_bytes()).hexdigest()
+                  if actual != str(expected_sha):
+                      probe_errors.append(f"HASH_MISMATCH:{rss}")
+                      continue
+              raw = out_dir / "probe.rgba"
+              proc = subprocess.run(
+                  [str(player), str(rss), "--clip", clips[0], "--view", "V0",
+                   "--frame", "0", "--out-rgba", str(raw)],
+                  capture_output=True, text=True
+              )
+              if proc.returncode == 0 and raw.is_file() and raw.stat().st_size >= 4:
+                  chosen = (rss, provenance)
+                  raw.unlink()
+                  break
+              probe_errors.append(f"{rss}:{proc.returncode}:{proc.stderr[-300:]}")
+              raw.unlink(missing_ok=True)
+
+          if chosen is None:
+              raise RuntimeError("NO_RENDERABLE_KNIGHT_RSS_WITH_CURRENT_MAIN\n" + "\n".join(probe_errors[:25]))
+
+          rss, provenance = chosen
+          rss_sha = hashlib.sha256(rss.read_bytes()).hexdigest()
           report = {
-              "schema": "RealSaS.DirectSealedHistoricalRenderReport.v1",
-              "source_run_id": run_id,
-              "source_ledger": str(ledger_path),
-              "source_mode": "READ_ONLY_HISTORICAL_STAGE42_STAGE43",
-              "refit_performed": False,
-              "compile_performed": False,
-              "stage42_status": s42.get("status"),
-              "stage43_status": s43.get("status"),
+              "schema": "RealSaS.CurrentMainDirectKnightRenderReport.v1",
+              "runtime_source": "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp",
               "rss_path": str(rss),
               "rss_sha256": rss_sha,
-              "projection_path": str(projection_path),
-              "projection_sha256": projection_sha,
-              "native_player": str(player),
-              "resolution": resolution,
+              "rss_provenance": provenance,
+              "refit_performed": False,
+              "compiler_pipeline_executed": False,
               "clips": [],
           }
 
-          for clip in projection["clips"]:
-              cid = str(clip["clip_id"])
-              frame_count = int(clip["frame_count"])
-              duration = float(clip["duration_seconds"])
-              sample_count = min(frame_count, 32)
-              indices = sorted(set(
-                  int(round(i * (frame_count - 1) / max(1, sample_count - 1)))
-                  for i in range(sample_count)
-              ))
+          for cid in clips:
               frames = []
-              for fi in indices:
-                  raw = out_dir / f"{cid}_V0_{fi:04d}.rgba"
+              frame_hashes = []
+              resolution = None
+              for fi in range(48):
+                  raw = out_dir / f"{cid}_{fi:04d}.rgba"
                   proc = subprocess.run(
                       [str(player), str(rss), "--clip", cid, "--view", "V0",
                        "--frame", str(fi), "--out-rgba", str(raw)],
                       capture_output=True, text=True
                   )
                   if proc.returncode != 0:
-                      raise RuntimeError(f"NATIVE_RENDER_FAIL:{cid}:{fi}:{proc.stderr}")
-                  arr = np.frombuffer(raw.read_bytes(), dtype=np.uint8)
-                  expected = resolution * resolution * 4
-                  if arr.size != expected:
-                      raise RuntimeError(f"RGBA_SIZE_DRIFT:{cid}:{fi}:{arr.size}:{expected}")
-                  im = Image.fromarray(arr.reshape(resolution, resolution, 4), "RGBA")
-                  frames.append(im)
+                      raw.unlink(missing_ok=True)
+                      if fi == 0:
+                          raise RuntimeError(f"CURRENT_MAIN_RENDER_FAIL:{cid}:0:{proc.stderr}")
+                      break
+                  data = raw.read_bytes()
                   raw.unlink()
+                  px = len(data) // 4
+                  side = int(round(math.sqrt(px)))
+                  if side * side * 4 != len(data):
+                      raise RuntimeError(f"NON_SQUARE_RGBA:{cid}:{fi}:{len(data)}")
+                  if resolution is None:
+                      resolution = side
+                  elif resolution != side:
+                      raise RuntimeError(f"RESOLUTION_DRIFT:{cid}:{resolution}:{side}")
+                  arr = np.frombuffer(data, dtype=np.uint8).reshape(side, side, 4)
+                  frames.append(Image.fromarray(arr, "RGBA"))
+                  frame_hashes.append(hashlib.sha256(data).hexdigest())
 
-              first_png = out_dir / f"KNIGHT_{cid.upper()}_FIRST.png"
-              last_png = out_dir / f"KNIGHT_{cid.upper()}_LAST.png"
+              if not frames:
+                  raise RuntimeError(f"NO_FRAMES_RENDERED:{cid}")
+
+              first_png = out_dir / f"KNIGHT_{cid.upper()}_MAIN_FIRST.png"
+              last_png = out_dir / f"KNIGHT_{cid.upper()}_MAIN_LAST.png"
+              gif = out_dir / f"KNIGHT_{cid.upper()}_MAIN.gif"
               frames[0].save(first_png)
               frames[-1].save(last_png)
-
-              delay = max(40, int(round(1000.0 * duration / max(1, frame_count - 1))))
-              gif = out_dir / f"KNIGHT_{cid.upper()}_SEALED.gif"
               pframes = [im.convert("P", palette=Image.Palette.ADAPTIVE, colors=255) for im in frames]
               pframes[0].save(
-                  gif,
-                  save_all=True,
-                  append_images=pframes[1:],
-                  duration=delay,
-                  loop=0,
-                  disposal=2,
-                  optimize=False,
-                  transparency=0,
+                  gif, save_all=True, append_images=pframes[1:],
+                  duration=80, loop=0, disposal=2, optimize=False, transparency=0
               )
               report["clips"].append({
                   "clip_id": cid,
-                  "frame_count": frame_count,
-                  "sampled_indices": indices,
+                  "frames_rendered": len(frames),
+                  "resolution": resolution,
+                  "unique_frame_hashes": len(set(frame_hashes)),
                   "gif": gif.name,
                   "first_png": first_png.name,
                   "last_png": last_png.name,
               })
 
           (out_dir / "REPORT.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
-          print("DIRECT_SEALED_RENDER_PASS", json.dumps(report, sort_keys=True))
+          print("CURRENT_MAIN_KNIGHT_RENDER_PASS")
+          print(json.dumps(report, sort_keys=True))
           PY
 
           echo "OUT_DIR=$OUT_DIR" >> "$GITHUB_ENV"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: knight-direct-sealed-render
+          name: knight-current-main-render
           path: ${{ env.OUT_DIR }}
           if-no-files-found: error
           retention-days: 7

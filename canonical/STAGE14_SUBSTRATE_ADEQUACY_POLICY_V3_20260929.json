@@ -1,0 +1,48 @@
+{
+  "schema": "RealSaS.Stage14SubstrateAdequacyPolicy.v3",
+  "status": "FROZEN_AFTER_TOPOLOGY_LOCAL_NORMAL_CAUSAL_AUDIT_BEFORE_RESTARTED_KNIGHT_STAGE14",
+  "date": "2026-09-29",
+  "authority": "NORMATIVE_STAGE14_SUBSTRATE_ADEQUACY_POLICY__TOPOLOGY_LOCAL_NORMALS__NOT_TUNED_FROM_KNIGHT_RESULT",
+  "supersedes": "canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V2_20260920.json",
+  "supersession_reason": "V2 sealed numeric adequacy and component-aware compaction but did not bind the normal neighborhood operator. Adversarial near-contact disconnected sheets proved global Euclidean kNN can contaminate normals; V3 binds normals to dense face incidence without relaxing any V2 quality threshold.",
+  "gsa": {
+    "normal_operator": {
+      "operator_id": "RealSaS.GSA.ZeroSurfaceTopologyAreaNormal.v2",
+      "method": "ORIENTED_AREA_WEIGHTED_INCIDENT_FACE_NORMAL",
+      "neighborhood_authority": "DENSE_ZERO_SURFACE_FACE_INCIDENCE_ONLY",
+      "orientation_hint": "MARCHING_CUBES_IMPLICIT_NORMAL_SIGN_ONLY",
+      "euclidean_cross_sheet_neighbors_forbidden": true,
+      "teacher_truth_used": false
+    },
+    "normal_k": 64,
+    "normal_k_role": "LEGACY_MANIFEST_COMPATIBILITY_ONLY__NOT_USED_BY_TOPOLOGY_AREA_NORMAL_V2",
+    "visibility_depth_tolerance_norm": 0.02,
+    "adequacy_policy": {
+      "min_candidate_nodes": 128,
+      "max_candidate_nodes": 12288,
+      "candidate_growth_factor": 2,
+      "refinement_rounds": 3,
+      "max_dense_to_surface_p95_norm": 0.03,
+      "max_dense_to_surface_max_norm": 0.08,
+      "max_normal_p95_deg": 30,
+      "max_projected_p95_px": 6,
+      "max_projected_max_px": 16,
+      "component_min_dense_fraction": 0.001,
+      "min_nodes_per_component": 8,
+      "max_component_alias_nodes": 0,
+      "visible_component_always_eligible": true,
+      "component_aware_voxel_compaction": true
+    }
+  },
+  "selection_rule": "MINIMUM_ACTUAL_NODE_COUNT_AMONG_PASSING_BOUNDED_SEARCH_CANDIDATES",
+  "invariants": [
+    "ALL_V2_NUMERIC_QUALITY_THRESHOLDS_UNCHANGED",
+    "VISIBLE_COMPONENT_ALWAYS_ELIGIBLE",
+    "COMPONENT_AWARE_VOXEL_COMPACTION",
+    "NORMAL_NEIGHBORHOOD_DENSE_FACE_INCIDENCE_ONLY",
+    "CROSS_SHEET_EUCLIDEAN_NORMAL_BORROWING_FORBIDDEN",
+    "DENSE_ZERO_SURFACE_REMAINS_GEOMETRY_AUTHORITY"
+  ],
+  "mutation_rule": "After a restarted Knight Stage14 result is inspected, quality tolerances may only be tightened prospectively. Any operator change requires a new policy version and causal evidence.",
+  "claim_boundary": "This policy closes Stage14 normal-operator authority only. It does not claim a restarted Knight Stage14 PASS, Stage15 PASS, Geppetto/Arachne refit PASS, topology closure, or PRODUCT_PASS."
+}

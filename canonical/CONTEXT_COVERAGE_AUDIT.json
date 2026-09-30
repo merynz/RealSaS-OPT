@@ -12,8 +12,8 @@
   "explained_high_signal_count": 344,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 152,
-  "safe_default_evidence_only_branch_count": 148,
+  "live_branch_count": 153,
+  "safe_default_evidence_only_branch_count": 149,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -90,7 +90,7 @@
     },
     {
       "name": "audit/generic-main-normalization-20260930",
-      "sha": "908fbcc9207221f640a5c6f36d586aca597135d0",
+      "sha": "bc790d2966a0f10d9569f47ecb6be874cc075ace",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -431,6 +431,12 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "integration/generic-main-normalization-v2-20260930",
+      "sha": "1980b30b24120d85cbe2b77e29d28589cf668357",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "integration/generic-main-promotion-20260930",
       "sha": "908fbcc9207221f640a5c6f36d586aca597135d0",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -474,7 +480,7 @@
     },
     {
       "name": "main",
-      "sha": "56d2f460ca1dbed5a727763f9ec89f51df9b88c1",
+      "sha": "5f8f8ab2d1976842edce90d69d380b1d2eb80c78",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },

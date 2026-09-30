@@ -4,6 +4,15 @@ on:
   push:
     branches:
       - integration/generic-main-normalization-v2-20260930
+    paths:
+      - '.github/workflows/source_owned_visual_runtime_wiring_gate_v1.yml'
+      - 'tests/repository/test_source_owned_visual_runtime_wiring_v1.py'
+      - 'compiler/realsas_compiler_core/product_state_v2.py'
+      - 'compiler/realsas_compiler_core/runtime_authority_v2.py'
+      - 'compiler/realsas_compiler_core/runtime_package_v2.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py'
+      - 'canonical/MAINLINE_EXECUTION_PLAN_V2.json'
   workflow_dispatch:
 
 concurrency:

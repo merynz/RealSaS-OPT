@@ -1,0 +1,32 @@
+name: final-mainline-postdocs-seal-v1
+on:
+  push:
+    branches: [integration/generic-main-finalization-20260930]
+    paths: ['.github/workflows/final_mainline_postdocs_seal_v1.yml']
+permissions:
+  contents: read
+jobs:
+  seal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env: {PYTHONPATH: .}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Validate final plan and docs governance
+        run: |
+          python -m pytest -q             tests/repository/test_canonical_main_readiness_v1.py             tests/repository/test_current_continuity_authority_v2.py             tests/repository/test_repository_governance_v1.py             tests/repository/test_mainline_execution_plan_v2.py             tests/repository/test_mainline_v2_dag_scheduler.py
+          python -m compiler.realsas_compiler_services.orchestrator.mainline validate-plan
+      - name: Emit final implementation closure
+        run: |
+          python -m compiler.realsas_compiler_services.orchestrator.mainline implementation-closure             > /tmp/closure.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/closure.json'))
+          print('FINAL_CLOSURE_SHA256='+p['implementation_closure_sha256'])
+          print('PLAN_SHA256='+p['manifest']['pipeline_plan_sha256'])
+          print('IMPORTED_MODULE_COUNT='+str(p['manifest']['imported_module_count']))
+          print('CLOSURE_FILE_COUNT='+str(len(p['manifest']['closure_files'])))
+          PY

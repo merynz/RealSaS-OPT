@@ -47,6 +47,12 @@ from compiler.realsas_compiler_core.substrate.adequacy_v1 import (
     select_adequate_rigging_surface_v1,
     substrate_adequacy_report_hash_v1,
 )
+from compiler.realsas_compiler_core.substrate.scene_first_signed import (
+    build_compacted_dense_face_provenance_v1,
+    validate_compacted_dense_face_provenance_v1,
+    zero_surface_normal_operator_identity_v2,
+    zero_surface_normal_operator_hash_v2,
+)
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     load_file_ref,
@@ -672,13 +678,21 @@ def qualify_geometry_substrate_stage(ctx: dict) -> dict:
 def _validate_gsa_policy_document(cfg: dict, policy_document: dict):
     if (
         str(policy_document.get("schema") or "")
-        != "RealSaS.Stage14SubstrateAdequacyPolicy.v2"
+        != "RealSaS.Stage14SubstrateAdequacyPolicy.v3"
     ):
         raise QualificationError("GSA_POLICY_DOCUMENT_SCHEMA_INVALID")
     if not str(policy_document.get("status") or "").startswith("FROZEN_"):
         raise QualificationError("GSA_POLICY_DOCUMENT_NOT_FROZEN")
     document_gsa = dict(policy_document.get("gsa") or {})
     document_adequacy = dict(document_gsa.get("adequacy_policy") or {})
+    document_normal_operator = dict(document_gsa.get("normal_operator") or {})
+    expected_normal_operator = zero_surface_normal_operator_identity_v2()
+    if content_sha256(document_normal_operator) != zero_surface_normal_operator_hash_v2():
+        raise QualificationError("GSA_POLICY_DOCUMENT_DRIFT:normal_operator")
+    if content_sha256(document_normal_operator) != content_sha256(expected_normal_operator):
+        raise QualificationError("GSA_POLICY_DOCUMENT_DRIFT:normal_operator_identity")
+    if document_gsa.get("normal_k_role") != "LEGACY_MANIFEST_COMPATIBILITY_ONLY__NOT_USED_BY_TOPOLOGY_AREA_NORMAL_V2":
+        raise QualificationError("GSA_POLICY_DOCUMENT_DRIFT:normal_k_role")
 
     normal_k = int(cfg["normal_k"])
     tolerance = float(cfg["visibility_depth_tolerance_norm"])
@@ -757,7 +771,7 @@ def build_gsa_stage(ctx: dict) -> dict:
     policy_ref = dict(cfg.get("policy_document") or {})
     policy_document = load_file_ref(
         policy_ref,
-        expected_schema="RealSaS.Stage14SubstrateAdequacyPolicy.v2",
+        expected_schema="RealSaS.Stage14SubstrateAdequacyPolicy.v3",
     )
     normal_k, tolerance, document_adequacy = _validate_gsa_policy_document(
         cfg, policy_document
@@ -793,6 +807,8 @@ def build_gsa_stage(ctx: dict) -> dict:
     adequacy["policy_document_path"] = str(policy_ref.get("path") or "")
     adequacy["policy_document_sha256"] = str(policy_ref.get("sha256") or "")
     adequacy["geometry_substrate_hash"] = geometry.substrate_hash
+    adequacy["normal_operator"] = zero_surface_normal_operator_identity_v2()
+    adequacy["normal_operator_hash"] = zero_surface_normal_operator_hash_v2()
     adequacy["adequacy_report_hash"] = ""
     adequacy["adequacy_report_hash"] = substrate_adequacy_report_hash_v1(
         adequacy
@@ -803,6 +819,17 @@ def build_gsa_stage(ctx: dict) -> dict:
             "blockers": ["SUBSTRATE_ADEQUACY_NO_PASSING_CANDIDATE"],
             "diagnostics": adequacy,
         }
+
+    dense_world = (
+        np.asarray(normalization.center_xyz, dtype=np.float64)[None, :]
+        + np.asarray(vertices, dtype=np.float64) * float(normalization.half_extent)
+    )
+    face_provenance = build_compacted_dense_face_provenance_v1(
+        dense_world,
+        faces,
+        surface,
+        source_zero_surface_sha256=zero.npz_sha256,
+    )
 
     root = ctx["run_root"] / "artifacts" / "14_GSA_BUILD"
     return {
@@ -819,12 +846,20 @@ def build_gsa_stage(ctx: dict) -> dict:
                 authority_class="SUBSTRATE_ADEQUACY_REPORT",
                 schema="RealSaS.SubstrateAdequacyReport.v1",
             ),
+            write_json(
+                root / "compacted_dense_face_provenance.json",
+                face_provenance,
+                authority_class="COMPACTED_DENSE_FACE_PROVENANCE",
+                schema="RealSaS.CompactedDenseFaceProvenance.v1",
+            ),
         ],
         "diagnostics": {
             "surface_lineage_hash": surface.geometry_lineage_hash,
             "node_count": len(surface.surface_nodes),
             "relation_count": len(surface.local_relations),
             "adequacy_report_hash": adequacy["adequacy_report_hash"],
+            "compacted_dense_face_provenance_hash": face_provenance["provenance_hash"],
+            "compacted_dense_face_count": face_provenance["compact_face_count"],
             "selected_target_node_cap": adequacy["selected_target_node_cap"],
         },
     }
@@ -843,6 +878,19 @@ def qualify_rigging_surface_stage(ctx: dict) -> dict:
         "14_GSA_BUILD",
         "RealSaS.SubstrateAdequacyReport.v1",
     )
+    face_provenance = stage_output_payload(
+        ctx,
+        "14_GSA_BUILD",
+        "RealSaS.CompactedDenseFaceProvenance.v1",
+    )
+    validate_compacted_dense_face_provenance_v1(
+        face_provenance,
+        surface=surface,
+    )
+    if str(face_provenance.get("source_zero_surface_sha256") or "") != str(
+        dict(surface.metadata or {}).get("source_zero_surface_sha256") or ""
+    ):
+        raise QualificationError("RIGGING_SURFACE_FACE_PROVENANCE_SOURCE_DRIFT")
     if (
         adequacy.get("adequacy_report_hash")
         != substrate_adequacy_report_hash_v1(adequacy)
@@ -885,12 +933,17 @@ def qualify_rigging_surface_stage(ctx: dict) -> dict:
             "local_relation_graph_present": tensor.edge_count > 0,
             "substrate_adequacy_passed": True,
             "substrate_adequacy_report_hash": adequacy["adequacy_report_hash"],
+            "compacted_dense_face_provenance_hash": face_provenance["provenance_hash"],
+            "compacted_dense_face_count": int(face_provenance["compact_face_count"]),
+            "triangle_authority": "EXACT_DENSE_FACE_WITNESS_AFTER_FROZEN_COMPACTION",
+            "three_clique_face_minting_allowed": False,
             "appearance_authority_used": False,
         },
         "",
         metadata={
             "tensorization_schema": tensor.schema_version,
             "substrate_adequacy_report_hash": adequacy["adequacy_report_hash"],
+            "compacted_dense_face_provenance_hash": face_provenance["provenance_hash"],
             "geometry_substrate_hash": adequacy["geometry_substrate_hash"],
             "v2_geometry_lane": True,
         },
@@ -913,11 +966,19 @@ def qualify_rigging_surface_stage(ctx: dict) -> dict:
                 value,
                 authority_class="RIGGING_SURFACE_QUALIFICATION",
             ),
+            write_json(
+                root / "qualified_compacted_dense_face_provenance.json",
+                face_provenance,
+                authority_class="QUALIFIED_COMPACTED_DENSE_FACE_PROVENANCE",
+                schema="RealSaS.CompactedDenseFaceProvenance.v1",
+            ),
         ],
         "diagnostics": {
             "surface_lineage_hash": surface.geometry_lineage_hash,
             "qualification_hash": value.qualification_hash,
             "tensorization_hash": value.tensorization_hash,
+            "compacted_dense_face_provenance_hash": face_provenance["provenance_hash"],
+            "compacted_dense_face_count": int(face_provenance["compact_face_count"]),
             "node_count": value.node_count,
             "edge_count": value.edge_count,
         },

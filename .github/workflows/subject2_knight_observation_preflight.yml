@@ -441,6 +441,16 @@ jobs:
           print(mainline.status_text(plan,ledger))
           PY
 
+      - name: Probe local CUDA capacity for required fresh Geppetto refit
+        shell: bash
+        run: |
+          set -euo pipefail
+          if command -v nvidia-smi >/dev/null 2>&1; then
+            nvidia-smi --query-gpu=name,memory.total,memory.free,driver_version --format=csv,noheader
+          else
+            echo CUDA_GPU_NOT_VISIBLE
+          fi
+
       - name: Rebind Stage15-equivalent topology repair and Geppetto prereeg
         shell: bash
         run: |

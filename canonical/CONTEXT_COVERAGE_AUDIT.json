@@ -12,8 +12,8 @@
   "explained_high_signal_count": 351,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 154,
-  "safe_default_evidence_only_branch_count": 150,
+  "live_branch_count": 155,
+  "safe_default_evidence_only_branch_count": 151,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -371,6 +371,12 @@
       "reason": "explicit authority-map override"
     },
     {
+      "name": "fix/final-main-closure-20260930",
+      "sha": "f3762db51ca26ee090b85c982c601dd0e7f667bc",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "fix/motion-v2-root-frame-20260919",
       "sha": "1ec74be48ab4708834663ea214a6fab79bd0b991",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -486,7 +492,7 @@
     },
     {
       "name": "main",
-      "sha": "f459fe5491e367e9e5da07cfc5b1886f1b138ae4",
+      "sha": "f3762db51ca26ee090b85c982c601dd0e7f667bc",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },

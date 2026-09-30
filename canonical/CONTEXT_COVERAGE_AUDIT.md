@@ -11,8 +11,8 @@
 - Explained by continuity policy: **351**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **154**
-- Safe-default evidence-only branches: **150**
+- Live branches: **155**
+- Safe-default evidence-only branches: **151**
 
 ### Classification counts
 
@@ -88,6 +88,7 @@ _None._
 | `first-fit-base/main-20260904-v2` | `461fd25264f4` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `fit/single-family-mage-v1-20260902` | `f2cd746f8beb` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `fit2/mage-full-subject-reclosure` | `eb7a20eb9da7` | `EVIDENCE_ONLY` | explicit authority-map override |
+| `fix/final-main-closure-20260930` | `f3762db51ca2` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `fix/motion-v2-root-frame-20260919` | `1ec74be48ab4` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `freeze/stage13-14-policy-20260919` | `75f1a1c5a845` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `g0-g1/single-pose-geometry` | `e423cd462002` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -107,7 +108,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `f459fe5491e3` | `CANONICAL` | canonical branch |
+| `main` | `f3762db51ca2` | `CANONICAL` | canonical branch |
 | `motion/quaternius-direct-fbx-gate-v1-20260919` | `47fb1555455b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

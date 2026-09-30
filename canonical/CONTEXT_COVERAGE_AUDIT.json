@@ -12,8 +12,8 @@
   "explained_high_signal_count": 344,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 153,
-  "safe_default_evidence_only_branch_count": 149,
+  "live_branch_count": 154,
+  "safe_default_evidence_only_branch_count": 150,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -90,7 +90,7 @@
     },
     {
       "name": "audit/generic-main-normalization-20260930",
-      "sha": "bc790d2966a0f10d9569f47ecb6be874cc075ace",
+      "sha": "2a69a9fbdd4aecfc4e73941b660648a01a3c0eb9",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -431,8 +431,14 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "integration/generic-main-finalization-20260930",
+      "sha": "bbb19a56ef948f137d6786de2902adc38dc578a2",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "integration/generic-main-normalization-v2-20260930",
-      "sha": "1980b30b24120d85cbe2b77e29d28589cf668357",
+      "sha": "75d7d590d0a381636a3600242c8351924759f9c7",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -480,7 +486,7 @@
     },
     {
       "name": "main",
-      "sha": "5f8f8ab2d1976842edce90d69d380b1d2eb80c78",
+      "sha": "9791a7b59a769729afd8897843175a32ace0aacc",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },

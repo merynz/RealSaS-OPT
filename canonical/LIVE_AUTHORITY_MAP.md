@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `9aa1b92f3e7b3d1b9765ac69f35c075af8e7066b82612289143f56056a88a708`
+> State fingerprint: `1afdd8bfe6d585121c6bdfc1f9e81b372f3e37925f38a11a6e66e6fc9bf14f79`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -36,17 +36,17 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `V2_IMPLEMENTATION_ASSEMBLY` | `RECLOSURE_ACTIVE__WITNESS_FORBIDDEN` | `main` | `5f8f8ab2d197` | Can the reopened subject-free visual-fidelity and governance audit be fully reclosed, including VF-11 R512, VF-23 exact production-policy E2E, and exact-head CI, before asking the user to authorize the first controlled Knight witness? | Knight product pass; unseen generalization; semantic object recognition; human aesthetic optimality; source-view cardinality reduction; witness execution authorization before explicit user approval |
+| `V2_IMPLEMENTATION_ASSEMBLY` | `RECLOSURE_ACTIVE__WITNESS_FORBIDDEN` | `main` | `9791a7b59a76` | Can the reopened subject-free visual-fidelity and governance audit be fully reclosed, including VF-11 R512, VF-23 exact production-policy E2E, and exact-head CI, before asking the user to authorize the first controlled Knight witness? | Knight product pass; unseen generalization; semantic object recognition; human aesthetic optimality; source-view cardinality reduction; witness execution authorization before explicit user approval |
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 149**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 150**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `5f8f8ab2d197` | canonical continuation branch |
+| `main` | `9791a7b59a76` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -72,7 +72,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `architecture/v4-generic-strength-source-completion-20260902` | `7f39a846ad05` | observed live; not explicitly registered active |
 | `audit/arachne-information-preservation-v1-20260910` | `94b4ef79e9b8` | observed live; not explicitly registered active |
 | `audit/final-completion-plan-20260902` | `00e930e788d3` | observed live; not explicitly registered active |
-| `audit/generic-main-normalization-20260930` | `bc790d2966a0` | observed live; not explicitly registered active |
+| `audit/generic-main-normalization-20260930` | `2a69a9fbdd4a` | observed live; not explicitly registered active |
 | `audit/geppetto-v2-frozen-base-7f39` | `7f39a846ad05` | observed live; not explicitly registered active |
 | `audit/historical-product-power-rebind-20260913` | `2bba9828a3b3` | observed live; not explicitly registered active |
 | `audit/iris-architecture-discipline-20260824` | `d7bba01c85e9` | observed live; not explicitly registered active |
@@ -128,7 +128,8 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `ignore-this` | `91b4593d5b2a` | observed live; not explicitly registered active |
 | `integration/compiler-runtime-canonical-20260828` | `e423cd462002` | observed live; not explicitly registered active |
 | `integration/compiler-runtime-heavy-promotion-20260901` | `47892ffa16b7` | observed live; not explicitly registered active |
-| `integration/generic-main-normalization-v2-20260930` | `1980b30b2412` | observed live; not explicitly registered active |
+| `integration/generic-main-finalization-20260930` | `bbb19a56ef94` | observed live; not explicitly registered active |
+| `integration/generic-main-normalization-v2-20260930` | `75d7d590d0a3` | observed live; not explicitly registered active |
 | `integration/generic-main-promotion-20260930` | `908fbcc92072` | observed live; not explicitly registered active |
 | `integration/mage-real-e2e-20260912` | `11d1fdfd4398` | observed live; not explicitly registered active |
 | `iris/mapanything-ortho-apache` | `3b66a4d2beb5` | observed live; not explicitly registered active |

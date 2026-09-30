@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `c5729c067823e070d2f3205b6b6356c36c542474a8f2bf661f8f3a87428a79cf`
+> State fingerprint: `47ec8570f6b878d7585c6566c0451006e3c5791ccdab2b98642cb5cd74a6b6e3`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -36,17 +36,17 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `V2_IMPLEMENTATION_ASSEMBLY` | `RECLOSURE_ACTIVE__WITNESS_FORBIDDEN` | `main` | `3f4dd26c383f` | Can the reopened subject-free visual-fidelity and governance audit be fully reclosed, including VF-11 R512, VF-23 exact production-policy E2E, and exact-head CI, before asking the user to authorize the first controlled Knight witness? | Knight product pass; unseen generalization; semantic object recognition; human aesthetic optimality; source-view cardinality reduction; witness execution authorization before explicit user approval |
+| `V2_IMPLEMENTATION_ASSEMBLY` | `RECLOSURE_ACTIVE__WITNESS_FORBIDDEN` | `main` | `1e7d983b2434` | Can the reopened subject-free visual-fidelity and governance audit be fully reclosed, including VF-11 R512, VF-23 exact production-policy E2E, and exact-head CI, before asking the user to authorize the first controlled Knight witness? | Knight product pass; unseen generalization; semantic object recognition; human aesthetic optimality; source-view cardinality reduction; witness execution authorization before explicit user approval |
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 146**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 147**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `3f4dd26c383f` | canonical continuation branch |
+| `main` | `1e7d983b2434` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -75,7 +75,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `audit/geppetto-v2-frozen-base-7f39` | `7f39a846ad05` | observed live; not explicitly registered active |
 | `audit/historical-product-power-rebind-20260913` | `2bba9828a3b3` | observed live; not explicitly registered active |
 | `audit/iris-architecture-discipline-20260824` | `d7bba01c85e9` | observed live; not explicitly registered active |
-| `audit/knight-rest-visual-owner-20260930` | `6ed060351512` | observed live; not explicitly registered active |
+| `audit/knight-rest-visual-owner-20260930` | `643714de2899` | observed live; not explicitly registered active |
 | `baseline/h0-first-family-v1-20260904` | `a3cec7021f0d` | observed live; not explicitly registered active |
 | `behavioral/geppetto-v2-integrity-v1-20260903` | `2b5d46718683` | observed live; not explicitly registered active |
 | `cleanroom/iris-geometry-field-v1-20260904` | `e72636d8366d` | observed live; not explicitly registered active |
@@ -127,6 +127,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `ignore-this` | `91b4593d5b2a` | observed live; not explicitly registered active |
 | `integration/compiler-runtime-canonical-20260828` | `e423cd462002` | observed live; not explicitly registered active |
 | `integration/compiler-runtime-heavy-promotion-20260901` | `47892ffa16b7` | observed live; not explicitly registered active |
+| `integration/generic-main-promotion-20260930` | `1e7d983b2434` | observed live; not explicitly registered active |
 | `integration/mage-real-e2e-20260912` | `11d1fdfd4398` | observed live; not explicitly registered active |
 | `iris/mapanything-ortho-apache` | `3b66a4d2beb5` | observed live; not explicitly registered active |
 | `legacy-geppetto-arachne-reconcile-20260901` | `f687ff8e78a2` | observed live; not explicitly registered active |

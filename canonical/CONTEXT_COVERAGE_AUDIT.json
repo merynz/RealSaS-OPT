@@ -12,8 +12,8 @@
   "explained_high_signal_count": 344,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 150,
-  "safe_default_evidence_only_branch_count": 146,
+  "live_branch_count": 151,
+  "safe_default_evidence_only_branch_count": 147,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -108,7 +108,7 @@
     },
     {
       "name": "audit/knight-rest-visual-owner-20260930",
-      "sha": "6ed060351512a5f76a206acce011b585f48b1768",
+      "sha": "643714de28999a7de9d0b25733a290136dc374c7",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -425,6 +425,12 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "integration/generic-main-promotion-20260930",
+      "sha": "1e7d983b2434e4675753b5da28399dfafe4c2f72",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "integration/mage-real-e2e-20260912",
       "sha": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -462,7 +468,7 @@
     },
     {
       "name": "main",
-      "sha": "3f4dd26c383f91dc620be97a693398c410c69393",
+      "sha": "1e7d983b2434e4675753b5da28399dfafe4c2f72",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },

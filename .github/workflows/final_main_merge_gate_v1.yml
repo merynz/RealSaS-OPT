@@ -1,5 +1,5 @@
 name: final-main-merge-gate-v1
-# rerun after generated-context reconciliation
+# rerun after main ancestry merge
 on:
   push:
     branches: [integration/generic-main-finalization-20260930]

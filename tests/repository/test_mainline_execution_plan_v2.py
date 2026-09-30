@@ -52,10 +52,15 @@ def test_v2_mesh_birth_precedes_parallel_mechanics_and_caa():
     plan = load("canonical/MAINLINE_EXECUTION_PLAN_V2.json")
     by = {row["id"]: row for row in plan["stages"]}
     assert by["18_CANONICAL_MESH_ADDRESSING_BUILD"]["depends_on"] == [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
         "15_RIGGING_SURFACE_QUALIFIED",
         "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
         "17_MECHANICAL_PARTITION_QUALIFIED",
     ]
+    assert plan["appearance_contract"]["visual_geometry_authority"] == (
+        "SOURCE_ART_SILHOUETTE_VISUAL_MESH"
+    )
+    assert plan["appearance_contract"]["mechanical_mesh_render_authority"] is False
     assert "18_CANONICAL_MESH_ADDRESSING_BUILD" in by[
         "20_CAA_BACKEND_PREREGISTERED"
     ]["depends_on"]

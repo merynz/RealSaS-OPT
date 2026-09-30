@@ -2,7 +2,7 @@
   "schema": "RealSaS.MainlineExecutionPlan.v2",
   "date": "2026-09-20",
   "canonical_branch": "main",
-  "architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__CANONICAL_MESH_SHARED_DOMAIN__CAA",
+  "architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__MECHANICAL_AND_VISUAL_MESH_OWNERSHIP_SPLIT__CAA",
   "subject_specific_code_forbidden": true,
   "stage_count": 46,
   "resume_contract": {
@@ -22,7 +22,11 @@
     "presentation_warp_v1_forbidden": true,
     "runtime_generation_forbidden": true,
     "canonical_internal_alpha": "PREMULTIPLIED",
-    "compiled_unobserved_exposure": "FROZEN_BUDGET_GATE"
+    "compiled_unobserved_exposure": "FROZEN_BUDGET_GATE",
+    "visual_geometry_authority": "SOURCE_ART_SILHOUETTE_VISUAL_MESH",
+    "mechanical_mesh_render_authority": false,
+    "visual_mesh_uv_contract": "FIXED_SOURCE_RASTER_UV",
+    "visual_deformation_contract": "BARYCENTRIC_MECHANICAL_BINDING_PLUS_ARAP_2D"
   },
   "first_knight_v2_contract": {
     "source_view_count": 8,
@@ -369,9 +373,10 @@
     {
       "ordinal": 18,
       "id": "18_CANONICAL_MESH_ADDRESSING_BUILD",
-      "title": "Canonical mesh candidate plus stable surface addressing and appearance domain",
+      "title": "Canonical mechanical mesh plus source-owned visual mesh, stable addressing and appearance domain",
       "group": "mesh",
       "depends_on": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
         "15_RIGGING_SURFACE_QUALIFIED",
         "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
         "17_MECHANICAL_PARTITION_QUALIFIED"

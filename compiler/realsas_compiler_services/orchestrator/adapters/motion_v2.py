@@ -90,6 +90,47 @@ def _motion_assets(ctx: dict):
     return tuple(assets), payloads
 
 
+def _demo_failed_rest_precondition_admissible(
+    ctx: dict,
+    rest_proof: dict,
+) -> bool:
+    if str(ctx["ledger"].get("execution_class") or "") != "DEMO_WITNESS":
+        return False
+    demo = dict(ctx["run_manifest"].get("demo_execution") or {})
+    if (
+        demo.get("stage13_scientific_pass") is not False
+        or demo.get("product_authority_claimed") is not False
+    ):
+        return False
+    stage25 = next(
+        (
+            row
+            for row in ctx["ledger"].get("stages") or ()
+            if str(row.get("id") or "")
+            == "25_CAA_REFERENCE_REST_RENDER_PROOF"
+        ),
+        None,
+    )
+    if (
+        stage25 is None
+        or str(stage25.get("status") or "") != "PASS_DEMO_ONLY"
+    ):
+        return False
+    report = dict(rest_proof.get("qualification_report") or {})
+    metadata = dict(rest_proof.get("metadata") or {})
+    return (
+        report.get("status") == "FAIL_CAA_REFERENCE_REST"
+        and report.get("every_direction_passed") is False
+        and report.get("demo_only_measured_failure_admission") is True
+        and report.get("strict_rest_proof_passed") is False
+        and report.get("product_pass") is False
+        and report.get("product_authority_claimed") is False
+        and metadata.get("demo_only_measurement") is True
+        and metadata.get("strict_failure_preserved") is True
+        and metadata.get("product_authority_claimed") is False
+    )
+
+
 def seal_motion_source_stage(ctx: dict) -> dict:
     mechanical = canonical_puppet_state_from_dict(
         stage_output_payload(
@@ -103,8 +144,22 @@ def seal_motion_source_stage(ctx: dict) -> dict:
         "25_CAA_REFERENCE_REST_RENDER_PROOF",
         "RealSaS.CAARestRenderProofIR.v2",
     )
-    if str(rest_proof.get("qualification_report", {}).get("status")) != "PASS_CAA_REFERENCE_REST":
-        raise QualificationError("MOTION_V2_CAA_REST_PRECONDITION_NOT_PASS")
+    strict_rest_pass = (
+        str(
+            rest_proof.get("qualification_report", {}).get("status")
+        )
+        == "PASS_CAA_REFERENCE_REST"
+    )
+    demo_rest_measurement = (
+        not strict_rest_pass
+        and _demo_failed_rest_precondition_admissible(
+            ctx, rest_proof
+        )
+    )
+    if not strict_rest_pass and not demo_rest_measurement:
+        raise QualificationError(
+            "MOTION_V2_CAA_REST_PRECONDITION_NOT_PASS"
+        )
 
     assets, _payloads = _motion_assets(ctx)
     source_set = build_motion_source_set(
@@ -127,19 +182,38 @@ def seal_motion_source_stage(ctx: dict) -> dict:
             "motion_quality_claimed": False,
             "stage40_compile_required": True,
             "stage41_dynamic_proof_required": True,
-            "rest_precondition_kind": "CAA_REFERENCE_REST_PROOF_V2",
+            "rest_precondition_kind": (
+                "CAA_REFERENCE_REST_PROOF_V2"
+                if strict_rest_pass
+                else "DEMO_ONLY_MEASURED_CAA_REFERENCE_REST_FAILURE_V2"
+            ),
+            "strict_rest_precondition_passed": bool(
+                strict_rest_pass
+            ),
+            "demo_only_measured_rest_failure": bool(
+                demo_rest_measurement
+            ),
+            "product_authority_claimed": False,
         },
         motion_source_seal_hash="",
         metadata={
             "legacy_rest_preservation_ir_used": False,
             "caa_rest_proof_binding_hash": str(rest_proof["proof_hash"]),
             "professional_motion_source_required": True,
+            "demo_only_rest_measurement": bool(
+                demo_rest_measurement
+            ),
+            "product_authority_claimed": False,
         },
     )
     seal = replace(seal, motion_source_seal_hash=motion_source_seal_hash(seal))
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     return {
-        "status": "PASS",
+        "status": (
+            "PASS_DEMO_ONLY"
+            if demo_rest_measurement
+            else "PASS"
+        ),
         "outputs": [
             write_ir(
                 root / "motion_source_set.json",
@@ -157,6 +231,13 @@ def seal_motion_source_stage(ctx: dict) -> dict:
             "motion_source_seal_hash": seal.motion_source_seal_hash,
             "clip_ids": [asset.clip_id for asset in source_set.assets],
             "caa_rest_proof_binding_hash": str(rest_proof["proof_hash"]),
+            "strict_rest_precondition_passed": bool(
+                strict_rest_pass
+            ),
+            "demo_only_measured_rest_failure": bool(
+                demo_rest_measurement
+            ),
+            "product_authority_claimed": False,
         },
     }
 

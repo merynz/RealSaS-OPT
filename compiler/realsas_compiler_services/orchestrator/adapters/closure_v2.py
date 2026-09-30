@@ -42,6 +42,7 @@ from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import 
     sha256_file,
     stage_output_payload,
     write_ir,
+    write_json,
 )
 from compiler.realsas_compiler_core.types import QualificationError
 
@@ -287,14 +288,47 @@ def _build_editable_bundle(ctx: dict, root: Path) -> tuple[Path, str, dict]:
             appearance_asset.textures,
             key=lambda row: row.direction_index,
         ):
-            file_rows.append(
-                _zip_add_file(
-                    archive,
-                    f"appearance/{texture.direction_id}_appearance.png",
-                    Path(texture.transport_png_path),
-                    texture.transport_png_sha256,
+            metadata = dict(texture.metadata or {})
+            raw_pages = tuple(metadata.get("pages") or ())
+            if raw_pages:
+                page_rows = tuple(
+                    sorted(
+                        (dict(row) for row in raw_pages),
+                        key=lambda row: int(row["page_index"]),
+                    )
                 )
-            )
+                if tuple(int(row["page_index"]) for row in page_rows) != tuple(
+                    range(len(page_rows))
+                ):
+                    raise QualificationError(
+                        "V2_AUTHORING_CAA_PAGE_INDEX_SEQUENCE_DRIFT"
+                    )
+                if int(metadata.get("page_count", len(page_rows))) != len(page_rows):
+                    raise QualificationError(
+                        "V2_AUTHORING_CAA_PAGE_COUNT_DRIFT"
+                    )
+                for row in page_rows:
+                    page_index = int(row["page_index"])
+                    file_rows.append(
+                        _zip_add_file(
+                            archive,
+                            (
+                                f"appearance/{texture.direction_id}_appearance_"
+                                f"p{page_index}.png"
+                            ),
+                            Path(str(row["path"])),
+                            str(row["sha256"]),
+                        )
+                    )
+            else:
+                file_rows.append(
+                    _zip_add_file(
+                        archive,
+                        f"appearance/{texture.direction_id}_appearance.png",
+                        Path(texture.transport_png_path),
+                        texture.transport_png_sha256,
+                    )
+                )
 
         bundle_manifest = {
             "schema": "RealSaS.EditablePuppetBundleManifest.v2",
@@ -310,6 +344,7 @@ def _build_editable_bundle(ctx: dict, root: Path) -> tuple[Path, str, dict]:
             "appearance_qualification_hash": appearance_qualification.qualification_hash,
             "motion_hash": motion.motion_lineage_hash,
             "appearance_authority": "COMPLETE_APPEARANCE_AUTHORITY_V2",
+            "appearance_page_transport_complete": True,
             "runtime_generation_required": False,
             "editable": True,
             "qualification_scope": "SEALED_EXPORTED_STATE_ONLY",
@@ -336,6 +371,44 @@ def _build_editable_bundle(ctx: dict, root: Path) -> tuple[Path, str, dict]:
 
 
 def seal_product_closure_stage(ctx: dict) -> dict:
+    if str(ctx["ledger"].get("execution_class") or "") == "DEMO_WITNESS":
+        root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+        archive_path, archive_sha, authoring_manifest = _build_editable_bundle(ctx, root)
+        payload = {
+            "schema": "RealSaS.DemoClosureV2.v1",
+            "status": "PASS_DEMO_ONLY",
+            "run_id": str(ctx["ledger"].get("run_id") or ""),
+            "subject_id": str(ctx["ledger"].get("subject_id") or ""),
+            "product_pass": False,
+            "product_authority_claimed": False,
+            "stage13_scientific_pass": False,
+            "editable_authoring_archive_sha256": archive_sha,
+            "authoring_manifest_sha256": authoring_manifest["manifest_sha256"],
+            "note": "Demo closure only; canonical Stage13 scientific qualification did not pass.",
+        }
+        return {
+            "status": "PASS_DEMO_ONLY",
+            "outputs": [
+                write_json(
+                    root / "demo_closure_v2.json",
+                    payload,
+                    authority_class="DEMO_ONLY_CLOSURE_V2",
+                    schema="RealSaS.DemoClosureV2.v1",
+                ),
+                {
+                    "path": str(archive_path),
+                    "sha256": archive_sha,
+                    "authority_class": "DEMO_ONLY_EDITABLE_PUPPET_ARCHIVE_V2",
+                    "schema": "application/x-realsas-editable-v2",
+                },
+            ],
+            "diagnostics": {
+                "product_pass": False,
+                "product_authority_claimed": False,
+                "demo_closure": True,
+                "editable_authoring_archive_sha256": archive_sha,
+            },
+        }
     complete = complete_puppet_state_v2_from_dict(
         stage_output_payload(
             ctx,

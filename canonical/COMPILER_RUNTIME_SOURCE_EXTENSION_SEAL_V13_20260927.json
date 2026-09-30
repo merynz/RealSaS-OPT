@@ -1,0 +1,34 @@
+{
+  "schema": "realsas.compiler_runtime_source_extension_seal.v13",
+  "sealed_on": "2026-09-27",
+  "prior_extension": {
+    "path": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V12_20260927.json",
+    "git_blob_sha1": "a2264049f5be48e3a4496580a790b9abd15da209",
+    "role": "IMMUTABLE_PRIOR_EXTENSION_PROVENANCE"
+  },
+  "authority": {
+    "extension_scope": "RUNTIME_V2_EXPLICIT_CAA_UNSUPPORTED_ABSTENTION_PROVENANCE",
+    "historical_base_seal_mutated": false,
+    "prior_extension_mutated": false,
+    "product_pass_claimed": false,
+    "knight_witness_used": false,
+    "runtime_role": "subordinate_deployment_consumer",
+    "subtree_closure": "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME"
+  },
+  "replacements": [
+    {
+      "path": "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp",
+      "size_bytes": 38916,
+      "git_blob_sha1": "f5602a391ca3c7020503e25638bc48f2f1855914",
+      "reason": "validate typed CAA provenance lineage exactly: direct/other source use donor 0..7, bounded harmonic uses -2, unsupported compiler abstention uses -4, and 255 remains physical padding only"
+    }
+  ],
+  "additions": [],
+  "closure": {
+    "runtime_realsas_cpp_blob_count": 25,
+    "replacement_count": 1,
+    "addition_count": 0,
+    "resulting_sealed_blob_count": 25,
+    "unsealed_repository_blob_count_under_subtree": 0
+  }
+}

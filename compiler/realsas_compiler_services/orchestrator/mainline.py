@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import ast
 import hashlib
 import importlib
@@ -12,13 +13,20 @@ from pathlib import Path
 from time import perf_counter
 from typing import Any
 
+from compiler.realsas_compiler_services.orchestrator.status_semantics import (
+    DEMO_ONLY_STATUS,
+    FAIL_STATUSES,
+    PASS_STATUSES,
+    assert_demo_only_scope,
+    dependency_status_admissible,
+    normalize_success_status,
+)
+
 ROOT = Path(__file__).resolve().parents[3]
 PLAN_PATH = ROOT / "canonical" / "MAINLINE_EXECUTION_PLAN_V2.json"
 LEDGER_PATH = ROOT / "canonical" / "ACTIVE_RUN_V2.json"
 READINESS_PATH = ROOT / "canonical" / "V2_IMPLEMENTATION_READINESS.json"
 
-PASS_STATUSES = {"PASS", "CACHE_HIT"}
-FAIL_STATUSES = {"FAIL", "ABSTAIN", "BLOCKED"}
 _STAGE_RE = re.compile(r"^\d{2}_[A-Z0-9_]+$")
 
 
@@ -61,6 +69,29 @@ def atomic_json(path: Path, value: dict) -> None:
     tmp = path.with_suffix(path.suffix + ".tmp")
     tmp.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     tmp.replace(path)
+
+
+def _persist_failure_diagnostics(
+    *,
+    run_id: str,
+    stage_id: str,
+    diagnostics: Any,
+) -> dict:
+    payload = {
+        "schema": "RealSaS.StageFailureDiagnostics.v1",
+        "run_id": str(run_id),
+        "stage_id": str(stage_id),
+        "diagnostics": _canon(diagnostics),
+    }
+    root = authority_root() / "runs" / str(run_id) / "artifacts" / str(stage_id)
+    path = root / "failure_diagnostics.json"
+    atomic_json(path, payload)
+    return {
+        "path": str(path.resolve()),
+        "sha256": sha256_file(path),
+        "bytes": path.stat().st_size,
+        "diagnostics_hash": content_sha256(diagnostics),
+    }
 
 
 def _stage_map(plan: dict) -> dict[str, dict]:
@@ -390,6 +421,41 @@ def validate_witness_authorization(plan: dict | None = None) -> str:
     return readiness_digest
 
 
+
+def validate_demo_witness_authorization(manifest: dict, *, subject_id: str) -> str:
+    demo=dict(manifest.get("demo_execution") or {})
+    if str(demo.get("schema") or "")!="RealSaS.DemoExecutionAuthorization.v1":
+        raise RuntimeError("DEMO_WITNESS_AUTHORIZATION_SCHEMA_INVALID")
+    if str(demo.get("mode") or "")!="DEMO_ONLY":
+        raise RuntimeError("DEMO_WITNESS_MODE_INVALID")
+    if demo.get("explicit_user_approval") is not True:
+        raise RuntimeError("DEMO_WITNESS_EXPLICIT_USER_APPROVAL_REQUIRED")
+    if demo.get("product_authority_claimed") is not False:
+        raise RuntimeError("DEMO_WITNESS_PRODUCT_AUTHORITY_FORBIDDEN")
+    if demo.get("stage13_scientific_pass") is not False:
+        raise RuntimeError("DEMO_WITNESS_STAGE13_SCIENTIFIC_STATE_DRIFT")
+    if demo.get("allow_stage13_scientific_fail_for_demo") is not True:
+        raise RuntimeError("DEMO_WITNESS_STAGE13_DEMO_ADMISSION_REQUIRED")
+    if str(manifest.get("subject_id") or "")!=str(subject_id):
+        raise RuntimeError("DEMO_WITNESS_SUBJECT_ID_DRIFT")
+    authority=dict(demo.get("authority") or {})
+    rel=str(authority.get("path") or "")
+    expected=str(authority.get("sha256") or "")
+    path=(ROOT/rel).resolve()
+    if not rel or len(expected)!=64 or ROOT not in path.parents or not path.is_file():
+        raise RuntimeError("DEMO_WITNESS_AUTHORITY_REF_INVALID")
+    if sha256_file(path)!=expected:
+        raise RuntimeError("DEMO_WITNESS_AUTHORITY_SHA_DRIFT")
+    payload=load_json(path)
+    if str(payload.get("schema") or "")!="RealSaS.DemoExecutionAuthority.v1":
+        raise RuntimeError("DEMO_WITNESS_AUTHORITY_SCHEMA_DRIFT")
+    if str(payload.get("status") or "")!="APPROVED_DEMO_ONLY":
+        raise RuntimeError("DEMO_WITNESS_AUTHORITY_NOT_APPROVED")
+    if payload.get("product_authority_claimed") is not False or payload.get("stage13_scientific_pass") is not False:
+        raise RuntimeError("DEMO_WITNESS_AUTHORITY_SCOPE_DRIFT")
+    return content_sha256(payload)
+
+
 def validate_ledger(plan: dict, ledger: dict) -> None:
     plan_hash = validate_plan(plan)
     if ledger.get("schema") != "RealSaS.ActiveRunLedger.v2":
@@ -397,8 +463,9 @@ def validate_ledger(plan: dict, ledger: dict) -> None:
     if ledger.get("canonical_branch") != "main":
         raise RuntimeError("ACTIVE_RUN_V2_LEDGER_BRANCH_DRIFT")
     execution_class = str(ledger.get("execution_class") or "WITNESS")
-    if execution_class not in {"WITNESS", "IMPLEMENTATION_AUDIT"}:
+    if execution_class not in {"WITNESS", "IMPLEMENTATION_AUDIT", "DEMO_WITNESS"}:
         raise RuntimeError("ACTIVE_RUN_V2_EXECUTION_CLASS_INVALID")
+    assert_demo_only_scope(ledger)
     if (
         execution_class == "IMPLEMENTATION_AUDIT"
         and not str(ledger.get("subject_id") or "").startswith("SUBJECT_FREE_")
@@ -420,15 +487,20 @@ def validate_ledger(plan: dict, ledger: dict) -> None:
         row = by_id[stage["id"]]
         if int(row.get("ordinal", -1)) != int(stage["ordinal"]):
             raise RuntimeError(f"ACTIVE_RUN_V2_LEDGER_ORDINAL_DRIFT:{stage['id']}")
-        if row.get("status") in PASS_STATUSES:
+        if dependency_status_admissible(ledger, str(row.get("status") or "")):
             for dependency in stage.get("depends_on", ()):
-                if by_id[str(dependency)].get("status") not in PASS_STATUSES:
+                if not dependency_status_admissible(
+                    ledger, str(by_id[str(dependency)].get("status") or "")
+                ):
                     raise RuntimeError(
                         "ACTIVE_RUN_V2_PASS_WITH_UNPASSED_DEPENDENCY:"
                         f"{stage['id']}:{dependency}"
                     )
 
-    completed = sum(row.get("status") in PASS_STATUSES for row in rows)
+    completed = sum(
+        dependency_status_admissible(ledger, str(row.get("status") or ""))
+        for row in rows
+    )
     if int(ledger.get("completed_count", -1)) != completed:
         raise RuntimeError("ACTIVE_RUN_V2_LEDGER_PROGRESS_DRIFT")
     expected_ready = list(ready_stage_ids(plan, ledger))
@@ -481,7 +553,7 @@ def build_fresh_run_ledger(
         for stage in plan["stages"]
     ]
     execution_class = str(execution_class).upper()
-    if execution_class not in {"WITNESS", "IMPLEMENTATION_AUDIT"}:
+    if execution_class not in {"WITNESS", "IMPLEMENTATION_AUDIT", "DEMO_WITNESS"}:
         raise RuntimeError(f"RUN_EXECUTION_CLASS_INVALID:{execution_class}")
     if execution_class == "IMPLEMENTATION_AUDIT" and not str(subject_id).startswith("SUBJECT_FREE_"):
         raise RuntimeError("IMPLEMENTATION_AUDIT_REQUIRES_SUBJECT_FREE_SUBJECT_ID")
@@ -589,7 +661,30 @@ def _adapter_impl_hash(adapter: str) -> str:
 
 
 def _manifest_subset(manifest: dict, stage: dict) -> dict:
-    return {key: manifest.get(key) for key in stage["manifest_keys"]}
+    """Return only manifest state semantically consumed by this stage.
+
+    External-fit preregistration must remain immutable when execution artifacts
+    are filled in later. Stages 26/30 read only the preregistration ref; their
+    downstream execution stages fingerprint the complete fit section.
+    """
+    stage_id = str(stage.get("id") or "")
+    subset = {}
+    for key in stage["manifest_keys"]:
+        value = manifest.get(key)
+        if (
+            stage_id == "26_GEPPETTO_FIT_PREREGISTERED"
+            and key == "geppetto_fit"
+        ) or (
+            stage_id == "30_ARACHNE_FIT_PREREGISTERED"
+            and key == "arachne_fit"
+        ):
+            cfg = dict(value or {})
+            subset[key] = _canon(
+                {"preregistration": cfg.get("preregistration")}
+            )
+        else:
+            subset[key] = copy.deepcopy(_canon(value))
+    return copy.deepcopy(subset)
 
 
 def _path_within(path: Path, root: Path) -> bool:
@@ -623,6 +718,172 @@ def _outputs_verify(row: dict, *, allowed_root: Path | None = None) -> bool:
         ):
             return False
     return True
+
+
+def _historical_import_fingerprint(
+    *,
+    ledger: dict,
+    manifest: dict,
+    stage: dict,
+    historical_import: dict,
+) -> tuple[str, str]:
+    policy_hash = content_sha256(stage["policy"])
+    manifest_subset_hash = content_sha256(_manifest_subset(manifest, stage))
+    fingerprint = content_sha256(
+        {
+            "schema": "RealSaS.HistoricalStageInputFingerprint.v1",
+            "run_id": str(ledger["run_id"]),
+            "stage_id": str(stage["id"]),
+            "pipeline_plan_sha256": str(ledger["pipeline_plan_sha256"]),
+            "archive_sha256": str(
+                historical_import.get("archive_sha256") or ""
+            ),
+            "source_output_sha256": str(
+                historical_import.get("source_output_sha256") or ""
+            ),
+            "authority_sha256": str(
+                historical_import.get("authority_sha256") or ""
+            ),
+            "manifest_subset_hash": manifest_subset_hash,
+            "policy_hash": policy_hash,
+        }
+    )
+    return fingerprint, policy_hash
+
+
+def _verify_historical_imported_pass(
+    *,
+    plan: dict,
+    ledger: dict,
+    manifest: dict,
+    stage: dict,
+    row: dict,
+) -> bool:
+    historical_import = dict(row.get("historical_import") or {})
+    if not historical_import:
+        return False
+    if str(ledger.get("execution_class") or "") != "DEMO_WITNESS":
+        return False
+    if (
+        str(historical_import.get("schema") or "")
+        != "RealSaS.HistoricalStageImportIdentity.v1"
+    ):
+        return False
+    if str(historical_import.get("stage_id") or "") != str(stage["id"]):
+        return False
+
+    run_root = (
+        authority_root() / "runs" / str(ledger["run_id"])
+    ).resolve()
+    archive_path = Path(
+        str(historical_import.get("archive_path") or "")
+    ).expanduser().resolve()
+    archive_sha256 = str(
+        historical_import.get("archive_sha256") or ""
+    )
+    if (
+        not _path_within(archive_path, run_root)
+        or not archive_path.is_file()
+        or len(archive_sha256) != 64
+        or sha256_file(archive_path) != archive_sha256
+    ):
+        return False
+
+    authority_rel = str(
+        historical_import.get("authority_path") or ""
+    )
+    authority_path = (ROOT / authority_rel).resolve()
+    authority_sha256 = str(
+        historical_import.get("authority_sha256") or ""
+    )
+    if (
+        not authority_rel
+        or not _path_within(authority_path, ROOT)
+        or not authority_path.is_file()
+        or len(authority_sha256) != 64
+        or sha256_file(authority_path) != authority_sha256
+    ):
+        return False
+    authority = load_json(authority_path)
+    if (
+        str(authority.get("schema") or "")
+        != "RealSaS.DemoHistoricalStageImportAuthority.v1"
+        or str(authority.get("status") or "") != "APPROVED_DEMO_ONLY"
+        or str(authority.get("target_run_id") or "")
+        != str(ledger["run_id"])
+        or str(authority.get("subject_id") or "")
+        != str(ledger.get("subject_id") or "")
+    ):
+        return False
+    scope = dict(authority.get("scope") or {})
+    if (
+        str(scope.get("execution_class") or "") != "DEMO_WITNESS"
+        or scope.get("product_authority_claimed") is not False
+        or scope.get("scientific_product_pass_forbidden") is not True
+        or scope.get("exact_byte_import_required") is not True
+        or scope.get("recomputation_forbidden") is not True
+    ):
+        return False
+
+    stage_id = str(stage["id"])
+    if stage_id not in tuple(
+        map(str, authority.get("imported_stage_ids") or ())
+    ):
+        return False
+    expected_output = dict(
+        (authority.get("exact_outputs") or {}).get(stage_id) or {}
+    )
+    outputs = list(row.get("outputs") or ())
+    if len(outputs) != 1 or not expected_output:
+        return False
+    output = outputs[0]
+    if (
+        str(output.get("sha256") or "")
+        != str(expected_output.get("sha256") or "")
+        or int(output.get("bytes", -1))
+        != int(expected_output.get("bytes", -2))
+        or str(output.get("schema") or "")
+        != str(expected_output.get("schema") or "")
+        or str(output.get("authority_class") or "")
+        != str(expected_output.get("authority_class") or "")
+        or str(historical_import.get("source_output_sha256") or "")
+        != str(expected_output.get("sha256") or "")
+        or str(historical_import.get("source_member") or "")
+        != str(expected_output.get("member") or "")
+        or archive_sha256
+        != str(
+            (
+                authority.get("source_evidence_archive") or {}
+            ).get("sha256")
+            or ""
+        )
+    ):
+        return False
+
+    fingerprint, policy_hash = _historical_import_fingerprint(
+        ledger=ledger,
+        manifest=manifest,
+        stage=stage,
+        historical_import=historical_import,
+    )
+    if (
+        str(row.get("input_fingerprint") or "") != fingerprint
+        or str(row.get("policy_hash") or "") != policy_hash
+        or str(
+            historical_import.get("manifest_subset_hash") or ""
+        )
+        != content_sha256(_manifest_subset(manifest, stage))
+        or str(historical_import.get("policy_hash") or "")
+        != policy_hash
+    ):
+        return False
+
+    return _outputs_verify(
+        row,
+        allowed_root=(
+            run_root / "artifacts" / stage_id
+        ),
+    )
 
 
 def _fingerprint(
@@ -694,7 +955,12 @@ def ready_stage_ids(plan: dict, ledger: dict) -> tuple[str, ...]:
         if row.get("status") != "PENDING":
             continue
         dependencies = tuple(map(str, stage.get("depends_on", ())))
-        if all(rows[dependency].get("status") in PASS_STATUSES for dependency in dependencies):
+        if all(
+            dependency_status_admissible(
+                ledger, str(rows[dependency].get("status") or "")
+            )
+            for dependency in dependencies
+        ):
             ready.append(stage_id)
     return tuple(sorted(ready, key=lambda stage_id: (ordinal[stage_id], stage_id)))
 
@@ -702,7 +968,8 @@ def ready_stage_ids(plan: dict, ledger: dict) -> tuple[str, ...]:
 def _refresh(plan: dict, ledger: dict) -> None:
     rows = ledger["stages"]
     ledger["completed_count"] = sum(
-        row.get("status") in PASS_STATUSES for row in rows
+        dependency_status_admissible(ledger, str(row.get("status") or ""))
+        for row in rows
     )
     ledger["failed_count"] = sum(row.get("status") in FAIL_STATUSES for row in rows)
     ledger["total_count"] = len(rows)
@@ -717,7 +984,11 @@ def _refresh(plan: dict, ledger: dict) -> None:
         and _ledger_map(ledger)[stage["id"]].get("status") == "PENDING"
     }
     if ledger["completed_count"] == len(rows):
-        ledger["status"] = "PASS__ALL_46_STAGES"
+        ledger["status"] = (
+            "PASS_DEMO_ONLY__ALL_46_STAGES"
+            if any(str(row.get("status") or "") == DEMO_ONLY_STATUS for row in rows)
+            else "PASS__ALL_46_STAGES"
+        )
     elif ledger["failed_count"]:
         ledger["status"] = "ACTIVE_WITH_FAILED_BRANCHES"
     elif ledger["ready_stage_ids"]:
@@ -744,6 +1015,7 @@ def _invalidate_dependents(
     for row in ledger["stages"]:
         if row["id"] not in invalid:
             continue
+        row.pop("historical_import", None)
         row.update(
             status="PENDING",
             input_fingerprint="",
@@ -812,29 +1084,82 @@ def _verify_existing_passes(plan: dict, ledger: dict, manifest: dict) -> bool:
     for stage_id in topological_stage_ids(plan):
         stage = _stage_map(plan)[stage_id]
         row = _ledger_map(ledger)[stage_id]
-        if row.get("status") not in PASS_STATUSES:
+        if not dependency_status_admissible(ledger, str(row.get("status") or "")):
+            continue
+
+        if row.get("historical_import"):
+            valid = _verify_historical_imported_pass(
+                plan=plan,
+                ledger=ledger,
+                manifest=manifest,
+                stage=stage,
+                row=row,
+            )
+        else:
+            implementation_hash = _adapter_impl_hash(stage["adapter"])
+            fingerprint, policy_hash = _fingerprint(
+                plan, ledger, manifest, stage, implementation_hash
+            )
+            valid = (
+                row.get("input_fingerprint") == fingerprint
+                and row.get("implementation_hash") == implementation_hash
+                and row.get("policy_hash") == policy_hash
+                and _outputs_verify(
+                    row,
+                    allowed_root=(
+                        authority_root()
+                        / "runs"
+                        / str(ledger["run_id"])
+                        / "artifacts"
+                        / stage_id
+                    ),
+                )
+            )
+        if not valid:
+            _invalidate_dependents(
+                plan, ledger, stage_id, "STALE_PASS_IDENTITY"
+            )
+            changed = True
+            break
+    return changed
+
+
+def _reset_stale_failures(plan: dict, ledger: dict, manifest: dict) -> bool:
+    """Re-open failed branches only when their exact execution identity changed.
+
+    A stable FAIL remains sealed. If adapter implementation, manifest inputs,
+    dependency identities, policy, or pipeline identity changes, the failed stage
+    and its dependent subgraph return to PENDING for a truthful retry.
+    """
+    changed = False
+    rows = _ledger_map(ledger)
+    for stage_id in topological_stage_ids(plan):
+        stage = _stage_map(plan)[stage_id]
+        row = rows[stage_id]
+        if str(row.get("status") or "") not in FAIL_STATUSES:
+            continue
+        dependencies = tuple(map(str, stage.get("depends_on", ())))
+        if not all(
+            dependency_status_admissible(
+                ledger, str(rows[dependency].get("status") or "")
+            )
+            for dependency in dependencies
+        ):
             continue
         implementation_hash = _adapter_impl_hash(stage["adapter"])
         fingerprint, policy_hash = _fingerprint(
             plan, ledger, manifest, stage, implementation_hash
         )
         if (
-            row.get("input_fingerprint") != fingerprint
-            or row.get("implementation_hash") != implementation_hash
-            or row.get("policy_hash") != policy_hash
-            or not _outputs_verify(
-                row,
-                allowed_root=(
-                    authority_root()
-                    / "runs"
-                    / str(ledger["run_id"])
-                    / "artifacts"
-                    / stage_id
-                ),
-            )
+            str(row.get("input_fingerprint") or "") != fingerprint
+            or str(row.get("implementation_hash") or "") != implementation_hash
+            or str(row.get("policy_hash") or "") != policy_hash
         ):
             _invalidate_dependents(
-                plan, ledger, stage_id, "STALE_PASS_IDENTITY"
+                plan,
+                ledger,
+                stage_id,
+                "STALE_FAILURE_IDENTITY",
             )
             changed = True
             break
@@ -881,6 +1206,7 @@ def _run_stage(
 
     module_name, _, function_name = stage["adapter"].partition(":")
     function = getattr(importlib.import_module(module_name), function_name)
+    row.pop("historical_import", None)
     row.update(
         status="RUNNING",
         attempts=int(row.get("attempts", 0)) + 1,
@@ -908,11 +1234,38 @@ def _run_stage(
     try:
         result = dict(function(ctx) or {})
         elapsed = perf_counter() - started
-        status = str(result.get("status", "FAIL")).upper()
-        if status != "PASS":
+        reported_status = str(result.get("status", "FAIL")).upper()
+        status = normalize_success_status(
+            plan=plan,
+            ledger=ledger,
+            stage_id=stage_id,
+            reported_status=reported_status,
+        )
+        if status != reported_status and status == DEMO_ONLY_STATUS:
+            ledger.setdefault("history", []).append(
+                {
+                    "event": "DEMO_ONLY_TAINT_PROPAGATED",
+                    "stage_id": stage_id,
+                    "reported_status": reported_status,
+                    "persisted_status": status,
+                    "demo_only_dependencies": [
+                        str(dep)
+                        for dep in stage.get("depends_on", ())
+                        if str(_ledger_map(ledger)[str(dep)].get("status") or "")
+                        == DEMO_ONLY_STATUS
+                    ],
+                }
+            )
+        if status not in PASS_STATUSES:
+            diagnostics = result.get("diagnostics", {})
+            diagnostics_ref = _persist_failure_diagnostics(
+                run_id=run_id,
+                stage_id=stage_id,
+                diagnostics=diagnostics,
+            )
             row.update(
                 status=status if status in FAIL_STATUSES else "FAIL",
-                diagnostics_hash=content_sha256(result.get("diagnostics", {})),
+                diagnostics_hash=diagnostics_ref["diagnostics_hash"],
                 blockers=list(
                     result.get("blockers")
                     or ["STAGE_ADAPTER_REPORTED_FAILURE"]
@@ -920,9 +1273,16 @@ def _run_stage(
                 wall_seconds=float(elapsed),
                 performance=dict(result.get("performance") or {}),
             )
+            ledger.setdefault("history", []).append(
+                {
+                    "event": "STAGE_FAILURE_DIAGNOSTICS_PERSISTED",
+                    "stage_id": stage_id,
+                    "diagnostics_ref": diagnostics_ref,
+                }
+            )
         else:
             row.update(
-                status="PASS",
+                status=status,
                 outputs=_seal_outputs(
                     list(result.get("outputs") or ()),
                     allowed_root=(
@@ -940,12 +1300,19 @@ def _run_stage(
             )
     except Exception as exc:
         elapsed = perf_counter() - started
+        diagnostics = {
+            "exception_type": type(exc).__name__,
+            "message": str(exc),
+        }
+        diagnostics_ref = _persist_failure_diagnostics(
+            run_id=run_id,
+            stage_id=stage_id,
+            diagnostics=diagnostics,
+        )
         row.update(
             status="FAIL",
             outputs=[],
-            diagnostics_hash=content_sha256(
-                {"exception_type": type(exc).__name__, "message": str(exc)}
-            ),
+            diagnostics_hash=diagnostics_ref["diagnostics_hash"],
             blockers=[f"EXCEPTION:{type(exc).__name__}:{exc}"],
             wall_seconds=float(elapsed),
             performance={},
@@ -956,6 +1323,7 @@ def _run_stage(
                 "stage_id": stage_id,
                 "exception_type": type(exc).__name__,
                 "message": str(exc),
+                "diagnostics_ref": diagnostics_ref,
             }
         )
     _refresh(plan, ledger)
@@ -996,6 +1364,12 @@ def execute(
             raise RuntimeError("IMPLEMENTATION_AUDIT_MANIFEST_FLAG_REQUIRED")
         if str(manifest_preview.get("subject_id") or "") != str(ledger.get("subject_id") or ""):
             raise RuntimeError("IMPLEMENTATION_AUDIT_SUBJECT_ID_DRIFT")
+    elif execution_class == "DEMO_WITNESS":
+        manifest_preview = load_json(run_manifest_path(run_id))
+        validate_demo_witness_authorization(
+            manifest_preview,
+            subject_id=str(ledger.get("subject_id") or ""),
+        )
     if ledger["run_id"] != run_id:
         raise RuntimeError(
             f"ACTIVE_RUN_V2_ID_MISMATCH:{ledger['run_id']}!={run_id}"
@@ -1015,12 +1389,17 @@ def execute(
     if _verify_existing_passes(plan, ledger, manifest):
         atomic_json(ledger_path, ledger)
 
+    while _reset_stale_failures(plan, ledger, manifest):
+        atomic_json(ledger_path, ledger)
+
     if not resume:
         for stage_id in sorted(
             target_set,
             key=lambda sid: int(_stage_map(plan)[sid]["ordinal"]),
         ):
-            if _ledger_map(ledger)[stage_id].get("status") in PASS_STATUSES:
+            if dependency_status_admissible(
+                ledger, str(_ledger_map(ledger)[stage_id].get("status") or "")
+            ):
                 _invalidate_dependents(plan, ledger, stage_id, "FORCED_RERUN")
 
     while True:
@@ -1080,7 +1459,7 @@ def status_text(plan: dict, ledger: dict) -> str:
         row = by_id[stage["id"]]
         mark = (
             "x"
-            if row["status"] in PASS_STATUSES
+            if dependency_status_admissible(ledger, str(row["status"]))
             else "!"
             if row["status"] in FAIL_STATUSES
             else "~"
@@ -1122,7 +1501,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     init.add_argument(
         "--execution-class",
-        choices=("WITNESS", "IMPLEMENTATION_AUDIT"),
+        choices=("WITNESS", "IMPLEMENTATION_AUDIT", "DEMO_WITNESS"),
         default="WITNESS",
     )
     run = sub.add_parser("execute")
@@ -1190,6 +1569,8 @@ def main(argv: list[str] | None = None) -> int:
             run_id=args.run_id,
             subject_id=args.subject_id,
         )
+        if args.execution_class == "DEMO_WITNESS":
+            validate_demo_witness_authorization(manifest_preview, subject_id=args.subject_id)
         if args.execution_class == "IMPLEMENTATION_AUDIT":
             if manifest_preview.get("implementation_audit") is not True:
                 raise RuntimeError("IMPLEMENTATION_AUDIT_MANIFEST_FLAG_REQUIRED")

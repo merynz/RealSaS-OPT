@@ -58,7 +58,7 @@ jobs:
 
       - name: Build exact native V2 reference player
         run: |
-          g++ -std=c++17 -O2 -Wall -Wextra -pedantic             runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp             -o "$REALSAS_RUNTIME_V2_PLAYER"
+          g++ -std=c++17 -O2 -Wall -Wextra -pedantic             runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp -lpng -lz -o "$REALSAS_RUNTIME_V2_PLAYER"
           sha256sum "$REALSAS_RUNTIME_V2_PLAYER"
 
       - name: Exact unmodified production-policy E2E wiring

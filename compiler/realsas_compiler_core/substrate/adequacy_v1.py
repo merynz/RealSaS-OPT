@@ -17,7 +17,11 @@ from ..hashing import content_sha256
 from ..types import QualificationError
 from .scene_first_signed import (
     _self_zbuffer_support,
+    mesh_connected_component_labels_v1,
     rigging_surface_from_scene_first_zero_mesh_v1,
+    topology_aware_zero_surface_normals_v2,
+    ZERO_SURFACE_NORMAL_OPERATOR_V2_ID,
+    zero_surface_normal_operator_hash_v2,
 )
 
 Json=dict[str,Any]
@@ -30,29 +34,7 @@ def substrate_adequacy_report_hash_v1(report:dict)->str:
 
 
 def _dense_component_labels(vertex_count:int,faces:np.ndarray)->np.ndarray:
-    parent=np.arange(int(vertex_count),dtype=np.int64)
-    rank=np.zeros(int(vertex_count),dtype=np.int8)
-
-    def find(x:int)->int:
-        while parent[x]!=x:
-            parent[x]=parent[parent[x]]
-            x=int(parent[x])
-        return x
-
-    def union(a:int,b:int)->None:
-        ra,rb=find(a),find(b)
-        if ra==rb: return
-        if rank[ra]<rank[rb]:
-            ra,rb=rb,ra
-        parent[rb]=ra
-        if rank[ra]==rank[rb]:
-            rank[ra]+=1
-
-    for a,b,c in np.asarray(faces,dtype=np.int64):
-        union(int(a),int(b)); union(int(b),int(c)); union(int(c),int(a))
-    roots=np.asarray([find(i) for i in range(int(vertex_count))],dtype=np.int64)
-    _,labels=np.unique(roots,return_inverse=True)
-    return labels.astype(np.int64)
+    return mesh_connected_component_labels_v1(vertex_count, faces)
 
 
 def _candidate_caps(policy:dict)->tuple[int,...]:
@@ -261,7 +243,14 @@ def select_adequate_rigging_surface_v1(
     # The public GSA builder recomputes robust normals per candidate. For adequacy
     # measurement we use the signed decoder normals as orientation-bearing dense
     # reference; selected S still uses the canonical robust PCA operator.
-    dense_normals=hints/np.linalg.norm(hints,axis=1,keepdims=True).clip(min=1e-12)
+    metric_dense_normals=hints/np.linalg.norm(hints,axis=1,keepdims=True).clip(min=1e-12)
+    gsa_dense_normals = topology_aware_zero_surface_normals_v2(
+        dense_world,
+        f,
+        hints,
+    )
+    gsa_normal_operator_id = ZERO_SURFACE_NORMAL_OPERATOR_V2_ID
+    gsa_normal_operator_hash = zero_surface_normal_operator_hash_v2()
     dense_labels=_dense_component_labels(len(vn),f)
     dense_support,dense_raster,_=_self_zbuffer_support(
         dense_world,dense_world,tuple(cameras),
@@ -285,10 +274,14 @@ def select_adequate_rigging_surface_v1(
             normal_k=int(normal_k),
             visibility_depth_tolerance_norm=float(visibility_depth_tolerance_norm),
             component_aware_compaction=bool(policy.get("component_aware_voxel_compaction",False)),
+            precomputed_dense_normals=gsa_dense_normals,
+            precomputed_normal_operator_id=gsa_normal_operator_id,
+            precomputed_normal_operator_hash=gsa_normal_operator_hash,
+            precomputed_component_labels=dense_labels,
             metadata={**dict(metadata or {}),"substrate_adequacy_candidate":True,"candidate_target_node_cap":cap},
         )
         metric=_metrics(
-            surface=surface,dense_world=dense_world,dense_normals=dense_normals,dense_labels=dense_labels,
+            surface=surface,dense_world=dense_world,dense_normals=metric_dense_normals,dense_labels=dense_labels,
             dense_support=dense_support,dense_raster=dense_raster,normalization_half_extent=half,policy=policy,
         )
         metric["candidate_target_node_cap"]=cap

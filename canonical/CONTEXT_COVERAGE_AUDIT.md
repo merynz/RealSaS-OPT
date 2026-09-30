@@ -11,8 +11,8 @@
 - Explained by continuity policy: **344**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **151**
-- Safe-default evidence-only branches: **147**
+- Live branches: **152**
+- Safe-default evidence-only branches: **148**
 
 ### Classification counts
 
@@ -41,6 +41,7 @@ _None._
 | `architecture/v4-generic-strength-source-completion-20260902` | `7f39a846ad05` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `audit/arachne-information-preservation-v1-20260910` | `94b4ef79e9b8` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `audit/final-completion-plan-20260902` | `00e930e788d3` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `audit/generic-main-normalization-20260930` | `908fbcc92072` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `audit/geppetto-v2-frozen-base-7f39` | `7f39a846ad05` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `audit/historical-product-power-rebind-20260913` | `2bba9828a3b3` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `audit/iris-architecture-discipline-20260824` | `d7bba01c85e9` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -97,14 +98,14 @@ _None._
 | `ignore-this` | `91b4593d5b2a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `integration/compiler-runtime-canonical-20260828` | `e423cd462002` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `integration/compiler-runtime-heavy-promotion-20260901` | `47892ffa16b7` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `integration/generic-main-promotion-20260930` | `1e7d983b2434` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `integration/generic-main-promotion-20260930` | `908fbcc92072` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `integration/mage-real-e2e-20260912` | `11d1fdfd4398` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `iris/mapanything-ortho-apache` | `3b66a4d2beb5` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `legacy-geppetto-arachne-reconcile-20260901` | `f687ff8e78a2` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `1e7d983b2434` | `CANONICAL` | canonical branch |
+| `main` | `56d2f460ca1d` | `CANONICAL` | canonical branch |
 | `motion/quaternius-direct-fbx-gate-v1-20260919` | `47fb1555455b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

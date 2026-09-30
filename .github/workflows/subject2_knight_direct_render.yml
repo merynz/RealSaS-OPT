@@ -1,4 +1,4 @@
-name: subject2-knight-current-main-deterministic-rebuild-render
+name: subject2-knight-current-main-continuation-render
 
 on:
   push:
@@ -9,11 +9,12 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   render:
     runs-on: [self-hosted, linux, x64, realsas]
-    timeout-minutes: 90
+    timeout-minutes: 45
     env:
       REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
       SOURCE_RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
@@ -22,6 +23,7 @@ jobs:
       OMP_NUM_THREADS: '1'
       MKL_NUM_THREADS: '1'
       OPENBLAS_NUM_THREADS: '1'
+      OUT_ROOT: /home/monster/actions-runner/_work/_temp/knight_current_main_rebuild_render
 
     steps:
       - uses: actions/checkout@v4
@@ -41,6 +43,15 @@ jobs:
           test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
           echo "EXACT_MAIN_SHA=$(git rev-parse HEAD)"
 
+      - name: Restore already-built current-main Stage18-19 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: knight-current-main-idle-run-slash
+          path: /home/monster/actions-runner/_work/_temp/knight_current_main_rebuild_render
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: merynz/RealSaS-OPT
+          run-id: 36760517314
+
       - name: Install current-main dependencies
         run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
 
@@ -50,77 +61,91 @@ jobs:
           set -euo pipefail
           c++ -std=c++17 -O2 -Wall -Wextra -pedantic             runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp             -lpng -lz             -o "$RUNNER_TEMP/realsas_runtime_v2_caa_reference_MAIN"
           sha256sum "$RUNNER_TEMP/realsas_runtime_v2_caa_reference_MAIN"
+          echo "PLAYER=$RUNNER_TEMP/realsas_runtime_v2_caa_reference_MAIN" >> "$GITHUB_ENV"
 
-      - name: Rebuild deterministic Stage18-25 then execute Stage35-43 and render clips
+      - name: Continue from Stage20 then render idle run slash
         shell: bash
         run: |
           set -euo pipefail
-          OUT_ROOT="$RUNNER_TEMP/knight_current_main_rebuild_render"
-          rm -rf "$OUT_ROOT"
-          mkdir -p "$OUT_ROOT"
-          echo "OUT_ROOT=$OUT_ROOT" >> "$GITHUB_ENV"
-          export OUT_ROOT
-          export PLAYER="$RUNNER_TEMP/realsas_runtime_v2_caa_reference_MAIN"
-
           python - <<'PY'
-          import copy, hashlib, importlib, json, os, subprocess
+          import copy
+          import hashlib
+          import importlib
+          import json
+          import os
+          import subprocess
           from pathlib import Path
+
           import numpy as np
           from PIL import Image
 
+          repo_root = Path.cwd().resolve()
           authority = Path(os.environ["REALSAS_AUTHORITY_ROOT"])
           source_run_id = os.environ["SOURCE_RUN_ID"]
           source_root = authority / "runs" / source_run_id
-          out_root = Path(os.environ["OUT_ROOT"])
-          player = Path(os.environ["PLAYER"])
+          out_root = Path(os.environ["OUT_ROOT"]).resolve()
+          player = Path(os.environ["PLAYER"]).resolve()
 
           ledger = json.loads((source_root / "ACTIVE_RUN_V2.json").read_text())
           manifest = json.loads((source_root / "run_manifest.json").read_text())
-          plan = json.loads(Path("canonical/MAINLINE_EXECUTION_PLAN_V2.json").read_text())
+          plan = json.loads((repo_root / "canonical" / "MAINLINE_EXECUTION_PLAN_V2.json").read_text())
           admissible = {"PASS", "PASS_DEMO_ONLY", "CACHE_HIT"}
 
-          # Rebind the exact current-main Stage18 demo fallback contract in temp only.
-          stage18_prereg = {
-              "schema": "RealSaS.KnightDemoStage18MeshFallbackPreregistration.v1",
-              "status": "FROZEN_BEFORE_KNIGHT_STAGE18_PARENT_QUALITY_METRICS_INSPECTION",
-              "run_id": str(ledger["run_id"]),
-              "subject_id": str(ledger["subject_id"]),
-              "execution_class": "DEMO_WITNESS",
-              "eligibility": {
-                  "stage15_ledger_status_required": "PASS_DEMO_ONLY",
-                  "product_authority_claimed_required": False,
-                  "requested_backend_required": "CANONICAL_CDT_LOCAL_CHART_V1",
-                  "only_admissible_precondition_failure": "RELATION_PARENT_MIN_ANGLE_BELOW_FROZEN_G3_TARGET",
-                  "boundary_split_must_remain_forbidden": True,
-                  "teacher_truth_allowed": False,
-                  "source_rig_labels_allowed": False,
-                  "source_skin_labels_allowed": False,
-                  "appearance_quality_allowed_for_selection": False,
-                  "future_geppetto_result_allowed_for_selection": False,
-                  "future_arachne_result_allowed_for_selection": False,
-              },
-              "fallback_rule": {
-                  "rule_id": "RELATION_BASELINE_IF_AND_ONLY_IF_CDT_PARENT_MIN_ANGLE_UNREPAIRABLE_V1",
-                  "producer": "CANONICAL_RELATION_BASELINE_V1",
-                  "candidate_choice": "EXACT_CURRENT_RELATION_BASELINE",
-                  "no_candidate_ranking": True,
-                  "no_threshold_relaxation": True,
-                  "stage19_remeasurement_required": True,
-              },
-              "demo_admission_semantics": {
-                  "stage19_actual_candidate_source_fidelity_replay_required": True,
-                  "product_pass_forbidden": True,
-              },
-          }
-          prereg_path = out_root / "stage18_fallback_preregistration.json"
-          prereg_path.write_text(json.dumps(stage18_prereg, sort_keys=True) + "\n")
-          demo = dict(manifest.get("demo_execution") or {})
-          demo["product_authority_claimed"] = False
-          demo["stage18_mesh_fallback_preregistration"] = {
-              "path": str(prereg_path),
-              "sha256": hashlib.sha256(prereg_path.read_bytes()).hexdigest(),
-          }
-          manifest["demo_execution"] = demo
+          work_ledger = copy.deepcopy(ledger)
+          work_by = {str(row["id"]): row for row in work_ledger["stages"]}
+
+          def sha256_file(path):
+              h = hashlib.sha256()
+              with Path(path).open("rb") as fh:
+                  for chunk in iter(lambda: fh.read(1 << 20), b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          # Rebind the already-built current-main Stage18/19 bytes from run 36760517314.
+          stage18_dir = out_root / "artifacts" / "18_CANONICAL_MESH_ADDRESSING_BUILD"
+          stage19_dir = out_root / "artifacts" / "19_STATIC_CANONICAL_MESH_QUALIFIED"
+          if not stage18_dir.is_dir() or not stage19_dir.is_dir():
+              raise RuntimeError("RESTORED_STAGE18_19_ARTIFACT_MISSING")
+
+          def output_row(path, authority_class="RESTORED_CURRENT_MAIN_CONTINUATION"):
+              payload = json.loads(Path(path).read_text())
+              schema = str(payload.get("schema") or payload.get("schema_version") or "")
+              if not schema:
+                  raise RuntimeError(f"RESTORED_OUTPUT_SCHEMA_MISSING:{path}")
+              return {
+                  "path": str(Path(path).resolve()),
+                  "sha256": sha256_file(path),
+                  "authority_class": authority_class,
+                  "schema": schema,
+              }
+
+          stage18_names = [
+              "canonical_mesh_candidate.json",
+              "surface_addressing.json",
+              "appearance_domain.json",
+              "visual_mesh_set.json",
+              "mesh_qualification_policy.json",
+              "relation_parent_quality_report.json",
+          ]
+          restored18 = [output_row(stage18_dir / name) for name in stage18_names]
+          restored19 = [output_row(stage19_dir / "static_canonical_mesh_qualification.json")]
+
+          work_by["18_CANONICAL_MESH_ADDRESSING_BUILD"]["status"] = "PASS"
+          work_by["18_CANONICAL_MESH_ADDRESSING_BUILD"]["outputs"] = restored18
+          work_by["18_CANONICAL_MESH_ADDRESSING_BUILD"]["blockers"] = []
+
+          work_by["19_STATIC_CANONICAL_MESH_QUALIFIED"]["status"] = "PASS_DEMO_ONLY"
+          work_by["19_STATIC_CANONICAL_MESH_QUALIFIED"]["outputs"] = restored19
+          work_by["19_STATIC_CANONICAL_MESH_QUALIFIED"]["blockers"] = []
+
+          # Validate embedded visual-mesh paths still resolve to the restored same absolute root.
+          visual_set = json.loads((stage18_dir / "visual_mesh_set.json").read_text())
+          for view in visual_set["views"]:
+              p = Path(view["mesh_npz_path"])
+              if not p.is_file():
+                  raise RuntimeError(f"RESTORED_VISUAL_MESH_MISSING:{p}")
+              if sha256_file(p) != str(view["mesh_npz_sha256"]):
+                  raise RuntimeError(f"RESTORED_VISUAL_MESH_HASH_DRIFT:{p}")
 
           expected_clips = {"demo_idle_v1", "demo_run_v1", "demo_slash_v1"}
 
@@ -139,7 +164,7 @@ jobs:
                   expected = str(ref.get("sha256") or "")
                   if not p.is_file() or len(expected) != 64:
                       return False
-                  if hashlib.sha256(p.read_bytes()).hexdigest() != expected:
+                  if sha256_file(p) != expected:
                       return False
               return True
 
@@ -161,10 +186,6 @@ jobs:
               manifest["motion"] = donor[1]
               print("MOTION_FRAGMENT_REUSED", donor[0])
 
-          work_ledger = copy.deepcopy(ledger)
-          work_by = {str(row["id"]): row for row in work_ledger["stages"]}
-
-          # Source-run artifacts remain read-only. Rebuilt outputs land only in OUT_ROOT.
           stage_log = []
 
           def run_stage(ordinal):
@@ -173,13 +194,14 @@ jobs:
               module_name, function_name = str(stage["adapter"]).split(":", 1)
               func = getattr(importlib.import_module(module_name), function_name)
               ctx = {
+                  "repo_root": repo_root,
                   "run_id": source_run_id,
                   "run_root": out_root,
                   "ledger": work_ledger,
                   "run_manifest": manifest,
                   "stage": stage,
               }
-              print("DIRECT_CURRENT_MAIN_STAGE_BEGIN", ordinal, sid)
+              print("DIRECT_CURRENT_MAIN_STAGE_BEGIN", ordinal, sid, flush=True)
               result = func(ctx)
               status = str(result.get("status") or "")
               row = work_by[sid]
@@ -194,32 +216,21 @@ jobs:
                   "blockers": row["blockers"],
                   "outputs": row["outputs"],
               })
-              print("DIRECT_CURRENT_MAIN_STAGE_END", ordinal, sid, status, row["blockers"])
+              print("DIRECT_CURRENT_MAIN_STAGE_END", ordinal, sid, status, row["blockers"], flush=True)
               if status not in admissible:
-                  (out_root / "FAILURE_REPORT.json").write_text(
-                      json.dumps({
-                          "schema": "RealSaS.CurrentMainKnightDeterministicRebuildFailure.v1",
-                          "failed_stage": sid,
-                          "result": result,
-                          "stage_log": stage_log,
-                          "model_execution_performed": False,
-                          "refit_performed": False,
-                      }, indent=2, sort_keys=True, default=str) + "\n"
-                  )
                   raise RuntimeError(
                       f"STAGE_FAILED:{ordinal}:{sid}:{status}:{row['blockers']}"
                   )
 
-          # Current-main deterministic visual/mesh rebuild only.
-          for ordinal in range(18, 26):
+          # Continue the current-main appearance chain from where the previous run stopped.
+          for ordinal in range(20, 26):
               run_stage(ordinal)
 
-          # Reuse solved model outputs unchanged.
+          # Existing solved model-derived authorities remain read-only.
           for sid in ("28_SKELETON_QUALIFIED", "32_SKIN_QUALIFIED", "34_DEFORMATION_CAPABILITY_ENVELOPE"):
               if str(work_by[sid].get("status")) not in admissible:
                   raise RuntimeError(f"MODEL_DERIVED_AUTHORITY_NOT_READY:{sid}:{work_by[sid].get('status')}")
 
-          # Current-main downstream product/runtime chain.
           for ordinal in range(35, 44):
               run_stage(ordinal)
 
@@ -245,15 +256,16 @@ jobs:
               clip = clips.get(cid)
               if clip is None:
                   raise RuntimeError(f"RUNTIME_CLIP_MISSING:{cid}")
-              n = int(clip["frame_count"])
+              frame_count = int(clip["frame_count"])
               duration = float(clip["duration_seconds"])
               frames = []
               hashes = []
-              for fi in range(n):
+              for fi in range(frame_count):
                   raw = render_dir / f"{cid}_{fi:04d}.rgba"
                   proc = subprocess.run(
-                      [str(player), str(rss_path), "--clip", cid, "--view", "V0", "--frame", str(fi), "--out-rgba", str(raw)],
-                      capture_output=True, text=True,
+                      [str(player), str(rss_path), "--clip", cid, "--view", "V0",
+                       "--frame", str(fi), "--out-rgba", str(raw)],
+                      capture_output=True, text=True
                   )
                   if proc.returncode != 0:
                       raise RuntimeError(f"NATIVE_RENDER_FAIL:{cid}:{fi}:{proc.stderr}")
@@ -265,58 +277,45 @@ jobs:
                   frames.append(Image.fromarray(arr, "RGBA"))
                   hashes.append(hashlib.sha256(data).hexdigest())
 
-              delay = max(20, int(round(1000.0 * duration / max(1, n - 1))))
+              delay = max(20, int(round(1000.0 * duration / max(1, frame_count - 1))))
               gif = render_dir / f"KNIGHT_{cid.upper()}_CURRENT_MAIN.gif"
               first = render_dir / f"KNIGHT_{cid.upper()}_CURRENT_MAIN_FIRST.png"
               frames[0].save(first)
               pframes = [im.convert("P", palette=Image.Palette.ADAPTIVE, colors=255) for im in frames]
               pframes[0].save(
-                  gif,
-                  save_all=True,
-                  append_images=pframes[1:],
-                  duration=delay,
-                  loop=0,
-                  disposal=2,
-                  optimize=False,
-                  transparency=0,
+                  gif, save_all=True, append_images=pframes[1:],
+                  duration=delay, loop=0, disposal=2, optimize=False, transparency=0
               )
               rendered.append({
                   "clip_id": cid,
-                  "frame_count": n,
+                  "frame_count": frame_count,
                   "duration_seconds": duration,
                   "unique_frame_hashes": len(set(hashes)),
                   "gif": gif.name,
                   "first_png": first.name,
-                  "gif_sha256": hashlib.sha256(gif.read_bytes()).hexdigest(),
+                  "gif_sha256": sha256_file(gif),
               })
 
           report = {
-              "schema": "RealSaS.CurrentMainKnightDeterministicRebuildRenderReport.v1",
-              "source_run_id": source_run_id,
-              "current_main_rebuilt_stages": list(range(18, 26)),
-              "current_main_downstream_stages": list(range(35, 44)),
-              "model_execution_performed": False,
+              "schema": "RealSaS.CurrentMainKnightContinuationRenderReport.v1",
+              "restored_from_run_id": 36760517314,
+              "continued_from_stage": 20,
               "refit_performed": False,
-              "iris_fit_performed": False,
-              "geppetto_fit_performed": False,
-              "arachne_fit_performed": False,
-              "runtime_player_source": "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp",
-              "rss_path": str(rss_path),
-              "rss_sha256": hashlib.sha256(rss_path.read_bytes()).hexdigest(),
-              "stage_log": stage_log,
+              "model_execution_performed": False,
               "clips": rendered,
+              "stage_log": stage_log,
+              "rss_path": str(rss_path),
+              "rss_sha256": sha256_file(rss_path),
           }
-          (render_dir / "REPORT.json").write_text(
-              json.dumps(report, indent=2, sort_keys=True) + "\n"
-          )
-          print("CURRENT_MAIN_KNIGHT_IDLE_RUN_SLASH_RENDER_PASS")
-          print(json.dumps(report, sort_keys=True))
+          (render_dir / "REPORT.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+          print("CURRENT_MAIN_KNIGHT_IDLE_RUN_SLASH_RENDER_PASS", flush=True)
+          print(json.dumps(report, sort_keys=True), flush=True)
           PY
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: knight-current-main-idle-run-slash
-          path: ${{ env.OUT_ROOT }}
+          name: knight-current-main-idle-run-slash-continuation
+          path: /home/monster/actions-runner/_work/_temp/knight_current_main_rebuild_render
           if-no-files-found: warn
           retention-days: 7

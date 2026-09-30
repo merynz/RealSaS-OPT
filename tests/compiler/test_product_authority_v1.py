@@ -374,6 +374,7 @@ def test_candidate_promotion_is_deterministic_and_compiler_mints_intrinsic_audit
             "G1_SUPPORT_LINEAGE": "PASS",
             "G2_TOPOLOGY": "PASS",
             "G3_DEFORMATION": "PASS",
+            "G3B_SKIN_TOPOLOGY_COMPATIBILITY": "PASS",
             "G4_COMPONENT_BOUNDARY": "PASS",
             "G5_MULTIVIEW_COVERAGE": "PASS",
         },
@@ -384,6 +385,9 @@ def test_candidate_promotion_is_deterministic_and_compiler_mints_intrinsic_audit
         "g3_envelope_binding_hash": envelope.envelope_lineage_hash,
         "g3_stress_probe_hash": "stress-probe-hash",
         "g3_stress_probe_status": "PASS",
+        "skin_topology_compatibility_report_hash": "skin-topology-test",
+        "skin_topology_compatibility_status": "PASS",
+        "skin_topology_weight_mutation": False,
         "carrier_policy_hash": carrier_policy.carrier_policy_lineage_hash,
         "view_component_coverage": tuple(
             {

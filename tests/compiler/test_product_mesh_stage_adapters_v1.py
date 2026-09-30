@@ -1078,42 +1078,14 @@ def test_vf23_stage20_to25_uses_unmodified_production_caa_policy(tmp_path):
         "native_player": {"path": str(player), "sha256": _sha(player)}
     }
 
-    run(
-        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
-        build_runtime_projection_stage,
-    )
-    run("43_RSS_MATERIALIZE_COMPACT", materialize_runtime_package_stage)
-    r44 = run(
-        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
-        prove_native_package_playback_stage,
-    )
-    assert r44["diagnostics"]["native_reference_mismatch_pixels"] == 0
-
-    r45 = run(
-        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
-        prove_dynamic_visual_integrity_stage,
-    )
-    assert r45["diagnostics"]["native_reference_mismatch_pixel_count"] == 0
-    assert r45["diagnostics"]["undefined_visible_pixel_count"] == 0
-    assert r45["diagnostics"]["compiled_unobserved_visible_fraction"] == 0.0
-    assert r45["diagnostics"]["interior_shared_edge_continuity_passed"] is True
-    assert r45["diagnostics"]["cross_component_crack_authority_claimed"] is False
-
-    r46 = run("46_PRODUCT_CLOSURE_SEAL", seal_product_closure_stage)
-    closure = read_json(
-        next(
-            out
-            for out in r46["outputs"]
-            if out["schema"] == "RealSaS.ProductClosureIR.v2"
-        )["path"]
-    )
-    assert closure["qualification_report"]["product_pass"] is True
-    assert closure["qualification_report"]["appearance_authority_passed"] is True
-    assert (
-        closure["qualification_report"]["interior_shared_edge_continuity_passed"]
-        is True
-    )
-    assert (
-        closure["qualification_report"]["cross_component_crack_authority_claimed"]
-        is False
-    )
+    # Current source-owned visual authority is complete through Stage25 and
+    # remains the current presentation authority at Stage37/38. The historical
+    # Stage42 package path still serializes the mechanical render mesh and has
+    # no typed VisualMeshSet/binding transport. Normalized main must fail closed
+    # here rather than silently claim Stage46 product closure on the wrong mesh.
+    ctx["stage"] = {"id": "42_RUNTIME_PROJECTION_AND_CAA_BINDING"}
+    with pytest.raises(
+        QualificationError,
+        match="RUNTIME_V2_SOURCE_OWNED_VISUAL_PRESENTATION_BINDING_REQUIRED",
+    ):
+        build_runtime_projection_stage(ctx)

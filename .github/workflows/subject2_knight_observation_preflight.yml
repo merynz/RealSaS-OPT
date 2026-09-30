@@ -393,20 +393,31 @@ jobs:
                   historical_import=hist,
               )
 
-          # Anything downstream must be reconsidered against the imported exact lineage.
-          for row in ledger["stages"][8:]:
-              row.pop("historical_import",None)
-              row.update(
-                  status="PENDING",
-                  input_fingerprint="",
-                  implementation_hash="",
-                  policy_hash="",
-                  outputs=[],
-                  diagnostics_hash="",
-                  blockers=[],
-                  wall_seconds=0.0,
-                  performance={},
-              )
+          # Preserve already-verified current-main downstream progress across
+          # harness retries. The imported Stage01-08 output bytes are identical,
+          # and downstream fingerprints bind dependency output identities rather
+          # than the historical-import archive container identity.
+          had_downstream_progress=any(
+              str(row.get("status") or "")!="PENDING"
+              for row in ledger["stages"][8:]
+          )
+          if not had_downstream_progress:
+              for row in ledger["stages"][8:]:
+                  row.pop("historical_import",None)
+                  row.update(
+                      status="PENDING",
+                      input_fingerprint="",
+                      implementation_hash="",
+                      policy_hash="",
+                      outputs=[],
+                      diagnostics_hash="",
+                      blockers=[],
+                      wall_seconds=0.0,
+                      performance={},
+                  )
+              print("CURRENT_MAIN_DOWNSTREAM_FRESH_START")
+          else:
+              print("CURRENT_MAIN_DOWNSTREAM_PROGRESS_PRESERVED")
           ledger.setdefault("history",[]).append({
               "event":"DEMO_HISTORICAL_STAGE01_08_IMPORTED",
               "stage_ids":stage_ids,

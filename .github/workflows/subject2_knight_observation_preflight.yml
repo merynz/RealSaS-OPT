@@ -441,6 +441,122 @@ jobs:
           print(mainline.status_text(plan,ledger))
           PY
 
+      - name: Rebind Stage15-equivalent topology repair and Geppetto prereeg
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          from compiler.realsas_compiler_core.artifact_codec_v2 import rigging_surface_from_dict
+          from compiler.realsas_compiler_core.mechanical_partition_v1 import build_structural_partition
+          from compiler.realsas_compiler_core.mechanical_repartition_v2 import repartition_authorization_hash_v1
+          from compiler.realsas_compiler_core.hashing import content_sha256
+
+          authority=Path(os.environ["REALSAS_AUTHORITY_ROOT"])
+          run_root=authority/"runs"/os.environ["RUN_ID"]
+          backup=authority/"historical_run_backups"/(os.environ["RUN_ID"]+"_PRE_CURRENT_MAIN_20260930")
+          ledger=json.loads((run_root/"ACTIVE_RUN_V2.json").read_text())
+          old_ledger=json.loads((backup/"ACTIVE_RUN_V2.json").read_text())
+          manifest_path=run_root/"run_manifest.json"
+          manifest=json.loads(manifest_path.read_text())
+          by={str(x["id"]):x for x in ledger["stages"]}
+          old_by={str(x["id"]):x for x in old_ledger["stages"]}
+
+          def output(stage, schema):
+              rows=[x for x in by[stage].get("outputs") or [] if x.get("schema")==schema]
+              if len(rows)!=1: raise RuntimeError(f"CURRENT_OUTPUT_CARDINALITY:{stage}:{schema}:{len(rows)}")
+              p=Path(rows[0]["path"])
+              return p,json.loads(p.read_text())
+
+          def old_output(stage, schema):
+              rows=[x for x in old_by[stage].get("outputs") or [] if x.get("schema")==schema]
+              if len(rows)!=1: raise RuntimeError(f"HISTORICAL_OUTPUT_CARDINALITY:{stage}:{schema}:{len(rows)}")
+              p=Path(rows[0]["path"])
+              if not p.is_file():
+                  p=backup/"artifacts"/stage/Path(rows[0]["path"]).name
+              return p,json.loads(p.read_text())
+
+          cur_surface_path,cur_surface_json=output("15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1")
+          _,old_surface_json=old_output("15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1")
+          exact_surface_semantics=(
+              cur_surface_json.get("surface_nodes")==old_surface_json.get("surface_nodes")
+              and cur_surface_json.get("local_relations")==old_surface_json.get("local_relations")
+          )
+          if not exact_surface_semantics:
+              raise RuntimeError("STAGE15_SURFACE_SEMANTIC_EQUIVALENCE_NOT_PROVEN")
+          surface=rigging_surface_from_dict(cur_surface_json)
+          parent=build_structural_partition(surface,boundary_overrides=())
+
+          workspace=Path(os.environ["GITHUB_WORKSPACE"])
+          def resolve_ref(ref):
+              raw=str(ref["path"])
+              if raw.startswith("$REALSAS_AUTHORITY_ROOT/"):
+                  return authority/raw.split("/",1)[1]
+              p=Path(raw).expanduser()
+              return p if p.is_absolute() else workspace/p
+
+          repair=dict(manifest.get("mechanical_repartition_repair") or {})
+          if repair:
+              old_directive=json.loads(resolve_ref(dict(repair["directive"])).read_text())
+              old_auth=json.loads(resolve_ref(dict(repair["authorization"])).read_text())
+              directive=dict(old_directive)
+              directive["source_surface_lineage_hash"]=surface.geometry_lineage_hash
+              directive["source_partition_lineage_hash"]=parent.partition_lineage_hash
+              directive["directive_hash"]=content_sha256({k:v for k,v in directive.items() if k!="directive_hash"})
+              drel="canonical/CURRENT_MAIN_KNIGHT_STAGE17_REPARTITION_DIRECTIVE_20260930.json"
+              dpath=workspace/drel
+              dpath.write_text(json.dumps(directive,indent=2,sort_keys=True)+"\n")
+
+              auth=dict(old_auth)
+              auth["directive_hash"]=directive["directive_hash"]
+              auth["source_surface_lineage_hash"]=surface.geometry_lineage_hash
+              auth["source_partition_lineage_hash"]=parent.partition_lineage_hash
+              auth["authorization_hash"]=repartition_authorization_hash_v1(auth)
+              arel="canonical/CURRENT_MAIN_KNIGHT_STAGE17_REPARTITION_AUTHORIZATION_20260930.json"
+              apath=workspace/arel
+              apath.write_text(json.dumps(auth,indent=2,sort_keys=True)+"\n")
+
+              manifest["mechanical_repartition_repair"]={
+                  "directive":{"path":drel,"sha256":hashlib.sha256(dpath.read_bytes()).hexdigest()},
+                  "authorization":{"path":arel,"sha256":hashlib.sha256(apath.read_bytes()).hexdigest()},
+              }
+              print("CURRENT_MAIN_STAGE17_REPAIR_REBOUND",directive["directive_hash"],auth["authorization_hash"])
+
+          _,qual_json=output("15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceQualificationIR.v1")
+          qual_hash=str(qual_json.get("qualification_hash") or "")
+          if len(qual_hash)!=64:
+              raise RuntimeError("CURRENT_STAGE15_QUALIFICATION_HASH_INVALID")
+          gcfg=dict(manifest.get("geppetto_fit") or {})
+          pref=dict(gcfg.get("preregistration") or {})
+          if pref:
+              spec=json.loads(resolve_ref(pref).read_text())
+              spec["upstream_bindings"]={
+                  "rigging_surface":surface.geometry_lineage_hash,
+                  "rigging_surface_qualification":qual_hash,
+              }
+              prel="canonical/CURRENT_MAIN_KNIGHT_GEPPETTO_PREREG_20260930.json"
+              ppath=workspace/prel
+              ppath.write_text(json.dumps(spec,indent=2,sort_keys=True)+"\n")
+              gcfg["preregistration"]={"path":prel,"sha256":hashlib.sha256(ppath.read_bytes()).hexdigest()}
+              manifest["geppetto_fit"]=gcfg
+              print("CURRENT_MAIN_GEPPETTO_PREREG_REBOUND",gcfg["preregistration"]["sha256"])
+
+          audit={
+              "schema":"RealSaS.CurrentMainKnightStage15EquivalenceRebind.v1",
+              "status":"PASS_EXACT_SURFACE_NODE_AND_RELATION_EQUIVALENCE",
+              "historical_surface_lineage_hash":old_surface_json.get("geometry_lineage_hash"),
+              "current_surface_lineage_hash":surface.geometry_lineage_hash,
+              "current_parent_partition_lineage_hash":parent.partition_lineage_hash,
+              "surface_nodes_exact":True,
+              "local_relations_exact":True,
+              "product_authority_claimed":False,
+          }
+          audit_path=workspace/"canonical/CURRENT_MAIN_KNIGHT_STAGE15_EQUIVALENCE_REBIND_20260930.json"
+          audit_path.write_text(json.dumps(audit,indent=2,sort_keys=True)+"\n")
+          manifest_path.write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n")
+          PY
+
       - name: Execute exact current-main DAG
         shell: bash
         run: |

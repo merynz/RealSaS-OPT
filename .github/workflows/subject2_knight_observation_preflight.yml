@@ -16,7 +16,9 @@ jobs:
     timeout-minutes: 180
     env:
       REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
-      RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671
+      SOURCE_RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671
+      RUN_ID: SUBJECT2_KNIGHT_CURRENT_MAIN_RENDER_V1_20260930
+      SUBJECT_ID: SUBJECT2_KNIGHT
       PYTHONPATH: .
       PYTHONHASHSEED: '0'
       OMP_NUM_THREADS: '1'
@@ -43,7 +45,58 @@ jobs:
       - name: Install pinned dependencies
         run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
 
-      - name: Hydrate immutable demo authority references only
+      - name: Prepare fresh current-main demo manifest from immutable Knight inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          authority=Path(os.environ["REALSAS_AUTHORITY_ROOT"])
+          source_root=authority/"runs"/os.environ["SOURCE_RUN_ID"]
+          root=authority/"runs"/os.environ["RUN_ID"]
+          if root.exists():
+              import shutil
+              shutil.rmtree(root)
+          root.mkdir(parents=True)
+          manifest=json.loads((source_root/"run_manifest.json").read_text())
+          manifest["run_id"]=os.environ["RUN_ID"]
+          manifest["subject_id"]=os.environ["SUBJECT_ID"]
+
+          expected={"demo_idle_v1","demo_run_v1","demo_slash_v1"}
+          sources=list(dict(manifest.get("motion") or {}).get("sources") or [])
+          if len(sources)!=3 or {str(x.get("clip_id")) for x in sources}!=expected:
+              donor=None
+              for frag in sorted(authority.rglob("MOTION_RUN_MANIFEST_FRAGMENT.json")):
+                  try:
+                      payload=json.loads(frag.read_text())
+                      candidate_motion=dict(payload.get("motion") or {})
+                      rows=list(candidate_motion.get("sources") or [])
+                  except Exception:
+                      continue
+                  if len(rows)!=3 or {str(x.get("clip_id")) for x in rows}!=expected:
+                      continue
+                  valid=True
+                  for row in rows:
+                      ref=dict(row.get("file") or {})
+                      raw=str(ref.get("path") or "")
+                      fp=(authority/raw.split("/",1)[1]) if raw.startswith("$REALSAS_AUTHORITY_ROOT/") else Path(raw).expanduser()
+                      if not fp.is_file() or hashlib.sha256(fp.read_bytes()).hexdigest()!=str(ref.get("sha256") or ""):
+                          valid=False
+                          break
+                  if valid:
+                      donor=(frag,candidate_motion)
+                      break
+              if donor is None:
+                  raise RuntimeError("THREE_CLIP_MOTION_FRAGMENT_NOT_FOUND")
+              manifest["motion"]=donor[1]
+              print("MOTION_INPUT_REUSED_FROM_FRAGMENT",donor[0])
+
+          (root/"run_manifest.json").write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n")
+          print("FRESH_RUN_MANIFEST",root/"run_manifest.json")
+          PY
+
+      - name: Hydrate exact relative authority documents referenced by manifest
         shell: bash
         run: |
           set -euo pipefail
@@ -52,19 +105,21 @@ jobs:
           import hashlib,json,os,subprocess
           from pathlib import Path
           root=Path(os.environ["REALSAS_AUTHORITY_ROOT"])/"runs"/os.environ["RUN_ID"]
-          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
           manifest=json.loads((root/"run_manifest.json").read_text())
           refs={}
-          demo=dict(manifest.get("demo_execution") or {})
-          auth=dict(demo.get("authority") or {})
-          if auth.get("path") and auth.get("sha256"):
-              refs[str(auth["path"])]=str(auth["sha256"])
-          for row in ledger.get("stages") or []:
-              h=dict(row.get("historical_import") or {})
-              if h.get("authority_path") and h.get("authority_sha256"):
-                  refs[str(h["authority_path"])]=str(h["authority_sha256"])
+          def walk(x):
+              if isinstance(x,dict):
+                  if isinstance(x.get("path"),str) and isinstance(x.get("sha256"),str) and len(x["sha256"])==64:
+                      refs[x["path"]]=x["sha256"]
+                  for v in x.values(): walk(v)
+              elif isinstance(x,list):
+                  for v in x: walk(v)
+          walk(manifest)
           branches=["origin/audit/knight-rest-visual-owner-20260930","origin/research/vf11-certified-adaptive-20260921"]
+          hydrated=0
           for rel,expected in sorted(refs.items()):
+              if rel.startswith("$REALSAS_AUTHORITY_ROOT/") or Path(rel).is_absolute():
+                  continue
               path=Path(rel)
               if path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest()==expected:
                   continue
@@ -75,63 +130,29 @@ jobs:
                   if p.returncode==0 and hashlib.sha256(p.stdout).hexdigest()==expected:
                       payload=p.stdout; source=ref; break
               if payload is None:
-                  raise RuntimeError(f"IMMUTABLE_AUTHORITY_NOT_RECOVERED:{rel}:{expected}")
+                  raise RuntimeError(f"RELATIVE_AUTHORITY_NOT_RECOVERED:{rel}:{expected}")
               path.parent.mkdir(parents=True,exist_ok=True)
               path.write_bytes(payload)
-              print("HYDRATED_AUTHORITY",rel,source,expected)
-          print("HYDRATED_AUTHORITY_COUNT",len(refs))
+              hydrated+=1
+              print("HYDRATED",rel,source)
+          print("HYDRATED_RELATIVE_AUTHORITY_COUNT",hydrated)
           PY
 
-      - name: Bind current-main native player and existing motion inputs
+      - name: Build and bind exact current-main native player
         shell: bash
         run: |
           set -euo pipefail
-          run_root="$REALSAS_AUTHORITY_ROOT/runs/$RUN_ID"
-          build="$run_root/tools/current_main_runtime"
-          mkdir -p "$build"
-          player="$build/realsas_runtime_v2_caa_reference"
+          root="$REALSAS_AUTHORITY_ROOT/runs/$RUN_ID"
+          mkdir -p "$root/tools/current_main_runtime"
+          player="$root/tools/current_main_runtime/realsas_runtime_v2_caa_reference"
           c++ -std=c++17 -O3 -DNDEBUG runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp -lpng -lz -o "$player"
           test -x "$player"
           PLAYER="$player" python - <<'PY'
           import hashlib,json,os
           from pathlib import Path
-          authority=Path(os.environ["REALSAS_AUTHORITY_ROOT"])
-          root=authority/"runs"/os.environ["RUN_ID"]
+          root=Path(os.environ["REALSAS_AUTHORITY_ROOT"])/"runs"/os.environ["RUN_ID"]
           path=root/"run_manifest.json"
           manifest=json.loads(path.read_text())
-          motion=dict(manifest.get("motion") or {})
-          sources=list(motion.get("sources") or [])
-          expected={"demo_idle_v1","demo_run_v1","demo_slash_v1"}
-          if len(sources)!=3 or {str(x.get("clip_id")) for x in sources}!=expected:
-              donor=None
-              for frag in sorted(authority.rglob("MOTION_RUN_MANIFEST_FRAGMENT.json")):
-                  try:
-                      payload=json.loads(frag.read_text())
-                      candidate_motion=dict(payload.get("motion") or {})
-                      s=list(candidate_motion.get("sources") or [])
-                  except Exception:
-                      continue
-                  if len(s)!=3 or {str(x.get("clip_id")) for x in s}!=expected:
-                      continue
-                  valid=True
-                  for row in s:
-                      ref=dict(row.get("file") or {})
-                      raw=str(ref.get("path") or "")
-                      fp=(authority/raw.split("/",1)[1]) if raw.startswith("$REALSAS_AUTHORITY_ROOT/") else Path(raw).expanduser()
-                      if not fp.is_file():
-                          valid=False
-                          break
-                      digest=hashlib.sha256(fp.read_bytes()).hexdigest()
-                      if digest!=str(ref.get("sha256") or ""):
-                          valid=False
-                          break
-                  if valid:
-                      donor=(frag,candidate_motion)
-                      break
-              if donor is None:
-                  raise RuntimeError("THREE_CLIP_MOTION_FRAGMENT_NOT_FOUND")
-              manifest["motion"]=donor[1]
-              print("MOTION_INPUT_REUSED_FROM_FRAGMENT",donor[0])
           player=Path(os.environ["PLAYER"]).resolve()
           sha=hashlib.sha256(player.read_bytes()).hexdigest()
           runtime=dict(manifest.get("runtime") or {})
@@ -139,42 +160,17 @@ jobs:
           manifest["runtime"]=runtime
           path.write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n")
           print("CURRENT_MAIN_NATIVE_PLAYER",sha)
-          print("MOTION_CLIPS",[x["clip_id"] for x in manifest["motion"]["sources"]])
           PY
           echo "PLAYER=$player" >> "$GITHUB_ENV"
 
-      - name: Measure exact current-main reusable stage count
+      - name: Initialize fresh 46-stage current-main demo ledger
         shell: bash
         run: |
           set -euo pipefail
-          python - <<'PY'
-          import copy,json,os
-          from compiler.realsas_compiler_services.orchestrator import mainline
-          run_id=os.environ["RUN_ID"]
-          plan=mainline.load_json(mainline.PLAN_PATH)
-          ledger=mainline.load_json(mainline.run_ledger_path(run_id))
-          manifest=mainline.load_json(mainline.run_manifest_path(run_id))
-          probe=copy.deepcopy(ledger)
-          mainline.validate_ledger(plan,probe)
-          while mainline._verify_existing_passes(plan,probe,manifest):
-              pass
-          while mainline._reset_stale_failures(plan,probe,manifest):
-              pass
-          rows=list(probe["stages"])
-          ready=[x for x in rows if str(x.get("status") or "") in mainline.PASS_STATUSES]
-          failed=[x for x in rows if str(x.get("status") or "") in mainline.FAIL_STATUSES]
-          pending=[x for x in rows if str(x.get("status") or "")=="PENDING"]
-          print("CURRENT_MAIN_REUSE",json.dumps({
-              "ready_count":len(ready),
-              "pending_count":len(pending),
-              "failed_count":len(failed),
-              "ready":[[x["ordinal"],x["id"],x["status"]] for x in ready],
-              "pending":[[x["ordinal"],x["id"]] for x in pending],
-              "failed":[[x["ordinal"],x["id"],x.get("blockers") or []] for x in failed],
-          },sort_keys=True))
-          PY
+          python -m compiler.realsas_compiler_services.orchestrator.mainline init-run             --run-id "$RUN_ID"             --subject-id "$SUBJECT_ID"             --architecture-scope REALSAS_V2_CURRENT_MAIN_KNIGHT_RENDER_DIAGNOSTIC             --execution-class DEMO_WITNESS
+          python -m compiler.realsas_compiler_services.orchestrator.mainline status --run-id "$RUN_ID"
 
-      - name: Resume exact current-main DAG through product closure target
+      - name: Execute exact current-main DAG
         shell: bash
         run: |
           set +e
@@ -182,6 +178,17 @@ jobs:
           rc=$?
           python -m compiler.realsas_compiler_services.orchestrator.mainline status --run-id "$RUN_ID" || true
           echo "EXECUTE_RC=$rc" >> "$GITHUB_ENV"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["REALSAS_AUTHORITY_ROOT"])/"runs"/os.environ["RUN_ID"]
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          print("CURRENT_MAIN_STAGE_SUMMARY",json.dumps({
+              "pass_count":sum(str(x.get("status") or "") in {"PASS","PASS_DEMO_ONLY","CACHE_HIT"} for x in ledger["stages"]),
+              "pending_count":sum(str(x.get("status") or "")=="PENDING" for x in ledger["stages"]),
+              "failures":[{"ordinal":x["ordinal"],"id":x["id"],"status":x["status"],"blockers":x.get("blockers") or []} for x in ledger["stages"] if str(x.get("status") or "") in {"FAIL","ABSTAIN","BLOCKED"}],
+          },sort_keys=True))
+          PY
           exit 0
 
       - name: Render current-main RSS to GIFs when Stage43 exists
@@ -189,22 +196,21 @@ jobs:
         run: |
           set -euo pipefail
           out="$RUNNER_TEMP/current_main_knight_render"
-          rm -rf "$out"
-          mkdir -p "$out"
+          rm -rf "$out"; mkdir -p "$out"
           OUT_DIR="$out" python - <<'PY'
           import json,os,subprocess
           from pathlib import Path
           import numpy as np
           from PIL import Image
 
-          authority=Path(os.environ["REALSAS_AUTHORITY_ROOT"])
-          root=authority/"runs"/os.environ["RUN_ID"]
+          root=Path(os.environ["REALSAS_AUTHORITY_ROOT"])/"runs"/os.environ["RUN_ID"]
           ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
           by={x["id"]:x for x in ledger["stages"]}
           report={
               "schema":"RealSaS.CurrentMainKnightRenderReport.v1",
               "run_id":os.environ["RUN_ID"],
-              "branch_sha":os.environ["GITHUB_SHA"],
+              "execution_sha":os.environ["GITHUB_SHA"],
+              "current_main_source_tree_exact":True,
               "execute_rc":int(os.environ.get("EXECUTE_RC","-1")),
               "stage_status":{x["id"]:x["status"] for x in ledger["stages"]},
           }
@@ -215,23 +221,18 @@ jobs:
           if str(s43["status"]) not in {"PASS","PASS_DEMO_ONLY"}:
               Path(os.environ["OUT_DIR"],"REPORT.json").write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
               raise SystemExit(0)
-
           rss_rows=[x for x in s43.get("outputs") or [] if x.get("schema")=="application/x-realsas-rss-v2"]
-          if len(rss_rows)!=1:
-              raise RuntimeError("RSS_OUTPUT_NOT_UNIQUE")
-          rss=Path(rss_rows[0]["path"])
           proj_rows=[x for x in s42.get("outputs") or [] if x.get("schema")=="RealSaS.RuntimeProjectionIR.v2"]
-          if len(proj_rows)!=1:
-              raise RuntimeError("PROJECTION_OUTPUT_NOT_UNIQUE")
+          if len(rss_rows)!=1 or len(proj_rows)!=1:
+              raise RuntimeError("RUNTIME_OUTPUT_NOT_UNIQUE")
+          rss=Path(rss_rows[0]["path"])
           projection=json.loads(Path(proj_rows[0]["path"]).read_text())
-          views={str(v["view_id"]):v for v in projection["views"]}
-          resolution=int(views["V0"]["camera"]["resolution"])
-          clips=list(projection["clips"])
+          resolution=int(next(v for v in projection["views"] if v["view_id"]=="V0")["camera"]["resolution"])
           player=Path(os.environ["PLAYER"])
-          report["rss_path"]=str(rss)
+          report["rss_sha256"]=rss_rows[0]["sha256"]
           report["resolution"]=resolution
           report["clips"]=[]
-          for clip in clips:
+          for clip in projection["clips"]:
               cid=str(clip["clip_id"])
               n=int(clip["frame_count"])
               dur=float(clip["duration_seconds"])

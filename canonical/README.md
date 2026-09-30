@@ -1,5 +1,9 @@
 # Canonical Authority Index
 
+## 2026-09-30 current authority note
+
+First read `MAINLINE_NORMALIZATION_HANDOFF_20260930.md`. The normalized mainline is regression-green but witness-forbidden. The sealed `V2_PRODUCT_STATE_WIRING_AUDIT_V1_20260928.json` remains current evidence for the P0 source-owned visual runtime presentation gap.
+
 `canonical/` contains current authority, preregistration, calibration, proof evidence and preserved historical scientific provenance.
 
 **Current continuation is RealSaS V2 on `main`.** Dated V1/Mage/FIT documents remain evidence only unless explicitly promoted by the current authority spine.

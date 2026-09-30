@@ -7,10 +7,15 @@ import math
 import numpy as np
 from .appearance_authority_v2 import CAA_PROVENANCE
 from .appearance_completion_v2 import (
+    SurfaceSampleGraph,
     bounded_surface_harmonic_fill,
     surface_sample_neighbors,
 )
 from .appearance_bake_v2 import straight_rgba_to_premultiplied_float
+from .appearance_compile_v2 import (
+    compatible_cross_view_foreground_donor_validity,
+    select_other_view_donor_by_support,
+)
 from .types import QualificationError
 
 
@@ -215,42 +220,85 @@ def _structured_band_mask(
 def _bounded_edge_holdout_mask(
     *,
     candidate_mask: np.ndarray,
-    neighbors: tuple[tuple[int, ...], ...],
+    neighbors: SurfaceSampleGraph,
     max_region_samples: int,
     max_graph_hops: int,
+    source_observed_mask: np.ndarray | None = None,
 ) -> np.ndarray:
     candidate = np.asarray(candidate_mask, dtype=bool)
+    source_observed = (
+        candidate.copy()
+        if source_observed_mask is None
+        else np.asarray(source_observed_mask, dtype=bool)
+    )
+    if source_observed.shape != candidate.shape:
+        raise QualificationError("CAA_HOLDOUT_SOURCE_OBSERVED_SHAPE_INVALID")
+    if np.any(candidate & ~source_observed):
+        raise QualificationError("CAA_HOLDOUT_CANDIDATE_NOT_SOURCE_OBSERVED")
+
     selected = np.zeros(len(candidate), dtype=bool)
     blocked = np.zeros(len(candidate), dtype=bool)
+    max_depth_from_seed = max(0, int(max_graph_hops) - 1)
+
     for seed in np.flatnonzero(candidate):
         seed = int(seed)
         if blocked[seed] or selected[seed]:
             continue
+
+        # Every withheld patch keeps one exact source-observed neighbor out of
+        # the patch. Growing at most max_graph_hops-1 edges away from the seed
+        # then proves every selected node remains within the shipping harmonic
+        # hop budget from a preserved source boundary. This is stronger than
+        # merely bounding radius from an arbitrary withheld seed.
+        anchors = sorted(
+            int(raw)
+            for raw in neighbors[seed]
+            if source_observed[int(raw)]
+            and not selected[int(raw)]
+            and not blocked[int(raw)]
+        )
+        if not anchors:
+            continue
+        anchors.sort(key=lambda node: (bool(candidate[node]), node))
+        anchor = int(anchors[0])
+        blocked[anchor] = True
+
         patch = []
         queue = [(seed, 0)]
-        visited = {seed}
+        visited = {seed, anchor}
         cursor = 0
         while cursor < len(queue) and len(patch) < int(max_region_samples):
             node, depth = queue[cursor]
             cursor += 1
-            if not candidate[node] or blocked[node]:
+            if (
+                node == anchor
+                or not candidate[node]
+                or blocked[node]
+                or selected[node]
+            ):
                 continue
             patch.append(node)
-            if depth + 1 >= int(max_graph_hops):
+            if depth >= max_depth_from_seed:
                 continue
-            for nxt in neighbors[node]:
+            for raw_nxt in neighbors[node]:
+                nxt = int(raw_nxt)
                 if nxt not in visited:
-                    visited.add(int(nxt))
-                    queue.append((int(nxt), depth + 1))
+                    visited.add(nxt)
+                    queue.append((nxt, depth + 1))
+
         if not patch:
             continue
         selected[patch] = True
-        # Keep selected regions disconnected so every withheld region respects
-        # the same bounded completion contract as shipping.
+
+        # Keep selected regions disconnected and preserve the explicit source
+        # anchor so the downstream harmonic solve sees the same local bounded
+        # domain that this holdout claims to qualify.
         for node in patch:
-            for nxt in neighbors[node]:
+            for raw_nxt in neighbors[node]:
+                nxt = int(raw_nxt)
                 if not selected[nxt]:
                     blocked[nxt] = True
+
     return selected
 
 
@@ -258,47 +306,103 @@ def structured_holdout_metrics(
     *,
     direct_valid: np.ndarray,
     direct_rgba: np.ndarray,
+    direct_donor_valid: np.ndarray | None = None,
     source_xy: np.ndarray,
     sample_positions: np.ndarray,
     sample_component_index: np.ndarray,
     sample_face_index: np.ndarray,
+    face_support_by_view: np.ndarray,
     face_count: int,
     tile_resolution: int,
     band_fraction: float,
     max_region_samples: int,
     max_graph_hops: int,
+    face_sample_offsets: np.ndarray | None = None,
+    face_tile_resolutions: np.ndarray | None = None,
+    face_vertex_ids: tuple[tuple[str, str, str], ...] | None = None,
+    surface_graph: SurfaceSampleGraph | None = None,
+    excluded_provenance_codes: tuple[int, ...] = (),
+    donor_color_conflict_cut_rgba_l1: float = 1.0,
+    donor_alpha_conflict_cut: float = 1.0,
 ) -> dict:
     direct_valid = np.asarray(direct_valid, dtype=bool)
     direct_rgba = np.asarray(direct_rgba, dtype=np.uint8)
+    direct_donor_valid = (
+        direct_valid
+        if direct_donor_valid is None
+        else np.asarray(direct_donor_valid, dtype=bool)
+    )
     source_xy = np.asarray(source_xy, dtype=np.float32)
     positions = np.asarray(sample_positions, dtype=np.float64)
     component = np.asarray(sample_component_index, dtype=np.int32)
     face_index = np.asarray(sample_face_index, dtype=np.int32)
+    face_support = np.asarray(face_support_by_view, dtype=np.float64)
     if direct_valid.ndim != 2 or direct_valid.shape[0] != 8:
         raise QualificationError("CAA_HOLDOUT_DIRECT_VALID_SHAPE_INVALID")
     n = direct_valid.shape[1]
     if (
         direct_rgba.shape != (8, n, 4)
+        or direct_donor_valid.shape != direct_valid.shape
+        or np.any(direct_donor_valid & ~direct_valid)
         or source_xy.shape != (8, n, 2)
         or positions.shape != (n, 3)
         or component.shape != (n,)
         or face_index.shape != (n,)
+        or face_support.shape != (8, int(face_count))
+        or not np.isfinite(face_support).all()
     ):
         raise QualificationError("CAA_HOLDOUT_ARRAY_SHAPE_DRIFT")
     fraction = float(band_fraction)
     if not math.isfinite(fraction) or not (0.02 <= fraction <= 0.5):
         raise QualificationError("CAA_HOLDOUT_BAND_FRACTION_INVALID")
-    if int(face_count) <= 0 or int(tile_resolution) < 4:
+    if int(face_count) <= 0:
         raise QualificationError("CAA_HOLDOUT_SURFACE_POLICY_INVALID")
-    if n != int(face_count) * int(tile_resolution) * (int(tile_resolution) + 1) // 2:
-        raise QualificationError("CAA_HOLDOUT_FACE_SAMPLE_ACCOUNTING_DRIFT")
-
-    neighbors = surface_sample_neighbors(
-        positions=positions,
-        face_count=int(face_count),
-        tile_resolution=int(tile_resolution),
-    )
-    sample_component = tuple(str(int(value)) for value in component)
+    adaptive = face_sample_offsets is not None or face_tile_resolutions is not None
+    if adaptive:
+        if face_sample_offsets is None or face_tile_resolutions is None:
+            raise QualificationError("CAA_HOLDOUT_ADAPTIVE_LAYOUT_INCOMPLETE")
+        offsets = np.asarray(face_sample_offsets, dtype=np.int64)
+        resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+        if (
+            offsets.shape != (int(face_count) + 1,)
+            or resolutions.shape != (int(face_count),)
+            or offsets[0] != 0
+            or offsets[-1] != n
+            or np.any(resolutions < 4)
+        ):
+            raise QualificationError("CAA_HOLDOUT_ADAPTIVE_LAYOUT_INVALID")
+        neighbors = (
+            surface_graph
+            if surface_graph is not None
+            else surface_sample_neighbors(
+                positions=positions,
+                face_count=int(face_count),
+                face_sample_offsets=offsets,
+                face_tile_resolutions=resolutions,
+                face_vertex_ids=face_vertex_ids,
+            )
+        )
+    else:
+        if tile_resolution is None or int(tile_resolution) < 4:
+            raise QualificationError("CAA_HOLDOUT_SURFACE_POLICY_INVALID")
+        if n != int(face_count) * int(tile_resolution) * (int(tile_resolution) + 1) // 2:
+            raise QualificationError("CAA_HOLDOUT_FACE_SAMPLE_ACCOUNTING_DRIFT")
+        neighbors = (
+            surface_graph
+            if surface_graph is not None
+            else surface_sample_neighbors(
+                positions=positions,
+                face_count=int(face_count),
+                tile_resolution=int(tile_resolution),
+                face_vertex_ids=face_vertex_ids,
+            )
+        )
+    if len(neighbors) != n:
+        raise QualificationError("CAA_HOLDOUT_SURFACE_GRAPH_CARDINALITY_DRIFT")
+    # Preserve compact compiler-native component ownership. The harmonic
+    # solver accepts numeric or textual component ids; Stage24 therefore avoids
+    # materializing a multi-million-element Python string tuple.
+    sample_component = component
 
     errors = []
     per_view = []
@@ -314,6 +418,7 @@ def structured_holdout_metrics(
             neighbors=neighbors,
             max_region_samples=int(max_region_samples),
             max_graph_hops=int(max_graph_hops),
+            source_observed_mask=direct_valid[target],
         )
         held = np.flatnonzero(holdout)
         if len(held) == 0:
@@ -331,33 +436,88 @@ def structured_holdout_metrics(
         provenance[available] = CAA_PROVENANCE["DIRECT_SOURCE"]
         source_view[available] = target
 
-        for donor in _view_order(target):
-            take = (~has) & direct_valid[donor]
-            if np.any(take):
-                predicted[take] = direct_rgba[donor, take]
-                provenance[take] = CAA_PROVENANCE["OTHER_VIEW_SOURCE"]
-                source_view[take] = donor
-                has[take] = True
+        # Mirror shipping semantics exactly: same-view local harmonic first.
+        local_missing = holdout.copy()
+        completion_stats = bounded_surface_harmonic_fill(
+            rgba=predicted,
+            provenance=provenance,
+            source_view=source_view,
+            missing=local_missing,
+            observed_mask=has,
+            sample_component=sample_component,
+            neighbors=neighbors,
+            max_region_samples=int(max_region_samples),
+            max_graph_hops=int(max_graph_hops),
+            abstain_on_policy_violation=True,
+            abstain_provenance_code=CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"],
+            abstain_source_view_value=-4,
+        )
 
-        unresolved = holdout & ~has
-        completion_stats = {
-            "region_count": 0,
-            "maximum_region_samples": 0,
-            "maximum_graph_hops": 0,
-        }
-        if np.any(unresolved):
-            completion_stats = bounded_surface_harmonic_fill(
-                rgba=predicted,
-                provenance=provenance,
-                source_view=source_view,
-                missing=unresolved,
-                observed_mask=has,
-                sample_component=sample_component,
-                neighbors=neighbors,
-                max_region_samples=int(max_region_samples),
-                max_graph_hops=int(max_graph_hops),
+        donor_fallback = holdout & (
+            provenance == CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"]
+        )
+        donor_fallback_count = int(np.count_nonzero(donor_fallback))
+        if donor_fallback_count:
+            predicted[donor_fallback] = 0
+            provenance[donor_fallback] = 255
+            source_view[donor_fallback] = -1
+
+            effective_valid = direct_valid.copy()
+            effective_donor_valid = direct_donor_valid.copy()
+            effective_valid[target, holdout] = False
+            effective_donor_valid[target, holdout] = False
+            compatible_donor_valid = (
+                compatible_cross_view_foreground_donor_validity(
+                    direct_valid=effective_valid,
+                    donor_valid=effective_donor_valid,
+                    direct_rgba=direct_rgba,
+                    color_conflict_cut_rgba_l1=float(
+                        donor_color_conflict_cut_rgba_l1
+                    ),
+                    alpha_conflict_cut=float(donor_alpha_conflict_cut),
+                )
             )
-            has[held] = provenance[held] != 255
+            best_view, _best_score = select_other_view_donor_by_support(
+                target_view_index=target,
+                missing=donor_fallback,
+                direct_valid=effective_valid,
+                donor_valid=compatible_donor_valid,
+                sample_face_index=face_index,
+                face_support_by_view=face_support,
+            )
+            take = donor_fallback & (best_view >= 0)
+            if np.any(take):
+                indices = np.flatnonzero(take)
+                donors = best_view[indices].astype(np.int64)
+                predicted[indices] = direct_rgba[donors, indices]
+                provenance[indices] = CAA_PROVENANCE["OTHER_VIEW_SOURCE"]
+                source_view[indices] = donors.astype(np.int16)
+            donor_rejected = donor_fallback & ~take
+            if np.any(donor_rejected):
+                provenance[donor_rejected] = CAA_PROVENANCE[
+                    "UNSUPPORTED_ABSTAIN"
+                ]
+                source_view[donor_rejected] = -4
+        else:
+            take = np.zeros(n, dtype=bool)
+            donor_rejected = np.zeros(n, dtype=bool)
+
+        has[held] = np.isin(
+            provenance[held],
+            (
+                CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"],
+                CAA_PROVENANCE["OTHER_VIEW_SOURCE"],
+                CAA_PROVENANCE["DIRECT_SOURCE"],
+            ),
+        )
+        completion_stats = {
+            **dict(completion_stats),
+            "donor_fallback_candidate_count": donor_fallback_count,
+            "donor_fallback_recovered_count": int(np.count_nonzero(take)),
+            "donor_fallback_rejected_count": int(
+                np.count_nonzero(donor_rejected)
+            ),
+        }
 
         if not np.all(has[held]):
             raise QualificationError("CAA_HOLDOUT_PREDICTION_NOT_TOTAL")
@@ -380,8 +540,9 @@ def structured_holdout_metrics(
 
     values = np.asarray(errors, dtype=np.float64)
     return {
-        "mode": "SILHOUETTE_ADJACENT_BOUNDED_OCCLUSION_PATCHES_V3",
+        "mode": "SILHOUETTE_ADJACENT_BOUNDED_OCCLUSION_PATCHES_V4_SOURCE_ANCHORED",
         "band_fraction": fraction,
+        "other_view_donor_selection": "MAX_FACE_SUPPORT_SAME_AS_STAGE21",
         "sample_count": int(len(values)),
         "mean_rgba_l1": float(np.mean(values)) if len(values) else 0.0,
         "p95_rgba_l1": float(np.quantile(values, 0.95)) if len(values) else 0.0,
@@ -395,12 +556,26 @@ def cross_view_source_compatibility_metrics(
     direct_valid: np.ndarray,
     direct_rgba: np.ndarray,
     sample_component_index: np.ndarray,
+    direct_source_silhouette_class: np.ndarray | None = None,
     color_conflict_cut_rgba_l1: float = 0.35,
     alpha_conflict_cut: float = 0.25,
 ) -> dict:
+    """Measure appearance compatibility only within the same source silhouette class.
+
+    A canonical surface sample may legitimately be source-foreground in one
+    direction and source-safe-background in an adjacent direction. That is a
+    directional silhouette/visibility transition, not an appearance-color
+    contradiction. Opposite-class evidence is therefore counted explicitly but
+    excluded from the appearance compatibility population.
+    """
     valid = np.asarray(direct_valid, dtype=bool)
     rgba = np.asarray(direct_rgba, dtype=np.uint8)
     component = np.asarray(sample_component_index, dtype=np.int32)
+    source_class = (
+        None
+        if direct_source_silhouette_class is None
+        else np.asarray(direct_source_silhouette_class, dtype=np.int8)
+    )
     color_cut = float(color_conflict_cut_rgba_l1)
     alpha_cut = float(alpha_conflict_cut)
     if valid.ndim != 2 or valid.shape[0] != 8:
@@ -408,10 +583,17 @@ def cross_view_source_compatibility_metrics(
     sample_count = valid.shape[1]
     if rgba.shape != (8, sample_count, 4) or component.shape != (sample_count,):
         raise QualificationError("CAA_CROSS_VIEW_ARRAY_SHAPE_DRIFT")
+    if source_class is not None:
+        if source_class.shape != valid.shape:
+            raise QualificationError("CAA_CROSS_VIEW_SOURCE_CLASS_SHAPE_INVALID")
+        if np.any(valid & ~np.isin(source_class, (0, 1))):
+            raise QualificationError("CAA_CROSS_VIEW_SOURCE_CLASS_INVALID")
     if not (0.0 <= color_cut <= 1.0 and 0.0 <= alpha_cut <= 1.0):
         raise QualificationError("CAA_CROSS_VIEW_CONFLICT_CUT_INVALID")
 
     def summarize(errors: np.ndarray, alpha: np.ndarray) -> dict:
+        errors = np.asarray(errors, dtype=np.float64)
+        alpha = np.asarray(alpha, dtype=np.float64)
         count = int(len(errors))
         return {
             "shared_direct_sample_count": count,
@@ -433,11 +615,37 @@ def cross_view_source_compatibility_metrics(
 
     pair_rows = []
     component_rows = []
-    all_errors = []
-    all_alpha = []
+    component_ids = np.unique(component).astype(np.int32, copy=False)
+    pair_gate_counts = []
+    pair_raw_counts = []
+    pair_transition_counts = []
     for left in range(8):
         right = (left + 1) % 8
-        shared = valid[left] & valid[right]
+        raw_shared = valid[left] & valid[right]
+        if source_class is None:
+            transition = np.zeros_like(raw_shared)
+            shared = raw_shared
+        else:
+            transition = raw_shared & (source_class[left] != source_class[right])
+            shared = raw_shared & ~transition
+        pair_raw_counts.append(int(np.count_nonzero(raw_shared)))
+        pair_transition_counts.append(int(np.count_nonzero(transition)))
+        pair_gate_counts.append(int(np.count_nonzero(shared)))
+
+    total_shared = int(sum(pair_gate_counts))
+    values = np.empty((total_shared,), dtype=np.float64)
+    alpha_values = np.empty((total_shared,), dtype=np.float64)
+    global_cursor = 0
+
+    for left in range(8):
+        right = (left + 1) % 8
+        raw_shared = valid[left] & valid[right]
+        if source_class is None:
+            transition = np.zeros_like(raw_shared)
+            shared = raw_shared
+        else:
+            transition = raw_shared & (source_class[left] != source_class[right])
+            shared = raw_shared & ~transition
         indices = np.flatnonzero(shared)
         if len(indices):
             errors = rgba_l1_premultiplied(
@@ -448,44 +656,79 @@ def cross_view_source_compatibility_metrics(
                 rgba[left, indices, 3].astype(np.float64)
                 - rgba[right, indices, 3].astype(np.float64)
             ) / 255.0
-            all_errors.extend(map(float, errors))
-            all_alpha.extend(map(float, alpha))
+            errors = np.asarray(errors, dtype=np.float64)
+            alpha = np.asarray(alpha, dtype=np.float64)
+            expected_count = pair_gate_counts[left]
+            if len(errors) != expected_count or len(alpha) != expected_count:
+                raise QualificationError(
+                    "CAA_CROSS_VIEW_SHARED_COUNT_ACCOUNTING_DRIFT"
+                )
+            stop = global_cursor + expected_count
+            values[global_cursor:stop] = errors
+            alpha_values[global_cursor:stop] = alpha
+            global_cursor = stop
+            shared_component = component[indices]
         else:
-            errors = np.asarray([], dtype=np.float64)
-            alpha = np.asarray([], dtype=np.float64)
-        row = {
-            "left_view_index": left,
-            "right_view_index": right,
-            **summarize(errors, alpha),
-        }
-        pair_rows.append(row)
-        for component_id in sorted(set(map(int, component))):
-            local = shared & (component == component_id)
-            local_indices = np.flatnonzero(local)
-            if not len(local_indices):
+            if pair_gate_counts[left] != 0:
+                raise QualificationError(
+                    "CAA_CROSS_VIEW_EMPTY_PAIR_COUNT_DRIFT"
+                )
+            errors = np.empty((0,), dtype=np.float64)
+            alpha = np.empty((0,), dtype=np.float64)
+            shared_component = np.empty((0,), dtype=np.int32)
+
+        raw_count = pair_raw_counts[left]
+        transition_count = pair_transition_counts[left]
+        pair_rows.append(
+            {
+                "left_view_index": left,
+                "right_view_index": right,
+                "raw_shared_direct_sample_count": raw_count,
+                "directional_silhouette_transition_sample_count": transition_count,
+                "directional_silhouette_transition_fraction": (
+                    float(transition_count) / float(raw_count)
+                    if raw_count
+                    else 0.0
+                ),
+                **summarize(errors, alpha),
+            }
+        )
+
+        for component_id in component_ids:
+            local = shared_component == int(component_id)
+            if not np.any(local):
                 continue
-            local_error = rgba_l1_premultiplied(
-                rgba[left, local_indices],
-                rgba[right, local_indices],
-            )
-            local_alpha = np.abs(
-                rgba[left, local_indices, 3].astype(np.float64)
-                - rgba[right, local_indices, 3].astype(np.float64)
-            ) / 255.0
+            local_error = errors[local]
+            local_alpha = alpha[local]
             component_rows.append(
                 {
                     "left_view_index": left,
                     "right_view_index": right,
-                    "component_index": component_id,
+                    "component_index": int(component_id),
                     **summarize(local_error, local_alpha),
                 }
             )
 
-    values = np.asarray(all_errors, dtype=np.float64)
-    alpha_values = np.asarray(all_alpha, dtype=np.float64)
+    if global_cursor != total_shared:
+        raise QualificationError("CAA_CROSS_VIEW_GLOBAL_ACCOUNTING_DRIFT")
+    raw_total = int(sum(pair_raw_counts))
+    transition_total = int(sum(pair_transition_counts))
     return {
-        "mode": "ADJACENT_8VIEW_SHARED_CANONICAL_DIRECT_SOURCE_V2",
+        "mode": (
+            "ADJACENT_8VIEW_SHARED_CANONICAL_DIRECT_SOURCE_V3_"
+            "SILHOUETTE_OWNER_SEPARATED"
+        ),
         "pair_count": 8,
+        "raw_shared_direct_sample_count": raw_total,
+        "directional_silhouette_transition_sample_count": transition_total,
+        "directional_silhouette_transition_fraction": (
+            float(transition_total) / float(raw_total)
+            if raw_total
+            else 0.0
+        ),
+        "appearance_population_requires_same_source_silhouette_class": (
+            source_class is not None
+        ),
         **summarize(values, alpha_values),
         "per_pair": pair_rows,
         "per_pair_component": component_rows,
@@ -493,7 +736,10 @@ def cross_view_source_compatibility_metrics(
         "alpha_conflict_cut": alpha_cut,
         "raw_rgb_equality_required": False,
         "measurement_is_compatibility_not_color_authority": True,
+        "directional_silhouette_transition_is_visibility_owner": True,
+        "storage_mode": "NUMPY_CHUNKS_NO_PYTHON_FLOAT_EXPANSION",
     }
+
 
 def adjacent_direction_transition_metrics(
     *,
@@ -645,8 +891,20 @@ def provenance_boundary_metrics(
     sample_positions: np.ndarray,
     sample_face_index: np.ndarray,
     face_count: int,
-    tile_resolution: int,
+    tile_resolution: int | None,
+    face_sample_offsets: np.ndarray | None = None,
+    face_tile_resolutions: np.ndarray | None = None,
+    face_vertex_ids: tuple[tuple[str, str, str], ...] | None = None,
+    surface_graph: SurfaceSampleGraph | None = None,
+    excluded_provenance_codes: tuple[int, ...] = (),
 ) -> dict:
+    """Measure exact surface seams without Python graph duplication.
+
+    Metric semantics are unchanged from the tuple/set implementation. The
+    surface graph itself is compact CSR and the undirected edge list is consumed
+    directly in chunks, so adaptive multi-million-sample CAA does not materialize
+    a second Python set/dict graph during Stage24.
+    """
     rgba = np.asarray(rgba, dtype=np.uint8)
     provenance = np.asarray(provenance, dtype=np.uint8)
     donor_view = (
@@ -659,141 +917,237 @@ def provenance_boundary_metrics(
     if rgba.ndim != 3 or rgba.shape[0] != 8 or rgba.shape[2] != 4:
         raise QualificationError("CAA_SEAM_RGBA_SHAPE_INVALID")
     n = rgba.shape[1]
-    if provenance.shape != (8, n) or positions.shape != (n, 3) or face_index.shape != (n,):
+    if (
+        provenance.shape != (8, n)
+        or positions.shape != (n, 3)
+        or face_index.shape != (n,)
+    ):
         raise QualificationError("CAA_SEAM_ARRAY_SHAPE_DRIFT")
     if donor_view is not None and donor_view.shape != (8, n):
         raise QualificationError("CAA_SEAM_SOURCE_VIEW_SHAPE_DRIFT")
-    per_face = int(tile_resolution) * (int(tile_resolution) + 1) // 2
-    if n != int(face_count) * per_face:
-        raise QualificationError("CAA_SEAM_FACE_SAMPLE_ACCOUNTING_DRIFT")
 
-    local_pairs = _triangle_lattice_neighbors(tile_resolution)
-    pair_set: set[tuple[int, int]] = set()
-    shared_edge_pair_set: set[tuple[int, int]] = set()
-    for face in range(int(face_count)):
-        base = face * per_face
-        for a, b in local_pairs:
-            pair_set.add((base + a, base + b))
+    adaptive = face_sample_offsets is not None or face_tile_resolutions is not None
+    if adaptive:
+        if face_sample_offsets is None or face_tile_resolutions is None:
+            raise QualificationError("CAA_SEAM_ADAPTIVE_LAYOUT_INCOMPLETE")
+        offsets = np.asarray(face_sample_offsets, dtype=np.int64)
+        resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+        if (
+            offsets.shape != (int(face_count) + 1,)
+            or resolutions.shape != (int(face_count),)
+            or offsets[0] != 0
+            or offsets[-1] != n
+            or np.any(resolutions < 4)
+        ):
+            raise QualificationError("CAA_SEAM_ADAPTIVE_LAYOUT_INVALID")
+    else:
+        if tile_resolution is None or int(tile_resolution) < 4:
+            raise QualificationError("CAA_SEAM_TILE_RESOLUTION_INVALID")
+        per_face = int(tile_resolution) * (int(tile_resolution) + 1) // 2
+        if n != int(face_count) * per_face:
+            raise QualificationError("CAA_SEAM_FACE_SAMPLE_ACCOUNTING_DRIFT")
+        offsets = np.arange(int(face_count) + 1, dtype=np.int64) * per_face
+        resolutions = np.full(
+            (int(face_count),),
+            int(tile_resolution),
+            dtype=np.int32,
+        )
 
-    # Shared-edge samples from adjacent faces occupy identical canonical positions.
-    buckets: dict[tuple[int, int, int], list[int]] = {}
-    scale = 1.0e8
-    for index, point in enumerate(positions):
-        key = tuple(int(round(float(value) * scale)) for value in point)
-        buckets.setdefault(key, []).append(index)
-    for indices in buckets.values():
-        if len(indices) < 2:
-            continue
-        for i in range(len(indices)):
-            for j in range(i + 1, len(indices)):
-                a = indices[i]
-                b = indices[j]
-                if face_index[a] != face_index[b]:
-                    pair = (min(a, b), max(a, b))
-                    pair_set.add(pair)
-                    shared_edge_pair_set.add(pair)
+    graph = (
+        surface_graph
+        if surface_graph is not None
+        else surface_sample_neighbors(
+            positions=positions,
+            face_count=int(face_count),
+            tile_resolution=None if adaptive else int(tile_resolution),
+            face_sample_offsets=offsets if adaptive else None,
+            face_tile_resolutions=resolutions if adaptive else None,
+            face_vertex_ids=face_vertex_ids,
+        )
+    )
+    if len(graph) != n:
+        raise QualificationError("CAA_SEAM_SURFACE_GRAPH_CARDINALITY_DRIFT")
+    edge_a = np.asarray(graph.edge_a, dtype=np.int32)
+    edge_b = np.asarray(graph.edge_b, dtype=np.int32)
+    if (
+        edge_a.shape != edge_b.shape
+        or edge_a.ndim != 1
+        or len(edge_a) != graph.edge_count
+        or np.any(edge_a == edge_b)
+    ):
+        raise QualificationError("CAA_SEAM_COMPACT_GRAPH_EDGE_DRIFT")
+    shared_edge_mask = face_index[edge_a] != face_index[edge_b]
+    edge_count = int(len(edge_a))
+    chunk_size = 250_000
 
-    adjacency: dict[int, set[int]] = {index: set() for index in range(n)}
-    for a, b in pair_set:
-        adjacency[a].add(b)
-        adjacency[b].add(a)
+    def edge_error_vector(view: int) -> np.ndarray:
+        out = np.empty(edge_count, dtype=np.float64)
+        for cursor in range(0, edge_count, chunk_size):
+            stop = min(edge_count, cursor + chunk_size)
+            aa = edge_a[cursor:stop]
+            bb = edge_b[cursor:stop]
+            out[cursor:stop] = rgba_l1_premultiplied(
+                rgba[view, aa],
+                rgba[view, bb],
+            )
+        return out
 
-    errors = []
-    gradient_jumps = []
+    global_error_chunks: list[np.ndarray] = []
+    global_gradient_chunks: list[np.ndarray] = []
     pairs_by_view = []
-    for view in range(8):
-        count = 0
-        values = []
-        view_gradient_jumps = []
-        donor_switch_count = 0
-        shared_edge_count = 0
-        shared_edge_errors = []
-        for a, b in pair_set:
-            shared_edge = (a, b) in shared_edge_pair_set
-            provenance_differs = provenance[view, a] != provenance[view, b]
-            donor_differs = bool(
-                donor_view is not None
-                and int(donor_view[view, a]) != int(donor_view[view, b])
-            )
-            if not shared_edge and not provenance_differs and not donor_differs:
-                continue
-            error = float(
-                rgba_l1_premultiplied(
-                    rgba[view, [a]],
-                    rgba[view, [b]],
-                )[0]
-            )
-            values.append(error)
-            errors.append(error)
-            count += 1
-            if shared_edge:
-                shared_edge_count += 1
-                shared_edge_errors.append(error)
-            if donor_differs:
-                donor_switch_count += 1
 
-            same_a = [
-                neighbor
-                for neighbor in adjacency[a]
-                if neighbor != b
-                and provenance[view, neighbor] == provenance[view, a]
-            ]
-            same_b = [
-                neighbor
-                for neighbor in adjacency[b]
-                if neighbor != a
-                and provenance[view, neighbor] == provenance[view, b]
-            ]
-            if same_a and same_b:
-                grad_a = float(
-                    np.mean(
-                        rgba_l1_premultiplied(
-                            np.repeat(rgba[view, [a]], len(same_a), axis=0),
-                            rgba[view, same_a],
-                        )
-                    )
-                )
-                grad_b = float(
-                    np.mean(
-                        rgba_l1_premultiplied(
-                            np.repeat(rgba[view, [b]], len(same_b), axis=0),
-                            rgba[view, same_b],
-                        )
-                    )
-                )
-                jump = abs(grad_a - grad_b)
-                view_gradient_jumps.append(jump)
-                gradient_jumps.append(jump)
+    for view in range(8):
+        prov_a = provenance[view, edge_a]
+        prov_b = provenance[view, edge_b]
+        provenance_same = prov_a == prov_b
+        donor_differs = (
+            np.zeros(edge_count, dtype=bool)
+            if donor_view is None
+            else donor_view[view, edge_a] != donor_view[view, edge_b]
+        )
+        if excluded_provenance_codes:
+            excluded = np.asarray(
+                tuple(map(int, excluded_provenance_codes)),
+                dtype=np.uint8,
+            )
+            eligible = (
+                ~np.isin(prov_a, excluded)
+                & ~np.isin(prov_b, excluded)
+            )
+        else:
+            eligible = np.ones(edge_count, dtype=bool)
+        active = eligible & (
+            shared_edge_mask | (~provenance_same) | donor_differs
+        )
+        errors = edge_error_vector(view)
+
+        # Old semantics: gradient around endpoint A/B uses same-provenance
+        # neighbours and explicitly excludes the active pair's opposite endpoint.
+        # Accumulate all same-provenance edge gradients once, then subtract this
+        # edge contribution when the active pair itself is same-provenance.
+        gradient_sum = np.zeros(n, dtype=np.float64)
+        gradient_count = np.zeros(n, dtype=np.int32)
+        for cursor in range(0, edge_count, chunk_size):
+            stop = min(edge_count, cursor + chunk_size)
+            same = (
+                provenance_same[cursor:stop]
+                & eligible[cursor:stop]
+            )
+            if not np.any(same):
+                continue
+            aa = edge_a[cursor:stop][same]
+            bb = edge_b[cursor:stop][same]
+            ee = errors[cursor:stop][same]
+            np.add.at(gradient_sum, aa, ee)
+            np.add.at(gradient_sum, bb, ee)
+            np.add.at(gradient_count, aa, 1)
+            np.add.at(gradient_count, bb, 1)
+
+        active_a = edge_a[active]
+        active_b = edge_b[active]
+        active_error = errors[active]
+        active_same = provenance_same[active]
+        subtract = active_error * active_same.astype(np.float64)
+
+        count_a = (
+            gradient_count[active_a].astype(np.int64)
+            - active_same.astype(np.int64)
+        )
+        count_b = (
+            gradient_count[active_b].astype(np.int64)
+            - active_same.astype(np.int64)
+        )
+        sum_a = gradient_sum[active_a] - subtract
+        sum_b = gradient_sum[active_b] - subtract
+        gradient_valid = (count_a > 0) & (count_b > 0)
+        if np.any(gradient_valid):
+            mean_a = np.zeros(len(active_error), dtype=np.float64)
+            mean_b = np.zeros(len(active_error), dtype=np.float64)
+            np.divide(sum_a, count_a, out=mean_a, where=count_a > 0)
+            np.divide(sum_b, count_b, out=mean_b, where=count_b > 0)
+            gradient_jump = np.abs(
+                mean_a[gradient_valid] - mean_b[gradient_valid]
+            )
+        else:
+            gradient_jump = np.empty((0,), dtype=np.float64)
+
+        shared_active = active & shared_edge_mask
+        shared_errors = errors[shared_active]
+        values = active_error
+        global_error_chunks.append(values)
+        global_gradient_chunks.append(gradient_jump)
 
         pairs_by_view.append(
             {
                 "view_index": view,
-                "boundary_pair_count": count,
-                "mean_rgba_l1": float(np.mean(values)) if values else 0.0,
-                "p95_rgba_l1": float(np.quantile(values, 0.95)) if values else 0.0,
-                "gradient_pair_count": int(len(view_gradient_jumps)),
-                "shared_edge_pair_count": int(shared_edge_count),
-                "shared_edge_mean_rgba_l1": float(np.mean(shared_edge_errors)) if shared_edge_errors else 0.0,
-                "shared_edge_p95_rgba_l1": float(np.quantile(shared_edge_errors, 0.95)) if shared_edge_errors else 0.0,
-                "donor_view_switch_pair_count": int(donor_switch_count),
-                "mean_gradient_jump": float(np.mean(view_gradient_jumps)) if view_gradient_jumps else 0.0,
-                "p95_gradient_jump": float(np.quantile(view_gradient_jumps, 0.95)) if view_gradient_jumps else 0.0,
+                "boundary_pair_count": int(len(values)),
+                "mean_rgba_l1": (
+                    float(np.mean(values)) if len(values) else 0.0
+                ),
+                "p95_rgba_l1": (
+                    float(np.quantile(values, 0.95)) if len(values) else 0.0
+                ),
+                "gradient_pair_count": int(len(gradient_jump)),
+                "shared_edge_pair_count": int(len(shared_errors)),
+                "shared_edge_mean_rgba_l1": (
+                    float(np.mean(shared_errors))
+                    if len(shared_errors)
+                    else 0.0
+                ),
+                "shared_edge_p95_rgba_l1": (
+                    float(np.quantile(shared_errors, 0.95))
+                    if len(shared_errors)
+                    else 0.0
+                ),
+                "donor_view_switch_pair_count": int(
+                    np.count_nonzero(donor_differs & eligible)
+                ),
+                "mean_gradient_jump": (
+                    float(np.mean(gradient_jump))
+                    if len(gradient_jump)
+                    else 0.0
+                ),
+                "p95_gradient_jump": (
+                    float(np.quantile(gradient_jump, 0.95))
+                    if len(gradient_jump)
+                    else 0.0
+                ),
             }
         )
-    arr = np.asarray(errors, dtype=np.float64)
-    grad = np.asarray(gradient_jumps, dtype=np.float64)
+
+    arr = (
+        np.concatenate(global_error_chunks)
+        if any(len(row) for row in global_error_chunks)
+        else np.empty((0,), dtype=np.float64)
+    )
+    grad = (
+        np.concatenate(global_gradient_chunks)
+        if any(len(row) for row in global_gradient_chunks)
+        else np.empty((0,), dtype=np.float64)
+    )
     return {
         "boundary_pair_count": int(len(arr)),
         "mean_rgba_l1": float(np.mean(arr)) if len(arr) else 0.0,
         "p95_rgba_l1": float(np.quantile(arr, 0.95)) if len(arr) else 0.0,
         "gradient_pair_count": int(len(grad)),
         "mean_gradient_jump": float(np.mean(grad)) if len(grad) else 0.0,
-        "p95_gradient_jump": float(np.quantile(grad, 0.95)) if len(grad) else 0.0,
+        "p95_gradient_jump": (
+            float(np.quantile(grad, 0.95)) if len(grad) else 0.0
+        ),
         "per_view": pairs_by_view,
         "includes_shared_face_edges": True,
         "shared_face_edges_are_compared_even_when_provenance_matches": True,
         "source_view_identity_consumed": donor_view is not None,
+        "excluded_provenance_codes": tuple(
+            map(int, excluded_provenance_codes)
+        ),
         "donor_view_switch_pair_count": int(
             sum(row["donor_view_switch_pair_count"] for row in pairs_by_view)
         ),
+        "surface_graph_edge_count": int(graph.edge_count),
+        "surface_graph_storage_bytes": int(graph.storage_nbytes),
+        "surface_graph_storage": (
+            "CSR_INT64_OFFSETS_INT32_INDICES_WITH_UNDIRECTED_EDGE_INDEX"
+        ),
     }
+

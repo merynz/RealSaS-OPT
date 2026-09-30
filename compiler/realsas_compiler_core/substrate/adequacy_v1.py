@@ -17,7 +17,11 @@ from ..hashing import content_sha256
 from ..types import QualificationError
 from .scene_first_signed import (
     _self_zbuffer_support,
+    mesh_connected_component_labels_v1,
     rigging_surface_from_scene_first_zero_mesh_v1,
+    topology_aware_zero_surface_normals_v2,
+    ZERO_SURFACE_NORMAL_OPERATOR_V2_ID,
+    zero_surface_normal_operator_hash_v2,
 )
 
 Json=dict[str,Any]
@@ -30,29 +34,7 @@ def substrate_adequacy_report_hash_v1(report:dict)->str:
 
 
 def _dense_component_labels(vertex_count:int,faces:np.ndarray)->np.ndarray:
-    parent=np.arange(int(vertex_count),dtype=np.int64)
-    rank=np.zeros(int(vertex_count),dtype=np.int8)
-
-    def find(x:int)->int:
-        while parent[x]!=x:
-            parent[x]=parent[parent[x]]
-            x=int(parent[x])
-        return x
-
-    def union(a:int,b:int)->None:
-        ra,rb=find(a),find(b)
-        if ra==rb: return
-        if rank[ra]<rank[rb]:
-            ra,rb=rb,ra
-        parent[rb]=ra
-        if rank[ra]==rank[rb]:
-            rank[ra]+=1
-
-    for a,b,c in np.asarray(faces,dtype=np.int64):
-        union(int(a),int(b)); union(int(b),int(c)); union(int(c),int(a))
-    roots=np.asarray([find(i) for i in range(int(vertex_count))],dtype=np.int64)
-    _,labels=np.unique(roots,return_inverse=True)
-    return labels.astype(np.int64)
+    return mesh_connected_component_labels_v1(vertex_count, faces)
 
 
 def _candidate_caps(policy:dict)->tuple[int,...]:
@@ -232,6 +214,129 @@ def _metrics(
     return values
 
 
+_CLOSEST_NONPASSING_RULE_ID = (
+    "MIN_FAILED_GATES__MIN_MAX_RELATIVE_EXCESS__MIN_SUM_RELATIVE_EXCESS__"
+    "MAX_ACTUAL_NODES__MIN_TARGET_CAP_V1"
+)
+
+
+def _candidate_gate_violations_v1(metric: dict, policy: dict) -> dict:
+    specs = (
+        ("dense_to_surface_p95_norm", "MAX", "max_dense_to_surface_p95_norm"),
+        ("dense_to_surface_max_norm", "MAX", "max_dense_to_surface_max_norm"),
+        ("normal_p95_deg", "MAX", "max_normal_p95_deg"),
+        ("projected_p95_px", "MAX", "max_projected_p95_px"),
+        ("projected_max_px", "MAX", "max_projected_max_px"),
+        (
+            "minimum_nodes_per_eligible_component",
+            "MIN",
+            "min_nodes_per_component",
+        ),
+        (
+            "component_alias_node_count",
+            "MAX_ZERO",
+            "max_component_alias_nodes",
+        ),
+    )
+    rows = []
+    finite = True
+    for metric_name, sense, policy_name in specs:
+        value = float(metric[metric_name])
+        threshold = float(policy[policy_name])
+        if not math.isfinite(value) or not math.isfinite(threshold):
+            finite = False
+            excess = float("inf")
+        elif sense == "MAX":
+            if threshold < 0:
+                raise QualificationError(
+                    "CLOSEST_CANDIDATE_MAX_THRESHOLD_NEGATIVE:"
+                    + metric_name
+                )
+            excess = (
+                max(0.0, value)
+                if threshold == 0.0
+                else max(0.0, value / threshold - 1.0)
+            )
+        elif sense == "MIN":
+            if threshold <= 0:
+                raise QualificationError(
+                    "CLOSEST_CANDIDATE_MIN_THRESHOLD_NONPOSITIVE:"
+                    + metric_name
+                )
+            excess = max(0.0, (threshold - value) / threshold)
+        elif sense == "MAX_ZERO":
+            excess = (
+                0.0
+                if value <= threshold
+                else (value if threshold == 0.0 else value / threshold - 1.0)
+            )
+        else:
+            raise AssertionError(sense)
+        rows.append(
+            {
+                "metric": metric_name,
+                "sense": sense,
+                "threshold": threshold,
+                "value": value,
+                "relative_excess": float(excess),
+                "failed": bool(excess > 0.0),
+            }
+        )
+    finite = finite and all(
+        math.isfinite(float(row["relative_excess"])) for row in rows
+    )
+    failed_count = sum(bool(row["failed"]) for row in rows)
+    max_excess = max((float(row["relative_excess"]) for row in rows), default=0.0)
+    sum_excess = sum(float(row["relative_excess"]) for row in rows)
+    return {
+        "finite": bool(finite),
+        "failed_gate_count": int(failed_count),
+        "max_relative_excess": float(max_excess),
+        "sum_relative_excess": float(sum_excess),
+        "gates": rows,
+    }
+
+
+def closest_nonpassing_candidate_v1(
+    evaluated: dict[int, dict],
+    policy: dict,
+) -> dict | None:
+    rows = []
+    for cap in sorted(evaluated):
+        metric = dict(evaluated[cap])
+        if bool(metric.get("passed")):
+            continue
+        violations = _candidate_gate_violations_v1(metric, policy)
+        if not violations["finite"]:
+            continue
+        actual = int(metric["actual_node_count"])
+        key = (
+            int(violations["failed_gate_count"]),
+            float(violations["max_relative_excess"]),
+            float(violations["sum_relative_excess"]),
+            -actual,
+            int(cap),
+        )
+        rows.append((key, int(cap), metric, violations))
+    if not rows:
+        return None
+    key, cap, metric, violations = min(rows, key=lambda row: row[0])
+    return {
+        "selection_rule": _CLOSEST_NONPASSING_RULE_ID,
+        "candidate_target_node_cap": int(cap),
+        "actual_node_count": int(metric["actual_node_count"]),
+        "surface_lineage_hash": str(metric["surface_lineage_hash"]),
+        "selection_key": [
+            int(key[0]),
+            float(key[1]),
+            float(key[2]),
+            int(key[3]),
+            int(key[4]),
+        ],
+        "violations": violations,
+    }
+
+
 def select_adequate_rigging_surface_v1(
     vertices_normalized,
     faces,
@@ -247,6 +352,7 @@ def select_adequate_rigging_surface_v1(
     normal_k:int,
     visibility_depth_tolerance_norm:float,
     adequacy_policy:dict,
+    return_closest_nonpassing_evidence:bool=False,
     metadata:dict|None=None,
 ):
     policy=_policy(dict(adequacy_policy))
@@ -261,7 +367,14 @@ def select_adequate_rigging_surface_v1(
     # The public GSA builder recomputes robust normals per candidate. For adequacy
     # measurement we use the signed decoder normals as orientation-bearing dense
     # reference; selected S still uses the canonical robust PCA operator.
-    dense_normals=hints/np.linalg.norm(hints,axis=1,keepdims=True).clip(min=1e-12)
+    metric_dense_normals=hints/np.linalg.norm(hints,axis=1,keepdims=True).clip(min=1e-12)
+    gsa_dense_normals = topology_aware_zero_surface_normals_v2(
+        dense_world,
+        f,
+        hints,
+    )
+    gsa_normal_operator_id = ZERO_SURFACE_NORMAL_OPERATOR_V2_ID
+    gsa_normal_operator_hash = zero_surface_normal_operator_hash_v2()
     dense_labels=_dense_component_labels(len(vn),f)
     dense_support,dense_raster,_=_self_zbuffer_support(
         dense_world,dense_world,tuple(cameras),
@@ -285,10 +398,14 @@ def select_adequate_rigging_surface_v1(
             normal_k=int(normal_k),
             visibility_depth_tolerance_norm=float(visibility_depth_tolerance_norm),
             component_aware_compaction=bool(policy.get("component_aware_voxel_compaction",False)),
+            precomputed_dense_normals=gsa_dense_normals,
+            precomputed_normal_operator_id=gsa_normal_operator_id,
+            precomputed_normal_operator_hash=gsa_normal_operator_hash,
+            precomputed_component_labels=dense_labels,
             metadata={**dict(metadata or {}),"substrate_adequacy_candidate":True,"candidate_target_node_cap":cap},
         )
         metric=_metrics(
-            surface=surface,dense_world=dense_world,dense_normals=dense_normals,dense_labels=dense_labels,
+            surface=surface,dense_world=dense_world,dense_normals=metric_dense_normals,dense_labels=dense_labels,
             dense_support=dense_support,dense_raster=dense_raster,normalization_half_extent=half,policy=policy,
         )
         metric["candidate_target_node_cap"]=cap
@@ -316,6 +433,11 @@ def select_adequate_rigging_surface_v1(
     else:
         best=None
 
+    closest_nonpassing = (
+        None
+        if best is not None
+        else closest_nonpassing_candidate_v1(evaluated, policy)
+    )
     report={
         "schema":"RealSaS.SubstrateAdequacyReport.v1",
         "status":"PASS" if best is not None else "FAIL",
@@ -327,12 +449,27 @@ def select_adequate_rigging_surface_v1(
         "selected_actual_node_count":None if best is None else int(evaluated[best]["actual_node_count"]),
         "selected_surface_lineage_hash":"" if best is None else str(evaluated[best]["surface_lineage_hash"]),
         "selection_rule":"MINIMUM_ACTUAL_NODE_COUNT_AMONG_PASSING_BOUNDED_SEARCH_CANDIDATES",
+        "diagnostic_closest_nonpassing_candidate":closest_nonpassing,
         "teacher_truth_used":False,
         "categorical_recognition_used":False,
         "adequacy_report_hash":"",
     }
     report["adequacy_report_hash"]=substrate_adequacy_report_hash_v1(report)
     if best is None:
+        if bool(return_closest_nonpassing_evidence):
+            if closest_nonpassing is None:
+                return None,report
+            cap=int(closest_nonpassing["candidate_target_node_cap"])
+            selected=surfaces.get(cap)
+            if selected is None:
+                raise QualificationError("CLOSEST_NONPASSING_SURFACE_MISSING")
+            if selected.geometry_lineage_hash != str(
+                closest_nonpassing["surface_lineage_hash"]
+            ):
+                raise QualificationError(
+                    "CLOSEST_NONPASSING_SURFACE_LINEAGE_DRIFT"
+                )
+            return selected,report
         return None,report
     selected=surfaces[best]
     selected.metadata.update if False else None

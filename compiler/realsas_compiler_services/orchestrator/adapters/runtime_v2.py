@@ -2,6 +2,7 @@ from __future__ import annotations
 
 """V2 Stage42-45 deterministic runtime projection, package, native proof and DVI."""
 
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, replace
 import hashlib
 from pathlib import Path
@@ -90,6 +91,47 @@ def _projection_arrays(projection):
     with np.load(path, allow_pickle=False) as data:
         return {name: np.asarray(data[name]).copy() for name in data.files}
 
+
+
+def _runtime_view_page_rows(view) -> tuple[dict, ...]:
+    metadata = dict(view.metadata or {})
+    rows = tuple(metadata.get("texture_pages") or ())
+    if not rows:
+        return (
+            {
+                "page_index": 0,
+                "path": str(view.texture_path),
+                "sha256": str(view.texture_sha256),
+            },
+        )
+    ordered = tuple(
+        sorted((dict(row) for row in rows), key=lambda row: int(row["page_index"]))
+    )
+    if tuple(int(row["page_index"]) for row in ordered) != tuple(range(len(ordered))):
+        raise QualificationError("RUNTIME_V2_TEXTURE_PAGE_INDEX_DRIFT")
+    if (
+        str(ordered[0]["path"]) != str(view.texture_path)
+        or str(ordered[0]["sha256"]) != str(view.texture_sha256)
+    ):
+        raise QualificationError("RUNTIME_V2_PRIMARY_TEXTURE_PAGE_DRIFT")
+    return ordered
+
+
+def _load_runtime_view_texture(view) -> np.ndarray:
+    rows = _runtime_view_page_rows(view)
+    images = []
+    for row in rows:
+        path = resolved_path(str(row["path"]))
+        if not path.is_file() or sha256_file(path) != str(row["sha256"]):
+            raise QualificationError("RUNTIME_V2_TEXTURE_PAGE_BYTES_DRIFT")
+        images.append(np.asarray(Image.open(path).convert("RGBA"), dtype=np.uint8))
+    if len({image.shape for image in images}) != 1:
+        raise QualificationError("RUNTIME_V2_TEXTURE_PAGE_SHAPE_DRIFT")
+    if bool(dict(view.metadata or {}).get("paged_atlas")):
+        return np.stack(images, axis=0)
+    if len(images) != 1:
+        raise QualificationError("RUNTIME_V2_LEGACY_TEXTURE_PAGE_COUNT_DRIFT")
+    return images[0]
 
 def _largest_connected_fraction(mask: np.ndarray, *, denominator: int) -> float:
     grid = np.asarray(mask, dtype=bool)
@@ -203,6 +245,12 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
         raise QualificationError("RUNTIME_V2_COMPLETE_PUPPET_APPEARANCE_QUAL_DRIFT")
     if dynamic.mesh_binding_hash != mesh.mesh_lineage_hash:
         raise QualificationError("RUNTIME_V2_DYNAMIC_MESH_DRIFT")
+
+    asset_meta = dict(asset.metadata or {})
+    if asset_meta.get("source_owned_visual_mesh_mode") is True:
+        raise QualificationError(
+            "RUNTIME_V2_SOURCE_OWNED_VISUAL_PRESENTATION_BINDING_REQUIRED"
+        )
     if (
         dynamic.mechanical_state_binding_hash
         != complete.mechanical_state_binding_hash
@@ -230,13 +278,24 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
         if "face_uv" not in data.files:
             raise QualificationError("RUNTIME_V2_CAA_FACE_UV_MISSING")
         face_uv = np.asarray(data["face_uv"], dtype=np.float64)
+        face_page_index = (
+            np.asarray(data["face_page_index"], dtype=np.int32)
+            if "face_page_index" in data.files
+            else np.zeros((len(mesh.faces),), dtype=np.int32)
+        )
     if face_uv.shape != (len(mesh.faces), 3, 2):
         raise QualificationError("RUNTIME_V2_FACE_UV_TOPOLOGY_DRIFT")
+    if (
+        face_page_index.shape != (len(mesh.faces),)
+        or np.any(face_page_index < 0)
+    ):
+        raise QualificationError("RUNTIME_V2_FACE_PAGE_INDEX_INVALID")
 
     arrays = {
         "vertices": vertices,
         "faces": faces,
         "face_uv": face_uv,
+        "face_page_index": face_page_index,
     }
     clips = []
     for clip_index, clip in enumerate(dynamic.clips):
@@ -279,20 +338,46 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
     views = []
     for camera in sorted(cameras.cameras, key=lambda row: row.view_index):
         texture = by_texture[int(camera.view_index)]
-        path = resolved_path(texture.transport_png_path)
-        if not path.is_file() or sha256_file(path) != texture.transport_png_sha256:
-            raise QualificationError("RUNTIME_V2_TEXTURE_BYTES_DRIFT")
+        metadata = dict(texture.metadata or {})
+        raw_pages = tuple(metadata.get("pages") or ())
+        if raw_pages:
+            page_rows = tuple(
+                sorted((dict(row) for row in raw_pages), key=lambda row: int(row["page_index"]))
+            )
+        else:
+            page_rows = (
+                {
+                    "page_index": 0,
+                    "path": str(texture.transport_png_path),
+                    "sha256": str(texture.transport_png_sha256),
+                    "width": int(texture.width),
+                    "height": int(texture.height),
+                },
+            )
+        if tuple(int(row["page_index"]) for row in page_rows) != tuple(range(len(page_rows))):
+            raise QualificationError("RUNTIME_V2_TEXTURE_PAGE_INDEX_DRIFT")
+        for row in page_rows:
+            page_path = resolved_path(str(row["path"]))
+            if not page_path.is_file() or sha256_file(page_path) != str(row["sha256"]):
+                raise QualificationError("RUNTIME_V2_TEXTURE_PAGE_BYTES_DRIFT")
+        if np.any(face_page_index >= len(page_rows)):
+            raise QualificationError("RUNTIME_V2_FACE_PAGE_OUT_OF_RANGE")
+        primary = page_rows[0]
+        path = resolved_path(str(primary["path"]))
         views.append(
             RuntimeViewV2IR(
                 view_index=int(camera.view_index),
                 view_id=str(camera.view_id),
                 camera=asdict(camera),
                 texture_path=str(path),
-                texture_sha256=texture.transport_png_sha256,
+                texture_sha256=str(primary["sha256"]),
                 metadata={
                     "visibility": "CANONICAL_POSED_XYZ_ZBUFFER",
                     "appearance": "SEALED_CAA_V2",
                     "runtime_generation": False,
+                    "paged_atlas": bool(metadata.get("paged_atlas", False)),
+                    "page_count": len(page_rows),
+                    "texture_pages": [dict(row) for row in page_rows],
                 },
             )
         )
@@ -333,6 +418,8 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
             "playback_sampling_contract": "SEALED_FRAME_INDEX_ONLY",
             "host_interpolation_authorized": False,
             "geometry_uv_position_precision": "IEEE754_FLOAT64",
+            "appearance_paging_contract": "FACE_INDEX_TO_FIXED_PHYSICAL_PAGE_V1",
+            "appearance_page_count": int(np.max(face_page_index) + 1) if len(face_page_index) else 1,
         },
     )
     projection = replace(
@@ -379,8 +466,7 @@ def materialize_runtime_package_stage(ctx: dict) -> dict:
     if sha256_file(provenance) != projection.provenance_npz_sha256:
         raise QualificationError("RUNTIME_V2_PACKAGE_PROVENANCE_BYTES_DRIFT")
     for view in projection.views:
-        if sha256_file(resolved_path(view.texture_path)) != view.texture_sha256:
-            raise QualificationError("RUNTIME_V2_PACKAGE_TEXTURE_BYTES_DRIFT")
+        _load_runtime_view_texture(view)
 
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     archive = root / "product_runtime_v2.rss"
@@ -398,8 +484,11 @@ def materialize_runtime_package_stage(ctx: dict) -> dict:
         entry_names=tuple(result["entry_names"]),
         package_hash="",
         metadata={
-            "compression": "NONE_V1",
-            "native_reader_dependency_free": True,
+            "container_compression": "NONE_V1",
+            "paged_texture_transport": "PNG_RGBA8",
+            "paged_provenance_transport": "ZLIB_U8_I16_V1",
+            "native_reader_dependency_free": False,
+            "native_reader_dependencies": ["libpng", "zlib"],
             "contains_only_sealed_runtime_authorities": True,
         },
     )
@@ -482,6 +571,52 @@ def _run_native(
     return rgba, provenance, owner, completed.stdout
 
 
+def _native_parallel_workers(ctx: dict) -> int:
+    """Bound native proof concurrency without changing render semantics."""
+    cfg = dict(ctx["run_manifest"].get("runtime") or {})
+    raw = int(cfg.get("native_parallel_workers", 2))
+    return max(1, min(raw, 8))
+
+
+def _run_native_many(
+    *,
+    player: Path,
+    package: Path,
+    requests,
+    root: Path,
+    max_workers: int,
+):
+    rows = tuple(dict(row) for row in requests)
+    if not rows:
+        return []
+    workers = max(1, min(int(max_workers), len(rows)))
+    if workers == 1:
+        return [
+            _run_native(
+                player=player,
+                package=package,
+                clip_id=row["clip_id"],
+                view_id=row["view_id"],
+                frame_index=int(row["frame_index"]),
+                root=root,
+            )
+            for row in rows
+        ]
+
+    def invoke(row):
+        return _run_native(
+            player=player,
+            package=package,
+            clip_id=row["clip_id"],
+            view_id=row["view_id"],
+            frame_index=int(row["frame_index"]),
+            root=root,
+        )
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        return list(pool.map(invoke, rows))
+
+
 def _numeric_mesh(arrays):
     vertices = [
         SimpleNamespace(canonical_mesh_vertex_id=f"v{index}", P=tuple(map(float, xyz)))
@@ -494,27 +629,78 @@ def _numeric_mesh(arrays):
     return SimpleNamespace(vertices=vertices, faces=faces)
 
 
-def _reference_frame(projection, arrays, *, clip, view, frame_index):
+def _build_reference_render_context(projection, arrays):
+    """Cache invariant Python reference-render inputs for one Stage44/45 run.
+
+    This is a performance-only transport optimization: mesh topology, CAA pages,
+    provenance and qualified camera objects are immutable across every frame.
+    Keeping them resident avoids repeated PNG/NPZ decode and object reconstruction
+    without changing any rendered bytes or qualification semantics.
+    """
     mesh = _numeric_mesh(arrays)
+    provenance_path = resolved_path(projection.provenance_npz_path)
+    if (
+        not provenance_path.is_file()
+        or sha256_file(provenance_path) != projection.provenance_npz_sha256
+    ):
+        raise QualificationError("RUNTIME_V2_PROVENANCE_BYTES_DRIFT")
+    with np.load(provenance_path, allow_pickle=False) as data:
+        if "provenance" not in data.files:
+            raise QualificationError("RUNTIME_V2_PROVENANCE_ARRAY_MISSING")
+        provenance_all = np.asarray(data["provenance"], dtype=np.uint8).copy()
+
+    face_page_index = np.asarray(
+        arrays.get("face_page_index", np.zeros((len(mesh.faces),), dtype=np.int32)),
+        dtype=np.int32,
+    )
+    return {
+        "mesh": mesh,
+        "face_uv": np.asarray(arrays["face_uv"], dtype=np.float64),
+        "face_page_index": face_page_index,
+        "provenance_all": provenance_all,
+        "texture_by_view_id": {
+            view.view_id: _load_runtime_view_texture(view)
+            for view in projection.views
+        },
+        "camera_by_view_id": {
+            view.view_id: qualify_camera_v3(
+                dict(view.camera),
+                view_id=view.view_id,
+                view_index=view.view_index,
+            )
+            for view in projection.views
+        },
+    }
+
+
+def _reference_frame(
+    projection,
+    arrays,
+    *,
+    clip,
+    view,
+    frame_index,
+    reference_context=None,
+):
+    context = (
+        reference_context
+        if reference_context is not None
+        else _build_reference_render_context(projection, arrays)
+    )
     positions = np.asarray(
         arrays[f"{clip.array_prefix}_positions"][frame_index],
         dtype=np.float64,
     )
-    camera = qualify_camera_v3(
-        dict(view.camera), view_id=view.view_id, view_index=view.view_index
-    )
-    texture = np.asarray(
-        Image.open(resolved_path(view.texture_path)).convert("RGBA"),
-        dtype=np.uint8,
-    )
-    with np.load(projection.provenance_npz_path, allow_pickle=False) as data:
-        provenance = np.asarray(data["provenance"][view.view_index], dtype=np.uint8)
     return render_caa_reference(
-        mesh=mesh,
-        camera=camera,
-        face_uv=np.asarray(arrays["face_uv"], dtype=np.float64),
-        texture_rgba_u8=texture,
-        provenance_atlas=provenance,
+        mesh=context["mesh"],
+        camera=context["camera_by_view_id"][view.view_id],
+        face_uv=context["face_uv"],
+        texture_rgba_u8=context["texture_by_view_id"][view.view_id],
+        provenance_atlas=np.asarray(
+            context["provenance_all"][view.view_index],
+            dtype=np.uint8,
+        ),
+        face_page_index=context["face_page_index"],
         positions=positions,
     )
 
@@ -541,22 +727,31 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
         raise QualificationError("RUNTIME_V2_NATIVE_PACKAGE_BYTES_DRIFT")
     player, player_sha = _native_player(ctx)
     arrays = _projection_arrays(projection)
+    reference_context = _build_reference_render_context(projection, arrays)
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
 
     probes = []
     outputs = []
+    native_workers = _native_parallel_workers(ctx)
     view_by_id = {view.view_id: view for view in projection.views}
     for clip in projection.clips:
         frame_index = int(clip.frame_count // 2)
-        for view in projection.views:
-            rgba, provenance, owner, stdout = _run_native(
-                player=player,
-                package=archive,
-                clip_id=clip.clip_id,
-                view_id=view.view_id,
-                frame_index=frame_index,
-                root=root / "probes",
-            )
+        views = tuple(projection.views)
+        native_rows = _run_native_many(
+            player=player,
+            package=archive,
+            requests=(
+                {
+                    "clip_id": clip.clip_id,
+                    "view_id": view.view_id,
+                    "frame_index": frame_index,
+                }
+                for view in views
+            ),
+            root=root / "probes",
+            max_workers=native_workers,
+        )
+        for view, (rgba, provenance, owner, stdout) in zip(views, native_rows):
             resolution = int(view.camera["resolution"])
             if rgba.stat().st_size != resolution * resolution * 4:
                 raise QualificationError("RUNTIME_V2_NATIVE_RGBA_SIZE_DRIFT")
@@ -582,6 +777,7 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
                 clip=clip,
                 view=view_by_id[view.view_id],
                 frame_index=frame_index,
+                reference_context=reference_context,
             )
             mismatch_mask = (
                 np.any(native_rgba != reference.straight_rgba_u8, axis=2)
@@ -637,6 +833,7 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
             "native_package_opened_directly": True,
             "midpoint_probe_per_clip_view": True,
             "python_reference_byte_parity": True,
+            "native_parallel_workers": native_workers,
         },
     )
     playback = replace(playback, playback_hash=native_playback_hash(playback))
@@ -656,6 +853,7 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
             "probe_count": len(probes),
             "native_reference_mismatch_pixels": 0,
             "native_player_sha256": player_sha,
+            "native_parallel_workers": native_workers,
         },
     }
 
@@ -757,7 +955,9 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         raise QualificationError("RUNTIME_V2_DVI_NATIVE_PLAYER_DRIFT")
     archive = resolved_path(package.archive_path)
     arrays = _projection_arrays(projection)
+    reference_context = _build_reference_render_context(projection, arrays)
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+    native_workers = _native_parallel_workers(ctx)
 
     faces = np.asarray(arrays["faces"], dtype=np.int64)
     rest_vertices = np.asarray(arrays["vertices"], dtype=np.float64)
@@ -789,6 +989,8 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     alpha_transparent = 0
     compiled_visible = 0
     undefined_visible = 0
+    unsupported_abstain_visible_pixels = 0
+    padding_visible_pixels = 0
     mismatch_pixels = 0
     max_mismatch_fraction = 0.0
     max_frame_compiled_fraction = 0.0
@@ -829,15 +1031,25 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             previous_vertices = (
                 None if frame_index <= 0 else positions_all[frame_index - 1]
             )
-            for view in projection.views:
-                rgba_path, prov_path, owner_path, _stdout = _run_native(
-                    player=player,
-                    package=archive,
-                    clip_id=clip.clip_id,
-                    view_id=view.view_id,
-                    frame_index=frame_index,
-                    root=root / "frames",
-                )
+            views = tuple(projection.views)
+            native_rows = _run_native_many(
+                player=player,
+                package=archive,
+                requests=(
+                    {
+                        "clip_id": clip.clip_id,
+                        "view_id": view.view_id,
+                        "frame_index": frame_index,
+                    }
+                    for view in views
+                ),
+                root=root / "frames",
+                max_workers=native_workers,
+            )
+            for view, (rgba_path, prov_path, owner_path, _stdout) in zip(
+                views,
+                native_rows,
+            ):
                 resolution = int(view.camera["resolution"])
                 rgba = np.frombuffer(rgba_path.read_bytes(), dtype=np.uint8).reshape(
                     resolution, resolution, 4
@@ -854,6 +1066,7 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                     clip=clip,
                     view=view,
                     frame_index=frame_index,
+                    reference_context=reference_context,
                 )
                 parity_mismatch = (
                     np.any(rgba != reference.straight_rgba_u8, axis=2)
@@ -868,9 +1081,15 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                         visible & (reference.straight_rgba_u8[:, :, 3] == 0)
                     )
                 )
-                compiled_mask = visible & (
-                    reference.provenance_code
-                    == int(CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"])
+                compiled_mask = visible & np.isin(
+                    reference.provenance_code,
+                    np.asarray(
+                        (
+                            int(CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"]),
+                            int(CAA_PROVENANCE["CANONICAL_GLOBAL_COMPLETION"]),
+                        ),
+                        dtype=np.uint8,
+                    ),
                 )
                 compiled_count = int(np.count_nonzero(compiled_mask))
                 compiled_visible += compiled_count
@@ -886,10 +1105,23 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                             denominator=visible_count,
                         ),
                     )
-                undefined_visible += int(
-                    np.count_nonzero(
-                        visible & (reference.provenance_code == 255)
-                    )
+                unsupported_visible_mask = visible & (
+                    reference.provenance_code
+                    == int(CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"])
+                )
+                padding_visible_mask = visible & (
+                    reference.provenance_code == 255
+                )
+                unsupported_visible_count = int(
+                    np.count_nonzero(unsupported_visible_mask)
+                )
+                padding_visible_count = int(
+                    np.count_nonzero(padding_visible_mask)
+                )
+                unsupported_abstain_visible_pixels += unsupported_visible_count
+                padding_visible_pixels += padding_visible_count
+                undefined_visible += (
+                    unsupported_visible_count + padding_visible_count
                 )
 
                 exact_depth_count = int(
@@ -1225,6 +1457,12 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                 else "FAIL_DYNAMIC_VISUAL_INTEGRITY"
             ),
             "undefined_visible_pixel_count": undefined_visible,
+            "unsupported_abstain_visible_pixel_count": int(
+                unsupported_abstain_visible_pixels
+            ),
+            "padding_visible_pixel_count": int(
+                padding_visible_pixels
+            ),
             "compiled_unobserved_exposure_budget": exposure_budget,
             "compiled_unobserved_exposure_passed": exposure_passed,
             "maximum_frame_compiled_unobserved_visible_fraction": max_frame_compiled_fraction,
@@ -1277,6 +1515,8 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                 unmeasurable_visible_face_count
             ),
             "alpha_transparency_is_diagnostic_not_undefinedness": True,
+            "unsupported_abstention_is_hard_undefined_visibility": True,
+            "physical_padding_is_hard_undefined_visibility": True,
             "renderer": "REALSAS_V2_CAA_CANONICAL_DEPTH",
         },
         visual_integrity_hash="",
@@ -1293,6 +1533,7 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             ),
             "raw_owner_negative_background_area_gated_as_crack": False,
             "cross_component_non_detachability_authority_claimed": False,
+            "native_parallel_workers": native_workers,
         },
     )
     value = replace(

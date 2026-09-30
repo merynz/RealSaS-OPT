@@ -1,0 +1,163 @@
+{
+  "claim_boundary": "Synthetic adversaries isolate current GSA operators. They do not choose the final point budget, compact surface representation, or visibility implementation.",
+  "findings": [
+    {
+      "class": "SURFACE_TOPOLOGY_COLLAPSE",
+      "confirmed": true,
+      "design_before_code": "Compare surface-sampling, cell-aware clustering, geodesic/topological clustering, and projection-back-to-surface variants under the fixed node budget. Connected-component labels alone are insufficient.",
+      "id": "GSA_COMPONENT_AWARE_VOXEL_COMPACTION_CAN_MERGE_GEODESICALLY_DISTINCT_SHEETS",
+      "severity": "P0"
+    },
+    {
+      "class": "VISIBILITY_EVIDENCE_APPROXIMATION",
+      "confirmed": true,
+      "design_before_code": "Use a topology-aware surface visibility operator (for example exact admitted-face raster/depth) or calibrate a conservative equivalent; do not infer source support from vertex splats.",
+      "id": "GSA_VERTEX_SPLAT_ZBUFFER_CAN_MISCLASSIFY_OCCLUDED_SURFACE_AS_VISIBLE",
+      "severity": "P1"
+    }
+  ],
+  "repo_head": "6a7d5272daa8b8d9ae8ee14b7cb9d9d4513a8ca3",
+  "same_component_fold_compaction": {
+    "compact_edge_count": 120,
+    "compact_node_count": 51,
+    "compact_normal_finite": true,
+    "corresponding_sheet_pair_count": 49,
+    "distinct_sheets_merged": true,
+    "example_merged_pairs": [
+      {
+        "compact_z": 0.0005,
+        "lower_compact_id": 1,
+        "merged": true,
+        "off_surface_distance": 0.0005,
+        "pair_index": 0,
+        "upper_compact_id": 1
+      },
+      {
+        "compact_z": 0.0005,
+        "lower_compact_id": 8,
+        "merged": true,
+        "off_surface_distance": 0.0005,
+        "pair_index": 1,
+        "upper_compact_id": 8
+      },
+      {
+        "compact_z": 0.0005,
+        "lower_compact_id": 15,
+        "merged": true,
+        "off_surface_distance": 0.0005,
+        "pair_index": 2,
+        "upper_compact_id": 15
+      },
+      {
+        "compact_z": 0.0005,
+        "lower_compact_id": 22,
+        "merged": true,
+        "off_surface_distance": 0.0005,
+        "pair_index": 3,
+        "upper_compact_id": 22
+      },
+      {
+        "compact_z": 0.0005,
+        "lower_compact_id": 29,
+        "merged": true,
+        "off_surface_distance": 0.0005,
+        "pair_index": 4,
+        "upper_compact_id": 29
+      },
+      {
+        "compact_z": 0.0005,
+        "lower_compact_id": 36,
+        "merged": true,
+        "off_surface_distance": 0.0005,
+        "pair_index": 5,
+        "upper_compact_id": 36
+      },
+      {
+        "compact_z": 0.0005,
+        "lower_compact_id": 43,
+        "merged": true,
+        "off_surface_distance": 0.0005,
+        "pair_index": 6,
+        "upper_compact_id": 43
+      },
+      {
+        "compact_z": 0.0005,
+        "lower_compact_id": 2,
+        "merged": true,
+        "off_surface_distance": 0.0005,
+        "pair_index": 7,
+        "upper_compact_id": 2
+      }
+    ],
+    "input_vertex_count": 100,
+    "maximum_off_surface_distance": 0.0005,
+    "merged_centroid_leaves_both_input_sheets": true,
+    "merged_corresponding_sheet_pair_count": 49,
+    "off_surface_merged_pair_count": 49,
+    "same_component_label_for_both_sheets": true,
+    "sheet_vertex_count_each": 49,
+    "target_nodes": 64,
+    "voxel_divisions": 512
+  },
+  "schema": "RealSaS.GSASurfaceCoherenceAdversaries.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED",
+  "vertex_splat_visibility": {
+    "continuous_front_triangle_contains_center": true,
+    "continuous_surface_expected_back_visibility": false,
+    "point_splat_marks_back_visible_all_views": true,
+    "raster": [
+      [
+        63.5,
+        63.5
+      ],
+      [
+        63.5,
+        63.5
+      ],
+      [
+        63.5,
+        63.5
+      ],
+      [
+        63.5,
+        63.5
+      ],
+      [
+        63.5,
+        63.5
+      ],
+      [
+        63.5,
+        63.5
+      ],
+      [
+        63.5,
+        63.5
+      ],
+      [
+        63.5,
+        63.5
+      ]
+    ],
+    "support": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "visible_counts": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  }
+}

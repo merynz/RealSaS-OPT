@@ -1,0 +1,31 @@
+name: stage18-harmonic-support-unit-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths:
+      - 'compiler/realsas_compiler_core/canonical_mesh_candidate_v1.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py'
+      - 'tests/compiler/test_canonical_mesh_candidate_v1.py'
+      - '.github/workflows/stage18_harmonic_support_unit_v1.yml'
+
+concurrency:
+  group: stage18-harmonic-support-unit-v1
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Canonical mesh + harmonic seam tests
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. pytest -q tests/compiler/test_canonical_mesh_candidate_v1.py
+
+# trigger: workflow existed before this commit

@@ -1,5 +1,13 @@
 # RealSaS-OPT
 
+## Current canonical status — 2026-09-30
+
+The 46-stage V2 mainline has been forensically normalized from the full research lineage. The final pre-documentation full candidate gate passed on run `36724501505` at head `484c01fca415c849c2b7d8c610294d493b7f219b`.
+
+The repository is implementation-green, but source-owned visual runtime presentation is **not** claimed complete. The sealed 2026-09-28 product-state wiring audit records a P0 Stage18/38 → Stage42 carrier/schema gap. Normalized current runtime fails closed at that seam rather than silently using the mechanical render mesh.
+
+Start with `canonical/MAINLINE_NORMALIZATION_HANDOFF_20260930.md`.
+
 Canonical RealSaS research, compiler, proof and runtime workspace. **Proprietary / all rights reserved.** See `LICENSE` and `THIRD_PARTY_NOTICES.md`.
 
 ## Current implementation status — V2 stage red-team hardened

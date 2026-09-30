@@ -121,7 +121,12 @@ def _spec() -> dict:
     }
 
 
-def _write_verified_fixture(tmp_path: Path, *, run_root_x: float = 0.0):
+def _write_verified_fixture(
+    tmp_path: Path,
+    *,
+    run_root_x: float = 0.0,
+    collapse_tracks: bool = False,
+):
     spec = _spec()
     spec_path = tmp_path / "spec.json"
     _write_json(spec_path, spec)
@@ -133,6 +138,15 @@ def _write_verified_fixture(tmp_path: Path, *, run_root_x: float = 0.0):
             row["source_take"],
             root_x=run_root_x if row["clip_kind"] == "RUN" else 0.0,
         )
+        if not collapse_tracks:
+            if row["clip_kind"] == "RUN":
+                payload["tracks"][1]["keyframes"][0]["local_rotation_quat_xyzw"] = [
+                    0.0, 0.0, 0.1, 0.99498743710662
+                ]
+            elif row["clip_kind"] == "SLASH":
+                payload["tracks"][1]["keyframes"][0]["local_rotation_quat_xyzw"] = [
+                    0.0, 0.0, 0.2, 0.9797958971132712
+                ]
         target = tmp_path / row["output_filename"]
         _write_json(target, payload)
         rows.append(
@@ -229,6 +243,17 @@ def test_verified_outputs_build_stage33_ready_fragment_with_authority_root(tmp_p
 def test_materializer_fails_closed_if_expected_in_place_clip_has_root_motion(tmp_path):
     spec_path, spec = _write_verified_fixture(tmp_path, run_root_x=1e-3)
     with pytest.raises(RuntimeError, match="EXPECTED_IN_PLACE_ROOT_TRANSLATION"):
+        verify_extraction_outputs(
+            out_dir=tmp_path,
+            spec_path=spec_path,
+            spec=spec,
+        )
+
+
+
+def test_materializer_rejects_distinct_take_track_collapse(tmp_path):
+    spec_path, spec = _write_verified_fixture(tmp_path, collapse_tracks=True)
+    with pytest.raises(RuntimeError, match="DISTINCT_TAKES_COLLAPSED"):
         verify_extraction_outputs(
             out_dir=tmp_path,
             spec_path=spec_path,

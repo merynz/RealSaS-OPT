@@ -100,6 +100,73 @@ def _pose_skin_matrices(skeleton,frames,*,joint_id=None,local_axis_index=None,de
     }
 
 
+def _triangle_metrics_batch_exact(
+    rest_positions: np.ndarray,
+    posed_positions: np.ndarray,
+    faces: np.ndarray,
+):
+    """Vectorized equivalent of deformation_stress_v1._triangle_metrics."""
+    rest=np.asarray(rest_positions,dtype=np.float64)
+    posed=np.asarray(posed_positions,dtype=np.float64)
+    face_array=np.asarray(faces,dtype=np.int64)
+    if face_array.ndim!=2 or face_array.shape[1]!=3:
+        raise QualificationError("G3_V2_FACE_INDEX_ARRAY_INVALID")
+
+    r=rest[face_array]
+    p=posed[face_array]
+    r1=r[:,1]-r[:,0]
+    r2=r[:,2]-r[:,0]
+    l1=np.linalg.norm(r1,axis=1)
+    if np.any(l1<=1e-12):
+        raise QualificationError("G3_REST_TRIANGLE_DEGENERATE")
+    u=r1/l1[:,None]
+    x2=np.sum(r2*u,axis=1)
+    perp=r2-x2[:,None]*u
+    y2=np.linalg.norm(perp,axis=1)
+    if np.any(y2<=1e-12):
+        raise QualificationError("G3_REST_TRIANGLE_DEGENERATE")
+
+    inv=np.zeros((len(face_array),2,2),dtype=np.float64)
+    inv[:,0,0]=1.0/l1
+    inv[:,0,1]=-x2/(l1*y2)
+    inv[:,1,1]=1.0/y2
+
+    p1=p[:,1]-p[:,0]
+    p2=p[:,2]-p[:,0]
+    posed_edges=np.stack((p1,p2),axis=2)
+    F=np.einsum("nij,njk->nik",posed_edges,inv,optimize=True)
+    singular=np.linalg.svd(F,compute_uv=False)
+    smax=singular[:,0]
+    smin=singular[:,1]
+    condition=np.where(
+        smin<=1e-15,
+        np.inf,
+        smax/smin,
+    )
+    area_ratio=smax*smin
+
+    rest_edges=np.stack((
+        np.linalg.norm(r[:,1]-r[:,0],axis=1),
+        np.linalg.norm(r[:,2]-r[:,1],axis=1),
+        np.linalg.norm(r[:,0]-r[:,2],axis=1),
+    ),axis=1)
+    posed_edge_lengths=np.stack((
+        np.linalg.norm(p[:,1]-p[:,0],axis=1),
+        np.linalg.norm(p[:,2]-p[:,1],axis=1),
+        np.linalg.norm(p[:,0]-p[:,2],axis=1),
+    ),axis=1)
+    if np.any(rest_edges<=1e-12):
+        raise QualificationError("G3_REST_TRIANGLE_DEGENERATE")
+    ratios=posed_edge_lengths/rest_edges
+    return (
+        area_ratio,
+        condition,
+        ratios.min(axis=1),
+        ratios.max(axis=1),
+        smin,
+    )
+
+
 def run_g3_local_frame_micro_stress_v2(
     candidate,
     *,
@@ -121,6 +188,9 @@ def run_g3_local_frame_micro_stress_v2(
     rest_positions,weights,faces=_candidate_skin_matrix(
         candidate,surface=surface,skeleton=skeleton,skin=skin
     )
+    rest_positions=np.asarray(rest_positions,dtype=np.float64)
+    weights=np.asarray(weights,dtype=np.float64)
+    faces=np.asarray(faces,dtype=np.int64)
     joint_ids=tuple(j.canonical_joint_id for j in skeleton.joints)
     joint_index={jid:i for i,jid in enumerate(joint_ids)}
     if len(joint_index)!=len(joint_ids):
@@ -147,23 +217,35 @@ def run_g3_local_frame_micro_stress_v2(
         )
         matrices=np.stack([skin_by_id[x] for x in joint_ids],axis=0)
         posed=apply_lbs_matrix_v1(rest_positions,weights,matrices)
-        min_area=float("inf"); max_area=0.0
-        max_condition=0.0; min_edge=float("inf"); max_edge=0.0
-        for face in faces:
-            metric=_triangle_metrics(rest_positions[list(face)],posed[list(face)])
-            area_ratio,condition,edge_min,edge_max,smin=metric
-            if not all(math.isfinite(x) for x in metric):
-                failures.add("NONFINITE_DEFORMATION_METRIC")
-                continue
-            min_area=min(min_area,area_ratio); max_area=max(max_area,area_ratio)
-            max_condition=max(max_condition,condition)
-            min_edge=min(min_edge,edge_min); max_edge=max(max_edge,edge_max)
-            if area_ratio<policy.g3_min_dynamic_area_ratio:
+        area_ratio,condition,edge_min,edge_max,smin=_triangle_metrics_batch_exact(
+            rest_positions,posed,faces
+        )
+        finite=(
+            np.isfinite(area_ratio)
+            & np.isfinite(condition)
+            & np.isfinite(edge_min)
+            & np.isfinite(edge_max)
+            & np.isfinite(smin)
+        )
+        if not np.all(finite):
+            failures.add("NONFINITE_DEFORMATION_METRIC")
+        if np.any(finite):
+            area_f=area_ratio[finite]
+            condition_f=condition[finite]
+            edge_min_f=edge_min[finite]
+            edge_max_f=edge_max[finite]
+            min_area=float(np.min(area_f)); max_area=float(np.max(area_f))
+            max_condition=float(np.max(condition_f))
+            min_edge=float(np.min(edge_min_f)); max_edge=float(np.max(edge_max_f))
+            if np.any(area_f<policy.g3_min_dynamic_area_ratio):
                 failures.add("DYNAMIC_AREA_RATIO_BELOW_MIN")
-            if area_ratio>policy.g3_max_dynamic_area_ratio:
+            if np.any(area_f>policy.g3_max_dynamic_area_ratio):
                 failures.add("DYNAMIC_AREA_RATIO_ABOVE_MAX")
-            if condition>policy.g3_max_dynamic_condition_number:
+            if np.any(condition_f>policy.g3_max_dynamic_condition_number):
                 failures.add("DYNAMIC_CONDITION_NUMBER_ABOVE_MAX")
+        else:
+            min_area=float("inf"); max_area=0.0
+            max_condition=0.0; min_edge=float("inf"); max_edge=0.0
         global_min_area=min(global_min_area,min_area)
         global_max_area=max(global_max_area,max_area)
         global_max_condition=max(global_max_condition,max_condition)

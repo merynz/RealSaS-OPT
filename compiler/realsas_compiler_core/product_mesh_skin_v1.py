@@ -11,6 +11,30 @@ from .types import QualifiedMeshSkinIR, QualifiedMeshSkinRow, QualificationError
 _TRANSFER_EPS=1e-9
 
 
+def _skin_support_coefficients(vertex):
+    """Return mechanical skin support, decoupled from seam geometry support when explicit."""
+    binding=vertex.support_binding
+    if str(binding.mode)!="SEAM_GEOMETRY_INTERPOLATION":
+        return tuple(binding.coefficients)
+    md=dict(binding.metadata or {})
+    raw=tuple(md.get("skin_support_coefficients") or ())
+    if not raw:
+        raise QualificationError("PRODUCT_MESH_SKIN_SEAM_SUPPORT_MISSING")
+    out=[]
+    seen=set()
+    total=0.0
+    for row in raw:
+        if len(row)!=2:
+            raise QualificationError("PRODUCT_MESH_SKIN_SEAM_SUPPORT_INVALID")
+        sid=str(row[0]); coeff=float(row[1])
+        if sid in seen or not math.isfinite(coeff) or coeff<0.0:
+            raise QualificationError("PRODUCT_MESH_SKIN_SEAM_SUPPORT_INVALID")
+        seen.add(sid); total+=coeff; out.append((sid,coeff))
+    if abs(total-1.0)>_TRANSFER_EPS:
+        raise QualificationError("PRODUCT_MESH_SKIN_SEAM_SUPPORT_SIMPLEX_INVALID")
+    return tuple(out)
+
+
 def product_mesh_skin_lineage_hash(value:QualifiedMeshSkinIR)->str:
     payload=value.to_dict()
     payload.pop("mesh_skin_lineage_hash",None)
@@ -56,7 +80,8 @@ def validate_product_mesh_skin(
         if vid in rows or vid not in mesh_by_id:
             raise QualificationError("PRODUCT_MESH_SKIN_ROW_ID_INVALID")
         rows[vid]=row
-        if tuple(row.source_support_coefficients)!=tuple(mesh_by_id[vid].support_binding.coefficients):
+        expected_support=_skin_support_coefficients(mesh_by_id[vid])
+        if tuple(row.source_support_coefficients)!=tuple(expected_support):
             raise QualificationError("PRODUCT_MESH_SKIN_SUPPORT_PROVENANCE_DRIFT")
         total=0.0
         seen=set()
@@ -120,7 +145,8 @@ def bind_product_mesh_skin(
         accum={}
         provenance=[]
         support_total=0.0
-        for sid,coeff in vertex.support_binding.coefficients:
+        skin_support=_skin_support_coefficients(vertex)
+        for sid,coeff in skin_support:
             if sid not in source:
                 raise QualificationError(f"PRODUCT_MESH_SKIN_UNSUPPORTED_SURFACE:{sid}")
             c=float(coeff)
@@ -180,7 +206,7 @@ def bind_product_mesh_skin(
         "SURFACE_SUPPORT_CONVEX_TRANSFER_V1",
         report,
         "",
-        metadata={"source_mesh_used":False,"second_mesh_truth_created":False},
+        metadata={"source_mesh_used":False,"second_mesh_truth_created":False,"seam_geometry_skin_support_decoupled":True},
     )
     value=QualifiedMeshSkinIR(**{
         **value.__dict__,

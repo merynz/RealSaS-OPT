@@ -8,7 +8,12 @@ from compiler.realsas_compiler_core.substrate.adequacy_v1 import (
     substrate_adequacy_report_hash_v1,
 )
 from models.iris.v3.zero_surface_decoder_v3 import extract_zero_surface_mesh_v3
-from compiler.realsas_compiler_core.substrate.scene_first_signed import _adaptive_voxel_compact
+from compiler.realsas_compiler_core.substrate.scene_first_signed import (
+    _adaptive_voxel_compact,
+    mesh_connected_component_labels_v1,
+    topology_aware_zero_surface_normals_v2,
+    ZERO_SURFACE_NORMAL_OPERATOR_V2_ID,
+)
 
 
 def _mesh():
@@ -59,6 +64,11 @@ def test_substrate_adequacy_selects_deterministic_passing_n():
     assert ra["selected_actual_node_count"]==len(a.surface_nodes)
     assert 64<=len(a.surface_nodes)<=512
     assert ra["status"]=="PASS"
+    assert a.metadata["Nd_operator"]==ZERO_SURFACE_NORMAL_OPERATOR_V2_ID
+    assert all(
+        node.metadata["normal_operator"]==ZERO_SURFACE_NORMAL_OPERATOR_V2_ID
+        for node in a.surface_nodes
+    )
 
 
 def test_substrate_adequacy_fails_closed_when_no_candidate_meets_policy():
@@ -143,3 +153,82 @@ def test_component_aware_voxel_compaction_prevents_cross_component_cluster_alias
 
     assert mixed_cluster_count(baseline_inverse)>0
     assert mixed_cluster_count(aware_inverse)==0
+
+
+def test_component_aware_compaction_precomputed_labels_are_exactly_equivalent():
+    count=48
+    theta=np.linspace(0.0,2.0*math.pi,count,endpoint=False)
+    ring=np.column_stack((0.3*np.cos(theta),0.3*np.sin(theta),np.zeros(count)))
+    points=np.concatenate((ring,ring+np.asarray([0.0,0.0,0.4])),axis=0)
+    normals=np.tile(np.asarray([[0.0,0.0,1.0]]),(len(points),1))
+    faces=[]
+    for offset in (0,count):
+        for i in range(1,count-1):
+            faces.append((offset,offset+i,offset+i+1))
+    faces=np.asarray(faces,dtype=np.int64)
+    labels=mesh_connected_component_labels_v1(len(points),faces,face_chunk_size=11)
+
+    auto=_adaptive_voxel_compact(
+        points,faces,normals,target_nodes=64,preserve_connected_components=True,
+    )
+    cached=_adaptive_voxel_compact(
+        points,faces,normals,target_nodes=64,preserve_connected_components=True,
+        precomputed_component_labels=labels,
+    )
+    for a,b in zip(auto[:4],cached[:4]):
+        if isinstance(a,np.ndarray):
+            assert np.array_equal(a,b)
+        else:
+            assert a==b
+    assert np.array_equal(auto[4],cached[4])
+
+
+def test_failed_selector_can_return_demo_evidence_without_mutating_product_status():
+    mesh=_mesh()
+    p=_policy()
+    p["max_dense_to_surface_max_norm"]=0.0
+    surface,report=select_adequate_rigging_surface_v1(
+        mesh.vertices_normalized,mesh.faces,mesh.normals,_cams(),
+        normalization_center=(0,0,0),normalization_half_extent=1.0,authority_label="TEST",
+        source_run_id="RUN",source_checkpoint_sha256="a"*64,source_zero_surface_sha256="b"*64,
+        normal_k=24,visibility_depth_tolerance_norm=0.03,adequacy_policy=p,
+        return_closest_nonpassing_evidence=True,
+    )
+    assert surface is not None
+    assert report["status"]=="FAIL"
+    assert report["selected_target_node_cap"] is None
+    assert report["selected_actual_node_count"] is None
+    assert report["selected_surface_lineage_hash"]==""
+    closest=report["diagnostic_closest_nonpassing_candidate"]
+    assert closest is not None
+    assert closest["surface_lineage_hash"]==surface.geometry_lineage_hash
+    assert closest["actual_node_count"]==len(surface.surface_nodes)
+    assert closest["violations"]["finite"] is True
+    assert report["adequacy_report_hash"]==substrate_adequacy_report_hash_v1(report)
+
+
+def test_topology_local_normals_ignore_spatially_close_disconnected_sheet():
+    # Sheet A is XY with +Z normal. Sheet B is XZ with +Y normal and is moved
+    # arbitrarily close to A. Face-incidence normals for A must be invariant.
+    a=np.asarray([
+        [-1.0,-1.0,0.0],[1.0,-1.0,0.0],[1.0,1.0,0.0],[-1.0,1.0,0.0],
+    ],dtype=np.float64)
+    fa=np.asarray([[0,1,2],[0,2,3]],dtype=np.int64)
+    ha=np.tile(np.asarray([[0.0,0.0,1.0]]),(4,1))
+
+    def combined(offset_y):
+        b=np.asarray([
+            [-1.0,offset_y,-1.0],[1.0,offset_y,-1.0],
+            [1.0,offset_y,1.0],[-1.0,offset_y,1.0],
+        ],dtype=np.float64)
+        fb=np.asarray([[4,6,5],[4,7,6]],dtype=np.int64)
+        hb=np.tile(np.asarray([[0.0,1.0,0.0]]),(4,1))
+        p=np.concatenate((a,b),axis=0)
+        f=np.concatenate((fa,fb),axis=0)
+        h=np.concatenate((ha,hb),axis=0)
+        return topology_aware_zero_surface_normals_v2(p,f,h)
+
+    near=combined(1e-7)
+    far=combined(5.0)
+    assert np.allclose(near[:4],far[:4],atol=1e-12)
+    assert np.allclose(near[:4],ha,atol=1e-12)

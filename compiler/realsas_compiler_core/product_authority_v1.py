@@ -454,7 +454,7 @@ def _vec_close(a: Vec3, b: Vec3) -> bool:
 
 
 def _support_position(surface_nodes: dict[str, Any], binding: SurfaceSupportBinding) -> Vec3:
-    if binding.mode not in {"IDENTITY_SURFACE_NODE", "LOCAL_CONVEX_INTERPOLATION"} or not binding.coefficients:
+    if binding.mode not in {"IDENTITY_SURFACE_NODE", "LOCAL_CONVEX_INTERPOLATION", "SEAM_GEOMETRY_INTERPOLATION"} or not binding.coefficients:
         raise QualificationError("QUALIFIED_MESH_G1_SUPPORT_MODE_INVALID")
     seen = set()
     total = 0.0
@@ -645,7 +645,28 @@ def qualified_mesh_intrinsic_audit(value: QualifiedMeshIR, *, surface, partition
             raise QualificationError("QUALIFIED_MESH_G1_COMPONENT_INVALID")
         base = _support_position(surface_nodes, vertex.support_binding)
         sids = {sid for sid, _ in vertex.support_binding.coefficients}
-        if any(owner.get(sid) != vertex.component_id for sid in sids):
+        if vertex.support_binding.mode == "SEAM_GEOMETRY_INTERPOLATION":
+            md = dict(vertex.support_binding.metadata or {})
+            if str(md.get("mechanical_component_id") or "") != str(vertex.component_id):
+                raise QualificationError("QUALIFIED_MESH_G1_SEAM_COMPONENT_BINDING_INVALID")
+            raw_skin_support = tuple(md.get("skin_support_coefficients") or ())
+            if not raw_skin_support:
+                raise QualificationError("QUALIFIED_MESH_G1_SEAM_SKIN_SUPPORT_MISSING")
+            skin_total = 0.0
+            skin_seen = set()
+            for row in raw_skin_support:
+                if len(row) != 2:
+                    raise QualificationError("QUALIFIED_MESH_G1_SEAM_SKIN_SUPPORT_INVALID")
+                sid, coeff = str(row[0]), float(row[1])
+                if sid in skin_seen or sid not in surface_nodes or owner.get(sid) != vertex.component_id:
+                    raise QualificationError("QUALIFIED_MESH_G1_SEAM_SKIN_SUPPORT_CROSS_COMPONENT")
+                if not math.isfinite(coeff) or coeff < 0.0:
+                    raise QualificationError("QUALIFIED_MESH_G1_SEAM_SKIN_SUPPORT_INVALID")
+                skin_seen.add(sid)
+                skin_total += coeff
+            if abs(skin_total - 1.0) > _SUPPORT_SIMPLEX_TOL:
+                raise QualificationError("QUALIFIED_MESH_G1_SEAM_SKIN_SUPPORT_SIMPLEX_INVALID")
+        elif any(owner.get(sid) != vertex.component_id for sid in sids):
             raise QualificationError("QUALIFIED_MESH_G1_CROSS_COMPONENT_SUPPORT")
         support_ids_by_vertex[vid] = sids
         component_vertex_ids[vertex.component_id].add(vid)
@@ -853,10 +874,34 @@ def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, carri
     if value.qualification_report.get("intrinsic_audit_hash") != content_sha256(intrinsic):
         raise QualificationError("QUALIFIED_MESH_INTRINSIC_AUDIT_BINDING_MISMATCH")
 
-    required = {"G1_SUPPORT_LINEAGE","G2_TOPOLOGY","G3_DEFORMATION","G4_COMPONENT_BOUNDARY","G5_MULTIVIEW_COVERAGE"}
+    required = {
+        "G1_SUPPORT_LINEAGE",
+        "G2_TOPOLOGY",
+        "G3_DEFORMATION",
+        "G3B_SKIN_TOPOLOGY_COMPATIBILITY",
+        "G4_COMPONENT_BOUNDARY",
+        "G5_MULTIVIEW_COVERAGE",
+    }
     gates = dict(value.qualification_report.get("gates") or {})
     if set(gates) != required or any(gates[k] != "PASS" for k in required):
-        raise QualificationError("QUALIFIED_MESH_REQUIRES_ALL_FIVE_GATES_PASS")
+        raise QualificationError("QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS")
+    if not str(
+        value.qualification_report.get("skin_topology_compatibility_report_hash") or ""
+    ):
+        raise QualificationError(
+            "QUALIFIED_MESH_G3B_SKIN_TOPOLOGY_REPORT_HASH_MISSING"
+        )
+    if (
+        value.qualification_report.get("skin_topology_compatibility_status")
+        != "PASS"
+    ):
+        raise QualificationError(
+            "QUALIFIED_MESH_G3B_SKIN_TOPOLOGY_NOT_PASS"
+        )
+    if value.qualification_report.get("skin_topology_weight_mutation") is not False:
+        raise QualificationError(
+            "QUALIFIED_MESH_G3B_SKIN_WEIGHT_MUTATION_FORBIDDEN"
+        )
     if value.qualification_report.get("single_aggregate_score_authority") is not False:
         raise QualificationError("QUALIFIED_MESH_AGGREGATE_SCORE_AUTHORITY_FORBIDDEN")
     if value.qualification_report.get("g3_envelope_binding_hash") != envelope.envelope_lineage_hash:

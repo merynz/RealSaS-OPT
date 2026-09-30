@@ -1,0 +1,66 @@
+name: final-mainline-candidate-full-gate-v1
+# rerun after final contract normalization and runtime fail-closed seam
+
+on:
+  push:
+    branches: [integration/generic-main-finalization-20260930]
+    paths:
+      - '.github/workflows/final_mainline_candidate_full_gate_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      REALSAS_RUNTIME_V2_PLAYER: /tmp/realsas_runtime_v2_caa_reference
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install system runtime dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libarchive-dev libpng-dev zlib1g-dev cmake g++
+      - name: Install pinned Python dependencies
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Compile
+        run: python -m compileall -q models compiler runtime/reference_v4 tools tests
+      - name: Repository governance
+        run: |
+          python -m pytest -q             tests/repository/test_repository_governance_v1.py             tests/repository/test_model_branding_boundary_v1.py             tests/repository/test_current_continuity_authority_v2.py             tests/repository/test_canonical_main_readiness_v1.py             tests/repository/test_mainline_execution_plan_v2.py             tests/repository/test_mainline_v2_dag_scheduler.py             tests/repository/test_witness_orchestration_v2.py
+      - name: V2 DAG and implementation closure
+        run: |
+          python -m compiler.realsas_compiler_services.orchestrator.mainline validate-plan
+          python -m compiler.realsas_compiler_services.orchestrator.mainline implementation-closure
+      - name: Build native V2 CAA player
+        run: |
+          g++ -std=c++17 -O2 -Wall -Wextra -pedantic             runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp             -lpng -lz -o "$REALSAS_RUNTIME_V2_PLAYER"
+      - name: Learned source ownership
+        run: |
+          python -m pytest -q             tests/models             tests/iris/test_iris_mainline_source_v1.py             tests/iris/test_iris_v2_dense_source_coverage_v2.py
+      - name: Full compiler regressions
+        run: python -m pytest -q tests/compiler
+      - name: Complete synthetic proof export gate
+        run: python -m pytest -q experiments/single_family_e2e_v1/test_complete_e2e_source_v1.py
+      - name: Native runtime library
+        run: |
+          rm -rf .runtime-ci
+          cmake -S runtime/realsas_cpp -B .runtime-ci/native-build             -DREALSAS_BUILD_SHARED=ON             -DREALSAS_BUILD_EXAMPLES=OFF             -DREALSAS_BUILD_TESTS=ON
+          cmake --build .runtime-ci/native-build --parallel
+          ctest --test-dir .runtime-ci/native-build --output-on-failure
+      - name: Candidate summary
+        run: |
+          echo FINAL_MAINLINE_CANDIDATE_FULL_GATE_PASS
+          echo "commit=$GITHUB_SHA"

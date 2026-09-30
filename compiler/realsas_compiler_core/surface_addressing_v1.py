@@ -124,19 +124,51 @@ def build_surface_addressing(candidate) -> SurfaceAddressingIR:
     return replace(value, addressing_hash=surface_addressing_hash(value))
 
 
-def build_appearance_domain(candidate, addressing: SurfaceAddressingIR, output_direction_set_hash: str) -> AppearanceDomainIR:
+def build_appearance_domain(
+    candidate,
+    addressing: SurfaceAddressingIR,
+    output_direction_set_hash: str,
+    *,
+    visual_mesh_set_hash: str | None = None,
+    visual_mesh_face_count: int | None = None,
+) -> AppearanceDomainIR:
     if addressing.candidate_mesh_binding_hash != candidate.candidate_lineage_hash:
         raise QualificationError("APPEARANCE_DOMAIN_MESH_ADDRESSING_DRIFT")
+    source_owned = visual_mesh_set_hash is not None
+    if source_owned:
+        if len(str(visual_mesh_set_hash)) != 64:
+            raise QualificationError("APPEARANCE_DOMAIN_VISUAL_MESH_SET_HASH_INVALID")
+        if visual_mesh_face_count is None or int(visual_mesh_face_count) <= 0:
+            raise QualificationError("APPEARANCE_DOMAIN_VISUAL_FACE_COUNT_INVALID")
+        renderable_face_count = int(visual_mesh_face_count)
+    else:
+        renderable_face_count = len(candidate.faces)
     value = AppearanceDomainIR(
         candidate_mesh_binding_hash=candidate.candidate_lineage_hash,
         surface_addressing_binding_hash=addressing.addressing_hash,
         output_direction_set_binding_hash=str(output_direction_set_hash),
-        renderable_face_count=len(candidate.faces),
+        renderable_face_count=renderable_face_count,
         total_appearance_required=True,
         geometry_mutation_forbidden=True,
         domain_hash="",
         metadata={
-            "domain": "CANONICAL_MESH_SURFACE_X_DISCRETE_V0_V7",
+            "domain": (
+                "SOURCE_OWNED_VISUAL_MESH_SET_X_DISCRETE_V0_V7"
+                if source_owned
+                else "LEGACY_CANONICAL_MECHANICAL_MESH_SURFACE_X_DISCRETE_V0_V7"
+            ),
+            "visual_mesh_set_binding_hash": (
+                str(visual_mesh_set_hash) if source_owned else None
+            ),
+            "mechanical_candidate_render_authority": False if source_owned else True,
+            "mechanical_candidate_role": (
+                "MECHANICS_AND_PRESENTATION_DISPLACEMENT_DRIVER_ONLY"
+                if source_owned
+                else "LEGACY_SHARED_GEOMETRY_APPEARANCE_DOMAIN"
+            ),
+            "source_art_silhouette_is_visual_geometry_authority": bool(source_owned),
+            "fixed_source_uv_authority": bool(source_owned),
+            "arap_visual_deformer_authorized": bool(source_owned),
             "presentation_warp_v1_forbidden": True,
             "appearance_cannot_mutate_geometry": True,
         },

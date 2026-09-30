@@ -1,5 +1,11 @@
 # RealSaS-OPT Agent Entry Contract
 
+## Mandatory 2026-09-30 handoff
+
+**First read:** `canonical/MAINLINE_NORMALIZATION_HANDOFF_20260930.md`.
+
+If the user says only “continue / devam et”, resume from current `main` and the P0 Stage18/38 source-owned visual authority → Stage42 runtime presentation seam described there. Do not restart research archaeology, do not revive historical donor/runtime paths, and do not claim Stage46 product readiness across the fail-closed seam.
+
 This repository must be resumable without conversational memory.
 
 ## Mandatory first read

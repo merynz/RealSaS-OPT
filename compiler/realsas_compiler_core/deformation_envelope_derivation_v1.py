@@ -107,6 +107,8 @@ def derive_deformation_envelope_v1(*,skeleton,camera_set):
             "actual_motion_capability_claimed":False,
             "actual_motion_capability_authority":"STAGE35_EXACT_QUATERNION_CLIP_EXECUTION",
             "g3_role":"LOCAL_3D_NUMERICAL_CONDITIONING_ONLY",
+            "skin_topology_compatibility_stress_angle_deg":120.0,
+            "skin_topology_compatibility_stress_semantics":"SUBJECT_FREE_MECHANICAL_STRESS__NOT_MOTION_CAPABILITY",
         },
     )
     env=replace(env,envelope_lineage_hash=deformation_envelope_lineage_hash(env))

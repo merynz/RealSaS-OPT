@@ -1,0 +1,32 @@
+name: zero-surface-topology-normal-tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'compiler/realsas_compiler_core/substrate/scene_first_signed.py'
+      - 'tests/compiler/test_scene_first_signed_surface_bridge_v1.py'
+      - '.github/workflows/zero_surface_topology_normal_tests.yml'
+
+concurrency:
+  group: zero-surface-topology-normal-tests
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install
+        run: python -m pip install --no-input --progress-bar off numpy scipy pytest scikit-image
+      - name: Focused normal tests
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. pytest -q tests/compiler/test_scene_first_signed_surface_bridge_v1.py
+          python -m py_compile compiler/realsas_compiler_core/substrate/scene_first_signed.py

@@ -1,0 +1,55 @@
+name: visual-runtime-consumer-forensic-audit-v1
+
+on:
+  push:
+    branches: [integration/generic-main-finalization-20260930]
+    paths:
+      - '.github/workflows/visual_runtime_consumer_forensic_audit_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - name: Exact current references
+        run: |
+          set -euxo pipefail
+          for q in             VisualMeshSetIR             visual_mesh_set_from_dict             visual_mesh_set_binding_hash             STAGE18_SOURCE_OWNED_VISUAL_MESH_SET             SOURCE_OWNED_VISUAL_MESH_SET             BARYCENTRIC_BINDING_PLUS_ARAP_2D             bind_region_visual_vertices_to_mechanical_affine_v1             evaluate_region_visual_binding_v1             visual_mesh
+          do
+            echo "===== GREP:$q ====="
+            git grep -n "$q" -- . ':!canonical/knight_*' ':!tools/demo/*' || true
+          done
+      - name: Runtime and package only
+        run: |
+          set -euxo pipefail
+          echo "===== RUNTIME/PACKAGE REFERENCES ====="
+          git grep -n -E 'VisualMesh|visual_mesh|face_uv|mesh\.bin|presentation_state_execution_authorized|mechanical_mesh_render_authority' --             compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py             compiler/realsas_compiler_core/runtime_authority_v2.py             compiler/realsas_compiler_core/runtime_package_v2.py             runtime/realsas_cpp/src || true
+      - name: Producer/consumer history
+        run: |
+          set -euxo pipefail
+          echo "===== HISTORY VisualMeshSetIR ====="
+          git log --all --date=iso --pretty=format:'%H %ad %s' -S'VisualMeshSetIR' -- .
+          echo
+          echo "===== HISTORY visual_mesh_set_binding_hash ====="
+          git log --all --date=iso --pretty=format:'%H %ad %s' -S'visual_mesh_set_binding_hash' -- .
+          echo
+          echo "===== HISTORY affine visual binding ====="
+          git log --all --date=iso --pretty=format:'%H %ad %s' -S'bind_region_visual_vertices_to_mechanical_affine_v1' -- .
+          echo
+          echo "===== HISTORY Stage42 visual ====="
+          git log --all --date=iso --pretty=format:'%H %ad %s' -G'visual_mesh|VisualMesh|source_owned_visual' --             compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py             compiler/realsas_compiler_core/runtime_authority_v2.py             compiler/realsas_compiler_core/runtime_package_v2.py             runtime/realsas_cpp/src || true
+      - name: Current Stage18 and Stage42 plan boundary
+        run: |
+          python - <<'PY'
+          import json
+          p=json.load(open('canonical/MAINLINE_EXECUTION_PLAN_V2.json'))
+          for s in p['stages']:
+              if int(s['ordinal']) in (18,20,21,22,23,24,25,37,38,42,43,44,45,46):
+                  print(json.dumps(s,sort_keys=True))
+          PY

@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import numpy as np
+import pytest
 from PIL import Image
 
 from compiler.realsas_compiler_core.hashing import content_sha256
@@ -15,6 +16,7 @@ from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
     rasterize_triangles_half_integer_top_left,
 )
 from compiler.realsas_compiler_core.playback_full_surface_v3 import qualify_camera_v3
+from compiler.realsas_compiler_core.substrate.scene_first_signed import compacted_dense_face_provenance_hash_v1
 from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     canonical_mesh_candidate_from_dict,
     canonical_puppet_state_from_dict,
@@ -42,6 +44,7 @@ from compiler.realsas_compiler_core.types import (
     QualifiedSkeletonIR,
     QualifiedSkinIR,
     QualifiedSkinRow,
+    QualificationError,
     RiggingSurfaceIR,
     SurfaceNode,
     SurfaceRelation,
@@ -108,6 +111,26 @@ def _fixture(tmp_path, *, resolution: int = 8):
         surface.geometry_lineage_hash,skeleton.skeleton_lineage_hash,{"status":"PASS"},"skin-hash",
     )
     s_path=_write(tmp_path/"surface.json",surface)
+    face_provenance={
+        "schema":"RealSaS.CompactedDenseFaceProvenance.v1",
+        "status":"PASS",
+        "surface_lineage_hash":surface.geometry_lineage_hash,
+        "source_zero_surface_sha256":"f"*64,
+        "source_dense_face_count":1,
+        "compact_face_count":1,
+        "compact_faces":(("s0","s1","s2"),),
+        "triangle_authority":"EXACT_DENSE_FACE_WITNESS_AFTER_FROZEN_COMPACTION",
+        "three_clique_face_minting_allowed":False,
+        "face_deletion_claimed":False,
+        "teacher_truth_used":False,
+        "provenance_hash":"",
+    }
+    face_provenance["provenance_hash"]=compacted_dense_face_provenance_hash_v1(face_provenance)
+    face_provenance_path=tmp_path/"compacted_dense_face_provenance.json"
+    face_provenance_path.write_text(
+        json.dumps(face_provenance,sort_keys=True)+"\n",
+        encoding="utf-8",
+    )
     g_path=_write(tmp_path/"skeleton.json",skeleton)
     w_path=_write(tmp_path/"skin.json",skin)
 
@@ -273,7 +296,10 @@ def _fixture(tmp_path, *, resolution: int = 8):
     ledger={"stages":[
         {"id":"05_CAMERA_CONTRACT_SOLVED","status":"PASS","outputs":[_out(camera_set_path,"RealSaS.QualifiedCameraSetIR.v1")]},
         {"id":"07_OBSERVATION_CONTRACT_QUALIFIED","status":"PASS","outputs":[_out(obs_path,"RealSaS.QualifiedObservationSetIR.v1")]},
-        {"id":"15_RIGGING_SURFACE_QUALIFIED","status":"PASS","outputs":[_out(s_path,"RealSaS.RiggingSurfaceIR.v1")]},
+        {"id":"15_RIGGING_SURFACE_QUALIFIED","status":"PASS","outputs":[
+            _out(s_path,"RealSaS.RiggingSurfaceIR.v1"),
+            _out(face_provenance_path,"RealSaS.CompactedDenseFaceProvenance.v1"),
+        ]},
         {"id":"18_SKELETON_QUALIFIED","status":"PASS","outputs":[_out(g_path,"RealSaS.QualifiedSkeletonIR.v1")]},
         {"id":"22_SKIN_QUALIFIED","status":"PASS","outputs":[_out(w_path,"RealSaS.QualifiedSkinIR.v1")]},
     ]}
@@ -293,17 +319,18 @@ def _install_stage_outputs(ctx,stage_id,result):
     })
 
 
-def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
+def test_superseded_stage24_to27_path_fails_closed_without_g3b(tmp_path):
+    """Historical product_mesh_v1 is not a current V2 qualification path.
+
+    The current 46-stage DAG computes G3B at Stage35 after qualified skin.
+    This compatibility path predates that authority and must therefore fail
+    closed rather than mint a five-gate QualifiedMeshIR.
+    """
     ctx=_fixture(tmp_path)
 
     r24=qualify_mechanical_partition_and_carriers(ctx)
     assert r24["status"]=="PASS"
     _install_stage_outputs(ctx,"24_MECHANICAL_PARTITION_QUALIFIED",r24)
-    partition=mechanical_partition_from_dict(read_json(r24["outputs"][0]["path"]))
-    carrier=component_carrier_policy_from_dict(read_json(r24["outputs"][1]["path"]))
-    assert len(partition.components)==1
-    assert carrier.decisions[0].carrier_class=="MESH"
-    assert carrier.decisions[0].metadata["automatic"] is True
 
     r25=seal_deformation_capability_envelope(ctx)
     assert r25["status"]=="PASS"
@@ -312,126 +339,12 @@ def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
     r26=build_canonical_mesh_candidate_stage(ctx)
     assert r26["status"]=="PASS"
     _install_stage_outputs(ctx,"26_MESH_CANDIDATE_BUILD",r26)
-    candidate=canonical_mesh_candidate_from_dict(read_json(r26["outputs"][0]["path"]))
-    assert len(candidate.faces)==1
 
-    component_id=partition.components[0].component_id
-    assert ctx["run_manifest"]["observation"].get("component_masks")==[]
-
-    r27=qualify_canonical_mesh_stage(ctx)
-    assert r27["status"]=="PASS",r27
-    qualified=next(out for out in r27["outputs"] if out["schema"]=="RealSaS.QualifiedMeshIR.v1")
-    mesh=qualified_mesh_from_dict(read_json(qualified["path"]))
-    assert mesh.qualification_report["g3_stress_probe_status"]=="PASS"
-    assert mesh.qualification_report["view_component_coverage_matrix_complete"] is True
-    assert len(mesh.qualification_report["view_component_coverage"])==8
-    assert mesh.qualification_report["consequential_unknown_boundary_count"]==0
-    assert len(mesh.mesh_lineage_hash)==64
-    _install_stage_outputs(ctx,"27_QUALIFIED_MESH_GATE",r27)
-
-    r28=bind_qualified_mesh_skin_stage(ctx)
-    assert r28["status"]=="PASS",r28
-    bound=qualified_mesh_skin_from_dict(read_json(r28["outputs"][0]["path"]))
-    assert bound.mesh_binding_hash==mesh.mesh_lineage_hash
-    assert bound.skin_binding_hash=="skin-hash"
-    assert len(bound.rows)==len(mesh.vertices)
-    assert len(bound.mesh_skin_lineage_hash)==64
-    _install_stage_outputs(ctx,"28_QUALIFIED_MESH_SKIN_TRANSFER",r28)
-
-    r29=seal_canonical_puppet_state_stage(ctx)
-    assert r29["status"]=="PASS",r29
-    state=canonical_puppet_state_from_dict(read_json(r29["outputs"][0]["path"]))
-    assert state.mesh_lineage_hash==mesh.mesh_lineage_hash
-    assert state.mesh_skin_lineage_hash==bound.mesh_skin_lineage_hash
-    assert state.metadata["presentation_bound"] is False
-    assert state.metadata["motion_bound"] is False
-    assert len(state.product_state_hash)==64
-    _install_stage_outputs(ctx,"29_CANONICAL_PUPPET_STATE_SEALED",r29)
-
-    r30=qualify_presentation_graph_stage(ctx)
-    assert r30["status"]=="PASS",r30
-    by_schema={out["schema"]:out for out in r30["outputs"]}
-    structure=qualified_presentation_structure_from_dict(read_json(by_schema["RealSaS.QualifiedPresentationStructureIR.v1"]["path"]))
-    appearance=qualified_appearance_set_from_dict(read_json(by_schema["RealSaS.QualifiedAppearanceSetIR.v1"]["path"]))
-    composition=qualified_composition_set_from_dict(read_json(by_schema["RealSaS.QualifiedCompositionSetIR.v1"]["path"]))
-    graph=qualified_presentation_graph_from_dict(read_json(by_schema["RealSaS.QualifiedPresentationGraphIR.v1"]["path"]))
-    assert graph.presentation_structure_binding_hash==structure.structure_lineage_hash
-    assert graph.appearance_set_binding_hash==appearance.appearance_set_hash
-    assert graph.composition_set_binding_hash==composition.composition_set_hash
-    assert graph.product_state_binding_hash==state.product_state_hash
-    assert len(graph.view_overlays)==8
-    assert graph.qualification_report["single_canonical_mesh"] is True
-    assert graph.qualification_report["slot_order_solves_physical_occlusion"] is False
-    assert graph.qualification_report["categorical_recognition_used"] is False
-    for binding in appearance.bindings:
-        assert {tuple(c.donor_raster_xy) for c in binding.corner_bindings}=={
-            (3.5,3.5),(5.5,3.5),(3.5,1.5)
-        }
-        assert {c.donor_view_index for c in binding.corner_bindings}=={binding.target_view_index}
-    _install_stage_outputs(ctx,"30_QUALIFIED_PRESENTATION_GRAPH",r30)
-
-    r31=qualify_rest_render_stage(ctx)
-    assert r31["status"]=="PASS",r31
-    rest_out=next(out for out in r31["outputs"] if out["schema"]=="RealSaS.RestRenderSetIR.v1")
-    rest=rest_render_set_from_dict(read_json(rest_out["path"]))
-    assert len(rest.views)==8
-    assert rest.presentation_binding_hash==graph.presentation_lineage_hash
-    assert rest.appearance_set_binding_hash==appearance.appearance_set_hash
-    assert rest.composition_set_binding_hash==composition.composition_set_hash
-    assert rest.metadata["canonical_geometry_is_never_rgb_authority"] is True
-    assert all(len(row.rendered_rgba_sha256)==64 for row in rest.views)
-    assert all(len(row.metadata["png_sha256"])==64 for row in rest.views)
-    assert all(
-        sum(Path(row["mask"]["path"]).read_bytes())>0
-        for row in ctx["run_manifest"]["observation"]["source_foreground_masks"]
-    ), [sum(Path(row["mask"]["path"]).read_bytes()) for row in ctx["run_manifest"]["observation"]["source_foreground_masks"]]
-    assert all(row.geometry_visible_pixel_count>0 for row in rest.views), [row.geometry_visible_pixel_count for row in rest.views]
-    assert all(row.visible_pixel_count>0 for row in rest.views), [row.visible_pixel_count for row in rest.views]
-    _install_stage_outputs(ctx,"31_REST_RENDER_8VIEW",r31)
-
-    r32=qualify_rest_source_preservation_stage(ctx)
-    assert r32["status"]=="PASS",r32
-    by_schema={out["schema"]:out for out in r32["outputs"]}
-    measurements=rest_preservation_measurement_set_from_dict(
-        read_json(by_schema["RealSaS.RestPreservationMeasurementSetIR.v1"]["path"])
-    )
-    policy=rest_source_preservation_policy_from_dict(
-        read_json(by_schema["RealSaS.RestSourcePreservationPolicyIR.v1"]["path"])
-    )
-    qualified_rest=qualified_rest_source_preservation_from_dict(
-        read_json(by_schema["RealSaS.QualifiedRestSourcePreservationIR.v1"]["path"])
-    )
-    assert len(measurements.views)==8
-    assert all(row.alpha_recall>=policy.min_alpha_recall for row in measurements.views)
-    assert all(row.alpha_precision>=policy.min_alpha_precision for row in measurements.views)
-    assert all(row.overlap_rgba_mismatch_pixel_count==0 for row in measurements.views)
-    assert all(row.direct_source_geometry_fraction==1.0 for row in measurements.views)
-    assert all(row.cross_view_source_geometry_fraction==0.0 for row in measurements.views)
-    assert qualified_rest.qualification_report["every_view_passed_every_rule"] is True
-    assert qualified_rest.qualification_report["motion_authorization_precondition_satisfied"] is True
-    _install_stage_outputs(ctx,"32_REST_SOURCE_PRESERVATION_GATE",r32)
-
-    r33=seal_motion_source_or_preset_stage(ctx)
-    assert r33["status"]=="PASS",r33
-    by_schema={out["schema"]:out for out in r33["outputs"]}
-    source_set=motion_source_set_from_dict(read_json(by_schema["RealSaS.MotionSourceSetIR.v1"]["path"]))
-    source_seal=qualified_motion_source_seal_from_dict(read_json(by_schema["RealSaS.QualifiedMotionSourceSealIR.v1"]["path"]))
-    assert len(source_set.assets)==1
-    assert source_set.assets[0].clip_id=="idle_artist"
-    assert source_set.assets[0].source_space=="SOURCE_RIG_TRACKS_V2"
-    assert source_seal.source_set_binding_hash==source_set.source_set_hash
-    assert source_seal.product_state_binding_hash==state.product_state_hash
-    assert source_seal.rest_preservation_binding_hash==qualified_rest.preservation_lineage_hash
-    assert source_seal.qualification_report["retargeting_performed"] is False
-    assert source_seal.qualification_report["motion_compilation_performed"] is False
-    assert source_seal.qualification_report["motion_quality_claimed"] is False
-    _install_stage_outputs(ctx,"33_MOTION_SOURCE_OR_PRESET_SEAL",r33)
-
-    # Stage34+ of the old V1 product path is preserved historical provenance,
-    # not current continuation authority. The motion compiler core is now
-    # intentionally V2-presentation-only; current Stage39-46 coverage lives in
-    # test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa.
-
+    with pytest.raises(
+        QualificationError,
+        match="QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS",
+    ):
+        qualify_canonical_mesh_stage(ctx)
 
 def test_vf23_stage37_to46_tail_uses_unmodified_production_dynamic_policy(tmp_path):
     import os
@@ -966,7 +879,16 @@ def test_vf23_stage20_to25_uses_unmodified_production_caa_policy(tmp_path):
         observation_set_binding_hash=observation.observation_set_hash,
         camera_set_binding_hash=cameras.camera_set_hash,
         normalization_binding_hash="n" * 64,
-        policy={"fixture": True},
+        policy={
+            "fixture": True,
+            "min_recall": 1.0,
+            "min_precision": 1.0,
+            "max_largest_coherent_hole_fraction": 0.0,
+            "max_interior_uncovered_fraction": 0.0,
+            "min_component_recall": 1.0,
+            "component_min_foreground_fraction": 0.0,
+            "max_silhouette_edge_p95_px": 0.0,
+        },
         views=geometry_views,
         metadata={"subject_free_fixture": True},
     )
@@ -1008,6 +930,10 @@ def test_vf23_stage20_to25_uses_unmodified_production_caa_policy(tmp_path):
     r20 = run("20_CAA_BACKEND_PREREGISTERED", preregister_caa_backend_stage)
     assert r20["diagnostics"]["shipping_eligible"] is True
     r21 = run("21_CAA_COMPILE", compile_caa_stage)
+    assert float(r21["performance"]["source_prepare_seconds"]) >= 0.0
+    assert float(r21["performance"]["deterministic_compile_seconds"]) >= 0.0
+    assert float(r21["performance"]["npz_seal_seconds"]) >= 0.0
+    assert "core_phase_seconds" in r21["performance"]
     compile_artifact = caa_compile_artifact_from_dict(
         read_json(
             next(
@@ -1039,6 +965,9 @@ def test_vf23_stage20_to25_uses_unmodified_production_caa_policy(tmp_path):
     assert seal.qualification_report["direct_source_immutable"] is True
 
     r23 = run("23_COMPLETE_APPEARANCE_ASSET_BAKED", bake_complete_appearance_stage)
+    assert float(r23["performance"]["array_load_seconds"]) >= 0.0
+    assert float(r23["performance"]["direction_bake_seconds_total"]) >= 0.0
+    assert len(r23["performance"]["direction_bake_seconds_by_view"]) == 8
     asset = complete_appearance_asset_from_dict(
         read_json(
             next(
@@ -1068,6 +997,9 @@ def test_vf23_stage20_to25_uses_unmodified_production_caa_policy(tmp_path):
     assert qualification.total_defined_fraction == 1.0
 
     r25 = run("25_CAA_REFERENCE_REST_RENDER_PROOF", prove_caa_reference_rest_stage)
+    assert float(r25["performance"]["setup_seconds"]) >= 0.0
+    assert float(r25["performance"]["direction_proof_seconds_total"]) >= 0.0
+    assert len(r25["performance"]["direction_proof_seconds_by_view"]) == 8
     rest = caa_rest_render_proof_from_dict(
         read_json(
             next(
@@ -1146,42 +1078,14 @@ def test_vf23_stage20_to25_uses_unmodified_production_caa_policy(tmp_path):
         "native_player": {"path": str(player), "sha256": _sha(player)}
     }
 
-    run(
-        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
-        build_runtime_projection_stage,
-    )
-    run("43_RSS_MATERIALIZE_COMPACT", materialize_runtime_package_stage)
-    r44 = run(
-        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
-        prove_native_package_playback_stage,
-    )
-    assert r44["diagnostics"]["native_reference_mismatch_pixels"] == 0
-
-    r45 = run(
-        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
-        prove_dynamic_visual_integrity_stage,
-    )
-    assert r45["diagnostics"]["native_reference_mismatch_pixel_count"] == 0
-    assert r45["diagnostics"]["undefined_visible_pixel_count"] == 0
-    assert r45["diagnostics"]["compiled_unobserved_visible_fraction"] == 0.0
-    assert r45["diagnostics"]["interior_shared_edge_continuity_passed"] is True
-    assert r45["diagnostics"]["cross_component_crack_authority_claimed"] is False
-
-    r46 = run("46_PRODUCT_CLOSURE_SEAL", seal_product_closure_stage)
-    closure = read_json(
-        next(
-            out
-            for out in r46["outputs"]
-            if out["schema"] == "RealSaS.ProductClosureIR.v2"
-        )["path"]
-    )
-    assert closure["qualification_report"]["product_pass"] is True
-    assert closure["qualification_report"]["appearance_authority_passed"] is True
-    assert (
-        closure["qualification_report"]["interior_shared_edge_continuity_passed"]
-        is True
-    )
-    assert (
-        closure["qualification_report"]["cross_component_crack_authority_claimed"]
-        is False
-    )
+    # Current source-owned visual authority is complete through Stage25 and
+    # remains the current presentation authority at Stage37/38. The historical
+    # Stage42 package path still serializes the mechanical render mesh and has
+    # no typed VisualMeshSet/binding transport. Normalized main must fail closed
+    # here rather than silently claim Stage46 product closure on the wrong mesh.
+    ctx["stage"] = {"id": "42_RUNTIME_PROJECTION_AND_CAA_BINDING"}
+    with pytest.raises(
+        QualificationError,
+        match="RUNTIME_V2_SOURCE_OWNED_VISUAL_PRESENTATION_BINDING_REQUIRED",
+    ):
+        build_runtime_projection_stage(ctx)

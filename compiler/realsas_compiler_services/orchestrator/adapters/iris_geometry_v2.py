@@ -15,6 +15,7 @@ from models.geppetto.reference_strength_v1.rigging_surface_tensorization_v1 impo
 from compiler.realsas_compiler_core.geometry_substrate_v2 import (
     GeometrySubstrateViewIR,
     build_geometry_substrate_qualification,
+    geometry_substrate_evidence_from_dict,
     geometry_substrate_from_dict,
 )
 from compiler.realsas_compiler_core.hashing import content_sha256
@@ -25,9 +26,11 @@ from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
 )
 from compiler.realsas_compiler_core.camera_geometry_v2 import project_points_xyz_v3
 from compiler.realsas_compiler_core.preproduct_authority_v1 import (
+    ModelCheckpointSealIR,
     RiggingSurfaceQualificationIR,
     SignedZeroSurfaceSealIR,
     model_checkpoint_seal_from_dict,
+    model_checkpoint_seal_hash,
     model_fit_execution_from_dict,
     model_fit_preregistration_from_dict,
     normalization_domain_from_dict,
@@ -35,7 +38,7 @@ from compiler.realsas_compiler_core.preproduct_authority_v1 import (
     signed_zero_surface_from_dict,
     signed_zero_surface_hash,
 )
-from compiler.realsas_compiler_core.artifact_codec_v2 import (
+from compiler.realsas_compiler_core.geometry_artifact_codec_v2 import (
     qualified_camera_set_from_dict,
     qualified_observation_set_from_dict,
     rigging_surface_from_dict,
@@ -46,6 +49,13 @@ from compiler.realsas_compiler_core.silhouette_metrics_v2 import (
 from compiler.realsas_compiler_core.substrate.adequacy_v1 import (
     select_adequate_rigging_surface_v1,
     substrate_adequacy_report_hash_v1,
+)
+from compiler.realsas_compiler_core.substrate.scene_first_signed import (
+    build_compacted_dense_face_provenance_v1,
+    compacted_dense_face_provenance_hash_v1,
+    validate_compacted_dense_face_provenance_v1,
+    zero_surface_normal_operator_identity_v2,
+    zero_surface_normal_operator_hash_v2,
 )
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
@@ -191,6 +201,53 @@ def _validate_dense_coverage_execution_metadata(
 
 
 
+_DEMO_IRIS_PREREG_SCHEMA = "RealSaS.DemoHistoricalIrisPreregEvidence.v1"
+_DEMO_IRIS_EXEC_SCHEMA = "RealSaS.DemoHistoricalIrisExecutionEvidence.v1"
+
+
+def _demo_frozen_iris_import_cfg(ctx: dict) -> dict | None:
+    if str(ctx["ledger"].get("execution_class") or "") != "DEMO_WITNESS":
+        return None
+    cfg = dict(ctx["run_manifest"].get("iris_fit") or {})
+    demo = dict(cfg.get("demo_frozen_import") or {})
+    if not demo:
+        return None
+    if demo.get("enabled") is not True:
+        raise QualificationError("DEMO_IRIS_IMPORT_NOT_EXPLICITLY_ENABLED")
+    if demo.get("product_authority_claimed") is not False:
+        raise QualificationError("DEMO_IRIS_IMPORT_PRODUCT_AUTHORITY_FORBIDDEN")
+    return demo
+
+
+def _demo_frozen_zero_import_cfg(ctx: dict) -> dict | None:
+    if str(ctx["ledger"].get("execution_class") or "") != "DEMO_WITNESS":
+        return None
+    cfg = dict(ctx["run_manifest"].get("geometry_decode") or {})
+    demo = dict(cfg.get("demo_frozen_import") or {})
+    if not demo:
+        return None
+    if demo.get("enabled") is not True:
+        raise QualificationError("DEMO_ZERO_IMPORT_NOT_EXPLICITLY_ENABLED")
+    if demo.get("product_authority_claimed") is not False:
+        raise QualificationError("DEMO_ZERO_IMPORT_PRODUCT_AUTHORITY_FORBIDDEN")
+    return demo
+
+
+def _demo_ref_payload(ref: dict, *, expected_schema: str | None = None):
+    payload = load_file_ref(
+        dict(ref),
+        expected_schema=expected_schema,
+    )
+    path = resolved_path(str(ref.get("path") or ""))
+    return path, sha256_file(path), payload
+
+
+def _demo_evidence_hash(payload: dict, field: str) -> str:
+    body = dict(payload)
+    body.pop(field, None)
+    return content_sha256(body)
+
+
 def preregister_iris_fit_stage(ctx: dict) -> dict:
     observation = qualified_observation_set_from_dict(
         stage_output_payload(
@@ -206,6 +263,73 @@ def preregister_iris_fit_stage(ctx: dict) -> dict:
             "RealSaS.NormalizationDomainIR.v1",
         )
     )
+
+    demo = _demo_frozen_iris_import_cfg(ctx)
+    if demo is not None:
+        prereg_ref = dict(demo.get("research_preregistration") or {})
+        closure_ref = dict(demo.get("research_closure") or {})
+        prereg_path, prereg_sha, research = _demo_ref_payload(
+            prereg_ref,
+            expected_schema="RealSaS.IRIS.V5TP64LongHorizonLowLRPreregistration.v1",
+        )
+        closure_path, closure_sha, closure = _demo_ref_payload(
+            closure_ref,
+            expected_schema="RealSaS.IRIS.V5TP64LongHorizonLowLRClosure.v1",
+        )
+        frozen = dict(research.get("frozen_inputs") or {})
+        if str(frozen.get("observation_set_binding_hash") or "") != observation.observation_set_hash:
+            raise QualificationError("DEMO_IRIS_IMPORT_OBSERVATION_BINDING_DRIFT")
+        if str(frozen.get("normalization_binding_hash") or "") != normalization.normalization_hash:
+            raise QualificationError("DEMO_IRIS_IMPORT_NORMALIZATION_BINDING_DRIFT")
+        architecture = str((research.get("architecture") or {}).get("id") or "")
+        if not architecture:
+            raise QualificationError("DEMO_IRIS_IMPORT_ARCHITECTURE_MISSING")
+        arm = dict((closure.get("arms") or {}).get("C") or {})
+        selected = str(arm.get("selected_checkpoint_sha256") or "")
+        expected_checkpoint = str((demo.get("checkpoint") or {}).get("sha256") or "")
+        if selected != expected_checkpoint or len(selected) != 64:
+            raise QualificationError("DEMO_IRIS_IMPORT_SELECTED_CHECKPOINT_DRIFT")
+
+        payload = {
+            "schema": _DEMO_IRIS_PREREG_SCHEMA,
+            "lane": "IRIS",
+            "status": "PASS_DEMO_ONLY",
+            "research_preregistration_path": str(prereg_path),
+            "research_preregistration_sha256": prereg_sha,
+            "research_closure_path": str(closure_path),
+            "research_closure_sha256": closure_sha,
+            "architecture_id": architecture,
+            "historical_run_id": str(closure.get("run_id") or ""),
+            "selected_arm": "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
+            "selected_checkpoint_sha256": selected,
+            "observation_set_binding_hash": observation.observation_set_hash,
+            "normalization_binding_hash": normalization.normalization_hash,
+            "stage08_evidence_sha256": str(frozen.get("stage08_evidence_sha256") or ""),
+            "preexecution_research_preregistration_verified": True,
+            "current_product_fit_preregistration_claimed": False,
+            "product_authority_claimed": False,
+            "evidence_hash": "",
+        }
+        payload["evidence_hash"] = _demo_evidence_hash(payload, "evidence_hash")
+        root = ctx["run_root"] / "artifacts" / "09_IRIS_FIT_PREREGISTERED"
+        return {
+            "status": "PASS",
+            "outputs": [
+                write_json(
+                    root / "demo_historical_iris_prereg_evidence.json",
+                    payload,
+                    authority_class="DEMO_HISTORICAL_IRIS_PREREG_EVIDENCE",
+                    schema=_DEMO_IRIS_PREREG_SCHEMA,
+                )
+            ],
+            "diagnostics": {
+                "demo_historical_import": True,
+                "evidence_hash": payload["evidence_hash"],
+                "selected_checkpoint_sha256": selected,
+                "product_authority_claimed": False,
+            },
+        }
+
     _dense_ref, dense_policy_sha, dense_policy = _iris_dense_coverage_policy(ctx)
     prereg, output = build_fit_preregistration(
         ctx,
@@ -237,6 +361,99 @@ def preregister_iris_fit_stage(ctx: dict) -> dict:
 
 
 def execute_iris_fit_stage(ctx: dict) -> dict:
+    demo = _demo_frozen_iris_import_cfg(ctx)
+    if demo is not None:
+        prereg = stage_output_payload(
+            ctx,
+            "09_IRIS_FIT_PREREGISTERED",
+            _DEMO_IRIS_PREREG_SCHEMA,
+        )
+        if prereg.get("evidence_hash") != _demo_evidence_hash(prereg, "evidence_hash"):
+            raise QualificationError("DEMO_IRIS_PREREG_EVIDENCE_HASH_DRIFT")
+
+        checkpoint_ref = dict(demo.get("checkpoint") or {})
+        result_ref = dict(demo.get("result") or {})
+        selected_ref = dict(demo.get("selected_checkpoint_report") or {})
+        checkpoint_path = load_file_ref(checkpoint_ref, json_required=False)
+        result_path, result_sha, result = _demo_ref_payload(
+            result_ref,
+            expected_schema="RealSaS.IRIS.V5TP64LongHorizonLowLR.v1",
+        )
+        selected_path, selected_sha, selected = _demo_ref_payload(selected_ref)
+        checkpoint_sha = sha256_file(checkpoint_path)
+        if checkpoint_sha != str(prereg.get("selected_checkpoint_sha256") or ""):
+            raise QualificationError("DEMO_IRIS_EXECUTION_CHECKPOINT_DRIFT")
+        if str(selected.get("selected_checkpoint_sha256") or "") != checkpoint_sha:
+            raise QualificationError("DEMO_IRIS_SELECTED_REPORT_CHECKPOINT_DRIFT")
+        if int(selected.get("selected_absolute_effective_step", -1)) != 19200:
+            raise QualificationError("DEMO_IRIS_SELECTED_REPORT_STEP_DRIFT")
+        if str(result.get("run_id") or "") != str(prereg.get("historical_run_id") or ""):
+            raise QualificationError("DEMO_IRIS_RESULT_RUN_ID_DRIFT")
+        if str((result.get("foundation") or {}).get("architecture_id") or "") != str(
+            prereg.get("architecture_id") or ""
+        ):
+            raise QualificationError("DEMO_IRIS_RESULT_ARCHITECTURE_DRIFT")
+        arm = dict(
+            (result.get("arms") or {}).get(
+                "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE"
+            )
+            or {}
+        )
+        selection = dict(arm.get("selection") or {})
+        if str(selection.get("selected_checkpoint_sha256") or "") != checkpoint_sha:
+            raise QualificationError("DEMO_IRIS_RESULT_SELECTED_CHECKPOINT_DRIFT")
+        if int(selection.get("selected_absolute_effective_step", -1)) != int(
+            selected.get("selected_absolute_effective_step", -2)
+        ):
+            raise QualificationError("DEMO_IRIS_RESULT_SELECTED_STEP_DRIFT")
+
+        payload = {
+            "schema": _DEMO_IRIS_EXEC_SCHEMA,
+            "lane": "IRIS",
+            "status": "PASS_DEMO_ONLY",
+            "prereg_evidence_hash": str(prereg["evidence_hash"]),
+            "architecture_id": str(prereg["architecture_id"]),
+            "historical_run_id": str(prereg["historical_run_id"]),
+            "selected_arm": str(prereg["selected_arm"]),
+            "checkpoint_path": str(checkpoint_path),
+            "checkpoint_sha256": checkpoint_sha,
+            "result_path": str(result_path),
+            "result_sha256": result_sha,
+            "selected_checkpoint_report_path": str(selected_path),
+            "selected_checkpoint_report_sha256": selected_sha,
+            "selected_absolute_effective_step": int(selected["selected_absolute_effective_step"]),
+            "optimizer_state_saved": bool(selected.get("optimizer_state_saved", False)),
+            "scheduler_state_saved": bool(selected.get("scheduler_state_saved", False)),
+            "teacher_training_supervision_used": True,
+            "teacher_inference_inputs_used": False,
+            "current_adapter_fit_executed": False,
+            "historical_external_gpu_fit_evidence_admitted": True,
+            "product_authority_claimed": False,
+            "evidence_hash": "",
+        }
+        if not payload["optimizer_state_saved"] or not payload["scheduler_state_saved"]:
+            raise QualificationError("DEMO_IRIS_SELECTED_STATE_NOT_FULLY_SEALED")
+        payload["evidence_hash"] = _demo_evidence_hash(payload, "evidence_hash")
+        root = ctx["run_root"] / "artifacts" / "10_IRIS_FIT"
+        return {
+            "status": "PASS",
+            "outputs": [
+                write_json(
+                    root / "demo_historical_iris_execution_evidence.json",
+                    payload,
+                    authority_class="DEMO_HISTORICAL_IRIS_EXECUTION_EVIDENCE",
+                    schema=_DEMO_IRIS_EXEC_SCHEMA,
+                )
+            ],
+            "diagnostics": {
+                "demo_historical_import": True,
+                "checkpoint_sha256": checkpoint_sha,
+                "result_sha256": result_sha,
+                "evidence_hash": payload["evidence_hash"],
+                "product_authority_claimed": False,
+            },
+        }
+
     _dense_ref, dense_policy_sha, dense_policy = _iris_dense_coverage_policy(ctx)
     prereg = model_fit_preregistration_from_dict(
         stage_output_payload(
@@ -278,6 +495,64 @@ def execute_iris_fit_stage(ctx: dict) -> dict:
 
 
 def seal_iris_checkpoint_stage(ctx: dict) -> dict:
+    demo = _demo_frozen_iris_import_cfg(ctx)
+    if demo is not None:
+        execution = stage_output_payload(
+            ctx,
+            "10_IRIS_FIT",
+            _DEMO_IRIS_EXEC_SCHEMA,
+        )
+        if execution.get("evidence_hash") != _demo_evidence_hash(execution, "evidence_hash"):
+            raise QualificationError("DEMO_IRIS_EXECUTION_EVIDENCE_HASH_DRIFT")
+        checkpoint_path = resolved_path(str(execution.get("checkpoint_path") or ""))
+        result_path = resolved_path(str(execution.get("result_path") or ""))
+        if (
+            not checkpoint_path.is_file()
+            or sha256_file(checkpoint_path) != str(execution.get("checkpoint_sha256") or "")
+        ):
+            raise QualificationError("DEMO_IRIS_CHECKPOINT_BYTES_DRIFT")
+        if (
+            not result_path.is_file()
+            or sha256_file(result_path) != str(execution.get("result_sha256") or "")
+        ):
+            raise QualificationError("DEMO_IRIS_RESULT_BYTES_DRIFT")
+        value = ModelCheckpointSealIR(
+            "IRIS",
+            str(execution["evidence_hash"]),
+            str(checkpoint_path),
+            str(execution["checkpoint_sha256"]),
+            str(execution["result_sha256"]),
+            None,
+            "",
+            metadata={
+                "architecture_id": str(execution["architecture_id"]),
+                "historical_demo_import": True,
+                "current_adapter_fit_executed": False,
+                "product_authority_claimed": False,
+                "historical_external_gpu_fit_evidence_hash": str(execution["evidence_hash"]),
+            },
+        )
+        value = replace(
+            value,
+            checkpoint_seal_hash=model_checkpoint_seal_hash(value),
+        )
+        root = ctx["run_root"] / "artifacts" / "11_IRIS_CHECKPOINT_SEALED"
+        output = write_ir(
+            root / "model_checkpoint_seal.json",
+            value,
+            authority_class="DEMO_IRIS_CHECKPOINT_SEAL",
+        )
+        return {
+            "status": "PASS",
+            "outputs": [output],
+            "diagnostics": {
+                "checkpoint_seal_hash": value.checkpoint_seal_hash,
+                "checkpoint_sha256": value.checkpoint_sha256,
+                "historical_demo_import": True,
+                "product_authority_claimed": False,
+            },
+        }
+
     execution = model_fit_execution_from_dict(
         stage_output_payload(
             ctx,
@@ -323,6 +598,117 @@ def decode_zero_surface_stage(ctx: dict) -> dict:
             "RealSaS.NormalizationDomainIR.v1",
         )
     )
+
+    demo = _demo_frozen_zero_import_cfg(ctx)
+    if demo is not None:
+        npz_ref = dict(demo.get("zero_surface_npz") or {})
+        decoder_ref = dict(demo.get("decoder_result") or {})
+        npz_path = load_file_ref(npz_ref, json_required=False)
+        decoder_path, decoder_sha, decoder = _demo_ref_payload(decoder_ref)
+        npz_sha = sha256_file(npz_path)
+        if str(decoder.get("arm") or "") != "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE":
+            raise QualificationError("DEMO_ZERO_SURFACE_ARM_DRIFT")
+        if str(decoder.get("decoder_id") or "") != (
+            "RealSaS.ZeroSurfaceDecoder.SparseRegularT512T1024IndexedMT."
+            "ExactShellContainment.v5_1"
+        ):
+            raise QualificationError("DEMO_ZERO_SURFACE_DECODER_DRIFT")
+        containment = dict(decoder.get("containment") or {})
+        if containment.get("passed") is not True:
+            raise QualificationError("DEMO_ZERO_SURFACE_CONTAINMENT_NOT_PASS")
+        mesh = dict(decoder.get("mesh") or {})
+        if str(mesh.get("npz_sha256") or "") != npz_sha:
+            raise QualificationError("DEMO_ZERO_SURFACE_NPZ_BINDING_DRIFT")
+        diagnostics = dict(mesh.get("diagnostics") or {})
+        normal_diag = dict(diagnostics.get("implicit_normal_diagnostics") or {})
+        if bool(normal_diag.get("teacher_truth_used", True)):
+            raise QualificationError("DEMO_ZERO_SURFACE_TEACHER_TRUTH_USED")
+
+        with np.load(npz_path, allow_pickle=False) as data:
+            required = {"vertices_normalized", "faces", "implicit_normals"}
+            if not required.issubset(set(data.files)):
+                raise QualificationError("ZERO_SURFACE_NPZ_ARRAYS_MISSING")
+            vertices = np.asarray(data["vertices_normalized"]).copy()
+            faces = np.asarray(data["faces"]).copy()
+            normals = np.asarray(data["implicit_normals"]).copy()
+        if (
+            vertices.ndim != 2
+            or vertices.shape[1] != 3
+            or len(vertices) < 4
+            or not np.isfinite(vertices).all()
+            or faces.ndim != 2
+            or faces.shape[1] != 3
+            or len(faces) == 0
+            or not np.issubdtype(faces.dtype, np.integer)
+            or np.any(faces < 0)
+            or np.any(faces >= len(vertices))
+            or normals.shape != vertices.shape
+            or not np.isfinite(normals).all()
+            or np.any(np.linalg.norm(normals, axis=1) <= 1e-12)
+        ):
+            raise QualificationError("DEMO_ZERO_SURFACE_ARRAYS_INVALID")
+        vertices_sha = _array_hash(vertices)
+        faces_sha = _array_hash(faces)
+        normals_sha = _array_hash(normals)
+        expected_arrays = {
+            "vertex_count": int(len(vertices)),
+            "face_count": int(len(faces)),
+            "vertices_sha256": vertices_sha,
+            "faces_sha256": faces_sha,
+            "implicit_normals_sha256": normals_sha,
+        }
+        for key, actual in expected_arrays.items():
+            expected = mesh.get(key)
+            if isinstance(actual, int):
+                if int(expected or -1) != actual:
+                    raise QualificationError(f"DEMO_ZERO_SURFACE_MESH_DRIFT:{key}")
+            elif str(expected or "") != actual:
+                raise QualificationError(f"DEMO_ZERO_SURFACE_MESH_DRIFT:{key}")
+
+        value = SignedZeroSurfaceSealIR(
+            checkpoint.checkpoint_seal_hash,
+            observation.observation_set_hash,
+            normalization.normalization_hash,
+            str(npz_path),
+            npz_sha,
+            str(decoder_path),
+            decoder_sha,
+            int(len(vertices)),
+            int(len(faces)),
+            vertices_sha,
+            faces_sha,
+            normals_sha,
+            "",
+            metadata={
+                "decoder_id": str(decoder["decoder_id"]),
+                "teacher_truth_used": False,
+                "historical_demo_import": True,
+                "decoder_evidence_schema": "V5_LONG_HORIZON_DECODER_RESULT",
+                "exact_containment_passed": True,
+                "normalized_coordinate_domain": "[-1,1]^3",
+                "v2_role": "DENSE_GEOMETRY_EVIDENCE",
+                "product_authority_claimed": False,
+            },
+        )
+        value = replace(value, zero_surface_hash=signed_zero_surface_hash(value))
+        root = ctx["run_root"] / "artifacts" / "12_ZERO_SURFACE_DECODED"
+        return {
+            "status": "PASS",
+            "outputs": [
+                write_ir(
+                    root / "signed_zero_surface_seal.json",
+                    value,
+                    authority_class="DEMO_IRIS_SIGNED_ZERO_SURFACE_SEAL",
+                )
+            ],
+            "diagnostics": {
+                "zero_surface_hash": value.zero_surface_hash,
+                "vertex_count": value.vertex_count,
+                "face_count": value.face_count,
+                "historical_demo_import": True,
+                "product_authority_claimed": False,
+            },
+        }
 
     cfg = dict(ctx["run_manifest"].get("geometry_decode") or {})
     npz_ref = dict(cfg.get("zero_surface_npz") or {})
@@ -446,6 +832,20 @@ def _source_foreground(ctx: dict, observation):
     return output
 
 
+def _demo_frozen_stage13_import_cfg(ctx: dict) -> dict | None:
+    if str(ctx["ledger"].get("execution_class") or "") != "DEMO_WITNESS":
+        return None
+    cfg = dict(ctx["run_manifest"].get("geometry_gate") or {})
+    demo = dict(cfg.get("demo_frozen_stage13_import") or {})
+    if not demo:
+        return None
+    if demo.get("enabled") is not True:
+        raise QualificationError("DEMO_STAGE13_IMPORT_NOT_EXPLICITLY_ENABLED")
+    if demo.get("product_authority_claimed") is not False:
+        raise QualificationError("DEMO_STAGE13_IMPORT_PRODUCT_AUTHORITY_FORBIDDEN")
+    return demo
+
+
 def _geometry_policy(cfg: dict) -> dict | None:
     keys = (
         "min_recall",
@@ -503,12 +903,6 @@ def qualify_geometry_substrate_stage(ctx: dict) -> dict:
         )
     )
 
-    vertices, faces, _normals = _load_zero_arrays(zero)
-    world = (
-        np.asarray(normalization.center_xyz, dtype=np.float64)[None, :]
-        + np.asarray(vertices, dtype=np.float64) * float(normalization.half_extent)
-    )
-    source = _source_foreground(ctx, observation)
     cfg = dict(ctx["run_manifest"].get("geometry_gate") or {})
     policy = _geometry_policy(cfg)
     if policy is None:
@@ -518,6 +912,167 @@ def qualify_geometry_substrate_stage(ctx: dict) -> dict:
             "diagnostics": {},
         }
 
+    demo_import = _demo_frozen_stage13_import_cfg(ctx)
+    if demo_import is not None:
+        evidence_ref = dict(demo_import.get("evidence") or {})
+        evidence_path, evidence_sha, evidence = _demo_ref_payload(
+            evidence_ref,
+            expected_schema="RealSaS.IRIS.V5TP64LongHorizon.Stage13Result.v1",
+        )
+        expected_npz = str(demo_import.get("zero_surface_npz_sha256") or "")
+        if expected_npz != zero.npz_sha256:
+            raise QualificationError("DEMO_STAGE13_ZERO_SURFACE_BINDING_DRIFT")
+        if str(evidence.get("arm") or "") != "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE":
+            raise QualificationError("DEMO_STAGE13_ARM_DRIFT")
+        if evidence.get("stage13_v2_pass") is not False:
+            raise QualificationError("DEMO_STAGE13_SCIENTIFIC_STATE_DRIFT")
+        evidence_policy = {
+            str(key): float(value)
+            for key, value in dict(evidence.get("policy") or {}).items()
+        }
+        if content_sha256(evidence_policy) != content_sha256(policy):
+            raise QualificationError("DEMO_STAGE13_POLICY_DRIFT")
+
+        source = _source_foreground(ctx, observation)
+        evidence_rows = tuple(evidence.get("per_view") or ())
+        if (
+            len(evidence_rows) != 8
+            or {int(row.get("view_index", -1)) for row in evidence_rows} != set(range(8))
+        ):
+            raise QualificationError("DEMO_STAGE13_VIEW_SET_INVALID")
+        if str(evidence.get("policy_profile") or "") != "P999":
+            raise QualificationError("DEMO_STAGE13_POLICY_PROFILE_DRIFT")
+        summary = dict(evidence.get("summary") or {})
+        extrema = {
+            "min_view_precision": min(
+                float(row["precision"]) for row in evidence_rows
+            ),
+            "min_view_recall": min(
+                float(row["recall"]) for row in evidence_rows
+            ),
+            "min_view_component_recall": min(
+                float(row["minimum_eligible_component_recall"])
+                for row in evidence_rows
+            ),
+            "max_view_interior_uncovered_fraction": max(
+                float(row["interior_uncovered_fraction"])
+                for row in evidence_rows
+            ),
+            "max_view_largest_coherent_hole_fraction": max(
+                float(row["largest_coherent_hole_fraction"])
+                for row in evidence_rows
+            ),
+            "max_view_silhouette_edge_p95_px": max(
+                float(row["silhouette_edge_p95_px"])
+                for row in evidence_rows
+            ),
+            "max_view_silhouette_edge_max_px": max(
+                float(row["silhouette_edge_max_px"])
+                for row in evidence_rows
+            ),
+        }
+        for key, actual in extrema.items():
+            if key not in summary or abs(float(summary[key]) - actual) > 1e-15:
+                raise QualificationError(
+                    f"DEMO_STAGE13_EVIDENCE_SUMMARY_DRIFT:{key}"
+                )
+
+        observations = {int(view.view_index): view for view in observation.views}
+        rows = []
+        for raw in sorted(evidence_rows, key=lambda value: int(value["view_index"])):
+            view_index = int(raw["view_index"])
+            authority = observations[view_index]
+            source_count = int(sum(source[view_index]))
+            recall = float(raw["recall"])
+            precision = float(raw["precision"])
+            if source_count <= 0 or recall <= 0 or precision <= 0:
+                raise QualificationError("DEMO_STAGE13_PIXEL_ACCOUNTING_INVALID")
+            true_positive = int(round(recall * source_count))
+            predicted_count = int(round(true_positive / precision))
+            if (
+                abs(true_positive / source_count - recall) > 1e-15
+                or abs(true_positive / predicted_count - precision) > 1e-15
+            ):
+                raise QualificationError("DEMO_STAGE13_INTEGER_METRIC_RECONSTRUCTION_DRIFT")
+
+            rows.append(
+                GeometrySubstrateViewIR(
+                    view_index=view_index,
+                    silhouette_recall=recall,
+                    silhouette_precision=precision,
+                    largest_coherent_hole_fraction=float(
+                        raw["largest_coherent_hole_fraction"]
+                    ),
+                    interior_uncovered_fraction=float(
+                        raw["interior_uncovered_fraction"]
+                    ),
+                    source_foreground_pixel_count=source_count,
+                    predicted_foreground_pixel_count=predicted_count,
+                    component_recall=float(
+                        raw["minimum_eligible_component_recall"]
+                    ),
+                    silhouette_edge_p95_px=float(raw["silhouette_edge_p95_px"]),
+                    passed=bool(raw["passed"]),
+                    metadata={
+                        "source_observation_hash": authority.source_observation_hash,
+                        "silhouette_edge_mean_px": float(
+                            raw["silhouette_edge_mean_px"]
+                        ),
+                        "silhouette_edge_max_px": float(
+                            raw["silhouette_edge_max_px"]
+                        ),
+                        "historical_external_measurement": True,
+                        "evidence_sha256": evidence_sha,
+                    },
+                )
+            )
+
+        value = build_geometry_substrate_qualification(
+            zero_surface_binding_hash=zero.zero_surface_hash,
+            observation_set_binding_hash=observation.observation_set_hash,
+            camera_set_binding_hash=cameras.camera_set_hash,
+            normalization_binding_hash=normalization.normalization_hash,
+            policy=policy,
+            views=tuple(rows),
+            metadata={
+                "metric_contract": "GEOMETRY_SUBSTRATE_V2",
+                "historical_external_stage13_measurement_import": True,
+                "historical_evidence_path": str(evidence_path),
+                "historical_evidence_sha256": evidence_sha,
+                "appearance_proxy_forbidden": True,
+                "final_visual_fidelity_claimed": False,
+                "product_authority_claimed": False,
+            },
+        )
+        if value.qualification_report["every_view_passed"]:
+            raise QualificationError("DEMO_STAGE13_IMPORT_UNEXPECTED_SCIENTIFIC_PASS")
+        root = ctx["run_root"] / "artifacts" / "13_GEOMETRY_SUBSTRATE_QUALIFIED"
+        return {
+            "status": "PASS_DEMO_ONLY",
+            "outputs": [
+                write_ir(
+                    root / "geometry_substrate_qualification.json",
+                    value,
+                    authority_class="DEMO_ONLY_GEOMETRY_SUBSTRATE",
+                )
+            ],
+            "diagnostics": {
+                "scientific_pass": False,
+                "demo_admitted": True,
+                "historical_external_measurement_import": True,
+                "evidence_sha256": evidence_sha,
+                "per_view": [row.to_dict() for row in rows],
+                "substrate_hash": value.substrate_hash,
+                "product_authority_claimed": False,
+            },
+        }
+
+    vertices, faces, _normals = _load_zero_arrays(zero)
+    world = (
+        np.asarray(normalization.center_xyz, dtype=np.float64)[None, :]
+        + np.asarray(vertices, dtype=np.float64) * float(normalization.half_extent)
+    )
+    source = _source_foreground(ctx, observation)
     observations = {int(view.view_index): view for view in observation.views}
     rows = []
     for camera in sorted(cameras.cameras, key=lambda value: value.view_index):
@@ -642,6 +1197,31 @@ def qualify_geometry_substrate_stage(ctx: dict) -> dict:
         },
     )
     if not value.qualification_report["every_view_passed"]:
+        demo = dict(ctx["run_manifest"].get("demo_execution") or {})
+        if (
+            str(ctx["ledger"].get("execution_class") or "") == "DEMO_WITNESS"
+            and demo.get("allow_stage13_scientific_fail_for_demo") is True
+            and demo.get("product_authority_claimed") is False
+            and demo.get("stage13_scientific_pass") is False
+        ):
+            root = ctx["run_root"] / "artifacts" / "13_GEOMETRY_SUBSTRATE_QUALIFIED"
+            return {
+                "status": "PASS_DEMO_ONLY",
+                "outputs": [
+                    write_ir(
+                        root / "geometry_substrate_qualification.json",
+                        value,
+                        authority_class="DEMO_ONLY_GEOMETRY_SUBSTRATE",
+                    )
+                ],
+                "diagnostics": {
+                    "scientific_pass": False,
+                    "demo_admitted": True,
+                    "per_view": [row.to_dict() for row in rows],
+                    "substrate_hash": value.substrate_hash,
+                    "product_authority_claimed": False,
+                },
+            }
         return {
             "status": "FAIL",
             "blockers": ["GEOMETRY_SUBSTRATE_QUALIFICATION_FAILED"],
@@ -672,13 +1252,21 @@ def qualify_geometry_substrate_stage(ctx: dict) -> dict:
 def _validate_gsa_policy_document(cfg: dict, policy_document: dict):
     if (
         str(policy_document.get("schema") or "")
-        != "RealSaS.Stage14SubstrateAdequacyPolicy.v2"
+        != "RealSaS.Stage14SubstrateAdequacyPolicy.v3"
     ):
         raise QualificationError("GSA_POLICY_DOCUMENT_SCHEMA_INVALID")
     if not str(policy_document.get("status") or "").startswith("FROZEN_"):
         raise QualificationError("GSA_POLICY_DOCUMENT_NOT_FROZEN")
     document_gsa = dict(policy_document.get("gsa") or {})
     document_adequacy = dict(document_gsa.get("adequacy_policy") or {})
+    document_normal_operator = dict(document_gsa.get("normal_operator") or {})
+    expected_normal_operator = zero_surface_normal_operator_identity_v2()
+    if content_sha256(document_normal_operator) != zero_surface_normal_operator_hash_v2():
+        raise QualificationError("GSA_POLICY_DOCUMENT_DRIFT:normal_operator")
+    if content_sha256(document_normal_operator) != content_sha256(expected_normal_operator):
+        raise QualificationError("GSA_POLICY_DOCUMENT_DRIFT:normal_operator_identity")
+    if document_gsa.get("normal_k_role") != "LEGACY_MANIFEST_COMPATIBILITY_ONLY__NOT_USED_BY_TOPOLOGY_AREA_NORMAL_V2":
+        raise QualificationError("GSA_POLICY_DOCUMENT_DRIFT:normal_k_role")
 
     normal_k = int(cfg["normal_k"])
     tolerance = float(cfg["visibility_depth_tolerance_norm"])
@@ -703,6 +1291,98 @@ def _validate_gsa_policy_document(cfg: dict, policy_document: dict):
     return normal_k, tolerance, document_adequacy
 
 
+def _geometry_substrate_for_downstream(ctx: dict):
+    payload = stage_output_payload(
+        ctx,
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+        "RealSaS.GeometrySubstrateQualificationIR.v2",
+    )
+    row = next(
+        (
+            value
+            for value in ctx["ledger"].get("stages") or ()
+            if str(value.get("id") or "") == "13_GEOMETRY_SUBSTRATE_QUALIFIED"
+        ),
+        None,
+    )
+    if (
+        str(ctx["ledger"].get("execution_class") or "") == "DEMO_WITNESS"
+        and row is not None
+        and str(row.get("status") or "") == "PASS_DEMO_ONLY"
+    ):
+        value = geometry_substrate_evidence_from_dict(payload)
+        demo = dict(ctx["run_manifest"].get("demo_execution") or {})
+        if (
+            value.qualification_report.get("every_view_passed") is not False
+            or demo.get("stage13_scientific_pass") is not False
+            or demo.get("product_authority_claimed") is not False
+        ):
+            raise QualificationError("DEMO_GEOMETRY_EVIDENCE_SCOPE_DRIFT")
+        return value
+    return geometry_substrate_from_dict(payload)
+
+
+_DEMO_STAGE14_FALLBACK_SCHEMA = (
+    "RealSaS.KnightDemoStage14FallbackPreregistration.v1"
+)
+_DEMO_STAGE14_FALLBACK_STATUS = (
+    "FROZEN_BEFORE_KNIGHT_STAGE14_CANDIDATE_METRICS_INSPECTION"
+)
+_DEMO_STAGE14_CLOSEST_RULE = (
+    "MIN_FAILED_GATES__MIN_MAX_RELATIVE_EXCESS__MIN_SUM_RELATIVE_EXCESS__"
+    "MAX_ACTUAL_NODES__MIN_TARGET_CAP_V1"
+)
+
+
+def _stage_row(ctx: dict, stage_id: str) -> dict | None:
+    return next(
+        (
+            row
+            for row in ctx["ledger"].get("stages") or ()
+            if str(row.get("id") or "") == str(stage_id)
+        ),
+        None,
+    )
+
+
+def _demo_stage14_fallback_prereg(ctx: dict) -> tuple[dict, str] | None:
+    if str(ctx["ledger"].get("execution_class") or "") != "DEMO_WITNESS":
+        return None
+    demo = dict(ctx["run_manifest"].get("demo_execution") or {})
+    ref = dict(demo.get("stage14_fallback_preregistration") or {})
+    if not ref:
+        return None
+    payload = load_file_ref(ref, expected_schema=_DEMO_STAGE14_FALLBACK_SCHEMA)
+    if (
+        demo.get("allow_stage14_scientific_fail_for_demo") is not True
+        or demo.get("stage13_scientific_pass") is not False
+        or demo.get("product_authority_claimed") is not False
+        or str(payload.get("status") or "") != _DEMO_STAGE14_FALLBACK_STATUS
+        or str(payload.get("run_id") or "") != str(ctx["ledger"].get("run_id") or "")
+        or str(payload.get("subject_id") or "") != str(ctx["ledger"].get("subject_id") or "")
+        or str(payload.get("execution_class") or "") != "DEMO_WITNESS"
+    ):
+        raise QualificationError("DEMO_STAGE14_FALLBACK_SCOPE_DRIFT")
+    eligibility = dict(payload.get("eligibility") or {})
+    rule = dict(payload.get("frozen_closest_candidate_rule") or {})
+    semantics = dict(payload.get("demo_admission_semantics") or {})
+    if (
+        eligibility.get("stage13_ledger_status_required") != "PASS_DEMO_ONLY"
+        or eligibility.get("stage13_scientific_pass_required") is not False
+        or eligibility.get("stage14_frozen_product_adequacy_status_required") != "FAIL"
+        or eligibility.get("product_authority_claimed_required") is not False
+        or eligibility.get("teacher_truth_allowed") is not False
+        or eligibility.get("appearance_authority_allowed") is not False
+        or str(rule.get("rule_id") or "") != _DEMO_STAGE14_CLOSEST_RULE
+        or semantics.get("product_pass_forbidden") is not True
+    ):
+        raise QualificationError("DEMO_STAGE14_FALLBACK_PREREG_DRIFT")
+    stage13 = _stage_row(ctx, "13_GEOMETRY_SUBSTRATE_QUALIFIED")
+    if stage13 is None or str(stage13.get("status") or "") != "PASS_DEMO_ONLY":
+        raise QualificationError("DEMO_STAGE14_FALLBACK_STAGE13_STATUS_DRIFT")
+    return payload, str(ref.get("sha256") or "")
+
+
 def build_gsa_stage(ctx: dict) -> dict:
     zero = signed_zero_surface_from_dict(
         stage_output_payload(
@@ -711,13 +1391,7 @@ def build_gsa_stage(ctx: dict) -> dict:
             "RealSaS.SignedZeroSurfaceSealIR.v1",
         )
     )
-    geometry = geometry_substrate_from_dict(
-        stage_output_payload(
-            ctx,
-            "13_GEOMETRY_SUBSTRATE_QUALIFIED",
-            "RealSaS.GeometrySubstrateQualificationIR.v2",
-        )
-    )
+    geometry = _geometry_substrate_for_downstream(ctx)
     normalization = normalization_domain_from_dict(
         stage_output_payload(
             ctx,
@@ -757,7 +1431,7 @@ def build_gsa_stage(ctx: dict) -> dict:
     policy_ref = dict(cfg.get("policy_document") or {})
     policy_document = load_file_ref(
         policy_ref,
-        expected_schema="RealSaS.Stage14SubstrateAdequacyPolicy.v2",
+        expected_schema="RealSaS.Stage14SubstrateAdequacyPolicy.v3",
     )
     normal_k, tolerance, document_adequacy = _validate_gsa_policy_document(
         cfg, policy_document
@@ -766,6 +1440,7 @@ def build_gsa_stage(ctx: dict) -> dict:
         asdict(camera)
         for camera in sorted(cameras.cameras, key=lambda value: value.view_index)
     )
+    demo_fallback = _demo_stage14_fallback_prereg(ctx)
     surface, adequacy = select_adequate_rigging_surface_v1(
         vertices,
         faces,
@@ -780,6 +1455,7 @@ def build_gsa_stage(ctx: dict) -> dict:
         normal_k=normal_k,
         visibility_depth_tolerance_norm=tolerance,
         adequacy_policy=document_adequacy,
+        return_closest_nonpassing_evidence=demo_fallback is not None,
         metadata={
             "geometry_substrate_hash": geometry.substrate_hash,
             "observation_set_hash": zero.observation_set_binding_hash,
@@ -793,6 +1469,8 @@ def build_gsa_stage(ctx: dict) -> dict:
     adequacy["policy_document_path"] = str(policy_ref.get("path") or "")
     adequacy["policy_document_sha256"] = str(policy_ref.get("sha256") or "")
     adequacy["geometry_substrate_hash"] = geometry.substrate_hash
+    adequacy["normal_operator"] = zero_surface_normal_operator_identity_v2()
+    adequacy["normal_operator_hash"] = zero_surface_normal_operator_hash_v2()
     adequacy["adequacy_report_hash"] = ""
     adequacy["adequacy_report_hash"] = substrate_adequacy_report_hash_v1(
         adequacy
@@ -804,20 +1482,87 @@ def build_gsa_stage(ctx: dict) -> dict:
             "diagnostics": adequacy,
         }
 
+    dense_world = (
+        np.asarray(normalization.center_xyz, dtype=np.float64)[None, :]
+        + np.asarray(vertices, dtype=np.float64) * float(normalization.half_extent)
+    )
+    face_provenance = build_compacted_dense_face_provenance_v1(
+        dense_world,
+        faces,
+        surface,
+        source_zero_surface_sha256=zero.npz_sha256,
+    )
+
+    scientific_pass = str(adequacy.get("status") or "") == "PASS"
+    authority_surface = "GSA_RIGGING_SURFACE_CANDIDATE"
+    authority_report = "SUBSTRATE_ADEQUACY_REPORT"
+    reported_status = "PASS"
+    selected_cap = adequacy.get("selected_target_node_cap")
+    if not scientific_pass:
+        if demo_fallback is None:
+            raise QualificationError("GSA_NONPASSING_SURFACE_WITHOUT_DEMO_PREREG")
+        prereg, prereg_sha = demo_fallback
+        closest = dict(adequacy.get("diagnostic_closest_nonpassing_candidate") or {})
+        if (
+            str(closest.get("selection_rule") or "") != _DEMO_STAGE14_CLOSEST_RULE
+            or str(closest.get("surface_lineage_hash") or "")
+            != surface.geometry_lineage_hash
+            or int(closest.get("actual_node_count", -1)) != len(surface.surface_nodes)
+            or dict(closest.get("violations") or {}).get("finite") is not True
+        ):
+            raise QualificationError("DEMO_STAGE14_CLOSEST_CANDIDATE_DRIFT")
+        selected_cap = int(closest["candidate_target_node_cap"])
+        adequacy.update(
+            {
+                "demo_fallback_admitted": True,
+                "demo_fallback_preregistration_sha256": prereg_sha,
+                "demo_fallback_selection_rule": _DEMO_STAGE14_CLOSEST_RULE,
+                "demo_fallback_target_node_cap": selected_cap,
+                "demo_fallback_actual_node_count": len(surface.surface_nodes),
+                "demo_fallback_surface_lineage_hash": surface.geometry_lineage_hash,
+                "stage14_scientific_pass": False,
+                "product_authority_claimed": False,
+                "product_selection_fields_remain_unset": (
+                    adequacy.get("selected_target_node_cap") is None
+                    and adequacy.get("selected_actual_node_count") is None
+                    and str(adequacy.get("selected_surface_lineage_hash") or "") == ""
+                ),
+            }
+        )
+        if adequacy["product_selection_fields_remain_unset"] is not True:
+            raise QualificationError("DEMO_STAGE14_PRODUCT_SELECTION_FIELDS_MUTATED")
+        adequacy["adequacy_report_hash"] = ""
+        adequacy["adequacy_report_hash"] = substrate_adequacy_report_hash_v1(
+            adequacy
+        )
+        authority_surface = "DEMO_ONLY_GSA_RIGGING_SURFACE_CANDIDATE"
+        authority_report = "DEMO_ONLY_SUBSTRATE_ADEQUACY_MEASUREMENT"
+        reported_status = "PASS_DEMO_ONLY"
+
     root = ctx["run_root"] / "artifacts" / "14_GSA_BUILD"
     return {
-        "status": "PASS",
+        "status": reported_status,
         "outputs": [
             write_ir(
                 root / "rigging_surface_candidate.json",
                 surface,
-                authority_class="GSA_RIGGING_SURFACE_CANDIDATE",
+                authority_class=authority_surface,
             ),
             write_json(
                 root / "substrate_adequacy_report.json",
                 adequacy,
-                authority_class="SUBSTRATE_ADEQUACY_REPORT",
+                authority_class=authority_report,
                 schema="RealSaS.SubstrateAdequacyReport.v1",
+            ),
+            write_json(
+                root / "compacted_dense_face_provenance.json",
+                face_provenance,
+                authority_class=(
+                    "DEMO_ONLY_COMPACTED_DENSE_FACE_PROVENANCE"
+                    if not scientific_pass
+                    else "COMPACTED_DENSE_FACE_PROVENANCE"
+                ),
+                schema="RealSaS.CompactedDenseFaceProvenance.v1",
             ),
         ],
         "diagnostics": {
@@ -825,7 +1570,12 @@ def build_gsa_stage(ctx: dict) -> dict:
             "node_count": len(surface.surface_nodes),
             "relation_count": len(surface.local_relations),
             "adequacy_report_hash": adequacy["adequacy_report_hash"],
-            "selected_target_node_cap": adequacy["selected_target_node_cap"],
+            "compacted_dense_face_provenance_hash": face_provenance["provenance_hash"],
+            "compacted_dense_face_count": face_provenance["compact_face_count"],
+            "selected_target_node_cap": selected_cap,
+            "stage14_scientific_pass": scientific_pass,
+            "demo_fallback_admitted": not scientific_pass,
+            "product_authority_claimed": False if not scientific_pass else None,
         },
     }
 
@@ -843,21 +1593,58 @@ def qualify_rigging_surface_stage(ctx: dict) -> dict:
         "14_GSA_BUILD",
         "RealSaS.SubstrateAdequacyReport.v1",
     )
+    face_provenance = stage_output_payload(
+        ctx,
+        "14_GSA_BUILD",
+        "RealSaS.CompactedDenseFaceProvenance.v1",
+    )
+    validate_compacted_dense_face_provenance_v1(
+        face_provenance,
+        surface=surface,
+    )
+    if str(face_provenance.get("source_zero_surface_sha256") or "") != str(
+        dict(surface.metadata or {}).get("source_zero_surface_sha256") or ""
+    ):
+        raise QualificationError("RIGGING_SURFACE_FACE_PROVENANCE_SOURCE_DRIFT")
     if (
         adequacy.get("adequacy_report_hash")
         != substrate_adequacy_report_hash_v1(adequacy)
     ):
         raise QualificationError("RIGGING_SURFACE_ADEQUACY_HASH_DRIFT")
-    if (
-        str(adequacy.get("status")) != "PASS"
-        or str(adequacy.get("selected_surface_lineage_hash"))
-        != surface.geometry_lineage_hash
-    ):
-        raise QualificationError("RIGGING_SURFACE_ADEQUACY_BINDING_DRIFT")
-    if int(adequacy.get("selected_actual_node_count", -1)) != len(
-        surface.surface_nodes
-    ):
-        raise QualificationError("RIGGING_SURFACE_ADEQUACY_NODE_COUNT_DRIFT")
+    scientific_adequacy_pass = str(adequacy.get("status") or "") == "PASS"
+    demo_fallback_admitted = False
+    if scientific_adequacy_pass:
+        if (
+            str(adequacy.get("selected_surface_lineage_hash"))
+            != surface.geometry_lineage_hash
+        ):
+            raise QualificationError("RIGGING_SURFACE_ADEQUACY_BINDING_DRIFT")
+        if int(adequacy.get("selected_actual_node_count", -1)) != len(
+            surface.surface_nodes
+        ):
+            raise QualificationError("RIGGING_SURFACE_ADEQUACY_NODE_COUNT_DRIFT")
+    else:
+        prereg = _demo_stage14_fallback_prereg(ctx)
+        stage14 = _stage_row(ctx, "14_GSA_BUILD")
+        closest = dict(adequacy.get("diagnostic_closest_nonpassing_candidate") or {})
+        if (
+            prereg is None
+            or stage14 is None
+            or str(stage14.get("status") or "") != "PASS_DEMO_ONLY"
+            or adequacy.get("demo_fallback_admitted") is not True
+            or adequacy.get("stage14_scientific_pass") is not False
+            or adequacy.get("product_authority_claimed") is not False
+            or str(adequacy.get("demo_fallback_selection_rule") or "")
+            != _DEMO_STAGE14_CLOSEST_RULE
+            or str(adequacy.get("demo_fallback_surface_lineage_hash") or "")
+            != surface.geometry_lineage_hash
+            or str(closest.get("surface_lineage_hash") or "")
+            != surface.geometry_lineage_hash
+            or int(adequacy.get("demo_fallback_actual_node_count", -1))
+            != len(surface.surface_nodes)
+        ):
+            raise QualificationError("RIGGING_SURFACE_DEMO_FALLBACK_BINDING_DRIFT")
+        demo_fallback_admitted = True
 
     tensor = tensorize_rigging_surface_v1(surface, require_scene_first=True)
     if tensor.source_surface_hash != surface.geometry_lineage_hash:
@@ -878,19 +1665,30 @@ def qualify_rigging_surface_stage(ctx: dict) -> dict:
         observed,
         completed,
         {
-            "status": "PASS",
+            "status": (
+                "DEMO_ONLY_RIGGING_SURFACE_ADMISSION__SCIENTIFIC_ADEQUACY_FAIL"
+                if demo_fallback_admitted
+                else "PASS"
+            ),
             "scene_first_signed_geometry": True,
             "teacher_truth_contamination_rejected": True,
             "lossless_fieldwise_tensorization_passed": True,
             "local_relation_graph_present": tensor.edge_count > 0,
-            "substrate_adequacy_passed": True,
+            "substrate_adequacy_passed": bool(scientific_adequacy_pass),
+            "demo_fallback_admitted": bool(demo_fallback_admitted),
+            "product_authority_claimed": False if demo_fallback_admitted else None,
             "substrate_adequacy_report_hash": adequacy["adequacy_report_hash"],
+            "compacted_dense_face_provenance_hash": face_provenance["provenance_hash"],
+            "compacted_dense_face_count": int(face_provenance["compact_face_count"]),
+            "triangle_authority": "EXACT_DENSE_FACE_WITNESS_AFTER_FROZEN_COMPACTION",
+            "three_clique_face_minting_allowed": False,
             "appearance_authority_used": False,
         },
         "",
         metadata={
             "tensorization_schema": tensor.schema_version,
             "substrate_adequacy_report_hash": adequacy["adequacy_report_hash"],
+            "compacted_dense_face_provenance_hash": face_provenance["provenance_hash"],
             "geometry_substrate_hash": adequacy["geometry_substrate_hash"],
             "v2_geometry_lane": True,
         },
@@ -901,17 +1699,35 @@ def qualify_rigging_surface_stage(ctx: dict) -> dict:
     )
     root = ctx["run_root"] / "artifacts" / "15_RIGGING_SURFACE_QUALIFIED"
     return {
-        "status": "PASS",
+        "status": "PASS_DEMO_ONLY" if demo_fallback_admitted else "PASS",
         "outputs": [
             write_ir(
                 root / "qualified_rigging_surface.json",
                 surface,
-                authority_class="QUALIFIED_RIGGING_SURFACE",
+                authority_class=(
+                    "DEMO_ONLY_RIGGING_SURFACE_MEASUREMENT"
+                    if demo_fallback_admitted
+                    else "QUALIFIED_RIGGING_SURFACE"
+                ),
             ),
             write_ir(
                 root / "rigging_surface_qualification.json",
                 value,
-                authority_class="RIGGING_SURFACE_QUALIFICATION",
+                authority_class=(
+                    "DEMO_ONLY_RIGGING_SURFACE_QUALIFICATION"
+                    if demo_fallback_admitted
+                    else "RIGGING_SURFACE_QUALIFICATION"
+                ),
+            ),
+            write_json(
+                root / "qualified_compacted_dense_face_provenance.json",
+                face_provenance,
+                authority_class=(
+                    "DEMO_ONLY_QUALIFIED_COMPACTED_DENSE_FACE_PROVENANCE"
+                    if demo_fallback_admitted
+                    else "QUALIFIED_COMPACTED_DENSE_FACE_PROVENANCE"
+                ),
+                schema="RealSaS.CompactedDenseFaceProvenance.v1",
             ),
         ],
         "diagnostics": {

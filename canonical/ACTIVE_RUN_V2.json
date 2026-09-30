@@ -5,7 +5,7 @@
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__CANONICAL_MESH_SHARED_DOMAIN__CAA",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
-  "pipeline_plan_sha256": "a41ccb9a157624fecc2177a05150646012577f443cc27938b7e93c1e0ff020e4",
+  "pipeline_plan_sha256": "be0067d78d5c1ecf51f5a0df2ee14e7a87ff0c44800ca66bbb5d5f8d5ad183cf",
   "status": "REOPENED_VISUAL_FIDELITY_REDTEAM__WITNESS_FORBIDDEN",
   "execution_enabled": false,
   "completed_count": 0,
@@ -604,15 +604,26 @@
     {
       "event": "PLAN_CACHE_SCOPE_CORRECTION",
       "note": "Stage41 now fingerprints observation manifest authority; Stage42 has no direct runtime manifest dependency; phantom PresentationTimelineIR title removed."
+    },
+    {
+      "event": "MAINLINE_NORMALIZATION_PLAN_REBIND_20260930",
+      "note": "Repository implementation-governance ledger rebound from a41ccb9a157624fecc2177a05150646012577f443cc27938b7e93c1e0ff020e4 to exact current 46-stage plan hash be0067d78d5c1ecf51f5a0df2ee14e7a87ff0c44800ca66bbb5d5f8d5ad183cf. No subject witness state or stage PASS was minted."
+    },
+    {
+      "event": "FINAL_MAINLINE_NORMALIZATION_REBIND_20260930",
+      "note": "Bound repository implementation-governance state to plan be0067d78d5c1ecf51f5a0df2ee14e7a87ff0c44800ca66bbb5d5f8d5ad183cf and implementation closure 19230647833a02da7ca5f549104d53a6275ce5b102d0daa11c713d6432c7e42a; full gate 36724501505 PASS, postdocs seal 36726078211 PASS. Witness remains forbidden; source-owned visual runtime presentation seam is fail-closed."
     }
   ],
   "metadata": {
     "implementation_readiness": "REOPENED_APPEARANCE_AND_DYNAMIC_VISUAL_FIDELITY_AUDIT__WITNESS_FORBIDDEN",
-    "implementation_head": "4419509ee0f62a7e5ca088b87feb682b1a664105",
-    "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
+    "implementation_head": "14b74fd8f4a017256ba491642842b4e5b4517545",
+    "implementation_closure_sha256": "19230647833a02da7ca5f549104d53a6275ce5b102d0daa11c713d6432c7e42a",
     "stage_redteam": "PASS_46_STAGE_SECOND_PASS_HARDENED_SUBJECT_FREE",
     "witness_execution_requires_explicit_user_approval": true,
     "knight_not_started": true,
-    "redteam_authority": "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+    "redteam_authority": "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json",
+    "latest_green_mainline_run_id": 36724501505,
+    "latest_green_postdocs_seal_run_id": 36726078211,
+    "current_p0": "SOURCE_OWNED_VISUAL_RUNTIME_PRESENTATION_BINDING_REQUIRED"
   }
 }

@@ -1,0 +1,73 @@
+name: generic-main-mechanical-geometry-candidate-gate-v1
+
+on:
+  push:
+    branches:
+      - integration/generic-main-normalization-v2-20260930
+  workflow_dispatch:
+
+concurrency:
+  group: generic-main-mechanical-geometry-candidate-gate-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  mechanics:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned regression dependencies
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Compile promoted mechanics and geometry closure
+        run: |
+          python -m compileall -q             compiler/realsas_compiler_core             compiler/realsas_compiler_services/orchestrator/adapters             models/geppetto/reference_strength_v1
+      - name: Mechanical geometry regression slice
+        run: |
+          python -m pytest -q             tests/compiler/test_automatic_deformation_envelope_v1.py             tests/compiler/test_canonical_mesh_candidate_v1.py             tests/compiler/test_canonical_mesh_quality_repair_v1.py             tests/compiler/test_compacted_dense_face_provenance_v1.py             tests/compiler/test_compiler_mesh_layout_v1.py             tests/compiler/test_compiler_substrate_layout_v1.py             tests/compiler/test_deformation_stress_v1.py             tests/compiler/test_deformation_stress_v2_vectorization.py             tests/compiler/test_demo_stage18_mesh_fallback_v2.py             tests/compiler/test_drawable_surface_v1.py             tests/compiler/test_dynamic_geometry_integrity_v2.py             tests/compiler/test_geometry_substrate_evidence_v2.py             tests/compiler/test_geppetto_demo_surface_scope_v2.py             tests/compiler/test_holeless_partitioned_dense_candidate_v1.py             tests/compiler/test_mechanical_partition_v1.py             tests/compiler/test_mechanical_repartition_v2.py             tests/compiler/test_mesh_component_labels_v1.py             tests/compiler/test_mesh_conditioning_v1.py             tests/compiler/test_playback_full_surface_v3.py             tests/compiler/test_product_authority_v1.py             tests/compiler/test_product_mesh_skin_v1.py             tests/compiler/test_product_mesh_stage_adapters_v1.py::test_superseded_stage24_to27_path_fails_closed_without_g3b             tests/compiler/test_scene_first_signed_surface_bridge_v1.py             tests/compiler/test_skeleton_identity_determinism_v2.py             tests/compiler/test_skin_repair_accounting_v1.py             tests/compiler/test_skin_topology_repartition_directive_v2.py             tests/compiler/test_source_edge_probe_repartition_v1.py             tests/compiler/test_stage13_geometry_gate_v2.py             tests/compiler/test_stage14_policy_v3.py             tests/compiler/test_substrate_adequacy_v1.py             tests/compiler/test_v2_geometry_dependency_split.py             tests/compiler/test_v2_static_mesh_source_fidelity_gate.py             tests/compiler/test_visual_mesh_arap_v1.py
+      - name: Promotion invariants
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          required = [
+              Path("compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py"),
+              Path("compiler/realsas_compiler_core/mechanical_repartition_v2.py"),
+              Path("compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py"),
+              Path("compiler/realsas_compiler_core/substrate/scene_first_signed.py"),
+              Path("compiler/realsas_compiler_core/visual_mesh_arap_v1.py"),
+          ]
+          assert all(p.is_file() for p in required)
+          mesh = Path("compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py").read_text()
+          assert "SOURCE_EDGE_PROBE_RATIO_V1" in mesh
+          assert "G3B_MECHANICAL_REPARTITION_REQUIRED" in mesh
+          assert "face_deletion_count" in mesh
+          assert '"weight_mutation":False' in mesh.replace(" ", "")
+          cand = Path("compiler/realsas_compiler_core/canonical_mesh_candidate_v1.py").read_text()
+          assert "COMPONENT_HARMONIC_DIRICHLET_V1" in cand
+          assert "explicit_face_provenance" in cand
+          print("MECHANICAL_GEOMETRY_PROMOTION_INVARIANTS_PASS")
+          PY
+      - name: Gate summary
+        run: |
+          echo MECHANICAL_GEOMETRY_CANDIDATE_PASS
+          echo corrected_topology=true
+          echo corrected_weights_consumed_without_mutation=true
+          echo dense_face_provenance=true
+          echo topology_local_normals=true
+          echo stage35_to_stage17_repartition=true
+          echo harmonic_seam_support=true

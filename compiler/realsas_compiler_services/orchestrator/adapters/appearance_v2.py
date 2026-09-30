@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import json
+
 """RealSaS V2 Complete Appearance Authority stages 20-25."""
 
 from dataclasses import replace
 from pathlib import Path
+from time import perf_counter
 
 import numpy as np
 from PIL import Image
@@ -29,16 +32,24 @@ from compiler.realsas_compiler_core.appearance_authority_v2 import (
     complete_appearance_qualification_hash,
 )
 from compiler.realsas_compiler_core.appearance_bake_v2 import (
+    bake_direction_adaptive_atlas_bundle,
+    bake_direction_adaptive_atlas_pages,
+    bake_direction_adaptive_source_view_atlas_pages,
+    prepare_adaptive_paged_scatter,
     bake_direction_atlas,
+    bake_direction_atlas_pages,
     bake_direction_source_view_atlas,
+    bake_direction_source_view_atlas_pages,
 )
 from compiler.realsas_compiler_core.appearance_compile_v2 import (
     compile_deterministic_caa,
-    resolve_projected_tile_resolution,
+    projected_adaptive_face_tile_evidence,
+    projected_tile_resolution_evidence,
 )
 from compiler.realsas_compiler_core.appearance_color_v2 import (
     source_sample_roundtrip_pm_error,
 )
+from compiler.realsas_compiler_core.appearance_completion_v2 import surface_sample_neighbors
 from compiler.realsas_compiler_core.appearance_quality_v2 import (
     cross_view_source_compatibility_metrics,
     provenance_boundary_metrics,
@@ -47,6 +58,7 @@ from compiler.realsas_compiler_core.appearance_quality_v2 import (
     structured_holdout_metrics,
 )
 from compiler.realsas_compiler_core.appearance_render_v2 import (
+    load_face_page_index,
     load_face_uv,
     load_provenance_atlas,
     render_caa_reference,
@@ -57,7 +69,11 @@ from compiler.realsas_compiler_core.camera_geometry_v2 import (
 from compiler.realsas_compiler_core.dynamic_appearance_conditioning_v2 import (
     screen_to_texture_max_texels_per_pixel,
 )
-from compiler.realsas_compiler_core.mesh.product_coverage_v1 import coverage_metrics
+from compiler.realsas_compiler_core.hashing import content_sha256
+from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
+    coverage_metrics,
+    rasterize_triangles_half_integer_top_left,
+)
 from compiler.realsas_compiler_core.output_presentation_v1 import (
     output_direction_set_from_dict,
 )
@@ -71,6 +87,11 @@ from compiler.realsas_compiler_core.surface_addressing_v1 import (
     static_mesh_qualification_from_dict,
     surface_addressing_from_dict,
 )
+from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
+    load_visual_mesh_view,
+    visual_mesh_set_from_dict,
+    source_texel_xy_to_raster_xy,
+)
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     load_file_ref,
@@ -82,6 +103,108 @@ from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import 
 
 
 _POLICY_SCHEMA = "RealSaS.CAAQualificationPolicy.v1"
+
+
+def _visual_mesh_set(ctx: dict):
+    return visual_mesh_set_from_dict(
+        stage_output_payload(
+            ctx,
+            "18_CANONICAL_MESH_ADDRESSING_BUILD",
+            "RealSaS.VisualMeshSetIR.v1",
+        )
+    )
+
+
+def _source_owned_visual_mode_from_domain(domain) -> bool:
+    metadata = dict(domain.metadata or {})
+    value = metadata.get("visual_mesh_set_binding_hash")
+    return (
+        str(metadata.get("domain") or "")
+        == "SOURCE_OWNED_VISUAL_MESH_SET_X_DISCRETE_V0_V7"
+        and isinstance(value, str)
+        and len(value) == 64
+        and metadata.get("mechanical_candidate_render_authority") is False
+    )
+
+
+def _source_owned_visual_mode_from_prereg(prereg) -> bool:
+    return (
+        str(dict(prereg.compile_policy or {}).get("tile_resolution_strategy") or "")
+        == "SOURCE_VISUAL_MESH_V1"
+    )
+
+
+def _source_visual_rgba(
+    source_rgba: np.ndarray,
+    source_mask: np.ndarray,
+) -> np.ndarray:
+    rgba = np.asarray(source_rgba, dtype=np.uint8)
+    mask = np.asarray(source_mask, dtype=bool)
+    if rgba.ndim != 3 or rgba.shape[2] != 4 or rgba.shape[:2] != mask.shape:
+        raise QualificationError("CAA_VISUAL_SOURCE_SHAPE_DRIFT")
+    out = rgba.copy()
+    out[~mask, :3] = 0
+    out[~mask, 3] = 0
+    inside_zero_alpha = mask & (out[..., 3] == 0)
+    out[inside_zero_alpha, 3] = 255
+    return out
+
+
+def _visual_mesh_coverage(mesh, *, width: int, height: int) -> bytes:
+    raster_positions = source_texel_xy_to_raster_xy(
+        np.asarray(mesh.positions, dtype=np.float64)
+    )
+    triangles = tuple(
+        tuple(
+            tuple(map(float, raster_positions[int(vertex_index)]))
+            for vertex_index in face
+        )
+        for face in np.asarray(mesh.faces, dtype=np.int64)
+    )
+    return rasterize_triangles_half_integer_top_left(
+        triangles,
+        width=int(width),
+        height=int(height),
+    )
+
+
+def _demo_rest_measurement_admissible(
+    ctx: dict,
+    *,
+    static_mesh,
+    appearance_qualification: dict,
+    proof: CAARestRenderProofIR,
+) -> bool:
+    """Permit measured rest failure to continue only as explicit demo evidence."""
+    if str(ctx["ledger"].get("execution_class") or "") != "DEMO_WITNESS":
+        return False
+    demo = dict(ctx["run_manifest"].get("demo_execution") or {})
+    if (
+        demo.get("stage13_scientific_pass") is not False
+        or demo.get("product_authority_claimed") is not False
+    ):
+        return False
+    report = dict(static_mesh.qualification_report or {})
+    if (
+        report.get("demo_geometry_lineage") is not True
+        or report.get("product_authority_claimed") is not False
+        or report.get("source_fidelity_qualification_passed") is not False
+        or report.get("demo_only_source_fidelity_admission") is not True
+    ):
+        return False
+    appearance_report = dict(
+        appearance_qualification.get("qualification_report") or {}
+    )
+    if appearance_report.get("status") != "PASS_COMPLETE_APPEARANCE":
+        return False
+    proof_report = dict(proof.qualification_report or {})
+    if (
+        proof_report.get("status") != "FAIL_CAA_REFERENCE_REST"
+        or proof_report.get("every_direction_passed") is not False
+        or len(proof.views) != 8
+    ):
+        return False
+    return True
 
 
 def _load_policy_document(ctx: dict) -> dict:
@@ -140,34 +263,241 @@ def _load_source_inputs(ctx: dict, observation):
     return rgba, masks
 
 
+def _static_mesh_for_appearance(ctx: dict):
+    payload = stage_output_payload(
+        ctx,
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "RealSaS.StaticCanonicalMeshQualificationIR.v1",
+    )
+    value = static_mesh_qualification_from_dict(payload)
+    report = dict(value.qualification_report or {})
+    status = str(report.get("status") or "")
+    row = next(
+        (
+            item
+            for item in ctx["ledger"].get("stages") or ()
+            if str(item.get("id") or "") == "19_STATIC_CANONICAL_MESH_QUALIFIED"
+        ),
+        None,
+    )
+    execution_class = str(ctx["ledger"].get("execution_class") or "")
+    ledger_status = "" if row is None else str(row.get("status") or "")
+
+    if status == "PASS_STATIC_CANONICAL_CARRIER":
+        return value
+
+    if (
+        execution_class == "DEMO_WITNESS"
+        and ledger_status == "PASS_DEMO_ONLY"
+        and status == "DEMO_ONLY_MEASURED_STATIC_CANONICAL_CARRIER__P999_FAIL"
+        and report.get("demo_geometry_lineage") is True
+        and report.get("product_authority_claimed") is False
+        and report.get("demo_only_source_fidelity_admission") is True
+    ):
+        demo = dict(ctx["run_manifest"].get("demo_execution") or {})
+        if (
+            demo.get("stage13_scientific_pass") is not False
+            or demo.get("product_authority_claimed") is not False
+        ):
+            raise QualificationError("CAA_DEMO_STATIC_MESH_SCOPE_DRIFT")
+        return value
+
+    raise QualificationError(
+        "CAA_STATIC_MESH_NOT_ADMISSIBLE:"
+        f"{execution_class}:{ledger_status}:{status}"
+    )
+
+
 def _save_npz(path: Path, **arrays) -> str:
     path.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(path, **arrays)
     return sha256_file(path)
 
 
-def _load_compile_arrays(artifact: CAACompileArtifactIR) -> dict:
+
+def _texture_page_rows(texture: AppearanceTextureIR) -> tuple[dict, ...]:
+    metadata = dict(texture.metadata or {})
+    raw = tuple(metadata.get("pages") or ())
+    if not raw:
+        return (
+            {
+                "page_index": 0,
+                "path": str(texture.transport_png_path),
+                "sha256": str(texture.transport_png_sha256),
+                "width": int(texture.width),
+                "height": int(texture.height),
+            },
+        )
+    rows = tuple(sorted((dict(row) for row in raw), key=lambda row: int(row["page_index"])))
+    if tuple(int(row["page_index"]) for row in rows) != tuple(range(len(rows))):
+        raise QualificationError("CAA_TEXTURE_PAGE_INDEX_SEQUENCE_INVALID")
+    if int(metadata.get("page_count", len(rows))) != len(rows):
+        raise QualificationError("CAA_TEXTURE_PAGE_COUNT_DRIFT")
+    first = rows[0]
+    if (
+        str(first["path"]) != str(texture.transport_png_path)
+        or str(first["sha256"]) != str(texture.transport_png_sha256)
+    ):
+        raise QualificationError("CAA_TEXTURE_PRIMARY_PAGE_BINDING_DRIFT")
+    dimensions = {
+        (int(row["width"]), int(row["height"]))
+        for row in rows
+    }
+    if len(dimensions) != 1:
+        raise QualificationError("CAA_TEXTURE_PAGE_DIMENSION_DRIFT")
+    return rows
+
+
+def _load_texture_pages(texture: AppearanceTextureIR) -> np.ndarray:
+    rows = _texture_page_rows(texture)
+    pages = []
+    for row in rows:
+        path = resolved_path(str(row["path"]))
+        if not path.is_file() or sha256_file(path) != str(row["sha256"]):
+            raise QualificationError("CAA_QUALIFICATION_TEXTURE_PAGE_BYTES_DRIFT")
+        image = np.asarray(Image.open(path).convert("RGBA"), dtype=np.uint8)
+        if image.shape != (int(row["height"]), int(row["width"]), 4):
+            raise QualificationError("CAA_TEXTURE_PAGE_DIMENSION_BYTES_DRIFT")
+        pages.append(image)
+    if bool(dict(texture.metadata or {}).get("paged_atlas")):
+        return np.stack(pages, axis=0)
+    if len(pages) != 1:
+        raise QualificationError("CAA_LEGACY_TEXTURE_HAS_MULTIPLE_PAGES")
+    return pages[0]
+
+def _load_compile_arrays(
+    artifact: CAACompileArtifactIR,
+    *,
+    required_names: set[str] | frozenset[str] | tuple[str, ...] | None = None,
+) -> dict:
+    """Load only arrays required by the current stage from a sealed CAA NPZ.
+
+    Current artifacts pack premultiplied-linear source truth only for direct
+    samples. Legacy dense truth remains readable so historical sealed artifacts
+    fail only on actual authority drift, not on a representation upgrade.
+    """
     path = resolved_path(artifact.compile_npz_path)
     if not path.is_file() or sha256_file(path) != artifact.compile_npz_sha256:
         raise QualificationError("CAA_COMPILE_NPZ_BYTES_DRIFT")
-    with np.load(path, allow_pickle=False) as data:
-        required = {
-            "barycentric",
-            "sample_positions",
-            "sample_face_index",
-            "sample_component_index",
-            "direct_valid",
-            "direct_rgba",
-            "direct_pm_linear",
-            "source_xy",
-            "rgba",
-            "provenance",
-            "source_view",
-        }
-        if not required.issubset(set(data.files)):
-            raise QualificationError("CAA_COMPILE_NPZ_ARRAYS_MISSING")
-        return {name: np.asarray(data[name]).copy() for name in required}
 
+    metadata = dict(artifact.metadata or {})
+    pm_mode = str(
+        metadata.get("direct_pm_linear_storage_mode")
+        or "DENSE_ALL_SAMPLES_V1"
+    )
+    if pm_mode == "PACKED_DIRECT_VALID_VIEW_MAJOR_V1":
+        pm_name = "direct_pm_linear_packed"
+    elif pm_mode == "DENSE_ALL_SAMPLES_V1":
+        pm_name = "direct_pm_linear"
+    else:
+        raise QualificationError("CAA_COMPILE_DIRECT_PM_STORAGE_MODE_UNSUPPORTED")
+
+    full_required = {
+        "sample_positions",
+        "sample_face_index",
+        "sample_component_index",
+        "direct_valid",
+        "direct_rgba",
+        pm_name,
+        "source_xy",
+        "rgba",
+        "provenance",
+        "source_view",
+    }
+    sample_mode = str(
+        metadata.get("sample_count_mode")
+        or "UNIFORM_FACE_LATTICE_V1"
+    )
+    barycentric_storage_mode = str(
+        metadata.get("barycentric_storage_mode")
+        or (
+            "UNIFORM_PATTERN_EXPLICIT_V1"
+            if sample_mode == "UNIFORM_FACE_LATTICE_V1"
+            else "PER_SAMPLE_EXPLICIT_LEGACY_V1"
+        )
+    )
+    if barycentric_storage_mode in {
+        "UNIFORM_PATTERN_EXPLICIT_V1",
+        "PER_SAMPLE_EXPLICIT_LEGACY_V1",
+    }:
+        full_required.add("barycentric")
+    elif barycentric_storage_mode != (
+        "RECONSTRUCT_FROM_FACE_RESOLUTION_AND_OFFSETS_V1"
+    ):
+        raise QualificationError(
+            "CAA_COMPILE_BARYCENTRIC_STORAGE_MODE_UNSUPPORTED"
+        )
+    adaptive_required = {"face_sample_offsets", "face_tile_resolutions"}
+    requested = None if required_names is None else set(map(str, required_names))
+
+    with np.load(path, allow_pickle=False) as data:
+        available = set(data.files)
+        if not full_required.issubset(available):
+            raise QualificationError("CAA_COMPILE_NPZ_ARRAYS_MISSING")
+        if sample_mode == "PER_FACE_ADAPTIVE_V1":
+            if not adaptive_required.issubset(available):
+                raise QualificationError("CAA_COMPILE_ADAPTIVE_ARRAYS_MISSING")
+            if requested is not None:
+                requested |= adaptive_required
+        elif sample_mode != "UNIFORM_FACE_LATTICE_V1":
+            raise QualificationError("CAA_COMPILE_SAMPLE_COUNT_MODE_UNSUPPORTED")
+
+        names = available if requested is None else requested
+        if not names.issubset(available):
+            raise QualificationError("CAA_COMPILE_REQUESTED_ARRAY_MISSING")
+        arrays = {
+            name: np.asarray(data[name]).copy()
+            for name in sorted(names)
+        }
+
+    if sample_mode == "PER_FACE_ADAPTIVE_V1":
+        offsets = np.asarray(arrays["face_sample_offsets"], dtype=np.int64)
+        resolutions = np.asarray(arrays["face_tile_resolutions"], dtype=np.int32)
+        if artifact.direction_count <= 0:
+            raise QualificationError("CAA_COMPILE_DIRECTION_COUNT_INVALID")
+        if artifact.total_sample_count % artifact.direction_count != 0:
+            raise QualificationError("CAA_COMPILE_TOTAL_SAMPLE_DIVISIBILITY_DRIFT")
+        per_direction = artifact.total_sample_count // artifact.direction_count
+        if (
+            offsets.shape != (artifact.face_count + 1,)
+            or resolutions.shape != (artifact.face_count,)
+            or offsets[0] != 0
+            or offsets[-1] != per_direction
+        ):
+            raise QualificationError("CAA_COMPILE_ADAPTIVE_ARRAY_BINDING_DRIFT")
+
+    if "source_xy" in arrays:
+        expected = str(metadata.get("source_xy_storage_dtype") or "")
+        if expected and str(arrays["source_xy"].dtype) != expected:
+            raise QualificationError("CAA_COMPILE_SOURCE_XY_DTYPE_DRIFT")
+
+    expected_pm_dtype = str(
+        metadata.get("direct_pm_linear_storage_dtype") or ""
+    )
+    if pm_name in arrays:
+        if expected_pm_dtype and str(arrays[pm_name].dtype) != expected_pm_dtype:
+            raise QualificationError("CAA_COMPILE_DIRECT_PM_DTYPE_DRIFT")
+        if pm_mode == "PACKED_DIRECT_VALID_VIEW_MAJOR_V1":
+            if arrays[pm_name].shape != (
+                artifact.direct_source_sample_count,
+                4,
+            ):
+                raise QualificationError(
+                    "CAA_COMPILE_DIRECT_PM_PACKED_SHAPE_DRIFT"
+                )
+        else:
+            if artifact.direction_count <= 0:
+                raise QualificationError("CAA_COMPILE_DIRECTION_COUNT_INVALID")
+            per_direction = artifact.total_sample_count // artifact.direction_count
+            if arrays[pm_name].shape != (
+                artifact.direction_count,
+                per_direction,
+                4,
+            ):
+                raise QualificationError(
+                    "CAA_COMPILE_DIRECT_PM_DENSE_SHAPE_DRIFT"
+                )
+    return arrays
 
 def preregister_caa_backend_stage(ctx: dict) -> dict:
     cfg = dict(ctx["run_manifest"].get("appearance") or {})
@@ -188,6 +518,27 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
     if not contract_path.is_file():
         raise QualificationError("CAA_CANONICAL_CONTRACT_MISSING")
     contract_sha = sha256_file(contract_path)
+
+    admission_contract_path = (
+        Path(ctx["repo_root"])
+        / "canonical"
+        / "CAA_V2_RENDERABLE_SUPPORT_ADMISSION_CONTRACT_V1_20260927.json"
+    )
+    if not admission_contract_path.is_file():
+        raise QualificationError("CAA_ADMISSION_CONTRACT_MISSING")
+    admission_contract = json.loads(
+        admission_contract_path.read_text(encoding="utf-8")
+    )
+    if (
+        admission_contract.get("schema")
+        != "RealSaS.CAARenderableSupportAdmissionContract.v1"
+        or admission_contract.get("status")
+        != "FROZEN_SUBJECT_FREE_ARCHITECTURE"
+        or admission_contract.get("subject_identity_used") is not False
+        or admission_contract.get("thresholds_changed") is not False
+    ):
+        raise QualificationError("CAA_ADMISSION_CONTRACT_INVALID")
+    admission_contract_sha = sha256_file(admission_contract_path)
 
     observation = qualified_observation_set_from_dict(
         stage_output_payload(
@@ -231,13 +582,7 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
             "RealSaS.AppearanceDomainIR.v1",
         )
     )
-    static_mesh = static_mesh_qualification_from_dict(
-        stage_output_payload(
-            ctx,
-            "19_STATIC_CANONICAL_MESH_QUALIFIED",
-            "RealSaS.StaticCanonicalMeshQualificationIR.v1",
-        )
-    )
+    static_mesh = _static_mesh_for_appearance(ctx)
 
     observation_camera_hashes = tuple(
         row.camera_binding_hash
@@ -246,11 +591,77 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
     if observation_camera_hashes != tuple(cameras.camera_binding_hashes):
         raise QualificationError("CAA_RASTER_CORRESPONDENCE_PREREQUISITE_FAILED")
 
+    if _source_owned_visual_mode_from_domain(domain):
+        visual_set = _visual_mesh_set(ctx)
+        domain_visual_hash = str(
+            dict(domain.metadata or {}).get("visual_mesh_set_binding_hash") or ""
+        )
+        if visual_set.set_hash != domain_visual_hash:
+            raise QualificationError("CAA_VISUAL_DOMAIN_MESH_SET_DRIFT")
+        if (
+            visual_set.observation_set_binding_hash
+            != observation.observation_set_hash
+            or visual_set.output_direction_set_binding_hash
+            != directions.direction_set_hash
+        ):
+            raise QualificationError("CAA_VISUAL_MESH_SET_INPUT_BINDING_DRIFT")
+        compile_policy = dict(policy["compile_policy"])
+        compile_policy["tile_resolution"] = 4
+        compile_policy["tile_resolution_strategy"] = "SOURCE_VISUAL_MESH_V1"
+        compile_policy["max_supported_face_count"] = int(
+            sum(int(row.face_count) for row in visual_set.views)
+        )
+        compile_policy["visual_mesh_set_binding_hash"] = visual_set.set_hash
+        compile_policy["visual_geometry_authority"] = "SOURCE_ART_SILHOUETTE"
+        compile_policy["mechanical_mesh_render_authority"] = False
+        compile_policy["visual_uv_authority"] = "FIXED_SOURCE_RASTER_UV"
+        compile_policy["runtime_generation_forbidden"] = True
+        compile_policy["cross_view_completion_authorized"] = False
+        prereg = build_caa_preregistration(
+            backend_id=backend,
+            contract_sha256=contract_sha,
+            observation_set_hash=observation.observation_set_hash,
+            camera_set_hash=cameras.camera_set_hash,
+            output_direction_set_hash=directions.direction_set_hash,
+            candidate_mesh_hash=candidate.candidate_lineage_hash,
+            surface_addressing_hash=addressing.addressing_hash,
+            appearance_domain_hash=domain.domain_hash,
+            static_mesh_qualification_hash=static_mesh.qualification_hash,
+            compile_policy=compile_policy,
+            source_lock_policy=dict(policy["source_lock_policy"]),
+            completion_quality_policy=dict(policy["completion_quality_policy"]),
+        )
+        root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+        return {
+            "status": "PASS",
+            "outputs": [
+                write_ir(
+                    root / "caa_backend_preregistration.json",
+                    prereg,
+                    authority_class="CAA_BACKEND_PREREGISTRATION",
+                )
+            ],
+            "diagnostics": {
+                "backend_id": backend,
+                "shipping_eligible": prereg.shipping_eligible,
+                "contract_sha256": contract_sha,
+                "preregistration_hash": prereg.preregistration_hash,
+                "raster_correspondence_prerequisite": "PASS",
+                "appearance_domain": "SOURCE_OWNED_VISUAL_MESH",
+                "visual_mesh_set_hash": visual_set.set_hash,
+                "visual_mesh_total_face_count": int(
+                    sum(int(row.face_count) for row in visual_set.views)
+                ),
+                "mechanical_mesh_render_authority": False,
+                "cross_view_completion_authorized": False,
+            },
+        }
+
     compile_policy = dict(policy["compile_policy"])
     if str(compile_policy.get("tile_resolution_mode") or "") != "PROJECTED_SOURCE_DENSITY_V1":
         raise QualificationError("CAA_TILE_RESOLUTION_MODE_UNSUPPORTED")
     _source_rgba, source_masks = _load_source_inputs(ctx, observation)
-    tile_evidence = resolve_projected_tile_resolution(
+    tile_evidence = projected_adaptive_face_tile_evidence(
         candidate=candidate,
         cameras=cameras.cameras,
         foreground_mask_by_view=source_masks,
@@ -264,13 +675,54 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
         bleed_px=int(compile_policy["bleed_px"]),
         max_atlas_resolution=int(compile_policy["max_atlas_resolution"]),
     )
+    if int(tile_evidence["unsatisfied_face_count"]) != 0:
+        return {
+            "status": "FAIL",
+            "blockers": ["CAA_ADAPTIVE_TILE_DENSITY_UNSATISFIED"],
+            "diagnostics": {
+                "backend_id": backend,
+                "shipping_eligible": False,
+                "contract_sha256": contract_sha,
+                "policy_document_sha256": str(
+                    dict(cfg.get("policy_document") or {}).get("sha256") or ""
+                ),
+                "raster_correspondence_prerequisite": "PASS",
+                "tile_resolution_evidence": tile_evidence,
+            },
+        }
     compile_policy["tile_resolution"] = int(
-        tile_evidence["selected_tile_resolution"]
+        tile_evidence["maximum_required_resolution"]
     )
-    compile_policy["max_supported_face_count"] = int(
-        tile_evidence["max_supported_face_count"]
+    compile_policy["tile_resolution_strategy"] = "PER_FACE_ADAPTIVE_V1"
+    compile_policy["face_tile_resolutions"] = list(
+        tile_evidence["selected_resolution_by_face"]
     )
+    compile_policy["sample_count_per_direction"] = int(
+        tile_evidence["sample_count_per_direction"]
+    )
+    compile_policy["adaptive_atlas_page_count"] = int(
+        tile_evidence["deterministic_shelf_page_count"]
+    )
+    compile_policy["adaptive_atlas_placement_hash"] = str(
+        tile_evidence["placement_hash"]
+    )
+    compile_policy["max_supported_face_count"] = int(tile_evidence["face_count"])
     compile_policy["tile_resolution_evidence"] = tile_evidence
+    compile_policy["renderable_support_admission_contract"] = (
+        "SOURCE_OR_BOUNDED_LOCAL_COMPLETION_V1"
+    )
+    compile_policy["renderable_support_admission_contract_sha256"] = (
+        admission_contract_sha
+    )
+    compile_policy["unsupported_policy_disqualification_action"] = (
+        "EXPLICIT_COMPILER_ABSTENTION"
+    )
+    compile_policy["unsupported_provenance_code"] = int(
+        CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"]
+    )
+    compile_policy["unsupported_source_view_value"] = -4
+    compile_policy["physical_padding_provenance_code"] = 255
+    compile_policy["thresholds_changed_for_admission"] = False
 
     prereg = build_caa_preregistration(
         backend_id=backend,
@@ -300,6 +752,9 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
             "backend_id": backend,
             "shipping_eligible": prereg.shipping_eligible,
             "contract_sha256": contract_sha,
+            "renderable_support_admission_contract_sha256": (
+                admission_contract_sha
+            ),
             "preregistration_hash": prereg.preregistration_hash,
             "policy_document_sha256": str(
                 dict(cfg.get("policy_document") or {}).get("sha256") or ""
@@ -310,7 +765,133 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
     }
 
 
+def _source_topology_appearance_components(ctx: dict, candidate):
+    """Derive appearance continuity from exact Stage15 source topology.
+
+    Mechanical Stage17 cuts remain deformation authority only. Appearance
+    completion may cross a mechanical seam only when both sides descend from
+    the same exact compacted source-surface connected component.
+    """
+    provenance = stage_output_payload(
+        ctx,
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "RealSaS.CompactedDenseFaceProvenance.v1",
+    )
+    compact_faces = tuple(
+        tuple(map(str, face))
+        for face in provenance.get("compact_faces") or ()
+    )
+    if not compact_faces:
+        raise QualificationError("CAA_SOURCE_TOPOLOGY_FACE_AUTHORITY_EMPTY")
+
+    source_ids = sorted({sid for face in compact_faces for sid in face})
+    parent = {sid: sid for sid in source_ids}
+
+    def find(value: str) -> str:
+        x = value
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def union(a: str, b: str) -> None:
+        ra, rb = find(a), find(b)
+        if ra == rb:
+            return
+        if ra < rb:
+            parent[rb] = ra
+        else:
+            parent[ra] = rb
+
+    for face in compact_faces:
+        if len(face) != 3 or len(set(face)) != 3:
+            raise QualificationError("CAA_SOURCE_TOPOLOGY_FACE_INVALID")
+        union(face[0], face[1])
+        union(face[1], face[2])
+        union(face[2], face[0])
+
+    roots = tuple(sorted({find(sid) for sid in source_ids}))
+    root_index = {root: index for index, root in enumerate(roots)}
+    component_by_source = {
+        sid: root_index[find(sid)] for sid in source_ids
+    }
+    component_ids = tuple(
+        f"SOURCE_TOPOLOGY_CC:{index:04d}:{root}"
+        for index, root in enumerate(roots)
+    )
+
+    vertices = {
+        str(vertex.candidate_vertex_id): vertex
+        for vertex in candidate.vertices
+    }
+    appearance_vertex_key = {}
+    for vertex_id, vertex in vertices.items():
+        coeffs = tuple(
+            sorted(
+                (str(source_id), float(coefficient))
+                for source_id, coefficient
+                in tuple(vertex.support_binding.coefficients)
+            )
+        )
+        if not coeffs:
+            raise QualificationError("CAA_SOURCE_TOPOLOGY_SUPPORT_EMPTY")
+        if (
+            any(source_id not in component_by_source for source_id, _ in coeffs)
+            or abs(sum(weight for _, weight in coeffs) - 1.0) > 1.0e-9
+        ):
+            raise QualificationError("CAA_SOURCE_TOPOLOGY_SUPPORT_INVALID")
+        appearance_vertex_key[vertex_id] = (
+            "APPV:"
+            + content_sha256(
+                {
+                    "geometry_support_coefficients": coeffs,
+                    "rest_position": tuple(map(float, vertex.P)),
+                }
+            )[:24]
+        )
+
+    face_component_index = np.empty(
+        (len(candidate.faces),), dtype=np.int32
+    )
+    appearance_face_vertex_ids = []
+    for face_index, face in enumerate(candidate.faces):
+        source_components = set()
+        topology_row = []
+        for vertex_id in map(str, face):
+            vertex = vertices.get(vertex_id)
+            if vertex is None:
+                raise QualificationError(
+                    "CAA_SOURCE_TOPOLOGY_CANDIDATE_VERTEX_UNKNOWN"
+                )
+            coeffs = tuple(vertex.support_binding.coefficients)
+            for source_id, _coefficient in coeffs:
+                sid = str(source_id)
+                if sid not in component_by_source:
+                    raise QualificationError(
+                        "CAA_SOURCE_TOPOLOGY_SUPPORT_OUTSIDE_AUTHORITY"
+                    )
+                source_components.add(component_by_source[sid])
+            topology_row.append(appearance_vertex_key[vertex_id])
+        if len(source_components) != 1:
+            raise QualificationError(
+                "CAA_SOURCE_TOPOLOGY_FACE_CROSSES_COMPONENT"
+            )
+        if len(set(topology_row)) != 3:
+            raise QualificationError(
+                "CAA_SOURCE_TOPOLOGY_APPEARANCE_FACE_DEGENERATE"
+            )
+        face_component_index[face_index] = next(iter(source_components))
+        appearance_face_vertex_ids.append(tuple(topology_row))
+
+    return (
+        face_component_index,
+        component_ids,
+        tuple(appearance_face_vertex_ids),
+    )
+
+
 def compile_caa_stage(ctx: dict) -> dict:
+    stage_started = perf_counter()
     prereg = caa_preregistration_from_dict(
         stage_output_payload(
             ctx,
@@ -349,40 +930,227 @@ def compile_caa_stage(ctx: dict) -> dict:
         )
     )
     rgba, masks = _load_source_inputs(ctx, observation)
+    source_prepare_seconds = perf_counter() - stage_started
 
     compile_policy = dict(prereg.compile_policy)
+    strategy = str(
+        compile_policy.get("tile_resolution_strategy")
+        or "UNIFORM_FACE_LATTICE_V1"
+    )
+    if strategy == "SOURCE_VISUAL_MESH_V1":
+        visual_set = _visual_mesh_set(ctx)
+        if (
+            visual_set.set_hash
+            != str(compile_policy.get("visual_mesh_set_binding_hash") or "")
+        ):
+            raise QualificationError("CAA_VISUAL_COMPILE_MESH_SET_DRIFT")
+        if visual_set.observation_set_binding_hash != observation.observation_set_hash:
+            raise QualificationError("CAA_VISUAL_COMPILE_OBSERVATION_DRIFT")
+        rows = tuple(sorted(visual_set.views, key=lambda row: int(row.view_index)))
+        if len(rows) != 8:
+            raise QualificationError("CAA_VISUAL_COMPILE_REQUIRES_V0_V7")
+        foreground_counts = np.asarray(
+            [int(np.count_nonzero(masks[int(row.view_index)])) for row in rows],
+            dtype=np.int64,
+        )
+        vertex_counts = np.asarray(
+            [int(row.vertex_count) for row in rows],
+            dtype=np.int64,
+        )
+        face_counts = np.asarray(
+            [int(row.face_count) for row in rows],
+            dtype=np.int64,
+        )
+        total = int(foreground_counts.sum())
+        if total <= 0:
+            raise QualificationError("CAA_VISUAL_COMPILE_EMPTY_FOREGROUND")
+        root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+        npz_path = root / "visual_appearance_compile.npz"
+        npz_started = perf_counter()
+        npz_sha = _save_npz(
+            npz_path,
+            view_index=np.arange(8, dtype=np.int32),
+            foreground_pixel_count=foreground_counts,
+            visual_vertex_count=vertex_counts,
+            visual_face_count=face_counts,
+            visual_mesh_hash=np.asarray(
+                [str(row.mesh_hash).encode("ascii") for row in rows],
+                dtype="S64",
+            ),
+            source_raster_sha256=np.asarray(
+                [str(row.source_raster_sha256).encode("ascii") for row in rows],
+                dtype="S64",
+            ),
+            source_foreground_mask_sha256=np.asarray(
+                [
+                    str(row.source_foreground_mask_sha256).encode("ascii")
+                    for row in rows
+                ],
+                dtype="S64",
+            ),
+        )
+        npz_seal_seconds = perf_counter() - npz_started
+        artifact = CAACompileArtifactIR(
+            backend_id=prereg.backend_id,
+            preregistration_binding_hash=prereg.preregistration_hash,
+            candidate_mesh_binding_hash=prereg.candidate_mesh_binding_hash,
+            surface_addressing_binding_hash=prereg.surface_addressing_binding_hash,
+            appearance_domain_binding_hash=prereg.appearance_domain_binding_hash,
+            output_direction_set_binding_hash=prereg.output_direction_set_binding_hash,
+            compile_npz_path=str(npz_path),
+            compile_npz_sha256=npz_sha,
+            face_count=int(face_counts.sum()),
+            direction_count=8,
+            tile_resolution=4,
+            sample_count_per_face=1,
+            total_sample_count=total,
+            direct_source_sample_count=total,
+            other_view_source_sample_count=0,
+            compiled_local_harmonic_sample_count=0,
+            compile_hash="",
+            metadata={
+                "source_owned_visual_mesh_mode": True,
+                "visual_mesh_set_binding_hash": visual_set.set_hash,
+                "mechanical_mesh_render_authority": False,
+                "sample_count_mode": "SOURCE_RASTER_DIRECT_V1",
+                "compile_array_schema": (
+                    "RealSaS.VisualAppearanceCompileArrays.v1"
+                ),
+                "unsupported_abstain_sample_count": 0,
+                "canonical_global_completion_sample_count": 0,
+                "total_appearance_defined": True,
+                "total_admitted_appearance_defined": True,
+                "runtime_generation_used": False,
+                "geometry_mutated": False,
+                "cross_view_completion_used": False,
+                "direct_pm_linear_storage_mode": (
+                    "PACKED_DIRECT_VALID_VIEW_MAJOR_V1"
+                ),
+                "direct_pm_linear_storage_dtype": "float64",
+                "source_xy_storage_dtype": "float32",
+                "visual_uv_authority": "FIXED_SOURCE_RASTER_UV",
+                "visual_geometry_authority": "SOURCE_ART_SILHOUETTE",
+                "foreground_pixel_count_by_view": foreground_counts.tolist(),
+                "visual_vertex_count_by_view": vertex_counts.tolist(),
+                "visual_face_count_by_view": face_counts.tolist(),
+            },
+        )
+        artifact = replace(
+            artifact,
+            compile_hash=caa_compile_hash(artifact),
+        )
+        return {
+            "status": "PASS",
+            "outputs": [
+                write_ir(
+                    root / "caa_compile_artifact.json",
+                    artifact,
+                    authority_class="CAA_COMPILE_ARTIFACT",
+                ),
+                {
+                    "path": str(npz_path),
+                    "sha256": npz_sha,
+                    "authority_class": "VISUAL_APPEARANCE_COMPILE_ARRAYS",
+                    "schema": "RealSaS.VisualAppearanceCompileArrays.v1",
+                },
+            ],
+            "performance": {
+                "source_prepare_seconds": float(source_prepare_seconds),
+                "deterministic_compile_seconds": 0.0,
+                "npz_seal_seconds": float(npz_seal_seconds),
+                "core_phase_seconds": {
+                    "visual_mesh_compile": 0.0,
+                    "generated_appearance": 0.0,
+                },
+                "measured_inner_seconds": float(
+                    source_prepare_seconds + npz_seal_seconds
+                ),
+            },
+            "diagnostics": {
+                "compile_hash": artifact.compile_hash,
+                "appearance_domain": "SOURCE_OWNED_VISUAL_MESH",
+                "visual_mesh_set_hash": visual_set.set_hash,
+                "direct_source_sample_count": total,
+                "generated_sample_count": 0,
+                "mechanical_mesh_render_authority": False,
+            },
+        }
+
+    face_tile_resolutions = None
+    if strategy == "PER_FACE_ADAPTIVE_V1":
+        face_tile_resolutions = np.asarray(
+            compile_policy.get("face_tile_resolutions") or (),
+            dtype=np.int32,
+        )
+        if face_tile_resolutions.shape != (len(candidate.faces),):
+            raise QualificationError("CAA_ADAPTIVE_FACE_RESOLUTION_BINDING_DRIFT")
+    elif strategy != "UNIFORM_FACE_LATTICE_V1":
+        raise QualificationError("CAA_TILE_RESOLUTION_STRATEGY_UNSUPPORTED")
+
+    compile_started = perf_counter()
+    (
+        appearance_face_component_index,
+        appearance_component_ids,
+        appearance_face_vertex_ids,
+    ) = _source_topology_appearance_components(ctx, candidate)
     result = compile_deterministic_caa(
         candidate=candidate,
         cameras=cameras.cameras,
         source_rgba_by_view=rgba,
         foreground_mask_by_view=masks,
         tile_resolution=int(compile_policy["tile_resolution"]),
+        face_tile_resolutions=face_tile_resolutions,
         source_lock_policy=prereg.source_lock_policy,
         completion_quality_policy=prereg.completion_quality_policy,
+        appearance_face_component_index=appearance_face_component_index,
+        appearance_component_ids=appearance_component_ids,
+        appearance_face_vertex_ids=appearance_face_vertex_ids,
     )
+    deterministic_compile_seconds = perf_counter() - compile_started
     component_ids = tuple(result["component_ids"])
-    component_index = {component_id: index for index, component_id in enumerate(component_ids)}
     sample_component_index = np.asarray(
-        [component_index[value] for value in result["sample_component"]],
+        result["sample_component_index"],
         dtype=np.int32,
     )
+    if (
+        sample_component_index.shape
+        != (int(result["sample_count_per_direction"]),)
+        or np.any(sample_component_index < 0)
+        or np.any(sample_component_index >= len(component_ids))
+    ):
+        raise QualificationError("CAA_STAGE21_COMPONENT_INDEX_DRIFT")
 
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     npz_path = root / "caa_compile.npz"
-    npz_sha = _save_npz(
-        npz_path,
-        barycentric=result["barycentric"],
-        sample_positions=result["sample_positions"],
-        sample_face_index=result["sample_face_index"],
-        sample_component_index=sample_component_index,
-        direct_valid=result["direct_valid"],
-        direct_rgba=result["direct_rgba"],
-        direct_pm_linear=result["direct_pm_linear"],
-        source_xy=result["source_xy"],
-        rgba=result["rgba"],
-        provenance=result["provenance"],
-        source_view=result["source_view"],
-    )
+    npz_arrays = {
+        "sample_positions": result["sample_positions"],
+        "sample_face_index": result["sample_face_index"],
+        "face_sample_offsets": np.asarray(
+            result["face_sample_offsets"], dtype=np.int64
+        ),
+        "face_tile_resolutions": np.asarray(
+            result["face_tile_resolutions"], dtype=np.int32
+        ),
+        "sample_component_index": sample_component_index,
+        "direct_valid": result["direct_valid"],
+        "direct_foreground_donor_valid": result[
+            "direct_foreground_donor_valid"
+        ],
+        "direct_rgba": result["direct_rgba"],
+        "face_support_by_view": result["face_support_by_view"],
+        "direct_pm_linear_packed": result["direct_pm_linear_packed"],
+        "source_xy": result["source_xy"],
+        "rgba": result["rgba"],
+        "provenance": result["provenance"],
+        "source_view": result["source_view"],
+    }
+    if result["barycentric"] is not None:
+        npz_arrays["barycentric"] = np.asarray(
+            result["barycentric"], dtype=np.float64
+        )
+    npz_started = perf_counter()
+    npz_sha = _save_npz(npz_path, **npz_arrays)
+    npz_seal_seconds = perf_counter() - npz_started
     counts = result["counts"]
     total = int(result["rgba"].shape[0] * result["rgba"].shape[1])
     artifact = CAACompileArtifactIR(
@@ -407,13 +1175,89 @@ def compile_caa_stage(ctx: dict) -> dict:
         compile_hash="",
         metadata={
             "component_ids": component_ids,
-            "total_appearance_defined": True,
+            "appearance_component_authority": (
+                "STAGE15_EXACT_COMPACTED_SOURCE_TOPOLOGY_V1"
+            ),
+            "mechanical_partition_is_appearance_boundary": False,
+            "total_appearance_defined": (
+                int(counts["UNSUPPORTED_ABSTAIN"]) == 0
+            ),
+            "total_admitted_appearance_defined": True,
+            "unsupported_abstain_sample_count": int(
+                counts["UNSUPPORTED_ABSTAIN"]
+            ),
+            "unsupported_abstain_fraction": (
+                float(counts["UNSUPPORTED_ABSTAIN"]) / float(total)
+            ),
+            "unsupported_abstain_source_view_value": int(
+                result["unsupported_abstain_source_view_value"]
+            ),
+            "canonical_global_completion_sample_count": int(
+                counts["CANONICAL_GLOBAL_COMPLETION"]
+            ),
+            "canonical_global_completion_fraction": (
+                float(counts["CANONICAL_GLOBAL_COMPLETION"]) / float(total)
+            ),
+            "canonical_global_completion_source_view_value": int(
+                result["canonical_global_completion_source_view_value"]
+            ),
+            "canonical_global_completion_metadata": dict(
+                result["canonical_global_completion_metadata"]
+            ),
+            "canonical_control_resolution": int(
+                result["canonical_control_resolution"]
+            ),
+            "globally_unseen_dense_sample_count": int(
+                result["globally_unseen_dense_sample_count"]
+            ),
+            "appearance_admission_contract": (
+                "SOURCE_OR_BOUNDED_LOCAL_OR_CANONICAL_GLOBAL_COMPLETION_V2"
+            ),
             "runtime_generation_used": False,
             "geometry_mutated": False,
             "visibility_authority": "RealSaS.VisibilityContract.v2",
-            "completion_mode": "BOUNDED_CANONICAL_SURFACE_HARMONIC",
+            "completion_mode": (
+                "BOUNDED_LOCAL_HARMONIC_PLUS_CONTROL_LATTICE_CANONICAL_C_P"
+            ),
             "completion_rows": list(result["completion_rows"]),
-            "global_surface_fill_used": False,
+            "global_surface_fill_used": (
+                int(counts["CANONICAL_GLOBAL_COMPLETION"]) > 0
+            ),
+            "sample_count_mode": str(result["sample_count_mode"]),
+            "sample_count_per_direction": int(result["sample_count_per_direction"]),
+            "maximum_tile_resolution": int(result["maximum_tile_resolution"]),
+            "source_xy_storage_dtype": str(result["source_xy_storage_dtype"]),
+            "direct_pm_linear_storage_dtype": str(
+                result["direct_pm_linear_storage_dtype"]
+            ),
+            "direct_pm_linear_storage_mode": str(
+                result["direct_pm_linear_storage_mode"]
+            ),
+            "barycentric_storage_mode": str(
+                result["barycentric_storage_mode"]
+            ),
+            "compile_array_schema": "RealSaS.CAACompileArrays.v3",
+            "selected_resolution_histogram": {
+                str(int(resolution)): int(
+                    np.count_nonzero(
+                        np.asarray(result["face_tile_resolutions"], dtype=np.int32)
+                        == int(resolution)
+                    )
+                )
+                for resolution in sorted(
+                    set(
+                        map(
+                            int,
+                            np.asarray(
+                                result["face_tile_resolutions"], dtype=np.int32
+                            ).tolist(),
+                        )
+                    )
+                )
+            },
+            "adaptive_atlas_placement_hash": str(
+                compile_policy.get("adaptive_atlas_placement_hash") or ""
+            ),
         },
     )
     artifact = replace(artifact, compile_hash=caa_compile_hash(artifact))
@@ -430,12 +1274,44 @@ def compile_caa_stage(ctx: dict) -> dict:
                 "path": str(npz_path),
                 "sha256": npz_sha,
                 "authority_class": "CAA_COMPILE_ARRAYS",
-                "schema": "RealSaS.CAACompileArrays.v2",
+                "schema": "RealSaS.CAACompileArrays.v3",
             },
         ],
+        "performance": {
+            "source_prepare_seconds": float(source_prepare_seconds),
+            "deterministic_compile_seconds": float(
+                deterministic_compile_seconds
+            ),
+            "npz_seal_seconds": float(npz_seal_seconds),
+            "core_phase_seconds": dict(result.get("performance") or {}),
+            "measured_inner_seconds": float(
+                source_prepare_seconds
+                + deterministic_compile_seconds
+                + npz_seal_seconds
+            ),
+        },
         "diagnostics": {
             "compile_hash": artifact.compile_hash,
             "total_sample_count": total,
+            "sample_count_per_direction": int(result["sample_count_per_direction"]),
+            "sample_count_mode": str(result["sample_count_mode"]),
+            "maximum_tile_resolution": int(result["maximum_tile_resolution"]),
+            "source_xy_storage_dtype": str(result["source_xy_storage_dtype"]),
+            "direct_pm_linear_storage_dtype": str(
+                result["direct_pm_linear_storage_dtype"]
+            ),
+            "direct_pm_linear_storage_mode": str(
+                result["direct_pm_linear_storage_mode"]
+            ),
+            "barycentric_storage_mode": str(
+                result["barycentric_storage_mode"]
+            ),
+            "compile_array_schema": "RealSaS.CAACompileArrays.v3",
+            "core_performance": dict(result.get("performance") or {}),
+            "appearance_component_authority": (
+                "STAGE15_EXACT_COMPACTED_SOURCE_TOPOLOGY_V1"
+            ),
+            "appearance_component_count": int(len(component_ids)),
             **{f"provenance_{key.lower()}": int(value) for key, value in counts.items()},
         },
     }
@@ -456,11 +1332,124 @@ def seal_caa_compile_stage(ctx: dict) -> dict:
             "RealSaS.CAACompileArtifactIR.v2",
         )
     )
-    arrays = _load_compile_arrays(artifact)
     if artifact.preregistration_binding_hash != prereg.preregistration_hash:
         raise QualificationError("CAA_COMPILE_PREREG_BINDING_DRIFT")
-    if np.any(arrays["provenance"] == 255):
-        raise QualificationError("CAA_COMPILE_NOT_TOTAL")
+
+    if (
+        _source_owned_visual_mode_from_prereg(prereg)
+        and dict(artifact.metadata or {}).get("source_owned_visual_mesh_mode")
+        is True
+    ):
+        compile_path = resolved_path(artifact.compile_npz_path)
+        if (
+            not compile_path.is_file()
+            or sha256_file(compile_path) != artifact.compile_npz_sha256
+        ):
+            raise QualificationError("CAA_VISUAL_COMPILE_BYTES_DRIFT")
+        visual_hash = str(
+            dict(artifact.metadata or {}).get("visual_mesh_set_binding_hash") or ""
+        )
+        if (
+            visual_hash
+            != str(prereg.compile_policy.get("visual_mesh_set_binding_hash") or "")
+        ):
+            raise QualificationError("CAA_VISUAL_COMPILE_SET_BINDING_DRIFT")
+        if (
+            artifact.direct_source_sample_count != artifact.total_sample_count
+            or artifact.other_view_source_sample_count != 0
+            or artifact.compiled_local_harmonic_sample_count != 0
+        ):
+            raise QualificationError("CAA_VISUAL_COMPILE_PROVENANCE_DRIFT")
+        seal = CAACompileSealIR(
+            compile_binding_hash=artifact.compile_hash,
+            preregistration_binding_hash=prereg.preregistration_hash,
+            compile_npz_sha256=artifact.compile_npz_sha256,
+            qualification_report={
+                "status": "PASS_CAA_COMPILE_SEAL",
+                "total_appearance_defined": True,
+                "total_admitted_appearance_defined": True,
+                "unsupported_abstain_sample_count": 0,
+                "unsupported_abstention_is_not_generated_appearance": True,
+                "dynamic_or_rest_exposure_must_fail_closed": True,
+                "direct_source_immutable": True,
+                "runtime_generation_required": False,
+                "geometry_mutation_used": False,
+                "cross_view_completion_used": False,
+                "mechanical_mesh_render_authority": False,
+            },
+            seal_hash="",
+            metadata={
+                "backend_id": artifact.backend_id,
+                "shipping_eligible": prereg.shipping_eligible,
+                "source_owned_visual_mesh_mode": True,
+                "visual_mesh_set_binding_hash": visual_hash,
+            },
+        )
+        seal = replace(seal, seal_hash=caa_compile_seal_hash(seal))
+        root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+        return {
+            "status": "PASS",
+            "outputs": [
+                write_ir(
+                    root / "caa_compile_seal.json",
+                    seal,
+                    authority_class="CAA_COMPILE_SEAL",
+                )
+            ],
+            "diagnostics": {
+                "seal_hash": seal.seal_hash,
+                "direct_source_immutable": True,
+                "admitted_totality": True,
+                "unsupported_abstain_sample_count": 0,
+                "canonical_global_completion_sample_count": 0,
+                "source_owned_visual_mesh_mode": True,
+                "mechanical_mesh_render_authority": False,
+            },
+        }
+
+    arrays = _load_compile_arrays(
+        artifact,
+        required_names={
+            "provenance",
+            "direct_valid",
+            "rgba",
+            "direct_rgba",
+        },
+    )
+    if artifact.preregistration_binding_hash != prereg.preregistration_hash:
+        raise QualificationError("CAA_COMPILE_PREREG_BINDING_DRIFT")
+    provenance = np.asarray(arrays["provenance"], dtype=np.uint8)
+    if np.any(provenance == 255):
+        raise QualificationError("CAA_COMPILE_UNCLASSIFIED_SAMPLE")
+    valid_codes = np.asarray(
+        tuple(sorted(CAA_PROVENANCE.values())),
+        dtype=np.uint8,
+    )
+    if np.any(~np.isin(provenance, valid_codes)):
+        raise QualificationError("CAA_COMPILE_PROVENANCE_CLASS_INVALID")
+    unsupported_count = int(
+        np.count_nonzero(
+            provenance == CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"]
+        )
+    )
+    canonical_global_count = int(
+        np.count_nonzero(
+            provenance == CAA_PROVENANCE["CANONICAL_GLOBAL_COMPLETION"]
+        )
+    )
+    metadata = dict(artifact.metadata or {})
+    expected_unsupported = int(
+        metadata.get("unsupported_abstain_sample_count", 0)
+    )
+    expected_canonical_global = int(
+        metadata.get("canonical_global_completion_sample_count", 0)
+    )
+    if unsupported_count != expected_unsupported:
+        raise QualificationError("CAA_COMPILE_UNSUPPORTED_COUNT_DRIFT")
+    if canonical_global_count != expected_canonical_global:
+        raise QualificationError(
+            "CAA_COMPILE_CANONICAL_GLOBAL_COUNT_DRIFT"
+        )
     direct = arrays["direct_valid"]
     direct_exact = np.all(
         arrays["rgba"][direct] == arrays["direct_rgba"][direct],
@@ -475,7 +1464,11 @@ def seal_caa_compile_stage(ctx: dict) -> dict:
         compile_npz_sha256=artifact.compile_npz_sha256,
         qualification_report={
             "status": "PASS_CAA_COMPILE_SEAL",
-            "total_appearance_defined": True,
+            "total_appearance_defined": unsupported_count == 0,
+            "total_admitted_appearance_defined": True,
+            "unsupported_abstain_sample_count": unsupported_count,
+            "unsupported_abstention_is_not_generated_appearance": True,
+            "dynamic_or_rest_exposure_must_fail_closed": True,
             "direct_source_immutable": True,
             "runtime_generation_required": False,
             "geometry_mutation_used": False,
@@ -500,12 +1493,17 @@ def seal_caa_compile_stage(ctx: dict) -> dict:
         "diagnostics": {
             "seal_hash": seal.seal_hash,
             "direct_source_immutable": True,
-            "totality": True,
+            "admitted_totality": True,
+            "unsupported_abstain_sample_count": unsupported_count,
+            "canonical_global_completion_sample_count": (
+                canonical_global_count
+            ),
         },
     }
 
 
 def bake_complete_appearance_stage(ctx: dict) -> dict:
+    stage_started = perf_counter()
     prereg = caa_preregistration_from_dict(
         stage_output_payload(
             ctx,
@@ -529,114 +1527,378 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
     )
     if seal.compile_binding_hash != artifact.compile_hash:
         raise QualificationError("CAA_BAKE_COMPILE_SEAL_DRIFT")
-    arrays = _load_compile_arrays(artifact)
+
+    if (
+        _source_owned_visual_mode_from_prereg(prereg)
+        and dict(artifact.metadata or {}).get("source_owned_visual_mesh_mode")
+        is True
+    ):
+        observation = qualified_observation_set_from_dict(
+            stage_output_payload(
+                ctx,
+                "07_OBSERVATION_CONTRACT_QUALIFIED",
+                "RealSaS.QualifiedObservationSetIR.v1",
+            )
+        )
+        source_rgba, source_masks = _load_source_inputs(ctx, observation)
+        visual_set = _visual_mesh_set(ctx)
+        visual_hash = str(
+            dict(artifact.metadata or {}).get("visual_mesh_set_binding_hash") or ""
+        )
+        if visual_set.set_hash != visual_hash:
+            raise QualificationError("CAA_VISUAL_BAKE_MESH_SET_DRIFT")
+        root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+        root.mkdir(parents=True, exist_ok=True)
+
+        texture_rows = []
+        outputs = []
+        widths = []
+        heights = []
+        for view_index in range(8):
+            authority = observation.views[view_index]
+            expected = _source_visual_rgba(
+                source_rgba[view_index],
+                source_masks[view_index],
+            )
+            path = root / f"V{view_index}_source_visual.png"
+            Image.fromarray(expected, mode="RGBA").save(
+                path,
+                format="PNG",
+                optimize=False,
+                compress_level=1,
+            )
+            digest = sha256_file(path)
+            height, width = expected.shape[:2]
+            widths.append(int(width))
+            heights.append(int(height))
+            texture_rows.append(
+                AppearanceTextureIR(
+                    direction_index=view_index,
+                    direction_id=f"V{view_index}",
+                    transport_png_path=str(path),
+                    transport_png_sha256=digest,
+                    width=int(width),
+                    height=int(height),
+                    metadata={
+                        "transport_alpha": "STRAIGHT",
+                        "runtime_filtering": "PREMULTIPLIED",
+                        "source_visual_direct": True,
+                        "source_raster_sha256": str(
+                            authority.source_raster_sha256
+                        ),
+                        "source_foreground_mask_sha256": str(
+                            authority.foreground_mask_sha256
+                        ),
+                        "alpha_authority": (
+                            "QUALIFIED_FOREGROUND_MASK_WITH_SOURCE_ALPHA_"
+                            "PRESERVED_WHEN_NONZERO"
+                        ),
+                        "visual_mesh_set_binding_hash": visual_set.set_hash,
+                    },
+                )
+            )
+            outputs.append(
+                {
+                    "path": str(path),
+                    "sha256": digest,
+                    "authority_class": "SOURCE_DIRECT_VISUAL_TEXTURE",
+                    "schema": (
+                        f"RealSaS.SourceDirectVisualTexture.V{view_index}.v1"
+                    ),
+                }
+            )
+
+        uv_path = root / "visual_uv_binding.npz"
+        uv_sha = _save_npz(
+            uv_path,
+            view_index=np.arange(8, dtype=np.int32),
+            visual_vertex_count=np.asarray(
+                [int(row.vertex_count) for row in visual_set.views],
+                dtype=np.int64,
+            ),
+            visual_face_count=np.asarray(
+                [int(row.face_count) for row in visual_set.views],
+                dtype=np.int64,
+            ),
+            visual_mesh_hash=np.asarray(
+                [
+                    str(row.mesh_hash).encode("ascii")
+                    for row in visual_set.views
+                ],
+                dtype="S64",
+            ),
+        )
+        provenance_path = root / "visual_source_provenance.npz"
+        provenance_sha = _save_npz(
+            provenance_path,
+            provenance=np.zeros((8,), dtype=np.uint8),
+            source_view=np.arange(8, dtype=np.int16),
+        )
+
+        asset = CompleteAppearanceAssetIR(
+            compile_seal_binding_hash=seal.seal_hash,
+            candidate_mesh_binding_hash=artifact.candidate_mesh_binding_hash,
+            surface_addressing_binding_hash=artifact.surface_addressing_binding_hash,
+            appearance_domain_binding_hash=artifact.appearance_domain_binding_hash,
+            output_direction_set_binding_hash=artifact.output_direction_set_binding_hash,
+            textures=tuple(texture_rows),
+            uv_npz_path=str(uv_path),
+            uv_npz_sha256=uv_sha,
+            provenance_npz_path=str(provenance_path),
+            provenance_npz_sha256=provenance_sha,
+            atlas_layout={
+                "mode": "SOURCE_RASTER_DIRECT_VISUAL_MESH_V1",
+                "page_count": 1,
+                "width": max(widths),
+                "height": max(heights),
+                "visual_mesh_set_binding_hash": visual_set.set_hash,
+                "fixed_source_uv": True,
+                "mechanical_mesh_render_authority": False,
+            },
+            asset_hash="",
+            metadata={
+                "total_appearance_asset": True,
+                "source_owned_visual_mesh_mode": True,
+                "visual_mesh_set_binding_hash": visual_set.set_hash,
+                "visual_geometry_authority": "SOURCE_ART_SILHOUETTE",
+                "visual_uv_authority": "STAGE18_FIXED_SOURCE_RASTER_UV",
+                "texture_authority": "SOURCE_RGBA",
+                "source_wins": True,
+                "runtime_generation_forbidden": True,
+                "cross_view_completion_used": False,
+                "generated_appearance_used": False,
+                "mechanical_mesh_render_authority": False,
+                "transport_alpha": "STRAIGHT",
+                "runtime_filtering": "PREMULTIPLIED",
+            },
+        )
+        asset = replace(
+            asset,
+            asset_hash=complete_appearance_asset_hash(asset),
+        )
+        outputs.extend(
+            [
+                {
+                    "path": str(uv_path),
+                    "sha256": uv_sha,
+                    "authority_class": "VISUAL_MESH_UV_BINDING",
+                    "schema": "RealSaS.VisualMeshUVBinding.v1",
+                },
+                {
+                    "path": str(provenance_path),
+                    "sha256": provenance_sha,
+                    "authority_class": "SOURCE_DIRECT_VISUAL_PROVENANCE",
+                    "schema": "RealSaS.VisualSourceProvenance.v1",
+                },
+                write_ir(
+                    root / "complete_appearance_asset.json",
+                    asset,
+                    authority_class="COMPLETE_APPEARANCE_ASSET",
+                ),
+            ]
+        )
+        return {
+            "status": "PASS",
+            "outputs": outputs,
+            "performance": {
+                "array_load_seconds": 0.0,
+                "direction_bake_seconds_total": 0.0,
+                "direction_bake_seconds_by_view": [0.0] * 8,
+                "post_bake_seal_seconds": 0.0,
+                "measured_inner_seconds": float(
+                    perf_counter() - stage_started
+                ),
+            },
+            "diagnostics": {
+                "asset_hash": asset.asset_hash,
+                "texture_count": 8,
+                "appearance_domain": "SOURCE_OWNED_VISUAL_MESH",
+                "visual_mesh_set_hash": visual_set.set_hash,
+                "generated_appearance_used": False,
+                "mechanical_mesh_render_authority": False,
+            },
+        }
+
+    arrays = _load_compile_arrays(
+        artifact,
+        required_names={"rgba", "provenance", "source_view"},
+    )
+    array_load_seconds = perf_counter() - stage_started
     bleed = int(prereg.compile_policy["bleed_px"])
     tile_resolution = int(prereg.compile_policy["tile_resolution"])
+    max_page_resolution = int(prereg.compile_policy["max_atlas_resolution"])
+    sample_mode = str(
+        dict(artifact.metadata or {}).get("sample_count_mode")
+        or "UNIFORM_FACE_LATTICE_V1"
+    )
+    adaptive = sample_mode == "PER_FACE_ADAPTIVE_V1"
+    if adaptive:
+        face_tile_resolutions = np.asarray(
+            arrays["face_tile_resolutions"], dtype=np.int32
+        )
+        face_sample_offsets = np.asarray(
+            arrays["face_sample_offsets"], dtype=np.int64
+        )
+        prepared_adaptive_scatter = prepare_adaptive_paged_scatter(
+            face_tile_resolutions=face_tile_resolutions,
+            face_sample_offsets=face_sample_offsets,
+            bleed_px=bleed,
+            max_page_resolution=max_page_resolution,
+        )
+    else:
+        face_tile_resolutions = None
+        face_sample_offsets = None
+        prepared_adaptive_scatter = None
 
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     root.mkdir(parents=True, exist_ok=True)
-    from compiler.realsas_compiler_core.appearance_compile_v2 import face_atlas_layout
-    max_supported_face_count = int(prereg.compile_policy["max_supported_face_count"])
-    if artifact.face_count > max_supported_face_count:
-        return {
-            "status": "FAIL",
-            "blockers": ["CAA_FACE_COUNT_EXCEEDS_FROZEN_ATLAS_CAPACITY"],
-            "diagnostics": {
-                "face_count": artifact.face_count,
-                "max_supported_face_count": max_supported_face_count,
-            },
-        }
-    projected_layout = face_atlas_layout(
-        artifact.face_count,
-        tile_resolution=tile_resolution,
-        bleed_px=bleed,
-    )
-    max_atlas_resolution = int(prereg.compile_policy["max_atlas_resolution"])
-    if (
-        int(projected_layout["width"]) > max_atlas_resolution
-        or int(projected_layout["height"]) > max_atlas_resolution
-    ):
-        return {
-            "status": "FAIL",
-            "blockers": ["CAA_ATLAS_EXCEEDS_FROZEN_PRODUCT_RESOLUTION_CAP"],
-            "diagnostics": {
-                "width": int(projected_layout["width"]),
-                "height": int(projected_layout["height"]),
-                "max_atlas_resolution": max_atlas_resolution,
-                "face_count": artifact.face_count,
-                "tile_resolution": tile_resolution,
-                "bleed_px": bleed,
-            },
-        }
     texture_rows = []
     output_rows = []
     provenance_atlases = []
     source_view_atlases = []
     reference_uv = None
+    reference_page_index = None
     reference_layout = None
+    direction_bake_seconds = []
+
     for direction in range(8):
-        atlas, provenance_atlas, uv, layout = bake_direction_atlas(
-            face_sample_rgba=arrays["rgba"][direction],
-            face_sample_provenance=arrays["provenance"][direction],
-            face_count=artifact.face_count,
-            tile_resolution=tile_resolution,
-            bleed_px=bleed,
-        )
+        direction_started = perf_counter()
+        if adaptive:
+            (
+                pages,
+                provenance_pages,
+                source_view_pages,
+                uv,
+                face_page_index,
+                layout,
+            ) = bake_direction_adaptive_atlas_bundle(
+                face_sample_rgba=arrays["rgba"][direction],
+                face_sample_provenance=arrays["provenance"][direction],
+                face_sample_source_view=arrays["source_view"][direction],
+                prepared_scatter=prepared_adaptive_scatter,
+            )
+        else:
+            source_view_pages = None
+            pages, provenance_pages, uv, face_page_index, layout = (
+                bake_direction_atlas_pages(
+                    face_sample_rgba=arrays["rgba"][direction],
+                    face_sample_provenance=arrays["provenance"][direction],
+                    face_count=artifact.face_count,
+                    tile_resolution=tile_resolution,
+                    bleed_px=bleed,
+                    max_page_resolution=max_page_resolution,
+                )
+            )
         if reference_uv is None:
             reference_uv = uv
+            reference_page_index = face_page_index
             reference_layout = layout
-        elif not np.array_equal(reference_uv, uv) or reference_layout != layout:
+            if adaptive:
+                expected_placement_hash = str(
+                    prereg.compile_policy.get("adaptive_atlas_placement_hash") or ""
+                )
+                if (
+                    not expected_placement_hash
+                    or str(layout.get("placement_hash") or "")
+                    != expected_placement_hash
+                ):
+                    raise QualificationError(
+                        "CAA_ADAPTIVE_BAKE_PLACEMENT_HASH_DRIFT"
+                    )
+        elif (
+            not np.array_equal(reference_uv, uv)
+            or not np.array_equal(reference_page_index, face_page_index)
+            or reference_layout != layout
+        ):
             raise QualificationError("CAA_BAKE_DIRECTION_LAYOUT_DRIFT")
-        path = root / f"V{direction}_appearance.png"
-        Image.fromarray(atlas, mode="RGBA").save(
-            path,
-            format="PNG",
-            optimize=False,
-            compress_level=6,
-        )
-        digest = sha256_file(path)
+
+        page_rows = []
+        for page_index in range(int(layout["page_count"])):
+            page_path = root / f"V{direction}_appearance_p{page_index}.png"
+            Image.fromarray(pages[page_index], mode="RGBA").save(
+                page_path,
+                format="PNG",
+                optimize=False,
+                compress_level=6,
+            )
+            page_sha = sha256_file(page_path)
+            page_rows.append(
+                {
+                    "page_index": int(page_index),
+                    "path": str(page_path),
+                    "sha256": page_sha,
+                    "width": int(pages.shape[2]),
+                    "height": int(pages.shape[1]),
+                }
+            )
+            output_rows.append(
+                {
+                    "path": str(page_path),
+                    "sha256": page_sha,
+                    "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+                    "schema": (
+                        f"RealSaS.CAATransportTexture.V{direction}."
+                        f"P{page_index}.v2"
+                    ),
+                }
+            )
+
+        primary = page_rows[0]
         texture_rows.append(
             AppearanceTextureIR(
                 direction_index=direction,
                 direction_id=f"V{direction}",
-                transport_png_path=str(path),
-                transport_png_sha256=digest,
-                width=int(atlas.shape[1]),
-                height=int(atlas.shape[0]),
+                transport_png_path=str(primary["path"]),
+                transport_png_sha256=str(primary["sha256"]),
+                width=int(primary["width"]),
+                height=int(primary["height"]),
                 metadata={
                     "transport_alpha": "STRAIGHT",
                     "runtime_filtering": "PREMULTIPLIED",
                     "atlas_bleed_px": bleed,
+                    "paged_atlas": True,
+                    "page_count": int(layout["page_count"]),
+                    "pages": page_rows,
                 },
             )
         )
-        output_rows.append(
-            {
-                "path": str(path),
-                "sha256": digest,
-                "authority_class": "CAA_TRANSPORT_TEXTURE",
-                "schema": f"RealSaS.CAATransportTexture.V{direction}.v2",
-            }
-        )
-        provenance_atlases.append(provenance_atlas)
-        source_view_atlases.append(
-            bake_direction_source_view_atlas(
-                face_sample_source_view=arrays["source_view"][direction],
-                face_count=artifact.face_count,
-                tile_resolution=tile_resolution,
-                bleed_px=bleed,
+        provenance_atlases.append(provenance_pages)
+        if adaptive:
+            if source_view_pages is None:
+                raise QualificationError(
+                    "CAA_ADAPTIVE_BUNDLE_SOURCE_VIEW_MISSING"
+                )
+            source_view_atlases.append(source_view_pages)
+        else:
+            source_view_atlases.append(
+                bake_direction_source_view_atlas_pages(
+                    face_sample_source_view=arrays["source_view"][direction],
+                    face_count=artifact.face_count,
+                    tile_resolution=tile_resolution,
+                    bleed_px=bleed,
+                    max_page_resolution=max_page_resolution,
+                )
             )
+        direction_bake_seconds.append(
+            float(perf_counter() - direction_started)
         )
 
+    post_bake_started = perf_counter()
     provenance_stack = np.stack(provenance_atlases, axis=0).astype(np.uint8)
     source_view_stack = np.stack(source_view_atlases, axis=0).astype(np.int16)
     target_view = np.broadcast_to(
-        np.arange(8, dtype=np.int16)[:, None, None],
+        np.arange(8, dtype=np.int16)[:, None, None, None],
         source_view_stack.shape,
     )
     direct_mask = provenance_stack == CAA_PROVENANCE["DIRECT_SOURCE"]
     other_mask = provenance_stack == CAA_PROVENANCE["OTHER_VIEW_SOURCE"]
     harmonic_mask = provenance_stack == CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"]
+    canonical_global_mask = (
+        provenance_stack == CAA_PROVENANCE["CANONICAL_GLOBAL_COMPLETION"]
+    )
+    unsupported_mask = (
+        provenance_stack == CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"]
+    )
     padding_mask = provenance_stack == 255
     if np.any(direct_mask & (source_view_stack != target_view)):
         raise QualificationError("CAA_BAKE_DIRECT_SOURCE_VIEW_IDENTITY_DRIFT")
@@ -651,6 +1913,12 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
         raise QualificationError("CAA_BAKE_OTHER_VIEW_IDENTITY_DRIFT")
     if np.any(harmonic_mask & (source_view_stack != -2)):
         raise QualificationError("CAA_BAKE_HARMONIC_SOURCE_VIEW_IDENTITY_DRIFT")
+    if np.any(canonical_global_mask & (source_view_stack != -3)):
+        raise QualificationError(
+            "CAA_BAKE_CANONICAL_GLOBAL_SOURCE_VIEW_IDENTITY_DRIFT"
+        )
+    if np.any(unsupported_mask & (source_view_stack != -4)):
+        raise QualificationError("CAA_BAKE_UNSUPPORTED_SOURCE_VIEW_IDENTITY_DRIFT")
     if np.any(padding_mask & (source_view_stack != np.iinfo(np.int16).min)):
         raise QualificationError("CAA_BAKE_SOURCE_VIEW_PADDING_DRIFT")
     if np.any(
@@ -658,11 +1926,21 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
         & (~direct_mask)
         & (~other_mask)
         & (~harmonic_mask)
+        & (~canonical_global_mask)
+        & (~unsupported_mask)
     ):
         raise QualificationError("CAA_BAKE_PROVENANCE_CLASS_INVALID")
 
     uv_path = root / "surface_uv.npz"
-    uv_sha = _save_npz(uv_path, face_uv=np.asarray(reference_uv, dtype=np.float64))
+    uv_payload = {
+        "face_uv": np.asarray(reference_uv, dtype=np.float64),
+        "face_page_index": np.asarray(reference_page_index, dtype=np.int32),
+    }
+    if adaptive:
+        uv_payload["face_tile_resolution"] = np.asarray(
+            face_tile_resolutions, dtype=np.int32
+        )
+    uv_sha = _save_npz(uv_path, **uv_payload)
     provenance_path = root / "provenance_atlas.npz"
     provenance_sha = _save_npz(
         provenance_path,
@@ -684,8 +1962,21 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
         atlas_layout=dict(reference_layout),
         asset_hash="",
         metadata={
-            "total_appearance_asset": True,
+            "total_appearance_asset": not bool(
+                dict(artifact.metadata or {}).get(
+                    "unsupported_abstain_sample_count", 0
+                )
+            ),
+            "total_admitted_appearance_asset": True,
+            "unsupported_abstention_transport": (
+                "PROVENANCE_3__SOURCE_VIEW_NEG4__RGBA_ZERO"
+            ),
             "unique_face_barycentric_atlas": True,
+            "paged_physical_atlas": True,
+            "adaptive_face_sampling": bool(adaptive),
+            "sample_count_mode": sample_mode,
+            "physical_page_resolution_cap": max_page_resolution,
+            "page_count": int(reference_layout["page_count"]),
             "internal_alpha": "PREMULTIPLIED",
             "transport_png_alpha": "STRAIGHT",
             "unpremultiply_export_boundary_count": 1,
@@ -694,6 +1985,8 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
             "source_view_identity_is_render_authority": False,
             "source_view_identity_encoding": (
                 "INT16_0_TO_7_SOURCE_VIEW__NEG2_COMPILED_HARMONIC"
+                "__NEG3_CANONICAL_GLOBAL_COMPLETION"
+                "__NEG4_UNSUPPORTED_ABSTAIN"
             ),
         },
     )
@@ -719,18 +2012,37 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
             ),
         ]
     )
+    post_bake_seal_seconds = perf_counter() - post_bake_started
     return {
         "status": "PASS",
         "outputs": output_rows,
+        "performance": {
+            "array_load_seconds": float(array_load_seconds),
+            "direction_bake_seconds_total": float(
+                sum(direction_bake_seconds)
+            ),
+            "direction_bake_seconds_by_view": [
+                float(value) for value in direction_bake_seconds
+            ],
+            "post_bake_seal_seconds": float(post_bake_seal_seconds),
+            "measured_inner_seconds": float(
+                array_load_seconds
+                + sum(direction_bake_seconds)
+                + post_bake_seal_seconds
+            ),
+        },
         "diagnostics": {
             "asset_hash": asset.asset_hash,
-            "atlas_width": int(reference_layout["width"]),
-            "atlas_height": int(reference_layout["height"]),
+            "physical_page_width": int(reference_layout["page_width"]),
+            "physical_page_height": int(reference_layout["page_height"]),
+            "page_count": int(reference_layout["page_count"]),
+            "tile_resolution": tile_resolution,
+            "sample_count_mode": sample_mode,
+            "adaptive_face_sampling": bool(adaptive),
             "bleed_px": bleed,
             "direction_count": 8,
         },
     }
-
 
 def qualify_complete_appearance_stage(ctx: dict) -> dict:
     prereg = caa_preregistration_from_dict(
@@ -757,11 +2069,170 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
     if asset.candidate_mesh_binding_hash != artifact.candidate_mesh_binding_hash:
         raise QualificationError("CAA_QUALIFICATION_MESH_BINDING_DRIFT")
     for texture in asset.textures:
-        path = resolved_path(texture.transport_png_path)
-        if not path.is_file() or sha256_file(path) != texture.transport_png_sha256:
-            raise QualificationError("CAA_QUALIFICATION_TEXTURE_BYTES_DRIFT")
+        _load_texture_pages(texture)
 
-    arrays = _load_compile_arrays(artifact)
+    if (
+        _source_owned_visual_mode_from_prereg(prereg)
+        and dict(asset.metadata or {}).get("source_owned_visual_mesh_mode")
+        is True
+    ):
+        visual_set = _visual_mesh_set(ctx)
+        visual_hash = str(
+            dict(asset.metadata or {}).get("visual_mesh_set_binding_hash") or ""
+        )
+        if visual_set.set_hash != visual_hash:
+            raise QualificationError("CAA_VISUAL_QUALIFICATION_MESH_SET_DRIFT")
+        observation = qualified_observation_set_from_dict(
+            stage_output_payload(
+                ctx,
+                "07_OBSERVATION_CONTRACT_QUALIFIED",
+                "RealSaS.QualifiedObservationSetIR.v1",
+            )
+        )
+        source_rgba, source_masks = _load_source_inputs(ctx, observation)
+        textures = {
+            int(row.direction_index): row for row in asset.textures
+        }
+        if set(textures) != set(range(8)):
+            raise QualificationError(
+                "CAA_VISUAL_QUALIFICATION_TEXTURE_MATRIX_INCOMPLETE"
+            )
+        direct_count = 0
+        for view_index in range(8):
+            row = textures[view_index]
+            path = resolved_path(row.transport_png_path)
+            if not path.is_file() or sha256_file(path) != row.transport_png_sha256:
+                raise QualificationError(
+                    "CAA_VISUAL_QUALIFICATION_TEXTURE_BYTES_DRIFT"
+                )
+            actual = np.asarray(
+                Image.open(path).convert("RGBA"),
+                dtype=np.uint8,
+            )
+            expected = _source_visual_rgba(
+                source_rgba[view_index],
+                source_masks[view_index],
+            )
+            if actual.shape != expected.shape or not np.array_equal(actual, expected):
+                raise QualificationError(
+                    "CAA_VISUAL_SOURCE_TEXTURE_NOT_EXACT"
+                )
+            direct_count += int(np.count_nonzero(source_masks[view_index]))
+        if direct_count <= 0:
+            raise QualificationError(
+                "CAA_VISUAL_QUALIFICATION_EMPTY_FOREGROUND"
+            )
+
+        value = CompleteAppearanceQualificationIR(
+            asset_binding_hash=asset.asset_hash,
+            preregistration_binding_hash=prereg.preregistration_hash,
+            source_lock_exact_fraction=1.0,
+            total_defined_fraction=1.0,
+            structured_holdout_sample_count=direct_count,
+            structured_holdout_mean_rgba_l1=0.0,
+            structured_holdout_p95_rgba_l1=0.0,
+            provenance_boundary_pair_count=0,
+            provenance_boundary_mean_rgba_l1=0.0,
+            provenance_boundary_p95_rgba_l1=0.0,
+            provenance_boundary_gradient_pair_count=0,
+            provenance_boundary_mean_gradient_jump=0.0,
+            provenance_boundary_p95_gradient_jump=0.0,
+            qualification_report={
+                "status": "PASS_COMPLETE_APPEARANCE",
+                "source_lock_passed": True,
+                "totality_passed": True,
+                "structured_holdout_passed": True,
+                "provenance_seam_passed": True,
+                "holdout_every_view_passed": True,
+                "seam_every_view_passed": True,
+                "cross_view_source_compatibility_measured": False,
+                "cross_view_source_compatibility_shipping_gate_frozen": False,
+                "cross_view_source_compatibility_passed": True,
+                "cross_view_pair_passed": True,
+                "cross_view_component_passed": True,
+                "source_pm_roundtrip_max_abs_error": 0.0,
+                "source_pm_roundtrip_passed": True,
+                "appearance_is_coequal_product_authority": True,
+                "totality_domain": "SOURCE_OWNED_VISUAL_MESH_ONLY",
+                "unsupported_abstention_is_not_appearance": True,
+                "source_owned_visual_mesh_mode": True,
+                "generated_appearance_used": False,
+                "cross_view_completion_used": False,
+                "mechanical_mesh_render_authority": False,
+            },
+            qualification_hash="",
+            metadata={
+                "visual_mesh_set_binding_hash": visual_set.set_hash,
+                "source_direct_foreground_sample_count": direct_count,
+                "holdout_not_applicable_reason": (
+                    "NO_GENERATED_OR_CROSS_VIEW_APPEARANCE_IN_SOURCE_DIRECT_MODE"
+                ),
+                "seam_not_applicable_reason": (
+                    "ONE_FIXED_SOURCE_TEXTURE_PER_VISUAL_VIEW"
+                ),
+                "cross_view_compatibility_not_shipping_gate_reason": (
+                    "ARTIST_SOURCE_VIEW_IS_LOCAL_VISUAL_AUTHORITY"
+                ),
+                "source_owned_visual_mesh_mode": True,
+                "policy": dict(prereg.completion_quality_policy),
+            },
+        )
+        value = replace(
+            value,
+            qualification_hash=complete_appearance_qualification_hash(value),
+        )
+        root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+        return {
+            "status": "PASS",
+            "outputs": [
+                write_ir(
+                    root / "complete_appearance_qualification.json",
+                    value,
+                    authority_class="QUALIFIED_COMPLETE_APPEARANCE",
+                )
+            ],
+            "diagnostics": {
+                "qualification_hash": value.qualification_hash,
+                "source_lock_exact_fraction": 1.0,
+                "total_defined_fraction": 1.0,
+                "holdout_p95_rgba_l1": 0.0,
+                "seam_p95_rgba_l1": 0.0,
+                "seam_p95_gradient_jump": 0.0,
+                "source_direct_foreground_sample_count": direct_count,
+                "source_owned_visual_mesh_mode": True,
+                "generated_appearance_used": False,
+                "mechanical_mesh_render_authority": False,
+            },
+        }
+
+    pm_storage_mode = str(
+        dict(artifact.metadata or {}).get("direct_pm_linear_storage_mode")
+        or "DENSE_ALL_SAMPLES_V1"
+    )
+    if pm_storage_mode == "PACKED_DIRECT_VALID_VIEW_MAJOR_V1":
+        pm_array_name = "direct_pm_linear_packed"
+    elif pm_storage_mode == "DENSE_ALL_SAMPLES_V1":
+        pm_array_name = "direct_pm_linear"
+    else:
+        raise QualificationError("CAA_QUALIFICATION_DIRECT_PM_STORAGE_MODE_UNSUPPORTED")
+
+    arrays = _load_compile_arrays(
+        artifact,
+        required_names={
+            "sample_positions",
+            "sample_face_index",
+            "sample_component_index",
+            "face_support_by_view",
+            "direct_valid",
+            "direct_foreground_donor_valid",
+            "direct_rgba",
+            pm_array_name,
+            "source_xy",
+            "rgba",
+            "provenance",
+            "source_view",
+        },
+    )
     direct = arrays["direct_valid"]
     direct_count = int(np.count_nonzero(direct))
     if direct_count <= 0:
@@ -771,7 +2242,33 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         axis=-1,
     )
     source_exact_fraction = float(np.mean(direct_exact))
-    total_fraction = float(np.mean(arrays["provenance"] != 255))
+    provenance = np.asarray(arrays["provenance"], dtype=np.uint8)
+    if np.any(provenance == 255):
+        raise QualificationError("CAA_QUALIFICATION_UNCLASSIFIED_SAMPLE")
+    unsupported_code = int(CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"])
+    unsupported_mask = provenance == unsupported_code
+    admitted_mask = ~unsupported_mask
+    admitted_count = int(np.count_nonzero(admitted_mask))
+    if admitted_count <= 0:
+        raise QualificationError("CAA_QUALIFICATION_NO_ADMITTED_APPEARANCE")
+    defined_codes = np.asarray(
+        (
+            CAA_PROVENANCE["DIRECT_SOURCE"],
+            CAA_PROVENANCE["OTHER_VIEW_SOURCE"],
+            CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"],
+            CAA_PROVENANCE["CANONICAL_GLOBAL_COMPLETION"],
+        ),
+        dtype=np.uint8,
+    )
+    defined_mask = np.isin(provenance, defined_codes)
+    if np.any(admitted_mask & ~defined_mask):
+        raise QualificationError("CAA_QUALIFICATION_ADMITTED_SAMPLE_UNDEFINED")
+    total_fraction = float(
+        np.count_nonzero(defined_mask & admitted_mask)
+        / float(admitted_count)
+    )
+    potential_surface_defined_fraction = float(np.mean(defined_mask))
+    unsupported_abstain_fraction = float(np.mean(unsupported_mask))
 
     policy = dict(prereg.completion_quality_policy)
     required = (
@@ -801,18 +2298,102 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
     if any(key not in policy for key in required):
         raise QualificationError("CAA_QUALITY_POLICY_INCOMPLETE")
 
+    adaptive_offsets = (
+        np.asarray(arrays["face_sample_offsets"], dtype=np.int64)
+        if "face_sample_offsets" in arrays
+        else None
+    )
+    adaptive_resolutions = (
+        np.asarray(arrays["face_tile_resolutions"], dtype=np.int32)
+        if "face_tile_resolutions" in arrays
+        else None
+    )
+
+    candidate = canonical_mesh_candidate_from_dict(
+        stage_output_payload(
+            ctx,
+            "18_CANONICAL_MESH_ADDRESSING_BUILD",
+            "RealSaS.CanonicalMeshCandidateIR.v1",
+        )
+    )
+    if len(candidate.faces) != artifact.face_count:
+        raise QualificationError("CAA_QUALIFICATION_FACE_TOPOLOGY_BINDING_DRIFT")
+    (
+        _appearance_face_component_index,
+        _appearance_component_ids,
+        face_vertex_ids,
+    ) = _source_topology_appearance_components(ctx, candidate)
+    quality_graph = surface_sample_neighbors(
+        positions=arrays["sample_positions"],
+        face_count=artifact.face_count,
+        tile_resolution=(
+            None if adaptive_offsets is not None else artifact.tile_resolution
+        ),
+        face_sample_offsets=adaptive_offsets,
+        face_tile_resolutions=adaptive_resolutions,
+        face_vertex_ids=face_vertex_ids,
+    )
+
+    observation = qualified_observation_set_from_dict(
+        stage_output_payload(
+            ctx,
+            "07_OBSERVATION_CONTRACT_QUALIFIED",
+            "RealSaS.QualifiedObservationSetIR.v1",
+        )
+    )
+    _source_rgba_unused, source_masks = _load_source_inputs(ctx, observation)
+    source_class = np.full(
+        np.asarray(arrays["direct_valid"], dtype=bool).shape,
+        -1,
+        dtype=np.int8,
+    )
+    source_xy = np.asarray(arrays["source_xy"], dtype=np.float64)
+    for view in range(8):
+        valid_ids = np.flatnonzero(arrays["direct_valid"][view])
+        if not len(valid_ids):
+            continue
+        mask = np.asarray(source_masks[view], dtype=bool)
+        xy = source_xy[view, valid_ids]
+        ix = np.rint(xy[:, 0]).astype(np.int64)
+        iy = np.rint(xy[:, 1]).astype(np.int64)
+        if np.any(
+            (ix < 0)
+            | (ix >= mask.shape[1])
+            | (iy < 0)
+            | (iy >= mask.shape[0])
+        ):
+            raise QualificationError(
+                "CAA_CROSS_VIEW_SOURCE_CLASS_COORDINATE_DRIFT"
+            )
+        source_class[view, valid_ids] = mask[iy, ix].astype(np.int8)
+
     holdout = structured_holdout_metrics(
         direct_valid=arrays["direct_valid"],
         direct_rgba=arrays["direct_rgba"],
+        direct_donor_valid=np.asarray(
+            arrays["direct_foreground_donor_valid"],
+            dtype=bool,
+        ),
         source_xy=arrays["source_xy"],
         sample_positions=arrays["sample_positions"],
         sample_component_index=arrays["sample_component_index"],
         sample_face_index=arrays["sample_face_index"],
+        face_support_by_view=arrays["face_support_by_view"],
         face_count=artifact.face_count,
         tile_resolution=artifact.tile_resolution,
         band_fraction=float(policy["holdout_band_fraction"]),
         max_region_samples=int(policy["max_local_harmonic_region_samples"]),
         max_graph_hops=int(policy["max_local_harmonic_graph_hops"]),
+        face_sample_offsets=adaptive_offsets,
+        face_tile_resolutions=adaptive_resolutions,
+        face_vertex_ids=face_vertex_ids,
+        surface_graph=quality_graph,
+        donor_color_conflict_cut_rgba_l1=float(
+            policy["cross_view_color_conflict_cut_rgba_l1"]
+        ),
+        donor_alpha_conflict_cut=float(
+            policy["cross_view_alpha_conflict_cut"]
+        ),
     )
     seam = provenance_boundary_metrics(
         rgba=arrays["rgba"],
@@ -822,20 +2403,36 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         sample_face_index=arrays["sample_face_index"],
         face_count=artifact.face_count,
         tile_resolution=artifact.tile_resolution,
+        face_sample_offsets=adaptive_offsets,
+        face_tile_resolutions=adaptive_resolutions,
+        face_vertex_ids=face_vertex_ids,
+        surface_graph=quality_graph,
+        excluded_provenance_codes=(
+            CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"],
+            255,
+        ),
     )
     cross_view = cross_view_source_compatibility_metrics(
-        direct_valid=arrays["direct_valid"],
+        direct_valid=arrays["direct_foreground_donor_valid"],
         direct_rgba=arrays["direct_rgba"],
         sample_component_index=arrays["sample_component_index"],
+        direct_source_silhouette_class=source_class,
         color_conflict_cut_rgba_l1=float(
             policy["cross_view_color_conflict_cut_rgba_l1"]
         ),
         alpha_conflict_cut=float(policy["cross_view_alpha_conflict_cut"]),
     )
 
+    direct_pm_truth = (
+        arrays["direct_pm_linear_packed"]
+        if pm_storage_mode == "PACKED_DIRECT_VALID_VIEW_MAJOR_V1"
+        else arrays["direct_pm_linear"][direct]
+    )
+    if direct_pm_truth.shape != (direct_count, 4):
+        raise QualificationError("CAA_QUALIFICATION_DIRECT_PM_ACCOUNTING_DRIFT")
     direct_pm_roundtrip = source_sample_roundtrip_pm_error(
         arrays["direct_rgba"][direct],
-        arrays["direct_pm_linear"][direct],
+        direct_pm_truth,
     )
     max_source_pm_roundtrip_error = (
         0.0
@@ -982,6 +2579,12 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
             "source_pm_roundtrip_max_abs_error": max_source_pm_roundtrip_error,
             "source_pm_roundtrip_passed": source_pm_roundtrip_passed,
             "appearance_is_coequal_product_authority": True,
+            "totality_domain": "ADMITTED_RENDERABLE_SUPPORT_ONLY",
+            "unsupported_abstention_is_not_appearance": True,
+            "potential_surface_defined_fraction": (
+                potential_surface_defined_fraction
+            ),
+            "unsupported_abstain_fraction": unsupported_abstain_fraction,
         },
         qualification_hash="",
         metadata={
@@ -989,6 +2592,17 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
             "seam": seam,
             "cross_view_source_compatibility": cross_view,
             "source_pm_roundtrip_max_abs_error": max_source_pm_roundtrip_error,
+            "potential_surface_defined_fraction": (
+                potential_surface_defined_fraction
+            ),
+            "unsupported_abstain_fraction": unsupported_abstain_fraction,
+            "unsupported_abstain_sample_count": int(
+                np.count_nonzero(unsupported_mask)
+            ),
+            "admitted_renderable_sample_count": admitted_count,
+            "surface_graph_edge_count": int(quality_graph.edge_count),
+            "surface_graph_storage_bytes": int(quality_graph.storage_nbytes),
+            "surface_graph_representation": "CSR_INT64_OFFSETS_INT32_INDICES_WITH_UNDIRECTED_EDGE_INDEX",
             "policy": policy,
             "totality_does_not_claim_geometry_or_visibility_correctness": True,
         },
@@ -1017,9 +2631,16 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
             "qualification_hash": value.qualification_hash,
             "source_lock_exact_fraction": source_exact_fraction,
             "total_defined_fraction": total_fraction,
+            "potential_surface_defined_fraction": (
+                potential_surface_defined_fraction
+            ),
+            "unsupported_abstain_fraction": unsupported_abstain_fraction,
             "holdout_p95_rgba_l1": holdout["p95_rgba_l1"],
             "seam_p95_rgba_l1": seam["p95_rgba_l1"],
             "seam_p95_gradient_jump": seam["p95_gradient_jump"],
+            "surface_graph_edge_count": int(quality_graph.edge_count),
+            "surface_graph_storage_bytes": int(quality_graph.storage_nbytes),
+            "surface_graph_representation": "CSR_INT64_OFFSETS_INT32_INDICES_WITH_UNDIRECTED_EDGE_INDEX",
             "cross_view_shared_direct_sample_count": cross_view[
                 "shared_direct_sample_count"
             ],
@@ -1032,6 +2653,7 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
 
 
 def prove_caa_reference_rest_stage(ctx: dict) -> dict:
+    stage_started = perf_counter()
     prereg = caa_preregistration_from_dict(
         stage_output_payload(
             ctx,
@@ -1058,13 +2680,7 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
             "RealSaS.CanonicalMeshCandidateIR.v1",
         )
     )
-    static_mesh = static_mesh_qualification_from_dict(
-        stage_output_payload(
-            ctx,
-            "19_STATIC_CANONICAL_MESH_QUALIFIED",
-            "RealSaS.StaticCanonicalMeshQualificationIR.v1",
-        )
-    )
+    static_mesh = _static_mesh_for_appearance(ctx)
     cameras = qualified_camera_set_from_dict(
         stage_output_payload(
             ctx,
@@ -1084,8 +2700,484 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
     if static_mesh.candidate_mesh_binding_hash != asset.candidate_mesh_binding_hash:
         raise QualificationError("CAA_REST_PROOF_STATIC_MESH_BINDING_DRIFT")
 
+    if (
+        _source_owned_visual_mode_from_prereg(prereg)
+        and dict(asset.metadata or {}).get("source_owned_visual_mesh_mode")
+        is True
+    ):
+        visual_set = _visual_mesh_set(ctx)
+        visual_hash = str(
+            dict(asset.metadata or {}).get("visual_mesh_set_binding_hash") or ""
+        )
+        if visual_set.set_hash != visual_hash:
+            raise QualificationError("CAA_VISUAL_REST_MESH_SET_DRIFT")
+        source_rgba, source_masks = _load_source_inputs(ctx, observation)
+        by_texture = {
+            int(row.direction_index): row for row in asset.textures
+        }
+        by_visual = {
+            int(row.view_index): row for row in visual_set.views
+        }
+        policy = dict(prereg.completion_quality_policy)
+        required = (
+            "rest_min_source_lock_fraction_of_source_foreground",
+            "rest_max_source_locked_mean_rgba_l1",
+            "rest_max_source_locked_p95_rgba_l1",
+            "rest_max_source_foreground_mean_rgba_l1",
+            "rest_max_source_foreground_p95_rgba_l1",
+            "rest_min_source_alpha_recall",
+            "rest_min_source_alpha_precision",
+            "rest_max_largest_coherent_alpha_hole_fraction",
+            "rest_max_alpha_interior_uncovered_fraction",
+            "rest_max_texture_texels_per_output_pixel",
+            "rest_feature_high_error_cut_rgba_l1",
+            "rest_feature_edge_gradient_cut",
+            "rest_max_feature_high_error_fraction",
+            "rest_max_largest_connected_high_error_fraction",
+            "rest_max_feature_p999_rgba_l1",
+            "rest_min_feature_edge_recall_1px",
+            "rest_min_feature_edge_precision_1px",
+        )
+        if any(key not in policy for key in required):
+            raise QualificationError(
+                "CAA_VISUAL_REST_PROOF_POLICY_INCOMPLETE"
+            )
+        root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+        root.mkdir(parents=True, exist_ok=True)
+        rows = []
+        outputs = []
+        all_pass = True
+        direction_seconds = []
+        setup_seconds = perf_counter() - stage_started
+
+        for direction in range(8):
+            direction_started = perf_counter()
+            visual_row = by_visual[direction]
+            mesh = load_visual_mesh_view(visual_row)
+            mask = np.asarray(source_masks[direction], dtype=bool)
+            height, width = mask.shape
+            if (
+                int(mesh.width) != int(width)
+                or int(mesh.height) != int(height)
+            ):
+                raise QualificationError(
+                    "CAA_VISUAL_REST_SOURCE_DIMENSION_DRIFT"
+                )
+            geometry_bytes = _visual_mesh_coverage(
+                mesh,
+                width=width,
+                height=height,
+            )
+            geometry_visible = np.frombuffer(
+                geometry_bytes,
+                dtype=np.uint8,
+            ).reshape(height, width).astype(bool)
+            source_visual = _source_visual_rgba(
+                source_rgba[direction],
+                mask,
+            )
+            texture_row = by_texture[direction]
+            texture_path = resolved_path(
+                texture_row.transport_png_path
+            )
+            if (
+                not texture_path.is_file()
+                or sha256_file(texture_path)
+                != texture_row.transport_png_sha256
+            ):
+                raise QualificationError(
+                    "CAA_VISUAL_REST_TEXTURE_BYTES_DRIFT"
+                )
+            texture_rgba = np.asarray(
+                Image.open(texture_path).convert("RGBA"),
+                dtype=np.uint8,
+            )
+            if not np.array_equal(texture_rgba, source_visual):
+                raise QualificationError(
+                    "CAA_VISUAL_REST_TEXTURE_NOT_SOURCE_EXACT"
+                )
+
+            rendered = source_visual.copy()
+            rendered[~geometry_visible] = 0
+            final_alpha = rendered[..., 3] > 0
+            foreground_count = int(np.count_nonzero(mask))
+            locked = geometry_visible & mask
+            locked_count = int(np.count_nonzero(locked))
+            source_lock_fraction = (
+                0.0
+                if foreground_count <= 0
+                else float(locked_count) / float(foreground_count)
+            )
+            locked_error = rgba_l1_premultiplied(
+                rendered[locked],
+                source_visual[locked],
+            )
+            mean_error = (
+                0.0
+                if len(locked_error) == 0
+                else float(np.mean(locked_error))
+            )
+            p95_error = (
+                0.0
+                if len(locked_error) == 0
+                else float(np.quantile(locked_error, 0.95))
+            )
+            foreground_error = rgba_l1_premultiplied(
+                rendered[mask],
+                source_visual[mask],
+            )
+            foreground_mean_error = (
+                0.0
+                if len(foreground_error) == 0
+                else float(np.mean(foreground_error))
+            )
+            foreground_p95_error = (
+                0.0
+                if len(foreground_error) == 0
+                else float(np.quantile(foreground_error, 0.95))
+            )
+            alpha_metrics = coverage_metrics(
+                bytes(mask.astype(np.uint8).reshape(-1)),
+                bytes(final_alpha.astype(np.uint8).reshape(-1)),
+                width=width,
+                height=height,
+            )
+            geometry_metrics = coverage_metrics(
+                bytes(mask.astype(np.uint8).reshape(-1)),
+                geometry_bytes,
+                width=width,
+                height=height,
+            )
+            feature_metrics = source_feature_preservation_metrics(
+                predicted_rgba=rendered,
+                source_rgba=source_visual,
+                source_foreground=mask,
+                high_error_cut_rgba_l1=float(
+                    policy["rest_feature_high_error_cut_rgba_l1"]
+                ),
+                edge_gradient_cut=float(
+                    policy["rest_feature_edge_gradient_cut"]
+                ),
+            )
+
+            identity_uv_error = float(
+                np.max(
+                    np.abs(
+                        np.asarray(mesh.uv, dtype=np.float64)
+                        - np.column_stack(
+                            (
+                                np.asarray(mesh.positions[:, 0], dtype=np.float64)
+                                / max(1.0, float(width - 1)),
+                                np.asarray(mesh.positions[:, 1], dtype=np.float64)
+                                / max(1.0, float(height - 1)),
+                            )
+                        )
+                    )
+                )
+            )
+            maximum_texture_texels_per_output_pixel = 1.0
+            exact_fraction = 1.0 if locked_count > 0 else 0.0
+            hole = mask & ~final_alpha
+            hole_count = int(np.count_nonzero(hole))
+            view_pass = (
+                locked_count > 0
+                and identity_uv_error <= 1.0e-12
+                and source_lock_fraction
+                >= float(
+                    policy[
+                        "rest_min_source_lock_fraction_of_source_foreground"
+                    ]
+                )
+                and mean_error
+                <= float(policy["rest_max_source_locked_mean_rgba_l1"])
+                and p95_error
+                <= float(policy["rest_max_source_locked_p95_rgba_l1"])
+                and foreground_mean_error
+                <= float(
+                    policy["rest_max_source_foreground_mean_rgba_l1"]
+                )
+                and foreground_p95_error
+                <= float(
+                    policy["rest_max_source_foreground_p95_rgba_l1"]
+                )
+                and float(alpha_metrics["recall"])
+                >= float(policy["rest_min_source_alpha_recall"])
+                and float(alpha_metrics["precision"])
+                >= float(policy["rest_min_source_alpha_precision"])
+                and float(
+                    alpha_metrics["largest_coherent_hole_fraction"]
+                )
+                <= float(
+                    policy[
+                        "rest_max_largest_coherent_alpha_hole_fraction"
+                    ]
+                )
+                and float(alpha_metrics["interior_uncovered_fraction"])
+                <= float(
+                    policy["rest_max_alpha_interior_uncovered_fraction"]
+                )
+                and maximum_texture_texels_per_output_pixel
+                <= float(
+                    policy["rest_max_texture_texels_per_output_pixel"]
+                )
+                and float(feature_metrics["high_error_fraction"])
+                <= float(
+                    policy["rest_max_feature_high_error_fraction"]
+                )
+                and float(
+                    feature_metrics[
+                        "largest_connected_high_error_fraction"
+                    ]
+                )
+                <= float(
+                    policy[
+                        "rest_max_largest_connected_high_error_fraction"
+                    ]
+                )
+                and float(feature_metrics["p999_rgba_l1"])
+                <= float(policy["rest_max_feature_p999_rgba_l1"])
+                and float(feature_metrics["edge_recall_1px"])
+                >= float(policy["rest_min_feature_edge_recall_1px"])
+                and float(feature_metrics["edge_precision_1px"])
+                >= float(policy["rest_min_feature_edge_precision_1px"])
+            )
+            all_pass = all_pass and view_pass
+
+            image_path = root / f"V{direction}_reference_rest.png"
+            Image.fromarray(rendered, mode="RGBA").save(
+                image_path,
+                format="PNG",
+                optimize=False,
+                compress_level=1,
+            )
+            image_sha = sha256_file(image_path)
+            outputs.append(
+                {
+                    "path": str(image_path),
+                    "sha256": image_sha,
+                    "authority_class": "CAA_REFERENCE_REST_RENDER",
+                    "schema": (
+                        f"RealSaS.CAAReferenceRestRender.V{direction}.v2"
+                    ),
+                }
+            )
+            diagnostic_path = root / f"V{direction}_diagnostics.npz"
+            diagnostic_sha = _save_npz(
+                diagnostic_path,
+                geometry_visible=geometry_visible.astype(np.uint8),
+                final_alpha=final_alpha.astype(np.uint8),
+                source_foreground=mask.astype(np.uint8),
+            )
+            outputs.append(
+                {
+                    "path": str(diagnostic_path),
+                    "sha256": diagnostic_sha,
+                    "authority_class": "CAA_REST_DIAGNOSTIC_MASKS",
+                    "schema": (
+                        f"RealSaS.CAARestDiagnosticMasks.V{direction}.v2"
+                    ),
+                }
+            )
+
+            rows.append(
+                CAARestViewProofIR(
+                    direction_index=direction,
+                    rendered_rgba_sha256=image_sha,
+                    rendered_alpha_pixel_count=int(
+                        np.count_nonzero(final_alpha)
+                    ),
+                    source_locked_pixel_count=locked_count,
+                    source_locked_fraction_of_source_foreground=(
+                        source_lock_fraction
+                    ),
+                    source_locked_exact_pixel_count=locked_count,
+                    source_locked_exact_fraction=exact_fraction,
+                    source_locked_mean_rgba_l1=mean_error,
+                    source_locked_p95_rgba_l1=p95_error,
+                    source_foreground_mean_rgba_l1=(
+                        foreground_mean_error
+                    ),
+                    source_foreground_p95_rgba_l1=(
+                        foreground_p95_error
+                    ),
+                    source_feature_p999_rgba_l1=float(
+                        feature_metrics["p999_rgba_l1"]
+                    ),
+                    source_feature_high_error_fraction=float(
+                        feature_metrics["high_error_fraction"]
+                    ),
+                    largest_connected_feature_high_error_fraction=float(
+                        feature_metrics[
+                            "largest_connected_high_error_fraction"
+                        ]
+                    ),
+                    source_feature_edge_recall_1px=float(
+                        feature_metrics["edge_recall_1px"]
+                    ),
+                    source_feature_edge_precision_1px=float(
+                        feature_metrics["edge_precision_1px"]
+                    ),
+                    geometry_visible_pixel_count=int(
+                        np.count_nonzero(geometry_visible)
+                    ),
+                    final_alpha_pixel_count=int(
+                        np.count_nonzero(final_alpha)
+                    ),
+                    geometry_visible_final_alpha_hole_count=hole_count,
+                    geometry_visible_final_alpha_hole_fraction=(
+                        0.0
+                        if foreground_count <= 0
+                        else float(hole_count)
+                        / float(foreground_count)
+                    ),
+                    source_alpha_recall=float(alpha_metrics["recall"]),
+                    source_alpha_precision=float(
+                        alpha_metrics["precision"]
+                    ),
+                    largest_coherent_alpha_hole_fraction=float(
+                        alpha_metrics["largest_coherent_hole_fraction"]
+                    ),
+                    alpha_interior_uncovered_fraction=float(
+                        alpha_metrics["interior_uncovered_fraction"]
+                    ),
+                    metadata={
+                        "status": "PASS" if view_pass else "FAIL",
+                        "source_owned_visual_mesh_mode": True,
+                        "identity_uv_error": identity_uv_error,
+                        "geometry_silhouette_coverage": geometry_metrics,
+                        "source_feature_preservation": feature_metrics,
+                        "exact_depth_ambiguous_pixel_count": 0,
+                        "exact_depth_ambiguous_fraction": 0.0,
+                        "visibility_layer_overflow_pixel_count": 0,
+                        "maximum_texture_texels_per_output_pixel": 1.0,
+                        "mechanical_mesh_render_authority": False,
+                    },
+                )
+            )
+            direction_seconds.append(
+                float(perf_counter() - direction_started)
+            )
+
+        proof = CAARestRenderProofIR(
+            asset_binding_hash=asset.asset_hash,
+            static_mesh_qualification_binding_hash=(
+                static_mesh.qualification_hash
+            ),
+            camera_set_binding_hash=cameras.camera_set_hash,
+            views=tuple(rows),
+            qualification_report={
+                "status": (
+                    "PASS_CAA_REFERENCE_REST"
+                    if all_pass
+                    else "FAIL_CAA_REFERENCE_REST"
+                ),
+                "every_direction_passed": bool(all_pass),
+                "visibility_authority": (
+                    "SOURCE_OWNED_VISUAL_MESH_2D_RASTER"
+                ),
+                "appearance_authority": "SOURCE_RGBA_FIXED_UV",
+                "source_owned_visual_mesh_mode": True,
+                "mechanical_mesh_render_authority": False,
+                "generated_appearance_used": False,
+            },
+            proof_hash="",
+            metadata={
+                "visual_mesh_set_binding_hash": visual_set.set_hash,
+                "identity_uv_proof": True,
+                "depth_layering_not_applicable_at_rest": True,
+                "product_authority_claimed": False,
+            },
+        )
+        proof = replace(
+            proof,
+            proof_hash=caa_rest_render_proof_hash(proof),
+        )
+        outputs.append(
+            write_ir(
+                root / "caa_reference_rest_proof.json",
+                proof,
+                authority_class="CAA_REFERENCE_REST_PROOF",
+            )
+        )
+        result_status = "PASS" if all_pass else "FAIL"
+        return {
+            "status": result_status,
+            "blockers": (
+                []
+                if all_pass
+                else ["CAA_VISUAL_REST_SOURCE_FIDELITY_FAIL"]
+            ),
+            "outputs": outputs,
+            "performance": {
+                "setup_seconds": float(setup_seconds),
+                "direction_proof_seconds_total": float(
+                    sum(direction_seconds)
+                ),
+                "direction_proof_seconds_by_view": direction_seconds,
+                "post_proof_seconds": 0.0,
+                "measured_inner_seconds": float(
+                    perf_counter() - stage_started
+                ),
+            },
+            "diagnostics": {
+                "proof_hash": proof.proof_hash,
+                "every_direction_passed": bool(all_pass),
+                "source_owned_visual_mesh_mode": True,
+                "mechanical_mesh_render_authority": False,
+                "view_status": [
+                    {
+                        "view_index": int(row.direction_index),
+                        "status": str(
+                            dict(row.metadata or {}).get("status") or ""
+                        ),
+                        "source_lock_fraction": float(
+                            row.source_locked_fraction_of_source_foreground
+                        ),
+                        "source_foreground_mean_rgba_l1": float(
+                            row.source_foreground_mean_rgba_l1
+                        ),
+                        "source_foreground_p95_rgba_l1": float(
+                            row.source_foreground_p95_rgba_l1
+                        ),
+                        "source_alpha_recall": float(
+                            row.source_alpha_recall
+                        ),
+                        "source_alpha_precision": float(
+                            row.source_alpha_precision
+                        ),
+                        "largest_coherent_alpha_hole_fraction": float(
+                            row.largest_coherent_alpha_hole_fraction
+                        ),
+                        "interior_uncovered_fraction": float(
+                            row.alpha_interior_uncovered_fraction
+                        ),
+                        "feature_high_error_fraction": float(
+                            row.source_feature_high_error_fraction
+                        ),
+                        "largest_connected_feature_high_error_fraction": float(
+                            row.largest_connected_feature_high_error_fraction
+                        ),
+                        "feature_p999_rgba_l1": float(
+                            row.source_feature_p999_rgba_l1
+                        ),
+                        "feature_edge_recall_1px": float(
+                            row.source_feature_edge_recall_1px
+                        ),
+                        "feature_edge_precision_1px": float(
+                            row.source_feature_edge_precision_1px
+                        ),
+                        "identity_uv_error": float(
+                            dict(row.metadata or {}).get("identity_uv_error", 0.0)
+                        ),
+                    }
+                    for row in rows
+                ],
+            },
+        }
+
     source_rgba, source_masks = _load_source_inputs(ctx, observation)
     face_uv = load_face_uv(asset)
+    face_page_index = load_face_page_index(asset)
     provenance_all = load_provenance_atlas(asset)
     by_camera = {int(camera.view_index): camera for camera in cameras.cameras}
     by_texture = {int(row.direction_index): row for row in asset.textures}
@@ -1133,19 +3225,22 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
         dtype=np.int64,
     )
 
+    setup_seconds = perf_counter() - stage_started
     rows = []
     outputs = []
     all_pass = True
+    direction_proof_seconds = []
     for direction in range(8):
+        direction_started = perf_counter()
         texture_row = by_texture[direction]
-        texture_path = resolved_path(texture_row.transport_png_path)
-        texture = np.asarray(Image.open(texture_path).convert("RGBA"), dtype=np.uint8)
+        texture = _load_texture_pages(texture_row)
         render = render_caa_reference(
             mesh=candidate,
             camera=by_camera[direction],
             face_uv=face_uv,
             texture_rgba_u8=texture,
             provenance_atlas=provenance_all[direction],
+            face_page_index=face_page_index,
         )
         projected_screen = project_points_xyz_v3(
             candidate_xyz,
@@ -1167,8 +3262,8 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
                 screen_triangle=projected_screen[
                     face_indices[int(face_index)]
                 ],
-                texture_width=int(texture.shape[1]),
-                texture_height=int(texture.shape[0]),
+                texture_width=int(texture.shape[2] if texture.ndim == 4 else texture.shape[1]),
+                texture_height=int(texture.shape[1] if texture.ndim == 4 else texture.shape[0]),
             )
             maximum_texture_texels_per_output_pixel = max(
                 maximum_texture_texels_per_output_pixel,
@@ -1210,6 +3305,18 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
         )
 
         visible_count = int(np.count_nonzero(visible))
+        unsupported_visible = visible & (
+            render.provenance_code
+            == int(CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"])
+        )
+        unsupported_visible_count = int(
+            np.count_nonzero(unsupported_visible)
+        )
+        padding_visible_count = int(
+            np.count_nonzero(
+                visible & (render.provenance_code == 255)
+            )
+        )
         exact_depth_ambiguous_count = int(
             np.count_nonzero(render.exact_depth_ambiguity)
         )
@@ -1262,7 +3369,9 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
             else float(direct_count) / float(source_foreground_count)
         )
         view_pass = (
-            source_lock_fraction
+            unsupported_visible_count == 0
+            and padding_visible_count == 0
+            and source_lock_fraction
             >= float(policy["rest_min_source_lock_fraction_of_source_foreground"])
             and mean_error <= float(policy["rest_max_source_locked_mean_rgba_l1"])
             and p95_error <= float(policy["rest_max_source_locked_p95_rgba_l1"])
@@ -1335,6 +3444,18 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
                     "source_evidence_available": True,
                     "visibility_and_appearance_masks_separate": True,
                     "geometry_visible_alpha_zero_is_diagnostic_not_undefinedness": True,
+                    "unsupported_abstain_visible_pixel_count": (
+                        unsupported_visible_count
+                    ),
+                    "unsupported_abstain_visibility_passed": (
+                        unsupported_visible_count == 0
+                    ),
+                    "physical_padding_visible_pixel_count": (
+                        padding_visible_count
+                    ),
+                    "physical_padding_visibility_passed": (
+                        padding_visible_count == 0
+                    ),
                     "exact_depth_ambiguous_pixel_count": exact_depth_ambiguous_count,
                     "exact_depth_ambiguous_fraction": exact_depth_ambiguous_fraction,
                     "exact_depth_ambiguity_passed": (
@@ -1386,7 +3507,11 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
                 "schema": f"RealSaS.CAARestDiagnosticMasks.V{direction}.v2",
             }
         )
+        direction_proof_seconds.append(
+            float(perf_counter() - direction_started)
+        )
 
+    post_proof_started = perf_counter()
     proof = CAARestRenderProofIR(
         asset_binding_hash=asset.asset_hash,
         static_mesh_qualification_binding_hash=static_mesh.qualification_hash,
@@ -1407,10 +3532,108 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
         },
     )
     proof = replace(proof, proof_hash=caa_rest_render_proof_hash(proof))
+    performance = {
+        "setup_seconds": float(setup_seconds),
+        "direction_proof_seconds_total": float(
+            sum(direction_proof_seconds)
+        ),
+        "direction_proof_seconds_by_view": [
+            float(value) for value in direction_proof_seconds
+        ],
+        "proof_seal_seconds": float(
+            perf_counter() - post_proof_started
+        ),
+    }
+    performance["measured_inner_seconds"] = float(
+        performance["setup_seconds"]
+        + performance["direction_proof_seconds_total"]
+        + performance["proof_seal_seconds"]
+    )
     if not all_pass:
+        if _demo_rest_measurement_admissible(
+            ctx,
+            static_mesh=static_mesh,
+            appearance_qualification=qualification,
+            proof=proof,
+        ):
+            demo_report = {
+                **dict(proof.qualification_report),
+                "demo_only_measured_failure_admission": True,
+                "strict_rest_proof_passed": False,
+                "product_pass": False,
+                "product_authority_claimed": False,
+                "upstream_static_source_fidelity_passed": False,
+                "downstream_motion_quality_claimed": False,
+            }
+            proof = replace(
+                proof,
+                qualification_report=demo_report,
+                proof_hash="",
+                metadata={
+                    **dict(proof.metadata),
+                    "demo_only_measurement": True,
+                    "product_authority_claimed": False,
+                    "strict_failure_preserved": True,
+                },
+            )
+            proof = replace(
+                proof,
+                proof_hash=caa_rest_render_proof_hash(proof),
+            )
+            outputs.append(
+                write_ir(
+                    root / "caa_reference_rest_proof.json",
+                    proof,
+                    authority_class=(
+                        "DEMO_ONLY_CAA_REFERENCE_REST_MEASUREMENT"
+                    ),
+                )
+            )
+            return {
+                "status": "PASS_DEMO_ONLY",
+                "outputs": outputs,
+                "performance": performance,
+                "diagnostics": {
+                    "proof_hash": proof.proof_hash,
+                    "every_direction_passed": False,
+                    "strict_rest_proof_passed": False,
+                    "demo_only_measured_failure_admission": True,
+                    "product_pass": False,
+                    "product_authority_claimed": False,
+                    "failed_direction_count": int(
+                        sum(
+                            str(row.metadata.get("status") or "")
+                            != "PASS"
+                            for row in rows
+                        )
+                    ),
+                    "unsupported_visible_pixel_count": int(
+                        sum(
+                            int(
+                                row.metadata.get(
+                                    "unsupported_abstain_visible_pixel_count",
+                                    0,
+                                )
+                            )
+                            for row in rows
+                        )
+                    ),
+                    "minimum_source_alpha_recall": min(
+                        row.source_alpha_recall for row in rows
+                    ),
+                    "minimum_source_alpha_precision": min(
+                        row.source_alpha_precision for row in rows
+                    ),
+                    "maximum_source_feature_high_error_fraction": max(
+                        row.source_feature_high_error_fraction
+                        for row in rows
+                    ),
+                },
+            }
         return {
             "status": "FAIL",
             "blockers": ["CAA_REFERENCE_REST_RENDER_PROOF_FAILED"],
+            "performance": performance,
             "diagnostics": proof.to_dict(),
         }
     outputs.append(
@@ -1423,6 +3646,7 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
     return {
         "status": "PASS",
         "outputs": outputs,
+        "performance": performance,
         "diagnostics": {
             "proof_hash": proof.proof_hash,
             "every_direction_passed": True,

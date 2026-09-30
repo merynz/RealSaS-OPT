@@ -1,0 +1,41 @@
+name: research-head-visual-runtime-consumer-forensic-v1
+on:
+  push:
+    branches: [integration/generic-main-finalization-20260930]
+    paths: ['.github/workflows/research_head_visual_runtime_consumer_forensic_v1.yml']
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - name: Checkout exact research head
+        run: |
+          git checkout --detach 6ed060351512a5f76a206acce011b585f48b1768
+          test "$(git rev-parse HEAD)" = "6ed060351512a5f76a206acce011b585f48b1768"
+      - name: Exact research tree references
+        run: |
+          set -euxo pipefail
+          echo "===== VISUAL SET CONSUMERS ====="
+          git grep -n -E 'VisualMeshSetIR|visual_mesh_set_from_dict|visual_mesh_set_binding_hash|SOURCE_OWNED_VISUAL_MESH_SET|BARYCENTRIC_BINDING_PLUS_ARAP_2D' --             compiler runtime tools tests ':!tools/demo/*' ':!tests/repository/test_source_owned_visual_runtime_wiring_v1.py' || true
+          echo "===== AFFINE BINDING CALLERS ====="
+          git grep -n -E 'bind_region_visual_vertices_to_mechanical_affine_v1|evaluate_region_visual_binding_v1' --             compiler runtime tools tests ':!tools/demo/*' || true
+          echo "===== RUNTIME PACKAGE REFERENCES ====="
+          git grep -n -E 'VisualMesh|visual_mesh|source_owned_visual|face_uv|mesh\.bin|presentation_state_execution_authorized' --             compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py             compiler/realsas_compiler_core/runtime_authority_v2.py             compiler/realsas_compiler_core/runtime_package_v2.py             runtime/realsas_cpp/src || true
+      - name: Exact research history for runtime consumer
+        run: |
+          set -euxo pipefail
+          echo "===== RUNTIME HISTORY visual terms ====="
+          git log --all --date=iso --pretty=format:'%H %ad %s' -G'VisualMesh|visual_mesh|source_owned_visual|visual_mesh_set_binding_hash' --             compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py             compiler/realsas_compiler_core/runtime_authority_v2.py             compiler/realsas_compiler_core/runtime_package_v2.py             runtime/realsas_cpp/src || true
+          echo
+          echo "===== AFFINE BINDING HISTORY ====="
+          git log --all --date=iso --pretty=format:'%H %ad %s' -S'bind_region_visual_vertices_to_mechanical_affine_v1' --             compiler tests tools || true
+          echo
+          echo "===== STAGE18 HISTORY ====="
+          git log --date=iso --pretty=format:'%H %ad %s' --             compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py | head -80
+          echo
+          echo "===== STAGE42 HISTORY ====="
+          git log --date=iso --pretty=format:'%H %ad %s' --             compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py | head -80

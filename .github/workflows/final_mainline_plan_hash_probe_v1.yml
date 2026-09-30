@@ -1,0 +1,21 @@
+name: final-mainline-plan-hash-probe-v1
+on:
+  push:
+    branches: [integration/generic-main-finalization-20260930]
+    paths: ['.github/workflows/final_mainline_plan_hash_probe_v1.yml']
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Emit exact plan hash
+        env: {PYTHONPATH: .}
+        run: |
+          python - <<'PY'
+          from compiler.realsas_compiler_services.orchestrator.mainline import PLAN_PATH, load_json, validate_plan
+          print("PLAN_HASH="+validate_plan(load_json(PLAN_PATH)))
+          PY

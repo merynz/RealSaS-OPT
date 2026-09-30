@@ -6,13 +6,17 @@ import numpy as np
 
 from compiler.realsas_compiler_core.appearance_bake_v2 import (
     bake_direction_atlas,
+    bake_direction_atlas_pages,
     bake_direction_source_view_atlas,
+    bake_direction_source_view_atlas_pages,
     bilinear_premultiplied_rgba,
     conservative_bilinear_provenance,
 )
 from compiler.realsas_compiler_core.appearance_compile_v2 import (
     bilinear_rgba_u8,
+    compatible_cross_view_foreground_donor_validity,
     compile_deterministic_caa,
+    direct_source_and_donor_eligibility,
     select_other_view_donor_by_support,
 )
 from compiler.realsas_compiler_core.appearance_render_v2 import render_caa_reference
@@ -20,6 +24,7 @@ from compiler.realsas_compiler_core.playback_full_surface_v3 import CameraProjec
 from compiler.realsas_compiler_core.visibility_v2 import (
     VISIBILITY_CONTRACT_V2,
     VISIBILITY_DEPTH_EQUIVALENCE_EPSILON,
+    _rasterize_visible_owner_legacy,
     rasterize_visible_owner,
 )
 
@@ -176,6 +181,98 @@ def test_other_view_donor_prefers_geometric_support_over_circular_proximity():
     assert np.allclose(tied_score, 0.90, atol=0.0, rtol=0.0)
 
 
+def test_safe_background_direct_source_is_not_cross_view_appearance_donor():
+    direct_valid = np.zeros((8, 3), dtype=bool)
+    direct_valid[1, :] = True
+    direct_valid[4, :] = True
+    donor_valid = np.zeros_like(direct_valid)
+    # V1 is a valid directional safe-background observation, but it is not
+    # transferable material appearance. V4 is foreground source evidence.
+    donor_valid[4, :] = True
+    face_support = np.zeros((8, 1), dtype=np.float64)
+    face_support[1, 0] = 0.99
+    face_support[4, 0] = 0.60
+    best_view, best_score = select_other_view_donor_by_support(
+        target_view_index=0,
+        missing=np.ones(3, dtype=bool),
+        direct_valid=direct_valid,
+        donor_valid=donor_valid,
+        sample_face_index=np.zeros(3, dtype=np.int32),
+        face_support_by_view=face_support,
+    )
+    assert set(map(int, best_view)) == {4}
+    assert np.allclose(best_score, 0.60, atol=0.0, rtol=0.0)
+
+
+def test_cross_view_donor_rejects_mixed_foreground_background_evidence():
+    direct_valid = np.zeros((8, 1), dtype=bool)
+    donor_valid = np.zeros_like(direct_valid)
+    rgba = np.zeros((8, 1, 4), dtype=np.uint8)
+
+    direct_valid[1, 0] = True
+    rgba[1, 0] = (0, 0, 0, 0)
+
+    direct_valid[4, 0] = True
+    donor_valid[4, 0] = True
+    rgba[4, 0] = (120, 90, 50, 255)
+
+    compatible = compatible_cross_view_foreground_donor_validity(
+        direct_valid=direct_valid,
+        donor_valid=donor_valid,
+        direct_rgba=rgba,
+        color_conflict_cut_rgba_l1=0.4,
+        alpha_conflict_cut=0.25,
+    )
+    assert not np.any(compatible)
+
+
+def test_cross_view_donor_rejects_gross_foreground_conflict():
+    direct_valid = np.zeros((8, 1), dtype=bool)
+    donor_valid = np.zeros_like(direct_valid)
+    rgba = np.zeros((8, 1, 4), dtype=np.uint8)
+
+    direct_valid[1, 0] = True
+    donor_valid[1, 0] = True
+    rgba[1, 0] = (255, 0, 0, 255)
+
+    direct_valid[4, 0] = True
+    donor_valid[4, 0] = True
+    rgba[4, 0] = (0, 0, 255, 255)
+
+    compatible = compatible_cross_view_foreground_donor_validity(
+        direct_valid=direct_valid,
+        donor_valid=donor_valid,
+        direct_rgba=rgba,
+        color_conflict_cut_rgba_l1=0.4,
+        alpha_conflict_cut=0.25,
+    )
+    assert not np.any(compatible)
+
+
+def test_cross_view_donor_accepts_compatible_foreground_evidence():
+    direct_valid = np.zeros((8, 1), dtype=bool)
+    donor_valid = np.zeros_like(direct_valid)
+    rgba = np.zeros((8, 1, 4), dtype=np.uint8)
+
+    direct_valid[1, 0] = True
+    donor_valid[1, 0] = True
+    rgba[1, 0] = (120, 90, 50, 255)
+
+    direct_valid[4, 0] = True
+    donor_valid[4, 0] = True
+    rgba[4, 0] = (125, 92, 52, 255)
+
+    compatible = compatible_cross_view_foreground_donor_validity(
+        direct_valid=direct_valid,
+        donor_valid=donor_valid,
+        direct_rgba=rgba,
+        color_conflict_cut_rgba_l1=0.4,
+        alpha_conflict_cut=0.25,
+    )
+    assert bool(compatible[1, 0]) is True
+    assert bool(compatible[4, 0]) is True
+
+
 def test_safe_transparent_source_background_is_defined_direct_source_not_unseen():
     candidate = _candidate()
     cameras = tuple(_camera(view, 32) for view in range(8))
@@ -201,6 +298,20 @@ def test_safe_transparent_source_background_is_defined_direct_source_not_unseen(
             "min_source_alpha_u8": 1,
         },
     )
+    assert result["source_xy"].dtype == np.float32
+    assert result["direct_pm_linear_packed"].dtype == np.float64
+    assert result["direct_pm_linear_storage_mode"] == (
+        "PACKED_DIRECT_VALID_VIEW_MAJOR_V1"
+    )
+    assert result["direct_pm_linear_packed"].shape == (
+        int(np.count_nonzero(result["direct_valid"])),
+        4,
+    )
+    assert result["sample_component_index"].dtype == np.int32
+    assert result["sample_component_index"].shape == (
+        result["sample_count_per_direction"],
+    )
+    assert len(result["component_ids"]) >= 1
     assert not np.any(result["provenance"] == 255)
     direct = result["provenance"] == 0
     assert np.any(direct)
@@ -348,6 +459,18 @@ def test_bilinear_provenance_is_conservative_over_color_footprint():
     assert int(sampled[1]) == 0
 
 
+def test_bilinear_provenance_risk_order_is_not_numeric_code_order():
+    # Canonical global completion is frozen as code 4 while unsupported
+    # abstention remains code 3. Abstention must still dominate a bilinear
+    # footprint because it is undefined, even though its numeric code is lower.
+    provenance = np.asarray([[4, 3]], dtype=np.uint8)
+    sampled = conservative_bilinear_provenance(
+        provenance,
+        np.asarray([[0.5, 0.0]], dtype=np.float64),
+    )
+    assert int(sampled[0]) == 3
+
+
 def test_face_atlas_bleed_leaves_no_undefined_texel():
     # tile_resolution=4 => 10 triangle samples for one face.
     rgba = np.tile(np.asarray([[40, 80, 120, 255]], dtype=np.uint8), (10, 1))
@@ -363,6 +486,65 @@ def test_face_atlas_bleed_leaves_no_undefined_texel():
     assert uv.shape == (1, 3, 2)
     assert not np.any(prov == 255)
 
+
+
+def test_paged_atlas_preserves_density_and_page_local_sampling():
+    face_count = 5
+    tile_resolution = 4
+    bleed_px = 2
+    per_face = tile_resolution * (tile_resolution + 1) // 2
+    rgba = np.zeros((face_count * per_face, 4), dtype=np.uint8)
+    provenance = np.zeros((face_count * per_face,), dtype=np.uint8)
+    source_view = np.zeros((face_count * per_face,), dtype=np.int16)
+    for face in range(face_count):
+        sl = slice(face * per_face, (face + 1) * per_face)
+        rgba[sl] = (20 + face * 30, 40, 60, 255)
+        source_view[sl] = face % 8
+
+    pages, prov_pages, uv, page_index, layout = bake_direction_atlas_pages(
+        face_sample_rgba=rgba,
+        face_sample_provenance=provenance,
+        face_count=face_count,
+        tile_resolution=tile_resolution,
+        bleed_px=bleed_px,
+        max_page_resolution=16,
+    )
+    donor_pages = bake_direction_source_view_atlas_pages(
+        face_sample_source_view=source_view,
+        face_count=face_count,
+        tile_resolution=tile_resolution,
+        bleed_px=bleed_px,
+        max_page_resolution=16,
+    )
+    assert layout["page_count"] == 2
+    assert layout["faces_per_page"] == 4
+    assert tuple(map(int, page_index)) == (0, 0, 0, 0, 1)
+    assert pages.shape == (2, 16, 16, 4)
+    assert prov_pages.shape == (2, 16, 16)
+    assert donor_pages.shape == (2, 16, 16)
+    assert uv.shape == (face_count, 3, 2)
+    assert np.all((uv >= 0.0) & (uv <= 1.0))
+
+    # Renderer must select the physical page by face identity, not by UV alone.
+    mesh = _overlap_mesh(equal_depth=False)
+    render_uv = np.zeros((2, 3, 2), dtype=np.float64)
+    texture_pages = np.asarray(
+        [
+            [[[255, 0, 0, 0]]],
+            [[[0, 255, 0, 255]]],
+        ],
+        dtype=np.uint8,
+    )
+    provenance_pages = np.zeros((2, 1, 1), dtype=np.uint8)
+    render = render_caa_reference(
+        mesh=mesh,
+        camera=_camera(resolution=32),
+        face_uv=render_uv,
+        face_page_index=np.asarray([0, 1], dtype=np.int32),
+        texture_rgba_u8=texture_pages,
+        provenance_atlas=provenance_pages,
+    )
+    assert tuple(map(int, render.straight_rgba_u8[16, 16])) == (0, 255, 0, 255)
 
 def test_source_view_atlas_preserves_exact_donor_ids_and_harmonic_code():
     per_face = 4 * (4 + 1) // 2
@@ -459,3 +641,96 @@ def test_face_atlas_allows_unallocated_grid_padding_but_not_surface_undefinednes
         tx = (face % layout["columns"]) * stride
         ty = (face // layout["columns"]) * stride
         assert not np.any(prov[ty : ty + stride, tx : tx + stride] == 255)
+
+
+def test_vectorized_visibility_is_exactly_equivalent_to_legacy_oracle():
+    fixtures = (
+        (_overlap_mesh(equal_depth=False), 1),
+        (_overlap_mesh(equal_depth=True), 1),
+        (_overlap_mesh_with_depth_delta(
+            2.0 * VISIBILITY_DEPTH_EQUIVALENCE_EPSILON
+        ), 2),
+    )
+    for mesh, coverage_scale in fixtures:
+        legacy = _rasterize_visible_owner_legacy(
+            mesh,
+            _camera(resolution=32),
+            coverage_scale=coverage_scale,
+        )
+        vectorized = rasterize_visible_owner(
+            mesh,
+            _camera(resolution=32),
+            coverage_scale=coverage_scale,
+        )
+        for name in (
+            "owner_face_index",
+            "depth",
+            "barycentric",
+            "projected_vertices",
+            "second_owner_face_index",
+            "second_depth",
+            "depth_margin",
+            "layer_owner_face_index",
+            "layer_depth",
+            "layer_barycentric",
+            "layer_overflow",
+        ):
+            assert np.array_equal(
+                getattr(vectorized, name),
+                getattr(legacy, name),
+                equal_nan=True,
+            ), name
+
+
+def test_source_view_atlas_accepts_canonical_global_completion_code():
+    per_face = 4 * (4 + 1) // 2
+    source_view = np.asarray(
+        [0, 1, 2, 3, 4, 5, 6, 7, -2, -3],
+        dtype=np.int16,
+    )
+    assert len(source_view) == per_face
+    atlas = bake_direction_source_view_atlas(
+        face_sample_source_view=source_view,
+        face_count=1,
+        tile_resolution=4,
+        bleed_px=2,
+    )
+    paged = bake_direction_source_view_atlas_pages(
+        face_sample_source_view=source_view,
+        face_count=1,
+        tile_resolution=4,
+        bleed_px=2,
+        max_page_resolution=16,
+    )
+    assert -3 in set(map(int, np.unique(atlas)))
+    assert -3 in set(map(int, np.unique(paged)))
+
+
+def test_direct_source_keeps_grazing_first_hit_but_donor_rejects_it():
+    direct, donor = direct_source_and_donor_eligibility(
+        in_bounds=np.asarray([True]),
+        visible=np.asarray([True]),
+        source_foreground=np.asarray([True]),
+        safe_foreground=np.asarray([True]),
+        safe_background=np.asarray([False]),
+        alpha_foreground=np.asarray([True]),
+        alpha_background=np.asarray([False]),
+        angle_safe=np.asarray([False]),
+    )
+    assert bool(direct[0]) is True
+    assert bool(donor[0]) is False
+
+
+def test_direct_source_keeps_foreground_boundary_but_donor_requires_erosion():
+    direct, donor = direct_source_and_donor_eligibility(
+        in_bounds=np.asarray([True]),
+        visible=np.asarray([True]),
+        source_foreground=np.asarray([True]),
+        safe_foreground=np.asarray([False]),
+        safe_background=np.asarray([False]),
+        alpha_foreground=np.asarray([True]),
+        alpha_background=np.asarray([False]),
+        angle_safe=np.asarray([True]),
+    )
+    assert bool(direct[0]) is True
+    assert bool(donor[0]) is False

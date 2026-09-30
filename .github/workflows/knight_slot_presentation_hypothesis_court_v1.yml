@@ -6,6 +6,7 @@ on:
       - integration/generic-main-normalization-v2-20260930
     paths:
       - 'tools/demo/audit_knight_slot_presentation_hypothesis_v1.py'
+      - 'tools/demo/audit_knight_slot_presentation_hypothesis_v2.py'
       - '.github/workflows/knight_slot_presentation_hypothesis_court_v1.yml'
   workflow_dispatch:
 
@@ -28,64 +29,54 @@ jobs:
           python-version: '3.11'
       - name: Install
         run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
-      - name: Inspect Knight authority ledger and surviving artifacts
+      - name: Materialize exact historical court inputs
         run: |
-          python - <<'PY'
-          import json, os
-          from pathlib import Path
-          root=Path(os.environ["AUTHORITY_ROOT"])/"runs"/os.environ["RUN_ID"]
-          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
-          by={str(x["id"]):x for x in ledger["stages"]}
-          for sid in (
-              "18_CANONICAL_MESH_ADDRESSING_BUILD",
-              "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
-              "36_QUALIFIED_MESH_SKIN_TRANSFER",
-              "37_QUALIFIED_PRESENTATION_STRUCTURE",
-              "38_CANONICAL_PUPPET_SEALED",
-              "41_MOTION_DYNAMIC_PROOF",
-          ):
-              row=by.get(sid,{})
-              print("LEDGER_STAGE",json.dumps({
-                  "id":sid,
-                  "status":row.get("status"),
-                  "blockers":row.get("blockers") or [],
-                  "outputs":[
-                      {"schema":x.get("schema"),"path":x.get("path"),"sha256":x.get("sha256")}
-                      for x in row.get("outputs") or []
-                  ],
-              },sort_keys=True))
-          for dirname in (
-              "18_CANONICAL_MESH_ADDRESSING_BUILD",
-              "27_QUALIFIED_MESH_GATE",
-              "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
-              "36_QUALIFIED_MESH_SKIN_TRANSFER",
-              "37_QUALIFIED_PRESENTATION_STRUCTURE",
-              "38_CANONICAL_PUPPET_SEALED",
-              "41_MOTION_DYNAMIC_PROOF",
-          ):
-              d=root/"artifacts"/dirname
-              rows=[]
-              if d.is_dir():
-                  for q in sorted(d.rglob("*")):
-                      if q.is_file():
-                          rows.append(str(q.relative_to(root)))
-              print("ARTIFACT_DIR",dirname,json.dumps(rows[:120]))
-          PY
+          set -euo pipefail
+          RESEARCH_SHA=6ed060351512a5f76a206acce011b585f48b1768
+          git fetch --no-tags origin "$RESEARCH_SHA"
+          git show "$RESEARCH_SHA:canonical/knight_source_owned_deformation_regions_v1/REPORT.json" \
+            > /tmp/knight_deformation_parent_report.json
+          git show "$RESEARCH_SHA:canonical/KNIGHT_MOTION_SOURCE_ACTION_DIAGNOSTIC_20260927.json" \
+            > /tmp/knight_motion_source_diagnostic.json
+          git show "$RESEARCH_SHA:tools/demo/render_knight_motion_preview_v1.py" \
+            > /tmp/realsas_knight_motion_court_helper.py
+          sha256sum \
+            /tmp/knight_deformation_parent_report.json \
+            /tmp/knight_motion_source_diagnostic.json \
+            /tmp/realsas_knight_motion_court_helper.py
       - name: Run slot-aware presentation court
         run: |
-          python -m tools.demo.audit_knight_slot_presentation_hypothesis_v1             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --out /tmp/knight_slot_presentation_hypothesis_v1.json
+          python -m tools.demo.audit_knight_slot_presentation_hypothesis_v2 \
+            --authority-root "$AUTHORITY_ROOT" \
+            --run-id "$RUN_ID" \
+            --parent-report /tmp/knight_deformation_parent_report.json \
+            --motion-helper /tmp/realsas_knight_motion_court_helper.py \
+            --source-report /tmp/knight_motion_source_diagnostic.json \
+            --out /tmp/knight_slot_presentation_hypothesis_v2.json
       - name: Summarize
         run: |
           python - <<'PY'
           import json
-          p=json.load(open("/tmp/knight_slot_presentation_hypothesis_v1.json"))
-          print("SLOT_COUNT",p["slot_count"])
+          p=json.load(open("/tmp/knight_slot_presentation_hypothesis_v2.json"))
+          print("VERDICT",p["hypothesis_verdict"])
+          print("LOGICAL_SLOT_COUNT",p["logical_slot_count"])
+          print("BLOCKERS",p["blockers"])
           for v in p["views"]:
-              print("VIEW",v["view_index"],"slots",v["visible_logical_slot_count"],
-                    "charts",v["chart_count"],"faces",v["visual_face_count"],
-                    "rest",v["max_rest_error_px"],
-                    "seed_max",v["max_binding_seed_distance_px"],
+              print("VIEW",v["view_index"],
+                    "binding",v["binding_status"],
+                    "slots",v["visible_logical_slot_count"],
+                    "charts",v["chart_count"],
+                    "faces",v["visual_face_count"],
+                    "fill_p95",v["p95_unowned_fill_distance_px"],
                     "fill_max",v["max_unowned_fill_distance_px"])
+              if v["binding_status"]!="PASS":
+                  print("BIND_BLOCKER",v["view_index"],v.get("binding_blocker"))
+                  continue
+              print("BIND",v["view_index"],
+                    "rest",v["max_rest_error_px"],
+                    "seed_p95",v["p95_binding_seed_distance_px"],
+                    "seed_max",v["max_binding_seed_distance_px"],
+                    "extrap",v["max_affine_extrapolation_penalty"])
               for clip,rows in v["qa_by_clip"].items():
                   print("QA",v["view_index"],clip,
                         "flip",max(x["flipped_triangles"] for x in rows),

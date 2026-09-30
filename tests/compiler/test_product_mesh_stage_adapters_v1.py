@@ -16,7 +16,7 @@ from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
     rasterize_triangles_half_integer_top_left,
 )
 from compiler.realsas_compiler_core.playback_full_surface_v3 import qualify_camera_v3
-from compiler.realsas_compiler_core.substrate.scene_first_signed import build_compacted_dense_face_provenance_v1
+from compiler.realsas_compiler_core.substrate.scene_first_signed import compacted_dense_face_provenance_hash_v1
 from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     canonical_mesh_candidate_from_dict,
     canonical_puppet_state_from_dict,
@@ -111,12 +111,21 @@ def _fixture(tmp_path, *, resolution: int = 8):
         surface.geometry_lineage_hash,skeleton.skeleton_lineage_hash,{"status":"PASS"},"skin-hash",
     )
     s_path=_write(tmp_path/"surface.json",surface)
-    face_provenance=build_compacted_dense_face_provenance_v1(
-        [node.P for node in surface.surface_nodes],
-        ((0,1,2),),
-        surface,
-        source_zero_surface_sha256="f"*64,
-    )
+    face_provenance={
+        "schema":"RealSaS.CompactedDenseFaceProvenance.v1",
+        "status":"PASS",
+        "surface_lineage_hash":surface.geometry_lineage_hash,
+        "source_zero_surface_sha256":"f"*64,
+        "source_dense_face_count":1,
+        "compact_face_count":1,
+        "compact_faces":(("s0","s1","s2"),),
+        "triangle_authority":"EXACT_DENSE_FACE_WITNESS_AFTER_FROZEN_COMPACTION",
+        "three_clique_face_minting_allowed":False,
+        "face_deletion_claimed":False,
+        "teacher_truth_used":False,
+        "provenance_hash":"",
+    }
+    face_provenance["provenance_hash"]=compacted_dense_face_provenance_hash_v1(face_provenance)
     face_provenance_path=tmp_path/"compacted_dense_face_provenance.json"
     face_provenance_path.write_text(
         json.dumps(face_provenance,sort_keys=True)+"\n",

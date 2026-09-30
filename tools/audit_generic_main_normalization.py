@@ -166,6 +166,7 @@ def main() -> int:
         )
 
     adapter_modules = []
+    adapter_seed_paths: set[str] = set()
     for stage in sorted(plan["stages"], key=lambda row: int(row["ordinal"])):
         adapter = str(stage["adapter"])
         module, sep, func = adapter.partition(":")
@@ -176,26 +177,30 @@ def main() -> int:
         if not path:
             raise RuntimeError(f"ADAPTER_MODULE_MISSING:{module}")
         selected.add(path)
+        adapter_seed_paths.add(path)
 
-    # Recursively close local Python imports for every selected Python source,
-    # including the entire implementation-closure test authority.
-    queue = deque(sorted(p for p in selected if p.endswith(".py")))
-    parsed: set[str] = set()
-    imported_modules: set[str] = set()
+    # Match canonical mainline.py semantics exactly: forbidden donor imports are
+    # checked only across the local import closure of the 46 stage adapters.
+    # Test files are closure-hashed governance inputs but are not runtime import
+    # roots and must not pull historical donor modules into the product closure.
+    queue = deque(sorted(adapter_seed_paths))
+    adapter_parsed: set[str] = set()
+    adapter_imported_modules: set[str] = set()
     while queue:
         path = queue.popleft()
-        if path in parsed:
+        if path in adapter_parsed:
             continue
-        parsed.add(path)
+        adapter_parsed.add(path)
         source = show_text(research, path)
         for module in imported_local_modules(research, path, source):
-            imported_modules.add(module)
+            adapter_imported_modules.add(module)
             child = module_path(research, module)
             if child and child not in selected:
                 selected.add(child)
+            if child and child not in adapter_parsed:
                 queue.append(child)
 
-    forbidden_used = sorted(imported_modules & forbidden_modules)
+    forbidden_used = sorted(adapter_imported_modules & forbidden_modules)
     if forbidden_used:
         raise RuntimeError("CURRENT_V2_IMPORTS_FORBIDDEN_DONOR_MODULE:" + ",".join(forbidden_used))
 
@@ -279,8 +284,8 @@ def main() -> int:
             "changed_file_count": len(changed),
             "new_file_count": len(new),
             "same_file_count": len(same),
-            "parsed_python_file_count": len(parsed),
-            "imported_local_module_count": len(imported_modules),
+            "adapter_import_closure_python_file_count": len(adapter_parsed),
+            "adapter_imported_local_module_count": len(adapter_imported_modules),
             "forbidden_donor_modules_used": forbidden_used,
             "adapter_modules": adapter_modules,
         },

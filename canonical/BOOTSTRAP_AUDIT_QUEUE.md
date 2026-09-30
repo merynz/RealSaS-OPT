@@ -4,10 +4,10 @@
 > Bootstrap: `BOOTSTRAP_AUDIT_CLOSED`
 
 - Declared census scope: `main` + 3 registered active/evidence branch(es)
-- Census artifacts in declared scope: **527 / 527 discovered (100%)**
+- Census artifacts in declared scope: **534 / 534 discovered (100%)**
 - Semantically reconciled: **57**
-- Catalogued but unreviewed: **470**
-- Semantic coverage: **10.8%**
+- Catalogued but unreviewed: **477**
+- Semantic coverage: **10.7%**
 
 **Important:** 100% is discovery coverage only inside the declared scan scope. It is not a claim that all historical branches have been audited or that the repository's scientific history is semantically complete.
 
@@ -15,9 +15,9 @@
 
 | Branch | Head | Different blobs vs main | High-signal differing artifacts |
 |---|---|---:|---:|
-| `fit2/mage-full-subject-reclosure` | `eb7a20eb9da7` | 170 | 49 |
-| `playback-stack-v1-20260916` | `46aaad438780` | 342 | 88 |
-| `repair/mage-full-subject-reclosure-20260912` | `2fa5d4b604d5` | 170 | 49 |
+| `fit2/mage-full-subject-reclosure` | `eb7a20eb9da7` | 172 | 49 |
+| `playback-stack-v1-20260916` | `46aaad438780` | 343 | 88 |
+| `repair/mage-full-subject-reclosure-20260912` | `2fa5d4b604d5` | 172 | 49 |
 
 The queue is a discovery aid. A path being listed does not establish what it proves, whether it is current, or whether it was ever executed.
 
@@ -411,6 +411,17 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-8616E5AB19E1` `AUTHORITY_DECISION` — `main` :: `canonical/VF13_RIGIDITY_NOOP_AUTHORITY_V1_20260921.json` @ blob `207f921ee9da`
 - `KA-5380C6C86298` `AUTHORITY_DECISION` — `main` :: `canonical/VF15_DYNAMIC_CONTINUITY_AUTHORITY_V1_20260921.json` @ blob `11d64f378484`
 
+### 2026-09-27 :: COMPILER (4)
+
+- `KA-28E0F0F09AE8` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V12_20260927.json` @ blob `a2264049f5be`
+- `KA-F1A11954EC87` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V13_20260927.json` @ blob `110a393e0687`
+- `KA-2C736797E7A3` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V14_20260927.json` @ blob `3cfbac0f1666`
+- `KA-53915BC83A52` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V15_20260927.json` @ blob `1d51ac0eed3c`
+
+### 2026-09-28 :: CROSS_CUTTING_OTHER (1)
+
+- `KA-104FBAD9C7CF` `AUDIT` — `main` :: `canonical/DEFORMATION_WITNESS_VALIDITY_AUDIT_V1_20260928.json` @ blob `6b0f3f13d45a`
+
 ### UNKNOWN_DATE :: ARACHNE_SKIN (10)
 
 - `KA-AF6CF11478B7` `WORKFLOW` — `main` :: `.github/workflows/arachne_codec_v2_source_contract.yml` @ blob `57ddbca877ea`
@@ -460,8 +471,9 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-295868B63E7C` `WORKFLOW` — `repair/mage-full-subject-reclosure-20260912` :: `.github/workflows/proof_service_promotion_gate.yml` @ blob `2fad848fd29e`
 - `KA-60227BFFD981` `PROMOTION_RETRACTION` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/NO_DOWNSTREAM_PROMOTION.txt` @ blob `ef2f5130b857`
 
-### UNKNOWN_DATE :: CROSS_CUTTING_OTHER (22)
+### UNKNOWN_DATE :: CROSS_CUTTING_OTHER (23)
 
+- `KA-5C47D4C056DC` `WORKFLOW` — `main` :: `.github/workflows/final_mainline_closure_audit_v1.yml` @ blob `eff65b2b173b`
 - `KA-6AFEA36BB50A` `WORKFLOW` — `main` :: `.github/workflows/p0_directional_binding_closure.yml` @ blob `f05bd4e0fd12`
 - `KA-95A27A7C439E` `PLAN_MATRIX` — `main` :: `canonical/BOOTSTRAP_COVERAGE_STATE_V1.json` @ blob `be0968276db7`
 - `KA-C0C4BE494F0E` `PLAN_MATRIX` — `main` :: `canonical/MAINLINE_EXECUTION_PLAN_V1.json` @ blob `0a1379353bd2`
@@ -511,12 +523,12 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-D2D319509ACF` `WORKFLOW` — `main` :: `.github/workflows/pre_fit_visible_optimizer_once_v1.yml` @ blob `16bf42a72ecc`
 - `KA-03510A41D0D4` `WORKFLOW` — `main` :: `.github/workflows/prefit_observation_authority_v1.yml` @ blob `b04004000018`
 - `KA-FDE35053B8A7` `WORKFLOW` — `main` :: `.github/workflows/single_family_data_contract_v1.yml` @ blob `929df12d859e`
-- `KA-646E3A27C424` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `52cd02ab4fcd`
+- `KA-B8EBF2BE3690` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `e69de29bb2d1`
 - `KA-25BB7CDC0AB9` `AUTHORITY_DECISION` — `main` :: `canonical/FIT2_CANONICAL_EXECUTION_AUTHORITY_V1.json` @ blob `6b5fff12a484`
 - `KA-DC74ABB19F22` `PREREG` — `main` :: `canonical/FIT8_SOURCE_TEXTURED_AUTHORITY_PREREG_V1.json` @ blob `c01e1a65f75e`
 - `KA-E1571E78A4A5` `PREREG` — `main` :: `canonical/IMAGE_SEMANTIC_CHARACTER_GATE_PREREG_V1.md` @ blob `36aef9ae6ecd`
 - `KA-72DE8D24F3F9` `AUTHORITY_DECISION` — `main` :: `canonical/MAGE_FIT2_PIPELINE_REFIT_AUTHORITY_V1.json` @ blob `58f60bd1771a`
-- `KA-19D7B249A189` `AUTHORITY_DECISION` — `main` :: `canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json` @ blob `6600543edc07`
+- `KA-D4613C34D73A` `AUTHORITY_DECISION` — `main` :: `canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json` @ blob `79fd3c6294c1`
 - `KA-4BA36C81DC37` `RESULT` — `main` :: `canonical/fit_mage_v1/CODEC_A0_EXACT_CONDITIONING_RESULT.json` @ blob `647d375bb65a`
 - `KA-2F8418D24D3C` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/fit_mage_v1/FIT_MAGE_CPU_V1_STATUS.md` @ blob `4edcee0fffff`
 - `KA-402A1F2E8E27` `AUTHORITY_DECISION` — `main` :: `experiments/family_selection_v1/post_freeze_family_selector_v1.py` @ blob `6571a60a4223`
@@ -667,8 +679,9 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-5009D0433825` `HIGH_SIGNAL_OTHER` — `repair/mage-full-subject-reclosure-20260912` :: `REPOSITORY_MAP.md` @ blob `e3b4fc8a05a3`
 - `KA-5A86DFD4CA5A` `AUTHORITY_DECISION` — `repair/mage-full-subject-reclosure-20260912` :: `canonical/BRANCH_AUTHORITY_V1.md` @ blob `8dc100c60438`
 
-### UNKNOWN_DATE :: RUNTIME_EXPORT (3)
+### UNKNOWN_DATE :: RUNTIME_EXPORT (4)
 
+- `KA-1113D467D8A9` `WORKFLOW` — `main` :: `.github/workflows/visual_runtime_consumer_forensic_audit_v1.yml` @ blob `317bcacd6f0b`
 - `KA-59DF32C61C82` `PLAN_MATRIX` — `main` :: `experiments/g0_g1_single_pose_geometry/schemas/REALSAS_MODEL_EXPORT_MANIFEST_SCHEMA_V1.json` @ blob `cc0af11b166b`
 - `KA-6C54B78042BB` `PREREG` — `playback-stack-v1-20260916` :: `experiments/playback_stack_v1/RUNTIME_V4_COMPACT_PREREG.md` @ blob `a94f314894e1`
 - `KA-0680F6B9E7F2` `NOTEBOOK` — `playback-stack-v1-20260916` :: `experiments/playback_stack_v1/RealSaS_Mage_Full_Assembly_Runtime_V4_Smoke_Colab.ipynb` @ blob `b4f2669a4bf4`

@@ -6,9 +6,9 @@
 
 ## Coverage
 
-- Git-tracked files: **1218**
-- High-signal knowledge artifacts: **344**
-- Explained by continuity policy: **344**
+- Git-tracked files: **1317**
+- High-signal knowledge artifacts: **351**
+- Explained by continuity policy: **351**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
 - Live branches: **154**
@@ -17,7 +17,7 @@
 ### Classification counts
 
 - `HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL`: **147**
-- `INDEXED_EXPLICIT`: **197**
+- `INDEXED_EXPLICIT`: **204**
 
 `FIT1_COMMIT_LEDGER_COVERED` means exact provenance is recoverable; it does **not** mean the artifact's scientific claim is promoted. `HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL` means the artifact predates the FIT1 gate and remains evidence/provenance unless another authority explicitly promotes it.
 
@@ -98,7 +98,7 @@ _None._
 | `ignore-this` | `91b4593d5b2a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `integration/compiler-runtime-canonical-20260828` | `e423cd462002` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `integration/compiler-runtime-heavy-promotion-20260901` | `47892ffa16b7` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `integration/generic-main-finalization-20260930` | `bbb19a56ef94` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `integration/generic-main-finalization-20260930` | `92de05292b05` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `integration/generic-main-normalization-v2-20260930` | `75d7d590d0a3` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `integration/generic-main-promotion-20260930` | `908fbcc92072` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `integration/mage-real-e2e-20260912` | `11d1fdfd4398` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -107,7 +107,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `9791a7b59a76` | `CANONICAL` | canonical branch |
+| `main` | `f459fe5491e3` | `CANONICAL` | canonical branch |
 | `motion/quaternius-direct-fbx-gate-v1-20260919` | `47fb1555455b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

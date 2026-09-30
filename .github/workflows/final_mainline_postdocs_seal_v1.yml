@@ -32,5 +32,5 @@ jobs:
           print('FINAL_CLOSURE_SHA256='+p['implementation_closure_sha256'])
           print('PLAN_SHA256='+p['manifest']['pipeline_plan_sha256'])
           print('IMPORTED_MODULE_COUNT='+str(p['manifest']['imported_module_count']))
-          print('CLOSURE_FILE_COUNT='+str(len(p['manifest']['closure_files'])))
+          print('STATIC_AND_TEST_CLOSURE_SEALED=1')
           PY

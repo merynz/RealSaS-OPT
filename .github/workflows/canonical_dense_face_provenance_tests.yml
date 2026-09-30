@@ -1,0 +1,33 @@
+name: canonical-dense-face-provenance-tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'compiler/realsas_compiler_core/canonical_mesh_candidate_v1.py'
+      - 'compiler/realsas_compiler_core/substrate/scene_first_signed.py'
+      - 'tests/compiler/test_canonical_mesh_candidate_v1.py'
+      - '.github/workflows/canonical_dense_face_provenance_tests.yml'
+
+concurrency:
+  group: canonical-dense-face-provenance-tests
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install
+        run: python -m pip install --no-input --progress-bar off numpy scipy pytest
+      - name: Focused provenance tests
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. pytest -q tests/compiler/test_canonical_mesh_candidate_v1.py
+          python -m py_compile             compiler/realsas_compiler_core/canonical_mesh_candidate_v1.py             compiler/realsas_compiler_core/substrate/scene_first_signed.py

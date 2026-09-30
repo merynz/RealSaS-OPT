@@ -51,20 +51,36 @@ def geometry_substrate_hash(value: GeometrySubstrateQualificationIR) -> str:
     return content_sha256(payload)
 
 
-def validate_geometry_substrate(value: GeometrySubstrateQualificationIR) -> None:
+def validate_geometry_substrate_evidence(
+    value: GeometrySubstrateQualificationIR,
+) -> None:
+    """Validate exact measurement integrity without claiming qualification."""
     rows = tuple(sorted(value.views, key=lambda row: row.view_index))
     if len(rows) != 8 or tuple(row.view_index for row in rows) != tuple(range(8)):
-        raise QualificationError("GEOMETRY_SUBSTRATE_REQUIRES_EXACT_8_FIRST_WITNESS_VIEWS")
-    if not all(row.passed for row in rows):
-        raise QualificationError("GEOMETRY_SUBSTRATE_HAS_FAILED_VIEW")
-    if value.qualification_report.get("status") != "PASS_GEOMETRY_SUBSTRATE":
+        raise QualificationError(
+            "GEOMETRY_SUBSTRATE_REQUIRES_EXACT_8_FIRST_WITNESS_VIEWS"
+        )
+    all_pass = all(row.passed for row in rows)
+    expected_status = (
+        "PASS_GEOMETRY_SUBSTRATE" if all_pass else "FAIL_GEOMETRY_SUBSTRATE"
+    )
+    if value.qualification_report.get("status") != expected_status:
         raise QualificationError("GEOMETRY_SUBSTRATE_STATUS_INVALID")
+    if bool(value.qualification_report.get("every_view_passed")) != bool(all_pass):
+        raise QualificationError("GEOMETRY_SUBSTRATE_AGGREGATE_STATUS_DRIFT")
     if value.qualification_report.get("appearance_authority_used") is not False:
         raise QualificationError("GEOMETRY_SUBSTRATE_MAY_NOT_USE_APPEARANCE_AUTHORITY")
     if value.qualification_report.get("teacher_truth_used") is not False:
         raise QualificationError("GEOMETRY_SUBSTRATE_TEACHER_TRUTH_FORBIDDEN")
     if value.substrate_hash != geometry_substrate_hash(value):
         raise QualificationError("GEOMETRY_SUBSTRATE_HASH_MISMATCH")
+
+
+def validate_geometry_substrate(value: GeometrySubstrateQualificationIR) -> None:
+    validate_geometry_substrate_evidence(value)
+    rows = tuple(sorted(value.views, key=lambda row: row.view_index))
+    if not all(row.passed for row in rows):
+        raise QualificationError("GEOMETRY_SUBSTRATE_HAS_FAILED_VIEW")
 
 
 def build_geometry_substrate_qualification(
@@ -109,7 +125,9 @@ def build_geometry_substrate_qualification(
     return value
 
 
-def geometry_substrate_from_dict(payload: Mapping[str, Any]) -> GeometrySubstrateQualificationIR:
+def _geometry_substrate_value_from_dict(
+    payload: Mapping[str, Any],
+) -> GeometrySubstrateQualificationIR:
     rows = tuple(
         GeometrySubstrateViewIR(
             view_index=int(row["view_index"]),
@@ -139,5 +157,20 @@ def geometry_substrate_from_dict(payload: Mapping[str, Any]) -> GeometrySubstrat
         schema_version=str(payload.get("schema_version") or "RealSaS.GeometrySubstrateQualificationIR.v2"),
         metadata=dict(payload.get("metadata") or {}),
     )
+    return value
+
+
+def geometry_substrate_evidence_from_dict(
+    payload: Mapping[str, Any],
+) -> GeometrySubstrateQualificationIR:
+    value = _geometry_substrate_value_from_dict(payload)
+    validate_geometry_substrate_evidence(value)
+    return value
+
+
+def geometry_substrate_from_dict(
+    payload: Mapping[str, Any],
+) -> GeometrySubstrateQualificationIR:
+    value = _geometry_substrate_value_from_dict(payload)
     validate_geometry_substrate(value)
     return value

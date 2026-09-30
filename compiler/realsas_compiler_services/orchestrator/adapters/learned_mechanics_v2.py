@@ -71,6 +71,51 @@ def _skin_proposal(payload:dict)->SkinProposalIR:
     )
 
 
+def _assert_geppetto_surface_scope(ctx: dict, qualification) -> None:
+    row = next(
+        (
+            item
+            for item in ctx["ledger"].get("stages") or ()
+            if str(item.get("id") or "") == "15_RIGGING_SURFACE_QUALIFIED"
+        ),
+        None,
+    )
+    if row is None:
+        raise QualificationError("GEPPETTO_STAGE15_LEDGER_ROW_MISSING")
+    ledger_status = str(row.get("status") or "")
+    report = dict(qualification.qualification_report or {})
+    report_status = str(report.get("status") or "")
+
+    if ledger_status in {"PASS", "CACHE_HIT"}:
+        if report_status != "PASS":
+            raise QualificationError(
+                "GEPPETTO_PRODUCT_SURFACE_QUALIFICATION_STATUS_DRIFT"
+            )
+        return
+
+    if (
+        str(ctx["ledger"].get("execution_class") or "") == "DEMO_WITNESS"
+        and ledger_status == "PASS_DEMO_ONLY"
+        and report_status
+        == "DEMO_ONLY_RIGGING_SURFACE_ADMISSION__SCIENTIFIC_ADEQUACY_FAIL"
+        and report.get("substrate_adequacy_passed") is False
+        and report.get("demo_fallback_admitted") is True
+        and report.get("product_authority_claimed") is False
+    ):
+        demo = dict(ctx["run_manifest"].get("demo_execution") or {})
+        if (
+            demo.get("allow_stage14_scientific_fail_for_demo") is not True
+            or demo.get("product_authority_claimed") is not False
+        ):
+            raise QualificationError("GEPPETTO_DEMO_SURFACE_SCOPE_DRIFT")
+        return
+
+    raise QualificationError(
+        "GEPPETTO_STAGE15_SURFACE_NOT_ADMISSIBLE:"
+        f"{ledger_status}:{report_status}"
+    )
+
+
 def preregister_geppetto_fit_stage(ctx:dict)->dict:
     surface=rigging_surface_from_dict(
         stage_output_payload(ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1")
@@ -78,6 +123,7 @@ def preregister_geppetto_fit_stage(ctx:dict)->dict:
     qualification=rigging_surface_qualification_from_dict(
         stage_output_payload(ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceQualificationIR.v1")
     )
+    _assert_geppetto_surface_scope(ctx, qualification)
     prereg,out=build_fit_preregistration(
         ctx,lane="GEPPETTO",section_key="geppetto_fit",
         upstream_bindings={
@@ -222,9 +268,20 @@ def qualify_skin_stage(ctx:dict)->dict:
         max_influences=None if max_influences is None else int(max_influences),
     )
     root=ctx["run_root"]/"artifacts"/"32_SKIN_QUALIFIED"
+    q=dict(skin.qualification_report or {})
     return {"status":"PASS","outputs":[write_ir(root/"qualified_skin.json",skin,authority_class="QUALIFIED_SKIN")],
-        "diagnostics":{"skin_lineage_hash":skin.skin_lineage_hash,"row_count":len(skin.rows),
-                       "total_correction_l1":skin.qualification_report.get("total_correction_l1")}}
+        "diagnostics":{
+            "skin_lineage_hash":skin.skin_lineage_hash,
+            "row_count":len(skin.rows),
+            "total_correction_l1":q.get("total_correction_l1"),
+            "prediction_surface_coverage":q.get("prediction_surface_coverage"),
+            "supervision_coverage":q.get("supervision_coverage"),
+            "supervision_coverage_semantics":q.get("supervision_coverage_semantics"),
+            "row_confidence_available":q.get("row_confidence_available"),
+            "row_confidence_semantics":q.get("row_confidence_semantics"),
+            "uncovered_row_semantics":q.get("uncovered_row_semantics"),
+            "product_skin_evidence_complete":q.get("product_skin_evidence_complete"),
+        }}
 
 
 def seal_arachne_checkpoint_stage(ctx:dict)->dict:

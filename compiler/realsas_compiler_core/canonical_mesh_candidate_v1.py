@@ -466,7 +466,7 @@ def build_holeless_partitioned_dense_candidate(
     separate skin_support_coefficients metadata field restricts mechanical skin
     transfer to the owning component.
 
-    This is the product-form counterpart of the preregistered holeless topology
+    This is the product-form counterpart of the preregistered Knight holeless
     oracle: no source face is dropped and rest-area is conserved up to floating
     point tolerance.
     """

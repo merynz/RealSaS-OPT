@@ -1,0 +1,113 @@
+{
+  "code_signatures": {
+    "gsa_collapses_faces_to_edges": true,
+    "stage18_mints_clique_faces": true
+  },
+  "construction": {
+    "dense_faces": [
+      [
+        "A",
+        "B",
+        "D"
+      ],
+      [
+        "B",
+        "C",
+        "E"
+      ],
+      [
+        "A",
+        "C",
+        "F"
+      ]
+    ],
+    "missing_dense_face": [
+      "A",
+      "B",
+      "C"
+    ],
+    "pairwise_edges": [
+      [
+        "A",
+        "B"
+      ],
+      [
+        "A",
+        "C"
+      ],
+      [
+        "A",
+        "D"
+      ],
+      [
+        "A",
+        "F"
+      ],
+      [
+        "B",
+        "C"
+      ],
+      [
+        "B",
+        "D"
+      ],
+      [
+        "B",
+        "E"
+      ],
+      [
+        "C",
+        "E"
+      ],
+      [
+        "C",
+        "F"
+      ]
+    ]
+  },
+  "finding": {
+    "claim_boundary": "This proves pairwise adjacency is insufficient to preserve admitted 2-simplex incidence under the current Stage18 clique rule. It does not prescribe the replacement surface complex or final mesh algorithm.",
+    "class": "INFORMATION_LOSS_AND_HIGHER_ORDER_TOPOLOGY_INVENTION",
+    "confirmed": true,
+    "id": "GSA_FACE_INCIDENCE_LOST_THEN_REINVENTED_AS_CLIQUE"
+  },
+  "repo_head": "3d1a60b2eefaf270438db16aca489af9f20491ff",
+  "schema": "RealSaS.GSAFaceIncidenceCliqueAdversary.v1",
+  "source_hashes": {
+    "compiler/realsas_compiler_core/canonical_mesh_candidate_v1.py": "c9368b702c16c3003d3817d847872ff9d819ef7548ae35b8fcd2196bce5c91fc",
+    "compiler/realsas_compiler_core/substrate/scene_first_signed.py": "58cefba13bc4148dd81679253b6aeae740668153d43536794ee8ab0c5a4c7743"
+  },
+  "stage18_rule_result": {
+    "invented_face_count": 1,
+    "invented_faces": [
+      [
+        "A",
+        "B",
+        "C"
+      ]
+    ],
+    "minted_faces": [
+      [
+        "A",
+        "B",
+        "C"
+      ],
+      [
+        "A",
+        "B",
+        "D"
+      ],
+      [
+        "A",
+        "C",
+        "F"
+      ],
+      [
+        "B",
+        "C",
+        "E"
+      ]
+    ]
+  },
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED"
+}

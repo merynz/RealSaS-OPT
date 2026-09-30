@@ -5,6 +5,8 @@ import pytest
 from compiler.realsas_compiler_core.substrate.scene_first_signed import (
     ZERO_SURFACE_NORMAL_OPERATOR_ID,
     rigging_surface_from_scene_first_zero_mesh_v1,
+    robust_zero_surface_normals_v1,
+    topology_aware_zero_surface_normals_v2,
 )
 from models.geppetto.v2.geppetto_conditioning_v2 import GeppettoConditioningAdapterV2
 from models.iris.v3.zero_surface_decoder_v3 import extract_zero_surface_mesh_v3
@@ -84,3 +86,70 @@ def test_hidden_completion_nodes_are_typed_not_fabricated_as_observed():
     for node in completed:
         assert "MODEL_COMPLETED_SIGNED_ZERO_SURFACE" in node.validity_flags
         assert not node.raster_bindings
+
+
+def _two_close_orthogonal_sheets(n=13, offset=0.035):
+    axis = np.linspace(-0.6, 0.6, n, dtype=np.float64)
+    pts = []
+    hints = []
+    faces = []
+
+    # Sheet A: XY plane, +Z.
+    base_a = 0
+    for y in axis:
+        for x in axis:
+            pts.append((x, y, 0.0))
+            hints.append((0.0, 0.0, 1.0))
+    for j in range(n - 1):
+        for i in range(n - 1):
+            a = base_a + j * n + i
+            b = a + 1
+            d = a + n
+            cc = d + 1
+            faces.extend(((a, b, cc), (a, cc, d)))
+
+    # Sheet B: XZ plane, shifted slightly in Y, +Y. It is geometrically close
+    # to A around the crossing strip but has no shared vertices or faces.
+    base_b = len(pts)
+    for z in axis:
+        for x in axis:
+            pts.append((x, float(offset), z))
+            hints.append((0.0, 1.0, 0.0))
+    for j in range(n - 1):
+        for i in range(n - 1):
+            a = base_b + j * n + i
+            b = a + 1
+            d = a + n
+            cc = d + 1
+            # Winding chosen so raw cross is -Y; V2 must orient it from hint.
+            faces.extend(((a, cc, b), (a, d, cc)))
+
+    return (
+        np.asarray(pts, dtype=np.float64),
+        np.asarray(faces, dtype=np.int64),
+        np.asarray(hints, dtype=np.float64),
+    )
+
+
+def _normal_angle_deg(normals, hints):
+    n = np.asarray(normals, dtype=np.float64)
+    h = np.asarray(hints, dtype=np.float64)
+    n /= np.linalg.norm(n, axis=1, keepdims=True)
+    h /= np.linalg.norm(h, axis=1, keepdims=True)
+    return np.degrees(np.arccos(np.clip(np.sum(n * h, axis=1), -1.0, 1.0)))
+
+
+def test_topology_aware_v2_cannot_mix_spatially_close_disconnected_sheets():
+    points, faces, hints = _two_close_orthogonal_sheets()
+    v1 = robust_zero_surface_normals_v1(points, hints, k=32)
+    v2 = topology_aware_zero_surface_normals_v2(points, faces, hints)
+
+    e1 = _normal_angle_deg(v1, hints)
+    e2 = _normal_angle_deg(v2, hints)
+
+    # Euclidean kNN sees the other sheet near the crossing and tilts the fitted
+    # plane. The topology-local operator is exactly constrained to incident faces.
+    assert float(np.quantile(e1, 0.95)) > 5.0
+    assert float(np.max(e1)) > 10.0
+    assert float(np.quantile(e2, 0.95)) < 1e-5
+    assert float(np.max(e2)) < 1e-5

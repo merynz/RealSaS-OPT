@@ -1,0 +1,33 @@
+{
+  "component_aware_same_operator_oracle": {
+    "max_angle_error_deg": 0.0,
+    "mean_angle_error_deg": 0.0,
+    "near_contact_mean_angle_error_deg": 0.0,
+    "near_contact_p95_angle_error_deg": 0.0,
+    "p95_angle_error_deg": 0.0
+  },
+  "construction": {
+    "components_are_distinct": true,
+    "k": 64,
+    "minimum_offset": 0.012,
+    "points_per_sheet": 1089,
+    "relative_tilt_deg": 35.0,
+    "sheet_count": 2,
+    "spacing": 0.04
+  },
+  "current_global_knn": {
+    "max_angle_error_deg": 65.62431721101042,
+    "mean_angle_error_deg": 6.743346698107959,
+    "near_contact_mean_angle_error_deg": 16.98246488314583,
+    "near_contact_p95_angle_error_deg": 20.935532383796478,
+    "p95_angle_error_deg": 20.861637773940913
+  },
+  "finding": {
+    "claim_boundary": "Synthetic falsification of topology-blind Euclidean normal neighbourhoods; does not choose the production repair operator.",
+    "confirmed": true,
+    "id": "GSA_NORMAL_GLOBAL_KNN_CROSS_SHEET_CONTAMINATION"
+  },
+  "repo_head": "a62016abe581452f4feeef65dd1d389f5d34c231",
+  "schema": "RealSaS.GSANormalTopologyAdversary.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED"
+}

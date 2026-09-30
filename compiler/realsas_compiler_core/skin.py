@@ -64,8 +64,37 @@ def qualify_skin(
             raise QualificationError(f"skin aggregate correction exceeds bounded repair budget:{total_corr}")
         if corr>1e-12: corrected+=1
         qualified.append(QualifiedSkinRow(sid,norm,res,corr))
+    proposal_meta=dict(proposal.metadata or {})
+    declared_supervision_coverage=proposal_meta.get("supervision_coverage")
+    if declared_supervision_coverage is None:
+        declared_supervision_coverage=proposal_meta.get("teacher_coverage")
+    if declared_supervision_coverage is not None:
+        declared_supervision_coverage=float(declared_supervision_coverage)
+        if not isfinite(declared_supervision_coverage) or not (0.0 <= declared_supervision_coverage <= 1.0):
+            raise QualificationError("skin proposal supervision coverage invalid")
+    confidence_summary=proposal_meta.get("row_confidence_summary")
+    confidence_semantics=proposal_meta.get("row_confidence_semantics")
+    row_confidence_available=confidence_summary is not None or confidence_semantics is not None
     report={
         "row_count":len(qualified),
+        "prediction_surface_coverage":len(qualified)/max(len(surface_ids),1),
+        "supervision_coverage":declared_supervision_coverage,
+        "supervision_coverage_semantics":(
+            str(proposal_meta.get("supervision_coverage_semantics"))
+            if proposal_meta.get("supervision_coverage_semantics") is not None
+            else ("DECLARED_BY_PROPOSAL" if declared_supervision_coverage is not None else "NOT_DECLARED_BY_PROPOSAL")
+        ),
+        "row_confidence_available":bool(row_confidence_available),
+        "row_confidence_semantics":(
+            str(confidence_semantics) if confidence_semantics is not None else "NOT_DECLARED_BY_PROPOSAL"
+        ),
+        "uncovered_row_semantics":str(
+            proposal_meta.get("uncovered_row_semantics")
+            or "UNDECLARED_SUPERVISION_ROWS_REQUIRE_DOWNSTREAM_MECHANICAL_COMPATIBILITY_PROOF"
+        ),
+        "product_skin_evidence_complete":bool(
+            declared_supervision_coverage is not None and row_confidence_available
+        ),
         "corrected_row_count":corrected,
         "max_simplex_residual_before":max_res,
         "total_correction_l1":total_corr,

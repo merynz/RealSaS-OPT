@@ -5,7 +5,7 @@
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__CANONICAL_MESH_SHARED_DOMAIN__CAA",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
-  "pipeline_plan_sha256": "a41ccb9a157624fecc2177a05150646012577f443cc27938b7e93c1e0ff020e4",
+  "pipeline_plan_sha256": "be0067d78d5c1ecf51f5a0df2ee14e7a87ff0c44800ca66bbb5d5f8d5ad183cf",
   "status": "REOPENED_VISUAL_FIDELITY_REDTEAM__WITNESS_FORBIDDEN",
   "execution_enabled": false,
   "completed_count": 0,
@@ -604,6 +604,10 @@
     {
       "event": "PLAN_CACHE_SCOPE_CORRECTION",
       "note": "Stage41 now fingerprints observation manifest authority; Stage42 has no direct runtime manifest dependency; phantom PresentationTimelineIR title removed."
+    },
+    {
+      "event": "MAINLINE_NORMALIZATION_PLAN_REBIND_20260930",
+      "note": "Repository implementation-governance ledger rebound from a41ccb9a157624fecc2177a05150646012577f443cc27938b7e93c1e0ff020e4 to exact current 46-stage plan hash be0067d78d5c1ecf51f5a0df2ee14e7a87ff0c44800ca66bbb5d5f8d5ad183cf. No subject witness state or stage PASS was minted."
     }
   ],
   "metadata": {

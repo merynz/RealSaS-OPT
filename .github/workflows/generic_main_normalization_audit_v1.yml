@@ -42,7 +42,17 @@ jobs:
 
       - name: Current V2 implementation closure dry-run
         run: |
-          python3 tools/audit_generic_main_normalization.py             --baseline-ref origin/integration/generic-main-promotion-20260930             --research-ref origin/research/vf11-certified-adaptive-20260921             --report normalization_closure_dry_run.json
+          python3 tools/audit_generic_main_normalization.py \
+            --baseline-ref origin/integration/generic-main-promotion-20260930 \
+            --research-ref origin/research/vf11-certified-adaptive-20260921 \
+            --report normalization_closure_dry_run.json
+
+      - name: Derive exact mechanical geometry promotion slice
+        run: |
+          python3 tools/audit_mechanical_geometry_promotion_slice.py \
+            --baseline-ref origin/integration/generic-main-promotion-20260930 \
+            --research-ref origin/research/vf11-certified-adaptive-20260921 \
+            --report mechanical_geometry_promotion_slice.json
 
       - name: Fail if audit accidentally changed tracked implementation
         run: |
@@ -57,5 +67,6 @@ jobs:
             mechanical_geometry_lineage_from_main.json
             mechanical_geometry_lineage_from_integration.json
             normalization_closure_dry_run.json
+            mechanical_geometry_promotion_slice.json
           if-no-files-found: error
           retention-days: 14

@@ -16,8 +16,7 @@ jobs:
     timeout-minutes: 180
     env:
       REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
-      SOURCE_RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671
-      RUN_ID: SUBJECT2_KNIGHT_CURRENT_MAIN_RENDER_V1_20260930
+      RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671
       SUBJECT_ID: SUBJECT2_KNIGHT
       PYTHONPATH: .
       PYTHONHASHSEED: '0'
@@ -45,24 +44,52 @@ jobs:
       - name: Install pinned dependencies
         run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
 
-      - name: Prepare fresh current-main demo manifest from immutable Knight inputs
+      - name: Preserve historical ledger and prepare same-lineage current-main execution
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
-          import hashlib,json,os
+          import hashlib,json,os,shutil
           from pathlib import Path
-          authority=Path(os.environ["REALSAS_AUTHORITY_ROOT"])
-          source_root=authority/"runs"/os.environ["SOURCE_RUN_ID"]
-          root=authority/"runs"/os.environ["RUN_ID"]
-          if root.exists():
-              import shutil
-              shutil.rmtree(root)
-          root.mkdir(parents=True)
-          manifest=json.loads((source_root/"run_manifest.json").read_text())
-          manifest["run_id"]=os.environ["RUN_ID"]
-          manifest["subject_id"]=os.environ["SUBJECT_ID"]
 
+          authority=Path(os.environ["REALSAS_AUTHORITY_ROOT"])
+          root=authority/"runs"/os.environ["RUN_ID"]
+          manifest_path=root/"run_manifest.json"
+          if not manifest_path.is_file():
+              raise RuntimeError(f"RUN_MANIFEST_MISSING:{manifest_path}")
+
+          ledger_path=root/"ACTIVE_RUN_V2.json"
+          current_scope="REALSAS_V2_CURRENT_MAIN_KNIGHT_RENDER_DIAGNOSTIC"
+          already_current=False
+          if ledger_path.is_file():
+              existing=json.loads(ledger_path.read_text())
+              already_current=str(existing.get("architecture_scope") or "")==current_scope
+
+          if not already_current:
+              backup=authority/"historical_run_backups"/(os.environ["RUN_ID"]+"_PRE_CURRENT_MAIN_20260930")
+              backup.mkdir(parents=True,exist_ok=True)
+              if ledger_path.is_file():
+                  dst=backup/"ACTIVE_RUN_V2.json"
+                  if not dst.exists():
+                      shutil.move(str(ledger_path),str(dst))
+                  else:
+                      ledger_path.unlink()
+              artifacts=root/"artifacts"
+              if artifacts.exists():
+                  dst=backup/"artifacts"
+                  if not dst.exists():
+                      shutil.move(str(artifacts),str(dst))
+                  else:
+                      shutil.rmtree(artifacts)
+              print("HISTORICAL_RUN_STATE_BACKED_UP",backup)
+          else:
+              print("CURRENT_MAIN_RUN_STATE_RESUME")
+
+          manifest=json.loads(manifest_path.read_text())
+          if str(manifest.get("run_id") or "")!=os.environ["RUN_ID"]:
+              raise RuntimeError("EXACT_RUN_ID_LINEAGE_DRIFT")
+          if str(manifest.get("subject_id") or "")!=os.environ["SUBJECT_ID"]:
+              raise RuntimeError("EXACT_SUBJECT_ID_DRIFT")
 
           expected={"demo_idle_v1","demo_run_v1","demo_slash_v1"}
           sources=list(dict(manifest.get("motion") or {}).get("sources") or [])
@@ -93,8 +120,8 @@ jobs:
               manifest["motion"]=donor[1]
               print("MOTION_INPUT_REUSED_FROM_FRAGMENT",donor[0])
 
-          (root/"run_manifest.json").write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n")
-          print("FRESH_RUN_MANIFEST",root/"run_manifest.json")
+          manifest_path.write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n")
+          print("EXACT_RUN_ID_PRESERVED",os.environ["RUN_ID"])
           PY
 
       - name: Hydrate exact relative authority documents referenced by manifest
@@ -176,11 +203,16 @@ jobs:
           PY
           echo "PLAYER=$player" >> "$GITHUB_ENV"
 
-      - name: Initialize fresh 46-stage current-main demo ledger
+      - name: Initialize or resume exact-lineage current-main 46-stage demo ledger
         shell: bash
         run: |
           set -euo pipefail
-          python -m compiler.realsas_compiler_services.orchestrator.mainline init-run             --run-id "$RUN_ID"             --subject-id "$SUBJECT_ID"             --architecture-scope REALSAS_V2_CURRENT_MAIN_KNIGHT_RENDER_DIAGNOSTIC             --execution-class DEMO_WITNESS
+          ledger="$REALSAS_AUTHORITY_ROOT/runs/$RUN_ID/ACTIVE_RUN_V2.json"
+          if test -s "$ledger"; then
+            echo CURRENT_MAIN_LEDGER_RESUME
+          else
+            python -m compiler.realsas_compiler_services.orchestrator.mainline init-run --run-id "$RUN_ID" --subject-id "$SUBJECT_ID" --architecture-scope REALSAS_V2_CURRENT_MAIN_KNIGHT_RENDER_DIAGNOSTIC --execution-class DEMO_WITNESS
+          fi
           python -m compiler.realsas_compiler_services.orchestrator.mainline status --run-id "$RUN_ID"
 
       - name: Execute exact current-main DAG

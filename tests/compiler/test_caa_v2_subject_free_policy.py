@@ -9,6 +9,7 @@ import pytest
 
 from compiler.realsas_compiler_core.appearance_compile_v2 import (
     face_atlas_layout,
+    projected_tile_resolution_evidence,
     resolve_projected_tile_resolution,
     triangular_barycentric_samples,
 )
@@ -18,9 +19,11 @@ from compiler.realsas_compiler_core.appearance_color_v2 import (
     straight_srgb_rgba_u8_to_premultiplied_linear,
 )
 from compiler.realsas_compiler_core.appearance_completion_v2 import (
+    SurfaceSampleGraph,
     bounded_surface_harmonic_fill,
 )
 from compiler.realsas_compiler_core.appearance_quality_v2 import (
+    _bounded_edge_holdout_mask,
     adjacent_direction_transition_metrics,
     cross_view_source_compatibility_metrics,
     provenance_boundary_metrics,
@@ -95,6 +98,35 @@ def test_caa_policy_is_refrozen_and_tile_density_is_art_quality_driven():
         if row["tile_resolution"] < evidence["selected_tile_resolution"]:
             assert not (row["density_passed"] and row["capacity_passed"])
 
+def test_tile_resolution_unsatisfied_evidence_is_preserved():
+    candidate = SimpleNamespace(
+        vertices=(
+            SimpleNamespace(candidate_vertex_id="v0", P=(-0.9, -0.9, 0.0), component_id="c0"),
+            SimpleNamespace(candidate_vertex_id="v1", P=(0.9, -0.9, 0.0), component_id="c0"),
+            SimpleNamespace(candidate_vertex_id="v2", P=(-0.9, 0.9, 0.0), component_id="c0"),
+        ),
+        faces=(("v0", "v1", "v2"),),
+    )
+    masks = {view: np.ones((64, 64), dtype=bool) for view in range(8)}
+    evidence = projected_tile_resolution_evidence(
+        candidate=candidate,
+        cameras=tuple(_camera(view, 64) for view in range(8)),
+        foreground_mask_by_view=masks,
+        candidate_resolutions=(8, 12),
+        max_source_pixels_per_atlas_texel=0.01,
+        bleed_px=2,
+        max_atlas_resolution=8,
+    )
+    assert evidence["selected_tile_resolution"] is None
+    assert evidence["face_count"] == 1
+    assert evidence["worst_projected_barycentric_sigma_px"] > 0.0
+    assert len(evidence["candidates"]) == 2
+    assert not any(
+        row["density_passed"] and row["capacity_passed"]
+        for row in evidence["candidates"]
+    )
+
+
 def _holdout_fixture(*, adversarial: bool):
     tile_resolution = 8
     bary = triangular_barycentric_samples(tile_resolution)
@@ -136,12 +168,54 @@ def _holdout_fixture(*, adversarial: bool):
         "sample_positions": positions,
         "sample_component_index": component,
         "sample_face_index": np.asarray(face_index, dtype=np.int32),
+        "face_support_by_view": np.ones((8, face_count), dtype=np.float64),
         "face_count": face_count,
         "tile_resolution": tile_resolution,
     }
 
 
-def test_structured_holdout_uses_bounded_surface_completion_and_rejects_view_conflict():
+def test_source_anchored_holdout_respects_shipping_hop_budget_on_branching_graph():
+    graph = SurfaceSampleGraph(
+        offsets=np.asarray([0, 2, 4, 5, 6], dtype=np.int64),
+        indices=np.asarray([1, 2, 0, 3, 0, 1], dtype=np.int32),
+        edge_a=np.asarray([0, 0, 1], dtype=np.int32),
+        edge_b=np.asarray([1, 2, 3], dtype=np.int32),
+    )
+    candidate = np.asarray([True, True, True, False], dtype=bool)
+    observed = np.ones(4, dtype=bool)
+    selected = _bounded_edge_holdout_mask(
+        candidate_mask=candidate,
+        neighbors=graph,
+        max_region_samples=16,
+        max_graph_hops=2,
+        source_observed_mask=observed,
+    )
+    assert selected[0]
+    assert np.count_nonzero(selected) >= 1
+    assert np.count_nonzero(selected) <= 2
+
+    rgba = np.zeros((4, 4), dtype=np.uint8)
+    rgba[:, 3] = 255
+    provenance = np.zeros(4, dtype=np.uint8)
+    source_view = np.zeros(4, dtype=np.int16)
+    missing = selected.copy()
+    provenance[missing] = 255
+    source_view[missing] = -1
+    stats = bounded_surface_harmonic_fill(
+        rgba=rgba,
+        provenance=provenance,
+        source_view=source_view,
+        missing=missing,
+        observed_mask=~missing,
+        sample_component=np.zeros(4, dtype=np.int32),
+        neighbors=graph,
+        max_region_samples=16,
+        max_graph_hops=2,
+    )
+    assert stats["maximum_graph_hops"] <= 2
+
+
+def test_structured_holdout_prefers_local_harmonic_before_cross_view_donor():
     p = _policy()["completion_quality_policy"]
     good_args = _holdout_fixture(adversarial=False)
     good = structured_holdout_metrics(
@@ -149,15 +223,20 @@ def test_structured_holdout_uses_bounded_surface_completion_and_rejects_view_con
         band_fraction=p["holdout_band_fraction"],
         max_region_samples=p["max_local_harmonic_region_samples"],
         max_graph_hops=p["max_local_harmonic_graph_hops"],
+        donor_color_conflict_cut_rgba_l1=p["cross_view_color_conflict_cut_rgba_l1"],
+        donor_alpha_conflict_cut=p["cross_view_alpha_conflict_cut"],
     )
-    bad_args = _holdout_fixture(adversarial=True)
-    bad = structured_holdout_metrics(
-        **bad_args,
+    conflicting_donor_args = _holdout_fixture(adversarial=True)
+    conflicting_donor = structured_holdout_metrics(
+        **conflicting_donor_args,
         band_fraction=p["holdout_band_fraction"],
         max_region_samples=p["max_local_harmonic_region_samples"],
         max_graph_hops=p["max_local_harmonic_graph_hops"],
+        donor_color_conflict_cut_rgba_l1=p["cross_view_color_conflict_cut_rgba_l1"],
+        donor_alpha_conflict_cut=p["cross_view_alpha_conflict_cut"],
     )
-    assert good["mode"] == "SILHOUETTE_ADJACENT_BOUNDED_OCCLUSION_PATCHES_V3"
+    assert good["mode"] == "SILHOUETTE_ADJACENT_BOUNDED_OCCLUSION_PATCHES_V4_SOURCE_ANCHORED"
+    assert good["other_view_donor_selection"] == "MAX_FACE_SUPPORT_SAME_AS_STAGE21"
     assert good["sample_count"] >= p["min_structured_holdout_samples"]
     assert all(
         row["holdout_sample_count"] >= p["min_structured_holdout_samples_per_view"]
@@ -165,9 +244,14 @@ def test_structured_holdout_uses_bounded_surface_completion_and_rejects_view_con
     )
     assert good["mean_rgba_l1"] <= p["max_structured_holdout_mean_rgba_l1"]
     assert good["p95_rgba_l1"] <= p["max_structured_holdout_p95_rgba_l1"]
-    assert (
-        bad["mean_rgba_l1"] > p["max_structured_holdout_mean_rgba_l1"]
-        or bad["p95_rgba_l1"] > p["max_structured_holdout_p95_rgba_l1"]
+
+    # Deliberately contradictory other-view colors must not poison a region
+    # that same-view source-bounded harmonic completion can already solve.
+    assert conflicting_donor["mean_rgba_l1"] <= p["max_structured_holdout_mean_rgba_l1"]
+    assert conflicting_donor["p95_rgba_l1"] <= p["max_structured_holdout_p95_rgba_l1"]
+    assert all(
+        int(row["harmonic_completion"]["donor_fallback_recovered_count"]) == 0
+        for row in conflicting_donor["per_view"]
     )
 
 def _seam_fixture(*, adversarial: bool):
@@ -343,6 +427,49 @@ def test_cross_view_compatibility_measures_same_canonical_source_without_requiri
     assert bad["p95_premultiplied_rgba_l1"] > metrics[
         "p95_premultiplied_rgba_l1"
     ]
+
+
+def test_cross_view_appearance_gate_excludes_directional_silhouette_class_transition():
+    count = 32
+    valid = np.ones((8, count), dtype=bool)
+    rgba = np.zeros((8, count, 4), dtype=np.uint8)
+    rgba[:, :, :3] = 120
+    rgba[:, :, 3] = 255
+    component = np.zeros(count, dtype=np.int32)
+    source_class = np.ones((8, count), dtype=np.int8)
+
+    # Eight canonical samples are legitimately foreground in V0 but
+    # source-safe-background in V1. This is a directional silhouette/visibility
+    # transition, not an appearance-alpha contradiction.
+    rgba[1, 24:, :] = 0
+    source_class[1, 24:] = 0
+
+    legacy = cross_view_source_compatibility_metrics(
+        direct_valid=valid,
+        direct_rgba=rgba,
+        sample_component_index=component,
+    )
+    separated = cross_view_source_compatibility_metrics(
+        direct_valid=valid,
+        direct_rgba=rgba,
+        sample_component_index=component,
+        direct_source_silhouette_class=source_class,
+    )
+
+    pair_legacy = legacy["per_pair"][0]
+    pair = separated["per_pair"][0]
+    assert pair_legacy["alpha_conflict_fraction"] > 0.0
+    assert pair["raw_shared_direct_sample_count"] == count
+    assert pair["directional_silhouette_transition_sample_count"] == 8
+    assert pair["shared_direct_sample_count"] == 24
+    assert pair["alpha_conflict_fraction"] == 0.0
+    assert pair["color_conflict_fraction"] == 0.0
+    assert separated[
+        "directional_silhouette_transition_is_visibility_owner"
+    ] is True
+    assert separated[
+        "appearance_population_requires_same_source_silhouette_class"
+    ] is True
 
 
 def test_adjacent_direction_transition_metric_allows_smooth_artist_variation_and_exposes_single_view_shimmer():

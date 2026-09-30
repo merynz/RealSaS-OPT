@@ -1,0 +1,337 @@
+from __future__ import annotations
+
+from dataclasses import replace
+
+import numpy as np
+import pytest
+
+from compiler.realsas_compiler_core.appearance_authority_v2 import (
+    CAACompileArtifactIR,
+    CAA_PROVENANCE,
+    caa_compile_hash,
+    validate_caa_compile_artifact,
+)
+from compiler.realsas_compiler_core.appearance_bake_v2 import (
+    bake_direction_adaptive_atlas_bundle,
+    bake_direction_adaptive_atlas_pages,
+    bake_direction_adaptive_source_view_atlas_pages,
+    bake_direction_atlas,
+    bake_direction_source_view_atlas,
+    prepare_adaptive_paged_scatter,
+)
+from compiler.realsas_compiler_core.appearance_completion_v2 import (
+    bounded_surface_harmonic_fill,
+)
+from compiler.realsas_compiler_core.appearance_compile_v2 import (
+    triangular_barycentric_samples,
+)
+from compiler.realsas_compiler_core.appearance_quality_v2 import (
+    provenance_boundary_metrics,
+)
+
+
+def _oversized_line_fixture():
+    count = 6
+    rgba = np.zeros((count, 4), dtype=np.uint8)
+    rgba[0] = (64, 96, 128, 255)
+    provenance = np.full((count,), 255, dtype=np.uint8)
+    provenance[0] = CAA_PROVENANCE["DIRECT_SOURCE"]
+    source_view = np.full((count,), -1, dtype=np.int16)
+    source_view[0] = 0
+    missing = np.ones((count,), dtype=bool)
+    missing[0] = False
+    neighbors = tuple(
+        tuple(
+            nxt
+            for nxt in (index - 1, index + 1)
+            if 0 <= nxt < count
+        )
+        for index in range(count)
+    )
+    component = np.zeros((count,), dtype=np.int32)
+    return rgba, provenance, source_view, missing, neighbors, component
+
+
+def test_strict_harmonic_policy_still_rejects_oversized_region():
+    rgba, provenance, source_view, missing, neighbors, component = (
+        _oversized_line_fixture()
+    )
+    with pytest.raises(Exception, match="CAA_HARMONIC_REGION_TOO_LARGE"):
+        bounded_surface_harmonic_fill(
+            rgba=rgba,
+            provenance=provenance,
+            source_view=source_view,
+            missing=missing,
+            sample_component=component,
+            neighbors=neighbors,
+            max_region_samples=4,
+            max_graph_hops=8,
+        )
+
+
+def test_shipping_completion_abstains_without_inventing_color():
+    rgba, provenance, source_view, missing, neighbors, component = (
+        _oversized_line_fixture()
+    )
+    stats = bounded_surface_harmonic_fill(
+        rgba=rgba,
+        provenance=provenance,
+        source_view=source_view,
+        missing=missing,
+        sample_component=component,
+        neighbors=neighbors,
+        max_region_samples=4,
+        max_graph_hops=8,
+        abstain_on_policy_violation=True,
+        abstain_provenance_code=CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"],
+        abstain_source_view_value=-4,
+    )
+    assert stats["abstained_region_count"] == 1
+    assert stats["abstained_sample_count"] == 5
+    assert stats["abstained_reason_counts"]["REGION_TOO_LARGE"] == 1
+    assert np.all(
+        provenance[1:] == CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"]
+    )
+    assert np.all(source_view[1:] == -4)
+    assert np.all(rgba[1:] == 0)
+    assert int(provenance[0]) == CAA_PROVENANCE["DIRECT_SOURCE"]
+    assert int(source_view[0]) == 0
+
+
+def test_atlas_keeps_abstention_distinct_from_physical_padding():
+    tile_resolution = 4
+    per_face = tile_resolution * (tile_resolution + 1) // 2
+    rgba = np.zeros((3 * per_face, 4), dtype=np.uint8)
+    rgba[:, 3] = 255
+    provenance = np.full(
+        (3 * per_face,),
+        CAA_PROVENANCE["DIRECT_SOURCE"],
+        dtype=np.uint8,
+    )
+    source_view = np.zeros((3 * per_face,), dtype=np.int16)
+    provenance[per_face : 2 * per_face] = CAA_PROVENANCE[
+        "UNSUPPORTED_ABSTAIN"
+    ]
+    source_view[per_face : 2 * per_face] = -4
+    rgba[per_face : 2 * per_face] = 0
+
+    _atlas, prov, _uv, layout = bake_direction_atlas(
+        face_sample_rgba=rgba,
+        face_sample_provenance=provenance,
+        face_count=3,
+        tile_resolution=tile_resolution,
+        bleed_px=2,
+    )
+    donor = bake_direction_source_view_atlas(
+        face_sample_source_view=source_view,
+        face_count=3,
+        tile_resolution=tile_resolution,
+        bleed_px=2,
+    )
+    padding = np.iinfo(np.int16).min
+    assert np.any(prov == CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"])
+    assert np.any(donor == -4)
+    assert np.array_equal(prov == 255, donor == padding)
+
+    stride = int(layout["tile_stride"])
+    # Face 1 is the second tile in row zero.
+    face1 = (
+        slice(0, stride),
+        slice(stride, 2 * stride),
+    )
+    assert np.all(
+        prov[face1] == CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"]
+    )
+    assert np.all(donor[face1] == -4)
+
+
+def test_undefined_support_is_not_scored_as_defined_appearance_seam():
+    tile_resolution = 4
+    bary = triangular_barycentric_samples(tile_resolution)
+    tri = np.asarray(
+        ((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0)),
+        dtype=np.float64,
+    )
+    positions = bary @ tri
+    count = len(positions)
+    rgba = np.zeros((8, count, 4), dtype=np.uint8)
+    rgba[:, :, 3] = 255
+    provenance = np.zeros((8, count), dtype=np.uint8)
+    source_view = np.zeros((8, count), dtype=np.int16)
+
+    unsupported = positions[:, 0] > 0.45
+    provenance[:, unsupported] = CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"]
+    source_view[:, unsupported] = -4
+    rgba[:, unsupported, :3] = 255
+
+    unfiltered = provenance_boundary_metrics(
+        rgba=rgba,
+        provenance=provenance,
+        source_view=source_view,
+        sample_positions=positions,
+        sample_face_index=np.zeros(count, dtype=np.int32),
+        face_count=1,
+        tile_resolution=tile_resolution,
+    )
+    filtered = provenance_boundary_metrics(
+        rgba=rgba,
+        provenance=provenance,
+        source_view=source_view,
+        sample_positions=positions,
+        sample_face_index=np.zeros(count, dtype=np.int32),
+        face_count=1,
+        tile_resolution=tile_resolution,
+        excluded_provenance_codes=(
+            CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"],
+            255,
+        ),
+    )
+    assert unfiltered["boundary_pair_count"] > 0
+    assert filtered["boundary_pair_count"] < unfiltered["boundary_pair_count"]
+    assert tuple(filtered["excluded_provenance_codes"]) == (
+        CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"],
+        255,
+    )
+
+
+def test_global_completion_nodes_are_not_local_harmonic_boundaries():
+    # 0 is true source evidence, 1 is a local bounded gap, 2 is all-view
+    # unseen and belongs to C(p). Excluding node 2 from local_missing must not
+    # accidentally make it an observed harmonic boundary.
+    rgba = np.zeros((3, 4), dtype=np.uint8)
+    rgba[0] = (32, 64, 96, 255)
+    provenance = np.full((3,), 255, dtype=np.uint8)
+    provenance[0] = CAA_PROVENANCE["DIRECT_SOURCE"]
+    source_view = np.full((3,), -1, dtype=np.int16)
+    source_view[0] = 0
+    original_missing = np.asarray([False, True, True], dtype=bool)
+    globally_unseen = np.asarray([False, False, True], dtype=bool)
+    local_missing = original_missing & ~globally_unseen
+    local_observed = ~original_missing
+    neighbors = ((1,), (0, 2), (1,))
+    component = np.zeros((3,), dtype=np.int32)
+
+    stats = bounded_surface_harmonic_fill(
+        rgba=rgba,
+        provenance=provenance,
+        source_view=source_view,
+        missing=local_missing,
+        observed_mask=local_observed,
+        sample_component=component,
+        neighbors=neighbors,
+        max_region_samples=4,
+        max_graph_hops=2,
+        abstain_on_policy_violation=True,
+        abstain_provenance_code=CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"],
+        abstain_source_view_value=-4,
+    )
+    assert stats["abstained_sample_count"] == 0
+    assert provenance[1] == CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"]
+    assert source_view[1] == -2
+    assert provenance[2] == 255
+    assert source_view[2] == -1
+    assert np.all(rgba[2] == 0)
+
+
+def test_compile_accounting_includes_canonical_global_completion():
+    artifact = CAACompileArtifactIR(
+        backend_id="DETERMINISTIC_V1",
+        preregistration_binding_hash="p",
+        candidate_mesh_binding_hash="m",
+        surface_addressing_binding_hash="s",
+        appearance_domain_binding_hash="a",
+        output_direction_set_binding_hash="d",
+        compile_npz_path="/tmp/fixture.npz",
+        compile_npz_sha256="0" * 64,
+        face_count=1,
+        direction_count=8,
+        tile_resolution=4,
+        sample_count_per_face=1,
+        total_sample_count=8,
+        direct_source_sample_count=2,
+        other_view_source_sample_count=1,
+        compiled_local_harmonic_sample_count=1,
+        compile_hash="",
+        metadata={
+            "unsupported_abstain_sample_count": 2,
+            "canonical_global_completion_sample_count": 2,
+            "sample_count_mode": "UNIFORM_FACE_LATTICE_V1",
+        },
+    )
+    artifact = replace(artifact, compile_hash=caa_compile_hash(artifact))
+    validate_caa_compile_artifact(artifact)
+
+    drifted = replace(
+        artifact,
+        metadata={
+            **artifact.metadata,
+            "canonical_global_completion_sample_count": 0,
+        },
+    )
+    drifted = replace(drifted, compile_hash=caa_compile_hash(drifted))
+    with pytest.raises(
+        Exception,
+        match="CAA_COMPILE_PROVENANCE_ACCOUNTING_DRIFT",
+    ):
+        validate_caa_compile_artifact(drifted)
+
+
+def test_vectorized_adaptive_bundle_is_byte_equivalent_to_legacy_mapping():
+    resolutions = np.asarray([4, 6, 4], dtype=np.int32)
+    offsets = np.zeros(len(resolutions) + 1, dtype=np.int64)
+    offsets[1:] = np.cumsum(
+        resolutions.astype(np.int64)
+        * (resolutions.astype(np.int64) + 1)
+        // 2
+    )
+    count = int(offsets[-1])
+    rgba = np.arange(count * 4, dtype=np.uint8).reshape(count, 4)
+    provenance = np.arange(count, dtype=np.uint8) % 5
+    source_view = np.empty(count, dtype=np.int16)
+    encoding = np.asarray([0, 1, -2, -3, -4], dtype=np.int16)
+    source_view[:] = encoding[np.arange(count) % len(encoding)]
+
+    legacy_pages, legacy_prov, legacy_uv, legacy_face_page, legacy_layout = (
+        bake_direction_adaptive_atlas_pages(
+            face_sample_rgba=rgba,
+            face_sample_provenance=provenance,
+            face_tile_resolutions=resolutions,
+            face_sample_offsets=offsets,
+            bleed_px=2,
+            max_page_resolution=64,
+        )
+    )
+    legacy_source = bake_direction_adaptive_source_view_atlas_pages(
+        face_sample_source_view=source_view,
+        face_tile_resolutions=resolutions,
+        face_sample_offsets=offsets,
+        bleed_px=2,
+        max_page_resolution=64,
+    )
+    prepared = prepare_adaptive_paged_scatter(
+        face_tile_resolutions=resolutions,
+        face_sample_offsets=offsets,
+        bleed_px=2,
+        max_page_resolution=64,
+    )
+    (
+        pages,
+        prov,
+        source,
+        uv,
+        face_page,
+        layout,
+    ) = bake_direction_adaptive_atlas_bundle(
+        face_sample_rgba=rgba,
+        face_sample_provenance=provenance,
+        face_sample_source_view=source_view,
+        prepared_scatter=prepared,
+        chunk_faces=2,
+    )
+
+    assert np.array_equal(pages, legacy_pages)
+    assert np.array_equal(prov, legacy_prov)
+    assert np.array_equal(source, legacy_source)
+    assert np.array_equal(uv, legacy_uv)
+    assert np.array_equal(face_page, legacy_face_page)
+    assert layout == legacy_layout

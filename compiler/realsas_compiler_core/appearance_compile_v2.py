@@ -3,10 +3,15 @@ from __future__ import annotations
 """Deterministic mesh-domain Complete Appearance Authority compiler."""
 
 import math
+from time import perf_counter
 from typing import Mapping
 
 import numpy as np
 from .appearance_authority_v2 import CAA_PROVENANCE
+from .appearance_canonical_completion_v1 import (
+    build_all_view_unseen_canonical_completion,
+    prolongate_control_pm_to_adaptive_faces,
+)
 from .appearance_color_v2 import (
     bilinear_premultiplied_linear_rgba,
     premultiplied_linear_to_straight_srgb_u8,
@@ -18,6 +23,7 @@ from .appearance_completion_v2 import (
 )
 from .camera_geometry_v2 import project_points_xyz_v3
 from .types import QualificationError
+from .hashing import content_sha256
 from .visibility_v2 import (
     projected_xy_to_source_texel_xy,
     rasterize_visible_owner,
@@ -73,6 +79,206 @@ def face_atlas_layout(
         "sampling": "BILINEAR_PREMULTIPLIED_INTERNAL",
     }
 
+
+
+def face_atlas_paged_layout(
+    face_count: int,
+    *,
+    tile_resolution: int,
+    bleed_px: int,
+    max_page_resolution: int,
+) -> dict:
+    """Deterministic fixed-resolution paging for the unique-face atlas.
+
+    The numerical/art-quality tile resolution is preserved exactly. Paging is
+    only a storage/layout operation: every physical page remains within the
+    frozen max_page_resolution and no face silently receives a smaller tile.
+    """
+    faces = int(face_count)
+    resolution = int(tile_resolution)
+    bleed = int(bleed_px)
+    page_resolution = int(max_page_resolution)
+    if faces <= 0 or resolution < 4 or bleed < 1 or page_resolution < 1:
+        raise QualificationError("CAA_PAGED_ATLAS_LAYOUT_DIMENSION_INVALID")
+    stride = resolution + 2 * bleed
+    tiles_per_axis = page_resolution // stride
+    if tiles_per_axis <= 0:
+        raise QualificationError("CAA_PAGED_ATLAS_TILE_EXCEEDS_PAGE")
+    faces_per_page = int(tiles_per_axis * tiles_per_axis)
+    page_count = int(math.ceil(faces / float(faces_per_page)))
+    return {
+        "layout": "UNIQUE_FACE_BARYCENTRIC_PAGED_V1",
+        "face_count": faces,
+        "tile_resolution": resolution,
+        "bleed_px": bleed,
+        "tile_stride": stride,
+        "page_width": page_resolution,
+        "page_height": page_resolution,
+        "tiles_per_axis": int(tiles_per_axis),
+        "faces_per_page": faces_per_page,
+        "page_count": page_count,
+        "uv_origin": "TOP_LEFT",
+        "sampling": "BILINEAR_PREMULTIPLIED_INTERNAL",
+        "paging": "FIXED_RESOLUTION_PHYSICAL_PAGES",
+    }
+
+
+def face_paged_uv_array(layout: Mapping[str, int]) -> tuple[np.ndarray, np.ndarray]:
+    faces = int(layout["face_count"])
+    resolution = int(layout["tile_resolution"])
+    bleed = int(layout["bleed_px"])
+    stride = int(layout["tile_stride"])
+    tiles_per_axis = int(layout["tiles_per_axis"])
+    faces_per_page = int(layout["faces_per_page"])
+    width = float(layout["page_width"])
+    height = float(layout["page_height"])
+    if min(tiles_per_axis, faces_per_page) <= 0:
+        raise QualificationError("CAA_PAGED_ATLAS_LAYOUT_INVALID")
+    uv = np.zeros((faces, 3, 2), dtype=np.float64)
+    page_index = np.zeros((faces,), dtype=np.int32)
+    for face_index in range(faces):
+        page = face_index // faces_per_page
+        local_face = face_index % faces_per_page
+        tx = (local_face % tiles_per_axis) * stride
+        ty = (local_face // tiles_per_axis) * stride
+        page_index[face_index] = int(page)
+        points = (
+            (tx + bleed + 0.5, ty + bleed + 0.5),
+            (tx + bleed + resolution - 0.5, ty + bleed + 0.5),
+            (tx + bleed + 0.5, ty + bleed + resolution - 0.5),
+        )
+        for corner, (x, y) in enumerate(points):
+            uv[face_index, corner, 0] = float(x / width)
+            uv[face_index, corner, 1] = float(y / height)
+    return uv, page_index
+
+
+def adaptive_face_atlas_plan(
+    face_tile_resolutions: np.ndarray,
+    *,
+    bleed_px: int,
+    max_page_resolution: int,
+) -> dict:
+    """Deterministically pack mixed-resolution triangular face tiles.
+
+    Packing order is decreasing tile stride with face index as the exact tie
+    break. The returned UV/page addressing is complete runtime authority; the
+    per-face resolution remains compile/bake evidence and never changes source
+    art or the qualified mesh.
+    """
+    resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+    if resolutions.ndim != 1 or len(resolutions) <= 0 or np.any(resolutions < 4):
+        raise QualificationError("CAA_ADAPTIVE_ATLAS_RESOLUTION_INVALID")
+    bleed = int(bleed_px)
+    page_size = int(max_page_resolution)
+    if bleed < 1 or page_size < 1:
+        raise QualificationError("CAA_ADAPTIVE_ATLAS_POLICY_INVALID")
+
+    tiles = [
+        (int(resolution) + 2 * bleed, int(face_index), int(resolution))
+        for face_index, resolution in enumerate(resolutions)
+    ]
+    tiles.sort(key=lambda row: (-row[0], row[1]))
+    page = 0
+    x = 0
+    y = 0
+    row_height = 0
+    placements: list[tuple[int, int, int, int, int, int]] = []
+    for stride, face_index, resolution in tiles:
+        if stride > page_size:
+            raise QualificationError("CAA_ADAPTIVE_ATLAS_TILE_EXCEEDS_PAGE")
+        if x + stride > page_size:
+            x = 0
+            y += row_height
+            row_height = 0
+        if y + stride > page_size:
+            page += 1
+            x = 0
+            y = 0
+            row_height = 0
+        placements.append((face_index, page, x, y, stride, resolution))
+        x += stride
+        row_height = max(row_height, stride)
+
+    face_count = len(resolutions)
+    page_index = np.zeros((face_count,), dtype=np.int32)
+    tile_x = np.zeros((face_count,), dtype=np.int32)
+    tile_y = np.zeros((face_count,), dtype=np.int32)
+    tile_stride = np.zeros((face_count,), dtype=np.int32)
+    uv = np.zeros((face_count, 3, 2), dtype=np.float64)
+    placement_rows = []
+    for face_index, page_index_value, x0, y0, stride, resolution in placements:
+        page_index[face_index] = int(page_index_value)
+        tile_x[face_index] = int(x0)
+        tile_y[face_index] = int(y0)
+        tile_stride[face_index] = int(stride)
+        points = (
+            (x0 + bleed + 0.5, y0 + bleed + 0.5),
+            (x0 + bleed + resolution - 0.5, y0 + bleed + 0.5),
+            (x0 + bleed + 0.5, y0 + bleed + resolution - 0.5),
+        )
+        for corner, (px, py) in enumerate(points):
+            uv[face_index, corner, 0] = float(px / float(page_size))
+            uv[face_index, corner, 1] = float(py / float(page_size))
+        placement_rows.append(
+            {
+                "face_index": int(face_index),
+                "page_index": int(page_index_value),
+                "x": int(x0),
+                "y": int(y0),
+                "stride": int(stride),
+                "tile_resolution": int(resolution),
+            }
+        )
+
+    page_count = 1 + int(np.max(page_index, initial=0))
+    histogram = {
+        str(int(resolution)): int(np.count_nonzero(resolutions == int(resolution)))
+        for resolution in sorted(set(map(int, resolutions.tolist())))
+    }
+    total_tile_area = int(np.sum(tile_stride.astype(np.int64) ** 2))
+    layout = {
+        "layout": "UNIQUE_FACE_BARYCENTRIC_ADAPTIVE_PAGED_V1",
+        "face_count": int(face_count),
+        "bleed_px": bleed,
+        "page_width": page_size,
+        "page_height": page_size,
+        "page_count": int(page_count),
+        "maximum_tile_resolution": int(np.max(resolutions)),
+        "minimum_tile_resolution": int(np.min(resolutions)),
+        "selected_resolution_histogram": histogram,
+        "total_allocated_tile_area_texels": total_tile_area,
+        "packing_efficiency_vs_page_area": float(
+            total_tile_area / float(page_count * page_size * page_size)
+        ),
+        "placement_hash": content_sha256(placement_rows),
+        "uv_origin": "TOP_LEFT",
+        "sampling": "BILINEAR_PREMULTIPLIED_INTERNAL",
+        "paging": "PER_FACE_RESOLUTION_FIXED_PHYSICAL_PAGES_V1",
+    }
+    return {
+        "layout": layout,
+        "face_uv": uv,
+        "face_page_index": page_index,
+        "face_tile_x": tile_x,
+        "face_tile_y": tile_y,
+        "face_tile_stride": tile_stride,
+        "face_tile_resolution": resolutions.copy(),
+    }
+
+
+def adaptive_face_sample_offsets(face_tile_resolutions: np.ndarray) -> np.ndarray:
+    resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+    if resolutions.ndim != 1 or len(resolutions) <= 0 or np.any(resolutions < 4):
+        raise QualificationError("CAA_ADAPTIVE_SAMPLE_RESOLUTION_INVALID")
+    counts = (
+        resolutions.astype(np.int64)
+        * (resolutions.astype(np.int64) + 1)
+        // 2
+    )
+    offsets = np.zeros((len(resolutions) + 1,), dtype=np.int64)
+    offsets[1:] = np.cumsum(counts, dtype=np.int64)
+    return offsets
 
 def face_uv_array(layout: Mapping[str, int]) -> np.ndarray:
     faces = int(layout["face_count"])
@@ -145,7 +351,12 @@ def _candidate_vertex_id(vertex) -> str:
     return str(value)
 
 
-def _surface_sample_geometry(candidate, barycentric: np.ndarray):
+def _candidate_face_geometry_authority(
+    candidate,
+    *,
+    face_component_index_override: np.ndarray | None = None,
+    component_ids_override: tuple[str, ...] | None = None,
+):
     vertices = {
         _candidate_vertex_id(vertex): np.asarray(vertex.P, dtype=np.float64)
         for vertex in candidate.vertices
@@ -154,37 +365,170 @@ def _surface_sample_geometry(candidate, barycentric: np.ndarray):
         _candidate_vertex_id(vertex): str(vertex.component_id)
         for vertex in candidate.vertices
     }
-    positions = []
-    face_indices = []
-    component_ids = []
-    normals = []
-    for face_index, face in enumerate(candidate.faces):
+    face_rows = []
+    face_component_names = []
+    for face in candidate.faces:
         ids = tuple(map(str, face))
         if len(ids) != 3 or any(vertex_id not in vertices for vertex_id in ids):
             raise QualificationError("CAA_CANDIDATE_FACE_INVALID")
         component_set = {components[vertex_id] for vertex_id in ids}
         if len(component_set) != 1:
             raise QualificationError("CAA_FACE_CROSSES_COMPONENT")
+        face_rows.append(ids)
+        face_component_names.append(next(iter(component_set)))
+
+    if face_component_index_override is not None or component_ids_override is not None:
+        if face_component_index_override is None or component_ids_override is None:
+            raise QualificationError("CAA_APPEARANCE_COMPONENT_OVERRIDE_INCOMPLETE")
+        face_component_index = np.asarray(
+            face_component_index_override, dtype=np.int32
+        )
+        component_ids = tuple(map(str, component_ids_override))
+        if (
+            face_component_index.shape != (len(face_rows),)
+            or not component_ids
+            or len(set(component_ids)) != len(component_ids)
+            or np.any(face_component_index < 0)
+            or np.any(face_component_index >= len(component_ids))
+        ):
+            raise QualificationError("CAA_APPEARANCE_COMPONENT_OVERRIDE_INVALID")
+        return (
+            vertices,
+            tuple(face_rows),
+            face_component_index,
+            component_ids,
+        )
+
+    component_ids = tuple(sorted(set(face_component_names)))
+    if not component_ids:
+        raise QualificationError("CAA_COMPONENT_SET_EMPTY")
+    component_index = {
+        component_id: index for index, component_id in enumerate(component_ids)
+    }
+    face_component_index = np.asarray(
+        [component_index[value] for value in face_component_names],
+        dtype=np.int32,
+    )
+    return (
+        vertices,
+        tuple(face_rows),
+        face_component_index,
+        component_ids,
+    )
+
+
+def _surface_sample_geometry(
+    candidate,
+    barycentric: np.ndarray,
+    *,
+    face_component_index_override: np.ndarray | None = None,
+    component_ids_override: tuple[str, ...] | None = None,
+):
+    barycentric = np.asarray(barycentric, dtype=np.float64)
+    if barycentric.ndim != 2 or barycentric.shape[1] != 3:
+        raise QualificationError("CAA_BARYCENTRIC_SAMPLE_SHAPE_INVALID")
+    (
+        vertices,
+        face_rows,
+        face_component_index,
+        component_ids,
+    ) = _candidate_face_geometry_authority(
+        candidate,
+        face_component_index_override=face_component_index_override,
+        component_ids_override=component_ids_override,
+    )
+    face_count = len(face_rows)
+    per_face = len(barycentric)
+    sample_count = face_count * per_face
+    positions = np.empty((sample_count, 3), dtype=np.float64)
+    face_indices = np.empty((sample_count,), dtype=np.int32)
+    sample_component_index = np.empty((sample_count,), dtype=np.int32)
+    normals = np.empty((face_count, 3), dtype=np.float64)
+
+    for face_index, ids in enumerate(face_rows):
         xyz = np.stack([vertices[vertex_id] for vertex_id in ids], axis=0)
         normal = np.cross(xyz[1] - xyz[0], xyz[2] - xyz[0])
         norm = float(np.linalg.norm(normal))
         if not math.isfinite(norm) or norm <= 1e-12:
             raise QualificationError("CAA_FACE_DEGENERATE_BEFORE_COMPILE")
-        normal = normal / norm
-        sample_xyz = barycentric @ xyz
-        positions.append(sample_xyz)
-        face_indices.extend([face_index] * len(barycentric))
-        component_ids.extend([next(iter(component_set))] * len(barycentric))
-        normals.append(normal)
+        base = face_index * per_face
+        stop = base + per_face
+        positions[base:stop] = barycentric @ xyz
+        face_indices[base:stop] = face_index
+        sample_component_index[base:stop] = face_component_index[face_index]
+        normals[face_index] = normal / norm
+
     return (
-        np.concatenate(positions, axis=0).astype(np.float64),
-        np.asarray(face_indices, dtype=np.int32),
-        tuple(component_ids),
-        np.asarray(normals, dtype=np.float64),
+        positions,
+        face_indices,
+        sample_component_index,
+        component_ids,
+        normals,
     )
 
 
-def resolve_projected_tile_resolution(
+def _surface_sample_geometry_adaptive(
+    candidate,
+    face_tile_resolutions: np.ndarray,
+    *,
+    face_component_index_override: np.ndarray | None = None,
+    component_ids_override: tuple[str, ...] | None = None,
+):
+    resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+    if resolutions.shape != (len(candidate.faces),) or np.any(resolutions < 4):
+        raise QualificationError("CAA_ADAPTIVE_GEOMETRY_RESOLUTION_INVALID")
+    offsets = adaptive_face_sample_offsets(resolutions)
+    sample_count = int(offsets[-1])
+    (
+        vertices,
+        face_rows,
+        face_component_index,
+        component_ids,
+    ) = _candidate_face_geometry_authority(
+        candidate,
+        face_component_index_override=face_component_index_override,
+        component_ids_override=component_ids_override,
+    )
+
+    positions = np.empty((sample_count, 3), dtype=np.float64)
+    face_indices = np.empty((sample_count,), dtype=np.int32)
+    sample_component_index = np.empty((sample_count,), dtype=np.int32)
+    normals = np.empty((len(face_rows), 3), dtype=np.float64)
+    barycentric_cache: dict[int, np.ndarray] = {}
+
+    for face_index, ids in enumerate(face_rows):
+        xyz = np.stack([vertices[vertex_id] for vertex_id in ids], axis=0)
+        normal = np.cross(xyz[1] - xyz[0], xyz[2] - xyz[0])
+        norm = float(np.linalg.norm(normal))
+        if not math.isfinite(norm) or norm <= 1e-12:
+            raise QualificationError("CAA_FACE_DEGENERATE_BEFORE_COMPILE")
+        resolution = int(resolutions[face_index])
+        barycentric = barycentric_cache.get(resolution)
+        if barycentric is None:
+            barycentric = triangular_barycentric_samples(resolution)
+            barycentric_cache[resolution] = barycentric
+
+        base = int(offsets[face_index])
+        stop = int(offsets[face_index + 1])
+        if stop - base != len(barycentric):
+            raise QualificationError(
+                "CAA_ADAPTIVE_GEOMETRY_SAMPLE_ACCOUNTING_DRIFT"
+            )
+        positions[base:stop] = barycentric @ xyz
+        face_indices[base:stop] = face_index
+        sample_component_index[base:stop] = face_component_index[face_index]
+        normals[face_index] = normal / norm
+
+    return (
+        positions,
+        face_indices,
+        sample_component_index,
+        component_ids,
+        normals,
+        offsets,
+    )
+
+def projected_tile_resolution_evidence(
     *,
     candidate,
     cameras,
@@ -194,12 +538,22 @@ def resolve_projected_tile_resolution(
     bleed_px: int,
     max_atlas_resolution: int,
 ) -> dict:
+    """Resolve art-quality tile density independently from physical page count.
+
+    max_atlas_resolution is a physical page ceiling, not a reason to lower
+    source-preserving tile density. When a single atlas would exceed the cap,
+    deterministic fixed-resolution pages are used.
+    """
     resolutions = tuple(sorted(set(int(value) for value in candidate_resolutions)))
     if not resolutions or resolutions[0] < 4:
         raise QualificationError("CAA_TILE_CANDIDATES_INVALID")
     limit = float(max_source_pixels_per_atlas_texel)
+    page_resolution = int(max_atlas_resolution)
+    bleed = int(bleed_px)
     if not math.isfinite(limit) or limit <= 0.0:
         raise QualificationError("CAA_TILE_DENSITY_LIMIT_INVALID")
+    if page_resolution < 1 or bleed < 1:
+        raise QualificationError("CAA_TILE_PAGE_POLICY_INVALID")
 
     vertex_ids = [_candidate_vertex_id(vertex) for vertex in candidate.vertices]
     index = {vertex_id: i for i, vertex_id in enumerate(vertex_ids)}
@@ -258,52 +612,232 @@ def resolve_projected_tile_resolution(
 
     rows = []
     selected = None
+    selected_layout = None
     face_count = len(candidate.faces)
     for resolution in resolutions:
         source_pixels_per_atlas_texel = worst_sigma / float(resolution - 1)
-        layout = face_atlas_layout(
+        single_layout = face_atlas_layout(
             face_count,
             tile_resolution=resolution,
-            bleed_px=int(bleed_px),
+            bleed_px=bleed,
         )
+        stride = int(resolution + 2 * bleed)
+        tiles_per_axis = page_resolution // stride
+        capacity_passed = tiles_per_axis > 0
+        page_count = None
+        faces_per_page = 0
+        if capacity_passed:
+            paged = face_atlas_paged_layout(
+                face_count,
+                tile_resolution=resolution,
+                bleed_px=bleed,
+                max_page_resolution=page_resolution,
+            )
+            page_count = int(paged["page_count"])
+            faces_per_page = int(paged["faces_per_page"])
         density_passed = source_pixels_per_atlas_texel <= limit
-        capacity_passed = (
-            int(layout["width"]) <= int(max_atlas_resolution)
-            and int(layout["height"]) <= int(max_atlas_resolution)
-        )
         rows.append(
             {
                 "tile_resolution": resolution,
                 "worst_source_pixels_per_atlas_texel": source_pixels_per_atlas_texel,
                 "density_passed": bool(density_passed),
-                "atlas_width": int(layout["width"]),
-                "atlas_height": int(layout["height"]),
+                "single_page_atlas_width": int(single_layout["width"]),
+                "single_page_atlas_height": int(single_layout["height"]),
+                "physical_page_width": page_resolution,
+                "physical_page_height": page_resolution,
+                "page_count": page_count,
+                "faces_per_page": faces_per_page,
                 "capacity_passed": bool(capacity_passed),
             }
         )
         if selected is None and density_passed and capacity_passed:
             selected = resolution
+            selected_layout = paged
 
-    if selected is None:
-        raise QualificationError("CAA_TILE_DENSITY_OR_CAPACITY_UNSATISFIED")
-    selected_layout = face_atlas_layout(
-        face_count,
-        tile_resolution=selected,
-        bleed_px=int(bleed_px),
-    )
-    stride = int(selected_layout["tile_stride"])
-    per_axis = int(max_atlas_resolution) // stride
+    max_supported_face_count = 0
+    selected_page_count = 0
+    if selected is not None and selected_layout is not None:
+        selected_page_count = int(selected_layout["page_count"])
+        max_supported_face_count = int(
+            selected_layout["faces_per_page"] * selected_layout["page_count"]
+        )
+
     return {
         "mode": "PROJECTED_SOURCE_DENSITY_V1",
-        "selected_tile_resolution": int(selected),
+        "paging_mode": "FIXED_MAX_RESOLUTION_PAGES_V1",
+        "selected_tile_resolution": (
+            None if selected is None else int(selected)
+        ),
+        "selected_page_count": selected_page_count,
         "max_source_pixels_per_atlas_texel": limit,
+        "max_atlas_resolution": page_resolution,
+        "face_count": int(face_count),
         "worst_projected_barycentric_sigma_px": worst_sigma,
         "worst_view_index": int(worst_view),
         "worst_face_index": int(worst_face),
         "visible_face_observation_count": int(visible_face_observation_count),
-        "max_supported_face_count": int(per_axis * per_axis),
+        "max_supported_face_count": int(max_supported_face_count),
         "candidates": rows,
     }
+
+def projected_adaptive_face_tile_evidence(
+    *,
+    candidate,
+    cameras,
+    foreground_mask_by_view: Mapping[int, np.ndarray],
+    candidate_resolutions: tuple[int, ...],
+    max_source_pixels_per_atlas_texel: float,
+    bleed_px: int,
+    max_atlas_resolution: int,
+) -> dict:
+    """Measure per-face source-density requirements and deterministic page demand.
+
+    This is evidence only. It does not change compile sampling or asset layout.
+    Every face receives the smallest frozen candidate resolution whose projected
+    source footprint satisfies the same source-pixels-per-texel limit. Faces not
+    directly visible in the source observation set receive the minimum candidate
+    resolution and are reported separately.
+    """
+    resolutions=tuple(sorted(set(int(x) for x in candidate_resolutions)))
+    if not resolutions or resolutions[0]<4:
+        raise QualificationError("CAA_ADAPTIVE_TILE_CANDIDATES_INVALID")
+    limit=float(max_source_pixels_per_atlas_texel)
+    max_res=int(max_atlas_resolution)
+    bleed=int(bleed_px)
+    if not math.isfinite(limit) or limit<=0.0 or max_res<256 or bleed<1:
+        raise QualificationError("CAA_ADAPTIVE_TILE_POLICY_INVALID")
+
+    vertex_ids=[_candidate_vertex_id(vertex) for vertex in candidate.vertices]
+    index={vertex_id:i for i,vertex_id in enumerate(vertex_ids)}
+    xyz=np.asarray([vertex.P for vertex in candidate.vertices],dtype=np.float64)
+    face_count=len(candidate.faces)
+    per_face_sigma=np.zeros(face_count,dtype=np.float64)
+    observed=np.zeros(face_count,dtype=bool)
+
+    by_view={int(camera.view_index):camera for camera in cameras}
+    if set(by_view)!=set(range(8)):
+        raise QualificationError("CAA_ADAPTIVE_TILE_REQUIRES_V0_V7_CAMERAS")
+    for view in range(8):
+        mask=np.asarray(foreground_mask_by_view[view],dtype=bool)
+        camera=by_view[view]
+        visibility=rasterize_visible_owner(
+            candidate,camera,width=mask.shape[1],height=mask.shape[0]
+        )
+        owner=visibility.owner_face_index
+        face_ids=np.unique(owner[mask & (owner>=0)]).astype(np.int64)
+        if not len(face_ids):
+            continue
+        projected=np.asarray(project_points_xyz_v3(xyz,camera),dtype=np.float64)
+        for face_index in face_ids:
+            face=candidate.faces[int(face_index)]
+            ids=[index[str(vertex_id)] for vertex_id in face]
+            tri=projected[ids,:2]
+            matrix=np.asarray(
+                [
+                    [tri[1,0]-tri[0,0],tri[2,0]-tri[0,0]],
+                    [tri[1,1]-tri[0,1],tri[2,1]-tri[0,1]],
+                ],
+                dtype=np.float64,
+            )
+            sigma=float(np.max(np.linalg.svd(matrix,compute_uv=False)))
+            if not math.isfinite(sigma):
+                raise QualificationError("CAA_ADAPTIVE_TILE_PROJECTED_SCALE_NONFINITE")
+            observed[int(face_index)]=True
+            if sigma>per_face_sigma[int(face_index)]:
+                per_face_sigma[int(face_index)]=sigma
+
+    selected=np.full(face_count,-1,dtype=np.int32)
+    unsatisfied=np.zeros(face_count,dtype=bool)
+    minimum=resolutions[0]
+    for face_index in range(face_count):
+        if not observed[face_index]:
+            selected[face_index]=minimum
+            continue
+        sigma=float(per_face_sigma[face_index])
+        choice=None
+        for resolution in resolutions:
+            if sigma/float(resolution-1)<=limit:
+                choice=resolution
+                break
+        if choice is None:
+            unsatisfied[face_index]=True
+            selected[face_index]=resolutions[-1]
+        else:
+            selected[face_index]=int(choice)
+
+    histogram={str(res):int(np.count_nonzero(selected==res)) for res in resolutions}
+    plan=adaptive_face_atlas_plan(
+        selected,
+        bleed_px=bleed,
+        max_page_resolution=max_res,
+    )
+    layout=dict(plan["layout"])
+    offsets=adaptive_face_sample_offsets(selected)
+    adaptive_samples=int(offsets[-1])
+    worst_resolution=int(np.max(selected,initial=minimum))
+    uniform_worst_samples=int(
+        face_count * worst_resolution * (worst_resolution + 1) // 2
+    )
+    return {
+        "schema":"RealSaS.CAAAdaptiveFaceTileEvidence.v1",
+        "mode":"PROJECTED_SOURCE_DENSITY_PER_FACE_V1",
+        "face_count":int(face_count),
+        "observed_face_count":int(np.count_nonzero(observed)),
+        "unobserved_face_count":int(np.count_nonzero(~observed)),
+        "unsatisfied_face_count":int(np.count_nonzero(unsatisfied)),
+        "candidate_resolutions":list(resolutions),
+        "selected_resolution_histogram":histogram,
+        "selected_resolution_by_face":[int(value) for value in selected],
+        "max_source_pixels_per_atlas_texel":limit,
+        "bleed_px":bleed,
+        "max_page_resolution":max_res,
+        "total_allocated_tile_area_texels":int(
+            layout["total_allocated_tile_area_texels"]
+        ),
+        "page_area_texels":int(max_res*max_res),
+        "area_lower_bound_page_count":int(
+            math.ceil(
+                float(layout["total_allocated_tile_area_texels"])
+                / float(max_res*max_res)
+            )
+        ),
+        "deterministic_shelf_page_count":int(layout["page_count"]),
+        "packing_efficiency_vs_page_area":float(
+            layout["packing_efficiency_vs_page_area"]
+        ),
+        "maximum_observed_sigma_px":float(np.max(per_face_sigma,initial=0.0)),
+        "maximum_required_resolution":worst_resolution,
+        "minimum_required_resolution":int(np.min(selected,initial=minimum)),
+        "placement_hash":str(layout["placement_hash"]),
+        "sample_count_per_direction":adaptive_samples,
+        "uniform_worst_case_sample_count_per_direction":uniform_worst_samples,
+        "adaptive_sample_fraction_of_uniform_worst_case":float(
+            adaptive_samples / float(max(uniform_worst_samples,1))
+        ),
+    }
+
+def resolve_projected_tile_resolution(
+    *,
+    candidate,
+    cameras,
+    foreground_mask_by_view: Mapping[int, np.ndarray],
+    candidate_resolutions: tuple[int, ...],
+    max_source_pixels_per_atlas_texel: float,
+    bleed_px: int,
+    max_atlas_resolution: int,
+) -> dict:
+    evidence = projected_tile_resolution_evidence(
+        candidate=candidate,
+        cameras=cameras,
+        foreground_mask_by_view=foreground_mask_by_view,
+        candidate_resolutions=candidate_resolutions,
+        max_source_pixels_per_atlas_texel=max_source_pixels_per_atlas_texel,
+        bleed_px=bleed_px,
+        max_atlas_resolution=max_atlas_resolution,
+    )
+    if evidence["selected_tile_resolution"] is None:
+        raise QualificationError("CAA_TILE_DENSITY_OR_CAPACITY_UNSATISFIED")
+    return evidence
 
 
 def _circular_view_order(target: int) -> tuple[int, ...]:
@@ -318,11 +852,43 @@ def _circular_view_order(target: int) -> tuple[int, ...]:
     )
 
 
+def direct_source_and_donor_eligibility(
+    *,
+    in_bounds: np.ndarray,
+    visible: np.ndarray,
+    source_foreground: np.ndarray,
+    safe_foreground: np.ndarray,
+    safe_background: np.ndarray,
+    alpha_foreground: np.ndarray,
+    alpha_background: np.ndarray,
+    angle_safe: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Separate immutable direct observation from transferable donor safety.
+
+    Exact first-hit source foreground is direct authority even at a one-pixel
+    silhouette boundary or a grazing face angle. Erosion and normal support
+    remain donor-safety constraints for cross-view reuse. Safe transparent
+    background remains a defined direct observation but is never an appearance
+    donor.
+    """
+    direct_foreground = source_foreground & alpha_foreground
+    direct_background = safe_background & alpha_background
+    direct = in_bounds & visible & (direct_foreground | direct_background)
+    donor = (
+        direct
+        & safe_foreground
+        & alpha_foreground
+        & angle_safe
+    )
+    return direct, donor
+
+
 def select_other_view_donor_by_support(
     *,
     target_view_index: int,
     missing: np.ndarray,
     direct_valid: np.ndarray,
+    donor_valid: np.ndarray | None = None,
     sample_face_index: np.ndarray,
     face_support_by_view: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
@@ -335,6 +901,11 @@ def select_other_view_donor_by_support(
     target = int(target_view_index)
     missing = np.asarray(missing, dtype=bool)
     direct_valid = np.asarray(direct_valid, dtype=bool)
+    donor_valid = (
+        direct_valid
+        if donor_valid is None
+        else np.asarray(donor_valid, dtype=bool)
+    )
     sample_face = np.asarray(sample_face_index, dtype=np.int32)
     support = np.asarray(face_support_by_view, dtype=np.float64)
     if (
@@ -343,6 +914,8 @@ def select_other_view_donor_by_support(
         or direct_valid.ndim != 2
         or direct_valid.shape[0] != 8
         or direct_valid.shape[1] != len(missing)
+        or donor_valid.shape != direct_valid.shape
+        or np.any(donor_valid & ~direct_valid)
         or sample_face.shape != (len(missing),)
         or support.ndim != 2
         or support.shape[0] != 8
@@ -357,7 +930,7 @@ def select_other_view_donor_by_support(
     for donor in _circular_view_order(target):
         if donor == target:
             continue
-        eligible = missing & direct_valid[donor]
+        eligible = missing & donor_valid[donor]
         if not np.any(eligible):
             continue
         candidate_support = support[donor, sample_face]
@@ -368,25 +941,177 @@ def select_other_view_donor_by_support(
     return best_view, best_score
 
 
+def compatible_cross_view_foreground_donor_validity(
+    *,
+    direct_valid: np.ndarray,
+    donor_valid: np.ndarray,
+    direct_rgba: np.ndarray,
+    color_conflict_cut_rgba_l1: float,
+    alpha_conflict_cut: float,
+) -> np.ndarray:
+    """Fail-closed donor safety from already qualified source evidence.
+
+    Cross-view transfer is allowed only when all direct source evidence at the
+    canonical sample agrees that the locus is foreground and the foreground
+    observations are mutually compatible under the frozen cross-view conflict
+    cuts. Mixed foreground/background evidence is a directional silhouette
+    transition and therefore forbids donor transfer.
+    """
+    valid = np.asarray(direct_valid, dtype=bool)
+    donor = np.asarray(donor_valid, dtype=bool)
+    rgba = np.asarray(direct_rgba, dtype=np.uint8)
+    color_cut = float(color_conflict_cut_rgba_l1)
+    alpha_cut = float(alpha_conflict_cut)
+    if (
+        valid.ndim != 2
+        or valid.shape[0] != 8
+        or donor.shape != valid.shape
+        or rgba.shape != (8, valid.shape[1], 4)
+        or np.any(donor & ~valid)
+        or not (0.0 <= color_cut <= 1.0)
+        or not (0.0 <= alpha_cut <= 1.0)
+    ):
+        raise QualificationError("CAA_DONOR_COMPATIBILITY_INPUT_INVALID")
+
+    alpha = rgba[:, :, 3]
+    direct_foreground = valid & (alpha > 0)
+    direct_background = valid & (alpha == 0)
+
+    sample_safe = ~np.any(direct_background, axis=0)
+    for left in range(8):
+        for right in range(left + 1, 8):
+            shared = sample_safe & direct_foreground[left] & direct_foreground[right]
+            ids = np.flatnonzero(shared)
+            if not len(ids):
+                continue
+            left_pm = straight_srgb_rgba_u8_to_premultiplied_linear(
+                rgba[left, ids]
+            )
+            right_pm = straight_srgb_rgba_u8_to_premultiplied_linear(
+                rgba[right, ids]
+            )
+            color_error = np.mean(np.abs(left_pm - right_pm), axis=1)
+            alpha_error = (
+                np.abs(
+                    rgba[left, ids, 3].astype(np.float64)
+                    - rgba[right, ids, 3].astype(np.float64)
+                )
+                / 255.0
+            )
+            bad = (color_error > color_cut) | (alpha_error > alpha_cut)
+            if np.any(bad):
+                sample_safe[ids[bad]] = False
+
+    return donor & sample_safe[None, :]
+
+
 def compile_deterministic_caa(
     *,
     candidate,
     cameras,
     source_rgba_by_view: Mapping[int, np.ndarray],
     foreground_mask_by_view: Mapping[int, np.ndarray],
-    tile_resolution: int,
+    tile_resolution: int | None,
     source_lock_policy: Mapping[str, object],
     completion_quality_policy: Mapping[str, object] | None = None,
+    face_tile_resolutions: np.ndarray | None = None,
+    appearance_face_component_index: np.ndarray | None = None,
+    appearance_component_ids: tuple[str, ...] | None = None,
+    appearance_face_vertex_ids: tuple[tuple[str, str, str], ...] | None = None,
 ) -> dict:
-    barycentric = triangular_barycentric_samples(tile_resolution)
-    positions, sample_face, sample_component, face_normals = _surface_sample_geometry(
-        candidate, barycentric
-    )
-    sample_count = len(positions)
-    per_face_samples = len(barycentric)
+    """Compile deterministic CAA on uniform or per-face adaptive lattices.
+
+    Adaptive mode changes only sampling density/layout. Source locking, donor
+    selection, bounded harmonic completion and every quality threshold remain
+    identical to the uniform path.
+    """
     face_count = len(candidate.faces)
-    if sample_count != face_count * per_face_samples:
-        raise QualificationError("CAA_SAMPLE_ACCOUNTING_DRIFT")
+    adaptive = face_tile_resolutions is not None
+    if adaptive:
+        resolutions = np.asarray(face_tile_resolutions, dtype=np.int32)
+        if resolutions.shape != (face_count,) or np.any(resolutions < 4):
+            raise QualificationError("CAA_ADAPTIVE_COMPILE_RESOLUTION_INVALID")
+        (
+            positions,
+            sample_face,
+            sample_component_index,
+            component_ids,
+            face_normals,
+            face_sample_offsets,
+        ) = _surface_sample_geometry_adaptive(
+            candidate,
+            resolutions,
+            face_component_index_override=appearance_face_component_index,
+            component_ids_override=appearance_component_ids,
+        )
+        barycentric = None
+        barycentric_storage_mode = (
+            "RECONSTRUCT_FROM_FACE_RESOLUTION_AND_OFFSETS_V1"
+        )
+        sample_count = len(positions)
+        max_resolution = int(np.max(resolutions))
+        max_samples_per_face = max_resolution * (max_resolution + 1) // 2
+        sample_count_mode = "PER_FACE_ADAPTIVE_V1"
+    else:
+        if tile_resolution is None:
+            raise QualificationError("CAA_TILE_RESOLUTION_MISSING")
+        resolution = int(tile_resolution)
+        barycentric = triangular_barycentric_samples(resolution)
+        (
+            positions,
+            sample_face,
+            sample_component_index,
+            component_ids,
+            face_normals,
+        ) = _surface_sample_geometry(
+            candidate,
+            barycentric,
+            face_component_index_override=appearance_face_component_index,
+            component_ids_override=appearance_component_ids,
+        )
+        sample_count = len(positions)
+        per_face_samples = len(barycentric)
+        if sample_count != face_count * per_face_samples:
+            raise QualificationError("CAA_SAMPLE_ACCOUNTING_DRIFT")
+        resolutions = np.full((face_count,), resolution, dtype=np.int32)
+        face_sample_offsets = adaptive_face_sample_offsets(resolutions)
+        max_resolution = resolution
+        max_samples_per_face = per_face_samples
+        sample_count_mode = "UNIFORM_FACE_LATTICE_V1"
+        barycentric_storage_mode = "UNIFORM_PATTERN_EXPLICIT_V1"
+
+    # C(p) is solved once on a fixed low-resolution canonical control lattice
+    # and prolonged onto the exact adaptive per-face transport lattice. This
+    # keeps the global solve independent of atlas density while preserving the
+    # same qualified mesh topology.
+    canonical_control_resolution = 4
+    canonical_control_barycentric = triangular_barycentric_samples(
+        canonical_control_resolution
+    )
+    (
+        canonical_control_positions,
+        canonical_control_face,
+        canonical_control_component,
+        canonical_control_component_ids,
+        canonical_control_face_normals,
+    ) = _surface_sample_geometry(
+        candidate,
+        canonical_control_barycentric,
+        face_component_index_override=appearance_face_component_index,
+        component_ids_override=appearance_component_ids,
+    )
+    if tuple(canonical_control_component_ids) != tuple(component_ids):
+        raise QualificationError("CAA_CANONICAL_CONTROL_COMPONENT_DRIFT")
+    canonical_control_count = len(canonical_control_positions)
+    canonical_control_direct_valid = np.zeros(
+        (8, canonical_control_count), dtype=bool
+    )
+    canonical_control_direct_rgba = np.zeros(
+        (8, canonical_control_count, 4), dtype=np.uint8
+    )
+    canonical_control_face_support = np.zeros(
+        (8, face_count), dtype=np.float64
+    )
 
     min_cos = float(source_lock_policy["min_abs_normal_camera_cos"])
     erosion = int(source_lock_policy["boundary_safe_erosion_px"])
@@ -402,16 +1127,26 @@ def compile_deterministic_caa(
         raise QualificationError("CAA_COMPLETION_POLICY_INVALID")
 
     direct_valid = np.zeros((8, sample_count), dtype=bool)
+    direct_foreground_donor_valid = np.zeros(
+        (8, sample_count), dtype=bool
+    )
     direct_rgba = np.zeros((8, sample_count, 4), dtype=np.uint8)
-    direct_pm_linear = np.zeros((8, sample_count, 4), dtype=np.float64)
-    source_xy = np.full((8, sample_count, 2), np.nan, dtype=np.float64)
+    # Premultiplied-linear truth is required only where direct source evidence
+    # exists. Keep exact float64 values packed in deterministic view-major order
+    # instead of allocating a dense 8 x sample_count x 4 tensor dominated by
+    # unused zeros.
+    direct_pm_linear_chunks: list[np.ndarray] = []
+    # Stage24 structured holdout authority consumes source_xy as float32.
+    # Store it in that canonical consumer precision instead of carrying a
+    # redundant float64 copy across the multi-million-sample compile artifact.
+    source_xy = np.full((8, sample_count, 2), np.nan, dtype=np.float32)
     face_support_by_view = np.zeros((8, face_count), dtype=np.float64)
 
     camera_by_view = {int(camera.view_index): camera for camera in cameras}
     if set(camera_by_view) != set(range(8)):
         raise QualificationError("CAA_DETERMINISTIC_REQUIRES_V0_V7_CAMERAS")
 
-    samples_per_face = per_face_samples
+    source_projection_started = perf_counter()
     for view in range(8):
         camera = camera_by_view[view]
         image = np.asarray(source_rgba_by_view[view], dtype=np.uint8)
@@ -465,14 +1200,23 @@ def compile_deterministic_caa(
         forward = forward / forward_norm
         face_cos = np.abs(face_normals @ forward)
         face_support_by_view[view] = face_cos
-        angle_safe = np.repeat(face_cos >= min_cos, samples_per_face)
+        angle_safe = face_cos[sample_face] >= min_cos
 
-        appearance_support = (
-            (foreground_safe & alpha_foreground_safe)
-            | (background_safe & alpha_background_safe)
+        source_foreground = np.zeros(sample_count, dtype=bool)
+        if len(valid_index):
+            source_foreground[valid_index] = mask[y, x]
+        valid, donor_valid = direct_source_and_donor_eligibility(
+            in_bounds=in_bounds,
+            visible=visible,
+            source_foreground=source_foreground,
+            safe_foreground=foreground_safe,
+            safe_background=background_safe,
+            alpha_foreground=alpha_foreground_safe,
+            alpha_background=alpha_background_safe,
+            angle_safe=angle_safe,
         )
-        valid = in_bounds & visible & appearance_support & angle_safe
         direct_valid[view] = valid
+        direct_foreground_donor_valid[view] = donor_valid
         if np.any(valid):
             sampled_rgba, sampled_pm = bilinear_rgba_u8(
                 image,
@@ -480,98 +1224,349 @@ def compile_deterministic_caa(
                 return_premultiplied_linear=True,
             )
             direct_rgba[view, valid] = sampled_rgba
-            direct_pm_linear[view, valid] = sampled_pm
+            direct_pm_linear_chunks.append(
+                np.asarray(sampled_pm, dtype=np.float64).copy()
+            )
+
+        # Evaluate the same source/visibility contract on the canonical C(p)
+        # control lattice. The rasterized owner map is reused from the dense
+        # pass, so this adds projection/sampling work but not another geometry
+        # rasterization.
+        control_projected = np.asarray(
+            project_points_xyz_v3(canonical_control_positions, camera),
+            dtype=np.float64,
+        )
+        control_xy = control_projected[:, :2] - 0.5
+        control_ix = np.rint(control_xy[:, 0]).astype(np.int64)
+        control_iy = np.rint(control_xy[:, 1]).astype(np.int64)
+        control_in_bounds = (
+            (control_ix >= 0)
+            & (control_ix < image.shape[1])
+            & (control_iy >= 0)
+            & (control_iy < image.shape[0])
+            & np.isfinite(control_projected[:, 2])
+            & (control_projected[:, 2] > 0.0)
+        )
+        control_foreground_safe = np.zeros(
+            canonical_control_count, dtype=bool
+        )
+        control_background_safe = np.zeros(
+            canonical_control_count, dtype=bool
+        )
+        control_visible = np.zeros(canonical_control_count, dtype=bool)
+        control_alpha_foreground_safe = np.zeros(
+            canonical_control_count, dtype=bool
+        )
+        control_alpha_background_safe = np.zeros(
+            canonical_control_count, dtype=bool
+        )
+        control_ids = np.flatnonzero(control_in_bounds)
+        if len(control_ids):
+            cx = control_ix[control_ids]
+            cy = control_iy[control_ids]
+            control_foreground_safe[control_ids] = safe_foreground[cy, cx]
+            control_background_safe[control_ids] = safe_background[cy, cx]
+            control_visible[control_ids] = (
+                visibility.owner_face_index[cy, cx]
+                == canonical_control_face[control_ids]
+            )
+            control_alpha_foreground_safe[control_ids] = (
+                image[cy, cx, 3] >= min_alpha
+            )
+            control_alpha_background_safe[control_ids] = (
+                image[cy, cx, 3] == 0
+            )
+        control_face_cos = np.abs(canonical_control_face_normals @ forward)
+        canonical_control_face_support[view] = control_face_cos
+        control_angle_safe = (
+            control_face_cos[canonical_control_face] >= min_cos
+        )
+        control_source_foreground = np.zeros(
+            canonical_control_count, dtype=bool
+        )
+        if len(control_ids):
+            control_source_foreground[control_ids] = mask[
+                control_iy[control_ids], control_ix[control_ids]
+            ]
+        control_valid, _control_donor_valid = (
+            direct_source_and_donor_eligibility(
+                in_bounds=control_in_bounds,
+                visible=control_visible,
+                source_foreground=control_source_foreground,
+                safe_foreground=control_foreground_safe,
+                safe_background=control_background_safe,
+                alpha_foreground=control_alpha_foreground_safe,
+                alpha_background=control_alpha_background_safe,
+                angle_safe=control_angle_safe,
+            )
+        )
+        canonical_control_direct_valid[view] = control_valid
+        if np.any(control_valid):
+            canonical_control_direct_rgba[view, control_valid] = (
+                bilinear_rgba_u8(image, control_xy[control_valid])
+            )
+
+    source_projection_seconds = perf_counter() - source_projection_started
+    direct_pm_linear_packed = (
+        np.concatenate(direct_pm_linear_chunks, axis=0)
+        if direct_pm_linear_chunks
+        else np.empty((0, 4), dtype=np.float64)
+    )
+
+    canonical_graph_started = perf_counter()
+    canonical_control_graph = surface_sample_neighbors(
+        positions=canonical_control_positions,
+        face_count=face_count,
+        tile_resolution=canonical_control_resolution,
+        face_vertex_ids=(
+            appearance_face_vertex_ids
+            if appearance_face_vertex_ids is not None
+            else tuple(
+            tuple(map(str, face)) for face in candidate.faces
+        )
+        ),
+    )
+    canonical_graph_build_seconds = perf_counter() - canonical_graph_started
+    canonical_solve_started = perf_counter()
+    canonical_completion = build_all_view_unseen_canonical_completion(
+        direct_valid=canonical_control_direct_valid,
+        direct_rgba=canonical_control_direct_rgba,
+        face_support_by_view=canonical_control_face_support,
+        sample_face_index=canonical_control_face,
+        sample_component_index=canonical_control_component,
+        sample_positions=canonical_control_positions,
+        surface_graph=canonical_control_graph,
+    )
+    canonical_solve_seconds = perf_counter() - canonical_solve_started
+    canonical_prolongation_started = perf_counter()
+    dense_canonical_pm = prolongate_control_pm_to_adaptive_faces(
+        control_pm_linear=canonical_completion.solved_pm_linear,
+        face_tile_resolutions=resolutions,
+        control_resolution=canonical_control_resolution,
+    )
+    canonical_prolongation_seconds = (
+        perf_counter() - canonical_prolongation_started
+    )
+    if dense_canonical_pm.shape != (sample_count, 4):
+        raise QualificationError("CAA_CANONICAL_COMPLETION_DENSE_SHAPE_DRIFT")
+    dense_canonical_rgba = premultiplied_linear_to_straight_srgb_u8(
+        dense_canonical_pm
+    )
+    globally_unseen_dense = ~np.any(direct_valid, axis=0)
+    direct_count = int(np.count_nonzero(direct_valid))
+    if direct_pm_linear_packed.shape != (direct_count, 4):
+        raise QualificationError("CAA_DIRECT_PM_PACKED_ACCOUNTING_DRIFT")
+    direct_pm_linear_chunks.clear()
 
     rgba = np.zeros_like(direct_rgba)
-    provenance = np.full(
-        (8, sample_count),
-        255,
-        dtype=np.uint8,
-    )
+    provenance = np.full((8, sample_count), 255, dtype=np.uint8)
     source_view = np.full((8, sample_count), -1, dtype=np.int16)
+    dense_surface_graph_started = perf_counter()
     surface_neighbors = surface_sample_neighbors(
         positions=positions,
         face_count=face_count,
-        tile_resolution=tile_resolution,
+        tile_resolution=None if adaptive else int(max_resolution),
+        face_sample_offsets=face_sample_offsets if adaptive else None,
+        face_tile_resolutions=resolutions if adaptive else None,
+        face_vertex_ids=(
+            appearance_face_vertex_ids
+            if appearance_face_vertex_ids is not None
+            else tuple(
+            tuple(map(str, face)) for face in candidate.faces
+        )
+        ),
+    )
+    dense_surface_graph_build_seconds = (
+        perf_counter() - dense_surface_graph_started
     )
     completion_rows = []
 
+    sample_component_index = np.asarray(
+        sample_component_index, dtype=np.int32
+    )
+    if (
+        sample_component_index.shape != (sample_count,)
+        or np.any(sample_component_index < 0)
+        or np.any(sample_component_index >= len(component_ids))
+    ):
+        raise QualificationError("CAA_SAMPLE_COMPONENT_INDEX_INVALID")
+    component_count = len(component_ids)
+
+    donor_color_cut = float(
+        completion_policy.get("cross_view_color_conflict_cut_rgba_l1", 1.0)
+    )
+    donor_alpha_cut = float(
+        completion_policy.get("cross_view_alpha_conflict_cut", 1.0)
+    )
+    compatible_foreground_donor_valid = (
+        compatible_cross_view_foreground_donor_validity(
+            direct_valid=direct_valid,
+            donor_valid=direct_foreground_donor_valid,
+            direct_rgba=direct_rgba,
+            color_conflict_cut_rgba_l1=donor_color_cut,
+            alpha_conflict_cut=donor_alpha_cut,
+        )
+    )
+
+    direction_completion_started = perf_counter()
     for target in range(8):
         direct = direct_valid[target]
         rgba[target, direct] = direct_rgba[target, direct]
         provenance[target, direct] = CAA_PROVENANCE["DIRECT_SOURCE"]
         source_view[target, direct] = target
 
+        # Same-view source-bounded harmonic completion owns local gaps first.
+        # Cross-view transfer is a fallback only for regions that cannot be
+        # completed inside the frozen local region/hop budget.
         missing = ~direct
-        best_view, best_score = select_other_view_donor_by_support(
-            target_view_index=target,
-            missing=missing,
-            direct_valid=direct_valid,
-            sample_face_index=sample_face,
-            face_support_by_view=face_support_by_view,
-        )
-        source_take = missing & (best_view >= 0)
-        if np.any(source_take):
-            indices = np.flatnonzero(source_take)
-            donors = best_view[indices].astype(np.int64)
-            rgba[target, indices] = direct_rgba[donors, indices]
-            provenance[target, indices] = CAA_PROVENANCE["OTHER_VIEW_SOURCE"]
-            source_view[target, indices] = donors.astype(np.int16)
-            missing[indices] = False
-
-        if not np.any(provenance[target] != 255):
-            raise QualificationError("CAA_NO_SOURCE_OBSERVATION_ANYWHERE")
-
-        for component_id in sorted(set(sample_component)):
-            component_mask = np.asarray(
-                [value == component_id for value in sample_component],
-                dtype=bool,
-            )
-            if np.any(missing & component_mask) and not np.any(
-                (~missing) & component_mask
-            ):
-                raise QualificationError(
-                    "CAA_COMPONENT_WITHOUT_SOURCE_OBSERVATION"
-                )
-
+        local_missing = missing & ~globally_unseen_dense
+        local_observed = direct.copy()
         stats = bounded_surface_harmonic_fill(
             rgba=rgba[target],
             provenance=provenance[target],
             source_view=source_view[target],
-            missing=missing,
-            sample_component=sample_component,
+            missing=local_missing,
+            observed_mask=local_observed,
+            sample_component=sample_component_index,
             neighbors=surface_neighbors,
             max_region_samples=max_harmonic_region,
             max_graph_hops=max_harmonic_hops,
+            abstain_on_policy_violation=True,
+            abstain_provenance_code=CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"],
+            abstain_source_view_value=-4,
         )
-        completion_rows.append(
-            {
-                "target_view_index": target,
-                **stats,
-            }
-        )
-        if np.any(provenance[target] == 255):
-            raise QualificationError("CAA_TOTALITY_FAILURE_AFTER_HARMONIC_COMPILE")
 
+        donor_fallback = (
+            provenance[target] == CAA_PROVENANCE["UNSUPPORTED_ABSTAIN"]
+        )
+        donor_fallback_count = int(np.count_nonzero(donor_fallback))
+        if donor_fallback_count:
+            rgba[target, donor_fallback] = 0
+            provenance[target, donor_fallback] = 255
+            source_view[target, donor_fallback] = -1
+
+            best_view, _best_score = select_other_view_donor_by_support(
+                target_view_index=target,
+                missing=donor_fallback,
+                direct_valid=direct_valid,
+                donor_valid=compatible_foreground_donor_valid,
+                sample_face_index=sample_face,
+                face_support_by_view=face_support_by_view,
+            )
+            source_take = donor_fallback & (best_view >= 0)
+            if np.any(source_take):
+                indices = np.flatnonzero(source_take)
+                donors = best_view[indices].astype(np.int64)
+                rgba[target, indices] = direct_rgba[donors, indices]
+                provenance[target, indices] = CAA_PROVENANCE["OTHER_VIEW_SOURCE"]
+                source_view[target, indices] = donors.astype(np.int16)
+
+            donor_rejected = donor_fallback & ~source_take
+            if np.any(donor_rejected):
+                rgba[target, donor_rejected] = 0
+                provenance[target, donor_rejected] = CAA_PROVENANCE[
+                    "UNSUPPORTED_ABSTAIN"
+                ]
+                source_view[target, donor_rejected] = -4
+        else:
+            source_take = np.zeros(sample_count, dtype=bool)
+            donor_rejected = np.zeros(sample_count, dtype=bool)
+
+        # C(p) remains the sole owner for samples unseen in every source view.
+        global_take = (
+            (provenance[target] == 255)
+            & globally_unseen_dense
+        )
+        if np.any(global_take):
+            rgba[target, global_take] = dense_canonical_rgba[global_take]
+            provenance[target, global_take] = CAA_PROVENANCE[
+                "CANONICAL_GLOBAL_COMPLETION"
+            ]
+            source_view[target, global_take] = -3
+
+        completion_rows.append({
+            "target_view_index": target,
+            **stats,
+            "donor_fallback_candidate_count": donor_fallback_count,
+            "donor_fallback_recovered_count": int(np.count_nonzero(source_take)),
+            "donor_fallback_rejected_count": int(np.count_nonzero(donor_rejected)),
+            "canonical_global_completion_sample_count": int(
+                np.count_nonzero(global_take)
+            ),
+        })
+        if np.any(provenance[target] == 255):
+            raise QualificationError("CAA_PROVENANCE_UNCLASSIFIED_AFTER_COMPILE")
+        valid_codes = np.asarray(
+            tuple(sorted(CAA_PROVENANCE.values())),
+            dtype=np.uint8,
+        )
+        if np.any(~np.isin(provenance[target], valid_codes)):
+            raise QualificationError("CAA_PROVENANCE_CLASS_INVALID_AFTER_COMPILE")
+
+    direction_completion_seconds = (
+        perf_counter() - direction_completion_started
+    )
     counts = {
         name: int(np.count_nonzero(provenance == code))
         for name, code in CAA_PROVENANCE.items()
     }
     return {
+        "performance": {
+            "source_projection_and_lock_seconds": float(
+                source_projection_seconds
+            ),
+            "canonical_control_graph_build_seconds": float(
+                canonical_graph_build_seconds
+            ),
+            "canonical_variational_solve_seconds": float(
+                canonical_solve_seconds
+            ),
+            "canonical_prolongation_seconds": float(
+                canonical_prolongation_seconds
+            ),
+            "dense_surface_graph_build_seconds": float(
+                dense_surface_graph_build_seconds
+            ),
+            "directional_donor_and_local_completion_seconds": float(
+                direction_completion_seconds
+            ),
+        },
         "barycentric": barycentric,
         "sample_positions": positions,
         "sample_face_index": sample_face,
+        "face_sample_offsets": face_sample_offsets,
+        "face_tile_resolutions": resolutions,
         "direct_valid": direct_valid,
+        "direct_foreground_donor_valid": direct_foreground_donor_valid,
+        "direct_foreground_donor_valid_count": int(
+            np.count_nonzero(direct_foreground_donor_valid)
+        ),
         "direct_rgba": direct_rgba,
-        "direct_pm_linear": direct_pm_linear,
+        "face_support_by_view": face_support_by_view,
+        "direct_pm_linear_packed": direct_pm_linear_packed,
         "source_xy": source_xy,
         "rgba": rgba,
         "provenance": provenance,
         "source_view": source_view,
-        "component_ids": tuple(sorted(set(sample_component))),
-        "sample_component": tuple(sample_component),
+        "component_ids": component_ids,
+        "sample_component_index": sample_component_index,
         "counts": counts,
         "completion_rows": tuple(completion_rows),
+        "canonical_global_completion_metadata": canonical_completion.metadata(),
+        "canonical_global_completion_source_view_value": -3,
+        "canonical_control_resolution": canonical_control_resolution,
+        "globally_unseen_dense_sample_count": int(
+            np.count_nonzero(globally_unseen_dense)
+        ),
+        "unsupported_abstain_source_view_value": -4,
         "face_count": face_count,
-        "sample_count_per_face": per_face_samples,
+        "sample_count_mode": sample_count_mode,
+        "sample_count_per_face": int(max_samples_per_face),
+        "sample_count_per_direction": int(sample_count),
+        "maximum_tile_resolution": int(max_resolution),
+        "source_xy_storage_dtype": "float32",
+        "direct_pm_linear_storage_dtype": "float64",
+        "direct_pm_linear_storage_mode": "PACKED_DIRECT_VALID_VIEW_MAJOR_V1",
+        "barycentric_storage_mode": barycentric_storage_mode,
     }
+

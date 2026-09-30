@@ -19,6 +19,12 @@ CAA_PROVENANCE = {
     "DIRECT_SOURCE": 0,
     "OTHER_VIEW_SOURCE": 1,
     "COMPILED_LOCAL_HARMONIC": 2,
+    # Explicit Compiler abstention on source-unsupported potential surface.
+    # This is a render-fail provenance class, not generated appearance.
+    "UNSUPPORTED_ABSTAIN": 3,
+    # View-independent deterministic C(p) for canonical samples with no
+    # qualified source support in any of the eight input directions.
+    "CANONICAL_GLOBAL_COMPLETION": 4,
 }
 CAA_PROVENANCE_BY_CODE = {value: key for key, value in CAA_PROVENANCE.items()}
 
@@ -90,6 +96,52 @@ def validate_caa_preregistration(value: CAACompilePreregistrationIR) -> None:
         raise QualificationError("CAA_ATLAS_POLICY_INVALID")
     if str(compile_policy.get("atlas_layout")) != "UNIQUE_FACE_BARYCENTRIC_V1":
         raise QualificationError("CAA_ATLAS_LAYOUT_UNSUPPORTED")
+    strategy = str(
+        compile_policy.get("tile_resolution_strategy")
+        or "UNIFORM_FACE_LATTICE_V1"
+    )
+    if strategy == "SOURCE_VISUAL_MESH_V1":
+        visual_hash = str(
+            compile_policy.get("visual_mesh_set_binding_hash") or ""
+        )
+        if len(visual_hash) != 64:
+            raise QualificationError(
+                "CAA_VISUAL_MESH_SET_BINDING_HASH_INVALID"
+            )
+        if str(
+            compile_policy.get("visual_geometry_authority") or ""
+        ) != "SOURCE_ART_SILHOUETTE":
+            raise QualificationError(
+                "CAA_VISUAL_GEOMETRY_AUTHORITY_INVALID"
+            )
+        if (
+            compile_policy.get("mechanical_mesh_render_authority")
+            is not False
+        ):
+            raise QualificationError(
+                "CAA_VISUAL_MODE_MECHANICAL_RENDER_AUTHORITY_FORBIDDEN"
+            )
+    elif strategy == "PER_FACE_ADAPTIVE_V1":
+        resolutions = tuple(
+            int(item) for item in (compile_policy.get("face_tile_resolutions") or ())
+        )
+        if (
+            len(resolutions) != max_supported_face_count
+            or any(item < 4 or item > tile_resolution for item in resolutions)
+        ):
+            raise QualificationError("CAA_ADAPTIVE_PREREG_RESOLUTION_VECTOR_DRIFT")
+        expected_samples = sum(item * (item + 1) // 2 for item in resolutions)
+        if int(compile_policy.get("sample_count_per_direction", 0)) != expected_samples:
+            raise QualificationError("CAA_ADAPTIVE_PREREG_SAMPLE_ACCOUNTING_DRIFT")
+        if int(compile_policy.get("adaptive_atlas_page_count", 0)) <= 0:
+            raise QualificationError("CAA_ADAPTIVE_PREREG_PAGE_COUNT_INVALID")
+        placement_hash = str(
+            compile_policy.get("adaptive_atlas_placement_hash") or ""
+        )
+        if len(placement_hash) != 64:
+            raise QualificationError("CAA_ADAPTIVE_PREREG_PLACEMENT_HASH_INVALID")
+    elif strategy != "UNIFORM_FACE_LATTICE_V1":
+        raise QualificationError("CAA_TILE_RESOLUTION_STRATEGY_UNSUPPORTED")
     source_policy = dict(value.source_lock_policy)
     angle = float(source_policy.get("min_abs_normal_camera_cos", -1.0))
     erosion = int(source_policy.get("boundary_safe_erosion_px", -1))
@@ -138,6 +190,16 @@ def build_caa_preregistration(
             "internal_filtering": "PREMULTIPLIED_ALPHA",
             "transport_png_may_be_straight_alpha": True,
             "appearance_is_coequal_product_authority": True,
+            "source_owned_visual_mesh_mode": (
+                str(dict(compile_policy).get("tile_resolution_strategy") or "")
+                == "SOURCE_VISUAL_MESH_V1"
+            ),
+            "mechanical_mesh_render_authority": (
+                False
+                if str(dict(compile_policy).get("tile_resolution_strategy") or "")
+                == "SOURCE_VISUAL_MESH_V1"
+                else True
+            ),
         },
     )
     value = replace(value, preregistration_hash=caa_preregistration_hash(value))
@@ -187,17 +249,111 @@ def validate_caa_compile_artifact(value: CAACompileArtifactIR) -> None:
         or value.sample_count_per_face <= 0
     ):
         raise QualificationError("CAA_COMPILE_DIMENSION_INVALID")
+    metadata = dict(value.metadata or {})
+    unsupported = int(metadata.get("unsupported_abstain_sample_count") or 0)
+    canonical_global = int(
+        metadata.get("canonical_global_completion_sample_count") or 0
+    )
+    if unsupported < 0:
+        raise QualificationError("CAA_COMPILE_UNSUPPORTED_COUNT_INVALID")
+    if canonical_global < 0:
+        raise QualificationError(
+            "CAA_COMPILE_CANONICAL_GLOBAL_COUNT_INVALID"
+        )
     counted = (
         value.direct_source_sample_count
         + value.other_view_source_sample_count
         + value.compiled_local_harmonic_sample_count
+        + canonical_global
+        + unsupported
     )
     if counted != value.total_sample_count:
         raise QualificationError("CAA_COMPILE_PROVENANCE_ACCOUNTING_DRIFT")
-    if value.total_sample_count != (
-        value.face_count * value.direction_count * value.sample_count_per_face
-    ):
-        raise QualificationError("CAA_COMPILE_TOTALITY_ACCOUNTING_DRIFT")
+
+    pm_storage_mode = str(
+        metadata.get("direct_pm_linear_storage_mode")
+        or "DENSE_ALL_SAMPLES_V1"
+    )
+    if pm_storage_mode not in {
+        "DENSE_ALL_SAMPLES_V1",
+        "PACKED_DIRECT_VALID_VIEW_MAJOR_V1",
+    }:
+        raise QualificationError("CAA_COMPILE_DIRECT_PM_STORAGE_MODE_UNSUPPORTED")
+    pm_dtype = str(metadata.get("direct_pm_linear_storage_dtype") or "")
+    if pm_dtype and pm_dtype != "float64":
+        raise QualificationError("CAA_COMPILE_DIRECT_PM_DTYPE_POLICY_DRIFT")
+    source_xy_dtype = str(metadata.get("source_xy_storage_dtype") or "")
+    if source_xy_dtype and source_xy_dtype not in {"float32", "float64"}:
+        raise QualificationError("CAA_COMPILE_SOURCE_XY_DTYPE_POLICY_DRIFT")
+
+    compile_array_schema = str(metadata.get("compile_array_schema") or "")
+    if compile_array_schema and compile_array_schema not in {
+        "RealSaS.CAACompileArrays.v2",
+        "RealSaS.CAACompileArrays.v3",
+        "RealSaS.VisualAppearanceCompileArrays.v1",
+    }:
+        raise QualificationError("CAA_COMPILE_ARRAY_SCHEMA_UNSUPPORTED")
+    barycentric_storage_mode = str(
+        metadata.get("barycentric_storage_mode") or ""
+    )
+    if barycentric_storage_mode and barycentric_storage_mode not in {
+        "UNIFORM_PATTERN_EXPLICIT_V1",
+        "PER_SAMPLE_EXPLICIT_LEGACY_V1",
+        "RECONSTRUCT_FROM_FACE_RESOLUTION_AND_OFFSETS_V1",
+    }:
+        raise QualificationError(
+            "CAA_COMPILE_BARYCENTRIC_STORAGE_MODE_UNSUPPORTED"
+        )
+
+    sample_mode = str(metadata.get("sample_count_mode") or "UNIFORM_FACE_LATTICE_V1")
+    if sample_mode == "SOURCE_RASTER_DIRECT_V1":
+        if metadata.get("source_owned_visual_mesh_mode") is not True:
+            raise QualificationError(
+                "CAA_VISUAL_COMPILE_MODE_METADATA_MISSING"
+            )
+        if value.other_view_source_sample_count != 0:
+            raise QualificationError(
+                "CAA_VISUAL_COMPILE_OTHER_VIEW_FORBIDDEN"
+            )
+        if value.compiled_local_harmonic_sample_count != 0:
+            raise QualificationError(
+                "CAA_VISUAL_COMPILE_HARMONIC_FORBIDDEN"
+            )
+        if canonical_global != 0 or unsupported != 0:
+            raise QualificationError(
+                "CAA_VISUAL_COMPILE_COMPLETION_FORBIDDEN"
+            )
+        if value.direct_source_sample_count != value.total_sample_count:
+            raise QualificationError(
+                "CAA_VISUAL_COMPILE_NOT_ALL_DIRECT_SOURCE"
+            )
+        visual_hash = str(
+            metadata.get("visual_mesh_set_binding_hash") or ""
+        )
+        if len(visual_hash) != 64:
+            raise QualificationError(
+                "CAA_VISUAL_COMPILE_MESH_BINDING_INVALID"
+            )
+    elif sample_mode == "PER_FACE_ADAPTIVE_V1":
+        per_direction = int(metadata.get("sample_count_per_direction") or 0)
+        maximum_resolution = int(metadata.get("maximum_tile_resolution") or 0)
+        if (
+            per_direction <= 0
+            or maximum_resolution != int(value.tile_resolution)
+            or value.total_sample_count != value.direction_count * per_direction
+        ):
+            raise QualificationError("CAA_COMPILE_ADAPTIVE_TOTALITY_ACCOUNTING_DRIFT")
+        histogram = dict(metadata.get("selected_resolution_histogram") or {})
+        if not histogram or sum(int(v) for v in histogram.values()) != value.face_count:
+            raise QualificationError("CAA_COMPILE_ADAPTIVE_HISTOGRAM_DRIFT")
+    elif sample_mode == "UNIFORM_FACE_LATTICE_V1":
+        if value.total_sample_count != (
+            value.face_count * value.direction_count * value.sample_count_per_face
+        ):
+            raise QualificationError("CAA_COMPILE_TOTALITY_ACCOUNTING_DRIFT")
+    else:
+        raise QualificationError("CAA_COMPILE_SAMPLE_COUNT_MODE_UNSUPPORTED")
+
     if value.compile_hash != caa_compile_hash(value):
         raise QualificationError("CAA_COMPILE_HASH_MISMATCH")
 

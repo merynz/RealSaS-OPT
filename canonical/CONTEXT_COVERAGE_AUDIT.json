@@ -12,8 +12,8 @@
   "explained_high_signal_count": 344,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 154,
-  "safe_default_evidence_only_branch_count": 150,
+  "live_branch_count": 158,
+  "safe_default_evidence_only_branch_count": 154,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -115,6 +115,12 @@
     {
       "name": "audit/knight-rest-visual-owner-20260930",
       "sha": "643714de28999a7de9d0b25733a290136dc374c7",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "backup/main-normalized-20260930-3529344",
+      "sha": "3529344ef3045e0f2d634b175aae2aed6ec05536",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -371,6 +377,12 @@
       "reason": "explicit authority-map override"
     },
     {
+      "name": "fix/final-main-closure-20260930",
+      "sha": "f3762db51ca26ee090b85c982c601dd0e7f667bc",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "fix/motion-v2-root-frame-20260919",
       "sha": "1ec74be48ab4708834663ea214a6fab79bd0b991",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -432,7 +444,7 @@
     },
     {
       "name": "integration/generic-main-finalization-20260930",
-      "sha": "bbb19a56ef948f137d6786de2902adc38dc578a2",
+      "sha": "92de05292b05e4ae8aaab3eed53c515b5eef5929",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -486,7 +498,7 @@
     },
     {
       "name": "main",
-      "sha": "9791a7b59a769729afd8897843175a32ace0aacc",
+      "sha": "e6c91184d6d877bd19980832a561e94a746ca7ce",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -557,6 +569,12 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "ops/current-main-knight-render-20260930",
+      "sha": "d0d2de09ee005fe8661154df39013e904a9a3813",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "ops/knight-authority-inventory-20260919",
       "sha": "5912a2cd042cc050c36ae1a90648ac2f06f63e37",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -565,6 +583,12 @@
     {
       "name": "ops/knight-stage09-15-continuation-20260919",
       "sha": "a431a35d613b12066d55275c5b036e281f0994d1",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "ops/main-knight-render-20260930",
+      "sha": "0a44ef505e6ec04ba7d361f96cb4a843b22b1357",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -792,7 +816,7 @@
     },
     {
       "name": "research/vf11-certified-adaptive-20260921",
-      "sha": "6ed060351512a5f76a206acce011b585f48b1768",
+      "sha": "a1d633a7b01a03c3161791c01fd4d949046f5ce9",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

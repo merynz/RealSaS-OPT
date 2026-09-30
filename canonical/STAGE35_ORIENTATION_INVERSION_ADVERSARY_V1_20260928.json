@@ -1,0 +1,35 @@
+{
+  "construction": "unit right triangle reflected across X in its rest tangent plane; edge lengths and singular values are unchanged while orientation reverses",
+  "finding": {
+    "claim_boundary": "This adversary proves an information-loss class in the Stage35 compatibility metric. It does not claim the known Knight smear offenders were missed; those are already classified unsafe by other distortion terms.",
+    "class": "IMPLEMENTATION_DEVIATION_FROM_DYNAMIC_NO_INVERSION_CONTRACT",
+    "confirmed": true,
+    "id": "STAGE35_SKIN_TOPOLOGY_METRICS_DROP_ORIENTATION_SIGN",
+    "mechanism": "Stage35 compatibility uses singular-value area/condition plus unsigned edge ratios. A reflection has identical values to an isometry, so a pure inversion can pass these metrics unless another independent gate catches it.",
+    "owner": "STAGE35_SKIN_TOPOLOGY_COMPATIBILITY",
+    "severity": "P0"
+  },
+  "orientation": {
+    "inverted": true,
+    "normal_dot": -1.0,
+    "posed_normal": [
+      0.0,
+      0.0,
+      -1.0
+    ],
+    "rest_normal": [
+      0.0,
+      0.0,
+      1.0
+    ]
+  },
+  "repo_head": "0a9c22a595269f57db3d16516fe87ec7b26cd3c7",
+  "schema": "RealSaS.Stage35OrientationInversionAdversary.v1",
+  "stage35_current_metrics": {
+    "area_ratio": 1.0,
+    "condition_number": 1.0,
+    "max_edge_ratio": 1.0,
+    "min_edge_ratio": 1.0
+  },
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED"
+}

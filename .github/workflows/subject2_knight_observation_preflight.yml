@@ -118,24 +118,36 @@ jobs:
           walk(manifest)
           branches=["origin/audit/knight-rest-visual-owner-20260930","origin/research/vf11-certified-adaptive-20260921"]
           hydrated=0
+          workspace=Path(os.environ["GITHUB_WORKSPACE"]).resolve()
           for rel,expected in sorted(refs.items()):
-              if rel.startswith("$REALSAS_AUTHORITY_ROOT/") or Path(rel).is_absolute():
+              if rel.startswith("$REALSAS_AUTHORITY_ROOT/"):
                   continue
-              path=Path(rel)
+              raw=Path(rel).expanduser()
+              if raw.is_absolute():
+                  try:
+                      repo_rel=raw.resolve().relative_to(workspace)
+                  except ValueError:
+                      # External immutable data under authority root is already
+                      # materialized and must not be copied into the checkout.
+                      continue
+                  path=workspace/repo_rel
+              else:
+                  repo_rel=raw
+                  path=workspace/repo_rel
               if path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest()==expected:
                   continue
               payload=None
               source=None
               for ref in branches:
-                  p=subprocess.run(["git","show",f"{ref}:{rel}"],capture_output=True)
-                  if p.returncode==0 and hashlib.sha256(p.stdout).hexdigest()==expected:
-                      payload=p.stdout; source=ref; break
+                  q=subprocess.run(["git","show",f"{ref}:{repo_rel.as_posix()}"],capture_output=True)
+                  if q.returncode==0 and hashlib.sha256(q.stdout).hexdigest()==expected:
+                      payload=q.stdout; source=ref; break
               if payload is None:
-                  raise RuntimeError(f"RELATIVE_AUTHORITY_NOT_RECOVERED:{rel}:{expected}")
+                  raise RuntimeError(f"RELATIVE_AUTHORITY_NOT_RECOVERED:{repo_rel}:{expected}")
               path.parent.mkdir(parents=True,exist_ok=True)
               path.write_bytes(payload)
               hydrated+=1
-              print("HYDRATED",rel,source)
+              print("HYDRATED",repo_rel,source)
           print("HYDRATED_RELATIVE_AUTHORITY_COUNT",hydrated)
           PY
 

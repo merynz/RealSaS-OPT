@@ -68,6 +68,9 @@ jobs:
           # it does not run an optimizer.
           source_ledger=json.loads((source_root/"ACTIVE_RUN_V2.json").read_text())
           source_by={x["id"]:x for x in source_ledger["stages"]}
+          print("SOURCE_IRIS_MANIFEST",json.dumps(manifest.get("iris_fit"),sort_keys=True))
+          for sid in ("09_IRIS_FIT_PREREGISTERED","10_IRIS_FIT","11_IRIS_CHECKPOINT_SEALED"):
+              print("SOURCE_IRIS_LEDGER_ROW",sid,json.dumps(source_by[sid],sort_keys=True))
           def one_json(stage_id,schema):
               rows=[x for x in source_by[stage_id].get("outputs") or [] if x.get("schema")==schema]
               if len(rows)!=1:

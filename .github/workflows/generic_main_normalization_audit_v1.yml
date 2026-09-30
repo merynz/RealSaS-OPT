@@ -34,15 +34,15 @@ jobs:
 
       - name: Full 1941-commit mechanical and geometry lineage audit
         run: |
-          python tools/audit_generic_mechanical_geometry_lineage.py             --baseline-ref origin/main             --research-ref origin/research/vf11-certified-adaptive-20260921             --report mechanical_geometry_lineage_from_main.json
+          python3 tools/audit_generic_mechanical_geometry_lineage.py             --baseline-ref origin/main             --research-ref origin/research/vf11-certified-adaptive-20260921             --report mechanical_geometry_lineage_from_main.json
 
       - name: Integration-to-research closure lineage audit
         run: |
-          python tools/audit_generic_mechanical_geometry_lineage.py             --baseline-ref origin/integration/generic-main-promotion-20260930             --research-ref origin/research/vf11-certified-adaptive-20260921             --report mechanical_geometry_lineage_from_integration.json
+          python3 tools/audit_generic_mechanical_geometry_lineage.py             --baseline-ref origin/integration/generic-main-promotion-20260930             --research-ref origin/research/vf11-certified-adaptive-20260921             --report mechanical_geometry_lineage_from_integration.json
 
       - name: Current V2 implementation closure dry-run
         run: |
-          python tools/audit_generic_main_normalization.py             --baseline-ref origin/integration/generic-main-promotion-20260930             --research-ref origin/research/vf11-certified-adaptive-20260921             --report normalization_closure_dry_run.json
+          python3 tools/audit_generic_main_normalization.py             --baseline-ref origin/integration/generic-main-promotion-20260930             --research-ref origin/research/vf11-certified-adaptive-20260921             --report normalization_closure_dry_run.json
 
       - name: Fail if audit accidentally changed tracked implementation
         run: |

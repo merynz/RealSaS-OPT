@@ -79,6 +79,49 @@ jobs:
           plan = json.loads(Path("canonical/MAINLINE_EXECUTION_PLAN_V2.json").read_text())
           admissible = {"PASS", "PASS_DEMO_ONLY", "CACHE_HIT"}
 
+          # Rebind the exact current-main Stage18 demo fallback contract in temp only.
+          stage18_prereg = {
+              "schema": "RealSaS.KnightDemoStage18MeshFallbackPreregistration.v1",
+              "status": "FROZEN_BEFORE_KNIGHT_STAGE18_PARENT_QUALITY_METRICS_INSPECTION",
+              "run_id": str(ledger["run_id"]),
+              "subject_id": str(ledger["subject_id"]),
+              "execution_class": "DEMO_WITNESS",
+              "eligibility": {
+                  "stage15_ledger_status_required": "PASS_DEMO_ONLY",
+                  "product_authority_claimed_required": False,
+                  "requested_backend_required": "CANONICAL_CDT_LOCAL_CHART_V1",
+                  "only_admissible_precondition_failure": "RELATION_PARENT_MIN_ANGLE_BELOW_FROZEN_G3_TARGET",
+                  "boundary_split_must_remain_forbidden": True,
+                  "teacher_truth_allowed": False,
+                  "source_rig_labels_allowed": False,
+                  "source_skin_labels_allowed": False,
+                  "appearance_quality_allowed_for_selection": False,
+                  "future_geppetto_result_allowed_for_selection": False,
+                  "future_arachne_result_allowed_for_selection": False,
+              },
+              "fallback_rule": {
+                  "rule_id": "RELATION_BASELINE_IF_AND_ONLY_IF_CDT_PARENT_MIN_ANGLE_UNREPAIRABLE_V1",
+                  "producer": "CANONICAL_RELATION_BASELINE_V1",
+                  "candidate_choice": "EXACT_CURRENT_RELATION_BASELINE",
+                  "no_candidate_ranking": True,
+                  "no_threshold_relaxation": True,
+                  "stage19_remeasurement_required": True,
+              },
+              "demo_admission_semantics": {
+                  "stage19_actual_candidate_source_fidelity_replay_required": True,
+                  "product_pass_forbidden": True,
+              },
+          }
+          prereg_path = out_root / "stage18_fallback_preregistration.json"
+          prereg_path.write_text(json.dumps(stage18_prereg, sort_keys=True) + "\n")
+          demo = dict(manifest.get("demo_execution") or {})
+          demo["product_authority_claimed"] = False
+          demo["stage18_mesh_fallback_preregistration"] = {
+              "path": str(prereg_path),
+              "sha256": hashlib.sha256(prereg_path.read_bytes()).hexdigest(),
+          }
+          manifest["demo_execution"] = demo
+
           expected_clips = {"demo_idle_v1", "demo_run_v1", "demo_slash_v1"}
 
           def resolve_ref(ref):

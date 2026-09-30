@@ -1,4 +1,5 @@
 name: final-mainline-closure-audit-v1
+# rerun after living-closure promotion
 on:
   push:
     branches: [integration/generic-main-finalization-20260930]

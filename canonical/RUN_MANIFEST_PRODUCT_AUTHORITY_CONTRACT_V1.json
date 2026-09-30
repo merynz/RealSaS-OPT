@@ -112,15 +112,16 @@
     "learned_execution": {
       "common": "IRIS/Geppetto/Arachne heavy fitting is represented by a preregistered exact-source execution receipt. Receipt status alone is not product authority: prereg hash, model-source SHA, checkpoint/result/proposal SHA and upstream lineages must all match. Teacher inference inputs are forbidden.",
       "iris": "Stages 09-11 preregister/verify/seal the IRIS fit. Stage 12 admits an exact signed-zero-surface NPZ bound to the checkpoint, observation set and normalization domain.",
-      "geometry": "Stage 13 performs eight-view source-foreground reprojection against the frozen Stage13 v2 geometry policy. Stage 14 requires an exact-hash frozen Stage14 v2 policy document and performs bounded subject-free substrate adequacy search over the dense signed zero-surface; the current calibrated ceiling is 12288 nodes, not a fixed target, with unchanged v1 quality tolerances plus visible-component eligibility and component-aware compaction. Stage 15 requires exact adequacy-report binding plus current lossless Geppetto RiggingSurface tensorization.",
+      "geometry": "Stage 13 performs eight-view source-foreground reprojection against the frozen Stage13 geometry policy. Stage 14 requires exact-hash frozen Stage14 v3 policy, uses dense-face-incidence topology-local normals, performs the unchanged bounded substrate adequacy search, and seals exact compacted dense-face provenance so pairwise relations cannot mint unwitnessed 3-clique faces. Stage 15 binds both the adequacy report and exact compacted-face provenance to the qualified RiggingSurface before downstream mechanics.",
       "geppetto": "Stages 16-17 admit only exact SkeletonProposalIR evidence. Stage 18 alone mints QualifiedSkeletonIR through Compiler.qualify_skeleton; Stage 19 seals checkpoint+qualified lineage.",
       "arachne": "Stages 20-21 admit only exact SkinProposalIR evidence. Stage 22 alone mints QualifiedSkinIR through Compiler.qualify_skin with preregistered bounded repair policy; Stage 23 seals checkpoint+qualified lineage."
     },
     "gsa": {
-      "policy_document": "Stage14 requires exact {path,sha256} to canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V2_20260920.json or a byte-identical frozen equivalent. Inline GSA values must exactly match the document; drift fails closed.",
+      "policy_document": "Stage14 requires exact {path,sha256} to canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V3_20260929.json or a byte-identical frozen equivalent. Inline GSA numeric values must exactly match the document; the policy also binds the topology-local dense normal operator identity.",
       "adequacy_policy": "Required subject-free bounded search policy: min/max candidate nodes, growth/refinement budget, dense-to-S spatial error, normal error, projected carrier spacing, visible-component preservation and aliasing limits. target_nodes as a fixed product decision is superseded.",
-      "operator": "V2 requires visible_component_always_eligible=true and component_aware_voxel_compaction=true. Dense zero-surface geometry remains authority; GSA may only select a mechanical carrier.",
-      "selection_rule": "Stage14 selects the minimum actual node count among passing evaluated candidates; no character name or categorical recognition may affect selection."
+      "operator": "V3 requires dense-face-incidence topology-local normals, euclidean cross-sheet normal borrowing forbidden, visible_component_always_eligible=true and component_aware_voxel_compaction=true. Dense zero-surface geometry remains authority; GSA may only select a mechanical carrier.",
+      "selection_rule": "Stage14 selects the minimum actual node count among passing evaluated candidates; no character name or categorical recognition may affect selection.",
+      "face_provenance": "Stage14 maps each exact dense zero-surface triangle through the frozen compaction and seals only nondegenerate compact triangles with a real dense-face witness. Stage15 revalidates and reseals this artifact. Stage18 must consume it; triangle reconstruction from relation 3-cliques is forbidden."
     },
     "authoring": {
       "archive": "Stage40 emits a self-contained .rsedit ZIP with puppet.json plus eight exact source-authoritative texture transports.",
@@ -142,7 +143,7 @@
     }
   },
   "upstream_stage_schemas": {
-    "15_RIGGING_SURFACE_QUALIFIED": "RealSaS.RiggingSurfaceIR.v1 + RealSaS.RiggingSurfaceQualificationIR.v1",
+    "15_RIGGING_SURFACE_QUALIFIED": "RealSaS.RiggingSurfaceIR.v1 + RealSaS.RiggingSurfaceQualificationIR.v1 + RealSaS.CompactedDenseFaceProvenance.v1",
     "18_SKELETON_QUALIFIED": "RealSaS.QualifiedSkeletonIR.v1",
     "22_SKIN_QUALIFIED": "RealSaS.QualifiedSkinIR.v1",
     "07_OBSERVATION_CONTRACT_QUALIFIED": "RealSaS.QualifiedObservationSetIR.v1",
@@ -165,7 +166,7 @@
     "11_IRIS_CHECKPOINT_SEALED": "RealSaS.ModelCheckpointSealIR.v1",
     "12_ZERO_SURFACE_DECODED": "RealSaS.SignedZeroSurfaceSealIR.v1",
     "13_REST_REPROJECTION_GEOMETRY_GATE": "RealSaS.RestReprojectionGeometryGateIR.v1",
-    "14_GSA_BUILD": "RealSaS.RiggingSurfaceIR.v1 + RealSaS.SubstrateAdequacyReport.v1",
+    "14_GSA_BUILD": "RealSaS.RiggingSurfaceIR.v1 + RealSaS.SubstrateAdequacyReport.v1 + RealSaS.CompactedDenseFaceProvenance.v1",
     "17_GEPPETTO_FIT": "RealSaS.ModelFitExecutionIR.v1",
     "21_ARACHNE_FIT": "RealSaS.ModelFitExecutionIR.v1",
     "25_DEFORMATION_CAPABILITY_ENVELOPE": "RealSaS.DerivedAxisContract.v1 + RealSaS.DeformationCapabilityEnvelopeIR.v1"
@@ -173,7 +174,8 @@
   "outputs": {
     "14": [
       "RealSaS.RiggingSurfaceIR.v1",
-      "RealSaS.SubstrateAdequacyReport.v1"
+      "RealSaS.SubstrateAdequacyReport.v1",
+      "RealSaS.CompactedDenseFaceProvenance.v1"
     ],
     "24": [
       "RealSaS.MechanicalPartitionIR.v1",

@@ -479,9 +479,56 @@ jobs:
 
           cur_surface_path,cur_surface_json=output("15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1")
           _,old_surface_json=old_output("15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1")
+          cur_nodes={str(x["surface_id"]):x for x in cur_surface_json.get("surface_nodes") or []}
+          old_nodes={str(x["surface_id"]):x for x in old_surface_json.get("surface_nodes") or []}
+          added=sorted(set(cur_nodes)-set(old_nodes))
+          removed=sorted(set(old_nodes)-set(cur_nodes))
+          common=sorted(set(cur_nodes)&set(old_nodes))
+          exact_common=sum(cur_nodes[k]==old_nodes[k] for k in common)
+          p_changed=normal_changed=support_changed=raster_changed=other_changed=0
+          max_p_l2=0.0
+          for k in common:
+              a,b=cur_nodes[k],old_nodes[k]
+              if a==b: continue
+              pa=tuple(map(float,a.get("P") or ()))
+              pb=tuple(map(float,b.get("P") or ()))
+              if pa!=pb:
+                  p_changed+=1
+                  if len(pa)==len(pb)==3:
+                      max_p_l2=max(max_p_l2,sum((pa[i]-pb[i])**2 for i in range(3))**0.5)
+              if a.get("derived_normal")!=b.get("derived_normal"): normal_changed+=1
+              if a.get("support_views")!=b.get("support_views"): support_changed+=1
+              if a.get("raster_bindings")!=b.get("raster_bindings"): raster_changed+=1
+              aa={kk:vv for kk,vv in a.items() if kk not in {"P","derived_normal","support_views","raster_bindings"}}
+              bb={kk:vv for kk,vv in b.items() if kk not in {"P","derived_normal","support_views","raster_bindings"}}
+              if aa!=bb: other_changed+=1
+          def relkey(x):
+              a,b=sorted((str(x.get("a_surface_id")),str(x.get("b_surface_id"))))
+              return (a,b,str(x.get("relation_kind") or ""))
+          cr={relkey(x):x for x in cur_surface_json.get("local_relations") or []}
+          orr={relkey(x):x for x in old_surface_json.get("local_relations") or []}
+          rel_added=sorted(set(cr)-set(orr))
+          rel_removed=sorted(set(orr)-set(cr))
+          rel_common=set(cr)&set(orr)
+          rel_changed=sum(cr[k]!=orr[k] for k in rel_common)
+          diff_report={
+              "current_node_count":len(cur_nodes),"historical_node_count":len(old_nodes),
+              "added_node_count":len(added),"removed_node_count":len(removed),
+              "common_node_count":len(common),"exact_common_node_count":exact_common,
+              "position_changed_count":p_changed,"max_position_l2":max_p_l2,
+              "normal_changed_count":normal_changed,"support_views_changed_count":support_changed,
+              "raster_bindings_changed_count":raster_changed,"other_node_fields_changed_count":other_changed,
+              "current_relation_count":len(cr),"historical_relation_count":len(orr),
+              "relation_added_count":len(rel_added),"relation_removed_count":len(rel_removed),
+              "relation_changed_count":rel_changed,
+              "added_node_sample":added[:10],"removed_node_sample":removed[:10],
+              "relation_added_sample":[list(x) for x in rel_added[:10]],
+              "relation_removed_sample":[list(x) for x in rel_removed[:10]],
+          }
+          print("CURRENT_MAIN_STAGE15_SEMANTIC_DIFF",json.dumps(diff_report,sort_keys=True))
           exact_surface_semantics=(
-              cur_surface_json.get("surface_nodes")==old_surface_json.get("surface_nodes")
-              and cur_surface_json.get("local_relations")==old_surface_json.get("local_relations")
+              not added and not removed and exact_common==len(common)
+              and not rel_added and not rel_removed and rel_changed==0
           )
           if not exact_surface_semantics:
               raise RuntimeError("STAGE15_SURFACE_SEMANTIC_EQUIVALENCE_NOT_PROVEN")

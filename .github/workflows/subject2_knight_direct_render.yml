@@ -1,4 +1,4 @@
-name: subject2-knight-current-main-continuation-render
+name: subject2-knight-stage35-owner-copy-probe
 
 on:
   push:
@@ -9,12 +9,11 @@ on:
 
 permissions:
   contents: read
-  actions: read
 
 jobs:
-  render:
+  probe:
     runs-on: [self-hosted, linux, x64, realsas]
-    timeout-minutes: 45
+    timeout-minutes: 30
     env:
       REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
       SOURCE_RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
@@ -23,7 +22,6 @@ jobs:
       OMP_NUM_THREADS: '1'
       MKL_NUM_THREADS: '1'
       OPENBLAS_NUM_THREADS: '1'
-      OUT_ROOT: /home/monster/actions-runner/_work/_temp/knight_current_main_rebuild_render
 
     steps:
       - uses: actions/checkout@v4
@@ -43,279 +41,164 @@ jobs:
           test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
           echo "EXACT_MAIN_SHA=$(git rev-parse HEAD)"
 
-      - name: Restore already-built current-main Stage18-19 artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: knight-current-main-idle-run-slash
-          path: /home/monster/actions-runner/_work/_temp/knight_current_main_rebuild_render
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: merynz/RealSaS-OPT
-          run-id: 36760517314
-
       - name: Install current-main dependencies
         run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
 
-      - name: Build exact current-main native runtime
+      - name: Probe Stage35 with OWNER_COPY seam skin transfer
         shell: bash
         run: |
           set -euo pipefail
-          c++ -std=c++17 -O2 -Wall -Wextra -pedantic             runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp             -lpng -lz             -o "$RUNNER_TEMP/realsas_runtime_v2_caa_reference_MAIN"
-          sha256sum "$RUNNER_TEMP/realsas_runtime_v2_caa_reference_MAIN"
-          echo "PLAYER=$RUNNER_TEMP/realsas_runtime_v2_caa_reference_MAIN" >> "$GITHUB_ENV"
+          OUT_ROOT="$RUNNER_TEMP/knight_stage35_owner_copy_probe"
+          rm -rf "$OUT_ROOT"
+          mkdir -p "$OUT_ROOT"
+          export OUT_ROOT
 
-      - name: Continue from Stage20 then render idle run slash
-        shell: bash
-        run: |
-          set -euo pipefail
           python - <<'PY'
-          import copy
-          import hashlib
-          import importlib
-          import json
-          import os
-          import subprocess
+          import copy, json, os
           from pathlib import Path
 
-          import numpy as np
-          from PIL import Image
+          from compiler.realsas_compiler_core.canonical_mesh_candidate_v1 import (
+              build_holeless_partitioned_dense_candidate,
+          )
+          from compiler.realsas_compiler_core.hashing import content_sha256
+          from compiler.realsas_compiler_core.mesh.product_policy_v1 import load_mesh_policy_document
+          from compiler.realsas_compiler_services.orchestrator.adapters import mesh_v2
 
           repo_root = Path.cwd().resolve()
           authority = Path(os.environ["REALSAS_AUTHORITY_ROOT"])
           source_run_id = os.environ["SOURCE_RUN_ID"]
           source_root = authority / "runs" / source_run_id
           out_root = Path(os.environ["OUT_ROOT"]).resolve()
-          player = Path(os.environ["PLAYER"]).resolve()
 
           ledger = json.loads((source_root / "ACTIVE_RUN_V2.json").read_text())
           manifest = json.loads((source_root / "run_manifest.json").read_text())
           plan = json.loads((repo_root / "canonical" / "MAINLINE_EXECUTION_PLAN_V2.json").read_text())
-          admissible = {"PASS", "PASS_DEMO_ONLY", "CACHE_HIT"}
-
           work_ledger = copy.deepcopy(ledger)
           work_by = {str(row["id"]): row for row in work_ledger["stages"]}
 
-          def sha256_file(path):
-              h = hashlib.sha256()
-              with Path(path).open("rb") as fh:
-                  for chunk in iter(lambda: fh.read(1 << 20), b""):
-                      h.update(chunk)
-              return h.hexdigest()
+          base_ctx = {
+              "repo_root": repo_root,
+              "run_id": source_run_id,
+              "run_root": out_root,
+              "ledger": work_ledger,
+              "run_manifest": manifest,
+              "stage": next(s for s in plan["stages"] if int(s["ordinal"]) == 18),
+          }
 
-          # Rebind the already-built current-main Stage18/19 bytes from run 36760517314.
-          stage18_dir = out_root / "artifacts" / "18_CANONICAL_MESH_ADDRESSING_BUILD"
-          stage19_dir = out_root / "artifacts" / "19_STATIC_CANONICAL_MESH_QUALIFIED"
-          if not stage18_dir.is_dir() or not stage19_dir.is_dir():
-              raise RuntimeError("RESTORED_STAGE18_19_ARTIFACT_MISSING")
+          surface = mesh_v2._load_surface(base_ctx)
+          partition, carrier = mesh_v2._load_partition_and_carrier(base_ctx)
+          face_provenance = mesh_v2._load_compacted_dense_face_provenance(
+              base_ctx, surface=surface
+          )
+          explicit_faces = tuple(
+              tuple(map(str, row))
+              for row in tuple(face_provenance.get("compact_faces") or ())
+          )
 
-          def output_row(path, authority_class="RESTORED_CURRENT_MAIN_CONTINUATION"):
-              payload = json.loads(Path(path).read_text())
-              schema = str(payload.get("schema") or payload.get("schema_version") or "")
-              if not schema:
-                  raise RuntimeError(f"RESTORED_OUTPUT_SCHEMA_MISSING:{path}")
-              return {
-                  "path": str(Path(path).resolve()),
-                  "sha256": sha256_file(path),
-                  "authority_class": authority_class,
-                  "schema": schema,
-              }
+          owner = {
+              str(sid): str(component.component_id)
+              for component in partition.components
+              for sid in component.surface_ids
+          }
+          mixed_source_face_count = sum(
+              1 for face in explicit_faces
+              if len({owner[str(sid)] for sid in face}) > 1
+          )
+          if mixed_source_face_count <= 0:
+              raise RuntimeError("OWNER_COPY_PROBE_REQUIRES_MIXED_SOURCE_FACES")
 
-          stage18_names = [
-              "canonical_mesh_candidate.json",
-              "surface_addressing.json",
-              "appearance_domain.json",
-              "visual_mesh_set.json",
-              "mesh_qualification_policy.json",
-              "relation_parent_quality_report.json",
+          policy_cfg = dict(manifest.get("mesh_policy") or {})
+          policy_doc_ref = dict(policy_cfg.get("document") or {})
+          policy_path = mesh_v2._resolved_path(str(policy_doc_ref.get("path") or ""))
+          expected = str(policy_doc_ref.get("sha256") or "")
+          if (
+              not policy_path.is_file()
+              or len(expected) != 64
+              or mesh_v2._sha256(policy_path) != expected
+          ):
+              raise RuntimeError("MESH_POLICY_DOCUMENT_REF_INVALID")
+          policy = load_mesh_policy_document(policy_path)
+
+          mesh_cfg = dict(manifest.get("mesh") or {})
+          owner_copy_policy_hash = content_sha256({
+              "schema": "RealSaS.CanonicalRelationBaselinePolicy.v1",
+              "mesh_config": mesh_cfg,
+              "mesh_policy_hash": policy.qualification_policy_lineage_hash,
+              "generated_seam_skin_transfer": "OWNER_COPY",
+          })
+
+          candidate = build_holeless_partitioned_dense_candidate(
+              surface,
+              partition,
+              carrier,
+              producer_policy_hash=owner_copy_policy_hash,
+              explicit_face_provenance=explicit_faces,
+              mechanical_skin_transfer="OWNER_COPY",
+          )
+
+          stage18_root = out_root / "artifacts" / "18_CANONICAL_MESH_ADDRESSING_BUILD"
+          candidate_out = mesh_v2._write_ir(
+              stage18_root / "canonical_mesh_candidate.json",
+              candidate,
+              authority_class="DIAGNOSTIC_OWNER_COPY_STAGE35_PROBE",
+          )
+          policy_out = mesh_v2._write_ir(
+              stage18_root / "mesh_qualification_policy.json",
+              policy,
+              authority_class="FROZEN_MESH_QUALIFICATION_POLICY",
+          )
+
+          work_by["18_CANONICAL_MESH_ADDRESSING_BUILD"]["status"] = "PASS_DEMO_ONLY"
+          work_by["18_CANONICAL_MESH_ADDRESSING_BUILD"]["outputs"] = [
+              candidate_out,
+              policy_out,
           ]
-          restored18 = [output_row(stage18_dir / name) for name in stage18_names]
-          restored19 = [output_row(stage19_dir / "static_canonical_mesh_qualification.json")]
-
-          work_by["18_CANONICAL_MESH_ADDRESSING_BUILD"]["status"] = "PASS"
-          work_by["18_CANONICAL_MESH_ADDRESSING_BUILD"]["outputs"] = restored18
           work_by["18_CANONICAL_MESH_ADDRESSING_BUILD"]["blockers"] = []
 
-          work_by["19_STATIC_CANONICAL_MESH_QUALIFIED"]["status"] = "PASS_DEMO_ONLY"
-          work_by["19_STATIC_CANONICAL_MESH_QUALIFIED"]["outputs"] = restored19
-          work_by["19_STATIC_CANONICAL_MESH_QUALIFIED"]["blockers"] = []
-
-          # Validate embedded visual-mesh paths still resolve to the restored same absolute root.
-          visual_set = json.loads((stage18_dir / "visual_mesh_set.json").read_text())
-          for view in visual_set["views"]:
-              p = Path(view["mesh_npz_path"])
-              if not p.is_file():
-                  raise RuntimeError(f"RESTORED_VISUAL_MESH_MISSING:{p}")
-              if sha256_file(p) != str(view["mesh_npz_sha256"]):
-                  raise RuntimeError(f"RESTORED_VISUAL_MESH_HASH_DRIFT:{p}")
-
-          expected_clips = {"demo_idle_v1", "demo_run_v1", "demo_slash_v1"}
-
-          def resolve_ref(ref):
-              raw = str(ref.get("path") or "")
-              if raw.startswith("$REALSAS_AUTHORITY_ROOT/"):
-                  return authority / raw.split("/", 1)[1]
-              return Path(os.path.expandvars(raw)).expanduser()
-
-          def sources_valid(rows):
-              if len(rows) != 3 or {str(x.get("clip_id")) for x in rows} != expected_clips:
-                  return False
-              for row in rows:
-                  ref = dict(row.get("file") or {})
-                  p = resolve_ref(ref)
-                  expected = str(ref.get("sha256") or "")
-                  if not p.is_file() or len(expected) != 64:
-                      return False
-                  if sha256_file(p) != expected:
-                      return False
-              return True
-
-          sources = list(dict(manifest.get("motion") or {}).get("sources") or [])
-          if not sources_valid(sources):
-              donor = None
-              for frag in sorted(authority.rglob("MOTION_RUN_MANIFEST_FRAGMENT.json")):
-                  try:
-                      payload = json.loads(frag.read_text())
-                      candidate = dict(payload.get("motion") or {})
-                      rows = list(candidate.get("sources") or [])
-                  except Exception:
-                      continue
-                  if sources_valid(rows):
-                      donor = (frag, candidate)
-                      break
-              if donor is None:
-                  raise RuntimeError("VALID_IDLE_RUN_SLASH_MOTION_FRAGMENT_NOT_FOUND")
-              manifest["motion"] = donor[1]
-              print("MOTION_FRAGMENT_REUSED", donor[0])
-
-          stage_log = []
-
-          def run_stage(ordinal):
-              stage = next(s for s in plan["stages"] if int(s["ordinal"]) == ordinal)
-              sid = str(stage["id"])
-              module_name, function_name = str(stage["adapter"]).split(":", 1)
-              func = getattr(importlib.import_module(module_name), function_name)
-              ctx = {
-                  "repo_root": repo_root,
-                  "run_id": source_run_id,
-                  "run_root": out_root,
-                  "ledger": work_ledger,
-                  "run_manifest": manifest,
-                  "stage": stage,
-              }
-              print("DIRECT_CURRENT_MAIN_STAGE_BEGIN", ordinal, sid, flush=True)
-              result = func(ctx)
-              status = str(result.get("status") or "")
-              row = work_by[sid]
-              row["status"] = status
-              row["outputs"] = list(result.get("outputs") or [])
-              row["blockers"] = list(result.get("blockers") or [])
-              row["performance"] = dict(result.get("performance") or {})
-              stage_log.append({
-                  "ordinal": ordinal,
-                  "id": sid,
-                  "status": status,
-                  "blockers": row["blockers"],
-                  "outputs": row["outputs"],
-              })
-              print("DIRECT_CURRENT_MAIN_STAGE_END", ordinal, sid, status, row["blockers"], flush=True)
-              if status not in admissible:
-                  raise RuntimeError(
-                      f"STAGE_FAILED:{ordinal}:{sid}:{status}:{row['blockers']}"
-                  )
-
-          # Continue the current-main appearance chain from where the previous run stopped.
-          for ordinal in range(20, 26):
-              run_stage(ordinal)
-
-          # Existing solved model-derived authorities remain read-only.
-          for sid in ("28_SKELETON_QUALIFIED", "32_SKIN_QUALIFIED", "34_DEFORMATION_CAPABILITY_ENVELOPE"):
-              if str(work_by[sid].get("status")) not in admissible:
-                  raise RuntimeError(f"MODEL_DERIVED_AUTHORITY_NOT_READY:{sid}:{work_by[sid].get('status')}")
-
-          for ordinal in range(35, 44):
-              run_stage(ordinal)
-
-          s42 = work_by["42_RUNTIME_PROJECTION_AND_CAA_BINDING"]
-          s43 = work_by["43_RSS_MATERIALIZE_COMPACT"]
-          proj_rows = [x for x in s42.get("outputs") or [] if x.get("schema") == "RealSaS.RuntimeProjectionIR.v2"]
-          rss_rows = [x for x in s43.get("outputs") or [] if x.get("schema") == "application/x-realsas-rss-v2"]
-          if len(proj_rows) != 1 or len(rss_rows) != 1:
-              raise RuntimeError(f"RUNTIME_OUTPUT_CARDINALITY:{len(proj_rows)}:{len(rss_rows)}")
-
-          projection_path = Path(proj_rows[0]["path"])
-          rss_path = Path(rss_rows[0]["path"])
-          projection = json.loads(projection_path.read_text())
-          view = next(v for v in projection["views"] if str(v["view_id"]) == "V0")
-          resolution = int(view["camera"]["resolution"])
-          clips = {str(c["clip_id"]): c for c in projection["clips"]}
-
-          render_dir = out_root / "GIFS"
-          render_dir.mkdir(parents=True, exist_ok=True)
-          rendered = []
-
-          for cid in ("demo_idle_v1", "demo_run_v1", "demo_slash_v1"):
-              clip = clips.get(cid)
-              if clip is None:
-                  raise RuntimeError(f"RUNTIME_CLIP_MISSING:{cid}")
-              frame_count = int(clip["frame_count"])
-              duration = float(clip["duration_seconds"])
-              frames = []
-              hashes = []
-              for fi in range(frame_count):
-                  raw = render_dir / f"{cid}_{fi:04d}.rgba"
-                  proc = subprocess.run(
-                      [str(player), str(rss_path), "--clip", cid, "--view", "V0",
-                       "--frame", str(fi), "--out-rgba", str(raw)],
-                      capture_output=True, text=True
-                  )
-                  if proc.returncode != 0:
-                      raise RuntimeError(f"NATIVE_RENDER_FAIL:{cid}:{fi}:{proc.stderr}")
-                  data = raw.read_bytes()
-                  raw.unlink()
-                  if len(data) != resolution * resolution * 4:
-                      raise RuntimeError(f"RGBA_SIZE_DRIFT:{cid}:{fi}:{len(data)}")
-                  arr = np.frombuffer(data, dtype=np.uint8).reshape(resolution, resolution, 4)
-                  frames.append(Image.fromarray(arr, "RGBA"))
-                  hashes.append(hashlib.sha256(data).hexdigest())
-
-              delay = max(20, int(round(1000.0 * duration / max(1, frame_count - 1))))
-              gif = render_dir / f"KNIGHT_{cid.upper()}_CURRENT_MAIN.gif"
-              first = render_dir / f"KNIGHT_{cid.upper()}_CURRENT_MAIN_FIRST.png"
-              frames[0].save(first)
-              pframes = [im.convert("P", palette=Image.Palette.ADAPTIVE, colors=255) for im in frames]
-              pframes[0].save(
-                  gif, save_all=True, append_images=pframes[1:],
-                  duration=delay, loop=0, disposal=2, optimize=False, transparency=0
-              )
-              rendered.append({
-                  "clip_id": cid,
-                  "frame_count": frame_count,
-                  "duration_seconds": duration,
-                  "unique_frame_hashes": len(set(hashes)),
-                  "gif": gif.name,
-                  "first_png": first.name,
-                  "gif_sha256": sha256_file(gif),
-              })
+          stage35 = next(s for s in plan["stages"] if int(s["ordinal"]) == 35)
+          ctx35 = {
+              "repo_root": repo_root,
+              "run_id": source_run_id,
+              "run_root": out_root,
+              "ledger": work_ledger,
+              "run_manifest": manifest,
+              "stage": stage35,
+          }
+          result = mesh_v2.qualify_canonical_mesh_stage(ctx35)
 
           report = {
-              "schema": "RealSaS.CurrentMainKnightContinuationRenderReport.v1",
-              "restored_from_run_id": 36760517314,
-              "continued_from_stage": 20,
-              "refit_performed": False,
-              "model_execution_performed": False,
-              "clips": rendered,
-              "stage_log": stage_log,
-              "rss_path": str(rss_path),
-              "rss_sha256": sha256_file(rss_path),
+              "schema": "RealSaS.KnightStage35OwnerCopyProbe.v1",
+              "source_run_id": source_run_id,
+              "mixed_source_face_count": mixed_source_face_count,
+              "candidate_vertex_count": len(candidate.vertices),
+              "candidate_face_count": len(candidate.faces),
+              "candidate_lineage_hash": candidate.candidate_lineage_hash,
+              "mechanical_skin_transfer": candidate.metadata.get("mechanical_skin_transfer"),
+              "stage35_status": result.get("status"),
+              "stage35_blockers": result.get("blockers") or [],
+              "stage35_diagnostics": result.get("diagnostics") or {},
+              "stage35_outputs": result.get("outputs") or [],
           }
-          (render_dir / "REPORT.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
-          print("CURRENT_MAIN_KNIGHT_IDLE_RUN_SLASH_RENDER_PASS", flush=True)
-          print(json.dumps(report, sort_keys=True), flush=True)
+          (out_root / "REPORT.json").write_text(
+              json.dumps(report, indent=2, sort_keys=True, default=str) + "\n"
+          )
+
+          print("OWNER_COPY_STAGE35_PROBE_RESULT")
+          print(json.dumps(report, sort_keys=True, default=str))
+
+          # Do not mask a Stage35 fail: workflow should show red if OWNER_COPY is not sufficient.
+          if str(result.get("status") or "") not in {"PASS", "PASS_DEMO_ONLY", "CACHE_HIT"}:
+              raise RuntimeError(
+                  f"OWNER_COPY_STAGE35_NOT_PASS:{result.get('status')}:{result.get('blockers')}"
+              )
           PY
+
+          echo "OUT_ROOT=$OUT_ROOT" >> "$GITHUB_ENV"
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: knight-current-main-idle-run-slash-continuation
-          path: /home/monster/actions-runner/_work/_temp/knight_current_main_rebuild_render
+          name: knight-stage35-owner-copy-probe
+          path: ${{ env.OUT_ROOT }}
           if-no-files-found: warn
           retention-days: 7

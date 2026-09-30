@@ -54,6 +54,13 @@ jobs:
             --research-ref origin/research/vf11-certified-adaptive-20260921 \
             --report mechanical_geometry_promotion_slice.json
 
+      - name: Derive exact Stage20-25 appearance promotion slice
+        run: |
+          python3 tools/audit_appearance_promotion_slice.py \
+            --baseline-ref origin/integration/generic-main-normalization-v2-20260930 \
+            --research-ref origin/research/vf11-certified-adaptive-20260921 \
+            --report appearance_promotion_slice.json
+
       - name: Fail if audit accidentally changed tracked implementation
         run: |
           test -z "$(git status --porcelain --untracked-files=no)"
@@ -68,5 +75,6 @@ jobs:
             mechanical_geometry_lineage_from_integration.json
             normalization_closure_dry_run.json
             mechanical_geometry_promotion_slice.json
+            appearance_promotion_slice.json
           if-no-files-found: error
           retention-days: 14

@@ -12,8 +12,8 @@
   "explained_high_signal_count": 344,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 150,
-  "safe_default_evidence_only_branch_count": 146,
+  "live_branch_count": 154,
+  "safe_default_evidence_only_branch_count": 150,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -89,6 +89,12 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "audit/generic-main-normalization-20260930",
+      "sha": "2a69a9fbdd4aecfc4e73941b660648a01a3c0eb9",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "audit/geppetto-v2-frozen-base-7f39",
       "sha": "7f39a846ad05f91560836026e5ef6dfbc74dc731",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -108,7 +114,7 @@
     },
     {
       "name": "audit/knight-rest-visual-owner-20260930",
-      "sha": "6ed060351512a5f76a206acce011b585f48b1768",
+      "sha": "643714de28999a7de9d0b25733a290136dc374c7",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -425,6 +431,24 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "integration/generic-main-finalization-20260930",
+      "sha": "bbb19a56ef948f137d6786de2902adc38dc578a2",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "integration/generic-main-normalization-v2-20260930",
+      "sha": "75d7d590d0a381636a3600242c8351924759f9c7",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "integration/generic-main-promotion-20260930",
+      "sha": "908fbcc9207221f640a5c6f36d586aca597135d0",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "integration/mage-real-e2e-20260912",
       "sha": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -462,7 +486,7 @@
     },
     {
       "name": "main",
-      "sha": "3f4dd26c383f91dc620be97a693398c410c69393",
+      "sha": "9791a7b59a769729afd8897843175a32ace0aacc",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },

@@ -106,5 +106,5 @@ def test_exact_face_provenance_blocks_three_edge_clique_face_minting():
     strict_faces=_source_face_set(strict)
     assert ("a","b","c") not in strict_faces
     assert strict_faces==set(provenance["compact_faces"])
-    assert strict.metadata["face_provenance_mode"]=="EXPLICIT_SOURCE_FACE_PROVENANCE"
+    assert strict.metadata["face_provenance_mode"]=="EXACT_COMPACTED_DENSE_FACE_REPLAY"
     assert strict.metadata["three_clique_face_minting_allowed"] is False

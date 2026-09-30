@@ -215,6 +215,172 @@ jobs:
           fi
           python -m compiler.realsas_compiler_services.orchestrator.mainline status --run-id "$RUN_ID"
 
+      - name: Import exact historical Stage01-08 observation lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os,shutil,zipfile
+          from pathlib import Path
+          from compiler.realsas_compiler_services.orchestrator import mainline
+
+          run_id=os.environ["RUN_ID"]
+          authority_root=Path(os.environ["REALSAS_AUTHORITY_ROOT"])
+          run_root=authority_root/"runs"/run_id
+          backup=authority_root/"historical_run_backups"/(run_id+"_PRE_CURRENT_MAIN_20260930")
+          backup_ledger_path=backup/"ACTIVE_RUN_V2.json"
+          backup_artifacts=backup/"artifacts"
+          if not backup_ledger_path.is_file() or not backup_artifacts.is_dir():
+              raise RuntimeError("HISTORICAL_STAGE01_08_BACKUP_MISSING")
+
+          plan=mainline.load_json(mainline.PLAN_PATH)
+          ledger=mainline.load_json(mainline.run_ledger_path(run_id))
+          manifest=mainline.load_json(mainline.run_manifest_path(run_id))
+          historical=mainline.load_json(backup_ledger_path)
+          old_by={str(x["id"]):x for x in historical["stages"]}
+          plan_by={str(x["id"]):x for x in plan["stages"]}
+          current_by={str(x["id"]):x for x in ledger["stages"]}
+          stage_ids=[str(x["id"]) for x in sorted(plan["stages"],key=lambda r:int(r["ordinal"]))[:8]]
+
+          import_root=run_root/"imports"/"historical_stage01_08"
+          import_root.mkdir(parents=True,exist_ok=True)
+          archive=import_root/"evidence.zip"
+          exact_outputs={}
+          copied={}
+
+          with zipfile.ZipFile(archive,"w",compression=zipfile.ZIP_STORED) as zf:
+              for sid in stage_ids:
+                  old=old_by[sid]
+                  outs=list(old.get("outputs") or [])
+                  if len(outs)!=1:
+                      raise RuntimeError(f"HISTORICAL_IMPORT_OUTPUT_CARDINALITY:{sid}:{len(outs)}")
+                  old_out=outs[0]
+                  src=Path(str(old_out["path"]))
+                  if not src.is_file():
+                      # Historical ledger path points at the old artifacts root;
+                      # after backup, resolve by stage + filename.
+                      src=backup_artifacts/sid/Path(str(old_out["path"])).name
+                  if not src.is_file():
+                      raise RuntimeError(f"HISTORICAL_OUTPUT_MISSING:{sid}:{src}")
+                  raw=src.read_bytes()
+                  digest=hashlib.sha256(raw).hexdigest()
+                  if digest!=str(old_out["sha256"]) or len(raw)!=int(old_out["bytes"]):
+                      raise RuntimeError(f"HISTORICAL_OUTPUT_DRIFT:{sid}")
+
+                  dst=run_root/"artifacts"/sid/src.name
+                  dst.parent.mkdir(parents=True,exist_ok=True)
+                  dst.write_bytes(raw)
+                  member=f"{sid}/{src.name}"
+                  zf.writestr(member,raw)
+                  exact_outputs[sid]={
+                      "member":member,
+                      "schema":str(old_out["schema"]),
+                      "authority_class":str(old_out["authority_class"]),
+                      "sha256":digest,
+                      "bytes":len(raw),
+                  }
+                  copied[sid]={
+                      "path":str(dst.resolve()),
+                      "sha256":digest,
+                      "bytes":len(raw),
+                      "authority_class":str(old_out["authority_class"]),
+                      "schema":str(old_out["schema"]),
+                  }
+
+          archive_sha=hashlib.sha256(archive.read_bytes()).hexdigest()
+          authority={
+              "schema":"RealSaS.DemoHistoricalStageImportAuthority.v1",
+              "status":"APPROVED_DEMO_ONLY",
+              "subject_id":str(ledger["subject_id"]),
+              "target_run_id":run_id,
+              "source_evidence_archive":{"sha256":archive_sha},
+              "imported_stage_ids":stage_ids,
+              "exact_outputs":exact_outputs,
+              "scope":{
+                  "execution_class":"DEMO_WITNESS",
+                  "product_authority_claimed":False,
+                  "scientific_product_pass_forbidden":True,
+                  "exact_byte_import_required":True,
+                  "recomputation_forbidden":True,
+              },
+          }
+          authority_rel="canonical/CURRENT_MAIN_KNIGHT_STAGE01_08_IMPORT_AUTHORITY_20260930.json"
+          authority_path=mainline.ROOT/authority_rel
+          authority_path.write_text(json.dumps(authority,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          authority_sha=hashlib.sha256(authority_path.read_bytes()).hexdigest()
+
+          for sid in stage_ids:
+              stage=plan_by[sid]
+              out=copied[sid]
+              hist={
+                  "schema":"RealSaS.HistoricalStageImportIdentity.v1",
+                  "stage_id":sid,
+                  "authority_path":authority_rel,
+                  "authority_sha256":authority_sha,
+                  "archive_path":str(archive.resolve()),
+                  "archive_sha256":archive_sha,
+                  "source_member":exact_outputs[sid]["member"],
+                  "source_output_sha256":out["sha256"],
+                  "manifest_subset_hash":mainline.content_sha256(mainline._manifest_subset(manifest,stage)),
+                  "policy_hash":mainline.content_sha256(stage["policy"]),
+              }
+              fingerprint,policy_hash=mainline._historical_import_fingerprint(
+                  ledger=ledger,manifest=manifest,stage=stage,historical_import=hist
+              )
+              row=current_by[sid]
+              row.update(
+                  status="PASS_DEMO_ONLY",
+                  input_fingerprint=fingerprint,
+                  implementation_hash=mainline.content_sha256(hist),
+                  policy_hash=policy_hash,
+                  outputs=[out],
+                  diagnostics_hash=mainline.content_sha256({
+                      "historical_import":True,
+                      "source_output_sha256":out["sha256"],
+                  }),
+                  blockers=[],
+                  wall_seconds=0.0,
+                  performance={},
+                  historical_import=hist,
+              )
+
+          # Anything downstream must be reconsidered against the imported exact lineage.
+          for row in ledger["stages"][8:]:
+              row.pop("historical_import",None)
+              row.update(
+                  status="PENDING",
+                  input_fingerprint="",
+                  implementation_hash="",
+                  policy_hash="",
+                  outputs=[],
+                  diagnostics_hash="",
+                  blockers=[],
+                  wall_seconds=0.0,
+                  performance={},
+              )
+          ledger.setdefault("history",[]).append({
+              "event":"DEMO_HISTORICAL_STAGE01_08_IMPORTED",
+              "stage_ids":stage_ids,
+              "archive_sha256":archive_sha,
+              "authority_sha256":authority_sha,
+              "scientific_product_pass_claimed":False,
+          })
+          mainline._refresh(plan,ledger)
+          mainline.atomic_json(mainline.run_ledger_path(run_id),ledger)
+          mainline.validate_ledger(plan,ledger)
+
+          # Strong verifier: every imported row must pass current main's own
+          # historical-import identity verification before execution continues.
+          for sid in stage_ids:
+              if not mainline._verify_historical_imported_pass(
+                  plan=plan,ledger=ledger,manifest=manifest,
+                  stage=plan_by[sid],row=current_by[sid]
+              ):
+                  raise RuntimeError(f"HISTORICAL_IMPORT_VERIFY_FAILED:{sid}")
+          print("CURRENT_MAIN_STAGE01_08_HISTORICAL_IMPORT_PASS",stage_ids,archive_sha)
+          print(mainline.status_text(plan,ledger))
+          PY
+
       - name: Execute exact current-main DAG
         shell: bash
         run: |

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - integration/generic-main-promotion-20260930
       - restoration/compiler-runtime-promotion-v1-20260903
     paths:
       - 'models/**'

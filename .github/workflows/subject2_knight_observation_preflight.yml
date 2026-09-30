@@ -13,51 +13,241 @@ permissions:
 jobs:
   render-and-preflight:
     runs-on: [self-hosted, linux, x64, realsas]
-    timeout-minutes: 10
+    timeout-minutes: 180
     env:
       REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Audit existing Knight V2 run roots against current branch source
+
+      - name: Prove compiler runtime models are exact current main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          echo "BRANCH_SHA=$(git rev-parse HEAD)"
+          echo "CURRENT_MAIN_SHA=$(git rev-parse origin/main)"
+          git diff --exit-code origin/main HEAD -- compiler runtime models requirements canonical/MAINLINE_EXECUTION_PLAN_V2.json
+          echo CURRENT_MAIN_SOURCE_TREE_EXACT_PASS
+
+      - name: Install pinned dependencies
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Hydrate immutable demo authority references only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin audit/knight-rest-visual-owner-20260930 research/vf11-certified-adaptive-20260921
+          python - <<'PY'
+          import hashlib,json,os,subprocess
+          from pathlib import Path
+          root=Path(os.environ["REALSAS_AUTHORITY_ROOT"])/"runs"/os.environ["RUN_ID"]
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          manifest=json.loads((root/"run_manifest.json").read_text())
+          refs={}
+          demo=dict(manifest.get("demo_execution") or {})
+          auth=dict(demo.get("authority") or {})
+          if auth.get("path") and auth.get("sha256"):
+              refs[str(auth["path"])]=str(auth["sha256"])
+          for row in ledger.get("stages") or []:
+              h=dict(row.get("historical_import") or {})
+              if h.get("authority_path") and h.get("authority_sha256"):
+                  refs[str(h["authority_path"])]=str(h["authority_sha256"])
+          branches=["origin/audit/knight-rest-visual-owner-20260930","origin/research/vf11-certified-adaptive-20260921"]
+          for rel,expected in sorted(refs.items()):
+              path=Path(rel)
+              if path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest()==expected:
+                  continue
+              payload=None
+              source=None
+              for ref in branches:
+                  p=subprocess.run(["git","show",f"{ref}:{rel}"],capture_output=True)
+                  if p.returncode==0 and hashlib.sha256(p.stdout).hexdigest()==expected:
+                      payload=p.stdout; source=ref; break
+              if payload is None:
+                  raise RuntimeError(f"IMMUTABLE_AUTHORITY_NOT_RECOVERED:{rel}:{expected}")
+              path.parent.mkdir(parents=True,exist_ok=True)
+              path.write_bytes(payload)
+              print("HYDRATED_AUTHORITY",rel,source,expected)
+          print("HYDRATED_AUTHORITY_COUNT",len(refs))
+          PY
+
+      - name: Bind current-main native player and existing motion inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_root="$REALSAS_AUTHORITY_ROOT/runs/$RUN_ID"
+          build="$run_root/tools/current_main_runtime"
+          mkdir -p "$build"
+          player="$build/realsas_runtime_v2_caa_reference"
+          c++ -std=c++17 -O3 -DNDEBUG runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp -lpng -lz -o "$player"
+          test -x "$player"
+          PLAYER="$player" python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          authority=Path(os.environ["REALSAS_AUTHORITY_ROOT"])
+          root=authority/"runs"/os.environ["RUN_ID"]
+          path=root/"run_manifest.json"
+          manifest=json.loads(path.read_text())
+          motion=dict(manifest.get("motion") or {})
+          sources=list(motion.get("sources") or [])
+          if len(sources)!=3:
+              donor=None
+              for candidate in sorted((authority/"runs").glob("*KNIGHT*")):
+                  p=candidate/"run_manifest.json"
+                  if not p.is_file():
+                      continue
+                  try:
+                      m=json.loads(p.read_text())
+                  except Exception:
+                      continue
+                  s=list(dict(m.get("motion") or {}).get("sources") or [])
+                  if len(s)==3 and {str(x.get("clip_id")) for x in s}=={"demo_idle_v1","demo_run_v1","demo_slash_v1"}:
+                      donor=(candidate,dict(m["motion"]))
+                      break
+              if donor is None:
+                  raise RuntimeError("THREE_CLIP_MOTION_INPUT_NOT_FOUND")
+              manifest["motion"]=donor[1]
+              print("MOTION_INPUT_REUSED_FROM",donor[0].name)
+          player=Path(os.environ["PLAYER"]).resolve()
+          sha=hashlib.sha256(player.read_bytes()).hexdigest()
+          runtime=dict(manifest.get("runtime") or {})
+          runtime["native_player"]={"path":str(player),"sha256":sha}
+          manifest["runtime"]=runtime
+          path.write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n")
+          print("CURRENT_MAIN_NATIVE_PLAYER",sha)
+          print("MOTION_CLIPS",[x["clip_id"] for x in manifest["motion"]["sources"]])
+          PY
+          echo "PLAYER=$player" >> "$GITHUB_ENV"
+
+      - name: Measure exact current-main reusable stage count
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
-          import json, os
-          from pathlib import Path
-          root=Path(os.environ["REALSAS_AUTHORITY_ROOT"])/"runs"
-          rows=[]
-          for d in sorted(root.glob("*KNIGHT*")):
-              if not d.is_dir():
-                  continue
-              ledger=d/"ACTIVE_RUN_V2.json"
-              manifest=d/"run_manifest.json"
-              row={"run_id":d.name,"ledger":ledger.is_file(),"manifest":manifest.is_file()}
-              if ledger.is_file():
-                  p=json.loads(ledger.read_text())
-                  stages=list(p.get("stages") or [])
-                  row.update({
-                      "execution_class":p.get("execution_class"),
-                      "status":p.get("status"),
-                      "completed_count":p.get("completed_count"),
-                      "total_count":p.get("total_count"),
-                      "pass_count":sum(str(x.get("status") or "").startswith("PASS") for x in stages),
-                      "fail_count":sum(str(x.get("status") or "") in {"FAIL","ABSTAIN","BLOCKED"} for x in stages),
-                      "pending_count":sum(str(x.get("status") or "")=="PENDING" for x in stages),
-                      "passes":[{"ordinal":x.get("ordinal"),"id":x.get("id"),"status":x.get("status")} for x in stages if str(x.get("status") or "").startswith("PASS")],
-                      "failures":[{"ordinal":x.get("ordinal"),"id":x.get("id"),"status":x.get("status"),"blockers":x.get("blockers") or []} for x in stages if str(x.get("status") or "") in {"FAIL","ABSTAIN","BLOCKED"}],
-                  })
-              rows.append(row)
-          out=Path("/tmp/current_main_knight_runroots.json")
-          out.write_text(json.dumps(rows,indent=2,sort_keys=True)+"\n")
-          print(out.read_text())
+          import copy,json,os
+          from compiler.realsas_compiler_services.orchestrator import mainline
+          run_id=os.environ["RUN_ID"]
+          plan=mainline.load_json(mainline.PLAN_PATH)
+          ledger=mainline.load_json(mainline.run_ledger_path(run_id))
+          manifest=mainline.load_json(mainline.run_manifest_path(run_id))
+          probe=copy.deepcopy(ledger)
+          mainline.validate_ledger(plan,probe)
+          while mainline._verify_existing_passes(plan,probe,manifest):
+              pass
+          while mainline._reset_stale_failures(plan,probe,manifest):
+              pass
+          rows=list(probe["stages"])
+          ready=[x for x in rows if str(x.get("status") or "") in mainline.PASS_STATUSES]
+          failed=[x for x in rows if str(x.get("status") or "") in mainline.FAIL_STATUSES]
+          pending=[x for x in rows if str(x.get("status") or "")=="PENDING"]
+          print("CURRENT_MAIN_REUSE",json.dumps({
+              "ready_count":len(ready),
+              "pending_count":len(pending),
+              "failed_count":len(failed),
+              "ready":[[x["ordinal"],x["id"],x["status"]] for x in ready],
+              "pending":[[x["ordinal"],x["id"]] for x in pending],
+              "failed":[[x["ordinal"],x["id"],x.get("blockers") or []] for x in failed],
+          },sort_keys=True))
           PY
-      - uses: actions/upload-artifact@v4
+
+      - name: Resume exact current-main DAG through product closure target
+        shell: bash
+        run: |
+          set +e
+          python -m compiler.realsas_compiler_services.orchestrator.mainline execute             --run-id "$RUN_ID"             --target 46_PRODUCT_CLOSURE_SEAL
+          rc=$?
+          python -m compiler.realsas_compiler_services.orchestrator.mainline status --run-id "$RUN_ID" || true
+          echo "EXECUTE_RC=$rc" >> "$GITHUB_ENV"
+          exit 0
+
+      - name: Render current-main RSS to GIFs when Stage43 exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/current_main_knight_render"
+          rm -rf "$out"
+          mkdir -p "$out"
+          OUT_DIR="$out" python - <<'PY'
+          import json,os,subprocess
+          from pathlib import Path
+          import numpy as np
+          from PIL import Image
+
+          authority=Path(os.environ["REALSAS_AUTHORITY_ROOT"])
+          root=authority/"runs"/os.environ["RUN_ID"]
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={x["id"]:x for x in ledger["stages"]}
+          report={
+              "schema":"RealSaS.CurrentMainKnightRenderReport.v1",
+              "run_id":os.environ["RUN_ID"],
+              "branch_sha":os.environ["GITHUB_SHA"],
+              "execute_rc":int(os.environ.get("EXECUTE_RC","-1")),
+              "stage_status":{x["id"]:x["status"] for x in ledger["stages"]},
+          }
+          s42=by["42_RUNTIME_PROJECTION_AND_CAA_BINDING"]
+          s43=by["43_RSS_MATERIALIZE_COMPACT"]
+          report["stage42_status"]=s42["status"]
+          report["stage43_status"]=s43["status"]
+          if str(s43["status"]) not in {"PASS","PASS_DEMO_ONLY"}:
+              Path(os.environ["OUT_DIR"],"REPORT.json").write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
+              raise SystemExit(0)
+
+          rss_rows=[x for x in s43.get("outputs") or [] if x.get("schema")=="application/x-realsas-rss-v2"]
+          if len(rss_rows)!=1:
+              raise RuntimeError("RSS_OUTPUT_NOT_UNIQUE")
+          rss=Path(rss_rows[0]["path"])
+          proj_rows=[x for x in s42.get("outputs") or [] if x.get("schema")=="RealSaS.RuntimeProjectionIR.v2"]
+          if len(proj_rows)!=1:
+              raise RuntimeError("PROJECTION_OUTPUT_NOT_UNIQUE")
+          projection=json.loads(Path(proj_rows[0]["path"]).read_text())
+          views={str(v["view_id"]):v for v in projection["views"]}
+          resolution=int(views["V0"]["camera"]["resolution"])
+          clips=list(projection["clips"])
+          player=Path(os.environ["PLAYER"])
+          report["rss_path"]=str(rss)
+          report["resolution"]=resolution
+          report["clips"]=[]
+          for clip in clips:
+              cid=str(clip["clip_id"])
+              n=int(clip["frame_count"])
+              dur=float(clip["duration_seconds"])
+              sample_count=min(n,24)
+              indices=sorted(set(int(round(i*(n-1)/max(1,sample_count-1))) for i in range(sample_count)))
+              frames=[]
+              for fi in indices:
+                  raw=Path(os.environ["OUT_DIR"])/f"{cid}_V0_{fi:04d}.rgba"
+                  proc=subprocess.run([str(player),str(rss),"--clip",cid,"--view","V0","--frame",str(fi),"--out-rgba",str(raw)],capture_output=True,text=True)
+                  if proc.returncode!=0:
+                      raise RuntimeError(f"NATIVE_RENDER_FAIL:{cid}:{fi}:{proc.stderr}")
+                  arr=np.frombuffer(raw.read_bytes(),dtype=np.uint8)
+                  if arr.size!=resolution*resolution*4:
+                      raise RuntimeError(f"RGBA_SIZE_DRIFT:{cid}:{fi}:{arr.size}")
+                  frames.append(Image.fromarray(arr.reshape(resolution,resolution,4),"RGBA"))
+                  raw.unlink()
+              delay=max(40,int(round(1000.0*dur/max(1,n-1))))
+              gif=Path(os.environ["OUT_DIR"])/f"KNIGHT_{cid.upper()}_CURRENT_MAIN.gif"
+              pframes=[im.convert("P",palette=Image.Palette.ADAPTIVE,colors=255) for im in frames]
+              pframes[0].save(gif,save_all=True,append_images=pframes[1:],duration=delay,loop=0,disposal=2,optimize=False,transparency=0)
+              report["clips"].append({"clip_id":cid,"frame_count":n,"sampled_indices":indices,"gif":gif.name})
+          Path(os.environ["OUT_DIR"],"REPORT.json").write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
+          PY
+          echo "OUT_DIR=$out" >> "$GITHUB_ENV"
+
+      - name: Upload current-main Knight render
+        uses: actions/upload-artifact@v4
         with:
-          name: current-main-knight-runroot-audit
-          path: /tmp/current_main_knight_runroots.json
+          name: current-main-knight-render
+          path: ${{ env.OUT_DIR }}
           if-no-files-found: error
-          retention-days: 2
+          retention-days: 7

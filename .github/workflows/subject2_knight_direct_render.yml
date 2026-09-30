@@ -1,4 +1,4 @@
-name: subject2-knight-current-main-stage25-scan-render
+name: subject2-knight-current-main-motion-render
 
 on:
   push:
@@ -13,14 +13,16 @@ permissions:
 jobs:
   render:
     runs-on: [self-hosted, linux, x64, realsas]
-    timeout-minutes: 30
+    timeout-minutes: 60
     env:
       REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
+      SOURCE_RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
       PYTHONPATH: .
       PYTHONHASHSEED: '0'
       OMP_NUM_THREADS: '1'
       MKL_NUM_THREADS: '1'
       OPENBLAS_NUM_THREADS: '1'
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,163 +44,256 @@ jobs:
       - name: Install current-main dependencies
         run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
 
-      - name: Probe all Stage25-pass Knight lineages and render first current-main-compatible one
+      - name: Build exact current-main native runtime
         shell: bash
         run: |
           set -euo pipefail
-          OUT_ROOT="$RUNNER_TEMP/knight_current_main_stage25_scan"
+          c++ -std=c++17 -O2 -Wall -Wextra -pedantic             runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp             -lpng -lz             -o "$RUNNER_TEMP/realsas_runtime_v2_caa_reference_MAIN"
+          sha256sum "$RUNNER_TEMP/realsas_runtime_v2_caa_reference_MAIN"
+
+      - name: Execute only current-main Stage35-43 adapters and render clips
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT_ROOT="$RUNNER_TEMP/knight_current_main_motion_render"
           rm -rf "$OUT_ROOT"
           mkdir -p "$OUT_ROOT"
+          echo "OUT_ROOT=$OUT_ROOT" >> "$GITHUB_ENV"
           export OUT_ROOT
+          export PLAYER="$RUNNER_TEMP/realsas_runtime_v2_caa_reference_MAIN"
 
           python - <<'PY'
-          import hashlib, json, os, shutil, traceback
+          import copy, hashlib, importlib, json, os, subprocess
           from pathlib import Path
-
-          from compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2 import (
-              prove_caa_reference_rest_stage,
-          )
+          import numpy as np
+          from PIL import Image
 
           authority = Path(os.environ["REALSAS_AUTHORITY_ROOT"])
+          source_run_id = os.environ["SOURCE_RUN_ID"]
+          source_root = authority / "runs" / source_run_id
           out_root = Path(os.environ["OUT_ROOT"])
-          required = {
+          player = Path(os.environ["PLAYER"])
+
+          ledger = json.loads((source_root / "ACTIVE_RUN_V2.json").read_text())
+          manifest = json.loads((source_root / "run_manifest.json").read_text())
+          plan = json.loads(Path("canonical/MAINLINE_EXECUTION_PLAN_V2.json").read_text())
+          admissible = {"PASS", "PASS_DEMO_ONLY", "CACHE_HIT"}
+
+          by = {str(row["id"]): row for row in ledger["stages"]}
+          required = [
               "05_CAMERA_CONTRACT_SOLVED",
               "07_OBSERVATION_CONTRACT_QUALIFIED",
+              "15_RIGGING_SURFACE_QUALIFIED",
+              "17_MECHANICAL_PARTITION_QUALIFIED",
               "18_CANONICAL_MESH_ADDRESSING_BUILD",
               "19_STATIC_CANONICAL_MESH_QUALIFIED",
-              "20_CAA_BACKEND_PREREGISTERED",
               "23_COMPLETE_APPEARANCE_ASSET_BAKED",
               "24_COMPLETE_APPEARANCE_QUALIFIED",
               "25_CAA_REFERENCE_REST_RENDER_PROOF",
+              "28_SKELETON_QUALIFIED",
+              "32_SKIN_QUALIFIED",
+              "34_DEFORMATION_CAPABILITY_ENVELOPE",
+          ]
+          bad = {
+              sid: by[sid].get("status")
+              for sid in required
+              if str(by[sid].get("status")) not in admissible
           }
+          if bad:
+              raise RuntimeError(f"UPSTREAM_NOT_READY:{bad}")
 
-          candidates = []
-          for run_root in sorted((authority / "runs").glob("*KNIGHT*")):
-              ledger_path = run_root / "ACTIVE_RUN_V2.json"
-              manifest_path = run_root / "run_manifest.json"
-              if not ledger_path.is_file() or not manifest_path.is_file():
-                  continue
-              try:
-                  ledger = json.loads(ledger_path.read_text())
-                  by = {str(row["id"]): row for row in ledger["stages"]}
-              except Exception:
-                  continue
-              if not required.issubset(by):
-                  continue
-              if str(by["25_CAA_REFERENCE_REST_RENDER_PROOF"].get("status")) != "PASS":
-                  continue
-              admissible = {"PASS", "PASS_DEMO_ONLY", "CACHE_HIT"}
-              if any(str(by[sid].get("status")) not in admissible for sid in required - {"25_CAA_REFERENCE_REST_RENDER_PROOF"}):
-                  continue
-              candidates.append((run_root, ledger, json.loads(manifest_path.read_text())))
+          expected_clips = {"demo_idle_v1", "demo_run_v1", "demo_slash_v1"}
 
-          if not candidates:
-              raise RuntimeError("NO_STAGE25_PASS_KNIGHT_LINEAGE")
+          def resolve_ref(ref):
+              raw = str(ref.get("path") or "")
+              if raw.startswith("$REALSAS_AUTHORITY_ROOT/"):
+                  return authority / raw.split("/", 1)[1]
+              return Path(os.path.expandvars(raw)).expanduser()
 
-          diagnostics = []
-          winner = None
-          for idx, (run_root, ledger, manifest) in enumerate(candidates):
-              run_id = run_root.name
-              attempt_root = out_root / f"attempt_{idx:02d}_{run_id}"
-              attempt_root.mkdir(parents=True, exist_ok=True)
-              stage = next(
-                  row for row in ledger["stages"]
-                  if row["id"] == "25_CAA_REFERENCE_REST_RENDER_PROOF"
-              )
-              ctx = {
-                  "run_id": run_id,
-                  "run_root": attempt_root,
-                  "ledger": ledger,
-                  "run_manifest": manifest,
-                  "stage": dict(stage),
-              }
-              try:
-                  result = prove_caa_reference_rest_stage(ctx)
-                  status = str(result.get("status") or "")
-                  outputs = list(result.get("outputs") or [])
-                  pngs = [
-                      row for row in outputs
-                      if str(row.get("schema") or "").startswith("RealSaS.CAAReferenceRestRender.V")
-                  ]
-                  if status == "PASS" and len(pngs) == 8:
-                      verified = []
-                      for row in pngs:
-                          p = Path(row["path"])
-                          actual = hashlib.sha256(p.read_bytes()).hexdigest()
-                          if actual != row["sha256"]:
-                              raise RuntimeError(f"HASH_DRIFT:{p}")
-                          verified.append({
-                              "name": p.name,
-                              "path": str(p),
-                              "sha256": actual,
-                              "size_bytes": p.stat().st_size,
-                              "schema": row["schema"],
-                          })
-                      winner = {
-                          "run_id": run_id,
-                          "attempt_root": str(attempt_root),
-                          "renders": verified,
-                          "result_diagnostics": result.get("diagnostics") or {},
-                      }
-                      diagnostics.append({"run_id": run_id, "status": "PASS_CURRENT_MAIN_RENDER"})
+          def sources_valid(rows):
+              if len(rows) != 3 or {str(x.get("clip_id")) for x in rows} != expected_clips:
+                  return False
+              for row in rows:
+                  ref = dict(row.get("file") or {})
+                  p = resolve_ref(ref)
+                  expected = str(ref.get("sha256") or "")
+                  if not p.is_file() or len(expected) != 64:
+                      return False
+                  if hashlib.sha256(p.read_bytes()).hexdigest() != expected:
+                      return False
+              return True
+
+          sources = list(dict(manifest.get("motion") or {}).get("sources") or [])
+          if not sources_valid(sources):
+              donor = None
+              for frag in sorted(authority.rglob("MOTION_RUN_MANIFEST_FRAGMENT.json")):
+                  try:
+                      payload = json.loads(frag.read_text())
+                      candidate = dict(payload.get("motion") or {})
+                      rows = list(candidate.get("sources") or [])
+                  except Exception:
+                      continue
+                  if sources_valid(rows):
+                      donor = (frag, candidate)
                       break
-                  diagnostics.append({
-                      "run_id": run_id,
-                      "status": f"NONPASS:{status}",
-                      "blockers": result.get("blockers") or [],
-                  })
-              except Exception as exc:
-                  diagnostics.append({
-                      "run_id": run_id,
-                      "status": "EXCEPTION",
-                      "error_type": type(exc).__name__,
-                      "error": str(exc),
-                  })
+              if donor is None:
+                  raise RuntimeError("VALID_IDLE_RUN_SLASH_MOTION_FRAGMENT_NOT_FOUND")
+              manifest["motion"] = donor[1]
+              print("MOTION_FRAGMENT_REUSED", donor[0])
+          else:
+              print("MOTION_SOURCES_REUSED_FROM_SOURCE_MANIFEST")
 
-          if winner is None:
-              (out_root / "SCAN_REPORT.json").write_text(
-                  json.dumps({"diagnostics": diagnostics}, indent=2, sort_keys=True) + "\n"
-              )
-              raise RuntimeError(
-                  "NO_CURRENT_MAIN_COMPATIBLE_STAGE25_KNIGHT_LINEAGE:"
-                  + json.dumps(diagnostics, sort_keys=True)
-              )
+          work_ledger = copy.deepcopy(ledger)
+          work_by = {str(row["id"]): row for row in work_ledger["stages"]}
+          stage_log = []
 
-          final_dir = out_root / "FINAL"
-          final_dir.mkdir(parents=True, exist_ok=True)
-          final_renders = []
-          for row in winner["renders"]:
-              src = Path(row["path"])
-              dst = final_dir / src.name
-              shutil.copy2(src, dst)
-              final_renders.append({
-                  **row,
-                  "path": str(dst),
+          for ordinal in range(35, 44):
+              stage = next(s for s in plan["stages"] if int(s["ordinal"]) == ordinal)
+              sid = str(stage["id"])
+              module_name, function_name = str(stage["adapter"]).split(":", 1)
+              func = getattr(importlib.import_module(module_name), function_name)
+              ctx = {
+                  "run_id": source_run_id,
+                  "run_root": out_root,
+                  "ledger": work_ledger,
+                  "run_manifest": manifest,
+                  "stage": stage,
+              }
+              print("DIRECT_CURRENT_MAIN_STAGE_BEGIN", ordinal, sid)
+              result = func(ctx)
+              status = str(result.get("status") or "")
+              row = work_by[sid]
+              row["status"] = status
+              row["outputs"] = list(result.get("outputs") or [])
+              row["blockers"] = list(result.get("blockers") or [])
+              row["performance"] = dict(result.get("performance") or {})
+              stage_log.append({
+                  "ordinal": ordinal,
+                  "id": sid,
+                  "status": status,
+                  "blockers": row["blockers"],
+                  "outputs": row["outputs"],
+              })
+              print("DIRECT_CURRENT_MAIN_STAGE_END", ordinal, sid, status, row["blockers"])
+              if status not in admissible:
+                  (out_root / "FAILURE_REPORT.json").write_text(
+                      json.dumps({
+                          "schema": "RealSaS.CurrentMainKnightMotionRenderFailure.v1",
+                          "failed_stage": sid,
+                          "result": result,
+                          "stage_log": stage_log,
+                          "refit_performed": False,
+                          "model_execution_performed": False,
+                      }, indent=2, sort_keys=True, default=str) + "\n"
+                  )
+                  raise RuntimeError(
+                      f"DOWNSTREAM_STAGE_FAILED:{ordinal}:{sid}:{status}:{row['blockers']}"
+                  )
+
+          s42 = work_by["42_RUNTIME_PROJECTION_AND_CAA_BINDING"]
+          s43 = work_by["43_RSS_MATERIALIZE_COMPACT"]
+          proj_rows = [x for x in s42.get("outputs") or [] if x.get("schema") == "RealSaS.RuntimeProjectionIR.v2"]
+          rss_rows = [x for x in s43.get("outputs") or [] if x.get("schema") == "application/x-realsas-rss-v2"]
+          if len(proj_rows) != 1 or len(rss_rows) != 1:
+              raise RuntimeError(f"RUNTIME_OUTPUT_CARDINALITY:{len(proj_rows)}:{len(rss_rows)}")
+
+          projection_path = Path(proj_rows[0]["path"])
+          rss_path = Path(rss_rows[0]["path"])
+          projection = json.loads(projection_path.read_text())
+          view = next(v for v in projection["views"] if str(v["view_id"]) == "V0")
+          resolution = int(view["camera"]["resolution"])
+          clips = {str(c["clip_id"]): c for c in projection["clips"]}
+
+          render_dir = out_root / "GIFS"
+          render_dir.mkdir(parents=True, exist_ok=True)
+          rendered = []
+
+          for cid in ("demo_idle_v1", "demo_run_v1", "demo_slash_v1"):
+              clip = clips.get(cid)
+              if clip is None:
+                  raise RuntimeError(f"RUNTIME_CLIP_MISSING:{cid}")
+              n = int(clip["frame_count"])
+              duration = float(clip["duration_seconds"])
+              frames = []
+              hashes = []
+
+              for fi in range(n):
+                  raw = render_dir / f"{cid}_{fi:04d}.rgba"
+                  proc = subprocess.run(
+                      [
+                          str(player), str(rss_path),
+                          "--clip", cid,
+                          "--view", "V0",
+                          "--frame", str(fi),
+                          "--out-rgba", str(raw),
+                      ],
+                      capture_output=True,
+                      text=True,
+                  )
+                  if proc.returncode != 0:
+                      raise RuntimeError(f"NATIVE_RENDER_FAIL:{cid}:{fi}:{proc.stderr}")
+                  data = raw.read_bytes()
+                  raw.unlink()
+                  if len(data) != resolution * resolution * 4:
+                      raise RuntimeError(f"RGBA_SIZE_DRIFT:{cid}:{fi}:{len(data)}")
+                  arr = np.frombuffer(data, dtype=np.uint8).reshape(resolution, resolution, 4)
+                  frames.append(Image.fromarray(arr, "RGBA"))
+                  hashes.append(hashlib.sha256(data).hexdigest())
+
+              delay = max(20, int(round(1000.0 * duration / max(1, n - 1))))
+              gif = render_dir / f"KNIGHT_{cid.upper()}_CURRENT_MAIN.gif"
+              first = render_dir / f"KNIGHT_{cid.upper()}_CURRENT_MAIN_FIRST.png"
+              frames[0].save(first)
+              pframes = [
+                  im.convert("P", palette=Image.Palette.ADAPTIVE, colors=255)
+                  for im in frames
+              ]
+              pframes[0].save(
+                  gif,
+                  save_all=True,
+                  append_images=pframes[1:],
+                  duration=delay,
+                  loop=0,
+                  disposal=2,
+                  optimize=False,
+                  transparency=0,
+              )
+              rendered.append({
+                  "clip_id": cid,
+                  "frame_count": n,
+                  "duration_seconds": duration,
+                  "unique_frame_hashes": len(set(hashes)),
+                  "gif": gif.name,
+                  "first_png": first.name,
+                  "gif_sha256": hashlib.sha256(gif.read_bytes()).hexdigest(),
               })
 
           report = {
-              "schema": "RealSaS.CurrentMainKnightStage25ScanRenderReport.v1",
-              "current_main_renderer": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2.prove_caa_reference_rest_stage",
+              "schema": "RealSaS.CurrentMainKnightMotionRenderReport.v1",
+              "source_run_id": source_run_id,
+              "current_main_only_stages_executed": list(range(35, 44)),
               "refit_performed": False,
-              "model_execution_performed": False,
-              "compiler_mainline_execute_performed": False,
-              "winning_source_run_id": winner["run_id"],
-              "render_count": len(final_renders),
-              "renders": final_renders,
-              "probe_diagnostics": diagnostics,
+              "iris_fit_performed": False,
+              "geppetto_fit_performed": False,
+              "arachne_fit_performed": False,
+              "runtime_player_source": "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp",
+              "rss_path": str(rss_path),
+              "rss_sha256": hashlib.sha256(rss_path.read_bytes()).hexdigest(),
+              "projection_path": str(projection_path),
+              "stage_log": stage_log,
+              "clips": rendered,
           }
-          (final_dir / "REPORT.json").write_text(
+          (render_dir / "REPORT.json").write_text(
               json.dumps(report, indent=2, sort_keys=True) + "\n"
           )
-          print("CURRENT_MAIN_KNIGHT_STAGE25_RENDER_PASS")
+          print("CURRENT_MAIN_KNIGHT_IDLE_RUN_SLASH_RENDER_PASS")
           print(json.dumps(report, sort_keys=True))
           PY
 
-          echo "OUT_ROOT=$OUT_ROOT" >> "$GITHUB_ENV"
-
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: knight-current-main-stage25-render
-          path: ${{ env.OUT_ROOT }}/FINAL
-          if-no-files-found: error
+          name: knight-current-main-idle-run-slash
+          path: ${{ env.OUT_ROOT }}
+          if-no-files-found: warn
           retention-days: 7

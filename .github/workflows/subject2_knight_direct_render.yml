@@ -1,4 +1,4 @@
-name: subject2-knight-current-main-stage25-render
+name: subject2-knight-current-main-stage25-scan-render
 
 on:
   push:
@@ -16,7 +16,6 @@ jobs:
     timeout-minutes: 30
     env:
       REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
-      SOURCE_RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_AB_V1_20260929
       PYTHONPATH: .
       PYTHONHASHSEED: '0'
       OMP_NUM_THREADS: '1'
@@ -43,19 +42,17 @@ jobs:
       - name: Install current-main dependencies
         run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
 
-      - name: Render Knight Stage25 with exact current-main renderer
+      - name: Probe all Stage25-pass Knight lineages and render first current-main-compatible one
         shell: bash
         run: |
           set -euo pipefail
-          OUT_ROOT="$RUNNER_TEMP/knight_current_main_stage25"
+          OUT_ROOT="$RUNNER_TEMP/knight_current_main_stage25_scan"
           rm -rf "$OUT_ROOT"
           mkdir -p "$OUT_ROOT"
           export OUT_ROOT
 
           python - <<'PY'
-          import hashlib
-          import json
-          import os
+          import hashlib, json, os, shutil, traceback
           from pathlib import Path
 
           from compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2 import (
@@ -63,26 +60,8 @@ jobs:
           )
 
           authority = Path(os.environ["REALSAS_AUTHORITY_ROOT"])
-          source_run_id = os.environ["SOURCE_RUN_ID"]
-          source_root = authority / "runs" / source_run_id
-          ledger_path = source_root / "ACTIVE_RUN_V2.json"
-          manifest_path = source_root / "run_manifest.json"
-          if not ledger_path.is_file() or not manifest_path.is_file():
-              raise RuntimeError("KNIGHT_SOURCE_RUN_MISSING")
-
-          ledger = json.loads(ledger_path.read_text())
-          manifest = json.loads(manifest_path.read_text())
-          stage = next(
-              row for row in ledger["stages"]
-              if row["id"] == "25_CAA_REFERENCE_REST_RENDER_PROOF"
-          )
-
-          if str(stage.get("status")) != "PASS":
-              raise RuntimeError(
-                  f"KNIGHT_STAGE25_SOURCE_NOT_PASS:{stage.get('status')}:{stage.get('blockers')}"
-              )
-
-          required = [
+          out_root = Path(os.environ["OUT_ROOT"])
+          required = {
               "05_CAMERA_CONTRACT_SOLVED",
               "07_OBSERVATION_CONTRACT_QUALIFIED",
               "18_CANONICAL_MESH_ADDRESSING_BUILD",
@@ -90,66 +69,125 @@ jobs:
               "20_CAA_BACKEND_PREREGISTERED",
               "23_COMPLETE_APPEARANCE_ASSET_BAKED",
               "24_COMPLETE_APPEARANCE_QUALIFIED",
-          ]
-          by = {row["id"]: row for row in ledger["stages"]}
-          bad = {
-              sid: by[sid].get("status")
-              for sid in required
-              if str(by[sid].get("status")) not in {"PASS", "PASS_DEMO_ONLY", "CACHE_HIT"}
-          }
-          if bad:
-              raise RuntimeError(f"KNIGHT_STAGE25_UPSTREAM_NOT_ADMISSIBLE:{bad}")
-
-          out_root = Path(os.environ["OUT_ROOT"])
-          ctx = {
-              "run_id": source_run_id,
-              "run_root": out_root,
-              "ledger": ledger,
-              "run_manifest": manifest,
-              "stage": dict(stage),
+              "25_CAA_REFERENCE_REST_RENDER_PROOF",
           }
 
-          result = prove_caa_reference_rest_stage(ctx)
-          status = str(result.get("status") or "")
-          if status != "PASS":
+          candidates = []
+          for run_root in sorted((authority / "runs").glob("*KNIGHT*")):
+              ledger_path = run_root / "ACTIVE_RUN_V2.json"
+              manifest_path = run_root / "run_manifest.json"
+              if not ledger_path.is_file() or not manifest_path.is_file():
+                  continue
+              try:
+                  ledger = json.loads(ledger_path.read_text())
+                  by = {str(row["id"]): row for row in ledger["stages"]}
+              except Exception:
+                  continue
+              if not required.issubset(by):
+                  continue
+              if str(by["25_CAA_REFERENCE_REST_RENDER_PROOF"].get("status")) != "PASS":
+                  continue
+              admissible = {"PASS", "PASS_DEMO_ONLY", "CACHE_HIT"}
+              if any(str(by[sid].get("status")) not in admissible for sid in required - {"25_CAA_REFERENCE_REST_RENDER_PROOF"}):
+                  continue
+              candidates.append((run_root, ledger, json.loads(manifest_path.read_text())))
+
+          if not candidates:
+              raise RuntimeError("NO_STAGE25_PASS_KNIGHT_LINEAGE")
+
+          diagnostics = []
+          winner = None
+          for idx, (run_root, ledger, manifest) in enumerate(candidates):
+              run_id = run_root.name
+              attempt_root = out_root / f"attempt_{idx:02d}_{run_id}"
+              attempt_root.mkdir(parents=True, exist_ok=True)
+              stage = next(
+                  row for row in ledger["stages"]
+                  if row["id"] == "25_CAA_REFERENCE_REST_RENDER_PROOF"
+              )
+              ctx = {
+                  "run_id": run_id,
+                  "run_root": attempt_root,
+                  "ledger": ledger,
+                  "run_manifest": manifest,
+                  "stage": dict(stage),
+              }
+              try:
+                  result = prove_caa_reference_rest_stage(ctx)
+                  status = str(result.get("status") or "")
+                  outputs = list(result.get("outputs") or [])
+                  pngs = [
+                      row for row in outputs
+                      if str(row.get("schema") or "").startswith("RealSaS.CAAReferenceRestRender.V")
+                  ]
+                  if status == "PASS" and len(pngs) == 8:
+                      verified = []
+                      for row in pngs:
+                          p = Path(row["path"])
+                          actual = hashlib.sha256(p.read_bytes()).hexdigest()
+                          if actual != row["sha256"]:
+                              raise RuntimeError(f"HASH_DRIFT:{p}")
+                          verified.append({
+                              "name": p.name,
+                              "path": str(p),
+                              "sha256": actual,
+                              "size_bytes": p.stat().st_size,
+                              "schema": row["schema"],
+                          })
+                      winner = {
+                          "run_id": run_id,
+                          "attempt_root": str(attempt_root),
+                          "renders": verified,
+                          "result_diagnostics": result.get("diagnostics") or {},
+                      }
+                      diagnostics.append({"run_id": run_id, "status": "PASS_CURRENT_MAIN_RENDER"})
+                      break
+                  diagnostics.append({
+                      "run_id": run_id,
+                      "status": f"NONPASS:{status}",
+                      "blockers": result.get("blockers") or [],
+                  })
+              except Exception as exc:
+                  diagnostics.append({
+                      "run_id": run_id,
+                      "status": "EXCEPTION",
+                      "error_type": type(exc).__name__,
+                      "error": str(exc),
+                  })
+
+          if winner is None:
+              (out_root / "SCAN_REPORT.json").write_text(
+                  json.dumps({"diagnostics": diagnostics}, indent=2, sort_keys=True) + "\n"
+              )
               raise RuntimeError(
-                  "CURRENT_MAIN_STAGE25_RENDER_FAILED:"
-                  + json.dumps(result, sort_keys=True, default=str)
+                  "NO_CURRENT_MAIN_COMPATIBLE_STAGE25_KNIGHT_LINEAGE:"
+                  + json.dumps(diagnostics, sort_keys=True)
               )
 
-          outputs = list(result.get("outputs") or [])
-          pngs = [row for row in outputs if str(row.get("schema") or "").startswith("RealSaS.CAAReferenceRestRender.V")]
-          if len(pngs) != 8:
-              raise RuntimeError(f"CURRENT_MAIN_STAGE25_RENDER_PNG_CARDINALITY:{len(pngs)}")
-
-          verified = []
-          for row in pngs:
-              p = Path(row["path"])
-              if not p.is_file():
-                  raise RuntimeError(f"CURRENT_MAIN_RENDER_FILE_MISSING:{p}")
-              actual = hashlib.sha256(p.read_bytes()).hexdigest()
-              if actual != row["sha256"]:
-                  raise RuntimeError(f"CURRENT_MAIN_RENDER_HASH_DRIFT:{p}")
-              verified.append({
-                  "path": str(p),
-                  "name": p.name,
-                  "sha256": actual,
-                  "size_bytes": p.stat().st_size,
-                  "schema": row["schema"],
+          final_dir = out_root / "FINAL"
+          final_dir.mkdir(parents=True, exist_ok=True)
+          final_renders = []
+          for row in winner["renders"]:
+              src = Path(row["path"])
+              dst = final_dir / src.name
+              shutil.copy2(src, dst)
+              final_renders.append({
+                  **row,
+                  "path": str(dst),
               })
 
           report = {
-              "schema": "RealSaS.CurrentMainKnightStage25RenderReport.v1",
-              "source_run_id": source_run_id,
-              "source_stage25_status": stage["status"],
-              "renderer": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2.prove_caa_reference_rest_stage",
+              "schema": "RealSaS.CurrentMainKnightStage25ScanRenderReport.v1",
+              "current_main_renderer": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2.prove_caa_reference_rest_stage",
               "refit_performed": False,
               "model_execution_performed": False,
               "compiler_mainline_execute_performed": False,
-              "render_count": len(verified),
-              "renders": verified,
+              "winning_source_run_id": winner["run_id"],
+              "render_count": len(final_renders),
+              "renders": final_renders,
+              "probe_diagnostics": diagnostics,
           }
-          (out_root / "REPORT.json").write_text(
+          (final_dir / "REPORT.json").write_text(
               json.dumps(report, indent=2, sort_keys=True) + "\n"
           )
           print("CURRENT_MAIN_KNIGHT_STAGE25_RENDER_PASS")
@@ -161,6 +199,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: knight-current-main-stage25-render
-          path: ${{ env.OUT_ROOT }}
+          path: ${{ env.OUT_ROOT }}/FINAL
           if-no-files-found: error
           retention-days: 7

@@ -264,7 +264,8 @@ jobs:
                       raise RuntimeError(f"HISTORICAL_OUTPUT_MISSING:{sid}:{src}")
                   raw=src.read_bytes()
                   digest=hashlib.sha256(raw).hexdigest()
-                  if digest!=str(old_out["sha256"]) or len(raw)!=int(old_out["bytes"]):
+                  expected_bytes=int(old_out.get("bytes", len(raw)))
+                  if digest!=str(old_out["sha256"]) or len(raw)!=expected_bytes:
                       raise RuntimeError(f"HISTORICAL_OUTPUT_DRIFT:{sid}")
 
                   dst=run_root/"artifacts"/sid/src.name

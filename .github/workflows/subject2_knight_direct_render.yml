@@ -1,4 +1,4 @@
-name: subject2-knight-stage35-owner-copy-probe
+name: subject2-knight-stage35-envelope-fix-proof
 
 on:
   push:
@@ -11,9 +11,9 @@ permissions:
   contents: read
 
 jobs:
-  probe:
+  proof:
     runs-on: [self-hosted, linux, x64, realsas]
-    timeout-minutes: 30
+    timeout-minutes: 20
     env:
       REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
       SOURCE_RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
@@ -26,179 +26,76 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ops/current-main-knight-render-20260930
           fetch-depth: 1
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Prove exact current main
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch origin main
-          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
-          echo "EXACT_MAIN_SHA=$(git rev-parse HEAD)"
-
-      - name: Install current-main dependencies
+      - name: Install dependencies
         run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
 
-      - name: Probe Stage35 with OWNER_COPY seam skin transfer
+      - name: Unit proof for envelope-bound G3B stress
+        run: |
+          python -m pytest -q             tests/compiler/test_source_edge_probe_repartition_v1.py             tests/compiler/test_skin_topology_repartition_directive_v2.py             tests/compiler/test_deformation_stress_v2_vectorization.py
+
+      - name: Re-run Knight Stage35 with patched G3B stress authority
         shell: bash
         run: |
           set -euo pipefail
-          OUT_ROOT="$RUNNER_TEMP/knight_stage35_owner_copy_probe"
+          OUT_ROOT="$RUNNER_TEMP/knight_stage35_envelope_fix"
           rm -rf "$OUT_ROOT"
           mkdir -p "$OUT_ROOT"
           export OUT_ROOT
-
           python - <<'PY'
-          import copy, json, os
+          import copy, importlib, json, os
           from pathlib import Path
 
-          from compiler.realsas_compiler_core.canonical_mesh_candidate_v1 import (
-              build_holeless_partitioned_dense_candidate,
-          )
-          from compiler.realsas_compiler_core.hashing import content_sha256
-          from compiler.realsas_compiler_core.mesh.product_policy_v1 import load_mesh_policy_document
-          from compiler.realsas_compiler_services.orchestrator.adapters import mesh_v2
+          authority=Path(os.environ["REALSAS_AUTHORITY_ROOT"])
+          source_run_id=os.environ["SOURCE_RUN_ID"]
+          source_root=authority/"runs"/source_run_id
+          out_root=Path(os.environ["OUT_ROOT"])
 
-          repo_root = Path.cwd().resolve()
-          authority = Path(os.environ["REALSAS_AUTHORITY_ROOT"])
-          source_run_id = os.environ["SOURCE_RUN_ID"]
-          source_root = authority / "runs" / source_run_id
-          out_root = Path(os.environ["OUT_ROOT"]).resolve()
+          ledger=json.loads((source_root/"ACTIVE_RUN_V2.json").read_text())
+          manifest=json.loads((source_root/"run_manifest.json").read_text())
+          plan=json.loads(Path("canonical/MAINLINE_EXECUTION_PLAN_V2.json").read_text())
+          stage=next(s for s in plan["stages"] if int(s["ordinal"])==35)
 
-          ledger = json.loads((source_root / "ACTIVE_RUN_V2.json").read_text())
-          manifest = json.loads((source_root / "run_manifest.json").read_text())
-          plan = json.loads((repo_root / "canonical" / "MAINLINE_EXECUTION_PLAN_V2.json").read_text())
-          work_ledger = copy.deepcopy(ledger)
-          work_by = {str(row["id"]): row for row in work_ledger["stages"]}
-
-          base_ctx = {
-              "repo_root": repo_root,
-              "run_id": source_run_id,
-              "run_root": out_root,
-              "ledger": work_ledger,
-              "run_manifest": manifest,
-              "stage": next(s for s in plan["stages"] if int(s["ordinal"]) == 18),
+          ctx={
+              "repo_root":Path.cwd().resolve(),
+              "run_id":source_run_id,
+              "run_root":out_root,
+              "ledger":copy.deepcopy(ledger),
+              "run_manifest":manifest,
+              "stage":stage,
           }
+          module_name,function_name=str(stage["adapter"]).split(":",1)
+          func=getattr(importlib.import_module(module_name),function_name)
+          result=func(ctx)
 
-          surface = mesh_v2._load_surface(base_ctx)
-          partition, carrier = mesh_v2._load_partition_and_carrier(base_ctx)
-          face_provenance = mesh_v2._load_compacted_dense_face_provenance(
-              base_ctx, surface=surface
-          )
-          explicit_faces = tuple(
-              tuple(map(str, row))
-              for row in tuple(face_provenance.get("compact_faces") or ())
-          )
-
-          owner = {
-              str(sid): str(component.component_id)
-              for component in partition.components
-              for sid in component.surface_ids
+          report={
+              "schema":"RealSaS.KnightStage35EnvelopeStressFixProof.v1",
+              "status":result.get("status"),
+              "blockers":result.get("blockers") or [],
+              "diagnostics":result.get("diagnostics") or {},
+              "outputs":result.get("outputs") or [],
           }
-          mixed_source_face_count = sum(
-              1 for face in explicit_faces
-              if len({owner[str(sid)] for sid in face}) > 1
+          (out_root/"REPORT.json").write_text(
+              json.dumps(report,indent=2,sort_keys=True,default=str)+"\n"
           )
-          if mixed_source_face_count <= 0:
-              raise RuntimeError("OWNER_COPY_PROBE_REQUIRES_MIXED_SOURCE_FACES")
-
-          policy_cfg = dict(manifest.get("mesh_policy") or {})
-          policy_doc_ref = dict(policy_cfg.get("document") or {})
-          policy_path = mesh_v2._resolved_path(str(policy_doc_ref.get("path") or ""))
-          expected = str(policy_doc_ref.get("sha256") or "")
-          if (
-              not policy_path.is_file()
-              or len(expected) != 64
-              or mesh_v2._sha256(policy_path) != expected
-          ):
-              raise RuntimeError("MESH_POLICY_DOCUMENT_REF_INVALID")
-          policy = load_mesh_policy_document(policy_path)
-
-          mesh_cfg = dict(manifest.get("mesh") or {})
-          owner_copy_policy_hash = content_sha256({
-              "schema": "RealSaS.CanonicalRelationBaselinePolicy.v1",
-              "mesh_config": mesh_cfg,
-              "mesh_policy_hash": policy.qualification_policy_lineage_hash,
-              "generated_seam_skin_transfer": "OWNER_COPY",
-          })
-
-          candidate = build_holeless_partitioned_dense_candidate(
-              surface,
-              partition,
-              carrier,
-              producer_policy_hash=owner_copy_policy_hash,
-              explicit_face_provenance=explicit_faces,
-              mechanical_skin_transfer="OWNER_COPY",
-          )
-
-          stage18_root = out_root / "artifacts" / "18_CANONICAL_MESH_ADDRESSING_BUILD"
-          candidate_out = mesh_v2._write_ir(
-              stage18_root / "canonical_mesh_candidate.json",
-              candidate,
-              authority_class="DIAGNOSTIC_OWNER_COPY_STAGE35_PROBE",
-          )
-          policy_out = mesh_v2._write_ir(
-              stage18_root / "mesh_qualification_policy.json",
-              policy,
-              authority_class="FROZEN_MESH_QUALIFICATION_POLICY",
-          )
-
-          work_by["18_CANONICAL_MESH_ADDRESSING_BUILD"]["status"] = "PASS_DEMO_ONLY"
-          work_by["18_CANONICAL_MESH_ADDRESSING_BUILD"]["outputs"] = [
-              candidate_out,
-              policy_out,
-          ]
-          work_by["18_CANONICAL_MESH_ADDRESSING_BUILD"]["blockers"] = []
-
-          stage35 = next(s for s in plan["stages"] if int(s["ordinal"]) == 35)
-          ctx35 = {
-              "repo_root": repo_root,
-              "run_id": source_run_id,
-              "run_root": out_root,
-              "ledger": work_ledger,
-              "run_manifest": manifest,
-              "stage": stage35,
-          }
-          result = mesh_v2.qualify_canonical_mesh_stage(ctx35)
-
-          report = {
-              "schema": "RealSaS.KnightStage35OwnerCopyProbe.v1",
-              "source_run_id": source_run_id,
-              "mixed_source_face_count": mixed_source_face_count,
-              "candidate_vertex_count": len(candidate.vertices),
-              "candidate_face_count": len(candidate.faces),
-              "candidate_lineage_hash": candidate.candidate_lineage_hash,
-              "mechanical_skin_transfer": candidate.metadata.get("mechanical_skin_transfer"),
-              "stage35_status": result.get("status"),
-              "stage35_blockers": result.get("blockers") or [],
-              "stage35_diagnostics": result.get("diagnostics") or {},
-              "stage35_outputs": result.get("outputs") or [],
-          }
-          (out_root / "REPORT.json").write_text(
-              json.dumps(report, indent=2, sort_keys=True, default=str) + "\n"
-          )
-
-          print("OWNER_COPY_STAGE35_PROBE_RESULT")
-          print(json.dumps(report, sort_keys=True, default=str))
-
-          # Do not mask a Stage35 fail: workflow should show red if OWNER_COPY is not sufficient.
-          if str(result.get("status") or "") not in {"PASS", "PASS_DEMO_ONLY", "CACHE_HIT"}:
+          print(json.dumps(report,sort_keys=True,default=str),flush=True)
+          if str(result.get("status") or "") not in {"PASS","PASS_DEMO_ONLY","CACHE_HIT"}:
               raise RuntimeError(
-                  f"OWNER_COPY_STAGE35_NOT_PASS:{result.get('status')}:{result.get('blockers')}"
+                  f"STAGE35_STILL_FAILS:{result.get('status')}:{result.get('blockers')}"
               )
           PY
-
           echo "OUT_ROOT=$OUT_ROOT" >> "$GITHUB_ENV"
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: knight-stage35-owner-copy-probe
+          name: knight-stage35-envelope-fix-proof
           path: ${{ env.OUT_ROOT }}
           if-no-files-found: warn
           retention-days: 7

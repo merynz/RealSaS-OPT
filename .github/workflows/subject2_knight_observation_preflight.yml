@@ -63,6 +63,30 @@ jobs:
           manifest["run_id"]=os.environ["RUN_ID"]
           manifest["subject_id"]=os.environ["SUBJECT_ID"]
 
+          # Reconstruct the current adapter's IRIS fit input refs from the
+          # source run's sealed Stage09/10 outputs. This reuses exact bytes;
+          # it does not run an optimizer.
+          source_ledger=json.loads((source_root/"ACTIVE_RUN_V2.json").read_text())
+          source_by={x["id"]:x for x in source_ledger["stages"]}
+          def one_json(stage_id,schema):
+              rows=[x for x in source_by[stage_id].get("outputs") or [] if x.get("schema")==schema]
+              if len(rows)!=1:
+                  raise RuntimeError(f"SOURCE_STAGE_OUTPUT_NOT_UNIQUE:{stage_id}:{schema}:{len(rows)}")
+              path=Path(rows[0]["path"])
+              if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest()!=rows[0]["sha256"]:
+                  raise RuntimeError(f"SOURCE_STAGE_OUTPUT_DRIFT:{stage_id}:{schema}")
+              return json.loads(path.read_text())
+          iris_pre=one_json("09_IRIS_FIT_PREREGISTERED","RealSaS.ModelFitPreregistrationIR.v1")
+          iris_exe=one_json("10_IRIS_FIT","RealSaS.ModelFitExecutionIR.v1")
+          manifest["iris_fit"]={
+              "preregistration":{"path":iris_pre["preregistration_document_path"],"sha256":iris_pre["preregistration_document_sha256"]},
+              "execution_receipt":{"path":iris_exe["execution_receipt_path"],"sha256":iris_exe["execution_receipt_sha256"]},
+              "checkpoint":{"path":iris_exe["checkpoint_path"],"sha256":iris_exe["checkpoint_sha256"]},
+              "result":{"path":iris_exe["result_path"],"sha256":iris_exe["result_sha256"]},
+              "proposal":{"path":iris_exe["proposal_path"],"sha256":iris_exe["proposal_sha256"]},
+          }
+          print("IRIS_FIT_REBOUND_FROM_SEALED_STAGE09_10")
+
           expected={"demo_idle_v1","demo_run_v1","demo_slash_v1"}
           sources=list(dict(manifest.get("motion") or {}).get("sources") or [])
           if len(sources)!=3 or {str(x.get("clip_id")) for x in sources}!=expected:

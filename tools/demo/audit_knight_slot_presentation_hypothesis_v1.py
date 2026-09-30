@@ -196,7 +196,8 @@ def _visual_qa(rest,posed,faces):
 
 def run(*,authority_root:Path,run_id:str,out_path:Path):
     root=authority_root/"runs"/run_id
-    ctx=_ctx(authority_root,run_id)
+    manifest=_read_json(root/"run_manifest.json")
+    ctx={"run_manifest":manifest}
     mesh=qualified_mesh_from_dict(_read_json(
         root/"artifacts/35_DYNAMIC_MECHANICAL_MESH_QUALIFIED/qualified_mesh.json"
     ))

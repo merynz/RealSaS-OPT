@@ -10,13 +10,13 @@ from scipy import ndimage
 from scipy.spatial import cKDTree
 
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
-    canonical_mesh_candidate_from_dict,
     qualified_camera_set_from_dict,
+    qualified_mesh_from_dict,
     qualified_observation_set_from_dict,
-    qualified_skeleton_from_dict,
-    qualified_skin_from_dict,
 )
-from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import _joint_pose_v2
+from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import (
+    qualified_dynamic_motion_v2_from_dict,
+)
 from compiler.realsas_compiler_core.product_state_v2 import (
     presentation_structure_v2_from_dict,
 )
@@ -29,21 +29,7 @@ from compiler.realsas_compiler_core.visibility_v2 import rasterize_visible_owner
 from compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2 import (
     _load_source_inputs,
 )
-from tools.demo.render_knight_motion_preview_v1 import (
-    _candidate_skin_weights,
-    _ctx,
-    _skin,
-    _tracks_for_clip,
-)
-from tools.demo.render_knight_visual_mesh_arap_witness_v1 import (
-    _candidate_face_indices,
-)
-
-CLIPS=(
-    ("demo_idle_v1","IDLE"),
-    ("demo_run_v1","RUN"),
-    ("demo_slash_v1","SLASH"),
-)
+CLIP_IDS=("demo_idle_v1","demo_run_v1","demo_slash_v1")
 
 
 def _read_json(path: Path):
@@ -211,8 +197,8 @@ def _visual_qa(rest,posed,faces):
 def run(*,authority_root:Path,run_id:str,out_path:Path):
     root=authority_root/"runs"/run_id
     ctx=_ctx(authority_root,run_id)
-    candidate=canonical_mesh_candidate_from_dict(_read_json(
-        root/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json"
+    mesh=qualified_mesh_from_dict(_read_json(
+        root/"artifacts/35_DYNAMIC_MECHANICAL_MESH_QUALIFIED/qualified_mesh.json"
     ))
     structure=presentation_structure_v2_from_dict(_read_json(
         root/"artifacts/37_QUALIFIED_PRESENTATION_STRUCTURE/qualified_presentation_structure_v2.json"
@@ -223,30 +209,25 @@ def run(*,authority_root:Path,run_id:str,out_path:Path):
     observation=qualified_observation_set_from_dict(_read_json(
         root/"artifacts/07_OBSERVATION_CONTRACT_QUALIFIED/qualified_observation_set.json"
     ))
-    skeleton=qualified_skeleton_from_dict(_read_json(
-        root/"artifacts/28_SKELETON_QUALIFIED/qualified_skeleton.json"
-    ))
-    skin=qualified_skin_from_dict(_read_json(
-        root/"artifacts/32_SKIN_QUALIFIED/qualified_skin.json"
+    dynamic=qualified_dynamic_motion_v2_from_dict(_read_json(
+        root/"artifacts/41_MOTION_DYNAMIC_PROOF/qualified_dynamic_motion.json"
     ))
 
     ordered=tuple(sorted(cameras.cameras,key=lambda c:int(c.view_index)))
-    rgba_by_view,mask_by_view=_load_source_inputs(ctx,observation)
-    rest=np.asarray([v.P for v in candidate.vertices],dtype=np.float64)
-    faces=_candidate_face_indices(candidate)
+    _rgba_by_view,mask_by_view=_load_source_inputs(ctx,observation)
+    vertex_ids=tuple(str(v.canonical_mesh_vertex_id) for v in mesh.vertices)
+    vertex_index={vid:i for i,vid in enumerate(vertex_ids)}
+    if len(vertex_index)!=len(vertex_ids):
+        raise RuntimeError("SLOT_COURT_DUPLICATE_MECHANICAL_VERTEX")
+    rest=np.asarray([v.P for v in mesh.vertices],dtype=np.float64)
+    faces=np.asarray(
+        [[vertex_index[str(vid)] for vid in face] for face in mesh.faces],
+        dtype=np.int64,
+    )
     face_slot,slot_by_index=_slot_face_labels(structure,len(faces))
-    joint_ids,W=_candidate_skin_weights(candidate,skin,skeleton)
-
-    source_report=_read_json(Path(
-        "canonical/KNIGHT_MOTION_SOURCE_ACTION_DIAGNOSTIC_20260927.json"
-    ))
-    clips={}
-    for clip_id,short in CLIPS:
-        payload=_read_json(
-            root/"inputs/motion/quaternius_knight_v1"/f"{clip_id}.motion.json"
-        )
-        tracks,mapping=_tracks_for_clip(payload,skeleton,ordered,source_report)
-        clips[clip_id]=(payload,tracks,mapping)
+    clips={clip.clip_id:clip for clip in dynamic.clips if clip.clip_id in CLIP_IDS}
+    if set(clips)!=set(CLIP_IDS):
+        raise RuntimeError("SLOT_COURT_DYNAMIC_CLIP_SET_INCOMPLETE")
 
     report={
         "schema":"RealSaS.KnightSlotPresentationHypothesisCourt.v1",
@@ -262,7 +243,7 @@ def run(*,authority_root:Path,run_id:str,out_path:Path):
         mask=np.asarray(mask_by_view[vi],dtype=bool)
         camera=ordered[vi]
         vis=rasterize_visible_owner(
-            candidate,camera,positions=rest,
+            mesh,camera,positions=rest,
             width=mask.shape[1],height=mask.shape[0],max_layers=4,
         )
         labels,seeds,chart_slot,max_fill=_partition_source_by_slot_adjacency(
@@ -271,9 +252,9 @@ def run(*,authority_root:Path,run_id:str,out_path:Path):
         region=build_visual_mesh_from_region_labels_v1(
             mask,labels,target_edge_px=16
         )
-        mesh=region.mesh
+        visual_mesh=region.mesh
         binding=bind_region_visual_vertices_to_mechanical_affine_v1(
-            points_source_xy=mesh.positions,
+            points_source_xy=visual_mesh.positions,
             vertex_region_id=region.vertex_region_id,
             seed_region_labels=seeds,
             owner_face_index=vis.owner_face_index,
@@ -290,8 +271,8 @@ def run(*,authority_root:Path,run_id:str,out_path:Path):
             "view_index":vi,
             "visible_logical_slot_count":len(set(chart_slot.values())),
             "chart_count":len(chart_slot),
-            "visual_vertex_count":int(len(mesh.positions)),
-            "visual_face_count":int(len(mesh.faces)),
+            "visual_vertex_count":int(len(visual_mesh.positions)),
+            "visual_face_count":int(len(visual_mesh.faces)),
             "source_foreground_pixel_count":int(mask.sum()),
             "max_unowned_fill_distance_px":float(max_fill),
             "max_binding_seed_distance_px":float(
@@ -304,28 +285,28 @@ def run(*,authority_root:Path,run_id:str,out_path:Path):
                 np.max(binding["extrapolation_penalty"])
             ),
             "max_rest_error_px":float(
-                np.max(np.linalg.norm(rest_eval-np.asarray(mesh.positions,float),axis=1))
+                np.max(np.linalg.norm(rest_eval-np.asarray(visual_mesh.positions,float),axis=1))
             ),
             "qa_by_clip":{},
         }
-        for clip_id,short in CLIPS:
-            payload,tracks,_mapping=clips[clip_id]
-            times=np.linspace(
-                0.0,float(payload["duration_seconds"]),4,
-                endpoint=not bool(payload.get("loop")),dtype=np.float64
-            )
+        for clip_id in CLIP_IDS:
+            clip=clips[clip_id]
             qa=[]
-            for t in times:
-                mats,_,_=_joint_pose_v2(
-                    skeleton=skeleton,tracks=tracks,
-                    time_seconds=float(t),cameras=ordered
-                )
-                posed=_skin(rest,W,joint_ids,mats)
+            for frame in clip.frames:
+                by_id={
+                    str(vid):tuple(map(float,xyz))
+                    for vid,xyz in frame.posed_vertex_xyz
+                }
+                if set(by_id)!=set(vertex_ids):
+                    raise RuntimeError(
+                        "SLOT_COURT_STAGE41_VERTEX_ID_SET_DRIFT:"+clip_id
+                    )
+                posed=np.asarray([by_id[vid] for vid in vertex_ids],dtype=np.float64)
                 visual=evaluate_region_visual_binding_v1(
                     binding,posed_mechanical_positions_xyz=posed,camera=camera
                 )
-                qa.append({"time_seconds":float(t),**_visual_qa(
-                    mesh.positions,visual,mesh.faces
+                qa.append({"time_seconds":float(frame.time_seconds),**_visual_qa(
+                    region.mesh.positions,visual,region.mesh.faces
                 )})
             row["qa_by_clip"][clip_id]=qa
         report["views"].append(row)

@@ -120,6 +120,22 @@ jobs:
               manifest["motion"]=donor[1]
               print("MOTION_INPUT_REUSED_FROM_FRAGMENT",donor[0])
 
+          policy_path=Path(os.environ["GITHUB_WORKSPACE"])/"canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V3_20260929.json"
+          policy=json.loads(policy_path.read_text())
+          if str(policy.get("schema") or "")!="RealSaS.Stage14SubstrateAdequacyPolicy.v3":
+              raise RuntimeError("CURRENT_MAIN_STAGE14_POLICY_SCHEMA_DRIFT")
+          gsa=dict(manifest.get("gsa") or {})
+          pgsa=dict(policy["gsa"])
+          gsa["policy_document"]={
+              "path":"canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V3_20260929.json",
+              "sha256":hashlib.sha256(policy_path.read_bytes()).hexdigest(),
+          }
+          gsa["normal_k"]=int(pgsa["normal_k"])
+          gsa["visibility_depth_tolerance_norm"]=float(pgsa["visibility_depth_tolerance_norm"])
+          gsa["adequacy_policy"]=dict(pgsa["adequacy_policy"])
+          manifest["gsa"]=gsa
+          print("CURRENT_MAIN_STAGE14_POLICY_REBOUND",gsa["policy_document"]["sha256"])
+
           manifest_path.write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n")
           print("EXACT_RUN_ID_PRESERVED",os.environ["RUN_ID"])
           PY

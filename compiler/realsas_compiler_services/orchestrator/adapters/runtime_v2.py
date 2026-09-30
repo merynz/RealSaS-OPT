@@ -245,6 +245,12 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
         raise QualificationError("RUNTIME_V2_COMPLETE_PUPPET_APPEARANCE_QUAL_DRIFT")
     if dynamic.mesh_binding_hash != mesh.mesh_lineage_hash:
         raise QualificationError("RUNTIME_V2_DYNAMIC_MESH_DRIFT")
+
+    asset_meta = dict(asset.metadata or {})
+    if asset_meta.get("source_owned_visual_mesh_mode") is True:
+        raise QualificationError(
+            "RUNTIME_V2_SOURCE_OWNED_VISUAL_PRESENTATION_BINDING_REQUIRED"
+        )
     if (
         dynamic.mechanical_state_binding_hash
         != complete.mechanical_state_binding_hash

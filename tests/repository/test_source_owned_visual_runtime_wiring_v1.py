@@ -28,7 +28,8 @@ def test_source_owned_visual_runtime_cannot_silently_fall_back_to_mechanical_ren
     # mesh as render geometry in source-owned visual mode.
     assert '"mechanical_mesh_render_authority": False' in appearance
     assert '"mechanical_mesh_render_authority": False' in product_state
-    assert "STAGE18_SOURCE_OWNED_VISUAL_MESH_SET" in product_state
+    assert "STAGE37_QUALIFIED_SOURCE_OWNED_VISUAL_PRESENTATION" in product_state
+    assert "QualifiedVisualPresentationSetIR" in product_state
 
     # Therefore Stage42 must either consume a typed visual-mesh/binding authority
     # or fail closed before materializing a mechanical render package.
@@ -40,6 +41,7 @@ def test_source_owned_visual_runtime_cannot_silently_fall_back_to_mechanical_ren
     fail_closed = (
         "SOURCE_OWNED_VISUAL_RUNTIME_NOT_IMPLEMENTED" in runtime
         or "RUNTIME_V2_SOURCE_OWNED_VISUAL_BINDING_REQUIRED" in runtime
+        or "RUNTIME_V2_SOURCE_OWNED_VISUAL_PRESENTATION_BINDING_REQUIRED" in runtime
     )
     assert consumes_visual_mesh or fail_closed, (
         "Stage20-38 revoke mechanical render authority, but Stage42 has neither "
@@ -57,3 +59,25 @@ def test_source_owned_visual_runtime_cannot_silently_fall_back_to_mechanical_ren
             "Runtime projection claims visual-mesh consumption but the package/IR "
             "has no visual presentation geometry transport."
         )
+
+
+
+def test_stage37_declares_direct_visual_topology_dependencies():
+    import json
+
+    plan = json.loads(
+        (ROOT / "canonical/MAINLINE_EXECUTION_PLAN_V2.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    stage37 = next(row for row in plan["stages"] if row["ordinal"] == 37)
+    required = {
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+    }
+    assert required.issubset(set(stage37["depends_on"]))
+    assert "observation" in set(stage37["manifest_keys"])
+    assert "source-owned visual presentation topology" in stage37["title"]

@@ -1,0 +1,3 @@
+# Temporal activity worker for the existing Python scientific Engine.
+# Keep this separate from compiler scientific requirements.
+temporalio==1.33.0

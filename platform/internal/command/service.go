@@ -210,7 +210,6 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 	return out, err
 }
 
-
 func SubmitRender(ctx context.Context, pool *pgxpool.Pool, req RenderRequest) (Receipt, error) {
 	if req.SubjectID == uuid.Nil || req.ProductRevisionID == uuid.Nil || req.MotionArtifactID == uuid.Nil {
 		return Receipt{}, errors.New("render subject/revision/motion ids are required")

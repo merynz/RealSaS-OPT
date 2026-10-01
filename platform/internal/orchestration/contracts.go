@@ -19,12 +19,12 @@ const (
 	EngineRenderTailActivityName         = "engine.render_runtime_tail.v1"
 	CommitRenderOutputActivityName       = "platform.commit_render_output.v1"
 
-	ResolveCapabilityGoalActivityName        = "platform.resolve_capability_goal.v1"
-	PrepareCapabilityExecutionActivityName   = "platform.prepare_capability_execution.v1"
-	CommitCapabilityResultActivityName       = "platform.commit_capability_result.v1"
+	ResolveCapabilityGoalActivityName         = "platform.resolve_capability_goal.v1"
+	PrepareCapabilityExecutionActivityName    = "platform.prepare_capability_execution.v1"
+	CommitCapabilityResultActivityName        = "platform.commit_capability_result.v1"
 	RecordCapabilityActivityErrorActivityName = "platform.record_capability_activity_error.v1"
-	FinalizeCapabilityGoalActivityName       = "platform.finalize_capability_goal.v1"
-	EngineExecuteCapabilityActivityName      = "engine.execute_capability.v1"
+	FinalizeCapabilityGoalActivityName        = "platform.finalize_capability_goal.v1"
+	EngineExecuteCapabilityActivityName       = "engine.execute_capability.v1"
 )
 
 type CompileWorkflowInput struct {

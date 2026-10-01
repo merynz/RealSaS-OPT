@@ -40,7 +40,8 @@ def test_identical_compile_reuses_every_qualified_stage_result():
     catalog.admit_plan(first)
     second=resolver.resolve(target_stage_id="46_PRODUCT_CLOSURE_SEAL",subject_semantic_sha256="a"*64,versions=versions(graph))
     assert second.execute_stage_ids==()
-    assert len(second.reused_stage_ids)==46
+    required=graph.ancestors_including(["46_PRODUCT_CLOSURE_SEAL"])
+    assert second.reused_stage_ids==required
 
 
 def test_stage42_implementation_change_invalidates_only_true_descendants():
@@ -66,4 +67,5 @@ def test_subject_identity_change_invalidates_entire_compile_graph():
     baseline=resolver.resolve(target_stage_id="46_PRODUCT_CLOSURE_SEAL",subject_semantic_sha256="a"*64,versions=versions(graph))
     catalog.admit_plan(baseline)
     changed=resolver.resolve(target_stage_id="46_PRODUCT_CLOSURE_SEAL",subject_semantic_sha256="b"*64,versions=versions(graph))
-    assert len(changed.execute_stage_ids)==46
+    required=graph.ancestors_including(["46_PRODUCT_CLOSURE_SEAL"])
+    assert changed.execute_stage_ids==required

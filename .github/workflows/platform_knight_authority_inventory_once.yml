@@ -1,0 +1,80 @@
+name: platform Knight authority inventory once
+
+on:
+  push:
+    branches: [platform/professional-backend-v1-20261001]
+    paths:
+      - '.github/workflows/platform_knight_authority_inventory_once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  inventory:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: platform/professional-backend-v1-20261001
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Inventory Knight runs
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ['AUTHORITY_ROOT'])/'runs'
+          rows=[]
+          for d in sorted(root.iterdir() if root.exists() else []):
+              if not d.is_dir() or 'KNIGHT' not in d.name.upper():
+                  continue
+              ledger_candidates=[d/'ACTIVE_RUN_V2.json',d/'active_run_v2.json',d/'ledger.json']
+              manifest_candidates=[d/'RUN_MANIFEST.json',d/'run_manifest.json','']
+              ledger=next((p for p in ledger_candidates if isinstance(p,Path) and p.is_file()),None)
+              manifests=[p for p in d.glob('*.json') if 'manifest' in p.name.lower()]
+              manifest=next((p for p in manifest_candidates if isinstance(p,Path) and p.is_file()),None) or (manifests[0] if manifests else None)
+              row={'run_id':d.name,'path':str(d),'ledger_path':str(ledger) if ledger else None,'manifest_path':str(manifest) if manifest else None}
+              if ledger:
+                  try:
+                      p=json.load(open(ledger,encoding='utf-8'))
+                      stages=p.get('stages') or []
+                      row.update({
+                        'ledger_schema':p.get('schema'),
+                        'status':p.get('status'),
+                        'execution_class':p.get('execution_class'),
+                        'subject_id':p.get('subject_id'),
+                        'stage_count':len(stages),
+                        'completed_count':p.get('completed_count'),
+                        'failed_count':p.get('failed_count'),
+                        'pass_count':sum(str(x.get('status','')).startswith('PASS') for x in stages),
+                        'pending_count':sum(x.get('status')=='PENDING' for x in stages),
+                        'first_stage':stages[0].get('id') if stages else None,
+                        'last_stage':stages[-1].get('id') if stages else None,
+                      })
+                  except Exception as e: row['ledger_error']=repr(e)
+              if manifest:
+                  try:
+                      m=json.load(open(manifest,encoding='utf-8'))
+                      row['manifest_schema']=m.get('schema')
+                      row['manifest_subject_id']=m.get('subject_id')
+                  except Exception as e: row['manifest_error']=repr(e)
+              rows.append(row)
+          out={'schema':'RealSaS.KnightAuthorityInventory.v1','authority_root':str(root.parent),'runs':rows}
+          Path('docs/platform/KNIGHT_AUTHORITY_INVENTORY_20261001.json').write_text(json.dumps(out,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          print(json.dumps(rows,indent=2,sort_keys=True))
+          PY
+      - name: Seal inventory and retire workflow
+        run: |
+          set -euo pipefail
+          rm .github/workflows/platform_knight_authority_inventory_once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/platform/KNIGHT_AUTHORITY_INVENTORY_20261001.json .github/workflows/platform_knight_authority_inventory_once.yml
+          git commit -m "evidence: inventory Knight authority runs for platform binding"
+          git push origin HEAD:platform/professional-backend-v1-20261001

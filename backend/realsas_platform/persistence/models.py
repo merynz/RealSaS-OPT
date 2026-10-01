@@ -120,6 +120,16 @@ class AttemptArtifactRow(Base):
     origin: Mapped[str] = mapped_column(String(20), nullable=False)
 
 
+class CompilerRunBindingRow(Base):
+    __tablename__ = "compiler_run_bindings"
+    attempt_id: Mapped[UUID] = mapped_column(ForeignKey("attempts.id", ondelete="RESTRICT"), primary_key=True)
+    compiler_run_id: Mapped[str] = mapped_column(String(300), nullable=False, unique=True)
+    run_manifest_path: Mapped[str] = mapped_column(Text, nullable=False)
+    run_ledger_path: Mapped[str] = mapped_column(Text, nullable=False)
+    pipeline_plan_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
 class ExecutionRow(Base):
     __tablename__ = "executions"
     __table_args__ = (UniqueConstraint("workflow_id", "stage_contract", "retry_number", name="uq_execution_retry"),)

@@ -1,4 +1,4 @@
-name: recovery-stage42-44-visual-runtime-gate-v1
+name: recovery-stage42-46-visual-product-gate-v1
 
 on:
   push:
@@ -8,6 +8,8 @@ on:
       - 'compiler/realsas_compiler_core/runtime_package_v2.py'
       - 'compiler/realsas_compiler_core/runtime_visual_authority_v1.py'
       - 'compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py'
+      - 'tests/compiler/test_product_mesh_stage_adapters_v1.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py'
       - 'runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp'
       - 'tests/compiler/test_runtime_v2_source_owned_visual_native_smoke.py'
       - 'tests/compiler/test_runtime_v2_native_smoke.py'

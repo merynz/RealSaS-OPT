@@ -98,6 +98,7 @@ def start_research_attempt(
                 final_state="OPEN",
             )
         )
+        session.flush()
         session.add(
             AttemptEventRow(
                 attempt_id=attempt_id,

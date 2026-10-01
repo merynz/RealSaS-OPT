@@ -142,6 +142,47 @@ class ExecutionArtifactRow(Base):
     __table_args__ = (CheckConstraint("relation IN ('input','output')", name="ck_execution_artifact_relation"),)
 
 
+class FailureSignatureRow(Base):
+    __tablename__ = "failure_signatures"
+    __table_args__ = (
+        UniqueConstraint("attempt_id", "signature_sha256", name="uq_attempt_failure_signature"),
+    )
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    attempt_id: Mapped[UUID] = mapped_column(ForeignKey("attempts.id", ondelete="RESTRICT"), nullable=False)
+    execution_id: Mapped[UUID | None] = mapped_column(ForeignKey("executions.id", ondelete="RESTRICT"))
+    stage_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    code: Mapped[str] = mapped_column(String(200), nullable=False)
+    severity: Mapped[str] = mapped_column(String(20), nullable=False)
+    signature_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    payload: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class OwnerAttributionRow(Base):
+    __tablename__ = "owner_attributions"
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    failure_signature_id: Mapped[UUID] = mapped_column(ForeignKey("failure_signatures.id", ondelete="RESTRICT"), nullable=False)
+    owner_stage_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    owner_kind: Mapped[str] = mapped_column(String(30), nullable=False)
+    reason: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class RepairDirectiveRow(Base):
+    __tablename__ = "repair_directives"
+    __table_args__ = (
+        CheckConstraint("status IN ('OPEN','APPLIED','SUPERSEDED')", name="ck_repair_directive_status"),
+    )
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    failure_signature_id: Mapped[UUID] = mapped_column(ForeignKey("failure_signatures.id", ondelete="RESTRICT"), nullable=False)
+    owner_stage_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    directive_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    invalidated_stage_ids: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    payload: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="OPEN")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
 class ProofRow(Base):
     __tablename__ = "proofs"
     __table_args__ = (CheckConstraint("result IN ('PASS','FAIL','ABSTAIN')", name="ck_proof_result"),)

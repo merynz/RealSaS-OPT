@@ -94,19 +94,11 @@ jobs:
           python -m compiler.realsas_compiler_services.orchestrator.mainline implementation-closure             > "$RUNNER_TEMP/recovery_implementation_closure.json"
           cat "$RUNNER_TEMP/recovery_implementation_closure.json"
 
-      - name: Appearance authority invariants
+      - name: Appearance and presentation authority invariants
         run: |
-          python - <<'PY'
-          from pathlib import Path
-          appearance=Path("compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py").read_text()
-          product=Path("compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py").read_text()
-          assert '"mechanical_mesh_render_authority": False' in appearance
-          assert '"SOURCE_VISUAL_MESH_V1"' in appearance
-          assert '"visual_geometry_authority"] = "SOURCE_ART_SILHOUETTE"' in appearance
-          assert '"mechanical_mesh_render_authority": False' in product
-          assert '"STAGE18_SOURCE_OWNED_VISUAL_MESH_SET"' in product
-          print("RECOVERY_APPEARANCE_AUTHORITY_INVARIANTS_PASS")
-          PY
+          python -m pytest -q \
+            tests/repository/test_source_owned_visual_runtime_wiring_v1.py::test_source_owned_visual_runtime_cannot_silently_fall_back_to_mechanical_render_mesh \
+            tests/repository/test_source_owned_visual_runtime_wiring_v1.py::test_stage37_declares_direct_visual_topology_dependencies
 
       - name: Freeze exact production policy identities
         shell: bash

@@ -34,6 +34,7 @@ from compiler.realsas_compiler_core.joint_frames_v1 import (
 
 EXTRACTOR_SCHEMA="RealSaS.BlenderMotionExtractor.v2"
 FRAME_SEMANTICS="REALSAS_DERIVED_JOINT_FRAME_V1"
+NONROOT_TRANSLATION_SEMANTICS="LOCAL_DERIVED_JOINT_FRAME_DELTA_NORMALIZED_BY_SOURCE_BODY_SCALE"
 
 
 def sha256(path:Path)->str:

@@ -107,6 +107,15 @@ class ExecutionRow(Base):
     error_payload: Mapped[dict | None] = mapped_column(JSONB)
 
 
+class ExecutionArtifactRow(Base):
+    __tablename__ = "execution_artifacts"
+    execution_id: Mapped[UUID] = mapped_column(ForeignKey("executions.id", ondelete="RESTRICT"), primary_key=True)
+    relation: Mapped[str] = mapped_column(String(20), primary_key=True)
+    role: Mapped[str] = mapped_column(String(150), primary_key=True)
+    artifact_id: Mapped[UUID] = mapped_column(ForeignKey("artifacts.id", ondelete="RESTRICT"), primary_key=True)
+    __table_args__ = (CheckConstraint("relation IN ('input','output')", name="ck_execution_artifact_relation"),)
+
+
 class ProofRow(Base):
     __tablename__ = "proofs"
     __table_args__ = (CheckConstraint("result IN ('PASS','FAIL','ABSTAIN')", name="ck_proof_result"),)
@@ -185,6 +194,13 @@ class RenderRequestRow(Base):
     render_settings: Mapped[dict] = mapped_column(JSONB, nullable=False)
     semantic_sha256: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     idempotency_key: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class RenderOutputRow(Base):
+    __tablename__ = "render_outputs"
+    render_request_id: Mapped[UUID] = mapped_column(ForeignKey("render_requests.id", ondelete="RESTRICT"), primary_key=True)
+    artifact_id: Mapped[UUID] = mapped_column(ForeignKey("artifacts.id", ondelete="RESTRICT"), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 

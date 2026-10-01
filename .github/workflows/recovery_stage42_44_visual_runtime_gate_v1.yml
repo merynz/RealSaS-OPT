@@ -1,0 +1,67 @@
+name: recovery-stage42-44-visual-runtime-gate-v1
+
+on:
+  push:
+    branches:
+      - recovery/canonical-main-20261001
+    paths:
+      - 'compiler/realsas_compiler_core/runtime_package_v2.py'
+      - 'compiler/realsas_compiler_core/runtime_visual_authority_v1.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py'
+      - 'runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp'
+      - 'tests/compiler/test_runtime_v2_source_owned_visual_native_smoke.py'
+      - 'tests/compiler/test_runtime_v2_native_smoke.py'
+      - 'tests/compiler/test_visual_presentation_v1.py'
+      - '.github/workflows/recovery_stage42_44_visual_runtime_gate_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visual-runtime:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      REALSAS_RUNTIME_V2_PLAYER: /tmp/realsas_recovery_runtime_v2_visual
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Seal recovery identity
+        run: |
+          set -euo pipefail
+          echo "RECOVERY_HEAD=$(git rev-parse HEAD)"
+
+      - name: Install pinned mainline test dependencies
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Build exact native V2 player
+        run: |
+          set -euo pipefail
+          c++ -std=c++17 -O2 -Wall -Wextra -pedantic             runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp             -lpng -lz -o "$REALSAS_RUNTIME_V2_PLAYER"
+          sha256sum "$REALSAS_RUNTIME_V2_PLAYER"
+
+      - name: Source-owned visual RSS native smoke
+        env:
+          PYTHONPATH: .
+          PYTHONHASHSEED: "0"
+        run: |
+          python -m pytest -q             tests/compiler/test_runtime_v2_source_owned_visual_native_smoke.py
+
+      - name: Legacy mechanical V2 native parity smoke
+        env:
+          PYTHONPATH: .
+          PYTHONHASHSEED: "0"
+        run: |
+          python -m pytest -q             tests/compiler/test_runtime_v2_native_smoke.py
+
+      - name: Visual presentation typed regression
+        env:
+          PYTHONPATH: .
+          PYTHONHASHSEED: "0"
+        run: |
+          python -m pytest -q             tests/compiler/test_visual_presentation_v1.py

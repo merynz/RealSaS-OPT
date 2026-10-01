@@ -48,6 +48,9 @@ func TestPrepareAndFailExecutionPersistsLocalizedRepair(t *testing.T) {
 	subjectID := uuid.New()
 	releaseID := uuid.New()
 	attemptID := uuid.New()
+	subjectInputID := uuid.New()
+	sourceTypeID := uuid.New()
+	sourceArtifactID := uuid.New()
 	if _, err := pool.Exec(ctx, "INSERT INTO subjects(id,slug,display_name) VALUES ($1,$2,$3)", subjectID, "control-"+subjectID.String(), "Control"); err != nil {
 		t.Fatal(err)
 	}
@@ -61,6 +64,32 @@ func TestPrepareAndFailExecutionPersistsLocalizedRepair(t *testing.T) {
 		INSERT INTO attempts(id,subject_id,engine_release_id,kind,spec_sha256,created_by,final_state)
 		VALUES ($1,$2,$3,'compile_candidate',$4,'ci','OPEN')
 	`, attemptID, subjectID, releaseID, repeatHex("2")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pool.Exec(ctx, `
+		INSERT INTO artifact_types(id,name,schema_version,domain)
+		VALUES ($1,$2,'v1','source')
+	`, sourceTypeID, "RealSaS.ControlTestSource."+subjectID.String()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pool.Exec(ctx, `
+		INSERT INTO artifacts
+		  (id,artifact_type_id,semantic_sha256,content_sha256,storage_key,size_bytes,
+		   producer_contract,implementation_sha256,policy_sha256,semantic_parameters,verified_at)
+		VALUES ($1,$2,$3,$4,$5,1,'TEST_SOURCE',$6,$7,'{}',now())
+	`, sourceArtifactID, sourceTypeID, repeatHex("6"), repeatHex("7"), "cas/test/"+sourceArtifactID.String(), repeatHex("8"), repeatHex("9")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pool.Exec(ctx, `
+		INSERT INTO subject_inputs(id,subject_id,manifest_sha256,created_by,sealed_at)
+		VALUES ($1,$2,$3,'ci',now())
+	`, subjectInputID, subjectID, repeatHex("a")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pool.Exec(ctx, `
+		INSERT INTO subject_input_artifacts(subject_input_id,role,ordinal,artifact_id)
+		VALUES ($1,'source',0,$2)
+	`, subjectInputID, sourceArtifactID); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := pool.Exec(ctx, `
@@ -78,6 +107,7 @@ func TestPrepareAndFailExecutionPersistsLocalizedRepair(t *testing.T) {
 		CommandID:              "cmd-" + attemptID.String(),
 		AttemptID:              attemptID.String(),
 		SubjectID:              subjectID.String(),
+		SubjectInputID:         subjectInputID.String(),
 		EngineReleaseID:        releaseID.String(),
 		StageID:                stageID,
 		ExpectedSemanticSHA256: repeatHex("4"),

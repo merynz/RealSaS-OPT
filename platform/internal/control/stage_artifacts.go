@@ -37,22 +37,13 @@ func (a Activities) bindStageExecutionInputs(
 	ctx context.Context,
 	tx pgx.Tx,
 	executionID uuid.UUID,
-	commandID string,
+	subjectInputID string,
 	attemptID uuid.UUID,
 	stageID string,
 ) error {
-	var raw []byte
-	if err := tx.QueryRow(ctx, "SELECT payload FROM commands WHERE id=$1", commandID).Scan(&raw); err != nil {
-		return err
-	}
-	var payload map[string]any
-	if err := json.Unmarshal(raw, &payload); err != nil {
-		return err
-	}
-	inputRaw, _ := payload["subject_input_id"].(string)
-	inputID, err := uuid.Parse(inputRaw)
+	inputID, err := uuid.Parse(subjectInputID)
 	if err != nil {
-		return errors.New("COMPILE_COMMAND_SUBJECT_INPUT_REQUIRED")
+		return errors.New("STAGE_EXECUTION_SUBJECT_INPUT_REQUIRED")
 	}
 	rows, err := tx.Query(ctx, `
 		SELECT sia.role,sia.artifact_id

@@ -164,7 +164,7 @@ func (a Activities) PrepareStageExecution(ctx context.Context, req orchestration
 	if err != nil {
 		return orchestration.EngineStageRequest{}, err
 	}
-	if err := a.bindStageExecutionInputs(ctx, tx, executionID, req.CommandID, attemptID, req.StageID); err != nil {
+	if err := a.bindStageExecutionInputs(ctx, tx, executionID, req.SubjectInputID, attemptID, req.StageID); err != nil {
 		return orchestration.EngineStageRequest{}, err
 	}
 	if tag.RowsAffected() == 1 {

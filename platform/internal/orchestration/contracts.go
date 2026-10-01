@@ -168,6 +168,7 @@ type PrepareStageExecutionRequest struct {
 	CommandID              string   `json:"command_id"`
 	AttemptID              string   `json:"attempt_id"`
 	SubjectID              string   `json:"subject_id"`
+	SubjectInputID         string   `json:"subject_input_id"`
 	EngineReleaseID        string   `json:"engine_release_id"`
 	StageID                string   `json:"stage_id"`
 	ExpectedSemanticSHA256 string   `json:"expected_semantic_sha256"`

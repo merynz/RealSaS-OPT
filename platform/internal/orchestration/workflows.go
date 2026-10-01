@@ -76,6 +76,7 @@ func CompileWorkflow(ctx workflow.Context, input CompileWorkflowInput) (CompileW
 				CommandID:              input.CommandID,
 				AttemptID:              input.AttemptID,
 				SubjectID:              input.SubjectID,
+				SubjectInputID:         input.SubjectInputID,
 				EngineReleaseID:        input.EngineReleaseID,
 				StageID:                stage.StageID,
 				ExpectedSemanticSHA256: stage.ExpectedSemanticSHA256,

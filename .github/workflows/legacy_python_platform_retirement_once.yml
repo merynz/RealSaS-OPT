@@ -1,0 +1,44 @@
+name: legacy-python-platform-retirement-once
+
+on:
+  push:
+    branches: [platform/professional-backend-v1-20261001]
+    paths:
+      - '.github/workflows/legacy_python_platform_retirement_once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: platform/professional-backend-v1-20261001
+          fetch-depth: 0
+      - name: Prove legacy Python control plane is retired
+        run: |
+          set -euo pipefail
+          test ! -e backend
+          test ! -e tests/platform
+          test ! -e requirements/platform.txt
+          test ! -e alembic.ini
+          test ! -e .github/workflows/platform_backend_contract_v1.yml
+
+          stale="$(git grep -nE 'backend/realsas_platform|requirements/platform\.txt|platform_backend_contract_v1\.yml|tests/platform|alembic\.ini' --             ':!docs/platform/adr/0003-go-control-plane.md'             ':!.github/workflows/legacy_python_platform_retirement_once.yml' || true)"
+          if [ -n "$stale" ]; then
+            echo "STALE_LEGACY_PLATFORM_REFERENCES"
+            echo "$stale"
+            exit 1
+          fi
+          echo "LEGACY_PYTHON_PLATFORM_RETIREMENT_PASS"
+      - name: Remove one-shot audit
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/legacy_python_platform_retirement_once.yml
+          git commit -m "ops: remove legacy platform retirement audit"
+          git push origin HEAD:platform/professional-backend-v1-20261001

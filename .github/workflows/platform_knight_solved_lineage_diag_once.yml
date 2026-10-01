@@ -1,0 +1,70 @@
+name: platform Knight solved-lineage diagnostic once
+
+on:
+  push:
+    branches: [platform/professional-backend-v1-20261001]
+    paths:
+      - '.github/workflows/platform_knight_solved_lineage_diag_once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: platform/professional-backend-v1-20261001
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Extract exact ledger and reusable runtime artifacts
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ['AUTHORITY_ROOT'])/'runs'/os.environ['RUN_ID']
+          ledger=json.load(open(root/'ACTIVE_RUN_V2.json',encoding='utf-8'))
+          manifest=json.load(open(root/'run_manifest.json',encoding='utf-8'))
+          stages=[]
+          for s in ledger.get('stages') or []:
+              stages.append({
+                'ordinal':s.get('ordinal'),'id':s.get('id'),'status':s.get('status'),
+                'attempts':s.get('attempts'),'blockers':s.get('blockers') or [],
+                'outputs':s.get('outputs') or [],
+                'implementation_hash':s.get('implementation_hash'),
+                'input_fingerprint':s.get('input_fingerprint'),
+              })
+          interesting=[s for s in stages if s['status']!='PENDING' or int(s.get('ordinal') or 0)>=35]
+          out={
+            'schema':'RealSaS.KnightSolvedLineageDiagnostic.v1',
+            'run_id':os.environ['RUN_ID'],
+            'ledger_status':ledger.get('status'),
+            'execution_class':ledger.get('execution_class'),
+            'subject_id':ledger.get('subject_id'),
+            'completed_count':ledger.get('completed_count'),
+            'failed_count':ledger.get('failed_count'),
+            'ready_stage_ids':ledger.get('ready_stage_ids'),
+            'interesting_stages':interesting,
+            'runtime_manifest':manifest.get('runtime'),
+            'manifest_keys':sorted(manifest.keys()),
+          }
+          Path('docs/platform/KNIGHT_SOLVED_LINEAGE_DIAGNOSTIC_20261001.json').write_text(json.dumps(out,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          print(json.dumps(out,indent=2,sort_keys=True))
+          PY
+      - name: Seal diagnostic and retire workflow
+        run: |
+          set -euo pipefail
+          rm .github/workflows/platform_knight_solved_lineage_diag_once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/platform/KNIGHT_SOLVED_LINEAGE_DIAGNOSTIC_20261001.json .github/workflows/platform_knight_solved_lineage_diag_once.yml
+          git commit -m "evidence: inspect Knight solved lineage for platform reuse"
+          git push origin HEAD:platform/professional-backend-v1-20261001

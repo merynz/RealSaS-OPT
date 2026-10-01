@@ -60,11 +60,11 @@ func CompileWorkflow(ctx workflow.Context, input CompileWorkflowInput) (CompileW
 				)
 			}
 			var committed StageCommitResult
-			request := map[string]any{
-				"attempt_id":               input.AttemptID,
-				"stage_id":                 stage.StageID,
-				"expected_semantic_sha256": stage.ExpectedSemanticSHA256,
-				"artifact_id":              *stage.ReusableArtifactID,
+			request := BindReusedStageRequest{
+				AttemptID:              input.AttemptID,
+				StageID:                stage.StageID,
+				ExpectedSemanticSHA256: stage.ExpectedSemanticSHA256,
+				ArtifactID:             *stage.ReusableArtifactID,
 			}
 			if err := workflow.ExecuteActivity(platformCtx, BindReusedStageActivityName, request).Get(ctx, &committed); err != nil {
 				return CompileWorkflowResult{}, err
@@ -72,7 +72,7 @@ func CompileWorkflow(ctx workflow.Context, input CompileWorkflowInput) (CompileW
 			completed = append(completed, committed)
 
 		case "EXECUTE":
-			request := EngineStageRequest{
+			prepare := PrepareStageExecutionRequest{
 				CommandID:              input.CommandID,
 				AttemptID:              input.AttemptID,
 				SubjectID:              input.SubjectID,
@@ -81,16 +81,28 @@ func CompileWorkflow(ctx workflow.Context, input CompileWorkflowInput) (CompileW
 				ExpectedSemanticSHA256: stage.ExpectedSemanticSHA256,
 				AllowedExecuteStageIDs: allowed,
 			}
+			var request EngineStageRequest
+			if err := workflow.ExecuteActivity(platformCtx, PrepareStageExecutionActivityName, prepare).Get(ctx, &request); err != nil {
+				return CompileWorkflowResult{}, err
+			}
 			var engineResult EngineStageResult
 			if err := workflow.ExecuteActivity(engineCtx, EngineExecuteStageActivityName, request).Get(ctx, &engineResult); err != nil {
+				_ = workflow.ExecuteActivity(platformCtx, RecordStageActivityErrorActivityName, StageActivityErrorRequest{
+					ExecutionID: request.ExecutionID,
+					AttemptID:   input.AttemptID,
+					StageID:     stage.StageID,
+					Error:       err.Error(),
+				}).Get(ctx, nil)
 				return CompileWorkflowResult{}, err
 			}
 			var committed StageCommitResult
 			if err := workflow.ExecuteActivity(platformCtx, CommitStageResultActivityName, StageCommitRequest{
+				ExecutionID:            request.ExecutionID,
 				CommandID:              input.CommandID,
 				AttemptID:              input.AttemptID,
 				StageID:                stage.StageID,
 				ExpectedSemanticSHA256: stage.ExpectedSemanticSHA256,
+				AllowedExecuteStageIDs: allowed,
 				EngineResult:           engineResult,
 			}).Get(ctx, &committed); err != nil {
 				return CompileWorkflowResult{}, err

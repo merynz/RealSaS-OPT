@@ -7,8 +7,10 @@ const (
 	CompileWorkflowName = "realsas.compile.v1"
 	RenderWorkflowName  = "realsas.render.v1"
 
-	ResolveCompilePlanActivityName   = "platform.resolve_compile_plan.v1"
-	BindReusedStageActivityName      = "platform.bind_reused_stage.v1"
+	ResolveCompilePlanActivityName      = "platform.resolve_compile_plan.v1"
+	PrepareStageExecutionActivityName   = "platform.prepare_stage_execution.v1"
+	BindReusedStageActivityName         = "platform.bind_reused_stage.v1"
+	RecordStageActivityErrorActivityName = "platform.record_stage_activity_error.v1"
 	CommitStageResultActivityName    = "platform.commit_stage_result.v1"
 	FinalizeCompileActivityName      = "platform.finalize_compile_attempt.v1"
 	EngineExecuteStageActivityName   = "engine.execute_compile_stage.v1"
@@ -47,11 +49,24 @@ type ResolvedCompilePlan struct {
 	Stages        []ResolvedStage `json:"stages"`
 }
 
-type EngineStageRequest struct {
+type PrepareStageExecutionRequest struct {
 	CommandID              string   `json:"command_id"`
 	AttemptID              string   `json:"attempt_id"`
 	SubjectID              string   `json:"subject_id"`
 	EngineReleaseID        string   `json:"engine_release_id"`
+	StageID                string   `json:"stage_id"`
+	ExpectedSemanticSHA256 string   `json:"expected_semantic_sha256"`
+	AllowedExecuteStageIDs []string `json:"allowed_execute_stage_ids"`
+}
+
+type EngineStageRequest struct {
+	ExecutionID            string   `json:"execution_id"`
+	CommandID              string   `json:"command_id"`
+	AttemptID              string   `json:"attempt_id"`
+	SubjectID              string   `json:"subject_id"`
+	EngineReleaseID        string   `json:"engine_release_id"`
+	CompilerRunID          string   `json:"compiler_run_id"`
+	PipelinePlanSHA256      string   `json:"pipeline_plan_sha256"`
 	StageID                string   `json:"stage_id"`
 	ExpectedSemanticSHA256 string   `json:"expected_semantic_sha256"`
 	AllowedExecuteStageIDs []string `json:"allowed_execute_stage_ids"`
@@ -83,12 +98,28 @@ type EngineStageResult struct {
 	Failure          *EngineFailureEvidence `json:"failure,omitempty"`
 }
 
+type BindReusedStageRequest struct {
+	AttemptID              string `json:"attempt_id"`
+	StageID                string `json:"stage_id"`
+	ExpectedSemanticSHA256 string `json:"expected_semantic_sha256"`
+	ArtifactID             string `json:"artifact_id"`
+}
+
 type StageCommitRequest struct {
+	ExecutionID            string            `json:"execution_id"`
 	CommandID              string            `json:"command_id"`
 	AttemptID              string            `json:"attempt_id"`
 	StageID                string            `json:"stage_id"`
 	ExpectedSemanticSHA256 string            `json:"expected_semantic_sha256"`
+	AllowedExecuteStageIDs []string          `json:"allowed_execute_stage_ids"`
 	EngineResult           EngineStageResult `json:"engine_result"`
+}
+
+type StageActivityErrorRequest struct {
+	ExecutionID string `json:"execution_id"`
+	AttemptID   string `json:"attempt_id"`
+	StageID     string `json:"stage_id"`
+	Error       string `json:"error"`
 }
 
 type StageCommitResult struct {

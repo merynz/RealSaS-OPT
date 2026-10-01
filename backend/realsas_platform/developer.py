@@ -89,3 +89,29 @@ def compare_stage_versions(
     invalid = set(invalidated)
     unchanged = tuple(s.stage_id for s in graph.stages if s.stage_id not in invalid)
     return ChangeImpact(tuple(direct), tuple(invalidated), unchanged)
+
+
+@dataclass(frozen=True)
+class ImpactReason:
+    stage_id: str
+    kind: str
+    roots: tuple[str, ...]
+
+
+def explain_change_impact(
+    graph: StageGraph,
+    impact: ChangeImpact,
+) -> tuple[ImpactReason, ...]:
+    direct = {x.stage_id for x in impact.direct_changes}
+    reasons: list[ImpactReason] = []
+    for stage_id in impact.invalidated_stage_ids:
+        if stage_id in direct:
+            reasons.append(ImpactReason(stage_id, "DIRECT_CHANGE", (stage_id,)))
+            continue
+        roots = tuple(
+            root
+            for root in sorted(direct)
+            if stage_id in set(graph.descendants_including([root]))
+        )
+        reasons.append(ImpactReason(stage_id, "DEPENDENCY_DESCENDANT", roots))
+    return tuple(reasons)

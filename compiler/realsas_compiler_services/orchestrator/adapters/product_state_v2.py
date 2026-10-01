@@ -31,6 +31,8 @@ from compiler.realsas_compiler_core.presentation_partition_v2 import (
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     component_carrier_policy_from_dict,
     deformation_envelope_from_dict,
+    qualified_camera_set_from_dict,
+    qualified_observation_set_from_dict,
     mechanical_partition_from_dict,
     mesh_policy_from_dict,
     qualified_mesh_from_dict,
@@ -54,7 +56,20 @@ from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import 
 )
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
+    build_visual_mesh_from_region_labels_v1,
+    partition_source_mask_by_safe_face_adjacency_v1,
+    visual_mesh_semantic_hash,
     visual_mesh_set_from_dict,
+)
+from compiler.realsas_compiler_core.visual_presentation_v1 import (
+    QualifiedVisualPresentationSetIR,
+    QualifiedVisualPresentationViewIR,
+    qualified_visual_presentation_set_from_dict,
+    qualified_visual_presentation_set_hash,
+    qualified_visual_presentation_view_hash,
+)
+from compiler.realsas_compiler_core.visibility_v2 import (
+    rasterize_visible_owner,
 )
 from compiler.realsas_compiler_core.types import QualificationError
 
@@ -72,6 +87,335 @@ def _require_caa_final_mesh_candidate_binding(mesh, asset) -> str:
             "PRESENTATION_V2_CAA_MESH_CANDIDATE_BINDING_DRIFT"
         )
     return source_candidate_hash
+
+
+
+def _qualified_visual_presentation_stage37(
+    ctx: dict,
+    *,
+    mesh,
+    asset,
+    appearance,
+):
+    """Qualify source-owned presentation topology downstream of Stage35.
+
+    Stage18 owns source visual substrate evidence. Stage35 owns mechanical
+    qualification. Stage37 combines those already-sealed authorities into the
+    final per-view presentation topology. Dynamic binding/deformation remains a
+    Stage42/45 concern.
+    """
+    observation = qualified_observation_set_from_dict(
+        stage_output_payload(
+            ctx,
+            "07_OBSERVATION_CONTRACT_QUALIFIED",
+            "RealSaS.QualifiedObservationSetIR.v1",
+        )
+    )
+    cameras = qualified_camera_set_from_dict(
+        stage_output_payload(
+            ctx,
+            "05_CAMERA_CONTRACT_SOLVED",
+            "RealSaS.QualifiedCameraSetIR.v1",
+        )
+    )
+    source_visual = visual_mesh_set_from_dict(
+        stage_output_payload(
+            ctx,
+            "18_CANONICAL_MESH_ADDRESSING_BUILD",
+            "RealSaS.VisualMeshSetIR.v1",
+        )
+    )
+    compatibility = stage_output_payload(
+        ctx,
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "RealSaS.SkinTopologyCompatibilityReport.v1",
+    )
+    if compatibility.get("passed") is not True:
+        raise QualificationError(
+            "PRESENTATION_V2_STAGE35_SKIN_TOPOLOGY_NOT_PASS"
+        )
+    compatibility_hash = str(compatibility.get("report_hash") or "")
+    if len(compatibility_hash) != 64:
+        raise QualificationError(
+            "PRESENTATION_V2_STAGE35_COMPATIBILITY_HASH_INVALID"
+        )
+    source_candidate_hash = str(
+        dict(mesh.metadata or {}).get("source_candidate_lineage_hash") or ""
+    )
+    if (
+        source_candidate_hash
+        != str(compatibility.get("candidate_lineage_hash") or "")
+    ):
+        raise QualificationError(
+            "PRESENTATION_V2_STAGE35_CANDIDATE_BINDING_DRIFT"
+        )
+    if (
+        str(dict(asset.metadata or {}).get("visual_mesh_set_binding_hash") or "")
+        != source_visual.set_hash
+    ):
+        raise QualificationError(
+            "PRESENTATION_V2_SOURCE_VISUAL_ASSET_BINDING_DRIFT"
+        )
+    if (
+        source_visual.observation_set_binding_hash
+        != observation.observation_set_hash
+    ):
+        raise QualificationError(
+            "PRESENTATION_V2_SOURCE_VISUAL_OBSERVATION_DRIFT"
+        )
+    if appearance.asset_binding_hash != asset.asset_hash:
+        raise QualificationError(
+            "PRESENTATION_V2_VISUAL_APPEARANCE_BINDING_DRIFT"
+        )
+
+    observations = {
+        int(row.view_index): row for row in observation.views
+    }
+    camera_by_view = {
+        int(row.view_index): row for row in cameras.cameras
+    }
+    source_by_view = {
+        int(row.view_index): row for row in source_visual.views
+    }
+    if (
+        set(observations) != set(range(8))
+        or set(camera_by_view) != set(range(8))
+        or set(source_by_view) != set(range(8))
+    ):
+        raise QualificationError(
+            "PRESENTATION_V2_VISUAL_REQUIRES_EXACT_V0_V7"
+        )
+
+    mask_rows = tuple(
+        dict(row)
+        for row in (
+            dict(ctx["run_manifest"].get("observation") or {}).get(
+                "source_foreground_masks"
+            )
+            or ()
+        )
+    )
+    if (
+        len(mask_rows) != 8
+        or {int(row["view_index"]) for row in mask_rows} != set(range(8))
+    ):
+        raise QualificationError(
+            "PRESENTATION_V2_VISUAL_FOREGROUND_MATRIX_INCOMPLETE"
+        )
+    mask_ref_by_view = {
+        int(row["view_index"]): dict(row.get("mask") or {})
+        for row in mask_rows
+    }
+
+    vertex_ids = [
+        str(vertex.canonical_mesh_vertex_id) for vertex in mesh.vertices
+    ]
+    vertex_index = {
+        vertex_id: index for index, vertex_id in enumerate(vertex_ids)
+    }
+    if len(vertex_index) != len(vertex_ids):
+        raise QualificationError(
+            "PRESENTATION_V2_VISUAL_DUPLICATE_MESH_VERTEX_ID"
+        )
+    mechanical_faces = np.asarray(
+        [
+            [vertex_index[str(vertex_id)] for vertex_id in face]
+            for face in mesh.faces
+        ],
+        dtype=np.int64,
+    )
+    if (
+        mechanical_faces.ndim != 2
+        or mechanical_faces.shape[1] != 3
+        or len(mechanical_faces) == 0
+    ):
+        raise QualificationError(
+            "PRESENTATION_V2_VISUAL_MECHANICAL_FACES_INVALID"
+        )
+
+    unsafe = tuple(
+        map(int, compatibility.get("unsafe_face_indices") or ())
+    )
+    if any(index < 0 or index >= len(mechanical_faces) for index in unsafe):
+        raise QualificationError(
+            "PRESENTATION_V2_VISUAL_UNSAFE_FACE_INDEX_DRIFT"
+        )
+
+    root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+    visual_root = root / "qualified_visual_presentation"
+    visual_root.mkdir(parents=True, exist_ok=True)
+    view_rows = []
+    region_total = 0
+    vertex_total = 0
+    face_total = 0
+    for view_index in range(8):
+        authority = observations[view_index]
+        source_row = source_by_view[view_index]
+        mask_path = load_file_ref(
+            mask_ref_by_view[view_index],
+            json_required=False,
+        )
+        mask_sha = sha256_file(mask_path)
+        if (
+            mask_sha != str(authority.foreground_mask_sha256)
+            or mask_sha != str(source_row.source_foreground_mask_sha256)
+        ):
+            raise QualificationError(
+                "PRESENTATION_V2_VISUAL_FOREGROUND_AUTHORITY_DRIFT"
+            )
+        raw = mask_path.read_bytes()
+        width = int(authority.width)
+        height = int(authority.height)
+        if (
+            len(raw) != width * height
+            or any(value not in (0, 1) for value in raw)
+        ):
+            raise QualificationError(
+                "PRESENTATION_V2_VISUAL_FOREGROUND_MASK_INVALID"
+            )
+        mask = np.frombuffer(raw, dtype=np.uint8).reshape(
+            height, width
+        ).astype(bool)
+
+        visibility = rasterize_visible_owner(
+            mesh,
+            camera_by_view[view_index],
+            width=width,
+            height=height,
+            max_layers=4,
+        )
+        region_labels, seed_region_labels, region_rows = (
+            partition_source_mask_by_safe_face_adjacency_v1(
+                mask,
+                visibility.owner_face_index,
+                mechanical_faces,
+                unsafe,
+                minimum_seed_pixels=1,
+            )
+        )
+        target_edge_px = int(
+            dict(source_row.metadata or {}).get("target_edge_px") or 16
+        )
+        if target_edge_px < 1:
+            raise QualificationError(
+                "PRESENTATION_V2_VISUAL_TARGET_EDGE_INVALID"
+            )
+        region_value = build_visual_mesh_from_region_labels_v1(
+            mask,
+            region_labels,
+            target_edge_px=target_edge_px,
+        )
+        visual_mesh = region_value.mesh
+        region_ids = set(map(int, region_value.face_region_id.tolist()))
+        if len(region_ids) != len(region_rows):
+            raise QualificationError(
+                "PRESENTATION_V2_VISUAL_REGION_COUNT_DRIFT"
+            )
+        mesh_path = visual_root / f"V{view_index}.npz"
+        np.savez_compressed(
+            mesh_path,
+            positions=np.asarray(
+                visual_mesh.positions, dtype=np.float64
+            ),
+            faces=np.asarray(visual_mesh.faces, dtype=np.uint32),
+            uv=np.asarray(visual_mesh.uv, dtype=np.float64),
+            vertex_region_id=np.asarray(
+                region_value.vertex_region_id, dtype=np.int32
+            ),
+            face_region_id=np.asarray(
+                region_value.face_region_id, dtype=np.int32
+            ),
+            region_labels=np.asarray(region_labels, dtype=np.int32),
+            seed_region_labels=np.asarray(
+                seed_region_labels, dtype=np.int32
+            ),
+        )
+        mesh_sha = sha256_file(mesh_path)
+        row = QualifiedVisualPresentationViewIR(
+            view_index=view_index,
+            direction_id=f"V{view_index}",
+            width=width,
+            height=height,
+            vertex_count=int(len(visual_mesh.positions)),
+            face_count=int(len(visual_mesh.faces)),
+            region_count=int(len(region_rows)),
+            mesh_npz_path=str(mesh_path.resolve()),
+            mesh_npz_sha256=mesh_sha,
+            source_visual_mesh_hash=str(source_row.mesh_hash),
+            source_raster_sha256=str(source_row.source_raster_sha256),
+            source_foreground_mask_sha256=str(
+                source_row.source_foreground_mask_sha256
+            ),
+            visual_mesh_hash=visual_mesh_semantic_hash(visual_mesh),
+            view_hash="",
+            metadata={
+                "ownership": "STAGE37_QUALIFIED_SOURCE_OWNED_PRESENTATION",
+                "qualification_scope": (
+                    "REST_SOURCE_TOPOLOGY_X_STAGE35_SAFE_ADJACENCY_V1"
+                ),
+                "dynamic_deformation_qualified": False,
+                "dynamic_deformation_owner": "STAGE42_AND_STAGE45",
+                "mechanical_mesh_render_authority": False,
+                "source_foreground_pixel_count": int(
+                    np.count_nonzero(mask)
+                ),
+                "safe_seed_pixel_count": int(
+                    np.count_nonzero(seed_region_labels >= 0)
+                ),
+                "visibility_layer_overflow_pixel_count": int(
+                    np.count_nonzero(visibility.layer_overflow & mask)
+                ),
+                "target_edge_px": target_edge_px,
+            },
+        )
+        row = replace(
+            row,
+            view_hash=qualified_visual_presentation_view_hash(row),
+        )
+        view_rows.append(row)
+        region_total += int(row.region_count)
+        vertex_total += int(row.vertex_count)
+        face_total += int(row.face_count)
+
+    value = QualifiedVisualPresentationSetIR(
+        source_visual_mesh_set_binding_hash=str(source_visual.set_hash),
+        observation_set_binding_hash=str(observation.observation_set_hash),
+        output_direction_set_binding_hash=str(
+            source_visual.output_direction_set_binding_hash
+        ),
+        mechanical_mesh_binding_hash=str(mesh.mesh_lineage_hash),
+        skin_topology_compatibility_report_hash=compatibility_hash,
+        appearance_asset_binding_hash=str(asset.asset_hash),
+        appearance_qualification_binding_hash=str(
+            appearance.qualification_hash
+        ),
+        views=tuple(view_rows),
+        set_hash="",
+        metadata={
+            "authority": "STAGE37_QUALIFIED_VISUAL_PRESENTATION_TOPOLOGY",
+            "source_owned_visual_mesh_mode": True,
+            "mechanical_mesh_render_authority": False,
+            "dynamic_deformation_qualified": False,
+            "dynamic_deformation_owner": "STAGE42_AND_STAGE45",
+            "region_partition_contract": (
+                "SOURCE_RASTER_4N_X_STAGE35_SAFE_SHARED_EDGE_V1"
+            ),
+            "minimum_seed_pixels": 1,
+            "subject_specific_code_used": False,
+        },
+    )
+    value = replace(
+        value,
+        set_hash=qualified_visual_presentation_set_hash(value),
+    )
+    return value, {
+        "qualified_visual_presentation_set_hash": value.set_hash,
+        "source_visual_mesh_set_hash": source_visual.set_hash,
+        "visual_region_count": region_total,
+        "visual_vertex_count": vertex_total,
+        "visual_face_count": face_total,
+        "skin_topology_compatibility_report_hash": compatibility_hash,
+    }
 
 
 def qualify_presentation_structure_stage(ctx: dict) -> dict:
@@ -188,6 +532,14 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
             raise QualificationError(
                 "PRESENTATION_V2_VISUAL_MESH_SET_BINDING_MISSING"
             )
+        qualified_visual, visual_diagnostics = (
+            _qualified_visual_presentation_stage37(
+                ctx,
+                mesh=mesh,
+                asset=asset,
+                appearance=appearance,
+            )
+        )
         evidence = PresentationPartitionEvidenceV2IR(
             mesh_binding_hash=str(mesh.mesh_lineage_hash),
             appearance_asset_binding_hash=str(asset.asset_hash),
@@ -207,7 +559,11 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
                 "evidence_supported_visual_partition": True,
                 "appearance_boundary_does_not_mint_appearance": True,
                 "source_owned_visual_mesh_mode": True,
-                "visual_mesh_set_binding_hash": visual_hash,
+                "visual_mesh_set_binding_hash": qualified_visual.set_hash,
+                "source_visual_mesh_set_binding_hash": visual_hash,
+                "qualified_visual_presentation_set_binding_hash": (
+                    qualified_visual.set_hash
+                ),
                 "mechanical_face_appearance_partition_not_applicable": True,
                 "mechanical_mesh_render_authority": False,
             },
@@ -246,10 +602,14 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
             metadata={
                 **dict(structure.metadata or {}),
                 "source_owned_visual_mesh_mode": True,
-                "visual_mesh_set_binding_hash": visual_hash,
+                "visual_mesh_set_binding_hash": qualified_visual.set_hash,
+                "source_visual_mesh_set_binding_hash": visual_hash,
+                "qualified_visual_presentation_set_binding_hash": (
+                    qualified_visual.set_hash
+                ),
                 "mechanical_mesh_render_authority": False,
                 "visual_partition_authority": (
-                    "STAGE18_SOURCE_OWNED_VISUAL_MESH_SET"
+                    "STAGE37_QUALIFIED_SOURCE_OWNED_VISUAL_PRESENTATION"
                 ),
             },
         )
@@ -270,6 +630,13 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
                     evidence,
                     authority_class=(
                         "QUALIFIED_PRESENTATION_PARTITION_EVIDENCE_V2"
+                    ),
+                ),
+                write_ir(
+                    root / "qualified_visual_presentation_set_v1.json",
+                    qualified_visual,
+                    authority_class=(
+                        "QUALIFIED_SOURCE_OWNED_VISUAL_PRESENTATION"
                     ),
                 ),
                 write_ir(
@@ -296,8 +663,13 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
                 "source_view_identity_preserved": True,
                 "source_view_identity_is_render_authority": False,
                 "source_owned_visual_mesh_mode": True,
-                "visual_mesh_set_binding_hash": visual_hash,
+                "visual_mesh_set_binding_hash": qualified_visual.set_hash,
+                "source_visual_mesh_set_binding_hash": visual_hash,
+                "qualified_visual_presentation_set_binding_hash": (
+                    qualified_visual.set_hash
+                ),
                 "mechanical_mesh_render_authority": False,
+                **visual_diagnostics,
             },
         }
 

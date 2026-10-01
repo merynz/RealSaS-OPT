@@ -25,3 +25,6 @@
 ## Reading rule
 
 A green gate only closes the contract it actually executes. Do not promote “full candidate PASS” into “product ready” when another mechanically relevant gate remains outside its test scope or is explicitly fail-closed.
+| Subject-free Stage35 G3B generic regression | `16b8cb72...` / 36847287654 | PASS | Full `tests/compiler`: **436 passed, 4 skipped**; fix has no Knight coupling and binds stress to sealed envelope `joint_ranges`. | Full product/native/runtime integration or G5 closure. |
+
+

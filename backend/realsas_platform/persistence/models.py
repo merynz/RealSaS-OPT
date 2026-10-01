@@ -87,9 +87,13 @@ class ArtifactInputRow(Base):
 
 class AttemptRow(Base):
     __tablename__ = "attempts"
-    __table_args__ = (CheckConstraint("kind IN ('research','repair','compile_candidate')", name="ck_attempt_kind"),)
+    __table_args__ = (
+        CheckConstraint("kind IN ('research','repair','compile_candidate')", name="ck_attempt_kind"),
+        Index("ix_attempts_subject_release_created", "subject_id", "engine_release_id", "created_at"),
+    )
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     subject_id: Mapped[UUID] = mapped_column(ForeignKey("subjects.id", ondelete="RESTRICT"), nullable=False)
+    engine_release_id: Mapped[UUID | None] = mapped_column(ForeignKey("engine_releases.id", ondelete="RESTRICT"))
     parent_attempt_id: Mapped[UUID | None] = mapped_column(ForeignKey("attempts.id", ondelete="RESTRICT"))
     kind: Mapped[str] = mapped_column(String(40), nullable=False)
     spec_sha256: Mapped[str] = mapped_column(String(64), nullable=False)

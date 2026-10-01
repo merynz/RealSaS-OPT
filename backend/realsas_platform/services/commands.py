@@ -118,6 +118,7 @@ def submit_compile_subject(
             AttemptRow(
                 id=attempt_id,
                 subject_id=subject_id,
+                engine_release_id=engine_release_id,
                 kind="compile_candidate",
                 spec_sha256=sha256_json(spec),
                 created_by=requested_by,

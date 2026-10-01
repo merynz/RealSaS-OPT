@@ -89,3 +89,38 @@ The recovered path still has a narrower unresolved presentation problem: **dynam
 5. Render idle/run/slash and compare to frozen mechanical-CAA witness.
 
 No RGB head, generated texture, or new appearance architecture should be selected before this test distinguishes missing arbitration from representation failure.
+
+
+## Additional behavioral findings
+
+### F5 — Triangle array order is an implicit presentation authority: PROVEN
+
+A hosted synthetic audit held geometry, posed positions, texture bytes and per-vertex UVs constant and changed only the order of two fully overlapping visual triangles. Forty-five visible pixels changed. One representative pixel changed from blue `[0,0,255,255]` to red `[255,0,0,255]`; output RGBA hashes changed from `41a177be...` to `a4c87ff6...`.
+
+Evidence: `canonical/SOURCE_OWNED_VISUAL_FACE_ORDER_SENSITIVITY_AUDIT_V1_20261002.json`.
+
+Therefore current source-owned face iteration order is behaviorally equivalent to an undeclared draw-order authority.
+
+### F6 — Visual triangle single-affine-domain coherence is not guaranteed: PROVEN CONTRACT GAP
+
+`bind_region_visual_vertices_to_mechanical_affine_v1` selects a mechanical face independently for every visual vertex. Stage37 guarantees that all corners of a visual triangle share a visual region, but it does not guarantee that those corners bind to one mechanical affine face/domain. Unclamped barycentric extrapolation is authorized.
+
+This exact gap was already identified in the preserved Knight R&D audits as `P1_VISUAL_TRIANGLE_SINGLE_DEFORMATION_DOMAIN_NOT_GUARANTEED`. The recovered Stage42 implementation still uses the same per-vertex binding operator.
+
+### F7 — Corrected mechanical CAA smear is not catastrophic mechanical stretch: MEASURED
+
+On the corrected mechanical seam-support state, the remaining-smear audit measured:
+- edge>4 = 0
+- edge>10 = 0
+- maximum edge ratio = 3.6155
+- 562,477 source-mask-exterior alpha pixels over 1,374,354 rendered-alpha pixels (~40.93%)
+- ~93.22% of representative extra pixels owned by non-seam faces
+- extra-pixel provenance dominated by `CANONICAL_GLOBAL_COMPLETION` (~64.01%); direct source was only ~7.97%.
+
+Thus the accepted frozen smear cannot be attributed primarily to the previously closed catastrophic topology/stretch mechanism.
+
+### F8 — Source-owned transport introduces a separate deformation-transfer failure class: MEASURED
+
+The preserved source-owned deformation-region proof already uses direct-source-only appearance, forbids mechanical-mesh render authority, forbids unsafe mechanical faces as rendered visual geometry, and uses region-local mechanical barycentric motion. It nevertheless measured up to 1,856 flipped visual triangles and maximum edge stretch ~95.58x on its historical substrate.
+
+The current corrected-lineage replay is running to determine whether the corrected topology/weights state materially changes this failure.

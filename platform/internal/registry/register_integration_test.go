@@ -54,6 +54,30 @@ func TestCapabilityOutputRegistrationDetectsSemanticNondeterminism(t *testing.T)
 	`, executionID, attemptID, "wf-"+executionID.String()); err != nil {
 		t.Fatal(err)
 	}
+	defer func() {
+		rows, _ := pool.Query(ctx, "SELECT artifact_id FROM attempt_artifacts WHERE attempt_id=$1", attemptID)
+		var artifactIDs []uuid.UUID
+		if rows != nil {
+			for rows.Next() {
+				var id uuid.UUID
+				if rows.Scan(&id) == nil {
+					artifactIDs = append(artifactIDs, id)
+				}
+			}
+			rows.Close()
+		}
+		_, _ = pool.Exec(ctx, "DELETE FROM qualifications WHERE artifact_id = ANY($1)", artifactIDs)
+		_, _ = pool.Exec(ctx, "DELETE FROM artifact_inputs WHERE artifact_id = ANY($1) OR input_artifact_id = ANY($1)", artifactIDs)
+		_, _ = pool.Exec(ctx, "DELETE FROM execution_artifacts WHERE execution_id=$1", executionID)
+		_, _ = pool.Exec(ctx, "DELETE FROM attempt_artifacts WHERE attempt_id=$1", attemptID)
+		_, _ = pool.Exec(ctx, "DELETE FROM executions WHERE id=$1", executionID)
+		_, _ = pool.Exec(ctx, "DELETE FROM attempt_events WHERE attempt_id=$1", attemptID)
+		_, _ = pool.Exec(ctx, "DELETE FROM attempts WHERE id=$1", attemptID)
+		for _, id := range artifactIDs {
+			_, _ = pool.Exec(ctx, "DELETE FROM artifacts WHERE id=$1", id)
+		}
+		_, _ = pool.Exec(ctx, "DELETE FROM subjects WHERE id=$1", subjectID)
+	}()
 
 	registrar := Registrar{Store: store}
 	capability := CapabilityIdentity{

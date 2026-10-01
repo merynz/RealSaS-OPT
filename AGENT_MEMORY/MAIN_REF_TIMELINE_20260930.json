@@ -1,8 +1,8 @@
 {
-  "schema": "RealSaS.AgentMainRefTimeline.20260930.v1",
+  "schema": "RealSaS.AgentMainRefTimeline.20260930.v2",
   "generated_date": "2026-10-01",
   "authority": "NON_AUTHORITATIVE_FORENSIC_DERIVATION",
-  "key_conclusion": "The normalized 46-stage candidate was actually merged and pushed to main, main later reached 3529344, then main was force-updated from 3529344 back to e6c91184. Current a8002 descends from that rollback.",
+  "key_conclusion": "The normalized 46-stage candidate was actually merged and pushed to main, later preserved on backup/main-normalized-20260930-3529344, then intentionally safety-rolled back to e6c91184 because recovery-polling timeouts/context-loss made continued main mutation unsafe. The rollback is not an engineering rejection of the normalized lineage.",
   "events": [
     {
       "time": "2026-09-30T13:37:19",
@@ -99,8 +99,12 @@
           "git log -1 => e6c91184d6d877bd19980832a561e94a746ca7ce"
         ]
       },
-      "interpretation": "The Git operation was an explicit forced ref move with a backup branch. The repository evidence does not by itself establish whether the engineering decision behind it was correct, mistaken, or context-drifted.",
-      "confidence": "A"
+      "interpretation": "Intentional safety/recovery action. Do not use the rollback itself as evidence against the normalized architecture.",
+      "confidence": "A",
+      "rationale_status": "CONFIRMED",
+      "rationale_class": "SAFETY_ROLLBACK_DUE_TO_AGENTING_UNCERTAINTY",
+      "rationale": "User-directed rollback during the recovery-polling/context-loss incident so normalized main could be revisited after platform stability returned. The normalized state was intentionally preserved on backup/main-normalized-20260930-3529344.",
+      "engineering_disposition": "NOT_REJECTED_BY_ROLLBACK"
     },
     {
       "time": "2026-09-30T19:32:38..19:32:41Z",
@@ -115,14 +119,23 @@
           "e6c91184d..a8002b20d HEAD -> main"
         ]
       },
-      "confidence": "A"
+      "confidence": "A",
+      "current_descendant_refresh": "c3b1b09c135bc0d4f0d019f9190b61ac621ac499",
+      "note": "On 2026-10-01, creating the agent-memory branch triggered Live Authority Context and indirectly added generated-only refresh c3b1b09... on main."
     }
   ],
   "unresolved_questions": [
-    "What rationale caused the forced rollback from normalized main to e6c?",
-    "Was the rollback an intended safety recovery or a context-drifted recovery action?",
-    "Which normalized slices should be restored after accounting for the unresolved Stage42 visual consumer, wiring-test token mismatch, and native source seal drift?",
-    "Which post-merge Knight operational commits are evidence only versus independently useful fixes?"
+    "Which normalized slices should be restored after accounting for the unresolved Stage42 visual consumer, wiring-test token mismatch, native source seal drift, and any later superseding evidence?",
+    "Which post-merge Knight operational commits are evidence-only versus independently useful general fixes?",
+    "What exact recovery head should be proposed after slice-level validation, without treating the safety rollback as an engineering verdict?"
   ],
-  "recovery_rule": "Do not force-move main during reconstruction. Preserve both current-main authority and normalized-backup evidence until promotion slices and gate scopes are fully classified."
+  "recovery_rule": "Treat both current rolled-back main and the normalized backup as preserved evidence states. The rollback was a deliberate safety measure under agenting uncertainty, not a scientific/architectural rejection. Re-promotion must still be evidence-driven and exact-gated.",
+  "agent_memory_side_effect": {
+    "main_head_after_branch_create": "c3b1b09c135bc0d4f0d019f9190b61ac621ac499",
+    "parent": "a8002b20dd2710e6f8edc9317be640d3bc9330f3",
+    "class": "GENERATED_CONTEXT_ONLY",
+    "cause": "Creating alfred/repo-memory-map-20261001 triggered Live Authority Context on branch create.",
+    "production_source_changed": false,
+    "policy": "Avoid creating additional branches during reconstruction unless required; account for branch-create workflows that refresh generated main context."
+  }
 }

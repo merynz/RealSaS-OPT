@@ -52,8 +52,12 @@ func TestCompilePlanIsJustOneCapabilityProvider(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(resolved) != graph.StageCount() {
-		t.Fatalf("resolved=%d graph=%d", len(resolved), graph.StageCount())
+	required, err := graph.AncestorsIncluding(productStage)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(resolved) != len(required) {
+		t.Fatalf("resolved=%d required=%d graph=%d", len(resolved), len(required), graph.StageCount())
 	}
 }
 

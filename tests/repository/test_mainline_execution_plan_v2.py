@@ -106,14 +106,18 @@ def test_stage37_consumes_qualified_caa_for_role_free_visual_partition():
     by = {row["id"]: row for row in plan["stages"]}
     stage37 = by["37_QUALIFIED_PRESENTATION_STRUCTURE"]
     assert stage37["depends_on"] == [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
         "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
         "23_COMPLETE_APPEARANCE_ASSET_BAKED",
         "24_COMPLETE_APPEARANCE_QUALIFIED",
         "28_SKELETON_QUALIFIED",
         "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
         "36_QUALIFIED_MESH_SKIN_TRANSFER",
     ]
-    assert "role-free presentation partition" in stage37["title"]
+    assert "source-owned visual presentation topology" in stage37["title"]
+    assert "observation" in stage37["manifest_keys"]
     assert by["06_OBSERVATION_RENDER_8VIEW"]["title"].startswith("Materialize")
     assert by["39_MOTION_SOURCE_OR_PRESET_SEAL"]["title"] == (
         "Professional external motion source seal"

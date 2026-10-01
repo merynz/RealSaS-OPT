@@ -1,0 +1,59 @@
+name: agent-memory-candidate-forensic-v1
+
+on:
+  push:
+    branches:
+      - alfred/repo-memory-map-20261001
+    paths:
+      - '.github/workflows/agent_memory_candidate_forensic_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  candidate-wiring-contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 92de05292b05e4ae8aaab3eed53c515b5eef5929
+          fetch-depth: 0
+
+      - name: Seal exact candidate identity
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "92de05292b05e4ae8aaab3eed53c515b5eef5929"
+          git status --porcelain=v1
+          echo "CANDIDATE_HEAD=$(git rev-parse HEAD)"
+
+      - name: Verify observed token mismatch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          runtime = Path("compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py").read_text()
+          test = Path("tests/repository/test_source_owned_visual_runtime_wiring_v1.py").read_text()
+          assert "RUNTIME_V2_SOURCE_OWNED_VISUAL_PRESENTATION_BINDING_REQUIRED" in runtime
+          assert "RUNTIME_V2_SOURCE_OWNED_VISUAL_BINDING_REQUIRED" not in runtime
+          assert "SOURCE_OWNED_VISUAL_RUNTIME_NOT_IMPLEMENTED" not in runtime
+          assert "RUNTIME_V2_SOURCE_OWNED_VISUAL_PRESENTATION_BINDING_REQUIRED" not in test
+          print("OBSERVED_EXACT_TOKEN_MISMATCH")
+          PY
+
+      - name: Prove repository wiring test still rejects candidate
+        run: |
+          set +e
+          python - <<'PY'
+          import runpy
+          ns = runpy.run_path("tests/repository/test_source_owned_visual_runtime_wiring_v1.py")
+          ns["test_source_owned_visual_runtime_cannot_silently_fall_back_to_mechanical_render_mesh"]()
+          PY
+          rc=$?
+          set -e
+          echo "WIRING_TEST_EXIT_CODE=$rc"
+          if [ "$rc" -eq 0 ]; then
+            echo "UNEXPECTED: wiring test passed; forensic assumption falsified"
+            exit 1
+          fi
+          echo "EXPECTED_REJECTION_CONFIRMED"

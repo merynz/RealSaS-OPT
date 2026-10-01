@@ -1078,14 +1078,79 @@ def test_vf23_stage20_to25_uses_unmodified_production_caa_policy(tmp_path):
         "native_player": {"path": str(player), "sha256": _sha(player)}
     }
 
-    # Current source-owned visual authority is complete through Stage25 and
-    # remains the current presentation authority at Stage37/38. The historical
-    # Stage42 package path still serializes the mechanical render mesh and has
-    # no typed VisualMeshSet/binding transport. Normalized main must fail closed
-    # here rather than silently claim Stage46 product closure on the wrong mesh.
-    ctx["stage"] = {"id": "42_RUNTIME_PROJECTION_AND_CAA_BINDING"}
-    with pytest.raises(
-        QualificationError,
-        match="RUNTIME_V2_SOURCE_OWNED_VISUAL_PRESENTATION_BINDING_REQUIRED",
-    ):
-        build_runtime_projection_stage(ctx)
+    # Recovery closes the former Stage42 fail-closed seam. The SAME exact
+    # production-policy context must now carry source-owned visual topology
+    # through RSS packaging, native playback, dynamic visual integrity and
+    # Stage46 product closure without regaining the mechanical mesh as render
+    # authority.
+    r42 = run(
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        build_runtime_projection_stage,
+    )
+    assert (
+        r42["diagnostics"]["presentation_geometry_mode"]
+        == "SOURCE_OWNED_VISUAL_PRESENTATION_V1"
+    )
+    assert r42["diagnostics"]["mechanical_mesh_render_authority"] is False
+    assert r42["diagnostics"]["runtime_generation"] is False
+
+    r43 = run(
+        "43_RSS_MATERIALIZE_COMPACT",
+        materialize_runtime_package_stage,
+    )
+    assert (
+        r43["diagnostics"]["presentation_geometry_mode"]
+        == "SOURCE_OWNED_VISUAL_PRESENTATION_V1"
+    )
+    assert r43["diagnostics"]["mechanical_mesh_render_authority"] is False
+
+    r44 = run(
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        prove_native_package_playback_stage,
+    )
+    assert r44["diagnostics"]["native_reference_mismatch_pixels"] == 0
+    assert (
+        r44["diagnostics"]["renderer"]
+        == "REALSAS_V2_SOURCE_OWNED_VISUAL_2D"
+    )
+    assert (
+        r44["diagnostics"]["presentation_geometry_mode"]
+        == "SOURCE_OWNED_VISUAL_PRESENTATION_V1"
+    )
+
+    r45 = run(
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        prove_dynamic_visual_integrity_stage,
+    )
+    assert r45["diagnostics"]["native_reference_mismatch_pixel_count"] == 0
+    assert (
+        r45["diagnostics"]["direct_source_provenance_mismatch_pixel_count"]
+        == 0
+    )
+    assert r45["diagnostics"]["flipped_triangle_count"] == 0
+    assert r45["diagnostics"]["edge_gt_4_count"] == 0
+    assert r45["diagnostics"]["evaluated_frame_view_count"] > 0
+    assert r45["diagnostics"]["rendered_visible_pixel_count"] > 0
+
+    r46 = run(
+        "46_PRODUCT_CLOSURE_SEAL",
+        seal_product_closure_stage,
+    )
+    closure = read_json(
+        next(
+            out
+            for out in r46["outputs"]
+            if out["schema"] == "RealSaS.ProductClosureIR.v2"
+        )["path"]
+    )
+    assert closure["qualification_report"]["product_pass"] is True
+    assert (
+        closure["qualification_report"][
+            "source_owned_visual_dynamic_integrity_passed"
+        ]
+        is True
+    )
+    assert (
+        closure["metadata"]["presentation_geometry_mode"]
+        == "SOURCE_OWNED_VISUAL_PRESENTATION_V1"
+    )

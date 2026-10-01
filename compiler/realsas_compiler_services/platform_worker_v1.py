@@ -164,8 +164,11 @@ def _render_compiler_run(request: dict[str, Any]) -> dict[str, Any]:
         raise RuntimeError(f"PLATFORM_ENGINE_COMPILER_RUN_NOT_FOUND:{run_id}")
     ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if str(ledger.get("run_id")) != run_id or str(manifest.get("run_id")) != run_id:
-        raise RuntimeError("PLATFORM_ENGINE_COMPILER_RUN_IDENTITY_DRIFT")
+    if str(ledger.get("run_id")) != run_id:
+        raise RuntimeError("PLATFORM_ENGINE_COMPILER_RUN_LEDGER_IDENTITY_DRIFT")
+    manifest_run_id = str(manifest.get("run_id") or "")
+    if manifest_run_id and manifest_run_id != run_id:
+        raise RuntimeError("PLATFORM_ENGINE_COMPILER_RUN_MANIFEST_IDENTITY_DRIFT")
 
     package = _stage_output(
         ledger,

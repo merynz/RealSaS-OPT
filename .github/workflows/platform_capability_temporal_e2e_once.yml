@@ -45,7 +45,14 @@ jobs:
         with: {python-version: '3.11'}
       - id: temporal_cli
         continue-on-error: true
-        uses: temporalio/setup-temporal@v0
+        name: Install Temporal CLI
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/temporal-cli
+          curl -fsSL "https://temporal.download/cli/archive/latest?platform=linux&arch=amd64" -o /tmp/temporal-cli.tar.gz
+          tar -xzf /tmp/temporal-cli.tar.gz -C /tmp/temporal-cli
+          echo "/tmp/temporal-cli" >> "$GITHUB_PATH"
+          /tmp/temporal-cli/temporal --version
       - id: e2e
         continue-on-error: true
         if: steps.temporal_cli.outcome == 'success'

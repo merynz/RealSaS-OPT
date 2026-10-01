@@ -96,6 +96,7 @@ def _qualified_visual_presentation_stage37(
     mesh,
     asset,
     appearance,
+    presentation_policy_hash: str,
 ):
     """Qualify source-owned presentation topology downstream of Stage35.
 
@@ -389,6 +390,7 @@ def _qualified_visual_presentation_stage37(
         appearance_qualification_binding_hash=str(
             appearance.qualification_hash
         ),
+        presentation_policy_binding_hash=str(presentation_policy_hash),
         views=tuple(view_rows),
         set_hash="",
         metadata={
@@ -538,6 +540,7 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
                 mesh=mesh,
                 asset=asset,
                 appearance=appearance,
+                presentation_policy_hash=content_sha256(policy),
             )
         )
         evidence = PresentationPartitionEvidenceV2IR(

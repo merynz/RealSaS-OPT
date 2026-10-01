@@ -80,7 +80,7 @@ func (m Manifest) Validate(g *stagegraph.Graph) error {
 		return errors.New("engine release purpose must be PRODUCT or RESEARCH")
 	}
 	stages := g.Stages()
-	if len(m.Stages) != len(stages) || len(stages) != 46 {
+	if len(stages) == 0 || len(m.Stages) != len(stages) {
 		return ErrGraphDrift
 	}
 	for i, expected := range stages {
@@ -225,7 +225,7 @@ func LoadVersions(
 	}
 	defer rows.Close()
 
-	out := make(map[string]StageVersion, 46)
+	out := make(map[string]StageVersion)
 	for rows.Next() {
 		var stageID, impl, policy string
 		var params []byte
@@ -249,7 +249,7 @@ func LoadVersions(
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
-	if len(out) != 46 {
+	if len(out) == 0 {
 		return nil, ErrGraphDrift
 	}
 	return out, nil

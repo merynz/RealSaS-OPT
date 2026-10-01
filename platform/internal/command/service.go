@@ -72,7 +72,11 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 		return Receipt{}, errors.New("compile subject/release/input ids are required")
 	}
 	if req.TargetStageID == "" {
-		req.TargetStageID = "46_PRODUCT_CLOSURE_SEAL"
+		productPassStageID, ok := graph.ProductPassStageID()
+		if !ok {
+			return Receipt{}, errors.New("compile graph has no product-pass authority")
+		}
+		req.TargetStageID = productPassStageID
 	}
 	if _, ok := graph.Get(req.TargetStageID); !ok {
 		return Receipt{}, fmt.Errorf("unknown target stage %s", req.TargetStageID)

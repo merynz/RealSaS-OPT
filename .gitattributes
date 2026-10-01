@@ -29,4 +29,5 @@
 *.ckpt binary
 *.onnx binary
 *.rss binary
+*.fbx binary
 *.rsr binary

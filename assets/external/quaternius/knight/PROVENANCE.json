@@ -4,5 +4,8 @@
   "source": "Knight Pack by Quaternius",
   "license": "CC0-1.0",
   "sha256": "41f2616fb4a42f9d35e242bbed1450ededc7537def4bf38cbb11b4e54ff2bf21",
-  "purpose": "Pinned external motion-source fixture for RealSaS qualification and regression."
+  "purpose": "Pinned external motion-source fixture for RealSaS qualification and regression.",
+  "license_evidence_sha256": "66967dc30f553af438851273eab91a66ca6ed5870778b393c4fb9f031cf62f1f",
+  "source_manifest": "canonical/MOTION_PRESET_SOURCE_QUATERNIUS_KNIGHT_V1.json",
+  "original_archive_member": "Knight by @Quaternius/FBX/KnightCharacter.fbx"
 }

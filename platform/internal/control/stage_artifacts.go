@@ -176,18 +176,18 @@ func (a Activities) prepareStageResultArtifact(
 		return nil, err
 	}
 	params, err := json.Marshal(map[string]any{
-		"stage_id": req.StageID,
+		"stage_id":        req.StageID,
 		"compiler_status": req.EngineResult.Status,
-		"output_count": len(outputs),
+		"output_count":    len(outputs),
 	})
 	if err != nil {
 		return nil, err
 	}
 	return &preparedStageResultArtifact{
-		Object: object,
-		Manifest: manifest,
-		ImplementationSHA256: implementationSHA,
-		PolicySHA256: policySHA,
+		Object:                 object,
+		Manifest:               manifest,
+		ImplementationSHA256:   implementationSHA,
+		PolicySHA256:           policySHA,
 		SemanticParametersJSON: params,
 	}, nil
 }

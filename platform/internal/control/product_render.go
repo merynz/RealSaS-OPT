@@ -191,8 +191,8 @@ func (a Activities) FinalizeCompile(ctx context.Context, payload map[string]any)
 		rows.Close()
 		required := map[string]bool{
 			"stage:46_PRODUCT_CLOSURE_SEAL": false,
-			productMotionRole:                false,
-			productRuntimeRole:               false,
+			productMotionRole:               false,
+			productRuntimeRole:              false,
 		}
 		for _, b := range bindings {
 			if _, ok := required[b.Role]; ok {

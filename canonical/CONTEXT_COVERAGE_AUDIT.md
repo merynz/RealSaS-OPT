@@ -6,18 +6,19 @@
 
 ## Coverage
 
-- Git-tracked files: **1218**
-- High-signal knowledge artifacts: **344**
-- Explained by continuity policy: **344**
+- Git-tracked files: **2514**
+- High-signal knowledge artifacts: **781**
+- Explained by continuity policy: **781**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **145**
-- Safe-default evidence-only branches: **141**
+- Live branches: **166**
+- Safe-default evidence-only branches: **162**
 
 ### Classification counts
 
+- `FIT1_COMMIT_LEDGER_COVERED`: **1**
 - `HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL`: **147**
-- `INDEXED_EXPLICIT`: **197**
+- `INDEXED_EXPLICIT`: **633**
 
 `FIT1_COMMIT_LEDGER_COVERED` means exact provenance is recoverable; it does **not** mean the artifact's scientific claim is promoted. `HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL` means the artifact predates the FIT1 gate and remains evidence/provenance unless another authority explicitly promotes it.
 
@@ -35,15 +36,20 @@ _None._
 | `agent/n1d-observable-functional-audit-v2-20260820` | `bf3ef16ae250` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `agent/n1d-observable-functional-quotient-rebuild-20260819` | `161d4d5d9893` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `agent/n1d-v2-source-parity-recovery-20260820` | `32b06472b7ff` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `alfred/repo-memory-map-20261001` | `13dfaf741903` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `architecture-v3-svg-20260901` | `f7473bc93a71` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `architecture-v4-single-family-e2e-20260902` | `c84658b8b95c` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `architecture/compiler-ir-solver-canonical-20260825` | `7163fac1f333` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `architecture/v4-generic-strength-source-completion-20260902` | `7f39a846ad05` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `archive/main-before-knight-canonical-20261002` | `aaf215aa81ad` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `audit/arachne-information-preservation-v1-20260910` | `94b4ef79e9b8` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `audit/final-completion-plan-20260902` | `00e930e788d3` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `audit/generic-main-normalization-20260930` | `2a69a9fbdd4a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `audit/geppetto-v2-frozen-base-7f39` | `7f39a846ad05` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `audit/historical-product-power-rebind-20260913` | `2bba9828a3b3` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `audit/iris-architecture-discipline-20260824` | `d7bba01c85e9` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `audit/knight-rest-visual-owner-20260930` | `643714de2899` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `backup/main-normalized-20260930-3529344` | `3529344ef304` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `baseline/h0-first-family-v1-20260904` | `a3cec7021f0d` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `behavioral/geppetto-v2-integrity-v1-20260903` | `2b5d46718683` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `cleanroom/iris-geometry-field-v1-20260904` | `e72636d8366d` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -51,6 +57,7 @@ _None._
 | `compiler-runtime-migration-closure-20260901` | `255910d22fea` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `consumer-interlock-v0-20260829` | `81ec9fd98d90` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `demo/investor-single-specimen-e2e` | `47892ffa16b7` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `demo/knight-arachne-v5-20260925` | `1dc51f4929a3` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `dependabot/pip/numpy-2.4.6` | `c9a1ecae3871` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `dependabot/pip/pillow-12.3.0` | `b7bdee2eda95` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `dependabot/pip/pip-audit-2.10.1` | `add7ffd97461` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -85,6 +92,7 @@ _None._
 | `first-fit-base/main-20260904-v2` | `461fd25264f4` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `fit/single-family-mage-v1-20260902` | `f2cd746f8beb` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `fit2/mage-full-subject-reclosure` | `eb7a20eb9da7` | `EVIDENCE_ONLY` | explicit authority-map override |
+| `fix/final-main-closure-20260930` | `f3762db51ca2` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `fix/motion-v2-root-frame-20260919` | `1ec74be48ab4` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `freeze/stage13-14-policy-20260919` | `75f1a1c5a845` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `g0-g1/single-pose-geometry` | `e423cd462002` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -95,13 +103,18 @@ _None._
 | `ignore-this` | `91b4593d5b2a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `integration/compiler-runtime-canonical-20260828` | `e423cd462002` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `integration/compiler-runtime-heavy-promotion-20260901` | `47892ffa16b7` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `integration/final-main-knight-platform-20261002` | `57499c8e032b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `integration/generic-main-finalization-20260930` | `92de05292b05` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `integration/generic-main-normalization-v2-20260930` | `75d7d590d0a3` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `integration/generic-main-promotion-20260930` | `908fbcc92072` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `integration/knight-latest-canonical-20261002` | `fbbcc008480e` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `integration/mage-real-e2e-20260912` | `11d1fdfd4398` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `iris/mapanything-ortho-apache` | `3b66a4d2beb5` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `legacy-geppetto-arachne-reconcile-20260901` | `f687ff8e78a2` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `91de4328fbb4` | `CANONICAL` | canonical branch |
+| `main` | `fbbcc008480e` | `CANONICAL` | canonical branch |
 | `motion/quaternius-direct-fbx-gate-v1-20260919` | `47fb1555455b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -113,10 +126,14 @@ _None._
 | `next/structured-depth-bridge-20260829` | `e362c473c2fd` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `noop` | `c6b5108f672b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `noop2` | `c6b5108f672b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `ops/current-main-knight-render-20260930` | `d0d2de09ee00` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `ops/knight-authority-inventory-20260919` | `5912a2cd042c` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `ops/knight-stage09-15-continuation-20260919` | `a431a35d613b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `ops/main-knight-render-20260930` | `0a44ef505e6e` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `ops/temp-trigger-n1d-v2-recovery-20260820` | `536b40b6a6bf` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `ops/trigger-n1d-v2-recovery-v2-verify-20260820` | `12a813a8f501` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `platform/professional-backend-v1-20261001` | `989a90b45726` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `platform/worker-seam-20261001` | `c9b4798c7e6d` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `playback-stack-v1-20260916` | `46aaad438780` | `EVIDENCE_ONLY` | explicit authority-map override |
 | `playback-stack-v1-20260916-p0p1-staging` | `d88a5fc9aa66` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `product/mage-fit1-demo-fulfillment-20260914` | `e60ea9129f55` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -125,9 +142,11 @@ _None._
 | `promote/fit1-evidence-main-20260909` | `9deccb8d051f` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `promote/iris-scene-first-signed-main-v3-20260905` | `dfb087c6a23e` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `promote/iris-scene-first-signed-v3-20260905` | `7cfb7efedbe9` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `recovery/canonical-main-20261001` | `54deade8abb2` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `redteam-hardening-20260920` | `a9aeb3fb1eac` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `redteam-sync-20260920` | `1741beaff327` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `repair/g5-mesh-policy-v2-20260919` | `1d1193f26796` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `repair/geppetto-mechanically-meaningful-rig-v2-20260925` | `df6985e03535` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `repair/mage-full-subject-reclosure-20260912` | `2fa5d4b604d5` | `EVIDENCE_ONLY` | explicit authority-map override |
 | `repair/mage-full-subject-reclosure-20260912-adaptive-steiner-tmp` | `221ad1b79eae` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `repair/mage-full-subject-reclosure-20260912-baseline-patch-tmp` | `c69ab78eac42` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -151,6 +170,8 @@ _None._
 | `research/stage14-v2-final-calibration-20260920` | `8a502d4bee42` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/stage14-v2-policy-calibration-20260919` | `b399a90c1c3a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/stage14-v2-policy-calibration-fixed-20260919` | `f08716b32db9` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `research/vf11-certified-adaptive-20260921` | `a1d633a7b01a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `research/vf11-x2-sparse-tetra-20261001` | `df2c7eddb19c` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/compiler-runtime-promotion-v1-20260903` | `83aa411cc06d` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/compiler-runtime-promotion-v1-20260903-directional-binding-firewall` | `800d3ccb042e` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety` | `2eb09fe3e8c6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -170,6 +191,7 @@ _None._
 | `subject2/knight-observation-v1-20260919` | `f45aed3655a2` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `tmp-do-not-use` | `953f2ded4911` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `tmp-noop` | `16ee5cd54a00` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `tmp/alfred-write-probe-20260926` | `b0b5140e3b68` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `tmp/appearance-witness-fetch-20260826` | `ec623d005bdb` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `tmp/runtime-v4-p0-p1-stage` | `e6654c065699` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `tmp_should_not_create` | `a5edb2b23fc4` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

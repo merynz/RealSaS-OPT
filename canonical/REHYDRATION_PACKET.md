@@ -11,9 +11,9 @@
 - Current state: REOPENED__WITNESS_FORBIDDEN
 - Active experiment: V2_IMPLEMENTATION_ASSEMBLY
 - Most recent closed gate: PRIOR_READY_SEAL_REVOKED_BY_POST_SEAL_APPEARANCE_REVIEW
-- Canonical main: 91de4328fbb4
+- Canonical main: fbbcc008480e
 - Governance ledger: V2_IMPLEMENTATION_ASSEMBLY — 0/46; ready 01_SOURCE_BYTES_SEALED,05_CAMERA_CONTRACT_SOLVED
-- Plan SHA-256: a41ccb9a157624fecc2177a05150646012577f443cc27938b7e93c1e0ff020e4
+- Plan SHA-256: be0067d78d5c1ecf51f5a0df2ee14e7a87ff0c44800ca66bbb5d5f8d5ad183cf
 - Promotion block: VF-11 R512 remains the active scientific blocker; VF-23 same-context Stage20->46 production-policy E2E and exact-head mainline/runtime/source/orchestration closure must also pass before technical reseal.
 - Scope warning: FIT1 or single-subject closure is not unseen/generalization evidence; current learned models are not claimed final.
 

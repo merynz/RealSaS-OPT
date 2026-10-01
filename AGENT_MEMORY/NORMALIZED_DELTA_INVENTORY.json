@@ -1,0 +1,1394 @@
+{
+  "schema": "RealSaS.AgentNormalizedDeltaInventory.v1",
+  "generated_date": "2026-10-01",
+  "base": "e6c91184d6d877bd19980832a561e94a746ca7ce",
+  "merged_head": "f459fe5491e367e9e5da07cfc5b1886f1b138ae4",
+  "compare_status": "ahead",
+  "ahead_by": 69,
+  "behind_by": 0,
+  "total_commits": 69,
+  "changed_file_count": 168,
+  "category_counts": {
+    "workflow": 21,
+    "governance": 26,
+    "appearance": 8,
+    "integration_other": 15,
+    "geometry_mesh": 8,
+    "mechanics": 7,
+    "runtime_motion": 7,
+    "presentation_visual": 2,
+    "native_runtime": 1,
+    "test": 70,
+    "tool": 3
+  },
+  "categories": {
+    "workflow": [
+      ".github/workflows/canonical_dense_face_provenance_tests.yml",
+      ".github/workflows/current_mainline_self_hosted_ci.yml",
+      ".github/workflows/current_runtime_self_hosted_ci.yml",
+      ".github/workflows/final_main_merge_gate_v1.yml",
+      ".github/workflows/final_mainline_candidate_full_gate_v1.yml",
+      ".github/workflows/final_mainline_closure_audit_v1.yml",
+      ".github/workflows/final_mainline_plan_hash_probe_v1.yml",
+      ".github/workflows/final_mainline_postdocs_seal_v1.yml",
+      ".github/workflows/g3_orientation_inversion_adversary_v1.yml",
+      ".github/workflows/generic_main_appearance_candidate_gate_v1.yml",
+      ".github/workflows/generic_main_mechanical_geometry_candidate_gate_v1.yml",
+      ".github/workflows/native_runtime_source_gate.yml",
+      ".github/workflows/research_head_visual_runtime_consumer_forensic_v1.yml",
+      ".github/workflows/source_edge_probe_repartition_unit_v1.yml",
+      ".github/workflows/source_owned_visual_runtime_wiring_gate_v1.yml",
+      ".github/workflows/stage18_harmonic_support_unit_v1.yml",
+      ".github/workflows/stage35_orientation_inversion_adversary_v1.yml",
+      ".github/workflows/topology_holeless_contract_v1.yml",
+      ".github/workflows/vf23_production_policy_e2e_bank.yml",
+      ".github/workflows/visual_runtime_consumer_forensic_audit_v1.yml",
+      ".github/workflows/zero_surface_topology_normal_tests.yml"
+    ],
+    "governance": [
+      "AGENTS.md",
+      "CURRENT_STATE.md",
+      "README.md",
+      "REPOSITORY_MAP.md",
+      "SYSTEM_INDEX.md",
+      "canonical/ACTIVE_RUN_V2.json",
+      "canonical/CAA_V2_RENDERABLE_SUPPORT_ADMISSION_CONTRACT_V1_20260927.json",
+      "canonical/CAA_V2_RENDERABLE_SUPPORT_ADMISSION_CONTRACT_V2_20260927.json",
+      "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V12_20260927.json",
+      "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V13_20260927.json",
+      "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V14_20260927.json",
+      "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V15_20260927.json",
+      "canonical/DEFORMATION_WITNESS_VALIDITY_AUDIT_V1_20260928.json",
+      "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+      "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+      "canonical/G3_ORIENTATION_INVERSION_ADVERSARY_V1_20260928.json",
+      "canonical/GSA_FACE_INCIDENCE_CLIQUE_ADVERSARY_V1_20260928.json",
+      "canonical/GSA_NORMAL_TOPOLOGY_ADVERSARY_V1_20260928.json",
+      "canonical/GSA_SURFACE_COHERENCE_ADVERSARIES_V1_20260928.json",
+      "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
+      "canonical/MAINLINE_NORMALIZATION_HANDOFF_20260930.md",
+      "canonical/README.md",
+      "canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json",
+      "canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V3_20260929.json",
+      "canonical/STAGE35_ORIENTATION_INVERSION_ADVERSARY_V1_20260928.json",
+      "canonical/V2_IMPLEMENTATION_READINESS.json"
+    ],
+    "appearance": [
+      "compiler/realsas_compiler_core/appearance_authority_v2.py",
+      "compiler/realsas_compiler_core/appearance_bake_v2.py",
+      "compiler/realsas_compiler_core/appearance_canonical_completion_v1.py",
+      "compiler/realsas_compiler_core/appearance_compile_v2.py",
+      "compiler/realsas_compiler_core/appearance_completion_v2.py",
+      "compiler/realsas_compiler_core/appearance_quality_v2.py",
+      "compiler/realsas_compiler_core/appearance_render_v2.py",
+      "compiler/realsas_compiler_core/appearance_variational_completion_v1.py"
+    ],
+    "integration_other": [
+      "compiler/realsas_compiler_core/artifact_io_v2.py",
+      "compiler/realsas_compiler_core/canonical_cdt_adapter_v1.py",
+      "compiler/realsas_compiler_core/product_authority_v1.py",
+      "compiler/realsas_compiler_core/product_mesh_skin_v1.py",
+      "compiler/realsas_compiler_core/product_state_v2.py",
+      "compiler/realsas_compiler_core/visibility_v2.py",
+      "compiler/realsas_compiler_services/orchestrator/adapters/adapter_io.py",
+      "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py",
+      "compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py",
+      "compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py",
+      "compiler/realsas_compiler_services/orchestrator/adapters/preflight_v2.py",
+      "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py",
+      "compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py",
+      "compiler/realsas_compiler_services/orchestrator/mainline.py",
+      "compiler/realsas_compiler_services/orchestrator/status_semantics.py"
+    ],
+    "geometry_mesh": [
+      "compiler/realsas_compiler_core/canonical_mesh_candidate_v1.py",
+      "compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py",
+      "compiler/realsas_compiler_core/geometry_artifact_codec_v2.py",
+      "compiler/realsas_compiler_core/geometry_substrate_v2.py",
+      "compiler/realsas_compiler_core/substrate/adequacy_v1.py",
+      "compiler/realsas_compiler_core/substrate/scene_first_signed.py",
+      "compiler/realsas_compiler_core/surface_addressing_v1.py",
+      "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py"
+    ],
+    "mechanics": [
+      "compiler/realsas_compiler_core/deformation_envelope_derivation_v1.py",
+      "compiler/realsas_compiler_core/mechanical_repartition_v2.py",
+      "compiler/realsas_compiler_core/mesh/deformation_stress_v1.py",
+      "compiler/realsas_compiler_core/mesh/deformation_stress_v2.py",
+      "compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py",
+      "compiler/realsas_compiler_core/rig.py",
+      "compiler/realsas_compiler_core/skin.py"
+    ],
+    "runtime_motion": [
+      "compiler/realsas_compiler_core/motion_compile_v2.py",
+      "compiler/realsas_compiler_core/runtime_package_v2.py",
+      "compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py",
+      "compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py",
+      "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py",
+      "tools/motion/materialize_quaternius_preset_v1.py",
+      "tools/verify_native_runtime_source_seal_v2.py"
+    ],
+    "presentation_visual": [
+      "compiler/realsas_compiler_core/presentation_partition_v2.py",
+      "compiler/realsas_compiler_core/visual_mesh_arap_v1.py"
+    ],
+    "native_runtime": [
+      "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp"
+    ],
+    "test": [
+      "tests/compiler/test_caa_abstention_contract_v1.py",
+      "tests/compiler/test_caa_adaptive_paging_v2.py",
+      "tests/compiler/test_caa_canonical_completion_v1.py",
+      "tests/compiler/test_caa_demo_static_mesh_admission_v2.py",
+      "tests/compiler/test_caa_v2_subject_free_policy.py",
+      "tests/compiler/test_caa_variational_completion_v1.py",
+      "tests/compiler/test_canonical_mesh_candidate_v1.py",
+      "tests/compiler/test_canonical_mesh_quality_repair_v1.py",
+      "tests/compiler/test_canonical_puppet_state_v1.py",
+      "tests/compiler/test_compacted_dense_face_provenance_v1.py",
+      "tests/compiler/test_deformation_stress_v2_vectorization.py",
+      "tests/compiler/test_demo_stage14_fallback_v2.py",
+      "tests/compiler/test_demo_stage18_mesh_fallback_v2.py",
+      "tests/compiler/test_geometry_substrate_evidence_v2.py",
+      "tests/compiler/test_geppetto_demo_surface_scope_v2.py",
+      "tests/compiler/test_holeless_partitioned_dense_candidate_v1.py",
+      "tests/compiler/test_mechanical_repartition_v2.py",
+      "tests/compiler/test_mesh_component_labels_v1.py",
+      "tests/compiler/test_motion_compile_v2.py",
+      "tests/compiler/test_product_authority_v1.py",
+      "tests/compiler/test_product_mesh_skin_v1.py",
+      "tests/compiler/test_product_mesh_stage_adapters_v1.py",
+      "tests/compiler/test_quaternius_motion_materializer_v1.py",
+      "tests/compiler/test_runtime_v2_package_abstention_v1.py",
+      "tests/compiler/test_runtime_v2_paged_native_smoke.py",
+      "tests/compiler/test_scene_first_signed_surface_bridge_v1.py",
+      "tests/compiler/test_skeleton_identity_determinism_v2.py",
+      "tests/compiler/test_skin_topology_repartition_directive_v2.py",
+      "tests/compiler/test_source_edge_probe_repartition_v1.py",
+      "tests/compiler/test_stage14_policy_v3.py",
+      "tests/compiler/test_substrate_adequacy_v1.py",
+      "tests/compiler/test_v2_static_mesh_source_fidelity_gate.py",
+      "tests/compiler/test_visibility_and_caa_v2.py",
+      "tests/compiler/test_visual_mesh_arap_v1.py",
+      "tests/iris/test_checkpoint_selection_v4_1.py",
+      "tests/iris/test_dense_source_coverage_v3.py",
+      "tests/iris/test_dense_source_coverage_v3_fixtures.py",
+      "tests/iris/test_dense_source_coverage_v3_gradient_scale.py",
+      "tests/iris/test_dense_source_sampling_v3.py",
+      "tests/iris/test_direct_fstar_fit_v5.py",
+      "tests/iris/test_field_failure_diagnostics_v5.py",
+      "tests/iris/test_full_screen_negative_space_audit_v3.py",
+      "tests/iris/test_indexed_sparse_tetra_decoder_v5.py",
+      "tests/iris/test_learned_tail_localization_v5.py",
+      "tests/iris/test_negative_space_barrier_v3.py",
+      "tests/iris/test_negative_space_upper_bound_v3.py",
+      "tests/iris/test_objective_tail_repair_v5.py",
+      "tests/iris/test_regularity_v4_1.py",
+      "tests/iris/test_regularity_v4_2.py",
+      "tests/iris/test_scene_first_signed_v4_demo.py",
+      "tests/iris/test_shell_escape_diagnostics_v5.py",
+      "tests/iris/test_source_constraint_v4.py",
+      "tests/iris/test_source_constraint_v4_1.py",
+      "tests/iris/test_source_exterior_v4.py",
+      "tests/iris/test_source_hull_lattice_v4_3.py",
+      "tests/iris/test_source_signed_field_v5.py",
+      "tests/iris/test_stage13_mask_morphology_v5.py",
+      "tests/iris/test_train_demo_fit_v4.py",
+      "tests/iris/test_train_demo_fit_v4_1.py",
+      "tests/iris/test_train_dense_fit_v3.py",
+      "tests/iris/test_train_upper_bound_fit_v3.py",
+      "tests/iris/test_v4_4_1_adaptive_hull_constraint.py",
+      "tests/iris/test_v4_4_adaptive_hull_constraint.py",
+      "tests/repository/test_demo_only_status_semantics.py",
+      "tests/repository/test_demo_witness_execution_v2.py",
+      "tests/repository/test_historical_demo_import_identity_v1.py",
+      "tests/repository/test_mainline_execution_plan_v2.py",
+      "tests/repository/test_mainline_implementation_closure_v1.py",
+      "tests/repository/test_mainline_v2_dag_scheduler.py",
+      "tests/repository/test_source_owned_visual_runtime_wiring_v1.py"
+    ],
+    "tool": [
+      "tools/audit_final_mainline_closure.py",
+      "tools/audit_g3_orientation_inversion_v1.py",
+      "tools/audit_stage35_orientation_inversion_v1.py"
+    ]
+  },
+  "files": [
+    {
+      "path": ".github/workflows/canonical_dense_face_provenance_tests.yml",
+      "status": "added",
+      "additions": 33,
+      "deletions": 0,
+      "changes": 33
+    },
+    {
+      "path": ".github/workflows/current_mainline_self_hosted_ci.yml",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1
+    },
+    {
+      "path": ".github/workflows/current_runtime_self_hosted_ci.yml",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 2,
+      "changes": 4
+    },
+    {
+      "path": ".github/workflows/final_main_merge_gate_v1.yml",
+      "status": "added",
+      "additions": 50,
+      "deletions": 0,
+      "changes": 50
+    },
+    {
+      "path": ".github/workflows/final_mainline_candidate_full_gate_v1.yml",
+      "status": "added",
+      "additions": 66,
+      "deletions": 0,
+      "changes": 66
+    },
+    {
+      "path": ".github/workflows/final_mainline_closure_audit_v1.yml",
+      "status": "added",
+      "additions": 30,
+      "deletions": 0,
+      "changes": 30
+    },
+    {
+      "path": ".github/workflows/final_mainline_plan_hash_probe_v1.yml",
+      "status": "added",
+      "additions": 21,
+      "deletions": 0,
+      "changes": 21
+    },
+    {
+      "path": ".github/workflows/final_mainline_postdocs_seal_v1.yml",
+      "status": "added",
+      "additions": 36,
+      "deletions": 0,
+      "changes": 36
+    },
+    {
+      "path": ".github/workflows/g3_orientation_inversion_adversary_v1.yml",
+      "status": "added",
+      "additions": 45,
+      "deletions": 0,
+      "changes": 45
+    },
+    {
+      "path": ".github/workflows/generic_main_appearance_candidate_gate_v1.yml",
+      "status": "added",
+      "additions": 62,
+      "deletions": 0,
+      "changes": 62
+    },
+    {
+      "path": ".github/workflows/generic_main_mechanical_geometry_candidate_gate_v1.yml",
+      "status": "added",
+      "additions": 73,
+      "deletions": 0,
+      "changes": 73
+    },
+    {
+      "path": ".github/workflows/native_runtime_source_gate.yml",
+      "status": "modified",
+      "additions": 8,
+      "deletions": 0,
+      "changes": 8
+    },
+    {
+      "path": ".github/workflows/research_head_visual_runtime_consumer_forensic_v1.yml",
+      "status": "added",
+      "additions": 41,
+      "deletions": 0,
+      "changes": 41
+    },
+    {
+      "path": ".github/workflows/source_edge_probe_repartition_unit_v1.yml",
+      "status": "added",
+      "additions": 32,
+      "deletions": 0,
+      "changes": 32
+    },
+    {
+      "path": ".github/workflows/source_owned_visual_runtime_wiring_gate_v1.yml",
+      "status": "added",
+      "additions": 29,
+      "deletions": 0,
+      "changes": 29
+    },
+    {
+      "path": ".github/workflows/stage18_harmonic_support_unit_v1.yml",
+      "status": "added",
+      "additions": 31,
+      "deletions": 0,
+      "changes": 31
+    },
+    {
+      "path": ".github/workflows/stage35_orientation_inversion_adversary_v1.yml",
+      "status": "added",
+      "additions": 45,
+      "deletions": 0,
+      "changes": 45
+    },
+    {
+      "path": ".github/workflows/topology_holeless_contract_v1.yml",
+      "status": "added",
+      "additions": 44,
+      "deletions": 0,
+      "changes": 44
+    },
+    {
+      "path": ".github/workflows/vf23_production_policy_e2e_bank.yml",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1,
+      "changes": 2
+    },
+    {
+      "path": ".github/workflows/visual_runtime_consumer_forensic_audit_v1.yml",
+      "status": "added",
+      "additions": 55,
+      "deletions": 0,
+      "changes": 55
+    },
+    {
+      "path": ".github/workflows/zero_surface_topology_normal_tests.yml",
+      "status": "added",
+      "additions": 32,
+      "deletions": 0,
+      "changes": 32
+    },
+    {
+      "path": "AGENTS.md",
+      "status": "modified",
+      "additions": 6,
+      "deletions": 0,
+      "changes": 6
+    },
+    {
+      "path": "CURRENT_STATE.md",
+      "status": "modified",
+      "additions": 12,
+      "deletions": 0,
+      "changes": 12
+    },
+    {
+      "path": "README.md",
+      "status": "modified",
+      "additions": 8,
+      "deletions": 0,
+      "changes": 8
+    },
+    {
+      "path": "REPOSITORY_MAP.md",
+      "status": "modified",
+      "additions": 4,
+      "deletions": 0,
+      "changes": 4
+    },
+    {
+      "path": "SYSTEM_INDEX.md",
+      "status": "modified",
+      "additions": 4,
+      "deletions": 0,
+      "changes": 4
+    },
+    {
+      "path": "canonical/ACTIVE_RUN_V2.json",
+      "status": "modified",
+      "additions": 15,
+      "deletions": 4,
+      "changes": 19
+    },
+    {
+      "path": "canonical/CAA_V2_RENDERABLE_SUPPORT_ADMISSION_CONTRACT_V1_20260927.json",
+      "status": "added",
+      "additions": 70,
+      "deletions": 0,
+      "changes": 70
+    },
+    {
+      "path": "canonical/CAA_V2_RENDERABLE_SUPPORT_ADMISSION_CONTRACT_V2_20260927.json",
+      "status": "added",
+      "additions": 101,
+      "deletions": 0,
+      "changes": 101
+    },
+    {
+      "path": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V12_20260927.json",
+      "status": "added",
+      "additions": 34,
+      "deletions": 0,
+      "changes": 34
+    },
+    {
+      "path": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V13_20260927.json",
+      "status": "added",
+      "additions": 34,
+      "deletions": 0,
+      "changes": 34
+    },
+    {
+      "path": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V14_20260927.json",
+      "status": "added",
+      "additions": 34,
+      "deletions": 0,
+      "changes": 34
+    },
+    {
+      "path": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V15_20260927.json",
+      "status": "added",
+      "additions": 34,
+      "deletions": 0,
+      "changes": 34
+    },
+    {
+      "path": "canonical/DEFORMATION_WITNESS_VALIDITY_AUDIT_V1_20260928.json",
+      "status": "added",
+      "additions": 90,
+      "deletions": 0,
+      "changes": 90
+    },
+    {
+      "path": "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+      "status": "modified",
+      "additions": 0,
+      "deletions": 194326,
+      "changes": 194326
+    },
+    {
+      "path": "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+      "status": "modified",
+      "additions": 0,
+      "deletions": 4863,
+      "changes": 4863
+    },
+    {
+      "path": "canonical/G3_ORIENTATION_INVERSION_ADVERSARY_V1_20260928.json",
+      "status": "added",
+      "additions": 33,
+      "deletions": 0,
+      "changes": 33
+    },
+    {
+      "path": "canonical/GSA_FACE_INCIDENCE_CLIQUE_ADVERSARY_V1_20260928.json",
+      "status": "added",
+      "additions": 113,
+      "deletions": 0,
+      "changes": 113
+    },
+    {
+      "path": "canonical/GSA_NORMAL_TOPOLOGY_ADVERSARY_V1_20260928.json",
+      "status": "added",
+      "additions": 33,
+      "deletions": 0,
+      "changes": 33
+    },
+    {
+      "path": "canonical/GSA_SURFACE_COHERENCE_ADVERSARIES_V1_20260928.json",
+      "status": "added",
+      "additions": 163,
+      "deletions": 0,
+      "changes": 163
+    },
+    {
+      "path": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
+      "status": "modified",
+      "additions": 8,
+      "deletions": 3,
+      "changes": 11
+    },
+    {
+      "path": "canonical/MAINLINE_NORMALIZATION_HANDOFF_20260930.md",
+      "status": "added",
+      "additions": 49,
+      "deletions": 0,
+      "changes": 49
+    },
+    {
+      "path": "canonical/README.md",
+      "status": "modified",
+      "additions": 4,
+      "deletions": 0,
+      "changes": 4
+    },
+    {
+      "path": "canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json",
+      "status": "modified",
+      "additions": 9,
+      "deletions": 7,
+      "changes": 16
+    },
+    {
+      "path": "canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V3_20260929.json",
+      "status": "added",
+      "additions": 48,
+      "deletions": 0,
+      "changes": 48
+    },
+    {
+      "path": "canonical/STAGE35_ORIENTATION_INVERSION_ADVERSARY_V1_20260928.json",
+      "status": "added",
+      "additions": 35,
+      "deletions": 0,
+      "changes": 35
+    },
+    {
+      "path": "canonical/V2_IMPLEMENTATION_READINESS.json",
+      "status": "modified",
+      "additions": 18,
+      "deletions": 13,
+      "changes": 31
+    },
+    {
+      "path": "compiler/realsas_compiler_core/appearance_authority_v2.py",
+      "status": "modified",
+      "additions": 160,
+      "deletions": 4,
+      "changes": 164
+    },
+    {
+      "path": "compiler/realsas_compiler_core/appearance_bake_v2.py",
+      "status": "modified",
+      "additions": 518,
+      "deletions": 8,
+      "changes": 526
+    },
+    {
+      "path": "compiler/realsas_compiler_core/appearance_canonical_completion_v1.py",
+      "status": "added",
+      "additions": 278,
+      "deletions": 0,
+      "changes": 278
+    },
+    {
+      "path": "compiler/realsas_compiler_core/appearance_compile_v2.py",
+      "status": "modified",
+      "additions": 1099,
+      "deletions": 104,
+      "changes": 1203
+    },
+    {
+      "path": "compiler/realsas_compiler_core/appearance_completion_v2.py",
+      "status": "modified",
+      "additions": 406,
+      "deletions": 44,
+      "changes": 450
+    },
+    {
+      "path": "compiler/realsas_compiler_core/appearance_quality_v2.py",
+      "status": "modified",
+      "additions": 537,
+      "deletions": 183,
+      "changes": 720
+    },
+    {
+      "path": "compiler/realsas_compiler_core/appearance_render_v2.py",
+      "status": "modified",
+      "additions": 173,
+      "deletions": 19,
+      "changes": 192
+    },
+    {
+      "path": "compiler/realsas_compiler_core/appearance_variational_completion_v1.py",
+      "status": "added",
+      "additions": 438,
+      "deletions": 0,
+      "changes": 438
+    },
+    {
+      "path": "compiler/realsas_compiler_core/artifact_io_v2.py",
+      "status": "added",
+      "additions": 22,
+      "deletions": 0,
+      "changes": 22
+    },
+    {
+      "path": "compiler/realsas_compiler_core/canonical_cdt_adapter_v1.py",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 0,
+      "changes": 2
+    },
+    {
+      "path": "compiler/realsas_compiler_core/canonical_mesh_candidate_v1.py",
+      "status": "modified",
+      "additions": 572,
+      "deletions": 32,
+      "changes": 604
+    },
+    {
+      "path": "compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py",
+      "status": "added",
+      "additions": 975,
+      "deletions": 0,
+      "changes": 975
+    },
+    {
+      "path": "compiler/realsas_compiler_core/deformation_envelope_derivation_v1.py",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 0,
+      "changes": 2
+    },
+    {
+      "path": "compiler/realsas_compiler_core/geometry_artifact_codec_v2.py",
+      "status": "added",
+      "additions": 146,
+      "deletions": 0,
+      "changes": 146
+    },
+    {
+      "path": "compiler/realsas_compiler_core/geometry_substrate_v2.py",
+      "status": "modified",
+      "additions": 39,
+      "deletions": 6,
+      "changes": 45
+    },
+    {
+      "path": "compiler/realsas_compiler_core/mechanical_repartition_v2.py",
+      "status": "added",
+      "additions": 366,
+      "deletions": 0,
+      "changes": 366
+    },
+    {
+      "path": "compiler/realsas_compiler_core/mesh/deformation_stress_v1.py",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 1,
+      "changes": 3
+    },
+    {
+      "path": "compiler/realsas_compiler_core/mesh/deformation_stress_v2.py",
+      "status": "modified",
+      "additions": 96,
+      "deletions": 14,
+      "changes": 110
+    },
+    {
+      "path": "compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py",
+      "status": "added",
+      "additions": 830,
+      "deletions": 0,
+      "changes": 830
+    },
+    {
+      "path": "compiler/realsas_compiler_core/motion_compile_v2.py",
+      "status": "modified",
+      "additions": 215,
+      "deletions": 21,
+      "changes": 236
+    },
+    {
+      "path": "compiler/realsas_compiler_core/presentation_partition_v2.py",
+      "status": "modified",
+      "additions": 49,
+      "deletions": 12,
+      "changes": 61
+    },
+    {
+      "path": "compiler/realsas_compiler_core/product_authority_v1.py",
+      "status": "modified",
+      "additions": 49,
+      "deletions": 4,
+      "changes": 53
+    },
+    {
+      "path": "compiler/realsas_compiler_core/product_mesh_skin_v1.py",
+      "status": "modified",
+      "additions": 29,
+      "deletions": 3,
+      "changes": 32
+    },
+    {
+      "path": "compiler/realsas_compiler_core/product_state_v2.py",
+      "status": "modified",
+      "additions": 108,
+      "deletions": 19,
+      "changes": 127
+    },
+    {
+      "path": "compiler/realsas_compiler_core/rig.py",
+      "status": "modified",
+      "additions": 126,
+      "deletions": 3,
+      "changes": 129
+    },
+    {
+      "path": "compiler/realsas_compiler_core/runtime_package_v2.py",
+      "status": "modified",
+      "additions": 192,
+      "deletions": 38,
+      "changes": 230
+    },
+    {
+      "path": "compiler/realsas_compiler_core/skin.py",
+      "status": "modified",
+      "additions": 29,
+      "deletions": 0,
+      "changes": 29
+    },
+    {
+      "path": "compiler/realsas_compiler_core/substrate/adequacy_v1.py",
+      "status": "modified",
+      "additions": 162,
+      "deletions": 25,
+      "changes": 187
+    },
+    {
+      "path": "compiler/realsas_compiler_core/substrate/scene_first_signed.py",
+      "status": "modified",
+      "additions": 376,
+      "deletions": 41,
+      "changes": 417
+    },
+    {
+      "path": "compiler/realsas_compiler_core/surface_addressing_v1.py",
+      "status": "modified",
+      "additions": 35,
+      "deletions": 3,
+      "changes": 38
+    },
+    {
+      "path": "compiler/realsas_compiler_core/visibility_v2.py",
+      "status": "modified",
+      "additions": 235,
+      "deletions": 2,
+      "changes": 237
+    },
+    {
+      "path": "compiler/realsas_compiler_core/visual_mesh_arap_v1.py",
+      "status": "added",
+      "additions": 1446,
+      "deletions": 0,
+      "changes": 1446
+    },
+    {
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/adapter_io.py",
+      "status": "modified",
+      "additions": 7,
+      "deletions": 2,
+      "changes": 9
+    },
+    {
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py",
+      "status": "modified",
+      "additions": 2370,
+      "deletions": 146,
+      "changes": 2516
+    },
+    {
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py",
+      "status": "modified",
+      "additions": 80,
+      "deletions": 7,
+      "changes": 87
+    },
+    {
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py",
+      "status": "modified",
+      "additions": 851,
+      "deletions": 35,
+      "changes": 886
+    },
+    {
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py",
+      "status": "modified",
+      "additions": 59,
+      "deletions": 2,
+      "changes": 61
+    },
+    {
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py",
+      "status": "modified",
+      "additions": 304,
+      "deletions": 37,
+      "changes": 341
+    },
+    {
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py",
+      "status": "modified",
+      "additions": 85,
+      "deletions": 4,
+      "changes": 89
+    },
+    {
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/preflight_v2.py",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1,
+      "changes": 2
+    },
+    {
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py",
+      "status": "modified",
+      "additions": 258,
+      "deletions": 15,
+      "changes": 273
+    },
+    {
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py",
+      "status": "modified",
+      "additions": 289,
+      "deletions": 48,
+      "changes": 337
+    },
+    {
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py",
+      "status": "modified",
+      "additions": 470,
+      "deletions": 15,
+      "changes": 485
+    },
+    {
+      "path": "compiler/realsas_compiler_services/orchestrator/mainline.py",
+      "status": "modified",
+      "additions": 417,
+      "deletions": 36,
+      "changes": 453
+    },
+    {
+      "path": "compiler/realsas_compiler_services/orchestrator/status_semantics.py",
+      "status": "added",
+      "additions": 78,
+      "deletions": 0,
+      "changes": 78
+    },
+    {
+      "path": "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp",
+      "status": "modified",
+      "additions": 217,
+      "deletions": 46,
+      "changes": 263
+    },
+    {
+      "path": "tests/compiler/test_caa_abstention_contract_v1.py",
+      "status": "added",
+      "additions": 337,
+      "deletions": 0,
+      "changes": 337
+    },
+    {
+      "path": "tests/compiler/test_caa_adaptive_paging_v2.py",
+      "status": "added",
+      "additions": 374,
+      "deletions": 0,
+      "changes": 374
+    },
+    {
+      "path": "tests/compiler/test_caa_canonical_completion_v1.py",
+      "status": "added",
+      "additions": 154,
+      "deletions": 0,
+      "changes": 154
+    },
+    {
+      "path": "tests/compiler/test_caa_demo_static_mesh_admission_v2.py",
+      "status": "added",
+      "additions": 105,
+      "deletions": 0,
+      "changes": 105
+    },
+    {
+      "path": "tests/compiler/test_caa_v2_subject_free_policy.py",
+      "status": "modified",
+      "additions": 135,
+      "deletions": 8,
+      "changes": 143
+    },
+    {
+      "path": "tests/compiler/test_caa_variational_completion_v1.py",
+      "status": "added",
+      "additions": 233,
+      "deletions": 0,
+      "changes": 233
+    },
+    {
+      "path": "tests/compiler/test_canonical_mesh_candidate_v1.py",
+      "status": "modified",
+      "additions": 160,
+      "deletions": 0,
+      "changes": 160
+    },
+    {
+      "path": "tests/compiler/test_canonical_mesh_quality_repair_v1.py",
+      "status": "added",
+      "additions": 192,
+      "deletions": 0,
+      "changes": 192
+    },
+    {
+      "path": "tests/compiler/test_canonical_puppet_state_v1.py",
+      "status": "modified",
+      "additions": 4,
+      "deletions": 0,
+      "changes": 4
+    },
+    {
+      "path": "tests/compiler/test_compacted_dense_face_provenance_v1.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_deformation_stress_v2_vectorization.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_demo_stage14_fallback_v2.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_demo_stage18_mesh_fallback_v2.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_geometry_substrate_evidence_v2.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_geppetto_demo_surface_scope_v2.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_holeless_partitioned_dense_candidate_v1.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_mechanical_repartition_v2.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_mesh_component_labels_v1.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_motion_compile_v2.py",
+      "status": "modified",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_product_authority_v1.py",
+      "status": "modified",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_product_mesh_skin_v1.py",
+      "status": "modified",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_product_mesh_stage_adapters_v1.py",
+      "status": "modified",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_quaternius_motion_materializer_v1.py",
+      "status": "modified",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_runtime_v2_package_abstention_v1.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_runtime_v2_paged_native_smoke.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_scene_first_signed_surface_bridge_v1.py",
+      "status": "modified",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_skeleton_identity_determinism_v2.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_skin_topology_repartition_directive_v2.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_source_edge_probe_repartition_v1.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_stage14_policy_v3.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_substrate_adequacy_v1.py",
+      "status": "modified",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_v2_static_mesh_source_fidelity_gate.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_visibility_and_caa_v2.py",
+      "status": "modified",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/compiler/test_visual_mesh_arap_v1.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_checkpoint_selection_v4_1.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_dense_source_coverage_v3.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_dense_source_coverage_v3_fixtures.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_dense_source_coverage_v3_gradient_scale.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_dense_source_sampling_v3.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_direct_fstar_fit_v5.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_field_failure_diagnostics_v5.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_full_screen_negative_space_audit_v3.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_indexed_sparse_tetra_decoder_v5.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_learned_tail_localization_v5.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_negative_space_barrier_v3.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_negative_space_upper_bound_v3.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_objective_tail_repair_v5.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_regularity_v4_1.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_regularity_v4_2.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_scene_first_signed_v4_demo.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_shell_escape_diagnostics_v5.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_source_constraint_v4.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_source_constraint_v4_1.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_source_exterior_v4.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_source_hull_lattice_v4_3.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_source_signed_field_v5.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_stage13_mask_morphology_v5.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_train_demo_fit_v4.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_train_demo_fit_v4_1.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_train_dense_fit_v3.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_train_upper_bound_fit_v3.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_v4_4_1_adaptive_hull_constraint.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/iris/test_v4_4_adaptive_hull_constraint.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/repository/test_demo_only_status_semantics.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/repository/test_demo_witness_execution_v2.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/repository/test_historical_demo_import_identity_v1.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/repository/test_mainline_execution_plan_v2.py",
+      "status": "modified",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/repository/test_mainline_implementation_closure_v1.py",
+      "status": "modified",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/repository/test_mainline_v2_dag_scheduler.py",
+      "status": "modified",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tests/repository/test_source_owned_visual_runtime_wiring_v1.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tools/audit_final_mainline_closure.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tools/audit_g3_orientation_inversion_v1.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tools/audit_stage35_orientation_inversion_v1.py",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tools/motion/materialize_quaternius_preset_v1.py",
+      "status": "modified",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    },
+    {
+      "path": "tools/verify_native_runtime_source_seal_v2.py",
+      "status": "modified",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0
+    }
+  ]
+}

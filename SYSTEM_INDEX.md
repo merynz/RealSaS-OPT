@@ -35,3 +35,16 @@ No subject witness is active merely because engineering recovery is green. Knigh
 ## Platform transition
 
 After canonical-main recovery, professional platformization may proceed independently of named-witness readiness: Artifact Registry, Attempt, ProductRevision, semantic invalidation and durable workflow become first-class system infrastructure.
+
+## Machine-readable architecture ownership
+
+The exact current system/domain/module/stage ownership map is implemented by `platform/internal/architecture/registry.go` and can be queried with:
+
+```bash
+cd platform
+go run ./cmd/realsas-architecture
+go run ./cmd/realsas-architecture -stage 35_DYNAMIC_MECHANICAL_MESH_QUALIFIED
+go run ./cmd/realsas-architecture -module platform.product
+```
+
+Every canonical compiler stage must resolve to exactly one owning Engine module. Platform modules separately own durable state and orchestration; native Runtime modules own package/playback/render hot paths. This registry is validated against the canonical 46-stage plan in CI.

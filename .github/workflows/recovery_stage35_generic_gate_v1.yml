@@ -1,0 +1,50 @@
+name: recovery-stage35-generic-gate-v1
+
+on:
+  push:
+    branches:
+      - recovery/canonical-main-20261001
+    paths:
+      - 'compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py'
+      - 'tests/compiler/test_source_edge_probe_repartition_v1.py'
+      - '.github/workflows/recovery_stage35_generic_gate_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compiler-regression:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Seal recovery identity
+        run: |
+          set -euo pipefail
+          echo "RECOVERY_HEAD=$(git rev-parse HEAD)"
+      - name: Install pinned mainline test dependencies
+        run: python -m pip install -r requirements/mainline-ci.txt
+      - name: Full subject-free compiler regression
+        env:
+          PYTHONPATH: .
+          PYTHONHASHSEED: "0"
+        run: python -m pytest -q tests/compiler
+      - name: Verify Stage35 envelope semantics are generic
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path("compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py")
+          t=Path("tests/compiler/test_source_edge_probe_repartition_v1.py")
+          source=p.read_text().lower()
+          test=t.read_text().lower()
+          section=source[source.index("def _stress_angle"):source.index("def run_skin_topology_compatibility_v1")]
+          assert "joint_ranges" in section
+          assert "skin_topology_compatibility_stress_angle_deg" not in section
+          assert "knight" not in source
+          assert "knight" not in test
+          print("RECOVERY_STAGE35_GENERIC_CONTRACT_PASS")
+          PY

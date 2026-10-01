@@ -69,6 +69,11 @@ class CompileSubjectWorkflow:
         )
 
         completed: list[dict[str, Any]] = []
+        allowed_execute_stage_ids = [
+            str(row["stage_id"])
+            for row in plan["stages"]
+            if str(row["action"]) == "EXECUTE"
+        ]
         for stage_id, activity_name in compile_activity_sequence(dict(plan)):
             request = {
                 "command_id": command.command_id,
@@ -79,6 +84,7 @@ class CompileSubjectWorkflow:
                 "resolution": next(
                     row for row in plan["stages"] if str(row["stage_id"]) == stage_id
                 ),
+                "allowed_execute_stage_ids": allowed_execute_stage_ids,
             }
             if activity_name == "bind_reused_stage":
                 result = await workflow.execute_activity(

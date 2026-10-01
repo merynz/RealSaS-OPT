@@ -51,6 +51,7 @@ def test_serializable_product_promotion_is_atomic_and_audited():
         current=session.execute(select(SubjectCurrentRevisionRow).where(SubjectCurrentRevisionRow.subject_id==subject_id)).scalar_one()
         assert current.product_revision_id==revision_id
         assert current.lock_version==1
+        session.rollback()
         with pytest.raises(PromotionRejected,match="PROMOTION_TARGET_ALREADY_CURRENT"):
             promote_product_revision(session,subject_id=subject_id,target_revision_id=revision_id,requested_by="ci",reason="duplicate")
     engine.dispose()

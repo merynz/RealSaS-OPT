@@ -1,5 +1,5 @@
 name: platform-go-contract-v1
-# normalized-worker-closure-20261001-r3
+# normalized-worker-closure-20261001-final
 
 on:
   push:

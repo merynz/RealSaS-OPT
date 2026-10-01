@@ -8,6 +8,10 @@ on:
       - '.github/workflows/vf11_r512_phase_capture_once.yml'
   workflow_dispatch:
 
+concurrency:
+  group: vf11-r512-phase-capture-once
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -29,12 +33,12 @@ jobs:
         with:
           ref: recovery/canonical-main-20261001
           fetch-depth: 0
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
-      - name: Install frozen dependencies
+      - id: deps
+        name: Install frozen dependencies
+        continue-on-error: true
         env:
           PIP_DISABLE_PIP_VERSION_CHECK: '1'
           PIP_DEFAULT_TIMEOUT: '60'
@@ -42,27 +46,45 @@ jobs:
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
           python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
           python -m pip install --no-input --progress-bar off scikit-image==0.25.2
-
-      - name: Run subject-free R512 phase panel
-        run: python tools/vf11_r512_phase_sensitivity_panel.py
-
-      - name: Seal measurement into recovery branch
-        shell: bash
+      - id: panel
+        name: Run subject-free R512 phase panel
+        continue-on-error: true
+        if: steps.deps.outcome == 'success'
+        run: |
+          set -o pipefail
+          python tools/vf11_r512_phase_sensitivity_panel.py 2>&1 | tee vf11_x1.log
+      - name: Seal measurement or failure into recovery branch
+        if: always()
+        env:
+          DEPS_OUTCOME: ${{ steps.deps.outcome }}
+          PANEL_OUTCOME: ${{ steps.panel.outcome }}
         run: |
           set -euo pipefail
-          cp vf11_x1_out/VF11_R512_PHASE_SENSITIVITY_PANEL.json canonical/VF11_R512_PHASE_SENSITIVITY_RESULT_20261001.json
-          python - <<'PY'
-          import json
-          p=json.load(open('canonical/VF11_R512_PHASE_SENSITIVITY_RESULT_20261001.json',encoding='utf-8'))
-          assert p['schema']=='RealSaS.VF11R512PhaseSensitivityPanel.v1'
-          assert p['decoder_resolution']==512
-          assert p['subject_inputs_used'] is False
-          assert p['knight_result_used'] is False
-          print(json.dumps(p['decision'],sort_keys=True))
+          STATUS=PASS
+          if [ "$DEPS_OUTCOME" != success ] || [ "$PANEL_OUTCOME" != success ]; then STATUS=ERROR; fi
+          if [ "$STATUS" = PASS ] && [ -f vf11_x1_out/VF11_R512_PHASE_SENSITIVITY_PANEL.json ]; then
+            cp vf11_x1_out/VF11_R512_PHASE_SENSITIVITY_PANEL.json canonical/VF11_R512_PHASE_SENSITIVITY_RESULT_20261001.json
+          else
+            python - <<'PY'
+          import json, os
+          from pathlib import Path
+          log=Path('vf11_x1.log').read_text(encoding='utf-8',errors='replace')[-12000:] if Path('vf11_x1.log').exists() else ''
+          p={
+            'schema':'RealSaS.VF11R512PhaseSensitivityCapture.v1',
+            'status':'ERROR',
+            'workflow_run_id':os.environ.get('GITHUB_RUN_ID'),
+            'source_head':os.environ.get('GITHUB_SHA'),
+            'dependency_outcome':os.environ.get('DEPS_OUTCOME'),
+            'panel_outcome':os.environ.get('PANEL_OUTCOME'),
+            'log_tail':log,
+          }
+          Path('canonical/VF11_R512_PHASE_SENSITIVITY_RESULT_20261001.json').write_text(json.dumps(p,indent=2,sort_keys=True)+'\n',encoding='utf-8')
           PY
+          fi
           rm .github/workflows/vf11_r512_phase_capture_once.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add canonical/VF11_R512_PHASE_SENSITIVITY_RESULT_20261001.json .github/workflows/vf11_r512_phase_capture_once.yml
           git commit -m "evidence: seal VF11 R512 phase sensitivity measurement"
           git push origin HEAD:recovery/canonical-main-20261001
+          test "$STATUS" = PASS

@@ -80,6 +80,9 @@ func (a Activities) FinalizeCompile(ctx context.Context, payload map[string]any)
 		_, err := a.Pool.Exec(ctx, "UPDATE attempts SET final_state='COMPLETED' WHERE id=$1 AND final_state='OPEN'", attemptID)
 		return result, err
 	}
+	if err := a.requireProductQualifiedClosure(ctx, attemptID); err != nil {
+		return orchestration.CompileWorkflowResult{}, err
+	}
 
 	motionID, err := a.promoteStageOutput(
 		ctx,
@@ -278,6 +281,28 @@ func (a Activities) FinalizeCompile(ctx context.Context, payload map[string]any)
 	value := revisionID.String()
 	result.ProductRevisionID = &value
 	return result, nil
+}
+
+
+func (a Activities) requireProductQualifiedClosure(ctx context.Context, attemptID uuid.UUID) error {
+	var qualified bool
+	if err := a.Pool.QueryRow(ctx, `
+		SELECT EXISTS (
+			SELECT 1
+			FROM attempt_artifacts aa
+			JOIN qualifications q ON q.artifact_id=aa.artifact_id
+			WHERE aa.attempt_id=$1
+			  AND aa.role='stage:46_PRODUCT_CLOSURE_SEAL'
+			  AND q.qualification_type='REUSE_ELIGIBLE'
+			  AND q.result='PASS'
+		)
+	`, attemptID).Scan(&qualified); err != nil {
+		return err
+	}
+	if !qualified {
+		return errors.New("PRODUCT_REVISION_STAGE46_PRODUCT_QUALIFICATION_REQUIRED")
+	}
+	return nil
 }
 
 func (a Activities) promoteStageOutput(

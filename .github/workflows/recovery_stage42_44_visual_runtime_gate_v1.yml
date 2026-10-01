@@ -43,7 +43,9 @@ jobs:
       - name: Build exact native V2 player
         run: |
           set -euo pipefail
-          c++ -std=c++17 -O2 -Wall -Wextra -pedantic             runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp             -lpng -lz -o "$REALSAS_RUNTIME_V2_PLAYER"
+          c++ -std=c++17 -O2 -Wall -Wextra -pedantic \
+            runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp \
+            -lpng -lz -o "$REALSAS_RUNTIME_V2_PLAYER"
           sha256sum "$REALSAS_RUNTIME_V2_PLAYER"
 
       - name: Source-owned visual RSS native smoke
@@ -51,18 +53,35 @@ jobs:
           PYTHONPATH: .
           PYTHONHASHSEED: "0"
         run: |
-          python -m pytest -q             tests/compiler/test_runtime_v2_source_owned_visual_native_smoke.py
+          python -m pytest -q \
+            tests/compiler/test_runtime_v2_source_owned_visual_native_smoke.py
 
       - name: Legacy mechanical V2 native parity smoke
         env:
           PYTHONPATH: .
           PYTHONHASHSEED: "0"
         run: |
-          python -m pytest -q             tests/compiler/test_runtime_v2_native_smoke.py
+          python -m pytest -q \
+            tests/compiler/test_runtime_v2_native_smoke.py
 
       - name: Visual presentation typed regression
         env:
           PYTHONPATH: .
           PYTHONHASHSEED: "0"
         run: |
-          python -m pytest -q             tests/compiler/test_visual_presentation_v1.py
+          python -m pytest -q \
+            tests/compiler/test_visual_presentation_v1.py
+
+      - name: Repository source-owned visual wiring contract
+        env:
+          PYTHONPATH: .
+          PYTHONHASHSEED: "0"
+        run: |
+          python -m pytest -q \
+            tests/repository/test_source_owned_visual_runtime_wiring_v1.py
+
+      - name: Full compiler regression
+        env:
+          PYTHONPATH: .
+          PYTHONHASHSEED: "0"
+        run: python -m pytest -q tests/compiler

@@ -14,7 +14,7 @@
 | S1 Stage14 topology/provenance | **RESTORE_READY_IN_PRINCIPLE** | Exact promotion lineage; later mechanics/full candidate gates green. | Re-run exact Stage14/15 + full compiler regressions on recovery head. |
 | S2 Holeless mesh/skin/mechanics | **RESTORE_READY_IN_PRINCIPLE** | Dedicated mechanics gate PASS; full candidate compiler suite green. | Re-run mechanics + Stage35/native interactions after integration. |
 | S3 Stage20–25 appearance | **RESTORE_READY_IN_PRINCIPLE** | Dedicated appearance gate PASS after presentation authority follow-up. | Re-run appearance + source-lock/holdout/seam gates on recovery head. |
-| S4 visual authority split + Stage37 presentation | **RESTORE_WITH_REPAIR** | Upstream ownership split and binding preservation are source-proven. | Must supply typed visual presentation carrier to Stage42/native; no mechanical fallback. |
+| S4 visual authority split + Stage37 presentation | **RESTORE_WITH_REPAIR** | Upstream source-owned visual substrate and ownership split are source-proven; late Knight research shows final deformation regions depend on Stage35-qualified mechanics. | Reclassify Stage18 visual output as substrate/candidate; Stage37 must qualify final visual presentation mesh/binding, then supply typed carrier to Stage42/native; no mechanical fallback. |
 | S5 living 46-stage closure | **RESTORE_WITH_REPAIR** | Closure audit PASS. | Recompute closure after runtime carrier + native seal repair; historical closure hash cannot be reused blindly. |
 | S6 motion + explicit runtime fail-close | **RESTORE_WITH_REPAIR** | Fail-close semantics are correct and mechanically observed. | Fix VisualMeshSet runtime consumer; reconcile wiring-test blocker token; separately resolve Quaternius distinct-take qualification. |
 | S7 full gate/docs/exact merge governance | **EVIDENCE_ONLY_FOR_REBUILD** | Demonstrates candidate was coherent enough to merge and did merge. | Governance/docs/readiness must be regenerated from the new recovery head, not cherry-picked as authority. |
@@ -55,7 +55,7 @@ Restoring the old head verbatim would deliberately recreate a state we now know 
 
 1. Reconstruct normalized source slices on a disposable recovery ref; do not move `main`.
 2. Add S9 Stage35 envelope-authority fix.
-3. Implement the visual presentation carrier from Stage38 → Stage42 → runtime package → native playback.
+3. Qualify final visual presentation mesh/binding at Stage37 from source substrate + Stage35 mechanics, seal at Stage38, then implement Stage38 → Stage42 → runtime package → native playback carrier.
 4. Update wiring test to assert the real typed-carrier contract, not merely accept a blocker token.
 5. Recompute native append-only source seals from the intended source lineage.
 6. Re-qualify external motion source/takes or scope motion-source policy explicitly.

@@ -12,6 +12,7 @@ appearance generation, donor search, model fitting, or visual-mesh rebuilding.
 """
 
 from dataclasses import asdict, dataclass, field
+import math
 from typing import Any, Mapping
 
 from .hashing import content_sha256
@@ -252,4 +253,136 @@ def source_owned_visual_runtime_projection_from_dict(
         metadata=dict(payload.get("metadata") or {}),
     )
     validate_source_owned_visual_runtime_projection(value)
+    return value
+
+
+SOURCE_OWNED_VISUAL_DYNAMIC_INTEGRITY_SCHEMA = (
+    "RealSaS.SourceOwnedVisualDynamicIntegrityIR.v1"
+)
+
+
+@dataclass(frozen=True)
+class SourceOwnedVisualDynamicIntegrityV1IR:
+    package_binding_hash: str
+    projection_binding_hash: str
+    native_playback_binding_hash: str
+    evaluated_frame_view_count: int
+    rendered_visible_pixel_count: int
+    empty_frame_view_count: int
+    flipped_triangle_count: int
+    edge_gt_4_count: int
+    edge_gt_10_count: int
+    maximum_p95_edge_ratio: float
+    maximum_edge_ratio: float
+    native_reference_mismatch_pixel_count: int
+    direct_source_provenance_mismatch_pixel_count: int
+    qualification_report: Json
+    integrity_hash: str
+    schema_version: str = SOURCE_OWNED_VISUAL_DYNAMIC_INTEGRITY_SCHEMA
+    metadata: Json = field(default_factory=dict)
+
+    def to_dict(self) -> Json:
+        return asdict(self)
+
+
+def source_owned_visual_dynamic_integrity_hash(
+    value: SourceOwnedVisualDynamicIntegrityV1IR,
+) -> str:
+    payload = value.to_dict()
+    payload.pop("integrity_hash", None)
+    return content_sha256(payload)
+
+
+def validate_source_owned_visual_dynamic_integrity(
+    value: SourceOwnedVisualDynamicIntegrityV1IR,
+) -> None:
+    if value.schema_version != SOURCE_OWNED_VISUAL_DYNAMIC_INTEGRITY_SCHEMA:
+        raise QualificationError(
+            "SOURCE_VISUAL_DYNAMIC_INTEGRITY_SCHEMA_DRIFT"
+        )
+    for label, digest in (
+        ("PACKAGE", value.package_binding_hash),
+        ("PROJECTION", value.projection_binding_hash),
+        ("NATIVE", value.native_playback_binding_hash),
+        ("INTEGRITY", value.integrity_hash),
+    ):
+        _require_hash(str(digest), label)
+    if int(value.evaluated_frame_view_count) <= 0:
+        raise QualificationError(
+            "SOURCE_VISUAL_DYNAMIC_INTEGRITY_EVIDENCE_EMPTY"
+        )
+    for label, count in (
+        ("VISIBLE_PIXELS", value.rendered_visible_pixel_count),
+        ("EMPTY_FRAME_VIEW", value.empty_frame_view_count),
+        ("FLIPPED_TRIANGLES", value.flipped_triangle_count),
+        ("EDGE_GT_4", value.edge_gt_4_count),
+        ("EDGE_GT_10", value.edge_gt_10_count),
+        (
+            "NATIVE_REFERENCE_MISMATCH",
+            value.native_reference_mismatch_pixel_count,
+        ),
+        (
+            "DIRECT_SOURCE_PROVENANCE_MISMATCH",
+            value.direct_source_provenance_mismatch_pixel_count,
+        ),
+    ):
+        if int(count) < 0:
+            raise QualificationError(
+                "SOURCE_VISUAL_DYNAMIC_INTEGRITY_COUNT_INVALID:"
+                + str(label)
+            )
+    for label, number in (
+        ("MAX_P95_EDGE_RATIO", value.maximum_p95_edge_ratio),
+        ("MAX_EDGE_RATIO", value.maximum_edge_ratio),
+    ):
+        if not math.isfinite(float(number)) or float(number) < 0.0:
+            raise QualificationError(
+                "SOURCE_VISUAL_DYNAMIC_INTEGRITY_METRIC_INVALID:"
+                + str(label)
+            )
+    if (
+        value.integrity_hash
+        != source_owned_visual_dynamic_integrity_hash(value)
+    ):
+        raise QualificationError(
+            "SOURCE_VISUAL_DYNAMIC_INTEGRITY_HASH_DRIFT"
+        )
+
+
+def source_owned_visual_dynamic_integrity_from_dict(
+    payload: Mapping[str, Any],
+) -> SourceOwnedVisualDynamicIntegrityV1IR:
+    value = SourceOwnedVisualDynamicIntegrityV1IR(
+        package_binding_hash=str(payload["package_binding_hash"]),
+        projection_binding_hash=str(payload["projection_binding_hash"]),
+        native_playback_binding_hash=str(
+            payload["native_playback_binding_hash"]
+        ),
+        evaluated_frame_view_count=int(
+            payload["evaluated_frame_view_count"]
+        ),
+        rendered_visible_pixel_count=int(
+            payload["rendered_visible_pixel_count"]
+        ),
+        empty_frame_view_count=int(payload["empty_frame_view_count"]),
+        flipped_triangle_count=int(payload["flipped_triangle_count"]),
+        edge_gt_4_count=int(payload["edge_gt_4_count"]),
+        edge_gt_10_count=int(payload["edge_gt_10_count"]),
+        maximum_p95_edge_ratio=float(payload["maximum_p95_edge_ratio"]),
+        maximum_edge_ratio=float(payload["maximum_edge_ratio"]),
+        native_reference_mismatch_pixel_count=int(
+            payload["native_reference_mismatch_pixel_count"]
+        ),
+        direct_source_provenance_mismatch_pixel_count=int(
+            payload["direct_source_provenance_mismatch_pixel_count"]
+        ),
+        qualification_report=dict(payload["qualification_report"]),
+        integrity_hash=str(payload["integrity_hash"]),
+        schema_version=str(
+            payload.get("schema_version")
+            or SOURCE_OWNED_VISUAL_DYNAMIC_INTEGRITY_SCHEMA
+        ),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+    validate_source_owned_visual_dynamic_integrity(value)
     return value

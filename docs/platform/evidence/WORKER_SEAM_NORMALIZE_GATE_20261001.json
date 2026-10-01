@@ -1,0 +1,7 @@
+{
+  "go_gate": "success",
+  "schema": "RealSaS.PlatformWorkerNormalizeGate.v1",
+  "source_head": "2c6f1d27f020e550a75cabe869a3b0bdb2fc8c5d",
+  "status": "PASS",
+  "workflow_run_id": "36924387164"
+}

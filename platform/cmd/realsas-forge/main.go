@@ -164,12 +164,12 @@ func bootstrapRuntimeRelease(ctx context.Context, env environment, createdBy, na
 		return err
 	}
 	policySHA, err := semantic.JSONSHA256(map[string]any{
-		"operation":                    "RENDER_COMPILER_RUN",
-		"render_only":                   true,
-		"fit_train_calibration":         false,
-		"product_promotion":             false,
-		"source":                        "SEALED_COMPILER_RUN",
-		"runtime_package_stage":         "43_RSS_MATERIALIZE_COMPACT",
+		"operation":             "RENDER_COMPILER_RUN",
+		"render_only":           true,
+		"fit_train_calibration": false,
+		"product_promotion":     false,
+		"source":                "SEALED_COMPILER_RUN",
+		"runtime_package_stage": "43_RSS_MATERIALIZE_COMPACT",
 	})
 	if err != nil {
 		return err

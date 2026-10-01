@@ -61,10 +61,10 @@ func CompileWorkflow(ctx workflow.Context, input CompileWorkflowInput) (CompileW
 			}
 			var committed StageCommitResult
 			request := map[string]any{
-				"attempt_id":                input.AttemptID,
-				"stage_id":                  stage.StageID,
+				"attempt_id":               input.AttemptID,
+				"stage_id":                 stage.StageID,
 				"expected_semantic_sha256": stage.ExpectedSemanticSHA256,
-				"artifact_id":               *stage.ReusableArtifactID,
+				"artifact_id":              *stage.ReusableArtifactID,
 			}
 			if err := workflow.ExecuteActivity(platformCtx, BindReusedStageActivityName, request).Get(ctx, &committed); err != nil {
 				return CompileWorkflowResult{}, err

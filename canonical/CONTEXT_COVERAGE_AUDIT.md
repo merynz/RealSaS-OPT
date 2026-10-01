@@ -11,8 +11,8 @@
 - Explained by continuity policy: **344**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **159**
-- Safe-default evidence-only branches: **155**
+- Live branches: **160**
+- Safe-default evidence-only branches: **156**
 
 ### Classification counts
 
@@ -35,7 +35,7 @@ _None._
 | `agent/n1d-observable-functional-audit-v2-20260820` | `bf3ef16ae250` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `agent/n1d-observable-functional-quotient-rebuild-20260819` | `161d4d5d9893` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `agent/n1d-v2-source-parity-recovery-20260820` | `32b06472b7ff` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `alfred/repo-memory-map-20261001` | `a8002b20dd27` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `alfred/repo-memory-map-20261001` | `2cda5775ccb5` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `architecture-v3-svg-20260901` | `f7473bc93a71` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `architecture-v4-single-family-e2e-20260902` | `c84658b8b95c` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `architecture/compiler-ir-solver-canonical-20260825` | `7163fac1f333` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -110,7 +110,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `a8002b20dd27` | `CANONICAL` | canonical branch |
+| `main` | `c3b1b09c135b` | `CANONICAL` | canonical branch |
 | `motion/quaternius-direct-fbx-gate-v1-20260919` | `47fb1555455b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -136,6 +136,7 @@ _None._
 | `promote/fit1-evidence-main-20260909` | `9deccb8d051f` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `promote/iris-scene-first-signed-main-v3-20260905` | `dfb087c6a23e` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `promote/iris-scene-first-signed-v3-20260905` | `7cfb7efedbe9` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `recovery/canonical-main-20261001` | `d7ff7cde204f` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `redteam-hardening-20260920` | `a9aeb3fb1eac` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `redteam-sync-20260920` | `1741beaff327` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `repair/g5-mesh-policy-v2-20260919` | `1d1193f26796` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

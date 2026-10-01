@@ -12,8 +12,8 @@
   "explained_high_signal_count": 344,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 159,
-  "safe_default_evidence_only_branch_count": 155,
+  "live_branch_count": 160,
+  "safe_default_evidence_only_branch_count": 156,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -54,7 +54,7 @@
     },
     {
       "name": "alfred/repo-memory-map-20261001",
-      "sha": "a8002b20dd2710e6f8edc9317be640d3bc9330f3",
+      "sha": "2cda5775ccb58389d7a3c046b6db92361dc6ea6d",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -504,7 +504,7 @@
     },
     {
       "name": "main",
-      "sha": "a8002b20dd2710e6f8edc9317be640d3bc9330f3",
+      "sha": "c3b1b09c135bc0d4f0d019f9190b61ac621ac499",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -655,6 +655,12 @@
     {
       "name": "promote/iris-scene-first-signed-v3-20260905",
       "sha": "7cfb7efedbe956c2aa16003e5a7df9bb56c907bb",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "recovery/canonical-main-20261001",
+      "sha": "d7ff7cde204f087b5e0e43d6292b253a409619a2",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `c78f84ba14c69412349b1e7d354046d674851003dc56fb7164178feb7ed6d247`
+> State fingerprint: `ccd6dd3f6115a1834886f0ed1d3c3ed0ef9c07adf1f9aabc24468a57b213db44`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -36,17 +36,17 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `V2_IMPLEMENTATION_ASSEMBLY` | `RECLOSURE_ACTIVE__WITNESS_FORBIDDEN` | `main` | `a8002b20dd27` | Can the reopened subject-free visual-fidelity and governance audit be fully reclosed, including VF-11 R512, VF-23 exact production-policy E2E, and exact-head CI, before asking the user to authorize the first controlled Knight witness? | Knight product pass; unseen generalization; semantic object recognition; human aesthetic optimality; source-view cardinality reduction; witness execution authorization before explicit user approval |
+| `V2_IMPLEMENTATION_ASSEMBLY` | `RECLOSURE_ACTIVE__WITNESS_FORBIDDEN` | `main` | `c3b1b09c135b` | Can the reopened subject-free visual-fidelity and governance audit be fully reclosed, including VF-11 R512, VF-23 exact production-policy E2E, and exact-head CI, before asking the user to authorize the first controlled Knight witness? | Knight product pass; unseen generalization; semantic object recognition; human aesthetic optimality; source-view cardinality reduction; witness execution authorization before explicit user approval |
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 155**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 156**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `a8002b20dd27` | canonical continuation branch |
+| `main` | `c3b1b09c135b` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -66,7 +66,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `agent/n1d-observable-functional-audit-v2-20260820` | `bf3ef16ae250` | observed live; not explicitly registered active |
 | `agent/n1d-observable-functional-quotient-rebuild-20260819` | `161d4d5d9893` | observed live; not explicitly registered active |
 | `agent/n1d-v2-source-parity-recovery-20260820` | `32b06472b7ff` | observed live; not explicitly registered active |
-| `alfred/repo-memory-map-20261001` | `a8002b20dd27` | observed live; not explicitly registered active |
+| `alfred/repo-memory-map-20261001` | `2cda5775ccb5` | observed live; not explicitly registered active |
 | `architecture-v3-svg-20260901` | `f7473bc93a71` | observed live; not explicitly registered active |
 | `architecture-v4-single-family-e2e-20260902` | `c84658b8b95c` | observed live; not explicitly registered active |
 | `architecture/compiler-ir-solver-canonical-20260825` | `7163fac1f333` | observed live; not explicitly registered active |
@@ -164,6 +164,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `promote/fit1-evidence-main-20260909` | `9deccb8d051f` | observed live; not explicitly registered active |
 | `promote/iris-scene-first-signed-main-v3-20260905` | `dfb087c6a23e` | observed live; not explicitly registered active |
 | `promote/iris-scene-first-signed-v3-20260905` | `7cfb7efedbe9` | observed live; not explicitly registered active |
+| `recovery/canonical-main-20261001` | `d7ff7cde204f` | observed live; not explicitly registered active |
 | `redteam-hardening-20260920` | `a9aeb3fb1eac` | observed live; not explicitly registered active |
 | `redteam-sync-20260920` | `1741beaff327` | observed live; not explicitly registered active |
 | `repair/g5-mesh-policy-v2-20260919` | `1d1193f26796` | observed live; not explicitly registered active |

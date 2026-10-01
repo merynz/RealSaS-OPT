@@ -1,94 +1,90 @@
 {
-  "schema": "RealSaS.AgentPromotionSlices.20260930.v1",
+  "schema": "RealSaS.AgentPromotionSlices.20260930.v2",
   "generated_date": "2026-10-01",
   "authority": "NON_AUTHORITATIVE_FORENSIC_DERIVATION",
   "normalized_candidate": "92de05292b05e4ae8aaab3eed53c515b5eef5929",
   "normalized_merge": "f459fe5491e367e9e5da07cfc5b1886f1b138ae4",
+  "rule": "Only verified exact SHAs are listed. Slice membership is for forensic navigation, not automatic cherry-pick authority.",
   "slices": [
     {
       "id": "S1_STAGE14_TOPOLOGY_PROVENANCE",
       "confidence": "B_TO_A_MIXED",
-      "commits": [
+      "exact_commits": [
         "9db06e21070a206a52cc758cb39ec95d26502bdc",
         "48591667aa85da976678932a8b2df28c026647b9",
         "4020d3f556b753036fb6ee8e112631321e984dfc",
         "2a2e0eebacfda1663f483b05dc941f14e3f0499c",
+        "c432033588ebe20db80ec875e508ee96e95c96fb",
         "d0e9d18d9a7e6a5c0de72a66e62e5fab9531c872",
         "f3a7c2869b2d87efb6ac5c38bac39dd105a54835",
         "4fc8dfc6f6c0845ca7a24c208316445c45b32823",
         "ce0ea4ebc1a686eba7d95f382ac09251c192172c"
       ],
-      "purpose": "Topology-preserving dense surface foundations; topology-local Stage14 evaluation/normals; V3 substrate policy; Stage14-15 topology provenance without demo fallback.",
-      "evidence": "Later mechanics gate becomes green; full candidate gate includes corresponding compiler regressions.",
-      "dependency_note": "Feeds mechanical/mesh closure and cannot be judged solely by final runtime state."
+      "purpose": "Topology-preserving dense surface, topology-local Stage14 normals/evaluation, V3 policy, dense-face provenance, Stage14→15 wiring without demo fallback."
     },
     {
       "id": "S2_HOLELESS_MESH_SKIN_MECHANICS",
       "confidence": "A_WITHIN_CANDIDATE_SCOPE",
-      "commits": [
+      "exact_commits": [
         "908fbcc9207221f640a5c6f36d586aca597135d0",
         "1980b30b24120d85cbe2b77e29d28589cf668357",
         "b31e401aef2d3af547eae32e50dcd295fd09c0b5",
+        "4cc31b989119284264e86fbd2b196fea7ff70e0f",
         "9c37d158132b44ffb6b82c227dd9d582a3546a54",
         "4f29cefc0b5f206fe89684a754360b4675ab4694",
         "f900f3d665dabf3ba2f32a439e291ba427afe7ae",
-        "73a8047a7d2b2b6c316d923863d9d582a3546a54"
+        "73a8047a7d2b2b6c316d923863d9cfa42349d3d4",
+        "2da22c05c531631b5f28bf85f5d6aeedfba3219c",
+        "0032e345e2d4bd77a13feb1bc4cee516b1d66e46",
+        "ceb1c31544608967ac0a19c55af1d177892301aa",
+        "d7efa80cceb91b8da62caf387c12ddb2c2d55b97"
       ],
-      "correction_note": "The exact G3B normalization sequence also includes 2da22c0, 0032e34, ceb1c31, d7efa80; inspect exact commit list before any cherry-pick.",
-      "purpose": "Holeless canonical topology, skin-compatibility, mechanical repartition, deformation stress and mechanical gate isolation.",
+      "purpose": "Holeless topology, skin compatibility, mechanical geometry closure and normalization of the G3B proof/test boundary.",
       "gate_evidence": [
-        "generic-main-mechanical-geometry-candidate-gate run 36714635480 PASS at 89b790c",
-        "run 36714886233 PASS at 6deb72a",
-        "full candidate gate compiler regressions 434 PASS / 5 skipped"
+        "36714635480 PASS at 89b790c",
+        "36714886233 PASS at 6deb72a"
       ]
     },
     {
       "id": "S3_STAGE20_25_APPEARANCE",
       "confidence": "A_WITHIN_CANDIDATE_SCOPE",
-      "commits": [
+      "exact_commits": [
         "993822ff578f6942c5e0cef4fbf6e8c7cf6be4f4",
         "b8f26f31568161c6b59b5a5c3b49dd3840c9ce39"
       ],
-      "purpose": "Current Stage20-25 deterministic appearance/CAA closure and its dedicated candidate gate.",
+      "purpose": "Current deterministic Stage20–25 CAA/appearance closure and dedicated gate.",
       "gate_evidence": [
-        "appearance gate initially failed at b8f26f3",
-        "appearance gate run 36714886326 PASS at 6deb72a after presentation/authority follow-up"
+        "36714886326 PASS at 6deb72a after follow-up authority/presentation promotion"
       ]
     },
     {
       "id": "S4_VISUAL_AUTHORITY_SPLIT_AND_PRESENTATION",
       "confidence": "A_FOR_AUTHORITY_SPLIT__D_FOR_RUNTIME_CONSUMER",
-      "commits": [
+      "exact_commits": [
         "3a780607ff3b8f9b42f82601be88f6c798289996",
         "89b790c3468ceff22f0573137fa694ceb5a6f1c6",
         "6deb72a16258b3a19e290e16e922dbeb95595e83"
       ],
-      "purpose": "Forbid mechanical render fallback after visual authority pivot; add source-owned visual runtime wiring gate; promote Stage37 presentation authority and CAA admission contracts.",
-      "gate_evidence": [
-        "mechanics PASS at 6deb72a",
-        "appearance PASS at 6deb72a",
-        "source-owned-visual-runtime-wiring gate 36714886282 FAIL at 6deb72a"
-      ],
-      "known_gap": "Stage42 typed VisualMeshSet consumer absent."
+      "purpose": "Forbid mechanical render fallback, add visual-runtime wiring gate, promote Stage37 presentation authority and CAA admission contracts.",
+      "known_gap": "Stage42 typed VisualMeshSet carrier/consumer absent."
     },
     {
       "id": "S5_LIVING_46_STAGE_CLOSURE",
       "confidence": "B",
-      "commits": [
+      "exact_commits": [
         "270ecffd30651341f3e89ea81b608e827d74fe51",
         "44dbb185ddc81a0300341c926cdaf0e05791c157",
         "4796205cc81323e1096bd6ead30e0ed021219aa8",
         "3bc2aa5bf35da8f6a2be0ade8a1038106af27864",
         "ff6352e83e245ae4b72abdc7f52e1e2dd3561373"
       ],
-      "purpose": "Derive, gate and promote the living 46-stage closure; update runtime/mainline workflows and source-seal chain.",
-      "positive_evidence": "final-mainline-closure-audit runs PASS",
-      "negative_evidence": "Native runtime source gate still detects source-size drift on final normalized main."
+      "purpose": "Derive, audit, promote and reverify the living 46-stage closure.",
+      "limitation": "Native append-only source seal still drifts on actual merged normalized main."
     },
     {
       "id": "S6_MOTION_AND_EXPLICIT_RUNTIME_FAILCLOSE",
       "confidence": "B",
-      "commits": [
+      "exact_commits": [
         "a9960bf47a91c6f4cd77389bd48a9d3035897ac3",
         "ca1eeeccb949ca218550222965450219118c4afc",
         "0658fd44b8890de1f05202219c8ce4bfab70bd54",
@@ -96,16 +92,20 @@
         "ddff8d274f8804f2fddc53d798532e928937188f",
         "7b9a7330d8ba38c2324e0c64f141f95b014bb757"
       ],
-      "purpose": "Fail-closed Quaternius materializer + explicit Stage42 fail-close + forensic visual-consumer audits.",
-      "known_gaps": [
-        "Quaternius external gate later fails MOTION_MATERIALIZER_DISTINCT_TAKES_COLLAPSED.",
-        "Repository wiring test recognizes older fail token(s), not RUNTIME_V2_SOURCE_OWNED_VISUAL_PRESENTATION_BINDING_REQUIRED."
+      "purpose": "Fail-closed Quaternius materializer, explicit Stage42 visual seam blocker, and exact consumer-lineage audits.",
+      "limitations": [
+        "External Quaternius gate later fails DISTINCT_TAKES_COLLAPSED.",
+        "Repository wiring test contract does not recognize the exact presentation-binding fail token."
       ]
     },
     {
-      "id": "S7_FULL_GATE_DOCS_AND_EXACT_MERGE",
-      "confidence": "A_FOR_GOVERNANCE_SCOPE",
-      "commits": [
+      "id": "S7_FULL_GATE_DOCS_EXACT_MERGE",
+      "confidence": "A_FOR_DECLARED_SCOPE",
+      "exact_commits": [
+        "4d4a3402bdb8a2fe888733f38a16de107984538f",
+        "05f0bbb7dc088684ba0eaafdc01c4ca4215ee4f0",
+        "791e9d9b3d1d7175ed1bd2e2c7d0f6a01f4be974",
+        "bbb19a56ef948f137d6786de2902adc38dc578a2",
         "484c01fca415c849c2b7d8c610294d493b7f219b",
         "c3cb27f1d27df83839aa24e0f9c9855a89096676",
         "85574118d9b8b7468c91de6a8c2b8e7e13ea0903",
@@ -114,23 +114,41 @@
         "4d32aef4f527d78e347b3251919e6de454981e81",
         "3bd2bec9898fe86a535cbff413f6dbe624c7ea88",
         "e29d5e820bf3b67e4c8e9359238cff29d1a471bc",
+        "bb3b64bb8307fd784c5c9e4326abf5def4d21238",
+        "9f26e79f85e56c9ca1451ca89a5798bf184be6f7",
         "14b74fd8f4a017256ba491642842b4e5b4517545",
         "39c665dd4f65225bfa0ad3088a9dd2931a9853a5",
         "3b16c672d7d9ac76d3964a6c7132603d578b305e",
+        "2a1c7f83860fa896be74ba6f9d44ce392991a9e3",
+        "82fb485cfd3e01ff2183662011e463686629b1ce",
         "a9a6356c90ac4679d95d891a7677cce5c27db1e7",
         "95ca2f71406a9113cf36921a633e6ea324b5b0a7",
         "92de05292b05e4ae8aaab3eed53c515b5eef5929",
         "f459fe5491e367e9e5da07cfc5b1886f1b138ae4"
       ],
-      "purpose": "Full candidate gate, normalized docs/readiness rebind, exact-head merge governance and actual merge to main.",
-      "gate_scope_warning": "Governance/full gate explicitly preserves witness-forbidden state and omitted the repository wiring test that still rejects the visual seam."
+      "generated_sync_commits_omitted_from_semantic_slice": true,
+      "purpose": "Full candidate gate, normalized handoff/docs, readiness/ledger rebind, exact merge governance, ancestry merge and real promotion to main.",
+      "limitation": "Witness remains forbidden; visual runtime carrier and native source seal remain outside/against full closure."
     },
     {
       "id": "S8_POST_MERGE_KNIGHT_OPS",
-      "confidence": "D_FOR_PRODUCT_PROMOTION",
+      "confidence": "D_FOR_WHOLESALE_PROMOTION",
       "range": "49d14811...d0d2de09",
-      "purpose": "Operational Knight run-root hydration, historical import/rebind, render diagnostics, and a late Stage35 deformation-envelope fix/proof.",
-      "note": "This branch descends from normalized main but is mostly witness/ops work. Mine commit-scoped evidence only; do not wholesale promote."
+      "purpose": "Knight run-root/rebind/render diagnostics. Mostly workflow/generated operations; do not wholesale promote."
+    },
+    {
+      "id": "S9_GENERIC_STAGE35_G3B_ENVELOPE_FIX",
+      "confidence": "A_FOR_COMPILER_REGRESSION__B_FOR_FULL_PRODUCT_INTEGRATION",
+      "exact_commits": [
+        "25e765e8ce345aaf25d1e504712014d4d4d60ffe",
+        "16b8cb72537ae6ed9788a075bff1d0205ba41e73"
+      ],
+      "source_change": "G3B stress angle derives from sealed deformation envelope joint_ranges instead of unrelated 120-degree metadata/default fallback.",
+      "proof": [
+        "Historical Knight-oriented workflow 36765075591: relevant unit set 7 PASS; g3_failures=[]; later Stage35 failure moves to G5_MULTIVIEW_COMPONENT_COVERAGE_FAIL.",
+        "Subject-free forensic workflow 36847287654 on exact 16b8cb72: tests/compiler = 436 PASS, 4 skipped; no Knight coupling; GENERIC_G3B_ENVELOPE_BINDING_CONFIRMED."
+      ],
+      "disposition": "Strong generic correctness candidate. Still re-run full exact current recovery gates before canonical promotion."
     }
   ]
 }

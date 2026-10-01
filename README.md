@@ -1,12 +1,14 @@
 # RealSaS-OPT
 
-## Current canonical status — 2026-09-30
+## Current canonical recovery status — 2026-10-01
 
-The 46-stage V2 mainline has been forensically normalized from the full research lineage. The final pre-documentation full candidate gate passed on run `36724501505` at head `484c01fca415c849c2b7d8c610294d493b7f219b`.
+The recovered 46-stage V2 engine is exact-head engineering-certified. Run `36871088319` passed at implementation head `af0cd4fe4aac2a4025a23bcc2d9bad35d696d3cd` with full compiler regression, current source-owned visual runtime wiring, VF23 production-policy checks, native source seal V16, native CTest, synthetic proof/export, subject-free Stage01–08 orchestration and repo-local Quaternius motion qualification.
 
-The repository is implementation-green, but source-owned visual runtime presentation is **not** claimed complete. The sealed 2026-09-28 product-state wiring audit records a P0 Stage18/38 → Stage42 carrier/schema gap. Normalized current runtime fails closed at that seam rather than silently using the mechanical render mesh.
+The former Stage18/38 → Stage42 source-owned visual carrier gap is closed: Stage18 is visual substrate, Stage37 owns final qualified presentation, and a typed source-owned visual carrier reaches RSS/native Stage44 and Stage45/46 without mechanical render fallback.
 
-Start with `canonical/MAINLINE_NORMALIZATION_HANDOFF_20260930.md`.
+**Witness execution remains forbidden.** VF-11 R512 feature-survival reclosure is still a separate scientific blocker; engineering recovery or canonical-main promotion does not prove Knight performance or unseen generalization.
+
+Start with `canonical/RECOVERY_CANONICAL_HANDOFF_20261001.md`.
 
 Canonical RealSaS research, compiler, proof and runtime workspace. **Proprietary / all rights reserved.** See `LICENSE` and `THIRD_PARTY_NOTICES.md`.
 

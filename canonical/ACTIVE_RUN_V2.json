@@ -6,7 +6,7 @@
   "architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__MECHANICAL_AND_SOURCE_VISUAL_SUBSTRATE_SPLIT_STAGE18__QUALIFIED_VISUAL_PRESENTATION_STAGE37__CAA",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
   "pipeline_plan_sha256": "cb97e4c68f8012f39d95f721284a85f300e5c695d7dd6362dad56a893c1965c0",
-  "status": "REOPENED_VISUAL_FIDELITY_REDTEAM__WITNESS_FORBIDDEN",
+  "status": "RECOVERY_ENGINEERING_CERTIFIED__VF11_R512_OPEN__WITNESS_FORBIDDEN",
   "execution_enabled": false,
   "completed_count": 0,
   "failed_count": 0,
@@ -619,15 +619,20 @@
     }
   ],
   "metadata": {
-    "implementation_readiness": "REOPENED_APPEARANCE_AND_DYNAMIC_VISUAL_FIDELITY_AUDIT__WITNESS_FORBIDDEN",
-    "implementation_head": "14b74fd8f4a017256ba491642842b4e5b4517545",
-    "implementation_closure_sha256": "19230647833a02da7ca5f549104d53a6275ce5b102d0daa11c713d6432c7e42a",
+    "implementation_readiness": "RECOVERY_ENGINEERING_CERTIFIED__VF11_R512_OPEN__WITNESS_FORBIDDEN",
+    "implementation_head": "af0cd4fe4aac2a4025a23bcc2d9bad35d696d3cd",
+    "implementation_closure_sha256": "b9367c5a609a3dc599323a5d2cbd1e66892691049b9a489d098e25386dbf5b6d",
     "stage_redteam": "PASS_46_STAGE_SECOND_PASS_HARDENED_SUBJECT_FREE",
     "witness_execution_requires_explicit_user_approval": true,
     "knight_not_started": true,
     "redteam_authority": "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json",
     "latest_green_mainline_run_id": 36724501505,
     "latest_green_postdocs_seal_run_id": 36726078211,
-    "current_p0": "SOURCE_OWNED_VISUAL_RUNTIME_PRESENTATION_BINDING_REQUIRED"
+    "current_p0": "VF11_R512_SCIENTIFIC_RECLOSURE_REQUIRED",
+    "source_owned_visual_runtime_carrier": "CLOSED_TYPED_STAGE37_TO46",
+    "quaternius_motion_source": "PASS_REPO_PINNED_CC0_SOURCE",
+    "latest_green_recovery_engineering_run_id": 36871088319,
+    "latest_green_recovery_engineering_head": "af0cd4fe4aac2a4025a23bcc2d9bad35d696d3cd",
+    "recovery_engineering_certification_artifact_digest": "sha256:c72d6add824c46a1e43c784c97b11eb3017df7d05c707c84d8fbf76a0437875e"
   }
 }

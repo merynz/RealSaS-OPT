@@ -1,0 +1,32 @@
+{
+  "schema": "RealSaS.RecoveryEngineeringCertification.v1",
+  "date": "2026-10-01",
+  "status": "PASS",
+  "certified_git_sha": "af0cd4fe4aac2a4025a23bcc2d9bad35d696d3cd",
+  "main_ancestry_reconciliation_commit": "7e6307e30313a8da7b27f87cd198cda9dc81c2c9",
+  "workflow_run_id": 36871088319,
+  "workflow_name": "recovery-exact-head-engineering-gate-v1",
+  "artifact_digest": "sha256:c72d6add824c46a1e43c784c97b11eb3017df7d05c707c84d8fbf76a0437875e",
+  "pipeline_plan_sha256": "cb97e4c68f8012f39d95f721284a85f300e5c695d7dd6362dad56a893c1965c0",
+  "implementation_closure_sha256": "b9367c5a609a3dc599323a5d2cbd1e66892691049b9a489d098e25386dbf5b6d",
+  "checks": {
+    "full_compiler_regression": "PASS",
+    "source_owned_visual_runtime_wiring": "PASS",
+    "stage37_presentation_authority": "PASS",
+    "vf23_production_policy_unchanged": "PASS",
+    "native_source_seal_v16": "PASS",
+    "native_ctest": "PASS",
+    "complete_synthetic_proof_export": "PASS",
+    "subject_free_stage01_08": "PASS",
+    "quaternius_motion_materialization": "PASS"
+  },
+  "witness_used": false,
+  "claim_boundary": {
+    "engineering_recovery_certified": true,
+    "canonical_main_promotion_supported": true,
+    "vf11_r512_closed": false,
+    "knight_product_pass_claimed": false,
+    "unseen_generalization_claimed": false,
+    "witness_execution_authorized": false
+  }
+}

@@ -1,40 +1,39 @@
 # RealSaS-OPT Agent Entry Contract
 
-## Mandatory 2026-09-30 handoff
+## Mandatory 2026-10-01 handoff
 
-**First read:** `canonical/MAINLINE_NORMALIZATION_HANDOFF_20260930.md`.
+**First read:** `canonical/RECOVERY_CANONICAL_HANDOFF_20261001.md`.
 
-If the user says only “continue / devam et”, resume from current `main` and the P0 Stage18/38 source-owned visual authority → Stage42 runtime presentation seam described there. Do not restart research archaeology, do not revive historical donor/runtime paths, and do not claim Stage46 product readiness across the fail-closed seam.
+If the user says only “continue / devam et”, resume from current canonical `main`. The old Stage18/38 → Stage42 carrier gap is historical and closed in the recovered lineage; do not reopen it without new evidence. The current scientific/witness blocker is VF-11 R512, while professional platform/backend work may proceed independently after canonical-main recovery.
 
 This repository must be resumable without conversational memory.
 
 ## Mandatory first read
 
-1. `canonical/V2_IMPLEMENTATION_READINESS.json`
-2. `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
-3. `CURRENT_STATE.md`
-4. `canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md`
-5. `canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md`
-6. `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
-7. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
-8. `canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json`
-9. `canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json`
-10. `canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json`
-11. `canonical/AUTHORITY_MAP_V1.json`
-12. `canonical/EXPERIMENT_REGISTRY_V3.json`
-13. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
-14. `canonical/ACTIVE_RUN_V2.json` — implementation governance only
+1. `canonical/RECOVERY_CANONICAL_HANDOFF_20261001.md`
+2. `canonical/RECOVERY_ENGINEERING_CERTIFICATION_V1_20261001.json`
+3. `canonical/V2_IMPLEMENTATION_READINESS.json`
+4. `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
+5. `CURRENT_STATE.md`
+6. `canonical/CONTEXT_STATE_V2.json`
+7. `canonical/AUTHORITY_MAP_V1.json`
+8. `canonical/EXPERIMENT_REGISTRY_V3.json`
+9. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
+10. `canonical/ACTIVE_RUN_V2.json` — implementation governance only
+11. `canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md`
+12. `canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md`
+13. `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
+14. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
 15. Historical provenance only: `canonical/EXPERIMENT_REGISTRY_V2.json`, then `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`
 
 ## Current execution rule
 
-The 46-stage second-pass red-team implementation blockers are closed subject-free. A subject witness still may not execute unless:
-
+Engineering recovery is exact-head certified, but a subject witness still may not execute unless:
 1. `V2_IMPLEMENTATION_READINESS.json` is exactly `READY_FOR_WITNESS_EXECUTION`;
 2. its implementation-closure fingerprint equals exact current `main`;
 3. the user explicitly approves Knight execution.
 
-Never infer approval from a green CI run, a READY seal or historical activation records. `canonical/ACTIVE_RUN_V2.json` is never a subject-run ledger.
+VF-11 R512 remains a scientific/witness-readiness blocker. Never infer witness permission from canonical-main promotion or engineering-green CI.
 
 ## Execution semantics
 
@@ -44,33 +43,27 @@ No subject-specific compiler/runtime branch. No moving aliases in authority inpu
 
 ## Product-quality rule
 
-**Geometry, Mechanics and Appearance are co-equal product authorities; Presentation is a first-class editable addressing authority over them.**
+**Geometry, Mechanics and Appearance are co-equal product authorities; Presentation is first-class editable addressing authority.**
 
-- Geometry: surface, silhouette capacity, topology, `SurfaceAddressing`, rasterizable conditioning.
-- Mechanics: rig, skin, deformation, contacts, motion.
-- Appearance: source-faithful total 2D art, provenance, holdout/seam quality, alpha/sampling, exposure and intrinsic dynamic deformation conditioning.
-- Presentation: role-free slots/attachments/grouping. It may use mechanical/topological/source-appearance evidence but may not invent category labels.
+- Geometry owns surface, silhouette capacity, topology and `SurfaceAddressing`.
+- Mechanics owns rig, skin, deformation, contacts and full-3D motion.
+- Appearance owns source-faithful total 2D art, provenance, holdout/seam quality, alpha/sampling and exposure.
+- Presentation owns Stage37-qualified source-owned visual presentation and role-free grouping; categorical identity is not invented.
 
-A visually incorrect puppet is not accepted because its mesh, rig and skin are mechanically valid.
-
-## RT-37 invariant
-
-`presentation_partition_v2.py` may cut adjacency inside a mechanical component only from frozen observable evidence. `PRESENTATION_PARTITION_POLICY_V1_20260921.json` is subject-free and Knight may not tune it. Missing evidence means continuity, not semantic invention.
-
-## RT-45 invariant
-
-Shipping dynamic appearance gates are **intrinsic textured-surface metrics**, not raw screen-space distortion metrics. Rigid 3D rotation/translation must not fail merely because projection foreshortens a face. Thresholds are frozen by `DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json`.
+A visually incorrect puppet is not accepted because mechanics are valid.
 
 ## Runtime invariant
 
-Visibility = posed canonical geometry + camera depth. Appearance = sealed CAA. Runtime may not do donor search, appearance generation/correction, hidden retriangulation, skin re-solving or character relighting.
+Stage18 visual output is substrate, Stage37 is final presentation owner, and Stage42+ must consume typed source-owned visual presentation. Mechanical render fallback, donor search, appearance generation/correction, hidden retriangulation, skin re-solving and character relighting are forbidden.
+
+## Research / product separation
+
+Research work may create branches and experiments, but normal product state must not be inferred from Git chronology. The next platform program introduces immutable `Artifact`, `Attempt`, `ProductRevision`, qualification and durable workflow state.
 
 ## Scientific claim discipline
 
-A FIT or witness PASS is scoped evidence for the exact subject/apparatus. It is not unseen generalization. Subject-free implementation gates are not Knight performance evidence. Semantic recognition and human aesthetic optimality are not implied by V2 closure.
+A FIT or witness PASS is scoped evidence for the exact subject/apparatus. It is not unseen generalization. Engineering implementation gates are not Knight performance evidence.
 
 ## Repository hygiene
 
-Use one canonical continuation branch: `main`. Preserve historical evidence, but do not allow historical donor/runtime modules into current V2 closure. Current `canonical/EXPERIMENT_REGISTRY_V3.json` and `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl` must be read before historical `canonical/EXPERIMENT_REGISTRY_V2.json` and `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`.
-
-The current execution plan is `canonical/MAINLINE_EXECUTION_PLAN_V2.json`. Product architecture authority is `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`; appearance authority is `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`; repository governance state is `canonical/ACTIVE_RUN_V2.json`.
+Use one canonical continuation branch: `main`. Current `canonical/EXPERIMENT_REGISTRY_V3.json` and `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl` must be read before historical `canonical/EXPERIMENT_REGISTRY_V2.json` and `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`.

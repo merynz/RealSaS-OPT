@@ -1,8 +1,8 @@
 # RealSaS Structural System Index
 
-## 2026-09-30 normalization note
+## 2026-10-01 recovery note
 
-Current continuation details and the exact Stage42 source-owned visual runtime seam are frozen in `canonical/MAINLINE_NORMALIZATION_HANDOFF_20260930.md`. Do not infer a complete visual runtime consumer from Stage18/38 authority hashes.
+Current continuation details are in `canonical/RECOVERY_CANONICAL_HANDOFF_20261001.md`. The former Stage42 source-owned visual runtime seam is closed: Stage18 provides visual substrate, Stage37 owns final qualified presentation, and typed transport continues through Stage42/RSS/native/Stage45/46. VF-11 R512 remains a separate scientific/witness-readiness blocker.
 
 > Navigation only. Current continuation authority is `canonical/V2_IMPLEMENTATION_READINESS.json`.
 
@@ -10,29 +10,28 @@ Current continuation details and the exact Stage42 source-owned visual runtime s
 |---|---|---|
 | Observation | observation/camera authority | exact source evidence; source cardinality is not output-direction authority |
 | Geometry / IRIS | `models/iris/` + geometry adapters | signed field/surface evidence; strict geometry proof; never RGB authority |
-| Geometry / GSA | `compiler/realsas_compiler_core/substrate/` | compact surface/relation producer; relation quality independently audited |
+| Geometry / GSA | `compiler/realsas_compiler_core/substrate/` | topology-local compact surface/relation producer with exact dense-face provenance |
 | Canonical mesh domain | product mesh + `surface_addressing_v1.py` | common address domain for geometry, mechanics and appearance |
-| Appearance / CAA | `appearance_authority_v2.py`, `appearance_compile_v2.py`, `appearance_bake_v2.py`, `appearance_quality_v2.py` | total source-preserving art; source wins; holdout/seam/sampling/exposure proof |
-| Presentation partition | `presentation_partition_v2.py` + `PRESENTATION_PARTITION_POLICY_V1_20260921.json` | role-free editable grouping from observable evidence; categorical identity forbidden |
+| Appearance / CAA | `appearance_authority_v2.py`, compile/bake/quality modules | total source-preserving art; source wins; holdout/seam/sampling/exposure proof |
+| Presentation | `visual_presentation_v1.py` + Stage37 product-state adapter | final qualified source-owned presentation; role-free editable grouping |
 | Mechanics / Rig | `models/geppetto/` | proposal only; Compiler owns qualified skeleton |
 | Mechanics / Skin | `models/arachne/` | proposal only; Compiler owns qualified skin |
 | Dynamic mechanics | mesh conditioning/deformation proof | stress-test frozen canonical carrier; repair mints new lineage |
-| Dynamic appearance | `dynamic_appearance_conditioning_v2.py` + `DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json` | rigid-motion-invariant intrinsic UV/surface stretch-shear gates; screen projection diagnostic only |
-| Visibility | V2 reference/native renderer | posed canonical XYZ + camera depth; appearance cannot choose front surface |
-| Motion | full-3D motion core | operates sealed puppet; appearance exposure is measured downstream |
-| Runtime | `runtime_authority_v2.py` + `runtime_package_v2.py` + native V2 CAA player | deterministic consumer; no donor search, generation, PBR or relighting |
+| Motion | `motion_compile_v2.py` + dynamic proof | full-3D rotations and local translations; exact source semantics are retained |
+| Visibility | V2 reference/native renderer | posed canonical geometry + camera depth |
+| Runtime | `runtime_authority_v2.py` + `runtime_visual_authority_v1.py` + `runtime_package_v2.py` + native player | typed source-owned visual consumer; no mechanical render fallback or generative correction |
 | Dynamic Visual Integrity | Stage45/native proof | native parity + provenance + exposure + intrinsic appearance conditioning |
-| Orchestration | `orchestrator/mainline.py` | dependency DAG; ordinal is human display only |
+| Orchestration | `orchestrator/mainline.py` | 46-stage dependency DAG; ordinal is display only |
 | Closure | Stage46 | Geometry + Mechanics + Appearance + Presentation + native dynamic integrity |
 
 ## Historical code
 
-V1 modules and historical Mage/FIT artifacts remain scientific provenance. They are not current continuation authority and current V2 adapter closure explicitly forbids donor-era presentation/runtime modules.
+V1 modules, Mage/FIT artifacts and the 2026-09-30 Stage42 fail-close handoff remain provenance. They are not current continuation authority.
 
 ## Witness
 
-No subject witness is active merely because implementation tests are green. Knight requires an exact current `READY_FOR_WITNESS_EXECUTION` seal **and explicit user approval**.
+No subject witness is active merely because engineering recovery is green. Knight requires exact `READY_FOR_WITNESS_EXECUTION`, VF-11 R512 reclosure and explicit user approval.
 
-## Scope boundary
+## Platform transition
 
-V2 implementation closure is not a claim of unseen generalization, semantic object recognition or universal perceptual optimality. The first controlled eight-view witness isolates product architecture from future View Contract Resolver/generalization work.
+After canonical-main recovery, professional platformization may proceed independently of named-witness readiness: Artifact Registry, Attempt, ProductRevision, semantic invalidation and durable workflow become first-class system infrastructure.

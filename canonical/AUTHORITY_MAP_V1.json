@@ -1,5 +1,5 @@
 {
-  "schema_version": 10,
+  "schema_version": 11,
   "repository": "merynz/RealSaS-OPT",
   "continuation_authority": "CURRENT_STATE.md",
   "context_state": "canonical/CONTEXT_STATE_V2.json",
@@ -17,6 +17,8 @@
   "generated_rehydration_packet": "canonical/REHYDRATION_PACKET.md",
   "required_files": [
     "CURRENT_STATE.md",
+    "canonical/RECOVERY_ENGINEERING_CERTIFICATION_V1_20261001.json",
+    "canonical/RECOVERY_CANONICAL_HANDOFF_20261001.md",
     "AGENTS.md",
     "SYSTEM_INDEX.md",
     "canonical/CONTEXT_STATE_V2.json",
@@ -36,6 +38,8 @@
     "canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json"
   ],
   "rehydration_order": [
+    "canonical/RECOVERY_CANONICAL_HANDOFF_20261001.md",
+    "canonical/RECOVERY_ENGINEERING_CERTIFICATION_V1_20261001.json",
     "canonical/V2_IMPLEMENTATION_READINESS.json",
     "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
     "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
@@ -74,8 +78,8 @@
     {
       "id": "V2_IMPLEMENTATION_ASSEMBLY",
       "branch": "main",
-      "status": "RECLOSURE_ACTIVE__WITNESS_FORBIDDEN",
-      "question": "Can the reopened subject-free visual-fidelity and governance audit be fully reclosed, including VF-11 R512, VF-23 exact production-policy E2E, and exact-head CI, before asking the user to authorize the first controlled Knight witness?",
+      "status": "RECOVERY_ENGINEERING_CERTIFIED__VF11_R512_OPEN__WITNESS_FORBIDDEN",
+      "question": "Can VF-11 R512 feature survival be reclosed subject-free before the first controlled Knight witness while canonical engine/platform work continues?",
       "does_not_prove": [
         "Knight product pass",
         "unseen generalization",
@@ -133,12 +137,12 @@
   "presentation_partition_policy": "canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json",
   "dynamic_appearance_calibration": "canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json",
   "latest_ready_evidence": {
-    "implementation_head": "4419509ee0f62a7e5ca088b87feb682b1a664105",
-    "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
-    "mainline_ci_run_id": 35539075794,
-    "orchestration_dry_run_id": 35539075769,
+    "implementation_head": "af0cd4fe4aac2a4025a23bcc2d9bad35d696d3cd",
+    "implementation_closure_sha256": "b9367c5a609a3dc599323a5d2cbd1e66892691049b9a489d098e25386dbf5b6d",
+    "engineering_certification_run_id": 36871088319,
+    "pipeline_plan_sha256": "cb97e4c68f8012f39d95f721284a85f300e5c695d7dd6362dad56a893c1965c0",
     "witness_used": false,
-    "evidence_class": "HISTORICAL_PRE_REOPEN_GREEN__NOT_CURRENT_READINESS",
+    "evidence_class": "CURRENT_ENGINEERING_RECOVERY_CERTIFIED__VF11_R512_OPEN__NOT_WITNESS_READY",
     "current_readiness_authority": "canonical/V2_IMPLEMENTATION_READINESS.json"
   }
 }

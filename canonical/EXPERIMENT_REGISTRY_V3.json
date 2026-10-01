@@ -1,28 +1,28 @@
 {
   "schema": "RealSaS.ExperimentRegistry.v3",
-  "date": "2026-09-21",
+  "date": "2026-10-01",
   "active_execution_branch": "main",
   "experiments": [
     {
       "id": "V2_IMPLEMENTATION_ASSEMBLY",
-      "status": "REOPENED__APPEARANCE_FIDELITY_RECLOSURE__WITNESS_FORBIDDEN",
+      "status": "RECOVERY_ENGINEERING_CERTIFIED__VF11_R512_OPEN__WITNESS_FORBIDDEN",
       "branch": "main",
       "scope": "Subject-free completion and red-team hardening of the 46-stage V2 DAG before the first controlled Knight witness.",
-      "progress": "POST_SEAL_APPEARANCE_REAUDIT",
+      "progress": "ENGINEERING_RECOVERY_CERTIFIED__CANONICAL_MAIN_PROMOTION_READY",
       "readiness": "canonical/V2_IMPLEMENTATION_READINESS.json",
-      "required_next_proof": "APPEARANCE_FIDELITY_RECLOSURE_BEFORE_USER_REVIEW",
+      "required_next_proof": "VF11_R512_FEATURE_SURVIVAL_RECLOSURE_BEFORE_WITNESS_READINESS",
       "product_pass_claimed": false,
       "knight_witness_claimed": false,
       "unseen_claimed": false,
       "stage_redteam": "canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md",
       "latest_green": {
-        "implementation_head": "4419509ee0f62a7e5ca088b87feb682b1a664105",
-        "mainline_ci_run_id": 35539075794,
-        "model_source_gate_run_id": 35539075776,
-        "orchestration_dry_run_id": 35539075769,
-        "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
-        "orchestration_artifact_zip_sha256": "e5d994baccae4baee42edb9b00381504f972e619d97521694f10efdb0398c1f1",
-        "witness_used": false
+        "implementation_head": "af0cd4fe4aac2a4025a23bcc2d9bad35d696d3cd",
+        "engineering_certification_run_id": 36871088319,
+        "pipeline_plan_sha256": "cb97e4c68f8012f39d95f721284a85f300e5c695d7dd6362dad56a893c1965c0",
+        "implementation_closure_sha256": "b9367c5a609a3dc599323a5d2cbd1e66892691049b9a489d098e25386dbf5b6d",
+        "certification_artifact_digest": "sha256:c72d6add824c46a1e43c784c97b11eb3017df7d05c707c84d8fbf76a0437875e",
+        "witness_used": false,
+        "scope": "EXACT_HEAD_ENGINEERING_RECOVERY__NOT_VF11_OR_WITNESS"
       },
       "redteam_resolution": [
         "RT-37:CLOSED_WITH_SCOPE",
@@ -32,7 +32,7 @@
     },
     {
       "id": "SUBJECT2_KNIGHT_FULL_CLOSURE",
-      "status": "BLOCKED__APPEARANCE_FIDELITY_RECLOSURE_REQUIRED",
+      "status": "BLOCKED__VF11_R512_AND_EXPLICIT_USER_APPROVAL_REQUIRED",
       "branch": "main",
       "scope": "First controlled V2 product witness; may activate only after explicit user approval.",
       "current_execution_authority": false,

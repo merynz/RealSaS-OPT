@@ -188,6 +188,36 @@ def extract_clip(*,armature,action,source_path,source_sha,license_sha,spec,C):
     # at a time, so disable NLA mixing explicitly before sampling.
     armature.animation_data.use_nla=False
     armature.animation_data.action=action
+
+    # Blender 4.4+ Actions are slotted. Assigning only animation_data.action
+    # may leave the previous/first slot active, which can make distinct FBX
+    # takes evaluate through the same channel bag. Resolve the exact armature
+    # slot explicitly and fail closed if the imported action is ambiguous.
+    suitable=list(armature.animation_data.action_suitable_slots)
+    by_user=[
+        slot for slot in suitable
+        if armature in tuple(slot.users())
+    ]
+    by_name=[
+        slot for slot in suitable
+        if str(slot.name_display)==str(armature.name)
+    ]
+    if len(by_user)==1:
+        action_slot=by_user[0]
+    elif len(by_name)==1:
+        action_slot=by_name[0]
+    elif len(suitable)==1:
+        action_slot=suitable[0]
+    else:
+        detail=",".join(
+            f"{slot.identifier}:{slot.name_display}:{slot.target_id_type}"
+            for slot in suitable
+        )
+        raise RuntimeError(
+            "MOTION_EXTRACTOR_ARMATURE_SLOT_NOT_UNIQUE:"
+            +action.name+":armature="+armature.name+":slots="+detail
+        )
+    armature.animation_data.action_slot=action_slot
     start,end=(float(action.frame_range[0]),float(action.frame_range[1]))
     scene=bpy.context.scene
     fps=float(scene.render.fps)/float(scene.render.fps_base or 1.0)
@@ -203,6 +233,7 @@ def extract_clip(*,armature,action,source_path,source_sha,license_sha,spec,C):
 
     for frame in sample_frames:
         scene.frame_set(frame)
+        bpy.context.view_layer.update()
         pose_global={}
         for bone in bones:
             pb=armature.pose.bones.get(bone.name)
@@ -284,6 +315,9 @@ def extract_clip(*,armature,action,source_path,source_sha,license_sha,spec,C):
             "source_fbx_sha256":source_sha,
             "license_evidence_sha256":license_sha,
             "source_take":action.name,
+            "source_action_slot_identifier":str(action_slot.identifier),
+            "source_action_slot_name":str(action_slot.name_display),
+            "source_action_slot_target_id_type":str(action_slot.target_id_type),
             "source_fps":fps,
             "sample_frame_first":sample_frames[0],
             "sample_frame_last":sample_frames[-1],
@@ -361,6 +395,8 @@ def main():
             "clip_id":payload["clip_id"],
             "clip_kind":payload["clip_kind"],
             "source_take":action.name,
+            "source_action_slot_identifier":str(payload["metadata"]["source_action_slot_identifier"]),
+            "source_action_slot_name":str(payload["metadata"]["source_action_slot_name"]),
             "path":str(target),
             "sha256":sha256(target),
             "payload_sha256":__import__("compiler.realsas_compiler_core.hashing",fromlist=["content_sha256"]).content_sha256(payload),

@@ -525,6 +525,315 @@ int parse_int_exact(const std::string& raw,const std::string& label) {
     return value;
 }
 
+
+struct VisualMesh2D {
+    std::uint32_t source_width{}, source_height{}, vertex_count{}, face_count{};
+    std::vector<Vec2> uv;
+    std::vector<std::array<std::uint32_t,3>> faces;
+};
+
+VisualMesh2D parse_visual_mesh_2d(const std::vector<std::uint8_t>& data) {
+    if (data.size() < 8 || std::memcmp(data.data(), "RSVM1\0\0\0", 8) != 0)
+        throw std::runtime_error("VISUAL_MESH_MAGIC_INVALID");
+    std::size_t off=8;
+    VisualMesh2D mesh;
+    mesh.source_width=read_scalar<std::uint32_t>(data,off);
+    mesh.source_height=read_scalar<std::uint32_t>(data,off);
+    mesh.vertex_count=read_scalar<std::uint32_t>(data,off);
+    mesh.face_count=read_scalar<std::uint32_t>(data,off);
+    if(mesh.source_width<1||mesh.source_height<1||mesh.vertex_count<3||mesh.face_count<1)
+        throw std::runtime_error("VISUAL_MESH_HEADER_INVALID");
+    mesh.uv.resize(mesh.vertex_count);
+    for(auto& p:mesh.uv) {
+        p.x=read_scalar<double>(data,off);
+        p.y=read_scalar<double>(data,off);
+        if(!std::isfinite(p.x)||!std::isfinite(p.y))
+            throw std::runtime_error("VISUAL_MESH_UV_NONFINITE");
+    }
+    mesh.faces.resize(mesh.face_count);
+    for(auto& face:mesh.faces) {
+        for(auto& index:face) {
+            index=read_scalar<std::uint32_t>(data,off);
+            if(index>=mesh.vertex_count)
+                throw std::runtime_error("VISUAL_MESH_FACE_INDEX_INVALID");
+        }
+    }
+    if(off!=data.size()) throw std::runtime_error("VISUAL_MESH_BYTES_TRAILING");
+    return mesh;
+}
+
+std::vector<Vec2> parse_visual_positions_2d(
+    const std::vector<std::uint8_t>& data,
+    std::uint32_t expected_vertices,
+    int frame_index
+) {
+    if(data.size()<8||std::memcmp(data.data(),"RSVP1\0\0\0",8)!=0)
+        throw std::runtime_error("VISUAL_POSITIONS_MAGIC_INVALID");
+    std::size_t off=8;
+    const auto frame_count=read_scalar<std::uint32_t>(data,off);
+    const auto vertex_count=read_scalar<std::uint32_t>(data,off);
+    if(vertex_count!=expected_vertices||frame_index<0||
+       static_cast<std::uint32_t>(frame_index)>=frame_count)
+        throw std::runtime_error("VISUAL_POSITIONS_HEADER_INVALID");
+    const auto frame_stride=
+        static_cast<std::size_t>(vertex_count)*2u*sizeof(double);
+    const auto target=off+static_cast<std::size_t>(frame_index)*frame_stride;
+    if(target+frame_stride>data.size())
+        throw std::runtime_error("VISUAL_POSITIONS_TRUNCATED");
+    off=target;
+    std::vector<Vec2> out(vertex_count);
+    for(auto& p:out) {
+        p.x=read_scalar<double>(data,off);
+        p.y=read_scalar<double>(data,off);
+        if(!std::isfinite(p.x)||!std::isfinite(p.y))
+            throw std::runtime_error("VISUAL_POSITION_NONFINITE");
+    }
+    return out;
+}
+
+struct StraightRGBA { double r{},g{},b{},a{}; };
+
+StraightRGBA visual_texel(
+    const std::vector<std::uint8_t>& rgba,
+    std::uint32_t width,
+    std::uint32_t height,
+    int x,
+    int y
+) {
+    x=std::max(0,std::min(x,static_cast<int>(width)-1));
+    y=std::max(0,std::min(y,static_cast<int>(height)-1));
+    const auto idx=(static_cast<std::size_t>(y)*width+static_cast<std::size_t>(x))*4u;
+    return {
+        static_cast<double>(rgba[idx])/255.0,
+        static_cast<double>(rgba[idx+1])/255.0,
+        static_cast<double>(rgba[idx+2])/255.0,
+        static_cast<double>(rgba[idx+3])/255.0
+    };
+}
+
+StraightRGBA visual_sample_bilinear(
+    const std::vector<std::uint8_t>& rgba,
+    std::uint32_t width,
+    std::uint32_t height,
+    double u,
+    double v
+) {
+    u=std::clamp(u,0.0,1.0);
+    v=std::clamp(v,0.0,1.0);
+    const double x=u*static_cast<double>(width-1);
+    const double y=v*static_cast<double>(height-1);
+    const int x0=static_cast<int>(std::floor(x));
+    const int y0=static_cast<int>(std::floor(y));
+    const int x1=std::min(x0+1,static_cast<int>(width)-1);
+    const int y1=std::min(y0+1,static_cast<int>(height)-1);
+    const double tx=x-x0,ty=y-y0;
+    const auto p00=visual_texel(rgba,width,height,x0,y0);
+    const auto p10=visual_texel(rgba,width,height,x1,y0);
+    const auto p01=visual_texel(rgba,width,height,x0,y1);
+    const auto p11=visual_texel(rgba,width,height,x1,y1);
+    auto mix1=[](double a,double b,double t){return a*(1.0-t)+b*t;};
+    StraightRGBA out;
+    out.r=mix1(mix1(p00.r,p10.r,tx),mix1(p01.r,p11.r,tx),ty);
+    out.g=mix1(mix1(p00.g,p10.g,tx),mix1(p01.g,p11.g,tx),ty);
+    out.b=mix1(mix1(p00.b,p10.b,tx),mix1(p01.b,p11.b,tx),ty);
+    out.a=mix1(mix1(p00.a,p10.a,tx),mix1(p01.a,p11.a,tx),ty);
+    return out;
+}
+
+double visual_orient(const Vec2& a,const Vec2& b,double x,double y) {
+    return (b.x-a.x)*(y-a.y)-(b.y-a.y)*(x-a.x);
+}
+
+bool visual_top_left(const Vec2& a,const Vec2& b) {
+    const double dy=b.y-a.y,dx=b.x-a.x;
+    return dy<0.0||(std::abs(dy)<=1e-12&&dx>0.0);
+}
+
+int render_source_owned_visual(
+    const Entries& entries,
+    const std::unordered_map<std::string,std::string>& manifest,
+    const std::string& clip_id,
+    const std::string& view_id,
+    int frame_index,
+    const std::string& rgba_path,
+    const std::string& prov_path,
+    const std::string& source_view_path,
+    const std::string& owner_path
+) {
+    if(manifest.at("presentation_geometry_mode")!="SOURCE_OWNED_VISUAL_PRESENTATION_V1")
+        throw std::runtime_error("VISUAL_PRESENTATION_MODE_INVALID");
+    if(manifest.at("mechanical_mesh_render_authority")!="0")
+        throw std::runtime_error("VISUAL_MECHANICAL_RENDER_AUTHORITY_FORBIDDEN");
+    if(manifest.at("runtime_visual_mesh_rebuild")!="0"||
+       manifest.at("runtime_binding_solve")!="0"||
+       manifest.at("runtime_generation")!="0"||
+       manifest.at("donor_search_at_runtime")!="0")
+        throw std::runtime_error("VISUAL_RUNTIME_REBUILD_OR_GENERATION_FORBIDDEN");
+    if(manifest.at("texture_sampling_contract")!="SOURCE_RGBA8_BILINEAR_STRAIGHT_TO_PM_V1")
+        throw std::runtime_error("VISUAL_TEXTURE_SAMPLING_CONTRACT_INVALID");
+    if(manifest.at("mip_generation_authorized")!="0")
+        throw std::runtime_error("MIP_GENERATION_MUST_BE_FORBIDDEN");
+    if(view_id.size()!=2||view_id[0]!='V')
+        throw std::runtime_error("VIEW_ID_INVALID");
+    const int view=parse_int_exact(view_id.substr(1),"VIEW");
+    if(view<0||view>=8) throw std::runtime_error("VIEW_INDEX_INVALID");
+    if(manifest.at("view."+std::to_string(view)+".id")!=view_id)
+        throw std::runtime_error("VISUAL_VIEW_ID_DRIFT");
+
+    const int clip_count=std::stoi(manifest.at("clip_count"));
+    int clip_index=-1;
+    for(int i=0;i<clip_count;++i) {
+        if(manifest.at("clip."+std::to_string(i)+".id")==clip_id) {
+            clip_index=i; break;
+        }
+    }
+    if(clip_index<0) throw std::runtime_error("CLIP_NOT_FOUND");
+    const auto frame_count=std::stoi(
+        manifest.at("clip."+std::to_string(clip_index)+".frame_count")
+    );
+    if(frame_index<0||frame_index>=frame_count)
+        throw std::runtime_error("FRAME_INDEX_INVALID");
+
+    const auto mesh_entry=manifest.at(
+        "view."+std::to_string(view)+".mesh_entry"
+    );
+    const auto texture_entry=manifest.at(
+        "view."+std::to_string(view)+".texture_entry"
+    );
+    const auto positions_entry=manifest.at(
+        "clip."+std::to_string(clip_index)+".view."+
+        std::to_string(view)+".positions_entry"
+    );
+    const auto mesh=parse_visual_mesh_2d(entries.at(mesh_entry));
+    auto positions=parse_visual_positions_2d(
+        entries.at(positions_entry),mesh.vertex_count,frame_index
+    );
+    const auto texture=decode_png_rgba(
+        entries.at(texture_entry),mesh.source_width,mesh.source_height
+    );
+    const int resolution=std::stoi(
+        manifest.at("view."+std::to_string(view)+".resolution")
+    );
+    if(resolution<=0) throw std::runtime_error("VISUAL_OUTPUT_RESOLUTION_INVALID");
+
+    const double sx=static_cast<double>(resolution)/
+        static_cast<double>(mesh.source_width);
+    const double sy=static_cast<double>(resolution)/
+        static_cast<double>(mesh.source_height);
+    for(auto& p:positions) {
+        p.x=(p.x+0.5)*sx;
+        p.y=(p.y+0.5)*sy;
+    }
+
+    struct Accum { double r{},g{},b{},a{}; };
+    const auto pixels=static_cast<std::size_t>(resolution)*resolution;
+    std::vector<Accum> accum(pixels);
+    std::vector<std::int32_t> owner(pixels,-1);
+    std::uint64_t covered_samples=0;
+
+    for(std::size_t fi=0;fi<mesh.faces.size();++fi) {
+        const auto face=mesh.faces[fi];
+        const auto& a=positions[face[0]];
+        const auto& b=positions[face[1]];
+        const auto& c=positions[face[2]];
+        const double area=visual_orient(a,b,c.x,c.y);
+        if(std::abs(area)<=1e-12) continue;
+        const double sign=area>0.0?1.0:-1.0;
+        const bool positive=area>0.0;
+        const int minx=std::max(
+            0,static_cast<int>(std::floor(std::min({a.x,b.x,c.x})-0.5))
+        );
+        const int maxx=std::min(
+            resolution-1,
+            static_cast<int>(std::ceil(std::max({a.x,b.x,c.x})-0.5))
+        );
+        const int miny=std::max(
+            0,static_cast<int>(std::floor(std::min({a.y,b.y,c.y})-0.5))
+        );
+        const int maxy=std::min(
+            resolution-1,
+            static_cast<int>(std::ceil(std::max({a.y,b.y,c.y})-0.5))
+        );
+        if(minx>maxx||miny>maxy) continue;
+        const bool tl0=positive?visual_top_left(b,c):visual_top_left(c,b);
+        const bool tl1=positive?visual_top_left(c,a):visual_top_left(a,c);
+        const bool tl2=positive?visual_top_left(a,b):visual_top_left(b,a);
+        for(int y=miny;y<=maxy;++y) for(int x=minx;x<=maxx;++x) {
+            const double px=x+0.5,py=y+0.5;
+            const double q0=sign*visual_orient(b,c,px,py);
+            const double q1=sign*visual_orient(c,a,px,py);
+            const double q2=sign*visual_orient(a,b,px,py);
+            auto accept=[](double q,bool tl){
+                return q>1e-12||(std::abs(q)<=1e-12&&tl);
+            };
+            if(!accept(q0,tl0)||!accept(q1,tl1)||!accept(q2,tl2)) continue;
+            const double w0=visual_orient(b,c,px,py)/area;
+            const double w1=visual_orient(c,a,px,py)/area;
+            const double w2=1.0-w0-w1;
+            const auto& ua=mesh.uv[face[0]];
+            const auto& ub=mesh.uv[face[1]];
+            const auto& uc=mesh.uv[face[2]];
+            const double u=w0*ua.x+w1*ub.x+w2*uc.x;
+            const double v=w0*ua.y+w1*ub.y+w2*uc.y;
+            const auto sample=visual_sample_bilinear(
+                texture,mesh.source_width,mesh.source_height,u,v
+            );
+            const double alpha=std::clamp(sample.a,0.0,1.0);
+            auto& dst=accum[
+                static_cast<std::size_t>(y)*resolution+
+                static_cast<std::size_t>(x)
+            ];
+            const double transmission=1.0-alpha;
+            dst.r=sample.r*alpha+dst.r*transmission;
+            dst.g=sample.g*alpha+dst.g*transmission;
+            dst.b=sample.b*alpha+dst.b*transmission;
+            dst.a=alpha+dst.a*transmission;
+            if(alpha>1e-12) owner[
+                static_cast<std::size_t>(y)*resolution+
+                static_cast<std::size_t>(x)
+            ]=static_cast<std::int32_t>(fi);
+            ++covered_samples;
+        }
+    }
+
+    std::vector<std::uint8_t> rgba(pixels*4u,0);
+    std::vector<std::uint8_t> provenance(pixels,255);
+    std::vector<std::int16_t> source_view(
+        pixels,std::numeric_limits<std::int16_t>::min()
+    );
+    for(std::size_t i=0;i<pixels;++i) {
+        const auto& p=accum[i];
+        const double alpha=std::clamp(p.a,0.0,1.0);
+        const double inv=alpha>1e-12?1.0/alpha:0.0;
+        rgba[i*4u]=q8(p.r*inv);
+        rgba[i*4u+1]=q8(p.g*inv);
+        rgba[i*4u+2]=q8(p.b*inv);
+        rgba[i*4u+3]=q8(alpha);
+        if(alpha>1e-12) {
+            provenance[i]=0;
+            source_view[i]=static_cast<std::int16_t>(view);
+        }
+    }
+    write_file(rgba_path,rgba.data(),rgba.size());
+    if(!prov_path.empty())
+        write_file(prov_path,provenance.data(),provenance.size());
+    if(!source_view_path.empty())
+        write_file(
+            source_view_path,source_view.data(),
+            source_view.size()*sizeof(std::int16_t)
+        );
+    if(!owner_path.empty())
+        write_file(owner_path,owner.data(),owner.size()*sizeof(std::int32_t));
+
+    std::cout<<"renderer=REALSAS_V2_SOURCE_OWNED_VISUAL_2D"
+             <<" clip="<<clip_id<<" view="<<view_id
+             <<" frame="<<frame_index<<" resolution="<<resolution
+             <<" faces="<<mesh.face_count<<" vertices="<<mesh.vertex_count
+             <<" covered_samples="<<covered_samples
+             <<" appearance=SOURCE_RGBA8_FIXED_UV\\n";
+    return 0;
+}
+
 } // namespace
 
 int main(int argc,char** argv) {
@@ -557,6 +866,27 @@ int main(int argc,char** argv) {
             throw std::runtime_error("RUNTIME_CLIPPING_MUST_BE_FORBIDDEN");
         if(manifest.at("tint_order_visibility_authorized")!="0")
             throw std::runtime_error("RUNTIME_TINT_ORDER_VISIBILITY_MUST_BE_FORBIDDEN");
+        const auto presentation_mode_it=manifest.find("presentation_geometry_mode");
+        const auto presentation_mode=(
+            presentation_mode_it==manifest.end()
+            ? std::string("MECHANICAL_CANONICAL_DEPTH_V2")
+            : presentation_mode_it->second
+        );
+        if(presentation_mode=="SOURCE_OWNED_VISUAL_PRESENTATION_V1") {
+            return render_source_owned_visual(
+                entries,
+                manifest,
+                clip_id,
+                view_id,
+                frame_index,
+                rgba_path,
+                prov_path,
+                source_view_path,
+                owner_path
+            );
+        }
+        if(presentation_mode!="MECHANICAL_CANONICAL_DEPTH_V2")
+            throw std::runtime_error("PRESENTATION_GEOMETRY_MODE_INVALID");
         if(manifest.at("texture_sampling_contract")!="BASE_LEVEL_BILINEAR_LINEAR_PM_ONLY")
             throw std::runtime_error("TEXTURE_SAMPLING_CONTRACT_INVALID");
         if(manifest.at("mip_generation_authorized")!="0")

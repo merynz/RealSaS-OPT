@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/merynz/RealSaS-OPT/platform/internal/capability"
 	"github.com/merynz/RealSaS-OPT/platform/internal/domain"
 	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
 	"github.com/merynz/RealSaS-OPT/platform/internal/release"
@@ -20,6 +21,7 @@ import (
 const (
 	CompileSubject = "COMPILE_SUBJECT"
 	RenderProduct  = "RENDER_PRODUCT"
+	RunCapability  = "RUN_CAPABILITY"
 )
 
 var (
@@ -39,6 +41,7 @@ type Receipt struct {
 	ReusedIdempotencyKey bool
 	AttemptID            *uuid.UUID
 	RenderRequestID      *uuid.UUID
+	ExecutionGoalID      *uuid.UUID
 }
 
 type CompileRequest struct {
@@ -46,6 +49,16 @@ type CompileRequest struct {
 	EngineReleaseID uuid.UUID
 	SubjectInputID  uuid.UUID
 	TargetStageID   string
+	IdempotencyKey  string
+	RequestedBy     string
+}
+
+type CapabilityRunRequest struct {
+	EngineReleaseID uuid.UUID
+	SubjectID       *uuid.UUID
+	GoalType        capability.GoalType
+	Targets         []string
+	Parameters      map[string]any
 	IdempotencyKey  string
 	RequestedBy     string
 }
@@ -204,6 +217,225 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 			CommandType: CompileSubject,
 			SubjectID:   req.SubjectID,
 			AttemptID:   &attemptID,
+		}
+		return nil
+	})
+	return out, err
+}
+
+
+func SubmitCapabilityRun(ctx context.Context, pool *pgxpool.Pool, req CapabilityRunRequest) (Receipt, error) {
+	if pool == nil || req.EngineReleaseID == uuid.Nil {
+		return Receipt{}, errors.New("capability run requires pool and engine_release_id")
+	}
+	if req.IdempotencyKey == "" || req.RequestedBy == "" {
+		return Receipt{}, errors.New("idempotency_key and requested_by are required")
+	}
+	if req.GoalType == "" {
+		req.GoalType = capability.GoalDeveloperRun
+	}
+	if req.GoalType != capability.GoalDeveloperRun && req.GoalType != capability.GoalProofRun {
+		return Receipt{}, fmt.Errorf("unsupported capability run goal type %q", req.GoalType)
+	}
+	if len(req.Targets) == 0 {
+		return Receipt{}, errors.New("capability run requires at least one target")
+	}
+	if req.Parameters == nil {
+		req.Parameters = map[string]any{}
+	}
+
+	snapshot, err := capability.LoadReleaseSnapshot(ctx, pool, req.EngineReleaseID)
+	if err != nil {
+		return Receipt{}, err
+	}
+	goal := capability.Goal{
+		Type:            req.GoalType,
+		Targets:         append([]string(nil), req.Targets...),
+		PromotionPolicy: capability.PromotionNever,
+	}
+	resolved, err := goal.Validate(snapshot.Registry)
+	if err != nil {
+		return Receipt{}, err
+	}
+	resolvedIDs := make([]string, 0, len(resolved))
+	for _, descriptor := range resolved {
+		resolvedIDs = append(resolvedIDs, descriptor.ID)
+	}
+	var subjectValue any
+	var subjectString any
+	if req.SubjectID != nil {
+		if *req.SubjectID == uuid.Nil {
+			return Receipt{}, errors.New("subject_id cannot be nil UUID")
+		}
+		subjectValue = *req.SubjectID
+		subjectString = req.SubjectID.String()
+	}
+
+	spec := map[string]any{
+		"schema":                "RealSaS.ExecutionGoalSpec.v1",
+		"goal_type":             string(req.GoalType),
+		"promotion_policy":      string(capability.PromotionNever),
+		"engine_release_id":     req.EngineReleaseID.String(),
+		"capability_set_sha256": snapshot.CapabilitySetSHA256,
+		"subject_id":            subjectString,
+		"target_capability_ids": append([]string(nil), req.Targets...),
+		"resolved_capability_ids": resolvedIDs,
+		"parameters":            req.Parameters,
+	}
+	specSHA, err := semantic.JSONSHA256(spec)
+	if err != nil {
+		return Receipt{}, err
+	}
+	parametersJSON, err := json.Marshal(req.Parameters)
+	if err != nil {
+		return Receipt{}, err
+	}
+	targetsJSON, err := json.Marshal(req.Targets)
+	if err != nil {
+		return Receipt{}, err
+	}
+	resolvedJSON, err := json.Marshal(resolvedIDs)
+	if err != nil {
+		return Receipt{}, err
+	}
+
+	var out Receipt
+	err = persistence.WithSerializableRetry(ctx, pool, 5, func(tx pgx.Tx) error {
+		var existingID uuid.UUID
+		var existingType string
+		var existingPayload []byte
+		err := tx.QueryRow(ctx, `
+			SELECT id,command_type,payload
+			FROM commands
+			WHERE idempotency_key=$1
+		`, req.IdempotencyKey).Scan(&existingID, &existingType, &existingPayload)
+		switch {
+		case err == nil:
+			var payload map[string]any
+			if err := json.Unmarshal(existingPayload, &payload); err != nil {
+				return err
+			}
+			if existingType != RunCapability || payloadString(payload, "goal_spec_sha256") != specSHA {
+				return ErrIdempotencyConflict
+			}
+			attemptID, err := payloadUUID(payload, "attempt_id")
+			if err != nil {
+				return err
+			}
+			goalID, err := payloadUUID(payload, "execution_goal_id")
+			if err != nil {
+				return err
+			}
+			out = Receipt{
+				CommandID:            existingID,
+				CommandType:          RunCapability,
+				ReusedIdempotencyKey: true,
+				AttemptID:            &attemptID,
+				ExecutionGoalID:      &goalID,
+			}
+			if req.SubjectID != nil {
+				out.SubjectID = *req.SubjectID
+			}
+			return nil
+		case !errors.Is(err, pgx.ErrNoRows):
+			return err
+		}
+
+		if req.SubjectID != nil {
+			var subject uuid.UUID
+			if err := tx.QueryRow(ctx, "SELECT id FROM subjects WHERE id=$1 FOR SHARE", *req.SubjectID).Scan(&subject); err != nil {
+				if errors.Is(err, pgx.ErrNoRows) {
+					return ErrSubjectNotFound
+				}
+				return err
+			}
+		}
+
+		attemptID := uuid.New()
+		goalID := uuid.New()
+		commandID := uuid.New()
+		attemptKind := "developer"
+		if req.GoalType == capability.GoalProofRun {
+			attemptKind = "proof"
+		}
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO attempts
+			  (id,subject_id,engine_release_id,kind,spec_sha256,created_by,final_state)
+			VALUES ($1,$2,$3,$4,$5,$6,'OPEN')
+		`, attemptID, subjectValue, req.EngineReleaseID, attemptKind, specSHA, req.RequestedBy); err != nil {
+			return err
+		}
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO execution_goals
+			  (id,attempt_id,goal_type,promotion_policy,target_capability_ids,
+			   resolved_capability_ids,parameters,spec_sha256)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+		`,
+			goalID,
+			attemptID,
+			string(req.GoalType),
+			string(capability.PromotionNever),
+			targetsJSON,
+			resolvedJSON,
+			parametersJSON,
+			specSHA,
+		); err != nil {
+			return err
+		}
+
+		payload := map[string]any{
+			"schema":                "RealSaS.RunCapabilityCommand.v1",
+			"command_id":            commandID.String(),
+			"attempt_id":            attemptID.String(),
+			"execution_goal_id":     goalID.String(),
+			"engine_release_id":     req.EngineReleaseID.String(),
+			"goal_type":             string(req.GoalType),
+			"goal_spec_sha256":      specSHA,
+			"capability_set_sha256": snapshot.CapabilitySetSHA256,
+		}
+		if req.SubjectID != nil {
+			payload["subject_id"] = req.SubjectID.String()
+		}
+		body, err := json.Marshal(payload)
+		if err != nil {
+			return err
+		}
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO commands(id,command_type,subject_id,idempotency_key,payload)
+			VALUES ($1,$2,$3,$4,$5)
+		`, commandID, RunCapability, subjectValue, req.IdempotencyKey, body); err != nil {
+			return err
+		}
+		if err := appendOutbox(ctx, tx, "Command", commandID, "RunCapabilityRequested", map[string]any{
+			"command_id": commandID.String(),
+		}); err != nil {
+			return err
+		}
+		auditBody, _ := json.Marshal(map[string]any{
+			"command_id":            commandID.String(),
+			"execution_goal_id":     goalID.String(),
+			"engine_release_id":     req.EngineReleaseID.String(),
+			"goal_type":             string(req.GoalType),
+			"target_capability_ids": req.Targets,
+			"resolved_capability_ids": resolvedIDs,
+			"capability_set_sha256": snapshot.CapabilitySetSHA256,
+			"goal_spec_sha256":      specSHA,
+		})
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO audit_events(actor,action,subject_id,attempt_id,payload)
+			VALUES ($1,'CAPABILITY_RUN_ACCEPTED',$2,$3,$4)
+		`, req.RequestedBy, subjectValue, attemptID, auditBody); err != nil {
+			return err
+		}
+
+		out = Receipt{
+			CommandID:       commandID,
+			CommandType:     RunCapability,
+			AttemptID:       &attemptID,
+			ExecutionGoalID: &goalID,
+		}
+		if req.SubjectID != nil {
+			out.SubjectID = *req.SubjectID
 		}
 		return nil
 	})

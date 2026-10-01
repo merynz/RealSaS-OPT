@@ -4,8 +4,9 @@ const (
 	ControlTaskQueue = "realsas-control-v1"
 	EngineTaskQueue  = "realsas-engine-v1"
 
-	CompileWorkflowName = "realsas.compile.v1"
-	RenderWorkflowName  = "realsas.render.v1"
+	CompileWorkflowName    = "realsas.compile.v1"
+	RenderWorkflowName     = "realsas.render.v1"
+	CapabilityWorkflowName = "realsas.capability.v1"
 
 	ResolveCompilePlanActivityName       = "platform.resolve_compile_plan.v1"
 	PrepareStageExecutionActivityName    = "platform.prepare_stage_execution.v1"
@@ -17,6 +18,13 @@ const (
 	ResolveRenderRequestActivityName     = "platform.resolve_render_request.v1"
 	EngineRenderTailActivityName         = "engine.render_runtime_tail.v1"
 	CommitRenderOutputActivityName       = "platform.commit_render_output.v1"
+
+	ResolveCapabilityGoalActivityName        = "platform.resolve_capability_goal.v1"
+	PrepareCapabilityExecutionActivityName   = "platform.prepare_capability_execution.v1"
+	CommitCapabilityResultActivityName       = "platform.commit_capability_result.v1"
+	RecordCapabilityActivityErrorActivityName = "platform.record_capability_activity_error.v1"
+	FinalizeCapabilityGoalActivityName       = "platform.finalize_capability_goal.v1"
+	EngineExecuteCapabilityActivityName      = "engine.execute_capability.v1"
 )
 
 type CompileWorkflowInput struct {
@@ -26,6 +34,35 @@ type CompileWorkflowInput struct {
 	EngineReleaseID string `json:"engine_release_id"`
 	SubjectInputID  string `json:"subject_input_id"`
 	TargetStageID   string `json:"target_stage_id"`
+}
+
+type CapabilityWorkflowInput struct {
+	CommandID       string `json:"command_id"`
+	AttemptID       string `json:"attempt_id"`
+	ExecutionGoalID string `json:"execution_goal_id"`
+	EngineReleaseID string `json:"engine_release_id"`
+	GoalSpecSHA256  string `json:"goal_spec_sha256"`
+}
+
+type CapabilityStep struct {
+	CapabilityID         string         `json:"capability_id"`
+	Kind                 string         `json:"kind"`
+	OwnerModuleID        string         `json:"owner_module_id"`
+	ExecutorActivity     string         `json:"executor_activity"`
+	ImplementationSHA256 string         `json:"implementation_sha256"`
+	PolicySHA256         string         `json:"policy_sha256"`
+	ParametersSHA256     string         `json:"parameters_sha256"`
+	Dependencies         []string       `json:"dependencies"`
+	Metadata             map[string]any `json:"metadata,omitempty"`
+}
+
+type ResolvedCapabilityGoal struct {
+	ExecutionGoalID     string           `json:"execution_goal_id"`
+	GoalType            string           `json:"goal_type"`
+	PromotionPolicy     string           `json:"promotion_policy"`
+	CapabilitySetSHA256 string           `json:"capability_set_sha256"`
+	Parameters          map[string]any   `json:"parameters"`
+	Steps               []CapabilityStep `json:"steps"`
 }
 
 type RenderWorkflowInput struct {

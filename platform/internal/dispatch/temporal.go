@@ -80,6 +80,33 @@ func workflowSpec(commandType string, payload map[string]any) (string, string, t
 				SubjectInputID:  inputID,
 				TargetStageID:   target,
 			}, nil
+	case command.RunCapability:
+		attemptID, err := requiredString(payload, "attempt_id")
+		if err != nil {
+			return "", "", 0, nil, err
+		}
+		goalID, err := requiredString(payload, "execution_goal_id")
+		if err != nil {
+			return "", "", 0, nil, err
+		}
+		releaseID, err := requiredString(payload, "engine_release_id")
+		if err != nil {
+			return "", "", 0, nil, err
+		}
+		specSHA, err := requiredString(payload, "goal_spec_sha256")
+		if err != nil {
+			return "", "", 0, nil, err
+		}
+		return orchestration.CapabilityWorkflowName,
+			"realsas:capability:" + commandID,
+			7 * 24 * time.Hour,
+			orchestration.CapabilityWorkflowInput{
+				CommandID:       commandID,
+				AttemptID:       attemptID,
+				ExecutionGoalID: goalID,
+				EngineReleaseID: releaseID,
+				GoalSpecSHA256:  specSHA,
+			}, nil
 	case command.RenderProduct:
 		subjectID, err := requiredString(payload, "subject_id")
 		if err != nil {

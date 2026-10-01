@@ -80,6 +80,7 @@ from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.runtime_package_v2 import (
     build_rss_v2_entries,
+    build_source_owned_visual_rss_v2_entries,
     read_rss_v2,
     write_rss_v2,
 )
@@ -1003,25 +1004,65 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
 
 
 def materialize_runtime_package_stage(ctx: dict) -> dict:
-    projection = runtime_projection_from_dict(
+    asset = complete_appearance_asset_from_dict(
         stage_output_payload(
             ctx,
-            "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
-            "RealSaS.RuntimeProjectionIR.v2",
+            "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+            "RealSaS.CompleteAppearanceAssetIR.v2",
         )
     )
-    arrays = resolved_path(projection.projection_npz_path)
-    provenance = resolved_path(projection.provenance_npz_path)
-    if sha256_file(arrays) != projection.projection_npz_sha256:
-        raise QualificationError("RUNTIME_V2_PACKAGE_PROJECTION_BYTES_DRIFT")
-    if sha256_file(provenance) != projection.provenance_npz_sha256:
-        raise QualificationError("RUNTIME_V2_PACKAGE_PROVENANCE_BYTES_DRIFT")
-    for view in projection.views:
-        _load_runtime_view_texture(view)
+    source_owned_visual = bool(
+        dict(asset.metadata or {}).get("source_owned_visual_mesh_mode")
+    )
+    if source_owned_visual:
+        projection = source_owned_visual_runtime_projection_from_dict(
+            stage_output_payload(
+                ctx,
+                "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+                "RealSaS.SourceOwnedVisualRuntimeProjectionIR.v1",
+            )
+        )
+        arrays = resolved_path(projection.projection_npz_path)
+        if sha256_file(arrays) != projection.projection_npz_sha256:
+            raise QualificationError(
+                "RUNTIME_V2_VISUAL_PACKAGE_PROJECTION_BYTES_DRIFT"
+            )
+        for view in projection.views:
+            texture = resolved_path(view.texture_path)
+            if (
+                not texture.is_file()
+                or sha256_file(texture) != view.texture_sha256
+            ):
+                raise QualificationError(
+                    "RUNTIME_V2_VISUAL_PACKAGE_TEXTURE_BYTES_DRIFT"
+                )
+        entries = build_source_owned_visual_rss_v2_entries(projection)
+        presentation_mode = "SOURCE_OWNED_VISUAL_PRESENTATION_V1"
+    else:
+        projection = runtime_projection_from_dict(
+            stage_output_payload(
+                ctx,
+                "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+                "RealSaS.RuntimeProjectionIR.v2",
+            )
+        )
+        arrays = resolved_path(projection.projection_npz_path)
+        provenance = resolved_path(projection.provenance_npz_path)
+        if sha256_file(arrays) != projection.projection_npz_sha256:
+            raise QualificationError(
+                "RUNTIME_V2_PACKAGE_PROJECTION_BYTES_DRIFT"
+            )
+        if sha256_file(provenance) != projection.provenance_npz_sha256:
+            raise QualificationError(
+                "RUNTIME_V2_PACKAGE_PROVENANCE_BYTES_DRIFT"
+            )
+        for view in projection.views:
+            _load_runtime_view_texture(view)
+        entries = build_rss_v2_entries(projection)
+        presentation_mode = "MECHANICAL_CANONICAL_DEPTH_V2"
 
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     archive = root / "product_runtime_v2.rss"
-    entries = build_rss_v2_entries(projection)
     result = write_rss_v2(archive, entries)
     replay = read_rss_v2(archive)
     if tuple(replay.keys()) != tuple(entries.keys()):
@@ -1036,11 +1077,12 @@ def materialize_runtime_package_stage(ctx: dict) -> dict:
         package_hash="",
         metadata={
             "container_compression": "NONE_V1",
-            "paged_texture_transport": "PNG_RGBA8",
-            "paged_provenance_transport": "ZLIB_U8_I16_V1",
-            "native_reader_dependency_free": False,
-            "native_reader_dependencies": ["libpng", "zlib"],
+            "presentation_geometry_mode": presentation_mode,
             "contains_only_sealed_runtime_authorities": True,
+            "source_owned_visual_mesh_mode": source_owned_visual,
+            "mechanical_mesh_render_authority": (
+                False if source_owned_visual else True
+            ),
         },
     )
     seal = replace(seal, package_hash=runtime_package_hash(seal))
@@ -1064,6 +1106,10 @@ def materialize_runtime_package_stage(ctx: dict) -> dict:
             "archive_sha256": seal.archive_sha256,
             "archive_bytes": seal.archive_bytes,
             "entry_count": len(seal.entry_names),
+            "presentation_geometry_mode": presentation_mode,
+            "mechanical_mesh_render_authority": (
+                False if source_owned_visual else True
+            ),
         },
     }
 

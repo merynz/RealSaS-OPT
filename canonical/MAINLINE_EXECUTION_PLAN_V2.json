@@ -2,7 +2,7 @@
   "schema": "RealSaS.MainlineExecutionPlan.v2",
   "date": "2026-09-20",
   "canonical_branch": "main",
-  "architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__MECHANICAL_AND_VISUAL_MESH_OWNERSHIP_SPLIT__CAA",
+  "architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__MECHANICAL_AND_SOURCE_VISUAL_SUBSTRATE_SPLIT_STAGE18__QUALIFIED_VISUAL_PRESENTATION_STAGE37__CAA",
   "subject_specific_code_forbidden": true,
   "stage_count": 46,
   "resume_contract": {
@@ -373,7 +373,7 @@
     {
       "ordinal": 18,
       "id": "18_CANONICAL_MESH_ADDRESSING_BUILD",
-      "title": "Canonical mechanical mesh plus source-owned visual mesh, stable addressing and appearance domain",
+      "title": "Canonical mechanical mesh plus source-owned visual substrate, stable addressing and appearance domain",
       "group": "mesh",
       "depends_on": [
         "07_OBSERVATION_CONTRACT_QUALIFIED",
@@ -768,10 +768,13 @@
     {
       "ordinal": 37,
       "id": "37_QUALIFIED_PRESENTATION_STRUCTURE",
-      "title": "Qualified role-free presentation partition, authoring slots and attachments; runtime keyability not claimed",
+      "title": "Qualified role-free presentation structure plus source-owned visual presentation topology; runtime keyability not claimed",
       "group": "presentation",
       "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
         "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
         "23_COMPLETE_APPEARANCE_ASSET_BAKED",
         "24_COMPLETE_APPEARANCE_QUALIFIED",
         "28_SKELETON_QUALIFIED",
@@ -790,7 +793,8 @@
         "runtime_tint_order_visibility_claimed": false
       },
       "manifest_keys": [
-        "presentation"
+        "presentation",
+        "observation"
       ]
     },
     {

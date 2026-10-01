@@ -1,0 +1,853 @@
+{
+  "completed_count": 9,
+  "execution_class": "DEMO_WITNESS",
+  "failed_count": 1,
+  "interesting_stages": [
+    {
+      "attempts": 2,
+      "blockers": [],
+      "id": "01_SOURCE_BYTES_SEALED",
+      "implementation_hash": "66fe2691d9d3d3ec81e7d867287a3007c47431b03234c1afac39910dc8119bbd",
+      "input_fingerprint": "2ae77c78cf980acddd354d7f3c83e5aa8c059d84397dacb81895a6ffc237f8f6",
+      "ordinal": 1,
+      "outputs": [
+        {
+          "authority_class": "SEALED_SOURCE_EVIDENCE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/01_SOURCE_BYTES_SEALED/source_byte_seal.json",
+          "schema": "RealSaS.SourceByteSeal.v1",
+          "sha256": "d6f517b56f865da87970b13b4a119030e67203cb572e755212addec82fcd39b0"
+        }
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "attempts": 2,
+      "blockers": [],
+      "id": "02_SOURCE_LICENSE_PROVENANCE",
+      "implementation_hash": "6fdfbcbae8132a1133a2a9abb342a72ddec00a824e7f6e902a7b02f6fb3d9ce6",
+      "input_fingerprint": "3f0e40d74c22c8de8563d01b81df1d16baa4169d27fd915bf1a8d955c847c285",
+      "ordinal": 2,
+      "outputs": [
+        {
+          "authority_class": "SEALED_SOURCE_EVIDENCE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/02_SOURCE_LICENSE_PROVENANCE/source_license_seal.json",
+          "schema": "RealSaS.SourceLicenseSeal.v1",
+          "sha256": "bf644396b1b38506a4fc6facf0f2fff13bb783a5ebb2ead748930bdde8dcd310"
+        }
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "attempts": 3,
+      "blockers": [],
+      "id": "03_SOURCE_MECHANICAL_AUDIT",
+      "implementation_hash": "a8fd1570309a859075f162c36c878997874b16583625a92b17511b4c6f274ee2",
+      "input_fingerprint": "c8e2e4b89de0c46dfeb95b82fa5d572d42b935ce1df2082a63fb1b204fb32248",
+      "ordinal": 3,
+      "outputs": [
+        {
+          "authority_class": "SOURCE_MECHANICAL_AUDIT",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/03_SOURCE_MECHANICAL_AUDIT/source_mechanical_audit.json",
+          "schema": "RealSaS.SourceMechanicalAuditIR.v1",
+          "sha256": "4b09a6dbba56ab7fd88c2bb59f890527974a9ab5638710590ca479a3e4127628"
+        }
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "attempts": 3,
+      "blockers": [],
+      "id": "04_FULL_SUBJECT_ADMISSION",
+      "implementation_hash": "582f26f4b17ab760c5fb407184dbc04ab88d430bf1868f22e96f4f7fc25c3e64",
+      "input_fingerprint": "cd684c9d3c27232f423a21c3714ee993ffc3b691ae9522dfa58b12d1c12f65dd",
+      "ordinal": 4,
+      "outputs": [
+        {
+          "authority_class": "FULL_SUBJECT_ADMISSION",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/04_FULL_SUBJECT_ADMISSION/full_subject_admission.json",
+          "schema": "RealSaS.FullSubjectAdmissionIR.v1",
+          "sha256": "dd268d9169a42ff60bb09c8a5460584e152cdc9a39110f502a348467c783514f"
+        }
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "attempts": 2,
+      "blockers": [],
+      "id": "05_CAMERA_CONTRACT_SOLVED",
+      "implementation_hash": "effc4fd9d6d581c75f62b225aff55e2d878a7d5ae6e61e3e26a85a37e8ed8a27",
+      "input_fingerprint": "f578c160740a2863a707dd9b582ae986259e81fc4443ee82dae7d83d3f7ff404",
+      "ordinal": 5,
+      "outputs": [
+        {
+          "authority_class": "QUALIFIED_CAMERA_SET",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/05_CAMERA_CONTRACT_SOLVED/qualified_camera_set.json",
+          "schema": "RealSaS.QualifiedCameraSetIR.v1",
+          "sha256": "e11ab0fe32378eb1cd06fbebd8d1827e71eaa7b3fbe31b78248f7f3f9ab91920"
+        }
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "attempts": 3,
+      "blockers": [],
+      "id": "06_OBSERVATION_RENDER_8VIEW",
+      "implementation_hash": "aa81f1b9591fbbe8ab9863fdd5b58d1133d77486c2d8333ded161f3286666e22",
+      "input_fingerprint": "a8df84ae65d5ad713c7ce30b60521dd221c166019a4e83410e5fe1b33949e726",
+      "ordinal": 6,
+      "outputs": [
+        {
+          "authority_class": "EXACT_OBSERVATION_RENDER_SET",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/06_OBSERVATION_RENDER_8VIEW/observation_render_set.json",
+          "schema": "RealSaS.ObservationRenderSetIR.v1",
+          "sha256": "9faf223d75f790f0a4cdb3bee7ed83847e516036ca0e95c00eee209d1fa6de4c"
+        }
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "attempts": 3,
+      "blockers": [],
+      "id": "07_OBSERVATION_CONTRACT_QUALIFIED",
+      "implementation_hash": "9d7a5bce6925dcece049f5f870fd2e569076b9440bafc900458044029d43ab4a",
+      "input_fingerprint": "35e1e2cc36403edfc64534098af4e12daa59052a69f2c9333e7b8c724a0f2f67",
+      "ordinal": 7,
+      "outputs": [
+        {
+          "authority_class": "QUALIFIED_OBSERVATION_SET",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/07_OBSERVATION_CONTRACT_QUALIFIED/qualified_observation_set.json",
+          "schema": "RealSaS.QualifiedObservationSetIR.v1",
+          "sha256": "f9ac32cf15ff8116d89827c32a961f06bc39582ee49e9854f7d5cdd42b24d87a"
+        }
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "attempts": 3,
+      "blockers": [],
+      "id": "08_NORMALIZATION_DOMAIN_QUALIFIED",
+      "implementation_hash": "aee9cadadc3645bad108b0bb9c4e6455f7943aea57ebb7883e11d7e7385657b7",
+      "input_fingerprint": "62b4bb33c443b2f7a06041603c24957fe40c51e6b198f12cf41d37234f3499e1",
+      "ordinal": 8,
+      "outputs": [
+        {
+          "authority_class": "QUALIFIED_NORMALIZATION_DOMAIN",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/08_NORMALIZATION_DOMAIN_QUALIFIED/normalization_domain.json",
+          "schema": "RealSaS.NormalizationDomainIR.v1",
+          "sha256": "5f5a803a33b56e3737e88fd802f6e79684da996e2134455a4b9f33cc8594bcac"
+        }
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "attempts": 5,
+      "blockers": [],
+      "id": "09_IRIS_FIT_PREREGISTERED",
+      "implementation_hash": "25a8e0c5e6c9036cf4173eed71e60c2486ee530bed79b17b2effd21be7c45c25",
+      "input_fingerprint": "d756e4c9517e49ccbb3ffde73d0c9ffa9eb9f910d46c0a29ab49458524924e0a",
+      "ordinal": 9,
+      "outputs": [
+        {
+          "authority_class": "DEMO_HISTORICAL_IRIS_PREREG_EVIDENCE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/09_IRIS_FIT_PREREGISTERED/demo_historical_iris_prereg_evidence.json",
+          "schema": "RealSaS.DemoHistoricalIrisPreregEvidence.v1",
+          "sha256": "d6bec38c18c056b501d5be3308a016662f7aabdc9fff673f2a5186c14c34f950"
+        }
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "attempts": 2,
+      "blockers": [],
+      "id": "10_IRIS_FIT",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 10,
+      "outputs": [
+        {
+          "authority_class": "DEMO_HISTORICAL_IRIS_EXECUTION_EVIDENCE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/10_IRIS_FIT/demo_historical_iris_execution_evidence.json",
+          "schema": "RealSaS.DemoHistoricalIrisExecutionEvidence.v1",
+          "sha256": "fa591b5f3ff05a849727d2119b36844b2c0ba2610d5813e74bcf00d82ed3a26c"
+        }
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "attempts": 2,
+      "blockers": [],
+      "id": "11_IRIS_CHECKPOINT_SEALED",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 11,
+      "outputs": [
+        {
+          "authority_class": "DEMO_IRIS_CHECKPOINT_SEAL",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/11_IRIS_CHECKPOINT_SEALED/model_checkpoint_seal.json",
+          "schema": "RealSaS.ModelCheckpointSealIR.v1",
+          "sha256": "1e1fedc07af624831c57f7292399b2d894a15a623778bb32b9e41d37640154f3"
+        }
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "attempts": 2,
+      "blockers": [],
+      "id": "12_ZERO_SURFACE_DECODED",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 12,
+      "outputs": [
+        {
+          "authority_class": "DEMO_IRIS_SIGNED_ZERO_SURFACE_SEAL",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/12_ZERO_SURFACE_DECODED/signed_zero_surface_seal.json",
+          "schema": "RealSaS.SignedZeroSurfaceSealIR.v1",
+          "sha256": "9585aeb771ba3fdc4b9aff96f56076b5f538406dc3fa22aa278e03ed4a519186"
+        }
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "attempts": 2,
+      "blockers": [],
+      "id": "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 13,
+      "outputs": [
+        {
+          "authority_class": "DEMO_ONLY_GEOMETRY_SUBSTRATE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/13_GEOMETRY_SUBSTRATE_QUALIFIED/geometry_substrate_qualification.json",
+          "schema": "RealSaS.GeometrySubstrateQualificationIR.v2",
+          "sha256": "9b97245c3ea40889623442292fdece00bc4ed01d66705662c1e44064392cbded"
+        }
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "attempts": 2,
+      "blockers": [],
+      "id": "14_GSA_BUILD",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 14,
+      "outputs": [
+        {
+          "authority_class": "DEMO_ONLY_GSA_RIGGING_SURFACE_CANDIDATE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/14_GSA_BUILD/rigging_surface_candidate.json",
+          "schema": "RealSaS.RiggingSurfaceIR.v1",
+          "sha256": "7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182"
+        },
+        {
+          "authority_class": "DEMO_ONLY_SUBSTRATE_ADEQUACY_MEASUREMENT",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/14_GSA_BUILD/substrate_adequacy_report.json",
+          "schema": "RealSaS.SubstrateAdequacyReport.v1",
+          "sha256": "400fadf03d44658a7227811916f09123f2773127212034160574587b2580715d"
+        }
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "attempts": 2,
+      "blockers": [],
+      "id": "15_RIGGING_SURFACE_QUALIFIED",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 15,
+      "outputs": [
+        {
+          "authority_class": "DEMO_ONLY_RIGGING_SURFACE_MEASUREMENT",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json",
+          "schema": "RealSaS.RiggingSurfaceIR.v1",
+          "sha256": "7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182"
+        },
+        {
+          "authority_class": "DEMO_ONLY_RIGGING_SURFACE_QUALIFICATION",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/15_RIGGING_SURFACE_QUALIFIED/rigging_surface_qualification.json",
+          "schema": "RealSaS.RiggingSurfaceQualificationIR.v1",
+          "sha256": "e037916e967878a1dd688257b63523ba25200d8aa9797a7da576d05be75dc0ff"
+        },
+        {
+          "authority_class": "REPLAYED_EXACT_DENSE_FACE_PROVENANCE__DEMO_SOLUTION_LINEAGE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/15_RIGGING_SURFACE_QUALIFIED/compacted_dense_face_provenance.json",
+          "schema": "RealSaS.CompactedDenseFaceProvenance.v1",
+          "sha256": "873f7b7d8b74a9c5cf504cb076ab478a28ca04c4c06a9b2e6bc5a651247153fc"
+        }
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "attempts": 7,
+      "blockers": [],
+      "id": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+      "implementation_hash": "59750df0c39ca2ecc6a2a3b69b8aaf4d486e1da61c9d8bc7fca143dbeed54647",
+      "input_fingerprint": "d4cfcc992db8da835f25c167627b3ee5a7a10de672f8d69347aa9e2b9c8a8f3b",
+      "ordinal": 16,
+      "outputs": [
+        {
+          "authority_class": "OUTPUT_PRESENTATION_DIRECTION_AUTHORITY",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED/output_presentation_directions.json",
+          "schema": "RealSaS.OutputPresentationDirectionSetIR.v1",
+          "sha256": "156a9f585a38f78511aa51cfa5fee19c9175f8eb32c166e47edccbec5b2be503"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "attempts": 4,
+      "blockers": [],
+      "id": "17_MECHANICAL_PARTITION_QUALIFIED",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 17,
+      "outputs": [
+        {
+          "authority_class": "QUALIFIED_MECHANICAL_PARTITION",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/17_MECHANICAL_PARTITION_QUALIFIED/mechanical_partition.json",
+          "schema": "RealSaS.MechanicalPartitionIR.v1",
+          "sha256": "2a6a7f10667d8b07de1e5770de517005e240480bae93fabf92db19b34d99c5b7"
+        },
+        {
+          "authority_class": "QUALIFIED_COMPONENT_CARRIER_POLICY",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/17_MECHANICAL_PARTITION_QUALIFIED/component_carrier_policy.json",
+          "schema": "RealSaS.ComponentCarrierPolicyIR.v1",
+          "sha256": "39ccf346e893200d577588826161cab4ee757bca5a68b0ca1b9e6eb648b3177f"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "attempts": 6,
+      "blockers": [],
+      "id": "18_CANONICAL_MESH_ADDRESSING_BUILD",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 18,
+      "outputs": [
+        {
+          "authority_class": "DERIVED_MESH_CANDIDATE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json",
+          "schema": "RealSaS.CanonicalMeshCandidateIR.v1",
+          "sha256": "143bf3bf69181a671e0cd31a1475c16701855b685a92e41456cdcbda7191fd20"
+        },
+        {
+          "authority_class": "FROZEN_MESH_QUALIFICATION_POLICY",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/mesh_qualification_policy.json",
+          "schema": "RealSaS.MeshQualificationPolicyIR.v1",
+          "sha256": "592c83144fccbb004384c02bf3229c286cd258d2213e727b4f62bb299a85c4db"
+        },
+        {
+          "authority_class": "DIAGNOSTIC_RELATION_PARENT_QUALITY",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/relation_parent_quality_report.json",
+          "schema": "RealSaS.RelationParentQualityReport.v1",
+          "sha256": "930dd2eae0f61033815b0e64822846f6fbd7da3d7005339e1cc1f14fea92cd04"
+        },
+        {
+          "authority_class": "CANONICAL_SURFACE_ADDRESSING",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/surface_addressing.json",
+          "schema": "RealSaS.SurfaceAddressingIR.v1",
+          "sha256": "0082b481d758bef9e49cf4dc5e54282872d186801d4398ad91616bdecfc1a875"
+        },
+        {
+          "authority_class": "SOURCE_OWNED_VISUAL_MESH_SET",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/visual_mesh_set.json",
+          "schema": "RealSaS.VisualMeshSetIR.v1",
+          "sha256": "39799bf9f5be00316998041f8de0d5021d5f9125b89846bebb15846c88a769ff"
+        },
+        {
+          "authority_class": "APPEARANCE_DOMAIN",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/appearance_domain.json",
+          "schema": "RealSaS.AppearanceDomainIR.v1",
+          "sha256": "c095269302a73c97f4febd817f0670af707864009a3670d8f306fc7dc4cf40b2"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "attempts": 5,
+      "blockers": [],
+      "id": "19_STATIC_CANONICAL_MESH_QUALIFIED",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 19,
+      "outputs": [
+        {
+          "authority_class": "DEMO_ONLY_STATIC_CANONICAL_MESH_MEASUREMENT",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/19_STATIC_CANONICAL_MESH_QUALIFIED/static_canonical_mesh_qualification.json",
+          "schema": "RealSaS.StaticCanonicalMeshQualificationIR.v1",
+          "sha256": "f2024ac05ab8a29df5250c203691230cae40cbf753a6b0bce2270ae81f471799"
+        }
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "attempts": 14,
+      "blockers": [],
+      "id": "20_CAA_BACKEND_PREREGISTERED",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 20,
+      "outputs": [
+        {
+          "authority_class": "CAA_BACKEND_PREREGISTRATION",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/20_CAA_BACKEND_PREREGISTERED/caa_backend_preregistration.json",
+          "schema": "RealSaS.CAACompilePreregistrationIR.v2",
+          "sha256": "2719a2dbc9c4eb63feef0f7a6f0a273c726cf59c96d53c03a54868bc489a09b3"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "attempts": 11,
+      "blockers": [],
+      "id": "21_CAA_COMPILE",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 21,
+      "outputs": [
+        {
+          "authority_class": "CAA_COMPILE_ARTIFACT",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/21_CAA_COMPILE/caa_compile_artifact.json",
+          "schema": "RealSaS.CAACompileArtifactIR.v2",
+          "sha256": "49006470fe55c80551cc2b1479a1cf940d3fef910dfc413b613de21332ccd908"
+        },
+        {
+          "authority_class": "VISUAL_APPEARANCE_COMPILE_ARRAYS",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/21_CAA_COMPILE/visual_appearance_compile.npz",
+          "schema": "RealSaS.VisualAppearanceCompileArrays.v1",
+          "sha256": "3e41b05675a8fe3dfbb4a26683946c83b107e35c5a963c56bb6569c5896b57f3"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "attempts": 9,
+      "blockers": [],
+      "id": "22_CAA_COMPILE_SEALED",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 22,
+      "outputs": [
+        {
+          "authority_class": "CAA_COMPILE_SEAL",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/22_CAA_COMPILE_SEALED/caa_compile_seal.json",
+          "schema": "RealSaS.CAACompileSealIR.v2",
+          "sha256": "a849d3ccc1f54f40017261b3fb17d6337a4c63042d19d8a3ba75f711aea07156"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "attempts": 8,
+      "blockers": [],
+      "id": "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 23,
+      "outputs": [
+        {
+          "authority_class": "SOURCE_DIRECT_VISUAL_TEXTURE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/23_COMPLETE_APPEARANCE_ASSET_BAKED/V0_source_visual.png",
+          "schema": "RealSaS.SourceDirectVisualTexture.V0.v1",
+          "sha256": "f2255e32c15ded74e08def99ef5160935b93c2d58d9c545ae4fc2d67ad2ae885"
+        },
+        {
+          "authority_class": "SOURCE_DIRECT_VISUAL_TEXTURE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/23_COMPLETE_APPEARANCE_ASSET_BAKED/V1_source_visual.png",
+          "schema": "RealSaS.SourceDirectVisualTexture.V1.v1",
+          "sha256": "feacec333c573a98d000fcd87811dc7fcdf55547bcd34bf06a1f5a932c35eac4"
+        },
+        {
+          "authority_class": "SOURCE_DIRECT_VISUAL_TEXTURE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/23_COMPLETE_APPEARANCE_ASSET_BAKED/V2_source_visual.png",
+          "schema": "RealSaS.SourceDirectVisualTexture.V2.v1",
+          "sha256": "0c5700e954039ebee7738e42497575130e74065e2ea98188a1c44a947d00b823"
+        },
+        {
+          "authority_class": "SOURCE_DIRECT_VISUAL_TEXTURE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/23_COMPLETE_APPEARANCE_ASSET_BAKED/V3_source_visual.png",
+          "schema": "RealSaS.SourceDirectVisualTexture.V3.v1",
+          "sha256": "9e5d385f0213082d443cd3cd48ab6c1f0e5e3f274a697f85fe5302e021668401"
+        },
+        {
+          "authority_class": "SOURCE_DIRECT_VISUAL_TEXTURE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/23_COMPLETE_APPEARANCE_ASSET_BAKED/V4_source_visual.png",
+          "schema": "RealSaS.SourceDirectVisualTexture.V4.v1",
+          "sha256": "cb248a199c25af7eb73d848f7306ca88dbc2eafd9b7d833542977da869308553"
+        },
+        {
+          "authority_class": "SOURCE_DIRECT_VISUAL_TEXTURE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/23_COMPLETE_APPEARANCE_ASSET_BAKED/V5_source_visual.png",
+          "schema": "RealSaS.SourceDirectVisualTexture.V5.v1",
+          "sha256": "9f846faad3c39b0cb23daecc8b48c067c908eb86028698c7179d04cc3ba5d30a"
+        },
+        {
+          "authority_class": "SOURCE_DIRECT_VISUAL_TEXTURE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/23_COMPLETE_APPEARANCE_ASSET_BAKED/V6_source_visual.png",
+          "schema": "RealSaS.SourceDirectVisualTexture.V6.v1",
+          "sha256": "85297608b6ddb9979e9966d7daf3ed78dbadb81c5c681a2d4b26a429bfbfe04f"
+        },
+        {
+          "authority_class": "SOURCE_DIRECT_VISUAL_TEXTURE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/23_COMPLETE_APPEARANCE_ASSET_BAKED/V7_source_visual.png",
+          "schema": "RealSaS.SourceDirectVisualTexture.V7.v1",
+          "sha256": "95e9a03828e734420db566caf7fc452ca719cbd92d778638995bcee15b17b731"
+        },
+        {
+          "authority_class": "VISUAL_MESH_UV_BINDING",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/23_COMPLETE_APPEARANCE_ASSET_BAKED/visual_uv_binding.npz",
+          "schema": "RealSaS.VisualMeshUVBinding.v1",
+          "sha256": "f775ae5d0ea24ebabbdf80f18fe0cc28fa1d97596e64742f78546c9385517956"
+        },
+        {
+          "authority_class": "SOURCE_DIRECT_VISUAL_PROVENANCE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/23_COMPLETE_APPEARANCE_ASSET_BAKED/visual_source_provenance.npz",
+          "schema": "RealSaS.VisualSourceProvenance.v1",
+          "sha256": "9deb7b98067efe7c23d53a22a9652d75d4eacc1dfd657f8d33c56d2fc5f3b7d9"
+        },
+        {
+          "authority_class": "COMPLETE_APPEARANCE_ASSET",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/23_COMPLETE_APPEARANCE_ASSET_BAKED/complete_appearance_asset.json",
+          "schema": "RealSaS.CompleteAppearanceAssetIR.v2",
+          "sha256": "202e398a87fe794ea3f6f55492e8ee40b34d3b20d5692bce0d9cfa65eb127be4"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "attempts": 8,
+      "blockers": [],
+      "id": "24_COMPLETE_APPEARANCE_QUALIFIED",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 24,
+      "outputs": [
+        {
+          "authority_class": "QUALIFIED_COMPLETE_APPEARANCE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/24_COMPLETE_APPEARANCE_QUALIFIED/complete_appearance_qualification.json",
+          "schema": "RealSaS.CompleteAppearanceQualificationIR.v2",
+          "sha256": "d466c89c1f574fc6e476529f9c0b46fed247aa229e0986b8f7de75738016f32c"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "attempts": 4,
+      "blockers": [],
+      "id": "25_CAA_REFERENCE_REST_RENDER_PROOF",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 25,
+      "outputs": [
+        {
+          "authority_class": "CAA_REFERENCE_REST_RENDER",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/V0_reference_rest.png",
+          "schema": "RealSaS.CAAReferenceRestRender.V0.v2",
+          "sha256": "f2255e32c15ded74e08def99ef5160935b93c2d58d9c545ae4fc2d67ad2ae885"
+        },
+        {
+          "authority_class": "CAA_REST_DIAGNOSTIC_MASKS",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/V0_diagnostics.npz",
+          "schema": "RealSaS.CAARestDiagnosticMasks.V0.v2",
+          "sha256": "769c40536099e678ee3b08a970c9584f821d20570358831fb467d0dd5dabdb79"
+        },
+        {
+          "authority_class": "CAA_REFERENCE_REST_RENDER",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/V1_reference_rest.png",
+          "schema": "RealSaS.CAAReferenceRestRender.V1.v2",
+          "sha256": "feacec333c573a98d000fcd87811dc7fcdf55547bcd34bf06a1f5a932c35eac4"
+        },
+        {
+          "authority_class": "CAA_REST_DIAGNOSTIC_MASKS",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/V1_diagnostics.npz",
+          "schema": "RealSaS.CAARestDiagnosticMasks.V1.v2",
+          "sha256": "5d2a108e9af13c47dc6f47f6017eb53a83a6f28ac08050b7cb5716517ce42aba"
+        },
+        {
+          "authority_class": "CAA_REFERENCE_REST_RENDER",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/V2_reference_rest.png",
+          "schema": "RealSaS.CAAReferenceRestRender.V2.v2",
+          "sha256": "0c5700e954039ebee7738e42497575130e74065e2ea98188a1c44a947d00b823"
+        },
+        {
+          "authority_class": "CAA_REST_DIAGNOSTIC_MASKS",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/V2_diagnostics.npz",
+          "schema": "RealSaS.CAARestDiagnosticMasks.V2.v2",
+          "sha256": "8819b98c5da49904a24d459fd35798f98550ccef236153c5ffb80895c3a4aa77"
+        },
+        {
+          "authority_class": "CAA_REFERENCE_REST_RENDER",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/V3_reference_rest.png",
+          "schema": "RealSaS.CAAReferenceRestRender.V3.v2",
+          "sha256": "9e5d385f0213082d443cd3cd48ab6c1f0e5e3f274a697f85fe5302e021668401"
+        },
+        {
+          "authority_class": "CAA_REST_DIAGNOSTIC_MASKS",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/V3_diagnostics.npz",
+          "schema": "RealSaS.CAARestDiagnosticMasks.V3.v2",
+          "sha256": "76faa9ce0857aefc8a1d789c8352edb11f725909604da937ea5c164d5fd61fb1"
+        },
+        {
+          "authority_class": "CAA_REFERENCE_REST_RENDER",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/V4_reference_rest.png",
+          "schema": "RealSaS.CAAReferenceRestRender.V4.v2",
+          "sha256": "cb248a199c25af7eb73d848f7306ca88dbc2eafd9b7d833542977da869308553"
+        },
+        {
+          "authority_class": "CAA_REST_DIAGNOSTIC_MASKS",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/V4_diagnostics.npz",
+          "schema": "RealSaS.CAARestDiagnosticMasks.V4.v2",
+          "sha256": "54b42bdee049bdfcdcc52c2c01417f3ab10105ff38a9b5f727003d5a074ba936"
+        },
+        {
+          "authority_class": "CAA_REFERENCE_REST_RENDER",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/V5_reference_rest.png",
+          "schema": "RealSaS.CAAReferenceRestRender.V5.v2",
+          "sha256": "9f846faad3c39b0cb23daecc8b48c067c908eb86028698c7179d04cc3ba5d30a"
+        },
+        {
+          "authority_class": "CAA_REST_DIAGNOSTIC_MASKS",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/V5_diagnostics.npz",
+          "schema": "RealSaS.CAARestDiagnosticMasks.V5.v2",
+          "sha256": "0711716b422a1079c53a3a6cfcd5fc0f5f707370dddd128966dfd19ace62330a"
+        },
+        {
+          "authority_class": "CAA_REFERENCE_REST_RENDER",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/V6_reference_rest.png",
+          "schema": "RealSaS.CAAReferenceRestRender.V6.v2",
+          "sha256": "85297608b6ddb9979e9966d7daf3ed78dbadb81c5c681a2d4b26a429bfbfe04f"
+        },
+        {
+          "authority_class": "CAA_REST_DIAGNOSTIC_MASKS",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/V6_diagnostics.npz",
+          "schema": "RealSaS.CAARestDiagnosticMasks.V6.v2",
+          "sha256": "805c29f8d7666a1a78040e1c22642b9a209327118142bb949f397d57369a287d"
+        },
+        {
+          "authority_class": "CAA_REFERENCE_REST_RENDER",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/V7_reference_rest.png",
+          "schema": "RealSaS.CAAReferenceRestRender.V7.v2",
+          "sha256": "95e9a03828e734420db566caf7fc452ca719cbd92d778638995bcee15b17b731"
+        },
+        {
+          "authority_class": "CAA_REST_DIAGNOSTIC_MASKS",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/V7_diagnostics.npz",
+          "schema": "RealSaS.CAARestDiagnosticMasks.V7.v2",
+          "sha256": "840db8626025b3df479a2bb7a3543159384a8d6b8fcfe61ca7faa172b928764b"
+        },
+        {
+          "authority_class": "CAA_REFERENCE_REST_PROOF",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/caa_reference_rest_proof.json",
+          "schema": "RealSaS.CAARestRenderProofIR.v2",
+          "sha256": "4a72e467621a403a59e7704e3d56b036de55968b0b32699c0f7a592ffc4dbf47"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "attempts": 6,
+      "blockers": [],
+      "id": "28_SKELETON_QUALIFIED",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 28,
+      "outputs": [
+        {
+          "authority_class": "SEMANTIC_SKELETON_AUTHORITY_RESTORED_FROM_STAGE29_AND_ARACHNE_BINDINGS",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/28_SKELETON_QUALIFIED/qualified_skeleton.json",
+          "schema": "RealSaS.QualifiedSkeletonIR.v1",
+          "sha256": "e89d0b64cf23b2954f2b30fb37836ee2b3287749a79c90a76185437b9217e987"
+        }
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "attempts": 3,
+      "blockers": [],
+      "id": "32_SKIN_QUALIFIED",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 32,
+      "outputs": [
+        {
+          "authority_class": "CORRECTED_ARACHNE_QUALIFIED_SKIN__SOLUTION_LINEAGE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/32_SKIN_QUALIFIED/qualified_skin.json",
+          "schema": "RealSaS.QualifiedSkinIR.v1",
+          "sha256": "90fd4b18817be5b1279a1a883c9e21c9049284a879a3af55f1fc16b302121c8c"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "attempts": 1,
+      "blockers": [],
+      "id": "34_DEFORMATION_CAPABILITY_ENVELOPE",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 34,
+      "outputs": [
+        {
+          "authority_class": "QUALIFIED_DERIVED_AXIS_CONTRACT",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/34_DEFORMATION_CAPABILITY_ENVELOPE/derived_axis_contract.json",
+          "schema": "RealSaS.DerivedAxisContract.v1",
+          "sha256": "ead83f14c6b42e0d7a2cbe4f316d665bae2208ed9e7fca5a3cb148723f112b0b"
+        },
+        {
+          "authority_class": "QUALIFIED_DEFORMATION_CAPABILITY_ENVELOPE",
+          "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/34_DEFORMATION_CAPABILITY_ENVELOPE/deformation_envelope.json",
+          "schema": "RealSaS.DeformationCapabilityEnvelopeIR.v1",
+          "sha256": "de5a073095e76432b13edfbc0107255e243a6ae7c6b4bb3df572c128f6dad957"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "attempts": 1,
+      "blockers": [],
+      "id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 35,
+      "outputs": [],
+      "status": "PENDING"
+    },
+    {
+      "attempts": 0,
+      "blockers": [],
+      "id": "36_QUALIFIED_MESH_SKIN_TRANSFER",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 36,
+      "outputs": [],
+      "status": "PENDING"
+    },
+    {
+      "attempts": 0,
+      "blockers": [],
+      "id": "37_QUALIFIED_PRESENTATION_STRUCTURE",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 37,
+      "outputs": [],
+      "status": "PENDING"
+    },
+    {
+      "attempts": 0,
+      "blockers": [],
+      "id": "38_CANONICAL_PUPPET_SEALED",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 38,
+      "outputs": [],
+      "status": "PENDING"
+    },
+    {
+      "attempts": 0,
+      "blockers": [],
+      "id": "39_MOTION_SOURCE_OR_PRESET_SEAL",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 39,
+      "outputs": [],
+      "status": "PENDING"
+    },
+    {
+      "attempts": 0,
+      "blockers": [],
+      "id": "40_MOTION_COMPILE_RUN",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 40,
+      "outputs": [],
+      "status": "PENDING"
+    },
+    {
+      "attempts": 0,
+      "blockers": [],
+      "id": "41_MOTION_DYNAMIC_PROOF",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 41,
+      "outputs": [],
+      "status": "PENDING"
+    },
+    {
+      "attempts": 0,
+      "blockers": [],
+      "id": "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 42,
+      "outputs": [],
+      "status": "PENDING"
+    },
+    {
+      "attempts": 0,
+      "blockers": [],
+      "id": "43_RSS_MATERIALIZE_COMPACT",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 43,
+      "outputs": [],
+      "status": "PENDING"
+    },
+    {
+      "attempts": 0,
+      "blockers": [],
+      "id": "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 44,
+      "outputs": [],
+      "status": "PENDING"
+    },
+    {
+      "attempts": 0,
+      "blockers": [],
+      "id": "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 45,
+      "outputs": [],
+      "status": "PENDING"
+    },
+    {
+      "attempts": 0,
+      "blockers": [],
+      "id": "46_PRODUCT_CLOSURE_SEAL",
+      "implementation_hash": "",
+      "input_fingerprint": "",
+      "ordinal": 46,
+      "outputs": [],
+      "status": "PENDING"
+    }
+  ],
+  "ledger_status": "ACTIVE_WITH_FAILED_BRANCHES",
+  "manifest_keys": [
+    "admission",
+    "appearance",
+    "arachne_fit",
+    "demo_execution",
+    "geometry_decode",
+    "geometry_gate",
+    "geppetto_fit",
+    "gsa",
+    "iris_fit",
+    "mechanical_repartition_repair",
+    "mesh",
+    "mesh_policy",
+    "normalization",
+    "observation",
+    "run_id",
+    "schema",
+    "source_audit",
+    "source_files",
+    "source_license",
+    "subject_id"
+  ],
+  "ready_stage_ids": [],
+  "run_id": "SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929",
+  "runtime_manifest": null,
+  "schema": "RealSaS.KnightSolvedLineageDiagnostic.v1",
+  "subject_id": "SUBJECT2_KNIGHT"
+}

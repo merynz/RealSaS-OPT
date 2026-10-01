@@ -115,10 +115,10 @@ func (r Registrar) RegisterCapabilityOutputs(
 			PolicySHA256:         capability.PolicySHA256,
 			Inputs:               semanticInputs,
 			SemanticParameters: map[string]any{
-				"capability_id":              capability.ID,
+				"capability_id":                capability.ID,
 				"capability_parameters_sha256": capability.ParametersSHA256,
-				"output_role":                output.Role,
-				"authority_class":            output.AuthorityClass,
+				"output_role":                  output.Role,
+				"authority_class":              output.AuthorityClass,
 			},
 		}
 		semanticSHA, err := descriptor.SemanticSHA256()

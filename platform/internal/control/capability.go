@@ -192,9 +192,9 @@ func (a Activities) PrepareCapabilityExecution(ctx context.Context, req orchestr
 	}
 	if tag.RowsAffected() == 1 {
 		payload, _ := json.Marshal(map[string]any{
-			"execution_id": executionID.String(),
-			"capability_id": descriptor.ID,
-			"owner_module_id": descriptor.OwnerModuleID,
+			"execution_id":         executionID.String(),
+			"capability_id":        descriptor.ID,
+			"owner_module_id":      descriptor.OwnerModuleID,
 			"input_artifact_count": len(refs),
 		})
 		if _, err := tx.Exec(ctx, `
@@ -277,16 +277,24 @@ func (a Activities) CommitCapabilityResult(ctx context.Context, req orchestratio
 		owner := req.Request.OwnerModuleID
 		diagnostics := req.Result.Diagnostics
 		if req.Result.Failure != nil {
-			if req.Result.Failure.Code != "" { code = req.Result.Failure.Code }
-			if req.Result.Failure.Class != "" { class = req.Result.Failure.Class }
-			if req.Result.Failure.ReportedOwnerModuleID != "" { owner = req.Result.Failure.ReportedOwnerModuleID }
-			if req.Result.Failure.Diagnostics != nil { diagnostics = req.Result.Failure.Diagnostics }
+			if req.Result.Failure.Code != "" {
+				code = req.Result.Failure.Code
+			}
+			if req.Result.Failure.Class != "" {
+				class = req.Result.Failure.Class
+			}
+			if req.Result.Failure.ReportedOwnerModuleID != "" {
+				owner = req.Result.Failure.ReportedOwnerModuleID
+			}
+			if req.Result.Failure.Diagnostics != nil {
+				diagnostics = req.Result.Failure.Diagnostics
+			}
 		}
 		body, _ := json.Marshal(map[string]any{
-			"capability_id": req.Request.CapabilityID,
+			"capability_id":   req.Request.CapabilityID,
 			"owner_module_id": owner,
-			"class": class,
-			"diagnostics": diagnostics,
+			"class":           class,
+			"diagnostics":     diagnostics,
 		})
 		if _, err := tx.Exec(ctx, `
 			UPDATE executions SET status='FAIL',finished_at=now(),error_code=$2,error_payload=$3 WHERE id=$1
@@ -306,10 +314,10 @@ func (a Activities) CommitCapabilityResult(ctx context.Context, req orchestratio
 	}
 
 	artifactIDs, err := registrar.RegisterCapabilityOutputs(ctx, tx, executionID, attemptID, registry.CapabilityIdentity{
-		ID: req.Request.CapabilityID,
+		ID:                   req.Request.CapabilityID,
 		ImplementationSHA256: req.Request.ImplementationSHA256,
-		PolicySHA256: req.Request.PolicySHA256,
-		ParametersSHA256: req.Request.ParametersSHA256,
+		PolicySHA256:         req.Request.PolicySHA256,
+		ParametersSHA256:     req.Request.ParametersSHA256,
 	}, produced)
 	if err != nil {
 		return orchestration.CapabilityCommitResult{}, err
@@ -320,11 +328,13 @@ func (a Activities) CommitCapabilityResult(ctx context.Context, req orchestratio
 		return orchestration.CapabilityCommitResult{}, err
 	}
 	artifactStrings := make([]string, 0, len(artifactIDs))
-	for _, id := range artifactIDs { artifactStrings = append(artifactStrings, id.String()) }
+	for _, id := range artifactIDs {
+		artifactStrings = append(artifactStrings, id.String())
+	}
 	payload, _ := json.Marshal(map[string]any{
-		"execution_id": executionID.String(),
-		"capability_id": req.Request.CapabilityID,
-		"owner_module_id": req.Request.OwnerModuleID,
+		"execution_id":        executionID.String(),
+		"capability_id":       req.Request.CapabilityID,
+		"owner_module_id":     req.Request.OwnerModuleID,
 		"output_artifact_ids": artifactStrings,
 	})
 	if _, err := tx.Exec(ctx, `
@@ -346,16 +356,22 @@ func (a Activities) RecordCapabilityActivityError(ctx context.Context, req orche
 		return errors.New("postgres pool is required")
 	}
 	executionID, err := uuid.Parse(req.ExecutionID)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	attemptID, err := uuid.Parse(req.AttemptID)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	body, _ := json.Marshal(map[string]any{
-		"capability_id": req.CapabilityID,
+		"capability_id":   req.CapabilityID,
 		"owner_module_id": req.OwnerModuleID,
-		"message": req.Error,
+		"message":         req.Error,
 	})
 	tx, err := a.Pool.BeginTx(ctx, pgx.TxOptions{IsoLevel: pgx.Serializable})
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	defer tx.Rollback(ctx)
 	if _, err := tx.Exec(ctx, `
 		UPDATE executions
@@ -382,18 +398,26 @@ func (a Activities) FinalizeCapabilityGoal(ctx context.Context, request map[stri
 		return orchestration.CapabilityWorkflowResult{}, errors.New("finalize capability command missing")
 	}
 	body, err := json.Marshal(commandRaw)
-	if err != nil { return orchestration.CapabilityWorkflowResult{}, err }
+	if err != nil {
+		return orchestration.CapabilityWorkflowResult{}, err
+	}
 	var command orchestration.CapabilityWorkflowInput
 	if err := json.Unmarshal(body, &command); err != nil {
 		return orchestration.CapabilityWorkflowResult{}, err
 	}
 	attemptID, err := uuid.Parse(command.AttemptID)
-	if err != nil { return orchestration.CapabilityWorkflowResult{}, err }
+	if err != nil {
+		return orchestration.CapabilityWorkflowResult{}, err
+	}
 	goalID, err := uuid.Parse(command.ExecutionGoalID)
-	if err != nil { return orchestration.CapabilityWorkflowResult{}, err }
+	if err != nil {
+		return orchestration.CapabilityWorkflowResult{}, err
+	}
 
 	tx, err := a.Pool.BeginTx(ctx, pgx.TxOptions{IsoLevel: pgx.Serializable})
-	if err != nil { return orchestration.CapabilityWorkflowResult{}, err }
+	if err != nil {
+		return orchestration.CapabilityWorkflowResult{}, err
+	}
 	defer tx.Rollback(ctx)
 	var policy string
 	var resolvedRaw []byte
@@ -428,9 +452,9 @@ func (a Activities) FinalizeCapabilityGoal(ctx context.Context, request map[stri
 		return orchestration.CapabilityWorkflowResult{}, err
 	}
 	payload, _ := json.Marshal(map[string]any{
-		"execution_goal_id": goalID.String(),
+		"execution_goal_id":       goalID.String(),
 		"resolved_capability_ids": resolved,
-		"promotion_policy": "NEVER",
+		"promotion_policy":        "NEVER",
 	})
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO attempt_events(attempt_id,event_type,payload)
@@ -455,11 +479,19 @@ func capabilityInputArtifactIDs(ctx context.Context, tx pgx.Tx, goalID, attemptI
 	rows, err := tx.Query(ctx, `
 		SELECT artifact_id FROM execution_goal_inputs WHERE execution_goal_id=$1 ORDER BY ordinal
 	`, goalID)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	for rows.Next() {
 		var id uuid.UUID
-		if err := rows.Scan(&id); err != nil { rows.Close(); return nil, err }
-		if _, ok := seen[id]; !ok { seen[id]=struct{}{}; ids=append(ids,id) }
+		if err := rows.Scan(&id); err != nil {
+			rows.Close()
+			return nil, err
+		}
+		if _, ok := seen[id]; !ok {
+			seen[id] = struct{}{}
+			ids = append(ids, id)
+		}
 	}
 	rows.Close()
 
@@ -470,11 +502,19 @@ func capabilityInputArtifactIDs(ctx context.Context, tx pgx.Tx, goalID, attemptI
 			WHERE attempt_id=$1 AND left(role,$2)=$3
 			ORDER BY role
 		`, attemptID, len(prefix), prefix)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 		for depRows.Next() {
 			var id uuid.UUID
-			if err := depRows.Scan(&id); err != nil { depRows.Close(); return nil, err }
-			if _, ok := seen[id]; !ok { seen[id]=struct{}{}; ids=append(ids,id) }
+			if err := depRows.Scan(&id); err != nil {
+				depRows.Close()
+				return nil, err
+			}
+			if _, ok := seen[id]; !ok {
+				seen[id] = struct{}{}
+				ids = append(ids, id)
+			}
 		}
 		depRows.Close()
 	}
@@ -506,13 +546,18 @@ func bindExecutionInputs(ctx context.Context, tx pgx.Tx, executionID uuid.UUID, 
 		}
 		refs = append(refs, ref)
 	}
-	sort.Slice(refs, func(i,j int) bool { return refs[i].Role < refs[j].Role })
+	sort.Slice(refs, func(i, j int) bool { return refs[i].Role < refs[j].Role })
 	return refs, nil
 }
 
-func equalStrings(a,b []string) bool {
-	if len(a)!=len(b) { return false }
-	for i := range a { if a[i]!=b[i] { return false } }
+func equalStrings(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
 	return true
 }
-

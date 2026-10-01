@@ -86,21 +86,21 @@ type PrepareCapabilityExecutionRequest struct {
 }
 
 type EngineCapabilityRequest struct {
-	ExecutionID              string         `json:"execution_id"`
-	CommandID                string         `json:"command_id"`
-	AttemptID                string         `json:"attempt_id"`
-	ExecutionGoalID          string         `json:"execution_goal_id"`
-	EngineReleaseID          string         `json:"engine_release_id"`
-	CapabilityID             string         `json:"capability_id"`
-	Kind                     string         `json:"kind"`
-	OwnerModuleID            string         `json:"owner_module_id"`
-	RequestedExecutorActivity string        `json:"requested_executor_activity"`
-	ImplementationSHA256     string         `json:"implementation_sha256"`
-	PolicySHA256             string         `json:"policy_sha256"`
-	ParametersSHA256         string         `json:"parameters_sha256"`
-	CapabilityMetadata       map[string]any `json:"capability_metadata,omitempty"`
-	GoalParameters           map[string]any `json:"goal_parameters"`
-	InputArtifacts           []ArtifactRef  `json:"input_artifacts"`
+	ExecutionID               string         `json:"execution_id"`
+	CommandID                 string         `json:"command_id"`
+	AttemptID                 string         `json:"attempt_id"`
+	ExecutionGoalID           string         `json:"execution_goal_id"`
+	EngineReleaseID           string         `json:"engine_release_id"`
+	CapabilityID              string         `json:"capability_id"`
+	Kind                      string         `json:"kind"`
+	OwnerModuleID             string         `json:"owner_module_id"`
+	RequestedExecutorActivity string         `json:"requested_executor_activity"`
+	ImplementationSHA256      string         `json:"implementation_sha256"`
+	PolicySHA256              string         `json:"policy_sha256"`
+	ParametersSHA256          string         `json:"parameters_sha256"`
+	CapabilityMetadata        map[string]any `json:"capability_metadata,omitempty"`
+	GoalParameters            map[string]any `json:"goal_parameters"`
+	InputArtifacts            []ArtifactRef  `json:"input_artifacts"`
 }
 
 type EngineCapabilityFailure struct {
@@ -124,8 +124,8 @@ type CapabilityCommitRequest struct {
 }
 
 type CapabilityCommitResult struct {
-	CapabilityID     string   `json:"capability_id"`
-	Status           string   `json:"status"`
+	CapabilityID      string   `json:"capability_id"`
+	Status            string   `json:"status"`
 	OutputArtifactIDs []string `json:"output_artifact_ids,omitempty"`
 }
 

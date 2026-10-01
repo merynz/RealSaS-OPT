@@ -100,13 +100,13 @@ func TestPrepareAndFailExecutionPersistsLocalizedRepair(t *testing.T) {
 		t.Fatal(err)
 	}
 	commandPayload, err := json.Marshal(map[string]any{
-		"schema":           "RealSaS.CompileSubjectCommand.v1",
-		"command_id":       commandID.String(),
-		"attempt_id":       attemptID.String(),
-		"subject_id":       subjectID.String(),
+		"schema":            "RealSaS.CompileSubjectCommand.v1",
+		"command_id":        commandID.String(),
+		"attempt_id":        attemptID.String(),
+		"subject_id":        subjectID.String(),
 		"engine_release_id": releaseID.String(),
-		"subject_input_id": subjectInputID.String(),
-		"target_stage_id":  "46_PRODUCT_CLOSURE_SEAL",
+		"subject_input_id":  subjectInputID.String(),
+		"target_stage_id":   "46_PRODUCT_CLOSURE_SEAL",
 	})
 	if err != nil {
 		t.Fatal(err)

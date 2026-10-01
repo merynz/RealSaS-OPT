@@ -7,6 +7,7 @@ toolchain go1.27.1
 require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.11.0
+	github.com/minio/minio-go/v7 v7.3.0
 	github.com/pressly/goose/v3 v3.28.0
 	go.temporal.io/api v1.63.5
 	go.temporal.io/sdk v1.49.0

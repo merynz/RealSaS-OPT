@@ -61,7 +61,7 @@ type EngineOutput struct {
 	Role           string `json:"role"`
 	ArtifactType   string `json:"artifact_type"`
 	SchemaVersion  string `json:"schema_version"`
-	Path           string `json:"path"`
+	StorageKey     string `json:"storage_key"`
 	ContentSHA256  string `json:"content_sha256"`
 	SizeBytes      int64  `json:"size_bytes"`
 	AuthorityClass string `json:"authority_class"`

@@ -1,0 +1,49 @@
+name: recovery-stage37-visual-ownership-gate-v1
+
+on:
+  push:
+    branches:
+      - recovery/canonical-main-20261001
+    paths:
+      - 'compiler/realsas_compiler_core/visual_presentation_v1.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py'
+      - 'canonical/MAINLINE_EXECUTION_PLAN_V2.json'
+      - 'tests/compiler/test_visual_presentation_v1.py'
+      - 'tests/repository/test_source_owned_visual_runtime_wiring_v1.py'
+      - '.github/workflows/recovery_stage37_visual_ownership_gate_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stage37-ownership:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Seal recovery identity
+        run: |
+          set -euo pipefail
+          echo "RECOVERY_HEAD=$(git rev-parse HEAD)"
+
+      - name: Install pinned mainline test dependencies
+        run: python -m pip install -r requirements/mainline-ci.txt
+
+      - name: Typed visual presentation tests
+        env:
+          PYTHONPATH: .
+          PYTHONHASHSEED: "0"
+        run: |
+          python -m pytest -q             tests/compiler/test_visual_presentation_v1.py             tests/repository/test_source_owned_visual_runtime_wiring_v1.py
+
+      - name: Full subject-free compiler regression
+        env:
+          PYTHONPATH: .
+          PYTHONHASHSEED: "0"
+        run: python -m pytest -q tests/compiler

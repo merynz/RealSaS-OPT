@@ -1,0 +1,73 @@
+{
+  "schema": "RealSaS.AgentMemorySourceManifest.v1",
+  "generated_date": "2026-10-01",
+  "repository": "merynz/RealSaS-OPT",
+  "memory_branch": "alfred/repo-memory-map-20261001",
+  "observed_main_head": "a8002b20dd2710e6f8edc9317be640d3bc9330f3",
+  "authority_note": "NON_AUTHORITATIVE_DERIVED_MEMORY__STALE_IF_ANY_SOURCE_BLOB_CHANGES",
+  "sources": [
+    {
+      "path": "CURRENT_STATE.md",
+      "blob_sha": "c57d258d296c3ca0b88273465bd3aef4a5e84ce2"
+    },
+    {
+      "path": "canonical/V2_IMPLEMENTATION_READINESS.json",
+      "blob_sha": "3515527775aa5946063d67e015901e760011d27c"
+    },
+    {
+      "path": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
+      "blob_sha": "f0b605d09d5e9ecfac0abde01f3a95f1e6ae6f1a"
+    },
+    {
+      "path": "canonical/CONTEXT_STATE_V2.json",
+      "blob_sha": "7372eadf92784faadb2f363313c74e5ec8a1301d"
+    },
+    {
+      "path": "canonical/AUTHORITY_MAP_V1.json",
+      "blob_sha": "62ed367f3e0150a9f98c7d783a718e4293b74de0"
+    },
+    {
+      "path": "canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md",
+      "blob_sha": "5ddb3e936bf46717b7d2e4723ff21f7c440d48f7"
+    },
+    {
+      "path": "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
+      "blob_sha": "7b77742ae549b728149be350f09215fe0681bb12"
+    },
+    {
+      "path": "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json",
+      "blob_sha": "c0f7dd1c5f83bf1c817cc5d828591139c5269be1"
+    },
+    {
+      "path": "canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json",
+      "blob_sha": "f730af767e2f47c898c4244409df8fb5a8f47591"
+    },
+    {
+      "path": "canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json",
+      "blob_sha": "cfe674205624cb105e855a31f342988d04322dec"
+    },
+    {
+      "path": "canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json",
+      "blob_sha": "9ab97fb8fb1826fe35e9d8b3452520b6a0a477f0"
+    },
+    {
+      "path": "canonical/REHYDRATION_PACKET.md",
+      "blob_sha": "3e7ea52a29770eda0689f8d317f5a5b98d164ed5"
+    },
+    {
+      "path": "REPOSITORY_MAP.md",
+      "blob_sha": "50fbb0652b149696f268992e9106e6a870acb7d9"
+    },
+    {
+      "path": "SYSTEM_INDEX.md",
+      "blob_sha": "c40f5c0f578f21dae8a9fa198bf8c0d2bd471561"
+    }
+  ],
+  "historical_green": {
+    "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
+    "proof_heads": [
+      "44b148737dc1e7eadb23048834d2111744a12bc6",
+      "4419509ee0f62a7e5ca088b87feb682b1a664105"
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "files": [
+    {
+      "path": "models/iris/v5/contained_sparse_tetra_decoder_v5.py",
+      "sha256": "3645d4295591d07b27764f6033688e22e85acc6ac54db6cff5e20e8d7b15f89f",
+      "source_commit": "26c8a0dd8faba074b247f1b31161d4ac4cf17346"
+    },
+    {
+      "path": "models/iris/v5/learned_tail_localization_v5.py",
+      "sha256": "06dfb9399994099788bc181fffd7dccf11c1118c68c4c15a19786b8123da0c2c",
+      "source_commit": "c707c6c83ea479f9d5fef47af7df51491248479e"
+    },
+    {
+      "path": "models/iris/v5/shell_escape_diagnostics_v5.py",
+      "sha256": "c0f2f9c5dc402a190e6ab76455827bc0e4c72097eab635af7c9fd229ad9eef8c",
+      "source_commit": "695eb9e0dffe620b2cd990e4aa8b58d65d7d15a7"
+    }
+  ],
+  "knight_result_used": false,
+  "schema": "RealSaS.VF11X2V5SourceRestoration.v1",
+  "status": "PASS_EXACT_HISTORY_RESTORATION_AND_CONTRACTS",
+  "subject_inputs_used": false
+}

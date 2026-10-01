@@ -12,6 +12,32 @@ class Base(DeclarativeBase):
     pass
 
 
+class EngineReleaseRow(Base):
+    __tablename__ = "engine_releases"
+    __table_args__ = (
+        CheckConstraint("purpose IN ('PRODUCT','RESEARCH')", name="ck_engine_release_purpose"),
+    )
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    name: Mapped[str] = mapped_column(String(300), nullable=False)
+    release_sha256: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    purpose: Mapped[str] = mapped_column(String(20), nullable=False)
+    created_by: Mapped[str] = mapped_column(String(300), nullable=False)
+    sealed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class EngineReleaseStageRow(Base):
+    __tablename__ = "engine_release_stages"
+    __table_args__ = (
+        UniqueConstraint("release_id", "ordinal", name="uq_engine_release_stage_ordinal"),
+    )
+    release_id: Mapped[UUID] = mapped_column(ForeignKey("engine_releases.id", ondelete="RESTRICT"), primary_key=True)
+    stage_id: Mapped[str] = mapped_column(String(100), primary_key=True)
+    ordinal: Mapped[int] = mapped_column(Integer, nullable=False)
+    implementation_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    policy_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    semantic_parameters: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+
+
 class SubjectRow(Base):
     __tablename__ = "subjects"
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)

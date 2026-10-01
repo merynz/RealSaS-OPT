@@ -30,6 +30,52 @@ def require_sha256(value: str, label: str) -> str:
 
 
 @dataclass(frozen=True)
+class StageReleaseBinding:
+    ordinal: int
+    stage_id: str
+    implementation_sha256: str
+    policy_sha256: str
+    semantic_parameters: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if self.ordinal < 1 or not self.stage_id:
+            raise ValueError("invalid stage release binding")
+        require_sha256(self.implementation_sha256, "stage implementation_sha256")
+        require_sha256(self.policy_sha256, "stage policy_sha256")
+
+
+@dataclass(frozen=True)
+class EngineReleaseManifest:
+    name: str
+    purpose: str
+    stages: tuple[StageReleaseBinding, ...]
+    contract_version: str = "RealSaS.EngineReleaseManifest.v1"
+
+    def __post_init__(self) -> None:
+        if not self.name:
+            raise ValueError("engine release name is required")
+        if self.purpose not in {"PRODUCT", "RESEARCH"}:
+            raise ValueError("engine release purpose must be PRODUCT or RESEARCH")
+        if [x.ordinal for x in self.stages] != list(range(1, 47)):
+            raise ValueError("engine release must contain exact stage ordinals 1..46")
+        ids = [x.stage_id for x in self.stages]
+        if len(ids) != len(set(ids)):
+            raise ValueError("engine release stage ids must be unique")
+
+    def payload(self) -> Json:
+        return {
+            "contract_version": self.contract_version,
+            "name": self.name,
+            "purpose": self.purpose,
+            "stages": [asdict(x) for x in self.stages],
+        }
+
+    @property
+    def release_sha256(self) -> str:
+        return sha256_json(self.payload())
+
+
+@dataclass(frozen=True)
 class ArtifactInputIdentity:
     role: str
     ordinal: int

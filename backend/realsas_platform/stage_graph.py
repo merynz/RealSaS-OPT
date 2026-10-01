@@ -59,6 +59,20 @@ class StageGraph:
     def stages(self) -> tuple[StageContract, ...]:
         return self._stages
 
+    def ancestors_including(self, targets: Iterable[str]) -> tuple[str, ...]:
+        pending = list(dict.fromkeys(targets))
+        unknown = [x for x in pending if x not in self._by_id]
+        if unknown:
+            raise KeyError(f"unknown stage ids: {unknown}")
+        required = set(pending)
+        while pending:
+            current = pending.pop()
+            for parent in self._by_id[current].depends_on:
+                if parent not in required:
+                    required.add(parent)
+                    pending.append(parent)
+        return tuple(s.stage_id for s in self._stages if s.stage_id in required)
+
     def descendants_including(self, changed: Iterable[str]) -> tuple[str, ...]:
         pending = list(dict.fromkeys(changed))
         unknown = [x for x in pending if x not in self._by_id]

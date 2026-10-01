@@ -111,6 +111,43 @@ class ProductRevisionManifest:
 
 
 @dataclass(frozen=True)
+class StageOutputBinding:
+    role: str
+    artifact_type: str
+    artifact_semantic_sha256: str
+
+    def __post_init__(self) -> None:
+        if not self.role or not self.artifact_type:
+            raise ValueError("stage output role and artifact type are required")
+        require_sha256(self.artifact_semantic_sha256, "stage output artifact_semantic_sha256")
+
+
+@dataclass(frozen=True)
+class StageResultManifest:
+    stage_id: str
+    output_bindings: tuple[StageOutputBinding, ...]
+    contract_version: str = "RealSaS.StageResultManifest.v1"
+
+    def __post_init__(self) -> None:
+        if not self.stage_id:
+            raise ValueError("stage_id is required")
+        roles = [x.role for x in self.output_bindings]
+        if roles != sorted(roles) or len(roles) != len(set(roles)):
+            raise ValueError("stage output roles must be unique and lexicographically sorted")
+
+    def payload(self) -> Json:
+        return {
+            "contract_version": self.contract_version,
+            "stage_id": self.stage_id,
+            "output_bindings": [asdict(x) for x in self.output_bindings],
+        }
+
+    @property
+    def manifest_sha256(self) -> str:
+        return sha256_json(self.payload())
+
+
+@dataclass(frozen=True)
 class RenderRequestSpec:
     product_revision_manifest_sha256: str
     motion_artifact_semantic_sha256: str

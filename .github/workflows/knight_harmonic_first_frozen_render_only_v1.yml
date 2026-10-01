@@ -3,7 +3,7 @@ name: knight-harmonic-first-frozen-render-only-v1
 on:
   workflow_dispatch:
   push:
-    branches: [research/vf11-certified-adaptive-20260921]
+    branches: [integration/knight-latest-canonical-20261002]
     paths:
       - 'tools/demo/render_knight_harmonic_first_frozen_only_v1.py'
       - '.github/workflows/knight_harmonic_first_frozen_render_only_v1.yml'

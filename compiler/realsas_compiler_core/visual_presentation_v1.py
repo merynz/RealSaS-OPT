@@ -65,6 +65,7 @@ class QualifiedVisualPresentationSetIR:
     skin_topology_compatibility_report_hash: str
     appearance_asset_binding_hash: str
     appearance_qualification_binding_hash: str
+    presentation_policy_binding_hash: str
     views: tuple[QualifiedVisualPresentationViewIR, ...]
     set_hash: str
     schema_version: str = QUALIFIED_VISUAL_PRESENTATION_SET_SCHEMA
@@ -158,6 +159,7 @@ def validate_qualified_visual_presentation_set(
             "APPEARANCE_QUALIFICATION",
             value.appearance_qualification_binding_hash,
         ),
+        ("PRESENTATION_POLICY", value.presentation_policy_binding_hash),
         ("SET", value.set_hash),
     ):
         _require_hash(str(digest), label)
@@ -219,6 +221,9 @@ def qualified_visual_presentation_set_from_dict(
         ),
         appearance_qualification_binding_hash=str(
             payload["appearance_qualification_binding_hash"]
+        ),
+        presentation_policy_binding_hash=str(
+            payload["presentation_policy_binding_hash"]
         ),
         views=views,
         set_hash=str(payload["set_hash"]),

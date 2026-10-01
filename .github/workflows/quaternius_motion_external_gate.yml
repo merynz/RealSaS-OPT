@@ -1,6 +1,14 @@
 name: quaternius-motion-external-gate
 
 on:
+  push:
+    branches: [recovery/canonical-main-20261001]
+    paths:
+      - 'tools/motion/materialize_quaternius_preset_v1.py'
+      - 'tools/motion/blender_extract_motion_source_v2.py'
+      - 'tests/compiler/test_quaternius_motion_materializer_v1.py'
+      - 'canonical/MOTION_PRESET_SOURCE_QUATERNIUS_KNIGHT_V1.json'
+      - '.github/workflows/quaternius_motion_external_gate.yml'
   pull_request:
     branches: [main]
     paths:

@@ -1,0 +1,76 @@
+name: recover-and-verify-knight-frozen-canonical
+
+on:
+  push:
+    branches: [integration/knight-latest-canonical-20261002]
+    paths: ['.github/workflows/recover_and_verify_knight_frozen_canonical.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      OLD_SOURCE_RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671
+      NEW_SOURCE_RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_RECOVERED_V1_643714DE
+      NEW_QUAL_RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_STAGE24_RECOVERED_V1_643714DE
+      OUT_DIR: /tmp/knight_harmonic_first_frozen_recovered_v1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Inspect historical seal and rebuild immutable Stage23
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ['AUTHORITY_ROOT'])/'runs'/os.environ['OLD_SOURCE_RUN_ID']
+          seal=json.load(open(root/'IMMUTABLE_STAGE23_SEAL.json',encoding='utf-8'))
+          ledger=json.load(open(root/'ACTIVE_RUN_V2.json',encoding='utf-8'))
+          row=next(x for x in ledger['stages'] if x['id']=='23_COMPLETE_APPEARANCE_ASSET_BAKED')
+          print(json.dumps({'seal':seal,'current_stage23_status':row.get('status')},sort_keys=True))
+          parent=seal['parent_run_id']
+          Path('/tmp/knight_parent_run_id.txt').write_text(parent)
+          PY
+          rm -rf "$AUTHORITY_ROOT/runs/$NEW_SOURCE_RUN_ID" "$AUTHORITY_ROOT/runs/$NEW_QUAL_RUN_ID" "$OUT_DIR"
+          parent="$(cat /tmp/knight_parent_run_id.txt)"
+          PYTHONPATH=. python tools/demo/build_knight_corrected_mechanical_caa_stage23_immutable_v1.py             --authority-root "$AUTHORITY_ROOT"             --parent-run-id "$parent"             --child-run-id "$NEW_SOURCE_RUN_ID"
+      - name: Qualify Stage24 and frozen-render recovered immutable state
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python tools/demo/consume_knight_corrected_mechanical_caa_stage23_immutable_v1.py             --authority-root "$AUTHORITY_ROOT"             --source-run-id "$NEW_SOURCE_RUN_ID"             --consumer-run-id "$NEW_QUAL_RUN_ID"             --out-dir "$OUT_DIR"
+      - name: Compare recovered state to frozen reference hashes
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import sha256_file
+          out=Path(os.environ['OUT_DIR'])
+          report=json.load(open(out/'REPORT.json',encoding='utf-8'))
+          expected={
+            'IDLE':'4c64437ba1f2ecaca8302a52c598f3ba7750a923fd50b90f7cafa3f8473386c3',
+            'RUN':'64ad50eeb9ea55ce202ddc46728ffea9074419dbf855938840f69d06661806e3',
+            'SLASH':'adc8e8cd0e2272a836e50f7a73585208074703ea5f3c9a549583d7a659fa2b85',
+          }
+          actual={row['name']:row['sha256'] for row in report['gifs']}
+          print(json.dumps({'actual':actual,'expected':expected,'stage23':report['stage23_asset_hash'],'skin':report['skin_lineage_hash']},sort_keys=True))
+          if actual != expected:
+              raise SystemExit('FROZEN_RENDER_HASH_MISMATCH')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: knight-frozen-canonical-recovered
+          path: |
+            /tmp/knight_harmonic_first_frozen_recovered_v1/*.gif
+            /tmp/knight_harmonic_first_frozen_recovered_v1/REPORT.json
+            /tmp/knight_harmonic_first_frozen_recovered_v1/frozen_renderer/*.png
+            /tmp/knight_harmonic_first_frozen_recovered_v1/frozen_renderer/*.json
+          if-no-files-found: error
+          retention-days: 30

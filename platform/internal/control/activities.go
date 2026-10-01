@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/merynz/RealSaS-OPT/platform/internal/artifactstore"
 	"github.com/merynz/RealSaS-OPT/platform/internal/diagnostic"
 	"github.com/merynz/RealSaS-OPT/platform/internal/input"
 	"github.com/merynz/RealSaS-OPT/platform/internal/orchestration"
@@ -24,6 +25,7 @@ import (
 type Activities struct {
 	Pool  *pgxpool.Pool
 	Graph *stagegraph.Graph
+	Store artifactstore.Store
 }
 
 func (a Activities) Validate() error {

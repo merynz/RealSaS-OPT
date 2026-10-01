@@ -65,6 +65,84 @@ type ResolvedCapabilityGoal struct {
 	Steps               []CapabilityStep `json:"steps"`
 }
 
+type ArtifactRef struct {
+	ID             string `json:"id"`
+	Role           string `json:"role"`
+	ArtifactType   string `json:"artifact_type"`
+	SchemaVersion  string `json:"schema_version"`
+	SemanticSHA256 string `json:"semantic_sha256"`
+	StorageKey     string `json:"storage_key"`
+	ContentSHA256  string `json:"content_sha256"`
+	SizeBytes      int64  `json:"size_bytes"`
+}
+
+type PrepareCapabilityExecutionRequest struct {
+	CommandID       string         `json:"command_id"`
+	AttemptID       string         `json:"attempt_id"`
+	ExecutionGoalID string         `json:"execution_goal_id"`
+	EngineReleaseID string         `json:"engine_release_id"`
+	Step            CapabilityStep `json:"step"`
+	GoalParameters  map[string]any `json:"goal_parameters"`
+}
+
+type EngineCapabilityRequest struct {
+	ExecutionID              string         `json:"execution_id"`
+	CommandID                string         `json:"command_id"`
+	AttemptID                string         `json:"attempt_id"`
+	ExecutionGoalID          string         `json:"execution_goal_id"`
+	EngineReleaseID          string         `json:"engine_release_id"`
+	CapabilityID             string         `json:"capability_id"`
+	Kind                     string         `json:"kind"`
+	OwnerModuleID            string         `json:"owner_module_id"`
+	RequestedExecutorActivity string        `json:"requested_executor_activity"`
+	ImplementationSHA256     string         `json:"implementation_sha256"`
+	PolicySHA256             string         `json:"policy_sha256"`
+	ParametersSHA256         string         `json:"parameters_sha256"`
+	CapabilityMetadata       map[string]any `json:"capability_metadata,omitempty"`
+	GoalParameters           map[string]any `json:"goal_parameters"`
+	InputArtifacts           []ArtifactRef  `json:"input_artifacts"`
+}
+
+type EngineCapabilityFailure struct {
+	Code                  string         `json:"code"`
+	Class                 string         `json:"class"`
+	ReportedOwnerModuleID string         `json:"reported_owner_module_id,omitempty"`
+	Diagnostics           map[string]any `json:"diagnostics,omitempty"`
+}
+
+type EngineCapabilityResult struct {
+	CapabilityID string                   `json:"capability_id"`
+	Status       string                   `json:"status"`
+	Outputs      []EngineOutput           `json:"outputs"`
+	Diagnostics  map[string]any           `json:"diagnostics,omitempty"`
+	Failure      *EngineCapabilityFailure `json:"failure,omitempty"`
+}
+
+type CapabilityCommitRequest struct {
+	Request EngineCapabilityRequest `json:"request"`
+	Result  EngineCapabilityResult  `json:"result"`
+}
+
+type CapabilityCommitResult struct {
+	CapabilityID     string   `json:"capability_id"`
+	Status           string   `json:"status"`
+	OutputArtifactIDs []string `json:"output_artifact_ids,omitempty"`
+}
+
+type CapabilityActivityErrorRequest struct {
+	ExecutionID   string `json:"execution_id"`
+	AttemptID     string `json:"attempt_id"`
+	CapabilityID  string `json:"capability_id"`
+	OwnerModuleID string `json:"owner_module_id"`
+	Error         string `json:"error"`
+}
+
+type CapabilityWorkflowResult struct {
+	AttemptID string                   `json:"attempt_id"`
+	Status    string                   `json:"status"`
+	Completed []CapabilityCommitResult `json:"completed"`
+}
+
 type RenderWorkflowInput struct {
 	CommandID                   string `json:"command_id"`
 	SubjectID                   string `json:"subject_id"`

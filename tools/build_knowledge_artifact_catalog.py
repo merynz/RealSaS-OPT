@@ -147,7 +147,7 @@ def fetch_branch_for_census(branch: str) -> str:
 def is_high_signal(path: str) -> bool:
     p = Path(path)
     name = p.name
-    if path in {"CURRENT_STATE.md", "RESTORATION_STATE.md", "REPOSITORY_MAP.md", "SYSTEM_INDEX.md", "AGENTS.md"}:
+    if path in {"CURRENT_STATE.md", "REPOSITORY_MAP.md", "SYSTEM_INDEX.md", "AGENTS.md"}:
         return True
     if path.startswith("prereg/"):
         return True

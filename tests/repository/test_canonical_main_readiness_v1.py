@@ -68,7 +68,6 @@ class CanonicalMainReadinessV1(unittest.TestCase):
             "runtime/realsas_cpp/CMakeLists.txt",
             "runtime/reference_v4/consumer.py",
             "SYSTEM_INDEX.md",
-            "RESTORATION_STATE.md",
         )
         missing = [path for path in required if not (ROOT / path).is_file()]
         self.assertEqual(missing, [], "missing canonical mainline files:\n" + "\n".join(missing))
@@ -157,7 +156,7 @@ class CanonicalMainReadinessV1(unittest.TestCase):
 
     def test_historical_prefit_gate_is_preserved_but_not_current_authority(self) -> None:
         gate = json.loads((ROOT / "canonical/CANONICAL_MAIN_BEFORE_FIT_GATE_V1_20260904.json").read_text(encoding="utf-8"))
-        restoration = (ROOT / "RESTORATION_STATE.md").read_text(encoding="utf-8")
+        restoration = (ROOT / "historical/repository/RESTORATION_STATE_20260904.md").read_text(encoding="utf-8")
         current = (ROOT / "CURRENT_STATE.md").read_text(encoding="utf-8")
         self.assertFalse(bool(gate["fit_authorized_now"]))
         self.assertIn("SUPERSEDED FOR CONTINUATION", restoration)
@@ -170,7 +169,7 @@ class CanonicalMainReadinessV1(unittest.TestCase):
         self.assertIn("Appearance", current)
 
     def test_state_and_index_point_to_current_product_authorities(self) -> None:
-        restoration = (ROOT / "RESTORATION_STATE.md").read_text(encoding="utf-8")
+        restoration = (ROOT / "historical/repository/RESTORATION_STATE_20260904.md").read_text(encoding="utf-8")
         state = (ROOT / "CURRENT_STATE.md").read_text(encoding="utf-8")
         index = (ROOT / "SYSTEM_INDEX.md").read_text(encoding="utf-8")
         self.assertIn("SUPERSEDED FOR CONTINUATION", restoration)

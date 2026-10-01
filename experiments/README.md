@@ -16,7 +16,7 @@ Common families currently present include:
 - geometry, appearance, motion and deformation behavioral probes;
 - exact/synthetic/one-family E2E harnesses.
 
-The active scientific authorization state is defined by `CURRENT_STATE.md` on canonical main and by `RESTORATION_STATE.md` while the restoration branch is open.
+The active scientific authorization state is defined by `CURRENT_STATE.md` on canonical main. Historical restoration-era state is preserved at `historical/repository/RESTORATION_STATE_20260904.md` and is never continuation authority.
 
 ## New experiment contract
 

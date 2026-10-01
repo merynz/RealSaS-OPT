@@ -85,8 +85,8 @@ func TestCompileCommandIsTransactionalAndIdempotent(t *testing.T) {
 	}
 
 	req := CompileRequest{
-		SubjectID:       subjectID,
-		EngineReleaseID: sealedRelease.ReleaseID,
+		SubjectID:          subjectID,
+		EngineReleaseID:    sealedRelease.ReleaseID,
 		SubjectInputID:     sealedInput.SubjectInputID,
 		CompilerRunID:      "run-" + subjectID.String(),
 		RunManifestPath:    "/authority/run_manifest.json",

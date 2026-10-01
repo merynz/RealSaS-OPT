@@ -173,8 +173,8 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 			"subject_input_id":              req.SubjectInputID.String(),
 			"subject_input_manifest_sha256": inputManifestSHA,
 			"target_stage_id":               req.TargetStageID,
-			"compiler_run_id":                req.CompilerRunID,
-			"pipeline_plan_sha256":           req.PipelinePlanSHA256,
+			"compiler_run_id":               req.CompilerRunID,
+			"pipeline_plan_sha256":          req.PipelinePlanSHA256,
 		}
 		specSHA, err := semantic.JSONSHA256(spec)
 		if err != nil {
@@ -200,17 +200,17 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 		}
 
 		payload := map[string]any{
-			"schema":            "RealSaS.CompileSubjectCommand.v1",
-			"command_id":        commandID.String(),
-			"attempt_id":        attemptID.String(),
-			"subject_id":        req.SubjectID.String(),
-			"engine_release_id": req.EngineReleaseID.String(),
-			"subject_input_id":      req.SubjectInputID.String(),
-			"target_stage_id":       req.TargetStageID,
-			"compiler_run_id":       req.CompilerRunID,
-			"run_manifest_path":     req.RunManifestPath,
-			"run_ledger_path":       req.RunLedgerPath,
-			"pipeline_plan_sha256":  req.PipelinePlanSHA256,
+			"schema":               "RealSaS.CompileSubjectCommand.v1",
+			"command_id":           commandID.String(),
+			"attempt_id":           attemptID.String(),
+			"subject_id":           req.SubjectID.String(),
+			"engine_release_id":    req.EngineReleaseID.String(),
+			"subject_input_id":     req.SubjectInputID.String(),
+			"target_stage_id":      req.TargetStageID,
+			"compiler_run_id":      req.CompilerRunID,
+			"run_manifest_path":    req.RunManifestPath,
+			"run_ledger_path":      req.RunLedgerPath,
+			"pipeline_plan_sha256": req.PipelinePlanSHA256,
 		}
 		if err := insertCommand(ctx, tx, commandID, CompileSubject, req.SubjectID, req.IdempotencyKey, payload); err != nil {
 			return err
@@ -219,12 +219,12 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 			return err
 		}
 		if err := appendAudit(ctx, tx, req.RequestedBy, "COMPILE_COMMAND_ACCEPTED", req.SubjectID, &attemptID, nil, map[string]any{
-			"command_id":        commandID.String(),
-			"engine_release_id": req.EngineReleaseID.String(),
-			"subject_input_id":      req.SubjectInputID.String(),
-			"target_stage_id":       req.TargetStageID,
-			"compiler_run_id":       req.CompilerRunID,
-			"pipeline_plan_sha256":  req.PipelinePlanSHA256,
+			"command_id":           commandID.String(),
+			"engine_release_id":    req.EngineReleaseID.String(),
+			"subject_input_id":     req.SubjectInputID.String(),
+			"target_stage_id":      req.TargetStageID,
+			"compiler_run_id":      req.CompilerRunID,
+			"pipeline_plan_sha256": req.PipelinePlanSHA256,
 		}); err != nil {
 			return err
 		}

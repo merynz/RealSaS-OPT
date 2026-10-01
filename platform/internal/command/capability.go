@@ -19,13 +19,13 @@ import (
 const RunCapability = "RUN_CAPABILITY"
 
 type CapabilityRunRequest struct {
-	EngineReleaseID uuid.UUID
-	SubjectID       *uuid.UUID
-	Targets         []string
+	EngineReleaseID  uuid.UUID
+	SubjectID        *uuid.UUID
+	Targets          []string
 	InputArtifactIDs []uuid.UUID
-	Parameters      map[string]any
-	IdempotencyKey  string
-	RequestedBy     string
+	Parameters       map[string]any
+	IdempotencyKey   string
+	RequestedBy      string
 }
 
 type CapabilityReceipt struct {
@@ -54,8 +54,8 @@ func SubmitCapabilityRun(
 		return CapabilityReceipt{}, err
 	}
 	goal := capability.Goal{
-		Type: capability.GoalDeveloperRun,
-		Targets: append([]string(nil), req.Targets...),
+		Type:            capability.GoalDeveloperRun,
+		Targets:         append([]string(nil), req.Targets...),
 		PromotionPolicy: capability.PromotionNever,
 	}
 	resolved, err := goal.Validate(snapshot.Registry)
@@ -96,15 +96,15 @@ func SubmitCapabilityRun(
 	}
 
 	spec := map[string]any{
-		"schema":                 "RealSaS.DeveloperCapabilityRunSpec.v1",
-		"engine_release_id":      req.EngineReleaseID.String(),
-		"engine_release_sha256":  releaseSHA,
-		"capability_set_sha256":  snapshot.CapabilitySetSHA256,
-		"targets":                req.Targets,
-		"resolved_capabilities":  resolvedIDs,
-		"input_artifacts":        artifactRows,
-		"parameters":             req.Parameters,
-		"promotion_policy":       string(capability.PromotionNever),
+		"schema":                "RealSaS.DeveloperCapabilityRunSpec.v1",
+		"engine_release_id":     req.EngineReleaseID.String(),
+		"engine_release_sha256": releaseSHA,
+		"capability_set_sha256": snapshot.CapabilitySetSHA256,
+		"targets":               req.Targets,
+		"resolved_capabilities": resolvedIDs,
+		"input_artifacts":       artifactRows,
+		"parameters":            req.Parameters,
+		"promotion_policy":      string(capability.PromotionNever),
 	}
 	if req.SubjectID != nil {
 		spec["subject_id"] = req.SubjectID.String()
@@ -171,13 +171,13 @@ func SubmitCapabilityRun(
 			return err
 		}
 		payload := map[string]any{
-			"schema":               "RealSaS.RunCapabilityCommand.v1",
-			"command_id":           commandID.String(),
-			"attempt_id":           attemptID.String(),
-			"execution_goal_id":    goalID.String(),
-			"engine_release_id":    req.EngineReleaseID.String(),
+			"schema":                "RealSaS.RunCapabilityCommand.v1",
+			"command_id":            commandID.String(),
+			"attempt_id":            attemptID.String(),
+			"execution_goal_id":     goalID.String(),
+			"engine_release_id":     req.EngineReleaseID.String(),
 			"capability_set_sha256": snapshot.CapabilitySetSHA256,
-			"spec_sha256":          specSHA,
+			"spec_sha256":           specSHA,
 		}
 		if req.SubjectID != nil {
 			payload["subject_id"] = req.SubjectID.String()
@@ -197,11 +197,11 @@ func SubmitCapabilityRun(
 			return err
 		}
 		auditBody, _ := json.Marshal(map[string]any{
-			"command_id": commandID.String(),
-			"execution_goal_id": goalID.String(),
-			"targets": req.Targets,
+			"command_id":            commandID.String(),
+			"execution_goal_id":     goalID.String(),
+			"targets":               req.Targets,
 			"resolved_capabilities": resolvedIDs,
-			"promotion_policy": "NEVER",
+			"promotion_policy":      "NEVER",
 		})
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO audit_events(actor,action,subject_id,attempt_id,payload)

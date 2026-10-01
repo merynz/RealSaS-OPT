@@ -18,41 +18,51 @@ func TestGlobalDeveloperCapabilityRunNeedsNoSyntheticSubject(t *testing.T) {
 	}
 	ctx := context.Background()
 	pool, err := persistence.Open(ctx, dsn)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	defer pool.Close()
 
 	releaseID := uuid.New()
 	if _, err := pool.Exec(ctx, `
 		INSERT INTO engine_releases(id,name,release_sha256,purpose,created_by,sealed_at)
 		VALUES ($1,$2,$3,'RESEARCH','ci',now())
-	`, releaseID, "developer-"+releaseID.String(), hex64("a")); err != nil { t.Fatal(err) }
+	`, releaseID, "developer-"+releaseID.String(), hex64("a")); err != nil {
+		t.Fatal(err)
+	}
 
 	descriptor := capability.Descriptor{
-		ID: "model/iris.infer",
-		Kind: capability.KindModel,
-		OwnerModuleID: "engine.model.iris",
+		ID:               "model/iris.infer",
+		Kind:             capability.KindModel,
+		OwnerModuleID:    "engine.model.iris",
 		ExecutorActivity: "engine.execute_model.v1",
-		AllowedModes: []capability.Mode{capability.ModeDeveloper},
+		AllowedModes:     []capability.Mode{capability.ModeDeveloper},
 	}
 	setSHA, err := capability.SealReleaseSnapshot(ctx, pool, releaseID, []capability.ReleaseBinding{{
 		Descriptor: descriptor,
 		Version: capability.VersionIdentity{
 			ImplementationSHA256: hex64("b"),
-			PolicySHA256: hex64("c"),
-			ParametersSHA256: hex64("d"),
+			PolicySHA256:         hex64("c"),
+			ParametersSHA256:     hex64("d"),
 		},
 	}}, "ci")
-	if err != nil { t.Fatal(err) }
-	if setSHA == "" { t.Fatal("capability set sha missing") }
+	if err != nil {
+		t.Fatal(err)
+	}
+	if setSHA == "" {
+		t.Fatal("capability set sha missing")
+	}
 
 	receipt, err := SubmitCapabilityRun(ctx, pool, CapabilityRunRequest{
 		EngineReleaseID: releaseID,
-		Targets: []string{"model/iris.infer"},
-		Parameters: map[string]any{"view_count": 2},
-		IdempotencyKey: "developer-"+releaseID.String(),
-		RequestedBy: "ci",
+		Targets:         []string{"model/iris.infer"},
+		Parameters:      map[string]any{"view_count": 2},
+		IdempotencyKey:  "developer-" + releaseID.String(),
+		RequestedBy:     "ci",
 	})
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	var subject *uuid.UUID
 	var kind string
 	if err := pool.QueryRow(ctx, "SELECT subject_id,kind FROM attempts WHERE id=$1", receipt.AttemptID).Scan(&subject, &kind); err != nil {
@@ -81,6 +91,8 @@ func TestGlobalDeveloperCapabilityRunNeedsNoSyntheticSubject(t *testing.T) {
 
 func hex64(ch string) string {
 	out := ""
-	for len(out) < 64 { out += ch }
+	for len(out) < 64 {
+		out += ch
+	}
 	return out[:64]
 }

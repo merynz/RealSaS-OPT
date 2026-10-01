@@ -146,7 +146,7 @@ func SealReleaseSnapshot(
 		return "", ErrCapabilitySnapshotAlreadySealed
 	}
 	audit, _ := json.Marshal(map[string]any{
-		"engine_release_id":      releaseID.String(),
+		"engine_release_id":     releaseID.String(),
 		"capability_set_sha256": setSHA,
 		"capability_count":      len(normalized),
 	})
@@ -229,9 +229,9 @@ func LoadReleaseSnapshot(
 		return ReleaseSnapshot{}, fmt.Errorf("CAPABILITY_SET_HASH_DRIFT:%s!=%s", recomputedSHA, *setSHA)
 	}
 	return ReleaseSnapshot{
-		ReleaseID: releaseID,
+		ReleaseID:           releaseID,
 		CapabilitySetSHA256: *setSHA,
-		Registry: registry,
-		Versions: versions,
+		Registry:            registry,
+		Versions:            versions,
 	}, nil
 }

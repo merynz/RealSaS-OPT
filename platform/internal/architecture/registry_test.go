@@ -37,11 +37,11 @@ func TestEveryCanonicalStageHasOneExactOwner(t *testing.T) {
 		t.Fatalf("stages=%d", len(r.Stages))
 	}
 	cases := map[string]string{
-		"10_IRIS_FIT":                          "engine.geometry",
-		"35_DYNAMIC_MECHANICAL_MESH_QUALIFIED": "engine.mesh",
-		"37_QUALIFIED_PRESENTATION_STRUCTURE":  "engine.presentation",
+		"10_IRIS_FIT":                           "engine.geometry",
+		"35_DYNAMIC_MECHANICAL_MESH_QUALIFIED":  "engine.mesh",
+		"37_QUALIFIED_PRESENTATION_STRUCTURE":   "engine.presentation",
 		"42_RUNTIME_PROJECTION_AND_CAA_BINDING": "engine.runtime_binding",
-		"46_PRODUCT_CLOSURE_SEAL":              "engine.closure",
+		"46_PRODUCT_CLOSURE_SEAL":               "engine.closure",
 	}
 	for stageID, wantOwner := range cases {
 		stage, ok := r.Stage(stageID)

@@ -1,0 +1,10 @@
+{
+  "schema": "RealSaS.PlatformWorkerSeamStaticGate.v1",
+  "status": "FAIL",
+  "source_head": "927c81e3851f45ef85caff48f5e3496e11f393a8",
+  "workflow_run_id": "36922996718",
+  "go_gate": "failure",
+  "python_gate": "success",
+  "temporal_cross_language_e2e": false,
+  "knight_render_executed": false
+}

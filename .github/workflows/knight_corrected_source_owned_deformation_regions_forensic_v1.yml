@@ -5,6 +5,7 @@ on:
     branches:
       - integration/final-main-knight-platform-20261002
       - main
+      - audit/appearance-runtime-dataflow-20261002
     paths:
       - .github/workflows/knight_corrected_source_owned_deformation_regions_forensic_v1.yml
 
@@ -21,7 +22,7 @@ jobs:
     timeout-minutes: 35
     env:
       AUTHORITY_ROOT: /home/monster/realsas_authority
-      RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671
+      RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
       OUT_DIR: canonical/knight_corrected_source_owned_deformation_regions_forensic_v1
       PLAYER: /tmp/realsas_native_visual_mesh_corrected_forensic_v1
       PYTHONPATH: .

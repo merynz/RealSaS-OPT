@@ -199,7 +199,7 @@ func (a Activities) PrepareStageExecution(ctx context.Context, req orchestration
 		SubjectID:              req.SubjectID,
 		EngineReleaseID:        req.EngineReleaseID,
 		CompilerRunID:          compilerRunID,
-		PipelinePlanSHA256:      planSHA,
+		PipelinePlanSHA256:     planSHA,
 		StageID:                req.StageID,
 		ExpectedSemanticSHA256: req.ExpectedSemanticSHA256,
 		AllowedExecuteStageIDs: append([]string(nil), req.AllowedExecuteStageIDs...),
@@ -325,10 +325,10 @@ func (a Activities) CommitStageResult(ctx context.Context, req orchestration.Sta
 			evidence = *req.EngineResult.Failure
 		}
 		errorPayload, _ := json.Marshal(map[string]any{
-			"compiler_status":     req.EngineResult.Status,
-			"executed_stage_ids":  req.EngineResult.ExecutedStageIDs,
-			"diagnostics_hash":    req.EngineResult.DiagnosticsHash,
-			"failure":             evidence,
+			"compiler_status":    req.EngineResult.Status,
+			"executed_stage_ids": req.EngineResult.ExecutedStageIDs,
+			"diagnostics_hash":   req.EngineResult.DiagnosticsHash,
+			"failure":            evidence,
 		})
 		if _, err := tx.Exec(ctx, `
 			UPDATE executions

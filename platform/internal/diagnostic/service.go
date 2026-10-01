@@ -15,12 +15,12 @@ import (
 )
 
 type Record struct {
-	FailureSignatureID uuid.UUID
-	OwnerAttributionID uuid.UUID
-	RepairDirectiveID  uuid.UUID
-	OwnerStageID       string
+	FailureSignatureID  uuid.UUID
+	OwnerAttributionID  uuid.UUID
+	RepairDirectiveID   uuid.UUID
+	OwnerStageID        string
 	InvalidatedStageIDs []string
-	SignatureSHA256    string
+	SignatureSHA256     string
 }
 
 func RecordFailure(

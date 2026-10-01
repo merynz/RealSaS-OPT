@@ -7,16 +7,16 @@ const (
 	CompileWorkflowName = "realsas.compile.v1"
 	RenderWorkflowName  = "realsas.render.v1"
 
-	ResolveCompilePlanActivityName      = "platform.resolve_compile_plan.v1"
-	PrepareStageExecutionActivityName   = "platform.prepare_stage_execution.v1"
-	BindReusedStageActivityName         = "platform.bind_reused_stage.v1"
+	ResolveCompilePlanActivityName       = "platform.resolve_compile_plan.v1"
+	PrepareStageExecutionActivityName    = "platform.prepare_stage_execution.v1"
+	BindReusedStageActivityName          = "platform.bind_reused_stage.v1"
 	RecordStageActivityErrorActivityName = "platform.record_stage_activity_error.v1"
-	CommitStageResultActivityName    = "platform.commit_stage_result.v1"
-	FinalizeCompileActivityName      = "platform.finalize_compile_attempt.v1"
-	EngineExecuteStageActivityName   = "engine.execute_compile_stage.v1"
-	ResolveRenderRequestActivityName = "platform.resolve_render_request.v1"
-	EngineRenderTailActivityName     = "engine.render_runtime_tail.v1"
-	CommitRenderOutputActivityName   = "platform.commit_render_output.v1"
+	CommitStageResultActivityName        = "platform.commit_stage_result.v1"
+	FinalizeCompileActivityName          = "platform.finalize_compile_attempt.v1"
+	EngineExecuteStageActivityName       = "engine.execute_compile_stage.v1"
+	ResolveRenderRequestActivityName     = "platform.resolve_render_request.v1"
+	EngineRenderTailActivityName         = "engine.render_runtime_tail.v1"
+	CommitRenderOutputActivityName       = "platform.commit_render_output.v1"
 )
 
 type CompileWorkflowInput struct {
@@ -66,7 +66,7 @@ type EngineStageRequest struct {
 	SubjectID              string   `json:"subject_id"`
 	EngineReleaseID        string   `json:"engine_release_id"`
 	CompilerRunID          string   `json:"compiler_run_id"`
-	PipelinePlanSHA256      string   `json:"pipeline_plan_sha256"`
+	PipelinePlanSHA256     string   `json:"pipeline_plan_sha256"`
 	StageID                string   `json:"stage_id"`
 	ExpectedSemanticSHA256 string   `json:"expected_semantic_sha256"`
 	AllowedExecuteStageIDs []string `json:"allowed_execute_stage_ids"`

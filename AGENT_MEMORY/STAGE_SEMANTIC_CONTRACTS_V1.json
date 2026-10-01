@@ -1,0 +1,1293 @@
+{
+  "schema": "RealSaS.AgentStageSemanticContracts.v1",
+  "generated_date": "2026-10-01",
+  "authority": "NON_AUTHORITATIVE_DERIVED_MEMORY",
+  "source_stage_graph_blob_sha": "5380118bdb0f6b1696ad506080e835bef41edb26",
+  "observed_recovery_head": "b6124442dfb91b486d574ef6af780aa4797df394",
+  "rule": "Stage graph supplies complete 46-stage structure; semantic contracts add authority/invariant/output/consumer meaning. Exact source and canonical policy outrank this derived map.",
+  "stage_count": 46,
+  "contracts": [
+    {
+      "ordinal": 1,
+      "id": "01_SOURCE_BYTES_SEALED",
+      "title": "Source bytes sealed",
+      "group": "source",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.source:seal_source_bytes",
+      "inputs": [],
+      "authority": "source/provenance authority",
+      "invariants": [
+        "source identity and provenance are immutable once sealed"
+      ],
+      "outputs": [
+        "01_SOURCE_BYTES_SEALED.qualified_output"
+      ],
+      "consumers": [
+        "02_SOURCE_LICENSE_PROVENANCE",
+        "03_SOURCE_MECHANICAL_AUDIT"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 2,
+      "id": "02_SOURCE_LICENSE_PROVENANCE",
+      "title": "Source/license provenance sealed",
+      "group": "source",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.source:seal_source_license_provenance",
+      "inputs": [
+        "01_SOURCE_BYTES_SEALED"
+      ],
+      "authority": "source/provenance authority",
+      "invariants": [
+        "source identity and provenance are immutable once sealed"
+      ],
+      "outputs": [
+        "02_SOURCE_LICENSE_PROVENANCE.qualified_output"
+      ],
+      "consumers": [
+        "03_SOURCE_MECHANICAL_AUDIT"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 3,
+      "id": "03_SOURCE_MECHANICAL_AUDIT",
+      "title": "Source mechanical audit",
+      "group": "source",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:audit_source_mechanics_stage",
+      "inputs": [
+        "01_SOURCE_BYTES_SEALED",
+        "02_SOURCE_LICENSE_PROVENANCE"
+      ],
+      "authority": "source/provenance authority",
+      "invariants": [
+        "source identity and provenance are immutable once sealed"
+      ],
+      "outputs": [
+        "03_SOURCE_MECHANICAL_AUDIT.qualified_output"
+      ],
+      "consumers": [
+        "04_FULL_SUBJECT_ADMISSION",
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 4,
+      "id": "04_FULL_SUBJECT_ADMISSION",
+      "title": "Full-subject admission",
+      "group": "observation",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:admit_full_subject_stage",
+      "inputs": [
+        "03_SOURCE_MECHANICAL_AUDIT"
+      ],
+      "authority": "qualified observation authority",
+      "invariants": [
+        "camera/view observations must remain bound to exact source and camera contracts"
+      ],
+      "outputs": [
+        "04_FULL_SUBJECT_ADMISSION.qualified_output"
+      ],
+      "consumers": [
+        "06_OBSERVATION_RENDER_8VIEW",
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 5,
+      "id": "05_CAMERA_CONTRACT_SOLVED",
+      "title": "Common 8-view camera contract",
+      "group": "observation",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.observation_v2:qualify_camera_contract_stage",
+      "inputs": [],
+      "authority": "qualified observation authority",
+      "invariants": [
+        "camera/view observations must remain bound to exact source and camera contracts"
+      ],
+      "outputs": [
+        "05_CAMERA_CONTRACT_SOLVED.qualified_output"
+      ],
+      "consumers": [
+        "06_OBSERVATION_RENDER_8VIEW",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+        "14_GSA_BUILD",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 6,
+      "id": "06_OBSERVATION_RENDER_8VIEW",
+      "title": "Materialize exact 8 source observations",
+      "group": "observation",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:materialize_observation_render_stage",
+      "inputs": [
+        "04_FULL_SUBJECT_ADMISSION",
+        "05_CAMERA_CONTRACT_SOLVED"
+      ],
+      "authority": "qualified observation authority",
+      "invariants": [
+        "camera/view observations must remain bound to exact source and camera contracts"
+      ],
+      "outputs": [
+        "06_OBSERVATION_RENDER_8VIEW.qualified_output"
+      ],
+      "consumers": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 7,
+      "id": "07_OBSERVATION_CONTRACT_QUALIFIED",
+      "title": "Observation contract qualification",
+      "group": "observation",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:qualify_observation_contract_stage",
+      "inputs": [
+        "03_SOURCE_MECHANICAL_AUDIT",
+        "04_FULL_SUBJECT_ADMISSION",
+        "05_CAMERA_CONTRACT_SOLVED",
+        "06_OBSERVATION_RENDER_8VIEW"
+      ],
+      "authority": "qualified observation authority",
+      "invariants": [
+        "camera/view observations must remain bound to exact source and camera contracts"
+      ],
+      "outputs": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED.qualified_output"
+      ],
+      "consumers": [
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "09_IRIS_FIT_PREREGISTERED",
+        "12_ZERO_SURFACE_DECODED",
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "20_CAA_BACKEND_PREREGISTERED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "41_MOTION_DYNAMIC_PROOF"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 8,
+      "id": "08_NORMALIZATION_DOMAIN_QUALIFIED",
+      "title": "Normalization/field-domain qualification",
+      "group": "geometry",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:qualify_normalization_domain_stage",
+      "inputs": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ],
+      "authority": "compiler-qualified geometric evidence",
+      "invariants": [
+        "learned geometry is evidence; compiler owns qualified canonical geometry"
+      ],
+      "outputs": [
+        "08_NORMALIZATION_DOMAIN_QUALIFIED.qualified_output"
+      ],
+      "consumers": [
+        "09_IRIS_FIT_PREREGISTERED",
+        "12_ZERO_SURFACE_DECODED",
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+        "14_GSA_BUILD"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 9,
+      "id": "09_IRIS_FIT_PREREGISTERED",
+      "title": "IRIS fit preregistration",
+      "group": "geometry",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:preregister_iris_fit_stage",
+      "inputs": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED"
+      ],
+      "authority": "compiler-qualified geometric evidence",
+      "invariants": [
+        "learned geometry is evidence; compiler owns qualified canonical geometry"
+      ],
+      "outputs": [
+        "09_IRIS_FIT_PREREGISTERED.qualified_output"
+      ],
+      "consumers": [
+        "10_IRIS_FIT"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 10,
+      "id": "10_IRIS_FIT",
+      "title": "IRIS signed-geometry fit",
+      "group": "geometry",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:execute_iris_fit_stage",
+      "inputs": [
+        "09_IRIS_FIT_PREREGISTERED"
+      ],
+      "authority": "compiler-qualified geometric evidence",
+      "invariants": [
+        "learned geometry is evidence; compiler owns qualified canonical geometry"
+      ],
+      "outputs": [
+        "10_IRIS_FIT.qualified_output"
+      ],
+      "consumers": [
+        "11_IRIS_CHECKPOINT_SEALED"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 11,
+      "id": "11_IRIS_CHECKPOINT_SEALED",
+      "title": "IRIS checkpoint seal",
+      "group": "geometry",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:seal_iris_checkpoint_stage",
+      "inputs": [
+        "10_IRIS_FIT"
+      ],
+      "authority": "compiler-qualified geometric evidence",
+      "invariants": [
+        "learned geometry is evidence; compiler owns qualified canonical geometry"
+      ],
+      "outputs": [
+        "11_IRIS_CHECKPOINT_SEALED.qualified_output"
+      ],
+      "consumers": [
+        "12_ZERO_SURFACE_DECODED",
+        "14_GSA_BUILD"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 12,
+      "id": "12_ZERO_SURFACE_DECODED",
+      "title": "Dense zero-surface decode",
+      "group": "geometry",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:decode_zero_surface_stage",
+      "inputs": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "11_IRIS_CHECKPOINT_SEALED"
+      ],
+      "authority": "compiler-qualified geometric evidence",
+      "invariants": [
+        "learned geometry is evidence; compiler owns qualified canonical geometry"
+      ],
+      "outputs": [
+        "12_ZERO_SURFACE_DECODED.qualified_output"
+      ],
+      "consumers": [
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+        "14_GSA_BUILD"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 13,
+      "id": "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+      "title": "Dense geometry substrate qualification; silhouette/coverage carrier proof only",
+      "group": "geometry",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:qualify_geometry_substrate_stage",
+      "inputs": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "12_ZERO_SURFACE_DECODED"
+      ],
+      "authority": "compiler-qualified geometric evidence",
+      "invariants": [
+        "learned geometry is evidence; compiler owns qualified canonical geometry"
+      ],
+      "outputs": [
+        "GeometrySubstrateQualificationIR"
+      ],
+      "consumers": [
+        "14_GSA_BUILD",
+        "15_RIGGING_SURFACE_QUALIFIED"
+      ],
+      "notes": [
+        "Compiler qualification boundary for IRIS geometry evidence."
+      ],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 14,
+      "id": "14_GSA_BUILD",
+      "title": "GSA build",
+      "group": "geometry",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:build_gsa_stage",
+      "inputs": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "11_IRIS_CHECKPOINT_SEALED",
+        "12_ZERO_SURFACE_DECODED",
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED"
+      ],
+      "authority": "compiler-qualified geometric evidence",
+      "invariants": [
+        "learned geometry is evidence; compiler owns qualified canonical geometry"
+      ],
+      "outputs": [
+        "GeometricSubstrateAssembler output",
+        "CompactedDenseFaceProvenance"
+      ],
+      "consumers": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD"
+      ],
+      "notes": [
+        "Topology-local normals and dense-face provenance are required; triangle cliques may not be minted from edges."
+      ],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 15,
+      "id": "15_RIGGING_SURFACE_QUALIFIED",
+      "title": "RiggingSurfaceIR qualification",
+      "group": "rig",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:qualify_rigging_surface_stage",
+      "inputs": [
+        "14_GSA_BUILD"
+      ],
+      "authority": "compiler-qualified rig authority",
+      "invariants": [
+        "learned skeleton proposals cannot become canonical without qualification"
+      ],
+      "outputs": [
+        "15_RIGGING_SURFACE_QUALIFIED.qualified_output"
+      ],
+      "consumers": [
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "26_GEPPETTO_FIT_PREREGISTERED",
+        "28_SKELETON_QUALIFIED",
+        "30_ARACHNE_FIT_PREREGISTERED",
+        "32_SKIN_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "38_CANONICAL_PUPPET_SEALED"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 16,
+      "id": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+      "title": "Eight output presentation directions sealed independently from source observation authority",
+      "group": "presentation_domain",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.v2_architecture:seal_output_presentation_directions_stage",
+      "inputs": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ],
+      "authority": "presentation direction contract",
+      "invariants": [
+        "output presentation directions are explicit sealed inputs"
+      ],
+      "outputs": [
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED.qualified_output"
+      ],
+      "consumers": [
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "20_CAA_BACKEND_PREREGISTERED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "38_CANONICAL_PUPPET_SEALED"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 17,
+      "id": "17_MECHANICAL_PARTITION_QUALIFIED",
+      "title": "Conservative mechanical partition and carrier policy",
+      "group": "components",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2:qualify_mechanical_partition_and_carriers",
+      "inputs": [
+        "15_RIGGING_SURFACE_QUALIFIED"
+      ],
+      "authority": "mechanical partition authority",
+      "invariants": [
+        "component boundaries may not be silently rewritten downstream"
+      ],
+      "outputs": [
+        "17_MECHANICAL_PARTITION_QUALIFIED.qualified_output"
+      ],
+      "consumers": [
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 18,
+      "id": "18_CANONICAL_MESH_ADDRESSING_BUILD",
+      "title": "Canonical mesh candidate plus stable surface addressing and appearance domain",
+      "group": "mesh",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.v2_architecture:build_canonical_mesh_addressing_stage",
+      "inputs": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "17_MECHANICAL_PARTITION_QUALIFIED"
+      ],
+      "authority": "canonical mechanical mesh authority",
+      "invariants": [
+        "topology/provenance must be justified upstream; repair creates new lineage"
+      ],
+      "outputs": [
+        "CanonicalMeshCandidateIR",
+        "VisualMeshSetIR",
+        "SurfaceAddressingIR"
+      ],
+      "consumers": [
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "20_CAA_BACKEND_PREREGISTERED",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE"
+      ],
+      "notes": [
+        "VisualMeshSet is source-owned visual substrate/candidate, not final presentation authority."
+      ],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 19,
+      "id": "19_STATIC_CANONICAL_MESH_QUALIFIED",
+      "title": "Static canonical carrier qualification before mechanics and appearance branches",
+      "group": "mesh",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.v2_architecture:qualify_static_canonical_mesh_stage",
+      "inputs": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD"
+      ],
+      "authority": "canonical mechanical mesh authority",
+      "invariants": [
+        "topology/provenance must be justified upstream; repair creates new lineage"
+      ],
+      "outputs": [
+        "19_STATIC_CANONICAL_MESH_QUALIFIED.qualified_output"
+      ],
+      "consumers": [
+        "20_CAA_BACKEND_PREREGISTERED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 20,
+      "id": "20_CAA_BACKEND_PREREGISTERED",
+      "title": "Complete Appearance Authority backend and contract preregistration",
+      "group": "appearance",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2:preregister_caa_backend_stage",
+      "inputs": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED"
+      ],
+      "authority": "source-owned appearance authority",
+      "invariants": [
+        "qualified source appearance wins; no runtime generation/correction"
+      ],
+      "outputs": [
+        "20_CAA_BACKEND_PREREGISTERED.qualified_output"
+      ],
+      "consumers": [
+        "21_CAA_COMPILE"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 21,
+      "id": "21_CAA_COMPILE",
+      "title": "Compile total appearance candidate over frozen mesh domain",
+      "group": "appearance",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2:compile_caa_stage",
+      "inputs": [
+        "20_CAA_BACKEND_PREREGISTERED"
+      ],
+      "authority": "source-owned appearance authority",
+      "invariants": [
+        "qualified source appearance wins; no runtime generation/correction"
+      ],
+      "outputs": [
+        "21_CAA_COMPILE.qualified_output"
+      ],
+      "consumers": [
+        "22_CAA_COMPILE_SEALED"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 22,
+      "id": "22_CAA_COMPILE_SEALED",
+      "title": "Seal deterministic or learned appearance compile execution",
+      "group": "appearance",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2:seal_caa_compile_stage",
+      "inputs": [
+        "21_CAA_COMPILE"
+      ],
+      "authority": "source-owned appearance authority",
+      "invariants": [
+        "qualified source appearance wins; no runtime generation/correction"
+      ],
+      "outputs": [
+        "22_CAA_COMPILE_SEALED.qualified_output"
+      ],
+      "consumers": [
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 23,
+      "id": "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+      "title": "Bake sealed premultiplied complete appearance asset",
+      "group": "appearance",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2:bake_complete_appearance_stage",
+      "inputs": [
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "22_CAA_COMPILE_SEALED"
+      ],
+      "authority": "source-owned appearance authority",
+      "invariants": [
+        "qualified source appearance wins; no runtime generation/correction"
+      ],
+      "outputs": [
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED.qualified_output"
+      ],
+      "consumers": [
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 24,
+      "id": "24_COMPLETE_APPEARANCE_QUALIFIED",
+      "title": "Qualify totality source-lock holdout seam sampling binding and exposure policy",
+      "group": "appearance",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2:qualify_complete_appearance_stage",
+      "inputs": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+      ],
+      "authority": "source-owned appearance authority",
+      "invariants": [
+        "qualified source appearance wins; no runtime generation/correction"
+      ],
+      "outputs": [
+        "CompleteAppearanceQualificationIR"
+      ],
+      "consumers": [
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF"
+      ],
+      "notes": [
+        "Source appearance qualification boundary."
+      ],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 25,
+      "id": "25_CAA_REFERENCE_REST_RENDER_PROOF",
+      "title": "Reference rest render proof with direction-class-specific evidence",
+      "group": "appearance",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2:prove_caa_reference_rest_stage",
+      "inputs": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED"
+      ],
+      "authority": "source-owned appearance authority",
+      "invariants": [
+        "qualified source appearance wins; no runtime generation/correction"
+      ],
+      "outputs": [
+        "25_CAA_REFERENCE_REST_RENDER_PROOF.qualified_output"
+      ],
+      "consumers": [
+        "39_MOTION_SOURCE_OR_PRESET_SEAL"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 26,
+      "id": "26_GEPPETTO_FIT_PREREGISTERED",
+      "title": "Geppetto fit preregistration",
+      "group": "rig",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:preregister_geppetto_fit_stage",
+      "inputs": [
+        "15_RIGGING_SURFACE_QUALIFIED"
+      ],
+      "authority": "compiler-qualified rig authority",
+      "invariants": [
+        "learned skeleton proposals cannot become canonical without qualification"
+      ],
+      "outputs": [
+        "26_GEPPETTO_FIT_PREREGISTERED.qualified_output"
+      ],
+      "consumers": [
+        "27_GEPPETTO_FIT"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 27,
+      "id": "27_GEPPETTO_FIT",
+      "title": "Geppetto fit",
+      "group": "rig",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:execute_geppetto_fit_stage",
+      "inputs": [
+        "26_GEPPETTO_FIT_PREREGISTERED"
+      ],
+      "authority": "compiler-qualified rig authority",
+      "invariants": [
+        "learned skeleton proposals cannot become canonical without qualification"
+      ],
+      "outputs": [
+        "27_GEPPETTO_FIT.qualified_output"
+      ],
+      "consumers": [
+        "28_SKELETON_QUALIFIED",
+        "29_GEPPETTO_CHECKPOINT_SEALED"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 28,
+      "id": "28_SKELETON_QUALIFIED",
+      "title": "Compiler skeleton qualification",
+      "group": "rig",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:qualify_skeleton_stage",
+      "inputs": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "27_GEPPETTO_FIT"
+      ],
+      "authority": "compiler-qualified rig authority",
+      "invariants": [
+        "learned skeleton proposals cannot become canonical without qualification"
+      ],
+      "outputs": [
+        "QualifiedSkeletonIR"
+      ],
+      "consumers": [
+        "29_GEPPETTO_CHECKPOINT_SEALED",
+        "30_ARACHNE_FIT_PREREGISTERED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE"
+      ],
+      "notes": [
+        "Canonical skeleton authority."
+      ],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 29,
+      "id": "29_GEPPETTO_CHECKPOINT_SEALED",
+      "title": "Geppetto checkpoint seal",
+      "group": "rig",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:seal_geppetto_checkpoint_stage",
+      "inputs": [
+        "27_GEPPETTO_FIT",
+        "28_SKELETON_QUALIFIED"
+      ],
+      "authority": "compiler-qualified rig authority",
+      "invariants": [
+        "learned skeleton proposals cannot become canonical without qualification"
+      ],
+      "outputs": [
+        "29_GEPPETTO_CHECKPOINT_SEALED.qualified_output"
+      ],
+      "consumers": [
+        "30_ARACHNE_FIT_PREREGISTERED"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 30,
+      "id": "30_ARACHNE_FIT_PREREGISTERED",
+      "title": "Arachne fit preregistration",
+      "group": "skin",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:preregister_arachne_fit_stage",
+      "inputs": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "29_GEPPETTO_CHECKPOINT_SEALED"
+      ],
+      "authority": "compiler-qualified skin authority",
+      "invariants": [
+        "learned skin proposals require compatibility and qualification"
+      ],
+      "outputs": [
+        "30_ARACHNE_FIT_PREREGISTERED.qualified_output"
+      ],
+      "consumers": [
+        "31_ARACHNE_FIT"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 31,
+      "id": "31_ARACHNE_FIT",
+      "title": "Arachne fit",
+      "group": "skin",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:execute_arachne_fit_stage",
+      "inputs": [
+        "30_ARACHNE_FIT_PREREGISTERED"
+      ],
+      "authority": "compiler-qualified skin authority",
+      "invariants": [
+        "learned skin proposals require compatibility and qualification"
+      ],
+      "outputs": [
+        "31_ARACHNE_FIT.qualified_output"
+      ],
+      "consumers": [
+        "32_SKIN_QUALIFIED",
+        "33_ARACHNE_CHECKPOINT_SEALED"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 32,
+      "id": "32_SKIN_QUALIFIED",
+      "title": "Compiler skin qualification",
+      "group": "skin",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:qualify_skin_stage",
+      "inputs": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "31_ARACHNE_FIT"
+      ],
+      "authority": "compiler-qualified skin authority",
+      "invariants": [
+        "learned skin proposals require compatibility and qualification"
+      ],
+      "outputs": [
+        "QualifiedSkinIR"
+      ],
+      "consumers": [
+        "33_ARACHNE_CHECKPOINT_SEALED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE"
+      ],
+      "notes": [
+        "Canonical skin authority."
+      ],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 33,
+      "id": "33_ARACHNE_CHECKPOINT_SEALED",
+      "title": "Arachne checkpoint seal",
+      "group": "skin",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:seal_arachne_checkpoint_stage",
+      "inputs": [
+        "31_ARACHNE_FIT",
+        "32_SKIN_QUALIFIED"
+      ],
+      "authority": "compiler-qualified skin authority",
+      "invariants": [
+        "learned skin proposals require compatibility and qualification"
+      ],
+      "outputs": [
+        "33_ARACHNE_CHECKPOINT_SEALED.qualified_output"
+      ],
+      "consumers": [],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 34,
+      "id": "34_DEFORMATION_CAPABILITY_ENVELOPE",
+      "title": "Subject-free 3D conditioning lineage and derived joint-frame witness",
+      "group": "mesh",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2:seal_deformation_capability_envelope",
+      "inputs": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "28_SKELETON_QUALIFIED"
+      ],
+      "authority": "canonical mechanical mesh authority",
+      "invariants": [
+        "topology/provenance must be justified upstream; repair creates new lineage"
+      ],
+      "outputs": [
+        "34_DEFORMATION_CAPABILITY_ENVELOPE.qualified_output"
+      ],
+      "consumers": [
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "38_CANONICAL_PUPPET_SEALED",
+        "40_MOTION_COMPILE_RUN"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 35,
+      "id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+      "title": "Dynamic mechanical qualification of frozen Stage18 mesh",
+      "group": "mesh",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2:qualify_canonical_mesh_stage",
+      "inputs": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "32_SKIN_QUALIFIED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE"
+      ],
+      "authority": "canonical mechanical mesh authority",
+      "invariants": [
+        "topology/provenance must be justified upstream; repair creates new lineage"
+      ],
+      "outputs": [
+        "QualifiedMeshIR",
+        "dynamic mechanical proof"
+      ],
+      "consumers": [
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED"
+      ],
+      "notes": [
+        "Repairs create new upstream attempts; no hidden face deletion. Stress envelope binds to sealed joint ranges."
+      ],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 36,
+      "id": "36_QUALIFIED_MESH_SKIN_TRANSFER",
+      "title": "Deterministic skin transfer to dynamically qualified frozen mesh",
+      "group": "mesh",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2:bind_qualified_mesh_skin_stage",
+      "inputs": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "32_SKIN_QUALIFIED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+      ],
+      "authority": "canonical mechanical mesh authority",
+      "invariants": [
+        "topology/provenance must be justified upstream; repair creates new lineage"
+      ],
+      "outputs": [
+        "36_QUALIFIED_MESH_SKIN_TRANSFER.qualified_output"
+      ],
+      "consumers": [
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "41_MOTION_DYNAMIC_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 37,
+      "id": "37_QUALIFIED_PRESENTATION_STRUCTURE",
+      "title": "Qualified role-free presentation partition, authoring slots and attachments; runtime keyability not claimed",
+      "group": "presentation",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.product_state_v2:qualify_presentation_structure_stage",
+      "inputs": [
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER"
+      ],
+      "authority": "qualified visual presentation authority",
+      "invariants": [
+        "final presentation binds source-owned visual substrate to qualified mechanics; mechanical mesh is not implicit render authority"
+      ],
+      "outputs": [
+        "QualifiedPresentationStructureIR.v2",
+        "QualifiedVisualPresentationSetIR.v1"
+      ],
+      "consumers": [
+        "38_CANONICAL_PUPPET_SEALED"
+      ],
+      "notes": [
+        "Final visual presentation ownership is qualified here from source-owned substrate plus Stage35-qualified mechanics."
+      ],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 38,
+      "id": "38_CANONICAL_PUPPET_SEALED",
+      "title": "Full canonical puppet seal: Mesh Rig Skin Complete Appearance Presentation",
+      "group": "product_state",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.product_state_v2:seal_complete_puppet_stage",
+      "inputs": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "32_SKIN_QUALIFIED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE"
+      ],
+      "authority": "sealed puppet aggregate state",
+      "invariants": [
+        "all component bindings must be identity-consistent before sealing"
+      ],
+      "outputs": [
+        "CompletePuppetStateIR.v2"
+      ],
+      "consumers": [
+        "40_MOTION_COMPILE_RUN",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING"
+      ],
+      "notes": [
+        "Seals identity-consistent product-state bindings including qualified visual presentation."
+      ],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 39,
+      "id": "39_MOTION_SOURCE_OR_PRESET_SEAL",
+      "title": "Professional external motion source seal",
+      "group": "motion",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.motion_v2:seal_motion_source_stage",
+      "inputs": [
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "38_CANONICAL_PUPPET_SEALED"
+      ],
+      "authority": "qualified motion authority",
+      "invariants": [
+        "motion source, retarget and dynamic proof remain explicit and provenance-bound"
+      ],
+      "outputs": [
+        "39_MOTION_SOURCE_OR_PRESET_SEAL.qualified_output"
+      ],
+      "consumers": [
+        "40_MOTION_COMPILE_RUN"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 40,
+      "id": "40_MOTION_COMPILE_RUN",
+      "title": "Full-3D canonical motion compilation",
+      "group": "motion",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.motion_v2:compile_motion_stage",
+      "inputs": [
+        "28_SKELETON_QUALIFIED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "39_MOTION_SOURCE_OR_PRESET_SEAL"
+      ],
+      "authority": "qualified motion authority",
+      "invariants": [
+        "motion source, retarget and dynamic proof remain explicit and provenance-bound"
+      ],
+      "outputs": [
+        "40_MOTION_COMPILE_RUN.qualified_output"
+      ],
+      "consumers": [
+        "41_MOTION_DYNAMIC_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 41,
+      "id": "41_MOTION_DYNAMIC_PROOF",
+      "title": "Canonical FK/LBS/contact/conditioning proof; rest-unseen exposure diagnostic only",
+      "group": "motion",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.motion_v2:prove_dynamic_motion_stage",
+      "inputs": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "28_SKELETON_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "38_CANONICAL_PUPPET_SEALED",
+        "40_MOTION_COMPILE_RUN"
+      ],
+      "authority": "qualified motion authority",
+      "invariants": [
+        "motion source, retarget and dynamic proof remain explicit and provenance-bound"
+      ],
+      "outputs": [
+        "41_MOTION_DYNAMIC_PROOF.qualified_output"
+      ],
+      "consumers": [
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ],
+      "notes": [],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 42,
+      "id": "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+      "title": "Runtime projection using sealed baked CAA only",
+      "group": "runtime",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_v2:build_runtime_projection_stage",
+      "inputs": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "38_CANONICAL_PUPPET_SEALED",
+        "41_MOTION_DYNAMIC_PROOF"
+      ],
+      "authority": "runtime transport/playback proof",
+      "invariants": [
+        "runtime consumes sealed product artifacts and may not silently repair/generate upstream state"
+      ],
+      "outputs": [
+        "RuntimeProjectionIR.v2",
+        "SourceOwnedVisualRuntimeProjectionIR.v1",
+        "SourceOwnedVisualRuntimeProjectionArrays.v1"
+      ],
+      "consumers": [
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF"
+      ],
+      "notes": [
+        "Recovery branch implements typed source-owned visual transport; no mechanical render fallback."
+      ],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 43,
+      "id": "43_RSS_MATERIALIZE_COMPACT",
+      "title": "Compact self-contained .rss materialization",
+      "group": "runtime",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_v2:materialize_runtime_package_stage",
+      "inputs": [
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING"
+      ],
+      "authority": "runtime transport/playback proof",
+      "invariants": [
+        "runtime consumes sealed product artifacts and may not silently repair/generate upstream state"
+      ],
+      "outputs": [
+        "RuntimePackage.v2",
+        "RuntimePackageSealIR.v2"
+      ],
+      "consumers": [
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF"
+      ],
+      "notes": [
+        "Materializes source-owned visual runtime projection into RSS v2."
+      ],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 44,
+      "id": "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+      "title": "Native package load playback and CAA binding re-verification",
+      "group": "runtime",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_v2:prove_native_package_playback_stage",
+      "inputs": [
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT"
+      ],
+      "authority": "runtime transport/playback proof",
+      "invariants": [
+        "runtime consumes sealed product artifacts and may not silently repair/generate upstream state"
+      ],
+      "outputs": [
+        "NativePlaybackIR.v2"
+      ],
+      "consumers": [
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ],
+      "notes": [
+        "Native player supports typed source-owned visual mode and parity proof."
+      ],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 45,
+      "id": "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+      "title": "Native dynamic visual integrity plus compiled-unobserved appearance exposure gate",
+      "group": "runtime",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_v2:prove_dynamic_visual_integrity_stage",
+      "inputs": [
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK"
+      ],
+      "authority": "runtime transport/playback proof",
+      "invariants": [
+        "runtime consumes sealed product artifacts and may not silently repair/generate upstream state"
+      ],
+      "outputs": [
+        "typed dynamic visual integrity proof"
+      ],
+      "consumers": [
+        "46_PRODUCT_CLOSURE_SEAL"
+      ],
+      "notes": [
+        "Recovery branch closes source-owned dynamic visual integrity."
+      ],
+      "fail_closed": true,
+      "product_pass_authority": false
+    },
+    {
+      "ordinal": 46,
+      "id": "46_PRODUCT_CLOSURE_SEAL",
+      "title": "Product closure plus editable canonical authoring export",
+      "group": "closure",
+      "producer": "compiler.realsas_compiler_services.orchestrator.adapters.closure_v2:seal_product_closure_stage",
+      "inputs": [
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "40_MOTION_COMPILE_RUN",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF"
+      ],
+      "authority": "single product-closure authority",
+      "invariants": [
+        "only Stage46 may declare product closure"
+      ],
+      "outputs": [
+        "product closure seal",
+        "editable canonical authoring export"
+      ],
+      "consumers": [],
+      "notes": [
+        "Only product-pass authority; recovery gate 36858047069 passed Stage42–46 scope at c5818c27."
+      ],
+      "fail_closed": true,
+      "product_pass_authority": true
+    }
+  ]
+}

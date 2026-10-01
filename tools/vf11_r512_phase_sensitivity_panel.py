@@ -174,12 +174,14 @@ def main() -> int:
             feature_recall = [
                 float(row["feature"]["feature_recall"])
                 for row in view_rows
-                if row["feature"]["feature_recall"] is not None
+                if row["feature"]["mode"] == "POSITIVE_FEATURE_RECALL"
+                and row["feature"]["source_visible_feature_pixels"] > 0
             ]
             gap_preservation = [
                 float(row["feature"]["gap_preservation"])
                 for row in view_rows
-                if row["feature"]["gap_preservation"] is not None
+                if row["feature"]["mode"] == "NEGATIVE_SPACE_PRESERVATION"
+                and row["feature"]["source_visible_gap_pixels"] > 0
             ]
             phase_rows.append(
                 {

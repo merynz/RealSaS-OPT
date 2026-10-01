@@ -1,0 +1,66 @@
+name: platform-worker-seam-v1
+
+on:
+  push:
+    branches: [platform/worker-seam-20261001]
+    paths:
+      - 'platform/**'
+      - 'compiler/realsas_compiler_services/platform_worker_v1.py'
+      - 'requirements/platform-engine-worker.txt'
+      - '.github/workflows/platform_worker_seam_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:18.6
+        env:
+          POSTGRES_USER: realsas
+          POSTGRES_PASSWORD: realsas
+          POSTGRES_DB: realsas_platform
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U realsas -d realsas_platform"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      REALSAS_DATABASE_URL: postgres://realsas:realsas@127.0.0.1:5432/realsas_platform?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+          cache-dependency-path: platform/go.sum
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Go format/vet
+        working-directory: platform
+        run: |
+          test -z "$(gofmt -l .)"
+          go vet ./...
+      - name: Apply schema and test Go platform
+        working-directory: platform
+        run: |
+          go run ./cmd/realsas-migrate up
+          go test -p 1 ./...
+          go build ./cmd/realsas-control-worker
+      - name: Compile Python Engine worker
+        run: |
+          python -m py_compile compiler/realsas_compiler_services/platform_worker_v1.py
+      - name: Enforce render-only worker boundary
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('compiler/realsas_compiler_services/platform_worker_v1.py').read_text()
+          assert 'mainline.execute' not in p
+          assert 'fit(' not in p
+          assert 'train(' not in p
+          assert 'RENDER_COMPILER_RUN' in p
+          assert 'upstream_stage_executions": 0' in p
+          print('PLATFORM_RENDER_ONLY_ENGINE_WORKER=PASS')
+          PY

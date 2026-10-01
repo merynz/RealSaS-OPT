@@ -1,10 +1,10 @@
 {
-  "schema": "RealSaS.AgentMemorySourceManifest.v1",
+  "schema": "RealSaS.AgentMemorySourceManifest.v2",
   "generated_date": "2026-10-01",
   "repository": "merynz/RealSaS-OPT",
   "memory_branch": "alfred/repo-memory-map-20261001",
-  "observed_main_head": "a8002b20dd2710e6f8edc9317be640d3bc9330f3",
-  "authority_note": "NON_AUTHORITATIVE_DERIVED_MEMORY__STALE_IF_ANY_SOURCE_BLOB_CHANGES",
+  "observed_main_head": "c3b1b09c135bc0d4f0d019f9190b61ac621ac499",
+  "authority_note": "NON_AUTHORITATIVE_DERIVED_MEMORY__STALE_IF_RELEVANT_SOURCE_BLOB_OR_REF_CHANGES",
   "sources": [
     {
       "path": "CURRENT_STATE.md",
@@ -69,5 +69,18 @@
       "44b148737dc1e7eadb23048834d2111744a12bc6",
       "4419509ee0f62a7e5ca088b87feb682b1a664105"
     ]
+  },
+  "observed_main_substantive_base": "e6c91184d6d877bd19980832a561e94a746ca7ce",
+  "current_main_class": "POST_USER_DIRECTED_TIMEOUT_SAFETY_ROLLBACK_PLUS_GENERATED_CONTEXT_REFRESH",
+  "normalized_evidence_state": {
+    "final_candidate": "92de05292b05e4ae8aaab3eed53c515b5eef5929",
+    "real_main_merge": "f459fe5491e367e9e5da07cfc5b1886f1b138ae4",
+    "preserved_backup_head": "3529344ef3045e0f2d634b175aae2aed6ec05536",
+    "backup_branch": "backup/main-normalized-20260930-3529344",
+    "normalized_plan_blob_sha": "73f7ad8b1d3325dfeef5534185cb655d5204d12c"
+  },
+  "current_main_plan": {
+    "blob_sha": "f0b605d09d5e9ecfac0abde01f3a95f1e6ae6f1a",
+    "architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__CANONICAL_MESH_SHARED_DOMAIN__CAA"
   }
 }

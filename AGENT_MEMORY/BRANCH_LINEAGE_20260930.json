@@ -1,0 +1,149 @@
+{
+  "schema": "RealSaS.AgentBranchLineage.20260930.v1",
+  "generated_date": "2026-10-01",
+  "authority": "NON_AUTHORITATIVE_FORENSIC_DERIVATION",
+  "canonical_main": {
+    "observed_head": "a8002b20dd2710e6f8edc9317be640d3bc9330f3",
+    "substantive_base": "e6c91184d6d877bd19980832a561e94a746ca7ce",
+    "relation_from_substantive_base": {
+      "ahead_by": 1,
+      "files": "generated authority/cache only"
+    },
+    "conclusion": "Current main does not contain the substantive generic-main-finalization lineage."
+  },
+  "candidate_lineages": [
+    {
+      "branch": "integration/generic-main-promotion-20260930",
+      "head": "908fbcc9207221f640a5c6f36d586aca597135d0",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "role": "ancestor containing generic holeless topology and skin-compatibility promotion"
+    },
+    {
+      "branch": "integration/generic-main-normalization-v2-20260930",
+      "head": "75d7d590d0a381636a3600242c8351924759f9c7",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "relation": "descends from generic-main-promotion but diverges from finalization lineage after merge-base 6deb72a16258b3a19e290e16e922dbeb95595e83",
+      "role": "normalization sibling; not safe to treat as final candidate"
+    },
+    {
+      "branch": "integration/generic-main-finalization-20260930",
+      "head": "92de05292b05e4ae8aaab3eed53c515b5eef5929",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "merge_base_with_current_main": "e6c91184d6d877bd19980832a561e94a746ca7ce",
+      "relation_to_current_main": {
+        "ahead_by": 68,
+        "behind_by": 2,
+        "changed_files": 168
+      },
+      "role": "primary substantive normalization/finalization candidate found so far",
+      "pre_docs_full_gate": {
+        "run_id": 36724501505,
+        "tested_head": "484c01fca415c849c2b7d8c610294d493b7f219b",
+        "conclusion": "success",
+        "plan_sha256": "be0067d78d5c1ecf51f5a0df2ee14e7a87ff0c44800ca66bbb5d5f8d5ad183cf",
+        "implementation_closure_sha256": "1cb60bb32abd33c325dd640a8c253f0d1dcc6ab33e19bc7ce480ff1bd0c5788f",
+        "observed_test_summary": {
+          "repository_governance": "59 passed",
+          "learned_source_ownership": "51 passed, 2 warnings",
+          "compiler_regressions": "434 passed, 5 skipped",
+          "synthetic_proof_export": "1 passed",
+          "native_runtime_library": "9/9 passed"
+        },
+        "scope_warning": "The gate did not include tests/repository/test_source_owned_visual_runtime_wiring_v1.py. It validated the candidate with the visual-runtime seam explicitly fail-closed, not a completed visual runtime consumer."
+      },
+      "post_gate_relation": {
+        "branch_head_is_descendant_of_tested_head": true,
+        "commits_after_tested_head": 29,
+        "changed_files_after_tested_head": [
+          ".github/workflows/final_main_merge_gate_v1.yml",
+          ".github/workflows/final_mainline_postdocs_seal_v1.yml",
+          "AGENTS.md",
+          "CURRENT_STATE.md",
+          "README.md",
+          "REPOSITORY_MAP.md",
+          "SYSTEM_INDEX.md",
+          "canonical/ACTIVE_RUN_V2.json",
+          "canonical/MAINLINE_NORMALIZATION_HANDOFF_20260930.md",
+          "canonical/V2_IMPLEMENTATION_READINESS.json",
+          "generated continuity/cache files"
+        ],
+        "note": "No broad compiler-core mutation observed in the 29-commit post-gate diff."
+      }
+    },
+    {
+      "branch": "fix/final-main-closure-20260930",
+      "head": "f3762db51ca26ee090b85c982c601dd0e7f667bc",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "relation": "2 commits after generic-main-finalization; tail dominated by generated continuity refresh"
+    },
+    {
+      "branch": "ops/main-knight-render-20260930",
+      "head": "0a44ef505e6ec04ba7d361f96cb4a843b22b1357",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "relation": "1 commit after final-main-closure; head is generated continuity refresh"
+    },
+    {
+      "branch": "backup/main-normalized-20260930-3529344",
+      "head": "3529344ef3045e0f2d634b175aae2aed6ec05536",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "relation": "2 commits after ops/main-knight-render; tail dominated by generated continuity refresh"
+    },
+    {
+      "branch": "ops/current-main-knight-render-20260930",
+      "head": "d0d2de09ee005fe8661154df39013e904a9a3813",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "relation_to_generic_finalization": {
+        "ahead_by": 35,
+        "behind_by": 0,
+        "changed_files": 12
+      },
+      "substantive_delta": [
+        ".github/workflows/subject2_knight_direct_render.yml",
+        ".github/workflows/subject2_knight_observation_preflight.yml",
+        "compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py",
+        "tests/compiler/test_source_edge_probe_repartition_v1.py"
+      ],
+      "role": "operational/witness extension, not a new broad architecture lineage"
+    },
+    {
+      "branch": "audit/knight-rest-visual-owner-20260930",
+      "head": "643714de28999a7de9d0b25733a290136dc374c7",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "relation_to_current_main": {
+        "ahead_by": 1958,
+        "behind_by": 11,
+        "changed_files_at_compare_cap": 300
+      },
+      "role": "huge research lineage; never wholesale-promote; mine only commit-scoped evidence"
+    }
+  ],
+  "visual_runtime_seam": {
+    "candidate_plan_change": {
+      "changed_stage_count_vs_current_main": 1,
+      "stage": 18,
+      "current_main_title": "Canonical mesh candidate plus stable surface addressing and appearance domain",
+      "candidate_title": "Canonical mechanical mesh plus source-owned visual mesh, stable addressing and appearance domain",
+      "candidate_additional_dependency": "07_OBSERVATION_CONTRACT_QUALIFIED",
+      "candidate_architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__MECHANICAL_AND_VISUAL_MESH_OWNERSHIP_SPLIT__CAA"
+    },
+    "source_evidence": [
+      "candidate product_state_v2 imports visual_mesh_set_from_dict",
+      "candidate product/presentation metadata carries visual_mesh_set_binding_hash",
+      "candidate source-owned visual mode sets mechanical_mesh_render_authority=False",
+      "candidate Stage38 checks visual mesh binding identity"
+    ],
+    "runtime_evidence": [
+      "candidate Stage42 runtime adapter checks source_owned_visual_mesh_mode",
+      "candidate Stage42 raises RUNTIME_V2_SOURCE_OWNED_VISUAL_PRESENTATION_BINDING_REQUIRED",
+      "candidate runtime still uses legacy mechanical face_uv / mesh transport"
+    ],
+    "conclusion": "The candidate establishes visual-mesh authority and intentionally fails closed at Stage42 because typed visual presentation geometry transport/execution is not implemented.",
+    "confidence": "A_FOR_EXISTENCE_OF_FAIL_CLOSED_SEAM__D_FOR_UNIMPLEMENTED_CONSUMER"
+  },
+  "stale_reference": {
+    "claimed_path": "canonical/V2_PRODUCT_STATE_WIRING_AUDIT_V1_20260928.json",
+    "observed_on_current_main": false,
+    "observed_on_generic_finalization_head": false,
+    "implication": "The normalization handoff contains a stale or incorrect exact audit-file reference. Do not cite that missing artifact as proof; use source + repository test + workflow evidence instead."
+  }
+}

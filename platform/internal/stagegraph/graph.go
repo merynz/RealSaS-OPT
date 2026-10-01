@@ -29,22 +29,26 @@ type planFile struct {
 }
 
 type Graph struct {
-	stages   []Stage
-	byID     map[string]Stage
-	children map[string][]string
+	stages             []Stage
+	byID               map[string]Stage
+	children           map[string][]string
+	productPassStageID string
 }
 
-func ParseCanonicalPlan(data []byte) (*Graph, error) {
+func ParsePlan(data []byte, requireProductPassAuthority bool) (*Graph, error) {
 	var p planFile
 	if err := json.Unmarshal(data, &p); err != nil {
 		return nil, err
 	}
-	if p.StageCount != 46 || len(p.Stages) != 46 {
-		return nil, fmt.Errorf("canonical plan must contain exactly 46 stages")
+	if len(p.Stages) == 0 {
+		return nil, errors.New("execution plan must contain at least one stage")
 	}
-	byID := make(map[string]Stage, 46)
-	children := make(map[string][]string, 46)
-	seen := map[string]struct{}{}
+	if p.StageCount != len(p.Stages) {
+		return nil, fmt.Errorf("declared stage_count=%d does not match stages=%d", p.StageCount, len(p.Stages))
+	}
+	byID := make(map[string]Stage, len(p.Stages))
+	children := make(map[string][]string, len(p.Stages))
+	seen := make(map[string]struct{}, len(p.Stages))
 	var passOwners []string
 	for i, s := range p.Stages {
 		if s.Ordinal != i+1 || s.ID == "" {
@@ -66,14 +70,36 @@ func ParseCanonicalPlan(data []byte) (*Graph, error) {
 		byID[s.ID] = s
 		children[s.ID] = append([]string(nil), children[s.ID]...)
 	}
-	if len(passOwners) != 1 || passOwners[0] != "46_PRODUCT_CLOSURE_SEAL" {
-		return nil, errors.New("Stage46 must be the single product-pass authority")
+	if len(passOwners) > 1 {
+		return nil, fmt.Errorf("multiple product-pass authorities: %v", passOwners)
 	}
-	return &Graph{stages: append([]Stage(nil), p.Stages...), byID: byID, children: children}, nil
+	if requireProductPassAuthority && len(passOwners) != 1 {
+		return nil, errors.New("canonical product plan requires exactly one product-pass authority")
+	}
+	productPassStageID := ""
+	if len(passOwners) == 1 {
+		productPassStageID = passOwners[0]
+	}
+	return &Graph{
+		stages:             append([]Stage(nil), p.Stages...),
+		byID:               byID,
+		children:           children,
+		productPassStageID: productPassStageID,
+	}, nil
 }
 
-func (g *Graph) Stages() []Stage {
-	return append([]Stage(nil), g.stages...)
+func ParseCanonicalPlan(data []byte) (*Graph, error) {
+	return ParsePlan(data, true)
+}
+
+func (g *Graph) Stages() []Stage { return append([]Stage(nil), g.stages...) }
+func (g *Graph) StageCount() int { return len(g.stages) }
+
+func (g *Graph) ProductPassStageID() (string, bool) {
+	if g.productPassStageID == "" {
+		return "", false
+	}
+	return g.productPassStageID, true
 }
 
 func (g *Graph) Get(id string) (Stage, bool) {

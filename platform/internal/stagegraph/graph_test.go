@@ -23,8 +23,8 @@ func TestCanonicalGraphAndRuntimeInvalidation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := len(g.Stages()); got != 46 {
-		t.Fatalf("got %d stages", got)
+	if got := len(g.Stages()); got == 0 {
+		t.Fatal("canonical graph must not be empty")
 	}
 	affected, err := g.DescendantsIncluding("42_RUNTIME_PROJECTION_AND_CAA_BINDING")
 	if err != nil {
@@ -44,5 +44,22 @@ func TestCanonicalGraphAndRuntimeInvalidation(t *testing.T) {
 		if affected[i] != want[i] {
 			t.Fatalf("affected=%v want=%v", affected, want)
 		}
+	}
+}
+
+func TestPlanCardinalityIsDataNotCode(t *testing.T) {
+	data := []byte(`{
+	  "stage_count": 3,
+	  "stages": [
+	    {"ordinal":1,"id":"source","title":"source","group":"source","depends_on":[],"adapter":"x:y","policy":{"product_pass_authority":false}},
+	    {"ordinal":2,"id":"model.infer","title":"infer","group":"model","depends_on":["source"],"adapter":"x:y","policy":{"product_pass_authority":false}},
+	    {"ordinal":3,"id":"product.seal","title":"seal","group":"closure","depends_on":["model.infer"],"adapter":"x:y","policy":{"product_pass_authority":true}}
+	  ]
+	}`)
+	g, err := ParseCanonicalPlan(data)
+	if err != nil { t.Fatal(err) }
+	if g.StageCount() != 3 { t.Fatalf("stage count=%d", g.StageCount()) }
+	if id, ok := g.ProductPassStageID(); !ok || id != "product.seal" {
+		t.Fatalf("product pass=%q ok=%v", id, ok)
 	}
 }

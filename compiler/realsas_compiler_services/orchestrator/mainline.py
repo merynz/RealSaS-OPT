@@ -140,8 +140,13 @@ def validate_plan(plan: dict) -> str:
     if plan.get("schema") != "RealSaS.MainlineExecutionPlan.v2":
         raise RuntimeError("MAINLINE_V2_PLAN_SCHEMA_DRIFT")
     stages = list(plan.get("stages") or ())
-    if int(plan.get("stage_count", -1)) != 46 or len(stages) != 46:
-        raise RuntimeError("MAINLINE_V2_REQUIRES_EXACT_46_STAGES")
+    if not stages:
+        raise RuntimeError("MAINLINE_V2_EMPTY_PLAN")
+    declared_count = int(plan.get("stage_count", -1))
+    if declared_count != len(stages):
+        raise RuntimeError(
+            f"MAINLINE_V2_STAGE_COUNT_DRIFT:{declared_count}!={len(stages)}"
+        )
     if plan.get("canonical_branch") != "main":
         raise RuntimeError("MAINLINE_V2_BRANCH_DRIFT")
     if plan.get("subject_specific_code_forbidden") is not True:
@@ -173,10 +178,20 @@ def validate_plan(plan: dict) -> str:
 
     if len(ids) != len(set(ids)):
         raise RuntimeError("MAINLINE_V2_DUPLICATE_STAGE_ID")
-    if sorted(ordinals) != list(range(1, 47)):
+    if sorted(ordinals) != list(range(1, len(stages) + 1)):
         raise RuntimeError("MAINLINE_V2_ORDINAL_SET_DRIFT")
     if len(ordinals) != len(set(ordinals)):
         raise RuntimeError("MAINLINE_V2_DUPLICATE_ORDINAL")
+    product_pass_owners = [
+        str(stage["id"])
+        for stage in stages
+        if dict(stage.get("policy") or {}).get("product_pass_authority") is True
+    ]
+    if len(product_pass_owners) != 1:
+        raise RuntimeError(
+            "MAINLINE_V2_PRODUCT_PASS_AUTHORITY_DRIFT:"
+            + ",".join(product_pass_owners)
+        )
     topological_stage_ids(plan)
     return content_sha256(plan)
 
@@ -474,8 +489,10 @@ def validate_ledger(plan: dict, ledger: dict) -> None:
         raise RuntimeError("ACTIVE_RUN_V2_LEDGER_PLAN_HASH_DRIFT")
 
     rows = list(ledger.get("stages") or ())
-    if len(rows) != 46:
-        raise RuntimeError("ACTIVE_RUN_V2_LEDGER_STAGE_COUNT_DRIFT")
+    if len(rows) != len(plan["stages"]):
+        raise RuntimeError(
+            f"ACTIVE_RUN_V2_LEDGER_STAGE_COUNT_DRIFT:{len(rows)}!={len(plan['stages'])}"
+        )
     if {str(row.get("id")) for row in rows} != {
         str(stage["id"]) for stage in plan["stages"]
     }:
@@ -984,9 +1001,9 @@ def _refresh(plan: dict, ledger: dict) -> None:
     }
     if ledger["completed_count"] == len(rows):
         ledger["status"] = (
-            "PASS_DEMO_ONLY__ALL_46_STAGES"
+            "PASS_DEMO_ONLY__ALL_STAGES"
             if any(str(row.get("status") or "") == DEMO_ONLY_STATUS for row in rows)
-            else "PASS__ALL_46_STAGES"
+            else "PASS__ALL_STAGES"
         )
     elif ledger["failed_count"]:
         ledger["status"] = "ACTIVE_WITH_FAILED_BRANCHES"
@@ -1471,8 +1488,10 @@ def status_text(plan: dict, ledger: dict) -> str:
             if row["status"] == "PENDING" and failures
             else ""
         )
+        total = len(plan["stages"])
+        width = max(2, len(str(total)))
         lines.append(
-            f"[{mark}] {stage['ordinal']:02d}/46 {stage['id']} "
+            f"[{mark}] {int(stage['ordinal']):0{width}d}/{total} {stage['id']} "
             f"[{stage['group']}] — {row['status']}{suffix}"
         )
     return "\n".join(lines)
@@ -1519,7 +1538,10 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "validate-plan":
         digest = validate_plan(plan)
-        print(f"MAINLINE_V2_PLAN_PASS stages=46 plan_sha256={digest}")
+        print(
+            f"MAINLINE_V2_PLAN_PASS stages={len(plan['stages'])} "
+            f"plan_sha256={digest}"
+        )
         return 0
     if args.command == "validate-readiness":
         digest = validate_readiness(plan)

@@ -1,0 +1,34 @@
+{
+  "schema": "realsas.compiler_runtime_source_extension_seal.v16",
+  "sealed_on": "2026-10-01",
+  "prior_extension": {
+    "path": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V15_20260927.json",
+    "git_blob_sha1": "1d51ac0eed3cdc9300530c0916d77c8e8f11e479",
+    "role": "IMMUTABLE_PRIOR_EXTENSION_PROVENANCE"
+  },
+  "authority": {
+    "extension_scope": "RUNTIME_V2_SOURCE_OWNED_VISUAL_PRESENTATION_NATIVE_CONSUMER",
+    "historical_base_seal_mutated": false,
+    "prior_extension_mutated": false,
+    "product_pass_claimed": false,
+    "knight_witness_used": false,
+    "runtime_role": "subordinate_deployment_consumer",
+    "subtree_closure": "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME"
+  },
+  "replacements": [
+    {
+      "path": "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp",
+      "size_bytes": 53405,
+      "git_blob_sha1": "b4d54a758b40abc3efdeb5e9cd75b1156c961a62",
+      "reason": "add typed SOURCE_OWNED_VISUAL_PRESENTATION_V1 RSS consumer using the proven RSVM1/RSVP1 source-art 2D raster semantics while preserving the legacy canonical-depth runtime path"
+    }
+  ],
+  "additions": [],
+  "closure": {
+    "runtime_realsas_cpp_blob_count": 25,
+    "replacement_count": 1,
+    "addition_count": 0,
+    "resulting_sealed_blob_count": 25,
+    "unsealed_repository_blob_count_under_subtree": 0
+  }
+}

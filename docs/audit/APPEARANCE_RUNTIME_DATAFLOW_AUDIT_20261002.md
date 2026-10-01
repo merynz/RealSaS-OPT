@@ -124,3 +124,60 @@ Thus the accepted frozen smear cannot be attributed primarily to the previously 
 The preserved source-owned deformation-region proof already uses direct-source-only appearance, forbids mechanical-mesh render authority, forbids unsafe mechanical faces as rendered visual geometry, and uses region-local mechanical barycentric motion. It nevertheless measured up to 1,856 flipped visual triangles and maximum edge stretch ~95.58x on its historical substrate.
 
 The current corrected-lineage replay is running to determine whether the corrected topology/weights state materially changes this failure.
+
+
+## Mental model — two runtime lanes
+
+### Lane A — historical corrected Mechanical CAA
+
+```text
+07 source observation
+  → 18 canonical mechanical candidate
+  → 21 CAA compile
+       direct source
+       local harmonic
+       other-view donor
+       canonical global completion C(p)
+  → 23 mechanical CAA atlas + face_uv + provenance
+  → 35 corrected mechanics / skin-topology state
+  → 41 posed mechanical XYZ
+  → 42 mechanical RuntimeProjectionIR.v2
+  → 44 canonical-depth mechanical CAA renderer
+  → 45 mechanical DVI
+```
+
+This lane retains canonical depth visibility. The corrected frozen visual witness nevertheless shows large motion-time source-mask exterior alpha. The forensic attribution is dominated by `CANONICAL_GLOBAL_COMPLETION`, not catastrophic mechanical stretch.
+
+The frozen GIF workflow is diagnostic and does not execute Stage45. Canonical Stage45 policy would permit at most 2% aggregate compiled-unobserved visibility, 5% per frame and 1% connected exposure.
+
+### Lane B — recovered Source-owned 2D presentation
+
+```text
+07 source observation
+  → 18 VisualMeshSetIR + fixed source UV
+  → 23 direct source RGBA asset
+  → 35 corrected mechanical qualification
+  → 37 QualifiedVisualPresentationSetIR
+       source mask
+       safe-face chart / visual regions
+  → 42 per-visual-vertex mechanical affine binding
+       posed mechanical XYZ → baked visual XY
+  → 43 RSS
+       visual faces + UV + RGBA + per-frame XY
+       [region ids / depth / binding authority do not enter native payload]
+  → 44 source-owned 2D renderer
+       face-index iteration + alpha compose
+  → 45 source-owned DVI
+       parity + provenance + flip/stretch
+```
+
+This lane preserves the artist pixels but currently has two independent control-plane gaps:
+
+1. **Deformation-domain coherence:** each visual vertex selects its mechanical affine face independently. A visual triangle is not guaranteed to belong to one affine deformation domain or a continuous qualified transfer field.
+2. **Dynamic visibility arbitration:** after Stage42, no canonical-depth or explicit overlap-owner authority is transported to native playback. When deformed visual triangles overlap, face array order becomes the implicit front-surface authority.
+
+The synthetic face-order audit proves (2) behaviorally: reversing only two overlapping triangle rows changes 45 visible pixels while geometry, UV, texture and positions remain identical.
+
+### Presentation structure side-channel
+
+Stage37 also seals `QualifiedPresentationStructureIR.v2` containing slots/attachments/setup order and keyable presentation structure. The source-owned Stage42/43/44 render path binds its hash indirectly through the complete-puppet/motion state, but does not execute that structure. This is not by itself a first-witness violation because authored order/visibility/clipping were explicitly excluded from Runtime V2 scope. It does, however, mean those semantics cannot repair physical source-owned overlap today. Physical visibility still requires the separate canonical-depth authority.

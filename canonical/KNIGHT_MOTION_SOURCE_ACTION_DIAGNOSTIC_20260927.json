@@ -1,0 +1,2353 @@
+{
+  "all_requested_takes_pose_distinct": true,
+  "body_scale": 4.8632933572573185,
+  "bone_roles": [
+    {
+      "has_mesh_influence": false,
+      "influenced_mesh_object_count": 0,
+      "maximum_vertex_weight": 0.0,
+      "mesh_influence_centroid": null,
+      "mesh_influence_covariance": null,
+      "mesh_influence_spread_eigenvalues": null,
+      "parent_source_joint_id": null,
+      "rest_position": [
+        0.0027436520904302597,
+        -0.1950817108154297,
+        -0.00492025027051568
+      ],
+      "source_joint_id": "Bone",
+      "use_deform": true,
+      "weight_sum": 0.0,
+      "weighted_vertex_count": 0
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9926971197128296,
+      "mesh_influence_centroid": [
+        -0.5486125891986866,
+        0.02597401212575985,
+        0.008770860318671832
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.007126995567428962,
+          0.0023947960726907174,
+          0.000190922557287216
+        ],
+        [
+          0.0023947960726907174,
+          0.03100883233540883,
+          1.672182984951753e-05
+        ],
+        [
+          0.000190922557287216,
+          1.672182984951753e-05,
+          0.0022260415939292684
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.0022184040941295993,
+        0.006896814320481451,
+        0.031246651082156005
+      ],
+      "parent_source_joint_id": "Bone",
+      "rest_position": [
+        -0.5319820046424866,
+        -0.13667814433574677,
+        0.02537654899060726
+      ],
+      "source_joint_id": "Foot.L",
+      "use_deform": true,
+      "weight_sum": 4.905622538179159,
+      "weighted_vertex_count": 12
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9323397874832153,
+      "mesh_influence_centroid": [
+        -0.007903360034770301,
+        0.2487041742166978,
+        2.1623001743204138
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.07897593501308495,
+          0.0017153602627406766,
+          0.0003919740124011424
+        ],
+        [
+          0.0017153602627406766,
+          0.013725295922721287,
+          -0.010249259999231763
+        ],
+        [
+          0.0003919740124011424,
+          -0.010249259999231763,
+          0.08245469808584982
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.012183373348518333,
+        0.07901801647499887,
+        0.08395453919813886
+      ],
+      "parent_source_joint_id": "Bone",
+      "rest_position": [
+        -0.001765321590937674,
+        0.12316793948411942,
+        2.1206552982330322
+      ],
+      "source_joint_id": "Body",
+      "use_deform": true,
+      "weight_sum": 3.1807763427495956,
+      "weighted_vertex_count": 18
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.5735310316085815,
+      "mesh_influence_centroid": [
+        -0.022137371463595023,
+        -0.23036555068373354,
+        1.6997484536231795
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.07123826701397044,
+          0.006718681126626349,
+          -0.004162061115122989
+        ],
+        [
+          0.006718681126626349,
+          0.20229100353738144,
+          -0.027187192470769228
+        ],
+        [
+          -0.004162061115122989,
+          -0.027187192470769228,
+          0.07916292946171222
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.06915306980098333,
+        0.07510939077697328,
+        0.20842973943510756
+      ],
+      "parent_source_joint_id": "Body",
+      "rest_position": [
+        2.2437920051743276e-05,
+        0.009688363410532475,
+        1.9585143327713013
+      ],
+      "source_joint_id": "Hips",
+      "use_deform": true,
+      "weight_sum": 7.049064414575696,
+      "weighted_vertex_count": 49
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.8187048435211182,
+      "mesh_influence_centroid": [
+        -0.0072164692565256944,
+        -0.23366015351544994,
+        2.6420170235328158
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.18252484811536243,
+          -0.0009052300085632542,
+          0.003761154889858136
+        ],
+        [
+          -0.0009052300085632542,
+          0.09777074888975484,
+          0.05278909810019283
+        ],
+        [
+          0.003761154889858136,
+          0.05278909810019283,
+          0.20759862900281156
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.07646478414957414,
+        0.18235895649854472,
+        0.22907048535981
+      ],
+      "parent_source_joint_id": "Hips",
+      "rest_position": [
+        -0.00015302354586310685,
+        -0.066070556640625,
+        2.3445067405700684
+      ],
+      "source_joint_id": "Abdomen",
+      "use_deform": true,
+      "weight_sum": 17.028776701539755,
+      "weighted_vertex_count": 64
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.6878320574760437,
+      "mesh_influence_centroid": [
+        0.0016993242782402187,
+        -0.13282111071703298,
+        3.782963173937039
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.045680843366013094,
+          8.29268269042052e-06,
+          0.0003055581264257024
+        ],
+        [
+          8.29268269042052e-06,
+          0.12198014771763357,
+          -0.03926982908687726
+        ],
+        [
+          0.0003055581264257024,
+          -0.03926982908687726,
+          0.079333148313383
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.045673705449279275,
+        0.05597787035165817,
+        0.14534256359609218
+      ],
+      "parent_source_joint_id": "Abdomen",
+      "rest_position": [
+        -0.00015275966143235564,
+        -0.06595660001039505,
+        3.115182638168335
+      ],
+      "source_joint_id": "Torso",
+      "use_deform": true,
+      "weight_sum": 9.317742794752121,
+      "weighted_vertex_count": 50
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.8020674586296082,
+      "mesh_influence_centroid": [
+        0.003454969229318878,
+        0.028505598784385626,
+        3.9745578910187622
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.036027034889922864,
+          -0.0005030999188116718,
+          1.6765798988703506e-05
+        ],
+        [
+          -0.0005030999188116718,
+          0.02707174596604814,
+          -0.007731077567268221
+        ],
+        [
+          1.6765798988703506e-05,
+          -0.007731077567268221,
+          0.007880590429028445
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.005152897111600111,
+        0.029761921459092712,
+        0.036064552714306634
+      ],
+      "parent_source_joint_id": "Torso",
+      "rest_position": [
+        2.190412942582043e-06,
+        0.0009461008012294769,
+        3.796839475631714
+      ],
+      "source_joint_id": "Neck",
+      "use_deform": true,
+      "weight_sum": 3.7090489622205496,
+      "weighted_vertex_count": 27
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9997949004173279,
+      "mesh_influence_centroid": [
+        0.00012571718944402879,
+        -0.0096939427632993,
+        4.830106033318711
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.12415648326937812,
+          5.7095477488686646e-05,
+          -0.0001754864088611874
+        ],
+        [
+          5.7095477488686646e-05,
+          0.1572793683509977,
+          -0.026832571505383852
+        ],
+        [
+          -0.0001754864088611874,
+          -0.026832571505383852,
+          0.18415157632331258
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.1241559483145085,
+        0.14070699222127875,
+        0.20072448740790108
+      ],
+      "parent_source_joint_id": "Neck",
+      "rest_position": [
+        2.24378800339764e-05,
+        0.009688346646726131,
+        4.121866703033447
+      ],
+      "source_joint_id": "Head",
+      "use_deform": true,
+      "weight_sum": 127.42530310340226,
+      "weighted_vertex_count": 149
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.8358586430549622,
+      "mesh_influence_centroid": [
+        -0.4592845661243184,
+        -0.13914960017365416,
+        3.6400902691657033
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.039225627872418345,
+          -0.0015632615013581388,
+          0.005171015498429465
+        ],
+        [
+          -0.0015632615013581388,
+          0.06798204935883227,
+          -0.0072441782374441654
+        ],
+        [
+          0.005171015498429465,
+          -0.0072441782374441654,
+          0.07055059276230757
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.03838855115728786,
+        0.06209283912693932,
+        0.077276879709331
+      ],
+      "parent_source_joint_id": "Torso",
+      "rest_position": [
+        -0.32486477494239807,
+        -0.11084917932748795,
+        3.4889719486236572
+      ],
+      "source_joint_id": "Shoulder.L",
+      "use_deform": true,
+      "weight_sum": 13.642425740137696,
+      "weighted_vertex_count": 44
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 1.0,
+      "mesh_influence_centroid": [
+        -1.3587447966260913,
+        -0.14301386429262047,
+        3.711815122449418
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.18037574670521628,
+          0.008638445502677145,
+          0.013902974378834365
+        ],
+        [
+          0.008638445502677145,
+          0.016293847459894123,
+          0.0008809022423333923
+        ],
+        [
+          0.013902974378834365,
+          0.0008809022423333923,
+          0.022652616511235735
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.015836281756029753,
+        0.021439247555954583,
+        0.1820466813643618
+      ],
+      "parent_source_joint_id": "Shoulder.L",
+      "rest_position": [
+        -0.6269686818122864,
+        -0.10903256386518478,
+        3.714759111404419
+      ],
+      "source_joint_id": "UpperArm.L",
+      "use_deform": true,
+      "weight_sum": 15.805738967843354,
+      "weighted_vertex_count": 37
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9560455679893494,
+      "mesh_influence_centroid": [
+        -2.3650100014819304,
+        -0.18589148341870051,
+        3.700440112836739
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.0739717389549277,
+          0.00969548184168706,
+          0.001482027835194799
+        ],
+        [
+          0.00969548184168706,
+          0.027433293550505472,
+          -0.000833624860047566
+        ],
+        [
+          0.001482027835194799,
+          -0.000833624860047566,
+          0.014393677122678028
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.014257424975046222,
+        0.02560341464003757,
+        0.0759378700130274
+      ],
+      "parent_source_joint_id": "UpperArm.L",
+      "rest_position": [
+        -1.6366329193115234,
+        -0.19991005957126617,
+        3.655707359313965
+      ],
+      "source_joint_id": "LowerArm.L",
+      "use_deform": true,
+      "weight_sum": 18.498522783629596,
+      "weighted_vertex_count": 36
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.8719865083694458,
+      "mesh_influence_centroid": [
+        -2.9300334423972942,
+        -0.2616843839907146,
+        3.759635843801432
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.03714186433716016,
+          -0.009677125160775013,
+          0.004882297414061654
+        ],
+        [
+          -0.009677125160775013,
+          0.06522902132510698,
+          0.006541457280134
+        ],
+        [
+          0.004882297414061654,
+          0.006541457280134,
+          0.006342943371008047
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.004509140421760222,
+        0.0355874447608997,
+        0.06861724385061525
+      ],
+      "parent_source_joint_id": "LowerArm.L",
+      "rest_position": [
+        -2.7316253185272217,
+        -0.21497581899166107,
+        3.698211908340454
+      ],
+      "source_joint_id": "Palm.L",
+      "use_deform": true,
+      "weight_sum": 6.6889515072107315,
+      "weighted_vertex_count": 24
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9031655788421631,
+      "mesh_influence_centroid": [
+        -3.1245544836010946,
+        -0.09824278800168282,
+        3.6856139272067536
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.02169278484846693,
+          -6.416190248981213e-05,
+          -0.0003124615061249614
+        ],
+        [
+          -6.416190248981213e-05,
+          0.06933988057053281,
+          -8.991915912304194e-05
+        ],
+        [
+          -0.0003124615061249614,
+          -8.991915912304194e-05,
+          0.0028999199945882737
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.002894601700935582,
+        0.021697896178876405,
+        0.06934008753377602
+      ],
+      "parent_source_joint_id": "Palm.L",
+      "rest_position": [
+        -2.989206314086914,
+        -0.20279307663440704,
+        3.6981546878814697
+      ],
+      "source_joint_id": "MiddleHand.L",
+      "use_deform": true,
+      "weight_sum": 3.9314238792285323,
+      "weighted_vertex_count": 22
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9301910400390625,
+      "mesh_influence_centroid": [
+        -3.28024324173649,
+        -0.11143613836180272,
+        3.6851246559829622
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.011685721107557612,
+          0.00025239387962400217,
+          0.0015598845757267554
+        ],
+        [
+          0.00025239387962400217,
+          0.05056945187080783,
+          0.0012521838101166027
+        ],
+        [
+          0.0015598845757267554,
+          0.0012521838101166027,
+          0.0024704391793868297
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.0021840528636701377,
+        0.011937323962832995,
+        0.050604235331249164
+      ],
+      "parent_source_joint_id": "MiddleHand.L",
+      "rest_position": [
+        -3.1498429775238037,
+        -0.20242105424404144,
+        3.698154926300049
+      ],
+      "source_joint_id": "Fingers.L",
+      "use_deform": true,
+      "weight_sum": 9.355192303657532,
+      "weighted_vertex_count": 19
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9412068128585815,
+      "mesh_influence_centroid": [
+        -2.593048332767982,
+        0.06099081973811463,
+        3.6329562249737455
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.01865986096743466,
+          -0.004905837904203236,
+          -0.0010283572880318559
+        ],
+        [
+          -0.004905837904203236,
+          0.005613749245760233,
+          0.0010073725093243113
+        ],
+        [
+          -0.0010283572880318559,
+          0.0010073725093243113,
+          0.012651313285628518
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.00392886187660474,
+        0.012483466694748912,
+        0.020512594927469763
+      ],
+      "parent_source_joint_id": "LowerArm.L",
+      "rest_position": [
+        -2.517533302307129,
+        0.006798642687499523,
+        3.630450963973999
+      ],
+      "source_joint_id": "Thumb.R",
+      "use_deform": true,
+      "weight_sum": 7.238997804932296,
+      "weighted_vertex_count": 28
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.994488537311554,
+      "mesh_influence_centroid": [
+        -2.7276472697293284,
+        0.16376935175182955,
+        3.5022761022027535
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.006357318887319607,
+          0.00021030775030234095,
+          0.0015126040572113197
+        ],
+        [
+          0.00021030775030234095,
+          0.0027056316685333155,
+          8.606608795491688e-05
+        ],
+        [
+          0.0015126040572113197,
+          8.606608795491688e-05,
+          0.006997327274891774
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.002693559389759698,
+        0.005136118525450363,
+        0.008230599915534634
+      ],
+      "parent_source_joint_id": "Thumb.R",
+      "rest_position": [
+        -2.6164395809173584,
+        0.13883718848228455,
+        3.541015148162842
+      ],
+      "source_joint_id": "Thumb2.R",
+      "use_deform": true,
+      "weight_sum": 8.623803216964006,
+      "weighted_vertex_count": 17
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.8361420035362244,
+      "mesh_influence_centroid": [
+        0.49376754672418904,
+        -0.15456340082010944,
+        3.655287063727041
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.05015754804991304,
+          -0.0045813221928862335,
+          -0.002725449748548936
+        ],
+        [
+          -0.0045813221928862335,
+          0.06383588776310563,
+          -0.007110557066791423
+        ],
+        [
+          -0.002725449748548936,
+          -0.007110557066791423,
+          0.06779964635979319
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.0475631340402598,
+        0.06101357036857526,
+        0.07321637776397681
+      ],
+      "parent_source_joint_id": "Torso",
+      "rest_position": [
+        0.3291322588920593,
+        -0.10517620295286179,
+        3.489290237426758
+      ],
+      "source_joint_id": "Shoulder.R",
+      "use_deform": true,
+      "weight_sum": 15.328683874569833,
+      "weighted_vertex_count": 47
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 1.0,
+      "mesh_influence_centroid": [
+        1.386701121882929,
+        -0.16688717343792198,
+        3.7120497871693545
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.14146251695949652,
+          0.0016395043462345826,
+          -0.008977877730566242
+        ],
+        [
+          0.0016395043462345826,
+          0.01602425070657998,
+          0.00015003211657393933
+        ],
+        [
+          -0.008977877730566242,
+          0.00015003211657393933,
+          0.020078536873509023
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.015982138081682196,
+        0.019439301589938937,
+        0.14214386486796438
+      ],
+      "parent_source_joint_id": "Shoulder.R",
+      "rest_position": [
+        0.6312414407730103,
+        -0.10475897043943405,
+        3.7150776386260986
+      ],
+      "source_joint_id": "UpperArm.R",
+      "use_deform": true,
+      "weight_sum": 15.75730138644576,
+      "weighted_vertex_count": 36
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9540833234786987,
+      "mesh_influence_centroid": [
+        2.301525506167915,
+        -0.19336628871420453,
+        3.700423863474099
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.11932711121097839,
+          -0.010682801566159417,
+          -0.002061948430650773
+        ],
+        [
+          -0.010682801566159417,
+          0.02665988501304544,
+          -0.0007597143448350163
+        ],
+        [
+          -0.002061948430650773,
+          -0.0007597143448350163,
+          0.014505421540347285
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.014380904855033244,
+        0.02553249499678624,
+        0.12057901791255163
+      ],
+      "parent_source_joint_id": "UpperArm.R",
+      "rest_position": [
+        1.5571271181106567,
+        -0.20011918246746063,
+        3.6560256481170654
+      ],
+      "source_joint_id": "LowerArm.R",
+      "use_deform": true,
+      "weight_sum": 20.10573297715746,
+      "weighted_vertex_count": 48
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.8797783851623535,
+      "mesh_influence_centroid": [
+        2.9276292631308687,
+        -0.2751591461638848,
+        3.7600119784499766
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.03702312250282347,
+          0.00943411942992467,
+          -0.004833624865394626
+        ],
+        [
+          0.00943411942992467,
+          0.06497912378258774,
+          0.006645287644398756
+        ],
+        [
+          -0.004833624865394626,
+          0.006645287644398756,
+          0.006346237855140657
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.004505987562437379,
+        0.035575152977122076,
+        0.06826734360099243
+      ],
+      "parent_source_joint_id": "LowerArm.R",
+      "rest_position": [
+        2.7353837490081787,
+        -0.2204500436782837,
+        3.698530435562134
+      ],
+      "source_joint_id": "Palm.R",
+      "use_deform": true,
+      "weight_sum": 6.671067867428064,
+      "weighted_vertex_count": 24
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9202732443809509,
+      "mesh_influence_centroid": [
+        3.130384313765757,
+        -0.16454744508797461,
+        3.6845167224848896
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.02179953906900778,
+          -0.0008125047082296888,
+          -0.0002448534223447041
+        ],
+        [
+          -0.0008125047082296888,
+          0.07479347882001186,
+          0.0002416332766143059
+        ],
+        [
+          -0.0002448534223447041,
+          0.0002416332766143059,
+          0.0028174969388405913
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.0028135964864818286,
+        0.021790148847449793,
+        0.07480676949392863
+      ],
+      "parent_source_joint_id": "Palm.R",
+      "rest_position": [
+        2.993018388748169,
+        -0.2094605714082718,
+        3.6984732151031494
+      ],
+      "source_joint_id": "MiddleHand.R",
+      "use_deform": true,
+      "weight_sum": 4.670639819465578,
+      "weighted_vertex_count": 22
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9346906542778015,
+      "mesh_influence_centroid": [
+        3.2882815133851095,
+        -0.10010219668479262,
+        3.686084299320488
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.01026747878806411,
+          -0.003159990954156533,
+          -0.0016922919103183887
+        ],
+        [
+          -0.003159990954156533,
+          0.04502056596017637,
+          0.0009895607624628155
+        ],
+        [
+          -0.0016922919103183887,
+          0.0009895607624628155,
+          0.002516565129440096
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.0021606848276432707,
+        0.010308095531083082,
+        0.04533582951895423
+      ],
+      "parent_source_joint_id": "MiddleHand.R",
+      "rest_position": [
+        3.153656244277954,
+        -0.20983266830444336,
+        3.6984732151031494
+      ],
+      "source_joint_id": "Fingers.R",
+      "use_deform": true,
+      "weight_sum": 8.66696012020111,
+      "weighted_vertex_count": 18
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9409603476524353,
+      "mesh_influence_centroid": [
+        2.593329790857258,
+        0.04995611757424562,
+        3.6323927332586017
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.018130881884155237,
+          0.0047269437082368415,
+          0.0010373372341128118
+        ],
+        [
+          0.0047269437082368415,
+          0.005392621713666493,
+          0.0010616458887501845
+        ],
+        [
+          0.0010373372341128118,
+          0.0010616458887501845,
+          0.012638946130364204
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.0037769708928874655,
+        0.012452993971026156,
+        0.019932484864272314
+      ],
+      "parent_source_joint_id": "LowerArm.R",
+      "rest_position": [
+        2.5175368785858154,
+        -0.004862870555371046,
+        3.630451202392578
+      ],
+      "source_joint_id": "Thumb.L",
+      "use_deform": true,
+      "weight_sum": 7.167040484026074,
+      "weighted_vertex_count": 27
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9944878220558167,
+      "mesh_influence_centroid": [
+        2.7282657113084166,
+        0.1511307225869084,
+        3.502167751626881
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.006319599673998866,
+          -0.0002306754179641768,
+          -0.001538156760616971
+        ],
+        [
+          -0.0002306754179641768,
+          0.0027074726784517937,
+          9.336844194440808e-05
+        ],
+        [
+          -0.001538156760616971,
+          9.336844194440808e-05,
+          0.006971831755780755
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.002692795551055985,
+        0.0050794459891938,
+        0.00822666256798163
+      ],
+      "parent_source_joint_id": "Thumb.L",
+      "rest_position": [
+        2.617053985595703,
+        0.1267160177230835,
+        3.541015625
+      ],
+      "source_joint_id": "Thumb2.L",
+      "use_deform": true,
+      "weight_sum": 8.619755804538727,
+      "weighted_vertex_count": 16
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9838986992835999,
+      "mesh_influence_centroid": [
+        -0.4198433295054874,
+        -0.17015655394540186,
+        1.3176452261411231
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.05287682167431981,
+          -0.014550874221470472,
+          0.003780123245190503
+        ],
+        [
+          -0.014550874221470472,
+          0.10051430772396375,
+          -0.044654903837666876
+        ],
+        [
+          0.003780123245190503,
+          -0.044654903837666876,
+          0.17294448092360448
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.04799649379820773,
+        0.0834513479655377,
+        0.1948877685581426
+      ],
+      "parent_source_joint_id": "Body",
+      "rest_position": [
+        -0.528574526309967,
+        -0.06005265191197395,
+        1.741301417350769
+      ],
+      "source_joint_id": "UpperLeg.L",
+      "use_deform": true,
+      "weight_sum": 33.82640748284757,
+      "weighted_vertex_count": 84
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9838001728057861,
+      "mesh_influence_centroid": [
+        -0.49271988809369166,
+        -0.0823365255267483,
+        0.5261390370019947
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.015633746639080792,
+          0.00043565699610071534,
+          0.0017583872155805813
+        ],
+        [
+          0.00043565699610071534,
+          0.024726320195788597,
+          0.002506647500390577
+        ],
+        [
+          0.0017583872155805813,
+          0.002506647500390577,
+          0.07842374871925423
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.015569801187494547,
+        0.024623361892660574,
+        0.07859065247396851
+      ],
+      "parent_source_joint_id": "UpperLeg.L",
+      "rest_position": [
+        -0.5282989740371704,
+        0.058927249163389206,
+        0.8018825054168701
+      ],
+      "source_joint_id": "LowerLeg.L",
+      "use_deform": true,
+      "weight_sum": 28.502241961658,
+      "weighted_vertex_count": 49
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9854114651679993,
+      "mesh_influence_centroid": [
+        0.4211444517155176,
+        -0.18480025154951168,
+        1.3573195597201213
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.05564672828515527,
+          0.01741118452135451,
+          -0.00651786623499917
+        ],
+        [
+          0.01741118452135451,
+          0.10479640980447419,
+          -0.046299575799664705
+        ],
+        [
+          -0.00651786623499917,
+          -0.046299575799664705,
+          0.1764710485033376
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.049437883288264005,
+        0.08701943629503098,
+        0.20045686700967205
+      ],
+      "parent_source_joint_id": "Body",
+      "rest_position": [
+        0.537383496761322,
+        -0.062056031078100204,
+        1.8354027271270752
+      ],
+      "source_joint_id": "UpperLeg.R",
+      "use_deform": true,
+      "weight_sum": 32.85236983280629,
+      "weighted_vertex_count": 85
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.976041853427887,
+      "mesh_influence_centroid": [
+        0.4869196906024273,
+        -0.08148822133335826,
+        0.566631728797207
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.017158904812381276,
+          -0.0009398941968907712,
+          -0.005991021376617889
+        ],
+        [
+          -0.0009398941968907712,
+          0.026328104134347486,
+          0.0015188703106666923
+        ],
+        [
+          -0.005991021376617889,
+          0.0015188703106666923,
+          0.07306719996491262
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.016463020612726274,
+        0.026334582280954588,
+        0.0737566060179605
+      ],
+      "parent_source_joint_id": "UpperLeg.R",
+      "rest_position": [
+        0.5376590490341187,
+        0.05692381039261818,
+        0.8959839344024658
+      ],
+      "source_joint_id": "LowerLeg.R",
+      "use_deform": true,
+      "weight_sum": 29.008027285337448,
+      "weighted_vertex_count": 54
+    },
+    {
+      "has_mesh_influence": false,
+      "influenced_mesh_object_count": 0,
+      "maximum_vertex_weight": 0.0,
+      "mesh_influence_centroid": null,
+      "mesh_influence_covariance": null,
+      "mesh_influence_spread_eigenvalues": null,
+      "parent_source_joint_id": "Bone",
+      "rest_position": [
+        -0.5208616256713867,
+        1.0561233758926392,
+        0.7096765041351318
+      ],
+      "source_joint_id": "PoleTarget.L",
+      "use_deform": true,
+      "weight_sum": 0.0,
+      "weighted_vertex_count": 0
+    },
+    {
+      "has_mesh_influence": true,
+      "influenced_mesh_object_count": 1,
+      "maximum_vertex_weight": 0.9557714462280273,
+      "mesh_influence_centroid": [
+        0.5244709081838755,
+        -0.005668454899307871,
+        0.009821297782372097
+      ],
+      "mesh_influence_covariance": [
+        [
+          0.0072067249719094395,
+          0.0011471328484964362,
+          -0.00025383835885646813
+        ],
+        [
+          0.0011471328484964362,
+          0.02865341866420383,
+          6.571363131248592e-05
+        ],
+        [
+          -0.00025383835885646813,
+          6.571363131248592e-05,
+          0.0023536588858577125
+        ]
+      ],
+      "mesh_influence_spread_eigenvalues": [
+        0.002339814511890593,
+        0.007159283482256415,
+        0.028714704527823973
+      ],
+      "parent_source_joint_id": "Bone",
+      "rest_position": [
+        0.5339749455451965,
+        -0.13914702832698822,
+        0.02537655085325241
+      ],
+      "source_joint_id": "Foot.R",
+      "use_deform": true,
+      "weight_sum": 6.089802328497171,
+      "weighted_vertex_count": 13
+    },
+    {
+      "has_mesh_influence": false,
+      "influenced_mesh_object_count": 0,
+      "maximum_vertex_weight": 0.0,
+      "mesh_influence_centroid": null,
+      "mesh_influence_covariance": null,
+      "mesh_influence_spread_eigenvalues": null,
+      "parent_source_joint_id": "Bone",
+      "rest_position": [
+        0.5450964570045471,
+        1.0541200637817383,
+        0.8037778735160828
+      ],
+      "source_joint_id": "PoleTarget.R",
+      "use_deform": true,
+      "weight_sum": 0.0,
+      "weighted_vertex_count": 0
+    }
+  ],
+  "clip_count": 3,
+  "clip_reports": [
+    {
+      "action_slot_identifier": "OBHumanArmature|HumanArmature|Idle",
+      "clip_id": "demo_idle_v1",
+      "clip_kind": "IDLE",
+      "frame_first": 1,
+      "frame_last": 81,
+      "nonroot_translation": {
+        "fraction_gt_1e_3": 0.02551440329218107,
+        "fraction_gt_1e_4": 0.03209876543209877,
+        "fraction_gt_1e_5": 0.03251028806584362,
+        "maximum": 0.00606463790978346,
+        "p95": 2.259777936203308e-07,
+        "p99": 0.005034821472836887,
+        "sample_count": 2430,
+        "top_bones": [
+          {
+            "maximum": 0.00606463790978346,
+            "source_joint_id": "Body"
+          },
+          {
+            "maximum": 2.7497500382236726e-07,
+            "source_joint_id": "Thumb2.R"
+          },
+          {
+            "maximum": 2.5125837067762806e-07,
+            "source_joint_id": "Thumb2.L"
+          },
+          {
+            "maximum": 2.3480914472977173e-07,
+            "source_joint_id": "Palm.L"
+          },
+          {
+            "maximum": 2.294716481847511e-07,
+            "source_joint_id": "Head"
+          },
+          {
+            "maximum": 2.2519305952270813e-07,
+            "source_joint_id": "Thumb.L"
+          },
+          {
+            "maximum": 2.0912267190450936e-07,
+            "source_joint_id": "Torso"
+          },
+          {
+            "maximum": 2.0162184598327062e-07,
+            "source_joint_id": "LowerArm.R"
+          },
+          {
+            "maximum": 1.8960719612664533e-07,
+            "source_joint_id": "Shoulder.L"
+          },
+          {
+            "maximum": 1.773408900844661e-07,
+            "source_joint_id": "Shoulder.R"
+          },
+          {
+            "maximum": 1.7429661733656182e-07,
+            "source_joint_id": "UpperArm.R"
+          },
+          {
+            "maximum": 1.7302722197295616e-07,
+            "source_joint_id": "MiddleHand.L"
+          },
+          {
+            "maximum": 1.6920792875967862e-07,
+            "source_joint_id": "LowerArm.L"
+          },
+          {
+            "maximum": 1.5592112161939845e-07,
+            "source_joint_id": "UpperArm.L"
+          },
+          {
+            "maximum": 1.476901156554455e-07,
+            "source_joint_id": "Palm.R"
+          },
+          {
+            "maximum": 1.3660677334357726e-07,
+            "source_joint_id": "Thumb.R"
+          }
+        ],
+        "top_samples": [
+          {
+            "frame": 20,
+            "normalized_translation": 0.00606463790978346,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 60,
+            "normalized_translation": 0.00606463790978346,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 19,
+            "normalized_translation": 0.006029542875442183,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 59,
+            "normalized_translation": 0.006029542875442183,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 18,
+            "normalized_translation": 0.0059969757226818726,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 58,
+            "normalized_translation": 0.0059969757226818726,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 21,
+            "normalized_translation": 0.005977437022648771,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 61,
+            "normalized_translation": 0.005977437022648771,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 17,
+            "normalized_translation": 0.005909000547912405,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 57,
+            "normalized_translation": 0.005909000547912405,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 22,
+            "normalized_translation": 0.005890331717353127,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 62,
+            "normalized_translation": 0.005890331717353127,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 23,
+            "normalized_translation": 0.005803366055242265,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 63,
+            "normalized_translation": 0.005803366055242265,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 16,
+            "normalized_translation": 0.005790921499084173,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 56,
+            "normalized_translation": 0.005790921499084173,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 24,
+            "normalized_translation": 0.005716444161075661,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 64,
+            "normalized_translation": 0.005716444161075661,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 25,
+            "normalized_translation": 0.0055258419423576885,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 65,
+            "normalized_translation": 0.0055258419423576885,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 15,
+            "normalized_translation": 0.005367379079784373,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 55,
+            "normalized_translation": 0.0053673748384857846,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 26,
+            "normalized_translation": 0.005296988964348048,
+            "source_joint_id": "Body"
+          },
+          {
+            "frame": 66,
+            "normalized_translation": 0.005296988964348048,
+            "source_joint_id": "Body"
+          }
+        ]
+      },
+      "pose_stream_sha256": "75d03b07b6654cbb40d54c79693752084c9d997e63c46d2eaf8a6f89aac7b176",
+      "requested_take": "HumanArmature|Idle",
+      "resolved_action_name": "HumanArmature|HumanArmature|Idle",
+      "rotation_amplitude": {
+        "top_bones": [
+          {
+            "maximum_angle_degrees": 77.45581063810408,
+            "maximum_angle_radians": 1.3518589204361664,
+            "source_joint_id": "UpperArm.L"
+          },
+          {
+            "maximum_angle_degrees": 77.37459276368146,
+            "maximum_angle_radians": 1.3504414011160204,
+            "source_joint_id": "UpperArm.R"
+          },
+          {
+            "maximum_angle_degrees": 30.04544204944688,
+            "maximum_angle_radians": 0.524391888980001,
+            "source_joint_id": "Fingers.R"
+          },
+          {
+            "maximum_angle_degrees": 29.488129405276524,
+            "maximum_angle_radians": 0.5146649483762327,
+            "source_joint_id": "Fingers.L"
+          },
+          {
+            "maximum_angle_degrees": 28.758606546335248,
+            "maximum_angle_radians": 0.5019323725191452,
+            "source_joint_id": "Thumb2.R"
+          },
+          {
+            "maximum_angle_degrees": 14.72665164995763,
+            "maximum_angle_radians": 0.2570285590860161,
+            "source_joint_id": "LowerArm.R"
+          },
+          {
+            "maximum_angle_degrees": 12.088777957739955,
+            "maximum_angle_radians": 0.21098897790507815,
+            "source_joint_id": "LowerArm.L"
+          },
+          {
+            "maximum_angle_degrees": 6.50381915646204,
+            "maximum_angle_radians": 0.11351305823454283,
+            "source_joint_id": "LowerLeg.R"
+          },
+          {
+            "maximum_angle_degrees": 6.485491565971517,
+            "maximum_angle_radians": 0.11319318143652601,
+            "source_joint_id": "LowerLeg.L"
+          },
+          {
+            "maximum_angle_degrees": 3.5202835668220596,
+            "maximum_angle_radians": 0.061440538844894754,
+            "source_joint_id": "Head"
+          },
+          {
+            "maximum_angle_degrees": 2.7153654780082648,
+            "maximum_angle_radians": 0.047392067986233896,
+            "source_joint_id": "UpperLeg.R"
+          },
+          {
+            "maximum_angle_degrees": 2.524141298758625,
+            "maximum_angle_radians": 0.044054576448903864,
+            "source_joint_id": "UpperLeg.L"
+          },
+          {
+            "maximum_angle_degrees": 1.411087606659467,
+            "maximum_angle_radians": 0.024628124770294364,
+            "source_joint_id": "Torso"
+          },
+          {
+            "maximum_angle_degrees": 0.44057392275627666,
+            "maximum_angle_radians": 0.007689465550524199,
+            "source_joint_id": "Body"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Abdomen"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Bone"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Hips"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "MiddleHand.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "MiddleHand.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Neck"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Palm.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Palm.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "PoleTarget.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "PoleTarget.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Shoulder.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Shoulder.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Thumb.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Thumb.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Thumb2.L"
+          }
+        ]
+      },
+      "sample_frame_count": 81,
+      "source_fps": 24.0
+    },
+    {
+      "action_slot_identifier": "OBHumanArmature|HumanArmature|Run",
+      "clip_id": "demo_run_v1",
+      "clip_kind": "RUN",
+      "frame_first": 1,
+      "frame_last": 21,
+      "nonroot_translation": {
+        "fraction_gt_1e_3": 0.09206349206349207,
+        "fraction_gt_1e_4": 0.09206349206349207,
+        "fraction_gt_1e_5": 0.09206349206349207,
+        "maximum": 0.45293144466500207,
+        "p95": 0.15983973725154998,
+        "p99": 0.3936773338100505,
+        "sample_count": 630,
+        "top_bones": [
+          {
+            "maximum": 0.45293144466500207,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "maximum": 0.4348348626084729,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "maximum": 0.07145609996465135,
+            "source_joint_id": "Body"
+          },
+          {
+            "maximum": 3.092735476505805e-07,
+            "source_joint_id": "Thumb2.R"
+          },
+          {
+            "maximum": 2.794144909990145e-07,
+            "source_joint_id": "Thumb.L"
+          },
+          {
+            "maximum": 2.483731145556653e-07,
+            "source_joint_id": "Palm.R"
+          },
+          {
+            "maximum": 2.4760973612226643e-07,
+            "source_joint_id": "Thumb2.L"
+          },
+          {
+            "maximum": 2.3461863657522952e-07,
+            "source_joint_id": "Shoulder.L"
+          },
+          {
+            "maximum": 2.1825401840787056e-07,
+            "source_joint_id": "Head"
+          },
+          {
+            "maximum": 2.0482861609199323e-07,
+            "source_joint_id": "Palm.L"
+          },
+          {
+            "maximum": 2.0107915515875023e-07,
+            "source_joint_id": "Torso"
+          },
+          {
+            "maximum": 1.9075249647074813e-07,
+            "source_joint_id": "MiddleHand.L"
+          },
+          {
+            "maximum": 1.8090544284421937e-07,
+            "source_joint_id": "Thumb.R"
+          },
+          {
+            "maximum": 1.730815842670561e-07,
+            "source_joint_id": "UpperArm.L"
+          },
+          {
+            "maximum": 1.5578182571643017e-07,
+            "source_joint_id": "MiddleHand.R"
+          },
+          {
+            "maximum": 1.4701686726129187e-07,
+            "source_joint_id": "Fingers.L"
+          }
+        ],
+        "top_samples": [
+          {
+            "frame": 11,
+            "normalized_translation": 0.45293144466500207,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 12,
+            "normalized_translation": 0.43897584440915627,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 1,
+            "normalized_translation": 0.4348348626084729,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 21,
+            "normalized_translation": 0.4348348626084729,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 2,
+            "normalized_translation": 0.4247911915250983,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 13,
+            "normalized_translation": 0.39766369721058953,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 3,
+            "normalized_translation": 0.3956914791388321,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 10,
+            "normalized_translation": 0.3887461504188946,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 4,
+            "normalized_translation": 0.35538464935789676,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 14,
+            "normalized_translation": 0.338142021972728,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 5,
+            "normalized_translation": 0.3142999979579574,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 1,
+            "normalized_translation": 0.29166004174899895,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 21,
+            "normalized_translation": 0.29166004174899895,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 2,
+            "normalized_translation": 0.28644099808000845,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 20,
+            "normalized_translation": 0.2842043749340241,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 6,
+            "normalized_translation": 0.277640598000446,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 15,
+            "normalized_translation": 0.27422844454877804,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 3,
+            "normalized_translation": 0.26930432230660367,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 20,
+            "normalized_translation": 0.2631428003854394,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 11,
+            "normalized_translation": 0.2500016763925608,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 9,
+            "normalized_translation": 0.24699970545682706,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 12,
+            "normalized_translation": 0.24435064674086757,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 4,
+            "normalized_translation": 0.23978831412038823,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 13,
+            "normalized_translation": 0.231448137801756,
+            "source_joint_id": "Foot.L"
+          }
+        ]
+      },
+      "pose_stream_sha256": "fc350dfae3900a9f742e193db49196a8eb5e8f75a5332741e451d91e8c12af40",
+      "requested_take": "HumanArmature|Run",
+      "resolved_action_name": "HumanArmature|HumanArmature|Run",
+      "rotation_amplitude": {
+        "top_bones": [
+          {
+            "maximum_angle_degrees": 120.61104035556063,
+            "maximum_angle_radians": 2.1050597684602854,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "maximum_angle_degrees": 118.15557419864173,
+            "maximum_angle_radians": 2.0622037993507587,
+            "source_joint_id": "UpperArm.L"
+          },
+          {
+            "maximum_angle_degrees": 117.83507216225048,
+            "maximum_angle_radians": 2.0566099835563847,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "maximum_angle_degrees": 107.43353150424826,
+            "maximum_angle_radians": 1.8750688517941887,
+            "source_joint_id": "LowerArm.R"
+          },
+          {
+            "maximum_angle_degrees": 104.69726642866688,
+            "maximum_angle_radians": 1.827312017017962,
+            "source_joint_id": "UpperArm.R"
+          },
+          {
+            "maximum_angle_degrees": 103.53157594204204,
+            "maximum_angle_radians": 1.8069668799671834,
+            "source_joint_id": "LowerLeg.L"
+          },
+          {
+            "maximum_angle_degrees": 101.3941895805502,
+            "maximum_angle_radians": 1.7696624505719294,
+            "source_joint_id": "Fingers.L"
+          },
+          {
+            "maximum_angle_degrees": 94.71660418708963,
+            "maximum_angle_radians": 1.6531165993729613,
+            "source_joint_id": "LowerArm.L"
+          },
+          {
+            "maximum_angle_degrees": 93.38813336559647,
+            "maximum_angle_radians": 1.629930409521232,
+            "source_joint_id": "LowerLeg.R"
+          },
+          {
+            "maximum_angle_degrees": 70.16105921363749,
+            "maximum_angle_radians": 1.2245414899646778,
+            "source_joint_id": "MiddleHand.R"
+          },
+          {
+            "maximum_angle_degrees": 69.10114565242654,
+            "maximum_angle_radians": 1.2060425085350082,
+            "source_joint_id": "UpperLeg.R"
+          },
+          {
+            "maximum_angle_degrees": 66.04321886355025,
+            "maximum_angle_radians": 1.1526716177841796,
+            "source_joint_id": "UpperLeg.L"
+          },
+          {
+            "maximum_angle_degrees": 64.87333457227035,
+            "maximum_angle_radians": 1.1322532850339848,
+            "source_joint_id": "Fingers.R"
+          },
+          {
+            "maximum_angle_degrees": 63.0650719660453,
+            "maximum_angle_radians": 1.100693148814664,
+            "source_joint_id": "MiddleHand.L"
+          },
+          {
+            "maximum_angle_degrees": 41.31310547323574,
+            "maximum_angle_radians": 0.7210497147316537,
+            "source_joint_id": "Thumb2.R"
+          },
+          {
+            "maximum_angle_degrees": 27.085248784038818,
+            "maximum_angle_radians": 0.47272677000326796,
+            "source_joint_id": "Thumb2.L"
+          },
+          {
+            "maximum_angle_degrees": 20.96042048239665,
+            "maximum_angle_radians": 0.3658283500202797,
+            "source_joint_id": "Abdomen"
+          },
+          {
+            "maximum_angle_degrees": 15.577917038102179,
+            "maximum_angle_radians": 0.271885942917406,
+            "source_joint_id": "Torso"
+          },
+          {
+            "maximum_angle_degrees": 8.682535528328833,
+            "maximum_angle_radians": 0.15153883239072352,
+            "source_joint_id": "Head"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Body"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Bone"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Hips"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Neck"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Palm.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Palm.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "PoleTarget.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "PoleTarget.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Shoulder.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Shoulder.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Thumb.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Thumb.R"
+          }
+        ]
+      },
+      "sample_frame_count": 21,
+      "source_fps": 24.0
+    },
+    {
+      "action_slot_identifier": "OBHumanArmature|HumanArmature|Run_swordAttack",
+      "clip_id": "demo_slash_v1",
+      "clip_kind": "SLASH",
+      "frame_first": 1,
+      "frame_last": 21,
+      "nonroot_translation": {
+        "fraction_gt_1e_3": 0.09206349206349207,
+        "fraction_gt_1e_4": 0.09206349206349207,
+        "fraction_gt_1e_5": 0.09206349206349207,
+        "maximum": 0.45293144466500207,
+        "p95": 0.15983973725154998,
+        "p99": 0.3936773338100505,
+        "sample_count": 630,
+        "top_bones": [
+          {
+            "maximum": 0.45293144466500207,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "maximum": 0.4348348626084729,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "maximum": 0.07145609996465135,
+            "source_joint_id": "Body"
+          },
+          {
+            "maximum": 3.092735476505805e-07,
+            "source_joint_id": "Thumb2.R"
+          },
+          {
+            "maximum": 2.3461863657522952e-07,
+            "source_joint_id": "Shoulder.L"
+          },
+          {
+            "maximum": 2.1950163647357705e-07,
+            "source_joint_id": "Thumb.L"
+          },
+          {
+            "maximum": 2.1825401840787056e-07,
+            "source_joint_id": "Head"
+          },
+          {
+            "maximum": 2.0851716635672492e-07,
+            "source_joint_id": "Thumb2.L"
+          },
+          {
+            "maximum": 2.0482861609199323e-07,
+            "source_joint_id": "Palm.L"
+          },
+          {
+            "maximum": 2.0107915515875023e-07,
+            "source_joint_id": "Torso"
+          },
+          {
+            "maximum": 1.9075249647074813e-07,
+            "source_joint_id": "MiddleHand.L"
+          },
+          {
+            "maximum": 1.8090544284421937e-07,
+            "source_joint_id": "Thumb.R"
+          },
+          {
+            "maximum": 1.730815842670561e-07,
+            "source_joint_id": "UpperArm.L"
+          },
+          {
+            "maximum": 1.679383603731619e-07,
+            "source_joint_id": "UpperArm.R"
+          },
+          {
+            "maximum": 1.4701686726129187e-07,
+            "source_joint_id": "Fingers.L"
+          },
+          {
+            "maximum": 1.3877509452559217e-07,
+            "source_joint_id": "LowerArm.L"
+          }
+        ],
+        "top_samples": [
+          {
+            "frame": 11,
+            "normalized_translation": 0.45293144466500207,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 12,
+            "normalized_translation": 0.43897584440915627,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 1,
+            "normalized_translation": 0.4348348626084729,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 21,
+            "normalized_translation": 0.4348348626084729,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 2,
+            "normalized_translation": 0.4247911915250983,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 13,
+            "normalized_translation": 0.39766369721058953,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 3,
+            "normalized_translation": 0.3956914791388321,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 10,
+            "normalized_translation": 0.3887461504188946,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 4,
+            "normalized_translation": 0.35538464935789676,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 14,
+            "normalized_translation": 0.338142021972728,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 5,
+            "normalized_translation": 0.3142999979579574,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 1,
+            "normalized_translation": 0.29166004174899895,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 21,
+            "normalized_translation": 0.29166004174899895,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 2,
+            "normalized_translation": 0.28644099808000845,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 20,
+            "normalized_translation": 0.2842043749340241,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 6,
+            "normalized_translation": 0.277640598000446,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 15,
+            "normalized_translation": 0.27422844454877804,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 3,
+            "normalized_translation": 0.26930432230660367,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 20,
+            "normalized_translation": 0.2631428003854394,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 11,
+            "normalized_translation": 0.2500016763925608,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 9,
+            "normalized_translation": 0.24699970545682706,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 12,
+            "normalized_translation": 0.24435064674086757,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "frame": 4,
+            "normalized_translation": 0.23978831412038823,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "frame": 13,
+            "normalized_translation": 0.231448137801756,
+            "source_joint_id": "Foot.L"
+          }
+        ]
+      },
+      "pose_stream_sha256": "935001e8d74ace494fd710166a85e7aa9298b4bb39891fe0cc2acd84c17647d8",
+      "requested_take": "HumanArmature|Run_swordAttack",
+      "resolved_action_name": "HumanArmature|HumanArmature|Run_swordAttack",
+      "rotation_amplitude": {
+        "top_bones": [
+          {
+            "maximum_angle_degrees": 120.61104035556063,
+            "maximum_angle_radians": 2.1050597684602854,
+            "source_joint_id": "Foot.L"
+          },
+          {
+            "maximum_angle_degrees": 118.15557419864173,
+            "maximum_angle_radians": 2.0622037993507587,
+            "source_joint_id": "UpperArm.L"
+          },
+          {
+            "maximum_angle_degrees": 117.83507216225048,
+            "maximum_angle_radians": 2.0566099835563847,
+            "source_joint_id": "Foot.R"
+          },
+          {
+            "maximum_angle_degrees": 104.69724054831562,
+            "maximum_angle_radians": 1.827311565320621,
+            "source_joint_id": "UpperArm.R"
+          },
+          {
+            "maximum_angle_degrees": 103.53157594204204,
+            "maximum_angle_radians": 1.8069668799671834,
+            "source_joint_id": "LowerLeg.L"
+          },
+          {
+            "maximum_angle_degrees": 101.3941895805502,
+            "maximum_angle_radians": 1.7696624505719294,
+            "source_joint_id": "Fingers.L"
+          },
+          {
+            "maximum_angle_degrees": 94.71660418708963,
+            "maximum_angle_radians": 1.6531165993729613,
+            "source_joint_id": "LowerArm.L"
+          },
+          {
+            "maximum_angle_degrees": 93.38813336559647,
+            "maximum_angle_radians": 1.629930409521232,
+            "source_joint_id": "LowerLeg.R"
+          },
+          {
+            "maximum_angle_degrees": 73.59562336194259,
+            "maximum_angle_radians": 1.2844859427235567,
+            "source_joint_id": "LowerArm.R"
+          },
+          {
+            "maximum_angle_degrees": 70.1610473294083,
+            "maximum_angle_radians": 1.2245412825457496,
+            "source_joint_id": "MiddleHand.R"
+          },
+          {
+            "maximum_angle_degrees": 69.10114565242654,
+            "maximum_angle_radians": 1.2060425085350082,
+            "source_joint_id": "UpperLeg.R"
+          },
+          {
+            "maximum_angle_degrees": 66.04321886355025,
+            "maximum_angle_radians": 1.1526716177841796,
+            "source_joint_id": "UpperLeg.L"
+          },
+          {
+            "maximum_angle_degrees": 64.87333457227035,
+            "maximum_angle_radians": 1.1322532850339848,
+            "source_joint_id": "Fingers.R"
+          },
+          {
+            "maximum_angle_degrees": 63.0650719660453,
+            "maximum_angle_radians": 1.100693148814664,
+            "source_joint_id": "MiddleHand.L"
+          },
+          {
+            "maximum_angle_degrees": 41.31310547323574,
+            "maximum_angle_radians": 0.7210497147316537,
+            "source_joint_id": "Thumb2.R"
+          },
+          {
+            "maximum_angle_degrees": 30.846464068316646,
+            "maximum_angle_radians": 0.5383723605902505,
+            "source_joint_id": "Palm.R"
+          },
+          {
+            "maximum_angle_degrees": 27.08530711961083,
+            "maximum_angle_radians": 0.4727277881510706,
+            "source_joint_id": "Thumb2.L"
+          },
+          {
+            "maximum_angle_degrees": 20.96042048239665,
+            "maximum_angle_radians": 0.3658283500202797,
+            "source_joint_id": "Abdomen"
+          },
+          {
+            "maximum_angle_degrees": 15.577917038102179,
+            "maximum_angle_radians": 0.271885942917406,
+            "source_joint_id": "Torso"
+          },
+          {
+            "maximum_angle_degrees": 13.578917580323754,
+            "maximum_angle_radians": 0.2369968206335911,
+            "source_joint_id": "Shoulder.R"
+          },
+          {
+            "maximum_angle_degrees": 8.682535528328833,
+            "maximum_angle_radians": 0.15153883239072352,
+            "source_joint_id": "Head"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Body"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Bone"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Hips"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Neck"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Palm.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "PoleTarget.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "PoleTarget.R"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Shoulder.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Thumb.L"
+          },
+          {
+            "maximum_angle_degrees": 0.0,
+            "maximum_angle_radians": 0.0,
+            "source_joint_id": "Thumb.R"
+          }
+        ]
+      },
+      "sample_frame_count": 21,
+      "source_fps": 24.0
+    }
+  ],
+  "deform_bone_count": 31,
+  "diagnostic_only": true,
+  "distinct_pose_stream_hash_count": 3,
+  "mesh_influencing_bone_count": 28,
+  "nondeform_bone_count": 0,
+  "schema": "RealSaS.MotionSourceActionDiagnostic.v1",
+  "source_fbx": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/inputs/motion/quaternius_knight_v1_source/KnightCharacter.fbx",
+  "status": "MEASURED",
+  "thresholds_changed": false,
+  "zero_mesh_influence_bone_count": 3
+}

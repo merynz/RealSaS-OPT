@@ -1,0 +1,29 @@
+{
+  "schema": "RealSaS.SourceOwnedVisualFaceOrderSensitivityAudit.v1",
+  "status": "ORDER_SENSITIVE",
+  "only_intervention": "REVERSE_FACE_ARRAY_ORDER",
+  "geometry_identical": true,
+  "texture_identical": true,
+  "positions_identical": true,
+  "uv_by_vertex_identical": true,
+  "changed_visible_pixel_count": 45,
+  "order_a_rgba_sha256": "41a177bebd34f1c75c1ef4ede8738324746ff826bc23a4f8fcd542a1de4649f7",
+  "order_b_rgba_sha256": "a4c87ff66d8e34beb37ddeef188454715c5ee7bd3d339eb83920a2dda401aaa7",
+  "sample_pixel_xy": [
+    8,
+    5
+  ],
+  "order_a_sample_rgba": [
+    0,
+    0,
+    255,
+    255
+  ],
+  "order_b_sample_rgba": [
+    255,
+    0,
+    0,
+    255
+  ],
+  "interpretation": "Current source-owned visual output changes when only triangle array order changes. Face iteration order is therefore an implicit overlap/presentation authority."
+}

@@ -29,6 +29,9 @@ from compiler.realsas_compiler_core.product_state_v2 import (
 from compiler.realsas_compiler_core.presentation_partition_v2 import (
     presentation_partition_evidence_from_dict,
 )
+from compiler.realsas_compiler_core.visual_presentation_v1 import (
+    qualified_visual_presentation_set_from_dict,
+)
 from compiler.realsas_compiler_core.runtime_visual_authority_v1 import (
     source_owned_visual_dynamic_integrity_from_dict,
     source_owned_visual_runtime_projection_from_dict,
@@ -164,6 +167,23 @@ def _build_editable_bundle(ctx: dict, root: Path) -> tuple[Path, str, dict]:
         "24_COMPLETE_APPEARANCE_QUALIFIED",
         "RealSaS.CompleteAppearanceQualificationIR.v2",
     )
+    source_owned_visual = bool(
+        dict(appearance_asset_payload.get("metadata") or {}).get(
+            "source_owned_visual_mesh_mode"
+        )
+    )
+    if source_owned_visual:
+        (
+            visual_presentation_payload,
+            visual_presentation_path,
+        ) = _stage_json(
+            ctx,
+            "37_QUALIFIED_PRESENTATION_STRUCTURE",
+            "RealSaS.QualifiedVisualPresentationSetIR.v1",
+        )
+    else:
+        visual_presentation_payload = None
+        visual_presentation_path = None
     motion_constraints_payload, motion_constraints_path = _stage_json(
         ctx,
         "40_MOTION_COMPILE_RUN",
@@ -187,6 +207,13 @@ def _build_editable_bundle(ctx: dict, root: Path) -> tuple[Path, str, dict]:
     appearance_asset = complete_appearance_asset_from_dict(appearance_asset_payload)
     appearance_qualification = complete_appearance_qualification_from_dict(
         appearance_qualification_payload
+    )
+    visual_presentation = (
+        qualified_visual_presentation_set_from_dict(
+            visual_presentation_payload
+        )
+        if source_owned_visual
+        else None
     )
     motion = qualified_motion_v2_from_dict(motion_payload)
 
@@ -245,6 +272,39 @@ def _build_editable_bundle(ctx: dict, root: Path) -> tuple[Path, str, dict]:
     for actual, expected, label in exact_checks:
         if actual != expected:
             raise QualificationError(f"V2_AUTHORING_BINDING_DRIFT:{label}")
+    if source_owned_visual:
+        visual_checks = (
+            (
+                visual_presentation.mechanical_mesh_binding_hash,
+                mesh.mesh_lineage_hash,
+                "VISUAL_PRESENTATION_MESH",
+            ),
+            (
+                visual_presentation.appearance_asset_binding_hash,
+                appearance_asset.asset_hash,
+                "VISUAL_PRESENTATION_APPEARANCE",
+            ),
+            (
+                visual_presentation.appearance_qualification_binding_hash,
+                appearance_qualification.qualification_hash,
+                "VISUAL_PRESENTATION_APPEARANCE_QUALIFICATION",
+            ),
+            (
+                str(
+                    dict(complete.metadata or {}).get(
+                        "visual_mesh_set_binding_hash"
+                    )
+                    or ""
+                ),
+                visual_presentation.set_hash,
+                "VISUAL_PRESENTATION_COMPLETE_PUPPET",
+            ),
+        )
+        for actual, expected, label in visual_checks:
+            if actual != expected:
+                raise QualificationError(
+                    f"V2_AUTHORING_BINDING_DRIFT:{label}"
+                )
 
     archive_path = root / "editable_puppet_v2.rsedit"
     root.mkdir(parents=True, exist_ok=True)
@@ -271,6 +331,30 @@ def _build_editable_bundle(ctx: dict, root: Path) -> tuple[Path, str, dict]:
             ("motion/qualified_motion.json", motion_path),
         ):
             file_rows.append(_zip_add_file(archive, name, path))
+
+        if source_owned_visual:
+            file_rows.append(
+                _zip_add_file(
+                    archive,
+                    "authority/qualified_visual_presentation_v1.json",
+                    visual_presentation_path,
+                )
+            )
+            for view in sorted(
+                visual_presentation.views,
+                key=lambda row: int(row.view_index),
+            ):
+                file_rows.append(
+                    _zip_add_file(
+                        archive,
+                        (
+                            "visual/"
+                            f"{view.direction_id}_presentation_mesh_v1.npz"
+                        ),
+                        Path(view.mesh_npz_path),
+                        view.mesh_npz_sha256,
+                    )
+                )
 
         file_rows.append(
             _zip_add_file(
@@ -349,6 +433,16 @@ def _build_editable_bundle(ctx: dict, root: Path) -> tuple[Path, str, dict]:
             "motion_hash": motion.motion_lineage_hash,
             "appearance_authority": "COMPLETE_APPEARANCE_AUTHORITY_V2",
             "appearance_page_transport_complete": True,
+            "presentation_geometry_mode": (
+                "SOURCE_OWNED_VISUAL_PRESENTATION_V1"
+                if source_owned_visual
+                else "MECHANICAL_CANONICAL_DEPTH_V2"
+            ),
+            "qualified_visual_presentation_hash": (
+                visual_presentation.set_hash
+                if source_owned_visual
+                else None
+            ),
             "runtime_generation_required": False,
             "editable": True,
             "qualification_scope": "SEALED_EXPORTED_STATE_ONLY",

@@ -63,9 +63,11 @@ from compiler.realsas_compiler_core.runtime_authority_v2 import (
     runtime_projection_hash,
 )
 from compiler.realsas_compiler_core.runtime_visual_authority_v1 import (
+    SourceOwnedVisualDynamicIntegrityV1IR,
     SourceOwnedVisualRuntimeClipV1IR,
     SourceOwnedVisualRuntimeProjectionV1IR,
     SourceOwnedVisualRuntimeViewV1IR,
+    source_owned_visual_dynamic_integrity_hash,
     source_owned_visual_runtime_projection_hash,
     source_owned_visual_runtime_projection_from_dict,
 )
@@ -1711,7 +1713,331 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
     }
 
 
+def _prove_source_owned_visual_dynamic_integrity(
+    ctx: dict,
+    *,
+    projection,
+    package,
+    playback,
+) -> dict:
+    if playback.package_binding_hash != package.package_hash:
+        raise QualificationError(
+            "SOURCE_VISUAL_DVI_PLAYBACK_PACKAGE_DRIFT"
+        )
+    if playback.projection_binding_hash != projection.projection_hash:
+        raise QualificationError(
+            "SOURCE_VISUAL_DVI_PLAYBACK_PROJECTION_DRIFT"
+        )
+    if (
+        str(dict(package.metadata or {}).get("presentation_geometry_mode") or "")
+        != "SOURCE_OWNED_VISUAL_PRESENTATION_V1"
+    ):
+        raise QualificationError(
+            "SOURCE_VISUAL_DVI_PACKAGE_PRESENTATION_MODE_DRIFT"
+        )
+    if bool(
+        dict(package.metadata or {}).get("mechanical_mesh_render_authority", True)
+    ):
+        raise QualificationError(
+            "SOURCE_VISUAL_DVI_MECHANICAL_RENDER_AUTHORITY_FORBIDDEN"
+        )
+
+    player, player_sha = _native_player(ctx)
+    if player_sha != playback.native_player_sha256:
+        raise QualificationError("SOURCE_VISUAL_DVI_NATIVE_PLAYER_DRIFT")
+    archive = resolved_path(package.archive_path)
+    if not archive.is_file() or sha256_file(archive) != package.archive_sha256:
+        raise QualificationError("SOURCE_VISUAL_DVI_PACKAGE_BYTES_DRIFT")
+    arrays = _projection_arrays(projection)
+    root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+    native_workers = _native_parallel_workers(ctx)
+
+    evaluated_frame_view_count = 0
+    rendered_visible_pixel_count = 0
+    empty_frame_view_count = 0
+    flipped_triangle_count = 0
+    edge_gt_4_count = 0
+    edge_gt_10_count = 0
+    maximum_p95_edge_ratio = 1.0
+    maximum_edge_ratio = 1.0
+    native_reference_mismatch_pixel_count = 0
+    direct_source_provenance_mismatch_pixel_count = 0
+    outputs = []
+
+    for clip in projection.clips:
+        views = tuple(projection.views)
+        for frame_index in range(int(clip.frame_count)):
+            native_rows = _run_native_many(
+                player=player,
+                package=archive,
+                requests=(
+                    {
+                        "clip_id": clip.clip_id,
+                        "view_id": view.view_id,
+                        "frame_index": frame_index,
+                    }
+                    for view in views
+                ),
+                root=root / "frames",
+                max_workers=native_workers,
+            )
+            for view, (
+                rgba_path,
+                prov_path,
+                owner_path,
+                stdout,
+            ) in zip(views, native_rows):
+                if (
+                    "renderer=REALSAS_V2_SOURCE_OWNED_VISUAL_2D"
+                    not in stdout
+                ):
+                    raise QualificationError(
+                        "SOURCE_VISUAL_DVI_RENDERER_CONTRACT_DRIFT"
+                    )
+                resolution = int(view.camera["resolution"])
+                rgba = np.frombuffer(
+                    rgba_path.read_bytes(), dtype=np.uint8
+                ).reshape(resolution, resolution, 4)
+                provenance = np.frombuffer(
+                    prov_path.read_bytes(), dtype=np.uint8
+                ).reshape(resolution, resolution)
+                owner = np.frombuffer(
+                    owner_path.read_bytes(), dtype="<i4"
+                ).reshape(resolution, resolution)
+
+                reference = _source_owned_visual_reference_frame(
+                    projection,
+                    arrays,
+                    clip=clip,
+                    view=view,
+                    frame_index=frame_index,
+                )
+                mismatch = (
+                    np.any(
+                        rgba != reference.straight_rgba_u8,
+                        axis=2,
+                    )
+                    | (provenance != reference.provenance_code)
+                    | (owner != reference.owner_face_index)
+                )
+                native_reference_mismatch_pixel_count += int(
+                    np.count_nonzero(mismatch)
+                )
+
+                visible = rgba[:, :, 3] > 0
+                visible_count = int(np.count_nonzero(visible))
+                rendered_visible_pixel_count += visible_count
+                if visible_count <= 0:
+                    empty_frame_view_count += 1
+                provenance_bad = (
+                    (visible & (provenance != 0))
+                    | ((~visible) & (provenance != 255))
+                )
+                direct_source_provenance_mismatch_pixel_count += int(
+                    np.count_nonzero(provenance_bad)
+                )
+
+                vi = int(view.view_index)
+                rest = np.asarray(
+                    arrays[f"view_{vi}_rest_positions"],
+                    dtype=np.float64,
+                )
+                faces = np.asarray(
+                    arrays[f"view_{vi}_faces"],
+                    dtype=np.int64,
+                )
+                posed = np.asarray(
+                    arrays[
+                        f"{clip.array_prefix}_view_{vi}_positions"
+                    ][frame_index],
+                    dtype=np.float64,
+                )
+                metrics = _visual_mesh_motion_metrics(
+                    rest,
+                    posed,
+                    faces,
+                )
+                flipped_triangle_count += int(
+                    metrics["flipped_triangle_count"]
+                )
+                edge_gt_4_count += int(metrics["edge_gt_4_count"])
+                edge_gt_10_count += int(metrics["edge_gt_10_count"])
+                maximum_p95_edge_ratio = max(
+                    maximum_p95_edge_ratio,
+                    float(metrics["p95_edge_ratio"]),
+                )
+                maximum_edge_ratio = max(
+                    maximum_edge_ratio,
+                    float(metrics["max_edge_ratio"]),
+                )
+                evaluated_frame_view_count += 1
+
+                for output_path, authority, schema in (
+                    (
+                        rgba_path,
+                        "SOURCE_VISUAL_DVI_NATIVE_RGBA",
+                        "application/x-rgba8",
+                    ),
+                    (
+                        prov_path,
+                        "SOURCE_VISUAL_DVI_NATIVE_PROVENANCE",
+                        "application/x-u8-mask",
+                    ),
+                    (
+                        owner_path,
+                        "SOURCE_VISUAL_DVI_NATIVE_OWNER",
+                        "application/x-i32-owner",
+                    ),
+                ):
+                    outputs.append(
+                        {
+                            "path": str(output_path),
+                            "sha256": sha256_file(output_path),
+                            "authority_class": authority,
+                            "schema": schema,
+                        }
+                    )
+
+    passed = (
+        evaluated_frame_view_count > 0
+        and rendered_visible_pixel_count > 0
+        and empty_frame_view_count == 0
+        and flipped_triangle_count == 0
+        and edge_gt_4_count == 0
+        and native_reference_mismatch_pixel_count == 0
+        and direct_source_provenance_mismatch_pixel_count == 0
+    )
+    value = SourceOwnedVisualDynamicIntegrityV1IR(
+        package_binding_hash=package.package_hash,
+        projection_binding_hash=projection.projection_hash,
+        native_playback_binding_hash=playback.playback_hash,
+        evaluated_frame_view_count=evaluated_frame_view_count,
+        rendered_visible_pixel_count=rendered_visible_pixel_count,
+        empty_frame_view_count=empty_frame_view_count,
+        flipped_triangle_count=flipped_triangle_count,
+        edge_gt_4_count=edge_gt_4_count,
+        edge_gt_10_count=edge_gt_10_count,
+        maximum_p95_edge_ratio=maximum_p95_edge_ratio,
+        maximum_edge_ratio=maximum_edge_ratio,
+        native_reference_mismatch_pixel_count=(
+            native_reference_mismatch_pixel_count
+        ),
+        direct_source_provenance_mismatch_pixel_count=(
+            direct_source_provenance_mismatch_pixel_count
+        ),
+        qualification_report={
+            "status": (
+                "PASS_SOURCE_OWNED_VISUAL_DYNAMIC_INTEGRITY"
+                if passed
+                else "FAIL_SOURCE_OWNED_VISUAL_DYNAMIC_INTEGRITY"
+            ),
+            "native_reference_byte_parity_passed": (
+                native_reference_mismatch_pixel_count == 0
+            ),
+            "direct_source_provenance_passed": (
+                direct_source_provenance_mismatch_pixel_count == 0
+            ),
+            "all_frame_views_nonempty": empty_frame_view_count == 0,
+            "visual_orientation_passed": flipped_triangle_count == 0,
+            "catastrophic_edge_stretch_passed": edge_gt_4_count == 0,
+            "catastrophic_edge_ratio_threshold": 4.0,
+            "p95_edge_ratio_is_diagnostic": True,
+            "maximum_edge_ratio_is_diagnostic_below_catastrophic_threshold": True,
+            "perceptual_optimality_claimed": False,
+            "subject_identity_used_for_thresholds": False,
+        },
+        integrity_hash="",
+        metadata={
+            "presentation_geometry_mode": (
+                "SOURCE_OWNED_VISUAL_PRESENTATION_V1"
+            ),
+            "renderer": "REALSAS_V2_SOURCE_OWNED_VISUAL_2D",
+            "mechanical_mesh_render_authority": False,
+            "runtime_generation": False,
+            "dynamic_quality_scope": (
+                "STRUCTURAL_RUNTIME_INTEGRITY__NOT_PERCEPTUAL_OPTIMALITY"
+            ),
+            "native_parallel_workers": native_workers,
+        },
+    )
+    value = replace(
+        value,
+        integrity_hash=source_owned_visual_dynamic_integrity_hash(value),
+    )
+    if not passed:
+        return {
+            "status": "FAIL",
+            "blockers": ["SOURCE_OWNED_VISUAL_DYNAMIC_INTEGRITY_FAILED"],
+            "diagnostics": value.to_dict(),
+        }
+    outputs.insert(
+        0,
+        write_ir(
+            root / "source_owned_visual_dynamic_integrity_v1.json",
+            value,
+            authority_class=(
+                "QUALIFIED_SOURCE_OWNED_VISUAL_DYNAMIC_INTEGRITY_V1"
+            ),
+        ),
+    )
+    return {
+        "status": "PASS",
+        "outputs": outputs,
+        "diagnostics": {
+            "integrity_hash": value.integrity_hash,
+            "evaluated_frame_view_count": evaluated_frame_view_count,
+            "rendered_visible_pixel_count": rendered_visible_pixel_count,
+            "flipped_triangle_count": flipped_triangle_count,
+            "edge_gt_4_count": edge_gt_4_count,
+            "maximum_p95_edge_ratio": maximum_p95_edge_ratio,
+            "maximum_edge_ratio": maximum_edge_ratio,
+            "native_reference_mismatch_pixel_count": (
+                native_reference_mismatch_pixel_count
+            ),
+            "direct_source_provenance_mismatch_pixel_count": (
+                direct_source_provenance_mismatch_pixel_count
+            ),
+        },
+    }
+
+
 def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
+    asset = complete_appearance_asset_from_dict(
+        stage_output_payload(
+            ctx,
+            "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+            "RealSaS.CompleteAppearanceAssetIR.v2",
+        )
+    )
+    if bool(dict(asset.metadata or {}).get("source_owned_visual_mesh_mode")):
+        projection = source_owned_visual_runtime_projection_from_dict(
+            stage_output_payload(
+                ctx,
+                "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+                "RealSaS.SourceOwnedVisualRuntimeProjectionIR.v1",
+            )
+        )
+        package = runtime_package_seal_from_dict(
+            stage_output_payload(
+                ctx,
+                "43_RSS_MATERIALIZE_COMPACT",
+                "RealSaS.RuntimePackageSealIR.v2",
+            )
+        )
+        playback = native_playback_from_dict(
+            stage_output_payload(
+                ctx,
+                "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+                "RealSaS.NativePlaybackIR.v2",
+            )
+        )
+        return _prove_source_owned_visual_dynamic_integrity(
+            ctx,
+            projection=projection,
+            package=package,
+            playback=playback,
+        )
+
     projection = runtime_projection_from_dict(
         stage_output_payload(
             ctx,

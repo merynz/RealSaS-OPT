@@ -48,6 +48,7 @@ func TestPrepareAndFailExecutionPersistsLocalizedRepair(t *testing.T) {
 	subjectID := uuid.New()
 	releaseID := uuid.New()
 	attemptID := uuid.New()
+	commandID := uuid.New()
 	subjectInputID := uuid.New()
 	sourceTypeID := uuid.New()
 	sourceArtifactID := uuid.New()
@@ -98,6 +99,24 @@ func TestPrepareAndFailExecutionPersistsLocalizedRepair(t *testing.T) {
 	`, attemptID, "run-"+attemptID.String(), repeatHex("3")); err != nil {
 		t.Fatal(err)
 	}
+	commandPayload, err := json.Marshal(map[string]any{
+		"schema":           "RealSaS.CompileSubjectCommand.v1",
+		"command_id":       commandID.String(),
+		"attempt_id":       attemptID.String(),
+		"subject_id":       subjectID.String(),
+		"engine_release_id": releaseID.String(),
+		"subject_input_id": subjectInputID.String(),
+		"target_stage_id":  "46_PRODUCT_CLOSURE_SEAL",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pool.Exec(ctx, `
+		INSERT INTO commands(id,command_type,subject_id,idempotency_key,payload)
+		VALUES ($1,'COMPILE_SUBJECT',$2,$3,$4)
+	`, commandID, subjectID, "control-test:"+commandID.String(), commandPayload); err != nil {
+		t.Fatal(err)
+	}
 	stageID := "37_QUALIFIED_PRESENTATION_STRUCTURE"
 	stage, ok := g.Get(stageID)
 	if !ok {
@@ -116,7 +135,7 @@ func TestPrepareAndFailExecutionPersistsLocalizedRepair(t *testing.T) {
 		t.Fatal(err)
 	}
 	prepared, err := a.PrepareStageExecution(ctx, orchestration.PrepareStageExecutionRequest{
-		CommandID:              "cmd-" + attemptID.String(),
+		CommandID:              commandID.String(),
 		AttemptID:              attemptID.String(),
 		SubjectID:              subjectID.String(),
 		SubjectInputID:         subjectInputID.String(),

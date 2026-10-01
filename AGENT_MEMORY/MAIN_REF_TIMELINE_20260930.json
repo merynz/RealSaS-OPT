@@ -1,0 +1,128 @@
+{
+  "schema": "RealSaS.AgentMainRefTimeline.20260930.v1",
+  "generated_date": "2026-10-01",
+  "authority": "NON_AUTHORITATIVE_FORENSIC_DERIVATION",
+  "key_conclusion": "The normalized 46-stage candidate was actually merged and pushed to main, main later reached 3529344, then main was force-updated from 3529344 back to e6c91184. Current a8002 descends from that rollback.",
+  "events": [
+    {
+      "time": "2026-09-30T13:37:19",
+      "kind": "PRE_NORMALIZATION_CONTEXT_REFRESH",
+      "sha": "e6c91184d6d877bd19980832a561e94a746ca7ce",
+      "evidence": "commit metadata",
+      "confidence": "A"
+    },
+    {
+      "time": "2026-09-30T14:14:56",
+      "kind": "FINAL_NORMALIZATION_CANDIDATE_HEAD",
+      "sha": "92de05292b05e4ae8aaab3eed53c515b5eef5929",
+      "evidence": "final-main-merge-gate-v1 run 36727669232 PASS; plan be0067d7..., closure 19230647..., readiness witness-forbidden",
+      "confidence": "A"
+    },
+    {
+      "time": "2026-09-30T14:16:54",
+      "kind": "NORMALIZED_MERGE_COMMIT",
+      "sha": "f459fe5491e367e9e5da07cfc5b1886f1b138ae4",
+      "parents": [
+        "e6c91184d6d877bd19980832a561e94a746ca7ce",
+        "92de05292b05e4ae8aaab3eed53c515b5eef5929"
+      ],
+      "tree_relation": "candidate 92de -> merge f459 has zero changed files",
+      "evidence": "commit metadata + compare",
+      "confidence": "A"
+    },
+    {
+      "time": "2026-09-30T14:16:57Z",
+      "kind": "NORMALIZED_MERGE_PUSHED_TO_MAIN",
+      "sha": "f459fe5491e367e9e5da07cfc5b1886f1b138ae4",
+      "evidence": {
+        "actions_head_branch": "main",
+        "event": "push",
+        "success_runs": [
+          36727929509,
+          36727929473,
+          36727929349,
+          36727929420,
+          36727929670,
+          36727929389,
+          36727929855,
+          36727929373,
+          36727929520,
+          36727929464
+        ],
+        "failing_runs": [
+          36727929386
+        ],
+        "failing_reason": "NATIVE_SOURCE_SIZE_DRIFT runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp actual=40003 expected=39694"
+      },
+      "confidence": "A"
+    },
+    {
+      "kind": "NORMALIZED_MAIN_REFRESH_CHAIN",
+      "lineage": [
+        "f459fe5491e367e9e5da07cfc5b1886f1b138ae4",
+        "f3762db51ca26ee090b85c982c601dd0e7f667bc",
+        "0a44ef505e6ec04ba7d361f96cb4a843b22b1357",
+        "e30bc098600a595010b940c0faede05a5fcbd2a2",
+        "3529344ef3045e0f2d634b175aae2aed6ec05536"
+      ],
+      "substantive_delta_after_f459": "generated live-authority/context files only across these refresh commits",
+      "evidence": [
+        "LIVE_AUTHORITY_MAP at f376 observes main=f459",
+        "LIVE_AUTHORITY_MAP at 0a44 observes main=f376",
+        "LIVE_AUTHORITY_MAP at 3529344 observes main=e30bc",
+        "later checkout log reports forced update 3529344 -> e6c91184 on main"
+      ],
+      "confidence": "A"
+    },
+    {
+      "time": "2026-09-30T16:14:49..19:21:14",
+      "kind": "KNIGHT_OPS_CONTINUE_FROM_NORMALIZED_LINEAGE",
+      "branch": "ops/current-main-knight-render-20260930",
+      "start_parent": "e30bc098600a595010b940c0faede05a5fcbd2a2",
+      "final_head": "d0d2de09ee005fe8661154df39013e904a9a3813",
+      "relation": "direct descendant of normalized merge f459 / candidate 92de",
+      "note": "Operational Knight retries did not begin from the later rolled-back e6c lineage.",
+      "confidence": "A"
+    },
+    {
+      "time": "2026-09-30T19:31:55Z",
+      "kind": "MAIN_FORCE_ROLLBACK_OBSERVED",
+      "from": "3529344ef3045e0f2d634b175aae2aed6ec05536",
+      "to": "e6c91184d6d877bd19980832a561e94a746ca7ce",
+      "backup_branch": "backup/main-normalized-20260930-3529344",
+      "evidence": {
+        "workflow_run": 36766305379,
+        "job": 110061221489,
+        "exact_log": [
+          "[new branch] backup/main-normalized-20260930-3529344 -> origin/backup/main-normalized-20260930-3529344",
+          "+ 3529344ef...e6c91184d main -> origin/main  (forced update)",
+          "git log -1 => e6c91184d6d877bd19980832a561e94a746ca7ce"
+        ]
+      },
+      "interpretation": "The Git operation was an explicit forced ref move with a backup branch. The repository evidence does not by itself establish whether the engineering decision behind it was correct, mistaken, or context-drifted.",
+      "confidence": "A"
+    },
+    {
+      "time": "2026-09-30T19:32:38..19:32:41Z",
+      "kind": "POST_ROLLBACK_GENERATED_CONTEXT_COMMIT",
+      "sha": "a8002b20dd2710e6f8edc9317be640d3bc9330f3",
+      "parent_lineage": "e6c91184...",
+      "evidence": {
+        "workflow_run": 36766305379,
+        "job": 110061221489,
+        "exact_log": [
+          "[main a8002b20d] Refresh live authority context [skip ci]",
+          "e6c91184d..a8002b20d HEAD -> main"
+        ]
+      },
+      "confidence": "A"
+    }
+  ],
+  "unresolved_questions": [
+    "What rationale caused the forced rollback from normalized main to e6c?",
+    "Was the rollback an intended safety recovery or a context-drifted recovery action?",
+    "Which normalized slices should be restored after accounting for the unresolved Stage42 visual consumer, wiring-test token mismatch, and native source seal drift?",
+    "Which post-merge Knight operational commits are evidence only versus independently useful fixes?"
+  ],
+  "recovery_rule": "Do not force-move main during reconstruction. Preserve both current-main authority and normalized-backup evidence until promotion slices and gate scopes are fully classified."
+}

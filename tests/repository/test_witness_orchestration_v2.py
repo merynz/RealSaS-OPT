@@ -363,15 +363,13 @@ def test_implementation_closure_hash_changes_when_critical_bytes_change(monkeypa
 
 def test_engineer_facing_navigation_describes_current_v2_not_historical_repair_branch():
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    repo_map = (ROOT / "REPOSITORY_MAP.md").read_text(encoding="utf-8")
     canonical_index = (ROOT / "canonical" / "README.md").read_text(encoding="utf-8")
     system_index = (ROOT / "SYSTEM_INDEX.md").read_text(encoding="utf-8")
 
     assert "Current product architecture — RealSaS V2" in readme
     assert "46-stage" in readme
     assert "repair/mage-full-subject-reclosure-20260912" not in readme
-    assert "repair/mage-full-subject-reclosure-20260912" not in repo_map
-    assert "Current executable lineage" in repo_map
     assert "V2_IMPLEMENTATION_READINESS.json" in canonical_index
+    assert "Current continuation details" in system_index
     assert "appearance_authority_v2.py" in system_index
     assert "runtime_authority_v2.py" in system_index

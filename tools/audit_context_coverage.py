@@ -35,7 +35,6 @@ INDEX_FILES = [
     "AGENTS.md",
     "CURRENT_STATE.md",
     "README.md",
-    "REPOSITORY_MAP.md",
     "SYSTEM_INDEX.md",
     "canonical/README.md",
     "canonical/CONTEXT_STATE_V2.json",
@@ -139,7 +138,7 @@ def is_high_signal(path: str) -> bool:
     p = Path(path)
     name = p.name
 
-    if path in {"AGENTS.md", "CURRENT_STATE.md", "REPOSITORY_MAP.md", "SYSTEM_INDEX.md"}:
+    if path in {"AGENTS.md", "CURRENT_STATE.md", "SYSTEM_INDEX.md"}:
         return True
     if path.startswith("prereg/"):
         return True

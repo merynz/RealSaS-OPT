@@ -228,7 +228,6 @@ IMPLEMENTATION_CLOSURE_STATIC_PATHS = (
     "compiler/realsas_compiler_services/orchestrator/mainline.py",
     "AGENTS.md",
     "SYSTEM_INDEX.md",
-    "REPOSITORY_MAP.md",
     "canonical/README.md",
     "README.md",
 )

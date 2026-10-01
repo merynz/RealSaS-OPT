@@ -1,0 +1,44 @@
+name: Knight appearance schema inspect once
+
+on:
+  push:
+    branches: [platform/professional-backend-v1-20261001]
+    paths:
+      - '.github/workflows/knight_appearance_schema_inspect_once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  inspect:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: platform/professional-backend-v1-20261001
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Inspect Stage23 UV binding
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          import numpy as np
+          root=Path(os.environ['AUTHORITY_ROOT'])/'runs'/os.environ['RUN_ID']/'artifacts'/'23_COMPLETE_APPEARANCE_ASSET_BAKED'
+          appearance=json.load(open(root/'complete_appearance_asset.json',encoding='utf-8'))
+          print('APPEARANCE_KEYS',sorted(appearance.keys()))
+          print('UV_PATH',appearance.get('uv_npz_path'))
+          uv=Path(appearance.get('uv_npz_path') or root/'visual_uv_binding.npz')
+          with np.load(uv,allow_pickle=False) as z:
+              print('NPZ_KEYS',z.files)
+              for k in z.files:
+                  a=np.asarray(z[k])
+                  print('NPZ',k,'shape=',a.shape,'dtype=',a.dtype,'min=',float(a.min()) if a.size and a.dtype.kind in 'fiu' else None,'max=',float(a.max()) if a.size and a.dtype.kind in 'fiu' else None)
+          PY

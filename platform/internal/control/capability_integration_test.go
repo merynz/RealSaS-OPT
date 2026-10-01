@@ -43,13 +43,13 @@ func TestDeveloperCapabilityGoalPersistsDependencyArtifactsAndFinalizes(t *testi
 	first := capability.Descriptor{
 		ID: firstID, Kind: capability.KindModel, OwnerModuleID: "engine.test",
 		ExecutorActivity: "engine.execute_capability.v1",
-		AllowedModes: []capability.Mode{capability.ModeDeveloper},
+		AllowedModes:     []capability.Mode{capability.ModeDeveloper},
 	}
 	second := capability.Descriptor{
 		ID: secondID, Kind: capability.KindModule, OwnerModuleID: "engine.test",
 		ExecutorActivity: "engine.execute_capability.v1",
-		Dependencies: []string{firstID},
-		AllowedModes: []capability.Mode{capability.ModeDeveloper},
+		Dependencies:     []string{firstID},
+		AllowedModes:     []capability.Mode{capability.ModeDeveloper},
 	}
 	bindings := []capability.ReleaseBinding{
 		{Descriptor: first, Version: capability.VersionIdentity{
@@ -65,10 +65,10 @@ func TestDeveloperCapabilityGoalPersistsDependencyArtifactsAndFinalizes(t *testi
 
 	receipt, err := command.SubmitCapabilityRun(ctx, pool, command.CapabilityRunRequest{
 		EngineReleaseID: releaseID,
-		Targets: []string{secondID},
-		Parameters: map[string]any{"probe": "knight"},
-		IdempotencyKey: "cap-e2e-" + releaseID.String(),
-		RequestedBy: "ci",
+		Targets:         []string{secondID},
+		Parameters:      map[string]any{"probe": "knight"},
+		IdempotencyKey:  "cap-e2e-" + releaseID.String(),
+		RequestedBy:     "ci",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -79,7 +79,9 @@ func TestDeveloperCapabilityGoalPersistsDependencyArtifactsAndFinalizes(t *testi
 		if rows != nil {
 			for rows.Next() {
 				var id uuid.UUID
-				if rows.Scan(&id) == nil { artifactIDs = append(artifactIDs, id) }
+				if rows.Scan(&id) == nil {
+					artifactIDs = append(artifactIDs, id)
+				}
 			}
 			rows.Close()
 		}
@@ -95,7 +97,9 @@ func TestDeveloperCapabilityGoalPersistsDependencyArtifactsAndFinalizes(t *testi
 		_, _ = pool.Exec(ctx, "DELETE FROM outbox_events WHERE aggregate_id=$1", receipt.CommandID)
 		_, _ = pool.Exec(ctx, "DELETE FROM commands WHERE id=$1", receipt.CommandID)
 		_, _ = pool.Exec(ctx, "DELETE FROM attempts WHERE id=$1", receipt.AttemptID)
-		for _, id := range artifactIDs { _, _ = pool.Exec(ctx, "DELETE FROM artifacts WHERE id=$1", id) }
+		for _, id := range artifactIDs {
+			_, _ = pool.Exec(ctx, "DELETE FROM artifacts WHERE id=$1", id)
+		}
 		_, _ = pool.Exec(ctx, "DELETE FROM engine_release_capabilities WHERE release_id=$1", releaseID)
 		_, _ = pool.Exec(ctx, "DELETE FROM engine_releases WHERE id=$1", releaseID)
 	}()
@@ -110,11 +114,11 @@ func TestDeveloperCapabilityGoalPersistsDependencyArtifactsAndFinalizes(t *testi
 
 	activities := Activities{Pool: pool, Store: store}
 	workflowInput := orchestration.CapabilityWorkflowInput{
-		CommandID: receipt.CommandID.String(),
-		AttemptID: receipt.AttemptID.String(),
+		CommandID:       receipt.CommandID.String(),
+		AttemptID:       receipt.AttemptID.String(),
 		ExecutionGoalID: receipt.ExecutionGoalID.String(),
 		EngineReleaseID: releaseID.String(),
-		GoalSpecSHA256: specSHA,
+		GoalSpecSHA256:  specSHA,
 	}
 	goal, err := activities.ResolveCapabilityGoal(ctx, workflowInput)
 	if err != nil {
@@ -125,12 +129,12 @@ func TestDeveloperCapabilityGoalPersistsDependencyArtifactsAndFinalizes(t *testi
 	}
 
 	firstReq, err := activities.PrepareCapabilityExecution(ctx, orchestration.PrepareCapabilityExecutionRequest{
-		CommandID: workflowInput.CommandID,
-		AttemptID: workflowInput.AttemptID,
+		CommandID:       workflowInput.CommandID,
+		AttemptID:       workflowInput.AttemptID,
 		ExecutionGoalID: workflowInput.ExecutionGoalID,
 		EngineReleaseID: workflowInput.EngineReleaseID,
-		Step: goal.Steps[0],
-		GoalParameters: goal.Parameters,
+		Step:            goal.Steps[0],
+		GoalParameters:  goal.Parameters,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -146,7 +150,7 @@ func TestDeveloperCapabilityGoalPersistsDependencyArtifactsAndFinalizes(t *testi
 		Request: firstReq,
 		Result: orchestration.EngineCapabilityResult{
 			CapabilityID: firstID,
-			Status: "PASS",
+			Status:       "PASS",
 			Outputs: []orchestration.EngineOutput{{
 				Role: "result", ArtifactType: "RealSaS.CapabilityE2E.First." + releaseID.String(),
 				SchemaVersion: "v1", StorageKey: firstObject.StorageKey,
@@ -163,12 +167,12 @@ func TestDeveloperCapabilityGoalPersistsDependencyArtifactsAndFinalizes(t *testi
 	}
 
 	secondReq, err := activities.PrepareCapabilityExecution(ctx, orchestration.PrepareCapabilityExecutionRequest{
-		CommandID: workflowInput.CommandID,
-		AttemptID: workflowInput.AttemptID,
+		CommandID:       workflowInput.CommandID,
+		AttemptID:       workflowInput.AttemptID,
 		ExecutionGoalID: workflowInput.ExecutionGoalID,
 		EngineReleaseID: workflowInput.EngineReleaseID,
-		Step: goal.Steps[1],
-		GoalParameters: goal.Parameters,
+		Step:            goal.Steps[1],
+		GoalParameters:  goal.Parameters,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -184,7 +188,7 @@ func TestDeveloperCapabilityGoalPersistsDependencyArtifactsAndFinalizes(t *testi
 		Request: secondReq,
 		Result: orchestration.EngineCapabilityResult{
 			CapabilityID: secondID,
-			Status: "PASS",
+			Status:       "PASS",
 			Outputs: []orchestration.EngineOutput{{
 				Role: "result", ArtifactType: "RealSaS.CapabilityE2E.Second." + releaseID.String(),
 				SchemaVersion: "v1", StorageKey: secondObject.StorageKey,

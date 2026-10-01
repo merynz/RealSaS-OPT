@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import os
 import re
@@ -111,7 +112,7 @@ def support_references(stage_id: str, adapter: str) -> list[str]:
     for token in sorted(tokens):
         if not token:
             continue
-        cmd = ["git", "grep", "-l", "-F", "--", token, "--", *search_roots]
+        cmd = ["git", "grep", "-l", "-F", token, "--", *search_roots]
         proc = _run(cmd, check=False)
         if proc.returncode not in (0, 1):
             raise RuntimeError(proc.stderr.strip())
@@ -119,11 +120,102 @@ def support_references(stage_id: str, adapter: str) -> list[str]:
     return sorted(found)
 
 
+def lightweight_implementation_closure(plan: dict[str, Any]) -> dict[str, Any]:
+    """Recompute the compiler implementation closure without importing adapters.
+
+    This intentionally mirrors mainline._adapter_impl_hash semantics from source
+    hashes and AST import closure only, so architecture discovery never requires
+    numpy/torch/blender or other runtime dependencies.
+    """
+    plan_hash = mainline.validate_plan(plan)
+    adapter_rows: list[dict[str, Any]] = []
+    imported_modules: set[str] = set()
+
+    for stage in sorted(plan["stages"], key=lambda row: int(row["ordinal"])):
+        adapter = str(stage["adapter"])
+        module_name, separator, function_name = adapter.partition(":")
+        if not separator or not module_name or not function_name:
+            raise RuntimeError(f"MAINLINE_V2_ADAPTER_ID_INVALID:{adapter}")
+        module_file = mainline._local_module_path(module_name)
+        if module_file is None:
+            raise RuntimeError(f"MAINLINE_V2_ADAPTER_MODULE_MISSING:{adapter}")
+
+        tree = ast.parse(module_file.read_text(encoding="utf-8"), filename=str(module_file))
+        callable_names = {
+            node.name
+            for node in tree.body
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        }
+        if function_name not in callable_names:
+            raise RuntimeError(f"MAINLINE_V2_ADAPTER_CALLABLE_MISSING_SOURCE:{adapter}")
+
+        local_closure = mainline._local_import_closure(module_name)
+        if not local_closure:
+            raise RuntimeError(f"MAINLINE_V2_IMPLEMENTATION_CLOSURE_EMPTY:{adapter}")
+        imported_modules.update(name for name, _digest in local_closure)
+
+        implementation_hash = mainline.content_sha256(
+            {
+                "schema": "RealSaS.AdapterImplementationClosure.v2",
+                "adapter": adapter,
+                "local_python_import_closure": [
+                    {"module": name, "sha256": digest}
+                    for name, digest in local_closure
+                ],
+            }
+        )
+        adapter_rows.append(
+            {
+                "stage_id": str(stage["id"]),
+                "adapter": adapter,
+                "implementation_hash": implementation_hash,
+                "local_python_import_closure": [
+                    {"module": name, "sha256": digest}
+                    for name, digest in local_closure
+                ],
+            }
+        )
+
+    forbidden = sorted(
+        module
+        for module in imported_modules
+        if module in mainline.CURRENT_V2_FORBIDDEN_IMPORT_MODULES
+    )
+    if forbidden:
+        raise RuntimeError(
+            "V2_CURRENT_CLOSURE_IMPORTS_DONOR_ERA_MODULE:" + ",".join(forbidden)
+        )
+
+    closure_files = (
+        tuple(mainline.IMPLEMENTATION_CLOSURE_STATIC_PATHS)
+        + mainline._implementation_closure_dynamic_files()
+        + mainline._implementation_closure_test_files()
+    )
+    if len(closure_files) != len(set(closure_files)):
+        raise RuntimeError("V2_IMPLEMENTATION_CLOSURE_DUPLICATE_FILE")
+    file_rows: list[dict[str, str]] = []
+    for rel in closure_files:
+        path = ROOT / rel
+        if not path.is_file():
+            raise RuntimeError(f"V2_IMPLEMENTATION_CLOSURE_FILE_MISSING:{rel}")
+        file_rows.append({"path": rel, "sha256": mainline.sha256_file(path)})
+
+    return {
+        "schema": "RealSaS.DynamicImplementationClosure.v1",
+        "pipeline_plan_sha256": plan_hash,
+        "adapter_implementation_closures": adapter_rows,
+        "imported_module_count": len(imported_modules),
+        "forbidden_import_modules": sorted(mainline.CURRENT_V2_FORBIDDEN_IMPORT_MODULES),
+        "dynamic_governance_files": list(mainline._implementation_closure_dynamic_files()),
+        "critical_files": file_rows,
+    }
+
+
 def build_discovery() -> dict[str, Any]:
     registry = architecture_registry()
     plan = mainline.load_json(mainline.PLAN_PATH)
     mainline.validate_plan(plan)
-    closure = mainline.implementation_closure_manifest(plan)
+    closure = lightweight_implementation_closure(plan)
     tracked = git_files()
     tracked_set = set(tracked)
     roots = owner_roots(registry)

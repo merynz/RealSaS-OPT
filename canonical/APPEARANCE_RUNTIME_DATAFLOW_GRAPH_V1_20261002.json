@@ -1,0 +1,305 @@
+{
+  "schema": "RealSaS.AppearanceRuntimeDataflowGraph.v1",
+  "date": "2026-10-02",
+  "nodes": [
+    {
+      "id": "S07_OBSERVATION",
+      "stage": 7,
+      "schema": "RealSaS.QualifiedObservationSetIR.v1",
+      "producer": "orchestrator/adapters/observation",
+      "payload": [
+        "source_raster_sha256",
+        "foreground_mask_sha256",
+        "width",
+        "height"
+      ]
+    },
+    {
+      "id": "S18_VISUAL_MESH",
+      "stage": 18,
+      "schema": "RealSaS.VisualMeshSetIR.v1",
+      "producer": "orchestrator/adapters/v2_architecture.py",
+      "payload": [
+        "per_view_2d_positions",
+        "faces",
+        "fixed_source_raster_uv",
+        "source_raster_sha256",
+        "source_foreground_mask_sha256"
+      ],
+      "authority": "SOURCE_ART_SILHOUETTE",
+      "mechanical_render_authority": false
+    },
+    {
+      "id": "S18_MECHANICAL",
+      "stage": 18,
+      "schema": "RealSaS.CanonicalMeshCandidateIR.v1",
+      "producer": "orchestrator/adapters/v2_architecture.py",
+      "payload": [
+        "3d_vertices",
+        "faces",
+        "surface_support"
+      ],
+      "authority": "MECHANICS"
+    },
+    {
+      "id": "S23_SOURCE_APPEARANCE",
+      "stage": 23,
+      "schema": "RealSaS.CompleteAppearanceAssetIR.v2",
+      "producer": "orchestrator/adapters/appearance_v2.py",
+      "mode": "SOURCE_OWNED_VISUAL",
+      "payload": [
+        "source_rgba_per_view",
+        "visual_mesh_set_binding_hash",
+        "direct_source_provenance"
+      ],
+      "mechanical_render_authority": false
+    },
+    {
+      "id": "S23_MECH_CAA",
+      "stage": 23,
+      "schema": "RealSaS.CompleteAppearanceAssetIR.v2",
+      "producer": "orchestrator/adapters/appearance_v2.py",
+      "mode": "MECHANICAL_CAA",
+      "payload": [
+        "mechanical_face_uv",
+        "caa_texture_pages",
+        "provenance_atlas"
+      ],
+      "note": "accepted frozen smear witness lane"
+    },
+    {
+      "id": "S35_MECHANICAL",
+      "stage": 35,
+      "schema": "RealSaS.QualifiedMeshIR.v1 + SkinTopologyCompatibilityReport.v1",
+      "producer": "dynamic mechanical qualification",
+      "payload": [
+        "qualified_mechanical_mesh",
+        "corrected_skin_topology_compatibility",
+        "unsafe_face_indices"
+      ]
+    },
+    {
+      "id": "S37_HISTORICAL",
+      "stage": 37,
+      "schema": "PresentationPartitionEvidenceIR.v2 + QualifiedPresentationStructureIR.v2",
+      "producer": "historical product_state_v2.py",
+      "payload": [
+        "visual_mesh_set_hash",
+        "mechanical_mesh_render_authority=false"
+      ],
+      "note": "declares authority but no typed final visual geometry payload"
+    },
+    {
+      "id": "S37_RECOVERED",
+      "stage": 37,
+      "schema": "RealSaS.QualifiedVisualPresentationSetIR.v1",
+      "producer": "recovered product_state_v2._qualified_visual_presentation_stage37",
+      "payload": [
+        "per_view_region_visual_mesh",
+        "vertex_region_id",
+        "face_region_id",
+        "seed_region_labels",
+        "source_uv",
+        "stage35_compatibility_binding"
+      ],
+      "mechanical_render_authority": false
+    },
+    {
+      "id": "S38_PUPPET",
+      "stage": 38,
+      "schema": "RealSaS.CompletePuppetStateIR.v2",
+      "producer": "product_state_v2.py",
+      "payload": [
+        "mechanical_state_binding",
+        "presentation_graph_binding",
+        "visual_presentation_binding"
+      ]
+    },
+    {
+      "id": "S41_MOTION",
+      "stage": 41,
+      "schema": "RealSaS.QualifiedDynamicMotionIR.v2",
+      "producer": "motion dynamic proof",
+      "payload": [
+        "posed_mechanical_xyz_per_frame"
+      ]
+    },
+    {
+      "id": "S42_HISTORICAL",
+      "stage": 42,
+      "schema": "RealSaS.RuntimeProjectionIR.v2",
+      "producer": "historical runtime_v2.build_runtime_projection_stage",
+      "payload": [
+        "stage35_mechanical_faces",
+        "mechanical_face_uv",
+        "posed_mechanical_xyz"
+      ],
+      "renderer": "REALSAS_V2_CAA_CANONICAL_DEPTH"
+    },
+    {
+      "id": "S42_RECOVERED",
+      "stage": 42,
+      "schema": "RealSaS.SourceOwnedVisualRuntimeProjectionIR.v1",
+      "producer": "recovered runtime_v2._build_source_owned_visual_runtime_projection",
+      "payload": [
+        "visual_faces",
+        "fixed_source_uv",
+        "region_ids",
+        "mechanical_face_indices_per_visual_vertex",
+        "mechanical_barycentric_per_visual_vertex",
+        "posed_visual_2d_per_frame"
+      ]
+    },
+    {
+      "id": "S43_RSS",
+      "stage": 43,
+      "schema": "RSS v2 source-owned visual package",
+      "producer": "runtime_package_v2.build_source_owned_visual_rss_v2_entries",
+      "payload": [
+        "visual_mesh",
+        "source_rgba",
+        "posed_visual_2d"
+      ]
+    },
+    {
+      "id": "S44_NATIVE",
+      "stage": 44,
+      "schema": "native framebuffer/provenance/owner",
+      "producer": "runtime_v2_caa_reference.cpp::render_source_owned_visual",
+      "payload": [
+        "rgba",
+        "direct_source_provenance",
+        "last_alpha_contributor_face_owner"
+      ],
+      "renderer": "REALSAS_V2_SOURCE_OWNED_VISUAL_2D",
+      "composition_policy": "FACE_INDEX_ITERATION_ALPHA_COMPOSITE"
+    },
+    {
+      "id": "S45_DVI",
+      "stage": 45,
+      "schema": "RealSaS.SourceOwnedVisualDynamicIntegrityIR.v1",
+      "producer": "runtime_v2._prove_source_owned_visual_dynamic_integrity",
+      "payload": [
+        "native_reference_parity",
+        "provenance",
+        "empty_frames",
+        "flips",
+        "edge_stretch"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "S07_OBSERVATION",
+      "to": "S18_VISUAL_MESH",
+      "status": "CARRIED"
+    },
+    {
+      "from": "S18_VISUAL_MESH",
+      "to": "S23_SOURCE_APPEARANCE",
+      "status": "CARRIED",
+      "binding": "visual_mesh_set_binding_hash"
+    },
+    {
+      "from": "S35_MECHANICAL",
+      "to": "S37_RECOVERED",
+      "status": "CARRIED",
+      "binding": "SkinTopologyCompatibilityReport"
+    },
+    {
+      "from": "S18_VISUAL_MESH",
+      "to": "S37_RECOVERED",
+      "status": "CARRIED"
+    },
+    {
+      "from": "S37_HISTORICAL",
+      "to": "S42_HISTORICAL",
+      "status": "HISTORICAL_BREAK",
+      "reason": "Stage37 declares visual authority/mechanical_render_authority=false but Stage42 reopens Stage35 mechanical mesh and requires mechanical face_uv"
+    },
+    {
+      "from": "S37_RECOVERED",
+      "to": "S38_PUPPET",
+      "status": "CARRIED"
+    },
+    {
+      "from": "S37_RECOVERED",
+      "to": "S42_RECOVERED",
+      "status": "CARRIED",
+      "binding": "QualifiedVisualPresentationSetIR.v1"
+    },
+    {
+      "from": "S41_MOTION",
+      "to": "S42_RECOVERED",
+      "status": "CARRIED",
+      "transform": "posed mechanical XYZ -> region-local per-vertex barycentric visual 2D"
+    },
+    {
+      "from": "S42_RECOVERED",
+      "to": "S43_RSS",
+      "status": "CARRIED"
+    },
+    {
+      "from": "S43_RSS",
+      "to": "S44_NATIVE",
+      "status": "CARRIED"
+    },
+    {
+      "from": "DYNAMIC_PRESENTATION_OCCLUSION_AUTHORITY",
+      "to": "S44_NATIVE",
+      "status": "MISSING_AUTHORITY",
+      "missing": [
+        "dynamic_depth",
+        "region_draw_order",
+        "occlusion_owner_priority",
+        "clipping",
+        "per_pixel_overlap_arbitration"
+      ]
+    },
+    {
+      "from": "S44_NATIVE",
+      "to": "S45_DVI",
+      "status": "PARTIALLY_PROVEN",
+      "proven": [
+        "byte_parity",
+        "direct_source_provenance",
+        "nonempty",
+        "orientation",
+        "catastrophic_edge_stretch"
+      ],
+      "unproven": [
+        "overlap_owner_correctness",
+        "draw_order_correctness",
+        "occlusion_correctness",
+        "perceptual_correctness"
+      ]
+    }
+  ],
+  "forensic": {
+    "corrected_mechanical_caa": {
+      "status": "MEASURED",
+      "frame_count": 3,
+      "view_rows": 6,
+      "total_extra_outside_source_pixels": 562477,
+      "total_rendered_alpha_pixels": 1374354,
+      "extra_fraction": 0.40926646264354016,
+      "max_frame_view_extra_fraction": 0.5193188990935337,
+      "max_edge_gt4": 0,
+      "max_edge_gt10": 0,
+      "max_edge_ratio": 3.6155354868853395,
+      "representative_nonseam_extra_pixels": 524360,
+      "representative_seam_extra_pixels": 38117,
+      "interpretation": "catastrophic mechanical stretch closed while large visual smear remained; non-seam faces dominate extra pixels"
+    },
+    "historical_source_owned_region_binding": {
+      "status": "MEASURED_RESCUE_PROOF",
+      "direct_source_fraction": 1,
+      "mechanical_render_authority": false,
+      "max_flipped_triangles": 1856,
+      "max_edge_stretch": 95.58467012943939,
+      "max_p95_edge_stretch": 2.7371826601278215,
+      "interpretation": "moving source-owned art onto mechanical motion introduces an independent deformation-transfer failure class"
+    }
+  },
+  "next_executable_test": "REPLAY_CORRECTED_KNIGHT_WITH_RECOVERED_STAGE37_45_AND_MEASURE_DEFORMATION_PLUS_OVERLAP_ARBITRATION"
+}

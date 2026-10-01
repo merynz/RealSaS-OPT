@@ -4,6 +4,8 @@ on:
   push:
     branches: [recovery/canonical-main-20261001]
     paths:
+      - 'assets/external/quaternius/knight/KnightCharacter.fbx'
+      - 'assets/external/quaternius/knight/PROVENANCE.json'
       - 'tools/motion/materialize_quaternius_preset_v1.py'
       - 'tools/motion/blender_extract_motion_source_v2.py'
       - 'tests/compiler/test_quaternius_motion_materializer_v1.py'
@@ -12,6 +14,8 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'assets/external/quaternius/knight/KnightCharacter.fbx'
+      - 'assets/external/quaternius/knight/PROVENANCE.json'
       - 'tools/motion/materialize_quaternius_preset_v1.py'
       - 'tools/motion/blender_extract_motion_source_v2.py'
       - 'tests/compiler/test_quaternius_motion_materializer_v1.py'
@@ -27,11 +31,27 @@ jobs:
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 15
     env:
-      QUATERNIUS_DRIVE_FILE_ID: '1f-Y_lNExN-eAp2XCMVokY9x3xy6-4Aen'
+      SOURCE_FBX: 'assets/external/quaternius/knight/KnightCharacter.fbx'
       EXPECTED_FBX_SHA256: '41f2616fb4a42f9d35e242bbed1450ededc7537def4bf38cbb11b4e54ff2bf21'
       PYTHONHASHSEED: '0'
     steps:
       - uses: actions/checkout@v4
+
+      - name: Verify pinned Quaternius source asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "$SOURCE_FBX"
+          printf '%s  %s\n' "$EXPECTED_FBX_SHA256" "$SOURCE_FBX" | sha256sum --check -
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("assets/external/quaternius/knight/PROVENANCE.json")
+          row = json.loads(p.read_text(encoding="utf-8"))
+          assert row["sha256"] == "41f2616fb4a42f9d35e242bbed1450ededc7537def4bf38cbb11b4e54ff2bf21"
+          assert row["license"] == "CC0-1.0"
+          print("QUATERNIUS_PINNED_SOURCE_VERIFIED")
+          PY
 
       - name: Resolve or bootstrap pinned Blender
         shell: bash
@@ -64,21 +84,13 @@ jobs:
           echo "BLENDER_EXE=$blender_path" >> "$GITHUB_ENV"
           "$blender_path" --version | head -n 2
 
-      - name: Download exact public Quaternius FBX
-        shell: bash
-        run: |
-          set -euo pipefail
-          target="$RUNNER_TEMP/KnightCharacter.fbx"
-          curl --fail --location --retry 3 --retry-delay 2             "https://drive.usercontent.google.com/download?id=$QUATERNIUS_DRIVE_FILE_ID&export=download&confirm=t"             --output "$target"
-          printf '%s  %s\n' "$EXPECTED_FBX_SHA256" "$target" | sha256sum --check -
-
       - name: Extract and qualify MotionSourceClip v2
         shell: bash
         run: |
           set -euo pipefail
           out="$RUNNER_TEMP/quaternius_motion_v2"
           rm -rf "$out"
-          python3 tools/motion/materialize_quaternius_preset_v1.py             --source-fbx "$RUNNER_TEMP/KnightCharacter.fbx"             --out-dir "$out"
+          python3 tools/motion/materialize_quaternius_preset_v1.py             --source-fbx "$SOURCE_FBX"             --out-dir "$out"
           test -s "$out/demo_idle_v1.motion.json"
           test -s "$out/demo_run_v1.motion.json"
           test -s "$out/demo_slash_v1.motion.json"

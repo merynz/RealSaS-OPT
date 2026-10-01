@@ -1,0 +1,23 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX4CostPreflightResult.v1",
+  "date_utc": "2026-09-21",
+  "status": "NAIVE_SCALAR_FULL_DOMAIN_FORBIDDEN__BATCHED_RANGE_ENGINE_REQUIRED",
+  "artifact_sha256": "c4d6653895ece83c47cf13eb3eb4c268b86846f3fbe43c56ada62e0e62a5d7ed",
+  "artifact_bytes": 53606,
+  "base_regime_count": 103823,
+  "sample_count": 256,
+  "sample_state_counts": {"UNKNOWN": 256},
+  "seconds_total": 1.9868158660001427,
+  "seconds_per_regime_median": 0.007421170499583241,
+  "seconds_per_regime_mean": 0.007752327191454356,
+  "seconds_per_regime_p90": 0.008980845499536372,
+  "projected_scalar_micro0_seconds_median_rate": 770.4881847782308,
+  "projected_scalar_micro0_seconds_mean_rate": 804.8698659983655,
+  "projected_scalar_micro2_worst_box_evals": 7579079,
+  "projected_scalar_micro2_worst_seconds_median_rate": 56245.63748881085,
+  "interpretation": "Even micro-depth 0 requires one scalar proof evaluation per 47^3 triplane interpolation regime and projects to roughly 13 minutes on the current CPU path. All 256 deterministic micro0 samples were UNKNOWN. A naive scalar full-domain proof traversal is therefore forbidden.",
+  "full_domain_execution_performed": false,
+  "full_domain_execution_authorized": false,
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false
+}

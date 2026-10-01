@@ -1,0 +1,24 @@
+name: knight-recover-geometry-lineage-v1
+
+on:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths:
+      - 'tools/demo/audit_recover_knight_geometry_lineage_v1.py'
+      - '.github/workflows/knight_recover_geometry_lineage_v1.yml'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Recover exact geometry lineage
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python tools/demo/audit_recover_knight_geometry_lineage_v1.py             --authority-root "$AUTHORITY_ROOT"

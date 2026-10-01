@@ -1,0 +1,394 @@
+{
+  "claim_boundary": "Arachne-derived edge scores are frozen before teacher source-component identity is loaded. Teacher is used only to evaluate whether the scores separate SAME_REGION from CROSS_REGION edges. No threshold is selected and no mesh or weight artifact is mutated.",
+  "diagnosis": "MOTION_EDGE_SIGNAL_STRONG",
+  "global": {
+    "cross_edge_count": 1199,
+    "cross_fraction": 0.35140679953106685,
+    "dominant_joint_disagreement": {
+      "cross_p01": 0.0,
+      "cross_p05": 0.0,
+      "cross_p50": 1.0,
+      "roc_auc": 0.8391314572657513,
+      "same_p50": 0.0,
+      "same_p95": 1.0,
+      "same_p99": 1.0
+    },
+    "edge_count": 3412,
+    "half_l1": {
+      "cross_p01": 0.00022424421554870154,
+      "cross_p05": 0.05859569984559722,
+      "cross_p50": 0.9640846156855336,
+      "roc_auc": 0.92598742663622,
+      "same_p50": 0.05058235645444425,
+      "same_p95": 0.7307232096136491,
+      "same_p99": 0.9499614117297199
+    },
+    "jsd": {
+      "cross_p01": 2.844962412884075e-05,
+      "cross_p05": 0.01064544684459068,
+      "cross_p50": 0.6110765776710267,
+      "roc_auc": 0.9284476783823845,
+      "same_p50": 0.007960897168517386,
+      "same_p95": 0.34545113955031176,
+      "same_p99": 0.5891195003935952
+    },
+    "same_edge_count": 2213
+  },
+  "largest_patches": [
+    {
+      "component_index": 0,
+      "cross_edge_count": 1033,
+      "cross_fraction": 0.3936737804878049,
+      "dominant_joint_disagreement": {
+        "cross_p01": 0.0,
+        "cross_p05": 0.0,
+        "cross_p50": 1.0,
+        "roc_auc": 0.8501548217435563,
+        "same_p50": 0.0,
+        "same_p95": 1.0,
+        "same_p99": 1.0
+      },
+      "edge_count": 2624,
+      "half_l1": {
+        "cross_p01": 5.26818880456425e-05,
+        "cross_p05": 0.03619252112979818,
+        "cross_p50": 0.9712572202880584,
+        "roc_auc": 0.9223804276597001,
+        "same_p50": 0.032632855564855665,
+        "same_p95": 0.8253800774917412,
+        "same_p99": 0.964643859889804
+      },
+      "jsd": {
+        "cross_p01": 1.0799355433656297e-05,
+        "cross_p05": 0.005768955277313869,
+        "cross_p50": 0.6235555323484201,
+        "roc_auc": 0.9229809741752828,
+        "same_p50": 0.005756400167408856,
+        "same_p95": 0.4200100117889092,
+        "same_p99": 0.6112898588972853
+      },
+      "same_edge_count": 1591,
+      "unsafe_face_count": 1404
+    },
+    {
+      "component_index": 1,
+      "cross_edge_count": 147,
+      "cross_fraction": 0.34507042253521125,
+      "dominant_joint_disagreement": {
+        "cross_p01": 1.0,
+        "cross_p05": 1.0,
+        "cross_p50": 1.0,
+        "roc_auc": 0.8655913978494624,
+        "same_p50": 0.0,
+        "same_p95": 1.0,
+        "same_p99": 1.0
+      },
+      "edge_count": 426,
+      "half_l1": {
+        "cross_p01": 0.622053232529525,
+        "cross_p05": 0.7072391828257506,
+        "cross_p50": 0.9302501376654035,
+        "roc_auc": 0.9969765684051398,
+        "same_p50": 0.1001823928427577,
+        "same_p95": 0.6386239002874923,
+        "same_p99": 0.6771590053242065
+      },
+      "jsd": {
+        "cross_p01": 0.21525222252567403,
+        "cross_p05": 0.30209450661882126,
+        "cross_p50": 0.5463891010614219,
+        "roc_auc": 0.9973179235852047,
+        "same_p50": 0.020733716735464695,
+        "same_p95": 0.22624693947452798,
+        "same_p99": 0.280088852873531
+      },
+      "same_edge_count": 279,
+      "unsafe_face_count": 221
+    },
+    {
+      "component_index": 2,
+      "cross_edge_count": 0,
+      "cross_fraction": 0.0,
+      "dominant_joint_disagreement": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 0.0,
+        "same_p95": 1.0,
+        "same_p99": 1.0
+      },
+      "edge_count": 25,
+      "half_l1": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 0.16424832373851175,
+        "same_p95": 0.41736888312325077,
+        "same_p99": 0.4234052580084286
+      },
+      "jsd": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 0.02298098487242456,
+        "same_p95": 0.09695655152592515,
+        "same_p99": 0.09768400407841442
+      },
+      "same_edge_count": 25,
+      "unsafe_face_count": 13
+    },
+    {
+      "component_index": 3,
+      "cross_edge_count": 0,
+      "cross_fraction": 0.0,
+      "dominant_joint_disagreement": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 1.0,
+        "same_p95": 1.0,
+        "same_p99": 1.0
+      },
+      "edge_count": 20,
+      "half_l1": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 0.2908813040938311,
+        "same_p95": 0.5229744394392434,
+        "same_p99": 0.5234443241272467
+      },
+      "jsd": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 0.06400817446103786,
+        "same_p95": 0.1572396831540026,
+        "same_p99": 0.16279041517322476
+      },
+      "same_edge_count": 20,
+      "unsafe_face_count": 10
+    },
+    {
+      "component_index": 4,
+      "cross_edge_count": 0,
+      "cross_fraction": 0.0,
+      "dominant_joint_disagreement": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 0.0,
+        "same_p95": 1.0,
+        "same_p99": 1.0
+      },
+      "edge_count": 17,
+      "half_l1": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 0.2004291399059668,
+        "same_p95": 0.3142396844897318,
+        "same_p99": 0.3195490462236449
+      },
+      "jsd": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 0.022113980223259888,
+        "same_p95": 0.061073925029641735,
+        "same_p99": 0.06582999862863935
+      },
+      "same_edge_count": 17,
+      "unsafe_face_count": 8
+    },
+    {
+      "component_index": 5,
+      "cross_edge_count": 0,
+      "cross_fraction": 0.0,
+      "dominant_joint_disagreement": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 1.0,
+        "same_p95": 1.0,
+        "same_p99": 1.0
+      },
+      "edge_count": 14,
+      "half_l1": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 0.3257840494593025,
+        "same_p95": 0.5429795902896591,
+        "same_p99": 0.5564837899990194
+      },
+      "jsd": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 0.07784498973742837,
+        "same_p95": 0.1763396475611065,
+        "same_p99": 0.190709370204094
+      },
+      "same_edge_count": 14,
+      "unsafe_face_count": 7
+    },
+    {
+      "component_index": 6,
+      "cross_edge_count": 0,
+      "cross_fraction": 0.0,
+      "dominant_joint_disagreement": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 1.0,
+        "same_p95": 1.0,
+        "same_p99": 1.0
+      },
+      "edge_count": 11,
+      "half_l1": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 0.3113081700996912,
+        "same_p95": 0.520130899826422,
+        "same_p99": 0.5254828046654985
+      },
+      "jsd": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 0.08465880609155141,
+        "same_p95": 0.1572003783542016,
+        "same_p99": 0.15838335089371924
+      },
+      "same_edge_count": 11,
+      "unsafe_face_count": 5
+    },
+    {
+      "component_index": 7,
+      "cross_edge_count": 0,
+      "cross_fraction": 0.0,
+      "dominant_joint_disagreement": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 0.0,
+        "same_p95": 0.0,
+        "same_p99": 0.0
+      },
+      "edge_count": 10,
+      "half_l1": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 0.014951730493011777,
+        "same_p95": 0.03235911012175216,
+        "same_p99": 0.034079735998914125
+      },
+      "jsd": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 0.0005968550020957524,
+        "same_p95": 0.0014484760153034898,
+        "same_p99": 0.0015119527082998903
+      },
+      "same_edge_count": 10,
+      "unsafe_face_count": 5
+    },
+    {
+      "component_index": 8,
+      "cross_edge_count": 0,
+      "cross_fraction": 0.0,
+      "dominant_joint_disagreement": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 0.0,
+        "same_p95": 1.0,
+        "same_p99": 1.0
+      },
+      "edge_count": 9,
+      "half_l1": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 0.08456150811048142,
+        "same_p95": 0.17482838107354412,
+        "same_p99": 0.19343738413384834
+      },
+      "jsd": {
+        "cross_p01": null,
+        "cross_p05": null,
+        "cross_p50": null,
+        "roc_auc": null,
+        "same_p50": 0.0036288602844579,
+        "same_p95": 0.01607062228393019,
+        "same_p99": 0.01920102038016014
+      },
+      "same_edge_count": 9,
+      "unsafe_face_count": 4
+    },
+    {
+      "component_index": 9,
+      "cross_edge_count": 5,
+      "cross_fraction": 0.5555555555555556,
+      "dominant_joint_disagreement": {
+        "cross_p01": 1.0,
+        "cross_p05": 1.0,
+        "cross_p50": 1.0,
+        "roc_auc": 1.0,
+        "same_p50": 0.0,
+        "same_p95": 0.0,
+        "same_p99": 0.0
+      },
+      "edge_count": 9,
+      "half_l1": {
+        "cross_p01": 0.5883402236132451,
+        "cross_p05": 0.6510797177983769,
+        "cross_p50": 0.9648268305228103,
+        "roc_auc": 1.0,
+        "same_p50": 0.12231373580626367,
+        "same_p95": 0.38689993376337617,
+        "same_p99": 0.4191962966282373
+      },
+      "jsd": {
+        "cross_p01": 0.27228125683083254,
+        "cross_p05": 0.32970979672451345,
+        "cross_p50": 0.6185397847900453,
+        "roc_auc": 1.0,
+        "same_p50": 0.02043248941269021,
+        "same_p95": 0.15349788410596055,
+        "same_p99": 0.17204213725312018
+      },
+      "same_edge_count": 4,
+      "unsafe_face_count": 4
+    }
+  ],
+  "preregistration": "canonical/KNIGHT_UNSAFE_PATCH_MOTION_EDGE_SEPARABILITY_PREREG_V1_20260929.json",
+  "schema": "RealSaS.KnightUnsafePatchMotionEdgeSeparabilityCourt.v1",
+  "status": "DIAGNOSTIC_ONLY__NO_PRODUCT_MUTATION",
+  "teacher_used_by_score_construction": false,
+  "unsafe_patch_count": 81
+}

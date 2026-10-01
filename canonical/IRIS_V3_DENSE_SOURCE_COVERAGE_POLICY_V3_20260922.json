@@ -1,0 +1,133 @@
+{
+  "schema": "RealSaS.IRISV3DenseSourceCoveragePolicy.v3",
+  "status": "FROZEN_PRE_KNIGHT_SUBJECT_FREE__LOGIT_BCE__BETA_SCALED",
+  "date_utc": "2026-09-22",
+  "authority": "IRIS_V3_TRAINING_OBJECTIVE_POLICY__NO_NEW_KNIGHT_RESULT",
+  "supersedes": "canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_POLICY_V2_20260922.json",
+  "numeric_errata": [
+    "canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_NUMERIC_ERRATUM_20260922.json",
+    "canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_GRADIENT_SCALE_ERRATUM_20260922.json"
+  ],
+  "architecture_id": "RealSaS.IRIS.SceneFirstSignedGeometry.v3",
+  "producer": "models/iris/v3/scene_first_signed_v3.py",
+  "trainer": "models/iris/v3/train_dense_fit_v3.py",
+  "sampling": "models/iris/v3/dense_source_sampling_v3.py",
+  "coverage_implementation": "models/iris/v3/dense_source_coverage_v3.py",
+  "amendment": "canonical/VF11_IRIS_V3_DENSE_STAGE13_REPAIR_SAMPLING_AMENDMENT_20260922.json",
+  "historical_baseline_authority": {
+    "notebook": "RealSaS_IRIS_KNIGHT_A100_RUN_ALL_V3_DUAL_ARM_STRIDE8_STRIDE4.ipynb",
+    "source_run_id": "20260919T150323Z",
+    "checkpoint_sha256": "59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f",
+    "random_seed": 26091909,
+    "anchor_stride_px": 8,
+    "train_steps": 4800,
+    "lr": 0.00008,
+    "weight_decay": 0.0001,
+    "surface_rays_per_step": 192,
+    "local_samples_per_ray": 9,
+    "local_band_norm": 0.1,
+    "local_target": "NEGATIVE_LOCAL_OFFSET",
+    "local_smooth_l1_beta": 0.02,
+    "background_rays_per_step": 128,
+    "certified_outside_points_per_step": 512,
+    "teacher_surface_zero_points_per_step": 1024,
+    "positive_margin": 0.04,
+    "teacher_surface_zero_smooth_l1_beta": 0.01,
+    "sparse_loss_formula": "local + 0.25*background + 0.25*certified_outside + 0.50*teacher_surface_zero"
+  },
+  "single_scientific_change": "ADD_V3_NATIVE_DENSE_SOURCE_COVERAGE_TERM_TO_UNCHANGED_HISTORICAL_SPARSE_OBJECTIVE",
+  "target_authority": "QUALIFIED_OBSERVATION_FOREGROUND_MASK_ONLY__TRAINING_TARGET_NOT_FORWARD_INPUT",
+  "camera_authority": "EXACT_STAGE07_QUALIFIED_ORTHOGRAPHIC_CAMERAS",
+  "mask_is_forward_input": false,
+  "teacher_geometry_used_by_dense_term": false,
+  "visual_hull_clipping": false,
+  "ray_domain": {
+    "domain": "NORMALIZATION_CUBE_MINUS1_PLUS1",
+    "segment_rule": "EXACT_FORWARD_RAY_BOX_INTERSECTION_WITH_NORMALIZATION_CUBE",
+    "no_intersection_pixel_rule": "NOT_ADMITTED_TO_DENSE_FIELD_LOSS__RESAMPLE_FROM_INTERSECTING_PIXEL_POOL",
+    "depth_lattice": "EQUALLY_SPACED_PER_RAY_WITH_GLOBAL_PAIR_PHASE_AND_EXPLICIT_SEGMENT_ENDPOINTS",
+    "maximum_depth_step_normalized": 0.0029411764705882353,
+    "minimum_feature_width_normalized": 0.0058823529411764705,
+    "phase_seed_derivation": "SHA256(fit_seed,training_step,opposite_view_pair_identity)",
+    "independent_per_bin_jitter": false
+  },
+  "ray_occupancy": {
+    "signed_reduction": "HARD_AMIN_OVER_VALID_DEPTH_SAMPLES",
+    "softmin_temperature": null,
+    "foreground_logit": "-ray_min_sdf / beta",
+    "foreground_probability_diagnostic_only": "sigmoid(foreground_logit)",
+    "beta_normalized": 0.0007352941176470588
+  },
+  "dense_loss": {
+    "bce_interface": "BINARY_CROSS_ENTROPY_WITH_LOGITS__NO_PROBABILITY_CLAMP",
+    "component_balanced_bce_weight": 1.0,
+    "soft_dice_weight": 1.0,
+    "boundary_multiplier": 4.0,
+    "top_level_loss_weight": 0.0007352941176470588,
+    "top_level_weight_derivation": "EQUAL_TO_OCCUPANCY_BETA_NORMALIZED_TO_CANCEL_1_OVER_BETA_SIGNED_FIELD_GRADIENT_SCALE",
+    "component_connectivity": 4,
+    "boundary_definition": "FOREGROUND_MINUS_CHEBYSHEV_RADIUS1_EROSION",
+    "background_component_id": -1,
+    "group_aggregation": "BACKGROUND_ONE_GROUP_PLUS_EACH_REPRESENTED_FOREGROUND_COMPONENT_ONE_EQUAL_GROUP"
+  },
+  "view_schedule": {
+    "opposite_view_pairs": [[0,4],[1,5],[2,6],[3,7]],
+    "mode": "ROUND_ROBIN_OPPOSITE_PAIR",
+    "one_pair_per_training_step": true,
+    "maximum_total_step_count_imbalance": 1,
+    "pair_loss_normalization": "MEAN_OF_TWO_VIEW_DENSE_LOSSES"
+  },
+  "ray_minibatch": {
+    "foreground_component_rays_per_component_per_view": 8,
+    "additional_global_foreground_boundary_rays_per_view": 16,
+    "additional_global_foreground_interior_rays_per_view": 16,
+    "background_rays_per_view": 32,
+    "sampling_with_replacement_when_pool_smaller_than_quota": true,
+    "empty_global_interior_fallback": "REALLOCATE_INTERIOR_QUOTA_TO_FOREGROUND_BOUNDARY",
+    "all_4_connected_foreground_components_are_represented_each_time_the_view_is_scheduled": true
+  },
+  "determinism": {
+    "fit_seed": 26091909,
+    "ray_selection_rng": "SHA256_DERIVED_FROM_FIT_SEED_STEP_VIEW",
+    "phase_rng": "SHA256_DERIVED_FROM_FIT_SEED_STEP_PAIR",
+    "fresh_initialization": true,
+    "cudnn_deterministic": true,
+    "cudnn_benchmark": false
+  },
+  "subject_free_falsification": {
+    "required_fixtures": ["THIN_BLADE","SMALL_COMPONENT","THIN_STRAP","FORK_GAP","CONCAVE_NOTCH"],
+    "required_before_knight_arm_A": true,
+    "required_properties": [
+      "minimum-width ray crossing is detected for a deterministic phase bank",
+      "severely wrong foreground and background rays retain finite nonzero corrective gradients",
+      "beta-scaled severe-error signed-field gradients are O(1)",
+      "small-component BCE authority does not vanish beside a large-body distractor",
+      "thin boundary groups remain consequential",
+      "FORK_GAP and CONCAVE_NOTCH background rays are pushed toward positive signed field rather than filled",
+      "actual SceneFirstSignedGeometryV3 sdf_head receives finite nonzero gradient from the dense loss",
+      "combined trainer applies beta scaling exactly once"
+    ]
+  },
+  "stage13_v2_gate": {
+    "min_recall": 0.999,
+    "min_precision": 0.999,
+    "min_component_recall": 0.999,
+    "component_min_foreground_fraction": 0.0,
+    "max_largest_coherent_hole_fraction": 0.00025,
+    "max_interior_uncovered_fraction": 0.0005,
+    "max_silhouette_edge_p95_px": 0.5
+  },
+  "knight_arm_A": {
+    "fresh_init": true,
+    "random_seed": 26091909,
+    "anchor_stride_px": 8,
+    "train_steps": 4800,
+    "only_causal_change": "ADD_THIS_FROZEN_DENSE_TERM",
+    "decode_resolutions": [256,512],
+    "primary_qualification_resolution": 512,
+    "qualification": "UNCHANGED_STAGE13_V2_PLUS_R256_R512_CONVERGENCE_AND_SOURCE_SUPPORT_AUDIT"
+  },
+  "knight_tuning_forbidden": true,
+  "x7_execution_authorized": false,
+  "product_authority_minted": false
+}

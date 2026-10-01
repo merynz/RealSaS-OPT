@@ -1,0 +1,102 @@
+{
+  "schema": "RealSaS.WeightOracleReplacementCourtVerdict.v1",
+  "status": "SEALED_DIAGNOSTIC_VERDICT__NO_PRODUCT_REPAIR_AUTHORIZED",
+  "date": "2026-09-28",
+  "established_causality": {
+    "statement": "Stage32 weight field is an independent causal owner of Knight catastrophic deformation.",
+    "evidence": [
+      "canonical/KNIGHT_TEACHER_WEIGHT_ORACLE_CAUSALITY_V1_20260928.json",
+      "canonical/KNIGHT_STAGE32_EVIDENCE_SUPPORT_AUDIT_V1_20260928.json",
+      "canonical/KNIGHT_TEACHER_PROJECTION_INTEGRITY_AUDIT_V1_20260928.json"
+    ],
+    "facts": {
+      "l1_gt_1_row_error_total": 154,
+      "l1_gt_1_row_error_teacher_invalid": 151,
+      "l1_gt_1_row_error_teacher_valid": 3,
+      "strict_local_predicted_discontinuity_gt_1_faces": 127,
+      "strict_local_gt_1_faces_with_any_teacher_invalid_vertex": 126
+    }
+  },
+  "falsified_generic_replacements": [
+    {
+      "id": "GRAPH_HARMONIC_COMPLETION_V1",
+      "verdict": "REJECT",
+      "evidence": "canonical/KNIGHT_TEACHER_FREE_WEIGHT_COMPLETION_COURT_V1_20260928.json",
+      "teacher_used_by_solver": false,
+      "actual_motion": {
+        "baseline_edge_gt_10_max": 630,
+        "completed_edge_gt_10_max": 657,
+        "baseline_edge_gt_4_max": 1032,
+        "completed_edge_gt_4_max": 1046,
+        "baseline_worst_edge": 209.99843678211477,
+        "completed_worst_edge": 209.99843678211477
+      },
+      "reason": "Topology-local harmonic diffusion slightly improves some oracle error statistics but worsens actual motion and leaves unresolved components; local smoothness is insufficient."
+    },
+    {
+      "id": "BONE_LOCALITY_TRUNCATION_V1",
+      "verdict": "REJECT",
+      "evidence": "canonical/KNIGHT_BONE_LOCALITY_CONSTRAINED_WEIGHT_COURT_V1_20260928.json",
+      "teacher_used_for_selection": false,
+      "selected_top_k": 12,
+      "actual_motion": {
+        "baseline_edge_gt_10_max": 630,
+        "selected_edge_gt_10_max": 752,
+        "baseline_edge_gt_4_max": 1032,
+        "selected_edge_gt_4_max": 1227,
+        "baseline_worst_edge": 209.99843678211477,
+        "selected_worst_edge": 102.467999767242
+      },
+      "synthetic": {
+        "baseline_unsafe_face_count": 1801,
+        "selected_unsafe_face_count": 1983
+      },
+      "reason": "Bone proximity is a useful diagnostic signal but not a sufficient semantic carrier authority; hard locality correction increases unsafe mechanics and teacher error."
+    }
+  ],
+  "measured_information_gap": {
+    "coherent_wrong_clusters": true,
+    "evidence": [
+      "canonical/KNIGHT_WEIGHT_OUTLIER_SIGNAL_COURT_V1_20260928.json",
+      "canonical/KNIGHT_BONE_LOCALITY_SIGNAL_COURT_V1_20260928.json"
+    ],
+    "facts": {
+      "l1_gt_1_error_component_count": 15,
+      "largest_error_component_sizes": [
+        65,
+        55,
+        9,
+        9
+      ],
+      "bad_row_predicted_bone_rank_median": 17,
+      "bad_row_teacher_bone_rank_median": 3
+    },
+    "interpretation": "The dominant error is not isolated numerical noise. Large unsupported regions can form internally smooth, confident-looking but semantically wrong weight fields."
+  },
+  "contract_consequence": {
+    "current_qualified_skin_row_fields": [
+      "surface_id",
+      "influences",
+      "simplex_residual_before",
+      "correction_l1"
+    ],
+    "missing_first_class_fields": [
+      "row_evidence_support_or_confidence",
+      "row_epistemic_uncertainty",
+      "completion_or_abstention_provenance"
+    ],
+    "evidence": "compiler/realsas_compiler_core/types.py",
+    "conclusion": "Numeric simplex qualification alone cannot promote free-running evidence-free rows to trusted product skin."
+  },
+  "authorized_next_research": [
+    "Direct mechanical-objective weight optimization with explicit fixed-evidence anchors and nontrivial anti-collapse constraints may be tested, but is not authorized as product repair.",
+    "Arachne evidence/support-confidence semantics and training coverage must be investigated because compiler-only smoothness/locality heuristics failed.",
+    "No Arachne retrain is authorized until the missing evidence/coverage contract and experiment are preregistered."
+  ],
+  "forbidden_promotions": [
+    "Do not adopt plain graph harmonic completion.",
+    "Do not adopt nearest-bone/top-k truncation.",
+    "Do not treat simplex validity as semantic skin validity.",
+    "Do not claim teacher-free weight oracle replacement is solved."
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "schema": "RealSaS.KnightArachneV6UncertaintySourceAuditPrereg.v1",
+  "status": "FROZEN_BEFORE_ARACHNE_V6_SOURCE_AUDIT_RESULT",
+  "date": "2026-09-29",
+  "purpose": "Inspect the exact hash-sealed Stage30 Arachne model source used by Knight for uncertainty/confidence/reliability mechanisms without running or modifying the model.",
+  "teacher_policy": "No teacher artifact is loaded.",
+  "read_only": true
+}

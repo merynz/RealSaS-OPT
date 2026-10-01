@@ -1,0 +1,68 @@
+{
+  "schema": "RealSaS.VF11C2OrientedCrossingPreregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__C2_ORIENTED_CROSSING_EXISTENCE_UNIQUENESS",
+  "authority_class": "RESEARCH_PREREGISTRATION_ONLY",
+  "product_authority_minted": false,
+  "shipping_certificate_backend": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "full_domain_traversal_authorized": false,
+  "parent_c1_closure": "canonical/VF11_C1_V2_RESEARCH_CLOSURE_20260921.json",
+  "input_cohort": {
+    "primary_c1_regular_count": 12,
+    "source": "C1 V2 margin replay",
+    "source_profile_sha256": "329ac936b54df4293f40803bd127a2da9c6ae79ace5129fd3f53733e527f38cf"
+  },
+  "theorem_contract": {
+    "regularity": "For a certified cell and fixed direction d, orient d so that D_d f > 0 over the whole cell.",
+    "line_uniqueness": "Strict positivity of D_d f implies at most one zero on every chord parallel to d inside the convex cell.",
+    "center_chord_crossing": "If conservative endpoint bounds on the center chord prove f(entry)<0 and f(exit)>0, continuity plus strict monotonicity proves exactly one zero on that chord.",
+    "full_oriented_crossing": "If every inflow boundary face has f<0 and every outflow boundary face has f>0, every nondegenerate chord parallel to d that intersects the box has exactly one zero.",
+    "c0_existence_bridge": "If C0 already proved zero existence and C1 proved directional regularity, the cell has at least one zero and at most one zero per d-parallel chord, even when full boundary crossing is not proved."
+  },
+  "states": [
+    "PROVEN_FULL_ORIENTED_CROSSING",
+    "PROVEN_CENTER_CHORD_CROSSING",
+    "PROVEN_C0_EXISTENCE_PLUS_LINE_UNIQUENESS",
+    "REGULAR_ONLY"
+  ],
+  "forbidden_inferences": [
+    "PROVEN_SINGLE_COMPONENT from center-chord or C0-existence state",
+    "global topology",
+    "full graph crossing without all inflow/outflow face signs",
+    "shipping proof from ordinary float64"
+  ],
+  "face_range_policy": {
+    "backend": "C0 affine value bound engine restricted to 2D boundary faces",
+    "split_at_triplane_knots": true,
+    "face_micro_depth": 2,
+    "strict_entry_sign": "upper < 0",
+    "strict_exit_sign": "lower > 0"
+  },
+  "center_chord_policy": {
+    "chord": "line through box center parallel to increasing C1 direction",
+    "endpoint_bounds": "degenerate-point C0 affine value bounds",
+    "strict_entry_sign": "upper < 0",
+    "strict_exit_sign": "lower > 0"
+  },
+  "frozen_knight_measurement": {
+    "cells": 12,
+    "same_c1_directions": true,
+    "same_c1_states": true,
+    "same_c0_states": true,
+    "report": [
+      "state counts",
+      "C0->C1->C2 transition per anchor",
+      "center chord endpoint margins",
+      "inflow/outflow face margins and unresolved counts",
+      "box evaluations and latency",
+      "empirical dense boundary/chord sanity contradictions"
+    ]
+  },
+  "runtime_policy": {
+    "short_fixture_smoke_allowed": true,
+    "knight_12_cell_run": "USER_RUN_ALL_NOTEBOOK",
+    "no_full_domain_run": true
+  }
+}

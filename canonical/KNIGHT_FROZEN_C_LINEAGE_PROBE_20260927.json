@@ -1,0 +1,46 @@
+{
+  "diagnostic_only": true,
+  "exact_stage08_file_matches": [],
+  "file_count": 6,
+  "files": [
+    {
+      "bytes": 3741,
+      "path": "DECODER_RESULT.json",
+      "sha256": "aa070bba89ef000d3c037c13223f6b0530876a301c4e6063b71360b271a73938"
+    },
+    {
+      "bytes": 4701,
+      "path": "FROZEN_STAGE13_RESULT.json",
+      "sha256": "df57e9e784329abfeef43d1b7801d4b73a15890df649290a664c3004b5170cc2"
+    },
+    {
+      "bytes": 290216622,
+      "path": "IRIS_SIGNED_ZERO_SURFACE.npz",
+      "sha256": "adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c"
+    },
+    {
+      "bytes": 61291875,
+      "path": "SELECTED_CHECKPOINT.pt",
+      "sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0"
+    },
+    {
+      "bytes": 1024,
+      "path": "SELECTED_CHECKPOINT_REPORT.json",
+      "sha256": "15fae5814158e4aef2070115cb7a35e889b86858e0841b1b438c7b0fc7c0ded9"
+    },
+    {
+      "bytes": 33462,
+      "path": "V5_TP64_LONG_HORIZON_LOW_LR_RESULT.json",
+      "sha256": "a4ac7e208db23c017cde8714f2d551c0c4b548e8de6136d56bb9911784896329"
+    }
+  ],
+  "frozen_root": "/home/monster/realsas_authority/imports/frozen_c_20260924T115953Z",
+  "schema": "RealSaS.KnightFrozenCLineageProbe.v1",
+  "status": "MEASURED",
+  "target_stage08_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+  "textual_references": {
+    "normalization_hash": [],
+    "observation_hash": [],
+    "stage08_sha256": []
+  }
+}

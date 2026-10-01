@@ -1,0 +1,8 @@
+{
+  "schema": "RealSaS.KnightStage17PartitionOwnerAuditPrereg.v1",
+  "status": "FROZEN_BEFORE_STAGE17_OWNER_AUDIT_RESULT",
+  "date": "2026-09-29",
+  "question": "Is the current Knight mechanical component collapse already present in the sealed Stage17 MechanicalPartitionIR before Stage18 mesh construction?",
+  "read_only": true,
+  "no_product_mutation": true
+}

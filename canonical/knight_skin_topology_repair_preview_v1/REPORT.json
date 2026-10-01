@@ -1,0 +1,2121 @@
+{
+  "appearance_note": "EXISTING_CAA_FACE_DATA_SUBSET_BY_ORIGINAL_FACE_INDEX_FOR_FAST_DIAGNOSTIC_ONLY",
+  "clips": [
+    {
+      "clip_id": "demo_idle_v1",
+      "frame_metrics": [
+        {
+          "final_alpha_pixel_count": 154614,
+          "frame_index": 0,
+          "time_seconds": 0.0,
+          "view_index": 0,
+          "visible_pixel_count": 154656
+        },
+        {
+          "final_alpha_pixel_count": 152927,
+          "frame_index": 1,
+          "time_seconds": 0.8333333333333334,
+          "view_index": 0,
+          "visible_pixel_count": 152963
+        },
+        {
+          "final_alpha_pixel_count": 150137,
+          "frame_index": 2,
+          "time_seconds": 1.6666666666666667,
+          "view_index": 0,
+          "visible_pixel_count": 150174
+        },
+        {
+          "final_alpha_pixel_count": 152927,
+          "frame_index": 3,
+          "time_seconds": 2.5,
+          "view_index": 0,
+          "visible_pixel_count": 152963
+        },
+        {
+          "final_alpha_pixel_count": 263322,
+          "frame_index": 0,
+          "time_seconds": 0.0,
+          "view_index": 2,
+          "visible_pixel_count": 264847
+        },
+        {
+          "final_alpha_pixel_count": 264604,
+          "frame_index": 1,
+          "time_seconds": 0.8333333333333334,
+          "view_index": 2,
+          "visible_pixel_count": 266101
+        },
+        {
+          "final_alpha_pixel_count": 264914,
+          "frame_index": 2,
+          "time_seconds": 1.6666666666666667,
+          "view_index": 2,
+          "visible_pixel_count": 266433
+        },
+        {
+          "final_alpha_pixel_count": 264604,
+          "frame_index": 3,
+          "time_seconds": 2.5,
+          "view_index": 2,
+          "visible_pixel_count": 266101
+        }
+      ],
+      "gif_path": "canonical/knight_skin_topology_repair_preview_v1/KNIGHT_IDLE_SKIN_TOPOLOGY_REPAIR_PREVIEW_V1.gif",
+      "mapping": [
+        {
+          "cost": 0.6116771317630436,
+          "next_cost": 0.7054434059820822,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:7e87e97fc9fe89cbd718"
+        },
+        {
+          "cost": 0.37324048737202953,
+          "next_cost": 0.5047419906119381,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ab16ff2ffc7408c862ae"
+        },
+        {
+          "cost": 0.2054681713865518,
+          "next_cost": 0.2925199639891659,
+          "source_joint_id": "Fingers.R",
+          "target_joint_id": "J:c9cdb266f7c167a620a9"
+        },
+        {
+          "cost": 0.17678234026097459,
+          "next_cost": 0.4085321751602823,
+          "source_joint_id": "LowerArm.R",
+          "target_joint_id": "J:932628adf7f0d5936426"
+        },
+        {
+          "cost": 0.2029030249075255,
+          "next_cost": 0.28310195332574495,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:4c9f9eace712daf31538"
+        },
+        {
+          "cost": 0.48247436163504,
+          "next_cost": 0.6238222174056915,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:f5cf9181e27d0f791f7d"
+        },
+        {
+          "cost": 0.19833878296620702,
+          "next_cost": 0.2583591034997136,
+          "source_joint_id": "Thumb.R",
+          "target_joint_id": "J:75a17a4287b28cd7f57f"
+        },
+        {
+          "cost": 0.1507628779714688,
+          "next_cost": 0.49685610634347954,
+          "source_joint_id": "UpperLeg.R",
+          "target_joint_id": "J:f50f39d42ef3820824ef"
+        },
+        {
+          "cost": 0.15738848284903773,
+          "next_cost": 0.2182245988227146,
+          "source_joint_id": "MiddleHand.L",
+          "target_joint_id": "J:8455bf4c0a38867b7d9b"
+        },
+        {
+          "cost": 0.12566026834671604,
+          "next_cost": 0.15653416095612008,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:5428a88dad4d4d8d5c4d"
+        },
+        {
+          "cost": 0.12744628795827562,
+          "next_cost": 0.17729832396772957,
+          "source_joint_id": "Palm.L",
+          "target_joint_id": "J:33c7075f501c9af4cd0d"
+        },
+        {
+          "cost": 0.21451150060948782,
+          "next_cost": 0.3102178824405303,
+          "source_joint_id": "Neck",
+          "target_joint_id": "J:1008208d141ae248de43"
+        },
+        {
+          "cost": 0.22331652895761903,
+          "next_cost": 0.341721580563024,
+          "source_joint_id": "Fingers.L",
+          "target_joint_id": "J:136e20712bbd1481596e"
+        },
+        {
+          "cost": 0.1753136842084541,
+          "next_cost": 0.2033041789185967,
+          "source_joint_id": "MiddleHand.R",
+          "target_joint_id": "J:e5441b559f1c34b41aa2"
+        },
+        {
+          "cost": 0.1542952449768342,
+          "next_cost": 0.521825399970232,
+          "source_joint_id": "UpperLeg.L",
+          "target_joint_id": "J:063ee183f601e19a8ca9"
+        },
+        {
+          "cost": 0.24521820132730113,
+          "next_cost": 0.5053838222620202,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:73295dbdbb50d303e597"
+        },
+        {
+          "cost": 0.18366720483839166,
+          "next_cost": 0.2331092975233877,
+          "source_joint_id": "UpperArm.R",
+          "target_joint_id": "J:42d181ebf3515959283a"
+        },
+        {
+          "cost": 0.5902787916544152,
+          "next_cost": 0.6714047201184266,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:7d9e31e2d0bd48f88ecb"
+        },
+        {
+          "cost": 0.338657132190124,
+          "next_cost": 0.5510856632138917,
+          "source_joint_id": "Head",
+          "target_joint_id": "J:eafe286e7d84499e5257"
+        },
+        {
+          "cost": 0.1615942399702586,
+          "next_cost": 0.45709510248575125,
+          "source_joint_id": "LowerArm.L",
+          "target_joint_id": "J:7cf59fbe52c53280546a"
+        },
+        {
+          "cost": 0.37056767662637935,
+          "next_cost": 0.4647284720520398,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:cf05f36e919ff69a9d8e"
+        },
+        {
+          "cost": 0.40659342489016087,
+          "next_cost": 0.6154678629286205,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:362735eeec6ee5a3d46f"
+        },
+        {
+          "cost": 0.5383114087285982,
+          "next_cost": 0.693192900090975,
+          "source_joint_id": "Body",
+          "target_joint_id": "J:237d229c33bc9eb9bf91"
+        },
+        {
+          "cost": 0.1952579664472978,
+          "next_cost": 0.25572078846434404,
+          "source_joint_id": "UpperArm.L",
+          "target_joint_id": "J:a80d2c086e86a4cc08b5"
+        },
+        {
+          "cost": 0.2208842181998788,
+          "next_cost": 0.6520160579394874,
+          "source_joint_id": "Torso",
+          "target_joint_id": "J:2ff965d6dbe4efc2d5d4"
+        },
+        {
+          "cost": 0.2598771637136827,
+          "next_cost": 0.4990601726171502,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ee24577789f0235b8186"
+        },
+        {
+          "cost": 0.16516790065247416,
+          "next_cost": 0.3150452870805952,
+          "source_joint_id": "Hips",
+          "target_joint_id": "J:b9e5c0d23f688f672060"
+        }
+      ],
+      "sheet_path": "canonical/knight_skin_topology_repair_preview_v1/KNIGHT_IDLE_SKIN_TOPOLOGY_REPAIR_PREVIEW_V1.png"
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "frame_metrics": [
+        {
+          "final_alpha_pixel_count": 235003,
+          "frame_index": 0,
+          "time_seconds": 0.0,
+          "view_index": 0,
+          "visible_pixel_count": 235133
+        },
+        {
+          "final_alpha_pixel_count": 292509,
+          "frame_index": 1,
+          "time_seconds": 0.20833333333333334,
+          "view_index": 0,
+          "visible_pixel_count": 292779
+        },
+        {
+          "final_alpha_pixel_count": 207064,
+          "frame_index": 2,
+          "time_seconds": 0.4166666666666667,
+          "view_index": 0,
+          "visible_pixel_count": 207359
+        },
+        {
+          "final_alpha_pixel_count": 253019,
+          "frame_index": 3,
+          "time_seconds": 0.625,
+          "view_index": 0,
+          "visible_pixel_count": 253645
+        },
+        {
+          "final_alpha_pixel_count": 255462,
+          "frame_index": 0,
+          "time_seconds": 0.0,
+          "view_index": 2,
+          "visible_pixel_count": 257743
+        },
+        {
+          "final_alpha_pixel_count": 230989,
+          "frame_index": 1,
+          "time_seconds": 0.20833333333333334,
+          "view_index": 2,
+          "visible_pixel_count": 232504
+        },
+        {
+          "final_alpha_pixel_count": 226240,
+          "frame_index": 2,
+          "time_seconds": 0.4166666666666667,
+          "view_index": 2,
+          "visible_pixel_count": 228234
+        },
+        {
+          "final_alpha_pixel_count": 253061,
+          "frame_index": 3,
+          "time_seconds": 0.625,
+          "view_index": 2,
+          "visible_pixel_count": 255098
+        }
+      ],
+      "gif_path": "canonical/knight_skin_topology_repair_preview_v1/KNIGHT_RUN_SKIN_TOPOLOGY_REPAIR_PREVIEW_V1.gif",
+      "mapping": [
+        {
+          "cost": 0.6116771317630436,
+          "next_cost": 0.7054434059820822,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:7e87e97fc9fe89cbd718"
+        },
+        {
+          "cost": 0.37324048737202953,
+          "next_cost": 0.5047419906119381,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ab16ff2ffc7408c862ae"
+        },
+        {
+          "cost": 0.2054681713865518,
+          "next_cost": 0.2925199639891659,
+          "source_joint_id": "Fingers.R",
+          "target_joint_id": "J:c9cdb266f7c167a620a9"
+        },
+        {
+          "cost": 0.17678234026097459,
+          "next_cost": 0.4085321751602823,
+          "source_joint_id": "LowerArm.R",
+          "target_joint_id": "J:932628adf7f0d5936426"
+        },
+        {
+          "cost": 0.2029030249075255,
+          "next_cost": 0.28310195332574495,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:4c9f9eace712daf31538"
+        },
+        {
+          "cost": 0.48247436163504,
+          "next_cost": 0.6238222174056915,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:f5cf9181e27d0f791f7d"
+        },
+        {
+          "cost": 0.19833878296620702,
+          "next_cost": 0.2583591034997136,
+          "source_joint_id": "Thumb.R",
+          "target_joint_id": "J:75a17a4287b28cd7f57f"
+        },
+        {
+          "cost": 0.1507628779714688,
+          "next_cost": 0.49685610634347954,
+          "source_joint_id": "UpperLeg.R",
+          "target_joint_id": "J:f50f39d42ef3820824ef"
+        },
+        {
+          "cost": 0.15738848284903773,
+          "next_cost": 0.2182245988227146,
+          "source_joint_id": "MiddleHand.L",
+          "target_joint_id": "J:8455bf4c0a38867b7d9b"
+        },
+        {
+          "cost": 0.12566026834671604,
+          "next_cost": 0.15653416095612008,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:5428a88dad4d4d8d5c4d"
+        },
+        {
+          "cost": 0.12744628795827562,
+          "next_cost": 0.17729832396772957,
+          "source_joint_id": "Palm.L",
+          "target_joint_id": "J:33c7075f501c9af4cd0d"
+        },
+        {
+          "cost": 0.21451150060948782,
+          "next_cost": 0.3102178824405303,
+          "source_joint_id": "Neck",
+          "target_joint_id": "J:1008208d141ae248de43"
+        },
+        {
+          "cost": 0.22331652895761903,
+          "next_cost": 0.341721580563024,
+          "source_joint_id": "Fingers.L",
+          "target_joint_id": "J:136e20712bbd1481596e"
+        },
+        {
+          "cost": 0.1753136842084541,
+          "next_cost": 0.2033041789185967,
+          "source_joint_id": "MiddleHand.R",
+          "target_joint_id": "J:e5441b559f1c34b41aa2"
+        },
+        {
+          "cost": 0.1542952449768342,
+          "next_cost": 0.521825399970232,
+          "source_joint_id": "UpperLeg.L",
+          "target_joint_id": "J:063ee183f601e19a8ca9"
+        },
+        {
+          "cost": 0.24521820132730113,
+          "next_cost": 0.5053838222620202,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:73295dbdbb50d303e597"
+        },
+        {
+          "cost": 0.18366720483839166,
+          "next_cost": 0.2331092975233877,
+          "source_joint_id": "UpperArm.R",
+          "target_joint_id": "J:42d181ebf3515959283a"
+        },
+        {
+          "cost": 0.5902787916544152,
+          "next_cost": 0.6714047201184266,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:7d9e31e2d0bd48f88ecb"
+        },
+        {
+          "cost": 0.338657132190124,
+          "next_cost": 0.5510856632138917,
+          "source_joint_id": "Head",
+          "target_joint_id": "J:eafe286e7d84499e5257"
+        },
+        {
+          "cost": 0.1615942399702586,
+          "next_cost": 0.45709510248575125,
+          "source_joint_id": "LowerArm.L",
+          "target_joint_id": "J:7cf59fbe52c53280546a"
+        },
+        {
+          "cost": 0.37056767662637935,
+          "next_cost": 0.4647284720520398,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:cf05f36e919ff69a9d8e"
+        },
+        {
+          "cost": 0.40659342489016087,
+          "next_cost": 0.6154678629286205,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:362735eeec6ee5a3d46f"
+        },
+        {
+          "cost": 0.5383114087285982,
+          "next_cost": 0.693192900090975,
+          "source_joint_id": "Body",
+          "target_joint_id": "J:237d229c33bc9eb9bf91"
+        },
+        {
+          "cost": 0.1952579664472978,
+          "next_cost": 0.25572078846434404,
+          "source_joint_id": "UpperArm.L",
+          "target_joint_id": "J:a80d2c086e86a4cc08b5"
+        },
+        {
+          "cost": 0.2208842181998788,
+          "next_cost": 0.6520160579394874,
+          "source_joint_id": "Torso",
+          "target_joint_id": "J:2ff965d6dbe4efc2d5d4"
+        },
+        {
+          "cost": 0.2598771637136827,
+          "next_cost": 0.4990601726171502,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ee24577789f0235b8186"
+        },
+        {
+          "cost": 0.16516790065247416,
+          "next_cost": 0.3150452870805952,
+          "source_joint_id": "Hips",
+          "target_joint_id": "J:b9e5c0d23f688f672060"
+        }
+      ],
+      "sheet_path": "canonical/knight_skin_topology_repair_preview_v1/KNIGHT_RUN_SKIN_TOPOLOGY_REPAIR_PREVIEW_V1.png"
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "frame_metrics": [
+        {
+          "final_alpha_pixel_count": 293010,
+          "frame_index": 0,
+          "time_seconds": 0.0,
+          "view_index": 0,
+          "visible_pixel_count": 293609
+        },
+        {
+          "final_alpha_pixel_count": 281639,
+          "frame_index": 1,
+          "time_seconds": 0.2777777777777778,
+          "view_index": 0,
+          "visible_pixel_count": 281875
+        },
+        {
+          "final_alpha_pixel_count": 228349,
+          "frame_index": 2,
+          "time_seconds": 0.5555555555555556,
+          "view_index": 0,
+          "visible_pixel_count": 228905
+        },
+        {
+          "final_alpha_pixel_count": 293010,
+          "frame_index": 3,
+          "time_seconds": 0.8333333333333334,
+          "view_index": 0,
+          "visible_pixel_count": 293609
+        },
+        {
+          "final_alpha_pixel_count": 222319,
+          "frame_index": 0,
+          "time_seconds": 0.0,
+          "view_index": 2,
+          "visible_pixel_count": 223206
+        },
+        {
+          "final_alpha_pixel_count": 207850,
+          "frame_index": 1,
+          "time_seconds": 0.2777777777777778,
+          "view_index": 2,
+          "visible_pixel_count": 208711
+        },
+        {
+          "final_alpha_pixel_count": 234863,
+          "frame_index": 2,
+          "time_seconds": 0.5555555555555556,
+          "view_index": 2,
+          "visible_pixel_count": 235618
+        },
+        {
+          "final_alpha_pixel_count": 222319,
+          "frame_index": 3,
+          "time_seconds": 0.8333333333333334,
+          "view_index": 2,
+          "visible_pixel_count": 223206
+        }
+      ],
+      "gif_path": "canonical/knight_skin_topology_repair_preview_v1/KNIGHT_SLASH_SKIN_TOPOLOGY_REPAIR_PREVIEW_V1.gif",
+      "mapping": [
+        {
+          "cost": 0.6116771317630436,
+          "next_cost": 0.7054434059820822,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:7e87e97fc9fe89cbd718"
+        },
+        {
+          "cost": 0.37324048737202953,
+          "next_cost": 0.5047419906119381,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ab16ff2ffc7408c862ae"
+        },
+        {
+          "cost": 0.2054681713865518,
+          "next_cost": 0.2925199639891659,
+          "source_joint_id": "Fingers.R",
+          "target_joint_id": "J:c9cdb266f7c167a620a9"
+        },
+        {
+          "cost": 0.17678234026097459,
+          "next_cost": 0.4085321751602823,
+          "source_joint_id": "LowerArm.R",
+          "target_joint_id": "J:932628adf7f0d5936426"
+        },
+        {
+          "cost": 0.2029030249075255,
+          "next_cost": 0.28310195332574495,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:4c9f9eace712daf31538"
+        },
+        {
+          "cost": 0.48247436163504,
+          "next_cost": 0.6238222174056915,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:f5cf9181e27d0f791f7d"
+        },
+        {
+          "cost": 0.19833878296620702,
+          "next_cost": 0.2583591034997136,
+          "source_joint_id": "Thumb.R",
+          "target_joint_id": "J:75a17a4287b28cd7f57f"
+        },
+        {
+          "cost": 0.1507628779714688,
+          "next_cost": 0.49685610634347954,
+          "source_joint_id": "UpperLeg.R",
+          "target_joint_id": "J:f50f39d42ef3820824ef"
+        },
+        {
+          "cost": 0.15738848284903773,
+          "next_cost": 0.2182245988227146,
+          "source_joint_id": "MiddleHand.L",
+          "target_joint_id": "J:8455bf4c0a38867b7d9b"
+        },
+        {
+          "cost": 0.12566026834671604,
+          "next_cost": 0.15653416095612008,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:5428a88dad4d4d8d5c4d"
+        },
+        {
+          "cost": 0.12744628795827562,
+          "next_cost": 0.17729832396772957,
+          "source_joint_id": "Palm.L",
+          "target_joint_id": "J:33c7075f501c9af4cd0d"
+        },
+        {
+          "cost": 0.21451150060948782,
+          "next_cost": 0.3102178824405303,
+          "source_joint_id": "Neck",
+          "target_joint_id": "J:1008208d141ae248de43"
+        },
+        {
+          "cost": 0.22331652895761903,
+          "next_cost": 0.341721580563024,
+          "source_joint_id": "Fingers.L",
+          "target_joint_id": "J:136e20712bbd1481596e"
+        },
+        {
+          "cost": 0.1753136842084541,
+          "next_cost": 0.2033041789185967,
+          "source_joint_id": "MiddleHand.R",
+          "target_joint_id": "J:e5441b559f1c34b41aa2"
+        },
+        {
+          "cost": 0.1542952449768342,
+          "next_cost": 0.521825399970232,
+          "source_joint_id": "UpperLeg.L",
+          "target_joint_id": "J:063ee183f601e19a8ca9"
+        },
+        {
+          "cost": 0.24521820132730113,
+          "next_cost": 0.5053838222620202,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:73295dbdbb50d303e597"
+        },
+        {
+          "cost": 0.18366720483839166,
+          "next_cost": 0.2331092975233877,
+          "source_joint_id": "UpperArm.R",
+          "target_joint_id": "J:42d181ebf3515959283a"
+        },
+        {
+          "cost": 0.5902787916544152,
+          "next_cost": 0.6714047201184266,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:7d9e31e2d0bd48f88ecb"
+        },
+        {
+          "cost": 0.338657132190124,
+          "next_cost": 0.5510856632138917,
+          "source_joint_id": "Head",
+          "target_joint_id": "J:eafe286e7d84499e5257"
+        },
+        {
+          "cost": 0.1615942399702586,
+          "next_cost": 0.45709510248575125,
+          "source_joint_id": "LowerArm.L",
+          "target_joint_id": "J:7cf59fbe52c53280546a"
+        },
+        {
+          "cost": 0.37056767662637935,
+          "next_cost": 0.4647284720520398,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:cf05f36e919ff69a9d8e"
+        },
+        {
+          "cost": 0.40659342489016087,
+          "next_cost": 0.6154678629286205,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:362735eeec6ee5a3d46f"
+        },
+        {
+          "cost": 0.5383114087285982,
+          "next_cost": 0.693192900090975,
+          "source_joint_id": "Body",
+          "target_joint_id": "J:237d229c33bc9eb9bf91"
+        },
+        {
+          "cost": 0.1952579664472978,
+          "next_cost": 0.25572078846434404,
+          "source_joint_id": "UpperArm.L",
+          "target_joint_id": "J:a80d2c086e86a4cc08b5"
+        },
+        {
+          "cost": 0.2208842181998788,
+          "next_cost": 0.6520160579394874,
+          "source_joint_id": "Torso",
+          "target_joint_id": "J:2ff965d6dbe4efc2d5d4"
+        },
+        {
+          "cost": 0.2598771637136827,
+          "next_cost": 0.4990601726171502,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ee24577789f0235b8186"
+        },
+        {
+          "cost": 0.16516790065247416,
+          "next_cost": 0.3150452870805952,
+          "source_joint_id": "Hips",
+          "target_joint_id": "J:b9e5c0d23f688f672060"
+        }
+      ],
+      "sheet_path": "canonical/knight_skin_topology_repair_preview_v1/KNIGHT_SLASH_SKIN_TOPOLOGY_REPAIR_PREVIEW_V1.png"
+    }
+  ],
+  "face_count_after": 23947,
+  "face_count_before": 24958,
+  "probe_evidence": [
+    {
+      "clip_id": "demo_idle_v1",
+      "frame_index": 0,
+      "max_area_ratio": 31.021523615710166,
+      "max_condition": 167.9554236066057,
+      "max_edge_stretch": 24.952764249595408,
+      "risky_face_count": 1820,
+      "time_seconds": 0.0
+    },
+    {
+      "clip_id": "demo_idle_v1",
+      "frame_index": 1,
+      "max_area_ratio": 31.526872906995244,
+      "max_condition": 163.76659839850694,
+      "max_edge_stretch": 25.77471290957917,
+      "risky_face_count": 1820,
+      "time_seconds": 0.8333333333333334
+    },
+    {
+      "clip_id": "demo_idle_v1",
+      "frame_index": 2,
+      "max_area_ratio": 32.022306445710846,
+      "max_condition": 186.30736389948873,
+      "max_edge_stretch": 26.54199214819158,
+      "risky_face_count": 1820,
+      "time_seconds": 1.6666666666666667
+    },
+    {
+      "clip_id": "demo_idle_v1",
+      "frame_index": 3,
+      "max_area_ratio": 31.52685667306125,
+      "max_condition": 163.7677567097957,
+      "max_edge_stretch": 25.774743880540154,
+      "risky_face_count": 1820,
+      "time_seconds": 2.5
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "frame_index": 0,
+      "max_area_ratio": 398.9841584844452,
+      "max_condition": 980.5806560922342,
+      "max_edge_stretch": 191.99772323243644,
+      "risky_face_count": 1820,
+      "time_seconds": 0.0
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "frame_index": 1,
+      "max_area_ratio": 664.5968838651902,
+      "max_condition": 815.8067052706804,
+      "max_edge_stretch": 163.50091675860156,
+      "risky_face_count": 1820,
+      "time_seconds": 0.20833333333333334
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "frame_index": 2,
+      "max_area_ratio": 366.26899375465837,
+      "max_condition": 565.8220441830152,
+      "max_edge_stretch": 209.99843678211477,
+      "risky_face_count": 1820,
+      "time_seconds": 0.4166666666666667
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "frame_index": 3,
+      "max_area_ratio": 400.68303747467644,
+      "max_condition": 1047.06670677674,
+      "max_edge_stretch": 197.13953775143932,
+      "risky_face_count": 1820,
+      "time_seconds": 0.625
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "frame_index": 0,
+      "max_area_ratio": 829.6997656680879,
+      "max_condition": 2670.9829577518103,
+      "max_edge_stretch": 125.2025537996953,
+      "risky_face_count": 1820,
+      "time_seconds": 0.0
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "frame_index": 1,
+      "max_area_ratio": 844.6157911421643,
+      "max_condition": 991.1720083686605,
+      "max_edge_stretch": 200.27233842960499,
+      "risky_face_count": 1820,
+      "time_seconds": 0.2777777777777778
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "frame_index": 2,
+      "max_area_ratio": 221.82652441236561,
+      "max_condition": 486.6355034987018,
+      "max_edge_stretch": 155.60277105836937,
+      "risky_face_count": 1820,
+      "time_seconds": 0.5555555555555556
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "frame_index": 3,
+      "max_area_ratio": 829.6997656680879,
+      "max_condition": 2670.9829577518103,
+      "max_edge_stretch": 125.2025537996953,
+      "risky_face_count": 1820,
+      "time_seconds": 0.8333333333333334
+    }
+  ],
+  "product_authority_claimed": false,
+  "removed_face_count": 1011,
+  "removed_fraction": 0.04050805352993028,
+  "repair_kind": "DETERMINISTIC_SEAM_CUT",
+  "repaired_candidate_lineage_hash": "55488a84ecfd8b0d09259f0e0dd85b9ac78ffe132f41603c41411d18718d6639",
+  "risky_face_count": 1820,
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "schema": "RealSaS.KnightStage35SkinTopologyRepairPreview.v1",
+  "source_candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+  "stage19_to_35_requalification_required": true,
+  "status": "DEMO_REPAIR_PREVIEW_PASS",
+  "thresholds": {
+    "max_area_ratio": 20.0,
+    "max_condition": 16.0,
+    "max_edge_stretch": 4.0,
+    "max_repair_iterations": 4,
+    "min_area_ratio": 0.05,
+    "risk_l1_min": 0.5
+  },
+  "top_removed_faces": [
+    {
+      "face_index": 5247,
+      "max_area_ratio": 212.48024247282424,
+      "max_condition": 336.8235925209024,
+      "max_edge_stretch": 209.99843678211477,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.46144641922638,
+      "vertex_ids": [
+        "CMV:b78a2c6ca6203952b6606c9b",
+        "CMV:aa665b9d9200184dcbbb7494",
+        "CMV:6328da6559a41e8b2670aa0e"
+      ]
+    },
+    {
+      "face_index": 5246,
+      "max_area_ratio": 197.92860182002266,
+      "max_condition": 486.6355034987018,
+      "max_edge_stretch": 209.99843678211477,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.8102965071348087,
+      "vertex_ids": [
+        "CMV:b78a2c6ca6203952b6606c9b",
+        "CMV:9343b9313ee49679799f8e9d",
+        "CMV:6328da6559a41e8b2670aa0e"
+      ]
+    },
+    {
+      "face_index": 19997,
+      "max_area_ratio": 184.5308560587622,
+      "max_condition": 333.44460547016183,
+      "max_edge_stretch": 190.75804583177018,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.8102965071348087,
+      "vertex_ids": [
+        "CMV:32bd02f295de16a2f725c42c",
+        "CMV:9343b9313ee49679799f8e9d",
+        "CMV:6328da6559a41e8b2670aa0e"
+      ]
+    },
+    {
+      "face_index": 8484,
+      "max_area_ratio": 167.95316265061805,
+      "max_condition": 2670.9829577518103,
+      "max_edge_stretch": 190.75804583177018,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.3672653734706486,
+      "vertex_ids": [
+        "CMV:027a2aa624b640a9032ac4a3",
+        "CMV:32bd02f295de16a2f725c42c",
+        "CMV:9343b9313ee49679799f8e9d"
+      ]
+    },
+    {
+      "face_index": 8485,
+      "max_area_ratio": 94.93642202256964,
+      "max_condition": 192.5802248546377,
+      "max_edge_stretch": 106.34820744455426,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 0.905148256886775,
+      "vertex_ids": [
+        "CMV:027a2aa624b640a9032ac4a3",
+        "CMV:9343b9313ee49679799f8e9d",
+        "CMV:0aaebe91171d3b083e34f196"
+      ]
+    },
+    {
+      "face_index": 8486,
+      "max_area_ratio": 90.08427489681499,
+      "max_condition": 332.4788390803291,
+      "max_edge_stretch": 106.34820744455426,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 0.9051482568615403,
+      "vertex_ids": [
+        "CMV:027a2aa624b640a9032ac4a3",
+        "CMV:0aaebe91171d3b083e34f196",
+        "CMV:fa476d6673f590f3683c774d"
+      ]
+    },
+    {
+      "face_index": 5242,
+      "max_area_ratio": 71.61944893063333,
+      "max_condition": 112.61724930066096,
+      "max_edge_stretch": 75.7057078811976,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.4487314178921626,
+      "vertex_ids": [
+        "CMV:b78a2c6ca6203952b6606c9b",
+        "CMV:8fdd5c61c0fa3316730b8aa1",
+        "CMV:76d217038287dc3fab1f35ff"
+      ]
+    },
+    {
+      "face_index": 5243,
+      "max_area_ratio": 70.83674550571114,
+      "max_condition": 272.8923023087028,
+      "max_edge_stretch": 75.7057078811976,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.666742403615287,
+      "vertex_ids": [
+        "CMV:b78a2c6ca6203952b6606c9b",
+        "CMV:8fdd5c61c0fa3316730b8aa1",
+        "CMV:9343b9313ee49679799f8e9d"
+      ]
+    },
+    {
+      "face_index": 6181,
+      "max_area_ratio": 67.33853572329467,
+      "max_condition": 68.2065530652227,
+      "max_edge_stretch": 67.24675663161882,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.9051482534483113,
+      "vertex_ids": [
+        "CMV:e07ff345b106e3f430d6686b",
+        "CMV:e85fad7830f07fe18f0c31c1",
+        "CMV:0e2025a9bce0042b17e27046"
+      ]
+    },
+    {
+      "face_index": 6179,
+      "max_area_ratio": 66.31137547074674,
+      "max_condition": 82.55943395156535,
+      "max_edge_stretch": 67.24675663161882,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.9593346824980582,
+      "vertex_ids": [
+        "CMV:e07ff345b106e3f430d6686b",
+        "CMV:40f8a6db49bf0938dc1a9640",
+        "CMV:e85fad7830f07fe18f0c31c1"
+      ]
+    },
+    {
+      "face_index": 20429,
+      "max_area_ratio": 53.850689110892084,
+      "max_condition": 87.60146100191801,
+      "max_edge_stretch": 62.75462781478565,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.5231882990179493,
+      "vertex_ids": [
+        "CMV:ad26da92497c19993f79be57",
+        "CMV:e690bef655278eeb1c2df280",
+        "CMV:782bfd201a7dda80e22122bc"
+      ]
+    },
+    {
+      "face_index": 20430,
+      "max_area_ratio": 51.303847349419264,
+      "max_condition": 127.70130526060264,
+      "max_edge_stretch": 62.75462781478565,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.5231882988160046,
+      "vertex_ids": [
+        "CMV:ad26da92497c19993f79be57",
+        "CMV:6908d5b597b4b7bdbd06120a",
+        "CMV:782bfd201a7dda80e22122bc"
+      ]
+    },
+    {
+      "face_index": 2365,
+      "max_area_ratio": 58.21968710311491,
+      "max_condition": 104.15643015667818,
+      "max_edge_stretch": 61.616817576695304,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.7246375262838318,
+      "vertex_ids": [
+        "CMV:c4cca8b173f07d1f8be75282",
+        "CMV:610c91c596e35759b089c587",
+        "CMV:fbdea33b1a23dba8da9c04be"
+      ]
+    },
+    {
+      "face_index": 2366,
+      "max_area_ratio": 51.539193995113855,
+      "max_condition": 152.41685027953855,
+      "max_edge_stretch": 61.616817576695304,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.7246375262838318,
+      "vertex_ids": [
+        "CMV:c4cca8b173f07d1f8be75282",
+        "CMV:0c99993a12c5dbcb32263537",
+        "CMV:fbdea33b1a23dba8da9c04be"
+      ]
+    },
+    {
+      "face_index": 19589,
+      "max_area_ratio": 63.55380928443422,
+      "max_condition": 116.53450317358849,
+      "max_edge_stretch": 60.34079552030603,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.7227265952511028,
+      "vertex_ids": [
+        "CMV:0c99993a12c5dbcb32263537",
+        "CMV:4ea0cf0f38e2d9527fdee85b",
+        "CMV:e7bcb675253c0054a1b42f2b"
+      ]
+    },
+    {
+      "face_index": 15506,
+      "max_area_ratio": 47.462844905317745,
+      "max_condition": 90.98286368083932,
+      "max_edge_stretch": 60.34079552030603,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.7533440335404045,
+      "vertex_ids": [
+        "CMV:2fc666a7f77786882c5a1bab",
+        "CMV:4ea0cf0f38e2d9527fdee85b",
+        "CMV:e7bcb675253c0054a1b42f2b"
+      ]
+    },
+    {
+      "face_index": 5245,
+      "max_area_ratio": 56.57573305826481,
+      "max_condition": 69.81305932044752,
+      "max_edge_stretch": 59.398060192898974,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.4614464192286758,
+      "vertex_ids": [
+        "CMV:b78a2c6ca6203952b6606c9b",
+        "CMV:d47e4bb0661efdafb6fa3132",
+        "CMV:aa665b9d9200184dcbbb7494"
+      ]
+    },
+    {
+      "face_index": 5244,
+      "max_area_ratio": 44.64903735442684,
+      "max_condition": 204.18362663930048,
+      "max_edge_stretch": 59.398060192898974,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.4614464192286758,
+      "vertex_ids": [
+        "CMV:b78a2c6ca6203952b6606c9b",
+        "CMV:76d217038287dc3fab1f35ff",
+        "CMV:d47e4bb0661efdafb6fa3132"
+      ]
+    },
+    {
+      "face_index": 8042,
+      "max_area_ratio": 82.76039512945415,
+      "max_condition": 272.1080201918218,
+      "max_edge_stretch": 58.70018590308067,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 0.7615941498121016,
+      "vertex_ids": [
+        "CMV:6dd31d01eead0376b081dde1",
+        "CMV:163f42a2026e9d551a2e21f6",
+        "CMV:782bfd201a7dda80e22122bc"
+      ]
+    },
+    {
+      "face_index": 8044,
+      "max_area_ratio": 60.70793813101867,
+      "max_condition": 275.56940111757615,
+      "max_edge_stretch": 58.70018590308067,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.5231882990179493,
+      "vertex_ids": [
+        "CMV:6dd31d01eead0376b081dde1",
+        "CMV:e690bef655278eeb1c2df280",
+        "CMV:782bfd201a7dda80e22122bc"
+      ]
+    },
+    {
+      "face_index": 3458,
+      "max_area_ratio": 47.16044165358578,
+      "max_condition": 86.52402339093923,
+      "max_edge_stretch": 57.041690830066266,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.6667743624416722,
+      "vertex_ids": [
+        "CMV:346abbbebfa5905fe89ba6ec",
+        "CMV:eab9161f4ca42b1c492ecf49",
+        "CMV:a45cbe6419f8d1d60457fba9"
+      ]
+    },
+    {
+      "face_index": 22573,
+      "max_area_ratio": 44.302391553024066,
+      "max_condition": 93.30576063506486,
+      "max_edge_stretch": 57.041690830066266,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.5232141461322264,
+      "vertex_ids": [
+        "CMV:eab9161f4ca42b1c492ecf49",
+        "CMV:16fa6298c5a49f774ef7afd9",
+        "CMV:a45cbe6419f8d1d60457fba9"
+      ]
+    },
+    {
+      "face_index": 8071,
+      "max_area_ratio": 54.57977983778239,
+      "max_condition": 119.2874359156631,
+      "max_edge_stretch": 57.015263648870906,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.666742403615287,
+      "vertex_ids": [
+        "CMV:8fdd5c61c0fa3316730b8aa1",
+        "CMV:9343b9313ee49679799f8e9d",
+        "CMV:55c41e1958c30638616d6d45"
+      ]
+    },
+    {
+      "face_index": 5977,
+      "max_area_ratio": 211.35583555557514,
+      "max_condition": 29.630092034464546,
+      "max_edge_stretch": 55.42214198942312,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.8460360917073753,
+      "vertex_ids": [
+        "CMV:592b8030f9db2ac9595f86be",
+        "CMV:e0027b5b5d4339e81cfcdce3",
+        "CMV:be3a8ca0bc6243c9d36794d0"
+      ]
+    },
+    {
+      "face_index": 5975,
+      "max_area_ratio": 42.58532481964004,
+      "max_condition": 80.61830874570087,
+      "max_edge_stretch": 55.42214198942312,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.8611950163594142,
+      "vertex_ids": [
+        "CMV:592b8030f9db2ac9595f86be",
+        "CMV:b9a32727396b62b3844911c0",
+        "CMV:e0027b5b5d4339e81cfcdce3"
+      ]
+    },
+    {
+      "face_index": 10583,
+      "max_area_ratio": 45.654264819485114,
+      "max_condition": 83.80160002512667,
+      "max_edge_stretch": 55.197874895566265,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.787132036591159,
+      "vertex_ids": [
+        "CMV:bfd56f7286d82bfb7f7a36a4",
+        "CMV:7b5809815deb971c3d68d2e2",
+        "CMV:218dc268f447b581dd9e4e73"
+      ]
+    },
+    {
+      "face_index": 10581,
+      "max_area_ratio": 42.28481832453055,
+      "max_condition": 83.41412046015473,
+      "max_edge_stretch": 55.197874895566265,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.7348616353385724,
+      "vertex_ids": [
+        "CMV:bfd56f7286d82bfb7f7a36a4",
+        "CMV:1638c0855b64c92b4fa19997",
+        "CMV:218dc268f447b581dd9e4e73"
+      ]
+    },
+    {
+      "face_index": 21149,
+      "max_area_ratio": 287.88088206298437,
+      "max_condition": 48.785332155518574,
+      "max_edge_stretch": 53.78090494154798,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.8747496137138404,
+      "vertex_ids": [
+        "CMV:b9a32727396b62b3844911c0",
+        "CMV:00ff01407aba337124de83dd",
+        "CMV:76eeda08ea870c154d1159b5"
+      ]
+    },
+    {
+      "face_index": 5974,
+      "max_area_ratio": 195.0347923586278,
+      "max_condition": 110.19583312897538,
+      "max_edge_stretch": 53.78090494154798,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.866483132958008,
+      "vertex_ids": [
+        "CMV:592b8030f9db2ac9595f86be",
+        "CMV:b9a32727396b62b3844911c0",
+        "CMV:76eeda08ea870c154d1159b5"
+      ]
+    },
+    {
+      "face_index": 15339,
+      "max_area_ratio": 84.49857695204925,
+      "max_condition": 326.66494907811983,
+      "max_edge_stretch": 53.56115356097884,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.995128151066438,
+      "vertex_ids": [
+        "CMV:8986e59f6d1d9d19ba3b9b09",
+        "CMV:3751d86d2b9a2ed4c1cf37d7",
+        "CMV:541484156efb3f68ce3d1fcf"
+      ]
+    },
+    {
+      "face_index": 18320,
+      "max_area_ratio": 52.44512914919777,
+      "max_condition": 110.63591975754875,
+      "max_edge_stretch": 53.56115356097884,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.995128151066438,
+      "vertex_ids": [
+        "CMV:9186bfa540bc3b891b678fbe",
+        "CMV:3751d86d2b9a2ed4c1cf37d7",
+        "CMV:541484156efb3f68ce3d1fcf"
+      ]
+    },
+    {
+      "face_index": 17876,
+      "max_area_ratio": 48.94323125714301,
+      "max_condition": 76.04894666028572,
+      "max_edge_stretch": 53.56115356097884,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.9964876205615274,
+      "vertex_ids": [
+        "CMV:c87434c998eaae2c5a6b5509",
+        "CMV:3751d86d2b9a2ed4c1cf37d7",
+        "CMV:541484156efb3f68ce3d1fcf"
+      ]
+    },
+    {
+      "face_index": 20321,
+      "max_area_ratio": 47.94956418468426,
+      "max_condition": 99.95748742765537,
+      "max_edge_stretch": 53.56115356097884,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.995128151066438,
+      "vertex_ids": [
+        "CMV:3751d86d2b9a2ed4c1cf37d7",
+        "CMV:541484156efb3f68ce3d1fcf",
+        "CMV:5c64cd5b48d908fda1006d86"
+      ]
+    },
+    {
+      "face_index": 10582,
+      "max_area_ratio": 193.70474694506453,
+      "max_condition": 100.24726754228135,
+      "max_edge_stretch": 53.33859550689008,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.792450762354288,
+      "vertex_ids": [
+        "CMV:bfd56f7286d82bfb7f7a36a4",
+        "CMV:1638c0855b64c92b4fa19997",
+        "CMV:be3a8ca0bc6243c9d36794d0"
+      ]
+    },
+    {
+      "face_index": 19040,
+      "max_area_ratio": 44.83377429503624,
+      "max_condition": 76.55787777303172,
+      "max_edge_stretch": 53.33859550689008,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.8460360917073753,
+      "vertex_ids": [
+        "CMV:1638c0855b64c92b4fa19997",
+        "CMV:e0027b5b5d4339e81cfcdce3",
+        "CMV:be3a8ca0bc6243c9d36794d0"
+      ]
+    },
+    {
+      "face_index": 4820,
+      "max_area_ratio": 48.061806494426385,
+      "max_condition": 137.16905792453497,
+      "max_edge_stretch": 52.32948495742729,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.223711269444733,
+      "vertex_ids": [
+        "CMV:7ccfa883d6eeff77a0063b54",
+        "CMV:8fdd5c61c0fa3316730b8aa1",
+        "CMV:55c41e1958c30638616d6d45"
+      ]
+    },
+    {
+      "face_index": 12844,
+      "max_area_ratio": 41.359599079515036,
+      "max_condition": 89.45506141485042,
+      "max_edge_stretch": 52.08446751173348,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.4261446910973432,
+      "vertex_ids": [
+        "CMV:c082742326cecf63872e3986",
+        "CMV:cf1660e6afce066fdd8668aa",
+        "CMV:0172c2525744a4c713fc60e2"
+      ]
+    },
+    {
+      "face_index": 20467,
+      "max_area_ratio": 40.04255829289652,
+      "max_condition": 80.26260814644058,
+      "max_edge_stretch": 52.08446751173348,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.4261446847245234,
+      "vertex_ids": [
+        "CMV:cf1660e6afce066fdd8668aa",
+        "CMV:0172c2525744a4c713fc60e2",
+        "CMV:7e1eeab5cbd980f1c871433d"
+      ]
+    },
+    {
+      "face_index": 3573,
+      "max_area_ratio": 844.6157911421643,
+      "max_condition": 26.53790949856241,
+      "max_edge_stretch": 52.042330673666264,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.92251300311386,
+      "vertex_ids": [
+        "CMV:70272d8f5b931e373c3d304a",
+        "CMV:cc4e835f79e0798cc86b9391",
+        "CMV:10b522e0dbb8a7cae30b2a35"
+      ]
+    },
+    {
+      "face_index": 8904,
+      "max_area_ratio": 469.879889245326,
+      "max_condition": 15.774037240143857,
+      "max_edge_stretch": 52.042330673666264,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.8825644638938945,
+      "vertex_ids": [
+        "CMV:cc4e835f79e0798cc86b9391",
+        "CMV:10b522e0dbb8a7cae30b2a35",
+        "CMV:00ff01407aba337124de83dd"
+      ]
+    },
+    {
+      "face_index": 8905,
+      "max_area_ratio": 41.22364617512455,
+      "max_condition": 85.17954198297006,
+      "max_edge_stretch": 51.64247036392909,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.8825644638938945,
+      "vertex_ids": [
+        "CMV:cc4e835f79e0798cc86b9391",
+        "CMV:31f9f2012b18e755b319d95f",
+        "CMV:00ff01407aba337124de83dd"
+      ]
+    },
+    {
+      "face_index": 21147,
+      "max_area_ratio": 36.228658345788155,
+      "max_condition": 83.80031103596684,
+      "max_edge_stretch": 51.64247036392909,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.8747496137138404,
+      "vertex_ids": [
+        "CMV:b9a32727396b62b3844911c0",
+        "CMV:31f9f2012b18e755b319d95f",
+        "CMV:00ff01407aba337124de83dd"
+      ]
+    },
+    {
+      "face_index": 21325,
+      "max_area_ratio": 40.75376322158186,
+      "max_condition": 91.43634014276941,
+      "max_edge_stretch": 51.60036474002884,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.426144697743983,
+      "vertex_ids": [
+        "CMV:0172c2525744a4c713fc60e2",
+        "CMV:e43b081a1c961171c0c4a17a",
+        "CMV:7e1eeab5cbd980f1c871433d"
+      ]
+    },
+    {
+      "face_index": 20249,
+      "max_area_ratio": 39.13465411504724,
+      "max_condition": 76.68805717860394,
+      "max_edge_stretch": 51.60036474002884,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.4487314178053798,
+      "vertex_ids": [
+        "CMV:6b199128a9fb6a669371b6f0",
+        "CMV:e43b081a1c961171c0c4a17a",
+        "CMV:7e1eeab5cbd980f1c871433d"
+      ]
+    },
+    {
+      "face_index": 5251,
+      "max_area_ratio": 57.53176370205143,
+      "max_condition": 132.91592350779678,
+      "max_edge_stretch": 50.689630302686226,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.381667452791473,
+      "vertex_ids": [
+        "CMV:cafb4d513d75a110be40a722",
+        "CMV:610c91c596e35759b089c587",
+        "CMV:a6ff7d6bd56052a9fe105aa2"
+      ]
+    },
+    {
+      "face_index": 14748,
+      "max_area_ratio": 40.32119857121075,
+      "max_condition": 73.06626626100503,
+      "max_edge_stretch": 50.689630302686226,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.440265404395478,
+      "vertex_ids": [
+        "CMV:610c91c596e35759b089c587",
+        "CMV:fbdea33b1a23dba8da9c04be",
+        "CMV:a6ff7d6bd56052a9fe105aa2"
+      ]
+    },
+    {
+      "face_index": 3453,
+      "max_area_ratio": 57.11794076216497,
+      "max_condition": 182.83411425302074,
+      "max_edge_stretch": 50.24868316878662,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.6667743624416722,
+      "vertex_ids": [
+        "CMV:346abbbebfa5905fe89ba6ec",
+        "CMV:cafb4d513d75a110be40a722",
+        "CMV:eab9161f4ca42b1c492ecf49"
+      ]
+    },
+    {
+      "face_index": 3454,
+      "max_area_ratio": 39.26155896399954,
+      "max_condition": 75.60316554894389,
+      "max_edge_stretch": 50.24868316878662,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.3698845287214336,
+      "vertex_ids": [
+        "CMV:346abbbebfa5905fe89ba6ec",
+        "CMV:cafb4d513d75a110be40a722",
+        "CMV:a6ff7d6bd56052a9fe105aa2"
+      ]
+    },
+    {
+      "face_index": 20248,
+      "max_area_ratio": 39.5059702488032,
+      "max_condition": 89.70988478809643,
+      "max_edge_stretch": 50.148354962410004,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.448731559631201,
+      "vertex_ids": [
+        "CMV:6b199128a9fb6a669371b6f0",
+        "CMV:e43b081a1c961171c0c4a17a",
+        "CMV:a060f2e5a94fad047b37151f"
+      ]
+    },
+    {
+      "face_index": 14205,
+      "max_area_ratio": 38.9715809147152,
+      "max_condition": 77.25613742686728,
+      "max_edge_stretch": 50.148354962410004,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.4487349675812724,
+      "vertex_ids": [
+        "CMV:06da62b50a1777d859a0aff7",
+        "CMV:6b199128a9fb6a669371b6f0",
+        "CMV:a060f2e5a94fad047b37151f"
+      ]
+    },
+    {
+      "face_index": 16955,
+      "max_area_ratio": 42.44227909442545,
+      "max_condition": 120.81020452881093,
+      "max_edge_stretch": 50.07719264914609,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.3672653721916261,
+      "vertex_ids": [
+        "CMV:d847a51e4a707f09e4eba6a8",
+        "CMV:c93ad3141606d71980b1a3a9",
+        "CMV:e6e1ed5cf59a4c68806bb5b6"
+      ]
+    },
+    {
+      "face_index": 16953,
+      "max_area_ratio": 38.87228755776525,
+      "max_condition": 89.71296073894943,
+      "max_edge_stretch": 50.07719264914609,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.2237112649879354,
+      "vertex_ids": [
+        "CMV:d847a51e4a707f09e4eba6a8",
+        "CMV:3d82d818254670476c2d4886",
+        "CMV:e6e1ed5cf59a4c68806bb5b6"
+      ]
+    },
+    {
+      "face_index": 12843,
+      "max_area_ratio": 38.89806411124911,
+      "max_condition": 90.7629244167975,
+      "max_edge_stretch": 49.99168772651929,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.367265372954766,
+      "vertex_ids": [
+        "CMV:c082742326cecf63872e3986",
+        "CMV:f942fba1e7c6018c613010d6",
+        "CMV:88304a7e54b8c9f4c4096a09"
+      ]
+    },
+    {
+      "face_index": 12845,
+      "max_area_ratio": 37.174682315935286,
+      "max_condition": 83.01874398957612,
+      "max_edge_stretch": 49.99168772651929,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.4261446910973432,
+      "vertex_ids": [
+        "CMV:c082742326cecf63872e3986",
+        "CMV:cf1660e6afce066fdd8668aa",
+        "CMV:88304a7e54b8c9f4c4096a09"
+      ]
+    },
+    {
+      "face_index": 17169,
+      "max_area_ratio": 38.674135904035914,
+      "max_condition": 80.29716606564871,
+      "max_edge_stretch": 49.398533347956715,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.2237112649879354,
+      "vertex_ids": [
+        "CMV:3d82d818254670476c2d4886",
+        "CMV:e6e1ed5cf59a4c68806bb5b6",
+        "CMV:52df0452f4e9bcee91fec433"
+      ]
+    },
+    {
+      "face_index": 17170,
+      "max_area_ratio": 37.904491252331866,
+      "max_condition": 91.46978884154163,
+      "max_edge_stretch": 49.398533347956715,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.2237112635833993,
+      "vertex_ids": [
+        "CMV:3d82d818254670476c2d4886",
+        "CMV:52df0452f4e9bcee91fec433",
+        "CMV:a775fba56ea6450b59cbcaaa"
+      ]
+    },
+    {
+      "face_index": 16956,
+      "max_area_ratio": 53.913129561679895,
+      "max_condition": 438.90781635911407,
+      "max_edge_stretch": 49.30755024461318,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.3672653721916261,
+      "vertex_ids": [
+        "CMV:d847a51e4a707f09e4eba6a8",
+        "CMV:c93ad3141606d71980b1a3a9",
+        "CMV:6f2b733dc9e22432ac50c2f7"
+      ]
+    },
+    {
+      "face_index": 20284,
+      "max_area_ratio": 77.09697288675909,
+      "max_condition": 80.21338722266098,
+      "max_edge_stretch": 49.03760636039639,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.787132036591159,
+      "vertex_ids": [
+        "CMV:1285ec376347a2fdfd06adca",
+        "CMV:7b5809815deb971c3d68d2e2",
+        "CMV:218dc268f447b581dd9e4e73"
+      ]
+    },
+    {
+      "face_index": 3832,
+      "max_area_ratio": 40.10165274502373,
+      "max_condition": 78.9478407957369,
+      "max_edge_stretch": 49.03760636039639,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.5422188582892338,
+      "vertex_ids": [
+        "CMV:d92e1f62e8ade892bf4b9c84",
+        "CMV:1285ec376347a2fdfd06adca",
+        "CMV:7b5809815deb971c3d68d2e2"
+      ]
+    },
+    {
+      "face_index": 19588,
+      "max_area_ratio": 40.70576421094236,
+      "max_condition": 74.49174997504136,
+      "max_edge_stretch": 48.954339445252536,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.4284827961099582,
+      "vertex_ids": [
+        "CMV:0c99993a12c5dbcb32263537",
+        "CMV:fda06c8f311a0a893650455b",
+        "CMV:fbdea33b1a23dba8da9c04be"
+      ]
+    },
+    {
+      "face_index": 19587,
+      "max_area_ratio": 38.46716245495706,
+      "max_condition": 70.70190267156165,
+      "max_edge_stretch": 48.954339445252536,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.4203416195861511,
+      "vertex_ids": [
+        "CMV:0c99993a12c5dbcb32263537",
+        "CMV:fda06c8f311a0a893650455b",
+        "CMV:e7bcb675253c0054a1b42f2b"
+      ]
+    },
+    {
+      "face_index": 14049,
+      "max_area_ratio": 50.43365386117446,
+      "max_condition": 73.68569668243666,
+      "max_edge_stretch": 48.68047371729029,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.4698015593649072,
+      "vertex_ids": [
+        "CMV:5bdd40d11eecb7cc8aa16161",
+        "CMV:bfa955c449b1822ca05fab0a",
+        "CMV:4f0bfe8f3c62a9cdedf36201"
+      ]
+    },
+    {
+      "face_index": 14050,
+      "max_area_ratio": 34.47832101671785,
+      "max_condition": 85.22551973713595,
+      "max_edge_stretch": 48.68047371729029,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.461660601069884,
+      "vertex_ids": [
+        "CMV:5bdd40d11eecb7cc8aa16161",
+        "CMV:bfa955c449b1822ca05fab0a",
+        "CMV:78c754c02e9c191c3ef8977f"
+      ]
+    },
+    {
+      "face_index": 15504,
+      "max_area_ratio": 93.03839756531822,
+      "max_condition": 565.8220441830152,
+      "max_edge_stretch": 48.52275169813749,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.7533440335404045,
+      "vertex_ids": [
+        "CMV:2fc666a7f77786882c5a1bab",
+        "CMV:31e38f0e11398c16830024f1",
+        "CMV:4ea0cf0f38e2d9527fdee85b"
+      ]
+    },
+    {
+      "face_index": 15503,
+      "max_area_ratio": 37.96368660640748,
+      "max_condition": 66.33194913203894,
+      "max_edge_stretch": 48.52275169813749,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.492279931815128,
+      "vertex_ids": [
+        "CMV:2fc666a7f77786882c5a1bab",
+        "CMV:31e38f0e11398c16830024f1",
+        "CMV:8223956d108930630cb4ee70"
+      ]
+    },
+    {
+      "face_index": 24608,
+      "max_area_ratio": 39.14289974405278,
+      "max_condition": 79.44699386646883,
+      "max_edge_stretch": 48.22553061109804,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.523188291483223,
+      "vertex_ids": [
+        "CMV:a775fba56ea6450b59cbcaaa",
+        "CMV:16fa6298c5a49f774ef7afd9",
+        "CMV:62a8df98613e58a42ea7d093"
+      ]
+    },
+    {
+      "face_index": 21831,
+      "max_area_ratio": 37.34202419207217,
+      "max_condition": 78.58368236895325,
+      "max_edge_stretch": 48.22553061109804,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.2237112606125582,
+      "vertex_ids": [
+        "CMV:52df0452f4e9bcee91fec433",
+        "CMV:a775fba56ea6450b59cbcaaa",
+        "CMV:62a8df98613e58a42ea7d093"
+      ]
+    },
+    {
+      "face_index": 5619,
+      "max_area_ratio": 42.95133858906912,
+      "max_condition": 67.92263058586855,
+      "max_edge_stretch": 47.615566119047735,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.5232141461322264,
+      "vertex_ids": [
+        "CMV:cb3c663bd401936b8ed6bc34",
+        "CMV:eab9161f4ca42b1c492ecf49",
+        "CMV:16fa6298c5a49f774ef7afd9"
+      ]
+    },
+    {
+      "face_index": 5620,
+      "max_area_ratio": 41.02138333303518,
+      "max_condition": 127.70731039980451,
+      "max_edge_stretch": 47.615566119047735,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.523188291483223,
+      "vertex_ids": [
+        "CMV:cb3c663bd401936b8ed6bc34",
+        "CMV:16fa6298c5a49f774ef7afd9",
+        "CMV:62a8df98613e58a42ea7d093"
+      ]
+    },
+    {
+      "face_index": 24360,
+      "max_area_ratio": 36.93993157263757,
+      "max_condition": 85.60114918782224,
+      "max_edge_stretch": 47.585992063842085,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.2237112709329327,
+      "vertex_ids": [
+        "CMV:082b761673bfc03d74b9a4fa",
+        "CMV:7fcfcfb80ef0c509c8d48b34",
+        "CMV:0acdb4acdc05f52544fbd8ba"
+      ]
+    },
+    {
+      "face_index": 5762,
+      "max_area_ratio": 35.75143704183867,
+      "max_condition": 83.63850754107808,
+      "max_edge_stretch": 47.585992063842085,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.2237112729545192,
+      "vertex_ids": [
+        "CMV:2148809460261162638f70e8",
+        "CMV:082b761673bfc03d74b9a4fa",
+        "CMV:0acdb4acdc05f52544fbd8ba"
+      ]
+    },
+    {
+      "face_index": 17709,
+      "max_area_ratio": 129.0569307304871,
+      "max_condition": 980.5806560922342,
+      "max_edge_stretch": 46.84229903295417,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 0.9866142992713912,
+      "vertex_ids": [
+        "CMV:9d9e3e84b8021d65b1451dcf",
+        "CMV:163f42a2026e9d551a2e21f6",
+        "CMV:ac642d381e707b087ba569cf"
+      ]
+    },
+    {
+      "face_index": 18009,
+      "max_area_ratio": 41.84493862949212,
+      "max_condition": 66.94593247519025,
+      "max_edge_stretch": 46.84229903295417,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 0.7615941498362228,
+      "vertex_ids": [
+        "CMV:163f42a2026e9d551a2e21f6",
+        "CMV:ac642d381e707b087ba569cf",
+        "CMV:782bfd201a7dda80e22122bc"
+      ]
+    },
+    {
+      "face_index": 5760,
+      "max_area_ratio": 36.09024290860085,
+      "max_condition": 83.1483010998566,
+      "max_edge_stretch": 46.424120300979595,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.2237112729545192,
+      "vertex_ids": [
+        "CMV:2148809460261162638f70e8",
+        "CMV:f942fba1e7c6018c613010d6",
+        "CMV:0acdb4acdc05f52544fbd8ba"
+      ]
+    },
+    {
+      "face_index": 5759,
+      "max_area_ratio": 35.34714857847727,
+      "max_condition": 72.81211705255764,
+      "max_edge_stretch": 46.424120300979595,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.367265372475262,
+      "vertex_ids": [
+        "CMV:2148809460261162638f70e8",
+        "CMV:f942fba1e7c6018c613010d6",
+        "CMV:88304a7e54b8c9f4c4096a09"
+      ]
+    },
+    {
+      "face_index": 18847,
+      "max_area_ratio": 43.21126148475558,
+      "max_condition": 88.66612779200538,
+      "max_edge_stretch": 45.76412240126531,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.4658230705076531,
+      "vertex_ids": [
+        "CMV:70290eb9ba43522fdd1cf32d",
+        "CMV:ebfd3e78a8c8fbae51db34c6",
+        "CMV:fb409dac4a83001dd1b93c0c"
+      ]
+    },
+    {
+      "face_index": 22553,
+      "max_area_ratio": 40.03577768303528,
+      "max_condition": 63.67924438149199,
+      "max_edge_stretch": 45.76412240126531,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.4658230705076531,
+      "vertex_ids": [
+        "CMV:ebfd3e78a8c8fbae51db34c6",
+        "CMV:fb409dac4a83001dd1b93c0c",
+        "CMV:ed028d9d07a99ea9b5b0673e"
+      ]
+    },
+    {
+      "face_index": 8687,
+      "max_area_ratio": 51.45902762406692,
+      "max_condition": 51.62218995461246,
+      "max_edge_stretch": 45.57065630611645,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.9828450274794367,
+      "vertex_ids": [
+        "CMV:b96f5c690faba5f80c4d5289",
+        "CMV:45872d065abeb232c14d4d4c",
+        "CMV:52e798b18a5a19883afd4de6"
+      ]
+    },
+    {
+      "face_index": 18067,
+      "max_area_ratio": 43.29218875410166,
+      "max_condition": 72.03365514885627,
+      "max_edge_stretch": 45.57065630611645,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.9881771700982116,
+      "vertex_ids": [
+        "CMV:45872d065abeb232c14d4d4c",
+        "CMV:2c90a3a7317b686a8e0055c4",
+        "CMV:52e798b18a5a19883afd4de6"
+      ]
+    },
+    {
+      "face_index": 4961,
+      "max_area_ratio": 37.177684016304525,
+      "max_condition": 117.39052823214745,
+      "max_edge_stretch": 45.07442132543291,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 0.9051482561857109,
+      "vertex_ids": [
+        "CMV:4432287c776a983e461a4378",
+        "CMV:b87a64f1bf2c739730aac668",
+        "CMV:6f2b733dc9e22432ac50c2f7"
+      ]
+    },
+    {
+      "face_index": 17818,
+      "max_area_ratio": 35.47506062810402,
+      "max_condition": 89.26408925151502,
+      "max_edge_stretch": 45.07442132543291,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 0.7615941494576458,
+      "vertex_ids": [
+        "CMV:9907107fcafcf7cf54803ac1",
+        "CMV:b87a64f1bf2c739730aac668",
+        "CMV:6f2b733dc9e22432ac50c2f7"
+      ]
+    },
+    {
+      "face_index": 17798,
+      "max_area_ratio": 51.86786760099218,
+      "max_condition": 52.54511745747156,
+      "max_edge_stretch": 44.50959806790643,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.9906522691578705,
+      "vertex_ids": [
+        "CMV:a0dd5f2fce489750f85e9b7b",
+        "CMV:62f03fb7a8b31dc0838b0c02",
+        "CMV:c97f54374ff3832e18d346e9"
+      ]
+    },
+    {
+      "face_index": 17804,
+      "max_area_ratio": 49.14927012790509,
+      "max_condition": 58.72993034851311,
+      "max_edge_stretch": 44.50959806790643,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.9931441659580202,
+      "vertex_ids": [
+        "CMV:a0dd5f2fce489750f85e9b7b",
+        "CMV:c97f54374ff3832e18d346e9",
+        "CMV:1d4586a32889dd61f2aae684"
+      ]
+    },
+    {
+      "face_index": 21251,
+      "max_area_ratio": 46.27505847727613,
+      "max_condition": 52.84869381375803,
+      "max_edge_stretch": 43.63914996126881,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.9999092042653295,
+      "vertex_ids": [
+        "CMV:e462ac77760b3a8bbcd1d3ec",
+        "CMV:c661e484739252c1abb5f066",
+        "CMV:7ba531c2783f0118f2985f73"
+      ]
+    },
+    {
+      "face_index": 21372,
+      "max_area_ratio": 36.398160971971876,
+      "max_condition": 118.63849207592018,
+      "max_edge_stretch": 43.63914996126881,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.9999092042653295,
+      "vertex_ids": [
+        "CMV:c661e484739252c1abb5f066",
+        "CMV:7ba531c2783f0118f2985f73",
+        "CMV:8fa45c4e2463c97d1a7d8dd5"
+      ]
+    },
+    {
+      "face_index": 24185,
+      "max_area_ratio": 37.316709137309736,
+      "max_condition": 56.76961745446575,
+      "max_edge_stretch": 43.53028219180293,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.4954773792534584,
+      "vertex_ids": [
+        "CMV:568fd9141f89a2fe75611fb9",
+        "CMV:d7f98c56b513afbffc27c49f",
+        "CMV:73721a2b04395d91617e2c40"
+      ]
+    },
+    {
+      "face_index": 24184,
+      "max_area_ratio": 33.17368724923457,
+      "max_condition": 76.36554859344062,
+      "max_edge_stretch": 43.53028219180293,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.473166069616681,
+      "vertex_ids": [
+        "CMV:568fd9141f89a2fe75611fb9",
+        "CMV:c811513b2be72a1c99df81a7",
+        "CMV:73721a2b04395d91617e2c40"
+      ]
+    },
+    {
+      "face_index": 16975,
+      "max_area_ratio": 50.1174508385516,
+      "max_condition": 60.02281633789321,
+      "max_edge_stretch": 43.485853421361,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.997788860699542,
+      "vertex_ids": [
+        "CMV:d282f8dc6a5896eba5118df7",
+        "CMV:ce26ea73de581359423c452e",
+        "CMV:a58d5ceb85b43979276332a2"
+      ]
+    },
+    {
+      "face_index": 18855,
+      "max_area_ratio": 42.63624630299933,
+      "max_condition": 44.38485722058565,
+      "max_edge_stretch": 43.485853421361,
+      "min_area_ratio": 0.29600541480059794,
+      "skin_l1_max": 1.9413758260327998,
+      "vertex_ids": [
+        "CMV:ce26ea73de581359423c452e",
+        "CMV:a58d5ceb85b43979276332a2",
+        "CMV:7ceda28a2fabfaa3bfd1a440"
+      ]
+    },
+    {
+      "face_index": 6990,
+      "max_area_ratio": 51.26306931192055,
+      "max_condition": 52.4041453265691,
+      "max_edge_stretch": 42.992377351706736,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.9986766192182057,
+      "vertex_ids": [
+        "CMV:bdc4dad23440575a8dd63843",
+        "CMV:e36740f947715bcb6fb84664",
+        "CMV:1de7444e28bf9caf245f853c"
+      ]
+    },
+    {
+      "face_index": 6992,
+      "max_area_ratio": 42.775570329831226,
+      "max_condition": 58.90454568821335,
+      "max_edge_stretch": 42.992377351706736,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.9718020352761465,
+      "vertex_ids": [
+        "CMV:bdc4dad23440575a8dd63843",
+        "CMV:1de7444e28bf9caf245f853c",
+        "CMV:52e798b18a5a19883afd4de6"
+      ]
+    },
+    {
+      "face_index": 6910,
+      "max_area_ratio": 479.3872918388124,
+      "max_condition": 64.15403862890264,
+      "max_edge_stretch": 42.761952043618784,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.692614122152109,
+      "vertex_ids": [
+        "CMV:bd7c866575aa2f91bb7e7b12",
+        "CMV:f19a88545d635cb892e90faa",
+        "CMV:98c586bfea1a2974c959ab6f"
+      ]
+    },
+    {
+      "face_index": 12557,
+      "max_area_ratio": 73.84470950903955,
+      "max_condition": 63.27747116114515,
+      "max_edge_stretch": 42.761952043618784,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.4969526416277132,
+      "vertex_ids": [
+        "CMV:f19a88545d635cb892e90faa",
+        "CMV:98c586bfea1a2974c959ab6f",
+        "CMV:c811513b2be72a1c99df81a7"
+      ]
+    },
+    {
+      "face_index": 3829,
+      "max_area_ratio": 121.65021832092143,
+      "max_condition": 109.2102523350688,
+      "max_edge_stretch": 42.39431086859892,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.461660601069884,
+      "vertex_ids": [
+        "CMV:d92e1f62e8ade892bf4b9c84",
+        "CMV:5bdd40d11eecb7cc8aa16161",
+        "CMV:78c754c02e9c191c3ef8977f"
+      ]
+    },
+    {
+      "face_index": 3833,
+      "max_area_ratio": 49.39405589522048,
+      "max_condition": 78.36570206332507,
+      "max_edge_stretch": 42.39431086859892,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.5422188269068082,
+      "vertex_ids": [
+        "CMV:d92e1f62e8ade892bf4b9c84",
+        "CMV:1285ec376347a2fdfd06adca",
+        "CMV:78c754c02e9c191c3ef8977f"
+      ]
+    },
+    {
+      "face_index": 12556,
+      "max_area_ratio": 39.80732350947476,
+      "max_condition": 52.12500643930118,
+      "max_edge_stretch": 42.29616199805047,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.4969526416277132,
+      "vertex_ids": [
+        "CMV:f19a88545d635cb892e90faa",
+        "CMV:d7ae99ed860be2d72ae53fe4",
+        "CMV:c811513b2be72a1c99df81a7"
+      ]
+    },
+    {
+      "face_index": 21291,
+      "max_area_ratio": 34.66645944465011,
+      "max_condition": 56.32143060529526,
+      "max_edge_stretch": 42.29616199805047,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 1.4741159141503213,
+      "vertex_ids": [
+        "CMV:d7ae99ed860be2d72ae53fe4",
+        "CMV:568fd9141f89a2fe75611fb9",
+        "CMV:c811513b2be72a1c99df81a7"
+      ]
+    },
+    {
+      "face_index": 24942,
+      "max_area_ratio": 35.59010478191971,
+      "max_condition": 57.28860366461673,
+      "max_edge_stretch": 41.1625811111784,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 0.964027583148393,
+      "vertex_ids": [
+        "CMV:e2852878ddb903b607efe06f",
+        "CMV:af80213975835d62ca0f60d2",
+        "CMV:5b00dd9e887445eb4f0c32dd"
+      ]
+    },
+    {
+      "face_index": 24755,
+      "max_area_ratio": 32.33101611073353,
+      "max_condition": 84.83880985204446,
+      "max_edge_stretch": 41.1625811111784,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 0.964027583148393,
+      "vertex_ids": [
+        "CMV:c6855f568c828f8c8cae7de0",
+        "CMV:e2852878ddb903b607efe06f",
+        "CMV:af80213975835d62ca0f60d2"
+      ]
+    },
+    {
+      "face_index": 3036,
+      "max_area_ratio": 42.17363222631646,
+      "max_condition": 123.83029028588686,
+      "max_edge_stretch": 40.52225509749685,
+      "min_area_ratio": 1.0,
+      "skin_l1_max": 0.9242342345027377,
+      "vertex_ids": [
+        "CMV:c62bfd5d719e74bb0c3544ec",
+        "CMV:ebf23904da2dbf91ce76f283",
+        "CMV:027a2aa624b640a9032ac4a3"
+      ]
+    }
+  ],
+  "vertex_position_mutation": false,
+  "weight_mutation": false
+}

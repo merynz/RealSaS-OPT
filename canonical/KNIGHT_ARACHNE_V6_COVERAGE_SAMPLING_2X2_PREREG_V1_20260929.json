@@ -1,0 +1,136 @@
+{
+  "schema": "RealSaS.KnightArachneV6CoverageSampling2x2Preregistration.v1",
+  "status": "REFROZEN_AFTER_INDEX_SPACE_REPAIR_BEFORE_CORRECTED_2X2_OPTIMIZER_STEP_1",
+  "date": "2026-09-29",
+  "purpose": "Separate teacher-coverage-mask effects from sparse active-support sampling effects in the exact Knight V6 conditioning row/column space while preserving model, objective, compiler gate and stop rule.",
+  "frozen_authority": {
+    "exact_v6_source_sha256": "39ff4f7a2051f0d9c1251a5999f472b9926e83deacbedcedc8e92eea424dce01",
+    "exact_v6_prereg_sha256": "187f5c1bac1e813ebdfd1bbb76fa6def3d6543b4c7abc5609d217b3ece5fd597",
+    "teacher_bank_sha256": "26b6891ff81b9bfc3405461394159547fa76b417852a44518425b4e1de7e67d3",
+    "architecture_id": "RealSaS.Arachne.A1.RawSurfaceK4AttentionDirectSimplex.v6",
+    "backbone_frozen": true,
+    "source_progress_step": 15360,
+    "decoder_seed": 20261128,
+    "seed": 20260926,
+    "rows_per_step": 384,
+    "closure_rule": "UNCHANGED_V6_THREE_CONSECUTIVE_FULL_GATE_PASS",
+    "max_steps": 32768,
+    "objective": "UNCHANGED_EXACT_V6_OBJECTIVE",
+    "compiler_qualification": "UNCHANGED_EXACT_V6_QUALIFY_SKIN",
+    "exact_v6_uniform_valid_schedule_sha256": "4c5731cf5b2b28a3985458d555c7ef545d78054523cf92ce3edb0e959eee82fb",
+    "conditioning_order_authority_sha256": "a0a3e652e323c6f2042354eb2095f3f66ff6168bf5ab51b53c83f728b8a00499",
+    "teacher_row_binding": "BANK_SURFACE_IDS_REINDEXED_TO_HISTORICAL_V6_CONDITIONING_SURFACE_IDS",
+    "teacher_column_binding": "BANK_TARGET_COLUMNS_REINDEXED_TO_HISTORICAL_V6_CANONICAL_JOINT_ORDER"
+  },
+  "arms": [
+    {
+      "id": "UNIFORM_VALID",
+      "training_pool": "teacher_valid_mask=true",
+      "schedule": "exact original V6 uniform-without-replacement schedule",
+      "causal_change": "NONE_CONTROL"
+    },
+    {
+      "id": "ACTIVE_BALANCED_VALID",
+      "training_pool": "teacher_valid_mask=true",
+      "schedule": "same 384-row budget; reserve up to 4 unique positive-support rows per target column, then fill uniformly from valid rows",
+      "positive_support_rule": "teacher weight > 0",
+      "causal_change": "SAMPLING_ONLY"
+    },
+    {
+      "id": "UNIFORM_ALL_PROJECTED",
+      "training_pool": "all 12090 projected teacher rows, including teacher_valid_mask=false",
+      "schedule": "uniform without replacement",
+      "causal_change": "COVERAGE_ONLY",
+      "scope_warning": "DEMO_FIT_CAUSAL_ARM_ONLY__PROJECTED_INVALID_ROWS_NOT_PRODUCT_TEACHER_AUTHORITY"
+    },
+    {
+      "id": "ACTIVE_BALANCED_ALL_PROJECTED",
+      "training_pool": "all 12090 projected teacher rows",
+      "schedule": "same 384-row budget; reserve up to 4 unique positive-support rows per target column, then fill uniformly from all rows",
+      "positive_support_rule": "teacher weight > 0",
+      "causal_change": "COVERAGE_PLUS_SAMPLING",
+      "scope_warning": "DEMO_FIT_CAUSAL_ARM_ONLY__PROJECTED_INVALID_ROWS_NOT_PRODUCT_TEACHER_AUTHORITY"
+    }
+  ],
+  "sanity_gates": [
+    "UNIFORM_VALID full schedule SHA must equal the exact historical V6 preflight schedule SHA in conditioning row space",
+    "Teacher-bank surface rows must be bijectively reindexed to historical V6 conditioning surface_ids before any valid-mask or support sampling",
+    "Teacher-bank target columns must be reindexed to historical V6 canonical joint order before active-support sampling",
+    "UNIFORM_VALID should reproduce the historical closure trajectory within execution tolerance",
+    "No arm may alter model architecture, backbone checkpoint, loss terms, optimizer family, LR schedule, compiler thresholds, teacher predictor input boundary or random base seed"
+  ],
+  "post_gpu_evaluation": [
+    "valid-row V6 metrics",
+    "all-projected-row and teacher-invalid-row row-L1 diagnostics",
+    "same downstream Stage35/topology courts using each arm's exact canonical weights",
+    "no topology winner may be declared from training loss alone"
+  ],
+  "product_boundary": {
+    "generalization_claimed": false,
+    "product_authority_claimed": false,
+    "knight_demo_fit_only": true,
+    "invalid_projected_teacher_rows_product_authority": false
+  },
+  "historical_control_receipt": {
+    "exact_v6_result_sha256": "42424db07f9e928bdad33a22fc5eed7c5507f4b20627731d62486eeb4f66d995",
+    "exact_v6_trace_sha256": "fa019088504f26ea26a7097dace11aeffda75b8c9e0148b2a5cbbe236aa8600b",
+    "a100_gpu": "NVIDIA A100-SXM4-40GB",
+    "closure_step": 8192,
+    "terminal_check_steps": [
+      7680,
+      7936,
+      8192
+    ],
+    "wall_seconds": 121.81457332699983,
+    "decoder_parameter_count": 1619491,
+    "backbone_parameter_count": 138053153,
+    "backbone_frozen": true
+  },
+  "frozen_schedule_sha256_by_arm": {
+    "UNIFORM_VALID": {
+      "full_32768": "4c5731cf5b2b28a3985458d555c7ef545d78054523cf92ce3edb0e959eee82fb",
+      "prefix_8192": "7c9a91a2e8051d3ff1ce534ccf908d5a0b25ca0620f15f0ab04efdfb228fa5e5"
+    },
+    "ACTIVE_BALANCED_VALID": {
+      "full_32768": "1c055e2ff76b65ead96094eaac613efbeeba1f552488c144d98d0d2bce13a308",
+      "prefix_8192": "5f8216c0e758d8d6830294ea765308ce66ee3648dc72335c6fba79a70fb0b934"
+    },
+    "UNIFORM_ALL_PROJECTED": {
+      "full_32768": "f2943931d70134509fbd24826ecd11388ccb5f4ce29a1d801626f6ffcd9ced4b",
+      "prefix_8192": "c1575c6e6260753b68e055873295b5c74da6486fc1911bcd61fef1e626098aa4"
+    },
+    "ACTIVE_BALANCED_ALL_PROJECTED": {
+      "full_32768": "24eaa6ab7faccf1fdff6bd2fc78b369f7ad19ca7841ef65a9721c775bc597a88",
+      "prefix_8192": "a2a0725af466f4af85bd15faac1236736c7876bd7146967378c80390120ee018"
+    }
+  },
+  "resource_budget_note": {
+    "user_reported_a100_budget_hours_today": 3,
+    "historical_control_wall_seconds": 121.81457332699983,
+    "scientific_policy": "DO_NOT_CHANGE_ARMS_OR_GATES_FOR_RUNTIME; run all four sequentially if preflight remains healthy, because historical control runtime is far below budget."
+  },
+  "index_space_repair": {
+    "discovered_by": "V3 reproducibility owner court before any corrected 2x2 optimizer step",
+    "raw_bank_schedule_sha256": "910e79a11dd70210108e164ed6e2b0c1a4b1fbb69632b80f546c68a9bb5331e9",
+    "exact_historical_v6_schedule_sha256": "4c5731cf5b2b28a3985458d555c7ef545d78054523cf92ce3edb0e959eee82fb",
+    "conditioning_row_permutation_moved_count": 12087,
+    "raw_vs_reindexed_valid_mask_diff_count": 2612,
+    "raw_vs_reindexed_valid_mask_diff_fraction": 0.21604631927212573,
+    "diagnosis": "The original 2x2 wrapper sampled teacher-bank row indices before reindexing them into the V6 conditioning surface order. Active-balanced arms also used unreindexed teacher columns. Those schedules are invalidated.",
+    "invalidated_schedule_hashes": {
+      "UNIFORM_VALID": {
+        "full_32768": "910e79a11dd70210108e164ed6e2b0c1a4b1fbb69632b80f546c68a9bb5331e9",
+        "prefix_8192": "74e2d3fa193acabdde2837394bd460dfc29c3bfd361a38380a987d1a6b031819"
+      },
+      "ACTIVE_BALANCED_VALID": {
+        "full_32768": "abafdbbb11e270725d64e8981932c7b2481344d4b68fea389fec557aabcaa574",
+        "prefix_8192": "cfbbcdb198b7b5f4328118ec665ee1e90abd5c5d9a513c2f287ce8592d900cd6"
+      },
+      "ACTIVE_BALANCED_ALL_PROJECTED": {
+        "full_32768": "0752250ceab3152444049c917cf910b94894ae8f500fb7265b4eb8db866718e2",
+        "prefix_8192": "91bfe3437f0893d0120395a72c09c982992728ea422937d53da79c12eff3af1b"
+      }
+    },
+    "note": "UNIFORM_ALL_PROJECTED is numerically unchanged because its pool is every conditioning row."
+  }
+}

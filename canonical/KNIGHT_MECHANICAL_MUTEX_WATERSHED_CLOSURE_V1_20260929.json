@@ -1,0 +1,103 @@
+{
+  "checks": {
+    "actual_gt10": false,
+    "actual_gt4": false,
+    "actual_worst_edge": false,
+    "mixed_precision": false,
+    "no_face_deletion": true,
+    "rest_area_preserved": true,
+    "synthetic_unsafe": false,
+    "unsafe_cross_region_recall": true
+  },
+  "claim_boundary": "The partition is solved entirely from dense adjacency plus teacher-free Arachne/Stage35 mechanical evidence. Teacher data enters only after labels are frozen.",
+  "closure_pass": false,
+  "holeless_split": {
+    "centroid_copy_count": 90,
+    "face_count_after": 27620,
+    "face_count_before": 24958,
+    "face_deletion_count": 0,
+    "mixed_face_count": 1286,
+    "region_pure_output_fraction": 1.0,
+    "rest_area_error_max": 1.0242505449561e-14,
+    "rest_area_error_p99": 2.1632753763958124e-15,
+    "seam_vertex_copy_count": 2526,
+    "unsplit_unresolved_face_count": 0,
+    "vertex_count_after": 14665,
+    "vertex_count_before": 12049
+  },
+  "preregistration": "canonical/KNIGHT_MECHANICAL_MUTEX_WATERSHED_CLOSURE_PREREG_V1_20260929.json",
+  "schema": "RealSaS.KnightMechanicalMutexWatershedClosureCourt.v1",
+  "solver": {
+    "attractive_union_blocked_by_mutex": 95,
+    "attractive_union_count": 12031,
+    "component_count": 18,
+    "event_count": 36424,
+    "largest_component_sizes": [
+      3456,
+      2933,
+      2387,
+      1138,
+      946,
+      352,
+      328,
+      165,
+      117,
+      107,
+      77,
+      22,
+      8,
+      5,
+      4,
+      2,
+      1,
+      1
+    ],
+    "mutex_constraint_count": 1168,
+    "repulsive_edge_arrived_after_endpoint_merge": 41,
+    "repulsive_edge_count": 1209
+  },
+  "status": "FAIL_TOPOLOGY_REMAINS_OPEN",
+  "teacher_evaluation_only": {
+    "mixed_face_precision": 0.8452566096423018,
+    "mixed_face_recall": 0.35993377483443706,
+    "predicted_mixed_face_count": 1286,
+    "truth_mixed_face_count": 3020,
+    "unsafe_truth_cross_region_face_count": 1178,
+    "unsafe_truth_cross_region_recall": 0.9193548387096774,
+    "vertex_ari": 0.6558414291518887,
+    "vertex_nmi": 0.7677171400773282
+  },
+  "teacher_topology_used_for_evaluation_only": true,
+  "teacher_used_by_partition_solver": false,
+  "teacher_weights_used_for_post_inference_mechanical_isolation_only": true,
+  "topology_isolated_mechanics": {
+    "after_motion": {
+      "max_edge_gt_10": 243,
+      "max_edge_gt_4": 275,
+      "max_edge_p99": 3.7052881891588934,
+      "worst_edge_max": 185.68269810598335
+    },
+    "after_stress": {
+      "max_area_max": 261.9025084037696,
+      "max_condition_max": 11708.855417316601,
+      "max_edge_max": 160.01958267986458,
+      "max_edge_p95": 1.532754594394969,
+      "min_area_min": 0.008162807818946684,
+      "unsafe_face_count": 623
+    },
+    "before_motion": {
+      "max_edge_gt_10": 592,
+      "max_edge_gt_4": 926,
+      "max_edge_p99": 27.601949326001453,
+      "worst_edge_max": 118.61647437227882
+    },
+    "before_stress": {
+      "max_area_max": 220.29867764004828,
+      "max_condition_max": 11708.855417316601,
+      "max_edge_max": 101.0908905951972,
+      "max_edge_p95": 6.866182063578426,
+      "min_area_min": 0.00409070782318895,
+      "unsafe_face_count": 1553
+    }
+  }
+}

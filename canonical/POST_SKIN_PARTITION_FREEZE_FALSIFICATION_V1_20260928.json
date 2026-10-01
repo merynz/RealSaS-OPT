@@ -1,0 +1,71 @@
+{
+  "schema": "RealSaS.PostSkinPartitionFreezeFalsification.v1",
+  "status": "AUDIT_ONLY__INTENDED_POLICY_FALSIFIED__NO_REPAIR_APPLIED",
+  "classification": "C_INTENDED_DECISION_ITSELF_FALSIFIED",
+  "severity": "P0",
+  "intended_policy": {
+    "authority": "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json",
+    "partition_policy": "FIRST_V2_RUN_KEEPS_STAGE17_UNKNOWN_CONSERVATIVE__NO_POST_SKIN_PARTITION_MUTATION",
+    "repair_policy": "STAGE35_DYNAMIC_FAILURE_REQUIRING_GEOMETRY_CHANGE_CREATES_NEW_STAGE18_LINEAGE"
+  },
+  "exact_knight_evidence": {
+    "stage17": {
+      "relation_count": 36469,
+      "preserve_continuity_count": 36469,
+      "separate_count": 0,
+      "unknown_count": 0
+    },
+    "teacher_valid_skin_seams": {
+      "both_valid_teacher_l1_gt_1p9": 931,
+      "source_topology_nonincident": 931,
+      "same_source_face": 0,
+      "share_edge": 0,
+      "share_vertex_only": 0
+    },
+    "idle_smear_offender": {
+      "teacher_valid": true,
+      "predicted_l1": [
+        1.9978838030158588,
+        1.9979355379702102,
+        0.00005173495437089545
+      ],
+      "teacher_l1": [
+        2,
+        2,
+        0
+      ],
+      "source_topology": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "skin_homogenization_removes_smear": true
+    }
+  },
+  "contract_collision": {
+    "qualified_mesh_g4": "PRESERVE_CONTINUITY requires represented local adjacency via shared support or direct product edge.",
+    "stage35_current_repair": "Unsafe faces are removed into a new Stage18 candidate; partition lineage is unchanged.",
+    "consequence": "A real post-skin deformation seam cannot be expressed legally: retaining adjacency keeps the pathological high-discontinuity deformation edge; cutting it contradicts the frozen PRESERVE_CONTINUITY partition/G4 requirement."
+  },
+  "falsification_logic": [
+    "Stage17 cannot observe the later Arachne skin field.",
+    "At least one teacher-valid, teacher-faithful seam is only exposed once skin evidence exists.",
+    "Smoothing/retraining that seam away would reduce teacher fidelity.",
+    "A geometry-only Stage35 repair cannot both eliminate that seam and satisfy the unchanged PRESERVE_CONTINUITY declaration.",
+    "Therefore forbidding a new partition lineage after skin evidence is available is not closed under the observed valid failure class."
+  ],
+  "verdict": {
+    "intended_no_post_skin_partition_mutation_policy_falsified": true,
+    "architecture_replacement_required": false,
+    "required_design_reconsideration": "Stage35 feedback must be allowed to revise the structural-boundary/partition lineage when qualified post-skin evidence proves the earlier conservative partition wrong, with exact invalidation/requalification of affected descendants.",
+    "exact_orchestration_form_not_selected": true
+  },
+  "evidence": [
+    "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json",
+    "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md",
+    "canonical/STAGE17_GEOMETRIC_TO_MECHANICAL_SEMANTIC_PROMOTION_AUDIT_V1_20260928.json",
+    "canonical/KNIGHT_SKIN_TOPOLOGY_COMPATIBILITY_DIAGNOSIS_V1_20260927.json",
+    "compiler/realsas_compiler_core/product_authority_v1.py",
+    "compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py"
+  ]
+}

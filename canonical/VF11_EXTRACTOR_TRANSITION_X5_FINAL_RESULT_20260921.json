@@ -1,0 +1,34 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX5FinalResult.v1",
+  "date_utc": "2026-09-21",
+  "status": "BATCH_ENGINE_NONVACUOUS__FULL_DOMAIN_CPU_STILL_FORBIDDEN",
+  "artifact_sha256": "99c39d3d97d4ca6072a07cdf3ef53dbdafdd34c674943c1dcac0e07fb4ff88e4",
+  "artifact_bytes": 3025,
+  "self_hosted_equivalence_smoke": {
+    "run_id": 35654227920,
+    "conclusion": "success",
+    "full_suite_passed": true
+  },
+  "frozen_field": {
+    "checkpoint_sha256": "59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f",
+    "scene_planes_sha256": "364f4769f1ffb04362669c1fe04b9b6c8f3afe3308bf4b7cede038d9e8226d28"
+  },
+  "benchmark": {
+    "panel_regime_count": 16,
+    "max_micro_depth": 2,
+    "cpu_torch_threads": 4,
+    "node_batch_size": 32,
+    "paired_repeats": 3,
+    "scalar_seconds_median": 8.131578673001059,
+    "batched_seconds_median": 2.131684961999781,
+    "median_speedup": 3.814624964738056,
+    "max_abs_bound_difference": 1.4210854715202004e-14,
+    "semantic_mismatch_count": 0,
+    "projected_103823_regime_seconds_at_observed_batch_rate": 13832.370488106455
+  },
+  "scientific_interpretation": "The batched engine preserves the scalar C0 V3 semantics on the frozen panel to far tighter than the preregistered 1e-10 bound tolerance and gives a robust roughly 3.8x median CPU speedup. The projected full-domain micro2 traversal is still about 3.84 hours at the observed rate, so CPU full-domain execution remains forbidden.",
+  "full_domain_cpu_execution_authorized": false,
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false
+}

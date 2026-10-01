@@ -1,0 +1,221 @@
+name: subject2-knight-demo-motion-retarget-preflight
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_DEMO_GEPPETTO_STAGE29_V2_RECEIPT_20260926.json'
+      - 'canonical/KNIGHT_DEMO_MOTION_RETARGET_PREFLIGHT_TRIGGER_*.json'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-demo-motion-retarget-preflight
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  motion-retarget-preflight:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
+      EXPECTED_SKELETON_LINEAGE: e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850
+      EXPECTED_SEMANTIC_TREE_SHA256: 95f6f224f52ba43dd96296ce877a11851037e939640a4c995e2b9f3e874c7f59
+      EXPECTED_FBX_SHA256: 41f2616fb4a42f9d35e242bbed1450ededc7537def4bf38cbb11b4e54ff2bf21
+      MOTION_FBX_REMOTE: 'gdrive:Knight by @Quaternius/FBX/KnightCharacter.fbx'
+      PYTHONHASHSEED: '0'
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m py_compile             tools/motion/materialize_quaternius_preset_v1.py             tools/motion/blender_extract_motion_source_v2.py             compiler/realsas_compiler_core/motion_compile_v2.py
+          pytest -q tests/compiler/test_quaternius_motion_materializer_v1.py tests/compiler/test_motion_compile_v2.py
+
+      - name: Verify exact reconciled 28-joint skeleton
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          receipt=json.loads(Path("canonical/KNIGHT_DEMO_GEPPETTO_STAGE29_V2_RECEIPT_20260926.json").read_text())
+          assert receipt["status"]=="PASS_DEMO_ONLY"
+          assert receipt["qualified_joint_count"]==28
+          assert receipt["qualified_skeleton_lineage_hash"]==os.environ["EXPECTED_SKELETON_LINEAGE"]
+          assert receipt["semantic_tree_sha256"]==os.environ["EXPECTED_SEMANTIC_TREE_SHA256"]
+          assert receipt["optimizer_identity_contract"]=="GRAPH_SELECTION_SEMANTICS_V1"
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+          rows=[x for x in by["28_SKELETON_QUALIFIED"]["outputs"] if x["schema"]=="RealSaS.QualifiedSkeletonIR.v1"]
+          assert len(rows)==1
+          skeleton_path=Path(rows[0]["path"]).resolve()
+          skeleton=json.loads(skeleton_path.read_text())
+          assert len(skeleton["joints"])==28
+          assert skeleton["skeleton_lineage_hash"]==os.environ["EXPECTED_SKELETON_LINEAGE"]
+          with Path(os.environ["GITHUB_ENV"]).open("a") as f:
+              f.write(f"SKELETON_JSON={skeleton_path}\n")
+          print("MOTION_PREFLIGHT_SKELETON_PASS")
+          PY
+
+      - name: Resolve or bootstrap pinned Blender
+        shell: bash
+        run: |
+          set -euo pipefail
+          version='4.5.14'
+          cache_root="$HOME/.cache/realsas/blender"
+          install_root="$cache_root/blender-${version}-linux-x64"
+          blender_path="$install_root/blender"
+          if test -x "$blender_path"; then
+            echo "BLENDER_EXE=$blender_path" >> "$GITHUB_ENV"
+            "$blender_path" --version | head -n 2
+            echo "MOTION_PREFLIGHT_BLENDER_CACHE_HIT=1"
+            exit 0
+          fi
+          if system_blender="$(command -v blender 2>/dev/null)" && test -x "$system_blender"; then
+            echo "BLENDER_EXE=$system_blender" >> "$GITHUB_ENV"
+            "$system_blender" --version | head -n 2
+            echo "MOTION_PREFLIGHT_SYSTEM_BLENDER=1"
+            exit 0
+          fi
+          base="https://download.blender.org/release/Blender4.5"
+          archive="blender-${version}-linux-x64.tar.xz"
+          download_root="$HOME/.cache/realsas/downloads"
+          archive_path="$download_root/$archive"
+          checksum_path="$download_root/blender-${version}.sha256"
+          mkdir -p "$cache_root" "$download_root"
+          if ! test -s "$archive_path" || ! test -s "$checksum_path"; then
+            curl --fail --location --retry 3 --retry-delay 2 "$base/$archive" --output "$archive_path"
+            curl --fail --location --retry 3 --retry-delay 2 "$base/blender-${version}.sha256" --output "$checksum_path"
+          fi
+          (
+            cd "$download_root"
+            grep "  $archive\$" "$(basename "$checksum_path")" | sha256sum --check -
+          )
+          rm -rf "$install_root"
+          tar -xJf "$archive_path" -C "$cache_root"
+          test -x "$blender_path"
+          echo "BLENDER_EXE=$blender_path" >> "$GITHUB_ENV"
+          "$blender_path" --version | head -n 2
+          echo "MOTION_PREFLIGHT_BLENDER_CACHE_POPULATED=1"
+
+      - name: Materialize exact sealed idle run slash source clips
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v rclone >/dev/null
+          source_root="$RUN_ROOT/inputs/motion/quaternius_knight_v1_source"
+          out_root="$RUN_ROOT/inputs/motion/quaternius_knight_v1"
+          mkdir -p "$source_root"
+          source_fbx="$source_root/KnightCharacter.fbx"
+          rclone copyto "$MOTION_FBX_REMOTE" "$source_fbx" --checksum --drive-shared-with-me
+          printf '%s  %s\n' "$EXPECTED_FBX_SHA256" "$source_fbx" | sha256sum --check -
+          rm -rf "$out_root"
+          python tools/motion/materialize_quaternius_preset_v1.py             --source-fbx "$source_fbx"             --out-dir "$out_root"             --run-id "$RUN_ID"
+          for f in demo_idle_v1.motion.json demo_run_v1.motion.json demo_slash_v1.motion.json MOTION_RUN_MANIFEST_FRAGMENT.json MATERIALIZATION_RECEIPT.json; do
+            test -s "$out_root/$f"
+          done
+          echo "MOTION_OUT=$out_root" >> "$GITHUB_ENV"
+
+      - name: Prove automatic retarget map for all three clips
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          from compiler.realsas_compiler_core.artifact_codec_v2 import qualified_skeleton_from_dict
+          from compiler.realsas_compiler_core.motion_compile_v2 import automatic_retarget_map_v2
+          root=Path(os.environ["MOTION_OUT"])
+          skeleton=qualified_skeleton_from_dict(json.loads(Path(os.environ["SKELETON_JSON"]).read_text()))
+          expected={
+              "demo_idle_v1":"IDLE",
+              "demo_run_v1":"RUN",
+              "demo_slash_v1":"SLASH",
+          }
+          import hashlib
+          def sha256(path):
+              return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+          reports=[]
+          for clip_id,kind in expected.items():
+              clip_path=root/f"{clip_id}.motion.json"
+              payload=json.loads(clip_path.read_text())
+              assert payload["schema"]=="RealSaS.MotionSourceClip.v2"
+              assert payload["clip_id"]==clip_id
+              assert payload["clip_kind"]==kind
+              assert payload["source_space"]=="SOURCE_RIG_TRACKS_V2"
+              mapping,report=automatic_retarget_map_v2(payload,skeleton)
+              assert len(mapping)==28
+              assert report["target_joint_count"]==28
+              assert report["mapped_joint_count"]==28
+              reports.append({
+                  "clip_id":clip_id,
+                  "clip_kind":kind,
+                  "motion_json_sha256":sha256(clip_path),
+                  "report":report,
+              })
+          fragment_path=root/"MOTION_RUN_MANIFEST_FRAGMENT.json"
+          materialization_path=root/"MATERIALIZATION_RECEIPT.json"
+          assert fragment_path.is_file()
+          assert materialization_path.is_file()
+          out={
+              "schema":"RealSaS.KnightMotionRetargetPreflight.v1",
+              "status":"PASS",
+              "run_id":os.environ["RUN_ID"],
+              "skeleton_lineage_hash":skeleton.skeleton_lineage_hash,
+              "target_joint_count":28,
+              "clip_count":3,
+              "source_fbx_sha256":os.environ["EXPECTED_FBX_SHA256"],
+              "motion_manifest_fragment_sha256":sha256(fragment_path),
+              "materialization_receipt_sha256":sha256(materialization_path),
+              "clips":reports,
+              "manual_retarget_used":False,
+              "source_rig_is_final_skeleton_authority":False,
+              "product_authority_claimed":False,
+              "generalization_claimed":False,
+              "execution_repo_commit":os.environ["GITHUB_SHA"],
+          }
+          Path("canonical/KNIGHT_DEMO_MOTION_RETARGET_PREFLIGHT_20260926.json").write_text(
+              json.dumps(out,indent=2,sort_keys=True)+"\n"
+          )
+          print("KNIGHT_MOTION_RETARGET_PREFLIGHT_PASS")
+          for row in reports:
+              report=row["report"]
+              print(row["clip_id"],report["source_joint_count"],report["total_assignment_cost"])
+          PY
+
+      - name: Seal motion retarget preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_DEMO_MOTION_RETARGET_PREFLIGHT_20260926.json
+          git commit -m 'demo: seal Knight motion retarget preflight'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921
+
+      - name: Upload failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: knight-motion-retarget-preflight-${{ github.run_id }}
+          path: |
+            ${{ env.RUN_ROOT }}/inputs/motion/quaternius_knight_v1
+            ${{ env.RUN_ROOT }}/ACTIVE_RUN_V2.json
+          if-no-files-found: warn
+          retention-days: 14

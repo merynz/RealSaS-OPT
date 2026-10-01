@@ -1,0 +1,137 @@
+{
+  "schema": "RealSaS.IRISV4DemoGeometryPolicy.v2",
+  "date_utc": "2026-09-22",
+  "status": "FROZEN_PRE_KNIGHT_V4_DEMO_FIT__SATURATING_FOREGROUND_EXISTENCE",
+  "authority": "CONTROLLED_KNIGHT_DEMO_ENGINEERING_POLICY__NO_V4_KNIGHT_RESULT_INSPECTED",
+  "supersedes": "canonical/IRIS_V4_DEMO_GEOMETRY_POLICY_20260922.json",
+  "erratum": "canonical/IRIS_V4_FOREGROUND_BCE_GEOMETRIC_PRESSURE_ERRATUM_20260922.json",
+  "architecture": {
+    "architecture_id": "RealSaS.IRIS.SceneFirstSignedGeometry.v4.demo64",
+    "source": "models/iris/v4/scene_first_signed_v4.py",
+    "image_token_dim": 384,
+    "camera_feature_dim": 13,
+    "scene_dim": 256,
+    "camera_embed_dim": 96,
+    "scene_transformer_layers": 4,
+    "attention_heads": 8,
+    "feedforward_multiplier": 3,
+    "scene_query_lattice": [3, 32, 32],
+    "scene_query_count": 3072,
+    "final_triplane_shape_excluding_batch": [3, 64, 64, 64],
+    "plane_channels": 64,
+    "point_feature_dim": 192,
+    "field_hidden_dim": 192,
+    "field_residual_blocks": 4,
+    "camera_injection_semantics": "UNCHANGED_V3_POST_DINO_CAMERA_AWARE_TOKEN_BANK",
+    "canonical_surface_extractor": "RealSaS.ZeroSurfaceDecoder.MarchingCubes.v3"
+  },
+  "training": {
+    "trainer": "models/iris/v4/train_demo_fit_v4.py",
+    "ray_sampler": "models/iris/v4/source_constraint_v4.py",
+    "source_exterior": "models/iris/v4/source_exterior_v4.py",
+    "fresh_init": true,
+    "random_seed": 26091909,
+    "anchor_stride_px": 8,
+    "train_steps": 4800,
+    "learning_rate": 0.00008,
+    "weight_decay": 0.0001,
+    "source_foreground_existence": {
+      "enabled": true,
+      "all_eight_views_every_step": true,
+      "ray_reduction": "HARD_AMIN_OVER_DEPTH_SAMPLES",
+      "loss": "COMPONENT_BALANCED_SATURATING_HINGE",
+      "boundary_inside_margin": "0.5*occupancy_beta_normalized",
+      "interior_inside_margin": "1.0*occupancy_beta_normalized",
+      "component_balanced": true,
+      "top_level_weight": 1.0,
+      "saturation": "ZERO_GRADIENT_AFTER_REQUIRED_NEGATIVE_MARGIN_IS_SATISFIED",
+      "bce_or_soft_dice_in_training_objective": false
+    },
+    "source_background_empty_space": {
+      "enabled": true,
+      "all_eight_views_every_step": true,
+      "pointwise_full_ray": true,
+      "margin_rule": "m(r)=min(0.04,r_px*(2*camera_half_extent_normalized/raster_width))",
+      "near_and_far_authority_coexist": true,
+      "top_level_weight": 1.0
+    },
+    "source_certified_3d_exterior": {
+      "enabled": true,
+      "points_per_step": 512,
+      "pixel_quantization_guard_px": 1.4142135623730951,
+      "out_of_frame_semantics": "UNKNOWN__NEVER_NEGATIVE_EVIDENCE",
+      "top_level_weight": 1.0
+    },
+    "local_metric_sdf": {
+      "enabled": true,
+      "surface_rays_per_step": 192,
+      "local_samples_per_ray": 9,
+      "local_band_norm": 0.1,
+      "smooth_l1_beta": 0.02,
+      "role": "FIT_ONLY_LOCAL_STRUCTURAL_AID"
+    },
+    "teacher_surface_zero_fit_only": {
+      "enabled": true,
+      "points_per_step": 1024,
+      "smooth_l1_beta": 0.01,
+      "top_level_weight": 0.5,
+      "inference_input": false,
+      "global_teacher_sdf_authority": false
+    },
+    "view_sampling": {
+      "foreground_component_rays_per_component_per_view": 4,
+      "foreground_boundary_rays_per_view": 12,
+      "foreground_interior_rays_per_view": 12,
+      "near_background_rays_per_view": 32,
+      "far_background_rays_per_view": 16,
+      "hard_negative_replay_rays_per_view": 16,
+      "hard_negative_refresh_candidates_per_view": 1024,
+      "hard_negative_bank_size_per_view": 64,
+      "hard_negative_refresh_interval_steps": 80,
+      "near_boundary_max_px": 32.0
+    },
+    "retention_contract": {
+      "pair_only_optimization_forbidden": true,
+      "all_eight_views_must_contribute_to_every_optimizer_step": true,
+      "near_and_far_background_both_required": true,
+      "hard_negative_replay_is_additive": true,
+      "source_certified_3d_exterior_is_additive": true
+    },
+    "held_from_first_v4": {
+      "explicit_zero_set_near_zero_loss": true,
+      "training_only_differentiable_mesh_raster_loss": true,
+      "eikonal_regularizer": true,
+      "global_teacher_sdf": true,
+      "reason": "Not required to express the exact source sign contract; each adds a new proxy or smoothing prior before the strengthened sign/retention lane is tested."
+    }
+  },
+  "qualification": {
+    "primary_resolution": 512,
+    "secondary_resolution": 256,
+    "stage13_policy_sha256": "8edf9934f1d14f45dcb719fcf39691d69c5797f7410c958ae3005ef639a3c214",
+    "threshold_relaxation": false,
+    "source_support_audit": true,
+    "r256_r512_convergence": true,
+    "posthoc_mesh_repair_before_primary_measurement": false,
+    "visual_hull_clipping": false
+  },
+  "explicitly_not_changed": [
+    "scene_dim",
+    "scene_transformer_depth",
+    "attention_heads",
+    "plane_channels",
+    "point_feature_width",
+    "DINO backbone or camera injection semantics",
+    "canonical surface extractor",
+    "GSA authority",
+    "RiggingSurfaceIR authority",
+    "CAA authority",
+    "Stage13-v2 thresholds"
+  ],
+  "promotion_boundary": {
+    "controlled_knight_demo_only": true,
+    "unseen_generalization_claim": false,
+    "shipping_architecture_claim": false,
+    "product_authority_minted": false
+  }
+}

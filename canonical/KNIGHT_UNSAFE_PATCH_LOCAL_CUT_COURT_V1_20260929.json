@@ -1,0 +1,753 @@
+{
+  "claim_boundary": "Local patch cut components and predicted mixed faces are frozen before teacher topology is loaded.",
+  "metrics_teacher_eval_only": {
+    "false_positive": 0,
+    "mixed_face_precision": 1.0,
+    "predicted_mixed_face_count": 3,
+    "true_positive": 3,
+    "unsafe_truth_cross_region_face_count": 1178,
+    "unsafe_truth_cross_region_recall": 0.0025466893039049238,
+    "unsafe_truth_cross_region_recovered": 3
+  },
+  "passes_frozen_label_gates": false,
+  "patches": [
+    {
+      "component_index": 0,
+      "largest_local_region_sizes": [
+        1210
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1404
+    },
+    {
+      "component_index": 1,
+      "largest_local_region_sizes": [
+        201
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 221
+    },
+    {
+      "component_index": 2,
+      "largest_local_region_sizes": [
+        12
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 13
+    },
+    {
+      "component_index": 3,
+      "largest_local_region_sizes": [
+        11
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 10
+    },
+    {
+      "component_index": 4,
+      "largest_local_region_sizes": [
+        10
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 8
+    },
+    {
+      "component_index": 5,
+      "largest_local_region_sizes": [
+        8
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 7
+    },
+    {
+      "component_index": 6,
+      "largest_local_region_sizes": [
+        7
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 5
+    },
+    {
+      "component_index": 7,
+      "largest_local_region_sizes": [
+        6
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 5
+    },
+    {
+      "component_index": 8,
+      "largest_local_region_sizes": [
+        6
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 4
+    },
+    {
+      "component_index": 9,
+      "largest_local_region_sizes": [
+        6
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 4
+    },
+    {
+      "component_index": 10,
+      "largest_local_region_sizes": [
+        5
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 3
+    },
+    {
+      "component_index": 11,
+      "largest_local_region_sizes": [
+        5
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 3
+    },
+    {
+      "component_index": 12,
+      "largest_local_region_sizes": [
+        4
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 2
+    },
+    {
+      "component_index": 13,
+      "largest_local_region_sizes": [
+        4
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 2
+    },
+    {
+      "component_index": 14,
+      "largest_local_region_sizes": [
+        4
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 2
+    },
+    {
+      "component_index": 15,
+      "largest_local_region_sizes": [
+        4
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 2
+    },
+    {
+      "component_index": 16,
+      "largest_local_region_sizes": [
+        4
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 2
+    },
+    {
+      "component_index": 17,
+      "largest_local_region_sizes": [
+        4
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 2
+    },
+    {
+      "component_index": 18,
+      "largest_local_region_sizes": [
+        4
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 2
+    },
+    {
+      "component_index": 19,
+      "largest_local_region_sizes": [
+        4
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 2
+    },
+    {
+      "component_index": 20,
+      "largest_local_region_sizes": [
+        4
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 2
+    },
+    {
+      "component_index": 21,
+      "largest_local_region_sizes": [
+        4
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 2
+    },
+    {
+      "component_index": 22,
+      "largest_local_region_sizes": [
+        4
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 2
+    },
+    {
+      "component_index": 23,
+      "largest_local_region_sizes": [
+        4
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 2
+    },
+    {
+      "component_index": 24,
+      "largest_local_region_sizes": [
+        4
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 2
+    },
+    {
+      "component_index": 25,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 26,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 27,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 28,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 29,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 30,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 31,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 32,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 33,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 34,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 35,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 36,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 37,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 38,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 39,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 40,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 41,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 42,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 43,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 44,
+      "largest_local_region_sizes": [
+        2,
+        1
+      ],
+      "local_region_count": 2,
+      "predicted_mixed_face_count": 1,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 45,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 46,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 47,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 48,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 49,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 50,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 51,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 52,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 53,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 54,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 55,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 56,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 57,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 58,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 59,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 60,
+      "largest_local_region_sizes": [
+        2,
+        1
+      ],
+      "local_region_count": 2,
+      "predicted_mixed_face_count": 1,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 61,
+      "largest_local_region_sizes": [
+        2,
+        1
+      ],
+      "local_region_count": 2,
+      "predicted_mixed_face_count": 1,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 62,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 63,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 64,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 65,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 66,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 67,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 68,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 69,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 70,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 71,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 72,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 73,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 74,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 75,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 76,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 77,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 78,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 79,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    },
+    {
+      "component_index": 80,
+      "largest_local_region_sizes": [
+        3
+      ],
+      "local_region_count": 1,
+      "predicted_mixed_face_count": 0,
+      "unsafe_face_count": 1
+    }
+  ],
+  "preregistration": "canonical/KNIGHT_UNSAFE_PATCH_LOCAL_CUT_PREREG_V1_20260929.json",
+  "schema": "RealSaS.KnightUnsafePatchLocalCutCourt.v1",
+  "seam_edge_count": 694,
+  "status": "DIAGNOSTIC_ONLY__NO_PRODUCT_MUTATION",
+  "teacher_used_by_operator": false,
+  "unsafe_patch_count": 81
+}

@@ -1,0 +1,42 @@
+{
+  "claim_boundary": "This audit reads sealed Stage15/17/18 artifacts only; it does not infer source/teacher topology and does not mutate product state.",
+  "owner_finding": {
+    "collapse_present_by_stage17": false,
+    "stage17_has_any_separate_boundary": false,
+    "stage18_exactly_inherits_stage17_partition": true
+  },
+  "preregistration": "canonical/KNIGHT_STAGE17_PARTITION_OWNER_AUDIT_PREREG_V1_20260929.json",
+  "schema": "RealSaS.KnightStage17PartitionOwnerAudit.v1",
+  "stage15": {
+    "local_relation_count": 36469,
+    "surface_node_count": 12090
+  },
+  "stage17": {
+    "boundary_constraint_count": 36469,
+    "boundary_decision_counts": {
+      "PRESERVE_CONTINUITY": 36469
+    },
+    "component_count": 6,
+    "component_surface_sizes": [
+      12080,
+      3,
+      2,
+      2,
+      2,
+      1
+    ],
+    "partition_lineage_hash": "ba14cb67ff5bdf78a609e56ccddcfd8203075ffe304734df3be8fcf657635dec",
+    "preserve_boundary_count": 36469,
+    "separate_boundary_count": 0,
+    "unknown_boundary_count": 0
+  },
+  "stage18": {
+    "candidate_component_count": 1,
+    "candidate_component_vertex_sizes": [
+      12049
+    ],
+    "candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+    "partition_binding_hash": "ba14cb67ff5bdf78a609e56ccddcfd8203075ffe304734df3be8fcf657635dec"
+  },
+  "status": "READ_ONLY_OWNER_AUDIT"
+}

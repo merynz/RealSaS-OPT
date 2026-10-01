@@ -1,0 +1,19 @@
+{
+  "artifacts": [
+    {
+      "bytes": 8192,
+      "path": "canonical/V2_PERFORMANCE_QUALITY_KNOB_AUDIT_V1_20260928.json",
+      "sha256": "61236fb02714e4a4045f6397c483fcf8d5514cce3de03eb06e5b647780b07a9a"
+    },
+    {
+      "bytes": 1112,
+      "path": "canonical/v2_performance_quality_knob_audit_v1/AUDIT_STDOUT.txt",
+      "sha256": "99a07559ad5f77a7bc41d505a2afe8a9417287e88306f4b01a01bdf90debbf32"
+    }
+  ],
+  "new_numeric_value_selected": false,
+  "repair_applied": false,
+  "repo_head": "7a1b79ada66bfb3a736dd3f13a5e995bd4a7a319",
+  "schema": "RealSaS.PerformanceQualityKnobAuditSeal.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED"
+}

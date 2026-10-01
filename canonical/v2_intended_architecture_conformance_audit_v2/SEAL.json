@@ -1,0 +1,17 @@
+{
+  "artifacts": [
+    {
+      "bytes": 54204,
+      "path": "canonical/V2_INTENDED_ARCHITECTURE_CONFORMANCE_AUDIT_V2_20260928.json",
+      "sha256": "32e56ba4e8a367166fed6acdd700d7bcc28f8e0651610856c49340ea7a6ef3c1"
+    },
+    {
+      "bytes": 994,
+      "path": "canonical/v2_intended_architecture_conformance_audit_v2/AUDIT_STDOUT.txt",
+      "sha256": "b94c690657cf712e1e691aa43788d92329f615a6f5ac37f2badc9adef79cb7af"
+    }
+  ],
+  "repo_head": "0fca42a8e3c0b33adb48e56521eef5b6448fbe3e",
+  "schema": "RealSaS.IntendedArchitectureConformanceAuditSeal.v2",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED__NO_ARCHITECTURE_REPLACEMENT_AUTHORIZED"
+}

@@ -1,0 +1,50 @@
+{
+  "schema": "RealSaS.VF11C2V2AxisGraphPreregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__C2_V2_AXIS_ALIGNED_GRAPH_PATCH",
+  "authority_class": "RESEARCH_PREREGISTRATION_ONLY",
+  "parent_c2_v1_closure": "canonical/VF11_C2_V1_RESEARCH_CLOSURE_20260921.json",
+  "product_authority_minted": false,
+  "shipping_certificate_backend": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "full_domain_traversal_authorized": false,
+  "cohort": {
+    "cells": 12,
+    "source": "corrected C1 V2 primary regular cohort",
+    "c1_fixed_profile_sha256": "800bb7cb3e82f2b1eeafa41fb83c843939e91ca53fb349125481731a09d927e2"
+  },
+  "theorem_contract": {
+    "axis_regularity": "For one coordinate axis e_i, certify a strict whole-cell sign for D_i f.",
+    "opposite_face_signs": "After orienting the axis so D_i f > 0, certify f<0 on the entry coordinate face and f>0 on the opposite exit coordinate face.",
+    "graph_patch": "For every transverse coordinate in the rectangular opposite-face domain, continuity plus strict monotonicity gives exactly one zero along the axis chord. The zero set inside the cell is therefore a local graph over that connected transverse rectangle.",
+    "claim_boundary": "This is a local cell graph-patch property only; it is not a global component or global topology statement."
+  },
+  "axis_search": {
+    "axes": ["X", "Y", "Z"],
+    "c1_engine": "C1_V2_CORRELATED_TANGENT_AFFINE",
+    "c1_max_micro_depth": 2,
+    "face_value_engine": "CORRECTED_C0_V3",
+    "face_micro_depth": 2,
+    "selection_if_multiple_axes_certify": "maximize min(derivative_margin, entry_face_margin, exit_face_margin), tie-break X then Y then Z"
+  },
+  "outputs": [
+    "axis regularity state and margin for X/Y/Z",
+    "entry/exit face sign states and margins for every regular axis",
+    "PROVEN_AXIS_GRAPH_PATCH or UNKNOWN_AXIS_GRAPH",
+    "selected axis and bottleneck margin",
+    "empirical dense face/derivative contradiction diagnostics",
+    "latency and box evaluations"
+  ],
+  "decision": {
+    "any_empirical_contradiction": "FAIL__SOUNDNESS_ALARM",
+    "one_or_more_graph_patches": "NONVACUOUS_C2_V2_AXIS_GRAPH_EVIDENCE__REVIEW_REQUIRED",
+    "zero_graph_patches": "FALSIFIED__PARENT_CELL_AXIS_GRAPH_VACUOUS__CONSIDER_CHILD_REFINEMENT"
+  },
+  "forbidden_inferences": [
+    "global single component",
+    "global topology",
+    "coverage of zero set outside the certified cell",
+    "shipping proof under ordinary float64"
+  ]
+}

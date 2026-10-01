@@ -1,0 +1,599 @@
+{
+  "actual_motion": {
+    "baseline": {
+      "aggregate": {
+        "max_edge_gt_10": 593,
+        "max_edge_gt_4": 955,
+        "worst_edge_max": 116.17707094235477,
+        "worst_edge_p99": 27.271917206586846
+      },
+      "clips": [
+        {
+          "clip_id": "demo_idle_v1",
+          "frames": [
+            {
+              "area_gt_20": 4,
+              "condition_gt_16": 71,
+              "condition_p95": 1.019116969732857,
+              "edge_gt_10": 97,
+              "edge_gt_2": 578,
+              "edge_gt_4": 421,
+              "edge_max": 24.95306762110568,
+              "edge_p95": 1.0026670737651513,
+              "edge_p99": 7.7470589436328945,
+              "face_count": 24958,
+              "frame": 0,
+              "time_seconds": 0.0
+            },
+            {
+              "area_gt_20": 6,
+              "condition_gt_16": 71,
+              "condition_p95": 1.0895340223889205,
+              "edge_gt_10": 107,
+              "edge_gt_2": 576,
+              "edge_gt_4": 427,
+              "edge_max": 25.775026324533673,
+              "edge_p95": 1.0261574091653942,
+              "edge_p99": 7.899097212327749,
+              "face_count": 24958,
+              "frame": 1,
+              "time_seconds": 0.8333333333333334
+            },
+            {
+              "area_gt_20": 7,
+              "condition_gt_16": 85,
+              "condition_p95": 1.0171817417694589,
+              "edge_gt_10": 108,
+              "edge_gt_2": 578,
+              "edge_gt_4": 432,
+              "edge_max": 26.54231495285995,
+              "edge_p95": 1.0023086097253908,
+              "edge_p99": 7.971990134741385,
+              "face_count": 24958,
+              "frame": 2,
+              "time_seconds": 1.6666666666666667
+            },
+            {
+              "area_gt_20": 6,
+              "condition_gt_16": 71,
+              "condition_p95": 1.0895340371569628,
+              "edge_gt_10": 107,
+              "edge_gt_2": 576,
+              "edge_gt_4": 427,
+              "edge_max": 25.775057295886295,
+              "edge_p95": 1.026157409187465,
+              "edge_p99": 7.899106950199828,
+              "face_count": 24958,
+              "frame": 3,
+              "time_seconds": 2.5
+            }
+          ]
+        },
+        {
+          "clip_id": "demo_run_v1",
+          "frames": [
+            {
+              "area_gt_20": 236,
+              "condition_gt_16": 487,
+              "condition_p95": 3.536751552913417,
+              "edge_gt_10": 553,
+              "edge_gt_2": 1328,
+              "edge_gt_4": 932,
+              "edge_max": 109.26301115673232,
+              "edge_p95": 2.1939185703926674,
+              "edge_p99": 19.47840314619346,
+              "face_count": 24958,
+              "frame": 0,
+              "time_seconds": 0.0
+            },
+            {
+              "area_gt_20": 273,
+              "condition_gt_16": 441,
+              "condition_p95": 2.335828731657864,
+              "edge_gt_10": 503,
+              "edge_gt_2": 1118,
+              "edge_gt_4": 879,
+              "edge_max": 94.82450328908304,
+              "edge_p95": 1.6643871157194656,
+              "edge_p99": 24.329850901304464,
+              "face_count": 24958,
+              "frame": 1,
+              "time_seconds": 0.20833333333333334
+            },
+            {
+              "area_gt_20": 217,
+              "condition_gt_16": 463,
+              "condition_p95": 3.108724711878791,
+              "edge_gt_10": 593,
+              "edge_gt_2": 1245,
+              "edge_gt_4": 955,
+              "edge_max": 116.17707094235477,
+              "edge_p95": 1.9734604205553214,
+              "edge_p99": 19.310247776383477,
+              "face_count": 24958,
+              "frame": 2,
+              "time_seconds": 0.4166666666666667
+            },
+            {
+              "area_gt_20": 206,
+              "condition_gt_16": 445,
+              "condition_p95": 2.332748819045749,
+              "edge_gt_10": 516,
+              "edge_gt_2": 1087,
+              "edge_gt_4": 880,
+              "edge_max": 109.79308935100693,
+              "edge_p95": 1.6350650358459058,
+              "edge_p99": 20.465858238832254,
+              "face_count": 24958,
+              "frame": 3,
+              "time_seconds": 0.625
+            }
+          ]
+        },
+        {
+          "clip_id": "demo_slash_v1",
+          "frames": [
+            {
+              "area_gt_20": 286,
+              "condition_gt_16": 497,
+              "condition_p95": 3.449289335459984,
+              "edge_gt_10": 548,
+              "edge_gt_2": 1330,
+              "edge_gt_4": 937,
+              "edge_max": 73.86236670323015,
+              "edge_p95": 2.1939185703926674,
+              "edge_p99": 26.668072738470045,
+              "face_count": 24958,
+              "frame": 0,
+              "time_seconds": 0.0
+            },
+            {
+              "area_gt_20": 280,
+              "condition_gt_16": 476,
+              "condition_p95": 1.876332976135517,
+              "edge_gt_10": 531,
+              "edge_gt_2": 1006,
+              "edge_gt_4": 825,
+              "edge_max": 112.63141658224096,
+              "edge_p95": 1.412089019064878,
+              "edge_p99": 27.271917206586846,
+              "face_count": 24958,
+              "frame": 1,
+              "time_seconds": 0.2777777777777778
+            },
+            {
+              "area_gt_20": 194,
+              "condition_gt_16": 385,
+              "condition_p95": 2.550050494198354,
+              "edge_gt_10": 504,
+              "edge_gt_2": 1162,
+              "edge_gt_4": 878,
+              "edge_max": 88.95218953103253,
+              "edge_p95": 1.632759549391403,
+              "edge_p99": 16.36219747331885,
+              "face_count": 24958,
+              "frame": 2,
+              "time_seconds": 0.5555555555555556
+            },
+            {
+              "area_gt_20": 286,
+              "condition_gt_16": 497,
+              "condition_p95": 3.449289335459984,
+              "edge_gt_10": 548,
+              "edge_gt_2": 1330,
+              "edge_gt_4": 937,
+              "edge_max": 73.86236670323015,
+              "edge_p95": 2.1939185703926674,
+              "edge_p99": 26.668072738470045,
+              "face_count": 24958,
+              "frame": 3,
+              "time_seconds": 0.8333333333333334
+            }
+          ]
+        }
+      ]
+    },
+    "final": {
+      "aggregate": {
+        "max_edge_gt_10": 32,
+        "max_edge_gt_4": 74,
+        "worst_edge_max": 61.51523482897883,
+        "worst_edge_p99": 1.8530904933245305
+      },
+      "clips": [
+        {
+          "clip_id": "demo_idle_v1",
+          "frames": [
+            {
+              "area_gt_20": 0,
+              "condition_gt_16": 3,
+              "condition_p95": 1.0119069108481453,
+              "edge_gt_10": 0,
+              "edge_gt_2": 26,
+              "edge_gt_4": 1,
+              "edge_max": 5.664908398463095,
+              "edge_p95": 1.0003777110281014,
+              "edge_p99": 1.035720255144306,
+              "face_count": 30969,
+              "frame": 0,
+              "time_seconds": 0.0
+            },
+            {
+              "area_gt_20": 0,
+              "condition_gt_16": 2,
+              "condition_p95": 1.0262575597717023,
+              "edge_gt_10": 0,
+              "edge_gt_2": 25,
+              "edge_gt_4": 1,
+              "edge_max": 5.416039006452451,
+              "edge_p95": 1.004894452700431,
+              "edge_p99": 1.0426936435554774,
+              "face_count": 30969,
+              "frame": 1,
+              "time_seconds": 0.8333333333333334
+            },
+            {
+              "area_gt_20": 0,
+              "condition_gt_16": 2,
+              "condition_p95": 1.011127729671742,
+              "edge_gt_10": 0,
+              "edge_gt_2": 26,
+              "edge_gt_4": 1,
+              "edge_max": 5.163383302208404,
+              "edge_p95": 1.00036523132774,
+              "edge_p99": 1.033810816317391,
+              "face_count": 30969,
+              "frame": 2,
+              "time_seconds": 1.6666666666666667
+            },
+            {
+              "area_gt_20": 0,
+              "condition_gt_16": 2,
+              "condition_p95": 1.0262575597717023,
+              "edge_gt_10": 0,
+              "edge_gt_2": 25,
+              "edge_gt_4": 1,
+              "edge_max": 5.4160404531216955,
+              "edge_p95": 1.004894452700431,
+              "edge_p99": 1.0426937017485973,
+              "face_count": 30969,
+              "frame": 3,
+              "time_seconds": 2.5
+            }
+          ]
+        },
+        {
+          "clip_id": "demo_run_v1",
+          "frames": [
+            {
+              "area_gt_20": 5,
+              "condition_gt_16": 51,
+              "condition_p95": 1.335757620658173,
+              "edge_gt_10": 31,
+              "edge_gt_2": 252,
+              "edge_gt_4": 69,
+              "edge_max": 57.283035115376,
+              "edge_p95": 1.0794880668948252,
+              "edge_p99": 1.7147641798587738,
+              "face_count": 30969,
+              "frame": 0,
+              "time_seconds": 0.0
+            },
+            {
+              "area_gt_20": 2,
+              "condition_gt_16": 37,
+              "condition_p95": 1.2628685963248945,
+              "edge_gt_10": 25,
+              "edge_gt_2": 181,
+              "edge_gt_4": 66,
+              "edge_max": 48.518842592328134,
+              "edge_p95": 1.0555502043912546,
+              "edge_p99": 1.5832177606332345,
+              "face_count": 30969,
+              "frame": 1,
+              "time_seconds": 0.20833333333333334
+            },
+            {
+              "area_gt_20": 9,
+              "condition_gt_16": 43,
+              "condition_p95": 1.3153647812692273,
+              "edge_gt_10": 31,
+              "edge_gt_2": 259,
+              "edge_gt_4": 73,
+              "edge_max": 61.51523482897883,
+              "edge_p95": 1.0664623504183706,
+              "edge_p99": 1.8530904933245305,
+              "face_count": 30969,
+              "frame": 2,
+              "time_seconds": 0.4166666666666667
+            },
+            {
+              "area_gt_20": 8,
+              "condition_gt_16": 35,
+              "condition_p95": 1.2718037251394754,
+              "edge_gt_10": 29,
+              "edge_gt_2": 187,
+              "edge_gt_4": 60,
+              "edge_max": 57.58888845727764,
+              "edge_p95": 1.0512846478522428,
+              "edge_p99": 1.6265999586343596,
+              "face_count": 30969,
+              "frame": 3,
+              "time_seconds": 0.625
+            }
+          ]
+        },
+        {
+          "clip_id": "demo_slash_v1",
+          "frames": [
+            {
+              "area_gt_20": 3,
+              "condition_gt_16": 33,
+              "condition_p95": 1.3236872910581976,
+              "edge_gt_10": 17,
+              "edge_gt_2": 259,
+              "edge_gt_4": 74,
+              "edge_max": 36.364134030863156,
+              "edge_p95": 1.0779775393318876,
+              "edge_p99": 1.7461875130283324,
+              "face_count": 30969,
+              "frame": 0,
+              "time_seconds": 0.0
+            },
+            {
+              "area_gt_20": 6,
+              "condition_gt_16": 36,
+              "condition_p95": 1.2484693953213766,
+              "edge_gt_10": 32,
+              "edge_gt_2": 164,
+              "edge_gt_4": 70,
+              "edge_max": 58.970438798751296,
+              "edge_p95": 1.0713724154224462,
+              "edge_p99": 1.5421281357790693,
+              "face_count": 30969,
+              "frame": 1,
+              "time_seconds": 0.2777777777777778
+            },
+            {
+              "area_gt_20": 8,
+              "condition_gt_16": 26,
+              "condition_p95": 1.2486059895029509,
+              "edge_gt_10": 23,
+              "edge_gt_2": 204,
+              "edge_gt_4": 56,
+              "edge_max": 44.91294009797881,
+              "edge_p95": 1.0505661482556474,
+              "edge_p99": 1.6465049669003988,
+              "face_count": 30969,
+              "frame": 2,
+              "time_seconds": 0.5555555555555556
+            },
+            {
+              "area_gt_20": 3,
+              "condition_gt_16": 33,
+              "condition_p95": 1.3236872910581976,
+              "edge_gt_10": 17,
+              "edge_gt_2": 259,
+              "edge_gt_4": 74,
+              "edge_max": 36.364134030863156,
+              "edge_p95": 1.0779775393318876,
+              "edge_p99": 1.7461875130283324,
+              "face_count": 30969,
+              "frame": 3,
+              "time_seconds": 0.8333333333333334
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "arm": "UNIFORM_ALL_PROJECTED",
+  "claim_boundary": [
+    "This court constructs isolated authorized Stage17 child partitions and holeless Stage18 candidates only.",
+    "No product mainline ledger, run manifest, Stage17 authority, Stage18 authority, or Stage32 skin authority is mutated.",
+    "The numeric Arachne field is losslessly semantic-ID rebound and independently requalified before topology evidence is used.",
+    "Teacher inputs are not provided to the predictor or topology operator.",
+    "A product integration attempt requires a separate mainline replay of the selected child repair."
+  ],
+  "compiler_requalification": {
+    "corrected_row_count": 0,
+    "max_abs_weight_delta": 5.551115123125783e-16,
+    "max_row_l1_weight_delta": 5.551115124164449e-16,
+    "numeric_field_preserved": true,
+    "skin_lineage_hash": "e48db005c0ecc96f96c923ecc0e6c476d5ed108da821c9c7310720a6c0f8a79c",
+    "total_correction_l1": 3.803060475541516e-13,
+    "total_l1_weight_delta": 3.803060475541516e-13
+  },
+  "final_g3": {
+    "face_count": 30969,
+    "failure_invariants": [
+      "DYNAMIC_AREA_RATIO_BELOW_MIN",
+      "DYNAMIC_CONDITION_NUMBER_ABOVE_MAX"
+    ],
+    "maximum_area_ratio": 6.368265162489407,
+    "maximum_condition_number": 159.80476553918533,
+    "maximum_edge_ratio": 6.181914232249359,
+    "minimum_area_ratio": 0.008288206693681889,
+    "minimum_edge_ratio": 0.14028159865486553,
+    "passed": false,
+    "probe_count": 169,
+    "report_hash": "37feae0866f563280beae98838201bf412eae8e61d757d24fb0b7a31fe2a5580"
+  },
+  "final_g3b": {
+    "passed": true,
+    "report_hash": "03ab26cbb95b4c1d5dc3e5b68852c604e5333aed4e5d2287cb879681cc8ed005",
+    "risky_face_count": 118,
+    "unsafe_face_count": 0,
+    "weight_mutation": false
+  },
+  "final_topology": {
+    "candidate_lineage_hash": "08d15249d2b7db5fc5667e8f483f8cfeeec16fafc7ebc3b3aa9c301bf91681fa",
+    "candidate_metadata": {
+      "camera_authority_used": false,
+      "dual_geometry_skin_support_required": true,
+      "face_deletion_count": 0,
+      "face_provenance_mode": "EXACT_COMPACTED_DENSE_FACE_REPLAY_HOLELESS_PARTITIONED",
+      "generated_centroid_vertex_count": 1224,
+      "generated_seam_vertex_count": 5660,
+      "mixed_source_face_count": 2651,
+      "output_face_count": 30969,
+      "rest_area_relative_error": 1.8559449054452937e-15,
+      "source_face_count": 24443,
+      "source_mesh_used": false,
+      "three_clique_face_minting_allowed": false,
+      "view_independent": true
+    },
+    "component_count": 203,
+    "face_count": 30969,
+    "partition_lineage_hash": "e77ab00d2b8402429d6c8d7f71c1379588b00e825da291ea83060c00202a7d3c",
+    "vertex_count": 18933
+  },
+  "iterations": [
+    {
+      "action": "REPARTITION_AND_HOLELESS_REBUILD",
+      "authorization_hash": "df69d3e62d92c0a7c21f19686722f7b3593b7a7180dad2660b7726db856ced27",
+      "candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+      "candidate_separate_pair_count": 996,
+      "child_candidate_lineage_hash": "8eb818e4d1fc0e04040978515b2789e93552fe7a02598ba771d7c68ed169d592",
+      "child_component_count": 81,
+      "child_face_count": 29768,
+      "child_face_deletion_count": 0,
+      "child_generated_centroid_vertex_count": 351,
+      "child_generated_seam_vertex_count": 5042,
+      "child_mixed_source_face_count": 2487,
+      "child_partition_lineage_hash": "d9cca9a61ff010e7bd1c7312856e7aeb31eea03a22418df1a07439759d9ad97a",
+      "child_rest_area_relative_error": 2.6995562261022457e-15,
+      "child_vertex_count": 17442,
+      "component_count": 6,
+      "directive_hash": "e4a278a6f1f05134ff1bd72ca23ee2f2da63c975ca87aa2a8adde4ab5a7d84a4",
+      "evaluation_index": 0,
+      "g3b": {
+        "passed": false,
+        "report_hash": "223ebb0d891e05a8d150639f1e03d40cb286b282ffd9a924a383ef34b6fd8a11",
+        "risky_face_count": 1776,
+        "unsafe_face_count": 1493
+      },
+      "partition_lineage_hash": "ba14cb67ff5bdf78a609e56ccddcfd8203075ffe304734df3be8fcf657635dec",
+      "separate_boundary_count": 0,
+      "unresolved_unsafe_face_count": 0
+    },
+    {
+      "action": "REPARTITION_AND_HOLELESS_REBUILD",
+      "authorization_hash": "75508551e63e8e76fbf2c2548e058e1090edc6b1932efcc5e026708bf2fccdbf",
+      "candidate_lineage_hash": "8eb818e4d1fc0e04040978515b2789e93552fe7a02598ba771d7c68ed169d592",
+      "candidate_separate_pair_count": 139,
+      "child_candidate_lineage_hash": "3a4553a8aa032602c2bd9f2824da7c522269ff46f7a5d51452db90b5ba5d6d54",
+      "child_component_count": 191,
+      "child_face_count": 30831,
+      "child_face_deletion_count": 0,
+      "child_generated_centroid_vertex_count": 1152,
+      "child_generated_seam_vertex_count": 5570,
+      "child_mixed_source_face_count": 2618,
+      "child_partition_lineage_hash": "d3581f6e626b133f883a153c5ce5fb1a3405b463c157561e8eaef7f267523d04",
+      "child_rest_area_relative_error": 3.0370007543650262e-15,
+      "child_vertex_count": 18771,
+      "component_count": 81,
+      "directive_hash": "9cff64eb230b7e46ba49d174acd5e948529ab843d1dea9374e885d1e86ab9d22",
+      "evaluation_index": 1,
+      "g3b": {
+        "passed": false,
+        "report_hash": "472d807d5203adae80cdf1847f5207436f68f971837cd012d92e39b03edd6af6",
+        "risky_face_count": 652,
+        "unsafe_face_count": 422
+      },
+      "partition_lineage_hash": "d9cca9a61ff010e7bd1c7312856e7aeb31eea03a22418df1a07439759d9ad97a",
+      "separate_boundary_count": 2523,
+      "unresolved_unsafe_face_count": 0
+    },
+    {
+      "action": "REPARTITION_AND_HOLELESS_REBUILD",
+      "authorization_hash": "907794be35b1bb54d6f182feae208a4bb62a177c1bbc60c9f499b1a560f8f480",
+      "candidate_lineage_hash": "3a4553a8aa032602c2bd9f2824da7c522269ff46f7a5d51452db90b5ba5d6d54",
+      "candidate_separate_pair_count": 12,
+      "child_candidate_lineage_hash": "09f1bbc2de71c6496ded93f6ee2b672f5e81fe72217b440701ec2e09380b4a3e",
+      "child_component_count": 201,
+      "child_face_count": 30957,
+      "child_face_deletion_count": 0,
+      "child_generated_centroid_vertex_count": 1212,
+      "child_generated_seam_vertex_count": 5656,
+      "child_mixed_source_face_count": 2651,
+      "child_partition_lineage_hash": "23d26838011c0de38be1a04b2b81e206b4ee1fbf7d19efc7520b9e17a3daccf9",
+      "child_rest_area_relative_error": 1.8559449054452937e-15,
+      "child_vertex_count": 18917,
+      "component_count": 191,
+      "directive_hash": "160a64e56ae6e9c6f6cf9ff93f2ab10a0cefcae7825b8077a7113e75d10252bf",
+      "evaluation_index": 2,
+      "g3b": {
+        "passed": false,
+        "report_hash": "556975e34f5fc4fba0ee03300761c13472e60f765bb3c76f8f856167e670a357",
+        "risky_face_count": 161,
+        "unsafe_face_count": 15
+      },
+      "partition_lineage_hash": "d3581f6e626b133f883a153c5ce5fb1a3405b463c157561e8eaef7f267523d04",
+      "separate_boundary_count": 2787,
+      "unresolved_unsafe_face_count": 0
+    },
+    {
+      "action": "REPARTITION_AND_HOLELESS_REBUILD",
+      "authorization_hash": "e9d2c29036c2a80a5a83a1b1625f758b39dfc7556e5edab33ee35638dd82ce13",
+      "candidate_lineage_hash": "09f1bbc2de71c6496ded93f6ee2b672f5e81fe72217b440701ec2e09380b4a3e",
+      "candidate_separate_pair_count": 2,
+      "child_candidate_lineage_hash": "08d15249d2b7db5fc5667e8f483f8cfeeec16fafc7ebc3b3aa9c301bf91681fa",
+      "child_component_count": 203,
+      "child_face_count": 30969,
+      "child_face_deletion_count": 0,
+      "child_generated_centroid_vertex_count": 1224,
+      "child_generated_seam_vertex_count": 5660,
+      "child_mixed_source_face_count": 2651,
+      "child_partition_lineage_hash": "e77ab00d2b8402429d6c8d7f71c1379588b00e825da291ea83060c00202a7d3c",
+      "child_rest_area_relative_error": 1.8559449054452937e-15,
+      "child_vertex_count": 18933,
+      "component_count": 201,
+      "directive_hash": "e8f0f5a235b63666f9533a57c4d91c940a7875a7e40929fb17b0d7c6b28c81d1",
+      "evaluation_index": 3,
+      "g3b": {
+        "passed": false,
+        "report_hash": "4c748a2d898a45f32d886b691e374ccb502f7d3769bad66a07e1f8ce30050fcb",
+        "risky_face_count": 126,
+        "unsafe_face_count": 2
+      },
+      "partition_lineage_hash": "23d26838011c0de38be1a04b2b81e206b4ee1fbf7d19efc7520b9e17a3daccf9",
+      "separate_boundary_count": 2830,
+      "unresolved_unsafe_face_count": 0
+    },
+    {
+      "action": "CLOSED",
+      "candidate_lineage_hash": "08d15249d2b7db5fc5667e8f483f8cfeeec16fafc7ebc3b3aa9c301bf91681fa",
+      "component_count": 203,
+      "evaluation_index": 4,
+      "g3b": {
+        "passed": true,
+        "report_hash": "03ab26cbb95b4c1d5dc3e5b68852c604e5333aed4e5d2287cb879681cc8ed005",
+        "risky_face_count": 118,
+        "unsafe_face_count": 0
+      },
+      "partition_lineage_hash": "e77ab00d2b8402429d6c8d7f71c1379588b00e825da291ea83060c00202a7d3c",
+      "separate_boundary_count": 2832
+    }
+  ],
+  "parent_topology": {
+    "candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+    "component_count": 6,
+    "face_count": 24958,
+    "partition_lineage_hash": "ba14cb67ff5bdf78a609e56ccddcfd8203075ffe304734df3be8fcf657635dec",
+    "vertex_count": 12049
+  },
+  "reliability_evidence_hash": "6745dd28eaacea7fc6857c73f53ee82744378dc487a6f196f4fc40a5dcf256ef",
+  "repair_closed_within_budget": true,
+  "repairs_used": 4,
+  "schema": "RealSaS.KnightArachneV6CoverageTopologyRepairCourtArm.v1",
+  "semantic_rebind": {
+    "mapping_hash": "f665a4b35d1e317afa3045fc4d05d7e15301aede411eac112346c04e1d3397ac",
+    "new_skeleton_lineage_hash": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+    "numeric_weight_array_unchanged": true,
+    "old_skeleton_lineage_hash": "c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce",
+    "semantic_tree_hash": "dbe7e6d29551d1211653efaf3c344c2007c5b6a812932c6d115d48b77b3ca46f"
+  },
+  "source_weights_npz_sha256": "41ab25238d7901653896daba1b5921a340824561893b581d2fe3aed9811bb7e8",
+  "status": "COMPLETE"
+}

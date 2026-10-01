@@ -1,0 +1,66 @@
+{
+  "schema": "RealSaS.IRISV4DemoGeometryPreflightResult.v1",
+  "date_utc": "2026-09-22",
+  "status": "PREFLIGHT_PASS__A100_RUN_ALL_NOTEBOOK_AUTHORIZED",
+  "tested_repo_commit": "478cbf82408ba903296196129b04efea0d3483ab",
+  "workflow": {
+    "name": "iris-v4-demo-geometry-contract",
+    "run_id": 35714931299,
+    "job_id": 106704082018,
+    "conclusion": "success",
+    "test_result": "20_PASSED",
+    "first_run_fixture_erratum": {
+      "run_id": 35714795576,
+      "conclusion": "failure",
+      "classification": "TEST_FIXTURE_SCALE_ONLY__64X64_SYNTHETIC_RASTER_HAD_NO_GT32PX_BACKGROUND_POOL",
+      "production_code_changed_to_fix": false,
+      "repair": "TEST_RASTER_INCREASED_TO_128X128_TO_CONTAIN_BOTH_NEAR_AND_FAR_BACKGROUND_POOLS"
+    }
+  },
+  "architecture_proof": {
+    "v3_trainable_parameters": 4489506,
+    "v4_trainable_parameters": 5094882,
+    "v4_minus_v3_parameters": 605376,
+    "v4_over_v3_parameter_ratio": 1.134842452599462,
+    "v4_scene_query_shape": [3,32,32,256],
+    "v4_final_triplane_resolution": 64,
+    "v4_plane_channels": 64,
+    "v4_point_feature_dim": 192,
+    "v4_scene_dim": 256,
+    "v4_scene_transformer_layers": 4,
+    "v4_attention_heads": 8,
+    "v4_field_residual_blocks": 4
+  },
+  "training_signal_proof": {
+    "all_eight_views_every_optimizer_step": true,
+    "foreground_component_balanced_occupancy": true,
+    "near_background_metric_full_ray_empty_space": true,
+    "far_background_metric_full_ray_empty_space": true,
+    "hard_negative_replay": true,
+    "hard_negative_refresh_candidates_per_view": 1024,
+    "hard_negative_bank_size_per_view": 64,
+    "source_certified_3d_exterior_metric_barrier": true,
+    "source_exterior_pixel_quantization_guard_px": 1.4142135623730951,
+    "out_of_frame_negative_evidence": false,
+    "explicit_zero_set_near_zero_loss": false,
+    "training_only_differentiable_mesh_raster_loss": false,
+    "global_teacher_sdf_authority": false,
+    "teacher_inference_input": false
+  },
+  "unchanged_authority": {
+    "canonical_surface_extractor": "RealSaS.ZeroSurfaceDecoder.MarchingCubes.v3",
+    "stage13_v2_policy_sha256": "8edf9934f1d14f45dcb719fcf39691d69c5797f7410c958ae3005ef639a3c214",
+    "threshold_relaxation": false,
+    "visual_hull_clipping": false,
+    "gsa_authority": "UNCHANGED",
+    "rigging_surface_ir_authority": "UNCHANGED",
+    "caa_authority": "UNCHANGED"
+  },
+  "claim_boundary": {
+    "controlled_knight_demo_engineering": true,
+    "scientific_single_variable_claim": false,
+    "unseen_generalization_claim": false,
+    "product_authority_minted": false,
+    "knight_witness_promoted": false
+  }
+}

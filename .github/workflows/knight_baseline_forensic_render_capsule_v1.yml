@@ -1,0 +1,236 @@
+name: knight-baseline-forensic-render-capsule-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/demo/render_knight_baseline_forensic_capsule_v1.py'
+      - '.github/workflows/knight_baseline_forensic_render_capsule_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: knight-baseline-forensic-render-capsule-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  forensic:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      BASELINE_COMMIT: 62aebc388605e0f762f175dd3f929b5c09d1d70b
+      BASELINE_PRODUCER_BLOB: 7917be02f325ba00b5dcd2b31a786898e45f640f
+      OUT_DIR: canonical/knight_baseline_forensic_capsule_v1
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Preserve diagnostic script and pin baseline codebase
+        run: |
+          set -euo pipefail
+          cp tools/demo/render_knight_baseline_forensic_capsule_v1.py /tmp/render_knight_baseline_forensic_capsule_v1.py
+          DIAG_BLOB="$(git hash-object /tmp/render_knight_baseline_forensic_capsule_v1.py)"
+          echo "DIAG_BLOB=$DIAG_BLOB" >> "$GITHUB_ENV"
+          git checkout --detach "$BASELINE_COMMIT"
+          test "$(git hash-object tools/demo/render_knight_motion_preview_v1.py)" = "$BASELINE_PRODUCER_BLOB"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_DEMO_MOTION_VISUAL_CONTINUATION_REPORT_V1.json)" = "9120723f6bc00142fb6bb992d3ee7a85c601bf4f"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_IDLE_DEMO_PREVIEW_V1.gif)" = "31b64edff1da106bc8feb00faede61ffe68dc89c"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_RUN_DEMO_PREVIEW_V1.gif)" = "b8f0e97e74396a0987444bb72ea93db4bb519640"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_SLASH_DEMO_PREVIEW_V1.gif)" = "73a567f3ff17786d3316e3fb02a723ee3c026eca"
+          cp /tmp/render_knight_baseline_forensic_capsule_v1.py tools/demo/render_knight_baseline_forensic_capsule_v1.py
+          test "$(git hash-object tools/demo/render_knight_baseline_forensic_capsule_v1.py)" = "$DIAG_BLOB"
+          echo "KNIGHT_BASELINE_CODEBASE_PIN_PASS"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Compile frozen producer and forensic diagnostic
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/demo/render_knight_motion_preview_v1.py
+          python -m py_compile tools/demo/render_knight_baseline_forensic_capsule_v1.py
+
+      - name: Recover and reconstruct historical baseline authority
+        run: |
+          set -euo pipefail
+          REPLAY_AUTHORITY=/tmp/knight_baseline_replay_authority
+          REPLAY_RUN="$REPLAY_AUTHORITY/runs/$RUN_ID"
+          SOURCE_RUN="$AUTHORITY_ROOT/runs/$RUN_ID"
+          rm -rf "$REPLAY_AUTHORITY"
+          mkdir -p "$REPLAY_RUN"
+          ln -s "$SOURCE_RUN/run_manifest.json" "$REPLAY_RUN/run_manifest.json"
+          ln -s "$SOURCE_RUN/inputs" "$REPLAY_RUN/inputs"
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          source_run = Path("/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924")
+          source_ledger = source_run / "ACTIVE_RUN_V2.json"
+          target = Path("/tmp/knight_baseline_replay_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/ACTIVE_RUN_V2.json")
+          ledger = json.loads(source_ledger.read_text())
+
+          expected_candidate = "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909"
+          wanted = {
+              "05_CAMERA_CONTRACT_SOLVED": "RealSaS.QualifiedCameraSetIR.v1",
+              "18_CANONICAL_MESH_ADDRESSING_BUILD": "RealSaS.CanonicalMeshCandidateIR.v1",
+              "23_COMPLETE_APPEARANCE_ASSET_BAKED": "RealSaS.CompleteAppearanceAssetIR.v2",
+              "28_SKELETON_QUALIFIED": "RealSaS.QualifiedSkeletonIR.v1",
+              "32_SKIN_QUALIFIED": "RealSaS.QualifiedSkinIR.v1",
+          }
+
+          def sha256(path):
+              h=hashlib.sha256()
+              with path.open("rb") as f:
+                  for chunk in iter(lambda:f.read(1<<20), b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          candidates={schema:[] for schema in wanted.values()}
+          scanned=0
+          for path in source_run.rglob("*.json"):
+              if path.name == "ACTIVE_RUN_V2.json":
+                  continue
+              try:
+                  if path.stat().st_size > 32*1024*1024:
+                      continue
+                  payload=json.loads(path.read_text())
+              except Exception:
+                  continue
+              scanned += 1
+              schema=str(payload.get("schema") or payload.get("schema_version") or "")
+              if schema in candidates:
+                  candidates[schema].append((path,payload,sha256(path)))
+
+          print("BASELINE_RECOVERY_SCANNED_JSON", scanned)
+          for schema, rows in candidates.items():
+              print("BASELINE_RECOVERY_CANDIDATES", schema, len(rows))
+              for path,payload,digest in rows[:50]:
+                  print(json.dumps({
+                      "schema":schema,
+                      "path":str(path),
+                      "sha256":digest,
+                      "candidate_lineage_hash":payload.get("candidate_lineage_hash"),
+                      "candidate_mesh_hash":payload.get("candidate_mesh_hash"),
+                      "candidate_mesh_binding_hash":payload.get("candidate_mesh_binding_hash"),
+                      "skeleton_lineage_hash":payload.get("skeleton_lineage_hash"),
+                      "skin_lineage_hash":payload.get("skin_lineage_hash"),
+                      "asset_binding_hash":payload.get("asset_binding_hash"),
+                  }, sort_keys=True))
+
+          recovered={}
+          # Stage18: exact baseline candidate is known from subsequent forensic reports.
+          rows=candidates["RealSaS.CanonicalMeshCandidateIR.v1"]
+          rows=[row for row in rows if str(row[1].get("candidate_lineage_hash") or "") == expected_candidate]
+          if len(rows) != 1:
+              raise RuntimeError("BASELINE_STAGE18_EXACT_CANDIDATE_CARDINALITY:"+str(len(rows)))
+          recovered["18_CANONICAL_MESH_ADDRESSING_BUILD"]=rows[0]
+
+          # Stage23 must explicitly bind the same candidate when that field exists.
+          rows=candidates["RealSaS.CompleteAppearanceAssetIR.v2"]
+          exact=[]
+          for row in rows:
+              p=row[1]
+              binds={
+                  str(p.get("candidate_mesh_hash") or ""),
+                  str(p.get("candidate_mesh_binding_hash") or ""),
+                  str((p.get("metadata") or {}).get("candidate_lineage_hash") or ""),
+                  str((p.get("metadata") or {}).get("candidate_mesh_hash") or ""),
+              }
+              if expected_candidate in binds:
+                  exact.append(row)
+          if not exact and len(rows)==1:
+              exact=rows
+          if len(exact) != 1:
+              raise RuntimeError("BASELINE_STAGE23_CANDIDATE_BINDING_CARDINALITY:"+str(len(exact)))
+          recovered["23_COMPLETE_APPEARANCE_ASSET_BAKED"]=exact[0]
+
+          # Camera/skeleton/skin: choose the actual stage output directory,
+          # never imported teacher/model handoff copies.
+          for sid,schema in [
+              ("05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1"),
+              ("28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1"),
+              ("32_SKIN_QUALIFIED","RealSaS.QualifiedSkinIR.v1"),
+          ]:
+              stage_fragment = "/artifacts/" + sid + "/"
+              rows=[
+                  row for row in candidates[schema]
+                  if stage_fragment in str(row[0]).replace("\\","/")
+              ]
+              by_sha={}
+              for row in rows:
+                  by_sha.setdefault(row[2],row)
+              rows=list(by_sha.values())
+              if len(rows) != 1:
+                  raise RuntimeError("BASELINE_RECOVERY_STAGE_OUTPUT_FAIL:"+sid+":"+str(len(rows)))
+              recovered[sid]=rows[0]
+
+          for row in ledger["stages"]:
+              sid=str(row["id"])
+              if sid not in recovered:
+                  continue
+              path,payload,digest=recovered[sid]
+              schema=wanted[sid]
+              row["status"]="PASS_DEMO_ONLY"
+              row["blockers"]=[]
+              row["outputs"]=[{
+                  "path":str(path.resolve()),
+                  "sha256":digest,
+                  "authority_class":"RECOVERED_HISTORICAL_BASELINE_FOR_FORENSIC_REPLAY",
+                  "schema":schema,
+              }]
+              print("BASELINE_RECOVERED_STAGE", json.dumps({
+                  "stage_id":sid,"schema":schema,"path":str(path),"sha256":digest
+              }, sort_keys=True))
+
+          target.write_text(json.dumps(ledger, indent=2, sort_keys=True) + "\n")
+          PY
+          echo "REPLAY_AUTHORITY=$REPLAY_AUTHORITY" >> "$GITHUB_ENV"
+
+      - name: Run focused byte-exact RUN baseline forensic capsule
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/knight_baseline_forensic_capsule_v1
+          PYTHONPATH=. python -m tools.demo.render_knight_baseline_forensic_capsule_v1 \
+            --authority-root "$REPLAY_AUTHORITY" \
+            --run-id "$RUN_ID" \
+            --out-dir /tmp/knight_baseline_forensic_capsule_v1 \
+            --clip-id demo_run_v1
+          test -f /tmp/knight_baseline_forensic_capsule_v1/BASELINE_FORENSIC_CAPSULE_V1.json
+          test "$(git hash-object /tmp/knight_baseline_forensic_capsule_v1/KNIGHT_RUN_BASELINE_ACTUAL_RGB_V1.png)" = "8e9ed58a3bfbbace73f54e3e5593691f90eef4f1"
+          echo "KNIGHT_RUN_BYTE_EXACT_BASELINE_AND_FORENSIC_PASS"
+
+      - name: Seal forensic capsule on research branch
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/knight_baseline_forensic_capsule_seal
+          cp -a /tmp/knight_baseline_forensic_capsule_v1 /tmp/knight_baseline_forensic_capsule_seal
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git checkout -B research/vf11-certified-adaptive-20260921 origin/research/vf11-certified-adaptive-20260921
+          rm -rf "$OUT_DIR"
+          mkdir -p "$(dirname "$OUT_DIR")"
+          cp -a /tmp/knight_baseline_forensic_capsule_seal "$OUT_DIR"
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add "$OUT_DIR"
+          if git diff --cached --quiet; then
+            echo "KNIGHT_BASELINE_FORENSIC_CAPSULE_UNCHANGED"
+            exit 0
+          fi
+          git commit -m 'diagnostic: seal byte-exact Knight baseline forensic capsule'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

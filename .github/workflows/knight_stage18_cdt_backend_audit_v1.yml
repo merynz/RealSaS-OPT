@@ -1,0 +1,116 @@
+name: knight-stage18-cdt-backend-audit-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/knight_stage18_cdt_backend_audit_v1.yml'
+
+concurrency:
+  group: knight-stage18-cdt-backend-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      OUT: canonical/knight_stage18_cdt_backend_audit_v1
+
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+
+      - name: Inspect exact Stage18 backend and parent quality
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT"
+          PYTHONPATH=. python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path("/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924")
+          out=Path("canonical/knight_stage18_cdt_backend_audit_v1")
+          p18=root/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json"
+          pq_candidates=[
+            root/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/relation_parent_quality_report.json",
+            root/"artifacts/26_MESH_CANDIDATE_BUILD/relation_parent_quality_report.json",
+          ]
+          pq=next((p for p in pq_candidates if p.is_file()),None)
+          if not p18.is_file(): raise RuntimeError(p18)
+          cand=json.loads(p18.read_text())
+          parent=json.loads(pq.read_text()) if pq else None
+
+          # Best-effort discover run manifest/ledger without assuming filename.
+          manifest_hits=[]
+          for p in sorted(root.glob("*.json")):
+            try:j=json.loads(p.read_text())
+            except:continue
+            if isinstance(j,dict) and ("mesh" in j or "run_id" in j or "stages" in j):
+              manifest_hits.append({
+                "path":str(p),
+                "sha256":hashlib.sha256(p.read_bytes()).hexdigest(),
+                "run_id":j.get("run_id"),
+                "execution_class":j.get("execution_class"),
+                "mesh":j.get("mesh"),
+                "mesh_policy":j.get("mesh_policy"),
+                "demo_execution":j.get("demo_execution"),
+              })
+
+          fallback=Path("canonical/KNIGHT_DEMO_STAGE18_MESH_FALLBACK_PREREG_20260925.json")
+          pre=json.loads(fallback.read_text())
+          report={
+            "schema":"RealSaS.KnightStage18CDTBackendAudit.v1",
+            "status":"AUDIT_ONLY__NO_REPAIR_APPLIED",
+            "candidate":{
+              "sha256":hashlib.sha256(p18.read_bytes()).hexdigest(),
+              "producer_id":cand.get("producer_id"),
+              "face_count":len(cand.get("faces") or []),
+              "vertex_count":len(cand.get("vertices") or []),
+              "backend_role":dict(cand.get("metadata") or {}).get("backend_role"),
+              "candidate_lineage_hash":cand.get("candidate_lineage_hash"),
+            },
+            "relation_parent_quality":parent,
+            "relation_parent_quality_path":None if pq is None else str(pq),
+            "run_root_json_candidates":manifest_hits,
+            "fallback_prereg":{
+              "sha256":hashlib.sha256(fallback.read_bytes()).hexdigest(),
+              "requested_backend_required":pre["eligibility"]["requested_backend_required"],
+              "only_admissible_precondition_failure":pre["eligibility"]["only_admissible_precondition_failure"],
+              "boundary_split_must_remain_forbidden":pre["eligibility"]["boundary_split_must_remain_forbidden"],
+              "product_pass_forbidden":pre["demo_admission_semantics"]["product_pass_forbidden"],
+              "minimum_rest_triangle_angle_deg":pre["frozen_product_policy"]["minimum_rest_triangle_angle_deg"],
+              "maximum_rest_aspect":pre["frozen_product_policy"]["maximum_rest_aspect_longest_edge_over_min_altitude"],
+            },
+            "finding":{
+              "id":"KNIGHT_STAGE18_EFFECTIVE_RELATION_BASELINE_IS_DEMO_FALLBACK_NOT_PRODUCT_CDT",
+              "confirmed":bool(
+                cand.get("producer_id")=="RealSaS.CanonicalRelationMeshBaseline.v1"
+                and dict(cand.get("metadata") or {}).get("backend_role")=="SAFE_BASELINE__NOT_FINAL_CDT_QUALITY_BACKEND"
+                and pre["eligibility"]["requested_backend_required"]=="CANONICAL_CDT_LOCAL_CHART_V1"
+                and pre["demo_admission_semantics"]["product_pass_forbidden"] is True
+              ),
+              "claim_boundary":"This audit determines why Knight used the relation baseline. It does not authorize boundary splitting or select a replacement triangulation policy."
+            }
+          }
+          (out/"REPORT.json").write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
+          print(json.dumps(report,indent=2,sort_keys=True))
+          PY
+
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add "$OUT/REPORT.json"
+          git commit -m 'audit: seal Knight Stage18 CDT backend evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

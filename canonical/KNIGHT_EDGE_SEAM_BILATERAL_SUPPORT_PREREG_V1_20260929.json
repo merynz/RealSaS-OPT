@@ -1,0 +1,11 @@
+{
+  "schema": "RealSaS.KnightEdgeSeamBilateralSupportPrereg.v1",
+  "status": "FROZEN_BEFORE_BILATERAL_SUPPORT_RESULT",
+  "date": "2026-09-29",
+  "base_rule": "STRETCH_GT4_AND_WEIGHT_L1_GT1",
+  "bilateral_support_rule": "For each candidate edge (u,v), u must have another dense neighbor whose Arachne dominant joint equals u's dominant joint, and v must independently have another dense neighbor whose dominant joint equals v's dominant joint.",
+  "postfilter": "Apply the already-preregistered graph 2-core after bilateral support.",
+  "rationale": "A coherent mechanical seam should separate two locally supported skin regimes; an isolated erroneous weight row tends to create unsupported star-like discontinuities.",
+  "teacher_policy": "Teacher source topology is evaluation-only after candidate, bilateral support, and 2-core are frozen.",
+  "no_product_mutation": true
+}

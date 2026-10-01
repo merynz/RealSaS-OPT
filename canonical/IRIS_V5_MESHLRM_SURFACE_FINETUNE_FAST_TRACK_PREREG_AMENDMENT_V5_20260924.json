@@ -1,0 +1,29 @@
+{
+  "schema": "RealSaS.IRIS.V5MeshLRMSurfaceFineTuneFastTrackPreregAmendmentV5.v1",
+  "status": "FROZEN_BEFORE_ANY_SCIENTIFIC_OPTIMIZER_STEP__PARITY_GATE_FINALIZATION",
+  "date_utc": "2026-09-24",
+  "amends": "canonical/IRIS_V5_MESHLRM_SURFACE_FINETUNE_FAST_TRACK_PREREG_AMENDMENT_V4_20260924.json",
+  "stage13_semantic_parity_gate": {
+    "deterministic_sample_faces": 4096,
+    "per_view_min_recall": 0.98,
+    "per_view_min_precision": 0.98,
+    "rationale": "This gate detects gross camera/raster semantic drift. Exact top-left edge ownership can differ at a small number of boundary pixels between PyTorch3D and the compiler rasterizer, so the gate is not used as a product-quality metric."
+  },
+  "frozen_product_proxy_gate": {
+    "per_view_min_recall": 0.95,
+    "per_view_min_precision": 0.95,
+    "authority": "FROZEN_C_STAGE13_PREDICTED_MASKS",
+    "role": "The stronger test that the 256-grid differentiable training mesh represents the product mesh footprint before any optimizer step."
+  },
+  "hard_raster": {
+    "blur_radius": 0,
+    "faces_per_pixel": 1,
+    "occupancy": "pix_to_face[...,0]>=0"
+  },
+  "soft_surrogate": {
+    "face_selection": "CURRENT_HARD_PREDICTED_BOUNDARY_VISIBLE_FACE_IDS",
+    "selection_detached": true,
+    "full_internal_mesh_soft_raster": false
+  },
+  "scientific_intervention_unchanged": true
+}

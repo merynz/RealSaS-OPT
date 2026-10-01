@@ -1,0 +1,19 @@
+{
+  "artifacts": [
+    {
+      "bytes": 13520,
+      "path": "canonical/V2_LEARNED_EVIDENCE_CONTRACT_AUDIT_V1_20260928.json",
+      "sha256": "fbecb2cb0f527b81b3623c66fc2a793ba8200fede4285cdaa09f925b5529ada5"
+    },
+    {
+      "bytes": 1445,
+      "path": "canonical/v2_learned_evidence_contract_audit_v1/AUDIT_STDOUT.txt",
+      "sha256": "ca6b720efe26e85e75d84ee09a78d7144e3ae045ad2c88b1d00444db5b8c694d"
+    }
+  ],
+  "model_retrain_authorized": false,
+  "repair_applied": false,
+  "repo_head": "5662de200697ca2d18bd9f30cc185243439e5a31",
+  "schema": "RealSaS.V2LearnedEvidenceContractAuditSeal.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED"
+}

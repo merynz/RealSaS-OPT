@@ -1,0 +1,39 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX6AcceleratorScreenPreregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__ACCELERATOR_SCREEN_CPU_VERIFY",
+  "authority_class": "RESEARCH_PERFORMANCE_ENGINEERING_ONLY",
+  "parent": "canonical/VF11_EXTRACTOR_TRANSITION_X5_RESEARCH_CLOSURE_20260921.json",
+  "design": {
+    "accelerator_backend": "float64 batched C0 X5 on CUDA when available",
+    "accelerator_role": "proposal/screening only",
+    "cpu_backend": "float64 X5 batched C0 on CPU",
+    "authority_rule": "a node may become terminal EMPTY only if CPU confirms the same strict sign after an accelerator decisive proposal",
+    "accelerator_unknown_rule": "remain active without CPU verification; false UNKNOWN only reduces pruning efficiency",
+    "accelerator_false_decisive_rule": "CPU rejection converts the node back to active and it is refined if depth remains"
+  },
+  "max_micro_depth": 2,
+  "correctness_gates": [
+    "CPU-only accelerator emulation matches X5 ladder on deterministic fixtures",
+    "injected false-positive accelerator decisive proposals are rejected by CPU confirmation",
+    "confirmed terminals are a subset of CPU-X5 decisive terminals",
+    "no terminal sign may disagree with CPU-X5"
+  ],
+  "a100_preflight": {
+    "frozen_panel_regimes": 16,
+    "accelerator_batch_sizes": [128,256,512,1024,2048],
+    "report": [
+      "CUDA-vs-CPU candidate sign agreement",
+      "CPU confirmation count",
+      "candidate rejection count",
+      "accelerator seconds",
+      "CPU verification seconds",
+      "projected full-domain micro2 seconds"
+    ],
+    "full_domain_run_gate_minutes": 45
+  },
+  "full_domain_execution_authorized": false,
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false
+}

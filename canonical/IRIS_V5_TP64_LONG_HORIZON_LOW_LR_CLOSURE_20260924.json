@@ -1,0 +1,193 @@
+{
+  "schema": "RealSaS.IRIS.V5TP64LongHorizonLowLRClosure.v1",
+  "status": "CLOSED__ALL_ARMS_IMPROVE__A0_D_HORIZON_NOT_LATE_SELECTED__B_NEAR_ENDPOINT__C_ENDPOINT_SELECTED__BC_ENDPOINT_CLOSURE_REQUIRED",
+  "date_utc": "2026-09-24",
+  "run_id": "20260924T115953Z",
+  "preregistration": "canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_PREREG_20260924.json",
+  "execution": {
+    "repo_commit": "54a18d5353c6d39f383b823c019c25336fbadaef",
+    "result_sha256": "a4ac7e208db23c017cde8714f2d551c0c4b548e8de6136d56bb9911784896329",
+    "manifest_sha256": "69efa1644599b6402589fa117f18965901e6654e41da13bc407ed8a67a8f61af",
+    "input_authority_sha256": "c8e6c7b48127175c9c7166acefa191d58161c0cbfbeb5edcedb1793ddaebdfd1",
+    "arm_selection_summary_sha256": "bf55128dd1e65a86b4513a11445d5ed52324dfcd4ae5e90be72bb3b3f99b8c9b",
+    "r512_joint_audit_sha256": "d8cc597393f14c13f9ec2a250ec8c68ee3c43f5ee3b806d0a8ce3cdd4587d1de",
+    "output_sync_report_sha256": "03b39f557a04d5a13a2547eaf362f2e2859230bc4f1acd8abbd664422d8aec5b",
+    "completion_marker_last": true,
+    "sync_ok": true,
+    "optimizer_scheduler_state_saved": true
+  },
+  "arms": {
+    "A0": {
+      "selected_continuation_step": 8000,
+      "selected_absolute_effective_step": 17400,
+      "selected_checkpoint_sha256": "7d27b3585f9485ce280668cae2ea23c9b3204adfba0a1a12ce5a4bdfeb0e6822",
+      "selected_at_endpoint": false,
+      "selected_in_final_2000_steps": false,
+      "heldout_sign_disagreement_count": 9642,
+      "heldout_mae": 0.0014920083340257406,
+      "r512_nonpositive": 17139,
+      "stage13_min_precision": 0.9745397756850125,
+      "stage13_min_recall": 0.9974776716616411,
+      "stage13_max_silhouette_p95_px": 4,
+      "exact_containment_pass": true,
+      "final_scientific_pass": false
+    },
+    "B": {
+      "selected_continuation_step": 9200,
+      "selected_absolute_effective_step": 18800,
+      "selected_checkpoint_sha256": "e44f88a6902f28f411bb368b95cdc572b0c3605ba21af0aca0a967402c1fb201",
+      "selected_at_endpoint": false,
+      "selected_in_final_2000_steps": true,
+      "terminal_step_sign_disagreement_count": 8764,
+      "selected_sign_disagreement_count": 8757,
+      "terminal_minus_selected_sign_count": 7,
+      "heldout_mae": 0.001623446587473154,
+      "r512_nonpositive": 10501,
+      "stage13_min_precision": 0.9778604789891472,
+      "stage13_min_recall": 0.9978216754755053,
+      "stage13_max_silhouette_p95_px": 4,
+      "exact_containment_pass": true,
+      "final_scientific_pass": false
+    },
+    "C": {
+      "selected_continuation_step": 9600,
+      "selected_absolute_effective_step": 19200,
+      "selected_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
+      "selected_at_endpoint": true,
+      "selected_in_final_2000_steps": true,
+      "heldout_sign_disagreement_count": 9882,
+      "heldout_mae": 0.0017101818230003119,
+      "r512_nonpositive": 11001,
+      "stage13_min_precision": 0.9783673081878721,
+      "stage13_min_recall": 0.9981541565871387,
+      "stage13_max_interior_uncovered_fraction": 0.00028673080073964843,
+      "stage13_max_largest_coherent_hole_fraction": 0.0003611515575377489,
+      "stage13_max_silhouette_p95_px": 3,
+      "exact_containment_pass": true,
+      "final_scientific_pass": false
+    },
+    "D": {
+      "selected_continuation_step": 6800,
+      "selected_absolute_effective_step": 15800,
+      "selected_checkpoint_sha256": "1ea722243809897588dbfead2a7f785682e8792268adbc092410b21fe520bc7d",
+      "selected_at_endpoint": false,
+      "selected_in_final_2000_steps": false,
+      "heldout_sign_disagreement_count": 9489,
+      "heldout_mae": 0.0018766002031043172,
+      "r512_nonpositive": 9650,
+      "stage13_min_precision": 0.9765700058185951,
+      "stage13_min_recall": 0.9972197062633998,
+      "stage13_max_silhouette_p95_px": 3,
+      "exact_containment_pass": true,
+      "final_scientific_pass": false
+    }
+  },
+  "trace_read": {
+    "B": {
+      "late_heldout_sign_counts": [
+        9326,
+        9249,
+        9084,
+        9055,
+        9038,
+        8935,
+        8943,
+        8820,
+        8757,
+        8764
+      ],
+      "late_training_sign_wrong_count": [
+        1522,
+        1525,
+        1505,
+        1494,
+        1520,
+        1478,
+        1437,
+        1493,
+        1454,
+        1511
+      ],
+      "terminal_training_total": 0.0005810599541291595,
+      "terminal_lr": 0.000001
+    },
+    "C": {
+      "late_heldout_sign_counts": [
+        11472,
+        12469,
+        10216,
+        10625,
+        10582,
+        10269,
+        10152,
+        10043,
+        9931,
+        9882
+      ],
+      "late_training_silhouette_wrong_count": [
+        12,
+        7,
+        6,
+        8,
+        5,
+        9,
+        7,
+        6,
+        7,
+        8
+      ],
+      "late_training_silhouette_total": [
+        0.00008010225428733975,
+        0.00004410740075400099,
+        0.000016096582839963958,
+        0.000050992330216104165,
+        0.00003291425309726037,
+        0.000022193949916982092,
+        0.000022289219486992806,
+        0.00003029146319022402,
+        0.00002498232788639143,
+        0.00004035568781546317
+      ],
+      "terminal_training_total": 0.0005080749397166073,
+      "terminal_lr": 0.000001
+    }
+  },
+  "interpretation": {
+    "long_horizon_helped_all_arms": true,
+    "corrected_containment_passed_all_arms": true,
+    "r512_passed_any_arm": false,
+    "stage13_p999_passed_any_arm": false,
+    "A0_horizon_censoring": "NOT_SUPPORTED_BY_SELECTION_POSITION",
+    "D_horizon_censoring": "NOT_SUPPORTED_BY_SELECTION_POSITION",
+    "B_horizon_censoring": "SUPPORTED__SELECTED_AT_9200_OF_9600_WITH_TERMINAL_SIGN_ONLY_7_WORSE",
+    "C_horizon_censoring": "SUPPORTED_STRONGLY__SELECTED_AT_9600_OF_9600",
+    "next_required_question": "DO_B_AND_C_PLATEAU_WHEN_CONTINUED_FROM_THEIR_SELECTED_CHECKPOINTS_WITH_RESTORED_OPTIMIZER_STATE_AT_TERMINAL_LOW_LR",
+    "spatial_capacity_ablation_authorized": false,
+    "representation_change_authorized": false,
+    "stage13_threshold_change_authorized": false
+  },
+  "next_gate": {
+    "status": "BC_ENDPOINT_CLOSURE_CONTINUATION_REQUIRED",
+    "train_arms": [
+      "B_DIRECT_FSTAR_PLUS_NEAR_ZERO_SIGN",
+      "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE"
+    ],
+    "frozen_reference_arms": [
+      "A0_CONTINUE_DIRECT_FSTAR_ONLY",
+      "D_DIRECT_FSTAR_PLUS_SIGN_AND_SILHOUETTE"
+    ],
+    "restore_optimizer_state": true,
+    "do_not_restore_exhausted_cosine_scheduler_as_active_schedule": true,
+    "terminal_lr": 0.000001,
+    "fixed_tp64": true,
+    "objective_definitions_unchanged": true,
+    "exact_r512_and_stage13_selection_blind": true
+  },
+  "claim_boundary": [
+    "All four arms improved substantially from their long-horizon starts.",
+    "No arm passes exact R512 or Stage13 P999.",
+    "B remains near-endpoint selected and C is exactly endpoint-selected, so their optimization horizon is not closed.",
+    "A0 and D do not require another continuation for the endpoint-censoring question because their selected checkpoints occur materially before the end.",
+    "This closure does not authorize a spatial or representation change before B/C endpoint closure."
+  ]
+}

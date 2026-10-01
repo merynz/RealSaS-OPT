@@ -1,0 +1,44 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX2Preregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__BLOCKWISE_LEWINER_MC_EQUIVALENCE",
+  "authority_class": "RESEARCH_PREREGISTRATION_ONLY",
+  "parents": [
+    "canonical/VF11_EXTRACTOR_TRANSITION_X0_CLOSURE_20260921.json",
+    "canonical/VF11_EXTRACTOR_TRANSITION_X1_RESULT_20260921.json",
+    "canonical/VF11_EXTRACTOR_TRANSITION_X1B_RESULT_20260921.json"
+  ],
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "objective": "Preserve the current skimage Lewiner marching-cubes contour semantics while allowing certified empty-space pruning by running MC on disjoint cell blocks of one global canonical lattice and welding shared edge vertices.",
+  "block_contract": {
+    "cell_partition": "blocks partition cube cells without overlap; adjacent block sample grids overlap by exactly one corner plane",
+    "contourer": "skimage.measure.marching_cubes method Lewiner, allow_degenerate=false",
+    "vertex_identity": "derive the unique global canonical lattice edge containing each emitted MC vertex; weld by unordered global edge endpoints",
+    "exact_zero_policy": "fixtures exclude exact-zero lattice corners; production exact-zero handling remains a separately typed policy",
+    "block_skip": "a block with sampled min>=0 or max<=0 emits no MC triangles; this is equivalence to dense sampled-lattice MC, not a continuous-field absence certificate"
+  },
+  "fixtures": [
+    "oblique plane",
+    "sphere",
+    "saddle-like field",
+    "torus-like field"
+  ],
+  "block_layouts": [
+    [2,2,2],
+    [3,4,5],
+    [5,3,4]
+  ],
+  "frozen_gates": [
+    "canonical global lattice-edge vertex-key set equals dense Lewiner MC",
+    "canonical face set in edge-key identities equals dense Lewiner MC",
+    "zero duplicate faces",
+    "zero degenerate faces",
+    "zero nonmanifold edges introduced by block welding",
+    "all block-boundary shared vertices weld to one global edge identity"
+  ],
+  "claim_boundary": "X2 establishes sampled-lattice blockwise equivalence only. Continuous-field completeness still comes from C0/adaptive discovery; source fidelity still requires VF11/Stage13.",
+  "next_if_pass": "X3_CERTIFIED_NARROW_BAND_BLOCK_MC_PLANNER"
+}

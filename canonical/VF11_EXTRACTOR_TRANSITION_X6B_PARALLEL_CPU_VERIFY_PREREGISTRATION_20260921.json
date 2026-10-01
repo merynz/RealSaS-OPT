@@ -1,0 +1,43 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX6BParallelCPUVerifyPreregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__PARALLEL_CPU_CONFIRMATION_FOR_X6",
+  "authority_class": "RESEARCH_PERFORMANCE_ENGINEERING_ONLY",
+  "parent_run": {
+    "run_id": "20260921T211741Z",
+    "research_status": "HELD_BY_RUNTIME_GATE__NO_FULL_DOMAIN_EXECUTION",
+    "sample_root_count": 256,
+    "accelerator_box_eval_count": 18688,
+    "accelerator_seconds": 0.7127558120000685,
+    "cpu_verify_box_eval_count": 9874,
+    "cpu_verify_seconds": 25.027459005000082,
+    "cpu_rejected_count": 0
+  },
+  "bottleneck_diagnosis": "All 9874 decisive proposals in the frozen 256-root reproduction occur only at micro-depth 2; root and micro-depth-1 boxes remain UNKNOWN. CPU confirmation, not A100 screening, dominates wall time.",
+  "design": {
+    "accelerator_role": "unchanged proposal-only X6 float64 CUDA screen",
+    "cpu_authority": "unchanged X5 float64 C0 bound mathematics",
+    "parallelization": "independent proposal boxes are partitioned across multiple CPU worker processes; each worker runs authoritative X5 bounds",
+    "multiprocessing_start_method": "spawn by default to avoid CUDA-fork contamination",
+    "worker_threads": 1,
+    "result_merge": "preserve original proposal order before sign comparison",
+    "safety_rule": "terminal EMPTY requires identical accelerator and CPU strict sign exactly as X6"
+  },
+  "correctness_gates": [
+    "parallel CPU bounds equal serial X5 bounds within 1e-10",
+    "parallel X6B root states/counts equal serial X6 on deterministic fixtures",
+    "false accelerator decisive proposals remain rejected",
+    "no CPU-confirmed sign disagreement"
+  ],
+  "local_exact_field_diagnostic": {
+    "proposal_reproduction_count": 9874,
+    "proposal_depth_distribution": {"2": 9874},
+    "four_process_local_speedup_over_one_process_on_2477_exact proposals": 3.23,
+    "note": "host-specific diagnostic only; A100-host worker count must be re-tuned before long execution"
+  },
+  "next_if_green": "A100_HOST_WORKER_AUTOTUNE_AND_256_ROOT_GATE",
+  "full_domain_execution_authorized": false,
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false
+}

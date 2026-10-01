@@ -1,0 +1,64 @@
+{
+  "schema": "RealSaS.VF11C1V1Closure.v1",
+  "date_utc": "2026-09-21",
+  "status": "FALSIFIED__C1_V1_VACUOUS_DIRECTIONAL_BOUNDS",
+  "authority_class": "RESEARCH_CLOSURE_ONLY",
+  "product_authority_minted": false,
+  "shipping_certificate_backend": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "full_domain_traversal_performed": false,
+  "source_run_id": "20260921T163553Z",
+  "source_repo_commit": "5b01e52e9857ba115a36fb2f5c30402a25c6ef6e",
+  "source_profile_sha256": "4476979339bccc41c4669b74dfc4d118ac844faa30ad7479aa89e3365ed2933e",
+  "parent_c0_profile_sha256": "16c2f43535a3c577c62494e464631ca9a79680e480cfeeac92e8a97b852b8ea5",
+  "primary_handoff": {
+    "count": 19,
+    "regular_count": 0,
+    "unknown_count": 19,
+    "regular_fraction": 0.0,
+    "wilson95": [0.0, 0.16817922405261626]
+  },
+  "stress_near_zero": {
+    "count": 32,
+    "regular_count": 0,
+    "unknown_count": 32,
+    "regular_fraction": 0.0,
+    "wilson95": [0.0, 0.1071791982550706]
+  },
+  "bound_failure_signature": {
+    "candidate_result_count": 128,
+    "all_positive_leaf_count_zero": true,
+    "all_negative_leaf_count_zero": true,
+    "all_have_unresolved_leaves": true,
+    "closest_lower_bound_to_zero": -815.5840813052995,
+    "closest_upper_bound_to_zero": 813.979528515698,
+    "candidate_bound_width_min": 1629.5636098209975,
+    "candidate_bound_width_median": 3515.6371933986184,
+    "candidate_bound_width_max": 10268.319111919081,
+    "interpretation": "The v1 interval-JVP machinery fails to prove even one derivative-sign leaf on the frozen d8 NEAR_ZERO cohort. This falsifies the v1 bound implementation as practically vacuous; it does not establish that the underlying field is nonregular."
+  },
+  "independent_diagnostic_not_authority": {
+    "description": "Post-run direct autograd sampling on the exact frozen field, 5x5x5 samples per d8 cell, using each cell's center-gradient direction. This diagnostic is not a certificate and was not part of the preregistered run.",
+    "stress_sign_consistent_cells": "28/32",
+    "primary_handoff_sign_consistent_cells": "17/19",
+    "primary_candidate0_bound_width_to_sample_span_median": 5657.870772,
+    "claim_boundary": "This strongly suggests range-tightness loss rather than demonstrated true nonregularity, but it cannot mint C1 certificates."
+  },
+  "root_cause_hypothesis": [
+    "Directional derivative correlation is discarded by interval propagation, especially across LayerNorm.",
+    "LayerNorm dmu/dvar products treat strongly correlated primal/tangent quantities independently.",
+    "Subsequent SiLU-prime times tangent interval products amplify the resulting over-approximation."
+  ],
+  "next": {
+    "id": "C1_V2_CORRELATED_DUAL_AFFINE",
+    "requirements": [
+      "propagate primal and directional tangent with shared affine generators",
+      "use exact affine triplane directional derivative inside each interpolation regime",
+      "preserve correlation through LayerNorm via dual-affine products with conservative remainder",
+      "preserve tangent correlation through SiLU using bounded derivative factor plus affine product",
+      "re-run exact semantic and adversarial fixtures before frozen Knight",
+      "do not run full-domain traversal"
+    ]
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "bank": {
+    "source_surface_distance": {
+      "dtype": "float32",
+      "max": 0.8943817019462585,
+      "min": 3.6376000025484245e-06,
+      "shape": [
+        12090
+      ]
+    },
+    "source_triangle_barycentric": {
+      "dtype": "float32",
+      "max": 1.0,
+      "min": 0.0,
+      "shape": [
+        12090,
+        3
+      ]
+    },
+    "source_triangle_index": {
+      "dtype": "int64",
+      "max": 6899.0,
+      "min": 0.0,
+      "shape": [
+        12090
+      ]
+    },
+    "surface_ids": {
+      "dtype": "<U24",
+      "sample": [
+        "SFS:d68d7b706a8fcaf98ab6",
+        "SFS:6f2f3f92a795eeb2106f",
+        "SFS:9034f8f637f32439896c",
+        "SFS:2843574b66ae154e6431",
+        "SFS:950fb1372bf1e83dafb2",
+        "SFS:0366359689d14e02d8cd",
+        "SFS:c2e66be55a845ff96cf0",
+        "SFS:f7836a3c69203368c2ec",
+        "SFS:b48f7781c043f68a0c41",
+        "SFS:d71a283c6aa5b7027002",
+        "SFS:12c2677f703a135369d5",
+        "SFS:08eb64ef4f4e2dc9309f"
+      ],
+      "shape": [
+        12090
+      ]
+    },
+    "target_parent_indices": {
+      "dtype": "int64",
+      "max": 26.0,
+      "min": -1.0,
+      "shape": [
+        28
+      ]
+    },
+    "target_positions_world": {
+      "dtype": "float32",
+      "max": 1.498274803161621,
+      "min": -0.8831326961517334,
+      "shape": [
+        28,
+        3
+      ]
+    },
+    "target_role_codes": {
+      "dtype": "int64",
+      "max": 4.0,
+      "min": 0.0,
+      "shape": [
+        28
+      ]
+    },
+    "target_source_indices_provenance_only": {
+      "dtype": "int64",
+      "max": 22.0,
+      "min": -1.0,
+      "shape": [
+        28
+      ]
+    },
+    "teacher_valid_mask": {
+      "dtype": "uint8",
+      "max": 1.0,
+      "min": 0.0,
+      "shape": [
+        12090
+      ]
+    },
+    "weights": {
+      "dtype": "float32",
+      "max": 1.0,
+      "min": 0.0,
+      "shape": [
+        12090,
+        28
+      ]
+    }
+  },
+  "schema": "RealSaS.KnightTeacherArtifactInventory.v1",
+  "source": {
+    "bone_heads_source": {
+      "dtype": "float32",
+      "max": 1.2414253950119019,
+      "min": -0.8831324577331543,
+      "shape": [
+        41,
+        3
+      ]
+    },
+    "bone_tails_source": {
+      "dtype": "float32",
+      "max": 1.5623290538787842,
+      "min": -1.5623290538787842,
+      "shape": [
+        41,
+        3
+      ]
+    },
+    "deform_mask": {
+      "dtype": "uint8",
+      "max": 1.0,
+      "min": 1.0,
+      "shape": [
+        41
+      ]
+    },
+    "faces": {
+      "dtype": "int32",
+      "max": 3664.0,
+      "min": 0.0,
+      "shape": [
+        6952,
+        3
+      ]
+    },
+    "parents": {
+      "dtype": "int32",
+      "max": 33.0,
+      "min": -1.0,
+      "shape": [
+        41
+      ]
+    },
+    "rest_local_source": {
+      "dtype": "float32",
+      "max": 1.2414253950119019,
+      "min": -1.0,
+      "shape": [
+        41,
+        4,
+        4
+      ]
+    },
+    "rest_world_source": {
+      "dtype": "float32",
+      "max": 1.2414253950119019,
+      "min": -1.0000003576278687,
+      "shape": [
+        41,
+        4,
+        4
+      ]
+    },
+    "skin": {
+      "dtype": "float32",
+      "max": 1.0,
+      "min": 0.0,
+      "shape": [
+        3665,
+        41
+      ]
+    },
+    "vertices_source": {
+      "dtype": "float32",
+      "max": 2.466552495956421,
+      "min": -1.9977490901947021,
+      "shape": [
+        3665,
+        3
+      ]
+    }
+  }
+}

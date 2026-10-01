@@ -1,0 +1,22 @@
+{
+  "schema": "RealSaS.KnightResidualActualMotionAttributionPrereg.v1",
+  "status": "FROZEN_BEFORE_RESIDUAL_ATTRIBUTION_RESULT",
+  "date": "2026-09-29",
+  "purpose": "Attribute residual actual-motion catastrophic faces after the best high-recall teacher-free partition to missed true mechanical boundaries inside versus outside the Stage35 unsafe scope.",
+  "partition_variant": "PRELOADED_MUTEX__STRETCH_ONLY_JSD",
+  "face_classes": [
+    "TRUTH_MIXED_PRED_MIXED",
+    "TRUTH_MIXED_PRED_SAME",
+    "TRUTH_SAME_PRED_MIXED",
+    "TRUTH_SAME_PRED_SAME"
+  ],
+  "motion_thresholds": [4.0, 10.0],
+  "stage35_scope": "Unsafe mask computed teacher-free from Arachne weights and frozen Stage35 synthetic probes.",
+  "teacher_policy": "Teacher topology and teacher weights are evaluation-only; partition labels and Stage35 unsafe mask are frozen first.",
+  "decision_rule": {
+    "SCOPE_OWNER": "Most catastrophic truth-mixed/pred-same faces are Stage35-safe.",
+    "PARTITION_OWNER": "Most catastrophic truth-mixed/pred-same faces are already Stage35-unsafe.",
+    "MIXED": "Neither side exceeds 70%."
+  },
+  "no_product_mutation": true
+}

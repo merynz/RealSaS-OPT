@@ -1,0 +1,15 @@
+{
+  "schema": "RealSaS.KnightTopologyWeightCouplingCourtPrereg.v1",
+  "status": "FROZEN_BEFORE_TOPOLOGY_WEIGHT_COUPLING_RESULT",
+  "date": "2026-09-29",
+  "purpose": "Measure whether teacher-free topology inference errors concentrate on Arachne rows that lack valid teacher supervision in the Knight evaluation bank.",
+  "partition_policy": "Existing STRETCH_AND_L1_JSD non-preloaded mechanical mutex partition, frozen before teacher access.",
+  "teacher_policy": "teacher_valid_mask, teacher source components and teacher weights are evaluation-only after partition freeze.",
+  "groups": [
+    "false-positive predicted split on teacher-same faces",
+    "unsafe false-negative teacher-cross faces",
+    "actual-motion >10x false-negative teacher-cross faces"
+  ],
+  "no_threshold_search": true,
+  "no_product_mutation": true
+}

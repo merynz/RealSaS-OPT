@@ -1,0 +1,187 @@
+{
+  "schema": "RealSaS.IRIS.V5TP64LongHorizonLowLRPreregistration.v1",
+  "status": "FROZEN_BEFORE_LONG_HORIZON_OPTIMIZER_STEP_1",
+  "date_utc": "2026-09-24",
+  "branch": "research/vf11-certified-adaptive-20260921",
+  "purpose": "Test whether additional low-learning-rate optimization moves the learned TP64 zero level toward canonical F* before any spatial-capacity ablation, while preserving the four-arm causal control structure.",
+  "scientific_basis": {
+    "objective_closure": "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json",
+    "zero_surface_owner_closure": "canonical/IRIS_V5_ZERO_SURFACE_OWNER_DIAGNOSTIC_CLOSURE_20260924.json",
+    "owner_run_id": "20260924T114349Z",
+    "owner_result_sha256": "45788db74ec1f653ea3f3a529ffff5c9654dc1589b6d897e5c8ce546a76996b3",
+    "owner_conclusion": "LEARNED_FIELD_ZERO_LEVEL_SET_DISPLACEMENT_RELATIVE_TO_CANONICAL_FSTAR_IS_THE_DOMINANT_OBSERVED_RESIDUAL_OWNER"
+  },
+  "execution": {
+    "code_repo_commit": "54a18d5353c6d39f383b823c019c25336fbadaef",
+    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_TP64_LONG_HORIZON_LOW_LR_RUN_ALL.ipynb",
+    "notebook_sha256": "ef2dde3de7b97af5d7da7d1782ebac72b3e9a83f07daf0fafe8c04c27bc1cc4d",
+    "notebook_outputs_required_initially_empty": true,
+    "notebook_execution_counts_required_initially_null": true,
+    "required_accelerator": "A100_CLASS__VRAM_GTE_30_GIB"
+  },
+  "frozen_inputs": {
+    "stage08_evidence_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "observation_set_binding_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa",
+    "normalization_binding_hash": "81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23",
+    "baseline_frozen_query_pool_sha256": "0f0215f4a2ef018729d0f86c052da916dcc3ca4b376c66c455ffdc38edfd91ad",
+    "objective_source_run_id": "20260924T084959Z",
+    "objective_source_result_sha256": "ddadbe4c10180e5d6f73a7f47cf88a816820d096e4f311a4b8abf1a83dc1dc04",
+    "target_contract": "canonical/IRIS_V5_CONTINUOUS_SOURCE_FIELD_POLICY_20260923.json",
+    "frozen_stage13_profile": "P999"
+  },
+  "required_arms": [
+    {
+      "id": "A0_CONTINUE_DIRECT_FSTAR_ONLY",
+      "slug": "A0",
+      "start_checkpoint_sha256": "2d2026f8d54cea27166d24a1c75dc8d9023756a6255f845b2ec0293a71863471",
+      "start_absolute_effective_step": 9400,
+      "objective": [
+        "DIRECT_FSTAR_HUBER"
+      ]
+    },
+    {
+      "id": "B_DIRECT_FSTAR_PLUS_NEAR_ZERO_SIGN",
+      "slug": "B",
+      "start_checkpoint_sha256": "9ff4583567470dd1f3c6806db3778f25ca97b8ec0e6431065b2e8973f21718ce",
+      "start_absolute_effective_step": 9600,
+      "objective": [
+        "DIRECT_FSTAR_HUBER",
+        "NEAR_ZERO_SIGN"
+      ]
+    },
+    {
+      "id": "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
+      "slug": "C",
+      "start_checkpoint_sha256": "988dd2a614a7e0632938e69d54abdbd96544a010c650ba8cf05f979ca86891b3",
+      "start_absolute_effective_step": 9600,
+      "objective": [
+        "DIRECT_FSTAR_HUBER",
+        "SOURCE_SILHOUETTE"
+      ]
+    },
+    {
+      "id": "D_DIRECT_FSTAR_PLUS_SIGN_AND_SILHOUETTE",
+      "slug": "D",
+      "start_checkpoint_sha256": "3ac74e0f841f665f52774f873cac82305852e7fdf60786c4f3aff55ccb1997a4",
+      "start_absolute_effective_step": 9000,
+      "objective": [
+        "DIRECT_FSTAR_HUBER",
+        "NEAR_ZERO_SIGN",
+        "SOURCE_SILHOUETTE"
+      ]
+    }
+  ],
+  "architecture": {
+    "id": "RealSaS.IRIS.SceneFirstSignedGeometry.v4.tp64",
+    "unchanged": true,
+    "final_triplane": "3x64chx64x64",
+    "spatial_resolution_ablation": false
+  },
+  "common_continuation": {
+    "each_arm_starts_from_its_own_frozen_selected_state": true,
+    "start_state_is_selection_candidate": true,
+    "fresh_optimizer_restart_for_every_arm": true,
+    "optimizer_state_available_in_source_checkpoints": false,
+    "continuation_steps": 9600,
+    "evaluation_every_steps": 400,
+    "optimizer": "AdamW",
+    "learning_rate": 0.00002,
+    "weight_decay": 0,
+    "scheduler": "CosineAnnealingLR",
+    "eta_min": 0.000001,
+    "gradient_clip_norm": 1,
+    "autocast": "bfloat16",
+    "tf32_allowed": false,
+    "objective_definitions_and_coefficients_unchanged": true,
+    "fixed_replay_bank_unchanged": true,
+    "stateless_query_schedule_unchanged": true,
+    "arm_dependent_replay_refresh": false,
+    "selected_checkpoint_must_save_optimizer_state": true,
+    "selected_checkpoint_must_save_scheduler_state": true
+  },
+  "checkpoint_selection": {
+    "authority": "FROZEN_HELDOUT_FSTAR_ONLY",
+    "candidates": "ARM_START_PLUS_EVERY_400_CONTINUATION_STEPS_THROUGH_9600",
+    "lexicographic_rule": [
+      "SIGN_CLEAN_FIRST",
+      "IF_NOT_SIGN_CLEAN__LOWER_SIGN_DISAGREEMENT_FRACTION",
+      "LOWER_HELDOUT_FSTAR_MAE",
+      "LOWER_NEAR_ZERO_MAE",
+      "LOWER_P95_ABSOLUTE_RESIDUAL",
+      "LOWER_RMSE",
+      "EARLIER_ABSOLUTE_EFFECTIVE_STEP"
+    ],
+    "exact_r512_blind": true,
+    "stage13_blind": true,
+    "source_silhouette_metric_blind": true
+  },
+  "final_qualification": {
+    "after_all_four_arm_selections_closed": true,
+    "r512": {
+      "authority": "FROZEN_V4_3_SOURCE_HULL_CERTIFICATION__SIGN_ONLY",
+      "resolution": 512,
+      "expected_certified_exterior_count": 128851336,
+      "required_nonpositive_count": 0
+    },
+    "decoder": {
+      "id": "RealSaS.ZeroSurfaceDecoder.SparseRegularT512T1024IndexedMT.ExactShellContainment.v5_1",
+      "base_cells": 512,
+      "fine_cells": 1024,
+      "exact_sparse_shell_containment_required": true,
+      "legacy_boundary_crossing_tets_role": "TELEMETRY_ONLY"
+    },
+    "stage13": {
+      "profile": "P999",
+      "thresholds": {
+        "min_recall": 0.999,
+        "min_precision": 0.999,
+        "max_largest_coherent_hole_fraction": 0.00025,
+        "max_interior_uncovered_fraction": 0.0005,
+        "min_component_recall": 0.999,
+        "component_min_foreground_fraction": 0,
+        "max_silhouette_edge_p95_px": 0.5
+      }
+    }
+  },
+  "leakage_controls": {
+    "exact_r512_audit_lattice_training_points_forbidden": true,
+    "exact_r512_failure_coordinates_training_conditioning_forbidden": true,
+    "exact_r512_checkpoint_selection_forbidden": true,
+    "stage13_feedback_forbidden": true,
+    "stage13_checkpoint_selection_forbidden": true,
+    "heldout_fstar_used_for_training": false,
+    "source_masks_are_forward_inputs": false
+  },
+  "forbidden_changes": [
+    "DINO_CHANGE",
+    "TP64_ARCHITECTURE_CHANGE",
+    "PLANE_SIZE_CHANGE",
+    "PLANE_CHANNEL_CHANGE",
+    "FINAL_TRIPLANE_RESOLUTION_CHANGE",
+    "FSTAR_TARGET_CHANGE",
+    "QUERY_POOL_REMINT",
+    "OBJECTIVE_FORMULA_OR_WEIGHT_CHANGE",
+    "EIKONAL",
+    "RAY_LIPSCHITZ",
+    "TEACHER_MESH",
+    "TEACHER_DEPTH",
+    "TEACHER_SDF",
+    "R512_FAILURE_LOCATION_CONDITIONING",
+    "STAGE13_FEEDBACK",
+    "DECODER_GATE_WEAKENING",
+    "STAGE13_THRESHOLD_CHANGE"
+  ],
+  "decision_rule": {
+    "automatic_winner_selected": false,
+    "automatic_spatial_ablation_authorized": false,
+    "automatic_representation_change_authorized": false,
+    "review_required": true
+  },
+  "claim_boundary": [
+    "This is a Knight FIT1 mechanism experiment only.",
+    "A0 must remain as the continuation-budget control; B/C/D preserve the prior objective comparison.",
+    "The experiment tests optimization horizon at fixed TP64 and does not itself change representation.",
+    "R512 and Stage13 remain post-selection qualification-only evidence.",
+    "No result automatically promotes a best objective or a spatial-capacity verdict."
+  ]
+}

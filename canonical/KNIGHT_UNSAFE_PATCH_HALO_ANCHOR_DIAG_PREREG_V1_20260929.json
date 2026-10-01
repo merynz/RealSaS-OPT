@@ -1,0 +1,25 @@
+{
+  "schema": "RealSaS.KnightUnsafePatchHaloAnchorDiagnosisPrereg.v1",
+  "status": "FROZEN_BEFORE_HALO_ANCHOR_DIAGNOSIS_RESULT",
+  "date": "2026-09-29",
+  "question": "For Stage35 unsafe connected patches that abstain under the direct-boundary James/Twigg completion rule, is the missing second mechanical-region anchor present in a small teacher-free dense-graph halo, or absent from the inferred representation?",
+  "inference_inputs": [
+    "Arachne predicted weights only",
+    "James/Twigg rotation-signature cluster labels inferred on dense mechanically-safe faces",
+    "Stage35 all-face unsafe mask",
+    "dense-supported canonical mesh graph"
+  ],
+  "teacher_policy": "Teacher source topology is evaluation-only after every halo measurement is frozen. Teacher may not choose a radius, label, patch, threshold, or traversal.",
+  "halo_hops": [1, 2, 3, 4, 8],
+  "diagnostic_partitions": [
+    "current abstain with zero boundary labels",
+    "current abstain with one boundary label",
+    "teacher-eval cross-region patch",
+    "teacher-eval same-region patch"
+  ],
+  "decision_rule": {
+    "LOCAL_ANCHOR_RULE_TOO_STRICT": "A material fraction of teacher-eval cross-region abstained patches exposes >=2 inferred region labels within <=4 dense-edge hops.",
+    "REPRESENTATION_RECALL_LIMIT": "Most teacher-eval cross-region abstained patches still expose <2 inferred labels by 8 dense-edge hops.",
+    "NO_REPAIR_PROMOTION_FROM_THIS_RUN": true
+  }
+}

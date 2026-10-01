@@ -1,0 +1,28 @@
+name: knight-arachne-teacher-bank-path-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/knight_arachne_teacher_bank_path_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V6_DEMO_OUTPUT
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find teacher bank path
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp)"
+          rclone copyto "$REMOTE/ARACHNE_V6_LIVE.log" "$tmp" --checksum
+          grep -n -E -- '--teacher-bank|teacher_bank|TEACHER_BANK' "$tmp" || true

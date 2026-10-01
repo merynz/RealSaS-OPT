@@ -1,0 +1,3652 @@
+{
+  "arm": "ACTIVE_BALANCED_ALL_PROJECTED",
+  "artifacts": {
+    "directive": "/tmp/tmp.GpoKPUlLQ5/ACTIVE_BALANCED_ALL_PROJECTED/artifacts/mechanical_repartition_directive.json",
+    "proposal": "/tmp/tmp.GpoKPUlLQ5/ACTIVE_BALANCED_ALL_PROJECTED/artifacts/skin_proposal_replay.json",
+    "qualified_skin": "/tmp/tmp.GpoKPUlLQ5/ACTIVE_BALANCED_ALL_PROJECTED/artifacts/qualified_skin_rebound.json",
+    "rebind_receipt": "/tmp/tmp.GpoKPUlLQ5/ACTIVE_BALANCED_ALL_PROJECTED/artifacts/semantic_id_rebind_receipt.json",
+    "rebound_npz": "/tmp/tmp.GpoKPUlLQ5/ACTIVE_BALANCED_ALL_PROJECTED/artifacts/weights_rebound_to_current_stage28.npz"
+  },
+  "claim_boundary": [
+    "Semantic ID rebind preserves the F64 numeric skin field and changes only compiler joint identities.",
+    "Compiler requalification is executed against the current Stage15 surface and current Stage28 skeleton.",
+    "Stage35 G3B topology compatibility is measured on the current Stage18 candidate without mutating product state; full G3 is deferred to repaired child candidates.",
+    "Any repartition directive remains authorization-gated; no Stage17/18 mutation is performed here."
+  ],
+  "compiler_requalification": {
+    "corrected_row_count": 0,
+    "max_abs_weight_delta": 5.551115123125783e-16,
+    "max_row_l1_weight_delta": 5.551115184717644e-16,
+    "numeric_field_preserved": true,
+    "row_count": 12090,
+    "skin_lineage_hash": "fa9d013764700bc05da3ada7f41183e443c3a8a01aafe5df4734b5e750b27ec5",
+    "total_correction_l1": 4.625739913524904e-13,
+    "total_l1_weight_delta": 4.625739913524904e-13
+  },
+  "current_skeleton_lineage_hash": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+  "g3": {
+    "passed": null,
+    "reason": "G3B owns topology repartition diagnosis; full G3 is reserved for A100-reliability-eligible repaired child candidates.",
+    "status": "DEFERRED_TO_REPAIRED_CHILD_COURT",
+    "unsafe_face_count": null
+  },
+  "g3b": {
+    "passed": false,
+    "report_hash": "ab3e27b6bda5971686d080c6cf9ac8ff64f0a27ee07f5bed96ece52fdacba519",
+    "risky_face_count": 1780,
+    "top_unsafe_faces": [
+      {
+        "face_index": 4961,
+        "max_area_ratio": 115.93015493168538,
+        "max_condition_number": 527.0130014189167,
+        "max_edge_ratio": 97.47027341447186,
+        "min_area_ratio": 0.9999756361955932,
+        "skin_l1_max": 1.9633568710355749,
+        "vertex_ids": [
+          "CMV:4432287c776a983e461a4378",
+          "CMV:b87a64f1bf2c739730aac668",
+          "CMV:6f2b733dc9e22432ac50c2f7"
+        ],
+        "worst_probe_id": "J:932628adf7f0d5936426:LOCAL_X:-120"
+      },
+      {
+        "face_index": 17818,
+        "max_area_ratio": 87.65331018081626,
+        "max_condition_number": 603.8263980039553,
+        "max_edge_ratio": 97.47027341447186,
+        "min_area_ratio": 0.9999840867841154,
+        "skin_l1_max": 1.9590820815350265,
+        "vertex_ids": [
+          "CMV:9907107fcafcf7cf54803ac1",
+          "CMV:b87a64f1bf2c739730aac668",
+          "CMV:6f2b733dc9e22432ac50c2f7"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 15339,
+        "max_area_ratio": 162.08231408319892,
+        "max_condition_number": 464.5380904462005,
+        "max_edge_ratio": 88.42619016178051,
+        "min_area_ratio": 0.9968478889559708,
+        "skin_l1_max": 1.9985741240771546,
+        "vertex_ids": [
+          "CMV:8986e59f6d1d9d19ba3b9b09",
+          "CMV:3751d86d2b9a2ed4c1cf37d7",
+          "CMV:541484156efb3f68ce3d1fcf"
+        ],
+        "worst_probe_id": "J:932628adf7f0d5936426:LOCAL_Y:+120"
+      },
+      {
+        "face_index": 18320,
+        "max_area_ratio": 89.1554735250585,
+        "max_condition_number": 301.44893766131054,
+        "max_edge_ratio": 88.42619016178051,
+        "min_area_ratio": 0.9730556886028527,
+        "skin_l1_max": 1.9985624552235273,
+        "vertex_ids": [
+          "CMV:9186bfa540bc3b891b678fbe",
+          "CMV:3751d86d2b9a2ed4c1cf37d7",
+          "CMV:541484156efb3f68ce3d1fcf"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:+120"
+      },
+      {
+        "face_index": 20321,
+        "max_area_ratio": 83.73542933402285,
+        "max_condition_number": 484.07095862653006,
+        "max_edge_ratio": 88.42619016178051,
+        "min_area_ratio": 0.9999999999988641,
+        "skin_l1_max": 1.9985624552235273,
+        "vertex_ids": [
+          "CMV:3751d86d2b9a2ed4c1cf37d7",
+          "CMV:541484156efb3f68ce3d1fcf",
+          "CMV:5c64cd5b48d908fda1006d86"
+        ],
+        "worst_probe_id": "J:5428a88dad4d4d8d5c4d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 17876,
+        "max_area_ratio": 82.80103516727733,
+        "max_condition_number": 390.0825932923836,
+        "max_edge_ratio": 88.42619016178051,
+        "min_area_ratio": 0.9989846348714857,
+        "skin_l1_max": 1.9985624552235273,
+        "vertex_ids": [
+          "CMV:c87434c998eaae2c5a6b5509",
+          "CMV:3751d86d2b9a2ed4c1cf37d7",
+          "CMV:541484156efb3f68ce3d1fcf"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:-120"
+      },
+      {
+        "face_index": 17817,
+        "max_area_ratio": 73.69101672847664,
+        "max_condition_number": 419.1453751362343,
+        "max_edge_ratio": 77.62156896870044,
+        "min_area_ratio": 0.9999879702620822,
+        "skin_l1_max": 1.9590820828112743,
+        "vertex_ids": [
+          "CMV:9907107fcafcf7cf54803ac1",
+          "CMV:b87a64f1bf2c739730aac668",
+          "CMV:10b70fe8a97569bfa9b47c70"
+        ],
+        "worst_probe_id": "J:932628adf7f0d5936426:LOCAL_X:+120"
+      },
+      {
+        "face_index": 8448,
+        "max_area_ratio": 64.70367022313383,
+        "max_condition_number": 286.426792281621,
+        "max_edge_ratio": 71.82270196091274,
+        "min_area_ratio": 0.9991232168959072,
+        "skin_l1_max": 1.9590775024112712,
+        "vertex_ids": [
+          "CMV:ebf23904da2dbf91ce76f283",
+          "CMV:32bd02f295de16a2f725c42c",
+          "CMV:24fa40b2d82eee610e3a4610"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 8447,
+        "max_area_ratio": 62.341734671996946,
+        "max_condition_number": 406.37691991274266,
+        "max_edge_ratio": 71.82270196091274,
+        "min_area_ratio": 0.9978423708092794,
+        "skin_l1_max": 1.9590838891413798,
+        "vertex_ids": [
+          "CMV:ebf23904da2dbf91ce76f283",
+          "CMV:9515e06c9f176a4fac35568a",
+          "CMV:24fa40b2d82eee610e3a4610"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:-120"
+      },
+      {
+        "face_index": 8041,
+        "max_area_ratio": 70.94791456081222,
+        "max_condition_number": 1079.717759451975,
+        "max_edge_ratio": 70.73366396781047,
+        "min_area_ratio": 0.39517626036041426,
+        "skin_l1_max": 1.927957171573512,
+        "vertex_ids": [
+          "CMV:6dd31d01eead0376b081dde1",
+          "CMV:163f42a2026e9d551a2e21f6",
+          "CMV:49e05b2ce642ff261cb77452"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_Y:-120"
+      },
+      {
+        "face_index": 4822,
+        "max_area_ratio": 68.20752267614132,
+        "max_condition_number": 888.8885511356486,
+        "max_edge_ratio": 70.73366396781047,
+        "min_area_ratio": 0.4550198819830527,
+        "skin_l1_max": 1.927957171573512,
+        "vertex_ids": [
+          "CMV:7ccfa883d6eeff77a0063b54",
+          "CMV:163f42a2026e9d551a2e21f6",
+          "CMV:49e05b2ce642ff261cb77452"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:+120"
+      },
+      {
+        "face_index": 19998,
+        "max_area_ratio": 77.25047790599423,
+        "max_condition_number": 341.79354073789074,
+        "max_edge_ratio": 70.56427914505498,
+        "min_area_ratio": 0.9999211546632084,
+        "skin_l1_max": 1.9590775024112712,
+        "vertex_ids": [
+          "CMV:32bd02f295de16a2f725c42c",
+          "CMV:24fa40b2d82eee610e3a4610",
+          "CMV:6328da6559a41e8b2670aa0e"
+        ],
+        "worst_probe_id": "J:a80d2c086e86a4cc08b5:LOCAL_Y:+120"
+      },
+      {
+        "face_index": 19997,
+        "max_area_ratio": 69.41668604379807,
+        "max_condition_number": 109.94674000013141,
+        "max_edge_ratio": 70.56427914505498,
+        "min_area_ratio": 0.8379413573622266,
+        "skin_l1_max": 1.756645986767129,
+        "vertex_ids": [
+          "CMV:32bd02f295de16a2f725c42c",
+          "CMV:9343b9313ee49679799f8e9d",
+          "CMV:6328da6559a41e8b2670aa0e"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 17819,
+        "max_area_ratio": 60.79376570241985,
+        "max_condition_number": 402.58525744296026,
+        "max_edge_ratio": 70.12349884195167,
+        "min_area_ratio": 0.9999949137641412,
+        "skin_l1_max": 1.9633565990915707,
+        "vertex_ids": [
+          "CMV:9907107fcafcf7cf54803ac1",
+          "CMV:10b70fe8a97569bfa9b47c70",
+          "CMV:c6855f568c828f8c8cae7de0"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:-120"
+      },
+      {
+        "face_index": 8044,
+        "max_area_ratio": 77.4757323099188,
+        "max_condition_number": 448.81879555419795,
+        "max_edge_ratio": 67.10860537315207,
+        "min_area_ratio": 0.8274154132553793,
+        "skin_l1_max": 1.9633585010095924,
+        "vertex_ids": [
+          "CMV:6dd31d01eead0376b081dde1",
+          "CMV:e690bef655278eeb1c2df280",
+          "CMV:782bfd201a7dda80e22122bc"
+        ],
+        "worst_probe_id": "J:a80d2c086e86a4cc08b5:LOCAL_X:+120"
+      },
+      {
+        "face_index": 8043,
+        "max_area_ratio": 60.29892818853887,
+        "max_condition_number": 2579.922106521987,
+        "max_edge_ratio": 67.10860537315207,
+        "min_area_ratio": 0.7665184452442584,
+        "skin_l1_max": 1.7609952846939652,
+        "vertex_ids": [
+          "CMV:6dd31d01eead0376b081dde1",
+          "CMV:e690bef655278eeb1c2df280",
+          "CMV:49e05b2ce642ff261cb77452"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_Y:+120"
+      },
+      {
+        "face_index": 5243,
+        "max_area_ratio": 68.90363547041936,
+        "max_condition_number": 857.5909865912912,
+        "max_edge_ratio": 66.5159248183251,
+        "min_area_ratio": 0.9999999999999748,
+        "skin_l1_max": 1.9590823276830338,
+        "vertex_ids": [
+          "CMV:b78a2c6ca6203952b6606c9b",
+          "CMV:8fdd5c61c0fa3316730b8aa1",
+          "CMV:9343b9313ee49679799f8e9d"
+        ],
+        "worst_probe_id": "J:932628adf7f0d5936426:LOCAL_Y:-120"
+      },
+      {
+        "face_index": 5246,
+        "max_area_ratio": 64.27608595004862,
+        "max_condition_number": 156.338276089533,
+        "max_edge_ratio": 66.5159248183251,
+        "min_area_ratio": 0.9325929098261344,
+        "skin_l1_max": 1.725622120537225,
+        "vertex_ids": [
+          "CMV:b78a2c6ca6203952b6606c9b",
+          "CMV:9343b9313ee49679799f8e9d",
+          "CMV:6328da6559a41e8b2670aa0e"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 8446,
+        "max_area_ratio": 63.35095225653747,
+        "max_condition_number": 362.16688283989737,
+        "max_edge_ratio": 66.07208849830887,
+        "min_area_ratio": 0.9959720627176292,
+        "skin_l1_max": 1.9590838891413798,
+        "vertex_ids": [
+          "CMV:ebf23904da2dbf91ce76f283",
+          "CMV:9515e06c9f176a4fac35568a",
+          "CMV:879f15c55285faa737f3bdd8"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 11028,
+        "max_area_ratio": 58.26646770427948,
+        "max_condition_number": 364.64644566541887,
+        "max_edge_ratio": 66.07208849830887,
+        "min_area_ratio": 0.9999218425263007,
+        "skin_l1_max": 1.7609239388063855,
+        "vertex_ids": [
+          "CMV:9515e06c9f176a4fac35568a",
+          "CMV:879f15c55285faa737f3bdd8",
+          "CMV:1b71a9fcd8ba09fc43b59c82"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:-120"
+      },
+      {
+        "face_index": 8071,
+        "max_area_ratio": 63.993581248381936,
+        "max_condition_number": 795.6628119084598,
+        "max_edge_ratio": 66.04294972402622,
+        "min_area_ratio": 0.9999994695086163,
+        "skin_l1_max": 1.9590823276830338,
+        "vertex_ids": [
+          "CMV:8fdd5c61c0fa3316730b8aa1",
+          "CMV:9343b9313ee49679799f8e9d",
+          "CMV:55c41e1958c30638616d6d45"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_Y:+120"
+      },
+      {
+        "face_index": 4820,
+        "max_area_ratio": 59.81574021818611,
+        "max_condition_number": 466.37902205217586,
+        "max_edge_ratio": 66.04294972402622,
+        "min_area_ratio": 0.9999999999999802,
+        "skin_l1_max": 1.7566488978479808,
+        "vertex_ids": [
+          "CMV:7ccfa883d6eeff77a0063b54",
+          "CMV:8fdd5c61c0fa3316730b8aa1",
+          "CMV:55c41e1958c30638616d6d45"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:-120"
+      },
+      {
+        "face_index": 24608,
+        "max_area_ratio": 54.792580764473286,
+        "max_condition_number": 1099.1975669404198,
+        "max_edge_ratio": 65.52231993499576,
+        "min_area_ratio": 0.998997534752361,
+        "skin_l1_max": 1.9943836057647948,
+        "vertex_ids": [
+          "CMV:a775fba56ea6450b59cbcaaa",
+          "CMV:16fa6298c5a49f774ef7afd9",
+          "CMV:62a8df98613e58a42ea7d093"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 21831,
+        "max_area_ratio": 53.68728484310776,
+        "max_condition_number": 933.0855225304877,
+        "max_edge_ratio": 65.52231993499576,
+        "min_area_ratio": 0.9996934320609613,
+        "skin_l1_max": 1.9639369575552252,
+        "vertex_ids": [
+          "CMV:52df0452f4e9bcee91fec433",
+          "CMV:a775fba56ea6450b59cbcaaa",
+          "CMV:62a8df98613e58a42ea7d093"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 5620,
+        "max_area_ratio": 54.00174335607092,
+        "max_condition_number": 1190.6926620817646,
+        "max_edge_ratio": 65.16061815568077,
+        "min_area_ratio": 0.9999779593607565,
+        "skin_l1_max": 1.9943836057647948,
+        "vertex_ids": [
+          "CMV:cb3c663bd401936b8ed6bc34",
+          "CMV:16fa6298c5a49f774ef7afd9",
+          "CMV:62a8df98613e58a42ea7d093"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 5619,
+        "max_area_ratio": 53.3545218681027,
+        "max_condition_number": 873.9965572923987,
+        "max_edge_ratio": 65.16061815568077,
+        "min_area_ratio": 0.99997068469281,
+        "skin_l1_max": 1.9901090669674113,
+        "vertex_ids": [
+          "CMV:cb3c663bd401936b8ed6bc34",
+          "CMV:eab9161f4ca42b1c492ecf49",
+          "CMV:16fa6298c5a49f774ef7afd9"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 20366,
+        "max_area_ratio": 54.45383822253441,
+        "max_condition_number": 1135.8356482935242,
+        "max_edge_ratio": 64.79518267874097,
+        "min_area_ratio": 0.9964442706205681,
+        "skin_l1_max": 1.9943809831973482,
+        "vertex_ids": [
+          "CMV:f942fba1e7c6018c613010d6",
+          "CMV:af8b1b3884b764d3b909b6f6",
+          "CMV:0acdb4acdc05f52544fbd8ba"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 24335,
+        "max_area_ratio": 52.93389029861588,
+        "max_condition_number": 955.9587573419612,
+        "max_edge_ratio": 64.79518267874097,
+        "min_area_ratio": 0.9991711459141103,
+        "skin_l1_max": 1.9633449425645548,
+        "vertex_ids": [
+          "CMV:af8b1b3884b764d3b909b6f6",
+          "CMV:17c40c29a6387bbe741e6666",
+          "CMV:0acdb4acdc05f52544fbd8ba"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 4384,
+        "max_area_ratio": 53.23655839360452,
+        "max_condition_number": 1000.5656547212051,
+        "max_edge_ratio": 64.7517889975216,
+        "min_area_ratio": 0.9995857317361813,
+        "skin_l1_max": 1.9949637626829122,
+        "vertex_ids": [
+          "CMV:2e538ef74a8d09f8b9474f57",
+          "CMV:c082742326cecf63872e3986",
+          "CMV:f942fba1e7c6018c613010d6"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 4386,
+        "max_area_ratio": 53.115086956427874,
+        "max_condition_number": 1119.0316047323051,
+        "max_edge_ratio": 64.7517889975216,
+        "min_area_ratio": 0.9972972918860462,
+        "skin_l1_max": 1.9943809831973482,
+        "vertex_ids": [
+          "CMV:2e538ef74a8d09f8b9474f57",
+          "CMV:f942fba1e7c6018c613010d6",
+          "CMV:af8b1b3884b764d3b909b6f6"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 22666,
+        "max_area_ratio": 62.1278146270958,
+        "max_condition_number": 354.68915968933266,
+        "max_edge_ratio": 64.52158134353064,
+        "min_area_ratio": 0.9999290843598357,
+        "skin_l1_max": 1.9633565990915707,
+        "vertex_ids": [
+          "CMV:10b70fe8a97569bfa9b47c70",
+          "CMV:469a033559d129c9a24bdaa4",
+          "CMV:c6855f568c828f8c8cae7de0"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 24419,
+        "max_area_ratio": 55.30044346160611,
+        "max_condition_number": 378.3693905739561,
+        "max_edge_ratio": 64.52158134353064,
+        "min_area_ratio": 0.9999230232846168,
+        "skin_l1_max": 1.7615018928828945,
+        "vertex_ids": [
+          "CMV:469a033559d129c9a24bdaa4",
+          "CMV:c6855f568c828f8c8cae7de0",
+          "CMV:af80213975835d62ca0f60d2"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 363,
+        "max_area_ratio": 201.24665748332936,
+        "max_condition_number": 346.58114771163486,
+        "max_edge_ratio": 64.37854086800999,
+        "min_area_ratio": 0.9999999999892812,
+        "skin_l1_max": 1.9206194308587283,
+        "vertex_ids": [
+          "CMV:3be9379c2a2a707c9af0486b",
+          "CMV:82dc9cb953df92e06f3e234c",
+          "CMV:5a235b333ec2f389e639e53c"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 4957,
+        "max_area_ratio": 63.470474827141345,
+        "max_condition_number": 431.8673476930858,
+        "max_edge_ratio": 63.441118269246395,
+        "min_area_ratio": 0.9998733523928586,
+        "skin_l1_max": 1.9633568710355749,
+        "vertex_ids": [
+          "CMV:4432287c776a983e461a4378",
+          "CMV:d847a51e4a707f09e4eba6a8",
+          "CMV:6f2b733dc9e22432ac50c2f7"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 7504,
+        "max_area_ratio": 61.319847165425976,
+        "max_condition_number": 342.069229171952,
+        "max_edge_ratio": 62.45853720648626,
+        "min_area_ratio": 0.9999250025737608,
+        "skin_l1_max": 1.975027332427448,
+        "vertex_ids": [
+          "CMV:3b6c838a7585e71c20eaac0a",
+          "CMV:762f25fd63d23101b0a4f1e0",
+          "CMV:83b37e5f1c795e3cd6a179dc"
+        ],
+        "worst_probe_id": "J:5428a88dad4d4d8d5c4d:LOCAL_Z:+120"
+      },
+      {
+        "face_index": 20864,
+        "max_area_ratio": 60.71500817011583,
+        "max_condition_number": 214.67884393910816,
+        "max_edge_ratio": 62.45853720648626,
+        "min_area_ratio": 0.9828533195801997,
+        "skin_l1_max": 1.9641513494635174,
+        "vertex_ids": [
+          "CMV:2d9be1af36f281142fd37c60",
+          "CMV:762f25fd63d23101b0a4f1e0",
+          "CMV:83b37e5f1c795e3cd6a179dc"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:-120"
+      },
+      {
+        "face_index": 3700,
+        "max_area_ratio": 51.7404351954531,
+        "max_condition_number": 1328.9691777103553,
+        "max_edge_ratio": 62.025305988697106,
+        "min_area_ratio": 0.8336587019574359,
+        "skin_l1_max": 1.7616604708531345,
+        "vertex_ids": [
+          "CMV:5ffb85d7a976bd20dbfac30d",
+          "CMV:6908d5b597b4b7bdbd06120a",
+          "CMV:c59517d35bbb3bbd621e054d"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 3698,
+        "max_area_ratio": 47.639914345760545,
+        "max_condition_number": 275.4233262012318,
+        "max_edge_ratio": 62.025305988697106,
+        "min_area_ratio": 0.8368046304624686,
+        "skin_l1_max": 1.7615828805892997,
+        "vertex_ids": [
+          "CMV:5ffb85d7a976bd20dbfac30d",
+          "CMV:ad26da92497c19993f79be57",
+          "CMV:6908d5b597b4b7bdbd06120a"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 4385,
+        "max_area_ratio": 54.311148534249384,
+        "max_condition_number": 4258.627350811134,
+        "max_edge_ratio": 61.866410519730444,
+        "min_area_ratio": 0.8885449360981115,
+        "skin_l1_max": 1.9949637626829122,
+        "vertex_ids": [
+          "CMV:2e538ef74a8d09f8b9474f57",
+          "CMV:c082742326cecf63872e3986",
+          "CMV:e420f20594f6f11e4712120e"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 12846,
+        "max_area_ratio": 52.716271965697466,
+        "max_condition_number": 4365.182719717721,
+        "max_edge_ratio": 61.866410519730444,
+        "min_area_ratio": 0.8387472308952432,
+        "skin_l1_max": 1.9051461114895263,
+        "vertex_ids": [
+          "CMV:c082742326cecf63872e3986",
+          "CMV:0172c2525744a4c713fc60e2",
+          "CMV:e420f20594f6f11e4712120e"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 20429,
+        "max_area_ratio": 73.18039978146936,
+        "max_condition_number": 426.64795752196216,
+        "max_edge_ratio": 61.84270358005926,
+        "min_area_ratio": 0.5201047572634404,
+        "skin_l1_max": 1.9633585010095924,
+        "vertex_ids": [
+          "CMV:ad26da92497c19993f79be57",
+          "CMV:e690bef655278eeb1c2df280",
+          "CMV:782bfd201a7dda80e22122bc"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 20430,
+        "max_area_ratio": 51.55268415875943,
+        "max_condition_number": 361.3114018760662,
+        "max_edge_ratio": 61.84270358005926,
+        "min_area_ratio": 0.5158438063978195,
+        "skin_l1_max": 1.7615828805892997,
+        "vertex_ids": [
+          "CMV:ad26da92497c19993f79be57",
+          "CMV:6908d5b597b4b7bdbd06120a",
+          "CMV:782bfd201a7dda80e22122bc"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_Y:-120"
+      },
+      {
+        "face_index": 3458,
+        "max_area_ratio": 52.041220264757214,
+        "max_condition_number": 2093.7076350886446,
+        "max_edge_ratio": 61.57631865856761,
+        "min_area_ratio": 0.9999081364460382,
+        "skin_l1_max": 1.9640152860938207,
+        "vertex_ids": [
+          "CMV:346abbbebfa5905fe89ba6ec",
+          "CMV:eab9161f4ca42b1c492ecf49",
+          "CMV:a45cbe6419f8d1d60457fba9"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 22573,
+        "max_area_ratio": 52.02531682372233,
+        "max_condition_number": 2123.2871417261654,
+        "max_edge_ratio": 61.57631865856761,
+        "min_area_ratio": 0.9997979827455004,
+        "skin_l1_max": 1.9639367482291703,
+        "vertex_ids": [
+          "CMV:eab9161f4ca42b1c492ecf49",
+          "CMV:16fa6298c5a49f774ef7afd9",
+          "CMV:a45cbe6419f8d1d60457fba9"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 17170,
+        "max_area_ratio": 55.344180715792525,
+        "max_condition_number": 2557.8604849540216,
+        "max_edge_ratio": 60.492363004405966,
+        "min_area_ratio": 0.9996946287092119,
+        "skin_l1_max": 1.9639369575552252,
+        "vertex_ids": [
+          "CMV:3d82d818254670476c2d4886",
+          "CMV:52df0452f4e9bcee91fec433",
+          "CMV:a775fba56ea6450b59cbcaaa"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 17169,
+        "max_area_ratio": 50.33757641934907,
+        "max_condition_number": 979.2998176136949,
+        "max_edge_ratio": 60.492363004405966,
+        "min_area_ratio": 0.9996415041680083,
+        "skin_l1_max": 1.761584198864565,
+        "vertex_ids": [
+          "CMV:3d82d818254670476c2d4886",
+          "CMV:e6e1ed5cf59a4c68806bb5b6",
+          "CMV:52df0452f4e9bcee91fec433"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 16953,
+        "max_area_ratio": 65.19986309541873,
+        "max_condition_number": 102.75738290110796,
+        "max_edge_ratio": 59.68364495469045,
+        "min_area_ratio": 0.999610094427769,
+        "skin_l1_max": 1.761584198864565,
+        "vertex_ids": [
+          "CMV:d847a51e4a707f09e4eba6a8",
+          "CMV:3d82d818254670476c2d4886",
+          "CMV:e6e1ed5cf59a4c68806bb5b6"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 16954,
+        "max_area_ratio": 64.73960900692238,
+        "max_condition_number": 112.05658052341391,
+        "max_edge_ratio": 59.68364495469045,
+        "min_area_ratio": 0.9996776910003096,
+        "skin_l1_max": 1.7615040803934283,
+        "vertex_ids": [
+          "CMV:d847a51e4a707f09e4eba6a8",
+          "CMV:3d82d818254670476c2d4886",
+          "CMV:85905c52dc8dd558d521aab4"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 24557,
+        "max_area_ratio": 54.556308595789474,
+        "max_condition_number": 2313.6442432766557,
+        "max_edge_ratio": 59.58879921986584,
+        "min_area_ratio": 0.9960373067053323,
+        "skin_l1_max": 1.9633449425645548,
+        "vertex_ids": [
+          "CMV:7fcfcfb80ef0c509c8d48b34",
+          "CMV:17c40c29a6387bbe741e6666",
+          "CMV:0acdb4acdc05f52544fbd8ba"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 24558,
+        "max_area_ratio": 48.226360758225496,
+        "max_condition_number": 681.6748823624173,
+        "max_edge_ratio": 59.58879921986584,
+        "min_area_ratio": 0.9976371046803713,
+        "skin_l1_max": 1.7615083277899661,
+        "vertex_ids": [
+          "CMV:7fcfcfb80ef0c509c8d48b34",
+          "CMV:17c40c29a6387bbe741e6666",
+          "CMV:916ac1cd532ba68d89b78cc1"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 4956,
+        "max_area_ratio": 48.69660968980038,
+        "max_condition_number": 665.3259505457781,
+        "max_edge_ratio": 59.11429874640179,
+        "min_area_ratio": 0.9997022084745839,
+        "skin_l1_max": 1.7615040803934283,
+        "vertex_ids": [
+          "CMV:4432287c776a983e461a4378",
+          "CMV:d847a51e4a707f09e4eba6a8",
+          "CMV:85905c52dc8dd558d521aab4"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:+120"
+      },
+      {
+        "face_index": 21251,
+        "max_area_ratio": 59.20369776318955,
+        "max_condition_number": 117.0917607724014,
+        "max_edge_ratio": 58.97121229493844,
+        "min_area_ratio": 0.9999999999999575,
+        "skin_l1_max": 1.9881779069137897,
+        "vertex_ids": [
+          "CMV:e462ac77760b3a8bbcd1d3ec",
+          "CMV:c661e484739252c1abb5f066",
+          "CMV:7ba531c2783f0118f2985f73"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_Y:+120"
+      },
+      {
+        "face_index": 21372,
+        "max_area_ratio": 58.81480889010949,
+        "max_condition_number": 711.893585797793,
+        "max_edge_ratio": 58.97121229493844,
+        "min_area_ratio": 0.9999999999999566,
+        "skin_l1_max": 1.9881779069137897,
+        "vertex_ids": [
+          "CMV:c661e484739252c1abb5f066",
+          "CMV:7ba531c2783f0118f2985f73",
+          "CMV:8fa45c4e2463c97d1a7d8dd5"
+        ],
+        "worst_probe_id": "J:42d181ebf3515959283a:LOCAL_Z:-120"
+      },
+      {
+        "face_index": 19214,
+        "max_area_ratio": 62.449019086424045,
+        "max_condition_number": 104.32339389355819,
+        "max_edge_ratio": 56.1520322772224,
+        "min_area_ratio": 0.4136181209432828,
+        "skin_l1_max": 1.7615018928828945,
+        "vertex_ids": [
+          "CMV:879f15c55285faa737f3bdd8",
+          "CMV:469a033559d129c9a24bdaa4",
+          "CMV:af80213975835d62ca0f60d2"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 19213,
+        "max_area_ratio": 61.61621199860023,
+        "max_condition_number": 109.12490592675762,
+        "max_edge_ratio": 56.1520322772224,
+        "min_area_ratio": 0.9998905208160643,
+        "skin_l1_max": 1.7609239388063855,
+        "vertex_ids": [
+          "CMV:879f15c55285faa737f3bdd8",
+          "CMV:1b71a9fcd8ba09fc43b59c82",
+          "CMV:469a033559d129c9a24bdaa4"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 9125,
+        "max_area_ratio": 48.33117938768255,
+        "max_condition_number": 3971.5854009333575,
+        "max_edge_ratio": 55.74032818113956,
+        "min_area_ratio": 0.7452731255897862,
+        "skin_l1_max": 1.9051368313924195,
+        "vertex_ids": [
+          "CMV:496c3048e4127fbaf5c53fe5",
+          "CMV:adff740adb49c93d40345195",
+          "CMV:f697e519996650be28c190c4"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:-120"
+      },
+      {
+        "face_index": 14957,
+        "max_area_ratio": 47.44148474640354,
+        "max_condition_number": 2652.757575717049,
+        "max_edge_ratio": 55.74032818113956,
+        "min_area_ratio": 0.9985339518429744,
+        "skin_l1_max": 1.9051368313924195,
+        "vertex_ids": [
+          "CMV:732e1850274dfce0d7686cb1",
+          "CMV:adff740adb49c93d40345195",
+          "CMV:f697e519996650be28c190c4"
+        ],
+        "worst_probe_id": "J:5428a88dad4d4d8d5c4d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 2731,
+        "max_area_ratio": 48.96010225061719,
+        "max_condition_number": 2786.526057433771,
+        "max_edge_ratio": 55.694945828195195,
+        "min_area_ratio": 0.999143135603472,
+        "skin_l1_max": 1.963744179254387,
+        "vertex_ids": [
+          "CMV:d59263f071b92649d5f5c51d",
+          "CMV:0c99993a12c5dbcb32263537",
+          "CMV:41c0d00a9f8a38b059bb06d7"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:+120"
+      },
+      {
+        "face_index": 2362,
+        "max_area_ratio": 46.72928463622356,
+        "max_condition_number": 1664.4217185401415,
+        "max_edge_ratio": 55.694945828195195,
+        "min_area_ratio": 0.9934441043251521,
+        "skin_l1_max": 1.963744179254387,
+        "vertex_ids": [
+          "CMV:c4cca8b173f07d1f8be75282",
+          "CMV:d59263f071b92649d5f5c51d",
+          "CMV:0c99993a12c5dbcb32263537"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:-120"
+      },
+      {
+        "face_index": 9127,
+        "max_area_ratio": 46.50205935961455,
+        "max_condition_number": 2744.731752048926,
+        "max_edge_ratio": 55.04882885121289,
+        "min_area_ratio": 0.9988173679360627,
+        "skin_l1_max": 1.9865098483385126,
+        "vertex_ids": [
+          "CMV:496c3048e4127fbaf5c53fe5",
+          "CMV:4f0bfe8f3c62a9cdedf36201",
+          "CMV:f697e519996650be28c190c4"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 9124,
+        "max_area_ratio": 46.48291366700512,
+        "max_condition_number": 4032.7644955219184,
+        "max_edge_ratio": 55.04882885121289,
+        "min_area_ratio": 0.6886645402063405,
+        "skin_l1_max": 1.998073206870467,
+        "vertex_ids": [
+          "CMV:496c3048e4127fbaf5c53fe5",
+          "CMV:5bdd40d11eecb7cc8aa16161",
+          "CMV:4f0bfe8f3c62a9cdedf36201"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 6179,
+        "max_area_ratio": 54.81970264726396,
+        "max_condition_number": 301.3033364218705,
+        "max_edge_ratio": 55.040751810092125,
+        "min_area_ratio": 0.9999999999999756,
+        "skin_l1_max": 1.8525851960087285,
+        "vertex_ids": [
+          "CMV:e07ff345b106e3f430d6686b",
+          "CMV:40f8a6db49bf0938dc1a9640",
+          "CMV:e85fad7830f07fe18f0c31c1"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_Z:-120"
+      },
+      {
+        "face_index": 6181,
+        "max_area_ratio": 51.117935684335286,
+        "max_condition_number": 182.39582290951526,
+        "max_edge_ratio": 55.040751810092125,
+        "min_area_ratio": 0.9999999999999785,
+        "skin_l1_max": 1.8346045551457428,
+        "vertex_ids": [
+          "CMV:e07ff345b106e3f430d6686b",
+          "CMV:e85fad7830f07fe18f0c31c1",
+          "CMV:0e2025a9bce0042b17e27046"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:+120"
+      },
+      {
+        "face_index": 2367,
+        "max_area_ratio": 47.61854818868391,
+        "max_condition_number": 7551.359506151555,
+        "max_edge_ratio": 55.00009003257672,
+        "min_area_ratio": 0.3874302339087794,
+        "skin_l1_max": 1.9051248671356658,
+        "vertex_ids": [
+          "CMV:c4cca8b173f07d1f8be75282",
+          "CMV:4f943f5eaeeb4c1ff90e9b33",
+          "CMV:cf79f08e629b82011b87b446"
+        ],
+        "worst_probe_id": "J:5428a88dad4d4d8d5c4d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 2363,
+        "max_area_ratio": 46.60828940710973,
+        "max_condition_number": 2933.107621544423,
+        "max_edge_ratio": 55.00009003257672,
+        "min_area_ratio": 0.9693018567887227,
+        "skin_l1_max": 1.9051138483921213,
+        "vertex_ids": [
+          "CMV:c4cca8b173f07d1f8be75282",
+          "CMV:d59263f071b92649d5f5c51d",
+          "CMV:cf79f08e629b82011b87b446"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 9123,
+        "max_area_ratio": 46.90802211962381,
+        "max_condition_number": 6419.116174226623,
+        "max_edge_ratio": 54.407330973638004,
+        "min_area_ratio": 0.44676161573368317,
+        "skin_l1_max": 1.998073206870467,
+        "vertex_ids": [
+          "CMV:496c3048e4127fbaf5c53fe5",
+          "CMV:5bdd40d11eecb7cc8aa16161",
+          "CMV:8269020a3195c524d40e9ba3"
+        ],
+        "worst_probe_id": "J:5428a88dad4d4d8d5c4d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 3828,
+        "max_area_ratio": 46.82483889667667,
+        "max_condition_number": 6374.406928432171,
+        "max_edge_ratio": 54.407330973638004,
+        "min_area_ratio": 0.4247684359833336,
+        "skin_l1_max": 1.9989780681497344,
+        "vertex_ids": [
+          "CMV:d92e1f62e8ade892bf4b9c84",
+          "CMV:5bdd40d11eecb7cc8aa16161",
+          "CMV:8269020a3195c524d40e9ba3"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 21746,
+        "max_area_ratio": 47.53696434553497,
+        "max_condition_number": 5803.237385464525,
+        "max_edge_ratio": 54.394938664200126,
+        "min_area_ratio": 0.48229544325697443,
+        "skin_l1_max": 1.998612153502591,
+        "vertex_ids": [
+          "CMV:31e38f0e11398c16830024f1",
+          "CMV:a218b311a172e55c8470a4a7",
+          "CMV:41c0d00a9f8a38b059bb06d7"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 21745,
+        "max_area_ratio": 47.429804323886195,
+        "max_condition_number": 4467.389261707315,
+        "max_edge_ratio": 54.394938664200126,
+        "min_area_ratio": 0.6304233195608295,
+        "skin_l1_max": 1.9986210003107967,
+        "vertex_ids": [
+          "CMV:31e38f0e11398c16830024f1",
+          "CMV:ed028d9d07a99ea9b5b0673e",
+          "CMV:a218b311a172e55c8470a4a7"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:+120"
+      },
+      {
+        "face_index": 3830,
+        "max_area_ratio": 46.91349375921825,
+        "max_condition_number": 4582.337221384511,
+        "max_edge_ratio": 53.50493659745249,
+        "min_area_ratio": 0.5706924577691248,
+        "skin_l1_max": 1.9990552119239002,
+        "vertex_ids": [
+          "CMV:d92e1f62e8ade892bf4b9c84",
+          "CMV:be1a1fd61ec76481fd897623",
+          "CMV:7b5809815deb971c3d68d2e2"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 3831,
+        "max_area_ratio": 46.7191426007244,
+        "max_condition_number": 2943.203461181289,
+        "max_edge_ratio": 53.50493659745249,
+        "min_area_ratio": 0.9394642185496034,
+        "skin_l1_max": 1.9989780681497344,
+        "vertex_ids": [
+          "CMV:d92e1f62e8ade892bf4b9c84",
+          "CMV:be1a1fd61ec76481fd897623",
+          "CMV:8269020a3195c524d40e9ba3"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:+120"
+      },
+      {
+        "face_index": 21743,
+        "max_area_ratio": 46.17708945113405,
+        "max_condition_number": 3369.207603414096,
+        "max_edge_ratio": 53.34708988151203,
+        "min_area_ratio": 0.831744539819137,
+        "skin_l1_max": 1.998612153502591,
+        "vertex_ids": [
+          "CMV:31e38f0e11398c16830024f1",
+          "CMV:4ea0cf0f38e2d9527fdee85b",
+          "CMV:41c0d00a9f8a38b059bb06d7"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:-120"
+      },
+      {
+        "face_index": 19590,
+        "max_area_ratio": 45.11577124806061,
+        "max_condition_number": 12705.72386421097,
+        "max_edge_ratio": 53.34708988151203,
+        "min_area_ratio": 0.20894836381852802,
+        "skin_l1_max": 1.985841373291205,
+        "vertex_ids": [
+          "CMV:0c99993a12c5dbcb32263537",
+          "CMV:4ea0cf0f38e2d9527fdee85b",
+          "CMV:41c0d00a9f8a38b059bb06d7"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:-120"
+      },
+      {
+        "face_index": 4779,
+        "max_area_ratio": 45.70541727861241,
+        "max_condition_number": 1760.370937977743,
+        "max_edge_ratio": 52.56481388235106,
+        "min_area_ratio": 0.9998636303315542,
+        "skin_l1_max": 1.9051368304995324,
+        "vertex_ids": [
+          "CMV:85d6efd90a52db05a51ee229",
+          "CMV:732e1850274dfce0d7686cb1",
+          "CMV:f697e519996650be28c190c4"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 4778,
+        "max_area_ratio": 44.708713655853664,
+        "max_condition_number": 2453.8798951906924,
+        "max_edge_ratio": 52.56481388235106,
+        "min_area_ratio": 0.9996087837433963,
+        "skin_l1_max": 1.7615955434033594,
+        "vertex_ids": [
+          "CMV:85d6efd90a52db05a51ee229",
+          "CMV:732e1850274dfce0d7686cb1",
+          "CMV:8847187b0de1005ef2902747"
+        ],
+        "worst_probe_id": "J:5428a88dad4d4d8d5c4d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 8391,
+        "max_area_ratio": 58.31602875938992,
+        "max_condition_number": 947.8263026366038,
+        "max_edge_ratio": 52.45755296357507,
+        "min_area_ratio": 0.993489963729802,
+        "skin_l1_max": 1.9816689799561433,
+        "vertex_ids": [
+          "CMV:48e5b26eb59144f9f793f411",
+          "CMV:fb409dac4a83001dd1b93c0c",
+          "CMV:7c5aebad341301c93da8cf19"
+        ],
+        "worst_probe_id": "J:932628adf7f0d5936426:LOCAL_X:-120"
+      },
+      {
+        "face_index": 23153,
+        "max_area_ratio": 54.26973637746692,
+        "max_condition_number": 2253.6433073421413,
+        "max_edge_ratio": 52.45755296357507,
+        "min_area_ratio": 0.9289853062323383,
+        "skin_l1_max": 1.9045729988696853,
+        "vertex_ids": [
+          "CMV:fb409dac4a83001dd1b93c0c",
+          "CMV:7c5aebad341301c93da8cf19",
+          "CMV:ed028d9d07a99ea9b5b0673e"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:+120"
+      },
+      {
+        "face_index": 5250,
+        "max_area_ratio": 54.16999783316597,
+        "max_condition_number": 665.0170420069875,
+        "max_edge_ratio": 52.42377366609534,
+        "min_area_ratio": 0.9753167595708625,
+        "skin_l1_max": 1.761750834150434,
+        "vertex_ids": [
+          "CMV:cafb4d513d75a110be40a722",
+          "CMV:610c91c596e35759b089c587",
+          "CMV:4f943f5eaeeb4c1ff90e9b33"
+        ],
+        "worst_probe_id": "J:7cf59fbe52c53280546a:LOCAL_X:+120"
+      },
+      {
+        "face_index": 2364,
+        "max_area_ratio": 45.16413898486444,
+        "max_condition_number": 1420.2215059085622,
+        "max_edge_ratio": 52.42377366609534,
+        "min_area_ratio": 0.9402017442949937,
+        "skin_l1_max": 1.9051248671356658,
+        "vertex_ids": [
+          "CMV:c4cca8b173f07d1f8be75282",
+          "CMV:610c91c596e35759b089c587",
+          "CMV:4f943f5eaeeb4c1ff90e9b33"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 10579,
+        "max_area_ratio": 51.31936986124911,
+        "max_condition_number": 1486.5020932517282,
+        "max_edge_ratio": 51.74183029388238,
+        "min_area_ratio": 0.8573610321894742,
+        "skin_l1_max": 1.9998057790302755,
+        "vertex_ids": [
+          "CMV:bfd56f7286d82bfb7f7a36a4",
+          "CMV:c26bec28c483e551334c0c15",
+          "CMV:7b5809815deb971c3d68d2e2"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:+120"
+      },
+      {
+        "face_index": 18495,
+        "max_area_ratio": 46.444347833337474,
+        "max_condition_number": 2563.104724622896,
+        "max_edge_ratio": 51.74183029388238,
+        "min_area_ratio": 0.953019587456884,
+        "skin_l1_max": 1.9990552119239002,
+        "vertex_ids": [
+          "CMV:c26bec28c483e551334c0c15",
+          "CMV:be1a1fd61ec76481fd897623",
+          "CMV:7b5809815deb971c3d68d2e2"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 3702,
+        "max_area_ratio": 57.47274791677246,
+        "max_condition_number": 137.5559421970779,
+        "max_edge_ratio": 51.57174869254149,
+        "min_area_ratio": 0.46015229439033106,
+        "skin_l1_max": 1.7615083277899661,
+        "vertex_ids": [
+          "CMV:5ffb85d7a976bd20dbfac30d",
+          "CMV:7fcfcfb80ef0c509c8d48b34",
+          "CMV:916ac1cd532ba68d89b78cc1"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 3701,
+        "max_area_ratio": 56.82740854321912,
+        "max_condition_number": 102.19861556405726,
+        "max_edge_ratio": 51.57174869254149,
+        "min_area_ratio": 0.8932799094050724,
+        "skin_l1_max": 1.7616604708531345,
+        "vertex_ids": [
+          "CMV:5ffb85d7a976bd20dbfac30d",
+          "CMV:7fcfcfb80ef0c509c8d48b34",
+          "CMV:c59517d35bbb3bbd621e054d"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 4939,
+        "max_area_ratio": 52.73438693114853,
+        "max_condition_number": 101.86393787015896,
+        "max_edge_ratio": 50.916015909996766,
+        "min_area_ratio": 0.9791589463314149,
+        "skin_l1_max": 1.9866018687542528,
+        "vertex_ids": [
+          "CMV:d33c9ecd2a47ba76b22343c9",
+          "CMV:ebfd3e78a8c8fbae51db34c6",
+          "CMV:ed028d9d07a99ea9b5b0673e"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 22553,
+        "max_area_ratio": 50.65435867743117,
+        "max_condition_number": 109.07127468112405,
+        "max_edge_ratio": 50.916015909996766,
+        "min_area_ratio": 0.9105391358241344,
+        "skin_l1_max": 1.9045729988696853,
+        "vertex_ids": [
+          "CMV:ebfd3e78a8c8fbae51db34c6",
+          "CMV:fb409dac4a83001dd1b93c0c",
+          "CMV:ed028d9d07a99ea9b5b0673e"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 8389,
+        "max_area_ratio": 52.77405954572301,
+        "max_condition_number": 718.5665882663858,
+        "max_edge_ratio": 50.74023710477496,
+        "min_area_ratio": 0.9999889302516077,
+        "skin_l1_max": 1.9816689799561433,
+        "vertex_ids": [
+          "CMV:48e5b26eb59144f9f793f411",
+          "CMV:1ace284b12d05c010116872c",
+          "CMV:fb409dac4a83001dd1b93c0c"
+        ],
+        "worst_probe_id": "J:932628adf7f0d5936426:LOCAL_X:+120"
+      },
+      {
+        "face_index": 21744,
+        "max_area_ratio": 45.886138176475605,
+        "max_condition_number": 1812.547809895072,
+        "max_edge_ratio": 50.11635050718059,
+        "min_area_ratio": 0.9274228846734395,
+        "skin_l1_max": 1.9986210003107967,
+        "vertex_ids": [
+          "CMV:31e38f0e11398c16830024f1",
+          "CMV:7c5aebad341301c93da8cf19",
+          "CMV:ed028d9d07a99ea9b5b0673e"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:-120"
+      },
+      {
+        "face_index": 22554,
+        "max_area_ratio": 43.89378835114809,
+        "max_condition_number": 2148.052004564398,
+        "max_edge_ratio": 49.99344885465727,
+        "min_area_ratio": 0.9973003248897921,
+        "skin_l1_max": 1.9981772751048597,
+        "vertex_ids": [
+          "CMV:ebfd3e78a8c8fbae51db34c6",
+          "CMV:83d722ef9a7a7fbd4f075ba1",
+          "CMV:d7f98c56b513afbffc27c49f"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 4940,
+        "max_area_ratio": 43.845006203796125,
+        "max_condition_number": 3224.1020984230304,
+        "max_edge_ratio": 49.99344885465727,
+        "min_area_ratio": 0.7618786730734741,
+        "skin_l1_max": 1.9866018687542528,
+        "vertex_ids": [
+          "CMV:d33c9ecd2a47ba76b22343c9",
+          "CMV:ebfd3e78a8c8fbae51db34c6",
+          "CMV:83d722ef9a7a7fbd4f075ba1"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 7503,
+        "max_area_ratio": 45.924325389620805,
+        "max_condition_number": 2081.311172471583,
+        "max_edge_ratio": 47.40406496347374,
+        "min_area_ratio": 0.04228123254903877,
+        "skin_l1_max": 1.974162734166466,
+        "vertex_ids": [
+          "CMV:3b6c838a7585e71c20eaac0a",
+          "CMV:b60b0d2da8fecf6876facdc7",
+          "CMV:fe7e4acb4c86d911650c215c"
+        ],
+        "worst_probe_id": "J:2ff965d6dbe4efc2d5d4:LOCAL_Z:-120"
+      },
+      {
+        "face_index": 7505,
+        "max_area_ratio": 45.24744259861276,
+        "max_condition_number": 76.8017605425873,
+        "max_edge_ratio": 47.40406496347374,
+        "min_area_ratio": 0.8335639101434563,
+        "skin_l1_max": 1.974162734166466,
+        "vertex_ids": [
+          "CMV:3b6c838a7585e71c20eaac0a",
+          "CMV:fe7e4acb4c86d911650c215c",
+          "CMV:83b37e5f1c795e3cd6a179dc"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_Y:-120"
+      },
+      {
+        "face_index": 18864,
+        "max_area_ratio": 48.2597233388623,
+        "max_condition_number": 101.15471184490322,
+        "max_edge_ratio": 47.013284342449744,
+        "min_area_ratio": 0.9999899642151446,
+        "skin_l1_max": 1.9981772751048597,
+        "vertex_ids": [
+          "CMV:49a0c3549a70ec5acea91cbc",
+          "CMV:83d722ef9a7a7fbd4f075ba1",
+          "CMV:d7f98c56b513afbffc27c49f"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 18862,
+        "max_area_ratio": 47.0410439092454,
+        "max_condition_number": 91.59798553354005,
+        "max_edge_ratio": 47.013284342449744,
+        "min_area_ratio": 0.9999951060288115,
+        "skin_l1_max": 1.905148110395102,
+        "vertex_ids": [
+          "CMV:49a0c3549a70ec5acea91cbc",
+          "CMV:018fc7a6b12cc55b57113f53",
+          "CMV:83d722ef9a7a7fbd4f075ba1"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 18086,
+        "max_area_ratio": 45.83660664146992,
+        "max_condition_number": 621.4108480070515,
+        "max_edge_ratio": 46.701649319330606,
+        "min_area_ratio": 0.9999213375632114,
+        "skin_l1_max": 1.9932326459583787,
+        "vertex_ids": [
+          "CMV:6b6eca57589d3053f6ac5c7f",
+          "CMV:1638c0855b64c92b4fa19997",
+          "CMV:e0027b5b5d4339e81cfcdce3"
+        ],
+        "worst_probe_id": "J:932628adf7f0d5936426:LOCAL_X:-120"
+      },
+      {
+        "face_index": 18088,
+        "max_area_ratio": 44.511224216513625,
+        "max_condition_number": 567.1311169793076,
+        "max_edge_ratio": 46.701649319330606,
+        "min_area_ratio": 0.9999989656373205,
+        "skin_l1_max": 1.9932326459583787,
+        "vertex_ids": [
+          "CMV:6b6eca57589d3053f6ac5c7f",
+          "CMV:dec8b3fbd471675cf44ea202",
+          "CMV:e0027b5b5d4339e81cfcdce3"
+        ],
+        "worst_probe_id": "J:932628adf7f0d5936426:LOCAL_X:+120"
+      },
+      {
+        "face_index": 9170,
+        "max_area_ratio": 47.652706611436024,
+        "max_condition_number": 90.8190546338227,
+        "max_edge_ratio": 46.53295075043503,
+        "min_area_ratio": 0.9999999467741929,
+        "skin_l1_max": 1.9981762341973328,
+        "vertex_ids": [
+          "CMV:2efdf3c45bc9a8e96c816ea7",
+          "CMV:8e6fe3b64efc6a10cbafc3a2",
+          "CMV:216e449ee74221028401ffbb"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 9166,
+        "max_area_ratio": 46.57448653637398,
+        "max_condition_number": 87.9148786488373,
+        "max_edge_ratio": 46.53295075043503,
+        "min_area_ratio": 0.9999999487798602,
+        "skin_l1_max": 1.9051482268093638,
+        "vertex_ids": [
+          "CMV:2efdf3c45bc9a8e96c816ea7",
+          "CMV:c1543905a906608869ecdfb2",
+          "CMV:216e449ee74221028401ffbb"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 4995,
+        "max_area_ratio": 45.06251401097426,
+        "max_condition_number": 66.56448654100721,
+        "max_edge_ratio": 45.87167889866356,
+        "min_area_ratio": 0.9993712678398903,
+        "skin_l1_max": 1.9825355568270018,
+        "vertex_ids": [
+          "CMV:2a5f0f397704cb2158b05936",
+          "CMV:b60b0d2da8fecf6876facdc7",
+          "CMV:fe7e4acb4c86d911650c215c"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_Y:-120"
+      },
+      {
+        "face_index": 4993,
+        "max_area_ratio": 44.93097319001996,
+        "max_condition_number": 76.97391173622235,
+        "max_edge_ratio": 45.87167889866356,
+        "min_area_ratio": 0.9993305338674234,
+        "skin_l1_max": 1.9832555876132067,
+        "vertex_ids": [
+          "CMV:2a5f0f397704cb2158b05936",
+          "CMV:bc8500f380cda13ade31637c",
+          "CMV:b60b0d2da8fecf6876facdc7"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_Y:-120"
+      },
+      {
+        "face_index": 6471,
+        "max_area_ratio": 51.798805119574496,
+        "max_condition_number": 1203.0216440735028,
+        "max_edge_ratio": 45.86359835117306,
+        "min_area_ratio": 0.9999999603956505,
+        "skin_l1_max": 1.9050574579168902,
+        "vertex_ids": [
+          "CMV:a0cb0df39e878bf45bdaf907",
+          "CMV:fe1ad1e8ce9f1c05fcd93f1e",
+          "CMV:cf60394dce0c0206836e218f"
+        ],
+        "worst_probe_id": "J:932628adf7f0d5936426:LOCAL_X:+120"
+      },
+      {
+        "face_index": 7144,
+        "max_area_ratio": 40.71487827779171,
+        "max_condition_number": 3628.6096229799,
+        "max_edge_ratio": 45.86359835117306,
+        "min_area_ratio": 0.5576655534198294,
+        "skin_l1_max": 1.9050574579168902,
+        "vertex_ids": [
+          "CMV:fe1ad1e8ce9f1c05fcd93f1e",
+          "CMV:1ace284b12d05c010116872c",
+          "CMV:cf60394dce0c0206836e218f"
+        ],
+        "worst_probe_id": "J:5428a88dad4d4d8d5c4d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 16116,
+        "max_area_ratio": 46.09033337748665,
+        "max_condition_number": 92.12643762947476,
+        "max_edge_ratio": 45.83414293723048,
+        "min_area_ratio": 0.9999992020243672,
+        "skin_l1_max": 1.9866136828766492,
+        "vertex_ids": [
+          "CMV:6018d820c299db42165f6ebc",
+          "CMV:6a52305334fd390d743bb3c0",
+          "CMV:4a8f1c202b0c4ca0c967805d"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 5894,
+        "max_area_ratio": 45.59340811646542,
+        "max_condition_number": 99.3717121357013,
+        "max_edge_ratio": 45.83414293723048,
+        "min_area_ratio": 0.9999993097844402,
+        "skin_l1_max": 1.9866141621671523,
+        "vertex_ids": [
+          "CMV:36aa717a30b9d88dac2acae0",
+          "CMV:6018d820c299db42165f6ebc",
+          "CMV:6a52305334fd390d743bb3c0"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 18806,
+        "max_area_ratio": 39.73775124107297,
+        "max_condition_number": 4953.26685682563,
+        "max_edge_ratio": 45.727092925548945,
+        "min_area_ratio": 0.41372391651133517,
+        "skin_l1_max": 1.9993290630662208,
+        "vertex_ids": [
+          "CMV:6a52305334fd390d743bb3c0",
+          "CMV:fe67b9305daaf9f0ed0a0f44",
+          "CMV:522416c7440a9168a4713170"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 5896,
+        "max_area_ratio": 39.63560409761372,
+        "max_condition_number": 9047.76872122889,
+        "max_edge_ratio": 45.727092925548945,
+        "min_area_ratio": 0.2187709344257008,
+        "skin_l1_max": 1.9866141621671523,
+        "vertex_ids": [
+          "CMV:36aa717a30b9d88dac2acae0",
+          "CMV:6a52305334fd390d743bb3c0",
+          "CMV:522416c7440a9168a4713170"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:-120"
+      },
+      {
+        "face_index": 10683,
+        "max_area_ratio": 54.769795390026765,
+        "max_condition_number": 184.9235811784885,
+        "max_edge_ratio": 45.54649805113126,
+        "min_area_ratio": 0.9999999999999685,
+        "skin_l1_max": 1.977865091634684,
+        "vertex_ids": [
+          "CMV:5f213d7379a94feae4e6a497",
+          "CMV:3c2ae3199ca2e79df2f776f1",
+          "CMV:0a21610c87f1bdadba289890"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:-120"
+      },
+      {
+        "face_index": 8040,
+        "max_area_ratio": 51.063408667016816,
+        "max_condition_number": 182.7472736348203,
+        "max_edge_ratio": 45.54649805113126,
+        "min_area_ratio": 0.9999999999999687,
+        "skin_l1_max": 1.9617215785090825,
+        "vertex_ids": [
+          "CMV:59f84aa36230a89ce5c2bc2b",
+          "CMV:3c2ae3199ca2e79df2f776f1",
+          "CMV:0a21610c87f1bdadba289890"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_X:+120"
+      },
+      {
+        "face_index": 6448,
+        "max_area_ratio": 51.09628485004012,
+        "max_condition_number": 2057.6498137006847,
+        "max_edge_ratio": 45.45132142653411,
+        "min_area_ratio": 0.9999999653656262,
+        "skin_l1_max": 1.9639367828193062,
+        "vertex_ids": [
+          "CMV:922951b8d86b2030963e2897",
+          "CMV:a0cb0df39e878bf45bdaf907",
+          "CMV:fe1ad1e8ce9f1c05fcd93f1e"
+        ],
+        "worst_probe_id": "J:932628adf7f0d5936426:LOCAL_X:-120"
+      },
+      {
+        "face_index": 3453,
+        "max_area_ratio": 52.550639169765574,
+        "max_condition_number": 1486.7980435542954,
+        "max_edge_ratio": 44.96860657899701,
+        "min_area_ratio": 0.9917259122397091,
+        "skin_l1_max": 1.9640152860938207,
+        "vertex_ids": [
+          "CMV:346abbbebfa5905fe89ba6ec",
+          "CMV:cafb4d513d75a110be40a722",
+          "CMV:eab9161f4ca42b1c492ecf49"
+        ],
+        "worst_probe_id": "J:7cf59fbe52c53280546a:LOCAL_X:-120"
+      },
+      {
+        "face_index": 3454,
+        "max_area_ratio": 37.80813014401147,
+        "max_condition_number": 1161.2748397212613,
+        "max_edge_ratio": 44.96860657899701,
+        "min_area_ratio": 0.9798455063794989,
+        "skin_l1_max": 1.4624805930753741,
+        "vertex_ids": [
+          "CMV:346abbbebfa5905fe89ba6ec",
+          "CMV:cafb4d513d75a110be40a722",
+          "CMV:a6ff7d6bd56052a9fe105aa2"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 19828,
+        "max_area_ratio": 49.48556663960771,
+        "max_condition_number": 704.1850212078822,
+        "max_edge_ratio": 44.92445522215242,
+        "min_area_ratio": 0.9985962668084525,
+        "skin_l1_max": 1.9051461114895263,
+        "vertex_ids": [
+          "CMV:1ec65dfc8c079fd33f5b542d",
+          "CMV:0172c2525744a4c713fc60e2",
+          "CMV:e420f20594f6f11e4712120e"
+        ],
+        "worst_probe_id": "J:7cf59fbe52c53280546a:LOCAL_X:-120"
+      },
+      {
+        "face_index": 19829,
+        "max_area_ratio": 38.03212043679307,
+        "max_condition_number": 3023.0366837572287,
+        "max_edge_ratio": 44.92445522215242,
+        "min_area_ratio": 0.6319229498824683,
+        "skin_l1_max": 1.4622135104543326,
+        "vertex_ids": [
+          "CMV:1ec65dfc8c079fd33f5b542d",
+          "CMV:0172c2525744a4c713fc60e2",
+          "CMV:e43b081a1c961171c0c4a17a"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 8390,
+        "max_area_ratio": 50.4302130834016,
+        "max_condition_number": 842.6262803846458,
+        "max_edge_ratio": 44.413040529736136,
+        "min_area_ratio": 0.9999983739325314,
+        "skin_l1_max": 1.7615818973260005,
+        "vertex_ids": [
+          "CMV:48e5b26eb59144f9f793f411",
+          "CMV:1ace284b12d05c010116872c",
+          "CMV:37403205108c792a4ec20df6"
+        ],
+        "worst_probe_id": "J:932628adf7f0d5936426:LOCAL_X:-120"
+      },
+      {
+        "face_index": 9168,
+        "max_area_ratio": 39.837775406227216,
+        "max_condition_number": 2271.9906186247254,
+        "max_edge_ratio": 43.802511490587655,
+        "min_area_ratio": 0.793415800084763,
+        "skin_l1_max": 1.9981762341973328,
+        "vertex_ids": [
+          "CMV:2efdf3c45bc9a8e96c816ea7",
+          "CMV:49a0c3549a70ec5acea91cbc",
+          "CMV:8e6fe3b64efc6a10cbafc3a2"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:+120"
+      },
+      {
+        "face_index": 9169,
+        "max_area_ratio": 37.74107430520858,
+        "max_condition_number": 4560.98084361987,
+        "max_edge_ratio": 43.802511490587655,
+        "min_area_ratio": 0.40509934367935385,
+        "skin_l1_max": 1.905148110395102,
+        "vertex_ids": [
+          "CMV:2efdf3c45bc9a8e96c816ea7",
+          "CMV:49a0c3549a70ec5acea91cbc",
+          "CMV:018fc7a6b12cc55b57113f53"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 8502,
+        "max_area_ratio": 39.52471753823856,
+        "max_condition_number": 1251.0772349953074,
+        "max_edge_ratio": 43.280153551417534,
+        "min_area_ratio": 0.5958816084984984,
+        "skin_l1_max": 1.9999591435369894,
+        "vertex_ids": [
+          "CMV:13cdfd5ecc823c969a3a506d",
+          "CMV:216e449ee74221028401ffbb",
+          "CMV:ce3de4e60487230704d035fe"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 8500,
+        "max_area_ratio": 37.27446854125215,
+        "max_condition_number": 2587.3415610577454,
+        "max_edge_ratio": 43.280153551417534,
+        "min_area_ratio": 0.5903954434292029,
+        "skin_l1_max": 1.9051482268093638,
+        "vertex_ids": [
+          "CMV:13cdfd5ecc823c969a3a506d",
+          "CMV:c1543905a906608869ecdfb2",
+          "CMV:216e449ee74221028401ffbb"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 6449,
+        "max_area_ratio": 37.65985997117467,
+        "max_condition_number": 3640.286550713289,
+        "max_edge_ratio": 43.067434853779204,
+        "min_area_ratio": 0.4928606012812363,
+        "skin_l1_max": 1.9639367828193062,
+        "vertex_ids": [
+          "CMV:922951b8d86b2030963e2897",
+          "CMV:a0cb0df39e878bf45bdaf907",
+          "CMV:6ba9b5f1d71e583d8c1c1ee0"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:-120"
+      },
+      {
+        "face_index": 5122,
+        "max_area_ratio": 47.94671780498808,
+        "max_condition_number": 87.64502879688389,
+        "max_edge_ratio": 43.06363821214182,
+        "min_area_ratio": 0.9991000250553324,
+        "skin_l1_max": 1.9993290630662208,
+        "vertex_ids": [
+          "CMV:37dc1a9293fe4e7b7e5c46a6",
+          "CMV:fe67b9305daaf9f0ed0a0f44",
+          "CMV:522416c7440a9168a4713170"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 5118,
+        "max_area_ratio": 42.56289868471174,
+        "max_condition_number": 90.4450624472163,
+        "max_edge_ratio": 43.06363821214182,
+        "min_area_ratio": 0.9992112752620895,
+        "skin_l1_max": 1.7615978099524428,
+        "vertex_ids": [
+          "CMV:37dc1a9293fe4e7b7e5c46a6",
+          "CMV:327631a4c62e56261c3a5f81",
+          "CMV:522416c7440a9168a4713170"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 7145,
+        "max_area_ratio": 37.34124223973944,
+        "max_condition_number": 4486.787500814038,
+        "max_edge_ratio": 43.059142607110935,
+        "min_area_ratio": 0.41415168190596424,
+        "skin_l1_max": 1.7615818973260005,
+        "vertex_ids": [
+          "CMV:fe1ad1e8ce9f1c05fcd93f1e",
+          "CMV:1ace284b12d05c010116872c",
+          "CMV:37403205108c792a4ec20df6"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:+120"
+      },
+      {
+        "face_index": 670,
+        "max_area_ratio": 36.809628806378896,
+        "max_condition_number": 1076.201344033283,
+        "max_edge_ratio": 42.78470476663734,
+        "min_area_ratio": 0.9999995816620686,
+        "skin_l1_max": 1.9993218440652172,
+        "vertex_ids": [
+          "CMV:28819171ae62c38e9946cb78",
+          "CMV:2824b5c14eadbed018490c50",
+          "CMV:6018d820c299db42165f6ebc"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 15193,
+        "max_area_ratio": 36.60723073066859,
+        "max_condition_number": 663.7565383753079,
+        "max_edge_ratio": 42.78470476663734,
+        "min_area_ratio": 0.999999934907166,
+        "skin_l1_max": 1.9866136828766492,
+        "vertex_ids": [
+          "CMV:2824b5c14eadbed018490c50",
+          "CMV:6018d820c299db42165f6ebc",
+          "CMV:4a8f1c202b0c4ca0c967805d"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 3337,
+        "max_area_ratio": 65.2311718514462,
+        "max_condition_number": 296.3867746344785,
+        "max_edge_ratio": 42.61282476262466,
+        "min_area_ratio": 0.5821662772654022,
+        "skin_l1_max": 1.9572832121114432,
+        "vertex_ids": [
+          "CMV:5b523c154b7fcdd44e73c772",
+          "CMV:a024417073be86db0b1535f0",
+          "CMV:ed25e3e9e797c0b9767593db"
+        ],
+        "worst_probe_id": "J:2ff965d6dbe4efc2d5d4:LOCAL_X:+120"
+      },
+      {
+        "face_index": 1657,
+        "max_area_ratio": 41.21163653889092,
+        "max_condition_number": 128.2514824160589,
+        "max_edge_ratio": 42.61282476262466,
+        "min_area_ratio": 0.351336171845977,
+        "skin_l1_max": 1.9564003897790636,
+        "vertex_ids": [
+          "CMV:0560dadb4b53735b3801d88a",
+          "CMV:5b523c154b7fcdd44e73c772",
+          "CMV:a024417073be86db0b1535f0"
+        ],
+        "worst_probe_id": "J:2ff965d6dbe4efc2d5d4:LOCAL_Z:-120"
+      },
+      {
+        "face_index": 5260,
+        "max_area_ratio": 38.06130058756752,
+        "max_condition_number": 2531.522515468991,
+        "max_edge_ratio": 42.4812664305543,
+        "min_area_ratio": 0.659103535915705,
+        "skin_l1_max": 1.9980871018519624,
+        "vertex_ids": [
+          "CMV:6b84c7712c0786600cf211d5",
+          "CMV:a0cb0df39e878bf45bdaf907",
+          "CMV:6ba9b5f1d71e583d8c1c1ee0"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:+120"
+      },
+      {
+        "face_index": 5263,
+        "max_area_ratio": 37.32659541234878,
+        "max_condition_number": 1311.8095893669247,
+        "max_edge_ratio": 42.4812664305543,
+        "min_area_ratio": 0.9910298485211191,
+        "skin_l1_max": 1.9980871018519624,
+        "vertex_ids": [
+          "CMV:6b84c7712c0786600cf211d5",
+          "CMV:574cb7e0198011c8a75a4870",
+          "CMV:6ba9b5f1d71e583d8c1c1ee0"
+        ],
+        "worst_probe_id": "J:5428a88dad4d4d8d5c4d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 13572,
+        "max_area_ratio": 39.76872477375636,
+        "max_condition_number": 372.1892305055719,
+        "max_edge_ratio": 42.28398236329631,
+        "min_area_ratio": 0.9999999010967873,
+        "skin_l1_max": 1.9965907810225383,
+        "vertex_ids": [
+          "CMV:9c7cb439b4d04cfa88aa0e68",
+          "CMV:dec8b3fbd471675cf44ea202",
+          "CMV:004c939d00d5cc6e6c1f4896"
+        ],
+        "worst_probe_id": "J:5428a88dad4d4d8d5c4d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 3589,
+        "max_area_ratio": 37.028733396322004,
+        "max_condition_number": 1865.3849522359847,
+        "max_edge_ratio": 42.28398236329631,
+        "min_area_ratio": 0.9414885266254203,
+        "skin_l1_max": 1.9965907810225383,
+        "vertex_ids": [
+          "CMV:1c035a8b031d066a30c1b9b3",
+          "CMV:9c7cb439b4d04cfa88aa0e68",
+          "CMV:004c939d00d5cc6e6c1f4896"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:+120"
+      },
+      {
+        "face_index": 15722,
+        "max_area_ratio": 49.63046153680931,
+        "max_condition_number": 203.28154256876522,
+        "max_edge_ratio": 41.75466419337504,
+        "min_area_ratio": 0.9986532190391834,
+        "skin_l1_max": 1.9824321609095672,
+        "vertex_ids": [
+          "CMV:9f8b60de3b932e5903c5a170",
+          "CMV:b076c94d2ec2d288cb3a150d",
+          "CMV:af410491326537d591599709"
+        ],
+        "worst_probe_id": "J:5428a88dad4d4d8d5c4d:LOCAL_Z:-120"
+      },
+      {
+        "face_index": 9487,
+        "max_area_ratio": 41.4982032284967,
+        "max_condition_number": 195.28111612514698,
+        "max_edge_ratio": 41.75466419337504,
+        "min_area_ratio": 0.9980512290814242,
+        "skin_l1_max": 1.9659808707201207,
+        "vertex_ids": [
+          "CMV:fb91cacbf035b142fbc2d2c5",
+          "CMV:9f8b60de3b932e5903c5a170",
+          "CMV:b076c94d2ec2d288cb3a150d"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_Z:+120"
+      },
+      {
+        "face_index": 5123,
+        "max_area_ratio": 41.422019035902046,
+        "max_condition_number": 752.2081616674958,
+        "max_edge_ratio": 41.487626315759854,
+        "min_area_ratio": 0.99987033900489,
+        "skin_l1_max": 1.999294009359162,
+        "vertex_ids": [
+          "CMV:37dc1a9293fe4e7b7e5c46a6",
+          "CMV:9c6e5f8b42ba50770aba5e42",
+          "CMV:1f1722f96ca88541e9af3ddf"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 5119,
+        "max_area_ratio": 36.55871545573332,
+        "max_condition_number": 2142.785164167328,
+        "max_edge_ratio": 41.487626315759854,
+        "min_area_ratio": 0.7707656743070097,
+        "skin_l1_max": 1.7615978099524428,
+        "vertex_ids": [
+          "CMV:37dc1a9293fe4e7b7e5c46a6",
+          "CMV:327631a4c62e56261c3a5f81",
+          "CMV:1f1722f96ca88541e9af3ddf"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:+120"
+      },
+      {
+        "face_index": 16975,
+        "max_area_ratio": 51.514396651518105,
+        "max_condition_number": 272.89848539347173,
+        "max_edge_ratio": 41.11518443694877,
+        "min_area_ratio": 0.999999998706409,
+        "skin_l1_max": 1.9873948608407843,
+        "vertex_ids": [
+          "CMV:d282f8dc6a5896eba5118df7",
+          "CMV:ce26ea73de581359423c452e",
+          "CMV:a58d5ceb85b43979276332a2"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_Z:-120"
+      },
+      {
+        "face_index": 18855,
+        "max_area_ratio": 39.856647978298994,
+        "max_condition_number": 135.89799808314112,
+        "max_edge_ratio": 41.11518443694877,
+        "min_area_ratio": 0.8078781387157038,
+        "skin_l1_max": 1.9145555609692346,
+        "vertex_ids": [
+          "CMV:ce26ea73de581359423c452e",
+          "CMV:a58d5ceb85b43979276332a2",
+          "CMV:7ceda28a2fabfaa3bfd1a440"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:+120"
+      },
+      {
+        "face_index": 3587,
+        "max_area_ratio": 36.743158039596615,
+        "max_condition_number": 846.3874326230009,
+        "max_edge_ratio": 41.04874079360344,
+        "min_area_ratio": 0.9999999997592347,
+        "skin_l1_max": 1.9918474357229732,
+        "vertex_ids": [
+          "CMV:1c035a8b031d066a30c1b9b3",
+          "CMV:2ae7793badbe7288eb8cf5d5",
+          "CMV:004c939d00d5cc6e6c1f4896"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:+120"
+      },
+      {
+        "face_index": 162,
+        "max_area_ratio": 36.42649764414155,
+        "max_condition_number": 949.1616931687304,
+        "max_edge_ratio": 41.04874079360344,
+        "min_area_ratio": 0.9999999999641765,
+        "skin_l1_max": 1.9918474357229732,
+        "vertex_ids": [
+          "CMV:70e37d7b72e53c257eb02d86",
+          "CMV:1c035a8b031d066a30c1b9b3",
+          "CMV:2ae7793badbe7288eb8cf5d5"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:-120"
+      },
+      {
+        "face_index": 17804,
+        "max_area_ratio": 48.79979748733348,
+        "max_condition_number": 192.4262573941979,
+        "max_edge_ratio": 40.219404718253124,
+        "min_area_ratio": 0.9999999999988474,
+        "skin_l1_max": 1.961742679765547,
+        "vertex_ids": [
+          "CMV:a0dd5f2fce489750f85e9b7b",
+          "CMV:c97f54374ff3832e18d346e9",
+          "CMV:1d4586a32889dd61f2aae684"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_Z:-120"
+      },
+      {
+        "face_index": 17798,
+        "max_area_ratio": 47.17001152082376,
+        "max_condition_number": 276.8791779402284,
+        "max_edge_ratio": 40.219404718253124,
+        "min_area_ratio": 0.8813385663497665,
+        "skin_l1_max": 1.9173307317003607,
+        "vertex_ids": [
+          "CMV:a0dd5f2fce489750f85e9b7b",
+          "CMV:62f03fb7a8b31dc0838b0c02",
+          "CMV:c97f54374ff3832e18d346e9"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_Z:+120"
+      },
+      {
+        "face_index": 17230,
+        "max_area_ratio": 41.34417151987093,
+        "max_condition_number": 74.51576385700659,
+        "max_edge_ratio": 39.87241967288276,
+        "min_area_ratio": 0.9999999999973899,
+        "skin_l1_max": 1.999329281795704,
+        "vertex_ids": [
+          "CMV:7c49a3007a668bc2e3238780",
+          "CMV:0074450a3ece07835f229698",
+          "CMV:3a7abbc18a2b789ce136f1dc"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 12133,
+        "max_area_ratio": 39.37183541368728,
+        "max_condition_number": 75.92742606140415,
+        "max_edge_ratio": 39.87241967288276,
+        "min_area_ratio": 0.9999999999974235,
+        "skin_l1_max": 1.9051482976619407,
+        "vertex_ids": [
+          "CMV:3b83d3bd52a7e5345e4afcfd",
+          "CMV:0074450a3ece07835f229698",
+          "CMV:3a7abbc18a2b789ce136f1dc"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 10583,
+        "max_area_ratio": 45.70535566478048,
+        "max_condition_number": 1050.9953489207085,
+        "max_edge_ratio": 39.66320148598424,
+        "min_area_ratio": 0.8831029536721213,
+        "skin_l1_max": 1.4621635584675525,
+        "vertex_ids": [
+          "CMV:bfd56f7286d82bfb7f7a36a4",
+          "CMV:7b5809815deb971c3d68d2e2",
+          "CMV:218dc268f447b581dd9e4e73"
+        ],
+        "worst_probe_id": "J:932628adf7f0d5936426:LOCAL_X:-120"
+      },
+      {
+        "face_index": 6120,
+        "max_area_ratio": 34.929424594637176,
+        "max_condition_number": 359.6552480379362,
+        "max_edge_ratio": 39.270662352672865,
+        "min_area_ratio": 0.9271513278479828,
+        "skin_l1_max": 1.904998582091339,
+        "vertex_ids": [
+          "CMV:63732363c082aa4bba4bb223",
+          "CMV:0074450a3ece07835f229698",
+          "CMV:9affa7b1e5e22fdafa3abc52"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 6118,
+        "max_area_ratio": 33.96863003772389,
+        "max_condition_number": 2167.5831818931993,
+        "max_edge_ratio": 39.270662352672865,
+        "min_area_ratio": 0.6441226936074228,
+        "skin_l1_max": 1.9051482976619407,
+        "vertex_ids": [
+          "CMV:63732363c082aa4bba4bb223",
+          "CMV:3b83d3bd52a7e5345e4afcfd",
+          "CMV:0074450a3ece07835f229698"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 164,
+        "max_area_ratio": 35.833648565748575,
+        "max_condition_number": 436.6637724105129,
+        "max_edge_ratio": 39.263340973397796,
+        "min_area_ratio": 0.9999999977803011,
+        "skin_l1_max": 1.9640152904828048,
+        "vertex_ids": [
+          "CMV:70e37d7b72e53c257eb02d86",
+          "CMV:2ae7793badbe7288eb8cf5d5",
+          "CMV:fc9ce33e1778384edb518ae3"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:+120"
+      },
+      {
+        "face_index": 165,
+        "max_area_ratio": 33.91221378717247,
+        "max_condition_number": 1542.3593307108897,
+        "max_edge_ratio": 39.263340973397796,
+        "min_area_ratio": 0.9929723863580819,
+        "skin_l1_max": 1.9996981394559754,
+        "vertex_ids": [
+          "CMV:70e37d7b72e53c257eb02d86",
+          "CMV:fc9ce33e1778384edb518ae3",
+          "CMV:0e6956d803c6add80564245a"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:-120"
+      },
+      {
+        "face_index": 361,
+        "max_area_ratio": 81.15934735675584,
+        "max_condition_number": 161.2945389573072,
+        "max_edge_ratio": 39.07872808386401,
+        "min_area_ratio": 0.9999999999958256,
+        "skin_l1_max": 1.9207211722921682,
+        "vertex_ids": [
+          "CMV:3be9379c2a2a707c9af0486b",
+          "CMV:c9289f7814ab24e50d361e67",
+          "CMV:5a235b333ec2f389e639e53c"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_Z:+120"
+      },
+      {
+        "face_index": 22600,
+        "max_area_ratio": 34.84583720701356,
+        "max_condition_number": 494.7895341430926,
+        "max_edge_ratio": 38.460888628518205,
+        "min_area_ratio": 0.9999999392671125,
+        "skin_l1_max": 1.9993610368340318,
+        "vertex_ids": [
+          "CMV:0e6956d803c6add80564245a",
+          "CMV:8138f8d50482bcc75f9fc631",
+          "CMV:aa635acd92bebbb8d59c4664"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_Y:-120"
+      },
+      {
+        "face_index": 21802,
+        "max_area_ratio": 34.828240933974115,
+        "max_condition_number": 581.8279877547582,
+        "max_edge_ratio": 38.460888628518205,
+        "min_area_ratio": 0.9999999827493766,
+        "skin_l1_max": 1.9996981394559754,
+        "vertex_ids": [
+          "CMV:fc9ce33e1778384edb518ae3",
+          "CMV:0e6956d803c6add80564245a",
+          "CMV:8138f8d50482bcc75f9fc631"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_Y:+120"
+      },
+      {
+        "face_index": 22733,
+        "max_area_ratio": 43.97135937301204,
+        "max_condition_number": 98.15095250463895,
+        "max_edge_ratio": 38.33543869047587,
+        "min_area_ratio": 0.952970306249499,
+        "skin_l1_max": 1.7413972834848457,
+        "vertex_ids": [
+          "CMV:9a3ab45196a63ca6a15b90e0",
+          "CMV:bcf82de6ccd89d0bb54f42fe",
+          "CMV:97619e42d1d9b7e2a13af237"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_X:+120"
+      },
+      {
+        "face_index": 18199,
+        "max_area_ratio": 38.9274902222125,
+        "max_condition_number": 142.06738248827395,
+        "max_edge_ratio": 38.33543869047587,
+        "min_area_ratio": 0.24531378671364978,
+        "skin_l1_max": 1.7413972834848457,
+        "vertex_ids": [
+          "CMV:2a9c36bce05772accd045d00",
+          "CMV:9a3ab45196a63ca6a15b90e0",
+          "CMV:bcf82de6ccd89d0bb54f42fe"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_X:+120"
+      },
+      {
+        "face_index": 13311,
+        "max_area_ratio": 32.83109410485423,
+        "max_condition_number": 2583.755050638334,
+        "max_edge_ratio": 38.08641225778849,
+        "min_area_ratio": 0.5026921164330574,
+        "skin_l1_max": 1.9993264214876316,
+        "vertex_ids": [
+          "CMV:795f483b37a916b3f54a9a34",
+          "CMV:1804b7246ebeb36ec80736da",
+          "CMV:3a7abbc18a2b789ce136f1dc"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 15553,
+        "max_area_ratio": 32.18475878074535,
+        "max_condition_number": 1547.9774558696433,
+        "max_edge_ratio": 38.08641225778849,
+        "min_area_ratio": 0.9401992549978297,
+        "skin_l1_max": 1.999329281795704,
+        "vertex_ids": [
+          "CMV:1804b7246ebeb36ec80736da",
+          "CMV:7c49a3007a668bc2e3238780",
+          "CMV:3a7abbc18a2b789ce136f1dc"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 10581,
+        "max_area_ratio": 31.83895332301523,
+        "max_condition_number": 215.27037380191652,
+        "max_edge_ratio": 38.01360452470746,
+        "min_area_ratio": 0.9928385791345683,
+        "skin_l1_max": 1.4621635584675525,
+        "vertex_ids": [
+          "CMV:bfd56f7286d82bfb7f7a36a4",
+          "CMV:1638c0855b64c92b4fa19997",
+          "CMV:218dc268f447b581dd9e4e73"
+        ],
+        "worst_probe_id": "J:5428a88dad4d4d8d5c4d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 5251,
+        "max_area_ratio": 41.50386172194491,
+        "max_condition_number": 82.72521089434815,
+        "max_edge_ratio": 37.93047848351396,
+        "min_area_ratio": 0.654477882298985,
+        "skin_l1_max": 1.4624805930753741,
+        "vertex_ids": [
+          "CMV:cafb4d513d75a110be40a722",
+          "CMV:610c91c596e35759b089c587",
+          "CMV:a6ff7d6bd56052a9fe105aa2"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:-120"
+      },
+      {
+        "face_index": 5537,
+        "max_area_ratio": 44.35359866373583,
+        "max_condition_number": 179.78166429634524,
+        "max_edge_ratio": 37.880213810777875,
+        "min_area_ratio": 0.9999992563460652,
+        "skin_l1_max": 1.9738780579936803,
+        "vertex_ids": [
+          "CMV:7262b8d56ebab51ed06dbc65",
+          "CMV:82c7612a534a566c188722b1",
+          "CMV:410e35863e0846d46b01003b"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_X:+120"
+      },
+      {
+        "face_index": 5535,
+        "max_area_ratio": 43.84660941510419,
+        "max_condition_number": 158.63918914627675,
+        "max_edge_ratio": 37.880213810777875,
+        "min_area_ratio": 0.9999999999779848,
+        "skin_l1_max": 1.9826449364592358,
+        "vertex_ids": [
+          "CMV:7262b8d56ebab51ed06dbc65",
+          "CMV:4fd04056f4d89168dd09771e",
+          "CMV:82c7612a534a566c188722b1"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_X:-120"
+      },
+      {
+        "face_index": 4781,
+        "max_area_ratio": 48.58585854108094,
+        "max_condition_number": 89.60713271024372,
+        "max_edge_ratio": 37.83293552724645,
+        "min_area_ratio": 0.9875522114452121,
+        "skin_l1_max": 1.7615955434033594,
+        "vertex_ids": [
+          "CMV:85d6efd90a52db05a51ee229",
+          "CMV:1ec65dfc8c079fd33f5b542d",
+          "CMV:8847187b0de1005ef2902747"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:-120"
+      },
+      {
+        "face_index": 10423,
+        "max_area_ratio": 34.28327369490662,
+        "max_condition_number": 751.6974952259275,
+        "max_edge_ratio": 37.799804538518366,
+        "min_area_ratio": 0.8607687231069376,
+        "skin_l1_max": 1.9895439700805098,
+        "vertex_ids": [
+          "CMV:9425e9ceb1b6e026ff942fd0",
+          "CMV:e1de45a91af6ef1e68f21850",
+          "CMV:cc8c0f1a6b67cddc61e142fa"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:-120"
+      },
+      {
+        "face_index": 22273,
+        "max_area_ratio": 33.935062202146604,
+        "max_condition_number": 1387.70082020091,
+        "max_edge_ratio": 37.799804538518366,
+        "min_area_ratio": 0.8526799521821187,
+        "skin_l1_max": 1.9895439700805098,
+        "vertex_ids": [
+          "CMV:e1de45a91af6ef1e68f21850",
+          "CMV:cc8c0f1a6b67cddc61e142fa",
+          "CMV:18ff778f41bd6efb2fd0b6af"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:+120"
+      },
+      {
+        "face_index": 2921,
+        "max_area_ratio": 35.74518313236171,
+        "max_condition_number": 558.9758038215167,
+        "max_edge_ratio": 37.69709859262293,
+        "min_area_ratio": 0.9999999800211365,
+        "skin_l1_max": 1.9413212830244513,
+        "vertex_ids": [
+          "CMV:495327fcdebe4ad8fae71531",
+          "CMV:b14a53aa96cc79f7242219f9",
+          "CMV:527c4db6749b8cd4adccf89d"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_Y:-120"
+      },
+      {
+        "face_index": 2920,
+        "max_area_ratio": 32.6639608391945,
+        "max_condition_number": 2622.5923754513915,
+        "max_edge_ratio": 37.69709859262293,
+        "min_area_ratio": 0.5129329414934509,
+        "skin_l1_max": 1.9413763431962283,
+        "vertex_ids": [
+          "CMV:495327fcdebe4ad8fae71531",
+          "CMV:4682bd452f2d6ef92587a4f6",
+          "CMV:527c4db6749b8cd4adccf89d"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:-120"
+      },
+      {
+        "face_index": 8687,
+        "max_area_ratio": 36.47742478607482,
+        "max_condition_number": 249.10165779613845,
+        "max_edge_ratio": 37.440828562246956,
+        "min_area_ratio": 0.9999999999999836,
+        "skin_l1_max": 1.9413755028807633,
+        "vertex_ids": [
+          "CMV:b96f5c690faba5f80c4d5289",
+          "CMV:45872d065abeb232c14d4d4c",
+          "CMV:52e798b18a5a19883afd4de6"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:+120"
+      },
+      {
+        "face_index": 18067,
+        "max_area_ratio": 34.82158244517789,
+        "max_condition_number": 161.01778185144224,
+        "max_edge_ratio": 37.440828562246956,
+        "min_area_ratio": 0.9999999999999879,
+        "skin_l1_max": 1.9837063918459263,
+        "vertex_ids": [
+          "CMV:45872d065abeb232c14d4d4c",
+          "CMV:2c90a3a7317b686a8e0055c4",
+          "CMV:52e798b18a5a19883afd4de6"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:+120"
+      },
+      {
+        "face_index": 4821,
+        "max_area_ratio": 49.03164692523193,
+        "max_condition_number": 410.84491500783975,
+        "max_edge_ratio": 37.388421743658675,
+        "min_area_ratio": 0.9980680280146279,
+        "skin_l1_max": 0.9993656192635925,
+        "vertex_ids": [
+          "CMV:7ccfa883d6eeff77a0063b54",
+          "CMV:d8317f4ab50d0419efcf937a",
+          "CMV:163f42a2026e9d551a2e21f6"
+        ],
+        "worst_probe_id": "J:7cf59fbe52c53280546a:LOCAL_X:-120"
+      },
+      {
+        "face_index": 4819,
+        "max_area_ratio": 30.93601426532651,
+        "max_condition_number": 192.3561892967129,
+        "max_edge_ratio": 37.388421743658675,
+        "min_area_ratio": 0.999002556617769,
+        "skin_l1_max": 0.9993656192635925,
+        "vertex_ids": [
+          "CMV:7ccfa883d6eeff77a0063b54",
+          "CMV:8fdd5c61c0fa3316730b8aa1",
+          "CMV:d8317f4ab50d0419efcf937a"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_Y:-120"
+      },
+      {
+        "face_index": 1071,
+        "max_area_ratio": 34.47783530748312,
+        "max_condition_number": 511.0264125290061,
+        "max_edge_ratio": 37.325222410636144,
+        "min_area_ratio": 0.9999999545437962,
+        "skin_l1_max": 1.9993610368340318,
+        "vertex_ids": [
+          "CMV:fda18809bd444def6c73e2b1",
+          "CMV:8138f8d50482bcc75f9fc631",
+          "CMV:aa635acd92bebbb8d59c4664"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_Y:+120"
+      },
+      {
+        "face_index": 1070,
+        "max_area_ratio": 33.888534351711236,
+        "max_condition_number": 424.69022207340606,
+        "max_edge_ratio": 37.325222410636144,
+        "min_area_ratio": 0.9999999301724831,
+        "skin_l1_max": 1.9935380512951104,
+        "vertex_ids": [
+          "CMV:fda18809bd444def6c73e2b1",
+          "CMV:bb33b934126616b75a06664c",
+          "CMV:aa635acd92bebbb8d59c4664"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_Y:-120"
+      },
+      {
+        "face_index": 4824,
+        "max_area_ratio": 29.70787924835303,
+        "max_condition_number": 208.65733171280044,
+        "max_edge_ratio": 37.19392566188405,
+        "min_area_ratio": 0.7037564873306534,
+        "skin_l1_max": 0.9993779256501751,
+        "vertex_ids": [
+          "CMV:7ccfa883d6eeff77a0063b54",
+          "CMV:630822e60ecd34a2068f3a06",
+          "CMV:ee6d52a1fe644637e462b5ed"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_Y:+120"
+      },
+      {
+        "face_index": 4823,
+        "max_area_ratio": 29.453386510642197,
+        "max_condition_number": 202.01795418159412,
+        "max_edge_ratio": 37.19392566188405,
+        "min_area_ratio": 0.7007348720700645,
+        "skin_l1_max": 0.9950774985856381,
+        "vertex_ids": [
+          "CMV:7ccfa883d6eeff77a0063b54",
+          "CMV:630822e60ecd34a2068f3a06",
+          "CMV:49e05b2ce642ff261cb77452"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 10864,
+        "max_area_ratio": 37.40942656648614,
+        "max_condition_number": 79.82958786591482,
+        "max_edge_ratio": 37.04581277530208,
+        "min_area_ratio": 0.9948450579819758,
+        "skin_l1_max": 1.7150926604457357,
+        "vertex_ids": [
+          "CMV:bc8500f380cda13ade31637c",
+          "CMV:2a9c36bce05772accd045d00",
+          "CMV:bcf82de6ccd89d0bb54f42fe"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_Y:+120"
+      },
+      {
+        "face_index": 10863,
+        "max_area_ratio": 37.062569675990815,
+        "max_condition_number": 413.6505980223584,
+        "max_edge_ratio": 37.04581277530208,
+        "min_area_ratio": 0.09086603452405811,
+        "skin_l1_max": 1.9832555876132067,
+        "vertex_ids": [
+          "CMV:bc8500f380cda13ade31637c",
+          "CMV:2a9c36bce05772accd045d00",
+          "CMV:b60b0d2da8fecf6876facdc7"
+        ],
+        "worst_probe_id": "J:2ff965d6dbe4efc2d5d4:LOCAL_Z:-120"
+      },
+      {
+        "face_index": 4780,
+        "max_area_ratio": 40.667626615956124,
+        "max_condition_number": 84.37080458105254,
+        "max_edge_ratio": 36.98958780847249,
+        "min_area_ratio": 0.6486806985596365,
+        "skin_l1_max": 1.4622135104543326,
+        "vertex_ids": [
+          "CMV:85d6efd90a52db05a51ee229",
+          "CMV:1ec65dfc8c079fd33f5b542d",
+          "CMV:e43b081a1c961171c0c4a17a"
+        ],
+        "worst_probe_id": "J:5428a88dad4d4d8d5c4d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 13194,
+        "max_area_ratio": 40.77615857858477,
+        "max_condition_number": 1240.1426707664868,
+        "max_edge_ratio": 36.94738702698494,
+        "min_area_ratio": 0.9999999999984974,
+        "skin_l1_max": 1.905147882642656,
+        "vertex_ids": [
+          "CMV:574cb7e0198011c8a75a4870",
+          "CMV:977590f5b4248fbae93bf303",
+          "CMV:18ff778f41bd6efb2fd0b6af"
+        ],
+        "worst_probe_id": "J:932628adf7f0d5936426:LOCAL_X:-120"
+      },
+      {
+        "face_index": 18971,
+        "max_area_ratio": 32.79375159848176,
+        "max_condition_number": 1452.0858483961042,
+        "max_edge_ratio": 36.94738702698494,
+        "min_area_ratio": 0.8975208954364297,
+        "skin_l1_max": 1.905147882642656,
+        "vertex_ids": [
+          "CMV:977590f5b4248fbae93bf303",
+          "CMV:cc8c0f1a6b67cddc61e142fa",
+          "CMV:18ff778f41bd6efb2fd0b6af"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:-120"
+      },
+      {
+        "face_index": 2448,
+        "max_area_ratio": 44.91739836835739,
+        "max_condition_number": 95.11463999932623,
+        "max_edge_ratio": 36.814889474648375,
+        "min_area_ratio": 0.9999999899154707,
+        "skin_l1_max": 1.890629152208724,
+        "vertex_ids": [
+          "CMV:cb02d6d748552a1fa2d3f03b",
+          "CMV:14a65cb20561428d170b77ea",
+          "CMV:473047bb1d7f57cc2e88027b"
+        ],
+        "worst_probe_id": "J:2ff965d6dbe4efc2d5d4:LOCAL_X:+120"
+      },
+      {
+        "face_index": 2451,
+        "max_area_ratio": 43.767389364986755,
+        "max_condition_number": 116.96961562304692,
+        "max_edge_ratio": 36.814889474648375,
+        "min_area_ratio": 0.9999999936062474,
+        "skin_l1_max": 1.890629152208724,
+        "vertex_ids": [
+          "CMV:cb02d6d748552a1fa2d3f03b",
+          "CMV:81ea6dfb0d8ed500fcaf4029",
+          "CMV:473047bb1d7f57cc2e88027b"
+        ],
+        "worst_probe_id": "J:2ff965d6dbe4efc2d5d4:LOCAL_X:+120"
+      },
+      {
+        "face_index": 19040,
+        "max_area_ratio": 40.77313431101969,
+        "max_condition_number": 585.8911514298097,
+        "max_edge_ratio": 36.44433319081375,
+        "min_area_ratio": 0.9998156076676937,
+        "skin_l1_max": 1.4602926669112808,
+        "vertex_ids": [
+          "CMV:1638c0855b64c92b4fa19997",
+          "CMV:e0027b5b5d4339e81cfcdce3",
+          "CMV:be3a8ca0bc6243c9d36794d0"
+        ],
+        "worst_probe_id": "J:932628adf7f0d5936426:LOCAL_X:+120"
+      },
+      {
+        "face_index": 10582,
+        "max_area_ratio": 31.370738927138852,
+        "max_condition_number": 232.0594036612789,
+        "max_edge_ratio": 36.44433319081375,
+        "min_area_ratio": 0.988173768311431,
+        "skin_l1_max": 1.4602926669112808,
+        "vertex_ids": [
+          "CMV:bfd56f7286d82bfb7f7a36a4",
+          "CMV:1638c0855b64c92b4fa19997",
+          "CMV:be3a8ca0bc6243c9d36794d0"
+        ],
+        "worst_probe_id": "J:5428a88dad4d4d8d5c4d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 10580,
+        "max_area_ratio": 45.56328193038747,
+        "max_condition_number": 369.5721440067675,
+        "max_edge_ratio": 36.37184878881107,
+        "min_area_ratio": 0.9896245085168979,
+        "skin_l1_max": 1.9998057790302755,
+        "vertex_ids": [
+          "CMV:bfd56f7286d82bfb7f7a36a4",
+          "CMV:c26bec28c483e551334c0c15",
+          "CMV:d931d2f73fda488d5f8cb44e"
+        ],
+        "worst_probe_id": "J:7cf59fbe52c53280546a:LOCAL_X:-120"
+      },
+      {
+        "face_index": 10424,
+        "max_area_ratio": 33.36387053019817,
+        "max_condition_number": 382.276588900867,
+        "max_edge_ratio": 36.296660840406894,
+        "min_area_ratio": 0.7402617641644739,
+        "skin_l1_max": 1.9895394886458002,
+        "vertex_ids": [
+          "CMV:9425e9ceb1b6e026ff942fd0",
+          "CMV:e1de45a91af6ef1e68f21850",
+          "CMV:dd7a9c1a7ef87c1df1c38696"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:+120"
+      },
+      {
+        "face_index": 10425,
+        "max_area_ratio": 32.87659121295009,
+        "max_condition_number": 723.267515857425,
+        "max_edge_ratio": 36.296660840406894,
+        "min_area_ratio": 0.745912762220732,
+        "skin_l1_max": 1.9718548683908081,
+        "vertex_ids": [
+          "CMV:9425e9ceb1b6e026ff942fd0",
+          "CMV:db8321452480601e4bbc9b46",
+          "CMV:dd7a9c1a7ef87c1df1c38696"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:-120"
+      },
+      {
+        "face_index": 6990,
+        "max_area_ratio": 43.67523017142999,
+        "max_condition_number": 75.26000404008656,
+        "max_edge_ratio": 36.063876006418354,
+        "min_area_ratio": 0.9999999999999787,
+        "skin_l1_max": 1.9907198189237847,
+        "vertex_ids": [
+          "CMV:bdc4dad23440575a8dd63843",
+          "CMV:e36740f947715bcb6fb84664",
+          "CMV:1de7444e28bf9caf245f853c"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:+120"
+      },
+      {
+        "face_index": 6992,
+        "max_area_ratio": 41.055583808180394,
+        "max_condition_number": 72.56116697566706,
+        "max_edge_ratio": 36.063876006418354,
+        "min_area_ratio": 0.9999999999999779,
+        "skin_l1_max": 1.89660468481005,
+        "vertex_ids": [
+          "CMV:bdc4dad23440575a8dd63843",
+          "CMV:1de7444e28bf9caf245f853c",
+          "CMV:52e798b18a5a19883afd4de6"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:+120"
+      },
+      {
+        "face_index": 13196,
+        "max_area_ratio": 39.66063663451581,
+        "max_condition_number": 1325.9491283994316,
+        "max_edge_ratio": 36.03252240031823,
+        "min_area_ratio": 0.9999999999980086,
+        "skin_l1_max": 1.761593782145646,
+        "vertex_ids": [
+          "CMV:574cb7e0198011c8a75a4870",
+          "CMV:6faa92e1d3470518fe9cf1da",
+          "CMV:18ff778f41bd6efb2fd0b6af"
+        ],
+        "worst_probe_id": "J:932628adf7f0d5936426:LOCAL_X:+120"
+      },
+      {
+        "face_index": 10584,
+        "max_area_ratio": 38.277444820002565,
+        "max_condition_number": 576.4934016260875,
+        "max_edge_ratio": 35.878314671243025,
+        "min_area_ratio": 0.9218267814987796,
+        "skin_l1_max": 1.4626163217642618,
+        "vertex_ids": [
+          "CMV:bfd56f7286d82bfb7f7a36a4",
+          "CMV:d931d2f73fda488d5f8cb44e",
+          "CMV:1f1722f96ca88541e9af3ddf"
+        ],
+        "worst_probe_id": "J:7cf59fbe52c53280546a:LOCAL_X:-120"
+      },
+      {
+        "face_index": 5264,
+        "max_area_ratio": 32.360625364240434,
+        "max_condition_number": 683.0209872602722,
+        "max_edge_ratio": 35.639786494298555,
+        "min_area_ratio": 0.923871648902865,
+        "skin_l1_max": 1.761593782145646,
+        "vertex_ids": [
+          "CMV:6b84c7712c0786600cf211d5",
+          "CMV:574cb7e0198011c8a75a4870",
+          "CMV:6faa92e1d3470518fe9cf1da"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:+120"
+      },
+      {
+        "face_index": 19662,
+        "max_area_ratio": 30.84488589898157,
+        "max_condition_number": 784.71891544848,
+        "max_edge_ratio": 35.55266932160448,
+        "min_area_ratio": 0.9999999999999881,
+        "skin_l1_max": 1.9981778674247437,
+        "vertex_ids": [
+          "CMV:60c86d63b1057d81924e85c6",
+          "CMV:6e732ab288d1fc7ef7dd3285",
+          "CMV:d437746afbd9043bae5a408a"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 18314,
+        "max_area_ratio": 30.682888219600706,
+        "max_condition_number": 3497.392322079183,
+        "max_edge_ratio": 35.55266932160448,
+        "min_area_ratio": 0.34648687251089066,
+        "skin_l1_max": 1.9997926217308317,
+        "vertex_ids": [
+          "CMV:dbc7452a2c6ee0867accf42e",
+          "CMV:6e732ab288d1fc7ef7dd3285",
+          "CMV:d437746afbd9043bae5a408a"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:-120"
+      },
+      {
+        "face_index": 21927,
+        "max_area_ratio": 46.96005879025726,
+        "max_condition_number": 85.56123279516176,
+        "max_edge_ratio": 35.52406578946006,
+        "min_area_ratio": 0.8823654594073753,
+        "skin_l1_max": 1.999294009359162,
+        "vertex_ids": [
+          "CMV:d931d2f73fda488d5f8cb44e",
+          "CMV:9c6e5f8b42ba50770aba5e42",
+          "CMV:1f1722f96ca88541e9af3ddf"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 12043,
+        "max_area_ratio": 37.135690299005105,
+        "max_condition_number": 385.3044048190451,
+        "max_edge_ratio": 35.40421922139488,
+        "min_area_ratio": 0.9999999999999851,
+        "skin_l1_max": 1.926221056462277,
+        "vertex_ids": [
+          "CMV:b62032e62ded89ebbbe37110",
+          "CMV:5be5afa0e861ba0d2d1f7d70",
+          "CMV:fac3b1dd85d9723fb6d54af6"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_X:-120"
+      },
+      {
+        "face_index": 17324,
+        "max_area_ratio": 34.84394108553882,
+        "max_condition_number": 233.35606906111056,
+        "max_edge_ratio": 35.40421922139488,
+        "min_area_ratio": 0.9999999999999853,
+        "skin_l1_max": 1.984812116221698,
+        "vertex_ids": [
+          "CMV:5be5afa0e861ba0d2d1f7d70",
+          "CMV:2d9ff8148264057737da4a74",
+          "CMV:fac3b1dd85d9723fb6d54af6"
+        ],
+        "worst_probe_id": "J:42d181ebf3515959283a:LOCAL_X:+120"
+      },
+      {
+        "face_index": 1069,
+        "max_area_ratio": 32.43906550163022,
+        "max_condition_number": 800.1483190539161,
+        "max_edge_ratio": 35.26240349105664,
+        "min_area_ratio": 0.9999998916553966,
+        "skin_l1_max": 1.9902531886300985,
+        "vertex_ids": [
+          "CMV:fda18809bd444def6c73e2b1",
+          "CMV:bb33b934126616b75a06664c",
+          "CMV:7501c09e914b11b94fffc901"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_Y:+120"
+      },
+      {
+        "face_index": 15011,
+        "max_area_ratio": 32.08976880339387,
+        "max_condition_number": 508.3189323799139,
+        "max_edge_ratio": 35.26240349105664,
+        "min_area_ratio": 0.9999997904749113,
+        "skin_l1_max": 1.9684713033018975,
+        "vertex_ids": [
+          "CMV:bb33b934126616b75a06664c",
+          "CMV:2367c18c529236b79d47921c",
+          "CMV:7501c09e914b11b94fffc901"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:-120"
+      },
+      {
+        "face_index": 2013,
+        "max_area_ratio": 33.13661993775397,
+        "max_condition_number": 143.09080247523386,
+        "max_edge_ratio": 34.69028538241974,
+        "min_area_ratio": 0.9999995693250499,
+        "skin_l1_max": 1.9979120308354932,
+        "vertex_ids": [
+          "CMV:6c813bb10ac2538a7b4cad2b",
+          "CMV:02f74f1761265434b0b82b03",
+          "CMV:af410491326537d591599709"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_Z:+120"
+      },
+      {
+        "face_index": 17567,
+        "max_area_ratio": 33.10335461945087,
+        "max_condition_number": 1283.9052044837558,
+        "max_edge_ratio": 34.69028538241974,
+        "min_area_ratio": 0.5236995028007455,
+        "skin_l1_max": 1.99566427910522,
+        "vertex_ids": [
+          "CMV:02f74f1761265434b0b82b03",
+          "CMV:af410491326537d591599709",
+          "CMV:01823679d5eb73b4f4412d29"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_Z:-120"
+      },
+      {
+        "face_index": 11265,
+        "max_area_ratio": 37.57876817782995,
+        "max_condition_number": 163.06061348371858,
+        "max_edge_ratio": 34.54461562278668,
+        "min_area_ratio": 0.49277163540872376,
+        "skin_l1_max": 1.9413763431962283,
+        "vertex_ids": [
+          "CMV:4682bd452f2d6ef92587a4f6",
+          "CMV:527c4db6749b8cd4adccf89d",
+          "CMV:4d7285fb40631cada09296f5"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_Z:-120"
+      },
+      {
+        "face_index": 21778,
+        "max_area_ratio": 35.35786215691367,
+        "max_condition_number": 67.04448214433904,
+        "max_edge_ratio": 34.54461562278668,
+        "min_area_ratio": 0.999999999981598,
+        "skin_l1_max": 1.7615948592040713,
+        "vertex_ids": [
+          "CMV:ac39e146cf6cb8401368c4c2",
+          "CMV:527c4db6749b8cd4adccf89d",
+          "CMV:4d7285fb40631cada09296f5"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 8325,
+        "max_area_ratio": 30.300236409226805,
+        "max_condition_number": 1280.3422746865267,
+        "max_edge_ratio": 34.48796606374547,
+        "min_area_ratio": 0.8149118642280888,
+        "skin_l1_max": 1.9968810529864127,
+        "vertex_ids": [
+          "CMV:e9c1b492d06fcdf30d5e17f5",
+          "CMV:dbc7452a2c6ee0867accf42e",
+          "CMV:6befa84f19b56448270e750e"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 18311,
+        "max_area_ratio": 29.768735269031975,
+        "max_condition_number": 1881.077345550001,
+        "max_edge_ratio": 34.48796606374547,
+        "min_area_ratio": 0.6326350043337149,
+        "skin_l1_max": 1.9997926217308317,
+        "vertex_ids": [
+          "CMV:dbc7452a2c6ee0867accf42e",
+          "CMV:6befa84f19b56448270e750e",
+          "CMV:d437746afbd9043bae5a408a"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 13314,
+        "max_area_ratio": 31.473203374292677,
+        "max_condition_number": 326.7988154821461,
+        "max_edge_ratio": 34.23588634059245,
+        "min_area_ratio": 0.6125881191386365,
+        "skin_l1_max": 1.9540273799303494,
+        "vertex_ids": [
+          "CMV:b0d7bff57a02dc1778c332e7",
+          "CMV:db8321452480601e4bbc9b46",
+          "CMV:edaa6c450e981f07bd1c4f85"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:-120"
+      },
+      {
+        "face_index": 13315,
+        "max_area_ratio": 31.105048148865688,
+        "max_condition_number": 367.84713039933195,
+        "max_edge_ratio": 34.23588634059245,
+        "min_area_ratio": 0.6013880386514963,
+        "skin_l1_max": 1.9718548683908081,
+        "vertex_ids": [
+          "CMV:b0d7bff57a02dc1778c332e7",
+          "CMV:db8321452480601e4bbc9b46",
+          "CMV:dd7a9c1a7ef87c1df1c38696"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:+120"
+      },
+      {
+        "face_index": 20118,
+        "max_area_ratio": 35.44383088637102,
+        "max_condition_number": 313.0060372084828,
+        "max_edge_ratio": 34.080701562578845,
+        "min_area_ratio": 0.8244567330205587,
+        "skin_l1_max": 1.9837881510774538,
+        "vertex_ids": [
+          "CMV:478e13c4c61ea76fe1d6cf33",
+          "CMV:a02441d29defd0808fff8305",
+          "CMV:156f310ac5ba341bbc7559b2"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_Y:+120"
+      },
+      {
+        "face_index": 21700,
+        "max_area_ratio": 33.10301369169942,
+        "max_condition_number": 360.54883998217986,
+        "max_edge_ratio": 34.080701562578845,
+        "min_area_ratio": 0.997724064842449,
+        "skin_l1_max": 1.9997193004091527,
+        "vertex_ids": [
+          "CMV:a02441d29defd0808fff8305",
+          "CMV:6c8cacfde1418323ca4c1d02",
+          "CMV:156f310ac5ba341bbc7559b2"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 1665,
+        "max_area_ratio": 35.96046979105503,
+        "max_condition_number": 134.4608996847044,
+        "max_edge_ratio": 33.9307849978421,
+        "min_area_ratio": 0.9999999999999644,
+        "skin_l1_max": 1.9817450806949495,
+        "vertex_ids": [
+          "CMV:b70d5c59d07f7c76d1d2b784",
+          "CMV:59f84aa36230a89ce5c2bc2b",
+          "CMV:0a21610c87f1bdadba289890"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_Y:-120"
+      },
+      {
+        "face_index": 15089,
+        "max_area_ratio": 41.282619205979074,
+        "max_condition_number": 71.06013028032777,
+        "max_edge_ratio": 33.79832839998885,
+        "min_area_ratio": 0.9999999999999792,
+        "skin_l1_max": 1.9129203861504935,
+        "vertex_ids": [
+          "CMV:595a1bd817dd7ca4f9ca5cd2",
+          "CMV:4a2cb46683cc32d59996f159",
+          "CMV:dc5b7e71a81427163574b37c"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:+120"
+      },
+      {
+        "face_index": 15088,
+        "max_area_ratio": 40.35459271729534,
+        "max_condition_number": 81.74813725268915,
+        "max_edge_ratio": 33.79832839998885,
+        "min_area_ratio": 0.9999999999999858,
+        "skin_l1_max": 1.9698733484927933,
+        "vertex_ids": [
+          "CMV:595a1bd817dd7ca4f9ca5cd2",
+          "CMV:4a2cb46683cc32d59996f159",
+          "CMV:acaaa24437986655cdc66431"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:+120"
+      },
+      {
+        "face_index": 8503,
+        "max_area_ratio": 42.41718866501982,
+        "max_condition_number": 72.3712724394182,
+        "max_edge_ratio": 33.68784832157256,
+        "min_area_ratio": 0.9307429998961589,
+        "skin_l1_max": 1.9999591435369894,
+        "vertex_ids": [
+          "CMV:13cdfd5ecc823c969a3a506d",
+          "CMV:ce3de4e60487230704d035fe",
+          "CMV:9affa7b1e5e22fdafa3abc52"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 8498,
+        "max_area_ratio": 33.68713803360153,
+        "max_condition_number": 63.69856325105954,
+        "max_edge_ratio": 33.68784832157256,
+        "min_area_ratio": 0.9999999999265903,
+        "skin_l1_max": 1.4621172290840967,
+        "vertex_ids": [
+          "CMV:13cdfd5ecc823c969a3a506d",
+          "CMV:f81e0e52f492bda9220133b8",
+          "CMV:9affa7b1e5e22fdafa3abc52"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 9486,
+        "max_area_ratio": 32.120582353591914,
+        "max_condition_number": 68.06476343123799,
+        "max_edge_ratio": 33.46731031644669,
+        "min_area_ratio": 0.998997430611504,
+        "skin_l1_max": 1.9659808707201207,
+        "vertex_ids": [
+          "CMV:fb91cacbf035b142fbc2d2c5",
+          "CMV:77e58a38ea76c4dad67e8f3b",
+          "CMV:b076c94d2ec2d288cb3a150d"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:-120"
+      },
+      {
+        "face_index": 23987,
+        "max_area_ratio": 32.03165655841998,
+        "max_condition_number": 222.7007867606516,
+        "max_edge_ratio": 33.39871474569546,
+        "min_area_ratio": 0.45350803983994686,
+        "skin_l1_max": 1.9913035931898797,
+        "vertex_ids": [
+          "CMV:ab09e7bcf46eb2db01c28e72",
+          "CMV:edaa6c450e981f07bd1c4f85",
+          "CMV:974964f2c2f183524851b6c1"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:+120"
+      },
+      {
+        "face_index": 13319,
+        "max_area_ratio": 30.64113791143907,
+        "max_condition_number": 253.99333923389477,
+        "max_edge_ratio": 33.39871474569546,
+        "min_area_ratio": 0.4516026228520942,
+        "skin_l1_max": 1.9639941760457853,
+        "vertex_ids": [
+          "CMV:b0d7bff57a02dc1778c332e7",
+          "CMV:edaa6c450e981f07bd1c4f85",
+          "CMV:974964f2c2f183524851b6c1"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:+120"
+      },
+      {
+        "face_index": 3092,
+        "max_area_ratio": 42.21372610056169,
+        "max_condition_number": 143.02438144611256,
+        "max_edge_ratio": 33.247186571641016,
+        "min_area_ratio": 0.9993293314840476,
+        "skin_l1_max": 1.9677557134573505,
+        "vertex_ids": [
+          "CMV:666e13c7799d6016c6e07673",
+          "CMV:916ea080e88cdd851e7776fd",
+          "CMV:969b88f6f51f6fde64686cf4"
+        ],
+        "worst_probe_id": "J:5428a88dad4d4d8d5c4d:LOCAL_Z:-120"
+      },
+      {
+        "face_index": 15442,
+        "max_area_ratio": 41.171393595467705,
+        "max_condition_number": 159.96016043254667,
+        "max_edge_ratio": 33.247186571641016,
+        "min_area_ratio": 0.9978351432475884,
+        "skin_l1_max": 1.958205474117779,
+        "vertex_ids": [
+          "CMV:d026221d377456ecc0bd30e6",
+          "CMV:916ea080e88cdd851e7776fd",
+          "CMV:969b88f6f51f6fde64686cf4"
+        ],
+        "worst_probe_id": "J:5428a88dad4d4d8d5c4d:LOCAL_Z:+120"
+      },
+      {
+        "face_index": 21191,
+        "max_area_ratio": 33.95003786147171,
+        "max_condition_number": 90.05024558861194,
+        "max_edge_ratio": 33.2245137737249,
+        "min_area_ratio": 0.9604616625418098,
+        "skin_l1_max": 1.9899223248032065,
+        "vertex_ids": [
+          "CMV:e4711fd615eb85c5c8321619",
+          "CMV:41e4eebc97dea4d0726ba97b",
+          "CMV:c289e69f9feffaf18fdcea8f"
+        ],
+        "worst_probe_id": "J:2ff965d6dbe4efc2d5d4:LOCAL_X:+120"
+      },
+      {
+        "face_index": 17298,
+        "max_area_ratio": 33.27421829599672,
+        "max_condition_number": 80.95064078537409,
+        "max_edge_ratio": 33.2245137737249,
+        "min_area_ratio": 0.9999999949211693,
+        "skin_l1_max": 1.6780226636486775,
+        "vertex_ids": [
+          "CMV:1c58dd9d4121012a84f292c9",
+          "CMV:e4711fd615eb85c5c8321619",
+          "CMV:41e4eebc97dea4d0726ba97b"
+        ],
+        "worst_probe_id": "J:2ff965d6dbe4efc2d5d4:LOCAL_X:+120"
+      },
+      {
+        "face_index": 17803,
+        "max_area_ratio": 37.699294768415044,
+        "max_condition_number": 119.02008842854613,
+        "max_edge_ratio": 33.20603942225121,
+        "min_area_ratio": 0.9999999999998864,
+        "skin_l1_max": 1.9905278953782108,
+        "vertex_ids": [
+          "CMV:a0dd5f2fce489750f85e9b7b",
+          "CMV:d0b51549a8f554414d6abb28",
+          "CMV:1d4586a32889dd61f2aae684"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 13366,
+        "max_area_ratio": 32.59958480708979,
+        "max_condition_number": 84.65438703601114,
+        "max_edge_ratio": 33.20603942225121,
+        "min_area_ratio": 0.9772929515852322,
+        "skin_l1_max": 1.9928126191976414,
+        "vertex_ids": [
+          "CMV:77323ddc75dd851a97d2248a",
+          "CMV:d0b51549a8f554414d6abb28",
+          "CMV:1d4586a32889dd61f2aae684"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 9606,
+        "max_area_ratio": 33.622470964359024,
+        "max_condition_number": 2498.8293583737677,
+        "max_edge_ratio": 33.04614237491225,
+        "min_area_ratio": 0.5018499230425019,
+        "skin_l1_max": 1.993611741987347,
+        "vertex_ids": [
+          "CMV:5540d235102f83037b5d3de4",
+          "CMV:5ffb61956ac54aec527685e0",
+          "CMV:dc350567ed973eece186d308"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 9607,
+        "max_area_ratio": 30.0342908888248,
+        "max_condition_number": 418.85611996218637,
+        "max_edge_ratio": 33.04614237491225,
+        "min_area_ratio": 0.9999999485069534,
+        "skin_l1_max": 1.993611741987347,
+        "vertex_ids": [
+          "CMV:5540d235102f83037b5d3de4",
+          "CMV:37a9ab486099e4345f8dc8d7",
+          "CMV:dc350567ed973eece186d308"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:+120"
+      },
+      {
+        "face_index": 23594,
+        "max_area_ratio": 33.682035294206216,
+        "max_condition_number": 223.75855449504553,
+        "max_edge_ratio": 32.969871239401094,
+        "min_area_ratio": 0.9999999999439504,
+        "skin_l1_max": 1.986844458732132,
+        "vertex_ids": [
+          "CMV:bbc76403ddf642286f321ac2",
+          "CMV:7ea4fbe7f8bc7520d31b2f3e",
+          "CMV:f4569eb40b990f3d891e094a"
+        ],
+        "worst_probe_id": "J:932628adf7f0d5936426:LOCAL_X:-120"
+      },
+      {
+        "face_index": 14151,
+        "max_area_ratio": 31.901986980450538,
+        "max_condition_number": 98.68411018573399,
+        "max_edge_ratio": 32.969871239401094,
+        "min_area_ratio": 0.9550492938472996,
+        "skin_l1_max": 1.9986665759831475,
+        "vertex_ids": [
+          "CMV:396bd7673d7cdba03139ebc7",
+          "CMV:bbc76403ddf642286f321ac2",
+          "CMV:f4569eb40b990f3d891e094a"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:+120"
+      },
+      {
+        "face_index": 14152,
+        "max_area_ratio": 32.25508544550522,
+        "max_condition_number": 129.68595116737015,
+        "max_edge_ratio": 32.92100576020734,
+        "min_area_ratio": 0.43168734563016375,
+        "skin_l1_max": 1.9986665759831475,
+        "vertex_ids": [
+          "CMV:396bd7673d7cdba03139ebc7",
+          "CMV:bbc76403ddf642286f321ac2",
+          "CMV:ab09e7bcf46eb2db01c28e72"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:+120"
+      },
+      {
+        "face_index": 23596,
+        "max_area_ratio": 31.32312053283356,
+        "max_condition_number": 194.24916652881802,
+        "max_edge_ratio": 32.92100576020734,
+        "min_area_ratio": 0.4304544051848265,
+        "skin_l1_max": 1.9913035931898797,
+        "vertex_ids": [
+          "CMV:bbc76403ddf642286f321ac2",
+          "CMV:ab09e7bcf46eb2db01c28e72",
+          "CMV:edaa6c450e981f07bd1c4f85"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_X:-120"
+      },
+      {
+        "face_index": 17075,
+        "max_area_ratio": 32.15642149404047,
+        "max_condition_number": 49.424149695599965,
+        "max_edge_ratio": 32.86953847487927,
+        "min_area_ratio": 0.9211074781817238,
+        "skin_l1_max": 1.982445422388022,
+        "vertex_ids": [
+          "CMV:35855b5bac07d6173eb1af70",
+          "CMV:77b238715b66662d9661aeb4",
+          "CMV:a39d2ee241258b07a76733a7"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_Y:-120"
+      },
+      {
+        "face_index": 24203,
+        "max_area_ratio": 31.95418413224999,
+        "max_condition_number": 46.90541407780937,
+        "max_edge_ratio": 32.86953847487927,
+        "min_area_ratio": 0.9999958147806416,
+        "skin_l1_max": 1.9999757443774167,
+        "vertex_ids": [
+          "CMV:77b238715b66662d9661aeb4",
+          "CMV:a39d2ee241258b07a76733a7",
+          "CMV:3aa98e30f47b1f34b5f23b71"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_Y:-120"
+      },
+      {
+        "face_index": 8327,
+        "max_area_ratio": 28.629395765887068,
+        "max_condition_number": 1024.5196147397912,
+        "max_edge_ratio": 32.85002397818156,
+        "min_area_ratio": 0.9694269719185902,
+        "skin_l1_max": 1.9989231584537384,
+        "vertex_ids": [
+          "CMV:e9c1b492d06fcdf30d5e17f5",
+          "CMV:6c0d74c201c653e38e22b20e",
+          "CMV:6befa84f19b56448270e750e"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 8328,
+        "max_area_ratio": 28.199397930216293,
+        "max_condition_number": 656.3802960613889,
+        "max_edge_ratio": 32.85002397818156,
+        "min_area_ratio": 0.9999999999999919,
+        "skin_l1_max": 1.9989231584537384,
+        "vertex_ids": [
+          "CMV:e9c1b492d06fcdf30d5e17f5",
+          "CMV:6c0d74c201c653e38e22b20e",
+          "CMV:c8b669d97dc26ff533e9f7df"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 13226,
+        "max_area_ratio": 27.267119076945516,
+        "max_condition_number": 4469.6954320538625,
+        "max_edge_ratio": 32.603256606789316,
+        "min_area_ratio": 0.2321555623317553,
+        "skin_l1_max": 1.7615948592040713,
+        "vertex_ids": [
+          "CMV:22261ec772d2604dcc887aa8",
+          "CMV:ac39e146cf6cb8401368c4c2",
+          "CMV:4d7285fb40631cada09296f5"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:-120"
+      },
+      {
+        "face_index": 13222,
+        "max_area_ratio": 25.99326822736502,
+        "max_condition_number": 172.3530494638756,
+        "max_edge_ratio": 32.603256606789316,
+        "min_area_ratio": 0.9999999999618591,
+        "skin_l1_max": 1.7615932328491484,
+        "vertex_ids": [
+          "CMV:22261ec772d2604dcc887aa8",
+          "CMV:1b6033bd0baf783cb58648c8",
+          "CMV:4d7285fb40631cada09296f5"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:+120"
+      },
+      {
+        "face_index": 669,
+        "max_area_ratio": 40.12958755026363,
+        "max_condition_number": 113.1282666602029,
+        "max_edge_ratio": 31.859296705043384,
+        "min_area_ratio": 0.999999994876857,
+        "skin_l1_max": 1.9993218440652172,
+        "vertex_ids": [
+          "CMV:28819171ae62c38e9946cb78",
+          "CMV:b14a53aa96cc79f7242219f9",
+          "CMV:2824b5c14eadbed018490c50"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 21192,
+        "max_area_ratio": 33.09499510080723,
+        "max_condition_number": 60.3708654826342,
+        "max_edge_ratio": 31.80328587596252,
+        "min_area_ratio": 0.9999999696457845,
+        "skin_l1_max": 1.9899223248032065,
+        "vertex_ids": [
+          "CMV:e4711fd615eb85c5c8321619",
+          "CMV:c289e69f9feffaf18fdcea8f",
+          "CMV:1e5ea451d0a1a976461dfb1e"
+        ],
+        "worst_probe_id": "J:2ff965d6dbe4efc2d5d4:LOCAL_X:+120"
+      },
+      {
+        "face_index": 21504,
+        "max_area_ratio": 32.061183232710945,
+        "max_condition_number": 61.12074847712299,
+        "max_edge_ratio": 31.80328587596252,
+        "min_area_ratio": 0.9999999694582988,
+        "skin_l1_max": 1.5568149004781378,
+        "vertex_ids": [
+          "CMV:7992a266dbfcedb0b13d643b",
+          "CMV:c289e69f9feffaf18fdcea8f",
+          "CMV:1e5ea451d0a1a976461dfb1e"
+        ],
+        "worst_probe_id": "J:2ff965d6dbe4efc2d5d4:LOCAL_X:+120"
+      },
+      {
+        "face_index": 19723,
+        "max_area_ratio": 28.71785401022553,
+        "max_condition_number": 378.2011304643762,
+        "max_edge_ratio": 31.60629113637326,
+        "min_area_ratio": 0.9999999890659045,
+        "skin_l1_max": 1.9997337239250792,
+        "vertex_ids": [
+          "CMV:615a76157a9ceb1b10cce47d",
+          "CMV:37a9ab486099e4345f8dc8d7",
+          "CMV:7a05b61c623702b75f29fab1"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 19724,
+        "max_area_ratio": 28.390977530477294,
+        "max_condition_number": 424.1182495778447,
+        "max_edge_ratio": 31.60629113637326,
+        "min_area_ratio": 0.9999999892283815,
+        "skin_l1_max": 1.9977858439471627,
+        "vertex_ids": [
+          "CMV:615a76157a9ceb1b10cce47d",
+          "CMV:37a9ab486099e4345f8dc8d7",
+          "CMV:dc350567ed973eece186d308"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_X:+120"
+      },
+      {
+        "face_index": 20120,
+        "max_area_ratio": 53.513975504748146,
+        "max_condition_number": 92.7980031997956,
+        "max_edge_ratio": 31.49923521361335,
+        "min_area_ratio": 0.9999999936897693,
+        "skin_l1_max": 1.9847411723262336,
+        "vertex_ids": [
+          "CMV:478e13c4c61ea76fe1d6cf33",
+          "CMV:3a95da46baa6fa387573e007",
+          "CMV:2031003988b6b3204999cf05"
+        ],
+        "worst_probe_id": "J:a80d2c086e86a4cc08b5:LOCAL_X:+120"
+      },
+      {
+        "face_index": 20117,
+        "max_area_ratio": 33.40908197609633,
+        "max_condition_number": 169.4356488603195,
+        "max_edge_ratio": 31.49923521361335,
+        "min_area_ratio": 0.9693398572852641,
+        "skin_l1_max": 1.9847846101390931,
+        "vertex_ids": [
+          "CMV:478e13c4c61ea76fe1d6cf33",
+          "CMV:a94a5b0c9f979de856e68344",
+          "CMV:2031003988b6b3204999cf05"
+        ],
+        "worst_probe_id": "J:8455bf4c0a38867b7d9b:LOCAL_Y:-120"
+      },
+      {
+        "face_index": 2945,
+        "max_area_ratio": 30.611445323926954,
+        "max_condition_number": 72.06605029717095,
+        "max_edge_ratio": 31.483920836029696,
+        "min_area_ratio": 0.9999999999999857,
+        "skin_l1_max": 1.9983117006877325,
+        "vertex_ids": [
+          "CMV:dd1438bb666fd8e5007345a8",
+          "CMV:653cdefbf50c04b1ac0c64b1",
+          "CMV:2ea2b30c1856b6c93e598747"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:+120"
+      },
+      {
+        "face_index": 18064,
+        "max_area_ratio": 30.47008776369089,
+        "max_condition_number": 192.13899561731142,
+        "max_edge_ratio": 31.483920836029696,
+        "min_area_ratio": 0.999999999999988,
+        "skin_l1_max": 1.9983117006877325,
+        "vertex_ids": [
+          "CMV:45872d065abeb232c14d4d4c",
+          "CMV:653cdefbf50c04b1ac0c64b1",
+          "CMV:2ea2b30c1856b6c93e598747"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_Y:-120"
+      },
+      {
+        "face_index": 22177,
+        "max_area_ratio": 30.280636992070235,
+        "max_condition_number": 270.01504480503826,
+        "max_edge_ratio": 31.357443252869025,
+        "min_area_ratio": 0.9999999158324376,
+        "skin_l1_max": 1.8295222671331417,
+        "vertex_ids": [
+          "CMV:da77531cf5718cdfdab2ce0a",
+          "CMV:b4ff916cd1e3328d31752fd3",
+          "CMV:2367c18c529236b79d47921c"
+        ],
+        "worst_probe_id": "J:932628adf7f0d5936426:LOCAL_X:+120"
+      },
+      {
+        "face_index": 22418,
+        "max_area_ratio": 29.60567130839655,
+        "max_condition_number": 883.7161951884033,
+        "max_edge_ratio": 31.357443252869025,
+        "min_area_ratio": 0.7891506233239438,
+        "skin_l1_max": 1.8295222671331417,
+        "vertex_ids": [
+          "CMV:b4ff916cd1e3328d31752fd3",
+          "CMV:2367c18c529236b79d47921c",
+          "CMV:7501c09e914b11b94fffc901"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_Y:+120"
+      },
+      {
+        "face_index": 22791,
+        "max_area_ratio": 48.65589661827978,
+        "max_condition_number": 131.24649829513217,
+        "max_edge_ratio": 31.250808685704943,
+        "min_area_ratio": 0.9970197448708467,
+        "skin_l1_max": 1.8093082786735142,
+        "vertex_ids": [
+          "CMV:2062213140f29525d6b49504",
+          "CMV:97619e42d1d9b7e2a13af237",
+          "CMV:a0b9db624be6bce1cec4a0f3"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_Y:-120"
+      },
+      {
+        "face_index": 22792,
+        "max_area_ratio": 34.420069414795634,
+        "max_condition_number": 39.632836889803485,
+        "max_edge_ratio": 31.250808685704943,
+        "min_area_ratio": 0.9950188932345986,
+        "skin_l1_max": 1.9875348598265767,
+        "vertex_ids": [
+          "CMV:2062213140f29525d6b49504",
+          "CMV:08ee53ecb90f6f2f13f3f417",
+          "CMV:a0b9db624be6bce1cec4a0f3"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_X:+120"
+      },
+      {
+        "face_index": 18735,
+        "max_area_ratio": 27.555527878989654,
+        "max_condition_number": 1133.1778658644798,
+        "max_edge_ratio": 31.03215153104377,
+        "min_area_ratio": 0.7932236671029732,
+        "skin_l1_max": 1.9681797633358002,
+        "vertex_ids": [
+          "CMV:6c0d74c201c653e38e22b20e",
+          "CMV:dd8c06be22d8248075da1d8b",
+          "CMV:c8b669d97dc26ff533e9f7df"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:-120"
+      },
+      {
+        "face_index": 364,
+        "max_area_ratio": 26.384805528171974,
+        "max_condition_number": 719.7567204166282,
+        "max_edge_ratio": 31.03215153104377,
+        "min_area_ratio": 0.9999999999999838,
+        "skin_l1_max": 1.9681797633358002,
+        "vertex_ids": [
+          "CMV:3be9379c2a2a707c9af0486b",
+          "CMV:dd8c06be22d8248075da1d8b",
+          "CMV:c8b669d97dc26ff533e9f7df"
+        ],
+        "worst_probe_id": "J:75a17a4287b28cd7f57f:LOCAL_X:+120"
+      },
+      {
+        "face_index": 16977,
+        "max_area_ratio": 30.894358975969762,
+        "max_condition_number": 343.0312846909027,
+        "max_edge_ratio": 31.02912255463548,
+        "min_area_ratio": 0.9999999926815721,
+        "skin_l1_max": 1.9873948608407843,
+        "vertex_ids": [
+          "CMV:d282f8dc6a5896eba5118df7",
+          "CMV:a58d5ceb85b43979276332a2",
+          "CMV:f4569eb40b990f3d891e094a"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_Y:-120"
+      },
+      {
+        "face_index": 19986,
+        "max_area_ratio": 30.259202612761612,
+        "max_condition_number": 230.58329414738256,
+        "max_edge_ratio": 30.99788648683187,
+        "min_area_ratio": 0.9999999972920237,
+        "skin_l1_max": 1.984982172284405,
+        "vertex_ids": [
+          "CMV:a58d5ceb85b43979276332a2",
+          "CMV:7ea4fbe7f8bc7520d31b2f3e",
+          "CMV:f4569eb40b990f3d891e094a"
+        ],
+        "worst_probe_id": "J:4c9f9eace712daf31538:LOCAL_Y:+120"
+      },
+      {
+        "face_index": 6822,
+        "max_area_ratio": 30.7990018536718,
+        "max_condition_number": 48.978948434027885,
+        "max_edge_ratio": 30.84232322557298,
+        "min_area_ratio": 0.9792443832102299,
+        "skin_l1_max": 1.9744814633830798,
+        "vertex_ids": [
+          "CMV:65a436ca86dff50fde387be4",
+          "CMV:8988076f80874ab53a644566",
+          "CMV:3aa98e30f47b1f34b5f23b71"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_Y:+120"
+      },
+      {
+        "face_index": 19215,
+        "max_area_ratio": 30.409793699806997,
+        "max_condition_number": 48.13283061035224,
+        "max_edge_ratio": 30.84232322557298,
+        "min_area_ratio": 0.9725911865768834,
+        "skin_l1_max": 1.9999757443774167,
+        "vertex_ids": [
+          "CMV:8988076f80874ab53a644566",
+          "CMV:77b238715b66662d9661aeb4",
+          "CMV:3aa98e30f47b1f34b5f23b71"
+        ],
+        "worst_probe_id": "J:1008208d141ae248de43:LOCAL_Y:+120"
+      },
+      {
+        "face_index": 8167,
+        "max_area_ratio": 35.55589334904024,
+        "max_condition_number": 458.406709078419,
+        "max_edge_ratio": 30.838419178513693,
+        "min_area_ratio": 0.999999890557169,
+        "skin_l1_max": 1.8104543195912932,
+        "vertex_ids": [
+          "CMV:6e82dc8675e5f5c3a0c769be",
+          "CMV:29919c6065ea389a2c15d5bf",
+          "CMV:ecf33e746cd809e29c1beefa"
+        ],
+        "worst_probe_id": "J:7cf59fbe52c53280546a:LOCAL_X:-120"
+      },
+      {
+        "face_index": 8165,
+        "max_area_ratio": 27.896726181270243,
+        "max_condition_number": 346.01644313439624,
+        "max_edge_ratio": 30.838419178513693,
+        "min_area_ratio": 0.8681553699110324,
+        "skin_l1_max": 1.9539774588609748,
+        "vertex_ids": [
+          "CMV:6e82dc8675e5f5c3a0c769be",
+          "CMV:a313c2dca0ef663e277d8002",
+          "CMV:ecf33e746cd809e29c1beefa"
+        ],
+        "worst_probe_id": "J:7cf59fbe52c53280546a:LOCAL_Y:+120"
+      },
+      {
+        "face_index": 7502,
+        "max_area_ratio": 29.61563169753862,
+        "max_condition_number": 35.40662895347457,
+        "max_edge_ratio": 30.73234800589762,
+        "min_area_ratio": 0.9906163216325029,
+        "skin_l1_max": 1.975027332427448,
+        "vertex_ids": [
+          "CMV:3b6c838a7585e71c20eaac0a",
+          "CMV:969b88f6f51f6fde64686cf4",
+          "CMV:762f25fd63d23101b0a4f1e0"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:-120"
+      },
+      {
+        "face_index": 3093,
+        "max_area_ratio": 30.258485956303552,
+        "max_condition_number": 40.90576665058149,
+        "max_edge_ratio": 30.656264544843584,
+        "min_area_ratio": 0.9996274143786065,
+        "skin_l1_max": 1.9677557134573505,
+        "vertex_ids": [
+          "CMV:666e13c7799d6016c6e07673",
+          "CMV:969b88f6f51f6fde64686cf4",
+          "CMV:762f25fd63d23101b0a4f1e0"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:-120"
+      },
+      {
+        "face_index": 14874,
+        "max_area_ratio": 30.06627697889098,
+        "max_condition_number": 79.62993794858515,
+        "max_edge_ratio": 30.511636061447415,
+        "min_area_ratio": 0.9998268198997903,
+        "skin_l1_max": 1.9734931745403834,
+        "vertex_ids": [
+          "CMV:db71afcff9672181615aaaf7",
+          "CMV:6579b48aa37101f7b4a3d9d6",
+          "CMV:a582de333b6818021299ee80"
+        ],
+        "worst_probe_id": "J:e5441b559f1c34b41aa2:LOCAL_X:+120"
+      },
+      {
+        "face_index": 14873,
+        "max_area_ratio": 28.76338839748671,
+        "max_condition_number": 203.9870082982172,
+        "max_edge_ratio": 30.511636061447415,
+        "min_area_ratio": 0.43149212463861714,
+        "skin_l1_max": 1.9995797573750396,
+        "vertex_ids": [
+          "CMV:db71afcff9672181615aaaf7",
+          "CMV:6579b48aa37101f7b4a3d9d6",
+          "CMV:a474b28b262b7086aa357934"
+        ],
+        "worst_probe_id": "J:42d181ebf3515959283a:LOCAL_Z:-120"
+      },
+      {
+        "face_index": 5716,
+        "max_area_ratio": 25.853600236891978,
+        "max_condition_number": 499.95669328121556,
+        "max_edge_ratio": 30.43892712549748,
+        "min_area_ratio": 0.9999999986553622,
+        "skin_l1_max": 1.4621097273078423,
+        "vertex_ids": [
+          "CMV:a7b0a30b9950ed92618d046c",
+          "CMV:0074450a3ece07835f229698",
+          "CMV:9affa7b1e5e22fdafa3abc52"
+        ],
+        "worst_probe_id": "J:33c7075f501c9af4cd0d:LOCAL_X:-120"
+      }
+    ],
+    "unsafe_face_count": 1491,
+    "weight_mutation": false
+  },
+  "numeric_weight_array_unchanged_by_rebind": true,
+  "old_skeleton_lineage_hash": "c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce",
+  "repartition": {
+    "auto_apply_allowed": false,
+    "candidate_separate_pair_count": 992,
+    "directive_hash": "ec42d49d2fee1748965cccec2b6584e05e492b48a23712348400661aeb305cbf",
+    "face_deletion_count": 0,
+    "mandatory_requalification_through": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+    "requires_trustworthy_skin_reliability_authority": true,
+    "restart_from": "17_MECHANICAL_PARTITION_QUALIFIED",
+    "status": "REPARTITION_PROPOSED__AWAIT_TRUSTWORTHY_SKIN_AUTHORITY",
+    "unresolved_unsafe_face_count": 0,
+    "weight_mutation": false
+  },
+  "schema": "RealSaS.KnightArachneV6ReboundStage35Diagnostic.v1",
+  "semantic_rebind_mapping_hash": "f665a4b35d1e317afa3045fc4d05d7e15301aede411eac112346c04e1d3397ac",
+  "semantic_tree_hash": "dbe7e6d29551d1211653efaf3c344c2007c5b6a812932c6d115d48b77b3ca46f",
+  "source_weights_npz_sha256": "3bc8ba801f0b24714a38cda37902e5377f896572edd35585327ade353bfdee12",
+  "status": "PASS_DIAGNOSTIC_EXECUTED",
+  "topology_authority": {
+    "candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+    "envelope_lineage_hash": "f9fe4d5b15f970045f9bb7755e0c4ddfc1097b3499cb955481a2267b5003df26",
+    "partition_lineage_hash": "ba14cb67ff5bdf78a609e56ccddcfd8203075ffe304734df3be8fcf657635dec",
+    "skeleton_lineage_hash": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+    "surface_lineage_hash": "452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a"
+  }
+}

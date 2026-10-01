@@ -1,0 +1,67 @@
+name: subject2-knight-owner-diagnostics-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_OWNER_DIAGNOSTICS_TRIGGER_20260927.json'
+      - 'tools/appearance/diagnose_caa_alpha_conflict_owner_v1.py'
+      - 'tools/motion/diagnose_retarget_ancestry_v1.py'
+      - '.github/workflows/subject2_knight_owner_diagnostics_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-owner-diagnostics-v1
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Trace CAA alpha conflict owner
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python -m tools.appearance.diagnose_caa_alpha_conflict_owner_v1             --repo-root .             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --out canonical/KNIGHT_CAA_ALPHA_CONFLICT_OWNER_DIAGNOSTIC_20260927.json
+
+      - name: Trace motion retarget ancestry owner
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python -m tools.motion.diagnose_retarget_ancestry_v1             --repo-root .             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --clip-id demo_idle_v1             --out canonical/KNIGHT_MOTION_RETARGET_ANCESTRY_DIAGNOSTIC_20260927.json
+
+      - name: Seal owner diagnostics
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add             canonical/KNIGHT_CAA_ALPHA_CONFLICT_OWNER_DIAGNOSTIC_20260927.json             canonical/KNIGHT_MOTION_RETARGET_ANCESTRY_DIAGNOSTIC_20260927.json
+          if git diff --cached --quiet; then
+            echo "OWNER_DIAGNOSTICS_UNCHANGED"
+            exit 0
+          fi
+          git commit -m 'diagnostic: seal Knight CAA and motion owner traces'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

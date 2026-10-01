@@ -1,0 +1,29 @@
+{
+  "arachne_execution_hash": "9deb433be219ec2cd6c1e42e4ef6a701820abe1e796d3955cc0ae68eb574ea11",
+  "architecture_id": "RealSaS.Arachne.A1.RawSurfaceK4AttentionDirectSimplex.v6",
+  "checkpoint_seal_hash": "e3ae066bd08e6bc727d7d994c02bff91a2fadd0edc351a10a00d0e5095137484",
+  "execution_repo_commit": "37d7625b85a33fd2839742c8d9a9fda06cf2c324",
+  "generalization_claimed": false,
+  "historical_v6_skeleton_lineage_hash": "c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce",
+  "historical_v6_skin_lineage_hash": "3fa8dacae0d52b86193f14f6cb0214ed68d8d40035317e367b335d9c06a48397",
+  "max_abs_weight_delta_after_compiler_requalification": 3.3306690738754696e-16,
+  "max_row_l1_weight_delta_after_compiler_requalification": 3.886323572359677e-16,
+  "model_retraining_used_for_identity_migration": false,
+  "numeric_skin_field_semantics_preserved": true,
+  "product_authority_claimed": false,
+  "qualified_skeleton_lineage_hash": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+  "qualified_skin_lineage_hash": "c509322f0583a0644bd082514e9572d1e3b5dd61352aeb133e597fcdfbb5ae25",
+  "qualified_skin_row_count": 12090,
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "schema": "RealSaS.KnightDemoArachneStage33V6Receipt.v2",
+  "semantic_id_rebind_mapping_hash": "f665a4b35d1e317afa3045fc4d05d7e15301aede411eac112346c04e1d3397ac",
+  "semantic_id_rebind_receipt_sha256": "24857c3b99da8ff39da25a157d80beed4d86c7ecd71640b597ffa8e71c28049a",
+  "semantic_skeleton_tree_sha256": "dbe7e6d29551d1211653efaf3c344c2007c5b6a812932c6d115d48b77b3ca46f",
+  "semantic_skin_migration_verification_sha256": "411a8fa355e027ea18114abf84edfb7dbbd1e14b10590fc1a57069c7fe1eecce",
+  "status": "PASS_DEMO_ONLY",
+  "terminal_check_steps": [
+    7680,
+    7936,
+    8192
+  ]
+}

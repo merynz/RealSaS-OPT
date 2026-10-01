@@ -1,0 +1,2632 @@
+{
+  "captured_by_commit": "04cd55537df6cac0f84a0069a6d6ddf6ff2c3d64",
+  "failure_diagnostics": {
+    "09_IRIS_FIT_PREREGISTERED": {
+      "diagnostics": {
+        "exception_type": "QualificationError",
+        "message": "DEMO_IRIS_IMPORT_OBSERVATION_BINDING_DRIFT"
+      },
+      "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+      "schema": "RealSaS.StageFailureDiagnostics.v1",
+      "stage_id": "09_IRIS_FIT_PREREGISTERED"
+    },
+    "18_CANONICAL_MESH_ADDRESSING_BUILD": {
+      "diagnostics": {
+        "above_max_aspect_face_count": 57,
+        "above_max_aspect_face_fraction": 0.002283836845901114,
+        "backend": "CANONICAL_CDT_LOCAL_CHART_V1",
+        "below_min_angle_face_count": 109,
+        "below_min_angle_face_fraction": 0.004367337126372306,
+        "cdt_v1_boundary_split_policy": "FORBIDDEN",
+        "cdt_v1_min_angle_repairability": "UNREPAIRABLE_IF_ANY_PARENT_CORNER_IS_BELOW_TARGET",
+        "degenerate_face_count": 0,
+        "face_count": 24958,
+        "max_aspect_longest_over_min_altitude": 272.00299700239304,
+        "min_angle_deg": 0.4074608559654188,
+        "not_raw_marching_cubes_parent_faces": true,
+        "policy_max_aspect_longest_over_min_altitude": 16.0,
+        "policy_min_angle_deg": 7.5,
+        "policy_violating_face_count": 109,
+        "policy_violating_face_fraction": 0.004367337126372306,
+        "producer_semantics": "THREE_CLIQUES_OF_RIGGING_SURFACE_LOCAL_RELATION_GRAPH",
+        "proof_note": "Without boundary splits, any triangulation covering a parent triangle preserves each parent corner as a sum of incident child angles; a parent corner below the target cannot be raised above the target by interior Steiner insertion alone.",
+        "relation_parent_quality_sha256": "5cd828a5c846d93138fba7ad5989abdcb08860af725c06d67e0e7f6d81f32d55",
+        "schema": "RealSaS.RelationParentQualityReport.v1"
+      },
+      "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+      "schema": "RealSaS.StageFailureDiagnostics.v1",
+      "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+    },
+    "20_CAA_BACKEND_PREREGISTERED": {
+      "diagnostics": {
+        "exception_type": "NameError",
+        "message": "name 'json' is not defined"
+      },
+      "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+      "schema": "RealSaS.StageFailureDiagnostics.v1",
+      "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+    },
+    "21_CAA_COMPILE": {
+      "diagnostics": {
+        "exception_type": "QualificationError",
+        "message": "CAA_HARMONIC_REGION_TOO_LARGE"
+      },
+      "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+      "schema": "RealSaS.StageFailureDiagnostics.v1",
+      "stage_id": "21_CAA_COMPILE"
+    },
+    "22_CAA_COMPILE_SEALED": {
+      "diagnostics": {
+        "exception_type": "QualificationError",
+        "message": "CAA_COMPILE_PROVENANCE_ACCOUNTING_DRIFT"
+      },
+      "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+      "schema": "RealSaS.StageFailureDiagnostics.v1",
+      "stage_id": "22_CAA_COMPILE_SEALED"
+    },
+    "24_COMPLETE_APPEARANCE_QUALIFIED": {
+      "diagnostics": {
+        "asset_binding_hash": "e5025d7fcd2aed71d5ce952cb6ee1913ecbbd0247dc2b7313045a9094def7e3a",
+        "metadata": {
+          "admitted_renderable_sample_count": 22876608,
+          "cross_view_source_compatibility": {
+            "alpha_conflict_cut": 0.25,
+            "alpha_conflict_fraction": 0.017507228905245448,
+            "color_conflict_cut_rgba_l1": 0.4,
+            "color_conflict_fraction": 0.006185546636165895,
+            "max_alpha_abs": 1.0,
+            "max_premultiplied_rgba_l1": 0.7724514315232762,
+            "mean_alpha_abs": 0.012970522952269145,
+            "mean_premultiplied_rgba_l1": 0.03871399842229735,
+            "measurement_is_compatibility_not_color_authority": true,
+            "mode": "ADJACENT_8VIEW_SHARED_CANONICAL_DIRECT_SOURCE_V2",
+            "p95_alpha_abs": 0.00392156862745098,
+            "p95_premultiplied_rgba_l1": 0.2020010584038471,
+            "p99_alpha_abs": 0.45098039215686275,
+            "p99_premultiplied_rgba_l1": 0.3476416390124678,
+            "pair_count": 8,
+            "per_pair": [
+              {
+                "alpha_conflict_fraction": 0.01581380045955541,
+                "color_conflict_fraction": 0.010684044158357347,
+                "left_view_index": 0,
+                "max_alpha_abs": 1.0,
+                "max_premultiplied_rgba_l1": 0.7724514315232762,
+                "mean_alpha_abs": 0.011639649429887763,
+                "mean_premultiplied_rgba_l1": 0.054997343718270204,
+                "p95_alpha_abs": 0.0,
+                "p95_premultiplied_rgba_l1": 0.22621993789867942,
+                "p99_alpha_abs": 0.4,
+                "p99_premultiplied_rgba_l1": 0.4033727899097458,
+                "right_view_index": 1,
+                "shared_direct_sample_count": 565329
+              },
+              {
+                "alpha_conflict_fraction": 0.019485929007003643,
+                "color_conflict_fraction": 0.009148056601517554,
+                "left_view_index": 1,
+                "max_alpha_abs": 1.0,
+                "max_premultiplied_rgba_l1": 0.7019413504111078,
+                "mean_alpha_abs": 0.01443078957501972,
+                "mean_premultiplied_rgba_l1": 0.051446703306575414,
+                "p95_alpha_abs": 0.011764705882352941,
+                "p95_premultiplied_rgba_l1": 0.21666117436363913,
+                "p99_alpha_abs": 0.5176470588235295,
+                "p99_premultiplied_rgba_l1": 0.3870844652889888,
+                "right_view_index": 2,
+                "shared_direct_sample_count": 510163
+              },
+              {
+                "alpha_conflict_fraction": 0.027748096266889212,
+                "color_conflict_fraction": 0.004305335652390943,
+                "left_view_index": 2,
+                "max_alpha_abs": 1.0,
+                "max_premultiplied_rgba_l1": 0.7124395069483003,
+                "mean_alpha_abs": 0.021191757649609722,
+                "mean_premultiplied_rgba_l1": 0.023863017507569285,
+                "p95_alpha_abs": 0.043137254901960784,
+                "p95_premultiplied_rgba_l1": 0.10692767316692192,
+                "p99_alpha_abs": 0.8745098039215686,
+                "p99_premultiplied_rgba_l1": 0.35461683844449926,
+                "right_view_index": 3,
+                "shared_direct_sample_count": 384639
+              },
+              {
+                "alpha_conflict_fraction": 0.013435393182546145,
+                "color_conflict_fraction": 0.0020202293066387783,
+                "left_view_index": 3,
+                "max_alpha_abs": 1.0,
+                "max_premultiplied_rgba_l1": 0.599053907077386,
+                "mean_alpha_abs": 0.009913171416855817,
+                "mean_premultiplied_rgba_l1": 0.025459294240888525,
+                "p95_alpha_abs": 0.0,
+                "p95_premultiplied_rgba_l1": 0.15167807338695427,
+                "p99_alpha_abs": 0.3411764705882353,
+                "p99_premultiplied_rgba_l1": 0.2586106583690887,
+                "right_view_index": 4,
+                "shared_direct_sample_count": 518258
+              },
+              {
+                "alpha_conflict_fraction": 0.013426450323576731,
+                "color_conflict_fraction": 0.0003192479456304516,
+                "left_view_index": 4,
+                "max_alpha_abs": 1.0,
+                "max_premultiplied_rgba_l1": 0.5149412409649828,
+                "mean_alpha_abs": 0.00942764965185104,
+                "mean_premultiplied_rgba_l1": 0.025643856191193734,
+                "p95_alpha_abs": 0.0,
+                "p95_premultiplied_rgba_l1": 0.1567610163903919,
+                "p99_alpha_abs": 0.32941176470588235,
+                "p99_premultiplied_rgba_l1": 0.23424992739957265,
+                "right_view_index": 5,
+                "shared_direct_sample_count": 554428
+              },
+              {
+                "alpha_conflict_fraction": 0.020554463408095792,
+                "color_conflict_fraction": 0.002211598606022697,
+                "left_view_index": 5,
+                "max_alpha_abs": 1.0,
+                "max_premultiplied_rgba_l1": 0.7158196784227489,
+                "mean_alpha_abs": 0.015411421292670407,
+                "mean_premultiplied_rgba_l1": 0.02601100882621489,
+                "p95_alpha_abs": 0.01568627450980392,
+                "p95_premultiplied_rgba_l1": 0.13538863465585507,
+                "p99_alpha_abs": 0.5137254901960784,
+                "p99_premultiplied_rgba_l1": 0.27122196165206625,
+                "right_view_index": 6,
+                "shared_direct_sample_count": 447640
+              },
+              {
+                "alpha_conflict_fraction": 0.018564973511997505,
+                "color_conflict_fraction": 0.008920224368962294,
+                "left_view_index": 6,
+                "max_alpha_abs": 1.0,
+                "max_premultiplied_rgba_l1": 0.7056348440251601,
+                "mean_alpha_abs": 0.01372254963063443,
+                "mean_premultiplied_rgba_l1": 0.04506359206007752,
+                "p95_alpha_abs": 0.00392156862745098,
+                "p95_premultiplied_rgba_l1": 0.21473818819006424,
+                "p99_alpha_abs": 0.49411764705882355,
+                "p99_premultiplied_rgba_l1": 0.38319639627075075,
+                "right_view_index": 7,
+                "shared_direct_sample_count": 513440
+              },
+              {
+                "alpha_conflict_fraction": 0.014753974097977216,
+                "color_conflict_fraction": 0.010615642280648561,
+                "left_view_index": 7,
+                "max_alpha_abs": 1.0,
+                "max_premultiplied_rgba_l1": 0.7130009774383494,
+                "mean_alpha_abs": 0.011012712357433986,
+                "mean_premultiplied_rgba_l1": 0.050540828123208696,
+                "p95_alpha_abs": 0.0,
+                "p95_premultiplied_rgba_l1": 0.2188215013501856,
+                "p99_alpha_abs": 0.3764705882352941,
+                "p99_premultiplied_rgba_l1": 0.40617222113082907,
+                "right_view_index": 0,
+                "shared_direct_sample_count": 554088
+              }
+            ],
+            "per_pair_component": [
+              {
+                "alpha_conflict_fraction": 0.01581380045955541,
+                "color_conflict_fraction": 0.010684044158357347,
+                "component_index": 0,
+                "left_view_index": 0,
+                "max_alpha_abs": 1.0,
+                "max_premultiplied_rgba_l1": 0.7724514315232762,
+                "mean_alpha_abs": 0.011639649429887763,
+                "mean_premultiplied_rgba_l1": 0.054997343718270204,
+                "p95_alpha_abs": 0.0,
+                "p95_premultiplied_rgba_l1": 0.22621993789867942,
+                "p99_alpha_abs": 0.4,
+                "p99_premultiplied_rgba_l1": 0.4033727899097458,
+                "right_view_index": 1,
+                "shared_direct_sample_count": 565329
+              },
+              {
+                "alpha_conflict_fraction": 0.019485929007003643,
+                "color_conflict_fraction": 0.009148056601517554,
+                "component_index": 0,
+                "left_view_index": 1,
+                "max_alpha_abs": 1.0,
+                "max_premultiplied_rgba_l1": 0.7019413504111078,
+                "mean_alpha_abs": 0.01443078957501972,
+                "mean_premultiplied_rgba_l1": 0.051446703306575414,
+                "p95_alpha_abs": 0.011764705882352941,
+                "p95_premultiplied_rgba_l1": 0.21666117436363913,
+                "p99_alpha_abs": 0.5176470588235295,
+                "p99_premultiplied_rgba_l1": 0.3870844652889888,
+                "right_view_index": 2,
+                "shared_direct_sample_count": 510163
+              },
+              {
+                "alpha_conflict_fraction": 0.027748096266889212,
+                "color_conflict_fraction": 0.004305335652390943,
+                "component_index": 0,
+                "left_view_index": 2,
+                "max_alpha_abs": 1.0,
+                "max_premultiplied_rgba_l1": 0.7124395069483003,
+                "mean_alpha_abs": 0.021191757649609722,
+                "mean_premultiplied_rgba_l1": 0.023863017507569285,
+                "p95_alpha_abs": 0.043137254901960784,
+                "p95_premultiplied_rgba_l1": 0.10692767316692192,
+                "p99_alpha_abs": 0.8745098039215686,
+                "p99_premultiplied_rgba_l1": 0.35461683844449926,
+                "right_view_index": 3,
+                "shared_direct_sample_count": 384639
+              },
+              {
+                "alpha_conflict_fraction": 0.013435393182546145,
+                "color_conflict_fraction": 0.0020202293066387783,
+                "component_index": 0,
+                "left_view_index": 3,
+                "max_alpha_abs": 1.0,
+                "max_premultiplied_rgba_l1": 0.599053907077386,
+                "mean_alpha_abs": 0.009913171416855817,
+                "mean_premultiplied_rgba_l1": 0.025459294240888525,
+                "p95_alpha_abs": 0.0,
+                "p95_premultiplied_rgba_l1": 0.15167807338695427,
+                "p99_alpha_abs": 0.3411764705882353,
+                "p99_premultiplied_rgba_l1": 0.2586106583690887,
+                "right_view_index": 4,
+                "shared_direct_sample_count": 518258
+              },
+              {
+                "alpha_conflict_fraction": 0.013426450323576731,
+                "color_conflict_fraction": 0.0003192479456304516,
+                "component_index": 0,
+                "left_view_index": 4,
+                "max_alpha_abs": 1.0,
+                "max_premultiplied_rgba_l1": 0.5149412409649828,
+                "mean_alpha_abs": 0.00942764965185104,
+                "mean_premultiplied_rgba_l1": 0.025643856191193734,
+                "p95_alpha_abs": 0.0,
+                "p95_premultiplied_rgba_l1": 0.1567610163903919,
+                "p99_alpha_abs": 0.32941176470588235,
+                "p99_premultiplied_rgba_l1": 0.23424992739957265,
+                "right_view_index": 5,
+                "shared_direct_sample_count": 554428
+              },
+              {
+                "alpha_conflict_fraction": 0.020554463408095792,
+                "color_conflict_fraction": 0.002211598606022697,
+                "component_index": 0,
+                "left_view_index": 5,
+                "max_alpha_abs": 1.0,
+                "max_premultiplied_rgba_l1": 0.7158196784227489,
+                "mean_alpha_abs": 0.015411421292670407,
+                "mean_premultiplied_rgba_l1": 0.02601100882621489,
+                "p95_alpha_abs": 0.01568627450980392,
+                "p95_premultiplied_rgba_l1": 0.13538863465585507,
+                "p99_alpha_abs": 0.5137254901960784,
+                "p99_premultiplied_rgba_l1": 0.27122196165206625,
+                "right_view_index": 6,
+                "shared_direct_sample_count": 447640
+              },
+              {
+                "alpha_conflict_fraction": 0.018564973511997505,
+                "color_conflict_fraction": 0.008920224368962294,
+                "component_index": 0,
+                "left_view_index": 6,
+                "max_alpha_abs": 1.0,
+                "max_premultiplied_rgba_l1": 0.7056348440251601,
+                "mean_alpha_abs": 0.01372254963063443,
+                "mean_premultiplied_rgba_l1": 0.04506359206007752,
+                "p95_alpha_abs": 0.00392156862745098,
+                "p95_premultiplied_rgba_l1": 0.21473818819006424,
+                "p99_alpha_abs": 0.49411764705882355,
+                "p99_premultiplied_rgba_l1": 0.38319639627075075,
+                "right_view_index": 7,
+                "shared_direct_sample_count": 513440
+              },
+              {
+                "alpha_conflict_fraction": 0.014753974097977216,
+                "color_conflict_fraction": 0.010615642280648561,
+                "component_index": 0,
+                "left_view_index": 7,
+                "max_alpha_abs": 1.0,
+                "max_premultiplied_rgba_l1": 0.7130009774383494,
+                "mean_alpha_abs": 0.011012712357433986,
+                "mean_premultiplied_rgba_l1": 0.050540828123208696,
+                "p95_alpha_abs": 0.0,
+                "p95_premultiplied_rgba_l1": 0.2188215013501856,
+                "p99_alpha_abs": 0.3764705882352941,
+                "p99_premultiplied_rgba_l1": 0.40617222113082907,
+                "right_view_index": 0,
+                "shared_direct_sample_count": 554088
+              }
+            ],
+            "raw_rgb_equality_required": false,
+            "shared_direct_sample_count": 4047985,
+            "storage_mode": "NUMPY_CHUNKS_NO_PYTHON_FLOAT_EXPANSION"
+          },
+          "holdout": {
+            "band_fraction": 0.15,
+            "max_rgba_l1": 0.599053907077386,
+            "mean_rgba_l1": 0.0295712477531746,
+            "mode": "SILHOUETTE_ADJACENT_BOUNDED_OCCLUSION_PATCHES_V4_SOURCE_ANCHORED",
+            "p95_rgba_l1": 0.144765931410555,
+            "p99_rgba_l1": 0.2549923713622815,
+            "per_view": [
+              {
+                "harmonic_completion": {
+                  "abstained_reason_counts": {
+                    "REGION_TOO_DEEP": 0,
+                    "REGION_TOO_LARGE": 0,
+                    "WITHOUT_SOURCE_BOUNDARY": 0
+                  },
+                  "abstained_region_count": 0,
+                  "abstained_sample_count": 0,
+                  "abstention_mode_enabled": false,
+                  "maximum_graph_hops": 1,
+                  "maximum_region_samples": 4,
+                  "region_count": 655
+                },
+                "holdout_sample_count": 8282,
+                "max_rgba_l1": 0.48613114438209126,
+                "mean_rgba_l1": 0.05911420857034252,
+                "p95_rgba_l1": 0.17026920922174055,
+                "p99_rgba_l1": 0.22918957196262613,
+                "view_index": 0
+              },
+              {
+                "harmonic_completion": {
+                  "abstained_reason_counts": {
+                    "REGION_TOO_DEEP": 0,
+                    "REGION_TOO_LARGE": 0,
+                    "WITHOUT_SOURCE_BOUNDARY": 0
+                  },
+                  "abstained_region_count": 0,
+                  "abstained_sample_count": 0,
+                  "abstention_mode_enabled": false,
+                  "maximum_graph_hops": 2,
+                  "maximum_region_samples": 4,
+                  "region_count": 1517
+                },
+                "holdout_sample_count": 40099,
+                "max_rgba_l1": 0.599053907077386,
+                "mean_rgba_l1": 0.01952436054285815,
+                "p95_rgba_l1": 0.10322240280516905,
+                "p99_rgba_l1": 0.16816752025085555,
+                "view_index": 1
+              },
+              {
+                "harmonic_completion": {
+                  "abstained_reason_counts": {
+                    "REGION_TOO_DEEP": 0,
+                    "REGION_TOO_LARGE": 0,
+                    "WITHOUT_SOURCE_BOUNDARY": 0
+                  },
+                  "abstained_region_count": 0,
+                  "abstained_sample_count": 0,
+                  "abstention_mode_enabled": false,
+                  "maximum_graph_hops": 2,
+                  "maximum_region_samples": 3,
+                  "region_count": 3009
+                },
+                "holdout_sample_count": 67629,
+                "max_rgba_l1": 0.5905606829736127,
+                "mean_rgba_l1": 0.03803561253140499,
+                "p95_rgba_l1": 0.21489777747599287,
+                "p99_rgba_l1": 0.37577499358519295,
+                "view_index": 2
+              },
+              {
+                "harmonic_completion": {
+                  "abstained_reason_counts": {
+                    "REGION_TOO_DEEP": 0,
+                    "REGION_TOO_LARGE": 0,
+                    "WITHOUT_SOURCE_BOUNDARY": 0
+                  },
+                  "abstained_region_count": 0,
+                  "abstained_sample_count": 0,
+                  "abstention_mode_enabled": false,
+                  "maximum_graph_hops": 2,
+                  "maximum_region_samples": 4,
+                  "region_count": 3035
+                },
+                "holdout_sample_count": 28728,
+                "max_rgba_l1": 0.497744474200907,
+                "mean_rgba_l1": 0.015387687825259167,
+                "p95_rgba_l1": 0.10217086700301015,
+                "p99_rgba_l1": 0.27641272499710634,
+                "view_index": 3
+              },
+              {
+                "harmonic_completion": {
+                  "abstained_reason_counts": {
+                    "REGION_TOO_DEEP": 0,
+                    "REGION_TOO_LARGE": 0,
+                    "WITHOUT_SOURCE_BOUNDARY": 0
+                  },
+                  "abstained_region_count": 0,
+                  "abstained_sample_count": 0,
+                  "abstention_mode_enabled": false,
+                  "maximum_graph_hops": 2,
+                  "maximum_region_samples": 3,
+                  "region_count": 843
+                },
+                "holdout_sample_count": 13486,
+                "max_rgba_l1": 0.5975448209469891,
+                "mean_rgba_l1": 0.046092144703537834,
+                "p95_rgba_l1": 0.14533713573184898,
+                "p99_rgba_l1": 0.25993961990000203,
+                "view_index": 4
+              },
+              {
+                "harmonic_completion": {
+                  "abstained_reason_counts": {
+                    "REGION_TOO_DEEP": 0,
+                    "REGION_TOO_LARGE": 0,
+                    "WITHOUT_SOURCE_BOUNDARY": 0
+                  },
+                  "abstained_region_count": 0,
+                  "abstained_sample_count": 0,
+                  "abstention_mode_enabled": false,
+                  "maximum_graph_hops": 1,
+                  "maximum_region_samples": 4,
+                  "region_count": 1512
+                },
+                "holdout_sample_count": 41393,
+                "max_rgba_l1": 0.49193648599223333,
+                "mean_rgba_l1": 0.014737547448467754,
+                "p95_rgba_l1": 0.09645158740213064,
+                "p99_rgba_l1": 0.16150358401724974,
+                "view_index": 5
+              },
+              {
+                "harmonic_completion": {
+                  "abstained_reason_counts": {
+                    "REGION_TOO_DEEP": 0,
+                    "REGION_TOO_LARGE": 0,
+                    "WITHOUT_SOURCE_BOUNDARY": 0
+                  },
+                  "abstained_region_count": 0,
+                  "abstained_sample_count": 0,
+                  "abstention_mode_enabled": false,
+                  "maximum_graph_hops": 1,
+                  "maximum_region_samples": 3,
+                  "region_count": 273
+                },
+                "holdout_sample_count": 3867,
+                "max_rgba_l1": 0.38432925990553723,
+                "mean_rgba_l1": 0.019713911306343555,
+                "p95_rgba_l1": 0.09632385820810867,
+                "p99_rgba_l1": 0.2544023649051952,
+                "view_index": 6
+              },
+              {
+                "harmonic_completion": {
+                  "abstained_reason_counts": {
+                    "REGION_TOO_DEEP": 0,
+                    "REGION_TOO_LARGE": 0,
+                    "WITHOUT_SOURCE_BOUNDARY": 0
+                  },
+                  "abstained_region_count": 0,
+                  "abstained_sample_count": 0,
+                  "abstention_mode_enabled": false,
+                  "maximum_graph_hops": 2,
+                  "maximum_region_samples": 4,
+                  "region_count": 3363
+                },
+                "holdout_sample_count": 31112,
+                "max_rgba_l1": 0.5168234990415178,
+                "mean_rgba_l1": 0.04315291956022441,
+                "p95_rgba_l1": 0.15509067383810307,
+                "p99_rgba_l1": 0.2456371081916874,
+                "view_index": 7
+              }
+            ],
+            "sample_count": 234596
+          },
+          "policy": {
+            "compiled_global_surface_forbidden": true,
+            "cross_view_alpha_conflict_cut": 0.25,
+            "cross_view_color_conflict_cut_rgba_l1": 0.4,
+            "cross_view_max_component_alpha_conflict_fraction": 0.05,
+            "cross_view_max_component_color_conflict_fraction": 0.1,
+            "cross_view_max_pair_alpha_conflict_fraction": 0.02,
+            "cross_view_max_pair_color_conflict_fraction": 0.05,
+            "cross_view_max_pair_p95_alpha_abs": 0.15,
+            "cross_view_max_pair_p95_rgba_l1": 0.3,
+            "cross_view_min_component_samples_for_gate": 4,
+            "cross_view_min_shared_direct_samples_per_pair": 16,
+            "dynamic_max_adjacent_frame_surface_principal_stretch": 2,
+            "dynamic_max_compiled_unobserved_visible_fraction": 0.02,
+            "dynamic_max_connected_compiled_unobserved_visible_fraction": 0.01,
+            "dynamic_max_exact_depth_ambiguous_fraction": 0,
+            "dynamic_max_frame_compiled_unobserved_visible_fraction": 0.05,
+            "dynamic_max_micro_visible_pixel_fraction_per_frame": 0.005,
+            "dynamic_max_relative_surface_condition_number": 3,
+            "dynamic_max_relative_surface_principal_stretch": 3,
+            "dynamic_max_texture_texels_per_output_pixel": 1,
+            "dynamic_max_unmeasurable_consequential_visible_face_count": 0,
+            "dynamic_max_uv_to_surface_condition_number": 3,
+            "dynamic_max_visibility_layer_overflow_pixel_count": 0,
+            "dynamic_max_visible_orientation_flip_face_count": 0,
+            "dynamic_min_projected_double_area_px2": 1,
+            "dynamic_min_visible_pixels_per_face": 4,
+            "holdout_band_fraction": 0.15,
+            "max_local_harmonic_graph_hops": 2,
+            "max_local_harmonic_region_samples": 16,
+            "max_provenance_boundary_mean_gradient_jump": 0.08,
+            "max_provenance_boundary_mean_rgba_l1": 0.1,
+            "max_provenance_boundary_p95_gradient_jump": 0.2,
+            "max_provenance_boundary_p95_rgba_l1": 0.25,
+            "max_source_sample_pm_roundtrip_abs_error": 0.0065,
+            "max_structured_holdout_mean_rgba_l1": 0.08,
+            "max_structured_holdout_p95_rgba_l1": 0.2,
+            "min_source_lock_exact_fraction": 1,
+            "min_structured_holdout_samples": 128,
+            "min_structured_holdout_samples_per_view": 128,
+            "min_total_defined_fraction": 1,
+            "rest_feature_edge_gradient_cut": 0.08,
+            "rest_feature_high_error_cut_rgba_l1": 0.1,
+            "rest_max_alpha_interior_uncovered_fraction": 0.001,
+            "rest_max_exact_depth_ambiguous_fraction": 0,
+            "rest_max_feature_high_error_fraction": 0.005,
+            "rest_max_feature_p999_rgba_l1": 0.2,
+            "rest_max_largest_coherent_alpha_hole_fraction": 0.001,
+            "rest_max_largest_connected_high_error_fraction": 0.001,
+            "rest_max_source_foreground_mean_rgba_l1": 0.03,
+            "rest_max_source_foreground_p95_rgba_l1": 0.1,
+            "rest_max_source_locked_mean_rgba_l1": 0.015,
+            "rest_max_source_locked_p95_rgba_l1": 0.05,
+            "rest_max_texture_texels_per_output_pixel": 1,
+            "rest_max_visibility_layer_overflow_pixel_count": 0,
+            "rest_min_feature_edge_precision_1px": 0.99,
+            "rest_min_feature_edge_recall_1px": 0.99,
+            "rest_min_source_alpha_precision": 0.995,
+            "rest_min_source_alpha_recall": 0.995,
+            "rest_min_source_lock_fraction_of_source_foreground": 0.5
+          },
+          "potential_surface_defined_fraction": 0.7275319576360967,
+          "seam": {
+            "boundary_pair_count": 9905731,
+            "donor_view_switch_pair_count": 9574810,
+            "excluded_provenance_codes": [
+              3,
+              255
+            ],
+            "gradient_pair_count": 8607940,
+            "includes_shared_face_edges": true,
+            "mean_gradient_jump": 0.01617749302756434,
+            "mean_rgba_l1": 0.033066377071478144,
+            "p95_gradient_jump": 0.08583101419959974,
+            "p95_rgba_l1": 0.17849056431041324,
+            "per_view": [
+              {
+                "boundary_pair_count": 1241075,
+                "donor_view_switch_pair_count": 1200381,
+                "gradient_pair_count": 1074934,
+                "mean_gradient_jump": 0.014568466733648798,
+                "mean_rgba_l1": 0.03417418466218362,
+                "p95_gradient_jump": 0.07743437133176066,
+                "p95_rgba_l1": 0.18700842897774844,
+                "shared_edge_mean_rgba_l1": 0.029028116961918492,
+                "shared_edge_p95_rgba_l1": 0.1614862100688592,
+                "shared_edge_pair_count": 398462,
+                "view_index": 0
+              },
+              {
+                "boundary_pair_count": 1251134,
+                "donor_view_switch_pair_count": 1208870,
+                "gradient_pair_count": 1084554,
+                "mean_gradient_jump": 0.014979158077304905,
+                "mean_rgba_l1": 0.03455339982378986,
+                "p95_gradient_jump": 0.07899195101700981,
+                "p95_rgba_l1": 0.18922083161274805,
+                "shared_edge_mean_rgba_l1": 0.028876637552889915,
+                "shared_edge_p95_rgba_l1": 0.16354009059724417,
+                "shared_edge_pair_count": 398462,
+                "view_index": 1
+              },
+              {
+                "boundary_pair_count": 1231748,
+                "donor_view_switch_pair_count": 1190866,
+                "gradient_pair_count": 1073573,
+                "mean_gradient_jump": 0.016482573145649246,
+                "mean_rgba_l1": 0.03284549279653958,
+                "p95_gradient_jump": 0.0868232017727612,
+                "p95_rgba_l1": 0.17716881831362297,
+                "shared_edge_mean_rgba_l1": 0.028049842467366776,
+                "shared_edge_p95_rgba_l1": 0.15663384176283487,
+                "shared_edge_pair_count": 398462,
+                "view_index": 2
+              },
+              {
+                "boundary_pair_count": 1237675,
+                "donor_view_switch_pair_count": 1195891,
+                "gradient_pair_count": 1075520,
+                "mean_gradient_jump": 0.01699859360907477,
+                "mean_rgba_l1": 0.032163784563410125,
+                "p95_gradient_jump": 0.08962216149573733,
+                "p95_rgba_l1": 0.17252273871864607,
+                "shared_edge_mean_rgba_l1": 0.02767257843901581,
+                "shared_edge_p95_rgba_l1": 0.15401697099693246,
+                "shared_edge_pair_count": 398462,
+                "view_index": 3
+              },
+              {
+                "boundary_pair_count": 1225140,
+                "donor_view_switch_pair_count": 1184244,
+                "gradient_pair_count": 1066359,
+                "mean_gradient_jump": 0.017801476680680654,
+                "mean_rgba_l1": 0.03183358832792997,
+                "p95_gradient_jump": 0.09335752401640396,
+                "p95_rgba_l1": 0.1708797264565004,
+                "shared_edge_mean_rgba_l1": 0.027482086316178916,
+                "shared_edge_p95_rgba_l1": 0.15337774484586916,
+                "shared_edge_pair_count": 398462,
+                "view_index": 4
+              },
+              {
+                "boundary_pair_count": 1258807,
+                "donor_view_switch_pair_count": 1216905,
+                "gradient_pair_count": 1094010,
+                "mean_gradient_jump": 0.01690514804337745,
+                "mean_rgba_l1": 0.03261398774735082,
+                "p95_gradient_jump": 0.08878058967560447,
+                "p95_rgba_l1": 0.1738183353309857,
+                "shared_edge_mean_rgba_l1": 0.027845994692723464,
+                "shared_edge_p95_rgba_l1": 0.15476003157536175,
+                "shared_edge_pair_count": 398462,
+                "view_index": 5
+              },
+              {
+                "boundary_pair_count": 1234501,
+                "donor_view_switch_pair_count": 1193965,
+                "gradient_pair_count": 1075244,
+                "mean_gradient_jump": 0.01651157181089628,
+                "mean_rgba_l1": 0.032692328718143725,
+                "p95_gradient_jump": 0.08762893629188247,
+                "p95_rgba_l1": 0.1746218323508867,
+                "shared_edge_mean_rgba_l1": 0.028165108165458155,
+                "shared_edge_p95_rgba_l1": 0.15656230168016166,
+                "shared_edge_pair_count": 398462,
+                "view_index": 6
+              },
+              {
+                "boundary_pair_count": 1225651,
+                "donor_view_switch_pair_count": 1183688,
+                "gradient_pair_count": 1063746,
+                "mean_gradient_jump": 0.01517311087554732,
+                "mean_rgba_l1": 0.03363376993611189,
+                "p95_gradient_jump": 0.0814131989673395,
+                "p95_rgba_l1": 0.1839892871426787,
+                "shared_edge_mean_rgba_l1": 0.02882534236435509,
+                "shared_edge_p95_rgba_l1": 0.16168067488995838,
+                "shared_edge_pair_count": 398462,
+                "view_index": 7
+              }
+            ],
+            "shared_face_edges_are_compared_even_when_provenance_matches": true,
+            "source_view_identity_consumed": true,
+            "surface_graph_edge_count": 11832127,
+            "surface_graph_storage": "CSR_INT64_OFFSETS_INT32_INDICES_WITH_UNDIRECTED_EDGE_INDEX",
+            "surface_graph_storage_bytes": 220758168
+          },
+          "source_pm_roundtrip_max_abs_error": 0.0057654882700243215,
+          "surface_graph_edge_count": 11832127,
+          "surface_graph_representation": "CSR_INT64_OFFSETS_INT32_INDICES_WITH_UNDIRECTED_EDGE_INDEX",
+          "surface_graph_storage_bytes": 220758168,
+          "totality_does_not_claim_geometry_or_visibility_correctness": true,
+          "unsupported_abstain_fraction": 0.2724680423639034,
+          "unsupported_abstain_sample_count": 8567520
+        },
+        "preregistration_binding_hash": "7e0ffa0c60820552403bb723c96ce63eae4639806b617bbca7007e01e4512449",
+        "provenance_boundary_gradient_pair_count": 8607940,
+        "provenance_boundary_mean_gradient_jump": 0.01617749302756434,
+        "provenance_boundary_mean_rgba_l1": 0.033066377071478144,
+        "provenance_boundary_p95_gradient_jump": 0.08583101419959974,
+        "provenance_boundary_p95_rgba_l1": 0.17849056431041324,
+        "provenance_boundary_pair_count": 9905731,
+        "qualification_hash": "91733ae7ede05454f2b11b4e8cbd76dd40fdc33b20daf2a2f63e9b897e4c9f97",
+        "qualification_report": {
+          "appearance_is_coequal_product_authority": true,
+          "cross_view_component_passed": true,
+          "cross_view_pair_passed": false,
+          "cross_view_source_compatibility_measured": true,
+          "cross_view_source_compatibility_passed": false,
+          "cross_view_source_compatibility_shipping_gate_frozen": true,
+          "holdout_every_view_passed": false,
+          "potential_surface_defined_fraction": 0.7275319576360967,
+          "provenance_seam_passed": true,
+          "seam_every_view_passed": true,
+          "source_lock_passed": true,
+          "source_pm_roundtrip_max_abs_error": 0.0057654882700243215,
+          "source_pm_roundtrip_passed": true,
+          "status": "FAIL_COMPLETE_APPEARANCE",
+          "structured_holdout_passed": false,
+          "totality_domain": "ADMITTED_RENDERABLE_SUPPORT_ONLY",
+          "totality_passed": true,
+          "unsupported_abstain_fraction": 0.2724680423639034,
+          "unsupported_abstention_is_not_appearance": true
+        },
+        "schema_version": "RealSaS.CompleteAppearanceQualificationIR.v2",
+        "source_lock_exact_fraction": 1.0,
+        "structured_holdout_mean_rgba_l1": 0.0295712477531746,
+        "structured_holdout_p95_rgba_l1": 0.144765931410555,
+        "structured_holdout_sample_count": 234596,
+        "total_defined_fraction": 1.0
+      },
+      "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+      "schema": "RealSaS.StageFailureDiagnostics.v1",
+      "stage_id": "24_COMPLETE_APPEARANCE_QUALIFIED"
+    },
+    "25_CAA_REFERENCE_REST_RENDER_PROOF": {
+      "diagnostics": {
+        "asset_binding_hash": "cec9d501d83229f99e76bffd81650273fa260d2ae25fabdc3affdf789995deea",
+        "camera_set_binding_hash": "2485d184c7fef6c453b6ff817d3eac525e438fe023350b294436589d62d75cca",
+        "metadata": {
+          "coequal_appearance_product_gate": true,
+          "policy": {
+            "compiled_global_surface_forbidden": true,
+            "cross_view_alpha_conflict_cut": 0.25,
+            "cross_view_color_conflict_cut_rgba_l1": 0.4,
+            "cross_view_max_component_alpha_conflict_fraction": 0.05,
+            "cross_view_max_component_color_conflict_fraction": 0.1,
+            "cross_view_max_pair_alpha_conflict_fraction": 0.02,
+            "cross_view_max_pair_color_conflict_fraction": 0.05,
+            "cross_view_max_pair_p95_alpha_abs": 0.15,
+            "cross_view_max_pair_p95_rgba_l1": 0.3,
+            "cross_view_min_component_samples_for_gate": 4,
+            "cross_view_min_shared_direct_samples_per_pair": 16,
+            "dynamic_max_adjacent_frame_surface_principal_stretch": 2,
+            "dynamic_max_compiled_unobserved_visible_fraction": 0.02,
+            "dynamic_max_connected_compiled_unobserved_visible_fraction": 0.01,
+            "dynamic_max_exact_depth_ambiguous_fraction": 0,
+            "dynamic_max_frame_compiled_unobserved_visible_fraction": 0.05,
+            "dynamic_max_micro_visible_pixel_fraction_per_frame": 0.005,
+            "dynamic_max_relative_surface_condition_number": 3,
+            "dynamic_max_relative_surface_principal_stretch": 3,
+            "dynamic_max_texture_texels_per_output_pixel": 1,
+            "dynamic_max_unmeasurable_consequential_visible_face_count": 0,
+            "dynamic_max_uv_to_surface_condition_number": 3,
+            "dynamic_max_visibility_layer_overflow_pixel_count": 0,
+            "dynamic_max_visible_orientation_flip_face_count": 0,
+            "dynamic_min_projected_double_area_px2": 1,
+            "dynamic_min_visible_pixels_per_face": 4,
+            "holdout_band_fraction": 0.15,
+            "max_local_harmonic_graph_hops": 2,
+            "max_local_harmonic_region_samples": 16,
+            "max_provenance_boundary_mean_gradient_jump": 0.08,
+            "max_provenance_boundary_mean_rgba_l1": 0.1,
+            "max_provenance_boundary_p95_gradient_jump": 0.2,
+            "max_provenance_boundary_p95_rgba_l1": 0.25,
+            "max_source_sample_pm_roundtrip_abs_error": 0.0065,
+            "max_structured_holdout_mean_rgba_l1": 0.08,
+            "max_structured_holdout_p95_rgba_l1": 0.2,
+            "min_source_lock_exact_fraction": 1,
+            "min_structured_holdout_samples": 128,
+            "min_structured_holdout_samples_per_view": 128,
+            "min_total_defined_fraction": 1,
+            "rest_feature_edge_gradient_cut": 0.08,
+            "rest_feature_high_error_cut_rgba_l1": 0.1,
+            "rest_max_alpha_interior_uncovered_fraction": 0.001,
+            "rest_max_exact_depth_ambiguous_fraction": 0,
+            "rest_max_feature_high_error_fraction": 0.005,
+            "rest_max_feature_p999_rgba_l1": 0.2,
+            "rest_max_largest_coherent_alpha_hole_fraction": 0.001,
+            "rest_max_largest_connected_high_error_fraction": 0.001,
+            "rest_max_source_foreground_mean_rgba_l1": 0.03,
+            "rest_max_source_foreground_p95_rgba_l1": 0.1,
+            "rest_max_source_locked_mean_rgba_l1": 0.015,
+            "rest_max_source_locked_p95_rgba_l1": 0.05,
+            "rest_max_texture_texels_per_output_pixel": 1,
+            "rest_max_visibility_layer_overflow_pixel_count": 0,
+            "rest_min_feature_edge_precision_1px": 0.99,
+            "rest_min_feature_edge_recall_1px": 0.99,
+            "rest_min_source_alpha_precision": 0.995,
+            "rest_min_source_alpha_recall": 0.995,
+            "rest_min_source_lock_fraction_of_source_foreground": 0.5
+          },
+          "source_observation_set_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa"
+        },
+        "proof_hash": "e410911eb4ed332df40eb648933aaf869b39f10cbbc47ba356431bdd3571b12f",
+        "qualification_report": {
+          "appearance_authority": "RealSaS.CompleteAppearanceAssetIR.v2",
+          "every_direction_passed": false,
+          "geometry_visibility_appearance_attribution_separated": true,
+          "status": "FAIL_CAA_REFERENCE_REST",
+          "visibility_authority": "RealSaS.VisibilityContract.v2"
+        },
+        "schema_version": "RealSaS.CAARestRenderProofIR.v2",
+        "static_mesh_qualification_binding_hash": "e3cbfb34882722583a3eaed949b3a097ebd7feefb4337fbe27a9a6ce06d8157c",
+        "views": [
+          {
+            "alpha_interior_uncovered_fraction": 0.001890126866719723,
+            "direction_index": 0,
+            "final_alpha_pixel_count": 176096,
+            "geometry_visible_final_alpha_hole_count": 7,
+            "geometry_visible_final_alpha_hole_fraction": 3.974946480184892e-05,
+            "geometry_visible_pixel_count": 176103,
+            "largest_coherent_alpha_hole_fraction": 0.0006248495201843593,
+            "largest_connected_feature_high_error_fraction": 0.0023274211485766042,
+            "metadata": {
+              "exact_depth_ambiguity_passed": true,
+              "exact_depth_ambiguous_fraction": 0.0,
+              "exact_depth_ambiguous_pixel_count": 0,
+              "geometry_visible_alpha_zero_is_diagnostic_not_undefinedness": true,
+              "maximum_texture_texels_per_output_pixel": 2802.5843553380487,
+              "physical_padding_visibility_passed": true,
+              "physical_padding_visible_pixel_count": 0,
+              "source_evidence_available": true,
+              "source_feature_preservation": {
+                "edge_gradient_cut": 0.08,
+                "edge_precision_1px": 0.6080382942704533,
+                "edge_recall_1px": 0.9021647175914407,
+                "foreground_pixel_count": 174442,
+                "high_error_cut_rgba_l1": 0.1,
+                "high_error_fraction": 0.040695474713658406,
+                "high_error_pixel_count": 7099,
+                "largest_connected_high_error_fraction": 0.0023274211485766042,
+                "max_rgba_l1": 0.5971247443872204,
+                "mean_rgba_l1": 0.016539163303755943,
+                "p95_rgba_l1": 0.08117041404697614,
+                "p999_rgba_l1": 0.5141143590053063,
+                "p99_rgba_l1": 0.3557905079577216,
+                "predicted_edge_pixel_count": 34261,
+                "source_edge_pixel_count": 20095
+              },
+              "source_feature_preservation_passed": false,
+              "status": "FAIL",
+              "texture_minification_passed": false,
+              "unsupported_abstain_visibility_passed": false,
+              "unsupported_abstain_visible_pixel_count": 187,
+              "visibility_and_appearance_masks_separate": true,
+              "visibility_layer_overflow_passed": false,
+              "visibility_layer_overflow_pixel_count": 10498
+            },
+            "rendered_alpha_pixel_count": 176096,
+            "rendered_rgba_sha256": "dc8acd51a186856128e4dfe015747ba98487ebab4528bdf38fc80b7780972bc8",
+            "schema_version": "RealSaS.CAARestViewProofIR.v2",
+            "source_alpha_precision": 0.9855079047792114,
+            "source_alpha_recall": 0.9948521571639858,
+            "source_feature_edge_precision_1px": 0.6080382942704533,
+            "source_feature_edge_recall_1px": 0.9021647175914407,
+            "source_feature_high_error_fraction": 0.040695474713658406,
+            "source_feature_p999_rgba_l1": 0.5141143590053063,
+            "source_foreground_mean_rgba_l1": 0.016539163303755943,
+            "source_foreground_p95_rgba_l1": 0.08117041404697614,
+            "source_locked_exact_fraction": 0.7019570738509039,
+            "source_locked_exact_pixel_count": 56384,
+            "source_locked_fraction_of_source_foreground": 0.4604625032962245,
+            "source_locked_mean_rgba_l1": 0.0016423904577599299,
+            "source_locked_p95_rgba_l1": 0.008605409425658385,
+            "source_locked_pixel_count": 80324
+          },
+          {
+            "alpha_interior_uncovered_fraction": 0.0012451326632255727,
+            "direction_index": 1,
+            "final_alpha_pixel_count": 182134,
+            "geometry_visible_final_alpha_hole_count": 21,
+            "geometry_visible_final_alpha_hole_fraction": 0.00011528643188493316,
+            "geometry_visible_pixel_count": 182155,
+            "largest_coherent_alpha_hole_fraction": 0.0011592305815011205,
+            "largest_connected_feature_high_error_fraction": 0.006938743815588046,
+            "metadata": {
+              "exact_depth_ambiguity_passed": true,
+              "exact_depth_ambiguous_fraction": 0.0,
+              "exact_depth_ambiguous_pixel_count": 0,
+              "geometry_visible_alpha_zero_is_diagnostic_not_undefinedness": true,
+              "maximum_texture_texels_per_output_pixel": 4807.2281148350685,
+              "physical_padding_visibility_passed": true,
+              "physical_padding_visible_pixel_count": 0,
+              "source_evidence_available": true,
+              "source_feature_preservation": {
+                "edge_gradient_cut": 0.08,
+                "edge_precision_1px": 0.5556410651069724,
+                "edge_recall_1px": 0.8796630565583634,
+                "foreground_pixel_count": 180292,
+                "high_error_cut_rgba_l1": 0.1,
+                "high_error_fraction": 0.04350719943203248,
+                "high_error_pixel_count": 7844,
+                "largest_connected_high_error_fraction": 0.006938743815588046,
+                "max_rgba_l1": 0.7077316123679878,
+                "mean_rgba_l1": 0.016726514088286973,
+                "p95_rgba_l1": 0.0864802562116653,
+                "p999_rgba_l1": 0.5272210410337462,
+                "p99_rgba_l1": 0.34956454729756414,
+                "predicted_edge_pixel_count": 32485,
+                "source_edge_pixel_count": 18282
+              },
+              "source_feature_preservation_passed": false,
+              "status": "FAIL",
+              "texture_minification_passed": false,
+              "unsupported_abstain_visibility_passed": false,
+              "unsupported_abstain_visible_pixel_count": 161,
+              "visibility_and_appearance_masks_separate": true,
+              "visibility_layer_overflow_passed": false,
+              "visibility_layer_overflow_pixel_count": 14377
+            },
+            "rendered_alpha_pixel_count": 182134,
+            "rendered_rgba_sha256": "5f1db2ce59736712179cb3b447596febb9d8288a8184ad1ac7b93dd2262e2a18",
+            "schema_version": "RealSaS.CAARestViewProofIR.v2",
+            "source_alpha_precision": 0.986092657054696,
+            "source_alpha_recall": 0.9961673285558982,
+            "source_feature_edge_precision_1px": 0.5556410651069724,
+            "source_feature_edge_recall_1px": 0.8796630565583634,
+            "source_feature_high_error_fraction": 0.04350719943203248,
+            "source_feature_p999_rgba_l1": 0.5272210410337462,
+            "source_foreground_mean_rgba_l1": 0.016726514088286973,
+            "source_foreground_p95_rgba_l1": 0.0864802562116653,
+            "source_locked_exact_fraction": 0.7205167670548883,
+            "source_locked_exact_pixel_count": 59452,
+            "source_locked_fraction_of_source_foreground": 0.4576631242650811,
+            "source_locked_mean_rgba_l1": 0.001290403580900387,
+            "source_locked_p95_rgba_l1": 0.00639463048027225,
+            "source_locked_pixel_count": 82513
+          },
+          {
+            "alpha_interior_uncovered_fraction": 0.0018812605155363723,
+            "direction_index": 2,
+            "final_alpha_pixel_count": 146757,
+            "geometry_visible_final_alpha_hole_count": 0,
+            "geometry_visible_final_alpha_hole_fraction": 0.0,
+            "geometry_visible_pixel_count": 146757,
+            "largest_coherent_alpha_hole_fraction": 0.0021324175938298357,
+            "largest_connected_feature_high_error_fraction": 0.011652138994855888,
+            "metadata": {
+              "exact_depth_ambiguity_passed": true,
+              "exact_depth_ambiguous_fraction": 0.0,
+              "exact_depth_ambiguous_pixel_count": 0,
+              "geometry_visible_alpha_zero_is_diagnostic_not_undefinedness": true,
+              "maximum_texture_texels_per_output_pixel": 2956.7584734778507,
+              "physical_padding_visibility_passed": true,
+              "physical_padding_visible_pixel_count": 0,
+              "source_evidence_available": true,
+              "source_feature_preservation": {
+                "edge_gradient_cut": 0.08,
+                "edge_precision_1px": 0.6452826403169986,
+                "edge_recall_1px": 0.8407004057228272,
+                "foreground_pixel_count": 144437,
+                "high_error_cut_rgba_l1": 0.1,
+                "high_error_fraction": 0.040737484162645304,
+                "high_error_pixel_count": 5884,
+                "largest_connected_high_error_fraction": 0.011652138994855888,
+                "max_rgba_l1": 0.7096566418463068,
+                "mean_rgba_l1": 0.01596740980724181,
+                "p95_rgba_l1": 0.07054860065055123,
+                "p999_rgba_l1": 0.5714794643796043,
+                "p99_rgba_l1": 0.3862560644409103,
+                "predicted_edge_pixel_count": 19937,
+                "source_edge_pixel_count": 14049
+              },
+              "source_feature_preservation_passed": false,
+              "status": "FAIL",
+              "texture_minification_passed": false,
+              "unsupported_abstain_visibility_passed": false,
+              "unsupported_abstain_visible_pixel_count": 80,
+              "visibility_and_appearance_masks_separate": true,
+              "visibility_layer_overflow_passed": false,
+              "visibility_layer_overflow_pixel_count": 14207
+            },
+            "rendered_alpha_pixel_count": 146757,
+            "rendered_rgba_sha256": "86edcd17c495b84352a3c325f6450a42dc06bd57eca2d8c85a0d1a16507d3a52",
+            "schema_version": "RealSaS.CAARestViewProofIR.v2",
+            "source_alpha_precision": 0.9789924841745198,
+            "source_alpha_recall": 0.9947174200516489,
+            "source_feature_edge_precision_1px": 0.6452826403169986,
+            "source_feature_edge_recall_1px": 0.8407004057228272,
+            "source_feature_high_error_fraction": 0.040737484162645304,
+            "source_feature_p999_rgba_l1": 0.5714794643796043,
+            "source_foreground_mean_rgba_l1": 0.01596740980724181,
+            "source_foreground_p95_rgba_l1": 0.07054860065055123,
+            "source_locked_exact_fraction": 0.7488583150905375,
+            "source_locked_exact_pixel_count": 51654,
+            "source_locked_fraction_of_source_foreground": 0.4775576895116902,
+            "source_locked_mean_rgba_l1": 0.0009888457683129089,
+            "source_locked_p95_rgba_l1": 0.004258011998664612,
+            "source_locked_pixel_count": 68977
+          },
+          {
+            "alpha_interior_uncovered_fraction": 0.0011068584444560957,
+            "direction_index": 3,
+            "final_alpha_pixel_count": 176408,
+            "geometry_visible_final_alpha_hole_count": 7,
+            "geometry_visible_final_alpha_hole_fraction": 3.9679165603831874e-05,
+            "geometry_visible_pixel_count": 176415,
+            "largest_coherent_alpha_hole_fraction": 0.0012472608892169148,
+            "largest_connected_feature_high_error_fraction": 0.004811680769868923,
+            "metadata": {
+              "exact_depth_ambiguity_passed": true,
+              "exact_depth_ambiguous_fraction": 0.0,
+              "exact_depth_ambiguous_pixel_count": 0,
+              "geometry_visible_alpha_zero_is_diagnostic_not_undefinedness": true,
+              "maximum_texture_texels_per_output_pixel": 1661.8196881828087,
+              "physical_padding_visibility_passed": true,
+              "physical_padding_visible_pixel_count": 0,
+              "source_evidence_available": true,
+              "source_feature_preservation": {
+                "edge_gradient_cut": 0.08,
+                "edge_precision_1px": 0.7239506803807577,
+                "edge_recall_1px": 0.8286064694159129,
+                "foreground_pixel_count": 174783,
+                "high_error_cut_rgba_l1": 0.1,
+                "high_error_fraction": 0.025969344844750348,
+                "high_error_pixel_count": 4539,
+                "largest_connected_high_error_fraction": 0.004811680769868923,
+                "max_rgba_l1": 0.7110197081020374,
+                "mean_rgba_l1": 0.010797863666965793,
+                "p95_rgba_l1": 0.0349705758989802,
+                "p999_rgba_l1": 0.513680368028484,
+                "p99_rgba_l1": 0.3441808643943048,
+                "predicted_edge_pixel_count": 15653,
+                "source_edge_pixel_count": 13046
+              },
+              "source_feature_preservation_passed": false,
+              "status": "FAIL",
+              "texture_minification_passed": false,
+              "unsupported_abstain_visibility_passed": false,
+              "unsupported_abstain_visible_pixel_count": 159,
+              "visibility_and_appearance_masks_separate": true,
+              "visibility_layer_overflow_passed": false,
+              "visibility_layer_overflow_pixel_count": 13326
+            },
+            "rendered_alpha_pixel_count": 176408,
+            "rendered_rgba_sha256": "cd4b5fdbf8277da4ce73953ecef6a44048b8a1cb732640a8d8173b72b325d331",
+            "schema_version": "RealSaS.CAARestViewProofIR.v2",
+            "source_alpha_precision": 0.9874608861276133,
+            "source_alpha_recall": 0.9966415498074755,
+            "source_feature_edge_precision_1px": 0.7239506803807577,
+            "source_feature_edge_recall_1px": 0.8286064694159129,
+            "source_feature_high_error_fraction": 0.025969344844750348,
+            "source_feature_p999_rgba_l1": 0.513680368028484,
+            "source_foreground_mean_rgba_l1": 0.010797863666965793,
+            "source_foreground_p95_rgba_l1": 0.0349705758989802,
+            "source_locked_exact_fraction": 0.7737420083613793,
+            "source_locked_exact_pixel_count": 66442,
+            "source_locked_fraction_of_source_foreground": 0.4913006413667233,
+            "source_locked_mean_rgba_l1": 0.0007555500391261384,
+            "source_locked_p95_rgba_l1": 0.0032680545496436286,
+            "source_locked_pixel_count": 85871
+          },
+          {
+            "alpha_interior_uncovered_fraction": 0.001890082625283805,
+            "direction_index": 4,
+            "final_alpha_pixel_count": 176103,
+            "geometry_visible_final_alpha_hole_count": 0,
+            "geometry_visible_final_alpha_hole_fraction": 0.0,
+            "geometry_visible_pixel_count": 176103,
+            "largest_coherent_alpha_hole_fraction": 0.0006248351925524231,
+            "largest_connected_feature_high_error_fraction": 0.002338832647352189,
+            "metadata": {
+              "exact_depth_ambiguity_passed": true,
+              "exact_depth_ambiguous_fraction": 0.0,
+              "exact_depth_ambiguous_pixel_count": 0,
+              "geometry_visible_alpha_zero_is_diagnostic_not_undefinedness": true,
+              "maximum_texture_texels_per_output_pixel": 9976.77954161772,
+              "physical_padding_visibility_passed": true,
+              "physical_padding_visible_pixel_count": 0,
+              "source_evidence_available": true,
+              "source_feature_preservation": {
+                "edge_gradient_cut": 0.08,
+                "edge_precision_1px": 0.7658245614035087,
+                "edge_recall_1px": 0.8490068408472761,
+                "foreground_pixel_count": 174446,
+                "high_error_cut_rgba_l1": 0.1,
+                "high_error_fraction": 0.026953899774142143,
+                "high_error_pixel_count": 4702,
+                "largest_connected_high_error_fraction": 0.002338832647352189,
+                "max_rgba_l1": 0.5971157629042882,
+                "mean_rgba_l1": 0.01046056281419094,
+                "p95_rgba_l1": 0.03333985330471753,
+                "p999_rgba_l1": 0.4932005350185067,
+                "p99_rgba_l1": 0.3379984140101169,
+                "predicted_edge_pixel_count": 14250,
+                "source_edge_pixel_count": 12133
+              },
+              "source_feature_preservation_passed": false,
+              "status": "FAIL",
+              "texture_minification_passed": false,
+              "unsupported_abstain_visibility_passed": false,
+              "unsupported_abstain_visible_pixel_count": 93,
+              "visibility_and_appearance_masks_separate": true,
+              "visibility_layer_overflow_passed": false,
+              "visibility_layer_overflow_pixel_count": 10498
+            },
+            "rendered_alpha_pixel_count": 176103,
+            "rendered_rgba_sha256": "865b69f44da35106e5354ac871fce82bb2bf726dc19e1eeb4c63b71edda1420d",
+            "schema_version": "RealSaS.CAARestViewProofIR.v2",
+            "source_alpha_precision": 0.9854744098624101,
+            "source_alpha_recall": 0.9948350779037639,
+            "source_feature_edge_precision_1px": 0.7658245614035087,
+            "source_feature_edge_recall_1px": 0.8490068408472761,
+            "source_feature_high_error_fraction": 0.026953899774142143,
+            "source_feature_p999_rgba_l1": 0.4932005350185067,
+            "source_foreground_mean_rgba_l1": 0.01046056281419094,
+            "source_foreground_p95_rgba_l1": 0.03333985330471753,
+            "source_locked_exact_fraction": 0.7671118713950479,
+            "source_locked_exact_pixel_count": 69956,
+            "source_locked_fraction_of_source_foreground": 0.5227634912809694,
+            "source_locked_mean_rgba_l1": 0.000718699770648937,
+            "source_locked_p95_rgba_l1": 0.0029527794867456048,
+            "source_locked_pixel_count": 91194
+          },
+          {
+            "alpha_interior_uncovered_fraction": 0.00124511152237522,
+            "direction_index": 5,
+            "final_alpha_pixel_count": 182142,
+            "geometry_visible_final_alpha_hole_count": 13,
+            "geometry_visible_final_alpha_hole_fraction": 7.136779116686338e-05,
+            "geometry_visible_pixel_count": 182155,
+            "largest_coherent_alpha_hole_fraction": 0.0011592112926037883,
+            "largest_connected_feature_high_error_fraction": 0.0031503924124351755,
+            "metadata": {
+              "exact_depth_ambiguity_passed": true,
+              "exact_depth_ambiguous_fraction": 0.0,
+              "exact_depth_ambiguous_pixel_count": 0,
+              "geometry_visible_alpha_zero_is_diagnostic_not_undefinedness": true,
+              "maximum_texture_texels_per_output_pixel": 30245.215444228073,
+              "physical_padding_visibility_passed": true,
+              "physical_padding_visible_pixel_count": 0,
+              "source_evidence_available": true,
+              "source_feature_preservation": {
+                "edge_gradient_cut": 0.08,
+                "edge_precision_1px": 0.7111594931055658,
+                "edge_recall_1px": 0.8642821799674842,
+                "foreground_pixel_count": 180295,
+                "high_error_cut_rgba_l1": 0.1,
+                "high_error_fraction": 0.027943093263817633,
+                "high_error_pixel_count": 5038,
+                "largest_connected_high_error_fraction": 0.0031503924124351755,
+                "max_rgba_l1": 0.708163251125467,
+                "mean_rgba_l1": 0.011624196039198408,
+                "p95_rgba_l1": 0.0413257023396537,
+                "p999_rgba_l1": 0.5185391927863443,
+                "p99_rgba_l1": 0.35039938035634477,
+                "predicted_edge_pixel_count": 17913,
+                "source_edge_pixel_count": 14147
+              },
+              "source_feature_preservation_passed": false,
+              "status": "FAIL",
+              "texture_minification_passed": false,
+              "unsupported_abstain_visibility_passed": false,
+              "unsupported_abstain_visible_pixel_count": 121,
+              "visibility_and_appearance_masks_separate": true,
+              "visibility_layer_overflow_passed": false,
+              "visibility_layer_overflow_pixel_count": 14377
+            },
+            "rendered_alpha_pixel_count": 182142,
+            "rendered_rgba_sha256": "c47a58fbaa955f9153481aa3af6b9e570372f9371f16e5abceefd038d29ac962",
+            "schema_version": "RealSaS.CAARestViewProofIR.v2",
+            "source_alpha_precision": 0.9860658167803142,
+            "source_alpha_recall": 0.9961673923292382,
+            "source_feature_edge_precision_1px": 0.7111594931055658,
+            "source_feature_edge_recall_1px": 0.8642821799674842,
+            "source_feature_high_error_fraction": 0.027943093263817633,
+            "source_feature_p999_rgba_l1": 0.5185391927863443,
+            "source_foreground_mean_rgba_l1": 0.011624196039198408,
+            "source_foreground_p95_rgba_l1": 0.0413257023396537,
+            "source_locked_exact_fraction": 0.7778463014355707,
+            "source_locked_exact_pixel_count": 68109,
+            "source_locked_fraction_of_source_foreground": 0.4856540669458388,
+            "source_locked_mean_rgba_l1": 0.0007762924835930829,
+            "source_locked_p95_rgba_l1": 0.0032354376075622512,
+            "source_locked_pixel_count": 87561
+          },
+          {
+            "alpha_interior_uncovered_fraction": 0.0018670623229662864,
+            "direction_index": 6,
+            "final_alpha_pixel_count": 146757,
+            "geometry_visible_final_alpha_hole_count": 0,
+            "geometry_visible_final_alpha_hole_fraction": 0.0,
+            "geometry_visible_pixel_count": 146757,
+            "largest_coherent_alpha_hole_fraction": 0.002139385463256574,
+            "largest_connected_feature_high_error_fraction": 0.010295359818325325,
+            "metadata": {
+              "exact_depth_ambiguity_passed": true,
+              "exact_depth_ambiguous_fraction": 0.0,
+              "exact_depth_ambiguous_pixel_count": 0,
+              "geometry_visible_alpha_zero_is_diagnostic_not_undefinedness": true,
+              "maximum_texture_texels_per_output_pixel": 2956.7584734782768,
+              "physical_padding_visibility_passed": true,
+              "physical_padding_visible_pixel_count": 0,
+              "source_evidence_available": true,
+              "source_feature_preservation": {
+                "edge_gradient_cut": 0.08,
+                "edge_precision_1px": 0.6520077456176111,
+                "edge_recall_1px": 0.8535119478638667,
+                "foreground_pixel_count": 144434,
+                "high_error_cut_rgba_l1": 0.1,
+                "high_error_fraction": 0.04080064250799673,
+                "high_error_pixel_count": 5893,
+                "largest_connected_high_error_fraction": 0.010295359818325325,
+                "max_rgba_l1": 0.7096566418463068,
+                "mean_rgba_l1": 0.016073832867305946,
+                "p95_rgba_l1": 0.07168610852681698,
+                "p999_rgba_l1": 0.5485208531402683,
+                "p99_rgba_l1": 0.3971848541575911,
+                "predicted_edge_pixel_count": 19624,
+                "source_edge_pixel_count": 13810
+              },
+              "source_feature_preservation_passed": false,
+              "status": "FAIL",
+              "texture_minification_passed": false,
+              "unsupported_abstain_visibility_passed": false,
+              "unsupported_abstain_visible_pixel_count": 36,
+              "visibility_and_appearance_masks_separate": true,
+              "visibility_layer_overflow_passed": false,
+              "visibility_layer_overflow_pixel_count": 14207
+            },
+            "rendered_alpha_pixel_count": 146757,
+            "rendered_rgba_sha256": "c738b4120dfb2b3d78c3d4f5e438bad52623228486954db0643fca26ed2c7559",
+            "schema_version": "RealSaS.CAARestViewProofIR.v2",
+            "source_alpha_precision": 0.9790061121445655,
+            "source_alpha_recall": 0.994751928216348,
+            "source_feature_edge_precision_1px": 0.6520077456176111,
+            "source_feature_edge_recall_1px": 0.8535119478638667,
+            "source_feature_high_error_fraction": 0.04080064250799673,
+            "source_feature_p999_rgba_l1": 0.5485208531402683,
+            "source_foreground_mean_rgba_l1": 0.016073832867305946,
+            "source_foreground_p95_rgba_l1": 0.07168610852681698,
+            "source_locked_exact_fraction": 0.7695925231419471,
+            "source_locked_exact_pixel_count": 51712,
+            "source_locked_fraction_of_source_foreground": 0.4652228699613664,
+            "source_locked_mean_rgba_l1": 0.0009014588950630857,
+            "source_locked_p95_rgba_l1": 0.0037306878747558614,
+            "source_locked_pixel_count": 67194
+          },
+          {
+            "alpha_interior_uncovered_fraction": 0.001095213683180314,
+            "direction_index": 7,
+            "final_alpha_pixel_count": 176408,
+            "geometry_visible_final_alpha_hole_count": 7,
+            "geometry_visible_final_alpha_hole_fraction": 3.9679165603831874e-05,
+            "geometry_visible_pixel_count": 176415,
+            "largest_coherent_alpha_hole_fraction": 0.0012415466123513862,
+            "largest_connected_feature_high_error_fraction": 0.009211474865832866,
+            "metadata": {
+              "exact_depth_ambiguity_passed": true,
+              "exact_depth_ambiguous_fraction": 0.0,
+              "exact_depth_ambiguous_pixel_count": 0,
+              "geometry_visible_alpha_zero_is_diagnostic_not_undefinedness": true,
+              "maximum_texture_texels_per_output_pixel": 3809.4134195516112,
+              "physical_padding_visibility_passed": true,
+              "physical_padding_visible_pixel_count": 0,
+              "source_evidence_available": true,
+              "source_feature_preservation": {
+                "edge_gradient_cut": 0.08,
+                "edge_precision_1px": 0.5691201135337376,
+                "edge_recall_1px": 0.872875175315568,
+                "foreground_pixel_count": 174782,
+                "high_error_cut_rgba_l1": 0.1,
+                "high_error_fraction": 0.04137153711480587,
+                "high_error_pixel_count": 7231,
+                "largest_connected_high_error_fraction": 0.009211474865832866,
+                "max_rgba_l1": 0.7109688750207598,
+                "mean_rgba_l1": 0.016255134339911333,
+                "p95_rgba_l1": 0.08353947398922734,
+                "p999_rgba_l1": 0.5123743624801961,
+                "p99_rgba_l1": 0.3474340954990648,
+                "predicted_edge_pixel_count": 31004,
+                "source_edge_pixel_count": 17825
+              },
+              "source_feature_preservation_passed": false,
+              "status": "FAIL",
+              "texture_minification_passed": false,
+              "unsupported_abstain_visibility_passed": false,
+              "unsupported_abstain_visible_pixel_count": 140,
+              "visibility_and_appearance_masks_separate": true,
+              "visibility_layer_overflow_passed": false,
+              "visibility_layer_overflow_pixel_count": 13326
+            },
+            "rendered_alpha_pixel_count": 176408,
+            "rendered_rgba_sha256": "28f5c4212946d2c15b55abdcc5ffcc6f36c6283ff4f3879f047fd003a6c41857",
+            "schema_version": "RealSaS.CAARestViewProofIR.v2",
+            "source_alpha_precision": 0.9874665548047707,
+            "source_alpha_recall": 0.9966529734183154,
+            "source_feature_edge_precision_1px": 0.5691201135337376,
+            "source_feature_edge_recall_1px": 0.872875175315568,
+            "source_feature_high_error_fraction": 0.04137153711480587,
+            "source_feature_p999_rgba_l1": 0.5123743624801961,
+            "source_foreground_mean_rgba_l1": 0.016255134339911333,
+            "source_foreground_p95_rgba_l1": 0.08353947398922734,
+            "source_locked_exact_fraction": 0.7310926451101561,
+            "source_locked_exact_pixel_count": 59035,
+            "source_locked_fraction_of_source_foreground": 0.46199837511871933,
+            "source_locked_mean_rgba_l1": 0.0013003621423229787,
+            "source_locked_p95_rgba_l1": 0.006409135386929438,
+            "source_locked_pixel_count": 80749
+          }
+        ]
+      },
+      "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+      "schema": "RealSaS.StageFailureDiagnostics.v1",
+      "stage_id": "25_CAA_REFERENCE_REST_RENDER_PROOF"
+    },
+    "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED": {
+      "diagnostics": {
+        "consequential_unknown_boundary_count": 0,
+        "g3_failures": [
+          "DYNAMIC_AREA_RATIO_BELOW_MIN",
+          "DYNAMIC_CONDITION_NUMBER_ABOVE_MAX"
+        ],
+        "g3_report_hash": "4b87f5b9c12dbf1a7399f7ab27a7567a26f697aea6de9a9d60d07ce878683119",
+        "g5_evidence_hash": "b79e0c05836a77cb568ad96e92080e1ceb0025d4157f156fd19ddc880164fa3d",
+        "g5_failed_cell_count": 24,
+        "unknown_boundary_analysis_hash": "c7d625cedc29cf4fe78ccde98c1246a68714d1c3ed93bf61cdc9d554dfbd1bf4"
+      },
+      "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+      "schema": "RealSaS.StageFailureDiagnostics.v1",
+      "stage_id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+    }
+  },
+  "history_tail": [
+    {
+      "demo_only_dependencies": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+    },
+    {
+      "demo_only_dependencies": [
+        "20_CAA_BACKEND_PREREGISTERED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "21_CAA_COMPILE"
+    },
+    {
+      "demo_only_dependencies": [
+        "21_CAA_COMPILE"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "22_CAA_COMPILE_SEALED"
+    },
+    {
+      "demo_only_dependencies": [
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "22_CAA_COMPILE_SEALED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+    },
+    {
+      "demo_only_dependencies": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "24_COMPLETE_APPEARANCE_QUALIFIED"
+    },
+    {
+      "diagnostics_ref": {
+        "bytes": 30043,
+        "diagnostics_hash": "4aa2cf20796e6b17e0aa8ac16572f0091b98d48d350ee087e207d488213f4ea4",
+        "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/failure_diagnostics.json",
+        "sha256": "02b7c0f7fc4e84a61403c9eab86a6be55fef48f439bb77b8af3b8418b78d519b"
+      },
+      "event": "STAGE_FAILURE_DIAGNOSTICS_PERSISTED",
+      "stage_id": "25_CAA_REFERENCE_REST_RENDER_PROOF"
+    },
+    {
+      "event": "DEPENDENCY_SUBGRAPH_INVALIDATED",
+      "invalidated_stages": [
+        "03_SOURCE_MECHANICAL_AUDIT",
+        "04_FULL_SUBJECT_ADMISSION",
+        "06_OBSERVATION_RENDER_8VIEW",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "09_IRIS_FIT_PREREGISTERED",
+        "10_IRIS_FIT",
+        "11_IRIS_CHECKPOINT_SEALED",
+        "12_ZERO_SURFACE_DECODED",
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+        "14_GSA_BUILD",
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "20_CAA_BACKEND_PREREGISTERED",
+        "21_CAA_COMPILE",
+        "22_CAA_COMPILE_SEALED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "26_GEPPETTO_FIT_PREREGISTERED",
+        "27_GEPPETTO_FIT",
+        "28_SKELETON_QUALIFIED",
+        "29_GEPPETTO_CHECKPOINT_SEALED",
+        "30_ARACHNE_FIT_PREREGISTERED",
+        "31_ARACHNE_FIT",
+        "32_SKIN_QUALIFIED",
+        "33_ARACHNE_CHECKPOINT_SEALED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "39_MOTION_SOURCE_OR_PRESET_SEAL",
+        "40_MOTION_COMPILE_RUN",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ],
+      "reason": "STALE_PASS_IDENTITY",
+      "source_stage": "03_SOURCE_MECHANICAL_AUDIT"
+    },
+    {
+      "demo_only_dependencies": [
+        "01_SOURCE_BYTES_SEALED",
+        "02_SOURCE_LICENSE_PROVENANCE"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "03_SOURCE_MECHANICAL_AUDIT"
+    },
+    {
+      "demo_only_dependencies": [
+        "03_SOURCE_MECHANICAL_AUDIT"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "04_FULL_SUBJECT_ADMISSION"
+    },
+    {
+      "demo_only_dependencies": [
+        "04_FULL_SUBJECT_ADMISSION",
+        "05_CAMERA_CONTRACT_SOLVED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "06_OBSERVATION_RENDER_8VIEW"
+    },
+    {
+      "demo_only_dependencies": [
+        "03_SOURCE_MECHANICAL_AUDIT",
+        "04_FULL_SUBJECT_ADMISSION",
+        "05_CAMERA_CONTRACT_SOLVED",
+        "06_OBSERVATION_RENDER_8VIEW"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+    },
+    {
+      "demo_only_dependencies": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "08_NORMALIZATION_DOMAIN_QUALIFIED"
+    },
+    {
+      "demo_only_dependencies": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED"
+    },
+    {
+      "diagnostics_ref": {
+        "bytes": 272,
+        "diagnostics_hash": "bd51fee1300228076aecf0416177b13f5d2640fd907c4129e1810893222257c2",
+        "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/artifacts/09_IRIS_FIT_PREREGISTERED/failure_diagnostics.json",
+        "sha256": "bb67f58694bdc8ab93e7c9677905d4751013dd54a4e347cdbc7dc0c6a8d4c276"
+      },
+      "event": "STAGE_EXCEPTION",
+      "exception_type": "QualificationError",
+      "message": "DEMO_IRIS_IMPORT_OBSERVATION_BINDING_DRIFT",
+      "stage_id": "09_IRIS_FIT_PREREGISTERED"
+    },
+    {
+      "archive_path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/imports/historical_stage08/SUBJECT2_KNIGHT_V1_STAGE08_PREFIT_EVIDENCE.zip",
+      "archive_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+      "authority_path": "canonical/KNIGHT_DEMO_HISTORICAL_STAGE08_IMPORT_AUTHORITY_V1_20260927.json",
+      "authority_sha256": "9a391d90107efea835ddb04e31e4fb3e395b156e2ac52847f1840baaf9cec6d2",
+      "downstream_reset_from_stage": "09_IRIS_FIT_PREREGISTERED",
+      "event": "DEMO_EXACT_HISTORICAL_STAGE08_IMPORTED",
+      "imported_stage_ids": [
+        "01_SOURCE_BYTES_SEALED",
+        "02_SOURCE_LICENSE_PROVENANCE",
+        "03_SOURCE_MECHANICAL_AUDIT",
+        "04_FULL_SUBJECT_ADMISSION",
+        "05_CAMERA_CONTRACT_SOLVED",
+        "06_OBSERVATION_RENDER_8VIEW",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED"
+      ],
+      "product_authority_claimed": false
+    },
+    {
+      "demo_only_dependencies": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "09_IRIS_FIT_PREREGISTERED"
+    },
+    {
+      "demo_only_dependencies": [
+        "09_IRIS_FIT_PREREGISTERED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "10_IRIS_FIT"
+    },
+    {
+      "demo_only_dependencies": [
+        "10_IRIS_FIT"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "11_IRIS_CHECKPOINT_SEALED"
+    },
+    {
+      "demo_only_dependencies": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "11_IRIS_CHECKPOINT_SEALED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "12_ZERO_SURFACE_DECODED"
+    },
+    {
+      "demo_only_dependencies": [
+        "15_RIGGING_SURFACE_QUALIFIED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "26_GEPPETTO_FIT_PREREGISTERED"
+    },
+    {
+      "demo_only_dependencies": [
+        "26_GEPPETTO_FIT_PREREGISTERED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "27_GEPPETTO_FIT"
+    },
+    {
+      "demo_only_dependencies": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "27_GEPPETTO_FIT"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "28_SKELETON_QUALIFIED"
+    },
+    {
+      "demo_only_dependencies": [
+        "27_GEPPETTO_FIT",
+        "28_SKELETON_QUALIFIED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "29_GEPPETTO_CHECKPOINT_SEALED"
+    },
+    {
+      "demo_only_dependencies": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "29_GEPPETTO_CHECKPOINT_SEALED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "30_ARACHNE_FIT_PREREGISTERED"
+    },
+    {
+      "demo_only_dependencies": [
+        "30_ARACHNE_FIT_PREREGISTERED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "31_ARACHNE_FIT"
+    },
+    {
+      "demo_only_dependencies": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "31_ARACHNE_FIT"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "32_SKIN_QUALIFIED"
+    },
+    {
+      "demo_only_dependencies": [
+        "31_ARACHNE_FIT",
+        "32_SKIN_QUALIFIED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "33_ARACHNE_CHECKPOINT_SEALED"
+    },
+    {
+      "demo_only_dependencies": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED"
+    },
+    {
+      "demo_only_dependencies": [
+        "15_RIGGING_SURFACE_QUALIFIED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "17_MECHANICAL_PARTITION_QUALIFIED"
+    },
+    {
+      "demo_only_dependencies": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+    },
+    {
+      "demo_only_dependencies": [
+        "20_CAA_BACKEND_PREREGISTERED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "21_CAA_COMPILE"
+    },
+    {
+      "diagnostics_ref": {
+        "bytes": 265,
+        "diagnostics_hash": "9ac9c54a4fd4142bb0fa90dd753f30e199257cb82424794b448fdc23368f1472",
+        "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/artifacts/22_CAA_COMPILE_SEALED/failure_diagnostics.json",
+        "sha256": "decc26e1b15fcc34dbaedb8562c731228d68f8fc9ff5bdf31c1debe852d71d27"
+      },
+      "event": "STAGE_EXCEPTION",
+      "exception_type": "QualificationError",
+      "message": "CAA_COMPILE_PROVENANCE_ACCOUNTING_DRIFT",
+      "stage_id": "22_CAA_COMPILE_SEALED"
+    },
+    {
+      "event": "DEPENDENCY_SUBGRAPH_INVALIDATED",
+      "invalidated_stages": [
+        "20_CAA_BACKEND_PREREGISTERED",
+        "21_CAA_COMPILE",
+        "22_CAA_COMPILE_SEALED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "39_MOTION_SOURCE_OR_PRESET_SEAL",
+        "40_MOTION_COMPILE_RUN",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ],
+      "reason": "STALE_PASS_IDENTITY",
+      "source_stage": "20_CAA_BACKEND_PREREGISTERED"
+    },
+    {
+      "demo_only_dependencies": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+    },
+    {
+      "demo_only_dependencies": [
+        "20_CAA_BACKEND_PREREGISTERED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "21_CAA_COMPILE"
+    },
+    {
+      "demo_only_dependencies": [
+        "21_CAA_COMPILE"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "22_CAA_COMPILE_SEALED"
+    },
+    {
+      "demo_only_dependencies": [
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "22_CAA_COMPILE_SEALED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+    },
+    {
+      "demo_only_dependencies": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "24_COMPLETE_APPEARANCE_QUALIFIED"
+    },
+    {
+      "diagnostics_ref": {
+        "bytes": 29950,
+        "diagnostics_hash": "9b7c532c7b6d5bec2b8f06fec86b9b010129a0e2fee2a2d50529d4bcc7c5da56",
+        "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/failure_diagnostics.json",
+        "sha256": "ac958b1028ada18c2b459803a06a20db4bea5ec3a7d7a0d7ff1da8fe368bde89"
+      },
+      "event": "STAGE_FAILURE_DIAGNOSTICS_PERSISTED",
+      "stage_id": "25_CAA_REFERENCE_REST_RENDER_PROOF"
+    },
+    {
+      "event": "DEPENDENCY_SUBGRAPH_INVALIDATED",
+      "invalidated_stages": [
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "20_CAA_BACKEND_PREREGISTERED",
+        "21_CAA_COMPILE",
+        "22_CAA_COMPILE_SEALED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "39_MOTION_SOURCE_OR_PRESET_SEAL",
+        "40_MOTION_COMPILE_RUN",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ],
+      "reason": "STALE_PASS_IDENTITY",
+      "source_stage": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED"
+    },
+    {
+      "demo_only_dependencies": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED"
+    },
+    {
+      "demo_only_dependencies": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+    },
+    {
+      "demo_only_dependencies": [
+        "20_CAA_BACKEND_PREREGISTERED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "21_CAA_COMPILE"
+    },
+    {
+      "demo_only_dependencies": [
+        "21_CAA_COMPILE"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "22_CAA_COMPILE_SEALED"
+    },
+    {
+      "demo_only_dependencies": [
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "22_CAA_COMPILE_SEALED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+    },
+    {
+      "demo_only_dependencies": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "24_COMPLETE_APPEARANCE_QUALIFIED"
+    },
+    {
+      "diagnostics_ref": {
+        "bytes": 30212,
+        "diagnostics_hash": "2eff03c4c07f7c86f934231ff711c93331e82e1c86d6c83c1ec1a15301c9c4f0",
+        "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/artifacts/25_CAA_REFERENCE_REST_RENDER_PROOF/failure_diagnostics.json",
+        "sha256": "0332f943f9d7022ba60c291a80215d570da73d14ff3d609843c3a26987a6ccf0"
+      },
+      "event": "STAGE_FAILURE_DIAGNOSTICS_PERSISTED",
+      "stage_id": "25_CAA_REFERENCE_REST_RENDER_PROOF"
+    },
+    {
+      "event": "DEPENDENCY_SUBGRAPH_INVALIDATED",
+      "invalidated_stages": [
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "20_CAA_BACKEND_PREREGISTERED",
+        "21_CAA_COMPILE",
+        "22_CAA_COMPILE_SEALED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "39_MOTION_SOURCE_OR_PRESET_SEAL",
+        "40_MOTION_COMPILE_RUN",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ],
+      "reason": "STALE_PASS_IDENTITY",
+      "source_stage": "17_MECHANICAL_PARTITION_QUALIFIED"
+    },
+    {
+      "demo_only_dependencies": [
+        "15_RIGGING_SURFACE_QUALIFIED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "17_MECHANICAL_PARTITION_QUALIFIED"
+    },
+    {
+      "demo_only_dependencies": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+    },
+    {
+      "demo_only_dependencies": [
+        "20_CAA_BACKEND_PREREGISTERED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "21_CAA_COMPILE"
+    },
+    {
+      "demo_only_dependencies": [
+        "21_CAA_COMPILE"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "22_CAA_COMPILE_SEALED"
+    },
+    {
+      "demo_only_dependencies": [
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "22_CAA_COMPILE_SEALED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+    },
+    {
+      "demo_only_dependencies": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "24_COMPLETE_APPEARANCE_QUALIFIED"
+    },
+    {
+      "event": "DEPENDENCY_SUBGRAPH_INVALIDATED",
+      "invalidated_stages": [
+        "26_GEPPETTO_FIT_PREREGISTERED",
+        "27_GEPPETTO_FIT",
+        "28_SKELETON_QUALIFIED",
+        "29_GEPPETTO_CHECKPOINT_SEALED",
+        "30_ARACHNE_FIT_PREREGISTERED",
+        "31_ARACHNE_FIT",
+        "32_SKIN_QUALIFIED",
+        "33_ARACHNE_CHECKPOINT_SEALED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "39_MOTION_SOURCE_OR_PRESET_SEAL",
+        "40_MOTION_COMPILE_RUN",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ],
+      "reason": "STALE_PASS_IDENTITY",
+      "source_stage": "26_GEPPETTO_FIT_PREREGISTERED"
+    },
+    {
+      "demo_only_dependencies": [
+        "15_RIGGING_SURFACE_QUALIFIED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "26_GEPPETTO_FIT_PREREGISTERED"
+    },
+    {
+      "demo_only_dependencies": [
+        "26_GEPPETTO_FIT_PREREGISTERED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "27_GEPPETTO_FIT"
+    },
+    {
+      "demo_only_dependencies": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "27_GEPPETTO_FIT"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "28_SKELETON_QUALIFIED"
+    },
+    {
+      "demo_only_dependencies": [
+        "27_GEPPETTO_FIT",
+        "28_SKELETON_QUALIFIED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "29_GEPPETTO_CHECKPOINT_SEALED"
+    },
+    {
+      "demo_only_dependencies": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "28_SKELETON_QUALIFIED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "34_DEFORMATION_CAPABILITY_ENVELOPE"
+    },
+    {
+      "demo_only_dependencies": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "29_GEPPETTO_CHECKPOINT_SEALED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "30_ARACHNE_FIT_PREREGISTERED"
+    },
+    {
+      "demo_only_dependencies": [
+        "30_ARACHNE_FIT_PREREGISTERED"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "31_ARACHNE_FIT"
+    },
+    {
+      "demo_only_dependencies": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "31_ARACHNE_FIT"
+      ],
+      "event": "DEMO_ONLY_TAINT_PROPAGATED",
+      "persisted_status": "PASS_DEMO_ONLY",
+      "reported_status": "PASS",
+      "stage_id": "32_SKIN_QUALIFIED"
+    },
+    {
+      "diagnostics_ref": {
+        "bytes": 654,
+        "diagnostics_hash": "bcc8c923c4efc57aa53073ec229a8c7b50476a5d1243dcb599b2c471c61850dc",
+        "path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/artifacts/35_DYNAMIC_MECHANICAL_MESH_QUALIFIED/failure_diagnostics.json",
+        "sha256": "291d915bb1d47d033e9a5538d609f0d8d7dfd36f5cb7cc6499f8c1801e16276c"
+      },
+      "event": "STAGE_FAILURE_DIAGNOSTICS_PERSISTED",
+      "stage_id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+    }
+  ],
+  "ledger_status": {
+    "current_stage": null,
+    "execution_class": "DEMO_WITNESS",
+    "failed_count": 1,
+    "failed_stage_ids": [
+      "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+    ]
+  },
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "schema": "RealSaS.KnightDemoRunSnapshot.v1",
+  "stages": [
+    {
+      "blockers": [],
+      "diagnostics_hash": "2962bfcae5a4aab816857ec1b4d59439df0b154ee93d0b445fa95a78de1a67ab",
+      "id": "01_SOURCE_BYTES_SEALED",
+      "ordinal": 1,
+      "output_schemas": [
+        "RealSaS.SourceByteSeal.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "e2c42641fbc4d18db211cf49af3be4071132980e7c028da418a01160d69a9697",
+      "id": "02_SOURCE_LICENSE_PROVENANCE",
+      "ordinal": 2,
+      "output_schemas": [
+        "RealSaS.SourceLicenseSeal.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "783f032dc700ae4343231968a1fb792339ba230bea26824ddcc6194367be402a",
+      "id": "03_SOURCE_MECHANICAL_AUDIT",
+      "ordinal": 3,
+      "output_schemas": [
+        "RealSaS.SourceMechanicalAuditIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "f5079ea1b9c46f8a00e67be0513ceca30377759525570f7410b05d28b95d15d5",
+      "id": "04_FULL_SUBJECT_ADMISSION",
+      "ordinal": 4,
+      "output_schemas": [
+        "RealSaS.FullSubjectAdmissionIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "971c376e25352dbe7f15d9590aa7b985f7926826492b39465037555b2ae8e36a",
+      "id": "05_CAMERA_CONTRACT_SOLVED",
+      "ordinal": 5,
+      "output_schemas": [
+        "RealSaS.QualifiedCameraSetIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "abf5725032c0b0bce3867c80c1a8a4f15f326e13723f74a47563682f97349f7e",
+      "id": "06_OBSERVATION_RENDER_8VIEW",
+      "ordinal": 6,
+      "output_schemas": [
+        "RealSaS.ObservationRenderSetIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "1c12c76c644ec772760a7350ce715a62ad6bbb9027a69a89bbd7ca71bb40626c",
+      "id": "07_OBSERVATION_CONTRACT_QUALIFIED",
+      "ordinal": 7,
+      "output_schemas": [
+        "RealSaS.QualifiedObservationSetIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "f9d2aee0a3a792c3509bd145214f8ce881618a3ef6e1ed16350b25c97e813e1e",
+      "id": "08_NORMALIZATION_DOMAIN_QUALIFIED",
+      "ordinal": 8,
+      "output_schemas": [
+        "RealSaS.NormalizationDomainIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "84cca439872046276fbd4935923d48dfc379c4b66c3e373323e14f073e1e66b9",
+      "id": "09_IRIS_FIT_PREREGISTERED",
+      "ordinal": 9,
+      "output_schemas": [
+        "RealSaS.DemoHistoricalIrisPreregEvidence.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "15a2326201c0b28241b68217727902f591b314a95f7e1751774dd691346c3844",
+      "id": "10_IRIS_FIT",
+      "ordinal": 10,
+      "output_schemas": [
+        "RealSaS.DemoHistoricalIrisExecutionEvidence.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "96c182f3682024e9f3516628d0b6dff041d0426b70ab3daf3ad7846e2d85d84b",
+      "id": "11_IRIS_CHECKPOINT_SEALED",
+      "ordinal": 11,
+      "output_schemas": [
+        "RealSaS.ModelCheckpointSealIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "a5a31bfc20aa6ebb5f74a1633672d3a2910d729a9135cdd0594da03d420653f5",
+      "id": "12_ZERO_SURFACE_DECODED",
+      "ordinal": 12,
+      "output_schemas": [
+        "RealSaS.SignedZeroSurfaceSealIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "4a89633da4a579716d0aab5150e79e949dfcd5e52a4855c050b7936da34ce55e",
+      "id": "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+      "ordinal": 13,
+      "output_schemas": [
+        "RealSaS.GeometrySubstrateQualificationIR.v2"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "851d0c6487b076a95eb9e209b170b60cc325a4920f379f6ca3027a910cc7d435",
+      "id": "14_GSA_BUILD",
+      "ordinal": 14,
+      "output_schemas": [
+        "RealSaS.RiggingSurfaceIR.v1",
+        "RealSaS.SubstrateAdequacyReport.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "0fcb6d358ed0c23bd58a9233a4bcd36d1073280fc7d544b9d47366d096653aa3",
+      "id": "15_RIGGING_SURFACE_QUALIFIED",
+      "ordinal": 15,
+      "output_schemas": [
+        "RealSaS.RiggingSurfaceIR.v1",
+        "RealSaS.RiggingSurfaceQualificationIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "1f406050e1662bb92b2a73bbacea5d7a5396c29471533327a43c38e3cda7ffd3",
+      "id": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+      "ordinal": 16,
+      "output_schemas": [
+        "RealSaS.OutputPresentationDirectionSetIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "548a4c34961f1a1462efbb17c5aa73ca588d4cea50029e97216e209440ef6a26",
+      "id": "17_MECHANICAL_PARTITION_QUALIFIED",
+      "ordinal": 17,
+      "output_schemas": [
+        "RealSaS.MechanicalPartitionIR.v1",
+        "RealSaS.ComponentCarrierPolicyIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "49401a5aa8bb76333333add32054d06e428c06e2417d9ddfcb18aa9fb6fad745",
+      "id": "18_CANONICAL_MESH_ADDRESSING_BUILD",
+      "ordinal": 18,
+      "output_schemas": [
+        "RealSaS.CanonicalMeshCandidateIR.v1",
+        "RealSaS.MeshQualificationPolicyIR.v1",
+        "RealSaS.RelationParentQualityReport.v1",
+        "RealSaS.SurfaceAddressingIR.v1",
+        "RealSaS.AppearanceDomainIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "bc484070286449cdf392754663f1cf34be78f19d1f1372b868febd0d45156848",
+      "id": "19_STATIC_CANONICAL_MESH_QUALIFIED",
+      "ordinal": 19,
+      "output_schemas": [
+        "RealSaS.StaticCanonicalMeshQualificationIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "30f0d7c1933615a7ddef26c899655d4ad1f17436112528c6124bda88ef604bb0",
+      "id": "20_CAA_BACKEND_PREREGISTERED",
+      "ordinal": 20,
+      "output_schemas": [
+        "RealSaS.CAACompilePreregistrationIR.v2"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "51bf42fcaa07c5e28e0bc87c55c75c213c6473de3b5149c66e9c8d74db25e836",
+      "id": "21_CAA_COMPILE",
+      "ordinal": 21,
+      "output_schemas": [
+        "RealSaS.CAACompileArtifactIR.v2",
+        "RealSaS.CAACompileArrays.v3"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "868b9d6407ec11f7b7ff6d8063cb7248e956107929141f831d8ad8b53ab1e91c",
+      "id": "22_CAA_COMPILE_SEALED",
+      "ordinal": 22,
+      "output_schemas": [
+        "RealSaS.CAACompileSealIR.v2"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "4b0278df6489225f29248863517bdac295ec29f52faacace9661ccfbfe87294a",
+      "id": "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+      "ordinal": 23,
+      "output_schemas": [
+        "RealSaS.CAATransportTexture.V0.P0.v2",
+        "RealSaS.CAATransportTexture.V0.P1.v2",
+        "RealSaS.CAATransportTexture.V0.P2.v2",
+        "RealSaS.CAATransportTexture.V1.P0.v2",
+        "RealSaS.CAATransportTexture.V1.P1.v2",
+        "RealSaS.CAATransportTexture.V1.P2.v2",
+        "RealSaS.CAATransportTexture.V2.P0.v2",
+        "RealSaS.CAATransportTexture.V2.P1.v2",
+        "RealSaS.CAATransportTexture.V2.P2.v2",
+        "RealSaS.CAATransportTexture.V3.P0.v2",
+        "RealSaS.CAATransportTexture.V3.P1.v2",
+        "RealSaS.CAATransportTexture.V3.P2.v2",
+        "RealSaS.CAATransportTexture.V4.P0.v2",
+        "RealSaS.CAATransportTexture.V4.P1.v2",
+        "RealSaS.CAATransportTexture.V4.P2.v2",
+        "RealSaS.CAATransportTexture.V5.P0.v2",
+        "RealSaS.CAATransportTexture.V5.P1.v2",
+        "RealSaS.CAATransportTexture.V5.P2.v2",
+        "RealSaS.CAATransportTexture.V6.P0.v2",
+        "RealSaS.CAATransportTexture.V6.P1.v2",
+        "RealSaS.CAATransportTexture.V6.P2.v2",
+        "RealSaS.CAATransportTexture.V7.P0.v2",
+        "RealSaS.CAATransportTexture.V7.P1.v2",
+        "RealSaS.CAATransportTexture.V7.P2.v2",
+        "RealSaS.CAASurfaceUV.v2",
+        "RealSaS.CAAProvenanceAtlas.v2",
+        "RealSaS.CompleteAppearanceAssetIR.v2"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "8cf34a5cf7ea42dc69149a7748a8a6b731dba4fb8074ed99e3d0b2bed3fc89fc",
+      "id": "24_COMPLETE_APPEARANCE_QUALIFIED",
+      "ordinal": 24,
+      "output_schemas": [
+        "RealSaS.CompleteAppearanceQualificationIR.v2"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "3ced70957a4342c178f720b1f50f5c4e8cd74175e2fbb6a6b646e1873ef3f4cd",
+      "id": "25_CAA_REFERENCE_REST_RENDER_PROOF",
+      "ordinal": 25,
+      "output_schemas": [
+        "RealSaS.CAAReferenceRestRender.V0.v2",
+        "RealSaS.CAARestDiagnosticMasks.V0.v2",
+        "RealSaS.CAAReferenceRestRender.V1.v2",
+        "RealSaS.CAARestDiagnosticMasks.V1.v2",
+        "RealSaS.CAAReferenceRestRender.V2.v2",
+        "RealSaS.CAARestDiagnosticMasks.V2.v2",
+        "RealSaS.CAAReferenceRestRender.V3.v2",
+        "RealSaS.CAARestDiagnosticMasks.V3.v2",
+        "RealSaS.CAAReferenceRestRender.V4.v2",
+        "RealSaS.CAARestDiagnosticMasks.V4.v2",
+        "RealSaS.CAAReferenceRestRender.V5.v2",
+        "RealSaS.CAARestDiagnosticMasks.V5.v2",
+        "RealSaS.CAAReferenceRestRender.V6.v2",
+        "RealSaS.CAARestDiagnosticMasks.V6.v2",
+        "RealSaS.CAAReferenceRestRender.V7.v2",
+        "RealSaS.CAARestDiagnosticMasks.V7.v2",
+        "RealSaS.CAARestRenderProofIR.v2"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "5445732fcf489763c89e78d6646c9d05637d961d0c744a3233ff70acb7ae234c",
+      "id": "26_GEPPETTO_FIT_PREREGISTERED",
+      "ordinal": 26,
+      "output_schemas": [
+        "RealSaS.ModelFitPreregistrationIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "f8a2c7466a52911642201c9cf8d2c2bef0b0e9b57b99f2bba4465a52463e0905",
+      "id": "27_GEPPETTO_FIT",
+      "ordinal": 27,
+      "output_schemas": [
+        "RealSaS.ModelFitExecutionIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "a63e3494698bfb074d661a978dbb22d0c34d691bdaec0716f93253e57873210a",
+      "id": "28_SKELETON_QUALIFIED",
+      "ordinal": 28,
+      "output_schemas": [
+        "RealSaS.QualifiedSkeletonIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "f7c18e4c2a3a0cc727d5b441f46ac0cd9610859a2e900c7a14d2bf2e25b4bbb3",
+      "id": "29_GEPPETTO_CHECKPOINT_SEALED",
+      "ordinal": 29,
+      "output_schemas": [
+        "RealSaS.ModelCheckpointSealIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "c40bdc468d14c51a476da79152b4aa8fb8d9caae91b2faf73a12b07f202c74e5",
+      "id": "30_ARACHNE_FIT_PREREGISTERED",
+      "ordinal": 30,
+      "output_schemas": [
+        "RealSaS.ModelFitPreregistrationIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "dd62eb48d080a77e462237db0e80e60e20f418b8eafd274849a9cd7de932e035",
+      "id": "31_ARACHNE_FIT",
+      "ordinal": 31,
+      "output_schemas": [
+        "RealSaS.ModelFitExecutionIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "fcecf8af40b83a3bca90ebd104953701ae5c57a7731d295785fdae61c64b9d77",
+      "id": "32_SKIN_QUALIFIED",
+      "ordinal": 32,
+      "output_schemas": [
+        "RealSaS.QualifiedSkinIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "",
+      "id": "33_ARACHNE_CHECKPOINT_SEALED",
+      "ordinal": 33,
+      "output_schemas": [],
+      "status": "PENDING"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "d122dc2febc260095533237a4c6ab512120219a3564d2fd67338cda178e8e900",
+      "id": "34_DEFORMATION_CAPABILITY_ENVELOPE",
+      "ordinal": 34,
+      "output_schemas": [
+        "RealSaS.DerivedAxisContract.v1",
+        "RealSaS.DeformationCapabilityEnvelopeIR.v1"
+      ],
+      "status": "PASS_DEMO_ONLY"
+    },
+    {
+      "blockers": [
+        "G3_DEFORMATION_STRESS_FAIL",
+        "G5_MULTIVIEW_COMPONENT_COVERAGE_FAIL"
+      ],
+      "diagnostics_hash": "bcc8c923c4efc57aa53073ec229a8c7b50476a5d1243dcb599b2c471c61850dc",
+      "id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+      "ordinal": 35,
+      "output_schemas": [],
+      "status": "FAIL"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "",
+      "id": "36_QUALIFIED_MESH_SKIN_TRANSFER",
+      "ordinal": 36,
+      "output_schemas": [],
+      "status": "PENDING"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "",
+      "id": "37_QUALIFIED_PRESENTATION_STRUCTURE",
+      "ordinal": 37,
+      "output_schemas": [],
+      "status": "PENDING"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "",
+      "id": "38_CANONICAL_PUPPET_SEALED",
+      "ordinal": 38,
+      "output_schemas": [],
+      "status": "PENDING"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "",
+      "id": "39_MOTION_SOURCE_OR_PRESET_SEAL",
+      "ordinal": 39,
+      "output_schemas": [],
+      "status": "PENDING"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "",
+      "id": "40_MOTION_COMPILE_RUN",
+      "ordinal": 40,
+      "output_schemas": [],
+      "status": "PENDING"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "",
+      "id": "41_MOTION_DYNAMIC_PROOF",
+      "ordinal": 41,
+      "output_schemas": [],
+      "status": "PENDING"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "",
+      "id": "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+      "ordinal": 42,
+      "output_schemas": [],
+      "status": "PENDING"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "",
+      "id": "43_RSS_MATERIALIZE_COMPACT",
+      "ordinal": 43,
+      "output_schemas": [],
+      "status": "PENDING"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "",
+      "id": "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+      "ordinal": 44,
+      "output_schemas": [],
+      "status": "PENDING"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "",
+      "id": "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+      "ordinal": 45,
+      "output_schemas": [],
+      "status": "PENDING"
+    },
+    {
+      "blockers": [],
+      "diagnostics_hash": "",
+      "id": "46_PRODUCT_CLOSURE_SEAL",
+      "ordinal": 46,
+      "output_schemas": [],
+      "status": "PENDING"
+    }
+  ]
+}

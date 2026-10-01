@@ -1,0 +1,1 @@
+KNIGHT_TEACHER_TARGET_ALIGNMENT_PROOF_PASS {"graph_edge_match_count": 28, "graph_edge_total": 28, "graph_exact": true, "max_position_error": 0.06348993057552103, "minimum_raw_nearest_margin": 0.014235053781742432}

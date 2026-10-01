@@ -1,0 +1,45 @@
+{
+  "schema": "RealSaS.KnightDemoTransferProbeTrigger.v1",
+  "status": "RERUN_REQUESTED",
+  "date_utc": "2026-09-25",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "probe_revision": 16,
+  "probe_scope": "FROZEN_C_STAGE14_15__FINGERPRINT_ALIASING_GUARD",
+  "expected_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
+  "expected_zero_surface_sha256": "adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c",
+  "expected_observation_set_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa",
+  "expected_normalization_hash": "81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23",
+  "performance_repair": {
+    "scientific_semantics_changed": false,
+    "geometry_evidence_policy_changed": false,
+    "dense_normal_operator": "UNCHANGED_ROBUST_LOCAL_PCA_K64",
+    "dense_normal_query": "EXACT_CHUNKED_CKDTREE_QUERY",
+    "dense_normal_candidate_reuse": true,
+    "connected_component_partition": "EXACT_CACHED_PARTITION",
+    "adequacy_metric_normal_authority": "UNCHANGED_IMPLICIT_DECODER_NORMALS",
+    "regression_tests": [
+      "tests/compiler/test_mesh_component_labels_v1.py",
+      "tests/compiler/test_substrate_adequacy_v1.py"
+    ]
+  },
+  "orchestrator_guard": {
+    "manifest_subset_snapshot": "DEEP_CANONICAL_COPY",
+    "learned_fit_prereg_immutability_preserved": true,
+    "execution_refs_fingerprint_bound": true
+  },
+  "demo_stage14_fallback": {
+    "preregistration": "canonical/KNIGHT_DEMO_STAGE14_FALLBACK_PREREG_20260925.json",
+    "scientific_stage14_pass_expected": false,
+    "expected_ledger_status": "PASS_DEMO_ONLY",
+    "product_policy_mutated": false,
+    "selection_rule": "MIN_FAILED_GATES__MIN_MAX_RELATIVE_EXCESS__MIN_SUM_RELATIVE_EXCESS__MAX_ACTUAL_NODES__MIN_TARGET_CAP_V1",
+    "full_failure_diagnostics_persistence_required": true
+  },
+  "last_gate_fix": "ZERO_MAX_THRESHOLD_DIAGNOSTIC_EXCESS_IS_ABSOLUTE__PRODUCT_POLICY_UNCHANGED",
+  "orchestrator_repair": {
+    "manifest_fingerprint_snapshot": "EXPLICIT_DEEP_COPY",
+    "prereg_future_execution_refs_ignored": true,
+    "execution_refs_bound": true,
+    "regression_test": "tests/repository/test_mainline_v2_dag_scheduler.py"
+  }
+}

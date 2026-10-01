@@ -1,0 +1,171 @@
+{
+  "counts": {
+    "calibrated_keep": 3,
+    "design_required": 3,
+    "open": 2
+  },
+  "new_numeric_value_selected": false,
+  "performance_contract": {
+    "hard_total_compile_max_seconds": 60,
+    "logical_stages_may_be_fused": true,
+    "note": "Logical 46-stage authority boundaries may be fused into fewer product execution passes when ownership, provenance and fail-closed semantics remain exactly recoverable.",
+    "quality_threshold_relaxation_for_speed_forbidden": true
+  },
+  "repair_applied": false,
+  "repo_head": "7a1b79ada66bfb3a736dd3f13a5e995bd4a7a319",
+  "rows": [
+    {
+      "classification": "CALIBRATED_SUBJECT_FREE",
+      "design_before_code": "Preserve unless a new subject-free calibration supersedes it. Do not change merely for speed.",
+      "evidence": [
+        "canonical/STAGE14_SUBSTRATE_ADEQUACY_CALIBRATION_AUTHORITY_V2_20260920.json",
+        "canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V2_20260920.json"
+      ],
+      "id": "CAL_GSA_SUBSTRATE_POLICY",
+      "knobs": {
+        "max_candidate_nodes": 12288,
+        "normal_k": 64,
+        "refinement_rounds": 3,
+        "visibility_depth_tolerance_norm": 0.02
+      },
+      "owner": "STAGE14_GSA",
+      "performance_role": "Bounded search budget; selection is minimum passing node count.",
+      "quality_role": "Mechanical-carrier adequacy and component preservation.",
+      "status": "KEEP"
+    },
+    {
+      "classification": "CALIBRATED_SUBJECT_FREE",
+      "design_before_code": "Never relax for compile time. Optimize algorithms around the thresholds.",
+      "evidence": [
+        "canonical/G5_MESH_POLICY_V2_CALIBRATION_AUTHORITY_20260919.json",
+        "canonical/ANIMATION_GRADE_MESH_CONDITIONING_CALIBRATION_RESULT_20260918.json"
+      ],
+      "id": "CAL_MESH_G3_G5_POLICY",
+      "knobs": {
+        "g5_mesh": {
+          "calibration_status": "SUBJECT_FREE_1024_AND_EXACT_G5_NUMERICAL_FLOOR_VERIFIED",
+          "max_interior_uncovered_fraction": 0.0005,
+          "max_largest_coherent_hole_fraction": 0.00025,
+          "min_precision": 0.999,
+          "min_recall": 0.999
+        },
+        "maximum_dynamic_area_ratio": 20,
+        "maximum_dynamic_condition_number": 16,
+        "maximum_rest_aspect": 16,
+        "minimum_dynamic_area_ratio": 0.05,
+        "minimum_rest_triangle_angle_deg": 7.5
+      },
+      "owner": "MECHANICAL_MESH_QUALIFICATION",
+      "performance_role": "Not a performance knob; quality authority.",
+      "quality_role": "Frozen mechanical geometry admission.",
+      "status": "KEEP"
+    },
+    {
+      "classification": "CALIBRATED_SUBJECT_FREE",
+      "design_before_code": "Preserve numerical limits; fuse/vectorize/accelerate evaluation instead.",
+      "evidence": [
+        "canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json"
+      ],
+      "id": "CAL_DYNAMIC_APPEARANCE_CONDITIONING",
+      "knobs": {
+        "dynamic_max_adjacent_frame_surface_principal_stretch": 2,
+        "dynamic_max_relative_surface_condition_number": 3,
+        "dynamic_max_relative_surface_principal_stretch": 3,
+        "dynamic_max_uv_to_surface_condition_number": 3,
+        "dynamic_min_projected_double_area_px2": 1,
+        "dynamic_min_visible_pixels_per_face": 4
+      },
+      "owner": "STAGE45_DVI",
+      "performance_role": "Proof cost may be optimized, thresholds may not be weakened.",
+      "quality_role": "Intrinsic dynamic visual conditioning and measurable visibility.",
+      "status": "KEEP"
+    },
+    {
+      "classification": "CONTRACT_BOUND__PARETO_CALIBRATION_NOT_FOUND",
+      "design_before_code": "Benchmark convergence/latency distribution on subject-free geometry controls. Select the minimum ceilings that preserve the frozen G3 outcome distribution; do not infer optimum from 96.",
+      "evidence": [
+        "canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json",
+        "compiler/realsas_compiler_core/canonical_cdt_adapter_v1.py"
+      ],
+      "id": "REVIEW_CANONICAL_CDT_ITERATION_BUDGET",
+      "knobs": {
+        "max_constraint_recovery_iterations": 96,
+        "max_quality_iterations": 96
+      },
+      "owner": "CANONICAL_CDT",
+      "performance_role": "Potentially large compile-time multiplier per parent patch.",
+      "quality_role": "Iteration ceilings determine whether the constrained refiner reaches the frozen mesh-quality target before fail-close.",
+      "status": "DESIGN_REQUIRED"
+    },
+    {
+      "classification": "UNCALIBRATED_SPEED_SHORTCUT_AFFECTING_QUALITY",
+      "design_before_code": "Calibrate an adaptive tessellation/refinement criterion against source curvature, deformation-field error, dynamic flip/stretch rate and compile latency. Do not choose a replacement count yet.",
+      "evidence": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py",
+        "compiler/realsas_compiler_core/visual_mesh_arap_v1.py"
+      ],
+      "id": "OPEN_VISUAL_MESH_SPEED_SHORTCUTS",
+      "knobs": {
+        "max_constraint_recovery_iterations": 192,
+        "max_quality_iterations": 0,
+        "stage18_target_edge_px": 16,
+        "target_min_angle_deg": 0.0
+      },
+      "owner": "SOURCE_OWNED_VISUAL_MESH",
+      "performance_role": "Code comment explicitly disables quality insertion to keep a fast iteration loop.",
+      "quality_role": "Controls source-owned visual primitive density/shape before deformation; exact silhouette alone does not bound deformation conditioning.",
+      "status": "OPEN"
+    },
+    {
+      "classification": "UNCALIBRATED_HARD_GATE_AND_REPAIR_BUDGET",
+      "design_before_code": "Build subject-free seam/non-seam controls with known artist topology and skin discontinuities. Select thresholds by separation and repair efficacy; repair budget should follow convergence evidence, not an arbitrary count.",
+      "evidence": [
+        "compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py"
+      ],
+      "id": "OPEN_SKIN_TOPOLOGY_COMPATIBILITY_THRESHOLDS",
+      "knobs": {
+        "max_edge_ratio": 4.0,
+        "max_repair_iterations": 4,
+        "risk_l1_min": 0.5,
+        "stress_angle_deg": 120.0
+      },
+      "owner": "STAGE35_G3B",
+      "performance_role": "Probe angle/repair budget directly affect stress-test and recompile cost.",
+      "quality_role": "Determines which topology\u00d7skin discontinuities are attacked and whether a candidate passes.",
+      "status": "OPEN"
+    },
+    {
+      "classification": "UNEXPLAINED_FAIL_CLOSED_MARGIN",
+      "design_before_code": "Calibrate cost-margin semantics on subject-free skeleton perturbations / known ambiguous controls. Preserve fail-closed behavior while replacing unexplained scale-sensitive constants if needed.",
+      "evidence": [
+        "compiler/realsas_compiler_core/motion_compile_v2.py"
+      ],
+      "id": "REVIEW_MOTION_RETARGET_AMBIGUITY_MARGIN",
+      "knobs": {
+        "global_second_best_cost_margin": 0.01
+      },
+      "owner": "STAGE40_RETARGET",
+      "performance_role": "Requires a second exact MILP solve; still bounded for preset-sized skeletons.",
+      "quality_role": "Fails ambiguous topology-constrained source\u2192target skeleton mappings.",
+      "status": "DESIGN_REVIEW"
+    },
+    {
+      "classification": "PROOF_DENSITY_BUDGET__NOT_OUTPUT_FPS",
+      "design_before_code": "Measure marginal defect detection versus wall time on subject-free high-curvature motion controls. This is proof density, not output frame-rate; optimize only after measurement.",
+      "evidence": [
+        "compiler/realsas_compiler_core/motion_dynamic_proof_v2.py",
+        "compiler/realsas_compiler_core/runtime_package_v2.py"
+      ],
+      "id": "REVIEW_MOTION_EXTRA_UNIFORM_PROOF_DENSITY",
+      "knobs": {
+        "extra_uniform_sample_count": 17
+      },
+      "owner": "STAGE41_DYNAMIC_MOTION_PROOF",
+      "performance_role": "Linear multiplier on FK/LBS/intersection/visibility proof work for extra samples.",
+      "quality_role": "Adds samples beyond all source keyframe and contact-boundary times. Runtime plays sealed frame indices only.",
+      "status": "DESIGN_REVIEW"
+    }
+  ],
+  "schema": "RealSaS.PerformanceQualityKnobAudit.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED"
+}

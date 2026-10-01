@@ -1,0 +1,109 @@
+{
+  "schema": "RealSaS.IRIS.V5Stage13FrozenMaskMorphologyPreregistration.v1",
+  "status": "FROZEN_BEFORE_DIAGNOSTIC_EXECUTION",
+  "date_utc": "2026-09-24",
+  "scientific_question": "IS_STAGE13_FAILURE_DOMINATED_BY_LOCAL_OUTWARD_BOUNDARY_DISPLACEMENT_VERSUS_REMOTE_OR_TOPOLOGICAL_FALSE_POSITIVE_GEOMETRY",
+  "parent": {
+    "requalification_preregistration": "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_PREREG_20260924.json",
+    "requalification_closure": "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_CLOSURE_20260924.json",
+    "run_id": "20260924T103507Z",
+    "result_sha256": "96bc865f9211244eb9e387d163566d8aebc5f3508f469d856d39432ba855eef4",
+    "manifest_sha256": "69819973e3dc7cb5b92e55b86595dc3337c05bab5eed9a5350064e08bfb95597",
+    "input_authority_sha256": "625cbe4a986062eea8262fd6e03f1cbbd85b5cd6ed1b226ea570a04ef6819838"
+  },
+  "execution": {
+    "diagnostic_repo_commit": "ba4fcb6b3320f1590583e75d85d485aa01d7dc90",
+    "code_ci_run_id": 35992552613,
+    "code_ci_conclusion": "success",
+    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_STAGE13_FROZEN_MASK_MORPHOLOGY_DIAGNOSTIC_RUN_ALL.ipynb",
+    "notebook_sha256": "76f2feb13ee136350ea348a52d577597a40b3dc8dadd250016bafd14617d4d56",
+    "optimizer_steps_permitted": 0,
+    "parameter_updates_permitted": 0,
+    "rerasterization_permitted": false,
+    "checkpoint_selection_permitted": false,
+    "stage13_feedback_to_model_permitted": false
+  },
+  "frozen_inputs": {
+    "stage08_evidence_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "predicted_mask_sha256_by_state": {
+      "BASE": "5e6de46249f3de161a67733ab93e918cc394266badf17f864a434f879a5b5715",
+      "A0": "b7772f0780969d7031be087eb63b9f92835262c3b4dd4e3c49f330f536bb75ce",
+      "B": "a09170fffdf163a6b5a2d10c3006b15e48f1f45fba62abed692ae07e40824e2f",
+      "C": "3cf10b739f845a4a741885060aff6e3794988349eb8f94f43039f4ae97b37d07",
+      "D": "f1fef875b7ab4410a0dd94bd78cdc17d57cfefb41d28db3247591cd16e6069c6"
+    },
+    "stage13_result_sha256_by_state": {
+      "BASE": "f3c58ae40fe109ec38b6e2cae89ecfe61192be4d500cc2834b5c7e1d2c16f2cb",
+      "A0": "3dc8a232865fcab8eca140f502f1b85b5879bcc42f80705291af0c942c69a6c7",
+      "B": "5310d287982886cca4a9d6fb6f42e762b65b9e7adde6a95bbd95cc28fa94396c",
+      "C": "193f9f3e46ea43f0f3b566bcdc3097c3e34cfb98dfdc196941ca167149de5296",
+      "D": "522ee2d16cf8d66d2c7e52056ead046c27e71e663e38938bc07ced6888322f0b"
+    }
+  },
+  "measurements": {
+    "overlap": [
+      "TP",
+      "FP",
+      "FN",
+      "recall",
+      "precision",
+      "predicted_to_source_area_ratio"
+    ],
+    "euclidean_error_bands_px": [
+      1,
+      2,
+      4,
+      8,
+      16
+    ],
+    "distance_quantiles": [
+      "p50",
+      "p90",
+      "p95",
+      "p99",
+      "max"
+    ],
+    "topology": "8_CONNECTED_COMPONENT_COUNTS",
+    "diagnostic_prediction_erosion_radii_px": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "erosion_is_product_fix": false
+  },
+  "preregistered_descriptive_flags": {
+    "LOCAL_FP_8PX_ALL_VIEWS": {
+      "rule": "EVERY_ONE_OF_40_STATE_VIEW_PAIRS_HAS_FP_WITHIN_8PX_FRACTION_GTE_0_95",
+      "threshold": 0.95
+    },
+    "REMOTE_FP_GT16PX_SIGNIFICANT": {
+      "rule": "ANY_STATE_VIEW_PAIR_HAS_FP_BEYOND_16PX_FRACTION_GT_0_01",
+      "threshold": 0.01
+    }
+  },
+  "forbidden": {
+    "long_horizon_training": true,
+    "representation_change": true,
+    "spatial_resolution_change": true,
+    "regularizer_change": true,
+    "stage13_threshold_change": true,
+    "posthoc_mesh_erosion_as_correction": true
+  },
+  "decision_rule": {
+    "automatic_route_authorization": false,
+    "review_required": true,
+    "note": "This diagnostic localizes the frozen Stage13 failure morphology. Any learned-field root-cause experiment must be separately preregistered after reviewing these measurements."
+  },
+  "claim_boundary": [
+    "This diagnostic can distinguish local boundary-band error from remote false-positive geometry in the frozen Stage13 masks.",
+    "It cannot by itself prove the learned-field root cause.",
+    "It does not relax R512 or Stage13 P999.",
+    "It does not authorize long-horizon training automatically."
+  ]
+}

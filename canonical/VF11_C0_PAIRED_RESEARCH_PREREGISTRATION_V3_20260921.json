@@ -1,0 +1,62 @@
+{
+  "schema": "RealSaS.VF11C0PairedResearchPreregistration.v3",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__PAIRED_MULTI_DEPTH_C0_ONLY",
+  "authority_class": "RESEARCH_PREREGISTRATION_ONLY",
+  "product_authority_minted": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "x1_phase_bank": "HOLD",
+  "proven_regular": "FORBIDDEN",
+  "parent_v1_closure": "canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json",
+  "parent_v2_prereg": "canonical/VF11_C0_RANGE_RESEARCH_PREREGISTRATION_V2_20260921.json",
+  "research_question": "Across the same spatial anchors, how much C0 certainty is gained by shrinking parent-cell depth versus micro-refining the same parent, and at what exact range-evaluation cost?",
+  "function_preservation": {
+    "range_math": "SAME_C0_V2_CONTRACT",
+    "v2_state_equivalence_regression_required": true,
+    "micro_0_1_2_from_one_tree": true,
+    "optimization_may_change_only_execution_strategy": true
+  },
+  "paired_design": {
+    "depths": [5, 6, 7, 8],
+    "micro_depths": [0, 1, 2],
+    "volume_anchor_count": 32,
+    "near_zero_anchor_count": 32,
+    "anchor_depth": 8,
+    "distinctness_depth": 5,
+    "near_zero_candidate_count": 4096,
+    "seed": 26092111,
+    "same_anchor_followed_across_all_depths": true,
+    "surface_near_selection_is_diagnostic_only": true,
+    "surface_near_selection_may_not_certify_absence": true
+  },
+  "engine": {
+    "range_module": "experiments/vf11_certified_adaptive/range_engine_c0_v3.py",
+    "profile_module": "experiments/vf11_certified_adaptive/paired_profile_c0_v3.py",
+    "optimizations": [
+      "prepare field weights once in float64",
+      "prepare triplanes once in float64",
+      "vectorized SiLU residual extrema",
+      "single refinement tree reused for micro depth 0/1/2",
+      "no repeated parent evaluation for separate micro settings"
+    ],
+    "numeric_status": "RESEARCH_CONSERVATIVE_FORMULAS__ORDINARY_FLOAT64__DIRECTED_ROUNDING_NOT_YET_PRODUCT_CERTIFIED"
+  },
+  "primary_outputs": [
+    "state fractions by stratum x depth x micro",
+    "decisive fraction by stratum x depth x micro",
+    "paired per-anchor state transitions across depth",
+    "actual evaluated box count",
+    "parent elapsed time",
+    "empirical 27-point contradiction alarms",
+    "near-zero versus volume certifiability separation"
+  ],
+  "interpretation_rules": [
+    "Any empirical sign contradiction against PROVEN_EMPTY is an implementation alarm and blocks C1.",
+    "Near-zero stratum is for stress characterization and may not be used as a proof source.",
+    "If certainty improves primarily with parent depth, spatial refinement is the dominant control.",
+    "If certainty improves primarily with micro depth at fixed parent depth, local range tightening is the dominant control.",
+    "If neither depth nor micro materially reduces UNKNOWN, C0 range machinery remains practically insufficient.",
+    "A successful C0 result authorizes only review of C1 regularity research, never product promotion or extractor promotion."
+  ]
+}

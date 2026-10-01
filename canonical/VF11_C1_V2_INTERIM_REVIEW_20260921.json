@@ -1,0 +1,52 @@
+{
+  "schema": "RealSaS.VF11C1V2InterimReview.v1",
+  "date_utc": "2026-09-21",
+  "status": "NONVACUOUS__MARGIN_REPORTING_REPLAY_REQUIRED_BEFORE_CLOSURE",
+  "authority_class": "RESEARCH_INTERIM_REVIEW_ONLY",
+  "source_run_id": "20260921T165847Z",
+  "source_repo_commit": "83d5bdb3b61e2df2b806e35e6e83dd242b191002",
+  "source_profile_sha256": "ec0c234a52f19b63560ab334de8df63066117a1bec2c5649c569cf824ca7ea42",
+  "parent_c0_profile_sha256": "16c2f43535a3c577c62494e464631ca9a79680e480cfeeac92e8a97b852b8ea5",
+  "parent_c1_v1_profile_sha256": "4476979339bccc41c4669b74dfc4d118ac844faa30ad7479aa89e3365ed2933e",
+  "validated_observations": {
+    "primary_handoff_count": 19,
+    "primary_regular_count": 12,
+    "primary_states": {
+      "PROVEN_DIRECTIONAL_REGULAR_POSITIVE": 10,
+      "PROVEN_DIRECTIONAL_REGULAR_NEGATIVE": 2,
+      "UNKNOWN": 7
+    },
+    "stress_near_zero_count": 32,
+    "stress_regular_count": 17,
+    "empirical_contradiction_count": 0,
+    "primary_v2_to_v1_candidate0_width_ratio_median": 0.009114067004035921,
+    "primary_width_tightening_factor_median": 109.72050123805067,
+    "primary_center_gradient_sample_sign_consistent_count": 17
+  },
+  "reporting_defect": {
+    "affected_fields": [
+      "C1Certificate.derivative_lower",
+      "C1Certificate.derivative_upper",
+      "c1_v2_positive_margin",
+      "summary margin_min/margin_p10/margin_median"
+    ],
+    "cause": "The profiler stored min/max bounds across every evaluated search-tree node, including coarse internal parents, instead of the strict terminal certified-leaf envelope.",
+    "effect_on_certificate_state": "NONE. The state is determined by complete terminal coverage: all terminal leaves have one strict sign and unresolved_leaf_count is zero.",
+    "effect_on_margin_audit": "INVALIDATES_THE_REPORTED_MARGIN_VALUES_FROM_THIS_RUN"
+  },
+  "required_replay": {
+    "same_science": true,
+    "same_frozen_inputs": true,
+    "same_cohort": true,
+    "same_max_micro_depth": 2,
+    "required_state_parity_with_source_run": true,
+    "required_primary_regular_count": 12,
+    "required_stress_regular_count": 17,
+    "required_all_certified_margins_strictly_positive": true,
+    "required_empirical_contradiction_count": 0
+  },
+  "product_authority_minted": false,
+  "shipping_certificate_backend": false,
+  "witness_execution": false,
+  "full_domain_traversal_performed": false
+}

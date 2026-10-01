@@ -1,0 +1,70 @@
+{
+  "schema": "RealSaS.IRISV4Demo64NegativeResultAndV41Decision.v1",
+  "date_utc": "2026-09-22",
+  "status": "V4_DEMO64_FAIL__NEGATIVE_SPACE_LOCALIZED__FOREGROUND_RETENTION_AND_FIELD_REGULARITY_OPEN",
+  "v4_run": {
+    "run_id": "20260922T110956Z",
+    "repo_commit": "07cf44cfa307b16e33d76c565a324e417c05b6d7",
+    "checkpoint_sha256": "ce76a99ee4e766ac7a56e7d3f55e371ab1836f1691b630554359beee3b7c58bb",
+    "r512_zero_surface_sha256": "ef91b5ea9538b7f7892fdb60ddfbe1201af0d5557e70e8316a21a99a8690f72c",
+    "stage13_r512": {
+      "pass": false,
+      "min_precision": 0.9196800511918093,
+      "min_recall": 0.9865514039050228,
+      "min_component_recall": 0.9865514039050228,
+      "max_interior_uncovered_fraction": 0.01203099033307586,
+      "max_largest_coherent_hole_fraction": 0.0029980624376597918,
+      "max_silhouette_edge_p95_px": 26.0,
+      "max_silhouette_edge_max_px": 169.64963896218583
+    },
+    "full_screen_negative_space": {
+      "audit_resolution": 256,
+      "max_margin_violation_fraction": 0.03522021846850996,
+      "max_zero_crossing_fraction": 0.011162893510416858,
+      "view0_zero_crossing_fraction_0_2px": 0.37324464153732445,
+      "view0_zero_crossing_fraction_2_8px": 0.025494276795005204,
+      "view0_zero_crossing_fraction_8_32px": 0.00018518518518518518,
+      "view0_zero_crossing_fraction_gt32px": 0.0,
+      "finding": "Background sign error is now strongly localized to the immediate silhouette neighborhood rather than broadly distributed through far negative space."
+    },
+    "source_support_r512": {
+      "largest_component_outside_1px_fraction": 0.11826468141120369,
+      "component_count": 624
+    },
+    "training_final": {
+      "gradient_norm_before_clip": 5.85207986831665,
+      "inside_negative_rate": 0.87890625,
+      "outside_positive_rate": 0.9501953125,
+      "source_exterior_violating_fraction": 0.001953125
+    }
+  },
+  "interpretation": {
+    "64x64_triplane_falsified": false,
+    "four_block_field_decoder_falsified": false,
+    "architecture_width_increase_authorized_now": false,
+    "source_constraint_retention_remains_owner": true,
+    "near_silhouette_0_2px_negative_band_is_primary_background_owner": true,
+    "foreground_retention_regressed": true,
+    "field_oscillation_or_under_regularization_supported_by_component_explosion": true,
+    "canonical_extractor_change_authorized": false
+  },
+  "v41_decision": {
+    "architecture": "FROZEN_EXACT_V4_DEMO64",
+    "hard_positive_replay": true,
+    "background_distance_bands_px": [[0,2],[2,8],[8,32],[32,null]],
+    "hard_negative_replay_per_band": true,
+    "narrow_band_eikonal": "FINITE_DIFFERENCE__FIT_LOCAL_BAND_ONLY",
+    "checkpoint_selection": "FIXED_SOURCE_CONTRACT_AUDIT__LEXICOGRAPHIC_HARD_SIGN_FIRST",
+    "final_step_forced_selection": false,
+    "differentiable_mesh_raster_loss": false,
+    "global_eikonal": false,
+    "global_teacher_sdf": false,
+    "threshold_relaxation": false,
+    "visual_hull_clipping": false,
+    "posthoc_mesh_repair_before_primary_measurement": false
+  },
+  "next_escalation_only_if_v41_fails": [
+    "training_only_differentiable_extracted_surface_raster_loss",
+    "then_plane_channels_or_field_width_ablation_if_source_contract_audit_shows_capacity saturation"
+  ]
+}

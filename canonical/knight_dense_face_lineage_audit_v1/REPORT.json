@@ -1,0 +1,67 @@
+{
+  "artifact_sha256": {
+    "stage12": "9585aeb771ba3fdc4b9aff96f56076b5f538406dc3fa22aa278e03ed4a519186",
+    "stage14_surface": "7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182",
+    "stage15_surface": "7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182",
+    "stage18_candidate": "0db35bbcdd3565cf42c74127fa33c66d39545e1ec84d1b1c74f1dac5bb6072d3",
+    "zero_npz": "adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c"
+  },
+  "offenders": [
+    {
+      "compact_triangle": [
+        9682,
+        9688,
+        9689
+      ],
+      "dense_face_descendant": true,
+      "dense_face_multiplicity": 1,
+      "face_index": 253
+    },
+    {
+      "compact_triangle": [
+        5889,
+        5891,
+        6190
+      ],
+      "dense_face_descendant": true,
+      "dense_face_multiplicity": 1,
+      "face_index": 3829
+    },
+    {
+      "compact_triangle": [
+        5905,
+        6204,
+        6206
+      ],
+      "dense_face_descendant": true,
+      "dense_face_multiplicity": 1,
+      "face_index": 3573
+    }
+  ],
+  "reproduction": {
+    "compact_node_count": 12090,
+    "component_aware_voxel_compaction": true,
+    "dense_compact_face_count": 24443,
+    "dense_face_count": 12092332,
+    "dense_vertex_count": 6046160,
+    "divisions": 56,
+    "gsa_relation_count": 36469,
+    "relation_graph_exact_reproduction": true,
+    "target_node_cap": 12288
+  },
+  "schema": "RealSaS.KnightDenseFaceLineageAudit.v1",
+  "stage18": {
+    "clique_invented_face_count": 515,
+    "clique_invented_face_fraction": 0.020634666239281993,
+    "dense_face_descendant_count": 24443,
+    "dense_face_descendant_fraction": 0.979365333760718,
+    "face_count": 24958
+  },
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED",
+  "verdict": {
+    "all_known_smear_offenders_are_clique_inventions": false,
+    "any_known_smear_offender_is_dense_face_descendant": true,
+    "claim_boundary": "Classifies Stage18 faces against exact Stage12 dense zero-surface 2-simplex incidence after reproducing the exact Stage14 compact-index map. Does not yet choose a repair.",
+    "face_incidence_loss_exists": true
+  }
+}

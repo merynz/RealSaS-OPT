@@ -1,0 +1,145 @@
+{
+  "claim_boundary": "Synthetic stretch and Arachne weight-L1 scores are computed before teacher source topology is loaded. Teacher labels only evaluate the four frozen rules; no threshold search or product mutation occurs.",
+  "edge_metrics_teacher_eval_only": {
+    "STRETCH_GT4": {
+      "edge_precision": 0.7014829142488717,
+      "edge_recall_in_scope": 0.9074228523769808,
+      "false_negative_in_scope_edge_count": 111,
+      "false_positive_edge_count": 463,
+      "predicted_seam_edge_count": 1551,
+      "true_positive_edge_count": 1088
+    },
+    "STRETCH_GT4_AND_WEIGHT_L1_GT1": {
+      "edge_precision": 0.8279569892473119,
+      "edge_recall_in_scope": 0.8348623853211009,
+      "false_negative_in_scope_edge_count": 198,
+      "false_positive_edge_count": 208,
+      "predicted_seam_edge_count": 1209,
+      "true_positive_edge_count": 1001
+    },
+    "STRETCH_GT4_OR_WEIGHT_L1_GT1": {
+      "edge_precision": 0.6915829145728644,
+      "edge_recall_in_scope": 0.9182652210175146,
+      "false_negative_in_scope_edge_count": 98,
+      "false_positive_edge_count": 491,
+      "predicted_seam_edge_count": 1592,
+      "true_positive_edge_count": 1101
+    },
+    "WEIGHT_L1_GT1": {
+      "edge_precision": 0.8112,
+      "edge_recall_in_scope": 0.8457047539616347,
+      "false_negative_in_scope_edge_count": 185,
+      "false_positive_edge_count": 236,
+      "predicted_seam_edge_count": 1250,
+      "true_positive_edge_count": 1014
+    }
+  },
+  "face_metrics_teacher_eval_only": {
+    "STRETCH_GT4": {
+      "false_positive_mixed_face_count": 417,
+      "mixed_face_precision": 0.7367424242424242,
+      "mixed_face_recall": 0.38642384105960265,
+      "name": "STRETCH_GT4",
+      "predicted_mixed_face_count": 1584,
+      "true_positive_mixed_face_count": 1167,
+      "unsafe_truth_cross_region_face_count": 1178,
+      "unsafe_truth_cross_region_recall": 0.9906621392190152,
+      "unsafe_truth_cross_region_recovered": 1167
+    },
+    "STRETCH_GT4_AND_WEIGHT_L1_GT1": {
+      "false_positive_mixed_face_count": 204,
+      "mixed_face_precision": 0.8387351778656127,
+      "mixed_face_recall": 0.35132450331125825,
+      "name": "STRETCH_GT4_AND_WEIGHT_L1_GT1",
+      "predicted_mixed_face_count": 1265,
+      "true_positive_mixed_face_count": 1061,
+      "unsafe_truth_cross_region_face_count": 1178,
+      "unsafe_truth_cross_region_recall": 0.900679117147708,
+      "unsafe_truth_cross_region_recovered": 1061
+    },
+    "STRETCH_GT4_OR_WEIGHT_L1_GT1": {
+      "false_positive_mixed_face_count": 440,
+      "mixed_face_precision": 0.7270471464019851,
+      "mixed_face_recall": 0.3880794701986755,
+      "name": "STRETCH_GT4_OR_WEIGHT_L1_GT1",
+      "predicted_mixed_face_count": 1612,
+      "true_positive_mixed_face_count": 1172,
+      "unsafe_truth_cross_region_face_count": 1178,
+      "unsafe_truth_cross_region_recall": 0.9915110356536503,
+      "unsafe_truth_cross_region_recovered": 1168
+    },
+    "WEIGHT_L1_GT1": {
+      "false_positive_mixed_face_count": 232,
+      "mixed_face_precision": 0.8212634822804314,
+      "mixed_face_recall": 0.3529801324503311,
+      "name": "WEIGHT_L1_GT1",
+      "predicted_mixed_face_count": 1298,
+      "true_positive_mixed_face_count": 1066,
+      "unsafe_truth_cross_region_face_count": 1178,
+      "unsafe_truth_cross_region_recall": 0.9015280135823429,
+      "unsafe_truth_cross_region_recovered": 1062
+    }
+  },
+  "giant_patch_metrics_teacher_eval_only": {
+    "STRETCH_GT4": {
+      "giant_patch_cross_region_recall": 0.9929639401934917,
+      "giant_patch_precision": 0.7486737400530504,
+      "giant_patch_predicted_mixed_face_count": 1508,
+      "giant_patch_recovered_cross_region_face_count": 1129,
+      "giant_patch_truth_cross_region_face_count": 1137
+    },
+    "STRETCH_GT4_AND_WEIGHT_L1_GT1": {
+      "giant_patch_cross_region_recall": 0.9050131926121372,
+      "giant_patch_precision": 0.84,
+      "giant_patch_predicted_mixed_face_count": 1225,
+      "giant_patch_recovered_cross_region_face_count": 1029,
+      "giant_patch_truth_cross_region_face_count": 1137
+    },
+    "STRETCH_GT4_OR_WEIGHT_L1_GT1": {
+      "giant_patch_cross_region_recall": 0.9938434476693052,
+      "giant_patch_precision": 0.7463672391017173,
+      "giant_patch_predicted_mixed_face_count": 1514,
+      "giant_patch_recovered_cross_region_face_count": 1130,
+      "giant_patch_truth_cross_region_face_count": 1137
+    },
+    "WEIGHT_L1_GT1": {
+      "giant_patch_cross_region_recall": 0.9058927000879508,
+      "giant_patch_precision": 0.8346839546191248,
+      "giant_patch_predicted_mixed_face_count": 1234,
+      "giant_patch_recovered_cross_region_face_count": 1030,
+      "giant_patch_truth_cross_region_face_count": 1137
+    }
+  },
+  "preregistration": "canonical/KNIGHT_TEACHER_FREE_EDGE_SEAM_DIAG_PREREG_V1_20260929.json",
+  "schema": "RealSaS.KnightTeacherFreeEdgeSeamDiagnosis.v1",
+  "scope": {
+    "edge_count": 36424,
+    "face_count": 24958,
+    "in_scope_edge_count": 3412,
+    "largest_unsafe_patch_face_counts": [
+      1404,
+      221,
+      13,
+      10,
+      8,
+      7,
+      5,
+      5,
+      4,
+      4
+    ],
+    "unsafe_face_count": 1801
+  },
+  "score_distribution": {
+    "max_stretch_max_in_scope": 181.98443623410574,
+    "max_stretch_p50_in_scope": 2.950201040708255,
+    "max_stretch_p95_in_scope": 29.38824568222118,
+    "max_stretch_p99_in_scope": 42.40890015987543,
+    "weight_l1_max_in_scope": 1.9999994919393846,
+    "weight_l1_p50_in_scope": 0.320400971186254,
+    "weight_l1_p95_in_scope": 1.9944439038452362,
+    "weight_l1_p99_in_scope": 1.999898671000787
+  },
+  "status": "DIAGNOSTIC_ONLY__NO_PRODUCT_MUTATION",
+  "teacher_used_by_edge_scores": false
+}

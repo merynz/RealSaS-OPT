@@ -1,0 +1,321 @@
+{
+  "anchor_max_abs_delta": 0.0,
+  "candidate": {
+    "cross_component_graph_edge_count": 0,
+    "face_count": 28331,
+    "generated_vertex_count": 3982,
+    "identity_anchor_count": 12049,
+    "vertex_count": 16031
+  },
+  "claim_boundary": [
+    "QualifiedSkinIR source rows are immutable anchors.",
+    "Only generated seam/centroid candidate-vertex mechanical weights are solved.",
+    "The solve graph contains zero cross-component edges.",
+    "Geometry, faces, Stage17 partition, skeleton and actual clips are identical between arms.",
+    "This is a causal audit oracle; product promotion requires support-coefficient provenance, not raw-weight invention."
+  ],
+  "component_harmonic_actual_motion": {
+    "frames": [
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 2.0717520260049898,
+        "edge_p95": 1.002466768621771,
+        "edge_p99": 1.051152789558405,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 2.0718892489682235,
+        "edge_p95": 1.0102070216707317,
+        "edge_p99": 1.05430750768312,
+        "frame": 1,
+        "time_seconds": 0.8333333333333334
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 2.0710169285035835,
+        "edge_p95": 1.0023040583045717,
+        "edge_p99": 1.0492556112294442,
+        "frame": 2,
+        "time_seconds": 1.6666666666666667
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 2.071889263481882,
+        "edge_p95": 1.0102070322632837,
+        "edge_p99": 1.05430745991376,
+        "frame": 3,
+        "time_seconds": 2.5
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.2078605613011666,
+        "edge_p95": 1.1175920219823285,
+        "edge_p99": 1.651871861267329,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.4728484597046405,
+        "edge_p95": 1.0984336567753692,
+        "edge_p99": 1.5505511812977577,
+        "frame": 1,
+        "time_seconds": 0.20833333333333334
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.6155354868853395,
+        "edge_p95": 1.1119887946290756,
+        "edge_p99": 1.7301390560559944,
+        "frame": 2,
+        "time_seconds": 0.4166666666666667
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.294703568083532,
+        "edge_p95": 1.0985156066857265,
+        "edge_p99": 1.5995082165378247,
+        "frame": 3,
+        "time_seconds": 0.625
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.2078605613011666,
+        "edge_p95": 1.1172105790996296,
+        "edge_p99": 1.6923082587037945,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.467988186153048,
+        "edge_p95": 1.1227492597125412,
+        "edge_p99": 1.5257837989217216,
+        "frame": 1,
+        "time_seconds": 0.2777777777777778
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.167107160012201,
+        "edge_p95": 1.089421182489656,
+        "edge_p99": 1.5237451895192775,
+        "frame": 2,
+        "time_seconds": 0.5555555555555556
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.2078605613011666,
+        "edge_p95": 1.1172105790996296,
+        "edge_p99": 1.6923082587037945,
+        "frame": 3,
+        "time_seconds": 0.8333333333333334
+      }
+    ],
+    "max_edge_gt_10": 0,
+    "max_edge_gt_4": 0,
+    "max_edge_p99": 1.7301390560559944,
+    "worst_edge_max": 3.6155354868853395
+  },
+  "delta": {
+    "max_edge_gt10": 0,
+    "max_edge_gt4": -15,
+    "max_edge_p99": -0.1172699045032135,
+    "worst_edge_max": -3.3251325627971333
+  },
+  "face_provenance_replay": {
+    "compact_face_count": 24443,
+    "compact_node_count": 12090,
+    "component_aware": true,
+    "dense_face_count": 12092332,
+    "dense_vertex_count": 6046160,
+    "position_error_max": 0.0,
+    "voxel_divisions": 56
+  },
+  "generated_weight_l1_delta": {
+    "max": 1.059792875491022,
+    "min": 3.009265538105056e-36,
+    "p50": 0.00890972660633971,
+    "p90": 0.08323317317567197,
+    "p95": 0.14290649074535525,
+    "p99": 0.3190400439662422
+  },
+  "harmonic_solve": {
+    "anchor_vertex_count": 12049,
+    "solved_vertex_count": 3982,
+    "unknown_vertex_count": 3982,
+    "unresolved_component_count": 0,
+    "unresolved_component_sizes": [],
+    "unresolved_vertex_count": 0
+  },
+  "owner_copy_actual_motion": {
+    "frames": [
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.3268229279011914,
+        "edge_p95": 1.0005050905121389,
+        "edge_p99": 1.0420202873164839,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.3302589775225506,
+        "edge_p95": 1.0066903458644751,
+        "edge_p99": 1.0508305875429516,
+        "frame": 1,
+        "time_seconds": 0.8333333333333334
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.331858759782785,
+        "edge_p95": 1.0004998302318775,
+        "edge_p99": 1.0423903186853303,
+        "frame": 2,
+        "time_seconds": 1.6666666666666667
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.330259001440276,
+        "edge_p95": 1.0066903458831993,
+        "edge_p99": 1.0508304386904317,
+        "frame": 3,
+        "time_seconds": 2.5
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 15,
+        "edge_max": 6.22012606615386,
+        "edge_p95": 1.096423116475498,
+        "edge_p99": 1.847089347444036,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 12,
+        "edge_max": 6.940668049682473,
+        "edge_p95": 1.0834778756003978,
+        "edge_p99": 1.675121391890849,
+        "frame": 1,
+        "time_seconds": 0.20833333333333334
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 12,
+        "edge_max": 6.866187378752013,
+        "edge_p95": 1.0841028995059137,
+        "edge_p99": 1.847408960559208,
+        "frame": 2,
+        "time_seconds": 0.4166666666666667
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 8,
+        "edge_max": 6.427001267962622,
+        "edge_p95": 1.0666641031505293,
+        "edge_p99": 1.6675502989222868,
+        "frame": 3,
+        "time_seconds": 0.625
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 13,
+        "edge_max": 6.22012606615386,
+        "edge_p95": 1.0938418550269613,
+        "edge_p99": 1.8279921841784696,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 14,
+        "edge_max": 6.936354613620711,
+        "edge_p95": 1.101182751423098,
+        "edge_p99": 1.6114443235880318,
+        "frame": 1,
+        "time_seconds": 0.2777777777777778
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 4,
+        "edge_max": 5.955629711184545,
+        "edge_p95": 1.0681811268278931,
+        "edge_p99": 1.6450782517159794,
+        "frame": 2,
+        "time_seconds": 0.5555555555555556
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 13,
+        "edge_max": 6.22012606615386,
+        "edge_p95": 1.0938418550269613,
+        "edge_p99": 1.8279921841784696,
+        "frame": 3,
+        "time_seconds": 0.8333333333333334
+      }
+    ],
+    "max_edge_gt_10": 0,
+    "max_edge_gt_4": 15,
+    "max_edge_p99": 1.847408960559208,
+    "worst_edge_max": 6.940668049682473
+  },
+  "partition": {
+    "closure": {
+      "attractive_union_blocked_by_mutex": 401,
+      "attractive_union_count": 12017,
+      "closure_added_separate_count": 401,
+      "closure_policy": "STRUCTURAL_AUTHORITY_MAX_CONTINUITY_WITH_PROBE_CANNOT_LINKS",
+      "component_count": 73,
+      "direct_seed_count": 1417,
+      "final_separate_count": 1818,
+      "seed_constraint_violation_count": 0
+    },
+    "component_count": 73,
+    "cut_closed_crossing_edge_count": 1818,
+    "unsafe_source_edge_seed_count": 1417
+  },
+  "schema": "RealSaS.KnightComponentHarmonicSeamOracle.v1",
+  "status": "COMPLETE__AUDIT_ONLY__NO_PARENT_MUTATION"
+}

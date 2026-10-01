@@ -1,0 +1,45 @@
+name: deformation-witness-validity-audit-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/audit_deformation_witness_validity_v1.py'
+      - '.github/workflows/deformation_witness_validity_audit_v1.yml'
+
+concurrency:
+  group: deformation-witness-validity-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install
+        run: python -m pip install --no-input --progress-bar off numpy
+      - name: Run witness audit
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python tools/audit_deformation_witness_validity_v1.py | tee /tmp/deformation_witness_validity.txt
+      - name: Seal correction
+        run: |
+          set -euo pipefail
+          mkdir -p canonical/deformation_witness_validity_audit_v1
+          cp /tmp/deformation_witness_validity.txt canonical/deformation_witness_validity_audit_v1/AUDIT_STDOUT.txt
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/DEFORMATION_WITNESS_VALIDITY_AUDIT_V1_20260928.json canonical/deformation_witness_validity_audit_v1
+          git commit -m 'audit: seal deformation witness validity correction'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

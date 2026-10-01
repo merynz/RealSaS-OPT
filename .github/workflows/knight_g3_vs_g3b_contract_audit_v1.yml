@@ -1,0 +1,121 @@
+name: knight-g3-vs-g3b-contract-audit-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/knight_g3_vs_g3b_contract_audit_v1.yml'
+
+concurrency:
+  group: knight-g3-vs-g3b-contract-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      OUT: canonical/knight_g3_vs_g3b_contract_audit_v1
+
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install runtime
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Compare intended G3 implementation with G3B closure
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+
+          from compiler.realsas_compiler_core.artifact_codec_v2 import (
+              canonical_mesh_candidate_from_dict,
+              qualified_skeleton_from_dict,
+              qualified_skin_from_dict,
+              qualified_camera_set_from_dict,
+              deformation_envelope_from_dict,
+              mesh_policy_from_dict,
+          )
+          from compiler.realsas_compiler_core.geometry_artifact_codec_v2 import rigging_surface_from_dict
+          from compiler.realsas_compiler_core.mesh.deformation_stress_v2 import run_g3_local_frame_micro_stress_v2
+          from compiler.realsas_compiler_core.mesh.skin_topology_compatibility_v1 import run_skin_topology_compatibility_v1
+
+          root=Path("/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924")
+          out=Path("canonical/knight_g3_vs_g3b_contract_audit_v1");out.mkdir(parents=True,exist_ok=True)
+          paths={
+            "surface":root/"artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json",
+            "candidate":root/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json",
+            "policy":root/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/mesh_qualification_policy.json",
+            "skeleton":root/"artifacts/28_SKELETON_QUALIFIED/qualified_skeleton.json",
+            "skin":root/"artifacts/32_SKIN_QUALIFIED/qualified_skin.json",
+            "envelope":root/"artifacts/34_DEFORMATION_CAPABILITY_ENVELOPE/deformation_envelope.json",
+            "camera":root/"artifacts/05_CAMERA_CONTRACT_SOLVED/qualified_camera_set.json",
+          }
+          for k,p in paths.items():
+              if not p.is_file():raise RuntimeError(f"MISSING:{k}:{p}")
+          surface=rigging_surface_from_dict(json.loads(paths["surface"].read_text()))
+          candidate=canonical_mesh_candidate_from_dict(json.loads(paths["candidate"].read_text()))
+          policy=mesh_policy_from_dict(json.loads(paths["policy"].read_text()))
+          skeleton=qualified_skeleton_from_dict(json.loads(paths["skeleton"].read_text()))
+          skin=qualified_skin_from_dict(json.loads(paths["skin"].read_text()))
+          envelope=deformation_envelope_from_dict(json.loads(paths["envelope"].read_text()))
+          cameras=qualified_camera_set_from_dict(json.loads(paths["camera"].read_text()))
+
+          g3=run_g3_local_frame_micro_stress_v2(
+              candidate,surface=surface,skeleton=skeleton,skin=skin,envelope=envelope,
+              cameras=cameras.cameras,policy=policy,
+          )
+          g3b=run_skin_topology_compatibility_v1(
+              candidate,surface=surface,skeleton=skeleton,skin=skin,envelope=envelope,
+              cameras=cameras.cameras,policy=policy,
+          )
+          offenders=(253,3829,3573)
+          unsafe=set(map(int,g3b["unsafe_face_indices"]))
+          payload={
+            "schema":"RealSaS.KnightG3VsG3BContractAudit.v1",
+            "status":"AUDIT_ONLY__NO_REPAIR_APPLIED",
+            "artifact_sha256":{k:hashlib.sha256(p.read_bytes()).hexdigest() for k,p in paths.items()},
+            "g3":{
+              "passed":bool(g3.passed),
+              "failure_invariants":list(g3.failure_invariants),
+              "report_hash":g3.report_hash,
+              "summary":dict(g3.summary or {}),
+            },
+            "g3b":{
+              "passed":bool(g3b["passed"]),
+              "risky_face_count":int(g3b["risky_face_count"]),
+              "unsafe_face_count":int(g3b["unsafe_face_count"]),
+              "unsafe_known_offenders":{str(i):i in unsafe for i in offenders},
+              "report_hash":g3b["report_hash"],
+            },
+            "verdict":{
+              "legacy_g3_alone_rejects_exact_baseline":not bool(g3.passed),
+              "g3b_rejects_exact_baseline":not bool(g3b["passed"]),
+              "all_known_smear_offenders_captured_by_g3b":all(i in unsafe for i in offenders),
+              "claim_boundary":"Compares current implementations of the frozen G3 lane and the later G3B topology-skin closure on the same exact baseline authorities."
+            }
+          }
+          (out/"REPORT.json").write_text(json.dumps(payload,indent=2,sort_keys=True)+"\n")
+          print(json.dumps(payload,indent=2,sort_keys=True))
+          PY
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add "$OUT/REPORT.json"
+          git commit -m 'audit: seal exact G3 vs G3B contract evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

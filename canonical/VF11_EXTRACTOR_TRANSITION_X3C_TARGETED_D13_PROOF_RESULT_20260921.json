@@ -1,0 +1,22 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX3CTargetedD13ProofResult.v1",
+  "date_utc": "2026-09-21",
+  "status": "TARGETED_D13_PROOF_CLOSED__FINAL_TARGET_LEAF_CERTIFIED_EMPTY",
+  "artifact_sha256": "77f0a481202ff7dc94967dad07a0dabec668a3afde0f2389a40ac8ad6b53fa1f",
+  "artifact_bytes": 5756,
+  "target_parent": {"root_anchor_id": 62, "path": "1157", "absolute_depth": 12},
+  "processed_child_count": 8,
+  "child_state_counts": {"EMPTY_NEGATIVE": 8},
+  "child_c0_state_counts": {"PROVEN_EMPTY_NEGATIVE": 8},
+  "unresolved_child_count": 0,
+  "empirical_contradiction_count": 0,
+  "elapsed_seconds_total": 0.3374236879999444,
+  "interpretation": "All eight d13 children of the sole remaining X3B UNKNOWN leaf received strict negative EMPTY certificates. The two no-surface leaves isolated by X3/X3A can therefore be replaced by certified-empty descendants in the proof-aware planner.",
+  "claim_boundary": "This closes the targeted pruning ambiguity only. It does not prove that every other ACTIVE_UNKNOWN or ACTIVE_ZERO_EXISTS region has no additional sub-grid zero-set structure. X3 remains a sampled-lattice extractor equivalence path with certified-empty pruning.",
+  "numeric_rigor": "ORDINARY_FLOAT64__NOT_DIRECTED_ROUNDING",
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false,
+  "full_domain_traversal_performed": false,
+  "next": "X3D_REMERGE_TARGETED_CERTIFICATES_AND_REPLAY_D13_SAMPLED_LATTICE_EQUIVALENCE"
+}

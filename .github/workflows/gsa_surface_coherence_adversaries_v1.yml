@@ -1,0 +1,51 @@
+name: gsa-surface-coherence-adversaries-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/audit_gsa_surface_coherence_v1.py'
+      - '.github/workflows/gsa_surface_coherence_adversaries_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: gsa-surface-coherence-adversaries-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install audit runtime
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off numpy scipy
+      - name: Run GSA surface coherence adversaries
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python tools/audit_gsa_surface_coherence_v1.py | tee /tmp/gsa_surface_coherence.txt
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          mkdir -p canonical/gsa_surface_coherence_adversaries_v1
+          cp /tmp/gsa_surface_coherence.txt canonical/gsa_surface_coherence_adversaries_v1/AUDIT_STDOUT.txt
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/GSA_SURFACE_COHERENCE_ADVERSARIES_V1_20260928.json canonical/gsa_surface_coherence_adversaries_v1
+          if git diff --cached --quiet; then
+            echo GSA_SURFACE_COHERENCE_ADVERSARIES_UNCHANGED
+            exit 0
+          fi
+          git commit -m 'audit: seal GSA surface-coherence adversaries'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

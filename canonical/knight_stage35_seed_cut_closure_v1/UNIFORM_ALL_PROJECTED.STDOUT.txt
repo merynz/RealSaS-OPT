@@ -1,0 +1,1 @@
+KNIGHT_STAGE35_SEED_CUT_CLOSURE_DIAGNOSTIC={"arm": "UNIFORM_ALL_PROJECTED", "blocked_attractive": 1527, "closure_added_separate_pair_count": 1527, "final_separate_pair_count": 2523, "naive_noncut_seed_count": 996, "preloaded_component_count": 81, "seed_count": 996, "violated": 0}

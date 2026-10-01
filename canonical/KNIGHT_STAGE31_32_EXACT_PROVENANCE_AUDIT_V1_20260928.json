@@ -1,0 +1,116 @@
+{
+  "ledgers": [],
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "schema": "RealSaS.KnightStage31Stage32ExactProvenanceAudit.v1",
+  "stage_artifacts": {
+    "31_ARACHNE_FIT": [
+      {
+        "json": {
+          "architecture_id": "RealSaS.Arachne.A1.RawSurfaceK4AttentionDirectSimplex.v6",
+          "checkpoint_path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/imports/arachne_stage31_v6/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt",
+          "checkpoint_sha256": "bfd2bd24f55bdce2dc36b0ae6a7afe01b8381c680de545c66a11a3d707fe73ed",
+          "execution_hash": "9deb433be219ec2cd6c1e42e4ef6a701820abe1e796d3955cc0ae68eb574ea11",
+          "execution_receipt_path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/imports/arachne_stage31_v6/ARACHNE_V6_MAINLINE_EXECUTION_RECEIPT.json",
+          "execution_receipt_sha256": "52619c1031765d57ffcb53c01665130ca1434e8ad4cc07a66e02e0eb2a514c5c",
+          "execution_report": {
+            "executor_kind": "EXTERNAL_GPU_JOB_V1",
+            "external_fit_executed": true,
+            "external_fit_timing": {
+              "closure_step": 8192,
+              "terminal_check_steps": [
+                7680,
+                7936,
+                8192
+              ]
+            },
+            "external_fit_wall_seconds": 121.81457332699983,
+            "product_authority_minted": false,
+            "receipt_payload_sha256": "52619c1031765d57ffcb53c01665130ca1434e8ad4cc07a66e02e0eb2a514c5c",
+            "status": "PASS",
+            "teacher_inference_inputs_used": false
+          },
+          "lane": "ARACHNE",
+          "metadata": {
+            "receipt_metadata": {
+              "closure_mode": "V6_FROZEN_BACKBONE_FRESH_READOUT",
+              "compiler_qualification_passed_externally": true,
+              "external_qualified_skin_is_evidence_only": true,
+              "external_qualified_skin_lineage": "3fa8dacae0d52b86193f14f6cb0214ed68d8d40035317e367b335d9c06a48397",
+              "generalization_claimed": false,
+              "historical_skeleton_lineage": "c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce",
+              "legacy_probe_semantic_tree_sha256": "95f6f224f52ba43dd96296ce877a11851037e939640a4c995e2b9f3e874c7f59",
+              "numeric_skin_field_unchanged": true,
+              "product_authority_minted": false,
+              "rebound_skeleton_lineage": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+              "semantic_id_rebind_receipt_sha256": "24857c3b99da8ff39da25a157d80beed4d86c7ecd71640b597ffa8e71c28049a",
+              "semantic_skeleton_tree_sha256": "dbe7e6d29551d1211653efaf3c344c2007c5b6a812932c6d115d48b77b3ca46f",
+              "stage32_requalification_required": true,
+              "teacher_boundary": "OBJECTIVE_AND_EVALUATION_ONLY__NEVER_PREDICTOR_INPUT"
+            },
+            "v2_orchestration": true
+          },
+          "model_source_sha256": "39ff4f7a2051f0d9c1251a5999f472b9926e83deacbedcedc8e92eea424dce01",
+          "preregistration_binding_hash": "2b16025fc19d06cdf2846d14f3c252721ad897cc7790ad1f8f93bed2d7c699b1",
+          "proposal_path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/imports/arachne_stage31_v6/ARACHNE_KNIGHT_V6_SKIN_PROPOSAL_REPLAY.json",
+          "proposal_sha256": "babd9f49c271ee51efad1aedeecc6217961a9bfd546ef7a00a98fc6e89a010a7",
+          "qualification_policy": {
+            "max_simplex_repair_l1": 1e-05,
+            "max_total_correction_l1": 0.0001,
+            "negative_tolerance": 1e-08
+          },
+          "result_path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/imports/arachne_stage31_v6/ARACHNE_KNIGHT_V6_RESULT.json",
+          "result_sha256": "42424db07f9e928bdad33a22fc5eed7c5507f4b20627731d62486eeb4f66d995",
+          "schema_version": "RealSaS.ModelFitExecutionIR.v1",
+          "upstream_bindings": [
+            [
+              "geppetto_checkpoint_seal",
+              "bbb195ffcf025fc75a88eaf027a11509c9cb1133940a82523a6dea8ca7c63ca6"
+            ],
+            [
+              "qualified_skeleton",
+              "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850"
+            ],
+            [
+              "rigging_surface",
+              "452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a"
+            ]
+          ]
+        },
+        "path": "artifacts/31_ARACHNE_FIT/model_fit_execution.json",
+        "sha256": "8a4448bd94ecf952970625285bcb159fc0c94e63bc173734187d54a890f2536b",
+        "size": 3620
+      }
+    ],
+    "32_SKIN_QUALIFIED": [
+      {
+        "path": "artifacts/32_SKIN_QUALIFIED/qualified_skin.json",
+        "sha256": "f1a937de488ec2a620ee292b3f865a3b2ca97b9466401555beb08b1d2f945a09",
+        "size": 29231021
+      }
+    ],
+    "33_ARACHNE_CHECKPOINT_SEALED": [
+      {
+        "json": {
+          "checkpoint_path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/imports/arachne_stage31_v6/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt",
+          "checkpoint_seal_hash": "034b984101d9976085720480e551b11b6cdd8615f0d85c5a3db7ecdb2e1f3021",
+          "checkpoint_sha256": "bfd2bd24f55bdce2dc36b0ae6a7afe01b8381c680de545c66a11a3d707fe73ed",
+          "execution_binding_hash": "9deb433be219ec2cd6c1e42e4ef6a701820abe1e796d3955cc0ae68eb574ea11",
+          "lane": "ARACHNE",
+          "metadata": {
+            "architecture_id": "RealSaS.Arachne.A1.RawSurfaceK4AttentionDirectSimplex.v6",
+            "checkpoint_filename_is_not_authority": true,
+            "external_fit_execution_binding_hash": "9deb433be219ec2cd6c1e42e4ef6a701820abe1e796d3955cc0ae68eb574ea11",
+            "v2_orchestration": true
+          },
+          "qualified_output_binding_hash": "5b268aa58602bd4ca6f924ee7442685f9d7ae78f6cf0ba4769e8aaae816e6af0",
+          "result_sha256": "42424db07f9e928bdad33a22fc5eed7c5507f4b20627731d62486eeb4f66d995",
+          "schema_version": "RealSaS.ModelCheckpointSealIR.v1"
+        },
+        "path": "artifacts/33_ARACHNE_CHECKPOINT_SEALED/model_checkpoint_seal.json",
+        "sha256": "0fdc502af57d5b941805ff601d0511ad14b2ae3964d123468da3bdd16b757c6e",
+        "size": 1004
+      }
+    ]
+  },
+  "status": "MEASURED__NO_REPAIR"
+}

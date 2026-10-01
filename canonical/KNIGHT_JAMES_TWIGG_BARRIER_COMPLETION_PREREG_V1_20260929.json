@@ -1,0 +1,12 @@
+{
+  "schema": "RealSaS.KnightJamesTwiggBarrierCompletionPrereg.v1",
+  "status": "FROZEN_BEFORE_BARRIER_COMPLETION_RESULT",
+  "date": "2026-09-29",
+  "question": "Can the high-recall Stage35 edge-stretch signal act only as a cannot-cross barrier while James/Twigg remains the sole region-label authority?",
+  "region_label_authority": "James/Twigg safe-face rotation-signature labels only",
+  "barrier_rule": "Dense canonical edge maximum controlled-probe expansion ratio > 4.0 under current Arachne weights",
+  "barrier_semantics": "Barrier edges never create labels or directly authorize a split; they only block patch-local geodesic propagation.",
+  "teacher_policy": "Teacher topology is evaluation-only. Teacher weights are introduced only after inference is frozen to isolate topology mechanics.",
+  "closure_policy": "Existing frozen Knight topology closure thresholds apply unchanged.",
+  "no_product_mutation": true
+}

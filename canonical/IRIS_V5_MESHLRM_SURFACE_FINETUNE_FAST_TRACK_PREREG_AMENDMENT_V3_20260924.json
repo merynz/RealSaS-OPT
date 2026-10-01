@@ -1,0 +1,61 @@
+{
+  "schema": "RealSaS.IRIS.V5MeshLRMSurfaceFineTuneFastTrackPreregAmendmentV3.v1",
+  "status": "FROZEN_BEFORE_ANY_SCIENTIFIC_OPTIMIZER_STEP__RASTER_SURROGATE_REPAIR",
+  "date_utc": "2026-09-24",
+  "amends": "canonical/IRIS_V5_MESHLRM_SURFACE_FINETUNE_FAST_TRACK_PREREG_AMENDMENT_V2_20260924.json",
+  "evidence_before_training": {
+    "run_id": "20260924T171641Z",
+    "actual_continuation_parameter_updates": 0,
+    "initial_soft_alpha_fg_miss_range": [
+      0.586280107498169,
+      0.6407040953636169
+    ],
+    "initial_soft_alpha_bg_fp_range": [
+      0.004096724092960358,
+      0.005062626674771309
+    ],
+    "training_mesh_vertices": 389408,
+    "training_mesh_faces": 779008,
+    "interpretation": "The former full-image SoftRas-style alpha is not a trustworthy forward coverage objective for a highly tessellated surface: each foreground pixel can be close to internal triangle edges. This differs materially from silhouette antialias semantics."
+  },
+  "replacement_raster_loss": {
+    "rasterizer": "PyTorch3D BSD, pinned as before",
+    "forward_coverage": "HARD_TRIANGLE_OCCUPANCY_FROM_SIGNED_RASTER_DISTANCE",
+    "backward_surrogate": "SOFT_DISTANCE_ALPHA_STRAIGHT_THROUGH_ESTIMATOR",
+    "gradient_domain": "UNION_OF_EXACT_SOURCE_BOUNDARY_BAND_AND_CURRENT_PREDICTED_HARD_BOUNDARY_OR_HOLE_BAND",
+    "boundary_radius_px": 8,
+    "formula": "alpha_ste = hard.detach() + soft - soft.detach(); loss is class-balanced |alpha_ste-target| only inside the detached boundary/hole band",
+    "rationale": "Forward loss now measures actual mesh coverage rather than internal-triangle softness; backward remains differentiable near geometry boundaries.",
+    "full_image_internal_triangle_alpha_penalty": false
+  },
+  "proxy_gate": {
+    "reference": "frozen-C exact Stage13 predicted masks",
+    "reference_sha256": "3a476f7997ffa837082f8ed33d991afca0d6c9a7f3bc2af1efbf5f180e3c83f0",
+    "min_per_view_recall_vs_product_mask": 0.95,
+    "min_per_view_precision_vs_product_mask": 0.95,
+    "purpose": "Prove the 256-grid training surface is a sufficiently faithful proxy for the frozen-C product mesh before any update. Failure is apparatus mismatch, not scientific negative."
+  },
+  "mesh_grid": {
+    "resolution": 256,
+    "retained_for_first_repair": true,
+    "reason": "Do not add a second causal change until hard proxy parity is measured. If the preregistered proxy gate fails, escalate carrier resolution in a new amendment rather than training against a known-mismatched proxy."
+  },
+  "gradient_scale": {
+    "policy": "DIRECT_RAW_EQUAL_NORM_SCALE_NO_DIMENSIONALLY_INVALID_CLAMP",
+    "safe_interval": [
+      1e-8,
+      1
+    ],
+    "required_scaled_mesh_to_base_norm_ratio": [
+      0.95,
+      1.05
+    ]
+  },
+  "precision": {
+    "mesh_dense_field_eval": "FP32",
+    "mesh_sparse_vjp_requery": "FP32",
+    "exact_zero_tie_break": "DETERMINISTIC_SYMBOLIC_EPSILON_ONLY_IF_EXACT_ZERO_REMAINS",
+    "exact_zero_epsilon": 1e-7
+  },
+  "final_gate_unchanged": true
+}

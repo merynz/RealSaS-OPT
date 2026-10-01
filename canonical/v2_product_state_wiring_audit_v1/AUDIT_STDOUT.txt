@@ -1,0 +1,70 @@
+{
+  "architecture_choice_frozen": false,
+  "counts": {
+    "P0": 4,
+    "P1": 1,
+    "P2": 0
+  },
+  "findings": [
+    {
+      "class": "AUTHORITY_CARRIER_GAP",
+      "consequence": "Product state knows which VisualMeshSet is authoritative, but runtime projection has no typed visual-geometry input and falls back to the mechanical mesh path.",
+      "design_before_code": "Define a typed runtime visual state carrying exact VisualMeshSet geometry plus a qualified deformation/visibility binding; Stage42 must consume that exact state.",
+      "evidence": {
+        "stage18_declares_mechanical_not_render_authority": true,
+        "stage38_carries_visual_hash": true,
+        "stage42_visual_payload_consumer": false
+      },
+      "id": "P0_VISUAL_AUTHORITY_HASHED_BUT_NOT_EXECUTED_AT_RUNTIME",
+      "severity": "P0"
+    },
+    {
+      "class": "AUTHORING_STATE_GAP",
+      "consequence": "The editable authoring/export state cannot contain or edit the actual declared visual topology.",
+      "design_before_code": "Make render-authoritative visual topology a first-class editable artifact or explicitly reject the dual-topology product architecture.",
+      "evidence": {
+        "stage46_visual_payload_consumer": false,
+        "visual_authority_declared": true
+      },
+      "id": "P0_VISUAL_AUTHORITY_NOT_PRESENT_IN_EDITABLE_EXPORT",
+      "severity": "P0"
+    },
+    {
+      "class": "SCHEMA_COMPOSITION_GAP",
+      "consequence": "Source-owned appearance emits a visual binding contract while runtime still requires per-mechanical-face UVs.",
+      "design_before_code": "Freeze one runtime visual projection IR; do not overload or silently coerce the legacy mechanical face_uv contract.",
+      "evidence": {
+        "stage23_source_uv_binding": "visual_uv_binding.npz",
+        "stage42_legacy_requirement": "face_uv required"
+      },
+      "id": "P0_SOURCE_OWNED_VISUAL_UV_RUNTIME_SCHEMA_DISCONNECT",
+      "severity": "P0"
+    },
+    {
+      "class": "DECLARED_VS_EXECUTABLE_CONTRACT_GAP",
+      "consequence": "VisualMeshSet metadata declares a deformation contract, but the canonical 46-stage path does not materialize or qualify that binding.",
+      "design_before_code": "Introduce an explicit typed visual-to-mechanical deformation binding stage/artifact and prove the exact binding before runtime/export.",
+      "evidence": {
+        "canonical_invocations": [],
+        "declared_contract": "BARYCENTRIC_BINDING_PLUS_ARAP_2D"
+      },
+      "id": "P0_DECLARED_VISUAL_DEFORMATION_CONTRACT_HAS_NO_CANONICAL_EXECUTOR",
+      "severity": "P0"
+    },
+    {
+      "class": "COMPOSITION_INVARIANT_GAP",
+      "consequence": "A visual triangle may remain inside one region while its corners are driven by different mechanical affine faces.",
+      "design_before_code": "Choose and qualify either single-affine-domain visual triangles, seam-aware subdivision, or a continuous transfer field; do not select by intuition.",
+      "evidence": {
+        "binding_granularity": "per visual vertex -> mechanical face",
+        "existing_face_gate": "cross-region face forbidden"
+      },
+      "id": "P1_VISUAL_TRIANGLE_DEFORMATION_DOMAIN_COHERENCE_NOT_PROVEN",
+      "severity": "P1"
+    }
+  ],
+  "repair_applied": false,
+  "repo_head": "a2f495cdc523003d72f1a0407b98db0000820b4b",
+  "schema": "RealSaS.V2ProductStateWiringAudit.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED"
+}

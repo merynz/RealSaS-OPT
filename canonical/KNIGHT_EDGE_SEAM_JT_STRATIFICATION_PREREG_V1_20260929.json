@@ -1,0 +1,16 @@
+{
+  "schema": "RealSaS.KnightEdgeSeamJamesTwiggStratificationPrereg.v1",
+  "status": "FROZEN_BEFORE_JT_EDGE_STRATIFICATION_RESULT",
+  "date": "2026-09-29",
+  "base_seam_rule": "STRETCH_GT4_AND_WEIGHT_L1_GT1 followed by graph 2-core",
+  "strata": [
+    "JT_DIFFERENT: both endpoint James/Twigg labels known and different",
+    "JT_SAME: both endpoint James/Twigg labels known and equal",
+    "JT_ONE_UNKNOWN: exactly one endpoint label unknown",
+    "JT_BOTH_UNKNOWN: both endpoint labels unknown"
+  ],
+  "teacher_policy": "Teacher source topology is evaluation-only after the base seam and James/Twigg strata are frozen.",
+  "purpose": "Determine whether remaining false-positive seam edges concentrate in a teacher-free evidence stratum before designing any repair.",
+  "no_product_mutation": true,
+  "no_threshold_search": true
+}

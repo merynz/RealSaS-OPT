@@ -1,0 +1,78 @@
+{
+  "schema": "RealSaS.CAADeterministicCompletionChallengerPrereg.v1",
+  "status": "FROZEN_DIAGNOSTIC_PREREG",
+  "frozen_on": "2026-09-27",
+  "shipping_policy_changed": false,
+  "product_authority_claimed": false,
+  "subject_identity_used_for_thresholds": false,
+  "purpose": "SELECT_A_SOURCE_CONSTRAINED_DETERMINISTIC_COMPLETION_BACKEND_WITHOUT_HALLUCINATED_OR_UNDEFINED_VISIBLE_PIXELS",
+  "immutable_principles": {
+    "observed_source_is_hard_constraint": true,
+    "source_safe_transparency_is_art_authority": true,
+    "unsupported_visible_pixels_forbidden": true,
+    "cross_component_copy_forbidden": true,
+    "euclidean_cross_sheet_nearest_copy_forbidden": true,
+    "runtime_generation_forbidden": true,
+    "learned_rgba_generation_forbidden": true,
+    "final_visible_undefined_pixel_count": 0
+  },
+  "arms": {
+    "A_WEIGHTED_VARIATIONAL": {
+      "family": "WEIGHTED_GRAPH_DIRICHLET_POISSON",
+      "domain": "CANONICAL_SURFACE_GRAPH",
+      "unknown_owner": "CONTINUOUS_PM_LINEAR_RGBA_FIELD",
+      "source_constraints": "HARD_DIRICHLET",
+      "role": "LOW_COMPLEXITY_BASELINE"
+    },
+    "B_SOURCE_PATCH_ENERGY": {
+      "family": "SOURCE_ONLY_PATCH_OR_DONOR_LABEL_ENERGY_PLUS_POISSON_CLOSURE",
+      "domain": "CANONICAL_SURFACE_GRAPH_OR_LOCAL_SURFACE_CHARTS",
+      "unknown_owner": "DISCRETE_SOURCE_DONOR_LABELS_THEN_CONTINUOUS_PM_LINEAR_RGBA",
+      "source_constraints": "HARD_SOURCE_ONLY",
+      "unary_terms": [
+        "SOURCE_SUPPORT_CONFIDENCE",
+        "SURFACE_GEODESIC_DISTANCE",
+        "NORMAL_ORIENTATION_COMPATIBILITY",
+        "LOCAL_SOURCE_PATCH_APPEARANCE_COMPATIBILITY"
+      ],
+      "pairwise_terms": [
+        "NEIGHBOR_DONOR_COHERENCE",
+        "BOUNDARY_GRADIENT_CONTINUITY",
+        "TOPOLOGY_EDGE_BARRIER"
+      ],
+      "closure": "WEIGHTED_POISSON_OR_GRAPH_LAPLACIAN_SEAM_RECONCILIATION",
+      "role": "DETAIL_PRESERVING_CHALLENGER"
+    }
+  },
+  "frozen_metrics": {
+    "mean_rgba_l1_limit": 0.08,
+    "p95_rgba_l1_limit": 0.2,
+    "thresholds_source": "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json",
+    "source_constraint_mutation_allowed": false,
+    "undefined_visible_pixel_count_limit": 0,
+    "cross_component_edges_consumed": false
+  },
+  "evaluation": {
+    "knight_use": "DIAGNOSTIC_WITNESS_ONLY",
+    "subject_free_control_bank_required_before_shipping_promotion": true,
+    "holdout_scales_samples": [
+      16,
+      64,
+      256,
+      1024
+    ],
+    "selection_order": [
+      "MUST_PASS_IMMUTABLE_SOURCE_AND_DEFINEDNESS_INVARIANTS",
+      "MUST_PASS_FROZEN_HOLDOUT_MEAN_AND_P95_GATES",
+      "PREFER_LOWER_P95_THEN_P99_AND_EDGE_ERROR",
+      "IF_VISUAL_METRICS_ARE_EFFECTIVELY_TIED_PREFER_LOWER_RUNTIME_AND_MEMORY_COMPLEXITY"
+    ],
+    "no_threshold_relaxation_after_witness": true
+  },
+  "literature_family_notes": {
+    "variational": "POISSON_OR_DIRICHLET_ENERGY_MINIMIZATION",
+    "discrete_labels": "MRF_GRAPH_ENERGY_MINIMIZATION",
+    "patch_correspondence": "PATCHMATCH_OR_IMAGE_QUILTING_STYLE_SOURCE_ONLY_CORRESPONDENCE",
+    "note": "Names identify algorithmic families only; no external implementation is imported by authority."
+  }
+}

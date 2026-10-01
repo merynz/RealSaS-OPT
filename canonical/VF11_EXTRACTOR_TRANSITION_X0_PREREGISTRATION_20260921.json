@@ -1,0 +1,54 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX0Preregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__SPARSE_FREUDENTHAL_MTET_EQUIVALENCE_BASELINE",
+  "authority_class": "RESEARCH_PREREGISTRATION_ONLY",
+  "parent_c2_v4_result": {
+    "run_id": "20260921T192348Z",
+    "profile_sha256": "a68b38d3882f8691e65b9637dd09bfc7b056ea82d7e7da4d5292ce4772e2bd0a",
+    "empirical_contradiction_count": 0,
+    "existence_partition_alarm_count": 0,
+    "d11_state_counts": {
+      "EMPTY_NEGATIVE": 146,
+      "EMPTY_POSITIVE": 161,
+      "GRAPH": 17,
+      "UNRESOLVED": 252
+    },
+    "unresolved_root_volume_fraction": 0.041015625
+  },
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "objective": "Establish a deterministic sparse contouring kernel whose output is exactly equivalent to dense fixed-Freudenthal marching tetrahedra on the same canonical lattice when supplied the same sign-changing cubes.",
+  "reason": "Adaptive proof traversal may prune empty volume, but contour topology must not depend on whether empty cubes were omitted. X0 isolates that extraction invariant before any Knight/full-domain bakeoff.",
+  "kernel_contract": {
+    "lattice": "global integer XYZ corner lattice",
+    "cube_corner_order": ["000","100","010","110","001","101","011","111"],
+    "tetrahedralization": [
+      [0,1,3,7],
+      [0,3,2,7],
+      [0,2,6,7],
+      [0,6,4,7],
+      [0,4,5,7],
+      [0,5,1,7]
+    ],
+    "vertex_identity": "canonical unordered lattice-edge endpoint pair",
+    "interpolation": "linear zero interpolation on tetra edge",
+    "degenerate_policy": "fail closed for exact-zero lattice values in X0 fixtures; later production policy must type exact-zero handling explicitly"
+  },
+  "fixtures": [
+    "oblique plane crossing adjacent cubes",
+    "sphere on a small canonical lattice",
+    "smooth saddle-like implicit field"
+  ],
+  "frozen_gates": [
+    "sparse active-cube mesh canonical vertex set == dense all-cube mesh canonical vertex set",
+    "sparse active-cube canonical face set == dense all-cube canonical face set",
+    "no duplicate or degenerate faces",
+    "no unmatched internal seam induced solely by sparse cube omission",
+    "all emitted vertices finite and inside the source lattice bounds"
+  ],
+  "claim_boundary": "X0 proves only sparse-vs-dense equivalence for the fixed MTet baseline. It does not claim MTet improves VF11 fidelity; historical regular MTet evidence already showed no material fidelity gain over MC. It is a topology/stitching baseline for the adaptive extractor transition.",
+  "next_if_pass": "X1_CERTIFIED_NARROW_BAND_PLAN_AND_LOCAL_REFERENCE_BAKEOFF"
+}

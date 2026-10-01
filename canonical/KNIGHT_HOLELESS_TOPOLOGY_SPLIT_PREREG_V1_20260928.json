@@ -1,0 +1,43 @@
+{
+  "schema": "RealSaS.KnightHolelessTopologySplitPrereg.v1",
+  "status": "FROZEN_BEFORE_RERUN_RESULT",
+  "date": "2026-09-28",
+  "hypothesis": "A large fraction of teacher-weight residual catastrophic deformation is caused by fused cross-mechanical-region topology. Splitting mixed-region triangles in place with duplicated seam vertices can remove that mechanical coupling without deleting rest geometry.",
+  "oracle_boundary": {
+    "region_labels": "Teacher source connected-component labels are diagnostic oracle only.",
+    "weights": "Teacher weights are held fixed as weight oracle so topology is the only causal variable.",
+    "product_claim": false
+  },
+  "held_fixed": [
+    "Stage28 skeleton",
+    "motion/retarget inputs",
+    "original rest positions for existing vertices",
+    "original triangle geometric domain; subdivision may add midpoint/centroid vertices only",
+    "teacher weight authority for existing vertices"
+  ],
+  "intervention": [
+    "No original face area may be deleted.",
+    "Mixed-region triangles are subdivided into region-pure subtriangles.",
+    "Seam vertices are duplicated per region at identical rest positions.",
+    "New seam weights are derived only from same-region endpoints/face vertices for this oracle test."
+  ],
+  "baseline": {
+    "synthetic_unsafe_face_count": 1553,
+    "actual_motion_max_edge_gt_10": 592,
+    "actual_motion_worst_edge": 118.61562382457814
+  },
+  "preregistered_success": {
+    "hard_requirements": [
+      "face_deletion_count == 0",
+      "max_parent_face_rest_area_relative_error <= 1e-10",
+      "all output faces are region-pure"
+    ],
+    "causal_effect_requirements": [
+      "synthetic unsafe-face count reduced by at least 65% relative to 1553",
+      "actual-motion max edge>10 count reduced by at least 65% relative to 592",
+      "actual-motion worst edge ratio reduced by at least 50% relative to 118.61562382457814"
+    ],
+    "interpretation": "If all hard requirements and at least two of three causal-effect requirements pass, holeless topological split is a viable repair architecture for the cross-region failure class. It is not yet a teacher-free product operator."
+  },
+  "failure_interpretation": "Do not promote split/remesh architecture solely from visual coverage. If mechanics do not improve under fixed teacher weights, continue topology owner search."
+}

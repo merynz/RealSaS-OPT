@@ -1,0 +1,60 @@
+{
+  "schema": "RealSaS.VF11C1V2ResearchClosure.v1",
+  "date_utc": "2026-09-21",
+  "status": "C1_V2_RESEARCH_CLOSED__C2_CROSSING_RESEARCH_AUTHORIZED",
+  "authority_class": "RESEARCH_CLOSURE_ONLY",
+  "product_authority_minted": false,
+  "shipping_certificate_backend": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "full_domain_traversal_performed": false,
+  "source_v2_run_id": "20260921T165847Z",
+  "source_v2_profile_sha256": "ec0c234a52f19b63560ab334de8df63066117a1bec2c5649c569cf824ca7ea42",
+  "margin_replay_run_id": "20260921T171024Z",
+  "margin_replay_profile_sha256": "329ac936b54df4293f40803bd127a2da9c6ae79ace5129fd3f53733e527f38cf",
+  "state_parity_with_source_v2": true,
+  "primary_handoff": {
+    "count": 19,
+    "regular_count": 12,
+    "regular_fraction": 0.631578947368421,
+    "wilson95": [0.41039533164803066, 0.8085048725486492],
+    "states": {
+      "PROVEN_DIRECTIONAL_REGULAR_POSITIVE": 10,
+      "PROVEN_DIRECTIONAL_REGULAR_NEGATIVE": 2,
+      "UNKNOWN": 7
+    },
+    "terminal_margin": {
+      "min": 0.01659096141021199,
+      "p10": 0.047791900505652886,
+      "median": 0.3331917794775452
+    },
+    "v2_to_v1_candidate0_width_ratio_median": 0.009114067004035921,
+    "median_tightening_factor": 109.72050123805067
+  },
+  "stress_near_zero": {
+    "count": 32,
+    "regular_count": 17,
+    "regular_fraction": 0.53125,
+    "wilson95": [0.3644951711897464, 0.6913061289193116],
+    "terminal_margin": {
+      "min": 0.007151780605689995,
+      "p10": 0.013385232401296188,
+      "median": 0.14838709511043802
+    }
+  },
+  "empirical_contradiction_count": 0,
+  "numeric_margin_note": {
+    "float32_machine_epsilon": 1.1920928955078125e-07,
+    "primary_min_margin_over_float32_epsilon": 139175.0716133956,
+    "stress_min_margin_over_float32_epsilon": 59993.484003135934,
+    "claim_boundary": "These ratios are descriptive only. Machine epsilon is not an end-to-end numerical error bound and does not upgrade ordinary-float64 research certificates to shipping-rigorous certificates."
+  },
+  "semantic_claim": "For each certified cell, one fixed direction has a conservative strict whole-cell directional derivative sign under the research arithmetic. This proves at most one zero on each chord parallel to that direction, but does not by itself prove surface existence, a single connected component, or global topology.",
+  "forbidden_inferences": [
+    "PROVEN_SINGLE_COMPONENT",
+    "surface existence from C1 regularity alone",
+    "global topology from C1 regularity alone",
+    "shipping proof under ordinary float64"
+  ],
+  "next": "C2_ORIENTED_CROSSING_EXISTENCE_UNIQUENESS"
+}

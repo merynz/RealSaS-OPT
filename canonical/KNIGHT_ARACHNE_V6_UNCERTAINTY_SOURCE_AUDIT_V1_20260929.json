@@ -1,0 +1,55 @@
+{
+  "architecture_id": "RealSaS.Arachne.A1.RawSurfaceK4AttentionDirectSimplex.v6",
+  "claim_boundary": "Only the exact Stage30 hash-sealed model source is inspected. No execution, teacher data, or model mutation occurs.",
+  "finding": {
+    "has_confidence_literal": false,
+    "has_log_sigma": false,
+    "has_reliability_literal": false,
+    "has_skin_proposal_literal": true,
+    "has_uncertainty_literal": false
+  },
+  "hits": [
+    {
+      "line": 40,
+      "text": "from compiler.realsas_compiler_core.types import SkinInfluenceProposal, SkinProposalIR",
+      "tokens": [
+        "SkinProposalIR"
+      ]
+    },
+    {
+      "line": 297,
+      "text": "    return SkinProposalIR(",
+      "tokens": [
+        "SkinProposalIR"
+      ]
+    },
+    {
+      "line": 302,
+      "text": "        metadata={",
+      "tokens": [
+        "metadata"
+      ]
+    }
+  ],
+  "model_source_path": "/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/imports/arachne_stage31_v6/run_knight_arachne_v6_demo_closure_v1.py",
+  "model_source_sha256": "39ff4f7a2051f0d9c1251a5999f472b9926e83deacbedcedc8e92eea424dce01",
+  "preregistration": "canonical/KNIGHT_ARACHNE_V6_UNCERTAINTY_SOURCE_AUDIT_PREREG_V1_20260929.json",
+  "schema": "RealSaS.KnightArachneV6UncertaintySourceAudit.v1",
+  "source_line_count": 753,
+  "source_utf8": true,
+  "status": "READ_ONLY_HASH_SEALED_SOURCE_AUDIT",
+  "teacher_loaded": false,
+  "token_hit_counts": {
+    "SkinProposalIR": 2,
+    "confidence": 0,
+    "coverage": 0,
+    "entropy": 0,
+    "log_sigma": 0,
+    "metadata": 1,
+    "reliability": 0,
+    "sigma": 0,
+    "teacher_valid": 0,
+    "uncertainty": 0,
+    "variance": 0
+  }
+}

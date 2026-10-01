@@ -1,0 +1,767 @@
+{
+  "appearance_authority": "STAGE23_COMPLETE_APPEARANCE",
+  "clips": [
+    {
+      "clip_id": "demo_idle_v1",
+      "duration_seconds": 3.3333333333333335,
+      "frame_metrics": [
+        {
+          "final_alpha_pixel_count": 160217,
+          "frame_index": 0,
+          "max_vertex_displacement": 1.46006930775992,
+          "mean_vertex_displacement": 0.33486827392485524,
+          "time_seconds": 0.0,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 0,
+          "visible_pixel_count": 160230
+        },
+        {
+          "final_alpha_pixel_count": 158323,
+          "frame_index": 1,
+          "max_vertex_displacement": 1.5206944735747587,
+          "mean_vertex_displacement": 0.35345273664111765,
+          "time_seconds": 0.8333333333333334,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 0,
+          "visible_pixel_count": 158335
+        },
+        {
+          "final_alpha_pixel_count": 155830,
+          "frame_index": 2,
+          "max_vertex_displacement": 1.565728120947578,
+          "mean_vertex_displacement": 0.3528087095904115,
+          "time_seconds": 1.6666666666666667,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 0,
+          "visible_pixel_count": 155841
+        },
+        {
+          "final_alpha_pixel_count": 158323,
+          "frame_index": 3,
+          "max_vertex_displacement": 1.5206964261710216,
+          "mean_vertex_displacement": 0.3534529690922253,
+          "time_seconds": 2.5,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 0,
+          "visible_pixel_count": 158335
+        },
+        {
+          "final_alpha_pixel_count": 281786,
+          "frame_index": 0,
+          "max_vertex_displacement": 1.46006930775992,
+          "mean_vertex_displacement": 0.33486827392485524,
+          "time_seconds": 0.0,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 2,
+          "visible_pixel_count": 283064
+        },
+        {
+          "final_alpha_pixel_count": 283213,
+          "frame_index": 1,
+          "max_vertex_displacement": 1.5206944735747587,
+          "mean_vertex_displacement": 0.35345273664111765,
+          "time_seconds": 0.8333333333333334,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 2,
+          "visible_pixel_count": 284482
+        },
+        {
+          "final_alpha_pixel_count": 283945,
+          "frame_index": 2,
+          "max_vertex_displacement": 1.565728120947578,
+          "mean_vertex_displacement": 0.3528087095904115,
+          "time_seconds": 1.6666666666666667,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 2,
+          "visible_pixel_count": 285231
+        },
+        {
+          "final_alpha_pixel_count": 283213,
+          "frame_index": 3,
+          "max_vertex_displacement": 1.5206964261710216,
+          "mean_vertex_displacement": 0.3534529690922253,
+          "time_seconds": 2.5,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 2,
+          "visible_pixel_count": 284482
+        }
+      ],
+      "mapping": [
+        {
+          "cost": 0.6116771317630436,
+          "next_cost": 0.7054434059820822,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:7e87e97fc9fe89cbd718"
+        },
+        {
+          "cost": 0.37324048737202953,
+          "next_cost": 0.5047419906119381,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ab16ff2ffc7408c862ae"
+        },
+        {
+          "cost": 0.2054681713865518,
+          "next_cost": 0.2925199639891659,
+          "source_joint_id": "Fingers.R",
+          "target_joint_id": "J:c9cdb266f7c167a620a9"
+        },
+        {
+          "cost": 0.17678234026097459,
+          "next_cost": 0.4085321751602823,
+          "source_joint_id": "LowerArm.R",
+          "target_joint_id": "J:932628adf7f0d5936426"
+        },
+        {
+          "cost": 0.2029030249075255,
+          "next_cost": 0.28310195332574495,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:4c9f9eace712daf31538"
+        },
+        {
+          "cost": 0.48247436163504,
+          "next_cost": 0.6238222174056915,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:f5cf9181e27d0f791f7d"
+        },
+        {
+          "cost": 0.19833878296620702,
+          "next_cost": 0.2583591034997136,
+          "source_joint_id": "Thumb.R",
+          "target_joint_id": "J:75a17a4287b28cd7f57f"
+        },
+        {
+          "cost": 0.1507628779714688,
+          "next_cost": 0.49685610634347954,
+          "source_joint_id": "UpperLeg.R",
+          "target_joint_id": "J:f50f39d42ef3820824ef"
+        },
+        {
+          "cost": 0.15738848284903773,
+          "next_cost": 0.2182245988227146,
+          "source_joint_id": "MiddleHand.L",
+          "target_joint_id": "J:8455bf4c0a38867b7d9b"
+        },
+        {
+          "cost": 0.12566026834671604,
+          "next_cost": 0.15653416095612008,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:5428a88dad4d4d8d5c4d"
+        },
+        {
+          "cost": 0.12744628795827562,
+          "next_cost": 0.17729832396772957,
+          "source_joint_id": "Palm.L",
+          "target_joint_id": "J:33c7075f501c9af4cd0d"
+        },
+        {
+          "cost": 0.21451150060948782,
+          "next_cost": 0.3102178824405303,
+          "source_joint_id": "Neck",
+          "target_joint_id": "J:1008208d141ae248de43"
+        },
+        {
+          "cost": 0.22331652895761903,
+          "next_cost": 0.341721580563024,
+          "source_joint_id": "Fingers.L",
+          "target_joint_id": "J:136e20712bbd1481596e"
+        },
+        {
+          "cost": 0.1753136842084541,
+          "next_cost": 0.2033041789185967,
+          "source_joint_id": "MiddleHand.R",
+          "target_joint_id": "J:e5441b559f1c34b41aa2"
+        },
+        {
+          "cost": 0.1542952449768342,
+          "next_cost": 0.521825399970232,
+          "source_joint_id": "UpperLeg.L",
+          "target_joint_id": "J:063ee183f601e19a8ca9"
+        },
+        {
+          "cost": 0.24521820132730113,
+          "next_cost": 0.5053838222620202,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:73295dbdbb50d303e597"
+        },
+        {
+          "cost": 0.18366720483839166,
+          "next_cost": 0.2331092975233877,
+          "source_joint_id": "UpperArm.R",
+          "target_joint_id": "J:42d181ebf3515959283a"
+        },
+        {
+          "cost": 0.5902787916544152,
+          "next_cost": 0.6714047201184266,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:7d9e31e2d0bd48f88ecb"
+        },
+        {
+          "cost": 0.338657132190124,
+          "next_cost": 0.5510856632138917,
+          "source_joint_id": "Head",
+          "target_joint_id": "J:eafe286e7d84499e5257"
+        },
+        {
+          "cost": 0.1615942399702586,
+          "next_cost": 0.45709510248575125,
+          "source_joint_id": "LowerArm.L",
+          "target_joint_id": "J:7cf59fbe52c53280546a"
+        },
+        {
+          "cost": 0.37056767662637935,
+          "next_cost": 0.4647284720520398,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:cf05f36e919ff69a9d8e"
+        },
+        {
+          "cost": 0.40659342489016087,
+          "next_cost": 0.6154678629286205,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:362735eeec6ee5a3d46f"
+        },
+        {
+          "cost": 0.5383114087285982,
+          "next_cost": 0.693192900090975,
+          "source_joint_id": "Body",
+          "target_joint_id": "J:237d229c33bc9eb9bf91"
+        },
+        {
+          "cost": 0.1952579664472978,
+          "next_cost": 0.25572078846434404,
+          "source_joint_id": "UpperArm.L",
+          "target_joint_id": "J:a80d2c086e86a4cc08b5"
+        },
+        {
+          "cost": 0.2208842181998788,
+          "next_cost": 0.6520160579394874,
+          "source_joint_id": "Torso",
+          "target_joint_id": "J:2ff965d6dbe4efc2d5d4"
+        },
+        {
+          "cost": 0.2598771637136827,
+          "next_cost": 0.4990601726171502,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ee24577789f0235b8186"
+        },
+        {
+          "cost": 0.16516790065247416,
+          "next_cost": 0.3150452870805952,
+          "source_joint_id": "Hips",
+          "target_joint_id": "J:b9e5c0d23f688f672060"
+        }
+      ],
+      "preview_path": "canonical/knight_demo_motion_preview_v1/KNIGHT_IDLE_DEMO_PREVIEW_V1.png"
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "duration_seconds": 0.8333333333333334,
+      "frame_metrics": [
+        {
+          "final_alpha_pixel_count": 245616,
+          "frame_index": 0,
+          "max_vertex_displacement": 3.6912465098278813,
+          "mean_vertex_displacement": 0.7768945575203482,
+          "time_seconds": 0.0,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 0,
+          "visible_pixel_count": 245679
+        },
+        {
+          "final_alpha_pixel_count": 322530,
+          "frame_index": 1,
+          "max_vertex_displacement": 3.5394290794486385,
+          "mean_vertex_displacement": 0.8080028914540743,
+          "time_seconds": 0.20833333333333334,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 0,
+          "visible_pixel_count": 322532
+        },
+        {
+          "final_alpha_pixel_count": 212933,
+          "frame_index": 2,
+          "max_vertex_displacement": 3.698592630525094,
+          "mean_vertex_displacement": 0.6716401008320811,
+          "time_seconds": 0.4166666666666667,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 0,
+          "visible_pixel_count": 212946
+        },
+        {
+          "final_alpha_pixel_count": 277130,
+          "frame_index": 3,
+          "max_vertex_displacement": 3.459862161835316,
+          "mean_vertex_displacement": 0.6779649869046893,
+          "time_seconds": 0.625,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 0,
+          "visible_pixel_count": 277152
+        },
+        {
+          "final_alpha_pixel_count": 323118,
+          "frame_index": 0,
+          "max_vertex_displacement": 3.6912465098278813,
+          "mean_vertex_displacement": 0.7768945575203482,
+          "time_seconds": 0.0,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 2,
+          "visible_pixel_count": 323899
+        },
+        {
+          "final_alpha_pixel_count": 287269,
+          "frame_index": 1,
+          "max_vertex_displacement": 3.5394290794486385,
+          "mean_vertex_displacement": 0.8080028914540743,
+          "time_seconds": 0.20833333333333334,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 2,
+          "visible_pixel_count": 288216
+        },
+        {
+          "final_alpha_pixel_count": 289385,
+          "frame_index": 2,
+          "max_vertex_displacement": 3.698592630525094,
+          "mean_vertex_displacement": 0.6716401008320811,
+          "time_seconds": 0.4166666666666667,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 2,
+          "visible_pixel_count": 289895
+        },
+        {
+          "final_alpha_pixel_count": 298520,
+          "frame_index": 3,
+          "max_vertex_displacement": 3.459862161835316,
+          "mean_vertex_displacement": 0.6779649869046893,
+          "time_seconds": 0.625,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 2,
+          "visible_pixel_count": 299086
+        }
+      ],
+      "mapping": [
+        {
+          "cost": 0.6116771317630436,
+          "next_cost": 0.7054434059820822,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:7e87e97fc9fe89cbd718"
+        },
+        {
+          "cost": 0.37324048737202953,
+          "next_cost": 0.5047419906119381,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ab16ff2ffc7408c862ae"
+        },
+        {
+          "cost": 0.2054681713865518,
+          "next_cost": 0.2925199639891659,
+          "source_joint_id": "Fingers.R",
+          "target_joint_id": "J:c9cdb266f7c167a620a9"
+        },
+        {
+          "cost": 0.17678234026097459,
+          "next_cost": 0.4085321751602823,
+          "source_joint_id": "LowerArm.R",
+          "target_joint_id": "J:932628adf7f0d5936426"
+        },
+        {
+          "cost": 0.2029030249075255,
+          "next_cost": 0.28310195332574495,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:4c9f9eace712daf31538"
+        },
+        {
+          "cost": 0.48247436163504,
+          "next_cost": 0.6238222174056915,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:f5cf9181e27d0f791f7d"
+        },
+        {
+          "cost": 0.19833878296620702,
+          "next_cost": 0.2583591034997136,
+          "source_joint_id": "Thumb.R",
+          "target_joint_id": "J:75a17a4287b28cd7f57f"
+        },
+        {
+          "cost": 0.1507628779714688,
+          "next_cost": 0.49685610634347954,
+          "source_joint_id": "UpperLeg.R",
+          "target_joint_id": "J:f50f39d42ef3820824ef"
+        },
+        {
+          "cost": 0.15738848284903773,
+          "next_cost": 0.2182245988227146,
+          "source_joint_id": "MiddleHand.L",
+          "target_joint_id": "J:8455bf4c0a38867b7d9b"
+        },
+        {
+          "cost": 0.12566026834671604,
+          "next_cost": 0.15653416095612008,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:5428a88dad4d4d8d5c4d"
+        },
+        {
+          "cost": 0.12744628795827562,
+          "next_cost": 0.17729832396772957,
+          "source_joint_id": "Palm.L",
+          "target_joint_id": "J:33c7075f501c9af4cd0d"
+        },
+        {
+          "cost": 0.21451150060948782,
+          "next_cost": 0.3102178824405303,
+          "source_joint_id": "Neck",
+          "target_joint_id": "J:1008208d141ae248de43"
+        },
+        {
+          "cost": 0.22331652895761903,
+          "next_cost": 0.341721580563024,
+          "source_joint_id": "Fingers.L",
+          "target_joint_id": "J:136e20712bbd1481596e"
+        },
+        {
+          "cost": 0.1753136842084541,
+          "next_cost": 0.2033041789185967,
+          "source_joint_id": "MiddleHand.R",
+          "target_joint_id": "J:e5441b559f1c34b41aa2"
+        },
+        {
+          "cost": 0.1542952449768342,
+          "next_cost": 0.521825399970232,
+          "source_joint_id": "UpperLeg.L",
+          "target_joint_id": "J:063ee183f601e19a8ca9"
+        },
+        {
+          "cost": 0.24521820132730113,
+          "next_cost": 0.5053838222620202,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:73295dbdbb50d303e597"
+        },
+        {
+          "cost": 0.18366720483839166,
+          "next_cost": 0.2331092975233877,
+          "source_joint_id": "UpperArm.R",
+          "target_joint_id": "J:42d181ebf3515959283a"
+        },
+        {
+          "cost": 0.5902787916544152,
+          "next_cost": 0.6714047201184266,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:7d9e31e2d0bd48f88ecb"
+        },
+        {
+          "cost": 0.338657132190124,
+          "next_cost": 0.5510856632138917,
+          "source_joint_id": "Head",
+          "target_joint_id": "J:eafe286e7d84499e5257"
+        },
+        {
+          "cost": 0.1615942399702586,
+          "next_cost": 0.45709510248575125,
+          "source_joint_id": "LowerArm.L",
+          "target_joint_id": "J:7cf59fbe52c53280546a"
+        },
+        {
+          "cost": 0.37056767662637935,
+          "next_cost": 0.4647284720520398,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:cf05f36e919ff69a9d8e"
+        },
+        {
+          "cost": 0.40659342489016087,
+          "next_cost": 0.6154678629286205,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:362735eeec6ee5a3d46f"
+        },
+        {
+          "cost": 0.5383114087285982,
+          "next_cost": 0.693192900090975,
+          "source_joint_id": "Body",
+          "target_joint_id": "J:237d229c33bc9eb9bf91"
+        },
+        {
+          "cost": 0.1952579664472978,
+          "next_cost": 0.25572078846434404,
+          "source_joint_id": "UpperArm.L",
+          "target_joint_id": "J:a80d2c086e86a4cc08b5"
+        },
+        {
+          "cost": 0.2208842181998788,
+          "next_cost": 0.6520160579394874,
+          "source_joint_id": "Torso",
+          "target_joint_id": "J:2ff965d6dbe4efc2d5d4"
+        },
+        {
+          "cost": 0.2598771637136827,
+          "next_cost": 0.4990601726171502,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ee24577789f0235b8186"
+        },
+        {
+          "cost": 0.16516790065247416,
+          "next_cost": 0.3150452870805952,
+          "source_joint_id": "Hips",
+          "target_joint_id": "J:b9e5c0d23f688f672060"
+        }
+      ],
+      "preview_path": "canonical/knight_demo_motion_preview_v1/KNIGHT_RUN_DEMO_PREVIEW_V1.png"
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "duration_seconds": 0.8333333333333334,
+      "frame_metrics": [
+        {
+          "final_alpha_pixel_count": 334083,
+          "frame_index": 0,
+          "max_vertex_displacement": 3.6912465098278946,
+          "mean_vertex_displacement": 0.8859292555203744,
+          "time_seconds": 0.0,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 0,
+          "visible_pixel_count": 334084
+        },
+        {
+          "final_alpha_pixel_count": 298368,
+          "frame_index": 1,
+          "max_vertex_displacement": 3.722002436974647,
+          "mean_vertex_displacement": 0.8560242431126518,
+          "time_seconds": 0.2777777777777778,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 0,
+          "visible_pixel_count": 298408
+        },
+        {
+          "final_alpha_pixel_count": 235976,
+          "frame_index": 2,
+          "max_vertex_displacement": 1.904232719671226,
+          "mean_vertex_displacement": 0.4883613658301737,
+          "time_seconds": 0.5555555555555556,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 0,
+          "visible_pixel_count": 236073
+        },
+        {
+          "final_alpha_pixel_count": 334083,
+          "frame_index": 3,
+          "max_vertex_displacement": 3.6912465098278946,
+          "mean_vertex_displacement": 0.8859292555203744,
+          "time_seconds": 0.8333333333333334,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 0,
+          "visible_pixel_count": 334084
+        },
+        {
+          "final_alpha_pixel_count": 251195,
+          "frame_index": 0,
+          "max_vertex_displacement": 3.6912465098278946,
+          "mean_vertex_displacement": 0.8859292555203744,
+          "time_seconds": 0.0,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 2,
+          "visible_pixel_count": 251661
+        },
+        {
+          "final_alpha_pixel_count": 251495,
+          "frame_index": 1,
+          "max_vertex_displacement": 3.722002436974647,
+          "mean_vertex_displacement": 0.8560242431126518,
+          "time_seconds": 0.2777777777777778,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 2,
+          "visible_pixel_count": 251962
+        },
+        {
+          "final_alpha_pixel_count": 249114,
+          "frame_index": 2,
+          "max_vertex_displacement": 1.904232719671226,
+          "mean_vertex_displacement": 0.4883613658301737,
+          "time_seconds": 0.5555555555555556,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 2,
+          "visible_pixel_count": 249355
+        },
+        {
+          "final_alpha_pixel_count": 251195,
+          "frame_index": 3,
+          "max_vertex_displacement": 3.6912465098278946,
+          "mean_vertex_displacement": 0.8859292555203744,
+          "time_seconds": 0.8333333333333334,
+          "undefined_visible_pixel_count": 0,
+          "view_index": 2,
+          "visible_pixel_count": 251661
+        }
+      ],
+      "mapping": [
+        {
+          "cost": 0.6116771317630436,
+          "next_cost": 0.7054434059820822,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:7e87e97fc9fe89cbd718"
+        },
+        {
+          "cost": 0.37324048737202953,
+          "next_cost": 0.5047419906119381,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ab16ff2ffc7408c862ae"
+        },
+        {
+          "cost": 0.2054681713865518,
+          "next_cost": 0.2925199639891659,
+          "source_joint_id": "Fingers.R",
+          "target_joint_id": "J:c9cdb266f7c167a620a9"
+        },
+        {
+          "cost": 0.17678234026097459,
+          "next_cost": 0.4085321751602823,
+          "source_joint_id": "LowerArm.R",
+          "target_joint_id": "J:932628adf7f0d5936426"
+        },
+        {
+          "cost": 0.2029030249075255,
+          "next_cost": 0.28310195332574495,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:4c9f9eace712daf31538"
+        },
+        {
+          "cost": 0.48247436163504,
+          "next_cost": 0.6238222174056915,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:f5cf9181e27d0f791f7d"
+        },
+        {
+          "cost": 0.19833878296620702,
+          "next_cost": 0.2583591034997136,
+          "source_joint_id": "Thumb.R",
+          "target_joint_id": "J:75a17a4287b28cd7f57f"
+        },
+        {
+          "cost": 0.1507628779714688,
+          "next_cost": 0.49685610634347954,
+          "source_joint_id": "UpperLeg.R",
+          "target_joint_id": "J:f50f39d42ef3820824ef"
+        },
+        {
+          "cost": 0.15738848284903773,
+          "next_cost": 0.2182245988227146,
+          "source_joint_id": "MiddleHand.L",
+          "target_joint_id": "J:8455bf4c0a38867b7d9b"
+        },
+        {
+          "cost": 0.12566026834671604,
+          "next_cost": 0.15653416095612008,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:5428a88dad4d4d8d5c4d"
+        },
+        {
+          "cost": 0.12744628795827562,
+          "next_cost": 0.17729832396772957,
+          "source_joint_id": "Palm.L",
+          "target_joint_id": "J:33c7075f501c9af4cd0d"
+        },
+        {
+          "cost": 0.21451150060948782,
+          "next_cost": 0.3102178824405303,
+          "source_joint_id": "Neck",
+          "target_joint_id": "J:1008208d141ae248de43"
+        },
+        {
+          "cost": 0.22331652895761903,
+          "next_cost": 0.341721580563024,
+          "source_joint_id": "Fingers.L",
+          "target_joint_id": "J:136e20712bbd1481596e"
+        },
+        {
+          "cost": 0.1753136842084541,
+          "next_cost": 0.2033041789185967,
+          "source_joint_id": "MiddleHand.R",
+          "target_joint_id": "J:e5441b559f1c34b41aa2"
+        },
+        {
+          "cost": 0.1542952449768342,
+          "next_cost": 0.521825399970232,
+          "source_joint_id": "UpperLeg.L",
+          "target_joint_id": "J:063ee183f601e19a8ca9"
+        },
+        {
+          "cost": 0.24521820132730113,
+          "next_cost": 0.5053838222620202,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:73295dbdbb50d303e597"
+        },
+        {
+          "cost": 0.18366720483839166,
+          "next_cost": 0.2331092975233877,
+          "source_joint_id": "UpperArm.R",
+          "target_joint_id": "J:42d181ebf3515959283a"
+        },
+        {
+          "cost": 0.5902787916544152,
+          "next_cost": 0.6714047201184266,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:7d9e31e2d0bd48f88ecb"
+        },
+        {
+          "cost": 0.338657132190124,
+          "next_cost": 0.5510856632138917,
+          "source_joint_id": "Head",
+          "target_joint_id": "J:eafe286e7d84499e5257"
+        },
+        {
+          "cost": 0.1615942399702586,
+          "next_cost": 0.45709510248575125,
+          "source_joint_id": "LowerArm.L",
+          "target_joint_id": "J:7cf59fbe52c53280546a"
+        },
+        {
+          "cost": 0.37056767662637935,
+          "next_cost": 0.4647284720520398,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:cf05f36e919ff69a9d8e"
+        },
+        {
+          "cost": 0.40659342489016087,
+          "next_cost": 0.6154678629286205,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:362735eeec6ee5a3d46f"
+        },
+        {
+          "cost": 0.5383114087285982,
+          "next_cost": 0.693192900090975,
+          "source_joint_id": "Body",
+          "target_joint_id": "J:237d229c33bc9eb9bf91"
+        },
+        {
+          "cost": 0.1952579664472978,
+          "next_cost": 0.25572078846434404,
+          "source_joint_id": "UpperArm.L",
+          "target_joint_id": "J:a80d2c086e86a4cc08b5"
+        },
+        {
+          "cost": 0.2208842181998788,
+          "next_cost": 0.6520160579394874,
+          "source_joint_id": "Torso",
+          "target_joint_id": "J:2ff965d6dbe4efc2d5d4"
+        },
+        {
+          "cost": 0.2598771637136827,
+          "next_cost": 0.4990601726171502,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ee24577789f0235b8186"
+        },
+        {
+          "cost": 0.16516790065247416,
+          "next_cost": 0.3150452870805952,
+          "source_joint_id": "Hips",
+          "target_joint_id": "J:b9e5c0d23f688f672060"
+        }
+      ],
+      "preview_path": "canonical/knight_demo_motion_preview_v1/KNIGHT_SLASH_DEMO_PREVIEW_V1.png"
+    }
+  ],
+  "mechanical_carrier": "STAGE18_CANONICAL_MESH_CANDIDATE",
+  "retarget": "NONINJECTIVE_REST_GEOMETRY_OBJECT_FRAME_REBASE_V1",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "schema": "RealSaS.KnightDemoMotionVisualContinuation.v1",
+  "skeleton_authority": "STAGE28_QUALIFIED_SKELETON",
+  "skin_authority": "STAGE32_QUALIFIED_SKIN",
+  "stage35_failure_preserved": true,
+  "stage35_product_pass_claimed": false,
+  "status": "MEASURED_DEMO_ONLY"
+}

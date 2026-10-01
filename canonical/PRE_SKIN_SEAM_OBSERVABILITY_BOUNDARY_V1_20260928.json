@@ -1,0 +1,23 @@
+{
+  "schema": "RealSaS.PreSkinSeamObservabilityBoundary.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED",
+  "evidence": {
+    "single_feature": "canonical/knight_observable_seam_feature_separability_v1/REPORT.json",
+    "multivariate": "canonical/knight_observable_seam_multivariate_v1/REPORT.json"
+  },
+  "results": {
+    "best_single_feature_nonincident_auc": 0.6205465651784572,
+    "multivariate_nonincident_pooled_auc": 0.6615893905484739,
+    "multivariate_high_skin_l1_gt_1_pooled_auc": 0.650814670893411,
+    "high_skin_l1_gt_1_positive_rate": 0.03961109110550954,
+    "high_skin_l1_gt_1_pooled_average_precision": 0.09107301668918627,
+    "high_precision_recall_observation": "At >=0.90 precision, node-disjoint seam recall is essentially zero in tested simple models."
+  },
+  "verdict": {
+    "current_shipping_local_gsa_features_do_not_support_reliable_simple_pre_skin_seam_qualification": true,
+    "richer_observable_model_impossibility_claimed": false,
+    "post_skin_feedback_need_strengthened": true,
+    "teacher_topology_inference_authority": false
+  },
+  "implication": "Freezing structural partition before qualified skin evidence is available requires stronger observable evidence than the current GSA feature contract demonstrates. The audit does not select the replacement mechanism."
+}

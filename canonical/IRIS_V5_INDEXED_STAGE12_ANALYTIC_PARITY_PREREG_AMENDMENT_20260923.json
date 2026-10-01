@@ -1,0 +1,68 @@
+{
+  "schema": "RealSaS.IRIS.V5IndexedStage12AnalyticParityPreregAmendment.v1",
+  "date": "2026-09-23",
+  "status": "SEALED_AFTER_APPARATUS_ABORT_BEFORE_SCIENTIFIC_DECISION",
+  "parent_prereg": "canonical/IRIS_V5_INDEXED_STAGE12_ANALYTIC_PARITY_PREREG_20260923.json",
+  "attempted_run": {
+    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_INDEXED_STAGE12_ANALYTIC_PARITY_RUN_ALL_AUDITED.ipynb",
+    "notebook_sha256": "f0dfd84c49cc3812f7184507dffe0388f9abd390840608e392dbddba6442306f",
+    "repo_commit": "9398cf415e76823499b903e025b14d5d501ddcf8",
+    "termination": "APPARATUS_ABORT_AT_IMPLICIT_NORMAL_CONSTRUCTION",
+    "exception": "ValueError: implicit field gradient is degenerate on extracted surface",
+    "scientific_result": "NONE",
+    "geometry_pass_fail_conclusion_authorized": false
+  },
+  "root_cause_boundary": {
+    "affected_layer": "STAGE12_IMPLICIT_ORIENTATION_HINT_CONSTRUCTION_ONLY",
+    "topology_or_vertex_positions_changed": false,
+    "fstar_contract_changed": false,
+    "sparse_carrier_changed": false,
+    "marching_tetrahedra_cases_changed": false,
+    "edge_dedup_changed": false,
+    "stage13_policy_changed": false,
+    "explanation": [
+      "The V5 source field is a MAX over per-view continuous signed fields and can be non-differentiable on valid zero-set ridges.",
+      "The decoder incorrectly required a nonzero symmetric central-difference gradient at every extracted vertex.",
+      "Stage14 consumes decoder normals as orientation hints for robust local-PCA normals; Stage13 does not consume normals."
+    ]
+  },
+  "repair": {
+    "decoder_commit": "efd814a15f5b6714fb6c3abb3ef7400ae9c312b0",
+    "method": "CENTRAL_DIFFERENCE_WHERE_DEFINED__DETERMINISTIC_ONE_SIDED_OUTWARD_SOURCE_FIELD_SECANT_ONLY_WHERE_CENTRAL_STENCIL_DEGENERATES",
+    "adaptive_scales": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "teacher_truth_used": false,
+    "source_field_only": true,
+    "unresolved_orientation_fails_closed": true,
+    "fallback_fraction_is_telemetry_not_posthoc_gate": true,
+    "no_geometry_deformation": true,
+    "no_threshold_relaxation": true
+  },
+  "ci": {
+    "workflow": "iris-v5-source-field-contract",
+    "run_id": 35914457172,
+    "job_id": 107362282020,
+    "conclusion": "success",
+    "tests": "13 passed in 1.61s",
+    "regression_coverage": [
+      "closed sphere extraction remains valid",
+      "deterministic indexed decoder remains deterministic",
+      "sparse-shell truncation remains fail-closed",
+      "nonsmooth absolute-value kink resolves through one-sided orientation fallback",
+      "truly flat field remains fail-closed"
+    ]
+  },
+  "canonical_rerun": {
+    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_INDEXED_STAGE12_ANALYTIC_PARITY_RUN_ALL_AUDITED_V2.ipynb",
+    "notebook_sha256": "b236df8f98a4fb61f1f4250c18904bccae6abf9870dfd57adb5fa5e36e249def",
+    "repo_commit": "efd814a15f5b6714fb6c3abb3ef7400ae9c312b0",
+    "required_decision_rule": "UNCHANGED_FROZEN_P999_STAGE13",
+    "normal_gate": "UNRESOLVED_ORIENTATION_COUNT_MUST_EQUAL_ZERO",
+    "fallback_fraction": "TELEMETRY_ONLY__NO_POSTHOC_THRESHOLD",
+    "training_steps": 0
+  }
+}

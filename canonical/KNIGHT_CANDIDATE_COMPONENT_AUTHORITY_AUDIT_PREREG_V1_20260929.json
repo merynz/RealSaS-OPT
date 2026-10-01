@@ -1,0 +1,9 @@
+{
+  "schema": "RealSaS.KnightCandidateComponentAuthorityAuditPrereg.v1",
+  "status": "FROZEN_BEFORE_CANDIDATE_COMPONENT_AUDIT_RESULT",
+  "date": "2026-09-29",
+  "question": "Does the current canonical mesh candidate already preserve a useful teacher-free component partition in CanonicalMeshVertexCandidateIR.component_id?",
+  "operator": "Read candidate vertex component_id exactly as sealed; mark a face mixed iff its three candidate vertices contain more than one component_id.",
+  "teacher_policy": "Teacher source topology is evaluation-only after candidate component labels and predicted mixed faces are frozen.",
+  "no_product_mutation": true
+}

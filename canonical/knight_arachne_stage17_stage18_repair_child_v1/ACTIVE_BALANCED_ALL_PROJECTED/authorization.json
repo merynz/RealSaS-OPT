@@ -1,0 +1,16 @@
+{
+  "authorization_hash": "df557be5e6fedc0e10825aab0469a99ac251fa4fefae9113617686c5595da05c",
+  "directive_hash": "ec42d49d2fee1748965cccec2b6584e05e492b48a23712348400661aeb305cbf",
+  "product_authority_claimed": false,
+  "projected_invalid_rows_product_teacher_authority": false,
+  "schema": "RealSaS.TrustworthySkinRepartitionAuthorization.v1",
+  "scope": "DEMO_REPAIR_CHILD_COURT_ONLY",
+  "source_partition_lineage_hash": "ba14cb67ff5bdf78a609e56ccddcfd8203075ffe304734df3be8fcf657635dec",
+  "source_skeleton_lineage_hash": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+  "source_skin_lineage_hash": "fa9d013764700bc05da3ada7f41183e443c3a8a01aafe5df4734b5e750b27ec5",
+  "source_surface_lineage_hash": "452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a",
+  "status": "PASS_TRUSTWORTHY_SKIN_REPARTITION_AUTHORIZATION",
+  "teacher_inputs_used_by_predictor": false,
+  "weight_reliability_closure_passed": true,
+  "weight_reliability_evidence_hash": "3ba3ab5b732916f8f59fc28ad8ba2ee7b49e36556c7453ab93f857bcf7091aee"
+}

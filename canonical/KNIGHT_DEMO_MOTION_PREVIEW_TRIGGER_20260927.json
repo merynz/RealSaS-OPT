@@ -1,0 +1,19 @@
+{
+  "schema": "RealSaS.KnightDemoMotionPreviewTrigger.v1",
+  "status": "RERUN_FOR_BYTE_EXACT_BASELINE_REVERIFY",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "requested_on": "2026-09-27",
+  "stage35_failure_preserved": true,
+  "product_authority_claimed": false,
+  "clips": [
+    "demo_idle_v1",
+    "demo_run_v1",
+    "demo_slash_v1"
+  ],
+  "views": [
+    0,
+    2
+  ],
+  "revision": 2,
+  "requires_fresh_caa_reason": "BYTE_EXACT_FIRST_MOTION_PREVIEW_BASELINE"
+}

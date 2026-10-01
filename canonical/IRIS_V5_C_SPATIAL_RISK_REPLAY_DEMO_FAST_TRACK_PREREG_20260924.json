@@ -1,0 +1,90 @@
+{
+  "schema": "RealSaS.IRIS.V5CSpatialRiskReplayDemoFastTrackPreregistration.v1",
+  "status": "FROZEN_BEFORE_DEMO_FAST_TRACK_OPTIMIZER_STEP_1",
+  "date_utc": "2026-09-24",
+  "purpose": "Produce at most one improved Knight investor-demo geometry candidate without weakening product qualification or using Stage13/R512 feedback in training.",
+  "scientific_context": {
+    "field_failure_closure": "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_CLOSURE_20260924.json",
+    "H1": "SUPPORTED_STRONGLY_AS_SPATIAL_ERROR_AMPLIFIER",
+    "H3": "SUPPORTED_DESCRIPTIVELY_AS_RESIDUAL_RANK_DRIFT",
+    "unresolved_bridge": "The causal H1×H3 bridge remains open; this fast-track is demo-only and does not close it."
+  },
+  "execution": {
+    "repo_commit": "9efef7087952f27ef72f4a68ef436e32d23599a4",
+    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_C_SPATIAL_RISK_REPLAY_DEMO_RUN_ALL.ipynb",
+    "notebook_sha256": "ed40ea5093034b308ee0f186bf9a5da24da8a8cec0e665a846c42d592878573f",
+    "required_accelerator": "A100_CLASS__VRAM_GTE_30_GIB"
+  },
+  "start": {
+    "source_run_id": "20260924T115953Z",
+    "arm": "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
+    "checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
+    "absolute_effective_step": 19200
+  },
+  "fallback": {
+    "manifest": "canonical/KNIGHT_INVESTOR_DEMO_FALLBACK_C_20260924.json",
+    "always_available": true,
+    "product_authority": false
+  },
+  "intervention": {
+    "architecture_unchanged": true,
+    "objective_unchanged": "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
+    "replay_pool": "FROZEN_REPLAY_Q_131072",
+    "risk_score": "ABS_CURRENT_RESIDUAL / MAX(FSTAR_GRADIENT_NORM,0.5)",
+    "fstar_gradient_epsilon": 0.00048828125,
+    "risk_gradient_floor": 0.5,
+    "risk_bank_size": 32768,
+    "training_replay_samples_per_step": 4096,
+    "current_stage13_or_r512_coordinates_forbidden": true,
+    "replay_refresh_count": 1
+  },
+  "training": {
+    "continuation_steps": 6000,
+    "eval_every_steps": 500,
+    "optimizer": "AdamW",
+    "fresh_optimizer_restart": true,
+    "learning_rate": 0.00001,
+    "weight_decay": 0,
+    "scheduler": "CosineAnnealingLR",
+    "eta_min": 0.000001,
+    "gradient_clip_norm": 1,
+    "autocast": "bfloat16",
+    "checkpoint_selection": "FROZEN_HELDOUT_FSTAR_ONLY",
+    "stage13_selection_blind": true,
+    "r512_selection_blind": true
+  },
+  "post_selection_demo_qualification": {
+    "r512_executed": false,
+    "corrected_exact_shell_containment": true,
+    "stage13_p999_measured": true,
+    "stage13_role": "DEMO_COMPARISON_ONLY__NOT_CHECKPOINT_SELECTION",
+    "fallback_metrics": {
+      "min_view_precision": 0.9783673081878721,
+      "min_view_recall": 0.9981541565871387,
+      "max_view_interior_uncovered_fraction": 0.00028673080073964843,
+      "max_view_largest_coherent_hole_fraction": 0.0003611515575377489,
+      "max_view_silhouette_edge_p95_px": 3
+    },
+    "promotion_rule": "NEW_CANDIDATE_MUST_PASS_EXACT_CONTAINMENT_AND_BE_NO_WORSE_THAN_FALLBACK_ON_ALL_FIVE_LISTED_STAGE13_METRICS_AND_STRICTLY_BETTER_ON_AT_LEAST_ONE",
+    "automatic_product_promotion": false
+  },
+  "forbidden": [
+    "PRODUCT_P999_CLAIM",
+    "UNSEEN_CLAIM",
+    "R512_FEEDBACK_TO_TRAINING",
+    "STAGE13_FEEDBACK_TO_TRAINING",
+    "STAGE13_CHECKPOINT_SELECTION",
+    "REPRESENTATION_CHANGE",
+    "TP64_ARCHITECTURE_CHANGE",
+    "FSTAR_TARGET_CHANGE",
+    "OBJECTIVE_WEIGHT_CHANGE",
+    "DECODER_GATE_WEAKENING",
+    "STAGE13_THRESHOLD_CHANGE"
+  ],
+  "claim_boundary": [
+    "This is a demo fast-track experiment, not a substitute for the open H1×H3 scientific bridge.",
+    "The frozen C fallback remains the default unless the new selected checkpoint Pareto-dominates it on the frozen five-metric demo rule.",
+    "A promoted demo candidate is still not product-qualified.",
+    "The result may be used later as evidence only after a separate scientific review."
+  ]
+}

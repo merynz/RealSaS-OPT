@@ -1,0 +1,27 @@
+{
+  "schema": "RealSaS.KnightReliabilityMaskOnlyTopologyCeilingPrereg.v1",
+  "status": "FROZEN_BEFORE_RELIABILITY_MASK_ONLY_RESULT",
+  "date": "2026-09-29",
+  "purpose": "Oracle ceiling for whether a correct per-row reliability mask alone is sufficient for topology inference without replacing any Arachne weights.",
+  "ORACLE_NOT_PRODUCT": true,
+  "oracle_input": "teacher_valid_mask only",
+  "teacher_weights_used_by_inference": false,
+  "teacher_region_labels_used_by_inference": false,
+  "algorithm": {
+    "trusted_partition": "mechanical mutex solver restricted to edges whose both endpoints are oracle-valid",
+    "variants": ["VALID_STRETCH_ONLY_JSD","VALID_STRETCH_AND_L1_JSD"],
+    "unreliable_vertices": "excluded from all attractive/repulsive weight evidence",
+    "unreliable_component_completion": "multi-source Euclidean geodesic from adjacent trusted component labels",
+    "zero_boundary_component": "abstain"
+  },
+  "closure_thresholds": {
+    "face_deletion_count_max": 0,
+    "rest_area_error_max": 1e-10,
+    "actual_motion_max_edge_gt_10_max": 5,
+    "actual_motion_max_edge_gt_4_max": 50,
+    "actual_motion_worst_edge_max": 25.0,
+    "synthetic_unsafe_face_count_max": 500,
+    "mixed_face_precision_min": 0.90,
+    "unsafe_cross_region_recall_min": 0.70
+  }
+}

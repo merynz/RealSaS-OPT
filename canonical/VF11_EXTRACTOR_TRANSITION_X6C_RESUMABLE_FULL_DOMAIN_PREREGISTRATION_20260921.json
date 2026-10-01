@@ -1,0 +1,53 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX6CResumableFullDomainPreregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__RESUMABLE_FULL_DOMAIN_X6B_EXECUTION",
+  "authority_class": "RESEARCH_LONG_RUN_PREREGISTRATION_ONLY",
+  "execution_class": "LONG__USER_RUN_ALL_NOTEBOOK_REQUIRED",
+  "parent_run": {
+    "run_id": "20260921T214726Z",
+    "repo_commit": "4c98d5344f335acb19ba642dd86d989a7d9490d9",
+    "gpu": "NVIDIA A100-SXM4-80GB",
+    "host_cpu_count": 12,
+    "selected_cpu_workers": 12,
+    "selected_gpu_batch_size": 2048,
+    "semantic16_root_state_match_count": 16,
+    "semantic16_cpu_rejected_count": 0,
+    "preflight_sample_root_count": 256,
+    "preflight_wall_seconds": 7.8954779179998695,
+    "preflight_parallel_cpu_verify_seconds": 7.195778674999929,
+    "preflight_accelerator_seconds": 0.6944378529997266,
+    "preflight_cpu_rejected_count": 0,
+    "projected_full_domain_seconds": 3202.0789214082047,
+    "safety_adjusted_projected_seconds": 4803.118382112307
+  },
+  "decision_rationale": "The previous 45-minute safety-adjusted gate was an operational cap, not a scientific failure. X6B reduced the raw projection to about 53.4 minutes and the 1.5x safety projection to about 80.1 minutes with zero accelerator/CPU sign rejections. A resumable chunked execution is therefore authorized with a 100-minute safety-adjusted admission cap.",
+  "execution": {
+    "base_regime_count": 103823,
+    "max_micro_depth": 2,
+    "chunk_root_count": 2048,
+    "chunk_independence": "each triplane base regime is an independent C0 root; chunking must not change per-root semantics",
+    "persistent_checkpoint": "one compressed NPZ per completed chunk plus atomic progress JSON",
+    "resume_rule": "on restart, completed chunks whose hashes and root ranges match the manifest are skipped",
+    "cpu_worker_autotune": "repeat host-local X6B autotune before CUDA initialization; selected pool remains authoritative",
+    "gpu_batch_autotune": "repeat A100 proposal-batch tuning",
+    "semantic_gate": "repeat frozen16 exact state match and require cpu_rejected_count=0",
+    "performance_gate": {
+      "sample_roots": 256,
+      "safety_factor": 1.5,
+      "max_safety_adjusted_minutes": 100
+    }
+  },
+  "final_merge_gates": [
+    "exactly 103823 unique root indices covered once",
+    "chunk ranges contiguous and non-overlapping",
+    "all chunk cpu_rejected_count values equal 0",
+    "merged state/count array lengths equal 103823",
+    "aggregate terminal/unresolved/proposal/evaluation counts equal sum of chunk receipts",
+    "all artifact hashes recorded before completion marker"
+  ],
+  "claim_boundary": "Research-only C0 micro2 full-domain measurement. No product authority, Knight witness, Stage13 pass, shipping directed-rounding certificate, or global continuous zero-set completeness claim.",
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false
+}

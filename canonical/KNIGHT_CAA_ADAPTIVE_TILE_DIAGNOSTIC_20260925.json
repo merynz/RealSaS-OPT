@@ -1,0 +1,37 @@
+{
+  "area_lower_bound_page_count": 3,
+  "bleed_px": 2,
+  "candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+  "candidate_resolutions": [
+    8,
+    12,
+    16,
+    24,
+    32
+  ],
+  "deterministic_shelf_page_count": 3,
+  "face_count": 24958,
+  "max_page_resolution": 2048,
+  "max_source_pixels_per_atlas_texel": 1.0,
+  "maximum_observed_sigma_px": 25.713368400756437,
+  "maximum_required_resolution": 32,
+  "mode": "PROJECTED_SOURCE_DENSITY_PER_FACE_V1",
+  "observed_face_count": 17467,
+  "packing_efficiency_vs_page_area": 0.878753662109375,
+  "page_area_texels": 4194304,
+  "placement_hash": "b183433fd303417e10af24adbdda88555289957c276383b3d3666fdfd752210d",
+  "product_authority_claimed": false,
+  "quality_thresholds_changed": false,
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "schema": "RealSaS.CAAAdaptiveFaceTileEvidence.v1",
+  "selected_resolution_histogram": {
+    "12": 1862,
+    "16": 7008,
+    "24": 8482,
+    "32": 28,
+    "8": 7578
+  },
+  "total_allocated_tile_area_texels": 11057280,
+  "unobserved_face_count": 7491,
+  "unsatisfied_face_count": 0
+}

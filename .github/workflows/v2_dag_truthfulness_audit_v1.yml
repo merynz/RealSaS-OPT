@@ -1,0 +1,43 @@
+name: v2-dag-truthfulness-audit-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/audit_v2_dag_truthfulness_v1.py'
+      - '.github/workflows/v2_dag_truthfulness_audit_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v2-dag-truthfulness-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Run DAG truthfulness audit
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python tools/audit_v2_dag_truthfulness_v1.py | tee /tmp/dag_truthfulness.txt
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          mkdir -p canonical/v2_dag_truthfulness_audit_v1
+          cp /tmp/dag_truthfulness.txt canonical/v2_dag_truthfulness_audit_v1/AUDIT_STDOUT.txt
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/V2_DAG_TRUTHFULNESS_AUDIT_V1_20260928.json canonical/v2_dag_truthfulness_audit_v1
+          git commit -m 'audit: seal V2 DAG truthfulness evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

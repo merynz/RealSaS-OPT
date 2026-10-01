@@ -1,0 +1,838 @@
+{
+  "after": {
+    "above_max_aspect_face_count": 41,
+    "above_max_aspect_face_fraction": 0.0016427598365253626,
+    "below_min_angle_face_count": 86,
+    "below_min_angle_face_fraction": 0.0034457889253946632,
+    "cdt_v1_boundary_split_policy": "FORBIDDEN",
+    "cdt_v1_min_angle_repairability": "UNREPAIRABLE_IF_ANY_PARENT_CORNER_IS_BELOW_TARGET",
+    "degenerate_face_count": 0,
+    "face_count": 24958,
+    "max_aspect_longest_over_min_altitude": 205.80454309529944,
+    "min_angle_deg": 0.5399013039955519,
+    "not_raw_marching_cubes_parent_faces": true,
+    "policy_max_aspect_longest_over_min_altitude": 16.0,
+    "policy_min_angle_deg": 7.5,
+    "policy_violating_face_count": 86,
+    "policy_violating_face_fraction": 0.0034457889253946632,
+    "producer_semantics": "THREE_CLIQUES_OF_RIGGING_SURFACE_LOCAL_RELATION_GRAPH",
+    "proof_note": "Without boundary splits, any triangulation covering a parent triangle preserves each parent corner as a sum of incident child angles; a parent corner below the target cannot be raised above the target by interior Steiner insertion alone.",
+    "schema": "RealSaS.RelationParentQualityReport.v1"
+  },
+  "before": {
+    "above_max_aspect_face_count": 57,
+    "above_max_aspect_face_fraction": 0.002283836845901114,
+    "below_min_angle_face_count": 109,
+    "below_min_angle_face_fraction": 0.004367337126372306,
+    "cdt_v1_boundary_split_policy": "FORBIDDEN",
+    "cdt_v1_min_angle_repairability": "UNREPAIRABLE_IF_ANY_PARENT_CORNER_IS_BELOW_TARGET",
+    "degenerate_face_count": 0,
+    "face_count": 24958,
+    "max_aspect_longest_over_min_altitude": 272.00299700239304,
+    "min_angle_deg": 0.4074608559654188,
+    "not_raw_marching_cubes_parent_faces": true,
+    "policy_max_aspect_longest_over_min_altitude": 16.0,
+    "policy_min_angle_deg": 7.5,
+    "policy_violating_face_count": 109,
+    "policy_violating_face_fraction": 0.004367337126372306,
+    "producer_semantics": "THREE_CLIQUES_OF_RIGGING_SURFACE_LOCAL_RELATION_GRAPH",
+    "proof_note": "Without boundary splits, any triangulation covering a parent triangle preserves each parent corner as a sum of incident child angles; a parent corner below the target cannot be raised above the target by interior Steiner insertion alone.",
+    "schema": "RealSaS.RelationParentQualityReport.v1"
+  },
+  "demo_geometry_lineage": true,
+  "face_count": 24958,
+  "input_candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+  "product_authority_claimed": false,
+  "repair": {
+    "accepted_flip_count": 33,
+    "accepted_flips": [
+      {
+        "allowed_local_deviation": 0.0038279204441721898,
+        "local_sampled_surface_deviation": 0.0010276246542831613,
+        "new_edge": [
+          "CMV:0366b9bb52cfc3b39560e6a7",
+          "CMV:b7a06227db45025e606613fa"
+        ],
+        "new_max_aspect": 2.1564287703454004,
+        "new_min_angle_deg": 42.074264989212914,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:0cd098b260f5a4f154c2b02a",
+          "CMV:3329af88ab8eb64d2f730e80"
+        ],
+        "old_max_aspect": 21.762589182419056,
+        "old_min_angle_deg": 4.7636568627750915,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.004632218453911827,
+        "local_sampled_surface_deviation": 3.679275349591708e-05,
+        "new_edge": [
+          "CMV:4155dbd1de9b857fd774f84a",
+          "CMV:4e460565b4bd07121980ed63"
+        ],
+        "new_max_aspect": 1.9766538208503,
+        "new_min_angle_deg": 36.45380724122293,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:6039d3e13289ef8cef8ba484",
+          "CMV:93db10daeba0de90ba7f757c"
+        ],
+        "old_max_aspect": 20.683423844564608,
+        "old_min_angle_deg": 5.490996634160727,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.0040253413937740715,
+        "local_sampled_surface_deviation": 0.0003701307893634557,
+        "new_edge": [
+          "CMV:083f2a306e26fb86ba47e259",
+          "CMV:6784a63df143e50542ec94c2"
+        ],
+        "new_max_aspect": 2.7561692679510923,
+        "new_min_angle_deg": 30.826005014829306,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:46bf97ae1ad84b9452bc6cd3",
+          "CMV:d06cad6d43fbe17b33aab734"
+        ],
+        "old_max_aspect": 13.843035998110798,
+        "old_min_angle_deg": 6.475132573800167,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.006321367134698486,
+        "local_sampled_surface_deviation": 0.0002189647256037039,
+        "new_edge": [
+          "CMV:89b90d37bdc20a389b40c793",
+          "CMV:ce3e5cd9c59b1c5843bb94e8"
+        ],
+        "new_max_aspect": 3.9435774424638335,
+        "new_min_angle_deg": 20.642191838562596,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:9866835a4fc8c947ec6b60db",
+          "CMV:c4ef86ac4c0d785d2cad09b6"
+        ],
+        "old_max_aspect": 95.35980395355634,
+        "old_min_angle_deg": 1.1891111002623613,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.004122214874138454,
+        "local_sampled_surface_deviation": 0.00022471967863187936,
+        "new_edge": [
+          "CMV:a0972b21050a27721a159756",
+          "CMV:f45dd6d523f297a2ee178dff"
+        ],
+        "new_max_aspect": 3.3442904501282658,
+        "new_min_angle_deg": 19.45494813507687,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:66ca9e8071946a2d54d1b5e3",
+          "CMV:d7dae2b010ee51be820eeda6"
+        ],
+        "old_max_aspect": 272.00299700239304,
+        "old_min_angle_deg": 0.4074608559654188,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.004767418165028934,
+        "local_sampled_surface_deviation": 0.0009826643727019336,
+        "new_edge": [
+          "CMV:491162075309502c3d6b61e8",
+          "CMV:725a8d56e5661be895af7a05"
+        ],
+        "new_max_aspect": 3.8894262306063396,
+        "new_min_angle_deg": 22.232081332872607,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:2dc1d8488d7309a00b89765a",
+          "CMV:71f9913cbd4fa3f60f327f20"
+        ],
+        "old_max_aspect": 22.477263826087245,
+        "old_min_angle_deg": 3.80525865347366,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.007353505080243761,
+        "local_sampled_surface_deviation": 0.002186961840298209,
+        "new_edge": [
+          "CMV:2107f82a8b3d3ac26756899d",
+          "CMV:433fd525e14b86638324f925"
+        ],
+        "new_max_aspect": 3.1606913540108916,
+        "new_min_angle_deg": 21.98516492618624,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:86c3a1024a68ba3addbba390",
+          "CMV:ec13f5ba8f3db6687f313444"
+        ],
+        "old_max_aspect": 22.9536547075632,
+        "old_min_angle_deg": 4.538780654534346,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.006345047853882193,
+        "local_sampled_surface_deviation": 0.000642092168598164,
+        "new_edge": [
+          "CMV:3fff64be67d443d8967d5569",
+          "CMV:a78aed9e01829d9cb6bdfe70"
+        ],
+        "new_max_aspect": 3.7129706822939443,
+        "new_min_angle_deg": 21.864330336287857,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:1fb99254b771a41c6cd60861",
+          "CMV:8d5bbcefba9f4ef52925baf9"
+        ],
+        "old_max_aspect": 20.298593416921303,
+        "old_min_angle_deg": 5.5930928885683215,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.006372195994053033,
+        "local_sampled_surface_deviation": 0.0017438878171707976,
+        "new_edge": [
+          "CMV:1b23e28d35c08ef6ca453ff1",
+          "CMV:d28e3e2bc715dc16960dde6d"
+        ],
+        "new_max_aspect": 3.9746193825636604,
+        "new_min_angle_deg": 20.284368289116507,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:537d468168c70a8d55756553",
+          "CMV:5f51fcabb1c388037e81e278"
+        ],
+        "old_max_aspect": 24.692837477309723,
+        "old_min_angle_deg": 4.549383095634312,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.0061693579701575865,
+        "local_sampled_surface_deviation": 0.0023073044317427037,
+        "new_edge": [
+          "CMV:4e6ab47d9f07aaee55c28d85",
+          "CMV:fdbfc7a7c2ca8cf2ceeea292"
+        ],
+        "new_max_aspect": 4.073557056103668,
+        "new_min_angle_deg": 17.875911855778597,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:6503e45cbb0de6455642ee5c",
+          "CMV:974ed8348f5f8e8592ab4b71"
+        ],
+        "old_max_aspect": 20.07009485432142,
+        "old_min_angle_deg": 5.423797634794278,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.00611842394395345,
+        "local_sampled_surface_deviation": 0.002314775570803487,
+        "new_edge": [
+          "CMV:4fdf57a549dc2b1dfd48bce1",
+          "CMV:96649283bfae9414e308aa51"
+        ],
+        "new_max_aspect": 3.4682061099160086,
+        "new_min_angle_deg": 17.772793376907533,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:3a69b1c01504dafe019a97a5",
+          "CMV:e047fc52eae52981d2c7d485"
+        ],
+        "old_max_aspect": 13.530719368537314,
+        "old_min_angle_deg": 7.071431549959994,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.0029970245761707453,
+        "local_sampled_surface_deviation": 0.0002120031243705383,
+        "new_edge": [
+          "CMV:2bff5a9c4e8663cce2d77384",
+          "CMV:f42f7d073318cff31d8a2e3e"
+        ],
+        "new_max_aspect": 4.327916718410097,
+        "new_min_angle_deg": 14.426506747620095,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:044d09bc0ee7a5e01ff9d56c",
+          "CMV:49f279d2a30bafe0b37ba674"
+        ],
+        "old_max_aspect": 25.558841813445145,
+        "old_min_angle_deg": 4.3330862863004596,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.0034960036256911895,
+        "local_sampled_surface_deviation": 0.0018297962621235896,
+        "new_edge": [
+          "CMV:364261b717f9abc4f11659a7",
+          "CMV:8b472fb417ccbc0d38ae634f"
+        ],
+        "new_max_aspect": 6.6252214050885145,
+        "new_min_angle_deg": 13.703042298221662,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:07b8f5715f1c0f23c996f6fd",
+          "CMV:3dae1ebeef8e080b84bd11c4"
+        ],
+        "old_max_aspect": 17.92114966097599,
+        "old_min_angle_deg": 6.2829763315470535,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.0058325860115971,
+        "local_sampled_surface_deviation": 0.003226401793982556,
+        "new_edge": [
+          "CMV:301a91f1023adc170e76939b",
+          "CMV:8301fea6453a0d8658b86872"
+        ],
+        "new_max_aspect": 5.343050184426477,
+        "new_min_angle_deg": 13.285009467601784,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:ae6a312f0b14158dbaa82621",
+          "CMV:ea5d221fc1c8b8c623f244cf"
+        ],
+        "old_max_aspect": 12.62741979270433,
+        "old_min_angle_deg": 6.477508814385223,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.004837867523938701,
+        "local_sampled_surface_deviation": 0.0017686264696496225,
+        "new_edge": [
+          "CMV:80be6e0fb6e099662c028b36",
+          "CMV:fcea717abbeb1d1485833573"
+        ],
+        "new_max_aspect": 7.979876882142936,
+        "new_min_angle_deg": 10.225476210412674,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:84503635e2984431eccd646a",
+          "CMV:9df38afa856b9ecc12b05865"
+        ],
+        "old_max_aspect": 24.47609808716781,
+        "old_min_angle_deg": 3.769894284900897,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.005064676156481027,
+        "local_sampled_surface_deviation": 0.0030990994347573765,
+        "new_edge": [
+          "CMV:451059d7ca1b2bd5057e18b1",
+          "CMV:645fd18a9dbc321d76f15334"
+        ],
+        "new_max_aspect": 5.3019934337579215,
+        "new_min_angle_deg": 11.142313007392946,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:4ed98e6e8ba296a55b20cb31",
+          "CMV:f833ccf551b59a4ce973629b"
+        ],
+        "old_max_aspect": 11.664434797836806,
+        "old_min_angle_deg": 5.322014192679521,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.003250534771684419,
+        "local_sampled_surface_deviation": 3.827832450969479e-05,
+        "new_edge": [
+          "CMV:f21d22c048ac092822706a16",
+          "CMV:fba12e15a19bda04f21b23be"
+        ],
+        "new_max_aspect": 8.477798104408583,
+        "new_min_angle_deg": 8.873000241227514,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:12ce432e1d3690749eb0b69b",
+          "CMV:d73fa8c07cf38180f26dc29c"
+        ],
+        "old_max_aspect": 21.419574056134284,
+        "old_min_angle_deg": 3.5083948169883308,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.00413832001464941,
+        "local_sampled_surface_deviation": 0.000944501281154057,
+        "new_edge": [
+          "CMV:acac79f9ca51da2fde57e779",
+          "CMV:b543ffefe5b056bb8131a909"
+        ],
+        "new_max_aspect": 7.112784091108646,
+        "new_min_angle_deg": 8.380254162679591,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:c58fb243d3dbfe5e0d39dc1f",
+          "CMV:dc29e72e970ac1c5707d7ff1"
+        ],
+        "old_max_aspect": 13.054799436906498,
+        "old_min_angle_deg": 4.705173318200543,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.005297690044395562,
+        "local_sampled_surface_deviation": 0.002976159638391279,
+        "new_edge": [
+          "CMV:c80135224e1b2e097e350c8c",
+          "CMV:d5ece6fd12dc189df89e7206"
+        ],
+        "new_max_aspect": 6.076565570411636,
+        "new_min_angle_deg": 10.001021753295708,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:2696dc70fd9af4ae6fd96d2a",
+          "CMV:5ddc0b9f61cb4d7b962812c2"
+        ],
+        "old_max_aspect": 8.561893216358094,
+        "old_min_angle_deg": 6.8080458562635995,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.005845314458014784,
+        "local_sampled_surface_deviation": 0.0005457012083405759,
+        "new_edge": [
+          "CMV:92d522dd83c2e238a82ef770",
+          "CMV:aca459608c90edc06aea03ef"
+        ],
+        "new_max_aspect": 8.074985420845943,
+        "new_min_angle_deg": 7.521293737877164,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:1247e956d34e91785ed98347",
+          "CMV:d3594eafacee4e5bbdb51e43"
+        ],
+        "old_max_aspect": 12.694096815488441,
+        "old_min_angle_deg": 5.069010269079129,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.005671530702946253,
+        "local_sampled_surface_deviation": 0.00036636867898811617,
+        "new_edge": [
+          "CMV:02ad82b03308fac582d6109c",
+          "CMV:d5ece6fd12dc189df89e7206"
+        ],
+        "new_max_aspect": 7.488564401426746,
+        "new_min_angle_deg": 7.691711906048827,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:2696dc70fd9af4ae6fd96d2a",
+          "CMV:b2288673a3f8ce70deba575d"
+        ],
+        "old_max_aspect": 7.978698722848333,
+        "old_min_angle_deg": 7.336709550234661,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.005473469316777238,
+        "local_sampled_surface_deviation": 0.000450874532925853,
+        "new_edge": [
+          "CMV:927a9422e637cd2266cfe530",
+          "CMV:ed7418f952ebf381474c40fa"
+        ],
+        "new_max_aspect": 8.902311755205076,
+        "new_min_angle_deg": 7.101404932613542,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:c40edde4863194fa3a43f7fb",
+          "CMV:d375e35439a23e874573122e"
+        ],
+        "old_max_aspect": 19.123329867929883,
+        "old_min_angle_deg": 3.4816088295089753,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.0034799134111284944,
+        "local_sampled_surface_deviation": 0.00028165691125025486,
+        "new_edge": [
+          "CMV:47a59bebc597554030772935",
+          "CMV:94e0233c0f94ccc0d97f054e"
+        ],
+        "new_max_aspect": 11.73445071797471,
+        "new_min_angle_deg": 5.972432137775047,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:57893dfa6ac238c9d8a01dcf",
+          "CMV:84c4c02c5b8b620d10e9371a"
+        ],
+        "old_max_aspect": 18.906186595766243,
+        "old_min_angle_deg": 3.698380657721882,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.006011886595320726,
+        "local_sampled_surface_deviation": 0.0011091571796281096,
+        "new_edge": [
+          "CMV:8301fea6453a0d8658b86872",
+          "CMV:b543ffefe5b056bb8131a909"
+        ],
+        "new_max_aspect": 12.070984469445646,
+        "new_min_angle_deg": 5.013332714680485,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:ae6a312f0b14158dbaa82621",
+          "CMV:dc29e72e970ac1c5707d7ff1"
+        ],
+        "old_max_aspect": 16.499417267557376,
+        "old_min_angle_deg": 3.7399370177166,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.004936148812797021,
+        "local_sampled_surface_deviation": 0.0004132301461872586,
+        "new_edge": [
+          "CMV:3d666442952646bf67c5e449",
+          "CMV:795de8db5cd660658b7696f4"
+        ],
+        "new_max_aspect": 10.757645750642746,
+        "new_min_angle_deg": 6.756943414879423,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:b572b7fc9cc83877be40912f",
+          "CMV:bc5967f17a94c93418599674"
+        ],
+        "old_max_aspect": 15.257179177763868,
+        "old_min_angle_deg": 5.530090316643287,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.004243994419118823,
+        "local_sampled_surface_deviation": 2.390151735775932e-05,
+        "new_edge": [
+          "CMV:3de72e013abe783f2457206a",
+          "CMV:f773f2f8e52565567aec37e0"
+        ],
+        "new_max_aspect": 9.546462131546045,
+        "new_min_angle_deg": 6.753649770989894,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:9e9a3b3ed3109a9633116b65",
+          "CMV:e0e942b7f64caa42b769fde2"
+        ],
+        "old_max_aspect": 11.155480487997714,
+        "old_min_angle_deg": 5.761011659717366,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.004662775654865848,
+        "local_sampled_surface_deviation": 0.0017460112546172236,
+        "new_edge": [
+          "CMV:88ea79cb3810945eb7eaa4cc",
+          "CMV:c40edde4863194fa3a43f7fb"
+        ],
+        "new_max_aspect": 11.435069284061164,
+        "new_min_angle_deg": 5.7117865790410836,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:0599bef64b9dd8c1f8f04516",
+          "CMV:ed7418f952ebf381474c40fa"
+        ],
+        "old_max_aspect": 13.92658402842245,
+        "old_min_angle_deg": 4.929124854231922,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.005462699988821925,
+        "local_sampled_surface_deviation": 0.0002770980044797822,
+        "new_edge": [
+          "CMV:645fd18a9dbc321d76f15334",
+          "CMV:fdf98db555127064ca0c43c0"
+        ],
+        "new_max_aspect": 9.982567632570365,
+        "new_min_angle_deg": 6.205462476999711,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:4ed98e6e8ba296a55b20cb31",
+          "CMV:ba25e1df055324a5d80d54f0"
+        ],
+        "old_max_aspect": 10.859993787237284,
+        "old_min_angle_deg": 5.817431470571014,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.006702581579848496,
+        "local_sampled_surface_deviation": 0.00040684262871871,
+        "new_edge": [
+          "CMV:c8794671c4e8d7602d1fcbb6",
+          "CMV:f833ccf551b59a4ce973629b"
+        ],
+        "new_max_aspect": 21.598710727476337,
+        "new_min_angle_deg": 2.655002961389664,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:645fd18a9dbc321d76f15334",
+          "CMV:c0726ed4127db981394ff767"
+        ],
+        "old_max_aspect": 23.917486813431506,
+        "old_min_angle_deg": 2.4550425345601674,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.004145242847050575,
+        "local_sampled_surface_deviation": 0.002023517750544473,
+        "new_edge": [
+          "CMV:3de72e013abe783f2457206a",
+          "CMV:f773f2f8e52565567aec37e0"
+        ],
+        "new_max_aspect": 9.546462131546045,
+        "new_min_angle_deg": 6.753649770989894,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:3ef0dc1a7644d504d5a9acfc",
+          "CMV:e0e942b7f64caa42b769fde2"
+        ],
+        "old_max_aspect": 9.607471212883924,
+        "old_min_angle_deg": 6.663812516826185,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.006234851902686682,
+        "local_sampled_surface_deviation": 0.0007742969225832534,
+        "new_edge": [
+          "CMV:795de8db5cd660658b7696f4",
+          "CMV:f103bc91134144cbd87b8362"
+        ],
+        "new_max_aspect": 3.4638138118294517,
+        "new_min_angle_deg": 18.77311179978312,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:3d666442952646bf67c5e449",
+          "CMV:bc5967f17a94c93418599674"
+        ],
+        "old_max_aspect": 10.757645750642746,
+        "old_min_angle_deg": 6.756943414879423,
+        "old_violation_count": 1,
+        "pass_index": 1
+      },
+      {
+        "allowed_local_deviation": 0.004097785955944719,
+        "local_sampled_surface_deviation": 0.0013564572943614234,
+        "new_edge": [
+          "CMV:aacbeafe6139b78af083fe7e",
+          "CMV:b543ffefe5b056bb8131a909"
+        ],
+        "new_max_aspect": 6.026456059328255,
+        "new_min_angle_deg": 9.798153672133912,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:8301fea6453a0d8658b86872",
+          "CMV:dc29e72e970ac1c5707d7ff1"
+        ],
+        "old_max_aspect": 12.070984469445646,
+        "old_min_angle_deg": 5.013332714680485,
+        "old_violation_count": 1,
+        "pass_index": 1
+      },
+      {
+        "allowed_local_deviation": 0.005824254510566522,
+        "local_sampled_surface_deviation": 0.001779384478016354,
+        "new_edge": [
+          "CMV:c40edde4863194fa3a43f7fb",
+          "CMV:e30269a92df16ece1a219101"
+        ],
+        "new_max_aspect": 9.069418003085374,
+        "new_min_angle_deg": 6.992398591063892,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:88ea79cb3810945eb7eaa4cc",
+          "CMV:ed7418f952ebf381474c40fa"
+        ],
+        "old_max_aspect": 11.435069284061164,
+        "old_min_angle_deg": 5.7117865790410836,
+        "old_violation_count": 1,
+        "pass_index": 1
+      }
+    ],
+    "after": {
+      "above_max_aspect_face_count": 41,
+      "below_min_angle_face_count": 86,
+      "degenerate_face_count": 0,
+      "face_count": 24958,
+      "max_aspect_longest_over_min_altitude": 205.80454309529944,
+      "min_angle_deg": 0.5399013039955519,
+      "policy_violating_face_count": 86,
+      "schema": "RealSaS.FixedVertexMeshQualityReport.v1"
+    },
+    "algorithm": "FIXED_VERTEX_MONOTONE_EDGE_FLIP_V1",
+    "before": {
+      "above_max_aspect_face_count": 57,
+      "below_min_angle_face_count": 109,
+      "degenerate_face_count": 0,
+      "face_count": 24958,
+      "max_aspect_longest_over_min_altitude": 272.00299700239304,
+      "min_angle_deg": 0.4074608559654188,
+      "policy_violating_face_count": 109,
+      "schema": "RealSaS.FixedVertexMeshQualityReport.v1"
+    },
+    "input_candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+    "rejected_shape_deviation_count": 47,
+    "rejected_topology_count": 4456,
+    "support_binding_changed": false,
+    "vertex_deletion": false,
+    "vertex_insertion": false,
+    "vertex_motion": false
+  },
+  "repaired_candidate_lineage_hash": "4bec07ba7054d26fb8f7793cff2c84edbe03083160fde7f100cd35b2b70cc960",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "schema": "RealSaS.KnightFixedVertexMeshQualityDiagnostic.v1",
+  "source_fidelity_passed": false,
+  "source_fidelity_views": [
+    {
+      "component_recall": 0.9934534114490776,
+      "eligible_component_count": 1,
+      "interior_uncovered_fraction": 0.0023699733158559994,
+      "largest_coherent_hole_fraction": 0.0007566985015076645,
+      "passed": false,
+      "predicted_foreground_pixel_count": 175293,
+      "silhouette_edge_max_px": 27.202941017470888,
+      "silhouette_edge_mean_px": 1.1698412099885103,
+      "silhouette_edge_p95_px": 3.605551275463989,
+      "silhouette_precision": 0.9886304644224242,
+      "silhouette_recall": 0.9934534114490776,
+      "source_foreground_pixel_count": 174442,
+      "view_index": 0
+    },
+    {
+      "component_recall": 0.9949027133760788,
+      "eligible_component_count": 1,
+      "interior_uncovered_fraction": 0.0016469709318120075,
+      "largest_coherent_hole_fraction": 0.0012646151798194041,
+      "passed": false,
+      "predicted_foreground_pixel_count": 181169,
+      "silhouette_edge_max_px": 27.0,
+      "silhouette_edge_mean_px": 1.0464998022669942,
+      "silhouette_edge_p95_px": 3.0,
+      "silhouette_precision": 0.9900866042203689,
+      "silhouette_recall": 0.9949027133760788,
+      "source_foreground_pixel_count": 180292,
+      "view_index": 1
+    },
+    {
+      "component_recall": 0.9934642785435864,
+      "eligible_component_count": 1,
+      "interior_uncovered_fraction": 0.002385296351774419,
+      "largest_coherent_hole_fraction": 0.0023678143412006617,
+      "passed": false,
+      "predicted_foreground_pixel_count": 145898,
+      "silhouette_edge_max_px": 22.0,
+      "silhouette_edge_mean_px": 1.3181842024114432,
+      "silhouette_edge_p95_px": 5.0,
+      "silhouette_precision": 0.9835158809579295,
+      "silhouette_recall": 0.9934642785435864,
+      "source_foreground_pixel_count": 144437,
+      "view_index": 2
+    },
+    {
+      "component_recall": 0.9956345868877408,
+      "eligible_component_count": 1,
+      "interior_uncovered_fraction": 0.0014389159777929243,
+      "largest_coherent_hole_fraction": 0.001361688493732228,
+      "passed": false,
+      "predicted_foreground_pixel_count": 175669,
+      "silhouette_edge_max_px": 13.92838827718412,
+      "silhouette_edge_mean_px": 0.8754387089889577,
+      "silhouette_edge_p95_px": 3.0,
+      "silhouette_precision": 0.9906130279104453,
+      "silhouette_recall": 0.9956345868877408,
+      "source_foreground_pixel_count": 174783,
+      "view_index": 3
+    },
+    {
+      "component_recall": 0.9934420966946792,
+      "eligible_component_count": 1,
+      "interior_uncovered_fraction": 0.002364066193853428,
+      "largest_coherent_hole_fraction": 0.0007566811506139436,
+      "passed": false,
+      "predicted_foreground_pixel_count": 175293,
+      "silhouette_edge_max_px": 27.202941017470888,
+      "silhouette_edge_mean_px": 1.1702480253652616,
+      "silhouette_edge_p95_px": 3.605551275463989,
+      "silhouette_precision": 0.9886418738911422,
+      "silhouette_recall": 0.9934420966946792,
+      "source_foreground_pixel_count": 174446,
+      "view_index": 4
+    },
+    {
+      "component_recall": 0.9949027981918522,
+      "eligible_component_count": 1,
+      "interior_uncovered_fraction": 0.0016526025660616556,
+      "largest_coherent_hole_fraction": 0.0012645941373859509,
+      "passed": false,
+      "predicted_foreground_pixel_count": 181169,
+      "silhouette_edge_max_px": 27.0,
+      "silhouette_edge_mean_px": 1.0457343213848183,
+      "silhouette_edge_p95_px": 3.0,
+      "silhouette_precision": 0.9901031633447224,
+      "silhouette_recall": 0.9949027981918522,
+      "source_foreground_pixel_count": 180295,
+      "view_index": 5
+    },
+    {
+      "component_recall": 0.9934849135245164,
+      "eligible_component_count": 1,
+      "interior_uncovered_fraction": 0.0023639990629192903,
+      "largest_coherent_hole_fraction": 0.002374787099990307,
+      "passed": false,
+      "predicted_foreground_pixel_count": 145898,
+      "silhouette_edge_max_px": 22.0,
+      "silhouette_edge_mean_px": 1.3163434029867345,
+      "silhouette_edge_p95_px": 5.0,
+      "silhouette_precision": 0.9835158809579295,
+      "silhouette_recall": 0.9934849135245164,
+      "source_foreground_pixel_count": 144434,
+      "view_index": 6
+    },
+    {
+      "component_recall": 0.9956517261502901,
+      "eligible_component_count": 1,
+      "interior_uncovered_fraction": 0.0014214475462553014,
+      "largest_coherent_hole_fraction": 0.001355974871554279,
+      "passed": false,
+      "predicted_foreground_pixel_count": 175669,
+      "silhouette_edge_max_px": 13.92838827718412,
+      "silhouette_edge_mean_px": 0.8738160371437245,
+      "silhouette_edge_p95_px": 3.0,
+      "silhouette_precision": 0.9906244129584616,
+      "silhouette_recall": 0.9956517261502901,
+      "source_foreground_pixel_count": 174782,
+      "view_index": 7
+    }
+  ],
+  "status": "PASS_MEASUREMENT",
+  "vertex_authority_hash_after": "8c8bbfb1e37d02239fe399e0cb83d61d97073d1114722ef9b26eb3ba3525a493",
+  "vertex_authority_hash_before": "8c8bbfb1e37d02239fe399e0cb83d61d97073d1114722ef9b26eb3ba3525a493",
+  "vertex_authority_unchanged": true,
+  "vertex_count": 12049,
+  "wall_seconds": 19.1924781120033
+}

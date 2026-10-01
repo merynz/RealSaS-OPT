@@ -1,0 +1,42 @@
+{
+  "schema": "RealSaS.IRISV4ForegroundBCEGeometricPressureErratum.v1",
+  "date_utc": "2026-09-22",
+  "status": "ERRATUM_CLOSED__SATURATING_FOREGROUND_EXISTENCE_REQUIRED_BEFORE_FIRST_V4_KNIGHT_RUN",
+  "supersedes_training_signal_only": "canonical/IRIS_V4_DEMO_GEOMETRY_POLICY_20260922.json",
+  "v4_knight_result_had_been_inspected": false,
+  "finding": {
+    "old_foreground_loss": "BCE_WITH_LOGITS_ON_MINUS_RAY_MIN_SDF_OVER_BETA_PLUS_SOFT_DICE",
+    "problem": "For target foreground, BCE has no finite satisfied state: making ray_min_sdf more negative always improves the objective. On silhouette-boundary rays this rewards geometric thickening beyond the source contract and can trade recall improvement for precision loss.",
+    "arm_A_supporting_signature": "Dense foreground supervision materially improved recall/interior coverage while reducing precision and increasing source-unsupported surface support.",
+    "arm_C_supporting_signature": "Changing negative-space sampling alone did not close source fidelity while the same non-saturating foreground pressure remained active."
+  },
+  "replacement": {
+    "name": "COMPONENT_BALANCED_SATURATING_FOREGROUND_EXISTENCE_HINGE_V4",
+    "ray_statistic": "HARD_AMIN_SDF_OVER_ADMITTED_DEPTH_SAMPLES",
+    "loss": "relu(ray_min_sdf + required_inside_margin)",
+    "boundary_required_inside_margin": "0.5 * occupancy_beta_normalized",
+    "interior_required_inside_margin": "1.0 * occupancy_beta_normalized",
+    "component_aggregation": "EQUAL_MEAN_PER_REPRESENTED_SOURCE_FOREGROUND_COMPONENT",
+    "saturation_rule": "NO_FOREGROUND_GRADIENT_AFTER_RAY_MIN_SDF_LE_REQUIRED_NEGATIVE_MARGIN",
+    "background_semantics": "UNCHANGED_POINTWISE_FULL_RAY_METRIC_EXTERIOR_CONSTRAINT",
+    "top_level_weight": 1.0
+  },
+  "why_no_explicit_zero_set_loss": "Given a continuous field and an enclosing normalization domain whose exterior is independently constrained positive, a foreground ray with a negative interior sample already implies at least one zero crossing by continuity. A second near-zero surrogate is redundant and can bias tangent rays.",
+  "why_no_differentiable_mesh_raster_yet": "Exact source-ray sign constraints are closer to the controlled orthographic silhouette contract and avoid introducing a second extractor proxy before the strengthened V4 field is tested.",
+  "why_no_eikonal_yet": "The observed blocker is source-contract retention and foreground/background sign pressure, not demonstrated gradient-norm pathology; Eikonal can oversmooth thin features and is held unless V4 produces oscillatory signed-field evidence after source constraints close.",
+  "why_no_global_teacher_sdf": "Teacher geometry remains FIT-only local structural aid. Global teacher-SDF domination would weaken the diagnostic value of image/source-driven geometry fitting and is unnecessary before the source-contract V4 is tested.",
+  "unchanged": [
+    "64x64 final triplane",
+    "4-layer 256D scene transformer",
+    "64 plane channels / 192D point feature",
+    "4 residual field blocks",
+    "all-eight-view every-step retention",
+    "near and far source-background constraints",
+    "hard-negative replay",
+    "source-certified 3D exterior metric barrier",
+    "canonical Marching Cubes extractor",
+    "unchanged Stage13-v2 qualification"
+  ],
+  "product_authority_minted": false,
+  "knight_witness_promoted": false
+}

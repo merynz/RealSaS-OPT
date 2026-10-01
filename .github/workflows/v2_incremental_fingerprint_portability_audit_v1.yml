@@ -1,0 +1,51 @@
+name: v2-incremental-fingerprint-portability-audit-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/audit_v2_incremental_fingerprint_portability_v1.py'
+      - '.github/workflows/v2_incremental_fingerprint_portability_audit_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v2-incremental-fingerprint-portability-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Run incremental fingerprint portability audit
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python tools/audit_v2_incremental_fingerprint_portability_v1.py | tee /tmp/incremental_fp.txt
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          mkdir -p canonical/v2_incremental_fingerprint_portability_audit_v1
+          cp /tmp/incremental_fp.txt canonical/v2_incremental_fingerprint_portability_audit_v1/AUDIT_STDOUT.txt
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/V2_INCREMENTAL_FINGERPRINT_PORTABILITY_AUDIT_V1_20260928.json canonical/v2_incremental_fingerprint_portability_audit_v1
+          if git diff --cached --quiet; then
+            echo INCREMENTAL_FP_AUDIT_UNCHANGED
+            exit 0
+          fi
+          git commit -m 'audit: seal incremental fingerprint portability evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

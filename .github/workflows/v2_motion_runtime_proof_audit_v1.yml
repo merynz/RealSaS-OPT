@@ -1,0 +1,47 @@
+name: v2-motion-runtime-proof-audit-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/audit_v2_motion_runtime_proof_v1.py'
+      - '.github/workflows/v2_motion_runtime_proof_audit_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v2-motion-runtime-proof-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Run motion-runtime proof audit
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python tools/audit_v2_motion_runtime_proof_v1.py | tee /tmp/motion_runtime_audit.txt
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          mkdir -p canonical/v2_motion_runtime_proof_audit_v1
+          cp /tmp/motion_runtime_audit.txt canonical/v2_motion_runtime_proof_audit_v1/AUDIT_STDOUT.txt
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/V2_MOTION_RUNTIME_PROOF_AUDIT_V1_20260928.json canonical/v2_motion_runtime_proof_audit_v1
+          if git diff --cached --quiet; then
+            echo MOTION_RUNTIME_AUDIT_UNCHANGED
+            exit 0
+          fi
+          git commit -m 'audit: seal current V2 motion-runtime proof evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

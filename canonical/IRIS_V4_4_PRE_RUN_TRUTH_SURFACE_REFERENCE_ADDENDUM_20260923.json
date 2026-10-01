@@ -1,0 +1,24 @@
+{
+  "schema": "RealSaS.IRIS.V44PreRunTruthSurfaceReferenceAddendum.v1",
+  "date_utc": "2026-09-23",
+  "status": "SEALED_PRE_RUN_ADDENDUM__NO_V44_SCIENTIFIC_PARAMETER_CHANGE",
+  "v44_policy": "canonical/IRIS_V4_4_TP64_ADAPTIVE_HULL_CONSTRAINT_POLICY_20260923.json",
+  "truth_surface_reference": "canonical/IRIS_V4_3_FOREGROUND_TRUTH_SURFACE_REFERENCE_20260923.json",
+  "source_only_feasibility": "canonical/IRIS_V4_3_FOREGROUND_HULL_CONSTRAINT_FEASIBILITY_20260923.json",
+  "finding": {
+    "truth_surface_miss_count_on_2048_fixed_foreground_rays": 38,
+    "boundary_miss_count": 36,
+    "interior_miss_count": 2,
+    "source_hull_infeasible_ray_count": 0
+  },
+  "interpretation": "The retained physical FIT truth surface is not an upper bound on admitted source-raster foreground coverage. This reference therefore does not change the V4.4 source-raster objective.",
+  "policy_effect": {
+    "v44_policy_change": false,
+    "foreground_audit_target_max_miss_fraction": 0,
+    "stage13_threshold_change": false,
+    "architecture_change": false,
+    "controller_change": false,
+    "teacher_authority_change": false
+  },
+  "claim_boundary": "Reference-only pre-run seal. It does not mint product authority, prove TP64 capacity, authorize raster coupling, or weaken any source/Stage13 gate."
+}

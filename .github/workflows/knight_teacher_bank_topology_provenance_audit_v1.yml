@@ -1,0 +1,116 @@
+name: knight-teacher-bank-topology-provenance-audit-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/knight_teacher_bank_topology_provenance_audit_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: knight-teacher-bank-topology-provenance-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V6_DEMO_OUTPUT
+      OUT: canonical/knight_teacher_bank_topology_provenance_audit_v1
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+
+      - name: Inspect remote teacher-bank provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT"
+          tmp="$(mktemp -d)"
+          rclone lsf -R "$REMOTE" > "$tmp/listing.txt"
+          cp "$tmp/listing.txt" "$OUT/REMOTE_LISTING.txt"
+
+          # Pull only known small provenance files; do not recursively copy the whole remote tree.
+          for f in ARACHNE_V6_LIVE.log ARACHNE_KNIGHT_V6_PREFLIGHT.json ARACHNE_KNIGHT_V6_RESULT.json KNIGHT_ARACHNE_V6_DEMO_CLOSURE_PREREG_V1_20260926.json run_knight_arachne_v6_demo_closure_v1.py; do
+            if grep -Fxq "$f" "$tmp/listing.txt"; then
+              rclone copyto "$REMOTE/$f" "$tmp/$f" --checksum
+            fi
+          done
+
+          # Pull exact teacher/source NPZs only if they are direct remote members.
+          for f in ARACHNE_KNIGHT_TEACHER_BANK_FIX2.npz KNIGHT_EVALUATED_TEACHER_SOURCE.npz; do
+            if grep -Fxq "$f" "$tmp/listing.txt"; then
+              rclone copyto "$REMOTE/$f" "$tmp/$f" --checksum
+            fi
+          done
+
+          python - "$tmp" "$OUT" <<'PY'
+          import json,re,sys,hashlib
+          from pathlib import Path
+          import numpy as np
+          tmp=Path(sys.argv[1]); out=Path(sys.argv[2])
+          needles=(
+            "teacher_bank","teacher-bank","source_face","nearest","bary","projection",
+            "teacher_source","evaluated_teacher","KDTree","cKDTree","closest","distance"
+          )
+          hits=[]
+          for p in sorted(tmp.iterdir()):
+            if not p.is_file() or p.suffix.lower()==".npz": continue
+            try:s=p.read_text(errors="replace")
+            except Exception:continue
+            rows=[]
+            for i,line in enumerate(s.splitlines(),1):
+              if any(n.lower() in line.lower() for n in needles):
+                rows.append({"line":i,"text":line[:1200]})
+            if rows:
+              hits.append({"path":p.name,"sha256":hashlib.sha256(p.read_bytes()).hexdigest(),"hits":rows[:400]})
+
+          arrays={}
+          for name in ("ARACHNE_KNIGHT_TEACHER_BANK_FIX2.npz","KNIGHT_EVALUATED_TEACHER_SOURCE.npz"):
+            p=tmp/name
+            if not p.is_file():
+              arrays[name]={"present":False};continue
+            inv={}
+            with np.load(p,allow_pickle=False) as z:
+              for k in z.files:
+                a=np.asarray(z[k])
+                row={"shape":list(a.shape),"dtype":str(a.dtype)}
+                if a.size and np.issubdtype(a.dtype,np.number):
+                  aa=a.astype(np.float64,copy=False); finite=np.isfinite(aa)
+                  row.update({"finite_fraction":float(finite.mean()),"min":float(np.nanmin(aa)) if finite.any() else None,"max":float(np.nanmax(aa)) if finite.any() else None})
+                inv[k]=row
+            arrays[name]={"present":True,"sha256":hashlib.sha256(p.read_bytes()).hexdigest(),"arrays":inv}
+
+          listing=(tmp/"listing.txt").read_text().splitlines()
+          report={
+            "schema":"RealSaS.KnightTeacherBankTopologyProvenanceAudit.v2",
+            "status":"AUDIT_ONLY__NO_REPAIR_APPLIED",
+            "remote_npz_candidates":[x for x in listing if "TEACHER" in x.upper() and x.lower().endswith(".npz")],
+            "textual_provenance_hits":hits,
+            "npz_inventory":arrays,
+            "finding":{
+              "id":"KNIGHT_TEACHER_BANK_TOPOLOGY_PROVENANCE",
+              "claim_boundary":"Fast remote provenance discovery plus exact array inventory for direct teacher/source NPZ members. No repair applied."
+            }
+          }
+          (out/"REPORT.json").write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
+          print(json.dumps(report,indent=2,sort_keys=True))
+          PY
+
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add "$OUT"
+          git commit -m 'audit: seal Knight teacher-bank topology provenance'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

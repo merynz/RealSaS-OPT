@@ -1,0 +1,19 @@
+{
+  "drive_path": "RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/GEPPETTO_STAGE27_HANDOFF",
+  "execution_repo_commit": "249bb6c69c66572ad96c221a807b773fb4ac3fbf",
+  "experiment_preregistration_sha256": "5d124e7a25c879b4be4f7fbcc5c519835488fedb7c908126e70b00cc1adcf678",
+  "handoff_manifest_sha256": "7996bf007d41a2c2eaff30011730d68f9a6258790f72e27a60831b0bf6aec890",
+  "next_stage": "27_GEPPETTO_FIT",
+  "product_authority_claimed": false,
+  "product_pass_forbidden": true,
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "schema": "RealSaS.KnightGeppettoStage26HandoffReceipt.v1",
+  "stage26_preregistration_file_sha256": "684f61b89d62d2fc04400fa3c3e837a1395bcc41909a8e90743f71fd20389f2b",
+  "stage26_preregistration_hash": "65ab4cdd080eb4d08cdf5f96cf3a039df8a74fef2eedd9747de40ba4f02d0a66",
+  "status": "PASS_DEMO_ONLY",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "teacher_target_content_sha256": "3207db68c9dc748690abc0bb54ee86f83f1d2f47b4007f77e1bca0b690d39d65",
+  "teacher_target_count": 20,
+  "teacher_target_root_count": 1,
+  "user_action_required": "RUN_COLAB_RUN_ALL"
+}

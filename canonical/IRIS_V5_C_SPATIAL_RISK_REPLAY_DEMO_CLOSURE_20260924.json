@@ -1,0 +1,32 @@
+{
+  "schema": "RealSaS.IRIS.V5CSpatialRiskReplayDemoClosure.v1",
+  "status": "CLOSED__SCIENTIFIC_STAGE13_FAIL__NEW_CANDIDATE_NOT_PROMOTED__FROZEN_C_FALLBACK_SELECTED",
+  "date_utc": "2026-09-24",
+  "run_id": "20260924T151936Z",
+  "result_sha256": "f9a3b5cc3125372bf08904cc0e7346be5df25ff99f0adeb4abba7896840dad7d",
+  "optimizer_steps_executed": 6000,
+  "parameter_updates_executed": 6000,
+  "selected_new_checkpoint_sha256": "8f4a9232cc18167c44fe496f58677af953e48182651630d6e8b74d5d82713875",
+  "selected_new_checkpoint_step": 23700,
+  "new_candidate_stage13": {
+    "every_view_passed": false,
+    "min_view_precision": 0.9795511018778769,
+    "min_view_recall": 0.9980681257953933,
+    "max_view_interior_uncovered_fraction": 0.00039206965966012827,
+    "max_view_largest_coherent_hole_fraction": 0.0004012795083752766,
+    "max_view_silhouette_edge_p95_px": 2.8284271247461903
+  },
+  "fallback_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
+  "fallback_stage13": {
+    "scientific_pass": false,
+    "min_view_precision": 0.9783673081878721,
+    "min_view_recall": 0.9981541565871387,
+    "max_view_interior_uncovered_fraction": 0.00028673080073964843,
+    "max_view_largest_coherent_hole_fraction": 0.0003611515575377489,
+    "max_view_silhouette_edge_p95_px": 3
+  },
+  "demo_choice": "FROZEN_C_FALLBACK",
+  "product_authority_claimed": false,
+  "p999_pass_claimed": false,
+  "unseen_claimed": false
+}

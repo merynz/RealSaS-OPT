@@ -1,0 +1,48 @@
+{
+  "schema": "RealSaS.VF11C2V1ResearchClosure.v1",
+  "date_utc": "2026-09-21",
+  "status": "C2_V1_RESEARCH_CLOSED__AXIS_GRAPH_RESEARCH_AUTHORIZED",
+  "authority_class": "RESEARCH_CLOSURE_ONLY",
+  "source_run_id": "20260921T182845Z",
+  "source_repo_commit": "bebe23888ca1b4dfdb2a6f4205b10a19fb7d2a39",
+  "source_profile_sha256": "fc9ce36fc0453e5a5a4bacda3969527b45cb96935de6d5c2133b15d6bf823d9b",
+  "product_authority_minted": false,
+  "shipping_certificate_backend": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "full_domain_traversal_performed": false,
+  "single_component_claimed": false,
+  "primary_c1_regular_count": 12,
+  "results": {
+    "state_counts": {
+      "PROVEN_CENTER_CHORD_CROSSING": 7,
+      "REGULAR_ONLY": 5
+    },
+    "existence_proven_count": 7,
+    "new_existence_from_center_or_full_count": 4,
+    "c0_bridge_only_count": 0,
+    "center_chord_crossing_count": 7,
+    "full_oriented_crossing_count": 0,
+    "empirical_contradiction_count": 0,
+    "center_margin_min": 0.0014049887001812817,
+    "center_margin_median": 0.009528084655108609,
+    "face_margin_min": 0.00006561875500539363,
+    "face_margin_median": 0.0026882903116003175,
+    "elapsed_seconds_total": 16.018693130000088
+  },
+  "face_failure_signature": {
+    "face_certificate_count": 64,
+    "proven_face_sign_count": 24,
+    "unknown_face_sign_count": 40,
+    "total_unresolved_leaf_count": 565,
+    "interpretation": "The oblique full-boundary sufficient condition was not established on any of the 12 cells. This does not falsify local graph-like surface patches; it shows that requiring all inflow/outflow faces for the arbitrary C1 direction is too demanding for this cohort at this cell scale."
+  },
+  "semantic_claim": "Seven cells have a certified unique zero on the chosen center chord under the research arithmetic. Four of those existence proofs are new relative to C0 UNKNOWN. No full d-parallel chord-family crossing was proved.",
+  "forbidden_inferences": [
+    "global topology",
+    "global single component",
+    "full oriented crossing from center-chord crossing",
+    "shipping proof under ordinary float64"
+  ],
+  "next": "C2_V2_AXIS_ALIGNED_GRAPH_PATCH"
+}

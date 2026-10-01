@@ -1,0 +1,105 @@
+name: knight-motion-gif-export
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/knight_motion_gif_export.yml'
+      - 'canonical/knight_demo_motion_preview_v1/KNIGHT_IDLE_DEMO_PREVIEW_V1.png'
+      - 'canonical/knight_demo_motion_preview_v1/KNIGHT_RUN_DEMO_PREVIEW_V1.png'
+      - 'canonical/knight_demo_motion_preview_v1/KNIGHT_SLASH_DEMO_PREVIEW_V1.png'
+      - 'canonical/KNIGHT_DEMO_MOTION_PREVIEW_BASELINE_V1.json'
+  workflow_dispatch:
+
+jobs:
+  export-gifs:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Ensure Pillow
+        run: python -m pip install --no-input --progress-bar off Pillow==11.3.0
+      - name: Build loop GIFs from sealed preview sheets
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+
+          root = Path("canonical/knight_demo_motion_preview_v1")
+          specs = [
+              ("IDLE", 833),
+              ("RUN", 208),
+              ("SLASH", 278),
+          ]
+
+          for name, duration_ms in specs:
+              src = root / f"KNIGHT_{name}_DEMO_PREVIEW_V1.png"
+              sheet = Image.open(src).convert("RGBA")
+              if sheet.width % 4 != 0 or sheet.height % 2 != 0:
+                  raise RuntimeError(f"unexpected sheet geometry: {src} {sheet.size}")
+
+              cell_w = sheet.width // 4
+              row_h = sheet.height // 2
+              header = 28
+              cell_h = row_h - header
+              frames = []
+
+              for i in range(4):
+                  v0 = sheet.crop((i * cell_w, header, (i + 1) * cell_w, header + cell_h))
+                  y2 = row_h + header
+                  v2 = sheet.crop((i * cell_w, y2, (i + 1) * cell_w, y2 + cell_h))
+
+                  combined = Image.new("RGBA", (cell_w * 2, cell_h), (0, 0, 0, 0))
+                  combined.alpha_composite(v0, (0, 0))
+                  combined.alpha_composite(v2, (cell_w, 0))
+
+                  target_h = min(640, combined.height)
+                  target_w = max(1, round(combined.width * target_h / combined.height))
+                  if (target_w, target_h) != combined.size:
+                      combined = combined.resize((target_w, target_h), Image.Resampling.LANCZOS)
+
+                  # GIF has no full RGBA alpha model; quantize each frame with transparency.
+                  frames.append(combined.convert("P", palette=Image.Palette.ADAPTIVE, colors=255))
+
+              out = root / f"KNIGHT_{name}_DEMO_PREVIEW_V1.gif"
+              frames[0].save(
+                  out,
+                  save_all=True,
+                  append_images=frames[1:],
+                  duration=duration_ms,
+                  loop=0,
+                  disposal=2,
+                  optimize=False,
+                  transparency=0,
+              )
+              print(name, out, out.stat().st_size)
+          PY
+      - name: Verify byte-exact GIF baseline
+        run: |
+          set -euo pipefail
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_IDLE_DEMO_PREVIEW_V1.gif)" = "31b64edff1da106bc8feb00faede61ffe68dc89c"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_RUN_DEMO_PREVIEW_V1.gif)" = "b8f0e97e74396a0987444bb72ea93db4bb519640"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_SLASH_DEMO_PREVIEW_V1.gif)" = "73a567f3ff17786d3316e3fb02a723ee3c026eca"
+          echo "KNIGHT_GIF_BASELINE_PASS"
+
+      - name: Commit GIF previews
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/knight_demo_motion_preview_v1/*.gif
+          if git diff --cached --quiet; then
+            echo "NO_GIF_DIFF"
+            exit 0
+          fi
+          git commit -m "demo: export Knight motion GIF previews"
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

@@ -1,0 +1,53 @@
+{
+  "schema": "RealSaS.KnightFaceIncidenceNegativeCausalBoundary.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED",
+  "exact_authority": {
+    "candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+    "skin_lineage_hash": "b30417b9375a52c646618f0fb94ea8ddd7285fea959e460522dd5f8b6b70cb2a"
+  },
+  "facts": {
+    "stage18_face_count": 24958,
+    "dense_supported_face_count": 24443,
+    "invented_three_clique_face_count": 515,
+    "invented_fraction": 0.020634666239281993,
+    "skin_l1_gt_0p5": {
+      "invented_rate": 0.07378640776699029,
+      "supported_rate": 0.0729043079818353,
+      "risk_ratio": 1.0120994192191601
+    },
+    "skin_l1_gt_1p9": {
+      "invented_rate": 0.04854368932038835,
+      "supported_rate": 0.032811029742666614,
+      "risk_ratio": 1.4794930150352275
+    },
+    "historical_smear_offenders": {
+      "253": {
+        "invented": false,
+        "dense_face_supported": true,
+        "skin_l1_max": 1.99793553797021
+      },
+      "3573": {
+        "invented": false,
+        "dense_face_supported": true,
+        "skin_l1_max": 1.92251300311386
+      },
+      "3829": {
+        "invented": false,
+        "dense_face_supported": true,
+        "skin_l1_max": 1.461660601069884
+      }
+    }
+  },
+  "verdict": {
+    "face_incidence_loss_is_real_architecture_defect": true,
+    "invented_face_status_is_not_sufficient_explanation_for_baseline_smear": true,
+    "preserving_dense_face_incidence_alone_cannot_remove_the_three_historical_smear_offenders": true,
+    "stage35_topology_skin_deformation_cross_qualification_remains_necessary": true
+  },
+  "evidence": [
+    "canonical/knight_stage18_dense_face_support_audit_v1/REPORT.json",
+    "canonical/knight_invented_face_skin_correlation_audit_v1/REPORT.json",
+    "canonical/KNIGHT_SKIN_TOPOLOGY_COMPATIBILITY_DIAGNOSIS_V1_20260927.json"
+  ],
+  "claim_boundary": "This is a negative causal boundary, not a defense of clique face invention. The incidence defect must still be repaired because it violates the frozen mesh-weight binding contract."
+}

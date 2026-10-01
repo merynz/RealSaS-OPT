@@ -1,0 +1,63 @@
+name: knight-source-owned-safe-handles-proof-v1
+# rerun-after-barycentric-index-fix
+# rerun-after-g3b-face-index-fix
+on:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths:
+      - 'tools/demo/render_knight_source_owned_safe_handles_v1.py'
+      - '.github/workflows/knight_source_owned_safe_handles_proof_v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  proof:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      PYTHONPATH: .
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      PARENT_RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      OUT_DIR: canonical/knight_source_owned_safe_handles_v1
+      PLAYER: /tmp/realsas_native_visual_mesh_safe_handles_v1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Unit proof
+        run: python -m pytest -q tests/compiler/test_visual_mesh_arap_v1.py tests/compiler/test_skin_repair_accounting_v1.py
+      - name: Build renderer
+        run: c++ -std=c++17 -O2 -Wall -Wextra -pedantic tools/demo/native_visual_mesh_preview_v1.cpp -lpng -lz -o "$PLAYER"
+      - name: Run safe-handle rescue proof
+        run: |
+          set -euo pipefail
+          rm -rf "$OUT_DIR"
+          python -m tools.demo.render_knight_source_owned_safe_handles_v1             --authority-root "$AUTHORITY_ROOT"             --parent-run-id "$PARENT_RUN_ID"             --out-dir "$OUT_DIR"             --native-player "$PLAYER"             --render-resolution 512
+      - name: Summarize
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path("canonical/knight_source_owned_safe_handles_v1/REPORT.json").read_text())
+          print("UNSAFE",p["mechanical_compatibility"])
+          for v in p["views"]:
+              print("VIEW",v["view_index"],"continuous",v["continuous_bound_fraction"],"safe",v["safe_handle_fraction"])
+              for clip,rows in v["qa_by_clip"].items():
+                  print("QA",v["view_index"],clip,
+                        "flip",max(x["flipped_triangles"] for x in rows),
+                        "p95",max(x["p95_edge_stretch"] for x in rows),
+                        "max",max(x["max_edge_stretch"] for x in rows),
+                        "resid",max(x["max_handle_residual_px"] for x in rows))
+          PY
+      - name: Seal
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add "$OUT_DIR"
+          git commit -m 'rescue: seal source-owned safe-handle proof'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

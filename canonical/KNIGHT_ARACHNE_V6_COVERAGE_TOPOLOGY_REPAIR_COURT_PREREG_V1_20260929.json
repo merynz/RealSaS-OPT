@@ -1,0 +1,63 @@
+{
+  "schema": "RealSaS.KnightArachneV6CoverageTopologyRepairCourtPrereg.v1",
+  "status": "FROZEN_BEFORE_CHILD_REPARTITION_ITERATION_1",
+  "date": "2026-09-29",
+  "source_a100_court": "canonical/KNIGHT_ARACHNE_V6_2X2_INDEXSPACE_FIXED_RESULT_AUDIT_V1_20260929.json",
+  "reliability_eligibility": {
+    "final_valid_gate_required": true,
+    "invalid_row_l1_p95_max": 0.05,
+    "invalid_row_l1_gt_1_max": 10,
+    "invalid_dominant_joint_accuracy_min": 0.99,
+    "compiler_semantic_rebind_numeric_field_preserved_required": true,
+    "compiler_requalification_max_abs_weight_delta": 1e-12,
+    "teacher_inputs_used_by_predictor": false,
+    "expected_eligible_arms_by_already_sealed_a100_evidence": [
+      "UNIFORM_ALL_PROJECTED",
+      "ACTIVE_BALANCED_ALL_PROJECTED"
+    ],
+    "note": "Eligibility is frozen from the completed A100 court before any Stage35 rebound/topology-repair result is inspected."
+  },
+  "topology_repair_loop": {
+    "max_iterations": 4,
+    "operation": "STAGE17_REPARTITION_THEN_STAGE18_HOLELESS_DENSE_SUBDIVISION",
+    "current_parent_stage17_required": true,
+    "exact_compacted_dense_face_provenance_required": true,
+    "face_deletion_count_required": 0,
+    "weight_mutation_required": false,
+    "manual_boundary_authoring_allowed": false,
+    "each_iteration_authorization_bound_to_exact_directive_partition_skin_skeleton": true,
+    "stage18_builder": "build_holeless_partitioned_dense_candidate",
+    "stop_condition": "G3B_SKIN_TOPOLOGY_COMPATIBILITY_PASS",
+    "on_no_identity_bound_proposal": "ABSTAIN_FAIL_CLOSED",
+    "on_budget_exhaustion": "FAIL_CLOSED"
+  },
+  "final_measurement": {
+    "run_g3_local_frame_micro_stress": true,
+    "run_g3b_skin_topology_compatibility": true,
+    "actual_motion_clips": [
+      "demo_idle_v1",
+      "demo_run_v1",
+      "demo_slash_v1"
+    ],
+    "frames_per_clip": 4,
+    "report_rest_area_relative_error": true,
+    "report_face_and_vertex_counts": true,
+    "report_edge_gt_4": true,
+    "report_edge_gt_10": true,
+    "report_worst_edge_max": true
+  },
+  "selection_after_court": {
+    "primary": "G3B_PASS_AND_G3_PASS_REQUIRED",
+    "secondary": "MIN_ACTUAL_MOTION_MAX_EDGE_GT_10",
+    "tertiary": "MIN_ACTUAL_MOTION_MAX_EDGE_GT_4",
+    "quaternary": "MIN_ACTUAL_MOTION_WORST_EDGE_MAX",
+    "tie_breaker": "FEWER_REPARTITION_ITERATIONS",
+    "no_selection_if_neither_closes_g3b_and_g3": true
+  },
+  "claim_boundary": [
+    "This is a demo-witness topology-repair court, not generalization evidence.",
+    "Teacher-projected invalid rows are used only through the already trained Arachne field; no teacher input is provided to the predictor or topology operator.",
+    "Authorization permits isolated child-attempt construction only; product mainline state is not mutated by this court.",
+    "Product integration requires the winning child attempt to be replayed through the actual mainline Stage17/18 and requalified through Stage35."
+  ]
+}

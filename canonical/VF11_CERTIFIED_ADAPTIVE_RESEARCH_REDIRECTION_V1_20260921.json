@@ -1,0 +1,103 @@
+{
+  "schema": "RealSaS.VF11CertifiedAdaptiveResearchRedirection.v1",
+  "date_utc": "2026-09-21",
+  "status": "RESEARCH_REDIRECTION__X1_FULL_PHASE_BANK_HOLD__CERTIFIABILITY_LADDER_OPEN",
+  "authority_class": "RESEARCH_PREREGISTRATION_ONLY",
+  "product_authority_minted": false,
+  "witness_execution_authorized": false,
+  "knight_mainline_started": false,
+  "source_branch": "research/vf11-certified-adaptive-20260921",
+  "source_parent_commit": "3fc8d247eed25e694d16f6e394877acfe78cdde8",
+  "parent_evidence": [
+    "canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_R512_AUTHORITY_V1_20260921.json",
+    "canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_CALIBRATION_V1_20260921.json"
+  ],
+  "research_problem": "Preserve artist geometry that is present in the continuous IRIS field without losing it through discretization, surface discovery, contouring, or later simplification.",
+  "scope_correction": {
+    "watertight_closed_mesh_generation_is_not_the_primary_research_problem": true,
+    "uniform_resolution_is_not_treated_as_the_only_control_axis": true,
+    "field_survival_sampling_discovery_contouring_and_simplification_are_separate_failure_owners": true,
+    "vf11_analytic_fixture_lane_is_decoder_discretization_evidence_not_learned_field_evidence": true
+  },
+  "x1_disposition": {
+    "experiment": "VF11_X1_R512_PHASE_BANK",
+    "state": "HOLD_NOT_EXECUTED",
+    "reason": [
+      "Eight half-voxel R512 phase evaluations have approximately the same field-query count as one R1024 evaluation.",
+      "Phase sensitivity is interpreted primarily as an undersampling/aliasing symptom, not as an independent product solution.",
+      "The next causal question is whether continuous-field regions can be certified empty or regular before choosing an adaptive extractor."
+    ],
+    "historical_authority_is_not_mutated": true
+  },
+  "causal_ladder": [
+    "OBSERVABILITY",
+    "CONTINUOUS_FIELD_SURVIVAL",
+    "CELL_RANGE_CERTIFIABILITY",
+    "ADAPTIVE_SURFACE_DISCOVERY",
+    "MANIFOLD_EXTRACTION",
+    "REFERENCE_MESH_FEATURE_SURVIVAL",
+    "ENVELOPE_BOUNDED_SIMPLIFICATION",
+    "RUNTIME_MESH_FEATURE_AND_STAGE13_PROOF"
+  ],
+  "cell_states": {
+    "PROVEN_EMPTY": "A conservative interval bound for f(C) excludes zero.",
+    "PROVEN_REGULAR": "A fixed direction d is found for which a conservative bound on D_d f(C) is strictly one-signed over the cell.",
+    "UNKNOWN": "Neither absence nor regular directional behavior is established; subdivision is required or the system abstains at the configured floor."
+  },
+  "asymmetric_refinement_rule": "Auxiliary source, silhouette, mechanical, uncertainty, or curvature evidence may request additional subdivision but may never certify absence or cancel a safety-required subdivision.",
+  "field_mesh_owner_rule": {
+    "SOURCE_PRESENT_FIELD_ABSENT": "FIELD_MISS__IRIS_OWNER",
+    "FIELD_PRESENT_REFERENCE_MESH_ABSENT": "EXTRACTION_MISS",
+    "REFERENCE_MESH_PRESENT_RUNTIME_MESH_ABSENT": "SIMPLIFICATION_MISS"
+  },
+  "prototype_v1": {
+    "module": "experiments/vf11_certified_adaptive/range_engine_v1.py",
+    "target_architecture": "bilinear triplane -> LayerNorm -> Linear -> SiLU -> Linear -> SiLU -> Linear(sdf)",
+    "numeric_status": "MATHEMATICALLY_CONSERVATIVE_FORMULAS__IEEE754_DIRECTED_ROUNDING_NOT_YET_PRODUCT_CERTIFIED",
+    "shipping_eligible": false,
+    "required_short_tests": [
+      "SiLU value and derivative interval containment",
+      "LayerNorm value and directional-derivative containment",
+      "bilinear triplane value and directional-derivative containment",
+      "no sampled zero crossing may be labelled PROVEN_EMPTY",
+      "sampled directional derivatives must agree with any emitted PROVEN_REGULAR direction"
+    ]
+  },
+  "next_long_experiment": {
+    "id": "KNIGHT_FIELD_CERTIFIABILITY_RESEARCH_V1",
+    "execution_class": "LONG__USER_RUN_ALL_NOTEBOOK_REQUIRED",
+    "mainline_witness": false,
+    "uses_existing_frozen_knight_field_or_checkpoint_only": true,
+    "no_training": true,
+    "no_threshold_selection_from_knight": true,
+    "required_output": [
+      "per-depth PROVEN_EMPTY fraction",
+      "per-depth PROVEN_REGULAR fraction",
+      "per-depth UNKNOWN fraction",
+      "surface-band certification fractions",
+      "UNKNOWN reason histogram",
+      "visited-cell and field-query counts",
+      "dense-equivalent query cost",
+      "exact repo/checkpoint/input hashes",
+      "final result bundle and logs"
+    ],
+    "decision_boundary": "This run may falsify or support practical certifiability of the current field representation, but cannot mint product authority or select a shipping threshold."
+  },
+  "extractor_decision_after_certifiability": {
+    "current_tetrahedral_path_with_certified_adaptive_refinement": "CANDIDATE",
+    "balanced_octree_manifold_dual_contouring": "CANDIDATE",
+    "flexicubes": "COMPARATOR",
+    "production_change_before_certifiability_evidence": "FORBIDDEN"
+  },
+  "simplification_policy": {
+    "reference_extraction_and_runtime_triangle_budget_are_separate_proofs": true,
+    "runtime_budget_should_be_solved_after_feature_complete_reference_extraction": true,
+    "future_requirements": [
+      "envelope containment",
+      "topology-preserving collapse condition",
+      "self-intersection gate",
+      "VF11 feature-survival replay",
+      "Stage13 replay"
+    ]
+  }
+}

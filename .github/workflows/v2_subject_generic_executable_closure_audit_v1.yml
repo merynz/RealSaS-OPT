@@ -1,0 +1,58 @@
+name: v2-subject-generic-executable-closure-audit-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/audit_v2_subject_generic_executable_closure_v1.py'
+      - '.github/workflows/v2_subject_generic_executable_closure_audit_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v2-subject-generic-executable-closure-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run subject-generic executable closure audit
+        id: scan
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          PYTHONPATH=. python tools/audit_v2_subject_generic_executable_closure_v1.py             2>&1 | tee /tmp/subject_generic_audit.txt
+          RC=${PIPESTATUS[0]}
+          echo "$RC" > /tmp/subject_generic_rc.txt
+          exit 0
+
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          test -f canonical/V2_SUBJECT_GENERIC_EXECUTABLE_CLOSURE_AUDIT_V1_20260928.json
+          mkdir -p canonical/v2_subject_generic_executable_closure_audit_v1
+          cp /tmp/subject_generic_audit.txt canonical/v2_subject_generic_executable_closure_audit_v1/AUDIT_STDOUT.txt
+          cp /tmp/subject_generic_rc.txt canonical/v2_subject_generic_executable_closure_audit_v1/AUDIT_RC.txt
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/V2_SUBJECT_GENERIC_EXECUTABLE_CLOSURE_AUDIT_V1_20260928.json canonical/v2_subject_generic_executable_closure_audit_v1
+          if git diff --cached --quiet; then
+            echo SUBJECT_GENERIC_AUDIT_UNCHANGED
+            exit 0
+          fi
+          git commit -m 'audit: seal subject-generic executable closure evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

@@ -1,0 +1,490 @@
+name: subject2-knight-demo-stage34-46-tail
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_DEMO_CAA_STAGE25_RECEIPT_20260925.json'
+      - 'canonical/KNIGHT_DEMO_ARACHNE_STAGE33_V6_RECEIPT_20260926.json'
+      - 'canonical/KNIGHT_DEMO_MOTION_RETARGET_PREFLIGHT_20260926.json'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-demo-v2-tail
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  tail-through-stage46:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 180
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      SUBJECT_ID: SUBJECT2_KNIGHT
+      REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      EXPECTED_SKELETON_LINEAGE: e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850
+      EXPECTED_SEMANTIC_TREE_SHA256: 95f6f224f52ba43dd96296ce877a11851037e939640a4c995e2b9f3e874c7f59
+      EXPECTED_MOTION_FBX_SHA256: 41f2616fb4a42f9d35e242bbed1450ededc7537def4bf38cbb11b4e54ff2bf21
+      PYTHONHASHSEED: '0'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned dependencies and compile tail modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m py_compile \
+            compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py \
+            compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py \
+            compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py \
+            compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py \
+            compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py \
+            compiler/realsas_compiler_core/runtime_package_v2.py \
+            tools/motion/materialize_quaternius_preset_v1.py
+
+      - name: Require CAA, Arachne and motion-retarget authorities
+        id: prereq
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! test -s canonical/KNIGHT_DEMO_CAA_STAGE25_RECEIPT_20260925.json; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "TAIL_WAITING_FOR_CAA_STAGE25=1"
+            exit 0
+          fi
+          if ! test -s canonical/KNIGHT_DEMO_ARACHNE_STAGE33_V6_RECEIPT_20260926.json; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "TAIL_WAITING_FOR_ARACHNE_STAGE33=1"
+            exit 0
+          fi
+          if ! test -s canonical/KNIGHT_DEMO_MOTION_RETARGET_PREFLIGHT_20260926.json; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "TAIL_WAITING_FOR_MOTION_RETARGET_PREFLIGHT=1"
+            exit 0
+          fi
+          rc=0
+          python - <<'PY' || rc=$?
+          import json,os
+          from pathlib import Path
+          caa=json.loads(Path("canonical/KNIGHT_DEMO_CAA_STAGE25_RECEIPT_20260925.json").read_text())
+          ara=json.loads(Path("canonical/KNIGHT_DEMO_ARACHNE_STAGE33_V6_RECEIPT_20260926.json").read_text())
+          motion=json.loads(Path("canonical/KNIGHT_DEMO_MOTION_RETARGET_PREFLIGHT_20260926.json").read_text())
+          assert caa["schema"]=="RealSaS.KnightDemoCAAStage25Receipt.v1"
+          assert caa["status"]=="PASS_DEMO_ONLY"
+          assert caa["run_id"]==os.environ["RUN_ID"]
+          assert caa["completed_through_stage"]==25
+          if (
+              caa.get("caa_production_semantic_version")
+              != "PER_FACE_ADAPTIVE_TOPOLOGY_PARAMETRIC_PAGED_CSR_V1"
+          ):
+              print("TAIL_WAITING_FOR_LATEST_CAA_SEMANTIC_RECEIPT=1")
+              raise SystemExit(75)
+          assert caa["surface_graph_representation"]=="CSR_INT64_OFFSETS_INT32_INDICES_WITH_UNDIRECTED_EDGE_INDEX"
+          assert int(caa["surface_graph_edge_count"])>0
+          assert int(caa["surface_graph_storage_bytes"])>0
+          assert int(caa["sample_count_per_direction"])>0
+          assert 0.0<float(caa["surface_graph_storage_bytes_per_sample"])<96.0
+          assert caa["compile_array_schema"]=="RealSaS.CAACompileArrays.v3"
+          assert caa["direct_pm_linear_storage_mode"]=="PACKED_DIRECT_VALID_VIEW_MAJOR_V1"
+          assert caa["direct_pm_linear_storage_dtype"]=="float64"
+          assert caa["source_xy_storage_dtype"]=="float32"
+          assert caa["barycentric_storage_mode"]=="RECONSTRUCT_FROM_FACE_RESOLUTION_AND_OFFSETS_V1"
+          assert caa["adaptive_sampling_required"] is True
+          assert caa["topology_bound_cross_face_completion_required"] is True
+          assert caa["bounded_physical_page_transport_required"] is True
+          assert caa["quality_thresholds_changed"] is False
+          assert caa["source_art_mutated"] is False
+          assert caa["product_authority_claimed"] is False
+          assert ara["schema"]=="RealSaS.KnightDemoArachneStage33V6Receipt.v2"
+          assert ara["status"]=="PASS_DEMO_ONLY"
+          assert ara["run_id"]==os.environ["RUN_ID"]
+          assert ara["qualified_skeleton_lineage_hash"]==os.environ["EXPECTED_SKELETON_LINEAGE"]
+          assert ara["semantic_skeleton_tree_sha256"]==os.environ["EXPECTED_SEMANTIC_TREE_SHA256"]
+          assert ara["qualified_skin_row_count"]==12090
+          assert ara["numeric_skin_field_semantics_preserved"] is True
+          assert ara["model_retraining_used_for_identity_migration"] is False
+          assert float(ara["max_abs_weight_delta_after_compiler_requalification"]) <= 1e-15
+          assert float(ara["max_row_l1_weight_delta_after_compiler_requalification"]) <= 1e-14
+          assert ara["product_authority_claimed"] is False
+          with Path(os.environ["GITHUB_ENV"]).open("a") as env:
+              env.write(f"QUALIFIED_SKIN_LINEAGE={ara['qualified_skin_lineage_hash']}\n")
+          assert motion["schema"]=="RealSaS.KnightMotionRetargetPreflight.v1"
+          assert motion["status"]=="PASS"
+          assert motion["run_id"]==os.environ["RUN_ID"]
+          assert motion["skeleton_lineage_hash"]==os.environ["EXPECTED_SKELETON_LINEAGE"]
+          assert motion["source_fbx_sha256"]==os.environ["EXPECTED_MOTION_FBX_SHA256"]
+          assert motion["target_joint_count"]==28
+          assert motion["clip_count"]==3
+          assert motion["manual_retarget_used"] is False
+          assert motion["source_rig_is_final_skeleton_authority"] is False
+          assert motion["product_authority_claimed"] is False
+          expected_clips={"demo_idle_v1":"IDLE","demo_run_v1":"RUN","demo_slash_v1":"SLASH"}
+          seen={}
+          for row in motion["clips"]:
+              clip_id=str(row["clip_id"])
+              assert clip_id in expected_clips
+              assert row["clip_kind"]==expected_clips[clip_id]
+              assert len(str(row["motion_json_sha256"]))==64
+              report=dict(row["report"])
+              assert report["target_joint_count"]==28
+              assert report["mapped_joint_count"]==28
+              seen[clip_id]=True
+          assert set(seen)==set(expected_clips)
+          print("KNIGHT_TAIL_PREREQUISITE_RECEIPTS_PASS")
+          PY
+          if test "$rc" -eq 75; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if test "$rc" -ne 0; then exit "$rc"; fi
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+
+      - name: Verify current run-root authority through Stage33
+        if: steps.prereq.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+          required=(
+            "20_CAA_BACKEND_PREREGISTERED",
+            "21_CAA_COMPILE",
+            "22_CAA_COMPILE_SEALED",
+            "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+            "24_COMPLETE_APPEARANCE_QUALIFIED",
+            "25_CAA_REFERENCE_REST_RENDER_PROOF",
+            "27_GEPPETTO_FIT",
+            "28_SKELETON_QUALIFIED",
+            "29_GEPPETTO_CHECKPOINT_SEALED",
+            "30_ARACHNE_FIT_PREREGISTERED",
+            "31_ARACHNE_FIT",
+            "32_SKIN_QUALIFIED",
+            "33_ARACHNE_CHECKPOINT_SEALED",
+          )
+          for sid in required:
+              assert by[sid]["status"]=="PASS_DEMO_ONLY",(sid,by[sid]["status"],by[sid].get("blockers"))
+          def one(stage,schema):
+              rows=[x for x in by[stage]["outputs"] if x["schema"]==schema]
+              assert len(rows)==1,(stage,schema,len(rows))
+              return json.loads(Path(rows[0]["path"]).read_text())
+          skeleton=one("28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1")
+          skin=one("32_SKIN_QUALIFIED","RealSaS.QualifiedSkinIR.v1")
+          assert len(skeleton["joints"])==28
+          assert skeleton["skeleton_lineage_hash"]==os.environ["EXPECTED_SKELETON_LINEAGE"]
+          assert skin["skin_lineage_hash"]==os.environ["QUALIFIED_SKIN_LINEAGE"]
+          assert skin["qualification_report"]["corrected_row_count"]==0
+          print("KNIGHT_RUN_ROOT_STAGE33_AUTHORITY_PASS")
+          PY
+
+      - name: Bind preflight-qualified idle run slash sources into run manifest
+        if: steps.prereq.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          from tools.motion.materialize_quaternius_preset_v1 import patch_run_manifest
+
+          authority=Path(os.environ["REALSAS_AUTHORITY_ROOT"]).resolve()
+          root=Path(os.environ["RUN_ROOT"]).resolve()
+          motion_root=root/"inputs"/"motion"/"quaternius_knight_v1"
+          preflight=json.loads(
+              Path("canonical/KNIGHT_DEMO_MOTION_RETARGET_PREFLIGHT_20260926.json").read_text()
+          )
+
+          def sha256(path):
+              return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+          fragment_path=motion_root/"MOTION_RUN_MANIFEST_FRAGMENT.json"
+          materialization_path=motion_root/"MATERIALIZATION_RECEIPT.json"
+          assert fragment_path.is_file()
+          assert materialization_path.is_file()
+          assert sha256(fragment_path)==preflight["motion_manifest_fragment_sha256"]
+          assert sha256(materialization_path)==preflight["materialization_receipt_sha256"]
+
+          expected={row["clip_id"]:row for row in preflight["clips"]}
+          assert set(expected)=={"demo_idle_v1","demo_run_v1","demo_slash_v1"}
+          fragment=json.loads(fragment_path.read_text())
+          sources=tuple(dict(fragment["motion"]).get("sources") or ())
+          assert len(sources)==3
+
+          for source in sources:
+              clip_id=str(source["clip_id"])
+              assert clip_id in expected
+              ref=dict(source["file"])
+              raw=str(ref["path"])
+              if raw.startswith("$REALSAS_AUTHORITY_ROOT/"):
+                  path=authority/raw.split("/",1)[1]
+              else:
+                  path=Path(raw).expanduser().resolve()
+              assert path.is_file(),path
+              digest=sha256(path)
+              assert digest==str(ref["sha256"])
+              assert digest==str(expected[clip_id]["motion_json_sha256"])
+              payload=json.loads(path.read_text())
+              assert payload["schema"]=="RealSaS.MotionSourceClip.v2"
+              assert payload["source_space"]=="SOURCE_RIG_TRACKS_V2"
+              assert payload["coordinate_frame"]=="REALSAS_OBJECT_FRAME_V1"
+
+          before,after=patch_run_manifest(
+              path=root/"run_manifest.json",
+              fragment=fragment,
+              replace_motion=True,
+          )
+          print("KNIGHT_MOTION_MANIFEST_BOUND",before,after)
+          PY
+
+      - name: Build exact paged CAA native V2 player and bind run manifest
+        if: steps.prereq.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          build="$RUN_ROOT/tools/runtime_v2"
+          mkdir -p "$build"
+          player="$build/realsas_runtime_v2_caa_reference"
+          c++ -std=c++17 -O2 runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp \
+            -lpng -lz -o "$player"
+          test -x "$player"
+          player_sha="$(sha256sum "$player" | awk '{print $1}')"
+          PYTHONPATH=. REALSAS_RUNTIME_V2_PLAYER="$player" python -m pytest -q \
+            tests/compiler/test_runtime_v2_native_smoke.py \
+            tests/compiler/test_runtime_v2_paged_native_smoke.py \
+            tests/compiler/test_v2_tail_authority_fail_closed.py
+          PLAYER="$player" PLAYER_SHA="$player_sha" python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          path=root/"run_manifest.json"
+          manifest=json.loads(path.read_text())
+          runtime=dict(manifest.get("runtime") or {})
+          runtime["native_player"]={
+              "path":str(Path(os.environ["PLAYER"]).resolve()),
+              "sha256":os.environ["PLAYER_SHA"],
+          }
+          manifest["runtime"]=runtime
+          path.write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n")
+          print("RUNTIME_V2_NATIVE_PLAYER_BOUND",os.environ["PLAYER_SHA"])
+          PY
+
+      - name: Execute Stage34 through Stage46
+        if: steps.prereq.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -uo pipefail
+          rc=0
+          python -m compiler.realsas_compiler_services.orchestrator.mainline execute \
+            --run-id "$RUN_ID" \
+            --target 46_PRODUCT_CLOSURE_SEAL || rc=$?
+          python -m compiler.realsas_compiler_services.orchestrator.mainline status \
+            --run-id "$RUN_ID" || true
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          for row in ledger["stages"][33:46]:
+              print("TAIL_STAGE_ROW",json.dumps({
+                  "ordinal":row["ordinal"],
+                  "id":row["id"],
+                  "status":row["status"],
+                  "blockers":row.get("blockers") or [],
+                  "diagnostics_hash":row.get("diagnostics_hash") or "",
+              },sort_keys=True))
+          for event in (ledger.get("history") or [])[-48:]:
+              if event.get("event") in {"STAGE_EXCEPTION","STAGE_FAILED","STAGE_BLOCKED"}:
+                  print("TAIL_STAGE_HISTORY",json.dumps(event,sort_keys=True))
+          for row in ledger["stages"]:
+              if row["status"] not in {"FAIL","ABSTAIN","BLOCKED"}:
+                  continue
+              p=root/"artifacts"/row["id"]/"failure_diagnostics.json"
+              if p.is_file():
+                  print("FULL_FAILURE_DIAGNOSTICS",row["id"],p.read_text())
+          PY
+          if test "$rc" -ne 0; then exit "$rc"; fi
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+          for ordinal in range(34,47):
+              row=next(x for x in ledger["stages"] if x["ordinal"]==ordinal)
+              assert row["status"]=="PASS_DEMO_ONLY",(row["id"],row["status"],row.get("blockers"))
+          closure=[x for x in by["46_PRODUCT_CLOSURE_SEAL"]["outputs"] if x["schema"]=="RealSaS.DemoClosureV2.v1"]
+          archives=[x for x in by["46_PRODUCT_CLOSURE_SEAL"]["outputs"] if x["schema"]=="application/x-realsas-editable-v2"]
+          assert len(closure)==1 and len(archives)==1
+          payload=json.loads(Path(closure[0]["path"]).read_text())
+          assert payload["status"]=="PASS_DEMO_ONLY"
+          assert payload["product_pass"] is False
+          assert payload["product_authority_claimed"] is False
+          assert payload["stage13_scientific_pass"] is False
+          print("KNIGHT_DEMO_STAGE46_PASS_DEMO_ONLY",payload["editable_authoring_archive_sha256"])
+          PY
+
+      - name: Upload tail failure evidence
+        if: failure() && steps.prereq.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: knight-stage34-46-failure-${{ github.run_id }}
+          path: |
+            ${{ env.RUN_ROOT }}/ACTIVE_RUN_V2.json
+            ${{ env.RUN_ROOT }}/artifacts/*/failure_diagnostics.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Seal Stage46 demo receipt
+        if: steps.prereq.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+          def one(stage,schema):
+              rows=[x for x in by[stage]["outputs"] if x["schema"]==schema]
+              assert len(rows)==1,(stage,schema,len(rows))
+              return rows[0],json.loads(Path(rows[0]["path"]).read_text()) if schema.endswith(".v1") or schema.endswith(".v2") else None
+          closure_row,closure=one("46_PRODUCT_CLOSURE_SEAL","RealSaS.DemoClosureV2.v1")
+          archive_rows=[x for x in by["46_PRODUCT_CLOSURE_SEAL"]["outputs"] if x["schema"]=="application/x-realsas-editable-v2"]
+          runtime_rows=[x for x in by["43_RSS_MATERIALIZE_COMPACT"]["outputs"] if x["schema"]=="application/x-realsas-rss-v2"]
+          dvi_rows=[x for x in by["45_DYNAMIC_VISUAL_INTEGRITY_PROOF"]["outputs"] if x["schema"]=="RealSaS.DynamicVisualIntegrityIR.v2"]
+          motion_rows=[x for x in by["41_MOTION_DYNAMIC_PROOF"]["outputs"] if x["schema"]=="RealSaS.QualifiedDynamicMotionIR.v2"]
+          assert len(archive_rows)==len(runtime_rows)==len(dvi_rows)==len(motion_rows)==1
+          dvi=json.loads(Path(dvi_rows[0]["path"]).read_text())
+          motion=json.loads(Path(motion_rows[0]["path"]).read_text())
+          receipt={
+              "schema":"RealSaS.KnightDemoStage46Receipt.v1",
+              "status":"PASS_DEMO_ONLY",
+              "run_id":os.environ["RUN_ID"],
+              "subject_id":os.environ["SUBJECT_ID"],
+              "execution_repo_commit":os.environ["GITHUB_SHA"],
+              "completed_through_stage":46,
+              "qualified_skeleton_lineage_hash":os.environ["EXPECTED_SKELETON_LINEAGE"],
+              "qualified_skin_lineage_hash":os.environ["QUALIFIED_SKIN_LINEAGE"],
+              "motion_clip_ids":[clip["clip_id"] for clip in motion["clips"]],
+              "dynamic_motion_hash":motion["dynamic_motion_hash"],
+              "dynamic_visual_integrity_hash":dvi["visual_integrity_hash"],
+              "runtime_rss_sha256":runtime_rows[0]["sha256"],
+              "editable_authoring_archive_sha256":archive_rows[0]["sha256"],
+              "demo_closure_sha256":closure_row["sha256"],
+              "product_pass":False,
+              "product_authority_claimed":False,
+              "generalization_claimed":False,
+              "stage13_scientific_pass":False,
+          }
+          assert set(receipt["motion_clip_ids"])=={"demo_idle_v1","demo_run_v1","demo_slash_v1"}
+          out=Path("canonical/KNIGHT_DEMO_STAGE46_RECEIPT_20260926.json")
+          out.write_text(json.dumps(receipt,indent=2,sort_keys=True)+"\n")
+          print(json.dumps(receipt,sort_keys=True))
+          PY
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_DEMO_STAGE46_RECEIPT_20260926.json
+          git commit -m 'demo: seal Knight Stage46 closure evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921
+
+
+      - name: Render byte-exact demo preview baseline
+        if: steps.prereq.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object tools/demo/render_knight_motion_preview_v1.py)" = "7917be02f325ba00b5dcd2b31a786898e45f640f"
+          rm -rf canonical/knight_demo_motion_preview_v1
+          PYTHONPATH=. python -m tools.demo.render_knight_motion_preview_v1 \
+            --authority-root "$REALSAS_AUTHORITY_ROOT" \
+            --run-id "$RUN_ID" \
+            --out-dir canonical/knight_demo_motion_preview_v1
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_DEMO_MOTION_VISUAL_CONTINUATION_REPORT_V1.json)" = "9120723f6bc00142fb6bb992d3ee7a85c601bf4f"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_IDLE_DEMO_PREVIEW_V1.png)" = "cae86d8a04bde6768ac9c3dafed13a2ab318cf29"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_RUN_DEMO_PREVIEW_V1.png)" = "8e9ed58a3bfbbace73f54e3e5593691f90eef4f1"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_SLASH_DEMO_PREVIEW_V1.png)" = "7a87f310473d602c99eb712be964dcd430b47cfb"
+          echo "KNIGHT_E2E_PREVIEW_SHEET_BASELINE_PASS"
+
+      - name: Export byte-exact demo GIF baseline
+        if: steps.prereq.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+
+          root = Path("canonical/knight_demo_motion_preview_v1")
+          specs = [("IDLE", 833), ("RUN", 208), ("SLASH", 278)]
+          for name, duration_ms in specs:
+              sheet = Image.open(root / f"KNIGHT_{name}_DEMO_PREVIEW_V1.png").convert("RGBA")
+              if sheet.width % 4 != 0 or sheet.height % 2 != 0:
+                  raise RuntimeError(f"unexpected sheet geometry: {name} {sheet.size}")
+              cell_w = sheet.width // 4
+              row_h = sheet.height // 2
+              header = 28
+              cell_h = row_h - header
+              frames = []
+              for i in range(4):
+                  v0 = sheet.crop((i * cell_w, header, (i + 1) * cell_w, header + cell_h))
+                  y2 = row_h + header
+                  v2 = sheet.crop((i * cell_w, y2, (i + 1) * cell_w, y2 + cell_h))
+                  combined = Image.new("RGBA", (cell_w * 2, cell_h), (0, 0, 0, 0))
+                  combined.alpha_composite(v0, (0, 0))
+                  combined.alpha_composite(v2, (cell_w, 0))
+                  target_h = min(640, combined.height)
+                  target_w = max(1, round(combined.width * target_h / combined.height))
+                  if (target_w, target_h) != combined.size:
+                      combined = combined.resize((target_w, target_h), Image.Resampling.LANCZOS)
+                  frames.append(combined.convert("P", palette=Image.Palette.ADAPTIVE, colors=255))
+              out = root / f"KNIGHT_{name}_DEMO_PREVIEW_V1.gif"
+              frames[0].save(
+                  out,
+                  save_all=True,
+                  append_images=frames[1:],
+                  duration=duration_ms,
+                  loop=0,
+                  disposal=2,
+                  optimize=False,
+                  transparency=0,
+              )
+          PY
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_IDLE_DEMO_PREVIEW_V1.gif)" = "31b64edff1da106bc8feb00faede61ffe68dc89c"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_RUN_DEMO_PREVIEW_V1.gif)" = "b8f0e97e74396a0987444bb72ea93db4bb519640"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_SLASH_DEMO_PREVIEW_V1.gif)" = "73a567f3ff17786d3316e3fb02a723ee3c026eca"
+          echo "KNIGHT_E2E_GIF_BASELINE_PASS"
+
+      - name: Seal byte-exact E2E demo preview baseline
+        if: steps.prereq.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/knight_demo_motion_preview_v1
+          if git diff --cached --quiet; then
+            echo "KNIGHT_E2E_PREVIEW_BASELINE_UNCHANGED"
+            exit 0
+          fi
+          git commit -m 'demo: seal byte-exact E2E preview baseline'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

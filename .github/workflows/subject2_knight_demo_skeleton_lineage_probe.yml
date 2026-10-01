@@ -1,0 +1,187 @@
+name: subject2-knight-demo-skeleton-lineage-probe
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_DEMO_SKELETON_LINEAGE_PROBE_TRIGGER_20260927.json'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-demo-skeleton-lineage-probe
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      GEPPETTO_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/GEPPETTO_STAGE27_MECHANICALLY_MEANINGFUL_V2_OUTPUT
+      EXPECTED_ARACHNE_SKELETON_LINEAGE: c2727bcf4f4b7f4bfbc8e4af24b8d731dd0892beee10608862f0943e4daebcce
+      PYTHONHASHSEED: '0'
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Compare legacy and product-facing skeleton qualifiers
+        shell: bash
+        run: |
+          set -euo pipefail
+          local="$RUN_ROOT/imports/geppetto_stage27_mechanically_meaningful_v2"
+          mkdir -p "$local"
+          if ! test -s "$local/GEPPETTO_KNIGHT_SKELETON_PROPOSAL.json"; then
+            rclone copy "$GEPPETTO_REMOTE" "$local" --checksum
+          fi
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+
+          from compiler.realsas_compiler_core.artifact_codec_v2 import (
+              rigging_surface_from_dict,
+          )
+          from compiler.realsas_compiler_core.rig import (
+              qualify_skeleton,
+              qualify_skeleton_v2,
+          )
+          from compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2 import (
+              _skeleton_proposal,
+          )
+
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+          rows=[
+              row for row in by["15_RIGGING_SURFACE_QUALIFIED"]["outputs"]
+              if row["schema"]=="RealSaS.RiggingSurfaceIR.v1"
+          ]
+          assert len(rows)==1
+          surface=rigging_surface_from_dict(json.loads(Path(rows[0]["path"]).read_text()))
+
+          payload=json.loads(
+              (root/"imports"/"geppetto_stage27_mechanically_meaningful_v2"/"GEPPETTO_KNIGHT_SKELETON_PROPOSAL.json").read_text()
+          )
+          proposal_schema=str(
+              payload.get("schema")
+              or payload.get("schema_version")
+              or "RealSaS.SkeletonProposalIR.v1"
+          )
+          assert proposal_schema=="RealSaS.SkeletonProposalIR.v1",proposal_schema
+          proposal=_skeleton_proposal(payload)
+          assert proposal.surface_binding_hash==surface.geometry_lineage_hash
+
+          def normalized_semantic_tree(value):
+              by_id={j.canonical_joint_id:j for j in value.joints}
+              source_by_id={
+                  j.canonical_joint_id:str(j.source_proposal_id)
+                  for j in value.joints
+              }
+              rows=[]
+              for joint in value.joints:
+                  parent_source=(
+                      None
+                      if joint.parent_canonical_id is None
+                      else source_by_id[str(joint.parent_canonical_id)]
+                  )
+                  rows.append({
+                      "source_proposal_id":str(joint.source_proposal_id),
+                      "parent_source_proposal_id":parent_source,
+                      "position":[float(x) for x in joint.position],
+                      "support_surface_ids":list(map(str,joint.support_surface_ids)),
+                  })
+              rows.sort(key=lambda row:row["source_proposal_id"])
+              return rows
+
+          variants={}
+          repeats={}
+          for shadow in (False,True):
+              for family,fn in (("v1",qualify_skeleton),("v2",qualify_skeleton_v2)):
+                  key=f"{family}_shadow_{str(shadow).lower()}"
+                  run_rows=[]
+                  for repeat in range(3):
+                      value=fn(surface,proposal,run_ilp_shadow=shadow)
+                      semantic_tree=normalized_semantic_tree(value)
+                      report=dict(value.qualification_report or {})
+                      run_rows.append({
+                          "repeat":repeat,
+                          "lineage":value.skeleton_lineage_hash,
+                          "joint_count":len(value.joints),
+                          "semantic_tree_sha256":__import__("hashlib").sha256(
+                              json.dumps(
+                                  semantic_tree,
+                                  sort_keys=True,
+                                  separators=(",",":"),
+                              ).encode()
+                          ).hexdigest(),
+                          "optimizer_result_sha256":str(
+                              report.get("optimizer_result_sha256") or ""
+                          ),
+                          "solver":str(report.get("solver") or ""),
+                          "root_source_proposal_ids":[
+                              str(j.source_proposal_id)
+                              for j in value.joints
+                              if j.parent_canonical_id is None
+                          ],
+                          "semantic_tree":semantic_tree,
+                      })
+                  variants[key]=run_rows[0]
+                  repeats[key]=run_rows
+          expected=os.environ["EXPECTED_ARACHNE_SKELETON_LINEAGE"]
+          matches=[
+              f"{name}:repeat{row['repeat']}"
+              for name,rows in repeats.items()
+              for row in rows
+              if row["lineage"]==expected
+          ]
+          semantic_stability={
+              name:len({row["semantic_tree_sha256"] for row in rows})==1
+              for name,rows in repeats.items()
+          }
+          lineage_stability={
+              name:len({row["lineage"] for row in rows})==1
+              for name,rows in repeats.items()
+          }
+          result={
+              "schema":"RealSaS.KnightSkeletonLineageProbe.v3",
+              "status":"PASS",
+              "run_id":os.environ["RUN_ID"],
+              "proposal_joint_count":len(proposal.joints),
+              "expected_arachne_skeleton_lineage":expected,
+              "matching_variants":matches,
+              "variants":variants,
+              "repeats":repeats,
+              "semantic_stability":semantic_stability,
+              "lineage_stability":lineage_stability,
+              "qualifier_source_commit_invariant":True,
+              "product_authority_claimed":False,
+          }
+          print("SKELETON_LINEAGE_PROBE",json.dumps(result,sort_keys=True))
+          Path("canonical/KNIGHT_DEMO_SKELETON_LINEAGE_PROBE_20260927.json").write_text(
+              json.dumps(result,indent=2,sort_keys=True)+"\n"
+          )
+          PY
+
+      - name: Seal probe result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_DEMO_SKELETON_LINEAGE_PROBE_20260927.json
+          git commit -m 'demo: seal Knight skeleton lineage qualifier probe'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

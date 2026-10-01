@@ -1,0 +1,7 @@
+{
+  "schema": "RealSaS.KnightIrisBindingDiagnosticTrigger.v1",
+  "status": "RUN",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "requested_on": "2026-09-27",
+  "diagnostic_only": true
+}

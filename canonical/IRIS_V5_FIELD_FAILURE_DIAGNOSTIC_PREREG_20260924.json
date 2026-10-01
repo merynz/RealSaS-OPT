@@ -1,0 +1,142 @@
+{
+  "schema": "RealSaS.IRIS.V5FieldFailureDiagnosticPreregistration.v1",
+  "status": "FROZEN_BEFORE_DIAGNOSTIC_EXECUTION",
+  "date_utc": "2026-09-24",
+  "branch": "research/vf11-certified-adaptive-20260921",
+  "scientific_question": "WHY_DOES_THE_LEARNED_TP64_ZERO_SET_REMAIN_DISPLACED_FROM_CANONICAL_FSTAR_AFTER_LONG_HORIZON_OPTIMIZATION",
+  "evidence_boundary": {
+    "completed_source_run_id": "20260924T115953Z",
+    "completed_source_result_sha256": "a4ac7e208db23c017cde8714f2d551c0c4b548e8de6136d56bb9911784896329",
+    "completed_source_closure": "canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_CLOSURE_20260924.json",
+    "incomplete_bc_endpoint_run_consumed_as_scientific_evidence": false,
+    "note": "Any operator-stopped BC endpoint run is excluded. This diagnostic starts only from the completed long-horizon B/C selected checkpoints and meshes."
+  },
+  "execution": {
+    "diagnostic_repo_commit": "6e3cf4d6f2d973e7c1df7ca0f31efbd7b11e3d86",
+    "code_ci_run_id": 36007195382,
+    "code_ci_conclusion": "success",
+    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_FIELD_FAILURE_DIAGNOSTIC_RUN_ALL.ipynb",
+    "notebook_sha256": "efcb98d93da2a00570e97e1939d583cbb20f8dc30bdca1a4c28c2cf69ff5d2ff",
+    "optimizer_steps_permitted": 0,
+    "parameter_updates_permitted": 0,
+    "autograd_gradient_measurement_permitted": true,
+    "checkpoint_selection_permitted": false,
+    "r512_permitted": false,
+    "stage13_permitted": false
+  },
+  "frozen_states": {
+    "B": {
+      "checkpoint_sha256": "e44f88a6902f28f411bb368b95cdc572b0c3605ba21af0aca0a967402c1fb201",
+      "selected_absolute_effective_step": 18800,
+      "mesh_sha256": "801dd6f30a3b7a04577b7896b478de0ff6bd86326560d7ae771a9e3a32d13f62"
+    },
+    "C": {
+      "checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
+      "selected_absolute_effective_step": 19200,
+      "mesh_sha256": "adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c"
+    }
+  },
+  "hypotheses": {
+    "H1_ZERO_SET_CONDITIONING": "SMALL_FIELD_RESIDUAL_CAN_MAP_TO_MULTI_PIXEL_SURFACE_OFFSET_WHERE_FSTAR_GRADIENT_IS_SMALL",
+    "H2_VIEW_SWITCH_RIDGE": "LARGE_SURFACE_RESIDUALS_CONCENTRATE_WHERE_TOP1_TOP2_FSTAR_VIEW_MARGIN_IS_SMALL",
+    "H3_REPLAY_STALENESS": "THE_FIXED_BASE_HARD_REPLAY_BANK_POORLY_COVERS_THE_CURRENT_HARD_RESIDUAL_SET",
+    "H4_GRADIENT_COMPETITION": "AUXILIARY_GRADIENTS_ARE_TOO_WEAK_OR_CONFLICT_WITH_DIRECT_FSTAR_GRADIENTS"
+  },
+  "surface_diagnostic": {
+    "sample_count_per_arm": 131072,
+    "sample_source": "DETERMINISTIC_WITHOUT_REPLACEMENT_FROM_INTERIOR_SELECTED_MESH_VERTICES",
+    "interior_rule": "ABS_Q_AXIS_LE_1_MINUS_FD_EPS",
+    "sample_seed_base": 260924811,
+    "finite_difference_epsilon": 0.00048828125,
+    "gradient_floor": 1e-8,
+    "offset_proxy": "ABS_FSTAR_DIV_GRADIENT_NORM",
+    "offset_proxy_is_exact_euclidean_distance": false,
+    "per_view_decomposition": "EXACT_CANONICAL_SCALED_VIEW_VALUES_BEFORE_MAX",
+    "view_margin": "TOP1_MINUS_TOP2_VALID_VIEW_VALUE",
+    "view_margin_thresholds": [
+      0.00001,
+      0.00005,
+      0.0001,
+      0.0005,
+      0.001,
+      0.002,
+      0.005
+    ],
+    "correlations": [
+      "SPEARMAN_ABS_FSTAR_VS_GRADIENT_NORM",
+      "SPEARMAN_ABS_FSTAR_VS_VIEW_MARGIN"
+    ],
+    "quartile_comparison": true
+  },
+  "replay_diagnostic": {
+    "frozen_pool_sha256": "0f0215f4a2ef018729d0f86c052da916dcc3ca4b376c66c455ffdc38edfd91ad",
+    "replay_pool_count": 131072,
+    "hard_bank_size": 32768,
+    "expected_fixed_bank_sha256": "f10fcd363423cda8131888b5720680297d7d4b263638e471f8b6484c5281ef16",
+    "fixed_bank_defined_from": "BASE_CHECKPOINT_ABSOLUTE_REPLAY_RESIDUAL_TOPK",
+    "current_hard_set_defined_from": "CURRENT_B_OR_C_ABSOLUTE_REPLAY_RESIDUAL_TOPK",
+    "measurements": [
+      "OVERLAP_FRACTION",
+      "CHANCE_OVERLAP_FRACTION",
+      "BASE_CURRENT_SPEARMAN",
+      "FROZEN_BANK_CURRENT_RESIDUAL_MEAN",
+      "CURRENT_HARD_RESIDUAL_MEAN"
+    ],
+    "replay_refresh_permitted": false
+  },
+  "gradient_diagnostic": {
+    "direct_points": 8192,
+    "direct_points_source": "DETERMINISTIC_SUBSET_OF_FROZEN_TRAIN_NEAR_ZERO_POOL",
+    "source_ray_categories": [
+      "FG_BOUNDARY",
+      "BG_BOUNDARY",
+      "FG_GLOBAL",
+      "BG_SUPPORT"
+    ],
+    "rays_per_view_category": 8,
+    "total_rays": 256,
+    "ray_depth_samples": 128,
+    "ray_softmin_tau": 0.001953125,
+    "rays_are_independently_fstar_certified": true,
+    "B_auxiliary": "NEAR_ZERO_WRONG_SIGN",
+    "C_auxiliary": "SOURCE_SILHOUETTE_WRONG_SIGN",
+    "measurements": [
+      "DIRECT_GRAD_NORM",
+      "AUX_GRAD_NORM",
+      "AUX_OVER_DIRECT_NORM",
+      "GRADIENT_COSINE",
+      "AUX_WRONG_COUNT"
+    ],
+    "parameter_state_hash_before_after_required_equal": true
+  },
+  "forbidden": [
+    "OPTIMIZER_STEP",
+    "PARAMETER_UPDATE",
+    "CHECKPOINT_SELECTION",
+    "R512_EXECUTION",
+    "STAGE13_EXECUTION",
+    "FSTAR_TARGET_CHANGE",
+    "MAX_AGGREGATION_CHANGE",
+    "REPLAY_REFRESH",
+    "OBJECTIVE_WEIGHT_CHANGE",
+    "SPATIAL_RESOLUTION_CHANGE",
+    "REPRESENTATION_CHANGE",
+    "DECODER_CHANGE",
+    "THRESHOLD_CHANGE"
+  ],
+  "decision_rule": {
+    "automatic_hypothesis_selected": false,
+    "automatic_training_authorization": false,
+    "automatic_replay_refresh_authorization": false,
+    "automatic_target_change_authorization": false,
+    "automatic_representation_change_authorization": false,
+    "review_required": true
+  },
+  "claim_boundary": [
+    "Conditioning offset is a first-order local proxy, not an exact geometric distance.",
+    "Small view margin indicates proximity to a MAX-view switch but does not prove MAX aggregation is causally wrong.",
+    "Replay-set drift is descriptive and does not authorize replay refresh.",
+    "Gradient interaction is measured without updating parameters.",
+    "The stopped BC tail is not evidence in this diagnostic."
+  ]
+}

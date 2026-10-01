@@ -1,0 +1,66 @@
+name: knight-visual-mesh-arap-witness-v1
+
+concurrency:
+  group: knight-visual-mesh-arap-witness-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'compiler/realsas_compiler_core/visual_mesh_arap_v1.py'
+      - 'tools/demo/render_knight_visual_mesh_arap_witness_v1.py'
+      - 'tests/compiler/test_visual_mesh_arap_v1.py'
+      - '.github/workflows/knight_visual_mesh_arap_witness_v1.yml'
+  workflow_dispatch:
+
+jobs:
+  witness:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 8
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      PLAYER: /tmp/realsas_runtime_visual_mesh_v1_witness
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned dependencies
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Unit test visual mesh ARAP core
+        run: PYTHONPATH=. python -m pytest -q tests/compiler/test_visual_mesh_arap_v1.py
+      - name: Build native 2D visual mesh renderer
+        run: |
+          set -euo pipefail
+          c++ -std=c++17 -O3 -DNDEBUG -Wall -Wextra -pedantic \
+            tools/demo/native_visual_mesh_preview_v1.cpp \
+            -lpng -lz -o "$PLAYER"
+      - name: Render source-owned visual mesh witness
+        run: |
+          set -euo pipefail
+          rm -rf canonical/knight_visual_mesh_arap_witness_v1
+          PYTHONPATH=. python -m tools.demo.render_knight_visual_mesh_arap_witness_v1 \
+            --authority-root "$AUTHORITY_ROOT" \
+            --run-id "$RUN_ID" \
+            --out-dir canonical/knight_visual_mesh_arap_witness_v1 \
+            --native-player "$PLAYER" \
+            --render-resolution 512
+      - name: Seal witness
+        run: |
+          set -euo pipefail
+          find canonical/knight_visual_mesh_arap_witness_v1 -type f \
+            \( -name '*.rss' -o -name '*.npz' -o -name '*.rgba' -o -name '*.bin' -o -name 'source_art.png' \) -delete
+          rm -rf canonical/knight_visual_mesh_arap_witness_v1/native_frames
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/knight_visual_mesh_arap_witness_v1
+          git commit -m "demo: seal source-owned visual mesh ARAP witness"
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

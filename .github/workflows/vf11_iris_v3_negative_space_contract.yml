@@ -1,0 +1,82 @@
+name: vf11-iris-v3-negative-space-contract
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'models/iris/v3/negative_space_barrier_v3.py'
+      - 'models/iris/v3/train_dense_fit_v3.py'
+      - 'tests/iris/test_negative_space_barrier_v3.py'
+      - 'tests/iris/test_train_dense_fit_v3.py'
+      - 'canonical/IRIS_V3_NEGATIVE_SPACE_FULL_RAY_POLICY_V1_20260922.json'
+      - 'canonical/IRIS_V3_DENSE_STAGE13_ARM_A_NEGATIVE_RESULT_20260922.json'
+      - '.github/workflows/vf11_iris_v3_negative_space_contract.yml'
+  workflow_dispatch:
+
+jobs:
+  negative-space-contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install frozen CPU test dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python -m pip install --no-input --progress-bar off pytest==8.3.5 scipy==1.15.3
+
+      - name: Compile V3 negative-space modules
+        run: |
+          python -m py_compile models/iris/v3/negative_space_barrier_v3.py
+          python -m py_compile models/iris/v3/train_dense_fit_v3.py
+          python -m py_compile tests/iris/test_negative_space_barrier_v3.py
+          python -m py_compile tests/iris/test_train_dense_fit_v3.py
+
+      - name: Run negative-space falsification tests
+        run: |
+          python -m pytest -q \
+            tests/iris/test_negative_space_barrier_v3.py \
+            tests/iris/test_train_dense_fit_v3.py \
+            tests/iris/test_dense_source_coverage_v3_fixtures.py \
+            tests/iris/test_dense_source_sampling_v3.py
+
+      - name: Seal Arm B policy binding
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from models.iris.v3.dense_source_coverage_v3 import DenseSourceCoveragePolicyV3
+          from models.iris.v3.train_dense_fit_v3 import compute_v3_dense_fit_objective
+          from models.iris.v3.negative_space_barrier_v3 import background_full_ray_empty_space_barrier
+
+          p = DenseSourceCoveragePolicyV3()
+          arm_a = json.loads(Path('canonical/IRIS_V3_DENSE_STAGE13_ARM_A_NEGATIVE_RESULT_20260922.json').read_text())
+          arm_b = json.loads(Path('canonical/IRIS_V3_NEGATIVE_SPACE_FULL_RAY_POLICY_V1_20260922.json').read_text())
+          assert arm_a['status'] == 'ARM_A_FAIL__FOREGROUND_COVERAGE_IMPROVED__NEGATIVE_SPACE_UNDERCONSTRAINED'
+          assert arm_b['status'] == 'FROZEN_PRE_KNIGHT_ARM_B_SUBJECT_FREE'
+          assert arm_b['single_scientific_change_vs_arm_A'] == 'ADD_POINTWISE_FULL_RAY_EMPTY_SPACE_BARRIER_ON_QUALIFIED_SOURCE_BACKGROUND_RAYS'
+          assert arm_b['full_ray_barrier']['positive_margin'] == 0.04
+          assert arm_b['full_ray_barrier']['top_level_weight'] == 1.0
+          assert arm_b['full_ray_barrier']['extra_model_queries'] is False
+          assert arm_b['unchanged_from_arm_A']['dense_sampler'] == 'UNCHANGED_UNIFORM_BACKGROUND_RAY_SAMPLER_FOR_CAUSAL_ISOLATION'
+          assert abs(p.top_level_loss_weight - arm_b['unchanged_from_arm_A']['dense_beta_scaled_weight']) < 1e-15
+          assert arm_b['unchanged_from_arm_A']['visual_hull_clipping'] is False
+          assert arm_b['unchanged_from_arm_A']['teacher_geometry_used_by_new_barrier'] is False
+          assert callable(compute_v3_dense_fit_objective)
+          assert callable(background_full_ray_empty_space_barrier)
+          print('V3_NEGATIVE_SPACE_ARM_B_POLICY_BINDING=PASS')
+          PY

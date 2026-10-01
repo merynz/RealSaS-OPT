@@ -1,0 +1,23 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX3BTargetedD12ProofResult.v1",
+  "date_utc": "2026-09-21",
+  "status": "TARGETED_D12_PARTIAL__KEEP_ONLY_REMAINING_CHILDREN_ACTIVE",
+  "artifact_sha256": "a6cf61a47261052fd496268df7e5f5b8d2c9f0834feaa7ea7f91915c67e9970f",
+  "artifact_bytes": 10643,
+  "target_parent_count": 2,
+  "processed_child_count": 16,
+  "child_state_counts": {"EMPTY_NEGATIVE": 15, "UNRESOLVED": 1},
+  "child_c0_state_counts": {"PROVEN_EMPTY_NEGATIVE": 15, "UNKNOWN": 1},
+  "unresolved_child_count": 1,
+  "unresolved_child": {"root_anchor_id": 62, "path": "1157", "c0_lower": -0.0022157028501316365, "c0_upper": 1.1986355764638523e-06},
+  "empirical_contradiction_count": 0,
+  "elapsed_seconds_total": 1.1226402960000996,
+  "interpretation": "Targeted proof refinement converted 15 of the 16 descendants of the two X3A proof-UNKNOWN d11 leaves into strict negative EMPTY certificates. Only root 62/path 1157 remained UNKNOWN.",
+  "claim_boundary": "This increases safely prunable volume. It does not prove global continuous zero-set completeness and does not alter product/shipping authority.",
+  "numeric_rigor": "ORDINARY_FLOAT64__NOT_DIRECTED_ROUNDING",
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false,
+  "full_domain_traversal_performed": false,
+  "next": "X3C_ONE_LEAF_D13_PROOF_REFINEMENT"
+}

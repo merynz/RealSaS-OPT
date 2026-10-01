@@ -1,0 +1,72 @@
+name: subject2-knight-motion-deform-candidate-retarget-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_MOTION_DEFORM_CANDIDATE_RETARGET_TRIGGER_20260927.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Diagnose deform-source candidate correspondence
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python -m tools.motion.diagnose_deform_candidate_retarget_v1 \
+            --repo-root . \
+            --authority-root "$AUTHORITY_ROOT" \
+            --run-id "$RUN_ID" \
+            --clip-id demo_idle_v1 \
+            --bone-role-report canonical/KNIGHT_MOTION_SOURCE_ACTION_DIAGNOSTIC_20260927.json \
+            --out canonical/KNIGHT_MOTION_DEFORM_CANDIDATE_RETARGET_DIAGNOSTIC_20260927.json
+
+      - name: Diagnose pairwise rest-geometry correspondence
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python -m tools.motion.diagnose_pairwise_rest_geometry_retarget_v1 \
+            --repo-root . \
+            --authority-root "$AUTHORITY_ROOT" \
+            --run-id "$RUN_ID" \
+            --clip-id demo_idle_v1 \
+            --bone-role-report canonical/KNIGHT_MOTION_SOURCE_ACTION_DIAGNOSTIC_20260927.json \
+            --out canonical/KNIGHT_MOTION_PAIRWISE_RETARGET_DIAGNOSTIC_20260927.json
+
+      - name: Seal diagnostic
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add \
+            canonical/KNIGHT_MOTION_DEFORM_CANDIDATE_RETARGET_DIAGNOSTIC_20260927.json \
+            canonical/KNIGHT_MOTION_PAIRWISE_RETARGET_DIAGNOSTIC_20260927.json
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'diagnostic: seal Knight deform-candidate retarget'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

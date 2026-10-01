@@ -1,0 +1,10 @@
+{
+  "schema": "RealSaS.KnightMeshQualityFlipDiagnosticTrigger.v1",
+  "status": "REQUESTED",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "execution_class": "DEMO_WITNESS",
+  "algorithm": "FIXED_VERTEX_MONOTONE_EDGE_FLIP_V1",
+  "purpose": "Measure generic deterministic triangle-quality improvement before changing Stage18 producer.",
+  "product_authority_claimed": false
+}

@@ -1,0 +1,107 @@
+name: subject2-knight-frozen-c-lineage-probe-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/subject2_knight_frozen_c_lineage_probe_v1.yml'
+      - 'canonical/KNIGHT_FROZEN_C_LINEAGE_PROBE_TRIGGER_20260927.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      FROZEN_ROOT: /home/monster/realsas_authority/imports/frozen_c_20260924T115953Z
+      TARGET_STAGE08_SHA256: '5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7'
+      TARGET_OBSERVATION_HASH: '87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa'
+      TARGET_NORMALIZATION_HASH: '81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Trace frozen C Stage08 lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+
+          root=Path(os.environ["FROZEN_ROOT"]).resolve()
+          if not root.is_dir():
+              raise SystemExit(f"FROZEN_ROOT_MISSING:{root}")
+
+          targets={
+              "stage08_sha256":os.environ["TARGET_STAGE08_SHA256"],
+              "observation_hash":os.environ["TARGET_OBSERVATION_HASH"],
+              "normalization_hash":os.environ["TARGET_NORMALIZATION_HASH"],
+          }
+
+          files=[]
+          exact_sha_matches=[]
+          textual_refs={key:[] for key in targets}
+          for p in sorted(x for x in root.rglob("*") if x.is_file()):
+              h=hashlib.sha256()
+              with p.open("rb") as f:
+                  for chunk in iter(lambda:f.read(1<<20),b""):
+                      h.update(chunk)
+              digest=h.hexdigest()
+              rel=str(p.relative_to(root))
+              row={"path":rel,"sha256":digest,"bytes":p.stat().st_size}
+              files.append(row)
+              if digest==targets["stage08_sha256"]:
+                  exact_sha_matches.append(row)
+              if p.stat().st_size<=16*1024*1024:
+                  try:
+                      text=p.read_text(encoding="utf-8")
+                  except Exception:
+                      text=""
+                  if text:
+                      for key,value in targets.items():
+                          if value in text:
+                              textual_refs[key].append(rel)
+
+          report={
+              "schema":"RealSaS.KnightFrozenCLineageProbe.v1",
+              "status":"MEASURED",
+              "frozen_root":str(root),
+              "file_count":len(files),
+              "target_stage08_sha256":targets["stage08_sha256"],
+              "exact_stage08_file_matches":exact_sha_matches,
+              "textual_references":textual_refs,
+              "files":files,
+              "diagnostic_only":True,
+          }
+          out=Path("canonical/KNIGHT_FROZEN_C_LINEAGE_PROBE_20260927.json")
+          out.write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
+          print("KNIGHT_FROZEN_C_LINEAGE_PROBE",json.dumps({
+              "file_count":report["file_count"],
+              "exact_stage08_file_matches":report["exact_stage08_file_matches"],
+              "textual_references":report["textual_references"],
+          },sort_keys=True))
+          PY
+
+      - name: Seal probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_FROZEN_C_LINEAGE_PROBE_20260927.json
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'diagnostic: seal Knight frozen C lineage probe'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

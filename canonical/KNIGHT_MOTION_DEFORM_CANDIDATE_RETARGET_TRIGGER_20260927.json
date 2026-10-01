@@ -1,0 +1,8 @@
+{
+  "schema": "RealSaS.KnightMotionDeformCandidateRetargetTrigger.v1",
+  "status": "RUN_PAIRWISE_REST_GEOMETRY_DIAGNOSTIC",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "revision": 1,
+  "requested_on": "2026-09-27",
+  "diagnostic_only": true
+}

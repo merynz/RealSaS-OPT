@@ -1,0 +1,37 @@
+name: knight-stage18-visual-output-audit-v1
+on:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths: ['.github/workflows/knight_stage18_visual_output_audit_v1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect Stage18 outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          row=next(x for x in ledger["stages"] if x["id"]=="18_CANONICAL_MESH_ADDRESSING_BUILD")
+          print("STATUS",row["status"])
+          for x in row["outputs"]:
+              print("OUTPUT",x["schema"],x["path"],x["sha256"])
+              if x["schema"] in ("RealSaS.AppearanceDomainIR.v1","RealSaS.VisualMeshSetIR.v1"):
+                  o=json.loads(Path(x["path"]).read_text())
+                  print(x["schema"],json.dumps({
+                    "metadata":o.get("metadata"),
+                    "set_hash":o.get("set_hash"),
+                    "view_count":len(o.get("views") or [])
+                  },sort_keys=True)[:30000])
+          PY

@@ -1,0 +1,58 @@
+name: v2-static-mesh-source-fidelity-gate
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py'
+      - 'tests/compiler/test_v2_static_mesh_source_fidelity_gate.py'
+      - '.github/workflows/v2_static_mesh_source_fidelity_gate.yml'
+  workflow_dispatch:
+
+jobs:
+  source-fidelity-gate:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install frozen CPU test dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python -m pip install --no-input --progress-bar off pytest==8.3.5
+
+      - name: Compile Stage19 adapter
+        run: |
+          python -m py_compile compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py
+          python -m py_compile tests/compiler/test_v2_static_mesh_source_fidelity_gate.py
+
+      - name: Verify actual candidate mesh source-fidelity gate
+        run: |
+          python -m pytest -q tests/compiler/test_v2_static_mesh_source_fidelity_gate.py
+
+      - name: Forbid inherited-only Stage13 claim
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          text=Path('compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py').read_text()
+          assert '"stage13_geometry_substrate_inherited": False' in text
+          assert '"stage13_policy_replayed_on_actual_candidate_mesh": True' in text
+          assert 'STATIC_MESH_SOURCE_FIDELITY_FAILED' in text
+          print('ACTUAL_PRODUCT_MESH_SOURCE_FIDELITY_GATE=SEALED')
+          PY

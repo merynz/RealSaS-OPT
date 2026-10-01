@@ -1,0 +1,373 @@
+name: VF11 certified adaptive research smoke
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'experiments/vf11_certified_adaptive/**'
+      - 'tests/research/test_vf11_range_engine_v1.py'
+      - 'tests/research/test_vf11_range_engine_c0_v2.py'
+      - 'tests/research/test_vf11_range_engine_c0_v3.py'
+      - 'tests/research/test_vf11_paired_profile_c0_v3.py'
+      - 'tests/research/test_vf11_directional_regular_c1_v1.py'
+      - 'tests/research/test_vf11_profile_c1_handoff_v1.py'
+      - 'tests/research/test_vf11_directional_regular_c1_v2.py'
+      - 'tests/research/test_vf11_profile_c1_handoff_v2.py'
+      - 'tests/research/test_vf11_oriented_crossing_c2_v1.py'
+      - 'tests/research/test_vf11_profile_c2_primary_v1.py'
+      - 'tests/research/test_vf11_axis_graph_c2_v2.py'
+      - 'tests/research/test_vf11_profile_c2_axis_graph_v2.py'
+      - 'tests/research/test_vf11_adaptive_empty_graph_c2_v3.py'
+      - 'tests/research/test_vf11_resume_d11_c2_v4.py'
+      - 'tests/research/test_vf11_sparse_mtet_x0.py'
+      - 'tests/research/test_vf11_block_mc_x2.py'
+      - 'tests/research/test_vf11_proof_aware_planner_x3.py'
+      - 'tests/research/test_vf11_batched_c0_x5.py'
+      - 'tests/research/test_vf11_accelerator_screen_x6.py'
+      - 'tests/research/test_vf11_parallel_cpu_verify_x6b.py'
+      - 'tests/research/test_vf11_resumable_full_domain_x6c.py'
+      - 'canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json'
+      - 'canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json'
+      - 'canonical/VF11_C0_RANGE_RESEARCH_PREREGISTRATION_V2_20260921.json'
+      - 'canonical/VF11_C0_PAIRED_RESEARCH_PREREGISTRATION_V3_20260921.json'
+      - 'canonical/VF11_C0_RESEARCH_CLOSURE_V4_20260921.json'
+      - 'canonical/VF11_C1_DIRECTIONAL_REGULARITY_PREREGISTRATION_V1_20260921.json'
+      - 'canonical/VF11_C1_V1_CLOSURE_20260921.json'
+      - 'canonical/VF11_C1_V2_CORRELATED_AFFINE_PREREGISTRATION_20260921.json'
+      - 'canonical/VF11_C1_V2_INTERIM_REVIEW_20260921.json'
+      - 'canonical/VF11_C1_V2_RESEARCH_CLOSURE_20260921.json'
+      - 'canonical/VF11_C2_ORIENTED_CROSSING_PREREGISTRATION_20260921.json'
+      - 'canonical/VF11_LAYERNORM_EPS_ERRATUM_20260921.json'
+      - 'canonical/VF11_LAYERNORM_EPS_CORRECTED_C0_C1_RECLOSURE_20260921.json'
+      - 'canonical/VF11_C2_V1_RESEARCH_CLOSURE_20260921.json'
+      - 'canonical/VF11_C2_V2_AXIS_GRAPH_PREREGISTRATION_20260921.json'
+      - 'canonical/VF11_C2_V2_AXIS_GRAPH_RESEARCH_CLOSURE_20260921.json'
+      - 'canonical/VF11_C2_V3_ADAPTIVE_REFINEMENT_PREREGISTRATION_20260921.json'
+      - 'canonical/VF11_C2_V3_ADAPTIVE_REFINEMENT_RESEARCH_CLOSURE_20260921.json'
+      - 'canonical/VF11_C2_V4_D11_RESUME_PREREGISTRATION_20260921.json'
+      - 'canonical/VF11_EXTRACTOR_TRANSITION_X0_PREREGISTRATION_20260921.json'
+      - 'canonical/VF11_EXTRACTOR_TRANSITION_X0_CLOSURE_20260921.json'
+      - 'canonical/VF11_EXTRACTOR_TRANSITION_X1_PREREGISTRATION_20260921.json'
+      - 'canonical/VF11_EXTRACTOR_TRANSITION_X1_RESULT_20260921.json'
+      - 'canonical/VF11_EXTRACTOR_TRANSITION_X1B_KNOT_ALIGNMENT_PREREGISTRATION_20260921.json'
+      - 'canonical/VF11_EXTRACTOR_TRANSITION_X1B_RESULT_20260921.json'
+      - 'canonical/VF11_EXTRACTOR_TRANSITION_X2_PREREGISTRATION_20260921.json'
+      - 'canonical/VF11_EXTRACTOR_TRANSITION_X2_CLOSURE_20260921.json'
+      - 'canonical/VF11_EXTRACTOR_TRANSITION_X3_PREREGISTRATION_20260921.json'
+      - 'canonical/VF11_EXTRACTOR_TRANSITION_X3_PREREGISTRATION_V2_20260921.json'
+      - 'canonical/VF11_LAYERNORM_EPS_IMPACT_REPLAY_PREREGISTRATION_20260921.json'
+      - 'canonical/VF11_EXTRACTOR_TRANSITION_X3A_UNKNOWN_DEPTH_DIAGNOSTIC_PREREGISTRATION_20260921.json'
+      - 'canonical/VF11_EXTRACTOR_TRANSITION_X3A_UNKNOWN_DEPTH_DIAGNOSTIC_RESULT_20260921.json'
+      - '.github/workflows/vf11_certified_adaptive_research_smoke.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: vf11-certified-adaptive-smoke-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  range-engine-smoke:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install minimal frozen test dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python -m pip install --no-input --progress-bar off pytest==8.3.5
+
+      - name: Compile research range engine
+        run: |
+          python -m py_compile experiments/vf11_certified_adaptive/range_engine_v1.py
+          python -m py_compile experiments/vf11_certified_adaptive/range_engine_c0_v2.py
+          python -m py_compile experiments/vf11_certified_adaptive/profile_c0_v2.py
+          python -m py_compile experiments/vf11_certified_adaptive/range_engine_c0_v3.py
+          python -m py_compile experiments/vf11_certified_adaptive/paired_profile_c0_v3.py
+          python -m py_compile experiments/vf11_certified_adaptive/directional_regular_c1_v1.py
+          python -m py_compile experiments/vf11_certified_adaptive/profile_c1_handoff_v1.py
+          python -m py_compile experiments/vf11_certified_adaptive/directional_regular_c1_v2.py
+          python -m py_compile experiments/vf11_certified_adaptive/profile_c1_handoff_v2.py
+          python -m py_compile experiments/vf11_certified_adaptive/oriented_crossing_c2_v1.py
+          python -m py_compile experiments/vf11_certified_adaptive/profile_c2_primary_v1.py
+          python -m py_compile experiments/vf11_certified_adaptive/axis_graph_c2_v2.py
+          python -m py_compile experiments/vf11_certified_adaptive/profile_c2_axis_graph_v2.py
+          python -m py_compile experiments/vf11_certified_adaptive/adaptive_empty_graph_c2_v3.py
+          python -m py_compile experiments/vf11_certified_adaptive/resume_d11_c2_v4.py
+          python -m py_compile experiments/vf11_certified_adaptive/sparse_mtet_x0.py
+          python -m py_compile experiments/vf11_certified_adaptive/block_mc_x2.py
+          python -m py_compile experiments/vf11_certified_adaptive/proof_aware_planner_x3.py
+          python -m py_compile experiments/vf11_certified_adaptive/batched_c0_x5.py
+          python -m py_compile experiments/vf11_certified_adaptive/accelerator_screen_x6.py
+          python -m py_compile experiments/vf11_certified_adaptive/parallel_cpu_verify_x6b.py
+          python -m py_compile experiments/vf11_certified_adaptive/resumable_full_domain_x6c.py
+          python -m py_compile tests/research/test_vf11_range_engine_v1.py
+          python -m py_compile tests/research/test_vf11_range_engine_c0_v2.py
+          python -m py_compile tests/research/test_vf11_range_engine_c0_v3.py
+          python -m py_compile tests/research/test_vf11_paired_profile_c0_v3.py
+          python -m py_compile tests/research/test_vf11_directional_regular_c1_v1.py
+          python -m py_compile tests/research/test_vf11_profile_c1_handoff_v1.py
+          python -m py_compile tests/research/test_vf11_directional_regular_c1_v2.py
+          python -m py_compile tests/research/test_vf11_profile_c1_handoff_v2.py
+          python -m py_compile tests/research/test_vf11_oriented_crossing_c2_v1.py
+          python -m py_compile tests/research/test_vf11_profile_c2_primary_v1.py
+          python -m py_compile tests/research/test_vf11_axis_graph_c2_v2.py
+          python -m py_compile tests/research/test_vf11_profile_c2_axis_graph_v2.py
+          python -m py_compile tests/research/test_vf11_adaptive_empty_graph_c2_v3.py
+          python -m py_compile tests/research/test_vf11_resume_d11_c2_v4.py
+          python -m py_compile tests/research/test_vf11_sparse_mtet_x0.py
+          python -m py_compile tests/research/test_vf11_block_mc_x2.py
+          python -m py_compile tests/research/test_vf11_proof_aware_planner_x3.py
+          python -m py_compile tests/research/test_vf11_batched_c0_x5.py
+          python -m py_compile tests/research/test_vf11_accelerator_screen_x6.py
+          python -m py_compile tests/research/test_vf11_parallel_cpu_verify_x6b.py
+          python -m py_compile tests/research/test_vf11_resumable_full_domain_x6c.py
+
+      - name: Enforce research-only claim boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          p=json.load(open('canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json',encoding='utf-8'))
+          assert p['authority_class']=='RESEARCH_PREREGISTRATION_ONLY'
+          assert p['product_authority_minted'] is False
+          assert p['witness_execution_authorized'] is False
+          assert p['knight_mainline_started'] is False
+          assert p['x1_disposition']['state']=='HOLD_NOT_EXECUTED'
+          assert p['next_long_experiment']['execution_class']=='LONG__USER_RUN_ALL_NOTEBOOK_REQUIRED'
+          v1=json.load(open('canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json',encoding='utf-8'))
+          assert v1['status']=='FALSIFIED__PRACTICALLY_VACUOUS_BOUNDS'
+          v2=json.load(open('canonical/VF11_C0_RANGE_RESEARCH_PREREGISTRATION_V2_20260921.json',encoding='utf-8'))
+          assert v2['status']=='PREREGISTERED__C0_RANGE_ONLY'
+          assert v2['product_authority_minted'] is False
+          assert v2['witness_execution'] is False
+          v3=json.load(open('canonical/VF11_C0_PAIRED_RESEARCH_PREREGISTRATION_V3_20260921.json',encoding='utf-8'))
+          assert v3['status']=='PREREGISTERED__PAIRED_MULTI_DEPTH_C0_ONLY'
+          assert v3['product_authority_minted'] is False
+          assert v3['witness_execution'] is False
+          assert v3['proven_regular']=='FORBIDDEN'
+          c0c=json.load(open('canonical/VF11_C0_RESEARCH_CLOSURE_V4_20260921.json',encoding='utf-8'))
+          assert c0c['status']=='C0_RESEARCH_CLOSED__C1_RESEARCH_AUTHORIZED'
+          assert c0c['product_authority_minted'] is False
+          assert c0c['shipping_certificate_backend'] is False
+          c1=json.load(open('canonical/VF11_C1_DIRECTIONAL_REGULARITY_PREREGISTRATION_V1_20260921.json',encoding='utf-8'))
+          assert c1['status']=='PREREGISTERED__C1_DIRECTIONAL_REGULARITY'
+          assert c1['product_authority_minted'] is False
+          assert 'PROVEN_SINGLE_COMPONENT' in c1['forbidden_inferences']
+          c1v1c=json.load(open('canonical/VF11_C1_V1_CLOSURE_20260921.json',encoding='utf-8'))
+          assert c1v1c['status']=='FALSIFIED__C1_V1_VACUOUS_DIRECTIONAL_BOUNDS'
+          assert c1v1c['product_authority_minted'] is False
+          c1v2=json.load(open('canonical/VF11_C1_V2_CORRELATED_AFFINE_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert c1v2['status']=='PREREGISTERED__C1_V2_CORRELATED_TANGENT_AFFINE'
+          assert c1v2['product_authority_minted'] is False
+          assert c1v2['full_domain_traversal_authorized'] is False
+          c1v2r=json.load(open('canonical/VF11_C1_V2_INTERIM_REVIEW_20260921.json',encoding='utf-8'))
+          assert c1v2r['status']=='NONVACUOUS__MARGIN_REPORTING_REPLAY_REQUIRED_BEFORE_CLOSURE'
+          assert c1v2r['product_authority_minted'] is False
+          c1close=json.load(open('canonical/VF11_C1_V2_RESEARCH_CLOSURE_20260921.json',encoding='utf-8'))
+          assert c1close['status']=='C1_V2_RESEARCH_CLOSED__C2_CROSSING_RESEARCH_AUTHORIZED'
+          assert c1close['product_authority_minted'] is False
+          c2=json.load(open('canonical/VF11_C2_ORIENTED_CROSSING_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert c2['status']=='PREREGISTERED__C2_ORIENTED_CROSSING_EXISTENCE_UNIQUENESS'
+          assert c2['product_authority_minted'] is False
+          assert c2['full_domain_traversal_authorized'] is False
+          epsfix=json.load(open('canonical/VF11_LAYERNORM_EPS_ERRATUM_20260921.json',encoding='utf-8'))
+          assert epsfix['status']=='ERRATUM_OPEN__C0_C1_IMPACT_REPLAY_REQUIRED__C2_HOLD'
+          impact=json.load(open('canonical/VF11_LAYERNORM_EPS_IMPACT_REPLAY_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert impact['status']=='PREREGISTERED__LAYERNORM_EPS_C0_C1_IMPACT_REPLAY'
+          reclose=json.load(open('canonical/VF11_LAYERNORM_EPS_CORRECTED_C0_C1_RECLOSURE_20260921.json',encoding='utf-8'))
+          assert reclose['status']=='CORRECTED_C0_C1_RECLOSED__C2_REAUTHORIZED'
+          assert reclose['c0_impact']['state_change_count']==0
+          assert reclose['c1_impact']['state_or_c0_change_count']==0
+          assert reclose['c2']['execution_authorized'] is True
+          assert reclose['c2']['full_domain_traversal_authorized'] is False
+          assert reclose['product_authority_minted'] is False
+          c2close=json.load(open('canonical/VF11_C2_V1_RESEARCH_CLOSURE_20260921.json',encoding='utf-8'))
+          assert c2close['status']=='C2_V1_RESEARCH_CLOSED__AXIS_GRAPH_RESEARCH_AUTHORIZED'
+          assert c2close['product_authority_minted'] is False
+          c2v2=json.load(open('canonical/VF11_C2_V2_AXIS_GRAPH_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert c2v2['status']=='PREREGISTERED__C2_V2_AXIS_ALIGNED_GRAPH_PATCH'
+          assert c2v2['product_authority_minted'] is False
+          assert c2v2['full_domain_traversal_authorized'] is False
+          c2v2c=json.load(open('canonical/VF11_C2_V2_AXIS_GRAPH_RESEARCH_CLOSURE_20260921.json',encoding='utf-8'))
+          assert c2v2c['status']=='C2_V2_RESEARCH_CLOSED__ADAPTIVE_CHILD_REFINEMENT_AUTHORIZED'
+          assert c2v2c['product_authority_minted'] is False
+          c2v3=json.load(open('canonical/VF11_C2_V3_ADAPTIVE_REFINEMENT_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert c2v3['status']=='PREREGISTERED__C2_V3_ADAPTIVE_EMPTY_OR_GRAPH_REFINEMENT'
+          assert c2v3['product_authority_minted'] is False
+          assert c2v3['full_domain_traversal_authorized'] is False
+          c2v3c=json.load(open('canonical/VF11_C2_V3_ADAPTIVE_REFINEMENT_RESEARCH_CLOSURE_20260921.json',encoding='utf-8'))
+          assert c2v3c['status']=='C2_V3_NONVACUOUS__D11_CONTINUATION_AUTHORIZED'
+          assert c2v3c['product_authority_minted'] is False
+          c2v4=json.load(open('canonical/VF11_C2_V4_D11_RESUME_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert c2v4['status']=='PREREGISTERED__C2_V4_D11_RESUME_CONTINUATION'
+          assert c2v4['product_authority_minted'] is False
+          assert c2v4['full_domain_traversal_authorized'] is False
+          x0=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X0_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert x0['status']=='PREREGISTERED__SPARSE_FREUDENTHAL_MTET_EQUIVALENCE_BASELINE'
+          assert x0['product_authority_minted'] is False
+          assert x0['shipping_extractor_selected'] is False
+          x0c=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X0_CLOSURE_20260921.json',encoding='utf-8'))
+          assert x0c['status']=='PASS__SPARSE_FREUDENTHAL_MTET_EQUIVALENCE_BASELINE'
+          x1=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X1_RESULT_20260921.json',encoding='utf-8'))
+          assert x1['status']=='DEPTH_DOMINANT__MC_RETAINS_BASELINE__LOCAL_SUPPORT_ANOMALY_ISOLATED'
+          x1b=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X1B_RESULT_20260921.json',encoding='utf-8'))
+          assert x1b['status']=='NO_MATERIAL_KNOT_EFFECT__KNOT_CROSSING_NOT_PRIMARY_ANOMALY_CAUSE'
+          x2=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X2_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert x2['status']=='PREREGISTERED__BLOCKWISE_LEWINER_MC_EQUIVALENCE'
+          assert x2['product_authority_minted'] is False
+          assert x2['shipping_extractor_selected'] is False
+          x2c=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X2_CLOSURE_20260921.json',encoding='utf-8'))
+          assert x2c['status']=='PASS__BLOCKWISE_LEWINER_MC_EQUIVALENCE'
+          x3=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X3_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert x3['status']=='PREREGISTERED__PROOF_AWARE_D13_NARROW_BAND_PLANNER'
+          assert x3['product_authority_minted'] is False
+          assert x3['shipping_extractor_selected'] is False
+          x3v2=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X3_PREREGISTRATION_V2_20260921.json',encoding='utf-8'))
+          assert x3v2['status']=='PREREGISTERED__PROOF_AWARE_D13_NARROW_BAND_PLANNER__SEMANTIC_CORRECTION'
+          assert x3v2['product_authority_minted'] is False
+          assert x3v2['shipping_extractor_selected'] is False
+          x3a=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X3A_UNKNOWN_DEPTH_DIAGNOSTIC_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert x3a['status']=='PREREGISTERED__TWO_UNKNOWN_LEAF_D14_D16_LATTICE_DIAGNOSTIC'
+          x3ar=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X3A_UNKNOWN_DEPTH_DIAGNOSTIC_RESULT_20260921.json',encoding='utf-8'))
+          assert x3ar['status']=='NO_SAMPLED_SURFACE_THROUGH_D16__PROOF_UNKNOWN_REMAINS'
+          assert x3ar['product_authority_minted'] is False
+          x5=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X5_BATCHED_C0_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert x5['status']=='PREREGISTERED__BATCHED_C0_EQUIVALENCE_AND_THROUGHPUT'
+          assert x5['full_domain_execution_authorized'] is False
+          assert x5['product_authority_minted'] is False
+          x6=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X6_ACCELERATOR_SCREEN_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert x6['status']=='PREREGISTERED__ACCELERATOR_SCREEN_CPU_VERIFY'
+          assert x6['full_domain_execution_authorized'] is False
+          assert x6['product_authority_minted'] is False
+          x6a=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X6_A100_RUN_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert x6a['status']=='PREREGISTERED__A100_ACCELERATOR_SCREEN_CPU_VERIFY_CONDITIONAL_FULL_DOMAIN'
+          assert x6a['execution_class']=='LONG__USER_RUN_ALL_NOTEBOOK_REQUIRED'
+          assert x6a['product_authority_minted'] is False
+          x6b=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X6B_PARALLEL_CPU_VERIFY_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert x6b['status']=='PREREGISTERED__PARALLEL_CPU_CONFIRMATION_FOR_X6'
+          assert x6b['full_domain_execution_authorized'] is False
+          assert x6b['product_authority_minted'] is False
+          x6ba=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X6B_A100_PARALLEL_RUN_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert x6ba['status']=='PREREGISTERED__A100_PARALLEL_CPU_CONFIRMATION_CONDITIONAL_FULL_DOMAIN'
+          assert x6ba['execution_class']=='LONG__USER_RUN_ALL_NOTEBOOK_REQUIRED'
+          assert x6ba['product_authority_minted'] is False
+          x6c=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X6C_RESUMABLE_FULL_DOMAIN_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert x6c['status']=='PREREGISTERED__RESUMABLE_FULL_DOMAIN_X6B_EXECUTION'
+          assert x6c['execution_class']=='LONG__USER_RUN_ALL_NOTEBOOK_REQUIRED'
+          assert x6c['product_authority_minted'] is False
+          print('VF11_RESEARCH_CLAIM_BOUNDARY=PASS')
+          PY
+
+      - name: Run short deterministic/adversarial range tests
+        run: pytest -q tests/research/test_vf11_range_engine_v1.py tests/research/test_vf11_range_engine_c0_v2.py tests/research/test_vf11_range_engine_c0_v3.py tests/research/test_vf11_paired_profile_c0_v3.py tests/research/test_vf11_directional_regular_c1_v1.py tests/research/test_vf11_profile_c1_handoff_v1.py tests/research/test_vf11_directional_regular_c1_v2.py tests/research/test_vf11_profile_c1_handoff_v2.py tests/research/test_vf11_oriented_crossing_c2_v1.py tests/research/test_vf11_profile_c2_primary_v1.py tests/research/test_vf11_axis_graph_c2_v2.py tests/research/test_vf11_profile_c2_axis_graph_v2.py tests/research/test_vf11_adaptive_empty_graph_c2_v3.py tests/research/test_vf11_resume_d11_c2_v4.py tests/research/test_vf11_sparse_mtet_x0.py tests/research/test_vf11_block_mc_x2.py tests/research/test_vf11_proof_aware_planner_x3.py tests/research/test_vf11_batched_c0_x5.py tests/research/test_vf11_accelerator_screen_x6.py tests/research/test_vf11_parallel_cpu_verify_x6b.py tests/research/test_vf11_resumable_full_domain_x6c.py
+
+      - name: Emit smoke receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p vf11_cert_smoke/source
+          cp experiments/vf11_certified_adaptive/range_engine_c0_v3.py vf11_cert_smoke/source/
+          cp experiments/vf11_certified_adaptive/directional_regular_c1_v1.py vf11_cert_smoke/source/
+          cp experiments/vf11_certified_adaptive/directional_regular_c1_v2.py vf11_cert_smoke/source/
+          cp experiments/vf11_certified_adaptive/oriented_crossing_c2_v1.py vf11_cert_smoke/source/
+          cp experiments/vf11_certified_adaptive/axis_graph_c2_v2.py vf11_cert_smoke/source/
+          cp experiments/vf11_certified_adaptive/paired_profile_c0_v3.py vf11_cert_smoke/source/
+          cp experiments/vf11_certified_adaptive/adaptive_empty_graph_c2_v3.py vf11_cert_smoke/source/
+          cp experiments/vf11_certified_adaptive/resume_d11_c2_v4.py vf11_cert_smoke/source/
+          cp experiments/vf11_certified_adaptive/batched_c0_x5.py vf11_cert_smoke/source/
+          cp experiments/vf11_certified_adaptive/accelerator_screen_x6.py vf11_cert_smoke/source/
+          cp experiments/vf11_certified_adaptive/parallel_cpu_verify_x6b.py vf11_cert_smoke/source/
+          mkdir -p vf11_cert_smoke/source/models/iris/v3
+          cp models/iris/v3/scene_first_signed_v3.py vf11_cert_smoke/source/models/iris/v3/
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          files=[
+            'experiments/vf11_certified_adaptive/range_engine_v1.py',
+            'experiments/vf11_certified_adaptive/range_engine_c0_v2.py',
+            'experiments/vf11_certified_adaptive/profile_c0_v2.py',
+            'experiments/vf11_certified_adaptive/range_engine_c0_v3.py',
+            'experiments/vf11_certified_adaptive/paired_profile_c0_v3.py',
+            'experiments/vf11_certified_adaptive/directional_regular_c1_v1.py',
+            'experiments/vf11_certified_adaptive/profile_c1_handoff_v1.py',
+            'experiments/vf11_certified_adaptive/directional_regular_c1_v2.py',
+            'experiments/vf11_certified_adaptive/profile_c1_handoff_v2.py',
+            'experiments/vf11_certified_adaptive/oriented_crossing_c2_v1.py',
+            'experiments/vf11_certified_adaptive/profile_c2_primary_v1.py',
+            'experiments/vf11_certified_adaptive/axis_graph_c2_v2.py',
+            'experiments/vf11_certified_adaptive/profile_c2_axis_graph_v2.py',
+            'experiments/vf11_certified_adaptive/adaptive_empty_graph_c2_v3.py',
+            'experiments/vf11_certified_adaptive/resume_d11_c2_v4.py',
+            'experiments/vf11_certified_adaptive/sparse_mtet_x0.py',
+            'experiments/vf11_certified_adaptive/block_mc_x2.py',
+            'experiments/vf11_certified_adaptive/batched_c0_x5.py',
+            'experiments/vf11_certified_adaptive/accelerator_screen_x6.py',
+            'experiments/vf11_certified_adaptive/parallel_cpu_verify_x6b.py',
+            'experiments/vf11_certified_adaptive/resumable_full_domain_x6c.py',
+            'experiments/vf11_certified_adaptive/proof_aware_planner_x3.py',
+            'tests/research/test_vf11_range_engine_v1.py',
+            'tests/research/test_vf11_range_engine_c0_v2.py',
+            'tests/research/test_vf11_range_engine_c0_v3.py',
+            'tests/research/test_vf11_paired_profile_c0_v3.py',
+            'tests/research/test_vf11_directional_regular_c1_v1.py',
+            'tests/research/test_vf11_profile_c1_handoff_v1.py',
+            'tests/research/test_vf11_directional_regular_c1_v2.py',
+            'tests/research/test_vf11_profile_c1_handoff_v2.py',
+            'tests/research/test_vf11_oriented_crossing_c2_v1.py',
+            'tests/research/test_vf11_profile_c2_primary_v1.py',
+            'tests/research/test_vf11_axis_graph_c2_v2.py',
+            'tests/research/test_vf11_profile_c2_axis_graph_v2.py',
+            'tests/research/test_vf11_adaptive_empty_graph_c2_v3.py',
+            'tests/research/test_vf11_resume_d11_c2_v4.py',
+            'tests/research/test_vf11_sparse_mtet_x0.py',
+            'tests/research/test_vf11_block_mc_x2.py',
+            'tests/research/test_vf11_batched_c0_x5.py',
+            'tests/research/test_vf11_accelerator_screen_x6.py',
+            'tests/research/test_vf11_parallel_cpu_verify_x6b.py',
+            'tests/research/test_vf11_resumable_full_domain_x6c.py',
+            'tests/research/test_vf11_proof_aware_planner_x3.py',
+            'canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json',
+            'canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json',
+            'canonical/VF11_C0_RANGE_RESEARCH_PREREGISTRATION_V2_20260921.json',
+            'canonical/VF11_C0_PAIRED_RESEARCH_PREREGISTRATION_V3_20260921.json',
+            'canonical/VF11_C0_RESEARCH_CLOSURE_V4_20260921.json',
+            'canonical/VF11_C1_DIRECTIONAL_REGULARITY_PREREGISTRATION_V1_20260921.json',
+            'canonical/VF11_C1_V1_CLOSURE_20260921.json',
+            'canonical/VF11_C1_V2_CORRELATED_AFFINE_PREREGISTRATION_20260921.json',
+            'canonical/VF11_C1_V2_INTERIM_REVIEW_20260921.json',
+            'canonical/VF11_C1_V2_RESEARCH_CLOSURE_20260921.json',
+            'canonical/VF11_C2_ORIENTED_CROSSING_PREREGISTRATION_20260921.json',
+          ]
+          def sha(path):
+              return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+          out={
+            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v24',
+            'status':'PASS',
+            'product_authority_minted':False,
+            'files':{p:sha(p) for p in files},
+          }
+          Path('vf11_cert_smoke/receipt.json').write_text(json.dumps(out,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(out,indent=2,sort_keys=True))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vf11-certified-adaptive-research-smoke
+          path: vf11_cert_smoke/
+          if-no-files-found: error

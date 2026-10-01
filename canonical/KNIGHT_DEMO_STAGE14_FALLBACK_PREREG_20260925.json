@@ -1,0 +1,97 @@
+{
+  "schema": "RealSaS.KnightDemoStage14FallbackPreregistration.v1",
+  "status": "FROZEN_BEFORE_KNIGHT_STAGE14_CANDIDATE_METRICS_INSPECTION",
+  "date_utc": "2026-09-25",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "execution_class": "DEMO_WITNESS",
+  "purpose": "Select one measured mechanical carrier for investor-demo continuation only when the unchanged frozen Stage14 product adequacy policy has no passing candidate.",
+  "frozen_product_policy": {
+    "path": "canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V2_20260920.json",
+    "git_blob_sha1": "4c2b9ec413a0d23e38194d9264efb4dc01c761f9",
+    "status": "FROZEN_AFTER_SUBJECT_FREE_12K_CALIBRATION_BEFORE_NEW_KNIGHT_STAGE14_RESULT",
+    "product_selection_rule": "MINIMUM_ACTUAL_NODE_COUNT_AMONG_PASSING_BOUNDED_SEARCH_CANDIDATES",
+    "mutation_forbidden": true
+  },
+  "eligibility": {
+    "stage13_ledger_status_required": "PASS_DEMO_ONLY",
+    "stage13_scientific_pass_required": false,
+    "stage14_frozen_product_adequacy_status_required": "FAIL",
+    "product_authority_claimed_required": false,
+    "all_candidate_measurements_must_be_finite": true,
+    "candidate_surface_integrity_must_pass": true,
+    "teacher_truth_allowed": false,
+    "appearance_authority_allowed": false
+  },
+  "frozen_closest_candidate_rule": {
+    "rule_id": "MIN_FAILED_GATES__MIN_MAX_RELATIVE_EXCESS__MIN_SUM_RELATIVE_EXCESS__MAX_ACTUAL_NODES__MIN_TARGET_CAP_V1",
+    "gates": [
+      {
+        "metric": "dense_to_surface_p95_norm",
+        "sense": "MAX",
+        "threshold": 0.03
+      },
+      {
+        "metric": "dense_to_surface_max_norm",
+        "sense": "MAX",
+        "threshold": 0.08
+      },
+      {
+        "metric": "normal_p95_deg",
+        "sense": "MAX",
+        "threshold": 30
+      },
+      {
+        "metric": "projected_p95_px",
+        "sense": "MAX",
+        "threshold": 6
+      },
+      {
+        "metric": "projected_max_px",
+        "sense": "MAX",
+        "threshold": 16
+      },
+      {
+        "metric": "minimum_nodes_per_eligible_component",
+        "sense": "MIN",
+        "threshold": 8
+      },
+      {
+        "metric": "component_alias_node_count",
+        "sense": "MAX_ZERO",
+        "threshold": 0
+      }
+    ],
+    "excess_definition": {
+      "MAX": "max(0, metric/threshold - 1) for threshold > 0",
+      "MIN": "max(0, (threshold-metric)/threshold) for threshold > 0",
+      "MAX_ZERO": "0 if metric == 0 else metric"
+    },
+    "lexicographic_key": [
+      "failed_gate_count ASC",
+      "max_relative_excess ASC",
+      "sum_relative_excess ASC",
+      "actual_node_count DESC",
+      "candidate_target_node_cap ASC"
+    ],
+    "metrics_not_used_for_selection": [
+      "teacher truth",
+      "source rig labels",
+      "source skin labels",
+      "appearance quality",
+      "future Geppetto result",
+      "future Arachne result"
+    ]
+  },
+  "demo_admission_semantics": {
+    "stage14_scientific_status_remains": "FAIL",
+    "stage14_ledger_status_if_fallback_materializes": "PASS_DEMO_ONLY",
+    "stage15_ledger_status_if_tensorization_integrity_passes": "PASS_DEMO_ONLY",
+    "stage14_authority_class": "DEMO_ONLY_GSA_RIGGING_SURFACE_CANDIDATE",
+    "stage15_authority_class": "DEMO_ONLY_RIGGING_SURFACE_MEASUREMENT",
+    "downstream_demo_taint_must_propagate": true,
+    "product_pass_forbidden": true,
+    "shipping_ready_claim_forbidden": true
+  },
+  "claim_boundary": "This preregistration does not relax or mutate the frozen Stage14 product policy and cannot convert a scientific Stage14 FAIL into PASS. It only predeclares how a measured nonpassing carrier may be chosen for the already-authorized DEMO_WITNESS lane."
+}

@@ -1,0 +1,315 @@
+{
+  "current_normalization_hash": "9fb343b6ae69f51c72107ad7fae37135679b3496824d90b09e42eb4bd2ddaec4",
+  "current_observation_set_hash": "82d746005720cb95b1217c58d73ad5c73efd47598be8523fc2bbca195662282e",
+  "current_source_view_identity": [
+    {
+      "camera_binding_hash": "3e37fd1c075033edc4f1e0accfca5b1cca8994aa1a4cc86240e279d7f43f310a",
+      "foreground_mask_sha256": "dd4d3ec254afe3a04c0507117f281b608dd5dcf6b005ae88fb3825bbecc67551",
+      "height": 1024,
+      "source_raster_sha256": "5149ce8062020fcee49249d51b06d87d3e119333efd8fcca8b509434a76ca78c",
+      "view_index": 0,
+      "width": 1024
+    },
+    {
+      "camera_binding_hash": "9d7034c3b0e35db7a3b07df1e0cb01d260d3ec61fcb1379e895abe227d6b8c5f",
+      "foreground_mask_sha256": "68a6d78a427976ca33a64c9e7dc40d8734748cbf165c780102221427e174f21f",
+      "height": 1024,
+      "source_raster_sha256": "541bb053cc01972eafda6b2774e12cbe0b56bfa8df51fecff1d823df229099da",
+      "view_index": 1,
+      "width": 1024
+    },
+    {
+      "camera_binding_hash": "fcb384b629b7329cc464b91e0fbe827460fdca534bc428f5f22912f5dd2a694d",
+      "foreground_mask_sha256": "ef56112fec0981df388f812673104ede408bee29848615f5cca09a15ab959848",
+      "height": 1024,
+      "source_raster_sha256": "431ba1e25de5862f0da77b7e494dbbc2a170f775ff626e64ef481f5e41a2df8a",
+      "view_index": 2,
+      "width": 1024
+    },
+    {
+      "camera_binding_hash": "b19f60cbfe48e90516470062f54c9a60265f4e16e6483bb407c1fb5fc1c54b24",
+      "foreground_mask_sha256": "d1766ce8a4f2d0a0c81f6b150608f31c6fd53ee9f72c9afc6551af12b42fa641",
+      "height": 1024,
+      "source_raster_sha256": "deebf678569c18ae4d7e809b4d335942d7678ed8b7d2aa259283f4ee8dbba9ee",
+      "view_index": 3,
+      "width": 1024
+    },
+    {
+      "camera_binding_hash": "15207e2c2e207c9d460926da2bfad252ee6ba3c97a3abb2e7f6d484aeee426a5",
+      "foreground_mask_sha256": "b1847b3c31a4181849e2fe694bbcaf50417b00e8c5e23af71209777877b3334b",
+      "height": 1024,
+      "source_raster_sha256": "d3a83c2c3f6615e625e1ae192e6543237a0236ad3e43bc06e95368ad19f95504",
+      "view_index": 4,
+      "width": 1024
+    },
+    {
+      "camera_binding_hash": "361bcf67f27910cb0120187fbafce7248be6e0859730374947fffb5b09d8fde2",
+      "foreground_mask_sha256": "e45ed3f8cf1ddbcbc77110f3c72f96cc6dffaffaa26dfd50d3eb266c9bd79cad",
+      "height": 1024,
+      "source_raster_sha256": "c3be5a6468a6e767967d1e3ac4e0b67f0d7c5ad0e2f11ef830aa529e4f081b66",
+      "view_index": 5,
+      "width": 1024
+    },
+    {
+      "camera_binding_hash": "e985029444c6764a405abfebb779d4efe4dadfa49f1d8d7d4dc4faa1601e7b7f",
+      "foreground_mask_sha256": "88c8b2544940656ec6c8f4abfbae4c6daaa00faf7b245909e9bd4fac8132923b",
+      "height": 1024,
+      "source_raster_sha256": "9f3b33457ae01c4cccf390a56fb9c4234a64d69f0a846a57e3fd1c8292c65a56",
+      "view_index": 6,
+      "width": 1024
+    },
+    {
+      "camera_binding_hash": "66940b1d8dc149aa310a556261985ad7d517e1c90f60f361ce21469c73cc01dc",
+      "foreground_mask_sha256": "e7acd5f11c8b28a8c09eacfbde4a2487e16cabbd8507544125499bcd5919a82e",
+      "height": 1024,
+      "source_raster_sha256": "91c5930051f3ff72965b101aa89d7b24caac90ce2f27e00c2f13f53d821e53b0",
+      "view_index": 7,
+      "width": 1024
+    }
+  ],
+  "diagnostic_only": true,
+  "exact_source_view_identity_equal": false,
+  "historical_hashes_match_frozen_contract": false,
+  "historical_normalization_hash": "30b4877618079e51e97b220c52d6a4f27b6d155ed783118d3cb5f280ab236a25",
+  "historical_observation_set_hash": "b96596d1b21e8581c255bf2ebfa2eeead46ecb821d24432dcae937e4954ed08c",
+  "historical_source_view_identity": [
+    {
+      "camera_binding_hash": "3e37fd1c075033edc4f1e0accfca5b1cca8994aa1a4cc86240e279d7f43f310a",
+      "foreground_mask_sha256": "dd4d3ec254afe3a04c0507117f281b608dd5dcf6b005ae88fb3825bbecc67551",
+      "height": 1024,
+      "source_raster_sha256": "ca400ecfb66bee3ed3e894f5058cebfe1000e4efd27c3390b65d566575247660",
+      "view_index": 0,
+      "width": 1024
+    },
+    {
+      "camera_binding_hash": "9d7034c3b0e35db7a3b07df1e0cb01d260d3ec61fcb1379e895abe227d6b8c5f",
+      "foreground_mask_sha256": "68a6d78a427976ca33a64c9e7dc40d8734748cbf165c780102221427e174f21f",
+      "height": 1024,
+      "source_raster_sha256": "67c05c2747b6688ca19f6d6109e4b773b760557dde9cf262ab7f994410f6f786",
+      "view_index": 1,
+      "width": 1024
+    },
+    {
+      "camera_binding_hash": "677577ba9a710d46003301413a292e7a0656de467feba7dfd43fa10db0e53a8a",
+      "foreground_mask_sha256": "f3866c0a07fb335ad1034b56cd34283bf92e4ad5763279d21c418ee6850a8090",
+      "height": 1024,
+      "source_raster_sha256": "8a188c15f518a6db08c55289e299f2ec7e95f4d4b06e8ca63724ce7a5d777243",
+      "view_index": 2,
+      "width": 1024
+    },
+    {
+      "camera_binding_hash": "b19f60cbfe48e90516470062f54c9a60265f4e16e6483bb407c1fb5fc1c54b24",
+      "foreground_mask_sha256": "d1766ce8a4f2d0a0c81f6b150608f31c6fd53ee9f72c9afc6551af12b42fa641",
+      "height": 1024,
+      "source_raster_sha256": "202608225bee62a15ec8e60a88915fc35cded935fc409f0867c04f7c2d7a4236",
+      "view_index": 3,
+      "width": 1024
+    },
+    {
+      "camera_binding_hash": "15207e2c2e207c9d460926da2bfad252ee6ba3c97a3abb2e7f6d484aeee426a5",
+      "foreground_mask_sha256": "b1847b3c31a4181849e2fe694bbcaf50417b00e8c5e23af71209777877b3334b",
+      "height": 1024,
+      "source_raster_sha256": "8defeffe0e086a5214cb22f0c84d52b1e0316e4ac486e43df3603603282341f1",
+      "view_index": 4,
+      "width": 1024
+    },
+    {
+      "camera_binding_hash": "361bcf67f27910cb0120187fbafce7248be6e0859730374947fffb5b09d8fde2",
+      "foreground_mask_sha256": "e45ed3f8cf1ddbcbc77110f3c72f96cc6dffaffaa26dfd50d3eb266c9bd79cad",
+      "height": 1024,
+      "source_raster_sha256": "59fe57cfd812ceac732a5a0000f9d0e32c8a53955a78e1ca716edcf58bb873cc",
+      "view_index": 5,
+      "width": 1024
+    },
+    {
+      "camera_binding_hash": "d4195e6dc06112a2db1420c52147f861ee7ed26ff9c0e8b589594ca65e6b0679",
+      "foreground_mask_sha256": "88c8b2544940656ec6c8f4abfbae4c6daaa00faf7b245909e9bd4fac8132923b",
+      "height": 1024,
+      "source_raster_sha256": "11207747f33f4da62c212564b068759989256262be89b4a10a743d71bf01a0cc",
+      "view_index": 6,
+      "width": 1024
+    },
+    {
+      "camera_binding_hash": "66940b1d8dc149aa310a556261985ad7d517e1c90f60f361ce21469c73cc01dc",
+      "foreground_mask_sha256": "e7acd5f11c8b28a8c09eacfbde4a2487e16cabbd8507544125499bcd5919a82e",
+      "height": 1024,
+      "source_raster_sha256": "60cce8f1d3fe4dac1324c70a1191e174554957d95592f07aa3bb5473b427af7a",
+      "view_index": 7,
+      "width": 1024
+    }
+  ],
+  "historical_workflow_run_id": 36022491562,
+  "schema": "RealSaS.KnightStage08HistoricalCompare.v1",
+  "stage_comparisons": [
+    {
+      "byte_identical": false,
+      "current_file_sha256": "4b09a6dbba56ab7fd88c2bb59f890527974a9ab5638710590ca479a3e4127628",
+      "full_diff_path_count": 12,
+      "full_diff_paths": [
+        "audit_hash",
+        "source_byte_seal_sha256",
+        "views[0].source_raster_sha256",
+        "views[1].source_raster_sha256",
+        "views[2].foreground_mask_sha256",
+        "views[2].foreground_pixel_count",
+        "views[2].source_raster_sha256",
+        "views[3].source_raster_sha256",
+        "views[4].source_raster_sha256",
+        "views[5].source_raster_sha256",
+        "views[6].source_raster_sha256",
+        "views[7].source_raster_sha256"
+      ],
+      "historical_file_sha256": "79adab8c1dcba28f453bd279004f50da3ffaa5ba8a3d3f794402ee9db0429461",
+      "schema": "RealSaS.SourceMechanicalAuditIR.v1",
+      "semantic_diff_path_count": 1,
+      "semantic_diff_paths": [
+        "views[2].foreground_pixel_count"
+      ],
+      "stage_id": "03_SOURCE_MECHANICAL_AUDIT"
+    },
+    {
+      "byte_identical": false,
+      "current_file_sha256": "dd268d9169a42ff60bb09c8a5460584e152cdc9a39110f502a348467c783514f",
+      "full_diff_path_count": 2,
+      "full_diff_paths": [
+        "admission_hash",
+        "source_mechanical_audit_binding_hash"
+      ],
+      "historical_file_sha256": "71a3a699e05d08398e3753a85a05ad432ce44bb049a708d86df4e6b4ca17ac66",
+      "schema": "RealSaS.FullSubjectAdmissionIR.v1",
+      "semantic_diff_path_count": 0,
+      "semantic_diff_paths": [],
+      "stage_id": "04_FULL_SUBJECT_ADMISSION"
+    },
+    {
+      "byte_identical": false,
+      "current_file_sha256": "e11ab0fe32378eb1cd06fbebd8d1827e71eaa7b3fbe31b78248f7f3f9ab91920",
+      "full_diff_path_count": 7,
+      "full_diff_paths": [
+        "camera_binding_hashes[2]",
+        "camera_binding_hashes[6]",
+        "camera_set_hash",
+        "cameras[2].origin[1]",
+        "cameras[6].origin[1]",
+        "metadata.v2_authority",
+        "source_bundle_sha256"
+      ],
+      "historical_file_sha256": "299d79a133c76ad37dcee4035bf5d69a8ab9422ae6dc8448b2118401d27c4195",
+      "schema": "RealSaS.QualifiedCameraSetIR.v1",
+      "semantic_diff_path_count": 2,
+      "semantic_diff_paths": [
+        "cameras[2].origin[1]",
+        "cameras[6].origin[1]"
+      ],
+      "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+    },
+    {
+      "byte_identical": false,
+      "current_file_sha256": "070136166df794dabce589857b1dcf24962871396cf22d0a566509a2e0a5b316",
+      "full_diff_path_count": 19,
+      "full_diff_paths": [
+        "admission_binding_hash",
+        "camera_set_binding_hash",
+        "render_set_hash",
+        "views[0].source_raster_path",
+        "views[0].source_raster_sha256",
+        "views[1].source_raster_path",
+        "views[1].source_raster_sha256",
+        "views[2].source_raster_path",
+        "views[2].source_raster_sha256",
+        "views[3].source_raster_path",
+        "views[3].source_raster_sha256",
+        "views[4].source_raster_path",
+        "views[4].source_raster_sha256",
+        "views[5].source_raster_path",
+        "views[5].source_raster_sha256",
+        "views[6].source_raster_path",
+        "views[6].source_raster_sha256",
+        "views[7].source_raster_path",
+        "views[7].source_raster_sha256"
+      ],
+      "historical_file_sha256": "0bde630fc48befa447b76fb733e316dc72e5067be840f3c59a72c127b6e610d2",
+      "schema": "RealSaS.ObservationRenderSetIR.v1",
+      "semantic_diff_path_count": 0,
+      "semantic_diff_paths": [],
+      "stage_id": "06_OBSERVATION_RENDER_8VIEW"
+    },
+    {
+      "byte_identical": false,
+      "current_file_sha256": "260209164d4afeb81ed8c738889a87f7e431553aaa78f78ac070fce34c06e7ee",
+      "full_diff_path_count": 46,
+      "full_diff_paths": [
+        "metadata.camera_set_hash",
+        "metadata.full_subject_admission_hash",
+        "observation_set_hash",
+        "views[0].evidence_refs[0]",
+        "views[0].evidence_refs[1]",
+        "views[0].evidence_refs[2]",
+        "views[0].source_observation_hash",
+        "views[0].source_raster_sha256",
+        "views[1].evidence_refs[0]",
+        "views[1].evidence_refs[1]",
+        "views[1].evidence_refs[2]",
+        "views[1].source_observation_hash",
+        "views[1].source_raster_sha256",
+        "views[2].camera_binding_hash",
+        "views[2].evidence_refs[0]",
+        "views[2].evidence_refs[1]",
+        "views[2].evidence_refs[2]",
+        "views[2].foreground_mask_sha256",
+        "views[2].source_observation_hash",
+        "views[2].source_raster_sha256",
+        "views[3].evidence_refs[0]",
+        "views[3].evidence_refs[1]",
+        "views[3].evidence_refs[2]",
+        "views[3].source_observation_hash",
+        "views[3].source_raster_sha256",
+        "views[4].evidence_refs[0]",
+        "views[4].evidence_refs[1]",
+        "views[4].evidence_refs[2]",
+        "views[4].source_observation_hash",
+        "views[4].source_raster_sha256",
+        "views[5].evidence_refs[0]",
+        "views[5].evidence_refs[1]",
+        "views[5].evidence_refs[2]",
+        "views[5].source_observation_hash",
+        "views[5].source_raster_sha256",
+        "views[6].camera_binding_hash",
+        "views[6].evidence_refs[0]",
+        "views[6].evidence_refs[1]",
+        "views[6].evidence_refs[2]",
+        "views[6].source_observation_hash",
+        "views[6].source_raster_sha256",
+        "views[7].evidence_refs[0]",
+        "views[7].evidence_refs[1]",
+        "views[7].evidence_refs[2]",
+        "views[7].source_observation_hash",
+        "views[7].source_raster_sha256"
+      ],
+      "historical_file_sha256": "f8f3b020a8ddd2f139444bd00f6333e56cdcae656095150cf223783921669c80",
+      "schema": "RealSaS.QualifiedObservationSetIR.v1",
+      "semantic_diff_path_count": 0,
+      "semantic_diff_paths": [],
+      "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+    },
+    {
+      "byte_identical": false,
+      "current_file_sha256": "9bf06763e857258b0e2a58349ec43431652b2f617f2290d5f0772d4a7ebf430a",
+      "full_diff_path_count": 4,
+      "full_diff_paths": [
+        "camera_set_binding_hash",
+        "center_xyz[1]",
+        "normalization_hash",
+        "observation_set_binding_hash"
+      ],
+      "historical_file_sha256": "3e58395f2ce5e7aa81ce24ef2557803863be9b78f2f9265b4bc9c280bbf7b2d9",
+      "schema": "RealSaS.NormalizationDomainIR.v1",
+      "semantic_diff_path_count": 1,
+      "semantic_diff_paths": [
+        "center_xyz[1]"
+      ],
+      "stage_id": "08_NORMALIZATION_DOMAIN_QUALIFIED"
+    }
+  ],
+  "status": "MEASURED"
+}

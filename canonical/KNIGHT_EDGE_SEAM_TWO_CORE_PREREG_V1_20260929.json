@@ -1,0 +1,14 @@
+{
+  "schema": "RealSaS.KnightEdgeSeamTwoCorePrereg.v1",
+  "status": "FROZEN_BEFORE_EDGE_SEAM_TWO_CORE_RESULT",
+  "date": "2026-09-29",
+  "question": "Do dangling branches explain most false-positive mechanical seam edges, while true closed-surface seams survive a graph 2-core?",
+  "rules": [
+    "STRETCH_GT4",
+    "STRETCH_GT4_AND_WEIGHT_L1_GT1"
+  ],
+  "operator": "Iteratively remove predicted seam edges incident to barrier-graph vertices of degree < 2, except vertices incident to an original mesh boundary edge.",
+  "rationale": "On a closed triangulated surface, a separating seam boundary should form cycles or junction-bearing cores rather than terminate arbitrarily in the interior.",
+  "teacher_policy": "Teacher source topology is evaluation-only after raw scores and 2-core pruning are frozen.",
+  "no_product_mutation": true
+}

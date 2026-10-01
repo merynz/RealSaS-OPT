@@ -1,0 +1,57 @@
+name: knight-iris-observation-rebind-audit-v1
+on:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths: ['.github/workflows/knight_iris_observation_rebind_audit_v1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit IRIS historical observation binding
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, hashlib
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          manifest=json.loads((root/"run_manifest.json").read_text())
+          led=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={x["id"]:x for x in led["stages"]}
+          def one(stage,schema):
+              rows=[x for x in by[stage]["outputs"] if x["schema"]==schema]
+              assert len(rows)==1,(stage,schema,len(rows))
+              return json.loads(Path(rows[0]["path"]).read_text())
+          obs=one("07_OBSERVATION_CONTRACT_QUALIFIED","RealSaS.QualifiedObservationSetIR.v1")
+          norm=one("08_NORMALIZATION_DOMAIN_QUALIFIED","RealSaS.NormalizationDomainIR.v1")
+          demo=dict(dict(manifest["iris_fit"]).get("demo_frozen_import") or {})
+          pref=Path(str(dict(demo["research_preregistration"])["path"]).replace("$REALSAS_AUTHORITY_ROOT",str(root.parents[1])))
+          research=json.loads(pref.read_text())
+          frozen=dict(research.get("frozen_inputs") or {})
+          print("CURRENT_OBS_HASH",obs["observation_set_hash"])
+          print("HIST_OBS_HASH",frozen.get("observation_set_binding_hash"))
+          print("CURRENT_NORM_HASH",norm["normalization_hash"])
+          print("HIST_NORM_HASH",frozen.get("normalization_binding_hash"))
+          print("PREF_PATH",pref)
+          print("FROZEN_KEYS",sorted(frozen))
+          for k,v in frozen.items():
+              if any(t in k.lower() for t in ("view","source","raster","mask","camera","observation")):
+                  print("FROZEN",k,json.dumps(v,sort_keys=True)[:30000])
+          print("CURRENT_VIEWS")
+          for v in sorted(obs["views"],key=lambda x:int(x["view_index"])):
+              print(json.dumps({
+                "view_index":v["view_index"],
+                "source_raster_sha256":v.get("source_raster_sha256"),
+                "foreground_mask_sha256":v.get("foreground_mask_sha256"),
+                "source_observation_hash":v.get("source_observation_hash"),
+                "camera_binding_hash":v.get("camera_binding_hash"),
+                "width":v.get("width"),"height":v.get("height")
+              },sort_keys=True))
+          PY

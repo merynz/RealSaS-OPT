@@ -1,0 +1,77 @@
+name: subject2-knight-mechanics-and-retarget-diagnostic-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_MECHANICS_RETARGET_DIAGNOSTIC_TRIGGER_20260927.json'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-mechanics-retarget-v1
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  mechanics-and-retarget:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Resume exact mechanics authority through Stage33
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python -m compiler.realsas_compiler_services.orchestrator.mainline execute             --run-id "$RUN_ID"             --target 33_ARACHNE_CHECKPOINT_SEALED
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["AUTHORITY_ROOT"])/"runs"/os.environ["RUN_ID"]
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+          for sid in (
+              "15_RIGGING_SURFACE_QUALIFIED",
+              "28_SKELETON_QUALIFIED",
+              "32_SKIN_QUALIFIED",
+              "33_ARACHNE_CHECKPOINT_SEALED",
+          ):
+              assert by[sid]["status"]=="PASS_DEMO_ONLY",(sid,by[sid]["status"],by[sid].get("blockers"))
+          print("KNIGHT_MECHANICS_STAGE33_PASS_DEMO_ONLY")
+          PY
+
+      - name: Diagnose deform-source candidate correspondence
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python -m tools.motion.diagnose_deform_candidate_retarget_v1             --repo-root .             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --clip-id demo_idle_v1             --bone-role-report canonical/KNIGHT_MOTION_SOURCE_ACTION_DIAGNOSTIC_20260927.json             --out canonical/KNIGHT_MOTION_DEFORM_CANDIDATE_RETARGET_DIAGNOSTIC_20260927.json
+
+      - name: Seal mechanics/retarget diagnostic
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_MOTION_DEFORM_CANDIDATE_RETARGET_DIAGNOSTIC_20260927.json
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'diagnostic: seal Knight mechanics retarget candidate test'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

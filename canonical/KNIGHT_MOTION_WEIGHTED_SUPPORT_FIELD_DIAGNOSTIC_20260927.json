@@ -1,0 +1,1261 @@
+{
+  "bindings": [
+    {
+      "effective_support_count": 3.994746333631553,
+      "support_reconstruction_error": 0.2509901986693761,
+      "supports": [
+        {
+          "centroid_distance": 0.2621608228837524,
+          "cost": 0.42467596892894205,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerLeg.L",
+          "spread_distance": 2.0314393255648704,
+          "weight": 0.2662580261315432
+        },
+        {
+          "centroid_distance": 0.26609132870200936,
+          "cost": 0.43352311097274454,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerLeg.R",
+          "spread_distance": 2.09289727838419,
+          "weight": 0.25700031060880685
+        },
+        {
+          "centroid_distance": 0.29194266811105735,
+          "cost": 0.44614009524576553,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperLeg.L",
+          "spread_distance": 1.9274678391838522,
+          "weight": 0.24435188948786396
+        },
+        {
+          "centroid_distance": 0.3024223745477518,
+          "cost": 0.458688429018399,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperLeg.R",
+          "spread_distance": 1.9533256808830899,
+          "weight": 0.23238977377178607
+        }
+      ],
+      "target_joint_id": "J:54e751020afdb32b5ec5",
+      "target_normalized_influence_centroid": [
+        -0.008431318749074412,
+        0.26289036230465934,
+        0.15955920733766008
+      ]
+    },
+    {
+      "effective_support_count": 3.496545283509049,
+      "support_reconstruction_error": 0.1913465973843133,
+      "supports": [
+        {
+          "centroid_distance": 0.18462309243989614,
+          "cost": 0.2738881685703542,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerLeg.L",
+          "spread_distance": 1.1158134516307257,
+          "weight": 0.39829929797725444
+        },
+        {
+          "centroid_distance": 0.19024778711225107,
+          "cost": 0.30640243249597265,
+          "side_penalty": 0.0,
+          "source_joint_id": "Foot.L",
+          "spread_distance": 1.4519330672965198,
+          "weight": 0.34972483932706416
+        },
+        {
+          "centroid_distance": 0.28552455944551014,
+          "cost": 0.51942188977612,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperLeg.L",
+          "spread_distance": 2.9237166291326235,
+          "weight": 0.14916735190537367
+        },
+        {
+          "centroid_distance": 0.35916812183452324,
+          "cost": 0.6124720656341517,
+          "side_penalty": 0.0,
+          "source_joint_id": "Hips",
+          "spread_distance": 3.166299297495356,
+          "weight": 0.10280851079030759
+        }
+      ],
+      "target_joint_id": "J:7e87e97fc9fe89cbd718",
+      "target_normalized_influence_centroid": [
+        -0.08407582550816364,
+        -0.1410052747459324,
+        0.026668622664936855
+      ]
+    },
+    {
+      "effective_support_count": 3.8558012220320785,
+      "support_reconstruction_error": 0.15304919719469334,
+      "supports": [
+        {
+          "centroid_distance": 0.0800574627989817,
+          "cost": 0.2328409010272236,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerLeg.R",
+          "spread_distance": 1.909792977853024,
+          "weight": 0.34245794730518
+        },
+        {
+          "centroid_distance": 0.24405615228956548,
+          "cost": 0.27634638445259785,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperLeg.R",
+          "spread_distance": 0.40362790203790494,
+          "weight": 0.2877600389870001
+        },
+        {
+          "centroid_distance": 0.3351977088497633,
+          "cost": 0.3837069249816976,
+          "side_penalty": 0.0,
+          "source_joint_id": "Hips",
+          "spread_distance": 0.6063652016491792,
+          "weight": 0.18729497355453878
+        },
+        {
+          "centroid_distance": 0.038699375724555694,
+          "cost": 0.39020832875997546,
+          "side_penalty": 0.0,
+          "source_joint_id": "Foot.R",
+          "spread_distance": 4.393861912942747,
+          "weight": 0.1824870401532812
+        }
+      ],
+      "target_joint_id": "J:ab16ff2ffc7408c862ae",
+      "target_normalized_influence_centroid": [
+        0.11352980385471473,
+        0.0253511722951695,
+        0.03872016375428153
+      ]
+    },
+    {
+      "effective_support_count": 3.9814342647582524,
+      "support_reconstruction_error": 0.12992560010482423,
+      "supports": [
+        {
+          "centroid_distance": 0.12380805587286871,
+          "cost": 0.5460606406391417,
+          "side_penalty": 0.0,
+          "source_joint_id": "Thumb2.L",
+          "spread_distance": 5.278157309578413,
+          "weight": 0.2888371528274496
+        },
+        {
+          "centroid_distance": 0.12791281125044873,
+          "cost": 0.5835170753047882,
+          "side_penalty": 0.0,
+          "source_joint_id": "Thumb.L",
+          "spread_distance": 5.695053300679243,
+          "weight": 0.2486477672438284
+        },
+        {
+          "centroid_distance": 0.17735427359005526,
+          "cost": 0.5923002937806592,
+          "side_penalty": 0.0,
+          "source_joint_id": "Fingers.R",
+          "spread_distance": 5.186825252382549,
+          "weight": 0.24006373046672605
+        },
+        {
+          "centroid_distance": 0.15160458108772082,
+          "cost": 0.6113492958077275,
+          "side_penalty": 0.0,
+          "source_joint_id": "MiddleHand.R",
+          "spread_distance": 5.746808934000083,
+          "weight": 0.22245134946199593
+        }
+      ],
+      "target_joint_id": "J:c9cdb266f7c167a620a9",
+      "target_normalized_influence_centroid": [
+        0.5462186226567377,
+        -0.026813068500303936,
+        0.6468230876334974
+      ]
+    },
+    {
+      "effective_support_count": 3.860564500429492,
+      "support_reconstruction_error": 0.11833866621461658,
+      "supports": [
+        {
+          "centroid_distance": 0.15220521515641336,
+          "cost": 0.2697772189929286,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerArm.R",
+          "spread_distance": 1.4696500479564407,
+          "weight": 0.32495909749344476
+        },
+        {
+          "centroid_distance": 0.1483775395750766,
+          "cost": 0.28450624759785104,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperArm.R",
+          "spread_distance": 1.7016088502846807,
+          "weight": 0.30636683958848954
+        },
+        {
+          "centroid_distance": 0.2940085032808644,
+          "cost": 0.40152533840375315,
+          "side_penalty": 0.0,
+          "source_joint_id": "Shoulder.R",
+          "spread_distance": 1.343960439036109,
+          "weight": 0.19184866208245738
+        },
+        {
+          "centroid_distance": 0.26339757548360687,
+          "cost": 0.4219113466865475,
+          "side_penalty": 0.0,
+          "source_joint_id": "Palm.R",
+          "spread_distance": 1.9814221400367575,
+          "weight": 0.17682540083560827
+        }
+      ],
+      "target_joint_id": "J:932628adf7f0d5936426",
+      "target_normalized_influence_centroid": [
+        0.3753938883724433,
+        0.045081862338327235,
+        0.6537284217731245
+      ]
+    },
+    {
+      "effective_support_count": 3.9896466880943713,
+      "support_reconstruction_error": 0.144612471735364,
+      "supports": [
+        {
+          "centroid_distance": 0.11146817233283329,
+          "cost": 0.3472399022793593,
+          "side_penalty": 0.0,
+          "source_joint_id": "Thumb.L",
+          "spread_distance": 2.9471466243315754,
+          "weight": 0.26544709730081617
+        },
+        {
+          "centroid_distance": 0.1987482939105862,
+          "cost": 0.3486956058718369,
+          "side_penalty": 0.0,
+          "source_joint_id": "MiddleHand.R",
+          "spread_distance": 1.8743413995156335,
+          "weight": 0.2639059394207593
+        },
+        {
+          "centroid_distance": 0.1849573476957122,
+          "cost": 0.36264049213916827,
+          "side_penalty": 0.0,
+          "source_joint_id": "Palm.R",
+          "spread_distance": 2.2210393055432007,
+          "weight": 0.24958841084745884
+        },
+        {
+          "centroid_distance": 0.12537528057435238,
+          "cost": 0.39298689088033284,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerArm.R",
+          "spread_distance": 3.345145128824756,
+          "weight": 0.2210585524309658
+        }
+      ],
+      "target_joint_id": "J:4c9f9eace712daf31538",
+      "target_normalized_influence_centroid": [
+        0.48432944961102065,
+        0.05025697852257163,
+        0.6474763301190755
+      ]
+    },
+    {
+      "effective_support_count": 3.8148320411412735,
+      "support_reconstruction_error": 0.19790470484467068,
+      "supports": [
+        {
+          "centroid_distance": 0.157617157472932,
+          "cost": 0.25933910577744224,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerLeg.R",
+          "spread_distance": 1.2715243538063776,
+          "weight": 0.3672931242242281
+        },
+        {
+          "centroid_distance": 0.269710469271346,
+          "cost": 0.3347706087082239,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperLeg.R",
+          "spread_distance": 0.8132517429609737,
+          "weight": 0.27162820045918945
+        },
+        {
+          "centroid_distance": 0.34551969717382053,
+          "cost": 0.41812805679065856,
+          "side_penalty": 0.0,
+          "source_joint_id": "Hips",
+          "spread_distance": 0.9076044952104756,
+          "weight": 0.19461133754412044
+        },
+        {
+          "centroid_distance": 0.1540193020272612,
+          "cost": 0.457179383834156,
+          "side_penalty": 0.0,
+          "source_joint_id": "Foot.R",
+          "spread_distance": 3.7895010225861854,
+          "weight": 0.166467337772462
+        }
+      ],
+      "target_joint_id": "J:f5cf9181e27d0f791f7d",
+      "target_normalized_influence_centroid": [
+        0.09106176154100687,
+        -0.11079528961661608,
+        0.03521889083829318
+      ]
+    },
+    {
+      "effective_support_count": 3.8761895625839853,
+      "support_reconstruction_error": 0.052886514612623,
+      "supports": [
+        {
+          "centroid_distance": 0.060472688459734907,
+          "cost": 0.2525187158125618,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerArm.L",
+          "spread_distance": 2.4005753419103364,
+          "weight": 0.35995362589246427
+        },
+        {
+          "centroid_distance": 0.12274203525191664,
+          "cost": 0.3699981618019079,
+          "side_penalty": 0.0,
+          "source_joint_id": "Palm.L",
+          "spread_distance": 3.0907015818748906,
+          "weight": 0.22499032971352095
+        },
+        {
+          "centroid_distance": 0.02859110368051526,
+          "cost": 0.37166698437035944,
+          "side_penalty": 0.0,
+          "source_joint_id": "Thumb.R",
+          "spread_distance": 4.288448508623052,
+          "weight": 0.2234934555469926
+        },
+        {
+          "centroid_distance": 0.23143850500539911,
+          "cost": 0.41020886987630933,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperArm.L",
+          "spread_distance": 2.2346295608863778,
+          "weight": 0.1915625888470223
+        }
+      ],
+      "target_joint_id": "J:75a17a4287b28cd7f57f",
+      "target_normalized_influence_centroid": [
+        -0.5061093513772353,
+        0.05843882546405344,
+        0.7524859548466863
+      ]
+    },
+    {
+      "effective_support_count": 3.7600517220008847,
+      "support_reconstruction_error": 0.11746909995761416,
+      "supports": [
+        {
+          "centroid_distance": 0.10926191616483803,
+          "cost": 0.14654709184067777,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperLeg.R",
+          "spread_distance": 0.4660646959479965,
+          "weight": 0.37125026115445836
+        },
+        {
+          "centroid_distance": 0.08262172843924988,
+          "cost": 0.2172729489876124,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerLeg.R",
+          "spread_distance": 1.6831402568545315,
+          "weight": 0.2797714346459888
+        },
+        {
+          "centroid_distance": 0.2204779833330799,
+          "cost": 0.28413778351005015,
+          "side_penalty": 0.0,
+          "source_joint_id": "Hips",
+          "spread_distance": 0.7957475022121279,
+          "weight": 0.21411507987020612
+        },
+        {
+          "centroid_distance": 0.30093359247366164,
+          "cost": 0.399700912297447,
+          "side_penalty": 0.0,
+          "source_joint_id": "Body",
+          "spread_distance": 1.234591497797317,
+          "weight": 0.13486322432934678
+        }
+      ],
+      "target_joint_id": "J:f50f39d42ef3820824ef",
+      "target_normalized_influence_centroid": [
+        0.14098800064573744,
+        0.026703179874026265,
+        0.18892845826294646
+      ]
+    },
+    {
+      "effective_support_count": 3.999737873886276,
+      "support_reconstruction_error": 0.6671971283382451,
+      "supports": [
+        {
+          "centroid_distance": 0.6557023058355714,
+          "cost": 1.1115625430041982,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerArm.L",
+          "spread_distance": 5.6982529646078355,
+          "weight": 0.2545226837336977
+        },
+        {
+          "centroid_distance": 0.8272170660604625,
+          "cost": 1.1157495517686857,
+          "side_penalty": 0.0,
+          "source_joint_id": "Abdomen",
+          "spread_distance": 3.6066560713527895,
+          "weight": 0.2502954268373297
+        },
+        {
+          "centroid_distance": 0.700168011192406,
+          "cost": 1.1178706631378126,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperArm.L",
+          "spread_distance": 5.221283149317582,
+          "weight": 0.24818079237101726
+        },
+        {
+          "centroid_distance": 0.6495817190028134,
+          "cost": 1.119061839117863,
+          "side_penalty": 0.0,
+          "source_joint_id": "Palm.L",
+          "spread_distance": 5.8685015014381205,
+          "weight": 0.24700109705795537
+        }
+      ],
+      "target_joint_id": "J:8455bf4c0a38867b7d9b",
+      "target_normalized_influence_centroid": [
+        -0.5003630509751164,
+        -0.6504092772047554,
+        0.696563888871104
+      ]
+    },
+    {
+      "effective_support_count": 3.97159121477851,
+      "support_reconstruction_error": 0.11363178693780378,
+      "supports": [
+        {
+          "centroid_distance": 0.12172824478062665,
+          "cost": 0.2648828942066654,
+          "side_penalty": 0.0,
+          "source_joint_id": "MiddleHand.R",
+          "spread_distance": 1.7894331178254843,
+          "weight": 0.29374463798811856
+        },
+        {
+          "centroid_distance": 0.1323999928451548,
+          "cost": 0.2991437236247953,
+          "side_penalty": 0.0,
+          "source_joint_id": "Palm.R",
+          "spread_distance": 2.084296634745506,
+          "weight": 0.256125483411477
+        },
+        {
+          "centroid_distance": 0.1370160212925801,
+          "cost": 0.31649549327400384,
+          "side_penalty": 0.0,
+          "source_joint_id": "Fingers.R",
+          "spread_distance": 2.243493399767797,
+          "weight": 0.23895145529136078
+        },
+        {
+          "centroid_distance": 0.11496974202515961,
+          "cost": 0.34738475105256694,
+          "side_penalty": 0.0,
+          "source_joint_id": "Thumb.L",
+          "spread_distance": 2.905187612842592,
+          "weight": 0.2111784233090436
+        }
+      ],
+      "target_joint_id": "J:5428a88dad4d4d8d5c4d",
+      "target_normalized_influence_centroid": [
+        0.5918677570471965,
+        0.03159526138983234,
+        0.651154259308647
+      ]
+    },
+    {
+      "effective_support_count": 3.988295675575065,
+      "support_reconstruction_error": 0.06719446002888783,
+      "supports": [
+        {
+          "centroid_distance": 0.02976421823478448,
+          "cost": 0.31415410242449837,
+          "side_penalty": 0.0,
+          "source_joint_id": "MiddleHand.L",
+          "spread_distance": 3.5548735523714234,
+          "weight": 0.2716456793634237
+        },
+        {
+          "centroid_distance": 0.08095562658830238,
+          "cost": 0.32168135795900155,
+          "side_penalty": 0.0,
+          "source_joint_id": "Palm.L",
+          "spread_distance": 3.009071642133739,
+          "weight": 0.26358859768696796
+        },
+        {
+          "centroid_distance": 0.17469188107222686,
+          "cost": 0.34321245060617256,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerArm.L",
+          "spread_distance": 2.1065071191743208,
+          "weight": 0.24183729733548326
+        },
+        {
+          "centroid_distance": 0.03336013939433028,
+          "cost": 0.3635660547100467,
+          "side_penalty": 0.0,
+          "source_joint_id": "Fingers.L",
+          "spread_distance": 4.127573941446455,
+          "weight": 0.2229284256141251
+        }
+      ],
+      "target_joint_id": "J:33c7075f501c9af4cd0d",
+      "target_normalized_influence_centroid": [
+        -0.6567146312937912,
+        0.03369480308198264,
+        0.7362941996754729
+      ]
+    },
+    {
+      "effective_support_count": 3.154141818469362,
+      "support_reconstruction_error": 0.32485993739337465,
+      "supports": [
+        {
+          "centroid_distance": 0.23491934453895916,
+          "cost": 0.5531062999309919,
+          "side_penalty": 0.0,
+          "source_joint_id": "Head",
+          "spread_distance": 3.977336942400409,
+          "weight": 0.5726536851210634
+        },
+        {
+          "centroid_distance": 0.43551029998251517,
+          "cost": 0.8598347226059668,
+          "side_penalty": 0.0,
+          "source_joint_id": "Torso",
+          "spread_distance": 5.304055282793145,
+          "weight": 0.16789981367244564
+        },
+        {
+          "centroid_distance": 0.4754013378098561,
+          "cost": 0.9232062115372681,
+          "side_penalty": 0.0,
+          "source_joint_id": "Shoulder.R",
+          "spread_distance": 5.597560921592651,
+          "weight": 0.1303054746009314
+        },
+        {
+          "centroid_distance": 0.47046834936491344,
+          "cost": 0.9254503270079155,
+          "side_penalty": 0.0,
+          "source_joint_id": "Shoulder.L",
+          "spread_distance": 5.687274720537525,
+          "weight": 0.1291410266055596
+        }
+      ],
+      "target_joint_id": "J:1008208d141ae248de43",
+      "target_normalized_influence_centroid": [
+        -0.01729496098650314,
+        -0.05671918239880352,
+        1.2084582459759194
+      ]
+    },
+    {
+      "effective_support_count": 3.9714590399394853,
+      "support_reconstruction_error": 0.2112667441949186,
+      "supports": [
+        {
+          "centroid_distance": 0.19833512905473596,
+          "cost": 0.5230564617244586,
+          "side_penalty": 0.0,
+          "source_joint_id": "Palm.L",
+          "spread_distance": 4.059016658371534,
+          "weight": 0.2956947946831176
+        },
+        {
+          "centroid_distance": 0.2132313672723476,
+          "cost": 0.560974431454248,
+          "side_penalty": 0.0,
+          "source_joint_id": "MiddleHand.L",
+          "spread_distance": 4.346788302273754,
+          "weight": 0.2540817192011167
+        },
+        {
+          "centroid_distance": 0.26857944497918285,
+          "cost": 0.5784463670777795,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerArm.L",
+          "spread_distance": 3.873336526232458,
+          "weight": 0.23693082050435885
+        },
+        {
+          "centroid_distance": 0.2088403093094941,
+          "cost": 0.6047221076657956,
+          "side_penalty": 0.0,
+          "source_joint_id": "Fingers.L",
+          "spread_distance": 4.948522479453768,
+          "weight": 0.21329266561140686
+        }
+      ],
+      "target_joint_id": "J:136e20712bbd1481596e",
+      "target_normalized_influence_centroid": [
+        -0.670962159967711,
+        -0.17987375902507755,
+        0.689763666011692
+      ]
+    },
+    {
+      "effective_support_count": 3.932136751425232,
+      "support_reconstruction_error": 0.30252368558537185,
+      "supports": [
+        {
+          "centroid_distance": 0.305969548874287,
+          "cost": 0.7657648087739348,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerArm.R",
+          "spread_distance": 5.747440748745598,
+          "weight": 0.3196215216499371
+        },
+        {
+          "centroid_distance": 0.3029616280673518,
+          "cost": 0.822310105347803,
+          "side_penalty": 0.0,
+          "source_joint_id": "Palm.R",
+          "spread_distance": 6.491855966005641,
+          "weight": 0.2549216810024679
+        },
+        {
+          "centroid_distance": 0.3806854309900267,
+          "cost": 0.8428064131517672,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperArm.R",
+          "spread_distance": 5.776512277021756,
+          "weight": 0.23485566487831597
+        },
+        {
+          "centroid_distance": 0.33900470333091853,
+          "cost": 0.8950034633116901,
+          "side_penalty": 0.0,
+          "source_joint_id": "MiddleHand.R",
+          "spread_distance": 6.949984499759646,
+          "weight": 0.19060113246927896
+        }
+      ],
+      "target_joint_id": "J:e5441b559f1c34b41aa2",
+      "target_normalized_influence_centroid": [
+        0.5060993911846106,
+        -0.30378620647339766,
+        0.7620491255007256
+      ]
+    },
+    {
+      "effective_support_count": 3.7730789184633364,
+      "support_reconstruction_error": 0.13255102401888308,
+      "supports": [
+        {
+          "centroid_distance": 0.11626110983654027,
+          "cost": 0.15931815920726147,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperLeg.L",
+          "spread_distance": 0.5382131171340151,
+          "weight": 0.37406136518812155
+        },
+        {
+          "centroid_distance": 0.10661795546431174,
+          "cost": 0.23861652609095796,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerLeg.L",
+          "spread_distance": 1.6499821328330777,
+          "weight": 0.27238769329726537
+        },
+        {
+          "centroid_distance": 0.2303040363548943,
+          "cost": 0.3019309620718972,
+          "side_penalty": 0.0,
+          "source_joint_id": "Hips",
+          "spread_distance": 0.8953365714625362,
+          "weight": 0.21144578935799116
+        },
+        {
+          "centroid_distance": 0.3118659154640452,
+          "cost": 0.4012813017804368,
+          "side_penalty": 0.0,
+          "source_joint_id": "Body",
+          "spread_distance": 1.117692328954895,
+          "weight": 0.14210515215662184
+        }
+      ],
+      "target_joint_id": "J:063ee183f601e19a8ca9",
+      "target_normalized_influence_centroid": [
+        -0.1693785349638965,
+        0.02171392695229001,
+        0.1917137288511673
+      ]
+    },
+    {
+      "effective_support_count": 3.7302217618407014,
+      "support_reconstruction_error": 0.13592588825685423,
+      "supports": [
+        {
+          "centroid_distance": 0.18835499282683116,
+          "cost": 0.22301107943531626,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperLeg.L",
+          "spread_distance": 0.4332010826060636,
+          "weight": 0.34565388457490165
+        },
+        {
+          "centroid_distance": 0.06944692199317401,
+          "cost": 0.24059422159536764,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerLeg.L",
+          "spread_distance": 2.1393412450274205,
+          "weight": 0.3221783815591176
+        },
+        {
+          "centroid_distance": 0.29789579486674134,
+          "cost": 0.34711654575321754,
+          "side_penalty": 0.0,
+          "source_joint_id": "Hips",
+          "spread_distance": 0.6152593860809527,
+          "weight": 0.21040117711900824
+        },
+        {
+          "centroid_distance": 0.11725755946771632,
+          "cost": 0.48384412902693424,
+          "side_penalty": 0.0,
+          "source_joint_id": "Foot.L",
+          "spread_distance": 4.582332119490224,
+          "weight": 0.12176655674697252
+        }
+      ],
+      "target_joint_id": "J:73295dbdbb50d303e597",
+      "target_normalized_influence_centroid": [
+        -0.16816191176171,
+        0.04372318647261745,
+        0.10646986771408236
+      ]
+    },
+    {
+      "effective_support_count": 3.8356532277117497,
+      "support_reconstruction_error": 0.08311710458570426,
+      "supports": [
+        {
+          "centroid_distance": 0.07764030580697384,
+          "cost": 0.23215607140102085,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperArm.R",
+          "spread_distance": 1.9314470699255877,
+          "weight": 0.36824164516143093
+        },
+        {
+          "centroid_distance": 0.18322344835268803,
+          "cost": 0.34452437166873773,
+          "side_penalty": 0.0,
+          "source_joint_id": "Shoulder.R",
+          "spread_distance": 2.0162615414506213,
+          "weight": 0.23492496518240322
+        },
+        {
+          "centroid_distance": 0.2141210968001055,
+          "cost": 0.3478245492019507,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerArm.R",
+          "spread_distance": 1.6712931550230647,
+          "weight": 0.23184416790781961
+        },
+        {
+          "centroid_distance": 0.28708313721719564,
+          "cost": 0.43287087592678,
+          "side_penalty": 0.0,
+          "source_joint_id": "Torso",
+          "spread_distance": 1.822346733869804,
+          "weight": 0.16498922174834624
+        }
+      ],
+      "target_joint_id": "J:42d181ebf3515959283a",
+      "target_normalized_influence_centroid": [
+        0.2723726394624145,
+        0.021336724870627332,
+        0.6892059739334033
+      ]
+    },
+    {
+      "effective_support_count": 3.4269169261866073,
+      "support_reconstruction_error": 0.19937976973121682,
+      "supports": [
+        {
+          "centroid_distance": 0.1956721410116547,
+          "cost": 0.25965661723963956,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerLeg.R",
+          "spread_distance": 0.799805952849811,
+          "weight": 0.4171803313701218
+        },
+        {
+          "centroid_distance": 0.16143431998633795,
+          "cost": 0.30516306651152836,
+          "side_penalty": 0.0,
+          "source_joint_id": "Foot.R",
+          "spread_distance": 1.7966093315648806,
+          "weight": 0.3477531122920147
+        },
+        {
+          "centroid_distance": 0.3194579524065175,
+          "cost": 0.5358382881587959,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperLeg.R",
+          "spread_distance": 2.7047541969034796,
+          "weight": 0.1382124361601065
+        },
+        {
+          "centroid_distance": 0.39760720362559193,
+          "cost": 0.624734778953273,
+          "side_penalty": 0.0,
+          "source_joint_id": "Hips",
+          "spread_distance": 2.8390946915960136,
+          "weight": 0.0968541201777569
+        }
+      ],
+      "target_joint_id": "J:7d9e31e2d0bd48f88ecb",
+      "target_normalized_influence_centroid": [
+        0.10589783257508284,
+        -0.12160620291782852,
+        -0.013750725199663716
+      ]
+    },
+    {
+      "effective_support_count": 3.9689150385617746,
+      "support_reconstruction_error": 0.29287071253579133,
+      "supports": [
+        {
+          "centroid_distance": 0.3921939808481601,
+          "cost": 0.5303984832382286,
+          "side_penalty": 0.0,
+          "source_joint_id": "Thumb.L",
+          "spread_distance": 1.7275562798758564,
+          "weight": 0.281021312577437
+        },
+        {
+          "centroid_distance": 0.41936573464876925,
+          "cost": 0.5452341789745206,
+          "side_penalty": 0.0,
+          "source_joint_id": "Thumb2.L",
+          "spread_distance": 1.573355554071892,
+          "weight": 0.2648298989108918
+        },
+        {
+          "centroid_distance": 0.3564806316502457,
+          "cost": 0.5550584913618539,
+          "side_penalty": 0.0,
+          "source_joint_id": "Neck",
+          "spread_distance": 2.4822232463951033,
+          "weight": 0.25462464476971686
+        },
+        {
+          "centroid_distance": 0.30463831707783384,
+          "cost": 0.6160222986528698,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperArm.R",
+          "spread_distance": 3.8922997696879498,
+          "weight": 0.19952414374195426
+        }
+      ],
+      "target_joint_id": "J:eafe286e7d84499e5257",
+      "target_normalized_influence_centroid": [
+        0.2658361410033087,
+        0.2205572203406279,
+        0.9795387181820103
+      ]
+    },
+    {
+      "effective_support_count": 3.84276712965422,
+      "support_reconstruction_error": 0.07104864492399218,
+      "supports": [
+        {
+          "centroid_distance": 0.08555634919290997,
+          "cost": 0.3087317013902714,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerArm.L",
+          "spread_distance": 2.789691902467018,
+          "weight": 0.3483953777886647
+        },
+        {
+          "centroid_distance": 0.1487194326756693,
+          "cost": 0.35760601299815753,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperArm.L",
+          "spread_distance": 2.6110822540311025,
+          "weight": 0.2865292804601621
+        },
+        {
+          "centroid_distance": 0.32892884531903904,
+          "cost": 0.46183067021113944,
+          "side_penalty": 0.0,
+          "source_joint_id": "Shoulder.L",
+          "spread_distance": 1.661272811151255,
+          "weight": 0.18884793276125983
+        },
+        {
+          "centroid_distance": 0.19616936185353004,
+          "cost": 0.4791223814877368,
+          "side_penalty": 0.0,
+          "source_joint_id": "Palm.L",
+          "spread_distance": 3.5369127454275837,
+          "weight": 0.17622740898991338
+        }
+      ],
+      "target_joint_id": "J:7cf59fbe52c53280546a",
+      "target_normalized_influence_centroid": [
+        -0.42106439465339596,
+        0.05481899155642769,
+        0.7481546915458199
+      ]
+    },
+    {
+      "effective_support_count": 3.8375500499961683,
+      "support_reconstruction_error": 0.1574067427910508,
+      "supports": [
+        {
+          "centroid_distance": 0.0819207158607214,
+          "cost": 0.23646808707997918,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerLeg.L",
+          "spread_distance": 1.9318421402407224,
+          "weight": 0.3410120885609752
+        },
+        {
+          "centroid_distance": 0.2410131271630585,
+          "cost": 0.26883536218139314,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperLeg.L",
+          "spread_distance": 0.34777793772918325,
+          "weight": 0.29960017224964347
+        },
+        {
+          "centroid_distance": 0.3428039771943554,
+          "cost": 0.3929928091318412,
+          "side_penalty": 0.0,
+          "source_joint_id": "Hips",
+          "spread_distance": 0.6273603992185723,
+          "weight": 0.18233014708969034
+        },
+        {
+          "centroid_distance": 0.05046132992377596,
+          "cost": 0.40032880413917377,
+          "side_penalty": 0.0,
+          "source_joint_id": "Foot.L",
+          "spread_distance": 4.373343427692473,
+          "weight": 0.17705759209969096
+        }
+      ],
+      "target_joint_id": "J:cf05f36e919ff69a9d8e",
+      "target_normalized_influence_centroid": [
+        -0.14326771272480351,
+        0.026096119827661864,
+        0.03856160308212115
+      ]
+    },
+    {
+      "effective_support_count": 3.797261454973386,
+      "support_reconstruction_error": 0.21314405874610934,
+      "supports": [
+        {
+          "centroid_distance": 0.2566499235764479,
+          "cost": 0.3581532339059038,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperLeg.L",
+          "spread_distance": 1.268791379118199,
+          "weight": 0.3338123793887113
+        },
+        {
+          "centroid_distance": 0.16203765838640444,
+          "cost": 0.3896333033557424,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerLeg.L",
+          "spread_distance": 2.844945562116725,
+          "weight": 0.2943174124057302
+        },
+        {
+          "centroid_distance": 0.33950905898012823,
+          "cost": 0.43790957935972913,
+          "side_penalty": 0.0,
+          "source_joint_id": "Hips",
+          "spread_distance": 1.230006504745011,
+          "weight": 0.24263389806648128
+        },
+        {
+          "centroid_distance": 0.18190414412420305,
+          "cost": 0.5953873605790636,
+          "side_penalty": 0.0,
+          "source_joint_id": "Foot.L",
+          "spread_distance": 5.1685402056857574,
+          "weight": 0.12923631013907724
+        }
+      ],
+      "target_joint_id": "J:362735eeec6ee5a3d46f",
+      "target_normalized_influence_centroid": [
+        -0.12167503363346882,
+        -0.12843519873785786,
+        0.05556683914493858
+      ]
+    },
+    {
+      "effective_support_count": 3.9068029809770604,
+      "support_reconstruction_error": 0.018588344390607636,
+      "supports": [
+        {
+          "centroid_distance": 0.014463924166352478,
+          "cost": 0.23290924540024532,
+          "side_penalty": 0.0,
+          "source_joint_id": "Hips",
+          "spread_distance": 2.7305665154236607,
+          "weight": 0.3444631937291027
+        },
+        {
+          "centroid_distance": 0.09976770499148693,
+          "cost": 0.32901322828187873,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperLeg.L",
+          "spread_distance": 2.865569041129898,
+          "weight": 0.2345271392351957
+        },
+        {
+          "centroid_distance": 0.11905115620544063,
+          "cost": 0.3436475397948382,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperLeg.R",
+          "spread_distance": 2.8074547948674695,
+          "weight": 0.22119265580326658
+        },
+        {
+          "centroid_distance": 0.20337456820147878,
+          "cost": 0.36905555569250276,
+          "side_penalty": 0.0,
+          "source_joint_id": "Abdomen",
+          "spread_distance": 2.0710123436377996,
+          "weight": 0.19981701123243506
+        }
+      ],
+      "target_joint_id": "J:237d229c33bc9eb9bf91",
+      "target_normalized_influence_centroid": [
+        -0.015846749806721197,
+        -0.003943916604546901,
+        0.34140177145034245
+      ]
+    },
+    {
+      "effective_support_count": 3.7672881348335623,
+      "support_reconstruction_error": 0.05646633555000466,
+      "supports": [
+        {
+          "centroid_distance": 0.06144637960416352,
+          "cost": 0.22480348769110825,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperArm.L",
+          "spread_distance": 2.041963851086809,
+          "weight": 0.3936622087287539
+        },
+        {
+          "centroid_distance": 0.17985462799718033,
+          "cost": 0.34974932474595977,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerArm.L",
+          "spread_distance": 2.1236837093597427,
+          "weight": 0.2388199343237365
+        },
+        {
+          "centroid_distance": 0.22295155115452078,
+          "cost": 0.37626228201599354,
+          "side_penalty": 0.0,
+          "source_joint_id": "Shoulder.L",
+          "spread_distance": 1.9163841357684095,
+          "weight": 0.21478940275697994
+        },
+        {
+          "centroid_distance": 0.2969228594395881,
+          "cost": 0.4615114046863763,
+          "side_penalty": 0.0,
+          "source_joint_id": "Palm.L",
+          "spread_distance": 2.057356815584852,
+          "weight": 0.15272845419052955
+        }
+      ],
+      "target_joint_id": "J:a80d2c086e86a4cc08b5",
+      "target_normalized_influence_centroid": [
+        -0.3148663881020639,
+        0.03018970732045582,
+        0.7175837606375594
+      ]
+    },
+    {
+      "effective_support_count": 3.9614921760761135,
+      "support_reconstruction_error": 0.23517010109189243,
+      "supports": [
+        {
+          "centroid_distance": 0.2774929227001397,
+          "cost": 0.4913542888649839,
+          "side_penalty": 0.0,
+          "source_joint_id": "Abdomen",
+          "spread_distance": 2.673267077060552,
+          "weight": 0.3053871160135682
+        },
+        {
+          "centroid_distance": 0.164506738517179,
+          "cost": 0.5462441101760156,
+          "side_penalty": 0.0,
+          "source_joint_id": "Body",
+          "spread_distance": 4.771717145735456,
+          "weight": 0.24518693494884622
+        },
+        {
+          "centroid_distance": 0.2797260769516714,
+          "cost": 0.5500570340495893,
+          "side_penalty": 0.0,
+          "source_joint_id": "Hips",
+          "spread_distance": 3.3791369637239734,
+          "weight": 0.24147579103474062
+        },
+        {
+          "centroid_distance": 0.30792319960517045,
+          "cost": 0.5874247335258242,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperLeg.L",
+          "spread_distance": 3.4937691740081727,
+          "weight": 0.20795015800284486
+        }
+      ],
+      "target_joint_id": "J:2ff965d6dbe4efc2d5d4",
+      "target_normalized_influence_centroid": [
+        -0.04192371890514369,
+        0.25075625641691235,
+        0.4521145909104669
+      ]
+    },
+    {
+      "effective_support_count": 3.714114743060495,
+      "support_reconstruction_error": 0.12148520826635188,
+      "supports": [
+        {
+          "centroid_distance": 0.04373252896607868,
+          "cost": 0.20915173737477732,
+          "side_penalty": 0.0,
+          "source_joint_id": "LowerLeg.R",
+          "spread_distance": 2.067740105108733,
+          "weight": 0.33921046662403814
+        },
+        {
+          "centroid_distance": 0.18460363764742618,
+          "cost": 0.21246310686721664,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperLeg.R",
+          "spread_distance": 0.3482433652473806,
+          "weight": 0.33474708691547833
+        },
+        {
+          "centroid_distance": 0.28574541665062353,
+          "cost": 0.3319345287220351,
+          "side_penalty": 0.0,
+          "source_joint_id": "Hips",
+          "spread_distance": 0.5773639008926444,
+          "weight": 0.20757435126626983
+        },
+        {
+          "centroid_distance": 0.10880117272822476,
+          "cost": 0.4721460060692151,
+          "side_penalty": 0.0,
+          "source_joint_id": "Foot.R",
+          "spread_distance": 4.541810416762379,
+          "weight": 0.11846809519421382
+        }
+      ],
+      "target_joint_id": "J:ee24577789f0235b8186",
+      "target_normalized_influence_centroid": [
+        0.13616198700815613,
+        0.04519648800650627,
+        0.10774219376686715
+      ]
+    },
+    {
+      "effective_support_count": 3.7992586778155086,
+      "support_reconstruction_error": 0.07040595035785502,
+      "supports": [
+        {
+          "centroid_distance": 0.08394966445731791,
+          "cost": 0.32092757022161067,
+          "side_penalty": 0.0,
+          "source_joint_id": "Abdomen",
+          "spread_distance": 2.9622238220536596,
+          "weight": 0.3745024905938848
+        },
+        {
+          "centroid_distance": 0.11470824545270068,
+          "cost": 0.4014818744483153,
+          "side_penalty": 0.0,
+          "source_joint_id": "Hips",
+          "spread_distance": 3.5846703624451823,
+          "weight": 0.2713423306638129
+        },
+        {
+          "centroid_distance": 0.20164707654539793,
+          "cost": 0.5040991845293556,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperLeg.L",
+          "spread_distance": 3.780651349799472,
+          "weight": 0.17999192632876004
+        },
+        {
+          "centroid_distance": 0.21446080342280338,
+          "cost": 0.5123289106652693,
+          "side_penalty": 0.0,
+          "source_joint_id": "UpperLeg.R",
+          "spread_distance": 3.723351340530823,
+          "weight": 0.17416325241354222
+        }
+      ],
+      "target_joint_id": "J:b9e5c0d23f688f672060",
+      "target_normalized_influence_centroid": [
+        -0.024855259902946823,
+        -0.005783807388862465,
+        0.46350488005803697
+      ]
+    }
+  ],
+  "coordinate_normalization": "ROOT_CENTERED__BODY_SCALE_NORMALIZED__CANONICAL_OBJECT_FRAME",
+  "interpretation": {
+    "diagnostic_only": true,
+    "dynamic_motion_transfer_must_be_tested_separately": true,
+    "low_reconstruction_error_is_necessary_not_sufficient": true,
+    "manual_names_used_for_cost": false,
+    "source_mesh_is_motion_evidence_only": true,
+    "source_parent_tree_used_for_cost": false,
+    "target_skeleton_remains_mechanical_authority": true
+  },
+  "maximum_support_count": 4,
+  "mean_effective_support_count": 3.8217319718716274,
+  "p95_effective_support_count": 3.9929614576935397,
+  "representation": "NONINJECTIVE_WEIGHTED_SOURCE_MOTION_SUPPORT_FIELD",
+  "schema": "RealSaS.MotionWeightedSupportFieldDiagnostic.v1",
+  "source_descriptor": "SOURCE_FBX_SKIN_INFLUENCE_CENTROID_SPREAD",
+  "source_scale": 4.8632933572573185,
+  "source_supported_joint_count": 28,
+  "status": "MEASURED",
+  "support_reconstruction_max": 0.6671971283382451,
+  "support_reconstruction_p95": 0.3170422492605736,
+  "support_reconstruction_rms": 0.21189200926654375,
+  "target_descriptor": "STAGE15_SURFACE_X_STAGE32_SKIN_INFLUENCE_CENTROID_SPREAD",
+  "target_scale": 1.4680122143415613,
+  "target_supported_joint_count": 28
+}

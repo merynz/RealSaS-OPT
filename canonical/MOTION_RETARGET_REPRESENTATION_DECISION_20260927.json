@@ -1,0 +1,94 @@
+{
+  "schema": "RealSaS.MotionRetargetRepresentationDecision.v1",
+  "status": "REPRESENTATION_FALSIFIED__RESEARCH_DECISION",
+  "date": "2026-09-27",
+  "subject": "SUBJECT2_KNIGHT_DEMO_ONLY",
+  "falsified_representation": {
+    "name": "INJECTIVE_ONE_SOURCE_JOINT_PER_TARGET_JOINT",
+    "reasons": [
+      "TARGET_AND_SOURCE_RIGS_HAVE_DIFFERENT_CHAIN_DENSITY_AND_BRANCHING",
+      "INJECTIVITY_FORCES_UNRELATED_SOURCE_BONES_TO_FILL_EXTRA_TARGET_JOINTS",
+      "RAW_SOURCE_PARENT_TREE_IS_CONTROL_DEFORM_AUTHORING_STRUCTURE_NOT_ANATOMICAL_CORRESPONDENCE_AUTHORITY",
+      "HARD_RAW_ANCESTRY_BECOMES_INFEASIBLE_FOR_REAL_SOURCE_FOOT_BONES"
+    ],
+    "evidence": {
+      "source_joint_count": 31,
+      "source_mesh_influencing_bone_count": 28,
+      "source_zero_mesh_influence_controls": [
+        "Bone",
+        "PoleTarget.L",
+        "PoleTarget.R"
+      ],
+      "note": "Bone is the unique source root and remains motion support despite zero mesh influence; PoleTarget.L/R are excluded from anatomical support.",
+      "filtered_injective_hungarian": {
+        "negative_target_edge_direction_count": 6,
+        "mean_target_source_edge_direction_cosine": 0.5317822764123165,
+        "p10_target_source_edge_direction_cosine": -0.6062483643619436,
+        "total_unary_assignment_cost": 11.350676805239818
+      },
+      "iterative_pairwise_shadow": {
+        "status": "DIAGNOSTIC_ONLY_NOT_AUTHORITY",
+        "negative_target_edge_direction_count": 2,
+        "mean_target_source_edge_direction_cosine": 0.747946194580978,
+        "p10_target_source_edge_direction_cosine": 0.14062135863285438,
+        "note": "Pairwise geometry improves geometric coherence but still assigns unrelated bones because injectivity remains structurally wrong."
+      },
+      "topology_shape": {
+        "target_leaf_count": 5,
+        "source_filtered_leaf_count": 9,
+        "target_root_to_leaf_lengths": [
+          7,
+          10,
+          10,
+          7,
+          6
+        ],
+        "source_filtered_root_to_leaf_lengths": [
+          2,
+          7,
+          11,
+          10,
+          11,
+          10,
+          4,
+          4,
+          2
+        ]
+      }
+    }
+  },
+  "next_representation": {
+    "name": "NONINJECTIVE_CONTINUOUS_SOURCE_MOTION_SUPPORT_FIELD",
+    "target_binding": "TARGET_JOINT_TO_WEIGHTED_SOURCE_MOTION_SUPPORTS",
+    "source_motion_semantics": [
+      "SOURCE_LOCAL_DERIVED_FRAME_DELTAS_ARE_CONVERTED_TO_CANONICAL_OBJECT_SPACE",
+      "OBJECT_SPACE_ROTATION_DELTA_FIELD_IS_INTERPOLATED_IN_LOG_QUATERNION_OR_EQUIVALENT_SE3_FORM",
+      "OBJECT_SPACE_TRANSLATION_DELTA_FIELD_IS_INTERPOLATED_CONTINUOUSLY",
+      "INTERPOLATED_OBJECT_SPACE_DELTA_IS_PROJECTED_INTO_TARGET_DERIVED_JOINT_FRAME"
+    ],
+    "invariants": [
+      "TARGET_QUALIFIED_SKELETON_REMAINS_FINAL_MECHANICAL_AUTHORITY",
+      "SOURCE_RIG_IS_MOTION_EVIDENCE_ONLY",
+      "SOURCE_MESH_OR_SKIN_MAY_BE_USED_ONLY_AS_RETARGET_SUPPORT_EVIDENCE_NOT_PRODUCT_AUTHORITY",
+      "MANY_TARGET_JOINTS_MAY_SHARE_OR_INTERPOLATE_THE_SAME_SOURCE_SUPPORT",
+      "SOURCE_SUPPORT_MUST_NOT_REQUIRE_BONE_NAMES",
+      "RAW_SOURCE_PARENT_TREE_MUST_NOT_BE_ANATOMICAL_AUTHORITY",
+      "ROOT_TRAJECTORY_REMAINS_EXPLICIT_POLICY",
+      "NONROOT_TRANSLATION_REMAINS_SUPPORTED",
+      "MOTION_QUALITY_REQUIRES_EXACT_DYNAMIC_DEFORMATION_PROOF"
+    ],
+    "first_diagnostics": [
+      "REST_SPACE_COMPACT_SUPPORT_RECONSTRUCTION",
+      "SOURCE_SKIN_INFLUENCE_CENTROID_AND_SPREAD_SUPPORT",
+      "OBJECT_SPACE_MOTION_FIELD_TRANSFER_ON_IDLE_RUN_SLASH",
+      "CONTACT_AND_DEFORMATION_ERROR_VS_SOURCE_MOTION_SEMANTICS"
+    ]
+  },
+  "product_constraints": {
+    "manual_retarget_forbidden": true,
+    "bone_name_semantic_rules_forbidden": true,
+    "quality_gate_relaxation_forbidden": true,
+    "runtime_or_compile_target_total_seconds_lt": 60,
+    "product_authority_minted": false
+  }
+}

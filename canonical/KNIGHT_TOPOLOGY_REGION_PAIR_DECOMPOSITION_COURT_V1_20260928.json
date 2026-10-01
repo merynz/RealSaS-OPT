@@ -1,0 +1,1328 @@
+{
+  "claim_boundary": "Source components are teacher-only labels used to test whether a mechanically correct region decomposition makes the residual topology repair local. Product inference may not use these labels.",
+  "finding": {
+    "region_pair_decomposition_breaks_giant_blob": true,
+    "unsafe_is_mostly_cross_component": true
+  },
+  "region_pair_decomposition": {
+    "connected_patch_count_total": 200,
+    "group_count": 69,
+    "groups": [
+      {
+        "bbox_extent": [
+          1.003237264301274,
+          0.430426716572118,
+          0.807146386323477
+        ],
+        "connected_patch_count": 3,
+        "connected_patch_sizes": [
+          159,
+          55,
+          1
+        ],
+        "face_count": 215,
+        "largest_patch_size": 159,
+        "region_pair_key": "CROSS:0,1",
+        "vertex_count": 197
+      },
+      {
+        "bbox_extent": [
+          0.41074852310207843,
+          1.647127999815483,
+          0.46218100402259843
+        ],
+        "connected_patch_count": 6,
+        "connected_patch_sizes": [
+          72,
+          27,
+          21,
+          13,
+          9,
+          1
+        ],
+        "face_count": 143,
+        "largest_patch_size": 72,
+        "region_pair_key": "CROSS:19,38",
+        "vertex_count": 147
+      },
+      {
+        "bbox_extent": [
+          0.3955645554797202,
+          0.3020095470284626,
+          0.3206809902966965
+        ],
+        "connected_patch_count": 17,
+        "connected_patch_sizes": [
+          36,
+          18,
+          15,
+          3,
+          2,
+          2,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "face_count": 87,
+        "largest_patch_size": 36,
+        "region_pair_key": "SAME:14",
+        "vertex_count": 108
+      },
+      {
+        "bbox_extent": [
+          0.6944690778859497,
+          1.0588849181135442,
+          0.37832104210541495
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          48,
+          23
+        ],
+        "face_count": 71,
+        "largest_patch_size": 48,
+        "region_pair_key": "CROSS:1,19",
+        "vertex_count": 71
+      },
+      {
+        "bbox_extent": [
+          0.807575747584,
+          0.32502049755788487,
+          0.24492502671758143
+        ],
+        "connected_patch_count": 4,
+        "connected_patch_sizes": [
+          41,
+          19,
+          3,
+          1
+        ],
+        "face_count": 64,
+        "largest_patch_size": 41,
+        "region_pair_key": "CROSS:6,28",
+        "vertex_count": 72
+      },
+      {
+        "bbox_extent": [
+          0.19346482488519867,
+          0.5429646747956653,
+          0.10884437187689378
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          63
+        ],
+        "face_count": 63,
+        "largest_patch_size": 63,
+        "region_pair_key": "CROSS:16,36",
+        "vertex_count": 65
+      },
+      {
+        "bbox_extent": [
+          0.41538864361455846,
+          0.2907640579976005,
+          0.322138877307244
+        ],
+        "connected_patch_count": 21,
+        "connected_patch_sizes": [
+          18,
+          9,
+          4,
+          3,
+          3,
+          3,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "face_count": 61,
+        "largest_patch_size": 18,
+        "region_pair_key": "SAME:29",
+        "vertex_count": 83
+      },
+      {
+        "bbox_extent": [
+          0.44022003601486226,
+          0.30833812625472684,
+          0.14617849847063874
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          58
+        ],
+        "face_count": 58,
+        "largest_patch_size": 58,
+        "region_pair_key": "CROSS:1,14",
+        "vertex_count": 58
+      },
+      {
+        "bbox_extent": [
+          0.4172977217087134,
+          0.30091057735865884,
+          0.13834680236049446
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          58
+        ],
+        "face_count": 58,
+        "largest_patch_size": 58,
+        "region_pair_key": "CROSS:1,29",
+        "vertex_count": 57
+      },
+      {
+        "bbox_extent": [
+          0.3863936898153282,
+          0.6024360098776331,
+          0.23434343153189663
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          35,
+          20
+        ],
+        "face_count": 55,
+        "largest_patch_size": 35,
+        "region_pair_key": "CROSS:19,34",
+        "vertex_count": 57
+      },
+      {
+        "bbox_extent": [
+          0.5764793040752489,
+          0.3242239374236747,
+          0.1760693218472198
+        ],
+        "connected_patch_count": 3,
+        "connected_patch_sizes": [
+          35,
+          7,
+          7
+        ],
+        "face_count": 49,
+        "largest_patch_size": 35,
+        "region_pair_key": "CROSS:4,28",
+        "vertex_count": 53
+      },
+      {
+        "bbox_extent": [
+          0.3386198316686712,
+          0.4164025557691762,
+          0.1111892376150464
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          25,
+          22
+        ],
+        "face_count": 47,
+        "largest_patch_size": 25,
+        "region_pair_key": "CROSS:5,19",
+        "vertex_count": 51
+      },
+      {
+        "bbox_extent": [
+          0.40506903557824214,
+          0.41676178720491563,
+          0.22173175182096472
+        ],
+        "connected_patch_count": 3,
+        "connected_patch_sizes": [
+          33,
+          6,
+          4
+        ],
+        "face_count": 43,
+        "largest_patch_size": 33,
+        "region_pair_key": "CROSS:28,35",
+        "vertex_count": 45
+      },
+      {
+        "bbox_extent": [
+          0.1562563068449005,
+          0.6946753035225277,
+          0.3547035277843793
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          25,
+          15
+        ],
+        "face_count": 40,
+        "largest_patch_size": 25,
+        "region_pair_key": "CROSS:1,28",
+        "vertex_count": 42
+      },
+      {
+        "bbox_extent": [
+          0.827872254214457,
+          0.7883601470754087,
+          0.5897262595107073
+        ],
+        "connected_patch_count": 22,
+        "connected_patch_sizes": [
+          6,
+          4,
+          3,
+          2,
+          2,
+          2,
+          2,
+          2,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "face_count": 37,
+        "largest_patch_size": 6,
+        "region_pair_key": "SAME:1",
+        "vertex_count": 73
+      },
+      {
+        "bbox_extent": [
+          0.4816048330359054,
+          0.41674882606652053,
+          0.027160883967980554
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          28,
+          5
+        ],
+        "face_count": 33,
+        "largest_patch_size": 28,
+        "region_pair_key": "CROSS:15,18",
+        "vertex_count": 37
+      },
+      {
+        "bbox_extent": [
+          0.05234945102557882,
+          0.35703957417129806,
+          0.1947548391429631
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          32
+        ],
+        "face_count": 32,
+        "largest_patch_size": 32,
+        "region_pair_key": "CROSS:14,29",
+        "vertex_count": 34
+      },
+      {
+        "bbox_extent": [
+          0.42992073501728845,
+          0.508778245775606,
+          0.24494985243724088
+        ],
+        "connected_patch_count": 12,
+        "connected_patch_sizes": [
+          7,
+          5,
+          4,
+          4,
+          3,
+          2,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "face_count": 31,
+        "largest_patch_size": 7,
+        "region_pair_key": "SAME:28",
+        "vertex_count": 50
+      },
+      {
+        "bbox_extent": [
+          0.3036970933551211,
+          0.1398327619858134,
+          0.11780372286940466
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          29
+        ],
+        "face_count": 29,
+        "largest_patch_size": 29,
+        "region_pair_key": "CROSS:0,38",
+        "vertex_count": 28
+      },
+      {
+        "bbox_extent": [
+          0.14672055571772769,
+          0.41573502907567705,
+          0.09516746002803644
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          27
+        ],
+        "face_count": 27,
+        "largest_patch_size": 27,
+        "region_pair_key": "CROSS:1,18",
+        "vertex_count": 29
+      },
+      {
+        "bbox_extent": [
+          0.18674189498992233,
+          0.32370648351055664,
+          0.2773066659711765
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          23,
+          4
+        ],
+        "face_count": 27,
+        "largest_patch_size": 23,
+        "region_pair_key": "CROSS:0,28",
+        "vertex_count": 30
+      },
+      {
+        "bbox_extent": [
+          0.24221470161289457,
+          1.0321180650925863,
+          0.27757076972991956
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          19,
+          7
+        ],
+        "face_count": 26,
+        "largest_patch_size": 19,
+        "region_pair_key": "CROSS:1,38",
+        "vertex_count": 28
+      },
+      {
+        "bbox_extent": [
+          0.503180905656438,
+          0.23225811046194594,
+          0.2254103420980592
+        ],
+        "connected_patch_count": 4,
+        "connected_patch_sizes": [
+          16,
+          3,
+          1,
+          1
+        ],
+        "face_count": 21,
+        "largest_patch_size": 16,
+        "region_pair_key": "CROSS:28,34",
+        "vertex_count": 28
+      },
+      {
+        "bbox_extent": [
+          0.12575037866284178,
+          0.4261758428210054,
+          0.08892010057338973
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          20
+        ],
+        "face_count": 20,
+        "largest_patch_size": 20,
+        "region_pair_key": "CROSS:19,28",
+        "vertex_count": 22
+      },
+      {
+        "bbox_extent": [
+          0.10179728298105095,
+          0.1647574109868007,
+          0.18932342571225202
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          18
+        ],
+        "face_count": 18,
+        "largest_patch_size": 18,
+        "region_pair_key": "CROSS:0,35",
+        "vertex_count": 18
+      },
+      {
+        "bbox_extent": [
+          0.043896541431991176,
+          0.369882345077913,
+          0.04548808129270476
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          17
+        ],
+        "face_count": 17,
+        "largest_patch_size": 17,
+        "region_pair_key": "CROSS:18,19",
+        "vertex_count": 19
+      },
+      {
+        "bbox_extent": [
+          0.4826563494412863,
+          0.18533859914294165,
+          0.013395103851793322
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          13,
+          4
+        ],
+        "face_count": 17,
+        "largest_patch_size": 13,
+        "region_pair_key": "CROSS:17,18",
+        "vertex_count": 21
+      },
+      {
+        "bbox_extent": [
+          0.3453566311781022,
+          0.08451428721350773,
+          0.22929883861162886
+        ],
+        "connected_patch_count": 7,
+        "connected_patch_sizes": [
+          5,
+          3,
+          2,
+          1,
+          1,
+          1,
+          1
+        ],
+        "face_count": 14,
+        "largest_patch_size": 5,
+        "region_pair_key": "CROSS:1,2",
+        "vertex_count": 27
+      },
+      {
+        "bbox_extent": [
+          0.050495851168861634,
+          0.1853346788774617,
+          0.10838855805351999
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          7,
+          7
+        ],
+        "face_count": 14,
+        "largest_patch_size": 7,
+        "region_pair_key": "CROSS:5,16",
+        "vertex_count": 18
+      },
+      {
+        "bbox_extent": [
+          0.24205594878053135,
+          0.23130560390579213,
+          0.02068938958134714
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          14
+        ],
+        "face_count": 14,
+        "largest_patch_size": 14,
+        "region_pair_key": "CROSS:1,34",
+        "vertex_count": 16
+      },
+      {
+        "bbox_extent": [
+          0.3705073373152928,
+          0.37035331887752154,
+          0.025456324877015657
+        ],
+        "connected_patch_count": 8,
+        "connected_patch_sizes": [
+          4,
+          2,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "face_count": 12,
+        "largest_patch_size": 4,
+        "region_pair_key": "SAME:18",
+        "vertex_count": 24
+      },
+      {
+        "bbox_extent": [
+          0.14530227092228076,
+          0.18473638030212292,
+          0.10892453851411954
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          7,
+          5
+        ],
+        "face_count": 12,
+        "largest_patch_size": 7,
+        "region_pair_key": "CROSS:16,19",
+        "vertex_count": 16
+      },
+      {
+        "bbox_extent": [
+          0.17616203687517418,
+          0.1393033812858599,
+          0.0658533372817377
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          11
+        ],
+        "face_count": 11,
+        "largest_patch_size": 11,
+        "region_pair_key": "CROSS:0,18",
+        "vertex_count": 13
+      },
+      {
+        "bbox_extent": [
+          0.0455688201769191,
+          0.23225120684202294,
+          0.00523006438686302
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          10
+        ],
+        "face_count": 10,
+        "largest_patch_size": 10,
+        "region_pair_key": "CROSS:7,18",
+        "vertex_count": 12
+      },
+      {
+        "bbox_extent": [
+          0.24164431411489762,
+          0.6009927984273107,
+          0.28500052588325653
+        ],
+        "connected_patch_count": 3,
+        "connected_patch_sizes": [
+          7,
+          2,
+          1
+        ],
+        "face_count": 10,
+        "largest_patch_size": 7,
+        "region_pair_key": "CROSS:18,38",
+        "vertex_count": 16
+      },
+      {
+        "bbox_extent": [
+          0.11121414325748469,
+          0.5580224016156607,
+          0.18152487224119085
+        ],
+        "connected_patch_count": 3,
+        "connected_patch_sizes": [
+          4,
+          3,
+          1
+        ],
+        "face_count": 8,
+        "largest_patch_size": 4,
+        "region_pair_key": "CROSS:7,19",
+        "vertex_count": 14
+      },
+      {
+        "bbox_extent": [
+          0.5301000445558525,
+          0.18262574793849776,
+          0.22436655820489315
+        ],
+        "connected_patch_count": 6,
+        "connected_patch_sizes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "face_count": 6,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:6,28,34",
+        "vertex_count": 16
+      },
+      {
+        "bbox_extent": [
+          0.28846352985780965,
+          0.3545028808231081,
+          0.1633306935909845
+        ],
+        "connected_patch_count": 5,
+        "connected_patch_sizes": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "face_count": 5,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:4,28,35",
+        "vertex_count": 15
+      },
+      {
+        "bbox_extent": [
+          0.047990370346748135,
+          0.09321647794670695,
+          0.009864488623327117
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          4
+        ],
+        "face_count": 4,
+        "largest_patch_size": 4,
+        "region_pair_key": "CROSS:18,33",
+        "vertex_count": 6
+      },
+      {
+        "bbox_extent": [
+          0.07339533410545668,
+          0.5580444301729113,
+          0.1559422287353205
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          2,
+          1
+        ],
+        "face_count": 3,
+        "largest_patch_size": 2,
+        "region_pair_key": "CROSS:7,19,38",
+        "vertex_count": 7
+      },
+      {
+        "bbox_extent": [
+          0.09871386309634,
+          0.13928607498887619,
+          0.19972446049100867
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          2,
+          1
+        ],
+        "face_count": 3,
+        "largest_patch_size": 2,
+        "region_pair_key": "CROSS:0,28,35",
+        "vertex_count": 7
+      },
+      {
+        "bbox_extent": [
+          0.04612638523934509,
+          0.0969385133107451,
+          0.008740106297102201
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          3
+        ],
+        "face_count": 3,
+        "largest_patch_size": 3,
+        "region_pair_key": "CROSS:19,30,38",
+        "vertex_count": 5
+      },
+      {
+        "bbox_extent": [
+          0.04953352608674479,
+          0.045945391177398154,
+          0.10781306799759971
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          1,
+          1
+        ],
+        "face_count": 2,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:5,16,36",
+        "vertex_count": 6
+      },
+      {
+        "bbox_extent": [
+          0.0961531031442335,
+          1.0019078183923733,
+          0.2945858953742676
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          1,
+          1
+        ],
+        "face_count": 2,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:1,19,38",
+        "vertex_count": 6
+      },
+      {
+        "bbox_extent": [
+          0.09808496024000124,
+          0.046878858800138964,
+          0.003988332140597017
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          1,
+          1
+        ],
+        "face_count": 2,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:15,17,18",
+        "vertex_count": 6
+      },
+      {
+        "bbox_extent": [
+          0.04973602646981434,
+          0.09137431765351156,
+          0.10871615755497
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          1,
+          1
+        ],
+        "face_count": 2,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:16,19,38",
+        "vertex_count": 6
+      },
+      {
+        "bbox_extent": [
+          0.050155826498146386,
+          0.25276280103191723,
+          0.07742810351884555
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          1,
+          1
+        ],
+        "face_count": 2,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:1,14,29",
+        "vertex_count": 6
+      },
+      {
+        "bbox_extent": [
+          0.050425980615898675,
+          0.045627336295055665,
+          0.10698172884819024
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          1,
+          1
+        ],
+        "face_count": 2,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:5,16,19",
+        "vertex_count": 6
+      },
+      {
+        "bbox_extent": [
+          0.0962728141817972,
+          0.09279265147891436,
+          0.10982662461295944
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          1,
+          1
+        ],
+        "face_count": 2,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:5,19,34",
+        "vertex_count": 6
+      },
+      {
+        "bbox_extent": [
+          0.06983548973762277,
+          0.2786810249653112,
+          0.31207303946731346
+        ],
+        "connected_patch_count": 2,
+        "connected_patch_sizes": [
+          1,
+          1
+        ],
+        "face_count": 2,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:0,1,28",
+        "vertex_count": 6
+      },
+      {
+        "bbox_extent": [
+          0.04731455213205915,
+          0.04567083244626011,
+          0.002291375246250782
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          1
+        ],
+        "face_count": 1,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:19,28,34",
+        "vertex_count": 3
+      },
+      {
+        "bbox_extent": [
+          0.017934682879002573,
+          0.04535488204051369,
+          0.036040885061391026
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          1
+        ],
+        "face_count": 1,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:0,1,18",
+        "vertex_count": 3
+      },
+      {
+        "bbox_extent": [
+          0.04804065173190919,
+          0.04666991441328053,
+          0.012622316313236404
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          1
+        ],
+        "face_count": 1,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:17,18,33",
+        "vertex_count": 3
+      },
+      {
+        "bbox_extent": [
+          0.03174067551845722,
+          0.05032487129663349,
+          0.014915537317611083
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          1
+        ],
+        "face_count": 1,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:1,19,28",
+        "vertex_count": 3
+      },
+      {
+        "bbox_extent": [
+          0.0476527142545034,
+          0.0463207288767134,
+          0.003098963561575907
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          1
+        ],
+        "face_count": 1,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:0,1,38",
+        "vertex_count": 3
+      },
+      {
+        "bbox_extent": [
+          0.049768513631522016,
+          0.0437162750907778,
+          0.016912222817389466
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          1
+        ],
+        "face_count": 1,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:0,18,38",
+        "vertex_count": 3
+      },
+      {
+        "bbox_extent": [
+          0.04014890695163276,
+          0.05022725469188116,
+          0.007882886355598862
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          1
+        ],
+        "face_count": 1,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:19,30",
+        "vertex_count": 3
+      },
+      {
+        "bbox_extent": [
+          0.04864621646849265,
+          0.04632776551150594,
+          0.01045942128383337
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          1
+        ],
+        "face_count": 1,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:1,18,38",
+        "vertex_count": 3
+      },
+      {
+        "bbox_extent": [
+          0.040070530714711505,
+          0.04515968867371685,
+          0.0014586610517364207
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          1
+        ],
+        "face_count": 1,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:7,18,38",
+        "vertex_count": 3
+      },
+      {
+        "bbox_extent": [
+          0.049298663740235005,
+          0.045819040163063984,
+          0.012801559710819865
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          1
+        ],
+        "face_count": 1,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:1,19,34",
+        "vertex_count": 3
+      },
+      {
+        "bbox_extent": [
+          0.0471040375469618,
+          0.04690436519237834,
+          0.0016391966674164093
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          1
+        ],
+        "face_count": 1,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:15,18,33",
+        "vertex_count": 3
+      },
+      {
+        "bbox_extent": [
+          0.04957340354375683,
+          0.0471586815140613,
+          0.003116886536865593
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          1
+        ],
+        "face_count": 1,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:17,18,38",
+        "vertex_count": 3
+      },
+      {
+        "bbox_extent": [
+          0.042215974489913266,
+          0.046757976244576005,
+          0.004747004395851517
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          1
+        ],
+        "face_count": 1,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:18,19,38",
+        "vertex_count": 3
+      },
+      {
+        "bbox_extent": [
+          0.03658368875511686,
+          0.046491568046430204,
+          0.013761382783856635
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          1
+        ],
+        "face_count": 1,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:6,28,35",
+        "vertex_count": 3
+      },
+      {
+        "bbox_extent": [
+          0.0480225068656851,
+          0.04722228775661369,
+          0.005638338678280674
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          1
+        ],
+        "face_count": 1,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:4,6,28",
+        "vertex_count": 3
+      },
+      {
+        "bbox_extent": [
+          0.050738557939269624,
+          0.04686807155585154,
+          0.006539688116209086
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          1
+        ],
+        "face_count": 1,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:1,28,34",
+        "vertex_count": 3
+      },
+      {
+        "bbox_extent": [
+          0.05001486686524388,
+          0.006370422109806317,
+          0.022524836631862777
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          1
+        ],
+        "face_count": 1,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:1,2,3",
+        "vertex_count": 3
+      },
+      {
+        "bbox_extent": [
+          0.04528212619514127,
+          0.047965243648705885,
+          0.0035335831921530225
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          1
+        ],
+        "face_count": 1,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:7,18,19",
+        "vertex_count": 3
+      },
+      {
+        "bbox_extent": [
+          0.048638818088703295,
+          0.04568501282187715,
+          0.01944503437388223
+        ],
+        "connected_patch_count": 1,
+        "connected_patch_sizes": [
+          1
+        ],
+        "face_count": 1,
+        "largest_patch_size": 1,
+        "region_pair_key": "CROSS:15,18,38",
+        "vertex_count": 3
+      }
+    ],
+    "largest_patch_sizes": [
+      159,
+      72,
+      63,
+      58,
+      58,
+      55,
+      48,
+      41,
+      36,
+      35,
+      35,
+      33,
+      32,
+      29,
+      28,
+      27,
+      27,
+      25,
+      25,
+      23,
+      23,
+      22,
+      21,
+      20,
+      20,
+      19,
+      19,
+      18,
+      18,
+      18,
+      17,
+      16,
+      15,
+      15,
+      14,
+      13,
+      13,
+      11,
+      10,
+      9,
+      9,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      6,
+      6,
+      5,
+      5,
+      5,
+      5,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "patches_gt_128_faces": 1,
+    "patches_le_32_faces": 188
+  },
+  "schema": "RealSaS.KnightTeacherTopologyRegionPairDecompositionCourt.v1",
+  "source_component_count": 39,
+  "status": "ORACLE_DIAGNOSTIC_ONLY__NO_PRODUCT_REPAIR",
+  "stress": {
+    "area_max": 220.29867764004828,
+    "area_min": 0.00409069849507017,
+    "condition_max": 11708.855417316601,
+    "edge_max": 101.0908905951972,
+    "edge_p95": 6.866182129077126,
+    "unsafe_face_count": 1553
+  },
+  "unsafe": {
+    "cross_fraction": 0.8531873792659369,
+    "cross_source_component": 1325,
+    "same_source_component": 228,
+    "total": 1553
+  }
+}

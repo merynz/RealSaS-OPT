@@ -1,0 +1,45 @@
+{
+  "schema": "RealSaS.KnightMechanicalMutexWatershedClosurePrereg.v1",
+  "status": "FROZEN_BEFORE_MUTEX_WATERSHED_RESULT",
+  "date": "2026-09-29",
+  "purpose": "Test a teacher-free globally consistent mechanical partition suitable for Stage17 repair, using Stage35 incompatibility evidence rather than sparse primal-edge deletion.",
+  "owner_hypothesis": "Stage17 currently conflates geometric adjacency with mechanical PRESERVE_CONTINUITY. Stage35 must return mechanical boundary evidence that is solved into a consistent Stage17 partition before Stage18 rebuild.",
+  "inference_forbidden": [
+    "teacher source component labels",
+    "teacher source triangle indices",
+    "teacher skin weights",
+    "teacher_valid_mask",
+    "teacher-tuned threshold",
+    "fixed number of output components"
+  ],
+  "graph": "DENSE_SUPPORTED_CANDIDATE_EDGE_GRAPH",
+  "edge_evidence": {
+    "repulsive": "EDGE_TOUCHES_STAGE35_UNSAFE_DENSE_FACE AND max_stretch>4 AND Arachne_weight_L1>1",
+    "attractive": "all other dense-supported edges",
+    "repulsive_confidence": "min((stretch-4)/(stretch+4),(L1-1)/(L1+1)) for strong repulsive edges",
+    "attractive_confidence": "min(max((4-stretch)/(4+stretch),0),max((1-L1)/(1+L1),0)); ambiguous attractive edges have confidence 0",
+    "frozen_thresholds": {
+      "max_edge_ratio": 4.0,
+      "weight_l1": 1.0
+    }
+  },
+  "solver": {
+    "class": "MUTEX_WATERSHED",
+    "event_order": "descending confidence; repulsive before attractive on exact ties; deterministic endpoint tie-break",
+    "repulsive_action": "install mutex between current components",
+    "attractive_action": "union current components only if no mutex exists",
+    "neutral_action": "processed as zero-confidence attractive after all positive-confidence evidence"
+  },
+  "repair_projection": "The resulting vertex partition is evaluated directly and through the existing holeless region-pure subdivision operator. A production Stage17 repair would derive exhaustive SEPARATE/PRESERVE constraints from the solved partition.",
+  "teacher_policy": "Teacher topology is evaluation-only after partition labels are frozen. Teacher weights are used only after inference for topology-mechanics isolation.",
+  "closure_thresholds": {
+    "face_deletion_count_max": 0,
+    "rest_area_error_max": 1e-10,
+    "actual_motion_max_edge_gt_10_max": 5,
+    "actual_motion_max_edge_gt_4_max": 50,
+    "actual_motion_worst_edge_max": 25.0,
+    "synthetic_unsafe_face_count_max": 500,
+    "mixed_face_precision_min": 0.90,
+    "unsafe_cross_region_recall_min": 0.70
+  }
+}

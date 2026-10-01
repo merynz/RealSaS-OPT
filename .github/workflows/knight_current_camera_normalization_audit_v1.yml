@@ -1,0 +1,36 @@
+name: knight-current-camera-normalization-audit-v1
+on:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths: ['.github/workflows/knight_current_camera_normalization_audit_v1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dump Stage05/07/08 numeric authority
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          led=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={x["id"]:x for x in led["stages"]}
+          def one(stage,schema):
+              rows=[x for x in by[stage]["outputs"] if x["schema"]==schema]
+              assert len(rows)==1,(stage,schema,len(rows))
+              return json.loads(Path(rows[0]["path"]).read_text())
+          cam=one("05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1")
+          obs=one("07_OBSERVATION_CONTRACT_QUALIFIED","RealSaS.QualifiedObservationSetIR.v1")
+          norm=one("08_NORMALIZATION_DOMAIN_QUALIFIED","RealSaS.NormalizationDomainIR.v1")
+          print("CAMERA_SET",json.dumps(cam,sort_keys=True)[:60000])
+          print("NORM",json.dumps(norm,sort_keys=True))
+          print("OBS_META",json.dumps({k:v for k,v in obs.items() if k!="views"},sort_keys=True))
+          PY

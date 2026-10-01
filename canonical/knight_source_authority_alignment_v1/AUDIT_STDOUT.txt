@@ -1,0 +1,821 @@
+{
+  "first_source_rows": [
+    {
+      "parent_source_joint_id": null,
+      "rest_position": [
+        0.0027436520904302597,
+        -0.1950817108154297,
+        -0.00492025027051568
+      ],
+      "source_joint_id": "Bone"
+    },
+    {
+      "parent_source_joint_id": "Bone",
+      "rest_position": [
+        -0.5319820046424866,
+        -0.13667814433574677,
+        0.02537654899060726
+      ],
+      "source_joint_id": "Foot.L"
+    },
+    {
+      "parent_source_joint_id": "Bone",
+      "rest_position": [
+        -0.001765321590937674,
+        0.12316793948411942,
+        2.1206552982330322
+      ],
+      "source_joint_id": "Body"
+    },
+    {
+      "parent_source_joint_id": "Body",
+      "rest_position": [
+        2.2437920051743276e-05,
+        0.009688363410532475,
+        1.9585143327713013
+      ],
+      "source_joint_id": "Hips"
+    },
+    {
+      "parent_source_joint_id": "Hips",
+      "rest_position": [
+        -0.00015302354586310685,
+        -0.066070556640625,
+        2.3445067405700684
+      ],
+      "source_joint_id": "Abdomen"
+    },
+    {
+      "parent_source_joint_id": "Abdomen",
+      "rest_position": [
+        -0.00015275966143235564,
+        -0.06595660001039505,
+        3.115182638168335
+      ],
+      "source_joint_id": "Torso"
+    },
+    {
+      "parent_source_joint_id": "Torso",
+      "rest_position": [
+        2.190412942582043e-06,
+        0.0009461008012294769,
+        3.796839475631714
+      ],
+      "source_joint_id": "Neck"
+    },
+    {
+      "parent_source_joint_id": "Neck",
+      "rest_position": [
+        2.24378800339764e-05,
+        0.009688346646726131,
+        4.121866703033447
+      ],
+      "source_joint_id": "Head"
+    }
+  ],
+  "first_tracks": [
+    {
+      "keyframes": [
+        {
+          "local_rotation_quat_xyzw": [
+            0.168986514210701,
+            3.596682063289336e-07,
+            0.00039938429836183786,
+            0.9856182932853699
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            1.711149027706032e-10,
+            -9.715192167061552e-08,
+            4.636415012270418e-10
+          ],
+          "time_seconds": 0.0
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            0.168986514210701,
+            3.596682063289336e-07,
+            0.00039938429836183786,
+            0.9856182932853699
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            1.711149027706032e-10,
+            -9.715192167061552e-08,
+            4.636415012270418e-10
+          ],
+          "time_seconds": 0.041666666666666664
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            0.168986514210701,
+            3.596682063289336e-07,
+            0.00039938429836183786,
+            0.9856182932853699
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            1.8927341422029813e-10,
+            -5.990806210570347e-08,
+            -3.3791362248324107e-09
+          ],
+          "time_seconds": 0.08333333333333333
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            0.168986514210701,
+            3.596682063289336e-07,
+            0.00039938429836183786,
+            0.9856182932853699
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            2.567539147050863e-10,
+            -1.1604078597438332e-07,
+            7.890883763466657e-09
+          ],
+          "time_seconds": 0.125
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            0.168986514210701,
+            3.596682063289336e-07,
+            0.00039938429836183786,
+            0.9856182932853699
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            1.804742663435707e-10,
+            -7.852513122223702e-08,
+            -1.5786719436434558e-09
+          ],
+          "time_seconds": 0.16666666666666666
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            0.17544476687908173,
+            3.654906208794273e-07,
+            0.000414618436479941,
+            0.9844892024993896
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            1.3898688986670791e-10,
+            -1.599941728625791e-08,
+            5.458791230315406e-09
+          ],
+          "time_seconds": 0.20833333333333334
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            0.1818956434726715,
+            3.7158662280489807e-07,
+            0.0004298349958844483,
+            0.9833178520202637
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            1.3898688986670791e-10,
+            -1.599941728625791e-08,
+            5.458791230315406e-09
+          ],
+          "time_seconds": 0.25
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            0.1801123470067978,
+            3.6992770446886425e-07,
+            0.00042562861926853657,
+            0.9836459755897522
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            1.7320641590486246e-10,
+            -7.850991731959533e-08,
+            1.4950495465982886e-09
+          ],
+          "time_seconds": 0.2916666666666667
+        }
+      ],
+      "metadata": {
+        "bone_local_axis_convention_discarded": true,
+        "source_joint_frame_hash": "f4960d5f750e51682ff4c7f976073919d3b043fbb7bdb7c95cc3c7f278d3ed75"
+      },
+      "source_joint_id": "Abdomen"
+    },
+    {
+      "keyframes": [
+        {
+          "local_rotation_quat_xyzw": [
+            3.7250900142282717e-09,
+            6.39635636123792e-11,
+            -5.253331103460823e-11,
+            1.0
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            3.3488880523527526e-10,
+            7.34429411181153e-11,
+            2.487719707299244e-10
+          ],
+          "time_seconds": 0.0
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            3.7250900142282717e-09,
+            6.39635636123792e-11,
+            -5.253331103460823e-11,
+            1.0
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            3.3488880523527526e-10,
+            7.34429411181153e-11,
+            2.487719707299244e-10
+          ],
+          "time_seconds": 0.041666666666666664
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            3.7250900142282717e-09,
+            6.39635636123792e-11,
+            -5.253331103460823e-11,
+            1.0
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            2.6324331023831875e-05,
+            -0.009806994918705032,
+            -0.0012082155211468335
+          ],
+          "time_seconds": 0.08333333333333333
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            3.7250900142282717e-09,
+            6.39635636123792e-11,
+            -5.253331103460823e-11,
+            1.0
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            9.518226945360866e-05,
+            -0.035459807004852295,
+            -0.004368560085102351
+          ],
+          "time_seconds": 0.125
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            3.7250900142282717e-09,
+            6.39635636123792e-11,
+            -5.253331103460823e-11,
+            1.0
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            0.00016404008894845432,
+            -0.06111259564751739,
+            -0.00752889809008464
+          ],
+          "time_seconds": 0.16666666666666666
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            3.7250900142282717e-09,
+            6.39635636123792e-11,
+            -5.253331103460823e-11,
+            1.0
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            0.00019036432087540656,
+            -0.07091968582844885,
+            -0.008737103220921862
+          ],
+          "time_seconds": 0.20833333333333334
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            3.7250900142282717e-09,
+            6.39635636123792e-11,
+            -5.253331103460823e-11,
+            1.0
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            0.00019036432087540656,
+            -0.07091968582844885,
+            -0.008737103220921862
+          ],
+          "time_seconds": 0.25
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            3.7250900142282717e-09,
+            6.39635636123792e-11,
+            -5.253331103460823e-11,
+            1.0
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            0.00016404009792501492,
+            -0.06111259610119564,
+            -0.007528901120317353
+          ],
+          "time_seconds": 0.2916666666666667
+        }
+      ],
+      "metadata": {
+        "bone_local_axis_convention_discarded": true,
+        "source_joint_frame_hash": "ddec50e13b91b3322db7f5e24b77525fee9a637928b0c28105a74fcaae67a5a5"
+      },
+      "source_joint_id": "Body"
+    },
+    {
+      "keyframes": [
+        {
+          "local_rotation_quat_xyzw": [
+            8.149069685714494e-08,
+            9.436850606503455e-11,
+            3.6140423986807946e-11,
+            1.0
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "time_seconds": 0.0
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            8.149069685714494e-08,
+            9.436850606503455e-11,
+            3.6140423986807946e-11,
+            1.0
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "time_seconds": 0.041666666666666664
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            8.149069685714494e-08,
+            9.436850606503455e-11,
+            3.6140423986807946e-11,
+            1.0
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "time_seconds": 0.08333333333333333
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            8.149069685714494e-08,
+            9.436850606503455e-11,
+            3.6140423986807946e-11,
+            1.0
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "time_seconds": 0.125
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            8.149069685714494e-08,
+            9.436850606503455e-11,
+            3.6140423986807946e-11,
+            1.0
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "time_seconds": 0.16666666666666666
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            8.149069685714494e-08,
+            9.436850606503455e-11,
+            3.6140423986807946e-11,
+            1.0
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "time_seconds": 0.20833333333333334
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            8.149069685714494e-08,
+            9.436850606503455e-11,
+            3.6140423986807946e-11,
+            1.0
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "time_seconds": 0.25
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            8.149069685714494e-08,
+            9.436850606503455e-11,
+            3.6140423986807946e-11,
+            1.0
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "time_seconds": 0.2916666666666667
+        }
+      ],
+      "metadata": {
+        "bone_local_axis_convention_discarded": true,
+        "source_joint_frame_hash": "5aff0d9cd8795a134afa57e4d0c2761bce2ba5702b5b8ccd6ce46c6d6363f07e"
+      },
+      "source_joint_id": "Bone"
+    },
+    {
+      "keyframes": [
+        {
+          "local_rotation_quat_xyzw": [
+            -0.07130331546068192,
+            -0.053576186299324036,
+            -0.768651008605957,
+            0.6334201693534851
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            -6.949108385494959e-08,
+            -4.7362557834725624e-08,
+            -5.88212727599158e-08
+          ],
+          "time_seconds": 0.0
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            -0.07130331546068192,
+            -0.05357619374990463,
+            -0.7686509490013123,
+            0.6334202289581299
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            -3.6766678149169608e-09,
+            -4.7524091655998134e-08,
+            9.834326641718578e-09
+          ],
+          "time_seconds": 0.041666666666666664
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            -0.07130330801010132,
+            -0.053576186299324036,
+            -0.768651008605957,
+            0.6334201693534851
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            2.7371866242047e-09,
+            -5.361137684285848e-08,
+            4.0427114079864386e-08
+          ],
+          "time_seconds": 0.08333333333333333
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            -0.07130331546068192,
+            -0.05357620492577553,
+            -0.7686509490013123,
+            0.6334202289581299
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            -1.1349243383553882e-07,
+            -6.52327156760044e-08,
+            6.691885056431053e-08
+          ],
+          "time_seconds": 0.125
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            -0.07130331546068192,
+            -0.05357618257403374,
+            -0.7686509490013123,
+            0.6334202289581299
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            -3.466104675443143e-10,
+            -2.9114660675675618e-08,
+            2.737372750688576e-08
+          ],
+          "time_seconds": 0.16666666666666666
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            -0.07130332291126251,
+            -0.05357616767287254,
+            -0.768651008605957,
+            0.6334201693534851
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            -5.6130972025391804e-08,
+            -5.347062008357822e-08,
+            -2.2558091679794248e-08
+          ],
+          "time_seconds": 0.20833333333333334
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            -0.0713033452630043,
+            -0.053576186299324036,
+            -0.768651008605957,
+            0.6334201693534851
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            -7.00554584485245e-09,
+            -7.205435721202508e-08,
+            -4.63141358695142e-09
+          ],
+          "time_seconds": 0.25
+        },
+        {
+          "local_rotation_quat_xyzw": [
+            -0.07130337506532669,
+            -0.05357614532113075,
+            -0.7686509490013123,
+            0.6334202289581299
+          ],
+          "local_scale_xyz": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "local_translation_xyz": [
+            -3.7252892254189196e-08,
+            -4.7328084395632565e-08,
+            2.2812639998057477e-08
+          ],
+          "time_seconds": 0.2916666666666667
+        }
+      ],
+      "metadata": {
+        "bone_local_axis_convention_discarded": true,
+        "source_joint_frame_hash": "e3b86f50dc3d3e7af745c888ac78370fb128776da83be0085cfd2b4e3243bbe9"
+      },
+      "source_joint_id": "Fingers.L"
+    }
+  ],
+  "motion_top_keys": [
+    "channel_contract",
+    "clip_id",
+    "clip_kind",
+    "coordinate_frame",
+    "duration_seconds",
+    "joint_frame_semantics",
+    "loop",
+    "metadata",
+    "schema",
+    "source_skeleton",
+    "source_space",
+    "tracks"
+  ],
+  "row_order_joint_ids": [
+    "Bone",
+    "Foot.L",
+    "Body",
+    "Hips",
+    "Abdomen",
+    "Torso",
+    "Neck",
+    "Head",
+    "Shoulder.L",
+    "UpperArm.L",
+    "LowerArm.L",
+    "Palm.L",
+    "MiddleHand.L",
+    "Fingers.L",
+    "Thumb.R",
+    "Thumb2.R",
+    "Shoulder.R",
+    "UpperArm.R",
+    "LowerArm.R",
+    "Palm.R",
+    "MiddleHand.R",
+    "Fingers.R",
+    "Thumb.L",
+    "Thumb2.L",
+    "UpperLeg.L",
+    "LowerLeg.L",
+    "UpperLeg.R",
+    "LowerLeg.R",
+    "PoleTarget.L",
+    "Foot.R",
+    "PoleTarget.R"
+  ],
+  "same_order_alignment_candidates": {},
+  "schema": "RealSaS.KnightSourceAuthorityAlignmentAudit.v1",
+  "source_npz_bone_count": 41,
+  "source_npz_skin_shape": [
+    3665,
+    41
+  ],
+  "source_skeleton_count": 31,
+  "source_skeleton_field_keys": [
+    "parent_source_joint_id",
+    "rest_position",
+    "source_joint_id"
+  ],
+  "track_count": 31,
+  "track_field_keys": [
+    "keyframes",
+    "metadata",
+    "source_joint_id"
+  ],
+  "track_joint_ids": [
+    "Abdomen",
+    "Body",
+    "Bone",
+    "Fingers.L",
+    "Fingers.R",
+    "Foot.L",
+    "Foot.R",
+    "Head",
+    "Hips",
+    "LowerArm.L",
+    "LowerArm.R",
+    "LowerLeg.L",
+    "LowerLeg.R",
+    "MiddleHand.L",
+    "MiddleHand.R",
+    "Neck",
+    "Palm.L",
+    "Palm.R",
+    "PoleTarget.L",
+    "PoleTarget.R",
+    "Shoulder.L",
+    "Shoulder.R",
+    "Thumb.L",
+    "Thumb.R",
+    "Thumb2.L",
+    "Thumb2.R",
+    "Torso",
+    "UpperArm.L",
+    "UpperArm.R",
+    "UpperLeg.L",
+    "UpperLeg.R"
+  ]
+}

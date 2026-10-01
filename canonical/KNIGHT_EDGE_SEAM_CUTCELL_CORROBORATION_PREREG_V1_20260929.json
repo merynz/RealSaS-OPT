@@ -1,0 +1,14 @@
+{
+  "schema":"RealSaS.KnightEdgeSeamCutCellCorroborationPrereg.v1",
+  "status":"FROZEN_BEFORE_CUTCELL_CORROBORATION_RESULT",
+  "date":"2026-09-29",
+  "base_seam_rule":"STRETCH_GT4_AND_ARACHNE_WEIGHT_L1_GT1 followed by graph 2-core",
+  "cutcell_role":"Independent teacher-free geometric/locality prior only; never used as final skin weights.",
+  "strata":[
+    "CUTCELL_DOM_DIFFERENT: CutCell dominant joint differs across candidate edge",
+    "CUTCELL_DOM_SAME: CutCell dominant joint is equal across candidate edge"
+  ],
+  "teacher_policy":"Teacher source topology is evaluation-only after base seam and CutCell strata are frozen.",
+  "no_product_mutation":true,
+  "no_threshold_search":true
+}

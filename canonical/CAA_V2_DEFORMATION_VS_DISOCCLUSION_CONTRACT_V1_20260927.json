@@ -1,0 +1,57 @@
+{
+  "schema": "RealSaS.CAADeformationVsDisocclusionContract.v1",
+  "status": "FROZEN_SUBJECT_FREE_ARCHITECTURE",
+  "frozen_on": "2026-09-27",
+  "subject_identity_used": false,
+  "product_authority_claimed": false,
+  "principles": {
+    "material_stretch_does_not_create_appearance": true,
+    "disocclusion_may_require_deterministic_completion": true,
+    "completion_may_never_be_used_to_hide_excessive_material_stretch": true,
+    "final_visible_undefined_pixel_count": 0
+  },
+  "material_deformation": {
+    "owner": "STAGE45_DYNAMIC_APPEARANCE_CONDITIONING",
+    "source": "EXISTING_CAA_APPEARANCE_AT_CANONICAL_SURFACE_COORDINATE",
+    "operation": "RESAMPLE_EXISTING_APPEARANCE_UNDER_POSED_SURFACE_MAP",
+    "completion_allowed": false,
+    "required_gates": [
+      "UV_TO_SURFACE_CONDITION_NUMBER",
+      "RELATIVE_SURFACE_CONDITION_NUMBER",
+      "RELATIVE_SURFACE_PRINCIPAL_STRETCH",
+      "ADJACENT_FRAME_SURFACE_PRINCIPAL_STRETCH",
+      "SCREEN_SPACE_TEXEL_DENSITY"
+    ],
+    "failure_action": "REPAIR_MESH_OR_DEFORMATION_OR_CAA_RESOLUTION_OR_MOTION__NEVER_FILL"
+  },
+  "disocclusion": {
+    "owner": "CAA_CANONICAL_SURFACE_COMPLETION",
+    "definition": "CANONICAL_SURFACE_SAMPLE_WITH_NO_QUALIFIED_SOURCE_SUPPORT_IN_ANY_INPUT_VIEW",
+    "directional_source_authority": "A(p,v)",
+    "hidden_surface_completion_authority": "C(p)",
+    "view_independent_completion_for_all_view_unseen_surface": true,
+    "allowed_backends": [
+      "BOUNDED_LOCAL_HARMONIC_FOR_SMALL_SOURCE_BOUNDED_GAPS",
+      "SOURCE_ONLY_PATCH_OR_DONOR_ENERGY_PLUS_SCREENED_POISSON_FOR_LARGE_ALL_VIEW_UNSEEN_REGIONS"
+    ],
+    "runtime_generation_allowed": false,
+    "learned_rgba_generation_allowed": false,
+    "final_visible_undefined_pixel_count": 0
+  },
+  "classification": {
+    "same_canonical_surface_point_deformed": true,
+    "material_deformation_path": "RESAMPLE_ONLY",
+    "previously_unseen_canonical_surface_point_exposed": true,
+    "disocclusion_path": "CANONICAL_COMPLETION",
+    "classification_unit": "CANONICAL_SURFACE_SAMPLE_NOT_TRIANGLE"
+  },
+  "provenance": {
+    "direct_source": 0,
+    "other_view_source": 1,
+    "bounded_local_harmonic": 2,
+    "unsupported_abstain": 3,
+    "physical_padding": 255,
+    "planned_global_completion_code": 4,
+    "note": "unsupported_abstain remains fail sentinel only; shipping visible frames may not contain it"
+  }
+}

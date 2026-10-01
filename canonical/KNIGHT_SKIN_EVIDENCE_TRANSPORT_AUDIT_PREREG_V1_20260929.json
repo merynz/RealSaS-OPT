@@ -1,0 +1,14 @@
+{
+  "schema": "RealSaS.KnightSkinEvidenceTransportAuditPrereg.v1",
+  "status": "FROZEN_BEFORE_SKIN_EVIDENCE_TRANSPORT_RESULT",
+  "date": "2026-09-29",
+  "purpose": "Read the exact sealed Knight Stage31 SkinProposal and Stage32 QualifiedSkin and determine whether any per-surface-row confidence/uncertainty evidence survives the Arachne shipping boundary.",
+  "teacher_policy": "No teacher artifact is loaded.",
+  "read_only": true,
+  "questions": [
+    "Does the exact Stage31 proposal contain per-surface-row confidence or uncertainty fields?",
+    "Does proposal metadata contain only aggregate uncertainty/coverage summaries?",
+    "Can Stage32 QualifiedSkin represent per-row evidence in its row schema?",
+    "Does Stage32 qualification report claim evidence completeness despite lacking per-row authority?"
+  ]
+}

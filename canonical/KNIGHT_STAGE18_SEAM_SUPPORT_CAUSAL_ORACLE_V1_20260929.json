@@ -1,0 +1,66 @@
+{
+  "changed_seam_vertex_count": 3982,
+  "claim_boundary": [
+    "Stage17 probe-conditioned partition is identical between arms.",
+    "Geometry, faces, QualifiedSkinIR and skeleton are identical between arms.",
+    "Only SEAM_GEOMETRY_INTERPOLATION mechanical skin transfer changes.",
+    "This is an audit oracle, not product authority."
+  ],
+  "delta": {
+    "all_face_unsafe": 4394,
+    "motion_gt10": 1762,
+    "motion_gt4": 2985,
+    "motion_worst": 158.88856408316386
+  },
+  "face_provenance_replay": {
+    "compact_face_count": 24443,
+    "compact_node_count": 12090,
+    "component_aware": true,
+    "dense_face_count": 12092332,
+    "dense_vertex_count": 6046160,
+    "position_error_max": 0.0,
+    "voxel_divisions": 56
+  },
+  "geometry_interpolated_skin": {
+    "all_face_passed": false,
+    "all_face_unsafe": 4856,
+    "candidate_lineage_hash": "8a4a3b7333dede99da012f34c9faa50d0a2a84e043626d248fbfd81ade9c1ad9",
+    "g3_failures": [
+      "DYNAMIC_AREA_RATIO_BELOW_MIN",
+      "DYNAMIC_CONDITION_NUMBER_ABOVE_MAX"
+    ],
+    "g3_passed": false,
+    "motion_gt10": 1762,
+    "motion_gt4": 3000,
+    "motion_p99": 52.71967763385916,
+    "motion_worst": 165.82923213284633,
+    "name": "GEOMETRY_INTERPOLATED_SKIN"
+  },
+  "owner_copy": {
+    "all_face_passed": false,
+    "all_face_unsafe": 462,
+    "candidate_lineage_hash": "91be35664ea35b1519a3ab8c354460916ed3afb61646c23848fa04d192c68b74",
+    "g3_failures": [],
+    "g3_passed": true,
+    "motion_gt10": 0,
+    "motion_gt4": 15,
+    "motion_p99": 1.847408960559208,
+    "motion_worst": 6.940668049682473,
+    "name": "OWNER_COPY"
+  },
+  "partition": {
+    "closure": {
+      "attractive_union_blocked_by_mutex": 401,
+      "attractive_union_count": 12017,
+      "closure_added_separate_count": 401,
+      "closure_policy": "STRUCTURAL_AUTHORITY_MAX_CONTINUITY_WITH_PROBE_CANNOT_LINKS",
+      "component_count": 73,
+      "direct_seed_count": 1417,
+      "final_separate_count": 1818,
+      "seed_constraint_violation_count": 0
+    },
+    "component_count": 73
+  },
+  "schema": "RealSaS.KnightStage18SeamSupportCausalOracle.v1",
+  "status": "COMPLETE__AUDIT_ONLY__NO_PARENT_MUTATION"
+}

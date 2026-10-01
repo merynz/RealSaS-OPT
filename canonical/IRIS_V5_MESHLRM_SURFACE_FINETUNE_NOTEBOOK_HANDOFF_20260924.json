@@ -1,0 +1,40 @@
+{
+  "schema": "RealSaS.IRIS.V5MeshLRMSurfaceFineTuneNotebookHandoff.v1",
+  "status": "READY_FOR_USER_A100_RUN",
+  "date_utc": "2026-09-24",
+  "notebook": {
+    "filename": "RealSaS_V5_MESHLRM_SURFACE_FINETUNE_LICENSE_SAFE_RUN_ALL.ipynb",
+    "sha256": "2dabed0238359ff03b9862bab5fed289f39956dcce9ea666d376a301fe8b9c04",
+    "code_cells": 11,
+    "static_compile_pass": true,
+    "stored_outputs": 0,
+    "stored_execution_counts": 0
+  },
+  "repo_commit_used_by_notebook": "77a26b64b0c6ec2595b5cfd937cca62b4330514f",
+  "prereg": "canonical/IRIS_V5_MESHLRM_SURFACE_FINETUNE_FAST_TRACK_PREREG_20260924.json",
+  "prereg_amendment": "canonical/IRIS_V5_MESHLRM_SURFACE_FINETUNE_FAST_TRACK_PREREG_AMENDMENT_20260924.json",
+  "intervention": {
+    "unchanged": [
+      "DINO",
+      "TP64",
+      "FSTAR",
+      "EXACT_8_CAMERAS",
+      "BASE_C_OBJECTIVE",
+      "FINAL_CONTAINED_T512_T1024_DECODER",
+      "FROZEN_P999_STAGE13"
+    ],
+    "added": "FIRST_PARTY_SPARSE_DIFFERENTIABLE_MT -> BSD_PYTORCH3D_SOURCE_MASK_RASTER_GRADIENT -> IRIS",
+    "training_surface_product_authority": false
+  },
+  "dependency_receipt": {
+    "pytorch3d_commit": "978cd99221b9e0a6a568f1d427854d73363265cf",
+    "license": "BSD",
+    "diso_used": false,
+    "nvdiffrast_used": false
+  },
+  "final_decision_rule": "PROMOTE IFF exact product decoder containment PASS AND unchanged frozen P999 Stage13 every_view_passed; else FROZEN_C_FALLBACK",
+  "claim_boundary": {
+    "product_authority_claimed": false,
+    "unseen_claimed": false
+  }
+}

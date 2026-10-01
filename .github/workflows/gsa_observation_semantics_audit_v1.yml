@@ -1,0 +1,47 @@
+name: gsa-observation-semantics-audit-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/audit_gsa_observation_semantics_v1.py'
+      - '.github/workflows/gsa_observation_semantics_audit_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: gsa-observation-semantics-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Run GSA observation semantics audit
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python tools/audit_gsa_observation_semantics_v1.py | tee /tmp/gsa_obs_semantics.txt
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          mkdir -p canonical/gsa_observation_semantics_audit_v1
+          cp /tmp/gsa_obs_semantics.txt canonical/gsa_observation_semantics_audit_v1/AUDIT_STDOUT.txt
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/GSA_OBSERVATION_SEMANTICS_AUDIT_V1_20260928.json canonical/gsa_observation_semantics_audit_v1
+          if git diff --cached --quiet; then
+            echo GSA_OBSERVATION_SEMANTICS_AUDIT_UNCHANGED
+            exit 0
+          fi
+          git commit -m 'audit: seal GSA observation semantics evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

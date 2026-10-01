@@ -1,0 +1,1 @@
+KNIGHT_ARACHNE_STAGE17_STAGE18_CHILD={"area_error": 6.748890565255636e-16, "arm": "ACTIVE_BALANCED_ALL_PROJECTED", "components": 84, "face_deletion": 0, "faces": 30237, "g3b_unsafe": 469, "mixed_source_faces": 2702, "motion_gt10": 254, "motion_gt4": 400, "motion_worst": 345.79862868756703, "separate": 2747, "stress_unsafe": 926, "vertices": 17929}

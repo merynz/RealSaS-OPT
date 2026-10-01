@@ -1,0 +1,33 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX3BTargetedProofRefinementPreregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__TWO_UNKNOWN_D11_LEAVES_TO_D12_PROOF_REFINEMENT",
+  "authority_class": "RESEARCH_PROOF_REFINEMENT_ONLY",
+  "source_x3_result": "canonical/VF11_EXTRACTOR_TRANSITION_X3_V2_RESULT_20260921.json",
+  "source_x3a_result": "canonical/VF11_EXTRACTOR_TRANSITION_X3A_UNKNOWN_DEPTH_DIAGNOSTIC_RESULT_20260921.json",
+  "targets": [
+    {"root_anchor_id": 49, "parent_path": "323", "parent_absolute_depth": 11, "parent_state": "UNRESOLVED", "parent_c0_state": "UNKNOWN"},
+    {"root_anchor_id": 62, "parent_path": "115", "parent_absolute_depth": 11, "parent_state": "UNRESOLVED", "parent_c0_state": "UNKNOWN"}
+  ],
+  "refinement": {
+    "target_absolute_depth": 12,
+    "children_per_parent": 8,
+    "total_child_count": 16,
+    "c0_micro_depth": 2,
+    "c1_micro_depth": 2,
+    "face_micro_depth": 2,
+    "classification_order": "C0 strict-sign EMPTY first; otherwise axis-graph certificate; otherwise UNRESOLVED",
+    "empirical_checks": true
+  },
+  "frozen_decision": {
+    "empirical_contradiction_count_gt_0": "FAIL__PROOF_ENGINE_CONTRADICTION",
+    "unresolved_child_count_eq_0": "TARGETED_D12_PROOF_CLOSED__X3_CONTINUOUS_LOCAL_CLOSURE_READY",
+    "unresolved_child_count_gt_0": "KEEP_ONLY_REMAINING_CHILDREN_ACTIVE__NO_GLOBAL_DEPTH_ESCALATION"
+  },
+  "claim_boundary": "This experiment refines exactly two proof-UNKNOWN d11 leaves. It does not rerun the full C2 partition, does not perform full-domain traversal, and cannot mint product/shipping/witness authority. Ordinary float64 remains research-only.",
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "full_domain_traversal_performed": false
+}

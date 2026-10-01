@@ -1,0 +1,59 @@
+name: v2-intended-architecture-conformance-audit-v2
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/audit_v2_intended_architecture_conformance_v2.py'
+      - '.github/workflows/v2_intended_architecture_conformance_audit_v2.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v2-intended-architecture-conformance-audit-v2
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Run intended architecture conformance audit
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python tools/audit_v2_intended_architecture_conformance_v2.py | tee /tmp/intended_conformance_v2.txt
+          test -f canonical/V2_INTENDED_ARCHITECTURE_CONFORMANCE_AUDIT_V2_20260928.json
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          mkdir -p canonical/v2_intended_architecture_conformance_audit_v2
+          cp /tmp/intended_conformance_v2.txt canonical/v2_intended_architecture_conformance_audit_v2/AUDIT_STDOUT.txt
+          python - <<'PY'
+          import hashlib,json,subprocess
+          from pathlib import Path
+          files=[
+            Path("canonical/V2_INTENDED_ARCHITECTURE_CONFORMANCE_AUDIT_V2_20260928.json"),
+            Path("canonical/v2_intended_architecture_conformance_audit_v2/AUDIT_STDOUT.txt"),
+          ]
+          seal={
+            "schema":"RealSaS.IntendedArchitectureConformanceAuditSeal.v2",
+            "status":"AUDIT_ONLY__NO_REPAIR_APPLIED__NO_ARCHITECTURE_REPLACEMENT_AUTHORIZED",
+            "repo_head":subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip(),
+            "artifacts":[{"path":str(p),"sha256":hashlib.sha256(p.read_bytes()).hexdigest(),"bytes":p.stat().st_size} for p in files],
+          }
+          Path("canonical/v2_intended_architecture_conformance_audit_v2/SEAL.json").write_text(json.dumps(seal,indent=2,sort_keys=True)+"\n")
+          PY
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/V2_INTENDED_ARCHITECTURE_CONFORMANCE_AUDIT_V2_20260928.json canonical/v2_intended_architecture_conformance_audit_v2
+          git commit -m 'audit: seal intended architecture conformance classification'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

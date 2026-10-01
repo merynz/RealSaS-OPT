@@ -1,0 +1,264 @@
+{
+  "actual_motion": {
+    "frames": [
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 2.9701007043948495,
+        "edge_p95": 1.0006436311295137,
+        "edge_p99": 1.0529195345038274,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.0102667888569052,
+        "edge_p95": 1.0082115087787467,
+        "edge_p99": 1.0664037380226359,
+        "frame": 1,
+        "time_seconds": 0.8333333333333334
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.0502343734685153,
+        "edge_p95": 1.0006584294137955,
+        "edge_p99": 1.05102597577629,
+        "frame": 2,
+        "time_seconds": 1.6666666666666667
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.0102665950078547,
+        "edge_p95": 1.0082115150846453,
+        "edge_p99": 1.0664038304552628,
+        "frame": 3,
+        "time_seconds": 2.5
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 35,
+        "edge_gt_4": 196,
+        "edge_max": 26.55182218931927,
+        "edge_p95": 1.1524376957108688,
+        "edge_p99": 3.107614655318139,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 35,
+        "edge_gt_4": 202,
+        "edge_max": 29.060260528774755,
+        "edge_p95": 1.1327707386574475,
+        "edge_p99": 3.0534817634288616,
+        "frame": 1,
+        "time_seconds": 0.20833333333333334
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 36,
+        "edge_gt_4": 206,
+        "edge_max": 29.969078103446215,
+        "edge_p95": 1.1426466085740314,
+        "edge_p99": 3.222816017827585,
+        "frame": 2,
+        "time_seconds": 0.4166666666666667
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 36,
+        "edge_gt_4": 196,
+        "edge_max": 30.318750260656017,
+        "edge_p95": 1.130270858001674,
+        "edge_p99": 2.9499814256836685,
+        "frame": 3,
+        "time_seconds": 0.625
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 37,
+        "edge_gt_4": 202,
+        "edge_max": 29.97450949610711,
+        "edge_p95": 1.1516315161278463,
+        "edge_p99": 3.1671066804381494,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 36,
+        "edge_gt_4": 205,
+        "edge_max": 29.04050356990024,
+        "edge_p95": 1.1504573072435527,
+        "edge_p99": 3.055350824932733,
+        "frame": 1,
+        "time_seconds": 0.2777777777777778
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 33,
+        "edge_gt_4": 182,
+        "edge_max": 26.548189010135662,
+        "edge_p95": 1.1092423257401323,
+        "edge_p99": 2.85963756057484,
+        "frame": 2,
+        "time_seconds": 0.5555555555555556
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 37,
+        "edge_gt_4": 202,
+        "edge_max": 29.97450949610711,
+        "edge_p95": 1.1516315161278463,
+        "edge_p99": 3.1671066804381494,
+        "frame": 3,
+        "time_seconds": 0.8333333333333334
+      }
+    ],
+    "max_edge_gt_10": 37,
+    "max_edge_gt_4": 206,
+    "max_edge_p99": 3.222816017827585,
+    "worst_edge_max": 30.318750260656017
+  },
+  "all_face_stress": {
+    "passed": false,
+    "report_hash": "73bcd41d22a9d7cb80e1ea73b4f6db044062fabad8dc7b05950efb0b6f8d61cb",
+    "residual_class_summary": {
+      "HAS_GENERATED_SEAM": {
+        "unsafe_face_count": 193,
+        "unsafe_l1_le_0p5_count": 139,
+        "unsafe_skin_l1": {
+          "count": 193,
+          "max": 1.9962577523414529,
+          "min": 0.020903305215708882,
+          "p50": 0.23840586505691988,
+          "p90": 1.4366701482349162,
+          "p95": 1.880928706136851,
+          "p99": 1.9705628831125193
+        }
+      },
+      "IDENTITY_ONLY": {
+        "unsafe_face_count": 605,
+        "unsafe_l1_le_0p5_count": 143,
+        "unsafe_skin_l1": {
+          "count": 605,
+          "max": 1.9999880652513071,
+          "min": 0.020708027942010494,
+          "p50": 1.1134222272970817,
+          "p90": 1.9909341530191333,
+          "p95": 1.9971530333677672,
+          "p99": 1.9999587855163683
+        }
+      },
+      "OTHER_SUPPORT_MODE": {
+        "unsafe_face_count": 0,
+        "unsafe_l1_le_0p5_count": 0,
+        "unsafe_skin_l1": {
+          "count": 0
+        }
+      }
+    },
+    "unsafe_face_count": 798
+  },
+  "candidate": {
+    "face_count": 26652,
+    "metadata": {
+      "camera_authority_used": false,
+      "dual_geometry_skin_support_required": true,
+      "face_deletion_count": 0,
+      "face_provenance_mode": "EXACT_COMPACTED_DENSE_FACE_REPLAY_HOLELESS_PARTITIONED",
+      "generated_centroid_vertex_count": 159,
+      "generated_seam_vertex_count": 2086,
+      "mixed_source_face_count": 1025,
+      "output_face_count": 26652,
+      "rest_area_relative_error": 6.748890565255636e-16,
+      "source_face_count": 24443,
+      "source_mesh_used": false,
+      "three_clique_face_minting_allowed": false,
+      "view_independent": true
+    },
+    "vertex_count": 14294
+  },
+  "claim_boundary": [
+    "Source adjacency is partitioned only by measured canonical stress edge stretch using the existing Stage35 edge-ratio limit.",
+    "No QualifiedSkinIR row is mutated.",
+    "Stage18 remains the existing holeless dense subdivision builder.",
+    "All-face stress, G3 10-degree micro-stress, and actual Knight motion are downstream validation only."
+  ],
+  "derived_default_g3b": {
+    "passed": false,
+    "risk_l1_min": 0.5,
+    "risky_face_count": 803,
+    "unsafe_face_count": 516
+  },
+  "face_provenance_replay": {
+    "compact_face_count": 24443,
+    "compact_node_count": 12090,
+    "component_aware": true,
+    "dense_face_count": 12092332,
+    "dense_vertex_count": 6046160,
+    "position_error_max": 0.0,
+    "voxel_divisions": 56
+  },
+  "g3_local_10deg": {
+    "failure_invariants": [
+      "DYNAMIC_AREA_RATIO_BELOW_MIN",
+      "DYNAMIC_CONDITION_NUMBER_ABOVE_MAX"
+    ],
+    "maximum_area_ratio": 8.71713526146853,
+    "maximum_condition_number": 28.54008539023163,
+    "maximum_edge_ratio": 6.626543614780516,
+    "minimum_area_ratio": 0.03703351137081509,
+    "minimum_edge_ratio": 0.07500326072438229,
+    "passed": false,
+    "report_hash": "0ae9ba6b86e80f1a7683b81558306c88a32633f8c1d0483dcdd509bb8ac7219d"
+  },
+  "operator": {
+    "edge_ratio_limit": 4.0,
+    "edge_rule": "REMOVE_SOURCE_EDGES_EXCEEDING_EXISTING_G3B_EDGE_LIMIT__THEN_EMIT_ALL_CONNECTED_COMPONENT_CROSSING_RELATIONS_AS_SEPARATE",
+    "new_numeric_threshold_introduced": false,
+    "probe_count": 168,
+    "region_owner": "CANONICAL_PROBE_CONDITIONED_SOURCE_EDGE_COMPATIBILITY",
+    "stress_angle_deg": 120.0
+  },
+  "partition": {
+    "component_count": 36,
+    "largest_component_size": 3518,
+    "separate_boundary_count": 1047,
+    "singleton_component_count": 22,
+    "small_le4_component_count": 27
+  },
+  "schema": "RealSaS.KnightProbeConditionedMechanicalRegionCourt.v1",
+  "skin_lineage_hash": "4332af4e7ce3bbb1c35d4c6de6014477374a172112c2caf60918aaabdb0060bb",
+  "source_edge_audit": {
+    "cut_closed_crossing_edge_count": 1047,
+    "edge_count": 36469,
+    "max_ratio": {
+      "count": 36469,
+      "max": 99.02545086278607,
+      "min": 1.0,
+      "p50": 1.0000000000000437,
+      "p90": 1.270162832363884,
+      "p95": 2.0223021517763815,
+      "p99": 23.313968653905633
+    },
+    "min_ratio": {
+      "count": 36469,
+      "max": 1.0,
+      "min": 0.017914843752954185,
+      "p50": 0.9999999999999809,
+      "p90": 0.9999999999999966,
+      "p95": 0.9999999999999972,
+      "p99": 0.999999999999998
+    },
+    "unsafe_source_edge_count": 1417
+  },
+  "status": "COMPLETE__AUDIT_ONLY__NO_PARENT_MUTATION"
+}

@@ -1,0 +1,119 @@
+{
+  "arms": {
+    "ACTIVE_BALANCED_ALL_PROJECTED": {
+      "authorization_hash": "df557be5e6fedc0e10825aab0469a99ac251fa4fefae9113617686c5595da05c",
+      "child": {
+        "candidate_lineage_hash": "45ec0442340f21ac5804b6aaa06da4a94a7308fdf312f647e499afabad4b4721",
+        "candidate_metadata": {
+          "camera_authority_used": false,
+          "dual_geometry_skin_support_required": true,
+          "face_deletion_count": 0,
+          "face_provenance_mode": "EXACT_COMPACTED_DENSE_FACE_REPLAY_HOLELESS_PARTITIONED",
+          "generated_centroid_vertex_count": 390,
+          "generated_seam_vertex_count": 5490,
+          "mixed_source_face_count": 2702,
+          "output_face_count": 30237,
+          "rest_area_relative_error": 6.748890565255636e-16,
+          "source_face_count": 24443,
+          "source_mesh_used": false,
+          "three_clique_face_minting_allowed": false,
+          "view_independent": true
+        },
+        "component_count": 84,
+        "face_count": 30237,
+        "partition_lineage_hash": "96405392e2d3f17d6fd38eb433dc9cbb705f9b8f28b1925e0685ea65b74b0ee1",
+        "separate_boundary_count": 2747,
+        "vertex_count": 17929
+      },
+      "invariants": {
+        "dual_geometry_skin_support_required": true,
+        "face_deletion_count": 0,
+        "parent_state_mutated": false,
+        "rest_area_relative_error": 6.748890565255636e-16,
+        "skin_weight_mutation": false
+      },
+      "post_repair_actual_motion": {
+        "max_edge_gt_10": 254,
+        "max_edge_gt_4": 400,
+        "max_edge_p99": 7.519043379825887,
+        "worst_edge_max": 345.79862868756703
+      },
+      "post_repair_g3b": {
+        "passed": false,
+        "report_hash": "b59d5653e9db8040da056dcbc236fa007e7e738234805d21baafccac611c5cae",
+        "risky_face_count": 721,
+        "unsafe_face_count": 469,
+        "weight_mutation": false
+      },
+      "post_repair_synthetic_stress": {
+        "max_area_max": 429.86398104155285,
+        "max_condition_max": 10109.718449476102,
+        "max_edge_max": 338.54529119388883,
+        "max_edge_p95": 2.0925403239275715,
+        "min_area_min": 0.009353015313040596,
+        "unsafe_face_count": 926
+      }
+    },
+    "UNIFORM_ALL_PROJECTED": {
+      "authorization_hash": "796b193d286a2ef639b58e78a512561b06f67bd5ba5e515b44f1e0e522ab6076",
+      "child": {
+        "candidate_lineage_hash": "7c1a064cd9445b42476573265f907947b668a67d694c5041af317a3adda6dac5",
+        "candidate_metadata": {
+          "camera_authority_used": false,
+          "dual_geometry_skin_support_required": true,
+          "face_deletion_count": 0,
+          "face_provenance_mode": "EXACT_COMPACTED_DENSE_FACE_REPLAY_HOLELESS_PARTITIONED",
+          "generated_centroid_vertex_count": 351,
+          "generated_seam_vertex_count": 5042,
+          "mixed_source_face_count": 2487,
+          "output_face_count": 29768,
+          "rest_area_relative_error": 1.3497781130511272e-15,
+          "source_face_count": 24443,
+          "source_mesh_used": false,
+          "three_clique_face_minting_allowed": false,
+          "view_independent": true
+        },
+        "component_count": 81,
+        "face_count": 29768,
+        "partition_lineage_hash": "3fd9d2d383107cd5a9103b9c28ba811c0a7f7efbb6b32a8100e0dc8fdecb3e8f",
+        "separate_boundary_count": 2523,
+        "vertex_count": 17442
+      },
+      "invariants": {
+        "dual_geometry_skin_support_required": true,
+        "face_deletion_count": 0,
+        "parent_state_mutated": false,
+        "rest_area_relative_error": 1.3497781130511272e-15,
+        "skin_weight_mutation": false
+      },
+      "post_repair_actual_motion": {
+        "max_edge_gt_10": 249,
+        "max_edge_gt_4": 362,
+        "max_edge_p99": 6.206206161642485,
+        "worst_edge_max": 354.06058732310305
+      },
+      "post_repair_g3b": {
+        "passed": false,
+        "report_hash": "84d9b0edc528794240f65b66d36887ce17aa035b128484683ec4ec6dcd3ba6ec",
+        "risky_face_count": 652,
+        "unsafe_face_count": 419,
+        "weight_mutation": false
+      },
+      "post_repair_synthetic_stress": {
+        "max_area_max": 458.6821724721922,
+        "max_condition_max": 10009.100266828083,
+        "max_edge_max": 346.63371638269444,
+        "max_edge_p95": 1.938631148826904,
+        "min_area_min": 0.001852655037384328,
+        "unsafe_face_count": 832
+      }
+    }
+  },
+  "schema": "RealSaS.KnightArachneStage17Stage18RepairChildCourt.v1.Summary",
+  "selection_policy": [
+    "No child is promoted from pre-repair Arachne metrics alone.",
+    "Prefer a child that preserves zero face deletion/rest area and materially closes post-repair G3B plus actual-motion catastrophic tails.",
+    "Parent run mutation is forbidden in this court."
+  ],
+  "status": "COMPLETE__NO_PARENT_MUTATION"
+}

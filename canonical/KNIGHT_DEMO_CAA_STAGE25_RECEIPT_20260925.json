@@ -1,0 +1,332 @@
+{
+  "adaptive_sampling_required": true,
+  "barycentric_storage_mode": "RECONSTRUCT_FROM_FACE_RESOLUTION_AND_OFFSETS_V1",
+  "bounded_physical_page_transport_required": true,
+  "caa_production_semantic_version": "PER_FACE_ADAPTIVE_TOPOLOGY_PARAMETRIC_PAGED_CSR_V1",
+  "compile_array_schema": "RealSaS.CAACompileArrays.v3",
+  "completed_through_stage": 25,
+  "direct_pm_linear_storage_dtype": "float64",
+  "direct_pm_linear_storage_mode": "PACKED_DIRECT_VALID_VIEW_MAJOR_V1",
+  "execution_repo_commit": "b630263f0f3f68109c28599be0acf2951bed4ab5",
+  "product_authority_claimed": false,
+  "product_pass_forbidden": true,
+  "quality_thresholds_changed": false,
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "sample_count_per_direction": 3930516,
+  "schema": "RealSaS.KnightDemoCAAStage25Receipt.v1",
+  "source_art_mutated": false,
+  "source_xy_storage_dtype": "float32",
+  "stage20_outputs": [
+    {
+      "authority_class": "CAA_BACKEND_PREREGISTRATION",
+      "bytes": 541333,
+      "schema": "RealSaS.CAACompilePreregistrationIR.v2",
+      "sha256": "0a90bc135e45ba44e3ec146b7eb1f7249a18b8a60115df161e0131fe141ab470"
+    }
+  ],
+  "stage21_outputs": [
+    {
+      "authority_class": "CAA_COMPILE_ARTIFACT",
+      "bytes": 8024,
+      "schema": "RealSaS.CAACompileArtifactIR.v2",
+      "sha256": "e5cc5f1251413554cef009d0789218ca247934b7b469dbacce1219e7e04e3fc4"
+    },
+    {
+      "authority_class": "CAA_COMPILE_ARRAYS",
+      "bytes": 449561762,
+      "schema": "RealSaS.CAACompileArrays.v3",
+      "sha256": "1e55e7341899552f501fff600a23f941a0eafde3808bcad905df922a44998cfc"
+    }
+  ],
+  "stage22_outputs": [
+    {
+      "authority_class": "CAA_COMPILE_SEAL",
+      "bytes": 953,
+      "schema": "RealSaS.CAACompileSealIR.v2",
+      "sha256": "0e4d509b5e71a492bcc31b8d62b81423d6d15dfd2f830328d28f5d83ae06ab49"
+    }
+  ],
+  "stage23_outputs": [
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 2102302,
+      "schema": "RealSaS.CAATransportTexture.V0.P0.v2",
+      "sha256": "58da1f424d16c2ead75e5be729381ea96ff0b58cd7cf2a0572e77e1ac029885f"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 2308319,
+      "schema": "RealSaS.CAATransportTexture.V0.P1.v2",
+      "sha256": "ac99391464d3ed24b9bd1b0d96c29a15fbfa5b6fdbe7fde769cabad4b183f7d3"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 1545141,
+      "schema": "RealSaS.CAATransportTexture.V0.P2.v2",
+      "sha256": "7b28bcb9789847635a0afa3de617c44a74eb9522f3bfb35d34626ea1f6366fa6"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 2120468,
+      "schema": "RealSaS.CAATransportTexture.V1.P0.v2",
+      "sha256": "b20f0834c6f323a4a34328586617bc5edc241d810bbf58fda0d98a2aea34042e"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 2317510,
+      "schema": "RealSaS.CAATransportTexture.V1.P1.v2",
+      "sha256": "f5144d38e983869608ae1792564a3120190f765537b88e3bdc1a1c9015777dd6"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 1539748,
+      "schema": "RealSaS.CAATransportTexture.V1.P2.v2",
+      "sha256": "2ce15d92314526866801ca4a43f024f1df4c60a54719f539d134a4b83500d459"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 2081784,
+      "schema": "RealSaS.CAATransportTexture.V2.P0.v2",
+      "sha256": "bc031de49d4689809bdf67190c309c219e44f9e71763b1787dbc23e716aa8180"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 2293957,
+      "schema": "RealSaS.CAATransportTexture.V2.P1.v2",
+      "sha256": "819a698629e436e6c40689dac2508254cd99664fda713fe49371f9b2e688757d"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 1530366,
+      "schema": "RealSaS.CAATransportTexture.V2.P2.v2",
+      "sha256": "98b14b8a3561c51473cfb27d52301f147350a7389a2e88f3106c2d30b08f70ed"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 2092396,
+      "schema": "RealSaS.CAATransportTexture.V3.P0.v2",
+      "sha256": "768b50b6a0170bd4f8bdee91983d75da1432cab2ab6b41db8cf3ddead10818c8"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 2294412,
+      "schema": "RealSaS.CAATransportTexture.V3.P1.v2",
+      "sha256": "06b446e49383cfd0e0acd4bfaa581e5643989e81676d6a371ba7d6f0cb540716"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 1529324,
+      "schema": "RealSaS.CAATransportTexture.V3.P2.v2",
+      "sha256": "801b51014d1321c4040a890970098c53644ebbc2f1e72b2f153057340e828555"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 2090023,
+      "schema": "RealSaS.CAATransportTexture.V4.P0.v2",
+      "sha256": "0b32acbc0fdf603c02c56464a495984e7113ae7d68ca057fe33f60714a1bfdef"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 2287368,
+      "schema": "RealSaS.CAATransportTexture.V4.P1.v2",
+      "sha256": "24dd4be6c5a4783e4f6140ac8a043e7305f1898880c46aaf3acef4f3f773a5fb"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 1522757,
+      "schema": "RealSaS.CAATransportTexture.V4.P2.v2",
+      "sha256": "fa339ed5f1c1056d724edfd297a33af9a38a25a15b668dc1a420846f30530d8c"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 2114298,
+      "schema": "RealSaS.CAATransportTexture.V5.P0.v2",
+      "sha256": "e5c2d55d52d62b5e047a646c73eb8bf2027b5003a9983021fcc9a10527c6cf55"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 2320080,
+      "schema": "RealSaS.CAATransportTexture.V5.P1.v2",
+      "sha256": "46860da0809ae86d9e307349b6946ff01d557769578b806e902d717c8c081e6c"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 1534755,
+      "schema": "RealSaS.CAATransportTexture.V5.P2.v2",
+      "sha256": "07710605cd8224b2e6df81313e71e9261662ef7bc02f96490ea82b4398b685f9"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 2094729,
+      "schema": "RealSaS.CAATransportTexture.V6.P0.v2",
+      "sha256": "a42c7f6ea41b804763d7a367885ffe15a293dd0b0fd957986075e21ec0f018f3"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 2300092,
+      "schema": "RealSaS.CAATransportTexture.V6.P1.v2",
+      "sha256": "d0f24f5c6006dbe1302106f4c9634c7ea005c690103da31fbe6d1d80d2da471f"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 1531002,
+      "schema": "RealSaS.CAATransportTexture.V6.P2.v2",
+      "sha256": "50d902325d5f17ce580a6acd7f65827038d3aac55517dc931754a5a0bc3930a7"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 2099631,
+      "schema": "RealSaS.CAATransportTexture.V7.P0.v2",
+      "sha256": "3862e018c8fd94870f37f981aca0bf24e566c16879682f902a7d6b9e4f6b1585"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 2309577,
+      "schema": "RealSaS.CAATransportTexture.V7.P1.v2",
+      "sha256": "54718b0c18a4324d30972c65727b46efc15ea7214e4d1f8f2b180cef1b7a5fd4"
+    },
+    {
+      "authority_class": "CAA_TRANSPORT_TEXTURE_PAGE",
+      "bytes": 1539499,
+      "schema": "RealSaS.CAATransportTexture.V7.P2.v2",
+      "sha256": "88dd4bc051899cbbb82067d8b3c9a09d2f48eb96719f45dda448961f55f81341"
+    },
+    {
+      "authority_class": "CAA_SURFACE_UV",
+      "bytes": 210000,
+      "schema": "RealSaS.CAASurfaceUV.v2",
+      "sha256": "a2123876300d6a478a7029114866642e7e7c43148626e2946169b336d6e38b9c"
+    },
+    {
+      "authority_class": "CAA_PROVENANCE_ATLAS",
+      "bytes": 16351513,
+      "schema": "RealSaS.CAAProvenanceAtlas.v2",
+      "sha256": "5886e9080990969ab875ab73cb0a07a336ee6620e4e2a1dae6fb623f1252cb95"
+    },
+    {
+      "authority_class": "COMPLETE_APPEARANCE_ASSET",
+      "bytes": 16582,
+      "schema": "RealSaS.CompleteAppearanceAssetIR.v2",
+      "sha256": "15e99e145137282fadc64f3cfcb646f00394307875283c3ce089c116ad692e60"
+    }
+  ],
+  "stage24_outputs": [
+    {
+      "authority_class": "QUALIFIED_COMPLETE_APPEARANCE",
+      "bytes": 30975,
+      "schema": "RealSaS.CompleteAppearanceQualificationIR.v2",
+      "sha256": "c7543356bd7ebe6faf874698769a657add659c2a5a77a8770fb21d65acd834d1"
+    }
+  ],
+  "stage25_outputs": [
+    {
+      "authority_class": "CAA_REFERENCE_REST_RENDER",
+      "bytes": 256004,
+      "schema": "RealSaS.CAAReferenceRestRender.V0.v2",
+      "sha256": "dc8acd51a186856128e4dfe015747ba98487ebab4528bdf38fc80b7780972bc8"
+    },
+    {
+      "authority_class": "CAA_REST_DIAGNOSTIC_MASKS",
+      "bytes": 146564,
+      "schema": "RealSaS.CAARestDiagnosticMasks.V0.v2",
+      "sha256": "5dcd1db92d9738dca5dc961a8a88ffcbd22dd53e784666482b308d2706e94c7f"
+    },
+    {
+      "authority_class": "CAA_REFERENCE_REST_RENDER",
+      "bytes": 254400,
+      "schema": "RealSaS.CAAReferenceRestRender.V1.v2",
+      "sha256": "5f1db2ce59736712179cb3b447596febb9d8288a8184ad1ac7b93dd2262e2a18"
+    },
+    {
+      "authority_class": "CAA_REST_DIAGNOSTIC_MASKS",
+      "bytes": 147356,
+      "schema": "RealSaS.CAARestDiagnosticMasks.V1.v2",
+      "sha256": "1685678ca2eae95913f610b9ba923137ef6f1939d1ade6c19ab4240b26cabbcd"
+    },
+    {
+      "authority_class": "CAA_REFERENCE_REST_RENDER",
+      "bytes": 190200,
+      "schema": "RealSaS.CAAReferenceRestRender.V2.v2",
+      "sha256": "86edcd17c495b84352a3c325f6450a42dc06bd57eca2d8c85a0d1a16507d3a52"
+    },
+    {
+      "authority_class": "CAA_REST_DIAGNOSTIC_MASKS",
+      "bytes": 124811,
+      "schema": "RealSaS.CAARestDiagnosticMasks.V2.v2",
+      "sha256": "1ce35e14e4b406a91c2d572a461564a59373fa970220d3e7a033d74b84aeab5c"
+    },
+    {
+      "authority_class": "CAA_REFERENCE_REST_RENDER",
+      "bytes": 203923,
+      "schema": "RealSaS.CAAReferenceRestRender.V3.v2",
+      "sha256": "cd4b5fdbf8277da4ce73953ecef6a44048b8a1cb732640a8d8173b72b325d331"
+    },
+    {
+      "authority_class": "CAA_REST_DIAGNOSTIC_MASKS",
+      "bytes": 141764,
+      "schema": "RealSaS.CAARestDiagnosticMasks.V3.v2",
+      "sha256": "080ec17b145984ac97d7fc4e40650dccfc31877e14c88b253fb2b2ae7d1d5339"
+    },
+    {
+      "authority_class": "CAA_REFERENCE_REST_RENDER",
+      "bytes": 193307,
+      "schema": "RealSaS.CAAReferenceRestRender.V4.v2",
+      "sha256": "865b69f44da35106e5354ac871fce82bb2bf726dc19e1eeb4c63b71edda1420d"
+    },
+    {
+      "authority_class": "CAA_REST_DIAGNOSTIC_MASKS",
+      "bytes": 136679,
+      "schema": "RealSaS.CAARestDiagnosticMasks.V4.v2",
+      "sha256": "e3c9bcbf253d4d4e76356064c6cd139d013b08900307e29fcaa0ee34a614dd0b"
+    },
+    {
+      "authority_class": "CAA_REFERENCE_REST_RENDER",
+      "bytes": 211002,
+      "schema": "RealSaS.CAAReferenceRestRender.V5.v2",
+      "sha256": "c47a58fbaa955f9153481aa3af6b9e570372f9371f16e5abceefd038d29ac962"
+    },
+    {
+      "authority_class": "CAA_REST_DIAGNOSTIC_MASKS",
+      "bytes": 146007,
+      "schema": "RealSaS.CAARestDiagnosticMasks.V5.v2",
+      "sha256": "098e118e7fca0fd1d199ff3bf75d0302627f2547594108c5f0fb06b3baeac19e"
+    },
+    {
+      "authority_class": "CAA_REFERENCE_REST_RENDER",
+      "bytes": 188068,
+      "schema": "RealSaS.CAAReferenceRestRender.V6.v2",
+      "sha256": "c738b4120dfb2b3d78c3d4f5e438bad52623228486954db0643fca26ed2c7559"
+    },
+    {
+      "authority_class": "CAA_REST_DIAGNOSTIC_MASKS",
+      "bytes": 127064,
+      "schema": "RealSaS.CAARestDiagnosticMasks.V6.v2",
+      "sha256": "46a135160f4f88356c33089e92ed8fc242ee9211792160f3e31f8530af6a0b19"
+    },
+    {
+      "authority_class": "CAA_REFERENCE_REST_RENDER",
+      "bytes": 244628,
+      "schema": "RealSaS.CAAReferenceRestRender.V7.v2",
+      "sha256": "28f5c4212946d2c15b55abdcc5ffcc6f36c6283ff4f3879f047fd003a6c41857"
+    },
+    {
+      "authority_class": "CAA_REST_DIAGNOSTIC_MASKS",
+      "bytes": 146166,
+      "schema": "RealSaS.CAARestDiagnosticMasks.V7.v2",
+      "sha256": "947adbde1e53c179894614e1f719015393645641ddb3bfb0f38dd72cf840034f"
+    },
+    {
+      "authority_class": "DEMO_ONLY_CAA_REFERENCE_REST_MEASUREMENT",
+      "bytes": 29259,
+      "schema": "RealSaS.CAARestRenderProofIR.v2",
+      "sha256": "116e606252806a896dcca16a5b38ec014e4d67129654e636060da81aeb63d4ae"
+    }
+  ],
+  "status": "PASS_DEMO_ONLY",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "surface_graph_edge_count": 11832127,
+  "surface_graph_representation": "CSR_INT64_OFFSETS_INT32_INDICES_WITH_UNDIRECTED_EDGE_INDEX",
+  "surface_graph_storage_bytes": 220758168,
+  "surface_graph_storage_bytes_per_sample": 56.16518747156862,
+  "topology_bound_cross_face_completion_required": true
+}

@@ -1,0 +1,179 @@
+{
+  "schema": "RealSaS.InformationLossSemanticInventionFinalLedger.v1",
+  "status": "AUDIT_CLOSURE_SEALED__NO_REPAIR_APPLIED",
+  "repo_head_before_seal": "25764867bef23d66eeb98912c5048ba76216e731",
+  "scope": "Structural information loss, semantic invention, and post-skin structural repair authority relevant to Knight smear causality.",
+  "classification_semantics": {
+    "A": "Implementation deviates from an already intended/frozen invariant; restore the intended semantics before judging the architecture.",
+    "B": "Intended direction is retained, but the exact operator/evidence/calibration contract remains incomplete.",
+    "C": "The intended decision itself is falsified by a valid failure class; the design rule must change."
+  },
+  "A_IMPLEMENTATION_DEVIATIONS": [
+    {
+      "id": "A01_FACE_INCIDENCE_DROPPED_THEN_REINVENTED",
+      "severity": "P0",
+      "owner": "STAGE14_TO_STAGE18",
+      "finding": "Dense admitted triangle incidence is reduced to pairwise relations and Stage18 re-mints 3-cliques as faces.",
+      "evidence": [
+        "canonical/V2_STRUCTURAL_INFORMATION_PRESERVATION_AUDIT_V1_20260928.json",
+        "canonical/GSA_FACE_INCIDENCE_CLIQUE_ADVERSARY_V1_20260928.json",
+        "canonical/knight_stage18_dense_face_support_audit_v1/REPORT.json"
+      ]
+    },
+    {
+      "id": "A02_GSA_NORMAL_OPERATOR_DEVIATES_FROM_FROZEN_DTB_ND1",
+      "severity": "P0",
+      "owner": "STAGE14_GSA_NORMAL_OPERATOR",
+      "finding": "Current global Euclidean cKDTree k=64 normal neighborhood replaces the frozen image-grid/local robust DTB-ND1 semantics and crosses nearby sheets.",
+      "evidence": [
+        "canonical/V2_STRUCTURAL_INFORMATION_PRESERVATION_AUDIT_V1_20260928.json",
+        "canonical/GSA_NORMAL_TOPOLOGY_ADVERSARY_V1_20260928.json"
+      ]
+    },
+    {
+      "id": "A03_SOURCE_OBSERVATION_PROVENANCE_DROPPED_AND_SELF_VISIBILITY_RELABELLED",
+      "severity": "P0",
+      "owner": "STAGE14_GSA_OBSERVATION_SEMANTICS",
+      "finding": "ObservableRiggingSubstrate requires traceable observation provenance; current scene-first GSA carries empty source_observation_ids and derives OBSERVED from predicted-surface self-zbuffer support.",
+      "evidence": [
+        "canonical/OBSERVABLE_RIGGING_SUBSTRATE_CONTRACT_V1.md",
+        "canonical/GSA_OBSERVATION_SEMANTICS_AUDIT_V1_20260928.json",
+        "canonical/V2_STRUCTURAL_INFORMATION_PRESERVATION_AUDIT_V1_20260928.json"
+      ]
+    },
+    {
+      "id": "A04_GEOMETRIC_ADJACENCY_PROMOTED_TO_MECHANICAL_PRESERVE_CONTINUITY",
+      "severity": "P0",
+      "owner": "STAGE17_WITH_STAGE14_EPISTEMIC_PREREQUISITE",
+      "finding": "Stage17 promotes every non-unknown GSA relation to PRESERVE_CONTINUITY; exact Knight has 36,469/36,469 preserve, zero separate, zero unknown.",
+      "evidence": [
+        "canonical/STAGE17_GEOMETRIC_TO_MECHANICAL_SEMANTIC_PROMOTION_AUDIT_V1_20260928.json",
+        "canonical/knight_stage14_18_structural_information_audit_v1/REPORT.json"
+      ]
+    },
+    {
+      "id": "A05_G3_ORIENTATION_SIGN_DROPPED",
+      "severity": "P0",
+      "owner": "QUALIFIED_MESH_G3",
+      "finding": "SVD singular values preserve stretch magnitude but erase determinant/orientation sign, so a reflection can satisfy the current G3 scalar metrics.",
+      "evidence": [
+        "canonical/G3_ORIENTATION_SIGN_INFORMATION_LOSS_AUDIT_V1_20260928.json",
+        "canonical/G3_ORIENTATION_INVERSION_ADVERSARY_V1_20260928.json"
+      ]
+    },
+    {
+      "id": "A06_STAGE35_COMPATIBILITY_ORIENTATION_SIGN_DROPPED",
+      "severity": "P0",
+      "owner": "STAGE35_SKIN_TOPOLOGY_COMPATIBILITY",
+      "finding": "Stage35 skin-topology compatibility repeats unsigned SVD/edge metrics; a pure reflected triangle returns area=condition=edge ratios=1 while orientation reverses.",
+      "evidence": [
+        "canonical/STAGE35_ORIENTATION_INVERSION_ADVERSARY_V1_20260928.json"
+      ]
+    },
+    {
+      "id": "A07_STAGE35_TO_STAGE18_REPAIR_FEEDBACK_IS_HIDDEN_FILESYSTEM_EDGE",
+      "severity": "P0",
+      "owner": "ORCHESTRATOR",
+      "finding": "Current experimental Stage35 repair feedback is read by Stage18 through a same-run filesystem side channel rather than an explicit lineage/fingerprint dependency.",
+      "evidence": [
+        "canonical/V2_INTENDED_ARCHITECTURE_CONFORMANCE_AUDIT_V2_20260928.json",
+        "canonical/V2_DAG_TRUTHFULNESS_AUDIT_V1_20260928.json"
+      ]
+    }
+  ],
+  "B_CONTRACT_OR_OPERATOR_GAPS": [
+    {
+      "id": "B01_GSA_COMPACTION_GEODESIC_SHEET_COHERENCE_OPERATOR_NOT_CLOSED",
+      "severity": "P0",
+      "owner": "STAGE14_GSA_COMPACTION",
+      "finding": "Even component-aware voxel compaction can merge geodesically distinct sheets in one connected component; exact replacement operator is not yet selected.",
+      "evidence": [
+        "canonical/GSA_SURFACE_COHERENCE_ADVERSARIES_V1_20260928.json"
+      ]
+    },
+    {
+      "id": "B02_SURFACE_VISIBILITY_OPERATOR_NOT_CLOSED",
+      "severity": "P1",
+      "owner": "STAGE14_GSA_VISIBILITY",
+      "finding": "Vertex-splat z-buffer is not equivalent to admitted-surface visibility; exact topology-aware visibility operator/calibration remains to be selected.",
+      "evidence": [
+        "canonical/GSA_SURFACE_COHERENCE_ADVERSARIES_V1_20260928.json",
+        "canonical/GSA_OBSERVATION_SEMANTICS_AUDIT_V1_20260928.json"
+      ]
+    },
+    {
+      "id": "B03_ARACHNE_ROW_EVIDENCE_UNCERTAINTY_NOT_TYPED",
+      "severity": "P1",
+      "owner": "ARACHNE_STAGE32",
+      "finding": "Weight rows are typed but row confidence/uncertainty/evidence-completeness is not a first-class product contract.",
+      "evidence": [
+        "canonical/V2_LEARNED_EVIDENCE_CONTRACT_AUDIT_V1_20260928.json"
+      ]
+    },
+    {
+      "id": "B04_STAGE35_PRODUCT_QUALITY_TOPOLOGY_REPAIR_OPERATOR_MISSING",
+      "severity": "P0",
+      "owner": "STAGE35_REPAIR_LOOP",
+      "finding": "Current seam-cut preview deletes unsafe faces and preserves the old partition binding; it is diagnostic, not a topology-lineage-producing product repair.",
+      "evidence": [
+        "compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py",
+        "canonical/POST_SKIN_PARTITION_FREEZE_FALSIFICATION_V1_20260928.json"
+      ]
+    },
+    {
+      "id": "B05_SKIN_TOPOLOGY_COMPATIBILITY_THRESHOLDS_REQUIRE_SUBJECT_FREE_CALIBRATION",
+      "severity": "P1",
+      "owner": "STAGE35_G3B",
+      "finding": "Risk L1/stress angle/max edge ratio are useful diagnostics but are not yet frozen product thresholds.",
+      "evidence": [
+        "canonical/V2_INTENDED_ARCHITECTURE_CONFORMANCE_AUDIT_V2_20260928.json"
+      ]
+    },
+    {
+      "id": "B06_TEACHER_TOPOLOGY_PROVENANCE_DROPPED_FROM_ARACHNE_EVALUATION_SEMANTICS",
+      "severity": "P1",
+      "owner": "ARACHNE_TRAINING_EVALUATION",
+      "finding": "Teacher source-triangle provenance exists in the bank but V5/V6 loading/evaluation uses weights, surface_ids and valid mask only; pointwise weight accuracy therefore did not prove topology compatibility.",
+      "evidence": [
+        "canonical/knight_s_w_topology_alignment_audit_v1/REPORT.json",
+        "canonical/knight_teacher_bank_topology_provenance_audit_v1/REPORT.json"
+      ],
+      "inference_authority_note": "Teacher topology remains diagnostic/training truth only and is forbidden as shipping inference input."
+    }
+  ],
+  "C_INTENDED_DECISIONS_FALSIFIED": [
+    {
+      "id": "C01_NO_POST_SKIN_PARTITION_MUTATION",
+      "severity": "P0",
+      "owner": "V2_PARTITION_REPAIR_POLICY",
+      "finding": "Freezing partition before qualified skin/deformation evidence is available is not closed under a valid teacher-faithful seam class; Stage35 must be allowed to produce a new structural partition/topology lineage.",
+      "evidence": [
+        "canonical/POST_SKIN_PARTITION_FREEZE_FALSIFICATION_V1_20260928.json",
+        "canonical/PRE_SKIN_SEAM_OBSERVABILITY_BOUNDARY_V1_20260928.json",
+        "canonical/STAGE17_GEOMETRIC_TO_MECHANICAL_SEMANTIC_PROMOTION_AUDIT_V1_20260928.json",
+        "canonical/knight_s_w_topology_alignment_audit_v1/REPORT.json"
+      ]
+    }
+  ],
+  "causal_boundaries": {
+    "invented_face_bug_is_dominant_smear_owner": false,
+    "evidence_for_negative_boundary": [
+      "canonical/KNIGHT_FACE_INCIDENCE_NEGATIVE_CAUSAL_BOUNDARY_V1_20260928.json",
+      "canonical/knight_invented_face_smear_causality_v1/REPORT.json"
+    ],
+    "s_w_topology_mismatch_is_stronger_owner_candidate": true,
+    "evidence_for_owner_candidate": [
+      "canonical/knight_s_w_topology_alignment_audit_v1/REPORT.json",
+      "canonical/knight_stage35_unsafe_source_topology_audit_v1/REPORT.json"
+    ]
+  },
+  "authorization": {
+    "repair_applied": false,
+    "model_retrain_authorized": false,
+    "main_merge_authorized": false,
+    "next_step": "ORACLE_TOPOLOGY_REPAIR_CAUSAL_EXPERIMENT",
+    "oracle_teacher_topology_allowed_for_diagnostic_only": true,
+    "generic_stage35_repair_promotion_authorized": false,
+    "generic_stage35_repair_promotion_condition": "Oracle experiment must confirm topology causality with skeleton, skin weights, motion and non-topology authorities held fixed."
+  }
+}

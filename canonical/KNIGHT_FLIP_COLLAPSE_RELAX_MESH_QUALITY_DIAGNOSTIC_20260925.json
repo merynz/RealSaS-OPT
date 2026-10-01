@@ -1,0 +1,2272 @@
+{
+  "after": {
+    "above_max_aspect_face_count": 8,
+    "above_max_aspect_face_fraction": 0.0003214400514304082,
+    "below_min_angle_face_count": 17,
+    "below_min_angle_face_fraction": 0.0006830601092896175,
+    "cdt_v1_boundary_split_policy": "FORBIDDEN",
+    "cdt_v1_min_angle_repairability": "UNREPAIRABLE_IF_ANY_PARENT_CORNER_IS_BELOW_TARGET",
+    "degenerate_face_count": 0,
+    "face_count": 24888,
+    "max_aspect_longest_over_min_altitude": 205.80454309529944,
+    "min_angle_deg": 0.5399013039955519,
+    "not_raw_marching_cubes_parent_faces": true,
+    "policy_max_aspect_longest_over_min_altitude": 16.0,
+    "policy_min_angle_deg": 7.5,
+    "policy_violating_face_count": 17,
+    "policy_violating_face_fraction": 0.0006830601092896175,
+    "producer_semantics": "THREE_CLIQUES_OF_RIGGING_SURFACE_LOCAL_RELATION_GRAPH",
+    "proof_note": "Without boundary splits, any triangulation covering a parent triangle preserves each parent corner as a sum of incident child angles; a parent corner below the target cannot be raised above the target by interior Steiner insertion alone.",
+    "schema": "RealSaS.RelationParentQualityReport.v1"
+  },
+  "after_collapse": {
+    "above_max_aspect_face_count": 15,
+    "below_min_angle_face_count": 35,
+    "degenerate_face_count": 0,
+    "face_count": 24888,
+    "max_aspect_longest_over_min_altitude": 205.80454309529944,
+    "min_angle_deg": 0.5399013039955519,
+    "policy_violating_face_count": 35,
+    "schema": "RealSaS.FixedVertexMeshQualityReport.v1"
+  },
+  "after_flip": {
+    "above_max_aspect_face_count": 41,
+    "below_min_angle_face_count": 86,
+    "degenerate_face_count": 0,
+    "face_count": 24958,
+    "max_aspect_longest_over_min_altitude": 205.80454309529944,
+    "min_angle_deg": 0.5399013039955519,
+    "policy_violating_face_count": 86,
+    "schema": "RealSaS.FixedVertexMeshQualityReport.v1"
+  },
+  "before": {
+    "above_max_aspect_face_count": 57,
+    "above_max_aspect_face_fraction": 0.002283836845901114,
+    "below_min_angle_face_count": 109,
+    "below_min_angle_face_fraction": 0.004367337126372306,
+    "cdt_v1_boundary_split_policy": "FORBIDDEN",
+    "cdt_v1_min_angle_repairability": "UNREPAIRABLE_IF_ANY_PARENT_CORNER_IS_BELOW_TARGET",
+    "degenerate_face_count": 0,
+    "face_count": 24958,
+    "max_aspect_longest_over_min_altitude": 272.00299700239304,
+    "min_angle_deg": 0.4074608559654188,
+    "not_raw_marching_cubes_parent_faces": true,
+    "policy_max_aspect_longest_over_min_altitude": 16.0,
+    "policy_min_angle_deg": 7.5,
+    "policy_violating_face_count": 109,
+    "policy_violating_face_fraction": 0.004367337126372306,
+    "producer_semantics": "THREE_CLIQUES_OF_RIGGING_SURFACE_LOCAL_RELATION_GRAPH",
+    "proof_note": "Without boundary splits, any triangulation covering a parent triangle preserves each parent corner as a sum of incident child angles; a parent corner below the target cannot be raised above the target by interior Steiner insertion alone.",
+    "schema": "RealSaS.RelationParentQualityReport.v1"
+  },
+  "collapse_report": {
+    "accepted_collapse_count": 35,
+    "accepted_collapses": [
+      {
+        "allowed_local_deviation": 0.007639470912560559,
+        "collapse_index": 0,
+        "edge": [
+          "CMV:c0726ed4127db981394ff767",
+          "CMV:c8794671c4e8d7602d1fcbb6"
+        ],
+        "edge_length": 0.056964276758619314,
+        "kept_vertex_id": "CMV:c8794671c4e8d7602d1fcbb6",
+        "local_sampled_surface_deviation": 0.0002932652120397717,
+        "new_max_aspect": 7.280337107664047,
+        "new_min_angle_deg": 11.853021541006305,
+        "new_violation_count": 0,
+        "old_max_aspect": 21.598710727476337,
+        "old_min_angle_deg": 2.655002961389664,
+        "old_violation_count": 3,
+        "removed_vertex_id": "CMV:c0726ed4127db981394ff767"
+      },
+      {
+        "allowed_local_deviation": 0.0060237658805554475,
+        "collapse_index": 1,
+        "edge": [
+          "CMV:c2dc71164366b66c1bb3aa8e",
+          "CMV:d6a5247961ec5ff11f0b45cf"
+        ],
+        "edge_length": 0.029426123036426756,
+        "kept_vertex_id": "CMV:c2dc71164366b66c1bb3aa8e",
+        "local_sampled_surface_deviation": 0.004423792446314617,
+        "new_max_aspect": 17.124583270342264,
+        "new_min_angle_deg": 5.216578901579335,
+        "new_violation_count": 1,
+        "old_max_aspect": 20.14242694291069,
+        "old_min_angle_deg": 4.913387660467671,
+        "old_violation_count": 4,
+        "removed_vertex_id": "CMV:d6a5247961ec5ff11f0b45cf"
+      },
+      {
+        "allowed_local_deviation": 0.003707640938650795,
+        "collapse_index": 2,
+        "edge": [
+          "CMV:9026baf1f37578210cc247d2",
+          "CMV:cf7c752ba72a6ca2e3535da2"
+        ],
+        "edge_length": 0.0036525241335596146,
+        "kept_vertex_id": "CMV:cf7c752ba72a6ca2e3535da2",
+        "local_sampled_surface_deviation": 0.0016932299151509048,
+        "new_max_aspect": 1.2689577397092948,
+        "new_min_angle_deg": 54.088619763049195,
+        "new_violation_count": 0,
+        "old_max_aspect": 11.02998602005942,
+        "old_min_angle_deg": 5.566789466120135,
+        "old_violation_count": 2,
+        "removed_vertex_id": "CMV:9026baf1f37578210cc247d2"
+      },
+      {
+        "allowed_local_deviation": 0.004447064585804066,
+        "collapse_index": 3,
+        "edge": [
+          "CMV:e0e942b7f64caa42b769fde2",
+          "CMV:f773f2f8e52565567aec37e0"
+        ],
+        "edge_length": 0.005364604668813411,
+        "kept_vertex_id": "CMV:f773f2f8e52565567aec37e0",
+        "local_sampled_surface_deviation": 0.0002506405228212589,
+        "new_max_aspect": 2.116459987554328,
+        "new_min_angle_deg": 42.653423027705685,
+        "new_violation_count": 0,
+        "old_max_aspect": 9.546462131546045,
+        "old_min_angle_deg": 6.753649770989894,
+        "old_violation_count": 2,
+        "removed_vertex_id": "CMV:e0e942b7f64caa42b769fde2"
+      },
+      {
+        "allowed_local_deviation": 0.00487331036664494,
+        "collapse_index": 4,
+        "edge": [
+          "CMV:22a11562a04ff3bde2163584",
+          "CMV:34ad9e56c8335a888ffe2426"
+        ],
+        "edge_length": 0.003283068390486832,
+        "kept_vertex_id": "CMV:22a11562a04ff3bde2163584",
+        "local_sampled_surface_deviation": 0.00044132269310259925,
+        "new_max_aspect": 2.0024890032514975,
+        "new_min_angle_deg": 38.42115920761711,
+        "new_violation_count": 0,
+        "old_max_aspect": 14.205226615325948,
+        "old_min_angle_deg": 4.223206625871141,
+        "old_violation_count": 2,
+        "removed_vertex_id": "CMV:34ad9e56c8335a888ffe2426"
+      },
+      {
+        "allowed_local_deviation": 0.006780672270151332,
+        "collapse_index": 5,
+        "edge": [
+          "CMV:af744250cccf03fe8736fc84",
+          "CMV:d893dd0c1fdf75b8dca0725c"
+        ],
+        "edge_length": 0.03796222396455573,
+        "kept_vertex_id": "CMV:af744250cccf03fe8736fc84",
+        "local_sampled_surface_deviation": 0.006223375162622405,
+        "new_max_aspect": 2.8120478365535098,
+        "new_min_angle_deg": 24.425732899740925,
+        "new_violation_count": 0,
+        "old_max_aspect": 66.38148162669663,
+        "old_min_angle_deg": 1.672427998333725,
+        "old_violation_count": 2,
+        "removed_vertex_id": "CMV:d893dd0c1fdf75b8dca0725c"
+      },
+      {
+        "allowed_local_deviation": 0.007259102045621,
+        "collapse_index": 6,
+        "edge": [
+          "CMV:57893dfa6ac238c9d8a01dcf",
+          "CMV:cc98d11c47f8718eda120b9a"
+        ],
+        "edge_length": 0.04666575131451939,
+        "kept_vertex_id": "CMV:cc98d11c47f8718eda120b9a",
+        "local_sampled_surface_deviation": 0.00041567042931463233,
+        "new_max_aspect": 4.847539696398714,
+        "new_min_angle_deg": 20.863296783165765,
+        "new_violation_count": 0,
+        "old_max_aspect": 11.73445071797471,
+        "old_min_angle_deg": 5.972432137775047,
+        "old_violation_count": 2,
+        "removed_vertex_id": "CMV:57893dfa6ac238c9d8a01dcf"
+      },
+      {
+        "allowed_local_deviation": 0.006376304790711287,
+        "collapse_index": 7,
+        "edge": [
+          "CMV:9f1276b869a4809d1457e1d2",
+          "CMV:d829ff6e8d9f9a2fc03746fa"
+        ],
+        "edge_length": 0.03464103602876437,
+        "kept_vertex_id": "CMV:d829ff6e8d9f9a2fc03746fa",
+        "local_sampled_surface_deviation": 0.0008926861367889815,
+        "new_max_aspect": 8.059863905485917,
+        "new_min_angle_deg": 8.597859175985198,
+        "new_violation_count": 0,
+        "old_max_aspect": 22.478685602232,
+        "old_min_angle_deg": 4.5434788588744,
+        "old_violation_count": 2,
+        "removed_vertex_id": "CMV:9f1276b869a4809d1457e1d2"
+      },
+      {
+        "allowed_local_deviation": 0.008460110374027224,
+        "collapse_index": 8,
+        "edge": [
+          "CMV:dbf3598d7e4532909c9477ad",
+          "CMV:e913a3c10ed45935ebe9b9c9"
+        ],
+        "edge_length": 0.02047315733490228,
+        "kept_vertex_id": "CMV:e913a3c10ed45935ebe9b9c9",
+        "local_sampled_surface_deviation": 0.002238824401999897,
+        "new_max_aspect": 8.187474045742686,
+        "new_min_angle_deg": 8.031786710837524,
+        "new_violation_count": 0,
+        "old_max_aspect": 15.553899676553034,
+        "old_min_angle_deg": 4.258919353661176,
+        "old_violation_count": 2,
+        "removed_vertex_id": "CMV:dbf3598d7e4532909c9477ad"
+      },
+      {
+        "allowed_local_deviation": 0.0077582821039146955,
+        "collapse_index": 9,
+        "edge": [
+          "CMV:e242a1e950366848f24db85b",
+          "CMV:e9eceec7f605e9c04bf73eb2"
+        ],
+        "edge_length": 0.035688848424339316,
+        "kept_vertex_id": "CMV:e9eceec7f605e9c04bf73eb2",
+        "local_sampled_surface_deviation": 0.003220325287130291,
+        "new_max_aspect": 8.733176608740212,
+        "new_min_angle_deg": 9.854181548529134,
+        "new_violation_count": 0,
+        "old_max_aspect": 10.89651379968863,
+        "old_min_angle_deg": 7.049905073876225,
+        "old_violation_count": 2,
+        "removed_vertex_id": "CMV:e242a1e950366848f24db85b"
+      },
+      {
+        "allowed_local_deviation": 0.006514435115873919,
+        "collapse_index": 10,
+        "edge": [
+          "CMV:1667f250f9fedd332c458167",
+          "CMV:90db3b696619ed0777fe251b"
+        ],
+        "edge_length": 0.03379421926975388,
+        "kept_vertex_id": "CMV:90db3b696619ed0777fe251b",
+        "local_sampled_surface_deviation": 0.0007118132208488131,
+        "new_max_aspect": 13.6070406384405,
+        "new_min_angle_deg": 4.554305429634355,
+        "new_violation_count": 2,
+        "old_max_aspect": 33.12187313332214,
+        "old_min_angle_deg": 2.7424501429172077,
+        "old_violation_count": 4,
+        "removed_vertex_id": "CMV:1667f250f9fedd332c458167"
+      },
+      {
+        "allowed_local_deviation": 0.0071978207340159025,
+        "collapse_index": 11,
+        "edge": [
+          "CMV:42441b34903b52793d6b980d",
+          "CMV:5ddc0b9f61cb4d7b962812c2"
+        ],
+        "edge_length": 0.00594653782719824,
+        "kept_vertex_id": "CMV:42441b34903b52793d6b980d",
+        "local_sampled_surface_deviation": 0.00280542573145775,
+        "new_max_aspect": 7.514508030217103,
+        "new_min_angle_deg": 7.9661250897390286,
+        "new_violation_count": 0,
+        "old_max_aspect": 8.710517560212862,
+        "old_min_angle_deg": 6.660842455856601,
+        "old_violation_count": 2,
+        "removed_vertex_id": "CMV:5ddc0b9f61cb4d7b962812c2"
+      },
+      {
+        "allowed_local_deviation": 0.007756361073316728,
+        "collapse_index": 12,
+        "edge": [
+          "CMV:92b1bd34412cf50c567ab439",
+          "CMV:c56c03a4e65b2cb8188eb266"
+        ],
+        "edge_length": 0.013284147891372309,
+        "kept_vertex_id": "CMV:c56c03a4e65b2cb8188eb266",
+        "local_sampled_surface_deviation": 0.0013480979661303486,
+        "new_max_aspect": 23.209982039827757,
+        "new_min_angle_deg": 3.4088482895679593,
+        "new_violation_count": 2,
+        "old_max_aspect": 26.00640278033823,
+        "old_min_angle_deg": 3.184204868563064,
+        "old_violation_count": 4,
+        "removed_vertex_id": "CMV:92b1bd34412cf50c567ab439"
+      },
+      {
+        "allowed_local_deviation": 0.0074274547843617925,
+        "collapse_index": 13,
+        "edge": [
+          "CMV:7f81626d5172bf740f2ab6f3",
+          "CMV:aef9078afb3f3ad642661447"
+        ],
+        "edge_length": 0.011419597695684496,
+        "kept_vertex_id": "CMV:aef9078afb3f3ad642661447",
+        "local_sampled_surface_deviation": 0.000875098322828314,
+        "new_max_aspect": 2.5564971795573834,
+        "new_min_angle_deg": 35.409824920853694,
+        "new_violation_count": 0,
+        "old_max_aspect": 23.209982039827757,
+        "old_min_angle_deg": 3.4088482895679593,
+        "old_violation_count": 2,
+        "removed_vertex_id": "CMV:7f81626d5172bf740f2ab6f3"
+      },
+      {
+        "allowed_local_deviation": 0.008306500505530261,
+        "collapse_index": 14,
+        "edge": [
+          "CMV:ac30e78c6ed1e1c48ab22f5a",
+          "CMV:cd8553d82748a46bacdb6e37"
+        ],
+        "edge_length": 0.03609341592292678,
+        "kept_vertex_id": "CMV:cd8553d82748a46bacdb6e37",
+        "local_sampled_surface_deviation": 0.00032665378542431477,
+        "new_max_aspect": 2.3821961952721766,
+        "new_min_angle_deg": 34.61404506328328,
+        "new_violation_count": 0,
+        "old_max_aspect": 96.50315005006519,
+        "old_min_angle_deg": 1.1804077721052495,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:ac30e78c6ed1e1c48ab22f5a"
+      },
+      {
+        "allowed_local_deviation": 0.005049742857890299,
+        "collapse_index": 15,
+        "edge": [
+          "CMV:4b1b0c511b96e6bf9b49af3a",
+          "CMV:72d96c3bee25916a76355a0e"
+        ],
+        "edge_length": 0.007191069730164774,
+        "kept_vertex_id": "CMV:4b1b0c511b96e6bf9b49af3a",
+        "local_sampled_surface_deviation": 5.3348090658680044e-05,
+        "new_max_aspect": 2.288964899412008,
+        "new_min_angle_deg": 37.73046904491659,
+        "new_violation_count": 0,
+        "old_max_aspect": 9.489626375929918,
+        "old_min_angle_deg": 6.889783428013179,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:72d96c3bee25916a76355a0e"
+      },
+      {
+        "allowed_local_deviation": 0.004869438723124011,
+        "collapse_index": 16,
+        "edge": [
+          "CMV:4276d9196687f15fba62176e",
+          "CMV:4e6fda1bb2a79c2e6c564714"
+        ],
+        "edge_length": 0.004843547551954012,
+        "kept_vertex_id": "CMV:4276d9196687f15fba62176e",
+        "local_sampled_surface_deviation": 0.00042986217119799446,
+        "new_max_aspect": 2.6857481299732946,
+        "new_min_angle_deg": 36.46067485112836,
+        "new_violation_count": 0,
+        "old_max_aspect": 8.150175781817325,
+        "old_min_angle_deg": 7.137202653990237,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:4e6fda1bb2a79c2e6c564714"
+      },
+      {
+        "allowed_local_deviation": 0.006611015767020747,
+        "collapse_index": 17,
+        "edge": [
+          "CMV:b7f311300f51407b5cbd591e",
+          "CMV:ef9bd985e6735e432fa19a73"
+        ],
+        "edge_length": 0.0338324233939117,
+        "kept_vertex_id": "CMV:ef9bd985e6735e432fa19a73",
+        "local_sampled_surface_deviation": 0.0021535771369704166,
+        "new_max_aspect": 2.767822993724226,
+        "new_min_angle_deg": 25.68149598917799,
+        "new_violation_count": 0,
+        "old_max_aspect": 101.43820216022883,
+        "old_min_angle_deg": 1.1094366908622835,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:b7f311300f51407b5cbd591e"
+      },
+      {
+        "allowed_local_deviation": 0.00637201354129628,
+        "collapse_index": 18,
+        "edge": [
+          "CMV:e05a1dd7f9363727e4cb66dc",
+          "CMV:fc14bb1d65e93a599db90660"
+        ],
+        "edge_length": 0.03316388373632436,
+        "kept_vertex_id": "CMV:fc14bb1d65e93a599db90660",
+        "local_sampled_surface_deviation": 0.0007894127450012219,
+        "new_max_aspect": 2.7239410052560293,
+        "new_min_angle_deg": 26.704753551367766,
+        "new_violation_count": 0,
+        "old_max_aspect": 29.305479805570997,
+        "old_min_angle_deg": 3.00659146992061,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:e05a1dd7f9363727e4cb66dc"
+      },
+      {
+        "allowed_local_deviation": 0.004723930504143335,
+        "collapse_index": 19,
+        "edge": [
+          "CMV:a3446ee5ed6475825f823bee",
+          "CMV:f45c50f08b8d7f315ea07e50"
+        ],
+        "edge_length": 0.00755951355190629,
+        "kept_vertex_id": "CMV:f45c50f08b8d7f315ea07e50",
+        "local_sampled_surface_deviation": 0.0028563446109359423,
+        "new_max_aspect": 3.323262861580841,
+        "new_min_angle_deg": 29.11597979676682,
+        "new_violation_count": 0,
+        "old_max_aspect": 9.478896374631486,
+        "old_min_angle_deg": 7.007092866086415,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:a3446ee5ed6475825f823bee"
+      },
+      {
+        "allowed_local_deviation": 0.005016901127810742,
+        "collapse_index": 20,
+        "edge": [
+          "CMV:3e35ef6fff4cba4602cd3961",
+          "CMV:60db84633b4a52a561af30d1"
+        ],
+        "edge_length": 0.009159001217092183,
+        "kept_vertex_id": "CMV:3e35ef6fff4cba4602cd3961",
+        "local_sampled_surface_deviation": 0.0005610389268693689,
+        "new_max_aspect": 3.657601854880219,
+        "new_min_angle_deg": 26.09874771675224,
+        "new_violation_count": 0,
+        "old_max_aspect": 10.670794845521074,
+        "old_min_angle_deg": 6.417447744287887,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:60db84633b4a52a561af30d1"
+      },
+      {
+        "allowed_local_deviation": 0.008472900809275326,
+        "collapse_index": 21,
+        "edge": [
+          "CMV:31c1f8ac31efdd86b4a97f5b",
+          "CMV:e3206dcd2584a12f10330598"
+        ],
+        "edge_length": 0.04298818413304042,
+        "kept_vertex_id": "CMV:31c1f8ac31efdd86b4a97f5b",
+        "local_sampled_surface_deviation": 0.001456825158645554,
+        "new_max_aspect": 4.670904342669937,
+        "new_min_angle_deg": 22.196949989775263,
+        "new_violation_count": 0,
+        "old_max_aspect": 23.300476683215496,
+        "old_min_angle_deg": 4.601731521398028,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:e3206dcd2584a12f10330598"
+      },
+      {
+        "allowed_local_deviation": 0.007448416421230859,
+        "collapse_index": 22,
+        "edge": [
+          "CMV:544a5464580a3e78ded6ec53",
+          "CMV:89b90d37bdc20a389b40c793"
+        ],
+        "edge_length": 0.0359327643445388,
+        "kept_vertex_id": "CMV:89b90d37bdc20a389b40c793",
+        "local_sampled_surface_deviation": 0.0016244711985865007,
+        "new_max_aspect": 3.9435774424638335,
+        "new_min_angle_deg": 20.642191838562596,
+        "new_violation_count": 0,
+        "old_max_aspect": 22.79974472407998,
+        "old_min_angle_deg": 4.693819911981594,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:544a5464580a3e78ded6ec53"
+      },
+      {
+        "allowed_local_deviation": 0.008221530335236753,
+        "collapse_index": 23,
+        "edge": [
+          "CMV:5fb8cd78f566b7b7700bcae9",
+          "CMV:745d999ee185044eb60a746f"
+        ],
+        "edge_length": 0.03504889082571657,
+        "kept_vertex_id": "CMV:5fb8cd78f566b7b7700bcae9",
+        "local_sampled_surface_deviation": 0.0019522683503244494,
+        "new_max_aspect": 3.767527097978145,
+        "new_min_angle_deg": 21.478334813315513,
+        "new_violation_count": 0,
+        "old_max_aspect": 17.86332187953547,
+        "old_min_angle_deg": 6.346130623478671,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:745d999ee185044eb60a746f"
+      },
+      {
+        "allowed_local_deviation": 0.007809292977123264,
+        "collapse_index": 24,
+        "edge": [
+          "CMV:2c4f5eafb5d405198ff8e336",
+          "CMV:5a7515eb030ac9089439506d"
+        ],
+        "edge_length": 0.03595930019767272,
+        "kept_vertex_id": "CMV:5a7515eb030ac9089439506d",
+        "local_sampled_surface_deviation": 0.0003385507527307652,
+        "new_max_aspect": 5.1125246496718555,
+        "new_min_angle_deg": 20.810326467312468,
+        "new_violation_count": 0,
+        "old_max_aspect": 17.419887361770904,
+        "old_min_angle_deg": 6.073228313776883,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:2c4f5eafb5d405198ff8e336"
+      },
+      {
+        "allowed_local_deviation": 0.008478520778124565,
+        "collapse_index": 25,
+        "edge": [
+          "CMV:2689cd38b81633d2a3e55617",
+          "CMV:c9f8e2013f231799498a17d0"
+        ],
+        "edge_length": 0.0655483344237629,
+        "kept_vertex_id": "CMV:2689cd38b81633d2a3e55617",
+        "local_sampled_surface_deviation": 0.0017538886030596336,
+        "new_max_aspect": 4.056650670788463,
+        "new_min_angle_deg": 20.330145326293188,
+        "new_violation_count": 0,
+        "old_max_aspect": 15.869047435502583,
+        "old_min_angle_deg": 7.0507218843879444,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:c9f8e2013f231799498a17d0"
+      },
+      {
+        "allowed_local_deviation": 0.004960242435921097,
+        "collapse_index": 26,
+        "edge": [
+          "CMV:3668bb9e1a81d128c132e0f2",
+          "CMV:defb4f59b1d698f36fdda028"
+        ],
+        "edge_length": 0.01619977035930801,
+        "kept_vertex_id": "CMV:3668bb9e1a81d128c132e0f2",
+        "local_sampled_surface_deviation": 0.0010685441664408004,
+        "new_max_aspect": 6.081428436687593,
+        "new_min_angle_deg": 17.422982551359457,
+        "new_violation_count": 0,
+        "old_max_aspect": 22.36827909949376,
+        "old_min_angle_deg": 4.535462111825961,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:defb4f59b1d698f36fdda028"
+      },
+      {
+        "allowed_local_deviation": 0.006910538484843218,
+        "collapse_index": 27,
+        "edge": [
+          "CMV:9d9e3e84b8021d65b1451dcf",
+          "CMV:ac642d381e707b087ba569cf"
+        ],
+        "edge_length": 0.03613266551983621,
+        "kept_vertex_id": "CMV:ac642d381e707b087ba569cf",
+        "local_sampled_surface_deviation": 0.0014212839557553206,
+        "new_max_aspect": 5.214095626427758,
+        "new_min_angle_deg": 18.000490606850907,
+        "new_violation_count": 0,
+        "old_max_aspect": 20.088690340332587,
+        "old_min_angle_deg": 5.392796104653554,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:9d9e3e84b8021d65b1451dcf"
+      },
+      {
+        "allowed_local_deviation": 0.009386173963180998,
+        "collapse_index": 28,
+        "edge": [
+          "CMV:59dfbd35252f88e83cb78603",
+          "CMV:d06cad6d43fbe17b33aab734"
+        ],
+        "edge_length": 0.04358061793733084,
+        "kept_vertex_id": "CMV:59dfbd35252f88e83cb78603",
+        "local_sampled_surface_deviation": 0.008711345922185629,
+        "new_max_aspect": 5.690972736693658,
+        "new_min_angle_deg": 14.544201109570293,
+        "new_violation_count": 0,
+        "old_max_aspect": 33.7697023573769,
+        "old_min_angle_deg": 2.4745662147488185,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:d06cad6d43fbe17b33aab734"
+      },
+      {
+        "allowed_local_deviation": 0.007337673099546744,
+        "collapse_index": 29,
+        "edge": [
+          "CMV:7124447bc3477a2219ae4738",
+          "CMV:974ed8348f5f8e8592ab4b71"
+        ],
+        "edge_length": 0.03332617654175358,
+        "kept_vertex_id": "CMV:974ed8348f5f8e8592ab4b71",
+        "local_sampled_surface_deviation": 0.0014917579777066802,
+        "new_max_aspect": 5.664505139133615,
+        "new_min_angle_deg": 15.864010957613715,
+        "new_violation_count": 0,
+        "old_max_aspect": 18.032230654540687,
+        "old_min_angle_deg": 6.018175966297979,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:7124447bc3477a2219ae4738"
+      },
+      {
+        "allowed_local_deviation": 0.008194159831235216,
+        "collapse_index": 30,
+        "edge": [
+          "CMV:44404474513d1166de1132c8",
+          "CMV:b2759f92eed1b986367cc1de"
+        ],
+        "edge_length": 0.04043584290957792,
+        "kept_vertex_id": "CMV:44404474513d1166de1132c8",
+        "local_sampled_surface_deviation": 0.005007852970615975,
+        "new_max_aspect": 9.455723171997702,
+        "new_min_angle_deg": 10.849667815853127,
+        "new_violation_count": 0,
+        "old_max_aspect": 26.00922717413728,
+        "old_min_angle_deg": 3.283558013686115,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:b2759f92eed1b986367cc1de"
+      },
+      {
+        "allowed_local_deviation": 0.006571375167639422,
+        "collapse_index": 31,
+        "edge": [
+          "CMV:4c6697b33ceca28e025253a9",
+          "CMV:5167360b0913df54e34accc0"
+        ],
+        "edge_length": 0.03211897980291971,
+        "kept_vertex_id": "CMV:4c6697b33ceca28e025253a9",
+        "local_sampled_surface_deviation": 0.0017584038522176426,
+        "new_max_aspect": 5.901186453237446,
+        "new_min_angle_deg": 11.939506147715017,
+        "new_violation_count": 0,
+        "old_max_aspect": 14.948500389947164,
+        "old_min_angle_deg": 6.286097700672805,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:5167360b0913df54e34accc0"
+      },
+      {
+        "allowed_local_deviation": 0.007173510051131234,
+        "collapse_index": 32,
+        "edge": [
+          "CMV:6fb064aa35659274f3a3104b",
+          "CMV:8d2b92313a354c4afa4a14df"
+        ],
+        "edge_length": 0.0152686791959086,
+        "kept_vertex_id": "CMV:6fb064aa35659274f3a3104b",
+        "local_sampled_surface_deviation": 0.0019345615565640685,
+        "new_max_aspect": 6.085706694019498,
+        "new_min_angle_deg": 11.102043128468999,
+        "new_violation_count": 0,
+        "old_max_aspect": 12.769344140617337,
+        "old_min_angle_deg": 6.093378584061726,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:8d2b92313a354c4afa4a14df"
+      },
+      {
+        "allowed_local_deviation": 0.006102119236165705,
+        "collapse_index": 33,
+        "edge": [
+          "CMV:4ed98e6e8ba296a55b20cb31",
+          "CMV:645fd18a9dbc321d76f15334"
+        ],
+        "edge_length": 0.006200401357696094,
+        "kept_vertex_id": "CMV:645fd18a9dbc321d76f15334",
+        "local_sampled_surface_deviation": 0.0026086833989666853,
+        "new_max_aspect": 7.176764862329066,
+        "new_min_angle_deg": 8.545742967621859,
+        "new_violation_count": 0,
+        "old_max_aspect": 9.982567632570365,
+        "old_min_angle_deg": 6.205462476999711,
+        "old_violation_count": 1,
+        "removed_vertex_id": "CMV:4ed98e6e8ba296a55b20cb31"
+      },
+      {
+        "allowed_local_deviation": 0.006343217694971571,
+        "collapse_index": 34,
+        "edge": [
+          "CMV:23e3c756ab49384ef7f7b7a6",
+          "CMV:9778bdf5f986cfe8aef6828a"
+        ],
+        "edge_length": 0.026892560237640153,
+        "kept_vertex_id": "CMV:23e3c756ab49384ef7f7b7a6",
+        "local_sampled_surface_deviation": 0.0026476872429995876,
+        "new_max_aspect": 14.77541045704155,
+        "new_min_angle_deg": 5.8674823308603425,
+        "new_violation_count": 1,
+        "old_max_aspect": 20.35646563498748,
+        "old_min_angle_deg": 3.5646603656184306,
+        "old_violation_count": 2,
+        "removed_vertex_id": "CMV:9778bdf5f986cfe8aef6828a"
+      }
+    ],
+    "after": {
+      "above_max_aspect_face_count": 15,
+      "below_min_angle_face_count": 35,
+      "degenerate_face_count": 0,
+      "face_count": 24888,
+      "max_aspect_longest_over_min_altitude": 205.80454309529944,
+      "min_angle_deg": 0.5399013039955519,
+      "policy_violating_face_count": 35,
+      "schema": "RealSaS.FixedVertexMeshQualityReport.v1"
+    },
+    "algorithm": "ENDPOINT_HALFEDGE_COLLAPSE_LINK_CONDITION_V1",
+    "before": {
+      "above_max_aspect_face_count": 41,
+      "below_min_angle_face_count": 86,
+      "degenerate_face_count": 0,
+      "face_count": 24958,
+      "max_aspect_longest_over_min_altitude": 205.80454309529944,
+      "min_angle_deg": 0.5399013039955519,
+      "policy_violating_face_count": 86,
+      "schema": "RealSaS.FixedVertexMeshQualityReport.v1"
+    },
+    "input_candidate_lineage_hash": "4bec07ba7054d26fb8f7793cff2c84edbe03083160fde7f100cd35b2b70cc960",
+    "new_vertex_creation": false,
+    "rejected_duplicate_face_count": 1510,
+    "rejected_link_condition_count": 3263,
+    "rejected_quality_count": 957,
+    "rejected_shape_deviation_count": 467,
+    "surviving_support_binding_changed": false,
+    "surviving_vertex_motion": false
+  },
+  "demo_geometry_lineage": true,
+  "final_candidate_lineage_hash": "b7b103cda68532c0e2daa1cc78e0c5bfd0a913dfbae760daf8917746aecedc17",
+  "final_face_count": 24888,
+  "final_vertex_count": 12014,
+  "flip_report": {
+    "accepted_flip_count": 33,
+    "accepted_flips": [
+      {
+        "allowed_local_deviation": 0.0038279204441721898,
+        "local_sampled_surface_deviation": 0.0010276246542831613,
+        "new_edge": [
+          "CMV:0366b9bb52cfc3b39560e6a7",
+          "CMV:b7a06227db45025e606613fa"
+        ],
+        "new_max_aspect": 2.1564287703454004,
+        "new_min_angle_deg": 42.074264989212914,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:0cd098b260f5a4f154c2b02a",
+          "CMV:3329af88ab8eb64d2f730e80"
+        ],
+        "old_max_aspect": 21.762589182419056,
+        "old_min_angle_deg": 4.7636568627750915,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.004632218453911827,
+        "local_sampled_surface_deviation": 3.679275349591708e-05,
+        "new_edge": [
+          "CMV:4155dbd1de9b857fd774f84a",
+          "CMV:4e460565b4bd07121980ed63"
+        ],
+        "new_max_aspect": 1.9766538208503,
+        "new_min_angle_deg": 36.45380724122293,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:6039d3e13289ef8cef8ba484",
+          "CMV:93db10daeba0de90ba7f757c"
+        ],
+        "old_max_aspect": 20.683423844564608,
+        "old_min_angle_deg": 5.490996634160727,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.0040253413937740715,
+        "local_sampled_surface_deviation": 0.0003701307893634557,
+        "new_edge": [
+          "CMV:083f2a306e26fb86ba47e259",
+          "CMV:6784a63df143e50542ec94c2"
+        ],
+        "new_max_aspect": 2.7561692679510923,
+        "new_min_angle_deg": 30.826005014829306,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:46bf97ae1ad84b9452bc6cd3",
+          "CMV:d06cad6d43fbe17b33aab734"
+        ],
+        "old_max_aspect": 13.843035998110798,
+        "old_min_angle_deg": 6.475132573800167,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.006321367134698486,
+        "local_sampled_surface_deviation": 0.0002189647256037039,
+        "new_edge": [
+          "CMV:89b90d37bdc20a389b40c793",
+          "CMV:ce3e5cd9c59b1c5843bb94e8"
+        ],
+        "new_max_aspect": 3.9435774424638335,
+        "new_min_angle_deg": 20.642191838562596,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:9866835a4fc8c947ec6b60db",
+          "CMV:c4ef86ac4c0d785d2cad09b6"
+        ],
+        "old_max_aspect": 95.35980395355634,
+        "old_min_angle_deg": 1.1891111002623613,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.004122214874138454,
+        "local_sampled_surface_deviation": 0.00022471967863187936,
+        "new_edge": [
+          "CMV:a0972b21050a27721a159756",
+          "CMV:f45dd6d523f297a2ee178dff"
+        ],
+        "new_max_aspect": 3.3442904501282658,
+        "new_min_angle_deg": 19.45494813507687,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:66ca9e8071946a2d54d1b5e3",
+          "CMV:d7dae2b010ee51be820eeda6"
+        ],
+        "old_max_aspect": 272.00299700239304,
+        "old_min_angle_deg": 0.4074608559654188,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.004767418165028934,
+        "local_sampled_surface_deviation": 0.0009826643727019336,
+        "new_edge": [
+          "CMV:491162075309502c3d6b61e8",
+          "CMV:725a8d56e5661be895af7a05"
+        ],
+        "new_max_aspect": 3.8894262306063396,
+        "new_min_angle_deg": 22.232081332872607,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:2dc1d8488d7309a00b89765a",
+          "CMV:71f9913cbd4fa3f60f327f20"
+        ],
+        "old_max_aspect": 22.477263826087245,
+        "old_min_angle_deg": 3.80525865347366,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.007353505080243761,
+        "local_sampled_surface_deviation": 0.002186961840298209,
+        "new_edge": [
+          "CMV:2107f82a8b3d3ac26756899d",
+          "CMV:433fd525e14b86638324f925"
+        ],
+        "new_max_aspect": 3.1606913540108916,
+        "new_min_angle_deg": 21.98516492618624,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:86c3a1024a68ba3addbba390",
+          "CMV:ec13f5ba8f3db6687f313444"
+        ],
+        "old_max_aspect": 22.9536547075632,
+        "old_min_angle_deg": 4.538780654534346,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.006345047853882193,
+        "local_sampled_surface_deviation": 0.000642092168598164,
+        "new_edge": [
+          "CMV:3fff64be67d443d8967d5569",
+          "CMV:a78aed9e01829d9cb6bdfe70"
+        ],
+        "new_max_aspect": 3.7129706822939443,
+        "new_min_angle_deg": 21.864330336287857,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:1fb99254b771a41c6cd60861",
+          "CMV:8d5bbcefba9f4ef52925baf9"
+        ],
+        "old_max_aspect": 20.298593416921303,
+        "old_min_angle_deg": 5.5930928885683215,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.006372195994053033,
+        "local_sampled_surface_deviation": 0.0017438878171707976,
+        "new_edge": [
+          "CMV:1b23e28d35c08ef6ca453ff1",
+          "CMV:d28e3e2bc715dc16960dde6d"
+        ],
+        "new_max_aspect": 3.9746193825636604,
+        "new_min_angle_deg": 20.284368289116507,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:537d468168c70a8d55756553",
+          "CMV:5f51fcabb1c388037e81e278"
+        ],
+        "old_max_aspect": 24.692837477309723,
+        "old_min_angle_deg": 4.549383095634312,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.0061693579701575865,
+        "local_sampled_surface_deviation": 0.0023073044317427037,
+        "new_edge": [
+          "CMV:4e6ab47d9f07aaee55c28d85",
+          "CMV:fdbfc7a7c2ca8cf2ceeea292"
+        ],
+        "new_max_aspect": 4.073557056103668,
+        "new_min_angle_deg": 17.875911855778597,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:6503e45cbb0de6455642ee5c",
+          "CMV:974ed8348f5f8e8592ab4b71"
+        ],
+        "old_max_aspect": 20.07009485432142,
+        "old_min_angle_deg": 5.423797634794278,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.00611842394395345,
+        "local_sampled_surface_deviation": 0.002314775570803487,
+        "new_edge": [
+          "CMV:4fdf57a549dc2b1dfd48bce1",
+          "CMV:96649283bfae9414e308aa51"
+        ],
+        "new_max_aspect": 3.4682061099160086,
+        "new_min_angle_deg": 17.772793376907533,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:3a69b1c01504dafe019a97a5",
+          "CMV:e047fc52eae52981d2c7d485"
+        ],
+        "old_max_aspect": 13.530719368537314,
+        "old_min_angle_deg": 7.071431549959994,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.0029970245761707453,
+        "local_sampled_surface_deviation": 0.0002120031243705383,
+        "new_edge": [
+          "CMV:2bff5a9c4e8663cce2d77384",
+          "CMV:f42f7d073318cff31d8a2e3e"
+        ],
+        "new_max_aspect": 4.327916718410097,
+        "new_min_angle_deg": 14.426506747620095,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:044d09bc0ee7a5e01ff9d56c",
+          "CMV:49f279d2a30bafe0b37ba674"
+        ],
+        "old_max_aspect": 25.558841813445145,
+        "old_min_angle_deg": 4.3330862863004596,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.0034960036256911895,
+        "local_sampled_surface_deviation": 0.0018297962621235896,
+        "new_edge": [
+          "CMV:364261b717f9abc4f11659a7",
+          "CMV:8b472fb417ccbc0d38ae634f"
+        ],
+        "new_max_aspect": 6.6252214050885145,
+        "new_min_angle_deg": 13.703042298221662,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:07b8f5715f1c0f23c996f6fd",
+          "CMV:3dae1ebeef8e080b84bd11c4"
+        ],
+        "old_max_aspect": 17.92114966097599,
+        "old_min_angle_deg": 6.2829763315470535,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.0058325860115971,
+        "local_sampled_surface_deviation": 0.003226401793982556,
+        "new_edge": [
+          "CMV:301a91f1023adc170e76939b",
+          "CMV:8301fea6453a0d8658b86872"
+        ],
+        "new_max_aspect": 5.343050184426477,
+        "new_min_angle_deg": 13.285009467601784,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:ae6a312f0b14158dbaa82621",
+          "CMV:ea5d221fc1c8b8c623f244cf"
+        ],
+        "old_max_aspect": 12.62741979270433,
+        "old_min_angle_deg": 6.477508814385223,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.004837867523938701,
+        "local_sampled_surface_deviation": 0.0017686264696496225,
+        "new_edge": [
+          "CMV:80be6e0fb6e099662c028b36",
+          "CMV:fcea717abbeb1d1485833573"
+        ],
+        "new_max_aspect": 7.979876882142936,
+        "new_min_angle_deg": 10.225476210412674,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:84503635e2984431eccd646a",
+          "CMV:9df38afa856b9ecc12b05865"
+        ],
+        "old_max_aspect": 24.47609808716781,
+        "old_min_angle_deg": 3.769894284900897,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.005064676156481027,
+        "local_sampled_surface_deviation": 0.0030990994347573765,
+        "new_edge": [
+          "CMV:451059d7ca1b2bd5057e18b1",
+          "CMV:645fd18a9dbc321d76f15334"
+        ],
+        "new_max_aspect": 5.3019934337579215,
+        "new_min_angle_deg": 11.142313007392946,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:4ed98e6e8ba296a55b20cb31",
+          "CMV:f833ccf551b59a4ce973629b"
+        ],
+        "old_max_aspect": 11.664434797836806,
+        "old_min_angle_deg": 5.322014192679521,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.003250534771684419,
+        "local_sampled_surface_deviation": 3.827832450969479e-05,
+        "new_edge": [
+          "CMV:f21d22c048ac092822706a16",
+          "CMV:fba12e15a19bda04f21b23be"
+        ],
+        "new_max_aspect": 8.477798104408583,
+        "new_min_angle_deg": 8.873000241227514,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:12ce432e1d3690749eb0b69b",
+          "CMV:d73fa8c07cf38180f26dc29c"
+        ],
+        "old_max_aspect": 21.419574056134284,
+        "old_min_angle_deg": 3.5083948169883308,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.00413832001464941,
+        "local_sampled_surface_deviation": 0.000944501281154057,
+        "new_edge": [
+          "CMV:acac79f9ca51da2fde57e779",
+          "CMV:b543ffefe5b056bb8131a909"
+        ],
+        "new_max_aspect": 7.112784091108646,
+        "new_min_angle_deg": 8.380254162679591,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:c58fb243d3dbfe5e0d39dc1f",
+          "CMV:dc29e72e970ac1c5707d7ff1"
+        ],
+        "old_max_aspect": 13.054799436906498,
+        "old_min_angle_deg": 4.705173318200543,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.005297690044395562,
+        "local_sampled_surface_deviation": 0.002976159638391279,
+        "new_edge": [
+          "CMV:c80135224e1b2e097e350c8c",
+          "CMV:d5ece6fd12dc189df89e7206"
+        ],
+        "new_max_aspect": 6.076565570411636,
+        "new_min_angle_deg": 10.001021753295708,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:2696dc70fd9af4ae6fd96d2a",
+          "CMV:5ddc0b9f61cb4d7b962812c2"
+        ],
+        "old_max_aspect": 8.561893216358094,
+        "old_min_angle_deg": 6.8080458562635995,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.005845314458014784,
+        "local_sampled_surface_deviation": 0.0005457012083405759,
+        "new_edge": [
+          "CMV:92d522dd83c2e238a82ef770",
+          "CMV:aca459608c90edc06aea03ef"
+        ],
+        "new_max_aspect": 8.074985420845943,
+        "new_min_angle_deg": 7.521293737877164,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:1247e956d34e91785ed98347",
+          "CMV:d3594eafacee4e5bbdb51e43"
+        ],
+        "old_max_aspect": 12.694096815488441,
+        "old_min_angle_deg": 5.069010269079129,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.005671530702946253,
+        "local_sampled_surface_deviation": 0.00036636867898811617,
+        "new_edge": [
+          "CMV:02ad82b03308fac582d6109c",
+          "CMV:d5ece6fd12dc189df89e7206"
+        ],
+        "new_max_aspect": 7.488564401426746,
+        "new_min_angle_deg": 7.691711906048827,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:2696dc70fd9af4ae6fd96d2a",
+          "CMV:b2288673a3f8ce70deba575d"
+        ],
+        "old_max_aspect": 7.978698722848333,
+        "old_min_angle_deg": 7.336709550234661,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.005473469316777238,
+        "local_sampled_surface_deviation": 0.000450874532925853,
+        "new_edge": [
+          "CMV:927a9422e637cd2266cfe530",
+          "CMV:ed7418f952ebf381474c40fa"
+        ],
+        "new_max_aspect": 8.902311755205076,
+        "new_min_angle_deg": 7.101404932613542,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:c40edde4863194fa3a43f7fb",
+          "CMV:d375e35439a23e874573122e"
+        ],
+        "old_max_aspect": 19.123329867929883,
+        "old_min_angle_deg": 3.4816088295089753,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.0034799134111284944,
+        "local_sampled_surface_deviation": 0.00028165691125025486,
+        "new_edge": [
+          "CMV:47a59bebc597554030772935",
+          "CMV:94e0233c0f94ccc0d97f054e"
+        ],
+        "new_max_aspect": 11.73445071797471,
+        "new_min_angle_deg": 5.972432137775047,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:57893dfa6ac238c9d8a01dcf",
+          "CMV:84c4c02c5b8b620d10e9371a"
+        ],
+        "old_max_aspect": 18.906186595766243,
+        "old_min_angle_deg": 3.698380657721882,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.006011886595320726,
+        "local_sampled_surface_deviation": 0.0011091571796281096,
+        "new_edge": [
+          "CMV:8301fea6453a0d8658b86872",
+          "CMV:b543ffefe5b056bb8131a909"
+        ],
+        "new_max_aspect": 12.070984469445646,
+        "new_min_angle_deg": 5.013332714680485,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:ae6a312f0b14158dbaa82621",
+          "CMV:dc29e72e970ac1c5707d7ff1"
+        ],
+        "old_max_aspect": 16.499417267557376,
+        "old_min_angle_deg": 3.7399370177166,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.004936148812797021,
+        "local_sampled_surface_deviation": 0.0004132301461872586,
+        "new_edge": [
+          "CMV:3d666442952646bf67c5e449",
+          "CMV:795de8db5cd660658b7696f4"
+        ],
+        "new_max_aspect": 10.757645750642746,
+        "new_min_angle_deg": 6.756943414879423,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:b572b7fc9cc83877be40912f",
+          "CMV:bc5967f17a94c93418599674"
+        ],
+        "old_max_aspect": 15.257179177763868,
+        "old_min_angle_deg": 5.530090316643287,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.004243994419118823,
+        "local_sampled_surface_deviation": 2.390151735775932e-05,
+        "new_edge": [
+          "CMV:3de72e013abe783f2457206a",
+          "CMV:f773f2f8e52565567aec37e0"
+        ],
+        "new_max_aspect": 9.546462131546045,
+        "new_min_angle_deg": 6.753649770989894,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:9e9a3b3ed3109a9633116b65",
+          "CMV:e0e942b7f64caa42b769fde2"
+        ],
+        "old_max_aspect": 11.155480487997714,
+        "old_min_angle_deg": 5.761011659717366,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.004662775654865848,
+        "local_sampled_surface_deviation": 0.0017460112546172236,
+        "new_edge": [
+          "CMV:88ea79cb3810945eb7eaa4cc",
+          "CMV:c40edde4863194fa3a43f7fb"
+        ],
+        "new_max_aspect": 11.435069284061164,
+        "new_min_angle_deg": 5.7117865790410836,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:0599bef64b9dd8c1f8f04516",
+          "CMV:ed7418f952ebf381474c40fa"
+        ],
+        "old_max_aspect": 13.92658402842245,
+        "old_min_angle_deg": 4.929124854231922,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.005462699988821925,
+        "local_sampled_surface_deviation": 0.0002770980044797822,
+        "new_edge": [
+          "CMV:645fd18a9dbc321d76f15334",
+          "CMV:fdf98db555127064ca0c43c0"
+        ],
+        "new_max_aspect": 9.982567632570365,
+        "new_min_angle_deg": 6.205462476999711,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:4ed98e6e8ba296a55b20cb31",
+          "CMV:ba25e1df055324a5d80d54f0"
+        ],
+        "old_max_aspect": 10.859993787237284,
+        "old_min_angle_deg": 5.817431470571014,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.006702581579848496,
+        "local_sampled_surface_deviation": 0.00040684262871871,
+        "new_edge": [
+          "CMV:c8794671c4e8d7602d1fcbb6",
+          "CMV:f833ccf551b59a4ce973629b"
+        ],
+        "new_max_aspect": 21.598710727476337,
+        "new_min_angle_deg": 2.655002961389664,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:645fd18a9dbc321d76f15334",
+          "CMV:c0726ed4127db981394ff767"
+        ],
+        "old_max_aspect": 23.917486813431506,
+        "old_min_angle_deg": 2.4550425345601674,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.004145242847050575,
+        "local_sampled_surface_deviation": 0.002023517750544473,
+        "new_edge": [
+          "CMV:3de72e013abe783f2457206a",
+          "CMV:f773f2f8e52565567aec37e0"
+        ],
+        "new_max_aspect": 9.546462131546045,
+        "new_min_angle_deg": 6.753649770989894,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:3ef0dc1a7644d504d5a9acfc",
+          "CMV:e0e942b7f64caa42b769fde2"
+        ],
+        "old_max_aspect": 9.607471212883924,
+        "old_min_angle_deg": 6.663812516826185,
+        "old_violation_count": 1,
+        "pass_index": 0
+      },
+      {
+        "allowed_local_deviation": 0.006234851902686682,
+        "local_sampled_surface_deviation": 0.0007742969225832534,
+        "new_edge": [
+          "CMV:795de8db5cd660658b7696f4",
+          "CMV:f103bc91134144cbd87b8362"
+        ],
+        "new_max_aspect": 3.4638138118294517,
+        "new_min_angle_deg": 18.77311179978312,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:3d666442952646bf67c5e449",
+          "CMV:bc5967f17a94c93418599674"
+        ],
+        "old_max_aspect": 10.757645750642746,
+        "old_min_angle_deg": 6.756943414879423,
+        "old_violation_count": 1,
+        "pass_index": 1
+      },
+      {
+        "allowed_local_deviation": 0.004097785955944719,
+        "local_sampled_surface_deviation": 0.0013564572943614234,
+        "new_edge": [
+          "CMV:aacbeafe6139b78af083fe7e",
+          "CMV:b543ffefe5b056bb8131a909"
+        ],
+        "new_max_aspect": 6.026456059328255,
+        "new_min_angle_deg": 9.798153672133912,
+        "new_violation_count": 0,
+        "old_edge": [
+          "CMV:8301fea6453a0d8658b86872",
+          "CMV:dc29e72e970ac1c5707d7ff1"
+        ],
+        "old_max_aspect": 12.070984469445646,
+        "old_min_angle_deg": 5.013332714680485,
+        "old_violation_count": 1,
+        "pass_index": 1
+      },
+      {
+        "allowed_local_deviation": 0.005824254510566522,
+        "local_sampled_surface_deviation": 0.001779384478016354,
+        "new_edge": [
+          "CMV:c40edde4863194fa3a43f7fb",
+          "CMV:e30269a92df16ece1a219101"
+        ],
+        "new_max_aspect": 9.069418003085374,
+        "new_min_angle_deg": 6.992398591063892,
+        "new_violation_count": 1,
+        "old_edge": [
+          "CMV:88ea79cb3810945eb7eaa4cc",
+          "CMV:ed7418f952ebf381474c40fa"
+        ],
+        "old_max_aspect": 11.435069284061164,
+        "old_min_angle_deg": 5.7117865790410836,
+        "old_violation_count": 1,
+        "pass_index": 1
+      }
+    ],
+    "after": {
+      "above_max_aspect_face_count": 41,
+      "below_min_angle_face_count": 86,
+      "degenerate_face_count": 0,
+      "face_count": 24958,
+      "max_aspect_longest_over_min_altitude": 205.80454309529944,
+      "min_angle_deg": 0.5399013039955519,
+      "policy_violating_face_count": 86,
+      "schema": "RealSaS.FixedVertexMeshQualityReport.v1"
+    },
+    "algorithm": "FIXED_VERTEX_MONOTONE_EDGE_FLIP_V1",
+    "before": {
+      "above_max_aspect_face_count": 57,
+      "below_min_angle_face_count": 109,
+      "degenerate_face_count": 0,
+      "face_count": 24958,
+      "max_aspect_longest_over_min_altitude": 272.00299700239304,
+      "min_angle_deg": 0.4074608559654188,
+      "policy_violating_face_count": 109,
+      "schema": "RealSaS.FixedVertexMeshQualityReport.v1"
+    },
+    "input_candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+    "rejected_shape_deviation_count": 47,
+    "rejected_topology_count": 4456,
+    "support_binding_changed": false,
+    "vertex_deletion": false,
+    "vertex_insertion": false,
+    "vertex_motion": false
+  },
+  "input_candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+  "input_face_count": 24958,
+  "input_vertex_count": 12049,
+  "pre_relax_wall_seconds": 120.56380736402934,
+  "product_authority_claimed": false,
+  "protected_surface_id_count": 0,
+  "quality_protection_policy": "SEPARATE_AND_UNKNOWN_ONLY__PRESERVE_CONTINUITY_VALIDATED_POST_REPAIR",
+  "relax_report": {
+    "accepted_move_count": 31,
+    "accepted_moves": [
+      {
+        "allowed_displacement": 0.007177542473233422,
+        "barycentric": [
+          0.8587652590578145,
+          0.04910258210883688,
+          0.09213215883334856
+        ],
+        "displacement": 0.006628164582706644,
+        "fraction": 0.5,
+        "move_index": 0,
+        "new_max_aspect": 13.241426507183796,
+        "new_min_angle_deg": 4.987968515136354,
+        "new_violation_count": 2,
+        "old_max_aspect": 14.47394941689629,
+        "old_min_angle_deg": 4.018769355581695,
+        "old_violation_count": 5,
+        "reference_face": [
+          "CMV:37e38337b7e8b6428f05958c",
+          "CMV:21259f1e4209c9406b274f00",
+          "CMV:690e763f034a9ba0ed46ffab"
+        ],
+        "vertex_id": "CMV:37e38337b7e8b6428f05958c"
+      },
+      {
+        "allowed_displacement": 0.007177542473233422,
+        "barycentric": [
+          0.7175305181156291,
+          0.09820516421767381,
+          0.1842643176666971
+        ],
+        "displacement": 0.006628164582706669,
+        "fraction": 1.0,
+        "move_index": 1,
+        "new_max_aspect": 10.45397259547146,
+        "new_min_angle_deg": 7.539056054580626,
+        "new_violation_count": 0,
+        "old_max_aspect": 13.241426507183796,
+        "old_min_angle_deg": 4.987968515136354,
+        "old_violation_count": 2,
+        "reference_face": [
+          "CMV:37e38337b7e8b6428f05958c",
+          "CMV:21259f1e4209c9406b274f00",
+          "CMV:690e763f034a9ba0ed46ffab"
+        ],
+        "vertex_id": "CMV:37e38337b7e8b6428f05958c"
+      },
+      {
+        "allowed_displacement": 0.006172417513037814,
+        "barycentric": [
+          0.9399751070901323,
+          0.04951768638963723,
+          0.01050720652023038
+        ],
+        "displacement": 0.0033482611989378453,
+        "fraction": 0.125,
+        "move_index": 2,
+        "new_max_aspect": 7.2471555773795515,
+        "new_min_angle_deg": 9.355806792980182,
+        "new_violation_count": 0,
+        "old_max_aspect": 9.069418003085374,
+        "old_min_angle_deg": 6.992398591063892,
+        "old_violation_count": 2,
+        "reference_face": [
+          "CMV:ed7418f952ebf381474c40fa",
+          "CMV:3d51fa7b52656594fc1bb80b",
+          "CMV:d375e35439a23e874573122e"
+        ],
+        "vertex_id": "CMV:ed7418f952ebf381474c40fa"
+      },
+      {
+        "allowed_displacement": 0.0077850470262938115,
+        "barycentric": [
+          0.025882120255364516,
+          0.07734359997484794,
+          0.8967742797697875
+        ],
+        "displacement": 0.005194716913799368,
+        "fraction": 0.25,
+        "move_index": 3,
+        "new_max_aspect": 9.863330112104862,
+        "new_min_angle_deg": 11.238021213875895,
+        "new_violation_count": 0,
+        "old_max_aspect": 21.816730085441105,
+        "old_min_angle_deg": 4.889961910407115,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:b13e482aa99880c2f1d61c4d",
+          "CMV:cce4cb3de784d0f752ad173c",
+          "CMV:ed3cde04199046d035eb8762"
+        ],
+        "vertex_id": "CMV:ed3cde04199046d035eb8762"
+      },
+      {
+        "allowed_displacement": 0.004529748730901732,
+        "barycentric": [
+          0.1773818350710834,
+          0.038318495166254844,
+          0.7842996697626617
+        ],
+        "displacement": 0.004160906775386862,
+        "fraction": 0.75,
+        "move_index": 4,
+        "new_max_aspect": 9.654198793636636,
+        "new_min_angle_deg": 11.479130801321592,
+        "new_violation_count": 0,
+        "old_max_aspect": 17.117066951297616,
+        "old_min_angle_deg": 6.343788808570896,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:a4bf5f28ad6b49257bde34ce",
+          "CMV:d742b88220ce838a7409b51b",
+          "CMV:be88615fd566b328f46566a1"
+        ],
+        "vertex_id": "CMV:be88615fd566b328f46566a1"
+      },
+      {
+        "allowed_displacement": 0.004522498251231555,
+        "barycentric": [
+          0.8559891214185202,
+          0.04930435148496702,
+          0.09470652709651274
+        ],
+        "displacement": 0.004519594509343037,
+        "fraction": 0.5,
+        "move_index": 5,
+        "new_max_aspect": 6.140904810807978,
+        "new_min_angle_deg": 9.781968771758907,
+        "new_violation_count": 0,
+        "old_max_aspect": 8.574291995010586,
+        "old_min_angle_deg": 7.200130051553783,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:19f62311ce1648d29d450808",
+          "CMV:7c6790f6d2c64d0e0da4c6a8",
+          "CMV:544ce0cadd541633b2e8fec4"
+        ],
+        "vertex_id": "CMV:19f62311ce1648d29d450808"
+      },
+      {
+        "allowed_displacement": 0.007139398232714454,
+        "barycentric": [
+          0.2965683484901037,
+          0.14239528879140598,
+          0.5610363627184903
+        ],
+        "displacement": 0.0038482272846735977,
+        "fraction": 0.5,
+        "move_index": 6,
+        "new_max_aspect": 10.518337881728462,
+        "new_min_angle_deg": 7.916911722185352,
+        "new_violation_count": 0,
+        "old_max_aspect": 13.514224322371257,
+        "old_min_angle_deg": 6.003125739811346,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:5b523c154b7fcdd44e73c772",
+          "CMV:8b472fb417ccbc0d38ae634f",
+          "CMV:ed25e3e9e797c0b9767593db"
+        ],
+        "vertex_id": "CMV:ed25e3e9e797c0b9767593db"
+      },
+      {
+        "allowed_displacement": 0.006573533311138798,
+        "barycentric": [
+          0.9069293131408127,
+          0.03688099284517879,
+          0.056189694014008536
+        ],
+        "displacement": 0.004871185677338649,
+        "fraction": 0.5,
+        "move_index": 7,
+        "new_max_aspect": 11.124351689822115,
+        "new_min_angle_deg": 5.9105320036611895,
+        "new_violation_count": 1,
+        "old_max_aspect": 13.972446789889224,
+        "old_min_angle_deg": 4.338595430017156,
+        "old_violation_count": 2,
+        "reference_face": [
+          "CMV:b543ffefe5b056bb8131a909",
+          "CMV:329dd27edf59abfaa7cf246d",
+          "CMV:ae6a312f0b14158dbaa82621"
+        ],
+        "vertex_id": "CMV:b543ffefe5b056bb8131a909"
+      },
+      {
+        "allowed_displacement": 0.00637315873949027,
+        "barycentric": [
+          0.12071045296782013,
+          0.0039224379362240176,
+          0.8753671090959558
+        ],
+        "displacement": 0.006150287337852159,
+        "fraction": 0.5,
+        "move_index": 8,
+        "new_max_aspect": 7.335671932101366,
+        "new_min_angle_deg": 8.39652120955219,
+        "new_violation_count": 0,
+        "old_max_aspect": 8.355775152411118,
+        "old_min_angle_deg": 7.3141600797513195,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:1247e956d34e91785ed98347",
+          "CMV:8d2a28342571c8e475b2b1ff",
+          "CMV:7f65c1ec7bdb554cfae54c55"
+        ],
+        "vertex_id": "CMV:7f65c1ec7bdb554cfae54c55"
+      },
+      {
+        "allowed_displacement": 0.007718746414099131,
+        "barycentric": [
+          0.09755043021000698,
+          0.8962462148236434,
+          0.006203354966349608
+        ],
+        "displacement": 0.005073614630737151,
+        "fraction": 1.0,
+        "move_index": 9,
+        "new_max_aspect": 15.222007170971363,
+        "new_min_angle_deg": 6.976051663795692,
+        "new_violation_count": 1,
+        "old_max_aspect": 51.691657190118704,
+        "old_min_angle_deg": 2.141011211948017,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:701eff6afd28a63736443b1d",
+          "CMV:ba27c28acfa7b3ec446258df",
+          "CMV:809dea8328bf3f89abb52025"
+        ],
+        "vertex_id": "CMV:ba27c28acfa7b3ec446258df"
+      },
+      {
+        "allowed_displacement": 0.007311829427361292,
+        "barycentric": [
+          0.030810743154974986,
+          0.9269773132568552,
+          0.04221194358816984
+        ],
+        "displacement": 0.004131417933848404,
+        "fraction": 0.25,
+        "move_index": 10,
+        "new_max_aspect": 21.191687096041992,
+        "new_min_angle_deg": 4.897411556114652,
+        "new_violation_count": 1,
+        "old_max_aspect": 32.38888340247067,
+        "old_min_angle_deg": 3.0552777066228276,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:d8ddf237356957a3fc843868",
+          "CMV:df2452c6f35ebd3747b1f4f9",
+          "CMV:013e4e9a1306907aab0e9433"
+        ],
+        "vertex_id": "CMV:df2452c6f35ebd3747b1f4f9"
+      },
+      {
+        "allowed_displacement": 0.007311829427361292,
+        "barycentric": [
+          0.07702685788743845,
+          0.8174432831421387,
+          0.1055298589704229
+        ],
+        "displacement": 0.006197126900772648,
+        "fraction": 0.5,
+        "move_index": 11,
+        "new_max_aspect": 11.89562190576647,
+        "new_min_angle_deg": 9.446706963777453,
+        "new_violation_count": 0,
+        "old_max_aspect": 21.191687096041992,
+        "old_min_angle_deg": 4.897411556114652,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:d8ddf237356957a3fc843868",
+          "CMV:df2452c6f35ebd3747b1f4f9",
+          "CMV:013e4e9a1306907aab0e9433"
+        ],
+        "vertex_id": "CMV:df2452c6f35ebd3747b1f4f9"
+      },
+      {
+        "allowed_displacement": 0.0064518999235596425,
+        "barycentric": [
+          0.014309371034827358,
+          0.9315570900878001,
+          0.054133538877372565
+        ],
+        "displacement": 0.004381060433861684,
+        "fraction": 0.25,
+        "move_index": 12,
+        "new_max_aspect": 9.239605579173165,
+        "new_min_angle_deg": 6.26476524311388,
+        "new_violation_count": 2,
+        "old_max_aspect": 13.6070406384405,
+        "old_min_angle_deg": 4.554305429634355,
+        "old_violation_count": 2,
+        "reference_face": [
+          "CMV:1c2721844548015ab6009518",
+          "CMV:90db3b696619ed0777fe251b",
+          "CMV:a977032dd6c833ab967cac98"
+        ],
+        "vertex_id": "CMV:90db3b696619ed0777fe251b"
+      },
+      {
+        "allowed_displacement": 0.0064518999235596425,
+        "barycentric": [
+          0.025041399310948093,
+          0.8802249076536502,
+          0.09473369303540166
+        ],
+        "displacement": 0.0032857953253962475,
+        "fraction": 0.25,
+        "move_index": 13,
+        "new_max_aspect": 7.133958822256167,
+        "new_min_angle_deg": 8.427427240578055,
+        "new_violation_count": 0,
+        "old_max_aspect": 9.239605579173165,
+        "old_min_angle_deg": 6.26476524311388,
+        "old_violation_count": 2,
+        "reference_face": [
+          "CMV:1c2721844548015ab6009518",
+          "CMV:90db3b696619ed0777fe251b",
+          "CMV:a977032dd6c833ab967cac98"
+        ],
+        "vertex_id": "CMV:90db3b696619ed0777fe251b"
+      },
+      {
+        "allowed_displacement": 0.0075093420315957065,
+        "barycentric": [
+          0.042329571751939465,
+          0.892922764765666,
+          0.06474766348239452
+        ],
+        "displacement": 0.0060706627556626775,
+        "fraction": 0.75,
+        "move_index": 14,
+        "new_max_aspect": 13.119934101553186,
+        "new_min_angle_deg": 6.1213127826045834,
+        "new_violation_count": 1,
+        "old_max_aspect": 16.692620941686442,
+        "old_min_angle_deg": 4.6570257702623215,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:bfed737308f4e5ef1e986dd3",
+          "CMV:811229285147698dbf3e79a0",
+          "CMV:4ecab6fb5dc5f0099318aceb"
+        ],
+        "vertex_id": "CMV:811229285147698dbf3e79a0"
+      },
+      {
+        "allowed_displacement": 0.006573533311138798,
+        "barycentric": [
+          0.8138586262816256,
+          0.07376198569035122,
+          0.11237938802802312
+        ],
+        "displacement": 0.00487118567733856,
+        "fraction": 1.0,
+        "move_index": 15,
+        "new_max_aspect": 9.71632382197391,
+        "new_min_angle_deg": 7.301844918917476,
+        "new_violation_count": 1,
+        "old_max_aspect": 11.124351689822115,
+        "old_min_angle_deg": 5.9105320036611895,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:b543ffefe5b056bb8131a909",
+          "CMV:329dd27edf59abfaa7cf246d",
+          "CMV:ae6a312f0b14158dbaa82621"
+        ],
+        "vertex_id": "CMV:b543ffefe5b056bb8131a909"
+      },
+      {
+        "allowed_displacement": 0.008001497354515628,
+        "barycentric": [
+          0.8762749860925201,
+          0.12372501390747986,
+          0.0
+        ],
+        "displacement": 0.006752267644613004,
+        "fraction": 0.5,
+        "move_index": 16,
+        "new_max_aspect": 8.794960292283177,
+        "new_min_angle_deg": 8.301801682723502,
+        "new_violation_count": 0,
+        "old_max_aspect": 9.71632382197391,
+        "old_min_angle_deg": 7.301844918917476,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:4be9913e8b5d949a1607d4c7",
+          "CMV:b543ffefe5b056bb8131a909",
+          "CMV:dc29e72e970ac1c5707d7ff1"
+        ],
+        "vertex_id": "CMV:4be9913e8b5d949a1607d4c7"
+      },
+      {
+        "allowed_displacement": 0.007423487183404308,
+        "barycentric": [
+          0.06532018307322218,
+          0.9346798169267778,
+          0.0
+        ],
+        "displacement": 0.00441807179268954,
+        "fraction": 0.25,
+        "move_index": 17,
+        "new_max_aspect": 12.621535382252059,
+        "new_min_angle_deg": 6.221183019359865,
+        "new_violation_count": 1,
+        "old_max_aspect": 17.039728159940964,
+        "old_min_angle_deg": 4.939351475628386,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:bc8edec53c5a392abcf4c9e3",
+          "CMV:280b5937794f1f2ace22e1b4",
+          "CMV:4a5b09db6ddf05b5782e066f"
+        ],
+        "vertex_id": "CMV:280b5937794f1f2ace22e1b4"
+      },
+      {
+        "allowed_displacement": 0.00713720195211971,
+        "barycentric": [
+          0.16330045768305435,
+          0.8366995423169457,
+          0.0
+        ],
+        "displacement": 0.006627107689034375,
+        "fraction": 0.5,
+        "move_index": 18,
+        "new_max_aspect": 8.077688034629933,
+        "new_min_angle_deg": 8.692094905402925,
+        "new_violation_count": 0,
+        "old_max_aspect": 12.621535382252059,
+        "old_min_angle_deg": 6.221183019359865,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:bc8edec53c5a392abcf4c9e3",
+          "CMV:280b5937794f1f2ace22e1b4",
+          "CMV:4a5b09db6ddf05b5782e066f"
+        ],
+        "vertex_id": "CMV:280b5937794f1f2ace22e1b4"
+      },
+      {
+        "allowed_displacement": 0.007447454558063847,
+        "barycentric": [
+          0.05643942900258769,
+          0.8572303530208881,
+          0.08633021797652418
+        ],
+        "displacement": 0.002023554251887543,
+        "fraction": 1.0,
+        "move_index": 19,
+        "new_max_aspect": 12.011092016789402,
+        "new_min_angle_deg": 6.7650968357792785,
+        "new_violation_count": 1,
+        "old_max_aspect": 13.119934101553186,
+        "old_min_angle_deg": 6.1213127826045834,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:bfed737308f4e5ef1e986dd3",
+          "CMV:811229285147698dbf3e79a0",
+          "CMV:4ecab6fb5dc5f0099318aceb"
+        ],
+        "vertex_id": "CMV:811229285147698dbf3e79a0"
+      },
+      {
+        "allowed_displacement": 0.005469873719696084,
+        "barycentric": [
+          0.9304511582384184,
+          0.05605693271538008,
+          0.013491909046201558
+        ],
+        "displacement": 0.0027612457835331614,
+        "fraction": 0.25,
+        "move_index": 20,
+        "new_max_aspect": 30.147189877894842,
+        "new_min_angle_deg": 3.7008109472283692,
+        "new_violation_count": 1,
+        "old_max_aspect": 34.1300793175075,
+        "old_min_angle_deg": 3.0673509322765313,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:5bea453909302849fec300ad",
+          "CMV:f91a4b2d505b58cb52bd4e0b",
+          "CMV:8c00a767b081e5f38a0c8719"
+        ],
+        "vertex_id": "CMV:5bea453909302849fec300ad"
+      },
+      {
+        "allowed_displacement": 0.005299904229467866,
+        "barycentric": [
+          0.8261278955960457,
+          0.1401423317884557,
+          0.03372977261549861
+        ],
+        "displacement": 0.004141868675299894,
+        "fraction": 0.5,
+        "move_index": 21,
+        "new_max_aspect": 25.63613307843816,
+        "new_min_angle_deg": 4.146324903939203,
+        "new_violation_count": 1,
+        "old_max_aspect": 30.147189877894842,
+        "old_min_angle_deg": 3.7008109472283692,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:5bea453909302849fec300ad",
+          "CMV:f91a4b2d505b58cb52bd4e0b",
+          "CMV:8c00a767b081e5f38a0c8719"
+        ],
+        "vertex_id": "CMV:5bea453909302849fec300ad"
+      },
+      {
+        "allowed_displacement": 0.008238675282715557,
+        "barycentric": [
+          0.07021434594028919,
+          0.01118801869274169,
+          0.9185976353669691
+        ],
+        "displacement": 0.006273902502012708,
+        "fraction": 0.75,
+        "move_index": 22,
+        "new_max_aspect": 22.79258768975555,
+        "new_min_angle_deg": 5.008436515486832,
+        "new_violation_count": 1,
+        "old_max_aspect": 25.63613307843816,
+        "old_min_angle_deg": 4.146324903939203,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:f91a4b2d505b58cb52bd4e0b",
+          "CMV:bfe78d8777efcbc85dd78fa0",
+          "CMV:6dad14c40472bc6686c11f6d"
+        ],
+        "vertex_id": "CMV:6dad14c40472bc6686c11f6d"
+      },
+      {
+        "allowed_displacement": 0.007618150020980948,
+        "barycentric": [
+          0.001225538397171766,
+          0.03762064024957879,
+          0.9611538213532494
+        ],
+        "displacement": 0.0020023160414114204,
+        "fraction": 1.0,
+        "move_index": 23,
+        "new_max_aspect": 15.140099151009148,
+        "new_min_angle_deg": 7.275009768701179,
+        "new_violation_count": 1,
+        "old_max_aspect": 15.222007170971363,
+        "old_min_angle_deg": 6.976051663795692,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:4ac56d8c46eda33f271a1cf5",
+          "CMV:ba27c28acfa7b3ec446258df",
+          "CMV:09f077ab5f056b687975fd4b"
+        ],
+        "vertex_id": "CMV:09f077ab5f056b687975fd4b"
+      },
+      {
+        "allowed_displacement": 0.00687142056943149,
+        "barycentric": [
+          0.022190029603582184,
+          0.154830325906138,
+          0.8229796444902798
+        ],
+        "displacement": 0.005150720281933432,
+        "fraction": 0.125,
+        "move_index": 24,
+        "new_max_aspect": 15.611978098173585,
+        "new_min_angle_deg": 5.329065625285892,
+        "new_violation_count": 1,
+        "old_max_aspect": 17.124583270342264,
+        "old_min_angle_deg": 5.216578901579335,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:05468cd0cd8c18f9aad01868",
+          "CMV:d6a5247961ec5ff11f0b45cf",
+          "CMV:c2dc71164366b66c1bb3aa8e"
+        ],
+        "vertex_id": "CMV:c2dc71164366b66c1bb3aa8e"
+      },
+      {
+        "allowed_displacement": 0.00687142056943149,
+        "barycentric": [
+          0.04160630550669875,
+          0.29030686107402465,
+          0.6680868334192765
+        ],
+        "displacement": 0.004506880246691747,
+        "fraction": 0.125,
+        "move_index": 25,
+        "new_max_aspect": 14.298038018297289,
+        "new_min_angle_deg": 5.443419680799897,
+        "new_violation_count": 1,
+        "old_max_aspect": 15.611978098173585,
+        "old_min_angle_deg": 5.329065625285892,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:05468cd0cd8c18f9aad01868",
+          "CMV:d6a5247961ec5ff11f0b45cf",
+          "CMV:c2dc71164366b66c1bb3aa8e"
+        ],
+        "vertex_id": "CMV:c2dc71164366b66c1bb3aa8e"
+      },
+      {
+        "allowed_displacement": 0.008238675282715557,
+        "barycentric": [
+          0.09361912792038773,
+          0.014917358256985255,
+          0.891463513822627
+        ],
+        "displacement": 0.00209130083400413,
+        "fraction": 1.0,
+        "move_index": 26,
+        "new_max_aspect": 21.859878610082344,
+        "new_min_angle_deg": 5.075920965319756,
+        "new_violation_count": 1,
+        "old_max_aspect": 22.79258768975555,
+        "old_min_angle_deg": 5.008436515486832,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:f91a4b2d505b58cb52bd4e0b",
+          "CMV:bfe78d8777efcbc85dd78fa0",
+          "CMV:6dad14c40472bc6686c11f6d"
+        ],
+        "vertex_id": "CMV:6dad14c40472bc6686c11f6d"
+      },
+      {
+        "allowed_displacement": 0.005045665673058365,
+        "barycentric": [
+          0.78809595531913,
+          0.17288500226219478,
+          0.039019042418675126
+        ],
+        "displacement": 0.0015541833979521133,
+        "fraction": 0.25,
+        "move_index": 27,
+        "new_max_aspect": 21.272321826604745,
+        "new_min_angle_deg": 5.303647598309038,
+        "new_violation_count": 1,
+        "old_max_aspect": 21.859878610082344,
+        "old_min_angle_deg": 5.075920965319756,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:5bea453909302849fec300ad",
+          "CMV:f91a4b2d505b58cb52bd4e0b",
+          "CMV:8c00a767b081e5f38a0c8719"
+        ],
+        "vertex_id": "CMV:5bea453909302849fec300ad"
+      },
+      {
+        "allowed_displacement": 0.008238675282715557,
+        "barycentric": [
+          0.09564577919028117,
+          0.014489539049007495,
+          0.8898646817607113
+        ],
+        "displacement": 0.000141286107390068,
+        "fraction": 1.0,
+        "move_index": 28,
+        "new_max_aspect": 21.256910980070597,
+        "new_min_angle_deg": 5.317579770843117,
+        "new_violation_count": 1,
+        "old_max_aspect": 21.272321826604745,
+        "old_min_angle_deg": 5.303647598309038,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:f91a4b2d505b58cb52bd4e0b",
+          "CMV:bfe78d8777efcbc85dd78fa0",
+          "CMV:6dad14c40472bc6686c11f6d"
+        ],
+        "vertex_id": "CMV:6dad14c40472bc6686c11f6d"
+      },
+      {
+        "allowed_displacement": 0.008005401832911829,
+        "barycentric": [
+          0.11919098544189,
+          0.88080901455811,
+          0.0
+        ],
+        "displacement": 0.007161514840015231,
+        "fraction": 0.75,
+        "move_index": 29,
+        "new_max_aspect": 13.014314724358428,
+        "new_min_angle_deg": 5.86748233086028,
+        "new_violation_count": 1,
+        "old_max_aspect": 14.77541045704155,
+        "old_min_angle_deg": 5.8674823308603425,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:479e1e0c0f1b2ca1db60b234",
+          "CMV:d20f4da9a06a7f036a63c631",
+          "CMV:5bfb2b2d9162a1428b7ac4d2"
+        ],
+        "vertex_id": "CMV:d20f4da9a06a7f036a63c631"
+      },
+      {
+        "allowed_displacement": 0.008118944864430174,
+        "barycentric": [
+          0.1589213139225225,
+          0.8410786860774775,
+          0.0
+        ],
+        "displacement": 0.0023871716133390002,
+        "fraction": 1.0,
+        "move_index": 30,
+        "new_max_aspect": 12.427282813463854,
+        "new_min_angle_deg": 5.86748233086028,
+        "new_violation_count": 1,
+        "old_max_aspect": 13.014314724358428,
+        "old_min_angle_deg": 5.86748233086028,
+        "old_violation_count": 1,
+        "reference_face": [
+          "CMV:479e1e0c0f1b2ca1db60b234",
+          "CMV:d20f4da9a06a7f036a63c631",
+          "CMV:5bfb2b2d9162a1428b7ac4d2"
+        ],
+        "vertex_id": "CMV:d20f4da9a06a7f036a63c631"
+      }
+    ],
+    "after": {
+      "above_max_aspect_face_count": 8,
+      "below_min_angle_face_count": 17,
+      "degenerate_face_count": 0,
+      "face_count": 24888,
+      "max_aspect_longest_over_min_altitude": 205.80454309529944,
+      "min_angle_deg": 0.5399013039955519,
+      "policy_violating_face_count": 17,
+      "schema": "RealSaS.FixedVertexMeshQualityReport.v1"
+    },
+    "algorithm": "PROJECTED_LOCAL_RELAXATION_V1",
+    "before": {
+      "above_max_aspect_face_count": 15,
+      "below_min_angle_face_count": 35,
+      "degenerate_face_count": 0,
+      "face_count": 24888,
+      "max_aspect_longest_over_min_altitude": 205.80454309529944,
+      "min_angle_deg": 0.5399013039955519,
+      "policy_violating_face_count": 35,
+      "schema": "RealSaS.FixedVertexMeshQualityReport.v1"
+    },
+    "input_candidate_lineage_hash": "8e8911f5c466784703a0d249e44611afb55d6c893f64279b5c2f6ebaceaa81c9",
+    "reference_candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+    "rejected_boundary_count": 1097,
+    "rejected_orientation_count": 52,
+    "rejected_projection_count": 0,
+    "rejected_protected_count": 0,
+    "rejected_quality_count": 1852,
+    "rejected_shape_count": 1197
+  },
+  "relax_wall_seconds": 83.7414841640275,
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "schema": "RealSaS.KnightFlipCollapseRelaxMeshQualityDiagnostic.v1",
+  "source_fidelity_passed": false,
+  "source_fidelity_views": [
+    {
+      "component_recall": 0.9934534114490776,
+      "eligible_component_count": 1,
+      "interior_uncovered_fraction": 0.0023699733158559994,
+      "largest_coherent_hole_fraction": 0.0007566985015076645,
+      "passed": false,
+      "predicted_foreground_pixel_count": 175297,
+      "silhouette_edge_max_px": 27.202941017470888,
+      "silhouette_edge_mean_px": 1.1713370442782152,
+      "silhouette_edge_p95_px": 3.605551275463989,
+      "silhouette_precision": 0.988607905440481,
+      "silhouette_recall": 0.9934534114490776,
+      "source_foreground_pixel_count": 174442,
+      "view_index": 0
+    },
+    {
+      "component_recall": 0.9948749805870477,
+      "eligible_component_count": 1,
+      "interior_uncovered_fraction": 0.001669609707507018,
+      "largest_coherent_hole_fraction": 0.0012646151798194041,
+      "passed": false,
+      "predicted_foreground_pixel_count": 181164,
+      "silhouette_edge_max_px": 27.0,
+      "silhouette_edge_mean_px": 1.0482500410429696,
+      "silhouette_edge_p95_px": 3.0,
+      "silhouette_precision": 0.990086330617562,
+      "silhouette_recall": 0.9948749805870477,
+      "source_foreground_pixel_count": 180292,
+      "view_index": 1
+    },
+    {
+      "component_recall": 0.993450431676094,
+      "eligible_component_count": 1,
+      "interior_uncovered_fraction": 0.002392395448059462,
+      "largest_coherent_hole_fraction": 0.0023678143412006617,
+      "passed": false,
+      "predicted_foreground_pixel_count": 145893,
+      "silhouette_edge_max_px": 22.0,
+      "silhouette_edge_mean_px": 1.317958019725285,
+      "silhouette_edge_p95_px": 5.0,
+      "silhouette_precision": 0.983535879034635,
+      "silhouette_recall": 0.993450431676094,
+      "source_foreground_pixel_count": 144437,
+      "view_index": 2
+    },
+    {
+      "component_recall": 0.9956345868877408,
+      "eligible_component_count": 1,
+      "interior_uncovered_fraction": 0.0014389159777929243,
+      "largest_coherent_hole_fraction": 0.001361688493732228,
+      "passed": false,
+      "predicted_foreground_pixel_count": 175669,
+      "silhouette_edge_max_px": 13.92838827718412,
+      "silhouette_edge_mean_px": 0.8754387089889577,
+      "silhouette_edge_p95_px": 3.0,
+      "silhouette_precision": 0.9906130279104453,
+      "silhouette_recall": 0.9956345868877408,
+      "source_foreground_pixel_count": 174783,
+      "view_index": 3
+    },
+    {
+      "component_recall": 0.9934420966946792,
+      "eligible_component_count": 1,
+      "interior_uncovered_fraction": 0.002364066193853428,
+      "largest_coherent_hole_fraction": 0.0007566811506139436,
+      "passed": false,
+      "predicted_foreground_pixel_count": 175297,
+      "silhouette_edge_max_px": 27.202941017470888,
+      "silhouette_edge_mean_px": 1.1717438596549665,
+      "silhouette_edge_p95_px": 3.605551275463989,
+      "silhouette_precision": 0.9886193146488531,
+      "silhouette_recall": 0.9934420966946792,
+      "source_foreground_pixel_count": 174446,
+      "view_index": 4
+    },
+    {
+      "component_recall": 0.994875065864278,
+      "eligible_component_count": 1,
+      "interior_uncovered_fraction": 0.0016752409573775686,
+      "largest_coherent_hole_fraction": 0.0012645941373859509,
+      "passed": false,
+      "predicted_foreground_pixel_count": 181164,
+      "silhouette_edge_max_px": 27.0,
+      "silhouette_edge_mean_px": 1.0474845601607938,
+      "silhouette_edge_p95_px": 3.0,
+      "silhouette_precision": 0.9901028901989358,
+      "silhouette_recall": 0.994875065864278,
+      "source_foreground_pixel_count": 180295,
+      "view_index": 5
+    },
+    {
+      "component_recall": 0.9934710663694144,
+      "eligible_component_count": 1,
+      "interior_uncovered_fraction": 0.002371098159204333,
+      "largest_coherent_hole_fraction": 0.002374787099990307,
+      "passed": false,
+      "predicted_foreground_pixel_count": 145893,
+      "silhouette_edge_max_px": 22.0,
+      "silhouette_edge_mean_px": 1.3161171198047146,
+      "silhouette_edge_p95_px": 5.0,
+      "silhouette_precision": 0.983535879034635,
+      "silhouette_recall": 0.9934710663694144,
+      "source_foreground_pixel_count": 144434,
+      "view_index": 6
+    },
+    {
+      "component_recall": 0.9956517261502901,
+      "eligible_component_count": 1,
+      "interior_uncovered_fraction": 0.0014214475462553014,
+      "largest_coherent_hole_fraction": 0.001355974871554279,
+      "passed": false,
+      "predicted_foreground_pixel_count": 175669,
+      "silhouette_edge_max_px": 13.92838827718412,
+      "silhouette_edge_mean_px": 0.8738160371437245,
+      "silhouette_edge_p95_px": 3.0,
+      "silhouette_precision": 0.9906244129584616,
+      "silhouette_recall": 0.9956517261502901,
+      "source_foreground_pixel_count": 174782,
+      "view_index": 7
+    }
+  ],
+  "status": "PASS_MEASUREMENT",
+  "total_repair_wall_seconds": 204.30529152805684
+}

@@ -1,0 +1,37 @@
+{
+  "schema": "RealSaS.ProductCompilePerformanceContract.v1",
+  "status": "FROZEN_PRODUCT_REQUIREMENT",
+  "frozen_on": "2026-09-27",
+  "scope": "END_USER_CHARACTER_COMPILE",
+  "principles": {
+    "quality_and_performance_are_coequal_product_gates": true,
+    "quality_threshold_relaxation_for_speed_forbidden": true,
+    "certification_work_is_not_user_compile_latency": true,
+    "model_training_is_not_user_compile_latency": true,
+    "product_compile_uses_trained_model_inference_only": true
+  },
+  "latency_budget_seconds": {
+    "hard_total_compile_max": 60,
+    "measurement_start": "USER_COMPILE_REQUEST_ACCEPTED_AFTER_INPUT_BYTES_AVAILABLE",
+    "measurement_end": "EDITABLE_RSS_PACKAGE_READY_WITH_FAST_PRODUCT_VALIDATION",
+    "excludes": [
+      "MODEL_TRAINING_OR_FINE_TUNING",
+      "OFFLINE_CI_CERTIFICATION",
+      "ADVERSARIAL_HOLDOUT_SWEEPS",
+      "RESEARCH_PROOF_RECOMPUTATION"
+    ]
+  },
+  "required_measurements": [
+    "TOTAL_WALL_SECONDS",
+    "PER_STAGE_OR_FUSED_PASS_WALL_SECONDS",
+    "PEAK_HOST_RAM_BYTES",
+    "PEAK_GPU_VRAM_BYTES_IF_GPU_USED"
+  ],
+  "pass_condition": "QUALITY_GATES_PASS_AND_TOTAL_WALL_SECONDS_LE_60",
+  "failure_classes": {
+    "quality_failure": "ANY_FROZEN_PRODUCT_QUALITY_GATE_FAILS",
+    "performance_failure": "TOTAL_PRODUCT_COMPILE_WALL_SECONDS_GT_60",
+    "measurement_failure": "REQUIRED_LATENCY_OR_MEMORY_EVIDENCE_MISSING"
+  },
+  "implementation_note": "Logical 46-stage authority boundaries may be fused into fewer product execution passes when ownership, provenance and fail-closed semantics remain exactly recoverable."
+}

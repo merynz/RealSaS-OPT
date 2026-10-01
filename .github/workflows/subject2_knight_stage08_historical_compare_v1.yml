@@ -1,0 +1,254 @@
+name: subject2-knight-stage08-historical-compare-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_STAGE08_HISTORICAL_COMPARE_TRIGGER_20260927.json'
+      - '.github/workflows/subject2_knight_stage08_historical_compare_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-stage08-historical-compare-v1
+  cancel-in-progress: false
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  compare:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      HISTORICAL_RUN_ID: '36022491562'
+      EXPECTED_HISTORICAL_OBSERVATION_HASH: '87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa'
+      EXPECTED_HISTORICAL_NORMALIZATION_HASH: '81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Download exact historical Stage01-08 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: subject2-knight-demo-v2-stage08
+          path: ${{ runner.temp }}/historical-stage08
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: 36022491562
+
+      - name: Compare historical and current Stage03-08 authorities
+        shell: bash
+        run: |
+          set -euo pipefail
+          HIST_ROOT="$RUNNER_TEMP/historical-stage08"
+          export HIST_ROOT
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+
+          hist_root=Path(os.environ["HIST_ROOT"]).resolve()
+          run_root=Path(os.environ["RUN_ROOT"]).resolve()
+          old_ledger=json.loads((hist_root/"ACTIVE_RUN_V2.json").read_text())
+          cur_ledger=json.loads((run_root/"ACTIVE_RUN_V2.json").read_text())
+          old_by={r["id"]:r for r in old_ledger["stages"]}
+          cur_by={r["id"]:r for r in cur_ledger["stages"]}
+
+          def sha(path):
+              h=hashlib.sha256()
+              with Path(path).open("rb") as f:
+                  for chunk in iter(lambda:f.read(1<<20),b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          def archived_output(stage_id,output):
+              name=Path(output["path"]).name
+              p=hist_root/stage_id/name
+              if not p.is_file():
+                  raise SystemExit(f"HISTORICAL_OUTPUT_MISSING:{stage_id}:{name}")
+              return p
+
+          def current_output(stage_id,schema):
+              rows=[x for x in cur_by[stage_id].get("outputs",[]) if x.get("schema")==schema]
+              if len(rows)!=1:
+                  raise SystemExit(f"CURRENT_OUTPUT_CARDINALITY:{stage_id}:{schema}:{len(rows)}")
+              p=Path(rows[0]["path"])
+              if not p.is_file():
+                  raise SystemExit(f"CURRENT_OUTPUT_MISSING:{p}")
+              return p
+
+          def normalize_semantic(value):
+              if isinstance(value,dict):
+                  out={}
+                  for k,v in value.items():
+                      lk=str(k).lower()
+                      if (
+                          "hash" in lk
+                          or "sha256" in lk
+                          or lk.endswith("_path")
+                          or lk=="path"
+                          or lk=="metadata"
+                          or lk=="evidence_refs"
+                      ):
+                          continue
+                      out[k]=normalize_semantic(v)
+                  return out
+              if isinstance(value,list):
+                  return [normalize_semantic(x) for x in value]
+              return value
+
+          def diff_paths(a,b,prefix=""):
+              rows=[]
+              if type(a) is not type(b):
+                  return [prefix or "<root>"]
+              if isinstance(a,dict):
+                  keys=sorted(set(a)|set(b))
+                  for k in keys:
+                      p=f"{prefix}.{k}" if prefix else str(k)
+                      if k not in a or k not in b:
+                          rows.append(p)
+                      else:
+                          rows.extend(diff_paths(a[k],b[k],p))
+                  return rows
+              if isinstance(a,list):
+                  if len(a)!=len(b):
+                      rows.append((prefix or "<root>")+".length")
+                  for i,(x,y) in enumerate(zip(a,b)):
+                      rows.extend(diff_paths(x,y,f"{prefix}[{i}]"))
+                  return rows
+              if a!=b:
+                  rows.append(prefix or "<root>")
+              return rows
+
+          stages=[
+              "03_SOURCE_MECHANICAL_AUDIT",
+              "04_FULL_SUBJECT_ADMISSION",
+              "05_CAMERA_CONTRACT_SOLVED",
+              "06_OBSERVATION_RENDER_8VIEW",
+              "07_OBSERVATION_CONTRACT_QUALIFIED",
+              "08_NORMALIZATION_DOMAIN_QUALIFIED",
+          ]
+          report_rows=[]
+          for sid in stages:
+              old_outputs=old_by[sid].get("outputs",[])
+              if len(old_outputs)!=1:
+                  raise SystemExit(f"HISTORICAL_OUTPUT_CARDINALITY:{sid}:{len(old_outputs)}")
+              schema=old_outputs[0]["schema"]
+              op=archived_output(sid,old_outputs[0])
+              cp=current_output(sid,schema)
+              old=json.loads(op.read_text())
+              cur=json.loads(cp.read_text())
+              full_diff=diff_paths(old,cur)
+              semantic_diff=diff_paths(
+                  normalize_semantic(old),
+                  normalize_semantic(cur),
+              )
+              report_rows.append({
+                  "stage_id":sid,
+                  "schema":schema,
+                  "historical_file_sha256":sha(op),
+                  "current_file_sha256":sha(cp),
+                  "byte_identical":op.read_bytes()==cp.read_bytes(),
+                  "full_diff_path_count":len(full_diff),
+                  "full_diff_paths":full_diff[:128],
+                  "semantic_diff_path_count":len(semantic_diff),
+                  "semantic_diff_paths":semantic_diff[:128],
+              })
+
+          old07=json.loads(
+              archived_output(
+                  "07_OBSERVATION_CONTRACT_QUALIFIED",
+                  old_by["07_OBSERVATION_CONTRACT_QUALIFIED"]["outputs"][0],
+              ).read_text()
+          )
+          cur07=json.loads(
+              current_output(
+                  "07_OBSERVATION_CONTRACT_QUALIFIED",
+                  "RealSaS.QualifiedObservationSetIR.v1",
+              ).read_text()
+          )
+          old08=json.loads(
+              archived_output(
+                  "08_NORMALIZATION_DOMAIN_QUALIFIED",
+                  old_by["08_NORMALIZATION_DOMAIN_QUALIFIED"]["outputs"][0],
+              ).read_text()
+          )
+          cur08=json.loads(
+              current_output(
+                  "08_NORMALIZATION_DOMAIN_QUALIFIED",
+                  "RealSaS.NormalizationDomainIR.v1",
+              ).read_text()
+          )
+
+          old_view_identity=[
+              {
+                  "view_index":int(v["view_index"]),
+                  "source_raster_sha256":v["source_raster_sha256"],
+                  "foreground_mask_sha256":v["foreground_mask_sha256"],
+                  "camera_binding_hash":v["camera_binding_hash"],
+                  "width":int(v["width"]),
+                  "height":int(v["height"]),
+              }
+              for v in old07["views"]
+          ]
+          cur_view_identity=[
+              {
+                  "view_index":int(v["view_index"]),
+                  "source_raster_sha256":v["source_raster_sha256"],
+                  "foreground_mask_sha256":v["foreground_mask_sha256"],
+                  "camera_binding_hash":v["camera_binding_hash"],
+                  "width":int(v["width"]),
+                  "height":int(v["height"]),
+              }
+              for v in cur07["views"]
+          ]
+
+          report={
+              "schema":"RealSaS.KnightStage08HistoricalCompare.v1",
+              "status":"MEASURED",
+              "historical_workflow_run_id":int(os.environ["HISTORICAL_RUN_ID"]),
+              "historical_observation_set_hash":old07["observation_set_hash"],
+              "current_observation_set_hash":cur07["observation_set_hash"],
+              "historical_normalization_hash":old08["normalization_hash"],
+              "current_normalization_hash":cur08["normalization_hash"],
+              "historical_hashes_match_frozen_contract":(
+                  old07["observation_set_hash"]==os.environ["EXPECTED_HISTORICAL_OBSERVATION_HASH"]
+                  and old08["normalization_hash"]==os.environ["EXPECTED_HISTORICAL_NORMALIZATION_HASH"]
+              ),
+              "exact_source_view_identity_equal":old_view_identity==cur_view_identity,
+              "historical_source_view_identity":old_view_identity,
+              "current_source_view_identity":cur_view_identity,
+              "stage_comparisons":report_rows,
+              "diagnostic_only":True,
+          }
+          out=Path("canonical/KNIGHT_STAGE08_HISTORICAL_COMPARE_20260927.json")
+          out.write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
+          print("KNIGHT_STAGE08_HISTORICAL_COMPARE",json.dumps({
+              "exact_source_view_identity_equal":report["exact_source_view_identity_equal"],
+              "historical_hashes_match_frozen_contract":report["historical_hashes_match_frozen_contract"],
+              "stage_semantic_diff_counts":{
+                  row["stage_id"]:row["semantic_diff_path_count"] for row in report_rows
+              },
+          },sort_keys=True))
+          PY
+
+      - name: Seal comparison
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_STAGE08_HISTORICAL_COMPARE_20260927.json
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'diagnostic: compare historical and current Knight Stage08'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

@@ -1,0 +1,33 @@
+{
+  "schema": "RealSaS.KnightArachneTeacherSupportCoverageCourtPreregistration.v1",
+  "status": "FROZEN_BEFORE_SUPPORT_COVERAGE_RESULT",
+  "date": "2026-09-29",
+  "purpose": "Separate true zero-skin target columns from target columns whose positive skin support exists only or mostly on teacher-invalid rows.",
+  "authority": {
+    "teacher_bank_filename": "ARACHNE_KNIGHT_TEACHER_BANK_FIX2.npz",
+    "teacher_bank_sha256": "26b6891ff81b9bfc3405461394159547fa76b417852a44518425b4e1de7e67d3",
+    "geppetto_target_npz": "teacher_target_v2.npz",
+    "geppetto_target_npz_sha256": "26d4d5411b14b23b894f0351ab08fc2da2b18d8fb3ac4776b25b8b2434b4bbc1",
+    "geppetto_target_report": "teacher_target_v2_report.json",
+    "geppetto_target_report_sha256": "c629a40c6f357f30f143d57752a442185bed68ac3cabc473255a88e9b6acb1b7"
+  },
+  "thresholds": [
+    0,
+    0.01,
+    0.05,
+    0.1
+  ],
+  "frozen_metrics": [
+    "positive_row_count_all/valid/invalid per target column",
+    "positive_weight_mass_all/valid/invalid per target column",
+    "fraction of positive support mass on invalid rows",
+    "zero_support_all flag",
+    "invalid_only_support flag",
+    "teacher target role alignment when available from sealed Geppetto target metadata"
+  ],
+  "claim_boundary": [
+    "Read-only diagnostic; no training, inference, topology solve, or product mutation.",
+    "Teacher data are used only to classify support coverage.",
+    "No threshold or repair policy will be selected from this court."
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX4ResearchClosure.v1",
+  "date_utc": "2026-09-21",
+  "status": "X4_CLOSED__BATCHED_RANGE_ENGINE_PROTOTYPE_AUTHORIZED__FULL_DOMAIN_STILL_FORBIDDEN",
+  "facts": {
+    "triplane_base_regime_count": 103823,
+    "scalar_micro0_projected_seconds": 770.4881847782308,
+    "scalar_micro2_worst_projected_seconds": 56245.63748881085,
+    "micro2_tiny_sample_decisive_fraction": 0.0625
+  },
+  "next": "X5_BATCHED_C0_RANGE_ENGINE_EQUIVALENCE_AND_THROUGHPUT",
+  "full_domain_execution_authorized": false,
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false
+}

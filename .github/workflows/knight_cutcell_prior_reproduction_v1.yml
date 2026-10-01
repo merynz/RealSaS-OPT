@@ -1,0 +1,60 @@
+name: knight-cutcell-prior-reproduction-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/audit_knight_cutcell_prior_reproduction_v1.py'
+      - '.github/workflows/knight_cutcell_prior_reproduction_v1.yml'
+
+concurrency:
+  group: knight-cutcell-prior-reproduction-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  repro:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      V5_HANDOFF: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V5_DEMO_HANDOFF
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off numpy scipy trimesh rtree
+          python -m pip install --no-input --progress-bar off libigl || true
+      - name: Fetch teacher evaluation artifact
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          echo "$tmp" >/tmp/cutcell_tmp
+          rclone copyto "$V5_HANDOFF/ARACHNE_KNIGHT_TEACHER_BANK_FIX2.npz" "$tmp/bank.npz" --checksum
+          sha256sum "$tmp/bank.npz"
+      - name: Reproduce cut-cell prior on Knight
+        run: |
+          set -euo pipefail
+          tmp="$(cat /tmp/cutcell_tmp)"
+          PYTHONPATH=. python tools/audit_knight_cutcell_prior_reproduction_v1.py             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --teacher-bank "$tmp/bank.npz"             --resolution 32             --out canonical/KNIGHT_CUTCELL_PRIOR_REPRODUCTION_V1_20260929.json             | tee /tmp/cutcell_repro.txt
+      - name: Seal
+        run: |
+          set -euo pipefail
+          mkdir -p canonical/knight_cutcell_prior_reproduction_v1
+          cp /tmp/cutcell_repro.txt canonical/knight_cutcell_prior_reproduction_v1/AUDIT_STDOUT.txt
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_CUTCELL_PRIOR_REPRODUCTION_V1_20260929.json canonical/KNIGHT_CUTCELL_PRIOR_REPRODUCTION_V1_20260929.npz canonical/knight_cutcell_prior_reproduction_v1
+          git commit -m 'research: seal Knight cut-cell prior reproduction'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

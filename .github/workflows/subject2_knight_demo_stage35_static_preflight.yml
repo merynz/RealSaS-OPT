@@ -1,0 +1,209 @@
+name: subject2-knight-demo-stage35-static-preflight
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/subject2_knight_demo_stage35_static_preflight.yml'
+      - 'canonical/KNIGHT_DEMO_STAGE19_RECEIPT_20260925.json'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py'
+      - 'compiler/realsas_compiler_core/mesh/product_coverage_v1.py'
+      - 'canonical/QUALIFIED_MESH_PRODUCT_POLICY_V2_20260919.json'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-demo-stage35-static-preflight
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  measure-g4-g5:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      SUBJECT_ID: SUBJECT2_KNIGHT
+      REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      EXPECTED_PARTITION_HASH: ba14cb67ff5bdf78a609e56ccddcfd8203075ffe304734df3be8fcf657635dec
+      EXPECTED_CANDIDATE_HASH: c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909
+      PYTHONHASHSEED: '0'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m py_compile \
+            compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py \
+            compiler/realsas_compiler_core/mesh/product_coverage_v1.py
+
+      - name: Measure exact frozen G4 and G5 on sealed Stage17/18 authorities
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+
+          from compiler.realsas_compiler_core.hashing import content_sha256
+          from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
+              build_g5_coverage_matrix,
+              g5_coverage_evidence_hash,
+          )
+          from compiler.realsas_compiler_services.orchestrator.adapters import mesh_v2
+          from compiler.realsas_compiler_services.orchestrator.mainline import (
+              load_json,
+          )
+
+          root=Path(os.environ["RUN_ROOT"]).resolve()
+          ledger=load_json(root/"ACTIVE_RUN_V2.json")
+          manifest=load_json(root/"run_manifest.json")
+          plan=load_json(Path("canonical/MAINLINE_EXECUTION_PLAN_V2.json"))
+          stage=next(
+              row for row in plan["stages"]
+              if row["id"]=="35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+          )
+          ctx={
+              "repo_root":Path(".").resolve(),
+              "authority_root":Path(os.environ["REALSAS_AUTHORITY_ROOT"]).resolve(),
+              "run_root":root,
+              "run_id":os.environ["RUN_ID"],
+              "run_manifest_path":root/"run_manifest.json",
+              "run_manifest":manifest,
+              "stage":stage,
+              "ledger":ledger,
+          }
+
+          receipt=json.loads(
+              Path("canonical/KNIGHT_DEMO_STAGE19_RECEIPT_20260925.json").read_text()
+          )
+          assert receipt["run_id"]==os.environ["RUN_ID"]
+          assert receipt["stage17_partition_lineage_hash"]==os.environ["EXPECTED_PARTITION_HASH"]
+          assert receipt["stage18_candidate_lineage_hash"]==os.environ["EXPECTED_CANDIDATE_HASH"]
+          assert receipt["product_authority_claimed"] is False
+
+          surface=mesh_v2._load_surface(ctx)
+          partition,carrier=mesh_v2._load_partition_and_carrier(ctx)
+          candidate,policy=mesh_v2._load_candidate_and_policy(ctx)
+          camera_set=mesh_v2._load_camera_set(ctx)
+          assert partition.partition_lineage_hash==os.environ["EXPECTED_PARTITION_HASH"]
+          assert candidate.candidate_lineage_hash==os.environ["EXPECTED_CANDIDATE_HASH"]
+
+          observations,source_masks,observation_set=mesh_v2._component_observations(
+              ctx,
+              surface=surface,
+              partition=partition,
+              carrier=carrier,
+              cameras=camera_set.cameras,
+          )
+          g5_rows=build_g5_coverage_matrix(
+              candidate,
+              surface=surface,
+              partition=partition,
+              carrier_policy=carrier,
+              mesh_policy=policy,
+              observations=observations,
+              cameras=camera_set.cameras,
+              observation_set=observation_set,
+              source_foreground_masks=source_masks,
+          )
+          failed_g5=[dict(row) for row in g5_rows if row["status"]!="PASS"]
+          unknown_rows=[
+              {
+                  "constraint_id":row.constraint_id,
+                  "a_surface_id":row.a_surface_id,
+                  "b_surface_id":row.b_surface_id,
+                  "decision":row.decision,
+                  "classification":"CONSEQUENTIAL_UNTIL_EXPLICITLY_RESOLVED",
+              }
+              for row in partition.boundary_constraints
+              if row.decision=="UNKNOWN"
+          ]
+          by_carrier={
+              row.carrier_class:{
+                  "min_recall":float(row.min_recall),
+                  "min_precision":float(row.min_precision),
+                  "max_largest_coherent_hole_fraction":float(
+                      row.max_largest_coherent_hole_fraction
+                  ),
+                  "max_interior_uncovered_fraction":float(
+                      row.max_interior_uncovered_fraction
+                  ),
+              }
+              for row in policy.coverage_thresholds
+          }
+          summary={
+              "schema":"RealSaS.KnightStage35StaticPreflight.v1",
+              "status":(
+                  "STATIC_G4_G5_PASS"
+                  if not failed_g5 and not unknown_rows
+                  else "STATIC_G4_G5_BLOCKER_MEASURED"
+              ),
+              "run_id":os.environ["RUN_ID"],
+              "subject_id":os.environ["SUBJECT_ID"],
+              "execution_class":"DEMO_WITNESS",
+              "partition_lineage_hash":partition.partition_lineage_hash,
+              "candidate_lineage_hash":candidate.candidate_lineage_hash,
+              "mesh_policy_lineage_hash":policy.qualification_policy_lineage_hash,
+              "carrier_thresholds":by_carrier,
+              "component_count":len(partition.components),
+              "boundary_constraint_count":len(partition.boundary_constraints),
+              "consequential_unknown_boundary_count":len(unknown_rows),
+              "unknown_boundaries":unknown_rows,
+              "g5_cell_count":len(g5_rows),
+              "g5_failed_cell_count":len(failed_g5),
+              "g5_evidence_hash":g5_coverage_evidence_hash(g5_rows),
+              "g5_failed_rows":failed_g5,
+              "g4_passed":not bool(unknown_rows),
+              "g5_passed":not bool(failed_g5),
+              "g3_evaluated":False,
+              "stage35_admission_claimed":False,
+              "stage35_pass_claimed":False,
+              "product_authority_claimed":False,
+              "threshold_relaxation_used":False,
+              "measurement_note":(
+                  "Exact Stage35 G4/G5 functions on already sealed Stage17/18 "
+                  "authorities. G3 remains unevaluated until qualified skeleton, "
+                  "skin and deformation envelope exist."
+              ),
+          }
+          summary["measurement_hash"]=content_sha256(summary)
+          out=Path("canonical/KNIGHT_DEMO_STAGE35_STATIC_PREFLIGHT_20260927.json")
+          out.write_text(json.dumps(summary,indent=2,sort_keys=True)+"\n")
+          print(json.dumps({
+              "status":summary["status"],
+              "component_count":summary["component_count"],
+              "boundary_constraint_count":summary["boundary_constraint_count"],
+              "unknown_count":summary["consequential_unknown_boundary_count"],
+              "g5_cell_count":summary["g5_cell_count"],
+              "g5_failed_cell_count":summary["g5_failed_cell_count"],
+              "measurement_hash":summary["measurement_hash"],
+          },sort_keys=True))
+          PY
+
+      - name: Commit measured static preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_DEMO_STAGE35_STATIC_PREFLIGHT_20260927.json
+          if git diff --cached --quiet; then
+            echo "STAGE35_STATIC_PREFLIGHT_ALREADY_CURRENT=1"
+            exit 0
+          fi
+          git commit -m 'demo: seal Knight Stage35 static G4 G5 preflight'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

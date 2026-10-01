@@ -1,0 +1,87 @@
+{
+  "schema": "RealSaS.KnightStage35MutexCutClosureChildCourtPrereg.v1",
+  "status": "FROZEN_BEFORE_MUTEX_CUT_CHILD_RESULT",
+  "date": "2026-09-29",
+  "source_weight_court": "canonical/KNIGHT_ARACHNE_V6_2X2_INDEXSPACE_FIXED_RESULT_AUDIT_V1_20260929.json",
+  "source_seed_court": "canonical/KNIGHT_STAGE35_SEED_CUT_CLOSURE_COURT_V1_20260929.json",
+  "admitted_weight_arms": [
+    "UNIFORM_ALL_PROJECTED",
+    "ACTIVE_BALANCED_ALL_PROJECTED"
+  ],
+  "closure_policies": [
+    {
+      "id": "STRUCTURAL_AUTHORITY_MAX_CONTINUITY",
+      "ordering": [
+        "PRESERVE_CONTINUITY_BEFORE_UNKNOWN",
+        "HIGHER_RIGGING_SURFACE_RELATION_CONFIDENCE_FIRST",
+        "CANONICAL_SURFACE_ID_PAIR_TIEBREAK"
+      ],
+      "skin_similarity_used_for_attractive_order": false
+    },
+    {
+      "id": "SKIN_JSD_MAX_CONTINUITY",
+      "ordering": [
+        "PRESERVE_CONTINUITY_BEFORE_UNKNOWN",
+        "LOWER_CORRECTED_SKIN_JSD_FIRST",
+        "HIGHER_RIGGING_SURFACE_RELATION_CONFIDENCE_FIRST",
+        "CANONICAL_SURFACE_ID_PAIR_TIEBREAK"
+      ],
+      "skin_similarity_used_for_attractive_order": true
+    }
+  ],
+  "solver_invariants": [
+    "ALL_STAGE35_DIRECT_SEEDS_PRELOADED_AS_CANNOT_LINK_BEFORE_ANY_CONTINUITY_UNION",
+    "ALL_PARENT_SEPARATE_BOUNDARIES_PRELOADED_AS_CANNOT_LINK",
+    "NO_CANNOT_LINK_ENDPOINTS_MAY_SHARE_A_FINAL_COMPONENT",
+    "EVERY_LOCAL_RELATION_EDGE_CROSSING_FINAL_COMPONENT_LABELS_BECOMES_EXPLICIT_SEPARATE",
+    "EVERY_CLOSURE_ADDED_SEPARATE_EDGE_MUST_CARRY_DIRECTIVE_AND_LOCAL_RELATION_EVIDENCE",
+    "NO_FACE_DELETION",
+    "NO_WEIGHT_MUTATION",
+    "NO_MANUAL_BOUNDARY_AUTHORING"
+  ],
+  "iteration_policy": {
+    "max_repair_iterations": 4,
+    "each_iteration": "G3B -> directive seeds -> authorized mutex cut closure -> Stage17 child -> Stage18 holeless rebuild -> G3B",
+    "stop": "G3B_PASS",
+    "abstain": "NO_DIRECT_STAGE35_SEEDS_OR_CONTRADICTORY_CANNOT_LINK_AUTHORITY",
+    "budget_exhaustion": "FAIL_CLOSED"
+  },
+  "final_gates": {
+    "g3b_pass_required": true,
+    "g3_pass_required": true,
+    "face_deletion_count_max": 0,
+    "rest_area_relative_error_max": 1e-10
+  },
+  "motion_measurement": {
+    "clips": [
+      "demo_idle_v1",
+      "demo_run_v1",
+      "demo_slash_v1"
+    ],
+    "frames_per_clip": 4,
+    "report": [
+      "max_edge_gt_10",
+      "max_edge_gt_4",
+      "worst_edge_max",
+      "worst_edge_p99"
+    ]
+  },
+  "selection": {
+    "eligibility": "G3B_PASS_AND_G3_PASS",
+    "ordering": [
+      "MIN_MAX_EDGE_GT_10",
+      "MIN_MAX_EDGE_GT_4",
+      "MIN_WORST_EDGE_MAX",
+      "MIN_REPAIR_ITERATIONS",
+      "FEWER_FINAL_COMPONENTS",
+      "LEXICAL_POLICY_ARM_TIEBREAK"
+    ],
+    "no_selection_if_no_eligible_child": true
+  },
+  "claim_boundary": [
+    "Court-only child partitions; no product run state mutation.",
+    "No teacher topology or teacher weights enter cut closure.",
+    "Corrected Arachne skin is admitted only through the previously sealed reliability gates and semantic-rebind/compiler-requalification evidence.",
+    "A selected child remains a candidate for separate mainline replay, not product authority."
+  ]
+}

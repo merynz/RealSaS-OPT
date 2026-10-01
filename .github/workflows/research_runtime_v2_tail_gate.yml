@@ -1,0 +1,44 @@
+name: research-runtime-v2-tail-gate
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py'
+      - 'runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp'
+      - 'tests/compiler/test_runtime_v2_native_smoke.py'
+      - 'tests/compiler/test_runtime_v2_paged_native_smoke.py'
+      - 'tests/compiler/test_product_mesh_stage_adapters_v1.py'
+      - '.github/workflows/research_runtime_v2_tail_gate.yml'
+  workflow_dispatch:
+
+jobs:
+  native-tail:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      REALSAS_RUNTIME_V2_PLAYER: /tmp/realsas_runtime_v2_caa_reference_research_gate
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned dependencies
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Build V2 native CAA player
+        run: |
+          set -euo pipefail
+          c++ -std=c++17 -O2 -Wall -Wextra -pedantic \
+            runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp \
+            -lpng -lz -o "$REALSAS_RUNTIME_V2_PLAYER"
+          sha256sum "$REALSAS_RUNTIME_V2_PLAYER"
+      - name: Native byte parity and V2 tail closure
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python -m pytest -q \
+            tests/compiler/test_runtime_v2_native_smoke.py \
+            tests/compiler/test_runtime_v2_paged_native_smoke.py \
+            tests/compiler/test_product_mesh_stage_adapters_v1.py::test_vf23_stage37_to46_tail_uses_unmodified_production_dynamic_policy
+      - name: Gate summary
+        run: echo 'RESEARCH_RUNTIME_V2_NATIVE_TAIL_PASS'

@@ -1,0 +1,32 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX3DReclosurePreregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__MERGED_TARGETED_CERTIFICATES_D13_SAMPLED_LATTICE_RECLOSURE",
+  "authority_class": "RESEARCH_RECLOSURE_ONLY",
+  "sources": [
+    "canonical/VF11_EXTRACTOR_TRANSITION_X3_V2_RESULT_20260921.json",
+    "canonical/VF11_EXTRACTOR_TRANSITION_X3B_TARGETED_D12_PROOF_RESULT_20260921.json",
+    "canonical/VF11_EXTRACTOR_TRANSITION_X3C_TARGETED_D13_PROOF_RESULT_20260921.json"
+  ],
+  "merge_policy": "Replace base final leaf root49/path323 by its eight X3B d12 children; replace base root62/path115 by its X3B children, and replace X3B child root62/path1157 by its eight X3C d13 children. All other base final leaves remain unchanged.",
+  "target_lattice": "absolute d13 over the same frozen 12 d8 roots",
+  "frozen_gates": [
+    "all certified-empty proof leaves contain zero d13 mixed-sign cubes",
+    "all GRAPH proof leaves have zero graph-line capture misses on the aligned d13 lattice",
+    "blockwise Lewiner MC over all query-active mixed-sign blocks equals dense d13 Lewiner MC exactly in canonical lattice-edge/face identity for every root",
+    "zero topology alarms introduced by block welding",
+    "query-active corners are counted exactly after merged certified-empty pruning"
+  ],
+  "non_claims": [
+    "ACTIVE_UNKNOWN leaves are not promoted to empty even when sampled signs are one-sided",
+    "ACTIVE_ZERO_EXISTS or ACTIVE_UNKNOWN leaves may still contain sub-grid structure not resolved by d13",
+    "no global continuous zero-set completeness claim",
+    "no full-domain traversal",
+    "no product/shipping/witness authority"
+  ],
+  "pass_status": "PASS__LOCAL_D13_SAMPLED_LATTICE_EQUIVALENCE_WITH_CERTIFIED_EMPTY_PRUNING",
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false,
+  "full_domain_traversal_performed": false
+}

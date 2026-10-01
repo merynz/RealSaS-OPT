@@ -1,0 +1,95 @@
+name: knight-skin-topology-graph-only-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/knight_skin_topology_graph_only_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Audit graph compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, numpy as np
+          from pathlib import Path
+          from compiler.realsas_compiler_core.artifact_codec_v2 import canonical_mesh_candidate_from_dict, qualified_skeleton_from_dict, qualified_skin_from_dict, rigging_surface_from_dict
+          from tools.demo.render_knight_motion_preview_v1 import _candidate_skin_weights
+
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={x["id"]:x for x in ledger["stages"]}
+          def one(stage,schema):
+              rows=[x for x in by[stage]["outputs"] if x["schema"]==schema]
+              assert len(rows)==1
+              return json.loads(Path(rows[0]["path"]).read_text())
+          surf=rigging_surface_from_dict(one("15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1"))
+          cand=canonical_mesh_candidate_from_dict(one("18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.CanonicalMeshCandidateIR.v1"))
+          skel=qualified_skeleton_from_dict(one("28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1"))
+          skin=qualified_skin_from_dict(one("32_SKIN_QUALIFIED","RealSaS.QualifiedSkinIR.v1"))
+          joint_ids,W=_candidate_skin_weights(cand,skin,skel)
+          vi={str(v.candidate_vertex_id):i for i,v in enumerate(cand.vertices)}
+
+          safe_rel=set()
+          for rel in surf.local_relations:
+              k=str(rel.relation_kind).upper()
+              if any(t in k for t in ("UNKNOWN","AMBIGUOUS","OCCLUDED","UNOBSERVED")): continue
+              if float(rel.score)<=0: continue
+              safe_rel.add(tuple(sorted((str(rel.a_surface_id),str(rel.b_surface_id)))))
+          def identity_sid(v):
+              coeff=tuple(v.support_binding.coefficients)
+              if len(coeff)==1 and abs(float(coeff[0][1])-1.0)<=1e-12:return str(coeff[0][0])
+              return None
+          sid_by_vid={str(v.candidate_vertex_id):identity_sid(v) for v in cand.vertices}
+          candidate_edges=sorted({tuple(sorted((str(f[a]),str(f[b])))) for f in cand.faces for a,b in ((0,1),(1,2),(2,0))})
+
+          skin_rows={str(r.surface_id):r for r in skin.rows}
+          ji={jid:i for i,jid in enumerate(joint_ids)}
+          SW={}
+          for sid,row in skin_rows.items():
+              x=np.zeros(len(joint_ids))
+              for jid,w in row.influences:x[ji[str(jid)]]=float(w)
+              SW[sid]=x
+
+          def summ(x):
+              x=np.asarray(x,float)
+              return {"count":int(len(x)),"mean":float(x.mean()),"p50":float(np.quantile(x,.5)),"p90":float(np.quantile(x,.9)),"p95":float(np.quantile(x,.95)),"p99":float(np.quantile(x,.99)),"max":float(x.max()),"gt_0_5":int(np.sum(x>0.5)),"gt_1_0":int(np.sum(x>1.0)),"gt_1_5":int(np.sum(x>1.5)),"gt_1_9":int(np.sum(x>1.9))}
+          relvals=[float(np.abs(SW[a]-SW[b]).sum()) for a,b in safe_rel if a in SW and b in SW]
+          erows=[]
+          for a,b in candidate_edges:
+              ia,ib=vi[a],vi[b]
+              sa,sb=sid_by_vid[a],sid_by_vid[b]
+              erows.append({"a":a,"b":b,"l1":float(np.abs(W[ia]-W[ib]).sum()),"sa":sa,"sb":sb,"rel":bool(sa and sb and tuple(sorted((sa,sb))) in safe_rel)})
+          print("SURFACE_RELATION_L1",json.dumps(summ(relvals),sort_keys=True))
+          print("STAGE18_EDGE_L1",json.dumps(summ([r["l1"] for r in erows]),sort_keys=True))
+          ids=[r for r in erows if r["sa"] and r["sb"]]
+          print("IDENTITY_EDGE_RELATION_MEMBERSHIP",json.dumps({"count":len(ids),"relation_member":sum(r["rel"] for r in ids),"not_relation_member":sum(not r["rel"] for r in ids)},sort_keys=True))
+
+          rep=json.loads(Path("canonical/knight_smear_topface_skin_counterfactual_v1/REPORT.json").read_text())
+          for case in rep["cases"]:
+              face=case["offender_vertex_ids"]
+              rows=[]
+              for a,b in ((face[0],face[1]),(face[1],face[2]),(face[2],face[0])):
+                  ia,ib=vi[a],vi[b];sa,sb=sid_by_vid[a],sid_by_vid[b]
+                  rows.append({"l1":float(np.abs(W[ia]-W[ib]).sum()),"surface_a":sa,"surface_b":sb,"safe_relation_member":bool(sa and sb and tuple(sorted((sa,sb))) in safe_rel)})
+              print("OFFENDER",json.dumps({"label":case["label"],"face":case["offender_face_index"],"edges":rows},sort_keys=True))
+          PY

@@ -1,0 +1,1 @@
+KNIGHT_COMBINED_ORACLE_RESIDUAL_COURT_PASS {"all_residuals_are_share_vertex_only": false, "all_residuals_explained_by_frozen_triangle_quality_violation": false, "rest_aspect_above_16_count": 1, "rest_min_angle_below_7_5_count": 4, "share_vertex_only_residual_face_count": 82, "unique_residual_face_count": 160, "worst_condition": 57.5734710956991, "worst_edge": 3.5759195743933514}

@@ -1,0 +1,729 @@
+{
+  "actual_motion": {
+    "face_gt10": 0,
+    "face_gt2": 404,
+    "face_gt3": 100,
+    "face_gt4": 20,
+    "face_gt6": 1,
+    "frames": [
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt10": 0,
+        "edge_gt2": 7,
+        "edge_gt3": 1,
+        "edge_gt4": 0,
+        "edge_gt6": 0,
+        "edge_max": 3.3268229279011914,
+        "edge_p99": 1.0420202873164839,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt10": 0,
+        "edge_gt2": 7,
+        "edge_gt3": 3,
+        "edge_gt4": 0,
+        "edge_gt6": 0,
+        "edge_max": 3.3302589775225506,
+        "edge_p99": 1.0508305875429516,
+        "frame": 1,
+        "time_seconds": 0.8333333333333334
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt10": 0,
+        "edge_gt2": 8,
+        "edge_gt3": 3,
+        "edge_gt4": 0,
+        "edge_gt6": 0,
+        "edge_max": 3.331858759782785,
+        "edge_p99": 1.0423903186853303,
+        "frame": 2,
+        "time_seconds": 1.6666666666666667
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt10": 0,
+        "edge_gt2": 7,
+        "edge_gt3": 3,
+        "edge_gt4": 0,
+        "edge_gt6": 0,
+        "edge_max": 3.330259001440276,
+        "edge_p99": 1.0508304386904317,
+        "frame": 3,
+        "time_seconds": 2.5
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt10": 0,
+        "edge_gt2": 244,
+        "edge_gt3": 44,
+        "edge_gt4": 15,
+        "edge_gt6": 1,
+        "edge_max": 6.22012606615386,
+        "edge_p99": 1.847089347444036,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt10": 0,
+        "edge_gt2": 141,
+        "edge_gt3": 42,
+        "edge_gt4": 12,
+        "edge_gt6": 1,
+        "edge_max": 6.940668049682473,
+        "edge_p99": 1.675121391890849,
+        "frame": 1,
+        "time_seconds": 0.20833333333333334
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt10": 0,
+        "edge_gt2": 229,
+        "edge_gt3": 67,
+        "edge_gt4": 12,
+        "edge_gt6": 1,
+        "edge_max": 6.866187378752013,
+        "edge_p99": 1.847408960559208,
+        "frame": 2,
+        "time_seconds": 0.4166666666666667
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt10": 0,
+        "edge_gt2": 154,
+        "edge_gt3": 32,
+        "edge_gt4": 8,
+        "edge_gt6": 1,
+        "edge_max": 6.427001267962622,
+        "edge_p99": 1.6675502989222868,
+        "frame": 3,
+        "time_seconds": 0.625
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt10": 0,
+        "edge_gt2": 242,
+        "edge_gt3": 44,
+        "edge_gt4": 13,
+        "edge_gt6": 1,
+        "edge_max": 6.22012606615386,
+        "edge_p99": 1.8279921841784696,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt10": 0,
+        "edge_gt2": 143,
+        "edge_gt3": 49,
+        "edge_gt4": 14,
+        "edge_gt6": 1,
+        "edge_max": 6.936354613620711,
+        "edge_p99": 1.6114443235880318,
+        "frame": 1,
+        "time_seconds": 0.2777777777777778
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt10": 0,
+        "edge_gt2": 165,
+        "edge_gt3": 25,
+        "edge_gt4": 4,
+        "edge_gt6": 0,
+        "edge_max": 5.955629711184545,
+        "edge_p99": 1.6450782517159794,
+        "frame": 2,
+        "time_seconds": 0.5555555555555556
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt10": 0,
+        "edge_gt2": 242,
+        "edge_gt3": 44,
+        "edge_gt4": 13,
+        "edge_gt6": 1,
+        "edge_max": 6.22012606615386,
+        "edge_p99": 1.8279921841784696,
+        "frame": 3,
+        "time_seconds": 0.8333333333333334
+      }
+    ],
+    "max_edge_ratio": 6.940668049682473,
+    "p99_face_worst_ratio": 2.296286616184271,
+    "sampled_frame_count": 12
+  },
+  "candidate": {
+    "closure": {
+      "attractive_union_blocked_by_mutex": 401,
+      "attractive_union_count": 12017,
+      "closure_added_separate_count": 401,
+      "closure_policy": "STRUCTURAL_AUTHORITY_MAX_CONTINUITY_WITH_PROBE_CANNOT_LINKS",
+      "component_count": 73,
+      "direct_seed_count": 1417,
+      "final_separate_count": 1818,
+      "seed_constraint_violation_count": 0
+    },
+    "component_count": 73,
+    "cut_closed_crossing_edge_count": 1818,
+    "face_count": 28331,
+    "unsafe_source_edge_seed_count": 1417,
+    "vertex_count": 16031
+  },
+  "claim_boundary": [
+    "Only exact Knight idle/run/slash clip samples used by the existing motion court are measured.",
+    "No 120-degree arbitrary stress is rerun.",
+    "QualifiedSkinIR, partition and candidate are not mutated.",
+    "This court diagnoses the remaining actual-motion tail only."
+  ],
+  "face_provenance_replay": {
+    "compact_face_count": 24443,
+    "compact_node_count": 12090,
+    "component_aware": true,
+    "dense_face_count": 12092332,
+    "dense_vertex_count": 6046160,
+    "position_error_max": 0.0,
+    "voxel_divisions": 56
+  },
+  "gt4_summary": {
+    "count": 20,
+    "identity_only_count": 0,
+    "max_ratio": {
+      "count": 20,
+      "max": 6.940668049682473,
+      "min": 4.017785049698641,
+      "p50": 4.5841963048092875,
+      "p90": 5.545208563932432,
+      "p95": 5.7712428339223445,
+      "p99": 6.706783006530445
+    },
+    "multi_component_face_count": 0,
+    "other_support_count": 0,
+    "rest_aspect": {
+      "count": 20,
+      "max": 8.78719968735378,
+      "min": 1.462428827255605,
+      "p50": 2.012870542533233,
+      "p90": 4.97404215871464,
+      "p95": 5.4458594047082896,
+      "p99": 8.118931630824678
+    },
+    "rest_aspect_gt_policy_count": 0,
+    "rest_min_angle_deg": {
+      "count": 20,
+      "max": 52.13598008949549,
+      "min": 12.475741728769824,
+      "p50": 41.28139914723013,
+      "p90": 45.235735324328104,
+      "p95": 49.18599293219192,
+      "p99": 51.545982658034774
+    },
+    "rest_min_angle_lt_7p5_count": 0,
+    "rest_min_edge": {
+      "count": 20,
+      "max": 0.033437733865437205,
+      "min": 0.013193466541127567,
+      "p50": 0.023034277131564827,
+      "p90": 0.026688478716070618,
+      "p95": 0.029886046501202464,
+      "p99": 0.03272739639259025
+    },
+    "seam_count": 20,
+    "skin_l1": {
+      "count": 20,
+      "max": 1.9838958074354425,
+      "min": 0.03102719720054685,
+      "p50": 0.32878682257764036,
+      "p90": 1.2196697606311173,
+      "p95": 1.831528994134323,
+      "p99": 1.9534224447752184
+    },
+    "skin_l1_gt_0p5_count": 9
+  },
+  "offenders_gt4": [
+    {
+      "face_index": 5925,
+      "max_actual_edge_ratio": 6.940668049682473,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:d2230bd506e3fc9b1bf7"
+      ],
+      "rest_aspect": 2.009215888981704,
+      "rest_max_edge": 0.02969911558729537,
+      "rest_min_angle_deg": 37.05791284974595,
+      "rest_min_edge": 0.017916475764879185,
+      "skin_l1": 0.9488008478961851,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:534f0dd4ccc1bba8a2c2",
+        "SFS:b56ffb93826006d401f0"
+      ],
+      "witness": {
+        "clip_id": "demo_run_v1",
+        "edge_ratio": 6.940668049682473,
+        "frame": 1,
+        "time_seconds": 0.20833333333333334
+      }
+    },
+    {
+      "face_index": 10350,
+      "max_actual_edge_ratio": 5.709694138356021,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:e620bf8fb7895e714b99"
+      ],
+      "rest_aspect": 2.0040334467445073,
+      "rest_max_edge": 0.033437733865437205,
+      "rest_min_angle_deg": 42.63252027296945,
+      "rest_min_edge": 0.022647191488012693,
+      "skin_l1": 0.15192713070788605,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:2e2a0ebaab5b4c85f71e",
+        "SFS:f3157f4c7f95599ec8d8"
+      ],
+      "witness": {
+        "clip_id": "demo_run_v1",
+        "edge_ratio": 5.709694138356021,
+        "frame": 0,
+        "time_seconds": 0.0
+      }
+    },
+    {
+      "face_index": 4303,
+      "max_actual_edge_ratio": 5.526932388996477,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:d2230bd506e3fc9b1bf7"
+      ],
+      "rest_aspect": 2.0165251960847623,
+      "rest_max_edge": 0.03314619390157722,
+      "rest_min_angle_deg": 44.14387444910745,
+      "rest_min_edge": 0.023085817398151246,
+      "skin_l1": 0.4092710744944556,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:248007d87cf88151a7f6",
+        "SFS:504383adc2cafed78230"
+      ],
+      "witness": {
+        "clip_id": "demo_run_v1",
+        "edge_ratio": 5.526932388996477,
+        "frame": 0,
+        "time_seconds": 0.0
+      }
+    },
+    {
+      "face_index": 15070,
+      "max_actual_edge_ratio": 4.782502124172166,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:0d312766664b5bb0ed46"
+      ],
+      "rest_aspect": 1.4659996964793822,
+      "rest_max_edge": 0.01660245818239408,
+      "rest_min_angle_deg": 49.030730450228575,
+      "rest_min_edge": 0.013193466541127567,
+      "skin_l1": 0.03530193700018769,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:122189932ed74c8f8f7f",
+        "SFS:895b8cc89543dc2d7868"
+      ],
+      "witness": {
+        "clip_id": "demo_run_v1",
+        "edge_ratio": 4.782502124172166,
+        "frame": 2,
+        "time_seconds": 0.4166666666666667
+      }
+    },
+    {
+      "face_index": 10679,
+      "max_actual_edge_ratio": 4.75428817730323,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:41b813131497654b7f25"
+      ],
+      "rest_aspect": 4.907390007935066,
+      "rest_max_edge": 0.035866465073240844,
+      "rest_min_angle_deg": 22.16670751476405,
+      "rest_min_edge": 0.01935991026004746,
+      "skin_l1": 0.693857184302948,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:95eb3e6368d29a7b8f37",
+        "SFS:e69fb4e467f838431587"
+      ],
+      "witness": {
+        "clip_id": "demo_run_v1",
+        "edge_ratio": 4.75428817730323,
+        "frame": 0,
+        "time_seconds": 0.0
+      }
+    },
+    {
+      "face_index": 15052,
+      "max_actual_edge_ratio": 4.7513766736465275,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:0d312766664b5bb0ed46"
+      ],
+      "rest_aspect": 3.584443079366054,
+      "rest_max_edge": 0.03346869085517814,
+      "rest_min_angle_deg": 23.07896851546462,
+      "rest_min_edge": 0.014856513125763698,
+      "skin_l1": 0.03102719720054685,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:895b8cc89543dc2d7868",
+        "SFS:8ee2c531f309c11238a0"
+      ],
+      "witness": {
+        "clip_id": "demo_run_v1",
+        "edge_ratio": 4.7513766736465275,
+        "frame": 2,
+        "time_seconds": 0.4166666666666667
+      }
+    },
+    {
+      "face_index": 18364,
+      "max_actual_edge_ratio": 4.701891220294065,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:046a53e821b8c70fb74a"
+      ],
+      "rest_aspect": 2.004362840042517,
+      "rest_max_edge": 0.03406689483899362,
+      "rest_min_angle_deg": 44.814069199228044,
+      "rest_min_edge": 0.024010691064450286,
+      "skin_l1": 0.24830257066082506,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:356fd76abd63a65bce54",
+        "SFS:5d59cb7ea1a0801f6a1f"
+      ],
+      "witness": {
+        "clip_id": "demo_slash_v1",
+        "edge_ratio": 4.701891220294065,
+        "frame": 1,
+        "time_seconds": 0.2777777777777778
+      }
+    },
+    {
+      "face_index": 11924,
+      "max_actual_edge_ratio": 4.692290869349698,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:c01767ea93741e5cc781"
+      ],
+      "rest_aspect": 1.947412548586768,
+      "rest_max_edge": 0.032660528759520496,
+      "rest_min_angle_deg": 44.10225818410004,
+      "rest_min_edge": 0.022738958630142962,
+      "skin_l1": 0.09488196578712853,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:7a2ad7901267ddd5e00a",
+        "SFS:7bae3eaa74fcd6fce601"
+      ],
+      "witness": {
+        "clip_id": "demo_run_v1",
+        "edge_ratio": 4.692290869349698,
+        "frame": 0,
+        "time_seconds": 0.0
+      }
+    },
+    {
+      "face_index": 10349,
+      "max_actual_edge_ratio": 4.669591374757774,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:e620bf8fb7895e714b99"
+      ],
+      "rest_aspect": 2.175559728130533,
+      "rest_max_edge": 0.04927026038152476,
+      "rest_min_angle_deg": 42.552420624976754,
+      "rest_min_edge": 0.033437733865437205,
+      "skin_l1": 0.15192713070788605,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:2e2a0ebaab5b4c85f71e",
+        "SFS:f3157f4c7f95599ec8d8"
+      ],
+      "witness": {
+        "clip_id": "demo_run_v1",
+        "edge_ratio": 4.669591374757774,
+        "frame": 0,
+        "time_seconds": 0.0
+      }
+    },
+    {
+      "face_index": 15069,
+      "max_actual_edge_ratio": 4.614657628579472,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:0d312766664b5bb0ed46"
+      ],
+      "rest_aspect": 1.8515563167641562,
+      "rest_max_edge": 0.02638693308225529,
+      "rest_min_angle_deg": 33.2813948619281,
+      "rest_min_edge": 0.014998791775941224,
+      "skin_l1": 0.03530193700018769,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:122189932ed74c8f8f7f",
+        "SFS:895b8cc89543dc2d7868"
+      ],
+      "witness": {
+        "clip_id": "demo_slash_v1",
+        "edge_ratio": 4.614657628579472,
+        "frame": 1,
+        "time_seconds": 0.2777777777777778
+      }
+    },
+    {
+      "face_index": 11180,
+      "max_actual_edge_ratio": 4.553734981039103,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:c01767ea93741e5cc781"
+      ],
+      "rest_aspect": 1.9822029264805148,
+      "rest_max_edge": 0.033083740696060765,
+      "rest_min_angle_deg": 44.38424317671186,
+      "rest_min_edge": 0.02314200405605869,
+      "skin_l1": 0.0948818151322329,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:c6c860567687a1cb8f31",
+        "SFS:c6e8904407661e8977a0"
+      ],
+      "witness": {
+        "clip_id": "demo_slash_v1",
+        "edge_ratio": 4.553734981039103,
+        "frame": 0,
+        "time_seconds": 0.0
+      }
+    },
+    {
+      "face_index": 5919,
+      "max_actual_edge_ratio": 4.46442622318332,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:7544f54d58b5416c9831"
+      ],
+      "rest_aspect": 1.9897908780214177,
+      "rest_max_edge": 0.034517212377945757,
+      "rest_min_angle_deg": 42.476229919841764,
+      "rest_min_edge": 0.02331006794663117,
+      "skin_l1": 0.9129692891042683,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:7b9e6f669372dfb25c02",
+        "SFS:cdf01bbd810bbbc5724c"
+      ],
+      "witness": {
+        "clip_id": "demo_run_v1",
+        "edge_ratio": 4.46442622318332,
+        "frame": 1,
+        "time_seconds": 0.20833333333333334
+      }
+    },
+    {
+      "face_index": 11469,
+      "max_actual_edge_ratio": 4.459443481136528,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:3066b099d4124dea405b"
+      ],
+      "rest_aspect": 8.78719968735378,
+      "rest_max_edge": 0.052834953571381016,
+      "rest_min_angle_deg": 12.475741728769824,
+      "rest_min_edge": 0.02635396350815675,
+      "skin_l1": 1.07471868475741,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:493056f054eb080a566d",
+        "SFS:d608508b74551d2ee2fb"
+      ],
+      "witness": {
+        "clip_id": "demo_run_v1",
+        "edge_ratio": 4.459443481136528,
+        "frame": 0,
+        "time_seconds": 0.0
+      }
+    },
+    {
+      "face_index": 26017,
+      "max_actual_edge_ratio": 4.375032284284084,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:92e737e95daaed409c31"
+      ],
+      "rest_aspect": 4.6678901460993885,
+      "rest_max_edge": 0.050894654824552965,
+      "rest_min_angle_deg": 19.29104687473334,
+      "rest_min_edge": 0.0225549693804628,
+      "skin_l1": 1.9838958074354425,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:0e2aed041e2924cdb0c4",
+        "SFS:14853717a2579d43b9e4"
+      ],
+      "witness": {
+        "clip_id": "demo_run_v1",
+        "edge_ratio": 4.375032284284084,
+        "frame": 2,
+        "time_seconds": 0.4166666666666667
+      }
+    },
+    {
+      "face_index": 26012,
+      "max_actual_edge_ratio": 4.348585418633427,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:92e737e95daaed409c31"
+      ],
+      "rest_aspect": 5.269999389832209,
+      "rest_max_edge": 0.05401068241089082,
+      "rest_min_angle_deg": 17.972324051629773,
+      "rest_min_edge": 0.024648220684566576,
+      "skin_l1": 1.823509688171106,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:1e45a13e106ec8a8f5a1",
+        "SFS:8c81b7f98137a4f46258"
+      ],
+      "witness": {
+        "clip_id": "demo_run_v1",
+        "edge_ratio": 4.348585418633427,
+        "frame": 2,
+        "time_seconds": 0.4166666666666667
+      }
+    },
+    {
+      "face_index": 16056,
+      "max_actual_edge_ratio": 4.3426520537257085,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:0d312766664b5bb0ed46"
+      ],
+      "rest_aspect": 1.989102500742635,
+      "rest_max_edge": 0.033331064340983575,
+      "rest_min_angle_deg": 43.646204910258504,
+      "rest_min_edge": 0.023005762116684696,
+      "skin_l1": 0.09460495729412757,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:43adcc879afed2d61334",
+        "SFS:8d813931f79cbc81e777"
+      ],
+      "witness": {
+        "clip_id": "demo_slash_v1",
+        "edge_ratio": 4.3426520537257085,
+        "frame": 1,
+        "time_seconds": 0.2777777777777778
+      }
+    },
+    {
+      "face_index": 4942,
+      "max_actual_edge_ratio": 4.232079381942512,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:3e04ac39778c88e008db"
+      ],
+      "rest_aspect": 4.911095260169062,
+      "rest_max_edge": 0.05195738860815984,
+      "rest_min_angle_deg": 18.584735676811256,
+      "rest_min_edge": 0.023062792146444962,
+      "skin_l1": 0.1517032966706141,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:2a814277b6d3d6074705",
+        "SFS:4daaf5317d9096bdece4"
+      ],
+      "witness": {
+        "clip_id": "demo_run_v1",
+        "edge_ratio": 4.232079381942512,
+        "frame": 0,
+        "time_seconds": 0.0
+      }
+    },
+    {
+      "face_index": 12207,
+      "max_actual_edge_ratio": 4.1274428742566,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:3066b099d4124dea405b"
+      ],
+      "rest_aspect": 4.941158021923799,
+      "rest_max_edge": 0.054866595660235995,
+      "rest_min_angle_deg": 18.215907615221113,
+      "rest_min_edge": 0.023865704410833077,
+      "skin_l1": 1.1525764353488954,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:9d2719c507e0326e3610",
+        "SFS:b5da69f7e4adc87cf05c"
+      ],
+      "witness": {
+        "clip_id": "demo_run_v1",
+        "edge_ratio": 4.1274428742566,
+        "frame": 0,
+        "time_seconds": 0.0
+      }
+    },
+    {
+      "face_index": 5924,
+      "max_actual_edge_ratio": 4.059008669465478,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:d2230bd506e3fc9b1bf7"
+      ],
+      "rest_aspect": 1.462428827255605,
+      "rest_max_edge": 0.03583295152975836,
+      "rest_min_angle_deg": 52.13598008949549,
+      "rest_min_edge": 0.02969911558729537,
+      "skin_l1": 0.9488008478961851,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:534f0dd4ccc1bba8a2c2",
+        "SFS:b56ffb93826006d401f0"
+      ],
+      "witness": {
+        "clip_id": "demo_run_v1",
+        "edge_ratio": 4.059008669465478,
+        "frame": 1,
+        "time_seconds": 0.20833333333333334
+      }
+    },
+    {
+      "face_index": 13847,
+      "max_actual_edge_ratio": 4.017785049698641,
+      "mechanical_component_count": 1,
+      "mechanical_component_ids": [
+        "CMP:8ab650a3ce1061d6a284"
+      ],
+      "rest_aspect": 2.1368093912131707,
+      "rest_max_edge": 0.03243233103905235,
+      "rest_min_angle_deg": 40.0865683746185,
+      "rest_min_edge": 0.0209215622448932,
+      "skin_l1": 0.5357427824377482,
+      "support_class": "HAS_GENERATED_SEAM",
+      "support_surface_ids": [
+        "SFS:9fd93eaeae9cc49e90e1",
+        "SFS:d176827b618e7b0227c4"
+      ],
+      "witness": {
+        "clip_id": "demo_run_v1",
+        "edge_ratio": 4.017785049698641,
+        "frame": 2,
+        "time_seconds": 0.4166666666666667
+      }
+    }
+  ],
+  "schema": "RealSaS.KnightActualMotionResidualCourt.v1",
+  "status": "COMPLETE__AUDIT_ONLY__NO_PARENT_MUTATION"
+}

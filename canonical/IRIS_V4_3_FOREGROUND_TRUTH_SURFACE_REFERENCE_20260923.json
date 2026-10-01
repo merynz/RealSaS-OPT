@@ -1,0 +1,62 @@
+{
+  "schema": "RealSaS.IRIS.V43ForegroundTruthSurfaceReference.v1",
+  "date_utc": "2026-09-23",
+  "status": "NON_NORMATIVE_TRUTH_SURFACE_REFERENCE__SOURCE_RASTER_REMAINS_AUTHORITY",
+  "parents": {
+    "foreground_hull_feasibility": "canonical/IRIS_V4_3_FOREGROUND_HULL_CONSTRAINT_FEASIBILITY_20260923.json",
+    "truth_raster_convention": "canonical/KNIGHT_TRUTH_RASTER_CONVENTION_REFERENCE_20260923.json"
+  },
+  "question": "Do the exact fixed V4.3 foreground audit pixel-center rays intersect the retained Knight teacher zero-surface mesh?",
+  "method": {
+    "foreground_rays": "Exact V4.3 fixed audit hard-positive refresh candidates: fit_seed=26091909+404, refresh_index=0, count=256 per view, V0..V7.",
+    "ray_geometry": "Qualified Stage05 orthographic pixel-center rays; continuous two-sided Moller-Trumbore intersection after exact Stage08 normalization.",
+    "signed_sdf_used": false,
+    "inside_outside_assigned": false,
+    "reproduction_tool": "tools/iris_v4_3_foreground_truth_surface_reference.py"
+  },
+  "inputs": {
+    "stage08_evidence_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "teacher_truth_fit_only_sha256": "95d2dec8dd5b960b6ea1a59b70ce6c0d64c7c121813b091e635e0565d84a7f96",
+    "resolution": 1024,
+    "truth_vertices": 3665,
+    "truth_faces": 6952,
+    "truth_mesh_objects": 15
+  },
+  "result": {
+    "total_rays": 2048,
+    "truth_surface_hit_count": 2010,
+    "truth_surface_miss_count": 38,
+    "truth_surface_hit_fraction": 0.9814453125,
+    "truth_surface_miss_fraction": 0.0185546875,
+    "boundary_miss_count": 36,
+    "interior_miss_count": 2,
+    "missed_source_inside_distance_px": {
+      "min": 1.0,
+      "median": 1.0,
+      "max": 27.0
+    },
+    "per_view": [
+      {"view_index":0,"ray_count":256,"truth_surface_hit_count":252,"truth_surface_miss_count":4,"truth_surface_hit_fraction":0.984375,"boundary_miss_count":4,"interior_miss_count":0,"missed_source_inside_distance_px":{"min":1.0,"median":1.0,"max":1.0}},
+      {"view_index":1,"ray_count":256,"truth_surface_hit_count":253,"truth_surface_miss_count":3,"truth_surface_hit_fraction":0.98828125,"boundary_miss_count":3,"interior_miss_count":0,"missed_source_inside_distance_px":{"min":1.0,"median":1.0,"max":1.0}},
+      {"view_index":2,"ray_count":256,"truth_surface_hit_count":250,"truth_surface_miss_count":6,"truth_surface_hit_fraction":0.9765625,"boundary_miss_count":6,"interior_miss_count":0,"missed_source_inside_distance_px":{"min":1.0,"median":1.0,"max":1.0}},
+      {"view_index":3,"ray_count":256,"truth_surface_hit_count":251,"truth_surface_miss_count":5,"truth_surface_hit_fraction":0.98046875,"boundary_miss_count":4,"interior_miss_count":1,"missed_source_inside_distance_px":{"min":1.0,"median":1.0,"max":27.0}},
+      {"view_index":4,"ray_count":256,"truth_surface_hit_count":253,"truth_surface_miss_count":3,"truth_surface_hit_fraction":0.98828125,"boundary_miss_count":3,"interior_miss_count":0,"missed_source_inside_distance_px":{"min":1.0,"median":1.0,"max":1.4142135623730951}},
+      {"view_index":5,"ray_count":256,"truth_surface_hit_count":249,"truth_surface_miss_count":7,"truth_surface_hit_fraction":0.97265625,"boundary_miss_count":6,"interior_miss_count":1,"missed_source_inside_distance_px":{"min":1.0,"median":1.0,"max":2.0}},
+      {"view_index":6,"ray_count":256,"truth_surface_hit_count":249,"truth_surface_miss_count":7,"truth_surface_hit_fraction":0.97265625,"boundary_miss_count":7,"interior_miss_count":0,"missed_source_inside_distance_px":{"min":1.0,"median":1.0,"max":1.4142135623730951}},
+      {"view_index":7,"ray_count":256,"truth_surface_hit_count":253,"truth_surface_miss_count":3,"truth_surface_hit_fraction":0.98828125,"boundary_miss_count":3,"interior_miss_count":0,"missed_source_inside_distance_px":{"min":1.0,"median":1.0,"max":1.0}}
+    ]
+  },
+  "interpretation": [
+    "The retained physical teacher zero-surface does not intersect every fixed source-foreground pixel-center ray.",
+    "36/38 misses are in the one-pixel 3x3-eroded source boundary class; only two are classified interior.",
+    "This independently agrees with the retained truth-raster convention reference that the physical FBX hard raster is a strict subset of the admitted source foreground.",
+    "The physical truth surface is therefore not a valid ceiling for the source-raster foreground target."
+  ],
+  "decision": {
+    "relax_v44_foreground_target": false,
+    "v44_policy_change": false,
+    "foreground_audit_target_max_miss_fraction_remains": 0,
+    "reason": "The admitted artist/source raster is the Stage13 geometry-fidelity authority, while the source-only hull feasibility audit found all 2048 fixed foreground rays geometrically admissible under the hull contract."
+  },
+  "claim_boundary": "Knight FIT reference only. No Stage13 PASS, product authority, TP64 capacity proof, unseen claim, or signed truth-volume claim."
+}

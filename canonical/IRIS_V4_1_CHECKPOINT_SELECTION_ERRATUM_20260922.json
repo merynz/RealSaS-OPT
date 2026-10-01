@@ -1,0 +1,49 @@
+{
+  "schema": "RealSaS.IRISV41CheckpointSelectionErratum.v1",
+  "date_utc": "2026-09-22",
+  "status": "APPARATUS_INVALID__CHECKPOINT_SELECTION_COLLAPSE__TRAINING_RESULT_NOT_INTERPRETABLE_AS_V41_GEOMETRY_RESULT",
+  "affected_run": {
+    "run_id": "20260922T122131Z",
+    "repo_commit": "7e08930291db3525c9a671a44881cf4379734e65",
+    "reported_decision": "V4_1_DEMO64_STAGE13_FAIL__RETENTION_REGULARITY_REMAINS_OPEN",
+    "selected_checkpoint_step": 160,
+    "selected_checkpoint_sha256": "f1071180bfd593a56e66e01b46b39c7caf044627eeeb7bc05d3b7db03c0f7260"
+  },
+  "bug": {
+    "old_selection": "LEXICOGRAPHIC_BACKGROUND_ZERO_CROSSING_FIRST",
+    "why_invalid": "The first score axis could reward an almost-empty field. Step 160 had max_background_zero_crossing_fraction=0.09375 but max_foreground_miss_fraction=1.0, and therefore displaced later non-collapsed checkpoints before Stage13 qualification.",
+    "selected_step_160": {
+      "max_background_zero_crossing_fraction": 0.09375,
+      "max_foreground_miss_fraction": 1.0,
+      "source_exterior_negative_fraction": 0.0
+    },
+    "final_step_4800": {
+      "max_background_zero_crossing_fraction": 0.859375,
+      "max_foreground_miss_fraction": 0.02734375,
+      "source_exterior_negative_fraction": 0.00390625,
+      "eikonal_abs_error_mean": 0.12576991319656372
+    }
+  },
+  "interpretation_boundary": {
+    "stage13_result_is_valid_for_selected_step_160": true,
+    "stage13_result_is_valid_as_evidence_about_v41_training_lane": false,
+    "v41_training_objective_falsified": false,
+    "v41_architecture_falsified": false,
+    "rerun_required": true
+  },
+  "repair": {
+    "training_objective_changed": false,
+    "architecture_changed": false,
+    "sampling_changed": false,
+    "stage13_thresholds_changed": false,
+    "new_selection": "SAVE_PERIODIC_CHECKPOINTS__HARD_SIGN_PARETO_FRONT__EXACT_FROZEN_STAGE13_R256_SELECTION__R512_FINAL_AUTHORITY",
+    "policy": "canonical/IRIS_V4_1_CHECKPOINT_SELECTION_POLICY_V2_20260922.json"
+  },
+  "governance": {
+    "threshold_relaxation": false,
+    "posthoc_mesh_repair": false,
+    "visual_hull_clipping": false,
+    "product_authority_minted": false,
+    "knight_witness_promoted": false
+  }
+}

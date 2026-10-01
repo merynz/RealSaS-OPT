@@ -1,0 +1,135 @@
+name: knight-stage35-offender-capture-audit-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/knight_stage35_offender_capture_audit_v1.yml'
+
+concurrency:
+  group: knight-stage35-offender-capture-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      OUT: canonical/knight_stage35_offender_capture_audit_v1
+
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install mainline runtime
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Run exact baseline through current Stage35 compatibility checker
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python - <<'PY'
+          import json, hashlib
+          from pathlib import Path
+
+          from compiler.realsas_compiler_core.artifact_codec_v2 import (
+              canonical_mesh_candidate_from_dict,
+              qualified_skeleton_from_dict,
+              qualified_skin_from_dict,
+              qualified_camera_set_from_dict,
+              deformation_envelope_from_dict,
+              mesh_policy_from_dict,
+          )
+          from compiler.realsas_compiler_core.geometry_artifact_codec_v2 import (
+              rigging_surface_from_dict,
+          )
+          from compiler.realsas_compiler_core.mesh.skin_topology_compatibility_v1 import (
+              run_skin_topology_compatibility_v1,
+          )
+
+          root=Path("/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924")
+          out=Path("canonical/knight_stage35_offender_capture_audit_v1")
+          out.mkdir(parents=True,exist_ok=True)
+
+          paths={
+            "surface":root/"artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json",
+            "candidate":root/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json",
+            "policy":root/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/mesh_qualification_policy.json",
+            "skeleton":root/"artifacts/28_SKELETON_QUALIFIED/qualified_skeleton.json",
+            "skin":root/"artifacts/32_SKIN_QUALIFIED/qualified_skin.json",
+            "envelope":root/"artifacts/34_DEFORMATION_CAPABILITY_ENVELOPE/deformation_envelope.json",
+            "camera":root/"artifacts/05_CAMERA_CONTRACT_SOLVED/qualified_camera_set.json",
+          }
+          for k,p in paths.items():
+              if not p.is_file():
+                  raise RuntimeError(f"MISSING:{k}:{p}")
+
+          surface=rigging_surface_from_dict(json.loads(paths["surface"].read_text()))
+          candidate=canonical_mesh_candidate_from_dict(json.loads(paths["candidate"].read_text()))
+          policy=mesh_policy_from_dict(json.loads(paths["policy"].read_text()))
+          skeleton=qualified_skeleton_from_dict(json.loads(paths["skeleton"].read_text()))
+          skin=qualified_skin_from_dict(json.loads(paths["skin"].read_text()))
+          envelope=deformation_envelope_from_dict(json.loads(paths["envelope"].read_text()))
+          camera=qualified_camera_set_from_dict(json.loads(paths["camera"].read_text()))
+
+          report=run_skin_topology_compatibility_v1(
+              candidate,
+              surface=surface,
+              skeleton=skeleton,
+              skin=skin,
+              envelope=envelope,
+              cameras=camera.cameras,
+              policy=policy,
+          )
+
+          offenders=(253,3829,3573)
+          unsafe=set(map(int,report.get("unsafe_face_indices") or ()))
+          risky=set(map(int,report.get("risky_face_indices") or ()))
+          rows=[]
+          for idx in offenders:
+              rows.append({
+                "face_index":idx,
+                "risky":idx in risky,
+                "unsafe":idx in unsafe,
+              })
+
+          payload={
+            "schema":"RealSaS.KnightStage35OffenderCaptureAudit.v1",
+            "status":"AUDIT_ONLY__NO_REPAIR_APPLIED",
+            "artifact_sha256":{k:hashlib.sha256(p.read_bytes()).hexdigest() for k,p in paths.items()},
+            "compatibility_summary":{
+              k:report.get(k) for k in (
+                "passed","risk_l1_min","max_edge_ratio","stress_angle_deg",
+                "risky_face_count","unsafe_face_count","report_hash"
+              )
+            },
+            "known_smear_offenders":rows,
+            "verdict":{
+              "all_known_offenders_risky":all(x["risky"] for x in rows),
+              "all_known_offenders_unsafe":all(x["unsafe"] for x in rows),
+              "stage35_current_checker_would_block_exact_baseline":not bool(report.get("passed")),
+              "claim_boundary":"Current Stage35 compatibility implementation applied to exact baseline artifacts; no repair applied."
+            }
+          }
+          (out/"REPORT.json").write_text(json.dumps(payload,indent=2,sort_keys=True)+"\n")
+          print(json.dumps(payload,indent=2,sort_keys=True))
+          PY
+
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add "$OUT/REPORT.json"
+          git commit -m 'audit: seal exact Stage35 offender-capture evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

@@ -1,0 +1,58 @@
+{
+  "schema": "RealSaS.VF11C1DirectionalRegularityPreregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__C1_DIRECTIONAL_REGULARITY",
+  "authority_class": "RESEARCH_PREREGISTRATION_ONLY",
+  "product_authority_minted": false,
+  "shipping_certificate_backend": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "parent_c0_closure": "canonical/VF11_C0_RESEARCH_CLOSURE_V4_20260921.json",
+  "core_claim": "A cell may be marked directionally regular only if one fixed unit direction d has a conservative whole-cell bound with inf <grad f(x), d> > 0 or sup <grad f(x), d> < 0.",
+  "forbidden_inferences": [
+    "PROVEN_SINGLE_COMPONENT",
+    "global topology from directional regularity alone",
+    "shipping proof from ordinary float64 arithmetic",
+    "surface existence from regularity alone"
+  ],
+  "states": [
+    "PROVEN_DIRECTIONAL_REGULAR_POSITIVE",
+    "PROVEN_DIRECTIONAL_REGULAR_NEGATIVE",
+    "UNKNOWN"
+  ],
+  "candidate_direction_policy": {
+    "primary": "normalized direct center gradient, used only to propose d and never as proof",
+    "fallback": "canonical coordinate axes, deterministic order",
+    "near_zero_center_gradient_tiny": "may return UNKNOWN; no invented direction"
+  },
+  "ladder": {
+    "C1_0": "semantic contract plus analytic exact-derivative fixtures",
+    "C1_1": "conservative directional-derivative range engine for the frozen triplane+LayerNorm+SiLU field",
+    "C1_2": "adversarial critical/fold/tangent fixtures with zero false regularity",
+    "C1_3": "numeric margin and exact-backend binding audit; ordinary float64 remains research-only",
+    "C1_4": "frozen Knight paired handoff: primary 19 d8/m2 C0 ZERO_OR_UNKNOWN cells; stress all 32 NEAR_ZERO cells",
+    "C1_5": "closure decision before any full-domain certified traversal or extractor promotion"
+  },
+  "c1_4_metrics": {
+    "primary_handoff_count": 19,
+    "primary_states_from_c0": {"PROVEN_ZERO_EXISTS": 7, "UNKNOWN": 12},
+    "stress_near_zero_count": 32,
+    "report": [
+      "REGULAR_POSITIVE / REGULAR_NEGATIVE / UNKNOWN counts",
+      "directional derivative lower/upper margins",
+      "paired C0->C1 transition per cell",
+      "Wilson 95 percent intervals for proportions",
+      "box evaluations and latency"
+    ],
+    "surface_ready_metric": "Regularity is not itself terminal. For a certified direction, opposite-face sign bounds may be combined with monotonicity in a later crossing proof."
+  },
+  "runtime_guard": {
+    "before_full_domain": [
+      "estimate surface-cell population from existing sign-change/MC evidence",
+      "project traversal cost with measured near-zero boxes per cell and measured per-box latency",
+      "batch/vectorize range evaluation if projected runtime is excessive"
+    ],
+    "no_long_full_domain_run_without_explicit_execution_decision": true
+  },
+  "demo_priority": "C1 research must not destabilize the existing demo/product path; all work remains isolated on the research branch."
+}

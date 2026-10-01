@@ -1,0 +1,397 @@
+name: subject2-knight-caa-boundary-guard-diagnostic
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_CAA_BOUNDARY_GUARD_DIAGNOSTIC_TRIGGER_20260927.json'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-caa-boundary-guard-diagnostic
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
+      PYTHONHASHSEED: '0'
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Classify safety-band versus truly-unobserved CAA samples
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from collections import deque
+          from pathlib import Path
+
+          import numpy as np
+
+          from compiler.realsas_compiler_core.artifact_codec_v2 import (
+              canonical_mesh_candidate_from_dict,
+              qualified_camera_set_from_dict,
+              qualified_observation_set_from_dict,
+          )
+          from compiler.realsas_compiler_core.appearance_compile_v2 import (
+              _surface_sample_geometry_adaptive,
+              erode_binary_mask,
+          )
+          from compiler.realsas_compiler_core.appearance_completion_v2 import (
+              surface_sample_neighbors,
+          )
+          from compiler.realsas_compiler_core.playback_full_surface_v3 import (
+              project_points_xyz_v3,
+          )
+          from compiler.realsas_compiler_core.visibility_v2 import (
+              rasterize_visible_owner,
+          )
+          from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
+              stage_output_payload,
+          )
+          from compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2 import (
+              _load_source_inputs,
+          )
+
+          root=Path(os.environ["RUN_ROOT"]).resolve()
+          repo=Path.cwd().resolve()
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          manifest=json.loads((root/"run_manifest.json").read_text())
+          ctx={
+              "repo_root":repo,
+              "authority_root":Path(os.environ["REALSAS_AUTHORITY_ROOT"]).resolve(),
+              "run_root":root,
+              "run_id":os.environ["RUN_ID"],
+              "run_manifest_path":root/"run_manifest.json",
+              "run_manifest":manifest,
+              "stage":{"id":"CAA_BOUNDARY_GUARD_DIAGNOSTIC"},
+              "ledger":ledger,
+          }
+          candidate=canonical_mesh_candidate_from_dict(
+              stage_output_payload(
+                  ctx,
+                  "18_CANONICAL_MESH_ADDRESSING_BUILD",
+                  "RealSaS.CanonicalMeshCandidateIR.v1",
+              )
+          )
+          cameras=qualified_camera_set_from_dict(
+              stage_output_payload(
+                  ctx,
+                  "05_CAMERA_CONTRACT_SOLVED",
+                  "RealSaS.QualifiedCameraSetIR.v1",
+              )
+          )
+          observation=qualified_observation_set_from_dict(
+              stage_output_payload(
+                  ctx,
+                  "07_OBSERVATION_CONTRACT_QUALIFIED",
+                  "RealSaS.QualifiedObservationSetIR.v1",
+              )
+          )
+          rgba,masks=_load_source_inputs(ctx,observation)
+          policy=json.loads(
+              (repo/"canonical"/"CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json").read_text()
+          )
+          source_policy=dict(policy["source_lock_policy"])
+          completion_policy=dict(policy["completion_quality_policy"])
+          min_cos=float(source_policy["min_abs_normal_camera_cos"])
+          erosion=int(source_policy["boundary_safe_erosion_px"])
+          min_alpha=int(source_policy["min_source_alpha_u8"])
+          max_region=int(completion_policy["max_local_harmonic_region_samples"])
+          max_hops=int(completion_policy["max_local_harmonic_graph_hops"])
+
+          face_count=len(candidate.faces)
+          resolutions=np.full((face_count,),4,dtype=np.int32)
+          (
+              positions,
+              sample_face,
+              sample_component,
+              _component_ids,
+              face_normals,
+              offsets,
+          )=_surface_sample_geometry_adaptive(candidate,resolutions)
+          sample_count=len(positions)
+          safe_valid=np.zeros((8,sample_count),dtype=bool)
+          raw_valid=np.zeros((8,sample_count),dtype=bool)
+          view_rows=[]
+          camera_by_view={int(c.view_index):c for c in cameras.cameras}
+          assert set(camera_by_view)==set(range(8))
+
+          for view in range(8):
+              camera=camera_by_view[view]
+              image=np.asarray(rgba[view],dtype=np.uint8)
+              mask=np.asarray(masks[view],dtype=bool)
+              safe_fg=erode_binary_mask(mask,erosion)
+              safe_bg=erode_binary_mask(~mask,erosion)
+              visibility=rasterize_visible_owner(
+                  candidate,
+                  camera,
+                  width=image.shape[1],
+                  height=image.shape[0],
+              )
+              projected=np.asarray(project_points_xyz_v3(positions,camera),dtype=np.float64)
+              xy=projected[:,:2]-0.5
+              ix=np.rint(xy[:,0]).astype(np.int64)
+              iy=np.rint(xy[:,1]).astype(np.int64)
+              in_bounds=(
+                  (ix>=0)&(ix<image.shape[1])&
+                  (iy>=0)&(iy<image.shape[0])&
+                  np.isfinite(projected[:,2])&(projected[:,2]>0.0)
+              )
+              raw_support=np.zeros(sample_count,dtype=bool)
+              safe_support=np.zeros(sample_count,dtype=bool)
+              visible=np.zeros(sample_count,dtype=bool)
+              valid_idx=np.flatnonzero(in_bounds)
+              if len(valid_idx):
+                  x=ix[valid_idx]
+                  y=iy[valid_idx]
+                  alpha=image[y,x,3]
+                  fg=mask[y,x]
+                  raw_support[valid_idx]=(
+                      (fg & (alpha>=min_alpha))
+                      | ((~fg) & (alpha==0))
+                  )
+                  safe_support[valid_idx]=(
+                      (safe_fg[y,x] & (alpha>=min_alpha))
+                      | (safe_bg[y,x] & (alpha==0))
+                  )
+                  visible[valid_idx]=(
+                      visibility.owner_face_index[y,x]
+                      == sample_face[valid_idx]
+                  )
+              forward=np.asarray(camera.forward,dtype=np.float64)
+              forward=forward/np.linalg.norm(forward)
+              angle_safe=(
+                  np.abs(face_normals@forward)[sample_face]
+                  >= min_cos
+              )
+              common=in_bounds&visible&angle_safe
+              raw_valid[view]=common&raw_support
+              safe_valid[view]=common&safe_support
+              if np.any(safe_valid[view] & ~raw_valid[view]):
+                  raise RuntimeError("SAFE_SOURCE_NOT_SUBSET_OF_RAW_SOURCE")
+              view_rows.append({
+                  "view_index":view,
+                  "raw_source_sample_count":int(np.count_nonzero(raw_valid[view])),
+                  "safe_source_sample_count":int(np.count_nonzero(safe_valid[view])),
+                  "safety_band_withheld_sample_count":int(
+                      np.count_nonzero(raw_valid[view]&~safe_valid[view])
+                  ),
+              })
+
+          safe_any=np.any(safe_valid,axis=0)
+          raw_any=np.any(raw_valid,axis=0)
+          boundary_guard=raw_any&~safe_any
+          truly_unobserved=~raw_any
+
+          safe_face_count=np.zeros(face_count,dtype=np.int32)
+          raw_face_count=np.zeros(face_count,dtype=np.int32)
+          np.add.at(safe_face_count,sample_face,safe_any.astype(np.int32))
+          np.add.at(raw_face_count,sample_face,raw_any.astype(np.int32))
+          raw_renderable_face=raw_face_count>0
+          active=raw_renderable_face[sample_face]
+          harmonic_missing=active&truly_unobserved
+
+          graph=surface_sample_neighbors(
+              positions=positions,
+              face_count=face_count,
+              face_sample_offsets=offsets,
+              face_tile_resolutions=resolutions,
+              face_vertex_ids=tuple(tuple(map(str,face)) for face in candidate.faces),
+          )
+          component=np.asarray(sample_component,dtype=np.int32)
+
+          def measure_regions(missing_mask, defined_mask, active_mask):
+              seen=np.zeros(sample_count,dtype=bool)
+              rows=[]
+              for seed in np.flatnonzero(missing_mask&active_mask):
+                  seed=int(seed)
+                  if seen[seed]:
+                      continue
+                  cid=int(component[seed])
+                  stack=[seed]
+                  seen[seed]=True
+                  region=[]
+                  while stack:
+                      node=stack.pop()
+                      region.append(node)
+                      for raw in graph[node]:
+                          nxt=int(raw)
+                          if (
+                              active_mask[nxt]
+                              and missing_mask[nxt]
+                              and not seen[nxt]
+                              and int(component[nxt])==cid
+                          ):
+                              seen[nxt]=True
+                              stack.append(nxt)
+                  region_set=set(region)
+                  boundary=set()
+                  for node in region:
+                      for raw in graph[node]:
+                          nxt=int(raw)
+                          if (
+                              active_mask[nxt]
+                              and defined_mask[nxt]
+                              and int(component[nxt])==cid
+                          ):
+                              boundary.add(nxt)
+                  hops=None
+                  if boundary:
+                      dist={node:None for node in region}
+                      q=deque()
+                      for node in region:
+                          if any(
+                              active_mask[int(n)]
+                              and defined_mask[int(n)]
+                              for n in graph[node]
+                          ):
+                              dist[node]=1
+                              q.append(node)
+                      while q:
+                          node=q.popleft()
+                          cur=int(dist[node])
+                          for raw in graph[node]:
+                              nxt=int(raw)
+                              if (
+                                  nxt in region_set
+                                  and active_mask[nxt]
+                                  and dist[nxt] is None
+                              ):
+                                  dist[nxt]=cur+1
+                                  q.append(nxt)
+                      if all(value is not None for value in dist.values()):
+                          hops=max(map(int,dist.values()))
+                  face_ids=np.unique(sample_face[np.asarray(region,dtype=np.int64)])
+                  rows.append({
+                      "sample_count":len(region),
+                      "face_count":int(len(face_ids)),
+                      "component_index":cid,
+                      "boundary_sample_count":len(boundary),
+                      "maximum_graph_hops":hops,
+                      "passes_region_sample_cap":len(region)<=max_region,
+                      "passes_graph_hop_cap":(
+                          hops is not None and hops<=max_hops
+                      ),
+                  })
+              rows.sort(key=lambda row:(-row["sample_count"],row["component_index"]))
+              return rows
+
+          # Once SOURCE_BOUNDARY_GUARD samples are source-defined, raw_any is
+          # the defined boundary for genuinely unobserved completion.
+          true_regions=measure_regions(
+              harmonic_missing,
+              raw_any,
+              active,
+          )
+          guard_regions=measure_regions(
+              boundary_guard&active,
+              safe_any,
+              active,
+          )
+
+          report={
+              "schema":"RealSaS.CAABoundaryGuardDiagnostic.v1",
+              "status":"MEASURED",
+              "run_id":os.environ["RUN_ID"],
+              "control_lattice_resolution":4,
+              "samples_per_face":10,
+              "face_count":face_count,
+              "sample_count":sample_count,
+              "source_lock_policy":{
+                  "min_abs_normal_camera_cos":min_cos,
+                  "boundary_safe_erosion_px":erosion,
+                  "min_source_alpha_u8":min_alpha,
+                  "thresholds_changed":False,
+              },
+              "view_rows":view_rows,
+              "safe_any_sample_count":int(np.count_nonzero(safe_any)),
+              "raw_any_sample_count":int(np.count_nonzero(raw_any)),
+              "source_boundary_guard_sample_count":int(np.count_nonzero(boundary_guard)),
+              "truly_unobserved_sample_count":int(np.count_nonzero(truly_unobserved)),
+              "source_boundary_guard_fraction":float(np.mean(boundary_guard)),
+              "truly_unobserved_fraction":float(np.mean(truly_unobserved)),
+              "raw_renderable_face_count":int(np.count_nonzero(raw_renderable_face)),
+              "mechanical_only_face_count":int(np.count_nonzero(~raw_renderable_face)),
+              "raw_renderable_missing_sample_count":int(np.count_nonzero(harmonic_missing)),
+              "source_boundary_guard_regions":{
+                  "region_count":len(guard_regions),
+                  "maximum_region_samples":max((r["sample_count"] for r in guard_regions),default=0),
+                  "maximum_graph_hops":max((r["maximum_graph_hops"] or 0 for r in guard_regions),default=0),
+                  "top_regions":guard_regions[:32],
+              },
+              "truly_unobserved_regions_after_boundary_guard_authority":{
+                  "region_count":len(true_regions),
+                  "maximum_region_samples":max((r["sample_count"] for r in true_regions),default=0),
+                  "maximum_region_faces":max((r["face_count"] for r in true_regions),default=0),
+                  "maximum_graph_hops":max((r["maximum_graph_hops"] or 0 for r in true_regions),default=0),
+                  "region_over_sample_cap_count":sum(
+                      not r["passes_region_sample_cap"] for r in true_regions
+                  ),
+                  "region_over_hop_cap_count":sum(
+                      not r["passes_graph_hop_cap"] for r in true_regions
+                  ),
+                  "region_without_qualified_boundary_count":sum(
+                      int(r["boundary_sample_count"])==0 for r in true_regions
+                  ),
+                  "passes_existing_local_harmonic_policy":bool(
+                      all(
+                          r["passes_region_sample_cap"]
+                          and r["passes_graph_hop_cap"]
+                          and int(r["boundary_sample_count"])>0
+                          for r in true_regions
+                      )
+                  ),
+                  "top_regions":true_regions[:64],
+              },
+              "interpretation":{
+                  "boundary_guard_is_raw_source_observed_not_generated":True,
+                  "boundary_guard_differs_from_safe_lock_only_by_erosion":True,
+                  "fully_unobserved_faces_remain_mechanical_only":True,
+                  "dynamic_exposure_of_mechanical_only_faces_must_fail_closed":True,
+                  "diagnostic_only":True,
+                  "product_authority_claimed":False,
+              },
+          }
+          Path("canonical/KNIGHT_CAA_BOUNDARY_GUARD_DIAGNOSTIC_20260927.json").write_text(
+              json.dumps(report,indent=2,sort_keys=True)+"\n"
+          )
+          print("CAA_BOUNDARY_GUARD_DIAGNOSTIC",json.dumps({
+              "guard_samples":report["source_boundary_guard_sample_count"],
+              "true_unobserved":report["truly_unobserved_sample_count"],
+              "raw_renderable_faces":report["raw_renderable_face_count"],
+              "mechanical_only_faces":report["mechanical_only_face_count"],
+              "true_regions":report["truly_unobserved_regions_after_boundary_guard_authority"],
+          },sort_keys=True))
+          PY
+
+      - name: Seal diagnostic
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_CAA_BOUNDARY_GUARD_DIAGNOSTIC_20260927.json
+          git commit -m 'appearance: seal Knight source-boundary guard diagnostic'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

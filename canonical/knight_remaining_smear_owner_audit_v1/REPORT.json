@@ -1,0 +1,3863 @@
+{
+  "cases": [
+    {
+      "clip_id": "demo_idle_v1",
+      "final_alpha_pixels": 262324,
+      "frame_index": 0,
+      "label": "idle_v2_f0",
+      "provenance_distribution": {
+        "CANONICAL_GLOBAL_COMPLETION": 137968,
+        "COMPILED_LOCAL_HARMONIC": 3904,
+        "DIRECT_SOURCE": 54474,
+        "OTHER_VIEW_SOURCE": 44836,
+        "UNSUPPORTED_ABSTAIN": 21142
+      },
+      "rest_alpha_pixels": 145694,
+      "time_seconds": 0.0,
+      "top_screen_growth_faces": [
+        {
+          "area_ratio": 2.2642957689784176,
+          "condition": 2.306899516541931,
+          "dynamic_pixels": 131,
+          "edge_ratio": 2.262076327513838,
+          "original_face_index": 20396,
+          "pixel_growth": 131,
+          "pixel_ratio": 131.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 81,
+            "OTHER_VIEW_SOURCE": 50
+          },
+          "repaired_face_index": 19426,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.24076805066991913,
+          "vertex_ids": [
+            "CMV:b1eca03b88f73f6a60ef7269",
+            "CMV:f130a642ddd6e07a5ff97bb4",
+            "CMV:f552d268218ac9eba8de4e88"
+          ]
+        },
+        {
+          "area_ratio": 1.515695094427468,
+          "condition": 1.5766578676458232,
+          "dynamic_pixels": 105,
+          "edge_ratio": 1.5343520875064005,
+          "original_face_index": 21702,
+          "pixel_growth": 105,
+          "pixel_ratio": 105.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 41,
+            "OTHER_VIEW_SOURCE": 64
+          },
+          "repaired_face_index": 20677,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.8577104071930901,
+          "vertex_ids": [
+            "CMV:a02441d29defd0808fff8305",
+            "CMV:aabaa6c45df457d92b8b50f8",
+            "CMV:3a95da46baa6fa387573e007"
+          ]
+        },
+        {
+          "area_ratio": 1.3700693727701336,
+          "condition": 1.3762235415245434,
+          "dynamic_pixels": 100,
+          "edge_ratio": 1.3700043795304029,
+          "original_face_index": 11031,
+          "pixel_growth": 100,
+          "pixel_ratio": 100.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 29,
+            "COMPILED_LOCAL_HARMONIC": 15,
+            "OTHER_VIEW_SOURCE": 36,
+            "UNSUPPORTED_ABSTAIN": 20
+          },
+          "repaired_face_index": 10513,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.0941810482022228,
+          "vertex_ids": [
+            "CMV:9515e06c9f176a4fac35568a",
+            "CMV:46f55e92ae2aa21132047add",
+            "CMV:f504e41fd3bf5c3be0353b89"
+          ]
+        },
+        {
+          "area_ratio": 1.1967191229693115,
+          "condition": 1.2828507020348137,
+          "dynamic_pixels": 94,
+          "edge_ratio": 1.2370021813560523,
+          "original_face_index": 11030,
+          "pixel_growth": 94,
+          "pixel_ratio": 94.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 29,
+            "COMPILED_LOCAL_HARMONIC": 11,
+            "OTHER_VIEW_SOURCE": 46,
+            "UNSUPPORTED_ABSTAIN": 8
+          },
+          "repaired_face_index": 10512,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.0941810482022228,
+          "vertex_ids": [
+            "CMV:9515e06c9f176a4fac35568a",
+            "CMV:1b71a9fcd8ba09fc43b59c82",
+            "CMV:46f55e92ae2aa21132047add"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999999999997,
+          "condition": 1.0000000000000053,
+          "dynamic_pixels": 97,
+          "edge_ratio": 1.0000000000000024,
+          "original_face_index": 16574,
+          "pixel_growth": 93,
+          "pixel_ratio": 24.25,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 51,
+            "UNSUPPORTED_ABSTAIN": 46
+          },
+          "repaired_face_index": 15804,
+          "rest_pixels": 4,
+          "skin_l1_max": 1.7508083250417557e-22,
+          "vertex_ids": [
+            "CMV:799b36e0f47405017d020f35",
+            "CMV:840618f6c890312dfba4f1f3",
+            "CMV:b0df1730d810ce33211cedeb"
+          ]
+        },
+        {
+          "area_ratio": 1.0000006196305757,
+          "condition": 1.0000018336456082,
+          "dynamic_pixels": 92,
+          "edge_ratio": 1.0000012213073013,
+          "original_face_index": 3719,
+          "pixel_growth": 92,
+          "pixel_ratio": 92.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 28,
+            "COMPILED_LOCAL_HARMONIC": 2,
+            "OTHER_VIEW_SOURCE": 62
+          },
+          "repaired_face_index": 3572,
+          "rest_pixels": 0,
+          "skin_l1_max": 6.156773142050959e-07,
+          "vertex_ids": [
+            "CMV:15807ecccbb6b5de69a41f99",
+            "CMV:0e59a89541ce12de135d1e76",
+            "CMV:c243b5c479d909adf962441d"
+          ]
+        },
+        {
+          "area_ratio": 1.430460041829415,
+          "condition": 1.4306038816949445,
+          "dynamic_pixels": 92,
+          "edge_ratio": 1.4305274499937064,
+          "original_face_index": 19945,
+          "pixel_growth": 92,
+          "pixel_ratio": 92.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 92
+          },
+          "repaired_face_index": 18995,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.1068066639728696,
+          "vertex_ids": [
+            "CMV:f6c1a496fc2a1136c51c89e2",
+            "CMV:c2b42a6a9dfdc76558739993",
+            "CMV:c3cc8d514b35324c8b7de81c"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999999999749,
+          "condition": 1.000000000000041,
+          "dynamic_pixels": 91,
+          "edge_ratio": 1.0000000000000044,
+          "original_face_index": 23586,
+          "pixel_growth": 91,
+          "pixel_ratio": 91.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 73,
+            "OTHER_VIEW_SOURCE": 13,
+            "UNSUPPORTED_ABSTAIN": 5
+          },
+          "repaired_face_index": 22489,
+          "rest_pixels": 0,
+          "skin_l1_max": 8.869493796458531e-15,
+          "vertex_ids": [
+            "CMV:ae5133410e0a03ecf0ddc382",
+            "CMV:3b9ecb8a607b07a4be68113b",
+            "CMV:d83d091bf823cf8e34c25fa7"
+          ]
+        },
+        {
+          "area_ratio": 1.0000000000000606,
+          "condition": 1.0000000000002702,
+          "dynamic_pixels": 90,
+          "edge_ratio": 1.0000000000001636,
+          "original_face_index": 18021,
+          "pixel_growth": 90,
+          "pixel_ratio": 90.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 80,
+            "UNSUPPORTED_ABSTAIN": 10
+          },
+          "repaired_face_index": 17175,
+          "rest_pixels": 0,
+          "skin_l1_max": 2.3483524386670408e-12,
+          "vertex_ids": [
+            "CMV:522d51158b5380801e1aa29c",
+            "CMV:ccd15adece6d74448d043a8f",
+            "CMV:09dba4f7a962d32972930679"
+          ]
+        },
+        {
+          "area_ratio": 1.0050378821153092,
+          "condition": 1.006095754917532,
+          "dynamic_pixels": 90,
+          "edge_ratio": 1.00497739275292,
+          "original_face_index": 20386,
+          "pixel_growth": 90,
+          "pixel_ratio": 90.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 39,
+            "OTHER_VIEW_SOURCE": 51
+          },
+          "repaired_face_index": 19418,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.0009907821147419867,
+          "vertex_ids": [
+            "CMV:da31a321bd06ed9a393fb397",
+            "CMV:f305e13dfd60a815f175bdbc",
+            "CMV:e009c79c913e41ee2c938f63"
+          ]
+        },
+        {
+          "area_ratio": 0.9987954635655635,
+          "condition": 1.0012859316263052,
+          "dynamic_pixels": 90,
+          "edge_ratio": 0.9999971802705572,
+          "original_face_index": 4388,
+          "pixel_growth": 90,
+          "pixel_ratio": 90.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 90
+          },
+          "repaired_face_index": 4217,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.012715007087667563,
+          "vertex_ids": [
+            "CMV:2e538ef74a8d09f8b9474f57",
+            "CMV:92a9f106d6619a2a6ad19a99",
+            "CMV:e420f20594f6f11e4712120e"
+          ]
+        },
+        {
+          "area_ratio": 1.0000000000000069,
+          "condition": 1.0000000000000047,
+          "dynamic_pixels": 89,
+          "edge_ratio": 1.0000000000000056,
+          "original_face_index": 22520,
+          "pixel_growth": 89,
+          "pixel_ratio": 89.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 89
+          },
+          "repaired_face_index": 21463,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.1216420698419044e-18,
+          "vertex_ids": [
+            "CMV:f71d1a6f27aba08ecff90f1f",
+            "CMV:9c7c467a990dbf508f6d240a",
+            "CMV:370087fe7dd1d112c865baab"
+          ]
+        },
+        {
+          "area_ratio": 0.999999999999997,
+          "condition": 1.0000000000000004,
+          "dynamic_pixels": 88,
+          "edge_ratio": 0.9999999999999988,
+          "original_face_index": 18512,
+          "pixel_growth": 88,
+          "pixel_ratio": 88.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 45,
+            "COMPILED_LOCAL_HARMONIC": 6,
+            "OTHER_VIEW_SOURCE": 36,
+            "UNSUPPORTED_ABSTAIN": 1
+          },
+          "repaired_face_index": 17641,
+          "rest_pixels": 0,
+          "skin_l1_max": 3.102238992704008e-18,
+          "vertex_ids": [
+            "CMV:64ff3f959db89c884837ac54",
+            "CMV:371076719bf1043ad18d5c9c",
+            "CMV:f3d4627a5522c0008ea8331b"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999755724115,
+          "condition": 1.0000000334774155,
+          "dynamic_pixels": 88,
+          "edge_ratio": 0.9999999997744977,
+          "original_face_index": 10422,
+          "pixel_growth": 88,
+          "pixel_ratio": 88.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 86,
+            "UNSUPPORTED_ABSTAIN": 2
+          },
+          "repaired_face_index": 9948,
+          "rest_pixels": 0,
+          "skin_l1_max": 8.284219977405021e-08,
+          "vertex_ids": [
+            "CMV:9425e9ceb1b6e026ff942fd0",
+            "CMV:ccd15adece6d74448d043a8f",
+            "CMV:db8321452480601e4bbc9b46"
+          ]
+        },
+        {
+          "area_ratio": 1.0001857767706888,
+          "condition": 1.0001858049598236,
+          "dynamic_pixels": 88,
+          "edge_ratio": 1.000185694069374,
+          "original_face_index": 16501,
+          "pixel_growth": 88,
+          "pixel_ratio": 88.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 86,
+            "UNSUPPORTED_ABSTAIN": 2
+          },
+          "repaired_face_index": 15742,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.0004239111495606316,
+          "vertex_ids": [
+            "CMV:031c265d87585971eaf7d272",
+            "CMV:a2d3b820d7394c4227b82a7a",
+            "CMV:04bdc27c8a8a15456715ad01"
+          ]
+        },
+        {
+          "area_ratio": 1.0000000001201548,
+          "condition": 1.0000000001720217,
+          "dynamic_pixels": 88,
+          "edge_ratio": 1.0000000001207583,
+          "original_face_index": 11185,
+          "pixel_growth": 88,
+          "pixel_ratio": 88.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 44,
+            "UNSUPPORTED_ABSTAIN": 44
+          },
+          "repaired_face_index": 10663,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.7557941315889926e-11,
+          "vertex_ids": [
+            "CMV:6585e8a1752a186c8d993356",
+            "CMV:1f73d50593eef757958096f3",
+            "CMV:68516368a70fb1241c2273d2"
+          ]
+        },
+        {
+          "area_ratio": 1.237033637334553,
+          "condition": 1.2370617962911072,
+          "dynamic_pixels": 88,
+          "edge_ratio": 1.2370458628741883,
+          "original_face_index": 13590,
+          "pixel_growth": 88,
+          "pixel_ratio": 88.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 88
+          },
+          "repaired_face_index": 12994,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.09842229704811539,
+          "vertex_ids": [
+            "CMV:7a7246156d3ba9b6141504a2",
+            "CMV:20559733d1a225864884b08c",
+            "CMV:a6ff7d6bd56052a9fe105aa2"
+          ]
+        },
+        {
+          "area_ratio": 1.0051504765919472,
+          "condition": 1.0057278576998618,
+          "dynamic_pixels": 87,
+          "edge_ratio": 1.0028409353658208,
+          "original_face_index": 4781,
+          "pixel_growth": 87,
+          "pixel_ratio": 87.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 87
+          },
+          "repaired_face_index": 4599,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.035301738519203756,
+          "vertex_ids": [
+            "CMV:85d6efd90a52db05a51ee229",
+            "CMV:1ec65dfc8c079fd33f5b542d",
+            "CMV:8847187b0de1005ef2902747"
+          ]
+        },
+        {
+          "area_ratio": 1.000000000009881,
+          "condition": 1.0000000000976987,
+          "dynamic_pixels": 87,
+          "edge_ratio": 1.000000000053642,
+          "original_face_index": 11189,
+          "pixel_growth": 87,
+          "pixel_ratio": 87.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 48,
+            "UNSUPPORTED_ABSTAIN": 39
+          },
+          "repaired_face_index": 10667,
+          "rest_pixels": 0,
+          "skin_l1_max": 2.0425892639911172e-11,
+          "vertex_ids": [
+            "CMV:6585e8a1752a186c8d993356",
+            "CMV:538ccd2192f5706ef3912fce",
+            "CMV:40d94f6b9f6beda81059dbc5"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999999999984,
+          "condition": 1.0000000000000033,
+          "dynamic_pixels": 87,
+          "edge_ratio": 1.0000000000000002,
+          "original_face_index": 2205,
+          "pixel_growth": 87,
+          "pixel_ratio": 87.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 87
+          },
+          "repaired_face_index": 2130,
+          "rest_pixels": 0,
+          "skin_l1_max": 3.1237864843103744e-17,
+          "vertex_ids": [
+            "CMV:dc2ab3aee7a5c2bf9722e23f",
+            "CMV:f40373aabcf4017f1629ddbd",
+            "CMV:eb6534c3615b53836f8e2994"
+          ]
+        },
+        {
+          "area_ratio": 1.1403992514404584,
+          "condition": 1.2358387944336908,
+          "dynamic_pixels": 87,
+          "edge_ratio": 1.1866577778699794,
+          "original_face_index": 4958,
+          "pixel_growth": 87,
+          "pixel_ratio": 87.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 51,
+            "UNSUPPORTED_ABSTAIN": 36
+          },
+          "repaired_face_index": 4758,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.09302964452295273,
+          "vertex_ids": [
+            "CMV:4432287c776a983e461a4378",
+            "CMV:c4127ef003888c76190eebd7",
+            "CMV:85905c52dc8dd558d521aab4"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999999999994,
+          "condition": 1.0000000000000029,
+          "dynamic_pixels": 86,
+          "edge_ratio": 1.0000000000000009,
+          "original_face_index": 20236,
+          "pixel_growth": 86,
+          "pixel_ratio": 86.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 86
+          },
+          "repaired_face_index": 19278,
+          "rest_pixels": 0,
+          "skin_l1_max": 9.19252332585537e-16,
+          "vertex_ids": [
+            "CMV:ab291ffeb7b944f69071a4a0",
+            "CMV:133bb2f778baf0f8e1405578",
+            "CMV:33088fc0b9f8c4df7beacfda"
+          ]
+        },
+        {
+          "area_ratio": 1.0919637672380036,
+          "condition": 1.1691668395367922,
+          "dynamic_pixels": 86,
+          "edge_ratio": 1.129383851838387,
+          "original_face_index": 18410,
+          "pixel_growth": 86,
+          "pixel_ratio": 86.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 86
+          },
+          "repaired_face_index": 17541,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.10682092134116325,
+          "vertex_ids": [
+            "CMV:b6ac31296863d05174c5da0b",
+            "CMV:fda06c8f311a0a893650455b",
+            "CMV:e7bcb675253c0054a1b42f2b"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999999984099,
+          "condition": 1.0000000000033842,
+          "dynamic_pixels": 86,
+          "edge_ratio": 0.9999999999998739,
+          "original_face_index": 19407,
+          "pixel_growth": 86,
+          "pixel_ratio": 86.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 33,
+            "COMPILED_LOCAL_HARMONIC": 11,
+            "OTHER_VIEW_SOURCE": 42
+          },
+          "repaired_face_index": 18483,
+          "rest_pixels": 0,
+          "skin_l1_max": 8.830867682354778e-13,
+          "vertex_ids": [
+            "CMV:d8d7c8e11f06f439cdda2da6",
+            "CMV:9a2db8b4c60bb874699ea168",
+            "CMV:53f9b97c09c8932b01eb6c85"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999728555603,
+          "condition": 1.0000000355766356,
+          "dynamic_pixels": 85,
+          "edge_ratio": 1.0000000004550051,
+          "original_face_index": 7726,
+          "pixel_growth": 85,
+          "pixel_ratio": 85.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 81,
+            "UNSUPPORTED_ABSTAIN": 4
+          },
+          "repaired_face_index": 7379,
+          "rest_pixels": 0,
+          "skin_l1_max": 9.757934303173822e-08,
+          "vertex_ids": [
+            "CMV:1eb53e99e722dd08b1062ff4",
+            "CMV:7da47cbc64112bd99442ae53",
+            "CMV:d2eed82386b904f8b6f2c801"
+          ]
+        },
+        {
+          "area_ratio": 1.0,
+          "condition": 1.0000000000000022,
+          "dynamic_pixels": 85,
+          "edge_ratio": 1.0000000000000013,
+          "original_face_index": 790,
+          "pixel_growth": 85,
+          "pixel_ratio": 85.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 85
+          },
+          "repaired_face_index": 762,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.5598810770447797e-18,
+          "vertex_ids": [
+            "CMV:cbb8e8707eb7dea0e105d34e",
+            "CMV:3461be6a80a77c65281ef517",
+            "CMV:eb6534c3615b53836f8e2994"
+          ]
+        },
+        {
+          "area_ratio": 1.0000000083841851,
+          "condition": 1.0000000286174713,
+          "dynamic_pixels": 85,
+          "edge_ratio": 1.000000018430982,
+          "original_face_index": 20125,
+          "pixel_growth": 85,
+          "pixel_ratio": 85.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 25,
+            "COMPILED_LOCAL_HARMONIC": 10,
+            "OTHER_VIEW_SOURCE": 50
+          },
+          "repaired_face_index": 19168,
+          "rest_pixels": 0,
+          "skin_l1_max": 2.265878369609122e-07,
+          "vertex_ids": [
+            "CMV:0c61d375abed674d21d56c63",
+            "CMV:d6a8bd778a5f526381b29790",
+            "CMV:6fdb5f8fb02bee7d69b75722"
+          ]
+        },
+        {
+          "area_ratio": 1.3692346504320059,
+          "condition": 1.3735164772684487,
+          "dynamic_pixels": 85,
+          "edge_ratio": 1.3700043795304029,
+          "original_face_index": 11032,
+          "pixel_growth": 85,
+          "pixel_ratio": 85.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 13,
+            "COMPILED_LOCAL_HARMONIC": 3,
+            "OTHER_VIEW_SOURCE": 49,
+            "UNSUPPORTED_ABSTAIN": 20
+          },
+          "repaired_face_index": 10514,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.09302964603577359,
+          "vertex_ids": [
+            "CMV:9515e06c9f176a4fac35568a",
+            "CMV:f504e41fd3bf5c3be0353b89",
+            "CMV:33524f53cadcae9bc01ff320"
+          ]
+        },
+        {
+          "area_ratio": 1.035386907514048,
+          "condition": 1.0354332453643726,
+          "dynamic_pixels": 85,
+          "edge_ratio": 1.0353906307970584,
+          "original_face_index": 324,
+          "pixel_growth": 85,
+          "pixel_ratio": 85.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 85
+          },
+          "repaired_face_index": 310,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.01313891561971693,
+          "vertex_ids": [
+            "CMV:69f8aa8cb8a44699f7eb93b4",
+            "CMV:5b892a91bcabb55ed902d2c2",
+            "CMV:2996b4d2f982bd6a87dc2ed8"
+          ]
+        },
+        {
+          "area_ratio": 1.0000000000000078,
+          "condition": 1.00000000000001,
+          "dynamic_pixels": 84,
+          "edge_ratio": 1.0000000000000084,
+          "original_face_index": 24473,
+          "pixel_growth": 84,
+          "pixel_ratio": 84.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 84
+          },
+          "repaired_face_index": 23323,
+          "rest_pixels": 0,
+          "skin_l1_max": 2.5314209859962334e-14,
+          "vertex_ids": [
+            "CMV:2b855da008d1773d250160d2",
+            "CMV:5698982355c12f318089d69e",
+            "CMV:2c7ac8537046e32b08636166"
+          ]
+        },
+        {
+          "area_ratio": 1.2477733691973287,
+          "condition": 1.2478046748327705,
+          "dynamic_pixels": 84,
+          "edge_ratio": 1.2477703752743983,
+          "original_face_index": 3455,
+          "pixel_growth": 84,
+          "pixel_ratio": 84.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 84
+          },
+          "repaired_face_index": 3325,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.09727118859927854,
+          "vertex_ids": [
+            "CMV:346abbbebfa5905fe89ba6ec",
+            "CMV:7a7246156d3ba9b6141504a2",
+            "CMV:97fe217fb15777199aa2d474"
+          ]
+        },
+        {
+          "area_ratio": 1.0000000000000033,
+          "condition": 1.0000000000000047,
+          "dynamic_pixels": 84,
+          "edge_ratio": 1.0000000000000033,
+          "original_face_index": 15625,
+          "pixel_growth": 84,
+          "pixel_ratio": 84.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 40,
+            "UNSUPPORTED_ABSTAIN": 44
+          },
+          "repaired_face_index": 14912,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.4003405770030012e-22,
+          "vertex_ids": [
+            "CMV:a924721e8298576f0cbe6bdb",
+            "CMV:56392a2404b380105634486d",
+            "CMV:0a72d194c1a2f5b16d6f1368"
+          ]
+        },
+        {
+          "area_ratio": 1.0000000000015559,
+          "condition": 1.00000000003125,
+          "dynamic_pixels": 84,
+          "edge_ratio": 1.0000000000163953,
+          "original_face_index": 8017,
+          "pixel_growth": 84,
+          "pixel_ratio": 84.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 77,
+            "UNSUPPORTED_ABSTAIN": 7
+          },
+          "repaired_face_index": 7658,
+          "rest_pixels": 0,
+          "skin_l1_max": 2.8767197750822835e-11,
+          "vertex_ids": [
+            "CMV:420f3c2a42db53adc6c56572",
+            "CMV:9cb5d706d926263e7be2cbbb",
+            "CMV:cc359e816ce7b74e44601b06"
+          ]
+        },
+        {
+          "area_ratio": 1.0000000000000069,
+          "condition": 1.0000000000000069,
+          "dynamic_pixels": 84,
+          "edge_ratio": 1.0000000000000053,
+          "original_face_index": 5427,
+          "pixel_growth": 84,
+          "pixel_ratio": 84.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 84
+          },
+          "repaired_face_index": 5205,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.2689403748498017e-15,
+          "vertex_ids": [
+            "CMV:f6f090eec3a74f563d33f949",
+            "CMV:902787849d71d8b9de4a5f4c",
+            "CMV:6691c88ff1ac3e287777034f"
+          ]
+        },
+        {
+          "area_ratio": 0.9999994624594306,
+          "condition": 1.000000768703502,
+          "dynamic_pixels": 83,
+          "edge_ratio": 0.9999999960029634,
+          "original_face_index": 3084,
+          "pixel_growth": 83,
+          "pixel_ratio": 83.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 83
+          },
+          "repaired_face_index": 2978,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.6671172241925194e-07,
+          "vertex_ids": [
+            "CMV:f168f39d2a74d0574a082b79",
+            "CMV:ef6b093ee8480ad3983d20ec",
+            "CMV:1151195d37ed137d1edaddb4"
+          ]
+        },
+        {
+          "area_ratio": 1.4354081771102691,
+          "condition": 1.4359216190512534,
+          "dynamic_pixels": 83,
+          "edge_ratio": 1.4356613904274291,
+          "original_face_index": 22032,
+          "pixel_growth": 83,
+          "pixel_ratio": 83.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 83
+          },
+          "repaired_face_index": 20993,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.1068066639728696,
+          "vertex_ids": [
+            "CMV:c2b42a6a9dfdc76558739993",
+            "CMV:c3cc8d514b35324c8b7de81c",
+            "CMV:d0f6d8c08d1ef8a87e05d67e"
+          ]
+        },
+        {
+          "area_ratio": 1.0343779540820162,
+          "condition": 1.0343779822163304,
+          "dynamic_pixels": 83,
+          "edge_ratio": 1.0343770189861934,
+          "original_face_index": 18038,
+          "pixel_growth": 83,
+          "pixel_ratio": 83.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 83
+          },
+          "repaired_face_index": 17192,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.008662992784354687,
+          "vertex_ids": [
+            "CMV:e8e354aaf95ea4fa3411a447",
+            "CMV:ac183b518a78b837d862d880",
+            "CMV:4f096b88ba4c63a0529faf9e"
+          ]
+        },
+        {
+          "area_ratio": 1.0000000145588628,
+          "condition": 1.0000000145589742,
+          "dynamic_pixels": 83,
+          "edge_ratio": 1.0000000145544443,
+          "original_face_index": 24536,
+          "pixel_growth": 83,
+          "pixel_ratio": 83.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 83
+          },
+          "repaired_face_index": 23382,
+          "rest_pixels": 0,
+          "skin_l1_max": 3.967660404730281e-09,
+          "vertex_ids": [
+            "CMV:164a36d01dc4ee87676de2c0",
+            "CMV:2178965acb2403aa4ef9d7cc",
+            "CMV:8fbb87414ad580e537da14d0"
+          ]
+        },
+        {
+          "area_ratio": 1.0035566243630416,
+          "condition": 1.0042516060313158,
+          "dynamic_pixels": 83,
+          "edge_ratio": 1.0018280219684317,
+          "original_face_index": 16504,
+          "pixel_growth": 83,
+          "pixel_ratio": 83.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 83
+          },
+          "repaired_face_index": 15744,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.03530172444512075,
+          "vertex_ids": [
+            "CMV:031c265d87585971eaf7d272",
+            "CMV:af8b1b3884b764d3b909b6f6",
+            "CMV:17c40c29a6387bbe741e6666"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999999999978,
+          "condition": 1.000000000000004,
+          "dynamic_pixels": 82,
+          "edge_ratio": 1.0000000000000002,
+          "original_face_index": 7213,
+          "pixel_growth": 82,
+          "pixel_ratio": 82.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 56,
+            "UNSUPPORTED_ABSTAIN": 26
+          },
+          "repaired_face_index": 6891,
+          "rest_pixels": 0,
+          "skin_l1_max": 5.345727791611893e-32,
+          "vertex_ids": [
+            "CMV:a52039ffdbe212d9cec7c6a7",
+            "CMV:b4c2ce7a2159046450b18ee9",
+            "CMV:dd9c220d2f48dabfa180fae9"
+          ]
+        },
+        {
+          "area_ratio": 1.1708273524663337,
+          "condition": 1.1711324537963594,
+          "dynamic_pixels": 82,
+          "edge_ratio": 1.1695276004389592,
+          "original_face_index": 24842,
+          "pixel_growth": 82,
+          "pixel_ratio": 82.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 82
+          },
+          "repaired_face_index": 23672,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.05846511659191105,
+          "vertex_ids": [
+            "CMV:2a67c8b4dfd30f141f1218a9",
+            "CMV:101b501d44dba730e7ab02a6",
+            "CMV:08912b724fd9aeea2e741fe5"
+          ]
+        },
+        {
+          "area_ratio": 0.9994125093852699,
+          "condition": 1.0005879538091114,
+          "dynamic_pixels": 82,
+          "edge_ratio": 1.000000000930099,
+          "original_face_index": 18035,
+          "pixel_growth": 82,
+          "pixel_ratio": 82.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 82
+          },
+          "repaired_face_index": 17189,
+          "rest_pixels": 0,
+          "skin_l1_max": 9.101707854308783e-05,
+          "vertex_ids": [
+            "CMV:82ce9653bda224af02dbf3a1",
+            "CMV:ca7e3f1656e7f96a88422589",
+            "CMV:712e539c35c23e9bee84c317"
+          ]
+        },
+        {
+          "area_ratio": 1.0000000000000004,
+          "condition": 1.0000000000000022,
+          "dynamic_pixels": 83,
+          "edge_ratio": 1.000000000000001,
+          "original_face_index": 13254,
+          "pixel_growth": 82,
+          "pixel_ratio": 83.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 83
+          },
+          "repaired_face_index": 12671,
+          "rest_pixels": 1,
+          "skin_l1_max": 2.3446667376900905e-21,
+          "vertex_ids": [
+            "CMV:8a3d3f0da3c59914e22ec99f",
+            "CMV:70e6e22d49aa9023ecc33f2c",
+            "CMV:ed04e84794038751ba58b201"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999999999959,
+          "condition": 1.0000000000000033,
+          "dynamic_pixels": 82,
+          "edge_ratio": 0.9999999999999996,
+          "original_face_index": 15185,
+          "pixel_growth": 82,
+          "pixel_ratio": 82.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 47,
+            "UNSUPPORTED_ABSTAIN": 35
+          },
+          "repaired_face_index": 14503,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.3181898908660356e-29,
+          "vertex_ids": [
+            "CMV:19ef6b680ad1e95e81b369ad",
+            "CMV:4666c2f871ae0d26c5466da2",
+            "CMV:32a6850c559abcd08f682362"
+          ]
+        },
+        {
+          "area_ratio": 1.0001426913530909,
+          "condition": 1.001467273621905,
+          "dynamic_pixels": 81,
+          "edge_ratio": 1.000804139844169,
+          "original_face_index": 12897,
+          "pixel_growth": 81,
+          "pixel_ratio": 81.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 81
+          },
+          "repaired_face_index": 12322,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.0009111644643332852,
+          "vertex_ids": [
+            "CMV:00836573d18952ab8ac1da3b",
+            "CMV:b6ac31296863d05174c5da0b",
+            "CMV:ed0f11feb7d5def513e21a50"
+          ]
+        },
+        {
+          "area_ratio": 1.0266213583906245,
+          "condition": 1.0360845004275938,
+          "dynamic_pixels": 81,
+          "edge_ratio": 1.0231925807329232,
+          "original_face_index": 3711,
+          "pixel_growth": 81,
+          "pixel_ratio": 81.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 15,
+            "COMPILED_LOCAL_HARMONIC": 8,
+            "OTHER_VIEW_SOURCE": 46,
+            "UNSUPPORTED_ABSTAIN": 12
+          },
+          "repaired_face_index": 3564,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.034150319808772256,
+          "vertex_ids": [
+            "CMV:e6d3cde8e8f51e9b0ee5f525",
+            "CMV:2dec6c1b8c62a2e27a5e2574",
+            "CMV:307e1b82914a083c056ec8fc"
+          ]
+        },
+        {
+          "area_ratio": 1.0000000000000013,
+          "condition": 1.0000000000000253,
+          "dynamic_pixels": 81,
+          "edge_ratio": 1.0000000000000133,
+          "original_face_index": 601,
+          "pixel_growth": 81,
+          "pixel_ratio": 81.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 76,
+            "UNSUPPORTED_ABSTAIN": 5
+          },
+          "repaired_face_index": 583,
+          "rest_pixels": 0,
+          "skin_l1_max": 3.3786685969427297e-15,
+          "vertex_ids": [
+            "CMV:ea66dc88fb182fcb3f06ad74",
+            "CMV:e45d55d099204cf4925ebdb4",
+            "CMV:a08f3c6917453a277b004170"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999999999993,
+          "condition": 1.000000000000002,
+          "dynamic_pixels": 81,
+          "edge_ratio": 0.9999999999999999,
+          "original_face_index": 24017,
+          "pixel_growth": 81,
+          "pixel_ratio": 81.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 72,
+            "DIRECT_SOURCE": 1,
+            "OTHER_VIEW_SOURCE": 2,
+            "UNSUPPORTED_ABSTAIN": 6
+          },
+          "repaired_face_index": 22899,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.6376955367828696e-18,
+          "vertex_ids": [
+            "CMV:03475922cdb9afe592dfd4fe",
+            "CMV:862ed18b7cf964409e3f6b07",
+            "CMV:d61321e7e66c7eab4aed3347"
+          ]
+        },
+        {
+          "area_ratio": 1.0000000000003821,
+          "condition": 1.000000000001197,
+          "dynamic_pixels": 81,
+          "edge_ratio": 1.0000000000007694,
+          "original_face_index": 17905,
+          "pixel_growth": 81,
+          "pixel_ratio": 81.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 54,
+            "UNSUPPORTED_ABSTAIN": 27
+          },
+          "repaired_face_index": 17063,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.1418220875097341e-11,
+          "vertex_ids": [
+            "CMV:3041ac2fb01a6579d51e22e6",
+            "CMV:e1fca775d2b94e8ea89b69c1",
+            "CMV:a25b4a07f4968911f094362a"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999999999964,
+          "condition": 1.0000000000000044,
+          "dynamic_pixels": 90,
+          "edge_ratio": 1.0,
+          "original_face_index": 4446,
+          "pixel_growth": 81,
+          "pixel_ratio": 10.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 13,
+            "COMPILED_LOCAL_HARMONIC": 9,
+            "DIRECT_SOURCE": 48,
+            "UNSUPPORTED_ABSTAIN": 20
+          },
+          "repaired_face_index": 4275,
+          "rest_pixels": 9,
+          "skin_l1_max": 4.2084936084467946e-22,
+          "vertex_ids": [
+            "CMV:973fa2e3d962ec7ca5357ec5",
+            "CMV:89fcb57cd2fd5dac535c7a2a",
+            "CMV:bb2fa47b34a79b0b349a3f8d"
+          ]
+        },
+        {
+          "area_ratio": 1.000000000000092,
+          "condition": 1.0000000000000902,
+          "dynamic_pixels": 81,
+          "edge_ratio": 1.0000000000000915,
+          "original_face_index": 24034,
+          "pixel_growth": 81,
+          "pixel_ratio": 81.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 76,
+            "UNSUPPORTED_ABSTAIN": 5
+          },
+          "repaired_face_index": 22916,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.756537422599764e-13,
+          "vertex_ids": [
+            "CMV:4ba9f2d44416575dfda7a0be",
+            "CMV:e45821efe28efa796d079d42",
+            "CMV:a25b4a07f4968911f094362a"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999999999991,
+          "condition": 1.0000000000000009,
+          "dynamic_pixels": 80,
+          "edge_ratio": 0.9999999999999997,
+          "original_face_index": 788,
+          "pixel_growth": 80,
+          "pixel_ratio": 80.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 80
+          },
+          "repaired_face_index": 760,
+          "rest_pixels": 0,
+          "skin_l1_max": 4.365236227677847e-20,
+          "vertex_ids": [
+            "CMV:cbb8e8707eb7dea0e105d34e",
+            "CMV:bc8922046f63ad3c6db9dfe9",
+            "CMV:3461be6a80a77c65281ef517"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999999999996,
+          "condition": 1.0000000000000147,
+          "dynamic_pixels": 80,
+          "edge_ratio": 1.0000000000000069,
+          "original_face_index": 5764,
+          "pixel_growth": 80,
+          "pixel_ratio": 80.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 58,
+            "UNSUPPORTED_ABSTAIN": 22
+          },
+          "repaired_face_index": 5520,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.28172578762221e-15,
+          "vertex_ids": [
+            "CMV:7062b9d15a1f636cd8c39de3",
+            "CMV:7a7e133e7bfb1bce6f1126a4",
+            "CMV:33532fd34876367d4442ef7f"
+          ]
+        },
+        {
+          "area_ratio": 1.000000000000084,
+          "condition": 1.0000000000000995,
+          "dynamic_pixels": 80,
+          "edge_ratio": 1.0000000000000915,
+          "original_face_index": 12948,
+          "pixel_growth": 80,
+          "pixel_ratio": 80.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 70,
+            "UNSUPPORTED_ABSTAIN": 10
+          },
+          "repaired_face_index": 12369,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.8427400436012174e-13,
+          "vertex_ids": [
+            "CMV:6942c4d765a0489070e71b75",
+            "CMV:4ba9f2d44416575dfda7a0be",
+            "CMV:a25b4a07f4968911f094362a"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999999999989,
+          "condition": 1.0000000000000029,
+          "dynamic_pixels": 80,
+          "edge_ratio": 1.0000000000000007,
+          "original_face_index": 14179,
+          "pixel_growth": 80,
+          "pixel_ratio": 80.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 71,
+            "UNSUPPORTED_ABSTAIN": 9
+          },
+          "repaired_face_index": 13554,
+          "rest_pixels": 0,
+          "skin_l1_max": 9.480871001192474e-19,
+          "vertex_ids": [
+            "CMV:081e723c77d5246d152a4f93",
+            "CMV:1f809672a9066e37881ebe81",
+            "CMV:fcc8d725b9aa783b73121655"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999999999956,
+          "condition": 1.0000000000000027,
+          "dynamic_pixels": 80,
+          "edge_ratio": 0.9999999999999988,
+          "original_face_index": 22978,
+          "pixel_growth": 80,
+          "pixel_ratio": 80.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 66,
+            "UNSUPPORTED_ABSTAIN": 14
+          },
+          "repaired_face_index": 21903,
+          "rest_pixels": 0,
+          "skin_l1_max": 2.6072267271609764e-23,
+          "vertex_ids": [
+            "CMV:073cd8c9280835dd90da2d5a",
+            "CMV:375412576e122140b60aae66",
+            "CMV:55f15eae5bea7609c38c15e8"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999521565596,
+          "condition": 1.0000000478445845,
+          "dynamic_pixels": 80,
+          "edge_ratio": 1.0000000000000218,
+          "original_face_index": 18971,
+          "pixel_growth": 80,
+          "pixel_ratio": 80.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 74,
+            "UNSUPPORTED_ABSTAIN": 6
+          },
+          "repaired_face_index": 18067,
+          "rest_pixels": 0,
+          "skin_l1_max": 6.860565125884528e-08,
+          "vertex_ids": [
+            "CMV:977590f5b4248fbae93bf303",
+            "CMV:cc8c0f1a6b67cddc61e142fa",
+            "CMV:18ff778f41bd6efb2fd0b6af"
+          ]
+        },
+        {
+          "area_ratio": 1.0000000000000007,
+          "condition": 1.0000000000000029,
+          "dynamic_pixels": 84,
+          "edge_ratio": 1.0000000000000016,
+          "original_face_index": 16207,
+          "pixel_growth": 80,
+          "pixel_ratio": 21.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 39,
+            "DIRECT_SOURCE": 5,
+            "UNSUPPORTED_ABSTAIN": 40
+          },
+          "repaired_face_index": 15464,
+          "rest_pixels": 4,
+          "skin_l1_max": 2.9797068209688487e-33,
+          "vertex_ids": [
+            "CMV:60cd424eaa1503a16d1915f8",
+            "CMV:ece98ce660e21b2bb649cd5e",
+            "CMV:4f838b42740196a8e84e9d59"
+          ]
+        },
+        {
+          "area_ratio": 1.000000000000001,
+          "condition": 1.0000000000000033,
+          "dynamic_pixels": 80,
+          "edge_ratio": 1.000000000000002,
+          "original_face_index": 19369,
+          "pixel_growth": 80,
+          "pixel_ratio": 80.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 43,
+            "UNSUPPORTED_ABSTAIN": 37
+          },
+          "repaired_face_index": 18446,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.0627588030909045e-25,
+          "vertex_ids": [
+            "CMV:8af5d93b7ae08769c5c72d5d",
+            "CMV:55f15eae5bea7609c38c15e8",
+            "CMV:24804c5b3a7790fdbff60929"
+          ]
+        },
+        {
+          "area_ratio": 1.0000000000510287,
+          "condition": 1.0000000001441551,
+          "dynamic_pixels": 80,
+          "edge_ratio": 1.0000000000954197,
+          "original_face_index": 9898,
+          "pixel_growth": 80,
+          "pixel_ratio": 80.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 80
+          },
+          "repaired_face_index": 9438,
+          "rest_pixels": 0,
+          "skin_l1_max": 2.1530375531472475e-10,
+          "vertex_ids": [
+            "CMV:09027b35f094bfa74f17768f",
+            "CMV:9cb5d706d926263e7be2cbbb",
+            "CMV:2ac20f3a547456bc02daea3a"
+          ]
+        }
+      ],
+      "view": 2
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "final_alpha_pixels": 247794,
+      "frame_index": 0,
+      "label": "run_v2_f0",
+      "provenance_distribution": {
+        "CANONICAL_GLOBAL_COMPLETION": 134755,
+        "COMPILED_LOCAL_HARMONIC": 2770,
+        "DIRECT_SOURCE": 44624,
+        "OTHER_VIEW_SOURCE": 48228,
+        "UNSUPPORTED_ABSTAIN": 17417
+      },
+      "rest_alpha_pixels": 145694,
+      "time_seconds": 0.0,
+      "top_screen_growth_faces": [
+        {
+          "area_ratio": 3.198331975155768,
+          "condition": 3.4873548517035116,
+          "dynamic_pixels": 190,
+          "edge_ratio": 3.3118193904531266,
+          "original_face_index": 20396,
+          "pixel_growth": 190,
+          "pixel_ratio": 190.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 110,
+            "OTHER_VIEW_SOURCE": 76,
+            "UNSUPPORTED_ABSTAIN": 4
+          },
+          "repaired_face_index": 19426,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.24076805066991913,
+          "vertex_ids": [
+            "CMV:b1eca03b88f73f6a60ef7269",
+            "CMV:f130a642ddd6e07a5ff97bb4",
+            "CMV:f552d268218ac9eba8de4e88"
+          ]
+        },
+        {
+          "area_ratio": 2.6213461300254393,
+          "condition": 4.889824045968916,
+          "dynamic_pixels": 176,
+          "edge_ratio": 3.519167893745908,
+          "original_face_index": 19723,
+          "pixel_growth": 176,
+          "pixel_ratio": 176.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 128,
+            "UNSUPPORTED_ABSTAIN": 48
+          },
+          "repaired_face_index": 18781,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.2384013498347039,
+          "vertex_ids": [
+            "CMV:615a76157a9ceb1b10cce47d",
+            "CMV:37a9ab486099e4345f8dc8d7",
+            "CMV:7a05b61c623702b75f29fab1"
+          ]
+        },
+        {
+          "area_ratio": 4.123611382652933,
+          "condition": 4.664770823425296,
+          "dynamic_pixels": 128,
+          "edge_ratio": 3.2901336010985545,
+          "original_face_index": 7951,
+          "pixel_growth": 128,
+          "pixel_ratio": 128.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 128
+          },
+          "repaired_face_index": 7596,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.18653733007863424,
+          "vertex_ids": [
+            "CMV:2837a6e3fef0d361c5a82a08",
+            "CMV:bf6350915e58d61fef43912d",
+            "CMV:7fb0f47eabc159b0bcde3a6e"
+          ]
+        },
+        {
+          "area_ratio": 2.586753910229939,
+          "condition": 3.650974519223467,
+          "dynamic_pixels": 111,
+          "edge_ratio": 3.0489904753180475,
+          "original_face_index": 6689,
+          "pixel_growth": 111,
+          "pixel_ratio": 111.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 20,
+            "COMPILED_LOCAL_HARMONIC": 11,
+            "OTHER_VIEW_SOURCE": 65,
+            "UNSUPPORTED_ABSTAIN": 15
+          },
+          "repaired_face_index": 6408,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.08146605236485958,
+          "vertex_ids": [
+            "CMV:12052eb43e75d2ab527d904f",
+            "CMV:b8da572eec3b9d1ba1ebf7dd",
+            "CMV:135237b785342bbc78ea002e"
+          ]
+        },
+        {
+          "area_ratio": 1.5601870464927114,
+          "condition": 2.0786503658783504,
+          "dynamic_pixels": 107,
+          "edge_ratio": 1.765394741972174,
+          "original_face_index": 23320,
+          "pixel_growth": 107,
+          "pixel_ratio": 107.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 107
+          },
+          "repaired_face_index": 22237,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.7733768517946863,
+          "vertex_ids": [
+            "CMV:7d8e9e65437cf50bfbf13bd5",
+            "CMV:5b93de911675487ecd4a12c5",
+            "CMV:267b076c39de3fdb7acdec3d"
+          ]
+        },
+        {
+          "area_ratio": 1.773388581968422,
+          "condition": 1.8231930362140363,
+          "dynamic_pixels": 105,
+          "edge_ratio": 1.7972488377346094,
+          "original_face_index": 22034,
+          "pixel_growth": 105,
+          "pixel_ratio": 105.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 98,
+            "UNSUPPORTED_ABSTAIN": 7
+          },
+          "repaired_face_index": 20994,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.09771556018583244,
+          "vertex_ids": [
+            "CMV:c2b42a6a9dfdc76558739993",
+            "CMV:d0f6d8c08d1ef8a87e05d67e",
+            "CMV:dd77bb29a1825951891d2ff4"
+          ]
+        },
+        {
+          "area_ratio": 1.2327181982119397,
+          "condition": 2.4895270944398353,
+          "dynamic_pixels": 105,
+          "edge_ratio": 1.6972633304776048,
+          "original_face_index": 18650,
+          "pixel_growth": 105,
+          "pixel_ratio": 105.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 105
+          },
+          "repaired_face_index": 17775,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.12721646955016913,
+          "vertex_ids": [
+            "CMV:7fe839abbe8774457125c85c",
+            "CMV:82ba1e328c4f9b187576aaa9",
+            "CMV:aba1158d42fb19f8e9c232ad"
+          ]
+        },
+        {
+          "area_ratio": 1.2445016819944479,
+          "condition": 1.2507826465774832,
+          "dynamic_pixels": 104,
+          "edge_ratio": 1.238447750304526,
+          "original_face_index": 24842,
+          "pixel_growth": 104,
+          "pixel_ratio": 104.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 53,
+            "UNSUPPORTED_ABSTAIN": 51
+          },
+          "repaired_face_index": 23672,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.05846511659191105,
+          "vertex_ids": [
+            "CMV:2a67c8b4dfd30f141f1218a9",
+            "CMV:101b501d44dba730e7ab02a6",
+            "CMV:08912b724fd9aeea2e741fe5"
+          ]
+        },
+        {
+          "area_ratio": 1.792381639991322,
+          "condition": 1.8087231273167252,
+          "dynamic_pixels": 104,
+          "edge_ratio": 1.7972488377346094,
+          "original_face_index": 22032,
+          "pixel_growth": 104,
+          "pixel_ratio": 104.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 103,
+            "UNSUPPORTED_ABSTAIN": 1
+          },
+          "repaired_face_index": 20993,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.1068066639728696,
+          "vertex_ids": [
+            "CMV:c2b42a6a9dfdc76558739993",
+            "CMV:c3cc8d514b35324c8b7de81c",
+            "CMV:d0f6d8c08d1ef8a87e05d67e"
+          ]
+        },
+        {
+          "area_ratio": 1.7987718967743933,
+          "condition": 1.8090294260460174,
+          "dynamic_pixels": 102,
+          "edge_ratio": 1.8019017312737953,
+          "original_face_index": 19945,
+          "pixel_growth": 102,
+          "pixel_ratio": 102.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 101,
+            "UNSUPPORTED_ABSTAIN": 1
+          },
+          "repaired_face_index": 18995,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.1068066639728696,
+          "vertex_ids": [
+            "CMV:f6c1a496fc2a1136c51c89e2",
+            "CMV:c2b42a6a9dfdc76558739993",
+            "CMV:c3cc8d514b35324c8b7de81c"
+          ]
+        },
+        {
+          "area_ratio": 1.351608887581655,
+          "condition": 2.028049995010492,
+          "dynamic_pixels": 101,
+          "edge_ratio": 1.5913597336184528,
+          "original_face_index": 20709,
+          "pixel_growth": 101,
+          "pixel_ratio": 101.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 95,
+            "OTHER_VIEW_SOURCE": 6
+          },
+          "repaired_face_index": 19729,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.17374292582896414,
+          "vertex_ids": [
+            "CMV:ef706c1066a25123ca1a6615",
+            "CMV:1359af28d43b4f446dbb4a5b",
+            "CMV:ca73d1cb2d375e3c380618fd"
+          ]
+        },
+        {
+          "area_ratio": 3.905538181858842,
+          "condition": 4.087953813598156,
+          "dynamic_pixels": 101,
+          "edge_ratio": 3.9872521915811143,
+          "original_face_index": 12147,
+          "pixel_growth": 101,
+          "pixel_ratio": 101.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 89,
+            "UNSUPPORTED_ABSTAIN": 12
+          },
+          "repaired_face_index": 11602,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.9245844962210397,
+          "vertex_ids": [
+            "CMV:45b0acedbc9971fc7c87aeb9",
+            "CMV:e5fbb41f15383f264511295f",
+            "CMV:c2b6f17f2f309e2b656fb17c"
+          ]
+        },
+        {
+          "area_ratio": 1.5299977536429739,
+          "condition": 2.8922850646304394,
+          "dynamic_pixels": 98,
+          "edge_ratio": 1.9993153653621807,
+          "original_face_index": 13258,
+          "pixel_growth": 98,
+          "pixel_ratio": 98.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 50,
+            "UNSUPPORTED_ABSTAIN": 48
+          },
+          "repaired_face_index": 12674,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.15171671843217394,
+          "vertex_ids": [
+            "CMV:7a94f7adf74ed20d8b975e7e",
+            "CMV:2095eca7a33b1eb43eae65d5",
+            "CMV:391c3c0e3b213469f4ae2fb0"
+          ]
+        },
+        {
+          "area_ratio": 2.487253745966464,
+          "condition": 3.583366886654041,
+          "dynamic_pixels": 98,
+          "edge_ratio": 2.5753471271169794,
+          "original_face_index": 16561,
+          "pixel_growth": 98,
+          "pixel_ratio": 98.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 43,
+            "UNSUPPORTED_ABSTAIN": 55
+          },
+          "repaired_face_index": 15794,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.09541105384572869,
+          "vertex_ids": [
+            "CMV:c5252adb425db9ac7341e345",
+            "CMV:82ba1e328c4f9b187576aaa9",
+            "CMV:ec4f360f71b889a3fb77a2b6"
+          ]
+        },
+        {
+          "area_ratio": 4.4967915787557935,
+          "condition": 4.604952278106428,
+          "dynamic_pixels": 97,
+          "edge_ratio": 3.4439359139677035,
+          "original_face_index": 16613,
+          "pixel_growth": 97,
+          "pixel_ratio": 97.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 23,
+            "COMPILED_LOCAL_HARMONIC": 7,
+            "OTHER_VIEW_SOURCE": 26,
+            "UNSUPPORTED_ABSTAIN": 41
+          },
+          "repaired_face_index": 15843,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.9960707735293668,
+          "vertex_ids": [
+            "CMV:4370170753b32c9edfb4b70b",
+            "CMV:63e04b94ac3e7fe82b7f4525",
+            "CMV:d6f35057e7214e909516257f"
+          ]
+        },
+        {
+          "area_ratio": 1.965764574608529,
+          "condition": 1.975818562288388,
+          "dynamic_pixels": 96,
+          "edge_ratio": 1.918259553542662,
+          "original_face_index": 12267,
+          "pixel_growth": 96,
+          "pixel_ratio": 96.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 96
+          },
+          "repaired_face_index": 11716,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.10962200051332852,
+          "vertex_ids": [
+            "CMV:950519bc1820fc0b41e4bd1d",
+            "CMV:7e28ac09d7f8845bf58f6eb1",
+            "CMV:d20fd79129e3255b0c69b804"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999999999987,
+          "condition": 1.0000000000000002,
+          "dynamic_pixels": 93,
+          "edge_ratio": 0.9999999999999994,
+          "original_face_index": 4426,
+          "pixel_growth": 93,
+          "pixel_ratio": 93.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 86,
+            "UNSUPPORTED_ABSTAIN": 7
+          },
+          "repaired_face_index": 4255,
+          "rest_pixels": 0,
+          "skin_l1_max": 4.653384654194224e-16,
+          "vertex_ids": [
+            "CMV:4c1b9318fe2ca11117bcb488",
+            "CMV:19b63c4fd5520472e636ace1",
+            "CMV:be9286cd8fca68263579475c"
+          ]
+        },
+        {
+          "area_ratio": 0.999999985242016,
+          "condition": 1.0000004243018767,
+          "dynamic_pixels": 92,
+          "edge_ratio": 1.0000000813295746,
+          "original_face_index": 2689,
+          "pixel_growth": 92,
+          "pixel_ratio": 92.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 92
+          },
+          "repaired_face_index": 2595,
+          "rest_pixels": 0,
+          "skin_l1_max": 5.602443794186535e-08,
+          "vertex_ids": [
+            "CMV:ca50d2917a079d8c0080d4fc",
+            "CMV:a555ea7e57a9a95387faf387",
+            "CMV:901be22313d050ccbce5dffe"
+          ]
+        },
+        {
+          "area_ratio": 1.0000011980807155,
+          "condition": 1.0000013540784354,
+          "dynamic_pixels": 91,
+          "edge_ratio": 1.000000669827286,
+          "original_face_index": 24312,
+          "pixel_growth": 91,
+          "pixel_ratio": 91.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 76,
+            "UNSUPPORTED_ABSTAIN": 15
+          },
+          "repaired_face_index": 23175,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.8650947670260673e-07,
+          "vertex_ids": [
+            "CMV:48fa0abeb068884523540823",
+            "CMV:30ae0ac5dbe489b441ff7e34",
+            "CMV:afb38ab65b6a01112b922d0c"
+          ]
+        },
+        {
+          "area_ratio": 1.900251458532463,
+          "condition": 1.953701166765608,
+          "dynamic_pixels": 90,
+          "edge_ratio": 1.918259553542662,
+          "original_face_index": 12266,
+          "pixel_growth": 90,
+          "pixel_ratio": 90.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 88,
+            "UNSUPPORTED_ABSTAIN": 2
+          },
+          "repaired_face_index": 11715,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.11624285663992615,
+          "vertex_ids": [
+            "CMV:950519bc1820fc0b41e4bd1d",
+            "CMV:688793dabd47b05cc1fbef21",
+            "CMV:d20fd79129e3255b0c69b804"
+          ]
+        },
+        {
+          "area_ratio": 2.046165074734711,
+          "condition": 6.657555894433167,
+          "dynamic_pixels": 87,
+          "edge_ratio": 3.5753178347750687,
+          "original_face_index": 18361,
+          "pixel_growth": 87,
+          "pixel_ratio": 87.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 81,
+            "UNSUPPORTED_ABSTAIN": 6
+          },
+          "repaired_face_index": 17493,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.983350683861779,
+          "vertex_ids": [
+            "CMV:7f0bbc388781779e10d01f68",
+            "CMV:effa35c4f261caca7db3919f",
+            "CMV:bab7631b4c6cfee81e6fd913"
+          ]
+        },
+        {
+          "area_ratio": 0.9981788517304404,
+          "condition": 1.002573142263814,
+          "dynamic_pixels": 87,
+          "edge_ratio": 0.9999553108728272,
+          "original_face_index": 22729,
+          "pixel_growth": 87,
+          "pixel_ratio": 87.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 43,
+            "OTHER_VIEW_SOURCE": 44
+          },
+          "repaired_face_index": 21663,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.0006422475423510645,
+          "vertex_ids": [
+            "CMV:759d9f8d218dde48f4f402cf",
+            "CMV:25e8f6c9388872d529790718",
+            "CMV:8a55c3d55d0ad8ee106ab984"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999074963188,
+          "condition": 1.0000003615171855,
+          "dynamic_pixels": 86,
+          "edge_ratio": 1.0000000005711274,
+          "original_face_index": 11191,
+          "pixel_growth": 86,
+          "pixel_ratio": 86.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 36,
+            "OTHER_VIEW_SOURCE": 27,
+            "UNSUPPORTED_ABSTAIN": 23
+          },
+          "repaired_face_index": 10669,
+          "rest_pixels": 0,
+          "skin_l1_max": 8.285514161341416e-08,
+          "vertex_ids": [
+            "CMV:e4c25f55836a142b108bbc5f",
+            "CMV:14e05b63e397d41098f91a0d",
+            "CMV:6d0efa061ffbbc1a4c5bc38f"
+          ]
+        },
+        {
+          "area_ratio": 1.5978849912222992,
+          "condition": 2.291521631185808,
+          "dynamic_pixels": 85,
+          "edge_ratio": 1.8869300962370077,
+          "original_face_index": 4958,
+          "pixel_growth": 85,
+          "pixel_ratio": 85.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 85
+          },
+          "repaired_face_index": 4758,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.09302964452295273,
+          "vertex_ids": [
+            "CMV:4432287c776a983e461a4378",
+            "CMV:c4127ef003888c76190eebd7",
+            "CMV:85905c52dc8dd558d521aab4"
+          ]
+        },
+        {
+          "area_ratio": 1.007860165868378,
+          "condition": 1.0102341968144146,
+          "dynamic_pixels": 82,
+          "edge_ratio": 1.0083323583422736,
+          "original_face_index": 20386,
+          "pixel_growth": 82,
+          "pixel_ratio": 82.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 31,
+            "OTHER_VIEW_SOURCE": 51
+          },
+          "repaired_face_index": 19418,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.0009907821147419867,
+          "vertex_ids": [
+            "CMV:da31a321bd06ed9a393fb397",
+            "CMV:f305e13dfd60a815f175bdbc",
+            "CMV:e009c79c913e41ee2c938f63"
+          ]
+        },
+        {
+          "area_ratio": 1.1142275187147923,
+          "condition": 1.290672038683341,
+          "dynamic_pixels": 80,
+          "edge_ratio": 1.1706500024017255,
+          "original_face_index": 9124,
+          "pixel_growth": 80,
+          "pixel_ratio": 80.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 80
+          },
+          "repaired_face_index": 8704,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.048121352198372803,
+          "vertex_ids": [
+            "CMV:496c3048e4127fbaf5c53fe5",
+            "CMV:5bdd40d11eecb7cc8aa16161",
+            "CMV:4f0bfe8f3c62a9cdedf36201"
+          ]
+        },
+        {
+          "area_ratio": 1.0010770888895881,
+          "condition": 1.0016529649328418,
+          "dynamic_pixels": 80,
+          "edge_ratio": 1.0010740330897885,
+          "original_face_index": 3146,
+          "pixel_growth": 80,
+          "pixel_ratio": 80.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 80
+          },
+          "repaired_face_index": 3034,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.0033784319109574257,
+          "vertex_ids": [
+            "CMV:290c665817e1ce38f0220e3e",
+            "CMV:5d1a6993ec580bbf7593c7fd",
+            "CMV:d86e78630b839cc529aadcad"
+          ]
+        },
+        {
+          "area_ratio": 1.0127353707789308,
+          "condition": 1.0125987944364676,
+          "dynamic_pixels": 80,
+          "edge_ratio": 1.0125326363333287,
+          "original_face_index": 3375,
+          "pixel_growth": 80,
+          "pixel_ratio": 80.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 60,
+            "UNSUPPORTED_ABSTAIN": 20
+          },
+          "repaired_face_index": 3250,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.30571166670405076,
+          "vertex_ids": [
+            "CMV:174cc1401513f4c19bfa6cb1",
+            "CMV:8aabc77ecb4405b6097e671c",
+            "CMV:924a931dd9c55540e2e0b18e"
+          ]
+        },
+        {
+          "area_ratio": 1.000000000000001,
+          "condition": 1.0000000000000042,
+          "dynamic_pixels": 79,
+          "edge_ratio": 1.0000000000000016,
+          "original_face_index": 16319,
+          "pixel_growth": 79,
+          "pixel_ratio": 79.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 79
+          },
+          "repaired_face_index": 15570,
+          "rest_pixels": 0,
+          "skin_l1_max": 7.310391874626673e-21,
+          "vertex_ids": [
+            "CMV:65e0182794e70ff41bd629cc",
+            "CMV:0ce487080f79dbe429bac307",
+            "CMV:4f2133e0a4b36de92fb7a08a"
+          ]
+        },
+        {
+          "area_ratio": 1.0000000000000022,
+          "condition": 1.0000000000000049,
+          "dynamic_pixels": 79,
+          "edge_ratio": 1.0000000000000024,
+          "original_face_index": 24414,
+          "pixel_growth": 79,
+          "pixel_ratio": 79.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 74,
+            "UNSUPPORTED_ABSTAIN": 5
+          },
+          "repaired_face_index": 23266,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.169501858375241e-22,
+          "vertex_ids": [
+            "CMV:8c2341da0e32555c0a695644",
+            "CMV:38e2cffb1af82b85eec2fced",
+            "CMV:d0c159f915b3be71edd43371"
+          ]
+        },
+        {
+          "area_ratio": 1.40832017851695,
+          "condition": 2.374188336308071,
+          "dynamic_pixels": 79,
+          "edge_ratio": 1.600217233557775,
+          "original_face_index": 9127,
+          "pixel_growth": 79,
+          "pixel_ratio": 79.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 79
+          },
+          "repaired_face_index": 8707,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.03998039390332316,
+          "vertex_ids": [
+            "CMV:496c3048e4127fbaf5c53fe5",
+            "CMV:4f0bfe8f3c62a9cdedf36201",
+            "CMV:f697e519996650be28c190c4"
+          ]
+        },
+        {
+          "area_ratio": 1.3396604883053014,
+          "condition": 2.375528942193165,
+          "dynamic_pixels": 78,
+          "edge_ratio": 1.7492213821909972,
+          "original_face_index": 14675,
+          "pixel_growth": 78,
+          "pixel_ratio": 78.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 78
+          },
+          "repaired_face_index": 14036,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.7723620479227631,
+          "vertex_ids": [
+            "CMV:3e089fa618609961e3cc6e19",
+            "CMV:7d8e9e65437cf50bfbf13bd5",
+            "CMV:5b93de911675487ecd4a12c5"
+          ]
+        },
+        {
+          "area_ratio": 1.1432617609925582,
+          "condition": 1.3164666496564048,
+          "dynamic_pixels": 77,
+          "edge_ratio": 1.212707737715884,
+          "original_face_index": 14677,
+          "pixel_growth": 76,
+          "pixel_ratio": 77.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 77
+          },
+          "repaired_face_index": 14037,
+          "rest_pixels": 1,
+          "skin_l1_max": 0.27179648981797483,
+          "vertex_ids": [
+            "CMV:3e089fa618609961e3cc6e19",
+            "CMV:3b90bd7fa3a2889b41dbb943",
+            "CMV:b0f2abb487e9dd61b3d387e9"
+          ]
+        },
+        {
+          "area_ratio": 1.0002009255534088,
+          "condition": 1.000265390111356,
+          "dynamic_pixels": 76,
+          "edge_ratio": 1.0001675841407494,
+          "original_face_index": 12168,
+          "pixel_growth": 76,
+          "pixel_ratio": 76.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 76
+          },
+          "repaired_face_index": 11623,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.10063940041700378,
+          "vertex_ids": [
+            "CMV:60325eead039dbf7e9f89d47",
+            "CMV:ec90f09cb29a10b767b6c4df",
+            "CMV:3c95138692748ecd82bc5c27"
+          ]
+        },
+        {
+          "area_ratio": 1.4103160965082702,
+          "condition": 1.4126171242713137,
+          "dynamic_pixels": 76,
+          "edge_ratio": 1.390211736990663,
+          "original_face_index": 21870,
+          "pixel_growth": 76,
+          "pixel_ratio": 76.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 46,
+            "UNSUPPORTED_ABSTAIN": 30
+          },
+          "repaired_face_index": 20834,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.05764874829899215,
+          "vertex_ids": [
+            "CMV:62fedf2634da500a252f2d99",
+            "CMV:6905afbc92561c49402b71d7",
+            "CMV:08912b724fd9aeea2e741fe5"
+          ]
+        },
+        {
+          "area_ratio": 1.0001973639084218,
+          "condition": 1.0002050813130574,
+          "dynamic_pixels": 75,
+          "edge_ratio": 1.000198479993624,
+          "original_face_index": 16126,
+          "pixel_growth": 75,
+          "pixel_ratio": 75.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 75
+          },
+          "repaired_face_index": 15393,
+          "rest_pixels": 0,
+          "skin_l1_max": 4.209286244005805e-05,
+          "vertex_ids": [
+            "CMV:05d6a937f0d14bd0c27b0099",
+            "CMV:9bc6d629a3f9e42186d9b210",
+            "CMV:d55096cbf25548395df5ea34"
+          ]
+        },
+        {
+          "area_ratio": 1.0101619012985847,
+          "condition": 1.0108888281635315,
+          "dynamic_pixels": 75,
+          "edge_ratio": 1.0105128946925184,
+          "original_face_index": 12146,
+          "pixel_growth": 75,
+          "pixel_ratio": 75.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 57,
+            "UNSUPPORTED_ABSTAIN": 18
+          },
+          "repaired_face_index": 11601,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.24834471800351643,
+          "vertex_ids": [
+            "CMV:8aabc77ecb4405b6097e671c",
+            "CMV:131e96be4d02ad4dba5341cf",
+            "CMV:924a931dd9c55540e2e0b18e"
+          ]
+        },
+        {
+          "area_ratio": 1.028747472899278,
+          "condition": 1.0796828279620625,
+          "dynamic_pixels": 75,
+          "edge_ratio": 1.0518933780124964,
+          "original_face_index": 9045,
+          "pixel_growth": 75,
+          "pixel_ratio": 75.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 75
+          },
+          "repaired_face_index": 8625,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.02086145064088418,
+          "vertex_ids": [
+            "CMV:f21334563645796f1d4ab418",
+            "CMV:16e45c03ebc4543c3c62c81a",
+            "CMV:9cad8e70bf8a8aae8d38a5b8"
+          ]
+        },
+        {
+          "area_ratio": 1.0001479376528841,
+          "condition": 1.000221313570955,
+          "dynamic_pixels": 74,
+          "edge_ratio": 1.000184520317835,
+          "original_face_index": 5208,
+          "pixel_growth": 74,
+          "pixel_ratio": 74.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 73,
+            "UNSUPPORTED_ABSTAIN": 1
+          },
+          "repaired_face_index": 5001,
+          "rest_pixels": 0,
+          "skin_l1_max": 7.299979739904554e-05,
+          "vertex_ids": [
+            "CMV:427131b31e5e088956ea2dbd",
+            "CMV:abab8abb3ba787a450fd3107",
+            "CMV:99d4d595534ec887d0446859"
+          ]
+        },
+        {
+          "area_ratio": 1.1346873298165134,
+          "condition": 1.4475843683967546,
+          "dynamic_pixels": 74,
+          "edge_ratio": 1.244488580829376,
+          "original_face_index": 24698,
+          "pixel_growth": 74,
+          "pixel_ratio": 74.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 74
+          },
+          "repaired_face_index": 23533,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.14705259253231656,
+          "vertex_ids": [
+            "CMV:c26cc9de2f16e27b40a6dc05",
+            "CMV:65ed62343d1dcdeca2a12a56",
+            "CMV:c86d4c5522978873b778ae3a"
+          ]
+        },
+        {
+          "area_ratio": 0.9985666039420588,
+          "condition": 1.0017723419801017,
+          "dynamic_pixels": 74,
+          "edge_ratio": 1.0001675841407494,
+          "original_face_index": 14931,
+          "pixel_growth": 74,
+          "pixel_ratio": 74.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 72,
+            "UNSUPPORTED_ABSTAIN": 2
+          },
+          "repaired_face_index": 14275,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.1137901554055215,
+          "vertex_ids": [
+            "CMV:ec90f09cb29a10b767b6c4df",
+            "CMV:3c95138692748ecd82bc5c27",
+            "CMV:46908aee62a2e9cbf0f56fbb"
+          ]
+        },
+        {
+          "area_ratio": 0.9979069080581464,
+          "condition": 1.0052603828110978,
+          "dynamic_pixels": 74,
+          "edge_ratio": 1.0012360246573595,
+          "original_face_index": 18460,
+          "pixel_growth": 74,
+          "pixel_ratio": 74.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 65,
+            "UNSUPPORTED_ABSTAIN": 9
+          },
+          "repaired_face_index": 17591,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.0022875778332622906,
+          "vertex_ids": [
+            "CMV:44ee4614ef06d57ccf8f56cd",
+            "CMV:e336d917334285cbdf67818b",
+            "CMV:bab7631b4c6cfee81e6fd913"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999999999998,
+          "condition": 1.0000000000000016,
+          "dynamic_pixels": 73,
+          "edge_ratio": 1.0,
+          "original_face_index": 24126,
+          "pixel_growth": 73,
+          "pixel_ratio": 73.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 33,
+            "OTHER_VIEW_SOURCE": 40
+          },
+          "repaired_face_index": 23006,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.1702067614084686e-22,
+          "vertex_ids": [
+            "CMV:39888c772fe27c7c65b4a0e5",
+            "CMV:8c2341da0e32555c0a695644",
+            "CMV:38e2cffb1af82b85eec2fced"
+          ]
+        },
+        {
+          "area_ratio": 1.005151575772015,
+          "condition": 1.0064425333360383,
+          "dynamic_pixels": 73,
+          "edge_ratio": 1.004174474702719,
+          "original_face_index": 479,
+          "pixel_growth": 73,
+          "pixel_ratio": 73.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 68,
+            "UNSUPPORTED_ABSTAIN": 5
+          },
+          "repaired_face_index": 461,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.18914404472387222,
+          "vertex_ids": [
+            "CMV:ccfebb753b76bd57c33086bf",
+            "CMV:4eec174e84b98cfd5a66abc5",
+            "CMV:07e54d855b88e8ddf8f43f23"
+          ]
+        },
+        {
+          "area_ratio": 2.615329912932819,
+          "condition": 2.6678048392545763,
+          "dynamic_pixels": 73,
+          "edge_ratio": 1.9353992977318208,
+          "original_face_index": 17521,
+          "pixel_growth": 73,
+          "pixel_ratio": 73.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 13,
+            "OTHER_VIEW_SOURCE": 22,
+            "UNSUPPORTED_ABSTAIN": 38
+          },
+          "repaired_face_index": 16702,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.8549863224214798,
+          "vertex_ids": [
+            "CMV:a57fe4a8c6cbd6b2c2f5caa3",
+            "CMV:fa90a13ff3a1757e748d3ec0",
+            "CMV:08f0ced82f35782a760f975a"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999999999968,
+          "condition": 1.0000000000000056,
+          "dynamic_pixels": 72,
+          "edge_ratio": 1.0000000000000007,
+          "original_face_index": 3384,
+          "pixel_growth": 72,
+          "pixel_ratio": 72.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 5,
+            "DIRECT_SOURCE": 14,
+            "OTHER_VIEW_SOURCE": 2,
+            "UNSUPPORTED_ABSTAIN": 51
+          },
+          "repaired_face_index": 3259,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.827807150072433e-18,
+          "vertex_ids": [
+            "CMV:940bdcef3e919ceb802e09e8",
+            "CMV:7badfea8bd619830a744a94c",
+            "CMV:6b49f133b1b2240932678c2c"
+          ]
+        },
+        {
+          "area_ratio": 0.9999803457440571,
+          "condition": 1.000020922183671,
+          "dynamic_pixels": 72,
+          "edge_ratio": 0.9999999464772703,
+          "original_face_index": 21332,
+          "pixel_growth": 72,
+          "pixel_ratio": 72.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 27,
+            "COMPILED_LOCAL_HARMONIC": 3,
+            "OTHER_VIEW_SOURCE": 24,
+            "UNSUPPORTED_ABSTAIN": 18
+          },
+          "repaired_face_index": 20326,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.8501360360389653,
+          "vertex_ids": [
+            "CMV:e1a2f57be11e589df7e4e0a4",
+            "CMV:121fb16d743c5c22a2ee09fa",
+            "CMV:c7bdf2892909d3cafcf78436"
+          ]
+        },
+        {
+          "area_ratio": 0.999960228220354,
+          "condition": 1.000053072316664,
+          "dynamic_pixels": 72,
+          "edge_ratio": 1.0000062047807567,
+          "original_face_index": 12167,
+          "pixel_growth": 72,
+          "pixel_ratio": 72.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 64,
+            "UNSUPPORTED_ABSTAIN": 8
+          },
+          "repaired_face_index": 11622,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.10063940041700378,
+          "vertex_ids": [
+            "CMV:60325eead039dbf7e9f89d47",
+            "CMV:ec90f09cb29a10b767b6c4df",
+            "CMV:aef77b768a93512b075e34dc"
+          ]
+        },
+        {
+          "area_ratio": 0.9999987210656763,
+          "condition": 1.0000025737807965,
+          "dynamic_pixels": 72,
+          "edge_ratio": 1.0000000852166133,
+          "original_face_index": 3719,
+          "pixel_growth": 72,
+          "pixel_ratio": 72.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 26,
+            "OTHER_VIEW_SOURCE": 46
+          },
+          "repaired_face_index": 3572,
+          "rest_pixels": 0,
+          "skin_l1_max": 6.156773142050959e-07,
+          "vertex_ids": [
+            "CMV:15807ecccbb6b5de69a41f99",
+            "CMV:0e59a89541ce12de135d1e76",
+            "CMV:c243b5c479d909adf962441d"
+          ]
+        },
+        {
+          "area_ratio": 0.999922116902419,
+          "condition": 1.0000872885216066,
+          "dynamic_pixels": 72,
+          "edge_ratio": 0.9999999317615708,
+          "original_face_index": 3372,
+          "pixel_growth": 72,
+          "pixel_ratio": 72.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 54,
+            "UNSUPPORTED_ABSTAIN": 18
+          },
+          "repaired_face_index": 3247,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.5390359922513762,
+          "vertex_ids": [
+            "CMV:174cc1401513f4c19bfa6cb1",
+            "CMV:5c98d3e2190bb8b1840f8ae4",
+            "CMV:34f232a6490719669fd700e9"
+          ]
+        },
+        {
+          "area_ratio": 1.0017745485713991,
+          "condition": 1.0022339535305473,
+          "dynamic_pixels": 71,
+          "edge_ratio": 1.0017831159125083,
+          "original_face_index": 16612,
+          "pixel_growth": 71,
+          "pixel_ratio": 71.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 50,
+            "UNSUPPORTED_ABSTAIN": 21
+          },
+          "repaired_face_index": 15842,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.55157249483644,
+          "vertex_ids": [
+            "CMV:4370170753b32c9edfb4b70b",
+            "CMV:01eea509ef53149bdb056c7d",
+            "CMV:d6f35057e7214e909516257f"
+          ]
+        },
+        {
+          "area_ratio": 3.3434723062255878,
+          "condition": 3.4154716319458776,
+          "dynamic_pixels": 71,
+          "edge_ratio": 3.3777084601158442,
+          "original_face_index": 12473,
+          "pixel_growth": 71,
+          "pixel_ratio": 71.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 71
+          },
+          "repaired_face_index": 11922,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.2742605775864881,
+          "vertex_ids": [
+            "CMV:01f4a220e08ed54c467ae2e1",
+            "CMV:66f26e6e55c87943800cc275",
+            "CMV:22e33386b8f3b46cbecfe821"
+          ]
+        },
+        {
+          "area_ratio": 0.9823589810224967,
+          "condition": 1.0199105635674204,
+          "dynamic_pixels": 71,
+          "edge_ratio": 1.0000000118784524,
+          "original_face_index": 10450,
+          "pixel_growth": 71,
+          "pixel_ratio": 71.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 71
+          },
+          "repaired_face_index": 9968,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.0017387346372839153,
+          "vertex_ids": [
+            "CMV:6180ff78e76c5805669ad005",
+            "CMV:48fa0abeb068884523540823",
+            "CMV:30ae0ac5dbe489b441ff7e34"
+          ]
+        },
+        {
+          "area_ratio": 0.9999997790538112,
+          "condition": 1.0000016115324089,
+          "dynamic_pixels": 71,
+          "edge_ratio": 1.0000001227492905,
+          "original_face_index": 21331,
+          "pixel_growth": 71,
+          "pixel_ratio": 71.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 32,
+            "COMPILED_LOCAL_HARMONIC": 1,
+            "OTHER_VIEW_SOURCE": 5,
+            "UNSUPPORTED_ABSTAIN": 33
+          },
+          "repaired_face_index": 20325,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.5709859241459082,
+          "vertex_ids": [
+            "CMV:e1a2f57be11e589df7e4e0a4",
+            "CMV:01eea509ef53149bdb056c7d",
+            "CMV:7fc5bdb19ead0b80420f46b8"
+          ]
+        },
+        {
+          "area_ratio": 1.0325955229689607,
+          "condition": 1.1888432978243708,
+          "dynamic_pixels": 71,
+          "edge_ratio": 1.089013560495822,
+          "original_face_index": 21899,
+          "pixel_growth": 71,
+          "pixel_ratio": 71.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 71
+          },
+          "repaired_face_index": 20863,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.05159525527053975,
+          "vertex_ids": [
+            "CMV:be74b0bf9e5271172eeaee1f",
+            "CMV:65ed62343d1dcdeca2a12a56",
+            "CMV:c86d4c5522978873b778ae3a"
+          ]
+        },
+        {
+          "area_ratio": 0.9999984636762264,
+          "condition": 1.000001414192273,
+          "dynamic_pixels": 70,
+          "edge_ratio": 0.9999999317615708,
+          "original_face_index": 1391,
+          "pixel_growth": 70,
+          "pixel_ratio": 70.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 59,
+            "UNSUPPORTED_ABSTAIN": 11
+          },
+          "repaired_face_index": 1346,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.5640479372879021,
+          "vertex_ids": [
+            "CMV:9ec7c53be54757ef381ebd68",
+            "CMV:174cc1401513f4c19bfa6cb1",
+            "CMV:34f232a6490719669fd700e9"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999999999994,
+          "condition": 1.000000000000002,
+          "dynamic_pixels": 70,
+          "edge_ratio": 1.0000000000000002,
+          "original_face_index": 4185,
+          "pixel_growth": 70,
+          "pixel_ratio": 70.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 44,
+            "UNSUPPORTED_ABSTAIN": 26
+          },
+          "repaired_face_index": 4023,
+          "rest_pixels": 0,
+          "skin_l1_max": 2.5231972096031644e-21,
+          "vertex_ids": [
+            "CMV:8f52522bc31a49d038ff8335",
+            "CMV:ec1e96487bc5245653babf0d",
+            "CMV:d172b0ababd433e5fd2e5c66"
+          ]
+        },
+        {
+          "area_ratio": 1.0000003090870637,
+          "condition": 1.0000003092430567,
+          "dynamic_pixels": 70,
+          "edge_ratio": 1.000000304383226,
+          "original_face_index": 19292,
+          "pixel_growth": 70,
+          "pixel_ratio": 70.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 70
+          },
+          "repaired_face_index": 18372,
+          "rest_pixels": 0,
+          "skin_l1_max": 7.244054999516359e-08,
+          "vertex_ids": [
+            "CMV:73e5c9ea67d5eda9e6e0f823",
+            "CMV:7001e45dfbe79b67a6af1345",
+            "CMV:6d0efa061ffbbc1a4c5bc38f"
+          ]
+        },
+        {
+          "area_ratio": 1.0000491362536457,
+          "condition": 1.0024297541797298,
+          "dynamic_pixels": 70,
+          "edge_ratio": 1.0012360246573595,
+          "original_face_index": 1271,
+          "pixel_growth": 70,
+          "pixel_ratio": 70.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 70
+          },
+          "repaired_face_index": 1231,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.0017557323480646972,
+          "vertex_ids": [
+            "CMV:5d55b1afe75d258fe17640f6",
+            "CMV:44ee4614ef06d57ccf8f56cd",
+            "CMV:bab7631b4c6cfee81e6fd913"
+          ]
+        },
+        {
+          "area_ratio": 1.000226576306547,
+          "condition": 1.0010852118241902,
+          "dynamic_pixels": 70,
+          "edge_ratio": 1.000262198012385,
+          "original_face_index": 13947,
+          "pixel_growth": 70,
+          "pixel_ratio": 70.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 25,
+            "OTHER_VIEW_SOURCE": 42,
+            "UNSUPPORTED_ABSTAIN": 3
+          },
+          "repaired_face_index": 13333,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.00012410098835814775,
+          "vertex_ids": [
+            "CMV:73f862d64c3fb20f58fa3b08",
+            "CMV:3d361e79f427d54c2079acf7",
+            "CMV:d83eaec4d9ac84e9550e25e6"
+          ]
+        }
+      ],
+      "view": 2
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "final_alpha_pixels": 291316,
+      "frame_index": 0,
+      "label": "slash_v0_f0",
+      "provenance_distribution": {
+        "CANONICAL_GLOBAL_COMPLETION": 164748,
+        "COMPILED_LOCAL_HARMONIC": 3697,
+        "DIRECT_SOURCE": 64703,
+        "OTHER_VIEW_SOURCE": 42779,
+        "UNSUPPORTED_ABSTAIN": 15389
+      },
+      "rest_alpha_pixels": 175769,
+      "time_seconds": 0.0,
+      "top_screen_growth_faces": [
+        {
+          "area_ratio": 3.8312132053275603,
+          "condition": 3.8605741089889465,
+          "dynamic_pixels": 263,
+          "edge_ratio": 3.822253832986534,
+          "original_face_index": 22073,
+          "pixel_growth": 263,
+          "pixel_ratio": 263.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 65,
+            "COMPILED_LOCAL_HARMONIC": 20,
+            "OTHER_VIEW_SOURCE": 151,
+            "UNSUPPORTED_ABSTAIN": 27
+          },
+          "repaired_face_index": 21030,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.9827703379963024,
+          "vertex_ids": [
+            "CMV:8a32913fc9f6c0f4615e7c7a",
+            "CMV:88a4506ec012f90035e4e11e",
+            "CMV:c00449db38f3b68b92c1de7c"
+          ]
+        },
+        {
+          "area_ratio": 4.307167446059882,
+          "condition": 4.542889995423914,
+          "dynamic_pixels": 207,
+          "edge_ratio": 3.290026594057707,
+          "original_face_index": 7951,
+          "pixel_growth": 207,
+          "pixel_ratio": 207.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 203,
+            "UNSUPPORTED_ABSTAIN": 4
+          },
+          "repaired_face_index": 7596,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.18653733007863424,
+          "vertex_ids": [
+            "CMV:2837a6e3fef0d361c5a82a08",
+            "CMV:bf6350915e58d61fef43912d",
+            "CMV:7fb0f47eabc159b0bcde3a6e"
+          ]
+        },
+        {
+          "area_ratio": 2.887502401264823,
+          "condition": 2.9508024379645827,
+          "dynamic_pixels": 169,
+          "edge_ratio": 2.913456012785772,
+          "original_face_index": 5815,
+          "pixel_growth": 169,
+          "pixel_ratio": 169.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 54,
+            "COMPILED_LOCAL_HARMONIC": 11,
+            "DIRECT_SOURCE": 27,
+            "OTHER_VIEW_SOURCE": 46,
+            "UNSUPPORTED_ABSTAIN": 31
+          },
+          "repaired_face_index": 5571,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.5615976330474352,
+          "vertex_ids": [
+            "CMV:8dc7804924254f79229bb8c1",
+            "CMV:6476a91c28759babdf5aa99c",
+            "CMV:c859c41c83989d00fead6f13"
+          ]
+        },
+        {
+          "area_ratio": 2.85745323974406,
+          "condition": 2.8720598986646193,
+          "dynamic_pixels": 163,
+          "edge_ratio": 2.8594917837097356,
+          "original_face_index": 12709,
+          "pixel_growth": 160,
+          "pixel_ratio": 54.333333333333336,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 163
+          },
+          "repaired_face_index": 12138,
+          "rest_pixels": 3,
+          "skin_l1_max": 0.5358696637153757,
+          "vertex_ids": [
+            "CMV:d8968399908b636889e20a47",
+            "CMV:dc5f96c9393df37998c75188",
+            "CMV:3c98c0d4ea9edde6487ab01c"
+          ]
+        },
+        {
+          "area_ratio": 2.8280023599795223,
+          "condition": 2.891333818814643,
+          "dynamic_pixels": 146,
+          "edge_ratio": 2.8594917837097356,
+          "original_face_index": 12707,
+          "pixel_growth": 145,
+          "pixel_ratio": 146.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 41,
+            "COMPILED_LOCAL_HARMONIC": 3,
+            "DIRECT_SOURCE": 17,
+            "OTHER_VIEW_SOURCE": 31,
+            "UNSUPPORTED_ABSTAIN": 54
+          },
+          "repaired_face_index": 12136,
+          "rest_pixels": 1,
+          "skin_l1_max": 0.5358696637153757,
+          "vertex_ids": [
+            "CMV:d8968399908b636889e20a47",
+            "CMV:8be6f1bf7762a440d0abe090",
+            "CMV:3c98c0d4ea9edde6487ab01c"
+          ]
+        },
+        {
+          "area_ratio": 2.6140578591843378,
+          "condition": 2.6890575964650045,
+          "dynamic_pixels": 141,
+          "edge_ratio": 2.6512427661648763,
+          "original_face_index": 21674,
+          "pixel_growth": 141,
+          "pixel_ratio": 141.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 60,
+            "DIRECT_SOURCE": 3,
+            "OTHER_VIEW_SOURCE": 61,
+            "UNSUPPORTED_ABSTAIN": 17
+          },
+          "repaired_face_index": 20652,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.5252558173779868,
+          "vertex_ids": [
+            "CMV:8be6f1bf7762a440d0abe090",
+            "CMV:23ea179ea9918fd583655f9a",
+            "CMV:3c98c0d4ea9edde6487ab01c"
+          ]
+        },
+        {
+          "area_ratio": 2.9173455131190584,
+          "condition": 2.972201874915128,
+          "dynamic_pixels": 140,
+          "edge_ratio": 2.913456012785772,
+          "original_face_index": 5814,
+          "pixel_growth": 140,
+          "pixel_ratio": 140.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 140
+          },
+          "repaired_face_index": 5570,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.5615976330474352,
+          "vertex_ids": [
+            "CMV:8dc7804924254f79229bb8c1",
+            "CMV:6476a91c28759babdf5aa99c",
+            "CMV:81bc103c079db47cdebb9c68"
+          ]
+        },
+        {
+          "area_ratio": 2.784461771380352,
+          "condition": 2.853849281008993,
+          "dynamic_pixels": 133,
+          "edge_ratio": 2.817519547741145,
+          "original_face_index": 12706,
+          "pixel_growth": 133,
+          "pixel_ratio": 133.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 15,
+            "COMPILED_LOCAL_HARMONIC": 3,
+            "DIRECT_SOURCE": 10,
+            "OTHER_VIEW_SOURCE": 64,
+            "UNSUPPORTED_ABSTAIN": 41
+          },
+          "repaired_face_index": 12135,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.5182372591128854,
+          "vertex_ids": [
+            "CMV:d8968399908b636889e20a47",
+            "CMV:8be6f1bf7762a440d0abe090",
+            "CMV:e8c37ee8fc82922e36a89c6d"
+          ]
+        },
+        {
+          "area_ratio": 2.5544912110993505,
+          "condition": 2.5900705977093152,
+          "dynamic_pixels": 132,
+          "edge_ratio": 2.571972176792663,
+          "original_face_index": 5816,
+          "pixel_growth": 132,
+          "pixel_ratio": 132.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 64,
+            "OTHER_VIEW_SOURCE": 51,
+            "UNSUPPORTED_ABSTAIN": 17
+          },
+          "repaired_face_index": 5572,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.5274351852732653,
+          "vertex_ids": [
+            "CMV:8dc7804924254f79229bb8c1",
+            "CMV:f4644601c5a4f6cc8e6c2709",
+            "CMV:c859c41c83989d00fead6f13"
+          ]
+        },
+        {
+          "area_ratio": 1.66635475646151,
+          "condition": 1.8338499595917976,
+          "dynamic_pixels": 131,
+          "edge_ratio": 1.724533020362157,
+          "original_face_index": 13590,
+          "pixel_growth": 131,
+          "pixel_ratio": 131.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 131
+          },
+          "repaired_face_index": 12994,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.09842229704811539,
+          "vertex_ids": [
+            "CMV:7a7246156d3ba9b6141504a2",
+            "CMV:20559733d1a225864884b08c",
+            "CMV:a6ff7d6bd56052a9fe105aa2"
+          ]
+        },
+        {
+          "area_ratio": 2.289978112033749,
+          "condition": 2.312629333864792,
+          "dynamic_pixels": 128,
+          "edge_ratio": 2.287713393313026,
+          "original_face_index": 22463,
+          "pixel_growth": 128,
+          "pixel_ratio": 128.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 128
+          },
+          "repaired_face_index": 21407,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.4513502613576984,
+          "vertex_ids": [
+            "CMV:6476a91c28759babdf5aa99c",
+            "CMV:dc5f96c9393df37998c75188",
+            "CMV:81bc103c079db47cdebb9c68"
+          ]
+        },
+        {
+          "area_ratio": 2.0868366027950187,
+          "condition": 2.136084633137396,
+          "dynamic_pixels": 128,
+          "edge_ratio": 2.108994858516325,
+          "original_face_index": 5858,
+          "pixel_growth": 128,
+          "pixel_ratio": 128.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 91,
+            "DIRECT_SOURCE": 2,
+            "UNSUPPORTED_ABSTAIN": 35
+          },
+          "repaired_face_index": 5611,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.5648958173507652,
+          "vertex_ids": [
+            "CMV:740a39e1d0bc6d6cb8fcdc0a",
+            "CMV:260cf7069a6b2d4f15dca3b1",
+            "CMV:441ce876661494ec52dbf1cb"
+          ]
+        },
+        {
+          "area_ratio": 2.8633898858546614,
+          "condition": 2.881351510449393,
+          "dynamic_pixels": 129,
+          "edge_ratio": 2.872320883536995,
+          "original_face_index": 12710,
+          "pixel_growth": 127,
+          "pixel_ratio": 64.5,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 24,
+            "DIRECT_SOURCE": 28,
+            "OTHER_VIEW_SOURCE": 15,
+            "UNSUPPORTED_ABSTAIN": 62
+          },
+          "repaired_face_index": 12139,
+          "rest_pixels": 2,
+          "skin_l1_max": 0.5166904933667503,
+          "vertex_ids": [
+            "CMV:d8968399908b636889e20a47",
+            "CMV:e8c37ee8fc82922e36a89c6d",
+            "CMV:6709b5cbf54a4ba1e2a46ad5"
+          ]
+        },
+        {
+          "area_ratio": 1.746301378532837,
+          "condition": 1.9312010125883667,
+          "dynamic_pixels": 125,
+          "edge_ratio": 1.8049176804210658,
+          "original_face_index": 3455,
+          "pixel_growth": 125,
+          "pixel_ratio": 125.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 125
+          },
+          "repaired_face_index": 3325,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.09727118859927854,
+          "vertex_ids": [
+            "CMV:346abbbebfa5905fe89ba6ec",
+            "CMV:7a7246156d3ba9b6141504a2",
+            "CMV:97fe217fb15777199aa2d474"
+          ]
+        },
+        {
+          "area_ratio": 1.6719682987182685,
+          "condition": 1.8143226169524531,
+          "dynamic_pixels": 123,
+          "edge_ratio": 1.724533020362157,
+          "original_face_index": 3456,
+          "pixel_growth": 123,
+          "pixel_ratio": 123.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 123
+          },
+          "repaired_face_index": 3326,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.09684803876163883,
+          "vertex_ids": [
+            "CMV:346abbbebfa5905fe89ba6ec",
+            "CMV:7a7246156d3ba9b6141504a2",
+            "CMV:a6ff7d6bd56052a9fe105aa2"
+          ]
+        },
+        {
+          "area_ratio": 2.2904372851474624,
+          "condition": 2.352711057129531,
+          "dynamic_pixels": 123,
+          "edge_ratio": 2.287713393313026,
+          "original_face_index": 12708,
+          "pixel_growth": 122,
+          "pixel_ratio": 123.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 123
+          },
+          "repaired_face_index": 12137,
+          "rest_pixels": 1,
+          "skin_l1_max": 0.49192065846743904,
+          "vertex_ids": [
+            "CMV:d8968399908b636889e20a47",
+            "CMV:dc5f96c9393df37998c75188",
+            "CMV:81bc103c079db47cdebb9c68"
+          ]
+        },
+        {
+          "area_ratio": 2.2266491994398443,
+          "condition": 2.3074072624600905,
+          "dynamic_pixels": 121,
+          "edge_ratio": 2.232831569014308,
+          "original_face_index": 7290,
+          "pixel_growth": 121,
+          "pixel_ratio": 121.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 12,
+            "COMPILED_LOCAL_HARMONIC": 18,
+            "DIRECT_SOURCE": 77,
+            "UNSUPPORTED_ABSTAIN": 14
+          },
+          "repaired_face_index": 6964,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.15171671843217394,
+          "vertex_ids": [
+            "CMV:80161ac95612f9f8e8a1f99e",
+            "CMV:7a94f7adf74ed20d8b975e7e",
+            "CMV:2095eca7a33b1eb43eae65d5"
+          ]
+        },
+        {
+          "area_ratio": 2.0502273225113874,
+          "condition": 3.2315717078169137,
+          "dynamic_pixels": 116,
+          "edge_ratio": 2.5582904726517457,
+          "original_face_index": 17123,
+          "pixel_growth": 116,
+          "pixel_ratio": 116.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 116
+          },
+          "repaired_face_index": 16325,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.12721646955016913,
+          "vertex_ids": [
+            "CMV:5c30408c5c815d927cebe0e3",
+            "CMV:7fe839abbe8774457125c85c",
+            "CMV:aba1158d42fb19f8e9c232ad"
+          ]
+        },
+        {
+          "area_ratio": 1.9924733029548578,
+          "condition": 2.056839299741874,
+          "dynamic_pixels": 116,
+          "edge_ratio": 2.021175837748084,
+          "original_face_index": 7355,
+          "pixel_growth": 116,
+          "pixel_ratio": 116.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 100,
+            "UNSUPPORTED_ABSTAIN": 16
+          },
+          "repaired_face_index": 7022,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.5648958173507652,
+          "vertex_ids": [
+            "CMV:8f22be1300b26c9c6207eb7b",
+            "CMV:260cf7069a6b2d4f15dca3b1",
+            "CMV:441ce876661494ec52dbf1cb"
+          ]
+        },
+        {
+          "area_ratio": 2.8732813092345477,
+          "condition": 2.9212975032873927,
+          "dynamic_pixels": 117,
+          "edge_ratio": 2.872320883536995,
+          "original_face_index": 12711,
+          "pixel_growth": 114,
+          "pixel_ratio": 39.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 117
+          },
+          "repaired_face_index": 12140,
+          "rest_pixels": 3,
+          "skin_l1_max": 0.6127520873510198,
+          "vertex_ids": [
+            "CMV:d8968399908b636889e20a47",
+            "CMV:81bc103c079db47cdebb9c68",
+            "CMV:6709b5cbf54a4ba1e2a46ad5"
+          ]
+        },
+        {
+          "area_ratio": 1.6999493831374008,
+          "condition": 1.7145521243948443,
+          "dynamic_pixels": 123,
+          "edge_ratio": 1.7064478937531151,
+          "original_face_index": 11031,
+          "pixel_growth": 111,
+          "pixel_ratio": 10.25,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 41,
+            "COMPILED_LOCAL_HARMONIC": 27,
+            "DIRECT_SOURCE": 48,
+            "UNSUPPORTED_ABSTAIN": 7
+          },
+          "repaired_face_index": 10513,
+          "rest_pixels": 12,
+          "skin_l1_max": 0.0941810482022228,
+          "vertex_ids": [
+            "CMV:9515e06c9f176a4fac35568a",
+            "CMV:46f55e92ae2aa21132047add",
+            "CMV:f504e41fd3bf5c3be0353b89"
+          ]
+        },
+        {
+          "area_ratio": 1.4381956563147478,
+          "condition": 1.4460702901721316,
+          "dynamic_pixels": 111,
+          "edge_ratio": 1.438700733618954,
+          "original_face_index": 13329,
+          "pixel_growth": 111,
+          "pixel_ratio": 111.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 111
+          },
+          "repaired_face_index": 12740,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.13921430324974435,
+          "vertex_ids": [
+            "CMV:d065000c905771437f8e9baf",
+            "CMV:bb006d3bbdd09d1d4d5bafee",
+            "CMV:fc7896155c586dd8824bec9c"
+          ]
+        },
+        {
+          "area_ratio": 2.188850593230629,
+          "condition": 2.222997573916288,
+          "dynamic_pixels": 110,
+          "edge_ratio": 2.205591250752558,
+          "original_face_index": 10240,
+          "pixel_growth": 110,
+          "pixel_ratio": 110.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 28,
+            "OTHER_VIEW_SOURCE": 15,
+            "UNSUPPORTED_ABSTAIN": 67
+          },
+          "repaired_face_index": 9769,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.9999148402678162,
+          "vertex_ids": [
+            "CMV:df395ffc27b88de592e08188",
+            "CMV:68a13afb91bfbf7cb75afe52",
+            "CMV:43a58f215913b00b67d84dd4"
+          ]
+        },
+        {
+          "area_ratio": 1.4732013190365232,
+          "condition": 1.4785904142258715,
+          "dynamic_pixels": 106,
+          "edge_ratio": 1.4671167723799998,
+          "original_face_index": 22465,
+          "pixel_growth": 106,
+          "pixel_ratio": 106.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 30,
+            "DIRECT_SOURCE": 23,
+            "OTHER_VIEW_SOURCE": 8,
+            "UNSUPPORTED_ABSTAIN": 45
+          },
+          "repaired_face_index": 21409,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.15749300694857013,
+          "vertex_ids": [
+            "CMV:6476a91c28759babdf5aa99c",
+            "CMV:010a2d081873395d6152fb7f",
+            "CMV:c859c41c83989d00fead6f13"
+          ]
+        },
+        {
+          "area_ratio": 1.2519704895721704,
+          "condition": 1.2618047415563491,
+          "dynamic_pixels": 104,
+          "edge_ratio": 1.253057481381946,
+          "original_face_index": 10404,
+          "pixel_growth": 104,
+          "pixel_ratio": 104.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 48,
+            "OTHER_VIEW_SOURCE": 34,
+            "UNSUPPORTED_ABSTAIN": 22
+          },
+          "repaired_face_index": 9931,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.10984170709477348,
+          "vertex_ids": [
+            "CMV:eba959a1de679749fc2c108a",
+            "CMV:61ddc0fe2f97bbd05f4c9060",
+            "CMV:36a4ca6dbad4b9c128dc2bef"
+          ]
+        },
+        {
+          "area_ratio": 1.407028347533957,
+          "condition": 1.415086409890624,
+          "dynamic_pixels": 103,
+          "edge_ratio": 1.4081725985119036,
+          "original_face_index": 22466,
+          "pixel_growth": 103,
+          "pixel_ratio": 103.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 18,
+            "DIRECT_SOURCE": 36,
+            "OTHER_VIEW_SOURCE": 6,
+            "UNSUPPORTED_ABSTAIN": 43
+          },
+          "repaired_face_index": 21410,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.1298392092842661,
+          "vertex_ids": [
+            "CMV:6476a91c28759babdf5aa99c",
+            "CMV:010a2d081873395d6152fb7f",
+            "CMV:669cea9c4b0eb32bed6e0129"
+          ]
+        },
+        {
+          "area_ratio": 1.2505042567415146,
+          "condition": 1.2792131824646704,
+          "dynamic_pixels": 102,
+          "edge_ratio": 1.2645223655159508,
+          "original_face_index": 20216,
+          "pixel_growth": 102,
+          "pixel_ratio": 102.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 72,
+            "OTHER_VIEW_SOURCE": 1,
+            "UNSUPPORTED_ABSTAIN": 29
+          },
+          "repaired_face_index": 19258,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.09702938186259771,
+          "vertex_ids": [
+            "CMV:52e8262a8ee69ad28436acd4",
+            "CMV:ff27766c28ebb0ef12f7cd49",
+            "CMV:d9af85299194096a97332f7a"
+          ]
+        },
+        {
+          "area_ratio": 1.3519238263810465,
+          "condition": 1.362935272345951,
+          "dynamic_pixels": 101,
+          "edge_ratio": 1.3533225209232842,
+          "original_face_index": 20214,
+          "pixel_growth": 101,
+          "pixel_ratio": 101.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 70,
+            "UNSUPPORTED_ABSTAIN": 31
+          },
+          "repaired_face_index": 19256,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.12929354525459097,
+          "vertex_ids": [
+            "CMV:52e8262a8ee69ad28436acd4",
+            "CMV:e59dcced2593d09b4b2c1e58",
+            "CMV:d9af85299194096a97332f7a"
+          ]
+        },
+        {
+          "area_ratio": 1.3632951316995567,
+          "condition": 1.361972366258913,
+          "dynamic_pixels": 100,
+          "edge_ratio": 1.3626328122409899,
+          "original_face_index": 13327,
+          "pixel_growth": 100,
+          "pixel_ratio": 100.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 97,
+            "UNSUPPORTED_ABSTAIN": 3
+          },
+          "repaired_face_index": 12738,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.11667181345235086,
+          "vertex_ids": [
+            "CMV:d065000c905771437f8e9baf",
+            "CMV:61ddc0fe2f97bbd05f4c9060",
+            "CMV:bb006d3bbdd09d1d4d5bafee"
+          ]
+        },
+        {
+          "area_ratio": 1.314478136201,
+          "condition": 1.3133785691196296,
+          "dynamic_pixels": 100,
+          "edge_ratio": 1.3138073193755782,
+          "original_face_index": 13328,
+          "pixel_growth": 100,
+          "pixel_ratio": 100.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 42,
+            "COMPILED_LOCAL_HARMONIC": 2,
+            "OTHER_VIEW_SOURCE": 24,
+            "UNSUPPORTED_ABSTAIN": 32
+          },
+          "repaired_face_index": 12739,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.15655181482032912,
+          "vertex_ids": [
+            "CMV:d065000c905771437f8e9baf",
+            "CMV:61ddc0fe2f97bbd05f4c9060",
+            "CMV:36a4ca6dbad4b9c128dc2bef"
+          ]
+        },
+        {
+          "area_ratio": 1.3626224925076815,
+          "condition": 1.3644032799702992,
+          "dynamic_pixels": 99,
+          "edge_ratio": 1.3626328122409899,
+          "original_face_index": 14703,
+          "pixel_growth": 99,
+          "pixel_ratio": 99.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 95,
+            "UNSUPPORTED_ABSTAIN": 4
+          },
+          "repaired_face_index": 14062,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.1117249567720848,
+          "vertex_ids": [
+            "CMV:61ddc0fe2f97bbd05f4c9060",
+            "CMV:bb006d3bbdd09d1d4d5bafee",
+            "CMV:669cea9c4b0eb32bed6e0129"
+          ]
+        },
+        {
+          "area_ratio": 2.4872537459417345,
+          "condition": 3.5833668876485407,
+          "dynamic_pixels": 98,
+          "edge_ratio": 2.575347127636795,
+          "original_face_index": 16561,
+          "pixel_growth": 98,
+          "pixel_ratio": 98.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 39,
+            "UNSUPPORTED_ABSTAIN": 59
+          },
+          "repaired_face_index": 15794,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.09541105384572869,
+          "vertex_ids": [
+            "CMV:c5252adb425db9ac7341e345",
+            "CMV:82ba1e328c4f9b187576aaa9",
+            "CMV:ec4f360f71b889a3fb77a2b6"
+          ]
+        },
+        {
+          "area_ratio": 1.4712949136734492,
+          "condition": 1.6383949640985795,
+          "dynamic_pixels": 105,
+          "edge_ratio": 1.5262431730214998,
+          "original_face_index": 4194,
+          "pixel_growth": 97,
+          "pixel_ratio": 13.125,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 74,
+            "DIRECT_SOURCE": 31
+          },
+          "repaired_face_index": 4030,
+          "rest_pixels": 8,
+          "skin_l1_max": 0.09418105130980801,
+          "vertex_ids": [
+            "CMV:99c257a6a93093560e4d33c5",
+            "CMV:482ac004c7db001736758681",
+            "CMV:88304a7e54b8c9f4c4096a09"
+          ]
+        },
+        {
+          "area_ratio": 1.5475906237759338,
+          "condition": 1.632688974620574,
+          "dynamic_pixels": 97,
+          "edge_ratio": 1.5784469492112012,
+          "original_face_index": 24580,
+          "pixel_growth": 97,
+          "pixel_ratio": 97.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 50,
+            "DIRECT_SOURCE": 6,
+            "OTHER_VIEW_SOURCE": 23,
+            "UNSUPPORTED_ABSTAIN": 18
+          },
+          "repaired_face_index": 23422,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.18246358713431932,
+          "vertex_ids": [
+            "CMV:eee30bae8ab3dac94e8946b1",
+            "CMV:fc7896155c586dd8824bec9c",
+            "CMV:23ea179ea9918fd583655f9a"
+          ]
+        },
+        {
+          "area_ratio": 1.2533010110485103,
+          "condition": 1.2529489623358578,
+          "dynamic_pixels": 97,
+          "edge_ratio": 1.253057481381946,
+          "original_face_index": 10405,
+          "pixel_growth": 97,
+          "pixel_ratio": 97.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 61,
+            "OTHER_VIEW_SOURCE": 13,
+            "UNSUPPORTED_ABSTAIN": 23
+          },
+          "repaired_face_index": 9932,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.11511779411283732,
+          "vertex_ids": [
+            "CMV:eba959a1de679749fc2c108a",
+            "CMV:61ddc0fe2f97bbd05f4c9060",
+            "CMV:ff27766c28ebb0ef12f7cd49"
+          ]
+        },
+        {
+          "area_ratio": 1.2798959481548537,
+          "condition": 1.4393750066980704,
+          "dynamic_pixels": 96,
+          "edge_ratio": 1.2948292103626218,
+          "original_face_index": 12205,
+          "pixel_growth": 96,
+          "pixel_ratio": 96.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 22,
+            "COMPILED_LOCAL_HARMONIC": 14,
+            "DIRECT_SOURCE": 3,
+            "OTHER_VIEW_SOURCE": 46,
+            "UNSUPPORTED_ABSTAIN": 11
+          },
+          "repaired_face_index": 11658,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.17184212326390905,
+          "vertex_ids": [
+            "CMV:cfcd7d37ebedd0856d86b72e",
+            "CMV:eee30bae8ab3dac94e8946b1",
+            "CMV:fc7896155c586dd8824bec9c"
+          ]
+        },
+        {
+          "area_ratio": 1.2352113088249075,
+          "condition": 1.2825342450124084,
+          "dynamic_pixels": 95,
+          "edge_ratio": 1.2579315639268251,
+          "original_face_index": 5860,
+          "pixel_growth": 95,
+          "pixel_ratio": 95.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 91,
+            "UNSUPPORTED_ABSTAIN": 4
+          },
+          "repaired_face_index": 5613,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.23183509973933192,
+          "vertex_ids": [
+            "CMV:740a39e1d0bc6d6cb8fcdc0a",
+            "CMV:bb8f3a102264a6bca37ca3db",
+            "CMV:441ce876661494ec52dbf1cb"
+          ]
+        },
+        {
+          "area_ratio": 1.3193564289003117,
+          "condition": 1.3191149240743918,
+          "dynamic_pixels": 94,
+          "edge_ratio": 1.3189752321372,
+          "original_face_index": 14705,
+          "pixel_growth": 94,
+          "pixel_ratio": 94.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 92,
+            "UNSUPPORTED_ABSTAIN": 2
+          },
+          "repaired_face_index": 14064,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.10527865046946484,
+          "vertex_ids": [
+            "CMV:61ddc0fe2f97bbd05f4c9060",
+            "CMV:d9af85299194096a97332f7a",
+            "CMV:669cea9c4b0eb32bed6e0129"
+          ]
+        },
+        {
+          "area_ratio": 1.3203480167941752,
+          "condition": 1.3367456645697597,
+          "dynamic_pixels": 94,
+          "edge_ratio": 1.3189752321372,
+          "original_face_index": 23494,
+          "pixel_growth": 94,
+          "pixel_ratio": 94.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 94
+          },
+          "repaired_face_index": 22405,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.09922539316873318,
+          "vertex_ids": [
+            "CMV:e59dcced2593d09b4b2c1e58",
+            "CMV:d9af85299194096a97332f7a",
+            "CMV:669cea9c4b0eb32bed6e0129"
+          ]
+        },
+        {
+          "area_ratio": 1.5139796616563665,
+          "condition": 1.5473329181933833,
+          "dynamic_pixels": 98,
+          "edge_ratio": 1.5304314859097496,
+          "original_face_index": 4959,
+          "pixel_growth": 93,
+          "pixel_ratio": 19.6,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 78,
+            "UNSUPPORTED_ABSTAIN": 20
+          },
+          "repaired_face_index": 4759,
+          "rest_pixels": 5,
+          "skin_l1_max": 0.09302964452295273,
+          "vertex_ids": [
+            "CMV:4432287c776a983e461a4378",
+            "CMV:c4127ef003888c76190eebd7",
+            "CMV:6c8bcdb872dbbcd155a6161e"
+          ]
+        },
+        {
+          "area_ratio": 1.5728451305782472,
+          "condition": 1.5782244455879104,
+          "dynamic_pixels": 97,
+          "edge_ratio": 1.571701474962474,
+          "original_face_index": 23909,
+          "pixel_growth": 92,
+          "pixel_ratio": 19.4,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 97
+          },
+          "repaired_face_index": 22796,
+          "rest_pixels": 5,
+          "skin_l1_max": 0.1785228388940694,
+          "vertex_ids": [
+            "CMV:dc5f96c9393df37998c75188",
+            "CMV:bb006d3bbdd09d1d4d5bafee",
+            "CMV:fc7896155c586dd8824bec9c"
+          ]
+        },
+        {
+          "area_ratio": 2.8150692002712683,
+          "condition": 2.9813245452006396,
+          "dynamic_pixels": 91,
+          "edge_ratio": 2.883465970341964,
+          "original_face_index": 9997,
+          "pixel_growth": 91,
+          "pixel_ratio": 91.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 56,
+            "OTHER_VIEW_SOURCE": 9,
+            "UNSUPPORTED_ABSTAIN": 26
+          },
+          "repaired_face_index": 9534,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.9578688859904174,
+          "vertex_ids": [
+            "CMV:4d5f875da70610e08e0f2412",
+            "CMV:92eb1e6ff779321cbf9bb527",
+            "CMV:21b19d642c0902bbfa79e174"
+          ]
+        },
+        {
+          "area_ratio": 1.688390507708459,
+          "condition": 1.7406043243303124,
+          "dynamic_pixels": 102,
+          "edge_ratio": 1.7064478937531151,
+          "original_face_index": 11032,
+          "pixel_growth": 90,
+          "pixel_ratio": 8.5,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 7,
+            "COMPILED_LOCAL_HARMONIC": 2,
+            "DIRECT_SOURCE": 68,
+            "UNSUPPORTED_ABSTAIN": 25
+          },
+          "repaired_face_index": 10514,
+          "rest_pixels": 12,
+          "skin_l1_max": 0.09302964603577359,
+          "vertex_ids": [
+            "CMV:9515e06c9f176a4fac35568a",
+            "CMV:f504e41fd3bf5c3be0353b89",
+            "CMV:33524f53cadcae9bc01ff320"
+          ]
+        },
+        {
+          "area_ratio": 1.5500924792917532,
+          "condition": 1.3369043097746136,
+          "dynamic_pixels": 89,
+          "edge_ratio": 1.438700733618954,
+          "original_face_index": 12203,
+          "pixel_growth": 89,
+          "pixel_ratio": 89.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 32,
+            "COMPILED_LOCAL_HARMONIC": 3,
+            "OTHER_VIEW_SOURCE": 9,
+            "UNSUPPORTED_ABSTAIN": 45
+          },
+          "repaired_face_index": 11656,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.17184212326390905,
+          "vertex_ids": [
+            "CMV:cfcd7d37ebedd0856d86b72e",
+            "CMV:d065000c905771437f8e9baf",
+            "CMV:fc7896155c586dd8824bec9c"
+          ]
+        },
+        {
+          "area_ratio": 1.264716316042029,
+          "condition": 1.2643682984592666,
+          "dynamic_pixels": 89,
+          "edge_ratio": 1.2645223655159508,
+          "original_face_index": 14704,
+          "pixel_growth": 89,
+          "pixel_ratio": 89.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 66,
+            "OTHER_VIEW_SOURCE": 3,
+            "UNSUPPORTED_ABSTAIN": 20
+          },
+          "repaired_face_index": 14063,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.11511779411283732,
+          "vertex_ids": [
+            "CMV:61ddc0fe2f97bbd05f4c9060",
+            "CMV:ff27766c28ebb0ef12f7cd49",
+            "CMV:d9af85299194096a97332f7a"
+          ]
+        },
+        {
+          "area_ratio": 1.5779910861483681,
+          "condition": 1.6136271099649895,
+          "dynamic_pixels": 89,
+          "edge_ratio": 1.571701474962474,
+          "original_face_index": 22462,
+          "pixel_growth": 88,
+          "pixel_ratio": 89.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 89
+          },
+          "repaired_face_index": 21406,
+          "rest_pixels": 1,
+          "skin_l1_max": 0.1785228388940694,
+          "vertex_ids": [
+            "CMV:6476a91c28759babdf5aa99c",
+            "CMV:dc5f96c9393df37998c75188",
+            "CMV:bb006d3bbdd09d1d4d5bafee"
+          ]
+        },
+        {
+          "area_ratio": 1.8431516494103872,
+          "condition": 2.9520481544270214,
+          "dynamic_pixels": 87,
+          "edge_ratio": 2.263376147748877,
+          "original_face_index": 23380,
+          "pixel_growth": 87,
+          "pixel_ratio": 87.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 83,
+            "UNSUPPORTED_ABSTAIN": 4
+          },
+          "repaired_face_index": 22296,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.15349364316780387,
+          "vertex_ids": [
+            "CMV:7fb0f47eabc159b0bcde3a6e",
+            "CMV:4aa1109fcfbcf9ec74f9e3e8",
+            "CMV:0b911e9643638d3f40ad2603"
+          ]
+        },
+        {
+          "area_ratio": 1.3851359341993033,
+          "condition": 1.521102631948983,
+          "dynamic_pixels": 87,
+          "edge_ratio": 1.419750818242161,
+          "original_face_index": 18088,
+          "pixel_growth": 87,
+          "pixel_ratio": 87.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 87
+          },
+          "repaired_face_index": 17235,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.12730509598512324,
+          "vertex_ids": [
+            "CMV:6b6eca57589d3053f6ac5c7f",
+            "CMV:dec8b3fbd471675cf44ea202",
+            "CMV:e0027b5b5d4339e81cfcdce3"
+          ]
+        },
+        {
+          "area_ratio": 3.12313691524395,
+          "condition": 3.1908312013415605,
+          "dynamic_pixels": 86,
+          "edge_ratio": 3.1278867194337243,
+          "original_face_index": 5817,
+          "pixel_growth": 86,
+          "pixel_ratio": 86.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 86
+          },
+          "repaired_face_index": 5573,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.5838611357632603,
+          "vertex_ids": [
+            "CMV:8dc7804924254f79229bb8c1",
+            "CMV:81bc103c079db47cdebb9c68",
+            "CMV:0072c2b368d84dd08754f890"
+          ]
+        },
+        {
+          "area_ratio": 1.3287275024765974,
+          "condition": 1.355412700145962,
+          "dynamic_pixels": 87,
+          "edge_ratio": 1.3251718480937826,
+          "original_face_index": 23910,
+          "pixel_growth": 86,
+          "pixel_ratio": 87.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 87
+          },
+          "repaired_face_index": 22797,
+          "rest_pixels": 1,
+          "skin_l1_max": 0.15598522978402501,
+          "vertex_ids": [
+            "CMV:dc5f96c9393df37998c75188",
+            "CMV:fc7896155c586dd8824bec9c",
+            "CMV:3c98c0d4ea9edde6487ab01c"
+          ]
+        },
+        {
+          "area_ratio": 1.319161385718862,
+          "condition": 1.3351413094221987,
+          "dynamic_pixels": 85,
+          "edge_ratio": 1.3251718480937826,
+          "original_face_index": 24677,
+          "pixel_growth": 85,
+          "pixel_ratio": 85.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 45,
+            "DIRECT_SOURCE": 10,
+            "OTHER_VIEW_SOURCE": 11,
+            "UNSUPPORTED_ABSTAIN": 19
+          },
+          "repaired_face_index": 23512,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.11231809345721133,
+          "vertex_ids": [
+            "CMV:fc7896155c586dd8824bec9c",
+            "CMV:23ea179ea9918fd583655f9a",
+            "CMV:3c98c0d4ea9edde6487ab01c"
+          ]
+        },
+        {
+          "area_ratio": 1.2874796004281626,
+          "condition": 1.827389163204983,
+          "dynamic_pixels": 99,
+          "edge_ratio": 1.41540962238909,
+          "original_face_index": 14003,
+          "pixel_growth": 85,
+          "pixel_ratio": 7.071428571428571,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 32,
+            "DIRECT_SOURCE": 51,
+            "UNSUPPORTED_ABSTAIN": 16
+          },
+          "repaired_face_index": 13386,
+          "rest_pixels": 14,
+          "skin_l1_max": 0.08146604509572204,
+          "vertex_ids": [
+            "CMV:d3b4388562bc6b0ddef1089a",
+            "CMV:d8317f4ab50d0419efcf937a",
+            "CMV:822a613c296b0d7060100e3b"
+          ]
+        },
+        {
+          "area_ratio": 1.49104905902064,
+          "condition": 1.7298406569545468,
+          "dynamic_pixels": 84,
+          "edge_ratio": 1.4832873128691297,
+          "original_face_index": 15301,
+          "pixel_growth": 84,
+          "pixel_ratio": 84.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 60,
+            "UNSUPPORTED_ABSTAIN": 24
+          },
+          "repaired_face_index": 14606,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.03596232178390967,
+          "vertex_ids": [
+            "CMV:907140add03f87e9b38b0e58",
+            "CMV:e184b53b51afd3fa06082234",
+            "CMV:ec4f360f71b889a3fb77a2b6"
+          ]
+        },
+        {
+          "area_ratio": 1.2828750688588546,
+          "condition": 1.8121220586659144,
+          "dynamic_pixels": 100,
+          "edge_ratio": 1.4719114237860467,
+          "original_face_index": 14001,
+          "pixel_growth": 83,
+          "pixel_ratio": 5.882352941176471,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 16,
+            "COMPILED_LOCAL_HARMONIC": 26,
+            "DIRECT_SOURCE": 56,
+            "OTHER_VIEW_SOURCE": 1,
+            "UNSUPPORTED_ABSTAIN": 1
+          },
+          "repaired_face_index": 13384,
+          "rest_pixels": 17,
+          "skin_l1_max": 0.0814660450957221,
+          "vertex_ids": [
+            "CMV:d3b4388562bc6b0ddef1089a",
+            "CMV:76d217038287dc3fab1f35ff",
+            "CMV:d8317f4ab50d0419efcf937a"
+          ]
+        },
+        {
+          "area_ratio": 2.850812864169895,
+          "condition": 2.8706741506391285,
+          "dynamic_pixels": 141,
+          "edge_ratio": 2.3714660257350286,
+          "original_face_index": 12921,
+          "pixel_growth": 83,
+          "pixel_ratio": 2.4310344827586206,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 28,
+            "COMPILED_LOCAL_HARMONIC": 7,
+            "DIRECT_SOURCE": 77,
+            "OTHER_VIEW_SOURCE": 28,
+            "UNSUPPORTED_ABSTAIN": 1
+          },
+          "repaired_face_index": 12345,
+          "rest_pixels": 58,
+          "skin_l1_max": 0.0948511346440272,
+          "vertex_ids": [
+            "CMV:e36740f947715bcb6fb84664",
+            "CMV:40f8a6db49bf0938dc1a9640",
+            "CMV:e85fad7830f07fe18f0c31c1"
+          ]
+        },
+        {
+          "area_ratio": 1.1599198850799302,
+          "condition": 1.1635579116233312,
+          "dynamic_pixels": 82,
+          "edge_ratio": 1.1605195081543758,
+          "original_face_index": 8248,
+          "pixel_growth": 82,
+          "pixel_ratio": 82.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 82
+          },
+          "repaired_face_index": 7873,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.022061404360005886,
+          "vertex_ids": [
+            "CMV:9eba32b9a7ad11f8271e963a",
+            "CMV:180959fd01c7416444464556",
+            "CMV:68a52a7a084663e506037c9d"
+          ]
+        },
+        {
+          "area_ratio": 1.2412397655686405,
+          "condition": 1.2447484172403696,
+          "dynamic_pixels": 87,
+          "edge_ratio": 1.2411396901902674,
+          "original_face_index": 23493,
+          "pixel_growth": 81,
+          "pixel_ratio": 14.5,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 85,
+            "UNSUPPORTED_ABSTAIN": 2
+          },
+          "repaired_face_index": 22404,
+          "rest_pixels": 6,
+          "skin_l1_max": 0.07886040697357388,
+          "vertex_ids": [
+            "CMV:e59dcced2593d09b4b2c1e58",
+            "CMV:010a2d081873395d6152fb7f",
+            "CMV:669cea9c4b0eb32bed6e0129"
+          ]
+        },
+        {
+          "area_ratio": 1.407765059320264,
+          "condition": 1.4093439846161677,
+          "dynamic_pixels": 87,
+          "edge_ratio": 1.4081725985119036,
+          "original_face_index": 22464,
+          "pixel_growth": 81,
+          "pixel_ratio": 14.5,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 87
+          },
+          "repaired_face_index": 21408,
+          "rest_pixels": 6,
+          "skin_l1_max": 0.1298392092842661,
+          "vertex_ids": [
+            "CMV:6476a91c28759babdf5aa99c",
+            "CMV:bb006d3bbdd09d1d4d5bafee",
+            "CMV:669cea9c4b0eb32bed6e0129"
+          ]
+        },
+        {
+          "area_ratio": 1.6792446757607369,
+          "condition": 2.793852655125615,
+          "dynamic_pixels": 80,
+          "edge_ratio": 2.0649418241918407,
+          "original_face_index": 24648,
+          "pixel_growth": 80,
+          "pixel_ratio": 80.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 78,
+            "UNSUPPORTED_ABSTAIN": 2
+          },
+          "repaired_face_index": 23485,
+          "rest_pixels": 0,
+          "skin_l1_max": 0.15172652640466855,
+          "vertex_ids": [
+            "CMV:19514a7bd4ae3f5555d9c1ac",
+            "CMV:ce1fec0179a63dea61342496",
+            "CMV:c38b7d98d090a2078e2bf3a0"
+          ]
+        },
+        {
+          "area_ratio": 0.9999999626531558,
+          "condition": 1.0000001780843868,
+          "dynamic_pixels": 79,
+          "edge_ratio": 1.0000000702409486,
+          "original_face_index": 8996,
+          "pixel_growth": 79,
+          "pixel_ratio": 79.0,
+          "provenance": {
+            "CANONICAL_GLOBAL_COMPLETION": 41,
+            "OTHER_VIEW_SOURCE": 38
+          },
+          "repaired_face_index": 8580,
+          "rest_pixels": 0,
+          "skin_l1_max": 1.3897922032996303e-07,
+          "vertex_ids": [
+            "CMV:0e21cf35ee98acd3b6e9683d",
+            "CMV:5c6d1a5690ffa813c52f7aa0",
+            "CMV:a60358edfeceaed97ec8a222"
+          ]
+        }
+      ],
+      "view": 0
+    }
+  ],
+  "forbidden_edge_count": 761,
+  "removed_face_count": 1174,
+  "repaired_lineage": "b422a961b9992a8d69f24ad9ac952fd44b2c4219097a1c6b83100d3d45dafc8c",
+  "schema": "RealSaS.KnightRemainingSmearOwnerAudit.v1"
+}

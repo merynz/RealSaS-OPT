@@ -1,0 +1,235 @@
+{
+  "candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+  "candidate_source": "STAGE18_CANONICAL_ADOPTED_LINEAGE",
+  "outputs": [
+    "canonical/knight_source_owned_mechanical_binding_v1/KNIGHT_IDLE_SOURCE_OWNED_MECHANICAL_BINDING_V1.gif",
+    "canonical/knight_source_owned_mechanical_binding_v1/KNIGHT_RUN_SOURCE_OWNED_MECHANICAL_BINDING_V1.gif",
+    "canonical/knight_source_owned_mechanical_binding_v1/KNIGHT_SLASH_SOURCE_OWNED_MECHANICAL_BINDING_V1.gif"
+  ],
+  "ownership": {
+    "appearance_provenance": "DIRECT_SOURCE_ONLY",
+    "arap_role": "UNBOUND_VISUAL_VERTEX_INTERPOLATION_ONLY",
+    "deformation_driver": "STAGE35_QUALIFIED_MECHANICAL_SURFACE_BARYCENTRIC_TARGETS",
+    "mechanical_mesh_render_authority": false,
+    "texture_authority": "ORIGINAL_SOURCE_RGBA",
+    "visual_mesh_authority": "SOURCE_FOREGROUND_MASK_CONSTRAINED_CDT"
+  },
+  "product_authority_claimed": false,
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "schema": "RealSaS.KnightSourceOwnedMechanicalBindingProof.v1",
+  "status": "MEASURED_RESCUE_PROOF",
+  "views": [
+    {
+      "bound_visual_vertex_count": 1254,
+      "bound_visual_vertex_fraction": 0.5648648648648649,
+      "completion_fraction": 0.0,
+      "direct_source_fraction": 1.0,
+      "other_view_fraction": 0.0,
+      "qa_by_clip": {
+        "demo_idle_v1": [
+          {
+            "flipped_triangles": 53,
+            "max_binding_residual_px": 6.207524623733372e-05,
+            "max_edge_stretch": 22.711156161112104,
+            "p95_edge_stretch": 1.334166516237298,
+            "time_seconds": 0.0
+          },
+          {
+            "flipped_triangles": 53,
+            "max_binding_residual_px": 6.364013057924583e-05,
+            "max_edge_stretch": 23.447141902006692,
+            "p95_edge_stretch": 1.3627035475798193,
+            "time_seconds": 0.8333333333333334
+          },
+          {
+            "flipped_triangles": 54,
+            "max_binding_residual_px": 6.423628940272467e-05,
+            "max_edge_stretch": 24.09014204979646,
+            "p95_edge_stretch": 1.344057185408814,
+            "time_seconds": 1.6666666666666667
+          },
+          {
+            "flipped_triangles": 53,
+            "max_binding_residual_px": 6.36401570030817e-05,
+            "max_edge_stretch": 23.447141815679075,
+            "p95_edge_stretch": 1.3635647317682316,
+            "time_seconds": 2.5
+          }
+        ],
+        "demo_run_v1": [
+          {
+            "flipped_triangles": 399,
+            "max_binding_residual_px": 0.00024212135505346334,
+            "max_edge_stretch": 76.03267650748903,
+            "p95_edge_stretch": 8.945053501295723,
+            "time_seconds": 0.0
+          },
+          {
+            "flipped_triangles": 411,
+            "max_binding_residual_px": 0.00024340375551613175,
+            "max_edge_stretch": 180.34224665123517,
+            "p95_edge_stretch": 15.855655126264157,
+            "time_seconds": 0.20833333333333334
+          },
+          {
+            "flipped_triangles": 524,
+            "max_binding_residual_px": 0.00020573332245106597,
+            "max_edge_stretch": 185.67122480136564,
+            "p95_edge_stretch": 8.603744266048412,
+            "time_seconds": 0.4166666666666667
+          },
+          {
+            "flipped_triangles": 503,
+            "max_binding_residual_px": 0.00022351738418923973,
+            "max_edge_stretch": 200.91528704414208,
+            "p95_edge_stretch": 12.025160287072195,
+            "time_seconds": 0.625
+          }
+        ],
+        "demo_slash_v1": [
+          {
+            "flipped_triangles": 594,
+            "max_binding_residual_px": 0.0002521502169274152,
+            "max_edge_stretch": 220.31468896707165,
+            "p95_edge_stretch": 17.18016573237717,
+            "time_seconds": 0.0
+          },
+          {
+            "flipped_triangles": 502,
+            "max_binding_residual_px": 0.00023712054960197545,
+            "max_edge_stretch": 196.90621416328386,
+            "p95_edge_stretch": 15.683701317050962,
+            "time_seconds": 0.2777777777777778
+          },
+          {
+            "flipped_triangles": 398,
+            "max_binding_residual_px": 0.00017023385744721574,
+            "max_edge_stretch": 146.7536554521451,
+            "p95_edge_stretch": 8.072230331739366,
+            "time_seconds": 0.5555555555555556
+          },
+          {
+            "flipped_triangles": 596,
+            "max_binding_residual_px": 0.00025215122980799267,
+            "max_edge_stretch": 220.314688967045,
+            "p95_edge_stretch": 17.18015160741192,
+            "time_seconds": 0.8333333333333334
+          }
+        ]
+      },
+      "source_foreground_pixel_count": 174442,
+      "source_texture_sha256": "f2255e32c15ded74e08def99ef5160935b93c2d58d9c545ae4fc2d67ad2ae885",
+      "unbound_visual_vertex_count": 966,
+      "unsupported_fraction": 0.0,
+      "view_index": 0,
+      "visual_face_count": 2902,
+      "visual_vertex_count": 2220
+    },
+    {
+      "bound_visual_vertex_count": 1019,
+      "bound_visual_vertex_fraction": 0.566425792106726,
+      "completion_fraction": 0.0,
+      "direct_source_fraction": 1.0,
+      "other_view_fraction": 0.0,
+      "qa_by_clip": {
+        "demo_idle_v1": [
+          {
+            "flipped_triangles": 192,
+            "max_binding_residual_px": 0.00034878644985298127,
+            "max_edge_stretch": 186.47536357063024,
+            "p95_edge_stretch": 8.342224713453714,
+            "time_seconds": 0.0
+          },
+          {
+            "flipped_triangles": 206,
+            "max_binding_residual_px": 0.00035422009172539684,
+            "max_edge_stretch": 189.4255745028491,
+            "p95_edge_stretch": 8.664952713538536,
+            "time_seconds": 0.8333333333333334
+          },
+          {
+            "flipped_triangles": 207,
+            "max_binding_residual_px": 0.00035834857468350877,
+            "max_edge_stretch": 191.67774083198648,
+            "p95_edge_stretch": 8.787593588148928,
+            "time_seconds": 1.6666666666666667
+          },
+          {
+            "flipped_triangles": 204,
+            "max_binding_residual_px": 0.0003542202631245825,
+            "max_edge_stretch": 189.42566820719466,
+            "p95_edge_stretch": 8.664964365470825,
+            "time_seconds": 2.5
+          }
+        ],
+        "demo_run_v1": [
+          {
+            "flipped_triangles": 370,
+            "max_binding_residual_px": 0.0003363250587138238,
+            "max_edge_stretch": 184.05087214110907,
+            "p95_edge_stretch": 9.007303219432497,
+            "time_seconds": 0.0
+          },
+          {
+            "flipped_triangles": 320,
+            "max_binding_residual_px": 0.0004687681123900814,
+            "max_edge_stretch": 251.52598961847502,
+            "p95_edge_stretch": 8.822369425188102,
+            "time_seconds": 0.20833333333333334
+          },
+          {
+            "flipped_triangles": 345,
+            "max_binding_residual_px": 0.0005788908318123745,
+            "max_edge_stretch": 309.9588189791479,
+            "p95_edge_stretch": 7.563343898071702,
+            "time_seconds": 0.4166666666666667
+          },
+          {
+            "flipped_triangles": 320,
+            "max_binding_residual_px": 0.0005412447502339844,
+            "max_edge_stretch": 289.666437543323,
+            "p95_edge_stretch": 7.391079210035272,
+            "time_seconds": 0.625
+          }
+        ],
+        "demo_slash_v1": [
+          {
+            "flipped_triangles": 356,
+            "max_binding_residual_px": 0.0005423407336190112,
+            "max_edge_stretch": 290.23013440907994,
+            "p95_edge_stretch": 9.315178955467422,
+            "time_seconds": 0.0
+          },
+          {
+            "flipped_triangles": 329,
+            "max_binding_residual_px": 0.0005678520744821128,
+            "max_edge_stretch": 304.3055820476014,
+            "p95_edge_stretch": 9.251725652929144,
+            "time_seconds": 0.2777777777777778
+          },
+          {
+            "flipped_triangles": 303,
+            "max_binding_residual_px": 0.0003925290425035822,
+            "max_edge_stretch": 210.77997326741394,
+            "p95_edge_stretch": 9.950658569385656,
+            "time_seconds": 0.5555555555555556
+          },
+          {
+            "flipped_triangles": 360,
+            "max_binding_residual_px": 0.0005423407336190112,
+            "max_edge_stretch": 290.23013440860393,
+            "p95_edge_stretch": 9.315173268930032,
+            "time_seconds": 0.8333333333333334
+          }
+        ]
+      },
+      "source_foreground_pixel_count": 144437,
+      "source_texture_sha256": "0c5700e954039ebee7738e42497575130e74065e2ea98188a1c44a947d00b823",
+      "unbound_visual_vertex_count": 780,
+      "unsupported_fraction": 0.0,
+      "view_index": 2,
+      "visual_face_count": 2359,
+      "visual_vertex_count": 1799
+    }
+  ]
+}

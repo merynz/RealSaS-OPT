@@ -1,0 +1,34 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX5BatchedC0Preregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__BATCHED_C0_EQUIVALENCE_AND_THROUGHPUT",
+  "authority_class": "RESEARCH_PERFORMANCE_ENGINEERING_ONLY",
+  "source_x4_closure": "canonical/VF11_EXTRACTOR_TRANSITION_X4_RESEARCH_CLOSURE_20260921.json",
+  "scope": {
+    "math_contract": "same affine arithmetic, LayerNorm enclosure, SiLU secant remainder and triplane single-regime semantics as range_engine_c0_v3",
+    "batch_dimension": "independent single-interpolation-regime boxes",
+    "max_micro_depth": 2,
+    "device": "CPU float64 prototype"
+  },
+  "correctness_gates": [
+    "batched single-regime lower/upper bounds match scalar V3 within 1e-10 absolute tolerance on deterministic boxes",
+    "batched m0/m1/m2 state, sign, lower, upper and leaf counts match scalar V3 within 1e-10 on deterministic refinement fixtures",
+    "no batched bound may be narrower than scalar by more than 1e-10",
+    "existing scalar C0/C1/C2 tests remain green"
+  ],
+  "performance_panel": {
+    "source": "same 16 deterministic X4B triplane base regimes",
+    "max_micro_depth": 2,
+    "report": ["scalar_seconds", "batched_seconds", "speedup", "projected_103823_regime_seconds_at_observed_batch_rate"]
+  },
+  "decision": {
+    "correctness_fail": "FALSIFIED__BATCH_ENGINE_UNSAFE",
+    "correctness_pass_and_speedup_lt_2": "CORRECT_BUT_INSUFFICIENT_ACCELERATION__DO_NOT_FULL_DOMAIN",
+    "correctness_pass_and_speedup_ge_2": "BATCH_ENGINE_NONVACUOUS__CONTINUE_THROUGHPUT_ENGINEERING",
+    "projected_full_domain_seconds_le_300": "MAY_PREREGISTER_FULL_DOMAIN_PILOT__EXPLICIT_EXECUTION_AUTHORIZATION_STILL_REQUIRED"
+  },
+  "full_domain_execution_authorized": false,
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false
+}

@@ -1,0 +1,19 @@
+{
+  "current_directive_candidate_pair_count": 125,
+  "current_directive_unresolved_unsafe_face_count": 250,
+  "finding": {
+    "current_identity_only_directive_leaves_repairable_seam_owner_evidence": true,
+    "seam_owner_support_recovers_additional_unsafe_faces": true
+  },
+  "g3b_unsafe_face_count": 469,
+  "owner_resolved_unique_pair_count": 152,
+  "schema": "RealSaS.KnightStage35SeamOwnerRepartitionAudit.v1",
+  "status": "MEASURED",
+  "strongest_edge_identity_resolved_count": 0,
+  "strongest_edge_owner_resolved_count": 469,
+  "strongest_edge_owner_unresolved_count": 0,
+  "unsafe_face_support_mode_histogram": {
+    "IDENTITY_SURFACE_NODE|IDENTITY_SURFACE_NODE|SEAM_GEOMETRY_INTERPOLATION": 219,
+    "IDENTITY_SURFACE_NODE|SEAM_GEOMETRY_INTERPOLATION|SEAM_GEOMETRY_INTERPOLATION": 250
+  }
+}

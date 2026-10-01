@@ -1,0 +1,142 @@
+{
+  "arm": "ACTIVE_BALANCED_ALL_PROJECTED",
+  "authorization": {
+    "authorization_hash": "df557be5e6fedc0e10825aab0469a99ac251fa4fefae9113617686c5595da05c",
+    "directive_hash": "ec42d49d2fee1748965cccec2b6584e05e492b48a23712348400661aeb305cbf",
+    "product_authority_claimed": false,
+    "projected_invalid_rows_product_teacher_authority": false,
+    "schema": "RealSaS.TrustworthySkinRepartitionAuthorization.v1",
+    "scope": "DEMO_REPAIR_CHILD_COURT_ONLY",
+    "source_partition_lineage_hash": "ba14cb67ff5bdf78a609e56ccddcfd8203075ffe304734df3be8fcf657635dec",
+    "source_skeleton_lineage_hash": "e54548b5dbd39e399fbd901edaef57efee167b665c9628f1f38820fa62c34850",
+    "source_skin_lineage_hash": "fa9d013764700bc05da3ada7f41183e443c3a8a01aafe5df4734b5e750b27ec5",
+    "source_surface_lineage_hash": "452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a",
+    "status": "PASS_TRUSTWORTHY_SKIN_REPARTITION_AUTHORIZATION",
+    "teacher_inputs_used_by_predictor": false,
+    "weight_reliability_closure_passed": true,
+    "weight_reliability_evidence_hash": "3ba3ab5b732916f8f59fc28ad8ba2ee7b49e36556c7453ab93f857bcf7091aee"
+  },
+  "child": {
+    "candidate_lineage_hash": "45ec0442340f21ac5804b6aaa06da4a94a7308fdf312f647e499afabad4b4721",
+    "candidate_metadata": {
+      "camera_authority_used": false,
+      "dual_geometry_skin_support_required": true,
+      "face_deletion_count": 0,
+      "face_provenance_mode": "EXACT_COMPACTED_DENSE_FACE_REPLAY_HOLELESS_PARTITIONED",
+      "generated_centroid_vertex_count": 390,
+      "generated_seam_vertex_count": 5490,
+      "mixed_source_face_count": 2702,
+      "output_face_count": 30237,
+      "rest_area_relative_error": 6.748890565255636e-16,
+      "source_face_count": 24443,
+      "source_mesh_used": false,
+      "three_clique_face_minting_allowed": false,
+      "view_independent": true
+    },
+    "component_count": 84,
+    "face_count": 30237,
+    "partition_lineage_hash": "96405392e2d3f17d6fd38eb433dc9cbb705f9b8f28b1925e0685ea65b74b0ee1",
+    "separate_boundary_count": 2747,
+    "vertex_count": 17929
+  },
+  "claim_boundary": [
+    "This is an in-memory repair child court; it does not mutate the parent product run.",
+    "Authorization is demo-child scoped and does not promote projected invalid rows to product teacher authority.",
+    "The child partition is built only through mechanical_repartition_v2 and the child candidate only through holeless dense subdivision.",
+    "A product/mainline mutation requires a separate promotion decision after this child court."
+  ],
+  "face_provenance_replay": {
+    "compact_face_count": 24443,
+    "compact_node_count": 12090,
+    "component_aware": true,
+    "dense_face_count": 12092332,
+    "dense_vertex_count": 6046160,
+    "position_error_max": 0.0,
+    "voxel_divisions": 56
+  },
+  "invariants": {
+    "dual_geometry_skin_support_required": true,
+    "face_deletion_count": 0,
+    "parent_state_mutated": false,
+    "rest_area_relative_error": 6.748890565255636e-16,
+    "skin_weight_mutation": false
+  },
+  "parent": {
+    "candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+    "component_count": 6,
+    "face_count": 24958,
+    "partition_lineage_hash": "ba14cb67ff5bdf78a609e56ccddcfd8203075ffe304734df3be8fcf657635dec",
+    "vertex_count": 12049
+  },
+  "post_repair_actual_motion": {
+    "max_edge_gt_10": 254,
+    "max_edge_gt_4": 400,
+    "max_edge_p99": 7.519043379825887,
+    "worst_edge_max": 345.79862868756703
+  },
+  "post_repair_g3b": {
+    "passed": false,
+    "report_hash": "b59d5653e9db8040da056dcbc236fa007e7e738234805d21baafccac611c5cae",
+    "risky_face_count": 721,
+    "unsafe_face_count": 469,
+    "weight_mutation": false
+  },
+  "post_repair_synthetic_stress": {
+    "max_area_max": 429.86398104155285,
+    "max_condition_max": 10109.718449476102,
+    "max_edge_max": 338.54529119388883,
+    "max_edge_p95": 2.0925403239275715,
+    "min_area_min": 0.009353015313040596,
+    "unsafe_face_count": 926
+  },
+  "schema": "RealSaS.KnightArachneV6Stage17Stage18RepairChildCourt.v1",
+  "status": "COMPLETE__NO_PARENT_MUTATION",
+  "weight_reliability_evidence": {
+    "a100_final_valid_gate": true,
+    "a100_invalid_diagnostic": {
+      "dominant_joint_accuracy": 0.9979716024340771,
+      "row_count": 1479,
+      "row_l1_gt_0p1": 39,
+      "row_l1_gt_0p5": 12,
+      "row_l1_gt_1": 5,
+      "row_l1_gt_1p5": 1,
+      "row_l1_max": 1.9051482538062579,
+      "row_l1_mean": 0.013456506631946523,
+      "row_l1_p50": 1.2470823617976846e-14,
+      "row_l1_p90": 0.0021590028774416724,
+      "row_l1_p95": 0.03598639451534793,
+      "row_l1_p99": 0.23900098556704588
+    },
+    "a100_result_sha256": "12104316a73b37f8064ca1886661ebc8c43893ea95632445b13f3223e3ccf8f8",
+    "a100_valid": {
+      "dominant_joint_accuracy": 0.9977381962114786,
+      "row_count": 10611,
+      "row_l1_gt_0p1": 163,
+      "row_l1_gt_0p5": 15,
+      "row_l1_gt_1": 8,
+      "row_l1_gt_1p5": 3,
+      "row_l1_max": 1.9736935196764804,
+      "row_l1_mean": 0.010642245861740954,
+      "row_l1_p50": 3.116271133047189e-12,
+      "row_l1_p90": 0.031940727006709954,
+      "row_l1_p95": 0.049338090774985126,
+      "row_l1_p99": 0.13718236103746403
+    },
+    "a100_weights_sha256": "3bc8ba801f0b24714a38cda37902e5377f896572edd35585327ade353bfdee12",
+    "arm": "ACTIVE_BALANCED_ALL_PROJECTED",
+    "compiler_requalification": {
+      "corrected_row_count": 0,
+      "max_abs_weight_delta": 5.551115123125783e-16,
+      "max_row_l1_weight_delta": 5.551115184717644e-16,
+      "numeric_field_preserved": true,
+      "row_count": 12090,
+      "skin_lineage_hash": "fa9d013764700bc05da3ada7f41183e443c3a8a01aafe5df4734b5e750b27ec5",
+      "total_correction_l1": 4.625739913524904e-13,
+      "total_l1_weight_delta": 4.625739913524904e-13
+    },
+    "projected_rows_are_product_teacher_authority": false,
+    "schema": "RealSaS.KnightArachneWeightReliabilityEvidence.v1",
+    "scope": "DEMO_REPAIR_CHILD_COURT_ONLY",
+    "teacher_inputs_used_by_predictor": false
+  }
+}

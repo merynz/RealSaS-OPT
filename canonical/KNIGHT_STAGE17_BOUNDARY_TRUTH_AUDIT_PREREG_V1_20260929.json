@@ -1,0 +1,9 @@
+{
+  "schema": "RealSaS.KnightStage17BoundaryTruthAuditPrereg.v1",
+  "status": "FROZEN_BEFORE_STAGE17_BOUNDARY_TRUTH_AUDIT_RESULT",
+  "date": "2026-09-29",
+  "question": "Among sealed Stage17 PRESERVE_CONTINUITY constraints whose endpoints survive into the Stage18 candidate, how many connect distinct evaluation-only teacher source components?",
+  "operator": "Read Stage17 decisions exactly as sealed. No teacher information changes or filters a decision.",
+  "teacher_policy": "Teacher source component identity is evaluation-only after the Stage17 constraint table is frozen.",
+  "no_product_mutation": true
+}

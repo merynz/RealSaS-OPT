@@ -1,0 +1,439 @@
+{
+  "candidate_lineage_hash": "c1db3416db84ca49f06dec3a22f8864fb54a7898a098f99975937e764d732909",
+  "cases": [
+    {
+      "clip_id": "demo_idle_v1",
+      "contribution_growth_samples": 3251,
+      "dynamic_contribution_samples": 3313,
+      "frame_index": 0,
+      "full_minus_top_face_changed_pixels": 930,
+      "homogenized_face_alpha_pixels": 51,
+      "homogenized_skin_geometry": {
+        "area_ratio_3d": 0.7809573533870644,
+        "max_edge_stretch": 0.9805412704693924,
+        "max_vertex_displacement": 0.3630762533211208
+      },
+      "homogenized_top_weights": [
+        {
+          "joint_id": "J:e5441b559f1c34b41aa2",
+          "weight": 0.667002121179093
+        },
+        {
+          "joint_id": "J:1008208d141ae248de43",
+          "weight": 0.3329978743286381
+        }
+      ],
+      "label": "idle_v2_f0",
+      "offender_face_index": 253,
+      "offender_vertex_ids": [
+        "CMV:0028a7b7d5fca4f424806795",
+        "CMV:e462ac77760b3a8bbcd1d3ec",
+        "CMV:835740400e9b2b428c0816ca"
+      ],
+      "original_face_alpha_pixels": 936,
+      "original_geometry": {
+        "area_ratio_3d": 11.440059579444789,
+        "max_edge_stretch": 11.889493342438511,
+        "max_vertex_displacement": 0.5103519574506719
+      },
+      "panel_path": "canonical/knight_smear_topface_skin_counterfactual_v1/idle_v2_f0_topface_skin_counterfactual.png",
+      "policy_violating": false,
+      "rest_aspect": 2.2040001088325583,
+      "rest_contribution_samples": 62,
+      "rest_min_angle_deg": 39.88347307198143,
+      "skin_weight_pair_l1_max": 1.9979355379702102,
+      "time_seconds": 0.0,
+      "vertex_details": [
+        {
+          "original_top_weights": [
+            {
+              "joint_id": "J:e5441b559f1c34b41aa2",
+              "weight": 0.9999741325226776
+            },
+            {
+              "joint_id": "J:1008208d141ae248de43",
+              "weight": 2.586743178352969e-05
+            }
+          ],
+          "support_binding": [
+            [
+              "SFS:0101f27e95a8a70d752a",
+              1.0
+            ]
+          ],
+          "vertex_id": "CMV:0028a7b7d5fca4f424806795"
+        },
+        {
+          "original_top_weights": [
+            {
+              "joint_id": "J:1008208d141ae248de43",
+              "weight": 0.9989677555540973
+            },
+            {
+              "joint_id": "J:e5441b559f1c34b41aa2",
+              "weight": 0.0010322310147482285
+            },
+            {
+              "joint_id": "J:2ff965d6dbe4efc2d5d4",
+              "weight": 1.3426536176552084e-08
+            }
+          ],
+          "support_binding": [
+            [
+              "SFS:78f0ba2213b2871d6e64",
+              1.0
+            ]
+          ],
+          "vertex_id": "CMV:e462ac77760b3a8bbcd1d3ec"
+        },
+        {
+          "original_top_weights": [
+            {
+              "joint_id": "J:e5441b559f1c34b41aa2",
+              "weight": 0.9999999999998532
+            }
+          ],
+          "support_binding": [
+            [
+              "SFS:ac3f22e22b4392b3ff59",
+              1.0
+            ]
+          ],
+          "vertex_id": "CMV:835740400e9b2b428c0816ca"
+        }
+      ],
+      "view_index": 2
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "contribution_growth_samples": 14572,
+      "dynamic_contribution_samples": 14572,
+      "frame_index": 0,
+      "full_minus_top_face_changed_pixels": 3752,
+      "homogenized_face_alpha_pixels": 10,
+      "homogenized_skin_geometry": {
+        "area_ratio_3d": 0.5164473328401953,
+        "max_edge_stretch": 0.8231716134605002,
+        "max_vertex_displacement": 1.8419613465429
+      },
+      "homogenized_top_weights": [
+        {
+          "joint_id": "J:8455bf4c0a38867b7d9b",
+          "weight": 0.6956997882558934
+        },
+        {
+          "joint_id": "J:e5441b559f1c34b41aa2",
+          "weight": 0.22922997235746667
+        },
+        {
+          "joint_id": "J:362735eeec6ee5a3d46f",
+          "weight": 0.07506959421838182
+        },
+        {
+          "joint_id": "J:73295dbdbb50d303e597",
+          "weight": 3.4468756310750235e-07
+        },
+        {
+          "joint_id": "J:ee24577789f0235b8186",
+          "weight": 2.8623799596221676e-07
+        }
+      ],
+      "label": "run_v2_f0",
+      "offender_face_index": 3829,
+      "offender_vertex_ids": [
+        "CMV:d92e1f62e8ade892bf4b9c84",
+        "CMV:5bdd40d11eecb7cc8aa16161",
+        "CMV:78c754c02e9c191c3ef8977f"
+      ],
+      "original_face_alpha_pixels": 5781,
+      "original_geometry": {
+        "area_ratio_3d": 104.02945802725284,
+        "max_edge_stretch": 41.064263875277,
+        "max_vertex_displacement": 2.5171204651461125
+      },
+      "panel_path": "canonical/knight_smear_topface_skin_counterfactual_v1/run_v2_f0_topface_skin_counterfactual.png",
+      "policy_violating": false,
+      "rest_aspect": 1.9643351724910652,
+      "rest_contribution_samples": 0,
+      "rest_min_angle_deg": 45.304455584439644,
+      "skin_weight_pair_l1_max": 1.461660601069884,
+      "time_seconds": 0.0,
+      "vertex_details": [
+        {
+          "original_top_weights": [
+            {
+              "joint_id": "J:8455bf4c0a38867b7d9b",
+              "weight": 0.866812466979455
+            },
+            {
+              "joint_id": "J:362735eeec6ee5a3d46f",
+              "weight": 0.11731030783937094
+            },
+            {
+              "joint_id": "J:e5441b559f1c34b41aa2",
+              "weight": 0.015876224253593398
+            },
+            {
+              "joint_id": "J:73295dbdbb50d303e597",
+              "weight": 7.207794391937939e-07
+            },
+            {
+              "joint_id": "J:ee24577789f0235b8186",
+              "weight": 2.651599400448212e-07
+            },
+            {
+              "joint_id": "J:cf05f36e919ff69a9d8e",
+              "weight": 1.3201537631767724e-08
+            }
+          ],
+          "support_binding": [
+            [
+              "SFS:0dae848c8baf01a23347",
+              1.0
+            ]
+          ],
+          "vertex_id": "CMV:d92e1f62e8ade892bf4b9c84"
+        },
+        {
+          "original_top_weights": [
+            {
+              "joint_id": "J:8455bf4c0a38867b7d9b",
+              "weight": 0.9755585991615837
+            },
+            {
+              "joint_id": "J:362735eeec6ee5a3d46f",
+              "weight": 0.01786798089475512
+            },
+            {
+              "joint_id": "J:e5441b559f1c34b41aa2",
+              "weight": 0.006573262294844266
+            },
+            {
+              "joint_id": "J:73295dbdbb50d303e597",
+              "weight": 1.0978466008156975e-07
+            },
+            {
+              "joint_id": "J:ee24577789f0235b8186",
+              "weight": 4.038751994284351e-08
+            }
+          ],
+          "support_binding": [
+            [
+              "SFS:3d9ff0b30d50454364a0",
+              1.0
+            ]
+          ],
+          "vertex_id": "CMV:5bdd40d11eecb7cc8aa16161"
+        },
+        {
+          "original_top_weights": [
+            {
+              "joint_id": "J:e5441b559f1c34b41aa2",
+              "weight": 0.6652404305239623
+            },
+            {
+              "joint_id": "J:8455bf4c0a38867b7d9b",
+              "weight": 0.24472829862664164
+            },
+            {
+              "joint_id": "J:362735eeec6ee5a3d46f",
+              "weight": 0.09003049392101937
+            },
+            {
+              "joint_id": "J:ee24577789f0235b8186",
+              "weight": 5.531665278989856e-07
+            },
+            {
+              "joint_id": "J:73295dbdbb50d303e597",
+              "weight": 2.034985900471434e-07
+            },
+            {
+              "joint_id": "J:cf05f36e919ff69a9d8e",
+              "weight": 1.0131598121780463e-08
+            }
+          ],
+          "support_binding": [
+            [
+              "SFS:e6a9b2e66c039090dea2",
+              1.0
+            ]
+          ],
+          "vertex_id": "CMV:78c754c02e9c191c3ef8977f"
+        }
+      ],
+      "view_index": 2
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "contribution_growth_samples": 104097,
+      "dynamic_contribution_samples": 104097,
+      "frame_index": 0,
+      "full_minus_top_face_changed_pixels": 26032,
+      "homogenized_face_alpha_pixels": 20,
+      "homogenized_skin_geometry": {
+        "area_ratio_3d": 0.26236187847554343,
+        "max_edge_stretch": 0.6793151231820596,
+        "max_vertex_displacement": 1.1689110671835459
+      },
+      "homogenized_top_weights": [
+        {
+          "joint_id": "J:e5441b559f1c34b41aa2",
+          "weight": 0.44427703491999176
+        },
+        {
+          "joint_id": "J:8455bf4c0a38867b7d9b",
+          "weight": 0.285012899360266
+        },
+        {
+          "joint_id": "J:1008208d141ae248de43",
+          "weight": 0.21278524579045974
+        },
+        {
+          "joint_id": "J:362735eeec6ee5a3d46f",
+          "weight": 0.0563896500694777
+        },
+        {
+          "joint_id": "J:ee24577789f0235b8186",
+          "weight": 0.0012217352227057903
+        },
+        {
+          "joint_id": "J:73295dbdbb50d303e597",
+          "weight": 0.00031326965717847567
+        }
+      ],
+      "label": "slash_v0_f0",
+      "offender_face_index": 3573,
+      "offender_vertex_ids": [
+        "CMV:70272d8f5b931e373c3d304a",
+        "CMV:cc4e835f79e0798cc86b9391",
+        "CMV:10b522e0dbb8a7cae30b2a35"
+      ],
+      "original_face_alpha_pixels": 32739,
+      "original_geometry": {
+        "area_ratio_3d": 829.6997656680883,
+        "max_edge_stretch": 41.34663134441607,
+        "max_vertex_displacement": 1.945860306691416
+      },
+      "panel_path": "canonical/knight_smear_topface_skin_counterfactual_v1/slash_v0_f0_topface_skin_counterfactual.png",
+      "policy_violating": false,
+      "rest_aspect": 1.9836060069894181,
+      "rest_contribution_samples": 0,
+      "rest_min_angle_deg": 44.96138397218184,
+      "skin_weight_pair_l1_max": 1.92251300311386,
+      "time_seconds": 0.0,
+      "vertex_details": [
+        {
+          "original_top_weights": [
+            {
+              "joint_id": "J:1008208d141ae248de43",
+              "weight": 0.616387910814097
+            },
+            {
+              "joint_id": "J:e5441b559f1c34b41aa2",
+              "weight": 0.3738581879431387
+            },
+            {
+              "joint_id": "J:362735eeec6ee5a3d46f",
+              "weight": 0.006847451520127789
+            },
+            {
+              "joint_id": "J:ee24577789f0235b8186",
+              "weight": 0.00251903667232025
+            },
+            {
+              "joint_id": "J:8455bf4c0a38867b7d9b",
+              "weight": 0.000340914532291317
+            },
+            {
+              "joint_id": "J:73295dbdbb50d303e597",
+              "weight": 4.613776817340174e-05
+            }
+          ],
+          "support_binding": [
+            [
+              "SFS:0cb3cbce2f4ee7a9ccb9",
+              1.0
+            ]
+          ],
+          "vertex_id": "CMV:70272d8f5b931e373c3d304a"
+        },
+        {
+          "original_top_weights": [
+            {
+              "joint_id": "J:e5441b559f1c34b41aa2",
+              "weight": 0.9433614097916706
+            },
+            {
+              "joint_id": "J:362735eeec6ee5a3d46f",
+              "weight": 0.04696719837728063
+            },
+            {
+              "joint_id": "J:1008208d141ae248de43",
+              "weight": 0.006356319532115963
+            },
+            {
+              "joint_id": "J:8455bf4c0a38867b7d9b",
+              "weight": 0.0023383592379040133
+            },
+            {
+              "joint_id": "J:ee24577789f0235b8186",
+              "weight": 0.0008602342681972579
+            },
+            {
+              "joint_id": "J:73295dbdbb50d303e597",
+              "weight": 0.00011642004485971187
+            }
+          ],
+          "support_binding": [
+            [
+              "SFS:22e6664e64a10601e170",
+              1.0
+            ]
+          ],
+          "vertex_id": "CMV:cc4e835f79e0798cc86b9391"
+        },
+        {
+          "original_top_weights": [
+            {
+              "joint_id": "J:8455bf4c0a38867b7d9b",
+              "weight": 0.852359424310603
+            },
+            {
+              "joint_id": "J:362735eeec6ee5a3d46f",
+              "weight": 0.11535430031102471
+            },
+            {
+              "joint_id": "J:e5441b559f1c34b41aa2",
+              "weight": 0.015611507025166286
+            },
+            {
+              "joint_id": "J:1008208d141ae248de43",
+              "weight": 0.015611507025166286
+            },
+            {
+              "joint_id": "J:73295dbdbb50d303e597",
+              "weight": 0.0007772511585023136
+            },
+            {
+              "joint_id": "J:ee24577789f0235b8186",
+              "weight": 0.00028593472759986377
+            }
+          ],
+          "support_binding": [
+            [
+              "SFS:6bcc17427c541dfb9872",
+              1.0
+            ]
+          ],
+          "vertex_id": "CMV:10b522e0dbb8a7cae30b2a35"
+        }
+      ],
+      "view_index": 0
+    }
+  ],
+  "product_authority_claimed": false,
+  "repair_attempted": false,
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "schema": "RealSaS.KnightSmearTopFaceSkinCounterfactual.v1",
+  "status": "DIAGNOSTIC_ONLY"
+}

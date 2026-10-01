@@ -1,0 +1,4936 @@
+{
+  "correlations": {
+    "face_bank_l1_vs_source_artist_l1": 0.9999999999999997,
+    "face_bank_l1_vs_source_distance": 0.09039735970723121
+  },
+  "face_groups": {
+    "ALL": {
+      "bank_l1_gt_1": 1372,
+      "bank_target_weight_l1_max": 2.0000000596046448,
+      "bank_target_weight_l1_p95": 1.7765144065022405,
+      "count": 24958,
+      "predicted_stage32_weight_l1_p95": 1.1801075514949724,
+      "source_artist_41d_weight_l1_max": 2.000000127603005,
+      "source_artist_41d_weight_l1_p95": 1.77651440622499,
+      "source_distance_max": 0.8943817019462585,
+      "source_distance_p95": 0.5071485638618469,
+      "source_l1_gt_1": 1372
+    },
+    "BANK_TARGET_L1_GT_1": {
+      "bank_l1_gt_1": 1372,
+      "bank_target_weight_l1_max": 2.0000000596046448,
+      "bank_target_weight_l1_p95": 2.0000000298023224,
+      "count": 1372,
+      "predicted_stage32_weight_l1_p95": 1.9997008963325897,
+      "source_artist_41d_weight_l1_max": 2.000000127603005,
+      "source_artist_41d_weight_l1_p95": 2.0000000611204465,
+      "source_distance_max": 0.8943817019462585,
+      "source_distance_p95": 0.7266173958778381,
+      "source_l1_gt_1": 1372
+    },
+    "BANK_TARGET_L1_GT_1_AND_DISTANCE_GT_0_05": {
+      "bank_l1_gt_1": 1055,
+      "bank_target_weight_l1_max": 2.0000000596046448,
+      "bank_target_weight_l1_p95": 2.0000000298023224,
+      "count": 1055,
+      "predicted_stage32_weight_l1_p95": 1.9996033566542015,
+      "source_artist_41d_weight_l1_max": 2.000000127603005,
+      "source_artist_41d_weight_l1_p95": 2.0000000596046448,
+      "source_distance_max": 0.8943817019462585,
+      "source_distance_p95": 0.7661166787147522,
+      "source_l1_gt_1": 1055
+    },
+    "BANK_TARGET_L1_GT_1_AND_DISTANCE_LE_0_01": {
+      "bank_l1_gt_1": 11,
+      "bank_target_weight_l1_max": 2.000000037252903,
+      "bank_target_weight_l1_p95": 2.0000000335276127,
+      "count": 11,
+      "predicted_stage32_weight_l1_p95": 1.9999863390043888,
+      "source_artist_41d_weight_l1_max": 2.000000046618341,
+      "source_artist_41d_weight_l1_p95": 2.000000038210332,
+      "source_distance_max": 0.009948892518877983,
+      "source_distance_p95": 0.009895935654640198,
+      "source_l1_gt_1": 11
+    },
+    "BANK_TARGET_L1_GT_1_AND_STRICT_LOCAL": {
+      "bank_l1_gt_1": 0,
+      "bank_target_weight_l1_max": null,
+      "bank_target_weight_l1_p95": null,
+      "count": 0,
+      "predicted_stage32_weight_l1_p95": null,
+      "source_artist_41d_weight_l1_max": null,
+      "source_artist_41d_weight_l1_p95": null,
+      "source_distance_max": null,
+      "source_distance_p95": null,
+      "source_l1_gt_1": 0
+    },
+    "NONINCIDENT": {
+      "bank_l1_gt_1": 1372,
+      "bank_target_weight_l1_max": 2.0000000596046448,
+      "bank_target_weight_l1_p95": 2.000000022351742,
+      "count": 4338,
+      "predicted_stage32_weight_l1_p95": 1.995359260858654,
+      "source_artist_41d_weight_l1_max": 2.000000127603005,
+      "source_artist_41d_weight_l1_p95": 2.000000038153344,
+      "source_distance_max": 0.8943817019462585,
+      "source_distance_p95": 0.41499799489974976,
+      "source_l1_gt_1": 1372
+    },
+    "SHARE_VERTEX_ONLY_BUT_NOT_NONINCIDENT": {
+      "bank_l1_gt_1": 0,
+      "bank_target_weight_l1_max": 0.8675930220633745,
+      "bank_target_weight_l1_p95": 0.2777102602645755,
+      "count": 4895,
+      "predicted_stage32_weight_l1_p95": 0.3311201813874677,
+      "source_artist_41d_weight_l1_max": 0.8675930507327505,
+      "source_artist_41d_weight_l1_p95": 0.277710266531446,
+      "source_distance_max": 0.7859570980072021,
+      "source_distance_p95": 0.14641097337007525,
+      "source_l1_gt_1": 0
+    },
+    "STRICT_SOURCE_LOCAL_SAME_OR_SHARE_EDGE": {
+      "bank_l1_gt_1": 0,
+      "bank_target_weight_l1_max": 0.7301381975412369,
+      "bank_target_weight_l1_p95": 0.03481346368789673,
+      "count": 15725,
+      "predicted_stage32_weight_l1_p95": 0.10529552790776764,
+      "source_artist_41d_weight_l1_max": 0.7301382025907754,
+      "source_artist_41d_weight_l1_p95": 0.03481345252471292,
+      "source_distance_max": 0.8943817019462585,
+      "source_distance_p95": 0.5733319640159606,
+      "source_l1_gt_1": 0
+    }
+  },
+  "measured_findings": {
+    "artist_source_projection_has_large_discontinuities_same_locations": true,
+    "bank_has_large_face_discontinuities": true,
+    "stage32_reproduces_bank_pointwise": false,
+    "strict_local_artist_source_discontinuity_count": 0,
+    "strict_local_bank_discontinuity_count": 0
+  },
+  "provenance_geometry_check": {
+    "candidate_to_reconstructed_source_distance_p50": 0.0384936165855374,
+    "max": 0.8943817049480246,
+    "p95": 0.4833162681577689,
+    "p99": 0.7271944548490588,
+    "recorded_vs_direct_abs_error_max": 8.792281506325716e-08,
+    "recorded_vs_direct_abs_error_p95": 3.586720225753904e-08,
+    "teacher_valid_count": 10611
+  },
+  "schema": "RealSaS.KnightTeacherProjectionIntegrityAudit.v1",
+  "stage32_vs_teacher_bank": {
+    "l1_max": 1.9999999999996914,
+    "l1_mean": 0.03402768056869417,
+    "l1_p95": 0.0635299919518639,
+    "l1_p99": 1.6505418170655386,
+    "rows_gt_0_01": 2287,
+    "rows_gt_0_1": 415,
+    "surface_row_count": 12090
+  },
+  "status": "MEASURED__NO_REPAIR",
+  "target_column_alignment": {
+    "mapping": [
+      {
+        "bank_col": 0,
+        "parent_bank_col": -1,
+        "position_error": 0.05204788080064558,
+        "source_index_provenance_only": 0,
+        "stage28_joint_id": "J:54e751020afdb32b5ec5"
+      },
+      {
+        "bank_col": 1,
+        "parent_bank_col": 0,
+        "position_error": 0.029605117104946697,
+        "source_index_provenance_only": 1,
+        "stage28_joint_id": "J:237d229c33bc9eb9bf91"
+      },
+      {
+        "bank_col": 2,
+        "parent_bank_col": 1,
+        "position_error": 0.022522360380906374,
+        "source_index_provenance_only": 19,
+        "stage28_joint_id": "J:063ee183f601e19a8ca9"
+      },
+      {
+        "bank_col": 3,
+        "parent_bank_col": 2,
+        "position_error": 0.010878032593160213,
+        "source_index_provenance_only": 20,
+        "stage28_joint_id": "J:73295dbdbb50d303e597"
+      },
+      {
+        "bank_col": 4,
+        "parent_bank_col": 3,
+        "position_error": 0.04236751126463432,
+        "source_index_provenance_only": 21,
+        "stage28_joint_id": "J:cf05f36e919ff69a9d8e"
+      },
+      {
+        "bank_col": 5,
+        "parent_bank_col": 4,
+        "position_error": 0.04798373998298569,
+        "source_index_provenance_only": 22,
+        "stage28_joint_id": "J:362735eeec6ee5a3d46f"
+      },
+      {
+        "bank_col": 6,
+        "parent_bank_col": 5,
+        "position_error": 0.029104273787935044,
+        "source_index_provenance_only": -1,
+        "stage28_joint_id": "J:7e87e97fc9fe89cbd718"
+      },
+      {
+        "bank_col": 7,
+        "parent_bank_col": 1,
+        "position_error": 0.024494391134410855,
+        "source_index_provenance_only": 2,
+        "stage28_joint_id": "J:b9e5c0d23f688f672060"
+      },
+      {
+        "bank_col": 8,
+        "parent_bank_col": 7,
+        "position_error": 0.02520098631997827,
+        "source_index_provenance_only": 3,
+        "stage28_joint_id": "J:2ff965d6dbe4efc2d5d4"
+      },
+      {
+        "bank_col": 9,
+        "parent_bank_col": 8,
+        "position_error": 0.026482739493556978,
+        "source_index_provenance_only": 9,
+        "stage28_joint_id": "J:a80d2c086e86a4cc08b5"
+      },
+      {
+        "bank_col": 10,
+        "parent_bank_col": 9,
+        "position_error": 0.025535339115983314,
+        "source_index_provenance_only": 10,
+        "stage28_joint_id": "J:7cf59fbe52c53280546a"
+      },
+      {
+        "bank_col": 11,
+        "parent_bank_col": 10,
+        "position_error": 0.02730887990001874,
+        "source_index_provenance_only": 11,
+        "stage28_joint_id": "J:75a17a4287b28cd7f57f"
+      },
+      {
+        "bank_col": 12,
+        "parent_bank_col": 11,
+        "position_error": 0.06348993057552103,
+        "source_index_provenance_only": 12,
+        "stage28_joint_id": "J:33c7075f501c9af4cd0d"
+      },
+      {
+        "bank_col": 13,
+        "parent_bank_col": 12,
+        "position_error": 0.04906727128773665,
+        "source_index_provenance_only": 13,
+        "stage28_joint_id": "J:8455bf4c0a38867b7d9b"
+      },
+      {
+        "bank_col": 14,
+        "parent_bank_col": 13,
+        "position_error": 0.057939816312708836,
+        "source_index_provenance_only": -1,
+        "stage28_joint_id": "J:136e20712bbd1481596e"
+      },
+      {
+        "bank_col": 15,
+        "parent_bank_col": 8,
+        "position_error": 0.04492300708031602,
+        "source_index_provenance_only": 14,
+        "stage28_joint_id": "J:1008208d141ae248de43"
+      },
+      {
+        "bank_col": 16,
+        "parent_bank_col": 15,
+        "position_error": 0.05741384387510739,
+        "source_index_provenance_only": -1,
+        "stage28_joint_id": "J:eafe286e7d84499e5257"
+      },
+      {
+        "bank_col": 17,
+        "parent_bank_col": 8,
+        "position_error": 0.035191677439537945,
+        "source_index_provenance_only": 4,
+        "stage28_joint_id": "J:42d181ebf3515959283a"
+      },
+      {
+        "bank_col": 18,
+        "parent_bank_col": 17,
+        "position_error": 0.021350881108461554,
+        "source_index_provenance_only": 5,
+        "stage28_joint_id": "J:932628adf7f0d5936426"
+      },
+      {
+        "bank_col": 19,
+        "parent_bank_col": 18,
+        "position_error": 0.035861352400021966,
+        "source_index_provenance_only": 6,
+        "stage28_joint_id": "J:4c9f9eace712daf31538"
+      },
+      {
+        "bank_col": 20,
+        "parent_bank_col": 19,
+        "position_error": 0.024024790479564868,
+        "source_index_provenance_only": 7,
+        "stage28_joint_id": "J:5428a88dad4d4d8d5c4d"
+      },
+      {
+        "bank_col": 21,
+        "parent_bank_col": 20,
+        "position_error": 0.033439293414376195,
+        "source_index_provenance_only": 8,
+        "stage28_joint_id": "J:e5441b559f1c34b41aa2"
+      },
+      {
+        "bank_col": 22,
+        "parent_bank_col": 21,
+        "position_error": 0.04197995769523707,
+        "source_index_provenance_only": -1,
+        "stage28_joint_id": "J:c9cdb266f7c167a620a9"
+      },
+      {
+        "bank_col": 23,
+        "parent_bank_col": 1,
+        "position_error": 0.0469602788211729,
+        "source_index_provenance_only": 15,
+        "stage28_joint_id": "J:f50f39d42ef3820824ef"
+      },
+      {
+        "bank_col": 24,
+        "parent_bank_col": 23,
+        "position_error": 0.02944338716703005,
+        "source_index_provenance_only": 16,
+        "stage28_joint_id": "J:ee24577789f0235b8186"
+      },
+      {
+        "bank_col": 25,
+        "parent_bank_col": 24,
+        "position_error": 0.04270384026707803,
+        "source_index_provenance_only": 17,
+        "stage28_joint_id": "J:ab16ff2ffc7408c862ae"
+      },
+      {
+        "bank_col": 26,
+        "parent_bank_col": 25,
+        "position_error": 0.0536685093183658,
+        "source_index_provenance_only": 18,
+        "stage28_joint_id": "J:f5cf9181e27d0f791f7d"
+      },
+      {
+        "bank_col": 27,
+        "parent_bank_col": 26,
+        "position_error": 0.06246447700957076,
+        "source_index_provenance_only": -1,
+        "stage28_joint_id": "J:7d9e31e2d0bd48f88ecb"
+      }
+    ],
+    "max_position_error": 0.06348993057552103,
+    "method": "Hungarian minimum world-position distance; measured, not assumed",
+    "p95_position_error": 0.06088084576566908
+  },
+  "top_bank_discontinuity_faces": [
+    {
+      "bank_target_weight_l1": 2.0000000596046448,
+      "face_index": 11036,
+      "max_source_surface_distance": 0.09835666418075562,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999952726264,
+      "source_triangle_indices": [
+        639,
+        639,
+        5192
+      ],
+      "stage32_pred_weight_l1": 1.842026391533711,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:2ce4f7ddcb2f90188cfd",
+        "SFS:568e0de6b5284a2fdac2",
+        "SFS:cf604f49100176557e3c"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000596046448,
+      "face_index": 6478,
+      "max_source_surface_distance": 0.05924469977617264,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000176568036,
+      "source_triangle_indices": [
+        2222,
+        187,
+        2213
+      ],
+      "stage32_pred_weight_l1": 1.9804108913692053,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:17c1699c6da4439825ce",
+        "SFS:353181a607cdf8d70645",
+        "SFS:d70e27b47c62a1838f59"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000596046448,
+      "face_index": 1286,
+      "max_source_surface_distance": 0.09009544551372528,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000560107494,
+      "source_triangle_indices": [
+        91,
+        5612,
+        91
+      ],
+      "stage32_pred_weight_l1": 1.8481488396017316,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:04560a29af958cba4982",
+        "SFS:2af9790e2e0e6027d640",
+        "SFS:4e4f40b7b7fb594e1efa"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000596046448,
+      "face_index": 1287,
+      "max_source_surface_distance": 0.09009544551372528,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999973915532,
+      "source_triangle_indices": [
+        91,
+        5612,
+        5612
+      ],
+      "stage32_pred_weight_l1": 1.8093988703576622,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:04560a29af958cba4982",
+        "SFS:2af9790e2e0e6027d640",
+        "SFS:cb2f5cdfbc3307e236ef"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000596046448,
+      "face_index": 17773,
+      "max_source_surface_distance": 0.09835666418075562,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_EDGE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999960459094,
+      "source_triangle_indices": [
+        639,
+        5192,
+        5133
+      ],
+      "stage32_pred_weight_l1": 1.9913099332989983,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:568e0de6b5284a2fdac2",
+        "SFS:cf604f49100176557e3c",
+        "SFS:e4221f20df059fceae9d"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000596046448,
+      "face_index": 2515,
+      "max_source_surface_distance": 0.09339501708745956,
+      "pair_categories": [
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000183146374,
+      "source_triangle_indices": [
+        5135,
+        5129,
+        543
+      ],
+      "stage32_pred_weight_l1": 1.9729660162814509,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:08c8659048962a9bd218",
+        "SFS:6255d697ebfd7fadd4f6",
+        "SFS:9bf54ed7acb950f4a089"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000596046448,
+      "face_index": 1290,
+      "max_source_surface_distance": 0.05622229352593422,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_EDGE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000306480192,
+      "source_triangle_indices": [
+        91,
+        5611,
+        5574
+      ],
+      "stage32_pred_weight_l1": 1.8686023700861272,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:04560a29af958cba4982",
+        "SFS:529df0c006d1fe778671",
+        "SFS:a3028f2136f44bd47fb0"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000596046448,
+      "face_index": 1291,
+      "max_source_surface_distance": 0.06857655942440033,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_EDGE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.99999998666872,
+      "source_triangle_indices": [
+        91,
+        5611,
+        5612
+      ],
+      "stage32_pred_weight_l1": 1.8686023700861272,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:04560a29af958cba4982",
+        "SFS:529df0c006d1fe778671",
+        "SFS:cb2f5cdfbc3307e236ef"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000596046448,
+      "face_index": 6477,
+      "max_source_surface_distance": 0.023829860612750053,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000033583402,
+      "source_triangle_indices": [
+        2222,
+        187,
+        187
+      ],
+      "stage32_pred_weight_l1": 1.9804108913692053,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:17c1699c6da4439825ce",
+        "SFS:353181a607cdf8d70645",
+        "SFS:9b4edde3b14c991e3554"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000596046448,
+      "face_index": 19084,
+      "max_source_surface_distance": 0.10127049684524536,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_EDGE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000575770374,
+      "source_triangle_indices": [
+        5129,
+        498,
+        543
+      ],
+      "stage32_pred_weight_l1": 1.9729660162814509,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:6255d697ebfd7fadd4f6",
+        "SFS:731fac523b23288b5925",
+        "SFS:9bf54ed7acb950f4a089"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000577419996,
+      "face_index": 16845,
+      "max_source_surface_distance": 0.1882975846529007,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999858137363,
+      "source_triangle_indices": [
+        718,
+        5004,
+        5133
+      ],
+      "stage32_pred_weight_l1": 1.9836475007529808,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:4f49322252d9a7dc866c",
+        "SFS:6035061fe5b5a5321d74",
+        "SFS:7a34e6d2bb7384f9e799"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000577419996,
+      "face_index": 16848,
+      "max_source_surface_distance": 0.21317587792873383,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999485608333,
+      "source_triangle_indices": [
+        718,
+        5004,
+        718
+      ],
+      "stage32_pred_weight_l1": 1.9904761685923846,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:4f49322252d9a7dc866c",
+        "SFS:9c64c9d0bd98bd68d45d",
+        "SFS:f14bed3676ee6d536721"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000577419996,
+      "face_index": 16846,
+      "max_source_surface_distance": 0.1956101655960083,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999485608333,
+      "source_triangle_indices": [
+        718,
+        5004,
+        5004
+      ],
+      "stage32_pred_weight_l1": 1.9836475007529808,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:4f49322252d9a7dc866c",
+        "SFS:6035061fe5b5a5321d74",
+        "SFS:9c64c9d0bd98bd68d45d"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000052154064,
+      "face_index": 18889,
+      "max_source_surface_distance": 0.09582660347223282,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000001515801,
+      "source_triangle_indices": [
+        3104,
+        538,
+        538
+      ],
+      "stage32_pred_weight_l1": 1.973955695354673,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:601e7c02b02045108735",
+        "SFS:9d7fed286c1fa027b2af",
+        "SFS:bc4cd4bc8d35c5113084"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000052154064,
+      "face_index": 9765,
+      "max_source_surface_distance": 0.0853918045759201,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000611204465,
+      "source_triangle_indices": [
+        3104,
+        3104,
+        538
+      ],
+      "stage32_pred_weight_l1": 1.9836724613382952,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:2715f3618c8b98837a4d",
+        "SFS:601e7c02b02045108735",
+        "SFS:9d7fed286c1fa027b2af"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000052154064,
+      "face_index": 12531,
+      "max_source_surface_distance": 0.029149148613214493,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999608662622,
+      "source_triangle_indices": [
+        5474,
+        136,
+        5459
+      ],
+      "stage32_pred_weight_l1": 1.9132256405197074,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:34fd547c5a1c5269ec26",
+        "SFS:35926bc25225db3e92d3",
+        "SFS:a273c35601d04e9418cc"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000052154064,
+      "face_index": 12691,
+      "max_source_surface_distance": 0.029149148613214493,
+      "pair_categories": [
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999251735456,
+      "source_triangle_indices": [
+        136,
+        115,
+        5459
+      ],
+      "stage32_pred_weight_l1": 1.8973192932425391,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:35926bc25225db3e92d3",
+        "SFS:607ea9412a97e8520b3d",
+        "SFS:a273c35601d04e9418cc"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000052154064,
+      "face_index": 20372,
+      "max_source_surface_distance": 0.016096588224172592,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999782136795,
+      "source_triangle_indices": [
+        2216,
+        2231,
+        180
+      ],
+      "stage32_pred_weight_l1": 1.943383091535016,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:6e639711337bd2dc5974",
+        "SFS:7777fb41644092fcef6f",
+        "SFS:a7646b6c3a80f076e87c"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000052154064,
+      "face_index": 7553,
+      "max_source_surface_distance": 0.0414682999253273,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000042841985,
+      "source_triangle_indices": [
+        91,
+        91,
+        5574
+      ],
+      "stage32_pred_weight_l1": 1.9674525683209179,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:1cabfd22aa21c3badaaa",
+        "SFS:582b6d844f450f704477",
+        "SFS:a3028f2136f44bd47fb0"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000052154064,
+      "face_index": 20375,
+      "max_source_surface_distance": 0.016096588224172592,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.999999979133834,
+      "source_triangle_indices": [
+        2216,
+        2237,
+        180
+      ],
+      "stage32_pred_weight_l1": 1.943383091535016,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:6e639711337bd2dc5974",
+        "SFS:98b9d028e2fff3964f1d",
+        "SFS:a7646b6c3a80f076e87c"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000052154064,
+      "face_index": 1292,
+      "max_source_surface_distance": 0.05622229352593422,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000306480192,
+      "source_triangle_indices": [
+        91,
+        91,
+        5574
+      ],
+      "stage32_pred_weight_l1": 1.9674525683209179,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:04560a29af958cba4982",
+        "SFS:582b6d844f450f704477",
+        "SFS:a3028f2136f44bd47fb0"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000052154064,
+      "face_index": 17954,
+      "max_source_surface_distance": 0.0404839813709259,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000474511284,
+      "source_triangle_indices": [
+        91,
+        5574,
+        116
+      ],
+      "stage32_pred_weight_l1": 1.9674525683209179,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:582b6d844f450f704477",
+        "SFS:a3028f2136f44bd47fb0",
+        "SFS:b338f0249a60fa7432eb"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000050291419,
+      "face_index": 21327,
+      "max_source_surface_distance": 0.059017911553382874,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_EDGE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999292043076,
+      "source_triangle_indices": [
+        2021,
+        5431,
+        5422
+      ],
+      "stage32_pred_weight_l1": 1.9959467694358959,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:79dac1c18c04da712bba",
+        "SFS:8be848f24db9e76fa4ce",
+        "SFS:c00885a6e804bc71d148"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000050291419,
+      "face_index": 12239,
+      "max_source_surface_distance": 0.0474526584148407,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 1.999999951315721,
+      "source_triangle_indices": [
+        5422,
+        2021,
+        5422
+      ],
+      "stage32_pred_weight_l1": 1.9959467694358959,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:3399480f5b94b1456c55",
+        "SFS:79dac1c18c04da712bba",
+        "SFS:c00885a6e804bc71d148"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000048428774,
+      "face_index": 21326,
+      "max_source_surface_distance": 0.059017911553382874,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999660926693,
+      "source_triangle_indices": [
+        2021,
+        5431,
+        2032
+      ],
+      "stage32_pred_weight_l1": 1.9728075716622169,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:79dac1c18c04da712bba",
+        "SFS:8be848f24db9e76fa4ce",
+        "SFS:b5a3bfbd04a681e62ee0"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000048428774,
+      "face_index": 22478,
+      "max_source_surface_distance": 0.06964503973722458,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999798964385,
+      "source_triangle_indices": [
+        5431,
+        2032,
+        5681
+      ],
+      "stage32_pred_weight_l1": 1.8981968551263286,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:8be848f24db9e76fa4ce",
+        "SFS:b5a3bfbd04a681e62ee0",
+        "SFS:dcc3c683ff4fd97054c0"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000048428774,
+      "face_index": 12530,
+      "max_source_surface_distance": 0.029149148613214493,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999973161178,
+      "source_triangle_indices": [
+        5474,
+        136,
+        225
+      ],
+      "stage32_pred_weight_l1": 1.9132256405197074,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:34fd547c5a1c5269ec26",
+        "SFS:35926bc25225db3e92d3",
+        "SFS:695d455bedf768f0ece8"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000447034836,
+      "face_index": 20649,
+      "max_source_surface_distance": 0.10865846276283264,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.00000006763885,
+      "source_triangle_indices": [
+        323,
+        2211,
+        2211
+      ],
+      "stage32_pred_weight_l1": 1.9161749087745832,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:719538dbc9045c02d123",
+        "SFS:83d2a1c6d860b994684c",
+        "SFS:f973604c3ea82382b464"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000447034836,
+      "face_index": 12924,
+      "max_source_surface_distance": 0.09582660347223282,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999894470402,
+      "source_triangle_indices": [
+        539,
+        3104,
+        538
+      ],
+      "stage32_pred_weight_l1": 1.9725620373039887,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:36f20c05aac78f38eeec",
+        "SFS:601e7c02b02045108735",
+        "SFS:bc4cd4bc8d35c5113084"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000447034836,
+      "face_index": 19186,
+      "max_source_surface_distance": 0.14671044051647186,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000584801505,
+      "source_triangle_indices": [
+        2173,
+        2172,
+        323
+      ],
+      "stage32_pred_weight_l1": 1.6305961391011692,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:633c04ec915f59dd2c70",
+        "SFS:dec8a4139253777da340",
+        "SFS:e8e7f615ae71ba056177"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000447034836,
+      "face_index": 11050,
+      "max_source_surface_distance": 0.10647952556610107,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000318366773,
+      "source_triangle_indices": [
+        2205,
+        2173,
+        323
+      ],
+      "stage32_pred_weight_l1": 1.4321600942716353,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:2cf2929fc6c37488c8a1",
+        "SFS:633c04ec915f59dd2c70",
+        "SFS:e8e7f615ae71ba056177"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000447034836,
+      "face_index": 20648,
+      "max_source_surface_distance": 0.10865846276283264,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY"
+      ],
+      "source_artist_41d_weight_l1": 2.00000006763885,
+      "source_triangle_indices": [
+        323,
+        2211,
+        344
+      ],
+      "stage32_pred_weight_l1": 1.7486553378046572,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:719538dbc9045c02d123",
+        "SFS:83d2a1c6d860b994684c",
+        "SFS:e0d37986250c780c05bf"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000447034836,
+      "face_index": 3408,
+      "max_source_surface_distance": 0.09215769171714783,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000703223684,
+      "source_triangle_indices": [
+        2211,
+        2211,
+        344
+      ],
+      "stage32_pred_weight_l1": 1.91424400963131,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:0c1e848e8797538addb7",
+        "SFS:83d2a1c6d860b994684c",
+        "SFS:e0d37986250c780c05bf"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000447034836,
+      "face_index": 12670,
+      "max_source_surface_distance": 0.12986187636852264,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY"
+      ],
+      "source_artist_41d_weight_l1": 2.000000074505806,
+      "source_triangle_indices": [
+        2172,
+        323,
+        2211
+      ],
+      "stage32_pred_weight_l1": 1.9161749087745832,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:357ced0515ff7993e737",
+        "SFS:719538dbc9045c02d123",
+        "SFS:f973604c3ea82382b464"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000409781933,
+      "face_index": 765,
+      "max_source_surface_distance": 0.03751279041171074,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_EDGE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000129050863,
+      "source_triangle_indices": [
+        2059,
+        348,
+        349
+      ],
+      "stage32_pred_weight_l1": 1.8952433061030023,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:02d2fffe5d983e599af1",
+        "SFS:02e5bb297323dcc8733f",
+        "SFS:52a5fc2ce361e951e9ba"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000409781933,
+      "face_index": 766,
+      "max_source_surface_distance": 0.021014243364334106,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000153429007,
+      "source_triangle_indices": [
+        2059,
+        348,
+        2058
+      ],
+      "stage32_pred_weight_l1": 1.8952433061030023,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:02d2fffe5d983e599af1",
+        "SFS:02e5bb297323dcc8733f",
+        "SFS:a37f50ac97b9a58108ae"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000409781933,
+      "face_index": 23198,
+      "max_source_surface_distance": 0.016096588224172592,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 1.999999979133834,
+      "source_triangle_indices": [
+        2237,
+        180,
+        2075
+      ],
+      "stage32_pred_weight_l1": 1.9427208002899838,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:98b9d028e2fff3964f1d",
+        "SFS:a7646b6c3a80f076e87c",
+        "SFS:f2ae6efccafcacf1b774"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000409781933,
+      "face_index": 21109,
+      "max_source_surface_distance": 0.016096588224172592,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.999999979133834,
+      "source_triangle_indices": [
+        2231,
+        2237,
+        180
+      ],
+      "stage32_pred_weight_l1": 1.9427208002899838,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:7777fb41644092fcef6f",
+        "SFS:98b9d028e2fff3964f1d",
+        "SFS:a7646b6c3a80f076e87c"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000409781933,
+      "face_index": 21307,
+      "max_source_surface_distance": 0.09860637784004211,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000842130516,
+      "source_triangle_indices": [
+        5567,
+        5597,
+        2299
+      ],
+      "stage32_pred_weight_l1": 1.7424504468849589,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:79a6b3cc0a63c5a32fe1",
+        "SFS:7f1cdbdd2ed477a52ebd",
+        "SFS:e67ccd7ca4336646725b"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000409781933,
+      "face_index": 18912,
+      "max_source_surface_distance": 0.09860637784004211,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000842130516,
+      "source_triangle_indices": [
+        2278,
+        5597,
+        2299
+      ],
+      "stage32_pred_weight_l1": 1.7424504468849589,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:606425cf1eb22fd21474",
+        "SFS:7f1cdbdd2ed477a52ebd",
+        "SFS:e67ccd7ca4336646725b"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000037252903,
+      "face_index": 2642,
+      "max_source_surface_distance": 0.004029774107038975,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_EDGE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000021446083,
+      "source_triangle_indices": [
+        2166,
+        212,
+        209
+      ],
+      "stage32_pred_weight_l1": 1.9701170056137292,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:094c29cc231ca8ace036",
+        "SFS:4e3332be3b8b49dcd47e",
+        "SFS:73b7bc2d4381fec8b431"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000037252903,
+      "face_index": 15233,
+      "max_source_surface_distance": 0.037154510617256165,
+      "pair_categories": [
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000152056057,
+      "source_triangle_indices": [
+        130,
+        215,
+        5545
+      ],
+      "stage32_pred_weight_l1": 1.4114305118129087,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:454d5cd6ed6446920a5c",
+        "SFS:82944489cca4ca795c08",
+        "SFS:f6aa1d9f415c140e78cc"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000037252903,
+      "face_index": 14961,
+      "max_source_surface_distance": 0.08637739717960358,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999845053724,
+      "source_triangle_indices": [
+        5288,
+        5377,
+        1977
+      ],
+      "stage32_pred_weight_l1": 1.9645993682025145,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:43769ac6b089cab869af",
+        "SFS:6724379756307465ab78",
+        "SFS:ba718cb6a33ee95846a1"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000037252903,
+      "face_index": 23465,
+      "max_source_surface_distance": 0.0853918045759201,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000592277454,
+      "source_triangle_indices": [
+        538,
+        538,
+        3104
+      ],
+      "stage32_pred_weight_l1": 1.9744745568372668,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:9d7fed286c1fa027b2af",
+        "SFS:9eb5331603c97c1bd1b5",
+        "SFS:a2ccc1fac5290ed5bb8a"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000037252903,
+      "face_index": 1705,
+      "max_source_surface_distance": 0.06017572060227394,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_EDGE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000151276307,
+      "source_triangle_indices": [
+        323,
+        2205,
+        2220
+      ],
+      "stage32_pred_weight_l1": 1.8674638097967493,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:05f19953480100218a64",
+        "SFS:673ff6a7de76dab45a99",
+        "SFS:f905ef8283a75c45e9ca"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000037252903,
+      "face_index": 6605,
+      "max_source_surface_distance": 0.06990707665681839,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000016773275,
+      "source_triangle_indices": [
+        1977,
+        5288,
+        5288
+      ],
+      "stage32_pred_weight_l1": 1.9997664491975156,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:186b0022ec9796ff2a3f",
+        "SFS:43769ac6b089cab869af",
+        "SFS:63203ca1f5e148862f63"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000037252903,
+      "face_index": 6606,
+      "max_source_surface_distance": 0.062076635658741,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999789978578,
+      "source_triangle_indices": [
+        1977,
+        5288,
+        5321
+      ],
+      "stage32_pred_weight_l1": 1.9997664491975156,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:186b0022ec9796ff2a3f",
+        "SFS:43769ac6b089cab869af",
+        "SFS:6c56811b0b4d10581a78"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000037252903,
+      "face_index": 1701,
+      "max_source_surface_distance": 0.06055622175335884,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000166338934,
+      "source_triangle_indices": [
+        323,
+        2205,
+        2205
+      ],
+      "stage32_pred_weight_l1": 1.830937039572181,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:05f19953480100218a64",
+        "SFS:2cf2929fc6c37488c8a1",
+        "SFS:673ff6a7de76dab45a99"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000037252903,
+      "face_index": 6607,
+      "max_source_surface_distance": 0.07790391892194748,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999789978578,
+      "source_triangle_indices": [
+        1977,
+        5288,
+        1977
+      ],
+      "stage32_pred_weight_l1": 1.9997664491975156,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:186b0022ec9796ff2a3f",
+        "SFS:43769ac6b089cab869af",
+        "SFS:ba718cb6a33ee95846a1"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000037252903,
+      "face_index": 2639,
+      "max_source_surface_distance": 0.0187801755964756,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999599313827,
+      "source_triangle_indices": [
+        2166,
+        2208,
+        209
+      ],
+      "stage32_pred_weight_l1": 1.9701170056137292,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:094c29cc231ca8ace036",
+        "SFS:2df8b26a8cb65a065d9e",
+        "SFS:73b7bc2d4381fec8b431"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000037252903,
+      "face_index": 9766,
+      "max_source_surface_distance": 0.0853918045759201,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000611204465,
+      "source_triangle_indices": [
+        3104,
+        538,
+        3104
+      ],
+      "stage32_pred_weight_l1": 1.9836724613382952,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:2715f3618c8b98837a4d",
+        "SFS:9d7fed286c1fa027b2af",
+        "SFS:a2ccc1fac5290ed5bb8a"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000037252903,
+      "face_index": 21909,
+      "max_source_surface_distance": 0.03276805952191353,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000152056057,
+      "source_triangle_indices": [
+        215,
+        226,
+        5545
+      ],
+      "stage32_pred_weight_l1": 1.4114305118129087,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:82944489cca4ca795c08",
+        "SFS:8c094038aac5c1db9a3f",
+        "SFS:f6aa1d9f415c140e78cc"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000335276127,
+      "face_index": 14168,
+      "max_source_surface_distance": 0.20318076014518738,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000335276127,
+      "source_triangle_indices": [
+        1033,
+        6369,
+        3524
+      ],
+      "stage32_pred_weight_l1": 1.999836660274896,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:3eb0b5a2022740efa398",
+        "SFS:6303d2138fedbe04a825",
+        "SFS:ae3d5fded5c94216aaaa"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000335276127,
+      "face_index": 14169,
+      "max_source_surface_distance": 0.20046259462833405,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000022351742,
+      "source_triangle_indices": [
+        1033,
+        1033,
+        3524
+      ],
+      "stage32_pred_weight_l1": 1.992643803931392,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:3eb0b5a2022740efa398",
+        "SFS:9434fcd0753e37031a57",
+        "SFS:ae3d5fded5c94216aaaa"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000335276127,
+      "face_index": 14164,
+      "max_source_surface_distance": 0.20318076014518738,
+      "pair_categories": [
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000043090816,
+      "source_triangle_indices": [
+        1033,
+        1034,
+        6369
+      ],
+      "stage32_pred_weight_l1": 1.999836660274896,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:3eb0b5a2022740efa398",
+        "SFS:41b0c012298fa829a454",
+        "SFS:6303d2138fedbe04a825"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000316649675,
+      "face_index": 12238,
+      "max_source_surface_distance": 0.0474526584148407,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000182870497,
+      "source_triangle_indices": [
+        5422,
+        2021,
+        1909
+      ],
+      "stage32_pred_weight_l1": 1.9951664184628695,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:3399480f5b94b1456c55",
+        "SFS:79dac1c18c04da712bba",
+        "SFS:98e950375490e93c5428"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 21058,
+      "max_source_surface_distance": 0.035214152187108994,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_EDGE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000021430674,
+      "source_triangle_indices": [
+        964,
+        8,
+        29
+      ],
+      "stage32_pred_weight_l1": 1.9939402000363404,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:76f73fb4745bcfde37a0",
+        "SFS:8c67911650f660732180",
+        "SFS:a975d9b6616e918ef07a"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 14910,
+      "max_source_surface_distance": 0.11825548857450485,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000033849034,
+      "source_triangle_indices": [
+        5129,
+        499,
+        42
+      ],
+      "stage32_pred_weight_l1": 1.952351464944234,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:4337bf028f967a415d07",
+        "SFS:8f97b3ce3c5a8e3eb47b",
+        "SFS:e75a70ca41503122a719"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 21059,
+      "max_source_surface_distance": 0.03953379765152931,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 2.000000021430674,
+      "source_triangle_indices": [
+        964,
+        8,
+        964
+      ],
+      "stage32_pred_weight_l1": 1.9939402000363404,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:76f73fb4745bcfde37a0",
+        "SFS:8c67911650f660732180",
+        "SFS:d40f0e51340d3043a876"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 20909,
+      "max_source_surface_distance": 0.10254576802253723,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999576024412,
+      "source_triangle_indices": [
+        4896,
+        4896,
+        6677
+      ],
+      "stage32_pred_weight_l1": 1.9954453012521165,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:752fe8ff5a6530f76399",
+        "SFS:c9197535ed8214d3e15b",
+        "SFS:d8126a1903dc7b2aa007"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 20908,
+      "max_source_surface_distance": 0.10254576802253723,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999403953552,
+      "source_triangle_indices": [
+        4896,
+        6675,
+        6677
+      ],
+      "stage32_pred_weight_l1": 1.9630329442961636,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:752fe8ff5a6530f76399",
+        "SFS:aa82495ab5eb159939f9",
+        "SFS:d8126a1903dc7b2aa007"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 19447,
+      "max_source_surface_distance": 0.11380689591169357,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999403953552,
+      "source_triangle_indices": [
+        6431,
+        4896,
+        6675
+      ],
+      "stage32_pred_weight_l1": 1.9630100911664363,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:6562c66b918b3572189e",
+        "SFS:752fe8ff5a6530f76399",
+        "SFS:aa82495ab5eb159939f9"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 22429,
+      "max_source_surface_distance": 0.06348194181919098,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999612154318,
+      "source_triangle_indices": [
+        2861,
+        2401,
+        2859
+      ],
+      "stage32_pred_weight_l1": 1.9578688859904174,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:8ae92b8ac17b1134b615",
+        "SFS:9d6119b2897f59385770",
+        "SFS:b40396486b92834ae3fd"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 23990,
+      "max_source_surface_distance": 0.1728915423154831,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.00000005549015,
+      "source_triangle_indices": [
+        685,
+        685,
+        3273
+      ],
+      "stage32_pred_weight_l1": 1.9767183026566604,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:aa14a9cb54913115c2fa",
+        "SFS:c63123123273fe06438e",
+        "SFS:e997a269dddaa4342f19"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 22721,
+      "max_source_surface_distance": 0.03952661529183388,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999915580555,
+      "source_triangle_indices": [
+        62,
+        62,
+        935
+      ],
+      "stage32_pred_weight_l1": 1.9987407013697838,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:8fa882a0df2507e09560",
+        "SFS:92c246891537a8d735c9",
+        "SFS:f45d0a2d3f81c54b9ccf"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 23717,
+      "max_source_surface_distance": 0.048216965049505234,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000451672477,
+      "source_triangle_indices": [
+        1920,
+        5321,
+        1920
+      ],
+      "stage32_pred_weight_l1": 1.988317408196828,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:a362880987c3c2be1735",
+        "SFS:d176827b618e7b0227c4",
+        "SFS:e9af1445f47f5c54fe47"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 22723,
+      "max_source_surface_distance": 0.03545229882001877,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000135382905,
+      "source_triangle_indices": [
+        62,
+        935,
+        935
+      ],
+      "stage32_pred_weight_l1": 1.9987419466686387,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:8fa882a0df2507e09560",
+        "SFS:9b66252faecd0e61b77a",
+        "SFS:f45d0a2d3f81c54b9ccf"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 5065,
+      "max_source_surface_distance": 0.025470733642578125,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000100595483,
+      "source_triangle_indices": [
+        719,
+        719,
+        3459
+      ],
+      "stage32_pred_weight_l1": 1.9218909230521146,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:127b511dd815eaf98cc9",
+        "SFS:56168bb9e24eec0f3fbe",
+        "SFS:8669d737c4bc0b614ab5"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 6479,
+      "max_source_surface_distance": 0.023829860612750053,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000832288385,
+      "source_triangle_indices": [
+        2222,
+        187,
+        2252
+      ],
+      "stage32_pred_weight_l1": 1.8926285637780202,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:17c1699c6da4439825ce",
+        "SFS:9b4edde3b14c991e3554",
+        "SFS:b1170372d54d6fbc620a"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 21060,
+      "max_source_surface_distance": 0.03545229882001877,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_EDGE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000139800935,
+      "source_triangle_indices": [
+        964,
+        62,
+        29
+      ],
+      "stage32_pred_weight_l1": 1.9937496761005278,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:76f73fb4745bcfde37a0",
+        "SFS:8fa882a0df2507e09560",
+        "SFS:a975d9b6616e918ef07a"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 5410,
+      "max_source_surface_distance": 0.035214152187108994,
+      "pair_categories": [
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000186837275,
+      "source_triangle_indices": [
+        934,
+        964,
+        29
+      ],
+      "stage32_pred_weight_l1": 1.9937496761005278,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:13f60af1eab0163c3155",
+        "SFS:76f73fb4745bcfde37a0",
+        "SFS:a975d9b6616e918ef07a"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 19446,
+      "max_source_surface_distance": 0.11380689591169357,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999403953552,
+      "source_triangle_indices": [
+        6431,
+        4896,
+        5240
+      ],
+      "stage32_pred_weight_l1": 1.9487646110450103,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:6562c66b918b3572189e",
+        "SFS:752fe8ff5a6530f76399",
+        "SFS:80ae7c4b7d30e5a1e9ba"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 12512,
+      "max_source_surface_distance": 0.14106504619121552,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000362160795,
+      "source_triangle_indices": [
+        3094,
+        572,
+        6803
+      ],
+      "stage32_pred_weight_l1": 1.9823687161643424,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:34eb36236470a8941494",
+        "SFS:6d9a039de58252f96d5c",
+        "SFS:9dce60f9508ba4684b6e"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 23525,
+      "max_source_surface_distance": 0.09497232735157013,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999823406847,
+      "source_triangle_indices": [
+        42,
+        4682,
+        5189
+      ],
+      "stage32_pred_weight_l1": 1.9554146004657202,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:9ec5a9c1da1e105ef27e",
+        "SFS:def8b8813100947f33cb",
+        "SFS:f577f5dfb5fa39d2bcee"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 22722,
+      "max_source_surface_distance": 0.03545229882001877,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000135382905,
+      "source_triangle_indices": [
+        62,
+        935,
+        29
+      ],
+      "stage32_pred_weight_l1": 1.999515384273617,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:8fa882a0df2507e09560",
+        "SFS:9b66252faecd0e61b77a",
+        "SFS:a975d9b6616e918ef07a"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 9737,
+      "max_source_surface_distance": 0.22975187003612518,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 2.0,
+      "source_triangle_indices": [
+        680,
+        6828,
+        680
+      ],
+      "stage32_pred_weight_l1": 0.19119323840627572,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:26f2c70285ca94bf888b",
+        "SFS:571e5509415c2c885d96",
+        "SFS:d63f580dce8613f47132"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 18355,
+      "max_source_surface_distance": 0.03953379765152931,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000080499025,
+      "source_triangle_indices": [
+        964,
+        8,
+        964
+      ],
+      "stage32_pred_weight_l1": 1.9983386767300457,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:5b802df6f580af162aeb",
+        "SFS:8c67911650f660732180",
+        "SFS:d40f0e51340d3043a876"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 11122,
+      "max_source_surface_distance": 0.041367460042238235,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.999999979107632,
+      "source_triangle_indices": [
+        2643,
+        2403,
+        2375
+      ],
+      "stage32_pred_weight_l1": 1.950066667079505,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:2d3e76a216430f829201",
+        "SFS:349c08e31f01bb3d89c5",
+        "SFS:4ba826c438570ef6ff72"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 11123,
+      "max_source_surface_distance": 0.041367460042238235,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.999999982762597,
+      "source_triangle_indices": [
+        2643,
+        2403,
+        2730
+      ],
+      "stage32_pred_weight_l1": 1.949120027266492,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:2d3e76a216430f829201",
+        "SFS:349c08e31f01bb3d89c5",
+        "SFS:84a1053d78b7f8662993"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 9738,
+      "max_source_surface_distance": 0.22589759528636932,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 1.999999994833388,
+      "source_triangle_indices": [
+        680,
+        6828,
+        680
+      ],
+      "stage32_pred_weight_l1": 1.9907856502963075,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:26f2c70285ca94bf888b",
+        "SFS:a4d32f94952aac57dbc5",
+        "SFS:af65eb3bd89f570aebed"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 4276,
+      "max_source_surface_distance": 0.02876318246126175,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000002241181,
+      "source_triangle_indices": [
+        965,
+        964,
+        8
+      ],
+      "stage32_pred_weight_l1": 1.999523485754907,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:0f6400a993506aaf86b7",
+        "SFS:5b802df6f580af162aeb",
+        "SFS:8c67911650f660732180"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 22866,
+      "max_source_surface_distance": 0.03952661529183388,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_EDGE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999605824499,
+      "source_triangle_indices": [
+        62,
+        935,
+        934
+      ],
+      "stage32_pred_weight_l1": 1.9977072385465473,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:92c246891537a8d735c9",
+        "SFS:f45d0a2d3f81c54b9ccf",
+        "SFS:f9fdd797d68eccce7223"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 9739,
+      "max_source_surface_distance": 0.22589759528636932,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.999999994833388,
+      "source_triangle_indices": [
+        680,
+        6828,
+        6828
+      ],
+      "stage32_pred_weight_l1": 1.8636109486384347,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:26f2c70285ca94bf888b",
+        "SFS:a4d32f94952aac57dbc5",
+        "SFS:e4f3625f519b71988000"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 10906,
+      "max_source_surface_distance": 0.11687864363193512,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999701976776,
+      "source_triangle_indices": [
+        961,
+        960,
+        54
+      ],
+      "stage32_pred_weight_l1": 1.9911612930848157,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:2c57ff9944760eff0d1c",
+        "SFS:8fe81813d8b5503e9ffd",
+        "SFS:e33ef2aa18c7ccbc40e2"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 22790,
+      "max_source_surface_distance": 0.1728915423154831,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000142835823,
+      "source_triangle_indices": [
+        685,
+        3273,
+        685
+      ],
+      "stage32_pred_weight_l1": 1.6184207683781668,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:912045400fb55d581382",
+        "SFS:a6df5fcf6abfb61c557b",
+        "SFS:aa14a9cb54913115c2fa"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 4277,
+      "max_source_surface_distance": 0.035214152187108994,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_EDGE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000002241181,
+      "source_triangle_indices": [
+        965,
+        8,
+        29
+      ],
+      "stage32_pred_weight_l1": 1.999523485754907,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:0f6400a993506aaf86b7",
+        "SFS:8c67911650f660732180",
+        "SFS:a975d9b6616e918ef07a"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 9741,
+      "max_source_surface_distance": 0.22589759528636932,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.999999994833388,
+      "source_triangle_indices": [
+        680,
+        680,
+        6828
+      ],
+      "stage32_pred_weight_l1": 1.9971819117503564,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:26f2c70285ca94bf888b",
+        "SFS:af65eb3bd89f570aebed",
+        "SFS:e4f3625f519b71988000"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 12559,
+      "max_source_surface_distance": 0.015672408044338226,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000034342748,
+      "source_triangle_indices": [
+        3389,
+        3388,
+        3111
+      ],
+      "stage32_pred_weight_l1": 1.9999469352783121,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:3520e34ae0af5dfc4c64",
+        "SFS:4b70350eb12640049380",
+        "SFS:5ee32b8667ae127e72ba"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 11645,
+      "max_source_surface_distance": 0.010669277980923653,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_EDGE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000298023224,
+      "source_triangle_indices": [
+        716,
+        3466,
+        3459
+      ],
+      "stage32_pred_weight_l1": 1.8386815846997528,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:302966bb30e78bd7f2a3",
+        "SFS:3bccde582e870ff0787b",
+        "SFS:8669d737c4bc0b614ab5"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 11646,
+      "max_source_surface_distance": 0.00935759674757719,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000298023224,
+      "source_triangle_indices": [
+        716,
+        3466,
+        715
+      ],
+      "stage32_pred_weight_l1": 1.7211636349847068,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:302966bb30e78bd7f2a3",
+        "SFS:3bccde582e870ff0787b",
+        "SFS:f67933621ff4b2e10d63"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 11321,
+      "max_source_surface_distance": 0.08913146704435349,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000078131865,
+      "source_triangle_indices": [
+        2840,
+        56,
+        3098
+      ],
+      "stage32_pred_weight_l1": 1.9902901445396557,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:2e9de426b2024fad60fe",
+        "SFS:5179673da59d9195acb1",
+        "SFS:a68e85499577dbf92026"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 11319,
+      "max_source_surface_distance": 0.09691088646650314,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000078131865,
+      "source_triangle_indices": [
+        2840,
+        2948,
+        56
+      ],
+      "stage32_pred_weight_l1": 1.98749133924077,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:2e9de426b2024fad60fe",
+        "SFS:3f71b2e7aae19fddc06c",
+        "SFS:5179673da59d9195acb1"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 12561,
+      "max_source_surface_distance": 0.014266159385442734,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 2.000000034342748,
+      "source_triangle_indices": [
+        3389,
+        3111,
+        3292
+      ],
+      "stage32_pred_weight_l1": 1.9998783084924165,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:3520e34ae0af5dfc4c64",
+        "SFS:5ee32b8667ae127e72ba",
+        "SFS:bc4fc77a4deb559b3c97"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 24385,
+      "max_source_surface_distance": 0.017379147931933403,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999687194077,
+      "source_triangle_indices": [
+        3475,
+        3474,
+        5141
+      ],
+      "stage32_pred_weight_l1": 1.9999859502862498,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:b7e8e65b56d4f00dfc65",
+        "SFS:c4f74840155b5b74b0f4",
+        "SFS:f7930b9cab089c9ce78f"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 5409,
+      "max_source_surface_distance": 0.03545229882001877,
+      "pair_categories": [
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000335848886,
+      "source_triangle_indices": [
+        934,
+        964,
+        62
+      ],
+      "stage32_pred_weight_l1": 1.992976238493376,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:13f60af1eab0163c3155",
+        "SFS:76f73fb4745bcfde37a0",
+        "SFS:8fa882a0df2507e09560"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 16847,
+      "max_source_surface_distance": 0.1882975846529007,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999858137363,
+      "source_triangle_indices": [
+        718,
+        5133,
+        715
+      ],
+      "stage32_pred_weight_l1": 1.9247458559723079,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:4f49322252d9a7dc866c",
+        "SFS:7a34e6d2bb7384f9e799",
+        "SFS:a2778ebc81bab8c0d423"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 16780,
+      "max_source_surface_distance": 0.012775768525898457,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_EDGE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.999999982188684,
+      "source_triangle_indices": [
+        1705,
+        3111,
+        3110
+      ],
+      "stage32_pred_weight_l1": 1.9999445472580102,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:4edd8b396292db9d39ec",
+        "SFS:5ee32b8667ae127e72ba",
+        "SFS:8646c5df7dedb65b1073"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 6466,
+      "max_source_surface_distance": 0.06417530030012131,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000068907477,
+      "source_triangle_indices": [
+        5606,
+        5605,
+        325
+      ],
+      "stage32_pred_weight_l1": 1.8444594755244204,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:17b46215e3f7c5a33081",
+        "SFS:73e39d2a6607586fe2f2",
+        "SFS:b8728539c00ad65661df"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 6465,
+      "max_source_surface_distance": 0.09480851143598557,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000061747155,
+      "source_triangle_indices": [
+        5606,
+        5605,
+        325
+      ],
+      "stage32_pred_weight_l1": 1.8444594755244204,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:17b46215e3f7c5a33081",
+        "SFS:6050f45fd390a860c2d3",
+        "SFS:b8728539c00ad65661df"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 5963,
+      "max_source_surface_distance": 0.08671064674854279,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000041069322,
+      "source_triangle_indices": [
+        585,
+        586,
+        5198
+      ],
+      "stage32_pred_weight_l1": 1.961245823473675,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:1627c1df949c6a4899fd",
+        "SFS:49ea127f8132be9edb94",
+        "SFS:9c934bd7546aad640cc3"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 18255,
+      "max_source_surface_distance": 0.09497232735157013,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 1.999999978806781,
+      "source_triangle_indices": [
+        5189,
+        42,
+        5189
+      ],
+      "stage32_pred_weight_l1": 1.9554146004657202,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:5ae712a12ae221106810",
+        "SFS:9ec5a9c1da1e105ef27e",
+        "SFS:f577f5dfb5fa39d2bcee"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 17718,
+      "max_source_surface_distance": 0.04267936572432518,
+      "pair_categories": [
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000034612809,
+      "source_triangle_indices": [
+        719,
+        639,
+        3459
+      ],
+      "stage32_pred_weight_l1": 1.9934847051720648,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:56168bb9e24eec0f3fbe",
+        "SFS:75ce520dccaeb5fffa35",
+        "SFS:981d157a432e715d2b45"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 14905,
+      "max_source_surface_distance": 0.1050347164273262,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999937870439,
+      "source_triangle_indices": [
+        5129,
+        42,
+        5128
+      ],
+      "stage32_pred_weight_l1": 1.985161096296311,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:4337bf028f967a415d07",
+        "SFS:52b08bf2702d59f6454e",
+        "SFS:e2e1d4c62f268ab9ce3e"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 9735,
+      "max_source_surface_distance": 0.22975187003612518,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.999999994833388,
+      "source_triangle_indices": [
+        680,
+        6828,
+        6828
+      ],
+      "stage32_pred_weight_l1": 1.8952865170056437,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:26f2c70285ca94bf888b",
+        "SFS:5023aa7b62091a889c63",
+        "SFS:571e5509415c2c885d96"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 9736,
+      "max_source_surface_distance": 0.22589759528636932,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.999999994833388,
+      "source_triangle_indices": [
+        680,
+        6828,
+        6828
+      ],
+      "stage32_pred_weight_l1": 1.86484938674628,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:26f2c70285ca94bf888b",
+        "SFS:5023aa7b62091a889c63",
+        "SFS:e4f3625f519b71988000"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 22448,
+      "max_source_surface_distance": 0.005269644781947136,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999884388675,
+      "source_triangle_indices": [
+        5140,
+        3475,
+        5141
+      ],
+      "stage32_pred_weight_l1": 1.9999859502862498,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:8b6edba9bbdf68366e21",
+        "SFS:b7e8e65b56d4f00dfc65",
+        "SFS:f7930b9cab089c9ce78f"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 22792,
+      "max_source_surface_distance": 0.1728915423154831,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000440859047,
+      "source_triangle_indices": [
+        685,
+        685,
+        3273
+      ],
+      "stage32_pred_weight_l1": 1.9767183026566604,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:912045400fb55d581382",
+        "SFS:aa14a9cb54913115c2fa",
+        "SFS:e997a269dddaa4342f19"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 12925,
+      "max_source_surface_distance": 0.10210521519184113,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000046754236,
+      "source_triangle_indices": [
+        539,
+        3098,
+        487
+      ],
+      "stage32_pred_weight_l1": 1.9646174701474208,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:36f20c05aac78f38eeec",
+        "SFS:74e0b3fec65eff16557c",
+        "SFS:c01939696f051847db95"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 22791,
+      "max_source_surface_distance": 0.15876176953315735,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000440859047,
+      "source_triangle_indices": [
+        685,
+        3273,
+        3273
+      ],
+      "stage32_pred_weight_l1": 1.9133801093507634,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:912045400fb55d581382",
+        "SFS:a6df5fcf6abfb61c557b",
+        "SFS:e997a269dddaa4342f19"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 14726,
+      "max_source_surface_distance": 0.16247880458831787,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000362160795,
+      "source_triangle_indices": [
+        561,
+        572,
+        6803
+      ],
+      "stage32_pred_weight_l1": 1.980254004253219,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:41b2fb95f36c52d84e50",
+        "SFS:6d9a039de58252f96d5c",
+        "SFS:9dce60f9508ba4684b6e"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 10907,
+      "max_source_surface_distance": 0.11420217901468277,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999701976776,
+      "source_triangle_indices": [
+        961,
+        962,
+        54
+      ],
+      "stage32_pred_weight_l1": 1.9911612930848157,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:2c57ff9944760eff0d1c",
+        "SFS:a66ae3514a4f017c5afe",
+        "SFS:e33ef2aa18c7ccbc40e2"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 13695,
+      "max_source_surface_distance": 0.013942738063633442,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000042358127,
+      "source_triangle_indices": [
+        3466,
+        645,
+        716
+      ],
+      "stage32_pred_weight_l1": 1.714793405996181,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:3bccde582e870ff0787b",
+        "SFS:9de5dbae1939812fa26f",
+        "SFS:eea73c9a822f803f9c66"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 22618,
+      "max_source_surface_distance": 0.07096198946237564,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_EDGE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999804422255,
+      "source_triangle_indices": [
+        20,
+        962,
+        963
+      ],
+      "stage32_pred_weight_l1": 1.9033872683154658,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:8e2a8c048059708e655c",
+        "SFS:e31bd85fc683747a13cf",
+        "SFS:f03e277353122476d61f"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 1702,
+      "max_source_surface_distance": 0.10076476633548737,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 2.00000002273351,
+      "source_triangle_indices": [
+        323,
+        2205,
+        323
+      ],
+      "stage32_pred_weight_l1": 1.581118738805213,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:05f19953480100218a64",
+        "SFS:2cf2929fc6c37488c8a1",
+        "SFS:e8e7f615ae71ba056177"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 11545,
+      "max_source_surface_distance": 0.12322214245796204,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000015802066,
+      "source_triangle_indices": [
+        718,
+        639,
+        5133
+      ],
+      "stage32_pred_weight_l1": 1.9971260703995002,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:2fa35813da63f5f0f346",
+        "SFS:568e0de6b5284a2fdac2",
+        "SFS:8b534787a92af98c7c03"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 641,
+      "max_source_surface_distance": 0.04200533404946327,
+      "pair_categories": [
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000563442377,
+      "source_triangle_indices": [
+        238,
+        293,
+        43
+      ],
+      "stage32_pred_weight_l1": 1.5502610715529594,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:0279bf7cb45efcae327a",
+        "SFS:a742011a0ff5723b943c",
+        "SFS:d0cd6094c70eed992b86"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 14870,
+      "max_source_surface_distance": 0.11420217901468277,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999403953561,
+      "source_triangle_indices": [
+        54,
+        962,
+        54
+      ],
+      "stage32_pred_weight_l1": 1.9623923599359396,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:42c5e58425ff3169e608",
+        "SFS:a66ae3514a4f017c5afe",
+        "SFS:e33ef2aa18c7ccbc40e2"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 15934,
+      "max_source_surface_distance": 0.06344433128833771,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000705762044,
+      "source_triangle_indices": [
+        586,
+        5124,
+        5198
+      ],
+      "stage32_pred_weight_l1": 1.961113466543087,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:49ea127f8132be9edb94",
+        "SFS:7b9e6f669372dfb25c02",
+        "SFS:aed5159ea3d5a44c05ff"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 15014,
+      "max_source_surface_distance": 0.06602592766284943,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000592277454,
+      "source_triangle_indices": [
+        573,
+        538,
+        3104
+      ],
+      "stage32_pred_weight_l1": 1.974577345392181,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:43b4021e338201043176",
+        "SFS:9eb5331603c97c1bd1b5",
+        "SFS:a2ccc1fac5290ed5bb8a"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 15933,
+      "max_source_surface_distance": 0.08671064674854279,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000041069322,
+      "source_triangle_indices": [
+        586,
+        5124,
+        5198
+      ],
+      "stage32_pred_weight_l1": 1.961113466543087,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:49ea127f8132be9edb94",
+        "SFS:7b9e6f669372dfb25c02",
+        "SFS:9c934bd7546aad640cc3"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 15932,
+      "max_source_surface_distance": 0.08671064674854279,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000041069322,
+      "source_triangle_indices": [
+        586,
+        5198,
+        5198
+      ],
+      "stage32_pred_weight_l1": 1.9573499782944888,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:49ea127f8132be9edb94",
+        "SFS:55bfcda1976b33726cf4",
+        "SFS:9c934bd7546aad640cc3"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 6497,
+      "max_source_surface_distance": 0.04768463224172592,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000001058439087,
+      "source_triangle_indices": [
+        3104,
+        3104,
+        538
+      ],
+      "stage32_pred_weight_l1": 1.999879979333184,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:17db7d438e2949b86abf",
+        "SFS:a2ccc1fac5290ed5bb8a",
+        "SFS:b67285ae197ad432c731"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 15931,
+      "max_source_surface_distance": 0.06622563302516937,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000334726518,
+      "source_triangle_indices": [
+        586,
+        5198,
+        5124
+      ],
+      "stage32_pred_weight_l1": 1.961113466543087,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:49ea127f8132be9edb94",
+        "SFS:55bfcda1976b33726cf4",
+        "SFS:7b9e6f669372dfb25c02"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 8762,
+      "max_source_surface_distance": 0.14502373337745667,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000298023215,
+      "source_triangle_indices": [
+        915,
+        304,
+        64
+      ],
+      "stage32_pred_weight_l1": 1.9884889419534804,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:21ffa97e00643c51d1b4",
+        "SFS:64e2b25a045fddb89910",
+        "SFS:d391086b1735439228d2"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 1815,
+      "max_source_surface_distance": 0.06344433128833771,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000705762044,
+      "source_triangle_indices": [
+        5198,
+        586,
+        5198
+      ],
+      "stage32_pred_weight_l1": 1.9528949849574482,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:064eaae0e25c4142b0ec",
+        "SFS:49ea127f8132be9edb94",
+        "SFS:aed5159ea3d5a44c05ff"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 11037,
+      "max_source_surface_distance": 0.06379896402359009,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000043095523,
+      "source_triangle_indices": [
+        639,
+        639,
+        5192
+      ],
+      "stage32_pred_weight_l1": 1.843993718633019,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:2ce4f7ddcb2f90188cfd",
+        "SFS:75ce520dccaeb5fffa35",
+        "SFS:cf604f49100176557e3c"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 8754,
+      "max_source_surface_distance": 0.13515986502170563,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000298023215,
+      "source_triangle_indices": [
+        915,
+        64,
+        64
+      ],
+      "stage32_pred_weight_l1": 1.9832713370268173,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:21ffa97e00643c51d1b4",
+        "SFS:256c6ecdcaa4441ea6a5",
+        "SFS:2cf69c957d69ce3428f5"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 8755,
+      "max_source_surface_distance": 0.13515986502170563,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000298023215,
+      "source_triangle_indices": [
+        915,
+        64,
+        64
+      ],
+      "stage32_pred_weight_l1": 1.9848080135452204,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:21ffa97e00643c51d1b4",
+        "SFS:256c6ecdcaa4441ea6a5",
+        "SFS:d391086b1735439228d2"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 8756,
+      "max_source_surface_distance": 0.13515986502170563,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000298023215,
+      "source_triangle_indices": [
+        915,
+        64,
+        915
+      ],
+      "stage32_pred_weight_l1": 1.9966221812021407,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:21ffa97e00643c51d1b4",
+        "SFS:2cf69c957d69ce3428f5",
+        "SFS:5a66673b25f01f1ad614"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 15016,
+      "max_source_surface_distance": 0.04768463224172592,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 2.0000001058439087,
+      "source_triangle_indices": [
+        573,
+        3104,
+        538
+      ],
+      "stage32_pred_weight_l1": 1.974577345392181,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:43b4021e338201043176",
+        "SFS:a2ccc1fac5290ed5bb8a",
+        "SFS:b67285ae197ad432c731"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 17771,
+      "max_source_surface_distance": 0.11863309144973755,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999960459094,
+      "source_triangle_indices": [
+        639,
+        5133,
+        5133
+      ],
+      "stage32_pred_weight_l1": 1.9913099332989983,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:568e0de6b5284a2fdac2",
+        "SFS:8b534787a92af98c7c03",
+        "SFS:e4221f20df059fceae9d"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 5412,
+      "max_source_surface_distance": 0.03545229882001877,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000335848886,
+      "source_triangle_indices": [
+        934,
+        62,
+        935
+      ],
+      "stage32_pred_weight_l1": 1.9987419466686387,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:13f60af1eab0163c3155",
+        "SFS:8fa882a0df2507e09560",
+        "SFS:9b66252faecd0e61b77a"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 24298,
+      "max_source_surface_distance": 0.15792450308799744,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.00000005549015,
+      "source_triangle_indices": [
+        684,
+        685,
+        3273
+      ],
+      "stage32_pred_weight_l1": 1.9767180033489078,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:b48b901284b496bd4f60",
+        "SFS:c63123123273fe06438e",
+        "SFS:e997a269dddaa4342f19"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 1076,
+      "max_source_surface_distance": 0.012922372668981552,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999834094018,
+      "source_triangle_indices": [
+        2833,
+        1705,
+        3111
+      ],
+      "stage32_pred_weight_l1": 1.999909559490988,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:03c63b86dd7b5704ee2f",
+        "SFS:4edd8b396292db9d39ec",
+        "SFS:5ee32b8667ae127e72ba"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 17208,
+      "max_source_surface_distance": 0.10254576802253723,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999701976787,
+      "source_triangle_indices": [
+        6677,
+        4896,
+        6677
+      ],
+      "stage32_pred_weight_l1": 1.9630329442961636,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:52097eea004252704333",
+        "SFS:752fe8ff5a6530f76399",
+        "SFS:d8126a1903dc7b2aa007"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 1075,
+      "max_source_surface_distance": 0.015672408044338226,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999908599824,
+      "source_triangle_indices": [
+        2833,
+        3388,
+        3111
+      ],
+      "stage32_pred_weight_l1": 1.9999469352783121,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:03c63b86dd7b5704ee2f",
+        "SFS:4b70350eb12640049380",
+        "SFS:5ee32b8667ae127e72ba"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 24099,
+      "max_source_surface_distance": 0.017379147931933403,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999703466655,
+      "source_triangle_indices": [
+        5122,
+        3474,
+        5141
+      ],
+      "stage32_pred_weight_l1": 1.9973435699336375,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:ad6bb92a46f42b642210",
+        "SFS:c4f74840155b5b74b0f4",
+        "SFS:f7930b9cab089c9ce78f"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 5415,
+      "max_source_surface_distance": 0.035214152187108994,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000186837275,
+      "source_triangle_indices": [
+        934,
+        935,
+        29
+      ],
+      "stage32_pred_weight_l1": 1.999515384273617,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:13f60af1eab0163c3155",
+        "SFS:9b66252faecd0e61b77a",
+        "SFS:a975d9b6616e918ef07a"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 22616,
+      "max_source_surface_distance": 0.07096198946237564,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999925494187,
+      "source_triangle_indices": [
+        20,
+        927,
+        963
+      ],
+      "stage32_pred_weight_l1": 1.9033872683154658,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:8e2a8c048059708e655c",
+        "SFS:c18c4bd8fa0700171183",
+        "SFS:f03e277353122476d61f"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 14906,
+      "max_source_surface_distance": 0.1050347164273262,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999937870439,
+      "source_triangle_indices": [
+        5129,
+        42,
+        42
+      ],
+      "stage32_pred_weight_l1": 1.96259120493055,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:4337bf028f967a415d07",
+        "SFS:52b08bf2702d59f6454e",
+        "SFS:e75a70ca41503122a719"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 17207,
+      "max_source_surface_distance": 0.10254576802253723,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999874047647,
+      "source_triangle_indices": [
+        6677,
+        4896,
+        4896
+      ],
+      "stage32_pred_weight_l1": 1.9807286261305508,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:52097eea004252704333",
+        "SFS:752fe8ff5a6530f76399",
+        "SFS:c9197535ed8214d3e15b"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 17719,
+      "max_source_surface_distance": 0.025470733642578125,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000017510129,
+      "source_triangle_indices": [
+        719,
+        3459,
+        3459
+      ],
+      "stage32_pred_weight_l1": 1.9854607888564872,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:56168bb9e24eec0f3fbe",
+        "SFS:8669d737c4bc0b614ab5",
+        "SFS:981d157a432e715d2b45"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 4278,
+      "max_source_surface_distance": 0.035214152187108994,
+      "pair_categories": [
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.999999998637129,
+      "source_triangle_indices": [
+        965,
+        935,
+        29
+      ],
+      "stage32_pred_weight_l1": 1.999515384273617,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:0f6400a993506aaf86b7",
+        "SFS:9b66252faecd0e61b77a",
+        "SFS:a975d9b6616e918ef07a"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 20167,
+      "max_source_surface_distance": 0.048783909529447556,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.999999991668415,
+      "source_triangle_indices": [
+        5321,
+        5321,
+        1920
+      ],
+      "stage32_pred_weight_l1": 1.988317408196828,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:6c56811b0b4d10581a78",
+        "SFS:d176827b618e7b0227c4",
+        "SFS:e9af1445f47f5c54fe47"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 23869,
+      "max_source_surface_distance": 0.09919502586126328,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 1.999999935738742,
+      "source_triangle_indices": [
+        962,
+        20,
+        962
+      ],
+      "stage32_pred_weight_l1": 1.9902889025231758,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:a66ae3514a4f017c5afe",
+        "SFS:e1e56f8d2a702ddb6292",
+        "SFS:e31bd85fc683747a13cf"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 12240,
+      "max_source_surface_distance": 0.0474526584148407,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000182870497,
+      "source_triangle_indices": [
+        5422,
+        1909,
+        5421
+      ],
+      "stage32_pred_weight_l1": 1.9951664184628695,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:3399480f5b94b1456c55",
+        "SFS:98e950375490e93c5428",
+        "SFS:9fd93eaeae9cc49e90e1"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 10238,
+      "max_source_surface_distance": 0.041367460042238235,
+      "pair_categories": [
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999496040743,
+      "source_triangle_indices": [
+        2885,
+        2643,
+        2375
+      ],
+      "stage32_pred_weight_l1": 1.9999148402678162,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:29208fcd85d5969daa61",
+        "SFS:2d3e76a216430f829201",
+        "SFS:4ba826c438570ef6ff72"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 22740,
+      "max_source_surface_distance": 0.11687864363193512,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999435346667,
+      "source_triangle_indices": [
+        960,
+        54,
+        54
+      ],
+      "stage32_pred_weight_l1": 1.9917499008480737,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:8fe81813d8b5503e9ffd",
+        "SFS:e33ef2aa18c7ccbc40e2",
+        "SFS:ec33bb6780bf76340d62"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 9997,
+      "max_source_surface_distance": 0.08990857005119324,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999861323448,
+      "source_triangle_indices": [
+        2779,
+        2401,
+        2859
+      ],
+      "stage32_pred_weight_l1": 1.9578688859904174,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:28059609abc598705421",
+        "SFS:9d6119b2897f59385770",
+        "SFS:b40396486b92834ae3fd"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 5060,
+      "max_source_surface_distance": 0.025347817689180374,
+      "pair_categories": [
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000022351742,
+      "source_triangle_indices": [
+        719,
+        716,
+        3459
+      ],
+      "stage32_pred_weight_l1": 1.9218909230521146,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:127b511dd815eaf98cc9",
+        "SFS:302966bb30e78bd7f2a3",
+        "SFS:8669d737c4bc0b614ab5"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 22741,
+      "max_source_surface_distance": 0.12853357195854187,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 1.999999962252057,
+      "source_triangle_indices": [
+        960,
+        54,
+        960
+      ],
+      "stage32_pred_weight_l1": 1.9965717642671437,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:8fe81813d8b5503e9ffd",
+        "SFS:ec33bb6780bf76340d62",
+        "SFS:fb97ca923857fa874db8"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 13696,
+      "max_source_surface_distance": 0.014414865523576736,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_EDGE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000007289492,
+      "source_triangle_indices": [
+        3466,
+        715,
+        716
+      ],
+      "stage32_pred_weight_l1": 1.7211869468142786,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:3bccde582e870ff0787b",
+        "SFS:c5aba2089b861af62f3a",
+        "SFS:eea73c9a822f803f9c66"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 10628,
+      "max_source_surface_distance": 0.09009544551372528,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000663845094,
+      "source_triangle_indices": [
+        5612,
+        91,
+        91
+      ],
+      "stage32_pred_weight_l1": 1.8648631191103018,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:2af9790e2e0e6027d640",
+        "SFS:4e4f40b7b7fb594e1efa",
+        "SFS:ae4d6002191a94ddec6b"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 17505,
+      "max_source_surface_distance": 0.10210521519184113,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000046754236,
+      "source_triangle_indices": [
+        3098,
+        3098,
+        487
+      ],
+      "stage32_pred_weight_l1": 1.936081852296715,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:5455a2c78faec1aa1bf1",
+        "SFS:74e0b3fec65eff16557c",
+        "SFS:c01939696f051847db95"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 18752,
+      "max_source_surface_distance": 0.014266159385442734,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000004540426,
+      "source_triangle_indices": [
+        3111,
+        3110,
+        3292
+      ],
+      "stage32_pred_weight_l1": 1.992995713720892,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:5ee32b8667ae127e72ba",
+        "SFS:8646c5df7dedb65b1073",
+        "SFS:bc4fc77a4deb559b3c97"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 640,
+      "max_source_surface_distance": 0.0406908318400383,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000786959795,
+      "source_triangle_indices": [
+        238,
+        43,
+        923
+      ],
+      "stage32_pred_weight_l1": 1.8923708988950594,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:0279bf7cb45efcae327a",
+        "SFS:8c19371684be0b578231",
+        "SFS:ff413526dd46829c703f"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 14869,
+      "max_source_surface_distance": 0.09919502586126328,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999329447755,
+      "source_triangle_indices": [
+        54,
+        962,
+        20
+      ],
+      "stage32_pred_weight_l1": 1.9623923599359396,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:42c5e58425ff3169e608",
+        "SFS:a66ae3514a4f017c5afe",
+        "SFS:e1e56f8d2a702ddb6292"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 637,
+      "max_source_surface_distance": 0.04200533404946327,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000637948183,
+      "source_triangle_indices": [
+        238,
+        43,
+        43
+      ],
+      "stage32_pred_weight_l1": 1.9054134772618168,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:0279bf7cb45efcae327a",
+        "SFS:19f661cecfd86db9c9df",
+        "SFS:d0cd6094c70eed992b86"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 636,
+      "max_source_surface_distance": 0.041477005928754807,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000637948183,
+      "source_triangle_indices": [
+        238,
+        43,
+        293
+      ],
+      "stage32_pred_weight_l1": 1.9054134772618168,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:0279bf7cb45efcae327a",
+        "SFS:19f661cecfd86db9c9df",
+        "SFS:a742011a0ff5723b943c"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 9998,
+      "max_source_surface_distance": 0.08990857005119324,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_EDGE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999861323448,
+      "source_triangle_indices": [
+        2779,
+        2401,
+        2380
+      ],
+      "stage32_pred_weight_l1": 1.925374007333939,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:28059609abc598705421",
+        "SFS:9d6119b2897f59385770",
+        "SFS:d566109b3399c5fe568d"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 17780,
+      "max_source_surface_distance": 0.09497232735157013,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999777835424,
+      "source_triangle_indices": [
+        5189,
+        42,
+        5189
+      ],
+      "stage32_pred_weight_l1": 1.9554146004657202,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:56a8ef51781abced8624",
+        "SFS:9ec5a9c1da1e105ef27e",
+        "SFS:f577f5dfb5fa39d2bcee"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 635,
+      "max_source_surface_distance": 0.041477005928754807,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000786959795,
+      "source_triangle_indices": [
+        238,
+        43,
+        43
+      ],
+      "stage32_pred_weight_l1": 1.9054134772618168,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:0279bf7cb45efcae327a",
+        "SFS:19f661cecfd86db9c9df",
+        "SFS:8c19371684be0b578231"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 11548,
+      "max_source_surface_distance": 0.15814904868602753,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000015802066,
+      "source_triangle_indices": [
+        718,
+        5133,
+        715
+      ],
+      "stage32_pred_weight_l1": 1.9247458559723079,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:2fa35813da63f5f0f346",
+        "SFS:7a34e6d2bb7384f9e799",
+        "SFS:a2778ebc81bab8c0d423"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 10001,
+      "max_source_surface_distance": 0.08990857005119324,
+      "pair_categories": [
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000041218639,
+      "source_triangle_indices": [
+        2779,
+        2989,
+        2380
+      ],
+      "stage32_pred_weight_l1": 1.9827703379963024,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:28059609abc598705421",
+        "SFS:d46128d6982eddfe49e4",
+        "SFS:d566109b3399c5fe568d"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 17654,
+      "max_source_surface_distance": 0.04702204465866089,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999866851732,
+      "source_triangle_indices": [
+        2022,
+        1909,
+        5421
+      ],
+      "stage32_pred_weight_l1": 1.9935221409398687,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:55a732e3b9c4baa39caf",
+        "SFS:98e950375490e93c5428",
+        "SFS:9fd93eaeae9cc49e90e1"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 12588,
+      "max_source_surface_distance": 0.05924469977617264,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY"
+      ],
+      "source_artist_41d_weight_l1": 2.00000001095044,
+      "source_triangle_indices": [
+        187,
+        2213,
+        185
+      ],
+      "stage32_pred_weight_l1": 1.8205320757625854,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:353181a607cdf8d70645",
+        "SFS:d70e27b47c62a1838f59",
+        "SFS:f5034b29e3eb6adeda5f"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000298023224,
+      "face_index": 11547,
+      "max_source_surface_distance": 0.15814904868602753,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000015802066,
+      "source_triangle_indices": [
+        718,
+        5133,
+        5133
+      ],
+      "stage32_pred_weight_l1": 1.9971260703995002,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:2fa35813da63f5f0f346",
+        "SFS:7a34e6d2bb7384f9e799",
+        "SFS:8b534787a92af98c7c03"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000284053385,
+      "face_index": 10168,
+      "max_source_surface_distance": 0.03304489701986313,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000014901161,
+      "source_triangle_indices": [
+        1212,
+        4715,
+        4731
+      ],
+      "stage32_pred_weight_l1": 1.9686752750754177,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:28da175b33d11ba8958b",
+        "SFS:62d1c0fade726027c97f",
+        "SFS:e735b2d5a6608d5ae969"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000284053385,
+      "face_index": 10172,
+      "max_source_surface_distance": 0.03793031722307205,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000375324833,
+      "source_triangle_indices": [
+        1212,
+        4828,
+        4731
+      ],
+      "stage32_pred_weight_l1": 1.9661900661662268,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:28da175b33d11ba8958b",
+        "SFS:a5c01ed0ec2f93d8d15d",
+        "SFS:e735b2d5a6608d5ae969"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000279396772,
+      "face_index": 21347,
+      "max_source_surface_distance": 0.26235583424568176,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.999999962747097,
+      "source_triangle_indices": [
+        5004,
+        5004,
+        6421
+      ],
+      "stage32_pred_weight_l1": 1.9997099317066718,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:7a20c4ecc607b81acea1",
+        "SFS:7ff6dcf3f2537a0b9518",
+        "SFS:8d9b1bc9e4f90a1d4c81"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000279396772,
+      "face_index": 21348,
+      "max_source_surface_distance": 0.2459397166967392,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.999999962747097,
+      "source_triangle_indices": [
+        5004,
+        6421,
+        6421
+      ],
+      "stage32_pred_weight_l1": 1.9997099317066718,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:7a20c4ecc607b81acea1",
+        "SFS:8bcbc3d4a3ffb6a449ff",
+        "SFS:8d9b1bc9e4f90a1d4c81"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000279396772,
+      "face_index": 23395,
+      "max_source_surface_distance": 0.2352447509765625,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999129935246,
+      "source_triangle_indices": [
+        5004,
+        5004,
+        718
+      ],
+      "stage32_pred_weight_l1": 1.9904761685923846,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:9c64c9d0bd98bd68d45d",
+        "SFS:cd8e62b074c2f49e27bb",
+        "SFS:f14bed3676ee6d536721"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000279396772,
+      "face_index": 13630,
+      "max_source_surface_distance": 0.21024516224861145,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 1.999999962747097,
+      "source_triangle_indices": [
+        6421,
+        5004,
+        6421
+      ],
+      "stage32_pred_weight_l1": 1.864237614914957,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:3b6413555cce3bed2b0e",
+        "SFS:48d95dce7ed8b001abb8",
+        "SFS:9873daae3fe70c368926"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000279396772,
+      "face_index": 21700,
+      "max_source_surface_distance": 0.27608227729797363,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.999999962747097,
+      "source_triangle_indices": [
+        5004,
+        6421,
+        6421
+      ],
+      "stage32_pred_weight_l1": 1.999498395140289,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:7ff6dcf3f2537a0b9518",
+        "SFS:8d9b1bc9e4f90a1d4c81",
+        "SFS:b1dc679416e6cc0084d3"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000279396772,
+      "face_index": 15684,
+      "max_source_surface_distance": 0.21024516224861145,
+      "pair_categories": [
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999729098055,
+      "source_triangle_indices": [
+        5236,
+        5004,
+        6421
+      ],
+      "stage32_pred_weight_l1": 1.4849486667678544,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:482c029a5b7ba6a7135e",
+        "SFS:48d95dce7ed8b001abb8",
+        "SFS:9873daae3fe70c368926"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000279396772,
+      "face_index": 13629,
+      "max_source_surface_distance": 0.2125413566827774,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 1.999999962747097,
+      "source_triangle_indices": [
+        6421,
+        5004,
+        6421
+      ],
+      "stage32_pred_weight_l1": 1.864237614914957,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:3b6413555cce3bed2b0e",
+        "SFS:48d95dce7ed8b001abb8",
+        "SFS:8bcbc3d4a3ffb6a449ff"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000279396772,
+      "face_index": 22670,
+      "max_source_surface_distance": 0.24095706641674042,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999329447746,
+      "source_triangle_indices": [
+        715,
+        5004,
+        718
+      ],
+      "stage32_pred_weight_l1": 1.9733625301972235,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:8ef43e7b2ff0553709d1",
+        "SFS:cd8e62b074c2f49e27bb",
+        "SFS:f14bed3676ee6d536721"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000279396772,
+      "face_index": 22668,
+      "max_source_surface_distance": 0.2731724977493286,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999925494198,
+      "source_triangle_indices": [
+        715,
+        42,
+        5004
+      ],
+      "stage32_pred_weight_l1": 1.9732509129102325,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:8ef43e7b2ff0553709d1",
+        "SFS:a425a2caee9137364c80",
+        "SFS:cd8e62b074c2f49e27bb"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000279396772,
+      "face_index": 20119,
+      "max_source_surface_distance": 0.29676002264022827,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000298023224,
+      "source_triangle_indices": [
+        6421,
+        5004,
+        42
+      ],
+      "stage32_pred_weight_l1": 0.8972787425413598,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:6be2c81e5686649f941d",
+        "SFS:7ff6dcf3f2537a0b9518",
+        "SFS:dabc5431cb17b17fece8"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000279396772,
+      "face_index": 15763,
+      "max_source_surface_distance": 0.2459397166967392,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.999999962747097,
+      "source_triangle_indices": [
+        5004,
+        5004,
+        6421
+      ],
+      "stage32_pred_weight_l1": 1.9941770053498862,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:48d95dce7ed8b001abb8",
+        "SFS:7a20c4ecc607b81acea1",
+        "SFS:8bcbc3d4a3ffb6a449ff"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000279396772,
+      "face_index": 20118,
+      "max_source_surface_distance": 0.29676002264022827,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 1.999999962747097,
+      "source_triangle_indices": [
+        6421,
+        5004,
+        6421
+      ],
+      "stage32_pred_weight_l1": 1.99820788977458,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:6be2c81e5686649f941d",
+        "SFS:7ff6dcf3f2537a0b9518",
+        "SFS:b1dc679416e6cc0084d3"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000279396772,
+      "face_index": 23749,
+      "max_source_surface_distance": 0.2731724977493286,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999925494198,
+      "source_triangle_indices": [
+        42,
+        5004,
+        5004
+      ],
+      "stage32_pred_weight_l1": 1.8754252685124202,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:a425a2caee9137364c80",
+        "SFS:c95cb557ce0bc0b436a5",
+        "SFS:cd8e62b074c2f49e27bb"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000279396772,
+      "face_index": 7140,
+      "max_source_surface_distance": 0.29676002264022827,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 1.999999962747097,
+      "source_triangle_indices": [
+        5004,
+        6421,
+        5004
+      ],
+      "stage32_pred_weight_l1": 1.7605367291643668,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:1ac0372d52a31d6a0621",
+        "SFS:6be2c81e5686649f941d",
+        "SFS:7ff6dcf3f2537a0b9518"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000279396772,
+      "face_index": 7142,
+      "max_source_surface_distance": 0.2966141700744629,
+      "pair_categories": [
+        "SAME_FACE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999925494194,
+      "source_triangle_indices": [
+        5004,
+        5004,
+        42
+      ],
+      "stage32_pred_weight_l1": 1.7868145868298506,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:1ac0372d52a31d6a0621",
+        "SFS:7ff6dcf3f2537a0b9518",
+        "SFS:dabc5431cb17b17fece8"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000279396772,
+      "face_index": 21702,
+      "max_source_surface_distance": 0.2966141700744629,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SAME_FACE",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999925494198,
+      "source_triangle_indices": [
+        5004,
+        42,
+        42
+      ],
+      "stage32_pred_weight_l1": 0.8577104071930902,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:7ff6dcf3f2537a0b9518",
+        "SFS:a425a2caee9137364c80",
+        "SFS:dabc5431cb17b17fece8"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000279396772,
+      "face_index": 7141,
+      "max_source_surface_distance": 0.29676002264022827,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000298023224,
+      "source_triangle_indices": [
+        5004,
+        6421,
+        42
+      ],
+      "stage32_pred_weight_l1": 1.7868145868298506,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:1ac0372d52a31d6a0621",
+        "SFS:6be2c81e5686649f941d",
+        "SFS:dabc5431cb17b17fece8"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000279396772,
+      "face_index": 21701,
+      "max_source_surface_distance": 0.2731724977493286,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999925494198,
+      "source_triangle_indices": [
+        5004,
+        42,
+        5004
+      ],
+      "stage32_pred_weight_l1": 1.869265598905522,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:7ff6dcf3f2537a0b9518",
+        "SFS:a425a2caee9137364c80",
+        "SFS:c95cb557ce0bc0b436a5"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000027474016,
+      "face_index": 17289,
+      "max_source_surface_distance": 0.047413550317287445,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000019776595,
+      "source_triangle_indices": [
+        1370,
+        1369,
+        4753
+      ],
+      "stage32_pred_weight_l1": 1.9987466502136724,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:52b8a05ffb3faf7d5021",
+        "SFS:69f891b81947b75ab300",
+        "SFS:9539faf341016c6e1204"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000027474016,
+      "face_index": 22627,
+      "max_source_surface_distance": 0.04724589362740517,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000495789174,
+      "source_triangle_indices": [
+        6292,
+        4753,
+        6292
+      ],
+      "stage32_pred_weight_l1": 1.998721314244538,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:8e5f23702964726e49b2",
+        "SFS:9539faf341016c6e1204",
+        "SFS:bc415c4a4fa6b02e5f5a"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000027474016,
+      "face_index": 22993,
+      "max_source_surface_distance": 0.04724589362740517,
+      "pair_categories": [
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000144214902,
+      "source_triangle_indices": [
+        4753,
+        4759,
+        6292
+      ],
+      "stage32_pred_weight_l1": 1.998721314244538,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:9539faf341016c6e1204",
+        "SFS:b44e329a12828160cde8",
+        "SFS:bc415c4a4fa6b02e5f5a"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000027474016,
+      "face_index": 17294,
+      "max_source_surface_distance": 0.04724589362740517,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.0000000495789174,
+      "source_triangle_indices": [
+        1370,
+        6292,
+        4753
+      ],
+      "stage32_pred_weight_l1": 1.9987466502136724,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:52b8a05ffb3faf7d5021",
+        "SFS:8e5f23702964726e49b2",
+        "SFS:9539faf341016c6e1204"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000027474016,
+      "face_index": 15181,
+      "max_source_surface_distance": 0.047413550317287445,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 2.000000004875434,
+      "source_triangle_indices": [
+        4706,
+        1369,
+        4753
+      ],
+      "stage32_pred_weight_l1": 1.9649168245987398,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:450251d116d6a7142d8e",
+        "SFS:69f891b81947b75ab300",
+        "SFS:9539faf341016c6e1204"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000270083547,
+      "face_index": 5601,
+      "max_source_surface_distance": 0.037163667380809784,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 2.00000001395851,
+      "source_triangle_indices": [
+        2454,
+        2750,
+        2453
+      ],
+      "stage32_pred_weight_l1": 1.8481964730491383,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:14853717a2579d43b9e4",
+        "SFS:1e45a13e106ec8a8f5a1",
+        "SFS:8c81b7f98137a4f46258"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000270083547,
+      "face_index": 3961,
+      "max_source_surface_distance": 0.037163667380809784,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999990573487,
+      "source_triangle_indices": [
+        2744,
+        2454,
+        2750
+      ],
+      "stage32_pred_weight_l1": 1.9049335757585228,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:0e2aed041e2924cdb0c4",
+        "SFS:14853717a2579d43b9e4",
+        "SFS:1e45a13e106ec8a8f5a1"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000270083547,
+      "face_index": 7961,
+      "max_source_surface_distance": 0.037163667380809784,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.00000001395851,
+      "source_triangle_indices": [
+        2750,
+        2453,
+        2597
+      ],
+      "stage32_pred_weight_l1": 1.8599396485446964,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:1e45a13e106ec8a8f5a1",
+        "SFS:8c81b7f98137a4f46258",
+        "SFS:cf4fb46256c636fd138a"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.0000000270083547,
+      "face_index": 7962,
+      "max_source_surface_distance": 0.06102810055017471,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SHARE_EDGE"
+      ],
+      "source_artist_41d_weight_l1": 2.00000001395851,
+      "source_triangle_indices": [
+        2750,
+        2597,
+        2678
+      ],
+      "stage32_pred_weight_l1": 1.953863954783362,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:1e45a13e106ec8a8f5a1",
+        "SFS:cf4fb46256c636fd138a",
+        "SFS:eb95c1bdc45efaa1d02d"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000026077032,
+      "face_index": 19761,
+      "max_source_surface_distance": 0.16531266272068024,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999873312035,
+      "source_triangle_indices": [
+        1036,
+        5125,
+        6356
+      ],
+      "stage32_pred_weight_l1": 1.9698256640842406,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:6871268ec9636b761d24",
+        "SFS:9236218798ba13368870",
+        "SFS:bb2060618d5de9c040fe"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000026077032,
+      "face_index": 16309,
+      "max_source_surface_distance": 0.025974206626415253,
+      "pair_categories": [
+        "NONINCIDENT",
+        "SHARE_VERTEX_ONLY",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000031346662,
+      "source_triangle_indices": [
+        6292,
+        4788,
+        4746
+      ],
+      "stage32_pred_weight_l1": 1.8121938974520104,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:4c0ce7155c818f650950",
+        "SFS:b19e6b55fc3153d3ac61",
+        "SFS:f40e8e55d3a89082ae7e"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000026077032,
+      "face_index": 2468,
+      "max_source_surface_distance": 0.009842978790402412,
+      "pair_categories": [
+        "SHARE_EDGE",
+        "NONINCIDENT",
+        "NONINCIDENT"
+      ],
+      "source_artist_41d_weight_l1": 2.000000046618341,
+      "source_triangle_indices": [
+        2730,
+        2731,
+        2339
+      ],
+      "stage32_pred_weight_l1": 0.2520658380146985,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:0893585c203f95ae903d",
+        "SFS:6918777efa1355628a18",
+        "SFS:8ced6b829142c54293ec"
+      ]
+    },
+    {
+      "bank_target_weight_l1": 2.000000026077032,
+      "face_index": 19764,
+      "max_source_surface_distance": 0.15800774097442627,
+      "pair_categories": [
+        "NONINCIDENT",
+        "NONINCIDENT",
+        "SAME_FACE"
+      ],
+      "source_artist_41d_weight_l1": 1.9999999910564934,
+      "source_triangle_indices": [
+        1036,
+        6356,
+        1036
+      ],
+      "stage32_pred_weight_l1": 1.9671564810452955,
+      "strict_source_local": false,
+      "vertex_surface_ids": [
+        "SFS:6871268ec9636b761d24",
+        "SFS:d796808d91174be53e5e",
+        "SFS:dc51b55f6db9f426aff7"
+      ]
+    }
+  ]
+}

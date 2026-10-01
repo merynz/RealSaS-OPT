@@ -1,0 +1,69 @@
+{
+  "schema": "RealSaS.IRIS.V5FieldFailureDiagnosticPreregistrationAmendment.v1",
+  "status": "FROZEN_AFTER_APPARATUS_FAIL_BEFORE_RERUN",
+  "date_utc": "2026-09-24",
+  "parent_preregistration": "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_20260924.json",
+  "apparatus_failure": {
+    "stage": "FOUNDATION_FIXED_REPLAY_RECONSTRUCTION",
+    "error": "FIXED_REPLAY_BANK_SHA_DRIFT",
+    "source_fixed_replay_bank_sha256": "f10fcd363423cda8131888b5720680297d7d4b263638e471f8b6484c5281ef16",
+    "reconstructed_base_topk_sha256_observed": "3a2a68a62d717a35a6e49edcd4eac52b46bcc270341d0426799a40a8cd7ad1d4",
+    "optimizer_steps_executed": 0,
+    "parameter_updates_executed": 0,
+    "scientific_surface_diagnostic_executed": false,
+    "scientific_replay_diagnostic_executed": false,
+    "scientific_gradient_diagnostic_executed": false,
+    "disposition": "APPARATUS_FAIL__NO_SCIENTIFIC_RESULT"
+  },
+  "root_cause": {
+    "finding": "THE_COMPLETED_SOURCE_RUN_PERSISTED_ONLY_THE_FIXED_REPLAY_BANK_SHA256_NOT_THE_EXACT_INDEX_ARRAY",
+    "source_foundation_artifact": "20260924T115953Z/V5_TP64_LONG_HORIZON_LOW_LR/FOUNDATION_AND_COMMON_BASE.json",
+    "source_foundation_sha256": "6945a2980e15059b9c977f06fe0a38981cce2ca7297660c5e738d2de7b6baade",
+    "exact_historical_bank_indices_available": false,
+    "consequence": "A_RECONSTRUCTED_GPU_TOPK_INDEX_ARRAY_CANNOT_BE_REQUIRED_TO_HASH_IDENTICALLY_TO_AN_UNPERSISTED_HISTORICAL_ARRAY",
+    "source_hash_is_still_provenance_authority": true
+  },
+  "amended_H3": {
+    "hypothesis_semantics": "REPLAY_DIFFICULTY_MAY_HAVE_DRIFTED_SO_A_FIXED_BASE_REPLAY_BANK_CAN_BECOME_STALE",
+    "retired_measurement_claim": "EXACT_HISTORICAL_FIXED_TRAINING_BANK_OVERLAP",
+    "replacement_measurement": "SAME_FROZEN_REPLAY_POOL_REFERENCE_BASE_RESIDUAL_RANK_VS_CURRENT_B_OR_C_RESIDUAL_RANK_AND_RECONSTRUCTED_HARD_SET_OVERLAP",
+    "exact_training_bank_overlap_claimed": false,
+    "source_fixed_bank_sha256_carried_as_provenance": true,
+    "reconstructed_reference_topk_is_diagnostic_only": true,
+    "replay_refresh_authorized": false
+  },
+  "unchanged_hypotheses": [
+    "H1_ZERO_SET_CONDITIONING",
+    "H2_VIEW_SWITCH_RIDGE",
+    "H4_GRADIENT_COMPETITION"
+  ],
+  "strengthened_reproduction_gates": {
+    "dino_patch_map_sha256_required": "19a7c82469fb00818adeacbb43d5c9da4c7f5e197338db086b3eab5a7ee9f134",
+    "base_heldout_reproduction_required": true,
+    "base_heldout_tolerance_absolute": 5e-7,
+    "frozen_query_pool_sha256": "0f0215f4a2ef018729d0f86c052da916dcc3ca4b376c66c455ffdc38edfd91ad"
+  },
+  "amended_execution": {
+    "diagnostic_repo_commit": "fd7ee14764f0d0be04b37349fac99825936c57a2",
+    "code_ci_run_id": 36009727585,
+    "code_ci_conclusion": "success",
+    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_FIELD_FAILURE_DIAGNOSTIC_RUN_ALL.ipynb",
+    "notebook_sha256": "250d3a4a4b2520aeb0d832ab13e0837565033416f48805c668d2367ca6a29b89",
+    "optimizer_steps_permitted": 0,
+    "parameter_updates_permitted": 0,
+    "checkpoint_selection_permitted": false,
+    "r512_permitted": false,
+    "stage13_permitted": false
+  },
+  "evidence_boundary": {
+    "completed_source_run_id": "20260924T115953Z",
+    "stopped_bc_endpoint_run_consumed_as_scientific_evidence": false
+  },
+  "claim_boundary": [
+    "The source fixed replay bank hash remains provenance evidence but its exact indices are unavailable.",
+    "The rerun must not claim exact overlap with the historical training bank.",
+    "Reference-vs-current residual rank drift is a distinct descriptive measurement on the same frozen query pool.",
+    "No scientific result was produced by the apparatus-failed notebook.",
+    "No training, replay refresh, target change, or capacity change is authorized by this amendment."
+  ]
+}

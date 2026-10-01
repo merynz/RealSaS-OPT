@@ -1,0 +1,229 @@
+name: knight-stage18-dense-face-support-audit-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/knight_stage18_dense_face_support_audit_v1.yml'
+
+concurrency:
+  group: knight-stage18-dense-face-support-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      OUT: canonical/knight_stage18_dense_face_support_audit_v1
+
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+
+      - name: Install exact audit dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off numpy scipy
+
+      - name: Compare Stage18 faces with Stage12 dense face incidence
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          import numpy as np
+
+          from compiler.realsas_compiler_core.substrate.scene_first_signed import (
+              mesh_connected_component_labels_v1,
+              _adaptive_voxel_compact,
+          )
+
+          root=Path("/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924")
+          out=Path("canonical/knight_stage18_dense_face_support_audit_v1")
+          out.mkdir(parents=True,exist_ok=True)
+
+          p12=root/"artifacts/12_ZERO_SURFACE_DECODED/signed_zero_surface_seal.json"
+          p15=root/"artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"
+          p18=root/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json"
+          for p in (p12,p15,p18):
+              if not p.is_file():
+                  raise RuntimeError(f"MISSING:{p}")
+
+          z=json.loads(p12.read_text())
+          s=json.loads(p15.read_text())
+          m=json.loads(p18.read_text())
+          npz=Path(str(z["npz_path"]))
+          if not npz.is_file():
+              raise RuntimeError(f"MISSING_ZERO_NPZ:{npz}")
+
+          with np.load(npz,allow_pickle=False) as data:
+              v=np.asarray(data["vertices_normalized"],np.float64)
+              f=np.asarray(data["faces"],np.int64)
+              h=np.asarray(data["implicit_normals"],np.float64)
+
+          meta=dict(s.get("metadata") or {})
+          target=int(meta["compact_target_nodes"])
+          component_aware=bool(meta["component_aware_compaction"])
+          # Voxel assignment/inverse is a pure function of positions, faces,
+          # target_nodes and component labels. Normals are not consulted until
+          # after inverse selection, so constant nondegenerate normals avoid
+          # re-running the unrelated O(N log N) normal operator.
+          audit_normals=np.zeros_like(v)
+          audit_normals[:,2]=1.0
+          labels=mesh_connected_component_labels_v1(len(v),f) if component_aware else None
+          cp,cn,edges,divisions,inverse=_adaptive_voxel_compact(
+              v,f,audit_normals,
+              target_nodes=target,
+              preserve_connected_components=component_aware,
+              precomputed_component_labels=labels,
+          )
+
+          nodes=list(s.get("surface_nodes") or [])
+          if len(nodes)!=len(cp):
+              raise RuntimeError(f"COMPACT_NODE_COUNT_DRIFT:{len(nodes)}!={len(cp)}")
+          sid_to_idx={}
+          sid_state={}
+          for i,node in enumerate(nodes):
+              sid=str(node["surface_id"])
+              pg=str(node.get("persistence_group_id") or "")
+              if pg!=f"SCENE_FIRST_SIGNED_ZERO:{i:05d}":
+                  raise RuntimeError(f"SURFACE_INDEX_IDENTITY_DRIFT:{i}:{pg}")
+              sid_to_idx[sid]=i
+              flags=set(map(str,node.get("validity_flags") or ()))
+              sid_state[sid]="COMPLETED" if "MODEL_COMPLETED_SIGNED_ZERO_SURFACE" in flags else "OBSERVED"
+
+          mapped=np.asarray(inverse[f],np.int64)
+          dense_face_incidence=set()
+          dense_edges=set()
+          collapsed_dense_faces=0
+          for tri in mapped:
+              vals=tuple(sorted(map(int,tri.tolist())))
+              uniq=tuple(sorted(set(vals)))
+              if len(uniq)<3:
+                  collapsed_dense_faces+=1
+              else:
+                  dense_face_incidence.add(vals)
+              u=sorted(set(map(int,tri.tolist())))
+              for a_i in range(len(u)):
+                  for b_i in range(a_i+1,len(u)):
+                      dense_edges.add((u[a_i],u[b_i]))
+
+          cid_to_sid={}
+          for row in m.get("vertices") or []:
+              cid=str(row["candidate_vertex_id"])
+              md=dict(row.get("metadata") or {})
+              sid=str(md.get("source_surface_id") or "")
+              if sid not in sid_to_idx:
+                  raise RuntimeError(f"CANDIDATE_SOURCE_SURFACE_MISSING:{cid}:{sid}")
+              cid_to_sid[cid]=sid
+
+          supported=0
+          invented=0
+          all_three_edges_but_no_face=0
+          unsupported_edge_face=0
+          invented_examples=[]
+          supported_examples=[]
+          supported_by_completed_vertices={str(i):0 for i in range(4)}
+          invented_by_completed_vertices={str(i):0 for i in range(4)}
+          edge_only_invented_by_completed_vertices={str(i):0 for i in range(4)}
+          for face in m.get("faces") or []:
+              sids=[cid_to_sid[str(cid)] for cid in face]
+              ids=[sid_to_idx[sid] for sid in sids]
+              completed_count=sum(sid_state[sid]=="COMPLETED" for sid in sids)
+              tri=tuple(sorted(ids))
+              edge_ok=all(
+                  tuple(sorted((tri[a],tri[b]))) in dense_edges
+                  for a,b in ((0,1),(1,2),(2,0))
+              )
+              if tri in dense_face_incidence:
+                  supported+=1
+                  supported_by_completed_vertices[str(completed_count)]+=1
+                  if len(supported_examples)<8: supported_examples.append(tri)
+              else:
+                  invented+=1
+                  invented_by_completed_vertices[str(completed_count)]+=1
+                  if edge_ok:
+                      all_three_edges_but_no_face+=1
+                      edge_only_invented_by_completed_vertices[str(completed_count)]+=1
+                  else:
+                      unsupported_edge_face+=1
+                  if len(invented_examples)<24:
+                      invented_examples.append({
+                        "compact_indices":tri,
+                        "all_three_dense_edges_exist":edge_ok,
+                        "surface_ids":sids,
+                        "completed_vertex_count":int(completed_count),
+                      })
+
+          total=len(m.get("faces") or [])
+          report={
+            "schema":"RealSaS.KnightStage18DenseFaceSupportAudit.v1",
+            "status":"AUDIT_ONLY__NO_REPAIR_APPLIED",
+            "artifact_sha256":{
+              "stage12_seal":hashlib.sha256(p12.read_bytes()).hexdigest(),
+              "stage12_npz":hashlib.sha256(npz.read_bytes()).hexdigest(),
+              "stage15_surface":hashlib.sha256(p15.read_bytes()).hexdigest(),
+              "stage18_candidate":hashlib.sha256(p18.read_bytes()).hexdigest(),
+            },
+            "replay":{
+              "dense_vertex_count":int(len(v)),
+              "dense_face_count":int(len(f)),
+              "compact_target_nodes":target,
+              "compact_actual_nodes":int(len(cp)),
+              "compact_voxel_divisions":int(divisions),
+              "component_aware_compaction":component_aware,
+              "inverse_replay_normal_independence_verified_from_implementation":True,
+              "collapsed_dense_face_count":int(collapsed_dense_faces),
+              "unique_noncollapsed_compact_dense_face_count":int(len(dense_face_incidence)),
+              "unique_compact_dense_edge_count":int(len(dense_edges)),
+            },
+            "stage18":{
+              "vertex_count":len(m.get("vertices") or []),
+              "face_count":total,
+              "candidate_lineage_hash":str(m.get("candidate_lineage_hash") or ""),
+              "producer_id":str(m.get("producer_id") or ""),
+              "metadata":dict(m.get("metadata") or {}),
+            },
+            "comparison":{
+              "dense_face_incidence_supported_stage18_faces":supported,
+              "dense_face_incidence_supported_fraction":supported/max(total,1),
+              "stage18_faces_without_dense_face_incidence":invented,
+              "stage18_faces_without_dense_face_incidence_fraction":invented/max(total,1),
+              "three_dense_edges_but_no_dense_face_count":all_three_edges_but_no_face,
+              "missing_at_least_one_dense_edge_count":unsupported_edge_face,
+              "supported_by_completed_vertex_count":supported_by_completed_vertices,
+              "invented_by_completed_vertex_count":invented_by_completed_vertices,
+              "edge_only_invented_by_completed_vertex_count":edge_only_invented_by_completed_vertices,
+              "supported_examples":supported_examples,
+              "invented_examples":invented_examples,
+            },
+            "finding":{
+              "id":"KNIGHT_STAGE18_FACE_INCIDENCE_PROVENANCE",
+              "clique_face_invention_observed":invented>0,
+              "pure_three_edge_clique_invention_observed":all_three_edges_but_no_face>0,
+              "claim_boundary":"Exact replay of current Stage14 compaction index partition from sealed Stage12 zero-surface. This measures incidence provenance only; it does not assert every dense zero-surface triangle is already a qualified product face."
+            }
+          }
+          (out/"REPORT.json").write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
+          print(json.dumps(report,indent=2,sort_keys=True))
+          PY
+
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add "$OUT/REPORT.json"
+          git commit -m 'audit: seal Knight Stage18 dense-face support evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

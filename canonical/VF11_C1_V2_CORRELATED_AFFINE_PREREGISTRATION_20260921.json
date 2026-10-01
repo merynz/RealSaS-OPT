@@ -1,0 +1,61 @@
+{
+  "schema": "RealSaS.VF11C1CorrelatedAffinePreregistration.v2",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__C1_V2_CORRELATED_TANGENT_AFFINE",
+  "authority_class": "RESEARCH_PREREGISTRATION_ONLY",
+  "product_authority_minted": false,
+  "shipping_certificate_backend": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "full_domain_traversal_authorized": false,
+  "parent_v1_closure": "canonical/VF11_C1_V1_CLOSURE_20260921.json",
+  "causal_hypothesis": "C1 V1 is practically vacuous primarily because interval JVP propagation destroys primal/tangent correlation, especially through LayerNorm and activation products.",
+  "intervention": {
+    "changed": [
+      "Represent directional tangent as affine center plus shared/correlated generators rather than component intervals.",
+      "Use exact affine directional derivative of bilinear triplane interpolation inside each interpolation regime.",
+      "Propagate dvar through affine products of centered primal and tangent forms.",
+      "Represent LayerNorm scalar factors conservatively and multiply them with tangent affine forms rather than collapsing the tangent to intervals.",
+      "Propagate SiLU tangent with conservative SiLU-prime factors multiplied into affine tangent forms."
+    ],
+    "frozen": [
+      "frozen Knight checkpoint and scene planes",
+      "C0 d8 NEAR_ZERO cohort and primary 19-cell handoff definition",
+      "candidate direction policy: center gradient then canonical axes",
+      "max micro depth 2 for the first frozen-Knight comparison",
+      "strict sign criterion for directional regularity"
+    ]
+  },
+  "claim_boundary": {
+    "proven_regular_means": "One fixed direction has a conservative whole-cell strict derivative sign.",
+    "does_not_mean": [
+      "single connected component",
+      "global topology",
+      "surface existence",
+      "surface crossing uniqueness without additional face-sign proof",
+      "shipping-rigorous certificate under ordinary float64"
+    ]
+  },
+  "gates_before_knight": [
+    "exact linear/monotone semantic fixtures certify",
+    "exact tangent/fold/critical fixtures do not falsely certify",
+    "random tiny production-architecture autograd JVP samples are contained by V2 bounds",
+    "no NaN/Inf bounds on the deterministic fixture bank"
+  ],
+  "frozen_knight_measurement": {
+    "primary_count": 19,
+    "primary_definition": "C0 d8/m2 PROVEN_ZERO_EXISTS or UNKNOWN",
+    "stress_count": 32,
+    "max_micro_depth": 2,
+    "interpretation": {
+      "zero_primary_certificates": "FALSIFIED__C1_V2_REMAINS_VACUOUS_ON_PRIMARY_HANDOFF",
+      "one_or_more_primary_certificates_and_zero_empirical_contradictions": "NONVACUOUS_C1_V2_EVIDENCE__REVIEW_REQUIRED",
+      "any_empirical_contradiction": "FAIL__IMPLEMENTATION_OR_NUMERIC_SOUNDNESS_ALARM"
+    }
+  },
+  "runtime_policy": {
+    "no_full_domain_run": true,
+    "short_self_hosted_fixture_smoke_allowed": true,
+    "frozen_knight_32_cell_run": "LONG_USER_RUN_ALL_NOTEBOOK_ONLY_AFTER_SHORT_GATES_PASS"
+  }
+}

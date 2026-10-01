@@ -1,0 +1,17 @@
+{
+  "schema": "RealSaS.KnightCAAVariationalHoldoutV2Trigger.v1",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "purpose": "MEASURE_FULL_SOURCE_CONSTRAINED_VARIATIONAL_COMPLETION_AGAINST_FROZEN_MULTI_SCALE_HOLDOUT",
+  "control_lattice_resolution": 4,
+  "holdout_region_sizes": [
+    16,
+    64,
+    256,
+    1024
+  ],
+  "regions_per_size": 2,
+  "source_constraints": "FOREGROUND_AND_SAFE_TRANSPARENT_SOURCE_HARD_DIRICHLET",
+  "shipping_policy_changed": false,
+  "product_authority_claimed": false,
+  "revision": 1
+}

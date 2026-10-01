@@ -1,0 +1,50 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX3Preregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__PROOF_AWARE_D13_NARROW_BAND_PLANNER",
+  "authority_class": "RESEARCH_PREREGISTRATION_ONLY",
+  "parents": [
+    "canonical/VF11_EXTRACTOR_TRANSITION_X2_CLOSURE_20260921.json",
+    "canonical/VF11_EXTRACTOR_TRANSITION_X1_RESULT_20260921.json"
+  ],
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "subject_scope": "same frozen 12 corrected C1-primary Knight d8 roots; local research only",
+  "target_lattice": {
+    "absolute_depth": 13,
+    "cells_per_d8_root_axis": 32,
+    "block_cells_per_axis": 4,
+    "blocks_per_d8_root_axis": 8,
+    "reason": "d11 proof leaves align exactly to one 4x4x4 d13 extraction block; coarser d9/d10 certified leaves cover integer unions of these blocks"
+  },
+  "planner_classes": {
+    "CERTIFIED_EMPTY": "covered by a terminal corrected-C0 strict-sign proof; block may be pruned without sampling-based absence inference",
+    "PROVEN_SURFACE": "terminal GRAPH or unresolved terminal with C0 PROVEN_ZERO_EXISTS; block must remain active",
+    "UNCERTAIN": "terminal unresolved with C0 UNKNOWN; block remains active and may not be treated as empty from same-sign target corners"
+  },
+  "frozen_audits": [
+    "every d13 block maps to exactly one final proof-partition leaf",
+    "CERTIFIED_EMPTY block must have no direct d13 corner sign bracket",
+    "PROVEN_SURFACE block with no d13 corner bracket is a hidden-surface sampling alarm, not permission to prune",
+    "UNCERTAIN block with no d13 corner bracket remains unresolved/active",
+    "all corner-bracketed nonempty blocks extracted with X2 blockwise Lewiner MC must reproduce dense d13 Lewiner MC on the same 12 root lattices"
+  ],
+  "primary_metrics": [
+    "block counts by planner class",
+    "corner-bracket rate by planner class",
+    "PROVEN_SURFACE_no_corner_bracket count and root IDs",
+    "UNCERTAIN_no_corner_bracket count",
+    "certified-empty contradiction count",
+    "blockwise-vs-dense d13 mesh equivalence",
+    "sample/query reduction relative to dense 12-root d13 evaluation"
+  ],
+  "decision": {
+    "certified_empty_contradiction_or_mesh_mismatch": "FAIL__PLANNER_OR_STITCHING_SOUNDNESS_ALARM",
+    "proven_surface_no_corner_bracket_gt_0": "D13_SAMPLING_INCOMPLETE__TARGETED_LOCAL_REFINEMENT_REQUIRED",
+    "else_uncertain_no_corner_bracket_gt_0": "D13_SAMPLED_MESH_EQUIVALENT_BUT_CONTINUOUS_COMPLETENESS_UNCLOSED",
+    "else": "D13_LOCAL_PROOF_AWARE_NARROW_BAND_READY_FOR_VF11_REPLAY"
+  },
+  "claim_boundary": "X3 does not run a full Knight witness and does not claim source-raster fidelity. It only tests whether the proof partition can safely drive the existing MC contourer on a fixed d13 local lattice."
+}

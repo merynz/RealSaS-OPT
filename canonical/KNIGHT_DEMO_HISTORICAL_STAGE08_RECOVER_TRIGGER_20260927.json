@@ -1,0 +1,10 @@
+{
+  "schema": "RealSaS.KnightDemoHistoricalStage08RecoverTrigger.v1",
+  "status": "RERUN_BY_EXACT_DRIVE_PARENT_ID",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "authority": "canonical/KNIGHT_DEMO_HISTORICAL_STAGE08_IMPORT_AUTHORITY_V1_20260927.json",
+  "archive_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+  "requested_on": "2026-09-27",
+  "product_authority_claimed": false,
+  "revision": 2
+}

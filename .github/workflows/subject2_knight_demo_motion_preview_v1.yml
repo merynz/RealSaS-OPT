@@ -1,0 +1,84 @@
+name: subject2-knight-demo-motion-preview-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_DEMO_MOTION_PREVIEW_TRIGGER_20260927.json'
+      - 'tools/demo/render_knight_motion_preview_v1.py'
+      - 'canonical/KNIGHT_DEMO_MOTION_PREVIEW_BASELINE_V1.json'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-demo-motion-preview-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Compile preview renderer
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/demo/render_knight_motion_preview_v1.py
+
+      - name: Verify frozen preview implementation
+        run: |
+          set -euo pipefail
+          test "$(git hash-object tools/demo/render_knight_motion_preview_v1.py)" = "7917be02f325ba00b5dcd2b31a786898e45f640f"
+          echo "KNIGHT_PREVIEW_RENDERER_BASELINE_PASS"
+
+      - name: Render idle run slash demo previews
+        run: |
+          set -euo pipefail
+          mkdir -p canonical/knight_demo_motion_preview_v1
+          rm -f \
+            canonical/knight_demo_motion_preview_v1/KNIGHT_DEMO_MOTION_VISUAL_CONTINUATION_REPORT_V1.json \
+            canonical/knight_demo_motion_preview_v1/KNIGHT_IDLE_DEMO_PREVIEW_V1.png \
+            canonical/knight_demo_motion_preview_v1/KNIGHT_RUN_DEMO_PREVIEW_V1.png \
+            canonical/knight_demo_motion_preview_v1/KNIGHT_SLASH_DEMO_PREVIEW_V1.png
+          PYTHONPATH=. python -m tools.demo.render_knight_motion_preview_v1             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --out-dir canonical/knight_demo_motion_preview_v1
+
+      - name: Verify byte-exact preview baseline
+        run: |
+          set -euo pipefail
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_DEMO_MOTION_VISUAL_CONTINUATION_REPORT_V1.json)" = "9120723f6bc00142fb6bb992d3ee7a85c601bf4f"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_IDLE_DEMO_PREVIEW_V1.png)" = "cae86d8a04bde6768ac9c3dafed13a2ab318cf29"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_RUN_DEMO_PREVIEW_V1.png)" = "8e9ed58a3bfbbace73f54e3e5593691f90eef4f1"
+          test "$(git hash-object canonical/knight_demo_motion_preview_v1/KNIGHT_SLASH_DEMO_PREVIEW_V1.png)" = "7a87f310473d602c99eb712be964dcd430b47cfb"
+          echo "KNIGHT_PREVIEW_SHEET_BASELINE_PASS"
+
+      - name: Seal demo previews
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/knight_demo_motion_preview_v1
+          if git diff --cached --quiet; then
+            echo "DEMO_MOTION_PREVIEW_UNCHANGED"
+            exit 0
+          fi
+          git commit -m 'demo: seal Knight idle run slash previews'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

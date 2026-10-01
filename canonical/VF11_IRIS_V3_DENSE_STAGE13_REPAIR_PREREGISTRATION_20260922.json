@@ -1,0 +1,132 @@
+{
+  "schema": "RealSaS.VF11IrisV3DenseStage13RepairPreregistration.v1",
+  "date_utc": "2026-09-22",
+  "status": "PREREGISTERED__IMPLEMENTATION_AND_SUBJECT_FREE_FALSIFICATION_REQUIRED_BEFORE_KNIGHT_RUN",
+  "root_cause_record": "canonical/VF11_LEARNED_FIELD_R512_ROOT_CAUSE_DIAGNOSIS_20260922.json",
+  "historical_baseline": {
+    "checkpoint_sha256": "59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f",
+    "source_run_id": "20260919T150323Z",
+    "architecture_id": "RealSaS.IRIS.SceneFirstSignedGeometry.v3",
+    "random_seed": 26091909,
+    "anchor_stride_px": 8,
+    "train_steps": 4800,
+    "stage08_evidence_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "dense_source_mask_objective_present": false
+  },
+  "downstream_rebaseline_rule": {
+    "x6c_same_checkpoint_verified": true,
+    "methodological_results_retained": [
+      "C0/X6/X6C soundness logic conditional on the frozen field",
+      "GPU-screen plus CPU-verification execution architecture",
+      "resumable chunk protocol",
+      "cost-model methodology",
+      "proof-engine and extractor implementation equivalence results that do not depend on field-specific numeric rates"
+    ],
+    "checkpoint_specific_numbers_not_transferable": [
+      "39.30427265634782 percent X6C micro2 unresolved-volume fraction",
+      "root EMPTY/UNKNOWN population counts",
+      "spatial certifiability maps and correlations",
+      "LayerNorm/certifiability correlations",
+      "source-external UNKNOWN population fractions",
+      "projected runtime estimates that depend on decisive/UNKNOWN population"
+    ],
+    "required_after_new_checkpoint": "Re-run the checkpoint-dependent diagnostic/certification population measurements before resuming X7."
+  },
+  "v3_native_dense_objective_contract": {
+    "producer": "models/iris/v3/scene_first_signed_v3.py",
+    "requirement": "The loss must backpropagate through SceneFirstSignedGeometryV3.signed-field queries themselves; V2 support-probability loss wiring is not accepted as V3 evidence.",
+    "target_authority": "QUALIFIED_OBSERVATION_FOREGROUND_MASK_ONLY__TRAINING_TARGET_NOT_FORWARD_INPUT",
+    "camera_authority": "EXACT_STAGE07_QUALIFIED_ORTHOGRAPHIC_CAMERAS",
+    "foreground_semantics": "For a camera ray, predicted foreground probability is a differentiable function of whether the V3 signed field enters the negative/interior side along the admitted ray segment.",
+    "recommended_surrogate": "Sample the V3 signed field at a fixed preregistered depth lattice along each camera ray; compute a temperature-controlled soft minimum of signed values; map it through a sigmoid to ray foreground probability; apply boundary-weighted BCE plus soft Dice at source-raster resolution or a preregistered anti-aliased equivalent.",
+    "must_preserve_existing_terms": [
+      "local signed supervision",
+      "background positive-margin supervision",
+      "certified-outside positive-margin supervision",
+      "sampled teacher-surface-zero supervision"
+    ],
+    "mask_forward_input": false,
+    "visual_hull_clipping": false,
+    "mesh_repair_before_primary_measurement": false
+  },
+  "subject_free_falsification_before_knight": {
+    "required_fixtures": [
+      "THIN_BLADE",
+      "SMALL_COMPONENT",
+      "THIN_STRAP",
+      "FORK_GAP",
+      "CONCAVE_NOTCH"
+    ],
+    "required_properties": [
+      "dense loss reduces source-external silhouette support error",
+      "dense loss reduces source-interior undercoverage",
+      "FORK_GAP and CONCAVE_NOTCH ground-truth geometry is not collapsed to the visual hull",
+      "thin and small components are not erased by the ray-depth soft-min surrogate",
+      "loss gradients remain finite and nonzero near foreground boundaries",
+      "opposite-view duplicate silhouette weighting cannot dominate the objective"
+    ],
+    "knight_threshold_tuning_forbidden": true
+  },
+  "orthographic_view_pair_semantics": {
+    "pairs": [[0,4],[1,5],[2,6],[3,7]],
+    "note": "For the sealed exact orthographic setup, opposite cameras provide the same projected occupancy support up to image-axis mirroring for closed opaque geometry; they are not eight independent silhouette constraints.",
+    "training_weight_rule": "Normalize dense silhouette loss by independent opposite-view pair so a duplicated opposite projection does not receive double authority merely by enumeration."
+  },
+  "knight_causal_arm_A_full_dense": {
+    "execute_only_after_subject_free_pass": true,
+    "initialization": "FRESH_INIT",
+    "random_seed": 26091909,
+    "anchor_stride_px": 8,
+    "train_steps": 4800,
+    "architecture": "UNCHANGED_SCENE_FIRST_SIGNED_GEOMETRY_V3_EXCEPT_REQUIRED_TRAINING_LOSS_INTERFACE",
+    "single_scientific_change": "ADD_FROZEN_V3_NATIVE_DENSE_SOURCE_COVERAGE_OBJECTIVE",
+    "all_four_opposite_view_pairs_dense_supervised": true,
+    "evaluation": [
+      "unchanged frozen Stage13-v2 on all eight views",
+      "R256 and R512 learned-field decode/convergence",
+      "source-support violation audit",
+      "learned-versus-source-hull distance diagnostic"
+    ],
+    "claim_if_pass": "FIT_SOURCE_FIDELITY_REPAIR_EVIDENCE_ONLY__NOT_GENERALIZATION_PROOF"
+  },
+  "knight_causal_arm_B_pair_holdout": {
+    "execute_only_if": "ARM_A_PASSES_STAGE13_V2_AND_SUBJECT_FREE_HULL_COLLAPSE_GATES",
+    "purpose": "Test whether dense raster-target alignment transfers to an unsupervised projection axis rather than succeeding only by direct target fitting.",
+    "held_out_opposite_pair": [0,4],
+    "held_out_pair_selection_rule": "LEXICOGRAPHIC_FIRST_PAIR_FROZEN_BEFORE_ARM_A_RESULT",
+    "held_out_from": [
+      "dense source-mask objective only"
+    ],
+    "still_available_as_forward_input": "RGB/camera observations remain available because the question is dense-target transfer given the normal inference evidence.",
+    "important_nonclaim": "This is not unseen-view or subject generalization: historical FIT geometry supervision can still constrain the field globally. It is specifically a dense-target leakage/collapse test.",
+    "primary_measurement": "Stage13-v2 metrics on held-out pair [0,4] plus all-view diagnostics"
+  },
+  "hull_collapse_policy": {
+    "source_external_support": "Must decrease toward the calibrated source-support tolerance; unsupported outgrowth is never useful geometry.",
+    "knight_learned_hull_distance": "DIAGNOSTIC_ONLY__do not freeze a Knight-derived minimum-distance threshold.",
+    "alarm": "A global trend toward learned surface == source visual hull is suspicious, but promotion-blocking thresholds must come from subject-free known-geometry fixtures.",
+    "hard_gate_owner": "VF11 subject-free FORK_GAP/CONCAVE_NOTCH known-geometry preservation tests"
+  },
+  "checkpoint_provenance_gate": {
+    "required_checkpoint_metadata": [
+      "architecture_id",
+      "trainer_source_path",
+      "trainer_source_sha256",
+      "training_objective_policy_path",
+      "training_objective_policy_sha256",
+      "v3_dense_source_coverage_enabled",
+      "dense_supervised_view_pairs",
+      "random_seed",
+      "anchor_stride_px",
+      "train_steps",
+      "stage08_evidence_sha256",
+      "observation_set_binding_hash",
+      "normalization_binding_hash"
+    ],
+    "stage12_rule": "Refuse zero-surface admission when checkpoint metadata does not prove the exact frozen V3 training producer/objective provenance expected by the preregistration.",
+    "hash_only_checkpoint_identity_is_sufficient": false
+  },
+  "x7_execution_authorized": false,
+  "certification_depth_escalation_authorized": false,
+  "product_authority_minted": false
+}

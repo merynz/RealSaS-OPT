@@ -1,0 +1,15 @@
+{
+  "schema": "RealSaS.KnightResidualTopologySeverityPrereg.v1",
+  "status": "FROZEN_BEFORE_RESIDUAL_TOPOLOGY_SEVERITY_RESULT",
+  "date": "2026-09-29",
+  "purpose": "Attribute the remaining catastrophic mechanics under the existing STRETCH_AND_L1_JSD mutex partition without changing its partition policy.",
+  "partition_policy": "Existing non-preloaded mechanical mutex solver with repulsive mask Stage35-scope AND stretch>4 AND Arachne weight-L1>1; JSD orders signed events.",
+  "teacher_policy": "Partition and every teacher-free edge score are frozen before teacher topology or teacher weights are loaded.",
+  "questions": [
+    "Are remaining actual-motion >10x and >4x faces concentrated in teacher-evaluation false-negative cross-region faces?",
+    "Do those false negatives lack raw repulsive evidence, or were they lost by graph partition conflict resolution?",
+    "What seam-edge multiplicity and teacher-free score distributions characterize the catastrophic false negatives?"
+  ],
+  "no_threshold_search": true,
+  "no_product_mutation": true
+}

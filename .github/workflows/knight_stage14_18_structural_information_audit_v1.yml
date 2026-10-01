@@ -1,0 +1,196 @@
+name: knight-stage14-18-structural-information-audit-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/knight_stage14_18_structural_information_audit_v1.yml'
+
+concurrency:
+  group: knight-stage14-18-structural-information-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      OUT: canonical/knight_stage14_18_structural_information_audit_v1
+
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+
+      - name: Audit exact Stage14-18 structural artifacts
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, hashlib
+          from pathlib import Path
+          root=Path("/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924")
+          out=Path("canonical/knight_stage14_18_structural_information_audit_v1")
+          out.mkdir(parents=True,exist_ok=True)
+
+          def find_semantic(kind):
+            candidates=[]
+            for p in sorted((root/"artifacts").glob("**/*.json")):
+              try:
+                d=json.loads(p.read_text())
+              except Exception:
+                continue
+              schema=str(d.get("schema") or "")
+              keys=set(d.keys())
+              ok=False
+              if kind=="surface":
+                ok=(schema=="RealSaS.RiggingSurfaceIR.v1" or {"surface_nodes","local_relations"}.issubset(keys))
+              elif kind=="partition":
+                ok=(schema=="RealSaS.MechanicalPartitionIR.v1" or {"components","boundary_constraints"}.issubset(keys))
+              elif kind=="candidate":
+                ok=(schema=="RealSaS.CanonicalMeshCandidateIR.v1" or {"vertices","faces","candidate_lineage_hash"}.issubset(keys))
+              if ok:
+                candidates.append(p)
+            if not candidates:
+              raise RuntimeError(f"MISSING_SEMANTIC_ARTIFACT:{kind}")
+            if len(candidates)==1:
+              return candidates[0]
+            # Prefer the candidate whose absolute path is referenced by ACTIVE_RUN_V2.
+            ledger_path=root/"ACTIVE_RUN_V2.json"
+            if ledger_path.is_file():
+              ledger=json.loads(ledger_path.read_text())
+              refs=set()
+              for row in ledger.get("stages") or []:
+                for o in row.get("outputs") or []:
+                  op=Path(str(o.get("path") or ""))
+                  if op.is_file():
+                    refs.add(str(op.resolve()))
+              matches=[p for p in candidates if str(p.resolve()) in refs]
+              if len(matches)==1:
+                return matches[0]
+            raise RuntimeError(f"AMBIGUOUS_SEMANTIC_ARTIFACT:{kind}:{[str(p) for p in candidates]}")
+          paths={
+            "stage14_candidate":root/"artifacts/14_GSA_BUILD/rigging_surface_candidate.json",
+            "stage15_surface":root/"artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json",
+            "stage17":root/"artifacts/17_MECHANICAL_PARTITION_QUALIFIED/mechanical_partition.json",
+            "stage18":root/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json",
+          }
+          for k,p in paths.items():
+            if not p.is_file():
+              raise RuntimeError(f"MISSING_EXACT_ARTIFACT:{k}:{p}")
+          print("RESOLVED_ARTIFACTS",json.dumps({k:str(v) for k,v in paths.items()},sort_keys=True))
+
+          j14=json.loads(paths["stage15_surface"].read_text())
+          j17=json.loads(paths["stage17"].read_text())
+          j18=json.loads(paths["stage18"].read_text())
+
+          def pick(d,*names):
+            for n in names:
+              if n in d:return d[n]
+            return None
+
+          nodes=pick(j14,"surface_nodes","nodes") or []
+          rels=pick(j14,"local_relations","relations") or []
+          comps=pick(j17,"components","component_regions") or []
+          bounds=pick(j17,"boundary_constraints","boundaries") or []
+          verts=pick(j18,"vertices") or []
+          faces=pick(j18,"faces") or []
+
+          decisions={}
+          for r in bounds:
+            d=str(r.get("decision"))
+            decisions[d]=decisions.get(d,0)+1
+
+          node_state={}
+          observed_nodes=0
+          completed_nodes=0
+          source_obs_bound_nodes=0
+          for n in nodes:
+            flags=set(map(str,n.get("validity_flags") or ()))
+            sid=str(n.get("surface_id") or "")
+            state="COMPLETED" if "MODEL_COMPLETED_SIGNED_ZERO_SURFACE" in flags else "OBSERVED"
+            node_state[sid]=state
+            observed_nodes += int(state=="OBSERVED")
+            completed_nodes += int(state=="COMPLETED")
+            source_obs_bound_nodes += int(bool(n.get("source_observation_ids") or ()))
+
+          rel_unknown=0
+          rel_scores=[]
+          rel_kinds={}
+          rel_endpoint_state_counts={}
+          certain_relations_touching_completed=0
+          for r in rels:
+            md=dict(r.get("metadata") or {})
+            is_unknown=bool(md.get("crosses_unknown")) or bool(md.get("unknown_bridge"))
+            if is_unknown:
+              rel_unknown+=1
+            try: rel_scores.append(float(r.get("score")))
+            except: pass
+            k=str(r.get("relation_kind"))
+            rel_kinds[k]=rel_kinds.get(k,0)+1
+            a=node_state[str(r.get("a_surface_id"))]
+            b=node_state[str(r.get("b_surface_id"))]
+            key="-".join(sorted((a,b)))
+            rel_endpoint_state_counts[key]=rel_endpoint_state_counts.get(key,0)+1
+            if "COMPLETED" in (a,b) and not is_unknown and float(r.get("score",0.0))>0.0:
+              certain_relations_touching_completed+=1
+
+          comp_sizes=sorted([len(c.get("surface_ids") or []) for c in comps],reverse=True)
+          report={
+            "schema":"RealSaS.KnightStage14To18StructuralInformationAudit.v1",
+            "status":"AUDIT_ONLY__NO_REPAIR_APPLIED",
+            "artifact_sha256":{k:hashlib.sha256(p.read_bytes()).hexdigest() for k,p in paths.items()},
+            "stage14_surface_preserved_at_stage15":{
+              "node_count":len(nodes),
+              "relation_count":len(rels),
+              "relation_kind_counts":rel_kinds,
+              "relation_unknown_flag_count":rel_unknown,
+              "relation_score_min":min(rel_scores) if rel_scores else None,
+              "relation_score_max":max(rel_scores) if rel_scores else None,
+              "relation_score_unique_count":len(set(rel_scores)),
+              "observed_node_count":int(observed_nodes),
+              "completed_node_count":int(completed_nodes),
+              "source_observation_id_bound_node_count":int(source_obs_bound_nodes),
+              "relation_endpoint_state_counts":rel_endpoint_state_counts,
+              "certain_relations_touching_completed_count":int(certain_relations_touching_completed),
+            },
+            "stage17":{
+              "component_count":len(comps),
+              "component_sizes_desc":comp_sizes[:32],
+              "largest_component_fraction":(comp_sizes[0]/max(1,len(nodes))) if comp_sizes else None,
+              "boundary_count":len(bounds),
+              "decision_counts":decisions,
+            },
+            "stage18":{
+              "vertex_count":len(verts),
+              "face_count":len(faces),
+            },
+            "finding":{
+              "all_gsa_relations_forced_certain":bool(rels and rel_unknown==0 and len(set(rel_scores))==1 and rel_scores[0]==1.0),
+              "stage14_surface_read_from_lossless_stage15_qualified_copy":True,
+              "partition_has_no_separate_edges":decisions.get("SEPARATE",0)==0,
+              "partition_single_component":len(comps)==1,
+              "completed_surface_relations_forced_certain":certain_relations_touching_completed>0,
+              "claim_boundary":"Exact Knight artifact audit; no repair or alternative partition is proposed."
+            }
+          }
+          (out/"REPORT.json").write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
+          print(json.dumps(report,indent=2,sort_keys=True))
+          PY
+
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add "$OUT/REPORT.json"
+          git commit -m 'audit: seal Knight Stage14-18 structural information evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

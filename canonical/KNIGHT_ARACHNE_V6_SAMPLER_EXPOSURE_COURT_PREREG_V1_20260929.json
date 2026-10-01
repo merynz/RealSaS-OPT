@@ -1,0 +1,49 @@
+{
+  "schema": "RealSaS.KnightArachneV6SamplerExposureCourtPreregistration.v1",
+  "status": "FROZEN_BEFORE_SAMPLER_EXPOSURE_RESULT",
+  "date": "2026-09-29",
+  "purpose": "Measure whether the exact Knight Arachne V6 uniform-valid sampling schedule starves sparse per-bone active support, and compare exposure-only active-balanced counterfactual schedules without training or model mutation.",
+  "authority": {
+    "v6_architecture": "RealSaS.Arachne.A1.RawSurfaceK4AttentionDirectSimplex.v6",
+    "v6_source_sha256": "39ff4f7a2051f0d9c1251a5999f472b9926e83deacbedcedc8e92eea424dce01",
+    "teacher_bank_filename": "ARACHNE_KNIGHT_TEACHER_BANK_FIX2.npz",
+    "teacher_bank_expected_sha256": "26b6891ff81b9bfc3405461394159547fa76b417852a44518425b4e1de7e67d3",
+    "closure_step": 8192,
+    "decoder_seed": 20261128,
+    "rows_per_step": 384
+  },
+  "arms": [
+    {
+      "id": "UNIFORM_VALID_EXACT_V6",
+      "description": "Exact V6 schedule replay: uniform sampling without replacement from teacher_valid rows."
+    },
+    {
+      "id": "ACTIVE_BALANCED_K1",
+      "description": "Exposure-only counterfactual: attempt one distinct positive-support row per teacher target column each step, fill remaining budget uniformly from valid rows."
+    },
+    {
+      "id": "ACTIVE_BALANCED_K4",
+      "description": "Exposure-only counterfactual: attempt four distinct positive-support rows per teacher target column each step, fill remaining budget uniformly from valid rows."
+    }
+  ],
+  "active_thresholds": [
+    0,
+    0.01,
+    0.05,
+    0.1
+  ],
+  "frozen_metrics": [
+    "active_valid_row_count per target column",
+    "zero_active_step_count/fraction per target column",
+    "active_rows_per_step min/p05/p50/p95/max",
+    "active exposure total",
+    "number of target columns with any zero-active step",
+    "worst/median zero-active-step fraction"
+  ],
+  "claim_boundary": [
+    "No optimizer step, model inference, topology inference, or product mutation is allowed.",
+    "Teacher data are used only to measure training exposure and construct diagnostic counterfactual schedules.",
+    "Counterfactual active-balanced schedules are not claimed to reproduce SkinTokens source exactly; they test the causal exposure principle under the same row budget.",
+    "All schedules remain within teacher-valid rows and therefore cannot solve the teacher-invalid supervision hole."
+  ]
+}

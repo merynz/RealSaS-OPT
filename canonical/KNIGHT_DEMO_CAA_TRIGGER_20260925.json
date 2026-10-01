@@ -1,0 +1,70 @@
+{
+  "schema": "RealSaS.KnightDemoCAATrigger.v1",
+  "status": "RERUN_EXACT_STAGE08_LINEAGE__CANONICAL_C_P__PROFILED",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "execution_class": "DEMO_WITNESS",
+  "stage19_receipt": "canonical/KNIGHT_DEMO_STAGE19_RECEIPT_20260925.json",
+  "stage26_handoff_receipt": "canonical/KNIGHT_DEMO_GEPPETTO_STAGE26_HANDOFF_RECEIPT_20260925.json",
+  "target": "25_CAA_REFERENCE_REST_RENDER_PROOF",
+  "product_authority_claimed": false,
+  "product_pass_forbidden": true,
+  "revision": 23,
+  "previous_failure": "GLOBAL_WORST_CASE_TILE32_COMPILE_MEMORY_EXPLOSION_AFTER_FIXED_PAGE_LAYOUT",
+  "test_fixture_repair": "CONSTANT_TIME_SINGLE_FACE_UNSATISFIED_CAPACITY",
+  "production_repair": "PER_FACE_ADAPTIVE_LATTICE_PLUS_TOPOLOGY_PARAMETRIC_EDGE_COUPLING_PLUS_BOUNDED_2K_PAGES_V1",
+  "quality_thresholds_changed": false,
+  "source_art_mutation": false,
+  "expected_sampling_change": {
+    "from": "UNIFORM_WORST_CASE_TILE_RESOLUTION_ON_ALL_FACES",
+    "to": "PER_FACE_PROJECTED_SOURCE_DENSITY_RESOLUTION",
+    "runtime_addressing": "FACE_INDEX_TO_FIXED_PHYSICAL_PAGE_V1"
+  },
+  "required_stage25_receipt_semantic_version": "CANONICAL_C_P_CONTROL_LATTICE_PROLONGATION_V1",
+  "required_head_features": [
+    "PER_FACE_ADAPTIVE_SAMPLING",
+    "TOPOLOGY_BOUND_CROSS_FACE_COMPLETION",
+    "PARAMETRIC_COARSE_FINE_EDGE_COUPLING",
+    "COMPACT_CSR_SURFACE_GRAPH",
+    "STAGE24_SINGLE_CSR_GRAPH_REUSE",
+    "STAGE24_DIRECT_CSR_SEAM_EVALUATION",
+    "NUMERIC_COMPONENT_OWNERSHIP",
+    "SELECTIVE_COMPILE_ARRAY_LOADING",
+    "PACKED_DIRECT_PM_TRUTH",
+    "COMPACT_ADAPTIVE_BARYCENTRIC_AUTHORITY",
+    "BOUNDED_2K_PHYSICAL_PAGES",
+    "PAGED_NATIVE_TRANSPORT"
+  ],
+  "caa_production_semantic_version": "PER_FACE_ADAPTIVE_TOPOLOGY_PARAMETRIC_PAGED_CSR_V1",
+  "surface_graph_representation": "CSR_INT64_OFFSETS_INT32_INDICES_WITH_UNDIRECTED_EDGE_INDEX",
+  "compile_array_schema": "RealSaS.CAACompileArrays.v3",
+  "direct_pm_linear_storage_mode": "PACKED_DIRECT_VALID_VIEW_MAJOR_V1",
+  "direct_pm_linear_storage_dtype": "float64",
+  "source_xy_storage_dtype": "float32",
+  "barycentric_storage_mode": "RECONSTRUCT_FROM_FACE_RESOLUTION_AND_OFFSETS_V1",
+  "canonical_global_completion": {
+    "provenance_code": 4,
+    "source_view_lineage": -3,
+    "control_resolution": 4,
+    "strict_owner": "ALL_VIEW_UNSEEN_ONLY",
+    "dense_transfer": "FACE_LOCAL_BARYCENTRIC_PROLONGATION_PREMULTIPLIED_LINEAR",
+    "threshold_changes": false
+  },
+  "historical_stage08_receipt": "canonical/KNIGHT_DEMO_STAGE08_HISTORICAL_IMPORT_RECEIPT_20260927.json",
+  "performance_contract": "canonical/PRODUCT_COMPILE_PERFORMANCE_CONTRACT_V1_20260927.json",
+  "requested_measurements": [
+    "STAGE21_SOURCE_PREPARE_SECONDS",
+    "STAGE21_CORE_PHASE_SECONDS",
+    "STAGE21_NPZ_SEAL_SECONDS",
+    "STAGE23_DIRECTION_BAKE_SECONDS",
+    "STAGE25_DIRECTION_PROOF_SECONDS"
+  ],
+  "reason": "RERUN_AFTER_STAGE24_DONOR_SAFE_QUALITY_MASK_REPAIR",
+  "requested_on": "2026-09-27",
+  "expected_semantic_change": {
+    "direct_source_authority": "UNCHANGED__EXACT_FIRST_HIT_SOURCE",
+    "holdout_donor_eligibility": "DIRECT_FOREGROUND_DONOR_SAFE",
+    "cross_view_compatibility_population": "DIRECT_FOREGROUND_DONOR_SAFE",
+    "thresholds_changed": false
+  }
+}

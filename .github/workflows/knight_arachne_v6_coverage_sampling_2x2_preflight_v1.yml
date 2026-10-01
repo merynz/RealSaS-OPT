@@ -1,0 +1,75 @@
+name: knight-arachne-v6-coverage-sampling-2x2-preflight-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths:
+      - 'tools/training/run_knight_arachne_v6_coverage_sampling_2x2_v1.py'
+      - 'canonical/KNIGHT_ARACHNE_V6_COVERAGE_SAMPLING_2X2_PREREG_V1_20260929.json'
+      - 'tools/audit_knight_arachne_v6_coverage_sampling_2x2_results_v1.py'
+      - '.github/workflows/knight_arachne_v6_coverage_sampling_2x2_preflight_v1.yml'
+
+concurrency:
+  group: knight-arachne-v6-coverage-sampling-2x2-preflight-v1
+  cancel-in-progress: true
+
+permissions: {contents: read}
+
+jobs:
+  preflight:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      BASE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924
+      V6_OUT: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V6_DEMO_OUTPUT
+      V5_HANDOFF: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V5_DEMO_HANDOFF
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install
+        run: python -m pip install --no-input --progress-bar off numpy
+      - name: Fetch frozen V6 authorities
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          echo "$tmp" >/tmp/arachne_2x2_preflight_dir
+          rclone copyto "$V6_OUT/run_knight_arachne_v6_demo_closure_v1.py" "$tmp/v6.py" --checksum
+          rclone copyto "$V6_OUT/KNIGHT_ARACHNE_V6_DEMO_CLOSURE_PREREG_V1_20260926.json" "$tmp/v6_prereg.json" --checksum
+          rclone copyto "$V5_HANDOFF/ARACHNE_KNIGHT_TEACHER_BANK_FIX2.npz" "$tmp/bank.npz" --checksum
+          mkdir -p "$tmp/historical/UNIFORM_VALID"
+          rclone copyto "$V6_OUT/ARACHNE_KNIGHT_V6_RESULT.json" "$tmp/historical/UNIFORM_VALID/ARACHNE_KNIGHT_V6_RESULT.json" --checksum
+          rclone copyto "$V6_OUT/ARACHNE_KNIGHT_V6_CANONICAL_SKIN_WEIGHTS_F64.npz" "$tmp/historical/UNIFORM_VALID/ARACHNE_KNIGHT_V6_CANONICAL_SKIN_WEIGHTS_F64.npz" --checksum
+          test "$(sha256sum "$tmp/v6.py" | awk '{print $1}')" = "39ff4f7a2051f0d9c1251a5999f472b9926e83deacbedcedc8e92eea424dce01"
+          test "$(sha256sum "$tmp/v6_prereg.json" | awk '{print $1}')" = "187f5c1bac1e813ebdfd1bbb76fa6def3d6543b4c7abc5609d217b3ece5fd597"
+          test "$(sha256sum "$tmp/bank.npz" | awk '{print $1}')" = "26b6891ff81b9bfc3405461394159547fa76b417852a44518425b4e1de7e67d3"
+      - name: Syntax
+        run: python -m py_compile tools/training/run_knight_arachne_v6_coverage_sampling_2x2_v1.py
+      - name: Four-arm CPU schedule preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(cat /tmp/arachne_2x2_preflight_dir)"
+          for arm in UNIFORM_VALID ACTIVE_BALANCED_VALID UNIFORM_ALL_PROJECTED ACTIVE_BALANCED_ALL_PROJECTED; do
+            out="$tmp/$arm"
+            mkdir -p "$out"
+            python tools/training/run_knight_arachne_v6_coverage_sampling_2x2_v1.py               --arm "$arm"               --experiment-prereg canonical/KNIGHT_ARACHNE_V6_COVERAGE_SAMPLING_2X2_PREREG_V1_20260929.json               --v6-source "$tmp/v6.py"               --v6-prereg "$tmp/v6_prereg.json"               --teacher-bank "$tmp/bank.npz"               --output-dir "$out"               --preflight-only
+          done
+          echo ARACHNE_V6_2X2_CPU_PREFLIGHT_PASS
+      - name: Historical evaluator regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(cat /tmp/arachne_2x2_preflight_dir)"
+          python tools/audit_knight_arachne_v6_coverage_sampling_2x2_results_v1.py             --teacher-bank "$tmp/bank.npz"             --root "$tmp/historical"             --out "$tmp/historical_audit.json"             --allow-partial
+          python - "$tmp/historical_audit.json" <<'PY'
+          import json,sys
+          x=json.load(open(sys.argv[1]))["arms"]["UNIFORM_VALID"]
+          assert x["closure_step"]==8192
+          assert abs(x["valid"]["row_l1_p95"]-0.046917030989715766)<1e-12
+          assert abs(x["invalid"]["row_l1_p95"]-1.9995936727362345)<1e-12
+          assert x["invalid"]["row_l1_gt_1"]==151
+          print("ARACHNE_V6_2X2_EVALUATOR_REGRESSION_PASS")
+          PY

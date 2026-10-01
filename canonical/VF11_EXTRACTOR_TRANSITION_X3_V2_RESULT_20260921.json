@@ -1,0 +1,43 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX3V2Result.v1",
+  "date_utc": "2026-09-21",
+  "status": "D13_SAMPLED_MESH_EQUIVALENT_BUT_CONTINUOUS_COMPLETENESS_UNCLOSED",
+  "artifact_sha256": "683b4dc7c5f44f61356f7eb38dc3e2089eca4315f42abca407bc9da1dbe08349",
+  "artifact_bytes": 204782,
+  "self_hosted_semantic_smoke_run_id": 35651123919,
+  "self_hosted_semantic_smoke_conclusion": "success",
+  "self_hosted_semantic_smoke_test_count": 62,
+  "frozen_inputs": {
+    "checkpoint_sha256": "59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f",
+    "scene_planes_sha256": "364f4769f1ffb04362669c1fe04b9b6c8f3afe3308bf4b7cede038d9e8226d28"
+  },
+  "root_count": 12,
+  "leaf_class_counts": {
+    "CERTIFIED_EMPTY": 470,
+    "ACTIVE_GRAPH": 32,
+    "ACTIVE_UNKNOWN": 146,
+    "ACTIVE_ZERO_EXISTS": 106
+  },
+  "certified_empty_mixed_cube_alarm_count": 0,
+  "graph_line_alarm_count": 0,
+  "zero_exists_leaf_sampling_miss_count": 0,
+  "active_unknown_no_mixed_cube_leaf_count": 2,
+  "active_unknown_no_mixed_cube_leaves": [
+    {"root_anchor_id": 49, "proof_path": "323", "absolute_depth": 11},
+    {"root_anchor_id": 62, "proof_path": "115", "absolute_depth": 11}
+  ],
+  "mesh_mismatch_root_count": 0,
+  "dense_query_corner_count": 431244,
+  "active_query_corner_count": 131631,
+  "query_reduction_fraction": 0.6947644488966803,
+  "elapsed_seconds_total": 2.8129277269999875,
+  "interpretation": "Proof-aware pruning removed about 69.5% of local d13 corner queries while reproducing dense d13 Lewiner MC exactly on all 12 roots. Every certified-empty region remained mixed-cube free, every graph leaf passed its axis-line capture audit, and every PROVEN_ZERO_EXISTS leaf contained at least one d13 mixed-sign cube. Continuous completeness remains unclosed only in two C0-UNKNOWN d11 leaves with no d13 mixed cube.",
+  "scientific_boundary": "The two remaining UNKNOWN leaves are not evidence of a missed surface. They are absence-of-proof cases. Same-sign d13 samples cannot promote them to empty.",
+  "full_domain_traversal_performed": false,
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "numeric_rigor": "FLOAT64_FIELD_EVAL__FLOAT32_SKIMAGE_MC_INTERNAL",
+  "next": "X3A_TARGETED_D12_PROOF_REFINEMENT_ON_TWO_UNKNOWN_LEAVES"
+}

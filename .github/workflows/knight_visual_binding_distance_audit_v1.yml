@@ -1,0 +1,65 @@
+name: knight-visual-binding-distance-audit-v1
+on:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths: ['.github/workflows/knight_visual_binding_distance_audit_v1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Measure unbound distance
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, numpy as np
+          from pathlib import Path
+          from scipy.spatial import cKDTree
+          from compiler.realsas_compiler_core.artifact_codec_v2 import (
+              canonical_mesh_candidate_from_dict, qualified_camera_set_from_dict,
+              qualified_observation_set_from_dict,
+          )
+          from compiler.realsas_compiler_core.camera_geometry_v2 import project_points_xyz_v3
+          from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
+              build_visual_mesh_from_mask, bind_source_visual_points_to_projected_surface_v1,
+              raster_xy_to_source_texel_xy,
+          )
+          from compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2 import _load_source_inputs
+          from tools.demo.render_knight_motion_preview_v1 import _ctx
+          from tools.demo.render_knight_visual_mesh_arap_witness_v1 import _candidate_face_indices
+          root=Path(os.environ["RUN_ROOT"]); ctx=_ctx(root.parents[1],root.name)
+          candidate=canonical_mesh_candidate_from_dict(json.loads((root/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json").read_text()))
+          camera_set=qualified_camera_set_from_dict(json.loads((root/"artifacts/05_CAMERA_CONTRACT_SOLVED/qualified_camera_set.json").read_text()))
+          obs=qualified_observation_set_from_dict(json.loads((root/"artifacts/07_OBSERVATION_CONTRACT_QUALIFIED/qualified_observation_set.json").read_text()))
+          cams=tuple(sorted(camera_set.cameras,key=lambda c:int(c.view_index)))
+          _,masks=_load_source_inputs(ctx,obs)
+          rest=np.asarray([v.P for v in candidate.vertices],float); faces=_candidate_face_indices(candidate)
+          for vi in (0,2):
+              mesh=build_visual_mesh_from_mask(np.asarray(masks[vi],bool),target_edge_px=16)
+              b=bind_source_visual_points_to_projected_surface_v1(points_source_xy=mesh.positions,mechanical_positions_xyz=rest,mechanical_faces=faces,camera=cams[vi])
+              un=np.flatnonzero(~np.asarray(b["valid"],bool))
+              proj_src=raster_xy_to_source_texel_xy(project_points_xyz_v3(rest,cams[vi])[:,:2])
+              tree=cKDTree(proj_src)
+              d,_=tree.query(np.asarray(mesh.positions)[un],k=1)
+              print("UNBOUND_VERTEX_DISTANCE",json.dumps({
+                  "view":vi,"count":len(un),
+                  "nearest_mech_vertex_px":{
+                    "min":float(np.min(d)),"p50":float(np.quantile(d,.5)),
+                    "p90":float(np.quantile(d,.9)),"p95":float(np.quantile(d,.95)),
+                    "p99":float(np.quantile(d,.99)),"max":float(np.max(d)),
+                    "le_1":int(np.sum(d<=1)),"le_2":int(np.sum(d<=2)),
+                    "le_4":int(np.sum(d<=4)),"le_8":int(np.sum(d<=8)),
+                  }
+              },sort_keys=True))
+          PY

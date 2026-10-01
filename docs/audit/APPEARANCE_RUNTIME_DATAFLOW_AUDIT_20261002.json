@@ -1,0 +1,37 @@
+{
+  "schema": "RealSaS.AppearanceRuntimeDataflowAudit.v1",
+  "date": "2026-10-02",
+  "status": "OPEN_WITH_PROVEN_GAPS",
+  "accepted_frozen_witness": {
+    "mode": "MECHANICAL_CAA",
+    "source_owned_visual_mesh_arap_used": false,
+    "sha256": {
+      "IDLE": "4c64437ba1f2ecaca8302a52c598f3ba7750a923fd50b90f7cafa3f8473386c3",
+      "RUN": "64ad50eeb9ea55ce202ddc46728ffea9074419dbf855938840f69d06661806e3",
+      "SLASH": "adc8e8cd0e2272a836e50f7a73585208074703ea5f3c9a549583d7a659fa2b85"
+    }
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "status": "PROVEN",
+      "finding": "Historical Stage37 declares source-owned visual authority but historical Stage42 consumes Stage35 mechanical mesh + mechanical CAA face UV. Recovery adds typed source-owned Stage42 consumer."
+    },
+    {
+      "id": "F2",
+      "status": "PROVEN",
+      "finding": "Accepted smear witness is mechanical CAA and does not exercise recovered source-owned visual runtime."
+    },
+    {
+      "id": "F3",
+      "status": "PROVEN",
+      "finding": "Recovered source-owned RSS/native path carries 2D faces, UV and posed positions but no explicit dynamic depth/draw-order/occlusion/clipping arbitration; native renderer alpha-composites in face-index iteration order."
+    },
+    {
+      "id": "F4",
+      "status": "PROVEN",
+      "finding": "Source-owned Stage45 proves parity/provenance/non-empty/flip/stretch but not overlap ownership, draw-order or occlusion correctness."
+    }
+  ],
+  "next_test": "CORRECTED_KNIGHT_STAGE35_TO_RECOVERED_STAGE37_45_WITH_OVERLAP_ARBITRATION_TELEMETRY"
+}

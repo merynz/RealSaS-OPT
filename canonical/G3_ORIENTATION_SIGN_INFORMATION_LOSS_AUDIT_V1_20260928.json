@@ -1,0 +1,35 @@
+{
+  "schema": "RealSaS.G3OrientationSignInformationLossAudit.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED",
+  "classification": "A_IMPLEMENTATION_DEVIATION_FROM_FROZEN_CONTRACT",
+  "severity": "P0",
+  "frozen_contract": {
+    "authority": "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md",
+    "invariant": "G3 deformation conditioning requires no inversion/foldover."
+  },
+  "implementation": {
+    "metric": "triangle deformation gradient singular values",
+    "area_ratio": "sigma_max * sigma_min",
+    "condition": "sigma_max / sigma_min",
+    "missing_information": "orientation/determinant sign",
+    "consequence": "reflection and orientation-preserving isometry have identical singular values"
+  },
+  "adversary": {
+    "source": "canonical/G3_ORIENTATION_INVERSION_ADVERSARY_V1_20260928.json",
+    "construction": "unit right triangle reflected across X in its rest tangent plane",
+    "inverted": true,
+    "normal_dot": -1,
+    "current_metrics": {
+      "area_ratio": 1,
+      "condition_number": 1,
+      "max_edge_ratio": 1,
+      "min_edge_ratio": 1,
+      "sigma_min": 1
+    }
+  },
+  "verdict": {
+    "current_g3_does_not_implement_frozen_no_inversion_invariant": true,
+    "downstream_projected_flip_checks_do_not_repair_missing_g3_contract": true,
+    "repair_selected": false
+  }
+}

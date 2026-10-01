@@ -1,0 +1,29 @@
+{
+  "schema": "RealSaS.IRISV3DenseSourceCoverageNumericErratum.v1",
+  "date_utc": "2026-09-22",
+  "status": "ERRATUM_CLOSED__LOGIT_DOMAIN_BCE_REQUIRED",
+  "falsified_policy": "canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_POLICY_20260922.json",
+  "falsified_workflow_run_id": 35695522869,
+  "falsified_workflow_job_id": 106641423109,
+  "knight_arm_A_had_started": false,
+  "knight_result_observed_before_fix": false,
+  "finding": "The probability-domain compatibility loss clamped foreground probability to [1e-6,1-1e-6]. On a severely missing foreground ray, the V3 signed-field logit was below -50 and sigmoid probability was below the clamp floor, so the clamp derivative was zero and the dense objective produced exactly zero signed-field gradient on the most severe error.",
+  "failed_fixture": "MISSING_FOREGROUND_STRONG_GRADIENT",
+  "secondary_failure": "The actual SceneFirstSignedGeometryV3 end-to-end gradient witness also reached sdf_head with zero norm because the same probability clamp saturated its sampled rays.",
+  "scientific_disposition": {
+    "threshold_relaxation": false,
+    "beta_change": false,
+    "depth_spacing_change": false,
+    "component_weight_change": false,
+    "corrective_change": "Compute foreground_logit=-hard_amin(sdf)/beta and apply binary_cross_entropy_with_logits directly. Use sigmoid(logit) only for the soft-Dice term and diagnostics.",
+    "reason": "BCEWithLogits preserves the analytic gradient for large-magnitude wrong logits without probability clipping and is numerically stable."
+  },
+  "required_retest": [
+    "severely missing foreground ray has finite nonzero signed-field gradient with the corrective sign",
+    "FORK_GAP and CONCAVE_NOTCH negative-space rays retain corrective background gradient",
+    "end-to-end loss backpropagates through the actual V3 signed-field sdf_head with finite nonzero norm",
+    "all prior primitive and phase/component tests remain green"
+  ],
+  "replacement_policy": "canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_POLICY_V2_20260922.json",
+  "product_authority_minted": false
+}

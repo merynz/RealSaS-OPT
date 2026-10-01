@@ -1,0 +1,98 @@
+{
+  "schema": "RealSaS.IRISV42TP64NegativeResult.v1",
+  "date_utc": "2026-09-23",
+  "status": "CATASTROPHIC_ZERO_SET_FOAM_SUPPRESSED__STAGE13_CONTOUR_FAIL__RASTER_COUPLED_SURFACE_SUPERVISION_AUTHORIZED",
+  "authority": "CONTROLLED_KNIGHT_FIT1_RESEARCH_RESULT__NO_PRODUCT_PROMOTION",
+  "run_id": "20260922T214018Z",
+  "repo_commit": "5a571b45ab2b5ee0bc83c8952296eaa6f191cbcc",
+  "scientific_name": "IRIS_V4_2_TP64",
+  "parent_policy": "canonical/IRIS_V4_2_TP64_GLOBAL_REGULARITY_POLICY_20260922.json",
+  "decision": "V4_2_TP64_R256_STAGE13_SCREEN_FAIL__R512_HELD__NO_PRODUCT_PROMOTION",
+  "selected_checkpoint_step": 4800,
+  "training_wall_seconds": 4906.111542224884,
+  "catastrophic_foam_comparison": {
+    "v4_1_fix1_selected_r256_face_count": 6037988,
+    "v4_2_selected_r256_face_count": 210584,
+    "face_count_reduction_factor": 28.67256391634521,
+    "v4_1_fix1_selected_r256_min_precision": 0.15586,
+    "v4_2_selected_r256_min_precision": 0.9328961676607243,
+    "interpretation": "GLOBAL_REGULARITY_PLUS_RAY_LIPSCHITZ_CAUSALLY_SUPPRESSED_FRAME_FILLING_ZERO_SET_FOAM"
+  },
+  "r256_stage13": {
+    "stage13_v2_pass": false,
+    "vertex_count": 105265,
+    "face_count": 210584,
+    "min_view_precision": 0.9328961676607243,
+    "min_view_recall": 0.9742652317445061,
+    "min_view_component_recall": 0.9742652317445061,
+    "max_view_interior_uncovered_fraction": 0.017063196159761384,
+    "max_view_largest_coherent_hole_fraction": 0.004798156407287236,
+    "max_view_silhouette_edge_p95_px": 196.93297890825028,
+    "max_view_silhouette_edge_max_px": 233.0,
+    "stage13_elapsed_seconds": 127.968923330307
+  },
+  "posthoc_r256_source_support_topology_diagnostic": {
+    "method": "SEALED_R256_ZERO_SURFACE_PLUS_EXACT_STAGE08_SOURCE_MASKS_AND_CAMERAS__NO_MESH_MUTATION",
+    "component_count": 105,
+    "largest_component_vertex_count": 100331,
+    "largest_component_vertex_fraction": 0.9531278202631454,
+    "vertices_outside_source_support_gt_1px_count": 10835,
+    "vertices_outside_source_support_gt_1px_fraction": 0.10293069871277252,
+    "largest_component_vertices_outside_source_support_gt_1px_count": 7941,
+    "largest_component_vertices_outside_source_support_gt_1px_fraction": 0.07914802005362251,
+    "interpretation": "RESIDUAL_ERROR_IS_NOT_ONLY_DETACHED_FLOATERS__SOURCE_UNSUPPORTED_OUTGROWTH_ON_MAIN_CARRIER_DOMINATES"
+  },
+  "training_regularization_diagnostics_at_selected_step": {
+    "global_eikonal_gradient_norm_mean": 1.013176441192627,
+    "global_eikonal_gradient_norm_abs_error_mean": 0.12513400614261627,
+    "ray_lipschitz_total": 9.54949655351811e-07,
+    "source_exterior_negative_fraction": 0.0,
+    "checkpoint_max_foreground_miss_fraction": 0.03125,
+    "checkpoint_max_background_zero_crossing_fraction": 0.5,
+    "checkpoint_source_exterior_negative_fraction": 0.0029296875,
+    "sign_transition_diagnostic": {
+      "training_loss": false,
+      "max_observed_transition_count_across_source_views": 28,
+      "max_observed_p95_transition_count_across_source_views": 14.100006103515625
+    },
+    "interpretation": "REGULARITY_IS_MATERIALLY_BETTER_BUT_DOES_NOT_CLOSE_SOURCE_PROJECTION_TOPOLOGY"
+  },
+  "compute_scheduler": {
+    "r128_pathological_checkpoint_compute_guard_worked": true,
+    "r256_exact_stage13_executed": true,
+    "r512_held_after_r256_fail": true,
+    "r512_stage13_executed": false,
+    "compute_guard_is_product_gate": false,
+    "interpretation": "FAST_AUDIT_PREVENTED_ANOTHER_MULTI_HOUR_R512_FAILURE_WITHOUT_CHANGING_FROZEN_STAGE13"
+  },
+  "scientific_interpretation": [
+    "V4_2 falsifies the claim that source-only global Eikonal plus finite sampled directional Lipschitz is sufficient for Stage13-faithful carrier geometry.",
+    "The intervention does suppress the catastrophic V4_1 zero-set foam, so the regularity diagnosis was causally meaningful rather than vacuous.",
+    "Residual Stage13 failure is dominated by projection-faithfulness: main-carrier source-unsupported outgrowth plus remaining multi-crossing behavior.",
+    "Architecture capacity growth is not authorized by this result.",
+    "Global teacher SDF and teacher first-hit depth remain held because they would import stronger teacher 3D completion authority than the source rasters justify."
+  ],
+  "next_authorized_experiment": {
+    "scientific_name": "IRIS_V4_3_TP64",
+    "architecture_changed": false,
+    "primary_change": "TRAINING_ONLY_SOURCE_RASTER_COUPLED_EXTRACTED_SURFACE_OR_EQUIVALENT_DIFFERENTIABLE_PROJECTION_SUPERVISION",
+    "source_authority": "EXACT_EIGHT_SOURCE_RASTERS_AND_CAMERAS",
+    "goal": "DIRECTLY_PENALIZE_THE_ACTUAL_PROJECTED_ZERO_SURFACE_FOR_SOURCE_PRECISION_RECALL_CONTOUR_ERROR",
+    "must_preserve": [
+      "FROZEN_STAGE13_V2_THRESHOLDS",
+      "NO_VISUAL_HULL_CLIPPING_BEFORE_MEASUREMENT",
+      "NO_POSTHOC_MESH_REPAIR_BEFORE_PRIMARY_MEASUREMENT",
+      "GLOBAL_TEACHER_SDF_HELD",
+      "TEACHER_FIRST_HIT_DEPTH_HELD",
+      "TP64_ARCHITECTURE_WIDTH_DEPTH_FROZEN",
+      "FAST_AUDIT_R128_TO_R256_TO_R512_PROMOTION_SCHEDULER"
+    ]
+  },
+  "claim_boundary": {
+    "controlled_knight_fit1_only": true,
+    "product_authority_minted": false,
+    "knight_witness_promoted": false,
+    "r512_result_available": false,
+    "x7_execution": false
+  }
+}

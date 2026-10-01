@@ -1,0 +1,11 @@
+{
+  "schema": "RealSaS.KnightDemoGeppettoStage26Trigger.v1",
+  "status": "REQUESTED_AFTER_SEALED_STAGE19",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "stage19_receipt": "canonical/KNIGHT_DEMO_STAGE19_RECEIPT_20260925.json",
+  "required_stage19_status": "PASS_DEMO_ONLY",
+  "next_stage": "26_GEPPETTO_FIT_PREREGISTERED",
+  "require_cpu_preflight_before_drive_publish": true,
+  "product_authority_claimed": false,
+  "product_pass_forbidden": true
+}

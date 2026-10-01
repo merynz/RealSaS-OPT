@@ -1,0 +1,16 @@
+{
+  "schema": "RealSaS.CurrentRNDLineage.v1",
+  "date": "2026-10-02",
+  "knight_parent": "fbbcc008480e37c44e1303939ec31dac918cbd3f",
+  "platform_parent": "989a90b45726a599c0005c5483f9b8c54e0b8a7c",
+  "merge_policy": {
+    "base": "OCT1_RECOVERED_PLATFORM",
+    "add_all_knight_only_paths": true,
+    "common_path_authority": "OCT1_RECOVERED_PLATFORM",
+    "reason": "Preserve latest Knight research evidence while retaining later recovered runtime/presentation/backend implementations."
+  },
+  "accepted_witness": {
+    "type": "CORRECTED_WEIGHT_TOPOLOGY_HARMONIC_FIRST_MECHANICAL_CAA",
+    "user_visual_approval": true
+  }
+}

@@ -1,0 +1,46 @@
+name: knight-stage31-32-exact-provenance-audit-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/audit_knight_stage31_32_exact_provenance_v1.py'
+      - '.github/workflows/knight_stage31_32_exact_provenance_audit_v1.yml'
+
+concurrency:
+  group: knight-stage31-32-exact-provenance-audit-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Measure exact Stage31-32 provenance
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python tools/audit_knight_stage31_32_exact_provenance_v1.py             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --out canonical/KNIGHT_STAGE31_32_EXACT_PROVENANCE_AUDIT_V1_20260928.json             | tee /tmp/stage31_32_prov.txt
+      - name: Seal
+        run: |
+          set -euo pipefail
+          mkdir -p canonical/knight_stage31_32_exact_provenance_v1
+          cp /tmp/stage31_32_prov.txt canonical/knight_stage31_32_exact_provenance_v1/AUDIT_STDOUT.txt
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_STAGE31_32_EXACT_PROVENANCE_AUDIT_V1_20260928.json canonical/knight_stage31_32_exact_provenance_v1
+          git commit -m 'audit: seal Knight Stage31-32 exact provenance'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

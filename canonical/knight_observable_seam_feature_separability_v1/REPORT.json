@@ -1,0 +1,280 @@
+{
+  "features": {
+    "common_raster_mean_distance": {
+      "NONINCIDENT": {
+        "count": 1839,
+        "max": 18.46031472705089,
+        "mean": 10.436558347264528,
+        "min": 0.723645810443492,
+        "p05": 5.348310176093248,
+        "p50": 10.31804553010184,
+        "p95": 15.074090125742172,
+        "p99": 16.81706253844974
+      },
+      "SAME_FACE_OR_SHARE_EDGE": {
+        "count": 15886,
+        "max": 18.063853805939022,
+        "mean": 9.463528346826498,
+        "min": 0.22358065444757103,
+        "p05": 4.678320332473776,
+        "p50": 9.51380754647066,
+        "p95": 14.72696504071231,
+        "p99": 15.581324647006058
+      },
+      "auc_high_skin_l1_gt_1": {
+        "best_oriented_auc": 0.582500163285065,
+        "orientation": "HIGHER_POSITIVE",
+        "raw_auc": 0.582500163285065
+      },
+      "auc_nonincident_vs_coherent": {
+        "best_oriented_auc": 0.5904479010557618,
+        "orientation": "HIGHER_POSITIVE",
+        "raw_auc": 0.5904479010557618
+      }
+    },
+    "common_raster_min_distance": {
+      "NONINCIDENT": {
+        "count": 1839,
+        "max": 18.46031472705089,
+        "mean": 8.902683976291486,
+        "min": 0.4144798754423099,
+        "p05": 3.082737080280421,
+        "p50": 8.685783884380694,
+        "p95": 14.106910348558825,
+        "p99": 16.247561130757905
+      },
+      "SAME_FACE_OR_SHARE_EDGE": {
+        "count": 15886,
+        "max": 17.676626889496184,
+        "mean": 8.11243970074446,
+        "min": 0.08881437085440479,
+        "p05": 2.657553861263485,
+        "p50": 8.15132667921138,
+        "p95": 13.272658817030205,
+        "p99": 14.506805241893542
+      },
+      "auc_high_skin_l1_gt_1": {
+        "best_oriented_auc": 0.5758466810869791,
+        "orientation": "HIGHER_POSITIVE",
+        "raw_auc": 0.5758466810869791
+      },
+      "auc_nonincident_vs_coherent": {
+        "best_oriented_auc": 0.5659015770124508,
+        "orientation": "HIGHER_POSITIVE",
+        "raw_auc": 0.5659015770124508
+      }
+    },
+    "common_support_count": {
+      "NONINCIDENT": {
+        "count": 3648,
+        "max": 4.0,
+        "mean": 1.3363486842105263,
+        "min": 0.0,
+        "p05": 0.0,
+        "p50": 1.0,
+        "p95": 3.0,
+        "p99": 4.0
+      },
+      "SAME_FACE_OR_SHARE_EDGE": {
+        "count": 23451,
+        "max": 6.0,
+        "mean": 1.8715193381945332,
+        "min": 0.0,
+        "p05": 0.0,
+        "p50": 3.0,
+        "p95": 4.0,
+        "p99": 4.0
+      },
+      "auc_high_skin_l1_gt_1": {
+        "best_oriented_auc": 0.5927087450367569,
+        "orientation": "LOWER_POSITIVE",
+        "raw_auc": 0.40729125496324314
+      },
+      "auc_nonincident_vs_coherent": {
+        "best_oriented_auc": 0.5985076104935487,
+        "orientation": "LOWER_POSITIVE",
+        "raw_auc": 0.4014923895064513
+      }
+    },
+    "completed_endpoint_count": {
+      "NONINCIDENT": {
+        "count": 3648,
+        "max": 2.0,
+        "mean": 0.8560855263157895,
+        "min": 0.0,
+        "p05": 0.0,
+        "p50": 0.0,
+        "p95": 2.0,
+        "p99": 2.0
+      },
+      "SAME_FACE_OR_SHARE_EDGE": {
+        "count": 23451,
+        "max": 2.0,
+        "mean": 0.5494008784273592,
+        "min": 0.0,
+        "p05": 0.0,
+        "p50": 0.0,
+        "p95": 2.0,
+        "p99": 2.0
+      },
+      "auc_high_skin_l1_gt_1": {
+        "best_oriented_auc": 0.593587885126384,
+        "orientation": "HIGHER_POSITIVE",
+        "raw_auc": 0.593587885126384
+      },
+      "auc_nonincident_vs_coherent": {
+        "best_oriented_auc": 0.5878199654075276,
+        "orientation": "HIGHER_POSITIVE",
+        "raw_auc": 0.5878199654075276
+      }
+    },
+    "distance_3d": {
+      "NONINCIDENT": {
+        "count": 3648,
+        "max": 0.07956046938946339,
+        "mean": 0.05143643031307374,
+        "min": 0.00942563310574852,
+        "p05": 0.030992647711471984,
+        "p50": 0.048951446042262356,
+        "p95": 0.06815600015525902,
+        "p99": 0.0708061769115192
+      },
+      "SAME_FACE_OR_SHARE_EDGE": {
+        "count": 23451,
+        "max": 0.08227394313244553,
+        "mean": 0.046344751154450595,
+        "min": 0.0026389031881469357,
+        "p05": 0.02661109343386927,
+        "p50": 0.046412895508055864,
+        "p95": 0.06698548808080346,
+        "p99": 0.0689473864010465
+      },
+      "auc_high_skin_l1_gt_1": {
+        "best_oriented_auc": 0.5952404854705428,
+        "orientation": "HIGHER_POSITIVE",
+        "raw_auc": 0.5952404854705428
+      },
+      "auc_nonincident_vs_coherent": {
+        "best_oriented_auc": 0.6205465651784572,
+        "orientation": "HIGHER_POSITIVE",
+        "raw_auc": 0.6205465651784572
+      }
+    },
+    "normal_abs_angle_deg": {
+      "NONINCIDENT": {
+        "count": 3648,
+        "max": 89.97959621190594,
+        "mean": 20.37011476148102,
+        "min": 0.20076056235487896,
+        "p05": 2.089160991057284,
+        "p50": 13.397773165590687,
+        "p95": 62.69712012981551,
+        "p99": 81.78997979036227
+      },
+      "SAME_FACE_OR_SHARE_EDGE": {
+        "count": 23451,
+        "max": 89.9777450806606,
+        "mean": 15.571944226997006,
+        "min": 0.0513045099519142,
+        "p05": 1.5036873665506225,
+        "p50": 8.822516382314134,
+        "p95": 55.318518648044744,
+        "p99": 81.4329202254429
+      },
+      "auc_high_skin_l1_gt_1": {
+        "best_oriented_auc": 0.600966380678467,
+        "orientation": "HIGHER_POSITIVE",
+        "raw_auc": 0.600966380678467
+      },
+      "auc_nonincident_vs_coherent": {
+        "best_oriented_auc": 0.5931094449830816,
+        "orientation": "HIGHER_POSITIVE",
+        "raw_auc": 0.5931094449830816
+      }
+    },
+    "normal_angle_deg": {
+      "NONINCIDENT": {
+        "count": 3648,
+        "max": 174.1147471808203,
+        "mean": 22.612480971810665,
+        "min": 0.20076056235487896,
+        "p05": 2.089160991057284,
+        "p50": 13.483442737493629,
+        "p95": 72.1792955785211,
+        "p99": 131.54353810525322
+      },
+      "SAME_FACE_OR_SHARE_EDGE": {
+        "count": 23451,
+        "max": 178.82009687981358,
+        "mean": 16.882653387257406,
+        "min": 0.0513045099519142,
+        "p05": 1.5045169980051898,
+        "p50": 8.827268452667951,
+        "p95": 59.946835523190536,
+        "p99": 118.73738382071576
+      },
+      "auc_high_skin_l1_gt_1": {
+        "best_oriented_auc": 0.6056749402586663,
+        "orientation": "HIGHER_POSITIVE",
+        "raw_auc": 0.6056749402586663
+      },
+      "auc_nonincident_vs_coherent": {
+        "best_oriented_auc": 0.5940151455217935,
+        "orientation": "HIGHER_POSITIVE",
+        "raw_auc": 0.5940151455217935
+      }
+    },
+    "support_jaccard": {
+      "NONINCIDENT": {
+        "count": 3648,
+        "max": 1.0,
+        "mean": 0.43400950292397655,
+        "min": 0.0,
+        "p05": 0.0,
+        "p50": 0.25,
+        "p95": 1.0,
+        "p99": 1.0
+      },
+      "SAME_FACE_OR_SHARE_EDGE": {
+        "count": 23451,
+        "max": 1.0,
+        "mean": 0.6005287620996972,
+        "min": 0.0,
+        "p05": 0.0,
+        "p50": 0.75,
+        "p95": 1.0,
+        "p99": 1.0
+      },
+      "auc_high_skin_l1_gt_1": {
+        "best_oriented_auc": 0.585245395508911,
+        "orientation": "LOWER_POSITIVE",
+        "raw_auc": 0.414754604491089
+      },
+      "auc_nonincident_vs_coherent": {
+        "best_oriented_auc": 0.5965885930405841,
+        "orientation": "LOWER_POSITIVE",
+        "raw_auc": 0.40341140695941596
+      }
+    }
+  },
+  "finding": {
+    "claim_boundary": "Teacher source topology and teacher weights are labels only. This audit asks whether already-shipping GSA node features contain simple geometric/observation evidence that correlates with the seam class; it does not authorize teacher topology at inference and does not select a classifier or threshold.",
+    "id": "OBSERVABLE_GSA_FEATURE_SEPARABILITY_OF_TEACHER_TOPOLOGY_SEAMS"
+  },
+  "population": {
+    "both_teacher_valid_relation_count": 31810,
+    "high_skin_l1_gt_1_by_category": {
+      "NONINCIDENT": 1070,
+      "SAME_FACE": 0,
+      "SHARE_EDGE": 0,
+      "SHARE_VERTEX_ONLY": 0
+    },
+    "high_skin_l1_gt_1_count": 1070,
+    "nonincident_count": 3648,
+    "same_face_or_share_edge_count": 23451,
+    "share_vertex_only_count": 4711
+  },
+  "repo_head": "e1b893cf8fea76d891b017850580e423bc6c1e37",
+  "schema": "RealSaS.KnightObservableSeamFeatureSeparabilityAudit.v1",
+  "status": "AUDIT_ONLY__TEACHER_LABELS_DIAGNOSTIC_ONLY"
+}

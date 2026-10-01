@@ -1,0 +1,19 @@
+{
+  "schema": "RealSaS.KnightFaceSeamMultiplicityPrereg.v1",
+  "status": "FROZEN_BEFORE_FACE_SEAM_MULTIPLICITY_RESULT",
+  "date": "2026-09-29",
+  "question": "Does requiring at least two independently detected seam edges per triangle yield a locally consistent teacher-free face partition with >=0.90 mixed-face precision and >=0.70 unsafe cross-region recall?",
+  "rules": [
+    "RAW_STRETCH_GT4_AND_WEIGHT_L1_GT1",
+    "TWO_CORE_STRETCH_GT4_AND_WEIGHT_L1_GT1",
+    "RAW_WEIGHT_L1_GT1",
+    "RAW_STRETCH_GT4"
+  ],
+  "face_partition_rule": "A face is locally splittable iff at least two of its three edges satisfy the frozen seam rule. One-edge cases are not split because they are not an equivalence-consistent vertex partition.",
+  "teacher_policy": "All edge scores, rule masks, 2-core pruning and seam multiplicities are frozen before teacher topology is loaded.",
+  "label_gates": {
+    "mixed_face_precision_min": 0.90,
+    "unsafe_cross_region_recall_min": 0.70
+  },
+  "no_product_mutation": true
+}

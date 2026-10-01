@@ -1,0 +1,47 @@
+{
+  "schema": "RealSaS.KnightDemoStage18MeshFallbackPreregistration.v1",
+  "status": "FROZEN_BEFORE_KNIGHT_STAGE18_PARENT_QUALITY_METRICS_INSPECTION",
+  "date_utc": "2026-09-25",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "execution_class": "DEMO_WITNESS",
+  "purpose": "Permit investor-demo continuation only if the frozen Stage18 CDT producer cannot legally improve a relation-parent triangle without a forbidden boundary split.",
+  "frozen_product_policy": {
+    "path": "canonical/QUALIFIED_MESH_PRODUCT_POLICY_V2_20260919.json",
+    "git_blob_sha1": "3582d6667cf82362ae6615a15a60ee1ab1ba9767",
+    "minimum_rest_triangle_angle_deg": 7.5,
+    "maximum_rest_aspect_longest_edge_over_min_altitude": 16,
+    "mutation_forbidden": true
+  },
+  "eligibility": {
+    "stage15_ledger_status_required": "PASS_DEMO_ONLY",
+    "product_authority_claimed_required": false,
+    "requested_backend_required": "CANONICAL_CDT_LOCAL_CHART_V1",
+    "only_admissible_precondition_failure": "RELATION_PARENT_MIN_ANGLE_BELOW_FROZEN_G3_TARGET",
+    "boundary_split_must_remain_forbidden": true,
+    "teacher_truth_allowed": false,
+    "source_rig_labels_allowed": false,
+    "source_skin_labels_allowed": false,
+    "appearance_quality_allowed_for_selection": false,
+    "future_geppetto_result_allowed_for_selection": false,
+    "future_arachne_result_allowed_for_selection": false
+  },
+  "fallback_rule": {
+    "rule_id": "RELATION_BASELINE_IF_AND_ONLY_IF_CDT_PARENT_MIN_ANGLE_UNREPAIRABLE_V1",
+    "producer": "CANONICAL_RELATION_BASELINE_V1",
+    "candidate_choice": "EXACT_CURRENT_RELATION_BASELINE",
+    "no_candidate_ranking": true,
+    "no_threshold_relaxation": true,
+    "stage19_remeasurement_required": true
+  },
+  "demo_admission_semantics": {
+    "stage18_product_mesh_qualification_claimed": false,
+    "stage18_ledger_status_if_fallback_materializes": "PASS_DEMO_ONLY",
+    "stage18_authority_class": "DEMO_ONLY_DERIVED_MESH_CANDIDATE",
+    "stage19_actual_candidate_source_fidelity_replay_required": true,
+    "downstream_demo_taint_must_propagate": true,
+    "product_pass_forbidden": true,
+    "shipping_ready_claim_forbidden": true
+  },
+  "claim_boundary": "This preregistration does not relax G3, enable boundary splitting, or convert any product mesh failure into PASS. It only predeclares a deterministic demo carrier if the frozen CDT producer is mathematically blocked by an unrecoverable parent angle."
+}

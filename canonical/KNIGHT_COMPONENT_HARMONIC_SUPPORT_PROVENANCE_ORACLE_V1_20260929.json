@@ -1,0 +1,678 @@
+{
+  "actual_motion_from_source_convex_support": {
+    "frames": [
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 2.0717520260049898,
+        "edge_p95": 1.002466768621771,
+        "edge_p99": 1.0511527895584045,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 2.0718892489682235,
+        "edge_p95": 1.01020702167073,
+        "edge_p99": 1.0543075076831196,
+        "frame": 1,
+        "time_seconds": 0.8333333333333334
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 2.0710169285035835,
+        "edge_p95": 1.0023040583045717,
+        "edge_p99": 1.0492556112294442,
+        "frame": 2,
+        "time_seconds": 1.6666666666666667
+      },
+      {
+        "clip_id": "demo_idle_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 2.071889263481882,
+        "edge_p95": 1.0102070322632817,
+        "edge_p99": 1.0543074599137612,
+        "frame": 3,
+        "time_seconds": 2.5
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.207860561301162,
+        "edge_p95": 1.1175920219823254,
+        "edge_p99": 1.651871861267306,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.4728484597046356,
+        "edge_p95": 1.0984336567753692,
+        "edge_p99": 1.5505511812977577,
+        "frame": 1,
+        "time_seconds": 0.20833333333333334
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.6155354868853404,
+        "edge_p95": 1.1119887946290836,
+        "edge_p99": 1.7301390560559817,
+        "frame": 2,
+        "time_seconds": 0.4166666666666667
+      },
+      {
+        "clip_id": "demo_run_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.294703568083532,
+        "edge_p95": 1.098515606685731,
+        "edge_p99": 1.5995082165378194,
+        "frame": 3,
+        "time_seconds": 0.625
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.207860561301162,
+        "edge_p95": 1.117210579099625,
+        "edge_p99": 1.6923082587037437,
+        "frame": 0,
+        "time_seconds": 0.0
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.4679881861530415,
+        "edge_p95": 1.122749259712541,
+        "edge_p99": 1.5257837989217207,
+        "frame": 1,
+        "time_seconds": 0.2777777777777778
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.167107160012201,
+        "edge_p95": 1.089421182489652,
+        "edge_p99": 1.5237451895192775,
+        "frame": 2,
+        "time_seconds": 0.5555555555555556
+      },
+      {
+        "clip_id": "demo_slash_v1",
+        "edge_gt_10": 0,
+        "edge_gt_4": 0,
+        "edge_max": 3.207860561301162,
+        "edge_p95": 1.117210579099625,
+        "edge_p99": 1.6923082587037437,
+        "frame": 3,
+        "time_seconds": 0.8333333333333334
+      }
+    ],
+    "max_edge_gt_10": 0,
+    "max_edge_gt_4": 0,
+    "max_edge_p99": 1.7301390560559817,
+    "worst_edge_max": 3.6155354868853404
+  },
+  "candidate": {
+    "face_count": 28331,
+    "generated_vertex_count": 3982,
+    "identity_anchor_count": 12049,
+    "vertex_count": 16031
+  },
+  "claim_boundary": [
+    "Harmonic support coordinates depend only on candidate geometry/connectivity and mechanical component membership.",
+    "Every generated vertex is reconstructed solely as a nonnegative convex combination of immutable QualifiedSkinIR source rows.",
+    "No generated raw skin row is introduced as independent authority.",
+    "No coefficient crosses a mechanical component because the solve graph is component-pure.",
+    "This audit proves representability; production implementation may require a compact sparse-support storage policy."
+  ],
+  "coordinate_operator": {
+    "component_count": 68,
+    "components": [
+      {
+        "anchors": 941,
+        "component_id": "CMP:046a53e821b8c70fb74a",
+        "dense_upper": 365108,
+        "support_coeff_count": 12760,
+        "unknown": 388
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:0858d0fe0a224d315f5d",
+        "dense_upper": 9,
+        "support_coeff_count": 9,
+        "unknown": 9
+      },
+      {
+        "anchors": 3,
+        "component_id": "CMP:0923b0e8f98fa2749429",
+        "dense_upper": 36,
+        "support_coeff_count": 36,
+        "unknown": 12
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:0a76da0662c9bb9ee563",
+        "dense_upper": 6,
+        "support_coeff_count": 6,
+        "unknown": 6
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:0b68c91cd6d9e8da7256",
+        "dense_upper": 9,
+        "support_coeff_count": 9,
+        "unknown": 9
+      },
+      {
+        "anchors": 2880,
+        "component_id": "CMP:0d312766664b5bb0ed46",
+        "dense_upper": 1350720,
+        "support_coeff_count": 13192,
+        "unknown": 469
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:1115a527f1f9544f6a38",
+        "dense_upper": 10,
+        "support_coeff_count": 10,
+        "unknown": 10
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:15052c27f1dea45f63ed",
+        "dense_upper": 12,
+        "support_coeff_count": 12,
+        "unknown": 12
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:185d21addf361d31e219",
+        "dense_upper": 9,
+        "support_coeff_count": 9,
+        "unknown": 9
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:1b7b6bb7fd537d698fd4",
+        "dense_upper": 4,
+        "support_coeff_count": 4,
+        "unknown": 4
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:1c90a862b546ee517399",
+        "dense_upper": 9,
+        "support_coeff_count": 9,
+        "unknown": 9
+      },
+      {
+        "anchors": 3,
+        "component_id": "CMP:1cb00cb99e012216c81a",
+        "dense_upper": 42,
+        "support_coeff_count": 42,
+        "unknown": 14
+      },
+      {
+        "anchors": 4,
+        "component_id": "CMP:2248ba8b308577e5e154",
+        "dense_upper": 68,
+        "support_coeff_count": 68,
+        "unknown": 17
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:249f86515feb476d11fc",
+        "dense_upper": 6,
+        "support_coeff_count": 6,
+        "unknown": 6
+      },
+      {
+        "anchors": 2,
+        "component_id": "CMP:2ac778e7e0840b7cfea7",
+        "dense_upper": 26,
+        "support_coeff_count": 26,
+        "unknown": 13
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:2cb463ea6d365dec10d0",
+        "dense_upper": 7,
+        "support_coeff_count": 7,
+        "unknown": 7
+      },
+      {
+        "anchors": 28,
+        "component_id": "CMP:3066b099d4124dea405b",
+        "dense_upper": 1736,
+        "support_coeff_count": 1240,
+        "unknown": 62
+      },
+      {
+        "anchors": 8,
+        "component_id": "CMP:314cb0510ec4a67f9f7a",
+        "dense_upper": 272,
+        "support_coeff_count": 272,
+        "unknown": 34
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:394d065dd265e013f9ce",
+        "dense_upper": 8,
+        "support_coeff_count": 8,
+        "unknown": 8
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:39841775e74c0aa65008",
+        "dense_upper": 8,
+        "support_coeff_count": 8,
+        "unknown": 8
+      },
+      {
+        "anchors": 2120,
+        "component_id": "CMP:3e04ac39778c88e008db",
+        "dense_upper": 748360,
+        "support_coeff_count": 11072,
+        "unknown": 353
+      },
+      {
+        "anchors": 271,
+        "component_id": "CMP:41b813131497654b7f25",
+        "dense_upper": 55013,
+        "support_coeff_count": 5895,
+        "unknown": 203
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:446a343a40f7414d44a6",
+        "dense_upper": 8,
+        "support_coeff_count": 8,
+        "unknown": 8
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:4552459918a03deecce3",
+        "dense_upper": 8,
+        "support_coeff_count": 8,
+        "unknown": 8
+      },
+      {
+        "anchors": 4,
+        "component_id": "CMP:4a21bd488ccd6c612e1f",
+        "dense_upper": 72,
+        "support_coeff_count": 72,
+        "unknown": 18
+      },
+      {
+        "anchors": 4,
+        "component_id": "CMP:4dc13cef0d5f1e076757",
+        "dense_upper": 92,
+        "support_coeff_count": 92,
+        "unknown": 23
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:52f86b5fae120f57d444",
+        "dense_upper": 8,
+        "support_coeff_count": 8,
+        "unknown": 8
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:54ef7a975daa2008d152",
+        "dense_upper": 9,
+        "support_coeff_count": 9,
+        "unknown": 9
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:584a5557280484c9cc40",
+        "dense_upper": 9,
+        "support_coeff_count": 9,
+        "unknown": 9
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:5c95d58bf7d527d100ab",
+        "dense_upper": 9,
+        "support_coeff_count": 9,
+        "unknown": 9
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:5e8fadd903523270aaf2",
+        "dense_upper": 9,
+        "support_coeff_count": 9,
+        "unknown": 9
+      },
+      {
+        "anchors": 49,
+        "component_id": "CMP:62937e42df2b2c85930e",
+        "dense_upper": 4557,
+        "support_coeff_count": 2527,
+        "unknown": 93
+      },
+      {
+        "anchors": 4,
+        "component_id": "CMP:72b3d49107db649ee6e6",
+        "dense_upper": 68,
+        "support_coeff_count": 68,
+        "unknown": 17
+      },
+      {
+        "anchors": 89,
+        "component_id": "CMP:7544f54d58b5416c9831",
+        "dense_upper": 10591,
+        "support_coeff_count": 3043,
+        "unknown": 119
+      },
+      {
+        "anchors": 128,
+        "component_id": "CMP:77e8703de0400b1ed15b",
+        "dense_upper": 25088,
+        "support_coeff_count": 5197,
+        "unknown": 196
+      },
+      {
+        "anchors": 909,
+        "component_id": "CMP:796581e70da6bdcf1972",
+        "dense_upper": 301788,
+        "support_coeff_count": 10606,
+        "unknown": 332
+      },
+      {
+        "anchors": 173,
+        "component_id": "CMP:7b085462abe395dc7a8a",
+        "dense_upper": 18511,
+        "support_coeff_count": 3134,
+        "unknown": 107
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:7c2b9ea3f93b7a52284e",
+        "dense_upper": 8,
+        "support_coeff_count": 8,
+        "unknown": 8
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:7dfb74125844c6a67ef1",
+        "dense_upper": 8,
+        "support_coeff_count": 8,
+        "unknown": 8
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:8171eaeb5951540fbabc",
+        "dense_upper": 6,
+        "support_coeff_count": 6,
+        "unknown": 6
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:848919ab37217b018610",
+        "dense_upper": 8,
+        "support_coeff_count": 8,
+        "unknown": 8
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:89fce6200f62f1119820",
+        "dense_upper": 9,
+        "support_coeff_count": 9,
+        "unknown": 9
+      },
+      {
+        "anchors": 276,
+        "component_id": "CMP:8ab650a3ce1061d6a284",
+        "dense_upper": 48576,
+        "support_coeff_count": 4991,
+        "unknown": 176
+      },
+      {
+        "anchors": 123,
+        "component_id": "CMP:92e737e95daaed409c31",
+        "dense_upper": 19926,
+        "support_coeff_count": 4313,
+        "unknown": 162
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:9f4142d4c81a357167a4",
+        "dense_upper": 10,
+        "support_coeff_count": 10,
+        "unknown": 10
+      },
+      {
+        "anchors": 8,
+        "component_id": "CMP:9f76bf451554b9d7180f",
+        "dense_upper": 232,
+        "support_coeff_count": 232,
+        "unknown": 29
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:a7a928c80a4f380e6123",
+        "dense_upper": 7,
+        "support_coeff_count": 7,
+        "unknown": 7
+      },
+      {
+        "anchors": 2,
+        "component_id": "CMP:ab08a2cf97127469bbb9",
+        "dense_upper": 36,
+        "support_coeff_count": 36,
+        "unknown": 18
+      },
+      {
+        "anchors": 3514,
+        "component_id": "CMP:c01767ea93741e5cc781",
+        "dense_upper": 1054200,
+        "support_coeff_count": 8932,
+        "unknown": 300
+      },
+      {
+        "anchors": 44,
+        "component_id": "CMP:c3ea5dea7b9565775950",
+        "dense_upper": 2464,
+        "support_coeff_count": 1176,
+        "unknown": 56
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:c52397c239d77cdde9cd",
+        "dense_upper": 4,
+        "support_coeff_count": 4,
+        "unknown": 4
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:cb3a3223971ed3c339d5",
+        "dense_upper": 6,
+        "support_coeff_count": 6,
+        "unknown": 6
+      },
+      {
+        "anchors": 6,
+        "component_id": "CMP:d0c525976419b50470fc",
+        "dense_upper": 120,
+        "support_coeff_count": 120,
+        "unknown": 20
+      },
+      {
+        "anchors": 89,
+        "component_id": "CMP:d2230bd506e3fc9b1bf7",
+        "dense_upper": 8455,
+        "support_coeff_count": 2452,
+        "unknown": 95
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:d2efe1c91bda9db436a7",
+        "dense_upper": 8,
+        "support_coeff_count": 8,
+        "unknown": 8
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:d45e4c656aee5be6c966",
+        "dense_upper": 8,
+        "support_coeff_count": 8,
+        "unknown": 8
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:d6093b737d2f6b5c263c",
+        "dense_upper": 8,
+        "support_coeff_count": 8,
+        "unknown": 8
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:d6b637f5b1b4e7a15413",
+        "dense_upper": 8,
+        "support_coeff_count": 8,
+        "unknown": 8
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:e001bc0facf1f860d507",
+        "dense_upper": 5,
+        "support_coeff_count": 5,
+        "unknown": 5
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:e242a786edc2e8c39757",
+        "dense_upper": 8,
+        "support_coeff_count": 8,
+        "unknown": 8
+      },
+      {
+        "anchors": 112,
+        "component_id": "CMP:e620bf8fb7895e714b99",
+        "dense_upper": 12544,
+        "support_coeff_count": 3061,
+        "unknown": 112
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:e91596b4642071a192ce",
+        "dense_upper": 9,
+        "support_coeff_count": 9,
+        "unknown": 9
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:f2318296051872e1e11e",
+        "dense_upper": 8,
+        "support_coeff_count": 8,
+        "unknown": 8
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:f58d82b9fec4ee294f6f",
+        "dense_upper": 9,
+        "support_coeff_count": 9,
+        "unknown": 9
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:f6371743ea9eb9b54bb2",
+        "dense_upper": 9,
+        "support_coeff_count": 9,
+        "unknown": 9
+      },
+      {
+        "anchors": 215,
+        "component_id": "CMP:f82a342679365b7104ff",
+        "dense_upper": 49450,
+        "support_coeff_count": 6255,
+        "unknown": 230
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:ffd1f45ef422376db782",
+        "dense_upper": 3,
+        "support_coeff_count": 3,
+        "unknown": 3
+      },
+      {
+        "anchors": 1,
+        "component_id": "CMP:ffe2306b5892caeef8a6",
+        "dense_upper": 8,
+        "support_coeff_count": 8,
+        "unknown": 8
+      }
+    ],
+    "dense_coefficient_upper_bound": 4078465,
+    "max_simplex_row_sum_error": 4.440892098500626e-16,
+    "minimum_raw_coordinate": 0.0,
+    "minimum_stored_coefficient": 1.0001893193245916e-14,
+    "stored_coefficient_count_gt_1e14": 101224,
+    "support_count_per_generated_vertex": {
+      "count": 3982,
+      "max": 49.0,
+      "min": 1.0,
+      "p50": 28.0,
+      "p90": 33.0,
+      "p95": 36.0,
+      "p99": 48.0
+    }
+  },
+  "face_provenance_replay": {
+    "compact_face_count": 24443,
+    "compact_node_count": 12090,
+    "component_aware": true,
+    "dense_face_count": 12092332,
+    "dense_vertex_count": 6046160,
+    "position_error_max": 0.0,
+    "voxel_divisions": 56
+  },
+  "harmonic_solve": {
+    "anchor_vertex_count": 12049,
+    "solved_vertex_count": 3982,
+    "unknown_vertex_count": 3982,
+    "unresolved_component_count": 0,
+    "unresolved_component_sizes": [],
+    "unresolved_vertex_count": 0
+  },
+  "partition": {
+    "closure": {
+      "attractive_union_blocked_by_mutex": 401,
+      "attractive_union_count": 12017,
+      "closure_added_separate_count": 401,
+      "closure_policy": "STRUCTURAL_AUTHORITY_MAX_CONTINUITY_WITH_PROBE_CANNOT_LINKS",
+      "component_count": 73,
+      "direct_seed_count": 1417,
+      "final_separate_count": 1818,
+      "seed_constraint_violation_count": 0
+    },
+    "component_count": 73,
+    "cut_closed_crossing_edge_count": 1818,
+    "unsafe_source_edge_seed_count": 1417
+  },
+  "reconstruction": {
+    "coordinate_to_direct_harmonic_max_abs_delta": 7.771561172376096e-16,
+    "coordinate_to_direct_harmonic_max_row_l1": 9.055286191868357e-16,
+    "qualified_skin_source_reconstruction_max_abs_delta": 2.066532708844271e-14,
+    "qualified_skin_source_reconstruction_max_row_l1": 4.3539608424881864e-14
+  },
+  "schema": "RealSaS.KnightComponentHarmonicSupportProvenanceOracle.v1",
+  "status": "PASS__CONVEX_SOURCE_SUPPORT_RECONSTRUCTION"
+}

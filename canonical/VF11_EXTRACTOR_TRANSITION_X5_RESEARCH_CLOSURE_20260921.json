@@ -1,0 +1,17 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX5ResearchClosure.v1",
+  "date_utc": "2026-09-21",
+  "status": "X5_CLOSED__ACCELERATOR_SCREEN_CPU_VERIFY_RESEARCH_AUTHORIZED",
+  "facts": {
+    "batched_scalar_semantic_mismatch_count": 0,
+    "max_abs_bound_difference": 1.4210854715202004e-14,
+    "median_cpu_speedup": 3.814624964738056,
+    "projected_full_domain_cpu_seconds": 13832.370488106455
+  },
+  "next": "X6_ACCELERATOR_SCREEN_WITH_CPU_CONFIRMATION",
+  "design_rule": "An accelerator backend may propose decisive EMPTY nodes, but no node may be pruned unless the CPU float64 X5 engine confirms the same strict sign. Accelerator UNKNOWN nodes remain active. Therefore accelerator arithmetic never mints proof authority.",
+  "full_domain_execution_authorized": false,
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false
+}

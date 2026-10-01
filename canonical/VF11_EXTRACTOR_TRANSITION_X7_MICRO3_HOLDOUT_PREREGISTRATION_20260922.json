@@ -1,0 +1,62 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX7Micro3HoldoutPreregistration.v1",
+  "date_utc": "2026-09-22",
+  "status": "PREREGISTERED__MICRO3_HOLDOUT_PRODUCTIVITY_AND_COST",
+  "authority_class": "RESEARCH_DIAGNOSTIC_ONLY",
+  "parent": "canonical/VF11_EXTRACTOR_TRANSITION_X6C_RESEARCH_CLOSURE_20260922.json",
+  "objective": "Measure whether unresolved-only micro3 refinement materially reduces certified-unknown volume and reveals zero-existence on a holdout not used for the exploratory post-X6C diagnostics.",
+  "exploratory_seed_exclusion": {
+    "reason": "Post-run local red-team already inspected a small set of micro3 roots; those root IDs are excluded from the confirmatory holdout.",
+    "root_ids": [0,2,10,110,11294,12462,15092,16792,28079,28180,29052,29276,29525,30244,37057,42913,43526,44169,44223,45837,47154,47818,47954,49506,49938,50161,50176,50226,52207,52393,56707,56660,58798,62711,63425,63426,63499,65165,65670,71191,72072,76490,76491,76537,76557,76674,80158,81047,83586,83924,90781,94710,103783,103801,103821,103822]
+  },
+  "holdout_construction": {
+    "source": "X6C FULL_DOMAIN_ROOT_STATES plus frozen field center SDF evaluations",
+    "total_roots": 64,
+    "cohorts": [
+      {
+        "name": "UNRESOLVED_COUNT_STRATIFIED",
+        "count": 32,
+        "rule": "8 deterministic evenly-spaced eligible UNKNOWN roots from each micro2 unresolved-count band [1,4], [5,16], [17,40], [41,64], after excluding exploratory IDs"
+      },
+      {
+        "name": "NEAR_ZERO_CENTER",
+        "count": 16,
+        "rule": "16 eligible UNKNOWN roots with smallest absolute direct center SDF, excluding exploratory IDs"
+      },
+      {
+        "name": "NEGATIVE_CENTER",
+        "count": 8,
+        "rule": "8 eligible UNKNOWN roots with most negative direct center SDF, excluding exploratory IDs"
+      },
+      {
+        "name": "POSITIVE_CENTER",
+        "count": 8,
+        "rule": "8 eligible UNKNOWN roots with most positive direct center SDF, excluding exploratory IDs"
+      }
+    ]
+  },
+  "refinement": {
+    "source_micro_depth": 2,
+    "target_micro_depth": 3,
+    "unresolved_only": true,
+    "same_C0_math": true,
+    "ordinary_float64_research_only": true
+  },
+  "primary_metrics": [
+    "micro2 unresolved volume units versus micro3 unresolved volume units",
+    "micro3 root states by cohort",
+    "new PROVEN_EMPTY_POSITIVE / PROVEN_EMPTY_NEGATIVE / PROVEN_ZERO_EXISTS counts",
+    "actual evaluated box count and wall time",
+    "micro3 unresolved-volume reduction fraction"
+  ],
+  "decision": {
+    "unresolved_volume_reduction_fraction_ge_0.75": "MICRO3_HIGH_PRODUCTIVITY__BOUNDED_ADAPTIVE_EXTENSION_MAY_BE_ENGINEERED",
+    "unresolved_volume_reduction_fraction_0.25_to_0.75": "MICRO3_MIXED_PRODUCTIVITY__TIGHTER_BOUND_ENGINE_SHOULD_COMPETE_BEFORE_GLOBAL_EXTENSION",
+    "unresolved_volume_reduction_fraction_lt_0.25": "MICRO3_LOW_PRODUCTIVITY__DEPTH_ESCALATION_FALSIFIED_AS_PRIMARY_LEVER"
+  },
+  "claim_boundary": "Holdout productivity only. No full-domain micro3 authorization is implied by preregistration.",
+  "full_domain_execution_authorized": false,
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false
+}

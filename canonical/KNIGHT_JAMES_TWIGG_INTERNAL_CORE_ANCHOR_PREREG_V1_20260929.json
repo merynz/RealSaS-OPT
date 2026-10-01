@@ -1,0 +1,16 @@
+{
+  "schema": "RealSaS.KnightJamesTwiggInternalCoreAnchorPrereg.v1",
+  "status": "FROZEN_BEFORE_INTERNAL_CORE_ANCHOR_RESULT",
+  "date": "2026-09-29",
+  "question": "Can strict James/Twigg h/4 projection of unsafe faces onto modes learned only from safe faces provide teacher-free interior anchors for the large Stage35 unsafe patches?",
+  "mode_learning": "SAFE_DENSE_VALID_FACES_ONLY",
+  "unsafe_face_policy": "Unsafe faces never fit PCA or mean-shift modes. They are projected only after the safe model is frozen.",
+  "core_distance": "epsilon/4",
+  "vertex_anchor_rule": {
+    "only_fill_currently_unlabeled_vertices": true,
+    "minimum_incident_projected_core_faces": 2,
+    "minimum_area_weighted_label_confidence": 0.8
+  },
+  "teacher_policy": "Teacher topology is evaluation-only. Teacher weights are used only after inference is frozen to isolate topology mechanics, identical to the existing topology closure court.",
+  "promotion_rule": "No product mutation. A topology-closed claim requires every existing frozen Knight topology closure threshold to pass."
+}

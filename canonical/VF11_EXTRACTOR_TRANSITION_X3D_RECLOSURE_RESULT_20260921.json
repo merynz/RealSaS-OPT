@@ -1,0 +1,28 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX3DReclosureResult.v1",
+  "date_utc": "2026-09-21",
+  "status": "PASS__LOCAL_D13_SAMPLED_LATTICE_EQUIVALENCE_WITH_CERTIFIED_EMPTY_PRUNING",
+  "artifact_sha256": "31e89d8019889c083d2a28a745322023e481d5762cf59375a369716c0f254359",
+  "artifact_bytes": 5490,
+  "root_count": 12,
+  "merged_leaf_class_counts": {
+    "CERTIFIED_EMPTY": 493,
+    "ACTIVE_GRAPH": 32,
+    "ACTIVE_UNKNOWN": 144,
+    "ACTIVE_ZERO_EXISTS": 106
+  },
+  "certified_empty_mixed_cube_alarm_count": 0,
+  "graph_line_alarm_count": 0,
+  "mesh_mismatch_root_count": 0,
+  "dense_query_corner_count": 431244,
+  "active_query_corner_count": 131471,
+  "query_reduction_fraction": 0.6951354685514466,
+  "elapsed_seconds_total": 2.904253165999762,
+  "interpretation": "After merging the targeted X3B/X3C empty certificates, proof-aware pruning removed about 69.5% of d13 corner queries over the frozen 12-root local panel while blockwise Lewiner MC remained exactly equivalent to dense d13 Lewiner MC in canonical lattice-edge/face identity on every root.",
+  "claim_boundary": "SAMPLED_D13_EQUIVALENCE_ONLY__NO_GLOBAL_CONTINUOUS_ZERO_SET_COMPLETENESS",
+  "numeric_rigor": "FLOAT64_FIELD_EVAL__FLOAT32_SKIMAGE_MC_INTERNAL__ORDINARY_FLOAT64_PROOF_INPUTS",
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false,
+  "full_domain_traversal_performed": false
+}

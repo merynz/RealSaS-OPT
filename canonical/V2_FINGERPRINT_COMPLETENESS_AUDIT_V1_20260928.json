@@ -1,0 +1,3073 @@
+{
+  "claim_boundary": "Static read-set audit; REVIEW findings require semantic confirmation before promotion to defects.",
+  "counts": {
+    "critical": 20,
+    "high": 15,
+    "review": 3,
+    "total": 38
+  },
+  "findings": [
+    {
+      "class": "MANIFEST_FINGERPRINT_GAP",
+      "evidence": {
+        "function": "_demo_frozen_iris_import_cfg",
+        "key": "iris_fit",
+        "line": 204
+      },
+      "id": "FP_UNDECLARED_MANIFEST_KEY__11_IRIS_CHECKPOINT_SEALED__iris_fit",
+      "manifest_key": "iris_fit",
+      "severity": "CRITICAL",
+      "stage": "11_IRIS_CHECKPOINT_SEALED"
+    },
+    {
+      "class": "MANIFEST_FINGERPRINT_GAP",
+      "evidence": {
+        "function": "qualify_geometry_substrate_stage",
+        "key": "demo_execution",
+        "line": 1193
+      },
+      "id": "FP_UNDECLARED_MANIFEST_KEY__13_GEOMETRY_SUBSTRATE_QUALIFIED__demo_execution",
+      "manifest_key": "demo_execution",
+      "severity": "CRITICAL",
+      "stage": "13_GEOMETRY_SUBSTRATE_QUALIFIED"
+    },
+    {
+      "class": "MANIFEST_FINGERPRINT_GAP",
+      "evidence": {
+        "function": "_demo_stage14_fallback_prereg",
+        "key": "demo_execution",
+        "line": 1336
+      },
+      "id": "FP_UNDECLARED_MANIFEST_KEY__14_GSA_BUILD__demo_execution",
+      "manifest_key": "demo_execution",
+      "severity": "CRITICAL",
+      "stage": "14_GSA_BUILD"
+    },
+    {
+      "class": "MANIFEST_FINGERPRINT_GAP",
+      "evidence": {
+        "function": "_geometry_substrate_for_downstream",
+        "key": "demo_execution",
+        "line": 1299
+      },
+      "id": "FP_UNDECLARED_MANIFEST_KEY__14_GSA_BUILD__demo_execution",
+      "manifest_key": "demo_execution",
+      "severity": "CRITICAL",
+      "stage": "14_GSA_BUILD"
+    },
+    {
+      "class": "MANIFEST_FINGERPRINT_GAP",
+      "evidence": {
+        "function": "_demo_stage14_fallback_prereg",
+        "key": "demo_execution",
+        "line": 1336
+      },
+      "id": "FP_UNDECLARED_MANIFEST_KEY__15_RIGGING_SURFACE_QUALIFIED__demo_execution",
+      "manifest_key": "demo_execution",
+      "severity": "CRITICAL",
+      "stage": "15_RIGGING_SURFACE_QUALIFIED"
+    },
+    {
+      "class": "FILESYSTEM_SIDE_CHANNEL",
+      "dependency": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+      "evidence": {
+        "function": "build_canonical_mesh_addressing_stage",
+        "stage_id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+      },
+      "id": "FP_FILESYSTEM_BACK_EDGE__18_CANONICAL_MESH_ADDRESSING_BUILD__35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+      "severity": "CRITICAL",
+      "stage": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+    },
+    {
+      "class": "MANIFEST_FINGERPRINT_GAP",
+      "evidence": {
+        "function": "_source_foreground_masks_v1",
+        "key": "observation",
+        "line": 314
+      },
+      "id": "FP_UNDECLARED_MANIFEST_KEY__18_CANONICAL_MESH_ADDRESSING_BUILD__observation",
+      "manifest_key": "observation",
+      "severity": "CRITICAL",
+      "stage": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+    },
+    {
+      "class": "FINGERPRINT_DEPENDENCY_GAP",
+      "dependency": "05_CAMERA_CONTRACT_SOLVED",
+      "evidence": {
+        "function": "qualify_static_canonical_mesh_stage",
+        "line": 555,
+        "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+      },
+      "id": "FP_UNDECLARED_DIRECT_STAGE_READ__19_STATIC_CANONICAL_MESH_QUALIFIED__05_CAMERA_CONTRACT_SOLVED",
+      "severity": "HIGH",
+      "stage": "19_STATIC_CANONICAL_MESH_QUALIFIED",
+      "transitive_ancestor": true
+    },
+    {
+      "class": "MANIFEST_FINGERPRINT_GAP",
+      "evidence": {
+        "function": "_source_foreground_masks_v1",
+        "key": "observation",
+        "line": 314
+      },
+      "id": "FP_UNDECLARED_MANIFEST_KEY__19_STATIC_CANONICAL_MESH_QUALIFIED__observation",
+      "manifest_key": "observation",
+      "severity": "CRITICAL",
+      "stage": "19_STATIC_CANONICAL_MESH_QUALIFIED"
+    },
+    {
+      "class": "MANIFEST_FINGERPRINT_GAP",
+      "evidence": {
+        "function": "_static_geometry_evidence",
+        "key": "demo_execution",
+        "line": 513
+      },
+      "id": "FP_UNDECLARED_MANIFEST_KEY__19_STATIC_CANONICAL_MESH_QUALIFIED__demo_execution",
+      "manifest_key": "demo_execution",
+      "severity": "CRITICAL",
+      "stage": "19_STATIC_CANONICAL_MESH_QUALIFIED"
+    },
+    {
+      "class": "FINGERPRINT_DEPENDENCY_GAP",
+      "dependency": "05_CAMERA_CONTRACT_SOLVED",
+      "evidence": {
+        "function": "preregister_caa_backend_stage",
+        "line": 550,
+        "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+      },
+      "id": "FP_UNDECLARED_DIRECT_STAGE_READ__20_CAA_BACKEND_PREREGISTERED__05_CAMERA_CONTRACT_SOLVED",
+      "severity": "HIGH",
+      "stage": "20_CAA_BACKEND_PREREGISTERED",
+      "transitive_ancestor": true
+    },
+    {
+      "class": "MANIFEST_FINGERPRINT_GAP",
+      "evidence": {
+        "function": "_load_source_inputs",
+        "key": "observation",
+        "line": 228
+      },
+      "id": "FP_UNDECLARED_MANIFEST_KEY__20_CAA_BACKEND_PREREGISTERED__observation",
+      "manifest_key": "observation",
+      "severity": "CRITICAL",
+      "stage": "20_CAA_BACKEND_PREREGISTERED"
+    },
+    {
+      "class": "MANIFEST_FINGERPRINT_GAP",
+      "evidence": {
+        "function": "_static_mesh_for_appearance",
+        "key": "demo_execution",
+        "line": 296
+      },
+      "id": "FP_UNDECLARED_MANIFEST_KEY__20_CAA_BACKEND_PREREGISTERED__demo_execution",
+      "manifest_key": "demo_execution",
+      "severity": "CRITICAL",
+      "stage": "20_CAA_BACKEND_PREREGISTERED"
+    },
+    {
+      "class": "REPO_FILE_FINGERPRINT_REVIEW",
+      "evidence": {
+        "function": "preregister_caa_backend_stage",
+        "path_literal": "COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json"
+      },
+      "id": "FP_REPO_POLICY_READ_REVIEW__20_CAA_BACKEND_PREREGISTERED__COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json",
+      "severity": "REVIEW",
+      "stage": "20_CAA_BACKEND_PREREGISTERED"
+    },
+    {
+      "class": "REPO_FILE_FINGERPRINT_REVIEW",
+      "evidence": {
+        "function": "preregister_caa_backend_stage",
+        "path_literal": "CAA_V2_RENDERABLE_SUPPORT_ADMISSION_CONTRACT_V1_20260927.json"
+      },
+      "id": "FP_REPO_POLICY_READ_REVIEW__20_CAA_BACKEND_PREREGISTERED__CAA_V2_RENDERABLE_SUPPORT_ADMISSION_CONTRACT_V1_20260927.json",
+      "severity": "REVIEW",
+      "stage": "20_CAA_BACKEND_PREREGISTERED"
+    },
+    {
+      "class": "REPO_FILE_FINGERPRINT_REVIEW",
+      "evidence": {
+        "function": "preregister_caa_backend_stage",
+        "path_literal": "caa_backend_preregistration.json"
+      },
+      "id": "FP_REPO_POLICY_READ_REVIEW__20_CAA_BACKEND_PREREGISTERED__caa_backend_preregistration.json",
+      "severity": "REVIEW",
+      "stage": "20_CAA_BACKEND_PREREGISTERED"
+    },
+    {
+      "class": "FINGERPRINT_DEPENDENCY_GAP",
+      "dependency": "18_CANONICAL_MESH_ADDRESSING_BUILD",
+      "evidence": {
+        "function": "_visual_mesh_set",
+        "line": 109,
+        "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+      },
+      "id": "FP_UNDECLARED_DIRECT_STAGE_READ__21_CAA_COMPILE__18_CANONICAL_MESH_ADDRESSING_BUILD",
+      "severity": "HIGH",
+      "stage": "21_CAA_COMPILE",
+      "transitive_ancestor": true
+    },
+    {
+      "class": "FINGERPRINT_DEPENDENCY_GAP",
+      "dependency": "18_CANONICAL_MESH_ADDRESSING_BUILD",
+      "evidence": {
+        "function": "compile_caa_stage",
+        "line": 786,
+        "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+      },
+      "id": "FP_UNDECLARED_DIRECT_STAGE_READ__21_CAA_COMPILE__18_CANONICAL_MESH_ADDRESSING_BUILD",
+      "severity": "HIGH",
+      "stage": "21_CAA_COMPILE",
+      "transitive_ancestor": true
+    },
+    {
+      "class": "FINGERPRINT_DEPENDENCY_GAP",
+      "dependency": "05_CAMERA_CONTRACT_SOLVED",
+      "evidence": {
+        "function": "compile_caa_stage",
+        "line": 793,
+        "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+      },
+      "id": "FP_UNDECLARED_DIRECT_STAGE_READ__21_CAA_COMPILE__05_CAMERA_CONTRACT_SOLVED",
+      "severity": "HIGH",
+      "stage": "21_CAA_COMPILE",
+      "transitive_ancestor": true
+    },
+    {
+      "class": "FINGERPRINT_DEPENDENCY_GAP",
+      "dependency": "07_OBSERVATION_CONTRACT_QUALIFIED",
+      "evidence": {
+        "function": "compile_caa_stage",
+        "line": 800,
+        "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+      },
+      "id": "FP_UNDECLARED_DIRECT_STAGE_READ__21_CAA_COMPILE__07_OBSERVATION_CONTRACT_QUALIFIED",
+      "severity": "HIGH",
+      "stage": "21_CAA_COMPILE",
+      "transitive_ancestor": true
+    },
+    {
+      "class": "MANIFEST_FINGERPRINT_GAP",
+      "evidence": {
+        "function": "_load_source_inputs",
+        "key": "observation",
+        "line": 228
+      },
+      "id": "FP_UNDECLARED_MANIFEST_KEY__21_CAA_COMPILE__observation",
+      "manifest_key": "observation",
+      "severity": "CRITICAL",
+      "stage": "21_CAA_COMPILE"
+    },
+    {
+      "class": "FINGERPRINT_DEPENDENCY_GAP",
+      "dependency": "20_CAA_BACKEND_PREREGISTERED",
+      "evidence": {
+        "function": "seal_caa_compile_stage",
+        "line": 1180,
+        "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+      },
+      "id": "FP_UNDECLARED_DIRECT_STAGE_READ__22_CAA_COMPILE_SEALED__20_CAA_BACKEND_PREREGISTERED",
+      "severity": "HIGH",
+      "stage": "22_CAA_COMPILE_SEALED",
+      "transitive_ancestor": true
+    },
+    {
+      "class": "FINGERPRINT_DEPENDENCY_GAP",
+      "dependency": "20_CAA_BACKEND_PREREGISTERED",
+      "evidence": {
+        "function": "bake_complete_appearance_stage",
+        "line": 1366,
+        "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+      },
+      "id": "FP_UNDECLARED_DIRECT_STAGE_READ__23_COMPLETE_APPEARANCE_ASSET_BAKED__20_CAA_BACKEND_PREREGISTERED",
+      "severity": "HIGH",
+      "stage": "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+      "transitive_ancestor": true
+    },
+    {
+      "class": "FINGERPRINT_DEPENDENCY_GAP",
+      "dependency": "21_CAA_COMPILE",
+      "evidence": {
+        "function": "bake_complete_appearance_stage",
+        "line": 1373,
+        "stage_id": "21_CAA_COMPILE"
+      },
+      "id": "FP_UNDECLARED_DIRECT_STAGE_READ__23_COMPLETE_APPEARANCE_ASSET_BAKED__21_CAA_COMPILE",
+      "severity": "HIGH",
+      "stage": "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+      "transitive_ancestor": true
+    },
+    {
+      "class": "FINGERPRINT_DEPENDENCY_GAP",
+      "dependency": "07_OBSERVATION_CONTRACT_QUALIFIED",
+      "evidence": {
+        "function": "bake_complete_appearance_stage",
+        "line": 1395,
+        "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+      },
+      "id": "FP_UNDECLARED_DIRECT_STAGE_READ__23_COMPLETE_APPEARANCE_ASSET_BAKED__07_OBSERVATION_CONTRACT_QUALIFIED",
+      "severity": "HIGH",
+      "stage": "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+      "transitive_ancestor": true
+    },
+    {
+      "class": "MANIFEST_FINGERPRINT_GAP",
+      "evidence": {
+        "function": "_load_source_inputs",
+        "key": "observation",
+        "line": 228
+      },
+      "id": "FP_UNDECLARED_MANIFEST_KEY__23_COMPLETE_APPEARANCE_ASSET_BAKED__observation",
+      "manifest_key": "observation",
+      "severity": "CRITICAL",
+      "stage": "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+    },
+    {
+      "class": "FINGERPRINT_DEPENDENCY_GAP",
+      "dependency": "20_CAA_BACKEND_PREREGISTERED",
+      "evidence": {
+        "function": "qualify_complete_appearance_stage",
+        "line": 1907,
+        "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+      },
+      "id": "FP_UNDECLARED_DIRECT_STAGE_READ__24_COMPLETE_APPEARANCE_QUALIFIED__20_CAA_BACKEND_PREREGISTERED",
+      "severity": "HIGH",
+      "stage": "24_COMPLETE_APPEARANCE_QUALIFIED",
+      "transitive_ancestor": true
+    },
+    {
+      "class": "FINGERPRINT_DEPENDENCY_GAP",
+      "dependency": "21_CAA_COMPILE",
+      "evidence": {
+        "function": "qualify_complete_appearance_stage",
+        "line": 1914,
+        "stage_id": "21_CAA_COMPILE"
+      },
+      "id": "FP_UNDECLARED_DIRECT_STAGE_READ__24_COMPLETE_APPEARANCE_QUALIFIED__21_CAA_COMPILE",
+      "severity": "HIGH",
+      "stage": "24_COMPLETE_APPEARANCE_QUALIFIED",
+      "transitive_ancestor": true
+    },
+    {
+      "class": "MANIFEST_FINGERPRINT_GAP",
+      "evidence": {
+        "function": "_load_source_inputs",
+        "key": "observation",
+        "line": 228
+      },
+      "id": "FP_UNDECLARED_MANIFEST_KEY__24_COMPLETE_APPEARANCE_QUALIFIED__observation",
+      "manifest_key": "observation",
+      "severity": "CRITICAL",
+      "stage": "24_COMPLETE_APPEARANCE_QUALIFIED"
+    },
+    {
+      "class": "FINGERPRINT_DEPENDENCY_GAP",
+      "dependency": "20_CAA_BACKEND_PREREGISTERED",
+      "evidence": {
+        "function": "prove_caa_reference_rest_stage",
+        "line": 2506,
+        "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+      },
+      "id": "FP_UNDECLARED_DIRECT_STAGE_READ__25_CAA_REFERENCE_REST_RENDER_PROOF__20_CAA_BACKEND_PREREGISTERED",
+      "severity": "HIGH",
+      "stage": "25_CAA_REFERENCE_REST_RENDER_PROOF",
+      "transitive_ancestor": true
+    },
+    {
+      "class": "FINGERPRINT_DEPENDENCY_GAP",
+      "dependency": "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+      "evidence": {
+        "function": "prove_caa_reference_rest_stage",
+        "line": 2513,
+        "stage_id": "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+      },
+      "id": "FP_UNDECLARED_DIRECT_STAGE_READ__25_CAA_REFERENCE_REST_RENDER_PROOF__23_COMPLETE_APPEARANCE_ASSET_BAKED",
+      "severity": "HIGH",
+      "stage": "25_CAA_REFERENCE_REST_RENDER_PROOF",
+      "transitive_ancestor": true
+    },
+    {
+      "class": "MANIFEST_FINGERPRINT_GAP",
+      "evidence": {
+        "function": "_demo_rest_measurement_admissible",
+        "key": "demo_execution",
+        "line": 180
+      },
+      "id": "FP_UNDECLARED_MANIFEST_KEY__25_CAA_REFERENCE_REST_RENDER_PROOF__demo_execution",
+      "manifest_key": "demo_execution",
+      "severity": "CRITICAL",
+      "stage": "25_CAA_REFERENCE_REST_RENDER_PROOF"
+    },
+    {
+      "class": "MANIFEST_FINGERPRINT_GAP",
+      "evidence": {
+        "function": "_load_source_inputs",
+        "key": "observation",
+        "line": 228
+      },
+      "id": "FP_UNDECLARED_MANIFEST_KEY__25_CAA_REFERENCE_REST_RENDER_PROOF__observation",
+      "manifest_key": "observation",
+      "severity": "CRITICAL",
+      "stage": "25_CAA_REFERENCE_REST_RENDER_PROOF"
+    },
+    {
+      "class": "MANIFEST_FINGERPRINT_GAP",
+      "evidence": {
+        "function": "_static_mesh_for_appearance",
+        "key": "demo_execution",
+        "line": 296
+      },
+      "id": "FP_UNDECLARED_MANIFEST_KEY__25_CAA_REFERENCE_REST_RENDER_PROOF__demo_execution",
+      "manifest_key": "demo_execution",
+      "severity": "CRITICAL",
+      "stage": "25_CAA_REFERENCE_REST_RENDER_PROOF"
+    },
+    {
+      "class": "MANIFEST_FINGERPRINT_GAP",
+      "evidence": {
+        "function": "_assert_geppetto_surface_scope",
+        "key": "demo_execution",
+        "line": 105
+      },
+      "id": "FP_UNDECLARED_MANIFEST_KEY__26_GEPPETTO_FIT_PREREGISTERED__demo_execution",
+      "manifest_key": "demo_execution",
+      "severity": "CRITICAL",
+      "stage": "26_GEPPETTO_FIT_PREREGISTERED"
+    },
+    {
+      "class": "MANIFEST_FINGERPRINT_GAP",
+      "evidence": {
+        "function": "_demo_failed_rest_precondition_admissible",
+        "key": "demo_execution",
+        "line": 99
+      },
+      "id": "FP_UNDECLARED_MANIFEST_KEY__39_MOTION_SOURCE_OR_PRESET_SEAL__demo_execution",
+      "manifest_key": "demo_execution",
+      "severity": "CRITICAL",
+      "stage": "39_MOTION_SOURCE_OR_PRESET_SEAL"
+    },
+    {
+      "class": "CANONICAL_DOCUMENTATION_DRIFT",
+      "evidence": "SYSTEM_ARCHITECTURE_V2 still says mesh-weight typed seam open/unsealed while MESH_WEIGHT_BINDING_CONTRACT_V1 and Stage36 typed mesh-skin transfer exist.",
+      "id": "DOC_SYSTEM_ARCH_V2_MWB_SEAM_STATUS_STALE",
+      "severity": "HIGH"
+    },
+    {
+      "class": "GOVERNANCE_STATE",
+      "evidence": {
+        "seal": {
+          "knight_started": false,
+          "reason": "Post-seal appearance fidelity review found unresolved product blockers: fixed CAA tile_resolution=8 lacks source-frequency/texel-density qualification; deterministic unobserved completion is nearest-surface copy rather than high-fidelity source-constrained completion; cross-view RGB compatibility lacks explicit qualification authority; Stage45 dynamic alpha holes are diagnostic rather than a hard gate; speckled/scattered-hole artifact class is not independently bounded. Native CAA currently uses premultiplied bilinear only; mip/minification and anisotropic sampling stability under motion are not yet qualified. Independent red-team additionally found Euclidean cross-surface completion risk, donor-view ranking weakness, same-provenance seam blindness/source-view provenance loss, owner-denominator crack blindness, XY-only contact proof under Z-up object frame, playback/proof sampling mismatch, missing explicit dynamic self-intersection qualification, and a referenced visual-fidelity recalibration artifact that does not yet exist.",
+          "status": "REVOKED",
+          "user_approval_required": true,
+          "user_approval_state": "BLOCKED_PENDING_APPEARANCE_FIDELITY_RECLOSURE",
+          "witness_execution_allowed": false,
+          "witness_execution_authorized_now": false
+        },
+        "status": "REOPENED_APPEARANCE_AND_DYNAMIC_VISUAL_FIDELITY_AUDIT__WITNESS_FORBIDDEN"
+      },
+      "id": "GOV_READINESS_REVOKED",
+      "severity": "CRITICAL"
+    }
+  ],
+  "repo_head": "dee1709a1617e74deda124c26636d1710a7be4b0",
+  "schema": "RealSaS.V2FingerprintCompletenessAudit.v1",
+  "stage_rows": [
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.source:seal_source_bytes",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [],
+      "declared_manifest_keys": [
+        "source_files"
+      ],
+      "direct_stage_reads": [],
+      "env_reads": [],
+      "manifest_reads": [],
+      "run_artifact_stage_refs": [
+        {
+          "function": "seal_source_bytes",
+          "stage_id": "01_SOURCE_BYTES_SEALED"
+        }
+      ],
+      "stage_id": "01_SOURCE_BYTES_SEALED",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.source:seal_source_license_provenance",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "01_SOURCE_BYTES_SEALED"
+      ],
+      "declared_manifest_keys": [
+        "source_license"
+      ],
+      "direct_stage_reads": [],
+      "env_reads": [],
+      "manifest_reads": [],
+      "run_artifact_stage_refs": [
+        {
+          "function": "seal_source_license_provenance",
+          "stage_id": "02_SOURCE_LICENSE_PROVENANCE"
+        }
+      ],
+      "stage_id": "02_SOURCE_LICENSE_PROVENANCE",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:audit_source_mechanics_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "01_SOURCE_BYTES_SEALED",
+        "02_SOURCE_LICENSE_PROVENANCE"
+      ],
+      "declared_manifest_keys": [
+        "source_audit",
+        "observation"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "audit_source_mechanics_stage",
+          "line": 61,
+          "stage_id": "01_SOURCE_BYTES_SEALED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_observation_rows",
+          "key": "observation",
+          "line": 31
+        },
+        {
+          "function": "audit_source_mechanics_stage",
+          "key": "source_audit",
+          "line": 63
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "audit_source_mechanics_stage",
+          "stage_id": "01_SOURCE_BYTES_SEALED"
+        }
+      ],
+      "stage_id": "03_SOURCE_MECHANICAL_AUDIT",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:admit_full_subject_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "03_SOURCE_MECHANICAL_AUDIT"
+      ],
+      "declared_manifest_keys": [
+        "admission"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "admit_full_subject_stage",
+          "line": 112,
+          "stage_id": "03_SOURCE_MECHANICAL_AUDIT"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "admit_full_subject_stage",
+          "key": "admission",
+          "line": 114
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "admit_full_subject_stage",
+          "stage_id": "03_SOURCE_MECHANICAL_AUDIT"
+        }
+      ],
+      "stage_id": "04_FULL_SUBJECT_ADMISSION",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.observation_v2:qualify_camera_contract_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [],
+      "declared_manifest_keys": [
+        "observation"
+      ],
+      "direct_stage_reads": [],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "qualify_camera_contract_stage",
+          "key": "observation",
+          "line": 18
+        }
+      ],
+      "run_artifact_stage_refs": [],
+      "stage_id": "05_CAMERA_CONTRACT_SOLVED",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:materialize_observation_render_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "04_FULL_SUBJECT_ADMISSION",
+        "05_CAMERA_CONTRACT_SOLVED"
+      ],
+      "declared_manifest_keys": [
+        "observation"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "materialize_observation_render_stage",
+          "line": 142,
+          "stage_id": "04_FULL_SUBJECT_ADMISSION"
+        },
+        {
+          "function": "materialize_observation_render_stage",
+          "line": 145,
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_observation_rows",
+          "key": "observation",
+          "line": 31
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "materialize_observation_render_stage",
+          "stage_id": "04_FULL_SUBJECT_ADMISSION"
+        },
+        {
+          "function": "materialize_observation_render_stage",
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        }
+      ],
+      "stage_id": "06_OBSERVATION_RENDER_8VIEW",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:qualify_observation_contract_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "03_SOURCE_MECHANICAL_AUDIT",
+        "04_FULL_SUBJECT_ADMISSION",
+        "05_CAMERA_CONTRACT_SOLVED",
+        "06_OBSERVATION_RENDER_8VIEW"
+      ],
+      "declared_manifest_keys": [
+        "observation"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "qualify_observation_contract_stage",
+          "line": 170,
+          "stage_id": "03_SOURCE_MECHANICAL_AUDIT"
+        },
+        {
+          "function": "qualify_observation_contract_stage",
+          "line": 173,
+          "stage_id": "04_FULL_SUBJECT_ADMISSION"
+        },
+        {
+          "function": "qualify_observation_contract_stage",
+          "line": 176,
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        },
+        {
+          "function": "qualify_observation_contract_stage",
+          "line": 179,
+          "stage_id": "06_OBSERVATION_RENDER_8VIEW"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_observation_rows",
+          "key": "observation",
+          "line": 31
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "qualify_observation_contract_stage",
+          "stage_id": "03_SOURCE_MECHANICAL_AUDIT"
+        },
+        {
+          "function": "qualify_observation_contract_stage",
+          "stage_id": "04_FULL_SUBJECT_ADMISSION"
+        },
+        {
+          "function": "qualify_observation_contract_stage",
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        },
+        {
+          "function": "qualify_observation_contract_stage",
+          "stage_id": "06_OBSERVATION_RENDER_8VIEW"
+        }
+      ],
+      "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:qualify_normalization_domain_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ],
+      "declared_manifest_keys": [
+        "normalization"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "qualify_normalization_domain_stage",
+          "line": 220,
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        },
+        {
+          "function": "qualify_normalization_domain_stage",
+          "line": 222,
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "qualify_normalization_domain_stage",
+          "key": "normalization",
+          "line": 224
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "qualify_normalization_domain_stage",
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        },
+        {
+          "function": "qualify_normalization_domain_stage",
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        }
+      ],
+      "stage_id": "08_NORMALIZATION_DOMAIN_QUALIFIED",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:preregister_iris_fit_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED"
+      ],
+      "declared_manifest_keys": [
+        "iris_fit"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "preregister_iris_fit_stage",
+          "line": 246,
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        },
+        {
+          "function": "preregister_iris_fit_stage",
+          "line": 253,
+          "stage_id": "08_NORMALIZATION_DOMAIN_QUALIFIED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_demo_frozen_iris_import_cfg",
+          "key": "iris_fit",
+          "line": 204
+        },
+        {
+          "function": "_iris_dense_coverage_policy",
+          "key": "iris_fit",
+          "line": 107
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "preregister_iris_fit_stage",
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        },
+        {
+          "function": "preregister_iris_fit_stage",
+          "stage_id": "08_NORMALIZATION_DOMAIN_QUALIFIED"
+        },
+        {
+          "function": "preregister_iris_fit_stage",
+          "stage_id": "09_IRIS_FIT_PREREGISTERED"
+        }
+      ],
+      "stage_id": "09_IRIS_FIT_PREREGISTERED",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:execute_iris_fit_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "09_IRIS_FIT_PREREGISTERED"
+      ],
+      "declared_manifest_keys": [
+        "iris_fit"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "execute_iris_fit_stage",
+          "line": 359,
+          "stage_id": "09_IRIS_FIT_PREREGISTERED"
+        },
+        {
+          "function": "execute_iris_fit_stage",
+          "line": 452,
+          "stage_id": "09_IRIS_FIT_PREREGISTERED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_demo_frozen_iris_import_cfg",
+          "key": "iris_fit",
+          "line": 204
+        },
+        {
+          "function": "_iris_dense_coverage_policy",
+          "key": "iris_fit",
+          "line": 107
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "execute_iris_fit_stage",
+          "stage_id": "09_IRIS_FIT_PREREGISTERED"
+        },
+        {
+          "function": "execute_iris_fit_stage",
+          "stage_id": "10_IRIS_FIT"
+        }
+      ],
+      "stage_id": "10_IRIS_FIT",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:seal_iris_checkpoint_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "10_IRIS_FIT"
+      ],
+      "declared_manifest_keys": [],
+      "direct_stage_reads": [
+        {
+          "function": "seal_iris_checkpoint_stage",
+          "line": 493,
+          "stage_id": "10_IRIS_FIT"
+        },
+        {
+          "function": "seal_iris_checkpoint_stage",
+          "line": 550,
+          "stage_id": "10_IRIS_FIT"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_demo_frozen_iris_import_cfg",
+          "key": "iris_fit",
+          "line": 204
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "seal_iris_checkpoint_stage",
+          "stage_id": "10_IRIS_FIT"
+        },
+        {
+          "function": "seal_iris_checkpoint_stage",
+          "stage_id": "11_IRIS_CHECKPOINT_SEALED"
+        }
+      ],
+      "stage_id": "11_IRIS_CHECKPOINT_SEALED",
+      "undeclared_manifest_reads": [
+        {
+          "function": "_demo_frozen_iris_import_cfg",
+          "key": "iris_fit",
+          "line": 204
+        }
+      ]
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:decode_zero_surface_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "11_IRIS_CHECKPOINT_SEALED"
+      ],
+      "declared_manifest_keys": [
+        "geometry_decode"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "decode_zero_surface_stage",
+          "line": 574,
+          "stage_id": "11_IRIS_CHECKPOINT_SEALED"
+        },
+        {
+          "function": "decode_zero_surface_stage",
+          "line": 581,
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        },
+        {
+          "function": "decode_zero_surface_stage",
+          "line": 588,
+          "stage_id": "08_NORMALIZATION_DOMAIN_QUALIFIED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_demo_frozen_zero_import_cfg",
+          "key": "geometry_decode",
+          "line": 218
+        },
+        {
+          "function": "decode_zero_surface_stage",
+          "key": "geometry_decode",
+          "line": 706
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "decode_zero_surface_stage",
+          "stage_id": "11_IRIS_CHECKPOINT_SEALED"
+        },
+        {
+          "function": "decode_zero_surface_stage",
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        },
+        {
+          "function": "decode_zero_surface_stage",
+          "stage_id": "08_NORMALIZATION_DOMAIN_QUALIFIED"
+        },
+        {
+          "function": "decode_zero_surface_stage",
+          "stage_id": "12_ZERO_SURFACE_DECODED"
+        }
+      ],
+      "stage_id": "12_ZERO_SURFACE_DECODED",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:qualify_geometry_substrate_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "12_ZERO_SURFACE_DECODED"
+      ],
+      "declared_manifest_keys": [
+        "geometry_gate",
+        "observation"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "qualify_geometry_substrate_stage",
+          "line": 871,
+          "stage_id": "12_ZERO_SURFACE_DECODED"
+        },
+        {
+          "function": "qualify_geometry_substrate_stage",
+          "line": 878,
+          "stage_id": "08_NORMALIZATION_DOMAIN_QUALIFIED"
+        },
+        {
+          "function": "qualify_geometry_substrate_stage",
+          "line": 885,
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        },
+        {
+          "function": "qualify_geometry_substrate_stage",
+          "line": 892,
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_demo_frozen_stage13_import_cfg",
+          "key": "geometry_gate",
+          "line": 831
+        },
+        {
+          "function": "_source_foreground",
+          "key": "observation",
+          "line": 806
+        },
+        {
+          "function": "qualify_geometry_substrate_stage",
+          "key": "geometry_gate",
+          "line": 899
+        },
+        {
+          "function": "qualify_geometry_substrate_stage",
+          "key": "demo_execution",
+          "line": 1193
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "qualify_geometry_substrate_stage",
+          "stage_id": "12_ZERO_SURFACE_DECODED"
+        },
+        {
+          "function": "qualify_geometry_substrate_stage",
+          "stage_id": "08_NORMALIZATION_DOMAIN_QUALIFIED"
+        },
+        {
+          "function": "qualify_geometry_substrate_stage",
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        },
+        {
+          "function": "qualify_geometry_substrate_stage",
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        },
+        {
+          "function": "qualify_geometry_substrate_stage",
+          "stage_id": "13_GEOMETRY_SUBSTRATE_QUALIFIED"
+        }
+      ],
+      "stage_id": "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+      "undeclared_manifest_reads": [
+        {
+          "function": "qualify_geometry_substrate_stage",
+          "key": "demo_execution",
+          "line": 1193
+        }
+      ]
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:build_gsa_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "11_IRIS_CHECKPOINT_SEALED",
+        "12_ZERO_SURFACE_DECODED",
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED"
+      ],
+      "declared_manifest_keys": [
+        "gsa"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "_geometry_substrate_for_downstream",
+          "line": 1280,
+          "stage_id": "13_GEOMETRY_SUBSTRATE_QUALIFIED"
+        },
+        {
+          "function": "build_gsa_stage",
+          "line": 1373,
+          "stage_id": "12_ZERO_SURFACE_DECODED"
+        },
+        {
+          "function": "build_gsa_stage",
+          "line": 1381,
+          "stage_id": "08_NORMALIZATION_DOMAIN_QUALIFIED"
+        },
+        {
+          "function": "build_gsa_stage",
+          "line": 1388,
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        },
+        {
+          "function": "build_gsa_stage",
+          "line": 1395,
+          "stage_id": "11_IRIS_CHECKPOINT_SEALED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_demo_stage14_fallback_prereg",
+          "key": "demo_execution",
+          "line": 1336
+        },
+        {
+          "function": "_geometry_substrate_for_downstream",
+          "key": "demo_execution",
+          "line": 1299
+        },
+        {
+          "function": "build_gsa_stage",
+          "key": "gsa",
+          "line": 1402
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "build_gsa_stage",
+          "stage_id": "12_ZERO_SURFACE_DECODED"
+        },
+        {
+          "function": "build_gsa_stage",
+          "stage_id": "08_NORMALIZATION_DOMAIN_QUALIFIED"
+        },
+        {
+          "function": "build_gsa_stage",
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        },
+        {
+          "function": "build_gsa_stage",
+          "stage_id": "11_IRIS_CHECKPOINT_SEALED"
+        },
+        {
+          "function": "build_gsa_stage",
+          "stage_id": "14_GSA_BUILD"
+        }
+      ],
+      "stage_id": "14_GSA_BUILD",
+      "undeclared_manifest_reads": [
+        {
+          "function": "_demo_stage14_fallback_prereg",
+          "key": "demo_execution",
+          "line": 1336
+        },
+        {
+          "function": "_geometry_substrate_for_downstream",
+          "key": "demo_execution",
+          "line": 1299
+        }
+      ]
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:qualify_rigging_surface_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "14_GSA_BUILD"
+      ],
+      "declared_manifest_keys": [],
+      "direct_stage_reads": [
+        {
+          "function": "qualify_rigging_surface_stage",
+          "line": 1551,
+          "stage_id": "14_GSA_BUILD"
+        },
+        {
+          "function": "qualify_rigging_surface_stage",
+          "line": 1545,
+          "stage_id": "14_GSA_BUILD"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_demo_stage14_fallback_prereg",
+          "key": "demo_execution",
+          "line": 1336
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "qualify_rigging_surface_stage",
+          "stage_id": "14_GSA_BUILD"
+        },
+        {
+          "function": "qualify_rigging_surface_stage",
+          "stage_id": "15_RIGGING_SURFACE_QUALIFIED"
+        }
+      ],
+      "stage_id": "15_RIGGING_SURFACE_QUALIFIED",
+      "undeclared_manifest_reads": [
+        {
+          "function": "_demo_stage14_fallback_prereg",
+          "key": "demo_execution",
+          "line": 1336
+        }
+      ]
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.v2_architecture:seal_output_presentation_directions_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ],
+      "declared_manifest_keys": [
+        "observation"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "seal_output_presentation_directions_stage",
+          "line": 61,
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [],
+      "run_artifact_stage_refs": [
+        {
+          "function": "seal_output_presentation_directions_stage",
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        }
+      ],
+      "stage_id": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2:qualify_mechanical_partition_and_carriers",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "15_RIGGING_SURFACE_QUALIFIED"
+      ],
+      "declared_manifest_keys": [
+        "components",
+        "carrier_policy"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "_load_surface",
+          "line": 137,
+          "stage_id": "15_RIGGING_SURFACE_QUALIFIED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "qualify_mechanical_partition_and_carriers",
+          "key": "components",
+          "line": 199
+        },
+        {
+          "function": "qualify_mechanical_partition_and_carriers",
+          "key": "carrier_policy",
+          "line": 200
+        }
+      ],
+      "run_artifact_stage_refs": [],
+      "stage_id": "17_MECHANICAL_PARTITION_QUALIFIED",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.v2_architecture:build_canonical_mesh_addressing_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "17_MECHANICAL_PARTITION_QUALIFIED"
+      ],
+      "declared_manifest_keys": [
+        "mesh",
+        "mesh_policy"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "build_canonical_mesh_addressing_stage",
+          "line": 157,
+          "stage_id": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED"
+        },
+        {
+          "function": "build_canonical_mesh_addressing_stage",
+          "line": 164,
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_source_foreground_masks_v1",
+          "key": "observation",
+          "line": 314
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "build_canonical_mesh_addressing_stage",
+          "stage_id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+        },
+        {
+          "function": "build_canonical_mesh_addressing_stage",
+          "stage_id": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED"
+        },
+        {
+          "function": "build_canonical_mesh_addressing_stage",
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        }
+      ],
+      "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD",
+      "undeclared_manifest_reads": [
+        {
+          "function": "_source_foreground_masks_v1",
+          "key": "observation",
+          "line": 314
+        }
+      ]
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.v2_architecture:qualify_static_canonical_mesh_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD"
+      ],
+      "declared_manifest_keys": [],
+      "direct_stage_reads": [
+        {
+          "function": "_static_geometry_evidence",
+          "line": 494,
+          "stage_id": "13_GEOMETRY_SUBSTRATE_QUALIFIED"
+        },
+        {
+          "function": "qualify_static_canonical_mesh_stage",
+          "line": 526,
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        },
+        {
+          "function": "qualify_static_canonical_mesh_stage",
+          "line": 533,
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        },
+        {
+          "function": "qualify_static_canonical_mesh_stage",
+          "line": 540,
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        },
+        {
+          "function": "qualify_static_canonical_mesh_stage",
+          "line": 548,
+          "stage_id": "17_MECHANICAL_PARTITION_QUALIFIED"
+        },
+        {
+          "function": "qualify_static_canonical_mesh_stage",
+          "line": 555,
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        },
+        {
+          "function": "qualify_static_canonical_mesh_stage",
+          "line": 562,
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_source_foreground_masks_v1",
+          "key": "observation",
+          "line": 314
+        },
+        {
+          "function": "_static_geometry_evidence",
+          "key": "demo_execution",
+          "line": 513
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "qualify_static_canonical_mesh_stage",
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        },
+        {
+          "function": "qualify_static_canonical_mesh_stage",
+          "stage_id": "17_MECHANICAL_PARTITION_QUALIFIED"
+        },
+        {
+          "function": "qualify_static_canonical_mesh_stage",
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        },
+        {
+          "function": "qualify_static_canonical_mesh_stage",
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        }
+      ],
+      "stage_id": "19_STATIC_CANONICAL_MESH_QUALIFIED",
+      "undeclared_manifest_reads": [
+        {
+          "function": "_source_foreground_masks_v1",
+          "key": "observation",
+          "line": 314
+        },
+        {
+          "function": "_static_geometry_evidence",
+          "key": "demo_execution",
+          "line": 513
+        }
+      ]
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2:preregister_caa_backend_stage",
+      "canonical_repo_reads": [
+        {
+          "function": "preregister_caa_backend_stage",
+          "path_literal": "COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json"
+        },
+        {
+          "function": "preregister_caa_backend_stage",
+          "path_literal": "CAA_V2_RENDERABLE_SUPPORT_ADMISSION_CONTRACT_V1_20260927.json"
+        },
+        {
+          "function": "preregister_caa_backend_stage",
+          "path_literal": "caa_backend_preregistration.json"
+        }
+      ],
+      "declared_dependencies": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED"
+      ],
+      "declared_manifest_keys": [
+        "appearance"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "_static_mesh_for_appearance",
+          "line": 266,
+          "stage_id": "19_STATIC_CANONICAL_MESH_QUALIFIED"
+        },
+        {
+          "function": "_visual_mesh_set",
+          "line": 109,
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        },
+        {
+          "function": "preregister_caa_backend_stage",
+          "line": 543,
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        },
+        {
+          "function": "preregister_caa_backend_stage",
+          "line": 550,
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        },
+        {
+          "function": "preregister_caa_backend_stage",
+          "line": 557,
+          "stage_id": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED"
+        },
+        {
+          "function": "preregister_caa_backend_stage",
+          "line": 564,
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        },
+        {
+          "function": "preregister_caa_backend_stage",
+          "line": 571,
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        },
+        {
+          "function": "preregister_caa_backend_stage",
+          "line": 578,
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_load_policy_document",
+          "key": "appearance",
+          "line": 210
+        },
+        {
+          "function": "_load_source_inputs",
+          "key": "observation",
+          "line": 228
+        },
+        {
+          "function": "_static_mesh_for_appearance",
+          "key": "demo_execution",
+          "line": 296
+        },
+        {
+          "function": "preregister_caa_backend_stage",
+          "key": "appearance",
+          "line": 502
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "preregister_caa_backend_stage",
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        },
+        {
+          "function": "preregister_caa_backend_stage",
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        },
+        {
+          "function": "preregister_caa_backend_stage",
+          "stage_id": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED"
+        },
+        {
+          "function": "preregister_caa_backend_stage",
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        }
+      ],
+      "stage_id": "20_CAA_BACKEND_PREREGISTERED",
+      "undeclared_manifest_reads": [
+        {
+          "function": "_load_source_inputs",
+          "key": "observation",
+          "line": 228
+        },
+        {
+          "function": "_static_mesh_for_appearance",
+          "key": "demo_execution",
+          "line": 296
+        }
+      ]
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2:compile_caa_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "20_CAA_BACKEND_PREREGISTERED"
+      ],
+      "declared_manifest_keys": [
+        "appearance"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "_visual_mesh_set",
+          "line": 109,
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        },
+        {
+          "function": "compile_caa_stage",
+          "line": 770,
+          "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+        },
+        {
+          "function": "compile_caa_stage",
+          "line": 786,
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        },
+        {
+          "function": "compile_caa_stage",
+          "line": 793,
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        },
+        {
+          "function": "compile_caa_stage",
+          "line": 800,
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_load_source_inputs",
+          "key": "observation",
+          "line": 228
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "compile_caa_stage",
+          "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+        },
+        {
+          "function": "compile_caa_stage",
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        },
+        {
+          "function": "compile_caa_stage",
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        },
+        {
+          "function": "compile_caa_stage",
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        }
+      ],
+      "stage_id": "21_CAA_COMPILE",
+      "undeclared_manifest_reads": [
+        {
+          "function": "_load_source_inputs",
+          "key": "observation",
+          "line": 228
+        }
+      ]
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2:seal_caa_compile_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "21_CAA_COMPILE"
+      ],
+      "declared_manifest_keys": [
+        "appearance"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "seal_caa_compile_stage",
+          "line": 1180,
+          "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+        },
+        {
+          "function": "seal_caa_compile_stage",
+          "line": 1187,
+          "stage_id": "21_CAA_COMPILE"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [],
+      "run_artifact_stage_refs": [
+        {
+          "function": "seal_caa_compile_stage",
+          "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+        },
+        {
+          "function": "seal_caa_compile_stage",
+          "stage_id": "21_CAA_COMPILE"
+        }
+      ],
+      "stage_id": "22_CAA_COMPILE_SEALED",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2:bake_complete_appearance_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "22_CAA_COMPILE_SEALED"
+      ],
+      "declared_manifest_keys": [
+        "appearance"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "_visual_mesh_set",
+          "line": 109,
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        },
+        {
+          "function": "bake_complete_appearance_stage",
+          "line": 1366,
+          "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+        },
+        {
+          "function": "bake_complete_appearance_stage",
+          "line": 1373,
+          "stage_id": "21_CAA_COMPILE"
+        },
+        {
+          "function": "bake_complete_appearance_stage",
+          "line": 1380,
+          "stage_id": "22_CAA_COMPILE_SEALED"
+        },
+        {
+          "function": "bake_complete_appearance_stage",
+          "line": 1395,
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_load_source_inputs",
+          "key": "observation",
+          "line": 228
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "bake_complete_appearance_stage",
+          "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+        },
+        {
+          "function": "bake_complete_appearance_stage",
+          "stage_id": "21_CAA_COMPILE"
+        },
+        {
+          "function": "bake_complete_appearance_stage",
+          "stage_id": "22_CAA_COMPILE_SEALED"
+        },
+        {
+          "function": "bake_complete_appearance_stage",
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        }
+      ],
+      "stage_id": "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+      "undeclared_manifest_reads": [
+        {
+          "function": "_load_source_inputs",
+          "key": "observation",
+          "line": 228
+        }
+      ]
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2:qualify_complete_appearance_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+      ],
+      "declared_manifest_keys": [
+        "appearance"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "_visual_mesh_set",
+          "line": 109,
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        },
+        {
+          "function": "qualify_complete_appearance_stage",
+          "line": 1907,
+          "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+        },
+        {
+          "function": "qualify_complete_appearance_stage",
+          "line": 1914,
+          "stage_id": "21_CAA_COMPILE"
+        },
+        {
+          "function": "qualify_complete_appearance_stage",
+          "line": 1921,
+          "stage_id": "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+        },
+        {
+          "function": "qualify_complete_appearance_stage",
+          "line": 2171,
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        },
+        {
+          "function": "qualify_complete_appearance_stage",
+          "line": 2192,
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        },
+        {
+          "function": "qualify_complete_appearance_stage",
+          "line": 1944,
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_load_source_inputs",
+          "key": "observation",
+          "line": 228
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "qualify_complete_appearance_stage",
+          "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+        },
+        {
+          "function": "qualify_complete_appearance_stage",
+          "stage_id": "21_CAA_COMPILE"
+        },
+        {
+          "function": "qualify_complete_appearance_stage",
+          "stage_id": "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+        },
+        {
+          "function": "qualify_complete_appearance_stage",
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        },
+        {
+          "function": "qualify_complete_appearance_stage",
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        }
+      ],
+      "stage_id": "24_COMPLETE_APPEARANCE_QUALIFIED",
+      "undeclared_manifest_reads": [
+        {
+          "function": "_load_source_inputs",
+          "key": "observation",
+          "line": 228
+        }
+      ]
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2:prove_caa_reference_rest_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED"
+      ],
+      "declared_manifest_keys": [
+        "appearance"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "_static_mesh_for_appearance",
+          "line": 266,
+          "stage_id": "19_STATIC_CANONICAL_MESH_QUALIFIED"
+        },
+        {
+          "function": "_visual_mesh_set",
+          "line": 109,
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        },
+        {
+          "function": "prove_caa_reference_rest_stage",
+          "line": 2519,
+          "stage_id": "24_COMPLETE_APPEARANCE_QUALIFIED"
+        },
+        {
+          "function": "prove_caa_reference_rest_stage",
+          "line": 2506,
+          "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+        },
+        {
+          "function": "prove_caa_reference_rest_stage",
+          "line": 2513,
+          "stage_id": "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+        },
+        {
+          "function": "prove_caa_reference_rest_stage",
+          "line": 2525,
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        },
+        {
+          "function": "prove_caa_reference_rest_stage",
+          "line": 2533,
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        },
+        {
+          "function": "prove_caa_reference_rest_stage",
+          "line": 2540,
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_demo_rest_measurement_admissible",
+          "key": "demo_execution",
+          "line": 180
+        },
+        {
+          "function": "_load_source_inputs",
+          "key": "observation",
+          "line": 228
+        },
+        {
+          "function": "_static_mesh_for_appearance",
+          "key": "demo_execution",
+          "line": 296
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "prove_caa_reference_rest_stage",
+          "stage_id": "20_CAA_BACKEND_PREREGISTERED"
+        },
+        {
+          "function": "prove_caa_reference_rest_stage",
+          "stage_id": "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+        },
+        {
+          "function": "prove_caa_reference_rest_stage",
+          "stage_id": "24_COMPLETE_APPEARANCE_QUALIFIED"
+        },
+        {
+          "function": "prove_caa_reference_rest_stage",
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        },
+        {
+          "function": "prove_caa_reference_rest_stage",
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        },
+        {
+          "function": "prove_caa_reference_rest_stage",
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        }
+      ],
+      "stage_id": "25_CAA_REFERENCE_REST_RENDER_PROOF",
+      "undeclared_manifest_reads": [
+        {
+          "function": "_demo_rest_measurement_admissible",
+          "key": "demo_execution",
+          "line": 180
+        },
+        {
+          "function": "_load_source_inputs",
+          "key": "observation",
+          "line": 228
+        },
+        {
+          "function": "_static_mesh_for_appearance",
+          "key": "demo_execution",
+          "line": 296
+        }
+      ]
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:preregister_geppetto_fit_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "15_RIGGING_SURFACE_QUALIFIED"
+      ],
+      "declared_manifest_keys": [
+        "geppetto_fit"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "preregister_geppetto_fit_stage",
+          "line": 121,
+          "stage_id": "15_RIGGING_SURFACE_QUALIFIED"
+        },
+        {
+          "function": "preregister_geppetto_fit_stage",
+          "line": 124,
+          "stage_id": "15_RIGGING_SURFACE_QUALIFIED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_assert_geppetto_surface_scope",
+          "key": "demo_execution",
+          "line": 105
+        }
+      ],
+      "run_artifact_stage_refs": [],
+      "stage_id": "26_GEPPETTO_FIT_PREREGISTERED",
+      "undeclared_manifest_reads": [
+        {
+          "function": "_assert_geppetto_surface_scope",
+          "key": "demo_execution",
+          "line": 105
+        }
+      ]
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:execute_geppetto_fit_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "26_GEPPETTO_FIT_PREREGISTERED"
+      ],
+      "declared_manifest_keys": [
+        "geppetto_fit"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "execute_geppetto_fit_stage",
+          "line": 142,
+          "stage_id": "26_GEPPETTO_FIT_PREREGISTERED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [],
+      "run_artifact_stage_refs": [],
+      "stage_id": "27_GEPPETTO_FIT",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:qualify_skeleton_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "27_GEPPETTO_FIT"
+      ],
+      "declared_manifest_keys": [],
+      "direct_stage_reads": [
+        {
+          "function": "qualify_skeleton_stage",
+          "line": 161,
+          "stage_id": "15_RIGGING_SURFACE_QUALIFIED"
+        },
+        {
+          "function": "qualify_skeleton_stage",
+          "line": 164,
+          "stage_id": "27_GEPPETTO_FIT"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [],
+      "run_artifact_stage_refs": [
+        {
+          "function": "qualify_skeleton_stage",
+          "stage_id": "15_RIGGING_SURFACE_QUALIFIED"
+        },
+        {
+          "function": "qualify_skeleton_stage",
+          "stage_id": "27_GEPPETTO_FIT"
+        },
+        {
+          "function": "qualify_skeleton_stage",
+          "stage_id": "28_SKELETON_QUALIFIED"
+        }
+      ],
+      "stage_id": "28_SKELETON_QUALIFIED",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:seal_geppetto_checkpoint_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "27_GEPPETTO_FIT",
+        "28_SKELETON_QUALIFIED"
+      ],
+      "declared_manifest_keys": [],
+      "direct_stage_reads": [
+        {
+          "function": "seal_geppetto_checkpoint_stage",
+          "line": 182,
+          "stage_id": "27_GEPPETTO_FIT"
+        },
+        {
+          "function": "seal_geppetto_checkpoint_stage",
+          "line": 185,
+          "stage_id": "28_SKELETON_QUALIFIED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [],
+      "run_artifact_stage_refs": [],
+      "stage_id": "29_GEPPETTO_CHECKPOINT_SEALED",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:preregister_arachne_fit_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "29_GEPPETTO_CHECKPOINT_SEALED"
+      ],
+      "declared_manifest_keys": [
+        "arachne_fit"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "preregister_arachne_fit_stage",
+          "line": 199,
+          "stage_id": "15_RIGGING_SURFACE_QUALIFIED"
+        },
+        {
+          "function": "preregister_arachne_fit_stage",
+          "line": 202,
+          "stage_id": "28_SKELETON_QUALIFIED"
+        },
+        {
+          "function": "preregister_arachne_fit_stage",
+          "line": 205,
+          "stage_id": "29_GEPPETTO_CHECKPOINT_SEALED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [],
+      "run_artifact_stage_refs": [],
+      "stage_id": "30_ARACHNE_FIT_PREREGISTERED",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:execute_arachne_fit_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "30_ARACHNE_FIT_PREREGISTERED"
+      ],
+      "declared_manifest_keys": [
+        "arachne_fit"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "execute_arachne_fit_stage",
+          "line": 227,
+          "stage_id": "30_ARACHNE_FIT_PREREGISTERED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [],
+      "run_artifact_stage_refs": [],
+      "stage_id": "31_ARACHNE_FIT",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:qualify_skin_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "31_ARACHNE_FIT"
+      ],
+      "declared_manifest_keys": [],
+      "direct_stage_reads": [
+        {
+          "function": "qualify_skin_stage",
+          "line": 245,
+          "stage_id": "15_RIGGING_SURFACE_QUALIFIED"
+        },
+        {
+          "function": "qualify_skin_stage",
+          "line": 248,
+          "stage_id": "28_SKELETON_QUALIFIED"
+        },
+        {
+          "function": "qualify_skin_stage",
+          "line": 251,
+          "stage_id": "31_ARACHNE_FIT"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [],
+      "run_artifact_stage_refs": [
+        {
+          "function": "qualify_skin_stage",
+          "stage_id": "15_RIGGING_SURFACE_QUALIFIED"
+        },
+        {
+          "function": "qualify_skin_stage",
+          "stage_id": "28_SKELETON_QUALIFIED"
+        },
+        {
+          "function": "qualify_skin_stage",
+          "stage_id": "31_ARACHNE_FIT"
+        },
+        {
+          "function": "qualify_skin_stage",
+          "stage_id": "32_SKIN_QUALIFIED"
+        }
+      ],
+      "stage_id": "32_SKIN_QUALIFIED",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:seal_arachne_checkpoint_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "31_ARACHNE_FIT",
+        "32_SKIN_QUALIFIED"
+      ],
+      "declared_manifest_keys": [],
+      "direct_stage_reads": [
+        {
+          "function": "seal_arachne_checkpoint_stage",
+          "line": 289,
+          "stage_id": "31_ARACHNE_FIT"
+        },
+        {
+          "function": "seal_arachne_checkpoint_stage",
+          "line": 292,
+          "stage_id": "32_SKIN_QUALIFIED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [],
+      "run_artifact_stage_refs": [],
+      "stage_id": "33_ARACHNE_CHECKPOINT_SEALED",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2:seal_deformation_capability_envelope",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "28_SKELETON_QUALIFIED"
+      ],
+      "declared_manifest_keys": [
+        "deformation_envelope"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "_load_camera_set",
+          "line": 186,
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "seal_deformation_capability_envelope",
+          "key": "deformation_envelope",
+          "line": 252
+        }
+      ],
+      "run_artifact_stage_refs": [],
+      "stage_id": "34_DEFORMATION_CAPABILITY_ENVELOPE",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2:qualify_canonical_mesh_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "32_SKIN_QUALIFIED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE"
+      ],
+      "declared_manifest_keys": [
+        "observation"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "_load_camera_set",
+          "line": 186,
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        },
+        {
+          "function": "_load_observation_set",
+          "line": 132,
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        },
+        {
+          "function": "_load_surface",
+          "line": 137,
+          "stage_id": "15_RIGGING_SURFACE_QUALIFIED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_component_observations",
+          "key": "observation",
+          "line": 503
+        }
+      ],
+      "run_artifact_stage_refs": [],
+      "stage_id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2:bind_qualified_mesh_skin_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "32_SKIN_QUALIFIED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+      ],
+      "declared_manifest_keys": [],
+      "direct_stage_reads": [
+        {
+          "function": "_load_surface",
+          "line": 137,
+          "stage_id": "15_RIGGING_SURFACE_QUALIFIED"
+        },
+        {
+          "function": "bind_qualified_mesh_skin_stage",
+          "line": 734,
+          "stage_id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [],
+      "run_artifact_stage_refs": [],
+      "stage_id": "36_QUALIFIED_MESH_SKIN_TRANSFER",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_state_v2:qualify_presentation_structure_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER"
+      ],
+      "declared_manifest_keys": [
+        "presentation"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "qualify_presentation_structure_stage",
+          "line": 79,
+          "stage_id": "28_SKELETON_QUALIFIED"
+        },
+        {
+          "function": "qualify_presentation_structure_stage",
+          "line": 84,
+          "stage_id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+        },
+        {
+          "function": "qualify_presentation_structure_stage",
+          "line": 91,
+          "stage_id": "36_QUALIFIED_MESH_SKIN_TRANSFER"
+        },
+        {
+          "function": "qualify_presentation_structure_stage",
+          "line": 98,
+          "stage_id": "17_MECHANICAL_PARTITION_QUALIFIED"
+        },
+        {
+          "function": "qualify_presentation_structure_stage",
+          "line": 105,
+          "stage_id": "17_MECHANICAL_PARTITION_QUALIFIED"
+        },
+        {
+          "function": "qualify_presentation_structure_stage",
+          "line": 112,
+          "stage_id": "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+        },
+        {
+          "function": "qualify_presentation_structure_stage",
+          "line": 119,
+          "stage_id": "24_COMPLETE_APPEARANCE_QUALIFIED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "qualify_presentation_structure_stage",
+          "key": "presentation",
+          "line": 131
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "qualify_presentation_structure_stage",
+          "stage_id": "28_SKELETON_QUALIFIED"
+        },
+        {
+          "function": "qualify_presentation_structure_stage",
+          "stage_id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+        },
+        {
+          "function": "qualify_presentation_structure_stage",
+          "stage_id": "36_QUALIFIED_MESH_SKIN_TRANSFER"
+        },
+        {
+          "function": "qualify_presentation_structure_stage",
+          "stage_id": "17_MECHANICAL_PARTITION_QUALIFIED"
+        },
+        {
+          "function": "qualify_presentation_structure_stage",
+          "stage_id": "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+        },
+        {
+          "function": "qualify_presentation_structure_stage",
+          "stage_id": "24_COMPLETE_APPEARANCE_QUALIFIED"
+        }
+      ],
+      "stage_id": "37_QUALIFIED_PRESENTATION_STRUCTURE",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_state_v2:seal_complete_puppet_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "32_SKIN_QUALIFIED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE"
+      ],
+      "declared_manifest_keys": [],
+      "direct_stage_reads": [
+        {
+          "function": "seal_complete_puppet_stage",
+          "line": 469,
+          "stage_id": "15_RIGGING_SURFACE_QUALIFIED"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "line": 476,
+          "stage_id": "28_SKELETON_QUALIFIED"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "line": 481,
+          "stage_id": "32_SKIN_QUALIFIED"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "line": 486,
+          "stage_id": "17_MECHANICAL_PARTITION_QUALIFIED"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "line": 493,
+          "stage_id": "17_MECHANICAL_PARTITION_QUALIFIED"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "line": 500,
+          "stage_id": "34_DEFORMATION_CAPABILITY_ENVELOPE"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "line": 507,
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "line": 514,
+          "stage_id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "line": 521,
+          "stage_id": "36_QUALIFIED_MESH_SKIN_TRANSFER"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "line": 528,
+          "stage_id": "37_QUALIFIED_PRESENTATION_STRUCTURE"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "line": 535,
+          "stage_id": "37_QUALIFIED_PRESENTATION_STRUCTURE"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "line": 542,
+          "stage_id": "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "line": 549,
+          "stage_id": "24_COMPLETE_APPEARANCE_QUALIFIED"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "line": 556,
+          "stage_id": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "line": 596,
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [],
+      "run_artifact_stage_refs": [
+        {
+          "function": "seal_complete_puppet_stage",
+          "stage_id": "15_RIGGING_SURFACE_QUALIFIED"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "stage_id": "28_SKELETON_QUALIFIED"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "stage_id": "32_SKIN_QUALIFIED"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "stage_id": "17_MECHANICAL_PARTITION_QUALIFIED"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "stage_id": "34_DEFORMATION_CAPABILITY_ENVELOPE"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "stage_id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "stage_id": "36_QUALIFIED_MESH_SKIN_TRANSFER"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "stage_id": "37_QUALIFIED_PRESENTATION_STRUCTURE"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "stage_id": "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "stage_id": "24_COMPLETE_APPEARANCE_QUALIFIED"
+        },
+        {
+          "function": "seal_complete_puppet_stage",
+          "stage_id": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED"
+        }
+      ],
+      "stage_id": "38_CANONICAL_PUPPET_SEALED",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.motion_v2:seal_motion_source_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "38_CANONICAL_PUPPET_SEALED"
+      ],
+      "declared_manifest_keys": [
+        "motion"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "seal_motion_source_stage",
+          "line": 142,
+          "stage_id": "25_CAA_REFERENCE_REST_RENDER_PROOF"
+        },
+        {
+          "function": "seal_motion_source_stage",
+          "line": 136,
+          "stage_id": "38_CANONICAL_PUPPET_SEALED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_demo_failed_rest_precondition_admissible",
+          "key": "demo_execution",
+          "line": 99
+        },
+        {
+          "function": "_motion_assets",
+          "key": "motion",
+          "line": 50
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "seal_motion_source_stage",
+          "stage_id": "38_CANONICAL_PUPPET_SEALED"
+        },
+        {
+          "function": "seal_motion_source_stage",
+          "stage_id": "25_CAA_REFERENCE_REST_RENDER_PROOF"
+        }
+      ],
+      "stage_id": "39_MOTION_SOURCE_OR_PRESET_SEAL",
+      "undeclared_manifest_reads": [
+        {
+          "function": "_demo_failed_rest_precondition_admissible",
+          "key": "demo_execution",
+          "line": 99
+        }
+      ]
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.motion_v2:compile_motion_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "28_SKELETON_QUALIFIED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "39_MOTION_SOURCE_OR_PRESET_SEAL"
+      ],
+      "declared_manifest_keys": [
+        "motion"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "compile_motion_stage",
+          "line": 267,
+          "stage_id": "34_DEFORMATION_CAPABILITY_ENVELOPE"
+        },
+        {
+          "function": "compile_motion_stage",
+          "line": 256,
+          "stage_id": "38_CANONICAL_PUPPET_SEALED"
+        },
+        {
+          "function": "compile_motion_stage",
+          "line": 263,
+          "stage_id": "28_SKELETON_QUALIFIED"
+        },
+        {
+          "function": "compile_motion_stage",
+          "line": 277,
+          "stage_id": "38_CANONICAL_PUPPET_SEALED"
+        },
+        {
+          "function": "compile_motion_stage",
+          "line": 284,
+          "stage_id": "39_MOTION_SOURCE_OR_PRESET_SEAL"
+        },
+        {
+          "function": "compile_motion_stage",
+          "line": 291,
+          "stage_id": "39_MOTION_SOURCE_OR_PRESET_SEAL"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_motion_assets",
+          "key": "motion",
+          "line": 50
+        },
+        {
+          "function": "compile_motion_stage",
+          "key": "motion",
+          "line": 246
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "compile_motion_stage",
+          "stage_id": "38_CANONICAL_PUPPET_SEALED"
+        },
+        {
+          "function": "compile_motion_stage",
+          "stage_id": "28_SKELETON_QUALIFIED"
+        },
+        {
+          "function": "compile_motion_stage",
+          "stage_id": "34_DEFORMATION_CAPABILITY_ENVELOPE"
+        },
+        {
+          "function": "compile_motion_stage",
+          "stage_id": "39_MOTION_SOURCE_OR_PRESET_SEAL"
+        }
+      ],
+      "stage_id": "40_MOTION_COMPILE_RUN",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.motion_v2:prove_dynamic_motion_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "28_SKELETON_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "38_CANONICAL_PUPPET_SEALED",
+        "40_MOTION_COMPILE_RUN"
+      ],
+      "declared_manifest_keys": [
+        "observation"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "_mesh_policy",
+          "line": 334,
+          "stage_id": "18_CANONICAL_MESH_ADDRESSING_BUILD"
+        },
+        {
+          "function": "prove_dynamic_motion_stage",
+          "line": 387,
+          "stage_id": "38_CANONICAL_PUPPET_SEALED"
+        },
+        {
+          "function": "prove_dynamic_motion_stage",
+          "line": 394,
+          "stage_id": "28_SKELETON_QUALIFIED"
+        },
+        {
+          "function": "prove_dynamic_motion_stage",
+          "line": 399,
+          "stage_id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+        },
+        {
+          "function": "prove_dynamic_motion_stage",
+          "line": 406,
+          "stage_id": "36_QUALIFIED_MESH_SKIN_TRANSFER"
+        },
+        {
+          "function": "prove_dynamic_motion_stage",
+          "line": 413,
+          "stage_id": "38_CANONICAL_PUPPET_SEALED"
+        },
+        {
+          "function": "prove_dynamic_motion_stage",
+          "line": 420,
+          "stage_id": "40_MOTION_COMPILE_RUN"
+        },
+        {
+          "function": "prove_dynamic_motion_stage",
+          "line": 427,
+          "stage_id": "40_MOTION_COMPILE_RUN"
+        },
+        {
+          "function": "prove_dynamic_motion_stage",
+          "line": 434,
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        },
+        {
+          "function": "prove_dynamic_motion_stage",
+          "line": 441,
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_source_foreground_masks",
+          "key": "observation",
+          "line": 367
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "prove_dynamic_motion_stage",
+          "stage_id": "38_CANONICAL_PUPPET_SEALED"
+        },
+        {
+          "function": "prove_dynamic_motion_stage",
+          "stage_id": "28_SKELETON_QUALIFIED"
+        },
+        {
+          "function": "prove_dynamic_motion_stage",
+          "stage_id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+        },
+        {
+          "function": "prove_dynamic_motion_stage",
+          "stage_id": "36_QUALIFIED_MESH_SKIN_TRANSFER"
+        },
+        {
+          "function": "prove_dynamic_motion_stage",
+          "stage_id": "40_MOTION_COMPILE_RUN"
+        },
+        {
+          "function": "prove_dynamic_motion_stage",
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        },
+        {
+          "function": "prove_dynamic_motion_stage",
+          "stage_id": "07_OBSERVATION_CONTRACT_QUALIFIED"
+        }
+      ],
+      "stage_id": "41_MOTION_DYNAMIC_PROOF",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_v2:build_runtime_projection_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "38_CANONICAL_PUPPET_SEALED",
+        "41_MOTION_DYNAMIC_PROOF"
+      ],
+      "declared_manifest_keys": [],
+      "direct_stage_reads": [
+        {
+          "function": "build_runtime_projection_stage",
+          "line": 195,
+          "stage_id": "38_CANONICAL_PUPPET_SEALED"
+        },
+        {
+          "function": "build_runtime_projection_stage",
+          "line": 202,
+          "stage_id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+        },
+        {
+          "function": "build_runtime_projection_stage",
+          "line": 209,
+          "stage_id": "41_MOTION_DYNAMIC_PROOF"
+        },
+        {
+          "function": "build_runtime_projection_stage",
+          "line": 216,
+          "stage_id": "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+        },
+        {
+          "function": "build_runtime_projection_stage",
+          "line": 223,
+          "stage_id": "24_COMPLETE_APPEARANCE_QUALIFIED"
+        },
+        {
+          "function": "build_runtime_projection_stage",
+          "line": 230,
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [],
+      "run_artifact_stage_refs": [
+        {
+          "function": "build_runtime_projection_stage",
+          "stage_id": "38_CANONICAL_PUPPET_SEALED"
+        },
+        {
+          "function": "build_runtime_projection_stage",
+          "stage_id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+        },
+        {
+          "function": "build_runtime_projection_stage",
+          "stage_id": "41_MOTION_DYNAMIC_PROOF"
+        },
+        {
+          "function": "build_runtime_projection_stage",
+          "stage_id": "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+        },
+        {
+          "function": "build_runtime_projection_stage",
+          "stage_id": "24_COMPLETE_APPEARANCE_QUALIFIED"
+        },
+        {
+          "function": "build_runtime_projection_stage",
+          "stage_id": "05_CAMERA_CONTRACT_SOLVED"
+        }
+      ],
+      "stage_id": "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_v2:materialize_runtime_package_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING"
+      ],
+      "declared_manifest_keys": [],
+      "direct_stage_reads": [
+        {
+          "function": "materialize_runtime_package_stage",
+          "line": 450,
+          "stage_id": "42_RUNTIME_PROJECTION_AND_CAA_BINDING"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [],
+      "run_artifact_stage_refs": [
+        {
+          "function": "materialize_runtime_package_stage",
+          "stage_id": "42_RUNTIME_PROJECTION_AND_CAA_BINDING"
+        }
+      ],
+      "stage_id": "43_RSS_MATERIALIZE_COMPACT",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_v2:prove_native_package_playback_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT"
+      ],
+      "declared_manifest_keys": [
+        "runtime"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "prove_native_package_playback_stage",
+          "line": 704,
+          "stage_id": "42_RUNTIME_PROJECTION_AND_CAA_BINDING"
+        },
+        {
+          "function": "prove_native_package_playback_stage",
+          "line": 711,
+          "stage_id": "43_RSS_MATERIALIZE_COMPACT"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_native_parallel_workers",
+          "key": "runtime",
+          "line": 570
+        },
+        {
+          "function": "_native_player",
+          "key": "runtime",
+          "line": 515
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "prove_native_package_playback_stage",
+          "stage_id": "42_RUNTIME_PROJECTION_AND_CAA_BINDING"
+        },
+        {
+          "function": "prove_native_package_playback_stage",
+          "stage_id": "43_RSS_MATERIALIZE_COMPACT"
+        }
+      ],
+      "stage_id": "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_v2:prove_dynamic_visual_integrity_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK"
+      ],
+      "declared_manifest_keys": [
+        "runtime"
+      ],
+      "direct_stage_reads": [
+        {
+          "function": "prove_dynamic_visual_integrity_stage",
+          "line": 882,
+          "stage_id": "24_COMPLETE_APPEARANCE_QUALIFIED"
+        },
+        {
+          "function": "prove_dynamic_visual_integrity_stage",
+          "line": 857,
+          "stage_id": "42_RUNTIME_PROJECTION_AND_CAA_BINDING"
+        },
+        {
+          "function": "prove_dynamic_visual_integrity_stage",
+          "line": 864,
+          "stage_id": "43_RSS_MATERIALIZE_COMPACT"
+        },
+        {
+          "function": "prove_dynamic_visual_integrity_stage",
+          "line": 871,
+          "stage_id": "44_NATIVE_PACKAGE_OPEN_PLAYBACK"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [
+        {
+          "function": "_native_parallel_workers",
+          "key": "runtime",
+          "line": 570
+        },
+        {
+          "function": "_native_player",
+          "key": "runtime",
+          "line": 515
+        }
+      ],
+      "run_artifact_stage_refs": [
+        {
+          "function": "prove_dynamic_visual_integrity_stage",
+          "stage_id": "42_RUNTIME_PROJECTION_AND_CAA_BINDING"
+        },
+        {
+          "function": "prove_dynamic_visual_integrity_stage",
+          "stage_id": "43_RSS_MATERIALIZE_COMPACT"
+        },
+        {
+          "function": "prove_dynamic_visual_integrity_stage",
+          "stage_id": "44_NATIVE_PACKAGE_OPEN_PLAYBACK"
+        },
+        {
+          "function": "prove_dynamic_visual_integrity_stage",
+          "stage_id": "24_COMPLETE_APPEARANCE_QUALIFIED"
+        }
+      ],
+      "stage_id": "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+      "undeclared_manifest_reads": []
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.closure_v2:seal_product_closure_stage",
+      "canonical_repo_reads": [],
+      "declared_dependencies": [
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "40_MOTION_COMPILE_RUN",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF"
+      ],
+      "declared_manifest_keys": [],
+      "direct_stage_reads": [
+        {
+          "function": "seal_product_closure_stage",
+          "line": 413,
+          "stage_id": "38_CANONICAL_PUPPET_SEALED"
+        },
+        {
+          "function": "seal_product_closure_stage",
+          "line": 420,
+          "stage_id": "41_MOTION_DYNAMIC_PROOF"
+        },
+        {
+          "function": "seal_product_closure_stage",
+          "line": 427,
+          "stage_id": "42_RUNTIME_PROJECTION_AND_CAA_BINDING"
+        },
+        {
+          "function": "seal_product_closure_stage",
+          "line": 434,
+          "stage_id": "43_RSS_MATERIALIZE_COMPACT"
+        },
+        {
+          "function": "seal_product_closure_stage",
+          "line": 441,
+          "stage_id": "44_NATIVE_PACKAGE_OPEN_PLAYBACK"
+        },
+        {
+          "function": "seal_product_closure_stage",
+          "line": 448,
+          "stage_id": "45_DYNAMIC_VISUAL_INTEGRITY_PROOF"
+        },
+        {
+          "function": "seal_product_closure_stage",
+          "line": 455,
+          "stage_id": "37_QUALIFIED_PRESENTATION_STRUCTURE"
+        },
+        {
+          "function": "seal_product_closure_stage",
+          "line": 462,
+          "stage_id": "37_QUALIFIED_PRESENTATION_STRUCTURE"
+        }
+      ],
+      "env_reads": [],
+      "manifest_reads": [],
+      "run_artifact_stage_refs": [
+        {
+          "function": "seal_product_closure_stage",
+          "stage_id": "38_CANONICAL_PUPPET_SEALED"
+        },
+        {
+          "function": "seal_product_closure_stage",
+          "stage_id": "41_MOTION_DYNAMIC_PROOF"
+        },
+        {
+          "function": "seal_product_closure_stage",
+          "stage_id": "42_RUNTIME_PROJECTION_AND_CAA_BINDING"
+        },
+        {
+          "function": "seal_product_closure_stage",
+          "stage_id": "43_RSS_MATERIALIZE_COMPACT"
+        },
+        {
+          "function": "seal_product_closure_stage",
+          "stage_id": "44_NATIVE_PACKAGE_OPEN_PLAYBACK"
+        },
+        {
+          "function": "seal_product_closure_stage",
+          "stage_id": "45_DYNAMIC_VISUAL_INTEGRITY_PROOF"
+        },
+        {
+          "function": "seal_product_closure_stage",
+          "stage_id": "37_QUALIFIED_PRESENTATION_STRUCTURE"
+        }
+      ],
+      "stage_id": "46_PRODUCT_CLOSURE_SEAL",
+      "undeclared_manifest_reads": []
+    }
+  ],
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED"
+}

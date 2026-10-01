@@ -1,0 +1,7 @@
+{
+  "schema": "RealSaS.KnightDemoRunSnapshotTrigger.v1",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "reason": "RETRY_STAGE34_38_LEDGER_SNAPSHOT_AFTER_PYTHON_BOOTSTRAP",
+  "revision": 3,
+  "requested_on": "2026-09-27"
+}

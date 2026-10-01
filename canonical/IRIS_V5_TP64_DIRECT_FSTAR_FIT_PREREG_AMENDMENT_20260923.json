@@ -1,0 +1,59 @@
+{
+  "schema": "RealSaS.IRIS.V5TP64DirectFStarFITPreregistrationAmendment.v1",
+  "status": "FROZEN_APPARATUS_ONLY_REPAIR_BEFORE_FINAL_QUALIFICATION_DECISION",
+  "date_utc": "2026-09-23",
+  "parent_preregistration": "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json",
+  "parent_notebook": {
+    "filename": "RealSaS_IRIS_KNIGHT_V5_TP64_DIRECT_FSTAR_FIT_RUN_ALL_AUDITED.ipynb",
+    "sha256": "c5ccbb66f7de1ef9993482d58a4e8d62ffe1950e3df7b947e3febb5d074e58b5"
+  },
+  "observed_abort": {
+    "scientific_result": "NONE",
+    "apparatus_abort": true,
+    "optimizer_result_invalidated": false,
+    "selected_checkpoint_invalidated": false,
+    "r512_sign_audit_invalidated": false,
+    "stage13_executed": false,
+    "exception_type": "TypeError",
+    "exception": "count_sparse_mt_v5() missing 1 required positional argument: 'boundary_parent'",
+    "location": "LEARNED_FIELD_TO_INDEXED_STAGE12__INDEPENDENT_MT_COUNT",
+    "root_cause": "NOTEBOOK_INTEGRATION_CALLSITE_LAGGED_PINNED_DECODER_API",
+    "pinned_decoder_signature": "count_sparse_mt_v5(refined_cells, fine_gids, fine_scalar, boundary_parent, *, policy)"
+  },
+  "repair": {
+    "scientific_change": false,
+    "optimizer_change": false,
+    "target_change": false,
+    "checkpoint_selection_change": false,
+    "r512_authority_change": false,
+    "decoder_change": false,
+    "stage13_change": false,
+    "changes": [
+      "IMPORT boundary_parent_cells_v5 FROM THE ALREADY_PINNED DECODER MODULE",
+      "COMPUTE BOUNDARY_PARENT FROM THE SAME REFINED CELLS BEFORE INDEPENDENT MT COUNT",
+      "PASS BOUNDARY_PARENT AS THE FOURTH POSITIONAL ARGUMENT TO count_sparse_mt_v5",
+      "FAIL BEFORE OPTIMIZER STEP 1 IF count_sparse_mt_v5 SIGNATURE DRIFTS AGAIN",
+      "RECORD boundary_parent_cell_count AS DIAGNOSTIC CARRIER TELEMETRY"
+    ]
+  },
+  "amended_execution": {
+    "repo_commit": "4de08a779199d64b60b0d1aae3512a0f77e77c77",
+    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_TP64_DIRECT_FSTAR_FIT_RUN_ALL_AUDITED_V2.ipynb",
+    "notebook_sha256": "93e7dd44dcfed865b5ba5861365e88b6407255da6ce0af9674c43a6bbb231aad",
+    "original_training_contract_unchanged": true,
+    "original_decision_rule_unchanged": true,
+    "exact_r512_contract_unchanged": true,
+    "exact_stage13_p999_contract_unchanged": true
+  },
+  "current_runtime_recovery_authorized": {
+    "authorized": true,
+    "rationale": "The exception occurred after optimizer/checkpoint selection and R512 audit and before any Stage13 execution; the repair changes only the independent MT count call signature.",
+    "rule": "In the still-live Colab kernel, import boundary_parent_cells_v5 and rerun the failed decoder cell onward. Do not rerun optimizer steps or alter selected checkpoint.",
+    "provenance_requirement": "Record this amendment in the final result/closure when evaluating the recovered run."
+  },
+  "claim_boundary": [
+    "The observed TypeError is not evidence for or against TP64 reachability.",
+    "No scientific PASS/FAIL may be declared until the repaired indexed Stage12 and frozen Stage13 qualification complete.",
+    "The parent preregistration remains historically immutable; this amendment changes only apparatus integration."
+  ]
+}

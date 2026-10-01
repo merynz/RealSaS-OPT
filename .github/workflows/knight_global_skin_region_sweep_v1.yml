@@ -1,0 +1,56 @@
+name: knight-global-skin-region-sweep-v1
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths:
+      - 'tools/audit_knight_global_skin_region_sweep_v1.py'
+      - '.github/workflows/knight_global_skin_region_sweep_v1.yml'
+permissions: {contents: write}
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 60
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Run global region sweep
+        shell: bash
+        run: |
+          set -euo pipefail
+          outroot="canonical/knight_global_skin_region_sweep_v1"
+          rm -rf "$outroot"; mkdir -p "$outroot"
+          for arm in UNIFORM_ALL_PROJECTED ACTIVE_BALANCED_ALL_PROJECTED; do
+            skin="canonical/knight_arachne_v6_2x2_rebound_stage35_v1/$arm.QUALIFIED_SKIN.json"
+            PYTHONPATH=. python tools/audit_knight_global_skin_region_sweep_v1.py               --authority-root "$AUTHORITY_ROOT"               --run-id "$RUN_ID"               --skin-json "$skin"               --arm "$arm"               --thresholds "0.25,0.5,0.75,1.0,1.25,1.5"               --out "$outroot/$arm.json"               | tee "$outroot/$arm.STDOUT.txt"
+          done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path("canonical/knight_global_skin_region_sweep_v1")
+          arms=("UNIFORM_ALL_PROJECTED","ACTIVE_BALANCED_ALL_PROJECTED")
+          rows={a:json.loads((root/f"{a}.json").read_text()) for a in arms}
+          Path("canonical/KNIGHT_GLOBAL_SKIN_REGION_SWEEP_V1_20260929.json").write_text(
+            json.dumps({"schema":"RealSaS.KnightGlobalSkinRegionSweepCourt.v1","status":"COMPLETE","arms":rows},indent=2,sort_keys=True)+"\n"
+          )
+          for a in arms:
+            print("ARM",a)
+            for r in rows[a]["rows"]:
+              print(json.dumps(r,sort_keys=True))
+          PY
+      - name: Seal
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add canonical/KNIGHT_GLOBAL_SKIN_REGION_SWEEP_V1_20260929.json canonical/knight_global_skin_region_sweep_v1
+          git commit -m 'audit: seal global skin-field region sweep'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

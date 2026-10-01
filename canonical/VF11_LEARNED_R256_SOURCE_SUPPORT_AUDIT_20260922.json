@@ -1,0 +1,32 @@
+{
+  "schema": "RealSaS.VF11LearnedR256SourceSupportAudit.v1",
+  "date_utc": "2026-09-22",
+  "status": "COMPLETE__EMPIRICAL_RED_TEAM_ONLY",
+  "learned_zero_surface_sha256": "42d7fc790d869d4248c23a3ef3d4ae1dea9f6d3e1b7a671557858b32a04ddc59",
+  "vertex_count": 96810,
+  "face_count": 193752,
+  "all_vertices_in_frame_all_8_views": true,
+  "source_support_semantics": "For each learned zero-surface point, project into all eight frozen source cameras and take the maximum signed 2D silhouette distance in pixels. Positive values lie outside at least one admitted source silhouette extrusion.",
+  "vertex_max_violation_px": 28.882309717847736,
+  "vertex_counts_over_px": {
+    "0": {"count": 7999, "fraction": 0.08262576180146679},
+    "0.5": {"count": 7092, "fraction": 0.07325689494886892},
+    "1": {"count": 6456, "fraction": 0.06668732568949488},
+    "2": {"count": 4884, "fraction": 0.05044933374651379},
+    "3": {"count": 4060, "fraction": 0.04193781634128706},
+    "4": {"count": 3574, "fraction": 0.03691767379402954},
+    "8": {"count": 2289, "fraction": 0.02364425162689805},
+    "12": {"count": 1389, "fraction": 0.014347691354198947},
+    "16": {"count": 767, "fraction": 0.007922735254622457},
+    "20": {"count": 391, "fraction": 0.004038838962917054},
+    "24": {"count": 174, "fraction": 0.0017973349860551597}
+  },
+  "mesh_components": {
+    "component_count": 21,
+    "largest_component_vertex_count": 92078,
+    "outside_1px_vertices_on_largest_component": 6456,
+    "other_components_outside_1px_vertex_count": 0
+  },
+  "interpretation": "At 1px tolerance all source-support violations lie on the giant connected learned surface component. These are SOURCE_UNSUPPORTED_ZERO_SURFACE / connected UNSUPPORTED_OUTGROWTH observations, not detached FLOATER_COMPONENTs.",
+  "authority": "EMPIRICAL_DIAGNOSTIC_ONLY__NOT_A_FORMAL_FIELD_CERTIFICATE"
+}

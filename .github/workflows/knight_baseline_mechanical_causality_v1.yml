@@ -1,0 +1,165 @@
+name: knight-baseline-mechanical-causality-v1
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'tools/demo/run_knight_baseline_mechanical_causality_v1.py'
+      - '.github/workflows/knight_baseline_mechanical_causality_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: knight-baseline-mechanical-causality-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  causality:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      BASELINE_COMMIT: 62aebc388605e0f762f175dd3f929b5c09d1d70b
+      OUT_DIR: canonical/knight_baseline_mechanical_causality_v1
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Preserve causality diagnostic and pin exact baseline codebase
+        run: |
+          set -euo pipefail
+          cp tools/demo/run_knight_baseline_mechanical_causality_v1.py /tmp/run_knight_baseline_mechanical_causality_v1.py
+          DIAG_BLOB="$(git hash-object /tmp/run_knight_baseline_mechanical_causality_v1.py)"
+          echo "DIAG_BLOB=$DIAG_BLOB" >> "$GITHUB_ENV"
+          git checkout --detach "$BASELINE_COMMIT"
+          test "$(git hash-object tools/demo/render_knight_motion_preview_v1.py)" = "7917be02f325ba00b5dcd2b31a786898e45f640f"
+          cp /tmp/run_knight_baseline_mechanical_causality_v1.py tools/demo/run_knight_baseline_mechanical_causality_v1.py
+          test "$(git hash-object tools/demo/run_knight_baseline_mechanical_causality_v1.py)" = "$DIAG_BLOB"
+          echo "KNIGHT_BASELINE_CAUSAL_CODEBASE_PIN_PASS"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m py_compile tools/demo/run_knight_baseline_mechanical_causality_v1.py
+
+      - name: Build exact baseline replay ledger
+        run: |
+          set -euo pipefail
+          REPLAY_AUTHORITY=/tmp/knight_baseline_causal_replay_authority
+          REPLAY_RUN="$REPLAY_AUTHORITY/runs/$RUN_ID"
+          SOURCE_RUN="$AUTHORITY_ROOT/runs/$RUN_ID"
+          rm -rf "$REPLAY_AUTHORITY"
+          mkdir -p "$REPLAY_RUN"
+          ln -s "$SOURCE_RUN/run_manifest.json" "$REPLAY_RUN/run_manifest.json"
+          ln -s "$SOURCE_RUN/inputs" "$REPLAY_RUN/inputs"
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          root=Path("/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924")
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          target=Path("/tmp/knight_baseline_causal_replay_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/ACTIVE_RUN_V2.json")
+          refs={
+            "05_CAMERA_CONTRACT_SOLVED":(
+              "RealSaS.QualifiedCameraSetIR.v1",
+              root/"artifacts/05_CAMERA_CONTRACT_SOLVED/qualified_camera_set.json",
+              "312a9b1afe4ea1fcdc481232ac951fb6a6815fee532fbb93646e97e609b5b80a",
+            ),
+            "18_CANONICAL_MESH_ADDRESSING_BUILD":(
+              "RealSaS.CanonicalMeshCandidateIR.v1",
+              root/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json",
+              "0db35bbcdd3565cf42c74127fa33c66d39545e1ec84d1b1c74f1dac5bb6072d3",
+            ),
+            "28_SKELETON_QUALIFIED":(
+              "RealSaS.QualifiedSkeletonIR.v1",
+              root/"artifacts/28_SKELETON_QUALIFIED/qualified_skeleton.json",
+              "e89d0b64cf23b2954f2b30fb37836ee2b3287749a79c90a76185437b9217e987",
+            ),
+            "32_SKIN_QUALIFIED":(
+              "RealSaS.QualifiedSkinIR.v1",
+              root/"artifacts/32_SKIN_QUALIFIED/qualified_skin.json",
+              "f1a937de488ec2a620ee292b3f865a3b2ca97b9466401555beb08b1d2f945a09",
+            ),
+          }
+          def sha(path):
+              h=hashlib.sha256()
+              with path.open("rb") as f:
+                  for chunk in iter(lambda:f.read(1<<20),b""):
+                      h.update(chunk)
+              return h.hexdigest()
+          for row in ledger["stages"]:
+              sid=str(row["id"])
+              if sid not in refs:
+                  continue
+              schema,path,expected=refs[sid]
+              actual=sha(path)
+              if actual != expected:
+                  raise RuntimeError(f"BASELINE_CAUSAL_STAGE_FILE_DRIFT:{sid}:{actual}:{expected}")
+              row["status"]="PASS_DEMO_ONLY"
+              row["blockers"]=[]
+              row["outputs"]=[{
+                  "path":str(path.resolve()),
+                  "sha256":actual,
+                  "authority_class":"EXACT_HISTORICAL_BASELINE_CAUSAL_REPLAY",
+                  "schema":schema,
+              }]
+          target.write_text(json.dumps(ledger,indent=2,sort_keys=True)+"\n")
+          print("KNIGHT_BASELINE_CAUSAL_REPLAY_LEDGER_PASS")
+          PY
+          echo "REPLAY_AUTHORITY=$REPLAY_AUTHORITY" >> "$GITHUB_ENV"
+
+      - name: Run exact motion-held-fixed skin causality counterfactual
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/knight_baseline_mechanical_causality_v1
+          PYTHONPATH=. python -m tools.demo.run_knight_baseline_mechanical_causality_v1             --authority-root "$REPLAY_AUTHORITY"             --run-id "$RUN_ID"             --out-dir /tmp/knight_baseline_mechanical_causality_v1
+          test -f /tmp/knight_baseline_mechanical_causality_v1/REPORT.json
+
+      - name: Summarize causal result
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          j=json.loads(Path("/tmp/knight_baseline_mechanical_causality_v1/REPORT.json").read_text())
+          print("SKIN_DISCONTINUITY",json.dumps(j["skin_discontinuity"],sort_keys=True))
+          for row in j["frames"]:
+              print("CAUSAL_FRAME",json.dumps({
+                  "view":row["view_index"],
+                  "frame":row["frame_index"],
+                  "time":row["time_seconds"],
+                  "original_measurable":row["original_measurable"],
+                  "homogenized_measurable":row["homogenized_measurable"],
+                  "flip_elimination_fraction":row["measurable_flip_elimination_fraction"],
+              },sort_keys=True))
+          PY
+
+      - name: Seal causal report
+        run: |
+          set -euo pipefail
+          cp /tmp/knight_baseline_mechanical_causality_v1/REPORT.json /tmp/BASELINE_MECHANICAL_CAUSALITY_REPORT.json
+          rm -f tools/demo/run_knight_baseline_mechanical_causality_v1.py
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git checkout -B research/vf11-certified-adaptive-20260921 origin/research/vf11-certified-adaptive-20260921
+          rm -rf "$OUT_DIR"
+          mkdir -p "$OUT_DIR"
+          cp /tmp/BASELINE_MECHANICAL_CAUSALITY_REPORT.json "$OUT_DIR/REPORT.json"
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add "$OUT_DIR"
+          git commit -m 'diagnostic: seal exact Knight baseline mechanical causality'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

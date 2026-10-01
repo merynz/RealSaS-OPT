@@ -1,0 +1,20 @@
+{
+  "schema": "RealSaS.KnightUnsafePatchMotionEdgeSeparabilityPrereg.v1",
+  "status": "FROZEN_BEFORE_MOTION_EDGE_SEPARABILITY_RESULT",
+  "date": "2026-09-29",
+  "question": "Inside the large Stage35 unsafe patches, do teacher-free Arachne vertex deformation signatures expose the internal mechanical seams that Euclidean-only geodesic completion misses?",
+  "scores": [
+    "Arachne skin-row half-L1 distance on an existing dense mesh edge",
+    "Jensen-Shannon divergence between Arachne skin rows",
+    "dominant-joint disagreement"
+  ],
+  "scope": "All dense edges belonging to Stage35 unsafe connected components, reported separately for the two largest patches and globally.",
+  "teacher_policy": "Teacher source-component identity is loaded only after all teacher-free scores are frozen and is used only to label evaluation pairs SAME_REGION or CROSS_REGION.",
+  "decision_rule": {
+    "MOTION_EDGE_SIGNAL_STRONG": "For at least one continuous teacher-free score, global ROC-AUC >= 0.90 and both largest patches ROC-AUC >= 0.85 when both classes exist.",
+    "MOTION_EDGE_SIGNAL_PARTIAL": "Global ROC-AUC >= 0.75 but strong criterion is not met.",
+    "MOTION_EDGE_SIGNAL_WEAK": "All continuous scores have global ROC-AUC < 0.75."
+  },
+  "no_threshold_selection": true,
+  "no_product_mutation": true
+}

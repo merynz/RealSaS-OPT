@@ -1,0 +1,58 @@
+{
+  "schema": "RealSaS.VF11C0RangeResearchPreregistration.v2",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__C0_RANGE_ONLY",
+  "authority_class": "RESEARCH_PREREGISTRATION_ONLY",
+  "product_authority_minted": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "parent_v1_closure": "canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json",
+  "research_question": "Can the frozen current IRIS field support useful, tightening, fail-closed C0 zero-set exclusion before any C1 regularity or extractor decision is attempted?",
+  "scope": {
+    "PROVEN_REGULAR": "FORBIDDEN_IN_V2",
+    "extractor_comparison": "NOT_RUN",
+    "x1_phase_bank": "HOLD",
+    "knight_mainline": "NOT_STARTED",
+    "uses_existing_frozen_knight_field_only": true
+  },
+  "engine": {
+    "module": "experiments/vf11_certified_adaptive/range_engine_c0_v2.py",
+    "profiler": "experiments/vf11_certified_adaptive/profile_c0_v2.py",
+    "method": [
+      "exact align_corners=False triplane interpolation-knot splitting",
+      "shared affine x/y/z and xy/xz/yz generators",
+      "LayerNorm variance nonnegativity invariant",
+      "affine LayerNorm propagation with conservative nonlinear remainders",
+      "correlation-preserving linear propagation",
+      "SiLU secant residual enclosure",
+      "adaptive unresolved-only octant micro-refinement"
+    ],
+    "numeric_status": "RESEARCH_CONSERVATIVE_FORMULAS__ORDINARY_FLOAT64__DIRECTED_ROUNDING_NOT_YET_PRODUCT_CERTIFIED"
+  },
+  "frozen_measurement_design": {
+    "depths": [5, 6, 7, 8],
+    "max_parent_cells_per_depth": 256,
+    "max_micro_depth": 2,
+    "parent_sampling": "DETERMINISTIC_MULTIPLICATIVE_SEQUENCE",
+    "seed": 26092111,
+    "profile_domain": "FIRST_TO_LAST_TRIPLANE_PIXEL_CENTER",
+    "empirical_sanity_samples_per_parent": 27,
+    "empirical_samples_are_authority": false
+  },
+  "primary_outputs": [
+    "PROVEN_EMPTY fraction by depth",
+    "PROVEN_ZERO_EXISTS fraction by depth",
+    "UNKNOWN fraction by depth",
+    "proof/refinement depth histogram",
+    "range-box evaluations per parent",
+    "regime-split count",
+    "throughput",
+    "empirical contradiction count for certified-empty cells"
+  ],
+  "hard_interpretation_rules": [
+    "Any sampled sign contradiction against a PROVEN_EMPTY certificate is an implementation alarm and blocks C1.",
+    "Zero PROVEN_EMPTY across the complete depth ladder falsifies practical C0 usefulness for this v2 implementation.",
+    "A nonvacuous and tightening C0 result does not authorize a shipping extractor; it only permits C1 regularity research to begin.",
+    "No threshold may be selected from this Knight run for product promotion."
+  ]
+}

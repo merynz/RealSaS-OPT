@@ -1,0 +1,206 @@
+{
+  "authority": {
+    "diagnostic_only": true,
+    "knight_result_cannot_select_new_thresholds": true,
+    "learned_pixel_generation_used": false,
+    "product_authority_claimed": false,
+    "shipping_policy_changed": false,
+    "source_foreground_and_safe_transparency_are_hard_constraints": true
+  },
+  "completed_alpha_u8": {
+    "maximum": 255,
+    "median": 253.0,
+    "minimum": 0,
+    "p01": 138.0,
+    "p05": 193.0,
+    "p95": 255.0,
+    "zero_alpha_fraction": 6.2575090108129755e-06
+  },
+  "completed_fraction": 0.6403077169645004,
+  "completed_sample_count": 159808,
+  "component_count": 1,
+  "control_lattice_resolution": 4,
+  "face_count": 24958,
+  "full_completion_solver": {
+    "channel_iterations": [
+      1407,
+      1354,
+      1335,
+      1323
+    ],
+    "channel_relative_residuals": [
+      9.965769999079242e-10,
+      9.872122616483953e-10,
+      9.78530749844994e-10,
+      9.980084703770843e-10
+    ],
+    "cross_component_edges_consumed": false,
+    "edge_count": 746577,
+    "known_count": 89772,
+    "maximum_edge_weight": 32.0,
+    "minimum_edge_weight": 0.5749716126638394,
+    "node_count": 249580,
+    "objective": "WEIGHTED_GRAPH_DIRICHLET_ENERGY",
+    "positive_edge_length_median": 0.015768393921025164,
+    "solver": "SCIPY_CONJUGATE_GRADIENT_JACOBI_PRECONDITIONED",
+    "source_constraints_exact": true,
+    "unknown_count": 159808,
+    "zero_length_topology_edge_count": 297333
+  },
+  "holdout": {
+    "aggregate": {
+      "max_rgba_l1": 0.5518780654551374,
+      "mean_rgba_l1": 0.062143527944750664,
+      "p50_rgba_l1": 0.03923919537377951,
+      "p95_rgba_l1": 0.19961938981187372,
+      "p99_rgba_l1": 0.3198136727474898,
+      "sample_count": 2720
+    },
+    "frozen_mean_limit": 0.08,
+    "frozen_p95_limit": 0.2,
+    "mode": "DETERMINISTIC_MULTI_SCALE_CONTIGUOUS_SOURCE_MASK_V1",
+    "passes_frozen_structured_holdout_gate": true,
+    "per_scale": [
+      {
+        "max_rgba_l1": 0.10189973331957952,
+        "mean_rgba_l1": 0.028398323736321493,
+        "p50_rgba_l1": 0.023130642432164564,
+        "p95_rgba_l1": 0.06872939644344223,
+        "p99_rgba_l1": 0.09221919778419821,
+        "region_count": 2,
+        "requested_region_size": 16,
+        "sample_count": 32
+      },
+      {
+        "max_rgba_l1": 0.006327813310373194,
+        "mean_rgba_l1": 0.0016316057626475874,
+        "p50_rgba_l1": 0.0009938459528739084,
+        "p95_rgba_l1": 0.00470135029318091,
+        "p99_rgba_l1": 0.0061510889783853405,
+        "region_count": 2,
+        "requested_region_size": 64,
+        "sample_count": 128
+      },
+      {
+        "max_rgba_l1": 0.44076369809909854,
+        "mean_rgba_l1": 0.06733935013088099,
+        "p50_rgba_l1": 0.010347039315865208,
+        "p95_rgba_l1": 0.2846640187840911,
+        "p99_rgba_l1": 0.3375184503436148,
+        "region_count": 2,
+        "requested_region_size": 256,
+        "sample_count": 512
+      },
+      {
+        "max_rgba_l1": 0.5518780654551374,
+        "mean_rgba_l1": 0.06515383635035624,
+        "p50_rgba_l1": 0.047315325336315245,
+        "p95_rgba_l1": 0.17531493638218193,
+        "p99_rgba_l1": 0.3081359014319685,
+        "region_count": 2,
+        "requested_region_size": 1024,
+        "sample_count": 2048
+      }
+    ],
+    "region_count": 8,
+    "region_sizes": [
+      16,
+      64,
+      256,
+      1024
+    ],
+    "regions": [
+      {
+        "boundary_count": 5,
+        "component_index": 0,
+        "repeat": 0,
+        "requested_size": 16
+      },
+      {
+        "boundary_count": 1,
+        "component_index": 0,
+        "repeat": 1,
+        "requested_size": 16
+      },
+      {
+        "boundary_count": 3,
+        "component_index": 0,
+        "repeat": 0,
+        "requested_size": 64
+      },
+      {
+        "boundary_count": 10,
+        "component_index": 0,
+        "repeat": 1,
+        "requested_size": 64
+      },
+      {
+        "boundary_count": 10,
+        "component_index": 0,
+        "repeat": 0,
+        "requested_size": 256
+      },
+      {
+        "boundary_count": 8,
+        "component_index": 0,
+        "repeat": 1,
+        "requested_size": 256
+      },
+      {
+        "boundary_count": 47,
+        "component_index": 0,
+        "repeat": 0,
+        "requested_size": 1024
+      },
+      {
+        "boundary_count": 5,
+        "component_index": 0,
+        "repeat": 1,
+        "requested_size": 1024
+      }
+    ],
+    "regions_per_size": 2
+  },
+  "holdout_solver": {
+    "channel_iterations": [
+      1406,
+      1354,
+      1319,
+      1323
+    ],
+    "channel_relative_residuals": [
+      9.990305241831901e-10,
+      9.828457739817242e-10,
+      9.539299082617844e-10,
+      9.955541203126024e-10
+    ],
+    "cross_component_edges_consumed": false,
+    "edge_count": 746577,
+    "known_count": 87052,
+    "maximum_edge_weight": 32.0,
+    "minimum_edge_weight": 0.5749716126638394,
+    "node_count": 249580,
+    "objective": "WEIGHTED_GRAPH_DIRICHLET_ENERGY",
+    "positive_edge_length_median": 0.015768393921025164,
+    "solver": "SCIPY_CONJUGATE_GRADIENT_JACOBI_PRECONDITIONED",
+    "source_constraints_exact": true,
+    "unknown_count": 162528,
+    "zero_length_topology_edge_count": 297333
+  },
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "sample_count": 249580,
+  "schema": "RealSaS.CAAVariationalCompletionChallenger.v2",
+  "source_anchor_alpha_u8": {
+    "maximum": 255,
+    "median": 255.0,
+    "minimum": 0,
+    "zero_alpha_fraction": 0.0029630619792362874
+  },
+  "source_anchor_count": 89772,
+  "source_anchor_fraction": 0.35969228303549966,
+  "source_constraints": {
+    "full_solve_premultiplied_linear_exact": true,
+    "holdout_train_constraints_exact": true
+  },
+  "status": "MEASURED"
+}

@@ -1,0 +1,98 @@
+{
+  "claim_boundary": "The partition and all Arachne-derived evidence are frozen before teacher_valid_mask, teacher topology or teacher weights are loaded.",
+  "finding": {
+    "false_positive_split_invalid_fraction": 0.948051948051948,
+    "unsafe_catastrophic_false_negative_invalid_fraction": 1.0
+  },
+  "groups": {
+    "ACTUAL_GT10_FALSE_NEGATIVE_CROSS_REGION": {
+      "all_teacher_valid_face_count": 0,
+      "any_teacher_invalid_face_count": 209,
+      "any_teacher_invalid_fraction": 1.0,
+      "face_count": 209,
+      "invalid_vertex_count_p50": 3.0,
+      "invalid_vertex_count_p95": 3.0
+    },
+    "FALSE_NEGATIVE_CROSS_REGION": {
+      "all_teacher_valid_face_count": 1622,
+      "any_teacher_invalid_face_count": 364,
+      "any_teacher_invalid_fraction": 0.18328298086606243,
+      "face_count": 1986,
+      "invalid_vertex_count_p50": 0.0,
+      "invalid_vertex_count_p95": 3.0
+    },
+    "FALSE_POSITIVE_SPLIT": {
+      "all_teacher_valid_face_count": 4,
+      "any_teacher_invalid_face_count": 73,
+      "any_teacher_invalid_fraction": 0.948051948051948,
+      "face_count": 77,
+      "invalid_vertex_count_p50": 3.0,
+      "invalid_vertex_count_p95": 3.0
+    },
+    "TRUE_POSITIVE_CROSS_REGION": {
+      "all_teacher_valid_face_count": 968,
+      "any_teacher_invalid_face_count": 66,
+      "any_teacher_invalid_fraction": 0.06382978723404255,
+      "face_count": 1034,
+      "invalid_vertex_count_p50": 0.0,
+      "invalid_vertex_count_p95": 1.0
+    },
+    "TRUE_SAME_REGION": {
+      "all_teacher_valid_face_count": 19147,
+      "any_teacher_invalid_face_count": 2714,
+      "any_teacher_invalid_fraction": 0.12414802616531723,
+      "face_count": 21861,
+      "invalid_vertex_count_p50": 0.0,
+      "invalid_vertex_count_p95": 3.0
+    },
+    "UNSAFE_ACTUAL_GT10_FALSE_NEGATIVE_CROSS_REGION": {
+      "all_teacher_valid_face_count": 0,
+      "any_teacher_invalid_face_count": 99,
+      "any_teacher_invalid_fraction": 1.0,
+      "face_count": 99,
+      "invalid_vertex_count_p50": 3.0,
+      "invalid_vertex_count_p95": 3.0
+    },
+    "UNSAFE_FALSE_NEGATIVE_CROSS_REGION": {
+      "all_teacher_valid_face_count": 33,
+      "any_teacher_invalid_face_count": 115,
+      "any_teacher_invalid_fraction": 0.777027027027027,
+      "face_count": 148,
+      "invalid_vertex_count_p50": 3.0,
+      "invalid_vertex_count_p95": 3.0
+    }
+  },
+  "preregistration": "canonical/KNIGHT_TOPOLOGY_WEIGHT_COUPLING_COURT_PREREG_V1_20260929.json",
+  "schema": "RealSaS.KnightTopologyWeightCouplingCourt.v1",
+  "solver": {
+    "attractive_union_blocked_by_mutex": 17,
+    "attractive_union_count": 12037,
+    "component_count": 12,
+    "event_count": 36424,
+    "largest_component_sizes": [
+      5328,
+      3456,
+      1142,
+      945,
+      352,
+      329,
+      187,
+      117,
+      107,
+      77,
+      8,
+      1
+    ],
+    "mutex_constraint_count": 1067,
+    "repulsive_edge_arrived_after_endpoint_merge": 142,
+    "repulsive_edge_count": 1209
+  },
+  "status": "DIAGNOSTIC_ONLY__NO_PRODUCT_MUTATION",
+  "teacher_used_by_partition_solver": false,
+  "vertex_teacher_validity": {
+    "teacher_invalid_vertex_count": 1474,
+    "teacher_valid_fraction": 0.8776661963648436,
+    "teacher_valid_vertex_count": 10575,
+    "vertex_count": 12049
+  }
+}

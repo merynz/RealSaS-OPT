@@ -1,0 +1,84 @@
+{
+  "claim_boundary": "Exact sealed Stage31 proposal and Stage32 QualifiedSkin are inspected read-only. No teacher data or inferred correctness labels are used.",
+  "finding": {
+    "stage31_has_candidate_per_surface_array": false,
+    "stage31_has_per_influence_confidence": false,
+    "stage32_product_skin_evidence_complete_claim": null,
+    "stage32_row_confidence_available_claim": null,
+    "stage32_row_has_per_row_evidence_field": false
+  },
+  "preregistration": "canonical/KNIGHT_SKIN_EVIDENCE_TRANSPORT_AUDIT_PREREG_V1_20260929.json",
+  "schema": "RealSaS.KnightSkinEvidenceTransportAudit.v1",
+  "stage31": {
+    "candidate_confidence_uncertainty_fields": [],
+    "candidate_per_surface_top_level_arrays": [],
+    "influence_count": 338520,
+    "influence_row_keys": [
+      "canonical_joint_id",
+      "surface_id",
+      "weight"
+    ],
+    "proposal_metadata": {
+      "backbone_architecture": "RealSaS.Arachne.A1.RichQualifiedBidirectional.v4",
+      "candidate_architecture": "RealSaS.Arachne.A1.RawSurfaceK4AttentionDirectSimplex.v6",
+      "compiler_owns_qualification": true,
+      "demo_witness": true,
+      "dense_proposal": true,
+      "field_tokens": 4,
+      "numeric_skin_field_unchanged": true,
+      "point_conditioned_k4_attention": true,
+      "semantic_id_rebind": true,
+      "surface_memory_direct": true,
+      "teacher_input_used": false,
+      "v5_readout_used": false
+    },
+    "proposal_metadata_keys": [
+      "backbone_architecture",
+      "candidate_architecture",
+      "compiler_owns_qualification",
+      "demo_witness",
+      "dense_proposal",
+      "field_tokens",
+      "numeric_skin_field_unchanged",
+      "point_conditioned_k4_attention",
+      "semantic_id_rebind",
+      "surface_memory_direct",
+      "teacher_input_used",
+      "v5_readout_used"
+    ],
+    "proposal_schema": "RealSaS.SkinProposalIR.v1",
+    "proposal_top_level_keys": [
+      "influences",
+      "metadata",
+      "model_provenance",
+      "schema_version",
+      "skeleton_binding_hash",
+      "surface_binding_hash"
+    ]
+  },
+  "stage32": {
+    "qualification_report": {
+      "bounded_repair_limit_l1_per_row": 1e-05,
+      "bounded_repair_limit_l1_total": 0.0001,
+      "corrected_row_count": 0,
+      "duplicate_pairs_rejected": true,
+      "max_simplex_residual_before": 5.551115123125783e-16,
+      "row_count": 12090,
+      "silent_clipping_forbidden": true,
+      "tiny_negative_clipped_count": 0,
+      "tiny_negative_clipped_mass": 0.0,
+      "total_correction_l1": 5.23383998829372e-13,
+      "total_sparsification_discarded_mass": 0.0
+    },
+    "qualified_row_count": 12090,
+    "qualified_row_serialized_keys": [
+      "correction_l1",
+      "influences",
+      "simplex_residual_before",
+      "surface_id"
+    ],
+    "row_schema_can_represent_confidence_or_uncertainty": false
+  },
+  "status": "READ_ONLY_EVIDENCE_TRANSPORT_AUDIT",
+  "teacher_loaded": false
+}

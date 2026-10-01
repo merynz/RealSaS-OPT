@@ -1,0 +1,194 @@
+{
+  "artifacts": {
+    "surface_sha256": "7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182",
+    "teacher_bank_sha256": "26b6891ff81b9bfc3405461394159547fa76b417852a44518425b4e1de7e67d3",
+    "teacher_source_sha256": "96435646a0084a0a038040ee748cb33d3bfa0b1ed550661befd3b18539e28e6f",
+    "v5_execution_commit": "1dc51f4929a3ff35edc33f10cd5f8cd2cef0e98e",
+    "v6_runner_sha256": "39ff4f7a2051f0d9c1251a5999f472b9926e83deacbedcedc8e92eea424dce01"
+  },
+  "component_counterfactuals": {
+    "ALL_GSA_RELATIONS": {
+      "component_count": 6,
+      "kept_relation_count": 36469,
+      "largest_component_fraction": 0.9991728701406121,
+      "largest_component_size": 12080,
+      "largest_component_sizes": [
+        12080,
+        3,
+        2,
+        2,
+        2,
+        1
+      ]
+    },
+    "EXCLUDE_SOURCE_NONINCIDENT": {
+      "component_count": 98,
+      "kept_relation_count": 32387,
+      "largest_component_fraction": 0.27576509511993386,
+      "largest_component_size": 3334,
+      "largest_component_sizes": [
+        3334,
+        1094,
+        963,
+        949,
+        857,
+        802,
+        642,
+        372,
+        350,
+        330,
+        237,
+        198,
+        179,
+        133,
+        129,
+        120,
+        115,
+        97,
+        90,
+        88,
+        87,
+        84,
+        83,
+        52
+      ]
+    },
+    "SAME_FACE_OR_SHARED_EDGE_ONLY": {
+      "component_count": 409,
+      "kept_relation_count": 27584,
+      "largest_component_fraction": 0.2753515301902399,
+      "largest_component_size": 3329,
+      "largest_component_sizes": [
+        3329,
+        1089,
+        963,
+        857,
+        705,
+        626,
+        371,
+        241,
+        195,
+        183,
+        179,
+        172,
+        139,
+        126,
+        118,
+        118,
+        115,
+        87,
+        86,
+        83,
+        75,
+        65,
+        63,
+        62
+      ]
+    }
+  },
+  "finding": {
+    "claim_boundary": "Teacher source topology is diagnostic/training truth only and is not proposed as shipping inference input. This audit establishes a domain-compatibility failure, not the production repair mechanism.",
+    "confirmed": true,
+    "id": "S_GRAPH_AND_W_TEACHER_TOPOLOGY_NOT_MECHANICALLY_ALIGNED",
+    "mechanism": "Teacher weights are projected row-wise from exact source triangles. Source-triangle provenance is stored, then discarded by V5/V6 teacher loading. GSA relations can connect rows projected from nonincident source triangles; large weight discontinuities are concentrated entirely on those bridges."
+  },
+  "relation_source_topology": {
+    "NONINCIDENT": {
+      "both_teacher_valid_count": 3648,
+      "high_l1_counts": {
+        "0.5": 1267,
+        "1.0": 1070,
+        "1.5": 971,
+        "1.9": 931
+      },
+      "relation_count": 4082,
+      "teacher_l1_max": 2.0000000596046448,
+      "teacher_l1_mean": 0.6327406523714459,
+      "teacher_l1_p50": 0.015918669058009982,
+      "teacher_l1_p95": 2.000000014901161,
+      "teacher_l1_p99": 2.0000000298023224
+    },
+    "SAME_FACE": {
+      "both_teacher_valid_count": 13879,
+      "high_l1_counts": {
+        "0.5": 29,
+        "1.0": 0,
+        "1.5": 0,
+        "1.9": 0
+      },
+      "relation_count": 17564,
+      "teacher_l1_max": 0.6338412091135979,
+      "teacher_l1_mean": 0.005171180344446024,
+      "teacher_l1_p50": 0.0,
+      "teacher_l1_p95": 0.01778093166649294,
+      "teacher_l1_p99": 0.10625234082341159
+    },
+    "SHARE_EDGE": {
+      "both_teacher_valid_count": 9572,
+      "high_l1_counts": {
+        "0.5": 38,
+        "1.0": 0,
+        "1.5": 0,
+        "1.9": 0
+      },
+      "relation_count": 10020,
+      "teacher_l1_max": 0.7301381975412369,
+      "teacher_l1_mean": 0.014154392303429238,
+      "teacher_l1_p50": 0.0,
+      "teacher_l1_p95": 0.08397896364331245,
+      "teacher_l1_p99": 0.28815073261502744
+    },
+    "SHARE_VERTEX_ONLY": {
+      "both_teacher_valid_count": 4711,
+      "high_l1_counts": {
+        "0.5": 76,
+        "1.0": 0,
+        "1.5": 0,
+        "1.9": 0
+      },
+      "relation_count": 4803,
+      "teacher_l1_max": 0.8675930220633745,
+      "teacher_l1_mean": 0.047056257539170025,
+      "teacher_l1_p50": 0.0,
+      "teacher_l1_p95": 0.26567782608617563,
+      "teacher_l1_p99": 0.5359542399644851
+    }
+  },
+  "repo_head": "bb6a8b101e8b0406c6c8b8451c94604819e02028",
+  "schema": "RealSaS.KnightSurfaceSkinTopologyAlignmentAudit.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED",
+  "surface": {
+    "node_count": 12090,
+    "relation_count": 36469
+  },
+  "teacher_projection": {
+    "source_face_count": 6952,
+    "source_triangle_barycentric_shape": [
+      12090,
+      3
+    ],
+    "source_triangle_index_shape": [
+      12090
+    ],
+    "source_triangle_provenance_present_in_bank": true,
+    "teacher_coverage": 0.8776674937965261,
+    "teacher_valid_count": 10611
+  },
+  "threshold_totals": {
+    "0.5": 1410,
+    "1.0": 1070,
+    "1.5": 971,
+    "1.9": 931
+  },
+  "training_semantic_drop": {
+    "source_triangle_provenance_used_in_compiler_skin_qualification": false,
+    "source_triangle_provenance_used_in_objective": false,
+    "v5_loader_required_arrays": [
+      "weights",
+      "surface_ids",
+      "teacher_valid_mask"
+    ],
+    "v5_teacher_loader_drops_source_triangle_provenance": true,
+    "v6_reuses_v5_teacher_loader": true
+  }
+}

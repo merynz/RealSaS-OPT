@@ -1,0 +1,50 @@
+{
+  "artifact_sha256": {
+    "camera": "312a9b1afe4ea1fcdc481232ac951fb6a6815fee532fbb93646e97e609b5b80a",
+    "candidate": "0db35bbcdd3565cf42c74127fa33c66d39545e1ec84d1b1c74f1dac5bb6072d3",
+    "envelope": "f03cd7bbd06406d7470d4630b2efd083bb2e9df1066b7d3d8578744b20a30b54",
+    "policy": "592c83144fccbb004384c02bf3229c286cd258d2213e727b4f62bb299a85c4db",
+    "skeleton": "e89d0b64cf23b2954f2b30fb37836ee2b3287749a79c90a76185437b9217e987",
+    "skin": "f1a937de488ec2a620ee292b3f865a3b2ca97b9466401555beb08b1d2f945a09",
+    "surface": "7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182"
+  },
+  "compatibility_summary": {
+    "max_edge_ratio": null,
+    "passed": false,
+    "report_hash": "03cbb6248877676ed179ea9e65b64c632c61019fcc965ea52ff8fded53ed1b82",
+    "risk_l1_min": 0.5,
+    "risky_face_count": 1820,
+    "stress_angle_deg": 120,
+    "unsafe_face_count": 1509
+  },
+  "known_smear_offenders": [
+    {
+      "face_index": 253,
+      "risky": true,
+      "unsafe": true
+    },
+    {
+      "face_index": 3829,
+      "risky": true,
+      "unsafe": true
+    },
+    {
+      "face_index": 3573,
+      "risky": true,
+      "unsafe": true
+    }
+  ],
+  "schema": "RealSaS.KnightStage35OffenderCaptureAudit.v1",
+  "status": "AUDIT_ONLY__NO_REPAIR_APPLIED",
+  "verdict": {
+    "all_known_offenders_risky": true,
+    "all_known_offenders_unsafe": true,
+    "claim_boundary": "Current Stage35 compatibility implementation applied to exact baseline artifacts; no repair applied.",
+    "stage35_current_checker_would_block_exact_baseline": true
+  },
+  "correction": {
+    "status": "AUDIT_ARTIFACT_BOOKKEEPING_CORRECTED",
+    "reason": "Original workflow attempted to read non-existent report.risky_face_indices. Stage35 defines unsafe = (skin_l1 > risk_l1_min) AND deformation_limit_violation, therefore every unsafe face is necessarily risky.",
+    "product_checker_changed": false
+  }
+}

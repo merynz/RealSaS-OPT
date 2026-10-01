@@ -1,0 +1,9 @@
+{
+  "schema": "RealSaS.CAABoundaryGuardDiagnosticTrigger.v1",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "reason": "SEPARATE_RAW_SOURCE_BOUNDARY_GUARD_FROM_TRULY_UNOBSERVED_COMPLETION",
+  "thresholds_changed": false,
+  "source_art_mutated": false,
+  "product_authority_claimed": false,
+  "revision": 1
+}

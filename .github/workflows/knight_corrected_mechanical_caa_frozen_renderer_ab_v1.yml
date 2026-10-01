@@ -1,0 +1,60 @@
+name: knight-corrected-mechanical-caa-frozen-renderer-ab-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/vf11-certified-adaptive-20260921]
+    paths:
+      - 'tools/demo/build_knight_corrected_mechanical_caa_ab_v1.py'
+      - 'compiler/realsas_compiler_core/appearance_compile_v2.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py'
+      - '.github/workflows/knight_corrected_mechanical_caa_frozen_renderer_ab_v1.yml'
+
+concurrency:
+  group: knight-corrected-mechanical-caa-frozen-renderer-ab-v1
+  cancel-in-progress: true
+
+jobs:
+  ab:
+    if: ${{ false }} # superseded by render-resume; avoid recomputing Stage19-23
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      PARENT_RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
+      CHILD_RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_AB_V1_20260929
+      OUT_DIR: /tmp/knight_corrected_mechanical_caa_ab
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Syntax and CAA regression gate
+        run: |
+          set -euo pipefail
+          python -m py_compile             compiler/realsas_compiler_core/appearance_compile_v2.py             compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py             tools/demo/build_knight_corrected_mechanical_caa_ab_v1.py
+          PYTHONPATH=. python -m pytest -q tests/compiler/test_visibility_and_caa_v2.py
+      - name: Verify frozen smear renderer is unchanged
+        run: |
+          set -euo pipefail
+          test "$(git hash-object tools/demo/frozen/render_knight_motion_preview_v1_7917be02.py)" = "7917be02f325ba00b5dcd2b31a786898e45f640f"
+          echo "FROZEN_SMEAR_RENDERER_HASH_PASS"
+      - name: Build corrected mechanical CAA and render frozen A/B
+        run: |
+          set -euo pipefail
+          rm -rf "$OUT_DIR"
+          mkdir -p "$OUT_DIR"
+          PYTHONPATH=. python tools/demo/build_knight_corrected_mechanical_caa_ab_v1.py             --authority-root "$AUTHORITY_ROOT"             --parent-run-id "$PARENT_RUN_ID"             --child-run-id "$CHILD_RUN_ID"             --out-dir "$OUT_DIR"
+      - name: Upload corrected frozen-renderer A/B
+        uses: actions/upload-artifact@v4
+        with:
+          name: knight-corrected-mechanical-caa-frozen-renderer-ab-v1
+          path: |
+            /tmp/knight_corrected_mechanical_caa_ab/*.gif
+            /tmp/knight_corrected_mechanical_caa_ab/REPORT.json
+            /tmp/knight_corrected_mechanical_caa_ab/frozen_renderer/*.png
+            /tmp/knight_corrected_mechanical_caa_ab/frozen_renderer/*.json
+          if-no-files-found: error
+          retention-days: 7
+
+# trigger: workflow existed before this commit

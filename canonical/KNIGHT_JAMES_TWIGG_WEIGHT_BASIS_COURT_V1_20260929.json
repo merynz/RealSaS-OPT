@@ -1,0 +1,270 @@
+{
+  "bases": [
+    {
+      "basis": "ARACHNE_SIGNATURE",
+      "clustering": {
+        "cluster_count": 8,
+        "core_face_count": 16875,
+        "core_fraction_of_fit": 0.7442445091293993,
+        "fit_face_count": 22674,
+        "mode_distance_max": 0.1272176561417627,
+        "mode_distance_p50": 0.011590911643627551,
+        "mode_distance_p95": 0.058056855183949804,
+        "pca_components": 32,
+        "pca_explained_variance_ratio_sum": 0.9943774734448894,
+        "seed_face_count": 4096
+      },
+      "holeless_split": {
+        "centroid_copy_count": 6,
+        "face_count_after": 25668,
+        "face_count_before": 24958,
+        "face_deletion_count": 0,
+        "mixed_face_count": 352,
+        "region_pure_output_fraction": 0.9703521894966495,
+        "rest_area_error_max": 8.510425874590087e-15,
+        "rest_area_error_p99": 7.791026401183475e-16,
+        "seam_vertex_copy_count": 726,
+        "unsplit_unresolved_face_count": 5795,
+        "vertex_count_after": 12781,
+        "vertex_count_before": 12049
+      },
+      "mechanics": {
+        "after_motion": {
+          "max_edge_gt_10": 474,
+          "max_edge_gt_4": 785,
+          "max_edge_p99": 17.46563823475647,
+          "worst_edge_max": 209.99843678211474
+        },
+        "after_stress": {
+          "max_area_max": 185.04374127600667,
+          "max_condition_max": 12993.435289538684,
+          "max_edge_max": 181.98443687372514,
+          "max_edge_p95": 4.043498064688502,
+          "min_area_min": 0.005589703982245581,
+          "unsafe_face_count": 1525
+        },
+        "before_motion": {
+          "max_edge_gt_10": 630,
+          "max_edge_gt_4": 1032,
+          "max_edge_p99": 24.747347006229525,
+          "worst_edge_max": 209.9984349009761
+        },
+        "before_stress": {
+          "max_area_max": 185.0437086690865,
+          "max_condition_max": 12997.510682966114,
+          "max_edge_max": 181.98443623410574,
+          "max_edge_p95": 8.075491201970923,
+          "min_area_min": 0.005588670590092759,
+          "unsafe_face_count": 1801
+        }
+      },
+      "propagation": {
+        "initial_labeled_vertex_count": 8702,
+        "propagated_vertex_count": 790,
+        "safe_graph_edge_count": 34583,
+        "unresolved_vertex_count": 2556
+      },
+      "score": {
+        "after_edge_gt10": 474,
+        "after_edge_gt4": 785,
+        "after_synthetic_unsafe": 1525,
+        "after_worst_edge": 209.99843678211474,
+        "mixed_precision": 0.9261363636363636,
+        "mixed_recall": 0.10794701986754966,
+        "unsafe_cross_region_recall": 0.2758913412563667
+      },
+      "teacher_eval_only": {
+        "mixed_face_precision": 0.9261363636363636,
+        "mixed_face_recall": 0.10794701986754966,
+        "predicted_mixed_face_count": 352,
+        "truth_mixed_face_count": 3020,
+        "unsafe_truth_cross_region_face_count": 1178,
+        "unsafe_truth_cross_region_recall": 0.2758913412563667,
+        "vertex_ari": 0.6353533149912199,
+        "vertex_nmi": 0.7061274655538949
+      }
+    },
+    {
+      "basis": "CUTCELL_SIGNATURE",
+      "clustering": {
+        "cluster_count": 5,
+        "core_face_count": 2048,
+        "core_fraction_of_fit": 0.09139593002499108,
+        "fit_face_count": 22408,
+        "mode_distance_max": 0.13513850611680034,
+        "mode_distance_p50": 0.02173407911008174,
+        "mode_distance_p95": 0.05703565231280365,
+        "pca_components": 32,
+        "pca_explained_variance_ratio_sum": 0.9336613510977221,
+        "seed_face_count": 4096
+      },
+      "holeless_split": {
+        "centroid_copy_count": 0,
+        "face_count_after": 25872,
+        "face_count_before": 24958,
+        "face_deletion_count": 0,
+        "mixed_face_count": 457,
+        "region_pure_output_fraction": 0.990530303030303,
+        "rest_area_error_max": 3.050147677041897e-14,
+        "rest_area_error_p99": 6.26314000877669e-16,
+        "seam_vertex_copy_count": 900,
+        "unsplit_unresolved_face_count": 260,
+        "vertex_count_after": 12949,
+        "vertex_count_before": 12049
+      },
+      "mechanics": {
+        "after_motion": {
+          "max_edge_gt_10": 634,
+          "max_edge_gt_4": 1044,
+          "max_edge_p99": 24.0677982492534,
+          "worst_edge_max": 209.99843678211474
+        },
+        "after_stress": {
+          "max_area_max": 185.04374127600667,
+          "max_condition_max": 12993.435289538684,
+          "max_edge_max": 181.98443687372514,
+          "max_edge_p95": 7.680495696347511,
+          "min_area_min": 0.005589703982245581,
+          "unsafe_face_count": 1839
+        },
+        "before_motion": {
+          "max_edge_gt_10": 630,
+          "max_edge_gt_4": 1032,
+          "max_edge_p99": 24.747347006229525,
+          "worst_edge_max": 209.9984349009761
+        },
+        "before_stress": {
+          "max_area_max": 185.0437086690865,
+          "max_condition_max": 12997.510682966114,
+          "max_edge_max": 181.98443623410574,
+          "max_edge_p95": 8.075491201970923,
+          "min_area_min": 0.005588670590092759,
+          "unsafe_face_count": 1801
+        }
+      },
+      "propagation": {
+        "initial_labeled_vertex_count": 2006,
+        "propagated_vertex_count": 9974,
+        "safe_graph_edge_count": 35086,
+        "unresolved_vertex_count": 69
+      },
+      "score": {
+        "after_edge_gt10": 634,
+        "after_edge_gt4": 1044,
+        "after_synthetic_unsafe": 1839,
+        "after_worst_edge": 209.99843678211474,
+        "mixed_precision": 0.12472647702407003,
+        "mixed_recall": 0.018874172185430464,
+        "unsafe_cross_region_recall": 0.024271844660194174
+      },
+      "teacher_eval_only": {
+        "mixed_face_precision": 0.12472647702407003,
+        "mixed_face_recall": 0.018874172185430464,
+        "predicted_mixed_face_count": 457,
+        "truth_mixed_face_count": 3020,
+        "unsafe_truth_cross_region_face_count": 412,
+        "unsafe_truth_cross_region_recall": 0.024271844660194174,
+        "vertex_ari": 0.0941840697146168,
+        "vertex_nmi": 0.2446127481126168
+      }
+    },
+    {
+      "basis": "DUAL_SIGNATURE",
+      "clustering": {
+        "cluster_count": 5,
+        "core_face_count": 3627,
+        "core_fraction_of_fit": 0.17475307154902434,
+        "fit_face_count": 20755,
+        "mode_distance_max": 0.08884056817015769,
+        "mode_distance_p50": 0.016476080857716666,
+        "mode_distance_p95": 0.04485395073546532,
+        "pca_components": 32,
+        "pca_explained_variance_ratio_sum": 0.971700546504891,
+        "seed_face_count": 4096
+      },
+      "holeless_split": {
+        "centroid_copy_count": 0,
+        "face_count_after": 25004,
+        "face_count_before": 24958,
+        "face_deletion_count": 0,
+        "mixed_face_count": 23,
+        "region_pure_output_fraction": 0.9552071668533034,
+        "rest_area_error_max": 8.249248323693101e-16,
+        "rest_area_error_p99": 0.0,
+        "seam_vertex_copy_count": 50,
+        "unsplit_unresolved_face_count": 13141,
+        "vertex_count_after": 12099,
+        "vertex_count_before": 12049
+      },
+      "mechanics": {
+        "after_motion": {
+          "max_edge_gt_10": 609,
+          "max_edge_gt_4": 1012,
+          "max_edge_p99": 24.743560448799478,
+          "worst_edge_max": 209.99843678211474
+        },
+        "after_stress": {
+          "max_area_max": 185.04374127600667,
+          "max_condition_max": 12993.435289538684,
+          "max_edge_max": 181.98443687372514,
+          "max_edge_p95": 7.7452701576462175,
+          "min_area_min": 0.005589703982245581,
+          "unsafe_face_count": 1782
+        },
+        "before_motion": {
+          "max_edge_gt_10": 630,
+          "max_edge_gt_4": 1032,
+          "max_edge_p99": 24.747347006229525,
+          "worst_edge_max": 209.9984349009761
+        },
+        "before_stress": {
+          "max_area_max": 185.0437086690865,
+          "max_condition_max": 12997.510682966114,
+          "max_edge_max": 181.98443623410574,
+          "max_edge_p95": 8.075491201970923,
+          "min_area_min": 0.005588670590092759,
+          "unsafe_face_count": 1801
+        }
+      },
+      "propagation": {
+        "initial_labeled_vertex_count": 2809,
+        "propagated_vertex_count": 3241,
+        "safe_graph_edge_count": 33239,
+        "unresolved_vertex_count": 5999
+      },
+      "score": {
+        "after_edge_gt10": 609,
+        "after_edge_gt4": 1012,
+        "after_synthetic_unsafe": 1782,
+        "after_worst_edge": 209.99843678211474,
+        "mixed_precision": 1.0,
+        "mixed_recall": 0.0076158940397350995,
+        "unsafe_cross_region_recall": 0.015333333333333332
+      },
+      "teacher_eval_only": {
+        "mixed_face_precision": 1.0,
+        "mixed_face_recall": 0.0076158940397350995,
+        "predicted_mixed_face_count": 23,
+        "truth_mixed_face_count": 3020,
+        "unsafe_truth_cross_region_face_count": 1500,
+        "unsafe_truth_cross_region_recall": 0.015333333333333332,
+        "vertex_ari": 0.3046859285593213,
+        "vertex_nmi": 0.5766155514565925
+      }
+    }
+  ],
+  "claim_boundary": "Teacher topology selects the best basis only for research interpretation after all teacher-free labels are produced. This selection is not a product inference rule. Every holeless split is evaluated on the original Arachne weight field so topology-label causality is isolated.",
+  "epsilon": 0.05,
+  "finding": {
+    "any_basis_recovers_half_unsafe_cross_region_boundaries": false,
+    "any_basis_reduces_arachne_edge_gt10_after_holeless_split": true,
+    "best_basis": "ARACHNE_SIGNATURE"
+  },
+  "probe_count": 168,
+  "probe_degrees": 30.0,
+  "schema": "RealSaS.KnightJamesTwiggWeightBasisCourt.v1",
+  "selected_basis_by_teacher_evaluation_for_RESEARCH_ONLY": "ARACHNE_SIGNATURE",
+  "split_weight_authority": "ORIGINAL_ARACHNE_ONLY",
+  "status": "PAPER_INSPIRED_TEACHER_FREE_REGION_INFERENCE__NO_PRODUCT_MUTATION",
+  "teacher_used_by_region_inference": false
+}

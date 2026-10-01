@@ -9,6 +9,7 @@ on:
 permissions:
   contents: write
 
+# retry: capability closure semantics
 jobs:
   normalize:
     runs-on: ubuntu-latest

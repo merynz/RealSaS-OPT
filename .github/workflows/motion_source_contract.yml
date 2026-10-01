@@ -1,23 +1,62 @@
-name: motion-source-contract
+name: motion-source-contract-v2
+
 on:
   pull_request:
+    branches: [main]
     paths:
-      - 'compiler/realsas_compiler_core/motion.py'
-      - 'compiler/test_motion_source_v1.py'
+      - 'compiler/realsas_compiler_core/motion_compile_v2.py'
+      - 'compiler/realsas_compiler_core/motion_dynamic_proof_v2.py'
+      - 'compiler/realsas_compiler_core/motion_source_v1.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py'
+      - 'tools/motion/blender_extract_motion_source_v2.py'
+      - 'tools/motion/materialize_quaternius_preset_v1.py'
+      - 'canonical/MOTION_PRESET_SOURCE_QUATERNIUS_KNIGHT_V1.json'
+      - 'tests/compiler/test_motion_compile_v2.py'
+      - 'tests/compiler/test_motion_dynamic_proof_v2.py'
+      - 'tests/compiler/test_quaternius_motion_materializer_v1.py'
       - '.github/workflows/motion_source_contract.yml'
   push:
-    branches: [source/generic-completion-v1-20260902]
+    branches: [recovery/canonical-main-20261001, main]
     paths:
-      - 'compiler/realsas_compiler_core/motion.py'
-      - 'compiler/test_motion_source_v1.py'
+      - 'compiler/realsas_compiler_core/motion_compile_v2.py'
+      - 'compiler/realsas_compiler_core/motion_dynamic_proof_v2.py'
+      - 'compiler/realsas_compiler_core/motion_source_v1.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py'
+      - 'tools/motion/blender_extract_motion_source_v2.py'
+      - 'tools/motion/materialize_quaternius_preset_v1.py'
+      - 'canonical/MOTION_PRESET_SOURCE_QUATERNIUS_KNIGHT_V1.json'
+      - 'tests/compiler/test_motion_compile_v2.py'
+      - 'tests/compiler/test_motion_dynamic_proof_v2.py'
+      - 'tests/compiler/test_quaternius_motion_materializer_v1.py'
       - '.github/workflows/motion_source_contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  motion-source-contract:
+  motion-v2-contract:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: {python-version: '3.11'}
-      - run: python -m pip install pytest
-      - run: python -m py_compile compiler/realsas_compiler_core/motion.py
-      - run: PYTHONPATH=. python -m pytest -q compiler/test_motion_source_v1.py
+        with:
+          python-version: '3.11'
+      - name: Install minimal pinned runtime dependencies
+        run: |
+          python -m pip install --no-input --progress-bar off --only-binary=:all:             numpy scipy pytest
+      - name: Compile current motion ownership
+        run: |
+          python -m py_compile             compiler/realsas_compiler_core/motion_compile_v2.py             compiler/realsas_compiler_core/motion_dynamic_proof_v2.py             compiler/realsas_compiler_core/motion_source_v1.py             compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py             tools/motion/materialize_quaternius_preset_v1.py
+          python -m py_compile tools/motion/blender_extract_motion_source_v2.py
+      - name: Motion v2 source compile and dynamic FK regressions
+        run: |
+          python -m pytest -q             tests/compiler/test_motion_compile_v2.py             tests/compiler/test_motion_dynamic_proof_v2.py             tests/compiler/test_quaternius_motion_materializer_v1.py
+      - name: Summary
+        run: |
+          echo MOTION_SOURCE_CONTRACT_V2_PASS
+          echo "commit=$GITHUB_SHA"

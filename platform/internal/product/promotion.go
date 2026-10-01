@@ -17,21 +17,11 @@ import (
 var (
 	ErrTargetNotFoundOrWrongSubject = errors.New("promotion target not found or subject mismatch")
 	ErrAlreadyCurrent               = errors.New("promotion target already current")
+	ErrProductContractRequired      = errors.New("promotion target requires sealed product contract")
 	ErrRequiredRolesMissing         = errors.New("promotion required roles missing")
 	ErrArtifactNotQualified         = errors.New("promotion artifact not qualified")
+	ErrArtifactContractMismatch     = errors.New("promotion artifact violates product contract")
 )
-
-var requiredProductRoles = []string{
-	"appearance",
-	"geometry",
-	"mechanical_mesh",
-	"motion_library",
-	"observation",
-	"runtime_compatibility",
-	"skeleton",
-	"skin",
-	"visual_presentation",
-}
 
 type PromotionRequest struct {
 	SubjectID        uuid.UUID
@@ -48,9 +38,17 @@ type PromotionResult struct {
 }
 
 type qualificationSnapshot struct {
-	RequiredRoles []string `json:"required_roles"`
-	BoundRoles    []string `json:"bound_roles"`
-	AllQualified  bool     `json:"all_bound_artifacts_have_pass_qualification"`
+	ProductContractID     string   `json:"product_contract_id"`
+	ProductContractSHA256 string   `json:"product_contract_sha256"`
+	RequiredRoles         []string `json:"required_roles"`
+	BoundRoles            []string `json:"bound_roles"`
+	AllQualified          bool     `json:"all_bound_artifacts_have_required_qualification"`
+}
+
+type boundArtifact struct {
+	ID            uuid.UUID
+	ArtifactType  string
+	SchemaVersion string
 }
 
 func Promote(ctx context.Context, pool *pgxpool.Pool, req PromotionRequest) (PromotionResult, error) {
@@ -63,17 +61,18 @@ func Promote(ctx context.Context, pool *pgxpool.Pool, req PromotionRequest) (Pro
 
 	var result PromotionResult
 	err := persistence.WithSerializableRetry(ctx, pool, 5, func(tx pgx.Tx) error {
-		// Lock the subject itself so first-time promotion is serialized too.
 		var locked uuid.UUID
 		if err := tx.QueryRow(ctx, "SELECT id FROM subjects WHERE id=$1 FOR UPDATE", req.SubjectID).Scan(&locked); err != nil {
 			return fmt.Errorf("lock subject: %w", err)
 		}
 
 		var targetSubject uuid.UUID
-		if err := tx.QueryRow(ctx,
-			"SELECT subject_id FROM product_revisions WHERE id=$1",
-			req.TargetRevisionID,
-		).Scan(&targetSubject); err != nil {
+		var productContractID *uuid.UUID
+		if err := tx.QueryRow(ctx, `
+			SELECT subject_id,product_contract_id
+			FROM product_revisions
+			WHERE id=$1
+		`, req.TargetRevisionID).Scan(&targetSubject, &productContractID); err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				return ErrTargetNotFoundOrWrongSubject
 			}
@@ -81,6 +80,13 @@ func Promote(ctx context.Context, pool *pgxpool.Pool, req PromotionRequest) (Pro
 		}
 		if targetSubject != req.SubjectID {
 			return ErrTargetNotFoundOrWrongSubject
+		}
+		if productContractID == nil {
+			return ErrProductContractRequired
+		}
+		contract, contractSHA, err := loadContractTx(ctx, tx, *productContractID)
+		if err != nil {
+			return err
 		}
 
 		var current uuid.UUID
@@ -104,13 +110,10 @@ func Promote(ctx context.Context, pool *pgxpool.Pool, req PromotionRequest) (Pro
 		}
 
 		rows, err := tx.Query(ctx, `
-			SELECT pra.role,
-			       EXISTS (
-			         SELECT 1 FROM qualifications q
-			         WHERE q.artifact_id = pra.artifact_id
-			           AND q.result = 'PASS'
-			       ) AS qualified
+			SELECT pra.role,pra.artifact_id,t.name,t.schema_version
 			FROM product_revision_artifacts pra
+			JOIN artifacts a ON a.id=pra.artifact_id
+			JOIN artifact_types t ON t.id=a.artifact_type_id
 			WHERE pra.product_revision_id=$1
 			ORDER BY pra.role
 		`, req.TargetRevisionID)
@@ -118,41 +121,63 @@ func Promote(ctx context.Context, pool *pgxpool.Pool, req PromotionRequest) (Pro
 			return err
 		}
 		defer rows.Close()
-
-		bound := make(map[string]bool)
+		bound := map[string]boundArtifact{}
 		var boundRoles []string
 		for rows.Next() {
 			var role string
-			var qualified bool
-			if err := rows.Scan(&role, &qualified); err != nil {
+			var artifact boundArtifact
+			if err := rows.Scan(&role, &artifact.ID, &artifact.ArtifactType, &artifact.SchemaVersion); err != nil {
 				return err
 			}
-			bound[role] = qualified
+			bound[role] = artifact
 			boundRoles = append(boundRoles, role)
 		}
 		if err := rows.Err(); err != nil {
 			return err
 		}
 
+		var requiredRoles []string
 		var missing []string
-		for _, role := range requiredProductRoles {
-			qualified, ok := bound[role]
-			if !ok {
-				missing = append(missing, role)
+		for _, rule := range contract.Roles {
+			if !rule.Required {
 				continue
 			}
+			requiredRoles = append(requiredRoles, rule.Role)
+			artifact, ok := bound[rule.Role]
+			if !ok {
+				missing = append(missing, rule.Role)
+				continue
+			}
+			if rule.ArtifactType != "" && artifact.ArtifactType != rule.ArtifactType {
+				return fmt.Errorf("%w: role=%s type=%s want=%s", ErrArtifactContractMismatch, rule.Role, artifact.ArtifactType, rule.ArtifactType)
+			}
+			if rule.SchemaVersion != "" && artifact.SchemaVersion != rule.SchemaVersion {
+				return fmt.Errorf("%w: role=%s schema=%s want=%s", ErrArtifactContractMismatch, rule.Role, artifact.SchemaVersion, rule.SchemaVersion)
+			}
+			var qualified bool
+			if err := tx.QueryRow(ctx, `
+				SELECT EXISTS (
+				  SELECT 1 FROM qualifications
+				  WHERE artifact_id=$1 AND qualification_type=$2 AND result='PASS'
+				)
+			`, artifact.ID, rule.QualificationType).Scan(&qualified); err != nil {
+				return err
+			}
 			if !qualified {
-				return fmt.Errorf("%w: %s", ErrArtifactNotQualified, role)
+				return fmt.Errorf("%w: role=%s qualification=%s", ErrArtifactNotQualified, rule.Role, rule.QualificationType)
 			}
 		}
 		if len(missing) != 0 {
 			return fmt.Errorf("%w: %v", ErrRequiredRolesMissing, missing)
 		}
+		sort.Strings(requiredRoles)
 		sort.Strings(boundRoles)
 		snapshot, err := json.Marshal(qualificationSnapshot{
-			RequiredRoles: append([]string(nil), requiredProductRoles...),
-			BoundRoles:    boundRoles,
-			AllQualified:  true,
+			ProductContractID:     productContractID.String(),
+			ProductContractSHA256: contractSHA,
+			RequiredRoles:         requiredRoles,
+			BoundRoles:            boundRoles,
+			AllQualified:          true,
 		})
 		if err != nil {
 			return err
@@ -186,10 +211,12 @@ func Promote(ctx context.Context, pool *pgxpool.Pool, req PromotionRequest) (Pro
 		}
 
 		auditPayload, _ := json.Marshal(map[string]any{
-			"promotion_id":     promotionID.String(),
+			"promotion_id": promotionID.String(),
 			"from_revision_id": from,
-			"to_revision_id":   req.TargetRevisionID.String(),
-			"reason":           req.Reason,
+			"to_revision_id": req.TargetRevisionID.String(),
+			"product_contract_id": productContractID.String(),
+			"product_contract_sha256": contractSHA,
+			"reason": req.Reason,
 		})
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO audit_events(actor, action, subject_id, product_revision_id, payload)
@@ -199,8 +226,9 @@ func Promote(ctx context.Context, pool *pgxpool.Pool, req PromotionRequest) (Pro
 		}
 
 		outboxPayload, _ := json.Marshal(map[string]any{
-			"promotion_id":        promotionID.String(),
+			"promotion_id": promotionID.String(),
 			"product_revision_id": req.TargetRevisionID.String(),
+			"product_contract_sha256": contractSHA,
 		})
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO outbox_events(aggregate_type, aggregate_id, event_type, payload)
@@ -210,9 +238,9 @@ func Promote(ctx context.Context, pool *pgxpool.Pool, req PromotionRequest) (Pro
 		}
 
 		result = PromotionResult{
-			PromotionID:    promotionID,
-			FromRevision:   from,
-			ToRevision:     req.TargetRevisionID,
+			PromotionID: promotionID,
+			FromRevision: from,
+			ToRevision: req.TargetRevisionID,
 			NewLockVersion: newLock,
 		}
 		return nil

@@ -35,6 +35,18 @@ func TestAtomicPromotion(t *testing.T) {
 	attemptID := uuid.New()
 	revisionID := uuid.New()
 	artifactTypeID := uuid.New()
+	contract, err := SealContract(ctx, pool, Contract{
+		Name: "rss-default",
+		Version: "test-" + subjectID.String(),
+		Roles: []RoleRule{
+			{Role: "geometry", QualificationType: "PRODUCT_PROMOTION", Required: true},
+			{Role: "runtime_compatibility", QualificationType: "PRODUCT_PROMOTION", Required: true},
+			{Role: "skin", QualificationType: "PRODUCT_PROMOTION", Required: true},
+		},
+	}, "ci")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	tx, err := pool.Begin(ctx)
 	if err != nil {
@@ -61,13 +73,13 @@ func TestAtomicPromotion(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := tx.Exec(ctx,
-		"INSERT INTO product_revisions(id,subject_id,revision_number,manifest_sha256,created_from_attempt_id,sealed_at) VALUES ($1,$2,1,$3,$4,now())",
-		revisionID, subjectID, repeatHex("d"), attemptID,
+		"INSERT INTO product_revisions(id,subject_id,revision_number,manifest_sha256,created_from_attempt_id,product_contract_id,sealed_at) VALUES ($1,$2,1,$3,$4,$5,now())",
+		revisionID, subjectID, repeatHex("d"), attemptID, contract.ID,
 	); err != nil {
 		t.Fatal(err)
 	}
 
-	for i, role := range requiredProductRoles {
+	for i, role := range []string{"geometry", "runtime_compatibility", "skin"} {
 		artifactID := uuid.New()
 		qualificationID := uuid.New()
 		if _, err := tx.Exec(ctx, `

@@ -1,0 +1,39 @@
+name: platform-go-contract-v1
+
+on:
+  push:
+    branches: [platform/professional-backend-v1-20261001]
+    paths:
+      - 'platform/**'
+      - 'canonical/MAINLINE_EXECUTION_PLAN_V2.json'
+      - 'docs/platform/adr/0003-go-control-plane.md'
+      - '.github/workflows/platform_go_contract_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: platform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+          cache-dependency-path: platform/go.sum
+      - name: Download pinned modules
+        run: go mod download
+      - name: Format gate
+        run: |
+          test -z "$(gofmt -l .)"
+      - name: Vet
+        run: go vet ./...
+      - name: Unit contracts
+        run: go test ./...
+      - name: Build control plane binary
+        run: go build ./cmd/realsas-api

@@ -12,8 +12,8 @@
   "explained_high_signal_count": 344,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 158,
-  "safe_default_evidence_only_branch_count": 154,
+  "live_branch_count": 159,
+  "safe_default_evidence_only_branch_count": 155,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -49,6 +49,12 @@
     {
       "name": "agent/n1d-v2-source-parity-recovery-20260820",
       "sha": "32b06472b7ffe94e3148ce0f3ed0b22d5508f2a6",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "alfred/repo-memory-map-20261001",
+      "sha": "a8002b20dd2710e6f8edc9317be640d3bc9330f3",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -498,7 +504,7 @@
     },
     {
       "name": "main",
-      "sha": "e6c91184d6d877bd19980832a561e94a746ca7ce",
+      "sha": "a8002b20dd2710e6f8edc9317be640d3bc9330f3",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },

@@ -99,6 +99,18 @@ func TestPrepareAndFailExecutionPersistsLocalizedRepair(t *testing.T) {
 		t.Fatal(err)
 	}
 	stageID := "37_QUALIFIED_PRESENTATION_STRUCTURE"
+	stage, ok := g.Get(stageID)
+	if !ok {
+		t.Fatal("stage37 missing")
+	}
+	for _, dependency := range stage.DependsOn {
+		if _, err := pool.Exec(ctx, `
+			INSERT INTO attempt_artifacts(attempt_id,role,artifact_id,origin)
+			VALUES ($1,$2,$3,'inherited')
+		`, attemptID, "stage:"+dependency, sourceArtifactID); err != nil {
+			t.Fatal(err)
+		}
+	}
 	allowed, err := g.DescendantsIncluding("35_DYNAMIC_MECHANICAL_MESH_QUALIFIED")
 	if err != nil {
 		t.Fatal(err)

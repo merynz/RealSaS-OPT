@@ -56,14 +56,11 @@ Go control-plane persistence uses `pgx/v5`.
 
 The platform must not maintain two production migration authorities. Existing Alembic migrations created during the Python reference phase are executable specification only until the Go migration cutover is completed and parity-proven. The cutover must be explicit.
 
-## Python backend status
+## Python backend retirement
 
-The existing `backend/realsas_platform` package is retained temporarily for:
-- executable/reference contracts;
-- parity tests during Go migration;
-- compiler bridge/engine-worker logic that properly belongs on the Python side.
+The temporary `backend/realsas_platform` reference control plane was retired after the Go control plane passed its PostgreSQL, migration, artifact, capability-execution and architecture-contract gates on 2026-10-01.
 
-No new long-lived product-control-plane feature should be added there after this ADR unless it is explicitly an engine-worker concern.
+Python remains authoritative only for scientific/compiler/model/runtime-worker concerns. A future Python engine worker must expose stable typed activity contracts to Go; it must not recreate product-state persistence, promotion, migration or orchestration authority in Python.
 
 ## Go baseline
 
@@ -74,7 +71,7 @@ No new long-lived product-control-plane feature should be added there after this
 
 ## Migration acceptance
 
-Go control-plane becomes authoritative only after parity tests prove at minimum:
+The Go control plane is the sole live platform/control-plane implementation on this branch after parity and closure gates proved at minimum:
 
 1. semantic Artifact identity parity;
 2. exact 46-stage graph/invalidation parity;
@@ -85,4 +82,4 @@ Go control-plane becomes authoritative only after parity tests prove at minimum:
 7. render cannot schedule fit/train/calibrate/promote;
 8. failure/repair explanation can be queried without Git archaeology.
 
-Until then, the platform branch is migration work and does not change product authority.
+The branch remains isolated from canonical product authority until explicit promotion, but there is no longer a second live Python control plane in the repository.

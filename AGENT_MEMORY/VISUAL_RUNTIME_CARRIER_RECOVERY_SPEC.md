@@ -47,7 +47,9 @@ Stage45 dynamic visual proof = shipping authority
 
 ## Proposed Stage42 product contract
 
-Stage42 becomes a compiler/runtime-projection stage with two explicit geometry modes:
+Before Stage42, Stage37 must qualify the final source-owned presentation geometry using Stage35-qualified mechanical evidence. Stage18 visual output is substrate/candidate evidence, not automatically final shipping topology.
+
+Stage42 then becomes a compiler/runtime-projection stage with two explicit geometry modes:
 
 ### MECHANICAL_PRESENTATION_V1
 
@@ -59,8 +61,8 @@ Required when Stage38 carries a non-empty `visual_mesh_set_binding_hash` and mec
 
 In source-owned mode Stage42 must consume:
 
-- Stage18 `VisualMeshSetIR.v1`;
-- Stage38 exact visual-mesh binding;
+- Stage37 qualified presentation visual mesh/binding derived from source-owned visual substrate plus Stage35-qualified mechanics;
+- Stage38 exact qualified visual-mesh/binding seal;
 - Stage41 exact posed mechanical motion;
 - Stage23/24 appearance authority;
 - Stage05 cameras;
@@ -84,7 +86,7 @@ Exact schema version may become `RuntimeProjectionIR.v3` rather than weakening V
 
 For each view, runtime projection must bind:
 
-- exact `VisualMeshViewIR.mesh_hash`;
+- exact qualified presentation visual-view mesh hash;
 - visual vertex count;
 - visual face count;
 - source dimensions;
@@ -165,7 +167,7 @@ rather than replaying Stage01–41.
 ## Existing reusable primitives
 
 Already in compiler core:
-- `VisualMeshSetIR` and per-view immutable source-owned visual meshes;
+- `VisualMeshSetIR` and per-view immutable source-owned visual substrate meshes;
 - `bind_source_visual_points_to_projected_surface_v1`;
 - `bind_region_visual_vertices_to_mechanical_affine_v1`;
 - `evaluate_region_visual_binding_v1`;
@@ -200,3 +202,10 @@ This repair does not:
 6. Changing only the visual deformation implementation invalidates Stage42–46, not Stage01–41.
 7. Repeating render against the same projection/package produces identical bytes.
 8. Stage45 can reject a visually bad operator without corrupting/recomputing upstream mechanical or appearance artifacts.
+
+
+## Ownership correction
+
+See `AGENT_MEMORY/VISUAL_PRESENTATION_OWNERSHIP_CORRECTION.md`.
+
+The recovery implementation must not accidentally make raw Stage18 source-mask CDT the final shipping render topology. The final visual presentation mesh/binding belongs after Stage35 qualification, naturally at Stage37, and is sealed by Stage38 before Stage42 runtime compilation.

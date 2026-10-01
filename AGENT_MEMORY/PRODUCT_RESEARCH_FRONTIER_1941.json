@@ -1,0 +1,119 @@
+{
+  "schema": "RealSaS.ProductResearchFrontier1941.v1",
+  "generated_date": "2026-10-01",
+  "authority": "NON_AUTHORITATIVE_FORENSIC_DERIVATION",
+  "trunk": {
+    "sha": "6ed060351512a5f76a206acce011b585f48b1768",
+    "ahead_of_current_main_observed": 1941,
+    "role": "LATEST_PRODUCT_RESEARCH_TRUNK_ANCHOR"
+  },
+  "late_refs": {
+    "vf11_branch": {
+      "name": "research/vf11-certified-adaptive-20260921",
+      "head": "a1d633a7b01a03c3161791c01fd4d949046f5ce9",
+      "relation": "trunk+1 render-rerun commit"
+    },
+    "visual_audit_branch": {
+      "name": "audit/knight-rest-visual-owner-20260930",
+      "head": "643714de28999a7de9d0b25733a290136dc374c7",
+      "relation": "trunk+17 audit-only commits"
+    }
+  },
+  "normalized": {
+    "backup_branch": "backup/main-normalized-20260930-3529344",
+    "head": "3529344ef3045e0f2d634b175aae2aed6ec05536",
+    "key_fact": "Almost all living compiler/native product logic from the 1941 trunk is preserved; the only compiler product-code tree difference is runtime_v2.py, where normalized runtime adds fail-closed source-owned visual handling and runtime refinements."
+  },
+  "classes": {
+    "LIVING_AND_NORMALIZED": [
+      "Stage14 topology-local normals v3",
+      "exact dense-face provenance through Stage15/18",
+      "Stage35 repair directive instead of face deletion",
+      "authorized Stage35->17 repair child semantics",
+      "Stage18 component-harmonic seam support",
+      "Stage35 source-edge probe seeds",
+      "source-topology CAA graph",
+      "harmonic-first appearance completion",
+      "compatibility-gated cross-view donor fallback",
+      "source-owned visual ownership split through Stage38"
+    ],
+    "LIVING_BUT_NOT_PRODUCTIZED": [
+      "VisualMeshSetIR direct source-owned render path",
+      "visual-to-mechanical binding execution",
+      "ARAP2D visual deformation",
+      "CXX_VISUAL_MESH_V1 native renderer",
+      "render-only sealed-artifact reuse"
+    ],
+    "POST_NORMALIZATION_GENERIC_FIX": [
+      {
+        "commits": [
+          "25e765e8ce345aaf25d1e504712014d4d4d60ffe",
+          "16b8cb72537ae6ed9788a075bff1d0205ba41e73"
+        ],
+        "result": "Subject-free exact regression 36847287654: 436 passed, 4 skipped; no Knight coupling."
+      }
+    ],
+    "HISTORICAL_RESEARCH_ONLY": [
+      "old VF11 experimental engines and one-off certification machinery",
+      "IRIS v3-v5 research implementation files not required by current product adapters",
+      "one-off Knight court workflows/tools after their conclusions are ledgered"
+    ],
+    "OPEN_FRONTIER": [
+      "typed source-owned visual carrier Stage38->42->package->native",
+      "residual visual projection/exposure ownership",
+      "wiring test contract drift",
+      "native runtime source seal drift",
+      "Quaternius distinct-take qualification",
+      "artifact continuity / cross-run reuse / professional orchestration"
+    ]
+  },
+  "mechanical_evidence": {
+    "topology_replay_status": "PASS__PRODUCTION_OPERATORS_REPLAYED",
+    "direct_seed_count": 1417,
+    "final_separate_count": 1818,
+    "component_count": 73,
+    "stage18_vertex_count": 16031,
+    "stage18_face_count": 28331,
+    "face_deletion_count": 0,
+    "edge_gt_4_max": 0,
+    "edge_gt_10_max": 0,
+    "worst_edge_max": 3.6155354868853395
+  },
+  "visual_tail_evidence": {
+    "corrected_rest": {
+      "V0": {
+        "extra_alpha_fraction": 0.0143868955998705,
+        "source_alpha_precision": 0.9856131044001295,
+        "source_alpha_recall": 0.9947719012623106
+      },
+      "V2": {
+        "extra_alpha_fraction": 0.02074770814163514,
+        "source_alpha_precision": 0.9792522918583648,
+        "source_alpha_recall": 0.9946966497504102
+      }
+    },
+    "remaining_dynamic_extra_alpha_fraction": {
+      "idle": {
+        "V0": 0.053305719712959054,
+        "V2": 0.5193188990935337
+      },
+      "run": {
+        "V0": 0.2925620934920695,
+        "V2": 0.4673454128666282
+      },
+      "slash": {
+        "V0": 0.4841166497117667,
+        "V2": 0.47111927707650586
+      }
+    },
+    "interpretation": "Canonical mechanical support closes catastrophic stretch, but large dynamic source-mask excess remains. Primary open owner is visual presentation/projection/exposure, not catastrophic mechanics."
+  },
+  "final_forensic_run": {
+    "run_id": 36640358982,
+    "native_renderer_build": "PASS",
+    "proof_status": "NOT_EXECUTED_TO_SCIENTIFIC_RESULT",
+    "blocker": "RESCUE_PARENT_ARTIFACT_MISSING for Stage18 canonical_mesh_candidate.json",
+    "classification": "ORCHESTRATION_ARTIFACT_CONTINUITY_FAILURE__NOT_VISUAL_HYPOTHESIS_FALSIFICATION"
+  },
+  "recovery_principle": "Use normalized lineage as engineering base; use 1941/1958 history as frontier/provenance; add post-normalization generic fixes and productize the proven visual primitive rather than wholesale-merging research history."
+}

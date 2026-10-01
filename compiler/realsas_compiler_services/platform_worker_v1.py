@@ -37,7 +37,7 @@ def _sha256(path: Path) -> str:
 def _resolved(path: str) -> Path:
     p = Path(path).expanduser()
     if not p.is_absolute():
-        repo_root = Path(__file__).resolve().parents[3]
+        repo_root = Path(__file__).resolve().parents[2]
         p = repo_root / p
     return p.resolve()
 

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - recovery/canonical-main-20261001
     paths:
       - 'tools/vf11_r512_phase_sensitivity_panel.py'
       - 'tools/vf11_geometry_feature_survival_panel.py'

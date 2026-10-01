@@ -4,7 +4,20 @@ on:
   push:
     branches: [recovery/canonical-main-20261001]
     paths:
-      - '.github/workflows/recovery_exact_head_engineering_gate_v1.yml'
+      - 'CURRENT_STATE.md'
+      - 'canonical/**'
+      - 'compiler/**'
+      - 'models/**'
+      - 'runtime/**'
+      - 'tools/**'
+      - 'tests/**'
+      - 'assets/external/quaternius/knight/**'
+      - 'requirements/**'
+      - '.github/workflows/**'
+      - 'AGENTS.md'
+      - 'SYSTEM_INDEX.md'
+      - 'REPOSITORY_MAP.md'
+      - 'README.md'
   workflow_dispatch:
 
 permissions:

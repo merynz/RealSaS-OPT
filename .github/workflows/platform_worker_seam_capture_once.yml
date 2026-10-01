@@ -7,6 +7,10 @@ on:
       - '.github/workflows/platform_worker_seam_capture_once.yml'
   workflow_dispatch:
 
+concurrency:
+  group: platform-worker-seam-capture-once
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -38,7 +42,9 @@ jobs:
           cache-dependency-path: platform/go.sum
       - uses: actions/setup-python@v5
         with: {python-version: '3.11'}
-      - name: Gate Go worker seam
+      - id: go_gate
+        name: Gate Go worker seam
+        continue-on-error: true
         working-directory: platform
         run: |
           set -euo pipefail
@@ -47,7 +53,9 @@ jobs:
           go run ./cmd/realsas-migrate up
           go test -p 1 ./...
           go build ./cmd/realsas-control-worker
-      - name: Gate Python worker syntax and render-only boundary
+      - id: python_gate
+        name: Gate Python worker syntax and render-only boundary
+        continue-on-error: true
         run: |
           set -euo pipefail
           python -m py_compile compiler/realsas_compiler_services/platform_worker_v1.py
@@ -58,22 +66,26 @@ jobs:
           assert all(token not in p for token in forbidden), [x for x in forbidden if x in p]
           assert 'RUNTIME_V2_RSS_PACKAGE' in p
           assert 'upstream_stage_executions": 0' in p
-          print('PLATFORM_WORKER_SEAM_STATIC=PASS')
+          print('PLATFORM_RENDER_ONLY_ENGINE_WORKER=PASS')
           PY
       - name: Seal gate evidence
+        if: always()
+        env:
+          GO_OUTCOME: ${{ steps.go_gate.outcome }}
+          PYTHON_OUTCOME: ${{ steps.python_gate.outcome }}
         run: |
           set -euo pipefail
           mkdir -p docs/platform/evidence
+          STATUS=PASS
+          if [ "$GO_OUTCOME" != success ] || [ "$PYTHON_OUTCOME" != success ]; then STATUS=FAIL; fi
           cat > docs/platform/evidence/WORKER_SEAM_STATIC_GATE_20261001.json <<EOF
           {
             "schema": "RealSaS.PlatformWorkerSeamStaticGate.v1",
-            "status": "PASS",
+            "status": "$STATUS",
             "source_head": "${GITHUB_SHA}",
             "workflow_run_id": "${GITHUB_RUN_ID}",
-            "go_format_vet_test_build": true,
-            "postgres_migrations": true,
-            "python_worker_compiles": true,
-            "render_only_boundary": true,
+            "go_gate": "$GO_OUTCOME",
+            "python_gate": "$PYTHON_OUTCOME",
             "temporal_cross_language_e2e": false,
             "knight_render_executed": false
           }
@@ -84,3 +96,4 @@ jobs:
           git add docs/platform/evidence/WORKER_SEAM_STATIC_GATE_20261001.json .github/workflows/platform_worker_seam_capture_once.yml
           git commit -m "evidence: seal platform worker seam static gate"
           git push origin HEAD:platform/worker-seam-20261001
+          test "$STATUS" = PASS

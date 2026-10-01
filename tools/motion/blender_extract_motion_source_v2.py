@@ -181,6 +181,12 @@ def extract_clip(*,armature,action,source_path,source_sha,license_sha,spec,C):
 
     if armature.animation_data is None:
         armature.animation_data_create()
+    # FBX imports commonly populate both Actions and an NLA stack. If NLA remains
+    # enabled, assigning animation_data.action can still evaluate the same active
+    # strip for every requested take, making distinct source actions collapse to
+    # byte-identical RealSaS tracks. Motion extraction owns one requested Action
+    # at a time, so disable NLA mixing explicitly before sampling.
+    armature.animation_data.use_nla=False
     armature.animation_data.action=action
     start,end=(float(action.frame_range[0]),float(action.frame_range[1]))
     scene=bpy.context.scene

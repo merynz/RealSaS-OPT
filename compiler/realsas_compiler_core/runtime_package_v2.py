@@ -431,7 +431,7 @@ def _source_owned_visual_mesh_payload(
     if faces.shape != (int(view.visual_face_count), 3):
         raise QualificationError("RSS_V2_VISUAL_FACE_SHAPE_INVALID")
     return (
-        b"RSVM1\\0\\0\\0"
+        b"RSVM1\0\0\0"
         + struct.pack(
             "<IIII",
             int(view.source_width),
@@ -451,7 +451,7 @@ def _source_owned_visual_positions_payload(
     if frames.ndim != 3 or frames.shape[2] != 2:
         raise QualificationError("RSS_V2_VISUAL_POSITION_SHAPE_INVALID")
     return (
-        b"RSVP1\\0\\0\\0"
+        b"RSVP1\0\0\0"
         + struct.pack("<II", int(frames.shape[0]), int(frames.shape[1]))
         + frames.tobytes(order="C")
     )

@@ -1,0 +1,110 @@
+{
+  "schema": "RealSaS.AgentDecisionSupersessionLedger.v1",
+  "generated_date": "2026-10-01",
+  "authority": "NON_AUTHORITATIVE_DERIVED_MEMORY",
+  "observed_recovery_head": "b6124442dfb91b486d574ef6af780aa4797df394",
+  "statuses": [
+    "CURRENT",
+    "RECOVERY_CURRENT",
+    "SUPERSEDED",
+    "FALSIFIED",
+    "HISTORICAL_EVIDENCE_ONLY",
+    "OPEN"
+  ],
+  "decisions": [
+    {
+      "id": "D-GRAPH-V1",
+      "status": "FALSIFIED",
+      "decision": "Graph V1 identity/canonicalization path is not current authority.",
+      "evidence": [
+        "M4 Graph V1 exact quotient partition failure; replaced by V2 signed joint quotient/canonical compiler ownership"
+      ]
+    },
+    {
+      "id": "D-COMPILER-CANONICAL",
+      "status": "CURRENT",
+      "decision": "Learned models propose evidence; compiler owns qualified canonical geometry, skeleton and skin."
+    },
+    {
+      "id": "D-GSA-FACES",
+      "status": "CURRENT",
+      "decision": "Exact dense-face provenance must survive; Stage18 may not recreate faces from pairwise edge cliques."
+    },
+    {
+      "id": "D-GSA-NORMALS",
+      "status": "CURRENT",
+      "decision": "Stage14 normal estimation/evaluation is topology-local, not global Euclidean kNN across disconnected sheets."
+    },
+    {
+      "id": "D-NO-FACE-DELETION",
+      "status": "CURRENT",
+      "decision": "Stage35 failures create typed repartition/repair lineage; hidden face deletion is forbidden."
+    },
+    {
+      "id": "D-G3B-ENVELOPE",
+      "status": "RECOVERY_CURRENT",
+      "decision": "Stage35 G3B stress derives from sealed deformation-envelope joint ranges, not unrelated 120-degree fallback.",
+      "evidence": [
+        "16b8cb72 subject-free compiler regression: 436 PASS, 4 skipped"
+      ]
+    },
+    {
+      "id": "D-STAGE18-VISUAL",
+      "status": "CURRENT",
+      "decision": "Stage18 VisualMeshSet is source-owned visual substrate/candidate, not final visual presentation authority."
+    },
+    {
+      "id": "D-STAGE37-PRESENTATION",
+      "status": "RECOVERY_CURRENT",
+      "decision": "Stage37 qualifies final visual presentation from source substrate plus Stage35-qualified mechanics.",
+      "evidence": [
+        "recovery-stage37-visual-ownership-gate run 36856784289 PASS"
+      ]
+    },
+    {
+      "id": "D-MECHANICAL-NOT-RENDER",
+      "status": "CURRENT",
+      "decision": "Mechanical mesh is not implicit render authority in source-owned visual mode."
+    },
+    {
+      "id": "D-STAGE42-CARRIER",
+      "status": "RECOVERY_CURRENT",
+      "decision": "Typed source-owned visual runtime transport is implemented through Stage42→RSS→native playback→Stage45/46.",
+      "evidence": [
+        "recovery-stage42-46-visual-product-gate run 36858047069 PASS"
+      ]
+    },
+    {
+      "id": "D-NATIVE-SEAL-V16",
+      "status": "RECOVERY_CURRENT",
+      "decision": "Native source-owned visual runtime extension is sealed through V16.",
+      "evidence": [
+        "Native runtime source gate run 36858593327 PASS"
+      ]
+    },
+    {
+      "id": "D-QUATERNIUS",
+      "status": "OPEN",
+      "decision": "External Quaternius source is not yet qualified on recovery head.",
+      "evidence": [
+        "run 36860292218 fails MOTION_EXTRACTOR_NONROOT_TRANSLATION_UNSUPPORTED:Body:2:0.00016491536101574295"
+      ],
+      "note": "Distinct-take collapse was superseded by action-slot binding work; current blocker is non-root translation contract."
+    },
+    {
+      "id": "D-RENDER-NOT-COMPILE",
+      "status": "CURRENT",
+      "decision": "Product render must reuse a promoted sealed product lineage and may not fit/train/calibrate/promote."
+    },
+    {
+      "id": "D-PRODUCTREVISION",
+      "status": "CURRENT",
+      "decision": "Future product truth is an atomic immutable ProductRevision; Git commit history remains source provenance, not product state."
+    },
+    {
+      "id": "D-ATTEMPT",
+      "status": "CURRENT",
+      "decision": "Research repairs are immutable Attempts with inherited unaffected artifacts and explicit promotion."
+    }
+  ]
+}

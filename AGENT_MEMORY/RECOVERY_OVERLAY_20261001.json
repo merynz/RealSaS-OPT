@@ -1,0 +1,62 @@
+{
+  "schema": "RealSaS.AgentRecoveryOverlay.v1",
+  "generated_date": "2026-10-01",
+  "authority": "NON_AUTHORITATIVE_DERIVED_MEMORY",
+  "recovery_branch": "recovery/canonical-main-20261001",
+  "observed_head": "b6124442dfb91b486d574ef6af780aa4797df394",
+  "current_main_observed": "dcce1955527665dd3c68ad431ff8baa73aaec199",
+  "resolved_since_memory_baseline": [
+    {
+      "seam": "STAGE35_G3B_ENVELOPE_AUTHORITY",
+      "status": "RESOLVED_IN_RECOVERY",
+      "evidence": "recovery-stage35-generic-gate 36851892031 PASS at d7ff7cde..."
+    },
+    {
+      "seam": "STAGE37_FINAL_VISUAL_OWNERSHIP",
+      "status": "RESOLVED_IN_RECOVERY",
+      "evidence": "recovery-stage37-visual-ownership-gate 36856784289 PASS at f2e1fb4a..."
+    },
+    {
+      "seam": "VISUAL_RUNTIME_TRANSPORT",
+      "status": "RESOLVED_IN_RECOVERY",
+      "evidence": "typed Stage42→46 product gate 36858047069 PASS at c5818c27..."
+    },
+    {
+      "seam": "REPOSITORY_VISUAL_WIRING_CONTRACT",
+      "status": "RESOLVED_IN_RECOVERY_GATE_SCOPE",
+      "evidence": "recovery visual-runtime gates pass after real transport requirement"
+    },
+    {
+      "seam": "NATIVE_SOURCE_SEAL",
+      "status": "RESOLVED_IN_RECOVERY",
+      "evidence": "Native runtime source gate 36858593327 PASS at 0874d81a..."
+    }
+  ],
+  "open": [
+    {
+      "id": "QUATERNIUS_NONROOT_TRANSLATION",
+      "owner": "motion source extraction/qualification",
+      "status": "FAIL_CLOSED",
+      "evidence": "36860292218",
+      "error": "MOTION_EXTRACTOR_NONROOT_TRANSLATION_UNSUPPORTED:Body:2:0.00016491536101574295"
+    },
+    {
+      "id": "VISUAL_QUALITY_FRONTIER",
+      "owner": "presentation/projection quality",
+      "status": "NOT_PRODUCT_WITNESS_CLOSED",
+      "note": "typed carrier and integrity machinery are closed in recovery gate scope; this does not itself prove Knight/unseen aesthetic fidelity."
+    },
+    {
+      "id": "PLATFORM_ARTIFACT_CONTINUITY",
+      "owner": "systems engineering",
+      "status": "OPEN",
+      "note": "Git/run/hash archaeology is still operationally required until Artifact Registry/ProductRevision/Attempt backend exists."
+    }
+  ],
+  "next_recovery_requirements": [
+    "Resolve or explicitly qualify Quaternius non-root translation semantics without weakening fail-closed motion contracts.",
+    "Run fresh exact-head broad gates after motion closure.",
+    "Regenerate readiness/closure/docs from exact recovery head.",
+    "Do not move main until explicit promotion decision."
+  ]
+}

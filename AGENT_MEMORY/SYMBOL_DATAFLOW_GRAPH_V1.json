@@ -1,0 +1,853 @@
+{
+  "schema": "RealSaS.AgentSymbolDataFlowGraph.v1",
+  "generated_date": "2026-10-01",
+  "authority": "NON_AUTHORITATIVE_DERIVED_MEMORY",
+  "observed_recovery_head": "b6124442dfb91b486d574ef6af780aa4797df394",
+  "stage_symbols": [
+    {
+      "stage": "01_SOURCE_BYTES_SEALED",
+      "group": "source",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.source",
+      "symbol": "seal_source_bytes",
+      "depends_on": [],
+      "consumers": [
+        "02_SOURCE_LICENSE_PROVENANCE",
+        "03_SOURCE_MECHANICAL_AUDIT"
+      ]
+    },
+    {
+      "stage": "02_SOURCE_LICENSE_PROVENANCE",
+      "group": "source",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.source",
+      "symbol": "seal_source_license_provenance",
+      "depends_on": [
+        "01_SOURCE_BYTES_SEALED"
+      ],
+      "consumers": [
+        "03_SOURCE_MECHANICAL_AUDIT"
+      ]
+    },
+    {
+      "stage": "03_SOURCE_MECHANICAL_AUDIT",
+      "group": "source",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2",
+      "symbol": "audit_source_mechanics_stage",
+      "depends_on": [
+        "01_SOURCE_BYTES_SEALED",
+        "02_SOURCE_LICENSE_PROVENANCE"
+      ],
+      "consumers": [
+        "04_FULL_SUBJECT_ADMISSION",
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ]
+    },
+    {
+      "stage": "04_FULL_SUBJECT_ADMISSION",
+      "group": "observation",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2",
+      "symbol": "admit_full_subject_stage",
+      "depends_on": [
+        "03_SOURCE_MECHANICAL_AUDIT"
+      ],
+      "consumers": [
+        "06_OBSERVATION_RENDER_8VIEW",
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ]
+    },
+    {
+      "stage": "05_CAMERA_CONTRACT_SOLVED",
+      "group": "observation",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.observation_v2",
+      "symbol": "qualify_camera_contract_stage",
+      "depends_on": [],
+      "consumers": [
+        "06_OBSERVATION_RENDER_8VIEW",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+        "14_GSA_BUILD",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING"
+      ]
+    },
+    {
+      "stage": "06_OBSERVATION_RENDER_8VIEW",
+      "group": "observation",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2",
+      "symbol": "materialize_observation_render_stage",
+      "depends_on": [
+        "04_FULL_SUBJECT_ADMISSION",
+        "05_CAMERA_CONTRACT_SOLVED"
+      ],
+      "consumers": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ]
+    },
+    {
+      "stage": "07_OBSERVATION_CONTRACT_QUALIFIED",
+      "group": "observation",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2",
+      "symbol": "qualify_observation_contract_stage",
+      "depends_on": [
+        "03_SOURCE_MECHANICAL_AUDIT",
+        "04_FULL_SUBJECT_ADMISSION",
+        "05_CAMERA_CONTRACT_SOLVED",
+        "06_OBSERVATION_RENDER_8VIEW"
+      ],
+      "consumers": [
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "09_IRIS_FIT_PREREGISTERED",
+        "12_ZERO_SURFACE_DECODED",
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "20_CAA_BACKEND_PREREGISTERED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "41_MOTION_DYNAMIC_PROOF"
+      ]
+    },
+    {
+      "stage": "08_NORMALIZATION_DOMAIN_QUALIFIED",
+      "group": "geometry",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2",
+      "symbol": "qualify_normalization_domain_stage",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ],
+      "consumers": [
+        "09_IRIS_FIT_PREREGISTERED",
+        "12_ZERO_SURFACE_DECODED",
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+        "14_GSA_BUILD"
+      ]
+    },
+    {
+      "stage": "09_IRIS_FIT_PREREGISTERED",
+      "group": "geometry",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2",
+      "symbol": "preregister_iris_fit_stage",
+      "depends_on": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED"
+      ],
+      "consumers": [
+        "10_IRIS_FIT"
+      ]
+    },
+    {
+      "stage": "10_IRIS_FIT",
+      "group": "geometry",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2",
+      "symbol": "execute_iris_fit_stage",
+      "depends_on": [
+        "09_IRIS_FIT_PREREGISTERED"
+      ],
+      "consumers": [
+        "11_IRIS_CHECKPOINT_SEALED"
+      ]
+    },
+    {
+      "stage": "11_IRIS_CHECKPOINT_SEALED",
+      "group": "geometry",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2",
+      "symbol": "seal_iris_checkpoint_stage",
+      "depends_on": [
+        "10_IRIS_FIT"
+      ],
+      "consumers": [
+        "12_ZERO_SURFACE_DECODED",
+        "14_GSA_BUILD"
+      ]
+    },
+    {
+      "stage": "12_ZERO_SURFACE_DECODED",
+      "group": "geometry",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2",
+      "symbol": "decode_zero_surface_stage",
+      "depends_on": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "11_IRIS_CHECKPOINT_SEALED"
+      ],
+      "consumers": [
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+        "14_GSA_BUILD"
+      ]
+    },
+    {
+      "stage": "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+      "group": "geometry",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2",
+      "symbol": "qualify_geometry_substrate_stage",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "12_ZERO_SURFACE_DECODED"
+      ],
+      "consumers": [
+        "14_GSA_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED"
+      ]
+    },
+    {
+      "stage": "14_GSA_BUILD",
+      "group": "geometry",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2",
+      "symbol": "build_gsa_stage",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "11_IRIS_CHECKPOINT_SEALED",
+        "12_ZERO_SURFACE_DECODED",
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED"
+      ],
+      "consumers": [
+        "15_RIGGING_SURFACE_QUALIFIED"
+      ]
+    },
+    {
+      "stage": "15_RIGGING_SURFACE_QUALIFIED",
+      "group": "rig",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2",
+      "symbol": "qualify_rigging_surface_stage",
+      "depends_on": [
+        "14_GSA_BUILD"
+      ],
+      "consumers": [
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "26_GEPPETTO_FIT_PREREGISTERED",
+        "28_SKELETON_QUALIFIED",
+        "30_ARACHNE_FIT_PREREGISTERED",
+        "32_SKIN_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "38_CANONICAL_PUPPET_SEALED"
+      ]
+    },
+    {
+      "stage": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+      "group": "presentation_domain",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.v2_architecture",
+      "symbol": "seal_output_presentation_directions_stage",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ],
+      "consumers": [
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "20_CAA_BACKEND_PREREGISTERED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "38_CANONICAL_PUPPET_SEALED"
+      ]
+    },
+    {
+      "stage": "17_MECHANICAL_PARTITION_QUALIFIED",
+      "group": "components",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2",
+      "symbol": "qualify_mechanical_partition_and_carriers",
+      "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED"
+      ],
+      "consumers": [
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED"
+      ]
+    },
+    {
+      "stage": "18_CANONICAL_MESH_ADDRESSING_BUILD",
+      "group": "mesh",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.v2_architecture",
+      "symbol": "build_canonical_mesh_addressing_stage",
+      "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "17_MECHANICAL_PARTITION_QUALIFIED"
+      ],
+      "consumers": [
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "20_CAA_BACKEND_PREREGISTERED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "38_CANONICAL_PUPPET_SEALED",
+        "41_MOTION_DYNAMIC_PROOF"
+      ]
+    },
+    {
+      "stage": "19_STATIC_CANONICAL_MESH_QUALIFIED",
+      "group": "mesh",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.v2_architecture",
+      "symbol": "qualify_static_canonical_mesh_stage",
+      "depends_on": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD"
+      ],
+      "consumers": [
+        "20_CAA_BACKEND_PREREGISTERED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER"
+      ]
+    },
+    {
+      "stage": "20_CAA_BACKEND_PREREGISTERED",
+      "group": "appearance",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2",
+      "symbol": "preregister_caa_backend_stage",
+      "depends_on": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED"
+      ],
+      "consumers": [
+        "21_CAA_COMPILE"
+      ]
+    },
+    {
+      "stage": "21_CAA_COMPILE",
+      "group": "appearance",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2",
+      "symbol": "compile_caa_stage",
+      "depends_on": [
+        "20_CAA_BACKEND_PREREGISTERED"
+      ],
+      "consumers": [
+        "22_CAA_COMPILE_SEALED"
+      ]
+    },
+    {
+      "stage": "22_CAA_COMPILE_SEALED",
+      "group": "appearance",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2",
+      "symbol": "seal_caa_compile_stage",
+      "depends_on": [
+        "21_CAA_COMPILE"
+      ],
+      "consumers": [
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+      ]
+    },
+    {
+      "stage": "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+      "group": "appearance",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2",
+      "symbol": "bake_complete_appearance_stage",
+      "depends_on": [
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "22_CAA_COMPILE_SEALED"
+      ],
+      "consumers": [
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ]
+    },
+    {
+      "stage": "24_COMPLETE_APPEARANCE_QUALIFIED",
+      "group": "appearance",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2",
+      "symbol": "qualify_complete_appearance_stage",
+      "depends_on": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+      ],
+      "consumers": [
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ]
+    },
+    {
+      "stage": "25_CAA_REFERENCE_REST_RENDER_PROOF",
+      "group": "appearance",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2",
+      "symbol": "prove_caa_reference_rest_stage",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED"
+      ],
+      "consumers": [
+        "39_MOTION_SOURCE_OR_PRESET_SEAL"
+      ]
+    },
+    {
+      "stage": "26_GEPPETTO_FIT_PREREGISTERED",
+      "group": "rig",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2",
+      "symbol": "preregister_geppetto_fit_stage",
+      "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED"
+      ],
+      "consumers": [
+        "27_GEPPETTO_FIT"
+      ]
+    },
+    {
+      "stage": "27_GEPPETTO_FIT",
+      "group": "rig",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2",
+      "symbol": "execute_geppetto_fit_stage",
+      "depends_on": [
+        "26_GEPPETTO_FIT_PREREGISTERED"
+      ],
+      "consumers": [
+        "28_SKELETON_QUALIFIED",
+        "29_GEPPETTO_CHECKPOINT_SEALED"
+      ]
+    },
+    {
+      "stage": "28_SKELETON_QUALIFIED",
+      "group": "rig",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2",
+      "symbol": "qualify_skeleton_stage",
+      "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "27_GEPPETTO_FIT"
+      ],
+      "consumers": [
+        "29_GEPPETTO_CHECKPOINT_SEALED",
+        "30_ARACHNE_FIT_PREREGISTERED",
+        "32_SKIN_QUALIFIED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "40_MOTION_COMPILE_RUN",
+        "41_MOTION_DYNAMIC_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ]
+    },
+    {
+      "stage": "29_GEPPETTO_CHECKPOINT_SEALED",
+      "group": "rig",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2",
+      "symbol": "seal_geppetto_checkpoint_stage",
+      "depends_on": [
+        "27_GEPPETTO_FIT",
+        "28_SKELETON_QUALIFIED"
+      ],
+      "consumers": [
+        "30_ARACHNE_FIT_PREREGISTERED"
+      ]
+    },
+    {
+      "stage": "30_ARACHNE_FIT_PREREGISTERED",
+      "group": "skin",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2",
+      "symbol": "preregister_arachne_fit_stage",
+      "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "29_GEPPETTO_CHECKPOINT_SEALED"
+      ],
+      "consumers": [
+        "31_ARACHNE_FIT"
+      ]
+    },
+    {
+      "stage": "31_ARACHNE_FIT",
+      "group": "skin",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2",
+      "symbol": "execute_arachne_fit_stage",
+      "depends_on": [
+        "30_ARACHNE_FIT_PREREGISTERED"
+      ],
+      "consumers": [
+        "32_SKIN_QUALIFIED",
+        "33_ARACHNE_CHECKPOINT_SEALED"
+      ]
+    },
+    {
+      "stage": "32_SKIN_QUALIFIED",
+      "group": "skin",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2",
+      "symbol": "qualify_skin_stage",
+      "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "31_ARACHNE_FIT"
+      ],
+      "consumers": [
+        "33_ARACHNE_CHECKPOINT_SEALED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "38_CANONICAL_PUPPET_SEALED"
+      ]
+    },
+    {
+      "stage": "33_ARACHNE_CHECKPOINT_SEALED",
+      "group": "skin",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2",
+      "symbol": "seal_arachne_checkpoint_stage",
+      "depends_on": [
+        "31_ARACHNE_FIT",
+        "32_SKIN_QUALIFIED"
+      ],
+      "consumers": []
+    },
+    {
+      "stage": "34_DEFORMATION_CAPABILITY_ENVELOPE",
+      "group": "mesh",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2",
+      "symbol": "seal_deformation_capability_envelope",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "28_SKELETON_QUALIFIED"
+      ],
+      "consumers": [
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "38_CANONICAL_PUPPET_SEALED",
+        "40_MOTION_COMPILE_RUN"
+      ]
+    },
+    {
+      "stage": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+      "group": "mesh",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2",
+      "symbol": "qualify_canonical_mesh_stage",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "32_SKIN_QUALIFIED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE"
+      ],
+      "consumers": [
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ]
+    },
+    {
+      "stage": "36_QUALIFIED_MESH_SKIN_TRANSFER",
+      "group": "mesh",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2",
+      "symbol": "bind_qualified_mesh_skin_stage",
+      "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "32_SKIN_QUALIFIED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+      ],
+      "consumers": [
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "41_MOTION_DYNAMIC_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ]
+    },
+    {
+      "stage": "37_QUALIFIED_PRESENTATION_STRUCTURE",
+      "group": "presentation",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.product_state_v2",
+      "symbol": "qualify_presentation_structure_stage",
+      "depends_on": [
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER"
+      ],
+      "consumers": [
+        "38_CANONICAL_PUPPET_SEALED",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ]
+    },
+    {
+      "stage": "38_CANONICAL_PUPPET_SEALED",
+      "group": "product_state",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.product_state_v2",
+      "symbol": "seal_complete_puppet_stage",
+      "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "32_SKIN_QUALIFIED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE"
+      ],
+      "consumers": [
+        "39_MOTION_SOURCE_OR_PRESET_SEAL",
+        "40_MOTION_COMPILE_RUN",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ]
+    },
+    {
+      "stage": "39_MOTION_SOURCE_OR_PRESET_SEAL",
+      "group": "motion",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.motion_v2",
+      "symbol": "seal_motion_source_stage",
+      "depends_on": [
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "38_CANONICAL_PUPPET_SEALED"
+      ],
+      "consumers": [
+        "40_MOTION_COMPILE_RUN"
+      ]
+    },
+    {
+      "stage": "40_MOTION_COMPILE_RUN",
+      "group": "motion",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.motion_v2",
+      "symbol": "compile_motion_stage",
+      "depends_on": [
+        "28_SKELETON_QUALIFIED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "39_MOTION_SOURCE_OR_PRESET_SEAL"
+      ],
+      "consumers": [
+        "41_MOTION_DYNAMIC_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ]
+    },
+    {
+      "stage": "41_MOTION_DYNAMIC_PROOF",
+      "group": "motion",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.motion_v2",
+      "symbol": "prove_dynamic_motion_stage",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "28_SKELETON_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "38_CANONICAL_PUPPET_SEALED",
+        "40_MOTION_COMPILE_RUN"
+      ],
+      "consumers": [
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ]
+    },
+    {
+      "stage": "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+      "group": "runtime",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_v2",
+      "symbol": "build_runtime_projection_stage",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "38_CANONICAL_PUPPET_SEALED",
+        "41_MOTION_DYNAMIC_PROOF"
+      ],
+      "consumers": [
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ]
+    },
+    {
+      "stage": "43_RSS_MATERIALIZE_COMPACT",
+      "group": "runtime",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_v2",
+      "symbol": "materialize_runtime_package_stage",
+      "depends_on": [
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING"
+      ],
+      "consumers": [
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ]
+    },
+    {
+      "stage": "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+      "group": "runtime",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_v2",
+      "symbol": "prove_native_package_playback_stage",
+      "depends_on": [
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT"
+      ],
+      "consumers": [
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "46_PRODUCT_CLOSURE_SEAL"
+      ]
+    },
+    {
+      "stage": "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+      "group": "runtime",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_v2",
+      "symbol": "prove_dynamic_visual_integrity_stage",
+      "depends_on": [
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK"
+      ],
+      "consumers": [
+        "46_PRODUCT_CLOSURE_SEAL"
+      ]
+    },
+    {
+      "stage": "46_PRODUCT_CLOSURE_SEAL",
+      "group": "closure",
+      "module": "compiler.realsas_compiler_services.orchestrator.adapters.closure_v2",
+      "symbol": "seal_product_closure_stage",
+      "depends_on": [
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "40_MOTION_COMPILE_RUN",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF"
+      ],
+      "consumers": []
+    }
+  ],
+  "critical_internal_flows": [
+    {
+      "id": "GEOMETRY_TOPOLOGY",
+      "flow": [
+        "decode_zero_surface_stage",
+        "qualify_geometry_substrate_stage",
+        "build_gsa_stage",
+        "qualify_rigging_surface_stage",
+        "build_canonical_mesh_addressing_stage"
+      ],
+      "rule": "dense-face provenance and topology-local evidence must survive into mesh construction"
+    },
+    {
+      "id": "MECHANICAL_QUALIFICATION",
+      "flow": [
+        "seal_deformation_capability_envelope",
+        "qualify_canonical_mesh_stage",
+        "bind_qualified_mesh_skin_stage"
+      ],
+      "rule": "Stage35 consumes sealed envelope and produces qualified frozen mechanics; no hidden topology deletion"
+    },
+    {
+      "id": "VISUAL_PRESENTATION",
+      "flow": [
+        "VisualMeshSetIR@Stage18",
+        "qualify_presentation_structure_stage",
+        "QualifiedVisualPresentationSetIR@Stage37",
+        "seal_complete_puppet_stage"
+      ],
+      "rule": "Stage18 visual mesh is substrate; Stage37 owns final qualified presentation binding"
+    },
+    {
+      "id": "VISUAL_RUNTIME",
+      "flow": [
+        "_build_source_owned_visual_runtime_projection",
+        "build_runtime_projection_stage",
+        "build_source_owned_visual_rss_v2_entries",
+        "prove_native_package_playback_stage",
+        "_prove_source_owned_visual_dynamic_integrity",
+        "seal_product_closure_stage"
+      ],
+      "rule": "typed source-owned visual carrier must persist Stage42→46 without mechanical render fallback"
+    },
+    {
+      "id": "MOTION",
+      "flow": [
+        "seal_motion_source_stage",
+        "compile_motion_stage",
+        "prove_dynamic_motion_stage"
+      ],
+      "rule": "external source qualification is distinct from motion compilation and dynamic proof"
+    }
+  ],
+  "implementation_modules": [
+    {
+      "path": "compiler/realsas_compiler_core/visual_mesh_arap_v1.py",
+      "role": "visual mesh substrate, binding and ARAP2D deformation"
+    },
+    {
+      "path": "compiler/realsas_compiler_core/runtime_package_v2.py",
+      "role": "RSS v2 materialization including source-owned visual payloads"
+    },
+    {
+      "path": "compiler/realsas_compiler_core/product_authority_v1.py",
+      "role": "typed product/mechanics authority IRs and validators"
+    },
+    {
+      "path": "compiler/realsas_compiler_core/motion_compile_v2.py",
+      "role": "motion retarget/compile typed IR construction"
+    },
+    {
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py",
+      "role": "Stage37/38 presentation and complete puppet sealing"
+    },
+    {
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py",
+      "role": "Stage42–45 runtime projection/package/native/integrity"
+    },
+    {
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py",
+      "role": "Stage46 product closure and editable export"
+    }
+  ]
+}

@@ -1,0 +1,480 @@
+{
+  "schema": "RealSaS.AgentSchemaRegistry.v1",
+  "generated_date": "2026-10-01",
+  "authority": "NON_AUTHORITATIVE_DERIVED_MEMORY",
+  "observed_recovery_head": "b6124442dfb91b486d574ef6af780aa4797df394",
+  "rule": "Schema identity is the stable semantic interface; source symbols are implementations. Exact code/policy wins on conflict.",
+  "schema_count": 46,
+  "schemas": [
+    {
+      "schema": "RealSaS.SourceByteSeal.v1",
+      "domain": "source",
+      "producer_stages": [
+        "01_SOURCE_BYTES_SEALED"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/source.py:seal_source_bytes"
+      ]
+    },
+    {
+      "schema": "RealSaS.SourceLicenseSeal.v1",
+      "domain": "source",
+      "producer_stages": [
+        "02_SOURCE_LICENSE_PROVENANCE"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/source.py:seal_source_license_provenance"
+      ]
+    },
+    {
+      "schema": "RealSaS.QualifiedCameraSetIR.v1",
+      "domain": "observation",
+      "producer_stages": [
+        "05_CAMERA_CONTRACT_SOLVED"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/observation_v2.py:qualify_camera_contract_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.QualifiedObservationSetIR.v1",
+      "domain": "observation",
+      "producer_stages": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/preflight_v2.py:qualify_observation_contract_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.NormalizationDomainIR.v1",
+      "domain": "geometry",
+      "producer_stages": [
+        "08_NORMALIZATION_DOMAIN_QUALIFIED"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/preflight_v2.py:qualify_normalization_domain_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.ModelFitPreregistrationIR.v1",
+      "domain": "model-fit",
+      "producer_stages": [
+        "09_IRIS_FIT_PREREGISTERED",
+        "26_GEPPETTO_FIT_PREREGISTERED",
+        "30_ARACHNE_FIT_PREREGISTERED"
+      ],
+      "implementations": [
+        "iris_geometry_v2.py",
+        "learned_mechanics_v2.py"
+      ]
+    },
+    {
+      "schema": "RealSaS.ModelFitExecutionIR.v1",
+      "domain": "model-fit",
+      "producer_stages": [
+        "10_IRIS_FIT",
+        "27_GEPPETTO_FIT",
+        "31_ARACHNE_FIT"
+      ],
+      "implementations": [
+        "iris_geometry_v2.py",
+        "learned_mechanics_v2.py"
+      ]
+    },
+    {
+      "schema": "RealSaS.ModelCheckpointSealIR.v1",
+      "domain": "model-fit",
+      "producer_stages": [
+        "11_IRIS_CHECKPOINT_SEALED",
+        "29_GEPPETTO_CHECKPOINT_SEALED",
+        "33_ARACHNE_CHECKPOINT_SEALED"
+      ],
+      "implementations": [
+        "iris_geometry_v2.py",
+        "learned_mechanics_v2.py"
+      ]
+    },
+    {
+      "schema": "RealSaS.SignedZeroSurfaceArtifact.v1",
+      "domain": "geometry",
+      "producer_stages": [
+        "12_ZERO_SURFACE_DECODED"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:decode_zero_surface_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.GeometrySubstrateQualificationIR.v2",
+      "domain": "geometry",
+      "producer_stages": [
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:qualify_geometry_substrate_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.CompactedDenseFaceProvenance.v1",
+      "domain": "geometry-provenance",
+      "producer_stages": [
+        "14_GSA_BUILD"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:build_gsa_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.RiggingSurfaceIR.v1",
+      "domain": "rig-surface",
+      "producer_stages": [
+        "15_RIGGING_SURFACE_QUALIFIED"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py:qualify_rigging_surface_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.OutputPresentationDirectionSetIR.v1",
+      "domain": "presentation-domain",
+      "producer_stages": [
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py:seal_output_presentation_directions_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.MechanicalPartitionIR.v1",
+      "domain": "mechanics",
+      "producer_stages": [
+        "17_MECHANICAL_PARTITION_QUALIFIED"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:qualify_mechanical_partition_and_carriers"
+      ]
+    },
+    {
+      "schema": "RealSaS.ComponentCarrierPolicyIR.v1",
+      "domain": "mechanics",
+      "producer_stages": [
+        "17_MECHANICAL_PARTITION_QUALIFIED"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:qualify_mechanical_partition_and_carriers"
+      ]
+    },
+    {
+      "schema": "RealSaS.CanonicalMeshCandidateIR.v1",
+      "domain": "mesh",
+      "producer_stages": [
+        "18_CANONICAL_MESH_ADDRESSING_BUILD"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py:build_canonical_mesh_addressing_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.VisualMeshSetIR.v1",
+      "domain": "visual-substrate",
+      "producer_stages": [
+        "18_CANONICAL_MESH_ADDRESSING_BUILD"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_core/visual_mesh_arap_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py"
+      ]
+    },
+    {
+      "schema": "RealSaS.SurfaceAddressingIR.v1",
+      "domain": "appearance-addressing",
+      "producer_stages": [
+        "18_CANONICAL_MESH_ADDRESSING_BUILD"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py"
+      ]
+    },
+    {
+      "schema": "RealSaS.AppearanceDomainIR.v1",
+      "domain": "appearance-domain",
+      "producer_stages": [
+        "18_CANONICAL_MESH_ADDRESSING_BUILD"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py"
+      ]
+    },
+    {
+      "schema": "RealSaS.CAACompilePreregistrationIR.v2",
+      "domain": "appearance",
+      "producer_stages": [
+        "20_CAA_BACKEND_PREREGISTERED"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:preregister_caa_backend_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.CAACompileArtifactIR.v2",
+      "domain": "appearance",
+      "producer_stages": [
+        "21_CAA_COMPILE"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:compile_caa_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.CAACompileSealIR.v2",
+      "domain": "appearance",
+      "producer_stages": [
+        "22_CAA_COMPILE_SEALED"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:seal_caa_compile_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.CompleteAppearanceAssetIR.v2",
+      "domain": "appearance",
+      "producer_stages": [
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:bake_complete_appearance_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.CompleteAppearanceQualificationIR.v2",
+      "domain": "appearance",
+      "producer_stages": [
+        "24_COMPLETE_APPEARANCE_QUALIFIED"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:qualify_complete_appearance_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.CAARestRenderProofIR.v2",
+      "domain": "appearance-proof",
+      "producer_stages": [
+        "25_CAA_REFERENCE_REST_RENDER_PROOF"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py:prove_caa_reference_rest_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.QualifiedSkeletonIR.v1",
+      "domain": "rig",
+      "producer_stages": [
+        "28_SKELETON_QUALIFIED"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py:qualify_skeleton_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.QualifiedSkinIR.v1",
+      "domain": "skin",
+      "producer_stages": [
+        "32_SKIN_QUALIFIED"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py:qualify_skin_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.DeformationCapabilityEnvelopeIR.v1",
+      "domain": "mechanics",
+      "producer_stages": [
+        "34_DEFORMATION_CAPABILITY_ENVELOPE"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:seal_deformation_capability_envelope"
+      ]
+    },
+    {
+      "schema": "RealSaS.QualifiedMeshIR.v1",
+      "domain": "mechanics",
+      "producer_stages": [
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:qualify_canonical_mesh_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.QualifiedMeshSkinIR.v1",
+      "domain": "mechanics",
+      "producer_stages": [
+        "36_QUALIFIED_MESH_SKIN_TRANSFER"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py:bind_qualified_mesh_skin_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.QualifiedPresentationStructureIR.v2",
+      "domain": "presentation",
+      "producer_stages": [
+        "37_QUALIFIED_PRESENTATION_STRUCTURE"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py:qualify_presentation_structure_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.QualifiedVisualPresentationSetIR.v1",
+      "domain": "presentation",
+      "producer_stages": [
+        "37_QUALIFIED_PRESENTATION_STRUCTURE"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py:_qualified_visual_presentation_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.CompletePuppetStateIR.v2",
+      "domain": "product-state",
+      "producer_stages": [
+        "38_CANONICAL_PUPPET_SEALED"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py:seal_complete_puppet_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.MotionSourceClip.v2",
+      "domain": "motion-source",
+      "producer_stages": [
+        "39_MOTION_SOURCE_OR_PRESET_SEAL"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py:seal_motion_source_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.QualifiedMotionSourceSealIR.v1",
+      "domain": "motion-source",
+      "producer_stages": [
+        "39_MOTION_SOURCE_OR_PRESET_SEAL"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py:seal_motion_source_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.MotionCompileConstraintSetIR.v2",
+      "domain": "motion",
+      "producer_stages": [
+        "40_MOTION_COMPILE_RUN"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_core/motion_compile_v2.py"
+      ]
+    },
+    {
+      "schema": "RealSaS.QualifiedMotionIR.v2",
+      "domain": "motion",
+      "producer_stages": [
+        "40_MOTION_COMPILE_RUN"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_core/motion_compile_v2.py:build_qualified_motion_v2"
+      ]
+    },
+    {
+      "schema": "RealSaS.QualifiedDynamicMotionIR.v2",
+      "domain": "motion-proof",
+      "producer_stages": [
+        "41_MOTION_DYNAMIC_PROOF"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py:prove_dynamic_motion_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.SourceOwnedVisualRuntimeProjectionIR.v1",
+      "domain": "runtime",
+      "producer_stages": [
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:_build_source_owned_visual_runtime_projection"
+      ]
+    },
+    {
+      "schema": "RealSaS.SourceOwnedVisualRuntimeProjectionArrays.v1",
+      "domain": "runtime",
+      "producer_stages": [
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ]
+    },
+    {
+      "schema": "RealSaS.RuntimeProjectionIR.v2",
+      "domain": "runtime",
+      "producer_stages": [
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:build_runtime_projection_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.RuntimePackage.v2",
+      "domain": "runtime-package",
+      "producer_stages": [
+        "43_RSS_MATERIALIZE_COMPACT"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_core/runtime_package_v2.py"
+      ]
+    },
+    {
+      "schema": "RealSaS.RuntimePackageSealIR.v2",
+      "domain": "runtime-package",
+      "producer_stages": [
+        "43_RSS_MATERIALIZE_COMPACT"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:materialize_runtime_package_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.NativePlaybackIR.v2",
+      "domain": "native-runtime",
+      "producer_stages": [
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:prove_native_package_playback_stage"
+      ]
+    },
+    {
+      "schema": "RealSaS.SourceOwnedVisualDynamicIntegrityIR.v1",
+      "domain": "runtime-proof",
+      "producer_stages": [
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py:_prove_source_owned_visual_dynamic_integrity"
+      ]
+    },
+    {
+      "schema": "RealSaS.EditablePuppetBundleManifest.v2",
+      "domain": "closure-export",
+      "producer_stages": [
+        "46_PRODUCT_CLOSURE_SEAL"
+      ],
+      "implementations": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py:_build_editable_bundle"
+      ]
+    }
+  ]
+}

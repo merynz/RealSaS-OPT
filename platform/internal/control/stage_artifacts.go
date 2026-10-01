@@ -54,27 +54,33 @@ func (a Activities) bindStageExecutionInputs(
 	if err != nil {
 		return err
 	}
+	type subjectInputBinding struct {
+		role       string
+		artifactID uuid.UUID
+	}
+	var subjectInputs []subjectInputBinding
 	for rows.Next() {
-		var role string
-		var artifactID uuid.UUID
-		if err := rows.Scan(&role, &artifactID); err != nil {
+		var item subjectInputBinding
+		if err := rows.Scan(&item.role, &item.artifactID); err != nil {
 			rows.Close()
 			return err
 		}
-		if _, err := tx.Exec(ctx, `
-			INSERT INTO execution_artifacts(execution_id,relation,role,artifact_id)
-			VALUES ($1,'input',$2,$3)
-			ON CONFLICT DO NOTHING
-		`, executionID, "subject:"+role, artifactID); err != nil {
-			rows.Close()
-			return err
-		}
+		subjectInputs = append(subjectInputs, item)
 	}
 	if err := rows.Err(); err != nil {
 		rows.Close()
 		return err
 	}
 	rows.Close()
+	for _, item := range subjectInputs {
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO execution_artifacts(execution_id,relation,role,artifact_id)
+			VALUES ($1,'input',$2,$3)
+			ON CONFLICT DO NOTHING
+		`, executionID, "subject:"+item.role, item.artifactID); err != nil {
+			return err
+		}
+	}
 
 	stage, ok := a.Graph.Get(stageID)
 	if !ok {

@@ -258,7 +258,8 @@ type RenderResolution struct {
 
 type EngineRenderResult struct {
 	Status        string         `json:"status"`
-	OutputPath    string         `json:"output_path"`
+	OutputPath    string         `json:"output_path,omitempty"`
+	StorageKey    string         `json:"storage_key,omitempty"`
 	ContentSHA256 string         `json:"content_sha256"`
 	SizeBytes     int64          `json:"size_bytes"`
 	Diagnostics   map[string]any `json:"diagnostics,omitempty"`

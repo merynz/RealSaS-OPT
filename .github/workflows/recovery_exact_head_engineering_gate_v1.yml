@@ -1,0 +1,258 @@
+name: recovery-exact-head-engineering-gate-v1
+
+on:
+  push:
+    branches: [recovery/canonical-main-20261001]
+    paths:
+      - '.github/workflows/recovery_exact_head_engineering_gate_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: recovery-exact-head-engineering-gate-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  certify:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 90
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      REALSAS_RUNTIME_V2_PLAYER: /tmp/realsas_recovery_exact_head_runtime_v2
+      SOURCE_FBX: assets/external/quaternius/knight/KnightCharacter.fbx
+      EXPECTED_FBX_SHA256: 41f2616fb4a42f9d35e242bbed1450ededc7537def4bf38cbb11b4e54ff2bf21
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Seal exact candidate identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          echo "RECOVERY_CERTIFICATION_SHA=$GITHUB_SHA"
+          git status --short
+          test -z "$(git status --porcelain)"
+
+      - name: Install pinned regression dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+
+      - name: Compile all current ownership roots
+        run: |
+          python -m compileall -q models compiler runtime/reference_v4 tools tests
+
+      - name: Build exact native V2 reference player before compiler tests
+        run: |
+          set -euo pipefail
+          c++ -std=c++17 -O2 -Wall -Wextra -pedantic             runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp             -lpng -lz -o "$REALSAS_RUNTIME_V2_PLAYER"
+          sha256sum "$REALSAS_RUNTIME_V2_PLAYER"
+
+      - name: Learned source ownership
+        run: |
+          python -m pytest -q             tests/models             tests/iris/test_iris_mainline_source_v1.py             tests/iris/test_iris_v2_dense_source_coverage_v2.py
+
+      - name: Full compiler regression
+        run: python -m pytest -q tests/compiler
+
+      - name: Exact recovery authority wiring
+        run: |
+          python -m pytest -q             tests/repository/test_source_owned_visual_runtime_wiring_v1.py             tests/repository/test_mainline_execution_plan_v2.py             tests/repository/test_mainline_v2_dag_scheduler.py             tests/repository/test_model_branding_boundary_v1.py             tests/repository/test_witness_orchestration_v2.py
+
+      - name: V2 DAG and implementation closure mechanics
+        run: |
+          python -m compiler.realsas_compiler_services.orchestrator.mainline validate-plan
+          python -m compiler.realsas_compiler_services.orchestrator.mainline implementation-closure             > "$RUNNER_TEMP/recovery_implementation_closure.json"
+          cat "$RUNNER_TEMP/recovery_implementation_closure.json"
+
+      - name: Appearance authority invariants
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          appearance=Path("compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py").read_text()
+          product=Path("compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py").read_text()
+          assert '"mechanical_mesh_render_authority": False' in appearance
+          assert '"SOURCE_VISUAL_MESH_V1"' in appearance
+          assert '"visual_geometry_authority"] = "SOURCE_ART_SILHOUETTE"' in appearance
+          assert '"mechanical_mesh_render_authority": False' in product
+          assert '"STAGE18_SOURCE_OWNED_VISUAL_MESH_SET"' in product
+          print("RECOVERY_APPEARANCE_AUTHORITY_INVARIANTS_PASS")
+          PY
+
+      - name: Freeze exact production policy identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum             canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json             canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json             canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json             > "$RUNNER_TEMP/vf23-policy-before.sha256"
+          cat "$RUNNER_TEMP/vf23-policy-before.sha256"
+
+      - name: VF23 exact production policy bank
+        run: |
+          python -m pytest -q             tests/compiler/test_product_mesh_stage_adapters_v1.py::test_vf23_stage20_to25_uses_unmodified_production_caa_policy             tests/compiler/test_product_mesh_stage_adapters_v1.py::test_vf23_stage37_to46_tail_uses_unmodified_production_dynamic_policy             tests/compiler/test_caa_v2_subject_free_policy.py::test_sparse_one_pixel_line_loss_is_detected_even_below_five_percent_area             tests/compiler/test_caa_v2_subject_free_policy.py::test_rest_alpha_policy_rejects_coherent_missing_art             tests/compiler/test_caa_v2_subject_free_policy.py::test_harmonic_completion_cannot_cross_component_or_invent_without_boundary             tests/compiler/test_visibility_and_caa_v2.py::test_transparent_front_geometry_reveals_deeper_character_layer             tests/compiler/test_visibility_and_caa_v2.py::test_depth_equivalence_epsilon_is_explicit_and_fail_closed_at_boundary             tests/compiler/test_visibility_and_caa_v2.py::test_runtime_reference_2x2_coverage_produces_fractional_edge_alpha             tests/compiler/test_visibility_and_caa_v2.py::test_visibility_reports_layer_overflow_instead_of_silent_drop             tests/compiler/test_dynamic_appearance_conditioning_v2.py::test_articulated_lbs_bank_selects_three_for_intrinsic_and_two_for_temporal             tests/compiler/test_presentation_partition_v2.py::test_visual_groups_can_have_distinct_rigid_and_deformable_mechanics_inside_one_component             tests/compiler/test_presentation_partition_v2.py::test_legacy_0999_rigid_false_positive_is_hard_failure_not_silent_wobble             tests/compiler/test_dynamic_geometry_integrity_v2.py::test_nonadjacent_crossing_triangles_are_detected             tests/compiler/test_dynamic_geometry_integrity_v2.py::test_interior_shared_edge_projection_continuity_detects_true_seam_crack             tests/compiler/test_dynamic_geometry_integrity_v2.py::test_topologically_separate_articulation_gap_is_not_inferred_as_crack
+
+      - name: Prove production policies stayed immutable
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum             canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json             canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json             canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json             > "$RUNNER_TEMP/vf23-policy-after.sha256"
+          diff -u "$RUNNER_TEMP/vf23-policy-before.sha256" "$RUNNER_TEMP/vf23-policy-after.sha256"
+
+      - name: Verify native source seal V16
+        run: PYTHONPATH=. python tools/verify_native_runtime_source_seal_v2.py
+
+      - name: Configure and build native runtime
+        run: |
+          rm -rf build/recovery-cert-native
+          cmake -S runtime/realsas_cpp -B build/recovery-cert-native             -DCMAKE_BUILD_TYPE=Release             -DREALSAS_BUILD_TESTS=ON
+
+          cmake --build build/recovery-cert-native --parallel 2
+
+      - name: Native ABI and runtime tests
+        run: ctest --test-dir build/recovery-cert-native --output-on-failure
+
+      - name: Complete synthetic proof/export gate
+        run: python -m pytest -q experiments/single_family_e2e_v1/test_complete_e2e_source_v1.py
+
+      - name: Subject-free Stage01-08 orchestration execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          export REALSAS_AUTHORITY_ROOT="$RUNNER_TEMP/recovery_authority"
+          export RUN_ID="RECOVERY_CERT_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"
+          python - <<'PY'
+          import hashlib,json,os,shutil
+          from pathlib import Path
+          import numpy as np
+          from PIL import Image
+
+          root=Path(os.environ["REALSAS_AUTHORITY_ROOT"])/"runs"/os.environ["RUN_ID"]
+          if root.exists(): shutil.rmtree(root)
+          fixture=root/"fixture"; fixture.mkdir(parents=True,exist_ok=True)
+          def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+          cameras=[]; source_files=[]; raster_rows=[]; mask_rows=[]
+          for view in range(8):
+              rgba=np.zeros((32,32,4),dtype=np.uint8)
+              rgba[8:24,8:24]=(40+view*3,80+view,120,255)
+              raster=fixture/f"V{view}.png"; Image.fromarray(rgba,"RGBA").save(raster)
+              mask=np.zeros((32,32),dtype=np.uint8); mask[8:24,8:24]=1
+              mask_path=fixture/f"V{view}.mask"; mask_path.write_bytes(mask.tobytes(order="C"))
+              source_files.append({"role":f"SOURCE_RASTER_V{view}","path":str(raster),"expected_sha256":sha(raster),"expected_size_bytes":raster.stat().st_size})
+              raster_rows.append({"view_index":view,"image":{"path":str(raster),"sha256":sha(raster)}})
+              mask_rows.append({"view_index":view,"mask":{"path":str(mask_path),"sha256":sha(mask_path)}})
+              cameras.append({"schema_version":"RealSaS.FullSurfaceCameraProjection.v3","view_id":f"V{view}","view_index":view,"origin":[0,0,-2],"right":[1,0,0],"screen_up":[0,1,0],"forward":[0,0,1],"half_extent":1.0,"resolution":32})
+          camera_path=fixture/"camera_bundle.json"
+          camera_path.write_text(json.dumps({"schema":"RealSaS.CameraProjectionBundle.v1","cameras":cameras},sort_keys=True)+"\n",encoding="utf-8")
+          manifest={
+              "schema":"RealSaS.RunManifest.v2","run_id":os.environ["RUN_ID"],
+              "subject_id":"SUBJECT_FREE_RECOVERY_CERT","implementation_audit":True,
+              "source_files":source_files,
+              "source_license":{"source_pack":"subject-free-recovery-cert","license_name":"TEST_ONLY","license_ref":"REPOSITORY_SELF_TEST","notes":"No Knight witness input."},
+              "source_audit":{"minimum_border_margin_px":2},
+              "admission":{"mode":"CONTROLLED_FULL_SUBJECT_8VIEW_V1"},
+              "observation":{"camera_bundle":{"path":str(camera_path),"sha256":sha(camera_path)},"source_rasters":raster_rows,"source_foreground_masks":mask_rows},
+              "normalization":{"center_xyz":[0,0,0],"half_extent":1.0,"coordinate_frame":"REALSAS_OBJECT_FRAME"},
+          }
+          (root/"run_manifest.json").write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          PY
+          python -m compiler.realsas_compiler_services.orchestrator.mainline init-run             --run-id "$RUN_ID"             --subject-id SUBJECT_FREE_RECOVERY_CERT             --architecture-scope REALSAS_V2_RECOVERY_CERT             --execution-class IMPLEMENTATION_AUDIT
+          python -m compiler.realsas_compiler_services.orchestrator.mainline execute             --run-id "$RUN_ID"             --target 08_NORMALIZATION_DOMAIN_QUALIFIED
+          python -m compiler.realsas_compiler_services.orchestrator.mainline status --run-id "$RUN_ID"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["REALSAS_AUTHORITY_ROOT"])/"runs"/os.environ["RUN_ID"]
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          assert ledger["completed_count"]==8,ledger
+          assert ledger["failed_count"]==0,ledger
+          print("RECOVERY_SUBJECT_FREE_STAGE01_08_PASS")
+          PY
+
+      - name: Resolve or bootstrap pinned Blender
+        shell: bash
+        run: |
+          set -euo pipefail
+          if python3 - <<'PY'
+          from tools.motion.materialize_quaternius_preset_v1 import resolve_blender
+          print(resolve_blender(None))
+          PY
+          then
+            exit 0
+          fi
+          version='4.5.14'
+          base="https://download.blender.org/release/Blender4.5"
+          archive="blender-${version}-linux-x64.tar.xz"
+          install_root="$RUNNER_TEMP/realsas_blender"
+          mkdir -p "$install_root"
+          curl --fail --location --retry 3 --retry-delay 2 "$base/$archive" --output "$RUNNER_TEMP/$archive"
+          curl --fail --location --retry 3 --retry-delay 2 "$base/blender-${version}.sha256" --output "$RUNNER_TEMP/blender.sha256"
+          (
+            cd "$RUNNER_TEMP"
+            grep "  $archive\$" blender.sha256 | sha256sum --check -
+          )
+          tar -xJf "$RUNNER_TEMP/$archive" -C "$install_root"
+          blender_path="$install_root/blender-${version}-linux-x64/blender"
+          test -x "$blender_path"
+          echo "BLENDER_EXE=$blender_path" >> "$GITHUB_ENV"
+
+      - name: Repo-local Quaternius motion qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s  %s\n' "$EXPECTED_FBX_SHA256" "$SOURCE_FBX" | sha256sum --check -
+          out="$RUNNER_TEMP/recovery_quaternius_motion"
+          rm -rf "$out"
+          python3 tools/motion/materialize_quaternius_preset_v1.py             --source-fbx "$SOURCE_FBX"             --out-dir "$out"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"recovery_quaternius_motion"
+          receipt=json.loads((root/"MATERIALIZATION_RECEIPT.json").read_text())
+          assert receipt["status"]=="PASS",receipt
+          assert len(receipt["outputs"])==3,receipt
+          print("RECOVERY_QUATERNIUS_MOTION_PASS")
+          PY
+
+      - name: Write exact-head certification receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/RECOVERY_ENGINEERING_CERTIFICATION.json" <<EOF
+          {
+            "schema": "RealSaS.RecoveryEngineeringCertification.v1",
+            "status": "PASS",
+            "git_sha": "$GITHUB_SHA",
+            "full_compiler_regression": true,
+            "source_owned_visual_runtime_wiring": true,
+            "vf23_production_policy_unchanged": true,
+            "native_source_seal_v16": true,
+            "native_ctest": true,
+            "subject_free_stage01_08": true,
+            "quaternius_motion_materialization": true
+          }
+          EOF
+          cat "$RUNNER_TEMP/RECOVERY_ENGINEERING_CERTIFICATION.json"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: recovery-engineering-certification-v1
+          path: |
+            ${{ runner.temp }}/RECOVERY_ENGINEERING_CERTIFICATION.json
+            ${{ runner.temp }}/recovery_implementation_closure.json
+          if-no-files-found: error
+          retention-days: 30

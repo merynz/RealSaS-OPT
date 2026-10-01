@@ -48,3 +48,26 @@ go run ./cmd/realsas-architecture -module platform.product
 ```
 
 Every canonical compiler stage must resolve to exactly one owning Engine module. Platform modules separately own durable state and orchestration; native Runtime modules own package/playback/render hot paths. This registry is validated against the canonical 46-stage plan in CI.
+
+
+### Dynamic discovery — shortcuts may not hide unknowns
+
+The architecture registry is the declared ownership contract. It is intentionally paired with a **live checkout discovery pass**:
+
+```bash
+python tools/realsas_architecture.py audit
+python tools/realsas_architecture.py stage 35_DYNAMIC_MECHANICAL_MESH_QUALIFIED
+python tools/realsas_architecture.py module engine.mesh
+python tools/realsas_architecture.py search appearance
+```
+
+The discovery command recomputes the compiler adapter/import closure from the current checkout on every invocation, combines it with the Go ownership registry and Git-tracked files, and explicitly reports:
+
+- dynamically consumed source files;
+- shared dependencies consumed by multiple modules;
+- `ownership_debt` for live dependencies with no declared file-owner root yet;
+- dynamic-import sites that require extra scrutiny;
+- live code outside the current 46-stage closure;
+- missing critical files or unresolved module paths.
+
+A shortcut is therefore a query over current evidence, **not a hand-maintained whitelist**. Files outside the declared map remain visible as audit debt rather than disappearing from the answer.

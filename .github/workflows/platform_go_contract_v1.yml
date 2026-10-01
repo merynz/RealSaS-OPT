@@ -5,6 +5,11 @@ on:
     branches: [platform/professional-backend-v1-20261001]
     paths:
       - 'platform/**'
+      - 'compiler/realsas_compiler_services/orchestrator/**'
+      - 'compiler/realsas_compiler_core/**'
+      - 'models/**'
+      - 'runtime/**'
+      - 'tools/realsas_architecture.py'
       - 'canonical/MAINLINE_EXECUTION_PLAN_V2.json'
       - 'docs/platform/adr/0003-go-control-plane.md'
       - '.github/workflows/platform_go_contract_v1.yml'
@@ -54,6 +59,21 @@ jobs:
         run: go run ./cmd/realsas-migrate status
       - name: Unit and PostgreSQL integration contracts
         run: go test -p 1 ./...
+      - name: Dynamic architecture discovery audit
+        run: |
+          python3 ../tools/realsas_architecture.py --json-out /tmp/realsas-architecture-audit.json audit
+          python3 ../tools/realsas_architecture.py --json-out /tmp/realsas-stage35.json stage 35_DYNAMIC_MECHANICAL_MESH_QUALIFIED
+          python3 - <<'PY'
+          import json
+          p=json.load(open('/tmp/realsas-architecture-audit.json',encoding='utf-8'))
+          print('ARCH stage_dependency_files=',p['stage_dependency_file_count'])
+          print('ARCH ownership_debt=',p['ownership_debt_count'])
+          print('ARCH shared_dependencies=',p['shared_dependency_file_count'])
+          print('ARCH outside_current_closure=',p['outside_current_stage_closure_count'])
+          print('ARCH dynamic_import_sites=',p['dynamic_import_site_count'])
+          print('ARCH missing_module_paths=',p['missing_module_path_count'])
+          print('ARCH missing_critical_files=',p['missing_critical_file_count'])
+          PY
       - name: Prove migration reversibility
         run: |
           go run ./cmd/realsas-migrate reset
@@ -63,3 +83,4 @@ jobs:
         run: |
           go build ./cmd/realsas-api
           go build ./cmd/realsas-migrate
+          go build ./cmd/realsas-architecture

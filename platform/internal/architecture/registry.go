@@ -77,6 +77,12 @@ func staticDomains() []Domain {
 			Purpose:   "Durable product/research state, orchestration, transactions, registry metadata and query surfaces.",
 			Modules: []Module{
 				{
+					ID: "platform.infrastructure", ParentDomain: "platform", Authority: AuthorityPlatform,
+					Purpose: "Control-plane boot, migrations, persistence primitives, semantic hashing, architecture introspection and canonical stage-graph loading.",
+					CodeRoots: []string{"platform/cmd", "platform/migrations", "platform/internal/persistence", "platform/internal/semantic", "platform/internal/stagegraph", "platform/internal/architecture"},
+					FailurePrefixes: []string{"PLATFORM_", "MIGRATION_", "PERSISTENCE_", "ARCHITECTURE_"},
+				},
+				{
 					ID: "platform.artifact", ParentDomain: "platform", Authority: AuthorityPlatform,
 					Purpose: "Immutable artifact metadata, CAS transport and immutable subject input sets.",
 					CodeRoots: []string{"platform/internal/artifactstore", "platform/internal/registry", "platform/internal/input"},

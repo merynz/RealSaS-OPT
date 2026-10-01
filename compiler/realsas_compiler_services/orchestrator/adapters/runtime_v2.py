@@ -1302,14 +1302,210 @@ def _reference_frame(
     )
 
 
+
+def _source_owned_visual_reference_frame(
+    projection,
+    arrays,
+    *,
+    clip,
+    view,
+    frame_index: int,
+):
+    vi = int(view.view_index)
+    uv = np.asarray(arrays[f"view_{vi}_uv"], dtype=np.float64)
+    faces = np.asarray(arrays[f"view_{vi}_faces"], dtype=np.int64)
+    positions = np.asarray(
+        arrays[f"{clip.array_prefix}_view_{vi}_positions"][frame_index],
+        dtype=np.float64,
+    )
+    if uv.shape != (int(view.visual_vertex_count), 2):
+        raise QualificationError("RUNTIME_V2_VISUAL_REFERENCE_UV_SHAPE_INVALID")
+    if faces.shape != (int(view.visual_face_count), 3):
+        raise QualificationError("RUNTIME_V2_VISUAL_REFERENCE_FACE_SHAPE_INVALID")
+    if positions.shape != (int(view.visual_vertex_count), 2):
+        raise QualificationError(
+            "RUNTIME_V2_VISUAL_REFERENCE_POSITION_SHAPE_INVALID"
+        )
+
+    texture_path = resolved_path(view.texture_path)
+    texture = np.asarray(
+        Image.open(texture_path).convert("RGBA"),
+        dtype=np.uint8,
+    )
+    if texture.shape != (
+        int(view.source_height),
+        int(view.source_width),
+        4,
+    ):
+        raise QualificationError(
+            "RUNTIME_V2_VISUAL_REFERENCE_TEXTURE_SHAPE_INVALID"
+        )
+    resolution = int(dict(view.camera).get("resolution") or 0)
+    if resolution <= 0:
+        raise QualificationError(
+            "RUNTIME_V2_VISUAL_REFERENCE_RESOLUTION_INVALID"
+        )
+
+    posed = np.asarray(positions, dtype=np.float64).copy()
+    posed[:, 0] = (
+        posed[:, 0] + 0.5
+    ) * float(resolution) / float(view.source_width)
+    posed[:, 1] = (
+        posed[:, 1] + 0.5
+    ) * float(resolution) / float(view.source_height)
+
+    accum = np.zeros((resolution, resolution, 4), dtype=np.float64)
+    owner = np.full((resolution, resolution), -1, dtype=np.int32)
+
+    def orient(a, b, x, y):
+        return (b[0] - a[0]) * (y - a[1]) - (
+            b[1] - a[1]
+        ) * (x - a[0])
+
+    def top_left(a, b):
+        dy = float(b[1] - a[1])
+        dx = float(b[0] - a[0])
+        return dy < 0.0 or (abs(dy) <= 1.0e-12 and dx > 0.0)
+
+    def sample_bilinear(u, v):
+        u = float(np.clip(u, 0.0, 1.0))
+        v = float(np.clip(v, 0.0, 1.0))
+        x = u * float(view.source_width - 1)
+        y = v * float(view.source_height - 1)
+        x0 = int(np.floor(x))
+        y0 = int(np.floor(y))
+        x1 = min(x0 + 1, int(view.source_width) - 1)
+        y1 = min(y0 + 1, int(view.source_height) - 1)
+        tx = float(x - x0)
+        ty = float(y - y0)
+        p00 = texture[y0, x0].astype(np.float64) / 255.0
+        p10 = texture[y0, x1].astype(np.float64) / 255.0
+        p01 = texture[y1, x0].astype(np.float64) / 255.0
+        p11 = texture[y1, x1].astype(np.float64) / 255.0
+        a = p00 * (1.0 - tx) + p10 * tx
+        b = p01 * (1.0 - tx) + p11 * tx
+        return a * (1.0 - ty) + b * ty
+
+    for face_index, face in enumerate(faces):
+        a, b, c = posed[face]
+        area = float(orient(a, b, c[0], c[1]))
+        if abs(area) <= 1.0e-12:
+            continue
+        sign = 1.0 if area > 0.0 else -1.0
+        positive = area > 0.0
+        min_x = max(
+            0,
+            int(np.floor(float(np.min((a[0], b[0], c[0]))) - 0.5)),
+        )
+        max_x = min(
+            resolution - 1,
+            int(np.ceil(float(np.max((a[0], b[0], c[0]))) - 0.5)),
+        )
+        min_y = max(
+            0,
+            int(np.floor(float(np.min((a[1], b[1], c[1]))) - 0.5)),
+        )
+        max_y = min(
+            resolution - 1,
+            int(np.ceil(float(np.max((a[1], b[1], c[1]))) - 0.5)),
+        )
+        if min_x > max_x or min_y > max_y:
+            continue
+        tl0 = top_left(b, c) if positive else top_left(c, b)
+        tl1 = top_left(c, a) if positive else top_left(a, c)
+        tl2 = top_left(a, b) if positive else top_left(b, a)
+        for y in range(min_y, max_y + 1):
+            for x in range(min_x, max_x + 1):
+                px = float(x) + 0.5
+                py = float(y) + 0.5
+                q0 = sign * orient(b, c, px, py)
+                q1 = sign * orient(c, a, px, py)
+                q2 = sign * orient(a, b, px, py)
+                accept0 = q0 > 1.0e-12 or (
+                    abs(q0) <= 1.0e-12 and tl0
+                )
+                accept1 = q1 > 1.0e-12 or (
+                    abs(q1) <= 1.0e-12 and tl1
+                )
+                accept2 = q2 > 1.0e-12 or (
+                    abs(q2) <= 1.0e-12 and tl2
+                )
+                if not (accept0 and accept1 and accept2):
+                    continue
+                w0 = orient(b, c, px, py) / area
+                w1 = orient(c, a, px, py) / area
+                w2 = 1.0 - w0 - w1
+                u = w0 * uv[face[0], 0] + w1 * uv[face[1], 0] + w2 * uv[
+                    face[2], 0
+                ]
+                v = w0 * uv[face[0], 1] + w1 * uv[face[1], 1] + w2 * uv[
+                    face[2], 1
+                ]
+                sample = sample_bilinear(u, v)
+                alpha = float(np.clip(sample[3], 0.0, 1.0))
+                transmission = 1.0 - alpha
+                accum[y, x, 0] = (
+                    sample[0] * alpha + accum[y, x, 0] * transmission
+                )
+                accum[y, x, 1] = (
+                    sample[1] * alpha + accum[y, x, 1] * transmission
+                )
+                accum[y, x, 2] = (
+                    sample[2] * alpha + accum[y, x, 2] * transmission
+                )
+                accum[y, x, 3] = alpha + accum[y, x, 3] * transmission
+                if alpha > 1.0e-12:
+                    owner[y, x] = int(face_index)
+
+    alpha = np.clip(accum[:, :, 3], 0.0, 1.0)
+    inv = np.zeros_like(alpha)
+    visible = alpha > 1.0e-12
+    inv[visible] = 1.0 / alpha[visible]
+    straight = np.zeros_like(accum)
+    straight[:, :, :3] = accum[:, :, :3] * inv[:, :, None]
+    straight[:, :, 3] = alpha
+    rgba = np.floor(
+        np.clip(straight, 0.0, 1.0) * 255.0 + 0.5
+    ).astype(np.uint8)
+    provenance = np.full((resolution, resolution), 255, dtype=np.uint8)
+    provenance[visible] = 0
+    return SimpleNamespace(
+        straight_rgba_u8=rgba,
+        provenance_code=provenance,
+        owner_face_index=owner,
+    )
+
+
 def prove_native_package_playback_stage(ctx: dict) -> dict:
-    projection = runtime_projection_from_dict(
+    asset = complete_appearance_asset_from_dict(
         stage_output_payload(
             ctx,
-            "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
-            "RealSaS.RuntimeProjectionIR.v2",
+            "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+            "RealSaS.CompleteAppearanceAssetIR.v2",
         )
     )
+    source_owned_visual = bool(
+        dict(asset.metadata or {}).get("source_owned_visual_mesh_mode")
+    )
+    if source_owned_visual:
+        projection = source_owned_visual_runtime_projection_from_dict(
+            stage_output_payload(
+                ctx,
+                "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+                "RealSaS.SourceOwnedVisualRuntimeProjectionIR.v1",
+            )
+        )
+        renderer_id = "REALSAS_V2_SOURCE_OWNED_VISUAL_2D"
+    else:
+        projection = runtime_projection_from_dict(
+            stage_output_payload(
+                ctx,
+                "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+                "RealSaS.RuntimeProjectionIR.v2",
+            )
+        )
+        renderer_id = "REALSAS_V2_CAA_CANONICAL_DEPTH"
+
     package = runtime_package_seal_from_dict(
         stage_output_payload(
             ctx,
@@ -1319,12 +1515,28 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
     )
     if package.projection_binding_hash != projection.projection_hash:
         raise QualificationError("RUNTIME_V2_NATIVE_PACKAGE_PROJECTION_DRIFT")
+    package_mode = str(
+        dict(package.metadata or {}).get("presentation_geometry_mode") or ""
+    )
+    expected_mode = (
+        "SOURCE_OWNED_VISUAL_PRESENTATION_V1"
+        if source_owned_visual
+        else "MECHANICAL_CANONICAL_DEPTH_V2"
+    )
+    if package_mode != expected_mode:
+        raise QualificationError(
+            "RUNTIME_V2_NATIVE_PACKAGE_PRESENTATION_MODE_DRIFT"
+        )
     archive = resolved_path(package.archive_path)
     if not archive.is_file() or sha256_file(archive) != package.archive_sha256:
         raise QualificationError("RUNTIME_V2_NATIVE_PACKAGE_BYTES_DRIFT")
     player, player_sha = _native_player(ctx)
     arrays = _projection_arrays(projection)
-    reference_context = _build_reference_render_context(projection, arrays)
+    reference_context = (
+        None
+        if source_owned_visual
+        else _build_reference_render_context(projection, arrays)
+    )
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
 
     probes = []
@@ -1348,34 +1560,50 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
             root=root / "probes",
             max_workers=native_workers,
         )
-        for view, (rgba, provenance, owner, stdout) in zip(views, native_rows):
+        for view, (rgba, provenance, owner, stdout) in zip(
+            views, native_rows
+        ):
             resolution = int(view.camera["resolution"])
             if rgba.stat().st_size != resolution * resolution * 4:
                 raise QualificationError("RUNTIME_V2_NATIVE_RGBA_SIZE_DRIFT")
             if provenance.stat().st_size != resolution * resolution:
-                raise QualificationError("RUNTIME_V2_NATIVE_PROVENANCE_SIZE_DRIFT")
+                raise QualificationError(
+                    "RUNTIME_V2_NATIVE_PROVENANCE_SIZE_DRIFT"
+                )
             if owner.stat().st_size != resolution * resolution * 4:
                 raise QualificationError("RUNTIME_V2_NATIVE_OWNER_SIZE_DRIFT")
+            if f"renderer={renderer_id}" not in stdout:
+                raise QualificationError(
+                    "RUNTIME_V2_NATIVE_RENDERER_CONTRACT_DRIFT"
+                )
 
-            native_rgba = np.frombuffer(rgba.read_bytes(), dtype=np.uint8).reshape(
-                resolution, resolution, 4
-            )
+            native_rgba = np.frombuffer(
+                rgba.read_bytes(), dtype=np.uint8
+            ).reshape(resolution, resolution, 4)
             native_provenance = np.frombuffer(
-                provenance.read_bytes(),
-                dtype=np.uint8,
+                provenance.read_bytes(), dtype=np.uint8
             ).reshape(resolution, resolution)
             native_owner = np.frombuffer(
-                owner.read_bytes(),
-                dtype="<i4",
+                owner.read_bytes(), dtype="<i4"
             ).reshape(resolution, resolution)
-            reference = _reference_frame(
-                projection,
-                arrays,
-                clip=clip,
-                view=view_by_id[view.view_id],
-                frame_index=frame_index,
-                reference_context=reference_context,
-            )
+
+            if source_owned_visual:
+                reference = _source_owned_visual_reference_frame(
+                    projection,
+                    arrays,
+                    clip=clip,
+                    view=view_by_id[view.view_id],
+                    frame_index=frame_index,
+                )
+            else:
+                reference = _reference_frame(
+                    projection,
+                    arrays,
+                    clip=clip,
+                    view=view_by_id[view.view_id],
+                    frame_index=frame_index,
+                    reference_context=reference_context,
+                )
             mismatch_mask = (
                 np.any(native_rgba != reference.straight_rgba_u8, axis=2)
                 | (native_provenance != reference.provenance_code)
@@ -1384,7 +1612,8 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
             mismatch = int(np.count_nonzero(mismatch_mask))
             if mismatch:
                 raise QualificationError(
-                    f"RUNTIME_V2_NATIVE_REFERENCE_PARITY_FAIL:{clip.clip_id}:{view.view_id}:{mismatch}"
+                    "RUNTIME_V2_NATIVE_REFERENCE_PARITY_FAIL:"
+                    f"{clip.clip_id}:{view.view_id}:{mismatch}"
                 )
 
             probe = NativePlaybackProbeV2IR(
@@ -1397,24 +1626,37 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
                 provenance_raw_sha256=sha256_file(provenance),
                 owner_raw_path=str(owner),
                 owner_raw_sha256=sha256_file(owner),
-                stdout_sha256=hashlib.sha256(stdout.encode("utf-8")).hexdigest(),
+                stdout_sha256=hashlib.sha256(
+                    stdout.encode("utf-8")
+                ).hexdigest(),
                 probe_hash="",
                 metadata={
                     "native_reference_mismatch_pixels": 0,
-                    "renderer": "REALSAS_V2_CAA_CANONICAL_DEPTH",
+                    "renderer": renderer_id,
+                    "presentation_geometry_mode": expected_mode,
+                    "mechanical_mesh_render_authority": (
+                        False if source_owned_visual else True
+                    ),
                 },
             )
-            probe = replace(probe, probe_hash=native_playback_probe_hash(probe))
+            probe = replace(
+                probe,
+                probe_hash=native_playback_probe_hash(probe),
+            )
             probes.append(probe)
-            for path, authority, schema in (
+            for output_path, authority, schema in (
                 (rgba, "NATIVE_V2_RGBA", "application/x-rgba8"),
-                (provenance, "NATIVE_V2_PROVENANCE", "application/x-u8-mask"),
+                (
+                    provenance,
+                    "NATIVE_V2_PROVENANCE",
+                    "application/x-u8-mask",
+                ),
                 (owner, "NATIVE_V2_OWNER", "application/x-i32-owner"),
             ):
                 outputs.append(
                     {
-                        "path": str(path),
-                        "sha256": sha256_file(path),
+                        "path": str(output_path),
+                        "sha256": sha256_file(output_path),
                         "authority_class": authority,
                         "schema": schema,
                     }
@@ -1431,9 +1673,17 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
             "midpoint_probe_per_clip_view": True,
             "python_reference_byte_parity": True,
             "native_parallel_workers": native_workers,
+            "renderer": renderer_id,
+            "presentation_geometry_mode": expected_mode,
+            "mechanical_mesh_render_authority": (
+                False if source_owned_visual else True
+            ),
         },
     )
-    playback = replace(playback, playback_hash=native_playback_hash(playback))
+    playback = replace(
+        playback,
+        playback_hash=native_playback_hash(playback),
+    )
     outputs.insert(
         0,
         write_ir(
@@ -1451,6 +1701,8 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
             "native_reference_mismatch_pixels": 0,
             "native_player_sha256": player_sha,
             "native_parallel_workers": native_workers,
+            "renderer": renderer_id,
+            "presentation_geometry_mode": expected_mode,
         },
     }
 

@@ -36,7 +36,7 @@ func TestAtomicPromotion(t *testing.T) {
 	revisionID := uuid.New()
 	artifactTypeID := uuid.New()
 	contract, err := SealContract(ctx, pool, Contract{
-		Name: "rss-default",
+		Name:    "rss-default",
 		Version: "test-" + subjectID.String(),
 		Roles: []RoleRule{
 			{Role: "geometry", QualificationType: "PRODUCT_PROMOTION", Required: true},

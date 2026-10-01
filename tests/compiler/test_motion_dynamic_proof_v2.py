@@ -87,3 +87,24 @@ def test_root_local_translation_reconstructs_requested_object_space_delta():
     )
     actual=np.asarray(pos["root"],dtype=np.float64)-np.asarray(skeleton.joints[0].position,dtype=np.float64)
     assert np.allclose(actual,desired,atol=1e-9)
+
+
+def test_nonroot_local_translation_reconstructs_requested_object_space_delta():
+    skeleton=Skeleton()
+    cameras=_cameras()
+    frames=derive_joint_frames_from_skeleton(skeleton,cameras=cameras)
+    desired=np.asarray((0.15,0.20,-0.10),dtype=np.float64)
+    local=object_vector_to_joint_local(frames["child"],desired)
+    track=CanonicalJointTrack3DIR(
+        "child","source_child",("LOCAL_ROTATION_QUAT_XYZW","LOCAL_TRANSLATION_XYZ"),
+        (MotionKeyframe3DIR(0.0,(0.0,0.0,0.0,1.0),tuple(local)),),
+    )
+    _,pos,_=_joint_pose_v2(
+        skeleton=skeleton,
+        tracks={"child":track},
+        time_seconds=0.0,
+        cameras=cameras,
+    )
+    rest=np.asarray(skeleton.joints[1].position,dtype=np.float64)
+    actual=np.asarray(pos["child"],dtype=np.float64)-rest
+    assert np.allclose(actual,desired,atol=1e-9)

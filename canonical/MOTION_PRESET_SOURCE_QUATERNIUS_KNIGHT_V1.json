@@ -13,7 +13,8 @@
     "license_text_fact": "License document states CC0 1.0 Universal / Public Domain Dedication",
     "source_mesh_skin_material_texture_as_product_authority": false,
     "source_skeleton_as_final_target_authority": false,
-    "allowed_use": "MOTION_SEMANTICS_SOURCE_ONLY"
+    "allowed_use": "MOTION_SEMANTICS_SOURCE_ONLY",
+    "repo_fbx_path": "assets/external/quaternius/knight/KnightCharacter.fbx"
   },
   "clips": [
     {
@@ -45,8 +46,10 @@
     "joint_frame_semantics": "REALSAS_DERIVED_JOINT_FRAME_V1",
     "curve_sampling": "SOURCE_FPS_BAKED",
     "scale_animation": "FORBIDDEN",
-    "nonroot_translation": "FORBIDDEN",
+    "nonroot_translation": "SUPPORTED",
     "generated_appearance": false,
-    "root_translation_semantics": "LOCAL_DERIVED_JOINT_FRAME_NORMALIZED_BY_SOURCE_BODY_SCALE"
+    "root_translation_semantics": "LOCAL_DERIVED_JOINT_FRAME_NORMALIZED_BY_SOURCE_BODY_SCALE",
+    "nonroot_translation_semantics": "LOCAL_DERIVED_JOINT_FRAME_DELTA_NORMALIZED_BY_SOURCE_BODY_SCALE",
+    "nonroot_translation_units": "SOURCE_BODY_SCALE_NORMALIZED__RETARGET_TO_TARGET_BODY_SCALE"
   }
 }

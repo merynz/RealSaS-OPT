@@ -12,6 +12,7 @@ from tools.motion.materialize_quaternius_preset_v1 import (
     EXPECTED_EXTRACTOR_SCHEMA,
     EXPECTED_JOINT_FRAME,
     EXPECTED_ROOT_TRANSLATION_SEMANTICS,
+    EXPECTED_NONROOT_TRANSLATION_SEMANTICS,
     build_motion_fragment,
     patch_run_manifest,
     sha256,
@@ -25,7 +26,14 @@ def _write_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def _clip_payload(clip_id: str, clip_kind: str, take: str, *, root_x: float = 0.0) -> dict:
+def _clip_payload(
+    clip_id: str,
+    clip_kind: str,
+    take: str,
+    *,
+    root_x: float = 0.0,
+    child_translation=(0.0, 0.0, 0.0),
+) -> dict:
     return {
         "schema": EXPECTED_CLIP_SCHEMA,
         "clip_id": clip_id,
@@ -67,7 +75,7 @@ def _clip_payload(clip_id: str, clip_kind: str, take: str, *, root_x: float = 0.
                     {
                         "time_seconds": 0.0,
                         "local_rotation_quat_xyzw": [0.0, 0.0, 0.0, 1.0],
-                        "local_translation_xyz": [0.0, 0.0, 0.0],
+                        "local_translation_xyz": list(child_translation),
                         "local_scale_xyz": [1.0, 1.0, 1.0],
                     }
                 ],
@@ -80,6 +88,8 @@ def _clip_payload(clip_id: str, clip_kind: str, take: str, *, root_x: float = 0.
             "license_evidence_sha256": "e" * 64,
             "source_take": take,
             "root_translation_semantics": EXPECTED_ROOT_TRANSLATION_SEMANTICS,
+            "nonroot_translation_semantics": EXPECTED_NONROOT_TRANSLATION_SEMANTICS,
+            "nonroot_translation_supported": True,
             "source_mesh_used_as_product_authority": False,
             "source_skin_used_as_product_authority": False,
             "source_material_used_as_product_authority": False,
@@ -296,3 +306,59 @@ def test_run_manifest_patch_requires_explicit_replace_for_existing_motion(tmp_pa
     )
     assert before != after
     assert json.loads(run_manifest.read_text(encoding="utf-8"))["motion"] == fragment["motion"]
+
+
+def test_materializer_preserves_declared_nonroot_translation_for_in_place_clip(tmp_path):
+    spec = _spec()
+    spec_path = tmp_path / "spec.json"
+    _write_json(spec_path, spec)
+    rows = []
+    for row in spec["clips"]:
+        payload = _clip_payload(
+            row["clip_id"],
+            row["clip_kind"],
+            row["source_take"],
+            child_translation=(0.01, -0.02, 0.03),
+        )
+        if row["clip_kind"] == "RUN":
+            payload["tracks"][1]["keyframes"][0]["local_rotation_quat_xyzw"] = [
+                0.0, 0.0, 0.1, 0.99498743710662
+            ]
+        elif row["clip_kind"] == "SLASH":
+            payload["tracks"][1]["keyframes"][0]["local_rotation_quat_xyzw"] = [
+                0.0, 0.0, 0.2, 0.9797958971132712
+            ]
+        target = tmp_path / row["output_filename"]
+        _write_json(target, payload)
+        rows.append(
+            {
+                "clip_id": row["clip_id"],
+                "clip_kind": row["clip_kind"],
+                "source_take": row["source_take"],
+                "path": str(target),
+                "sha256": sha256(target),
+                "payload_sha256": "0" * 64,
+            }
+        )
+    _write_json(
+        tmp_path / "EXTRACTION_RECEIPT.json",
+        {
+            "schema": "RealSaS.MotionPresetExtractionReceipt.v1",
+            "status": "PASS",
+            "source_fbx_sha256": "f" * 64,
+            "spec_sha256": sha256(spec_path),
+            "extractor_schema": EXPECTED_EXTRACTOR_SCHEMA,
+            "outputs": rows,
+            "source_mesh_skin_appearance_product_authority": False,
+        },
+    )
+    verified = verify_extraction_outputs(
+        out_dir=tmp_path,
+        spec_path=spec_path,
+        spec=spec,
+    )
+    assert len(verified) == 3
+    payload = json.loads((tmp_path / "run.json").read_text(encoding="utf-8"))
+    assert payload["tracks"][1]["keyframes"][0]["local_translation_xyz"] == [
+        0.01, -0.02, 0.03
+    ]

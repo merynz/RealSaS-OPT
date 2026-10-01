@@ -46,6 +46,9 @@ EXPECTED_JOINT_FRAME = "REALSAS_DERIVED_JOINT_FRAME_V1"
 EXPECTED_ROOT_TRANSLATION_SEMANTICS = (
     "LOCAL_DERIVED_JOINT_FRAME_NORMALIZED_BY_SOURCE_BODY_SCALE"
 )
+EXPECTED_NONROOT_TRANSLATION_SEMANTICS = (
+    "LOCAL_DERIVED_JOINT_FRAME_DELTA_NORMALIZED_BY_SOURCE_BODY_SCALE"
+)
 
 
 def sha256(path: Path) -> str:
@@ -308,6 +311,14 @@ def verify_extraction_outputs(
         _require(
             str(meta.get("root_translation_semantics") or "") == EXPECTED_ROOT_TRANSLATION_SEMANTICS,
             f"MOTION_MATERIALIZER_ROOT_TRANSLATION_SEMANTICS:{clip_id}",
+        )
+        _require(
+            str(meta.get("nonroot_translation_semantics") or "") == EXPECTED_NONROOT_TRANSLATION_SEMANTICS,
+            f"MOTION_MATERIALIZER_NONROOT_TRANSLATION_SEMANTICS:{clip_id}",
+        )
+        _require(
+            meta.get("nonroot_translation_supported") is True,
+            f"MOTION_MATERIALIZER_NONROOT_TRANSLATION_SUPPORT:{clip_id}",
         )
         for key in (
             "source_mesh_used_as_product_authority",

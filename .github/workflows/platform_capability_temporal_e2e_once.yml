@@ -1,0 +1,249 @@
+name: platform cross-language capability e2e once
+
+on:
+  push:
+    branches: [platform/worker-seam-20261001]
+    paths:
+      - '.github/workflows/platform_capability_temporal_e2e_once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:18.6
+        env:
+          POSTGRES_USER: realsas
+          POSTGRES_PASSWORD: realsas
+          POSTGRES_DB: realsas_platform
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U realsas -d realsas_platform"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      REALSAS_DATABASE_URL: postgres://realsas:realsas@127.0.0.1:5432/realsas_platform?sslmode=disable
+      REALSAS_TEMPORAL_ADDRESS: 127.0.0.1:7233
+      REALSAS_TEMPORAL_NAMESPACE: default
+      REALSAS_ARTIFACT_ROOT: ${{ runner.temp }}/realsas-cas
+      REALSAS_AUTHORITY_ROOT: ${{ runner.temp }}/realsas-authority
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: platform/worker-seam-20261001
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+          cache-dependency-path: platform/go.sum
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - id: temporal_cli
+        continue-on-error: true
+        uses: temporalio/setup-temporal@v0
+      - id: e2e
+        continue-on-error: true
+        if: steps.temporal_cli.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          gofmt -w platform
+          cd platform
+          go vet ./...
+          go run ./cmd/realsas-migrate up
+          go test -p 1 ./...
+          go build ./cmd/realsas-control-worker
+          go build ./cmd/realsas-forge
+          cd ..
+
+          python -m pip install --disable-pip-version-check --progress-bar off             -r requirements/platform-engine-worker.txt Pillow==11.3.0
+
+          mkdir -p "$REALSAS_ARTIFACT_ROOT" "$REALSAS_AUTHORITY_ROOT/runs/E2E_RUNTIME_RENDER"
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+
+          root=Path(os.environ['REALSAS_AUTHORITY_ROOT'])/'runs'/'E2E_RUNTIME_RENDER'
+          root.mkdir(parents=True,exist_ok=True)
+          package=root/'product_runtime_v2.rss'
+          package.write_bytes(b'REALSAS_E2E_PACKAGE')
+          projection=root/'source_owned_runtime_projection.json'
+          projection_payload={
+            'schema_version':'RealSaS.SourceOwnedVisualRuntimeProjectionIR.v1',
+            'clips':[{
+              'clip_id':'run','duration_seconds':0.125,'loop':True,
+              'frame_count':4,'array_prefix':'clip_0'
+            }],
+            'views':[{
+              'view_index':0,'view_id':'V0','camera':{'resolution':8},
+              'source_width':8,'source_height':8
+            }],
+          }
+          projection.write_text(json.dumps(projection_payload,sort_keys=True)+'\n',encoding='utf-8')
+          player=root/'fake_native_player.py'
+          player.write_text("""#!/usr/bin/env python3
+          import argparse, pathlib, struct
+          p=argparse.ArgumentParser()
+          p.add_argument('package')
+          p.add_argument('--clip',required=True)
+          p.add_argument('--view',required=True)
+          p.add_argument('--frame',type=int,required=True)
+          p.add_argument('--out-rgba',required=True)
+          p.add_argument('--out-provenance',required=True)
+          p.add_argument('--out-owner',required=True)
+          a=p.parse_args()
+          n=8
+          rgba=bytearray(n*n*4)
+          x=1+(a.frame%4)
+          for y in range(2,6):
+              i=(y*n+x)*4
+              rgba[i:i+4]=bytes((220,180,70,255))
+          pathlib.Path(a.out_rgba).write_bytes(rgba)
+          pathlib.Path(a.out_provenance).write_bytes(bytes([1])*(n*n))
+          pathlib.Path(a.out_owner).write_bytes(b''.join(struct.pack('<i',0) for _ in range(n*n)))
+          print('renderer=REALSAS_V2_SOURCE_OWNED_VISUAL_2D')
+          """,encoding='utf-8')
+          player.chmod(0o755)
+          sha=lambda p: hashlib.sha256(Path(p).read_bytes()).hexdigest()
+          manifest={
+            'run_id':'E2E_RUNTIME_RENDER',
+            'subject_id':'SUBJECT_FREE_PLATFORM_E2E',
+            'runtime':{'native_player':{'path':str(player),'sha256':sha(player)}}
+          }
+          (root/'run_manifest.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          ledger={
+            'schema':'RealSaS.ActiveRunLedger.v2',
+            'run_id':'E2E_RUNTIME_RENDER',
+            'subject_id':'SUBJECT_FREE_PLATFORM_E2E',
+            'status':'COMPLETE',
+            'stages':[
+              {'id':'42_RUNTIME_PROJECTION_AND_CAA_BINDING','status':'PASS','outputs':[
+                {'path':str(projection),'sha256':sha(projection),'authority_class':'SOURCE_OWNED_VISUAL_RUNTIME_PROJECTION','schema':'RealSaS.SourceOwnedVisualRuntimeProjectionIR.v1'}
+              ]},
+              {'id':'43_RSS_MATERIALIZE_COMPACT','status':'PASS','outputs':[
+                {'path':str(package),'sha256':sha(package),'authority_class':'RUNTIME_V2_RSS_PACKAGE','schema':'application/x-realsas-rss-v2'}
+              ]},
+            ]
+          }
+          (root/'ACTIVE_RUN_V2.json').write_text(json.dumps(ledger,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          PY
+
+          temporal server start-dev --headless >/tmp/temporal.log 2>&1 &
+          echo $! >/tmp/temporal.pid
+          READY=0
+          for _ in $(seq 1 30); do
+            if (echo >/dev/tcp/127.0.0.1/7233) >/dev/null 2>&1; then READY=1; break; fi
+            sleep 1
+          done
+          test "$READY" = 1
+
+          python -m compiler.realsas_compiler_services.platform_worker_v1 >/tmp/engine-worker.log 2>&1 &
+          echo $! >/tmp/engine.pid
+          (
+            cd platform
+            go run ./cmd/realsas-control-worker
+          ) >/tmp/control-worker.log 2>&1 &
+          echo $! >/tmp/control.pid
+          sleep 2
+
+          (
+            cd platform
+            go run ./cmd/realsas-forge bootstrap-runtime-release               --name "platform-e2e-${GITHUB_RUN_ID}" --actor ci
+          ) >/tmp/release.json
+          RELEASE_ID=$(python -c "import json; print(json.load(open('/tmp/release.json'))['release_id'])")
+          (
+            cd platform
+            go run ./cmd/realsas-forge render-run               --release-id "$RELEASE_ID"               --compiler-run-id E2E_RUNTIME_RENDER               --clip run --view V0               --idempotency-key "platform-e2e:${GITHUB_RUN_ID}"               --actor ci
+          ) >/tmp/receipt.json
+          ATTEMPT_ID=$(python -c "import json; print(json.load(open('/tmp/receipt.json'))['attempt_id'])")
+          (
+            cd platform
+            go run ./cmd/realsas-forge wait-attempt --attempt-id "$ATTEMPT_ID" --timeout 4m
+          ) >/tmp/attempt.json
+
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          from PIL import Image
+
+          status=json.load(open('/tmp/attempt.json'))
+          assert status['state']=='PASS', status
+          by_type={x['artifact_type']:x for x in status['artifacts']}
+          render=by_type['RealSaS.DeveloperRender']
+          report=by_type['RealSaS.DeveloperRenderReport']
+          root=Path(os.environ['REALSAS_ARTIFACT_ROOT'])
+          gif=root/render['storage_key']
+          report_path=root/report['storage_key']
+          assert gif.is_file() and report_path.is_file()
+          with Image.open(gif) as im:
+              assert getattr(im,'n_frames',1)==4
+              assert im.size==(8,8)
+          detail=json.load(open(report_path))
+          assert detail['upstream_stage_executions']==0
+          assert detail['fit_train_calibration_executed'] is False
+          assert detail['product_promotion_executed'] is False
+          evidence={
+            'schema':'RealSaS.PlatformTemporalCrossLanguageE2E.v1',
+            'status':'PASS',
+            'workflow_run_id':os.environ['GITHUB_RUN_ID'],
+            'source_head':os.environ['GITHUB_SHA'],
+            'temporal_cross_language_e2e':True,
+            'command_outbox_temporal_go_python_cas':True,
+            'attempt_id':status['attempt_id'],
+            'render_content_sha256':render['content_sha256'],
+            'report_content_sha256':report['content_sha256'],
+            'render_frame_count':4,
+            'render_resolution':[8,8],
+            'upstream_stage_executions':0,
+            'fit_train_calibration_executed':False,
+            'knight_render_executed':False,
+          }
+          Path('/tmp/e2e-evidence.json').write_text(json.dumps(evidence,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          PY
+
+      - name: Seal cross-language evidence
+        if: always()
+        env:
+          TEMPORAL_CLI_OUTCOME: ${{ steps.temporal_cli.outcome }}
+          E2E_OUTCOME: ${{ steps.e2e.outcome }}
+        run: |
+          set -euo pipefail
+          mkdir -p docs/platform/evidence
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          target=Path('docs/platform/evidence/TEMPORAL_CAPABILITY_E2E_20261001.json')
+          src=Path('/tmp/e2e-evidence.json')
+          if src.is_file():
+              payload=json.loads(src.read_text())
+          else:
+              def tail(path):
+                  p=Path(path)
+                  return p.read_text(encoding='utf-8',errors='replace')[-8000:] if p.is_file() else ''
+              payload={
+                'schema':'RealSaS.PlatformTemporalCrossLanguageE2E.v1',
+                'status':'FAIL',
+                'workflow_run_id':os.environ.get('GITHUB_RUN_ID'),
+                'source_head':os.environ.get('GITHUB_SHA'),
+                'temporal_cli_outcome':os.environ.get('TEMPORAL_CLI_OUTCOME'),
+                'e2e_outcome':os.environ.get('E2E_OUTCOME'),
+                'temporal_cross_language_e2e':False,
+                'knight_render_executed':False,
+                'control_log_tail':tail('/tmp/control-worker.log'),
+                'engine_log_tail':tail('/tmp/engine-worker.log'),
+                'temporal_log_tail':tail('/tmp/temporal.log'),
+              }
+          target.write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          PY
+          rm .github/workflows/platform_capability_temporal_e2e_once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add platform docs/platform/evidence/TEMPORAL_CAPABILITY_E2E_20261001.json .github/workflows/platform_capability_temporal_e2e_once.yml
+          git commit -m "evidence: seal platform cross-language capability e2e"
+          git push origin HEAD:platform/worker-seam-20261001
+          test "$E2E_OUTCOME" = success

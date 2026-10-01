@@ -1,86 +1,92 @@
 {
-  "schema": "RealSaS.AgentMemorySourceManifest.v2",
+  "schema": "RealSaS.AgentMemorySourceManifest.v3",
   "generated_date": "2026-10-01",
   "repository": "merynz/RealSaS-OPT",
   "memory_branch": "alfred/repo-memory-map-20261001",
-  "observed_main_head": "c3b1b09c135bc0d4f0d019f9190b61ac621ac499",
+  "observed_main_head": "dcce1955527665dd3c68ad431ff8baa73aaec199",
+  "observed_recovery_head": "b6124442dfb91b486d574ef6af780aa4797df394",
   "authority_note": "NON_AUTHORITATIVE_DERIVED_MEMORY__STALE_IF_RELEVANT_SOURCE_BLOB_OR_REF_CHANGES",
-  "sources": [
+  "canonical_baseline": {
+    "substantive_main_base": "e6c91184d6d877bd19980832a561e94a746ca7ce",
+    "normalized_candidate": "92de05292b05e4ae8aaab3eed53c515b5eef5929",
+    "normalized_merge": "f459fe5491e367e9e5da07cfc5b1886f1b138ae4",
+    "preserved_backup": "3529344ef3045e0f2d634b175aae2aed6ec05536"
+  },
+  "recovery_source_blobs": [
     {
-      "path": "CURRENT_STATE.md",
-      "blob_sha": "c57d258d296c3ca0b88273465bd3aef4a5e84ce2"
+      "path": "compiler/realsas_compiler_core/visual_mesh_arap_v1.py",
+      "blob_sha": "0ab54e1c56e2f78c2fcb292c17bc012afc76044d"
     },
     {
-      "path": "canonical/V2_IMPLEMENTATION_READINESS.json",
-      "blob_sha": "3515527775aa5946063d67e015901e760011d27c"
+      "path": "compiler/realsas_compiler_core/runtime_package_v2.py",
+      "blob_sha": "66658d1aabafe054fa783d96b37b6cfac5173ac0"
     },
     {
-      "path": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
-      "blob_sha": "f0b605d09d5e9ecfac0abde01f3a95f1e6ae6f1a"
+      "path": "compiler/realsas_compiler_core/product_authority_v1.py",
+      "blob_sha": "19a3fed356a70b3bca5ed1a439c4e1b2c070bc40"
     },
     {
-      "path": "canonical/CONTEXT_STATE_V2.json",
-      "blob_sha": "7372eadf92784faadb2f363313c74e5ec8a1301d"
+      "path": "compiler/realsas_compiler_core/motion_compile_v2.py",
+      "blob_sha": "2b260840331305c36693bc083b8713f70d3194b1"
     },
     {
-      "path": "canonical/AUTHORITY_MAP_V1.json",
-      "blob_sha": "62ed367f3e0150a9f98c7d783a718e4293b74de0"
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py",
+      "blob_sha": "6152564cb0d524275bf4490a7f60d970a18a5f70"
     },
     {
-      "path": "canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md",
-      "blob_sha": "5ddb3e936bf46717b7d2e4723ff21f7c440d48f7"
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py",
+      "blob_sha": "5bd3a0066940a4d2c796734d10996980dfe6a798"
     },
     {
-      "path": "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
-      "blob_sha": "7b77742ae549b728149be350f09215fe0681bb12"
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py",
+      "blob_sha": "69f424be2d027647fecf5e81e877fb0c4fe07ba2"
     },
     {
-      "path": "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json",
-      "blob_sha": "c0f7dd1c5f83bf1c817cc5d828591139c5269be1"
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py",
+      "blob_sha": "442f4724196319fe552f3f4503b1184289ef6c2b"
     },
     {
-      "path": "canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json",
-      "blob_sha": "f730af767e2f47c898c4244409df8fb5a8f47591"
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py",
+      "blob_sha": "1985afe7e688e9a9e006940d306a95acf3c4a174"
     },
     {
-      "path": "canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json",
-      "blob_sha": "cfe674205624cb105e855a31f342988d04322dec"
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py",
+      "blob_sha": "106f6dc515f4cb2c9b52001f8eef2631d4b46e27"
     },
     {
-      "path": "canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json",
-      "blob_sha": "9ab97fb8fb1826fe35e9d8b3452520b6a0a477f0"
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py",
+      "blob_sha": "4f2296db1c931929cdfd8bad402d4a392408dc6c"
     },
     {
-      "path": "canonical/REHYDRATION_PACKET.md",
-      "blob_sha": "3e7ea52a29770eda0689f8d317f5a5b98d164ed5"
-    },
-    {
-      "path": "REPOSITORY_MAP.md",
-      "blob_sha": "50fbb0652b149696f268992e9106e6a870acb7d9"
-    },
-    {
-      "path": "SYSTEM_INDEX.md",
-      "blob_sha": "c40f5c0f578f21dae8a9fa198bf8c0d2bd471561"
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py",
+      "blob_sha": "1fe93b747befc654cdae6cb2085041385ebd745a"
     }
   ],
-  "historical_green": {
-    "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
-    "proof_heads": [
-      "44b148737dc1e7eadb23048834d2111744a12bc6",
-      "4419509ee0f62a7e5ca088b87feb682b1a664105"
-    ]
-  },
-  "observed_main_substantive_base": "e6c91184d6d877bd19980832a561e94a746ca7ce",
-  "current_main_class": "POST_USER_DIRECTED_TIMEOUT_SAFETY_ROLLBACK_PLUS_GENERATED_CONTEXT_REFRESH",
-  "normalized_evidence_state": {
-    "final_candidate": "92de05292b05e4ae8aaab3eed53c515b5eef5929",
-    "real_main_merge": "f459fe5491e367e9e5da07cfc5b1886f1b138ae4",
-    "preserved_backup_head": "3529344ef3045e0f2d634b175aae2aed6ec05536",
-    "backup_branch": "backup/main-normalized-20260930-3529344",
-    "normalized_plan_blob_sha": "73f7ad8b1d3325dfeef5534185cb655d5204d12c"
-  },
-  "current_main_plan": {
-    "blob_sha": "f0b605d09d5e9ecfac0abde01f3a95f1e6ae6f1a",
-    "architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__CANONICAL_MESH_SHARED_DOMAIN__CAA"
-  }
+  "memory_layers": [
+    {
+      "path": "AGENT_MEMORY/STAGE_GRAPH_V2.json",
+      "blob_sha": "5380118bdb0f6b1696ad506080e835bef41edb26"
+    },
+    {
+      "path": "AGENT_MEMORY/STAGE_SEMANTIC_CONTRACTS_V1.json",
+      "introduced_commit": "d178277c4f50bcb26568a807ac1726c9696f9841"
+    },
+    {
+      "path": "AGENT_MEMORY/SCHEMA_REGISTRY_V1.json",
+      "blob_sha": "0b72c6ce59772413d515f1edd27124831664841a"
+    },
+    {
+      "path": "AGENT_MEMORY/SYMBOL_DATAFLOW_GRAPH_V1.json",
+      "blob_sha": "ea841b1879aa43060c058dc87ab35190b437da8c"
+    },
+    {
+      "path": "AGENT_MEMORY/DECISION_SUPERSESSION_LEDGER_V1.json",
+      "blob_sha": "69f945122528e83414f1e20bfbe1d80e8cc9371f"
+    },
+    {
+      "path": "AGENT_MEMORY/RECOVERY_OVERLAY_20261001.json",
+      "blob_sha": "ef3ac94ad548d72eb1cf8f4619da7df19ba167c8"
+    }
+  ],
+  "staleness_rule": "Ref movement alone does not invalidate unrelated memory; compare the relevant source/policy blobs and recovery overlay. Any semantic source change requires the affected memory layer to be regenerated."
 }

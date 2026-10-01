@@ -5,48 +5,44 @@
 ## Canonical continuation state
 
 - Repository: `merynz/RealSaS-OPT`
-- Current `main` head: `c3b1b09c135bc0d4f0d019f9190b61ac621ac499`
-- Current substantive base: `e6c91184d6d877bd19980832a561e94a746ca7ce`
-- `a8002b20...` and `c3b1b09c...` are generated authority/context refresh descendants, not compiler/runtime production changes.
-- Current readiness: `REOPENED_APPEARANCE_AND_DYNAMIC_VISUAL_FIDELITY_AUDIT__WITNESS_FORBIDDEN`
-- Witness policy: `WITNESS_FORBIDDEN_UNTIL_SUBJECT_FREE_VISUAL_FIDELITY_RECLOSURE_AND_EXPLICIT_USER_APPROVAL`
-- Current main plan scope: `SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__CANONICAL_MESH_SHARED_DOMAIN__CAA`
+- Observed `main` head: `dcce1955527665dd3c68ad431ff8baa73aaec199`
+- Current substantive main base remains the post-timeout safety-rollback lineage rooted at `e6c91184...`; recent main descendants are generated live-authority/context refreshes, not compiler/runtime product-source promotion.
+- Current canonical main therefore remains a safe continuation anchor, not the most advanced engineering candidate.
 
-## Normalized lineage is preserved evidence, not rejected history
+## Recovery engineering state
 
-The normalized 46-stage lineage was genuinely merged to `main`:
-- candidate `92de05292...`
-- real main merge `f459fe549...`
-- preserved pre-rollback normalized head `3529344ef...`
-- backup branch `backup/main-normalized-20260930-3529344`
+- Recovery branch: `recovery/canonical-main-20261001`
+- Observed recovery head: `b6124442dfb91b486d574ef6af780aa4797df394`
+- Normalized lineage was genuinely merged historically and preserved; recovery reconstructs its justified slices plus later generic fixes rather than blindly restoring the old backup.
 
-The later force rollback to `e6c91184...` was explicitly requested as a **safety rollback during ChatGPT recovery-polling/context-loss instability**. It is not evidence that normalization was technically rejected.
+Recovery evidence now establishes, within exact gate scope:
+- Stage35 G3B stress binds to the sealed deformation envelope;
+- Stage37 qualifies final source-owned visual presentation from source substrate plus qualified mechanics;
+- typed source-owned visual projection exists at Stage42;
+- RSS v2 and native playback carry source-owned visual geometry;
+- Stage45 typed dynamic visual integrity and Stage46 closure wiring exist;
+- native source extension V16 passes its source gate.
 
-## Current main vs normalized engineering state
+## Important distinction
 
-Current main uses the earlier shared canonical-mesh-domain architecture.
+The old normalized candidate had a real Stage42 visual carrier gap. **That historical fact remains true.**
+The current recovery candidate repairs that gap. Do not read the historical `VISUAL_RUNTIME_SEAM_MAP` as current recovery state without its recovery overlay.
 
-The preserved normalized lineage adds an explicit mechanical/visual ownership split:
-- Stage18 produces source-owned visual mesh authority in addition to mechanical mesh;
-- Stage37/38 preserve and verify its binding;
-- mechanical mesh render authority is revoked in source-owned visual mode;
-- Stage42 currently lacks typed VisualMeshSet transport/execution and therefore fails closed.
+Carrier closure does **not** by itself prove final Knight/unseen aesthetic fidelity or broad product readiness.
 
-This means canonical continuation authority and most technically advanced evidence are currently on different refs.
+## Current open blockers/frontiers
 
-## Highest-value open seams
-
-1. **Visual runtime carrier** — VisualMeshSet exists upstream but has no typed runtime/native transport.
-2. **Repository wiring-test contract drift** — exact normalized fail-close token is not accepted by the repository test; self-hosted forensic run 36844455739 confirms rejection.
-3. **Native source seal drift** — actual merged normalized main fails the append-only native source seal before build.
-4. **Quaternius take qualification** — external motion materializer rejects collapsed distinct takes.
-5. **Stage35 G3B envelope authority** — post-merge generic fix is strongly supported: exact `16b8cb72...` passed 436 compiler tests with 4 skips and has no Knight coupling; still needs inclusion in a full recovery-head gate.
+1. **Quaternius motion qualification** — run `36860292218` fails closed at:
+   `MOTION_EXTRACTOR_NONROOT_TRANSLATION_UNSUPPORTED:Body:2:0.00016491536101574295`.
+   Distinct-take collapse is no longer the latest observed blocker after action-slot binding work.
+2. **Broad exact-head recertification** — after motion closure, rerun the intended repository/compiler/mechanics/appearance/runtime/native/VF23/orchestration/closure suites on one exact recovery head.
+3. **Visual quality witness/generalization** — typed transport/integrity closure is not equivalent to human aesthetic or unseen-generalization proof.
+4. **Professional platform state** — artifact/product lineage is still carried operationally through Git/files/runs; Artifact Registry/ProductRevision/Attempt backend remains to be built.
 
 ## Recovery discipline
 
 - Do not force-move `main`.
 - Treat rollback as safety history, not falsification.
-- Do not wholesale merge ops/research branches.
-- Use `PROMOTION_SLICES_20260930.json` and exact gate scope.
-- Preserve both current rolled-back main and normalized backup until a new recovery head is proven.
-- A green gate closes only what it actually executes.
+- Do not wholesale merge research/ops branches.
+- A green gate closes only what it executes.
+- Promote only a fresh exact recovery head after all required blockers/gates are resolved.

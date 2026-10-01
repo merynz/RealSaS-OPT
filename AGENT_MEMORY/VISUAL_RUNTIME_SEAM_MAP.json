@@ -1,79 +1,69 @@
 {
-  "schema": "RealSaS.AgentVisualRuntimeSeamMap.v1",
+  "schema": "RealSaS.AgentVisualRuntimeSeamMap.v2",
   "generated_date": "2026-10-01",
-  "source_ref": "backup/main-normalized-20260930-3529344",
-  "producer": {
-    "stage": "18_CANONICAL_MESH_ADDRESSING_BUILD",
-    "adapter": "compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py",
-    "ir": "RealSaS.VisualMeshSetIR.v1",
-    "core": "compiler/realsas_compiler_core/visual_mesh_arap_v1.py",
-    "bindings": [
-      "observation_set_binding_hash",
-      "output_direction_set_binding_hash",
-      "set_hash"
-    ],
-    "persisted_artifact": "visual_mesh_set.json",
-    "source_authority": "source-art silhouette / fixed source raster UV"
+  "historical_normalized_ref": "backup/main-normalized-20260930-3529344",
+  "recovery_ref": "recovery/canonical-main-20261001",
+  "observed_recovery_head": "b6124442dfb91b486d574ef6af780aa4797df394",
+  "historical_gap": {
+    "status": "CONFIRMED_HISTORICAL",
+    "description": "Normalized candidate had no typed source-owned visual runtime consumer and failed closed at Stage42."
   },
-  "preservation": {
-    "stages": [
-      "37_QUALIFIED_PRESENTATION_STRUCTURE",
-      "38_CANONICAL_PUPPET_SEALED"
-    ],
-    "adapter": "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py",
-    "metadata": [
-      "source_owned_visual_mesh_mode=True",
-      "visual_mesh_set_binding_hash=<VisualMeshSetIR.set_hash>",
-      "mechanical_mesh_render_authority=False"
-    ],
-    "validation": "Stage38 reloads VisualMeshSetIR and checks binding identity before sealing complete puppet."
-  },
-  "consumer_gap": {
-    "stage": "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
-    "adapter": "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py",
-    "current_behavior": "If source_owned_visual_mesh_mode is true, raises RUNTIME_V2_SOURCE_OWNED_VISUAL_PRESENTATION_BINDING_REQUIRED.",
-    "current_transport": [
-      "mechanical mesh vertices",
-      "mechanical mesh faces",
-      "face_uv shaped to mechanical mesh faces",
-      "appearance asset/qualification hashes",
-      "motion/camera bindings"
-    ],
-    "missing_transport": [
-      "typed VisualMeshSetIR payload or runtime-facing equivalent",
-      "visual_mesh_set_binding_hash in runtime projection/package IR",
-      "per-view visual geometry serialization",
-      "visual-to-mechanical deformation binding execution at runtime",
-      "native package/load/playback support for visual presentation geometry"
-    ],
-    "package_core": "compiler/realsas_compiler_core/runtime_package_v2.py",
-    "package_required_arrays": [
-      "vertices",
-      "faces",
-      "face_uv"
-    ],
-    "inference": "The gap is a carrier/transport/execution seam between sealed product-state visual authority and runtime/native presentation. It is not an appearance-completion problem."
-  },
-  "test_contract": {
-    "file": "tests/repository/test_source_owned_visual_runtime_wiring_v1.py",
-    "intended_rule": "Runtime must either consume VisualMeshSet or fail closed explicitly.",
-    "observed_problem": "The exact normalized runtime fails closed using RUNTIME_V2_SOURCE_OWNED_VISUAL_PRESENTATION_BINDING_REQUIRED, but the repository test does not recognize that token as its accepted blocker.",
-    "forensic_run": 36844455739,
-    "classification": "TEST_CONTRACT_DRIFT_PLUS_REAL_UNIMPLEMENTED_CONSUMER"
-  },
-  "repair_owner": {
-    "primary": "Runtime projection/package/native presentation transport",
-    "upstream_not_owner": [
-      "CAA totality/completion",
-      "Stage18 visual mesh creation",
-      "Stage37/38 binding identity"
-    ],
-    "must_preserve": [
-      "mechanical_mesh_render_authority=False in source-owned visual mode",
-      "VisualMeshSet identity/hash",
-      "source-owned fixed raster UV",
-      "no silent mechanical render fallback",
-      "no runtime appearance generation"
+  "authority_chain": [
+    {
+      "stage": "18_CANONICAL_MESH_ADDRESSING_BUILD",
+      "artifact": "RealSaS.VisualMeshSetIR.v1",
+      "role": "source-owned visual substrate/candidate"
+    },
+    {
+      "stage": "37_QUALIFIED_PRESENTATION_STRUCTURE",
+      "artifact": "RealSaS.QualifiedVisualPresentationSetIR.v1",
+      "role": "final qualified visual presentation binding"
+    },
+    {
+      "stage": "38_CANONICAL_PUPPET_SEALED",
+      "artifact": "RealSaS.CompletePuppetStateIR.v2",
+      "role": "sealed aggregate product state"
+    },
+    {
+      "stage": "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+      "artifact": "RealSaS.SourceOwnedVisualRuntimeProjectionIR.v1",
+      "role": "typed runtime-facing visual projection"
+    },
+    {
+      "stage": "43_RSS_MATERIALIZE_COMPACT",
+      "artifact": "RealSaS.RuntimePackage.v2",
+      "role": "RSS source-owned visual transport"
+    },
+    {
+      "stage": "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+      "artifact": "RealSaS.NativePlaybackIR.v2",
+      "role": "native package/playback verification"
+    },
+    {
+      "stage": "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+      "artifact": "RealSaS.SourceOwnedVisualDynamicIntegrityIR.v1",
+      "role": "dynamic visual integrity proof"
+    },
+    {
+      "stage": "46_PRODUCT_CLOSURE_SEAL",
+      "artifact": "RealSaS.EditablePuppetBundleManifest.v2",
+      "role": "closure/export consumer"
+    }
+  ],
+  "recovery_status": {
+    "carrier": "IMPLEMENTED_AND_GATE_PROVEN_IN_SCOPE",
+    "mechanical_render_fallback": "FORBIDDEN",
+    "runtime_appearance_generation": "FORBIDDEN",
+    "evidence": [
+      "recovery-stage37-visual-ownership-gate 36856784289 PASS",
+      "recovery-stage42-44 visual-runtime gate reached PASS at 36857109953",
+      "recovery-stage42-46-visual-product-gate 36858047069 PASS",
+      "Native runtime source gate 36858593327 PASS"
     ]
-  }
+  },
+  "remaining_frontier": [
+    "broad exact-head product recertification after motion source closure",
+    "Knight/unseen visual-quality witness and generalization evidence",
+    "professional artifact/product-state backend"
+  ]
 }

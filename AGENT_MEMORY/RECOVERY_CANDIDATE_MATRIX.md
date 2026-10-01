@@ -1,79 +1,44 @@
 # Recovery Candidate Matrix — 2026-10-01
 
-> Agent-side decision surface. NON-AUTHORITATIVE. No promotion is authorized by this file.
+> NON-AUTHORITATIVE decision surface. No promotion is authorized by this file.
 
-## Meaning of classes
+| Slice | Current recovery disposition | Evidence / remaining condition |
+|---|---|---|
+| S1 Stage14 topology/provenance | **IN RECOVERY CANDIDATE** | Exact-face provenance/topology-local decisions preserved; broad exact-head regression still required before main promotion. |
+| S2 holeless mesh/skin/mechanics | **IN RECOVERY CANDIDATE** | Mechanics lineage restored; broad candidate recertification remains. |
+| S3 Stage20–25 appearance | **IN RECOVERY CANDIDATE** | Appearance lineage restored; broad appearance/VF23 recertification remains. |
+| S4 visual authority + Stage37 | **RECOVERED / GATE-PROVEN IN SCOPE** | Stage37 visual ownership gate `36856784289` PASS. |
+| S5 living Stage42–46 visual closure | **RECOVERED / GATE-PROVEN IN SCOPE** | Stage42→46 visual-product gate `36858047069` PASS; do not infer full product readiness. |
+| S6 motion | **OPEN** | Latest Quaternius run `36860292218` fails `MOTION_EXTRACTOR_NONROOT_TRANSLATION_UNSUPPORTED:Body:2:0.00016491536101574295`. |
+| S7 docs/governance/main promotion | **REBUILD AFTER EXACT-HEAD GREEN** | Regenerate from final recovery head; historical docs are evidence only. |
+| S8 Knight ops | **EVIDENCE ONLY** | Never wholesale promote witness/run-root/rebind operations. |
+| S9 Stage35 G3B envelope | **RECOVERED / SUBJECT-FREE PROVEN** | Stage35 recovery gate `36851892031` PASS; prior exact compiler evidence 436 PASS / 4 skip. |
+| Native source seal | **RECOVERED / GATE-PROVEN** | V16 native source gate `36858593327` PASS. |
 
-- **RESTORE_READY_IN_PRINCIPLE** — strong generic evidence; no known architectural contradiction in its own scope. Still requires exact recovery-head regression before promotion.
-- **RESTORE_WITH_REPAIR** — valuable normalized work, but a known open seam must be repaired before the slice can participate in product closure.
-- **EVIDENCE_ONLY** — useful forensic/proof material; do not promote wholesale.
-- **GENERATED_ONLY** — continuity/context output; not product logic.
-
-| Slice | Class | Evidence | Open condition before canonical recovery |
-|---|---|---|---|
-| S1 Stage14 topology/provenance | **RESTORE_READY_IN_PRINCIPLE** | Exact promotion lineage; later mechanics/full candidate gates green. | Re-run exact Stage14/15 + full compiler regressions on recovery head. |
-| S2 Holeless mesh/skin/mechanics | **RESTORE_READY_IN_PRINCIPLE** | Dedicated mechanics gate PASS; full candidate compiler suite green. | Re-run mechanics + Stage35/native interactions after integration. |
-| S3 Stage20–25 appearance | **RESTORE_READY_IN_PRINCIPLE** | Dedicated appearance gate PASS after presentation authority follow-up. | Re-run appearance + source-lock/holdout/seam gates on recovery head. |
-| S4 visual authority split + Stage37 presentation | **RESTORE_WITH_REPAIR** | Upstream source-owned visual substrate and ownership split are source-proven; late Knight research shows final deformation regions depend on Stage35-qualified mechanics. | Reclassify Stage18 visual output as substrate/candidate; Stage37 must qualify final visual presentation mesh/binding, then supply typed carrier to Stage42/native; no mechanical fallback. |
-| S5 living 46-stage closure | **RESTORE_WITH_REPAIR** | Closure audit PASS. | Recompute closure after runtime carrier + native seal repair; historical closure hash cannot be reused blindly. |
-| S6 motion + explicit runtime fail-close | **RESTORE_WITH_REPAIR** | Fail-close semantics are correct and mechanically observed. | Fix VisualMeshSet runtime consumer; reconcile wiring-test blocker token; separately resolve Quaternius distinct-take qualification. |
-| S7 full gate/docs/exact merge governance | **EVIDENCE_ONLY_FOR_REBUILD** | Demonstrates candidate was coherent enough to merge and did merge. | Governance/docs/readiness must be regenerated from the new recovery head, not cherry-picked as authority. |
-| S8 post-merge Knight ops | **EVIDENCE_ONLY** | Mostly witness/run-root/rebind/render operations. | Mine only exact generic fixes; never wholesale promote. |
-| S9 generic Stage35 G3B envelope fix | **RESTORE_READY_IN_PRINCIPLE** | 2026-10-01 exact subject-free run 36847287654: 436 compiler PASS, 4 skip; no Knight coupling. | Include on recovery candidate and run full mechanics/VF23/native product gates. |
-
-## Current recommended recovery shape
-
-The safest candidate is **not** “reset main to `3529344`” and not “cherry-pick random late commits”.
-
-It is conceptually:
+## Current recovery shape
 
 ```text
-normalized engineering lineage
-    + generic Stage35 G3B envelope fix
-    + repair typed VisualMeshSet runtime/native carrier
-    + repair repository wiring contract
-    + reseal native source extension chain
-    + resolve or explicitly scope external Quaternius take qualification
-    -> fresh exact-current full gate
-    -> fresh readiness/closure/docs
-    -> only then proposed main promotion
+normalized justified engineering slices
++ generic Stage35 envelope repair
++ Stage37 qualified visual ownership
++ typed Stage42→46 source-owned visual carrier
++ native source seal V16
++ motion-source repair (still open)
+-> one exact-head broad gate set
+-> fresh readiness/closure/docs
+-> explicit main promotion decision
 ```
 
-## Why not restore the old normalized head verbatim?
+## What is no longer current
 
-Because known defects are now explicit:
+The following were real defects of the old normalized candidate but are no longer the latest recovery blockers:
+- missing Stage42 source-owned visual carrier;
+- wiring test accepting only a blocker token rather than real transport;
+- stale native runtime source seal;
+- Quaternius distinct-take collapse as the latest error.
 
-1. Stage42 visual presentation carrier is missing by design and fails closed.
-2. The repository wiring test and runtime fail-close token drifted.
-3. Native source extension seal is stale against the normalized runtime source.
-4. Quaternius external motion source does not satisfy distinct-take qualification.
-5. The generic Stage35 G3B envelope fix was discovered after the normalized backup and is not contained by `3529344`.
+They remain historical evidence and explain why the repairs exist.
 
-Restoring the old head verbatim would deliberately recreate a state we now know is incomplete.
+## Main discipline
 
-## Candidate recovery order
-
-1. Reconstruct normalized source slices on a disposable recovery ref; do not move `main`.
-2. Add S9 Stage35 envelope-authority fix.
-3. Qualify final visual presentation mesh/binding at Stage37 from source substrate + Stage35 mechanics, seal at Stage38, then implement Stage38 → Stage42 → runtime package → native playback carrier.
-4. Update wiring test to assert the real typed-carrier contract, not merely accept a blocker token.
-5. Recompute native append-only source seals from the intended source lineage.
-6. Re-qualify external motion source/takes or scope motion-source policy explicitly.
-7. Run:
-   - repository governance;
-   - complete compiler regressions;
-   - mechanics candidate;
-   - appearance candidate;
-   - visual-runtime wiring;
-   - mainline;
-   - runtime;
-   - native source seal + native CTest;
-   - VF23 exact production bank;
-   - subject-free orchestration;
-   - closure audit.
-8. Regenerate readiness/current-state/docs only after exact-head tests are green.
-9. Present the proven recovery head for explicit user approval before touching `main`.
-
-## Main remains intentionally untouched
-
-Current `main` is the post-timeout safety rollback lineage plus generated context refreshes. That is a safe anchor while reconstruction proceeds.
+Current `main` remains untouched as the safe rollback anchor. Recovery work stays isolated until the exact final recovery head is qualified.

@@ -29,7 +29,6 @@ on:
       - 'SYSTEM_INDEX.md'
       - 'AGENTS.md'
       - 'README.md'
-      - 'REPOSITORY_MAP.md'
       - 'tools/build_knowledge_artifact_catalog.py'
       - 'tools/render_authority_map.py'
       - 'tools/render_rehydration_packet.py'

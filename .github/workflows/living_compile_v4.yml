@@ -11,7 +11,6 @@ on:
       - 'product/**'
       - 'tests/product/**'
       - 'experiments/single_family_e2e_v1/export_bundle_v1.py'
-      - 'REPOSITORY_MAP.md'
       - 'canonical/LIVING_COMPILE_V4_PRODUCT_SHELL_PROMOTION_20260905.md'
       - '.github/workflows/living_compile_v4.yml'
   push:

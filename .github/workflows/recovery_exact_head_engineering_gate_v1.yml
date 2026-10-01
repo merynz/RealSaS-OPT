@@ -16,7 +16,6 @@ on:
       - '.github/workflows/**'
       - 'AGENTS.md'
       - 'SYSTEM_INDEX.md'
-      - 'REPOSITORY_MAP.md'
       - 'README.md'
   workflow_dispatch:
 

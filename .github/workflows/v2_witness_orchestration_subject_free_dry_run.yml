@@ -25,7 +25,6 @@ on:
       - 'README.md'
       - 'AGENTS.md'
       - 'SYSTEM_INDEX.md'
-      - 'REPOSITORY_MAP.md'
       - '.github/workflows/current_mainline_self_hosted_ci.yml'
       - '.github/workflows/live_authority_map.yml'
       - '.github/workflows/subject2_knight_observation_preflight.yml'

@@ -57,6 +57,8 @@ jobs:
         run: go run ./cmd/realsas-migrate up
       - name: Migration status
         run: go run ./cmd/realsas-migrate status
+      - name: Explicit generic developer execution proof
+        run: go test -p 1 ./internal/control -run TestDeveloperCapabilityGoalPersistsDependencyArtifactsAndFinalizes -count=1
       - name: Unit and PostgreSQL integration contracts
         run: go test -p 1 ./...
       - name: Dynamic architecture discovery audit

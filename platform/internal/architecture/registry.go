@@ -270,10 +270,10 @@ func Build(g *stagegraph.Graph) (Registry, error) {
 			}
 			dynamic := Module{
 				ID: owner, ParentDomain: "engine", Authority: AuthorityEngine,
-				Purpose: "Dynamically discovered compiler stage group " + s.Group + ".",
-				CodeRoots: []string{adapterCodeRoot(s.Adapter)},
+				Purpose:          "Dynamically discovered compiler stage group " + s.Group + ".",
+				CodeRoots:        []string{adapterCodeRoot(s.Adapter)},
 				ArtifactFamilies: []string{"RealSaS.StageResultManifest"},
-				FailurePrefixes: []string{strings.ToUpper(normalizedGroupID(s.Group)) + "_", "STAGE_"},
+				FailurePrefixes:  []string{strings.ToUpper(normalizedGroupID(s.Group)) + "_", "STAGE_"},
 			}
 			domains[engineIndex].Modules = append(domains[engineIndex].Modules, dynamic)
 			moduleIDs[owner] = struct{}{}
@@ -281,7 +281,7 @@ func Build(g *stagegraph.Graph) (Registry, error) {
 		stages = append(stages, StageOwner{
 			Ordinal: s.Ordinal, StageID: s.ID, Group: s.Group, OwnerModuleID: owner,
 			OwnershipSource: ownershipSource,
-			Adapter: s.Adapter, DependsOn: append([]string(nil), s.DependsOn...),
+			Adapter:         s.Adapter, DependsOn: append([]string(nil), s.DependsOn...),
 		})
 	}
 	if len(stages) != g.StageCount() {

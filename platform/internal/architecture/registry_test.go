@@ -84,11 +84,17 @@ func TestUnknownFutureStageGroupGetsVisibleDiscoveredOwner(t *testing.T) {
 	  ]
 	}`)
 	g, err := stagegraph.ParseCanonicalPlan(data)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	r, err := Build(g)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	stage, ok := r.Stage("alpha")
-	if !ok { t.Fatal("alpha missing") }
+	if !ok {
+		t.Fatal("alpha missing")
+	}
 	if stage.OwnerModuleID != "engine.future_domain" || stage.OwnershipSource != "DISCOVERED_STAGE_GROUP" {
 		t.Fatalf("stage=%+v", stage)
 	}

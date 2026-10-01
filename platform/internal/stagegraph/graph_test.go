@@ -57,8 +57,12 @@ func TestPlanCardinalityIsDataNotCode(t *testing.T) {
 	  ]
 	}`)
 	g, err := ParseCanonicalPlan(data)
-	if err != nil { t.Fatal(err) }
-	if g.StageCount() != 3 { t.Fatalf("stage count=%d", g.StageCount()) }
+	if err != nil {
+		t.Fatal(err)
+	}
+	if g.StageCount() != 3 {
+		t.Fatalf("stage count=%d", g.StageCount())
+	}
 	if id, ok := g.ProductPassStageID(); !ok || id != "product.seal" {
 		t.Fatalf("product pass=%q ok=%v", id, ok)
 	}

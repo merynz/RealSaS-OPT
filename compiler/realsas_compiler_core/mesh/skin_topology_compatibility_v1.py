@@ -36,7 +36,6 @@ SKIN_TOPOLOGY_COMPAT_SCHEMA = "RealSaS.SkinTopologyCompatibilityReport.v1"
 SKIN_TOPOLOGY_REPAIR_SCHEMA = "RealSaS.SkinTopologyRepairDirective.v1"
 DEFAULT_RISK_L1_MIN = 0.5
 DEFAULT_MAX_EDGE_RATIO = 4.0
-DEFAULT_STRESS_ANGLE_DEG = 120.0
 DEFAULT_MAX_REPAIR_ITERATIONS = 4
 
 
@@ -111,12 +110,25 @@ def _triangle_metrics_batch(rest,posed,faces):
 
 
 def _stress_angle(envelope):
-    meta=dict(envelope.metadata or {})
-    value=meta.get("skin_topology_compatibility_stress_angle_deg",DEFAULT_STRESS_ANGLE_DEG)
-    value=float(value)
-    if not math.isfinite(value) or value<=0.0 or value>180.0:
+    """Derive G3B stress from the sealed deformation capability envelope.
+
+    G3B is a compatibility proof inside the admitted mechanical capability; it
+    must not silently widen that capability with an unrelated hard-coded angle.
+    """
+    ranges=tuple(envelope.joint_ranges or ())
+    if not ranges:
+        raise QualificationError("SKIN_TOPOLOGY_STRESS_RANGE_MISSING")
+    values=[]
+    for row in ranges:
+        lo=float(row.min_rotation_deg)
+        hi=float(row.max_rotation_deg)
+        if not math.isfinite(lo) or not math.isfinite(hi):
+            raise QualificationError("SKIN_TOPOLOGY_STRESS_RANGE_NONFINITE")
+        values.append(max(abs(lo),abs(hi)))
+    value=max(values)
+    if not math.isfinite(value) or value<0.0 or value>180.0:
         raise QualificationError("SKIN_TOPOLOGY_STRESS_ANGLE_INVALID")
-    return value
+    return float(value)
 
 
 def run_skin_topology_compatibility_v1(

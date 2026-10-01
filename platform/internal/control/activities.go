@@ -164,6 +164,9 @@ func (a Activities) PrepareStageExecution(ctx context.Context, req orchestration
 	if err != nil {
 		return orchestration.EngineStageRequest{}, err
 	}
+	if err := a.bindStageExecutionInputs(ctx, tx, executionID, req.CommandID, attemptID, req.StageID); err != nil {
+		return orchestration.EngineStageRequest{}, err
+	}
 	if tag.RowsAffected() == 1 {
 		payload, _ := json.Marshal(map[string]any{
 			"execution_id": executionID.String(),
@@ -300,6 +303,15 @@ func (a Activities) CommitStageResult(ctx context.Context, req orchestration.Sta
 		}
 	}
 
+	success := req.EngineResult.Status == "PASS" || req.EngineResult.Status == "PASS_DEMO_ONLY"
+	var prepared *preparedStageResultArtifact
+	if success {
+		prepared, err = a.prepareStageResultArtifact(ctx, attemptID, req)
+		if err != nil {
+			return orchestration.StageCommitResult{}, err
+		}
+	}
+
 	tx, err := a.Pool.BeginTx(ctx, pgx.TxOptions{IsoLevel: pgx.Serializable})
 	if err != nil {
 		return orchestration.StageCommitResult{}, err
@@ -316,7 +328,6 @@ func (a Activities) CommitStageResult(ctx context.Context, req orchestration.Sta
 		return orchestration.StageCommitResult{}, errors.New("EXECUTION_RESULT_IDENTITY_DRIFT")
 	}
 
-	success := req.EngineResult.Status == "PASS" || req.EngineResult.Status == "PASS_DEMO_ONLY"
 	if !success {
 		evidence := orchestration.EngineFailureEvidence{
 			Code:        "COMPILER_STAGE_FAILED",
@@ -348,6 +359,10 @@ func (a Activities) CommitStageResult(ctx context.Context, req orchestration.Sta
 		return orchestration.StageCommitResult{StageID: req.StageID, Status: "FAIL"}, nil
 	}
 
+	artifactID, err := a.commitStageResultArtifact(ctx, tx, executionID, attemptID, req, prepared)
+	if err != nil {
+		return orchestration.StageCommitResult{}, err
+	}
 	if _, err := tx.Exec(ctx, `
 		UPDATE executions
 		SET status='PASS',finished_at=now(),error_code=NULL,error_payload=NULL
@@ -372,7 +387,8 @@ func (a Activities) CommitStageResult(ctx context.Context, req orchestration.Sta
 	if err := tx.Commit(ctx); err != nil {
 		return orchestration.StageCommitResult{}, err
 	}
-	return orchestration.StageCommitResult{StageID: req.StageID, Status: "PASS"}, nil
+	value := artifactID.String()
+	return orchestration.StageCommitResult{StageID: req.StageID, Status: "PASS", ArtifactID: &value}, nil
 }
 
 func (a Activities) RecordStageActivityError(ctx context.Context, req orchestration.StageActivityErrorRequest) error {

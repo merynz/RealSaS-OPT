@@ -13,7 +13,9 @@ class CompileSubjectCommand:
     command_id: str
     subject_id: str
     attempt_id: str
-    desired_revision_spec_sha256: str
+    engine_release_id: str
+    subject_semantic_sha256: str
+    target_stage_id: str
 
 
 @dataclass(frozen=True)
@@ -21,6 +23,7 @@ class RenderCommand:
     command_id: str
     subject_id: str
     product_revision_id: str
+    render_request_id: str
     render_request_semantic_sha256: str
 
 

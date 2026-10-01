@@ -44,8 +44,8 @@ func TestCompilePlanIsJustOneCapabilityProvider(t *testing.T) {
 		t.Fatal("product pass stage missing")
 	}
 	goal := Goal{
-		Type: GoalProductCompile,
-		Targets: []string{StageCapabilityID(productStage)},
+		Type:            GoalProductCompile,
+		Targets:         []string{StageCapabilityID(productStage)},
 		PromotionPolicy: PromotionQualifiedProductOnly,
 	}
 	resolved, err := goal.Validate(registry)
@@ -65,8 +65,8 @@ func TestDeveloperCanRunOnlyOneSubgraphWithoutProductPromotion(t *testing.T) {
 	registry, _ := currentRegistry(t)
 	target := StageCapabilityID("35_DYNAMIC_MECHANICAL_MESH_QUALIFIED")
 	resolved, err := (Goal{
-		Type: GoalDeveloperRun,
-		Targets: []string{target},
+		Type:            GoalDeveloperRun,
+		Targets:         []string{target},
 		PromotionPolicy: PromotionNever,
 	}).Validate(registry)
 	if err != nil {
@@ -93,20 +93,20 @@ func TestExternalModelOrModuleProviderCanExtendRegistryWithoutChangingCore(t *te
 	extra := ProviderFunc(func(context.Context) ([]Descriptor, error) {
 		return []Descriptor{
 			{
-				ID: "model/experimental.depth",
-				Kind: KindModel,
-				OwnerModuleID: "engine.experimental_depth",
+				ID:               "model/experimental.depth",
+				Kind:             KindModel,
+				OwnerModuleID:    "engine.experimental_depth",
 				ExecutorActivity: "engine.execute_model.v1",
-				AllowedModes: []Mode{ModeDeveloper},
-				Aliases: []string{"depth", "experimental model"},
+				AllowedModes:     []Mode{ModeDeveloper},
+				Aliases:          []string{"depth", "experimental model"},
 			},
 			{
-				ID: "module/experimental.inspect",
-				Kind: KindModule,
-				OwnerModuleID: "engine.experimental_depth",
+				ID:               "module/experimental.inspect",
+				Kind:             KindModule,
+				OwnerModuleID:    "engine.experimental_depth",
 				ExecutorActivity: "engine.execute_module.v1",
-				Dependencies: []string{"model/experimental.depth"},
-				AllowedModes: []Mode{ModeDeveloper},
+				Dependencies:     []string{"model/experimental.depth"},
+				AllowedModes:     []Mode{ModeDeveloper},
 			},
 		}, nil
 	})
@@ -118,8 +118,8 @@ func TestExternalModelOrModuleProviderCanExtendRegistryWithoutChangingCore(t *te
 		t.Fatal(err)
 	}
 	resolved, err := (Goal{
-		Type: GoalDeveloperRun,
-		Targets: []string{"module/experimental.inspect"},
+		Type:            GoalDeveloperRun,
+		Targets:         []string{"module/experimental.inspect"},
 		PromotionPolicy: PromotionNever,
 	}).Validate(registry)
 	if err != nil {

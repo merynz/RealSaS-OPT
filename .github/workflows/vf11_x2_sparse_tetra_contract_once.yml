@@ -30,7 +30,8 @@ jobs:
           set -euo pipefail
           mkdir -p models/iris/v5
           : > /tmp/v5_restore_receipt.txt
-          for path in             models/iris/v5/contained_sparse_tetra_decoder_v5.py             models/iris/v5/learned_tail_localization_v5.py
+          for path in             models/iris/v5/contained_sparse_tetra_decoder_v5.py             models/iris/v5/learned_tail_localization_v5.py \
+            models/iris/v5/shell_escape_diagnostics_v5.py
           do
             commit="$(git log --all --format=%H -- "$path" | head -n 1)"
             test -n "$commit"

@@ -31,34 +31,29 @@ def test_source_owned_visual_runtime_cannot_silently_fall_back_to_mechanical_ren
     assert "STAGE37_QUALIFIED_SOURCE_OWNED_VISUAL_PRESENTATION" in product_state
     assert "QualifiedVisualPresentationSetIR" in product_state
 
-    # Therefore Stage42 must either consume a typed visual-mesh/binding authority
-    # or fail closed before materializing a mechanical render package.
-    consumes_visual_mesh = (
-        "visual_mesh_set_from_dict" in runtime
-        or "VisualMeshSetIR" in runtime
-        or "visual_mesh_set_binding_hash" in runtime_ir
-    )
-    fail_closed = (
-        "SOURCE_OWNED_VISUAL_RUNTIME_NOT_IMPLEMENTED" in runtime
-        or "RUNTIME_V2_SOURCE_OWNED_VISUAL_BINDING_REQUIRED" in runtime
-        or "RUNTIME_V2_SOURCE_OWNED_VISUAL_PRESENTATION_BINDING_REQUIRED" in runtime
-    )
-    assert consumes_visual_mesh or fail_closed, (
-        "Stage20-38 revoke mechanical render authority, but Stage42 has neither "
-        "a VisualMeshSet consumer nor an explicit fail-closed blocker."
-    )
+    # Stage42 must now consume the qualified Stage37 presentation through a
+    # typed runtime projection. The old fail-closed token is no longer sufficient:
+    # canonical recovery requires real transport through Stage43 and native Stage44.
+    assert "SourceOwnedVisualRuntimeProjectionV1IR" in runtime
+    assert "source_owned_visual_runtime_projection_from_dict" in runtime
+    assert "build_source_owned_visual_rss_v2_entries" in runtime
+    assert "SourceOwnedVisualRuntimeProjectionV1IR" in package
+    assert "SOURCE_OWNED_VISUAL_PRESENTATION_V1" in package
 
-    # A source-owned per-view visual mesh cannot be represented by silently
-    # reusing the legacy single mechanical mesh.bin contract.
-    if consumes_visual_mesh:
-        supports_visual_package = (
-            "visual_mesh" in package.lower()
-            or "visual_mesh_set_binding_hash" in runtime_ir
-        )
-        assert supports_visual_package, (
-            "Runtime projection claims visual-mesh consumption but the package/IR "
-            "has no visual presentation geometry transport."
-        )
+    native = _text(
+        "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp"
+    )
+    assert "SOURCE_OWNED_VISUAL_PRESENTATION_V1" in native
+    assert "REALSAS_V2_SOURCE_OWNED_VISUAL_2D" in native
+
+    # The product path must not regain the mechanical relation mesh as visual
+    # authority while adding the carrier.
+    assert '"mechanical_mesh_render_authority": False' in runtime
+    assert "mechanical_mesh_render_authority=0" in package
+
+    # Recovery has crossed the former explicit blocker: keeping the old blocker
+    # token around would make it ambiguous whether runtime transport is real.
+    assert "RUNTIME_V2_SOURCE_OWNED_VISUAL_PRESENTATION_BINDING_REQUIRED" not in runtime
 
 
 

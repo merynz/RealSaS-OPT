@@ -21,16 +21,19 @@ jobs:
           ref: 92de05292b05e4ae8aaab3eed53c515b5eef5929
           fetch-depth: 0
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
       - name: Seal exact candidate identity
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "92de05292b05e4ae8aaab3eed53c515b5eef5929"
-          git status --porcelain=v1
           echo "CANDIDATE_HEAD=$(git rev-parse HEAD)"
 
       - name: Verify observed token mismatch
         run: |
-          python3 - <<'PY'
+          python - <<'PY'
           from pathlib import Path
           runtime = Path("compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py").read_text()
           test = Path("tests/repository/test_source_owned_visual_runtime_wiring_v1.py").read_text()
@@ -44,7 +47,7 @@ jobs:
       - name: Prove repository wiring test still rejects candidate
         run: |
           set +e
-          python3 - <<'PY'
+          python - <<'PY'
           import runpy
           ns = runpy.run_path("tests/repository/test_source_owned_visual_runtime_wiring_v1.py")
           ns["test_source_owned_visual_runtime_cannot_silently_fall_back_to_mechanical_render_mesh"]()
@@ -57,3 +60,44 @@ jobs:
             exit 1
           fi
           echo "EXPECTED_REJECTION_CONFIRMED"
+
+  stage35-g3b-generic-regression:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 16b8cb72537ae6ed9788a075bff1d0205ba41e73
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Seal exact generic-fix identity
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "16b8cb72537ae6ed9788a075bff1d0205ba41e73"
+          echo "G3B_FIX_HEAD=$(git rev-parse HEAD)"
+
+      - name: Install pinned mainline test dependencies
+        run: python -m pip install -r requirements/mainline-ci.txt
+
+      - name: Run complete subject-free compiler regression suite
+        env:
+          PYTHONPATH: .
+          PYTHONHASHSEED: "0"
+        run: python -m pytest -q tests/compiler
+
+      - name: Verify the fix has no Knight coupling
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path("compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py").read_text().lower()
+          test = Path("tests/compiler/test_source_edge_probe_repartition_v1.py").read_text().lower()
+          assert "knight" not in source
+          assert "knight" not in test
+          assert "skin_topology_compatibility_stress_angle_deg" not in source[source.index("def _stress_angle"):source.index("def run_skin_topology_compatibility_v1")]
+          assert "joint_ranges" in source[source.index("def _stress_angle"):source.index("def run_skin_topology_compatibility_v1")]
+          print("GENERIC_G3B_ENVELOPE_BINDING_CONFIRMED")
+          PY

@@ -29,6 +29,10 @@ from compiler.realsas_compiler_core.product_state_v2 import (
 from compiler.realsas_compiler_core.presentation_partition_v2 import (
     presentation_partition_evidence_from_dict,
 )
+from compiler.realsas_compiler_core.runtime_visual_authority_v1 import (
+    source_owned_visual_dynamic_integrity_from_dict,
+    source_owned_visual_runtime_projection_from_dict,
+)
 from compiler.realsas_compiler_core.runtime_authority_v2 import (
     ProductClosureV2IR,
     dynamic_visual_integrity_from_dict,
@@ -423,13 +427,34 @@ def seal_product_closure_stage(ctx: dict) -> dict:
             "RealSaS.QualifiedDynamicMotionIR.v2",
         )
     )
-    projection = runtime_projection_from_dict(
+    appearance_asset = complete_appearance_asset_from_dict(
         stage_output_payload(
             ctx,
-            "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
-            "RealSaS.RuntimeProjectionIR.v2",
+            "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+            "RealSaS.CompleteAppearanceAssetIR.v2",
         )
     )
+    source_owned_visual = bool(
+        dict(appearance_asset.metadata or {}).get(
+            "source_owned_visual_mesh_mode"
+        )
+    )
+    if source_owned_visual:
+        projection = source_owned_visual_runtime_projection_from_dict(
+            stage_output_payload(
+                ctx,
+                "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+                "RealSaS.SourceOwnedVisualRuntimeProjectionIR.v1",
+            )
+        )
+    else:
+        projection = runtime_projection_from_dict(
+            stage_output_payload(
+                ctx,
+                "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+                "RealSaS.RuntimeProjectionIR.v2",
+            )
+        )
     package = runtime_package_seal_from_dict(
         stage_output_payload(
             ctx,
@@ -444,13 +469,24 @@ def seal_product_closure_stage(ctx: dict) -> dict:
             "RealSaS.NativePlaybackIR.v2",
         )
     )
-    visual = dynamic_visual_integrity_from_dict(
-        stage_output_payload(
-            ctx,
-            "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
-            "RealSaS.DynamicVisualIntegrityIR.v2",
+    if source_owned_visual:
+        visual = source_owned_visual_dynamic_integrity_from_dict(
+            stage_output_payload(
+                ctx,
+                "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+                "RealSaS.SourceOwnedVisualDynamicIntegrityIR.v1",
+            )
         )
-    )
+        visual_integrity_hash = visual.integrity_hash
+    else:
+        visual = dynamic_visual_integrity_from_dict(
+            stage_output_payload(
+                ctx,
+                "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+                "RealSaS.DynamicVisualIntegrityIR.v2",
+            )
+        )
+        visual_integrity_hash = visual.visual_integrity_hash
     structure = presentation_structure_v2_from_dict(
         stage_output_payload(
             ctx,
@@ -516,38 +552,78 @@ def seal_product_closure_stage(ctx: dict) -> dict:
     for actual, expected, label in exact_checks:
         if actual != expected:
             raise QualificationError(f"V2_PRODUCT_CLOSURE_BINDING_DRIFT:{label}")
-    if (
-        visual.qualification_report.get("status")
-        != "PASS_DYNAMIC_VISUAL_INTEGRITY"
-    ):
-        raise QualificationError("V2_PRODUCT_CLOSURE_VISUAL_NOT_PASS")
-    if not bool(
-        visual.qualification_report.get(
-            "dynamic_appearance_conditioning_passed", False
+    if source_owned_visual:
+        report = dict(visual.qualification_report or {})
+        if (
+            report.get("status")
+            != "PASS_SOURCE_OWNED_VISUAL_DYNAMIC_INTEGRITY"
+        ):
+            raise QualificationError(
+                "V2_PRODUCT_CLOSURE_SOURCE_VISUAL_NOT_PASS"
+            )
+        for key, label in (
+            (
+                "native_reference_byte_parity_passed",
+                "NATIVE_REFERENCE_PARITY",
+            ),
+            (
+                "direct_source_provenance_passed",
+                "DIRECT_SOURCE_PROVENANCE",
+            ),
+            ("all_frame_views_nonempty", "NONEMPTY_FRAME_VIEW"),
+            ("visual_orientation_passed", "VISUAL_ORIENTATION"),
+            (
+                "catastrophic_edge_stretch_passed",
+                "CATASTROPHIC_EDGE_STRETCH",
+            ),
+        ):
+            if not bool(report.get(key, False)):
+                raise QualificationError(
+                    "V2_PRODUCT_CLOSURE_SOURCE_VISUAL_"
+                    + label
+                    + "_NOT_PASS"
+                )
+        dynamic_conditioning_mode = (
+            "SOURCE_OWNED_VISUAL_2D_STRUCTURAL_INTEGRITY_V1"
         )
-    ):
-        raise QualificationError(
-            "V2_PRODUCT_CLOSURE_DYNAMIC_APPEARANCE_CONDITIONING_NOT_PASS"
-        )
-    if visual.dynamic_conditioning_sample_count <= 0:
-        raise QualificationError(
-            "V2_PRODUCT_CLOSURE_DYNAMIC_APPEARANCE_EVIDENCE_EMPTY"
-        )
-    if not bool(
-        visual.qualification_report.get(
-            "interior_shared_edge_continuity_passed", False
-        )
-    ):
-        raise QualificationError(
-            "V2_PRODUCT_CLOSURE_SHARED_EDGE_CONTINUITY_NOT_PASS"
-        )
-    if bool(
-        visual.qualification_report.get(
-            "cross_component_background_gap_is_crack_authority", True
-        )
-    ):
-        raise QualificationError(
-            "V2_PRODUCT_CLOSURE_CROSS_COMPONENT_CRACK_AUTHORITY_FORBIDDEN"
+    else:
+        if (
+            visual.qualification_report.get("status")
+            != "PASS_DYNAMIC_VISUAL_INTEGRITY"
+        ):
+            raise QualificationError(
+                "V2_PRODUCT_CLOSURE_VISUAL_NOT_PASS"
+            )
+        if not bool(
+            visual.qualification_report.get(
+                "dynamic_appearance_conditioning_passed", False
+            )
+        ):
+            raise QualificationError(
+                "V2_PRODUCT_CLOSURE_DYNAMIC_APPEARANCE_CONDITIONING_NOT_PASS"
+            )
+        if visual.dynamic_conditioning_sample_count <= 0:
+            raise QualificationError(
+                "V2_PRODUCT_CLOSURE_DYNAMIC_APPEARANCE_EVIDENCE_EMPTY"
+            )
+        if not bool(
+            visual.qualification_report.get(
+                "interior_shared_edge_continuity_passed", False
+            )
+        ):
+            raise QualificationError(
+                "V2_PRODUCT_CLOSURE_SHARED_EDGE_CONTINUITY_NOT_PASS"
+            )
+        if bool(
+            visual.qualification_report.get(
+                "cross_component_background_gap_is_crack_authority", True
+            )
+        ):
+            raise QualificationError(
+                "V2_PRODUCT_CLOSURE_CROSS_COMPONENT_CRACK_AUTHORITY_FORBIDDEN"
+            )
+        dynamic_conditioning_mode = (
+            "RIGID_INVARIANT_CAA_UV_TO_POSED_SURFACE_METRIC"
         )
     if (
         str(structure.metadata.get("presentation_partition_evidence_hash") or "")
@@ -575,7 +651,7 @@ def seal_product_closure_stage(ctx: dict) -> dict:
         runtime_projection_binding_hash=projection.projection_hash,
         runtime_package_binding_hash=package.package_hash,
         native_playback_binding_hash=native.playback_hash,
-        dynamic_visual_integrity_binding_hash=visual.visual_integrity_hash,
+        dynamic_visual_integrity_binding_hash=visual_integrity_hash,
         editable_authoring_archive_path=str(archive_path),
         editable_authoring_archive_sha256=archive_sha,
         qualification_report={
@@ -586,6 +662,12 @@ def seal_product_closure_stage(ctx: dict) -> dict:
             "appearance_authority_passed": True,
             "presentation_partition_authority_passed": True,
             "dynamic_appearance_conditioning_passed": True,
+            "dynamic_appearance_conditioning_mode": (
+                dynamic_conditioning_mode
+            ),
+            "source_owned_visual_dynamic_integrity_passed": (
+                source_owned_visual
+            ),
             "interior_shared_edge_continuity_passed": True,
             "cross_component_crack_authority_claimed": False,
             "native_visual_integrity_passed": True,
@@ -597,7 +679,12 @@ def seal_product_closure_stage(ctx: dict) -> dict:
         metadata={
             "authoring_manifest_sha256": authoring_manifest["manifest_sha256"],
             "presentation_partition_evidence_hash": partition_evidence.evidence_hash,
-            "dynamic_visual_integrity_hash": visual.visual_integrity_hash,
+            "dynamic_visual_integrity_hash": visual_integrity_hash,
+            "presentation_geometry_mode": (
+                "SOURCE_OWNED_VISUAL_PRESENTATION_V1"
+                if source_owned_visual
+                else "MECHANICAL_CANONICAL_DEPTH_V2"
+            ),
             "geometry_mechanics_appearance_coequal": True,
             "product_stage": 46,
         },

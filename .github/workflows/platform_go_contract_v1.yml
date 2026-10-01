@@ -86,3 +86,6 @@ jobs:
           go build ./cmd/realsas-api
           go build ./cmd/realsas-migrate
           go build ./cmd/realsas-architecture
+          go build ./cmd/realsas-control-worker
+      - name: Python Engine worker syntax contract
+        run: python3 -m py_compile ../compiler/realsas_compiler_services/platform_worker/worker.py

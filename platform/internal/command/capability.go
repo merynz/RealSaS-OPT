@@ -170,6 +170,18 @@ func SubmitCapabilityRun(
 		`, goalID, attemptID, targetsJSON, resolvedJSON, paramsJSON, specSHA); err != nil {
 			return err
 		}
+		for ordinal, artifact := range artifactRows {
+			artifactID, err := uuid.Parse(artifact.ID)
+			if err != nil {
+				return err
+			}
+			if _, err := tx.Exec(ctx, `
+				INSERT INTO execution_goal_inputs(execution_goal_id,ordinal,artifact_id)
+				VALUES ($1,$2,$3)
+			`, goalID, ordinal, artifactID); err != nil {
+				return err
+			}
+		}
 		payload := map[string]any{
 			"schema":                "RealSaS.RunCapabilityCommand.v1",
 			"command_id":            commandID.String(),

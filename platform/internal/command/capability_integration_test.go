@@ -78,11 +78,22 @@ func TestGlobalDeveloperCapabilityRunNeedsNoSyntheticSubject(t *testing.T) {
 	if goalType != "DEVELOPER_RUN" || policy != "NEVER" {
 		t.Fatalf("goal=%s policy=%s", goalType, policy)
 	}
+	var inputCount int
+	if err := pool.QueryRow(ctx,
+		"SELECT count(*) FROM execution_goal_inputs WHERE execution_goal_id=$1",
+		receipt.ExecutionGoalID,
+	).Scan(&inputCount); err != nil {
+		t.Fatal(err)
+	}
+	if inputCount != 0 {
+		t.Fatalf("unexpected input count=%d", inputCount)
+	}
 
 	// Clean up so migration-down reversibility can restore subject_id NOT NULL.
 	_, _ = pool.Exec(ctx, "DELETE FROM audit_events WHERE attempt_id=$1", receipt.AttemptID)
 	_, _ = pool.Exec(ctx, "DELETE FROM outbox_events WHERE aggregate_id=$1", receipt.CommandID)
 	_, _ = pool.Exec(ctx, "DELETE FROM commands WHERE id=$1", receipt.CommandID)
+	_, _ = pool.Exec(ctx, "DELETE FROM execution_goal_inputs WHERE execution_goal_id=$1", receipt.ExecutionGoalID)
 	_, _ = pool.Exec(ctx, "DELETE FROM execution_goals WHERE id=$1", receipt.ExecutionGoalID)
 	_, _ = pool.Exec(ctx, "DELETE FROM attempts WHERE id=$1", receipt.AttemptID)
 	_, _ = pool.Exec(ctx, "DELETE FROM engine_release_capabilities WHERE release_id=$1", releaseID)

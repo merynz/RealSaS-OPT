@@ -1,0 +1,19 @@
+name: platform-backend-contract-v1
+on:
+  push:
+    branches: [platform/professional-backend-v1-20261001]
+    paths: ['backend/**','tests/platform/**','requirements/platform.txt','canonical/MAINLINE_EXECUTION_PLAN_V2.json','.github/workflows/platform_backend_contract_v1.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env: {PYTHONPATH: ., PYTHONHASHSEED: '0'}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt -r requirements/platform.txt
+      - run: python -m compileall -q backend tests/platform
+      - run: python -m pytest -q tests/platform

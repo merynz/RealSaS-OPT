@@ -1,0 +1,79 @@
+name: platform Knight lineage gap diagnostic once
+
+on:
+  push:
+    branches: [platform/professional-backend-v1-20261001]
+    paths:
+      - '.github/workflows/platform_knight_lineage_gap_diag_once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: platform/professional-backend-v1-20261001
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Inspect exact gap
+        env:
+          PYTHONPATH: .
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          from compiler.realsas_compiler_services.orchestrator import mainline
+          run_id=os.environ['RUN_ID']
+          ledger=mainline.load_json(mainline.run_ledger_path(run_id))
+          plan=mainline.load_json(mainline.PLAN_PATH)
+          by={str(x['id']):x for x in ledger.get('stages') or []}
+          rows=[]
+          for stage in plan['stages']:
+              sid=str(stage['id'])
+              row=by.get(sid)
+              rows.append({
+                'ordinal':int(stage['ordinal']),
+                'id':sid,
+                'depends_on':list(stage.get('depends_on') or []),
+                'row_present':row is not None,
+                'status':None if row is None else row.get('status'),
+                'attempts':None if row is None else row.get('attempts'),
+                'blockers':[] if row is None else list(row.get('blockers') or []),
+                'outputs':[] if row is None else list(row.get('outputs') or []),
+                'dependency_failures':mainline.dependency_failure_ids(plan,ledger,sid) if row is not None else [],
+              })
+          out={
+            'schema':'RealSaS.KnightLineageGapDiagnostic.v1',
+            'run_id':run_id,
+            'ledger_stage_count':len(ledger.get('stages') or []),
+            'ledger_status':ledger.get('status'),
+            'completed_count':ledger.get('completed_count'),
+            'failed_count':ledger.get('failed_count'),
+            'ready_stage_ids':ledger.get('ready_stage_ids'),
+            'rows':rows,
+            'non_pass_non_pending':[r for r in rows if r['status'] not in ('PASS','PASS_DEMO_ONLY','PENDING')],
+            'mid_gap':[r for r in rows if 26 <= r['ordinal'] <= 34],
+          }
+          Path('docs/platform/KNIGHT_LINEAGE_GAP_DIAGNOSTIC_20261001.json').write_text(json.dumps(out,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          print(json.dumps(out['mid_gap'],indent=2,sort_keys=True))
+          print(json.dumps(out['non_pass_non_pending'],indent=2,sort_keys=True))
+          PY
+      - name: Seal diagnostic and retire workflow
+        run: |
+          set -euo pipefail
+          rm .github/workflows/platform_knight_lineage_gap_diag_once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/platform/KNIGHT_LINEAGE_GAP_DIAGNOSTIC_20261001.json .github/workflows/platform_knight_lineage_gap_diag_once.yml
+          git commit -m "evidence: locate Knight solved-lineage blocking gap"
+          git push origin HEAD:platform/professional-backend-v1-20261001

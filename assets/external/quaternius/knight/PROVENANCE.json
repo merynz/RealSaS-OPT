@@ -1,0 +1,8 @@
+{
+  "schema": "RealSaS.ExternalAssetProvenance.v1",
+  "asset": "KnightCharacter.fbx",
+  "source": "Knight Pack by Quaternius",
+  "license": "CC0-1.0",
+  "sha256": "41f2616fb4a42f9d35e242bbed1450ededc7537def4bf38cbb11b4e54ff2bf21",
+  "purpose": "Pinned external motion-source fixture for RealSaS qualification and regression."
+}

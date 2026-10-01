@@ -93,7 +93,7 @@ func workflowSpec(commandType string, payload map[string]any) (string, string, t
 		if err != nil {
 			return "", "", 0, nil, err
 		}
-		specSHA, err := requiredString(payload, "goal_spec_sha256")
+		specSHA, err := requiredString(payload, "spec_sha256")
 		if err != nil {
 			return "", "", 0, nil, err
 		}

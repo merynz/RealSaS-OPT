@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - recovery/canonical-main-20261001
+      - integration/final-main-knight-platform-20261002
+      - main
     paths:
       - 'compiler/realsas_compiler_core/runtime_package_v2.py'
       - 'compiler/realsas_compiler_core/runtime_visual_authority_v1.py'

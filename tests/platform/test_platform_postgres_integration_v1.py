@@ -26,6 +26,7 @@ def test_serializable_product_promotion_is_atomic_and_audited():
     with Session() as session:
         with session.begin():
             session.add(SubjectRow(id=subject_id,slug="promotion-smoke",display_name="Promotion Smoke"))
+            session.flush()
             session.add(AttemptRow(id=attempt_id,subject_id=subject_id,kind="compile_candidate",spec_sha256="a"*64,created_by="ci",final_state="QUALIFIED"))
             artifact_type=ArtifactTypeRow(id=uuid4(),name="RealSaS.PlatformPromotionSmoke.v1",schema_version="v1",domain="test")
             session.add(artifact_type); session.flush()

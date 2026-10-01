@@ -5,6 +5,7 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, replace
 import hashlib
+import math
 from pathlib import Path
 import subprocess
 from types import SimpleNamespace
@@ -61,6 +62,22 @@ from compiler.realsas_compiler_core.runtime_authority_v2 import (
     runtime_projection_from_dict,
     runtime_projection_hash,
 )
+from compiler.realsas_compiler_core.runtime_visual_authority_v1 import (
+    SourceOwnedVisualRuntimeClipV1IR,
+    SourceOwnedVisualRuntimeProjectionV1IR,
+    SourceOwnedVisualRuntimeViewV1IR,
+    source_owned_visual_runtime_projection_hash,
+    source_owned_visual_runtime_projection_from_dict,
+)
+from compiler.realsas_compiler_core.visual_presentation_v1 import (
+    load_qualified_visual_presentation_view,
+    qualified_visual_presentation_set_from_dict,
+)
+from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
+    bind_region_visual_vertices_to_mechanical_affine_v1,
+    evaluate_region_visual_binding_v1,
+)
+from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.runtime_package_v2 import (
     build_rss_v2_entries,
     read_rss_v2,
@@ -68,6 +85,7 @@ from compiler.realsas_compiler_core.runtime_package_v2 import (
 )
 from compiler.realsas_compiler_core.visibility_v2 import (
     VISIBILITY_CONTRACT_V2_HASH,
+    rasterize_visible_owner,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     resolved_path,
@@ -190,6 +208,533 @@ def _pixel_face_counts(
     return np.bincount(unique_faces, minlength=int(face_count))
 
 
+
+def _visual_mesh_motion_metrics(
+    rest_positions: np.ndarray,
+    posed_positions: np.ndarray,
+    faces: np.ndarray,
+) -> dict:
+    rest = np.asarray(rest_positions, dtype=np.float64)
+    posed = np.asarray(posed_positions, dtype=np.float64)
+    tri = np.asarray(faces, dtype=np.int64)
+    if (
+        rest.ndim != 2
+        or rest.shape[1] != 2
+        or posed.shape != rest.shape
+        or tri.ndim != 2
+        or tri.shape[1] != 3
+        or np.any(tri < 0)
+        or np.any(tri >= len(rest))
+    ):
+        raise QualificationError(
+            "SOURCE_VISUAL_RUNTIME_MOTION_METRIC_INPUT_INVALID"
+        )
+    edges = set()
+    for face in tri.tolist():
+        for a, b in (
+            (face[0], face[1]),
+            (face[1], face[2]),
+            (face[2], face[0]),
+        ):
+            edges.add(tuple(sorted((int(a), int(b)))))
+    if not edges:
+        raise QualificationError(
+            "SOURCE_VISUAL_RUNTIME_MOTION_METRIC_EDGE_EMPTY"
+        )
+    edge_rows = np.asarray(sorted(edges), dtype=np.int64)
+    rest_len = np.linalg.norm(
+        rest[edge_rows[:, 1]] - rest[edge_rows[:, 0]], axis=1
+    )
+    posed_len = np.linalg.norm(
+        posed[edge_rows[:, 1]] - posed[edge_rows[:, 0]], axis=1
+    )
+    valid = (rest_len > 1.0e-12) & (posed_len > 1.0e-12)
+    ratio = np.ones_like(rest_len)
+    ratio[valid] = np.maximum(
+        posed_len[valid] / rest_len[valid],
+        rest_len[valid] / posed_len[valid],
+    )
+    ratio[~valid & (rest_len > 1.0e-12)] = np.inf
+
+    def signed_double_area(points):
+        a = points[tri[:, 0]]
+        b = points[tri[:, 1]]
+        c = points[tri[:, 2]]
+        return (
+            (b[:, 0] - a[:, 0]) * (c[:, 1] - a[:, 1])
+            - (b[:, 1] - a[:, 1]) * (c[:, 0] - a[:, 0])
+        )
+
+    rest_area = signed_double_area(rest)
+    posed_area = signed_double_area(posed)
+    measurable = np.abs(rest_area) > 1.0e-12
+    flipped = measurable & (
+        np.sign(rest_area) != np.sign(posed_area)
+    )
+    finite_ratio = ratio[np.isfinite(ratio)]
+    return {
+        "edge_count": int(len(edge_rows)),
+        "flipped_triangle_count": int(np.count_nonzero(flipped)),
+        "edge_gt_4_count": int(np.count_nonzero(ratio > 4.0)),
+        "edge_gt_10_count": int(np.count_nonzero(ratio > 10.0)),
+        "p95_edge_ratio": (
+            float(np.percentile(finite_ratio, 95.0))
+            if len(finite_ratio)
+            else float("inf")
+        ),
+        "max_edge_ratio": (
+            float(np.max(finite_ratio))
+            if len(finite_ratio)
+            else float("inf")
+        ),
+    }
+
+
+def _build_source_owned_visual_runtime_projection(
+    ctx: dict,
+    *,
+    complete,
+    mesh,
+    dynamic,
+    asset,
+    appearance,
+    cameras,
+) -> dict:
+    qualified_visual = qualified_visual_presentation_set_from_dict(
+        stage_output_payload(
+            ctx,
+            "37_QUALIFIED_PRESENTATION_STRUCTURE",
+            "RealSaS.QualifiedVisualPresentationSetIR.v1",
+        )
+    )
+    complete_visual_hash = str(
+        dict(complete.metadata or {}).get(
+            "visual_mesh_set_binding_hash"
+        )
+        or ""
+    )
+    if complete_visual_hash != qualified_visual.set_hash:
+        raise QualificationError(
+            "SOURCE_VISUAL_RUNTIME_COMPLETE_PUPPET_BINDING_DRIFT"
+        )
+    if (
+        qualified_visual.mechanical_mesh_binding_hash
+        != mesh.mesh_lineage_hash
+    ):
+        raise QualificationError(
+            "SOURCE_VISUAL_RUNTIME_MECHANICAL_MESH_DRIFT"
+        )
+    if (
+        qualified_visual.appearance_asset_binding_hash
+        != asset.asset_hash
+        or qualified_visual.appearance_qualification_binding_hash
+        != appearance.qualification_hash
+    ):
+        raise QualificationError(
+            "SOURCE_VISUAL_RUNTIME_APPEARANCE_BINDING_DRIFT"
+        )
+    if (
+        dynamic.mechanical_state_binding_hash
+        != complete.mechanical_state_binding_hash
+        or dynamic.presentation_binding_hash
+        != complete.presentation_graph_binding_hash
+    ):
+        raise QualificationError(
+            "SOURCE_VISUAL_RUNTIME_DYNAMIC_BINDING_DRIFT"
+        )
+
+    vertex_ids = [
+        str(vertex.canonical_mesh_vertex_id) for vertex in mesh.vertices
+    ]
+    vertex_index = {
+        vertex_id: index for index, vertex_id in enumerate(vertex_ids)
+    }
+    if len(vertex_index) != len(vertex_ids):
+        raise QualificationError(
+            "SOURCE_VISUAL_RUNTIME_DUPLICATE_MECHANICAL_VERTEX_ID"
+        )
+    rest_mechanical = np.asarray(
+        [vertex.P for vertex in mesh.vertices], dtype=np.float64
+    )
+    mechanical_faces = np.asarray(
+        [
+            [vertex_index[str(vertex_id)] for vertex_id in face]
+            for face in mesh.faces
+        ],
+        dtype=np.int64,
+    )
+    camera_by_view = {
+        int(row.view_index): row for row in cameras.cameras
+    }
+    texture_by_view = {
+        int(row.direction_index): row for row in asset.textures
+    }
+    visual_by_view = {
+        int(row.view_index): row for row in qualified_visual.views
+    }
+    if (
+        set(camera_by_view) != set(range(8))
+        or set(texture_by_view) != set(range(8))
+        or set(visual_by_view) != set(range(8))
+    ):
+        raise QualificationError(
+            "SOURCE_VISUAL_RUNTIME_REQUIRES_EXACT_V0_V7"
+        )
+
+    operator_policy = {
+        "schema": "RealSaS.VisualDeformationOperatorPolicy.v1",
+        "operator_id": "REGION_LOCAL_SAFE_MECHANICAL_AFFINE_V1",
+        "candidate_seed_count": 16,
+        "seed_distance_budget": "VIEW_DIAGONAL__MEASURE_NOT_TUNE",
+        "unclamped_barycentric_authorized": True,
+        "runtime_binding_solve_authorized": False,
+        "dynamic_quality_authority": "STAGE45",
+    }
+    operator_policy_hash = content_sha256(operator_policy)
+
+    arrays = {}
+    runtime_views = []
+    bindings = {}
+    qa_summary = {}
+    for view_index in range(8):
+        camera = camera_by_view[view_index]
+        visual_row = visual_by_view[view_index]
+        loaded = load_qualified_visual_presentation_view(visual_row)
+        visual_mesh = loaded["mesh"]
+        visibility = rasterize_visible_owner(
+            mesh,
+            camera,
+            width=int(visual_row.width),
+            height=int(visual_row.height),
+            max_layers=4,
+        )
+        binding = bind_region_visual_vertices_to_mechanical_affine_v1(
+            points_source_xy=np.asarray(
+                visual_mesh.positions, dtype=np.float64
+            ),
+            vertex_region_id=np.asarray(
+                loaded["vertex_region_id"], dtype=np.int32
+            ),
+            seed_region_labels=np.asarray(
+                loaded["seed_region_labels"], dtype=np.int32
+            ),
+            owner_face_index=np.asarray(
+                visibility.owner_face_index, dtype=np.int64
+            ),
+            mechanical_positions_xyz=rest_mechanical,
+            mechanical_faces=mechanical_faces,
+            camera=camera,
+            candidate_seed_count=int(
+                operator_policy["candidate_seed_count"]
+            ),
+            max_seed_distance_px=float(
+                math.hypot(
+                    int(visual_row.width),
+                    int(visual_row.height),
+                )
+            ),
+        )
+        rest_eval = evaluate_region_visual_binding_v1(
+            binding,
+            posed_mechanical_positions_xyz=rest_mechanical,
+            camera=camera,
+        )
+        rest_error = np.linalg.norm(
+            np.asarray(rest_eval, dtype=np.float64)
+            - np.asarray(visual_mesh.positions, dtype=np.float64),
+            axis=1,
+        )
+        if (
+            not np.isfinite(rest_error).all()
+            or float(np.max(rest_error, initial=0.0)) > 1.0e-7
+        ):
+            raise QualificationError(
+                "SOURCE_VISUAL_RUNTIME_REST_BINDING_DRIFT"
+            )
+        prefix = f"view_{view_index}"
+        arrays[f"{prefix}_faces"] = np.asarray(
+            visual_mesh.faces, dtype=np.uint32
+        )
+        arrays[f"{prefix}_uv"] = np.asarray(
+            visual_mesh.uv, dtype=np.float64
+        )
+        arrays[f"{prefix}_rest_positions"] = np.asarray(
+            visual_mesh.positions, dtype=np.float64
+        )
+        arrays[f"{prefix}_vertex_region_id"] = np.asarray(
+            loaded["vertex_region_id"], dtype=np.int32
+        )
+        arrays[f"{prefix}_face_region_id"] = np.asarray(
+            loaded["face_region_id"], dtype=np.int32
+        )
+        arrays[f"{prefix}_mechanical_face_indices"] = np.asarray(
+            binding["mechanical_face_indices"], dtype=np.int64
+        )
+        arrays[f"{prefix}_mechanical_barycentric"] = np.asarray(
+            binding["mechanical_barycentric"], dtype=np.float64
+        )
+        arrays[f"{prefix}_nearest_safe_seed_distance_px"] = np.asarray(
+            binding["nearest_safe_seed_distance_px"], dtype=np.float64
+        )
+        arrays[f"{prefix}_extrapolation_penalty"] = np.asarray(
+            binding["extrapolation_penalty"], dtype=np.float64
+        )
+        bindings[view_index] = binding
+
+        texture = texture_by_view[view_index]
+        texture_path = resolved_path(texture.transport_png_path)
+        if (
+            not texture_path.is_file()
+            or sha256_file(texture_path)
+            != texture.transport_png_sha256
+        ):
+            raise QualificationError(
+                "SOURCE_VISUAL_RUNTIME_TEXTURE_BYTES_DRIFT"
+            )
+        texture_meta = dict(texture.metadata or {})
+        if (
+            str(
+                texture_meta.get("visual_mesh_set_binding_hash")
+                or ""
+            )
+            != qualified_visual.source_visual_mesh_set_binding_hash
+        ):
+            raise QualificationError(
+                "SOURCE_VISUAL_RUNTIME_TEXTURE_SOURCE_BINDING_DRIFT"
+            )
+        runtime_views.append(
+            SourceOwnedVisualRuntimeViewV1IR(
+                view_index=view_index,
+                view_id=f"V{view_index}",
+                camera=asdict(camera),
+                source_width=int(visual_row.width),
+                source_height=int(visual_row.height),
+                texture_path=str(texture_path),
+                texture_sha256=str(texture.transport_png_sha256),
+                visual_mesh_npz_path=str(visual_row.mesh_npz_path),
+                visual_mesh_npz_sha256=str(
+                    visual_row.mesh_npz_sha256
+                ),
+                visual_mesh_hash=str(visual_row.visual_mesh_hash),
+                visual_vertex_count=int(visual_row.vertex_count),
+                visual_face_count=int(visual_row.face_count),
+                metadata={
+                    "source_owned_visual_mesh_mode": True,
+                    "mechanical_mesh_render_authority": False,
+                    "fixed_source_raster_uv": True,
+                    "source_visual_mesh_hash": (
+                        visual_row.source_visual_mesh_hash
+                    ),
+                },
+            )
+        )
+        qa_summary[f"V{view_index}"] = {
+            "max_nearest_safe_seed_distance_px": float(
+                np.max(
+                    binding["nearest_safe_seed_distance_px"],
+                    initial=0.0,
+                )
+            ),
+            "max_extrapolation_penalty": float(
+                np.max(
+                    binding["extrapolation_penalty"],
+                    initial=0.0,
+                )
+            ),
+            "max_rest_reconstruction_error_px": float(
+                np.max(rest_error, initial=0.0)
+            ),
+            "visibility_layer_overflow_pixel_count": int(
+                np.count_nonzero(visibility.layer_overflow)
+            ),
+        }
+
+    clips = []
+    dynamic_qa = {}
+    for clip_index, clip in enumerate(dynamic.clips):
+        prefix = f"clip_{clip_index}"
+        times = np.asarray(
+            [frame.time_seconds for frame in clip.frames],
+            dtype=np.float64,
+        )
+        arrays[f"{prefix}_times"] = times
+        clip_qa = {}
+        for view_index in range(8):
+            visual_row = visual_by_view[view_index]
+            loaded = load_qualified_visual_presentation_view(
+                visual_row
+            )
+            visual_mesh = loaded["mesh"]
+            frames = np.empty(
+                (
+                    len(clip.frames),
+                    int(visual_row.vertex_count),
+                    2,
+                ),
+                dtype=np.float64,
+            )
+            metrics = []
+            for frame_index, frame in enumerate(clip.frames):
+                by_id = {
+                    str(vertex_id): tuple(map(float, xyz))
+                    for vertex_id, xyz in frame.posed_vertex_xyz
+                }
+                if set(by_id) != set(vertex_ids):
+                    raise QualificationError(
+                        "SOURCE_VISUAL_RUNTIME_DYNAMIC_VERTEX_SET_DRIFT"
+                    )
+                posed_mechanical = np.asarray(
+                    [by_id[vertex_id] for vertex_id in vertex_ids],
+                    dtype=np.float64,
+                )
+                posed_visual = evaluate_region_visual_binding_v1(
+                    bindings[view_index],
+                    posed_mechanical_positions_xyz=posed_mechanical,
+                    camera=camera_by_view[view_index],
+                )
+                frames[frame_index] = posed_visual
+                metrics.append(
+                    _visual_mesh_motion_metrics(
+                        np.asarray(
+                            visual_mesh.positions, dtype=np.float64
+                        ),
+                        np.asarray(posed_visual, dtype=np.float64),
+                        np.asarray(
+                            visual_mesh.faces, dtype=np.int64
+                        ),
+                    )
+                )
+            arrays[
+                f"{prefix}_view_{view_index}_positions"
+            ] = frames
+            clip_qa[f"V{view_index}"] = {
+                "maximum_flipped_triangle_count": max(
+                    row["flipped_triangle_count"] for row in metrics
+                ),
+                "maximum_edge_gt_4_count": max(
+                    row["edge_gt_4_count"] for row in metrics
+                ),
+                "maximum_edge_gt_10_count": max(
+                    row["edge_gt_10_count"] for row in metrics
+                ),
+                "maximum_p95_edge_ratio": max(
+                    row["p95_edge_ratio"] for row in metrics
+                ),
+                "maximum_edge_ratio": max(
+                    row["max_edge_ratio"] for row in metrics
+                ),
+                "frames": metrics,
+            }
+        dynamic_qa[str(clip.clip_id)] = clip_qa
+        clips.append(
+            SourceOwnedVisualRuntimeClipV1IR(
+                clip_id=str(clip.clip_id),
+                duration_seconds=float(clip.duration_seconds),
+                loop=bool(clip.loop),
+                frame_count=len(clip.frames),
+                array_prefix=prefix,
+                metadata={
+                    "classification": str(clip.classification),
+                    "source_dynamic_clip_proof_hash": str(
+                        clip.clip_proof_hash
+                    ),
+                    "playback_sampling_contract": (
+                        "SEALED_FRAME_INDEX_ONLY"
+                    ),
+                    "host_interpolation_authorized": False,
+                },
+            )
+        )
+
+    root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+    array_path = root / "source_owned_visual_projection_arrays_v1.npz"
+    array_sha = _save_npz(array_path, **arrays)
+    projection = SourceOwnedVisualRuntimeProjectionV1IR(
+        complete_puppet_binding_hash=str(complete.complete_puppet_hash),
+        mechanical_state_binding_hash=str(
+            complete.mechanical_state_binding_hash
+        ),
+        mechanical_mesh_binding_hash=str(mesh.mesh_lineage_hash),
+        qualified_visual_presentation_binding_hash=str(
+            qualified_visual.set_hash
+        ),
+        dynamic_motion_binding_hash=str(dynamic.dynamic_motion_hash),
+        appearance_asset_binding_hash=str(asset.asset_hash),
+        appearance_qualification_binding_hash=str(
+            appearance.qualification_hash
+        ),
+        camera_set_binding_hash=str(cameras.camera_set_hash),
+        visual_deformation_operator_id=str(
+            operator_policy["operator_id"]
+        ),
+        visual_deformation_policy_hash=operator_policy_hash,
+        projection_npz_path=str(array_path),
+        projection_npz_sha256=array_sha,
+        views=tuple(runtime_views),
+        clips=tuple(clips),
+        projection_hash="",
+        metadata={
+            "presentation_geometry_mode": (
+                "SOURCE_OWNED_VISUAL_PRESENTATION_V1"
+            ),
+            "mechanical_mesh_render_authority": False,
+            "runtime_visual_mesh_rebuild": False,
+            "runtime_binding_solve": False,
+            "runtime_generation": False,
+            "donor_search_at_runtime": False,
+            "dynamic_quality_authority": "STAGE45",
+            "operator_policy": operator_policy,
+            "rest_binding_qa": qa_summary,
+            "dynamic_motion_qa": dynamic_qa,
+        },
+    )
+    projection = replace(
+        projection,
+        projection_hash=source_owned_visual_runtime_projection_hash(
+            projection
+        ),
+    )
+    root.mkdir(parents=True, exist_ok=True)
+    return {
+        "status": "PASS",
+        "outputs": [
+            write_ir(
+                root / "source_owned_visual_runtime_projection_v1.json",
+                projection,
+                authority_class=(
+                    "SOURCE_OWNED_VISUAL_RUNTIME_PROJECTION_V1"
+                ),
+            ),
+            {
+                "path": str(array_path),
+                "sha256": array_sha,
+                "authority_class": (
+                    "SOURCE_OWNED_VISUAL_RUNTIME_ARRAYS_V1"
+                ),
+                "schema": (
+                    "RealSaS.SourceOwnedVisualRuntimeProjectionArrays.v1"
+                ),
+            },
+        ],
+        "diagnostics": {
+            "projection_hash": projection.projection_hash,
+            "qualified_visual_presentation_binding_hash": (
+                qualified_visual.set_hash
+            ),
+            "clip_count": len(clips),
+            "view_count": len(runtime_views),
+            "presentation_geometry_mode": (
+                "SOURCE_OWNED_VISUAL_PRESENTATION_V1"
+            ),
+            "visual_deformation_operator_id": (
+                projection.visual_deformation_operator_id
+            ),
+            "mechanical_mesh_render_authority": False,
+            "runtime_generation": False,
+        },
+    }
+
+
 def build_runtime_projection_stage(ctx: dict) -> dict:
     complete = complete_puppet_state_v2_from_dict(
         stage_output_payload(
@@ -248,8 +793,14 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
 
     asset_meta = dict(asset.metadata or {})
     if asset_meta.get("source_owned_visual_mesh_mode") is True:
-        raise QualificationError(
-            "RUNTIME_V2_SOURCE_OWNED_VISUAL_PRESENTATION_BINDING_REQUIRED"
+        return _build_source_owned_visual_runtime_projection(
+            ctx,
+            complete=complete,
+            mesh=mesh,
+            dynamic=dynamic,
+            asset=asset,
+            appearance=appearance,
+            cameras=cameras,
         )
     if (
         dynamic.mechanical_state_binding_hash

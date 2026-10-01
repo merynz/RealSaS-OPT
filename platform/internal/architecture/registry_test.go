@@ -33,8 +33,8 @@ func testRegistry(t *testing.T) Registry {
 
 func TestEveryCanonicalStageHasOneExactOwner(t *testing.T) {
 	r := testRegistry(t)
-	if len(r.Stages) != 46 {
-		t.Fatalf("stages=%d", len(r.Stages))
+	if len(r.Stages) == 0 {
+		t.Fatal("registry has no stages")
 	}
 	cases := map[string]string{
 		"10_IRIS_FIT":                           "engine.geometry",
@@ -72,5 +72,27 @@ func TestPlatformModulesExposeStateOwnership(t *testing.T) {
 		if len(module.StateTables) == 0 {
 			t.Fatalf("%s has no state-table ownership", id)
 		}
+	}
+}
+
+func TestUnknownFutureStageGroupGetsVisibleDiscoveredOwner(t *testing.T) {
+	data := []byte(`{
+	  "stage_count": 2,
+	  "stages": [
+	    {"ordinal":1,"id":"alpha","title":"alpha","group":"future_domain","depends_on":[],"adapter":"compiler.future.alpha:run","policy":{"product_pass_authority":false}},
+	    {"ordinal":2,"id":"omega","title":"omega","group":"closure","depends_on":["alpha"],"adapter":"compiler.future.omega:run","policy":{"product_pass_authority":true}}
+	  ]
+	}`)
+	g, err := stagegraph.ParseCanonicalPlan(data)
+	if err != nil { t.Fatal(err) }
+	r, err := Build(g)
+	if err != nil { t.Fatal(err) }
+	stage, ok := r.Stage("alpha")
+	if !ok { t.Fatal("alpha missing") }
+	if stage.OwnerModuleID != "engine.future_domain" || stage.OwnershipSource != "DISCOVERED_STAGE_GROUP" {
+		t.Fatalf("stage=%+v", stage)
+	}
+	if _, ok := r.Module("engine.future_domain"); !ok {
+		t.Fatal("dynamic owner module missing")
 	}
 }

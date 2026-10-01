@@ -37,12 +37,13 @@ type Domain struct {
 }
 
 type StageOwner struct {
-	Ordinal       int      `json:"ordinal"`
-	StageID       string   `json:"stage_id"`
-	Group         string   `json:"group"`
-	OwnerModuleID string   `json:"owner_module_id"`
-	Adapter       string   `json:"adapter"`
-	DependsOn     []string `json:"depends_on"`
+	Ordinal         int      `json:"ordinal"`
+	StageID         string   `json:"stage_id"`
+	Group           string   `json:"group"`
+	OwnerModuleID   string   `json:"owner_module_id"`
+	OwnershipSource string   `json:"ownership_source"`
+	Adapter         string   `json:"adapter"`
+	DependsOn       []string `json:"depends_on"`
 }
 
 type Registry struct {
@@ -92,7 +93,7 @@ func staticDomains() []Domain {
 				},
 				{
 					ID: "platform.release", ParentDomain: "platform", Authority: AuthorityPlatform,
-					Purpose:         "Immutable 46-stage engine release snapshots and semantic version identity.",
+					Purpose:         "Immutable engine-graph release snapshots and semantic version identity.",
 					CodeRoots:       []string{"platform/internal/release"},
 					StateTables:     []string{"engine_releases", "engine_release_stages"},
 					FailurePrefixes: []string{"ENGINE_RELEASE_"},
@@ -189,6 +190,40 @@ func staticDomains() []Domain {
 	}
 }
 
+func normalizedGroupID(group string) string {
+	group = strings.ToLower(strings.TrimSpace(group))
+	if group == "" {
+		return "unclassified"
+	}
+	var b strings.Builder
+	lastUnderscore := false
+	for _, r := range group {
+		valid := (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9')
+		if valid {
+			b.WriteRune(r)
+			lastUnderscore = false
+			continue
+		}
+		if !lastUnderscore {
+			b.WriteByte('_')
+			lastUnderscore = true
+		}
+	}
+	out := strings.Trim(b.String(), "_")
+	if out == "" {
+		return "unclassified"
+	}
+	return out
+}
+
+func adapterCodeRoot(adapter string) string {
+	module := strings.SplitN(adapter, ":", 2)[0]
+	if module == "" {
+		return "compiler"
+	}
+	return strings.ReplaceAll(module, ".", "/") + ".py"
+}
+
 func engineModule(group, purpose, codeRoot string) Module {
 	id := "engine." + group
 	return Module{
@@ -214,22 +249,43 @@ func Build(g *stagegraph.Graph) (Registry, error) {
 			moduleIDs[m.ID] = struct{}{}
 		}
 	}
-	stages := make([]StageOwner, 0, 46)
+	stages := make([]StageOwner, 0, g.StageCount())
 	for _, s := range g.Stages() {
 		owner, ok := engineGroupOwner[s.Group]
+		ownershipSource := "DECLARED_GROUP_MAPPING"
 		if !ok {
-			return Registry{}, fmt.Errorf("UNOWNED_STAGE_GROUP:%s:%s", s.ID, s.Group)
+			owner = "engine." + normalizedGroupID(s.Group)
+			ownershipSource = "DISCOVERED_STAGE_GROUP"
 		}
-		if _, ok := moduleIDs[owner]; !ok {
-			return Registry{}, fmt.Errorf("UNKNOWN_STAGE_OWNER_MODULE:%s:%s", s.ID, owner)
+		if _, exists := moduleIDs[owner]; !exists {
+			engineIndex := -1
+			for i := range domains {
+				if domains[i].ID == "engine" {
+					engineIndex = i
+					break
+				}
+			}
+			if engineIndex < 0 {
+				return Registry{}, errors.New("engine domain missing")
+			}
+			dynamic := Module{
+				ID: owner, ParentDomain: "engine", Authority: AuthorityEngine,
+				Purpose: "Dynamically discovered compiler stage group " + s.Group + ".",
+				CodeRoots: []string{adapterCodeRoot(s.Adapter)},
+				ArtifactFamilies: []string{"RealSaS.StageResultManifest"},
+				FailurePrefixes: []string{strings.ToUpper(normalizedGroupID(s.Group)) + "_", "STAGE_"},
+			}
+			domains[engineIndex].Modules = append(domains[engineIndex].Modules, dynamic)
+			moduleIDs[owner] = struct{}{}
 		}
 		stages = append(stages, StageOwner{
 			Ordinal: s.Ordinal, StageID: s.ID, Group: s.Group, OwnerModuleID: owner,
+			OwnershipSource: ownershipSource,
 			Adapter: s.Adapter, DependsOn: append([]string(nil), s.DependsOn...),
 		})
 	}
-	if len(stages) != 46 {
-		return Registry{}, fmt.Errorf("architecture registry expected 46 stages, got %d", len(stages))
+	if len(stages) != g.StageCount() {
+		return Registry{}, fmt.Errorf("architecture registry stage count drift: registry=%d graph=%d", len(stages), g.StageCount())
 	}
 	return Registry{
 		ContractVersion: "RealSaS.SystemArchitectureRegistry.v1",
@@ -272,8 +328,8 @@ func (r Registry) Validate() error {
 			seenModules[m.ID] = struct{}{}
 		}
 	}
-	if len(r.Stages) != 46 {
-		return fmt.Errorf("architecture registry must own exactly 46 stages")
+	if len(r.Stages) == 0 {
+		return fmt.Errorf("architecture registry must own at least one compiler stage")
 	}
 	for _, s := range r.Stages {
 		if _, ok := seenModules[s.OwnerModuleID]; !ok {

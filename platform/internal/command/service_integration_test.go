@@ -87,9 +87,13 @@ func TestCompileCommandIsTransactionalAndIdempotent(t *testing.T) {
 	req := CompileRequest{
 		SubjectID:       subjectID,
 		EngineReleaseID: sealedRelease.ReleaseID,
-		SubjectInputID:  sealedInput.SubjectInputID,
-		IdempotencyKey:  "compile:" + subjectID.String(),
-		RequestedBy:     "ci",
+		SubjectInputID:     sealedInput.SubjectInputID,
+		CompilerRunID:      "run-" + subjectID.String(),
+		RunManifestPath:    "/authority/run_manifest.json",
+		RunLedgerPath:      "/authority/ACTIVE_RUN_V2.json",
+		PipelinePlanSHA256: repeatCommandHex("d"),
+		IdempotencyKey:     "compile:" + subjectID.String(),
+		RequestedBy:        "ci",
 	}
 	first, err := SubmitCompile(ctx, pool, g, req)
 	if err != nil {

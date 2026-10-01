@@ -42,12 +42,16 @@ type Receipt struct {
 }
 
 type CompileRequest struct {
-	SubjectID       uuid.UUID
-	EngineReleaseID uuid.UUID
-	SubjectInputID  uuid.UUID
-	TargetStageID   string
-	IdempotencyKey  string
-	RequestedBy     string
+	SubjectID          uuid.UUID
+	EngineReleaseID    uuid.UUID
+	SubjectInputID     uuid.UUID
+	TargetStageID      string
+	CompilerRunID      string
+	RunManifestPath    string
+	RunLedgerPath      string
+	PipelinePlanSHA256 string
+	IdempotencyKey     string
+	RequestedBy        string
 }
 
 type RenderRequest struct {
@@ -84,6 +88,12 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 	if req.IdempotencyKey == "" || req.RequestedBy == "" {
 		return Receipt{}, errors.New("idempotency_key and requested_by are required")
 	}
+	if req.CompilerRunID == "" || req.RunManifestPath == "" || req.RunLedgerPath == "" {
+		return Receipt{}, errors.New("compile compiler-run binding is required")
+	}
+	if err := semantic.ValidateSHA256(req.PipelinePlanSHA256); err != nil {
+		return Receipt{}, errors.New("compile pipeline plan sha256 is required")
+	}
 
 	var out Receipt
 	err := persistence.WithSerializableRetry(ctx, pool, 5, func(tx pgx.Tx) error {
@@ -95,7 +105,11 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 			if existing.CommandType != CompileSubject || existing.SubjectID != req.SubjectID ||
 				payloadString(existing.Payload, "engine_release_id") != req.EngineReleaseID.String() ||
 				payloadString(existing.Payload, "subject_input_id") != req.SubjectInputID.String() ||
-				payloadString(existing.Payload, "target_stage_id") != req.TargetStageID {
+				payloadString(existing.Payload, "target_stage_id") != req.TargetStageID ||
+				payloadString(existing.Payload, "compiler_run_id") != req.CompilerRunID ||
+				payloadString(existing.Payload, "run_manifest_path") != req.RunManifestPath ||
+				payloadString(existing.Payload, "run_ledger_path") != req.RunLedgerPath ||
+				payloadString(existing.Payload, "pipeline_plan_sha256") != req.PipelinePlanSHA256 {
 				return ErrIdempotencyConflict
 			}
 			attemptID, err := payloadUUID(existing.Payload, "attempt_id")
@@ -159,6 +173,8 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 			"subject_input_id":              req.SubjectInputID.String(),
 			"subject_input_manifest_sha256": inputManifestSHA,
 			"target_stage_id":               req.TargetStageID,
+			"compiler_run_id":                req.CompilerRunID,
+			"pipeline_plan_sha256":           req.PipelinePlanSHA256,
 		}
 		specSHA, err := semantic.JSONSHA256(spec)
 		if err != nil {
@@ -174,6 +190,14 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 		`, attemptID, req.SubjectID, req.EngineReleaseID, specSHA, req.RequestedBy); err != nil {
 			return err
 		}
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO compiler_run_bindings(
+				attempt_id,compiler_run_id,run_manifest_path,run_ledger_path,pipeline_plan_sha256
+			)
+			VALUES ($1,$2,$3,$4,$5)
+		`, attemptID, req.CompilerRunID, req.RunManifestPath, req.RunLedgerPath, req.PipelinePlanSHA256); err != nil {
+			return err
+		}
 
 		payload := map[string]any{
 			"schema":            "RealSaS.CompileSubjectCommand.v1",
@@ -181,8 +205,12 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 			"attempt_id":        attemptID.String(),
 			"subject_id":        req.SubjectID.String(),
 			"engine_release_id": req.EngineReleaseID.String(),
-			"subject_input_id":  req.SubjectInputID.String(),
-			"target_stage_id":   req.TargetStageID,
+			"subject_input_id":      req.SubjectInputID.String(),
+			"target_stage_id":       req.TargetStageID,
+			"compiler_run_id":       req.CompilerRunID,
+			"run_manifest_path":     req.RunManifestPath,
+			"run_ledger_path":       req.RunLedgerPath,
+			"pipeline_plan_sha256":  req.PipelinePlanSHA256,
 		}
 		if err := insertCommand(ctx, tx, commandID, CompileSubject, req.SubjectID, req.IdempotencyKey, payload); err != nil {
 			return err
@@ -193,8 +221,10 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 		if err := appendAudit(ctx, tx, req.RequestedBy, "COMPILE_COMMAND_ACCEPTED", req.SubjectID, &attemptID, nil, map[string]any{
 			"command_id":        commandID.String(),
 			"engine_release_id": req.EngineReleaseID.String(),
-			"subject_input_id":  req.SubjectInputID.String(),
-			"target_stage_id":   req.TargetStageID,
+			"subject_input_id":      req.SubjectInputID.String(),
+			"target_stage_id":       req.TargetStageID,
+			"compiler_run_id":       req.CompilerRunID,
+			"pipeline_plan_sha256":  req.PipelinePlanSHA256,
 		}); err != nil {
 			return err
 		}

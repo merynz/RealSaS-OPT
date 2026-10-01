@@ -30,7 +30,7 @@ jobs:
 
       - name: Verify observed token mismatch
         run: |
-          python - <<'PY'
+          python3 - <<'PY'
           from pathlib import Path
           runtime = Path("compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py").read_text()
           test = Path("tests/repository/test_source_owned_visual_runtime_wiring_v1.py").read_text()
@@ -44,7 +44,7 @@ jobs:
       - name: Prove repository wiring test still rejects candidate
         run: |
           set +e
-          python - <<'PY'
+          python3 - <<'PY'
           import runpy
           ns = runpy.run_path("tests/repository/test_source_owned_visual_runtime_wiring_v1.py")
           ns["test_source_owned_visual_runtime_cannot_silently_fall_back_to_mechanical_render_mesh"]()

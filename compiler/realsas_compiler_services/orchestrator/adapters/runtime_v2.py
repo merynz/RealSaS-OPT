@@ -1163,7 +1163,11 @@ def _run_native(
         raise QualificationError(
             "RUNTIME_V2_NATIVE_PLAYER_FAIL:" + completed.stderr.strip()
         )
-    if "renderer=REALSAS_V2_CAA_CANONICAL_DEPTH" not in completed.stdout:
+    renderer_tokens = (
+        "renderer=REALSAS_V2_CAA_CANONICAL_DEPTH",
+        "renderer=REALSAS_V2_SOURCE_OWNED_VISUAL_2D",
+    )
+    if not any(token in completed.stdout for token in renderer_tokens):
         raise QualificationError("RUNTIME_V2_NATIVE_RENDERER_CONTRACT_DRIFT")
     return rgba, provenance, owner, completed.stdout
 

@@ -283,7 +283,6 @@ func (a Activities) FinalizeCompile(ctx context.Context, payload map[string]any)
 	return result, nil
 }
 
-
 func (a Activities) requireProductQualifiedClosure(ctx context.Context, attemptID uuid.UUID) error {
 	var qualified bool
 	if err := a.Pool.QueryRow(ctx, `

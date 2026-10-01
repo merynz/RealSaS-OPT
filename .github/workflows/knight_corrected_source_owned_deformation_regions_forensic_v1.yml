@@ -3,7 +3,8 @@ name: knight-corrected-source-owned-deformation-regions-forensic-v1
 on:
   push:
     branches:
-      - audit/knight-rest-visual-owner-20260930
+      - integration/final-main-knight-platform-20261002
+      - main
     paths:
       - .github/workflows/knight_corrected_source_owned_deformation_regions_forensic_v1.yml
 
@@ -12,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   proof:
@@ -74,14 +75,3 @@ jobs:
           path: ${{ env.OUT_DIR }}
           if-no-files-found: error
           retention-days: 14
-      - name: Seal audit branch
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "realsas-self-hosted-runner"
-          git config user.email "runner@realsas.local"
-          git add "$OUT_DIR"
-          git commit -m "audit: seal corrected source-owned visual forensic proof"
-          git fetch origin "$GITHUB_REF_NAME"
-          git rebase "origin/$GITHUB_REF_NAME"
-          git push origin HEAD:"$GITHUB_REF_NAME"

@@ -99,10 +99,10 @@ func TestAtomicPromotion(t *testing.T) {
 	}
 
 	result, err := Promote(ctx, pool, PromotionRequest{
-		SubjectID: subjectID,
+		SubjectID:        subjectID,
 		TargetRevisionID: revisionID,
-		RequestedBy: "ci",
-		Reason: "integration smoke",
+		RequestedBy:      "ci",
+		Reason:           "integration smoke",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -139,10 +139,10 @@ func TestAtomicPromotion(t *testing.T) {
 		t.Fatalf("audit=%d outbox=%d", auditCount, outboxCount)
 	}
 	if _, err := Promote(ctx, pool, PromotionRequest{
-		SubjectID: subjectID,
+		SubjectID:        subjectID,
 		TargetRevisionID: revisionID,
-		RequestedBy: "ci",
-		Reason: "duplicate",
+		RequestedBy:      "ci",
+		Reason:           "duplicate",
 	}); err != ErrAlreadyCurrent {
 		t.Fatalf("duplicate promotion error=%v", err)
 	}

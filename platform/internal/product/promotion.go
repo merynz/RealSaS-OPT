@@ -16,9 +16,9 @@ import (
 
 var (
 	ErrTargetNotFoundOrWrongSubject = errors.New("promotion target not found or subject mismatch")
-	ErrAlreadyCurrent                = errors.New("promotion target already current")
-	ErrRequiredRolesMissing          = errors.New("promotion required roles missing")
-	ErrArtifactNotQualified          = errors.New("promotion artifact not qualified")
+	ErrAlreadyCurrent               = errors.New("promotion target already current")
+	ErrRequiredRolesMissing         = errors.New("promotion required roles missing")
+	ErrArtifactNotQualified         = errors.New("promotion artifact not qualified")
 )
 
 var requiredProductRoles = []string{
@@ -41,9 +41,9 @@ type PromotionRequest struct {
 }
 
 type PromotionResult struct {
-	PromotionID   uuid.UUID
-	FromRevision  *uuid.UUID
-	ToRevision    uuid.UUID
+	PromotionID    uuid.UUID
+	FromRevision   *uuid.UUID
+	ToRevision     uuid.UUID
 	NewLockVersion int64
 }
 
@@ -186,10 +186,10 @@ func Promote(ctx context.Context, pool *pgxpool.Pool, req PromotionRequest) (Pro
 		}
 
 		auditPayload, _ := json.Marshal(map[string]any{
-			"promotion_id":      promotionID.String(),
-			"from_revision_id":  from,
-			"to_revision_id":    req.TargetRevisionID.String(),
-			"reason":            req.Reason,
+			"promotion_id":     promotionID.String(),
+			"from_revision_id": from,
+			"to_revision_id":   req.TargetRevisionID.String(),
+			"reason":           req.Reason,
 		})
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO audit_events(actor, action, subject_id, product_revision_id, payload)
@@ -199,7 +199,7 @@ func Promote(ctx context.Context, pool *pgxpool.Pool, req PromotionRequest) (Pro
 		}
 
 		outboxPayload, _ := json.Marshal(map[string]any{
-			"promotion_id":       promotionID.String(),
+			"promotion_id":        promotionID.String(),
 			"product_revision_id": req.TargetRevisionID.String(),
 		})
 		if _, err := tx.Exec(ctx, `
@@ -210,9 +210,9 @@ func Promote(ctx context.Context, pool *pgxpool.Pool, req PromotionRequest) (Pro
 		}
 
 		result = PromotionResult{
-			PromotionID:   promotionID,
-			FromRevision:  from,
-			ToRevision:    req.TargetRevisionID,
+			PromotionID:    promotionID,
+			FromRevision:   from,
+			ToRevision:     req.TargetRevisionID,
 			NewLockVersion: newLock,
 		}
 		return nil

@@ -1,120 +1,92 @@
-# Timeout-Era Forensic Index — 2026-09-30 Lineage
+# Timeout-Era Forensic Index — corrected 2026-10-01
 
-> NON-AUTHORITATIVE agent reconstruction. This file records what was mechanically observed, not what should be promoted.
+> NON-AUTHORITATIVE agent reconstruction. Repository history, CI evidence, and explicit user decisions outrank this note.
 
 ## Executive finding
 
-The current `main` and the 30 September normalization candidate are **not the same implementation**.
+The normalized 46-stage lineage **was promoted to `main`**.
 
-Current main:
-- substantive base `e6c91184...`
-- current head `a8002b20...`
-- only one commit ahead of `e6c91184...`, and that commit changes generated authority/cache files only.
+Exact normalized candidate:
+`92de05292b05e4ae8aaab3eed53c515b5eef5929`
 
-Primary normalization candidate:
-- `integration/generic-main-finalization-20260930`
-- head `92de05292...`
-- diverged from current main at `e6c91184...`
-- 68 commits ahead / 2 behind current main at inspection
-- 168 changed files
+Exact merge commit pushed to `main`:
+`f459fe5491e367e9e5da07cfc5b1886f1b138ae4`
 
-Therefore the large normalization effort was not substantively promoted into current main.
+The merge tree is byte-equivalent to candidate `92de052...` except for ancestry.
 
-## Candidate family
+GitHub Actions then executed `f459fe54...` as `head_branch=main`. Mainline, runtime, VF23, model-source, proof-service, completion-audit, subject-free orchestration, VF10 and VF13 workflows were green; native source seal was red.
 
-The following are mostly one family rather than separate architectures:
+## Why main was later rolled back
+
+The normalized lineage later reached `3529344ef3045e0f2d634b175aae2aed6ec05536`.
+
+It was intentionally preserved as:
+
+`backup/main-normalized-20260930-3529344`
+
+Then `main` was force-updated back to `e6c91184...`.
+
+This was **not an engineering rejection** of normalization. It was a user-directed **safety rollback** because ChatGPT recovery-polling timeouts/context loss were making continued agent-driven main mutations unsafe. The explicit purpose of the backup was to keep the normalized state available for re-evaluation once the platform issue stabilized.
+
+Therefore:
+
+- rollback != falsification;
+- rollback != architectural rejection;
+- rollback != evidence that old main was technically superior;
+- normalized lineage remains a strong candidate/evidence source;
+- re-promotion still requires exact current validation because independent blockers were already known.
+
+## Exact rollback evidence
+
+Live Authority job `36766305379`, job `110061221489`, observed:
 
 ```text
-generic-main-promotion
-       |
-       +--> generic-main-finalization
-                 |
-                 +-- 2 --> final-main-closure
-                           |
-                           +-- 1 --> ops/main-knight-render
-                                      |
-                                      +-- 2 --> backup/main-normalized
-                 |
-                 +-- 35 --> ops/current-main-knight-render
+[new branch] backup/main-normalized-20260930-3529344 -> origin/backup/main-normalized-20260930-3529344
++ 3529344ef...e6c91184d main -> origin/main  (forced update)
 ```
 
-`integration/generic-main-normalization-v2-20260930` descends from the promotion lineage but later diverges from finalization. It must be treated as a sibling evidence branch, not “the final version”.
+The same job then generated `a8002b20...` on top of `e6c91184...`.
 
-`audit/knight-rest-visual-owner-20260930` is a 1,958-commit research lineage relative to current main and is not a merge candidate as a whole.
+On 2026-10-01, creating `alfred/repo-memory-map-20261001` triggered the repository's branch-create `Live Authority Context` workflow, which added another generated-only main refresh `c3b1b09c...`. No compiler/runtime production source changed in that side effect.
 
-## What the full PASS actually proves
+## Normalized candidate quality boundary
 
-Run `36724501505` on tested head `484c01f...` succeeded:
-- repository/governance: 59 passed
-- learned-source ownership: 51 passed
-- compiler regressions: 434 passed, 5 skipped
-- synthetic proof export: 1 passed
-- native runtime CTest: 9/9 passed
-- plan validated with SHA `be0067d7...`
-- implementation closure `1cb60bb3...`
+The normalized candidate is substantial and well-tested, but not fully closed:
 
-The workflow explicitly describes itself as rerunning after a **runtime fail-closed seam**.
+- Stage18 establishes mechanical/visual mesh ownership split.
+- Stage37/38 carry and verify visual-mesh binding identity.
+- Stage42 does not execute typed source-owned visual presentation geometry; it fails closed.
+- Dedicated source-owned visual wiring gate was red.
+- Full candidate gate later passed because that repository wiring test was outside its suite and the runtime seam was explicitly fail-closed.
+- Self-hosted forensic run `36844455739` confirms exact candidate `92de...` still fails the repository wiring contract as currently written.
+- Actual merged main `f459...` had native source seal drift: `runtime_v2_caa_reference.cpp` 40003 bytes vs sealed 39694.
+- Quaternius external motion qualification separately fails `MOTION_MATERIALIZER_DISTINCT_TAKES_COLLAPSED`.
 
-It did **not** run `tests/repository/test_source_owned_visual_runtime_wiring_v1.py` as part of its repository-governance set.
+So the correct task is **reconstruct and revalidate normalization**, not blindly force `main` back to the backup.
 
-So its correct interpretation is:
+## Post-merge Knight branch
 
-> the normalized candidate is mechanically coherent under its declared fail-closed boundary; the source-owned visual runtime seam is not implemented.
+`ops/current-main-knight-render-20260930` descends from normalized main.
 
-It is **not** evidence that the visual presentation path reaches Stage42/native playback.
+Most of its commits are witness/run-root/rebind/render operations. Two source commits deserve separate treatment:
 
-## Source-owned visual ownership split
+- `25e765e8...` changes G3B skin-topology stress from a 120-degree metadata/default fallback to the maximum rotation admitted by the sealed deformation envelope.
+- `16b8cb72...` adds a unit proof that the sealed envelope wins over metadata fallback.
 
-Current main and candidate differ in architecture scope. Only Stage18's plan record changes, but the candidate has substantial implementation changes downstream.
+Workflow `36765075591` proves:
+- relevant unit set: **7 PASS**;
+- Stage35 diagnostic after the patch: `g3_failures=[]`;
+- the run still fails later at `G5_MULTIVIEW_COMPONENT_COVERAGE_FAIL` with 223 failed cells.
 
-Candidate Stage18:
-- takes observation authority directly;
-- builds mechanical mesh plus source-owned visual mesh;
-- establishes a distinct visual presentation geometry ownership domain.
+This means the Stage35 change is **not a product-pass proof**, but it is a plausible generic correctness fix whose immediate G3 failure mode disappears and whose remaining blocker moves to G5. It should be revalidated subject-free before any promotion.
 
-Candidate Stage37/38 lineage:
-- carries `visual_mesh_set_binding_hash`;
-- asserts `mechanical_mesh_render_authority=False` in source-owned visual mode;
-- verifies exact visual-mesh binding identity.
+## Reconstruction rule
 
-Candidate Stage42:
-- does not yet execute the visual mesh;
-- sees source-owned mode and raises `RUNTIME_V2_SOURCE_OWNED_VISUAL_PRESENTATION_BINDING_REQUIRED`;
-- legacy runtime package remains mechanical `faces + face_uv + mesh.bin` oriented.
-
-This is an explicit fail-closed P0 boundary, not silent fallback.
-
-## Stale audit reference
-
-The normalization handoff claims an exact audit file:
-
-`canonical/V2_PRODUCT_STATE_WIRING_AUDIT_V1_20260928.json`
-
-That path is absent from both:
-- current `main`;
-- `generic-main-finalization` head.
-
-Do not use that missing file as authority. The seam is independently supported by:
-- `tests/repository/test_source_owned_visual_runtime_wiring_v1.py`;
-- `.github/workflows/source_owned_visual_runtime_wiring_gate_v1.yml`;
-- candidate product-state adapter source;
-- candidate runtime adapter source.
-
-This stale reference is itself evidence that documentation and exact artifact lineage drifted during the timeout-era work.
-
-## Current classification
-
-- Current main: **A authority / incomplete relative to candidate research**
-- Generic finalization candidate: **C/B mixed evidence** — extensively tested, non-authoritative, known P0 fail-closed seam
-- Visual ownership split existence on candidate: **A observed**
-- Stage42 visual consumer implementation: **F absent / D unresolved engineering target**
-- Wholesale promotion decision: **D forbidden until commit-level lineage and gate scopes are reconstructed**
-- Huge audit branch: **D evidence mine only**
-
-## Next forensic target
-
-1. reconstruct the candidate's substantive commit slices from `e6c91184...` to tested head `484c01f...`;
-2. classify each slice by subsystem + test evidence + supersession;
-3. identify which slices are independently promotable and which depend on the unresolved Stage42 visual presentation executor;
-4. inspect gate failures that coexisted with the full PASS rather than assuming every workflow was part of the closure;
-5. only after this build a proposed canonical promotion set.
+1. Treat current rolled-back `main` and normalized backup as preserved evidence states.
+2. Treat the rollback as a safety action, not a technical verdict.
+3. Classify normalized promotion slices by exact source/test/gate evidence.
+4. Separate witness-specific Knight ops from generic fixes.
+5. Revalidate generic candidates against current subject-free contracts.
+6. Repair/resolve Stage42 visual carrier, wiring-test contract drift, native source seal, and external motion-take qualification.
+7. Only then propose a new canonical recovery head.
+8. Do not force-move `main` during reconstruction.

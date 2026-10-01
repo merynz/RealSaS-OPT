@@ -12,6 +12,7 @@ on:
       - 'tests/compiler/test_runtime_v2_source_owned_visual_native_smoke.py'
       - 'tests/compiler/test_runtime_v2_native_smoke.py'
       - 'tests/compiler/test_visual_presentation_v1.py'
+      - 'tests/repository/test_source_owned_visual_runtime_wiring_v1.py'
       - '.github/workflows/recovery_stage42_44_visual_runtime_gate_v1.yml'
   workflow_dispatch:
 

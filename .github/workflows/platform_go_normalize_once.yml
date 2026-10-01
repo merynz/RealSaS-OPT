@@ -1,4 +1,5 @@
 name: platform-go-normalize-once
+# rerun: capability-control-import
 
 on:
   push:

@@ -12,7 +12,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	"github.com/merynz/RealSaS-OPT/platform/internal/artifactstore"
 	"github.com/merynz/RealSaS-OPT/platform/internal/capability"
 	"github.com/merynz/RealSaS-OPT/platform/internal/orchestration"
 	"github.com/merynz/RealSaS-OPT/platform/internal/registry"
@@ -463,7 +462,7 @@ func capabilityInputArtifactIDs(ctx context.Context, tx pgx.Tx, goalID, attemptI
 		if err := rows.Scan(&id); err != nil { rows.Close(); return nil, err }
 		if _, ok := seen[id]; !ok { seen[id]=struct{}{}; ids=append(ids,id) }
 	}
-	if err := rows.Close(); err != nil { return nil, err }
+	rows.Close()
 
 	for _, dependency := range dependencies {
 		prefix := "capability:" + dependency + ":"
@@ -478,7 +477,7 @@ func capabilityInputArtifactIDs(ctx context.Context, tx pgx.Tx, goalID, attemptI
 			if err := depRows.Scan(&id); err != nil { depRows.Close(); return nil, err }
 			if _, ok := seen[id]; !ok { seen[id]=struct{}{}; ids=append(ids,id) }
 		}
-		if err := depRows.Close(); err != nil { return nil, err }
+		depRows.Close()
 	}
 	return ids, nil
 }
@@ -518,4 +517,3 @@ func equalStrings(a,b []string) bool {
 	return true
 }
 
-var _ artifactstore.Store

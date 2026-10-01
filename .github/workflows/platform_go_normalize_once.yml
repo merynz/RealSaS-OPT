@@ -28,12 +28,12 @@ jobs:
           gofmt -w .
           go mod tidy
           go test -p 1 ./...
-      - name: Commit normalized generic run command and remove workflow
+      - name: Commit normalized reconciled command and remove workflow
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git rm .github/workflows/platform_go_normalize_once.yml
           git add platform
-          git commit -m "platform: normalize generic capability command"
+          git commit -m "platform: normalize reconciled capability command"
           git push origin HEAD:platform/professional-backend-v1-20261001

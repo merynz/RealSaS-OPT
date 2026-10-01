@@ -24,6 +24,7 @@ jobs:
       - name: Normalize and validate Go platform
         run: |
           set -euo pipefail
+          echo 'Running dependency-free architecture discovery validation.'
           cd platform
           gofmt -w .
           go mod tidy

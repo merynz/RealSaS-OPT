@@ -1,6 +1,7 @@
 package semantic
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -10,11 +11,24 @@ import (
 var ErrInvalidSHA256 = errors.New("invalid lowercase sha256")
 
 func CanonicalJSON(v any) ([]byte, error) {
-	b, err := json.Marshal(v)
+	raw, err := json.Marshal(v)
 	if err != nil {
 		return nil, err
 	}
-	return append(b, '\n'), nil
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.UseNumber()
+	var generic any
+	if err := decoder.Decode(&generic); err != nil {
+		return nil, err
+	}
+
+	var out bytes.Buffer
+	encoder := json.NewEncoder(&out)
+	encoder.SetEscapeHTML(false)
+	if err := encoder.Encode(generic); err != nil {
+		return nil, err
+	}
+	return out.Bytes(), nil
 }
 
 func JSONSHA256(v any) (string, error) {

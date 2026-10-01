@@ -966,38 +966,95 @@ def seal_complete_puppet_stage(ctx: dict) -> dict:
         dict(asset.metadata or {}).get("source_owned_visual_mesh_mode")
     )
     visual_mesh_set_hash = ""
+    source_visual_mesh_set_hash = ""
     if source_owned_visual_mode:
-        visual_set = visual_mesh_set_from_dict(
+        source_visual_set = visual_mesh_set_from_dict(
             stage_output_payload(
                 ctx,
                 "18_CANONICAL_MESH_ADDRESSING_BUILD",
                 "RealSaS.VisualMeshSetIR.v1",
             )
         )
-        visual_mesh_set_hash = str(visual_set.set_hash)
-        for label, value in (
-            (
-                "ASSET",
+        qualified_visual = qualified_visual_presentation_set_from_dict(
+            stage_output_payload(
+                ctx,
+                "37_QUALIFIED_PRESENTATION_STRUCTURE",
+                "RealSaS.QualifiedVisualPresentationSetIR.v1",
+            )
+        )
+        source_visual_mesh_set_hash = str(source_visual_set.set_hash)
+        visual_mesh_set_hash = str(qualified_visual.set_hash)
+        if (
+            qualified_visual.source_visual_mesh_set_binding_hash
+            != source_visual_mesh_set_hash
+        ):
+            raise ValueError(
+                "COMPLETE_PUPPET_SOURCE_VISUAL_SUBSTRATE_BINDING_DRIFT"
+            )
+        if (
+            qualified_visual.mechanical_mesh_binding_hash
+            != mesh.mesh_lineage_hash
+        ):
+            raise ValueError(
+                "COMPLETE_PUPPET_QUALIFIED_VISUAL_MESH_BINDING_DRIFT"
+            )
+        if (
+            qualified_visual.appearance_asset_binding_hash
+            != asset.asset_hash
+            or qualified_visual.appearance_qualification_binding_hash
+            != appearance.qualification_hash
+        ):
+            raise ValueError(
+                "COMPLETE_PUPPET_QUALIFIED_VISUAL_APPEARANCE_DRIFT"
+            )
+        if (
+            str(
                 dict(asset.metadata or {}).get(
                     "visual_mesh_set_binding_hash"
-                ),
-            ),
+                )
+                or ""
+            )
+            != source_visual_mesh_set_hash
+        ):
+            raise ValueError(
+                "COMPLETE_PUPPET_SOURCE_VISUAL_ASSET_BINDING_DRIFT"
+            )
+        for label, value in (
             (
                 "STRUCTURE",
                 dict(structure.metadata or {}).get(
-                    "visual_mesh_set_binding_hash"
+                    "qualified_visual_presentation_set_binding_hash"
                 ),
             ),
             (
                 "PARTITION_EVIDENCE",
                 dict(partition_evidence.metadata or {}).get(
-                    "visual_mesh_set_binding_hash"
+                    "qualified_visual_presentation_set_binding_hash"
                 ),
             ),
         ):
             if str(value or "") != visual_mesh_set_hash:
                 raise ValueError(
-                    "COMPLETE_PUPPET_VISUAL_MESH_BINDING_DRIFT:"
+                    "COMPLETE_PUPPET_QUALIFIED_VISUAL_BINDING_DRIFT:"
+                    + label
+                )
+        for label, value in (
+            (
+                "STRUCTURE",
+                dict(structure.metadata or {}).get(
+                    "source_visual_mesh_set_binding_hash"
+                ),
+            ),
+            (
+                "PARTITION_EVIDENCE",
+                dict(partition_evidence.metadata or {}).get(
+                    "source_visual_mesh_set_binding_hash"
+                ),
+            ),
+        ):
+            if str(value or "") != source_visual_mesh_set_hash:
+                raise ValueError(
+                    "COMPLETE_PUPPET_SOURCE_VISUAL_BINDING_DRIFT:"
                     + label
                 )
         if (
@@ -1081,6 +1138,7 @@ def seal_complete_puppet_stage(ctx: dict) -> dict:
             "geometry_mechanics_appearance_coequal": True,
             "source_owned_visual_mesh_mode": source_owned_visual_mode,
             "visual_mesh_set_binding_hash": visual_mesh_set_hash,
+            "source_visual_mesh_set_binding_hash": source_visual_mesh_set_hash,
             "mechanical_mesh_render_authority": (
                 False if source_owned_visual_mode else True
             ),

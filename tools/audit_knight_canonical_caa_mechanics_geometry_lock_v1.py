@@ -541,11 +541,31 @@ def main() -> None:
 
     if global_worst_pose is None:
         raise RuntimeError("LOCK_GLOBAL_WORST_POSE_MISSING")
+    # Render-relevant self-intersection census: restrict the expensive SAT court
+    # to faces that are actually frontmost in the demo presentation views at the
+    # globally worst actual-motion frame. This directly tests whether a newly
+    # introduced visible geometric penetration can own the smear.
+    visible_face_union: set[int] = set()
+    for camera in cameras:
+        if int(camera.view_index) not in DEMO_VIEWS:
+            continue
+        vis = rasterize_visible_owner(
+            candidate,
+            camera,
+            positions=global_worst_pose,
+            coverage_scale=1,
+        )
+        owner = np.asarray(vis.owner_face_index, dtype=np.int64)
+        visible_face_union.update(int(x) for x in np.unique(owner[owner >= 0]).tolist())
+    visible_face_indices = np.asarray(sorted(visible_face_union), dtype=np.int64)
+    if len(visible_face_indices) == 0:
+        raise RuntimeError("LOCK_GLOBAL_WORST_VISIBLE_FACE_SET_EMPTY")
+    visible_faces = faces[visible_face_indices]
     rest_intersections = set(
-        unexpected_intersection_pairs(vertices=rest, faces=faces)
+        unexpected_intersection_pairs(vertices=rest, faces=visible_faces)
     )
     global_posed_intersections = set(
-        unexpected_intersection_pairs(vertices=global_worst_pose, faces=faces)
+        unexpected_intersection_pairs(vertices=global_worst_pose, faces=visible_faces)
     )
     new_intersections = sorted(global_posed_intersections - rest_intersections)
     max_new_intersections = int(len(new_intersections))
@@ -656,17 +676,20 @@ def main() -> None:
                 "max_visible_projected_flip_count_demo_views": int(
                     max_visible_projected_flips
                 ),
-                "rest_unexpected_self_intersection_pair_count": int(
+                "render_visible_intersection_census_face_count": int(
+                    len(visible_face_indices)
+                ),
+                "rest_visible_unexpected_self_intersection_pair_count": int(
                     len(rest_intersections)
                 ),
                 "global_worst_actual_motion_frame": global_worst_locator,
-                "global_worst_frame_total_self_intersection_pair_count": int(
+                "global_worst_frame_visible_self_intersection_pair_count": int(
                     len(global_posed_intersections)
                 ),
-                "global_worst_frame_new_self_intersection_pair_count": int(
+                "global_worst_frame_new_visible_self_intersection_pair_count": int(
                     max_new_intersections
                 ),
-                "global_worst_frame_new_self_intersection_pairs_sample": [
+                "global_worst_frame_new_visible_self_intersection_pairs_sample": [
                     [int(a), int(b)] for a, b in new_intersections[:32]
                 ],
             },

@@ -124,6 +124,26 @@ def main():
     after_bad=link_components(after_cf,int(refined.max())+1)
     metrics=compact_metrics(verts,faces,refined)
 
+    # Diagnose how each original illegal quotient vertex distributed into refined children.
+    child_diagnostics={}
+    for q in sorted(before_bad):
+        dense_ids=np.nonzero(inv==int(q))[0]
+        children=np.unique(refined[dense_ids])
+        rows=[]
+        for child in children.tolist():
+            members=dense_ids[refined[dense_ids]==int(child)]
+            token_hist=Counter()
+            for vid in members.tolist():
+                # Reconstruct fan token from incident nondegenerate dense faces lazily below
+                pass
+            rows.append({"child":int(child),"dense_vertex_count":int(len(members)),
+                         "illegal_after":bool(int(child) in after_bad)})
+        child_diagnostics[str(int(q))]={
+            "dense_preimage_count":int(len(dense_ids)),
+            "child_count":int(len(children)),
+            "children":rows,
+        }
+
     pairs=np.unique(np.column_stack((base,refined)),axis=0)
     seen={};cross=0
     for b,r in pairs:
@@ -139,6 +159,14 @@ def main():
                "nonmanifold_edges":metrics["nonmanifold_edge_count"]},
       "cross_base_merge_count":cross,
       "pure_refinement":cross==0,
+      "after_illegal_vertex_ids":sorted(int(x) for x in after_bad),
+      "after_illegal_vertex_rows":{
+        str(int(k)):{
+          "component_sizes":[len(c) for c in v["components"]],
+          "degree_histogram":{str(kk):int(vv) for kk,vv in v["degree_histogram"].items()},
+        } for k,v in after_bad.items()
+      },
+      "child_diagnostics":child_diagnostics,
       "success":bool(len(after_bad)==0 and metrics["nonmanifold_edge_count"]==0 and cross==0 and meta["multi_fan_dense_vertex_count"]==0),
     }
     a.out.parent.mkdir(parents=True,exist_ok=True)

@@ -35,4 +35,21 @@ jobs:
                   print(f"STAGE15_DICT {k} keys={list(v)[:20]!r}")
               else:
                   print(f"STAGE15_SCALAR {k}={v!r}")
+
+          from collections import Counter
+          edge=Counter()
+          for face in p["compact_faces"]:
+              if len(face)!=3 or len(set(face))!=3:
+                  raise RuntimeError("STAGE15_FACE_INVALID")
+              for i,j in ((0,1),(1,2),(2,0)):
+                  a,b=sorted((str(face[i]),str(face[j])))
+                  edge[(a,b)]+=1
+          bad={k:v for k,v in edge.items() if v>2}
+          print("STAGE15_TOPOLOGY="+repr({
+              "face_count":len(p["compact_faces"]),
+              "edge_count":len(edge),
+              "nonmanifold_edge_count":len(bad),
+              "nonmanifold_incidence_histogram":dict(sorted(Counter(bad.values()).items())),
+              "examples":list(bad.items())[:20],
+          }))
           PY

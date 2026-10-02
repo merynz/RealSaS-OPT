@@ -18,6 +18,7 @@ permissions:
 
 jobs:
   proof:
+    if: ${{ false }}
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 35
     env:

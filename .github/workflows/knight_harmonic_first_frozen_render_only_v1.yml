@@ -3,7 +3,7 @@ name: knight-harmonic-first-frozen-render-only-v1
 on:
   workflow_dispatch:
   push:
-    branches: [integration/final-main-knight-platform-20261002, main]
+    branches: [integration/final-main-knight-platform-20261002, main, repair/visual-triangle-deformation-domain-20261002]
     paths:
       - 'tools/demo/frozen/render_knight_motion_preview_v1_7917be02.py'
       - 'tools/demo/build_knight_corrected_mechanical_caa_stage23_immutable_v1.py'

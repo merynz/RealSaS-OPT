@@ -18,6 +18,9 @@ jobs:
       REPORT: /tmp/knight_canonical_caa_mechanics_geometry_lock_v1/REPORT.json
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
       - name: Require preserved report
         run: test -f "$REPORT"
       - name: Print forensic summary

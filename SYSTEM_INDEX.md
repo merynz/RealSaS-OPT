@@ -1,10 +1,10 @@
 # RealSaS Structural System Index
 
-## 2026-10-01 recovery note
+## 2026-10-02 canonical main
 
-Current continuation details are in `canonical/RECOVERY_CANONICAL_HANDOFF_20261001.md`. The former Stage42 source-owned visual runtime seam is closed: Stage18 provides visual substrate, Stage37 owns final qualified presentation, and typed transport continues through Stage42/RSS/native/Stage45/46. VF-11 R512 remains a separate scientific/witness-readiness blocker.
+Current continuation details are in `CURRENT_STATE.md`. The canonical main combines the latest preserved Knight R&D lineage with the Oct-1 recovered engine/platform. The historical Stage37→42 source-owned carrier cut is closed by typed transport; the active work is the appearance/runtime data-flow audit for deformation-domain coherence, canonical-depth overlap ownership, and Stage45 proof.
 
-> Navigation only. Current continuation authority is `canonical/V2_IMPLEMENTATION_READINESS.json`.
+> Navigation only. Current continuation authority is `CURRENT_STATE.md`; `canonical/V2_IMPLEMENTATION_READINESS.json` is preserved recovery/readiness history, not the active scientific pointer.
 
 | Product authority | Canonical home | V2 rule |
 |---|---|---|
@@ -30,11 +30,11 @@ V1 modules, Mage/FIT artifacts and the 2026-09-30 Stage42 fail-close handoff rem
 
 ## Witness
 
-No subject witness is active merely because engineering recovery is green. Knight requires exact `READY_FOR_WITNESS_EXECUTION`, VF-11 R512 reclosure and explicit user approval.
+The corrected-weight/topology Knight harmonic-first mechanical-CAA witness is accepted as the current R&D/demo visual anchor. It is not product visual authority or unseen/generalization evidence. The active question is whether the recovered source-owned runtime can preserve coherent deformation and canonical physical visibility.
 
-## Platform transition
+## Platform
 
-After canonical-main recovery, professional platformization may proceed independently of named-witness readiness: Artifact Registry, Attempt, ProductRevision, semantic invalidation and durable workflow become first-class system infrastructure.
+The Go control plane is part of current main: Artifact Registry, Attempt, ProductRevision, semantic invalidation and durable workflow are first-class system infrastructure and remain independent of any single witness result.
 
 ## Machine-readable architecture ownership
 

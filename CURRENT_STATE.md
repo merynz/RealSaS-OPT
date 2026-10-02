@@ -3,7 +3,8 @@
 **Date:** 2026-10-02  
 **Canonical continuation branch:** `main`  
 **Active experiment:** `KNIGHT_APPEARANCE_RUNTIME_DATAFLOW_AUDIT`  
-**State:** `MAIN_CANONICALIZED__FROZEN_WITNESS_VERIFIED__RUNTIME_DATAFLOW_AUDIT_ACTIVE`
+**State:** `MAIN_CANONICALIZED__FROZEN_WITNESS_VERIFIED__RUNTIME_DATAFLOW_AUDIT_ACTIVE`  
+**Certification rule:** the current `main` head itself must have completed green CI; generated-view bot commits are followed by a human/tool certification commit.
 
 ## Canonical lineage
 

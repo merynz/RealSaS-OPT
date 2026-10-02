@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `a6ba57a621a8235d22c4cf305fdeed36cf84bbbcd9971f09adafd0ff5887b0f4`
+> State fingerprint: `0c77aea3092d4c53b240dd8ff41710af9d27b1a10b9fab544d1a457adf5f4d13`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -17,36 +17,40 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 ## Rehydration order
 
-1. `canonical/V2_IMPLEMENTATION_READINESS.json`
-2. `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
-3. `canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md`
-4. `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
-5. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
-6. `canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md`
-7. `canonical/AUTHORITY_MAP_V1.json`
-8. `canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json`
-9. `canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json`
-10. `canonical/ACTIVE_RUN_V2.json`
-11. `canonical/EXPERIMENT_REGISTRY_V3.json`
-12. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
-13. `CURRENT_STATE.md`
-14. `canonical/CONTEXT_STATE_V2.json`
+1. `CURRENT_STATE.md`
+2. `canonical/CURRENT_RND_LINEAGE_V1.json`
+3. `canonical/APPEARANCE_RUNTIME_DATAFLOW_GRAPH_V1_20261002.json`
+4. `docs/audit/APPEARANCE_RUNTIME_DATAFLOW_AUDIT_20261002.md`
+5. `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
+6. `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
+7. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
+8. `canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json`
+9. `canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json`
+10. `canonical/V2_IMPLEMENTATION_READINESS.json`
+11. `canonical/RECOVERY_ENGINEERING_CERTIFICATION_V1_20261001.json`
+12. `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V16_20261001.json`
+13. `canonical/RECOVERY_CANONICAL_HANDOFF_20261001.md`
+14. `canonical/AUTHORITY_MAP_V1.json`
+15. `canonical/CONTEXT_STATE_V2.json`
+16. `canonical/ACTIVE_RUN_V2.json`
+17. `canonical/EXPERIMENT_REGISTRY_V3.json`
+18. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
 
 ## Live experiment register
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `V2_IMPLEMENTATION_ASSEMBLY` | `RECLOSURE_ACTIVE__WITNESS_FORBIDDEN` | `main` | `e30bc098600a` | Can the reopened subject-free visual-fidelity and governance audit be fully reclosed, including VF-11 R512, VF-23 exact production-policy E2E, and exact-head CI, before asking the user to authorize the first controlled Knight witness? | Knight product pass; unseen generalization; semantic object recognition; human aesthetic optimality; source-view cardinality reduction; witness execution authorization before explicit user approval |
+| `KNIGHT_APPEARANCE_RUNTIME_DATAFLOW_AUDIT` | `MAIN_CANONICALIZED__FROZEN_WITNESS_VERIFIED__RUNTIME_DATAFLOW_AUDIT_ACTIVE` | `main` | `d19ebc48475c` | Can corrected Knight mechanics drive source-owned 2D presentation with visual-triangle deformation-domain coherence and canonical-depth overlap ownership, and can Stage45 prove both fail-closed? | product visual pass; unseen generalization; human aesthetic optimality; source-view cardinality reduction; RGB-generation necessity |
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 153**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 165**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `e30bc098600a` | canonical continuation branch |
+| `main` | `d19ebc48475c` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -66,10 +70,14 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `agent/n1d-observable-functional-audit-v2-20260820` | `bf3ef16ae250` | observed live; not explicitly registered active |
 | `agent/n1d-observable-functional-quotient-rebuild-20260819` | `161d4d5d9893` | observed live; not explicitly registered active |
 | `agent/n1d-v2-source-parity-recovery-20260820` | `32b06472b7ff` | observed live; not explicitly registered active |
+| `alfred/repo-memory-map-20261001` | `13dfaf741903` | observed live; not explicitly registered active |
 | `architecture-v3-svg-20260901` | `f7473bc93a71` | observed live; not explicitly registered active |
 | `architecture-v4-single-family-e2e-20260902` | `c84658b8b95c` | observed live; not explicitly registered active |
 | `architecture/compiler-ir-solver-canonical-20260825` | `7163fac1f333` | observed live; not explicitly registered active |
 | `architecture/v4-generic-strength-source-completion-20260902` | `7f39a846ad05` | observed live; not explicitly registered active |
+| `archive/knight-only-main-before-platform-merge-20261002` | `95eed847c40d` | observed live; not explicitly registered active |
+| `archive/main-before-knight-canonical-20261002` | `aaf215aa81ad` | observed live; not explicitly registered active |
+| `audit/appearance-runtime-dataflow-20261002` | `7e1ef272aa01` | observed live; not explicitly registered active |
 | `audit/arachne-information-preservation-v1-20260910` | `94b4ef79e9b8` | observed live; not explicitly registered active |
 | `audit/final-completion-plan-20260902` | `00e930e788d3` | observed live; not explicitly registered active |
 | `audit/generic-main-normalization-20260930` | `2a69a9fbdd4a` | observed live; not explicitly registered active |
@@ -77,6 +85,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `audit/historical-product-power-rebind-20260913` | `2bba9828a3b3` | observed live; not explicitly registered active |
 | `audit/iris-architecture-discipline-20260824` | `d7bba01c85e9` | observed live; not explicitly registered active |
 | `audit/knight-rest-visual-owner-20260930` | `643714de2899` | observed live; not explicitly registered active |
+| `backup/main-normalized-20260930-3529344` | `3529344ef304` | observed live; not explicitly registered active |
 | `baseline/h0-first-family-v1-20260904` | `a3cec7021f0d` | observed live; not explicitly registered active |
 | `behavioral/geppetto-v2-integrity-v1-20260903` | `2b5d46718683` | observed live; not explicitly registered active |
 | `cleanroom/iris-geometry-field-v1-20260904` | `e72636d8366d` | observed live; not explicitly registered active |
@@ -129,15 +138,18 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `ignore-this` | `91b4593d5b2a` | observed live; not explicitly registered active |
 | `integration/compiler-runtime-canonical-20260828` | `e423cd462002` | observed live; not explicitly registered active |
 | `integration/compiler-runtime-heavy-promotion-20260901` | `47892ffa16b7` | observed live; not explicitly registered active |
+| `integration/final-main-knight-platform-20261002` | `30428107138f` | observed live; not explicitly registered active |
 | `integration/generic-main-finalization-20260930` | `92de05292b05` | observed live; not explicitly registered active |
 | `integration/generic-main-normalization-v2-20260930` | `75d7d590d0a3` | observed live; not explicitly registered active |
 | `integration/generic-main-promotion-20260930` | `908fbcc92072` | observed live; not explicitly registered active |
+| `integration/knight-latest-canonical-20261002` | `fbbcc008480e` | observed live; not explicitly registered active |
 | `integration/mage-real-e2e-20260912` | `11d1fdfd4398` | observed live; not explicitly registered active |
 | `iris/mapanything-ortho-apache` | `3b66a4d2beb5` | observed live; not explicitly registered active |
 | `legacy-geppetto-arachne-reconcile-20260901` | `f687ff8e78a2` | observed live; not explicitly registered active |
 | `m4-closure-20260829` | `95a487b92ab0` | observed live; not explicitly registered active |
 | `m4-execution-seal-20260829` | `d203b8233509` | observed live; not explicitly registered active |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | observed live; not explicitly registered active |
+| `maintenance/main-green-20261002` | `d19ebc48475c` | observed live; not explicitly registered active |
 | `motion/quaternius-direct-fbx-gate-v1-20260919` | `47fb1555455b` | observed live; not explicitly registered active |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | observed live; not explicitly registered active |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | observed live; not explicitly registered active |
@@ -149,12 +161,14 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `next/structured-depth-bridge-20260829` | `e362c473c2fd` | observed live; not explicitly registered active |
 | `noop` | `c6b5108f672b` | observed live; not explicitly registered active |
 | `noop2` | `c6b5108f672b` | observed live; not explicitly registered active |
-| `ops/current-main-knight-render-20260930` | `e30bc098600a` | observed live; not explicitly registered active |
+| `ops/current-main-knight-render-20260930` | `d0d2de09ee00` | observed live; not explicitly registered active |
 | `ops/knight-authority-inventory-20260919` | `5912a2cd042c` | observed live; not explicitly registered active |
 | `ops/knight-stage09-15-continuation-20260919` | `a431a35d613b` | observed live; not explicitly registered active |
 | `ops/main-knight-render-20260930` | `0a44ef505e6e` | observed live; not explicitly registered active |
 | `ops/temp-trigger-n1d-v2-recovery-20260820` | `536b40b6a6bf` | observed live; not explicitly registered active |
 | `ops/trigger-n1d-v2-recovery-v2-verify-20260820` | `12a813a8f501` | observed live; not explicitly registered active |
+| `platform/professional-backend-v1-20261001` | `989a90b45726` | observed live; not explicitly registered active |
+| `platform/worker-seam-20261001` | `c9b4798c7e6d` | observed live; not explicitly registered active |
 | `playback-stack-v1-20260916-p0p1-staging` | `d88a5fc9aa66` | observed live; not explicitly registered active |
 | `product/mage-fit1-demo-fulfillment-20260914` | `e60ea9129f55` | observed live; not explicitly registered active |
 | `product/mage-fit1-demo-fulfillment-20260914-role-fix-tmp` | `7ca58068d58e` | observed live; not explicitly registered active |
@@ -162,6 +176,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `promote/fit1-evidence-main-20260909` | `9deccb8d051f` | observed live; not explicitly registered active |
 | `promote/iris-scene-first-signed-main-v3-20260905` | `dfb087c6a23e` | observed live; not explicitly registered active |
 | `promote/iris-scene-first-signed-v3-20260905` | `7cfb7efedbe9` | observed live; not explicitly registered active |
+| `recovery/canonical-main-20261001` | `54deade8abb2` | observed live; not explicitly registered active |
 | `redteam-hardening-20260920` | `a9aeb3fb1eac` | observed live; not explicitly registered active |
 | `redteam-sync-20260920` | `1741beaff327` | observed live; not explicitly registered active |
 | `repair/g5-mesh-policy-v2-20260919` | `1d1193f26796` | observed live; not explicitly registered active |
@@ -188,7 +203,8 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `research/stage14-v2-final-calibration-20260920` | `8a502d4bee42` | observed live; not explicitly registered active |
 | `research/stage14-v2-policy-calibration-20260919` | `b399a90c1c3a` | observed live; not explicitly registered active |
 | `research/stage14-v2-policy-calibration-fixed-20260919` | `f08716b32db9` | observed live; not explicitly registered active |
-| `research/vf11-certified-adaptive-20260921` | `6ed060351512` | observed live; not explicitly registered active |
+| `research/vf11-certified-adaptive-20260921` | `a1d633a7b01a` | observed live; not explicitly registered active |
+| `research/vf11-x2-sparse-tetra-20261001` | `df2c7eddb19c` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903` | `83aa411cc06d` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903-directional-binding-firewall` | `800d3ccb042e` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety` | `2eb09fe3e8c6` | observed live; not explicitly registered active |

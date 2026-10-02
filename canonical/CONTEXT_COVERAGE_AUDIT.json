@@ -3,17 +3,18 @@
   "bootstrap_status": "BOOTSTRAP_AUDIT_CLOSED",
   "fit1_gate_anchor": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
   "candidate_rule": "high-signal canonical/prereg/experiment/challenger/workflow artifacts",
-  "tracked_file_count": 1317,
-  "high_signal_artifact_count": 351,
+  "tracked_file_count": 2626,
+  "high_signal_artifact_count": 782,
   "classification_counts": {
-    "INDEXED_EXPLICIT": 204,
-    "HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL": 147
+    "INDEXED_EXPLICIT": 634,
+    "HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL": 147,
+    "FIT1_COMMIT_LEDGER_COVERED": 1
   },
-  "explained_high_signal_count": 351,
+  "explained_high_signal_count": 782,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 157,
-  "safe_default_evidence_only_branch_count": 153,
+  "live_branch_count": 169,
+  "safe_default_evidence_only_branch_count": 165,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -53,6 +54,12 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "alfred/repo-memory-map-20261001",
+      "sha": "13dfaf741903a4afe27a2b46d12588ac363b10b9",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "architecture-v3-svg-20260901",
       "sha": "f7473bc93a71eaee3c95b1f42a0e03f7d4ac28f9",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -73,6 +80,24 @@
     {
       "name": "architecture/v4-generic-strength-source-completion-20260902",
       "sha": "7f39a846ad05f91560836026e5ef6dfbc74dc731",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "archive/knight-only-main-before-platform-merge-20261002",
+      "sha": "95eed847c40d6d41611cfa11286504f8203b79dd",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "archive/main-before-knight-canonical-20261002",
+      "sha": "aaf215aa81adb6d2cd430e45a471529612785626",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "audit/appearance-runtime-dataflow-20261002",
+      "sha": "7e1ef272aa016968c1296afdbcedf890217b9e37",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -115,6 +140,12 @@
     {
       "name": "audit/knight-rest-visual-owner-20260930",
       "sha": "643714de28999a7de9d0b25733a290136dc374c7",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "backup/main-normalized-20260930-3529344",
+      "sha": "3529344ef3045e0f2d634b175aae2aed6ec05536",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -437,6 +468,12 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "integration/final-main-knight-platform-20261002",
+      "sha": "30428107138fbe131f5ddef8944138310d1664b6",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "integration/generic-main-finalization-20260930",
       "sha": "92de05292b05e4ae8aaab3eed53c515b5eef5929",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -451,6 +488,12 @@
     {
       "name": "integration/generic-main-promotion-20260930",
       "sha": "908fbcc9207221f640a5c6f36d586aca597135d0",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "integration/knight-latest-canonical-20261002",
+      "sha": "fbbcc008480e37c44e1303939ec31dac918cbd3f",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -492,9 +535,15 @@
     },
     {
       "name": "main",
-      "sha": "e30bc098600a595010b940c0faede05a5fcbd2a2",
+      "sha": "d19ebc48475cb3173de4ce5cd683fb04caebbd35",
       "class": "CANONICAL",
       "reason": "canonical branch"
+    },
+    {
+      "name": "maintenance/main-green-20261002",
+      "sha": "d19ebc48475cb3173de4ce5cd683fb04caebbd35",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "motion/quaternius-direct-fbx-gate-v1-20260919",
@@ -564,7 +613,7 @@
     },
     {
       "name": "ops/current-main-knight-render-20260930",
-      "sha": "e30bc098600a595010b940c0faede05a5fcbd2a2",
+      "sha": "d0d2de09ee005fe8661154df39013e904a9a3813",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -595,6 +644,18 @@
     {
       "name": "ops/trigger-n1d-v2-recovery-v2-verify-20260820",
       "sha": "12a813a8f50118a4ad34c37fd5b43bd760d45d97",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "platform/professional-backend-v1-20261001",
+      "sha": "989a90b45726a599c0005c5483f9b8c54e0b8a7c",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "platform/worker-seam-20261001",
+      "sha": "c9b4798c7e6d10882bcc57d06dc6aeb2b89827ff",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -643,6 +704,12 @@
     {
       "name": "promote/iris-scene-first-signed-v3-20260905",
       "sha": "7cfb7efedbe956c2aa16003e5a7df9bb56c907bb",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "recovery/canonical-main-20261001",
+      "sha": "54deade8abb2df161042ef6c3bdb47f427a6e496",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -810,7 +877,13 @@
     },
     {
       "name": "research/vf11-certified-adaptive-20260921",
-      "sha": "6ed060351512a5f76a206acce011b585f48b1768",
+      "sha": "a1d633a7b01a03c3161791c01fd4d949046f5ce9",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "research/vf11-x2-sparse-tetra-20261001",
+      "sha": "df2c7eddb19c751cfefbfeff0aea5ab1121e054f",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

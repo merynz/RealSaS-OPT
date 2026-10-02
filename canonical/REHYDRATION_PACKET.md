@@ -6,16 +6,16 @@
 ## 60-second state
 
 - Product: automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics
-- Current witness: Subject-2 Knight (technical readiness reclosure active; execution forbidden)
-- Current module: appearance fidelity + dynamic visual integrity reclosure
-- Current state: REOPENED__WITNESS_FORBIDDEN
-- Active experiment: V2_IMPLEMENTATION_ASSEMBLY
-- Most recent closed gate: PRIOR_READY_SEAL_REVOKED_BY_POST_SEAL_APPEARANCE_REVIEW
-- Canonical main: e30bc098600a
+- Current witness: Subject-2 Knight (engineering recovery certified; witness execution still forbidden)
+- Current module: Knight appearance/runtime producer-consumer audit
+- Current state: MAIN_CANONICALIZED__FROZEN_WITNESS_VERIFIED__RUNTIME_DATAFLOW_AUDIT_ACTIVE
+- Active experiment: KNIGHT_APPEARANCE_RUNTIME_DATAFLOW_AUDIT
+- Most recent closed gate: CORRECTED_WEIGHT_TOPOLOGY_HARMONIC_FIRST_FROZEN_WITNESS_BYTE_EXACT_PASS
+- Canonical main: d19ebc48475c
 - Governance ledger: V2_IMPLEMENTATION_ASSEMBLY — 0/46; ready 01_SOURCE_BYTES_SEALED,05_CAMERA_CONTRACT_SOLVED
-- Plan SHA-256: be0067d78d5c1ecf51f5a0df2ee14e7a87ff0c44800ca66bbb5d5f8d5ad183cf
-- Promotion block: VF-11 R512 remains the active scientific blocker; VF-23 same-context Stage20->46 production-policy E2E and exact-head mainline/runtime/source/orchestration closure must also pass before technical reseal.
-- Scope warning: FIT1 or single-subject closure is not unseen/generalization evidence; current learned models are not claimed final.
+- Plan SHA-256: cb97e4c68f8012f39d95f721284a85f300e5c695d7dd6362dad56a893c1965c0
+- Promotion block: Before any new appearance architecture is selected, prove A) visual-triangle deformation-domain coherence, B) canonical-depth to visual-overlap ownership, and C) Stage45 fail-closed qualification of both.
+- Scope warning: The accepted frozen smear witness is an R&D/demo mechanical-CAA witness. It is not product visual PASS or unseen/generalization evidence.
 
 ## Current machine authority
 
@@ -59,7 +59,7 @@
 
 ## Current scientific question
 
-Can the reopened geometry/appearance/runtime fidelity audit be fully reclosed subject-free, including R512 feature survival and exact production-policy E2E, without relaxing thresholds or using Knight?
+Does the current source-owned 2D runtime preserve one coherent deformation domain per visual triangle and canonical physical visibility through native playback, with both properties enforced by Stage45?
 
 ## Settled invariants
 
@@ -91,22 +91,26 @@ Can the reopened geometry/appearance/runtime fidelity audit be fully reclosed su
 ## Resume
 
 Read in this order:
-1. canonical/V2_IMPLEMENTATION_READINESS.json
-2. canonical/MAINLINE_EXECUTION_PLAN_V2.json
-3. canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md
-4. canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json
-5. canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json
-6. canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md
-7. canonical/AUTHORITY_MAP_V1.json
-8. canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json
-9. canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json
-10. canonical/ACTIVE_RUN_V2.json
-11. canonical/EXPERIMENT_REGISTRY_V3.json
-12. canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl
-13. CURRENT_STATE.md
-14. canonical/CONTEXT_STATE_V2.json
+1. CURRENT_STATE.md
+2. canonical/CURRENT_RND_LINEAGE_V1.json
+3. canonical/APPEARANCE_RUNTIME_DATAFLOW_GRAPH_V1_20261002.json
+4. docs/audit/APPEARANCE_RUNTIME_DATAFLOW_AUDIT_20261002.md
+5. canonical/MAINLINE_EXECUTION_PLAN_V2.json
+6. canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json
+7. canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json
+8. canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json
+9. canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json
+10. canonical/V2_IMPLEMENTATION_READINESS.json
+11. canonical/RECOVERY_ENGINEERING_CERTIFICATION_V1_20261001.json
+12. canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V16_20261001.json
+13. canonical/RECOVERY_CANONICAL_HANDOFF_20261001.md
+14. canonical/AUTHORITY_MAP_V1.json
+15. canonical/CONTEXT_STATE_V2.json
+16. canonical/ACTIVE_RUN_V2.json
+17. canonical/EXPERIMENT_REGISTRY_V3.json
+18. canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl
 
-Resume rule: Implementation assembly is complete only after VF-11, VF-23 and exact-head CI reclosure are sealed; technical READY still does not authorize Knight without separate explicit user approval.
+Resume rule: VF-11 R512 scientific reclosure remains required for witness readiness; platform/system engineering may proceed after canonical-main recovery.
 
 ## Packet validity
 

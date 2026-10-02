@@ -11,7 +11,7 @@
 - Current state: MAIN_CANONICALIZED__FROZEN_WITNESS_VERIFIED__RUNTIME_DATAFLOW_AUDIT_ACTIVE
 - Active experiment: KNIGHT_APPEARANCE_RUNTIME_DATAFLOW_AUDIT
 - Most recent closed gate: CORRECTED_WEIGHT_TOPOLOGY_HARMONIC_FIRST_FROZEN_WITNESS_BYTE_EXACT_PASS
-- Canonical main: d19ebc48475c
+- Canonical main: b6ad184b6b9b
 - Governance ledger: V2_IMPLEMENTATION_ASSEMBLY — 0/46; ready 01_SOURCE_BYTES_SEALED,05_CAMERA_CONTRACT_SOLVED
 - Plan SHA-256: cb97e4c68f8012f39d95f721284a85f300e5c695d7dd6362dad56a893c1965c0
 - Promotion block: Before any new appearance architecture is selected, prove A) visual-triangle deformation-domain coherence, B) canonical-depth to visual-overlap ownership, and C) Stage45 fail-closed qualification of both.

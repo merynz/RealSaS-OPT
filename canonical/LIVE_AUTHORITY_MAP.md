@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `0c77aea3092d4c53b240dd8ff41710af9d27b1a10b9fab544d1a457adf5f4d13`
+> State fingerprint: `c534d42fef46877b6d6ffeb3c2ac2e229d0824d397964f50f915f529dec4feb8`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -40,7 +40,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `KNIGHT_APPEARANCE_RUNTIME_DATAFLOW_AUDIT` | `MAIN_CANONICALIZED__FROZEN_WITNESS_VERIFIED__RUNTIME_DATAFLOW_AUDIT_ACTIVE` | `main` | `d19ebc48475c` | Can corrected Knight mechanics drive source-owned 2D presentation with visual-triangle deformation-domain coherence and canonical-depth overlap ownership, and can Stage45 prove both fail-closed? | product visual pass; unseen generalization; human aesthetic optimality; source-view cardinality reduction; RGB-generation necessity |
+| `KNIGHT_APPEARANCE_RUNTIME_DATAFLOW_AUDIT` | `MAIN_CANONICALIZED__FROZEN_WITNESS_VERIFIED__RUNTIME_DATAFLOW_AUDIT_ACTIVE` | `main` | `b6ad184b6b9b` | Can corrected Knight mechanics drive source-owned 2D presentation with visual-triangle deformation-domain coherence and canonical-depth overlap ownership, and can Stage45 prove both fail-closed? | product visual pass; unseen generalization; human aesthetic optimality; source-view cardinality reduction; RGB-generation necessity |
 
 ## Branch inventory — observed live
 
@@ -50,7 +50,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `d19ebc48475c` | canonical continuation branch |
+| `main` | `b6ad184b6b9b` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 

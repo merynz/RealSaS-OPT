@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **5196**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **5198**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -5208,6 +5208,8 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-10-02T03:13:57+03:00` | `b3d436726e8f` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | governance: index current compiler-runtime source seal | `canonical/AUTHORITY_MAP_V1.json` | `main`<br>`maintenance/main-green-20261002` |
 | `2026-10-02T03:14:00+03:00` | `7d5bd39bf3ee` | yes | CI_TEST | ci: bind governance preflight to canonical state changes | `.github/workflows/main_green_governance_preflight.yml` | `main`<br>`maintenance/main-green-20261002` |
 | `2026-10-02T03:15:21+03:00` | `d19ebc48475c` | yes | CI_TEST | ci: retire temporary main-green governance preflight | `.github/workflows/main_green_governance_preflight.yml` | `main`<br>`maintenance/main-green-20261002` |
+| `2026-10-02T03:21:29+03:00` | `026d8d3888b4` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | chore: refresh live authority context | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-10-02T03:24:11+03:00` | `b6ad184b6b9b` | yes | GOVERNANCE_CONTINUITY | certify: bind refreshed canonical state to current main CI | `CURRENT_STATE.md`<br>`SYSTEM_INDEX.md` | `main` |
 
 ## Use rule
 

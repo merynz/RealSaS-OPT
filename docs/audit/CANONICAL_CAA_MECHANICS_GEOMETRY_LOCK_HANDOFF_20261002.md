@@ -229,3 +229,37 @@ Next diagnostic controls use the same corrected checkpoint on the original
 surface: (1) existing rig plus fresh skin, including archived-weight replay delta;
 (2) fresh rig plus fresh skin. These isolate inference-apparatus/precision effects
 from refinement effects. They mint no product authority and do not weaken gates.
+
+## 2026-10-02 22:31 UTC original-surface inference controls completed
+
+Run `37072500679`, commit `874f89cadb3afc503de0ab24c6e5520533dc0c15`,
+artifact `11255580761` completed both controls and exited 2 for measured scientific
+failure, not an apparatus exception. Original surface has 12,090 nodes.
+
+| Original-surface arm | G3 max condition | Failed motion frames | Maximum motion edge ratio |
+|---|---:|---:|---:|
+| Existing rig + archived skin (earlier baseline) | Not rerun in this job | 51/51 | 3.61553549 |
+| Existing rig + fresh CPU FP32 skin | 32.28742663888593 | 51/51 | 18.14963526817917 |
+| Fresh CPU rig + fresh CPU FP32 skin | 7458.209765794128 | 51/51 | 184.64133276429234 |
+
+With original surface and qualified rig held fixed, fresh skin differs from the
+archived weight field: row-L1 mean 0.004808228385607706, p95 0.02798091127904944,
+maximum 0.6133617368875417; 7 of 12,090 dominant-joint assignments change.
+The exact same corrected checkpoint is verified, but numerical replay parity is
+therefore NOT established. The historical source runs backbone and readout under
+CUDA BF16 autocast; this replay used CPU FP32. Precision, backend and inference
+port differences are not separately isolated by this control.
+
+Fresh rig on the original surface has lineage
+`4d1dfb2c86faefcfd3e68000215cdc3eb591102e6805a97506b1b91a9aeaa0fe`.
+Changing rig also changes the skin conditioning, predicted weights and derived
+retarget mapping; this comparison is not a rig-only causal intervention. It does
+show that new-surface topology is not necessary for the new inference path to
+produce severe dynamic failure. Do not conclude that topology alone owns the
+regression, or that retraining alone is required.
+
+Both controls still report only structural inference qualification, with no
+product authority. Full fresh rig/skin PASS is rejected. Next diagnostic priority
+is to recover and verify the original inference numerical contract on the original
+surface/rig before using this new inference path as a causal control for refinement.
+Do not weaken thresholds, smooth weights, or alter authority artifacts to pass.

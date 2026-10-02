@@ -23,7 +23,6 @@ jobs:
     env:
       AUTHORITY_ROOT: /home/monster/realsas_authority
       RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
-      CAA_RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671
       CORRECTED_SKIN: canonical/knight_arachne_v6_2x2_rebound_stage35_v1/UNIFORM_ALL_PROJECTED.QUALIFIED_SKIN.json
       OUT_DIR: /tmp/knight_canonical_caa_mechanics_geometry_lock_v1
       PYTHONPATH: .
@@ -35,7 +34,20 @@ jobs:
       - name: Install
         run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
       - name: Compile audit
-        run: python -m py_compile tools/audit_knight_canonical_caa_mechanics_geometry_lock_v1.py
+        run: python -m py_compile tools/audit_knight_canonical_caa_mechanics_geometry_lock_v1.py tools/demo/build_knight_corrected_mechanical_caa_stage23_immutable_v1.py
+      - name: Rebuild fresh immutable Stage23 from exact corrected parent
+        shell: bash
+        run: |
+          set -euo pipefail
+          short="$(printf '%s' "$GITHUB_SHA" | cut -c1-8)"
+          caa_id="SUBJECT2_KNIGHT_CAA_LOCK_STAGE23_${short}"
+          echo "CAA_RUN_ID=$caa_id" >> "$GITHUB_ENV"
+          rm -rf "$AUTHORITY_ROOT/runs/$caa_id"
+          PYTHONPATH=. python tools/demo/build_knight_corrected_mechanical_caa_stage23_immutable_v1.py \
+            --authority-root "$AUTHORITY_ROOT" \
+            --parent-run-id "$RUN_ID" \
+            --child-run-id "$caa_id"
+          test -f "$AUTHORITY_ROOT/runs/$caa_id/IMMUTABLE_STAGE23_SEAL.json"
       - name: Run exact current-code mechanics geometry lock
         shell: bash
         run: |

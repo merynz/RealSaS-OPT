@@ -3,7 +3,12 @@ import argparse,json,time
 from pathlib import Path
 import numpy as np
 
-from tools.audit_knight_repaired_quality_collapse_v1 import loadj
+from tools.audit_knight_repaired_quality_collapse_v1 import loadj,build_repaired_surface,report_quality
+from tools.audit_knight_v9_source_fidelity_v1 import sha
+from compiler.realsas_compiler_core.preproduct_authority_v1 import signed_zero_surface_from_dict,normalization_domain_from_dict
+from compiler.realsas_compiler_core.refined_surface_skin_proposal_v1 import propose_refined_surface_skin_v1
+from compiler.realsas_compiler_core.skin import qualify_skin
+from compiler.realsas_compiler_core.canonical_mesh_quality_topology_safe_flip_v2 import _manifold_report
 from tools.audit_knight_canonical_caa_mechanics_geometry_lock_v1 import (
     CLIPS,FULL_MOTION_SAMPLES,VISIBLE_FLIP_SAMPLE_INDICES,DEMO_VIEWS,
     _faces,_triangle_geometry,_projected_flip_metrics,
@@ -24,6 +29,7 @@ from compiler.realsas_compiler_core.mesh.deformation_stress_v1 import _candidate
 from compiler.realsas_compiler_core.mesh.deformation_stress_v2 import run_g3_local_frame_micro_stress_v2
 from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import _joint_pose_v2
 from compiler.realsas_compiler_core.product_authority_v1 import (
+    ComponentCarrierDecisionIR,build_component_carrier_policy,
     validate_canonical_mesh_candidate,
     validate_component_carrier_policy,
     validate_mechanical_partition,
@@ -37,17 +43,33 @@ def main():
     ap.add_argument("--authority-root",type=Path,required=True)
     ap.add_argument("--run-id",required=True)
     ap.add_argument("--candidate-json",type=Path,required=True)
+    ap.add_argument("--partition-json",type=Path,required=True)
+    ap.add_argument("--inverse-npz",type=Path,required=True)
+    ap.add_argument("--compaction-seal",type=Path,required=True)
+    ap.add_argument("--static-report",type=Path,required=True)
     ap.add_argument("--out",type=Path,required=True)
     a=ap.parse_args()
 
     ctx=_ctx(a.authority_root,a.run_id)
     rr=ctx["run_root"]
     candidate=canonical_mesh_candidate_from_dict(loadj(a.candidate_json))
-    surface=rigging_surface_from_dict(stage_output_payload(ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1"))
-    partition=mechanical_partition_from_dict(stage_output_payload(ctx,"17_MECHANICAL_PARTITION_QUALIFIED","RealSaS.MechanicalPartitionIR.v1"))
-    carrier=component_carrier_policy_from_dict(stage_output_payload(ctx,"17_MECHANICAL_PARTITION_QUALIFIED","RealSaS.ComponentCarrierPolicyIR.v1"))
+    source_surface=rigging_surface_from_dict(stage_output_payload(ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1"))
+    partition=mechanical_partition_from_dict(loadj(a.partition_json))
+    seal=loadj(a.compaction_seal)
+    zero=signed_zero_surface_from_dict(stage_output_payload(ctx,"12_ZERO_SURFACE_DECODED","RealSaS.SignedZeroSurfaceSealIR.v1"))
+    if sha(a.inverse_npz)!=seal["inverse_npz_sha256"] or sha(Path(zero.npz_path))!=zero.npz_sha256 or zero.npz_sha256!=seal["source_zero_surface_sha256"]:
+        raise RuntimeError("V9_DYNAMIC_REFINEMENT_SOURCE_BYTES_DRIFT")
+    surface,_explicit=build_repaired_surface(rr,a.inverse_npz)
+    carrier=build_component_carrier_policy(
+        partition=partition,
+        decisions=tuple(ComponentCarrierDecisionIR(
+            c.component_id,"MESH",("REPAIRED_STATIC_QUALITY_ALTERNATING_V3",),
+            metadata={"automatic":True,"semantic_recognition_used":False}
+        ) for c in partition.components),
+        metadata={"default_carrier":"MESH","automatic":True},
+    )
     skeleton=qualified_skeleton_from_dict(stage_output_payload(ctx,"28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1"))
-    skin=qualified_skin_from_dict(stage_output_payload(ctx,"32_SKIN_QUALIFIED","RealSaS.QualifiedSkinIR.v1"))
+    source_skin=qualified_skin_from_dict(stage_output_payload(ctx,"32_SKIN_QUALIFIED","RealSaS.QualifiedSkinIR.v1"))
     camera_set=qualified_camera_set_from_dict(stage_output_payload(ctx,"05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1"))
     cameras=tuple(sorted(camera_set.cameras,key=lambda x:int(x.view_index)))
     envelope=deformation_envelope_from_dict(stage_output_payload(ctx,"34_DEFORMATION_CAPABILITY_ENVELOPE","RealSaS.DeformationCapabilityEnvelopeIR.v1"))
@@ -56,6 +78,27 @@ def main():
     validate_mechanical_partition(partition,surface)
     validate_component_carrier_policy(carrier,partition)
     validate_canonical_mesh_candidate(candidate,surface=surface,partition=partition,carrier_policy=carrier)
+    static_report=loadj(a.static_report)
+    quality=report_quality(candidate,policy)
+    if (static_report["final_candidate_lineage_hash"]!=candidate.candidate_lineage_hash
+            or quality["policy_violating_face_count"]!=0 or not _manifold_report(candidate.faces)["passed"]):
+        raise RuntimeError("V9_DYNAMIC_STATIC_COURT_NOT_PASS")
+    norm=normalization_domain_from_dict(loadj(rr/"artifacts/08_NORMALIZATION_DOMAIN_QUALIFIED/normalization_domain.json"))
+    with np.load(Path(zero.npz_path),allow_pickle=False) as z:
+        world=np.asarray(norm.center_xyz)[None,:]+np.asarray(z["vertices_normalized"],np.float64)*float(norm.half_extent)
+    with np.load(a.inverse_npz,allow_pickle=False) as z:
+        proposal,transfer_receipt=propose_refined_surface_skin_v1(
+            source_surface=source_surface,target_surface=surface,skeleton=skeleton,source_skin=source_skin,
+            dense_positions=world,source_inverse=z["base_inverse"],target_inverse=z["final_inverse"],
+            dense_source_sha256=zero.npz_sha256,
+        )
+    # Numeric simplex requalification only; actual mechanics remain unproven.
+    skin=qualify_skin(surface,skeleton,proposal,max_simplex_repair_l1=1e-8,max_total_correction_l1=1e-4)
+    a.out.parent.mkdir(parents=True,exist_ok=True)
+    for name,value in (("refined_surface.json",surface.to_dict()),("transferred_skin.json",skin.to_dict()),
+                       ("transfer_receipt.json",transfer_receipt)):
+        (a.out.parent/name).write_text(json.dumps(value,sort_keys=True)+"\n")
+    print("V9_DYNAMIC_INPUT_BINDINGS="+json.dumps(transfer_receipt,sort_keys=True),flush=True)
 
     faces=_faces(candidate)
     rest,W,faces_support=_candidate_skin_matrix(candidate,surface=surface,skeleton=skeleton,skin=skin)
@@ -73,6 +116,9 @@ def main():
         envelope=envelope,cameras=cameras,policy=policy
     )
     g3_seconds=time.perf_counter()-t0
+    (a.out.parent/"g3_report.json").write_text(json.dumps(g3.to_dict(),sort_keys=True)+"\n")
+    print("V9_DYNAMIC_G3="+json.dumps({"passed":g3.passed,"failures":g3.failure_invariants,
+          "seconds":g3_seconds,"condition":g3.maximum_condition_number}),flush=True)
 
     source_report=loadj(Path("canonical/KNIGHT_MOTION_SOURCE_ACTION_DIAGNOSTIC_20260927.json"))
     joint_ids=tuple(j.canonical_joint_id for j in skeleton.joints)
@@ -130,6 +176,9 @@ def main():
           "clip_id":clip_id,"mapping":mapping,"sample_count":len(times),
           "worst_frame_index":clip_worst_index,"worst_key":clip_worst,"frames":frames,
         })
+        (a.out.parent/"motion_checkpoint.json").write_text(json.dumps(clip_rows,sort_keys=True)+"\n")
+        print("V9_DYNAMIC_CLIP="+json.dumps({"clip":clip_id,"worst":clip_worst,
+              "max_posed_degenerate":max_posed_degenerate}),flush=True)
 
     if global_worst_pose is None:
         raise RuntimeError("V9_DYNAMIC_GLOBAL_WORST_MISSING")
@@ -137,6 +186,7 @@ def main():
     # Full all-face intersection census only at rest and global worst actual-motion frame.
     inter_t0=time.perf_counter()
     rest_pairs=set(unexpected_intersection_pairs(vertices=rest,faces=faces))
+    print("V9_DYNAMIC_REST_INTERSECTIONS="+str(len(rest_pairs)),flush=True)
     worst_pairs=set(unexpected_intersection_pairs(vertices=global_worst_pose,faces=faces))
     full_new=sorted(worst_pairs-rest_pairs)
     full_intersection_seconds=time.perf_counter()-inter_t0
@@ -150,9 +200,9 @@ def main():
         owner=np.asarray(vis.owner_face_index,dtype=np.int64)
         visible_union.update(int(x) for x in np.unique(owner[owner>=0]).tolist())
     visible_indices=np.asarray(sorted(visible_union),dtype=np.int64)
-    visible_faces=faces[visible_indices]
-    vis_rest=set(unexpected_intersection_pairs(vertices=rest,faces=visible_faces))
-    vis_worst=set(unexpected_intersection_pairs(vertices=global_worst_pose,faces=visible_faces))
+    # The exact all-face census already includes these pairs. Preserve global IDs.
+    vis_rest={p for p in rest_pairs if p[0] in visible_union and p[1] in visible_union}
+    vis_worst={p for p in worst_pairs if p[0] in visible_union and p[1] in visible_union}
     visible_new=sorted(vis_worst-vis_rest)
 
     mechanical_pass=bool(
@@ -169,11 +219,12 @@ def main():
       "surface_lineage_hash":surface.geometry_lineage_hash,
       "skin_lineage_hash":skin.skin_lineage_hash,
       "skin_transfer":{
-        "method":"SURFACE_SUPPORT_CONVEX_TRANSFER_V1_MEASUREMENT",
+        "method":"EXACT_DENSE_CLUSTER_PARENT_CONSTANT_THEN_CANDIDATE_CONVEX_TRANSFER",
+        "receipt":transfer_receipt,
         "candidate_weight_simplex_residual_max":simplex_residual,
         "negative_weight_count":negative,
         "nonfinite_weight_count":nonfinite,
-        "model_refit_required":False,
+        "model_refit_requirement":"UNDETERMINED_BY_THIS_COURT",
       },
       "g3":{
         "passed":bool(g3.passed),"failure_invariants":list(g3.failure_invariants),
@@ -214,6 +265,9 @@ def main():
       },
       "verdict":{
         "mechanical_pass":mechanical_pass,
+        "product_authority_minted":False,
+        "scope":"EXACT_PARENT_CONSTANT_SKIN_HYPOTHESIS__SAMPLED_MOTION_ONLY",
+        "source_fidelity_sealed":False,
         "projected_flips_reclassified_as_presentation_diagnostic":True,
         "next_if_pass":"EXHAUSTIVE_ALL_51_SAMPLED_FRAMES_SELF_INTERSECTION_COURT",
         "next_if_fail":"LOCALIZE_EXACT_DYNAMIC_FAILURE_OWNER",

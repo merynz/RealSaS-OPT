@@ -7,6 +7,8 @@ on:
     paths:
       - tools/audit_knight_v9_dynamic_mechanics_phase1_v1.py
       - .github/workflows/knight_v9_dynamic_mechanics_phase1_v1.yml
+      - compiler/realsas_compiler_core/refined_surface_skin_proposal_v1.py
+      - tests/compiler/test_refined_surface_skin_proposal_v1.py
 
 permissions:
   actions: read
@@ -22,6 +24,9 @@ jobs:
       STATIC_V9_DIR: /tmp/knight_static_quality_source_opt_v9_input
       OUT: /tmp/knight_v9_dynamic_mechanics_phase1_v1/REPORT.json
       PYTHONPATH: .
+      PYTHONUNBUFFERED: 1
+      OPENBLAS_NUM_THREADS: 1
+      OMP_NUM_THREADS: 1
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -34,17 +39,25 @@ jobs:
           path: /tmp/knight_static_quality_source_opt_v9_input
           github-token: ${{ github.token }}
           run-id: 37057338450
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-repaired-compaction-seal-v2
+          path: /tmp/knight_v9_dynamic_compaction_input
+          github-token: ${{ github.token }}
+          run-id: 37023349486
+      - name: Subject-free refinement transport contracts
+        run: python -m pytest -q tests/compiler/test_refined_surface_skin_proposal_v1.py
       - run: python -m py_compile tools/audit_knight_v9_dynamic_mechanics_phase1_v1.py
       - name: Run v9 G3 actual-motion and worst-frame intersection court
         run: |
           set -euo pipefail
           rm -rf "$(dirname "$OUT")"
           mkdir -p "$(dirname "$OUT")"
-          python tools/audit_knight_v9_dynamic_mechanics_phase1_v1.py             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --candidate-json "$STATIC_V9_DIR/final_candidate.json"             --out "$OUT"
+          python tools/audit_knight_v9_dynamic_mechanics_phase1_v1.py             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --candidate-json "$STATIC_V9_DIR/final_candidate.json" --partition-json "$STATIC_V9_DIR/partition.json" --static-report "$STATIC_V9_DIR/REPORT.json" --inverse-npz /tmp/knight_v9_dynamic_compaction_input/repaired_inverse_v2.npz --compaction-seal /tmp/knight_v9_dynamic_compaction_input/SEAL_V2.json             --out "$OUT"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: knight-v9-dynamic-mechanics-phase1-v1
-          path: /tmp/knight_v9_dynamic_mechanics_phase1_v1/REPORT.json
+          path: /tmp/knight_v9_dynamic_mechanics_phase1_v1
           if-no-files-found: error
           retention-days: 30

@@ -55,16 +55,59 @@ def boundary_cycle(faces,patch):
         if len(cycle)>len(graph):return None
     return tuple(cycle) if len(cycle)==len(graph) else None
 
-def pca_chart(vertex_ids,positions):
-    ids=tuple(sorted(set(map(str,vertex_ids))))
-    P=np.asarray([positions[v] for v in ids],dtype=np.float64)
-    center=np.mean(P,axis=0)
-    U,S,Vt=np.linalg.svd(P-center,full_matrices=False)
-    ex=np.asarray(Vt[0],dtype=np.float64);ey=np.asarray(Vt[1],dtype=np.float64)
-    normal=np.cross(ex,ey)
-    normal/=max(float(np.linalg.norm(normal)),1e-18)
-    xy={vid:(float(np.dot(positions[vid]-center,ex)),float(np.dot(positions[vid]-center,ey))) for vid in ids}
-    return center,ex,ey,normal,xy
+def tutte_chart(old_faces,cycle,positions):
+    # Positive-weight Tutte embedding: map boundary to a convex circle using
+    # cumulative 3D boundary length, then solve uniform barycentric equations
+    # for interior vertices.  This is a topology chart, not geometry authority;
+    # 3D G1/G3 and manifold courts remain final.
+    cycle=tuple(map(str,cycle))
+    all_ids=sorted({str(v) for face in old_faces for v in face})
+    boundary=set(cycle)
+    interior=[v for v in all_ids if v not in boundary]
+
+    lengths=[]
+    total=0.0
+    for i,v in enumerate(cycle):
+        w=cycle[(i+1)%len(cycle)]
+        d=float(np.linalg.norm(np.asarray(positions[v])-np.asarray(positions[w])))
+        d=max(d,1e-12);lengths.append(d);total+=d
+    xy={}
+    acc=0.0
+    for i,v in enumerate(cycle):
+        theta=2.0*math.pi*(acc/total)
+        xy[v]=(math.cos(theta),math.sin(theta))
+        acc+=lengths[i]
+
+    if not interior:
+        return xy
+
+    neigh=defaultdict(set)
+    for face in old_faces:
+        a,b,c=map(str,face)
+        neigh[a].update((b,c));neigh[b].update((a,c));neigh[c].update((a,b))
+    idx={v:i for i,v in enumerate(interior)}
+    A=np.zeros((len(interior),len(interior)),dtype=np.float64)
+    bx=np.zeros(len(interior),dtype=np.float64)
+    by=np.zeros(len(interior),dtype=np.float64)
+    for v in interior:
+        i=idx[v]; nbs=sorted(neigh[v])
+        if not nbs:
+            raise RuntimeError(f"TUTTE_ISOLATED_INTERIOR:{v}")
+        A[i,i]=float(len(nbs))
+        for nb in nbs:
+            if nb in idx:
+                A[i,idx[nb]]-=1.0
+            elif nb in xy:
+                bx[i]+=float(xy[nb][0]);by[i]+=float(xy[nb][1])
+            else:
+                raise RuntimeError(f"TUTTE_NEIGHBOR_OUTSIDE_PATCH:{v}:{nb}")
+    try:
+        sx=np.linalg.solve(A,bx);sy=np.linalg.solve(A,by)
+    except np.linalg.LinAlgError as exc:
+        raise RuntimeError("TUTTE_SINGULAR") from exc
+    for v,i in idx.items():
+        xy[v]=(float(sx[i]),float(sy[i]))
+    return xy
 
 def signed_area2(a,b,c):
     return (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])
@@ -133,7 +176,10 @@ def main():
             patch_vertices={str(v) for f in old_faces for v in f}
             boundary=set(cycle)
             interior=sorted(patch_vertices-boundary)
-            _center,_ex,_ey,_normal,xy=pca_chart(patch_vertices,positions)
+            try:
+                xy=tutte_chart(old_faces,cycle,positions)
+            except RuntimeError:
+                reject[f"H{hops}_TUTTE_FAIL"]+=1;continue
             if not chart_injective(old_faces,xy):
                 reject[f"H{hops}_NONINJECTIVE_CHART"]+=1;continue
             cycle=orient_boundary(cycle,xy)

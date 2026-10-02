@@ -36,8 +36,17 @@ jobs:
             tests/repository/test_canonical_main_readiness_v1.py \
             tests/repository/test_mainline_execution_plan_v2.py
       - name: Context coverage
-        run: python tools/audit_context_coverage.py
+        id: coverage
+        shell: bash
+        run: |
+          set +e
+          python tools/audit_context_coverage.py
+          rc=$?
+          cat canonical/CONTEXT_COVERAGE_AUDIT.json || true
+          exit "$rc"
       - name: Authority map
+        if: always()
         run: python tools/render_authority_map.py --cached-refs
       - name: Rehydration packet
+        if: always()
         run: python tools/render_rehydration_packet.py

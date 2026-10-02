@@ -8,10 +8,12 @@ from pathlib import Path
 import numpy as np
 
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
-    normalization_domain_from_dict,
     rigging_surface_from_dict,
 )
-from compiler.realsas_compiler_core.preproduct_authority_v1 import signed_zero_surface_from_dict
+from compiler.realsas_compiler_core.preproduct_authority_v1 import (
+    normalization_domain_from_dict,
+    signed_zero_surface_from_dict,
+)
 from tools.audit_knight_arachne_stage17_stage18_repair_child_v1 import compact_inverse
 
 

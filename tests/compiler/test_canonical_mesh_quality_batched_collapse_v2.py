@@ -71,7 +71,7 @@ def test_batched_collapse_repairs_two_disjoint_stars_in_one_batch():
     assert report["before"]["policy_violating_face_count"]==4
     assert report["after"]["policy_violating_face_count"]==0
     assert len(repaired.vertices)==10
-    assert all(len(rows)<=2 for rows in _edge_incidence(repaired.faces).values())
+    assert all(count<=2 for count in _edge_incidence(repaired.faces).values())
 
 
 def _edge_incidence(faces):

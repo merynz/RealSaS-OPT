@@ -1,0 +1,56 @@
+name: knight-static-quality-source-opt-v9
+
+on:
+  push:
+    branches:
+      - audit/canonical-caa-mechanics-geometry-lock-20261002
+    paths:
+      - tools/audit_knight_static_quality_source_opt_v9.py
+      - .github/workflows/knight_static_quality_source_opt_v9.yml
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 25
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
+      STATIC_V8_DIR: /tmp/knight_static_quality_split_cycle_v8_input
+      COMPACTION_V2_DIR: /tmp/knight_repaired_compaction_v2_input
+      OUT_DIR: /tmp/knight_static_quality_source_opt_v9
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-static-quality-split-cycle-v8
+          path: /tmp/knight_static_quality_split_cycle_v8_input
+          github-token: ${{ github.token }}
+          run-id: 37047428237
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-repaired-compaction-seal-v2
+          path: /tmp/knight_repaired_compaction_v2_input
+          github-token: ${{ github.token }}
+          run-id: 37023349486
+      - run: python -m py_compile tools/audit_knight_static_quality_source_opt_v9.py
+      - name: Run source-surface constrained static quality optimization
+        run: |
+          set -euo pipefail
+          rm -rf "$OUT_DIR"
+          mkdir -p "$OUT_DIR"
+          python tools/audit_knight_static_quality_source_opt_v9.py             --run-root "$RUN_ROOT"             --inverse-npz "$COMPACTION_V2_DIR/repaired_inverse_v2.npz"             --static-v8-dir "$STATIC_V8_DIR"             --out-dir "$OUT_DIR"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knight-static-quality-source-opt-v9
+          path: /tmp/knight_static_quality_source_opt_v9
+          if-no-files-found: error
+          retention-days: 30

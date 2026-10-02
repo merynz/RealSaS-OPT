@@ -438,18 +438,16 @@ def main() -> None:
     )
     joint_ids = tuple(j.canonical_joint_id for j in skeleton.joints)
 
-    rest_intersections = set(
-        unexpected_intersection_pairs(vertices=rest, faces=faces)
-    )
-
     clip_rows = []
+    global_worst_key = (-1, -1, -1.0)
+    global_worst_pose = None
+    global_worst_locator = None
     max_edge_gt4 = 0
     max_edge_gt10 = 0
     worst_edge = 0.0
     max_visible_projected_flips = 0
     max_all_projected_flips = 0
     max_posed_degenerate = 0
-    max_new_intersections = 0
 
     for clip_id in CLIPS:
         motion_path = (
@@ -496,6 +494,14 @@ def main() -> None:
             if key > worst_key:
                 worst_key = key
                 worst_index = frame_index
+            if key > global_worst_key:
+                global_worst_key = key
+                global_worst_pose = posed.copy()
+                global_worst_locator = {
+                    "clip_id": clip_id,
+                    "frame_index": int(frame_index),
+                    "time_seconds": float(time_seconds),
+                }
 
             max_edge_gt4 = max(max_edge_gt4, int(mechanical["edge_gt_4"]))
             max_edge_gt10 = max(max_edge_gt10, int(mechanical["edge_gt_10"]))
@@ -523,26 +529,26 @@ def main() -> None:
                 }
             )
 
-        worst_posed = posed_by_index[worst_index]
-        posed_intersections = set(
-            unexpected_intersection_pairs(vertices=worst_posed, faces=faces)
-        )
-        new_intersections = sorted(posed_intersections - rest_intersections)
-        max_new_intersections = max(max_new_intersections, len(new_intersections))
-
         clip_rows.append(
             {
                 "clip_id": clip_id,
                 "mapping": mapping,
                 "sample_count": int(len(times)),
                 "worst_frame_index": int(worst_index),
-                "worst_frame_new_self_intersection_pair_count": int(len(new_intersections)),
-                "worst_frame_new_self_intersection_pairs_sample": [
-                    [int(a), int(b)] for a, b in new_intersections[:32]
-                ],
                 "frames": frames,
             }
         )
+
+    if global_worst_pose is None:
+        raise RuntimeError("LOCK_GLOBAL_WORST_POSE_MISSING")
+    rest_intersections = set(
+        unexpected_intersection_pairs(vertices=rest, faces=faces)
+    )
+    global_posed_intersections = set(
+        unexpected_intersection_pairs(vertices=global_worst_pose, faces=faces)
+    )
+    new_intersections = sorted(global_posed_intersections - rest_intersections)
+    max_new_intersections = int(len(new_intersections))
 
     caa_ctx = _ctx(authority_root, args.caa_run_id)
     caa_stage23 = stage_output_payload(
@@ -653,9 +659,16 @@ def main() -> None:
                 "rest_unexpected_self_intersection_pair_count": int(
                     len(rest_intersections)
                 ),
-                "max_new_self_intersection_pair_count_on_worst_clip_frames": int(
+                "global_worst_actual_motion_frame": global_worst_locator,
+                "global_worst_frame_total_self_intersection_pair_count": int(
+                    len(global_posed_intersections)
+                ),
+                "global_worst_frame_new_self_intersection_pair_count": int(
                     max_new_intersections
                 ),
+                "global_worst_frame_new_self_intersection_pairs_sample": [
+                    [int(a), int(b)] for a, b in new_intersections[:32]
+                ],
             },
         },
         "exact_caa_render_binding": {
@@ -701,7 +714,7 @@ def main() -> None:
                 "motion_gt10": int(max_edge_gt10),
                 "motion_worst": float(worst_edge),
                 "visible_projected_flips": int(max_visible_projected_flips),
-                "new_self_intersections": int(max_new_intersections),
+                "new_self_intersections_global_worst_frame": int(max_new_intersections),
                 "corrected_skin_exact": bool(corrected_skin_exact),
                 "caa_binding": bool(exact_render_binding_pass),
             },

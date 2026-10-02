@@ -136,3 +136,63 @@ collisions, and rejection of old PASS receipts.
 This closes an unsound admission path; it does **not** implement missing depth
 transport or coherent visual-triangle deformation bindings. Those remain open,
 alongside the measured mechanical and absolute source-fidelity failures.
+
+## 2026-10-02 21:48 UTC differential result and fresh inference request
+
+Run `37068452456` (commit `afaf4c0b9fbe2e3e7b6563195fc925bab16c1639`,
+artifact `11254170095`) completed the original Stage18 versus V9 comparison.
+All 51 replayed V9 poses are byte-identical to the prior archived poses. Both
+meshes fail conditioning, but the catastrophic magnitude is a regression of the
+V9 geometry/topology plus transported-skin combination:
+
+| Clip | Original max edge ratio | V9 max edge ratio | Original bad faces/frame | V9 bad faces/frame |
+|---|---:|---:|---:|---:|
+| Idle | 2.07193 | 364.65035 | 2 | 156–173 |
+| Run | 3.55756 | 1043.29591 | 1–16 | 633–762 |
+| Slash | 3.61554 | 1307.70318 | 1–16 | 610–799 |
+
+Original has 28,331 faces; V9 has 28,810. This comparison holds rig, numeric
+source weight field, motion source, retarget rule and policy fixed, while surface
+refinement, mesh geometry/topology and weight transport differ. It does not
+identify a single one of those changed factors as the sole causal owner.
+
+Local analysis of the exact archived 51 poses finds 1,257 unique edges stretching
+above 4x (841 above 10x). Of the >4x edges, 1,076 are identity-bound edges already
+present in the refined surface relations; 79 have nonidentity support bindings.
+None of the >4x edges' identity-bound endpoints moved relative to their refined
+surface node. The worst edge (candidate indices 4884,10219) is inherited directly
+from refined surface connectivity, rest length 0.0006387936215529746, and bridges
+base clusters 8403 and 8058. Thus the final single-vertex V9 adjustment did not
+create this worst edge. For edges whose endpoint weight L1 difference is <1e-10,
+maximum stretch over the 51 poses is 1.0000000032895184. These are diagnostic
+associations, not grounds to mutate weights or erase faces.
+
+User explicitly requested fresh rig **and** skin inference on the new surface.
+Model asset inspection run `37069671533`, artifact `11254465379`, verified:
+
+- ML runtime `/home/monster/realsas-ml312/bin/python`, Python 3.12,
+  Torch 2.7.0+cu118, GTX 1660 Ti available.
+- Fit authority resides in parent `SUBJECT2_KNIGHT_DEMO_V2_20260924`; solved child
+  does not duplicate Stage26/27/30/31 files.
+- Geppetto sealed checkpoint is available (46,011,564 bytes).
+- Arachne sealed Stage31 checkpoint is available (558,860,805 bytes), but is the
+  original V6 closure model, not the corrected UNIFORM_ALL_PROJECTED arm used by
+  the current skin. Fresh inference must fetch the corrected arm checkpoint and
+  verify its result's canonical weight digest against the committed rebound
+  report (41ab25238d7901653896daba1b5921a340824561893b581d2fe3aed9811bb7e8).
+
+Commit `dac0f302b16e5eb5a34fff7a25b98f648afcc122` starts actual inference run
+`37070427256`: exact 15,490-node refined surface -> freshly inferred qualified
+Geppetto rig -> corrected V6 checkpoint inference -> frozen G3 and 51-frame court.
+This is teacher-free inference, no training, no old-row transport. CPU FP32 and
+four threads are explicit apparatus choices; original A100 BF16 parity is not
+claimed. Geppetto uses predeclared seed 11; new rig retargeting uses the existing
+rule and records its resulting mapping. The V6 readout class was copied unchanged
+from sealed source SHA 39ff4f7a2051f0d9c1251a5999f472b9926e83deacbedcedc8e92eea424dce01
+into an inference-only module; runtime verifies AST identity. Its chunking and
+row/joint permutation test passed on the self-hosted runner.
+
+At this checkpoint Geppetto inference and compiler structural qualification have
+completed successfully; the corrected Arachne checkpoint is being retrieved. No
+fresh skin result or dynamic PASS has been observed. Even a sampled-conditioning PASS still requires intersection,
+source fidelity and appearance/presentation closure before any product claim.

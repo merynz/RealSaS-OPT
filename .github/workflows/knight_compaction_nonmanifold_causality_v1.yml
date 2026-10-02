@@ -1,0 +1,41 @@
+name: knight-compaction-nonmanifold-causality-v1
+
+on:
+  push:
+    branches:
+      - audit/canonical-caa-mechanics-geometry-lock-20261002
+    paths:
+      - tools/audit_knight_compaction_nonmanifold_causality_v1.py
+      - .github/workflows/knight_compaction_nonmanifold_causality_v1.yml
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
+      OUT: /tmp/knight_compaction_nonmanifold_causality_v1/REPORT.json
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - run: python -m py_compile tools/audit_knight_compaction_nonmanifold_causality_v1.py
+      - name: Localize Stage15 nonmanifold cause
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$(dirname "$OUT")"
+          mkdir -p "$(dirname "$OUT")"
+          python tools/audit_knight_compaction_nonmanifold_causality_v1.py             --run-root "$RUN_ROOT"             --out "$OUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: knight-compaction-nonmanifold-causality-v1
+          path: /tmp/knight_compaction_nonmanifold_causality_v1/REPORT.json
+          if-no-files-found: error
+          retention-days: 30

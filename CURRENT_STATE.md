@@ -4,7 +4,7 @@
 **Canonical continuation branch:** `main`  
 **Active experiment:** `KNIGHT_APPEARANCE_RUNTIME_DATAFLOW_AUDIT`  
 **State:** `MAIN_CANONICALIZED__FROZEN_WITNESS_VERIFIED__RUNTIME_DATAFLOW_AUDIT_ACTIVE`  
-**Certification rule:** the current `main` head itself must have completed green CI; generated-view bot commits are followed by a human/tool certification commit.
+**Certification rule:** the current `main` head itself must have completed green CI; live authority refresh is validation-only and may not mutate `main`.
 
 ## Canonical lineage
 

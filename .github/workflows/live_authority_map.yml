@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: live-authority-context
@@ -104,32 +104,7 @@ jobs:
             fi
           done
 
-      - name: Commit refreshed generated views
-        shell: bash
+      - name: Confirm validation-only authority refresh
         run: |
-          changed="$(git status --porcelain -- \
-            canonical/LIVE_AUTHORITY_MAP.md \
-            canonical/REHYDRATION_PACKET.md \
-            canonical/CONTEXT_COVERAGE_AUDIT.md \
-            canonical/CONTEXT_COVERAGE_AUDIT.json \
-            canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json \
-            canonical/BOOTSTRAP_AUDIT_QUEUE.md \
-            canonical/FIT1_COMMIT_LINEAGE_V1.md \
-            canonical/FIT1_COMMIT_LINEAGE_V1.json)"
-          if [ -z "$changed" ]; then
-            echo "Generated authority/context views already current."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add \
-            canonical/LIVE_AUTHORITY_MAP.md \
-            canonical/REHYDRATION_PACKET.md \
-            canonical/CONTEXT_COVERAGE_AUDIT.md \
-            canonical/CONTEXT_COVERAGE_AUDIT.json \
-            canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json \
-            canonical/BOOTSTRAP_AUDIT_QUEUE.md \
-            canonical/FIT1_COMMIT_LINEAGE_V1.md \
-            canonical/FIT1_COMMIT_LINEAGE_V1.json
-          git commit -m "chore: refresh live authority context"
-          git push origin HEAD:main
+          echo "Live authority refresh is validation-only."
+          echo "Generated views are job-local diagnostics; this workflow does not mutate main."

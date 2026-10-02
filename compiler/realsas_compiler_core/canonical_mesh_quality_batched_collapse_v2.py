@@ -24,6 +24,7 @@ from .product_authority_v1 import (
     canonical_mesh_candidate_lineage_hash,
 )
 from .types import QualificationError
+from .canonical_mesh_quality_topology_safe_flip_v2 import _manifold_report
 
 
 def _global_nonmanifold_edge_count(faces) -> int:
@@ -47,6 +48,13 @@ def repair_candidate_endpoint_collapses_batched_v2(
     if not faces:
         raise QualificationError("QUALITY_BATCHED_COLLAPSE_REQUIRES_FACES")
 
+    initial_topology=_manifold_report(faces)
+    if not initial_topology["passed"]:
+        raise QualificationError(
+            f"QUALITY_BATCHED_COLLAPSE_INPUT_NONMANIFOLD:"
+            f"{initial_topology['nonmanifold_edge_count']}:"
+            f"{initial_topology['illegal_vertex_link_count']}"
+        )
     before=_report(faces,positions,policy)
     accepted=[]
     batch_rows=[]
@@ -173,9 +181,13 @@ def repair_candidate_endpoint_collapses_batched_v2(
             vertex_rows.pop(rem,None)
             positions.pop(rem,None)
 
-        nm=_global_nonmanifold_edge_count(faces)
-        if nm:
-            raise QualificationError(f"QUALITY_BATCHED_COLLAPSE_NONMANIFOLD:{nm}")
+        topo=_manifold_report(faces)
+        if not topo["passed"]:
+            raise QualificationError(
+                f"QUALITY_BATCHED_COLLAPSE_POSTBATCH_NONMANIFOLD:"
+                f"{batch_index}:{topo['nonmanifold_edge_count']}:"
+                f"{topo['illegal_vertex_link_count']}"
+            )
 
         for row in selected:
             accepted.append({
@@ -196,6 +208,7 @@ def repair_candidate_endpoint_collapses_batched_v2(
             "accepted_count":len(selected),
             "occupied_closed_one_ring_vertex_count":len(occupied),
             "face_count_after":len(faces),
+            "topology":topo,
         })
 
     faces_tuple=tuple(sorted(tuple(face) for face in faces))
@@ -203,13 +216,14 @@ def repair_candidate_endpoint_collapses_batched_v2(
     vertices=tuple(row for vid,row in sorted(vertex_rows.items()) if vid in used_ids)
     edges=tuple(sorted({_edge(face[i],face[j]) for face in faces_tuple for i,j in ((0,1),(1,2),(2,0))}))
     after=_report(faces_tuple,positions,policy)
+    final_topology=_manifold_report(faces_tuple)
     policy_hash=content_sha256({
         "schema":"RealSaS.EndpointHalfedgeBatchedCollapseRepairPolicy.v2",
         "input_candidate_lineage_hash":candidate.candidate_lineage_hash,
         "mesh_policy_hash":policy.qualification_policy_lineage_hash,
         "max_batches":int(max_batches),"max_collapses":int(max_collapses),
         "independence_guard":"PAIRWISE_DISJOINT_CLOSED_ONE_RING_VERTEX_SETS",
-        "topology_guard":"INTERIOR_MANIFOLD_LINK_CONDITION_PLUS_GLOBAL_POST_BATCH_MANIFOLD_CHECK",
+        "topology_guard":"EDGE_AND_VERTEX_LINK_MANIFOLD_PRE_AND_POST_BATCH",
         "placement":"KEEP_EXISTING_ENDPOINT_ONLY",
         "selection":"MONOTONE_G3_WITH_FROZEN_G1_LOCAL_DEVIATION",
     })
@@ -233,7 +247,9 @@ def repair_candidate_endpoint_collapses_batched_v2(
                 "rejected_shape_deviation_count":int(rejected_shape),
                 "rejected_quality_count":int(rejected_quality),
                 "rejected_duplicate_face_count":int(rejected_duplicate),
-                "before":before,"after":after,"accepted_collapses":accepted,
+                "before":before,"after":after,
+                "initial_topology":initial_topology,"final_topology":final_topology,
+                "accepted_collapses":accepted,
             },
         },
     )

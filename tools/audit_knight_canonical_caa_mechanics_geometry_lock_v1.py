@@ -7,6 +7,9 @@ from pathlib import Path
 
 import numpy as np
 
+from compiler.realsas_compiler_core.appearance_authority_v2 import (
+    complete_appearance_asset_from_dict,
+)
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     canonical_mesh_candidate_from_dict,
     component_carrier_policy_from_dict,
@@ -570,18 +573,48 @@ def main() -> None:
     new_intersections = sorted(global_posed_intersections - rest_intersections)
     max_new_intersections = int(len(new_intersections))
 
-    caa_ctx = _ctx(authority_root, args.caa_run_id)
-    caa_stage23 = stage_output_payload(
-        caa_ctx,
-        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
-        "RealSaS.CompleteAppearanceAssetIR.v2",
+    # The immutable Stage23 witness intentionally seals Stage19->23 without
+    # promoting the child ledger into ordinary downstream execution authority.
+    # Therefore stage_output_payload() correctly refuses this child run.  Validate
+    # the immutable witness by its own seal and typed Stage23 artifact instead.
+    caa_root = (authority_root / "runs" / args.caa_run_id).resolve()
+    caa_seal_path = caa_root / "IMMUTABLE_STAGE23_SEAL.json"
+    caa_asset_path = (
+        caa_root
+        / "artifacts"
+        / "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+        / "complete_appearance_asset.json"
+    )
+    if not caa_seal_path.is_file() or not caa_asset_path.is_file():
+        raise RuntimeError("LOCK_IMMUTABLE_CAA_STAGE23_EVIDENCE_MISSING")
+    caa_seal = _load_json(caa_seal_path)
+    if (
+        str(caa_seal.get("schema") or "")
+        != "RealSaS.ImmutableMechanicalCAAStage23Seal.v1"
+        or str(caa_seal.get("status") or "") != "SEALED_IMMUTABLE_STAGE23"
+        or str(caa_seal.get("run_id") or "") != str(args.caa_run_id)
+        or caa_seal.get("overwrite_forbidden") is not True
+        or caa_seal.get("stage19_to23_only") is not True
+    ):
+        raise RuntimeError("LOCK_IMMUTABLE_CAA_STAGE23_SEAL_INVALID")
+    caa_stage23_ir = complete_appearance_asset_from_dict(_load_json(caa_asset_path))
+    caa_stage23 = caa_stage23_ir.to_dict()
+    caa_asset_hash_matches_seal = (
+        str(caa_stage23_ir.asset_hash)
+        == str(caa_seal.get("stage23_asset_hash") or "")
+    )
+    caa_candidate_binding_matches_seal = (
+        str(caa_stage23_ir.candidate_mesh_binding_hash)
+        == str(caa_seal.get("stage23_candidate_binding_hash") or "")
     )
     caa_candidate_binding_pass = (
-        str(caa_stage23["candidate_mesh_binding_hash"])
+        caa_candidate_binding_matches_seal
+        and str(caa_stage23_ir.candidate_mesh_binding_hash)
         == str(candidate.candidate_lineage_hash)
     )
     caa_is_mechanical_mode = (
-        dict(caa_stage23.get("metadata") or {}).get("source_owned_visual_mesh_mode")
+        caa_seal.get("source_owned_visual_mesh_mode") is False
+        and dict(caa_stage23_ir.metadata or {}).get("source_owned_visual_mesh_mode")
         is not True
     )
 
@@ -608,7 +641,9 @@ def main() -> None:
         and max_new_intersections == 0
     )
     exact_render_binding_pass = bool(
-        caa_candidate_binding_pass and caa_is_mechanical_mode
+        caa_asset_hash_matches_seal
+        and caa_candidate_binding_pass
+        and caa_is_mechanical_mode
     )
 
     status = (
@@ -695,15 +730,26 @@ def main() -> None:
             },
         },
         "exact_caa_render_binding": {
+            "immutable_seal_path": str(caa_seal_path),
+            "immutable_seal_sha256": _sha256(caa_seal_path),
+            "asset_path": str(caa_asset_path),
+            "asset_file_sha256": _sha256(caa_asset_path),
+            "asset_hash_matches_seal": bool(caa_asset_hash_matches_seal),
+            "candidate_binding_matches_seal": bool(
+                caa_candidate_binding_matches_seal
+            ),
             "candidate_binding_hash": str(
-                caa_stage23["candidate_mesh_binding_hash"]
+                caa_stage23_ir.candidate_mesh_binding_hash
             ),
             "candidate_binding_pass": bool(caa_candidate_binding_pass),
             "source_owned_visual_mesh_mode": dict(
-                caa_stage23.get("metadata") or {}
+                caa_stage23_ir.metadata or {}
             ).get("source_owned_visual_mesh_mode"),
+            "seal_source_owned_visual_mesh_mode": caa_seal.get(
+                "source_owned_visual_mesh_mode"
+            ),
             "mechanical_caa_mode_pass": bool(caa_is_mechanical_mode),
-            "appearance_asset_hash": str(caa_stage23["asset_hash"]),
+            "appearance_asset_hash": str(caa_stage23_ir.asset_hash),
         },
         "verdict": {
             "geometry_pass": geometry_pass,

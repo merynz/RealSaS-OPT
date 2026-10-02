@@ -1,0 +1,42 @@
+name: knight-repaired-compaction-seal-v1
+
+on:
+  push:
+    branches:
+      - audit/canonical-caa-mechanics-geometry-lock-20261002
+    paths:
+      - tools/seal_knight_repaired_compaction_v1.py
+      - .github/workflows/knight_repaired_compaction_seal_v1.yml
+
+permissions:
+  contents: read
+
+jobs:
+  seal:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
+      OUT_DIR: /tmp/knight_repaired_compaction_seal_v1
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - run: python -m py_compile tools/seal_knight_repaired_compaction_v1.py
+      - name: Seal repaired compaction mapping
+        run: |
+          set -euo pipefail
+          rm -rf "$OUT_DIR"
+          mkdir -p "$OUT_DIR"
+          python tools/seal_knight_repaired_compaction_v1.py             --run-root "$RUN_ROOT"             --out-dir "$OUT_DIR"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: knight-repaired-compaction-seal-v1
+          path: |
+            /tmp/knight_repaired_compaction_seal_v1/SEAL.json
+            /tmp/knight_repaired_compaction_seal_v1/repaired_inverse.npz
+          if-no-files-found: error
+          retention-days: 30

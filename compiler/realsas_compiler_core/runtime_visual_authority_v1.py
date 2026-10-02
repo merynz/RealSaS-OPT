@@ -340,6 +340,13 @@ def validate_source_owned_visual_dynamic_integrity(
                 "SOURCE_VISUAL_DYNAMIC_INTEGRITY_METRIC_INVALID:"
                 + str(label)
             )
+    report = dict(value.qualification_report)
+    if report.get("status") == "PASS_SOURCE_OWNED_VISUAL_DYNAMIC_INTEGRITY":
+        if (report.get("visual_occlusion_passed") is not True
+                or type(report.get("unresolved_overlap_pixel_count")) is not int
+                or report["unresolved_overlap_pixel_count"] != 0
+                or report.get("occlusion_scope") != "SAMPLED_ALPHA_POSITIVE_PIXEL_COLLISIONS"):
+            raise QualificationError("SOURCE_VISUAL_OCCLUSION_EVIDENCE_MISSING_OR_FAILED")
     if (
         value.integrity_hash
         != source_owned_visual_dynamic_integrity_hash(value)

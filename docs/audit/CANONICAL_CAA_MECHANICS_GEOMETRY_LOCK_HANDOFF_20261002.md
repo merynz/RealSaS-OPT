@@ -89,3 +89,50 @@ These are synthetic implementation checks, not Knight qualification evidence.
 - Before render, replay affected bindings/proofs and show that the runtime uses
   the tested candidate/rig/skin/motion identity. Audit-only objects cannot silently
   become product authority. Record any remaining demo-only scope explicitly.
+
+## 2026-10-02 21:30 UTC measured failure and follow-up
+
+Run `37064886261` completed with scientific `FAIL_PHASE1_MECHANICS`, not an apparatus exception.
+Artifact `11252813278` binds the exact V9/refined-surface/transported-skin chain.
+G3 fails area ratio (both bounds) and condition; maximum condition 2136.782204031984.
+Across sampled motion, maximum edge ratio is 1307.7031818661376, maximum edge counts
+above 10/4 are 812/1249, and posed degenerate face count is zero. The selected worst
+frame has 9653 intersection pairs versus 3389 at rest; 6555 pairs are new by pair-ID
+subtraction. These are not exhaustive all-frame intersection results, and preexisting
+penetrations are not accepted as a valid rest surface.
+
+Run `37065836498` completed and localized the failures (artifact `11252996685`):
+96 failed micro probes and 51/51 failed sampled motion frames. The highest-stretch
+short edges have near-disjoint endpoint skin weights (L1 approximately 2). This is
+an observed association, not proof that a particular learning or topology change is
+the sole cause. Parent-constant transport has failed qualification; no dynamic seal
+or render closure is granted. Original Stage18/skin under the same rig/tracks/policy
+is the next differential measurement. No threshold is relaxed and no seam is cut.
+
+A reporting defect was also found: `_joint_pose_v2` returns the derived **rest joint
+frame set hash**, not a per-motion-frame hash. Earlier `motion_frame_hash` fields
+are mislabeled and constant across all 51 frames. The follow-up now verifies exact
+replay against the archived sampled geometry bytes, records the correct rest-frame
+field, and adds a hash over clip/time, evaluated skin matrices and posed XYZ. The
+old phase1 report is preserved as historical evidence, not silently rewritten.
+
+## Appearance/presentation gate repair
+
+Source-owned Stage42 projection/native rendering still has 2D positions and fixed
+UVs without canonical depth/order authority. Stage45 previously treated native /
+reference byte parity plus orientation and stretch as sufficient, even though both
+renderers can reproduce the same unqualified painter order.
+
+The reference rasterizer now counts alpha-positive contributors at each sampled
+pixel before compositing. Stage45 rejects any multi-contributor pixel until a
+qualified depth/order contract exists; diagnostics explicitly scope this to sampled
+pixels (not a subpixel or continuous-time geometric proof). Shared triangle edges
+use the existing top-left rule, and transparent contributions do not count. The
+IR validator and Stage46 closure also require this occlusion evidence, so old PASS
+receipts cannot bypass the new gate. Generic tests cover overlapping colors,
+face-order reversal, transparent samples, shared edges, Stage45 parity with/without
+collisions, and rejection of old PASS receipts.
+
+This closes an unsound admission path; it does **not** implement missing depth
+transport or coherent visual-triangle deformation bindings. Those remain open,
+alongside the measured mechanical and absolute source-fidelity failures.

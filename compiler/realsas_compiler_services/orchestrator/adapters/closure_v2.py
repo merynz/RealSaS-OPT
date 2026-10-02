@@ -666,6 +666,7 @@ def seal_product_closure_stage(ctx: dict) -> dict:
             ),
             ("all_frame_views_nonempty", "NONEMPTY_FRAME_VIEW"),
             ("visual_orientation_passed", "VISUAL_ORIENTATION"),
+            ("visual_occlusion_passed", "VISUAL_OCCLUSION"),
             (
                 "catastrophic_edge_stretch_passed",
                 "CATASTROPHIC_EDGE_STRETCH",

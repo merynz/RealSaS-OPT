@@ -15,7 +15,7 @@ from compiler.realsas_compiler_core.artifact_codec_v2 import (
 )
 from compiler.realsas_compiler_core.mesh.deformation_stress_v1 import _candidate_skin_matrix
 from compiler.realsas_compiler_core.mesh.deformation_stress_v2 import _pose_skin_matrices
-from compiler.realsas_compiler_core.mesh.dynamic_frame_court_v1 import measure_dynamic_frame_geometry_v1
+from compiler.realsas_compiler_core.mesh.dynamic_frame_court_v1 import measure_dynamic_frame_geometry_v1, sampled_pose_hash_v1
 from compiler.realsas_compiler_core.joint_frames_v1 import derive_joint_frames_from_skeleton
 from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import _joint_pose_v2
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import stage_output_payload
@@ -34,6 +34,7 @@ def main():
     ap.add_argument("--run-id",required=True)
     ap.add_argument("--candidate-json",type=Path,required=True)
     ap.add_argument("--phase1-dir",type=Path,required=True)
+    ap.add_argument("--previous-owner-dir",type=Path,required=True)
     ap.add_argument("--out-dir",type=Path,required=True)
     args=ap.parse_args()
     out=args.out_dir;out.mkdir(parents=True,exist_ok=True)
@@ -81,6 +82,20 @@ def main():
         stress.append({"probe_id":row["probe_id"],"geometry":details(measure_dynamic_frame_geometry_v1(
             rest=rest,posed=posed,faces=faces,policy=policy))})
     (out/"micro_stress_failures.json").write_text(json.dumps(stress,sort_keys=True)+"\n")
+    previous=read(args.previous_owner_dir/"REPORT.json")
+    geometry_path=args.previous_owner_dir/"sampled_geometry.npz"
+    if (sha(geometry_path)!=previous["sampled_geometry_sha256"]
+            or previous["parent_report_sha256"]!=sha(args.phase1_dir/"REPORT.json")):
+        raise RuntimeError("DYNAMIC_OWNER_PREVIOUS_GEOMETRY_BYTES_DRIFT")
+    with np.load(geometry_path,allow_pickle=False) as z:
+        previous_poses=z["poses"].copy()
+        if not all(np.array_equal(z[k],v) for k,v in (("rest",rest),("faces",faces),("weights",W))):
+            raise RuntimeError("DYNAMIC_OWNER_PREVIOUS_GEOMETRY_INPUT_DRIFT")
+    original_candidate=canonical_mesh_candidate_from_dict(stage_output_payload(ctx,"18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.CanonicalMeshCandidateIR.v1"))
+    original_surface=rigging_surface_from_dict(stage_output_payload(ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1"))
+    original_skin=qualified_skin_from_dict(stage_output_payload(ctx,"32_SKIN_QUALIFIED","RealSaS.QualifiedSkinIR.v1"))
+    base_rest,base_weights,base_faces=_candidate_skin_matrix(original_candidate,surface=original_surface,skeleton=skeleton,skin=original_skin)
+    baseline_results=[]
     source_report=read("canonical/KNIGHT_MOTION_SOURCE_ACTION_DIAGNOSTIC_20260927.json")
     results=[];poses=[];locators=[];motion_hashes={}
     for clip in CLIPS:
@@ -95,14 +110,36 @@ def main():
             if parent_clip["frames"][index]["motion_frame_hash"]!=frame_hash:
                 raise RuntimeError("DYNAMIC_OWNER_MOTION_FRAME_DRIFT")
             posed=_skin(rest,W,joint_ids,mats)
-            locator={"clip_id":clip,"frame_index":index,"time_seconds":float(t),"motion_frame_hash":frame_hash}
+            sample_index=len(poses)
+            if not np.array_equal(posed,previous_poses[sample_index]):
+                raise RuntimeError("DYNAMIC_OWNER_EXACT_POSE_REPLAY_DRIFT")
+            pose_hash=sampled_pose_hash_v1(clip_id=clip,time_seconds=float(t),rest_frame_set_hash=frame_hash,skin_matrices=mats,posed=posed)
+            locator={"clip_id":clip,"frame_index":index,"time_seconds":float(t),
+                     "derived_joint_frame_set_hash":frame_hash,"sampled_pose_hash":pose_hash}
+            base_posed=_skin(base_rest,base_weights,joint_ids,mats)
+            baseline=measure_dynamic_frame_geometry_v1(rest=base_rest,posed=base_posed,faces=np.asarray(base_faces),policy=policy)
+            baseline_results.append({"clip_id":clip,"frame_index":index,"geometry":baseline})
             results.append({**locator,"geometry":details(measure_dynamic_frame_geometry_v1(rest=rest,posed=posed,faces=faces,policy=policy))})
             poses.append(posed);locators.append(locator)
         print("DYNAMIC_OWNER_CLIP="+json.dumps({"clip":clip,"failed_frames":sum(not x["geometry"]["passed"] for x in results if x["clip_id"]==clip)}),flush=True)
+    if len(poses)!=len(previous_poses):
+        raise RuntimeError("DYNAMIC_OWNER_PREVIOUS_FRAME_COUNT_DRIFT")
+    (out/"original_stage18_motion_baseline.json").write_text(json.dumps({
+        "candidate_lineage_hash":original_candidate.candidate_lineage_hash,
+        "skin_lineage_hash":original_skin.skin_lineage_hash,
+        "surface_lineage_hash":original_surface.geometry_lineage_hash,
+        "comparison_scope":"ORIGINAL_STAGE18_AND_V9_WITH_SAME_RIG_TRACKS_POLICY",
+        "motion":baseline_results,
+        "failed_frame_count":sum(not r["geometry"]["passed"] for r in baseline_results),
+    },sort_keys=True)+"\n")
     bundle=out/"sampled_geometry.npz"
     np.savez_compressed(bundle,rest=rest,faces=faces,weights=W,poses=np.asarray(poses))
     report={"schema":"RealSaS.DynamicFrameOwnerAudit.v1",**expected,
             "parent_report_sha256":sha(args.phase1_dir/"REPORT.json"),
+            "previous_owner_report_sha256":sha(args.previous_owner_dir/"REPORT.json"),
+            "exact_previous_sampled_geometry_replay_verified":True,
+            "legacy_parent_motion_frame_hash_semantics":"DERIVED_REST_JOINT_FRAME_SET_ONLY",
+            "baseline_failed_frame_count":sum(not r["geometry"]["passed"] for r in baseline_results),
             "skeleton_lineage_hash":skeleton.skeleton_lineage_hash,
             "camera_set_hash":camera_set.camera_set_hash,"motion_source_sha256":motion_hashes,
             "policy_hash":policy.qualification_policy_lineage_hash,"frame_count":len(results),

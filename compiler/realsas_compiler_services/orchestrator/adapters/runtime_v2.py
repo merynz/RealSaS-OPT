@@ -1362,6 +1362,9 @@ def _source_owned_visual_reference_frame(
 
     accum = np.zeros((resolution, resolution, 4), dtype=np.float64)
     owner = np.full((resolution, resolution), -1, dtype=np.int32)
+    # Count all alpha-positive contributors before painter-order compositing.
+    # Matching native/reference output does not prove that this order is valid.
+    contributors = np.zeros((resolution, resolution), dtype=np.uint32)
 
     def orient(a, b, x, y):
         return (b[0] - a[0]) * (y - a[1]) - (
@@ -1461,6 +1464,7 @@ def _source_owned_visual_reference_frame(
                 )
                 accum[y, x, 3] = alpha + accum[y, x, 3] * transmission
                 if alpha > 1.0e-12:
+                    contributors[y, x] += 1
                     owner[y, x] = int(face_index)
 
     alpha = np.clip(accum[:, :, 3], 0.0, 1.0)
@@ -1479,6 +1483,8 @@ def _source_owned_visual_reference_frame(
         straight_rgba_u8=rgba,
         provenance_code=provenance,
         owner_face_index=owner,
+        unresolved_overlap_pixel_count=int(np.count_nonzero(contributors > 1)),
+        maximum_pixel_contributor_count=int(contributors.max(initial=0)),
     )
 
 
@@ -1762,6 +1768,8 @@ def _prove_source_owned_visual_dynamic_integrity(
     maximum_edge_ratio = 1.0
     native_reference_mismatch_pixel_count = 0
     direct_source_provenance_mismatch_pixel_count = 0
+    unresolved_overlap_pixel_count = 0
+    maximum_pixel_contributor_count = 0
     outputs = []
 
     for clip in projection.clips:
@@ -1811,6 +1819,10 @@ def _prove_source_owned_visual_dynamic_integrity(
                     clip=clip,
                     view=view,
                     frame_index=frame_index,
+                )
+                unresolved_overlap_pixel_count += reference.unresolved_overlap_pixel_count
+                maximum_pixel_contributor_count = max(
+                    maximum_pixel_contributor_count, reference.maximum_pixel_contributor_count
                 )
                 mismatch = (
                     np.any(
@@ -1902,6 +1914,7 @@ def _prove_source_owned_visual_dynamic_integrity(
         evaluated_frame_view_count > 0
         and rendered_visible_pixel_count > 0
         and empty_frame_view_count == 0
+        and unresolved_overlap_pixel_count == 0
         and flipped_triangle_count == 0
         and edge_gt_4_count == 0
         and native_reference_mismatch_pixel_count == 0
@@ -1938,6 +1951,12 @@ def _prove_source_owned_visual_dynamic_integrity(
                 direct_source_provenance_mismatch_pixel_count == 0
             ),
             "all_frame_views_nonempty": empty_frame_view_count == 0,
+            "unresolved_overlap_pixel_count": unresolved_overlap_pixel_count,
+            "maximum_pixel_contributor_count": maximum_pixel_contributor_count,
+            "visual_occlusion_passed": unresolved_overlap_pixel_count == 0,
+            "occlusion_scope": "SAMPLED_ALPHA_POSITIVE_PIXEL_COLLISIONS",
+            "depth_order_authority_present": False,
+            "subpixel_overlap_proof_claimed": False,
             "visual_orientation_passed": flipped_triangle_count == 0,
             "catastrophic_edge_stretch_passed": edge_gt_4_count == 0,
             "catastrophic_edge_ratio_threshold": 4.0,
@@ -1967,7 +1986,10 @@ def _prove_source_owned_visual_dynamic_integrity(
     if not passed:
         return {
             "status": "FAIL",
-            "blockers": ["SOURCE_OWNED_VISUAL_DYNAMIC_INTEGRITY_FAILED"],
+            "blockers": ["SOURCE_OWNED_VISUAL_DYNAMIC_INTEGRITY_FAILED"] + (
+                ["SOURCE_VISUAL_DEPTH_ORDER_AUTHORITY_MISSING"]
+                if unresolved_overlap_pixel_count else []
+            ),
             "diagnostics": value.to_dict(),
         }
     outputs.insert(

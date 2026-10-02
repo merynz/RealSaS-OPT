@@ -35,3 +35,15 @@ def test_uniform_expansion_trips_area_gate_with_good_condition():
     assert result["maximum_condition_number"] == 1.
     assert result["failure_counts"]["DYNAMIC_AREA_RATIO_ABOVE_MAX"] == 1
     assert not result["passed"]
+
+
+def test_pose_hash_binds_motion_not_just_static_joint_frames():
+    from compiler.realsas_compiler_core.mesh.dynamic_frame_court_v1 import sampled_pose_hash_v1
+    args=dict(clip_id='clip',time_seconds=0.,rest_frame_set_hash='a'*64,
+              skin_matrices={'joint':np.eye(4)},posed=np.zeros((3,3)))
+    first=sampled_pose_hash_v1(**args)
+    assert first==sampled_pose_hash_v1(**args)
+    assert first!=sampled_pose_hash_v1(**{**args,'time_seconds':1.})
+    assert first!=sampled_pose_hash_v1(**{**args,'posed':np.ones((3,3))})
+    matrix=np.eye(4);matrix[0,3]=1.
+    assert first!=sampled_pose_hash_v1(**{**args,'skin_matrices':{'joint':matrix}})

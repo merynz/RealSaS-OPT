@@ -53,3 +53,28 @@ def measure_dynamic_frame_geometry_v1(*, rest, posed, faces, policy):
         ],
         "projected_orientation_used": False,
     }
+
+
+def sampled_pose_hash_v1(*, clip_id, time_seconds, rest_frame_set_hash, skin_matrices, posed):
+    """Bind a sampled pose, never confuse a rest-frame hash with motion evidence."""
+    import hashlib
+    from ..hashing import content_sha256
+
+    xyz = np.asarray(posed, dtype='<f8')
+    if xyz.ndim != 2 or xyz.shape[1] != 3 or not np.isfinite(xyz).all():
+        raise QualificationError('SAMPLED_POSE_POSITION_INVALID')
+    matrices = {}
+    for joint_id, matrix in sorted(skin_matrices.items()):
+        matrix = np.asarray(matrix, dtype='<f8')
+        if matrix.shape != (4, 4) or not np.isfinite(matrix).all():
+            raise QualificationError('SAMPLED_POSE_MATRIX_INVALID')
+        matrices[str(joint_id)] = matrix.tolist()
+    if not matrices or not np.isfinite(time_seconds):
+        raise QualificationError('SAMPLED_POSE_BINDING_INVALID')
+    return content_sha256({
+        'schema': 'RealSaS.SampledPoseBinding.v1',
+        'clip_id': str(clip_id), 'time_seconds': float(time_seconds),
+        'rest_frame_set_hash': str(rest_frame_set_hash),
+        'skin_matrices': matrices, 'posed_shape': list(xyz.shape),
+        'posed_xyz_f64le_sha256': hashlib.sha256(xyz.tobytes(order='C')).hexdigest(),
+    })

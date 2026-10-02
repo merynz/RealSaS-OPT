@@ -30,7 +30,7 @@ jobs:
           python-version: '3.11'
       - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
       - name: Subject-free intrinsic motion court
-        run: python -m pytest -q tests/compiler/test_dynamic_frame_court_v1.py
+        run: python -m pytest -q tests/compiler/test_dynamic_frame_court_v1.py tests/compiler/test_source_visual_occlusion_gate_v1.py
       - uses: actions/download-artifact@v4
         with:
           name: knight-static-quality-source-opt-v9
@@ -43,6 +43,12 @@ jobs:
           path: /tmp/knight_v9_frame_owner_phase1
           github-token: ${{ github.token }}
           run-id: 37064886261
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-v9-dynamic-frame-owners-v1
+          path: /tmp/knight_v9_previous_frame_owners
+          github-token: ${{ github.token }}
+          run-id: 37065836498
       - name: Localize micro-stress and all 51 sampled motion frames
         run: |
           python tools/audit_knight_v9_dynamic_frame_owners_v1.py \
@@ -50,6 +56,7 @@ jobs:
             --run-id SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929 \
             --candidate-json /tmp/knight_v9_frame_owner_static/final_candidate.json \
             --phase1-dir /tmp/knight_v9_frame_owner_phase1 \
+            --previous-owner-dir /tmp/knight_v9_previous_frame_owners \
             --out-dir /tmp/knight_v9_dynamic_frame_owners_${{ github.run_id }}
       - uses: actions/upload-artifact@v4
         if: always()

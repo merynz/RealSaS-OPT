@@ -35,25 +35,29 @@
     "canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md",
     "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json",
     "canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json",
-    "canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json"
+    "canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json",
+    "canonical/CURRENT_RND_LINEAGE_V1.json",
+    "canonical/APPEARANCE_RUNTIME_DATAFLOW_GRAPH_V1_20261002.json",
+    "docs/audit/APPEARANCE_RUNTIME_DATAFLOW_AUDIT_20261002.md"
   ],
   "rehydration_order": [
-    "canonical/RECOVERY_CANONICAL_HANDOFF_20261001.md",
-    "canonical/RECOVERY_ENGINEERING_CERTIFICATION_V1_20261001.json",
-    "canonical/V2_IMPLEMENTATION_READINESS.json",
+    "CURRENT_STATE.md",
+    "canonical/CURRENT_RND_LINEAGE_V1.json",
+    "canonical/APPEARANCE_RUNTIME_DATAFLOW_GRAPH_V1_20261002.json",
+    "docs/audit/APPEARANCE_RUNTIME_DATAFLOW_AUDIT_20261002.md",
     "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
-    "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
     "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json",
     "canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json",
-    "canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md",
-    "canonical/AUTHORITY_MAP_V1.json",
-    "canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json",
     "canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json",
+    "canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json",
+    "canonical/V2_IMPLEMENTATION_READINESS.json",
+    "canonical/RECOVERY_ENGINEERING_CERTIFICATION_V1_20261001.json",
+    "canonical/RECOVERY_CANONICAL_HANDOFF_20261001.md",
+    "canonical/AUTHORITY_MAP_V1.json",
+    "canonical/CONTEXT_STATE_V2.json",
     "canonical/ACTIVE_RUN_V2.json",
     "canonical/EXPERIMENT_REGISTRY_V3.json",
-    "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
-    "CURRENT_STATE.md",
-    "canonical/CONTEXT_STATE_V2.json"
+    "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl"
   ],
   "branch_policy": {
     "canonical_branch": "main",
@@ -76,17 +80,16 @@
   },
   "active_experiments": [
     {
-      "id": "V2_IMPLEMENTATION_ASSEMBLY",
+      "id": "KNIGHT_APPEARANCE_RUNTIME_DATAFLOW_AUDIT",
       "branch": "main",
-      "status": "RECOVERY_ENGINEERING_CERTIFIED__VF11_R512_OPEN__WITNESS_FORBIDDEN",
-      "question": "Can VF-11 R512 feature survival be reclosed subject-free before the first controlled Knight witness while canonical engine/platform work continues?",
+      "status": "MAIN_CANONICALIZED__FROZEN_WITNESS_VERIFIED__RUNTIME_DATAFLOW_AUDIT_ACTIVE",
+      "question": "Can corrected Knight mechanics drive source-owned 2D presentation with visual-triangle deformation-domain coherence and canonical-depth overlap ownership, and can Stage45 prove both fail-closed?",
       "does_not_prove": [
-        "Knight product pass",
+        "product visual pass",
         "unseen generalization",
-        "semantic object recognition",
         "human aesthetic optimality",
         "source-view cardinality reduction",
-        "witness execution authorization before explicit user approval"
+        "RGB-generation necessity"
       ]
     }
   ],

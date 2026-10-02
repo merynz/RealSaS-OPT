@@ -83,10 +83,9 @@ class CurrentContinuityAuthorityV2(unittest.TestCase):
     def test_active_experiment_records_satisfy_live_map_contract(self) -> None:
         authority = json.loads((ROOT / "canonical/AUTHORITY_MAP_V1.json").read_text(encoding="utf-8"))
         active = authority.get("active_experiments", [])
-        self.assertEqual(
-            [x["id"] for x in active],
-            ["V2_IMPLEMENTATION_ASSEMBLY"],
-        )
+        context = json.loads((ROOT / "canonical/CONTEXT_STATE_V2.json").read_text(encoding="utf-8"))
+        active_id = str(context["current_focus"]["active_experiment"])
+        self.assertEqual([x["id"] for x in active], [active_id])
         for exp in active:
             for key in ("id", "branch", "status", "question"):
                 self.assertIsInstance(exp[key], str)

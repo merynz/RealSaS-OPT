@@ -26,13 +26,13 @@
     "next_visible_product_milestone": "promote the certified recovery lineage to canonical main, begin professional platformization, and separately close VF-11 R512 before any Knight witness"
   },
   "current_focus": {
-    "module": "canonical recovery promotion + professional systems engineering preparation",
-    "state": "RECOVERY_ENGINEERING_CERTIFIED__VF11_R512_OPEN__WITNESS_FORBIDDEN",
-    "active_experiment": "V2_IMPLEMENTATION_ASSEMBLY",
-    "most_recent_closed_gate": "RECOVERY_ENGINEERING_CERTIFICATION_V1_PASS",
-    "promotion_block": "No engineering blocker remains for canonical-main recovery promotion. VF-11 R512 remains a separate scientific/witness-readiness blocker; explicit user approval remains mandatory after technical witness readiness.",
-    "scope_warning": "Engineering certification, canonical-main promotion, or a single-subject result is not unseen/generalization evidence.",
-    "scientific_question": "Can VF-11 R512 feature survival be reclosed subject-free without relaxing thresholds before a named witness is authorized?"
+    "module": "Knight appearance/runtime producer-consumer audit",
+    "state": "MAIN_CANONICALIZED__FROZEN_WITNESS_VERIFIED__RUNTIME_DATAFLOW_AUDIT_ACTIVE",
+    "active_experiment": "KNIGHT_APPEARANCE_RUNTIME_DATAFLOW_AUDIT",
+    "most_recent_closed_gate": "CORRECTED_WEIGHT_TOPOLOGY_HARMONIC_FIRST_FROZEN_WITNESS_BYTE_EXACT_PASS",
+    "promotion_block": "Before any new appearance architecture is selected, prove A) visual-triangle deformation-domain coherence, B) canonical-depth to visual-overlap ownership, and C) Stage45 fail-closed qualification of both.",
+    "scope_warning": "The accepted frozen smear witness is an R&D/demo mechanical-CAA witness. It is not product visual PASS or unseen/generalization evidence.",
+    "scientific_question": "Does the current source-owned 2D runtime preserve one coherent deformation domain per visual triangle and canonical physical visibility through native playback, with both properties enforced by Stage45?"
   },
   "execution_environment": {
     "actions": "SELF_HOSTED_LOCAL_ONLY",

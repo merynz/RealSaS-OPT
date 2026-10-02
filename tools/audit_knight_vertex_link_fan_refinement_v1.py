@@ -1,6 +1,6 @@
 from __future__ import annotations
 import argparse,json
-from collections import defaultdict,Counter
+from collections import defaultdict,Counter,deque
 from pathlib import Path
 import numpy as np
 
@@ -78,6 +78,87 @@ def refine_bad_vertex_links(faces,inv):
                     raise RuntimeError(f"VERTEX_LINK_FACE_COMPONENT_INCONSISTENT:{qq}:{n1}:{n2}:{c1}:{c2}")
                 tokens[int(raw[rowidx,i])].add((qq,int(c1)))
 
+    # Propagate each proven fan label through the dense-edge graph inside the
+    # original quotient vertex.  Face-silent dense vertices are not a third fan:
+    # they inherit the nearest proven fan in dense-edge distance.  Components
+    # with no fan seed remain isolated ORPHAN_COMPONENT classes and therefore
+    # cannot bridge two proven fans.
+    propagated={}
+    orphan_component_count=0
+    mixed_seed_component_count=0
+    tie_count=0
+
+    farr=np.asarray(faces,dtype=np.int64)
+    for q in sorted(bad):
+        dense=np.nonzero(inv==int(q))[0]
+        dset=set(map(int,dense.tolist()))
+        adj={int(v):set() for v in dense.tolist()}
+        for start in range(0,len(farr),300_000):
+            chunk=farr[start:start+300_000]
+            for ia,ib in ((0,1),(1,2),(2,0)):
+                a=chunk[:,ia]; b=chunk[:,ib]
+                mask=np.isin(a,dense,assume_unique=False)&np.isin(b,dense,assume_unique=False)
+                for u,v in zip(a[mask].tolist(),b[mask].tolist()):
+                    u=int(u);v=int(v)
+                    adj[u].add(v);adj[v].add(u)
+
+        # Dense-edge connected components.
+        seen=set()
+        components=[]
+        for root in sorted(adj):
+            if root in seen: continue
+            dq=[root];seen.add(root);cc=[]
+            while dq:
+                x=dq.pop();cc.append(x)
+                for y in adj[x]:
+                    if y not in seen:
+                        seen.add(y);dq.append(y)
+            components.append(sorted(cc))
+
+        for ci,cc in enumerate(components):
+            seed_rows=[]
+            seed_labels=set()
+            for v in cc:
+                tt=tuple(sorted(tokens.get(v,())))
+                if len(tt)>1:
+                    raise RuntimeError(f"MULTI_FAN_DENSE_VERTEX:{q}:{v}:{tt}")
+                if tt:
+                    label=int(tt[0][1])
+                    seed_rows.append((v,label))
+                    seed_labels.add(label)
+            if not seed_rows:
+                orphan_component_count+=1
+                label=("ORPHAN_COMPONENT",int(q),int(ci))
+                for v in cc:
+                    propagated[v]=label
+                continue
+            if len(seed_labels)>1:
+                mixed_seed_component_count+=1
+
+            # Multi-source shortest-path on dense edges, deterministic tie-break
+            # by fan label then seed vertex id.
+            best={}
+            dq=deque()
+            for v,label in sorted(seed_rows,key=lambda x:(x[1],x[0])):
+                cand=(0,int(label),int(v))
+                old=best.get(v)
+                if old is None or cand<old:
+                    best[v]=cand; dq.append(v)
+            while dq:
+                x=dq.popleft()
+                dist,label,seed=best[x]
+                for y in sorted(adj[x]):
+                    cand=(dist+1,label,seed)
+                    old=best.get(y)
+                    if old is None or cand<old:
+                        if old is not None and cand[0]==old[0] and cand[1]!=old[1]:
+                            tie_count+=1
+                        best[y]=cand; dq.append(y)
+            for v in cc:
+                if v not in best:
+                    raise RuntimeError(f"PROPAGATION_UNREACHED:{q}:{v}")
+                propagated[v]=("FAN",int(q),int(best[v][1]))
+
     rows=np.empty(len(inv),dtype=np.int64)
     sig_ids={}
     multi=0;unassigned=0
@@ -89,9 +170,7 @@ def refine_bad_vertex_links(faces,inv):
             tt=tuple(sorted(tokens.get(vid,())))
             if len(tt)>1: multi+=1
             if not tt: unassigned+=1
-            # Empty evidence gets an isolated residual child rather than being
-            # allowed to bridge two proven fan classes.
-            key=(q,tt if tt else (("UNASSIGNED",),))
+            key=(q,propagated[int(vid)])
         rows[vid]=sig_ids.setdefault(key,len(sig_ids))
     refined=np.asarray(rows,dtype=np.int64)
     refined,_=topology_local_refine(faces,refined)
@@ -100,6 +179,9 @@ def refine_bad_vertex_links(faces,inv):
       "bad_vertices":sorted(int(x) for x in bad),
       "multi_fan_dense_vertex_count":int(multi),
       "unassigned_dense_vertex_count":int(unassigned),
+      "orphan_dense_component_count":int(orphan_component_count),
+      "mixed_seed_dense_component_count":int(mixed_seed_component_count),
+      "fan_propagation_tie_count":int(tie_count),
       "signature_count":len(sig_ids),
     }
 

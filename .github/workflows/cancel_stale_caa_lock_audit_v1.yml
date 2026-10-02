@@ -1,0 +1,21 @@
+name: cancel-stale-caa-lock-audit-v1
+
+on:
+  push:
+    branches:
+      - audit/canonical-caa-mechanics-geometry-lock-20261002
+    paths:
+      - .github/workflows/cancel_stale_caa_lock_audit_v1.yml
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cancel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel stale self-hosted audit run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method POST repos/${{ github.repository }}/actions/runs/36988841830/cancel

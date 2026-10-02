@@ -59,11 +59,13 @@ def repair_candidate_endpoint_collapses_batched_v2(
     accepted=[]
     batch_rows=[]
     rejected_link=rejected_shape=rejected_quality=rejected_duplicate=0
+    rejected_boundary=0
 
     for batch_index in range(int(max_batches)):
         if len(accepted)>=int(max_collapses):
             break
         incidence=_edge_incidence(faces)
+        boundary_vertices={vid for edge,adj in incidence.items() if len(adj)==1 for vid in edge}
         neighbors=_vertex_neighbors(faces)
         incident_by_vertex=_incident_faces_by_vertex(faces)
         metrics=[_metric(face,positions) for face in faces]
@@ -82,6 +84,9 @@ def repair_candidate_endpoint_collapses_batched_v2(
             if u not in vertex_rows or v not in vertex_rows:
                 continue
             if vertex_rows[u].component_id!=vertex_rows[v].component_id:
+                continue
+            if u in boundary_vertices or v in boundary_vertices:
+                rejected_boundary+=1
                 continue
             if not _link_condition_holds(faces,edge=edge,incidence=incidence,neighbors=neighbors):
                 rejected_link+=1
@@ -223,7 +228,7 @@ def repair_candidate_endpoint_collapses_batched_v2(
         "mesh_policy_hash":policy.qualification_policy_lineage_hash,
         "max_batches":int(max_batches),"max_collapses":int(max_collapses),
         "independence_guard":"PAIRWISE_DISJOINT_CLOSED_ONE_RING_VERTEX_SETS",
-        "topology_guard":"EDGE_AND_VERTEX_LINK_MANIFOLD_PRE_AND_POST_BATCH",
+        "topology_guard":"EDGE_AND_VERTEX_LINK_MANIFOLD_PRE_AND_POST_BATCH__BOUNDARY_ENDPOINT_COLLAPSE_FORBIDDEN",
         "placement":"KEEP_EXISTING_ENDPOINT_ONLY",
         "selection":"MONOTONE_G3_WITH_FROZEN_G1_LOCAL_DEVIATION",
     })
@@ -247,6 +252,7 @@ def repair_candidate_endpoint_collapses_batched_v2(
                 "rejected_shape_deviation_count":int(rejected_shape),
                 "rejected_quality_count":int(rejected_quality),
                 "rejected_duplicate_face_count":int(rejected_duplicate),
+                "rejected_boundary_vertex_count":int(rejected_boundary),
                 "before":before,"after":after,
                 "initial_topology":initial_topology,"final_topology":final_topology,
                 "accepted_collapses":accepted,

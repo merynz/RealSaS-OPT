@@ -131,5 +131,5 @@ jobs:
             canonical/BOOTSTRAP_AUDIT_QUEUE.md \
             canonical/FIT1_COMMIT_LINEAGE_V1.md \
             canonical/FIT1_COMMIT_LINEAGE_V1.json
-          git commit -m "Refresh live authority context [skip ci]"
+          git commit -m "chore: refresh live authority context"
           git push origin HEAD:main

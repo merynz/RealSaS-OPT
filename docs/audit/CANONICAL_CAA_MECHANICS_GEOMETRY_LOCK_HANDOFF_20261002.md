@@ -196,3 +196,36 @@ At this checkpoint Geppetto inference and compiler structural qualification have
 completed successfully; the corrected Arachne checkpoint is being retrieved. No
 fresh skin result or dynamic PASS has been observed. Even a sampled-conditioning PASS still requires intersection,
 source fidelity and appearance/presentation closure before any product claim.
+
+## 2026-10-02 22:20 UTC fresh result and qualification scope correction
+
+Run `37070427256` completed with artifact `11254498087`. Both inference lanes
+finished, but **neither may be described as meeting the complete product standard**.
+Rig structural qualification found an optimal 28-joint arborescence with no
+blockers. This does not establish semantic joint placement or motion correctness.
+Skin structural qualification covers all 15,490 rows, but its receipt explicitly
+sets `product_skin_evidence_complete=false`, `row_confidence_available=false` and
+`supervision_coverage=null`. Its downstream mechanical proof is mandatory and fails.
+
+- New rig lineage: `a6b0ad63f688920eb138e9e4305508f63da3943e348b32b43b1a0e393484ae8c`.
+- New skin lineage: `a76d0e6893d18fde2cf200985088689498fca3c078cbfc4d2247352c4ca19603`.
+- Corrected checkpoint: `63e589b679461daf7cf859eb0c10e4b5f9c285b055d18f114d0ba348f2829892`.
+- G3 FAIL, maximum condition 2179.9684077385773; 51/51 motion frames FAIL.
+- Maximum edge ratio 355.8847115545404. Despite the lower extreme, unique edges
+  above 4x increased from 1,257 to 1,995, and above 10x from 841 to 1,228. This is
+  not evidence of general improvement. Intersection proof was not executed.
+
+The fresh script normalizes FP32 softmax rows in float64 before submitting the
+proposal. Recorded correction is max-row 1.6038227060315497e-7 and aggregate
+1.833692925243228e-4. The latter exceeds the qualifier's 1e-4 aggregate budget,
+but that budget currently measures only corrections to the *submitted*, already
+normalized proposal (receipt aggregate ~4.494e-13). The historical sealed V6 source
+also canonicalizes rows before qualification, so this comparison alone does not
+establish a historical contract violation. It does establish that the qualifier
+receipt is NOT an end-to-end raw-model-output correction certificate. Preserve
+both measurements; do not silently label the complete raw-output path PASS.
+
+Next diagnostic controls use the same corrected checkpoint on the original
+surface: (1) existing rig plus fresh skin, including archived-weight replay delta;
+(2) fresh rig plus fresh skin. These isolate inference-apparatus/precision effects
+from refinement effects. They mint no product authority and do not weaken gates.

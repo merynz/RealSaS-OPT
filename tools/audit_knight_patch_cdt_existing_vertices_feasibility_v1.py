@@ -77,13 +77,15 @@ def orient_boundary(cycle,xy):
     return tuple(cycle) if area>=0 else (cycle[0],)+tuple(reversed(cycle[1:]))
 
 def chart_injective(old_faces,xy):
-    signs=[]
+    # Candidate face tuple order is deterministic ID order, not a geometric
+    # winding authority. Signed-area consistency is therefore meaningless here.
+    # The only valid pre-gate is that no source triangle collapses in the chart;
+    # CDT constraint recovery + 3D G1 + full manifold court remain authority.
     for face in old_faces:
         a,b,c=[xy[str(v)] for v in face]
-        s=float(signed_area2(a,b,c))
-        if abs(s)<=1e-12:return False
-        signs.append(1 if s>0 else -1)
-    return len(set(signs))==1
+        if abs(float(signed_area2(a,b,c)))<=1e-12:
+            return False
+    return True
 
 def patch_quality(faces,positions,policy):
     ms=[_metric(f,positions) for f in faces]

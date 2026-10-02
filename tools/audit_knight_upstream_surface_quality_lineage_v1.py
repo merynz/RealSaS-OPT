@@ -35,10 +35,18 @@ def main():
     s13=loadj(rr/"artifacts/13_GEOMETRY_SUBSTRATE_QUALIFIED/geometry_substrate_qualification.json")
     s14_report=loadj(rr/"artifacts/14_GSA_BUILD/substrate_adequacy_report.json")
     s14_surface=loadj(rr/"artifacts/14_GSA_BUILD/rigging_surface_candidate.json")
-    s14_prov=loadj(rr/"artifacts/14_GSA_BUILD/compacted_dense_face_provenance.json")
     s15_surface=loadj(rr/"artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json")
     s15_qual=loadj(rr/"artifacts/15_RIGGING_SURFACE_QUALIFIED/rigging_surface_qualification.json")
     s15_prov=loadj(rr/"artifacts/15_RIGGING_SURFACE_QUALIFIED/compacted_dense_face_provenance.json")
+    s14_prov_path=rr/"artifacts/14_GSA_BUILD/compacted_dense_face_provenance.json"
+    if s14_prov_path.is_file():
+        s14_prov=loadj(s14_prov_path)
+        s14_prov_source="STAGE14_DIRECT"
+    else:
+        if str(s14_surface.get("geometry_lineage_hash"))!=str(s15_surface.get("geometry_lineage_hash")):
+            raise RuntimeError("STAGE14_PROVENANCE_MISSING_AND_STAGE15_LINEAGE_DIFFERS")
+        s14_prov=s15_prov
+        s14_prov_source="STAGE15_REPLAY_BOUND_TO_IDENTICAL_STAGE14_GEOMETRY"
     policy=mesh_policy_from_dict(loadj(rr/"artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/mesh_qualification_policy.json"))
 
     stage13_report=dict(s13.get("qualification_report") or {})
@@ -71,6 +79,7 @@ def main():
         "passing_candidate_count":passing,
         "closest_nonpassing":closest,
         "surface_quality":s14q,
+        "provenance_source":s14_prov_source,
       },
       "stage15":{
         "qualification_status":s15_qual.get("status"),

@@ -131,8 +131,6 @@ def main():
             patch_vertices={str(v) for f in old_faces for v in f}
             boundary=set(cycle)
             interior=sorted(patch_vertices-boundary)
-            if not interior:
-                reject[f"H{hops}_NO_INTERIOR"]+=1;continue
             _center,_ex,_ey,_normal,xy=pca_chart(patch_vertices,positions)
             if not chart_injective(old_faces,xy):
                 reject[f"H{hops}_NONINJECTIVE_CHART"]+=1;continue

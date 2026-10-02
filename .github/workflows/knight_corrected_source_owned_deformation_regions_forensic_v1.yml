@@ -5,6 +5,7 @@ on:
     branches:
       - integration/final-main-knight-platform-20261002
       - main
+      - repair/visual-triangle-deformation-domain-20261002
     paths:
       - .github/workflows/knight_corrected_source_owned_deformation_regions_forensic_v1.yml
 

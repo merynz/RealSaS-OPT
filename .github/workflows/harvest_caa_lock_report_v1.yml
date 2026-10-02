@@ -1,0 +1,59 @@
+name: harvest-caa-lock-report-v1
+
+on:
+  push:
+    branches:
+      - audit/canonical-caa-mechanics-geometry-lock-20261002
+    paths:
+      - .github/workflows/harvest_caa_lock_report_v1.yml
+
+permissions:
+  contents: read
+
+jobs:
+  harvest:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 5
+    env:
+      REPORT: /tmp/knight_canonical_caa_mechanics_geometry_lock_v1/REPORT.json
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require preserved report
+        run: test -f "$REPORT"
+      - name: Print forensic summary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=json.loads(Path(os.environ["REPORT"]).read_text())
+          out={
+            "status":p["status"],
+            "static_topology":p["static_topology"],
+            "dense_face_provenance_replay":p["dense_face_provenance_replay"],
+            "stage19_source_fidelity":p["stage19_source_fidelity"],
+            "corrected_skin_identity":p["corrected_skin_identity"],
+            "g3":p["g3"],
+            "actual_motion_aggregate":p["actual_motion"]["aggregate"],
+            "clips":[{
+              "clip_id":c["clip_id"],
+              "sample_count":c["sample_count"],
+              "worst_frame_index":c["worst_frame_index"],
+              "frames":[{
+                "frame_index":f["frame_index"],
+                "time_seconds":f["time_seconds"],
+                "mechanical":f["mechanical"],
+                "projected":f["projected"],
+              } for f in c["frames"]]
+            } for c in p["actual_motion"]["clips"]],
+            "exact_caa_render_binding":p["exact_caa_render_binding"],
+            "verdict":p["verdict"],
+          }
+          print("CAA_LOCK_FULL_FORENSIC="+json.dumps(out,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: knight-canonical-caa-mechanics-geometry-lock-v1-failed-report
+          path: /tmp/knight_canonical_caa_mechanics_geometry_lock_v1/REPORT.json
+          if-no-files-found: error
+          retention-days: 30

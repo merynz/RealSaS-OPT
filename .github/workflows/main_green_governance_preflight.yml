@@ -1,0 +1,36 @@
+name: main-green-governance-preflight
+
+on:
+  push:
+    branches: [maintenance/main-green-20261002]
+    paths:
+      - '.github/workflows/main_green_governance_preflight.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  governance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Repository readiness subset
+        run: |
+          python -m pytest -q             tests/repository/test_repository_governance_v1.py             tests/repository/test_current_continuity_authority_v2.py             tests/repository/test_canonical_main_readiness_v1.py             tests/repository/test_mainline_execution_plan_v2.py
+      - name: Context coverage
+        run: python tools/audit_context_coverage.py
+      - name: Authority map
+        run: python tools/render_authority_map.py --cached-refs
+      - name: Rehydration packet
+        run: python tools/render_rehydration_packet.py

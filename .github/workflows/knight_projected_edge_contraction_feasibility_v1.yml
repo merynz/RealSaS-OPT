@@ -1,0 +1,56 @@
+name: knight-projected-edge-contraction-feasibility-v1
+
+on:
+  push:
+    branches:
+      - audit/canonical-caa-mechanics-geometry-lock-20261002
+    paths:
+      - tools/audit_knight_projected_edge_contraction_feasibility_v1.py
+      - .github/workflows/knight_projected_edge_contraction_feasibility_v1.yml
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
+      STATIC_V4_DIR: /tmp/knight_static_quality_relax_cycle_v4_input
+      COMPACTION_V2_DIR: /tmp/knight_repaired_compaction_v2_input
+      OUT: /tmp/knight_projected_edge_contraction_feasibility_v1/REPORT.json
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-static-quality-relax-cycle-v4
+          path: /tmp/knight_static_quality_relax_cycle_v4_input
+          github-token: ${{ github.token }}
+          run-id: 37029194292
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-repaired-compaction-seal-v2
+          path: /tmp/knight_repaired_compaction_v2_input
+          github-token: ${{ github.token }}
+          run-id: 37023349486
+      - run: python -m py_compile tools/audit_knight_projected_edge_contraction_feasibility_v1.py
+      - name: Test projected edge contraction feasibility
+        run: |
+          set -euo pipefail
+          rm -rf "$(dirname "$OUT")"
+          mkdir -p "$(dirname "$OUT")"
+          python tools/audit_knight_projected_edge_contraction_feasibility_v1.py             --run-root "$RUN_ROOT"             --inverse-npz "$COMPACTION_V2_DIR/repaired_inverse_v2.npz"             --static-v4-dir "$STATIC_V4_DIR"             --out "$OUT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knight-projected-edge-contraction-feasibility-v1
+          path: /tmp/knight_projected_edge_contraction_feasibility_v1/REPORT.json
+          if-no-files-found: error
+          retention-days: 30

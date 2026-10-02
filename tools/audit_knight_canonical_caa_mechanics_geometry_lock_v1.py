@@ -386,7 +386,7 @@ def main() -> None:
     source_fidelity_passed, source_fidelity_rows = _evaluate_candidate_source_fidelity_v1(
         candidate=candidate,
         geometry=geometry,
-        cameras=cameras,
+        cameras=camera_set,
         observation=observation,
         source_foreground=source_foreground,
     )

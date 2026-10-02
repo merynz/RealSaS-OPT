@@ -4,6 +4,13 @@ on:
   push:
     branches: [maintenance/main-green-20261002]
     paths:
+      - 'CURRENT_STATE.md'
+      - 'canonical/AUTHORITY_MAP_V1.json'
+      - 'canonical/CONTEXT_STATE_V2.json'
+      - 'canonical/CURRENT_RND_LINEAGE_V1.json'
+      - 'canonical/APPEARANCE_RUNTIME_DATAFLOW_GRAPH_V1_20261002.json'
+      - 'tests/repository/test_current_continuity_authority_v2.py'
+      - '.github/workflows/live_authority_map.yml'
       - '.github/workflows/main_green_governance_preflight.yml'
   workflow_dispatch:
 

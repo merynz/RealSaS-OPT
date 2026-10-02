@@ -1,0 +1,50 @@
+name: knight-v9-source-fidelity-ab-v1
+
+on:
+  push:
+    branches:
+      - audit/canonical-caa-mechanics-geometry-lock-20261002
+    paths:
+      - tools/audit_knight_v9_source_fidelity_ab_v1.py
+      - .github/workflows/knight_v9_source_fidelity_ab_v1.yml
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
+      STATIC_V9_DIR: /tmp/knight_static_quality_source_opt_v9_input
+      OUT: /tmp/knight_v9_source_fidelity_ab_v1/REPORT.json
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-static-quality-source-opt-v9
+          path: /tmp/knight_static_quality_source_opt_v9_input
+          github-token: ${{ github.token }}
+          run-id: 37057338450
+      - run: python -m py_compile tools/audit_knight_v9_source_fidelity_ab_v1.py
+      - name: Compare base and v9 source fidelity
+        run: |
+          set -euo pipefail
+          rm -rf "$(dirname "$OUT")"
+          mkdir -p "$(dirname "$OUT")"
+          python tools/audit_knight_v9_source_fidelity_ab_v1.py             --authority-root "$AUTHORITY_ROOT"             --run-id "$RUN_ID"             --v9-candidate-json "$STATIC_V9_DIR/final_candidate.json"             --out "$OUT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knight-v9-source-fidelity-ab-v1
+          path: /tmp/knight_v9_source_fidelity_ab_v1/REPORT.json
+          if-no-files-found: error
+          retention-days: 30

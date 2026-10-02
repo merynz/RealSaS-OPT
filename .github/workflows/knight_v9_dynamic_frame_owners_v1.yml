@@ -1,0 +1,60 @@
+name: knight-v9-dynamic-frame-owners-v1
+
+on:
+  push:
+    branches:
+      - audit/canonical-caa-mechanics-geometry-lock-20261002
+    paths:
+      - .github/workflows/knight_v9_dynamic_frame_owners_v1.yml
+      - tools/audit_knight_v9_dynamic_frame_owners_v1.py
+      - compiler/realsas_compiler_core/mesh/dynamic_frame_court_v1.py
+      - tests/compiler/test_dynamic_frame_court_v1.py
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 25
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: 1
+      OPENBLAS_NUM_THREADS: 1
+      OMP_NUM_THREADS: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Subject-free intrinsic motion court
+        run: python -m pytest -q tests/compiler/test_dynamic_frame_court_v1.py
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-static-quality-source-opt-v9
+          path: /tmp/knight_v9_frame_owner_static
+          github-token: ${{ github.token }}
+          run-id: 37057338450
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-v9-dynamic-mechanics-phase1-v1
+          path: /tmp/knight_v9_frame_owner_phase1
+          github-token: ${{ github.token }}
+          run-id: 37064886261
+      - name: Localize micro-stress and all 51 sampled motion frames
+        run: |
+          python tools/audit_knight_v9_dynamic_frame_owners_v1.py \
+            --authority-root /home/monster/realsas_authority \
+            --run-id SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929 \
+            --candidate-json /tmp/knight_v9_frame_owner_static/final_candidate.json \
+            --phase1-dir /tmp/knight_v9_frame_owner_phase1 \
+            --out-dir /tmp/knight_v9_dynamic_frame_owners_${{ github.run_id }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knight-v9-dynamic-frame-owners-v1
+          path: /tmp/knight_v9_dynamic_frame_owners_${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30

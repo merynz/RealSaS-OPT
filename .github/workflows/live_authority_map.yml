@@ -3,8 +3,6 @@ name: Live Authority Context
 on:
   push:
     branches: [main]
-  create:
-  delete:
   workflow_dispatch:
 
 permissions:

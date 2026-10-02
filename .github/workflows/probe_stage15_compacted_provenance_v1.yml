@@ -1,0 +1,38 @@
+name: probe-stage15-compacted-provenance-v1
+
+on:
+  push:
+    branches:
+      - audit/canonical-caa-mechanics-geometry-lock-20261002
+    paths:
+      - .github/workflows/probe_stage15_compacted_provenance_v1.yml
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 5
+    env:
+      P: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/15_RIGGING_SURFACE_QUALIFIED/compacted_dense_face_provenance.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Inspect Stage15 provenance shape
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          p=json.load(open(os.environ["P"],encoding="utf-8"))
+          print("STAGE15_PROVENANCE_KEYS="+repr(sorted(p)))
+          for k,v in p.items():
+              if isinstance(v,list):
+                  print(f"STAGE15_LIST {k} len={len(v)} sample={v[:2]!r}")
+              elif isinstance(v,dict):
+                  print(f"STAGE15_DICT {k} keys={list(v)[:20]!r}")
+              else:
+                  print(f"STAGE15_SCALAR {k}={v!r}")
+          PY

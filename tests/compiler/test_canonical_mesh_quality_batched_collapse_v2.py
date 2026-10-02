@@ -9,7 +9,8 @@ from compiler.realsas_compiler_core.product_authority_v1 import (
     CarrierCoverageThresholdIR,build_mesh_qualification_policy,
     canonical_mesh_candidate_lineage_hash,
 )
-from compiler.realsas_compiler_core.types import SurfaceSupportBinding
+import pytest
+from compiler.realsas_compiler_core.types import QualificationError,SurfaceSupportBinding
 
 
 def _policy():
@@ -92,3 +93,29 @@ def test_batched_collapse_preserves_surviving_support_bindings():
     original={v.candidate_vertex_id:v.support_binding for v in candidate.vertices}
     assert report["accepted_collapse_count"]==2
     assert all(original[v.candidate_vertex_id]==v.support_binding for v in repaired.vertices)
+
+def test_batched_collapse_rejects_bow_tie_input_vertex_link():
+    pts={
+        "v":(0.0,0.0,0.0),
+        "a":(1.0,0.0,0.0),"b":(0.0,1.0,0.0),"c":(-1.0,0.0,0.0),
+        "d":(3.0,0.0,0.0),"e":(2.0,1.0,0.0),"f":(1.0,2.0,0.0),
+    }
+    faces=(("v","a","b"),("v","b","c"),("v","c","a"),
+           ("v","d","e"),("v","e","f"),("v","f","d"))
+    vertices=tuple(
+        CanonicalMeshVertexCandidateIR(
+            vid,SurfaceSupportBinding("IDENTITY_SURFACE_NODE",((f"s{vid}",1.0),)),
+            "c0",pts[vid]
+        ) for vid in sorted(pts)
+    )
+    edges=tuple(sorted({
+        tuple(sorted((face[i],face[j])))
+        for face in faces for i,j in ((0,1),(1,2),(2,0))
+    }))
+    value=CanonicalMeshCandidateIR(
+        vertices,faces,edges,
+        "surface","partition","carrier","fixture","fixture-policy","",
+    )
+    value=replace(value,candidate_lineage_hash=canonical_mesh_candidate_lineage_hash(value))
+    with pytest.raises(QualificationError,match="INPUT_NONMANIFOLD"):
+        repair_candidate_endpoint_collapses_batched_v2(value,_policy())

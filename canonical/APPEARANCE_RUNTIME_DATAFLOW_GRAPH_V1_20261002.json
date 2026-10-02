@@ -299,7 +299,98 @@
       "max_edge_stretch": 95.58467012943939,
       "max_p95_edge_stretch": 2.7371826601278215,
       "interpretation": "moving source-owned art onto mechanical motion introduces an independent deformation-transfer failure class"
+    },
+    "corrected_source_owned_solved_lineage_replay": {
+      "status": "FAIL_CLOSED",
+      "workflow_run_id": 36943075707,
+      "parent_run_id": "SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929",
+      "failure": "VISUAL_AFFINE_BIND_SEED_DISTANCE_EXCEEDS_BUDGET",
+      "region_id": 109,
+      "nearest_distance_px": 10.124228365658293,
+      "interpretation": "The corrected solved-lineage replay did not qualify the visual affine bind; this failed attempt is evidence for the deformation-transfer admissibility problem and is not promoted as a successful runtime replay."
     }
   },
-  "next_executable_test": "REPLAY_CORRECTED_KNIGHT_WITH_RECOVERED_STAGE37_45_AND_MEASURE_DEFORMATION_PLUS_OVERLAP_ARBITRATION"
+  "next_executable_test": "A_VISUAL_TRIANGLE_DEFORMATION_DOMAIN_COHERENCE__THEN_B_CANONICAL_DEPTH_OVERLAP_OWNERSHIP__THEN_C_STAGE45_PROOF",
+  "findings": [
+    {
+      "id": "F5_FACE_ORDER_IS_IMPLICIT_PRESENTATION_AUTHORITY",
+      "status": "PROVEN_BEHAVIORAL",
+      "owner_stage": "44_NATIVE_PLAYBACK",
+      "evidence": {
+        "only_intervention": "REVERSE_FACE_ARRAY_ORDER",
+        "changed_visible_pixel_count": 45,
+        "rgba_sha_a": "41a177bebd34f1c75c1ef4ede8738324746ff826bc23a4f8fcd542a1de4649f7",
+        "rgba_sha_b": "a4c87ff66d8e34beb37ddeef188454715c5ee7bd3d339eb83920a2dda401aaa7"
+      },
+      "missing_authority": [
+        "explicit_draw_order",
+        "dynamic_occlusion_priority"
+      ]
+    },
+    {
+      "id": "F6_VISUAL_TRIANGLE_SINGLE_AFFINE_DOMAIN_NOT_GUARANTEED",
+      "status": "PROVEN_CONTRACT_GAP",
+      "owner_stage": "42_SOURCE_OWNED_VISUAL_RUNTIME_PROJECTION",
+      "evidence": {
+        "binding_granularity": "PER_VISUAL_VERTEX",
+        "candidate_mechanical_face_selection": "INDEPENDENT_PER_VERTEX",
+        "unclamped_barycentric_authorized": true,
+        "only_existing_face_coherence": "VISUAL_REGION_CROSS_REGION_FACE_FORBIDDEN"
+      },
+      "consequence": "one visual triangle may have corners driven by different mechanical affine domains"
+    },
+    {
+      "id": "F7_CORRECTED_MECHANICAL_CAA_SMEAR_IS_NOT_CATASTROPHIC_MECHANICAL_STRETCH",
+      "status": "MEASURED",
+      "owner_stage": "23_TO_45_MECHANICAL_CAA_PRESENTATION",
+      "evidence": {
+        "edge_gt_4": 0,
+        "edge_gt_10": 0,
+        "max_edge_ratio": 3.6155354868853395,
+        "source_mask_exterior_alpha_fraction": 0.40926646264354016,
+        "representative_nonseam_fraction": 0.932233673554652,
+        "extra_pixel_provenance_fraction": {
+          "CANONICAL_GLOBAL_COMPLETION": 0.640052837716031,
+          "COMPILED_LOCAL_HARMONIC": 0.026369078202308716,
+          "DIRECT_SOURCE": 0.07969570311319396,
+          "OTHER_VIEW_SOURCE": 0.10264419700716651,
+          "UNSUPPORTED_ABSTAIN": 0.15123818396129976
+        }
+      }
+    }
+  ],
+  "owner_matrix": [
+    {
+      "symptom": "historical frozen CAA smear",
+      "producer": "appearance_compile_v2::build_all_view_unseen_canonical_completion",
+      "datum": "CANONICAL_GLOBAL_COMPLETION C(p)",
+      "consumer": "historical Stage42 mechanical CAA renderer",
+      "owner_status": "MEASURED_DOMINANT_PROVENANCE",
+      "note": "completion dominates extra source-mask-exterior pixels; canonical Stage45 exposure policy would reject large exposure"
+    },
+    {
+      "symptom": "source-owned triangle flips/stretch",
+      "producer": "Stage42 visual binding solve",
+      "datum": "per-vertex mechanical face+barycentric binding",
+      "consumer": "posed visual XY bake",
+      "owner_status": "CONTRACT_GAP",
+      "missing": "single-affine-domain face coherence or continuous qualified transfer field"
+    },
+    {
+      "symptom": "overlap output changes under face permutation",
+      "producer": "Stage43 RSS faces array",
+      "datum": "triangle array order",
+      "consumer": "Stage44 alpha compositor",
+      "owner_status": "PROVEN_BEHAVIORAL",
+      "missing": "explicit presentation draw/occlusion authority"
+    },
+    {
+      "symptom": "native/reference parity can pass wrong overlap semantics",
+      "producer": "Stage44 native/reference same policy",
+      "datum": "pixel equality",
+      "consumer": "Stage45 DVI",
+      "owner_status": "PROOF_GAP",
+      "missing": "occlusion ownership/draw-order correctness oracle"
+    }
+  ]
 }

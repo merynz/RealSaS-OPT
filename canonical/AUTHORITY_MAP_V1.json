@@ -39,12 +39,14 @@
     "canonical/CURRENT_RND_LINEAGE_V1.json",
     "canonical/APPEARANCE_RUNTIME_DATAFLOW_GRAPH_V1_20261002.json",
     "docs/audit/APPEARANCE_RUNTIME_DATAFLOW_AUDIT_20261002.md",
-    "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V16_20261001.json"
+    "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V16_20261001.json",
+    "canonical/SOURCE_OWNED_VISUAL_FACE_ORDER_SENSITIVITY_AUDIT_V1_20261002.json"
   ],
   "rehydration_order": [
     "CURRENT_STATE.md",
     "canonical/CURRENT_RND_LINEAGE_V1.json",
     "canonical/APPEARANCE_RUNTIME_DATAFLOW_GRAPH_V1_20261002.json",
+    "canonical/SOURCE_OWNED_VISUAL_FACE_ORDER_SENSITIVITY_AUDIT_V1_20261002.json",
     "docs/audit/APPEARANCE_RUNTIME_DATAFLOW_AUDIT_20261002.md",
     "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
     "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json",
@@ -133,7 +135,7 @@
     "Historical donor/QualifiedAppearanceSet/Runtime-v4 documents remain evidence only and are not current V2 execution authority.",
     "Presentation partition uses qualified observable evidence; categorical object identity is not minted.",
     "Dynamic appearance quality gates use rigid-motion-invariant intrinsic textured-surface metrics; screen projection conditioning is diagnostic only.",
-    "Subject-2 Knight remains inactive until the user explicitly approves execution even when readiness is READY_FOR_WITNESS_EXECUTION."
+    "The corrected Knight mechanical-CAA witness is explicitly approved as R&D/demo evidence; product visual authority remains blocked until current A/B/C appearance-runtime closure."
   ],
   "implementation_readiness": "canonical/V2_IMPLEMENTATION_READINESS.json",
   "architecture_transition_rationale": "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
@@ -147,7 +149,7 @@
     "engineering_certification_run_id": 36871088319,
     "pipeline_plan_sha256": "cb97e4c68f8012f39d95f721284a85f300e5c695d7dd6362dad56a893c1965c0",
     "witness_used": false,
-    "evidence_class": "CURRENT_ENGINEERING_RECOVERY_CERTIFIED__VF11_R512_OPEN__NOT_WITNESS_READY",
-    "current_readiness_authority": "canonical/V2_IMPLEMENTATION_READINESS.json"
+    "evidence_class": "HISTORICAL_RECOVERY_ENGINEERING_CERTIFICATION__CURRENT_STATE_SUPERSEDES_OLD_VF11_POINTER",
+    "current_readiness_authority": "CURRENT_STATE.md"
   }
 }

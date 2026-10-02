@@ -45,7 +45,7 @@ This is an R&D/demo witness, not product visual authority.
 3. The recovered source-owned path still has two unclosed contracts:
    - visual-triangle deformation-domain coherence is not guaranteed because mechanical affine binding is solved per visual vertex;
    - canonical physical depth/overlap ownership is not transported to native source-owned playback, where face-array order currently acts as an implicit overlap authority.
-4. Stage45 currently proves native/reference parity, direct-source provenance, non-empty frames, flips and catastrophic stretch, but does not yet prove overlap-owner/physical-visibility correctness.
+4. Stage45 currently proves native/reference parity, direct-source provenance, non-empty frames, flips and catastrophic stretch, but does not yet prove overlap-owner/physical-visibility correctness.\n5. Behavioral audit `canonical/SOURCE_OWNED_VISUAL_FACE_ORDER_SENSITIVITY_AUDIT_V1_20261002.json` proves that reversing only overlapping face-array order changes 45 visible pixels.\n6. The corrected solved-lineage source-owned replay failed closed at visual affine binding (`VISUAL_AFFINE_BIND_SEED_DISTANCE_EXCEEDS_BUDGET`, region 109, distance 10.1242 px); this is evidence for A, not a successful replay.
 
 ## Immediate execution
 

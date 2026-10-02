@@ -89,3 +89,32 @@ The recovered path still has a narrower unresolved presentation problem: **dynam
 5. Render idle/run/slash and compare to frozen mechanical-CAA witness.
 
 No RGB head, generated texture, or new appearance architecture should be selected before this test distinguishes missing arbitration from representation failure.
+
+
+## Promoted behavioral evidence — 2026-10-02
+
+### F5 — Triangle array order is an implicit overlap authority: PROVEN
+
+Hosted audit run `36940982276` held geometry, posed positions, texture bytes and per-vertex UVs constant and reversed only two fully overlapping visual triangle rows. **45 visible pixels changed**. The representative pixel changed from blue `[0,0,255,255]` to red `[255,0,0,255]`; framebuffer hashes changed from `41a177be...` to `a4c87ff6...`.
+
+Canonical evidence: `canonical/SOURCE_OWNED_VISUAL_FACE_ORDER_SENSITIVITY_AUDIT_V1_20261002.json`.
+
+Therefore Stage44 face iteration order is behaviorally acting as an undeclared overlap/presentation authority.
+
+### F6 — Visual triangle single-affine-domain coherence is not guaranteed: PROVEN CONTRACT GAP
+
+`bind_region_visual_vertices_to_mechanical_affine_v1` selects a mechanical face independently per visual vertex. Stage37 guarantees visual-region coherence, but it does not guarantee that all three corners of one visual triangle bind to one qualified affine deformation domain or to a continuous transfer field. The recovered Stage42 source-owned path still consumes this per-vertex binding.
+
+### Corrected solved-lineage source-owned replay: FAIL-CLOSED
+
+The attempted replay on `SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929` did **not** reach a successful source-owned runtime render. Workflow run `36943075707` failed during visual affine binding with:
+
+`VISUAL_AFFINE_BIND_SEED_DISTANCE_EXCEEDS_BUDGET:109:10.124228365658293`
+
+This failed attempt is preserved as evidence for A (deformation-domain/admissibility ownership); its workflow change is not promoted to canonical main.
+
+## Current closure order
+
+A. Visual triangle deformation-domain coherence.  
+B. Canonical depth → visual overlap ownership.  
+C. Stage45 fail-closed proof of A + B.

@@ -106,3 +106,36 @@ def test_product_space_loss_is_zero_for_rigid_single_joint_identity():
         trust_weight=0.0,
     )
     assert abs(float(loss["mechanical"]))<1e-12
+
+
+def test_mechanical_residual_adapter_cannot_mint_masked_joint_support():
+    torch.manual_seed(3)
+    model=MechanicalResidualAdapterV1()
+    B,N,J=1,2,3
+    base=torch.tensor([[
+        [0.75,0.25,0.0],
+        [0.0,1.0,0.0],
+    ]],dtype=torch.float32)
+    geom=torch.randn(B,N,7)
+    pair=torch.randn(B,N,J,10)
+    sm=torch.ones(B,N,dtype=torch.bool)
+    jm=torch.ones(B,J,dtype=torch.bool)
+    row_mask=torch.tensor([[
+        [True,True,False],
+        [False,True,False],
+    ]])
+    # Make a nonzero residual deliberately; masked supports must remain exact zero.
+    with torch.no_grad():
+        model.residual[-1].bias.fill_(2.0)
+    out,_=model(
+        base_weights=base,
+        surface_geometry7=geom,
+        pair_geometry=pair,
+        surface_mask=sm,
+        joint_mask=jm,
+        row_joint_mask=row_mask,
+    )
+    assert torch.equal(out[...,2],torch.zeros_like(out[...,2]))
+    assert float(out[0,1,0])==0.0
+    assert float(out[0,1,1])==1.0
+    assert torch.allclose(out.sum(-1),torch.ones(B,N),atol=1e-7,rtol=0.0)

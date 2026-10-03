@@ -32,6 +32,10 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
 
+      - name: Install isolated historical projector dependencies
+        run: |
+          python -m pip install --no-input --progress-bar off numpy scipy trimesh
+
       - name: Verify exact frozen V9 inputs
         run: |
           set -euo pipefail

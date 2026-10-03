@@ -234,6 +234,23 @@ Before any A100 run, report to the user with:
 - Arachne readout-only refit: contingency only, gated by Section 6.
 - Active next step: recover and complete the deformation-sensitive solver, then move to direct LBS deformation-constrained projection.
 
+## 8A. Decision after deformation-sensitive projection run 37116286772
+
+The implementation issue from run `37113657436` was a linear-solver convergence limit, not a scientific result. Commit `a72c4c88fc2127ade696d92885f210c168c39ca4` added a fail-closed sparse-direct fallback and run `37116286772` completed all 8 variants plus frozen G3 and 51-frame courts.
+
+Measured range:
+
+- low-correction variants (~0.034-0.036 p95 L1) still had G3 max condition ~314-330 and max motion edge ~149-292x;
+- medium variants (~0.168-0.449 p95 L1) still had G3 max condition ~123-199 and max motion edge ~60-130x;
+- strongest variants (~0.765-0.792 p95 L1) still failed G3 and all 51 motion frames, with best max motion edge ~26.38x and best observed G3 max condition ~120.11.
+
+Decision:
+
+- reject the G3-joint-metric proxy projection as a sufficient product repair;
+- do not increase lambda further because correction is already too large and all exact-motion frames still fail;
+- do not use A100 yet;
+- advance to **Phase B: direct LBS deformation-constrained projection**, which optimizes measured carrier deformation rather than proxy weight-space motion similarity.
+
 ## 9. Progress ledger
 
 | Step | State | Evidence |
@@ -247,7 +264,7 @@ Before any A100 run, report to the user with:
 | Geometry-only projection | DIAGNOSTIC IMPROVEMENT, NOT ADMISSIBLE | max edge ~13.48x at large correction; 49/51 still fail |
 | Topology-aware old-skin prolongation | FAIL | all variants 51/51 fail |
 | Coarse FEM prolongation | STRUCTURALLY INCOMPLETE | source components without coarse faces |
-| G3-sensitive projection | IMPLEMENTATION FAILURE, THEORY UNJUDGED | run 37113657436 failed before dynamic court |
+| G3-sensitive projection | FAIL / PROXY INSUFFICIENT | run 37116286772 PASS as workflow; all 8 variants mechanically fail. Best max motion edge ~26.38x, G3 max condition ~120.11, 51/51 frames fail, p95 correction ~0.765 L1 |
 | Direct LBS deformation-constrained projection | TODO | next scientific experiment |
 | Multi-topology invariance court | TODO | required before genericity claim |
 | Product contract integration | BLOCKED | requires preceding PASS |

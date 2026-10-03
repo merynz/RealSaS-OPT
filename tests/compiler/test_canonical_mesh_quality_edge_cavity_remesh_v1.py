@@ -121,3 +121,14 @@ def test_edge_cavity_remesh_keeps_product_triangle_authority_unminted():
     assert meta["audit_only"] is True
     assert meta["product_triangle_authority_minted"] is False
     assert meta["stage14_surface_remesh_authority_required_for_product_promotion"] is True
+
+
+def test_edge_cavity_remesh_proposal_guard_can_fail_closed():
+    candidate=_candidate()
+    repaired,report=repair_candidate_edge_cavity_retriangulation_v1(
+        candidate,_policy(),max_batches=4,max_removed_edges=8,
+        proposal_admissibility=lambda row: False,
+    )
+    assert report["accepted_edge_cavity_count"]==0
+    assert report["rejected_counts"]["mechanical_admissibility"]>=1
+    assert repaired.faces==tuple(sorted(candidate.faces))

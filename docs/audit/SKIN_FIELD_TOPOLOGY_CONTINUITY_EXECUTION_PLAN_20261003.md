@@ -730,6 +730,255 @@ A100 becomes scientifically justified only after the CPU preflight seals:
 At that point provide a single **Run All Colab notebook**. The notebook trains only the residual adapter and produces a sealed checkpoint + receipt for compiler requalification.
 
 
+
+## 8J. Representation-conditioned truth — teacher labels are conditional, not universal
+
+The topology/basis equivalence court in Section 8F changes how both rig and skin supervision must be interpreted.
+
+Binding principle:
+
+> A teacher rig/skin label is truth on the representation that generated it. Once RealSaS owns the carrier, product-space mechanical truth must be measured on the RealSaS representation.
+
+For skinning, the product target is not an abstract vertex label W. It is a conditional object:
+
+W* = f(M, G, D)
+
+where:
+
+- M is the admitted carrier geometry/topology/basis;
+- G is the qualified skeleton;
+- D is the admitted deformation/motion objective.
+
+Therefore a teacher field W_T that is correct on M_T need not equal the mechanically optimal field W_R on a different RealSaS carrier M_R, even when vertex positions and transferred weights are numerically almost identical.
+
+This is now measured, not hypothetical: Section 8F observed teacher-basis PASS and V9-basis catastrophic FAIL with barycentric weight rebind row-L1 max only about 7.45e-8.
+
+Consequences:
+
+1. teacher weight similarity is retained as semantic/source-space supervision, not final mechanical authority;
+2. product-space deformation consequence is mandatory in Arachne training/evaluation;
+3. carrier topology is an active representation owner;
+4. final skin truth is minted only after exact Compiler qualification on the exact product carrier;
+5. a high teacher-match score can mean the model learned the wrong representation-conditioned target very accurately.
+
+The same caution applies to skeleton targets. A teacher skeleton is a strong articulation prior, but the mechanically optimal RealSaS skeleton may contain more or fewer controls if the RealSaS surface, carrier, motion envelope or editability contract differs.
+
+## 8K. Geppetto articulation-capacity reopening — remove the "clean rig" aesthetic prior
+
+The current Knight Geppetto training target is not the full source rig. The target builder at experiments/geppetto_reference_strength_fullstack_v1/mechanical_core_target_v1.py uses:
+
+SKIN_SUPPORTED_PLUS_SUPPORTED_BRIDGES__ASSEMBLY_ONLY_ROOT_EXCLUDED
+
+and explicitly:
+
+- seeds skin-supported deform controls;
+- retains unsupported controls only when structurally required as bridges;
+- excludes unsupported assembly-only root chains;
+- excludes helper/IK-only leaves;
+- projects parents to the nearest retained ancestor.
+
+This is a defensible mechanical-core projection, but it is not evidence that the projected rig has sufficient articulation capacity for the final product.
+
+Current Geppetto V2 also does not have a binding 28-joint product architecture. GeppettoCandidateV2 is resource-bounded by admitted surface support; the historical Knight witness happened to qualify 28 joints. The research question is therefore not "raise a hard 28 cap". It is:
+
+> Did target-construction / regularization teach Geppetto a rig that is mechanically too sparse?
+
+### Capacity hypothesis
+
+H_RIG_CAPACITY:
+
+A denser but still justified skeleton can lower downstream deformation residual and reduce cardboard-like articulation without requiring a template-specific rig or weakening Compiler authority.
+
+### Target-policy arms
+
+Do not synthesize arbitrary extra bones just to hit a requested count.
+
+Use teacher-only training/evaluation construction to define increasingly rich anonymous target policies:
+
+- K0 — CURRENT_CORE: current skin-supported deform controls plus required bridges.
+- K1 — ALL_DEFORM: all legal teacher deform controls, including low-direct-mass controls.
+- K2 — DEFORMATION_NECESSARY: K1 plus non-deform/helper controls whose removal causes a preregistered measurable increase in deformation or retarget residual under the source motion/probe court.
+- K3 — FULL_LEGAL_DIAGNOSTIC: full legal source skeleton after removing only controls that cannot participate in the product deformation contract; diagnostic ceiling only, not automatic shipping target.
+
+K2 is the intended scientific target:
+
+> no unnecessary bone, not minimum bone count.
+
+### Marginal articulation gain
+
+Define a subject-free quantity MARGINAL_ARTICULATION_GAIN(control) as the downstream improvement caused by admitting a control, measured with the same skin fitter and motion/deformation court.
+
+A retained control must improve at least one preregistered deformation-capacity quantity without violating rig legality:
+
+- local deformation condition;
+- edge/area stress;
+- authored-motion residual;
+- retarget residual;
+- mechanically defined endpoint/segment trajectory;
+- downstream skin semantic correction required.
+
+Joint count itself is never a quality metric. Complexity is a tie-breaker only after mechanical quality.
+
+### Articulation-capacity court
+
+Hold constant:
+
+- exact RiggingSurfaceIR lineage;
+- Geppetto architecture arm;
+- optimizer budget;
+- initialization/seeds;
+- Compiler graph qualifier;
+- skin training/fitting budget;
+- carrier and G3/G3B/motion courts.
+
+Compare K0/K1/K2/K3 using:
+
+1. proposal matched-position error and calibrated uncertainty;
+2. root/parent evidence and Compiler graph PASS;
+3. qualified joint count and unsupported-control rate;
+4. downstream skin correction budget;
+5. G3B / G3;
+6. exact authored motion;
+7. marginal articulation gain;
+8. model/runtime cost.
+
+A richer rig is promoted only if product-space mechanics improves. "Looks cleaner" is not an admissible selection criterion.
+
+### Code changes
+
+Planned:
+
+- keep mechanical_core_target_v1.py frozen as K0 baseline;
+- add experiments/geppetto_reference_strength_fullstack_v1/mechanical_capacity_target_v2.py;
+- add typed target-policy receipts and source-provenance hashes;
+- add tools/audit_geppetto_articulation_capacity_court_v1.py;
+- add unit tests proving target policies are anonymous, parent-before-child, family-count agnostic and source-name free.
+
+No current Geppetto checkpoint or product authority changes merely by defining these challengers.
+
+## 8L. RigAnything-derived joint-locus diffusion challenger — exact insertion point
+
+RigAnything's useful mechanism for RealSaS is conditional diffusion for the next continuous 3D joint locus, not replacement of the Compiler and not automatic adoption of its whole autoregressive rig authority.
+
+The reference factorizes skeleton generation as:
+
+shape context + previous skeleton -> next-joint context -> diffusion XYZ -> parent evidence -> next step.
+
+Current independent Geppetto V2 already satisfies the same functional obligation with a different mechanism:
+
+- latent autoregressive control state;
+- three continuous locus modes;
+- heteroscedastic per-mode sigma;
+- stable MAP representative;
+- parent/root/support evidence;
+- hard-MAP XYZ deliberately not fed back into recurrent state.
+
+Therefore diffusion is a challenger to the current locus distribution head, not a missing mandatory component.
+
+### D0 — current Geppetto baseline
+
+Keep the current mapping:
+
+h_t -> three locus modes + sigma + mode logits
+
+with latent-state-only recurrence.
+
+### D1 — conditional diffusion locus head — recommended first challenger
+
+Keep unchanged:
+
+- current SurfaceSetEncoderV2;
+- current recurrent control state;
+- current STOP/existence/root/support heads;
+- current parent evidence;
+- current Compiler graph ownership.
+
+Replace only the locus head with:
+
+h_t + pooled/surface context -> conditional diffusion -> XYZ sample distribution.
+
+Requirements:
+
+- predict normalized 3D joint locus;
+- expose multiple deterministic-seed samples as typed position hypotheses;
+- expose calibrated uncertainty / sample dispersion;
+- never mint canonical joint identity;
+- do not feed sampled XYZ back into recurrence in D1;
+- emit the same SkeletonProposalIR authority class.
+
+Initial fitting strategy:
+
+1. freeze surface encoder plus recurrent state plus non-locus heads;
+2. train only the diffusion locus head against the same matched anonymous targets;
+3. evaluate locus quality and downstream product consequence;
+4. unfreeze shared latent blocks only if the D1 head-only ceiling is insufficient.
+
+This makes the causal question clean:
+
+> Does diffusion improve continuous locus evidence at fixed Geppetto representation?
+
+### D2 — generated-XYZ causal-feedback challenger
+
+Only if D1 indicates that locus quality helps but latent recurrence remains limiting, test the stronger RigAnything-like mechanism:
+
+sampled/generated XYZ -> joint position token -> next autoregressive state.
+
+Potential upside:
+
+- later controls explicitly observe earlier realized geometry;
+- local skeleton geometry may become more coherent;
+- richer rigs may become easier to sequence.
+
+Risks:
+
+- sample-path dependence;
+- error cascade;
+- seed sensitivity;
+- serialization/order sensitivity;
+- conflict with the current deliberate safety property that hard-MAP locus does not rewrite later anonymous control state.
+
+D2 therefore requires a separate adversarial court and may not silently replace D0/D1.
+
+### Diffusion court
+
+Run D0 vs D1 first. D2 only after D1 result.
+
+Measure:
+
+- matched PCK / normalized MAE / p95;
+- calibrated coverage / NLL where comparable;
+- position-hypothesis diversity without unsupported spread;
+- Compiler root/tree qualification;
+- downstream Arachne/skin correction;
+- G3B/G3;
+- authored motion;
+- seed-to-seed skeleton stability;
+- inference wall time and memory.
+
+Primary decision metric is downstream mechanically qualified product behavior, not lower XYZ loss alone.
+
+### Code changes
+
+Refactor without deleting the current head:
+
+- models/geppetto/v2/geppetto_candidate_v2.py
+  - extract a JointLocusDistributionHead interface;
+  - retain current multimodal head as MULTIMODAL_GAUSSIAN_V1.
+- new models/geppetto/v2/joint_locus_diffusion_v1.py
+  - independent conditional denoiser/sampler;
+  - clean-room implementation; no RigAnything source import.
+- models/geppetto/v2/geppetto_loss_v2.py
+  - add diffusion-loss arm while leaving matching/root/parent/support losses unchanged.
+- models/geppetto/v2/geppetto_train_v2.py
+  - add frozen-base/head-only challenger mode and deterministic sampling seeds.
+- tests/models/
+  - conditionality, finite samples, deterministic-seed replay, no canonical-ID leakage, no parent-authority duplication.
+- new audit:
+  - tools/audit_geppetto_joint_locus_challenger_v1.py.
+
+Reference-specific 300-step sampling is not adopted by default. Sampling schedule is an implementation hyperparameter and must earn its cost.
+
+
 ## 9. Progress ledger
 
 | Step | State | Evidence |

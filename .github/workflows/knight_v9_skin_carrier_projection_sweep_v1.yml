@@ -1,0 +1,94 @@
+name: knight-v9-skin-carrier-projection-sweep-v1
+on:
+  push:
+    branches: [audit/canonical-caa-mechanics-geometry-lock-20261002]
+    paths:
+      - tools/audit_skin_carrier_projection_sweep_v1.py
+      - .github/workflows/knight_v9_skin_carrier_projection_sweep_v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  sweep:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '4'
+      PY: /home/monster/realsas-ml312/bin/python
+      AUTH: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
+      INPUT: /tmp/knight_v9_skin_projection_input_${{ github.run_id }}
+      OUT: /tmp/knight_v9_skin_projection_${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-v9-dynamic-mechanics-phase1-v1
+          path: ${{ env.INPUT }}/phase1
+          github-token: ${{ github.token }}
+          run-id: 37064886261
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-static-quality-source-opt-v9
+          path: ${{ env.INPUT }}/static
+          github-token: ${{ github.token }}
+          run-id: 37057338450
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-v9-fresh-rig-skin-inference-v1
+          path: ${{ env.INPUT }}/fresh
+          github-token: ${{ github.token }}
+          run-id: 37106649335
+      - name: Build minimum-correction projection sweep
+        run: |
+          "$PY" tools/audit_skin_carrier_projection_sweep_v1.py \
+            --surface-json "$INPUT/phase1/refined_surface.json" \
+            --candidate-json "$INPUT/static/final_candidate.json" \
+            --fresh-inference-dir "$INPUT/fresh" --out-root "$OUT"
+      - name: Run frozen G3 and 51-frame court for every projection
+        run: |
+          set +e
+          for D in "$OUT"/lambda_*; do
+            echo "PROJECTION_DYNAMIC_BEGIN=$D"
+            "$PY" tools/audit_fresh_inference_dynamics_v1.py \
+              --authority-root "$AUTH" --run-id "$RUN_ID" \
+              --surface-json "$INPUT/phase1/refined_surface.json" \
+              --candidate-json "$INPUT/static/final_candidate.json" \
+              --inference-dir "$D"
+            CODE=$?
+            echo "$CODE" > "$D/dynamic_exit_code.txt"
+            rm -f "$D/fresh_sampled_geometry.npz" "$D/fresh_qualified_skin.json" "$D/fresh_qualified_skeleton.json"
+          done
+          exit 0
+      - name: Summarize projection sweep
+        run: |
+          "$PY" - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ["OUT"]); rows=[]
+          for d in sorted(root.glob("lambda_*")):
+              p=json.loads((d/"PROJECTION_STATS.json").read_text())
+              dyn=json.loads((d/"DYNAMIC_REPORT.json").read_text())
+              g3=json.loads((d/"fresh_g3_report.json").read_text())
+              rows.append({"lambda":p["lambda"],"p95_corr":p["p95_row_correction_l1"],
+                  "max_corr":p["max_row_correction_l1"],"grad_p99":p["carrier_gradient_p99"],
+                  "grad_max":p["carrier_gradient_max"],"g3_passed":dyn["g3_passed"],
+                  "g3_max_condition":g3["maximum_condition_number"],
+                  "failed_frames":dyn["failed_motion_frame_count"],
+                  "max_motion_edge_ratio":dyn["maximum_motion_edge_ratio"]})
+          (root/"SWEEP_RESULT.json").write_text(json.dumps({"status":"MEASURED_DIAGNOSTIC_ONLY","rows":rows},indent=2,sort_keys=True)+"\n")
+          for row in rows: print("PROJECTION_SWEEP_RESULT="+json.dumps(row,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knight-v9-skin-carrier-projection-sweep-v1
+          path: ${{ env.OUT }}
+          if-no-files-found: error
+          retention-days: 30

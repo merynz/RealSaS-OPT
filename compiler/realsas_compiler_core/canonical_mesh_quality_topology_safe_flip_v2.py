@@ -72,6 +72,7 @@ def repair_candidate_fixed_vertex_flips_topology_safe_v2(
     policy: MeshQualificationPolicyIR,
     *,
     max_passes: int = 12,
+    proposal_admissibility=None,
 ) -> tuple[CanonicalMeshCandidateIR,dict]:
     if int(max_passes)<1:
         raise QualificationError("QUALITY_TOPO_SAFE_FLIP_MAX_PASSES_INVALID")
@@ -95,6 +96,7 @@ def repair_candidate_fixed_vertex_flips_topology_safe_v2(
     rejected_shape=0
     rejected_topology=0
     rejected_batch_conflict=0
+    rejected_mechanical=0
 
     for pass_index in range(int(max_passes)):
         inc=_edge_incidence(faces)
@@ -150,11 +152,16 @@ def repair_candidate_fixed_vertex_flips_topology_safe_v2(
                 newq["min_angle_deg"]-oldq["min_angle_deg"],
                 oldq["max_aspect"]-newq["max_aspect"],
             )
-            proposals.append({
-                "edge":edge,"faces":(i,j),"new_faces":new_faces,"quad":quad,
+            proposal={
+                "operator":"flip","edge":edge,"faces":(i,j),
+                "old_faces":old_faces,"new_faces":new_faces,"quad":quad,
                 "oldq":oldq,"newq":newq,"deviation":deviation,"allowed":allowed,
                 "improvement":improvement,
-            })
+            }
+            if proposal_admissibility is not None and not bool(proposal_admissibility(proposal)):
+                rejected_mechanical+=1
+                continue
+            proposals.append(proposal)
 
         if not proposals:
             break
@@ -242,6 +249,7 @@ def repair_candidate_fixed_vertex_flips_topology_safe_v2(
                 "rejected_shape_deviation_count":int(rejected_shape),
                 "rejected_topology_count":int(rejected_topology),
                 "rejected_batch_conflict_count":int(rejected_batch_conflict),
+                "rejected_mechanical_admissibility_count":int(rejected_mechanical),
                 "before":before,"after":after,
                 "initial_topology":initial_topology,"final_topology":final_topology,
                 "passes":pass_rows,"accepted_flips":accepted,

@@ -1,0 +1,62 @@
+name: knight-v9-static-mechanical-transactional-composition-v1
+
+on:
+  push:
+    branches: [audit/canonical-caa-mechanics-geometry-lock-20261002]
+    paths:
+      - tools/audit_v9_static_mechanical_transactional_composition_v1.py
+      - .github/workflows/knight_v9_static_mechanical_transactional_composition_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 75
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: '1'
+      PY: /home/monster/realsas-ml312/bin/python
+      AUTH: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
+      CACHE_ROOT: /tmp/knight_v9_direct_lbs_input_37118100232
+      CHILD: /tmp/knight_v9_teacher_repartition_37123289786
+      TEACHER_ROOT: /tmp/knight_v9_teacher_oracle_37122879585
+      OUT: /tmp/knight_v9_static_mechanical_transaction_\${{ github.run_id }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Verify frozen composition inputs
+        run: |
+          set -euo pipefail
+          test -f "$CHILD/CHILD_CANDIDATE.json"
+          test -f "$CHILD/CHILD_PARTITION.json"
+          test -f "$CACHE_ROOT/phase1/refined_surface.json"
+          test -f "$CACHE_ROOT/fresh/fresh_qualified_skeleton.json"
+          test -f "$TEACHER_ROOT/V9_TEACHER_BANK.npz"
+          echo "5f23adc084fdc15c95a6807e5f86fd365d547e7f558a0d341f9ec3be9bfa2987  $TEACHER_ROOT/V9_TEACHER_BANK.npz" | sha256sum -c -
+          "$PY" -m py_compile tools/audit_v9_static_mechanical_transactional_composition_v1.py
+          echo "V9_TRANSACTION_INPUT_PASS"
+      - name: Run transactional static mechanical pilot
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT"
+          "$PY" tools/audit_v9_static_mechanical_transactional_composition_v1.py \
+            --authority-root "$AUTH" --run-id "$RUN_ID" \
+            --surface-json "$CACHE_ROOT/phase1/refined_surface.json" \
+            --child-candidate-json "$CHILD/CHILD_CANDIDATE.json" \
+            --child-partition-json "$CHILD/CHILD_PARTITION.json" \
+            --fresh-skeleton-json "$CACHE_ROOT/fresh/fresh_qualified_skeleton.json" \
+            --teacher-bank "$TEACHER_ROOT/V9_TEACHER_BANK.npz" \
+            --out-dir "$OUT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knight-v9-static-mechanical-transactional-composition-v1
+          path: \${{ env.OUT }}
+          if-no-files-found: error
+          retention-days: 30

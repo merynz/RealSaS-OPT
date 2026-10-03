@@ -858,6 +858,44 @@ No current Geppetto checkpoint or product authority changes merely by defining t
 
 ## 8L. RigAnything-derived joint-locus diffusion challenger — exact insertion point
 
+
+### 8L.0 Correction after live-checkpoint audit — current product Geppetto already has diffusion
+
+A live-checkpoint audit on 2026-10-03 corrected the assumed baseline.
+
+The exact Knight checkpoint used by backend replay run 37104998946 is:
+
+- class: GeppettoReferenceStrengthNoLearnedSlotV1;
+- architecture: RealSaS.Geppetto.ReferenceStrength.DirectSurfaceCausalDiffusion.DeterministicViewDirection.v1;
+- checkpoint SHA256: 1c124f876858f6f5b5fd0d4639fc7f2b596a25e962d19de8799ecd64ae59b08f.
+
+The live model already contains ConditionalResidualDiffusionV1.
+
+Its actual locus factorization is:
+
+state -> learned coarse XYZ
+state + noisy residual -> conditional residual diffusion
+final XYZ = coarse XYZ + sampled residual
+
+The recurrence deliberately feeds back coarse XYZ, not the sampled residual-refined XYZ. Final all-pair parent evidence is recomputed from the final refined XYZ.
+
+Therefore the earlier GeppettoCandidateV2 D0/D1 implementation on this research branch is an interface/mechanism prototype only. It is not the current product baseline and is not eligible for promotion as a new diffusion feature.
+
+The corrected live research arms are:
+
+- L0 — LIVE_DIFFUSION: frozen current ReferenceStrength checkpoint, coarse + conditional residual diffusion, coarse-only recurrence.
+- L-1 — COARSE_ONLY_ABLATION: exact same checkpoint/control states/STOP/root/support/cardinality, but emit coarse XYZ and recompute final parent evidence from coarse XYZ.
+- L1 — DIFFUSION_VARIANT only if L0 contribution is insufficient: change residual diffusion mechanism/schedule while retaining coarse-only recurrence.
+- L2 — REFINED_XYZ_FEEDBACK: only after L0/L-1 attribution; feed refined/generated XYZ into later autoregressive state, closer to the stronger RigAnything causal formulation.
+
+The immediate court is L0 vs L-1. No training is needed. This measures whether current diffusion is already materially helping Knight and prevents duplicating an architecture feature that exists.
+
+Research tool:
+tools/audit_geppetto_live_diffusion_ablation_v1.py
+
+The L2 feedback arm remains high risk because it introduces sample-path dependence and exposure/cascade sensitivity. It requires a separate court and cannot inherit L0 credit.
+
+
 RigAnything's useful mechanism for RealSaS is conditional diffusion for the next continuous 3D joint locus, not replacement of the Compiler and not automatic adoption of its whole autoregressive rig authority.
 
 The reference factorizes skeleton generation as:

@@ -1,0 +1,112 @@
+name: knight-v9-archived-kinematics-counterfactual-v1
+on:
+  push:
+    branches: [audit/canonical-caa-mechanics-geometry-lock-20261002]
+    paths:
+      - tools/audit_v9_archived_kinematics_counterfactual_v1.py
+      - .github/workflows/knight_v9_archived_kinematics_counterfactual_v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  counterfactual:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '4'
+      PY: /home/monster/realsas-ml312/bin/python
+      AUTH: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
+      FIT_RUN: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      INPUT: /tmp/knight_v9_archived_kinematics_input_${{ github.run_id }}
+      OUT: /tmp/knight_v9_archived_kinematics_${{ github.run_id }}
+      ARM: /home/monster/realsas_model_cache/arachne_uniform_all_projected_63e589b67946
+      ARM_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_V6_COVERAGE_SAMPLING_2X2_INDEXSPACE_FIXED_20260929/ARMS/UNIFORM_ALL_PROJECTED
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-v9-dynamic-mechanics-phase1-v1
+          path: ${{ env.INPUT }}/phase1
+          github-token: ${{ github.token }}
+          run-id: 37064886261
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-static-quality-source-opt-v9
+          path: ${{ env.INPUT }}/static
+          github-token: ${{ github.token }}
+          run-id: 37057338450
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-v9-fresh-rig-skin-inference-v1
+          path: ${{ env.INPUT }}/fresh
+          github-token: ${{ github.token }}
+          run-id: 37106649335
+      - name: Build diagnostic archived-kinematics V9-support skeleton
+        run: |
+          "$PY" tools/audit_v9_archived_kinematics_counterfactual_v1.py \
+            --authority-root "$AUTH" --run-id "$RUN_ID" \
+            --fresh-skeleton-json "$INPUT/fresh/fresh_qualified_skeleton.json" \
+            --out-dir "$OUT"
+      - name: Retrieve and verify corrected Arachne checkpoint
+        run: |
+          mkdir -p "$ARM"
+          for FILE in ARACHNE_KNIGHT_V6_RESULT.json ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt; do
+            if [ ! -f "$ARM/$FILE" ]; then
+              rclone copyto "$ARM_REMOTE/$FILE" "$ARM/$FILE.partial" --checksum
+              mv "$ARM/$FILE.partial" "$ARM/$FILE"
+            fi
+          done
+          printf '%s  %s\n' 0a73240d2278a69fe24d1b6a8ebf185dbe8556a0bd17b7d4c70731ff558be31f "$ARM/ARACHNE_KNIGHT_V6_RESULT.json" | sha256sum --check
+          printf '%s  %s\n' 63e589b679461daf7cf859eb0c10e4b5f9c285b055d18f114d0ba348f2829892 "$ARM/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt" | sha256sum --check
+      - name: Arachne CUDA BF16 on V9 with archived rig kinematics
+        run: |
+          "$PY" tools/inference/refined_surface_rig_skin_v1.py --lane skin --device cuda \
+            --skin-autocast bf16 --cuda-query-chunk 128 --readout-chunk 1024 \
+            --surface-json "$INPUT/phase1/refined_surface.json" --fit-run "$FIT_RUN" \
+            --out-dir "$OUT" --arm-dir "$ARM"
+      - name: Frozen G3 and 51-frame court (diagnostic result)
+        run: |
+          set +e
+          "$PY" tools/audit_fresh_inference_dynamics_v1.py \
+            --authority-root "$AUTH" --run-id "$RUN_ID" \
+            --surface-json "$INPUT/phase1/refined_surface.json" \
+            --candidate-json "$INPUT/static/final_candidate.json" \
+            --inference-dir "$OUT"
+          CODE=$?
+          echo "DYNAMIC_EXIT_CODE=$CODE" >> "$GITHUB_ENV"
+          exit 0
+      - name: Summarize counterfactual
+        run: |
+          "$PY" - <<'PY'
+          import json, os
+          from pathlib import Path
+          out=Path(os.environ["OUT"])
+          rig=json.loads((out/"RIG_DELTA_REPORT.json").read_text())
+          dyn=json.loads((out/"DYNAMIC_REPORT.json").read_text())
+          g3=json.loads((out/"fresh_g3_report.json").read_text())
+          print("COUNTERFACTUAL_RESULT="+json.dumps({
+            "dynamic_exit_code": int(os.environ.get("DYNAMIC_EXIT_CODE","-1")),
+            "g3_passed": dyn["g3_passed"],
+            "g3_max_condition": g3["maximum_condition_number"],
+            "failed_motion_frame_count": dyn["failed_motion_frame_count"],
+            "maximum_motion_edge_ratio": dyn["maximum_motion_edge_ratio"],
+            "parent_source_change_count": rig["parent_source_change_count"],
+            "canonical_joint_id_change_count": rig["canonical_joint_id_change_count"],
+            "position_delta_p95_over_span": rig["position_delta_p95_over_span"],
+            "position_delta_max_over_span": rig["position_delta_max_over_span"],
+          },sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knight-v9-archived-kinematics-counterfactual-v1
+          path: ${{ env.OUT }}
+          if-no-files-found: error
+          retention-days: 30

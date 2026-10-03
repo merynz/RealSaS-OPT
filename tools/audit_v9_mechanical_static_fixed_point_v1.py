@@ -72,6 +72,9 @@ from tools.audit_knight_repaired_quality_collapse_v1 import (
     build_repaired_surface,
     report_quality,
 )
+from tools.audit_knight_static_quality_split_cycle_v8 import (
+    synchronized_long_edge_split,
+)
 from tools.audit_v9_teacher_oracle_iterative_repartition_v1 import (
     authorization_for,
     carrier_for,
@@ -125,24 +128,45 @@ def _guarded_static_rounds(
     rows=[]
     current=candidate
 
-    # All admitted operators in this court are connectivity/subset-only:
-    # flip rewires faces; collapse/cavities only remove vertices. No surviving
-    # vertex position or support binding changes and no new vertex is created.
-    # Therefore one frozen posed-vertex cache is valid across every proposal in
-    # every static round for this exact child lineage.
-    guard=MechanicalProposalAdmissibilityGuardV1(
-        current,
-        surface=surface,
-        skeleton=skeleton,
-        skin=skin,
-        envelope=envelope,
-        cameras=cameras,
-        policy=policy,
-    )
-
     for round_index in range(MAX_STATIC_ROUNDS_PER_CYCLE):
         before=report_quality(current,policy)
         op_rows=[]
+
+        # Split is the only admitted static operator here that creates a vertex.
+        # Its proposal guard computes the temporary midpoint with exact LBS from
+        # midpoint rest position + convex transferred skin. After accepted
+        # splits, rebuild the posed cache once for the new candidate lineage.
+        split_guard=MechanicalProposalAdmissibilityGuardV1(
+            current,
+            surface=surface,
+            skeleton=skeleton,
+            skin=skin,
+            envelope=envelope,
+            cameras=cameras,
+            policy=policy,
+        )
+        nxt,rep=synchronized_long_edge_split(
+            current,policy,max_splits=96,proposal_admissibility=split_guard,
+        )
+        op_rows.append({
+            "operator":"split",
+            "accepted":int(rep["accepted_split_count"]),
+            "rejected_mechanical":int(rep.get("rejected_mechanical_admissibility_count",0)),
+            "violations_after":int(report_quality(nxt,policy)["policy_violating_face_count"]),
+        })
+        current=nxt
+
+        # All subsequent operators are connectivity/subset-only. One posed
+        # cache is valid across flip/collapse/cavity removals in this round.
+        guard=MechanicalProposalAdmissibilityGuardV1(
+            current,
+            surface=surface,
+            skeleton=skeleton,
+            skin=skin,
+            envelope=envelope,
+            cameras=cameras,
+            policy=policy,
+        )
 
         nxt,rep=repair_candidate_fixed_vertex_flips_topology_safe_v2(
             current,policy,max_passes=6,proposal_admissibility=guard,

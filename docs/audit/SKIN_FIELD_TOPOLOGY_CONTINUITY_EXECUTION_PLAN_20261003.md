@@ -44,6 +44,22 @@ QualifiedSkinIR
 
 A topology/refinement change is allowed to change the discretization. It is not allowed to create an unrelated deformation field.
 
+## 2A. Existing canonical contract alignment
+
+This work is **not** authorization for a new learned-owner architecture.
+
+`canonical/PRODUCT_CONTRACT_V1.md` already states:
+
+- Arachne owns learned **semantic influence-field / editable skin proposal** evidence, including proposed continuous field/weight evidence;
+- Compiler skin qualification may perform only a **bounded** mathematical/admissibility projection of that evidence;
+- a materially different BBW/QP/KKT semantic solution would be a separately typed proposal producer, not invisible qualification;
+- an explicit editable-mesh / mesh-weight projection seam **must close before final Arachne/product seal**;
+- that seam must define how Arachne's qualified field/weights are evaluated/interpolated/projected onto mesh vertices, with residual/failure/coverage policy.
+
+Therefore the active program is best understood as **closing the already-preregistered mesh-weight binding seam and enforcing its continuity under carrier changes**, not inventing a Knight-driven architecture revision.
+
+A new IR type such as `SkinFieldEvidenceIR` is optional implementation detail only. Prefer the least-disruptive typed extension compatible with the existing product contract.
+
 ## 3. Genericity invariants
 
 A proposed repair or representation is admissible only if all of the following hold:

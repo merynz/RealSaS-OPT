@@ -251,6 +251,46 @@ Decision:
 - do not use A100 yet;
 - advance to **Phase B: direct LBS deformation-constrained projection**, which optimizes measured carrier deformation rather than proxy weight-space motion similarity.
 
+## 8B. Decision after direct-LBS mesh-weight projection
+
+Phase B directly optimized carrier deformation under the generic G3 local-frame probe bank while:
+
+- keeping the qualified Arachne surface skin fixed;
+- hard-preserving original joint support;
+- hard-parameterizing per-vertex simplex conservation;
+- using no authored clip data in optimization;
+- evaluating results separately under frozen G3 and the 51-frame exact-motion court.
+
+The self-hosted workflow was stabilized against GitHub artifact transport failures by reusing a lineage-verified frozen cache. Verified bindings:
+
+- surface lineage: `25b8ff0acd2154d8a3fc333d65af70b65f2658309135cf630225ecdfc35ab08d`;
+- V9 candidate lineage: `3ab6b0ae02e362079fed11ceb627acf9be795004e790ee897c98a1eadc14edab`;
+- fresh CUDA skeleton/skin hashes were independently SHA-verified before reuse.
+
+Measured direct-LBS variants from run `37120181421`:
+
+| lambda | numerical KKT | p95 row L1 | p99 row L1 | max row L1 | G3 max condition | failed frames | max motion edge |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0.1 | ~2.98e-9 | ~1.25e-4 | ~0.572 | ~1.010 | ~356.97 | 51/51 | ~369.39x |
+| 1.0 | ~4.91e-8 | ~9.59e-5 | ~0.618 | ~1.372 | ~2650.42 | 51/51 | ~337.08x |
+| 10.0 | ~9.89e-8 | ~4.77e-5 | ~0.810 | ~2.000 | ~883.90 | 51/51 | ~298.84x |
+
+The correction is highly localized, so p95 alone is misleading: the catastrophic tail requires near-complete semantic reassignment on some rows while all exact-motion frames still fail.
+
+Current product code is much stricter than these diagnostics:
+
+- `product_mesh_skin_v1.py::_TRANSFER_EPS = 1e-9`;
+- `mwb2_skin.py::_MESH_SKIN_TRANSFER_REPAIR_L1 = 1e-9`;
+- the shipping Stage36 binder uses those default bounds.
+
+Decision:
+
+- **REJECT** direct-LBS carrier repair as the normal-path solution;
+- do not pursue lambda=100 merely to force the Knight witness, because lambda=10 already requires materially different semantic weights and still fails catastrophically;
+- preserve the result as owner-attribution evidence: the carrier binder cannot legally repair the admitted Arachne evidence within the existing semantic-ownership contract;
+- advance to Arachne evidence/training-domain diagnosis;
+- A100 remains unauthorized until V9-compatible truth/evidence mapping is proven legal and sufficiently complete.
+
 ## 9. Progress ledger
 
 | Step | State | Evidence |
@@ -265,6 +305,6 @@ Decision:
 | Topology-aware old-skin prolongation | FAIL | all variants 51/51 fail |
 | Coarse FEM prolongation | STRUCTURALLY INCOMPLETE | source components without coarse faces |
 | G3-sensitive projection | FAIL / PROXY INSUFFICIENT | run 37116286772 PASS as workflow; all 8 variants mechanically fail. Best max motion edge ~26.38x, G3 max condition ~120.11, 51/51 frames fail, p95 correction ~0.765 L1 |
-| Direct LBS deformation-constrained projection | TODO | next scientific experiment |
+| Direct LBS deformation-constrained projection | FAIL / COMPILER OWNER REJECTED | run 37120181421: lambda 10 still 51/51 fail, max motion edge ~298.84x, p99 correction ~0.81, max correction ~2.0; shipping binder budget is 1e-9 |
 | Multi-topology invariance court | TODO | required before genericity claim |
 | Product contract integration | BLOCKED | requires preceding PASS |

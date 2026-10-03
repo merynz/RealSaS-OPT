@@ -273,3 +273,50 @@ surface, rig, checkpoint and decoder chunk fixed while crossing backbone/readout
 FP32 and BF16 autocast. Archived skin is read only after predictions for evaluation.
 Raw weights and diagnostic normalized weights are preserved; this experiment
 performs no qualification and claims no CUDA BF16 equivalence or product PASS.
+
+## 2026-10-03 07:20 UTC inference backend findings and partial-fit constraint
+
+User clarified that the previous Arachne V6 run froze the backbone and trained
+only the 1,619,491-parameter readout. If refitting becomes necessary, assess that
+limited trainable scope first; do not assume full-model training or spend the
+approximately two-hour A100 budget before measuring need and runtime.
+
+CPU precision run `37104805187`, artifact `11267178130`, completed in 272.5s
+after restoring the corrected checkpoint to persistent runner cache. Initial run
+`37104519703` failed before inference because WSL restart removed `/tmp` assets;
+this was an apparatus failure. The cache is now
+`/home/monster/realsas_model_cache/arachne_uniform_all_projected_63e589b67946`,
+with both result and checkpoint SHA verified.
+
+| CPU backbone/readout | Archived weight row-L1 mean | p95 | maximum | Changed dominant joints |
+|---|---:|---:|---:|---:|
+| FP32 / FP32 | 0.0048082284 | 0.0279809113 | 0.6133617369 | 7 |
+| FP32 / BF16 | 0.0020320257 | 0.0113994800 | 0.7612506384 | 3 |
+| BF16 / FP32 | 0.0048185937 | 0.0280128241 | 0.6126665513 | 8 |
+| BF16 / BF16 | 0.0021275513 | 0.0112162137 | 0.7616920203 | 4 |
+
+Readout precision has a material effect; backbone precision alone has a much
+smaller effect. Lower mean does not establish parity: the worst row worsens.
+CPU BF16 normalization max-row correction is ~0.004 and total ~2.9. These are
+diagnostic arrays only: no qualification or product PASS was attempted. CPU and
+CUDA autocast have different operator policies, so CPU BF16 is not a substitute
+for CUDA BF16 (PyTorch 2.7 AMP operator reference).
+
+Geppetto backend replay `37104998946`, artifact `11267412885`, used original
+surface/checkpoint and seed 11. CUDA FP32 on the GTX1660Ti gives normalized
+position RMSE 3.5147134835032963e-6 versus the archived T4 output; CPU FP32 gives
+0.01520612243374879. Both preserve all 28 generation IDs, parent relations and
+support sets. Original tensorization hash is unchanged. CUDA thus recovers the
+archived rig approximately 4,300 times more closely in position; this establishes
+a concrete backend discrepancy, not a full new-surface rig qualification.
+There is presently no evidence requiring a rig refit from this comparison.
+
+Capability run `37105645982` confirms CUDA BF16 linear/norm/softmax executes on
+the 1660Ti (emulated BF16; native support false), while fused memory-efficient
+BF16 attention fails with no available kernel. Commit
+`feefe931cafcd0acb157c249360e88d9d71a8a44` adds a query-chunked CUDA BF16 math-SDPA
+audit adapter to retain all keys for every query while bounding temporary memory.
+It rejects training, dropout and causal attention, and restores the original
+function after the context. CUDA tests compare full vs chunked attention with
+no mask, broadcast padding masks and full masks. Original-surface CUDA replay
+is queued/running; do not claim parity until its actual result is read.

@@ -66,29 +66,46 @@ def _load_bundle(path: Path, dev: torch.device):
             "probe_ids":tuple(map(str,z["probe_ids"].tolist())),
         }
         if "carrier_ids" in z.files:
-            carrier_ids=tuple(map(str,z["carrier_ids"].tolist()))
-            if not carrier_ids:
+            all_carrier_ids=tuple(map(str,z["carrier_ids"].tolist()))
+            if not all_carrier_ids:
                 raise ValueError("multi-carrier bundle has empty carrier_ids")
+            admitted=(
+                np.asarray(z["carrier_training_admitted"]).astype(bool).tolist()
+                if "carrier_training_admitted" in z.files
+                else [True]*len(all_carrier_ids)
+            )
+            if len(admitted)!=len(all_carrier_ids):
+                raise ValueError("carrier admission axis drift")
             carriers=[]
-            for i,cid in enumerate(carrier_ids):
+            diagnostic_carriers=[]
+            for i,(cid,is_admitted) in enumerate(zip(all_carrier_ids,admitted)):
                 p=f"carrier_{i:02d}_"
-                carriers.append({
+                row={
                     "id":cid,
                     "support_idx":T(p+"support_indices",torch.long)[None],
                     "support_coeff":T(p+"support_coefficients",torch.float32)[None],
                     "rest":T(p+"rest_vertices",torch.float32)[None],
                     "faces":T(p+"faces",torch.long),
-                })
+                    "training_admitted":bool(is_admitted),
+                }
+                diagnostic_carriers.append(row)
+                if is_admitted:
+                    carriers.append(row)
+            carrier_ids=tuple(row["id"] for row in carriers)
+            diagnostic_carrier_ids=tuple(row["id"] for row in diagnostic_carriers)
         else:
             carrier_ids=("single",)
+            diagnostic_carrier_ids=carrier_ids
             carriers=[{
                 "id":"single",
                 "support_idx":T("candidate_support_indices",torch.long)[None],
                 "support_coeff":T("candidate_support_coefficients",torch.float32)[None],
                 "rest":T("candidate_rest_vertices",torch.float32)[None],
                 "faces":T("candidate_faces",torch.long),
+                "training_admitted":True,
             }]
     common["carrier_ids"]=carrier_ids
+    common["diagnostic_carrier_ids"]=diagnostic_carrier_ids
     common["carriers"]=tuple(carriers)
     return common
 
@@ -120,9 +137,10 @@ def main():
     ap.add_argument("--max-teacher-valid-p95-l1",type=float,required=True)
     ap.add_argument("--seed",type=int,default=20261003)
     ap.add_argument("--log-every",type=int,default=25)
+    ap.add_argument("--min-training-carriers",type=int,default=2)
     a=ap.parse_args()
 
-    if a.steps<1 or a.lr<=0 or a.probe_batch<1 or a.surface_chunk<1:
+    if a.steps<1 or a.lr<=0 or a.probe_batch<1 or a.surface_chunk<1 or a.min_training_carriers<1:
         raise ValueError("invalid optimization hyperparameters")
     if min(a.mechanical_weight,a.teacher_weight,a.trust_weight)<0:
         raise ValueError("negative objective weight forbidden")
@@ -143,6 +161,11 @@ def main():
     sm=bundle["surface_mask"]; jm=bundle["joint_mask"]
     probes=bundle["probes"]; probe_ids=bundle["probe_ids"]
     carriers=bundle["carriers"]; carrier_ids=bundle["carrier_ids"]
+    diagnostic_carrier_ids=bundle["diagnostic_carrier_ids"]
+    if len(carriers)<int(a.min_training_carriers):
+        raise RuntimeError(
+            f"insufficient training-admitted carriers: {len(carriers)} < {a.min_training_carriers}"
+        )
 
     P=probes.shape[1]
     if a.probe_batch>P:
@@ -169,6 +192,9 @@ def main():
         "surface_chunk":a.surface_chunk,
         "carrier_ids":list(carrier_ids),
         "carrier_count":len(carrier_ids),
+        "diagnostic_carrier_ids":list(diagnostic_carrier_ids),
+        "diagnostic_carrier_count":len(diagnostic_carrier_ids),
+        "min_training_carriers":int(a.min_training_carriers),
         "carrier_mechanical_aggregation":"0.5_MEAN_PLUS_0.5_WORST",
         "objective_weights":{
             "mechanical":a.mechanical_weight,

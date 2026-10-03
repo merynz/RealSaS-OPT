@@ -411,6 +411,40 @@ Decision:
 - advance to Arachne evidence/training-domain diagnosis;
 - A100 remains unauthorized until V9-compatible truth/evidence mapping is proven legal and sufficiently complete.
 
+## 8B.1. Static/mechanical composition replay — run 37124108389
+
+The first explicit composition replay tested whether the existing generic static-quality operator family can close the one-pass teacher-oracle repartition child **without losing the mechanical class that motivated the repartition**. Qualified teacher skin remained frozen and no product authority was minted.
+
+Measured result:
+
+- input static-policy violations: **3,217**;
+- after four admitted static cycles: **66** violations remain;
+- residual classification: **1 interior/unprotected**, **65 boundary-or-protected**;
+- topology manifold report remained PASS;
+- final vertices / faces: **16,811 / 31,328**;
+- final G3B unsafe faces: **277**;
+- final G3: **FAIL**, max condition **~10,362.18**;
+- exact authored motion: **51/51 FAIL**;
+- maximum motion edge ratio: **~3,200.14x**.
+
+This is a decisive composition failure, not a request for a larger repair budget. Static quality improved by ~97.95%, but the static operator sequence destroyed the mechanical improvement of the one-pass repartition child (previous max motion edge ~56.15x) and left the candidate mechanically much worse.
+
+Decision:
+
+- **REJECT** independent terminal sequencing of "dynamic repartition, then generic static cleanup";
+- do not increase static cycles or weaken the 7.5-degree/aspect policy merely to close this witness;
+- do not mutate QualifiedSkinIR;
+- do not use A100: Section 6 remains unsatisfied because carrier topology / basis compatibility is still an open owner;
+- next evidence court must test **deformation-field equivalence across topology/basis**, rather than treating exact projected teacher vertex weights as proof of equivalent teacher mechanics.
+
+The next court must distinguish:
+
+1. teacher behavior on its own source topology/basis;
+2. the same teacher-induced field sampled/realized on the current product carrier;
+3. alternate qualified carrier triangulations/refinements under the same subject-free realization policy.
+
+Required measurements are deformation-space, not only vertex-weight-space: sampled displacement error under the frozen G3 probe bank, local edge/Jacobian response error where measurable, G3/G3B class, and exact-motion class. This court is diagnostic/attribution only and may not mint product weights or topology.
+
 ## 8C. V9 exact-teacher reprojection oracle — A100 escalation paused
 
 Run `37122879585` rebuilt the teacher bank for the **current 15,490-node V9 RiggingSurface** from the exact artist/source authority using the frozen historical projector:
@@ -499,5 +533,5 @@ Next court:
 | Coarse FEM prolongation | STRUCTURALLY INCOMPLETE | source components without coarse faces |
 | G3-sensitive projection | FAIL / PROXY INSUFFICIENT | run 37116286772 PASS as workflow; all 8 variants mechanically fail. Best max motion edge ~26.38x, G3 max condition ~120.11, 51/51 frames fail, p95 correction ~0.765 L1 |
 | Direct LBS deformation-constrained projection | FAIL / COMPILER OWNER REJECTED | run 37120181421: lambda 10 still 51/51 fail, max motion edge ~298.84x, p99 correction ~0.81, max correction ~2.0; shipping binder budget is 1e-9 |
-| V9 exact teacher reprojection oracle | FAIL / TOPOLOGY-FIELD OWNER EXPOSED | run 37122879585: teacher G3 ~177.68, 51/51 motion fail, max edge ~188.70x; A100 paused |\n| Teacher-oracle production repartition one-pass | IMPROVES / NOT CLOSED | run 37123289786: G3B unsafe 418→166, motion max edge 188.70x→56.15x, 51/51 still fail; child static violations 3217 |\n| Iterative teacher-oracle production repartition | ACTIVE | bounded to existing max 4 repair iterations; no weight mutation |\n| Multi-topology invariance court | TODO | required before genericity claim |
+| V9 exact teacher reprojection oracle | FAIL / TOPOLOGY-FIELD OWNER EXPOSED | run 37122879585: teacher G3 ~177.68, 51/51 motion fail, max edge ~188.70x; A100 paused |\n| Teacher-oracle production repartition one-pass | IMPROVES / NOT CLOSED | run 37123289786: G3B unsafe 418→166, motion max edge 188.70x→56.15x, 51/51 still fail; child static violations 3217 |\n| Iterative teacher-oracle production repartition | SUPERSEDED BY COMPOSITION COURT | one-pass improved mechanics but reopened static quality; independent static cleanup then regressed mechanics |\n| Static↔mechanical composition court | FAIL / OWNER LOCALIZED | run 37124108389: 3217→66 static violations, but G3 max condition ~10362.18, 51/51 motion fail, max edge ~3200.14x; independent static cleanup destroys mechanical class |\n| Deformation-field / topology-basis equivalence court | NEXT | compare teacher-own-basis behavior vs teacher-induced field on V9/alternate carriers in deformation space; no product mutation |\n| Multi-topology invariance court | TODO | required before genericity claim |
 | Product contract integration | BLOCKED | requires preceding PASS |

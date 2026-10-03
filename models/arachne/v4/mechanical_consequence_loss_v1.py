@@ -69,7 +69,8 @@ def _triangle_metrics(rest: torch.Tensor, posed: torch.Tensor, faces: torch.Tens
 def mechanical_consequence_loss_v1(
     surface_weights: torch.Tensor,
     *,
-    surface_to_candidate: torch.Tensor,
+    candidate_support_indices: torch.Tensor,
+    candidate_support_coefficients: torch.Tensor,
     candidate_rest_vertices: torch.Tensor,
     candidate_faces: torch.Tensor,
     probe_transforms: torch.Tensor,
@@ -84,9 +85,26 @@ def mechanical_consequence_loss_v1(
     teacher_weight: float = 1.0,
     mechanical_weight: float = 1.0,
 ):
-    # transfer [B,V,N] is deterministic compiler support transfer and rows sum to 1.
-    vw = torch.einsum("bvn,bnj->bvj", surface_to_candidate.float(), surface_weights.float())
-    vw = vw / vw.sum(-1, keepdim=True).clamp_min(1e-12)
+    # Sparse compiler support transfer. indices [B,V,K] uses -1 as padding;
+    # coefficients are nonnegative and each admitted vertex sums to one.
+    idx=candidate_support_indices.long()
+    coeff=candidate_support_coefficients.float()
+    if idx.ndim!=3 or coeff.shape!=idx.shape:
+        raise ValueError("candidate sparse support shape drift")
+    if idx.shape[0]!=surface_weights.shape[0]:
+        raise ValueError("candidate sparse support batch drift")
+    valid=idx>=0
+    safe=idx.clamp_min(0)
+    if bool((safe>=surface_weights.shape[1]).any()):
+        raise ValueError("candidate sparse support index outside surface field")
+    b=torch.arange(surface_weights.shape[0],device=surface_weights.device)[:,None,None]
+    picked=surface_weights.float()[b,safe]  # [B,V,K,J]
+    coeff=coeff*valid.to(coeff.dtype)
+    support_sum=coeff.sum(-1)
+    if bool((support_sum-1.0).abs().max()>1e-5):
+        raise ValueError("candidate sparse support simplex drift")
+    vw=(picked*coeff[...,None]).sum(2)
+    vw=vw/vw.sum(-1,keepdim=True).clamp_min(1e-12)
     posed = _lbs(candidate_rest_vertices.float(), vw, probe_transforms.float())
     edge, area, cond = _triangle_metrics(candidate_rest_vertices.float(), posed, candidate_faces)
 

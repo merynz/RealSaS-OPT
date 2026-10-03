@@ -518,6 +518,45 @@ Next court:
 - after topology feedback closes or exhausts, evaluate static quality + G3B + G3 + exact 51-frame motion;
 - if mechanics closes but static quality reopens, compose the V9 source-surface static quality repair onto that child and re-run all mechanical courts.
 
+## 8E. Dynamic-child static composition court — composition failure localized
+
+Run `37124108389` completed successfully as an audit workflow, but **did not close either product domain**. This is a scientific FAIL, not a workflow failure.
+
+Starting from the one-pass dynamically repartitioned child:
+
+- static policy violations: **3,217**
+- G3B unsafe faces: **166**
+- max authored-motion edge ratio: **~56.15x**
+- mechanics already remained FAIL.
+
+After four cycles of existing generic static-quality repair operators:
+
+- static policy violations: **3,217 -> 66**
+- topology audit: **PASS** (`nonmanifold_edge_count=0`, `illegal_vertex_link_count=0`)
+- final minimum angle: **~0.213°** (policy floor 7.5°)
+- final maximum aspect: **~537.77** (policy ceiling 16)
+- 65 / 66 residual violations are boundary/protected; only 1 is interior/unprotected.
+
+However the same static repair sequence materially regressed the mechanical domain:
+
+- G3B unsafe faces: **166 -> 277**
+- G3 max condition: **~366.92 -> ~10,362.18**
+- G3 max edge ratio: **~315.98**
+- G3 area ratio: **~0.0114 to ~7,811.46**
+- authored motion: **51/51 FAIL**
+- max authored-motion edge ratio: **~56.15x -> ~3,200.14x**
+- max authored-motion condition number: **~145,625.55**.
+
+No skin weight was mutated. Product authority was not minted.
+
+Decision:
+
+- the active blocker is now explicitly **STATIC-QUALITY × MECHANICAL-PARTITION COMPOSITION**, not a standalone G3 threshold issue;
+- existing static repair operators are individually effective but are not currently constrained to preserve the deformation-domain / mechanical-partition invariants that made the dynamic child better;
+- a static PASS obtained after unconstrained remeshing cannot retain prior mechanical credit;
+- the next repair must make mechanical no-cross / partition / deformation-field constraints first-class hard constraints inside static quality operations, then rerun static + G3B + G3 + full motion on the exact same candidate;
+- do not render and do not start A100 on this state.
+
 ## 9. Progress ledger
 
 | Step | State | Evidence |
@@ -533,5 +572,6 @@ Next court:
 | Coarse FEM prolongation | STRUCTURALLY INCOMPLETE | source components without coarse faces |
 | G3-sensitive projection | FAIL / PROXY INSUFFICIENT | run 37116286772 PASS as workflow; all 8 variants mechanically fail. Best max motion edge ~26.38x, G3 max condition ~120.11, 51/51 frames fail, p95 correction ~0.765 L1 |
 | Direct LBS deformation-constrained projection | FAIL / COMPILER OWNER REJECTED | run 37120181421: lambda 10 still 51/51 fail, max motion edge ~298.84x, p99 correction ~0.81, max correction ~2.0; shipping binder budget is 1e-9 |
-| V9 exact teacher reprojection oracle | FAIL / TOPOLOGY-FIELD OWNER EXPOSED | run 37122879585: teacher G3 ~177.68, 51/51 motion fail, max edge ~188.70x; A100 paused |\n| Teacher-oracle production repartition one-pass | IMPROVES / NOT CLOSED | run 37123289786: G3B unsafe 418→166, motion max edge 188.70x→56.15x, 51/51 still fail; child static violations 3217 |\n| Iterative teacher-oracle production repartition | SUPERSEDED BY COMPOSITION COURT | one-pass improved mechanics but reopened static quality; independent static cleanup then regressed mechanics |\n| Static↔mechanical composition court | FAIL / OWNER LOCALIZED | run 37124108389: 3217→66 static violations, but G3 max condition ~10362.18, 51/51 motion fail, max edge ~3200.14x; independent static cleanup destroys mechanical class |\n| Deformation-field / topology-basis equivalence court | NEXT | compare teacher-own-basis behavior vs teacher-induced field on V9/alternate carriers in deformation space; no product mutation |\n| Multi-topology invariance court | TODO | required before genericity claim |
+| V9 exact teacher reprojection oracle | FAIL / TOPOLOGY-FIELD OWNER EXPOSED | run 37122879585: teacher G3 ~177.68, 51/51 motion fail, max edge ~188.70x; A100 paused |\n| Teacher-oracle production repartition one-pass | IMPROVES / NOT CLOSED | run 37123289786: G3B unsafe 418→166, motion max edge 188.70x→56.15x, 51/51 still fail; child static violations 3217 |\n| Iterative teacher-oracle production repartition | SUPERSEDED BY COMPOSITION COURT | one-pass improved mechanics but reopened static quality; independent static cleanup then regressed mechanics |\n| Static↔mechanical composition court | FAIL / OWNER LOCALIZED | run 37124108389: 3217→66 static violations, but G3 max condition ~10362.18, 51/51 motion fail, max edge ~3200.14x; independent static cleanup destroys mechanical class |\n| Deformation-field / topology-basis equivalence court | NEXT | compare teacher-own-basis behavior vs teacher-induced field on V9/alternate carriers in deformation space; no product mutation |\n| Dynamic-child static composition | FAIL / COMPOSITION OWNER EXPOSED | run 37124108389: static violations 3217→66, but G3B unsafe 166→277, G3 condition ~10362, 51/51 motion fail, max edge ~3200x |
+| Multi-topology invariance court | TODO | required before genericity claim |
 | Product contract integration | BLOCKED | requires preceding PASS |

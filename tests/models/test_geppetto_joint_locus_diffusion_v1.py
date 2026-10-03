@@ -56,9 +56,12 @@ def test_diffusion_distribution_representative_is_real_medoid_sample():
             dist.representative_position[bi],
             dist.modes_normalized[bi,idx],
         )
+    assert torch.isfinite(dist.mode_logits).all()
     assert torch.equal(
-        dist.mode_logits,
-        torch.zeros_like(dist.mode_logits),
+        torch.argsort(
+            dist.mode_logits,dim=-1,descending=True,stable=True
+        )[:,0],
+        dist.representative_mode_index,
     )
     assert torch.isfinite(dist.representative_log_sigma).all()
 

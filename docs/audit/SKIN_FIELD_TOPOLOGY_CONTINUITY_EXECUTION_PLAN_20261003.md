@@ -216,6 +216,37 @@ Before any A100 run, report to the user with:
 - run configuration and stop criteria;
 - checkpoint/rollback plan.
 
+## 6A. FITK=2 escalation before any genericity claim
+
+Single-witness iteration is no longer sufficient evidence for skin/topology continuity. Before any new Arachne fit can support a genericity claim, move from one-witness fitting to a **two-subject joint-fit court (FITK=2)**.
+
+Terminology note: do not reuse the historical repo label `FIT2`, which referred to a same-Mage full-subject reclosure. This program means **K=2 distinct subjects trained/evaluated under one frozen architecture and one frozen compiler policy**.
+
+Required subjects:
+
+- Knight: current V9 mechanics witness.
+- Mage: preferred second subject because historical exact rig/skin authorities and Arachne/Geppetto evidence exist, but all Mage truth must be regenerated/rebound under the current product contracts; stale historical FIT1/FIT2 product claims are not reusable as current authority.
+
+Rules:
+
+1. Freeze subject-free representation, compiler qualification policy, G3/G3B thresholds, topology operators, and training objective before exposing the second subject to policy development.
+2. No per-subject thresholds, masks, topology heuristics, lambdas, loss weights, or repair paths.
+3. Arachne readout is the first trainable scope. Geppetto remains frozen unless independent cross-subject evidence reopens skeleton ownership.
+4. Use balanced subject sampling and report all metrics separately per subject plus the aggregate; one subject may not hide the other's regression.
+5. Every compiler/topology repair must run unchanged on both subjects.
+6. A fitted subject may be used for capacity/continuity closure, but **FITK=2 does not prove generalization**.
+7. After both fitted subjects close, require at least one truly unseen third subject (or a preregistered LOFO/unseen court) before any genericity/generalization claim.
+8. If a policy change is motivated by failure on either fitted subject, both subjects must be rerun from frozen inputs before admission.
+
+Decision rationale:
+
+- Knight has demonstrated that a static-quality improvement can regress dynamic mechanical compatibility.
+- Historical Mage evidence shows a second independent subject already exists in the project lineage.
+- Joint fitting reduces the risk that learned evidence or compiler seam policies silently encode Knight-specific coincidences.
+- A third unseen subject remains mandatory because two fitted subjects can still be jointly overfit.
+
+A100 authorization under this program therefore requires not only a legal Knight target but a current-contract Mage target and a frozen two-subject training/evaluation manifest.
+
 ## 7. Explicit non-goals
 
 - no Knight-specific skin painting;

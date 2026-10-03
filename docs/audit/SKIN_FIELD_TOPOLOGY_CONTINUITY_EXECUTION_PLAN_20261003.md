@@ -1226,6 +1226,289 @@ Potential:
 - no Compiler dependence on learned hidden tokens.
 
 
+
+## 8P. Experiment matrix — prevent architecture confounding
+
+Do not run all new ideas in one model. Promotion is staged and orthogonal.
+
+### Rig axis
+
+| ID | Target policy | Locus head | Recurrence feedback | Purpose |
+|---|---|---|---|---|
+| R0 | K0 current core | D0 current 3-mode | latent-only | frozen baseline |
+| R1 | K1/K2/K3 sweep | D0 | latent-only | isolate articulation-capacity / target-policy effect |
+| R2 | winning target policy | D1 diffusion | latent-only | isolate diffusion-locus effect |
+| R3 | winning target policy | D2 diffusion | generated-XYZ feedback | only if R2 justifies |
+
+Do not compare R3 directly against R0 and attribute the entire delta to diffusion; the intermediate courts are mandatory.
+
+### Skin axis
+
+| ID | Rig conditioning | Skin representation | Mechanical adaptation | Purpose |
+|---|---|---|---|---|
+| S0 | current explicit | current Arachne | residual adapter | baseline |
+| S1 | + CanonicalRigTokens | current Arachne | residual adapter | isolate token-conditioning effect |
+| S2 | winning conditioning | continuous field codec | product-space loss | representation ceiling |
+| S3 | winning conditioning | predicted compact field state | product-space loss | learned field challenger |
+| S4 | optional quantized state | field decode | product-space loss | operational compression only |
+
+### Shared encoder axis
+
+Evaluate only after independent rig and skin winners are known:
+
+- E0 independent encoders;
+- E1 shared frozen surface tokens;
+- E2 shared jointly trained encoder.
+
+### Final combination rule
+
+The integrated candidate contains only independently supported mechanisms.
+
+A mechanism that wins only when paired with another unproven mechanism is marked interaction-dependent, not independently promoted.
+
+## 8Q. Court definitions and winner criteria
+
+### Q1 — Rig articulation-capacity court
+
+Primary:
+
+- Compiler-qualified skeleton legality;
+- downstream G3B/G3/motion;
+- marginal articulation gain.
+
+Secondary:
+
+- joint count;
+- inference cost;
+- retarget complexity.
+
+No winner may be selected by raw joint count or visual rig cleanliness.
+
+### Q2 — Joint-locus distribution court
+
+Primary:
+
+- downstream mechanically qualified product behavior.
+
+Secondary:
+
+- matched locus PCK/MAE/p95;
+- calibrated uncertainty;
+- sample stability;
+- inference cost.
+
+Diffusion must beat D0 by enough to justify sampling cost.
+
+### Q3 — Canonical RigToken court
+
+Primary:
+
+- downstream skin mechanics under the exact same rig/carrier;
+- semantic support fidelity.
+
+Secondary:
+
+- Arachne parameter/FLOP reduction opportunity;
+- scaling with richer rigs.
+
+### Q4 — Skin-field representation ceiling
+
+The decoder receives authoritative training field state / truth state where legally available.
+
+This isolates representation from predictor difficulty.
+
+Required PASS:
+
+- semantic support;
+- multi-carrier deformation consequence;
+- exact Compiler requalification;
+- bounded reconstruction error;
+- no hidden topology-specific smoothing.
+
+### Q5 — Skin predictor court
+
+Only after Q4.
+
+Compare current Arachne state prediction against compact field-state prediction.
+
+### Q6 — Shared encoder court
+
+Only after rig and skin independent winners.
+
+Requires no hard-gate regression for either subsystem.
+
+### Q7 — Integrated Knight court
+
+Exact same immutable lineage must pass:
+
+- rig;
+- skin;
+- static mesh;
+- topology;
+- G3B;
+- G3;
+- 51/51 motion;
+- source geometry;
+- adversarial/refinement invariance.
+
+Then and only then architecture becomes eligible for Mage cold replay / later FITK.
+
+## 8R. Training and refit schedule
+
+### Stage 0 — no A100: contracts and ceilings
+
+CPU/1660Ti where practical:
+
+- richer Geppetto target-policy builders and receipts;
+- CanonicalRigToken serializer;
+- diffusion-head unit/shape/seed tests;
+- field-codec synthetic/teacher ceiling setup;
+- active-region sampler;
+- shared-token contract;
+- exact court plumbing.
+
+No model refit is authorized until each challenger can be evaluated without training ambiguity.
+
+### Stage 1 — Geppetto target-policy sweep
+
+Prefer reuse of existing architecture/checkpoint.
+
+For K1/K2/K3:
+
+1. build new anonymous teacher targets;
+2. first test current checkpoint inference against richer truth for attribution;
+3. fine-tune only necessary Geppetto blocks;
+4. keep D0 locus head fixed during target-policy causality court.
+
+This determines whether the current cardboard-risk is caused primarily by impoverished truth rather than architecture.
+
+### Stage 2 — Geppetto D1 diffusion head
+
+Start head-only:
+
+- freeze shared encoder;
+- freeze recurrent state;
+- freeze parent/root/support/STOP heads;
+- train diffusion locus head;
+- deterministic validation seeds;
+- compare against D0.
+
+Only unfreeze common latent blocks if head-only ceiling is insufficient.
+
+### Stage 3 — Arachne A0 mechanical adapter
+
+If still useful after the architecture courts, fit the existing 1.58M adapter on the preregistered multi-carrier bundle.
+
+This remains the cheapest product-space correction baseline.
+
+### Stage 4 — A1 continuous field-codec ceiling
+
+Train representation only; no compact predictor yet.
+
+A100 is justified if CPU preflight seals at least two distinct admitted carriers and exact training manifests.
+
+### Stage 5 — A2 compact field-state predictor + RigTokens
+
+Train predictor against the qualified field representation.
+
+Start with existing Arachne backbone frozen where possible; add token adapter / new state head first.
+
+### Stage 6 — shared encoder
+
+E1 frozen shared tokens first.
+
+E2 joint training only after independent Geppetto and Arachne quality gates are stable.
+
+### Retrain principle
+
+Never do a full end-to-end refit merely because a local head changed.
+
+Unfreeze from the outside in:
+
+1. new head/adapter only;
+2. nearest latent block;
+3. shared task encoder;
+4. full subsystem only when smaller scopes fail a preregistered ceiling.
+
+Every escalation needs a causal receipt.
+
+## 8S. Branch isolation and promotion governance
+
+Architecture research is separated from the active mechanics seal.
+
+### Active mechanics branch
+
+audit/canonical-caa-mechanics-geometry-lock-20261002
+
+Purpose:
+
+- finish current Knight mechanical/static fixed-point;
+- close existing contracts;
+- no new rig/skin architecture experiments;
+- keep current audit lineage interpretable.
+
+### Architecture challenger branch
+
+research/rig-skin-architecture-challengers-20261003
+
+Fork point:
+
+f271f87d8085e2df08ae8774ab67a19790eefe42
+
+Purpose:
+
+- richer Geppetto target policies;
+- diffusion locus challenger;
+- CanonicalRigTokens;
+- SkinTokens-derived Arachne field architecture;
+- shared surface encoder;
+- training/court infrastructure.
+
+### One-way synchronization rule
+
+Validated generic compiler fixes from the active audit branch may be selectively brought into the challenger branch.
+
+Experimental architecture commits never flow back into the audit branch.
+
+### Main promotion rule
+
+Never merge the challenger branch wholesale.
+
+Promotion unit is one independently evidenced mechanism:
+
+implementation commit(s) + tests + court artifact/receipt + no-regression evidence.
+
+Examples:
+
+- K2 target policy may promote while D1 diffusion remains rejected;
+- CanonicalRigTokens may promote while field codec remains experimental;
+- shared encoder may remain rejected even if rig/skin challengers pass.
+
+Use isolated cherry-picks or narrowly scoped PRs after evidence review.
+
+## 8T. Naming / branding — explicitly deferred from architecture identity
+
+The names Geppetto/Arachne and the product name RealSaS are not architectural contracts.
+
+A later naming pass may replace model/product display names with concise acronym-style names without rewriting schemas or scientific lineage.
+
+Rules:
+
+- architecture IDs and historical receipts remain immutable;
+- aliases/display names may change;
+- no code rename during active causal courts;
+- product-name decision is separate from model architecture.
+
+Desired future model naming properties:
+
+- short pronounceable acronym;
+- distinct visual identity next to IRIS;
+- name expands to a real functional description rather than a forced backronym;
+- no collision with major existing graphics/ML systems.
+
+Naming is deliberately postponed until the current architecture candidates stabilize.
+
+
 ## 9. Progress ledger
 
 | Step | State | Evidence |

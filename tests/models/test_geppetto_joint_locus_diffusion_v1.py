@@ -35,8 +35,9 @@ def test_diffusion_locus_sampling_is_exact_seed_replay_and_bounded():
 
 def test_diffusion_locus_is_condition_sensitive_at_fixed_seed():
     head=_head().eval()
-    c0=torch.zeros(2,16)
-    c1=torch.ones(2,16)
+    base=torch.linspace(-1.0,1.0,16)
+    c0=torch.stack([base,base.flip(0)],dim=0)
+    c1=torch.stack([base.roll(3),base.roll(-5)],dim=0)
     a=head.sample_hypotheses(c0,seed=91)
     b=head.sample_hypotheses(c1,seed=91)
     assert not torch.equal(a,b)

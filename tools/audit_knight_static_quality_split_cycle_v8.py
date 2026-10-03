@@ -38,7 +38,24 @@ from compiler.realsas_compiler_core.canonical_mesh_quality_patch_purge_v1 import
     repair_candidate_patch_interior_purge_v1,
 )
 from compiler.realsas_compiler_core.hashing import content_sha256
+from compiler.realsas_compiler_core.product_mesh_skin_v1 import _skin_support_coefficients
 from compiler.realsas_compiler_core.types import SurfaceSupportBinding
+
+
+def _combine_mechanical_skin_support(vertices,weights):
+    rows={}
+    for vertex,alpha in zip(vertices,weights):
+        a=float(alpha)
+        if a<=1e-14:
+            continue
+        for sid,coeff in _skin_support_coefficients(vertex):
+            key=str(sid)
+            rows[key]=rows.get(key,0.0)+a*float(coeff)
+    cleaned=[(sid,value) for sid,value in sorted(rows.items()) if value>1e-12]
+    total=sum(value for _,value in cleaned)
+    if total<=0.0:
+        raise RuntimeError("SPLIT_MECHANICAL_SKIN_SUPPORT_EMPTY")
+    return tuple((sid,float(value/total)) for sid,value in cleaned)
 
 def synchronized_long_edge_split(candidate,policy,max_splits=64):
     vertices={str(v.candidate_vertex_id):v for v in candidate.vertices}
@@ -88,7 +105,23 @@ def synchronized_long_edge_split(candidate,policy,max_splits=64):
     new_vertices=dict(vertices)
     for e,fi,ratio in selected:
         u,v=e
-        support=_combine_support_bindings([vertices[u],vertices[v]],(0.5,0.5))
+        geometry_support=_combine_support_bindings([vertices[u],vertices[v]],(0.5,0.5))
+        mechanical_support=_combine_mechanical_skin_support([vertices[u],vertices[v]],(0.5,0.5))
+        parent_modes=tuple(str(vertices[x].support_binding.mode) for x in (u,v))
+        if "SEAM_GEOMETRY_INTERPOLATION" in parent_modes:
+            support=SurfaceSupportBinding(
+                "SEAM_GEOMETRY_INTERPOLATION",
+                tuple(geometry_support.coefficients),
+                metadata={
+                    **dict(geometry_support.metadata or {}),
+                    "mechanical_component_id":str(vertices[u].component_id),
+                    "skin_support_coefficients":mechanical_support,
+                    "seam_geometry":"DERIVED_EDGE_MIDPOINT",
+                    "derived_from_modes":parent_modes,
+                },
+            )
+        else:
+            support=geometry_support
         P=tuple(map(float,0.5*(positions[u]+positions[v])))
         nid="SPLITV:"+content_sha256({
             "input_candidate":candidate.candidate_lineage_hash,

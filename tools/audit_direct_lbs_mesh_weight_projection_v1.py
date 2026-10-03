@@ -17,7 +17,7 @@ from pathlib import Path
 
 import numpy as np
 from scipy import sparse
-from scipy.sparse.linalg import lsmr
+from scipy.sparse.linalg import LinearOperator, cg, lsmr
 
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     canonical_mesh_candidate_from_dict,
@@ -388,7 +388,8 @@ def build_constraint_system(rest, edges, probes, constraints, current_weights):
 
 def solve_variant(W0, A, b, lam, support_mask):
     x0 = np.asarray(W0, dtype=np.float64).reshape(-1)
-    root = math.sqrt(float(lam))
+    lam = float(lam)
+    root = math.sqrt(lam)
     aug = sparse.vstack(
         [
             sparse.eye(len(x0), format="csr", dtype=np.float64),
@@ -396,21 +397,68 @@ def solve_variant(W0, A, b, lam, support_mask):
         ],
         format="csr",
     )
-    rhs = np.concatenate([x0, b * root])
-    result = lsmr(aug, rhs, atol=1e-8, btol=1e-8, maxiter=1200)
-    x = np.asarray(result[0], dtype=np.float64)
-    istop = int(result[1])
-    if istop not in (1, 2) or not np.isfinite(x).all():
-        raise RuntimeError(
-            f"DIRECT_LBS_LSMR_FAIL:istop={istop}:itn={int(result[2])}:normr={float(result[3])}"
+    rhs_aug = np.concatenate([x0, b * root])
+    ls = lsmr(aug, rhs_aug, atol=1e-8, btol=1e-8, maxiter=1200)
+    x = np.asarray(ls[0], dtype=np.float64)
+    lsmr_istop = int(ls[1])
+
+    rhs = x0 + lam * np.asarray(A.T @ b, dtype=np.float64).reshape(-1)
+    diag = 1.0 + lam * np.asarray(
+        A.power(2).sum(axis=0), dtype=np.float64
+    ).reshape(-1)
+    if np.any(diag <= 0.0) or not np.isfinite(diag).all():
+        raise RuntimeError("DIRECT_LBS_NORMAL_DIAGONAL_INVALID")
+
+    H = LinearOperator(
+        (len(x0), len(x0)),
+        matvec=lambda z: np.asarray(z, dtype=np.float64)
+        + lam
+        * np.asarray(
+            A.T @ (A @ np.asarray(z, dtype=np.float64)),
+            dtype=np.float64,
+        ).reshape(-1),
+        dtype=np.float64,
+    )
+    M = LinearOperator(
+        (len(x0), len(x0)),
+        matvec=lambda z: np.asarray(z, dtype=np.float64) / diag,
+        dtype=np.float64,
+    )
+
+    cg_info = 0
+    solver = f"LSMR_ISTOP_{lsmr_istop}"
+    if lsmr_istop not in (1, 2):
+        x, cg_info = cg(
+            H,
+            rhs,
+            x0=x,
+            M=M,
+            rtol=1e-8,
+            atol=1e-10,
+            maxiter=3000,
         )
+        solver += f"_CG_{int(cg_info)}"
+
+    if not np.isfinite(x).all():
+        raise RuntimeError(f"DIRECT_LBS_LINEAR_SOLVE_NONFINITE:{solver}")
+    normal_residual = float(
+        np.linalg.norm(H @ x - rhs) / max(np.linalg.norm(rhs), 1e-12)
+    )
+    if normal_residual > 1e-6:
+        raise RuntimeError(
+            f"DIRECT_LBS_NORMAL_RESIDUAL:{solver}:{normal_residual}"
+        )
+
     raw = x.reshape(W0.shape)
     projected = simplex_project_rows(raw, support_mask)
     return projected, {
-        "lsmr_istop": istop,
-        "lsmr_iterations": int(result[2]),
-        "lsmr_normr": float(result[3]),
-        "lsmr_normar": float(result[4]),
+        "solver": solver,
+        "lsmr_istop": lsmr_istop,
+        "lsmr_iterations": int(ls[2]),
+        "lsmr_normr": float(ls[3]),
+        "lsmr_normar": float(ls[4]),
+        "cg_info": int(cg_info),
+        "normal_relative_residual": normal_residual,
         "raw_negative_mass": float(-np.minimum(raw, 0.0).sum()),
         "simplex_projection_l1_mean": float(np.mean(np.abs(projected - raw).sum(axis=1))),
         "simplex_projection_l1_max": float(np.max(np.abs(projected - raw).sum(axis=1))),

@@ -87,3 +87,42 @@ def test_seam_touching_split_preserves_mechanical_support_separately_from_geomet
     )
     assert row.support_binding.metadata["mechanical_component_id"]=="c0"
     assert row.support_binding.metadata["seam_geometry"]=="DERIVED_EDGE_MIDPOINT"
+
+
+def test_split_proposal_guard_can_fail_closed():
+    vertices=(
+        CanonicalMeshVertexCandidateIR(
+            "u",SurfaceSupportBinding("IDENTITY_SURFACE_NODE",(("s0",1.0),)),
+            "c0",(0.0,0.0,0.0),
+        ),
+        CanonicalMeshVertexCandidateIR(
+            "v",SurfaceSupportBinding("IDENTITY_SURFACE_NODE",(("s1",1.0),)),
+            "c0",(4.0,0.0,0.0),
+        ),
+        CanonicalMeshVertexCandidateIR(
+            "a",SurfaceSupportBinding("IDENTITY_SURFACE_NODE",(("s2",1.0),)),
+            "c0",(0.1,0.1,0.0),
+        ),
+        CanonicalMeshVertexCandidateIR(
+            "b",SurfaceSupportBinding("IDENTITY_SURFACE_NODE",(("s3",1.0),)),
+            "c0",(3.9,0.1,0.0),
+        ),
+    )
+    faces=(("u","v","a"),("v","u","b"))
+    edges=tuple(sorted({
+        tuple(sorted((face[i],face[j])))
+        for face in faces for i,j in ((0,1),(1,2),(2,0))
+    }))
+    candidate=CanonicalMeshCandidateIR(
+        vertices,faces,edges,"surface","partition","carrier",
+        "fixture","fixture-policy","",
+    )
+    candidate=replace(
+        candidate,candidate_lineage_hash=canonical_mesh_candidate_lineage_hash(candidate)
+    )
+    repaired,report=synchronized_long_edge_split(
+        candidate,_policy(),max_splits=1,proposal_admissibility=lambda row: False
+    )
+    assert report["accepted_split_count"]==0
+    assert report["rejected_mechanical_admissibility_count"]>=1
+    assert repaired.candidate_lineage_hash==candidate.candidate_lineage_hash

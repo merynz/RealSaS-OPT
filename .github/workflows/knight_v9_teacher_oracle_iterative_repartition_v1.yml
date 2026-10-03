@@ -5,6 +5,7 @@ on:
     branches: [audit/canonical-caa-mechanics-geometry-lock-20261002]
     paths:
       - tools/audit_v9_teacher_oracle_iterative_repartition_v1.py
+      - compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py
       - .github/workflows/knight_v9_teacher_oracle_iterative_repartition_v1.yml
   workflow_dispatch:
 

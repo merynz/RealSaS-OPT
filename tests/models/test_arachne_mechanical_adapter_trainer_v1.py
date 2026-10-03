@@ -1,0 +1,90 @@
+from __future__ import annotations
+
+import numpy as np
+import torch
+
+from models.arachne.v4.train_mechanical_residual_adapter_v1 import (
+    _aggregate_carrier_mechanical,
+    _load_bundle,
+)
+
+
+def _write_common(path, *, multi: bool):
+    N,J,P=3,2,2
+    base=np.asarray([[1.,0.],[0.5,0.5],[0.,1.]],np.float32)
+    teacher=base.copy()
+    payload={
+        "base_weights":base,
+        "teacher_weights":teacher,
+        "teacher_valid_mask":np.asarray([1,1,1],np.uint8),
+        "geometry7":np.zeros((N,7),np.float32),
+        "pair_geometry":np.zeros((N,J,10),np.float32),
+        "surface_mask":np.ones((N,),np.uint8),
+        "joint_mask":np.ones((J,),np.uint8),
+        "probe_transforms":np.tile(np.eye(4,dtype=np.float32),(P,J,1,1)),
+        "probe_ids":np.asarray(["REST","P1"],dtype="U16"),
+    }
+    if multi:
+        payload.update({
+            "carrier_ids":np.asarray(["base","child"],dtype="U16"),
+            "carrier_00_support_indices":np.asarray([[0],[1],[2]],np.int64),
+            "carrier_00_support_coefficients":np.ones((3,1),np.float32),
+            "carrier_00_rest_vertices":np.asarray(
+                [[0.,0.,0.],[1.,0.,0.],[0.,1.,0.]],np.float32
+            ),
+            "carrier_00_faces":np.asarray([[0,1,2]],np.int64),
+            "carrier_01_support_indices":np.asarray(
+                [[0,1],[1,2],[0,2],[2,-1]],np.int64
+            ),
+            "carrier_01_support_coefficients":np.asarray(
+                [[0.5,0.5],[0.25,0.75],[0.75,0.25],[1.0,0.0]],np.float32
+            ),
+            "carrier_01_rest_vertices":np.asarray(
+                [[0.,0.,0.],[1.,0.,0.],[0.,1.,0.],[1.,1.,0.]],np.float32
+            ),
+            "carrier_01_faces":np.asarray([[0,1,2],[1,3,2]],np.int64),
+        })
+    else:
+        payload.update({
+            "candidate_support_indices":np.asarray([[0],[1],[2]],np.int64),
+            "candidate_support_coefficients":np.ones((3,1),np.float32),
+            "candidate_rest_vertices":np.asarray(
+                [[0.,0.,0.],[1.,0.,0.],[0.,1.,0.]],np.float32
+            ),
+            "candidate_faces":np.asarray([[0,1,2]],np.int64),
+        })
+    np.savez_compressed(path,**payload)
+
+
+def test_multi_carrier_bundle_loader_preserves_independent_shapes(tmp_path):
+    path=tmp_path/"multi.npz"
+    _write_common(path,multi=True)
+    b=_load_bundle(path,torch.device("cpu"))
+    assert b["carrier_ids"]==("base","child")
+    assert len(b["carriers"])==2
+    assert tuple(b["carriers"][0]["rest"].shape)==(1,3,3)
+    assert tuple(b["carriers"][0]["faces"].shape)==(1,3)
+    assert tuple(b["carriers"][1]["rest"].shape)==(1,4,3)
+    assert tuple(b["carriers"][1]["faces"].shape)==(2,3)
+    assert tuple(b["carriers"][1]["support_idx"].shape)==(1,4,2)
+
+
+def test_single_carrier_bundle_remains_backward_compatible(tmp_path):
+    path=tmp_path/"single.npz"
+    _write_common(path,multi=False)
+    b=_load_bundle(path,torch.device("cpu"))
+    assert b["carrier_ids"]==("single",)
+    assert len(b["carriers"])==1
+    assert tuple(b["carriers"][0]["support_idx"].shape)==(1,3,1)
+
+
+def test_carrier_mechanical_aggregation_emphasizes_worst_without_hiding_mean():
+    rows=[
+        {"mechanical":torch.tensor(1.0)},
+        {"mechanical":torch.tensor(3.0)},
+        {"mechanical":torch.tensor(2.0)},
+    ]
+    aggregate,mean,worst=_aggregate_carrier_mechanical(rows)
+    assert float(mean)==2.0
+    assert float(worst)==3.0
+    assert float(aggregate)==2.5

@@ -77,12 +77,33 @@ def coarse_face_candidates(coarse,source_surface,nbr):
         support=set()
         for v in idx: support.update(vertex_support[v])
         for s in support: faces_by[s].add(fi)
-    one_ring=[]
-    for s,own in enumerate(faces_by):
-        expanded=set(own)
-        for n in nbr[s]: expanded.update(faces_by[n])
-        one_ring.append(tuple(sorted(expanded)))
-    return tuple(faces),tuple(tuple(sorted(x)) for x in faces_by),tuple(one_ring)
+    return tuple(faces),tuple(tuple(sorted(x)) for x in faces_by)
+
+def nearest_topology_faces(start,faces_by,nbr,cache):
+    if start in cache: return cache[start]
+    if faces_by[start]:
+        value=(faces_by[start],0)
+        cache[start]=value
+        return value
+    seen={int(start)}
+    frontier={int(start)}
+    hop=0
+    while frontier:
+        hop+=1
+        nxt=set()
+        for u in frontier:
+            for v in nbr[u]:
+                if v not in seen:
+                    seen.add(v);nxt.add(v)
+        if not nxt: break
+        found=set()
+        for u in nxt: found.update(faces_by[u])
+        if found:
+            value=(tuple(sorted(found)),hop)
+            cache[start]=value
+            return value
+        frontier=nxt
+    raise RuntimeError("FEM_SOURCE_COMPONENT_HAS_NO_COARSE_FACE")
 
 def main():
     ap=argparse.ArgumentParser()
@@ -103,21 +124,20 @@ def main():
         coarse,surface=source_surface,skeleton=source_skeleton,skin=source_skin
     )
     coarse_pos=np.asarray(coarse_pos,np.float64);coarse_W=np.asarray(coarse_W,np.float64)
-    coarse_faces,faces_by,one_ring=coarse_face_candidates(coarse,source_surface,nbr)
+    coarse_faces,faces_by=coarse_face_candidates(coarse,source_surface,nbr)
     if not np.array_equal(np.asarray(coarse_faces,np.int64),np.asarray(coarse_faces_matrix,np.int64)):
         raise RuntimeError("FEM_COARSE_FACE_ORDER_DRIFT")
     jids=tuple(j.canonical_joint_id for j in source_skeleton.joints)
     X=np.asarray([n.P for n in target_surface.surface_nodes],np.float64)
     span=float(np.max(coarse_pos.max(0)-coarse_pos.min(0)))
     W=np.zeros((len(X),len(jids)),np.float64)
-    residual=np.empty(len(X),np.float64);used_fallback=np.zeros(len(X),bool);bary_min=np.empty(len(X),np.float64)
+    residual=np.empty(len(X),np.float64);fallback_hops=np.empty(len(X),np.int64);bary_min=np.empty(len(X),np.float64)
     face_choice=np.empty(len(X),np.int64)
+    topology_face_cache={}
 
     for t,x in enumerate(X):
-        p=int(parent[t]); candidates=faces_by[p]
-        if not candidates:
-            candidates=one_ring[p];used_fallback[t]=True
-        if not candidates: raise RuntimeError("FEM_NO_LOCAL_COARSE_FACE")
+        p=int(parent[t]); candidates,hop=nearest_topology_faces(p,faces_by,nbr,topology_face_cache)
+        fallback_hops[t]=int(hop)
         best=None
         for fi in candidates:
             ia,ib,ic=coarse_faces[fi]
@@ -148,7 +168,10 @@ def main():
         "method":"TOPOLOGY_LOCAL_CLOSEST_COARSE_TRIANGLE_BARYCENTRIC",
         "source_relation_kind_counts":kinds,"source_node_count":len(source_surface.surface_nodes),
         "target_node_count":len(target_surface.surface_nodes),"coarse_vertex_count":len(coarse.vertices),
-        "coarse_face_count":len(coarse.faces),"local_face_fallback_count":int(np.count_nonzero(used_fallback)),
+        "coarse_face_count":len(coarse.faces),
+        "local_face_fallback_count":int(np.count_nonzero(fallback_hops)),
+        "topology_face_fallback_hops":{"p50":q(fallback_hops,.5),"p95":q(fallback_hops,.95),
+            "p99":q(fallback_hops,.99),"max":int(np.max(fallback_hops))},
         "projection_residual_over_span":{"p50":q(residual,.5),"p95":q(residual,.95),"p99":q(residual,.99),"max":float(residual.max())},
         "minimum_barycentric":{"min":float(bary_min.min()),"p01":q(bary_min,.01),"p50":q(bary_min,.5)},
         **grad,"skin_lineage_hash":skin.skin_lineage_hash,"target_skeleton_lineage_hash":target_skeleton.skeleton_lineage_hash}

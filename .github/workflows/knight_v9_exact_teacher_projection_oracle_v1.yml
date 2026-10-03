@@ -77,10 +77,14 @@ jobs:
           echo "TEACHER_PROJECTOR_SHA=$got"
           grep -q 'EXACT_SOURCE_TRIANGLE_CLOSEST_POINT_BARYCENTRIC_WITH_COMPONENT_MECHANICAL_ATTACHMENT' "$OUT/input/projector.py"
 
+      - name: Install frozen projector runtime dependencies
+        run: |
+          python -m pip install --no-input --progress-bar off numpy scipy trimesh
+
       - name: Reproject exact artist skin onto V9 RiggingSurface
         run: |
           set -euo pipefail
-          "$PY" "$OUT/input/projector.py" \
+          python "$OUT/input/projector.py" \
             --full-source-npz "$OUT/input/source.npz" \
             --target-npz "$OUT/input/target.npz" \
             --surface-json "$CACHE_ROOT/phase1/refined_surface.json" \

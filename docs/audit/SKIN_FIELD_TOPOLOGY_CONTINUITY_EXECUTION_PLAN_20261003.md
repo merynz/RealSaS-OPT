@@ -680,6 +680,31 @@ G3B
 
 No skin weight is mutated by this compiler loop.
 
+
+Fixed-point run 37140820111 did not complete scientifically; the GitHub job hit the 120-minute timeout. Its checkpoint artifact is valid and preserved:
+
+- cycle 0 input: static violations 0, production G3B unsafe 418, all-face unsafe 423;
+- after first mechanical repartition + guarded static cycle:
+  - static 3217 -> 186 -> 120 across two guarded static rounds;
+  - production G3B 418 -> 153;
+  - all-face G3B 423 -> 171;
+  - child components 88;
+  - SEPARATE boundaries 1125;
+  - final checkpoint in artifact: cycle_01/CANDIDATE.json + PARTITION.json + STEP.json.
+
+This is positive composition evidence: unlike the prior unconstrained static court, static quality and mechanical compatibility improved simultaneously.
+
+Operational correction:
+
+- full baseline workflow is now manual-only;
+- fixed-point court supports resume candidate/partition/step + resume cycle;
+- resume workflow starts from the exact cycle_01 artifact rather than replaying the first two hours;
+- resume run 37150942822 is the active continuation;
+- static rounds per mechanical cycle are reduced to one in the resume court to checkpoint progress more frequently while preserving the same hard mechanical non-regression rules.
+
+The Arachne multi-carrier preflight failure 37143837337 was downstream of this timeout only: it requested FINAL_CANDIDATE.json from an incomplete fixed-point artifact. The preflight model/logic did not scientifically fail.
+
+
 ## 8I. Arachne mechanical residual adapter — minimal trainable scope
 
 A full Arachne refit is not the active plan.

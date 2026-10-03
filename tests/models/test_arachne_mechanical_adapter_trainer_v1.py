@@ -123,7 +123,7 @@ def test_trainer_entrypoint_completes_one_cpu_step(tmp_path):
     subprocess.run(
         [
             sys.executable,
-            "models/arachne/v4/train_mechanical_residual_adapter_v1.py",
+            "-m","models.arachne.v4.train_mechanical_residual_adapter_v1",
             "--bundle",str(bundle),
             "--out-dir",str(out),
             "--device","cpu",
@@ -137,6 +137,8 @@ def test_trainer_entrypoint_completes_one_cpu_step(tmp_path):
             "--max-base-p95-l1","1.0",
             "--max-teacher-valid-p95-l1","1.0",
             "--min-training-carriers","2",
+            "--eval-probe-count","2",
+            "--checkpoint-every","1",
             "--log-every","1",
         ],
         check=True,
@@ -147,3 +149,6 @@ def test_trainer_entrypoint_completes_one_cpu_step(tmp_path):
     assert receipt["unique_training_carrier_lineages"]==2
     assert receipt["semantic_support_hard_mask"] is True
     assert (out/"ARACHNE_MECHANICAL_RESIDUAL_ADAPTER_V1.pt").is_file()
+    assert (out/"ARACHNE_MECHANICAL_RESIDUAL_ADAPTER_RESUME.pt").is_file()
+    assert (out/"ADAPTED_SURFACE_WEIGHTS_V1.npz").is_file()
+    assert receipt["adapted_weights_sha256"]

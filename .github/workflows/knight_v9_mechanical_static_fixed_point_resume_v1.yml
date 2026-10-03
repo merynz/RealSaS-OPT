@@ -1,7 +1,7 @@
 name: knight-v9-mechanical-static-fixed-point-resume-v1
 
 concurrency:
-  group: knight-v9-mechanical-static-fixed-point-resume-v1-\${{ github.ref }}
+  group: knight-v9-mechanical-static-fixed-point-resume-v1-${{ github.ref }}
   cancel-in-progress: true
 
 on:
@@ -27,8 +27,8 @@ jobs:
       RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
       CACHE_ROOT: /tmp/knight_v9_direct_lbs_input_37118100232
       TEACHER_ROOT: /tmp/knight_v9_teacher_oracle_37122879585
-      INPUT: /tmp/knight_v9_fixed_point_resume_input_\${{ github.run_id }}
-      OUT: /tmp/knight_v9_fixed_point_resume_\${{ github.run_id }}
+      INPUT: /tmp/knight_v9_fixed_point_resume_input_${{ github.run_id }}
+      OUT: /tmp/knight_v9_fixed_point_resume_${{ github.run_id }}
 
     steps:
       - uses: actions/checkout@v4
@@ -37,8 +37,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: knight-v9-mechanical-static-fixed-point-v1
-          path: \${{ env.INPUT }}/prior
-          github-token: \${{ github.token }}
+          path: ${{ env.INPUT }}/prior
+          github-token: ${{ github.token }}
           run-id: 37140820111
       - name: Resolve frozen and resume inputs
         id: inputs
@@ -76,7 +76,7 @@ jobs:
             --partition-json "$CACHE_ROOT/static/partition.json" \
             --fresh-skeleton-json "$CACHE_ROOT/fresh/fresh_qualified_skeleton.json" \
             --teacher-bank "$TEACHER_ROOT/V9_TEACHER_BANK.npz" \
-            --inverse-npz "\${{ steps.inputs.outputs.inverse }}" \
+            --inverse-npz "${{ steps.inputs.outputs.inverse }}" \
             --resume-candidate-json "$INPUT/prior/cycle_01/CANDIDATE.json" \
             --resume-partition-json "$INPUT/prior/cycle_01/PARTITION.json" \
             --resume-step-json "$INPUT/prior/cycle_01/STEP.json" \
@@ -87,6 +87,6 @@ jobs:
         if: always()
         with:
           name: knight-v9-mechanical-static-fixed-point-resume-v1
-          path: \${{ env.OUT }}
+          path: ${{ env.OUT }}
           if-no-files-found: error
           retention-days: 30

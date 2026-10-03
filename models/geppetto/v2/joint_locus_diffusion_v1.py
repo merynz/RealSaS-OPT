@@ -284,11 +284,11 @@ class ConditionalDiffusionLocusHeadV1(nn.Module):
         std = samples.std(dim=1, unbiased=False).clamp_min(1e-6)
         rep_log_sigma = torch.log(std)
         mode_ls = rep_log_sigma[:, None, :].expand_as(samples)
-        logits = torch.zeros(
-            samples.shape[:2],
-            device=samples.device,
-            dtype=samples.dtype,
-        )
+        # Use sample centrality as deterministic relative hypothesis score.
+        # The medoid is therefore the highest-logit real sample, preserving the
+        # existing Geppetto MAP-representative proposal contract without
+        # inventing a synthetic mean locus.
+        logits = -d2.to(samples.dtype)
         return JointLocusDistributionV1(
             representative_position=representative,
             representative_log_sigma=rep_log_sigma,

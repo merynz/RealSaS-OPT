@@ -42,8 +42,9 @@ def _guard(posed):
     g.policy=_policy()
     g.max_edge_ratio=2.0
     g.tolerance=1e-9
-    g.posed=(g.rest.copy(),np.asarray(posed,dtype=np.float64))
+    g.posed=np.stack((g.rest.copy(),np.asarray(posed,dtype=np.float64)),axis=0)
     g.probe_ids=("REST","STRESS")
+    g._signature_cache={}
     return g
 
 

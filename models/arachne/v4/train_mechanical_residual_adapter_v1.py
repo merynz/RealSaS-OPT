@@ -62,6 +62,11 @@ def _load_bundle(path: Path, dev: torch.device):
             "pair":T("pair_geometry",torch.float32)[None],
             "surface_mask":T("surface_mask",torch.bool)[None],
             "joint_mask":T("joint_mask",torch.bool)[None],
+            "row_joint_mask":(
+                T("row_joint_mask",torch.bool)[None]
+                if "row_joint_mask" in z.files
+                else None
+            ),
             "probes":T("probe_transforms",torch.float32)[None],
             "probe_ids":tuple(map(str,z["probe_ids"].tolist())),
         }
@@ -159,6 +164,11 @@ def main():
     base=bundle["base"]; teacher=bundle["teacher"]; valid=bundle["valid"]
     geometry7=bundle["geometry7"]; pair=bundle["pair"]
     sm=bundle["surface_mask"]; jm=bundle["joint_mask"]
+    row_jm=bundle["row_joint_mask"]
+    if row_jm is None:
+        # Backward-compatible local/unit bundle path only. Sealed A100 bundles
+        # must carry an explicit row_joint_mask from CPU preflight.
+        row_jm=(base>1e-8)
     probes=bundle["probes"]; probe_ids=bundle["probe_ids"]
     carriers=bundle["carriers"]; carrier_ids=bundle["carrier_ids"]
     diagnostic_carrier_ids=bundle["diagnostic_carrier_ids"]
@@ -196,6 +206,7 @@ def main():
         "diagnostic_carrier_count":len(diagnostic_carrier_ids),
         "min_training_carriers":int(a.min_training_carriers),
         "carrier_mechanical_aggregation":"0.5_MEAN_PLUS_0.5_WORST",
+        "semantic_support_hard_mask":True,
         "objective_weights":{
             "mechanical":a.mechanical_weight,
             "teacher_valid":a.teacher_weight,
@@ -210,6 +221,7 @@ def main():
             "Knight integration fit only; no genericity claim.",
             "Historical Arachne/base field is frozen.",
             "Only MechanicalResidualAdapterV1 parameters are trainable.",
+            "Residual influence redistribution is hard-limited by the sealed per-row semantic support mask.",
             "Mechanical fit is evaluated across a frozen carrier ensemble when present.",
             "Carrier objective is 0.5 mean + 0.5 worst; one topology cannot hide another.",
             "Compiler exact G3B/G3/motion courts remain final authority.",
@@ -236,6 +248,7 @@ def main():
                 pair_geometry=pair,
                 surface_mask=sm,
                 joint_mask=jm,
+                row_joint_mask=row_jm,
                 surface_chunk_size=a.surface_chunk,
             )
         carrier_loss_rows=[]

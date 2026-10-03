@@ -7,8 +7,10 @@ on:
       - models/arachne/v4/mechanical_residual_adapter_v1.py
       - models/arachne/v4/mechanical_consequence_loss_v1.py
       - models/arachne/v4/train_mechanical_residual_adapter_v1.py
+      - tools/requalify_arachne_mechanical_adapter_v1.py
       - tests/models/test_arachne_mechanical_residual_adapter_v1.py
       - tests/models/test_arachne_mechanical_adapter_trainer_v1.py
+      - tests/models/test_arachne_mechanical_adapter_requalification_v1.py
       - .github/workflows/arachne_mechanical_residual_adapter_contract_v1.yml
   workflow_dispatch:
 
@@ -28,4 +30,5 @@ jobs:
       - run: |
           python -m pytest -q \
             tests/models/test_arachne_mechanical_residual_adapter_v1.py \
-            tests/models/test_arachne_mechanical_adapter_trainer_v1.py
+            tests/models/test_arachne_mechanical_adapter_trainer_v1.py \
+            tests/models/test_arachne_mechanical_adapter_requalification_v1.py

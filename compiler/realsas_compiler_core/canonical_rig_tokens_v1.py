@@ -119,12 +119,16 @@ def _normalized_position(joint, center, half):
     return tuple((p[k] - center[k]) / half for k in range(3))
 
 
-def build_canonical_rig_tokens_v1(skeleton: QualifiedSkeletonIR) -> CanonicalRigTokenSetV1:
+def _canonical_order_v1(skeleton: QualifiedSkeletonIR):
+    """Return the deterministic token order plus normalized geometry.
+
+    Canonical IDs are used only internally to resolve the qualified graph.
+    They are never emitted in the learned token payload.
+    """
     by_id, children, root_id = _validate_tree(skeleton)
     center, half = _normalization(by_id)
     pos = {jid: _normalized_position(j, center, half) for jid, j in by_id.items()}
 
-    # Content signatures deliberately exclude canonical/source IDs.
     sig_cache = {}
 
     def signature(jid: str):
@@ -139,7 +143,6 @@ def build_canonical_rig_tokens_v1(skeleton: QualifiedSkeletonIR) -> CanonicalRig
         return row
 
     signature(root_id)
-
     order = []
 
     def emit(jid: str):
@@ -148,17 +151,77 @@ def build_canonical_rig_tokens_v1(skeleton: QualifiedSkeletonIR) -> CanonicalRig
         for child in children[jid]:
             groups.setdefault(signature(child), []).append(child)
         for sig in sorted(groups):
-            # Exact content-tied children are semantically indistinguishable to
-            # this token contract. Their identical token subtrees make tie order
-            # irrelevant to the serialized payload.
-            rows = groups[sig]
-            for child in rows:
+            for child in groups[sig]:
                 emit(child)
 
     emit(root_id)
     if len(order) != len(by_id):
         raise QualificationError("CANONICAL_RIG_TOKEN_SERIALIZATION_INCOMPLETE")
+    return by_id, children, root_id, center, half, pos, tuple(order)
 
+
+def canonical_rig_token_indices_for_joint_ids_v1(
+    skeleton: QualifiedSkeletonIR,
+    joint_ids: Iterable[str],
+) -> tuple[int, ...]:
+    """Packaging sidecar from caller joint order to ID-free token order.
+
+    The returned integers may be shown to the learned consumer; canonical IDs
+    themselves must not be.  The sidecar is deliberately excluded from the
+    token-set content hash.
+    """
+    by_id, _children, _root_id, _center, _half, _pos, order = _canonical_order_v1(
+        skeleton
+    )
+    requested = tuple(str(x) for x in joint_ids)
+    if len(requested) != len(by_id) or set(requested) != set(by_id):
+        raise QualificationError("CANONICAL_RIG_TOKEN_JOINT_AXIS_DRIFT")
+    seq = {jid: i for i, jid in enumerate(order)}
+    return tuple(int(seq[jid]) for jid in requested)
+
+
+def canonical_rig_token_features_v1(
+    token_set: CanonicalRigTokenSetV1,
+) -> tuple[tuple[float, ...], ...]:
+    """Return numeric, ID-free token features for learned consumers.
+
+    Width = 12:
+      position(3), parent_delta(3), parent_distance(1),
+      root(1), child_count_log1p(1), sequence_fraction(1),
+      parent_sequence_fraction(1), parent_gap_fraction(1).
+    """
+    tokens = tuple(token_set.tokens)
+    if not tokens:
+        raise QualificationError("CANONICAL_RIG_TOKEN_FEATURES_EMPTY")
+    denom = float(max(1, len(tokens) - 1))
+    out = []
+    for t in tokens:
+        seq = float(t.sequence_index) / denom
+        if t.parent_sequence_index is None:
+            parent_seq = -1.0
+            gap = 0.0
+        else:
+            parent_seq = float(t.parent_sequence_index) / denom
+            gap = float(t.sequence_index - t.parent_sequence_index) / denom
+        child_log = math.log1p(max(0, int(t.child_count)))
+        row = (
+            *tuple(float(x) for x in t.position_normalized),
+            *tuple(float(x) for x in t.parent_delta_normalized),
+            float(t.parent_distance_normalized),
+            1.0 if bool(t.is_root) else 0.0,
+            float(child_log),
+            float(seq),
+            float(parent_seq),
+            float(gap),
+        )
+        if len(row) != 12 or not all(math.isfinite(x) for x in row):
+            raise QualificationError("CANONICAL_RIG_TOKEN_FEATURE_ROW_INVALID")
+        out.append(row)
+    return tuple(out)
+
+
+def build_canonical_rig_tokens_v1(skeleton: QualifiedSkeletonIR) -> CanonicalRigTokenSetV1:
+    by_id, children, root_id, center, half, pos, order = _canonical_order_v1(skeleton)
     seq = {jid: i for i, jid in enumerate(order)}
     tokens = []
     for jid in order:
@@ -207,4 +270,6 @@ __all__ = [
     "CanonicalRigTokenV1",
     "CanonicalRigTokenSetV1",
     "build_canonical_rig_tokens_v1",
+    "canonical_rig_token_indices_for_joint_ids_v1",
+    "canonical_rig_token_features_v1",
 ]

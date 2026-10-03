@@ -35,16 +35,32 @@ def test_d0_locus_interface_is_exact_legacy_formula_on_forward_states():
 
     h=out.control_states
     M=cfg.position_modes
-    manual_modes=torch.tanh(model.position(h).reshape(B,4,M,3))*cfg.position_scale
-    manual_ls=model.log_sigma(h.detach()).reshape(B,4,M,3).clamp(-8.0,4.0)
-    manual_logits=model.position_mode_logits(h)
-
-    idx=torch.argsort(
-        manual_logits,dim=-1,descending=True,stable=True
-    )[...,0]
-    gather3=idx[...,None,None].expand(B,4,1,3)
-    manual_pos=torch.gather(manual_modes,2,gather3).squeeze(2)
-    manual_rep_ls=torch.gather(manual_ls,2,gather3).squeeze(2)
+    # Historical _decode invoked all three heads one timestep at a time on
+    # [B,D]. Preserve that exact execution shape; a single [B,K,D] GEMM may
+    # legitimately choose a different CPU kernel / accumulation order.
+    mode_rows=[]
+    sigma_rows=[]
+    logit_rows=[]
+    pos_rows=[]
+    rep_sigma_rows=[]
+    for t in range(4):
+        ht=h[:,t]
+        modes_t=torch.tanh(model.position(ht).reshape(B,M,3))*cfg.position_scale
+        ls_t=model.log_sigma(ht.detach()).reshape(B,M,3).clamp(-8.0,4.0)
+        logits_t=model.position_mode_logits(ht)
+        pos_t,rep_ls_t,_=GeppettoCandidateV2._map_representative(
+            modes_t,ls_t,logits_t
+        )
+        mode_rows.append(modes_t)
+        sigma_rows.append(ls_t)
+        logit_rows.append(logits_t)
+        pos_rows.append(pos_t)
+        rep_sigma_rows.append(rep_ls_t)
+    manual_modes=torch.stack(mode_rows,1)
+    manual_ls=torch.stack(sigma_rows,1)
+    manual_logits=torch.stack(logit_rows,1)
+    manual_pos=torch.stack(pos_rows,1)
+    manual_rep_ls=torch.stack(rep_sigma_rows,1)
 
     assert torch.equal(out.position_modes_normalized,manual_modes)
     assert torch.equal(out.position_mode_log_sigma,manual_ls)

@@ -1,0 +1,57 @@
+name: geppetto-live-diffusion-ablation-v1
+
+concurrency:
+  group: geppetto-live-diffusion-ablation-v1-\${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [research/rig-skin-architecture-challengers-20261003]
+    paths:
+      - tools/audit_geppetto_live_diffusion_ablation_v1.py
+      - .github/workflows/geppetto_live_diffusion_ablation_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  court:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 25
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: '1'
+      PY: /home/monster/realsas-ml312/bin/python
+      AUTH: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
+      FIT_RUN: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      OUT: /tmp/geppetto_live_diffusion_ablation_\${{ github.run_id }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Verify court source
+        run: |
+          set -euo pipefail
+          "$PY" -m py_compile tools/audit_geppetto_live_diffusion_ablation_v1.py
+          test -f "$FIT_RUN/artifacts/27_GEPPETTO_FIT/model_fit_execution.json"
+          test -f "$AUTH/runs/$RUN_ID/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"
+          echo "GEPPETTO_LIVE_DIFFUSION_ABLATION_INPUT_PASS"
+      - name: Run live diffusion contribution court
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT"
+          "$PY" tools/audit_geppetto_live_diffusion_ablation_v1.py \
+            --authority-root "$AUTH" \
+            --run-id "$RUN_ID" \
+            --fit-run "$FIT_RUN" \
+            --out-dir "$OUT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: geppetto-live-diffusion-ablation-v1
+          path: \${{ env.OUT }}
+          if-no-files-found: error
+          retention-days: 30

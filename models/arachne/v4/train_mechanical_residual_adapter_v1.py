@@ -532,6 +532,9 @@ def main():
         bundle_sha256=np.asarray([receipt["bundle_sha256"]],dtype="U64"),
         best_step=np.asarray([best_step],dtype=np.int64),
     )
+    adapted_path=a.out_dir/"ADAPTED_SURFACE_WEIGHTS_V1.npz"
+    receipt["adapted_weights_sha256"]=sha256(adapted_path)
+
     torch.save({
         "schema":"RealSaS.ArachneMechanicalResidualAdapterCheckpoint.v1",
         "state_dict":best_state,

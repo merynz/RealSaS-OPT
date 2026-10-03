@@ -1,21 +1,12 @@
 name: knight-v9-mechanical-static-fixed-point-v1
 
+# Full baseline workflow is manual-only. Resume workflows carry checkpointed progress.
+
 concurrency:
   group: knight-v9-mechanical-static-fixed-point-v1-${{ github.ref }}
   cancel-in-progress: true
 
 on:
-  push:
-    branches: [audit/canonical-caa-mechanics-geometry-lock-20261002]
-    paths:
-      - tools/audit_v9_mechanical_static_fixed_point_v1.py
-      - compiler/realsas_compiler_core/mesh/mechanical_proposal_admissibility_v1.py
-      - compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py
-      - compiler/realsas_compiler_core/canonical_mesh_quality_topology_safe_flip_v2.py
-      - compiler/realsas_compiler_core/canonical_mesh_quality_batched_collapse_v2.py
-      - compiler/realsas_compiler_core/canonical_mesh_quality_cavity_remesh_v1.py
-      - compiler/realsas_compiler_core/canonical_mesh_quality_edge_cavity_remesh_v1.py
-      - .github/workflows/knight_v9_mechanical_static_fixed_point_v1.yml
   workflow_dispatch:
 
 permissions:

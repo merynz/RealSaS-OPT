@@ -88,3 +88,17 @@ def test_carrier_mechanical_aggregation_emphasizes_worst_without_hiding_mean():
     assert float(mean)==2.0
     assert float(worst)==3.0
     assert float(aggregate)==2.5
+
+
+def test_multi_carrier_loader_filters_nonadmitted_training_carriers(tmp_path):
+    path=tmp_path/"multi_admission.npz"
+    _write_common(path,multi=True)
+    with np.load(path,allow_pickle=False) as z:
+        payload={k:np.asarray(z[k]) for k in z.files}
+    payload["carrier_training_admitted"]=np.asarray([1,0],np.uint8)
+    np.savez_compressed(path,**payload)
+    b=_load_bundle(path,torch.device("cpu"))
+    assert b["diagnostic_carrier_ids"]==("base","child")
+    assert b["carrier_ids"]==("base",)
+    assert len(b["carriers"])==1
+    assert b["carriers"][0]["training_admitted"] is True

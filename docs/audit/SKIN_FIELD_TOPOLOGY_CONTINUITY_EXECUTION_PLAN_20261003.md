@@ -979,6 +979,30 @@ Refactor without deleting the current head:
 Reference-specific 300-step sampling is not adopted by default. Sampling schedule is an implementation hyperparameter and must earn its cost.
 
 
+### D1 implementation evidence — 2026-10-03
+
+Implemented on research/rig-skin-architecture-challengers-20261003:
+
+- checkpoint-compatible D0 locus interface; historical parameter keys preserved;
+- D0 exact timestep-shape parity gate: PASS, run 37151040534;
+- clean-room conditional diffusion locus head with deterministic DDIM-style eta=0 sampling;
+- D1 diffusion head contract: PASS, run 37151271350;
+- actual-sample medoid representative with deterministic relative hypothesis scoring;
+- isolated Geppetto D1 subclass:
+  - same recurrence/control states;
+  - same STOP/root/support evidence;
+  - D1 locus only;
+  - parent logits recomputed from D1 XYZ;
+  - historical base checkpoint load permits only diffusion-head missing keys;
+- isolated D1 semantics gate: PASS, run 37151486678;
+- frozen-D0 anonymous matching -> fixed control-state/target XYZ training pairs;
+- head-only fit scope; all non-diffusion Geppetto parameters frozen;
+- head-only fit contract: PASS, run 37151641152.
+
+No Knight D1 fit or product claim has been made yet. The next scientific step is a D0-vs-D1 locus court on the same frozen Geppetto checkpoint/targets before any wider unfreeze.
+
+
+
 
 ## 8M. Canonical Rig Tokens — shared mechanical language between Geppetto and Arachne
 

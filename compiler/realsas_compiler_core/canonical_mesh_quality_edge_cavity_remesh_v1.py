@@ -79,6 +79,7 @@ def repair_candidate_edge_cavity_retriangulation_v1(
     protected_surface_ids: set[str] | frozenset[str] = frozenset(),
     max_batches: int = 64,
     max_removed_edges: int = 2048,
+    proposal_admissibility=None,
 ) -> tuple[CanonicalMeshCandidateIR,dict]:
     if int(max_batches)<1 or int(max_removed_edges)<1:
         raise QualificationError("QUALITY_EDGE_CAVITY_LIMIT_INVALID")
@@ -236,7 +237,8 @@ def repair_candidate_edge_cavity_retriangulation_v1(
                 (float(positions[u][k])-float(positions[v][k]))**2
                 for k in range(3)
             )**0.5
-            proposals.append({
+            proposal={
+                "operator":"edge_cavity",
                 "edge":edge,
                 "cavity_indices":frozenset(cavity_indices),
                 "cavity_vertices":frozenset(local_vertices),
@@ -249,7 +251,11 @@ def repair_candidate_edge_cavity_retriangulation_v1(
                 "boundary_size":len(cycle),
                 "edge_length":float(edge_length),
                 "bad_faces_in_cavity":sum(fi in violating for fi in cavity_indices),
-            })
+            }
+            if proposal_admissibility is not None and not bool(proposal_admissibility(proposal)):
+                rejected["mechanical_admissibility"]+=1
+                continue
+            proposals.append(proposal)
 
         if not proposals:
             break

@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import json
+import subprocess
+import sys
+
 import numpy as np
 import torch
 
@@ -102,3 +106,44 @@ def test_multi_carrier_loader_filters_nonadmitted_training_carriers(tmp_path):
     assert b["carrier_ids"]==("base",)
     assert len(b["carriers"])==1
     assert b["carriers"][0]["training_admitted"] is True
+
+
+def test_trainer_entrypoint_completes_one_cpu_step(tmp_path):
+    bundle=tmp_path/"fit.npz"
+    _write_common(bundle,multi=True)
+    with np.load(bundle,allow_pickle=False) as z:
+        payload={k:np.asarray(z[k]) for k in z.files}
+    payload["carrier_training_admitted"]=np.asarray([1,1],np.uint8)
+    payload["carrier_lineage_hashes"]=np.asarray(
+        ["lineage-a","lineage-b"],dtype="U32"
+    )
+    payload["row_joint_mask"]=(payload["base_weights"]>1e-8).astype(np.uint8)
+    np.savez_compressed(bundle,**payload)
+    out=tmp_path/"out"
+    subprocess.run(
+        [
+            sys.executable,
+            "models/arachne/v4/train_mechanical_residual_adapter_v1.py",
+            "--bundle",str(bundle),
+            "--out-dir",str(out),
+            "--device","cpu",
+            "--steps","1",
+            "--lr","0.0001",
+            "--probe-batch","1",
+            "--surface-chunk","2",
+            "--mechanical-weight","1.0",
+            "--teacher-weight","1.0",
+            "--trust-weight","0.25",
+            "--max-base-p95-l1","1.0",
+            "--max-teacher-valid-p95-l1","1.0",
+            "--min-training-carriers","2",
+            "--log-every","1",
+        ],
+        check=True,
+    )
+    receipt=json.loads((out/"FIT_RECEIPT.json").read_text())
+    assert receipt["status"]=="PASS_FIT_COMPLETED__AWAIT_COMPILER_REQUALIFICATION"
+    assert receipt["carrier_count"]==2
+    assert receipt["unique_training_carrier_lineages"]==2
+    assert receipt["semantic_support_hard_mask"] is True
+    assert (out/"ARACHNE_MECHANICAL_RESIDUAL_ADAPTER_V1.pt").is_file()

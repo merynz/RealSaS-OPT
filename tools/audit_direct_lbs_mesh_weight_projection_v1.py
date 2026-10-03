@@ -17,7 +17,7 @@ from pathlib import Path
 
 import numpy as np
 from scipy import sparse
-from scipy.sparse.linalg import splu
+from scipy.sparse.linalg import LinearOperator, lsmr
 
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     canonical_mesh_candidate_from_dict,
@@ -386,132 +386,153 @@ def build_constraint_system(rest, edges, probes, constraints, current_weights):
     return A, b
 
 
-def prepare_dual_system(W0, A, b, support_mask):
-    """Prepare the exact Woodbury/dual form on admitted source support only.
+def prepare_simplex_tangent_system(W0, A, b, support_mask):
+    """Parameterize the original-support simplex exactly.
 
-    Primal objective:
-        ||x-x0||^2 + lambda ||A x-b||^2
-
-    With inactive joint supports fixed to zero, the exact unconstrained optimum
-    over active variables is recovered from:
-        (I + lambda A A^T) r = A x0 - b
-        x = x0 - lambda A^T r
+    For every vertex choose its highest-mass admitted joint as a pivot. Each
+    free variable transfers mass between one admitted joint and that pivot:
+        w_j = w0_j + z_j
+        w_p = w0_p - sum_j z_j
+    Therefore original support and row-sum=1 are hard constraints of the linear
+    solve rather than a post-hoc normalization. This also removes the common
+    affine/translation mode that made the tiny-edge direct-LBS system poorly
+    conditioned.
     """
-    x0 = np.asarray(W0, dtype=np.float64).reshape(-1)
-    active = np.asarray(support_mask, dtype=bool).reshape(-1)
-    if active.shape != x0.shape or not np.any(active):
-        raise RuntimeError("DIRECT_LBS_ACTIVE_SUPPORT_INVALID")
-    if np.any(x0[~active] != 0.0):
+    W0=np.asarray(W0,dtype=np.float64)
+    mask=np.asarray(support_mask,dtype=bool)
+    if W0.shape!=mask.shape or W0.ndim!=2:
+        raise RuntimeError("DIRECT_LBS_SIMPLEX_TANGENT_SHAPE_INVALID")
+    if np.any(W0[~mask]!=0.0):
         raise RuntimeError("DIRECT_LBS_INACTIVE_SOURCE_MASS_NONZERO")
+    if not np.allclose(W0.sum(axis=1),1.0,atol=1e-10,rtol=0.0):
+        raise RuntimeError("DIRECT_LBS_SOURCE_SIMPLEX_INVALID")
 
-    A_active = A[:, active].tocsr()
-    x0_active = x0[active]
-    c = np.asarray(A_active @ x0_active - b, dtype=np.float64).reshape(-1)
-    if not np.isfinite(c).all():
-        raise RuntimeError("DIRECT_LBS_DUAL_RHS_NONFINITE")
-    gram = (A_active @ A_active.T).tocsr()
-    gram = ((gram + gram.T) * 0.5).tocsr()
-    if gram.shape != (A.shape[0], A.shape[0]):
-        raise RuntimeError("DIRECT_LBS_DUAL_GRAM_SHAPE_INVALID")
-    return active, A_active, x0_active, c, gram
+    n,jcount=W0.shape
+    rows=[]; cols=[]; data=[]
+    pivots=[]
+    col=0
+    for i in range(n):
+        active=np.flatnonzero(mask[i])
+        if not len(active):
+            raise RuntimeError("DIRECT_LBS_SOURCE_SUPPORT_EMPTY")
+        pivot=int(active[np.argmax(W0[i,active])])
+        pivots.append(pivot)
+        for jid in active:
+            jid=int(jid)
+            if jid==pivot:
+                continue
+            rows.extend((i*jcount+jid,i*jcount+pivot))
+            cols.extend((col,col))
+            data.extend((1.0,-1.0))
+            col+=1
 
-
-def solve_variant(W0, b, lam, support_mask, dual):
-    active, A_active, x0_active, c, gram = dual
-    lam = float(lam)
-    if lam <= 0.0 or not math.isfinite(lam):
-        raise RuntimeError("DIRECT_LBS_LAMBDA_INVALID")
-
-    S = sparse.eye(
-        gram.shape[0], format="csc", dtype=np.float64
-    ) + lam * gram.tocsc()
-    lu = splu(S)
-    r = np.asarray(lu.solve(c), dtype=np.float64).reshape(-1)
-    if not np.isfinite(r).all():
-        raise RuntimeError("DIRECT_LBS_DUAL_SOLVE_NONFINITE")
-
-    # Sparse direct solves on the tiny-edge-scaled system can have a small
-    # backward error that is strongly amplified by A^T. Reuse the same LU for
-    # deterministic iterative refinement before evaluating the primal KKT
-    # residual; never relax the mechanical or numerical acceptance thresholds.
-    refinement_steps = 0
-    dual_residual = float("inf")
-    for refinement_steps in range(9):
-        delta = np.asarray(c - S @ r, dtype=np.float64).reshape(-1)
-        dual_residual = float(
-            np.linalg.norm(delta) / max(np.linalg.norm(c), 1e-12)
-        )
-        if dual_residual <= 1e-13:
-            break
-        correction = np.asarray(lu.solve(delta), dtype=np.float64).reshape(-1)
-        if not np.isfinite(correction).all():
-            raise RuntimeError("DIRECT_LBS_DUAL_REFINEMENT_NONFINITE")
-        r += correction
-
-    if dual_residual > 1e-11:
-        raise RuntimeError(
-            f"DIRECT_LBS_DUAL_RESIDUAL:{dual_residual}:"
-            f"refinement_steps={refinement_steps}"
-        )
-
-    x_active = x0_active - lam * np.asarray(
-        A_active.T @ r, dtype=np.float64
-    ).reshape(-1)
-    if not np.isfinite(x_active).all():
-        raise RuntimeError("DIRECT_LBS_PRIMAL_NONFINITE")
-
-    primal_edge_residual = np.asarray(
-        A_active @ x_active - b, dtype=np.float64
-    ).reshape(-1)
-    displacement_term = x_active - x0_active
-    gradient_term = lam * np.asarray(
-        A_active.T @ primal_edge_residual, dtype=np.float64
-    ).reshape(-1)
-    stationarity = displacement_term + gradient_term
-    stationarity_x0_relative = float(
-        np.linalg.norm(stationarity)
-        / max(np.linalg.norm(x0_active), 1e-12)
+    if col<=0:
+        raise RuntimeError("DIRECT_LBS_SIMPLEX_TANGENT_EMPTY")
+    T=sparse.csr_matrix(
+        (np.asarray(data,dtype=np.float64),(rows,cols)),
+        shape=(n*jcount,col),dtype=np.float64,
     )
-    stationarity_backward_error = float(
+    AT=(A@T).tocsr()
+    x0=W0.reshape(-1)
+    d=np.asarray(b-A@x0,dtype=np.float64).reshape(-1)
+    if not np.isfinite(d).all():
+        raise RuntimeError("DIRECT_LBS_SIMPLEX_TANGENT_RHS_NONFINITE")
+    column_sum=np.asarray(T.sum(axis=0),dtype=np.float64).reshape(-1)
+    if np.max(np.abs(column_sum))>1e-12:
+        raise RuntimeError("DIRECT_LBS_SIMPLEX_TANGENT_NOT_CONSERVATIVE")
+    return T,AT,d,{
+        "tangent_variable_count":int(col),
+        "fixed_single_support_vertex_count":int(sum(np.count_nonzero(mask[i])==1 for i in range(n))),
+        "pivot_policy":"MAX_SOURCE_WEIGHT_PER_VERTEX",
+    }
+
+
+def solve_variant(W0, lam, support_mask, tangent):
+    T,AT,d,tmeta=tangent
+    lam=float(lam)
+    if lam<=0.0 or not math.isfinite(lam):
+        raise RuntimeError("DIRECT_LBS_LAMBDA_INVALID")
+    root=math.sqrt(lam)
+
+    t_col=np.asarray(T.power(2).sum(axis=0),dtype=np.float64).reshape(-1)
+    a_col=np.asarray(AT.power(2).sum(axis=0),dtype=np.float64).reshape(-1)
+    scale=np.sqrt(t_col+lam*a_col)
+    if np.any(scale<=1e-14) or not np.isfinite(scale).all():
+        raise RuntimeError("DIRECT_LBS_TANGENT_COLUMN_SCALE_INVALID")
+    inv_scale=1.0/scale
+    n_top=T.shape[0]
+
+    def matvec(y):
+        z=np.asarray(y,dtype=np.float64)*inv_scale
+        return np.concatenate((
+            np.asarray(T@z,dtype=np.float64).reshape(-1),
+            root*np.asarray(AT@z,dtype=np.float64).reshape(-1),
+        ))
+
+    def rmatvec(v):
+        v=np.asarray(v,dtype=np.float64)
+        grad=np.asarray(T.T@v[:n_top],dtype=np.float64).reshape(-1)
+        grad+=root*np.asarray(AT.T@v[n_top:],dtype=np.float64).reshape(-1)
+        return grad*inv_scale
+
+    op=LinearOperator(
+        (T.shape[0]+AT.shape[0],T.shape[1]),
+        matvec=matvec,rmatvec=rmatvec,dtype=np.float64,
+    )
+    rhs=np.concatenate((
+        np.zeros(T.shape[0],dtype=np.float64),
+        root*d,
+    ))
+    ls=lsmr(op,rhs,atol=1e-9,btol=1e-9,conlim=1e12,maxiter=4000)
+    y=np.asarray(ls[0],dtype=np.float64)
+    if not np.isfinite(y).all():
+        raise RuntimeError("DIRECT_LBS_TANGENT_LSMR_NONFINITE")
+    z=y*inv_scale
+
+    delta=np.asarray(T@z,dtype=np.float64).reshape(np.asarray(W0).shape)
+    raw=np.asarray(W0,dtype=np.float64)+delta
+    row_sum_residual=float(np.max(np.abs(raw.sum(axis=1)-1.0)))
+    if row_sum_residual>1e-9:
+        raise RuntimeError(
+            f"DIRECT_LBS_TANGENT_SIMPLEX_SUM_DRIFT:{row_sum_residual}"
+        )
+
+    edge_residual=np.asarray(AT@z-d,dtype=np.float64).reshape(-1)
+    displacement_grad=np.asarray(
+        T.T@delta.reshape(-1),dtype=np.float64
+    ).reshape(-1)
+    deformation_grad=lam*np.asarray(
+        AT.T@edge_residual,dtype=np.float64
+    ).reshape(-1)
+    stationarity=displacement_grad+deformation_grad
+    backward=float(
         np.linalg.norm(stationarity)
         / max(
-            np.linalg.norm(displacement_term)
-            + np.linalg.norm(gradient_term),
+            np.linalg.norm(displacement_grad)+np.linalg.norm(deformation_grad),
             1e-12,
         )
     )
-    # Gate the numerical solve on a scale-aware KKT backward error.  Dividing
-    # cancellation error by ||x0|| is not stable for the deliberately
-    # dimensionless tiny-edge rows, whose two stationarity terms can both be
-    # large while cancelling correctly.
-    if stationarity_backward_error > 1e-7:
+    if backward>1e-7:
         raise RuntimeError(
-            "DIRECT_LBS_PRIMAL_BACKWARD_ERROR:"
-            f"{stationarity_backward_error}:"
-            f"x0_relative={stationarity_x0_relative}:"
-            f"dual_relative={dual_residual}"
+            "DIRECT_LBS_TANGENT_KKT_BACKWARD_ERROR:"
+            f"{backward}:istop={int(ls[1])}:itn={int(ls[2])}:"
+            f"normar={float(ls[4])}"
         )
 
-    raw_flat = np.zeros(np.asarray(W0).size, dtype=np.float64)
-    raw_flat[active] = x_active
-    raw = raw_flat.reshape(W0.shape)
-    projected = simplex_project_rows(raw, support_mask)
-    return projected, {
-        "solver": "WOODBURY_DUAL_SPARSE_DIRECT",
-        "active_variable_count": int(np.count_nonzero(active)),
-        "dual_dimension": int(gram.shape[0]),
-        "dual_nnz": int(gram.nnz),
-        "dual_relative_residual": dual_residual,
-        "dual_iterative_refinement_steps": int(refinement_steps),
-        "primal_stationarity_x0_relative": stationarity_x0_relative,
-        "primal_stationarity_backward_error": stationarity_backward_error,
-        "raw_negative_mass": float(-np.minimum(raw, 0.0).sum()),
-        "simplex_projection_l1_mean": float(
-            np.mean(np.abs(projected - raw).sum(axis=1))
-        ),
-        "simplex_projection_l1_max": float(
-            np.max(np.abs(projected - raw).sum(axis=1))
-        ),
+    projected=simplex_project_rows(raw,support_mask)
+    projection=np.abs(projected-raw).sum(axis=1)
+    return projected,{
+        "solver":"SIMPLEX_TANGENT_COLUMN_SCALED_LSMR",
+        **tmeta,
+        "lsmr_istop":int(ls[1]),
+        "lsmr_iterations":int(ls[2]),
+        "lsmr_normr":float(ls[3]),
+        "lsmr_normar":float(ls[4]),
+        "tangent_kkt_backward_error":backward,
+        "preprojection_row_sum_residual_max":row_sum_residual,
+        "raw_negative_mass":float(-np.minimum(raw,0.0).sum()),
+        "simplex_projection_l1_mean":float(np.mean(projection)),
+        "simplex_projection_l1_max":float(np.max(projection)),
     }
 
 
@@ -661,6 +682,7 @@ def main():
         "motion_clip_data_used_for_optimization": False,
         "optimization_domain": "MESH_WEIGHT_REALIZATION_ONLY",
         "original_joint_support_hard_preserved": True,
+        "simplex_hard_parameterized_in_linear_solve": True,
         "source_surface_skin_mutated": False,
         "objective": "L2_TO_DETERMINISTIC_BINDER_WEIGHTS_PLUS_DIRECT_G3_LBS_RELATIVE_EDGE_TARGETS",
         "g3_probe_count": len(probes),
@@ -681,14 +703,18 @@ def main():
     }
 
     source_support_mask = W0 > 0.0
-    dual = prepare_dual_system(W0, A, b, source_support_mask)
+    tangent = prepare_simplex_tangent_system(
+        W0, A, b, source_support_mask
+    )
     print(
-        "DIRECT_LBS_DUAL_PREP="
+        "DIRECT_LBS_TANGENT_PREP="
         + json.dumps(
             {
-                "active_variable_count": int(np.count_nonzero(dual[0])),
-                "dual_dimension": int(dual[4].shape[0]),
-                "dual_nnz": int(dual[4].nnz),
+                "active_source_weight_count": int(np.count_nonzero(source_support_mask)),
+                "tangent_variable_count": int(tangent[0].shape[1]),
+                "constraint_dimension": int(tangent[1].shape[0]),
+                "constraint_tangent_nnz": int(tangent[1].nnz),
+                **tangent[3],
             },
             sort_keys=True,
         ),
@@ -696,7 +722,7 @@ def main():
     )
     for lam in LAMBDAS:
         W, solver = solve_variant(
-            W0, b, lam, source_support_mask, dual
+            W0, lam, source_support_mask, tangent
         )
         correction = np.abs(W - W0).sum(axis=1)
         new_support_mass = np.where(source_support_mask, 0.0, W).sum(axis=1)

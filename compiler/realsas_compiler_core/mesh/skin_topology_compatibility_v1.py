@@ -381,6 +381,55 @@ def seam_cut_candidate_v1(candidate,unsafe_face_indices,*,report_hash:str,max_it
     return repaired,directive
 
 
+def _mechanical_owner_surface_support(
+    vertex, *, partition_owner:dict[str,str]
+)->tuple[tuple[str,float],...]:
+    """Return complete mechanical skin support for identity/seam vertices.
+
+    Geometry support is not skin authority at a seam. Harmonic Stage18 seam
+    vertices may carry multiple positive source-surface skin supports inside one
+    mechanical component; preserve that convex support instead of collapsing it
+    to a single arbitrary owner.
+    """
+    mode=str(vertex.support_binding.mode)
+    if mode=="IDENTITY_SURFACE_NODE":
+        raw=tuple(vertex.support_binding.coefficients)
+        if len(raw)!=1 or abs(float(raw[0][1])-1.0)>1e-12:
+            raise QualificationError("SKIN_TOPOLOGY_IDENTITY_SUPPORT_INVALID")
+    elif mode=="SEAM_GEOMETRY_INTERPOLATION":
+        md=dict(vertex.support_binding.metadata or {})
+        raw=tuple(md.get("skin_support_coefficients") or ())
+        if not raw:
+            raise QualificationError("SKIN_TOPOLOGY_SEAM_SKIN_SUPPORT_MISSING")
+        declared=str(md.get("mechanical_component_id") or "")
+        if not declared or declared!=str(vertex.component_id):
+            raise QualificationError("SKIN_TOPOLOGY_SEAM_COMPONENT_BINDING_INVALID")
+    else:
+        return ()
+
+    rows=[]
+    seen=set()
+    total=0.0
+    for item in raw:
+        if len(item)!=2:
+            raise QualificationError("SKIN_TOPOLOGY_MECHANICAL_SUPPORT_INVALID")
+        sid=str(item[0]); coeff=float(item[1])
+        if sid in seen or not math.isfinite(coeff) or coeff<0.0:
+            raise QualificationError("SKIN_TOPOLOGY_MECHANICAL_SUPPORT_INVALID")
+        seen.add(sid)
+        if coeff<=1e-15:
+            continue
+        owner=str(partition_owner.get(sid) or "")
+        if not owner:
+            raise QualificationError("SKIN_TOPOLOGY_MECHANICAL_OWNER_SURFACE_UNKNOWN")
+        if owner!=str(vertex.component_id):
+            raise QualificationError("SKIN_TOPOLOGY_MECHANICAL_OWNER_COMPONENT_DRIFT")
+        rows.append((sid,coeff)); total+=coeff
+    if not rows or abs(total-1.0)>1e-9:
+        raise QualificationError("SKIN_TOPOLOGY_MECHANICAL_SUPPORT_SIMPLEX_INVALID")
+    return tuple((sid,float(coeff/total)) for sid,coeff in sorted(rows))
+
+
 def _mechanical_owner_surface_id(vertex, *, partition_owner:dict[str,str])->str|None:
     """Resolve the surface node that owns Stage35 mechanical skin transfer.
 
@@ -762,21 +811,39 @@ def propose_mechanical_repartition_directive_v2(
 
         chosen=None
         for l1,a,b in edge_rows:
-            sa=_mechanical_owner_surface_id(vertices[a],partition_owner=partition_owner)
-            sb=_mechanical_owner_surface_id(vertices[b],partition_owner=partition_owner)
-            if sa is None or sb is None or sa==sb:
+            support_a=_mechanical_owner_surface_support(
+                vertices[a],partition_owner=partition_owner
+            )
+            support_b=_mechanical_owner_surface_support(
+                vertices[b],partition_owner=partition_owner
+            )
+            if not support_a or not support_b:
                 continue
-            pair=tuple(sorted((sa,sb)))
-            if pair not in existing:
+            pair_rows=[]
+            for sa,ca in support_a:
+                for sb,cb in support_b:
+                    if sa==sb:
+                        continue
+                    pair=tuple(sorted((sa,sb)))
+                    if pair not in existing or existing.get(pair)=="SEPARATE":
+                        continue
+                    pair_rows.append((
+                        float(ca)*float(cb),
+                        pair,str(sa),str(sb),float(ca),float(cb),
+                    ))
+            if not pair_rows:
                 continue
-            if existing.get(pair)=="SEPARATE":
-                continue
-            chosen=(l1,a,b,sa,sb,pair)
+            # Do not collapse multi-support to an arbitrary vertex-owner argmax.
+            # Choose the admissible source pair with greatest joint support mass;
+            # deterministic lexical pair order breaks exact ties.
+            pair_rows.sort(key=lambda x:(-x[0],x[1]))
+            coeff_product,pair,sa,sb,ca,cb=pair_rows[0]
+            chosen=(l1,a,b,sa,sb,pair,ca,cb,coeff_product)
             break
         if chosen is None:
             unresolved+=1
             continue
-        l1,a,b,sa,sb,pair=chosen
+        l1,a,b,sa,sb,pair,ca,cb,coeff_product=chosen
         row=proposals.setdefault(pair,{
             "a_surface_id":pair[0],
             "b_surface_id":pair[1],
@@ -791,9 +858,17 @@ def propose_mechanical_repartition_directive_v2(
                 "manual_authoring_used":False,
                 "mechanical_owner_surface_support_required":True,
                 "identity_or_holeless_seam_owner_supported":True,
+                "multi_support_owner_resolution":"CARTESIAN_SUPPORT_MASS_V1",
+                "max_support_pair_coeff_product":0.0,
             },
         })
-        row["evidence_refs"].append(f"{report_hash}:FACE:{fi}")
+        row["metadata"]["max_support_pair_coeff_product"]=max(
+            float(row["metadata"].get("max_support_pair_coeff_product",0.0)),
+            float(coeff_product),
+        )
+        row["evidence_refs"].append(
+            f"{report_hash}:FACE:{fi}:SUPPORT:{sa}:{ca:.17g}:{sb}:{cb:.17g}"
+        )
         row["unsafe_face_indices"].append(int(fi))
         row["max_pairwise_skin_l1"]=max(float(row["max_pairwise_skin_l1"]),l1)
         row["confidence"]=max(float(row["confidence"]),min(1.0,max(0.0,l1/2.0)))

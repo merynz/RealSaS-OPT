@@ -38,6 +38,7 @@ def repair_candidate_endpoint_collapses_batched_v2(
     *,
     max_batches: int = 64,
     max_collapses: int = 2048,
+    proposal_admissibility=None,
 ) -> tuple[CanonicalMeshCandidateIR,dict]:
     if int(max_batches)<1 or int(max_collapses)<1:
         raise QualificationError("QUALITY_BATCHED_COLLAPSE_LIMIT_INVALID")
@@ -60,6 +61,7 @@ def repair_candidate_endpoint_collapses_batched_v2(
     batch_rows=[]
     rejected_link=rejected_shape=rejected_quality=rejected_duplicate=0
     rejected_boundary=0
+    rejected_mechanical=0
 
     for batch_index in range(int(max_batches)):
         if len(accepted)>=int(max_collapses):
@@ -141,12 +143,17 @@ def repair_candidate_endpoint_collapses_batched_v2(
                     np.asarray(positions[u],dtype=np.float64)
                     -np.asarray(positions[v],dtype=np.float64)
                 ))
-                proposals.append({
-                    "edge":edge,"keep":keep,"remove":remove,
+                proposal={
+                    "operator":"collapse","edge":edge,"keep":keep,"remove":remove,
                     "affected":affected,"local_vertices":frozenset(local_vertices),
+                    "old_faces":old_faces,"new_faces":new_faces,
                     "oldq":oldq,"newq":newq,"deviation":deviation,
                     "allowed":allowed,"edge_length":edge_len,
-                })
+                }
+                if proposal_admissibility is not None and not bool(proposal_admissibility(proposal)):
+                    rejected_mechanical+=1
+                    continue
+                proposals.append(proposal)
 
         if not proposals:
             break
@@ -253,6 +260,7 @@ def repair_candidate_endpoint_collapses_batched_v2(
                 "rejected_quality_count":int(rejected_quality),
                 "rejected_duplicate_face_count":int(rejected_duplicate),
                 "rejected_boundary_vertex_count":int(rejected_boundary),
+                "rejected_mechanical_admissibility_count":int(rejected_mechanical),
                 "before":before,"after":after,
                 "initial_topology":initial_topology,"final_topology":final_topology,
                 "accepted_collapses":accepted,

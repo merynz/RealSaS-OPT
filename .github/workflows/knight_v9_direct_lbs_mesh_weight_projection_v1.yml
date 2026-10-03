@@ -42,7 +42,39 @@ jobs:
           path: ${{ env.INPUT }}/static
           github-token: ${{ github.token }}
           run-id: 37057338450
+      - name: Recover exact fresh inference from self-hosted cache
+        id: fresh_cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$INPUT/fresh"
+          check_dir() {
+            local D="$1"
+            [ -f "$D/fresh_qualified_skeleton.json" ] || return 1
+            [ -f "$D/fresh_qualified_skin.json" ] || return 1
+            [ -f "$D/rig_REPORT.json" ] || return 1
+            [ -f "$D/skin_REPORT.json" ] || return 1
+            echo "a35fcc16b2e86c018aabf015834c8d9b4fd29d10bf31ecf3539bb778bb6cfb5b  $D/fresh_qualified_skeleton.json" | sha256sum -c - >/dev/null || return 1
+            echo "97905d057b0164b39a56e75ed4087617cbbff786281959e9a0f46962d56ca230  $D/fresh_qualified_skin.json" | sha256sum -c - >/dev/null || return 1
+            echo "f8fcb82b9439f1eaff54861110f4d9d232db1fd85b0e02dcea8e9c8415938aca  $D/rig_REPORT.json" | sha256sum -c - >/dev/null || return 1
+            echo "96c04b0745dcab69628dedefa1cd513b88f07dfbf3d4110579c736f773e6ad93  $D/skin_REPORT.json" | sha256sum -c - >/dev/null || return 1
+            return 0
+          }
+          for D in /tmp/knight_v9_direct_lbs_input_*/fresh /tmp/knight_v9_deform_skin_input_*/fresh; do
+            [ -d "$D" ] || continue
+            if check_dir "$D"; then
+              rm -rf "$INPUT/fresh"
+              mkdir -p "$INPUT/fresh"
+              cp -a "$D/." "$INPUT/fresh/"
+              echo "hit=true" >> "$GITHUB_OUTPUT"
+              echo "FRESH_INFERENCE_CACHE_HIT=$D"
+              exit 0
+            fi
+          done
+          echo "hit=false" >> "$GITHUB_OUTPUT"
+          echo "FRESH_INFERENCE_CACHE_MISS"
       - uses: actions/download-artifact@v4
+        if: steps.fresh_cache.outputs.hit != 'true'
         with:
           name: knight-v9-fresh-rig-skin-inference-v1
           path: ${{ env.INPUT }}/fresh

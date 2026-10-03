@@ -59,9 +59,10 @@ SEEDS = (11, 23, 47, 89)
 
 def _load_teacher_target(fit_run: Path):
     candidates = (
-        fit_run / "artifacts/26_GEPPETTO_FIT_PREREGISTERED/GEPPETTO_KNIGHT_MECHANICAL_CORE_TARGET.npz",
+        fit_run / "training/geppetto_teacher/KNIGHT_GEPPETTO_MECHANICAL_CORE_TARGET.npz",
+        fit_run / "handoff/GEPPETTO_STAGE27/teacher_target.npz",
         fit_run / "artifacts/26_GEPPETTO_FIT_PREREGISTERED/KNIGHT_GEPPETTO_MECHANICAL_CORE_TARGET.npz",
-        fit_run / "artifacts/27_GEPPETTO_FIT/GEPPETTO_KNIGHT_MECHANICAL_CORE_TARGET.npz",
+        fit_run / "artifacts/27_GEPPETTO_FIT/KNIGHT_GEPPETTO_MECHANICAL_CORE_TARGET.npz",
     )
     for p in candidates:
         if p.is_file():

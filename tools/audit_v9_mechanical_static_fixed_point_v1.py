@@ -268,13 +268,35 @@ def main():
     ap.add_argument("--teacher-bank",type=Path,required=True)
     ap.add_argument("--inverse-npz",type=Path,required=True)
     ap.add_argument("--out-dir",type=Path,required=True)
+    ap.add_argument("--resume-candidate-json",type=Path)
+    ap.add_argument("--resume-partition-json",type=Path)
+    ap.add_argument("--resume-step-json",type=Path)
+    ap.add_argument("--resume-cycle",type=int,default=0)
+    ap.add_argument("--static-rounds-per-cycle",type=int,default=MAX_STATIC_ROUNDS_PER_CYCLE)
     a=ap.parse_args()
+    if (a.resume_candidate_json is None) != (a.resume_partition_json is None):
+        raise RuntimeError("V9_FIXED_POINT_RESUME_PAIR_REQUIRED")
+    if a.resume_cycle < 0 or a.resume_cycle > MAX_MECHANICAL_CYCLES:
+        raise RuntimeError("V9_FIXED_POINT_RESUME_CYCLE_INVALID")
+    if a.static_rounds_per_cycle < 1 or a.static_rounds_per_cycle > MAX_STATIC_ROUNDS_PER_CYCLE:
+        raise RuntimeError("V9_FIXED_POINT_STATIC_ROUND_BUDGET_INVALID")
 
     ctx=_ctx(a.authority_root,a.run_id)
     rr=ctx["run_root"]
     surface=rigging_surface_from_dict(read(a.surface_json))
     partition=mechanical_partition_from_dict(read(a.partition_json))
     candidate=canonical_mesh_candidate_from_dict(read(a.candidate_json))
+    start_cycle=0
+    resumed_from=None
+    if a.resume_candidate_json is not None:
+        partition=mechanical_partition_from_dict(read(a.resume_partition_json))
+        candidate=canonical_mesh_candidate_from_dict(read(a.resume_candidate_json))
+        start_cycle=int(a.resume_cycle)
+        resumed_from={
+            "candidate_path":str(a.resume_candidate_json),
+            "partition_path":str(a.resume_partition_json),
+            "resume_cycle":start_cycle,
+        }
     skeleton=qualified_skeleton_from_dict(read(a.fresh_skeleton_json))
     camera_set=qualified_camera_set_from_dict(
         stage_output_payload(ctx,"05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1")
@@ -306,8 +328,14 @@ def main():
 
     a.out_dir.mkdir(parents=True,exist_ok=True)
     history=[]
+    if a.resume_step_json is not None:
+        prior=read(a.resume_step_json)
+        history.append(prior)
+        if resumed_from is None:
+            raise RuntimeError("V9_FIXED_POINT_RESUME_STEP_WITHOUT_RESUME_STATE")
+        resumed_from["step_path"]=str(a.resume_step_json)
 
-    for cycle in range(MAX_MECHANICAL_CYCLES+1):
+    for cycle in range(start_cycle,MAX_MECHANICAL_CYCLES+1):
         quality=report_quality(candidate,policy)
         compat=_compat(
             candidate,surface=surface,skeleton=skeleton,skin=teacher_skin,
@@ -400,10 +428,15 @@ def main():
             candidate=child
 
         # Static optimization is allowed only inside the mechanical feasible region.
-        candidate,static_report=_guarded_static_rounds(
-            candidate,partition=partition,surface=surface,skeleton=skeleton,
-            skin=teacher_skin,envelope=envelope,cameras=cameras,policy=policy,
-        )
+        old_round_budget=MAX_STATIC_ROUNDS_PER_CYCLE
+        try:
+            globals()["MAX_STATIC_ROUNDS_PER_CYCLE"]=int(a.static_rounds_per_cycle)
+            candidate,static_report=_guarded_static_rounds(
+                candidate,partition=partition,surface=surface,skeleton=skeleton,
+                skin=teacher_skin,envelope=envelope,cameras=cameras,policy=policy,
+            )
+        finally:
+            globals()["MAX_STATIC_ROUNDS_PER_CYCLE"]=old_round_budget
         row["static_composition"]=static_report
         history.append(row)
 
@@ -449,6 +482,8 @@ def main():
         "product_authority_minted":False,
         "skin_weight_mutation":False,
         "teacher_oracle_only":True,
+        "resumed_from":resumed_from,
+        "static_rounds_per_cycle":int(a.static_rounds_per_cycle),
         "history":history,
         "final":{
             "components":len(partition.components),

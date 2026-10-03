@@ -196,6 +196,13 @@ class GeppettoCandidateV2(nn.Module):
             modes, mode_log_sigma, mode_logits
         )
 
+    def _locus_distribution(
+        self, h: torch.Tensor, *, step_index: int
+    ):
+        """D0 locus distribution seam; D1 challengers override this only."""
+        del step_index
+        return self.locus_head(h)
+
     def _parent_logits_chunked(self, h: torch.Tensor, pos: torch.Tensor) -> torch.Tensor:
         B, K, D = h.shape
         rows = []
@@ -237,7 +244,7 @@ class GeppettoCandidateV2(nn.Module):
                 states[li] = cell(x, states[li])
                 x = torch.cat([pooled, states[li], rel], dim=-1)
             h = states[-1]
-            locus = self.locus_head(h)
+            locus = self._locus_distribution(h, step_index=t)
             modes = locus.modes_normalized
             mode_ls = locus.mode_log_sigma
             mode_logits = locus.mode_logits

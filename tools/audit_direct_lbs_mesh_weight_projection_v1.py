@@ -17,7 +17,7 @@ from pathlib import Path
 
 import numpy as np
 from scipy import sparse
-from scipy.sparse.linalg import LinearOperator, cg, lsmr
+from scipy.sparse.linalg import spsolve
 
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     canonical_mesh_candidate_from_dict,
@@ -386,82 +386,101 @@ def build_constraint_system(rest, edges, probes, constraints, current_weights):
     return A, b
 
 
-def solve_variant(W0, A, b, lam, support_mask):
+def prepare_dual_system(W0, A, b, support_mask):
+    """Prepare the exact Woodbury/dual form on admitted source support only.
+
+    Primal objective:
+        ||x-x0||^2 + lambda ||A x-b||^2
+
+    With inactive joint supports fixed to zero, the exact unconstrained optimum
+    over active variables is recovered from:
+        (I + lambda A A^T) r = A x0 - b
+        x = x0 - lambda A^T r
+    """
     x0 = np.asarray(W0, dtype=np.float64).reshape(-1)
+    active = np.asarray(support_mask, dtype=bool).reshape(-1)
+    if active.shape != x0.shape or not np.any(active):
+        raise RuntimeError("DIRECT_LBS_ACTIVE_SUPPORT_INVALID")
+    if np.any(x0[~active] != 0.0):
+        raise RuntimeError("DIRECT_LBS_INACTIVE_SOURCE_MASS_NONZERO")
+
+    A_active = A[:, active].tocsr()
+    x0_active = x0[active]
+    c = np.asarray(A_active @ x0_active - b, dtype=np.float64).reshape(-1)
+    if not np.isfinite(c).all():
+        raise RuntimeError("DIRECT_LBS_DUAL_RHS_NONFINITE")
+    gram = (A_active @ A_active.T).tocsr()
+    gram = ((gram + gram.T) * 0.5).tocsr()
+    if gram.shape != (A.shape[0], A.shape[0]):
+        raise RuntimeError("DIRECT_LBS_DUAL_GRAM_SHAPE_INVALID")
+    return active, A_active, x0_active, c, gram
+
+
+def solve_variant(W0, b, lam, support_mask, dual):
+    active, A_active, x0_active, c, gram = dual
     lam = float(lam)
-    root = math.sqrt(lam)
-    aug = sparse.vstack(
-        [
-            sparse.eye(len(x0), format="csr", dtype=np.float64),
-            A * root,
-        ],
-        format="csr",
+    if lam <= 0.0 or not math.isfinite(lam):
+        raise RuntimeError("DIRECT_LBS_LAMBDA_INVALID")
+
+    S = sparse.eye(
+        gram.shape[0], format="csc", dtype=np.float64
+    ) + lam * gram.tocsc()
+    r = np.asarray(spsolve(S, c), dtype=np.float64).reshape(-1)
+    if not np.isfinite(r).all():
+        raise RuntimeError("DIRECT_LBS_DUAL_SOLVE_NONFINITE")
+
+    dual_residual = float(
+        np.linalg.norm(S @ r - c) / max(np.linalg.norm(c), 1e-12)
     )
-    rhs_aug = np.concatenate([x0, b * root])
-    ls = lsmr(aug, rhs_aug, atol=1e-8, btol=1e-8, maxiter=1200)
-    x = np.asarray(ls[0], dtype=np.float64)
-    lsmr_istop = int(ls[1])
+    if dual_residual > 1e-8:
+        raise RuntimeError(
+            f"DIRECT_LBS_DUAL_RESIDUAL:{dual_residual}"
+        )
 
-    rhs = x0 + lam * np.asarray(A.T @ b, dtype=np.float64).reshape(-1)
-    diag = 1.0 + lam * np.asarray(
-        A.power(2).sum(axis=0), dtype=np.float64
+    x_active = x0_active - lam * np.asarray(
+        A_active.T @ r, dtype=np.float64
     ).reshape(-1)
-    if np.any(diag <= 0.0) or not np.isfinite(diag).all():
-        raise RuntimeError("DIRECT_LBS_NORMAL_DIAGONAL_INVALID")
+    if not np.isfinite(x_active).all():
+        raise RuntimeError("DIRECT_LBS_PRIMAL_NONFINITE")
 
-    H = LinearOperator(
-        (len(x0), len(x0)),
-        matvec=lambda z: np.asarray(z, dtype=np.float64)
+    primal_edge_residual = np.asarray(
+        A_active @ x_active - b, dtype=np.float64
+    ).reshape(-1)
+    stationarity = (
+        x_active
+        - x0_active
         + lam
         * np.asarray(
-            A.T @ (A @ np.asarray(z, dtype=np.float64)),
-            dtype=np.float64,
-        ).reshape(-1),
-        dtype=np.float64,
+            A_active.T @ primal_edge_residual, dtype=np.float64
+        ).reshape(-1)
     )
-    M = LinearOperator(
-        (len(x0), len(x0)),
-        matvec=lambda z: np.asarray(z, dtype=np.float64) / diag,
-        dtype=np.float64,
+    stationarity_residual = float(
+        np.linalg.norm(stationarity)
+        / max(np.linalg.norm(x0_active), 1e-12)
     )
-
-    cg_info = 0
-    solver = f"LSMR_ISTOP_{lsmr_istop}"
-    if lsmr_istop not in (1, 2):
-        x, cg_info = cg(
-            H,
-            rhs,
-            x0=x,
-            M=M,
-            rtol=1e-8,
-            atol=1e-10,
-            maxiter=3000,
-        )
-        solver += f"_CG_{int(cg_info)}"
-
-    if not np.isfinite(x).all():
-        raise RuntimeError(f"DIRECT_LBS_LINEAR_SOLVE_NONFINITE:{solver}")
-    normal_residual = float(
-        np.linalg.norm(H @ x - rhs) / max(np.linalg.norm(rhs), 1e-12)
-    )
-    if normal_residual > 1e-6:
+    if stationarity_residual > 1e-7:
         raise RuntimeError(
-            f"DIRECT_LBS_NORMAL_RESIDUAL:{solver}:{normal_residual}"
+            f"DIRECT_LBS_PRIMAL_STATIONARITY:{stationarity_residual}"
         )
 
-    raw = x.reshape(W0.shape)
+    raw_flat = np.zeros(np.asarray(W0).size, dtype=np.float64)
+    raw_flat[active] = x_active
+    raw = raw_flat.reshape(W0.shape)
     projected = simplex_project_rows(raw, support_mask)
     return projected, {
-        "solver": solver,
-        "lsmr_istop": lsmr_istop,
-        "lsmr_iterations": int(ls[2]),
-        "lsmr_normr": float(ls[3]),
-        "lsmr_normar": float(ls[4]),
-        "cg_info": int(cg_info),
-        "normal_relative_residual": normal_residual,
+        "solver": "WOODBURY_DUAL_SPARSE_DIRECT",
+        "active_variable_count": int(np.count_nonzero(active)),
+        "dual_dimension": int(gram.shape[0]),
+        "dual_nnz": int(gram.nnz),
+        "dual_relative_residual": dual_residual,
+        "primal_stationarity_relative_residual": stationarity_residual,
         "raw_negative_mass": float(-np.minimum(raw, 0.0).sum()),
-        "simplex_projection_l1_mean": float(np.mean(np.abs(projected - raw).sum(axis=1))),
-        "simplex_projection_l1_max": float(np.max(np.abs(projected - raw).sum(axis=1))),
+        "simplex_projection_l1_mean": float(
+            np.mean(np.abs(projected - raw).sum(axis=1))
+        ),
+        "simplex_projection_l1_max": float(
+            np.max(np.abs(projected - raw).sum(axis=1))
+        ),
     }
 
 
@@ -630,9 +649,24 @@ def main():
         "variants": [],
     }
 
-    source_support_mask = W0 > SUPPORT_EPS
+    source_support_mask = W0 > 0.0
+    dual = prepare_dual_system(W0, A, b, source_support_mask)
+    print(
+        "DIRECT_LBS_DUAL_PREP="
+        + json.dumps(
+            {
+                "active_variable_count": int(np.count_nonzero(dual[0])),
+                "dual_dimension": int(dual[4].shape[0]),
+                "dual_nnz": int(dual[4].nnz),
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
     for lam in LAMBDAS:
-        W, solver = solve_variant(W0, A, b, lam, source_support_mask)
+        W, solver = solve_variant(
+            W0, b, lam, source_support_mask, dual
+        )
         correction = np.abs(W - W0).sum(axis=1)
         new_support_mass = np.where(source_support_mask, 0.0, W).sum(axis=1)
         new_support_count = np.count_nonzero(

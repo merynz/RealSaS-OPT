@@ -67,6 +67,7 @@ class MechanicalResidualAdapterV1(nn.Module):
         pair_geometry: torch.Tensor,
         surface_mask: torch.Tensor,
         joint_mask: torch.Tensor,
+        row_joint_mask: torch.Tensor | None = None,
         surface_chunk_size: int | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         if base_weights.ndim != 3:
@@ -78,8 +79,12 @@ class MechanicalResidualAdapterV1(nn.Module):
             raise ValueError("pair_geometry shape drift")
         if surface_mask.shape != (B, N) or joint_mask.shape != (B, J):
             raise ValueError("mask shape drift")
+        if row_joint_mask is not None and row_joint_mask.shape != (B,N,J):
+            raise ValueError("row_joint_mask shape drift")
 
         legal = surface_mask[:, :, None].bool() & joint_mask[:, None, :].bool()
+        if row_joint_mask is not None:
+            legal = legal & row_joint_mask.bool()
         w = base_weights.float().clamp_min(0.0)
         w = w * legal.to(w.dtype)
         denom = w.sum(-1, keepdim=True)
@@ -103,7 +108,7 @@ class MechanicalResidualAdapterV1(nn.Module):
         delta = delta.masked_fill(~legal, 0.0)
 
         logits = base_log + delta
-        logits = logits.masked_fill(~joint_mask[:, None, :].bool(), -1e4)
+        logits = logits.masked_fill(~legal, -1e4)
         out = torch.softmax(logits, dim=-1)
         out = out * legal.to(out.dtype)
         out = out / out.sum(-1, keepdim=True).clamp_min(1e-12)

@@ -291,6 +291,43 @@ Decision:
 - advance to Arachne evidence/training-domain diagnosis;
 - A100 remains unauthorized until V9-compatible truth/evidence mapping is proven legal and sufficiently complete.
 
+## 8C. V9 exact-teacher reprojection oracle — A100 escalation paused
+
+Run `37122879585` rebuilt the teacher bank for the **current 15,490-node V9 RiggingSurface** from the exact artist/source authority using the frozen historical projector:
+
+`EXACT_SOURCE_TRIANGLE_CLOSEST_POINT_BARYCENTRIC_WITH_COMPONENT_MECHANICAL_ATTACHMENT`.
+
+Authority checks:
+
+- V9 surface lineage: `25b8ff0acd2154d8a3fc333d65af70b65f2658309135cf630225ecdfc35ab08d`;
+- V9 candidate lineage: `3ab6b0ae02e362079fed11ceb627acf9be795004e790ee897c98a1eadc14edab`;
+- exact teacher source SHA-256: `96435646a0084a0a038040ee748cb33d3bfa0b1ed550661befd3b18539e28e6f`;
+- exact Geppetto target SHA-256: `26d4d5411b14b23b894f0351ab08fc2da2b18d8fb3ac4776b25b8b2434b4bbc1`;
+- generated V9 teacher bank SHA-256: `5f23adc084fdc15c95a6807e5f86fd365d547e7f558a0d341f9ec3be9bfa2987`;
+- clean rows: **13,840 / 15,490 = 0.8934796643**;
+- invalid / distance-warning rows: **1,650**;
+- projection simplex residual: ~`2.22e-16`.
+
+Critical oracle result:
+
+- exact all-projected teacher skin on the current V9 carrier: **G3 FAIL**;
+- G3 max condition: **~177.6753**;
+- exact authored-motion court: **51/51 FAIL**;
+- max motion edge ratio: **~188.6986x**.
+
+Fresh Arachne versus this reprojected teacher:
+
+- teacher-valid p95 row-L1: **~0.18872**;
+- teacher-invalid p95 row-L1: **~0.03598**.
+
+Decision:
+
+- **do not start A100 readout refit yet**;
+- the exact teacher itself is not mechanically admissible on current V9 connectivity, so readout-only fitting to this field cannot by itself establish closure;
+- the previous compiler-weight-repair rejection remains valid, but ownership must now be split between **field prediction** and **carrier seam/connectivity compatibility**;
+- next court: attribute exact-teacher failures by source-triangle topology class and test the existing subject-free G3B seam-cut / repartition mechanism as a teacher-oracle topology ceiling while keeping teacher weights frozen;
+- A100 escalation resumes only if a mechanically admissible target topology/field realization is demonstrated.
+
 ## 9. Progress ledger
 
 | Step | State | Evidence |
@@ -306,5 +343,5 @@ Decision:
 | Coarse FEM prolongation | STRUCTURALLY INCOMPLETE | source components without coarse faces |
 | G3-sensitive projection | FAIL / PROXY INSUFFICIENT | run 37116286772 PASS as workflow; all 8 variants mechanically fail. Best max motion edge ~26.38x, G3 max condition ~120.11, 51/51 frames fail, p95 correction ~0.765 L1 |
 | Direct LBS deformation-constrained projection | FAIL / COMPILER OWNER REJECTED | run 37120181421: lambda 10 still 51/51 fail, max motion edge ~298.84x, p99 correction ~0.81, max correction ~2.0; shipping binder budget is 1e-9 |
-| Multi-topology invariance court | TODO | required before genericity claim |
+| V9 exact teacher reprojection oracle | FAIL / TOPOLOGY-FIELD OWNER EXPOSED | run 37122879585: teacher G3 ~177.68, 51/51 motion fail, max edge ~188.70x; A100 paused |\n| Teacher-oracle source-topology attribution + G3B ceiling | TODO | next owner-separation court |\n| Multi-topology invariance court | TODO | required before genericity claim |
 | Product contract integration | BLOCKED | requires preceding PASS |

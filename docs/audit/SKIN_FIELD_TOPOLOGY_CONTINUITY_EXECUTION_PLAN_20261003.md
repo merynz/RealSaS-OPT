@@ -208,12 +208,12 @@ A100/readout refit is allowed only if all of the following are established:
 3. failure is attributed to insufficient Arachne evidence rather than Geppetto or carrier topology;
 4. V9-compatible training truth / teacher mapping is legal and complete enough to train against;
 5. the refit plan freezes the backbone by default and trains only the minimal necessary readout unless evidence proves otherwise;
-6. expected fit cost fits the remaining A100 budget.
+6. A100 capacity is available; compute budget is no longer the limiting gate. The remaining gate is scientific legality/completeness of V9-compatible truth and minimal trainable scope.
 
 Before any A100 run, report to the user with:
 - exact reason compiler repair was rejected;
 - exact trainable parameter scope;
-- estimated run configuration and stop criteria;
+- run configuration and stop criteria;
 - checkpoint/rollback plan.
 
 ## 7. Explicit non-goals

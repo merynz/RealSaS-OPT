@@ -1,0 +1,29 @@
+name: rig-skin-architecture-contracts-v1
+
+on:
+  push:
+    branches: [research/rig-skin-architecture-challengers-20261003]
+    paths:
+      - compiler/realsas_compiler_core/canonical_rig_tokens_v1.py
+      - tests/compiler/test_canonical_rig_tokens_v1.py
+      - experiments/geppetto_reference_strength_fullstack_v1/mechanical_capacity_target_v2.py
+      - tests/models/test_geppetto_mechanical_capacity_target_v2.py
+      - .github/workflows/rig_skin_architecture_contracts_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - run: |
+          python -m pytest -q \
+            tests/compiler/test_canonical_rig_tokens_v1.py \
+            tests/models/test_geppetto_mechanical_capacity_target_v2.py

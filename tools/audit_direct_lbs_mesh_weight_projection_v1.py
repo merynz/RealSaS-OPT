@@ -142,20 +142,35 @@ def posed_from_weights(rest, weights, matrices):
     return np.sum(per * np.asarray(weights, dtype=np.float64)[:, :, None], axis=1)
 
 
-def simplex_project_rows(values):
-    """Euclidean projection of every row onto the probability simplex."""
+def simplex_project_rows(values, support_mask):
+    """Project each row onto its original Arachne support simplex.
+
+    Mesh-weight binding is not allowed to invent a joint support that is absent
+    from the deterministic transfer of the qualified surface skin evidence.
+    """
     v = np.asarray(values, dtype=np.float64)
-    u = np.sort(v, axis=1)[:, ::-1]
-    cssv = np.cumsum(u, axis=1) - 1.0
-    ind = np.arange(1, v.shape[1] + 1, dtype=np.float64)[None, :]
-    cond = u - cssv / ind > 0.0
-    rho = np.maximum(cond.sum(axis=1) - 1, 0)
-    theta = cssv[np.arange(len(v)), rho] / (rho.astype(np.float64) + 1.0)
-    out = np.maximum(v - theta[:, None], 0.0)
+    mask = np.asarray(support_mask, dtype=bool)
+    if mask.shape != v.shape:
+        raise RuntimeError("DIRECT_LBS_SUPPORT_MASK_SHAPE_INVALID")
+    out = np.zeros_like(v)
+    for i in range(len(v)):
+        active = np.flatnonzero(mask[i])
+        if not len(active):
+            raise RuntimeError("DIRECT_LBS_SOURCE_SUPPORT_EMPTY")
+        row = v[i, active]
+        u = np.sort(row)[::-1]
+        cssv = np.cumsum(u) - 1.0
+        ind = np.arange(1, len(u) + 1, dtype=np.float64)
+        cond = u - cssv / ind > 0.0
+        rho = max(int(np.count_nonzero(cond)) - 1, 0)
+        theta = float(cssv[rho] / float(rho + 1))
+        out[i, active] = np.maximum(row - theta, 0.0)
     mass = out.sum(axis=1, keepdims=True)
     if np.any(mass <= 1e-12) or not np.isfinite(out).all():
         raise RuntimeError("DIRECT_LBS_SIMPLEX_PROJECTION_INVALID")
     out /= mass
+    if np.any(out[~mask] != 0.0):
+        raise RuntimeError("DIRECT_LBS_NEW_SUPPORT_CREATED")
     return out
 
 
@@ -371,7 +386,7 @@ def build_constraint_system(rest, edges, probes, constraints, current_weights):
     return A, b
 
 
-def solve_variant(W0, A, b, lam):
+def solve_variant(W0, A, b, lam, support_mask):
     x0 = np.asarray(W0, dtype=np.float64).reshape(-1)
     root = math.sqrt(float(lam))
     aug = sparse.vstack(
@@ -390,7 +405,7 @@ def solve_variant(W0, A, b, lam):
             f"DIRECT_LBS_LSMR_FAIL:istop={istop}:itn={int(result[2])}:normr={float(result[3])}"
         )
     raw = x.reshape(W0.shape)
-    projected = simplex_project_rows(raw)
+    projected = simplex_project_rows(raw, support_mask)
     return projected, {
         "lsmr_istop": istop,
         "lsmr_iterations": int(result[2]),
@@ -546,7 +561,7 @@ def main():
         "training_used": False,
         "teacher_data_used": False,
         "motion_clip_data_used_for_optimization": False,
-        "optimization_domain": "MESH_WEIGHT_REALIZATION_ONLY",
+        "optimization_domain": "MESH_WEIGHT_REALIZATION_ONLY",\n        "original_joint_support_hard_preserved": True,
         "source_surface_skin_mutated": False,
         "objective": "L2_TO_DETERMINISTIC_BINDER_WEIGHTS_PLUS_DIRECT_G3_LBS_RELATIVE_EDGE_TARGETS",
         "g3_probe_count": len(probes),
@@ -568,7 +583,7 @@ def main():
 
     source_support_mask = W0 > SUPPORT_EPS
     for lam in LAMBDAS:
-        W, solver = solve_variant(W0, A, b, lam)
+        W, solver = solve_variant(W0, A, b, lam, source_support_mask)
         correction = np.abs(W - W0).sum(axis=1)
         new_support_mass = np.where(source_support_mask, 0.0, W).sum(axis=1)
         new_support_count = np.count_nonzero(

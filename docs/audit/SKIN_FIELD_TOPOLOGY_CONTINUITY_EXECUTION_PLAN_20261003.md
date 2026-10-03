@@ -328,6 +328,42 @@ Decision:
 - next court: attribute exact-teacher failures by source-triangle topology class and test the existing subject-free G3B seam-cut / repartition mechanism as a teacher-oracle topology ceiling while keeping teacher weights frozen;
 - A100 escalation resumes only if a mechanically admissible target topology/field realization is demonstrated.
 
+## 8D. One-pass production repartition feedback on V9 teacher oracle
+
+Run `37123289786` applied the existing production dynamic topology feedback path to the exact V9 teacher field, without changing any skin weight:
+
+`SOURCE_EDGE_PROBE_RATIO_V1 -> mechanical_repartition_v2 -> Stage18 holeless dense -> COMPONENT_HARMONIC_DIRICHLET_V1`.
+
+Measured one-pass change:
+
+- parent partition components: **50**;
+- parent G3B unsafe faces: **418**;
+- direct source-edge separation seeds: **274**;
+- partition-closed final SEPARATE constraints: **1,125**;
+- child components: **88**;
+- child vertices / faces: **17,733 / 33,172**;
+- child G3B unsafe faces: **166**;
+- teacher max authored-motion edge: **188.70x -> 56.15x**;
+- child G3: still FAIL, max condition **~366.92**;
+- exact authored motion: still **51/51 FAIL**;
+- child static policy violations: **3,217**.
+
+Interpretation:
+
+- the existing generic repartition loop materially attacks the correct owner; this is not evidence for a Knight-specific weight patch;
+- one pass is insufficient on the refined V9 carrier;
+- Stage18 rebuild also reopens static mesh-quality violations, so dynamic partition repair and static quality qualification must eventually be composed rather than treated as independent terminal passes;
+- do not start A100 while the exact teacher target itself is still mechanically inadmissible.
+
+Next court:
+
+- execute the already-bounded generic topology feedback loop for at most `DEFAULT_MAX_REPAIR_ITERATIONS=4`;
+- use `SOURCE_EDGE_PROBE_RATIO_V1` where new source-edge cannot-links remain;
+- use the existing `UNSAFE_FACE_LOCAL_L1_V1` residual proposal path if source-edge probing has no new admissible pair;
+- never mutate QualifiedSkinIR weights;
+- after topology feedback closes or exhausts, evaluate static quality + G3B + G3 + exact 51-frame motion;
+- if mechanics closes but static quality reopens, compose the V9 source-surface static quality repair onto that child and re-run all mechanical courts.
+
 ## 9. Progress ledger
 
 | Step | State | Evidence |
@@ -343,5 +379,5 @@ Decision:
 | Coarse FEM prolongation | STRUCTURALLY INCOMPLETE | source components without coarse faces |
 | G3-sensitive projection | FAIL / PROXY INSUFFICIENT | run 37116286772 PASS as workflow; all 8 variants mechanically fail. Best max motion edge ~26.38x, G3 max condition ~120.11, 51/51 frames fail, p95 correction ~0.765 L1 |
 | Direct LBS deformation-constrained projection | FAIL / COMPILER OWNER REJECTED | run 37120181421: lambda 10 still 51/51 fail, max motion edge ~298.84x, p99 correction ~0.81, max correction ~2.0; shipping binder budget is 1e-9 |
-| V9 exact teacher reprojection oracle | FAIL / TOPOLOGY-FIELD OWNER EXPOSED | run 37122879585: teacher G3 ~177.68, 51/51 motion fail, max edge ~188.70x; A100 paused |\n| Teacher-oracle source-topology attribution + G3B ceiling | TODO | next owner-separation court |\n| Multi-topology invariance court | TODO | required before genericity claim |
+| V9 exact teacher reprojection oracle | FAIL / TOPOLOGY-FIELD OWNER EXPOSED | run 37122879585: teacher G3 ~177.68, 51/51 motion fail, max edge ~188.70x; A100 paused |\n| Teacher-oracle production repartition one-pass | IMPROVES / NOT CLOSED | run 37123289786: G3B unsafe 418→166, motion max edge 188.70x→56.15x, 51/51 still fail; child static violations 3217 |\n| Iterative teacher-oracle production repartition | ACTIVE | bounded to existing max 4 repair iterations; no weight mutation |\n| Multi-topology invariance court | TODO | required before genericity claim |
 | Product contract integration | BLOCKED | requires preceding PASS |

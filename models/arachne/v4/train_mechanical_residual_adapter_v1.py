@@ -47,6 +47,62 @@ def correction_metrics(pred,base,teacher,valid):
     }
 
 
+def _load_bundle(path: Path, dev: torch.device):
+    with np.load(path,allow_pickle=False) as z:
+        def T(name,dtype=None):
+            arr=np.asarray(z[name])
+            t=torch.from_numpy(arr.copy())
+            if dtype is not None:t=t.to(dtype)
+            return t.to(dev)
+        common={
+            "base":T("base_weights",torch.float32)[None],
+            "teacher":T("teacher_weights",torch.float32)[None],
+            "valid":T("teacher_valid_mask",torch.bool)[None],
+            "geometry7":T("geometry7",torch.float32)[None],
+            "pair":T("pair_geometry",torch.float32)[None],
+            "surface_mask":T("surface_mask",torch.bool)[None],
+            "joint_mask":T("joint_mask",torch.bool)[None],
+            "probes":T("probe_transforms",torch.float32)[None],
+            "probe_ids":tuple(map(str,z["probe_ids"].tolist())),
+        }
+        if "carrier_ids" in z.files:
+            carrier_ids=tuple(map(str,z["carrier_ids"].tolist()))
+            if not carrier_ids:
+                raise ValueError("multi-carrier bundle has empty carrier_ids")
+            carriers=[]
+            for i,cid in enumerate(carrier_ids):
+                p=f"carrier_{i:02d}_"
+                carriers.append({
+                    "id":cid,
+                    "support_idx":T(p+"support_indices",torch.long)[None],
+                    "support_coeff":T(p+"support_coefficients",torch.float32)[None],
+                    "rest":T(p+"rest_vertices",torch.float32)[None],
+                    "faces":T(p+"faces",torch.long),
+                })
+        else:
+            carrier_ids=("single",)
+            carriers=[{
+                "id":"single",
+                "support_idx":T("candidate_support_indices",torch.long)[None],
+                "support_coeff":T("candidate_support_coefficients",torch.float32)[None],
+                "rest":T("candidate_rest_vertices",torch.float32)[None],
+                "faces":T("candidate_faces",torch.long),
+            }]
+    common["carrier_ids"]=carrier_ids
+    common["carriers"]=tuple(carriers)
+    return common
+
+
+def _aggregate_carrier_mechanical(rows):
+    if not rows:
+        raise ValueError("carrier mechanical rows empty")
+    values=torch.stack([row["mechanical"] for row in rows])
+    mean=values.mean()
+    worst=values.max()
+    aggregate=0.5*mean+0.5*worst
+    return aggregate,mean,worst
+
+
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--bundle",type=Path,required=True)
@@ -81,25 +137,12 @@ def main():
     if dev.type=="cuda" and not torch.cuda.is_available():
         raise RuntimeError("CUDA requested but unavailable")
 
-    with np.load(a.bundle,allow_pickle=False) as z:
-        def T(name,dtype=None):
-            arr=np.asarray(z[name])
-            t=torch.from_numpy(arr.copy())
-            if dtype is not None:t=t.to(dtype)
-            return t.to(dev)
-        base=T("base_weights",torch.float32)[None]
-        teacher=T("teacher_weights",torch.float32)[None]
-        valid=T("teacher_valid_mask",torch.bool)[None]
-        geometry7=T("geometry7",torch.float32)[None]
-        pair=T("pair_geometry",torch.float32)[None]
-        sm=T("surface_mask",torch.bool)[None]
-        jm=T("joint_mask",torch.bool)[None]
-        support_idx=T("candidate_support_indices",torch.long)[None]
-        support_coeff=T("candidate_support_coefficients",torch.float32)[None]
-        rest=T("candidate_rest_vertices",torch.float32)[None]
-        faces=T("candidate_faces",torch.long)
-        probes=T("probe_transforms",torch.float32)[None]
-        probe_ids=tuple(map(str,z["probe_ids"].tolist()))
+    bundle=_load_bundle(a.bundle,dev)
+    base=bundle["base"]; teacher=bundle["teacher"]; valid=bundle["valid"]
+    geometry7=bundle["geometry7"]; pair=bundle["pair"]
+    sm=bundle["surface_mask"]; jm=bundle["joint_mask"]
+    probes=bundle["probes"]; probe_ids=bundle["probe_ids"]
+    carriers=bundle["carriers"]; carrier_ids=bundle["carrier_ids"]
 
     P=probes.shape[1]
     if a.probe_batch>P:
@@ -124,6 +167,9 @@ def main():
         "weight_decay":a.weight_decay,
         "probe_batch":a.probe_batch,
         "surface_chunk":a.surface_chunk,
+        "carrier_ids":list(carrier_ids),
+        "carrier_count":len(carrier_ids),
+        "carrier_mechanical_aggregation":"0.5_MEAN_PLUS_0.5_WORST",
         "objective_weights":{
             "mechanical":a.mechanical_weight,
             "teacher_valid":a.teacher_weight,
@@ -138,6 +184,8 @@ def main():
             "Knight integration fit only; no genericity claim.",
             "Historical Arachne/base field is frozen.",
             "Only MechanicalResidualAdapterV1 parameters are trainable.",
+            "Mechanical fit is evaluated across a frozen carrier ensemble when present.",
+            "Carrier objective is 0.5 mean + 0.5 worst; one topology cannot hide another.",
             "Compiler exact G3B/G3/motion courts remain final authority.",
         ],
     }
@@ -164,25 +212,38 @@ def main():
                 joint_mask=jm,
                 surface_chunk_size=a.surface_chunk,
             )
-        loss=mechanical_consequence_loss_v1(
-            pred.float(),
-            candidate_support_indices=support_idx,
-            candidate_support_coefficients=support_coeff,
-            candidate_rest_vertices=rest,
-            candidate_faces=faces,
-            probe_transforms=probes[:,idx],
-            base_surface_weights=base,
-            teacher_surface_weights=teacher,
-            teacher_valid_mask=valid,
-            max_edge_ratio=4.0,
-            min_area_ratio=0.05,
-            max_area_ratio=20.0,
-            max_condition_number=16.0,
-            mechanical_weight=a.mechanical_weight,
-            teacher_weight=a.teacher_weight,
-            trust_weight=a.trust_weight,
+        carrier_loss_rows=[]
+        for carrier in carriers:
+            carrier_loss_rows.append(mechanical_consequence_loss_v1(
+                pred.float(),
+                candidate_support_indices=carrier["support_idx"],
+                candidate_support_coefficients=carrier["support_coeff"],
+                candidate_rest_vertices=carrier["rest"],
+                candidate_faces=carrier["faces"],
+                probe_transforms=probes[:,idx],
+                base_surface_weights=None,
+                teacher_surface_weights=None,
+                teacher_valid_mask=None,
+                max_edge_ratio=4.0,
+                min_area_ratio=0.05,
+                max_area_ratio=20.0,
+                max_condition_number=16.0,
+                mechanical_weight=1.0,
+                teacher_weight=0.0,
+                trust_weight=0.0,
+            ))
+        mechanical,mechanical_mean,mechanical_worst=_aggregate_carrier_mechanical(
+            carrier_loss_rows
         )
-        total=loss["total"]
+        trust=(pred.float()-base).abs().sum(-1).mean()
+        teacher_row=(pred.float()-teacher).abs().sum(-1)
+        vm=valid.bool()
+        supervised=teacher_row[vm].mean() if bool(vm.any()) else teacher_row.new_zeros(())
+        total=(
+            a.mechanical_weight*mechanical
+            + a.teacher_weight*supervised
+            + a.trust_weight*trust
+        )
         if not torch.isfinite(total):
             raise RuntimeError(f"nonfinite loss at step {step}")
         total.backward()
@@ -192,16 +253,34 @@ def main():
         if step==0 or (step+1)%a.log_every==0 or step+1==a.steps:
             with torch.no_grad():
                 metrics=correction_metrics(pred.float(),base,teacher,valid)
+                per_carrier={
+                    carrier["id"]:{
+                        "mechanical":float(row_loss["mechanical"].detach().cpu()),
+                        "edge":float(row_loss["edge"].detach().cpu()),
+                        "area_hi":float(row_loss["area_hi"].detach().cpu()),
+                        "area_lo":float(row_loss["area_lo"].detach().cpu()),
+                        "condition":float(row_loss["condition"].detach().cpu()),
+                        "max_edge_ratio":float(row_loss["maximum_edge_ratio"].detach().cpu()),
+                        "min_area_ratio":float(row_loss["minimum_area_ratio"].detach().cpu()),
+                        "max_area_ratio":float(row_loss["maximum_area_ratio"].detach().cpu()),
+                        "max_condition_number":float(row_loss["maximum_condition_number"].detach().cpu()),
+                    }
+                    for carrier,row_loss in zip(carriers,carrier_loss_rows)
+                }
+                worst_carrier=max(
+                    per_carrier,
+                    key=lambda cid:(per_carrier[cid]["mechanical"],cid),
+                )
                 row={
                     "step":step+1,
                     "probe_indices":stream[step].tolist(),
                     "probe_ids":[probe_ids[i] for i in stream[step]],
                     "total":float(total.detach().cpu()),
-                    "mechanical":float(loss["mechanical"].detach().cpu()),
-                    "edge":float(loss["edge"].detach().cpu()),
-                    "area_hi":float(loss["area_hi"].detach().cpu()),
-                    "area_lo":float(loss["area_lo"].detach().cpu()),
-                    "condition":float(loss["condition"].detach().cpu()),
+                    "mechanical":float(mechanical.detach().cpu()),
+                    "mechanical_mean":float(mechanical_mean.detach().cpu()),
+                    "mechanical_worst":float(mechanical_worst.detach().cpu()),
+                    "worst_carrier_id":worst_carrier,
+                    "per_carrier":per_carrier,
                     **metrics,
                 }
                 receipt["history"].append(row)

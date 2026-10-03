@@ -9,6 +9,7 @@ import argparse
 import inspect
 import json
 import time
+from contextlib import nullcontext
 from pathlib import Path
 
 import numpy as np
@@ -25,6 +26,7 @@ from models.arachne.v4.arachne_candidate_v4 import ArachneA1V4
 from models.arachne.v6.readout_v6 import ArachneV6RawReadout
 from tools.demo.render_knight_motion_preview_v1 import _ctx
 from tools.inference.refined_surface_rig_skin_v1 import class_ast, read, verified_checkpoint, write
+from tools.inference.query_chunked_sdpa_v1 import query_chunked_cuda_bf16_sdpa
 
 
 def delta(a, b):
@@ -64,11 +66,14 @@ def main(args):
     torch.manual_seed(11)
     np.random.seed(11)
     conditioning = ArachneRichConditioningAdapterV3(require_scene_first=True)([surface], [skeleton])
-    model = ArachneA1V4().eval()
+    device = args.device
+    if device == 'cuda' and not torch.cuda.is_available():
+        raise RuntimeError('CUDA_DEVICE_NOT_AVAILABLE')
+    model = ArachneA1V4().to(device).eval()
     model.load_state_dict(data['backbone'], strict=True)
-    ci = {key: torch.as_tensor(getattr(conditioning, 'view_yaw_code' if key == 'view_yaw_fourier' else key))
+    ci = {key: torch.as_tensor(getattr(conditioning, 'view_yaw_code' if key == 'view_yaw_fourier' else key), device=device)
           for key in inspect.signature(model.forward).parameters}
-    geom = torch.as_tensor(conditioning.geometry7)[0].float()
+    geom = torch.as_tensor(conditioning.geometry7, device=device)[0].float()
     pair = ci['pair_geometry'][0].float()
     legal = (ci['pair_mask'].bool() & ci['surface_mask'][:, :, None].bool()
              & ci['joint_mask'][:, None, :].bool())[0]
@@ -77,17 +82,19 @@ def main(args):
     started = time.monotonic()
     for backbone_precision in ('fp32', 'bf16'):
         print('PRECISION_BACKBONE_BEGIN=' + backbone_precision, flush=True)
-        with torch.inference_mode(), torch.autocast('cpu', dtype=torch.bfloat16,
-                                                   enabled=backbone_precision == 'bf16'):
+        attention_context = (query_chunked_cuda_bf16_sdpa(args.cuda_query_chunk)
+                             if device == 'cuda' and args.cuda_query_chunk else nullcontext(None))
+        with attention_context as telemetry, torch.inference_mode(), torch.autocast(device, dtype=torch.bfloat16,
+                                                                                    enabled=backbone_precision == 'bf16'):
             raw = model(**ci)
         memory = raw.surface_memory[0].float()
         tokens = raw.field_tokens[0].float()
-        decoder = ArachneV6RawReadout(memory.shape[-1], tokens.shape[-1], pair.shape[-1]).eval()
+        decoder = ArachneV6RawReadout(memory.shape[-1], tokens.shape[-1], pair.shape[-1]).to(device).eval()
         decoder.load_state_dict(data['decoder'], strict=True)
         for readout_precision in ('fp32', 'bf16'):
             arm = backbone_precision + '_backbone__' + readout_precision + '_readout'
             print('PRECISION_READOUT_BEGIN=' + arm, flush=True)
-            with torch.inference_mode(), torch.autocast('cpu', dtype=torch.bfloat16,
+            with torch.inference_mode(), torch.autocast(device, dtype=torch.bfloat16,
                                                        enabled=readout_precision == 'bf16'):
                 _, pred = decoder.decode_all(memory, geom, pair, tokens, legal, chunk=128)
             weights = pred.float().cpu().numpy().astype(np.float64)
@@ -100,6 +107,7 @@ def main(args):
                 'normalization_max_row_l1': float(correction.max()),
                 'normalization_total_l1': float(correction.sum()),
                 'normalization_is_diagnostic_only': True,
+                'attention_query_chunk_telemetry': telemetry,
             }
             np.savez_compressed(out / (arm + '.npz'), raw_weights=weights, weights=normalized,
                                 surface_ids=np.asarray(conditioning.surface_ids[0]),
@@ -119,7 +127,7 @@ def main(args):
     target = np.asarray([[rows[s].get(j, 0.) for j in jids] for s in ids], dtype=np.float64)
     for arm, pred in predictions.items():
         measurements[arm]['vs_archived'] = delta(pred, target)
-        measurements[arm]['vs_cpu_fp32'] = delta(pred, predictions['fp32_backbone__fp32_readout'])
+        measurements[arm]['vs_' + device + '_fp32'] = delta(pred, predictions['fp32_backbone__fp32_readout'])
     report = {
         'status': 'PRECISION_SENSITIVITY_MEASURED_ONLY',
         'surface_lineage_hash': surface.geometry_lineage_hash,
@@ -129,7 +137,9 @@ def main(args):
         'arm_result_sha256': sha256_file(args.arm_dir / 'ARACHNE_KNIGHT_V6_RESULT.json'),
         'conditioning_hash': conditioning.conditioning_hashes[0],
         'node_count': len(ids), 'joint_count': len(jids),
-        'device': 'cpu', 'torch_version': str(torch.__version__), 'seed': 11,
+        'device': device, 'torch_version': str(torch.__version__), 'seed': 11,
+        'cuda_query_chunk': args.cuda_query_chunk,
+        'gpu_name': torch.cuda.get_device_name(0) if device == 'cuda' else None,
         'readout_chunk': 128, 'measurements': measurements,
         'seconds': time.monotonic() - started,
         'training_used': False, 'teacher_predictor_input_used': False,
@@ -145,6 +155,8 @@ if __name__ == '__main__':
     for name in ('authority-root', 'fit-run', 'arm-dir', 'out-dir'):
         ap.add_argument('--' + name, type=Path, required=True)
     ap.add_argument('--run-id', required=True)
+    ap.add_argument('--device', choices=('cpu', 'cuda'), default='cpu')
+    ap.add_argument('--cuda-query-chunk', type=int, default=0)
     args = ap.parse_args()
     try:
         main(args)

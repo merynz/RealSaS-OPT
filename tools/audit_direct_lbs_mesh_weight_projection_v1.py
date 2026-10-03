@@ -523,18 +523,24 @@ def solve_variant(W0, lam, support_mask, tangent):
             f"DIRECT_LBS_TANGENT_SIMPLEX_SUM_DRIFT:{row_sum_residual}"
         )
 
-    edge_residual=np.asarray(AT@z-d,dtype=np.float64).reshape(-1)
+    atz=np.asarray(AT@z,dtype=np.float64).reshape(-1)
     displacement_grad=np.asarray(
         T.T@delta.reshape(-1),dtype=np.float64
     ).reshape(-1)
-    deformation_grad=float(lam)*np.asarray(
-        AT.T@edge_residual,dtype=np.float64
+    deformation_hessian_grad=float(lam)*np.asarray(
+        AT.T@atz,dtype=np.float64
     ).reshape(-1)
-    stationarity=displacement_grad+deformation_grad
+    stationarity=displacement_grad+deformation_hessian_grad-rhs
+    # Normwise KKT backward error must scale the three algebraic terms before
+    # cancellation.  Scaling by ||Gz|| + ||lambda*A^T(Az-d)|| incorrectly puts
+    # the rhs cancellation inside the denominator and can report a large error
+    # for an otherwise accurate solve.
     backward=float(
         np.linalg.norm(stationarity)
         / max(
-            np.linalg.norm(displacement_grad)+np.linalg.norm(deformation_grad),
+            np.linalg.norm(displacement_grad)
+            +np.linalg.norm(deformation_hessian_grad)
+            +np.linalg.norm(rhs),
             1e-12,
         )
     )

@@ -446,21 +446,33 @@ def solve_variant(W0, b, lam, support_mask, dual):
     primal_edge_residual = np.asarray(
         A_active @ x_active - b, dtype=np.float64
     ).reshape(-1)
-    stationarity = (
-        x_active
-        - x0_active
-        + lam
-        * np.asarray(
-            A_active.T @ primal_edge_residual, dtype=np.float64
-        ).reshape(-1)
-    )
-    stationarity_residual = float(
+    displacement_term = x_active - x0_active
+    gradient_term = lam * np.asarray(
+        A_active.T @ primal_edge_residual, dtype=np.float64
+    ).reshape(-1)
+    stationarity = displacement_term + gradient_term
+    stationarity_x0_relative = float(
         np.linalg.norm(stationarity)
         / max(np.linalg.norm(x0_active), 1e-12)
     )
-    if stationarity_residual > 1e-7:
+    stationarity_backward_error = float(
+        np.linalg.norm(stationarity)
+        / max(
+            np.linalg.norm(displacement_term)
+            + np.linalg.norm(gradient_term),
+            1e-12,
+        )
+    )
+    # Gate the numerical solve on a scale-aware KKT backward error.  Dividing
+    # cancellation error by ||x0|| is not stable for the deliberately
+    # dimensionless tiny-edge rows, whose two stationarity terms can both be
+    # large while cancelling correctly.
+    if stationarity_backward_error > 1e-7:
         raise RuntimeError(
-            f"DIRECT_LBS_PRIMAL_STATIONARITY:{stationarity_residual}"
+            "DIRECT_LBS_PRIMAL_BACKWARD_ERROR:"
+            f"{stationarity_backward_error}:"
+            f"x0_relative={stationarity_x0_relative}:"
+            f"dual_relative={dual_residual}"
         )
 
     raw_flat = np.zeros(np.asarray(W0).size, dtype=np.float64)
@@ -473,7 +485,8 @@ def solve_variant(W0, b, lam, support_mask, dual):
         "dual_dimension": int(gram.shape[0]),
         "dual_nnz": int(gram.nnz),
         "dual_relative_residual": dual_residual,
-        "primal_stationarity_relative_residual": stationarity_residual,
+        "primal_stationarity_x0_relative": stationarity_x0_relative,
+        "primal_stationarity_backward_error": stationarity_backward_error,
         "raw_negative_mass": float(-np.minimum(raw, 0.0).sum()),
         "simplex_projection_l1_mean": float(
             np.mean(np.abs(projected - raw).sum(axis=1))

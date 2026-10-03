@@ -96,7 +96,7 @@ def main(args):
             print('PRECISION_READOUT_BEGIN=' + arm, flush=True)
             with torch.inference_mode(), torch.autocast(device, dtype=torch.bfloat16,
                                                        enabled=readout_precision == 'bf16'):
-                _, pred = decoder.decode_all(memory, geom, pair, tokens, legal, chunk=128)
+                _, pred = decoder.decode_all(memory, geom, pair, tokens, legal, chunk=args.readout_chunk)
             weights = pred.float().cpu().numpy().astype(np.float64)
             if not np.isfinite(weights).all() or np.any(weights < 0) or np.any(weights.sum(1) <= 0):
                 raise RuntimeError('INVALID_PRECISION_PROBE_WEIGHTS')
@@ -140,7 +140,7 @@ def main(args):
         'device': device, 'torch_version': str(torch.__version__), 'seed': 11,
         'cuda_query_chunk': args.cuda_query_chunk,
         'gpu_name': torch.cuda.get_device_name(0) if device == 'cuda' else None,
-        'readout_chunk': 128, 'measurements': measurements,
+        'readout_chunk': args.readout_chunk, 'measurements': measurements,
         'seconds': time.monotonic() - started,
         'training_used': False, 'teacher_predictor_input_used': False,
         'qualification_executed': False, 'product_authority_minted': False,
@@ -157,6 +157,7 @@ if __name__ == '__main__':
     ap.add_argument('--run-id', required=True)
     ap.add_argument('--device', choices=('cpu', 'cuda'), default='cpu')
     ap.add_argument('--cuda-query-chunk', type=int, default=0)
+    ap.add_argument('--readout-chunk', type=int, default=128)
     args = ap.parse_args()
     try:
         main(args)

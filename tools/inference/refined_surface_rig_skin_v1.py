@@ -1,6 +1,7 @@
 """Fresh checkpoint inference on an explicit surface; never reuse weight rows."""
 from __future__ import annotations
 import argparse, ast, inspect, json, time
+from contextlib import nullcontext
 from pathlib import Path
 
 import numpy as np
@@ -16,6 +17,7 @@ from models.geppetto.reference_strength_v1.rigging_surface_tensorization_v1 impo
 from models.arachne.v3.conditioning_v3 import ArachneRichConditioningAdapterV3
 from models.arachne.v4.arachne_candidate_v4 import ArachneA1V4
 from models.arachne.v6.readout_v6 import ArachneV6RawReadout
+from tools.inference.query_chunked_sdpa_v1 import query_chunked_cuda_bf16_sdpa
 
 
 def read(p):return json.loads(Path(p).read_text())
@@ -33,13 +35,16 @@ def class_ast(source,name):
 def run(args):
     out=args.out_dir;out.mkdir(parents=True,exist_ok=True)
     surface=rigging_surface_from_dict(read(args.surface_json))
-    # Same FP32 operations and all surface nodes; SDPA avoids materializing N*N
-    # attention matrices in the CPU native MHA fast path. No downsampling/cast.
+    # Preserve all nodes. Device and autocast are explicit execution contracts;
+    # query partitioning bounds attention memory while retaining every key.
     torch.set_num_threads(4);torch.backends.mha.set_fastpath_enabled(False)
     torch.manual_seed(11);np.random.seed(11)
+    if args.device=='cuda' and not torch.cuda.is_available():raise RuntimeError('CUDA_INFERENCE_DEVICE_NOT_AVAILABLE')
     report={'lane':args.lane,'surface_lineage_hash':surface.geometry_lineage_hash,
             'surface_file_sha256':sha256_file(args.surface_json),'node_count':len(surface.surface_nodes),
-            'torch_version':str(torch.__version__),'device':'cpu','dtype':'float32',
+            'torch_version':str(torch.__version__),'device':args.device,'dtype':'float32',
+            'skin_autocast':args.skin_autocast if args.lane=='skin' else 'disabled',
+            'cuda_query_chunk':args.cuda_query_chunk,'readout_chunk':args.readout_chunk,
             'teacher_inference_inputs_used':False,'model_training_used':False,
             'product_authority_minted':False,'seed':11}
     write(out/(args.lane+'_progress.json'),report)
@@ -48,13 +53,13 @@ def run(args):
         execution=read(args.fit_run/'artifacts/27_GEPPETTO_FIT/model_fit_execution.json')
         checkpoint=Path(execution['checkpoint_path']);digest=execution['checkpoint_sha256']
         data=verified_checkpoint(checkpoint,digest)
-        model=GeppettoReferenceStrengthNoLearnedSlotV1(GeppettoReferenceStrengthConfigV1(**data['config']))
+        model=GeppettoReferenceStrengthNoLearnedSlotV1(GeppettoReferenceStrengthConfigV1(**data['config'])).to(args.device)
         if model.config.config_hash!=data['config_hash']:raise RuntimeError('GEPPETTO_CONFIG_DRIFT')
         model.load_state_dict(data['model'],strict=True);model.eval();del data
         tensor=tensorize_rigging_surface_v1(surface)
         print('FRESH_RIG_INFERENCE_BEGIN',len(surface.surface_nodes),flush=True)
         with torch.inference_mode():
-            proposal=model.propose(tensor,resource_step_limit=min(128,tensor.node_count),generator=torch.Generator(device='cpu').manual_seed(11))
+            proposal=model.propose(tensor,resource_step_limit=min(128,tensor.node_count),generator=torch.Generator(device=args.device).manual_seed(11))
         write(out/'fresh_skeleton_proposal.json',proposal.to_dict())
         skeleton=qualify_skeleton(surface,proposal,run_ilp_shadow=False)
         write(out/'fresh_qualified_skeleton.json',skeleton.to_dict())
@@ -74,19 +79,24 @@ def run(args):
         data=verified_checkpoint(checkpoint,digest)
         skeleton=qualified_skeleton_from_dict(read(out/'fresh_qualified_skeleton.json'))
         conditioning=ArachneRichConditioningAdapterV3(require_scene_first=True)([surface],[skeleton])
-        model=ArachneA1V4();model.load_state_dict(data['backbone'],strict=True);model.eval()
-        ci={key:torch.as_tensor(getattr(conditioning,'view_yaw_code' if key=='view_yaw_fourier' else key))
+        model=ArachneA1V4().to(args.device);model.load_state_dict(data['backbone'],strict=True);model.eval()
+        ci={key:torch.as_tensor(getattr(conditioning,'view_yaw_code' if key=='view_yaw_fourier' else key),device=args.device)
             for key in inspect.signature(model.forward).parameters}
         print('FRESH_SKIN_BACKBONE_BEGIN',len(surface.surface_nodes),len(skeleton.joints),flush=True)
-        with torch.inference_mode():raw=model(**ci)
-        geom=torch.as_tensor(conditioning.geometry7)[0].float()
+        attention_context=(query_chunked_cuda_bf16_sdpa(args.cuda_query_chunk)
+                           if args.device=='cuda' and args.cuda_query_chunk else nullcontext(None))
+        with attention_context as telemetry,torch.inference_mode(),torch.autocast(args.device,dtype=torch.bfloat16,enabled=args.skin_autocast=='bf16'):
+            raw=model(**ci)
+        report['attention_query_chunk_telemetry']=telemetry
+        geom=torch.as_tensor(conditioning.geometry7,device=args.device)[0].float()
         pair=ci['pair_geometry'][0].float();legal=(ci['pair_mask'].bool() & ci['surface_mask'][:,:,None].bool() & ci['joint_mask'][:,None,:].bool())[0]
         memory=raw.surface_memory[0].float();tokens=raw.field_tokens[0].float()
-        decoder=ArachneV6RawReadout(memory.shape[-1],tokens.shape[-1],pair.shape[-1]);decoder.load_state_dict(data['decoder'],strict=True);decoder.eval()
+        decoder=ArachneV6RawReadout(memory.shape[-1],tokens.shape[-1],pair.shape[-1]).to(args.device);decoder.load_state_dict(data['decoder'],strict=True);decoder.eval()
         del model,data
         print('FRESH_SKIN_READOUT_BEGIN',flush=True)
-        with torch.inference_mode():_,pred=decoder.decode_all(memory,geom,pair,tokens,legal,chunk=128)
-        weights=pred.cpu().numpy().astype(np.float64)
+        with torch.inference_mode(),torch.autocast(args.device,dtype=torch.bfloat16,enabled=args.skin_autocast=='bf16'):
+            _,pred=decoder.decode_all(memory,geom,pair,tokens,legal,chunk=args.readout_chunk)
+        weights=pred.float().cpu().numpy().astype(np.float64)
         if not np.isfinite(weights).all() or np.any(weights<0):raise RuntimeError('FRESH_SKIN_NONFINITE_OR_NEGATIVE')
         # FP32 softmax roundoff correction only; recorded, fixed numeric budget.
         normalized=weights/weights.sum(axis=1,keepdims=True)
@@ -111,6 +121,10 @@ if __name__=='__main__':
     ap=argparse.ArgumentParser();ap.add_argument('--lane',choices=['rig','skin'],required=True)
     ap.add_argument('--surface-json',type=Path,required=True);ap.add_argument('--fit-run',type=Path,required=True)
     ap.add_argument('--out-dir',type=Path,required=True);ap.add_argument('--arm-dir',type=Path)
+    ap.add_argument('--device',choices=('cpu','cuda'),default='cpu')
+    ap.add_argument('--skin-autocast',choices=('fp32','bf16'),default='fp32')
+    ap.add_argument('--cuda-query-chunk',type=int,default=0)
+    ap.add_argument('--readout-chunk',type=int,default=128)
     args=ap.parse_args()
     try:run(args)
     except Exception as exc:

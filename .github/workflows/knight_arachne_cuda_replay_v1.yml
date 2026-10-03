@@ -42,7 +42,7 @@ jobs:
           /home/monster/realsas-ml312/bin/python tools/audit_arachne_precision_replay_v1.py \
             --authority-root /home/monster/realsas_authority --run-id SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929 \
             --fit-run /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924 \
-            --arm-dir "$ARM" --device cuda --cuda-query-chunk 128 \
+            --arm-dir "$ARM" --device cuda --cuda-query-chunk 128 --readout-chunk 1024 \
             --out-dir /tmp/knight_arachne_cuda_replay_${{ github.run_id }}
       - uses: actions/upload-artifact@v4
         if: always()

@@ -1,10 +1,8 @@
 name: knight-arachne-precision-replay-v1
 on:
-  push:
-    branches: [audit/canonical-caa-mechanics-geometry-lock-20261002]
-    paths:
-      - tools/audit_arachne_precision_replay_v1.py
-      - .github/workflows/knight_arachne_precision_replay_v1.yml
+  # The CPU reference and unchanged-result replay are archived. Further CPU
+  # repeats are explicit diagnostics, not a product or required CI gate.
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

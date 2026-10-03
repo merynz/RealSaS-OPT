@@ -131,3 +131,13 @@ def test_batched_collapse_rejects_bow_tie_input_vertex_link():
     value=replace(value,candidate_lineage_hash=canonical_mesh_candidate_lineage_hash(value))
     with pytest.raises(QualificationError,match="INPUT_NONMANIFOLD"):
         repair_candidate_endpoint_collapses_batched_v2(value,_policy())
+
+def test_batched_collapse_proposal_guard_can_fail_closed():
+    candidate=_fixture()
+    repaired,report=repair_candidate_endpoint_collapses_batched_v2(
+        candidate,_policy(),max_batches=2,max_collapses=8,
+        proposal_admissibility=lambda row: False,
+    )
+    assert report["accepted_collapse_count"]==0
+    assert report["rejected_mechanical_admissibility_count"]>=1
+    assert repaired.faces==tuple(sorted(candidate.faces))

@@ -57,7 +57,7 @@ def _combine_mechanical_skin_support(vertices,weights):
         raise RuntimeError("SPLIT_MECHANICAL_SKIN_SUPPORT_EMPTY")
     return tuple((sid,float(value/total)) for sid,value in cleaned)
 
-def synchronized_long_edge_split(candidate,policy,max_splits=64):
+def synchronized_long_edge_split(candidate,policy,max_splits=64,proposal_admissibility=None):
     vertices={str(v.candidate_vertex_id):v for v in candidate.vertices}
     positions={vid:np.asarray(v.P,dtype=np.float64) for vid,v in vertices.items()}
     faces=[tuple(map(str,f)) for f in candidate.faces]
@@ -67,6 +67,7 @@ def synchronized_long_edge_split(candidate,policy,max_splits=64):
     ratio_floor=2.0*math.cos(math.radians(float(policy.g3_min_angle_deg)))
 
     proposals=[]
+    rejected_mechanical=0
     for fi in bad:
         f=faces[fi]
         rows=[]
@@ -78,32 +79,68 @@ def synchronized_long_edge_split(candidate,policy,max_splits=64):
         minL=rows[0][0];maxL,e=rows[-1]
         if minL<=1e-12 or maxL/minL<=ratio_floor+1e-9:
             continue
-        if len(inc.get(e,()))!=2:
+        adj=tuple(inc.get(e,()))
+        if len(adj)!=2:
             continue
         u,v=e
         if vertices[u].component_id!=vertices[v].component_id:
             continue
-        proposals.append((-(maxL/minL),-maxL,e,fi,maxL/minL))
+        nid="SPLITV:"+content_sha256({
+            "input_candidate":candidate.candidate_lineage_hash,
+            "edge":e,"fraction":0.5,
+        })[:24]
+        old_faces=tuple(faces[i] for i in adj)
+        new_local=[]
+        for face in old_faces:
+            hit=None
+            a,b,c=face
+            for x,y,z in ((a,b,c),(b,c,a),(c,a,b)):
+                if _edge(x,y)==e:
+                    hit=(x,y,z)
+                    break
+            if hit is None:
+                raise RuntimeError("SPLIT_ADJACENT_FACE_EDGE_MISSING")
+            x,y,z=hit
+            new_local.extend(((x,nid,z),(nid,y,z)))
+        proposal={
+            "operator":"split",
+            "edge":e,
+            "seed_face":int(fi),
+            "edge_ratio":float(maxL/minL),
+            "old_faces":old_faces,
+            "new_faces":tuple(new_local),
+            "temporary_split_vertex":{
+                "id":nid,"edge":e,"fraction":0.5,
+            },
+        }
+        if proposal_admissibility is not None and not bool(proposal_admissibility(proposal)):
+            rejected_mechanical+=1
+            continue
+        proposals.append((-(maxL/minL),-maxL,e,fi,maxL/minL,nid))
 
     proposals.sort()
     selected=[]
     occupied=set()
-    for _,_,e,fi,ratio in proposals:
+    for _,_,e,fi,ratio,nid in proposals:
         u,v=e
         # closed endpoint conflict guard: no two selected split edges share an
         # endpoint. Synchronized face rewrite then has at most one split/face.
         if u in occupied or v in occupied:
             continue
-        selected.append((e,fi,ratio))
+        selected.append((e,fi,ratio,nid))
         occupied.update((u,v))
         if len(selected)>=int(max_splits):
             break
     if not selected:
-        return candidate,{"accepted_split_count":0,"selected":[]}
+        return candidate,{
+            "accepted_split_count":0,
+            "rejected_mechanical_admissibility_count":int(rejected_mechanical),
+            "selected":[],
+        }
 
     split_map={}
     new_vertices=dict(vertices)
-    for e,fi,ratio in selected:
+    for e,fi,ratio,nid in selected:
         u,v=e
         geometry_support=_combine_support_bindings([vertices[u],vertices[v]],(0.5,0.5))
         mechanical_support=_combine_mechanical_skin_support([vertices[u],vertices[v]],(0.5,0.5))
@@ -123,10 +160,6 @@ def synchronized_long_edge_split(candidate,policy,max_splits=64):
         else:
             support=geometry_support
         P=tuple(map(float,0.5*(positions[u]+positions[v])))
-        nid="SPLITV:"+content_sha256({
-            "input_candidate":candidate.candidate_lineage_hash,
-            "edge":e,"fraction":0.5,
-        })[:24]
         split_map[e]=nid
         new_vertices[nid]=CanonicalMeshVertexCandidateIR(
             candidate_vertex_id=nid,
@@ -182,9 +215,10 @@ def synchronized_long_edge_split(candidate,policy,max_splits=64):
             **dict(candidate.metadata or {}),
             "synchronized_edge_split_audit":{
                 "accepted_split_count":len(selected),
+                "rejected_mechanical_admissibility_count":int(rejected_mechanical),
                 "selected":[
                     {"edge":list(e),"seed_face":int(fi),"edge_ratio":float(r)}
-                    for e,fi,r in selected
+                    for e,fi,r,_nid in selected
                 ],
                 "product_authority_minted":False,
                 "stage14_stitch_proof_required_for_product_promotion":True,

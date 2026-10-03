@@ -17,7 +17,7 @@ from pathlib import Path
 
 import numpy as np
 from scipy import sparse
-from scipy.sparse.linalg import spsolve
+from scipy.sparse.linalg import splu
 
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     canonical_mesh_candidate_from_dict,
@@ -425,16 +425,33 @@ def solve_variant(W0, b, lam, support_mask, dual):
     S = sparse.eye(
         gram.shape[0], format="csc", dtype=np.float64
     ) + lam * gram.tocsc()
-    r = np.asarray(spsolve(S, c), dtype=np.float64).reshape(-1)
+    lu = splu(S)
+    r = np.asarray(lu.solve(c), dtype=np.float64).reshape(-1)
     if not np.isfinite(r).all():
         raise RuntimeError("DIRECT_LBS_DUAL_SOLVE_NONFINITE")
 
-    dual_residual = float(
-        np.linalg.norm(S @ r - c) / max(np.linalg.norm(c), 1e-12)
-    )
-    if dual_residual > 1e-8:
+    # Sparse direct solves on the tiny-edge-scaled system can have a small
+    # backward error that is strongly amplified by A^T. Reuse the same LU for
+    # deterministic iterative refinement before evaluating the primal KKT
+    # residual; never relax the mechanical or numerical acceptance thresholds.
+    refinement_steps = 0
+    dual_residual = float("inf")
+    for refinement_steps in range(9):
+        delta = np.asarray(c - S @ r, dtype=np.float64).reshape(-1)
+        dual_residual = float(
+            np.linalg.norm(delta) / max(np.linalg.norm(c), 1e-12)
+        )
+        if dual_residual <= 1e-13:
+            break
+        correction = np.asarray(lu.solve(delta), dtype=np.float64).reshape(-1)
+        if not np.isfinite(correction).all():
+            raise RuntimeError("DIRECT_LBS_DUAL_REFINEMENT_NONFINITE")
+        r += correction
+
+    if dual_residual > 1e-11:
         raise RuntimeError(
-            f"DIRECT_LBS_DUAL_RESIDUAL:{dual_residual}"
+            f"DIRECT_LBS_DUAL_RESIDUAL:{dual_residual}:"
+            f"refinement_steps={refinement_steps}"
         )
 
     x_active = x0_active - lam * np.asarray(
@@ -485,6 +502,7 @@ def solve_variant(W0, b, lam, support_mask, dual):
         "dual_dimension": int(gram.shape[0]),
         "dual_nnz": int(gram.nnz),
         "dual_relative_residual": dual_residual,
+        "dual_iterative_refinement_steps": int(refinement_steps),
         "primal_stationarity_x0_relative": stationarity_x0_relative,
         "primal_stationarity_backward_error": stationarity_backward_error,
         "raw_negative_mass": float(-np.minimum(raw, 0.0).sum()),

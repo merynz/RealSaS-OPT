@@ -164,11 +164,13 @@ def main():
     ap.add_argument("--min-training-carriers",type=int,default=2)
     ap.add_argument("--checkpoint-every",type=int,default=100)
     ap.add_argument("--resume-checkpoint",type=Path)
+    ap.add_argument("--eval-probe-count",type=int,default=32)
     a=ap.parse_args()
 
     if (
         a.steps<1 or a.lr<=0 or a.probe_batch<1 or a.surface_chunk<1
         or a.min_training_carriers<1 or a.checkpoint_every<1
+        or a.eval_probe_count<1
     ):
         raise ValueError("invalid optimization hyperparameters")
     if min(a.mechanical_weight,a.teacher_weight,a.trust_weight)<0:
@@ -210,6 +212,10 @@ def main():
     P=probes.shape[1]
     if a.probe_batch>P:
         raise ValueError(f"probe batch {a.probe_batch} exceeds frozen bank {P}")
+    if a.eval_probe_count>P:
+        raise ValueError(
+            f"eval probe count {a.eval_probe_count} exceeds frozen bank {P}"
+        )
 
     model=MechanicalResidualAdapterV1().to(dev)
     if model.parameter_count!=1_582_849:
@@ -251,6 +257,7 @@ def main():
         "lr":a.lr,
         "weight_decay":a.weight_decay,
         "probe_batch":a.probe_batch,
+        "eval_probe_count":a.eval_probe_count,
         "surface_chunk":a.surface_chunk,
         "carrier_ids":list(carrier_ids),
         "carrier_count":len(carrier_ids),
@@ -298,6 +305,10 @@ def main():
         schedules.append(rng.permutation(full_order))
     stream=np.concatenate(schedules)
     stream=stream[:a.steps*a.probe_batch].reshape(a.steps,a.probe_batch)
+    eval_rng=np.random.default_rng(a.seed+1)
+    eval_stream=eval_rng.permutation(full_order)[:a.eval_probe_count]
+    receipt["eval_probe_indices"]=eval_stream.tolist()
+    receipt["eval_probe_ids"]=[probe_ids[i] for i in eval_stream]
 
     for step in range(start_step,a.steps):
         idx=torch.as_tensor(stream[step],device=dev,dtype=torch.long)
@@ -360,6 +371,9 @@ def main():
             # model state. Re-evaluate after opt.step(); do not reuse the
             # pre-update training prediction.
             with torch.no_grad():
+                eval_idx=torch.as_tensor(
+                    eval_stream,device=dev,dtype=torch.long
+                )
                 with torch.autocast(
                     device_type=dev.type,dtype=torch.bfloat16,
                     enabled=(dev.type=="cuda")
@@ -381,7 +395,7 @@ def main():
                         candidate_support_coefficients=carrier["support_coeff"],
                         candidate_rest_vertices=carrier["rest"],
                         candidate_faces=carrier["faces"],
-                        probe_transforms=probes[:,idx],
+                        probe_transforms=probes[:,eval_idx],
                         base_surface_weights=None,
                         teacher_surface_weights=None,
                         teacher_valid_mask=None,
@@ -426,8 +440,10 @@ def main():
                 )
                 row={
                     "step":step+1,
-                    "probe_indices":stream[step].tolist(),
-                    "probe_ids":[probe_ids[i] for i in stream[step]],
+                    "train_probe_indices":stream[step].tolist(),
+                    "train_probe_ids":[probe_ids[i] for i in stream[step]],
+                    "eval_probe_indices":eval_stream.tolist(),
+                    "eval_probe_ids":[probe_ids[i] for i in eval_stream],
                     "total":float(eval_total.detach().cpu()),
                     "mechanical":float(eval_mech.detach().cpu()),
                     "mechanical_mean":float(eval_mean.detach().cpu()),

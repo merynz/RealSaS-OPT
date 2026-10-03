@@ -1,0 +1,58 @@
+name: geppetto-articulation-target-capacity-v1
+
+concurrency:
+  group: geppetto-articulation-target-capacity-v1-\${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [research/rig-skin-architecture-challengers-20261003]
+    paths:
+      - tools/audit_geppetto_articulation_target_capacity_v1.py
+      - experiments/geppetto_reference_strength_fullstack_v1/mechanical_capacity_target_v2.py
+      - .github/workflows/geppetto_articulation_target_capacity_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  court:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: '1'
+      PY: /home/monster/realsas-ml312/bin/python
+      FIT_RUN: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      OUT: /tmp/geppetto_articulation_target_capacity_\${{ github.run_id }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Resolve frozen teacher source
+        id: inputs
+        run: |
+          set -euo pipefail
+          src="$FIT_RUN/training/geppetto_teacher/KNIGHT_GEPPETTO_TEACHER_SOURCE.npz"
+          test -f "$src"
+          "$PY" -m py_compile \
+            tools/audit_geppetto_articulation_target_capacity_v1.py \
+            experiments/geppetto_reference_strength_fullstack_v1/mechanical_capacity_target_v2.py
+          echo "source=$src" >> "$GITHUB_OUTPUT"
+          echo "GEPPETTO_ARTICULATION_CAPACITY_INPUT_PASS"
+      - name: Run target capacity court
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT"
+          "$PY" tools/audit_geppetto_articulation_target_capacity_v1.py \
+            --teacher-source-npz "\${{ steps.inputs.outputs.source }}" \
+            --out-dir "$OUT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: geppetto-articulation-target-capacity-v1
+          path: \${{ env.OUT }}
+          if-no-files-found: error
+          retention-days: 30

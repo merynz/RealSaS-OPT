@@ -480,7 +480,7 @@ def _block_jacobi_apply(vector, starts, lengths, at_column_square, lam):
     return base-dinv*correction
 
 
-def solve_variant(W0, lam, support_mask, tangent):
+def solve_variant(W0, lam, support_mask, tangent, *, warm_start=None):
     T,AT,d,tmeta,blocks=tangent
     lam=float(lam)
     if lam<=0.0 or not math.isfinite(lam):
@@ -508,8 +508,13 @@ def solve_variant(W0, lam, support_mask, tangent):
         ),
         dtype=np.float64,
     )
+    x0=None
+    if warm_start is not None:
+        x0=np.asarray(warm_start,dtype=np.float64)
+        if x0.shape!=(T.shape[1],) or not np.isfinite(x0).all():
+            raise RuntimeError("DIRECT_LBS_WARM_START_INVALID")
     z,info=cg(
-        H,rhs,M=M,rtol=1e-10,atol=1e-12,maxiter=5000
+        H,rhs,x0=x0,M=M,rtol=1e-10,atol=1e-12,maxiter=5000
     )
     z=np.asarray(z,dtype=np.float64)
     if not np.isfinite(z).all():
@@ -565,7 +570,8 @@ def solve_variant(W0, lam, support_mask, tangent):
         "raw_negative_mass":float(-np.minimum(raw,0.0).sum()),
         "simplex_projection_l1_mean":float(np.mean(projection)),
         "simplex_projection_l1_max":float(np.max(projection)),
-    }
+        "warm_start_used":bool(warm_start is not None),
+    },z
 
 
 def exact_motion_court(ctx, rest, weights, faces, joint_ids, skeleton, cameras, policy):
@@ -753,9 +759,10 @@ def main():
         ),
         flush=True,
     )
+    warm_start=None
     for lam in LAMBDAS:
-        W, solver = solve_variant(
-            W0, lam, source_support_mask, tangent
+        W, solver, warm_start = solve_variant(
+            W0, lam, source_support_mask, tangent, warm_start=warm_start
         )
         correction = np.abs(W - W0).sum(axis=1)
         new_support_mass = np.where(source_support_mask, 0.0, W).sum(axis=1)

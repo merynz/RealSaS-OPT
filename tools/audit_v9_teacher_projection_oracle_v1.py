@@ -228,8 +228,19 @@ def main():
     for jcol, joint in enumerate(skeleton.joints):
         idx = int(str(joint.source_proposal_id).rsplit(":", 1)[1])
         canonical_from_bank[:, jcol] = bankW_target[:, idx]
-    if not np.allclose(canonical_from_bank, teacherW_canonical, atol=1e-8, rtol=0.0):
-        raise RuntimeError("V9_TEACHER_ORACLE_CANONICAL_COLUMN_BINDING_DRIFT")
+    canonical_binding_l1 = np.abs(
+        canonical_from_bank - teacherW_canonical
+    ).sum(axis=1)
+    canonical_binding_l1_max = float(np.max(canonical_binding_l1))
+    # The historical projector serializes weights as float32 and itself admits
+    # simplex residual up to 1e-6. qualify_skin() deterministically renormalizes
+    # those rows to exact simplex. Treat only a discrepancy beyond the frozen
+    # projector numeric contract as a semantic column-binding drift.
+    if canonical_binding_l1_max > 1e-6:
+        raise RuntimeError(
+            "V9_TEACHER_ORACLE_CANONICAL_COLUMN_BINDING_DRIFT:"
+            f"{canonical_binding_l1_max}"
+        )
 
     row_err = np.abs(predW - teacherW_canonical).sum(axis=1)
     all_mask = np.ones(len(valid), dtype=bool)
@@ -288,6 +299,8 @@ def main():
         "teacher_projection": projection,
         "teacher_bank": {
             "row_count": int(len(valid)),
+            "qualified_rebind_l1_max": canonical_binding_l1_max,
+            "qualified_rebind_numeric_contract_l1_max": 1e-6,
             "clean_row_count": int(np.count_nonzero(valid)),
             "coverage": float(np.mean(valid)),
             "invalid_row_count": int(np.count_nonzero(~valid)),

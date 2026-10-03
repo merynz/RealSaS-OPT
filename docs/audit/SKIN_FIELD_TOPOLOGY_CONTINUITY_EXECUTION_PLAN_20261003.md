@@ -60,6 +60,17 @@ Therefore the active program is best understood as **closing the already-preregi
 
 A new IR type such as `SkinFieldEvidenceIR` is optional implementation detail only. Prefer the least-disruptive typed extension compatible with the existing product contract.
 
+## 2B. Existing G3B implementation boundary
+
+`compiler/realsas_compiler_core/mesh/skin_topology_compatibility_v1.py` already provides a deterministic topology x skin compatibility proof. It can:
+
+- stress the exact candidate under canonical joint-frame probes;
+- detect unsafe faces/edges;
+- propose seam-cut candidate repair or mechanical repartition evidence;
+- remain fail-closed and preserve skin weights.
+
+It explicitly **does not** repair the skin field, and its automatic repartition path is forbidden until trustworthy skin/reliability authority exists. Therefore it must not be used to hide the present V9 failure by cutting away enough topology. The current program must first establish whether the admitted Arachne field can be realized continuously with bounded correction. G3B remains the verifier / downstream owner-attribution court, not a license for topology-specific witness surgery.
+
 ## 3. Genericity invariants
 
 A proposed repair or representation is admissible only if all of the following hold:

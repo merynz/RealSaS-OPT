@@ -1,0 +1,63 @@
+name: knight-v9-dynamic-source-topology-attribution-v1
+on:
+  push:
+    branches: [audit/canonical-caa-mechanics-geometry-lock-20261002]
+    paths:
+      - tools/audit_v9_dynamic_source_topology_attribution_v1.py
+      - .github/workflows/knight_v9_dynamic_source_topology_attribution_v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '4'
+      PY: /home/monster/realsas-ml312/bin/python
+      AUTH: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
+      INPUT: /tmp/knight_v9_topology_attr_input_${{ github.run_id }}
+      OUT: /tmp/knight_v9_topology_attr_${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-v9-dynamic-mechanics-phase1-v1
+          path: ${{ env.INPUT }}/phase1
+          github-token: ${{ github.token }}
+          run-id: 37064886261
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-static-quality-source-opt-v9
+          path: ${{ env.INPUT }}/static
+          github-token: ${{ github.token }}
+          run-id: 37057338450
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-repaired-compaction-seal-v2
+          path: ${{ env.INPUT }}/compaction
+          github-token: ${{ github.token }}
+          run-id: 37023349486
+      - name: Attribute remaining stretch to source topology
+        run: |
+          mkdir -p "$OUT"
+          "$PY" tools/audit_v9_dynamic_source_topology_attribution_v1.py \
+            --authority-root "$AUTH" --run-id "$RUN_ID" \
+            --target-surface-json "$INPUT/phase1/refined_surface.json" \
+            --candidate-json "$INPUT/static/final_candidate.json" \
+            --inverse-npz "$INPUT/compaction/repaired_inverse_v2.npz" \
+            --out "$OUT/REPORT.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knight-v9-dynamic-source-topology-attribution-v1
+          path: ${{ env.OUT }}
+          if-no-files-found: error
+          retention-days: 30

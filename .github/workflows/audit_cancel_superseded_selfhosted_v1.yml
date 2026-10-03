@@ -31,7 +31,8 @@ jobs:
             37138555995 \
             37138569874 \
             37138627154 \
-            37141688595
+            37141688595 \
+            37141788475
           do
             status="$(gh api "repos/$REPO/actions/runs/$id" --jq .status || true)"
             echo "run=$id status=$status"

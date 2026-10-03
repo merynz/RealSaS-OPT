@@ -51,7 +51,8 @@ def test_mechanical_residual_adapter_receives_gradient_from_product_space_mechan
         surface_mask=sm,
         joint_mask=jm,
     )
-    transfer=torch.eye(N).unsqueeze(0)
+    support_idx=torch.arange(N).reshape(1,N,1)
+    support_coeff=torch.ones(1,N,1)
     rest=torch.tensor([[[0.,0.,0.],[1.,0.,0.],[0.,1.,0.]]])
     faces=torch.tensor([[0,1,2]],dtype=torch.long)
     transforms=torch.eye(4).reshape(1,1,1,4,4).repeat(1,1,J,1,1)
@@ -62,7 +63,8 @@ def test_mechanical_residual_adapter_receives_gradient_from_product_space_mechan
     transforms[0,0,1,1,1]=math.cos(theta)
     loss=mechanical_consequence_loss_v1(
         out,
-        surface_to_candidate=transfer,
+        candidate_support_indices=support_idx,
+        candidate_support_coefficients=support_coeff,
         candidate_rest_vertices=rest,
         candidate_faces=faces,
         probe_transforms=transforms,
@@ -84,7 +86,8 @@ def test_mechanical_residual_adapter_receives_gradient_from_product_space_mechan
 
 def test_product_space_loss_is_zero_for_rigid_single_joint_identity():
     weights=torch.ones(1,3,1)
-    transfer=torch.eye(3).unsqueeze(0)
+    support_idx=torch.arange(3).reshape(1,3,1)
+    support_coeff=torch.ones(1,3,1)
     rest=torch.tensor([[[0.,0.,0.],[1.,0.,0.],[0.,1.,0.]]])
     faces=torch.tensor([[0,1,2]],dtype=torch.long)
     transforms=torch.eye(4).reshape(1,1,1,4,4)

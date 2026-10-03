@@ -5,6 +5,8 @@ on:
     branches: [research/rig-skin-architecture-challengers-20261003]
     paths:
       - compiler/realsas_compiler_core/canonical_rig_tokens_v1.py
+      - models/arachne/v4/rig_token_conditioning_v1.py
+      - tests/models/test_arachne_rig_token_conditioning_v1.py
       - tests/models/test_geppetto_locus_interface_parity_v1.py
       - models/geppetto/v2/geppetto_candidate_v2.py
       - models/geppetto/v2/joint_locus_distribution_v1.py
@@ -36,6 +38,7 @@ jobs:
       - run: |
           python -m pytest -q \
             tests/compiler/test_canonical_rig_tokens_v1.py \
+            tests/models/test_arachne_rig_token_conditioning_v1.py \
             tests/models/test_geppetto_mechanical_capacity_target_v2.py \
             tests/models/test_geppetto_locus_interface_parity_v1.py \
             tests/models/test_geppetto_joint_locus_diffusion_v1.py \

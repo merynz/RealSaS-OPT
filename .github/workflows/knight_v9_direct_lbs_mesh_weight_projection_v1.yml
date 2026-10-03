@@ -1,4 +1,7 @@
 name: knight-v9-direct-lbs-mesh-weight-projection-v1
+concurrency:
+  group: knight-v9-direct-lbs-mesh-weight-projection-v1-${{ github.ref }}
+  cancel-in-progress: true
 on:
   push:
     branches: [audit/canonical-caa-mechanics-geometry-lock-20261002]

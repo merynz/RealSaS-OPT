@@ -79,11 +79,20 @@ def _load_bundle(path: Path, dev: torch.device):
                 if "carrier_training_admitted" in z.files
                 else [True]*len(all_carrier_ids)
             )
+            lineage_hashes=(
+                tuple(map(str,z["carrier_lineage_hashes"].tolist()))
+                if "carrier_lineage_hashes" in z.files
+                else all_carrier_ids
+            )
+            if len(lineage_hashes)!=len(all_carrier_ids):
+                raise ValueError("carrier lineage axis drift")
             if len(admitted)!=len(all_carrier_ids):
                 raise ValueError("carrier admission axis drift")
             carriers=[]
             diagnostic_carriers=[]
-            for i,(cid,is_admitted) in enumerate(zip(all_carrier_ids,admitted)):
+            for i,(cid,is_admitted,lineage_hash) in enumerate(
+                zip(all_carrier_ids,admitted,lineage_hashes)
+            ):
                 p=f"carrier_{i:02d}_"
                 row={
                     "id":cid,
@@ -92,6 +101,7 @@ def _load_bundle(path: Path, dev: torch.device):
                     "rest":T(p+"rest_vertices",torch.float32)[None],
                     "faces":T(p+"faces",torch.long),
                     "training_admitted":bool(is_admitted),
+                    "lineage_hash":str(lineage_hash),
                 }
                 diagnostic_carriers.append(row)
                 if is_admitted:
@@ -108,6 +118,7 @@ def _load_bundle(path: Path, dev: torch.device):
                 "rest":T("candidate_rest_vertices",torch.float32)[None],
                 "faces":T("candidate_faces",torch.long),
                 "training_admitted":True,
+                "lineage_hash":"single",
             }]
     common["carrier_ids"]=carrier_ids
     common["diagnostic_carrier_ids"]=diagnostic_carrier_ids
@@ -176,6 +187,12 @@ def main():
         raise RuntimeError(
             f"insufficient training-admitted carriers: {len(carriers)} < {a.min_training_carriers}"
         )
+    unique_training_lineages={str(x["lineage_hash"]) for x in carriers}
+    if len(unique_training_lineages)<int(a.min_training_carriers):
+        raise RuntimeError(
+            "insufficient distinct training carrier lineages: "
+            f"{len(unique_training_lineages)} < {a.min_training_carriers}"
+        )
 
     P=probes.shape[1]
     if a.probe_batch>P:
@@ -205,6 +222,7 @@ def main():
         "diagnostic_carrier_ids":list(diagnostic_carrier_ids),
         "diagnostic_carrier_count":len(diagnostic_carrier_ids),
         "min_training_carriers":int(a.min_training_carriers),
+        "unique_training_carrier_lineages":len(unique_training_lineages),
         "carrier_mechanical_aggregation":"0.5_MEAN_PLUS_0.5_WORST",
         "semantic_support_hard_mask":True,
         "objective_weights":{

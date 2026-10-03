@@ -451,26 +451,33 @@ def prepare_simplex_tangent_system(W0, A, b, support_mask):
     },tuple(blocks)
 
 
-def _block_jacobi_apply(vector, blocks, at_column_square, lam):
-    """Exact inverse of each per-vertex block D + 11^T.
+def _block_jacobi_prepare(blocks):
+    starts=np.asarray([int(x[0]) for x in blocks],dtype=np.int64)
+    lengths=np.asarray([int(x[1])-int(x[0]) for x in blocks],dtype=np.int64)
+    if not len(starts) or np.any(lengths<=0):
+        raise RuntimeError("DIRECT_LBS_BLOCK_PRECONDITIONER_LAYOUT_INVALID")
+    if int(starts[0])!=0 or not np.array_equal(
+        starts[1:],np.cumsum(lengths)[:-1]
+    ):
+        raise RuntimeError("DIRECT_LBS_BLOCK_PRECONDITIONER_NOT_CONTIGUOUS")
+    return starts,lengths
 
-    T^T T is block diagonal with I + 11^T for each vertex tangent block.
-    Add the diagonal of lambda*(AT)^T(AT) and invert each block exactly via
-    Sherman-Morrison. Cross-vertex deformation coupling remains in the CG
-    operator, so this is a preconditioner only and cannot alter the optimum.
-    """
+
+def _block_jacobi_apply(vector, starts, lengths, at_column_square, lam):
+    """Vectorized exact inverse of each per-vertex D + 11^T block."""
     v=np.asarray(vector,dtype=np.float64)
-    out=np.zeros_like(v)
-    for start,end,_support_count in blocks:
-        sl=slice(int(start),int(end))
-        diag=1.0+float(lam)*at_column_square[sl]
-        if np.any(diag<=0.0) or not np.isfinite(diag).all():
-            raise RuntimeError("DIRECT_LBS_BLOCK_PRECONDITIONER_DIAGONAL_INVALID")
-        dinv=1.0/diag
-        base=dinv*v[sl]
-        denom=1.0+float(np.sum(dinv))
-        out[sl]=base-dinv*(float(np.sum(base))/denom)
-    return out
+    diag=1.0+float(lam)*at_column_square
+    if np.any(diag<=0.0) or not np.isfinite(diag).all():
+        raise RuntimeError("DIRECT_LBS_BLOCK_PRECONDITIONER_DIAGONAL_INVALID")
+    dinv=1.0/diag
+    base=dinv*v
+    sum_dinv=np.add.reduceat(dinv,starts)
+    sum_base=np.add.reduceat(base,starts)
+    block_correction=sum_base/(1.0+sum_dinv)
+    correction=np.repeat(block_correction,lengths)
+    if correction.shape!=v.shape:
+        raise RuntimeError("DIRECT_LBS_BLOCK_PRECONDITIONER_VECTORIZE_SHAPE")
+    return base-dinv*correction
 
 
 def solve_variant(W0, lam, support_mask, tangent):
@@ -481,6 +488,7 @@ def solve_variant(W0, lam, support_mask, tangent):
     at_column_square=np.asarray(
         AT.power(2).sum(axis=0),dtype=np.float64
     ).reshape(-1)
+    block_starts,block_lengths=_block_jacobi_prepare(blocks)
     rhs=float(lam)*np.asarray(AT.T@d,dtype=np.float64).reshape(-1)
 
     H=LinearOperator(
@@ -496,7 +504,7 @@ def solve_variant(W0, lam, support_mask, tangent):
     M=LinearOperator(
         (T.shape[1],T.shape[1]),
         matvec=lambda z:_block_jacobi_apply(
-            z,blocks,at_column_square,float(lam)
+            z,block_starts,block_lengths,at_column_square,float(lam)
         ),
         dtype=np.float64,
     )

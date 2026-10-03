@@ -203,6 +203,13 @@ def main():
     if probe_jids!=jids:
         raise RuntimeError("ARACHNE_MECH_PREFLIGHT_PROBE_JOINT_DRIFT")
 
+    semantic_support=(
+        (base>1e-8)
+        | (np.asarray(valid,bool)[:,None] & (teacher>1e-8))
+    )
+    if not np.all(semantic_support.any(axis=1)):
+        raise RuntimeError("ARACHNE_MECH_PREFLIGHT_SEMANTIC_SUPPORT_EMPTY")
+
     model=MechanicalResidualAdapterV1().eval()
     with torch.no_grad():
         out,delta=model(
@@ -211,6 +218,7 @@ def main():
             pair_geometry=torch.from_numpy(cond.pair_geometry.astype(np.float32)),
             surface_mask=torch.from_numpy(cond.surface_mask),
             joint_mask=torch.from_numpy(cond.joint_mask),
+            row_joint_mask=torch.from_numpy(semantic_support[None]),
             surface_chunk_size=256,
         )
         identity_l1=(out-torch.from_numpy(base[None])).abs().sum(-1)
@@ -252,6 +260,7 @@ def main():
         "pair_geometry":cond.pair_geometry[0].astype(np.float32),
         "surface_mask":cond.surface_mask[0].astype(np.uint8),
         "joint_mask":cond.joint_mask[0].astype(np.uint8),
+        "row_joint_mask":semantic_support.astype(np.uint8),
         "probe_transforms":transforms,
         "surface_ids":np.asarray(sids,dtype="U128"),
         "joint_ids":np.asarray(jids,dtype="U128"),
@@ -295,6 +304,13 @@ def main():
         "adapter_trainable_parameters":int(model.parameter_count),
         "adapter_identity_row_l1_max":float(identity_l1.max()),
         "adapter_delta_abs_max":float(delta.abs().max()),
+        "semantic_support_mean_width":float(semantic_support.sum(1).mean()),
+        "semantic_support_max_width":int(semantic_support.sum(1).max()),
+        "semantic_support_added_from_teacher_valid_rows":int(
+            np.count_nonzero(
+                semantic_support & ~(base>1e-8)
+            )
+        ),
         "smoke_probe_count":min(int(a.probe_count),len(probe_ids)),
         "full_probe_count":len(probe_ids),
         "probe_ids":probe_ids,
@@ -303,6 +319,7 @@ def main():
             "This court performs no optimization.",
             "The residual adapter is zero-init and must reproduce the frozen fresh V9 Arachne field.",
             "Teacher supervision is bound only through the V9 teacher-valid mask.",
+            "Residual redistribution is hard-limited to base support union teacher-valid support; unrelated joint support cannot be minted.",
             "Compiler carrier transfer uses sparse typed support coefficients, including harmonic multi-support.",
             "Only static-quality + manifold PASS carriers are training-admitted.",
             "At least two distinct training-admitted carriers are required before A100 fit authorization.",

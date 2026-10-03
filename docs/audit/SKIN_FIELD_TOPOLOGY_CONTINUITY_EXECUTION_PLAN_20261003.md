@@ -979,6 +979,253 @@ Refactor without deleting the current head:
 Reference-specific 300-step sampling is not adopted by default. Sampling schedule is an implementation hyperparameter and must earn its cost.
 
 
+
+## 8M. Canonical Rig Tokens — shared mechanical language between Geppetto and Arachne
+
+SkinTokens/TokenRig demonstrates a useful structural dependency: skeleton state and skin state can be represented in one causal rig sequence.
+
+RealSaS should adopt the dependency structure, not unified model authority.
+
+Compiler remains between the learned systems:
+
+Geppetto proposal -> Compiler -> QualifiedSkeletonIR -> CanonicalRigTokens -> Arachne.
+
+This gives Arachne a compact, already-qualified description of the rig rather than forcing it to rediscover the skeleton graph from loosely packaged joint features.
+
+### Canonical token contract
+
+Tokens are a deterministic serialization of QualifiedSkeletonIR, not new truth.
+
+Minimum token content:
+
+- sequence/start/end grammar;
+- normalized joint position;
+- parent reference in deterministic serialization;
+- root marker;
+- bounded local-frame / segment geometry derived from qualified rig;
+- optional capability-envelope attributes only when already qualified.
+
+Forbidden:
+
+- source bone names;
+- teacher row IDs;
+- source semantic labels unavailable at product inference;
+- token order as canonical joint identity;
+- learned rewrite of Compiler parent/root decisions.
+
+The token-stream hash binds:
+
+- skeleton lineage;
+- normalization;
+- serializer version;
+- capability-envelope lineage where used.
+
+### T0 — current Arachne conditioning baseline
+
+Current explicit joint and point-joint / parent-segment geometry only.
+
+### T1 — additive canonical rig-token conditioning
+
+Add:
+
+CanonicalRigTokenAdapter(QualifiedSkeletonIR) -> token embeddings
+
+alongside current explicit pair geometry.
+
+Question:
+
+> Do canonical rig tokens reduce the relational structure Arachne must relearn while preserving or improving product-space skin mechanics?
+
+No existing conditioning is removed in T1.
+
+### T2 — token-conditioned compact skin state
+
+Only if T1 passes:
+
+rig token -> compact per-joint skin-field state.
+
+Dense influence remains geometry-conditioned and is queried on admitted surface nodes.
+
+### T3 — architecture reduction
+
+Only after T1/T2 quality parity or improvement:
+
+- ablate redundant Arachne graph/relational blocks;
+- reduce width/layers;
+- measure quality-per-FLOP and memory;
+- never assume tokenization automatically reduces compute.
+
+### Required courts
+
+- deterministic serialization replay;
+- permutation / canonical-ID invariance;
+- source-name leakage;
+- 28-control and richer-rig scaling;
+- current conditioning vs additive RigTokens vs reduced token architecture;
+- exact Compiler requalification after every arm;
+- G3B/G3/motion;
+- compute/memory/latency.
+
+### Code changes
+
+- new Compiler-owned serializer:
+  - compiler/realsas_compiler_core/canonical_rig_tokens_v1.py;
+- new Arachne adapter:
+  - models/arachne/v4/rig_token_conditioning_v1.py;
+- extend conditioning batch with optional token stream/hash;
+- do not change QualifiedSkeletonIR schema for the experiment;
+- add token-specific tests before any training.
+
+## 8N. SkinTokens-derived Arachne evolution — keep Arachne, adopt the stronger field formulation
+
+SkinTokens remains a reference mechanism, not a model replacement.
+
+Current Arachne strengths to preserve:
+
+- exact QualifiedSkeletonIR conditioning;
+- explicit point-joint / parent-segment geometry;
+- RealSaS lineage/provenance;
+- Compiler-owned legal/simplex qualification;
+- product-space mechanical residual adapter from Section 8I.
+
+Mechanisms worth testing:
+
+1. per-bone continuous influence field rather than treating final N x J rows as the primary learned object;
+2. geometry-conditioned field decode at requested admitted surface points;
+3. compact per-joint field state;
+4. optional quantization/token state only after the continuous codec ceiling passes;
+5. active-region / sparse-positive supervision;
+6. canonical rig-token conditioning from Section 8M.
+
+### A0 — current baseline
+
+Frozen current Arachne + 1.58M mechanical residual adapter + multi-carrier product-space consequence.
+
+### A1 — continuous field-codec challenger
+
+Introduce an independently trained geometry-conditioned per-joint field codec.
+
+The first court is a representation ceiling, not predictor training.
+
+Required:
+
+- decode on all admitted surface nodes;
+- reconstruct semantic support;
+- preserve local influence transitions;
+- product-space multi-carrier G3-like consequence;
+- exact Compiler requalification.
+
+Teacher row-L1 reconstruction alone cannot PASS the codec.
+
+### A2 — compact field-state predictor
+
+Only after A1 ceiling PASS:
+
+Arachne conditioning -> per-joint compact field state -> frozen/qualified field decoder.
+
+Compare against A0 with identical skeleton/carrier courts.
+
+### A3 — optional quantized field state
+
+Only if A2 works and quantization provides measurable operational value:
+
+- deterministic bounded codebook/FSQ-like state;
+- exact decode reproducibility;
+- no material mechanical regression;
+- lower storage/sequence complexity sufficient to justify added representation machinery.
+
+Quantization is not a goal by itself.
+
+### Active-region supervision
+
+Teacher skin may be used offline to construct sparse-positive / active-region sampling for training, but:
+
+- teacher topology is not product authority;
+- teacher-invalid regions are not exact labels;
+- final loss includes product-space multi-carrier deformation consequence;
+- no source mesh is required at product inference.
+
+### Code changes
+
+Potential independent modules:
+
+- models/arachne/v4/skin_field_codec_v1.py;
+- models/arachne/v4/skin_field_codec_loss_v1.py;
+- models/arachne/v4/skin_field_state_predictor_v1.py;
+- models/arachne/v4/active_region_sampler_v1.py;
+- optional later models/arachne/v4/skin_field_quantizer_v1.py.
+
+Existing Arachne remains the baseline and is not deleted.
+
+## 8O. Shared Surface Encoder — reduce duplicate geometry work only after functional equivalence
+
+Geppetto and Arachne both consume the same admitted surface family. There is potential duplicated compute in independently re-encoding surface geometry.
+
+Do not force a shared encoder before proving that both tasks can use the same representation without loss.
+
+### E0 — current baseline
+
+Independent Geppetto and Arachne geometry encoders.
+
+### E1 — shared frozen surface-token contract
+
+Create a typed internal learned tensor:
+
+SharedSurfaceTokenSet
+
+bound to:
+
+- exact RiggingSurfaceIR lineage;
+- normalization;
+- encoder architecture/checkpoint;
+- token mask/order;
+- local P+N / qualified feature contract.
+
+One encoder produces surface tokens once. Geppetto and Arachne consume task-specific projections from the same frozen token set.
+
+E1 must preserve task-specific heads and task-specific downstream losses.
+
+### E2 — jointly trained shared encoder
+
+Only after E1 demonstrates no material information loss:
+
+- unfreeze the shared encoder;
+- optimize a multi-task objective;
+- maintain separate task heads;
+- require no-regression on rig and skin courts.
+
+Avoid allowing a single scalar weighted objective to become authority. Both domains keep hard PASS gates.
+
+### Shared-encoder courts
+
+Compare E0/E1/E2:
+
+- Geppetto skeleton proposal metrics;
+- Compiler graph qualification;
+- Arachne semantic/support metrics;
+- product-space mechanical metrics;
+- memory;
+- FLOPs;
+- latency;
+- representation size;
+- gradient conflict diagnostics for E2.
+
+Promotion requires:
+
+- no hard-gate regression;
+- meaningful compute/memory gain or quality gain;
+- deterministic lineage binding.
+
+### Code map
+
+Potential:
+
+- new models/shared/surface_encoder_v1.py;
+- new models/shared/surface_token_contract_v1.py;
+- adapters in Geppetto/Arachne rather than schema changes to RiggingSurfaceIR;
+- no Compiler dependence on learned hidden tokens.
+
+
 ## 9. Progress ledger
 
 | Step | State | Evidence |

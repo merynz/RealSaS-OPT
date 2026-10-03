@@ -1044,6 +1044,42 @@ No Knight D1 fit or product claim has been made yet. The next scientific step is
 
 ## 8M. Canonical Rig Tokens — shared mechanical language between Geppetto and Arachne
 
+
+### 8M.0 Correction after current Arachne audit — RigTokens are primarily a compression challenger
+
+The current Knight skin inference path is not a generic "V6 backbone". It is:
+
+ArachneRichConditioningAdapterV3
+-> ArachneA1V4 backbone
+-> per-joint K=4 field tokens + surface memory
+-> ArachneV6RawReadout
+-> geometry-conditioned skin weights.
+
+ArachneA1V4 already consumes:
+
+- qualified joint positions;
+- parent indices;
+- root/deform-root masks;
+- normalized joint depth;
+- sparse support anchors;
+- exact point-joint pair geometry;
+- the qualified tree via explicit tree message passing.
+
+Its joint feature construction already derives parent delta and segment length. Therefore most proposed CanonicalRigToken content is information-equivalent to data current Arachne already receives.
+
+Consequences:
+
+1. T1 additive RigTokens is no longer presumed to add useful information.
+2. The first RigToken court is an INFORMATION_EQUIVALENCE_AND_COMPRESSION court:
+   - prove which token fields are exactly derivable from current conditioning;
+   - identify any genuinely new field such as deterministic content serialization context;
+   - measure whether token representation can replace part of tree/relational processing with equal mechanical quality.
+3. Do not add a redundant RigToken residual merely because the representation is convenient.
+4. RigTokens become most interesting for richer-rig scaling and architecture reduction, not as a new authority source.
+
+The existing CanonicalRigToken serializer remains useful infrastructure and has contract PASS, but it has no promotion claim yet.
+
+
 SkinTokens/TokenRig demonstrates a useful structural dependency: skeleton state and skin state can be represented in one causal rig sequence.
 
 RealSaS should adopt the dependency structure, not unified model authority.
@@ -1139,6 +1175,51 @@ Only after T1/T2 quality parity or improvement:
 - add token-specific tests before any training.
 
 ## 8N. SkinTokens-derived Arachne evolution — keep Arachne, adopt the stronger field formulation
+
+
+### 8N.0 Correction after current Arachne audit — much of the SkinTokens field formulation already exists
+
+The live Arachne architecture already contains several mechanisms previously listed as future SkinTokens-derived work:
+
+- per-joint compact field state: K=4 x 512 latent field tokens from ArachneA1V4;
+- geometry-conditioned decoding: ArachneV6RawReadout consumes surface memory, geometry7, point-joint pair geometry, field tokens and legal support mask;
+- exact qualified-skeleton conditioning;
+- non-autoregressive per-joint latent-set representation;
+- dense surface<->joint-field reasoning.
+
+Therefore the research target is not to rebuild a second field-token architecture.
+
+The genuinely open mechanisms are now:
+
+A0 — CURRENT_FIELD_BASELINE
+- current ArachneA1V4 + V6 readout;
+- frozen checkpoint;
+- exact current conditioning.
+
+A1 — PRODUCT_SPACE_MECHANICAL_CONDITIONING
+- existing 1.58M zero-init mechanical residual adapter;
+- multi-carrier deformation consequence;
+- teacher as semantic tether, not final numerical truth.
+
+A2 — MECHANICALLY_TRAINED_FIELD_STATE
+- if A1 demonstrates value, move the product-space mechanical consequence upstream into a small field-token/readout fine-tune;
+- freeze as much of ArachneA1V4 as possible;
+- compare against A1 before any full refit.
+
+A3 — ACTIVE_REGION_AND_REFINEMENT_ROBUSTNESS
+- sparse-positive / active-region supervision;
+- multi-carrier/refinement invariance;
+- topology-robust field behavior.
+
+A4 — OPTIONAL_FIELD_COMPRESSION
+- quantization/FSQ/codebook only if storage/sequence/runtime benefit is measured;
+- not a quality assumption.
+
+A5 — RIGTOKEN_ARCHITECTURE_REDUCTION
+- replace or reduce redundant tree/relational blocks only after information-equivalence proof.
+
+A separate learned field codec is no longer mandatory merely to imitate SkinTokens: current V6 readout already supplies a geometry-conditioned field decoder. Any replacement codec must beat the current readout on product-space mechanics or operational cost.
+
 
 SkinTokens remains a reference mechanism, not a model replacement.
 

@@ -20,26 +20,39 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
+          BRANCH: audit/canonical-caa-mechanics-geometry-lock-20261002
+          ACTIVE_FIXED_POINT: '37140820111'
         run: |
           set -euo pipefail
-          # Keep latest guarded fixed-point run 37140820111.
-          for id in \
-            37138069391 \
-            37139093207 \
-            37140755110 \
-            37140783584 \
-            37138555995 \
-            37138569874 \
-            37138627154 \
-            37141688595 \
-            37141788475
-          do
-            status="$(gh api "repos/$REPO/actions/runs/$id" --jq .status || true)"
-            echo "run=$id status=$status"
-            case "$status" in
-              queued|in_progress|waiting|pending|requested)
-                gh api --method POST "repos/$REPO/actions/runs/$id/cancel" || true
+          runs="$(gh api "repos/$REPO/actions/runs?branch=$BRANCH&per_page=100")"
+          fixed_status="$(jq -r --arg id "$ACTIVE_FIXED_POINT" '.workflow_runs[] | select((.id|tostring)==$id) | .status' <<<"$runs" | head -n1)"
+          keep_fixed=""
+          case "$fixed_status" in
+            queued|in_progress|waiting|pending|requested) keep_fixed="$ACTIVE_FIXED_POINT" ;;
+          esac
+          latest_preflight="$(jq -r '[.workflow_runs[] | select(.name=="knight-v9-arachne-mechanical-adapter-preflight-v1" and (.status=="queued" or .status=="in_progress" or .status=="waiting" or .status=="pending" or .status=="requested")) | .id] | if length>0 then max else empty end' <<<"$runs")"
+          echo "keep_fixed=$keep_fixed latest_preflight=$latest_preflight"
+          jq -r '.workflow_runs[] | [.id,.name,.status] | @tsv' <<<"$runs" | while IFS=$'\t' read -r id name status; do
+            active=0
+            case "$status" in queued|in_progress|waiting|pending|requested) active=1 ;; esac
+            test "$active" -eq 1 || continue
+            cancel=0
+            case "$name" in
+              knight-v9-mechanical-static-fixed-point-v1)
+                test "$id" = "$keep_fixed" || cancel=1
+                ;;
+              knight-v9-arachne-mechanical-adapter-preflight-v1)
+                test "$id" = "$latest_preflight" || cancel=1
+                ;;
+              knight-static-quality-split-cycle-v8)
+                cancel=1
                 ;;
             esac
+            if test "$cancel" -eq 1; then
+              echo "cancel run=$id name=$name status=$status"
+              gh api --method POST "repos/$REPO/actions/runs/$id/cancel" || true
+            else
+              echo "keep run=$id name=$name status=$status"
+            fi
           done
-          echo "AUDIT_SUPERSEDED_QUEUE_CANCEL_REQUESTED"
+          echo "AUDIT_SUPERSEDED_QUEUE_COLLAPSED"

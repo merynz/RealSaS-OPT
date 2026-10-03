@@ -197,6 +197,95 @@ Static PASS
 
 Only then continue to final presentation/render attribution.
 
+## 5A. Render-entry gate — Mechanics / Geometry Absolute Seal
+
+**Render is forbidden as an attribution test until this seal is green.**
+
+Purpose: when render is finally executed, any remaining visual failure must no longer have a plausible unclosed owner in rig, skin, weights, carrier topology, static mesh quality, deformation conditioning, or authored-motion mechanics. Only then may the program narrow the remaining owner to appearance / presentation / runtime transport.
+
+The seal is conjunctive. Every item below must PASS on the exact same admitted lineage:
+
+### A. Static geometry / topology
+- canonical face provenance is complete; no invented faces or unsupported topology;
+- manifold / incidence / component invariants PASS;
+- no unresolved holes, self-intersections, duplicated faces, invalid winding, or topology-owner ambiguity;
+- triangle quality PASS under frozen policy: minimum angle, aspect ratio, area/sliver limits, edge-length limits, and CDT/constrained-boundary rules where applicable;
+- component-aware normals / local geometry evidence PASS;
+- refinement/remeshing preserves all mechanical no-cross / continuity constraints;
+- static quality repair may not erase qualified mechanical partition boundaries;
+- zero unresolved static-policy residuals.
+
+### B. Rig authority
+- skeleton lineage and parent graph PASS structural qualification;
+- rest positions / local frames / root / attachments satisfy current canonical contracts;
+- reproducibility under the admitted inference backend is proven;
+- no unresolved rig-owner counterfactual remains;
+- motion retarget / joint-map coverage is complete for the court clips.
+
+### C. Skin / weight authority
+- simplex, non-negativity, influence sparsity / support policy, and coverage PASS;
+- admitted Arachne evidence is preserved within the product correction budget;
+- no unqualified / unmeasured population is shipped;
+- topology x weight discontinuity court PASS;
+- refinement / remeshing does not create unbounded skin gradients or tiny-edge opposite-influence failures;
+- mesh-weight binding seam is fully typed, provenance-bound, and residual-accounted.
+
+### D. Mechanical topology / deformation domain
+- G3B skin-topology compatibility PASS with zero unsafe faces / consequential UNKNOWNs;
+- no visual/mechanical triangle spans an unqualified deformation-domain boundary;
+- mechanical partition constraints are preserved through all static remesh / quality operations;
+- seam-owner / multi-support generated-vertex ownership is total and deterministic;
+- repeated bounded topology feedback reaches a fixed point or fails closed.
+
+### E. Local deformation conditioning
+- production G3 local-frame micro-stress PASS;
+- area-ratio lower/upper bounds PASS;
+- condition-number bound PASS;
+- edge-ratio lower/upper bounds PASS;
+- zero flipped / collapsed faces under the complete G3 probe bank;
+- no catastrophic response hidden by aggregate quantiles.
+
+### F. Actual authored motion mechanics
+- the full preregistered Idle / Run / Slash court passes on every sampled frame;
+- zero failed frames;
+- zero catastrophic edge / area / condition events;
+- no face flips / collapses;
+- no clip-specific repair or threshold;
+- worst-case and tail metrics are reported, not only averages.
+
+### G. Stability / adversarial courts
+- alternate qualified triangulation / refinement replay does not change mechanical class;
+- denser refinement does not cause stress divergence;
+- tiny-edge / near-contact / cross-component / seam adversarial tests PASS;
+- same subject-free operator and same frozen thresholds are used across all carrier variants;
+- no success depends on reverting to a historically convenient topology.
+
+### H. Source / physical geometry fidelity
+- source-surface correspondence and addressing lineage remain valid after all repairs;
+- no geometry repair changes the intended physical/source surface without explicit typed authority;
+- camera / view / depth geometric contracts required by mechanics are intact;
+- no hidden geometry warp is introduced by a downstream consumer.
+
+Only when **A–H all PASS on one immutable lineage** may the state be called:
+
+```
+MECHANICS_GEOMETRY_ABSOLUTE_SEAL = PASS
+```
+
+At that point, and only at that point, run the render / appearance / presentation chain.
+
+### Attribution rule after the seal
+
+If the exact sealed mechanical/geometric lineage renders incorrectly while:
+
+- no geometry or mechanics are mutated after the seal;
+- source appearance bytes and provenance are known;
+- the renderer consumes the sealed lineage exactly;
+
+then the mechanical/geometric side is closed by construction and the remaining defect owner is restricted to the downstream **appearance / presentation / runtime-transport** domain.
+
+This does **not** mean G3 alone proves that attribution. G3 is only one sub-gate inside the absolute seal.
+
 ## 6. A100 escalation rule
 
 Do **not** use A100 merely because a compiler experiment fails.
@@ -216,9 +305,9 @@ Before any A100 run, report to the user with:
 - run configuration and stop criteria;
 - checkpoint/rollback plan.
 
-## 6A. FITK=2 escalation before any genericity claim
+## 6A. FITK=2 escalation before any genericity claim — DEFERRED UNTIL KNIGHT E2E CLOSURE
 
-Single-witness iteration is no longer sufficient evidence for skin/topology continuity. Before any new Arachne fit can support a genericity claim, move from one-witness fitting to a **two-subject joint-fit court (FITK=2)**.
+Single-witness iteration is not sufficient evidence for genericity. However, FITK=2 is **not an active execution target before Knight reaches the Mechanics/Geometry Absolute Seal and a real end-to-end render**. Knight remains the current integration witness. After Knight E2E closure, freeze architecture/policy and cold-replay the second subject before deciding whether joint fitting is required.
 
 Terminology note: do not reuse the historical repo label `FIT2`, which referred to a same-Mage full-subject reclosure. This program means **K=2 distinct subjects trained/evaluated under one frozen architecture and one frozen compiler policy**.
 

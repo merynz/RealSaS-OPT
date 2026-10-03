@@ -16,7 +16,7 @@ from pathlib import Path
 
 import numpy as np
 from scipy import sparse
-from scipy.sparse.linalg import LinearOperator, cg
+from scipy.sparse.linalg import LinearOperator, cg, spsolve
 
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     canonical_mesh_candidate_from_dict,
@@ -166,19 +166,27 @@ def joint_motion_metric(skeleton,cameras,body_span):
 
 def solve_mode_system(K,b,scale):
     if scale<=1e-14:
-        return b.copy(),0
+        return b.copy(),0.0,"IDENTITY"
     A=sparse.eye(K.shape[0],format="csr",dtype=np.float64)+float(scale)*K
     d=np.asarray(A.diagonal(),dtype=np.float64)
     if np.any(d<=0.0) or not np.isfinite(d).all():
         raise RuntimeError("DEFORM_REPAIR_LINEAR_SYSTEM_DIAGONAL_INVALID")
     M=LinearOperator(A.shape,matvec=lambda x:x/d,dtype=np.float64)
     x,info=cg(A,b,rtol=1e-9,atol=1e-11,maxiter=1500,M=M)
+    solver="CG_JACOBI"
     if info!=0 or not np.isfinite(x).all():
-        raise RuntimeError(f"DEFORM_REPAIR_CG_FAIL:{info}")
+        # The system is SPD by construction (I + scale*K, K=Q^T D Q), but
+        # large length-power/lambda modes can be too ill-conditioned for the
+        # intentionally cheap Jacobi-preconditioned CG iteration budget.
+        # Fall back to an exact sparse solve and still fail closed on residual.
+        x=np.asarray(spsolve(A.tocsc(),b),dtype=np.float64)
+        solver=f"SPARSE_DIRECT_AFTER_CG_{info}"
+    if not np.isfinite(x).all():
+        raise RuntimeError(f"DEFORM_REPAIR_LINEAR_SOLVE_NONFINITE:{solver}")
     residual=float(np.linalg.norm(A@x-b)/max(np.linalg.norm(b),1e-12))
     if residual>1e-7:
-        raise RuntimeError(f"DEFORM_REPAIR_CG_RESIDUAL:{residual}")
-    return x,residual
+        raise RuntimeError(f"DEFORM_REPAIR_LINEAR_RESIDUAL:{solver}:{residual}")
+    return x,residual,solver
 
 
 def main():
@@ -250,9 +258,11 @@ def main():
         for lam in LAMBDAS:
             Z=np.empty_like(B)
             max_residual=0.0
+            solver_counts={}
             for k,h in enumerate(heig):
-                Z[:,k],residual=solve_mode_system(K,B[:,k],float(lam)*float(h))
+                Z[:,k],residual,solver=solve_mode_system(K,B[:,k],float(lam)*float(h))
                 max_residual=max(max_residual,float(residual))
+                solver_counts[solver]=solver_counts.get(solver,0)+1
             W=Z@U.T
             if not np.isfinite(W).all():
                 raise RuntimeError("DEFORM_REPAIR_OUTPUT_NONFINITE")
@@ -288,7 +298,8 @@ def main():
                 "length_power":float(power),
                 "K_diagonal_median_normalizer":knorm,
                 "negative_mass_clipped":negative_mass,
-                "cg_max_relative_residual":max_residual,
+                "linear_solver_counts":dict(sorted(solver_counts.items())),
+                "linear_solve_max_relative_residual":max_residual,
                 "mean_row_correction_l1":float(np.mean(correction)),
                 "p95_row_correction_l1":q(correction,.95),
                 "max_row_correction_l1":float(np.max(correction)),

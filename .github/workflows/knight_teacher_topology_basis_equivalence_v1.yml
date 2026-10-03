@@ -25,13 +25,13 @@ jobs:
         with:
           name: knight-v9-exact-teacher-projection-oracle-v1
           path: /tmp/teacher
-          github-token: \${{ github.token }}
+          github-token: ${{ github.token }}
           run-id: 37122879585
       - uses: actions/download-artifact@v4
         with:
           name: knight-static-quality-source-opt-v9
           path: /tmp/static
-          github-token: \${{ github.token }}
+          github-token: ${{ github.token }}
           run-id: 37057338450
       - name: Run topology-basis equivalence court
         run: |

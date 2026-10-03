@@ -7,6 +7,7 @@ on:
       - tools/preflight_knight_v9_arachne_mechanical_adapter_v1.py
       - models/arachne/v4/mechanical_residual_adapter_v1.py
       - models/arachne/v4/mechanical_consequence_loss_v1.py
+      - models/arachne/v4/train_mechanical_residual_adapter_v1.py
       - .github/workflows/knight_v9_arachne_mechanical_adapter_preflight_v1.yml
   workflow_dispatch:
 
@@ -17,7 +18,7 @@ permissions:
 jobs:
   preflight:
     runs-on: [self-hosted, linux, x64, realsas]
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       PYTHONPATH: .
       PYTHONUNBUFFERED: '1'
@@ -55,7 +56,19 @@ jobs:
           path: ${{ env.INPUT }}/teacher
           github-token: ${{ github.token }}
           run-id: 37122879585
-      - name: Run exact V9 CPU preflight
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-v9-teacher-oracle-iterative-repartition-v1
+          path: ${{ env.INPUT }}/iterative
+          github-token: ${{ github.token }}
+          run-id: 37137357080
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-v9-mechanical-static-fixed-point-v1
+          path: ${{ env.INPUT }}/fixedpoint
+          github-token: ${{ github.token }}
+          run-id: 37140820111
+      - name: Run exact multi-carrier V9 CPU preflight
         run: |
           set -euo pipefail
           mkdir -p "$OUT"
@@ -64,6 +77,8 @@ jobs:
             --authority-root "$AUTH" --run-id "$RUN_ID" \
             --surface-json "$INPUT/phase1/refined_surface.json" \
             --candidate-json "$INPUT/static/final_candidate.json" \
+            --carrier "FIXED_POINT=$INPUT/fixedpoint/FINAL_CANDIDATE.json" \
+            --carrier "ITERATIVE4_DIAGNOSTIC=$INPUT/iterative/FINAL_CANDIDATE.json" \
             --fresh-dir "$INPUT/fresh" \
             --teacher-bank "$INPUT/teacher/V9_TEACHER_BANK.npz" \
             --out-dir "$OUT" --probe-count 8

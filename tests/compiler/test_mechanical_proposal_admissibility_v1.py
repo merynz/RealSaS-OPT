@@ -78,3 +78,35 @@ def test_local_mechanical_guard_rejects_topology_only_deformation_regression():
         "old_faces":(("0","1","2"),("1","3","2")),
         "new_faces":(("0","1","3"),("0","3","2")),
     }) is False
+
+
+def test_local_mechanical_guard_evaluates_temporary_split_with_exact_lbs():
+    # One rigidly transformed joint: the temporary split vertex must be skinned
+    # from its midpoint rest position, not guessed from static geometry alone.
+    posed=np.asarray([
+        [0.2,0.1,0.0],
+        [1.2,0.1,0.0],
+        [0.2,1.1,0.0],
+        [1.2,1.1,0.0],
+    ],dtype=np.float64)
+    g=_guard(posed)
+    I=np.eye(4,dtype=np.float64)
+    T=np.eye(4,dtype=np.float64)
+    T[:3,3]=np.asarray([0.2,0.1,0.0])
+    g.probe_matrices=np.stack((I[None],T[None]),axis=0)
+    proposal={
+        "operator":"split",
+        "old_faces":(("0","3","1"),("3","0","2")),
+        "new_faces":(
+            ("0","m","1"),("m","3","1"),
+            ("3","m","2"),("m","0","2"),
+        ),
+        "temporary_split_vertex":{
+            "id":"m","edge":("0","3"),"fraction":0.5,
+        },
+    }
+    new=g.signature_with_temporary_split(
+        proposal["new_faces"],proposal["temporary_split_vertex"]
+    )
+    assert new.unsafe_face_count==0
+    assert g(proposal) is True

@@ -29,7 +29,7 @@ jobs:
       RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
       CACHE_ROOT: /tmp/knight_v9_direct_lbs_input_37118100232
       TEACHER_ROOT: /tmp/knight_v9_teacher_oracle_37122879585
-      OUT: /tmp/knight_v9_mechanical_static_fixed_point_\${{ github.run_id }}
+      OUT: /tmp/knight_v9_mechanical_static_fixed_point_${{ github.run_id }}
 
     steps:
       - uses: actions/checkout@v4
@@ -70,12 +70,12 @@ jobs:
             --partition-json "$CACHE_ROOT/static/partition.json" \
             --fresh-skeleton-json "$CACHE_ROOT/fresh/fresh_qualified_skeleton.json" \
             --teacher-bank "$TEACHER_ROOT/V9_TEACHER_BANK.npz" \
-            --inverse-npz "\${{ steps.inputs.outputs.inverse }}" \
+            --inverse-npz "${{ steps.inputs.outputs.inverse }}" \
             --out-dir "$OUT"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: knight-v9-mechanical-static-fixed-point-v1
-          path: \${{ env.OUT }}
+          path: ${{ env.OUT }}
           if-no-files-found: error
           retention-days: 30

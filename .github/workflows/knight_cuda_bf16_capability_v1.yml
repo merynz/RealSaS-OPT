@@ -1,0 +1,59 @@
+name: knight-cuda-bf16-capability-v1
+on:
+  push:
+    branches: [audit/canonical-caa-mechanics-geometry-lock-20261002]
+    paths: [.github/workflows/knight_cuda_bf16_capability_v1.yml]
+permissions:
+  contents: read
+jobs:
+  capability:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 5
+    env:
+      OUT: /tmp/knight_cuda_bf16_capability_${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Measure actual CUDA BF16 operations before loading full model
+        run: |
+          /home/monster/realsas-ml312/bin/python - <<'PY'
+          import inspect,json,os
+          from pathlib import Path
+          import torch
+          from torch.nn.attention import sdpa_kernel, SDPBackend
+          out=Path(os.environ['OUT']);out.mkdir(parents=True,exist_ok=True)
+          report={'status':'CAPABILITY_MEASUREMENTS_ONLY','torch_version':str(torch.__version__),
+              'cuda_available':torch.cuda.is_available(),'training_used':False,'product_authority_minted':False}
+          if torch.cuda.is_available():
+              report.update(gpu_name=torch.cuda.get_device_name(0),capability=list(torch.cuda.get_device_capability(0)),
+                  bf16_supported_default=torch.cuda.is_bf16_supported())
+              if 'including_emulation' in inspect.signature(torch.cuda.is_bf16_supported).parameters:
+                  report['bf16_supported_native']=torch.cuda.is_bf16_supported(including_emulation=False)
+              torch.manual_seed(11)
+              try:
+                  model=torch.nn.Sequential(torch.nn.Linear(64,64),torch.nn.LayerNorm(64),torch.nn.Softmax(-1)).cuda().eval()
+                  with torch.inference_mode(),torch.autocast('cuda',dtype=torch.bfloat16):
+                      y=model(torch.randn(32,64,device='cuda'))
+                  torch.cuda.synchronize()
+                  report['autocast_linear_norm_softmax']={'executed':True,'finite':bool(torch.isfinite(y).all()),'output_dtype':str(y.dtype)}
+              except Exception as exc:
+                  report['autocast_linear_norm_softmax']={'executed':False,'error':type(exc).__name__+': '+str(exc)}
+              try:
+                  q=torch.randn(1,10,32,64,device='cuda',dtype=torch.bfloat16)
+                  with torch.inference_mode(),sdpa_kernel([SDPBackend.EFFICIENT_ATTENTION]):
+                      y=torch.nn.functional.scaled_dot_product_attention(q,q,q)
+                  torch.cuda.synchronize()
+                  report['bf16_memory_efficient_attention']={'executed':True,'finite':bool(torch.isfinite(y).all())}
+              except Exception as exc:
+                  report['bf16_memory_efficient_attention']={'executed':False,'error':type(exc).__name__+': '+str(exc)}
+          (out/'REPORT.json').write_text(json.dumps(report,indent=2,sort_keys=True)+'\n')
+          print('CUDA_BF16_CAPABILITY='+json.dumps(report),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knight-cuda-bf16-capability-v1
+          path: ${{ env.OUT }}
+          if-no-files-found: error
+          retention-days: 30

@@ -14,6 +14,7 @@ except ImportError:
     from realsas_compiler_core.types import SkeletonProposalEdge, SkeletonProposalIR, SkeletonProposalJoint
 
 from .geppetto_conditioning_v2 import GeppettoConditioningBatchV2
+from .joint_locus_distribution_v1 import MultimodalGaussianLocusHeadV1
 
 
 def _hash(payload: object) -> str:
@@ -167,6 +168,13 @@ class GeppettoCandidateV2(nn.Module):
         self.position = nn.Linear(d, M * 3)
         self.log_sigma = nn.Linear(d, M * 3)
         self.position_mode_logits = nn.Linear(d, M)
+        self.locus_head = MultimodalGaussianLocusHeadV1(
+            position=self.position,
+            log_sigma=self.log_sigma,
+            mode_logits=self.position_mode_logits,
+            position_modes=M,
+            position_scale=config.position_scale,
+        )
         self.existence = nn.Linear(d, 1)
         self.stop = nn.Linear(d, 1)
         self.root = nn.Linear(d, 1)
@@ -183,20 +191,10 @@ class GeppettoCandidateV2(nn.Module):
 
     @staticmethod
     def _map_representative(modes: torch.Tensor, mode_log_sigma: torch.Tensor, mode_logits: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        """Select a real hypothesis, never the mean between separated modes."""
-        if modes.ndim != 3 or mode_log_sigma.shape != modes.shape or mode_logits.shape != modes.shape[:2]:
-            raise ValueError("multimodal representative contract drift")
-        B, M, C = modes.shape
-        if C != 3 or M < 2:
-            raise ValueError("expected at least two 3D locus modes")
-        # Mode slots are fixed architecture coordinates. Stable descending sort
-        # makes exact-logit ties explicit and backend-independent instead of
-        # delegating tie behavior to a bare argmax implementation.
-        idx = torch.argsort(mode_logits, dim=-1, descending=True, stable=True)[:, 0]
-        gather3 = idx[:, None, None].expand(B, 1, 3)
-        pos = torch.gather(modes, 1, gather3).squeeze(1)
-        log_sigma = torch.gather(mode_log_sigma, 1, gather3).squeeze(1)
-        return pos, log_sigma, idx
+        """Backward-compatible delegate to the D0 locus interface."""
+        return MultimodalGaussianLocusHeadV1.map_representative(
+            modes, mode_log_sigma, mode_logits
+        )
 
     def _parent_logits_chunked(self, h: torch.Tensor, pos: torch.Tensor) -> torch.Tensor:
         B, K, D = h.shape
@@ -239,13 +237,12 @@ class GeppettoCandidateV2(nn.Module):
                 states[li] = cell(x, states[li])
                 x = torch.cat([pooled, states[li], rel], dim=-1)
             h = states[-1]
-            modes = torch.tanh(self.position(h).reshape(B, M, 3)) * self.config.position_scale
-            # Uncertainty calibration owns only the sigma head. The NLL may update
-            # log_sigma parameters, but it must not rewrite the shared latent state
-            # that also drives locus, STOP, root, parent and support evidence.
-            mode_ls = self.log_sigma(h.detach()).reshape(B, M, 3).clamp(-8.0, 4.0)
-            mode_logits = self.position_mode_logits(h)
-            pos, rep_ls, _ = self._map_representative(modes, mode_ls, mode_logits)
+            locus = self.locus_head(h)
+            modes = locus.modes_normalized
+            mode_ls = locus.mode_log_sigma
+            mode_logits = locus.mode_logits
+            pos = locus.representative_position
+            rep_ls = locus.representative_log_sigma
             previous_states.append(h)
             out.append((h, pos, rep_ls, modes, mode_ls, mode_logits, self.existence(h).squeeze(-1), self.stop(h).squeeze(-1), self.root(h).squeeze(-1), self.support_presence(h).squeeze(-1)))
         fields = list(zip(*out))

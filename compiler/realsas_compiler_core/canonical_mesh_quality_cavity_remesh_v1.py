@@ -156,6 +156,7 @@ def repair_candidate_cavity_retriangulation_v1(
     protected_surface_ids: set[str] | frozenset[str] = frozenset(),
     max_batches: int = 64,
     max_removed_vertices: int = 2048,
+    proposal_admissibility=None,
 ) -> tuple[CanonicalMeshCandidateIR,dict]:
     if int(max_batches)<1 or int(max_removed_vertices)<1:
         raise QualificationError("QUALITY_CAVITY_REMESH_LIMIT_INVALID")
@@ -283,7 +284,8 @@ def repair_candidate_cavity_retriangulation_v1(
                 rejected["topology"]+=1
                 continue
 
-            proposals.append({
+            proposal={
+                "operator":"vertex_cavity",
                 "removed_vertex_id":vid,
                 "cavity_indices":frozenset(cavity_indices),
                 "cavity_vertices":frozenset(local_vertices),
@@ -295,7 +297,11 @@ def repair_candidate_cavity_retriangulation_v1(
                 "allowed":float(allowed),
                 "valence":len(cycle),
                 "bad_faces_in_cavity":sum(fi in violating for fi in cavity_indices),
-            })
+            }
+            if proposal_admissibility is not None and not bool(proposal_admissibility(proposal)):
+                rejected["mechanical_admissibility"]+=1
+                continue
+            proposals.append(proposal)
 
         if not proposals:
             break

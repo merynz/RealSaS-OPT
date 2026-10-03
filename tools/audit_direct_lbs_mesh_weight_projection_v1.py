@@ -17,7 +17,7 @@ from pathlib import Path
 
 import numpy as np
 from scipy import sparse
-from scipy.sparse.linalg import LinearOperator, lsmr
+from scipy.sparse.linalg import LinearOperator, cg
 
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     canonical_mesh_candidate_from_dict,
@@ -410,6 +410,7 @@ def prepare_simplex_tangent_system(W0, A, b, support_mask):
     n,jcount=W0.shape
     rows=[]; cols=[]; data=[]
     pivots=[]
+    blocks=[]
     col=0
     for i in range(n):
         active=np.flatnonzero(mask[i])
@@ -417,6 +418,7 @@ def prepare_simplex_tangent_system(W0, A, b, support_mask):
             raise RuntimeError("DIRECT_LBS_SOURCE_SUPPORT_EMPTY")
         pivot=int(active[np.argmax(W0[i,active])])
         pivots.append(pivot)
+        block_start=col
         for jid in active:
             jid=int(jid)
             if jid==pivot:
@@ -425,6 +427,8 @@ def prepare_simplex_tangent_system(W0, A, b, support_mask):
             cols.extend((col,col))
             data.extend((1.0,-1.0))
             col+=1
+        if col>block_start:
+            blocks.append((block_start,col,int(len(active))))
 
     if col<=0:
         raise RuntimeError("DIRECT_LBS_SIMPLEX_TANGENT_EMPTY")
@@ -444,50 +448,64 @@ def prepare_simplex_tangent_system(W0, A, b, support_mask):
         "tangent_variable_count":int(col),
         "fixed_single_support_vertex_count":int(sum(np.count_nonzero(mask[i])==1 for i in range(n))),
         "pivot_policy":"MAX_SOURCE_WEIGHT_PER_VERTEX",
-    }
+    },tuple(blocks)
+
+
+def _block_jacobi_apply(vector, blocks, at_column_square, lam):
+    """Exact inverse of each per-vertex block D + 11^T.
+
+    T^T T is block diagonal with I + 11^T for each vertex tangent block.
+    Add the diagonal of lambda*(AT)^T(AT) and invert each block exactly via
+    Sherman-Morrison. Cross-vertex deformation coupling remains in the CG
+    operator, so this is a preconditioner only and cannot alter the optimum.
+    """
+    v=np.asarray(vector,dtype=np.float64)
+    out=np.zeros_like(v)
+    for start,end,_support_count in blocks:
+        sl=slice(int(start),int(end))
+        diag=1.0+float(lam)*at_column_square[sl]
+        if np.any(diag<=0.0) or not np.isfinite(diag).all():
+            raise RuntimeError("DIRECT_LBS_BLOCK_PRECONDITIONER_DIAGONAL_INVALID")
+        dinv=1.0/diag
+        base=dinv*v[sl]
+        denom=1.0+float(np.sum(dinv))
+        out[sl]=base-dinv*(float(np.sum(base))/denom)
+    return out
 
 
 def solve_variant(W0, lam, support_mask, tangent):
-    T,AT,d,tmeta=tangent
+    T,AT,d,tmeta,blocks=tangent
     lam=float(lam)
     if lam<=0.0 or not math.isfinite(lam):
         raise RuntimeError("DIRECT_LBS_LAMBDA_INVALID")
-    root=math.sqrt(lam)
+    at_column_square=np.asarray(
+        AT.power(2).sum(axis=0),dtype=np.float64
+    ).reshape(-1)
+    rhs=float(lam)*np.asarray(AT.T@d,dtype=np.float64).reshape(-1)
 
-    t_col=np.asarray(T.power(2).sum(axis=0),dtype=np.float64).reshape(-1)
-    a_col=np.asarray(AT.power(2).sum(axis=0),dtype=np.float64).reshape(-1)
-    scale=np.sqrt(t_col+lam*a_col)
-    if np.any(scale<=1e-14) or not np.isfinite(scale).all():
-        raise RuntimeError("DIRECT_LBS_TANGENT_COLUMN_SCALE_INVALID")
-    inv_scale=1.0/scale
-    n_top=T.shape[0]
-
-    def matvec(y):
-        z=np.asarray(y,dtype=np.float64)*inv_scale
-        return np.concatenate((
-            np.asarray(T@z,dtype=np.float64).reshape(-1),
-            root*np.asarray(AT@z,dtype=np.float64).reshape(-1),
-        ))
-
-    def rmatvec(v):
-        v=np.asarray(v,dtype=np.float64)
-        grad=np.asarray(T.T@v[:n_top],dtype=np.float64).reshape(-1)
-        grad+=root*np.asarray(AT.T@v[n_top:],dtype=np.float64).reshape(-1)
-        return grad*inv_scale
-
-    op=LinearOperator(
-        (T.shape[0]+AT.shape[0],T.shape[1]),
-        matvec=matvec,rmatvec=rmatvec,dtype=np.float64,
+    H=LinearOperator(
+        (T.shape[1],T.shape[1]),
+        matvec=lambda z: (
+            np.asarray(T.T@(T@np.asarray(z,dtype=np.float64)),dtype=np.float64).reshape(-1)
+            +float(lam)*np.asarray(
+                AT.T@(AT@np.asarray(z,dtype=np.float64)),dtype=np.float64
+            ).reshape(-1)
+        ),
+        dtype=np.float64,
     )
-    rhs=np.concatenate((
-        np.zeros(T.shape[0],dtype=np.float64),
-        root*d,
-    ))
-    ls=lsmr(op,rhs,atol=1e-9,btol=1e-9,conlim=1e12,maxiter=4000)
-    y=np.asarray(ls[0],dtype=np.float64)
-    if not np.isfinite(y).all():
-        raise RuntimeError("DIRECT_LBS_TANGENT_LSMR_NONFINITE")
-    z=y*inv_scale
+    M=LinearOperator(
+        (T.shape[1],T.shape[1]),
+        matvec=lambda z:_block_jacobi_apply(
+            z,blocks,at_column_square,float(lam)
+        ),
+        dtype=np.float64,
+    )
+    z,info=cg(
+        H,rhs,M=M,rtol=1e-10,atol=1e-12,maxiter=5000
+    )
+    z=np.asarray(z,dtype=np.float64)
+    if not np.isfinite(z).all():
+        raise RuntimeError("DIRECT_LBS_TANGENT_CG_NONFINITE")
 
     delta=np.asarray(T@z,dtype=np.float64).reshape(np.asarray(W0).shape)
     raw=np.asarray(W0,dtype=np.float64)+delta
@@ -501,7 +519,7 @@ def solve_variant(W0, lam, support_mask, tangent):
     displacement_grad=np.asarray(
         T.T@delta.reshape(-1),dtype=np.float64
     ).reshape(-1)
-    deformation_grad=lam*np.asarray(
+    deformation_grad=float(lam)*np.asarray(
         AT.T@edge_residual,dtype=np.float64
     ).reshape(-1)
     stationarity=displacement_grad+deformation_grad
@@ -512,23 +530,23 @@ def solve_variant(W0, lam, support_mask, tangent):
             1e-12,
         )
     )
+    rhs_relative=float(
+        np.linalg.norm(stationarity)/max(np.linalg.norm(rhs),1e-12)
+    )
     if backward>1e-7:
         raise RuntimeError(
             "DIRECT_LBS_TANGENT_KKT_BACKWARD_ERROR:"
-            f"{backward}:istop={int(ls[1])}:itn={int(ls[2])}:"
-            f"normar={float(ls[4])}"
+            f"{backward}:cg_info={int(info)}:rhs_relative={rhs_relative}"
         )
 
     projected=simplex_project_rows(raw,support_mask)
     projection=np.abs(projected-raw).sum(axis=1)
     return projected,{
-        "solver":"SIMPLEX_TANGENT_COLUMN_SCALED_LSMR",
+        "solver":"SIMPLEX_TANGENT_BLOCK_JACOBI_PCG",
         **tmeta,
-        "lsmr_istop":int(ls[1]),
-        "lsmr_iterations":int(ls[2]),
-        "lsmr_normr":float(ls[3]),
-        "lsmr_normar":float(ls[4]),
+        "cg_info":int(info),
         "tangent_kkt_backward_error":backward,
+        "tangent_stationarity_rhs_relative":rhs_relative,
         "preprojection_row_sum_residual_max":row_sum_residual,
         "raw_negative_mass":float(-np.minimum(raw,0.0).sum()),
         "simplex_projection_l1_mean":float(np.mean(projection)),
@@ -714,6 +732,7 @@ def main():
                 "tangent_variable_count": int(tangent[0].shape[1]),
                 "constraint_dimension": int(tangent[1].shape[0]),
                 "constraint_tangent_nnz": int(tangent[1].nnz),
+                "tangent_block_count": int(len(tangent[4])),
                 **tangent[3],
             },
             sort_keys=True,

@@ -263,3 +263,13 @@ product authority. Full fresh rig/skin PASS is rejected. Next diagnostic priorit
 is to recover and verify the original inference numerical contract on the original
 surface/rig before using this new inference path as a causal control for refinement.
 Do not weaken thresholds, smooth weights, or alter authority artifacts to pass.
+
+## 2026-10-03 continuation: constrained A100 budget
+
+User can afford approximately two further A100 hours in Colab and requests notice
+if refitting is necessary. Do not launch or prescribe a refit without resolving
+the inference replay discrepancy first. CPU precision control holds original
+surface, rig, checkpoint and decoder chunk fixed while crossing backbone/readout
+FP32 and BF16 autocast. Archived skin is read only after predictions for evaluation.
+Raw weights and diagnostic normalized weights are preserved; this experiment
+performs no qualification and claims no CUDA BF16 equivalence or product PASS.

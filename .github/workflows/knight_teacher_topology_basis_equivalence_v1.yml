@@ -1,0 +1,50 @@
+name: knight-teacher-topology-basis-equivalence-v1
+
+on:
+  push:
+    branches: [audit/canonical-caa-mechanics-geometry-lock-20261002]
+    paths:
+      - tools/audit_knight_teacher_topology_basis_equivalence_v1.py
+      - .github/workflows/knight_teacher_topology_basis_equivalence_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-v9-exact-teacher-projection-oracle-v1
+          path: /tmp/teacher
+          github-token: \${{ github.token }}
+          run-id: 37122879585
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-static-quality-source-opt-v9
+          path: /tmp/static
+          github-token: \${{ github.token }}
+          run-id: 37057338450
+      - name: Run topology-basis equivalence court
+        run: |
+          python tools/audit_knight_teacher_topology_basis_equivalence_v1.py \
+            --source-npz /tmp/teacher/input/source.npz \
+            --target-npz /tmp/teacher/input/target.npz \
+            --teacher-bank /tmp/teacher/V9_TEACHER_BANK.npz \
+            --candidate-json /tmp/static/final_candidate.json \
+            --out /tmp/out/REPORT.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knight-teacher-topology-basis-equivalence-v1
+          path: /tmp/out
+          if-no-files-found: error
+          retention-days: 30

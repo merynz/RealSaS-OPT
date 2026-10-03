@@ -141,7 +141,7 @@ def main():
     support_idx,support_coeff=sparse_candidate_support(candidate,sids)
     rest,faces=candidate_geometry(candidate)
     probe_jids,probe_ids,transforms=probe_transforms(
-        skeleton,cameras,envelope,max_probes=a.probe_count
+        skeleton,cameras,envelope,max_probes=1_000_000
     )
     if probe_jids!=jids:
         raise RuntimeError("ARACHNE_MECH_PREFLIGHT_PROBE_JOINT_DRIFT")
@@ -163,7 +163,7 @@ def main():
             candidate_support_coefficients=torch.from_numpy(support_coeff[None]),
             candidate_rest_vertices=torch.from_numpy(rest[None]),
             candidate_faces=torch.from_numpy(faces),
-            probe_transforms=torch.from_numpy(transforms[None]),
+            probe_transforms=torch.from_numpy(transforms[:a.probe_count][None]),
             base_surface_weights=torch.from_numpy(base[None]),
             teacher_surface_weights=torch.from_numpy(teacher[None]),
             teacher_valid_mask=torch.from_numpy(valid[None]),
@@ -211,7 +211,8 @@ def main():
         "adapter_trainable_parameters":int(model.parameter_count),
         "adapter_identity_row_l1_max":float(identity_l1.max()),
         "adapter_delta_abs_max":float(delta.abs().max()),
-        "probe_count":len(probe_ids),
+        "smoke_probe_count":min(int(a.probe_count),len(probe_ids)),
+        "full_probe_count":len(probe_ids),
         "probe_ids":probe_ids,
         "initial_loss":{
             k:float(v) for k,v in loss.items()

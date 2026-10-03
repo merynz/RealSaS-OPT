@@ -351,8 +351,9 @@ A100 authorization under this program therefore requires not only a legal Knight
 - V9 static mesh/topology: retained as current static witness; no rollback is justified by current evidence.
 - Geppetto refit: not indicated by current counterfactual/replay evidence.
 - Arachne full refit: not authorized.
-- Arachne readout-only refit: contingency only, gated by Section 6.
-- Active next step: recover and complete the deformation-sensitive solver, then move to direct LBS deformation-constrained projection.
+- Arachne minimal residual mechanical adapter: **AUTHORIZED FOR CPU PREFLIGHT ONLY**; A100 fit waits for the sealed multi-carrier bundle and Run-All handoff.
+- Active compiler step: proposal-guarded static ↔ mechanical fixed-point court.
+- Active model step: seal topology-robust multi-carrier Arachne adapter bundle; no GPU fit before that seal.
 
 ## 8A. Decision after deformation-sensitive projection run 37116286772
 
@@ -557,6 +558,178 @@ Decision:
 - the next repair must make mechanical no-cross / partition / deformation-field constraints first-class hard constraints inside static quality operations, then rerun static + G3B + G3 + full motion on the exact same candidate;
 - do not render and do not start A100 on this state.
 
+## 8F. Teacher topology/basis equivalence court — hypothesis confirmed
+
+Run `37139120074` directly tested the hypothesis that near-exact teacher weight transfer does **not** imply equivalent deformation mechanics when the carrier topology/basis changes.
+
+The court compared the same teacher-induced field under the same frozen stress probe on:
+
+1. the teacher/source topology/basis;
+2. the current V9 product topology/basis.
+
+Weight-transfer fidelity was effectively exact:
+
+- teacher-bank barycentric rebind row-L1 max: **~7.45e-8**.
+
+Teacher/source basis:
+
+- vertices / faces: **3,665 / 6,952**;
+- minimum area ratio: **~0.72536**;
+- maximum area ratio: **~1.27937**;
+- maximum condition number: **~1.32708**;
+- maximum edge ratio: **~1.22730**;
+- qualification class: **PASS**.
+
+Current V9 basis:
+
+- vertices / faces: **14,399 / 28,810**;
+- minimum area ratio: **~0.00731**;
+- maximum area ratio: **~56.6407**;
+- maximum condition number: **~829.9104**;
+- maximum edge ratio: **~62.6450**;
+- qualification class: **FAIL**.
+
+Sampled field-equivalence displacement error was small in absolute source scale (p99 ~`1.876e-4`, max ~`0.00611`, max/bbox diagonal ~`0.001368`) while the local deformation/Jacobian class changed catastrophically. This is precisely why vertex-weight similarity or even small point-displacement error is not sufficient authority for a discretized deformation system: local derivatives and triangle basis can amplify a small field mismatch.
+
+Decision:
+
+- **HYPOTHESIS CONFIRMED**;
+- retire the assumption `teacher-like vertex weights => teacher-like deformation mechanics`;
+- teacher remains a semantic/source-space supervisory oracle, not direct product-space mechanical truth;
+- product truth must be evaluated on the actual compiler carrier;
+- Arachne evaluation/training must include product-space deformation consequence, not only teacher weight error;
+- carrier topology qualification must include field/deformation compatibility.
+
+## 8G. Iterative repartition after harmonic multi-support owner closure
+
+The harmonic seam multi-support owner contract is now generic and gated:
+
+- contract gate run `37136685525`: **PASS**;
+- multi-support is preserved as a complete convex support rather than collapsed to an arbitrary single owner;
+- residual repartition evidence deterministically ranks admissible support-pair Cartesian products.
+
+With that blocker removed, iterative teacher-oracle repartition run `37137357080` completed the bounded four-repair court:
+
+| evaluation | components | SEPARATE | G3B unsafe | static violations |
+|---:|---:|---:|---:|---:|
+| 0 | 50 | 0 | 418 | 0 |
+| 1 | 88 | 1,125 | 166 | 3,217 |
+| 2 | 143 | 2,166 | 66 | 3,336 |
+| 3 | 180 | 2,452 | 24 | 3,371 |
+| 4 | 194 | 2,541 | 14 | 3,388 |
+
+Final bounded-court result:
+
+- G3B: **14 unsafe remain**;
+- G3: **FAIL**, max condition **~489.11**;
+- exact motion: **51/51 FAIL**;
+- max motion edge: **~32.98x**;
+- static violations: **3,388**.
+
+Interpretation:
+
+- the generic mechanical repartition operator is strongly convergent on the correct mechanical owner;
+- repartition alone is insufficient and progressively reopens static quality;
+- static quality and mechanical partition therefore require a true closed-loop composition, not terminal sequencing.
+
+## 8H. Proposal-level static × mechanical composition
+
+The static operator family now exposes fail-closed proposal-level mechanical admissibility for:
+
+- fixed-vertex edge flip;
+- endpoint collapse;
+- vertex-cavity retriangulation;
+- edge-cavity retriangulation;
+- synchronized interior-edge midpoint split.
+
+The local mechanical guard precomputes the frozen G3B pose bank and evaluates only the old/new proposal patch. Acceptance is hard/lexicographic:
+
+```
+new unsafe-face count <= old unsafe-face count
+AND
+new worst normalized mechanical severity <= old severity
+```
+
+Static quality cannot purchase a mechanical regression.
+
+For split proposals, the temporary midpoint is evaluated with **exact LBS** using:
+
+- midpoint rest position;
+- the exact convex transferred endpoint skin field;
+- the frozen joint probe matrices.
+
+It is not approximated as the midpoint of posed endpoints.
+
+Evidence:
+
+- proposal-level static mechanical contract: **PASS**;
+- exact-LBS temporary split guard: **PASS**;
+- split mechanical-support preservation contract: **PASS**;
+- topology-only synthetic adversary is rejected when a diagonal change raises normalized mechanical severity despite unchanged vertex positions/weights.
+
+The closed-loop target is now:
+
+```
+G3B
+ -> mechanical repartition / Stage18 rebuild
+ -> mechanically guarded static proposals
+ -> global production + all-face G3B non-regression
+ -> repeat to fixed point
+ -> STATIC + G3B + G3 + 51-frame exact motion
+```
+
+No skin weight is mutated by this compiler loop.
+
+## 8I. Arachne mechanical residual adapter — minimal trainable scope
+
+A full Arachne refit is not the active plan.
+
+Implemented trainable scope:
+
+- frozen existing Arachne field/backbone;
+- zero-initialized `MechanicalResidualAdapterV1`;
+- **1,582,849 trainable parameters**;
+- output remains a non-negative simplex over the admitted joint mask;
+- step-0 output reproduces the frozen base field up to floating-point tolerance.
+
+Contract gate run `37138462111`: **PASS** (identity/simplex/gradient/mechanical-loss tests).
+
+Training objective is product-space:
+
+```
+L =
+    mechanical_consequence_on_compiler_carrier
+  + lambda_teacher * teacher_valid_semantic_tether
+  + lambda_trust   * frozen_base_field_trust
+```
+
+The mechanical term uses differentiable LBS consequences aligned with G3 classes:
+
+- edge stretch;
+- area lower/upper violation;
+- local deformation condition number.
+
+Teacher-invalid rows are not promoted to exact truth. The compiler exact G3B/G3/actual-motion courts remain final authority.
+
+Because Section 8F proves topology/basis sensitivity, the A100 fit must not optimize against only one carrier. The sealed training bundle should contain a **preregistered carrier ensemble** drawn from subject-free compiler lineages (at minimum current V9 plus mechanically repartitioned child variants). The same Arachne prediction is evaluated across those carriers. This makes the intended target:
+
+> a topology-robust mechanically conditioned influence field,
+
+not a Knight/V9-topology-specific correction.
+
+A100 becomes scientifically justified only after the CPU preflight seals:
+
+- exact frozen base field;
+- exact conditioning tensors;
+- typed sparse carrier support transfer;
+- full frozen probe bank;
+- carrier-ensemble manifest and hashes;
+- semantic/trust correction budgets;
+- deterministic training schedule and rollback checkpoint.
+
+At that point provide a single **Run All Colab notebook**. The notebook trains only the residual adapter and produces a sealed checkpoint + receipt for compiler requalification.
+
+
 ## 9. Progress ledger
 
 | Step | State | Evidence |
@@ -572,6 +745,8 @@ Decision:
 | Coarse FEM prolongation | STRUCTURALLY INCOMPLETE | source components without coarse faces |
 | G3-sensitive projection | FAIL / PROXY INSUFFICIENT | run 37116286772 PASS as workflow; all 8 variants mechanically fail. Best max motion edge ~26.38x, G3 max condition ~120.11, 51/51 frames fail, p95 correction ~0.765 L1 |
 | Direct LBS deformation-constrained projection | FAIL / COMPILER OWNER REJECTED | run 37120181421: lambda 10 still 51/51 fail, max motion edge ~298.84x, p99 correction ~0.81, max correction ~2.0; shipping binder budget is 1e-9 |
-| V9 exact teacher reprojection oracle | FAIL / TOPOLOGY-FIELD OWNER EXPOSED | run 37122879585: teacher G3 ~177.68, 51/51 motion fail, max edge ~188.70x; A100 paused |\n| Teacher-oracle production repartition one-pass | IMPROVES / NOT CLOSED | run 37123289786: G3B unsafe 418→166, motion max edge 188.70x→56.15x, 51/51 still fail; child static violations 3217 |\n| Iterative teacher-oracle production repartition | SUPERSEDED BY COMPOSITION COURT | one-pass improved mechanics but reopened static quality; independent static cleanup then regressed mechanics |\n| Static↔mechanical composition court | FAIL / OWNER LOCALIZED | run 37124108389: 3217→66 static violations, but G3 max condition ~10362.18, 51/51 motion fail, max edge ~3200.14x; independent static cleanup destroys mechanical class |\n| Deformation-field / topology-basis equivalence court | NEXT | compare teacher-own-basis behavior vs teacher-induced field on V9/alternate carriers in deformation space; no product mutation |\n| Dynamic-child static composition | FAIL / COMPOSITION OWNER EXPOSED | run 37124108389: static violations 3217→66, but G3B unsafe 166→277, G3 condition ~10362, 51/51 motion fail, max edge ~3200x |
+| V9 exact teacher reprojection oracle | FAIL / TOPOLOGY-FIELD OWNER EXPOSED | run 37122879585: teacher G3 ~177.68, 51/51 motion fail, max edge ~188.70x; A100 paused |\n| Teacher-oracle production repartition one-pass | IMPROVES / NOT CLOSED | run 37123289786: G3B unsafe 418→166, motion max edge 188.70x→56.15x, 51/51 still fail; child static violations 3217 |\n| Iterative teacher-oracle production repartition | CONVERGENT / BUDGET-EXHAUSTED | run 37137357080 after multi-support fix: G3B unsafe 418→166→66→24→14; static violations 0→3388; G3/motion still fail |\n| Static↔mechanical composition court | FAIL / OWNER LOCALIZED | run 37124108389: 3217→66 static violations, but G3 max condition ~10362.18, 51/51 motion fail, max edge ~3200.14x; independent static cleanup destroys mechanical class |\n| Deformation-field / topology-basis equivalence court | PASS AS ATTRIBUTION / HYPOTHESIS CONFIRMED | run 37139120074: teacher/source basis PASS (cond ~1.33, edge ~1.23), V9 basis FAIL (cond ~829.91, edge ~62.65) despite weight rebind L1 max ~7.45e-8 |\n| Dynamic-child static composition | FAIL / COMPOSITION OWNER EXPOSED | run 37124108389: static violations 3217→66, but G3B unsafe 166→277, G3 condition ~10362, 51/51 motion fail, max edge ~3200x |
+| Proposal-level mechanical static guard | CONTRACT PASS | flip/collapse/vertex-cavity/edge-cavity/split; exact-LBS split temporary vertex guarded; hosted gates PASS |
+| Arachne mechanical residual adapter | CONTRACT PASS / CPU PREFLIGHT PENDING | 1,582,849 trainable params, zero-init identity, product-space mechanical loss; full Arachne frozen |
 | Multi-topology invariance court | TODO | required before genericity claim |
 | Product contract integration | BLOCKED | requires preceding PASS |

@@ -8,6 +8,8 @@ on:
       - tests/models/test_geppetto_locus_interface_parity_v1.py
       - models/geppetto/v2/geppetto_candidate_v2.py
       - models/geppetto/v2/joint_locus_distribution_v1.py
+      - tests/models/test_geppetto_joint_locus_diffusion_v1.py
+      - models/geppetto/v2/joint_locus_diffusion_v1.py
       - tests/compiler/test_canonical_rig_tokens_v1.py
       - experiments/geppetto_reference_strength_fullstack_v1/mechanical_capacity_target_v2.py
       - tests/models/test_geppetto_mechanical_capacity_target_v2.py
@@ -31,4 +33,5 @@ jobs:
           python -m pytest -q \
             tests/compiler/test_canonical_rig_tokens_v1.py \
             tests/models/test_geppetto_mechanical_capacity_target_v2.py \
-            tests/models/test_geppetto_locus_interface_parity_v1.py
+            tests/models/test_geppetto_locus_interface_parity_v1.py \
+            tests/models/test_geppetto_joint_locus_diffusion_v1.py

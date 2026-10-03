@@ -77,11 +77,20 @@ jobs:
               raise SystemExit("CACHE_SKIN_SKELETON_DRIFT")
           print("FROZEN_PHASE_B_CACHE_LINEAGE_PASS", surface.geometry_lineage_hash, candidate.candidate_lineage_hash)
           PY
+          # Reuse the immutable, lineage-verified cache by symlink. Do not
+          # duplicate tens of MB on the self-hosted runner's /tmp volume.
+          find /tmp -maxdepth 1 -type d -name 'knight_v9_direct_lbs_input_*' \
+            ! -name 'knight_v9_direct_lbs_input_37118100232' \
+            ! -name "knight_v9_direct_lbs_input_${GITHUB_RUN_ID}" \
+            -exec rm -rf {} + || true
+          find /tmp -maxdepth 1 -type d -name 'knight_v9_direct_lbs_[0-9]*' \
+            ! -name "knight_v9_direct_lbs_${GITHUB_RUN_ID}" \
+            -exec rm -rf {} + || true
           rm -rf "$INPUT"
           mkdir -p "$INPUT"
-          cp -a "$CACHE_ROOT/phase1" "$INPUT/phase1"
-          cp -a "$CACHE_ROOT/static" "$INPUT/static"
-          cp -a "$CACHE_ROOT/fresh" "$INPUT/fresh"
+          ln -s "$CACHE_ROOT/phase1" "$INPUT/phase1"
+          ln -s "$CACHE_ROOT/static" "$INPUT/static"
+          ln -s "$CACHE_ROOT/fresh" "$INPUT/fresh"
           echo "hit=true" >> "$GITHUB_OUTPUT"
           echo "FROZEN_PHASE_B_CACHE_HIT=$CACHE_ROOT"
       - uses: actions/download-artifact@v4

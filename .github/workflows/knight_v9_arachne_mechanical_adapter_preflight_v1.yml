@@ -1,5 +1,9 @@
 name: knight-v9-arachne-mechanical-adapter-preflight-v1
 
+concurrency:
+  group: knight-v9-arachne-mechanical-adapter-preflight-v1-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [audit/canonical-caa-mechanics-geometry-lock-20261002]

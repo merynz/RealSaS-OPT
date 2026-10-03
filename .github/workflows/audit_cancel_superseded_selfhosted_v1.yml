@@ -1,0 +1,43 @@
+name: audit-cancel-superseded-selfhosted-v1
+
+on:
+  push:
+    branches: [audit/canonical-caa-mechanics-geometry-lock-20261002]
+    paths:
+      - .github/workflows/audit_cancel_superseded_selfhosted_v1.yml
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cancel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Cancel superseded audit runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # Keep latest guarded fixed-point run 37140820111.
+          for id in \
+            37138069391 \
+            37139093207 \
+            37140755110 \
+            37140783584 \
+            37138555995 \
+            37138569874 \
+            37138627154
+          do
+            status="$(gh api "repos/$REPO/actions/runs/$id" --jq .status || true)"
+            echo "run=$id status=$status"
+            case "$status" in
+              queued|in_progress|waiting|pending|requested)
+                gh api --method POST "repos/$REPO/actions/runs/$id/cancel" || true
+                ;;
+            esac
+          done
+          echo "AUDIT_SUPERSEDED_QUEUE_CANCEL_REQUESTED"

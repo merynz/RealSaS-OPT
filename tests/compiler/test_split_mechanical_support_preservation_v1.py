@@ -51,11 +51,11 @@ def test_seam_touching_split_preserves_mechanical_support_separately_from_geomet
         ),
         CanonicalMeshVertexCandidateIR(
             "a",SurfaceSupportBinding("IDENTITY_SURFACE_NODE",(("s3",1.0),)),
-            "c0",(0.0,0.1,0.0),
+            "c0",(0.1,0.1,0.0),
         ),
         CanonicalMeshVertexCandidateIR(
             "b",SurfaceSupportBinding("IDENTITY_SURFACE_NODE",(("s4",1.0),)),
-            "c0",(4.0,0.1,0.0),
+            "c0",(3.9,0.1,0.0),
         ),
     )
     faces=(("u","v","a"),("v","u","b"))

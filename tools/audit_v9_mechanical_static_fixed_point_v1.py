@@ -125,17 +125,23 @@ def _guarded_static_rounds(
     rows=[]
     current=candidate
 
+    # All admitted operators in this court are connectivity/subset-only:
+    # flip rewires faces; collapse/cavities only remove vertices. No surviving
+    # vertex position or support binding changes and no new vertex is created.
+    # Therefore one frozen posed-vertex cache is valid across every proposal in
+    # every static round for this exact child lineage.
+    guard=MechanicalProposalAdmissibilityGuardV1(
+        current,
+        surface=surface,
+        skeleton=skeleton,
+        skin=skin,
+        envelope=envelope,
+        cameras=cameras,
+        policy=policy,
+    )
+
     for round_index in range(MAX_STATIC_ROUNDS_PER_CYCLE):
         before=report_quality(current,policy)
-        guard=MechanicalProposalAdmissibilityGuardV1(
-            current,
-            surface=surface,
-            skeleton=skeleton,
-            skin=skin,
-            envelope=envelope,
-            cameras=cameras,
-            policy=policy,
-        )
         op_rows=[]
 
         nxt,rep=repair_candidate_fixed_vertex_flips_topology_safe_v2(
@@ -149,12 +155,6 @@ def _guarded_static_rounds(
         })
         current=nxt
 
-        # Rebuild the guard after topology changes. Vertex positions/supports are
-        # unchanged, but rebuilding binds the predicate to the exact current lineage.
-        guard=MechanicalProposalAdmissibilityGuardV1(
-            current,surface=surface,skeleton=skeleton,skin=skin,
-            envelope=envelope,cameras=cameras,policy=policy,
-        )
         nxt,rep=repair_candidate_endpoint_collapses_batched_v2(
             current,policy,max_batches=24,max_collapses=768,
             proposal_admissibility=guard,
@@ -167,10 +167,6 @@ def _guarded_static_rounds(
         })
         current=nxt
 
-        guard=MechanicalProposalAdmissibilityGuardV1(
-            current,surface=surface,skeleton=skeleton,skin=skin,
-            envelope=envelope,cameras=cameras,policy=policy,
-        )
         nxt,rep=repair_candidate_cavity_retriangulation_v1(
             current,policy,protected_surface_ids=protected,
             max_batches=24,max_removed_vertices=768,
@@ -184,10 +180,6 @@ def _guarded_static_rounds(
         })
         current=nxt
 
-        guard=MechanicalProposalAdmissibilityGuardV1(
-            current,surface=surface,skeleton=skeleton,skin=skin,
-            envelope=envelope,cameras=cameras,policy=policy,
-        )
         nxt,rep=repair_candidate_edge_cavity_retriangulation_v1(
             current,policy,protected_surface_ids=protected,
             max_batches=24,max_removed_edges=768,

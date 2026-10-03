@@ -1,0 +1,24 @@
+name: mechanical-split-support-contract-v1
+
+on:
+  push:
+    branches: [audit/canonical-caa-mechanics-geometry-lock-20261002]
+    paths:
+      - tools/audit_knight_static_quality_split_cycle_v8.py
+      - tests/compiler/test_split_mechanical_support_preservation_v1.py
+      - .github/workflows/mechanical_split_support_contract_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - run: python -m pytest -q tests/compiler/test_split_mechanical_support_preservation_v1.py

@@ -1,0 +1,35 @@
+name: knight-geppetto-backend-replay-v1
+on:
+  push:
+    branches: [audit/canonical-caa-mechanics-geometry-lock-20261002]
+    paths:
+      - tools/audit_geppetto_backend_replay_v1.py
+      - .github/workflows/knight_geppetto_backend_replay_v1.yml
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '4'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Original-surface CPU and CUDA rig inference without fitting
+        run: |
+          /home/monster/realsas-ml312/bin/python tools/audit_geppetto_backend_replay_v1.py \
+            --authority-root /home/monster/realsas_authority --run-id SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929 \
+            --fit-run /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924 \
+            --out-dir /tmp/knight_geppetto_backend_${{ github.run_id }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knight-geppetto-backend-replay-v1
+          path: /tmp/knight_geppetto_backend_${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30

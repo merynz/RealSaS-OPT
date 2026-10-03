@@ -93,6 +93,7 @@ class MechanicalProposalAdmissibilityGuardV1:
                     probes.append((f"{jid}:LOCAL_{axis_name}:{deg:+g}", jid, axis_index, deg))
 
         posed_rows = []
+        matrix_rows = []
         probe_ids = []
         for probe_id, jid, axis_index, degrees in probes:
             skin_by_id = _pose_skin_matrices(
@@ -109,8 +110,10 @@ class MechanicalProposalAdmissibilityGuardV1:
                     dtype=np.float64,
                 )
             )
+            matrix_rows.append(np.asarray(matrices,dtype=np.float64))
             probe_ids.append(probe_id)
         self.posed = np.stack(posed_rows, axis=0)
+        self.probe_matrices = np.stack(matrix_rows, axis=0)
         self.probe_ids = tuple(probe_ids)
         self._signature_cache = {}
 
@@ -125,16 +128,14 @@ class MechanicalProposalAdmissibilityGuardV1:
             raise QualificationError("MECHANICAL_PROPOSAL_GUARD_EMPTY_PATCH")
         return np.asarray(out, dtype=np.int64)
 
-    def signature(self, faces) -> LocalMechanicalSignatureV1:
-        face_rows=tuple(tuple(map(str,face)) for face in tuple(faces))
-        key=tuple(sorted(face_rows))
-        cached=self._signature_cache.get(key)
-        if cached is not None:
-            return cached
-        fi=self._face_indices(face_rows)
+    def _signature_from_face_state(self, r, p) -> LocalMechanicalSignatureV1:
+        r=np.asarray(r,dtype=np.float64)
+        p=np.asarray(p,dtype=np.float64)
+        if r.ndim!=3 or r.shape[1:]!=(3,3):
+            raise QualificationError("MECHANICAL_PROPOSAL_GUARD_REST_PATCH_SHAPE_INVALID")
+        if p.ndim!=4 or p.shape[1:]!=(len(r),3,3):
+            raise QualificationError("MECHANICAL_PROPOSAL_GUARD_POSED_PATCH_SHAPE_INVALID")
 
-        r=self.rest[fi]                                      # [F,3,3]
-        p=self.posed[:,fi]                                  # [P,F,3,3]
         r1=r[:,1]-r[:,0]; r2=r[:,2]-r[:,0]
         l1=np.linalg.norm(r1,axis=1)
         if np.any(l1<=1e-12):
@@ -146,7 +147,7 @@ class MechanicalProposalAdmissibilityGuardV1:
         if np.any(y2<=1e-12):
             raise QualificationError("MECHANICAL_PROPOSAL_GUARD_REST_TRIANGLE_DEGENERATE")
 
-        inv=np.zeros((len(fi),2,2),dtype=np.float64)
+        inv=np.zeros((len(r),2,2),dtype=np.float64)
         inv[:,0,0]=1.0/l1
         inv[:,0,1]=-x2/(l1*y2)
         inv[:,1,1]=1.0/y2
@@ -177,11 +178,9 @@ class MechanicalProposalAdmissibilityGuardV1:
             and np.isfinite(edge_max).all()
         )
         if not finite:
-            out=LocalMechanicalSignatureV1(
-                len(fi),len(fi),float("inf"),0.0,float("inf"),float("inf"),float("inf")
+            return LocalMechanicalSignatureV1(
+                len(r),len(r),float("inf"),0.0,float("inf"),float("inf"),float("inf")
             )
-            self._signature_cache[key]=out
-            return out
 
         min_area=area.min(axis=0)
         max_area=area.max(axis=0)
@@ -194,8 +193,8 @@ class MechanicalProposalAdmissibilityGuardV1:
             float(self.policy.g3_min_dynamic_area_ratio)/np.maximum(min_area,1e-12),
         ))
         unsafe=severity>(1.0+self.tolerance)
-        out=LocalMechanicalSignatureV1(
-            face_count=len(fi),
+        return LocalMechanicalSignatureV1(
+            face_count=len(r),
             unsafe_face_count=int(np.count_nonzero(unsafe)),
             maximum_severity=float(np.max(severity,initial=0.0)),
             minimum_area_ratio=float(np.min(min_area,initial=1.0)),
@@ -203,8 +202,59 @@ class MechanicalProposalAdmissibilityGuardV1:
             maximum_condition_number=float(np.max(max_cond,initial=1.0)),
             maximum_edge_ratio=float(np.max(max_edge,initial=1.0)),
         )
+
+    def signature(self, faces) -> LocalMechanicalSignatureV1:
+        face_rows=tuple(tuple(map(str,face)) for face in tuple(faces))
+        key=tuple(sorted(face_rows))
+        cached=self._signature_cache.get(key)
+        if cached is not None:
+            return cached
+        fi=self._face_indices(face_rows)
+        out=self._signature_from_face_state(self.rest[fi],self.posed[:,fi])
         self._signature_cache[key]=out
         return out
+
+    def _temporary_split_state(self, spec):
+        nid=str(spec.get("id") or "")
+        edge=tuple(map(str,spec.get("edge") or ()))
+        t=float(spec.get("fraction",0.5))
+        if not nid or len(edge)!=2 or edge[0] not in self.vertex_index or edge[1] not in self.vertex_index:
+            raise QualificationError("MECHANICAL_PROPOSAL_GUARD_SPLIT_SPEC_INVALID")
+        if not math.isfinite(t) or t<=0.0 or t>=1.0:
+            raise QualificationError("MECHANICAL_PROPOSAL_GUARD_SPLIT_FRACTION_INVALID")
+        ia,ib=(self.vertex_index[edge[0]],self.vertex_index[edge[1]])
+        rest=(1.0-t)*self.rest[ia]+t*self.rest[ib]
+        weights=(1.0-t)*self.weights[ia]+t*self.weights[ib]
+        weights=weights/np.maximum(float(weights.sum()),1e-15)
+        hom=np.concatenate([rest,np.ones((1,),dtype=np.float64)],axis=0)
+        per=np.einsum("pjac,c->pja",self.probe_matrices,hom,optimize=True)[...,:3]
+        posed=np.einsum("j,pja->pa",weights,per,optimize=True)
+        return nid,rest,posed
+
+    def signature_with_temporary_split(self, faces, spec) -> LocalMechanicalSignatureV1:
+        nid,temp_rest,temp_posed=self._temporary_split_state(spec)
+        face_rows=tuple(tuple(map(str,face)) for face in tuple(faces))
+        if not face_rows:
+            raise QualificationError("MECHANICAL_PROPOSAL_GUARD_EMPTY_PATCH")
+        r=[]; p=[]
+        for face in face_rows:
+            if len(face)!=3:
+                raise QualificationError("MECHANICAL_PROPOSAL_GUARD_FACE_INVALID")
+            rr=[]; pp=[]
+            for vid in face:
+                if vid==nid:
+                    rr.append(temp_rest); pp.append(temp_posed)
+                elif vid in self.vertex_index:
+                    i=self.vertex_index[vid]
+                    rr.append(self.rest[i]); pp.append(self.posed[:,i])
+                else:
+                    raise QualificationError("MECHANICAL_PROPOSAL_GUARD_FACE_UNKNOWN_VERTEX")
+            r.append(np.stack(rr,axis=0))
+            p.append(np.stack(pp,axis=1))
+        return self._signature_from_face_state(
+            np.stack(r,axis=0),
+            np.stack(p,axis=1),
+        )
 
     def __call__(self, proposal) -> bool:
         old_faces = tuple(proposal.get("old_faces") or ())
@@ -212,11 +262,18 @@ class MechanicalProposalAdmissibilityGuardV1:
         if not old_faces or not new_faces:
             raise QualificationError("MECHANICAL_PROPOSAL_GUARD_PATCH_MISSING")
         old = self.signature(old_faces)
-        new = self.signature(new_faces)
+        split_spec=proposal.get("temporary_split_vertex")
+        new = (
+            self.signature_with_temporary_split(new_faces,split_spec)
+            if split_spec is not None
+            else self.signature(new_faces)
+        )
         return bool(
             new.unsafe_face_count <= old.unsafe_face_count
             and new.maximum_severity <= old.maximum_severity * (1.0 + self.tolerance)
         )
+
+
 
 
 __all__ = [

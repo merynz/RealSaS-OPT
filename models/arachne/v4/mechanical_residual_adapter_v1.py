@@ -67,6 +67,7 @@ class MechanicalResidualAdapterV1(nn.Module):
         pair_geometry: torch.Tensor,
         surface_mask: torch.Tensor,
         joint_mask: torch.Tensor,
+        surface_chunk_size: int | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         if base_weights.ndim != 3:
             raise ValueError("base_weights must be [B,N,J]")
@@ -87,10 +88,18 @@ class MechanicalResidualAdapterV1(nn.Module):
         w = w / denom.clamp_min(1e-12)
 
         base_log = torch.log(w.clamp_min(1e-8))
-        se = self.surface(surface_geometry7.float())[:, :, None, :].expand(-1, -1, J, -1)
-        pe = self.pair(pair_geometry.float())
-        x = torch.cat([se, pe, base_log[..., None]], dim=-1)
-        delta = self.residual(x).squeeze(-1)
+        se_all = self.surface(surface_geometry7.float())
+        chunk = N if surface_chunk_size is None else int(surface_chunk_size)
+        if chunk <= 0:
+            raise ValueError("surface_chunk_size must be positive")
+        delta_chunks = []
+        for start in range(0, N, chunk):
+            stop = min(N, start + chunk)
+            se = se_all[:, start:stop, None, :].expand(-1, -1, J, -1)
+            pe = self.pair(pair_geometry[:, start:stop].float())
+            x = torch.cat([se, pe, base_log[:, start:stop, :, None]], dim=-1)
+            delta_chunks.append(self.residual(x).squeeze(-1))
+        delta = torch.cat(delta_chunks, dim=1)
         delta = delta.masked_fill(~legal, 0.0)
 
         logits = base_log + delta

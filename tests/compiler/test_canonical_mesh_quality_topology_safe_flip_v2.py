@@ -106,3 +106,13 @@ def test_topology_safe_flip_rejects_bow_tie_input_vertex_link():
     value=replace(value,candidate_lineage_hash=canonical_mesh_candidate_lineage_hash(value))
     with pytest.raises(QualificationError,match="INPUT_NONMANIFOLD"):
         repair_candidate_fixed_vertex_flips_topology_safe_v2(value,_policy())
+
+
+def test_topology_safe_flip_proposal_guard_can_fail_closed():
+    candidate=_candidate()
+    repaired,report=repair_candidate_fixed_vertex_flips_topology_safe_v2(
+        candidate,_policy(),proposal_admissibility=lambda row: False
+    )
+    assert report["accepted_flip_count"]==0
+    assert report["rejected_mechanical_admissibility_count"]>=1
+    assert repaired.faces==candidate.faces

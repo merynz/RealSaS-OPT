@@ -1,0 +1,89 @@
+name: knight-v9-fem-skin-prolongation-v1
+on:
+  push:
+    branches: [audit/canonical-caa-mechanics-geometry-lock-20261002]
+    paths:
+      - tools/audit_coarse_mesh_fem_skin_prolongation_v1.py
+      - .github/workflows/knight_v9_fem_skin_prolongation_v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 35
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '4'
+      PY: /home/monster/realsas-ml312/bin/python
+      AUTH: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
+      INPUT: /tmp/knight_v9_fem_input_${{ github.run_id }}
+      OUT: /tmp/knight_v9_fem_${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-v9-dynamic-mechanics-phase1-v1
+          path: ${{ env.INPUT }}/phase1
+          github-token: ${{ github.token }}
+          run-id: 37064886261
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-static-quality-source-opt-v9
+          path: ${{ env.INPUT }}/static
+          github-token: ${{ github.token }}
+          run-id: 37057338450
+      - uses: actions/download-artifact@v4
+        with:
+          name: knight-repaired-compaction-seal-v2
+          path: ${{ env.INPUT }}/compaction
+          github-token: ${{ github.token }}
+          run-id: 37023349486
+      - name: Build coarse-mesh FEM prolongation
+        run: |
+          "$PY" tools/audit_coarse_mesh_fem_skin_prolongation_v1.py \
+            --authority-root "$AUTH" --run-id "$RUN_ID" \
+            --target-surface-json "$INPUT/phase1/refined_surface.json" \
+            --v9-candidate-json "$INPUT/static/final_candidate.json" \
+            --inverse-npz "$INPUT/compaction/repaired_inverse_v2.npz" --out-dir "$OUT"
+      - name: Frozen G3 and 51-frame court
+        run: |
+          set +e
+          "$PY" tools/audit_fresh_inference_dynamics_v1.py \
+            --authority-root "$AUTH" --run-id "$RUN_ID" \
+            --surface-json "$INPUT/phase1/refined_surface.json" \
+            --candidate-json "$INPUT/static/final_candidate.json" --inference-dir "$OUT"
+          CODE=$?
+          echo "$CODE" > "$OUT/dynamic_exit_code.txt"
+          rm -f "$OUT/fresh_sampled_geometry.npz"
+          exit 0
+      - name: Summarize
+        run: |
+          "$PY" - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["OUT"])
+          s=json.loads((root/"FEM_STATS.json").read_text())
+          d=json.loads((root/"DYNAMIC_REPORT.json").read_text())
+          g=json.loads((root/"fresh_g3_report.json").read_text())
+          out={"projection_residual_p95":s["projection_residual_over_span"]["p95"],
+               "projection_residual_max":s["projection_residual_over_span"]["max"],
+               "grad_p99":s["grad_p99"],"grad_max":s["grad_max"],
+               "g3_passed":d["g3_passed"],"g3_max_condition":g["maximum_condition_number"],
+               "failed_frames":d["failed_motion_frame_count"],"max_motion_edge_ratio":d["maximum_motion_edge_ratio"]}
+          (root/"RESULT.json").write_text(json.dumps(out,indent=2,sort_keys=True)+"\n")
+          print("FEM_PROLONGATION_RESULT="+json.dumps(out,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knight-v9-fem-skin-prolongation-v1
+          path: ${{ env.OUT }}
+          if-no-files-found: error
+          retention-days: 30

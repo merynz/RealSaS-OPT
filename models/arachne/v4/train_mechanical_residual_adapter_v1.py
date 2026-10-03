@@ -69,6 +69,14 @@ def _load_bundle(path: Path, dev: torch.device):
             ),
             "probes":T("probe_transforms",torch.float32)[None],
             "probe_ids":tuple(map(str,z["probe_ids"].tolist())),
+            "surface_ids":(
+                tuple(map(str,z["surface_ids"].tolist()))
+                if "surface_ids" in z.files else None
+            ),
+            "joint_ids":(
+                tuple(map(str,z["joint_ids"].tolist()))
+                if "joint_ids" in z.files else None
+            ),
         }
         if "carrier_ids" in z.files:
             all_carrier_ids=tuple(map(str,z["carrier_ids"].tolist()))
@@ -154,9 +162,14 @@ def main():
     ap.add_argument("--seed",type=int,default=20261003)
     ap.add_argument("--log-every",type=int,default=25)
     ap.add_argument("--min-training-carriers",type=int,default=2)
+    ap.add_argument("--checkpoint-every",type=int,default=100)
+    ap.add_argument("--resume-checkpoint",type=Path)
     a=ap.parse_args()
 
-    if a.steps<1 or a.lr<=0 or a.probe_batch<1 or a.surface_chunk<1 or a.min_training_carriers<1:
+    if (
+        a.steps<1 or a.lr<=0 or a.probe_batch<1 or a.surface_chunk<1
+        or a.min_training_carriers<1 or a.checkpoint_every<1
+    ):
         raise ValueError("invalid optimization hyperparameters")
     if min(a.mechanical_weight,a.teacher_weight,a.trust_weight)<0:
         raise ValueError("negative objective weight forbidden")
@@ -204,6 +217,25 @@ def main():
     opt=torch.optim.AdamW(model.parameters(),lr=a.lr,weight_decay=a.weight_decay)
 
     a.out_dir.mkdir(parents=True,exist_ok=True)
+    start_step=0
+    resumed_from=None
+    resume_best=None
+    resume_history=[]
+    if a.resume_checkpoint is not None:
+        ck=torch.load(a.resume_checkpoint,map_location="cpu",weights_only=False)
+        if str(ck.get("bundle_sha256") or "")!=sha256(a.bundle):
+            raise RuntimeError("resume checkpoint bundle hash mismatch")
+        if int(ck.get("parameter_count") or -1)!=model.parameter_count:
+            raise RuntimeError("resume checkpoint parameter contract drift")
+        model.load_state_dict(ck["state_dict"])
+        if "optimizer_state_dict" in ck:
+            opt.load_state_dict(ck["optimizer_state_dict"])
+        start_step=int(ck.get("next_step") or 0)
+        if start_step<0 or start_step>a.steps:
+            raise RuntimeError("resume checkpoint step outside requested schedule")
+        resumed_from=str(a.resume_checkpoint)
+        resume_best=ck.get("best")
+        resume_history=list(ck.get("history") or ())
     receipt={
         "schema":"RealSaS.ArachneMechanicalResidualAdapterFitReceipt.v1",
         "status":"RUNNING",
@@ -213,6 +245,9 @@ def main():
         "frozen_base_field":True,
         "optimizer":"AdamW",
         "steps":a.steps,
+        "start_step":start_step,
+        "resumed_from":resumed_from,
+        "checkpoint_every":a.checkpoint_every,
         "lr":a.lr,
         "weight_decay":a.weight_decay,
         "probe_batch":a.probe_batch,
@@ -234,7 +269,7 @@ def main():
             "base_p95_l1":a.max_base_p95_l1,
             "teacher_valid_p95_l1":a.max_teacher_valid_p95_l1,
         },
-        "history":[],
+        "history":resume_history,
         "claim_boundary":[
             "Knight integration fit only; no genericity claim.",
             "Historical Arachne/base field is frozen.",
@@ -247,6 +282,14 @@ def main():
     }
 
     best=None
+    if resume_best is not None:
+        rb=resume_best
+        best=(
+            tuple(rb["key"]),
+            int(rb["step"]),
+            {k:v.detach().cpu() for k,v in rb["state_dict"].items()},
+            dict(rb["row"]),
+        )
     full_order=np.arange(P,dtype=np.int64)
     rng=np.random.default_rng(a.seed)
     # Pre-register one deterministic permutation stream; no metric-conditioned resampling.
@@ -256,7 +299,7 @@ def main():
     stream=np.concatenate(schedules)
     stream=stream[:a.steps*a.probe_batch].reshape(a.steps,a.probe_batch)
 
-    for step in range(a.steps):
+    for step in range(start_step,a.steps):
         idx=torch.as_tensor(stream[step],device=dev,dtype=torch.long)
         opt.zero_grad(set_to_none=True)
         with torch.autocast(device_type=dev.type,dtype=torch.bfloat16,enabled=(dev.type=="cuda")):
@@ -307,9 +350,62 @@ def main():
         torch.nn.utils.clip_grad_norm_(model.parameters(),1.0)
         opt.step()
 
-        if step==0 or (step+1)%a.log_every==0 or step+1==a.steps:
+        if (
+            step==start_step
+            or (step+1)%a.log_every==0
+            or (step+1)%a.checkpoint_every==0
+            or step+1==a.steps
+        ):
+            # Metrics and checkpoint must describe the exact same post-update
+            # model state. Re-evaluate after opt.step(); do not reuse the
+            # pre-update training prediction.
             with torch.no_grad():
-                metrics=correction_metrics(pred.float(),base,teacher,valid)
+                with torch.autocast(
+                    device_type=dev.type,dtype=torch.bfloat16,
+                    enabled=(dev.type=="cuda")
+                ):
+                    pred_eval,_=model(
+                        base_weights=base,
+                        surface_geometry7=geometry7,
+                        pair_geometry=pair,
+                        surface_mask=sm,
+                        joint_mask=jm,
+                        row_joint_mask=row_jm,
+                        surface_chunk_size=a.surface_chunk,
+                    )
+                eval_rows=[]
+                for carrier in carriers:
+                    eval_rows.append(mechanical_consequence_loss_v1(
+                        pred_eval.float(),
+                        candidate_support_indices=carrier["support_idx"],
+                        candidate_support_coefficients=carrier["support_coeff"],
+                        candidate_rest_vertices=carrier["rest"],
+                        candidate_faces=carrier["faces"],
+                        probe_transforms=probes[:,idx],
+                        base_surface_weights=None,
+                        teacher_surface_weights=None,
+                        teacher_valid_mask=None,
+                        max_edge_ratio=4.0,
+                        min_area_ratio=0.05,
+                        max_area_ratio=20.0,
+                        max_condition_number=16.0,
+                        mechanical_weight=1.0,
+                        teacher_weight=0.0,
+                        trust_weight=0.0,
+                    ))
+                eval_mech,eval_mean,eval_worst=_aggregate_carrier_mechanical(eval_rows)
+                eval_trust=(pred_eval.float()-base).abs().sum(-1).mean()
+                eval_teacher_row=(pred_eval.float()-teacher).abs().sum(-1)
+                eval_supervised=(
+                    eval_teacher_row[vm].mean()
+                    if bool(vm.any()) else eval_teacher_row.new_zeros(())
+                )
+                eval_total=(
+                    a.mechanical_weight*eval_mech
+                    + a.teacher_weight*eval_supervised
+                    + a.trust_weight*eval_trust
+                )
+                metrics=correction_metrics(pred_eval.float(),base,teacher,valid)
                 per_carrier={
                     carrier["id"]:{
                         "mechanical":float(row_loss["mechanical"].detach().cpu()),
@@ -322,7 +418,7 @@ def main():
                         "max_area_ratio":float(row_loss["maximum_area_ratio"].detach().cpu()),
                         "max_condition_number":float(row_loss["maximum_condition_number"].detach().cpu()),
                     }
-                    for carrier,row_loss in zip(carriers,carrier_loss_rows)
+                    for carrier,row_loss in zip(carriers,eval_rows)
                 }
                 worst_carrier=max(
                     per_carrier,
@@ -332,10 +428,10 @@ def main():
                     "step":step+1,
                     "probe_indices":stream[step].tolist(),
                     "probe_ids":[probe_ids[i] for i in stream[step]],
-                    "total":float(total.detach().cpu()),
-                    "mechanical":float(mechanical.detach().cpu()),
-                    "mechanical_mean":float(mechanical_mean.detach().cpu()),
-                    "mechanical_worst":float(mechanical_worst.detach().cpu()),
+                    "total":float(eval_total.detach().cpu()),
+                    "mechanical":float(eval_mech.detach().cpu()),
+                    "mechanical_mean":float(eval_mean.detach().cpu()),
+                    "mechanical_worst":float(eval_worst.detach().cpu()),
                     "worst_carrier_id":worst_carrier,
                     "per_carrier":per_carrier,
                     **metrics,
@@ -348,11 +444,78 @@ def main():
                 )
                 key=(0 if admissible else 1,float(row["mechanical"]),float(row["total"]),step)
                 if best is None or key<best[0]:
-                    best=(key,step+1,{k:v.detach().cpu() for k,v in model.state_dict().items()},row)
+                    best=(
+                        key,step+1,
+                        {k:v.detach().cpu() for k,v in model.state_dict().items()},
+                        row,
+                    )
+
+                receipt["last_completed_step"]=step+1
+                (a.out_dir/"FIT_RECEIPT_PARTIAL.json").write_text(
+                    json.dumps(receipt,indent=2,sort_keys=True)+"\n"
+                )
+                if (step+1)%a.checkpoint_every==0 or step+1==a.steps:
+                    best_payload=None
+                    if best is not None:
+                        best_payload={
+                            "key":list(best[0]),
+                            "step":int(best[1]),
+                            "state_dict":best[2],
+                            "row":best[3],
+                        }
+                    torch.save({
+                        "schema":"RealSaS.ArachneMechanicalResidualAdapterResumeCheckpoint.v1",
+                        "state_dict":{
+                            k:v.detach().cpu() for k,v in model.state_dict().items()
+                        },
+                        "optimizer_state_dict":opt.state_dict(),
+                        "parameter_count":model.parameter_count,
+                        "bundle_sha256":receipt["bundle_sha256"],
+                        "next_step":step+1,
+                        "best":best_payload,
+                        "history":receipt["history"],
+                        "seed":a.seed,
+                    },a.out_dir/"ARACHNE_MECHANICAL_RESIDUAL_ADAPTER_RESUME.pt")
 
     if best is None:
         raise RuntimeError("no adapter checkpoint candidate")
     _,best_step,best_state,best_row=best
+    model.load_state_dict(best_state)
+    model.eval()
+    with torch.no_grad():
+        best_pred,_=model(
+            base_weights=base,
+            surface_geometry7=geometry7,
+            pair_geometry=pair,
+            surface_mask=sm,
+            joint_mask=jm,
+            row_joint_mask=row_jm,
+            surface_chunk_size=a.surface_chunk,
+        )
+    best_weights=best_pred[0].float().cpu().numpy().astype(np.float32)
+    if not np.allclose(best_weights.sum(1),1.0,atol=1e-6,rtol=0.0):
+        raise RuntimeError("best adapted skin simplex drift")
+    allowed=row_jm[0].detach().cpu().numpy().astype(bool)
+    if np.any(best_weights[~allowed]!=0.0):
+        raise RuntimeError("best adapted skin minted forbidden support")
+    np.savez_compressed(
+        a.out_dir/"ADAPTED_SURFACE_WEIGHTS_V1.npz",
+        weights=best_weights,
+        base_weights=base[0].detach().cpu().numpy().astype(np.float32),
+        row_joint_mask=allowed.astype(np.uint8),
+        surface_ids=np.asarray(
+            bundle["surface_ids"] if bundle["surface_ids"] is not None
+            else tuple(str(i) for i in range(best_weights.shape[0])),
+            dtype="U128",
+        ),
+        joint_ids=np.asarray(
+            bundle["joint_ids"] if bundle["joint_ids"] is not None
+            else tuple(str(i) for i in range(best_weights.shape[1])),
+            dtype="U128",
+        ),
+        bundle_sha256=np.asarray([receipt["bundle_sha256"]],dtype="U64"),
+        best_step=np.asarray([best_step],dtype=np.int64),
+    )
     torch.save({
         "schema":"RealSaS.ArachneMechanicalResidualAdapterCheckpoint.v1",
         "state_dict":best_state,
@@ -362,7 +525,13 @@ def main():
         "best_metrics":best_row,
         "config":model.config.__dict__,
     },a.out_dir/"ARACHNE_MECHANICAL_RESIDUAL_ADAPTER_V1.pt")
-    receipt["status"]="PASS_FIT_COMPLETED__AWAIT_COMPILER_REQUALIFICATION"
+    if not (
+        best_row["base_p95_l1"]<=a.max_base_p95_l1
+        and best_row["teacher_valid_p95_l1"]<=a.max_teacher_valid_p95_l1
+    ):
+        receipt["status"]="FAIL_FIT_NO_SEMANTICALLY_ADMISSIBLE_CHECKPOINT"
+    else:
+        receipt["status"]="PASS_FIT_COMPLETED__AWAIT_COMPILER_REQUALIFICATION"
     receipt["best_step"]=best_step
     receipt["best_metrics"]=best_row
     receipt["best_semantic_budgets_passed"]=bool(
@@ -376,6 +545,8 @@ def main():
         "best_metrics":best_row,
         "semantic_budgets_passed":receipt["best_semantic_budgets_passed"],
     },sort_keys=True),flush=True)
+    if receipt["status"]!="PASS_FIT_COMPLETED__AWAIT_COMPILER_REQUALIFICATION":
+        raise RuntimeError(receipt["status"])
 
 
 if __name__=="__main__":

@@ -93,7 +93,8 @@ def test_product_space_loss_is_zero_for_rigid_single_joint_identity():
     transforms=torch.eye(4).reshape(1,1,1,4,4)
     loss=mechanical_consequence_loss_v1(
         weights,
-        surface_to_candidate=transfer,
+        candidate_support_indices=support_idx,
+        candidate_support_coefficients=support_coeff,
         candidate_rest_vertices=rest,
         candidate_faces=faces,
         probe_transforms=transforms,

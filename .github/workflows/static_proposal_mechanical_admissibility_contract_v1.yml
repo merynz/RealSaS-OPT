@@ -8,10 +8,12 @@ on:
       - compiler/realsas_compiler_core/canonical_mesh_quality_batched_collapse_v2.py
       - compiler/realsas_compiler_core/canonical_mesh_quality_cavity_remesh_v1.py
       - compiler/realsas_compiler_core/canonical_mesh_quality_edge_cavity_remesh_v1.py
+      - compiler/realsas_compiler_core/mesh/mechanical_proposal_admissibility_v1.py
       - tests/compiler/test_canonical_mesh_quality_topology_safe_flip_v2.py
       - tests/compiler/test_canonical_mesh_quality_batched_collapse_v2.py
       - tests/compiler/test_canonical_mesh_quality_cavity_remesh_v1.py
       - tests/compiler/test_canonical_mesh_quality_edge_cavity_remesh_v1.py
+      - tests/compiler/test_mechanical_proposal_admissibility_v1.py
       - .github/workflows/static_proposal_mechanical_admissibility_contract_v1.yml
   workflow_dispatch:
 
@@ -32,4 +34,5 @@ jobs:
             tests/compiler/test_canonical_mesh_quality_topology_safe_flip_v2.py \
             tests/compiler/test_canonical_mesh_quality_batched_collapse_v2.py \
             tests/compiler/test_canonical_mesh_quality_cavity_remesh_v1.py \
-            tests/compiler/test_canonical_mesh_quality_edge_cavity_remesh_v1.py
+            tests/compiler/test_canonical_mesh_quality_edge_cavity_remesh_v1.py \
+            tests/compiler/test_mechanical_proposal_admissibility_v1.py

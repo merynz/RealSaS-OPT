@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-"""Exact Stage41 failure context for controlled causal attribution.
+"""Exact Stage41 probe/state identity for controlled causal attribution.
 
-This service binds one failed exact-motion measurement to the exact evaluator,
-policy and product lineages that produced it. It does not infer a causal owner
-and does not authorize repair.
+A causal court needs two different identities:
+- the immutable evaluation protocol ("same probe");
+- the mutable product/mechanical state being intervened on.
+
+Conflating them makes real single-owner counterfactuals impossible, because an
+owner mutation necessarily changes one or more product lineage hashes.
 """
 
 from typing import Any, Mapping, Sequence
@@ -15,9 +18,25 @@ from compiler.realsas_compiler_services.proof.causal_attribution import (
 )
 
 
-def build_stage41_failure_attribution_context_v1(
+_REQUIRED_BINDINGS = {
+    "mechanical_state_binding_hash",
+    "skeleton_binding_hash",
+    "mesh_binding_hash",
+    "mesh_skin_binding_hash",
+    "qualified_motion_binding_hash",
+    "constraint_set_binding_hash",
+    "presentation_binding_hash",
+    "mechanical_carrier_evidence_hash",
+    "mechanical_carrier_topology_hash",
+    "mechanical_carrier_geometry_hash",
+    "static_mesh_qualification_binding_hash",
+    "motion_source_set_binding_hash",
+    "motion_source_seal_binding_hash",
+}
+
+
+def build_stage41_probe_receipt_v1(
     *,
-    measurements: Mapping[str, Any],
     bindings: Mapping[str, str],
     mesh_policy_hash: str,
     camera_binding_hashes: Sequence[str],
@@ -25,22 +44,7 @@ def build_stage41_failure_attribution_context_v1(
     evaluator_semantic_version: str,
 ) -> dict[str, Any]:
     bindings = {str(k): str(v) for k, v in dict(bindings).items()}
-    required = {
-        "mechanical_state_binding_hash",
-        "skeleton_binding_hash",
-        "mesh_binding_hash",
-        "mesh_skin_binding_hash",
-        "qualified_motion_binding_hash",
-        "constraint_set_binding_hash",
-        "presentation_binding_hash",
-        "mechanical_carrier_evidence_hash",
-        "mechanical_carrier_topology_hash",
-        "mechanical_carrier_geometry_hash",
-        "static_mesh_qualification_binding_hash",
-        "motion_source_set_binding_hash",
-        "motion_source_seal_binding_hash",
-    }
-    missing = sorted(k for k in required if not bindings.get(k))
+    missing = sorted(k for k in _REQUIRED_BINDINGS if not bindings.get(k))
     if missing:
         raise ValueError(
             "STAGE41_ATTRIBUTION_BINDING_MISSING:" + ",".join(missing)
@@ -55,12 +59,6 @@ def build_stage41_failure_attribution_context_v1(
     if not evaluator_semantic_version:
         raise ValueError("STAGE41_ATTRIBUTION_EVALUATOR_VERSION_MISSING")
 
-    # IMPORTANT: causal probe identity is the immutable evaluation protocol,
-    # not the mutable product state under intervention. Product/carrier/rig/skin/
-    # compiled-motion bindings remain sealed below in the measurement identity.
-    # Otherwise a legitimate single-owner counterfactual could never be replayed
-    # under the "same probe" because changing that owner necessarily changes one
-    # or more derived lineage hashes.
     probe_specification = {
         "schema": "RealSaS.Stage41ExactMotionProbeSpecification.v2",
         "proof_domain": "MOTION",
@@ -83,13 +81,47 @@ def build_stage41_failure_attribution_context_v1(
         operator_policy_hashes=operator_policy_hashes,
         probe_specification=probe_specification,
     )
+    product_bindings_hash = content_sha256(
+        {
+            "schema": "RealSaS.Stage41ProductBindings.v1",
+            "bindings": bindings,
+        }
+    )
+    return {
+        "schema": "RealSaS.Stage41ProbeReceipt.v1",
+        "proof_domain": "MOTION",
+        "proof_probe_fingerprint": probe_fingerprint,
+        "operator_policy_hashes": list(operator_policy_hashes),
+        "probe_specification": probe_specification,
+        "bindings": bindings,
+        "product_bindings_hash": product_bindings_hash,
+        "probe_identity_excludes_mutable_product_bindings": True,
+    }
+
+
+def build_stage41_failure_attribution_context_v1(
+    *,
+    measurements: Mapping[str, Any],
+    bindings: Mapping[str, str],
+    mesh_policy_hash: str,
+    camera_binding_hashes: Sequence[str],
+    observation_set_hash: str,
+    evaluator_semantic_version: str,
+) -> dict[str, Any]:
+    receipt = build_stage41_probe_receipt_v1(
+        bindings=bindings,
+        mesh_policy_hash=mesh_policy_hash,
+        camera_binding_hashes=camera_binding_hashes,
+        observation_set_hash=observation_set_hash,
+        evaluator_semantic_version=evaluator_semantic_version,
+    )
     measurement_payload = {
         "schema": "RealSaS.Stage41ExactMotionFailureMeasurement.v1",
         "proof_domain": "MOTION",
         "measurements": dict(measurements),
-        "bindings": bindings,
+        "bindings": dict(receipt["bindings"]),
         "mesh_policy_hash": str(mesh_policy_hash),
-        "probe_fingerprint": probe_fingerprint,
+        "probe_fingerprint": receipt["proof_probe_fingerprint"],
     }
     return {
         "schema": "RealSaS.Stage41FailureAttributionContext.v1",
@@ -97,16 +129,12 @@ def build_stage41_failure_attribution_context_v1(
         "baseline_measurement_report_hash": content_sha256(
             measurement_payload
         ),
-        "proof_probe_fingerprint": probe_fingerprint,
-        "operator_policy_hashes": list(operator_policy_hashes),
-        "probe_specification": probe_specification,
-        "bindings": bindings,
-        "baseline_product_bindings_hash": content_sha256(
-            {
-                "schema": "RealSaS.Stage41BaselineProductBindings.v1",
-                "bindings": bindings,
-            }
-        ),
+        "proof_probe_fingerprint": receipt["proof_probe_fingerprint"],
+        "operator_policy_hashes": list(receipt["operator_policy_hashes"]),
+        "probe_specification": dict(receipt["probe_specification"]),
+        "bindings": dict(receipt["bindings"]),
+        "baseline_product_bindings_hash": receipt["product_bindings_hash"],
+        "probe_receipt": receipt,
         "probe_identity_excludes_mutable_product_bindings": True,
         "causal_owner_attribution": "NOT_PERFORMED",
         "automatic_repair_eligible": False,
@@ -115,4 +143,7 @@ def build_stage41_failure_attribution_context_v1(
     }
 
 
-__all__ = ["build_stage41_failure_attribution_context_v1"]
+__all__ = [
+    "build_stage41_probe_receipt_v1",
+    "build_stage41_failure_attribution_context_v1",
+]

@@ -1,0 +1,42 @@
+name: atlas-mira-shared-surface-evidence-v1
+
+on:
+  push:
+    branches: [research/rig-skin-architecture-challengers-20261003]
+    paths:
+      - models/shared/**
+      - tests/models/test_atlas_mira_shared_surface_evidence_v1.py
+      - canonical/ATLAS_MIRA_SHARED_SURFACE_ENCODER_E0_COMPATIBILITY_V1.json
+      - canonical/LEARNED_MODEL_NAMING_AND_SHARED_ENCODER_PLAN_V1.md
+      - .github/workflows/atlas_mira_shared_surface_evidence_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      CUDA_VISIBLE_DEVICES: ""
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: .
+      PY: /home/monster/realsas-ml312/bin/python
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Shared evidence contract gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$PY" -m py_compile models/shared/surface_evidence_input_v1.py
+          "$PY" -m pytest -q tests/models/test_atlas_mira_shared_surface_evidence_v1.py
+          echo "ATLAS_MIRA_SHARED_SURFACE_EVIDENCE_PASS"

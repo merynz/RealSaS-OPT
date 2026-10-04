@@ -41,6 +41,15 @@ def _fixture():
         normal_valid=(True, True, True),
         carrier_evidence_hash="e" * 64,
         topology_hash="t" * 64,
+        metadata={"learned_query_normal_use_forbidden": True},
+    )
+    signed_normals = SimpleNamespace(
+        candidate_mesh_binding_hash="c" * 64,
+        mechanical_carrier_evidence_binding_hash="e" * 64,
+        ordered_vertex_ids=("a", "b", "c"),
+        signed_normals=((0.0, 1.0, 0.0),) * 3,
+        normal_valid=(True, True, True),
+        query_normal_evidence_hash="n" * 64,
     )
     tensor = SimpleNamespace(
         surface_ids=("s0", "s1"),
@@ -67,20 +76,23 @@ def _fixture():
         geometry_lineage_hash="s" * 64,
         surface_nodes=(SimpleNamespace(surface_id="s0"), SimpleNamespace(surface_id="s1")),
     )
-    return candidate, carrier, tensor, conditioning, skeleton, surface
+    return candidate, carrier, signed_normals, tensor, conditioning, skeleton, surface
 
 
 def test_carrier_query_uses_exact_geometry_and_support_bound_memory_transport():
-    candidate, carrier, tensor, conditioning, _, _ = _fixture()
+    candidate, carrier, signed_normals, tensor, conditioning, _, _ = _fixture()
     query = build_mira_mechanical_carrier_query_v1(
         candidate=candidate,
         carrier_evidence=carrier,
         surface_tensor=tensor,
         conditioning=conditioning,
+        signed_query_normal_evidence=signed_normals,
     )
 
     np.testing.assert_allclose(query.positions_normalized, np.asarray(carrier.positions))
-    np.testing.assert_allclose(query.normals, np.asarray(carrier.normals))
+    np.testing.assert_allclose(query.normals, np.asarray(signed_normals.signed_normals))
+    assert query.query_normal_authority_hash == "n" * 64
+    assert query.query_normal_authority_class == "CARRIER_BOUND_SIGNED_QUERY_NORMAL_EVIDENCE"
     assert query.pair_geometry.shape == (3, 2, 10)
     assert query.legal_pair.all()
 
@@ -95,7 +107,7 @@ def test_carrier_query_uses_exact_geometry_and_support_bound_memory_transport():
 
 
 def test_direct_carrier_skin_bypasses_surface_weight_transfer():
-    candidate, carrier, _, _, skeleton, surface = _fixture()
+    candidate, carrier, _, _, _, skeleton, surface = _fixture()
     weights = np.asarray([
         [1.0, 0.0],
         [0.2, 0.8],
@@ -125,3 +137,30 @@ def test_direct_carrier_skin_bypasses_surface_weight_transfer():
     np.testing.assert_allclose(actual, weights)
     assert faces == ((0, 1, 2),)
     assert skin.qualification_report["surface_skin_transfer_used"] is False
+
+
+def test_real_carrier_that_forbids_face_cross_query_normals_fails_without_signed_evidence():
+    candidate, carrier, _, tensor, conditioning, _, _ = _fixture()
+    import pytest
+    with pytest.raises(
+        ValueError, match="MIRA_CARRIER_QUERY_SIGNED_NORMAL_EVIDENCE_REQUIRED"
+    ):
+        build_mira_mechanical_carrier_query_v1(
+            candidate=candidate,
+            carrier_evidence=carrier,
+            surface_tensor=tensor,
+            conditioning=conditioning,
+        )
+
+
+def test_historical_causal_court_can_explicitly_replay_unoriented_diagnostic_arm():
+    candidate, carrier, _, tensor, conditioning, _, _ = _fixture()
+    query = build_mira_mechanical_carrier_query_v1(
+        candidate=candidate,
+        carrier_evidence=carrier,
+        surface_tensor=tensor,
+        conditioning=conditioning,
+        allow_unoriented_carrier_normals_for_diagnostic=True,
+    )
+    np.testing.assert_allclose(query.normals, np.asarray(carrier.normals))
+    assert query.query_normal_authority_class == "DIAGNOSTIC_UNORIENTED_CARRIER_NORMALS"

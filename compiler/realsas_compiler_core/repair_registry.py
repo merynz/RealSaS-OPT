@@ -39,6 +39,28 @@ class RepairOperationAuthorityRecordV1:
 # historical semantics but current V4 lacks the exact upstream representation
 # needed to execute them without bypassing current qualification authority.
 REPAIR_OPERATION_AUTHORITY: dict[str, RepairOperationAuthorityRecordV1] = {
+    "CONTROL_BASIS_SINGLE_PRUNE_REQUALIFICATION_V1": RepairOperationAuthorityRecordV1(
+        operation_id="CONTROL_BASIS_SINGLE_PRUNE_REQUALIFICATION_V1",
+        owner_id="ATLAS_CONTROL_BASIS",
+        operation_family="prune_single_control_and_rederive_downstream",
+        current_main_status="CANONICAL_MAINLINE_EXECUTABLE",
+        qualification_hash="4ac53ed6ee5bcd261c3f5f27fab24022f6b78bdd1f260828242fb770e22183fe",
+        allowed_change_patterns=(
+            "mechanical.skeleton",
+            "mechanical.skin",
+            "motion",
+            "directional_visual.direction.*.component.*.mesh_skin",
+        ),
+        historical_reference="NONE__CURRENT_TYPED_OPERATOR",
+        promotion_rule=(
+            "selection requires controlled causal owner attribution; executor may remove "
+            "exactly one authorized non-root control through current "
+            "control_basis_pruning_v1 and all skeleton-bound downstream artifacts must "
+            "be rederived in a distinct child attempt before repair credit"
+        ),
+        module_name="compiler.realsas_compiler_services.proof.control_basis_repair",
+        callable_name="execute_control_basis_single_prune_v1",
+    ),
     "RIG_PARENT_REQUALIFICATION_V1": RepairOperationAuthorityRecordV1(
         operation_id="RIG_PARENT_REQUALIFICATION_V1",
         owner_id="rig",

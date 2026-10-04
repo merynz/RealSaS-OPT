@@ -1,3 +1,7 @@
+from types import SimpleNamespace as NS
+
+import compiler.realsas_compiler_services.proof.repair_loop as repair_loop
+
 from compiler.realsas_compiler_services.proof.repair_loop import (
     BoundedRepairOperationV1,
     RepairApplicationRecordV1,
@@ -5,6 +9,7 @@ from compiler.realsas_compiler_services.proof.repair_loop import (
     V2VisualRepairNonRegressionEvidenceV1,
     build_bounded_repair_directives_v1,
     evaluate_repair_effect_v1,
+    evaluate_real_repair_child_effect_v1,
     validate_repair_application_v1,
 )
 
@@ -189,3 +194,129 @@ def test_v2_repair_credit_requires_same_child_static_and_dynamic_visual_pass():
         "visual_nonregression_cross_bank_implementation_drift"
         in implementation_drift["blockers"]
     )
+
+
+
+def _wildcard_directive():
+    op = BoundedRepairOperationV1(
+        operation_id="OP:WILDCARD",
+        owner_id="mesh",
+        operation_family="rebind_mesh_skin",
+        target_signature_ids=("S:1",),
+        qualification_hash="QUAL:W",
+        automatic_execution_qualified=True,
+        allowed_change_paths=(
+            "directional_visual.direction.*.component.*.mesh_skin",
+        ),
+        bounded_change_spec={"max_components": 8},
+    )
+    rows = build_bounded_repair_directives_v1(
+        attribution_finding=FINDING,
+        parent_product_state_hash="PARENT",
+        baseline_measurement_report_hash="MR",
+        proof_probe_fingerprint="PROBE",
+        operation_candidates=(op,),
+    )
+    assert len(rows) == 1 and rows[0].executable
+    return rows[0]
+
+
+def test_application_scope_supports_promoted_wildcard_patterns():
+    d = _wildcard_directive()
+    app = RepairApplicationRecordV1(
+        application_id="APP:W",
+        directive_id=d.directive_id,
+        parent_product_state_hash="PARENT",
+        child_product_state_hash="CHILD",
+        child_parent_state_hash="PARENT",
+        applied_operation_id=d.operation.operation_id,
+        changed_owner_ids=("mesh",),
+        changed_paths=(
+            "directional_visual.direction.3.component.body.mesh_skin",
+        ),
+        bounded_change_passed=True,
+    )
+    ok, blockers = validate_repair_application_v1(d, app)
+    assert ok
+    assert blockers == ()
+
+
+def test_real_child_audit_is_required_before_same_probe_repair_credit(monkeypatch):
+    d = _wildcard_directive()
+    parent = NS(product_state_hash="PARENT")
+    child = NS(product_state_hash="CHILD", parent_state_hash="PARENT")
+
+    def fake_audit(_parent, _child, _directive):
+        return NS(
+            status="PASS",
+            blockers=(),
+            actual_changed_paths=(
+                "directional_visual.direction.3.component.body.mesh_skin",
+            ),
+            audit_hash="AUDIT:PASS",
+            to_dict=lambda: {
+                "status": "PASS",
+                "blockers": [],
+                "actual_changed_paths": [
+                    "directional_visual.direction.3.component.body.mesh_skin"
+                ],
+                "audit_hash": "AUDIT:PASS",
+            },
+        )
+
+    monkeypatch.setattr(repair_loop, "audit_repair_child_attempt_v1", fake_audit)
+    reproof = RepairReproofEvidenceV1(
+        directive_id=d.directive_id,
+        child_product_state_hash="CHILD",
+        child_proof_bundle_hash="PB:CHILD",
+        proof_probe_fingerprint="PROBE",
+        target_signature_id="S:1",
+        target_materially_improved=True,
+        target_resolved=False,
+        child_domain_status="FAIL",
+    )
+    out = evaluate_real_repair_child_effect_v1(
+        parent=parent,
+        child=child,
+        directive=d,
+        reproof=reproof,
+        visual_nonregression=_visual(),
+    )
+    assert out["repair_accepted"] is True
+    assert out["child_attempt_audit"]["status"] == "PASS"
+    assert out["application_record"]["metadata"]["child_attempt_audit_hash"] == "AUDIT:PASS"
+
+    def rejected_audit(_parent, _child, _directive):
+        return NS(
+            status="REJECTED",
+            blockers=("repair_child_actual_change_outside_authorized_scope",),
+            actual_changed_paths=(
+                "directional_visual.direction.3.component.body.appearance",
+            ),
+            audit_hash="AUDIT:REJECT",
+            to_dict=lambda: {
+                "status": "REJECTED",
+                "blockers": [
+                    "repair_child_actual_change_outside_authorized_scope"
+                ],
+                "actual_changed_paths": [
+                    "directional_visual.direction.3.component.body.appearance"
+                ],
+                "audit_hash": "AUDIT:REJECT",
+            },
+        )
+
+    monkeypatch.setattr(
+        repair_loop,
+        "audit_repair_child_attempt_v1",
+        rejected_audit,
+    )
+    rejected = evaluate_real_repair_child_effect_v1(
+        parent=parent,
+        child=child,
+        directive=d,
+        reproof=reproof,
+        visual_nonregression=_visual(),
+    )
+    assert rejected["repair_accepted"] is False
+    assert "repair_child_attempt_audit_rejected" in rejected["blockers"]

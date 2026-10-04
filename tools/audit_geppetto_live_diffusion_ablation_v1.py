@@ -46,6 +46,10 @@ from models.geppetto.reference_strength_v1.geppetto_reference_strength_candidate
 from models.geppetto.reference_strength_v1.rigging_surface_tensorization_v1 import (
     tensorize_rigging_surface_v1,
 )
+from experiments.geppetto_reference_strength_fullstack_v1.mechanical_core_target_v1 import (
+    build_mechanical_core_target_v1,
+    world_heads_from_rest_world_source_v1,
+)
 from tools.demo.render_knight_motion_preview_v1 import _ctx
 from tools.inference.refined_surface_rig_skin_v1 import (
     read,
@@ -68,8 +72,42 @@ def _load_teacher_target(fit_run: Path):
         if p.is_file():
             with np.load(p, allow_pickle=False) as z:
                 if "positions_world" in z.files:
-                    return np.asarray(z["positions_world"], dtype=np.float64), str(p)
-    return None, None
+                    return (
+                        np.asarray(z["positions_world"], dtype=np.float64),
+                        str(p),
+                        "SEALED_TARGET_FILE",
+                    )
+
+    # Some later runner layouts retained the exact sealed FBX teacher-source arrays
+    # but not a copied mechanical-core target NPZ at the historical candidate paths.
+    # Rebuild the anonymous evaluation target deterministically from the same source
+    # contract rather than silently dropping teacher-quality comparison.
+    source = fit_run / "training/geppetto_teacher/KNIGHT_GEPPETTO_TEACHER_SOURCE.npz"
+    if source.is_file():
+        with np.load(source, allow_pickle=False) as z:
+            required = {"parents", "deform_mask", "skin", "rest_world_source"}
+            missing = required - set(z.files)
+            if missing:
+                raise RuntimeError(
+                    "GEPPETTO_DIFFUSION_TEACHER_SOURCE_ARRAYS_MISSING:"
+                    + ",".join(sorted(missing))
+                )
+            parents = np.asarray(z["parents"], dtype=np.int64)
+            deform = np.asarray(z["deform_mask"], dtype=np.uint8).astype(bool)
+            skin = np.asarray(z["skin"], dtype=np.float64)
+            rest = np.asarray(z["rest_world_source"], dtype=np.float64)
+        target = build_mechanical_core_target_v1(
+            parents=parents,
+            deform_mask=deform,
+            skin=skin,
+            bone_heads_world=world_heads_from_rest_world_source_v1(rest),
+        )
+        return (
+            np.asarray(target.positions_world, dtype=np.float64),
+            str(source),
+            "DETERMINISTIC_REBUILD_FROM_SEALED_TEACHER_SOURCE",
+        )
+    return None, None, None
 
 
 def _proposal_from_raw(model, surface, out, count: int, *, coarse_only: bool):
@@ -230,7 +268,7 @@ def main(args):
     if "CausalDiffusion" not in config.architecture_id:
         raise RuntimeError("GEPPETTO_LIVE_ARCHITECTURE_NOT_DIFFUSION")
 
-    teacher_world, teacher_path = _load_teacher_target(args.fit_run)
+    teacher_world, teacher_path, teacher_target_source = _load_teacher_target(args.fit_run)
 
     torch.backends.mha.set_fastpath_enabled(False)
     torch.backends.cuda.matmul.allow_tf32 = False
@@ -344,6 +382,8 @@ def main(args):
         "diffusion_sample_steps":config.diffusion_sample_steps,
         "diffusion_residual_clip":config.diffusion_residual_clip,
         "teacher_target_path":teacher_path,
+        "teacher_target_source":teacher_target_source,
+        "teacher_comparison_available":bool(teacher_world is not None),
         "seeds":list(SEEDS),
         "rows":rows,
         "teacher_comparison_summary":live_better,
@@ -353,6 +393,7 @@ def main(args):
             "The live model already contains conditional residual diffusion.",
             "Both arms share exact encoder, recurrence, control states, STOP/root/support evidence and cardinality.",
             "Coarse-only recomputes final all-pair parent evidence from coarse XYZ.",
+            "Teacher comparison uses the exact frozen mechanical-core target file when present, otherwise a deterministic rebuild from the sealed teacher-source arrays using the canonical target constructor.",
             "This court measures diffusion contribution; it does not evaluate richer-rig target policy.",
         ],
     }

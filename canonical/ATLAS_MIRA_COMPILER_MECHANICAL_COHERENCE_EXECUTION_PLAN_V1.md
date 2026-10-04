@@ -1374,24 +1374,67 @@ The screen used:
 - no teacher weights;
 - no model training.
 
-### C5.1b — structural full prune-to-proof — RUNNING
+### C5.1b — structural full prune-to-proof — COMPLETE / ONE 27-CONTROL MECHANICAL CLOSURE
 
-After C5.0b establishes the correct (W^*_{tree}(R)) baseline:
-- rerun/rebase the prune screen if the active skin state changed materially;
-- for screened candidates, collapse the effective control;
-- reoptimize/adapt skin for that reduced basis under the same corrected exact-motion domain;
-- rerun hard Stage35 exact-motion proof;
-- rerun source fidelity and editability/locality;
-- feed signed margins + complexity to the generic minimum-sufficient selector.
+Workflow:
+- `37207907720`.
 
-A product prune is authorized only from an **admissible** reduced basis, never from “less bad than an already failing baseline.”
+Court:
+- 16 screened controls from C5.1a;
+- true structural removal for every candidate;
+- children reparented;
+- removed skin column mass conserved at parent;
+- fresh tree-consistent retarget on each 27-control skeleton;
+- independent exact-motion skin reoptimization;
+- hard 51-frame replay;
+- fresh reduced-skeleton microstress only after exact-motion PASS;
+- no teacher count/weights.
 
-For screened candidates:
-- construct the reduced/effective basis;
-- reoptimize/adapt skin for that basis under exact-motion consequence;
-- rerun Stage35 hard motion proof;
-- rerun source fidelity and editability/locality;
-- feed the resulting signed margins + complexity to the generic minimum-sufficient selector.
+Result:
+- mechanically admissible candidate count = **1**;
+- unique mechanically admitted removal:
+  - `J:4c9f9eace712daf31538`;
+- control count: **28 -> 27**;
+- exact motion after reoptimization:
+  - failed frames = **0**;
+  - unique bad faces = **0**;
+  - max condition ≈ **15.97**;
+  - max area ratio ≈ **5.93**;
+  - min area ratio ≈ **0.0644**;
+- fresh microstress:
+  - G3 PASS;
+  - G3B PASS;
+  - unsafe faces = **0**;
+  - max condition ≈ **5.90**.
+
+Scientific consequence:
+- the current 28-control basis was not merely “too small”;
+- at least one control/hierarchy choice was mechanically harmful/redundant under the admitted motion + skin optimization;
+- control-count admissibility is empirically non-monotonic;
+- ATLAS repair priority therefore shifts toward **mechanical salience / keep-drop / hierarchy quality** before any assumption that more controls are needed.
+
+This is mechanical admission only. Product prune is not yet authorized.
+
+### C5.1c — reduced-basis source/editability admission — RUNNING
+
+Workflow/code:
+- `tools/audit_knight_reduced_basis_product_admissibility_c51c_v1.py`;
+- source/editability court triggered after C5.1b.
+
+Required gates for the 27-control candidate:
+- exact same Stage19 carrier => static source fidelity invariant;
+- exact-motion + microstress PASS from C5.1b;
+- supplied-motion tree-consistent correspondence cost non-regressive against the corrected 28-control baseline;
+- legal reduced tree / exact skin-joint accounting;
+- every exposed remaining control has a measurable carrier response under subject-free ±10° XYZ edit probes.
+
+If C5.1c PASS:
+- 27 controls becomes the first **product-admissible search-frontier basis**, not “the optimum”;
+- continue bounded Pareto/beam prune search toward 26 and below;
+- ATLAS salience supervision may use the proven harmful/redundant control as proof-derived training evidence.
+
+If C5.1c FAIL:
+- reject the mechanical-only prune as product basis and route the failed gate to its semantic owner.
 
 ### C5.2 — actual-motion rig ceiling
 

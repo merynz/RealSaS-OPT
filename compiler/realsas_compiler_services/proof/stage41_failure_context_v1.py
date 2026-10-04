@@ -33,6 +33,10 @@ def build_stage41_failure_attribution_context_v1(
         "qualified_motion_binding_hash",
         "constraint_set_binding_hash",
         "presentation_binding_hash",
+        "mechanical_carrier_evidence_hash",
+        "mechanical_carrier_topology_hash",
+        "mechanical_carrier_geometry_hash",
+        "static_mesh_qualification_binding_hash",
     }
     missing = sorted(k for k in required if not bindings.get(k))
     if missing:
@@ -68,6 +72,18 @@ def build_stage41_failure_attribution_context_v1(
         ],
         "presentation_binding_hash": bindings[
             "presentation_binding_hash"
+        ],
+        "mechanical_carrier_evidence_hash": bindings[
+            "mechanical_carrier_evidence_hash"
+        ],
+        "mechanical_carrier_topology_hash": bindings[
+            "mechanical_carrier_topology_hash"
+        ],
+        "mechanical_carrier_geometry_hash": bindings[
+            "mechanical_carrier_geometry_hash"
+        ],
+        "static_mesh_qualification_binding_hash": bindings[
+            "static_mesh_qualification_binding_hash"
         ],
         "camera_binding_hashes": list(cameras),
         "observation_set_hash": str(observation_set_hash),

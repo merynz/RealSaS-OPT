@@ -2,7 +2,10 @@ import pytest
 
 from compiler.realsas_compiler_core.control_basis_selection_v1 import (
     ControlBasisEvaluationV1,
+    lower_bounded_signed_margin_v1,
+    minimum_gate_margin_v1,
     select_minimum_sufficient_control_basis_v1,
+    upper_bounded_signed_margin_v1,
 )
 
 
@@ -104,3 +107,14 @@ def test_no_admissible_basis_fails_closed():
                 _row("R12", 12, mechanical=-0.01),
             )
         )
+
+
+def test_signed_normalized_margin_contracts_have_universal_pass_semantics():
+    assert upper_bounded_signed_margin_v1(8.0, 10.0) == pytest.approx(0.2)
+    assert upper_bounded_signed_margin_v1(12.0, 10.0) == pytest.approx(-0.2)
+
+    assert lower_bounded_signed_margin_v1(0.9, 0.8) == pytest.approx(0.125)
+    assert lower_bounded_signed_margin_v1(0.7, 0.8) == pytest.approx(-0.125)
+
+    assert minimum_gate_margin_v1(0.2, 0.125, 0.4) == pytest.approx(0.125)
+    assert minimum_gate_margin_v1(0.2, -0.125, 0.4) == pytest.approx(-0.125)

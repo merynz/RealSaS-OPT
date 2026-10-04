@@ -35,9 +35,10 @@ class RepairOperationAuthorityRecordV1:
         return asdict(self)
 
 
-# These records are intentionally NON-executable. Source audit found valuable
-# historical semantics but current V4 lacks the exact upstream representation
-# needed to execute them without bypassing current qualification authority.
+# Registry records are fail-closed individually. Historical operations remain
+# non-executable unless separately requalified. Current operations may be promoted
+# only with an exact qualification hash, bounded semantic scope and resolvable
+# typed executor. Presence in this table alone never authorizes execution.
 REPAIR_OPERATION_AUTHORITY: dict[str, RepairOperationAuthorityRecordV1] = {
     "CONTROL_BASIS_SINGLE_PRUNE_REQUALIFICATION_V1": RepairOperationAuthorityRecordV1(
         operation_id="CONTROL_BASIS_SINGLE_PRUNE_REQUALIFICATION_V1",

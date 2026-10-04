@@ -5,7 +5,6 @@ on:
     branches: [impl/carrier-first-mechanical-compilation-20261004]
     paths:
       - tools/audit_knight_tree_retarget_skin_ceiling_c50b_v1.py
-      - canonical/ATLAS_MIRA_COMPILER_MECHANICAL_COHERENCE_EXECUTION_PLAN_V1.md
       - .github/workflows/knight_tree_retarget_skin_ceiling_c50b_v1.yml
   workflow_dispatch:
 

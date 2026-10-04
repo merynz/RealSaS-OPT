@@ -13,6 +13,10 @@ BINDINGS = {
     "qualified_motion_binding_hash": "MOTION",
     "constraint_set_binding_hash": "CONSTRAINTS",
     "presentation_binding_hash": "PRESENTATION",
+    "mechanical_carrier_evidence_hash": "CARRIER:EVIDENCE",
+    "mechanical_carrier_topology_hash": "CARRIER:TOPOLOGY",
+    "mechanical_carrier_geometry_hash": "CARRIER:GEOMETRY",
+    "static_mesh_qualification_binding_hash": "CARRIER:STATIC",
 }
 
 
@@ -56,6 +60,14 @@ def test_stage41_probe_fingerprint_changes_with_any_mechanical_probe_authority()
     )
     assert changed_motion["proof_probe_fingerprint"] != base
 
+    changed_carrier = _context(
+        bindings={
+            **BINDINGS,
+            "mechanical_carrier_topology_hash": "CARRIER:TOPOLOGY:2",
+        }
+    )
+    assert changed_carrier["proof_probe_fingerprint"] != base
+
     changed_camera = _context(
         camera_binding_hashes=tuple(
             "CAM:CHANGED" if i == 3 else f"CAM:{i}" for i in range(8)
@@ -86,5 +98,13 @@ def test_measurement_identity_changes_without_changing_probe_identity():
 def test_stage41_context_rejects_incomplete_bindings_or_camera_set():
     with pytest.raises(ValueError, match="BINDING_MISSING"):
         _context(bindings={k: v for k, v in BINDINGS.items() if k != "mesh_binding_hash"})
+    with pytest.raises(ValueError, match="BINDING_MISSING"):
+        _context(
+            bindings={
+                k: v
+                for k, v in BINDINGS.items()
+                if k != "mechanical_carrier_evidence_hash"
+            }
+        )
     with pytest.raises(ValueError, match="CAMERA_BINDING_INVALID"):
         _context(camera_binding_hashes=("CAM:0",))

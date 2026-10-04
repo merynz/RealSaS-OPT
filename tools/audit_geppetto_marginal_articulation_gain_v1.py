@@ -22,7 +22,6 @@ import numpy as np
 from experiments.geppetto_reference_strength_fullstack_v1.mechanical_capacity_target_v2 import (
     POLICY_K0,
     POLICY_K1,
-    POLICY_K2,
     build_mechanical_capacity_target_v2,
 )
 from experiments.geppetto_reference_strength_fullstack_v1.mechanical_core_target_v1 import (
@@ -286,21 +285,9 @@ def main(args) -> None:
         if row["necessary_for_k2"]:
             necessary[int(row["source_index_provenance_only"])] = True
 
-    k2 = build_mechanical_capacity_target_v2(
-        parents=parents,
-        deform_mask=deform,
-        skin=skin,
-        bone_heads_world=heads,
-        policy=POLICY_K2,
-        necessary_control_mask=necessary,
-    )
-    k2_set = _target_indices(k2)
-    if not (k0_set <= k2_set <= k1_set):
-        raise RuntimeError("GEPPETTO_K2_SET_ORDER_VIOLATION")
-
     report = {
         "schema": "RealSaS.GeppettoMarginalArticulationGainCourt.v1",
-        "status": "MEASURED__K2_CONSTRUCTED__NO_PROMOTION_CLAIM",
+        "status": "MEASURED__K1_MARGINAL_EFFECT_CLASSIFIED__NO_PROMOTION_CLAIM",
         "probe_contract": {
             "type": "REST_LOCAL_AXIS_MICRO_ROTATION",
             "angle_degrees": ANGLE_DEG,
@@ -324,20 +311,14 @@ def main(args) -> None:
         "rest_reconstruction_max_abs_error": rest_reconstruction_error,
         "target_counts": {
             "K0_CURRENT_CORE": int(k0.count),
-            "K2_DEFORMATION_NECESSARY": int(k2.count),
             "K1_ALL_DEFORM": int(k1.count),
         },
         "set_deltas": {
             "K1_minus_K0": int(len(k1_set - k0_set)),
-            "K2_minus_K0": int(len(k2_set - k0_set)),
-            "K1_minus_K2": int(len(k1_set - k2_set)),
         },
-        "necessary_control_count": int(np.count_nonzero(necessary)),
-        "necessary_source_indices_provenance_only": [
+        "marginal_nonzero_effect_control_count": int(np.count_nonzero(necessary)),
+        "marginal_nonzero_effect_source_indices_provenance_only": [
             int(x) for x in np.flatnonzero(necessary).tolist()
-        ],
-        "k2_source_indices_provenance_only": [
-            int(x) for x in k2.source_indices_provenance_only.tolist()
         ],
         "controls": controls,
         "training_used": False,
@@ -347,7 +328,7 @@ def main(args) -> None:
         "claim_boundary": [
             "This court measures whether omitted source controls create a non-zero hierarchical LBS affine-field degree of freedom under generic micro-poses.",
             "It does not claim perceptual importance, animation quality, or cross-character generalization.",
-            "K2 is K0 plus independently necessary controls and required structural bridges; it is not allowed to collapse to K1 by construction.",
+            "This court classifies the extra K1 all-deform controls relative to K0; it does not redefine the existing K2 helper-extension contract.",
             "Source row indices are emitted only as provenance and are not learner inputs or product IDs.",
         ],
     }
@@ -356,8 +337,8 @@ def main(args) -> None:
         encoding="utf-8",
     )
     np.savez_compressed(
-        args.out_dir / "K2_NECESSITY_MASK.npz",
-        necessary_control_mask=necessary.astype(np.uint8),
+        args.out_dir / "K1_MARGINAL_EFFECT_MASK.npz",
+        marginal_nonzero_effect_mask=necessary.astype(np.uint8),
     )
     print(
         "GEPPETTO_MARGINAL_ARTICULATION_GAIN_RESULT="
@@ -366,7 +347,7 @@ def main(args) -> None:
                 "status": report["status"],
                 "target_counts": report["target_counts"],
                 "set_deltas": report["set_deltas"],
-                "necessary_control_count": report["necessary_control_count"],
+                "marginal_nonzero_effect_control_count": report["marginal_nonzero_effect_control_count"],
             },
             sort_keys=True,
         ),

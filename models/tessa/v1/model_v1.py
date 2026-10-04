@@ -26,7 +26,6 @@ class TESSAConfigV1:
     query_chunk_size: int = 256
     max_faces: int = 32768
     max_vertices: int = 32768
-    max_faces_per_chart: int = 4096
 
     @property
     def special_token_count(self) -> int:
@@ -78,8 +77,6 @@ class TESSAConfigV1:
             coordinate_bins=self.coordinate_bins,
         )
         policy.validate()
-        if self.max_faces_per_chart < 256 or self.max_faces_per_chart > self.max_faces:
-            raise ValueError("TESSA_MAX_FACES_PER_CHART_INVALID")
         return policy
 
 
@@ -94,7 +91,7 @@ class TESSASurfaceEncoderV1(nn.Module):
     """Permutation-tolerant GSA surface encoder with fixed latent bottleneck.
 
     Complexity of the expensive latent stack is independent of raw GSA point
-    count.  Cross-attention is O(N * K), where K is the fixed latent count.
+    count. Cross-attention is O(N*K), where K is the fixed latent count.
     """
 
     def __init__(self, cfg: TESSAConfigV1):
@@ -156,11 +153,10 @@ class TESSASurfaceEncoderV1(nn.Module):
 
 
 class WindowedCausalSelfAttentionV1(nn.Module):
-    """Exact causal attention inside a bounded trailing window.
+    """Exact causal attention inside a bounded trailing token window.
 
-    Training memory/time is O(L*W), not O(L^2).  This is the scaling invariant
-    that prevents a MeshAnything-V2-like short-sequence ceiling from becoming a
-    TESSA product contract.
+    Compute is O(L*W), not O(L^2). The mesh remains one global serialized
+    topology; W bounds context, not topology extent.
     """
 
     def __init__(self, cfg: TESSAConfigV1):
@@ -240,9 +236,9 @@ class TESSADecoderBlockV1(nn.Module):
 class TESSAV1(nn.Module):
     """Topology Estimation for Stable Surface Animation, V1.
 
-    Input: GSA-derived XYZ/N/evidence features for one admitted component/chart.
-    Output: learned mesh token proposal only.  The Compiler must decode, project,
-    support-bind, qualify and seal before ATLAS or MIRA may consume the carrier.
+    Input: global GSA-derived XYZ/N/evidence features plus one global serialized
+    mesh-token context. Output: learned mesh token proposal only. Compiler must
+    decode, support-bind, orient, qualify and seal it before ATLAS/MIRA consume it.
     """
 
     def __init__(self, cfg: TESSAConfigV1 | None = None):
@@ -261,18 +257,25 @@ class TESSAV1(nn.Module):
         self.final_norm = nn.LayerNorm(self.cfg.d_model)
         self.lm_head = nn.Linear(self.cfg.d_model, self.cfg.vocab_size, bias=False)
 
-    def _position_ids(self, length: int, device: torch.device) -> torch.Tensor:
-        # Relative/sliding positions intentionally wrap at W; long-range identity
-        # is carried by chart/component structure and surface cross-attention.
-        return torch.arange(length, device=device) % self.cfg.local_attention_window
+    def _position_ids(self, length: int, device: torch.device, *, offset: int = 0) -> torch.Tensor:
+        if offset < 0:
+            raise ValueError("TESSA_POSITION_OFFSET_NEGATIVE")
+        return (torch.arange(length, device=device) + int(offset)) % self.cfg.local_attention_window
 
-    def forward(
+    def encode_surface(
+        self,
+        surface_features: torch.Tensor,
+        surface_valid_mask: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        return self.surface_encoder(surface_features, surface_valid_mask)
+
+    def decode_tokens(
         self,
         *,
-        surface_features: torch.Tensor,
+        memory: torch.Tensor,
         input_ids: torch.Tensor,
         labels: torch.Tensor | None = None,
-        surface_valid_mask: torch.Tensor | None = None,
+        sequence_position_offset: int = 0,
     ) -> TESSAOutputV1:
         if input_ids.ndim != 2:
             raise ValueError("TESSA_INPUT_IDS_SHAPE_INVALID")
@@ -280,8 +283,9 @@ class TESSAV1(nn.Module):
             int(input_ids.min()) < 0 or int(input_ids.max()) >= self.cfg.vocab_size
         ):
             raise ValueError("TESSA_INPUT_TOKEN_OUT_OF_RANGE")
-        memory = self.surface_encoder(surface_features, surface_valid_mask)
-        pos = self._position_ids(input_ids.shape[1], input_ids.device)
+        pos = self._position_ids(
+            input_ids.shape[1], input_ids.device, offset=sequence_position_offset
+        )
         x = self.token_embedding(input_ids) + self.position_embedding(pos)[None]
         for block in self.decoder:
             x = block(x, memory)
@@ -297,9 +301,26 @@ class TESSAV1(nn.Module):
             )
         return TESSAOutputV1(logits=logits, surface_latents=memory, loss=loss)
 
+    def forward(
+        self,
+        *,
+        surface_features: torch.Tensor,
+        input_ids: torch.Tensor,
+        labels: torch.Tensor | None = None,
+        surface_valid_mask: torch.Tensor | None = None,
+        sequence_position_offset: int = 0,
+    ) -> TESSAOutputV1:
+        memory = self.encode_surface(surface_features, surface_valid_mask)
+        return self.decode_tokens(
+            memory=memory,
+            input_ids=input_ids,
+            labels=labels,
+            sequence_position_offset=sequence_position_offset,
+        )
 
-def tessa_attention_work_upper_bound_v1(sequence_length: int, cfg: TESSAConfigV1) -> int:
-    """Number of q-k pairs per layer, excluding fixed surface cross-attention."""
-    if sequence_length < 0:
+
+def tessa_attention_work_upper_bound_v1(length: int, cfg: TESSAConfigV1 | None = None) -> int:
+    cfg = cfg or TESSAConfigV1()
+    if length < 0:
         raise ValueError("TESSA_SEQUENCE_LENGTH_NEGATIVE")
-    return int(sequence_length * min(sequence_length, cfg.local_attention_window))
+    return int(length) * min(int(length), int(cfg.local_attention_window))

@@ -62,7 +62,6 @@ def test_stage41_probe_fingerprint_tracks_protocol_not_mutable_product_state():
         bindings={
             **BINDINGS,
             "motion_source_set_binding_hash": "MOTION:SOURCE_SET:2",
-            "motion_source_seal_binding_hash": "MOTION:SOURCE_SEAL:2",
         }
     )
     assert changed_source["proof_probe_fingerprint"] != base
@@ -85,6 +84,7 @@ def test_stage41_probe_fingerprint_tracks_protocol_not_mutable_product_state():
         ("skeleton_binding_hash", "SK:2"),
         ("mesh_skin_binding_hash", "SKIN:2"),
         ("mechanical_carrier_topology_hash", "CARRIER:TOPOLOGY:2"),
+        ("motion_source_seal_binding_hash", "MOTION:SOURCE_SEAL:2"),
     ):
         child = _context(bindings={**BINDINGS, key: value})
         assert child["proof_probe_fingerprint"] == base

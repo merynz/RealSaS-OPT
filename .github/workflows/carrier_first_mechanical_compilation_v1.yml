@@ -4,7 +4,7 @@ on:
   push:
     branches: [impl/carrier-first-mechanical-compilation-20261004]
     paths:
-      - canonical/CARRIER_FIRST_MECHANICAL_COMPILATION_PROGRAM_V1_20261004.md
+      - canonical/ATLAS_MIRA_COMPILER_MECHANICAL_COHERENCE_EXECUTION_PLAN_V1.md
       - canonical/MAINLINE_EXECUTION_PLAN_V2.json
       - compiler/realsas_compiler_core/mechanical_carrier_evidence_v1.py
       - compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py
@@ -21,36 +21,46 @@ permissions:
 
 jobs:
   contracts:
-    runs-on: [self-hosted, linux, x64, realsas]
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
       CUDA_VISIBLE_DEVICES: ""
       PYTHONUNBUFFERED: "1"
       PYTHONPATH: .
-      PY: /home/monster/realsas-ml312/bin/python
 
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install gate dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+
       - name: Compile carrier-first modules
         shell: bash
         run: |
           set -euo pipefail
-          "$PY" -m py_compile             compiler/realsas_compiler_core/mechanical_carrier_evidence_v1.py             compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py             compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py             models/shared/joint_mechanical_loss_v1.py
+          python -m py_compile             compiler/realsas_compiler_core/mechanical_carrier_evidence_v1.py             compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py             compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py             models/shared/joint_mechanical_loss_v1.py
 
       - name: Carrier identity and DAG contracts
         shell: bash
         run: |
           set -euo pipefail
-          "$PY" -m pytest -q             tests/compiler/test_mechanical_carrier_evidence_v1.py             tests/repository/test_mainline_execution_plan_v2.py
+          python -m pytest -q             tests/compiler/test_mechanical_carrier_evidence_v1.py             tests/repository/test_mainline_execution_plan_v2.py
 
       - name: Mechanical loss regression
         shell: bash
         run: |
           set -euo pipefail
-          "$PY" -m pytest -q tests/models/test_joint_mechanical_loss_v1.py
+          python -m pytest -q tests/models/test_joint_mechanical_loss_v1.py
 
       - name: Seal gate
         shell: bash

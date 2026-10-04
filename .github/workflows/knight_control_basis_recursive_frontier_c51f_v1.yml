@@ -27,6 +27,7 @@ jobs:
       RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
       C50B: /home/monster/realsas_research_scratch/tree_retarget_skin_c50b_37207528345
       C51E: /home/monster/realsas_research_scratch/control_basis_c51e_37212497232
+      C51F_PREV: /home/monster/realsas_research_scratch/control_basis_c51f_37214483038
       OUT: /home/monster/realsas_research_scratch/control_basis_c51f_${{ github.run_id }}
 
     steps:
@@ -46,6 +47,7 @@ jobs:
           test -x "$PY"
           test -f "$C50B/REPORT.json"
           test -f "$C51E/REPORT.json"
+          test -f "$C51F_PREV/REPORT.json"
           "$PY" - <<'PY'
           import torch, numpy
           print("C51F_ENV", torch.__version__, torch.version.cuda, torch.cuda.is_available(), numpy.__version__, flush=True)
@@ -62,7 +64,7 @@ jobs:
           export LD_LIBRARY_PATH="$pythonLocation/lib:${LD_LIBRARY_PATH:-}"
           rm -rf "$OUT"
           mkdir -p "$OUT"
-          "$PY" -u tools/audit_knight_control_basis_recursive_frontier_c51f_v1.py             --authority-root "$AUTH"             --run-id "$RUN_ID"             --c50b-dir "$C50B"             --c51e-dir "$C51E"             --out-dir "$OUT"             --device cuda             --steps 250             --lr 0.02             --frame-batch 9             --log-every 50             --trust-weight 0.0005             --max-depth 2             --max-parent-count 8
+          "$PY" -u tools/audit_knight_control_basis_recursive_frontier_c51f_v1.py             --authority-root "$AUTH"             --run-id "$RUN_ID"             --c50b-dir "$C50B"             --c51e-dir "$C51E"             --resume-dir "$C51F_PREV"             --out-dir "$OUT"             --device cuda             --steps 250             --lr 0.02             --frame-batch 9             --log-every 50             --trust-weight 0.0005             --max-depth 2             --max-parent-count 8
 
       - uses: actions/upload-artifact@v4
         if: always()

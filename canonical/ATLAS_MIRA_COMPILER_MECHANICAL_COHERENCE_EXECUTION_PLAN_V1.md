@@ -1614,25 +1614,47 @@ Scientific consequence:
 - no single numeric control count is a generic rule;
 - C5.2 grow/locus remains unauthorized while a valid prune frontier still exists.
 
-### C5.1f — recursive Pareto prune frontier from admitted 24-control children — NEXT
+### C5.1f — recursive Pareto prune frontier — ACTIVE / CHECKPOINTED AT 22 CONTROLS
 
-Start from every **non-dominated admitted** C5.1e basis, not from an arbitrary 24-control child.
+First recursive run:
+- workflow `37214483038` PASS infrastructure;
+- scientific status: `BOUNDED_DEPTH_REACHED_WITH_ADMITTED_FRONTIER`;
+- initial admitted parent count = **1** at **24 controls**;
+- bounded depth = **2**;
+- explored child candidates = **67**;
+- final non-dominated admitted parents = **2**;
+- final admitted control count = **22**;
+- local prune fixed point = **false**;
+- decision = `CONTINUE_C5_1F_FROM_SEALED_FRONTIER`.
 
-For each frontier parent:
-1. enumerate every remaining non-root single-control deletion;
-2. truly prune and reparent;
-3. mint a fresh skeleton lineage;
-4. rebuild tree-consistent retarget;
-5. independently reoptimize skin for that exact reduced rig and the exact 51-frame idle/run/slash domain;
-6. replay hard exact-motion proof;
-7. run fresh reduced-skeleton microstress when motion closes;
-8. run motion-source fidelity;
-9. run editability/no-op response;
-10. rebuild the Pareto frontier from all admitted children.
+Therefore:
+- 24 is not a fixed point;
+- 23 is not the end of the admitted prune frontier;
+- 22 is **not** claimed as optimum or fixed point;
+- C5.2 grow/locus and C5.3 ATLAS architecture change remain unauthorized while this admitted prune frontier exists.
 
-Repeat rung-by-rung until:
-- no admitted child exists from any non-dominated admitted parent => local prune fixed point under the sealed policy;
-- or a capability defect appears that cannot be resolved by pruning => route that defect to C5.2 grow/locus attribution.
+The C5.1f runner is now checkpoint-resumable:
+- resume source must be the previous report's exact `final_basis_ids`;
+- matching reduced skeleton + weight artifacts are loaded by lineage;
+- prune-history lineage is reconstructed back to the C5.1e admitted parent;
+- previous carrier hash and run id must match exactly;
+- duplicate frontier runs are serialized with workflow concurrency.
+
+Resume objective:
+1. expand every non-dominated admitted 22-control parent;
+2. enumerate every remaining non-root single-control deletion;
+3. truly prune and reparent;
+4. mint fresh skeleton lineage;
+5. rebuild tree-consistent retarget;
+6. independently reoptimize skin for that exact reduced rig and exact 51-frame idle/run/slash domain;
+7. replay hard exact-motion proof;
+8. run fresh reduced-skeleton microstress when motion closes;
+9. run motion-source fidelity;
+10. run editability/no-op response;
+11. rebuild the Pareto frontier;
+12. checkpoint and repeat until:
+   - no admitted child exists from any non-dominated admitted parent => local prune fixed point under the sealed policy; or
+   - a capability defect appears that pruning cannot resolve => route to C5.2.
 
 Hard claim boundary:
 - a local prune fixed point is not global optimality;

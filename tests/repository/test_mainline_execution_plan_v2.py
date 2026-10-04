@@ -17,10 +17,10 @@ def load(rel: str):
     return json.loads((ROOT / rel).read_text(encoding="utf-8"))
 
 
-def test_v2_plan_is_clean_46_stage_subject_agnostic_dag():
+def test_v2_plan_is_clean_subject_agnostic_dag_without_fixed_stage_count_contract():
     plan = load("canonical/MAINLINE_EXECUTION_PLAN_V2.json")
     assert len(validate_plan(plan)) == 64
-    assert plan["stage_count"] == 46
+    assert plan["stage_count"] == len(plan["stages"])
     assert plan["subject_specific_code_forbidden"] is True
     assert plan["stages"][12]["id"] == "13_GEOMETRY_SUBSTRATE_QUALIFIED"
     assert plan["stages"][17]["id"] == "18_CANONICAL_MESH_ADDRESSING_BUILD"
@@ -43,7 +43,7 @@ def test_v2_active_ledger_is_implementation_assembly_not_premature_witness():
     assert ledger["run_id"] == "V2_IMPLEMENTATION_ASSEMBLY"
     assert ledger["subject_id"] == "NONE"
     assert ledger["execution_enabled"] is False
-    assert "progress=0/46" in text
+    assert f"progress=0/{plan['stage_count']}" in text
     assert "01_SOURCE_BYTES_SEALED" in text
     assert "05_CAMERA_CONTRACT_SOLVED" in text
 
@@ -57,6 +57,7 @@ def test_v2_mesh_birth_precedes_parallel_mechanics_and_caa():
         "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
         "17_MECHANICAL_PARTITION_QUALIFIED",
     ]
+    assert "mechanical_attempt" in by["18_CANONICAL_MESH_ADDRESSING_BUILD"]["manifest_keys"]
     assert plan["appearance_contract"]["visual_geometry_authority"] == (
         "SOURCE_ART_SILHOUETTE_VISUAL_MESH"
     )
@@ -65,8 +66,12 @@ def test_v2_mesh_birth_precedes_parallel_mechanics_and_caa():
         "20_CAA_BACKEND_PREREGISTERED"
     ]["depends_on"]
     assert by["26_GEPPETTO_FIT_PREREGISTERED"]["depends_on"] == [
-        "15_RIGGING_SURFACE_QUALIFIED"
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
     ]
+    assert "19_STATIC_CANONICAL_MESH_QUALIFIED" in by[
+        "30_ARACHNE_FIT_PREREGISTERED"
+    ]["depends_on"]
     assert by["35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"]["adapter"].endswith(
         ":qualify_canonical_mesh_stage"
     )
@@ -157,3 +162,20 @@ def test_v2_tail_manifest_fingerprint_scope_matches_current_authority_reads():
     assert by["42_RUNTIME_PROJECTION_AND_CAA_BINDING"]["manifest_keys"] == []
     assert by["44_NATIVE_PACKAGE_OPEN_PLAYBACK"]["manifest_keys"] == ["runtime"]
     assert by["45_DYNAMIC_VISUAL_INTEGRITY_PROOF"]["manifest_keys"] == ["runtime"]
+
+
+def test_carrier_first_mechanics_has_no_hidden_stage35_to_stage18_filesystem_backedge():
+    source = (
+        ROOT
+        / "compiler"
+        / "realsas_compiler_services"
+        / "orchestrator"
+        / "adapters"
+        / "v2_architecture.py"
+    ).read_text(encoding="utf-8")
+    stage18 = source.split("def build_canonical_mesh_addressing_stage", 1)[1].split(
+        "def _double_area", 1
+    )[0]
+    assert 'artifacts" / "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED' not in stage18
+    assert 'ctx["run_manifest"].get("mechanical_attempt")' in stage18
+    assert "DERIVED_PARENT_ATTEMPT_REPAIRED_MESH_CANDIDATE" in stage18

@@ -8,34 +8,37 @@ on:
       - canonical/MAINLINE_EXECUTION_PLAN_V2.json
       - canonical/ACTIVE_RUN_V2.json
       - compiler/realsas_compiler_core/mechanical_carrier_evidence_v1.py
+      - compiler/realsas_compiler_core/carrier_query_normal_evidence_v1.py
+      - compiler/realsas_compiler_core/mechanical_carrier_skin_v1.py
+      - compiler/realsas_compiler_core/rig.py
+      - compiler/realsas_compiler_core/skin.py
       - compiler/realsas_compiler_core/control_basis_selection_v1.py
       - compiler/realsas_compiler_core/control_basis_frontier_v1.py
       - compiler/realsas_compiler_core/control_basis_pruning_v1.py
-      - compiler/realsas_compiler_core/carrier_query_normal_evidence_v1.py
-      - tests/models/test_mira_carrier_query_v1.py
-      - models/mira/carrier_query_v1.py
-      - compiler/realsas_compiler_core/mechanical_carrier_skin_v1.py
+      - compiler/realsas_compiler_core/motion_dynamic_proof_v2.py
+      - compiler/realsas_compiler_core/repair_registry.py
+      - compiler/realsas_compiler_core/repair_attempt.py
+      - compiler/realsas_compiler_services/proof/failure_signatures.py
+      - compiler/realsas_compiler_services/proof/stage41_failure_context_v1.py
+      - compiler/realsas_compiler_services/proof/control_basis_repair.py
+      - compiler/realsas_compiler_services/proof/repair_loop.py
+      - compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py
       - compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py
       - compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py
+      - models/mira/carrier_query_v1.py
       - models/shared/joint_mechanical_loss_v1.py
+      - tests/compiler/test_mechanical_carrier_evidence_v1.py
+      - tests/compiler/test_carrier_query_normal_evidence_v1.py
       - tests/compiler/test_carrier_bound_mechanics_lineage_v1.py
-      - compiler/realsas_compiler_core/skin.py
-      - compiler/realsas_compiler_core/rig.py
-      - tests/compiler/test_stage41_failure_context_v1.py
-      - compiler/realsas_compiler_services/proof/stage41_failure_context_v1.py
-      - tests/compiler/test_control_basis_repair_v1.py
-      - tests/compiler/test_repair_child_attempt_gate_v1.py
-      - compiler/realsas_compiler_services/proof/control_basis_repair.py
-      - compiler/realsas_compiler_core/repair_registry.py
-      - tests/compiler/test_stage41_failure_diagnostics_v1.py
-      - compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py
-      - compiler/realsas_compiler_services/proof/failure_signatures.py
-      - compiler/realsas_compiler_core/motion_dynamic_proof_v2.py
-      - tests/compiler/test_carrier_bound_mechanics_lineage_v1.py             tests/compiler/test_mechanical_carrier_evidence_v1.py
       - tests/compiler/test_control_basis_selection_v1.py
       - tests/compiler/test_control_basis_frontier_v1.py
       - tests/compiler/test_control_basis_pruning_v1.py
-      - tests/compiler/test_carrier_query_normal_evidence_v1.py
+      - tests/compiler/test_control_basis_repair_v1.py
+      - tests/compiler/test_repair_child_attempt_gate_v1.py
+      - tests/compiler/test_bounded_repair_loop_v1.py
+      - tests/compiler/test_stage41_failure_context_v1.py
+      - tests/compiler/test_stage41_failure_diagnostics_v1.py
+      - tests/models/test_mira_carrier_query_v1.py
       - tests/models/test_joint_mechanical_loss_v1.py
       - tests/repository/test_mainline_execution_plan_v2.py
       - .github/workflows/carrier_first_mechanical_compilation_v1.yml
@@ -43,6 +46,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: carrier-first-mechanical-compilation-v1-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   contracts:
@@ -73,13 +80,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m py_compile             compiler/realsas_compiler_core/mechanical_carrier_evidence_v1.py             compiler/realsas_compiler_core/rig.py             compiler/realsas_compiler_core/skin.py             compiler/realsas_compiler_core/control_basis_selection_v1.py             compiler/realsas_compiler_core/control_basis_frontier_v1.py             compiler/realsas_compiler_core/control_basis_pruning_v1.py             compiler/realsas_compiler_core/carrier_query_normal_evidence_v1.py             compiler/realsas_compiler_core/motion_dynamic_proof_v2.py             compiler/realsas_compiler_services/proof/failure_signatures.py             compiler/realsas_compiler_services/proof/stage41_failure_context_v1.py             compiler/realsas_compiler_core/repair_registry.py             compiler/realsas_compiler_services/proof/control_basis_repair.py             compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py             compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py             compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py             models/shared/joint_mechanical_loss_v1.py
+          python -m py_compile             compiler/realsas_compiler_core/mechanical_carrier_evidence_v1.py             compiler/realsas_compiler_core/carrier_query_normal_evidence_v1.py             compiler/realsas_compiler_core/mechanical_carrier_skin_v1.py             compiler/realsas_compiler_core/rig.py             compiler/realsas_compiler_core/skin.py             compiler/realsas_compiler_core/control_basis_selection_v1.py             compiler/realsas_compiler_core/control_basis_frontier_v1.py             compiler/realsas_compiler_core/control_basis_pruning_v1.py             compiler/realsas_compiler_core/motion_dynamic_proof_v2.py             compiler/realsas_compiler_core/repair_registry.py             compiler/realsas_compiler_core/repair_attempt.py             compiler/realsas_compiler_services/proof/failure_signatures.py             compiler/realsas_compiler_services/proof/stage41_failure_context_v1.py             compiler/realsas_compiler_services/proof/control_basis_repair.py             compiler/realsas_compiler_services/proof/repair_loop.py             compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py             compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py             compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py             models/mira/carrier_query_v1.py             models/shared/joint_mechanical_loss_v1.py
 
       - name: Carrier identity and DAG contracts
         shell: bash
         run: |
           set -euo pipefail
-          python -m pytest -q             tests/compiler/test_mechanical_carrier_evidence_v1.py             tests/compiler/test_control_basis_selection_v1.py             tests/compiler/test_control_basis_frontier_v1.py             tests/compiler/test_control_basis_pruning_v1.py             tests/compiler/test_carrier_query_normal_evidence_v1.py             tests/compiler/test_control_basis_repair_v1.py             tests/compiler/test_repair_child_attempt_gate_v1.py             tests/compiler/test_stage41_failure_context_v1.py             tests/compiler/test_stage41_failure_diagnostics_v1.py             tests/repository/test_mainline_execution_plan_v2.py
+          python -m pytest -q             tests/compiler/test_mechanical_carrier_evidence_v1.py             tests/compiler/test_carrier_query_normal_evidence_v1.py             tests/compiler/test_carrier_bound_mechanics_lineage_v1.py             tests/compiler/test_control_basis_selection_v1.py             tests/compiler/test_control_basis_frontier_v1.py             tests/compiler/test_control_basis_pruning_v1.py             tests/compiler/test_control_basis_repair_v1.py             tests/compiler/test_repair_child_attempt_gate_v1.py             tests/compiler/test_bounded_repair_loop_v1.py             tests/compiler/test_stage41_failure_context_v1.py             tests/compiler/test_stage41_failure_diagnostics_v1.py             tests/models/test_mira_carrier_query_v1.py             tests/repository/test_mainline_execution_plan_v2.py
 
       - name: Mechanical loss regression
         shell: bash
@@ -88,5 +95,4 @@ jobs:
           python -m pytest -q tests/models/test_joint_mechanical_loss_v1.py
 
       - name: Seal gate
-        shell: bash
         run: echo "CARRIER_FIRST_MECHANICAL_COMPILATION_V1_PASS"

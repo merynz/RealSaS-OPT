@@ -1,5 +1,9 @@
 name: knight-control-basis-recursive-frontier-c51f-v1
 
+concurrency:
+  group: knight-control-basis-recursive-frontier-c51f-v1
+  cancel-in-progress: true
+
 on:
   push:
     branches: [impl/carrier-first-mechanical-compilation-20261004]

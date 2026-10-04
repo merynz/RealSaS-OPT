@@ -26,6 +26,7 @@ jobs:
       RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
       SOURCE_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V5_DEMO_HANDOFF/KNIGHT_EVALUATED_TEACHER_SOURCE.npz
       DEST_REMOTE: gdrive:RealSaS_TESSA_KNIGHT_V1_HANDOFF
+      TEACHER_SHA256: 96435646a0084a0a038040ee748cb33d3bfa0b1ed550661befd3b18539e28e6f
       PYTHONUNBUFFERED: "1"
       PYTHONPATH: .
     steps:
@@ -37,41 +38,42 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install handoff audit dependencies
-        run: python -m pip install --no-input --progress-bar off numpy
-
-      - name: Materialize exact TESSA handoff inputs
+      - name: Disk and dependency preflight
         shell: bash
         run: |
           set -euo pipefail
-          OUT="$(mktemp -d)"
-          echo "$OUT" > /tmp/tessa_knight_t1_handoff_dir
+          df -h / /tmp || true
+          python -m pip install --no-input --progress-bar off numpy
+          # Cache is expendable; authority artifacts and runner workspaces are not.
+          python -m pip cache purge >/dev/null 2>&1 || true
+          rm -rf "$HOME/.cache/pip" 2>/dev/null || true
+          command -v rclone
           SURFACE="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"
-          test -f "$SURFACE"
-          cp "$SURFACE" "$OUT/qualified_rigging_surface.json"
-          rclone copyto "$SOURCE_REMOTE" "$OUT/KNIGHT_EVALUATED_TEACHER_SOURCE.npz" --checksum
-          test -s "$OUT/KNIGHT_EVALUATED_TEACHER_SOURCE.npz"
+          test -s "$SURFACE"
+          echo "TESSA_HANDOFF_PREFLIGHT_PASS"
+          df -h / /tmp || true
 
-      - name: Audit shapes lineage and seal manifest
+      - name: Audit exact source inputs in place and by stream
         shell: bash
         run: |
           set -euo pipefail
-          OUT="$(cat /tmp/tessa_knight_t1_handoff_dir)"
-          python - "$OUT" "$GITHUB_SHA" <<'PY'
-          import hashlib,json,sys
+          SURFACE="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"
+          python - "$SURFACE" "$SOURCE_REMOTE" "$TEACHER_SHA256" <<'PY'
+          import hashlib,io,json,subprocess,sys
           from pathlib import Path
           import numpy as np
 
-          out=Path(sys.argv[1]); commit=sys.argv[2]
-          surface=out/'qualified_rigging_surface.json'
-          teacher=out/'KNIGHT_EVALUATED_TEACHER_SOURCE.npz'
-          payload=json.loads(surface.read_text(encoding='utf-8'))
+          surface_path=Path(sys.argv[1]); source_remote=sys.argv[2]; expected_sha=sys.argv[3]
+          payload=json.loads(surface_path.read_text(encoding='utf-8'))
           schema=str(payload.get('schema_version') or payload.get('schema') or '')
           assert schema=='RealSaS.RiggingSurfaceIR.v1', schema
           assert payload.get('geometry_lineage_hash'), 'GSA_GEOMETRY_LINEAGE_MISSING'
           assert len(payload.get('surface_nodes') or ())>0, 'GSA_SURFACE_EMPTY'
 
-          with np.load(teacher,allow_pickle=False) as z:
+          teacher_bytes=subprocess.check_output(['rclone','cat',source_remote])
+          got_sha=hashlib.sha256(teacher_bytes).hexdigest()
+          assert got_sha==expected_sha, f'TEACHER_SHA256_DRIFT:{got_sha}!={expected_sha}'
+          with np.load(io.BytesIO(teacher_bytes),allow_pickle=False) as z:
               required={'vertices_source','faces','bone_heads_source','bone_tails_source','parents','skin'}
               missing=required-set(z.files)
               assert not missing, f'TEACHER_KEYS_MISSING:{sorted(missing)}'
@@ -81,15 +83,26 @@ jobs:
               assert tuple(z['bone_tails_source'].shape)==(41,3), z['bone_tails_source'].shape
               assert tuple(z['parents'].shape)==(41,), z['parents'].shape
               assert tuple(z['skin'].shape)==(3665,41), z['skin'].shape
+          print('TESSA_KNIGHT_SOURCE_STREAM_AUDIT_PASS', len(teacher_bytes), got_sha, payload['geometry_lineage_hash'])
+          PY
 
-          def digest(p):
-              h=hashlib.sha256()
-              with p.open('rb') as f:
-                  for chunk in iter(lambda:f.read(1<<20),b''): h.update(chunk)
-              return h.hexdigest()
-          files={}
-          for p in (surface,teacher):
-              files[p.name]={'bytes':p.stat().st_size,'sha256':digest(p)}
+      - name: Publish payload and manifest to Drive without local staging
+        shell: bash
+        run: |
+          set -euo pipefail
+          SURFACE="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"
+          rclone mkdir "$DEST_REMOTE"
+          rclone copyto "$SURFACE" "$DEST_REMOTE/qualified_rigging_surface.json" --checksum
+          # Stream remote->remote to avoid using the full runner filesystem as staging.
+          rclone cat "$SOURCE_REMOTE" | rclone rcat "$DEST_REMOTE/KNIGHT_EVALUATED_TEACHER_SOURCE.npz"
+          python - "$SURFACE" "$SOURCE_REMOTE" "$DEST_REMOTE" "$TEACHER_SHA256" "$GITHUB_SHA" <<'PY'
+          import hashlib,json,subprocess,sys
+          from pathlib import Path
+
+          surface=Path(sys.argv[1]); source_remote=sys.argv[2]; dest=sys.argv[3]; teacher_sha=sys.argv[4]; commit=sys.argv[5]
+          payload=json.loads(surface.read_text(encoding='utf-8'))
+          surface_sha=hashlib.sha256(surface.read_bytes()).hexdigest()
+          teacher_size=int(subprocess.check_output(['rclone','size','--json',source_remote],text=True).strip() and json.loads(subprocess.check_output(['rclone','size','--json',source_remote],text=True))['bytes'])
           manifest={
               'schema':'RealSaS.TESSAKnightTrainingHandoff.v1',
               'status':'PASS',
@@ -107,22 +120,26 @@ jobs:
                   'skin_columns':41,
                   'zero_skin_bone_deletion_forbidden':True,
               },
-              'files':files,
+              'files':{
+                  'qualified_rigging_surface.json':{'bytes':surface.stat().st_size,'sha256':surface_sha},
+                  'KNIGHT_EVALUATED_TEACHER_SOURCE.npz':{'bytes':teacher_size,'sha256':teacher_sha},
+              },
               'product_authority_claimed':False,
               'generalization_claimed':False,
               'training_rung':'T1_SUPERVISED_TOPOLOGY_FIT_INPUT',
           }
-          (out/'TESSA_HANDOFF_MANIFEST.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n',encoding='utf-8')
-          print('TESSA_KNIGHT_T1_HANDOFF_AUDIT_PASS')
-          print(json.dumps(manifest,sort_keys=True))
+          data=(json.dumps(manifest,indent=2,sort_keys=True)+'\n').encode()
+          subprocess.run(['rclone','rcat',dest+'/TESSA_HANDOFF_MANIFEST.json'],input=data,check=True)
+          print('TESSA_KNIGHT_T1_MANIFEST_PUBLISHED', json.dumps(manifest,sort_keys=True))
           PY
 
-      - name: Publish immutable handoff payload to Drive
+      - name: Verify Drive payload by streaming hashes
         shell: bash
         run: |
           set -euo pipefail
-          OUT="$(cat /tmp/tessa_knight_t1_handoff_dir)"
-          rclone mkdir "$DEST_REMOTE"
-          rclone copy "$OUT" "$DEST_REMOTE" --checksum
-          rclone check "$OUT" "$DEST_REMOTE" --one-way --size-only
+          test "$(rclone cat "$DEST_REMOTE/KNIGHT_EVALUATED_TEACHER_SOURCE.npz" | sha256sum | awk '{print $1}')" = "$TEACHER_SHA256"
+          SURFACE="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"
+          LOCAL_SURFACE_SHA="$(sha256sum "$SURFACE" | awk '{print $1}')"
+          test "$(rclone cat "$DEST_REMOTE/qualified_rigging_surface.json" | sha256sum | awk '{print $1}')" = "$LOCAL_SURFACE_SHA"
+          rclone cat "$DEST_REMOTE/TESSA_HANDOFF_MANIFEST.json" | python -c 'import json,sys; x=json.load(sys.stdin); assert x["status"]=="PASS"; assert x["schema"]=="RealSaS.TESSAKnightTrainingHandoff.v1"'
           echo "TESSA_KNIGHT_T1_HANDOFF_DRIVE_PASS"

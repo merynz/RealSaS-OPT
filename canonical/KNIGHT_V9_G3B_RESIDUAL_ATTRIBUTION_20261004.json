@@ -1,0 +1,129 @@
+{
+  "schema": "RealSaS.KnightV9G3BResidualAttribution.v1",
+  "date": "2026-10-04",
+  "status": "CLOSED_DIAGNOSTIC__OWNER_NARROWED",
+  "source": {
+    "mechanics_run_stamp": "20261004T065036Z",
+    "mechanics_source_commit": "06f3453f754db73ed4230ff4f295b7a58ba931ea",
+    "classifier_source_commit": "7b0c1d14a9159dcbe97ced9d7a4ad1f32fbd0ac5",
+    "final_candidate_sha256": "a49170c38167291e629d9c05d91f70193c1547e44a8e0da4e1b649a2f6b36baa",
+    "final_partition_sha256": "b2503c49d3210e48e85f07225bfbcb234350c18674e4a191dac53d26d25be7ed",
+    "classification_sha256": "ebb7d398b02b4943613c4461a04c1e07e8895d8fe1d3e674e98bfdcc69b07265"
+  },
+  "production": {
+    "unsafe_face_count": 48,
+    "all_face_unsafe_count": 58,
+    "all_face_only_unsafe_count": 10,
+    "component_pure_count": 48,
+    "seam_face_count": 46,
+    "identity_only_face_count": 2,
+    "rest_static_bad_count": 4,
+    "dynamic_only_count": 44,
+    "dynamic_failure_signature_counts": {
+      "CONDITION": 41,
+      "AREA_COLLAPSE+CONDITION": 6,
+      "AREA_EXPANSION+CONDITION": 1
+    },
+    "severity": {
+      "p50": 1.4219436682421445,
+      "p95": 6.07687641754187,
+      "max": 15.470549172428793
+    },
+    "dominant_component_counts": {
+      "CMP:c87914aab5af8eeaa0ed": 18,
+      "CMP:635911c2968c273a6f71": 10,
+      "CMP:43015a7ab8a5fd24e9d0": 7,
+      "CMP:490313a06271bd69b662": 6
+    },
+    "dominant_worst_joint_counts": {
+      "J:2ab93c4af20f30da20cf": 16,
+      "J:a06e2545423c89a08d0f": 6,
+      "J:4d65086d482f02dcf49c": 5
+    }
+  },
+  "all_face_only": {
+    "count": 10,
+    "seam_face_count": 10,
+    "interpretation": "Every risk-prefilter-excluded residual is also seam-bearing; seam ownership is therefore not an artifact of the production risk_l1 threshold."
+  },
+  "partition_and_transfer": {
+    "current_component_count": 134,
+    "current_final_separate_count": 2034,
+    "current_direct_seed_count": 116,
+    "current_inherited_separate_count": 1125,
+    "current_closure_added_separate_count": 793,
+    "current_generated_seam_vertex_count": 4068,
+    "current_generated_centroid_vertex_count": 348,
+    "current_harmonic_generated_vertex_count": 4416,
+    "current_harmonic_stored_support_coefficient_count": 99098,
+    "current_harmonic_max_support_count_per_generated_vertex": 35,
+    "historical_20260929_passing_reference": {
+      "component_count": 73,
+      "face_count": 28331,
+      "vertex_count": 16031,
+      "generated_harmonic_vertex_count": 3982,
+      "max_support_count_per_generated_vertex": 49,
+      "g3_pass": true
+    }
+  },
+  "support_locality_forensics": {
+    "unique_unsafe_seam_vertex_count": 61,
+    "unsafe_mean_stored_support_count": 18.590164,
+    "unsafe_mean_max_support_weight": 0.523945,
+    "unsafe_mean_effective_support_count": 2.683668,
+    "safe_mean_stored_support_count": 22.494604,
+    "safe_mean_max_support_weight": 0.665955,
+    "safe_mean_effective_support_count": 2.079603,
+    "interpretation": "Unsafe seam vertices are not characterized by larger raw support lists; they are characterized by more diffuse effective support. This is consistent with a locality/smoothness mismatch in component-harmonic transfer, not proof of causality."
+  },
+  "cut_provenance_on_unsafe_seam_vertices": {
+    "note": "Unique unsafe HSMV seam vertices only; HSCV centroid vertices reported separately.",
+    "closure_added_cut_vertices": 40,
+    "partition_closed_noninherited_vertices": 16,
+    "inherited_vertices": 3,
+    "centroid_vertices": 4,
+    "interpretation": "The overwhelming majority of unsafe seam vertices sit on boundaries introduced/closed by the current repartition rather than inherited legacy cuts."
+  },
+  "owner_attribution": {
+    "ruled_out_as_primary": [
+      "another blind static remesh round",
+      "rest-state triangle quality as the dominant owner",
+      "component impurity across residual faces"
+    ],
+    "primary_suspects": [
+      "repartition-induced seam proliferation / cut closure",
+      "mechanical skin support locality on generated seam vertices",
+      "interaction of the two under the sealed +/-10 degree G3B probe bank"
+    ],
+    "important_boundary": "Historical component-harmonic transfer has passed a production G3 court on a different 73-component partition; therefore harmonic transfer itself is not globally falsified."
+  },
+  "next_gate": {
+    "id": "KNIGHT_V9_SEAM_SUPPORT_LOCALITY_COUNTERFACTUAL_V1",
+    "mutation_scope": "AUDIT_ONLY_IN_MEMORY__GEOMETRY_AND_PARTITION_FROZEN",
+    "arms": [
+      "CURRENT_COMPONENT_HARMONIC_DIRICHLET_V1",
+      "HARMONIC_TOP1_RENORMALIZED",
+      "HARMONIC_TOP2_RENORMALIZED",
+      "HARMONIC_TOP4_RENORMALIZED"
+    ],
+    "required_outputs": [
+      "production unsafe count",
+      "all-face unsafe count",
+      "condition-only count",
+      "area-collapse count",
+      "per-face paired delta versus baseline",
+      "support entropy/effective-support deltas",
+      "no geometry mutation",
+      "no partition mutation",
+      "no QualifiedSkinIR mutation"
+    ],
+    "promotion_rule": "No core change from this diagnostic alone. If locality materially reduces G3B without moving failure elsewhere, follow with a bounded component-local/geodesic support solver court."
+  },
+  "claim_boundary": {
+    "product_authority_minted": false,
+    "generalization_claimed": false,
+    "skin_weights_mutated_in_product": false,
+    "geometry_mutated": false,
+    "partition_mutated": false
+  }
+}

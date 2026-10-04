@@ -8,6 +8,7 @@ on:
       - .github/workflows/tessa_knight_t1_handoff_v1.yml
       - tools/training/run_tessa_supervised_fit_v1.py
       - models/tessa/v1/training_data_v1.py
+      - models/tessa/v1/tokenization_v1.py
       - notebooks/RealSaS_TESSA_KNIGHT_T1_RUN_ALL.ipynb
 
 permissions:
@@ -86,6 +87,118 @@ jobs:
           print('TESSA_KNIGHT_SOURCE_STREAM_AUDIT_PASS', len(teacher_bytes), got_sha, payload['geometry_lineage_hash'])
           PY
 
+      - name: T0 GSA-to-teacher substrate compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          SURFACE="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"
+          python - "$SURFACE" "$SOURCE_REMOTE" <<'PY'
+          import io,json,subprocess,sys
+          from collections import deque
+          from pathlib import Path
+          import numpy as np
+
+          surface_path=Path(sys.argv[1]); source_remote=sys.argv[2]
+          payload=json.loads(surface_path.read_text(encoding='utf-8'))
+          gsa=np.asarray([n['P'] for n in payload['surface_nodes']],dtype=np.float64)
+          assert gsa.ndim==2 and gsa.shape[1]==3 and np.isfinite(gsa).all()
+          lo=gsa.min(axis=0); hi=gsa.max(axis=0)
+          center=0.5*(lo+hi); scale=float((hi-lo).max())
+          assert np.isfinite(scale) and scale>1e-12, 'TESSA_GSA_SCALE_DEGENERATE'
+
+          teacher_bytes=subprocess.check_output(['rclone','cat',source_remote])
+          with np.load(io.BytesIO(teacher_bytes),allow_pickle=False) as z:
+              vertices=np.asarray(z['vertices_source'],dtype=np.float64)
+              faces=np.asarray(z['faces'],dtype=np.int64)
+          normalized=(vertices-center[None,:])/scale
+          nlo=normalized.min(axis=0); nhi=normalized.max(axis=0)
+          outside=np.any((normalized < -0.5000001) | (normalized > 0.5000001),axis=1)
+          outside_count=int(outside.sum())
+          print('TESSA_T0_NORMALIZATION',json.dumps({
+              'gsa_center':center.tolist(),'gsa_scale':scale,
+              'teacher_normalized_min':nlo.tolist(),'teacher_normalized_max':nhi.tolist(),
+              'teacher_vertices_outside_gsa_domain':outside_count,
+          },sort_keys=True))
+          assert outside_count==0, f'TESSA_T0_TEACHER_OUTSIDE_GSA_DOMAIN:{outside_count}'
+
+          edge_to_faces={}
+          for fi,(a,b,c) in enumerate(faces.tolist()):
+              for u,w in ((a,b),(b,c),(c,a)):
+                  edge_to_faces.setdefault(tuple(sorted((int(u),int(w)))),[]).append(fi)
+          neighbors=[set() for _ in range(len(faces))]
+          for incident in edge_to_faces.values():
+              ids=sorted(set(map(int,incident)))
+              for i in ids:
+                  neighbors[i].update(j for j in ids if j!=i)
+          remaining=set(range(len(faces))); components=[]
+          while remaining:
+              seed=min(remaining); remaining.remove(seed); q=deque([seed]); comp=[]
+              while q:
+                  fi=q.popleft(); comp.append(fi)
+                  for nb in sorted(neighbors[fi]):
+                      if nb in remaining:
+                          remaining.remove(nb); q.append(nb)
+              components.append(tuple(sorted(comp)))
+
+          bins=1024
+          u=np.clip(normalized+0.5,0.0,1.0-np.finfo(np.float64).eps)
+          qxyz=np.floor(u*bins).astype(np.int64)
+          collision_components=[]
+          restart_total=0
+          global_tokens=2  # one global BOS + EOS
+          for ci,face_ids in enumerate(components):
+              block=faces[np.asarray(face_ids,dtype=np.int64)]
+              vertex_ids=sorted(set(map(int,block.reshape(-1).tolist())))
+              keys=[tuple(map(int,qxyz[vi].tolist())) for vi in vertex_ids]
+              if len(set(keys))!=len(keys):
+                  collision_components.append(ci)
+
+              remap={source_vi:local_vi for local_vi,source_vi in enumerate(vertex_ids)}
+              lf=[tuple(remap[int(x)] for x in row) for row in block.tolist()]
+              edge_map={}
+              for fi,face in enumerate(lf):
+                  a,b,c=face
+                  for x,y in ((a,b),(b,c),(c,a)):
+                      edge_map.setdefault(tuple(sorted((x,y))),[]).append(fi)
+              unvisited=set(range(len(lf))); trailing=None; seq_tokens=3  # BOS, component begin, chart begin
+              restarts=0
+              while unvisited:
+                  next_fi=None; new_vertex=None
+                  if trailing is not None:
+                      for fi in sorted(edge_map.get(tuple(sorted(trailing)),())):
+                          if fi not in unvisited: continue
+                          rem=[x for x in lf[fi] if x not in trailing]
+                          if len(rem)==1:
+                              next_fi=fi; new_vertex=int(rem[0]); break
+                  if next_fi is not None:
+                      seq_tokens += 3
+                      unvisited.remove(next_fi)
+                      trailing=(trailing[1],new_vertex)
+                      continue
+                  next_fi=min(unvisited,key=lambda i:(tuple(sorted(lf[i])),i))
+                  face=lf[next_fi]
+                  seq_tokens += 10  # FACE_BREAK + 9 xyz tokens
+                  trailing=(face[1],face[2])
+                  unvisited.remove(next_fi); restarts += 1
+              seq_tokens += 3  # chart end, component end, eos
+              restart_total += restarts
+              global_tokens += seq_tokens-2  # strip component-local BOS/EOS
+
+          t0={
+              'schema':'RealSaS.TESSAKnightT0SubstratePreflight.v1',
+              'status':'PASS' if not collision_components else 'FAIL',
+              'teacher_component_count':len(components),
+              'teacher_restart_count':restart_total,
+              'global_sequence_tokens':global_tokens,
+              'coordinate_bins':bins,
+              'quantized_vertex_collision_components':collision_components,
+              'artificial_topology_chart_split':False,
+          }
+          print('TESSA_T0_TOKENIZATION',json.dumps(t0,sort_keys=True))
+          assert not collision_components, f'TESSA_T0_QUANTIZED_VERTEX_COLLISION:{collision_components}'
+          print('TESSA_KNIGHT_T0_SUBSTRATE_PASS')
+          PY
+
       - name: Publish payload and manifest to Drive without local staging
         shell: bash
         run: |
@@ -93,7 +206,6 @@ jobs:
           SURFACE="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"
           rclone mkdir "$DEST_REMOTE"
           rclone copyto "$SURFACE" "$DEST_REMOTE/qualified_rigging_surface.json" --checksum
-          # Stream remote->remote to avoid using the full runner filesystem as staging.
           rclone cat "$SOURCE_REMOTE" | rclone rcat "$DEST_REMOTE/KNIGHT_EVALUATED_TEACHER_SOURCE.npz"
           python - "$SURFACE" "$SOURCE_REMOTE" "$DEST_REMOTE" "$TEACHER_SHA256" "$GITHUB_SHA" <<'PY'
           import hashlib,json,subprocess,sys
@@ -102,7 +214,8 @@ jobs:
           surface=Path(sys.argv[1]); source_remote=sys.argv[2]; dest=sys.argv[3]; teacher_sha=sys.argv[4]; commit=sys.argv[5]
           payload=json.loads(surface.read_text(encoding='utf-8'))
           surface_sha=hashlib.sha256(surface.read_bytes()).hexdigest()
-          teacher_size=int(subprocess.check_output(['rclone','size','--json',source_remote],text=True).strip() and json.loads(subprocess.check_output(['rclone','size','--json',source_remote],text=True))['bytes'])
+          size_payload=json.loads(subprocess.check_output(['rclone','size','--json',source_remote],text=True))
+          teacher_size=int(size_payload['bytes'])
           manifest={
               'schema':'RealSaS.TESSAKnightTrainingHandoff.v1',
               'status':'PASS',
@@ -119,6 +232,12 @@ jobs:
                   'bones':41,
                   'skin_columns':41,
                   'zero_skin_bone_deletion_forbidden':True,
+              },
+              't0_contract':{
+                  'gsa_normalization_must_contain_teacher':True,
+                  'coordinate_bins':1024,
+                  'quantized_collision_within_component_forbidden':True,
+                  'artificial_topology_chart_split':False,
               },
               'files':{
                   'qualified_rigging_surface.json':{'bytes':surface.stat().st_size,'sha256':surface_sha},
@@ -141,5 +260,5 @@ jobs:
           SURFACE="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"
           LOCAL_SURFACE_SHA="$(sha256sum "$SURFACE" | awk '{print $1}')"
           test "$(rclone cat "$DEST_REMOTE/qualified_rigging_surface.json" | sha256sum | awk '{print $1}')" = "$LOCAL_SURFACE_SHA"
-          rclone cat "$DEST_REMOTE/TESSA_HANDOFF_MANIFEST.json" | python -c 'import json,sys; x=json.load(sys.stdin); assert x["status"]=="PASS"; assert x["schema"]=="RealSaS.TESSAKnightTrainingHandoff.v1"'
+          rclone cat "$DEST_REMOTE/TESSA_HANDOFF_MANIFEST.json" | python -c 'import json,sys; x=json.load(sys.stdin); assert x["status"]=="PASS"; assert x["schema"]=="RealSaS.TESSAKnightTrainingHandoff.v1"; assert x["t0_contract"]["artificial_topology_chart_split"] is False'
           echo "TESSA_KNIGHT_T1_HANDOFF_DRIVE_PASS"

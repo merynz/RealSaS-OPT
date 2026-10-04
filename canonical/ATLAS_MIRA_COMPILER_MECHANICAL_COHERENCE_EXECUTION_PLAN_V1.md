@@ -1085,49 +1085,42 @@ Exit:
 
 The goal is to infer the smallest control basis that is mechanically sufficient for the current carrier and admitted motion/editing envelope.
 
-For a candidate control basis (R), define its best achievable skin state under the same carrier:
+For a candidate control basis \(R\), define its best achievable skin state under the same carrier:
 
-[
-W^*(R)=argmin_W L_{mech}(M,R,W,Q)
-]
+\[
+W^*(R)=\arg\min_W L_{\text{mech}}(M,R,W,Q)
+\]
 
 subject to skin legality/locality constraints.
 
-Then define hard admissibility:
+Define hard subject-specific admissibility with explicit robustness thresholds:
 
-[
-A(R)=
-[
-Stage35(M,R,W^*(R),Q)=PASS
-]
-land
-[
-SourceFidelity ge 	au_s
-]
-land
-[
-Editability/Locality ge 	au_e
-]
-land
-[
-FreeRunningStructure=PASS
-]
-]
+\[
+A_\tau(R)=
+[G_{\text{mech}}(R)\ge\tau_m]
+\land
+[G_{\text{source}}(R)\ge\tau_s]
+\land
+[G_{\text{edit}}(R)\ge\tau_e]
+\land
+[G_{\text{free}}(R)\ge\tau_f]
+\]
 
-The product control basis is chosen **lexicographically**:
+where the \(G\) terms are measured on the current carrier and admitted probe/motion/editing envelope after skin is reoptimized/adapted for that rig.
 
-1. hard mechanical/source/editability admissibility;
-2. maximum proof margin / robustness;
-3. minimum control complexity.
+Then select the minimum-sufficient basis:
 
-Equivalent constrained form:
+\[
+R^*=\arg\min_R C(R)
+\quad\text{s.t.}\quad
+A_\tau(R)=\text{true}
+\]
 
-[
-R^*=argmin_R C(R)
-quad	ext{s.t.}quad A(R)=true
-]
+Only after minimum complexity is established may excess proof margin be used as a tie-breaker between equally simple admissible bases.
 
-where (C(R)) may include:
+This ordering is deliberate: maximizing proof margin before complexity can reward unnecessary controls and is therefore not the RealSaS optimum-rig objective.
+
+\(C(R)\) may include:
 - control count;
 - unnecessary chain depth;
 - redundant near-collinear controls;

@@ -17,6 +17,8 @@ BINDINGS = {
     "mechanical_carrier_topology_hash": "CARRIER:TOPOLOGY",
     "mechanical_carrier_geometry_hash": "CARRIER:GEOMETRY",
     "static_mesh_qualification_binding_hash": "CARRIER:STATIC",
+    "motion_source_set_binding_hash": "MOTION:SOURCE_SET",
+    "motion_source_seal_binding_hash": "MOTION:SOURCE_SEAL",
 }
 
 
@@ -49,24 +51,21 @@ def test_stage41_attribution_context_is_deterministic_and_fail_closed():
     assert a["failure_signature_alone_is_not_owner_evidence"] is True
 
 
-def test_stage41_probe_fingerprint_changes_with_any_mechanical_probe_authority():
-    base = _context()["proof_probe_fingerprint"]
+def test_stage41_probe_fingerprint_tracks_protocol_not_mutable_product_state():
+    base_ctx = _context()
+    base = base_ctx["proof_probe_fingerprint"]
 
     changed_policy = _context(mesh_policy_hash="POLICY:2")
     assert changed_policy["proof_probe_fingerprint"] != base
 
-    changed_motion = _context(
-        bindings={**BINDINGS, "qualified_motion_binding_hash": "MOTION:2"}
-    )
-    assert changed_motion["proof_probe_fingerprint"] != base
-
-    changed_carrier = _context(
+    changed_source = _context(
         bindings={
             **BINDINGS,
-            "mechanical_carrier_topology_hash": "CARRIER:TOPOLOGY:2",
+            "motion_source_set_binding_hash": "MOTION:SOURCE_SET:2",
+            "motion_source_seal_binding_hash": "MOTION:SOURCE_SEAL:2",
         }
     )
-    assert changed_carrier["proof_probe_fingerprint"] != base
+    assert changed_source["proof_probe_fingerprint"] != base
 
     changed_camera = _context(
         camera_binding_hashes=tuple(
@@ -77,6 +76,24 @@ def test_stage41_probe_fingerprint_changes_with_any_mechanical_probe_authority()
 
     changed_observation = _context(observation_set_hash="OBS:2")
     assert changed_observation["proof_probe_fingerprint"] != base
+
+    # These are exactly the mutable state bindings a controlled owner
+    # intervention may legitimately change. They must change baseline state
+    # identity without silently changing the experiment itself.
+    for key, value in (
+        ("qualified_motion_binding_hash", "MOTION:2"),
+        ("skeleton_binding_hash", "SK:2"),
+        ("mesh_skin_binding_hash", "SKIN:2"),
+        ("mechanical_carrier_topology_hash", "CARRIER:TOPOLOGY:2"),
+    ):
+        child = _context(bindings={**BINDINGS, key: value})
+        assert child["proof_probe_fingerprint"] == base
+        assert child["baseline_product_bindings_hash"] != base_ctx[
+            "baseline_product_bindings_hash"
+        ]
+        assert child["baseline_measurement_report_hash"] != base_ctx[
+            "baseline_measurement_report_hash"
+        ]
 
 
 def test_measurement_identity_changes_without_changing_probe_identity():
@@ -104,6 +121,14 @@ def test_stage41_context_rejects_incomplete_bindings_or_camera_set():
                 k: v
                 for k, v in BINDINGS.items()
                 if k != "mechanical_carrier_evidence_hash"
+            }
+        )
+    with pytest.raises(ValueError, match="BINDING_MISSING"):
+        _context(
+            bindings={
+                k: v
+                for k, v in BINDINGS.items()
+                if k != "motion_source_seal_binding_hash"
             }
         )
     with pytest.raises(ValueError, match="CAMERA_BINDING_INVALID"):

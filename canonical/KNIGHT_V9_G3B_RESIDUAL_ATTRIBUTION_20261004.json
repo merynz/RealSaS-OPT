@@ -77,12 +77,13 @@
     "interpretation": "Unsafe seam vertices are not characterized by larger raw support lists; they are characterized by more diffuse effective support. This is consistent with a locality/smoothness mismatch in component-harmonic transfer, not proof of causality."
   },
   "cut_provenance_on_unsafe_seam_vertices": {
-    "note": "Unique unsafe HSMV seam vertices only; HSCV centroid vertices reported separately.",
-    "closure_added_cut_vertices": 40,
+    "note": "Disjoint counts over 61 unique unsafe seam vertices: 57 HSMV edge-midpoint vertices plus 4 HSCV centroid vertices.",
+    "closure_added_noninherited_vertices": 38,
     "partition_closed_noninherited_vertices": 16,
-    "inherited_vertices": 3,
+    "closure_added_inherited_vertices": 2,
+    "partition_closed_inherited_direct_vertices": 1,
     "centroid_vertices": 4,
-    "interpretation": "The overwhelming majority of unsafe seam vertices sit on boundaries introduced/closed by the current repartition rather than inherited legacy cuts."
+    "interpretation": "54/57 unsafe edge-midpoint seam vertices are on boundaries introduced by the current repartition/closure rather than inherited parent cuts; only 3/57 are inherited."
   },
   "owner_attribution": {
     "ruled_out_as_primary": [

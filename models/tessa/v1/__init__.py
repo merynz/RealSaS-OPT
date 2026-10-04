@@ -1,7 +1,7 @@
 """TESSA V1 — Topology Estimation for Stable Surface Animation.
 
 TESSA consumes observation-grounded GSA surface evidence and emits learned mesh
-proposals.  It never owns canonical mesh truth; Compiler qualification does.
+proposals. It never owns canonical mesh truth; Compiler qualification does.
 """
 
 from .conditioning_v1 import (
@@ -39,8 +39,10 @@ from .tokenization_v1 import (
     quantize_tessa_xyz_v1,
 )
 from .training_data_v1 import (
-    TESSATeacherChartV1,
-    build_teacher_charts_v1,
+    TESSATeacherAssetSequenceV1,
+    TESSATrainingWindowV1,
+    build_teacher_asset_sequence_v1,
+    build_truncated_teacher_windows_v1,
     connected_face_components_v1,
     deterministic_face_charts_v1,
 )
@@ -55,15 +57,17 @@ __all__ = [
     "TESSAScalingPolicyV1",
     "TESSASurfaceEncoderV1",
     "TESSA_SURFACE_FEATURE_DIM_V1",
-    "TESSATeacherChartV1",
+    "TESSATeacherAssetSequenceV1",
     "TESSATeacherSequenceV1",
+    "TESSATrainingWindowV1",
     "TESSATriangleMetricsV1",
     "TESSAV1",
     "TESSAVertexProposalV1",
     "WindowedCausalSelfAttentionV1",
     "adjacent_sequence_token_upper_bound_v1",
     "assemble_tessa_proposal_v1",
-    "build_teacher_charts_v1",
+    "build_teacher_asset_sequence_v1",
+    "build_truncated_teacher_windows_v1",
     "build_tessa_conditioning_v1",
     "connected_face_components_v1",
     "denormalize_tessa_xyz_v1",

@@ -2,14 +2,14 @@ import numpy as np
 
 from models.tessa.v1 import (
     TESSAConfigV1,
-    build_teacher_charts_v1,
+    build_teacher_asset_sequence_v1,
+    build_truncated_teacher_windows_v1,
     connected_face_components_v1,
     deterministic_face_charts_v1,
 )
 
 
 def _strip_mesh(face_count: int):
-    # Connected triangle strip in normalized object coordinates.
     vertices = []
     for i in range(face_count + 2):
         x = -0.49 + 0.98 * (i / max(1, face_count + 1))
@@ -19,13 +19,27 @@ def _strip_mesh(face_count: int):
     return np.asarray(vertices, dtype=np.float64), np.asarray(faces, dtype=np.int64)
 
 
+def _cfg():
+    return TESSAConfigV1(
+        d_model=64,
+        n_heads=8,
+        surface_layers=1,
+        decoder_layers=1,
+        surface_latent_count=64,
+        local_attention_window=128,
+        query_chunk_size=32,
+        max_faces=8192,
+        max_vertices=8192,
+    )
+
+
 def test_connected_face_components_separates_disconnected_islands():
     faces = np.asarray([[0, 1, 2], [1, 2, 3], [4, 5, 6]], dtype=np.int64)
     comps = connected_face_components_v1(faces)
     assert comps == ((0, 1), (2,))
 
 
-def test_face_charting_is_bounded_complete_and_nonoverlapping():
+def test_face_charting_remains_diagnostic_only_and_complete():
     _, faces = _strip_mesh(11)
     charts = deterministic_face_charts_v1(faces, max_faces_per_chart=4)
     face_ids = [fi for _, _, ids in charts for fi in ids]
@@ -34,29 +48,49 @@ def test_face_charting_is_bounded_complete_and_nonoverlapping():
     assert max(len(ids) for _, _, ids in charts) <= 4
 
 
-def test_teacher_chart_builder_preserves_exact_teacher_face_set():
+def test_teacher_asset_sequence_preserves_true_components_without_artificial_chart_split():
     vertices, faces = _strip_mesh(17)
-    cfg = TESSAConfigV1(
-        d_model=64,
-        n_heads=8,
-        surface_layers=1,
-        decoder_layers=1,
-        surface_latent_count=64,
-        local_attention_window=256,
-        query_chunk_size=32,
-        max_faces=8192,
-        max_vertices=8192,
-        max_faces_per_chart=256,
+    seq = build_teacher_asset_sequence_v1(vertices, faces, cfg=_cfg())
+    assert seq.face_count == 17
+    assert seq.vertex_count == 19
+    assert seq.component_count == 1
+    assert seq.source_component_face_indices == (tuple(range(17)),)
+    assert seq.token_ids[0] == _cfg().BOS
+    assert seq.token_ids[-1] == _cfg().EOS
+
+
+def test_disconnected_source_components_get_distinct_component_blocks():
+    vertices = np.asarray(
+        [
+            [-0.45, -0.2, 0.0], [-0.25, -0.2, 0.0], [-0.35, 0.0, 0.0],
+            [0.25, -0.2, 0.0], [0.45, -0.2, 0.0], [0.35, 0.0, 0.0],
+        ],
+        dtype=np.float64,
     )
-    charts = build_teacher_charts_v1(vertices, faces, cfg=cfg)
-    seen = [fi for chart in charts for fi in chart.source_face_indices]
-    assert sorted(seen) == list(range(len(faces)))
-    assert all(chart.sequence.face_count <= 256 for chart in charts)
-    assert all(chart.sequence.token_ids[-1] == cfg.EOS for chart in charts)
+    faces = np.asarray([[0, 1, 2], [3, 4, 5]], dtype=np.int64)
+    cfg = _cfg()
+    seq = build_teacher_asset_sequence_v1(vertices, faces, cfg=cfg)
+    assert seq.component_count == 2
+    assert seq.token_ids.count(cfg.COMPONENT_BEGIN) == 2
+    assert seq.token_ids.count(cfg.COMPONENT_END) == 2
 
 
-def test_knight_scale_policy_requires_multiple_default_charts_not_face_truncation():
+def test_truncated_windows_score_every_global_input_position_exactly_once():
+    vertices, faces = _strip_mesh(41)
+    cfg = _cfg()
+    seq = build_teacher_asset_sequence_v1(vertices, faces, cfg=cfg)
+    windows = build_truncated_teacher_windows_v1(seq, cfg=cfg, target_tokens=37)
+    scored = []
+    for w in windows:
+        assert len(w.input_ids) == len(w.labels)
+        assert len(w.input_ids) <= cfg.local_attention_window + 37
+        prefix = w.target_input_start - w.sequence_position_offset
+        assert all(x == cfg.PAD for x in w.labels[:prefix])
+        scored.extend(range(w.target_input_start, w.target_input_end))
+    assert scored == list(range(len(seq.token_ids) - 1))
+
+
+def test_knight_scale_policy_is_asset_level_not_chart_count():
     cfg = TESSAConfigV1()
     assert cfg.scaling_policy().admits(vertex_count=3665, face_count=6952)
-    minimum_chart_count = (6952 + cfg.max_faces_per_chart - 1) // cfg.max_faces_per_chart
-    assert minimum_chart_count >= 2
+    assert cfg.max_faces == 32768

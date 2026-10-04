@@ -12,6 +12,8 @@ from __future__ import annotations
 import argparse
 import json
 import time
+
+import numpy as np
 from pathlib import Path
 
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
@@ -44,6 +46,7 @@ from compiler.realsas_compiler_core.deformation_envelope_derivation_v1 import (
     derive_deformation_envelope_v1,
 )
 from compiler.realsas_compiler_core.hashing import content_sha256
+from compiler.realsas_compiler_core.mechanical_repartition_v2 import build_repartitioned_partition_v2
 from compiler.realsas_compiler_core.mesh.mechanical_proposal_admissibility_v1 import (
     MechanicalProposalAdmissibilityGuardV1,
 )
@@ -61,7 +64,13 @@ from tools.audit_knight_repaired_quality_collapse_v1 import (
     build_repaired_surface,
     report_quality,
 )
-from tools.audit_v9_teacher_oracle_iterative_repartition_v1 import carrier_for, read
+from tools.audit_v9_teacher_oracle_iterative_repartition_v1 import (
+    authorization_for,
+    carrier_for,
+    propose_with_generic_fallback,
+    read,
+    sha256,
+)
 from tools.audit_v9_teacher_projection_oracle_v1 import teacher_to_skin
 from tools.demo.render_knight_motion_preview_v1 import _ctx
 
@@ -122,6 +131,8 @@ def main():
     ap.add_argument("--operator",choices=OPS,required=True)
     ap.add_argument("--out-dir",type=Path,required=True)
     ap.add_argument("--cycle-tag",default="MICROSTEP")
+    ap.add_argument("--repartition-first",action="store_true")
+    ap.add_argument("--repartition-iteration",type=int,default=1)
     a=ap.parse_args()
 
     t0=time.perf_counter()
@@ -142,16 +153,16 @@ def main():
             ctx,"18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.MeshQualificationPolicyIR.v1"
         )
     )
-    teacher_skin,_,_,_,_,_=teacher_to_skin(surface,skeleton,a.teacher_bank)
+    teacher_skin,_,valid,_,_,_=teacher_to_skin(surface,skeleton,a.teacher_bank)
+    rebuilt_surface,explicit_faces=build_repaired_surface(rr,a.inverse_npz)
+    if rebuilt_surface.geometry_lineage_hash!=surface.geometry_lineage_hash:
+        raise RuntimeError("MICROSTEP_REBUILT_SURFACE_LINEAGE_DRIFT")
 
     if a.candidate_json is not None:
         candidate=canonical_mesh_candidate_from_dict(read(a.candidate_json))
         candidate_source="EXPLICIT_CANDIDATE"
         carrier=None
     else:
-        rebuilt_surface,explicit_faces=build_repaired_surface(rr,a.inverse_npz)
-        if rebuilt_surface.geometry_lineage_hash!=surface.geometry_lineage_hash:
-            raise RuntimeError("MICROSTEP_REBUILT_SURFACE_LINEAGE_DRIFT")
         carrier=carrier_for(partition,99)
         candidate=build_holeless_partitioned_dense_candidate(
             surface,partition,carrier,
@@ -167,6 +178,104 @@ def main():
             candidate,surface=surface,partition=partition,carrier_policy=carrier
         )
         candidate_source="REBUILT_FROM_PARTITION"
+
+    repartition_report=None
+    if a.repartition_first:
+        if a.candidate_json is None:
+            raise RuntimeError("MICROSTEP_REPARTITION_REQUIRES_EXPLICIT_PARENT_CANDIDATE")
+        parent_compat=_compat(
+            candidate,surface=surface,skeleton=skeleton,skin=teacher_skin,
+            envelope=envelope,cameras=cameras,policy=policy,all_faces=False,
+        )
+        directive,strategy=propose_with_generic_fallback(
+            candidate=candidate,
+            surface=surface,
+            skeleton=skeleton,
+            skin=teacher_skin,
+            partition=partition,
+            compatibility=parent_compat,
+            envelope=envelope,
+            cameras=cameras,
+        )
+        if (
+            directive.get("status")!="REPARTITION_PROPOSED__AWAIT_TRUSTWORTHY_SKIN_AUTHORITY"
+            or int(directive.get("candidate_separate_pair_count") or 0)<=0
+        ):
+            raise RuntimeError("MICROSTEP_REPARTITION_NO_QUALIFIED_DIRECTIVE")
+        evidence={
+            "schema":"RealSaS.V9TeacherOracleMechanicalStaticFixedPointEvidence.v1",
+            "teacher_bank_sha256":sha256(a.teacher_bank),
+            "teacher_clean_row_count":int(np.count_nonzero(valid)),
+            "teacher_row_count":int(len(valid)),
+            "teacher_coverage":float(np.mean(valid)),
+            "surface_lineage_hash":surface.geometry_lineage_hash,
+            "skeleton_lineage_hash":skeleton.skeleton_lineage_hash,
+            "product_authority_claimed":False,
+        }
+        evidence_hash=content_sha256(evidence)
+        auth=authorization_for(
+            directive=directive,
+            surface=surface,
+            partition=partition,
+            skeleton=skeleton,
+            skin=teacher_skin,
+            evidence_hash=evidence_hash,
+            iteration=int(a.repartition_iteration),
+        )
+        child_partition=build_repartitioned_partition_v2(
+            surface=surface,
+            parent_partition=partition,
+            directive=directive,
+            authorization=auth,
+        )
+        validate_mechanical_partition(child_partition,surface)
+        child_carrier=carrier_for(child_partition,int(a.repartition_iteration))
+        child=build_holeless_partitioned_dense_candidate(
+            surface,
+            child_partition,
+            child_carrier,
+            producer_policy_hash=content_sha256({
+                "schema":"RealSaS.V9MechanicalStaticFixedPointChildPolicy.v1",
+                "cycle":int(a.repartition_iteration),
+                "parent_candidate":candidate.candidate_lineage_hash,
+                "parent_partition":partition.partition_lineage_hash,
+                "directive":directive["directive_hash"],
+                "authorization":auth["authorization_hash"],
+                "teacher_evidence":evidence_hash,
+            }),
+            explicit_face_provenance=explicit_faces,
+            mechanical_skin_transfer="COMPONENT_HARMONIC_DIRICHLET_V1",
+        )
+        validate_canonical_mesh_candidate(
+            child,surface=surface,partition=child_partition,carrier_policy=child_carrier
+        )
+        child_compat=_compat(
+            child,surface=surface,skeleton=skeleton,skin=teacher_skin,
+            envelope=envelope,cameras=cameras,policy=policy,all_faces=False,
+        )
+        if int(child_compat["unsafe_face_count"])>=int(parent_compat["unsafe_face_count"]):
+            raise RuntimeError(
+                "MICROSTEP_REPARTITION_DID_NOT_IMPROVE_G3B:"
+                f"{parent_compat['unsafe_face_count']}->{child_compat['unsafe_face_count']}"
+            )
+        repartition_report={
+            "strategy":strategy,
+            "parent_g3b_unsafe":int(parent_compat["unsafe_face_count"]),
+            "child_g3b_unsafe":int(child_compat["unsafe_face_count"]),
+            "candidate_separate_pair_count":int(directive["candidate_separate_pair_count"]),
+            "parent_partition_hash":partition.partition_lineage_hash,
+            "child_partition_hash":child_partition.partition_lineage_hash,
+            "parent_candidate_hash":candidate.candidate_lineage_hash,
+            "child_candidate_hash":child.candidate_lineage_hash,
+            "iteration":int(a.repartition_iteration),
+        }
+        (a.out_dir/"REPARTITION_REPORT.json").write_text(
+            json.dumps(repartition_report,indent=2,sort_keys=True)+"\n"
+        )
+        partition=child_partition
+        candidate=child
+        candidate_source="REPARTITIONED_FROM_EXPLICIT_PARENT"
+        print("V9_MICROSTEP_REPARTITION="+json.dumps(repartition_report,sort_keys=True),flush=True)
 
     (a.out_dir/"INPUT_PARTITION.json").write_text(
         json.dumps(partition.to_dict(),indent=2,sort_keys=True)+"\n"
@@ -268,6 +377,8 @@ def main():
         "skin_weight_mutation":False,
         "partition_mutation":False,
         "candidate_source":candidate_source,
+        "repartition_first":bool(a.repartition_first),
+        "repartition_report":repartition_report,
         "operator":a.operator,
         "cycle_tag":str(a.cycle_tag),
         "baseline":baseline,

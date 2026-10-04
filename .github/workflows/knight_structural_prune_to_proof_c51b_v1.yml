@@ -6,7 +6,6 @@ on:
     paths:
       - tools/audit_knight_structural_prune_to_proof_c51b_v1.py
       - compiler/realsas_compiler_core/control_basis_pruning_v1.py
-      - canonical/ATLAS_MIRA_COMPILER_MECHANICAL_COHERENCE_EXECUTION_PLAN_V1.md
       - .github/workflows/knight_structural_prune_to_proof_c51b_v1.yml
   workflow_dispatch:
 

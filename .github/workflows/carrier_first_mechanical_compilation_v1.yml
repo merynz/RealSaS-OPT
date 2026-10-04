@@ -6,6 +6,7 @@ on:
     paths:
       - canonical/ATLAS_MIRA_COMPILER_MECHANICAL_COHERENCE_EXECUTION_PLAN_V1.md
       - canonical/MAINLINE_EXECUTION_PLAN_V2.json
+      - canonical/ACTIVE_RUN_V2.json
       - compiler/realsas_compiler_core/mechanical_carrier_evidence_v1.py
       - compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py
       - compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py

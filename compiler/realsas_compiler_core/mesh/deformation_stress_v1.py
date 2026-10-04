@@ -122,7 +122,66 @@ def _probe_rotations(envelope: DeformationCapabilityEnvelopeIR) -> tuple[tuple[s
     return tuple(dedup.values())
 
 
+def _direct_carrier_skin_matrix(candidate, *, skeleton, skin):
+    if str(getattr(skin, "candidate_mesh_binding_hash", "")) != str(
+        candidate.candidate_lineage_hash
+    ):
+        raise QualificationError("G3_CARRIER_SKIN_CANDIDATE_LINEAGE_MISMATCH")
+    if str(getattr(skin, "skeleton_binding_hash", "")) != str(
+        skeleton.skeleton_lineage_hash
+    ):
+        raise QualificationError("G3_CARRIER_SKIN_SKELETON_LINEAGE_MISMATCH")
+
+    joint_ids = tuple(str(j.canonical_joint_id) for j in skeleton.joints)
+    joint_index = {jid: i for i, jid in enumerate(joint_ids)}
+    if len(joint_index) != len(joint_ids):
+        raise QualificationError("G3_SKELETON_DUPLICATE_JOINT")
+
+    vertex_ids = tuple(str(v.candidate_vertex_id) for v in candidate.vertices)
+    vertex_index = {vid: i for i, vid in enumerate(vertex_ids)}
+    if len(vertex_index) != len(vertex_ids):
+        raise QualificationError("G3_CANDIDATE_VERTEX_ID_DUPLICATE")
+
+    rows = {str(row.carrier_vertex_id): row for row in skin.rows}
+    if set(rows) != set(vertex_ids):
+        raise QualificationError("G3_CARRIER_SKIN_INCOMPLETE_VERTEX_ACCOUNTING")
+
+    weights = np.zeros((len(vertex_ids), len(joint_ids)), dtype=np.float64)
+    for vid, vi in vertex_index.items():
+        seen = set()
+        total = 0.0
+        for jid, weight in rows[vid].influences:
+            jid = str(jid)
+            value = float(weight)
+            if jid in seen or jid not in joint_index:
+                raise QualificationError("G3_CARRIER_SKIN_JOINT_INVALID")
+            if not math.isfinite(value) or value < 0.0:
+                raise QualificationError("G3_CARRIER_SKIN_WEIGHT_INVALID")
+            seen.add(jid)
+            weights[vi, joint_index[jid]] = value
+            total += value
+        if abs(total - 1.0) > 1e-8:
+            raise QualificationError("G3_CARRIER_SKIN_SIMPLEX_INVALID")
+
+    positions = np.asarray([v.P for v in candidate.vertices], dtype=np.float64)
+    if positions.shape != (len(vertex_ids), 3) or not np.isfinite(positions).all():
+        raise QualificationError("G3_CANDIDATE_VERTEX_PAYLOAD_INVALID")
+
+    faces = []
+    for face in candidate.faces:
+        ids = tuple(map(str, face))
+        if len(ids) != 3 or any(vid not in vertex_index for vid in ids):
+            raise QualificationError("G3_CANDIDATE_FACE_INVALID")
+        faces.append(tuple(vertex_index[vid] for vid in ids))
+    if not faces:
+        raise QualificationError("G3_CANDIDATE_FACE_SET_EMPTY")
+    return positions, weights, tuple(faces)
+
+
 def _candidate_skin_matrix(candidate, *, surface, skeleton, skin):
+    if str(getattr(skin, "schema_version", "")) == "RealSaS.QualifiedMechanicalCarrierSkinIR.v1":
+        return _direct_carrier_skin_matrix(candidate, skeleton=skeleton, skin=skin)
+
     if candidate.surface_binding_hash != surface.geometry_lineage_hash:
         raise QualificationError("G3_CANDIDATE_SURFACE_LINEAGE_MISMATCH")
     if skin.surface_binding_hash != surface.geometry_lineage_hash:

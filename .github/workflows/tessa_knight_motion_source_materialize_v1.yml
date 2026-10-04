@@ -24,6 +24,10 @@ jobs:
         with:
           ref: ${{ github.sha }}
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Verify source FBX
         shell: bash
         run: |

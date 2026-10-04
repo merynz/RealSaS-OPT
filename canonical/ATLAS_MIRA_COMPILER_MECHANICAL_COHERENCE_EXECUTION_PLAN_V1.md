@@ -416,6 +416,170 @@ Order:
 4. absolute-joint diffusion challenger;
 5. larger/full fit only if smaller interventions are falsified.
 
+## 7.7 ATLAS pre-fit test ladder
+
+The ATLAS redesign is evidence-gated. Run these courts before spending A100.
+
+### A0 — carrier/GSA evidence decomposition
+
+Question:
+- which current ATLAS inputs are true perception evidence and which are accidental substrate coordinates?
+
+Freeze:
+- current checkpoint;
+- one Knight carrier;
+- current GSA.
+
+Measure separate ablations for:
+- GSA XYZ/N;
+- mapped Stage19 carrier XYZ/N;
+- view/raster support;
+- GSA relation graph;
+- carrier topology digest used only as lineage/evaluation, not neural input.
+
+Exit:
+- exact list of features that must remain source/GSA auxiliary evidence;
+- exact list that must be carrier-derived.
+
+### A1 — support-binding transport court
+
+Every Stage18/19 carrier vertex already has a `SurfaceSupportBinding`.
+
+Build deterministic source-evidence transport:
+- carrier XYZ/N remain exact carrier values;
+- support/raster evidence is transported only through admitted support coefficients;
+- no teacher fields;
+- no nearest-neighbor remapping;
+- no hidden topology substitution.
+
+Conservative view-valid rule:
+- a transported raster/view field is valid only when the admitted support mass for that view is complete within tolerance;
+- otherwise validity is false rather than hallucinated.
+
+Exit:
+- deterministic transport hash;
+- identity-support vertices reproduce GSA evidence exactly;
+- seam/generated vertices remain provenance-complete and fail closed on incomplete support.
+
+### A2 — frozen ATLAS compatibility
+
+Run current checkpoint without fitting on:
+- legacy GSA contract;
+- carrier-first transported contract.
+
+Measure:
+- joint proposal PCK/locus drift for diagnostics only;
+- stop/existence drift;
+- parent/root proposal drift;
+- confidence/uncertainty drift;
+- hard downstream Stage35 consequence on the same carrier.
+
+Decision:
+- if carrier-first evidence is compatible and mechanical utility is non-regressive, keep frozen backbone;
+- if representation mismatch is large, do not immediately full-fit: open A3.
+
+### A3 — carrier-awareness necessity court
+
+Question:
+- does ATLAS actually need explicit carrier conditioning beyond GSA semantics?
+
+Construct paired carriers from the same upstream perception evidence:
+- same GSA/source;
+- different mechanically admissible carrier variants or bounded local connectivity changes;
+- same MIRA ceiling/optimization policy.
+
+Hold the ATLAS rig fixed and measure best achievable skin/mechanical closure on each carrier.
+
+Then allow rig loci/control basis to optimize/search independently on each carrier.
+
+Carrier-aware ATLAS is justified only if:
+
+[
+min_W L_{mech}(M_1,R_{fixed},W)
+]
+
+is materially worse than
+
+[
+min_{R,W} L_{mech}(M_1,R,W)
+]
+
+for a carrier change while source semantics are held fixed.
+
+This prevents adding mesh topology to ATLAS merely because it is available.
+
+### A4 — cardinality/control-capacity court
+
+Use K0/K1/K2/K3 only as evaluation/training-policy challengers:
+- K0 current core;
+- K1 all deform + structural bridges;
+- K2 independently proven mechanically necessary controls;
+- K3 full legal source skeleton diagnostic ceiling.
+
+Do not target a requested joint count.
+
+Measure each additional control by marginal articulation consequence after common-mode rigid motion removal.
+
+Exit:
+- minimum evidence-backed control family;
+- no teacher-cardinality authority.
+
+### A5 — absolute-joint sampled-feedback challenger
+
+Only if A2/A3 shows a rig-owned residual that locus generation can plausibly fix.
+
+Compare controlled rungs:
+- current coarse/residual locus;
+- absolute joint diffusion;
+- absolute joint diffusion + sampled XYZ -> parent;
+- + sampled joint/parent -> next autoregressive state;
+- + BFS-equivalent order augmentation as a separate final rung.
+
+Required metrics:
+- free-running structural closure;
+- carrier-bound mechanical utility;
+- locus error;
+- parent/root correctness;
+- terminal stability;
+- no teacher feedback.
+
+The historical C3/C4 source is the starting point; do not reimplement from scratch.
+
+### A6 — mechanically sufficient basis loss
+
+Only after a differentiable carrier-native `L_mech` is parity-checked against hard G3.
+
+Potential ATLAS objective:
+
+[
+L_{ATLAS}
+=
+L_{reference_locus}
++
+L_{structure}
++
+lambda_m L_{mech}(M,R,hat W)
++
+lambda_c L_{control_complexity}
+]
+
+where (hat W) comes from a frozen/admitted MIRA or a bounded inner optimization used only for training research.
+
+Hard Compiler qualification remains separate.
+
+### A7 — ATLAS promotion court
+
+No promotion from teacher metrics alone.
+
+Require:
+- hard Stage35 improvement or non-regression;
+- lower/equal catastrophic-face count;
+- free-running stability;
+- control-basis adequacy;
+- editability/locality;
+- held-out coherent assets;
+- no carrier-lineage violation.
+
 ---
 
 # 8. MIRA architecture program

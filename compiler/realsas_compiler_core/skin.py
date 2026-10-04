@@ -14,6 +14,7 @@ def qualify_skin(
     max_total_correction_l1:float=0.02,
     negative_tolerance:float=1e-8,
     max_influences:int|None=None,
+    authority_bindings:dict[str,str]|None=None,
 )->QualifiedSkinIR:
     if max_simplex_repair_l1 < 0.0 or max_total_correction_l1 < 0.0 or negative_tolerance < 0.0:
         raise ValueError("skin repair budgets/tolerance must be nonnegative")
@@ -106,6 +107,14 @@ def qualify_skin(
         "duplicate_pairs_rejected":True,
         "silent_clipping_forbidden":True,
     }
+    authority_bindings={
+        str(k):str(v)
+        for k,v in sorted(dict(authority_bindings or {}).items())
+    }
+    if any(not k or not v for k,v in authority_bindings.items()):
+        raise QualificationError("SKIN_AUTHORITY_BINDING_INVALID")
+    if authority_bindings:
+        report["authority_bindings"]=authority_bindings
     if corrected>len(qualified):
         raise QualificationError("skin repair accounting invariant violated")
     lineage=content_sha256({"surface":surface.geometry_lineage_hash,"skeleton":skeleton.skeleton_lineage_hash,"proposal":proposal.to_dict(),"report":report,"rows":[r.to_dict() for r in qualified]})

@@ -198,11 +198,24 @@ def qualify_skeleton_stage(ctx:dict)->dict:
     unknown=set(policy)-{"run_ilp_shadow"}
     if unknown:
         raise QualificationError(f"GEPPETTO_QUALIFICATION_POLICY_UNSUPPORTED:{sorted(unknown)}")
-    skeleton=qualify_skeleton(surface,proposal,run_ilp_shadow=bool(policy.get("run_ilp_shadow",False)))
+    skeleton=qualify_skeleton(
+        surface,
+        proposal,
+        run_ilp_shadow=bool(policy.get("run_ilp_shadow",False)),
+        authority_bindings={
+            "mechanical_carrier_evidence":carrier.carrier_evidence_hash,
+            "mechanical_carrier_topology":carrier.topology_hash,
+            "mechanical_carrier_geometry":carrier.geometry_hash,
+            "candidate_mesh":carrier.candidate_mesh_binding_hash,
+            "static_mesh_qualification":carrier.static_mesh_qualification_binding_hash,
+        },
+    )
     root=ctx["run_root"]/"artifacts"/"28_SKELETON_QUALIFIED"
     return {"status":"PASS","outputs":[write_ir(root/"qualified_skeleton.json",skeleton,authority_class="QUALIFIED_SKELETON")],
         "diagnostics":{"skeleton_lineage_hash":skeleton.skeleton_lineage_hash,"joint_count":len(skeleton.joints),
-                       "optimizer":skeleton.qualification_report.get("solver"),"optimality_proven":skeleton.qualification_report.get("optimality_proven")}}
+                       "optimizer":skeleton.qualification_report.get("solver"),"optimality_proven":skeleton.qualification_report.get("optimality_proven"),
+                       "mechanical_carrier_evidence_hash":carrier.carrier_evidence_hash,
+                       "mechanical_carrier_topology_hash":carrier.topology_hash}}
 
 
 def seal_geppetto_checkpoint_stage(ctx:dict)->dict:
@@ -306,6 +319,13 @@ def qualify_skin_stage(ctx:dict)->dict:
         max_total_correction_l1=float(policy["max_total_correction_l1"]),
         negative_tolerance=float(policy["negative_tolerance"]),
         max_influences=None if max_influences is None else int(max_influences),
+        authority_bindings={
+            "mechanical_carrier_evidence":carrier.carrier_evidence_hash,
+            "mechanical_carrier_topology":carrier.topology_hash,
+            "mechanical_carrier_geometry":carrier.geometry_hash,
+            "candidate_mesh":carrier.candidate_mesh_binding_hash,
+            "static_mesh_qualification":carrier.static_mesh_qualification_binding_hash,
+        },
     )
     root=ctx["run_root"]/"artifacts"/"32_SKIN_QUALIFIED"
     q=dict(skin.qualification_report or {})
@@ -321,6 +341,8 @@ def qualify_skin_stage(ctx:dict)->dict:
             "row_confidence_semantics":q.get("row_confidence_semantics"),
             "uncovered_row_semantics":q.get("uncovered_row_semantics"),
             "product_skin_evidence_complete":q.get("product_skin_evidence_complete"),
+            "mechanical_carrier_evidence_hash":carrier.carrier_evidence_hash,
+            "mechanical_carrier_topology_hash":carrier.topology_hash,
         }}
 
 

@@ -1,0 +1,65 @@
+{
+  "schema": "RealSaS.KnightV9SeamSupportLocalityCounterfactualEvidence.v1",
+  "date": "2026-10-04",
+  "status": "PASS__LOCALITY_ONLY_HYPOTHESIS_FALSIFIED",
+  "source": {
+    "court_commit": "bc69f8c8fbdb46e79754bba6ea8fe633fab2ca64",
+    "mechanics_source_commit": "06f3453f754db73ed4230ff4f295b7a58ba931ea",
+    "final_candidate_sha256": "a49170c38167291e629d9c05d91f70193c1547e44a8e0da4e1b649a2f6b36baa",
+    "final_partition_sha256": "b2503c49d3210e48e85f07225bfbcb234350c18674e4a191dac53d26d25be7ed",
+    "report_sha256": "e8508774857bd8dd2f80e0556829e7a39d0135866cdc5f4571c9a7c020aadf2d"
+  },
+  "arms": [
+    {
+      "arm": "CURRENT_COMPONENT_HARMONIC_DIRICHLET_V1",
+      "production_unsafe": 48,
+      "all_face_unsafe": 58,
+      "condition_unsafe": 48,
+      "introduced": 0,
+      "resolved": 0
+    },
+    {
+      "arm": "HARMONIC_TOP1_RENORMALIZED",
+      "production_unsafe": 141,
+      "all_face_unsafe": 143,
+      "condition_unsafe": 92,
+      "introduced": 122,
+      "resolved": 29
+    },
+    {
+      "arm": "HARMONIC_TOP2_RENORMALIZED",
+      "production_unsafe": 72,
+      "all_face_unsafe": 83,
+      "condition_unsafe": 65,
+      "introduced": 46,
+      "resolved": 22
+    },
+    {
+      "arm": "HARMONIC_TOP4_RENORMALIZED",
+      "production_unsafe": 50,
+      "all_face_unsafe": 64,
+      "condition_unsafe": 50,
+      "introduced": 6,
+      "resolved": 4
+    }
+  ],
+  "verdict": {
+    "locality_hypothesis_supported": false,
+    "best_counterfactual_arm": "HARMONIC_TOP4_RENORMALIZED",
+    "interpretation": [
+      "Naive support sparsification/localization is not a monotonic route to G3 compatibility.",
+      "Each localized arm resolves some baseline unsafe faces but introduces new failures elsewhere.",
+      "The composed topology + rig + support field under motion must be evaluated jointly.",
+      "Do not promote top-k seam support into production."
+    ]
+  },
+  "next_owner": "JOINT_MECHANICAL_COMPATIBILITY_ON_CANONICAL_SUBSTRATE",
+  "claim_boundary": {
+    "geometry_mutated": false,
+    "topology_mutated": false,
+    "partition_mutated": false,
+    "qualified_skin_mutated": false,
+    "product_authority_minted": false,
+    "generalization_claimed": false
+  }
+}

@@ -5,6 +5,7 @@ import math
 
 import torch
 
+from compiler.realsas_compiler_core.preproduct_authority_v1 import NormalizationDomainIR
 from compiler.realsas_compiler_core.types import RiggingSurfaceIR
 
 
@@ -13,18 +14,23 @@ TESSA_SURFACE_FEATURE_DIM_V1 = 17
 
 @dataclass(frozen=True)
 class TESSAConditioningV1:
-    """Deterministic RiggingSurfaceIR -> TESSA tensor adapter.
+    """Deterministic Stage08 + RiggingSurfaceIR -> TESSA tensor adapter.
 
-    The adapter preserves GSA as geometry/evidence authority.  It does not use
-    teacher topology, teacher rig, teacher skin, or current Stage18 faces.
+    Stage08 NormalizationDomainIR owns the canonical object coordinate frame.
+    GSA is geometry/evidence authority inside that frame. TESSA must never
+    recompute a new object frame from the finite GSA sample cloud because doing
+    so can exclude valid source surface points that lie between/just outside GSA
+    samples. Teacher topology, rig, skin and Stage18 faces are never inputs.
     """
 
     features: torch.Tensor  # [N,17]
     surface_ids: tuple[str, ...]
     component_ids: tuple[str, ...]
     center: tuple[float, float, float]
-    scale: float
+    scale: float  # full world extent represented by TESSA [-0.5,+0.5]
     source_geometry_lineage_hash: str
+    normalization_hash: str
+    coordinate_frame: str
 
 
 def _normal(node) -> tuple[float, float, float, float]:
@@ -42,6 +48,7 @@ def _normal(node) -> tuple[float, float, float, float]:
 def build_tessa_conditioning_v1(
     surface: RiggingSurfaceIR,
     *,
+    normalization: NormalizationDomainIR,
     component_by_surface_id: dict[str, str] | None = None,
     dtype: torch.dtype = torch.float32,
     device: torch.device | str | None = None,
@@ -50,22 +57,37 @@ def build_tessa_conditioning_v1(
         raise ValueError("TESSA_GSA_SURFACE_EMPTY")
     if not surface.geometry_lineage_hash:
         raise ValueError("TESSA_GSA_GEOMETRY_LINEAGE_MISSING")
+    if not normalization.normalization_hash:
+        raise ValueError("TESSA_NORMALIZATION_HASH_MISSING")
+    if str(normalization.coordinate_frame) != "REALSAS_OBJECT_FRAME":
+        raise ValueError("TESSA_NORMALIZATION_FRAME_UNSUPPORTED")
+
+    center_t = torch.tensor(tuple(map(float, normalization.center_xyz)), dtype=torch.float64)
+    half_extent = float(normalization.half_extent)
+    if center_t.shape != (3,) or not torch.isfinite(center_t).all():
+        raise ValueError("TESSA_NORMALIZATION_CENTER_INVALID")
+    if not math.isfinite(half_extent) or half_extent <= 1e-12:
+        raise ValueError("TESSA_NORMALIZATION_HALF_EXTENT_INVALID")
+
+    # Stage08 canonical normalization is world = center + normalized * half_extent,
+    # with canonical normalized coordinates in [-1,+1]. TESSA's coordinate token
+    # vocabulary is [-0.5,+0.5], so use a full scale of 2*half_extent. This is an
+    # exact frame conversion, not padding, clipping or a teacher-derived fit.
+    scale = 2.0 * half_extent
 
     ordered = tuple(sorted(surface.surface_nodes, key=lambda n: str(n.surface_id)))
     ids = tuple(str(n.surface_id) for n in ordered)
     if len(ids) != len(set(ids)):
         raise ValueError("TESSA_GSA_SURFACE_ID_DUPLICATE")
 
-    xyz = torch.tensor([tuple(map(float, n.P)) for n in ordered], dtype=torch.float64)
-    if not torch.isfinite(xyz).all():
+    world_xyz = torch.tensor([tuple(map(float, n.P)) for n in ordered], dtype=torch.float64)
+    if not torch.isfinite(world_xyz).all():
         raise ValueError("TESSA_GSA_XYZ_NONFINITE")
-    lo = xyz.amin(dim=0)
-    hi = xyz.amax(dim=0)
-    center_t = 0.5 * (lo + hi)
-    scale = float((hi - lo).amax())
-    if not math.isfinite(scale) or scale <= 1e-12:
-        raise ValueError("TESSA_GSA_SCALE_DEGENERATE")
-    xyz = (xyz - center_t[None, :]) / scale
+    xyz = (world_xyz - center_t[None, :]) / scale
+    if torch.any(xyz < -0.500001) or torch.any(xyz > 0.500001):
+        lo = tuple(map(float, xyz.amin(dim=0).tolist()))
+        hi = tuple(map(float, xyz.amax(dim=0).tolist()))
+        raise ValueError(f"TESSA_GSA_OUTSIDE_CANONICAL_NORMALIZATION:{lo}:{hi}")
 
     degree = {sid: 0 for sid in ids}
     for rel in surface.local_relations:
@@ -93,7 +115,9 @@ def build_tessa_conditioning_v1(
             float(xyz[index, 0]),
             float(xyz[index, 1]),
             float(xyz[index, 2]),
-            nx, ny, nz,
+            nx,
+            ny,
+            nz,
             normal_valid,
             *view_mask,
             float(degree[sid]) / float(max_degree),
@@ -110,8 +134,10 @@ def build_tessa_conditioning_v1(
         surface_ids=ids,
         component_ids=tuple(components),
         center=tuple(map(float, center_t.tolist())),
-        scale=scale,
+        scale=float(scale),
         source_geometry_lineage_hash=str(surface.geometry_lineage_hash),
+        normalization_hash=str(normalization.normalization_hash),
+        coordinate_frame=str(normalization.coordinate_frame),
     )
 
 

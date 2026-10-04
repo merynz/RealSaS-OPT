@@ -29,8 +29,20 @@ jobs:
         with:
           ref: ${{ github.sha }}
 
-      - name: Compile TESSA namespace
-        run: "$PY -m py_compile models/tessa/__init__.py models/tessa/v1/__init__.py"
+      - name: Runner Python preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          "$PY" --version
+          test -f models/tessa/__init__.py
+          test -f models/tessa/v1/__init__.py
+          echo "TESSA_RUNNER_PREFLIGHT_PASS"
+
+      - name: Compile TESSA top namespace
+        run: "$PY -m py_compile models/tessa/__init__.py"
+      - name: Compile TESSA v1 namespace
+        run: "$PY -m py_compile models/tessa/v1/__init__.py"
       - name: Compile TESSA contracts
         run: "$PY -m py_compile models/tessa/v1/contracts_v1.py"
       - name: Compile TESSA conditioning

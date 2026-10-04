@@ -1029,18 +1029,198 @@ Compute:
 - C4.1 remains local/self-hosted if feasible;
 - no A100 until C4.1 proves that a learnable skin-only solution exists and the selected training bundle exceeds local practical limits.
 
-## C5 — ATLAS mechanically sufficient control basis — CONDITIONAL
+## C5 — motion adapter and ATLAS control-basis attribution — ACTIVE
 
-Only if C3/C4 identifies rig-owned residual.
+C4.1 is COMPLETE / FAIL.
 
-Subcourts:
-- current checkpoint vs carrier-first evidence;
-- mechanical-capacity/marginal-control court;
-- absolute-joint sampled-feedback diffusion challenger;
-- grow-to-need/prune-to-proof;
-- free-running stability.
+Workflow:
+- `37204866091`.
 
-Prefer minimal head/locus fit before full ATLAS fit.
+Frozen:
+- exact Stage19 carrier;
+- A2-verified ATLAS rig;
+- exact 51-frame idle/run/slash motion;
+- no teacher weights;
+- no topology repair.
+
+Skin-only optimization result:
+- bad faces: `90 -> 20`;
+- failed frames: `51 -> 40`;
+- max condition: `381.66 -> 94.66`;
+- max edge ratio: `9.33 -> 4.05`;
+- Stage34 microstress remained PASS;
+- exact-motion closure still FAIL.
+
+Verdict:
+- skin is a material contributor but **not a sufficient sole owner**;
+- MIRA fit remains blocked;
+- next attribution must separate retarget/motion-adapter error from ATLAS rig/control-basis insufficiency and carrier insufficiency.
+
+### C5.0 — tree-consistent retarget ceiling — NEXT
+
+The current demo retarget mapping is independently nearest-cost and historical forensic evidence found target-parent/source-child hierarchy reversal or cross-branch assignments.
+
+Historical evidence:
+- 4 target edges contain source hierarchy reversal/cross-branch mappings;
+- ablating only those bad children improves catastrophic stretch but does not close the problem;
+- therefore retarget is a real contributor but not proven sole owner.
+
+Court:
+- freeze carrier, ATLAS rig, and an admitted skin state;
+- compare current mapping against a target-tree-constrained source mapping where:
+  - target parent and child may map to the same source chain;
+  - otherwise target parent must map to a source ancestor of the target child mapping;
+  - side consistency and geometry cost remain secondary objectives;
+  - no source-name hard coding in the generic solver;
+- execute the exact 51-frame motion court.
+
+Exit:
+- quantify how much residual belongs to the motion-adapter layer;
+- if tree-consistent retarget closes or materially changes owner ordering, repair retarget before changing ATLAS;
+- otherwise proceed to C5.1.
+
+### C5.1 — subject-agnostic optimum control-basis court
+
+**Do not optimize for a requested joint count.**
+
+The goal is to infer the smallest control basis that is mechanically sufficient for the current carrier and admitted motion/editing envelope.
+
+For a candidate control basis (R), define its best achievable skin state under the same carrier:
+
+[
+W^*(R)=argmin_W L_{mech}(M,R,W,Q)
+]
+
+subject to skin legality/locality constraints.
+
+Then define hard admissibility:
+
+[
+A(R)=
+[
+Stage35(M,R,W^*(R),Q)=PASS
+]
+land
+[
+SourceFidelity ge 	au_s
+]
+land
+[
+Editability/Locality ge 	au_e
+]
+land
+[
+FreeRunningStructure=PASS
+]
+]
+
+The product control basis is chosen **lexicographically**:
+
+1. hard mechanical/source/editability admissibility;
+2. maximum proof margin / robustness;
+3. minimum control complexity.
+
+Equivalent constrained form:
+
+[
+R^*=argmin_R C(R)
+quad	ext{s.t.}quad A(R)=true
+]
+
+where (C(R)) may include:
+- control count;
+- unnecessary chain depth;
+- redundant near-collinear controls;
+- edit burden;
+- instability/uncertainty penalty.
+
+This formulation is subject-agnostic:
+- Knight may close at one count;
+- a creature, cloth-like appendage, quadruped, or unusual topology may require another;
+- the number is an output of the proof, not a target label.
+
+### Marginal control utility
+
+For candidate control (j), define mechanical marginal gain only after reoptimizing/adapting skin:
+
+[
+Delta_j(R)=
+Phi(M,Rcup{j},W^*(Rcup{j}),Q)
+-
+Phi(M,R,W^*(R),Q)
+]
+
+where (Phi) is a proof-margin vector/score derived from:
+- failed frame count;
+- catastrophic face count;
+- condition margin;
+- area margin;
+- edge-stretch margin;
+- motion coverage;
+- edit locality.
+
+A control is not justified merely because a teacher/source skeleton contains it.
+
+### Search policy
+
+Use two complementary directions:
+
+**Grow-to-need**
+- start from the minimal legal/current core;
+- add the control with highest positive marginal proof gain;
+- stop when hard closure and robustness margin are reached.
+
+**Prune-to-proof**
+- start from an admitted richer basis;
+- remove the lowest-utility control;
+- reoptimize/adapt skin locally;
+- keep the removal only if hard closure and editability remain non-regressive.
+
+The intersection/stable fixed point is the candidate optimum basis.
+
+### Historical Knight capacity evidence — diagnostic only
+
+Existing teacher-side court:
+- K0 current core = 20;
+- K1/K3 = 41;
+- K1-K0 adds 21 zero-direct-skin-mass deform controls;
+- generic common-mode-removed marginal articulation court measured **0/21** additional controls with non-zero internal skin-deformation effect.
+
+Interpretation:
+- more joints do not automatically mean more useful mechanical capacity;
+- this evidence is a prior/diagnostic only;
+- it does **not** authorize 20 as the Knight product count and does not define counts for unseen subjects.
+
+### C5.2 — actual-motion rig ceiling
+
+After C5.0, use the C5.1 search formulation on the exact carrier.
+
+For each rig challenger:
+- reoptimize/adapt skin under the same exact-motion objective before comparing rigs;
+- never compare one rig with stale skin from another rig;
+- run hard Stage35 exact-motion proof;
+- measure complexity and editability.
+
+Rig challenger ladder:
+1. current A2-verified ATLAS rig;
+2. current rig with bounded locus perturbation in owner regions;
+3. mechanically justified grow-to-need controls;
+4. mechanically justified prune-to-proof simplification;
+5. absolute-joint sampled-feedback ATLAS challenger only if locus/control generation remains the proven bottleneck.
+
+### C5.3 — ATLAS architecture change — BLOCKED ON C5.2
+
+Only if C5.2 proves that current ATLAS representation/generation cannot produce an admissible sufficient basis.
+
+Then test:
+- absolute next-joint XYZ diffusion;
+- sampled joint XYZ -> parent prediction;
+- sampled joint/parent state -> later generation;
+- full carrier/source perception access;
+- control-existence/stop head optimized against mechanical sufficiency, not teacher cardinality;
+- Compiler retains tree/root legality and final proof authority.
+
+No full ATLAS retrain before this point.
 
 ## C6 — Compiler repair loop
 

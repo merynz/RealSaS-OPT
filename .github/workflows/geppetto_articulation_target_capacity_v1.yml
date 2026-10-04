@@ -1,7 +1,7 @@
 name: geppetto-articulation-target-capacity-v1
 
 concurrency:
-  group: geppetto-articulation-target-capacity-v1-\${{ github.ref }}
+  group: geppetto-articulation-target-capacity-v1-${{ github.ref }}
   cancel-in-progress: true
 
 on:
@@ -25,9 +25,16 @@ jobs:
       PYTHONUNBUFFERED: '1'
       PY: /home/monster/realsas-ml312/bin/python
       FIT_RUN: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
-      OUT: /tmp/geppetto_articulation_target_capacity_\${{ github.run_id }}
+      OUT: /tmp/geppetto_articulation_target_capacity_${{ github.run_id }}
 
     steps:
+      - name: Reclaim research scratch space
+        shell: bash
+        run: |
+          set -euo pipefail
+          df -h / /tmp || true
+          rm -rf /tmp/geppetto_live_diffusion_ablation_* /tmp/geppetto_articulation_target_capacity_*
+          df -h / /tmp || true
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
@@ -47,12 +54,12 @@ jobs:
           set -euo pipefail
           mkdir -p "$OUT"
           "$PY" tools/audit_geppetto_articulation_target_capacity_v1.py \
-            --teacher-source-npz "\${{ steps.inputs.outputs.source }}" \
+            --teacher-source-npz "${{ steps.inputs.outputs.source }}" \
             --out-dir "$OUT"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: geppetto-articulation-target-capacity-v1
-          path: \${{ env.OUT }}
+          path: ${{ env.OUT }}
           if-no-files-found: error
           retention-days: 30

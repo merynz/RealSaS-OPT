@@ -125,7 +125,11 @@ def test_child_application_must_be_distinct_single_owner_and_in_scope():
     ok, blockers = validate_repair_application_v1(d, _application(d, owners=("mesh", "weight")))
     assert not ok and "repair_not_single_owner_local" in blockers
     ok, blockers = validate_repair_application_v1(d, _application(d, paths=("mechanical_state.skeleton",)))
-    assert not ok and "repair_changed_path_outside_operation_scope" in blockers
+    assert not ok
+    assert any(
+        blocker.startswith("repair_changed_path_outside_operation_scope")
+        for blocker in blockers
+    )
 
 
 def test_same_probe_reproof_with_material_improvement_accepts_effect():

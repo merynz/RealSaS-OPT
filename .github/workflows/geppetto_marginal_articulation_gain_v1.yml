@@ -1,0 +1,70 @@
+name: geppetto-marginal-articulation-gain-v1
+
+concurrency:
+  group: geppetto-marginal-articulation-gain-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [research/rig-skin-architecture-challengers-20261003]
+    paths:
+      - tools/audit_geppetto_marginal_articulation_gain_v1.py
+      - experiments/geppetto_reference_strength_fullstack_v1/mechanical_capacity_target_v2.py
+      - tests/test_geppetto_mechanical_capacity_target_v2.py
+      - .github/workflows/geppetto_marginal_articulation_gain_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  court:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: '1'
+      PY: /home/monster/realsas-ml312/bin/python
+      FIT_RUN: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      SCRATCH_ROOT: /home/monster/realsas_research_scratch
+      OUT: /home/monster/realsas_research_scratch/geppetto_marginal_articulation_${{ github.run_id }}
+
+    steps:
+      - name: Reclaim court scratch
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$SCRATCH_ROOT"
+          rm -rf "$SCRATCH_ROOT"/geppetto_marginal_articulation_*
+          df -h / /tmp "$SCRATCH_ROOT" || true
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Verify source and regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          src="$FIT_RUN/training/geppetto_teacher/KNIGHT_GEPPETTO_TEACHER_SOURCE.npz"
+          test -f "$src"
+          "$PY" -m py_compile             tools/audit_geppetto_marginal_articulation_gain_v1.py             experiments/geppetto_reference_strength_fullstack_v1/mechanical_capacity_target_v2.py
+          "$PY" -m pytest -q tests/test_geppetto_mechanical_capacity_target_v2.py
+          echo "GEPPETTO_MARGINAL_ARTICULATION_PREFLIGHT_PASS"
+
+      - name: Run marginal articulation court
+        shell: bash
+        run: |
+          set -euo pipefail
+          src="$FIT_RUN/training/geppetto_teacher/KNIGHT_GEPPETTO_TEACHER_SOURCE.npz"
+          mkdir -p "$OUT"
+          "$PY" -u tools/audit_geppetto_marginal_articulation_gain_v1.py             --teacher-source-npz "$src"             --out-dir "$OUT"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: geppetto-marginal-articulation-gain-v1
+          path: ${{ env.OUT }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6

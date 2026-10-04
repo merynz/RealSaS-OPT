@@ -1,0 +1,59 @@
+name: geppetto-riganything-joint-diffusion-parity-v1
+
+concurrency:
+  group: geppetto-riganything-joint-diffusion-parity-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [research/rig-skin-architecture-challengers-20261003]
+    paths:
+      - canonical/GEPPETTO_RIGANYTHING_JOINT_DIFFUSION_PARITY_V1.json
+      - canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md
+      - tools/audit_geppetto_riganything_joint_diffusion_parity_v1.py
+      - models/geppetto/reference_strength_v1/geppetto_reference_strength_candidate_v1.py
+      - .github/workflows/geppetto_riganything_joint_diffusion_parity_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parity:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      PYTHONUNBUFFERED: '1'
+      SCRATCH: /home/monster/realsas_research_scratch/geppetto_riganything_parity_${{ github.run_id }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Preflight and materialize historical challenger
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$SCRATCH"
+          mkdir -p "$SCRATCH"
+          git cat-file -e ba634955777479ee05a5b199742710b1736123b5^{commit}
+          git show ba634955777479ee05a5b199742710b1736123b5:models/geppetto/challengers/riganything_mechanisms_v1.py             > "$SCRATCH/riganything_mechanisms_v1.py"
+          python3 -m py_compile tools/audit_geppetto_riganything_joint_diffusion_parity_v1.py
+          echo "GEPPETTO_RIGANYTHING_PARITY_PREFLIGHT_PASS"
+
+      - name: Run source parity guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -u tools/audit_geppetto_riganything_joint_diffusion_parity_v1.py             --contract canonical/GEPPETTO_RIGANYTHING_JOINT_DIFFUSION_PARITY_V1.json             --frozen-source models/geppetto/reference_strength_v1/geppetto_reference_strength_candidate_v1.py             --historical-source "$SCRATCH/riganything_mechanisms_v1.py"             --out "$SCRATCH/PARITY_GUARD_REPORT.json"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: geppetto-riganything-joint-diffusion-parity-v1
+          path: ${{ env.SCRATCH }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6

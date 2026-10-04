@@ -19,11 +19,15 @@ from compiler.realsas_compiler_core.artifact_codec_v2 import (
     mesh_policy_from_dict,
     qualified_camera_set_from_dict,
     qualified_observation_set_from_dict,
+    rigging_surface_from_dict,
     read_json,
 )
 from compiler.realsas_compiler_core.camera_geometry_v2 import project_points_xyz_v3
 from compiler.realsas_compiler_core.mechanical_carrier_evidence_v1 import (
     build_mechanical_carrier_evidence_v1,
+)
+from compiler.realsas_compiler_core.carrier_query_normal_evidence_v1 import (
+    build_carrier_signed_query_normal_evidence_v1,
 )
 from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
     coverage_metrics,
@@ -196,6 +200,15 @@ def build_canonical_mesh_addressing_stage(ctx: dict) -> dict:
             "RealSaS.QualifiedObservationSetIR.v1",
         )
     )
+    rigging_surface = rigging_surface_from_dict(
+        stage_output_payload(
+            ctx,
+            "15_RIGGING_SURFACE_QUALIFIED",
+            "RealSaS.RiggingSurfaceIR.v1",
+        )
+    )
+    if rigging_surface.geometry_lineage_hash != candidate.surface_binding_hash:
+        raise QualificationError("STATIC_MESH_RIGGING_SURFACE_BINDING_DRIFT")
     source_foreground = _source_foreground_masks_v1(ctx, observation)
     observation_by_view = {
         int(row.view_index): row for row in observation.views
@@ -719,6 +732,11 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
         static_qualification=value,
         surface_addressing=addressing,
     )
+    signed_query_normals = build_carrier_signed_query_normal_evidence_v1(
+        candidate,
+        mechanical_carrier_evidence=carrier_evidence,
+        surface=rigging_surface,
+    )
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     return {
         "status": "PASS_DEMO_ONLY" if demo_geometry_lineage else "PASS",
@@ -741,6 +759,15 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
                     else "STATIC_QUALIFIED_MECHANICAL_CARRIER_EVIDENCE"
                 ),
             ),
+            write_ir(
+                root / "carrier_signed_query_normal_evidence.json",
+                signed_query_normals,
+                authority_class=(
+                    "DEMO_ONLY_CARRIER_BOUND_SIGNED_QUERY_NORMAL_EVIDENCE"
+                    if demo_geometry_lineage
+                    else "CARRIER_BOUND_SIGNED_QUERY_NORMAL_EVIDENCE"
+                ),
+            ),
         ],
         "diagnostics": {
             "qualification_hash": value.qualification_hash,
@@ -749,6 +776,14 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
             "mechanical_carrier_geometry_hash": carrier_evidence.geometry_hash,
             "mechanical_carrier_invalid_normal_count": int(
                 sum(not flag for flag in carrier_evidence.normal_valid)
+            ),
+            "mechanical_carrier_signed_normal_authority": False,
+            "carrier_signed_query_normal_evidence_hash": (
+                signed_query_normals.query_normal_evidence_hash
+            ),
+            "carrier_signed_query_normal_valid_fraction": float(
+                sum(signed_query_normals.normal_valid)
+                / max(len(signed_query_normals.normal_valid), 1)
             ),
             **report,
         },

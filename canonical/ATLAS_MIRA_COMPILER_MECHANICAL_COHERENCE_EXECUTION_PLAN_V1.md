@@ -1046,9 +1046,9 @@ Not authorized yet:
 
 The next question is now:
 
-> On the exact Stage19 carrier and frozen A2-verified ATLAS rig, can **skin weights alone** close the exact Stage35 idle/run/slash deformation court when optimization is driven by those real motion transforms rather than the Stage34 microstress surrogate?
+> On the exact Stage19 carrier and frozen A2-verified ATLAS rig, can **skin weights alone** close the exact compiled-motion idle/run/slash court (current Stage41 authority) when optimization is driven by those real motion transforms rather than the Stage34/35 local microstress surrogate?
 
-#### C4.1 — actual-motion skin-only direct-weight ceiling — NEXT
+#### C4.1 — actual-motion skin-only direct-weight ceiling — COMPLETE / FAIL
 
 This is an optimization oracle, not a model fit.
 
@@ -1057,7 +1057,7 @@ Freeze:
 - A2-verified Stage28 ATLAS rig;
 - exact current idle/run/slash retarget tracks;
 - carrier/query lineage;
-- Stage35 mechanical thresholds;
+- exact compiled-motion mechanical thresholds used by the current Stage41 court;
 - no teacher skin;
 - no topology repair.
 
@@ -1113,7 +1113,7 @@ Training requirements:
 - exact carrier binding;
 - coherent reference motion may supply behavioral reference evidence;
 - product objective is mechanical consequence, not teacher weight equality;
-- hard Stage35 remains qualification authority.
+- hard exact compiled-motion qualification (current Stage41) remains product motion authority.
 
 Identity rows are no longer assumed universally safe under product motion; any bypass/freeze mask must be justified by the exact-motion court, not by microstress identity alone.
 
@@ -1645,7 +1645,7 @@ After C5.0, use the C5.1 search formulation on the exact carrier.
 For each rig challenger:
 - reoptimize/adapt skin under the same exact-motion objective before comparing rigs;
 - never compare one rig with stale skin from another rig;
-- run hard Stage35 exact-motion proof;
+- run hard exact compiled-motion proof under the current Stage41 authority;
 - measure complexity and editability.
 
 Rig challenger ladder:
@@ -1823,10 +1823,12 @@ Goal:
 
 Path:
 - sealed carrier;
-- qualified ATLAS/MIRA state;
-- Stage35 PASS;
-- mechanical-state seal;
-- existing appearance/runtime;
+- qualified carrier-bound ATLAS/MIRA state;
+- current Stage35 pre-motion local compatibility PASS;
+- canonical mechanical-state / puppet seal;
+- motion source + canonical motion compile;
+- current Stage41 exact idle/run/slash compiled-motion PASS;
+- required runtime/presentation integrity gates PASS;
 - idle/run/slash render.
 
 Do not block on FITK/LOFO/shared-encoder efficiency research.
@@ -1932,18 +1934,17 @@ Research chronology is evidence, not shipping authority.
 
 # 13. Immediate work queue
 
-1. Close C0 contract tests.
-2. Close C1 Stage19 carrier-evidence tests.
-3. Fix runner/tooling failures independently of scientific verdicts.
-4. Add fold/parity to JointMechanicalLoss.
-5. Run C2 ATLAS zero-train carrier compatibility.
-6. Run C2 MIRA exact-carrier query compatibility.
-7. Run C3 Knight one-shot carrier-first court.
-8. Use owner attribution to decide whether ATLAS, MIRA, or Compiler needs the next change.
-9. If rig-owned, run C5 ATLAS challenger ladder.
-10. If skin-owned, run C4 minimal MIRA fit ladder.
-11. Close C6 explicit fixed-point orchestration.
-12. Return to Knight idle/run/slash render.
+Current execution order:
+
+1. Finish C5.1f recursive Pareto prune frontier from the admitted 24-control basis.
+2. If C5.1f still has an admitted frontier at the bounded depth, continue the same checkpointed prune frontier until a sealed local prune fixed point or a non-prunable capability defect is reached.
+3. Do **not** open C5.2 locus/grow or C5.3 ATLAS architecture change while a valid prune frontier still exists.
+4. Keep C6 owner attribution tied to the exact Stage41 same-probe fingerprint; failure signatures alone never select an owner.
+5. Integrate promoted owner-local repair operations into immutable child attempts and require same-probe repair-effect closure.
+6. Replace the historical Stage36 surface->mesh skin transfer only when direct carrier-native MIRA output is scientifically authorized; until then it remains an explicit baseline/compatibility seam.
+7. Request A100 only if owner attribution proves an actual learned-model fit is necessary.
+8. Once carrier/rig/skin + exact compiled motion close, return immediately to Knight idle/run/slash product render.
+9. FITK / LOFO / unseen / shared-encoder efficiency work remains after Knight closure.
 
 ---
 
@@ -2006,7 +2007,7 @@ But:
 
 > “Mesh first” does not mean “mesh is dynamically final before mechanics.”
 
-Stage19 seals a statically admissible carrier attempt. Stage35 decides whether the full `(M,R,W)` mechanical state closes. Compiler repair then creates a new attempt rather than silently mutating the current one.
+Stage19 seals a statically admissible carrier attempt. Current Stage35 is an early local compatibility witness for `(M,R,W)`; current Stage41 is the authoritative exact compiled-motion consequence court for an admitted motion envelope. A failure at either semantically relevant proof routes through owner attribution, and Compiler repair creates a new immutable attempt rather than silently mutating the current one.
 
 The quality moat is therefore:
 

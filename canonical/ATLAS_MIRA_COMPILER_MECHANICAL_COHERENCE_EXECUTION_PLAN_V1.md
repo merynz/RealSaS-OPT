@@ -1734,7 +1734,7 @@ Stage41 failure diagnostics bind two distinct identities:
 - evaluator semantic version;
 - mesh-policy lineage;
 - frozen Stage41 sampling contract;
-- external motion-source set + qualified source seal;
+- external motion-source set identity;
 - all eight camera binding hashes;
 - Stage07 observation-set hash.
 
@@ -1751,10 +1751,10 @@ Implementation:
 - `compiler/realsas_compiler_services/proof/stage41_failure_context_v1.py`;
 - Stage41 adapter emits `owner_attribution_context` on structured exact-motion FAIL;
 - Stage41 loads the Stage19 carrier explicitly and records its evidence/topology/geometry/static qualification identity;
-- Stage41 also records the exact Stage39 motion-source set/seal used by the immutable probe.
+- Stage41 records the exact Stage39 motion-source set as external probe authority and retains the product-bound source seal in baseline/child state identity.
 
 Acceptance semantics:
-- changing policy/source-motion/camera/observation/evaluator changes the probe fingerprint;
+- changing policy/source-motion-set/camera/observation/evaluator changes the probe fingerprint;
 - changing carrier/skeleton/skin/product/compiled-motion changes state identity but **not** the external probe fingerprint;
 - changing only measured consequence changes measurement identity but not probe identity;
 - a child receives causal credit only when its intervention is single-owner, bounded, rederived correctly, run under the exact same external probe fingerprint, and materially improves the target without protected-invariant regression.

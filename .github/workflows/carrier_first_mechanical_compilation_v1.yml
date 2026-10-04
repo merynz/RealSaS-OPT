@@ -20,6 +20,7 @@ on:
       - compiler/realsas_compiler_core/repair_attempt.py
       - compiler/realsas_compiler_services/proof/failure_signatures.py
       - compiler/realsas_compiler_services/proof/stage41_failure_context_v1.py
+      - compiler/realsas_compiler_services/proof/stage41_controlled_intervention_v1.py
       - compiler/realsas_compiler_services/proof/control_basis_repair.py
       - compiler/realsas_compiler_services/proof/repair_loop.py
       - compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py
@@ -37,6 +38,7 @@ on:
       - tests/compiler/test_repair_child_attempt_gate_v1.py
       - tests/compiler/test_bounded_repair_loop_v1.py
       - tests/compiler/test_stage41_failure_context_v1.py
+      - tests/compiler/test_stage41_controlled_intervention_v1.py
       - tests/compiler/test_stage41_failure_diagnostics_v1.py
       - tests/models/test_mira_carrier_query_v1.py
       - tests/models/test_joint_mechanical_loss_v1.py

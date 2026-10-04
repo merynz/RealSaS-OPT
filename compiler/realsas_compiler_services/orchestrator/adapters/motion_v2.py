@@ -21,6 +21,7 @@ from compiler.realsas_compiler_core.motion_source_v1 import (
 )
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     canonical_puppet_state_from_dict,
+    mechanical_carrier_evidence_from_dict,
     motion_compile_constraint_set_v2_from_dict,
     motion_source_set_from_dict,
     qualified_camera_set_from_dict,
@@ -53,6 +54,16 @@ from compiler.realsas_compiler_services.proof.failure_signatures import (
 from compiler.realsas_compiler_services.proof.stage41_failure_context_v1 import (
     build_stage41_failure_attribution_context_v1,
 )
+
+
+def _mechanical_carrier(ctx: dict):
+    return mechanical_carrier_evidence_from_dict(
+        stage_output_payload(
+            ctx,
+            "19_STATIC_CANONICAL_MESH_QUALIFIED",
+            "RealSaS.MechanicalCarrierEvidenceIR.v1",
+        )
+    )
 
 
 def _motion_assets(ctx: dict):
@@ -454,6 +465,7 @@ def prove_dynamic_motion_stage(ctx: dict) -> dict:
         )
     )
     mesh_policy = _mesh_policy(ctx)
+    carrier = _mechanical_carrier(ctx)
     try:
         proof = build_qualified_dynamic_motion_v2(
             motion=motion,
@@ -492,6 +504,10 @@ def prove_dynamic_motion_stage(ctx: dict) -> dict:
             "qualified_motion_binding_hash":motion.motion_lineage_hash,
             "constraint_set_binding_hash":constraints.constraint_set_hash,
             "presentation_binding_hash":presentation.presentation_lineage_hash,
+            "mechanical_carrier_evidence_hash":carrier.carrier_evidence_hash,
+            "mechanical_carrier_topology_hash":carrier.topology_hash,
+            "mechanical_carrier_geometry_hash":carrier.geometry_hash,
+            "static_mesh_qualification_binding_hash":carrier.static_mesh_qualification_binding_hash,
         }
         attribution_context=build_stage41_failure_attribution_context_v1(
             measurements=measurements,
@@ -540,5 +556,9 @@ def prove_dynamic_motion_stage(ctx: dict) -> dict:
                 "rest_unseen_dynamic_exposed_fraction", 0.0
             ),
             "compiled_unobserved_appearance_budget_gate_stage": 45,
+            "mechanical_carrier_evidence_hash": carrier.carrier_evidence_hash,
+            "mechanical_carrier_topology_hash": carrier.topology_hash,
+            "mechanical_carrier_geometry_hash": carrier.geometry_hash,
+            "static_mesh_qualification_binding_hash": carrier.static_mesh_qualification_binding_hash,
         },
     }

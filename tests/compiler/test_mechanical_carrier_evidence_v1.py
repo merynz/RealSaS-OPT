@@ -63,6 +63,8 @@ def test_carrier_evidence_is_deterministic_and_roundtrips():
     assert a.geometry_hash == b.geometry_hash
     assert all(a.normal_valid)
     assert set(a.normals) == {(0.0, 0.0, 1.0)}
+    assert a.metadata["signed_normal_authority"] is False
+    assert a.metadata["learned_query_normal_use_forbidden"] is True
     assert mechanical_carrier_evidence_from_dict(a.to_dict()) == a
 
 

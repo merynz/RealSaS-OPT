@@ -1,0 +1,284 @@
+from __future__ import annotations
+
+import argparse
+from dataclasses import asdict, replace
+import hashlib
+import json
+from pathlib import Path
+import random
+import time
+
+import numpy as np
+import torch
+
+from compiler.realsas_compiler_core.geometry_artifact_codec_v2 import rigging_surface_from_dict
+from models.tessa.v1 import (
+    TESSAConfigV1,
+    TESSAV1,
+    build_teacher_charts_v1,
+    build_tessa_conditioning_v1,
+)
+
+
+SCHEMA = "RealSaS.TESSASupervisedFitResult.v1"
+
+
+def sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def normalize_teacher_vertices(vertices: np.ndarray, *, center: tuple[float, float, float], scale: float) -> np.ndarray:
+    v = np.asarray(vertices, dtype=np.float64)
+    c = np.asarray(center, dtype=np.float64)
+    if v.ndim != 2 or v.shape[1] != 3 or not np.isfinite(v).all():
+        raise ValueError("TESSA_TEACHER_VERTICES_INVALID")
+    out = (v - c[None, :]) / float(scale)
+    if np.any(out < -0.5000001) or np.any(out > 0.5000001):
+        lo = out.min(axis=0).tolist()
+        hi = out.max(axis=0).tolist()
+        raise ValueError(f"TESSA_TEACHER_OUTSIDE_GSA_NORMALIZED_DOMAIN:{lo}:{hi}")
+    return out
+
+
+def load_teacher(npz_path: Path) -> tuple[np.ndarray, np.ndarray]:
+    with np.load(npz_path, allow_pickle=False) as z:
+        vertex_key = "vertices_source" if "vertices_source" in z.files else "vertices"
+        face_key = "faces" if "faces" in z.files else "faces_source"
+        if vertex_key not in z.files or face_key not in z.files:
+            raise ValueError(f"TESSA_TEACHER_NPZ_KEYS_MISSING:{z.files}")
+        vertices = np.asarray(z[vertex_key], dtype=np.float64)
+        faces = np.asarray(z[face_key], dtype=np.int64)
+    return vertices, faces
+
+
+def parameter_count(model: torch.nn.Module) -> int:
+    return sum(p.numel() for p in model.parameters())
+
+
+def save_checkpoint(path: Path, *, model, optimizer, epoch: int, step: int, cfg: TESSAConfigV1, metadata: dict) -> None:
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    torch.save(
+        {
+            "schema": "RealSaS.TESSASupervisedCheckpoint.v1",
+            "epoch": int(epoch),
+            "step": int(step),
+            "config": asdict(cfg),
+            "model": model.state_dict(),
+            "optimizer": optimizer.state_dict(),
+            "metadata": metadata,
+        },
+        tmp,
+    )
+    tmp.replace(path)
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--surface-json", required=True)
+    ap.add_argument("--teacher-npz", required=True)
+    ap.add_argument("--output-dir", required=True)
+    ap.add_argument("--epochs", type=int, default=20)
+    ap.add_argument("--lr", type=float, default=2e-4)
+    ap.add_argument("--weight-decay", type=float, default=0.01)
+    ap.add_argument("--chart-faces", type=int, default=512)
+    ap.add_argument("--grad-accum", type=int, default=4)
+    ap.add_argument("--seed", type=int, default=1337)
+    ap.add_argument("--resume", action="store_true")
+    ap.add_argument("--small-smoke", action="store_true")
+    args = ap.parse_args()
+
+    if args.epochs < 1 or args.grad_accum < 1 or args.chart_faces < 1:
+        raise ValueError("TESSA_TRAIN_ARGUMENT_INVALID")
+
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(args.seed)
+
+    surface_path = Path(args.surface_json)
+    teacher_path = Path(args.teacher_npz)
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    payload = json.loads(surface_path.read_text(encoding="utf-8"))
+    surface = rigging_surface_from_dict(payload)
+    conditioning = build_tessa_conditioning_v1(surface)
+    teacher_vertices, teacher_faces = load_teacher(teacher_path)
+    normalized_teacher = normalize_teacher_vertices(
+        teacher_vertices,
+        center=conditioning.center,
+        scale=conditioning.scale,
+    )
+
+    cfg = TESSAConfigV1(max_faces_per_chart=int(args.chart_faces))
+    if args.small_smoke:
+        cfg = TESSAConfigV1(
+            d_model=128,
+            n_heads=8,
+            surface_layers=2,
+            decoder_layers=2,
+            mlp_ratio=2,
+            surface_latent_count=96,
+            local_attention_window=256,
+            query_chunk_size=64,
+            max_faces=32768,
+            max_vertices=32768,
+            max_faces_per_chart=min(int(args.chart_faces), 128),
+        )
+    charts = build_teacher_charts_v1(normalized_teacher, teacher_faces, cfg=cfg)
+    if not charts:
+        raise RuntimeError("TESSA_NO_TEACHER_CHARTS")
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = TESSAV1(cfg).to(device)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    latest = output_dir / "TESSA_V1_LATEST.pt"
+    start_epoch = 0
+    global_step = 0
+    if args.resume and latest.is_file():
+        state = torch.load(latest, map_location="cpu")
+        if state.get("schema") != "RealSaS.TESSASupervisedCheckpoint.v1":
+            raise ValueError("TESSA_RESUME_SCHEMA_MISMATCH")
+        saved_cfg = dict(state.get("config") or {})
+        if saved_cfg != asdict(cfg):
+            raise ValueError("TESSA_RESUME_CONFIG_MISMATCH")
+        model.load_state_dict(state["model"])
+        optimizer.load_state_dict(state["optimizer"])
+        start_epoch = int(state["epoch"]) + 1
+        global_step = int(state["step"])
+        print("TESSA_RESUME", start_epoch, global_step, flush=True)
+
+    surface_features = conditioning.features.unsqueeze(0).to(device)
+    use_bf16 = device.type == "cuda" and torch.cuda.is_bf16_supported()
+    amp_dtype = torch.bfloat16 if use_bf16 else torch.float32
+    manifest = {
+        "surface_sha256": sha256_file(surface_path),
+        "teacher_sha256": sha256_file(teacher_path),
+        "surface_geometry_lineage_hash": conditioning.source_geometry_lineage_hash,
+        "teacher_vertex_count": int(len(teacher_vertices)),
+        "teacher_face_count": int(len(teacher_faces)),
+        "chart_count": int(len(charts)),
+        "chart_face_limit": int(cfg.max_faces_per_chart),
+        "model_parameter_count": int(parameter_count(model)),
+        "device": str(device),
+        "gpu_name": torch.cuda.get_device_name(0) if device.type == "cuda" else None,
+        "bf16": bool(use_bf16),
+        "seed": int(args.seed),
+        "product_authority_claimed": False,
+        "generalization_claimed": False,
+    }
+    (output_dir / "TESSA_V1_FIT_INPUT_MANIFEST.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    print("TESSA_PREFLIGHT", json.dumps(manifest, sort_keys=True), flush=True)
+
+    epoch_records = []
+    for epoch in range(start_epoch, args.epochs):
+        order = list(range(len(charts)))
+        random.Random(args.seed + epoch).shuffle(order)
+        model.train()
+        optimizer.zero_grad(set_to_none=True)
+        epoch_loss = 0.0
+        token_count = 0
+        t0 = time.time()
+        for local_index, chart_index in enumerate(order):
+            seq = charts[chart_index].sequence.token_ids
+            if len(seq) < 2:
+                raise RuntimeError("TESSA_TEACHER_SEQUENCE_TOO_SHORT")
+            ids = torch.tensor(seq[:-1], dtype=torch.long, device=device).unsqueeze(0)
+            labels = torch.tensor(seq[1:], dtype=torch.long, device=device).unsqueeze(0)
+            with torch.autocast(device_type=device.type, dtype=amp_dtype, enabled=use_bf16):
+                out = model(surface_features=surface_features, input_ids=ids, labels=labels)
+                if out.loss is None:
+                    raise RuntimeError("TESSA_LOSS_MISSING")
+                loss = out.loss / float(args.grad_accum)
+            loss.backward()
+            raw_loss = float(out.loss.detach().cpu())
+            epoch_loss += raw_loss * ids.numel()
+            token_count += ids.numel()
+            do_step = ((local_index + 1) % args.grad_accum == 0) or (local_index + 1 == len(order))
+            if do_step:
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                optimizer.step()
+                optimizer.zero_grad(set_to_none=True)
+                global_step += 1
+            if device.type == "cuda":
+                peak = int(torch.cuda.max_memory_allocated())
+            else:
+                peak = 0
+            print(
+                "TESSA_CHART",
+                json.dumps(
+                    {
+                        "epoch": epoch,
+                        "chart": int(chart_index),
+                        "faces": charts[chart_index].sequence.face_count,
+                        "tokens": int(ids.numel()),
+                        "loss": raw_loss,
+                        "global_step": global_step,
+                        "cuda_peak_bytes": peak,
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
+        elapsed = max(time.time() - t0, 1e-9)
+        mean_loss = epoch_loss / max(token_count, 1)
+        record = {
+            "epoch": epoch,
+            "mean_token_loss": mean_loss,
+            "tokens": token_count,
+            "seconds": elapsed,
+            "tokens_per_second": token_count / elapsed,
+            "global_step": global_step,
+        }
+        epoch_records.append(record)
+        print("TESSA_EPOCH", json.dumps(record, sort_keys=True), flush=True)
+        save_checkpoint(
+            latest,
+            model=model,
+            optimizer=optimizer,
+            epoch=epoch,
+            step=global_step,
+            cfg=cfg,
+            metadata=manifest,
+        )
+        numbered = output_dir / f"TESSA_V1_EPOCH_{epoch:04d}.pt"
+        if epoch == args.epochs - 1 or epoch % 5 == 0:
+            save_checkpoint(
+                numbered,
+                model=model,
+                optimizer=optimizer,
+                epoch=epoch,
+                step=global_step,
+                cfg=cfg,
+                metadata=manifest,
+            )
+
+    result = {
+        "schema": SCHEMA,
+        "status": "PASS",
+        "training_class": "T1_SUPERVISED_TOPOLOGY_FIT",
+        "input_manifest": manifest,
+        "epochs": epoch_records,
+        "latest_checkpoint": latest.name,
+        "latest_checkpoint_sha256": sha256_file(latest),
+        "product_authority_claimed": False,
+        "generalization_claimed": False,
+        "mechanical_consequence_training_included": False,
+        "next_required_rung": "T2_MECHANICAL_CONSEQUENCE_FIT",
+    }
+    (output_dir / "TESSA_V1_FIT_RESULT.json").write_text(
+        json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    print("TESSA_SUPERVISED_FIT_PASS", json.dumps(result, sort_keys=True), flush=True)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

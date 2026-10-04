@@ -77,15 +77,39 @@ def _install_test_authority(monkeypatch):
     monkeypatch.setattr("compiler.realsas_compiler_core.repair_registry.REPAIR_OPERATION_AUTHORITY", records)
 
 
-def test_historical_repair_operations_are_fail_closed():
+def test_blocked_historical_repair_operations_remain_fail_closed():
     assert REPAIR_OPERATION_AUTHORITY
+    blocked = 0
     for oid, rec in REPAIR_OPERATION_AUTHORITY.items():
+        if rec.current_main_status == "CANONICAL_MAINLINE_EXECUTABLE":
+            continue
+        blocked += 1
         op=NS(
             operation_id=oid, owner_id=rec.owner_id, operation_family=rec.operation_family,
             qualification_hash=rec.qualification_hash, allowed_change_paths=rec.allowed_change_patterns,
         )
         assert operation_authority_blockers_v1(op)
-        assert rec.current_main_status != "CANONICAL_MAINLINE_EXECUTABLE"
+    assert blocked > 0
+
+
+def test_every_promoted_repair_operation_has_complete_executable_authority():
+    promoted = [
+        rec for rec in REPAIR_OPERATION_AUTHORITY.values()
+        if rec.current_main_status == "CANONICAL_MAINLINE_EXECUTABLE"
+    ]
+    assert promoted
+    for rec in promoted:
+        assert rec.qualification_hash
+        assert rec.module_name
+        assert rec.callable_name
+        op=NS(
+            operation_id=rec.operation_id,
+            owner_id=rec.owner_id,
+            operation_family=rec.operation_family,
+            qualification_hash=rec.qualification_hash,
+            allowed_change_paths=rec.allowed_change_patterns,
+        )
+        assert operation_authority_blockers_v1(op) == ()
 
 
 def test_semantic_delta_localizes_mesh_leaf():

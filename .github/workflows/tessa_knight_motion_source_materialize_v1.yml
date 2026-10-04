@@ -1,0 +1,67 @@
+name: tessa-knight-motion-source-materialize-v1
+
+on:
+  push:
+    branches:
+      - research/tessa-mechanical-mesh-v1-20261004
+    paths:
+      - .github/workflows/tessa_knight_motion_source_materialize_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  materialize:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: .
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Verify source FBX
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s assets/external/quaternius/knight/KnightCharacter.fbx
+          printf '%s  %s\n' \
+            '41f2616fb4a42f9d35e242bbed1450ededc7537def4bf38cbb11b4e54ff2bf21' \
+            'assets/external/quaternius/knight/KnightCharacter.fbx' | sha256sum --check -
+          echo "TESSA_MOTION_SOURCE_FBX_PASS"
+
+      - name: Materialize sealed Knight clips
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/tessa_knight_motion_v1"
+          rm -rf "$out"
+          python tools/motion/materialize_quaternius_preset_v1.py \
+            --source-fbx assets/external/quaternius/knight/KnightCharacter.fbx \
+            --out-dir "$out" \
+            --run-id TESSA_KNIGHT_CONTINUOUS_FIELD_WITNESS_V1
+          for f in demo_idle_v1.motion.json demo_run_v1.motion.json demo_slash_v1.motion.json EXTRACTION_RECEIPT.json MATERIALIZATION_RECEIPT.json; do
+            test -s "$out/$f"
+          done
+          echo "MOTION_OUT=$out" >> "$GITHUB_ENV"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])/'tessa_knight_motion_v1'
+          for name in ('demo_idle_v1.motion.json','demo_run_v1.motion.json','demo_slash_v1.motion.json'):
+              p=root/name
+              x=json.loads(p.read_text())
+              print('TESSA_MOTION_CLIP_PASS', name, x['schema'], x['clip_kind'], len(x.get('source_joints',())))
+          PY
+
+      - name: Upload motion witness source
+        uses: actions/upload-artifact@v4
+        with:
+          name: tessa-knight-motion-source-v1
+          path: ${{ env.MOTION_OUT }}
+          if-no-files-found: error
+          retention-days: 7

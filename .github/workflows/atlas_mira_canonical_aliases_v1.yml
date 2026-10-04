@@ -22,20 +22,18 @@ jobs:
     env:
       CUDA_VISIBLE_DEVICES: ""
       PYTHONUNBUFFERED: "1"
+      PYTHONPATH: .
+      PY: /home/monster/realsas-ml312/bin/python
 
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
       - name: Canonical alias source gate
         shell: bash
         run: |
           set -euo pipefail
-          python -m py_compile models/atlas/__init__.py models/mira/__init__.py tests/models/test_atlas_mira_canonical_aliases_v1.py
-          python -m pytest -q tests/models/test_atlas_mira_canonical_aliases_v1.py
+          "$PY" -m py_compile models/atlas/__init__.py models/mira/__init__.py tests/models/test_atlas_mira_canonical_aliases_v1.py
+          "$PY" -m pytest -q tests/models/test_atlas_mira_canonical_aliases_v1.py
           echo "ATLAS_MIRA_CANONICAL_ALIASES_PASS"

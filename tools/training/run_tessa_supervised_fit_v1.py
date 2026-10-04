@@ -15,13 +15,13 @@ from compiler.realsas_compiler_core.geometry_artifact_codec_v2 import rigging_su
 from models.tessa.v1 import (
     TESSAConfigV1,
     TESSAV1,
-    build_teacher_charts_v1,
+    build_teacher_asset_sequence_v1,
+    build_truncated_teacher_windows_v1,
     build_tessa_conditioning_v1,
 )
 
 
 SCHEMA = "RealSaS.TESSASupervisedFitResult.v1"
-MIN_CHART_FACES = 256
 
 
 def sha256_file(path: Path) -> str:
@@ -85,14 +85,14 @@ def main() -> int:
     ap.add_argument("--epochs", type=int, default=20)
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--weight-decay", type=float, default=0.01)
-    ap.add_argument("--chart-faces", type=int, default=512)
+    ap.add_argument("--target-tokens", type=int, default=4096)
     ap.add_argument("--grad-accum", type=int, default=4)
     ap.add_argument("--seed", type=int, default=1337)
     ap.add_argument("--resume", action="store_true")
     ap.add_argument("--small-smoke", action="store_true")
     args = ap.parse_args()
 
-    if args.epochs < 1 or args.grad_accum < 1 or args.chart_faces < MIN_CHART_FACES:
+    if args.epochs < 1 or args.grad_accum < 1 or args.target_tokens < 32:
         raise ValueError("TESSA_TRAIN_ARGUMENT_INVALID")
 
     random.seed(args.seed)
@@ -116,7 +116,7 @@ def main() -> int:
         scale=conditioning.scale,
     )
 
-    cfg = TESSAConfigV1(max_faces_per_chart=int(args.chart_faces))
+    cfg = TESSAConfigV1()
     if args.small_smoke:
         cfg = TESSAConfigV1(
             d_model=128,
@@ -129,11 +129,15 @@ def main() -> int:
             query_chunk_size=64,
             max_faces=32768,
             max_vertices=32768,
-            max_faces_per_chart=int(args.chart_faces),
         )
-    charts = build_teacher_charts_v1(normalized_teacher, teacher_faces, cfg=cfg)
-    if not charts:
-        raise RuntimeError("TESSA_NO_TEACHER_CHARTS")
+    teacher_sequence = build_teacher_asset_sequence_v1(normalized_teacher, teacher_faces, cfg=cfg)
+    windows = build_truncated_teacher_windows_v1(
+        teacher_sequence,
+        cfg=cfg,
+        target_tokens=int(args.target_tokens),
+    )
+    if not windows:
+        raise RuntimeError("TESSA_NO_TRAINING_WINDOWS")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = TESSAV1(cfg).to(device)
@@ -141,13 +145,45 @@ def main() -> int:
     latest = output_dir / "TESSA_V1_LATEST.pt"
     start_epoch = 0
     global_step = 0
+
+    manifest = {
+        "surface_sha256": sha256_file(surface_path),
+        "teacher_sha256": sha256_file(teacher_path),
+        "surface_geometry_lineage_hash": conditioning.source_geometry_lineage_hash,
+        "teacher_vertex_count": int(len(teacher_vertices)),
+        "teacher_face_count": int(len(teacher_faces)),
+        "teacher_component_count": int(teacher_sequence.component_count),
+        "teacher_restart_count": int(teacher_sequence.restart_count),
+        "global_sequence_tokens": int(len(teacher_sequence.token_ids)),
+        "training_window_count": int(len(windows)),
+        "target_tokens_per_window": int(args.target_tokens),
+        "causal_context_tokens": int(cfg.local_attention_window),
+        "artificial_topology_chart_split": False,
+        "model_parameter_count": int(parameter_count(model)),
+        "device": str(device),
+        "gpu_name": torch.cuda.get_device_name(0) if device.type == "cuda" else None,
+        "bf16": bool(device.type == "cuda" and torch.cuda.is_bf16_supported()),
+        "seed": int(args.seed),
+        "product_authority_claimed": False,
+        "generalization_claimed": False,
+    }
+
     if args.resume and latest.is_file():
         state = torch.load(latest, map_location="cpu")
         if state.get("schema") != "RealSaS.TESSASupervisedCheckpoint.v1":
             raise ValueError("TESSA_RESUME_SCHEMA_MISMATCH")
-        saved_cfg = dict(state.get("config") or {})
-        if saved_cfg != asdict(cfg):
+        if dict(state.get("config") or {}) != asdict(cfg):
             raise ValueError("TESSA_RESUME_CONFIG_MISMATCH")
+        old_meta = dict(state.get("metadata") or {})
+        for key in (
+            "surface_sha256",
+            "teacher_sha256",
+            "global_sequence_tokens",
+            "target_tokens_per_window",
+            "causal_context_tokens",
+        ):
+            if old_meta.get(key) != manifest.get(key):
+                raise ValueError(f"TESSA_RESUME_INPUT_CONTRACT_MISMATCH:{key}")
         model.load_state_dict(state["model"])
         optimizer.load_state_dict(state["optimizer"])
         start_epoch = int(state["epoch"]) + 1
@@ -155,24 +191,8 @@ def main() -> int:
         print("TESSA_RESUME", start_epoch, global_step, flush=True)
 
     surface_features = conditioning.features.unsqueeze(0).to(device)
-    use_bf16 = device.type == "cuda" and torch.cuda.is_bf16_supported()
+    use_bf16 = bool(manifest["bf16"])
     amp_dtype = torch.bfloat16 if use_bf16 else torch.float32
-    manifest = {
-        "surface_sha256": sha256_file(surface_path),
-        "teacher_sha256": sha256_file(teacher_path),
-        "surface_geometry_lineage_hash": conditioning.source_geometry_lineage_hash,
-        "teacher_vertex_count": int(len(teacher_vertices)),
-        "teacher_face_count": int(len(teacher_faces)),
-        "chart_count": int(len(charts)),
-        "chart_face_limit": int(cfg.max_faces_per_chart),
-        "model_parameter_count": int(parameter_count(model)),
-        "device": str(device),
-        "gpu_name": torch.cuda.get_device_name(0) if device.type == "cuda" else None,
-        "bf16": bool(use_bf16),
-        "seed": int(args.seed),
-        "product_authority_claimed": False,
-        "generalization_claimed": False,
-    }
     (output_dir / "TESSA_V1_FIT_INPUT_MANIFEST.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
@@ -180,28 +200,34 @@ def main() -> int:
 
     epoch_records = []
     for epoch in range(start_epoch, args.epochs):
-        order = list(range(len(charts)))
+        order = list(range(len(windows)))
         random.Random(args.seed + epoch).shuffle(order)
         model.train()
         optimizer.zero_grad(set_to_none=True)
-        epoch_loss = 0.0
-        token_count = 0
+        epoch_loss_sum = 0.0
+        scored_token_count = 0
         t0 = time.time()
-        for local_index, chart_index in enumerate(order):
-            seq = charts[chart_index].sequence.token_ids
-            if len(seq) < 2:
-                raise RuntimeError("TESSA_TEACHER_SEQUENCE_TOO_SHORT")
-            ids = torch.tensor(seq[:-1], dtype=torch.long, device=device).unsqueeze(0)
-            labels = torch.tensor(seq[1:], dtype=torch.long, device=device).unsqueeze(0)
+        for local_index, window_index in enumerate(order):
+            window = windows[window_index]
+            ids = torch.tensor(window.input_ids, dtype=torch.long, device=device).unsqueeze(0)
+            labels = torch.tensor(window.labels, dtype=torch.long, device=device).unsqueeze(0)
+            scored = int((labels != cfg.PAD).sum().item())
+            if scored < 1:
+                raise RuntimeError("TESSA_WINDOW_HAS_NO_SCORED_TOKENS")
             with torch.autocast(device_type=device.type, dtype=amp_dtype, enabled=use_bf16):
-                out = model(surface_features=surface_features, input_ids=ids, labels=labels)
+                out = model(
+                    surface_features=surface_features,
+                    input_ids=ids,
+                    labels=labels,
+                    sequence_position_offset=window.sequence_position_offset,
+                )
                 if out.loss is None:
                     raise RuntimeError("TESSA_LOSS_MISSING")
                 loss = out.loss / float(args.grad_accum)
             loss.backward()
             raw_loss = float(out.loss.detach().cpu())
-            epoch_loss += raw_loss * ids.numel()
-            token_count += ids.numel()
+            epoch_loss_sum += raw_loss * scored
+            scored_token_count += scored
             do_step = ((local_index + 1) % args.grad_accum == 0) or (local_index + 1 == len(order))
             if do_step:
                 torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
@@ -210,13 +236,14 @@ def main() -> int:
                 global_step += 1
             peak = int(torch.cuda.max_memory_allocated()) if device.type == "cuda" else 0
             print(
-                "TESSA_CHART",
+                "TESSA_WINDOW",
                 json.dumps(
                     {
                         "epoch": epoch,
-                        "chart": int(chart_index),
-                        "faces": charts[chart_index].sequence.face_count,
-                        "tokens": int(ids.numel()),
+                        "window": int(window_index),
+                        "sequence_position_offset": window.sequence_position_offset,
+                        "input_tokens": int(ids.numel()),
+                        "scored_tokens": scored,
                         "loss": raw_loss,
                         "global_step": global_step,
                         "cuda_peak_bytes": peak,
@@ -226,13 +253,13 @@ def main() -> int:
                 flush=True,
             )
         elapsed = max(time.time() - t0, 1e-9)
-        mean_loss = epoch_loss / max(token_count, 1)
+        mean_loss = epoch_loss_sum / max(scored_token_count, 1)
         record = {
             "epoch": epoch,
-            "mean_token_loss": mean_loss,
-            "tokens": token_count,
+            "mean_scored_token_loss": mean_loss,
+            "scored_tokens": scored_token_count,
             "seconds": elapsed,
-            "tokens_per_second": token_count / elapsed,
+            "scored_tokens_per_second": scored_token_count / elapsed,
             "global_step": global_step,
         }
         epoch_records.append(record)

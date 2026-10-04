@@ -1,0 +1,102 @@
+{
+  "schema": "RealSaS.GeppettoRigAnythingJointDiffusionParity.v1",
+  "date": "2026-10-04",
+  "status": "CLOSED_SOURCE_PARITY_AUDIT__NO_MODEL_PROMOTION",
+  "external_reference": {
+    "repository": "Isabella98Liu/RigAnything",
+    "commit": "d03cdb21dd134fa81df6b0947522469db3f78bd2",
+    "ar_rig_diffusion_blob": "862c26e6d86470e3a8074c2b2a41d44401895455",
+    "diffloss_blob": "a008237e04d08c79edc470ff5cdcbc3d70273bde",
+    "config_blob": "921d5df9d5f4005b81de004103e42e39c23612d5",
+    "paper": "arXiv:2502.09615 / ACM TOG 44(4), 2025",
+    "project_page": "https://www.liuisabella.com/RigAnything/"
+  },
+  "reference_contract": {
+    "skeleton_sequence": "BFS ordered joints represented by 3D position plus parent index",
+    "locus_target": "ABSOLUTE_NEXT_JOINT_XYZ",
+    "diffusion_condition": "NEXT_JOINT_AR_TRANSFORMER_TOKEN",
+    "sampled_joint_used_by_parent_prediction": true,
+    "sampled_joint_used_by_next_autoregressive_step": true,
+    "shape_and_joint_attention": "POINT_TOKENS_FULL_SELF_ATTENTION__JOINT_TOKENS_CAUSAL_AND_ATTEND_ALL_POINTS",
+    "stop_rule": "NEW_JOINT_SELECTS_SELF_AS_PARENT_SENTINEL",
+    "released_diffusion": {
+      "target_channels": 3,
+      "width": 1024,
+      "depth": 3,
+      "configured_num_sampling_steps": "300",
+      "public_diffloss_effective_sampler_note": "Released model/diffloss.py hard-codes timestep_respacing='50' for gen_diffusion despite config.yaml declaring 300; parity must distinguish configuration intent from released executable behavior."
+    }
+  },
+  "frozen_geppetto": {
+    "source": "models/geppetto/reference_strength_v1/geppetto_reference_strength_candidate_v1.py",
+    "source_blob": "e9b626815c63a96ac1d390580e1aa19f8bf1cfb2",
+    "architecture_id": "RealSaS.Geppetto.ReferenceStrength.DirectSurfaceCausalDiffusion.DeterministicViewDirection.v1",
+    "locus_target": "RESIDUAL_AROUND_DETERMINISTIC_COARSE_XYZ",
+    "diffusion_condition": "GEPPETTO_RECURRENT_STATE",
+    "sampled_joint_used_by_internal_parent_prediction": false,
+    "sampled_joint_used_by_next_autoregressive_step": false,
+    "final_all_pair_parent_sees_refined_xyz": true,
+    "recurrence_geometry": "COARSE_XYZ",
+    "stop_rule": "SEPARATE_NATIVE_STOP_HEAD",
+    "attention": "DIRECT_SURFACE_ENCODER_PLUS_PER_STEP_CROSS_ATTENTION_PLUS_GRU_RECURRENCE",
+    "parity_verdict": "NOT_RIGANYTHING_JOINT_DIFFUSION_PARITY",
+    "negative_ablation_scope": "CURRENT_RESIDUAL_OUTPUT_REFINER_ONLY"
+  },
+  "historical_challenger": {
+    "source_commit": "ba634955777479ee05a5b199742710b1736123b5",
+    "source_path": "models/geppetto/challengers/riganything_mechanisms_v1.py",
+    "source_blob": "136d358572be6ff72ba15999474b6d3be600f5bc",
+    "architecture_id": "RealSaS.GeppettoChallenger.RigAnythingMechanisms.v1",
+    "locus_target": "ABSOLUTE_JOINT_XYZ",
+    "sampled_joint_used_by_parent_prediction": true,
+    "sampled_joint_used_by_next_autoregressive_step": true,
+    "bfs_equivalent_order_augmentation_present": true,
+    "full_surface_access_each_step": true,
+    "diffusion_impl": "CUSTOM_COSINE_EPS_PREDICTION_DDIM_STYLE",
+    "default_sample_steps": 50,
+    "stop_rule": "FIXED_DECODE_STEPS_IN_CHALLENGER_FORWARD",
+    "attention": "SEPARATE_SURFACE_ENCODER_PLUS_CROSS_ATTENTION_PLUS_GRU",
+    "core_causal_mechanism_parity": {
+      "absolute_joint_diffusion": true,
+      "sampled_xyz_to_parent": true,
+      "sampled_xyz_to_next_step": true,
+      "parent_before_child_sequence": true
+    },
+    "exact_formulation_differences": [
+      "Does not use RigAnything's released unified point-plus-joint transformer with its hybrid causal attention mask.",
+      "Does not use the released RigAnything DiffLoss implementation or its exact learned-variance diffusion parameterization.",
+      "Uses custom diffusion width/depth defaults and deterministic DDIM-style sampling rather than the released p_sample_loop implementation.",
+      "Does not reproduce RigAnything's self-parent stop sentinel in the challenger forward path.",
+      "BFS ambiguity handling exists as a separate randomize_bfs_depth_order_v1 training utility rather than being proof of identical dataset/preprocessing semantics.",
+      "Retains RealSaS Compiler authority and richer RiggingSurface conditioning, intentionally diverging from reference product ownership."
+    ],
+    "parity_verdict": "CORE_CAUSAL_MECHANISM_PARITY_PASS__EXACT_FORMULATION_PARITY_FAIL"
+  },
+  "scientific_interpretation": {
+    "current_knight_diffusion_ablation": {
+      "run_id": 37187501053,
+      "verdict": "CURRENT_RESIDUAL_REFINER_NEGATIVE",
+      "coarse_teacher_mae_norm_approx": 0.00644575,
+      "live_teacher_mae_norm_range_approx": [
+        0.01272744,
+        0.01727422
+      ],
+      "compiler_parent_changes_all_four_seeds": 0
+    },
+    "allowed_claims": [
+      "The frozen Geppetto residual diffusion head is not a faithful test of RigAnything joint diffusion.",
+      "The negative Knight ablation falsifies benefit of the current residual-output-refinement role on this frozen witness; it does not falsify reference-style joint diffusion.",
+      "The historical challenger captured the key sampled-joint causal loop closely enough to remain the correct starting point for a parity-faithful research challenger."
+    ],
+    "forbidden_claims": [
+      "RigAnything joint diffusion is harmful.",
+      "The historical challenger is an exact reimplementation of the full RigAnything formulation.",
+      "Any source-level parity result authorizes Geppetto refreeze or product promotion."
+    ]
+  },
+  "next_gate": {
+    "id": "GEPPETTO_RIGANYTHING_PARITY_CHALLENGER_V2",
+    "requirement": "If reference-style diffusion remains scientifically material, derive the next challenger from the historical absolute-joint sampled-feedback path, explicitly selecting which remaining reference differences to preserve versus intentionally substitute. Do not train until that contract is frozen.",
+    "training_required_for_this_audit": false
+  }
+}

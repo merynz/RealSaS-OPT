@@ -1636,13 +1636,37 @@ Hard rule:
 Contract gate:
 - carrier-first compilation run `37212172910` PASS.
 
-### C6.1 — controlled owner attribution
+### C6.1 — controlled owner attribution — PROBE IDENTITY IMPLEMENTED / OWNER COURT STILL OPEN
+
+Stage41 failure diagnostics now bind a deterministic attribution context:
+- baseline measurement report hash;
+- exact proof-probe fingerprint;
+- evaluator semantic version;
+- mesh-policy lineage;
+- exact mechanical-state, skeleton, mesh, mesh-skin, motion, constraint and presentation bindings;
+- all eight camera binding hashes;
+- Stage07 observation-set hash;
+- frozen sampling contract.
+
+Implementation:
+- `compiler/realsas_compiler_services/proof/stage41_failure_context_v1.py`;
+- Stage41 adapter emits `owner_attribution_context` on structured exact-motion FAIL.
+
+Contract gate:
+- `37215166639` PASS.
+
+Invariant:
+- changing motion/policy/carrier/skeleton/skin/presentation/camera/observation changes the probe fingerprint;
+- changing only the measured failed consequence changes the baseline measurement identity but not the probe identity;
+- therefore a counterfactual cannot receive causal credit by silently changing the experiment.
+
+Owner attribution itself remains open.
 
 For each failure signature:
-1. seal the exact parent attempt, proof policy and probe fingerprint;
+1. seal the exact parent attempt, baseline measurement identity and proof fingerprint;
 2. generate bounded child attempts changing one semantic owner at a time;
 3. rederive every downstream artifact invalidated by that owner change;
-4. rerun the **same** authoritative proof;
+4. rerun the **same** authoritative proof fingerprint;
 5. attribute an owner only if exactly one owner-domain counterfactual materially improves/resolves the target without protected-invariant regression;
 6. abstain when no owner improves or multiple owner domains independently improve.
 

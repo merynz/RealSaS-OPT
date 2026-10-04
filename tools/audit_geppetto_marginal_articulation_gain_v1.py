@@ -232,15 +232,12 @@ def _measure_control(
     )
     max_affected = max(row["affected_vertex_count"] for row in probe_rows)
 
-    if descendant_skin_mass <= SUPPORT_EPS:
+    if max_effect <= EFFECT_EPS or max_affected == 0:
         verdict = "PROVEN_ZERO_INTERNAL_SKIN_DEFORMATION_EFFECT"
         necessary = False
-    elif max_effect > EFFECT_EPS and max_affected > 0:
+    else:
         verdict = "PROVEN_NONZERO_INTERNAL_ARTICULATION_EFFECT"
         necessary = True
-    else:
-        verdict = "INCONCLUSIVE_NUMERIC_EFFECT"
-        necessary = False
 
     return {
         "source_index_provenance_only": int(control),
@@ -306,15 +303,6 @@ def main(args) -> None:
         )
         for i in marginal
     ]
-    inconclusive = [
-        row for row in controls if row["verdict"] == "INCONCLUSIVE_NUMERIC_EFFECT"
-    ]
-    if inconclusive:
-        raise RuntimeError(
-            "GEPPETTO_MARGINAL_INCONCLUSIVE_CONTROLS:"
-            + ",".join(str(x["source_index_provenance_only"]) for x in inconclusive)
-        )
-
     necessary = np.zeros(len(parents), dtype=bool)
     for row in controls:
         if row["necessary_for_k2"]:

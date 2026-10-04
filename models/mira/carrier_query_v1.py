@@ -67,6 +67,8 @@ class MIRAMechanicalCarrierQueryV1:
     joint_ids: tuple[str, ...]
     carrier_evidence_hash: str
     carrier_topology_hash: str
+    query_normal_authority_hash: str
+    query_normal_authority_class: str
     gsa_tensorization_hash: str
     skeleton_lineage_hash: str
     query_hash: str
@@ -122,6 +124,8 @@ def build_mira_mechanical_carrier_query_v1(
     carrier_evidence,
     surface_tensor,
     conditioning,
+    signed_query_normal_evidence=None,
+    allow_unoriented_carrier_normals_for_diagnostic: bool = False,
 ) -> MIRAMechanicalCarrierQueryV1:
     if str(candidate.candidate_lineage_hash) != str(carrier_evidence.candidate_mesh_binding_hash):
         raise ValueError("MIRA_CARRIER_QUERY_CANDIDATE_BINDING_DRIFT")
@@ -136,8 +140,45 @@ def build_mira_mechanical_carrier_query_v1(
         raise ValueError("MIRA_CARRIER_QUERY_VERTEX_ORDER_DRIFT")
 
     positions_world = np.asarray(carrier_evidence.positions, np.float64)
-    normals = np.asarray(carrier_evidence.normals, np.float32)
-    normal_valid = np.asarray(carrier_evidence.normal_valid, bool)
+    carrier_meta = dict(getattr(carrier_evidence, "metadata", {}) or {})
+    learned_use_forbidden = bool(
+        carrier_meta.get("learned_query_normal_use_forbidden", False)
+    )
+
+    if signed_query_normal_evidence is not None:
+        evidence = signed_query_normal_evidence
+        if str(evidence.candidate_mesh_binding_hash) != str(candidate.candidate_lineage_hash):
+            raise ValueError("MIRA_CARRIER_QUERY_NORMAL_CANDIDATE_BINDING_DRIFT")
+        if (
+            str(evidence.mechanical_carrier_evidence_binding_hash)
+            != str(carrier_evidence.carrier_evidence_hash)
+        ):
+            raise ValueError("MIRA_CARRIER_QUERY_NORMAL_CARRIER_BINDING_DRIFT")
+        if tuple(evidence.ordered_vertex_ids) != vertex_ids:
+            raise ValueError("MIRA_CARRIER_QUERY_NORMAL_VERTEX_ORDER_DRIFT")
+        normals = np.asarray(evidence.signed_normals, np.float32)
+        normal_valid = np.asarray(evidence.normal_valid, bool)
+        query_normal_authority_hash = str(evidence.query_normal_evidence_hash)
+        query_normal_authority_class = "CARRIER_BOUND_SIGNED_QUERY_NORMAL_EVIDENCE"
+    else:
+        if learned_use_forbidden and not allow_unoriented_carrier_normals_for_diagnostic:
+            raise ValueError("MIRA_CARRIER_QUERY_SIGNED_NORMAL_EVIDENCE_REQUIRED")
+        if learned_use_forbidden:
+            query_normal_authority_class = "DIAGNOSTIC_UNORIENTED_CARRIER_NORMALS"
+        else:
+            query_normal_authority_class = "LEGACY_OR_DIAGNOSTIC_CARRIER_NORMALS"
+        normals = np.asarray(carrier_evidence.normals, np.float32)
+        normal_valid = np.asarray(carrier_evidence.normal_valid, bool)
+        query_normal_authority_hash = _hash(
+            {
+                "schema": "RealSaS.MIRAQueryNormalDiagnosticAuthority.v1",
+                "carrier_evidence_hash": str(carrier_evidence.carrier_evidence_hash),
+                "authority_class": query_normal_authority_class,
+                "normals": normals,
+                "normal_valid": normal_valid.astype(np.uint8),
+            }
+        )
+
     if positions_world.shape != (len(ordered), 3) or normals.shape != positions_world.shape:
         raise ValueError("MIRA_CARRIER_QUERY_GEOMETRY_SHAPE")
     center = np.asarray(surface_tensor.normalization_center, np.float64)
@@ -203,6 +244,8 @@ def build_mira_mechanical_carrier_query_v1(
         "joint_ids": tuple(conditioning.joint_ids[0]),
         "carrier_evidence_hash": str(carrier_evidence.carrier_evidence_hash),
         "carrier_topology_hash": str(carrier_evidence.topology_hash),
+        "query_normal_authority_hash": query_normal_authority_hash,
+        "query_normal_authority_class": query_normal_authority_class,
         "gsa_tensorization_hash": str(surface_tensor.tensorization_hash),
         "skeleton_lineage_hash": str(conditioning.source_skeleton_hashes[0]),
         "pair_geometry_contract": PAIR_GEOMETRY_CONTRACT_V2,
@@ -223,6 +266,8 @@ def build_mira_mechanical_carrier_query_v1(
         joint_ids=tuple(conditioning.joint_ids[0]),
         carrier_evidence_hash=str(carrier_evidence.carrier_evidence_hash),
         carrier_topology_hash=str(carrier_evidence.topology_hash),
+        query_normal_authority_hash=query_normal_authority_hash,
+        query_normal_authority_class=query_normal_authority_class,
         gsa_tensorization_hash=str(surface_tensor.tensorization_hash),
         skeleton_lineage_hash=str(conditioning.source_skeleton_hashes[0]),
         query_hash=query_hash,

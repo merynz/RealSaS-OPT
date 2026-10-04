@@ -30,6 +30,7 @@ from compiler.realsas_compiler_core.artifact_codec_v2 import (
     deformation_envelope_from_dict,
     mesh_policy_from_dict,
     qualified_camera_set_from_dict,
+    qualified_skeleton_from_dict,
     rigging_surface_from_dict,
 )
 from compiler.realsas_compiler_core.mechanical_carrier_evidence_v1 import (
@@ -267,8 +268,18 @@ def main(args):
     cameras = qualified_camera_set_from_dict(stage_output_payload(
         ctx, "05_CAMERA_CONTRACT_SOLVED", "RealSaS.QualifiedCameraSetIR.v1"))
 
-    proposal, skeleton, surface_tensor, atlas_hash = _run_atlas(
-        surface=surface, fit_run=args.fit_run, device=args.device, seed=args.seed)
+    # A2/C2 already proved the frozen ATLAS checkpoint replays this Stage28
+    # skeleton with 28/28 shared controls, zero parent changes and ~3.5e-6
+    # normalized position RMSE. C3 intentionally reuses the exact Stage28
+    # qualified rig so the sealed Stage34 envelope remains the same variable.
+    skeleton = qualified_skeleton_from_dict(stage_output_payload(
+        ctx, "28_SKELETON_QUALIFIED", "RealSaS.QualifiedSkeletonIR.v1"))
+    surface_tensor = tensorize_rigging_surface_v1(surface)
+    atlas_execution = read(
+        args.fit_run / "artifacts/27_GEPPETTO_FIT/model_fit_execution.json"
+    )
+    atlas_hash = atlas_execution["checkpoint_sha256"]
+    proposal = None
 
     prereg = read(args.fit_run / "artifacts/30_ARACHNE_FIT_PREREGISTERED/model_fit_preregistration.json")
     conditioning, ci, memory, tokens, decoder, mira_result, telemetry = _run_mira_backbone(
@@ -350,6 +361,8 @@ def main(args):
         "carrier_face_count": len(candidate.faces),
         "atlas_checkpoint_sha256": atlas_hash,
         "atlas_joint_count": len(skeleton.joints),
+        "atlas_rig_source": "A2_VERIFIED_ARCHIVED_STAGE28_QUALIFIED_SKELETON",
+        "atlas_c2_evidence": "canonical/ATLAS_CARRIER_FIRST_C2_RESULT_20261004.json",
         "mira_checkpoint_sha256": mira_result["model_sha256"],
         "mira_query_hash": query.query_hash,
         "backbone_query_chunk_telemetry": telemetry,
@@ -373,7 +386,6 @@ def main(args):
         ),
     }
 
-    write(args.out_dir / "atlas_skeleton_proposal.json", proposal.to_dict())
     write(args.out_dir / "qualified_skeleton.json", skeleton.to_dict())
     write(args.out_dir / "carrier_skin.json", carrier_skin.to_dict())
     write(args.out_dir / "legacy_g3.json", legacy_g3.to_dict())

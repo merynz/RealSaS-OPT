@@ -118,3 +118,14 @@ def test_signed_normalized_margin_contracts_have_universal_pass_semantics():
 
     assert minimum_gate_margin_v1(0.2, 0.125, 0.4) == pytest.approx(0.125)
     assert minimum_gate_margin_v1(0.2, -0.125, 0.4) == pytest.approx(-0.125)
+
+
+def test_larger_basis_cannot_win_only_because_secondary_complexity_is_lower():
+    result = select_minimum_sufficient_control_basis_v1(
+        (
+            _row("SMALL", 10, mechanical=0.05, complexity=100.0),
+            _row("LARGE", 14, mechanical=0.50, complexity=1.0),
+        )
+    )
+    assert result.selected_basis_id == "SMALL"
+    assert len(result.selected_control_ids) == 10

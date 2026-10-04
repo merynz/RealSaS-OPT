@@ -29,20 +29,22 @@ jobs:
         with:
           ref: ${{ github.sha }}
 
-      - name: Compile TESSA sources
-        shell: bash
-        run: |
-          set -euo pipefail
-          "$PY" -m py_compile \
-            models/tessa/__init__.py \
-            models/tessa/v1/__init__.py \
-            models/tessa/v1/contracts_v1.py \
-            models/tessa/v1/conditioning_v1.py \
-            models/tessa/v1/model_v1.py \
-            models/tessa/v1/tokenization_v1.py \
-            models/tessa/v1/proposal_v1.py \
-            models/tessa/v1/mechanical_objective_v1.py \
-            tests/models/test_tessa_v1.py
+      - name: Compile TESSA namespace
+        run: "$PY -m py_compile models/tessa/__init__.py models/tessa/v1/__init__.py"
+      - name: Compile TESSA contracts
+        run: "$PY -m py_compile models/tessa/v1/contracts_v1.py"
+      - name: Compile TESSA conditioning
+        run: "$PY -m py_compile models/tessa/v1/conditioning_v1.py"
+      - name: Compile TESSA model
+        run: "$PY -m py_compile models/tessa/v1/model_v1.py"
+      - name: Compile TESSA tokenization
+        run: "$PY -m py_compile models/tessa/v1/tokenization_v1.py"
+      - name: Compile TESSA proposal
+        run: "$PY -m py_compile models/tessa/v1/proposal_v1.py"
+      - name: Compile TESSA mechanical objective
+        run: "$PY -m py_compile models/tessa/v1/mechanical_objective_v1.py"
+      - name: Compile TESSA tests
+        run: "$PY -m py_compile tests/models/test_tessa_v1.py"
 
       - name: Import TESSA package
         shell: bash

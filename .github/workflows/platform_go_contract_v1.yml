@@ -51,7 +51,15 @@ jobs:
       - name: Download pinned modules
         run: go mod download
       - name: Format gate
-        run: test -z "$(gofmt -l .)"
+        run: |
+          set -euo pipefail
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "GOFMT_UNFORMATTED_FILES"
+            printf '%s\n' "$unformatted"
+            exit 1
+          fi
+          echo "GOFMT_PASS"
       - name: Vet
         run: go vet ./...
       - name: Apply Go-owned PostgreSQL baseline

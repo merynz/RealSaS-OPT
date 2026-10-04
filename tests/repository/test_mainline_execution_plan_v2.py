@@ -179,3 +179,21 @@ def test_carrier_first_mechanics_has_no_hidden_stage35_to_stage18_filesystem_bac
     assert 'artifacts" / "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED' not in stage18
     assert 'ctx["run_manifest"].get("mechanical_attempt")' in stage18
     assert "DERIVED_PARENT_ATTEMPT_REPAIRED_MESH_CANDIDATE" in stage18
+
+
+def test_stage19_requalifies_exact_effective_carrier_static_quality_before_mechanics():
+    source = (
+        ROOT
+        / "compiler"
+        / "realsas_compiler_services"
+        / "orchestrator"
+        / "adapters"
+        / "v2_architecture.py"
+    ).read_text(encoding="utf-8")
+    stage19 = source.split("def qualify_static_canonical_mesh_stage", 1)[1].split(
+        "def _static_geometry_evidence", 1
+    )[0]
+    assert "_relation_parent_quality_report(candidate, policy)" in stage19
+    assert "STATIC_MESH_QUALITY_POLICY_FAILED" in stage19
+    assert '"static_quality_policy_passed"' in stage19
+    assert "build_mechanical_carrier_evidence_v1" in stage19

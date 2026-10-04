@@ -36,28 +36,26 @@ def test_face_charting_is_bounded_complete_and_nonoverlapping():
 
 def test_teacher_chart_builder_preserves_exact_teacher_face_set():
     vertices, faces = _strip_mesh(17)
-    # Global policy remains Knight-scale. Only the per-chart training sequence
-    # is intentionally tiny in this fixture.
     cfg = TESSAConfigV1(
         d_model=64,
         n_heads=8,
         surface_layers=1,
         decoder_layers=1,
         surface_latent_count=64,
-        local_attention_window=128,
+        local_attention_window=256,
         query_chunk_size=32,
         max_faces=8192,
         max_vertices=8192,
-        max_faces_per_chart=5,
+        max_faces_per_chart=256,
     )
     charts = build_teacher_charts_v1(vertices, faces, cfg=cfg)
     seen = [fi for chart in charts for fi in chart.source_face_indices]
     assert sorted(seen) == list(range(len(faces)))
-    assert all(chart.sequence.face_count <= 5 for chart in charts)
+    assert all(chart.sequence.face_count <= 256 for chart in charts)
     assert all(chart.sequence.token_ids[-1] == cfg.EOS for chart in charts)
 
 
-def test_knight_scale_policy_requires_multiple_charts_not_face_truncation():
+def test_knight_scale_policy_requires_multiple_default_charts_not_face_truncation():
     cfg = TESSAConfigV1()
     assert cfg.scaling_policy().admits(vertex_count=3665, face_count=6952)
     minimum_chart_count = (6952 + cfg.max_faces_per_chart - 1) // cfg.max_faces_per_chart

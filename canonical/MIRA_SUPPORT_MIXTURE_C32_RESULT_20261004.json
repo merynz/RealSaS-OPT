@@ -1,0 +1,94 @@
+{
+  "schema": "RealSaS.MIRASupportMixtureCausalCourtResult.v1",
+  "date": "2026-10-04",
+  "workflow_run_id": 37201533011,
+  "status": "COMPLETE__SCIENTIFIC_FAIL_FOR_ZERO_TRAIN_DIRECT_QUERY__C4_MINIMAL_ADAPTATION_JUSTIFIED",
+  "branch": "impl/carrier-first-mechanical-compilation-20261004",
+  "carrier": {
+    "topology_hash": "5d48f74b930fd56ac6fdef6f00e5d34dc8d60ef20f09a31f000b364ad9d07a60",
+    "vertex_count": 16031,
+    "non_identity_vertex_count": 3982,
+    "signed_normal_counterfactual_evidence_hash": "cacb45ace3f751397babeec25ae285fcf918b2b967e14036b86e1ca543cb40d0"
+  },
+  "mira_checkpoint_sha256": "63e589b679461daf7cf859eb0c10e4b5f9c285b055d18f114d0ba348f2829892",
+  "query_hash": "677db9a119b3673a9540dad71b2c5cecb0a9e70721d5429f748acb475d004a33",
+  "decision": "SUPPORT_MIXTURE_ORDER_NOT_SUFFICIENT",
+  "arms": {
+    "LATENT_PREBLEND": {
+      "g3_passed": false,
+      "g3b_passed": false,
+      "unsafe_face_count": 1327,
+      "max_condition": 1313.05204351678,
+      "max_edge_ratio": 43.16802354982272,
+      "min_area_ratio": 0.0037969016966807176,
+      "max_area_ratio": 42.62735184038984,
+      "row_l1_to_ceiling_mean": 0.17796082318575368,
+      "row_l1_to_ceiling_p95": 1.5220937421771166
+    },
+    "LOGIT_POSTBLEND": {
+      "g3_passed": false,
+      "g3b_passed": false,
+      "unsafe_face_count": 1340,
+      "max_condition": 1716.0101367265827,
+      "max_edge_ratio": 43.16802344355417,
+      "min_area_ratio": 0.005855775574959535,
+      "max_area_ratio": 42.62735173841318,
+      "row_l1_to_ceiling_mean": 0.17799063299876,
+      "row_l1_to_ceiling_p95": 1.5222842017879024
+    },
+    "PROB_POSTBLEND": {
+      "g3_passed": false,
+      "g3b_passed": false,
+      "unsafe_face_count": 1332,
+      "max_condition": 1818.7194014488248,
+      "max_edge_ratio": 43.16802354982272,
+      "min_area_ratio": 0.003947438083072965,
+      "max_area_ratio": 42.62735184038984,
+      "row_l1_to_ceiling_mean": 0.1789481108987706,
+      "row_l1_to_ceiling_p95": 1.50010887769844
+    },
+    "LEGACY_WEIGHT_TRANSFER_CEILING": {
+      "role": "DIAGNOSTIC_CEILING_ONLY__NOT_PRODUCT_METHOD",
+      "g3_passed": true,
+      "g3b_passed": true,
+      "unsafe_face_count": 0,
+      "max_condition": 9.491854526594858,
+      "max_edge_ratio": 1.694292520721721,
+      "min_area_ratio": 0.11083975672781615,
+      "max_area_ratio": 3.4344864677746947
+    }
+  },
+  "residual_localization": {
+    "all_identity": {
+      "face_count": 22676,
+      "unsafe_count": 0,
+      "unsafe_rate": 0,
+      "vertex_weight_delta_to_ceiling_mean": 5.4995548716380394e-17,
+      "vertex_weight_delta_to_ceiling_p95": 2.2204484191289626e-16
+    },
+    "touches_non_identity": {
+      "face_count": 1649,
+      "unsafe_count": 225,
+      "unsafe_rate": 0.13644633110976348,
+      "unsafe_vertex_weight_delta_to_ceiling_mean": 1.5998495160192203,
+      "unsafe_vertex_weight_delta_to_ceiling_p95": 1.9954746992193748
+    },
+    "two_plus_non_identity": {
+      "face_count": 4006,
+      "unsafe_count": 1102,
+      "unsafe_rate": 0.27508736894658015,
+      "unsafe_vertex_weight_delta_to_ceiling_mean": 1.5499861043150964,
+      "unsafe_vertex_weight_delta_to_ceiling_p95": 1.994206133448638
+    }
+  },
+  "conclusions": [
+    "Changing support-mixture order before/after the frozen nonlinear V6 readout does not close mechanics.",
+    "Every all-identity carrier face is mechanically safe under the signed-normal counterfactual.",
+    "The remaining direct-query failure is completely localized to faces touching non-identity compiled-carrier vertices.",
+    "The diagnostic transferred frozen semantic field closes hard G3/G3B on the exact same carrier, proving an admissible semantic/mechanical field exists without changing carrier or rig.",
+    "Full MIRA retraining is not justified. A minimal carrier-native decoder/tail or bounded correction adaptation is justified after a direct-weight optimization oracle validates the differentiable mechanical objective."
+  ],
+  "product_authority_minted": false,
+  "teacher_predictor_input_used": false,
+  "training_used": false
+}

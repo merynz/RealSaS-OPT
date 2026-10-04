@@ -1190,24 +1190,33 @@ A multi-metric gate reports the minimum admitted normalized margin unless its co
 - the selector cannot trade a catastrophic mechanical failure for extra source fidelity or vice versa.
 
 
-Then select the minimum-sufficient basis:
+Then select the minimum-sufficient basis with **effective control count as the primary amount objective**:
 
 \[
-R^*=\arg\min_R C(R)
+R^*=\arg\min_R |R|
 \quad\text{s.t.}\quad
 A_\tau(R)=\text{true}
 \]
 
-Only after minimum complexity is established may excess proof margin be used as a tie-breaker between equally simple admissible bases.
+Among equally small admissible bases, minimize a secondary complexity functional:
 
-This ordering is deliberate: maximizing proof margin before complexity can reward unnecessary controls and is therefore not the RealSaS optimum-rig objective.
+\[
+C_{secondary}(R)
+\]
 
-\(C(R)\) may include:
-- control count;
+which may include:
 - unnecessary chain depth;
 - redundant near-collinear controls;
-- edit burden;
+- edit burden already inside the admitted editability range;
 - instability/uncertainty penalty.
+
+Only after equal control count and secondary complexity may excess proof margin be used as a tie-breaker.
+
+This ordering is deliberate:
+- hard capability/editability comes first;
+- then the smallest number of independent effective controls;
+- a larger rig cannot win merely because an arbitrary secondary complexity scalar is lower;
+- maximizing proof margin before count would reward unnecessary controls.
 
 This formulation is subject-agnostic:
 - Knight may close at one count;
@@ -1223,9 +1232,9 @@ Code:
 Contract:
 - every candidate basis reports signed normalized margins for mechanics, source fidelity, editability and free-running stability;
 - only bases with all hard margins \(\ge 0\) are admissible;
-- selection minimizes complexity first;
-- control count is the next deterministic simplicity term;
-- excess robustness margin is only a tie-breaker after equal simplicity.
+- selection minimizes effective control count first;
+- secondary structural/edit complexity breaks equal-count ties;
+- excess robustness margin is only a tie-breaker after equal count and secondary complexity.
 
 Synthetic regression explicitly proves that two subjects can select different optimum control counts from the same candidate-count family.
 

@@ -1,0 +1,41 @@
+name: atlas-mira-canonical-aliases-v1
+
+on:
+  push:
+    branches: [research/rig-skin-architecture-challengers-20261003]
+    paths:
+      - models/atlas/**
+      - models/mira/**
+      - tests/models/test_atlas_mira_canonical_aliases_v1.py
+      - canonical/LEARNED_MODEL_NAMING_AND_SHARED_ENCODER_PLAN_V1.md
+      - canonical/ATLAS_MIRA_SHARED_SURFACE_ENCODER_E0_COMPATIBILITY_V1.json
+      - .github/workflows/atlas_mira_canonical_aliases_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  aliases:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      CUDA_VISIBLE_DEVICES: ""
+      PYTHONUNBUFFERED: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Canonical alias source gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile models/atlas/__init__.py models/mira/__init__.py tests/models/test_atlas_mira_canonical_aliases_v1.py
+          python -m pytest -q tests/models/test_atlas_mira_canonical_aliases_v1.py
+          echo "ATLAS_MIRA_CANONICAL_ALIASES_PASS"

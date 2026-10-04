@@ -5,10 +5,13 @@ on:
     branches: [research/tessa-mechanical-mesh-v1-20261004]
     paths:
       - models/tessa/**
+      - tools/training/run_tessa_supervised_fit_v1.py
+      - notebooks/RealSaS_TESSA_KNIGHT_T1_RUN_ALL.ipynb
       - tests/models/test_tessa_v1.py
       - tests/models/test_tessa_training_data_v1.py
       - canonical/TESSA_MECHANICAL_MESH_MODEL_EXECUTION_PLAN_V1.md
       - canonical/TESSA_MESHANYTHING_V2_CLEANROOM_REFERENCE_AUDIT_V1.md
+      - canonical/TESSA_CARRIER_FIRST_MECHANICAL_COHERENCE_AMENDMENT_V1.md
       - requirements/mainline-ci.txt
       - requirements/torch-cpu.txt
       - .github/workflows/tessa_v1_contract.yml
@@ -67,8 +70,17 @@ jobs:
             models/tessa/v1/proposal_v1.py \
             models/tessa/v1/mechanical_objective_v1.py \
             models/tessa/v1/training_data_v1.py \
+            tools/training/run_tessa_supervised_fit_v1.py \
             tests/models/test_tessa_v1.py \
             tests/models/test_tessa_training_data_v1.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload=json.loads(Path('notebooks/RealSaS_TESSA_KNIGHT_T1_RUN_ALL.ipynb').read_text(encoding='utf-8'))
+          assert payload['nbformat']==4
+          assert payload['cells']
+          print('TESSA_NOTEBOOK_JSON_PASS', len(payload['cells']))
+          PY
           echo "TESSA_COMPILE_PASS"
 
       - name: Import TESSA package

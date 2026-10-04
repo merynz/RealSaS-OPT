@@ -38,6 +38,19 @@ Vec2=tuple[float,float]
 Vec3=tuple[float,float,float]
 
 
+class DynamicMotionProofFailure(QualificationError):
+    """Structured Stage41 proof failure.
+
+    This is not causal owner attribution. It carries exact measured consequence
+    so the orchestrator can persist a deterministic failure signature and open a
+    controlled counterfactual repair court.
+    """
+    def __init__(self, failure_code:str, measurements:Mapping[str,Any]):
+        self.failure_code=str(failure_code)
+        self.measurements=dict(measurements or {})
+        super().__init__(self.failure_code)
+
+
 @dataclass(frozen=True)
 class DynamicContactProofV2IR:
     contact_id:str
@@ -196,25 +209,66 @@ def _condition(points)->tuple[float,float]:
     return area,math.sqrt(lmax/lmin)
 
 
-def _frame_metrics(mesh,rest,posed,policy):
+def _frame_metrics(
+    mesh,rest,posed,policy,*,clip_id:str="",time_seconds:float=0.0
+):
     index={v.canonical_mesh_vertex_id:i for i,v in enumerate(mesh.vertices)}
     min_ratio=float("inf"); max_ratio=0.0; max_cond=0.0
-    for face in mesh.faces:
+    min_face=None; max_face=None; cond_face=None
+    for face_index,face in enumerate(mesh.faces):
         ids=[index[x] for x in face]
         ra,_=_condition(rest[ids]); pa,cond=_condition(posed[ids])
         if ra<=1e-15 or pa<=1e-15 or not math.isfinite(cond):
-            raise QualificationError("MOTION_V2_DYNAMIC_TRIANGLE_DEGENERATE")
+            raise DynamicMotionProofFailure(
+                "MOTION_V2_DYNAMIC_TRIANGLE_DEGENERATE",
+                {
+                    "clip_id":str(clip_id),
+                    "time_seconds":float(time_seconds),
+                    "degenerate_faces":1,
+                    "failure_localization":{"face_index":int(face_index)},
+                },
+            )
         ratio=pa/ra
-        min_ratio=min(min_ratio,ratio)
-        max_ratio=max(max_ratio,ratio)
-        max_cond=max(max_cond,cond)
-        if (
-            ratio<float(policy.g3_min_dynamic_area_ratio)-1e-9
-            or ratio>float(policy.g3_max_dynamic_area_ratio)+1e-9
-        ):
-            raise QualificationError("MOTION_V2_DYNAMIC_TRIANGLE_AREA_RATIO_FAIL")
-        if cond>float(policy.g3_max_dynamic_condition_number)+1e-9:
-            raise QualificationError("MOTION_V2_DYNAMIC_TRIANGLE_CONDITION_FAIL")
+        if ratio<min_ratio:
+            min_ratio=ratio; min_face=face_index
+        if ratio>max_ratio:
+            max_ratio=ratio; max_face=face_index
+        if cond>max_cond:
+            max_cond=cond; cond_face=face_index
+
+    thresholds={
+        "g3_min_dynamic_area_ratio":float(policy.g3_min_dynamic_area_ratio),
+        "g3_max_dynamic_area_ratio":float(policy.g3_max_dynamic_area_ratio),
+        "g3_max_dynamic_condition_number":float(policy.g3_max_dynamic_condition_number),
+    }
+    measurements={
+        "clip_id":str(clip_id),
+        "time_seconds":float(time_seconds),
+        "min_triangle_area_ratio":float(min_ratio),
+        "max_triangle_area_ratio":float(max_ratio),
+        "max_triangle_condition_number":float(max_cond),
+        "frozen_policy_thresholds":thresholds,
+    }
+    if (
+        min_ratio<thresholds["g3_min_dynamic_area_ratio"]-1e-9
+        or max_ratio>thresholds["g3_max_dynamic_area_ratio"]+1e-9
+    ):
+        measurements["failure_localization"]={
+            "min_area_ratio_face_index":None if min_face is None else int(min_face),
+            "max_area_ratio_face_index":None if max_face is None else int(max_face),
+        }
+        raise DynamicMotionProofFailure(
+            "MOTION_V2_DYNAMIC_TRIANGLE_AREA_RATIO_FAIL",
+            measurements,
+        )
+    if max_cond>thresholds["g3_max_dynamic_condition_number"]+1e-9:
+        measurements["failure_localization"]={
+            "max_condition_face_index":None if cond_face is None else int(cond_face),
+        }
+        raise DynamicMotionProofFailure(
+            "MOTION_V2_DYNAMIC_TRIANGLE_CONDITION_FAIL",
+            measurements,
+        )
     return min_ratio,max_ratio,max_cond
 
 
@@ -603,7 +657,10 @@ def build_qualified_dynamic_motion_v2(
             displacement=np.linalg.norm(posed-rest,axis=1)
             max_disp=float(displacement.max(initial=0.0))
             clip_max=max(clip_max,max_disp)
-            min_area,max_area,max_condition=_frame_metrics(mesh,rest,posed,mesh_policy)
+            min_area,max_area,max_condition=_frame_metrics(
+                mesh,rest,posed,mesh_policy,
+                clip_id=clip.clip_id,time_seconds=float(time_seconds),
+            )
             frame_intersection_pairs=set(
                 unexpected_intersection_pairs(
                     vertices=posed,
@@ -613,9 +670,17 @@ def build_qualified_dynamic_motion_v2(
             )
             new_intersections=frame_intersection_pairs-rest_intersection_pairs
             if new_intersections:
-                raise QualificationError(
-                    "MOTION_V2_DYNAMIC_NEW_SELF_INTERSECTION:"
-                    + str(len(new_intersections))
+                raise DynamicMotionProofFailure(
+                    "MOTION_V2_DYNAMIC_NEW_SELF_INTERSECTION",
+                    {
+                        "clip_id":str(clip.clip_id),
+                        "time_seconds":float(time_seconds),
+                        "new_self_intersection_pair_count":int(len(new_intersections)),
+                        "allowed_new_self_intersection_pair_count":0,
+                        "failure_localization":{
+                            "face_pairs":[list(map(int,p)) for p in sorted(new_intersections)[:32]]
+                        },
+                    },
                 )
             posed_triangles = posed[face_indices]
             max_existing_intersection_severity_growth = 0.0
@@ -635,11 +700,25 @@ def build_qualified_dynamic_motion_v2(
                 max_existing_intersection_severity_growth
                 > INTERSECTION_PERSISTENCE_NUMERICAL_SLACK
             ):
-                raise QualificationError(
-                    "MOTION_V2_DYNAMIC_REST_INTERSECTION_WORSENED:"
-                    + str(worst_existing_intersection_pair)
-                    + ":"
-                    + f"{max_existing_intersection_severity_growth:.9g}"
+                raise DynamicMotionProofFailure(
+                    "MOTION_V2_DYNAMIC_REST_INTERSECTION_WORSENED",
+                    {
+                        "clip_id":str(clip.clip_id),
+                        "time_seconds":float(time_seconds),
+                        "max_rest_existing_intersection_severity_growth":float(
+                            max_existing_intersection_severity_growth
+                        ),
+                        "intersection_persistence_numerical_slack":float(
+                            INTERSECTION_PERSISTENCE_NUMERICAL_SLACK
+                        ),
+                        "failure_localization":{
+                            "face_pair":(
+                                None
+                                if worst_existing_intersection_pair is None
+                                else list(map(int,worst_existing_intersection_pair))
+                            )
+                        },
+                    },
                 )
 
             frame=CanonicalDynamicFrameV2IR(
@@ -727,7 +806,20 @@ def build_qualified_dynamic_motion_v2(
             )
             proof=replace(proof,proof_hash=dynamic_contact_proof_v2_hash(proof))
             if status!="PASS":
-                raise QualificationError("MOTION_V2_DYNAMIC_CONTACT_FAIL:"+row.contact_id)
+                raise DynamicMotionProofFailure(
+                    "MOTION_V2_DYNAMIC_CONTACT_FAIL",
+                    {
+                        "clip_id":str(row.clip_id),
+                        "contact_id":str(row.contact_id),
+                        "canonical_joint_id":str(row.canonical_joint_id),
+                        "max_contact_drift":float(max_drift),
+                        "contact_tolerance":float(contact_tol),
+                        "failure_localization":{
+                            "start_time_seconds":float(row.start_time_seconds),
+                            "end_time_seconds":float(row.end_time_seconds),
+                        },
+                    },
+                )
             contact_proofs.append(proof)
 
         nonzero=clip_max>motion_eps
@@ -763,7 +855,14 @@ def build_qualified_dynamic_motion_v2(
     if not clips:
         raise QualificationError("MOTION_V2_DYNAMIC_CLIP_SET_EMPTY")
     if not any_nonzero:
-        raise QualificationError("MOTION_V2_DYNAMIC_ALL_CLIPS_STATIC")
+        raise DynamicMotionProofFailure(
+            "MOTION_V2_DYNAMIC_ALL_CLIPS_STATIC",
+            {
+                "clip_count":int(len(clips)),
+                "effective_joint_track_count":0,
+                "motion_nonzero_epsilon":float(motion_eps),
+            },
+        )
     if len(frame_set_hashes)!=1:
         raise QualificationError("MOTION_V2_DYNAMIC_JOINT_FRAME_SET_DRIFT")
 

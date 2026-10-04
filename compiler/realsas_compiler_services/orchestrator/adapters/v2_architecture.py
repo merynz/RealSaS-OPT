@@ -16,6 +16,7 @@ from compiler.realsas_compiler_core.geometry_substrate_v2 import (
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     canonical_mesh_candidate_from_dict,
     mechanical_partition_from_dict,
+    mesh_policy_from_dict,
     qualified_camera_set_from_dict,
     qualified_observation_set_from_dict,
     read_json,
@@ -55,6 +56,7 @@ from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import 
     write_ir,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2 import (
+    _relation_parent_quality_report,
     build_canonical_mesh_candidate_stage,
 )
 
@@ -572,6 +574,15 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
         )
     )
     geometry, demo_geometry_lineage = _static_geometry_evidence(ctx)
+    policy = mesh_policy_from_dict(
+        stage_output_payload(
+            ctx,
+            "18_CANONICAL_MESH_ADDRESSING_BUILD",
+            "RealSaS.MeshQualificationPolicyIR.v1",
+        )
+    )
+    static_quality = _relation_parent_quality_report(candidate, policy)
+    static_quality_passed = int(static_quality["policy_violating_face_count"]) == 0
     partition = mechanical_partition_from_dict(
         stage_output_payload(
             ctx,
@@ -622,6 +633,16 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
         raise QualificationError("STATIC_MESH_FACE_ADDRESSABILITY_INCOMPLETE")
     if not all(view.passed for view in geometry.views) and not demo_geometry_lineage:
         raise QualificationError("STATIC_MESH_GEOMETRY_SUBSTRATE_NOT_PASS")
+    if not static_quality_passed and not demo_geometry_lineage:
+        return {
+            "status": "FAIL",
+            "blockers": ["STATIC_MESH_QUALITY_POLICY_FAILED"],
+            "diagnostics": {
+                "candidate_mesh_binding_hash": candidate.candidate_lineage_hash,
+                "mesh_policy_hash": policy.qualification_policy_lineage_hash,
+                "static_quality": static_quality,
+            },
+        }
 
     source_foreground = _source_foreground_masks_v1(ctx, observation)
     source_fidelity_passed, source_fidelity_rows = _evaluate_candidate_source_fidelity_v1(
@@ -652,6 +673,15 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
         "vertex_count": len(candidate.vertices),
         "face_count": len(candidate.faces),
         "degenerate_face_count": 0,
+        "static_quality_policy_passed": bool(static_quality_passed),
+        "static_quality_min_angle_deg": float(static_quality["min_angle_deg"]),
+        "static_quality_max_aspect": float(
+            static_quality["max_aspect_longest_over_min_altitude"]
+        ),
+        "static_quality_policy_violating_face_count": int(
+            static_quality["policy_violating_face_count"]
+        ),
+        "mesh_policy_hash": policy.qualification_policy_lineage_hash,
         "surface_addressability_fraction": 1.0,
         "stage13_geometry_substrate_inherited": False,
         "stage13_policy_replayed_on_actual_candidate_mesh": True,
@@ -679,6 +709,8 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
             "repair_on_stage35_failure": "NEW_STAGE18_LINEAGE",
             "source_fidelity_policy_owner": "STAGE13_GEOMETRY_SUBSTRATE_POLICY",
             "source_fidelity_measurement_target": "ACTUAL_STAGE18_CANDIDATE_MESH",
+            "static_quality_measurement_target": "ACTUAL_STAGE18_CANDIDATE_MESH",
+            "static_quality_policy_passed": bool(static_quality_passed),
         },
     )
     value = replace(value, qualification_hash=static_mesh_qualification_hash(value))

@@ -54,7 +54,6 @@ def _small_cfg():
         query_chunk_size=32,
         max_faces=8192,
         max_vertices=8192,
-        max_faces_per_chart=2048,
     )
 
 
@@ -101,8 +100,6 @@ def test_tessa_adjacent_teacher_encoding_compresses_shared_edge():
     )
     assert seq.face_count == 2
     assert seq.restart_count == 1
-    # A naive two-face coordinate stream would spend 18 coordinate tokens.
-    # TESSA emits 9 for the seed and 3 for the adjacent face.
     coordinate_tokens = [t for t in seq.token_ids if 0 <= t < cfg.coordinate_bins]
     assert len(coordinate_tokens) == 12
 
@@ -125,13 +122,20 @@ def test_tessa_identity_deformation_has_unit_metrics_and_zero_penalty():
     assert float(losses["total"]) < 1e-6
 
 
-def test_tessa_forward_uses_surface_memory_without_global_sequence_attention():
+def test_tessa_forward_uses_surface_memory_and_sequence_offset():
     cfg = _small_cfg()
     model = TESSAV1(cfg)
     surface = torch.randn(2, 32, 17)
     input_ids = torch.randint(0, cfg.coordinate_bins, (2, 24))
     labels = input_ids.clone()
-    out = model(surface_features=surface, input_ids=input_ids, labels=labels)
+    out = model(
+        surface_features=surface,
+        input_ids=input_ids,
+        labels=labels,
+        sequence_position_offset=257,
+    )
     assert out.logits.shape == (2, 24, cfg.vocab_size)
     assert out.surface_latents.shape == (2, cfg.surface_latent_count, cfg.d_model)
     assert out.loss is not None and torch.isfinite(out.loss)
+    expected = (torch.arange(24) + 257) % cfg.local_attention_window
+    assert torch.equal(model._position_ids(24, input_ids.device, offset=257), expected)

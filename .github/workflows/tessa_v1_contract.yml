@@ -29,7 +29,7 @@ jobs:
         with:
           ref: ${{ github.sha }}
 
-      - name: TESSA source and unit gate
+      - name: Compile TESSA sources
         shell: bash
         run: |
           set -euo pipefail
@@ -43,5 +43,22 @@ jobs:
             models/tessa/v1/proposal_v1.py \
             models/tessa/v1/mechanical_objective_v1.py \
             tests/models/test_tessa_v1.py
+
+      - name: Import TESSA package
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$PY" - <<'PY'
+          import torch
+          import models.tessa.v1 as tessa
+          cfg = tessa.TESSAConfigV1()
+          assert cfg.scaling_policy().admits(vertex_count=3665, face_count=6952)
+          print("TESSA_IMPORT_SMOKE_PASS", torch.__version__, cfg.max_faces)
+          PY
+
+      - name: Run TESSA unit tests
+        shell: bash
+        run: |
+          set -euo pipefail
           "$PY" -m pytest -q tests/models/test_tessa_v1.py
           echo "TESSA_V1_CONTRACT_PASS"

@@ -22,47 +22,60 @@ jobs:
       CUDA_VISIBLE_DEVICES: ""
       PYTHONUNBUFFERED: "1"
       PYTHONPATH: .
-      PY: /home/monster/realsas-ml312/bin/python
 
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
 
-      - name: Runner Python preflight
+      - name: Resolve runner Python
         shell: bash
         run: |
           set -euo pipefail
-          test -x "$PY"
-          "$PY" --version
+          if [ -x /home/monster/realsas-ml312/bin/python ]; then
+            TESSA_PY=/home/monster/realsas-ml312/bin/python
+          elif command -v python >/dev/null 2>&1; then
+            TESSA_PY=$(command -v python)
+          elif command -v python3 >/dev/null 2>&1; then
+            TESSA_PY=$(command -v python3)
+          else
+            echo "NO_PYTHON_INTERPRETER" >&2
+            exit 1
+          fi
+          echo "TESSA_PY=$TESSA_PY" >> "$GITHUB_ENV"
+          "$TESSA_PY" --version
+          "$TESSA_PY" - <<'PY'
+          import numpy, pytest, torch
+          print("TESSA_PY_DEPS_PASS", numpy.__version__, pytest.__version__, torch.__version__)
+          PY
           test -f models/tessa/__init__.py
           test -f models/tessa/v1/__init__.py
           echo "TESSA_RUNNER_PREFLIGHT_PASS"
 
       - name: Compile TESSA top namespace
-        run: "$PY -m py_compile models/tessa/__init__.py"
+        run: "$TESSA_PY -m py_compile models/tessa/__init__.py"
       - name: Compile TESSA v1 namespace
-        run: "$PY -m py_compile models/tessa/v1/__init__.py"
+        run: "$TESSA_PY -m py_compile models/tessa/v1/__init__.py"
       - name: Compile TESSA contracts
-        run: "$PY -m py_compile models/tessa/v1/contracts_v1.py"
+        run: "$TESSA_PY -m py_compile models/tessa/v1/contracts_v1.py"
       - name: Compile TESSA conditioning
-        run: "$PY -m py_compile models/tessa/v1/conditioning_v1.py"
+        run: "$TESSA_PY -m py_compile models/tessa/v1/conditioning_v1.py"
       - name: Compile TESSA model
-        run: "$PY -m py_compile models/tessa/v1/model_v1.py"
+        run: "$TESSA_PY -m py_compile models/tessa/v1/model_v1.py"
       - name: Compile TESSA tokenization
-        run: "$PY -m py_compile models/tessa/v1/tokenization_v1.py"
+        run: "$TESSA_PY -m py_compile models/tessa/v1/tokenization_v1.py"
       - name: Compile TESSA proposal
-        run: "$PY -m py_compile models/tessa/v1/proposal_v1.py"
+        run: "$TESSA_PY -m py_compile models/tessa/v1/proposal_v1.py"
       - name: Compile TESSA mechanical objective
-        run: "$PY -m py_compile models/tessa/v1/mechanical_objective_v1.py"
+        run: "$TESSA_PY -m py_compile models/tessa/v1/mechanical_objective_v1.py"
       - name: Compile TESSA tests
-        run: "$PY -m py_compile tests/models/test_tessa_v1.py"
+        run: "$TESSA_PY -m py_compile tests/models/test_tessa_v1.py"
 
       - name: Import TESSA package
         shell: bash
         run: |
           set -euo pipefail
-          "$PY" - <<'PY'
+          "$TESSA_PY" - <<'PY'
           import torch
           import models.tessa.v1 as tessa
           cfg = tessa.TESSAConfigV1()
@@ -74,5 +87,5 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          "$PY" -m pytest -q tests/models/test_tessa_v1.py
+          "$TESSA_PY" -m pytest -q tests/models/test_tessa_v1.py
           echo "TESSA_V1_CONTRACT_PASS"

@@ -745,83 +745,121 @@ Exit:
 - determine exactly which components need fit;
 - no A100.
 
-## C3 — Knight carrier-first one-shot court — MEASURED / NORMAL AUTHORITY CONFOUND FOUND
-
-Freeze one Stage19 carrier attempt.
-
-Run:
-- current/best ATLAS;
-- current/best MIRA carrier query;
-- Stage35 hard proof.
-
-Metrics:
-- G3/G3B closure;
-- catastrophic faces;
-- condition/edge/area/fold;
-- source fidelity;
-- carrier/rig/skin lineage coherence.
-
-This is the new one-shot baseline.
+## C3 — Knight carrier-first one-shot court — SCIENTIFIC FAIL / OWNER ATTRIBUTION ACTIVE
 
 Measured run:
-- workflow `37200683451` completed successfully;
+- workflow `37200683451` completed successfully as an execution;
 - frozen/A2-verified Stage28 ATLAS rig;
 - frozen MIRA V6 checkpoint;
 - exact same Stage18/19 carrier;
 - no training.
 
-A/B result:
+A/B:
 - legacy GSA skin -> deterministic carrier transfer: **G3 PASS / G3B PASS / unsafe faces = 0**;
 - zero-train direct carrier query using current Stage19 face-cross normals: **G3 FAIL / G3B FAIL / unsafe faces = 2348**;
-- identity carrier vertices alone showed weight-row L1 p95 ≈ `1.7789`.
+- identity carrier vertices showed direct-vs-legacy weight-row L1 p95 ≈ `1.7789`.
 
-This does **not** authorize MIRA refit.
+This is a scientific FAIL of the first direct-carrier query construction, not a workflow failure, and it does **not** authorize MIRA refit by itself.
 
-Source-level forensic follow-up found:
-- compact face provenance stores each triangle as a canonical sorted vertex-ID tuple;
-- therefore candidate face tuples preserve connectivity but do not preserve oriented winding;
-- Stage19 V1 carrier evidence derived signed normals by cross-producting those unordered/canonicalized tuples;
-- direct MIRA query was therefore given an invalid/arbitrary signed normal field.
+Source-level forensic:
+- compact candidate faces preserve connectivity but not oriented winding because triangle IDs are canonicalized/sorted;
+- Stage19 V1 then cross-producted those unordered tuples and treated the result as a signed carrier normal field;
+- signed query normals were therefore not a valid authority.
 
-### C3.1 — carrier normal authority causal court — NOW
+### C3.1 — carrier normal authority causal court — COMPLETE / CAUSAL DRIVER CONFIRMED
 
-Hold fixed:
-- carrier positions;
-- carrier connectivity;
+Workflow:
+- `37201156219`;
+- verdict: `NORMAL_AUTHORITY_CAUSAL_DRIVER_SUPPORTED`.
+
+Frozen:
+- carrier XYZ/connectivity;
 - ATLAS rig;
 - MIRA checkpoint/backbone/readout;
 - query support;
-- Stage35 metric family.
+- hard G3/G3B family.
 
-Change only:
-- current unoriented face-cross normals;
+Changed only:
+- current Stage19 face-cross normal field;
 - versus signed GSA normal field transported through exact geometry `SurfaceSupportBinding`.
 
-Measure:
-- signed/absolute normal cosine;
-- negative-dot fraction;
-- identity-vertex weight parity;
-- hard G3/G3B.
+Normal evidence:
+- all carrier vertices valid in the counterfactual;
+- signed cosine mean ≈ `0.00278`;
+- negative-dot fraction ≈ **0.4974**;
+- strongly opposed fraction ≈ **0.4126**;
+- identity subset negative-dot fraction ≈ **0.4978**.
 
-If the normal counterfactual restores weight parity/mechanics:
-- MIRA fit remains blocked;
-- implement a deterministic oriented carrier basis/normal authority at Stage19.
+Therefore the current Stage19 signed normal field is effectively unoriented with respect to the admitted GSA signed normal field.
 
-If it does not:
-- continue carrier-query causal decomposition before training.
+Mechanical consequence:
+- current normal arm: unsafe faces **2348**;
+- GSA-oriented geometry-support normal counterfactual: unsafe faces **1327**;
+- identity weight parity improves from p95 `1.7789` to exact `0.0`.
 
-## C4 — minimal MIRA mechanical fit — CONDITIONAL
+Conclusion:
+- normal authority is a **proven causal bug**;
+- it explains a large fraction of the direct-query failure;
+- it is not the sole residual owner because 1327 unsafe faces remain.
 
-**Blocked until C3.1 and any remaining carrier-evidence confounds close.**
+Product direction:
+- Stage19 requires a deterministic oriented carrier normal/basis authority;
+- do not derive signed normals from canonical-sorted face tuples;
+- transported GSA normals are a diagnostic counterfactual, not yet the final product normal authority.
 
-Only if C3 identifies skin-owned residual.
+### C3.1b — normal-path factorization — COMPLETE
 
-Order:
+Workflow:
+- `37201079379`.
+
+Additional factorization with exact carrier XYZ:
+- current carrier normals in both paths: unsafe **2348**;
+- transported GSA normals in geometry7 + pair geometry using current carrier-query support semantics: unsafe **903**, identity parity exact;
+- GSA normals only in geometry7: unsafe **1033**, identity p95 L1 ≈ `0.1218`;
+- GSA normals only in pair geometry: unsafe **2277**, identity p95 L1 ≈ `1.7502`.
+
+Interpretation:
+- geometry7 normal semantics dominate the identity-domain shift;
+- pair-normal semantics are secondary but nonzero;
+- support choice changes the residual, so carrier normal authority and semantic-memory support authority must remain separate contracts.
+
+### C3.2 — MIRA support-mixture order court — IN PROGRESS
+
+Workflow:
+- `37201533011`.
+
+Question:
+- after correcting the signed-normal confound, is the remaining residual caused by transporting GSA latent memory **before** a nonlinear readout?
+
+All zero-train arms use:
+- same exact carrier XYZ;
+- same carrier connectivity;
+- same ATLAS rig;
+- same MIRA backbone/readout;
+- same signed-normal diagnostic authority;
+- same support coefficients.
+
+Arms:
+1. `LATENT_PREBLEND` — current bridge, `D(sum alpha h)`;
+2. `LOGIT_POSTBLEND` — evaluate exact carrier geometry per support, then blend logits;
+3. `PROB_POSTBLEND` — evaluate per support, then blend normalized probabilities;
+4. `LEGACY_WEIGHT_TRANSFER_CEILING` — diagnostic ceiling only, not a product method.
+
+Decision:
+- if a postblend arm closes mechanics, keep C4 blocked and revise the zero-train query composition contract;
+- if only the diagnostic ceiling passes, carrier-query decoder/tail mismatch is finally isolated strongly enough to consider C4;
+- if the ceiling fails, do not fit MIRA: the remaining owner is elsewhere.
+
+## C4 — minimal MIRA mechanical fit — BLOCKED ON C3.2
+
+Open only after zero-train query-domain and composition confounds are closed.
+
+Order if authorized:
 1. decoder/tail-only;
 2. bounded residual;
 3. larger MIRA fit.
 
-A100 only after residual is demonstrated.
+A100 remains **NOT AUTHORIZED** until C3.2 closes.
 
 ## C5 — ATLAS mechanically sufficient control basis — CONDITIONAL
 

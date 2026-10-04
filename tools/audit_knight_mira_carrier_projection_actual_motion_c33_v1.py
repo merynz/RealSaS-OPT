@@ -117,7 +117,7 @@ def main(args):
     # enter the projection.
     query=build_mira_mechanical_carrier_query_v1(
         candidate=candidate,carrier_evidence=carrier,
-        surface_tensor=surface_tensor,conditioning=conditioning)
+        surface_tensor=surface_tensor,conditioning=conditioning,allow_unoriented_carrier_normals_for_diagnostic=True)
     projected=_legacy_transfer_ceiling(query=query,legacy_weights=legacy)
 
     skin=qualify_mechanical_carrier_skin_v1(

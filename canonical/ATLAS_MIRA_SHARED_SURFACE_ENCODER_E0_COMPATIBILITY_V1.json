@@ -1,0 +1,106 @@
+{
+  "schema": "RealSaS.ATLASMIRASharedSurfaceEncoderE0Compatibility.v1",
+  "date": "2026-10-04",
+  "status": "SOURCE_COMPATIBILITY_PASS__DROP_IN_WEIGHT_SHARING_NOT_AUTHORIZED",
+  "atlas": {
+    "legacy_name": "Geppetto",
+    "source": "models/geppetto/reference_strength_v1/geppetto_reference_strength_candidate_v1.py",
+    "encoder": "DirectRiggingSurfaceEncoderV1",
+    "model_dim": 256,
+    "graph_layers": 3,
+    "global_layers": 4,
+    "attention_heads": 8,
+    "surface_information": [
+      "positions_normalized",
+      "normals",
+      "normal_valid",
+      "support_views[8]",
+      "raster_xy[8x2]",
+      "raster_valid[8]",
+      "observed",
+      "completed",
+      "degree_from_graph",
+      "edge_index",
+      "edge_attr[4]"
+    ],
+    "view_parameterization": "learned fixed-8 view index + raster/support payload"
+  },
+  "mira": {
+    "legacy_name": "Arachne",
+    "source": "models/arachne/v4/arachne_candidate_v4.py",
+    "downstream_current": "models/arachne/v5/arachne_candidate_v5.py uses exact V4 backbone",
+    "encoder_region": "_surface_features + surface_graph + surface_global",
+    "model_dim": 640,
+    "graph_layers": 4,
+    "global_layers": 6,
+    "attention_heads": 10,
+    "surface_information": [
+      "positions_normalized",
+      "normals",
+      "normal_valid",
+      "support_views[8]",
+      "raster_xy[8x2]",
+      "raster_valid[8]",
+      "observed",
+      "completed",
+      "view_yaw_fourier[8x4]",
+      "edge_index",
+      "edge_features[4]"
+    ],
+    "view_parameterization": "explicit yaw Fourier + shared view feature encoder/gate"
+  },
+  "overlap": {
+    "same_semantic_surface_authority": "RiggingSurfaceIR / qualified GSA surface evidence",
+    "exact_common_information": [
+      "positions_normalized",
+      "normals",
+      "normal_valid",
+      "support_views",
+      "raster_xy",
+      "raster_valid",
+      "observed",
+      "completed",
+      "edge_index",
+      "four-dimensional local relation evidence"
+    ],
+    "atlas_only_or_parameterized_differently": [
+      "explicit degree scalar (derivable from shared graph)",
+      "learned fixed view-index embedding"
+    ],
+    "mira_only_or_parameterized_differently": [
+      "explicit view_yaw_fourier sidecar",
+      "support/raster fractions as explicit scalar features (derivable from masks)"
+    ]
+  },
+  "conclusion": {
+    "semantic_input_compatibility": true,
+    "drop_in_module_compatibility": false,
+    "reason": [
+      "Different model widths, depths and attention-head counts.",
+      "Different view parameterization.",
+      "MIRA surface representation participates later in skeleton-conditioned bidirectional fusion; that region must stay MIRA-specific.",
+      "ATLAS pooled/global memory feeds autoregressive articulation generation; task heads remain ATLAS-specific."
+    ],
+    "proposed_common_contract": "SurfaceEvidenceEncoderInputV1 = superset of shared physical evidence, with degree and support/raster fractions derived deterministically and explicit yaw Fourier retained.",
+    "shared_boundary": "Only pre-skeleton surface memory before ATLAS autoregressive reasoning or MIRA qualified-skeleton/pair reasoning."
+  },
+  "next_court": {
+    "id": "ATLAS_MIRA_SHARED_ENCODER_E1_FROZEN_REPRESENTATION",
+    "training_required": false,
+    "purpose": "Instantiate one task-neutral superset input adapter and compare frozen/shared surface-memory probes against current separate encoders before any A100 fit.",
+    "must_report": [
+      "parameter_count",
+      "memory_width",
+      "surface permutation stability",
+      "ATLAS frozen probe retention",
+      "MIRA frozen probe retention",
+      "input-field ablation sensitivity",
+      "runtime and peak memory"
+    ]
+  },
+  "claim_boundary": [
+    "This audit authorizes a shared-encoder experiment, not shared-model promotion.",
+    "Semantic ATLAS/MIRA outputs remain separate typed contracts.",
+    "No skin or teacher payload may become an ATLAS inference input."
+  ]
+}

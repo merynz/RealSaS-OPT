@@ -861,75 +861,173 @@ Interpretation:
 - merely moving convex support composition across the nonlinear readout does not solve it;
 - because the same carrier + same rig closes under the diagnostic frozen semantic-field ceiling, a mechanically admissible field exists without carrier or ATLAS changes.
 
-### C4 — minimal carrier-native MIRA adaptation — AUTHORIZED
+### C3.3 — carrier-bound frozen semantic projection vs exact motion — COMPLETE / MICROSTRESS PASS IS NOT MOTION CLOSURE
 
-C4 is now scientifically authorized, but the authorization is intentionally narrow.
+Workflow:
+- `37202726161`;
+- scientific result was emitted before the workflow surfaced a failure status;
+- no training;
+- no teacher weights;
+- frozen MIRA semantic field;
+- deterministic exact carrier-bound mechanical-support projection.
 
-Not authorized:
+Micro-stress:
+- G3 PASS;
+- G3B PASS;
+- unsafe faces = **0**;
+- max condition ≈ `9.49`;
+- max edge ratio ≈ `1.69`.
+
+Exact idle/run/slash motion:
+- **51 / 51 sampled frames FAIL**;
+- maximum condition ≈ `381.66`;
+- maximum edge ratio ≈ `9.33`.
+
+Interpretation:
+- the Stage34 micro-stress witness is functioning according to contract: it is a small numerical compatibility witness, not motion-capability authority;
+- product motion capability remains owned by Stage35 exact quaternion clip execution;
+- therefore “G3/G3B microstress PASS” must never be promoted as final mechanical closure.
+
+### C3.4 — exact-motion residual localization — COMPLETE / RESIDUAL IS NOT NON-IDENTITY-ONLY
+
+Workflow:
+- `37203108738`;
+- diagnosis: `MIXED_IDENTITY_AND_COMPILED_DOMAIN_FAILURE`.
+
+Exact 51-frame idle/run/slash replay:
+- unique bad faces = **90**;
+- all-identity bad faces = **47**;
+- non-identity-touching bad faces = **43**;
+- identity fraction of bad faces ≈ `0.5222`;
+- max condition ≈ `381.66`;
+- max edge ratio ≈ `9.328`;
+- min area ratio ≈ `0.00262`.
+
+Important:
+- several high-severity identity-domain offenders have acceptable static triangle shape;
+- therefore the residual cannot be attributed only to Stage18 seam/generated vertices;
+- the earlier “only adapt 3,982 non-identity rows” C4 authorization was too narrow.
+
+### C4.0 — non-identity microstress direct-weight oracle — COMPLETE / FAIL
+
+Workflow:
+- `37202314087`.
+
+Frozen:
+- exact carrier;
+- A2-verified ATLAS rig;
+- 12,049 identity weight rows;
+- frozen MIRA base field.
+
+Optimized:
+- only 3,982 non-identity carrier rows;
+- differentiable condition/area/edge microstress surrogate;
+- no teacher weight objective.
+
+Result after 300 steps:
+- hard microstress G3 FAIL;
+- G3B FAIL;
+- unsafe faces = **787**;
+- max condition ≈ `1313.05`;
+- max edge ratio ≈ `18.32`.
+
+Verdict:
+- `FAIL_DIRECT_WEIGHT_ORACLE__DO_NOT_FIT_HEAD_YET`;
+- do not fit the previously proposed non-identity correction head from this objective;
+- either the surrogate/probe family is insufficient for the true product motion objective, or ownership is broader than the non-identity skin domain.
+
+### C4 — exact-motion owner attribution before any MIRA fit — ACTIVE
+
+The previous non-identity-only MIRA adaptation authorization is **withdrawn**.
+
+Not authorized yet:
+- C4 correction-head training;
+- decoder/tail fit;
 - full MIRA retrain;
-- shared encoder retrain;
 - ATLAS retrain;
-- teacher-weight authority on compiled carrier;
-- returning to surface-skin transfer as the product path.
+- teacher-weight authority;
+- A100 spend.
 
-Target:
-- adapt only the compiled-carrier query behavior at non-identity vertices;
-- preserve frozen GSA semantic field and exact identity-vertex behavior;
-- output `QualifiedMechanicalCarrierSkinIR` directly on the Stage19 carrier.
+The next question is now:
 
-#### C4.0 — direct-weight mechanical optimization oracle — NEXT
+> On the exact Stage19 carrier and frozen A2-verified ATLAS rig, can **skin weights alone** close the exact Stage35 idle/run/slash deformation court when optimization is driven by those real motion transforms rather than the Stage34 microstress surrogate?
 
-Before fitting a neural head, optimize only non-identity carrier weight logits directly.
+#### C4.1 — actual-motion skin-only direct-weight ceiling — NEXT
+
+This is an optimization oracle, not a model fit.
 
 Freeze:
-- carrier;
-- ATLAS rig;
-- all 12,049 identity carrier rows;
-- probe family and hard G3/G3B thresholds.
+- Stage19 carrier topology/XYZ;
+- A2-verified Stage28 ATLAS rig;
+- exact current idle/run/slash retarget tracks;
+- carrier/query lineage;
+- Stage35 mechanical thresholds;
+- no teacher skin;
+- no topology repair.
+
+Base:
+- frozen MIRA semantic field deterministically bound/projected to the exact carrier;
+- this base is diagnostic initialization, not teacher truth.
+
+Active region:
+1. run the exact 51-frame motion court;
+2. collect union offender faces;
+3. activate every weight row on those faces plus one carrier 1-ring closure;
+4. keep every row outside the closure exact-frozen;
+5. identity and non-identity rows are both admissible **only inside the proven offender closure**.
 
 Optimize:
-- only 3,982 non-identity rows;
-- differentiable carrier-native mechanical consequence loss;
-- semantic/trust regularization to the frozen direct-query field;
-- **no teacher weight target**.
+- exact-motion differentiable mechanical consequence over the real 51 frame transforms;
+- condition / area / edge terms aligned with the hard court;
+- trust/locality regularization to the frozen MIRA base;
+- simplex-preserving weights;
+- no teacher weight target.
 
-Exit questions:
-1. Can the differentiable objective drive hard G3/G3B to PASS?
-2. How large a weight correction is mechanically necessary?
-3. Which query features/regions require correction?
-4. Does correction remain localized to non-identity rows?
+Hard exit:
+- replay the full exact 51-frame motion court on the full carrier;
+- rerun Stage34 microstress G3/G3B as non-regression;
+- do not claim PASS from surrogate loss alone.
 
-If C4.0 cannot close the exact carrier, do not fit a head; repair the loss/probe contract or re-attribute the residual.
+Decision tree:
 
-#### C4.1 — carrier-native bounded correction head
+```text
+C4.1 exact-motion skin-only ceiling PASS
+    -> skin/model objective is a sufficient owner
+    -> authorize minimal MIRA carrier-motion adapter/fit
+    -> train against compiled-carrier actual-motion consequence
 
-Only after C4.0 closes.
+C4.1 FAIL
+    -> do NOT fit MIRA
+    -> open C5 actual-motion rig ceiling with skin reoptimized
+       and/or C6 carrier repair attribution
+```
 
-Preferred architecture:
-- frozen MIRA backbone/readout;
-- small residual head in carrier weight/logit space;
-- exact carrier geometry + carrier↔joint pair evidence;
-- explicit `non_identity_mask`;
-- identity rows hard bypass/freeze, not merely regularized;
-- simplex-preserving output;
-- no forbidden support minting;
-- bounded correction budgets;
-- Compiler hard requalification after fit.
+This is the key owner-separation court before any expensive fit.
 
-This is preferred over modifying the historical V6 checkpoint because it preserves the already-proven semantic field exactly and isolates the compiled-carrier domain bridge.
+#### C4.2 — minimal carrier-motion MIRA adaptation — BLOCKED ON C4.1 PASS
 
-#### C4.2 — decoder/tail-only fit
+If C4.1 proves skin-only sufficiency, preferred fit order:
 
-Use only if the bounded correction head is falsified by C4.1.
+1. frozen backbone/readout + small bounded carrier-motion correction head;
+2. decoder/tail-only fit;
+3. larger MIRA fit only if the smaller adapter is falsified.
 
-#### C4.3 — larger MIRA fit
+Training requirements:
+- compiled-carrier examples;
+- exact carrier binding;
+- coherent reference motion may supply behavioral reference evidence;
+- product objective is mechanical consequence, not teacher weight equality;
+- hard Stage35 remains qualification authority.
 
-Last resort. Requires evidence that the frozen representation itself is the blocker.
+Identity rows are no longer assumed universally safe under product motion; any bypass/freeze mask must be justified by the exact-motion court, not by microstress identity alone.
+
+#### C4.3 — larger MIRA fit — LAST RESORT
+
+Requires evidence that the frozen semantic representation itself, rather than the carrier-domain adapter/objective, is the blocker.
 
 Compute:
-- C4.0 should run on the local/self-hosted GPU if feasible;
-- A100 is **not yet required**;
-- use A100 only when an admitted C4.1/C4.2 training bundle exceeds local practical limits.
+- C4.1 remains local/self-hosted if feasible;
+- no A100 until C4.1 proves that a learnable skin-only solution exists and the selected training bundle exceeds local practical limits.
 
 ## C5 — ATLAS mechanically sufficient control basis — CONDITIONAL
 

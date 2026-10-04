@@ -723,7 +723,7 @@
     {
       "ordinal": 35,
       "id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
-      "title": "Joint dynamic mechanical proof of carrier + rig + skin",
+      "title": "Pre-motion carrier/rig/skin local compatibility proof; not motion-capability authority",
       "group": "mesh",
       "depends_on": [
         "05_CAMERA_CONTRACT_SOLVED",
@@ -876,7 +876,7 @@
     {
       "ordinal": 41,
       "id": "41_MOTION_DYNAMIC_PROOF",
-      "title": "Canonical FK/LBS/contact/conditioning proof; rest-unseen exposure diagnostic only",
+      "title": "Authoritative exact compiled-motion FK/LBS/contact dynamic mechanical proof",
       "group": "motion",
       "depends_on": [
         "05_CAMERA_CONTRACT_SOLVED",
@@ -983,7 +983,7 @@
     {
       "ordinal": 46,
       "id": "46_PRODUCT_CLOSURE_SEAL",
-      "title": "Product closure plus editable canonical authoring export",
+      "title": "Current product closure aggregation plus editable canonical authoring export; stage number not architectural",
       "group": "closure",
       "depends_on": [
         "23_COMPLETE_APPEARANCE_ASSET_BAKED",

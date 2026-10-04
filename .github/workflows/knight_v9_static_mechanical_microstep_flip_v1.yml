@@ -46,16 +46,17 @@ jobs:
         with: {python-version: '3.12'}
       - uses: actions/download-artifact@v4
         with:
-          name: knight-v9-mechanical-static-fixed-point-resume-v1
+          name: knight-v9-mechanical-static-fixed-point-v1
           path: ${{ env.INPUT }}/prior
           github-token: ${{ github.token }}
-          run-id: 37150942822
+          run-id: 37140820111
       - name: Resolve frozen inputs
         id: inputs
         shell: bash
         run: |
           set -euo pipefail
-          test -f "$INPUT/prior/cycle_02/PARTITION.json"
+          test -f "$INPUT/prior/cycle_01/CANDIDATE.json"
+          test -f "$INPUT/prior/cycle_01/PARTITION.json"
           test -f "$CACHE_ROOT/phase1/refined_surface.json"
           test -f "$CACHE_ROOT/fresh/fresh_qualified_skeleton.json"
           test -f "$TEACHER_ROOT/V9_TEACHER_BANK.npz"

@@ -8,6 +8,9 @@ on:
       - canonical/MAINLINE_EXECUTION_PLAN_V2.json
       - canonical/ACTIVE_RUN_V2.json
       - compiler/realsas_compiler_core/mechanical_carrier_evidence_v1.py
+      - tests/models/test_mira_carrier_query_v1.py
+      - models/mira/carrier_query_v1.py
+      - compiler/realsas_compiler_core/mechanical_carrier_skin_v1.py
       - compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py
       - compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py
       - models/shared/joint_mechanical_loss_v1.py

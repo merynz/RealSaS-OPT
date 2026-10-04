@@ -1,7 +1,9 @@
 # RealSaS — ATLAS / MIRA / Compiler Mechanical Coherence Execution Plan V1
 
 **Date:** 2026-10-04  
-**Status:** `PREREGISTERED_ARCHITECTURE_DIRECTION__NO_A100_TRAINING_YET`
+**Status:** `SUPERSEDED_BY_TRUTH_CARRIER_PLAN_V2__DO_NOT_EXECUTE_MIRA_M_OR_E3_FROM_THIS_DOCUMENT`
+
+> **2026-10-04 correction:** Source-level re-audit of RigAnything, SkinTokens, current ATLAS/MIRA, and historical MIRA FIT1 shows that an explicit topology-conditioned MIRA-M head is not yet justified. Existing MIRA already supports point-query decoding, while the demonstrated gap is truth-carrier coherence. See `canonical/MECHANICAL_TRUTH_CARRIER_ARCHITECTURE_PLAN_V2_20261004.md`. E3 from this document is blocked.
 
 ## Goal
 

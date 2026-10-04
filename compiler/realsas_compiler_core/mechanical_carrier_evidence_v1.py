@@ -1,12 +1,15 @@
 from __future__ import annotations
 
-"""Carrier-bound model evidence derived from the statically qualified mechanical mesh.
+"""Statically qualified mechanical-carrier topology and geometry evidence.
 
 GSA/RiggingSurfaceIR remains observation-grounded perception evidence. This module
-defines the mechanical coordinate system consumed by carrier-first learned mechanics.
-The neural models are not required to consume triangle faces directly; faces are
-sealed here so XYZ/normals/query evidence cannot silently drift to another
-interpolation basis.
+owns the exact carrier vertex domain, XYZ and connectivity used by mechanics.
+
+Important: candidate face tuples are canonicalized for deterministic connectivity
+and do not carry an oriented-winding contract. The face-cross `normals` retained
+in this V1 artifact are therefore an *unoriented geometric diagnostic only*.
+They are forbidden as signed learned-query normal authority. Learned mechanics
+must consume a separate carrier-bound signed query-normal evidence artifact.
 """
 
 from dataclasses import asdict, dataclass, field, replace
@@ -178,7 +181,10 @@ def build_mechanical_carrier_evidence_v1(
         metadata={
             "authority": "STATIC_QUALIFIED_MECHANICAL_CARRIER",
             "positions_owner": "STAGE18_CANONICAL_MESH",
-            "normals_owner": "DERIVED_FROM_EXACT_CARRIER_FACES",
+            "normals_owner": "UNORIENTED_DIAGNOSTIC_FROM_CANONICAL_FACE_TUPLES",
+            "signed_normal_authority": False,
+            "learned_query_normal_use_forbidden": True,
+            "signed_query_normal_authority_schema": "RealSaS.CarrierSignedQueryNormalEvidenceIR.v1",
             "faces_are_neural_input_required": False,
             "gsa_is_auxiliary_observation_evidence": True,
             "invalid_normal_count": int(sum(not x for x in normal_valid)),

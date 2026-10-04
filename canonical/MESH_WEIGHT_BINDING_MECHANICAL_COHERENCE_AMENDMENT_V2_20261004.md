@@ -1,8 +1,10 @@
 # RealSaS — Mesh / Weight Binding Mechanical-Coherence Amendment V2 — 2026-10-04
 
-**Status:** `RESEARCH_AMENDMENT_PREREGISTERED__V1_LINEAGE_PRESERVED__PRODUCT_MIGRATION_BLOCKED_ON_E3`
+**Status:** `SUPERSEDED_BY_TRUTH_CARRIER_PLAN_V2__DO_NOT_EXECUTE_MIRA_M_OR_E3_FROM_THIS_DOCUMENT`
 
 This document amends, but does not erase, `MESH_WEIGHT_BINDING_CONTRACT_V1.md`.
+
+> **2026-10-04 correction:** Source-level re-audit of RigAnything, SkinTokens, current ATLAS/MIRA, and historical MIRA FIT1 shows that an explicit topology-conditioned MIRA-M head is not yet justified. Existing MIRA already supports point-query decoding, while the demonstrated gap is truth-carrier coherence. See `canonical/MECHANICAL_TRUTH_CARRIER_ARCHITECTURE_PLAN_V2_20261004.md`. E3 from this document is blocked.
 
 ## Why V1 is insufficient
 

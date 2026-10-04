@@ -606,7 +606,8 @@ Hard Compiler qualification remains separate.
 No promotion from teacher metrics alone.
 
 Require:
-- hard Stage35 improvement or non-regression;
+- current Stage35 local-compatibility non-regression;
+- current Stage41 exact compiled-motion improvement or non-regression on the admitted motion envelope;
 - lower/equal catastrophic-face count;
 - free-running stability;
 - control-basis adequacy;

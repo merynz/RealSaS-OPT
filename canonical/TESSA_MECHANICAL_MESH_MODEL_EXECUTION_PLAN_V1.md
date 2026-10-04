@@ -13,7 +13,9 @@ source views
    ↓
 IRIS
    ↓
-GSA / RiggingSurfaceIR S                 observation-grounded surface truth
+Stage08 NormalizationDomainIR             canonical object coordinate authority
+   ↓
+GSA / RiggingSurfaceIR S                  observation-grounded surface truth
    ↓
 mechanical partition / support domains
    ↓
@@ -32,35 +34,36 @@ MIRA                                     skin-field proposal
 Compiler skin + dynamic motion proof
 ```
 
-TESSA owns no canonical truth.  It proposes a production mesh.  The Compiler
-owns support binding, legality, source fidelity, mechanical qualification,
-repair, attempt lineage and final carrier seal.
+TESSA owns no canonical truth. It proposes a production mesh. The Compiler owns
+support binding, legality, source fidelity, mechanical qualification, repair,
+attempt lineage and final carrier seal.
 
-The new first-class map is:
+The first-class map is:
 
-`TESSA : S_GSA -> M_proposal`
+`TESSA : (N_stage08, S_GSA) -> M_proposal`
 
 with the explicit rule:
 
 `S_GSA != M_proposal` is legal.
 
-GSA owns where the admitted surface is; TESSA learns how that surface should be
-discretized to become a useful deformable production carrier.
+Stage08 owns the object coordinate frame. GSA owns where the admitted surface is
+inside that frame. TESSA learns how that surface should be discretized to become
+a useful deformable production carrier.
 
 ## 1. Why TESSA exists
 
-Current Stage18 is a strong deterministic geometry/discretization baseline.  It
+Current Stage18 is a strong deterministic geometry/discretization baseline. It
 preserves compact dense-face provenance and can locally improve triangles with
-CDT, but it does not learn or globally design animation topology.  A bad parent
+CDT, but it does not learn or globally design animation topology. A bad parent
 connectivity/edge-flow pattern can therefore remain a bad mechanical basis even
 when XYZ/source fidelity is excellent.
 
 The decisive scientific observation is that static geometry quality and dynamic
-mechanical quality are different objectives.  A product carrier must satisfy
+mechanical quality are different objectives. A product carrier must satisfy
 both.
 
-TESSA is not an IRIS replacement.  IRIS/GSA already solves the observation-side
-surface problem.  TESSA is the learned bridge from admitted surface truth to a
+TESSA is not an IRIS replacement. IRIS/GSA already solves the observation-side
+surface problem. TESSA is the learned bridge from admitted surface truth to a
 riggable, weightable, deformation-stable carrier.
 
 ## 2. Clean-room reference and deliberate departures
@@ -74,27 +77,47 @@ Useful solution-class ideas retained in clean-room form:
 - adjacent-face continuation to avoid repeating an entire triangle;
 - teacher artist meshes as topology priors.
 
-RealSaS deliberately differs in five places:
+RealSaS deliberately differs in six places:
 
 1. **Input distribution.** Training input must be actual IRIS/GSA evidence made
    from teacher renders, not a pristine teacher point cloud unavailable at
    product inference.
-2. **Authority.** Learned mesh output is `PROPOSAL`; Compiler qualification is
+2. **Coordinate authority.** TESSA may not refit a frame from the finite GSA
+   cloud. Stage08 `NormalizationDomainIR` is the sole canonical object-frame
+   authority used by both GSA conditioning and teacher targets.
+3. **Authority.** Learned mesh output is `PROPOSAL`; Compiler qualification is
    mandatory before ATLAS/MIRA.
-3. **Source support.** Every admitted generated vertex must resolve to a typed
+4. **Source support.** Every admitted generated vertex must resolve to a typed
    `SurfaceSupportBinding` inside its admitted GSA/component domain.
-4. **Mechanics.** Training includes rig/skin/motion consequence objectives using
+5. **Mechanics.** Training includes rig/skin/motion consequence objectives using
    coherent teacher assets; static token likelihood is insufficient.
-5. **Scale.** A ~1.6K-face research ceiling is not a RealSaS product contract.
+6. **Scale.** A ~1.6K-face research ceiling is not a RealSaS product contract.
    TESSA V1 is configured for 32,768 faces and must admit the Knight source mesh
    (3,665 vertices / 6,952 faces) as ordinary workload.
 
 ## 3. V1 architecture
 
-### 3.1 Conditioning
+### 3.1 Coordinate authority and conditioning
 
-Deterministic `RiggingSurfaceIR -> tensor` adapter, currently 17 features/node:
-- normalized XYZ: 3;
+The deterministic adapter is:
+
+`NormalizationDomainIR + RiggingSurfaceIR -> tensor`
+
+Stage08 normalization has world relation:
+
+`P_world = center_xyz + P_stage08 * half_extent`
+
+with admitted source coordinates inside `[-1,+1]`. TESSA coordinate tokens use
+`[-0.5,+0.5]`, therefore the exact conversion is:
+
+`P_tessa = (P_world - center_xyz) / (2 * half_extent)`
+
+No GSA-bbox refit, teacher-derived recenter/rescale, padding chosen from teacher
+truth, or clipping is permitted. This rule is hash-bound by the Stage08
+`normalization_hash` and is part of the T1 checkpoint resume contract.
+
+Current GSA conditioning has 17 features/node:
+- Stage08-bound normalized XYZ: 3;
 - derived normal: 3;
 - normal-valid bit: 1;
 - 8-view support mask: 8;
@@ -103,7 +126,7 @@ Deterministic `RiggingSurfaceIR -> tensor` adapter, currently 17 features/node:
 
 No teacher topology, rig or skin enters product conditioning.
 
-Generation is component/chart scoped.  A learned proposal may not escape the
+Generation remains component-aware. A learned proposal may not escape the
 admitted support domain and then recover by unconstrained nearest-neighbor
 binding across a nearby disconnected sheet.
 
@@ -114,7 +137,7 @@ Transformer.
 
 Default latent memory: 384 x 768.
 
-The expensive latent stack is fixed-size.  Raw GSA size affects the one
+The expensive latent stack is fixed-size. Raw GSA size affects the one
 point-to-latent cross-attention rather than every autoregressive layer.
 
 ### 3.3 Mesh token grammar
@@ -123,17 +146,33 @@ V1 clean-room adjacent-face grammar:
 - seed face: `FACE_BREAK + 9 coordinate tokens`;
 - adjacent face sharing the active trailing edge: only 3 coordinate tokens for
   the new vertex;
-- explicit component/chart delimiters;
+- explicit source-connected component delimiters;
+- chart delimiters retained by the grammar for compatibility/structured
+  continuation, but canonical T1 does not split a connected source component
+  into independently generated training charts;
 - EOS/PAD.
 
-Coordinates are normalized RealSaS object coordinates and quantized to 1,024
-bins in V1.
+Coordinates are Stage08-bound RealSaS object coordinates quantized to 1,024 bins
+in V1.
+
+The whole asset is serialized as one global topology sequence. Each true
+face-connected source component receives one explicit component block. Arbitrary
+face-count chart cuts are forbidden in canonical T1 because independent chart
+generation would sever identity/connectivity at artificial boundaries.
+
+V1 also fails closed if two distinct vertices inside the same source-connected
+component quantize to the same coordinate identity. Cross-component equal XYZ is
+not globally welded.
+
+The strict decoder reconstructs indexed proposal geometry with component-local
+coordinate identity. Face orientation remains unqualified until Compiler
+support/normal evidence resolves it.
 
 This sequence is a learned representation, not a canonical mesh identity.
 Compiler decode/support resolution may reject ambiguous welding, cross-sheet
 binding, non-manifoldness, boundary drift or source-fidelity failure.
 
-### 3.4 Scalable decoder
+### 3.4 Scalable decoder and training windows
 
 A full L-token self-attention matrix is forbidden as the product scaling
 contract.
@@ -145,39 +184,47 @@ TESSA V1 decoder uses bounded causal attention:
 where default trailing window `W = 2048`, with query chunks of 256 tokens.
 Every decoder block also cross-attends to the fixed surface latent memory.
 
-Default mesh budget:
+The global topology sequence is not cut into independent meshes for training.
+Instead, constant-memory teacher-forcing uses overlapping truncated LM windows:
+- every target token position is scored exactly once;
+- up to `W` preceding tokens from the same global sequence are provided as
+  causal context;
+- context-prefix labels are ignored/PAD;
+- absolute sequence offset is retained for wrapped positional phase.
+
+Default asset budget:
 - 32,768 faces;
 - 32,768 vertices;
-- 4,096 faces per generation chart;
-- 128 components;
-- 512 charts/component upper contract.
+- 128 source-connected components;
+- local causal attention window 2,048 tokens;
+- query chunk 256 tokens.
 
-Large assets are represented as component/chart sequences with explicit seam
-and support-domain bookkeeping.  Chart decomposition is a scalability device;
-it may not create a second geometry authority.
+`max_faces_per_chart` is not a canonical T1 scaling mechanism. Legacy bounded
+face-chart partitioning remains diagnostic only.
 
 Future challengers may borrow the solution class of hierarchical/hourglass and
-sliding-context mesh transformers (e.g. Meshtron-like scaling), but V1 does not
-make any external implementation a runtime dependency.
+sliding-context mesh transformers, but V1 does not make any external
+implementation a runtime dependency.
 
 ## 4. Proposal -> canonical carrier handoff
 
 TESSA learned output is conceptually:
 
-`TESSAMeshProposalV1 { V_proposal, F_proposal, GSA lineage, model provenance }`
+`TESSAMeshProposalV1 { V_proposal, F_proposal, Stage08/GSA lineage, model provenance }`
 
 For each proposed vertex the model may expose a primary GSA anchor for routing,
 but that pointer is not a qualified `SurfaceSupportBinding`.
 
 Compiler must:
 1. decode topology;
-2. restrict support search to the admitted component/chart domain;
-3. project/bind generated vertices onto admitted GSA/source support;
-4. construct `MeshDiscretizationCandidateIR` with typed support bindings;
-5. run static carrier qualification;
-6. run source/silhouette/coverage replay;
-7. seal only a passing candidate;
-8. invalidate downstream rig/skin if carrier lineage changes.
+2. preserve explicit component separation during identity/weld resolution;
+3. restrict support search to the admitted component domain;
+4. project/bind generated vertices onto admitted GSA/source support;
+5. construct `MeshDiscretizationCandidateIR` with typed support bindings;
+6. run static carrier qualification;
+7. run source/silhouette/coverage replay;
+8. seal only a passing candidate;
+9. invalidate downstream rig/skin if carrier lineage changes.
 
 No direct `TESSAMeshProposalV1 -> QualifiedEditableMeshIR` conversion exists.
 
@@ -195,19 +242,23 @@ For each coherent teacher asset:
 teacher source asset M*, R*, W*
         ↓ render using frozen observation contract
 source views
-        ↓ frozen/current IRIS + deterministic GSA
-S_train
+        ↓ frozen/current IRIS + deterministic Stage08 + GSA
+(N_stage08, S_train)
 ```
 
 Training pair:
 
-`S_train -> M*`
+`(N_stage08, S_train) -> M*`
 
-This is essential.  Training on pristine source geometry while product inference
+Teacher vertices are transformed into the same Stage08-bound TESSA coordinate
+frame. The target may never be clipped or independently normalized to make the
+fit easier.
+
+This is essential. Training on pristine source geometry while product inference
 uses GSA geometry would recreate the substrate-distribution mismatch TESSA is
 meant to remove.
 
-Teacher source topology is a high-value prior, not a unique truth.  Multiple
+Teacher source topology is a high-value prior, not a unique truth. Multiple
 meshes may be mechanically equivalent or better while representing the same
 surface.
 
@@ -215,19 +266,26 @@ surface.
 
 ### T0 — deterministic/oracle dataset audit
 - prove teacher source mesh/rig/skin lineage;
-- generate GSA input through the real observation path;
+- generate Stage08 + GSA input through the real observation path;
+- prove Stage08 normalization hash and coordinate-frame integrity;
+- prove GSA and teacher source geometry both lie inside the canonical domain
+  without refit or clipping;
+- reject V1 examples with within-component quantized vertex identity collision;
 - record component and support-domain correspondence;
 - reject examples whose source mechanics cannot pass the oracle court.
 
 ### T1 — supervised topology fit
 Primary loss:
-- autoregressive mesh-token cross entropy.
+- autoregressive mesh-token cross entropy over one global asset sequence using
+  overlap/context-preserving truncated windows.
 
 Auxiliary losses/metrics:
 - source-surface residual;
 - boundary/component preservation;
 - manifold/degenerate statistics;
 - density/triangle quality diagnostics.
+
+T1 does not claim mechanical consequence learning.
 
 ### T2 — mechanical consequence fit
 Use coherent teacher `R*, W*` and a broad source + synthetic pose bank.
@@ -246,7 +304,7 @@ These are training surrogates only.
 
 ### T3 — hard Compiler court
 A frozen checkpoint must pass deterministic Compiler qualification on held-out
-poses/assets.  Training reward cannot self-authorize shipping.
+poses/assets. Training reward cannot self-authorize shipping.
 
 ## 7. Knight causal court — mandatory before promotion
 
@@ -269,7 +327,7 @@ Measure separately:
 5. boundary/component/source fidelity.
 
 This separation is mandatory because under ordinary per-vertex LBS, changing
-triangle connectivity alone does not change identical vertex trajectories.  A
+triangle connectivity alone does not change identical vertex trajectories. A
 topology claim must therefore be supported by interior/surface/Jacobian evidence
 or by an explicit topology-dependent deformation operator.
 
@@ -291,9 +349,9 @@ Final learned stack:
 - ATLAS infers/preserves the admitted rig/control contract on that carrier.
 - MIRA predicts/queries a geometry-conditioned skin field on that carrier.
 
-Source skeleton complexity and skin sparsity remain separate.  In particular,
+Source skeleton complexity and skin sparsity remain separate. In particular,
 zero-skin source/control bones are not deleted merely because their skin mass is
-zero.  Historical control-count pruning is not TESSA authority.
+zero. Historical control-count pruning is not TESSA authority.
 
 ATLAS/MIRA final retraining should wait until the TESSA carrier evidence contract
 is frozen, otherwise a carrier-contract change can invalidate the fit target.
@@ -303,8 +361,8 @@ is frozen, otherwise a carrier-contract change can invalidate the fit target.
 TESSA cannot become shipping authority until all are true:
 
 - G0: code/unit invariants PASS;
-- G1: GSA-only conditioning / teacher-leak audit PASS;
-- G2: Knight 6,952-face scale admission PASS;
+- G1: Stage08/GSA-only conditioning / teacher-leak audit PASS;
+- G2: Knight 6,952-face scale admission + coordinate/tokenization T0 PASS;
 - G3: supervised topology fit beats deterministic baseline on source fidelity
   without mechanical regression;
 - G4: teacher rig/skin mechanical consequence court PASS;
@@ -321,8 +379,14 @@ Until G8, TESSA outputs are research/proposal artifacts only.
 - `models/tessa/v1/conditioning_v1.py`
 - `models/tessa/v1/model_v1.py`
 - `models/tessa/v1/tokenization_v1.py`
+- `models/tessa/v1/sequence_codec_v1.py`
+- `models/tessa/v1/training_data_v1.py`
+- `models/tessa/v1/proposal_v1.py`
 - `models/tessa/v1/mechanical_objective_v1.py`
+- `tools/training/run_tessa_supervised_fit_v1.py`
+- `notebooks/RealSaS_TESSA_KNIGHT_T1_RUN_ALL.ipynb`
 - `tests/models/test_tessa_v1.py`
+- `tests/models/test_tessa_training_data_v1.py`
 
-This document is the canonical TESSA V1 program.  It extends, rather than
+This document is the canonical TESSA V1 program. It extends, rather than
 silently rewrites, the existing carrier-first mechanical-coherence lineage.

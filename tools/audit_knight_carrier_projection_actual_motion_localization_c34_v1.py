@@ -231,7 +231,7 @@ def main(args):
         decoder=decoder,device=args.device,chunk=args.readout_chunk)
     query=build_mira_mechanical_carrier_query_v1(
         candidate=candidate,carrier_evidence=carrier,
-        surface_tensor=surface_tensor,conditioning=conditioning)
+        surface_tensor=surface_tensor,conditioning=conditioning,allow_unoriented_carrier_normals_for_diagnostic=True)
     weights=_legacy_transfer_ceiling(query=query,legacy_weights=legacy)
 
     rest=np.asarray(carrier.positions,np.float64)

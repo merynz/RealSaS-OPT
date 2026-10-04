@@ -1092,9 +1092,43 @@ Result with the C4.1 optimized skin:
 
 Verdict:
 - tree-consistent retarget is a real quality improvement and should replace the current independent nearest mapping;
-- it is not sufficient to close the mechanical system;
-- ATLAS/control-basis and/or carrier ownership remains open.
+- it is not sufficient to close the mechanical system with the **stale C4.1 skin optimized under the old mapping**;
+- this does not yet prove rig insufficiency because the optimal skin state is motion-domain dependent.
 
+### C5.0b — tree-consistent-retarget skin reoptimization ceiling — NEXT
+
+Coherence correction:
+
+C4.1 optimized
+[
+W^*(R,Q_{old})
+]
+under the previous independent-nearest retarget motion domain.
+
+C5.0 changed the motion domain to
+[
+Q_{tree}.
+]
+
+Therefore judging ((M,R,W^*(R,Q_{old}),Q_{tree})) is not a valid final owner court.
+
+C5.0b must compute:
+[
+W^*_{tree}(R)=argmin_W L_{mech}(M,R,W,Q_{tree})
+]
+
+with:
+- exact same Stage19 carrier;
+- exact same A2-verified current ATLAS rig;
+- tree-consistent retarget only;
+- no teacher weights;
+- exact 51-frame idle/run/slash consequence;
+- hard replay after optimization;
+- Stage34 microstress non-regression.
+
+Decision:
+- PASS -> current rig is mechanically sufficient for the admitted motion envelope; MIRA/objective + retarget are sufficient owners and C5.1 becomes true prune-from-admissible search.
+- FAIL -> current rig still lacks an admissible skin solution under the corrected motion adapter; C5.1 prune candidates may still reveal harmful controls, otherwise C5.2 grow/locus/carrier attribution opens.
 
 ### C5.1 — subject-agnostic optimum control-basis court
 
@@ -1262,19 +1296,39 @@ Interpretation:
 - this evidence is a prior/diagnostic only;
 - it does **not** authorize 20 as the Knight product count and does not define counts for unseen subjects.
 
-### C5.1a — effective-control prune screen — RUNNING
+### C5.1a — effective-control prune screen — COMPLETE / SCREEN ONLY
 
-Generic operator:
-- for each non-root control, remove its independent motion DOF;
-- collapse that control's skin mass exactly to its parent;
-- preserve the carrier and all remaining controls;
-- use the tree-consistent retarget mapping;
-- replay the exact 51-frame motion court;
-- no teacher count or teacher weight is used.
+Workflow:
+- `37206114965`.
 
-This is a cheap screen only. A passing candidate advances to C5.1b; product pruning requires skin reoptimization, hard proof and editability/non-regression.
+Measured current effective basis:
+- control count = **28**;
+- non-root prune candidates = **27**;
+- cheap non-regressive screen candidates = **16**.
 
-### C5.1b — full prune-to-proof — BLOCKED ON C5.1a
+Important:
+- the baseline itself is not mechanically admissible;
+- this court does not prove that any of the 16 controls is product-redundant;
+- it only proves that collapsing those controls to their parent does not worsen the stale tree-consistent/C4.1-skin screen metrics before skin reoptimization.
+
+The screen used:
+- tree-consistent retarget;
+- C4.1 optimized skin state;
+- no teacher count;
+- no teacher weights;
+- no model training.
+
+### C5.1b — full prune-to-proof — BLOCKED ON C5.0b REBASE
+
+After C5.0b establishes the correct (W^*_{tree}(R)) baseline:
+- rerun/rebase the prune screen if the active skin state changed materially;
+- for screened candidates, collapse the effective control;
+- reoptimize/adapt skin for that reduced basis under the same corrected exact-motion domain;
+- rerun hard Stage35 exact-motion proof;
+- rerun source fidelity and editability/locality;
+- feed signed margins + complexity to the generic minimum-sufficient selector.
+
+A product prune is authorized only from an **admissible** reduced basis, never from “less bad than an already failing baseline.”
 
 For screened candidates:
 - construct the reduced/effective basis;

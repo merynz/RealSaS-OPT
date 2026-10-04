@@ -10,7 +10,9 @@ from compiler.realsas_compiler_core.types import (
 from models.tessa.v1 import (
     TESSAConfigV1,
     TESSAV1,
+    build_teacher_asset_sequence_v1,
     build_tessa_conditioning_v1,
+    decode_tessa_asset_sequence_v1,
     encode_adjacent_teacher_mesh_v1,
     mechanical_consequence_loss_v1,
     tessa_attention_work_upper_bound_v1,
@@ -123,6 +125,31 @@ def test_tessa_adjacent_teacher_encoding_compresses_shared_edge():
     assert seq.restart_count == 1
     coordinate_tokens = [t for t in seq.token_ids if 0 <= t < cfg.coordinate_bins]
     assert len(coordinate_tokens) == 12
+
+
+def test_tessa_decoder_does_not_weld_equal_xyz_across_components():
+    cfg = _small_cfg()
+    tri = np.asarray(
+        [
+            [-0.25, -0.25, 0.0],
+            [0.25, -0.25, 0.0],
+            [0.0, 0.25, 0.0],
+        ],
+        dtype=np.float64,
+    )
+    # Two disconnected source components deliberately occupy identical XYZ.
+    # Global coordinate welding would collapse them; component-local identity
+    # must preserve six vertices and two separate faces.
+    vertices = np.concatenate([tri, tri], axis=0)
+    faces = np.asarray([[0, 1, 2], [3, 4, 5]], dtype=np.int64)
+    seq = build_teacher_asset_sequence_v1(vertices, faces, cfg=cfg)
+    decoded = decode_tessa_asset_sequence_v1(seq.token_ids, cfg=cfg)
+    assert decoded.component_count == 2
+    assert decoded.vertices_normalized.shape == (6, 3)
+    assert decoded.faces.shape == (2, 3)
+    assert decoded.face_component_indices == (0, 1)
+    assert set(decoded.faces[0].tolist()).isdisjoint(set(decoded.faces[1].tolist()))
+    assert decoded.orientation_qualified is False
 
 
 def test_tessa_identity_deformation_has_unit_metrics_and_zero_penalty():

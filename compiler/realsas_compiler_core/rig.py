@@ -90,7 +90,7 @@ def _optimizer_semantic_sha256(res) -> str:
     return content_sha256(_optimizer_semantic_identity(res))
 
 
-def qualify_skeleton(surface:RiggingSurfaceIR, proposal:SkeletonProposalIR, *, run_ilp_shadow:bool=False)->QualifiedSkeletonIR:
+def qualify_skeleton(surface:RiggingSurfaceIR, proposal:SkeletonProposalIR, *, run_ilp_shadow:bool=False, authority_bindings:dict[str,str]|None=None)->QualifiedSkeletonIR:
     if proposal.surface_binding_hash != surface.geometry_lineage_hash:
         raise QualificationError("stale/mismatched skeleton proposal: surface lineage mismatch")
     if not proposal.joints: raise QualificationError("empty skeleton proposal")
@@ -172,6 +172,14 @@ def qualify_skeleton(surface:RiggingSurfaceIR, proposal:SkeletonProposalIR, *, r
         "proposal_to_candidate":internal,
         "candidate_to_canonical":canonical,
     }
+    authority_bindings={
+        str(k):str(v)
+        for k,v in sorted(dict(authority_bindings or {}).items())
+    }
+    if any(not k or not v for k,v in authority_bindings.items()):
+        raise QualificationError("SKELETON_AUTHORITY_BINDING_INVALID")
+    if authority_bindings:
+        report["authority_bindings"]=authority_bindings
     lineage=content_sha256({
         "surface":surface.geometry_lineage_hash,
         "proposal":proposal.to_dict(),

@@ -29,16 +29,18 @@ jobs:
       RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
       CACHE_ROOT: /tmp/knight_v9_direct_lbs_input_37118100232
       TEACHER_ROOT: /tmp/knight_v9_teacher_oracle_37122879585
-      INPUT: /tmp/knight_v9_notebook_handoff_input_${{ github.run_id }}
-      OUT: /tmp/knight_v9_notebook_handoff_${{ github.run_id }}
+      SCRATCH_ROOT: /home/monster/realsas_notebook_handoff
+      INPUT: /home/monster/realsas_notebook_handoff/input_${{ github.run_id }}
+      OUT: /home/monster/realsas_notebook_handoff/output_${{ github.run_id }}
 
     steps:
       - name: Reclaim exporter scratch
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf /tmp/knight_v9_notebook_handoff_input_* /tmp/knight_v9_notebook_handoff_*
-          df -h / /tmp || true
+          mkdir -p "$SCRATCH_ROOT"
+          rm -rf "$SCRATCH_ROOT"/input_* "$SCRATCH_ROOT"/output_*
+          df -h / /tmp "$SCRATCH_ROOT" || true
 
       - uses: actions/checkout@v4
         with:

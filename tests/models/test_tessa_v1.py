@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 
+from compiler.realsas_compiler_core.preproduct_authority_v1 import NormalizationDomainIR
 from compiler.realsas_compiler_core.types import (
     RiggingSurfaceIR,
     SurfaceNode,
@@ -42,6 +43,19 @@ def _surface():
     )
 
 
+def _normalization():
+    return NormalizationDomainIR(
+        observation_set_binding_hash="obs-test",
+        camera_set_binding_hash="cam-test",
+        center_xyz=(0.0, 0.0, 0.0),
+        half_extent=1.0,
+        normalized_bounds_min=(-1.0, -1.0, -1.0),
+        normalized_bounds_max=(1.0, 1.0, 1.0),
+        coordinate_frame="REALSAS_OBJECT_FRAME",
+        normalization_hash="norm-test-hash",
+    )
+
+
 def _small_cfg():
     return TESSAConfigV1(
         d_model=64,
@@ -71,12 +85,19 @@ def test_tessa_attention_contract_is_linear_in_long_sequence_window():
     assert work < length * length
 
 
-def test_tessa_gsa_conditioning_is_deterministic_and_17d():
-    c = build_tessa_conditioning_v1(_surface())
+def test_tessa_gsa_conditioning_uses_stage08_frame_not_gsa_bbox():
+    c = build_tessa_conditioning_v1(_surface(), normalization=_normalization())
     assert c.features.shape == (4, 17)
     assert c.surface_ids == ("S0", "S1", "S2", "S3")
     assert c.source_geometry_lineage_hash == "gsa-test-lineage"
+    assert c.normalization_hash == "norm-test-hash"
+    assert c.coordinate_frame == "REALSAS_OBJECT_FRAME"
+    assert c.scale == 2.0
     assert torch.isfinite(c.features).all()
+    # Surface bbox is +/-0.5 world units, but Stage08 half_extent=1.0. The
+    # TESSA token frame must therefore be +/-0.25, proving it did not refit to
+    # the finite GSA cloud bbox.
+    assert torch.allclose(c.features[:, :3].abs().amax(), torch.tensor(0.25), atol=1e-6)
 
 
 def test_tessa_adjacent_teacher_encoding_compresses_shared_edge():

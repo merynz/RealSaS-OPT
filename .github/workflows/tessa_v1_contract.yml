@@ -17,6 +17,10 @@ on:
       - .github/workflows/tessa_v1_contract.yml
   workflow_dispatch:
 
+concurrency:
+  group: tessa-v1-contract-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -67,6 +71,7 @@ jobs:
             models/tessa/v1/conditioning_v1.py \
             models/tessa/v1/model_v1.py \
             models/tessa/v1/tokenization_v1.py \
+            models/tessa/v1/sequence_codec_v1.py \
             models/tessa/v1/proposal_v1.py \
             models/tessa/v1/mechanical_objective_v1.py \
             models/tessa/v1/training_data_v1.py \

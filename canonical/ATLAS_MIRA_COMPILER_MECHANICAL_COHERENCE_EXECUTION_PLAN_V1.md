@@ -1056,7 +1056,7 @@ Verdict:
 - MIRA fit remains blocked;
 - next attribution must separate retarget/motion-adapter error from ATLAS rig/control-basis insufficiency and carrier insufficiency.
 
-### C5.0 — tree-consistent retarget ceiling — NEXT
+### C5.0 — tree-consistent retarget ceiling — COMPLETE / MATERIAL CONTRIBUTOR, NOT SOLE OWNER
 
 The current demo retarget mapping is independently nearest-cost and historical forensic evidence found target-parent/source-child hierarchy reversal or cross-branch assignments.
 
@@ -1078,6 +1078,23 @@ Exit:
 - quantify how much residual belongs to the motion-adapter layer;
 - if tree-consistent retarget closes or materially changes owner ordering, repair retarget before changing ATLAS;
 - otherwise proceed to C5.1.
+
+Measured workflow:
+- \`37205629997\`.
+
+Result with the C4.1 optimized skin:
+- hierarchy violations: \`4 -> 0\`;
+- failed-frame sum across idle/run/slash: \`40 -> 35\`;
+- unique-bad-face sum across clips: \`29 -> 16\`;
+- run unique bad faces: \`15 -> 10\`;
+- slash unique bad faces: \`12 -> 4\`;
+- no clip fully closed.
+
+Verdict:
+- tree-consistent retarget is a real quality improvement and should replace the current independent nearest mapping;
+- it is not sufficient to close the mechanical system;
+- ATLAS/control-basis and/or carrier ownership remains open.
+
 
 ### C5.1 — subject-agnostic optimum control-basis court
 
@@ -1132,6 +1149,23 @@ This formulation is subject-agnostic:
 - a creature, cloth-like appendage, quadruped, or unusual topology may require another;
 - the number is an output of the proof, not a target label.
 
+### Generic minimum-sufficient selector — IMPLEMENTED / CONTRACT PASS
+
+Code:
+- \`compiler/realsas_compiler_core/control_basis_selection_v1.py\`;
+- \`tests/compiler/test_control_basis_selection_v1.py\`.
+
+Contract:
+- every candidate basis reports signed normalized margins for mechanics, source fidelity, editability and free-running stability;
+- only bases with all hard margins \(\ge 0\) are admissible;
+- selection minimizes complexity first;
+- control count is the next deterministic simplicity term;
+- excess robustness margin is only a tie-breaker after equal simplicity.
+
+Synthetic regression explicitly proves that two subjects can select different optimum control counts from the same candidate-count family.
+
+This selector does not decide how candidates are generated; C5.1a/C5.1b and later grow-to-need courts generate the measured candidate set.
+
 ### Marginal control utility
 
 For candidate control (j), define mechanical marginal gain only after reoptimizing/adapting skin:
@@ -1183,6 +1217,27 @@ Interpretation:
 - more joints do not automatically mean more useful mechanical capacity;
 - this evidence is a prior/diagnostic only;
 - it does **not** authorize 20 as the Knight product count and does not define counts for unseen subjects.
+
+### C5.1a — effective-control prune screen — RUNNING
+
+Generic operator:
+- for each non-root control, remove its independent motion DOF;
+- collapse that control's skin mass exactly to its parent;
+- preserve the carrier and all remaining controls;
+- use the tree-consistent retarget mapping;
+- replay the exact 51-frame motion court;
+- no teacher count or teacher weight is used.
+
+This is a cheap screen only. A passing candidate advances to C5.1b; product pruning requires skin reoptimization, hard proof and editability/non-regression.
+
+### C5.1b — full prune-to-proof — BLOCKED ON C5.1a
+
+For screened candidates:
+- construct the reduced/effective basis;
+- reoptimize/adapt skin for that basis under exact-motion consequence;
+- rerun Stage35 hard motion proof;
+- rerun source fidelity and editability/locality;
+- feed the resulting signed margins + complexity to the generic minimum-sufficient selector.
 
 ### C5.2 — actual-motion rig ceiling
 

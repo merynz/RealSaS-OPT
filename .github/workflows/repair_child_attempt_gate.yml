@@ -5,18 +5,24 @@ on:
     paths:
       - 'compiler/realsas_compiler_core/repair_registry.py'
       - 'compiler/realsas_compiler_core/repair_attempt.py'
-      - 'tests/compiler/test_bounded_repair_loop_v1.py'
       - 'compiler/realsas_compiler_services/proof/repair_loop.py'
       - 'tests/compiler/test_repair_child_attempt_gate_v1.py'
+      - 'tests/compiler/test_bounded_repair_loop_v1.py'
       - 'canonical/REPAIR_OPERATION_SOURCE_DIFF_V1_20260903.json'
       - '.github/workflows/repair_child_attempt_gate.yml'
   push:
     paths:
       - 'compiler/realsas_compiler_core/repair_registry.py'
       - 'compiler/realsas_compiler_core/repair_attempt.py'
+      - 'compiler/realsas_compiler_services/proof/repair_loop.py'
       - 'tests/compiler/test_repair_child_attempt_gate_v1.py'
+      - 'tests/compiler/test_bounded_repair_loop_v1.py'
       - 'canonical/REPAIR_OPERATION_SOURCE_DIFF_V1_20260903.json'
       - '.github/workflows/repair_child_attempt_gate.yml'
+
+concurrency:
+  group: repair-child-attempt-gate-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   repair-child-attempt:
@@ -29,9 +35,7 @@ jobs:
       - run: python -m pip install pytest numpy
       - name: Compile repair authority gate
         run: |
-          python -m py_compile \
-            compiler/realsas_compiler_core/repair_registry.py \
-            compiler/realsas_compiler_core/repair_attempt.py             compiler/realsas_compiler_services/proof/repair_loop.py
+          python -m py_compile             compiler/realsas_compiler_core/repair_registry.py             compiler/realsas_compiler_core/repair_attempt.py             compiler/realsas_compiler_services/proof/repair_loop.py
       - name: Run repair child-attempt regressions
         run: |
           PYTHONPATH=. python -m pytest -q             tests/compiler/test_repair_child_attempt_gate_v1.py             tests/compiler/test_bounded_repair_loop_v1.py

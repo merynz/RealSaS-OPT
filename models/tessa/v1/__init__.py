@@ -30,6 +30,7 @@ from .model_v1 import (
     WindowedCausalSelfAttentionV1,
     tessa_attention_work_upper_bound_v1,
 )
+from .proposal_v1 import assemble_tessa_proposal_v1
 from .tokenization_v1 import (
     TESSATeacherSequenceV1,
     adjacent_sequence_token_upper_bound_v1,
@@ -54,6 +55,7 @@ __all__ = [
     "TESSAVertexProposalV1",
     "WindowedCausalSelfAttentionV1",
     "adjacent_sequence_token_upper_bound_v1",
+    "assemble_tessa_proposal_v1",
     "build_tessa_conditioning_v1",
     "denormalize_tessa_xyz_v1",
     "dequantize_tessa_xyz_v1",

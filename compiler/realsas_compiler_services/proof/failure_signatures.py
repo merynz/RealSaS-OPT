@@ -186,7 +186,7 @@ def _visual(measurements: Mapping[str, Any]) -> Iterable[dict[str, Any]]:
 def _motion(measurements: Mapping[str, Any]) -> Iterable[dict[str, Any]]:
     clip_count = int(measurements.get("clip_count", 0) or 0)
     effective = int(measurements.get("effective_joint_track_count", 0) or 0)
-    if clip_count <= 0:
+    if "clip_count" in measurements and clip_count <= 0:
         yield _signature(
             proof_domain="MOTION",
             failure_family="missing_motion_clip",
@@ -195,7 +195,7 @@ def _motion(measurements: Mapping[str, Any]) -> Iterable[dict[str, Any]]:
             allowed=1,
             severity01=1.0,
         )
-    if effective <= 0:
+    if "effective_joint_track_count" in measurements and effective <= 0:
         yield _signature(
             proof_domain="MOTION",
             failure_family="required_mobility_not_achieved",
@@ -233,6 +233,98 @@ def _motion(measurements: Mapping[str, Any]) -> Iterable[dict[str, Any]]:
                     "historical_family_rebound": True,
                     "full_amplitude_authority_requires_probe_contract": True,
                 },
+            )
+
+
+    # Stage41 exact compiled-motion consequence diagnostics.
+    localization=dict(measurements.get("failure_localization", {}) or {})
+    if "min_triangle_area_ratio" in measurements:
+        observed=_number(measurements.get("min_triangle_area_ratio"),0.0)
+        allowed=_number(thresholds.get("g3_min_dynamic_area_ratio"),0.05)
+        if observed<allowed:
+            yield _signature(
+                proof_domain="MOTION",
+                failure_family="triangle_area_ratio_below_min",
+                invariant="dynamic_triangle_area_ratio_lower_bound",
+                observed=observed,
+                allowed=allowed,
+                severity01=_deficit_severity(observed,allowed),
+                localization=localization,
+                metadata={"stage41_exact_motion":True},
+            )
+    if "max_triangle_area_ratio" in measurements:
+        observed=_number(measurements.get("max_triangle_area_ratio"),0.0)
+        allowed=_number(thresholds.get("g3_max_dynamic_area_ratio"),20.0)
+        if observed>allowed:
+            yield _signature(
+                proof_domain="MOTION",
+                failure_family="triangle_area_ratio_above_max",
+                invariant="dynamic_triangle_area_ratio_upper_bound",
+                observed=observed,
+                allowed=allowed,
+                severity01=_ratio_severity(observed,allowed),
+                localization=localization,
+                metadata={"stage41_exact_motion":True},
+            )
+    if "max_triangle_condition_number" in measurements:
+        observed=_number(measurements.get("max_triangle_condition_number"),0.0)
+        allowed=_number(thresholds.get("g3_max_dynamic_condition_number"),16.0)
+        if observed>allowed:
+            yield _signature(
+                proof_domain="MOTION",
+                failure_family="triangle_condition_exceeded",
+                invariant="dynamic_triangle_condition_bound",
+                observed=observed,
+                allowed=allowed,
+                severity01=_ratio_severity(observed,allowed),
+                localization=localization,
+                metadata={"stage41_exact_motion":True},
+            )
+    if "new_self_intersection_pair_count" in measurements:
+        observed=int(measurements.get("new_self_intersection_pair_count",0) or 0)
+        allowed=int(measurements.get("allowed_new_self_intersection_pair_count",0) or 0)
+        if observed>allowed:
+            yield _signature(
+                proof_domain="MOTION",
+                failure_family="new_self_intersection",
+                invariant="no_new_dynamic_self_intersections",
+                observed=observed,
+                allowed=allowed,
+                severity01=1.0,
+                localization=localization,
+                metadata={"stage41_exact_motion":True},
+            )
+    if "max_rest_existing_intersection_severity_growth" in measurements:
+        observed=_number(
+            measurements.get("max_rest_existing_intersection_severity_growth"),0.0
+        )
+        allowed=_number(
+            measurements.get("intersection_persistence_numerical_slack"),0.0
+        )
+        if observed>allowed:
+            yield _signature(
+                proof_domain="MOTION",
+                failure_family="rest_intersection_worsened",
+                invariant="rest_intersection_persistence_nonregression",
+                observed=observed,
+                allowed=allowed,
+                severity01=1.0 if allowed<=0 else _ratio_severity(observed,allowed),
+                localization=localization,
+                metadata={"stage41_exact_motion":True},
+            )
+    if "max_contact_drift" in measurements:
+        observed=_number(measurements.get("max_contact_drift"),0.0)
+        allowed=_number(measurements.get("contact_tolerance"),0.0)
+        if observed>allowed:
+            yield _signature(
+                proof_domain="MOTION",
+                failure_family="contact_drift_exceeded",
+                invariant="declared_contact_bound",
+                observed=observed,
+                allowed=allowed,
+                severity01=1.0 if allowed<=0 else _ratio_severity(observed,allowed),
+                localization=localization,
+                metadata={"stage41_exact_motion":True},
             )
 
 

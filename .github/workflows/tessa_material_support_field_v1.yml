@@ -1,0 +1,64 @@
+name: tessa-material-support-field-v1
+
+on:
+  push:
+    branches:
+      - research/tessa-mechanical-mesh-v1-20261004
+    paths:
+      - compiler/realsas_compiler_core/tessa_surface_field_v1.py
+      - tests/compiler/test_tessa_surface_field_v1.py
+      - .github/workflows/tessa_material_support_field_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tessa-material-support-field-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: .
+      PYTHONHASHSEED: "0"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pinned contract dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: "1"
+          PIP_DEFAULT_TIMEOUT: "60"
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Compile material-field contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            compiler/realsas_compiler_core/tessa_surface_field_v1.py \
+            tests/compiler/test_tessa_surface_field_v1.py
+          echo "TESSA_MATERIAL_SUPPORT_FIELD_COMPILE_PASS"
+
+      - name: Run material-field unit court
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pytest -q tests/compiler/test_tessa_surface_field_v1.py
+          echo "TESSA_MATERIAL_SUPPORT_FIELD_CONTRACT_PASS"

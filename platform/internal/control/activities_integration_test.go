@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
 
@@ -31,7 +30,7 @@ func controlGraph(t *testing.T) *stagegraph.Graph {
 	return g
 }
 
-func TestPrepareAndFailExecutionPersistsLocalizedRepair(t *testing.T) {
+func TestPrepareAndFailExecutionPersistsFailureWithoutInventingOwner(t *testing.T) {
 	dsn := os.Getenv("REALSAS_DATABASE_URL")
 	if dsn == "" {
 		t.Skip("REALSAS_DATABASE_URL not set")
@@ -183,31 +182,57 @@ func TestPrepareAndFailExecutionPersistsLocalizedRepair(t *testing.T) {
 	if executionStatus != "FAIL" {
 		t.Fatalf("status=%s", executionStatus)
 	}
-	var owner string
-	var invalidatedRaw []byte
+	var failureCount, attributionCount, directiveCount int
+	if err := pool.QueryRow(
+		ctx,
+		"SELECT count(*) FROM failure_signatures WHERE attempt_id=$1",
+		attemptID,
+	).Scan(&failureCount); err != nil {
+		t.Fatal(err)
+	}
+	if failureCount != 1 {
+		t.Fatalf("failure signatures=%d want=1", failureCount)
+	}
 	if err := pool.QueryRow(ctx, `
-		SELECT oa.owner_stage_id,rd.invalidated_stage_ids
-		FROM failure_signatures fs
-		JOIN owner_attributions oa ON oa.failure_signature_id=fs.id
-		JOIN repair_directives rd ON rd.failure_signature_id=fs.id
+		SELECT count(*)
+		FROM owner_attributions oa
+		JOIN failure_signatures fs ON fs.id=oa.failure_signature_id
 		WHERE fs.attempt_id=$1
-	`, attemptID).Scan(&owner, &invalidatedRaw); err != nil {
+	`, attemptID).Scan(&attributionCount); err != nil {
 		t.Fatal(err)
 	}
-	if owner != "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED" {
-		t.Fatalf("owner=%s", owner)
+	if attributionCount != 0 {
+		t.Fatalf("owner attributions=%d want=0 before controlled counterfactual", attributionCount)
 	}
-	var invalidated struct {
-		StageIDs []string `json:"stage_ids"`
-	}
-	if err := json.Unmarshal(invalidatedRaw, &invalidated); err != nil {
+	if err := pool.QueryRow(ctx, `
+		SELECT count(*)
+		FROM repair_directives rd
+		JOIN failure_signatures fs ON fs.id=rd.failure_signature_id
+		WHERE fs.attempt_id=$1
+	`, attemptID).Scan(&directiveCount); err != nil {
 		t.Fatal(err)
 	}
-	want, _ := g.DescendantsIncluding(owner)
-	if len(invalidated.StageIDs) != len(want) {
-		t.Fatalf("invalidated=%v want=%v", invalidated.StageIDs, want)
+	if directiveCount != 0 {
+		t.Fatalf("repair directives=%d want=0 before causal owner attribution", directiveCount)
 	}
-	_ = time.Now()
+
+	var eventPayload []byte
+	if err := pool.QueryRow(ctx, `
+		SELECT payload
+		FROM attempt_events
+		WHERE attempt_id=$1 AND event_type='FAILURE_SIGNATURE_RECORDED'
+		ORDER BY id DESC
+		LIMIT 1
+	`, attemptID).Scan(&eventPayload); err != nil {
+		t.Fatal(err)
+	}
+	var event map[string]any
+	if err := json.Unmarshal(eventPayload, &event); err != nil {
+		t.Fatal(err)
+	}
+	if event["causal_owner_attribution"] != "NOT_PERFORMED" || event["repair_authorized"] != false {
+		t.Fatalf("unexpected failure event=%v", event)
+	}
 }
 
 func repeatHex(ch string) string {

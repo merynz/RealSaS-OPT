@@ -745,7 +745,7 @@ Exit:
 - determine exactly which components need fit;
 - no A100.
 
-## C3 — Knight carrier-first one-shot court
+## C3 — Knight carrier-first one-shot court — MEASURED / NORMAL AUTHORITY CONFOUND FOUND
 
 Freeze one Stage19 carrier attempt.
 
@@ -763,7 +763,56 @@ Metrics:
 
 This is the new one-shot baseline.
 
+Measured run:
+- workflow `37200683451` completed successfully;
+- frozen/A2-verified Stage28 ATLAS rig;
+- frozen MIRA V6 checkpoint;
+- exact same Stage18/19 carrier;
+- no training.
+
+A/B result:
+- legacy GSA skin -> deterministic carrier transfer: **G3 PASS / G3B PASS / unsafe faces = 0**;
+- zero-train direct carrier query using current Stage19 face-cross normals: **G3 FAIL / G3B FAIL / unsafe faces = 2348**;
+- identity carrier vertices alone showed weight-row L1 p95 ≈ `1.7789`.
+
+This does **not** authorize MIRA refit.
+
+Source-level forensic follow-up found:
+- compact face provenance stores each triangle as a canonical sorted vertex-ID tuple;
+- therefore candidate face tuples preserve connectivity but do not preserve oriented winding;
+- Stage19 V1 carrier evidence derived signed normals by cross-producting those unordered/canonicalized tuples;
+- direct MIRA query was therefore given an invalid/arbitrary signed normal field.
+
+### C3.1 — carrier normal authority causal court — NOW
+
+Hold fixed:
+- carrier positions;
+- carrier connectivity;
+- ATLAS rig;
+- MIRA checkpoint/backbone/readout;
+- query support;
+- Stage35 metric family.
+
+Change only:
+- current unoriented face-cross normals;
+- versus signed GSA normal field transported through exact geometry `SurfaceSupportBinding`.
+
+Measure:
+- signed/absolute normal cosine;
+- negative-dot fraction;
+- identity-vertex weight parity;
+- hard G3/G3B.
+
+If the normal counterfactual restores weight parity/mechanics:
+- MIRA fit remains blocked;
+- implement a deterministic oriented carrier basis/normal authority at Stage19.
+
+If it does not:
+- continue carrier-query causal decomposition before training.
+
 ## C4 — minimal MIRA mechanical fit — CONDITIONAL
+
+**Blocked until C3.1 and any remaining carrier-evidence confounds close.**
 
 Only if C3 identifies skin-owned residual.
 

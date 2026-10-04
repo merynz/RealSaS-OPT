@@ -1,0 +1,100 @@
+{
+  "schema": "RealSaS.KnightV9StaticMechanicsNotebookResult.v1",
+  "date": "2026-10-04",
+  "status": "PASS__PARTIAL_MECHANICAL_IMPROVEMENT__NOT_FULL_CLOSURE",
+  "run_stamp": "20261004T065036Z",
+  "source_commit": "06f3453f754db73ed4230ff4f295b7a58ba931ea",
+  "drive_summary_sha256": "11844fc170f6b4665aff2cbf440b0b53bafee6d59946877215d1bf78f99d3367",
+  "handoff_manifest_sha256": "059eaeb82c171ac2b4279ef849b439686506a997d673d1a34118e2c9431fdcaf",
+  "final_candidate_sha256": "a49170c38167291e629d9c05d91f70193c1547e44a8e0da4e1b649a2f6b36baa",
+  "final_partition_sha256": "b2503c49d3210e48e85f07225bfbcb234350c18674e4a191dac53d26d25be7ed",
+  "baseline": {
+    "static_violations": 3281,
+    "g3b_unsafe": 55
+  },
+  "final": {
+    "static_violations": 1225,
+    "g3b_unsafe": 48
+  },
+  "reductions": {
+    "static_absolute": 2056,
+    "static_fraction": 0.6266382200548614,
+    "g3b_absolute": 7,
+    "g3b_fraction": 0.12727272727272726
+  },
+  "steps": [
+    {
+      "step": "00_repartition_flip",
+      "operator": "flip",
+      "accepted": true,
+      "static": [
+        3281,
+        2495
+      ],
+      "g3b": [
+        55,
+        50
+      ],
+      "seconds": 201.83496782300006
+    },
+    {
+      "step": "01_collapse",
+      "operator": "collapse",
+      "accepted": true,
+      "static": [
+        2495,
+        2114
+      ],
+      "g3b": [
+        50,
+        49
+      ],
+      "seconds": 270.01396561399997
+    },
+    {
+      "step": "02_vertex_cavity",
+      "operator": "vertex_cavity",
+      "accepted": true,
+      "static": [
+        2114,
+        1780
+      ],
+      "g3b": [
+        49,
+        48
+      ],
+      "seconds": 1384.1917140599999
+    },
+    {
+      "step": "03_edge_cavity",
+      "operator": "edge_cavity",
+      "accepted": true,
+      "static": [
+        1780,
+        1225
+      ],
+      "g3b": [
+        48,
+        48
+      ],
+      "seconds": 3394.7826631529997
+    }
+  ],
+  "invariants": {
+    "production_g3b_nonregression_all_steps": true,
+    "all_face_g3b_nonregression_all_steps": true,
+    "every_step_static_improved": true,
+    "product_authority_claimed": false,
+    "generalization_claimed": false
+  },
+  "interpretation": [
+    "The microstep chain is operational and materially reduces static violations.",
+    "G3B unsafe reaches a plateau at 48; edge-cavity reduces static violations by 555 without reducing G3B unsafe.",
+    "The next mechanics action is residual G3B classification/owner attribution, not an unbounded repetition of the same operator chain."
+  ],
+  "next_gate": {
+    "id": "KNIGHT_V9_G3B_48_RESIDUAL_CLASSIFICATION_V1",
+    "purpose": "Classify the 48 remaining production G3B unsafe cases by geometric/mechanical failure signature, component/region, operator applicability and minimum new primitive required.",
+    "forbidden": "Do not launch another long full static operator chain before this classification."
+  }
+}

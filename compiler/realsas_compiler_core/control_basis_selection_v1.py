@@ -63,6 +63,47 @@ class ControlBasisSelectionV1:
         return asdict(self)
 
 
+
+def upper_bounded_signed_margin_v1(
+    value: float,
+    threshold: float,
+    *,
+    epsilon: float = 1e-12,
+) -> float:
+    """Return >=0 when an upper-bounded badness metric satisfies value <= threshold."""
+    x = float(value)
+    t = float(threshold)
+    e = float(epsilon)
+    if not all(math.isfinite(v) for v in (x, t, e)) or e <= 0.0:
+        raise ValueError("CONTROL_BASIS_MARGIN_ARGUMENT_INVALID")
+    return (t - x) / max(abs(t), e)
+
+
+def lower_bounded_signed_margin_v1(
+    value: float,
+    threshold: float,
+    *,
+    epsilon: float = 1e-12,
+) -> float:
+    """Return >=0 when a lower-bounded goodness metric satisfies value >= threshold."""
+    x = float(value)
+    t = float(threshold)
+    e = float(epsilon)
+    if not all(math.isfinite(v) for v in (x, t, e)) or e <= 0.0:
+        raise ValueError("CONTROL_BASIS_MARGIN_ARGUMENT_INVALID")
+    return (x - t) / max(abs(t), e)
+
+
+def minimum_gate_margin_v1(*margins: float) -> float:
+    """Fail-closed aggregation for a gate made of multiple required sub-margins."""
+    if not margins:
+        raise ValueError("CONTROL_BASIS_GATE_MARGINS_EMPTY")
+    values = tuple(float(x) for x in margins)
+    if not all(math.isfinite(x) for x in values):
+        raise ValueError("CONTROL_BASIS_GATE_MARGIN_NONFINITE")
+    return min(values)
+
+
 def _validate(value: ControlBasisEvaluationV1) -> None:
     if not value.basis_id:
         raise ValueError("CONTROL_BASIS_ID_EMPTY")
@@ -132,5 +173,8 @@ def select_minimum_sufficient_control_basis_v1(
 __all__ = [
     "ControlBasisEvaluationV1",
     "ControlBasisSelectionV1",
+    "upper_bounded_signed_margin_v1",
+    "lower_bounded_signed_margin_v1",
+    "minimum_gate_margin_v1",
     "select_minimum_sufficient_control_basis_v1",
 ]

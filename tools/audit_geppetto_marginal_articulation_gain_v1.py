@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-"""Measure marginal articulation gain for Geppetto K1\K0 source controls.
+"""Measure marginal articulation gain for Geppetto K1-minus-K0 source controls.
 
 Training/evaluation-only court. For every source control admitted by K1 but not
 K0, apply generic rest-local +/-10 degree probes around all three local axes and
-measure whether that control changes the downstream skinning affine field of
-skin-supported deform descendants.
+measure whether that control changes the *relative/internal* downstream skinning
+affine field of skin-supported deform descendants after removing the common-mode
+rigid transform shared by the supported skeleton.
 
 This court does not use source names, requested control counts, animation clips,
 or product inference. It constructs the K2 target only from independently
@@ -159,6 +160,12 @@ def _measure_control(
     inv_rest = np.linalg.inv(rest_world)
     eye = np.eye(4, dtype=np.float64)
     supported_rows = np.asarray(skin.sum(axis=1) > SUPPORT_EPS, bool)
+    bone_mass = np.asarray(skin, np.float64).sum(axis=0)
+    supported_bones = np.asarray(deform & (bone_mass > SUPPORT_EPS), bool)
+    supported_mass = bone_mass[supported_bones]
+    if supported_mass.size == 0 or float(supported_mass.sum()) <= SUPPORT_EPS:
+        raise RuntimeError("GEPPETTO_MARGINAL_NO_SUPPORTED_BONES")
+    supported_mass = supported_mass / float(supported_mass.sum())
     probe_rows = []
 
     for axis in range(3):
@@ -169,39 +176,67 @@ def _measure_control(
             )
             skin_mats = posed @ inv_rest
             delta = skin_mats - eye[None, :, :]
-            # Non-deform bones are not allowed to create deformation authority.
-            delta[:, :, :] *= deform[:, None, None]
-            blended = np.einsum("vj,jab->vab", skin, delta, optimize=True)
+
+            # Remove the mass-weighted common-mode transform shared by the
+            # skin-supported deform skeleton. A zero-mass assembly/root control
+            # can rigidly move every supported bone; that is global placement,
+            # not an additional internal articulation degree of freedom.
+            common = np.einsum(
+                "j,jab->ab",
+                supported_mass,
+                delta[supported_bones],
+                optimize=True,
+            )
+            relative_delta = delta - common[None, :, :]
+            relative_delta *= deform[:, None, None]
+
+            blended = np.einsum(
+                "vj,jab->vab", skin, relative_delta, optimize=True
+            )
             rot = np.linalg.norm(blended[:, :3, :3], axis=(1, 2))
             trans = np.linalg.norm(blended[:, :3, 3], axis=1) / body_span
             affine = np.sqrt(rot * rot + trans * trans)
             active_vals = affine[supported_rows]
             affected = int(np.count_nonzero(active_vals > EFFECT_EPS))
+
+            supported_relative = relative_delta[supported_bones, :3, :4]
+            supported_relative_norm = np.linalg.norm(
+                supported_relative.reshape(len(supported_relative), -1), axis=1
+            )
             probe_rows.append(
                 {
                     "axis": int(axis),
                     "degrees": float(degrees),
                     "affected_vertex_count": affected,
-                    "affine_delta_rms_supported": float(
+                    "relative_affine_delta_rms_supported_vertices": float(
                         np.sqrt(np.mean(active_vals * active_vals))
                     )
                     if active_vals.size
                     else 0.0,
-                    "affine_delta_p95_supported": _quantile(active_vals, 0.95),
-                    "affine_delta_max_supported": float(
+                    "relative_affine_delta_p95_supported_vertices":
+                        _quantile(active_vals, 0.95),
+                    "relative_affine_delta_max_supported_vertices": float(
                         active_vals.max(initial=0.0)
+                    ),
+                    "relative_supported_bone_transform_p95":
+                        _quantile(supported_relative_norm, 0.95),
+                    "relative_supported_bone_transform_max": float(
+                        supported_relative_norm.max(initial=0.0)
                     ),
                 }
             )
 
-    max_effect = max(row["affine_delta_max_supported"] for row in probe_rows)
+    max_effect = max(
+        row["relative_affine_delta_max_supported_vertices"]
+        for row in probe_rows
+    )
     max_affected = max(row["affected_vertex_count"] for row in probe_rows)
 
     if descendant_skin_mass <= SUPPORT_EPS:
-        verdict = "PROVEN_ZERO_SKIN_DEFORMATION_EFFECT"
+        verdict = "PROVEN_ZERO_INTERNAL_SKIN_DEFORMATION_EFFECT"
         necessary = False
     elif max_effect > EFFECT_EPS and max_affected > 0:
-        verdict = "PROVEN_NONZERO_MARGINAL_ARTICULATION_EFFECT"
+        verdict = "PROVEN_NONZERO_INTERNAL_ARTICULATION_EFFECT"
         necessary = True
     else:
         verdict = "INCONCLUSIVE_NUMERIC_EFFECT"
@@ -294,7 +329,8 @@ def main(args) -> None:
             "axes": 3,
             "signed_probes_per_axis": 2,
             "effect_metric": (
-                "SKIN_WEIGHTED_DESCENDANT_AFFINE_DELTA_3x4;"
+                "COMMON_MODE_REMOVED_SKIN_WEIGHTED_AFFINE_DELTA_3x4;"
+                "COMMON_MODE_MASS_WEIGHTED_OVER_SKIN_SUPPORTED_DEFORM_BONES;"
                 "TRANSLATION_NORMALIZED_BY_SOURCE_HEAD_SPAN"
             ),
             "support_epsilon": SUPPORT_EPS,
@@ -328,6 +364,7 @@ def main(args) -> None:
         "claim_boundary": [
             "This court measures whether omitted source controls create a non-zero hierarchical LBS affine-field degree of freedom under generic micro-poses.",
             "It does not claim perceptual importance, animation quality, or cross-character generalization.",
+            "Global/common rigid motion shared by all skin-supported deform bones is explicitly removed and is not counted as articulation.",
             "This court classifies the extra K1 all-deform controls relative to K0; it does not redefine the existing K2 helper-extension contract.",
             "Source row indices are emitted only as provenance and are not learner inputs or product IDs.",
         ],

@@ -35,7 +35,7 @@ Architecture ID:
 | `R2` | corrected-raster matched historical baseline; xattn OFF; diffusion OFF; geometry feedback OFF | **RUN — stable FAIL** in Causal Repair V2 contract `233ec3bcd77e0f02` |
 | `C1` | R2 + per-step full-surface cross-attention | **RUN — stable PASS** in Causal Repair V2; winner candidate `C1` |
 | `C2` | C1 + conditional diffusion locus; geometry feedback still OFF | **IMPLEMENTED / PREREGISTERED BUT NOT RUN in authoritative Causal Repair V2** because the preregistered staircase stopped after C1 PASS |
-| `C3` | C2 + current joint / parent geometry feedback token into subsequent generation | **SOURCE-CODED; no authoritative closed full-formulation run registered** |
+| `C3` | C2 + current joint / parent geometry feedback token into subsequent generation | **SOURCE-CODED; core RigAnything causal-loop parity only; no authoritative closed run registered** |
 | `C4` | C3 + sibling/BFS-equivalent-order augmentation | **SOURCE-CODED; no authoritative closed run registered** |
 
 This distinction is binding: **C2 source/prereg existence is not C2 experimental evidence.**
@@ -115,7 +115,7 @@ C3 already contained a broader joint+parent feedback mechanism, but bundled it w
 
 Therefore:
 
-`AR-01 != C3/C4 full-formulation test`
+`AR-01 != C3/C4 mechanism-family test`
 
 AR-01 source/prereg lineage:
 
@@ -144,7 +144,7 @@ Three questions must remain separate:
 
 1. **AR0 residual stability:** Why can a no-feedback model sustain long exact streaks and then catastrophically leave the region under the current optimizer/trajectory?
 2. **AR1 exposure/recovery:** Why does teacher-forced structural closure fail under generated joint + hard predicted-parent feedback, and what feedback/training policy would make free-running state robust?
-3. **Fuller formulation:** Does the already-existing C3/C4 combination — including conditional diffusion and tokenized mechanical feedback/order handling — materially change the outcome under a properly preregistered formulation-level test?
+3. **Reference-style mechanism family:** Does the already-existing C3/C4 combination — including absolute joint diffusion and sampled joint/parent feedback/order handling — materially change the outcome under a properly preregistered mechanism-level test? This is not an exact RigAnything formulation claim.
 
 A future experiment must state which one it tests. Do not bundle all three and later infer causality post hoc.
 
@@ -152,11 +152,35 @@ A future experiment must state which one it tests. Do not bundle all three and l
 
 - `C2 implemented/preregistered` != `C2 run`.
 - `source-coded C3/C4` != `C3/C4 scientifically closed`.
-- `C1 PASS + C2 source + AR-01 result` != `full C3/C4 verdict`.
+- `C1 PASS + C2 source + AR-01 result` != `C3/C4 mechanism-family verdict`.
+- `C3/C4 source-coded` != `exact RigAnything formulation parity`.
+- frozen reference-strength residual diffusion != RigAnything next-joint diffusion.
 - `AR1 exposure collapse` != `all structural AR falsified`.
 - `AR0 long exact streak` != `terminal stability PASS`.
 - `FIT1` != `generalization`.
 - Detached/generated drafts never outrank the repo prereg/result hashes.
+
+
+## 2026-10-04 joint-diffusion parity closure
+
+A source-level parity audit was closed against the public RigAnything repository pinned at commit
+`d03cdb21dd134fa81df6b0947522469db3f78bd2` and the project/paper contract.
+Canonical machine-readable result:
+
+`canonical/GEPPETTO_RIGANYTHING_JOINT_DIFFUSION_PARITY_V1.json`
+
+Binding correction:
+
+- current frozen `GeppettoReferenceStrength` diffusion is **not** RigAnything joint-diffusion parity. It predicts a deterministic coarse XYZ, diffuses only a residual output correction, and deliberately feeds coarse XYZ rather than the sampled/refined XYZ into the next causal step;
+- therefore the Knight ablation in run `37187501053` is scoped to the **current residual output-refiner** and must not be widened into a verdict on reference-style joint diffusion;
+- historical challenger commit `ba634955777479ee05a5b199742710b1736123b5` does preserve the key causal mechanism: absolute XYZ diffusion, sampled XYZ -> parent prediction, and sampled joint+parent -> subsequent autoregressive state;
+- the historical challenger is still **not an exact full RigAnything reimplementation**. It intentionally/substantively differs in transformer topology, diffusion implementation/sampler, stop semantics, and RealSaS authority boundaries.
+
+Canonical verdicts:
+
+- frozen Geppetto: `NOT_RIGANYTHING_JOINT_DIFFUSION_PARITY`;
+- historical C3/C4 source: `CORE_CAUSAL_MECHANISM_PARITY_PASS__EXACT_FORMULATION_PARITY_FAIL`;
+- next reference-style experiment, if still needed, must start from the historical absolute-joint sampled-feedback path and freeze the remaining intentional substitutions before training.
 
 ## Bootstrap audit status
 

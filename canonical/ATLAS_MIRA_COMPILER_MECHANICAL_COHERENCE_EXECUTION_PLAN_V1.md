@@ -1223,6 +1223,51 @@ This formulation is subject-agnostic:
 - a creature, cloth-like appendage, quadruped, or unusual topology may require another;
 - the number is an output of the proof, not a target label.
 
+### Minimality semantics and non-monotonic search
+
+C5.1b supplies a crucial counterexample to any monotonic count assumption:
+- the 28-control current basis is mechanically inadmissible under the corrected motion/skin court;
+- a true 27-control structural child can be mechanically admissible after skin reoptimization.
+
+Therefore:
+- admissibility is **not monotonic in control count**;
+- binary search on joint count is invalid;
+- greedy “stop at the first failing prune” is not a proof of global minimum;
+- more controls can be mechanically worse because hierarchy, retarget and skin optimization interact.
+
+Use three distinct claims:
+
+**Sufficient**
+[
+A_\tau(R)=true.
+]
+
+**Locally irreducible**
+- (R) is sufficient;
+- every admitted single-control deletion, after required skin/motion reoptimization, fails at least one hard gate.
+
+**Minimum-sufficient over a sealed candidate family**
+[
+R^*_{\mathcal F}=\arg\min_{R\in\mathcal F}|R|
+\quad\text{s.t.}\quad A_\tau(R)=true
+]
+where (mathcal F) is an explicitly hashed finite candidate family/search frontier.
+
+RealSaS must not call a rig globally optimal unless the globally relevant candidate family is actually enumerable and exhausted. The ordinary product claim is:
+- sufficient;
+- locally irreducible under the preregistered repair neighborhood;
+- minimum among the sealed explored/admitted candidate family.
+
+Search should therefore maintain a **Pareto/beam frontier**, not a single greedy path:
+- hard mechanical defect vector;
+- source/editability margins;
+- effective control count;
+- secondary structural complexity;
+- lineage/search depth.
+
+Inadmissible states may remain on the frontier when they have materially better defect vectors or lower count, because a later prune/grow/locus repair can cross back into admissibility.
+
+
 ### Generic minimum-sufficient selector — IMPLEMENTED / CONTRACT PASS
 
 Code:

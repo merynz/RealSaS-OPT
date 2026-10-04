@@ -1095,40 +1095,36 @@ Verdict:
 - it is not sufficient to close the mechanical system with the **stale C4.1 skin optimized under the old mapping**;
 - this does not yet prove rig insufficiency because the optimal skin state is motion-domain dependent.
 
-### C5.0b — tree-consistent-retarget skin reoptimization ceiling — NEXT
+### C5.0b — tree-consistent-retarget skin reoptimization ceiling — COMPLETE / FAIL
 
-Coherence correction:
+Workflow:
+- `37207528345`.
 
-C4.1 optimized
-[
-W^*(R,Q_{old})
-]
-under the previous independent-nearest retarget motion domain.
-
-C5.0 changed the motion domain to
-[
-Q_{tree}.
-]
-
-Therefore judging ((M,R,W^*(R,Q_{old}),Q_{tree})) is not a valid final owner court.
-
-C5.0b must compute:
-[
-W^*_{tree}(R)=argmin_W L_{mech}(M,R,W,Q_{tree})
-]
-
-with:
+Coherence correction tested:
 - exact same Stage19 carrier;
-- exact same A2-verified current ATLAS rig;
-- tree-consistent retarget only;
+- exact same A2-verified ATLAS rig;
+- tree-consistent retarget;
+- MIRA semantic field used only as initialization;
+- skin reoptimized under the corrected exact 51-frame motion domain;
 - no teacher weights;
-- exact 51-frame idle/run/slash consequence;
-- hard replay after optimization;
-- Stage34 microstress non-regression.
+- hard actual-motion replay plus Stage34 microstress non-regression.
 
-Decision:
-- PASS -> current rig is mechanically sufficient for the admitted motion envelope; MIRA/objective + retarget are sufficient owners and C5.1 becomes true prune-from-admissible search.
-- FAIL -> current rig still lacks an admissible skin solution under the corrected motion adapter; C5.1 prune candidates may still reveal harmful controls, otherwise C5.2 grow/locus/carrier attribution opens.
+Measured:
+- base bad faces = `39`;
+- final bad faces = `10`;
+- failed frames = `51 -> 36`;
+- max condition = `280.38 -> 54.55`;
+- max edge ratio = `9.33 -> 5.53`;
+- microstress G3 PASS;
+- microstress G3B PASS;
+- exact-motion closure still FAIL.
+
+Verdict:
+- stale-(W) was a real methodological issue, now removed;
+- even after reoptimizing skin for the corrected retarget domain, the current 28-control rig does not admit an exact-motion skin-only closure under this court;
+- MIRA-only fit remains blocked;
+- C5.1 reduced-basis courts are justified because harmful/redundant controls may still prevent closure;
+- if no reduced basis closes, proceed to C5.2 grow-to-need / locus / carrier attribution.
 
 ### C5.1 — subject-agnostic optimum control-basis court
 
@@ -1318,7 +1314,7 @@ The screen used:
 - no teacher weights;
 - no model training.
 
-### C5.1b — full prune-to-proof — BLOCKED ON C5.0b REBASE
+### C5.1b — structural full prune-to-proof — RUNNING
 
 After C5.0b establishes the correct (W^*_{tree}(R)) baseline:
 - rerun/rebase the prune screen if the active skin state changed materially;

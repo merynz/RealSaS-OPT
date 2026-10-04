@@ -1,5 +1,15 @@
 # Canonical Authority Index
 
+## 2026-10-04 corpus authority note
+
+RealSaS now has an external sealed raw truth corpus for initial research. Read `TRUTH_CORPUS_V1_STATUS_20261004.md` before making any corpus-availability, corpus-size, LOFO, unseen-generalization, or training-readiness claim.
+
+Current corpus state is exactly:
+
+`SEALED_RAW__STRUCTURALLY_AUDITED__ADMISSION_PENDING`
+
+The audited GLTF subset confirms 139 unique rigged+animated subjects after obvious identity/variant collapse, but the full raw corpus is not yet globally deduplicated or training-ready. Pack-level LOFO is unsafe because exact skeleton lineages cross nominal pack boundaries. Representative import/render validation, FBX/Blend-only audit, lineage-connected split construction and UNSEEN sealing remain open.
+
 ## 2026-09-30 current authority note
 
 First read `MAINLINE_NORMALIZATION_HANDOFF_20260930.md`. The normalized mainline is regression-green but witness-forbidden. The sealed `V2_PRODUCT_STATE_WIRING_AUDIT_V1_20260928.json` remains current evidence for the P0 source-owned visual runtime presentation gap.
@@ -10,23 +20,24 @@ First read `MAINLINE_NORMALIZATION_HANDOFF_20260930.md`. The normalized mainline
 
 ## Start here
 
-1. `V2_IMPLEMENTATION_READINESS.json`
-2. `MAINLINE_EXECUTION_PLAN_V2.json`
-3. `../CURRENT_STATE.md`
-4. `CONTEXT_STATE_V2.json`
-5. `V2_STAGE_BY_STAGE_REDTEAM_20260920.md`
-6. `V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md`
-7. `REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
-8. `COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
-9. `CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json`
-10. `PRESENTATION_PARTITION_POLICY_V1_20260921.json`
-11. `DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json`
-12. `V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md`
-13. `V2_ADVERSARIAL_MODULE_AUDIT_LEDGER_20260920.json`
-14. `AUTHORITY_MAP_V1.json`
-15. `EXPERIMENT_REGISTRY_V3.json`
-16. `SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
-17. `REHYDRATION_PACKET.md` — generated navigation/cache, not independent authority.
+1. `TRUTH_CORPUS_V1_STATUS_20261004.md`
+2. `V2_IMPLEMENTATION_READINESS.json`
+3. `MAINLINE_EXECUTION_PLAN_V2.json`
+4. `../CURRENT_STATE.md`
+5. `CONTEXT_STATE_V2.json`
+6. `V2_STAGE_BY_STAGE_REDTEAM_20260920.md`
+7. `V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md`
+8. `REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
+9. `COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
+10. `CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json`
+11. `PRESENTATION_PARTITION_POLICY_V1_20260921.json`
+12. `DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json`
+13. `V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md`
+14. `V2_ADVERSARIAL_MODULE_AUDIT_LEDGER_20260920.json`
+15. `AUTHORITY_MAP_V1.json`
+16. `EXPERIMENT_REGISTRY_V3.json`
+17. `SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
+18. `REHYDRATION_PACKET.md` — generated navigation/cache, not independent authority.
 
 ## Current product authority
 

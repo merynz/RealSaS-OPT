@@ -28,7 +28,14 @@ class TESSAActionKindV1(IntEnum):
 
 @dataclass(frozen=True)
 class TESSAScalingPolicyV1:
-    """Resource/sequence contract for product-scale TESSA generation."""
+    """Resource/sequence contract for product-scale TESSA generation.
+
+    GSA input coordinates are normalized to its own [-0.5,0.5] longest-axis
+    frame. TESSA output gets a slightly larger, still bounded envelope so that
+    observation/reconstruction under-coverage at a source boundary is not
+    silently clipped out of the teacher target. This is proposal freedom only;
+    Compiler source-support qualification remains mandatory.
+    """
 
     max_faces: int = 32768
     max_vertices: int = 32768
@@ -38,6 +45,7 @@ class TESSAScalingPolicyV1:
     query_chunk_size: int = 256
     surface_latent_count: int = 384
     coordinate_bins: int = 1024
+    coordinate_extent: float = 0.55
 
     def validate(self) -> None:
         if self.max_faces < 6952:
@@ -52,6 +60,8 @@ class TESSAScalingPolicyV1:
             raise ValueError("TESSA_SURFACE_LATENT_COUNT_TOO_SMALL")
         if self.coordinate_bins < 128:
             raise ValueError("TESSA_COORDINATE_BINS_TOO_SMALL")
+        if not (0.5 <= float(self.coordinate_extent) <= 0.75):
+            raise ValueError("TESSA_COORDINATE_EXTENT_OUT_OF_BOUNDED_COMPLETION_POLICY")
 
     def admits(self, *, vertex_count: int, face_count: int) -> bool:
         self.validate()
@@ -62,7 +72,7 @@ class TESSAScalingPolicyV1:
 class TESSAVertexProposalV1:
     """Learned vertex proposal before Compiler support qualification.
 
-    `primary_surface_id` is a learned/pointer anchor only.  It is not a
+    `primary_surface_id` is a learned/pointer anchor only. It is not a
     SurfaceSupportBinding and cannot be promoted without deterministic Compiler
     support resolution and source-fidelity qualification.
     """

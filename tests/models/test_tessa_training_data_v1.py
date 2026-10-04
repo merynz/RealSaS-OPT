@@ -5,7 +5,9 @@ from models.tessa.v1 import (
     build_teacher_asset_sequence_v1,
     build_truncated_teacher_windows_v1,
     connected_face_components_v1,
+    decode_tessa_asset_sequence_v1,
     deterministic_face_charts_v1,
+    quantize_tessa_xyz_v1,
 )
 
 
@@ -33,6 +35,14 @@ def _cfg():
     )
 
 
+def _geometric_face_keys(vertices, faces, cfg):
+    q = quantize_tessa_xyz_v1(np.asarray(vertices), cfg.coordinate_bins)
+    return sorted(
+        tuple(sorted(tuple(map(int, q[int(vi)].tolist())) for vi in face))
+        for face in np.asarray(faces, dtype=np.int64).tolist()
+    )
+
+
 def test_connected_face_components_separates_disconnected_islands():
     faces = np.asarray([[0, 1, 2], [1, 2, 3], [4, 5, 6]], dtype=np.int64)
     comps = connected_face_components_v1(faces)
@@ -48,31 +58,41 @@ def test_face_charting_remains_diagnostic_only_and_complete():
     assert max(len(ids) for _, _, ids in charts) <= 4
 
 
-def test_teacher_asset_sequence_preserves_true_components_without_artificial_chart_split():
+def test_teacher_asset_sequence_roundtrips_connectivity_without_artificial_chart_split():
     vertices, faces = _strip_mesh(17)
-    seq = build_teacher_asset_sequence_v1(vertices, faces, cfg=_cfg())
+    cfg = _cfg()
+    seq = build_teacher_asset_sequence_v1(vertices, faces, cfg=cfg)
+    decoded = decode_tessa_asset_sequence_v1(seq.token_ids, cfg=cfg)
     assert seq.face_count == 17
     assert seq.vertex_count == 19
     assert seq.component_count == 1
     assert seq.source_component_face_indices == (tuple(range(17)),)
-    assert seq.token_ids[0] == _cfg().BOS
-    assert seq.token_ids[-1] == _cfg().EOS
+    assert decoded.component_count == 1
+    assert decoded.orientation_qualified is False
+    assert _geometric_face_keys(vertices, faces, cfg) == _geometric_face_keys(
+        decoded.vertices_normalized, decoded.faces, cfg
+    )
 
 
-def test_disconnected_source_components_get_distinct_component_blocks():
+def test_disconnected_source_components_never_weld_equal_xyz_across_components():
     vertices = np.asarray(
         [
-            [-0.45, -0.2, 0.0], [-0.25, -0.2, 0.0], [-0.35, 0.0, 0.0],
-            [0.25, -0.2, 0.0], [0.45, -0.2, 0.0], [0.35, 0.0, 0.0],
+            [0.0, 0.0, 0.0], [-0.4, -0.2, 0.0], [-0.3, 0.1, 0.0],
+            [0.0, 0.0, 0.0], [0.4, -0.2, 0.0], [0.3, 0.1, 0.0],
         ],
         dtype=np.float64,
     )
     faces = np.asarray([[0, 1, 2], [3, 4, 5]], dtype=np.int64)
     cfg = _cfg()
     seq = build_teacher_asset_sequence_v1(vertices, faces, cfg=cfg)
+    decoded = decode_tessa_asset_sequence_v1(seq.token_ids, cfg=cfg)
     assert seq.component_count == 2
     assert seq.token_ids.count(cfg.COMPONENT_BEGIN) == 2
-    assert seq.token_ids.count(cfg.COMPONENT_END) == 2
+    assert decoded.component_count == 2
+    assert len(decoded.vertices_normalized) == 6
+    coincident = np.where(np.linalg.norm(decoded.vertices_normalized, axis=1) < 1e-3)[0]
+    assert len(coincident) == 2
+    assert decoded.vertex_component_indices[int(coincident[0])] != decoded.vertex_component_indices[int(coincident[1])]
 
 
 def test_truncated_windows_score_every_global_input_position_exactly_once():

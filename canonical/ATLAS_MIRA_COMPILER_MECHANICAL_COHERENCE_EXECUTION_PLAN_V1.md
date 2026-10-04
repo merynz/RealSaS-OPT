@@ -1672,15 +1672,45 @@ Rig-owner example:
 Carrier-owner example:
 - a new Stage18/19 carrier attempt invalidates rig, skin and every downstream mechanical/motion proof by default.
 
-### C6.3 — executable repair-operation authority
+### C6.3 — executable repair-operation authority — FIRST CURRENT EXECUTOR PROMOTED / CONTRACT PASS
 
-The historical proof/repair framework is already fail-closed, but its production repair registry historically contained **zero executable operations**.
+The historical proof/repair framework was fail-closed with zero promoted owner-specific executors. That is no longer true on this branch.
 
-Promotion order:
-1. control-basis structural prune/requalification, because current C5 evidence supplies a typed current operator and real child-state proof;
-2. bounded skin adaptation only after a product-authorized learned/numerical seam exists;
-3. grow/locus ATLAS repair only when C5.2 authorizes it;
-4. carrier/topology repair only after carrier ownership is causally attributed.
+Promoted current operation:
+- operation id: `CONTROL_BASIS_SINGLE_PRUNE_REQUALIFICATION_V1`;
+- owner: `ATLAS_CONTROL_BASIS`;
+- family: `prune_single_control_and_rederive_downstream`;
+- current registry status: `CANONICAL_MAINLINE_EXECUTABLE`;
+- qualification hash: `4ac53ed6ee5bcd261c3f5f27fab24022f6b78bdd1f260828242fb770e22183fe`;
+- implementation: `compiler/realsas_compiler_services/proof/control_basis_repair.py`;
+- typed structural operator: `compiler/realsas_compiler_core/control_basis_pruning_v1.py`.
+
+Hard scope:
+- executor never chooses the control;
+- controlled owner attribution + bounded repair directive must select the exact control first;
+- exactly one non-root control may be removed per child attempt;
+- retained rest joint positions are preserved;
+- children are reparented to the removed control's parent;
+- carrier topology is immutable in this operation;
+- skeleton lineage must change;
+- MIRA/skin, deformation envelope, mesh-skin binding, puppet state, retarget, motion compile and exact dynamic proof are downstream rederivations;
+- same-probe reproof remains mandatory.
+
+Authorized semantic change scope:
+- `mechanical.skeleton`;
+- `mechanical.skin`;
+- `motion`;
+- `directional_visual.direction.*.component.*.mesh_skin`.
+
+Contract gate:
+- `37214786794` PASS.
+
+This promotion does **not** mean a failed rig may be pruned heuristically. A failure signature still cannot select an owner or a control.
+
+Remaining promotion order:
+1. bounded skin adaptation only after a product-authorized learned/numerical seam exists;
+2. grow/locus ATLAS repair only when C5.2 authorizes it;
+3. carrier/topology repair only after carrier ownership is causally attributed.
 
 No historical repair executor is promoted merely because source code exists.
 

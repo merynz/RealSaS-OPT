@@ -1,0 +1,47 @@
+name: tessa-v1-contract
+
+on:
+  push:
+    branches: [research/tessa-mechanical-mesh-v1-20261004]
+    paths:
+      - models/tessa/**
+      - tests/models/test_tessa_v1.py
+      - canonical/TESSA_MECHANICAL_MESH_MODEL_EXECUTION_PLAN_V1.md
+      - canonical/TESSA_MESHANYTHING_V2_CLEANROOM_REFERENCE_AUDIT_V1.md
+      - .github/workflows/tessa_v1_contract.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      CUDA_VISIBLE_DEVICES: ""
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: .
+      PY: /home/monster/realsas-ml312/bin/python
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: TESSA source and unit gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$PY" -m py_compile \
+            models/tessa/__init__.py \
+            models/tessa/v1/__init__.py \
+            models/tessa/v1/contracts_v1.py \
+            models/tessa/v1/conditioning_v1.py \
+            models/tessa/v1/model_v1.py \
+            models/tessa/v1/tokenization_v1.py \
+            models/tessa/v1/proposal_v1.py \
+            models/tessa/v1/mechanical_objective_v1.py \
+            tests/models/test_tessa_v1.py
+          "$PY" -m pytest -q tests/models/test_tessa_v1.py
+          echo "TESSA_V1_CONTRACT_PASS"

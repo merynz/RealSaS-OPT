@@ -6,25 +6,36 @@
 
 If the user says only “continue / devam et”, resume from current canonical `main`. The old Stage18/38 → Stage42 carrier gap is historical and closed in the recovered lineage; do not reopen it without new evidence. The current scientific/witness blocker is VF-11 R512, while professional platform/backend work may proceed independently after canonical-main recovery.
 
+## Mandatory 2026-10-04 corpus status
+
+**Corpus authority:** `canonical/TRUTH_CORPUS_V1_STATUS_20261004.md`.
+
+RealSaS now has a real external sealed raw truth corpus for initial research. Do **not** say or assume that RealSaS has no corpus. Its current status is exactly:
+
+`SEALED_RAW__STRUCTURALLY_AUDITED__ADMISSION_PENDING`
+
+The audited GLTF subset contains 139 confirmed unique rigged+animated subjects after obvious format/variant identity collapse, but this is not the final global corpus count. Representative import/render admission, FBX/Blend-only truth audit, lineage-connected split construction, and cryptographic UNSEEN sealing are still required before calling the corpus training-ready canonical truth. Pack-level LOFO is forbidden because exact skeleton lineages cross pack boundaries.
+
 This repository must be resumable without conversational memory.
 
 ## Mandatory first read
 
 1. `canonical/RECOVERY_CANONICAL_HANDOFF_20261001.md`
-2. `canonical/RECOVERY_ENGINEERING_CERTIFICATION_V1_20261001.json`
-3. `canonical/V2_IMPLEMENTATION_READINESS.json`
-4. `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
-5. `CURRENT_STATE.md`
-6. `canonical/CONTEXT_STATE_V2.json`
-7. `canonical/AUTHORITY_MAP_V1.json`
-8. `canonical/EXPERIMENT_REGISTRY_V3.json`
-9. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
-10. `canonical/ACTIVE_RUN_V2.json` — implementation governance only
-11. `canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md`
-12. `canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md`
-13. `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
-14. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
-15. Historical provenance only: `canonical/EXPERIMENT_REGISTRY_V2.json`, then `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`
+2. `canonical/TRUTH_CORPUS_V1_STATUS_20261004.md`
+3. `canonical/RECOVERY_ENGINEERING_CERTIFICATION_V1_20261001.json`
+4. `canonical/V2_IMPLEMENTATION_READINESS.json`
+5. `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
+6. `CURRENT_STATE.md`
+7. `canonical/CONTEXT_STATE_V2.json`
+8. `canonical/AUTHORITY_MAP_V1.json`
+9. `canonical/EXPERIMENT_REGISTRY_V3.json`
+10. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
+11. `canonical/ACTIVE_RUN_V2.json` — implementation governance only
+12. `canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md`
+13. `canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md`
+14. `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
+15. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
+16. Historical provenance only: `canonical/EXPERIMENT_REGISTRY_V2.json`, then `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`
 
 ## Current execution rule
 

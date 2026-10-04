@@ -264,6 +264,7 @@ def main(args):
         carrier_evidence=carrier,
         surface_tensor=surface_tensor,
         conditioning=conditioning,
+    allow_unoriented_carrier_normals_for_diagnostic=True,
     )
     qmemory = transport_surface_memory_to_carrier_v1(gsa_memory, query)
     semantic_normals, semantic_valid = _transport_gsa_normals(query, surface_tensor)
@@ -344,6 +345,7 @@ def main(args):
                 carrier_weights=weights,
                 legacy_weights=legacy_weights,
                 conditioning=conditioning,
+            allow_unoriented_carrier_normals_for_diagnostic=True,
             ),
             "skin_lineage_hash": skin.skin_lineage_hash,
         }

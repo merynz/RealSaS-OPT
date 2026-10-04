@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/tessa_knight_t1_handoff_v1.yml
       - tools/training/run_tessa_supervised_fit_v1.py
+      - models/tessa/v1/conditioning_v1.py
       - models/tessa/v1/training_data_v1.py
       - models/tessa/v1/tokenization_v1.py
       - notebooks/RealSaS_TESSA_KNIGHT_T1_RUN_ALL.ipynb
@@ -45,12 +46,13 @@ jobs:
           set -euo pipefail
           df -h / /tmp || true
           python -m pip install --no-input --progress-bar off numpy
-          # Cache is expendable; authority artifacts and runner workspaces are not.
           python -m pip cache purge >/dev/null 2>&1 || true
           rm -rf "$HOME/.cache/pip" 2>/dev/null || true
           command -v rclone
           SURFACE="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"
+          NORM="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/08_NORMALIZATION_DOMAIN_QUALIFIED/normalization_domain.json"
           test -s "$SURFACE"
+          test -s "$NORM"
           echo "TESSA_HANDOFF_PREFLIGHT_PASS"
           df -h / /tmp || true
 
@@ -59,17 +61,30 @@ jobs:
         run: |
           set -euo pipefail
           SURFACE="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"
-          python - "$SURFACE" "$SOURCE_REMOTE" "$TEACHER_SHA256" <<'PY'
+          NORM="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/08_NORMALIZATION_DOMAIN_QUALIFIED/normalization_domain.json"
+          python - "$SURFACE" "$NORM" "$SOURCE_REMOTE" "$TEACHER_SHA256" <<'PY'
           import hashlib,io,json,subprocess,sys
           from pathlib import Path
           import numpy as np
+          from compiler.realsas_compiler_core.preproduct_authority_v1 import (
+              normalization_domain_from_dict,
+              normalization_domain_hash,
+          )
 
-          surface_path=Path(sys.argv[1]); source_remote=sys.argv[2]; expected_sha=sys.argv[3]
+          surface_path=Path(sys.argv[1]); norm_path=Path(sys.argv[2]); source_remote=sys.argv[3]; expected_sha=sys.argv[4]
           payload=json.loads(surface_path.read_text(encoding='utf-8'))
           schema=str(payload.get('schema_version') or payload.get('schema') or '')
           assert schema=='RealSaS.RiggingSurfaceIR.v1', schema
           assert payload.get('geometry_lineage_hash'), 'GSA_GEOMETRY_LINEAGE_MISSING'
           assert len(payload.get('surface_nodes') or ())>0, 'GSA_SURFACE_EMPTY'
+
+          norm_payload=json.loads(norm_path.read_text(encoding='utf-8'))
+          norm=normalization_domain_from_dict(norm_payload)
+          assert norm.schema_version=='RealSaS.NormalizationDomainIR.v1', norm.schema_version
+          assert norm.coordinate_frame=='REALSAS_OBJECT_FRAME', norm.coordinate_frame
+          assert norm.normalization_hash==normalization_domain_hash(norm), 'NORMALIZATION_HASH_DRIFT'
+          assert np.isfinite(np.asarray(norm.center_xyz,dtype=np.float64)).all()
+          assert np.isfinite(norm.half_extent) and norm.half_extent>0.0
 
           teacher_bytes=subprocess.check_output(['rclone','cat',source_remote])
           got_sha=hashlib.sha256(teacher_bytes).hexdigest()
@@ -84,27 +99,36 @@ jobs:
               assert tuple(z['bone_tails_source'].shape)==(41,3), z['bone_tails_source'].shape
               assert tuple(z['parents'].shape)==(41,), z['parents'].shape
               assert tuple(z['skin'].shape)==(3665,41), z['skin'].shape
-          print('TESSA_KNIGHT_SOURCE_STREAM_AUDIT_PASS', len(teacher_bytes), got_sha, payload['geometry_lineage_hash'])
+          print('TESSA_KNIGHT_SOURCE_STREAM_AUDIT_PASS', len(teacher_bytes), got_sha, payload['geometry_lineage_hash'], norm.normalization_hash)
           PY
 
-      - name: T0 GSA-to-teacher substrate compatibility
+      - name: T0 Stage08-to-GSA-to-teacher substrate compatibility
         shell: bash
         run: |
           set -euo pipefail
           SURFACE="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"
-          python - "$SURFACE" "$SOURCE_REMOTE" <<'PY'
+          NORM="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/08_NORMALIZATION_DOMAIN_QUALIFIED/normalization_domain.json"
+          python - "$SURFACE" "$NORM" "$SOURCE_REMOTE" <<'PY'
           import io,json,subprocess,sys
           from collections import deque
           from pathlib import Path
           import numpy as np
+          from compiler.realsas_compiler_core.preproduct_authority_v1 import normalization_domain_from_dict
 
-          surface_path=Path(sys.argv[1]); source_remote=sys.argv[2]
+          surface_path=Path(sys.argv[1]); norm_path=Path(sys.argv[2]); source_remote=sys.argv[3]
           payload=json.loads(surface_path.read_text(encoding='utf-8'))
+          norm=normalization_domain_from_dict(json.loads(norm_path.read_text(encoding='utf-8')))
+          center=np.asarray(norm.center_xyz,dtype=np.float64)
+          half=float(norm.half_extent)
+          scale=2.0*half
+          assert norm.coordinate_frame=='REALSAS_OBJECT_FRAME'
+          assert np.isfinite(center).all() and np.isfinite(scale) and scale>1e-12
+
           gsa=np.asarray([n['P'] for n in payload['surface_nodes']],dtype=np.float64)
           assert gsa.ndim==2 and gsa.shape[1]==3 and np.isfinite(gsa).all()
-          lo=gsa.min(axis=0); hi=gsa.max(axis=0)
-          center=0.5*(lo+hi); scale=float((hi-lo).max())
-          assert np.isfinite(scale) and scale>1e-12, 'TESSA_GSA_SCALE_DEGENERATE'
+          gsa_normalized=(gsa-center[None,:])/scale
+          gsa_outside=np.any((gsa_normalized < -0.5000001) | (gsa_normalized > 0.5000001),axis=1)
+          assert int(gsa_outside.sum())==0, f'TESSA_T0_GSA_OUTSIDE_STAGE08:{int(gsa_outside.sum())}'
 
           teacher_bytes=subprocess.check_output(['rclone','cat',source_remote])
           with np.load(io.BytesIO(teacher_bytes),allow_pickle=False) as z:
@@ -115,11 +139,20 @@ jobs:
           outside=np.any((normalized < -0.5000001) | (normalized > 0.5000001),axis=1)
           outside_count=int(outside.sum())
           print('TESSA_T0_NORMALIZATION',json.dumps({
-              'gsa_center':center.tolist(),'gsa_scale':scale,
-              'teacher_normalized_min':nlo.tolist(),'teacher_normalized_max':nhi.tolist(),
-              'teacher_vertices_outside_gsa_domain':outside_count,
+              'normalization_authority':'STAGE08_NORMALIZATION_DOMAIN_IR',
+              'normalization_hash':norm.normalization_hash,
+              'coordinate_frame':norm.coordinate_frame,
+              'stage08_center':center.tolist(),
+              'stage08_half_extent':half,
+              'tessa_world_scale':scale,
+              'gsa_normalized_min':gsa_normalized.min(axis=0).tolist(),
+              'gsa_normalized_max':gsa_normalized.max(axis=0).tolist(),
+              'teacher_normalized_min':nlo.tolist(),
+              'teacher_normalized_max':nhi.tolist(),
+              'teacher_vertices_outside_canonical_domain':outside_count,
+              'teacher_refit_or_clip_performed':False,
           },sort_keys=True))
-          assert outside_count==0, f'TESSA_T0_TEACHER_OUTSIDE_GSA_DOMAIN:{outside_count}'
+          assert outside_count==0, f'TESSA_T0_TEACHER_OUTSIDE_STAGE08_DOMAIN:{outside_count}'
 
           edge_to_faces={}
           for fi,(a,b,c) in enumerate(faces.tolist()):
@@ -144,14 +177,17 @@ jobs:
           u=np.clip(normalized+0.5,0.0,1.0-np.finfo(np.float64).eps)
           qxyz=np.floor(u*bins).astype(np.int64)
           collision_components=[]
+          collision_vertex_count=0
           restart_total=0
-          global_tokens=2  # one global BOS + EOS
+          global_tokens=2
           for ci,face_ids in enumerate(components):
               block=faces[np.asarray(face_ids,dtype=np.int64)]
               vertex_ids=sorted(set(map(int,block.reshape(-1).tolist())))
               keys=[tuple(map(int,qxyz[vi].tolist())) for vi in vertex_ids]
-              if len(set(keys))!=len(keys):
+              duplicate_count=len(keys)-len(set(keys))
+              if duplicate_count:
                   collision_components.append(ci)
+                  collision_vertex_count += duplicate_count
 
               remap={source_vi:local_vi for local_vi,source_vi in enumerate(vertex_ids)}
               lf=[tuple(remap[int(x)] for x in row) for row in block.tolist()]
@@ -160,7 +196,7 @@ jobs:
                   a,b,c=face
                   for x,y in ((a,b),(b,c),(c,a)):
                       edge_map.setdefault(tuple(sorted((x,y))),[]).append(fi)
-              unvisited=set(range(len(lf))); trailing=None; seq_tokens=3  # BOS, component begin, chart begin
+              unvisited=set(range(len(lf))); trailing=None; seq_tokens=3
               restarts=0
               while unvisited:
                   next_fi=None; new_vertex=None
@@ -177,25 +213,29 @@ jobs:
                       continue
                   next_fi=min(unvisited,key=lambda i:(tuple(sorted(lf[i])),i))
                   face=lf[next_fi]
-                  seq_tokens += 10  # FACE_BREAK + 9 xyz tokens
+                  seq_tokens += 10
                   trailing=(face[1],face[2])
                   unvisited.remove(next_fi); restarts += 1
-              seq_tokens += 3  # chart end, component end, eos
+              seq_tokens += 3
               restart_total += restarts
-              global_tokens += seq_tokens-2  # strip component-local BOS/EOS
+              global_tokens += seq_tokens-2
 
           t0={
               'schema':'RealSaS.TESSAKnightT0SubstratePreflight.v1',
               'status':'PASS' if not collision_components else 'FAIL',
+              'normalization_authority':'STAGE08_NORMALIZATION_DOMAIN_IR',
+              'normalization_hash':norm.normalization_hash,
               'teacher_component_count':len(components),
               'teacher_restart_count':restart_total,
               'global_sequence_tokens':global_tokens,
               'coordinate_bins':bins,
               'quantized_vertex_collision_components':collision_components,
+              'quantized_vertex_collision_count':collision_vertex_count,
               'artificial_topology_chart_split':False,
+              'teacher_refit_or_clip_performed':False,
           }
           print('TESSA_T0_TOKENIZATION',json.dumps(t0,sort_keys=True))
-          assert not collision_components, f'TESSA_T0_QUANTIZED_VERTEX_COLLISION:{collision_components}'
+          assert not collision_components, f'TESSA_T0_QUANTIZED_VERTEX_COLLISION:{collision_components}:{collision_vertex_count}'
           print('TESSA_KNIGHT_T0_SUBSTRATE_PASS')
           PY
 
@@ -204,16 +244,21 @@ jobs:
         run: |
           set -euo pipefail
           SURFACE="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"
+          NORM="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/08_NORMALIZATION_DOMAIN_QUALIFIED/normalization_domain.json"
           rclone mkdir "$DEST_REMOTE"
           rclone copyto "$SURFACE" "$DEST_REMOTE/qualified_rigging_surface.json" --checksum
+          rclone copyto "$NORM" "$DEST_REMOTE/normalization_domain.json" --checksum
           rclone cat "$SOURCE_REMOTE" | rclone rcat "$DEST_REMOTE/KNIGHT_EVALUATED_TEACHER_SOURCE.npz"
-          python - "$SURFACE" "$SOURCE_REMOTE" "$DEST_REMOTE" "$TEACHER_SHA256" "$GITHUB_SHA" <<'PY'
+          python - "$SURFACE" "$NORM" "$SOURCE_REMOTE" "$DEST_REMOTE" "$TEACHER_SHA256" "$GITHUB_SHA" <<'PY'
           import hashlib,json,subprocess,sys
           from pathlib import Path
+          from compiler.realsas_compiler_core.preproduct_authority_v1 import normalization_domain_from_dict
 
-          surface=Path(sys.argv[1]); source_remote=sys.argv[2]; dest=sys.argv[3]; teacher_sha=sys.argv[4]; commit=sys.argv[5]
-          payload=json.loads(surface.read_text(encoding='utf-8'))
+          surface=Path(sys.argv[1]); norm_path=Path(sys.argv[2]); source_remote=sys.argv[3]; dest=sys.argv[4]; teacher_sha=sys.argv[5]; commit=sys.argv[6]
+          surface_payload=json.loads(surface.read_text(encoding='utf-8'))
+          norm=normalization_domain_from_dict(json.loads(norm_path.read_text(encoding='utf-8')))
           surface_sha=hashlib.sha256(surface.read_bytes()).hexdigest()
+          norm_sha=hashlib.sha256(norm_path.read_bytes()).hexdigest()
           size_payload=json.loads(subprocess.check_output(['rclone','size','--json',source_remote],text=True))
           teacher_size=int(size_payload['bytes'])
           manifest={
@@ -221,8 +266,11 @@ jobs:
               'status':'PASS',
               'source_repo_commit':commit,
               'source_run_id':'SUBJECT2_KNIGHT_DEMO_V2_20260924',
-              'surface_geometry_lineage_hash':str(payload['geometry_lineage_hash']),
+              'surface_geometry_lineage_hash':str(surface_payload['geometry_lineage_hash']),
+              'normalization_hash':norm.normalization_hash,
+              'coordinate_frame':norm.coordinate_frame,
               'roles':{
+                  'normalization_domain':'normalization_domain.json',
                   'rigging_surface':'qualified_rigging_surface.json',
                   'teacher_source_truth':'KNIGHT_EVALUATED_TEACHER_SOURCE.npz',
               },
@@ -234,12 +282,14 @@ jobs:
                   'zero_skin_bone_deletion_forbidden':True,
               },
               't0_contract':{
-                  'gsa_normalization_must_contain_teacher':True,
+                  'normalization_authority':'STAGE08_NORMALIZATION_DOMAIN_IR',
+                  'teacher_refit_or_clip_forbidden':True,
                   'coordinate_bins':1024,
                   'quantized_collision_within_component_forbidden':True,
                   'artificial_topology_chart_split':False,
               },
               'files':{
+                  'normalization_domain.json':{'bytes':norm_path.stat().st_size,'sha256':norm_sha},
                   'qualified_rigging_surface.json':{'bytes':surface.stat().st_size,'sha256':surface_sha},
                   'KNIGHT_EVALUATED_TEACHER_SOURCE.npz':{'bytes':teacher_size,'sha256':teacher_sha},
               },
@@ -258,7 +308,10 @@ jobs:
           set -euo pipefail
           test "$(rclone cat "$DEST_REMOTE/KNIGHT_EVALUATED_TEACHER_SOURCE.npz" | sha256sum | awk '{print $1}')" = "$TEACHER_SHA256"
           SURFACE="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"
+          NORM="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/08_NORMALIZATION_DOMAIN_QUALIFIED/normalization_domain.json"
           LOCAL_SURFACE_SHA="$(sha256sum "$SURFACE" | awk '{print $1}')"
+          LOCAL_NORM_SHA="$(sha256sum "$NORM" | awk '{print $1}')"
           test "$(rclone cat "$DEST_REMOTE/qualified_rigging_surface.json" | sha256sum | awk '{print $1}')" = "$LOCAL_SURFACE_SHA"
-          rclone cat "$DEST_REMOTE/TESSA_HANDOFF_MANIFEST.json" | python -c 'import json,sys; x=json.load(sys.stdin); assert x["status"]=="PASS"; assert x["schema"]=="RealSaS.TESSAKnightTrainingHandoff.v1"; assert x["t0_contract"]["artificial_topology_chart_split"] is False'
+          test "$(rclone cat "$DEST_REMOTE/normalization_domain.json" | sha256sum | awk '{print $1}')" = "$LOCAL_NORM_SHA"
+          rclone cat "$DEST_REMOTE/TESSA_HANDOFF_MANIFEST.json" | python -c 'import json,sys; x=json.load(sys.stdin); assert x["status"]=="PASS"; assert x["schema"]=="RealSaS.TESSAKnightTrainingHandoff.v1"; assert x["t0_contract"]["normalization_authority"]=="STAGE08_NORMALIZATION_DOMAIN_IR"; assert x["t0_contract"]["teacher_refit_or_clip_forbidden"] is True; assert x["t0_contract"]["artificial_topology_chart_split"] is False'
           echo "TESSA_KNIGHT_T1_HANDOFF_DRIVE_PASS"

@@ -1524,35 +1524,57 @@ Scientific consequence:
 - 25 is the **first product-admissible basis found in this bounded prune frontier**, not a generic count and not yet the Knight optimum;
 - C5.2 grow/locus is not authorized yet because pruning has produced a valid descendant.
 
-### C5.1e — full single-prune local-irreducibility court from the admitted 25-control basis — NEXT
+### C5.1e — full single-prune court from the admitted 25-control basis — COMPLETE / 25 NOT LOCALLY IRREDUCIBLE
+
+Workflow:
+- `37212497232` PASS infrastructure; scientific verdict below.
 
 Question:
 
 > Is the admitted 25-control Knight basis locally irreducible under the sealed single-control structural-prune neighborhood?
 
-Procedure:
-1. load the exact C5.1d admitted 25-control skeleton + skin state;
-2. enumerate every remaining non-root control exactly once;
-3. for each candidate:
-   - truly remove the control;
-   - reparent children;
-   - mint a fresh skeleton lineage;
-   - collapse the removed initial skin mass to the replacement parent only as initialization;
-   - rebuild tree-consistent retarget;
-   - independently reoptimize skin for the exact 24-control rig and exact 51-frame motion domain;
-   - replay hard exact motion;
-   - run fresh reduced-skeleton microstress when motion closes;
-   - run motion-source fidelity;
-   - run editability/locality;
-4. seal the explored candidate family and Pareto frontier.
+Measured:
+- base control count = **25**;
+- all remaining non-root controls enumerated = **24 / 24**;
+- every child received true structural prune, fresh tree-consistent retarget and independent skin reoptimization;
+- product-admissible 24-control children = **17 / 24**;
+- therefore `locally_irreducible_under_sealed_policy = false`;
+- no teacher joint count, teacher weights or model fit were used.
 
-Claim policy:
-- if **no** 24-control child is product-admissible under the sealed optimization/proof policy, call the 25-control basis **locally irreducible under this preregistered single-prune neighborhood**;
-- do not call it globally optimal;
-- if one or more 24-control children pass, continue the frontier recursively from all non-dominated admitted children;
-- failure of the bounded optimizer is evidence only under its sealed policy, not a mathematical impossibility proof.
+The current Pareto frontier contains one non-dominated admitted 24-control child under the sealed count + hard-defect + secondary-complexity coordinates:
+- removed control = `J:237d229c33bc9eb9bf91`;
+- basis id / skeleton lineage = `9db5a58a3660743e5d713c2ca08bb221168bc2771ad4e02b89a5f245a0a3f5d3`.
 
-Only after this prune frontier reaches an admitted local fixed point may C5.2 grow/locus be considered for unresolved capability defects.
+Scientific consequence:
+- **25 is not the Knight prune fixed point**;
+- the result strengthens the non-monotonic-search requirement: many distinct 24-control children remain admissible;
+- no single numeric control count is a generic rule;
+- C5.2 grow/locus remains unauthorized while a valid prune frontier still exists.
+
+### C5.1f — recursive Pareto prune frontier from admitted 24-control children — NEXT
+
+Start from every **non-dominated admitted** C5.1e basis, not from an arbitrary 24-control child.
+
+For each frontier parent:
+1. enumerate every remaining non-root single-control deletion;
+2. truly prune and reparent;
+3. mint a fresh skeleton lineage;
+4. rebuild tree-consistent retarget;
+5. independently reoptimize skin for that exact reduced rig and the exact 51-frame idle/run/slash domain;
+6. replay hard exact-motion proof;
+7. run fresh reduced-skeleton microstress when motion closes;
+8. run motion-source fidelity;
+9. run editability/no-op response;
+10. rebuild the Pareto frontier from all admitted children.
+
+Repeat rung-by-rung until:
+- no admitted child exists from any non-dominated admitted parent => local prune fixed point under the sealed policy;
+- or a capability defect appears that cannot be resolved by pruning => route that defect to C5.2 grow/locus attribution.
+
+Hard claim boundary:
+- a local prune fixed point is not global optimality;
+- Knight's resulting count is never promoted as a generic target;
+- the generic product rule is the proof-guided search/stop criterion, not `N`.
 
 ### C5.2 — actual-motion rig ceiling
 

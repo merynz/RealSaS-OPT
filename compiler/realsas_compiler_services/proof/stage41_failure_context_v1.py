@@ -67,9 +67,6 @@ def build_stage41_probe_receipt_v1(
         "motion_source_set_binding_hash": bindings[
             "motion_source_set_binding_hash"
         ],
-        "motion_source_seal_binding_hash": bindings[
-            "motion_source_seal_binding_hash"
-        ],
         "camera_binding_hashes": list(cameras),
         "observation_set_hash": str(observation_set_hash),
     }

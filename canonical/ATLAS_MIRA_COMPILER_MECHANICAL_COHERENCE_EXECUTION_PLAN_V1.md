@@ -1721,39 +1721,54 @@ Hard rule:
 Contract gate:
 - carrier-first compilation run `37212172910` PASS.
 
-### C6.1 — controlled owner attribution — PROBE IDENTITY IMPLEMENTED / OWNER COURT STILL OPEN
+### C6.1 — controlled owner attribution — PROBE/STATE IDENTITY SEPARATED / OWNER COURT STILL OPEN
 
-Stage41 failure diagnostics now bind a deterministic attribution context:
-- baseline measurement report hash;
-- exact proof-probe fingerprint;
+Stage41 failure diagnostics bind two distinct identities:
+
+**Baseline/child mechanical-state identity**
+- exact mechanical-state, skeleton, mesh, mesh-skin, compiled-motion, constraint and presentation bindings;
+- exact Stage19 carrier evidence/topology/geometry/static-qualification bindings;
+- these are sealed into the baseline measurement/state identity and must change when a controlled owner intervention changes the corresponding mechanical world.
+
+**Causal evaluation-probe identity**
 - evaluator semantic version;
 - mesh-policy lineage;
-- exact mechanical-state, skeleton, mesh, mesh-skin, motion, constraint and presentation bindings;
+- frozen Stage41 sampling contract;
+- external motion-source set + qualified source seal;
 - all eight camera binding hashes;
-- Stage07 observation-set hash;
-- frozen sampling contract.
+- Stage07 observation-set hash.
+
+This separation is mandatory.
+
+A controlled counterfactual must be allowed to change exactly one semantic owner and rederive its dependent artifacts. Therefore mutable product/carrier/rig/skin/compiled-motion lineage hashes **must not** be part of the causal same-probe fingerprint itself. Otherwise no real owner mutation could ever satisfy same-probe attribution.
+
+At the same time, those mutable bindings are never discarded:
+- they remain exact in the baseline/child measurement identity;
+- carrier changes still create a new mechanical world and invalidate downstream lineages;
+- the same external evaluation protocol is what makes parent/child consequence comparison causal rather than accidental.
 
 Implementation:
 - `compiler/realsas_compiler_services/proof/stage41_failure_context_v1.py`;
-- Stage41 adapter emits `owner_attribution_context` on structured exact-motion FAIL.
+- Stage41 adapter emits `owner_attribution_context` on structured exact-motion FAIL;
+- Stage41 loads the Stage19 carrier explicitly and records its evidence/topology/geometry/static qualification identity;
+- Stage41 also records the exact Stage39 motion-source set/seal used by the immutable probe.
 
-Contract gate:
-- `37215166639` PASS.
-
-Invariant:
-- changing motion/policy/carrier/skeleton/skin/presentation/camera/observation changes the probe fingerprint;
-- changing only the measured failed consequence changes the baseline measurement identity but not the probe identity;
-- therefore a counterfactual cannot receive causal credit by silently changing the experiment.
+Acceptance semantics:
+- changing policy/source-motion/camera/observation/evaluator changes the probe fingerprint;
+- changing carrier/skeleton/skin/product/compiled-motion changes state identity but **not** the external probe fingerprint;
+- changing only measured consequence changes measurement identity but not probe identity;
+- a child receives causal credit only when its intervention is single-owner, bounded, rederived correctly, run under the exact same external probe fingerprint, and materially improves the target without protected-invariant regression.
 
 Owner attribution itself remains open.
 
 For each failure signature:
-1. seal the exact parent attempt, baseline measurement identity and proof fingerprint;
+1. seal the exact parent attempt, baseline state bindings, baseline measurement identity and proof fingerprint;
 2. generate bounded child attempts changing one semantic owner at a time;
 3. rederive every downstream artifact invalidated by that owner change;
-4. rerun the **same** authoritative proof fingerprint;
-5. attribute an owner only if exactly one owner-domain counterfactual materially improves/resolves the target without protected-invariant regression;
-6. abstain when no owner improves or multiple owner domains independently improve.
+4. rerun the **same external evaluation probe**;
+5. verify child-attempt semantic scope and parent/child lineage;
+6. attribute an owner only if exactly one owner-domain counterfactual materially improves/resolves the target without protected-invariant regression;
+7. abstain when no owner improves or multiple owner domains independently improve.
 
 Owner candidates may include:
 - ATLAS/control basis;

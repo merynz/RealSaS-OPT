@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict, replace
+from dataclasses import asdict
 import hashlib
 import json
 from pathlib import Path
@@ -21,6 +21,7 @@ from models.tessa.v1 import (
 
 
 SCHEMA = "RealSaS.TESSASupervisedFitResult.v1"
+MIN_CHART_FACES = 256
 
 
 def sha256_file(path: Path) -> str:
@@ -91,7 +92,7 @@ def main() -> int:
     ap.add_argument("--small-smoke", action="store_true")
     args = ap.parse_args()
 
-    if args.epochs < 1 or args.grad_accum < 1 or args.chart_faces < 1:
+    if args.epochs < 1 or args.grad_accum < 1 or args.chart_faces < MIN_CHART_FACES:
         raise ValueError("TESSA_TRAIN_ARGUMENT_INVALID")
 
     random.seed(args.seed)
@@ -128,7 +129,7 @@ def main() -> int:
             query_chunk_size=64,
             max_faces=32768,
             max_vertices=32768,
-            max_faces_per_chart=min(int(args.chart_faces), 128),
+            max_faces_per_chart=int(args.chart_faces),
         )
     charts = build_teacher_charts_v1(normalized_teacher, teacher_faces, cfg=cfg)
     if not charts:
@@ -207,10 +208,7 @@ def main() -> int:
                 optimizer.step()
                 optimizer.zero_grad(set_to_none=True)
                 global_step += 1
-            if device.type == "cuda":
-                peak = int(torch.cuda.max_memory_allocated())
-            else:
-                peak = 0
+            peak = int(torch.cuda.max_memory_allocated()) if device.type == "cuda" else 0
             print(
                 "TESSA_CHART",
                 json.dumps(

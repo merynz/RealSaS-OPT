@@ -1,0 +1,43 @@
+name: carrier-research-cancel-stale-v1
+
+on:
+  push:
+    branches: [impl/carrier-first-mechanical-compilation-20261004]
+    paths:
+      - .github/workflows/carrier_research_cancel_stale_v1.yml
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cancel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Cancel superseded C5 research runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BRANCH: impl/carrier-first-mechanical-compilation-20261004
+        run: |
+          set -euo pipefail
+          runs="$(gh api "repos/$REPO/actions/runs?branch=$BRANCH&per_page=100")"
+          jq -r '.workflow_runs[] | [.id,.name,.status] | @tsv' <<<"$runs" |
+          while IFS=$'\t' read -r id name status; do
+            case "$status" in
+              queued|in_progress|waiting|pending|requested) ;;
+              *) continue ;;
+            esac
+            case "$name" in
+              knight-targeted-noop-prune-frontier-c51d-v1|knight-control-basis-local-irreducibility-c51e-v1)
+                echo "cancel stale run=$id name=$name status=$status"
+                gh api --method POST "repos/$REPO/actions/runs/$id/cancel" || true
+                ;;
+              knight-control-basis-recursive-frontier-c51f-v1)
+                echo "keep current frontier run=$id status=$status"
+                ;;
+            esac
+          done
+          echo "CARRIER_RESEARCH_STALE_QUEUE_COLLAPSED"

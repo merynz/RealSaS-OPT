@@ -823,43 +823,113 @@ Interpretation:
 - pair-normal semantics are secondary but nonzero;
 - support choice changes the residual, so carrier normal authority and semantic-memory support authority must remain separate contracts.
 
-### C3.2 — MIRA support-mixture order court — IN PROGRESS
+### C3.2 — MIRA support-mixture order court — COMPLETE / NOT THE OWNER
 
 Workflow:
-- `37201533011`.
+- `37201533011`;
+- canonical result: `canonical/MIRA_SUPPORT_MIXTURE_C32_RESULT_20261004.json`;
+- verdict: `SUPPORT_MIXTURE_ORDER_NOT_SUFFICIENT`.
 
-Question:
-- after correcting the signed-normal confound, is the remaining residual caused by transporting GSA latent memory **before** a nonlinear readout?
+All zero-train arms held fixed:
+- exact carrier XYZ/connectivity;
+- A2-verified ATLAS rig;
+- frozen MIRA backbone/readout;
+- signed-normal C3.1 counterfactual;
+- support coefficients;
+- no teacher inference input;
+- no training.
 
-All zero-train arms use:
-- same exact carrier XYZ;
-- same carrier connectivity;
-- same ATLAS rig;
-- same MIRA backbone/readout;
-- same signed-normal diagnostic authority;
-- same support coefficients.
+Results:
+- `LATENT_PREBLEND`: **1327 unsafe**;
+- `LOGIT_POSTBLEND`: **1340 unsafe**;
+- `PROB_POSTBLEND`: **1332 unsafe**;
+- diagnostic `LEGACY_WEIGHT_TRANSFER_CEILING`: **0 unsafe / G3 PASS / G3B PASS**.
 
-Arms:
-1. `LATENT_PREBLEND` — current bridge, `D(sum alpha h)`;
-2. `LOGIT_POSTBLEND` — evaluate exact carrier geometry per support, then blend logits;
-3. `PROB_POSTBLEND` — evaluate per support, then blend normalized probabilities;
-4. `LEGACY_WEIGHT_TRANSFER_CEILING` — diagnostic ceiling only, not a product method.
+Therefore nonlinear support-mixture order is not the residual owner.
 
-Decision:
-- if a postblend arm closes mechanics, keep C4 blocked and revise the zero-train query composition contract;
-- if only the diagnostic ceiling passes, carrier-query decoder/tail mismatch is finally isolated strongly enough to consider C4;
-- if the ceiling fails, do not fit MIRA: the remaining owner is elsewhere.
+Residual localization is decisive:
+- all-identity faces: **22,676 faces / 0 unsafe**;
+- faces touching exactly one non-identity carrier vertex: **1,649 / 225 unsafe**;
+- faces with two or more non-identity carrier vertices: **4,006 / 1,102 unsafe**.
 
-## C4 — minimal MIRA mechanical fit — BLOCKED ON C3.2
+There are 3,982 non-identity carrier vertices. On unsafe faces, direct-query rows differ from the diagnostic semantic ceiling by roughly L1 `1.55-1.60` on average and approximately `1.99` at p95.
 
-Open only after zero-train query-domain and composition confounds are closed.
+Interpretation:
+- the frozen MIRA semantic field is coherent on its trained GSA-node domain;
+- after the signed-normal bug is removed, every pure identity face is mechanically safe;
+- the remaining gap is specifically the **compiled-carrier/interpolated query domain**;
+- merely moving convex support composition across the nonlinear readout does not solve it;
+- because the same carrier + same rig closes under the diagnostic frozen semantic-field ceiling, a mechanically admissible field exists without carrier or ATLAS changes.
 
-Order if authorized:
-1. decoder/tail-only;
-2. bounded residual;
-3. larger MIRA fit.
+### C4 — minimal carrier-native MIRA adaptation — AUTHORIZED
 
-A100 remains **NOT AUTHORIZED** until C3.2 closes.
+C4 is now scientifically authorized, but the authorization is intentionally narrow.
+
+Not authorized:
+- full MIRA retrain;
+- shared encoder retrain;
+- ATLAS retrain;
+- teacher-weight authority on compiled carrier;
+- returning to surface-skin transfer as the product path.
+
+Target:
+- adapt only the compiled-carrier query behavior at non-identity vertices;
+- preserve frozen GSA semantic field and exact identity-vertex behavior;
+- output `QualifiedMechanicalCarrierSkinIR` directly on the Stage19 carrier.
+
+#### C4.0 — direct-weight mechanical optimization oracle — NEXT
+
+Before fitting a neural head, optimize only non-identity carrier weight logits directly.
+
+Freeze:
+- carrier;
+- ATLAS rig;
+- all 12,049 identity carrier rows;
+- probe family and hard G3/G3B thresholds.
+
+Optimize:
+- only 3,982 non-identity rows;
+- differentiable carrier-native mechanical consequence loss;
+- semantic/trust regularization to the frozen direct-query field;
+- **no teacher weight target**.
+
+Exit questions:
+1. Can the differentiable objective drive hard G3/G3B to PASS?
+2. How large a weight correction is mechanically necessary?
+3. Which query features/regions require correction?
+4. Does correction remain localized to non-identity rows?
+
+If C4.0 cannot close the exact carrier, do not fit a head; repair the loss/probe contract or re-attribute the residual.
+
+#### C4.1 — carrier-native bounded correction head
+
+Only after C4.0 closes.
+
+Preferred architecture:
+- frozen MIRA backbone/readout;
+- small residual head in carrier weight/logit space;
+- exact carrier geometry + carrier↔joint pair evidence;
+- explicit `non_identity_mask`;
+- identity rows hard bypass/freeze, not merely regularized;
+- simplex-preserving output;
+- no forbidden support minting;
+- bounded correction budgets;
+- Compiler hard requalification after fit.
+
+This is preferred over modifying the historical V6 checkpoint because it preserves the already-proven semantic field exactly and isolates the compiled-carrier domain bridge.
+
+#### C4.2 — decoder/tail-only fit
+
+Use only if the bounded correction head is falsified by C4.1.
+
+#### C4.3 — larger MIRA fit
+
+Last resort. Requires evidence that the frozen representation itself is the blocker.
+
+Compute:
+- C4.0 should run on the local/self-hosted GPU if feasible;
+- A100 is **not yet required**;
+- use A100 only when an admitted C4.1/C4.2 training bundle exceeds local practical limits.
 
 ## C5 — ATLAS mechanically sufficient control basis — CONDITIONAL
 

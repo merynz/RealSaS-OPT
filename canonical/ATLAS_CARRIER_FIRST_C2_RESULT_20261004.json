@@ -1,0 +1,48 @@
+{
+  "schema": "RealSaS.ATLASCarrierFirstCompatibilityCourt.v1",
+  "date": "2026-10-04",
+  "status": "MEASURED__ZERO_TRAIN__PASS_FOR_C3_BASELINE__NO_PROMOTION_CLAIM",
+  "workflow_run_id": 37200030790,
+  "workflow_head_sha": "ff1d70adc9cfded1863d0bf3c5f8cdda6b526edf",
+  "architecture_id": "RealSaS.Geppetto.ReferenceStrength.DirectSurfaceCausalDiffusion.DeterministicViewDirection.v1",
+  "checkpoint_sha256": "1c124f876858f6f5b5fd0d4639fc7f2b596a25e962d19de8799ecd64ae59b08f",
+  "carrier_candidate_hash": "cb83b1e188770a2a8d748e5f89bd4a41ac3a4ee10c250b95c764ccde35c8fa96",
+  "carrier_static_qualification_hash": "04320f8b5bfdabac550ec47b97d6cf23394eeb7e5a38ad4ac090a806bf3d21b4",
+  "carrier_evidence_hash": "1907f4c4d0b645246f96f526e25d184b764bc01ccb4f148f3390c1218087b4ce",
+  "carrier_topology_hash": "5d48f74b930fd56ac6fdef6f00e5d34dc8d60ef20f09a31f000b364ad9d07a60",
+  "carrier_geometry_hash": "a7621144829275d85fa190ecca865751f3d5a31c4466376aaccf246b313e266e",
+  "gsa_surface_lineage_hash": "452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a",
+  "gsa_tensorization_hash": "fb5e8afa1c7d489bb0aedd0c79eb1c3267d7ad8b256734862cd3fb6b8bd905e8",
+  "carrier_neural_conditioning_used": false,
+  "carrier_bound_evaluation_domain": true,
+  "teacher_predictor_input_used": false,
+  "training_used": false,
+  "comparison_to_archived_prediction": {
+    "archived_joint_count": 28,
+    "pred_joint_count": 28,
+    "shared_joint_count": 28,
+    "same_generation_id_set": true,
+    "changed_parent_count_shared": 0,
+    "normalized_position_rmse": 0.000003503460062806982,
+    "normalized_position_p95": 0.000005220373898337513,
+    "normalized_position_max": 0.0000059826828403789735
+  },
+  "carrier_relative_rig_metrics": {
+    "carrier_face_count": 28331,
+    "carrier_vertex_count": 16031,
+    "joint_count": 28,
+    "joint_inside_carrier_bbox_margin_fraction": 1,
+    "joint_to_nearest_carrier_vertex_mean_norm": 0.05380260401261522,
+    "joint_to_nearest_carrier_vertex_p95_norm": 0.13592447924834059,
+    "joint_to_nearest_carrier_vertex_max_norm": 0.16221687879756558
+  },
+  "proposal_support_surface_count": 198,
+  "proposal_support_outside_carrier_provenance_count": 0,
+  "verdict": {
+    "current_atlas_checkpoint_is_valid_zero_train_c3_baseline": true,
+    "immediate_atlas_retrain_authorized": false,
+    "explicit_carrier_conditioning_authorized": false,
+    "carrier_awareness_requires_a3_necessity_court": true
+  },
+  "next_gate": "C3_KNIGHT_CARRIER_FIRST_ONE_SHOT_MECHANICAL_COURT"
+}

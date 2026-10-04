@@ -38,6 +38,51 @@ jobs:
             'assets/external/quaternius/knight/KnightCharacter.fbx' | sha256sum --check -
           echo "TESSA_MOTION_SOURCE_FBX_PASS"
 
+      - name: Resolve Blender across WSL
+        shell: bash
+        run: |
+          set -euo pipefail
+          if command -v blender >/dev/null 2>&1; then
+            echo "BLENDER_FOR_MATERIALIZER=$(command -v blender)" >> "$GITHUB_ENV"
+            blender --version | head -n 2
+            exit 0
+          fi
+
+          win_root='/mnt/c/Program Files/Blender Foundation'
+          win_blender=''
+          if [ -d "$win_root" ]; then
+            win_blender="$(find "$win_root" -maxdepth 3 -type f -iname blender.exe -print | sort -V | tail -n 1 || true)"
+          fi
+          if [ -z "$win_blender" ]; then
+            echo "TESSA_BLENDER_SEARCH_FAIL"
+            find /usr/bin /usr/local/bin /snap/bin -maxdepth 1 -iname 'blender*' -print 2>/dev/null || true
+            if [ -d "$win_root" ]; then
+              find "$win_root" -maxdepth 3 -iname 'blender*' -print 2>/dev/null || true
+            fi
+            exit 1
+          fi
+
+          wrapper="$RUNNER_TEMP/realsas-blender-wsl-wrapper"
+          cat > "$wrapper" <<'SH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          exe="${REALSAS_WINDOWS_BLENDER_EXE:?missing REALSAS_WINDOWS_BLENDER_EXE}"
+          converted=()
+          for arg in "$@"; do
+            if [[ "$arg" == /* ]]; then
+              converted+=("$(wslpath -w "$arg")")
+            else
+              converted+=("$arg")
+            fi
+          done
+          exec "$exe" "${converted[@]}"
+          SH
+          chmod +x "$wrapper"
+          echo "REALSAS_WINDOWS_BLENDER_EXE=$win_blender" >> "$GITHUB_ENV"
+          echo "BLENDER_FOR_MATERIALIZER=$wrapper" >> "$GITHUB_ENV"
+          echo "TESSA_WINDOWS_BLENDER_FOUND=$win_blender"
+          "$win_blender" --version | head -n 2
+
       - name: Materialize sealed Knight clips
         shell: bash
         run: |
@@ -46,6 +91,7 @@ jobs:
           rm -rf "$out"
           python tools/motion/materialize_quaternius_preset_v1.py \
             --source-fbx assets/external/quaternius/knight/KnightCharacter.fbx \
+            --blender "$BLENDER_FOR_MATERIALIZER" \
             --out-dir "$out" \
             --run-id TESSA_KNIGHT_CONTINUOUS_FIELD_WITNESS_V1
           for f in demo_idle_v1.motion.json demo_run_v1.motion.json demo_slash_v1.motion.json EXTRACTION_RECEIPT.json MATERIALIZATION_RECEIPT.json; do
@@ -59,7 +105,14 @@ jobs:
           for name in ('demo_idle_v1.motion.json','demo_run_v1.motion.json','demo_slash_v1.motion.json'):
               p=root/name
               x=json.loads(p.read_text())
-              print('TESSA_MOTION_CLIP_PASS', name, x['schema'], x['clip_kind'], len(x.get('source_joints',())))
+              print(
+                  'TESSA_MOTION_CLIP_PASS',
+                  name,
+                  x['schema'],
+                  x['clip_kind'],
+                  len(x.get('source_skeleton',())),
+                  len(x.get('tracks',())),
+              )
           PY
 
       - name: Upload motion witness source

@@ -68,12 +68,65 @@ func Resolve(
 	rootInputs []domain.ArtifactInputIdentity,
 	versions map[string]release.StageVersion,
 ) (Plan, error) {
+	return ResolveWithStageSemanticParameters(
+		ctx,
+		g,
+		catalog,
+		targetStageID,
+		rootInputs,
+		versions,
+		nil,
+	)
+}
+
+// ResolveWithStageSemanticParameters is the repair-safe resolver entrypoint.
+//
+// extraByStage is semantic input, not execution metadata. A value injected at
+// one restart stage changes that stage's semantic identity; ordinary dependency
+// hashing then invalidates only its downstream descendants while exact upstream
+// qualified artifacts remain reusable.
+//
+// Reserved semantic fields are owned by the resolver and cannot be overridden.
+func ResolveWithStageSemanticParameters(
+	ctx context.Context,
+	g *stagegraph.Graph,
+	catalog Catalog,
+	targetStageID string,
+	rootInputs []domain.ArtifactInputIdentity,
+	versions map[string]release.StageVersion,
+	extraByStage map[string]map[string]any,
+) (Plan, error) {
 	if len(rootInputs) == 0 {
 		return Plan{}, fmt.Errorf("compile resolver requires immutable subject root inputs")
 	}
 	required, err := g.AncestorsIncluding(targetStageID)
 	if err != nil {
 		return Plan{}, err
+	}
+	requiredSet := make(map[string]struct{}, len(required))
+	for _, stageID := range required {
+		requiredSet[stageID] = struct{}{}
+	}
+	for stageID, params := range extraByStage {
+		if _, ok := g.Get(stageID); !ok {
+			return Plan{}, fmt.Errorf("semantic parameter override references unknown stage %s", stageID)
+		}
+		if _, ok := requiredSet[stageID]; !ok {
+			return Plan{}, fmt.Errorf(
+				"semantic parameter override stage %s is outside target closure %s",
+				stageID,
+				targetStageID,
+			)
+		}
+		for key := range params {
+			if key == "stage_id" || key == "parameters_sha256" {
+				return Plan{}, fmt.Errorf(
+					"semantic parameter override uses reserved key %s at stage %s",
+					key,
+					stageID,
+				)
+			}
+		}
 	}
 	expected := make(map[string]string, len(required))
 	out := Plan{TargetStageID: targetStageID, Stages: make([]ResolvedStage, 0, len(required))}
@@ -110,6 +163,13 @@ func Resolve(
 			})
 		}
 
+		semanticParameters := map[string]any{
+			"stage_id":          stageID,
+			"parameters_sha256": version.ParametersSHA256,
+		}
+		for key, value := range extraByStage[stageID] {
+			semanticParameters[key] = value
+		}
 		descriptor := domain.ArtifactSemanticDescriptor{
 			ArtifactType:         StageResultArtifactType,
 			SchemaVersion:        StageResultSchema,
@@ -117,10 +177,7 @@ func Resolve(
 			ImplementationSHA256: version.ImplementationSHA256,
 			PolicySHA256:         version.PolicySHA256,
 			Inputs:               inputs,
-			SemanticParameters: map[string]any{
-				"stage_id":          stageID,
-				"parameters_sha256": version.ParametersSHA256,
-			},
+			SemanticParameters:   semanticParameters,
 		}
 		semanticSHA, err := descriptor.SemanticSHA256()
 		if err != nil {

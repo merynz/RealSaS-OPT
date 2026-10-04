@@ -1,0 +1,97 @@
+{
+  "schema": "RealSaS.TESSAKnightT0Readiness.v1",
+  "status": "PASS",
+  "recorded_at_date": "2026-10-05",
+  "program": "TESSA = Topology Estimation for Stable Surface Animation",
+  "authority_class": "RESEARCH_READINESS_EVIDENCE_ONLY",
+  "source_run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "evidence": {
+    "handoff_workflow_run_id": 37235225149,
+    "handoff_workflow_conclusion": "success",
+    "source_contract_workflow_run_id": 37235441035,
+    "source_contract_workflow_conclusion": "success",
+    "handoff_source_repo_commit": "dc1a1701dcfc28e1599f0fac1c6d5f875e4d6500",
+    "latest_component_safe_decoder_test_commit": "eccbd5cd28a6d69f444e93e72b2340747a5aefe3"
+  },
+  "canonical_frame": {
+    "authority": "STAGE08_NORMALIZATION_DOMAIN_IR",
+    "coordinate_frame": "REALSAS_OBJECT_FRAME",
+    "normalization_hash": "4d1fd4943d2815156974b8967d5ba180e424dc7343f9da68549cff8146efdb41",
+    "stage08_center_xyz": [
+      0.042003750801086426,
+      -0.7091579437255859,
+      1.2332630157470703
+    ],
+    "stage08_half_extent": 2.016295680999756,
+    "tessa_world_scale": 4.032591361999512,
+    "mapping": "P_tessa=(P_world-center_xyz)/(2*half_extent)",
+    "teacher_refit_or_clip_performed": false
+  },
+  "substrate_metrics": {
+    "gsa_normalized_min": [
+      -0.3294162159596672,
+      -0.31612510480252726,
+      -0.3073729052659004
+    ],
+    "gsa_normalized_max": [
+      0.3329574315825849,
+      0.31929569807870245,
+      0.30246068954467736
+    ],
+    "teacher_normalized_min": [
+      -0.3334448178774241,
+      -0.3195441915121754,
+      -0.30583053596925786
+    ],
+    "teacher_normalized_max": [
+      0.3334448178774241,
+      0.3195442949772865,
+      0.3058305118220158
+    ],
+    "teacher_vertices_outside_canonical_domain": 0
+  },
+  "teacher_contract": {
+    "teacher_source_sha256": "96435646a0084a0a038040ee748cb33d3bfa0b1ed550661befd3b18539e28e6f",
+    "vertices": 3665,
+    "faces": 6952,
+    "bones": 41,
+    "skin_columns": 41,
+    "zero_skin_bone_deletion_forbidden": true
+  },
+  "gsa_contract": {
+    "geometry_lineage_hash": "452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a",
+    "qualified_rigging_surface_sha256": "7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182"
+  },
+  "tokenization_metrics": {
+    "coordinate_bins": 1024,
+    "teacher_component_count": 39,
+    "teacher_restart_count": 2004,
+    "global_sequence_tokens": 35042,
+    "quantized_vertex_collision_components": [],
+    "quantized_vertex_collision_count": 0,
+    "artificial_topology_chart_split": false,
+    "component_local_coordinate_weld": true,
+    "cross_component_coordinate_weld_forbidden": true
+  },
+  "handoff": {
+    "drive_path": "RealSaS_TESSA_KNIGHT_V1_HANDOFF",
+    "normalization_domain_sha256": "01b63a57390de9a5d2c731d9644e65ff779980caa066c19204db3b4a3e0c634b",
+    "qualified_rigging_surface_sha256": "7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182",
+    "teacher_source_sha256": "96435646a0084a0a038040ee748cb33d3bfa0b1ed550661befd3b18539e28e6f",
+    "drive_hash_verification": "PASS"
+  },
+  "training_readiness": {
+    "t0": "PASS",
+    "t1_supervised_topology_fit_ready": true,
+    "notebook": "notebooks/RealSaS_TESSA_KNIGHT_T1_RUN_ALL.ipynb",
+    "next_required_rung_after_t1": "T2_MECHANICAL_CONSEQUENCE_FIT",
+    "product_authority_claimed": false,
+    "generalization_claimed": false,
+    "mechanical_consequence_training_completed": false
+  },
+  "interpretation": {
+    "previous_four_vertex_failure_owner": "TESSA_RECOMPUTED_GSA_BBOX_NORMALIZATION_NOT_STAGE08_AUTHORITY",
+    "teacher_gsa_substrate_mismatch_inferred_from_that_failure": false,
+    "t0_result": "CANONICAL_STAGE08_FRAME_ADMITS_GSA_AND_RAW_TEACHER_WITHOUT_CLIP_OR_REFIT"
+  }
+}

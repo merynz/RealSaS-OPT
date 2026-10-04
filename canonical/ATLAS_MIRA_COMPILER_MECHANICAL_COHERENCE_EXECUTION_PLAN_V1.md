@@ -1194,8 +1194,17 @@ Use two complementary directions:
 
 **Grow-to-need**
 - start from the minimal legal/current core;
-- add the control with highest positive marginal proof gain;
-- stop when hard closure and robustness margin are reached.
+- run the best admitted skin + motion adapter and aggregate hard failure signatures into a carrier-space residual field;
+- cluster connected/local residual regions rather than reading teacher joints;
+- propose one bounded control birth per residual region from carrier geometry/evidence;
+- choose candidate locus/parent through local mechanical search under Compiler tree legality;
+- reoptimize/adapt skin for each proposed basis;
+- add only the control with the highest positive marginal proof gain per unit complexity;
+- stop as soon as the hard admissibility thresholds are met;
+- if every legal birth has marginal gain below the preregistered threshold, reattribute to carrier rather than adding arbitrary joints.
+
+Candidate birth is therefore failure-driven and subject-specific. A quadruped, humanoid, tail, wing, or unusual articulated object is free to require a different number and spatial arrangement of controls.
+
 
 **Prune-to-proof**
 - start from an admitted richer basis;

@@ -6,97 +6,684 @@
     "historical_backfill": "Never invent clock time; use date_only until artifact/commit verifies it.",
     "display_timezone": "UTC canonical; Europe/Istanbul may be shown additionally."
   },
-  "status_vocabulary": ["ACTIVE_RUNNING","CLOSED_PASS","CLOSED_FAIL","COMPONENT_EVIDENCE","IMPLEMENTED_NOT_AUTHORITATIVELY_RUN","APPARATUS_FAILURE","INDEX_BACKFILL_REQUIRED","OPEN_NOT_RUN"],
+  "status_vocabulary": [
+    "ACTIVE_RUNNING",
+    "CLOSED_PASS",
+    "CLOSED_FAIL",
+    "COMPONENT_EVIDENCE",
+    "IMPLEMENTED_NOT_AUTHORITATIVELY_RUN",
+    "APPARATUS_FAILURE",
+    "INDEX_BACKFILL_REQUIRED",
+    "OPEN_NOT_RUN"
+  ],
   "records": [
     {
-      "id":"GEPPETTO_B1S_HISTORICAL_FIT1","date":"2026-09-04","time_precision":"date_only","started_at_utc":null,"closed_at_utc":null,"recorded_at_utc":"2026-09-07T04:35:00Z","module":"Geppetto","witness":"Mage FIT1","status":"INDEX_BACKFILL_REQUIRED",
-      "local_question":"Can the historical latent-only family fit/retain Mage?","global_purpose":"Establish same-witness capacity without structural-AR/generalization claims.","arms":["historical B1s latent-only"],
-      "mechanisms_present":["latent recurrence","historical structural serialization","same-witness optimization"],"mechanisms_absent_or_not_claimed":["lossless V3 full-surface consumer","RigAnything formulation equivalence","generalization"],
-      "outcome_summary":"Historical strong same-witness capacity/retention evidence exists; exact result pointer still requires bootstrap normalization.","falsified_or_weakened":[],"survived_or_supported":["latent-only family has substantial Mage FIT1 capacity"],"cannot_prove":["structural AR unnecessary generically","generalization"],
-      "target_effect":"Moved diagnosis from raw capacity toward conditioning/stability.","necessity_assessment":"Useful historical capacity witness; not architecture closure.","source_pointers":[],"next_dependencies":["V3P_LOSSLESS_EVIDENCE_STABILITY","V3X_FULL_SURFACE_STABILITY"]
+      "id": "GEPPETTO_B1S_HISTORICAL_FIT1",
+      "date": "2026-09-04",
+      "time_precision": "date_only",
+      "started_at_utc": null,
+      "closed_at_utc": null,
+      "recorded_at_utc": "2026-09-07T04:35:00Z",
+      "module": "Geppetto",
+      "witness": "Mage FIT1",
+      "status": "INDEX_BACKFILL_REQUIRED",
+      "local_question": "Can the historical latent-only family fit/retain Mage?",
+      "global_purpose": "Establish same-witness capacity without structural-AR/generalization claims.",
+      "arms": [
+        "historical B1s latent-only"
+      ],
+      "mechanisms_present": [
+        "latent recurrence",
+        "historical structural serialization",
+        "same-witness optimization"
+      ],
+      "mechanisms_absent_or_not_claimed": [
+        "lossless V3 full-surface consumer",
+        "RigAnything formulation equivalence",
+        "generalization"
+      ],
+      "outcome_summary": "Historical strong same-witness capacity/retention evidence exists; exact result pointer still requires bootstrap normalization.",
+      "falsified_or_weakened": [],
+      "survived_or_supported": [
+        "latent-only family has substantial Mage FIT1 capacity"
+      ],
+      "cannot_prove": [
+        "structural AR unnecessary generically",
+        "generalization"
+      ],
+      "target_effect": "Moved diagnosis from raw capacity toward conditioning/stability.",
+      "necessity_assessment": "Useful historical capacity witness; not architecture closure.",
+      "source_pointers": [],
+      "next_dependencies": [
+        "V3P_LOSSLESS_EVIDENCE_STABILITY",
+        "V3X_FULL_SURFACE_STABILITY"
+      ]
     },
     {
-      "id":"V3P_LOSSLESS_EVIDENCE_STABILITY","date":"2026-09-06","time_precision":"date_only","started_at_utc":null,"closed_at_utc":null,"recorded_at_utc":"2026-09-07T04:35:00Z","module":"Geppetto","witness":"Mage FIT1","status":"COMPONENT_EVIDENCE",
-      "local_question":"Does a lossless fixed-8-view evidence side path improve reachability/stability?","global_purpose":"Repair lossy evidence contract before attributing failure to later mechanisms.","arms":["V3P"],
-      "mechanisms_present":["lossless x/y/valid/support evidence","historical trunk compatibility","zero-init side projection"],"mechanisms_absent_or_not_claimed":["per-step full-surface xattn","skeleton feedback","full RigAnything formulation"],
-      "outcome_summary":"Lossless evidence repaired the representation boundary and achieved reachability but not terminal stability alone.","falsified_or_weakened":["summary-only raster evidence is sufficient generic product authority"],"survived_or_supported":["lossless learned-consumer boundary"],"cannot_prove":["Geppetto solved","generalization","AR necessity"],
-      "target_effect":"Moved bottleneck toward evidence access and stability.","necessity_assessment":"Necessary boundary repair; insufficient alone.","source_pointers":["exp/lossless-rigging-evidence-v1-20260906"],"next_dependencies":["V3X_FULL_SURFACE_STABILITY"]
+      "id": "V3P_LOSSLESS_EVIDENCE_STABILITY",
+      "date": "2026-09-06",
+      "time_precision": "date_only",
+      "started_at_utc": null,
+      "closed_at_utc": null,
+      "recorded_at_utc": "2026-09-07T04:35:00Z",
+      "module": "Geppetto",
+      "witness": "Mage FIT1",
+      "status": "COMPONENT_EVIDENCE",
+      "local_question": "Does a lossless fixed-8-view evidence side path improve reachability/stability?",
+      "global_purpose": "Repair lossy evidence contract before attributing failure to later mechanisms.",
+      "arms": [
+        "V3P"
+      ],
+      "mechanisms_present": [
+        "lossless x/y/valid/support evidence",
+        "historical trunk compatibility",
+        "zero-init side projection"
+      ],
+      "mechanisms_absent_or_not_claimed": [
+        "per-step full-surface xattn",
+        "skeleton feedback",
+        "full RigAnything formulation"
+      ],
+      "outcome_summary": "Lossless evidence repaired the representation boundary and achieved reachability but not terminal stability alone.",
+      "falsified_or_weakened": [
+        "summary-only raster evidence is sufficient generic product authority"
+      ],
+      "survived_or_supported": [
+        "lossless learned-consumer boundary"
+      ],
+      "cannot_prove": [
+        "Geppetto solved",
+        "generalization",
+        "AR necessity"
+      ],
+      "target_effect": "Moved bottleneck toward evidence access and stability.",
+      "necessity_assessment": "Necessary boundary repair; insufficient alone.",
+      "source_pointers": [
+        "exp/lossless-rigging-evidence-v1-20260906"
+      ],
+      "next_dependencies": [
+        "V3X_FULL_SURFACE_STABILITY"
+      ]
     },
     {
-      "id":"V3X_FULL_SURFACE_STABILITY","date":"2026-09-06","time_precision":"date_only","started_at_utc":null,"closed_at_utc":null,"recorded_at_utc":"2026-09-07T04:35:00Z","module":"Geppetto","witness":"Mage FIT1","status":"COMPONENT_EVIDENCE",
-      "local_question":"Does per-step access to full lossless surface memory improve reachability/retention?","global_purpose":"Isolate evidence access before changing locus or causal skeleton state.","arms":["V3P","V3X=V3P+full-surface xattn"],
-      "mechanisms_present":["lossless evidence","per-step full-surface xattn in V3X"],"mechanisms_absent_or_not_claimed":["joint+parent recurrent feedback","sibling/BFS augmentation","full formulation"],
-      "outcome_summary":"Full-surface access improved fit/reachability behavior but did not close terminal long-horizon stability.","falsified_or_weakened":["evidence access alone explains all terminal instability"],"survived_or_supported":["full-surface access is useful generic evidence mechanism"],"cannot_prove":["AR necessity","diffusion necessity","full formulation"],
-      "target_effect":"Reduced evidence-access uncertainty.","necessity_assessment":"Useful component; insufficient alone.","source_pointers":["exp/lossless-rigging-evidence-v1-20260906"],"next_dependencies":["GEPPETTO_CAUSAL_REPAIR_V2_R2_C1"]
+      "id": "V3X_FULL_SURFACE_STABILITY",
+      "date": "2026-09-06",
+      "time_precision": "date_only",
+      "started_at_utc": null,
+      "closed_at_utc": null,
+      "recorded_at_utc": "2026-09-07T04:35:00Z",
+      "module": "Geppetto",
+      "witness": "Mage FIT1",
+      "status": "COMPONENT_EVIDENCE",
+      "local_question": "Does per-step access to full lossless surface memory improve reachability/retention?",
+      "global_purpose": "Isolate evidence access before changing locus or causal skeleton state.",
+      "arms": [
+        "V3P",
+        "V3X=V3P+full-surface xattn"
+      ],
+      "mechanisms_present": [
+        "lossless evidence",
+        "per-step full-surface xattn in V3X"
+      ],
+      "mechanisms_absent_or_not_claimed": [
+        "joint+parent recurrent feedback",
+        "sibling/BFS augmentation",
+        "full formulation"
+      ],
+      "outcome_summary": "Full-surface access improved fit/reachability behavior but did not close terminal long-horizon stability.",
+      "falsified_or_weakened": [
+        "evidence access alone explains all terminal instability"
+      ],
+      "survived_or_supported": [
+        "full-surface access is useful generic evidence mechanism"
+      ],
+      "cannot_prove": [
+        "AR necessity",
+        "diffusion necessity",
+        "full formulation"
+      ],
+      "target_effect": "Reduced evidence-access uncertainty.",
+      "necessity_assessment": "Useful component; insufficient alone.",
+      "source_pointers": [
+        "exp/lossless-rigging-evidence-v1-20260906"
+      ],
+      "next_dependencies": [
+        "GEPPETTO_CAUSAL_REPAIR_V2_R2_C1"
+      ]
     },
     {
-      "id":"GEPPETTO_CAUSAL_REPAIR_V2_R2_C1","date":"2026-09-06","time_precision":"closed_exact","started_at_utc":null,"closed_at_utc":"2026-09-06T04:06:17.337Z","recorded_at_utc":"2026-09-07T10:24:30Z","module":"Geppetto","witness":"Mage FIT1","status":"CLOSED_PASS",
-      "local_question":"On corrected-raster conditioning, which minimal rung first yields the preregistered stable fit: R2 baseline, C1 full-surface xattn, or if necessary C2 diffusion?","global_purpose":"Causally isolate RigAnything-inspired evidence/locus mechanisms via a staircase rather than bundle changes.","arms":["R2: xattn OFF/diffusion OFF/feedback OFF","C1: xattn ON/diffusion OFF/feedback OFF","C2: xattn ON/diffusion ON/feedback OFF — only if C1 failed"],
-      "mechanisms_present":["corrected raster conditioning","C1 full-surface xattn"],"mechanisms_absent_or_not_claimed":["geometry feedback all executed arms","sibling/BFS augmentation","generalization","promotion"],
-      "outcome_summary":"R2 stable FAIL; C1 stable PASS; preregistered staircase stopped and C2 was not executed. Winner candidate C1. Causal interpretation: XATTN_RESCUES_THIS_FROZEN_TRAINING_PROTOCOL__NOT_THEORETICAL_NECESSITY.",
-      "falsified_or_weakened":["R2 corrected-raster baseline alone closes this frozen protocol"],"survived_or_supported":["per-step full-surface xattn causally rescues this frozen Mage training protocol relative to R2"],"cannot_prove":["xattn theoretically necessary","C2 diffusion behavior","skeleton feedback","full C3/C4 formulation","generalization"],
-      "target_effect":"Established controlled C1 evidence and, by staircase design, intentionally left C2 untested.","necessity_assessment":"High-value component closure because it preserves causal attribution.",
-      "source_pointers":["Drive:RealSaS_MAGE_GEPPETTO_CAUSAL_REPAIR_V2_NO_TOKEN","contract:233ec3bcd77e0f02","COMPARISON_233ec3bcd77e0f02.json","RealSaS_MAGE_GEPPETTO_CAUSAL_REPAIR_V2_RUN_ALL_NO_TOKEN_FINAL.ipynb","canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md"],
-      "metrics":{"R2":{"stable_pass":false,"best_slot_p95":0.041321732103824615,"final_outside":27,"final_slot_p95":0.1146610826253891},"C1":{"stable_pass":true,"first_stable_step":4992,"switch_step":4736,"best_step":6208,"best_slot_p95":0.004098494071513414,"final_outside":0,"final_slot_p95":0.005874851252883673},"winner_candidate":"C1"},
-      "next_dependencies":["GEPPETTO_C2_CONDITIONAL_DIFFUSION_LOCUS","AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE"]
+      "id": "GEPPETTO_CAUSAL_REPAIR_V2_R2_C1",
+      "date": "2026-09-06",
+      "time_precision": "closed_exact",
+      "started_at_utc": null,
+      "closed_at_utc": "2026-09-06T04:06:17.337Z",
+      "recorded_at_utc": "2026-09-07T10:24:30Z",
+      "module": "Geppetto",
+      "witness": "Mage FIT1",
+      "status": "CLOSED_PASS",
+      "local_question": "On corrected-raster conditioning, which minimal rung first yields the preregistered stable fit: R2 baseline, C1 full-surface xattn, or if necessary C2 diffusion?",
+      "global_purpose": "Causally isolate RigAnything-inspired evidence/locus mechanisms via a staircase rather than bundle changes.",
+      "arms": [
+        "R2: xattn OFF/diffusion OFF/feedback OFF",
+        "C1: xattn ON/diffusion OFF/feedback OFF",
+        "C2: xattn ON/diffusion ON/feedback OFF — only if C1 failed"
+      ],
+      "mechanisms_present": [
+        "corrected raster conditioning",
+        "C1 full-surface xattn"
+      ],
+      "mechanisms_absent_or_not_claimed": [
+        "geometry feedback all executed arms",
+        "sibling/BFS augmentation",
+        "generalization",
+        "promotion"
+      ],
+      "outcome_summary": "R2 stable FAIL; C1 stable PASS; preregistered staircase stopped and C2 was not executed. Winner candidate C1. Causal interpretation: XATTN_RESCUES_THIS_FROZEN_TRAINING_PROTOCOL__NOT_THEORETICAL_NECESSITY.",
+      "falsified_or_weakened": [
+        "R2 corrected-raster baseline alone closes this frozen protocol"
+      ],
+      "survived_or_supported": [
+        "per-step full-surface xattn causally rescues this frozen Mage training protocol relative to R2"
+      ],
+      "cannot_prove": [
+        "xattn theoretically necessary",
+        "C2 diffusion behavior",
+        "skeleton feedback",
+        "full C3/C4 formulation",
+        "generalization"
+      ],
+      "target_effect": "Established controlled C1 evidence and, by staircase design, intentionally left C2 untested.",
+      "necessity_assessment": "High-value component closure because it preserves causal attribution.",
+      "source_pointers": [
+        "Drive:RealSaS_MAGE_GEPPETTO_CAUSAL_REPAIR_V2_NO_TOKEN",
+        "contract:233ec3bcd77e0f02",
+        "COMPARISON_233ec3bcd77e0f02.json",
+        "RealSaS_MAGE_GEPPETTO_CAUSAL_REPAIR_V2_RUN_ALL_NO_TOKEN_FINAL.ipynb",
+        "canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md"
+      ],
+      "metrics": {
+        "R2": {
+          "stable_pass": false,
+          "best_slot_p95": 0.041321732103824615,
+          "final_outside": 27,
+          "final_slot_p95": 0.1146610826253891
+        },
+        "C1": {
+          "stable_pass": true,
+          "first_stable_step": 4992,
+          "switch_step": 4736,
+          "best_step": 6208,
+          "best_slot_p95": 0.004098494071513414,
+          "final_outside": 0,
+          "final_slot_p95": 0.005874851252883673
+        },
+        "winner_candidate": "C1"
+      },
+      "next_dependencies": [
+        "GEPPETTO_C2_CONDITIONAL_DIFFUSION_LOCUS",
+        "AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE"
+      ]
     },
     {
-      "id":"GEPPETTO_C2_CONDITIONAL_DIFFUSION_LOCUS","date":"2026-09-06","time_precision":"defined_in_prereg","started_at_utc":null,"closed_at_utc":null,"recorded_at_utc":"2026-09-07T10:24:30Z","module":"Geppetto research challenger","witness":"Mage FIT1","status":"IMPLEMENTED_NOT_AUTHORITATIVELY_RUN",
-      "local_question":"What changes when conditional diffusion is added on top of C1 full-surface access?","global_purpose":"Separate locus-generation mechanism from skeleton feedback.","arms":["C2=C1+conditional diffusion"],
-      "mechanisms_present":["full-surface xattn","conditional diffusion implementation"],"mechanisms_absent_or_not_claimed":["joint geometry feedback","parent geometry feedback","sibling/BFS augmentation"],
-      "outcome_summary":"C2 was implemented and preregistered as the third Causal Repair V2 staircase rung, but C1 passed and the staircase stopped. The authoritative Drive runs folder contains only R2 and C1 results. Therefore no C2 result is authorized from that experiment.",
-      "falsified_or_weakened":[],"survived_or_supported":["diffusion remains independently testable if later scientifically necessary"],"cannot_prove":["diffusion helps/hurts Mage","full formulation verdict","skeleton-feedback necessity"],
-      "target_effect":"Preserved an untested mechanism option without contaminating the C1 causal result.","necessity_assessment":"Implementation lineage only until a future prereg actually executes it.","source_pointers":["models/geppetto/challengers/riganything_mechanisms_v1.py","RealSaS_MAGE_GEPPETTO_CAUSAL_REPAIR_V2_RUN_ALL_NO_TOKEN_FINAL.ipynb","canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md"],"next_dependencies":["RIGANYTHING_FULL_FORMULATION_CHALLENGER_C3_C4"]
+      "id": "GEPPETTO_C2_CONDITIONAL_DIFFUSION_LOCUS",
+      "date": "2026-09-06",
+      "time_precision": "defined_in_prereg",
+      "started_at_utc": null,
+      "closed_at_utc": null,
+      "recorded_at_utc": "2026-09-07T10:24:30Z",
+      "module": "Geppetto research challenger",
+      "witness": "Mage FIT1",
+      "status": "IMPLEMENTED_NOT_AUTHORITATIVELY_RUN",
+      "local_question": "What changes when conditional diffusion is added on top of C1 full-surface access?",
+      "global_purpose": "Separate locus-generation mechanism from skeleton feedback.",
+      "arms": [
+        "C2=C1+conditional diffusion"
+      ],
+      "mechanisms_present": [
+        "full-surface xattn",
+        "conditional diffusion implementation"
+      ],
+      "mechanisms_absent_or_not_claimed": [
+        "joint geometry feedback",
+        "parent geometry feedback",
+        "sibling/BFS augmentation"
+      ],
+      "outcome_summary": "C2 was implemented and preregistered as the third Causal Repair V2 staircase rung, but C1 passed and the staircase stopped. The authoritative Drive runs folder contains only R2 and C1 results. Therefore no C2 result is authorized from that experiment.",
+      "falsified_or_weakened": [],
+      "survived_or_supported": [
+        "diffusion remains independently testable if later scientifically necessary"
+      ],
+      "cannot_prove": [
+        "diffusion helps/hurts Mage",
+        "full formulation verdict",
+        "skeleton-feedback necessity"
+      ],
+      "target_effect": "Preserved an untested mechanism option without contaminating the C1 causal result.",
+      "necessity_assessment": "Implementation lineage only until a future prereg actually executes it.",
+      "source_pointers": [
+        "models/geppetto/challengers/riganything_mechanisms_v1.py",
+        "RealSaS_MAGE_GEPPETTO_CAUSAL_REPAIR_V2_RUN_ALL_NO_TOKEN_FINAL.ipynb",
+        "canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md"
+      ],
+      "next_dependencies": [
+        "RIGANYTHING_FULL_FORMULATION_CHALLENGER_C3_C4"
+      ]
     },
     {
-      "id":"FIT1_TRUNK_ACTUAL_UPDATE_CAP_0_005","date":"2026-09-06","time_precision":"date_only","started_at_utc":null,"closed_at_utc":null,"recorded_at_utc":"2026-09-07T04:35:00Z","module":"Geppetto optimizer/training system","witness":"Mage FIT1","status":"COMPONENT_EVIDENCE",
-      "local_question":"Does preregistered strong-trunk actual-update containment prevent catastrophic Mage retention failures?","global_purpose":"Separate optimizer runaway from forward-architecture defects.","arms":["uncapped lineage","0.005 containment"],
-      "mechanisms_present":["FIT1-specific optimizer-time containment"],"mechanisms_absent_or_not_claimed":["forward architecture change","generalization"],"outcome_summary":"Containment strongly reduced catastrophic failures, but strict preregistered terminal closure did not pass; no post-hoc promotion.",
-      "falsified_or_weakened":["all Mage retention failures must be forward-architecture failures"],"survived_or_supported":["optimizer-time trunk runaway has causal role on Mage"],"cannot_prove":["generic stability","generalization","0.005 product-optimal"],"target_effect":"Separated an optimizer-mediated component.","necessity_assessment":"Useful FIT1 diagnostic/containment, not generic architecture answer.","source_pointers":[],"next_dependencies":["AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE"],"index_note":"Exact result pointer still requires bootstrap normalization."
+      "id": "FIT1_TRUNK_ACTUAL_UPDATE_CAP_0_005",
+      "date": "2026-09-06",
+      "time_precision": "date_only",
+      "started_at_utc": null,
+      "closed_at_utc": null,
+      "recorded_at_utc": "2026-09-07T04:35:00Z",
+      "module": "Geppetto optimizer/training system",
+      "witness": "Mage FIT1",
+      "status": "COMPONENT_EVIDENCE",
+      "local_question": "Does preregistered strong-trunk actual-update containment prevent catastrophic Mage retention failures?",
+      "global_purpose": "Separate optimizer runaway from forward-architecture defects.",
+      "arms": [
+        "uncapped lineage",
+        "0.005 containment"
+      ],
+      "mechanisms_present": [
+        "FIT1-specific optimizer-time containment"
+      ],
+      "mechanisms_absent_or_not_claimed": [
+        "forward architecture change",
+        "generalization"
+      ],
+      "outcome_summary": "Containment strongly reduced catastrophic failures, but strict preregistered terminal closure did not pass; no post-hoc promotion.",
+      "falsified_or_weakened": [
+        "all Mage retention failures must be forward-architecture failures"
+      ],
+      "survived_or_supported": [
+        "optimizer-time trunk runaway has causal role on Mage"
+      ],
+      "cannot_prove": [
+        "generic stability",
+        "generalization",
+        "0.005 product-optimal"
+      ],
+      "target_effect": "Separated an optimizer-mediated component.",
+      "necessity_assessment": "Useful FIT1 diagnostic/containment, not generic architecture answer.",
+      "source_pointers": [],
+      "next_dependencies": [
+        "AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE"
+      ],
+      "index_note": "Exact result pointer still requires bootstrap normalization."
     },
     {
-      "id":"RIGANYTHING_FULL_FORMULATION_CHALLENGER_C3_C4","date":"2026-09-05","time_precision":"creation_commit_exact__run_status_open","started_at_utc":null,"closed_at_utc":null,"recorded_at_utc":"2026-09-07T10:24:30Z","module":"Geppetto research challenger","witness":"Mage FIT1 / formulation research","status":"IMPLEMENTED_NOT_AUTHORITATIVELY_RUN",
-      "local_question":"How does the fuller full-surface+diffusion+joint/parent feedback+order-handling formulation behave?","global_purpose":"Preserve full clean-room formulation lineage while components are isolated.","arms":["C3=C2+joint/parent feedback","C4=C3+sibling/BFS augmentation"],
-      "mechanisms_present":["full-surface xattn","conditional diffusion locus","joint+parent feedback token","sibling/BFS helper"],"mechanisms_absent_or_not_claimed":["canonical product authority","authoritative full-formulation result"],
-      "outcome_summary":"Executable research challenger exists; no authoritative C3/C4 closed result is registered.","falsified_or_weakened":[],"survived_or_supported":["fuller RigAnything mechanism family already translated into RealSaS research source"],"cannot_prove":["formulation works","formulation necessary","canonical Geppetto contains it"],
-      "target_effect":"Prevents repeated reimplementation and preserves formulation-level option.","necessity_assessment":"Run only if dependency graph makes it necessary.","source_pointers":["canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md","commit:ba634955777479ee05a5b199742710b1736123b5","blob:136d358572be6ff72ba15999474b6d3be600f5bc","models/geppetto/challengers/riganything_mechanisms_v1.py"],"next_dependencies":["POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION"]
+      "id": "RIGANYTHING_FULL_FORMULATION_CHALLENGER_C3_C4",
+      "date": "2026-09-05",
+      "time_precision": "creation_commit_exact__run_status_open",
+      "started_at_utc": null,
+      "closed_at_utc": null,
+      "recorded_at_utc": "2026-09-07T10:24:30Z",
+      "module": "Geppetto research challenger",
+      "witness": "Mage FIT1 / formulation research",
+      "status": "IMPLEMENTED_NOT_AUTHORITATIVELY_RUN",
+      "local_question": "How does the fuller full-surface+diffusion+joint/parent feedback+order-handling formulation behave?",
+      "global_purpose": "Preserve full clean-room formulation lineage while components are isolated.",
+      "arms": [
+        "C3=C2+joint/parent feedback",
+        "C4=C3+sibling/BFS augmentation"
+      ],
+      "mechanisms_present": [
+        "full-surface xattn",
+        "conditional diffusion locus",
+        "joint+parent feedback token",
+        "sibling/BFS helper"
+      ],
+      "mechanisms_absent_or_not_claimed": [
+        "canonical product authority",
+        "authoritative full-formulation result"
+      ],
+      "outcome_summary": "Executable research challenger exists; no authoritative C3/C4 closed result is registered.",
+      "falsified_or_weakened": [],
+      "survived_or_supported": [
+        "fuller RigAnything mechanism family already translated into RealSaS research source"
+      ],
+      "cannot_prove": [
+        "formulation works",
+        "formulation necessary",
+        "canonical Geppetto contains it"
+      ],
+      "target_effect": "Prevents repeated reimplementation and preserves formulation-level option.",
+      "necessity_assessment": "Run only if dependency graph makes it necessary.",
+      "source_pointers": [
+        "canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md",
+        "commit:ba634955777479ee05a5b199742710b1736123b5",
+        "blob:136d358572be6ff72ba15999474b6d3be600f5bc",
+        "models/geppetto/challengers/riganything_mechanisms_v1.py"
+      ],
+      "next_dependencies": [
+        "POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION"
+      ]
     },
     {
-      "id":"AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE","date":"2026-09-07","time_precision":"closed_exact__start_not_normalized","started_at_utc":null,"closed_at_utc":"2026-09-07T06:00:52.301304Z","recorded_at_utc":"2026-09-07T10:05:10Z","module":"Geppetto","witness":"Mage FIT1","status":"CLOSED_FAIL",
-      "local_question":"Does minimal joint+parent mechanical recurrent feedback improve matched Mage FIT1 reachability/retention?","global_purpose":"Isolate generated-skeleton causal state from the fuller RigAnything bundle.","arms":["AR0 feedback OFF","AR1 feedback ON"],
-      "mechanisms_present":["lossless V3 evidence","full-surface xattn","causal parent prediction","direct three-mode locus","structural serialization","feedback only in AR1"],"mechanisms_absent_or_not_claimed":["conditional diffusion","sibling/BFS augmentation","full formulation equivalence","mechanical salience","generalization"],
-      "outcome_summary":"Both arms completed 16384 and failed terminal 48-check stability. Verdict AR01_NO_TERMINAL_CLOSURE. AR0 max exact streak 61 but terminal streak 1; AR1 no free-running structural PASS despite exact teacher-forced final state.",
-      "falsified_or_weakened":["exact minimal AR-01 feedback implementation is terminal FIT1 repair","one earlier stable streak is sufficient terminal evidence"],"survived_or_supported":["AR0 strong Mage capacity/reachability","AR0 residual late instability","AR1 teacher/free exposure failure","full C3/C4 question remains open"],
-      "cannot_prove":["full RigAnything verdict","all AR harmful","specific recovery method necessary","generalization","promotion"],"target_effect":"Closed minimal-feedback ambiguity and partitioned remaining questions.","necessity_assessment":"Useful negative closure; no refreeze.",
-      "source_pointers":["canonical/AR01_RESULT_20260907.md","canonical/AR01_RUNTIME_BACKEND_AMENDMENT_20260907.md","canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md","contract:41055bd073538d6b"],
-      "terminal_result":{"verdict":"AR01_NO_TERMINAL_CLOSURE","AR0":{"terminal_stability_pass":false,"first_structural_pass_step":2368,"first_48_streak_step":11840,"max_structural_streak_checks":61,"final_streak":1,"final_outside":0,"final_parent_accuracy":1.0,"final_slot_p95":0.0008499497780576348},"AR1":{"terminal_stability_pass":false,"first_structural_pass_step":null,"final_streak":0,"final_outside":28,"final_parent_accuracy":0.5,"final_slot_p95":0.47583022713661194,"teacher_forced_structural_pass":true,"teacher_forced_parent_accuracy":1.0,"teacher_forced_slot_p95":0.00206305761821568,"teacher_forced_vs_free_position_max_abs":0.4984188377857208}},
-      "next_dependencies":["POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION"]
+      "id": "AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE",
+      "date": "2026-09-07",
+      "time_precision": "closed_exact__start_not_normalized",
+      "started_at_utc": null,
+      "closed_at_utc": "2026-09-07T06:00:52.301304Z",
+      "recorded_at_utc": "2026-09-07T10:05:10Z",
+      "module": "Geppetto",
+      "witness": "Mage FIT1",
+      "status": "CLOSED_FAIL",
+      "local_question": "Does minimal joint+parent mechanical recurrent feedback improve matched Mage FIT1 reachability/retention?",
+      "global_purpose": "Isolate generated-skeleton causal state from the fuller RigAnything bundle.",
+      "arms": [
+        "AR0 feedback OFF",
+        "AR1 feedback ON"
+      ],
+      "mechanisms_present": [
+        "lossless V3 evidence",
+        "full-surface xattn",
+        "causal parent prediction",
+        "direct three-mode locus",
+        "structural serialization",
+        "feedback only in AR1"
+      ],
+      "mechanisms_absent_or_not_claimed": [
+        "conditional diffusion",
+        "sibling/BFS augmentation",
+        "full formulation equivalence",
+        "mechanical salience",
+        "generalization"
+      ],
+      "outcome_summary": "Both arms completed 16384 and failed terminal 48-check stability. Verdict AR01_NO_TERMINAL_CLOSURE. AR0 max exact streak 61 but terminal streak 1; AR1 no free-running structural PASS despite exact teacher-forced final state.",
+      "falsified_or_weakened": [
+        "exact minimal AR-01 feedback implementation is terminal FIT1 repair",
+        "one earlier stable streak is sufficient terminal evidence"
+      ],
+      "survived_or_supported": [
+        "AR0 strong Mage capacity/reachability",
+        "AR0 residual late instability",
+        "AR1 teacher/free exposure failure",
+        "full C3/C4 question remains open"
+      ],
+      "cannot_prove": [
+        "full RigAnything verdict",
+        "all AR harmful",
+        "specific recovery method necessary",
+        "generalization",
+        "promotion"
+      ],
+      "target_effect": "Closed minimal-feedback ambiguity and partitioned remaining questions.",
+      "necessity_assessment": "Useful negative closure; no refreeze.",
+      "source_pointers": [
+        "canonical/AR01_RESULT_20260907.md",
+        "canonical/AR01_RUNTIME_BACKEND_AMENDMENT_20260907.md",
+        "canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md",
+        "contract:41055bd073538d6b"
+      ],
+      "terminal_result": {
+        "verdict": "AR01_NO_TERMINAL_CLOSURE",
+        "AR0": {
+          "terminal_stability_pass": false,
+          "first_structural_pass_step": 2368,
+          "first_48_streak_step": 11840,
+          "max_structural_streak_checks": 61,
+          "final_streak": 1,
+          "final_outside": 0,
+          "final_parent_accuracy": 1,
+          "final_slot_p95": 0.0008499497780576348
+        },
+        "AR1": {
+          "terminal_stability_pass": false,
+          "first_structural_pass_step": null,
+          "final_streak": 0,
+          "final_outside": 28,
+          "final_parent_accuracy": 0.5,
+          "final_slot_p95": 0.47583022713661194,
+          "teacher_forced_structural_pass": true,
+          "teacher_forced_parent_accuracy": 1,
+          "teacher_forced_slot_p95": 0.00206305761821568,
+          "teacher_forced_vs_free_position_max_abs": 0.4984188377857208
+        }
+      },
+      "next_dependencies": [
+        "POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION"
+      ]
     },
     {
-      "id":"POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION","date":"2026-09-07","time_precision":"decision_state_exact","started_at_utc":null,"closed_at_utc":null,"recorded_at_utc":"2026-09-07T10:05:10Z","module":"Geppetto scientific governance","witness":"Mage FIT1 / architecture decision","status":"OPEN_NOT_RUN",
-      "local_question":"Which single uncertainty is next: AR0 terminal stability, AR1 generated-state exposure/recovery, or fuller C3/C4 formulation?","global_purpose":"Prevent bundled post-hoc repair and choose one falsifiable next gate.","arms":[],"mechanisms_present":[],"mechanisms_absent_or_not_claimed":["no new intervention authorized yet"],
-      "outcome_summary":"OPEN DECISION STATE; no new scientific run is preregistered.","falsified_or_weakened":[],"survived_or_supported":["remaining questions are separable"],"cannot_prove":["any mechanism is superior before new prereg"],"target_effect":"Keeps Geppetto moving toward refreeze without uncontrolled bundling.","necessity_assessment":"Required governance transition.","source_pointers":["CURRENT_STATE.md","canonical/AR01_RESULT_20260907.md","canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md"],"candidate_next_hypotheses":["AR0_RESIDUAL_TERMINAL_STABILITY","AR1_GENERATED_STATE_EXPOSURE_RECOVERY","RIGANYTHING_FULL_FORMULATION_CHALLENGER_C3_C4"],"next_dependencies":["GEPPETTO_REFREEZE_DECISION"]
+      "id": "POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION",
+      "date": "2026-09-07",
+      "time_precision": "decision_state_exact",
+      "started_at_utc": null,
+      "closed_at_utc": null,
+      "recorded_at_utc": "2026-09-07T10:05:10Z",
+      "module": "Geppetto scientific governance",
+      "witness": "Mage FIT1 / architecture decision",
+      "status": "OPEN_NOT_RUN",
+      "local_question": "Which single uncertainty is next: AR0 terminal stability, AR1 generated-state exposure/recovery, or fuller C3/C4 formulation?",
+      "global_purpose": "Prevent bundled post-hoc repair and choose one falsifiable next gate.",
+      "arms": [],
+      "mechanisms_present": [],
+      "mechanisms_absent_or_not_claimed": [
+        "no new intervention authorized yet"
+      ],
+      "outcome_summary": "OPEN DECISION STATE; no new scientific run is preregistered.",
+      "falsified_or_weakened": [],
+      "survived_or_supported": [
+        "remaining questions are separable"
+      ],
+      "cannot_prove": [
+        "any mechanism is superior before new prereg"
+      ],
+      "target_effect": "Keeps Geppetto moving toward refreeze without uncontrolled bundling.",
+      "necessity_assessment": "Required governance transition.",
+      "source_pointers": [
+        "CURRENT_STATE.md",
+        "canonical/AR01_RESULT_20260907.md",
+        "canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md"
+      ],
+      "candidate_next_hypotheses": [
+        "AR0_RESIDUAL_TERMINAL_STABILITY",
+        "AR1_GENERATED_STATE_EXPOSURE_RECOVERY",
+        "RIGANYTHING_FULL_FORMULATION_CHALLENGER_C3_C4"
+      ],
+      "next_dependencies": [
+        "GEPPETTO_REFREEZE_DECISION"
+      ]
     },
     {
-      "id":"GEPPETTO_REFREEZE_DECISION","date":null,"time_precision":"future","started_at_utc":null,"closed_at_utc":null,"recorded_at_utc":"2026-09-07T10:05:10Z","module":"Geppetto","witness":"post-required-gates architecture decision","status":"OPEN_NOT_RUN",
-      "local_question":"Which Geppetto mechanism set is justified after required post-AR01 gates?","global_purpose":"Freeze a generic/generalization-oriented Geppetto before Arachne.","arms":[],"mechanisms_present":[],"mechanisms_absent_or_not_claimed":[],"outcome_summary":"BLOCKED by post-AR01 diagnosis/follow-up.","falsified_or_weakened":[],"survived_or_supported":[],"cannot_prove":["generalization without later FIT-k/FIT8/LOFO/scaling"],"target_effect":"Unlocks Arachne only after genuine refreeze.","necessity_assessment":"Required transition gate; not ready.","source_pointers":["CURRENT_STATE.md"],"next_dependencies":["ARACHNE_FIT1_SKINTOKENS_CLEANROOM"]
+      "id": "GEPPETTO_REFREEZE_DECISION",
+      "date": null,
+      "time_precision": "future",
+      "started_at_utc": null,
+      "closed_at_utc": null,
+      "recorded_at_utc": "2026-09-07T10:05:10Z",
+      "module": "Geppetto",
+      "witness": "post-required-gates architecture decision",
+      "status": "OPEN_NOT_RUN",
+      "local_question": "Which Geppetto mechanism set is justified after required post-AR01 gates?",
+      "global_purpose": "Freeze a generic/generalization-oriented Geppetto before Arachne.",
+      "arms": [],
+      "mechanisms_present": [],
+      "mechanisms_absent_or_not_claimed": [],
+      "outcome_summary": "BLOCKED by post-AR01 diagnosis/follow-up.",
+      "falsified_or_weakened": [],
+      "survived_or_supported": [],
+      "cannot_prove": [
+        "generalization without later FIT-k/FIT8/LOFO/scaling"
+      ],
+      "target_effect": "Unlocks Arachne only after genuine refreeze.",
+      "necessity_assessment": "Required transition gate; not ready.",
+      "source_pointers": [
+        "CURRENT_STATE.md"
+      ],
+      "next_dependencies": [
+        "ARACHNE_FIT1_SKINTOKENS_CLEANROOM"
+      ]
     },
     {
-      "id":"ARACHNE_FIT1_SKINTOKENS_CLEANROOM","date":null,"time_precision":"future","started_at_utc":null,"closed_at_utc":null,"recorded_at_utc":"2026-09-07T04:35:00Z","module":"Arachne","witness":"Mage FIT1","status":"OPEN_NOT_RUN",
-      "local_question":"Can Arachne learn editable skin/weight/deformation from qualified IRIS+Geppetto outputs with SkinTokens clean-room audit?","global_purpose":"Close deformation layer for an actual editable 2D puppet.","arms":[],"mechanisms_present":["planned IRIS+Geppetto conditioning","planned SkinTokens clean-room audit"],"mechanisms_absent_or_not_claimed":["unqualified teacher-exact shipping path"],"outcome_summary":"FUTURE — blocked until Geppetto refreeze.","falsified_or_weakened":[],"survived_or_supported":[],"cannot_prove":["generalization from FIT1 alone"],"target_effect":"Required for Mage deformation/breathing.","necessity_assessment":"Next major product-science module after Geppetto.","source_pointers":["models/arachne/v2/"],"next_dependencies":["MAGE_IDLE_BREATHING_PRODUCT_WITNESS"]
+      "id": "ARACHNE_FIT1_SKINTOKENS_CLEANROOM",
+      "date": null,
+      "time_precision": "future",
+      "started_at_utc": null,
+      "closed_at_utc": null,
+      "recorded_at_utc": "2026-09-07T04:35:00Z",
+      "module": "Arachne",
+      "witness": "Mage FIT1",
+      "status": "OPEN_NOT_RUN",
+      "local_question": "Can Arachne learn editable skin/weight/deformation from qualified IRIS+Geppetto outputs with SkinTokens clean-room audit?",
+      "global_purpose": "Close deformation layer for an actual editable 2D puppet.",
+      "arms": [],
+      "mechanisms_present": [
+        "planned IRIS+Geppetto conditioning",
+        "planned SkinTokens clean-room audit"
+      ],
+      "mechanisms_absent_or_not_claimed": [
+        "unqualified teacher-exact shipping path"
+      ],
+      "outcome_summary": "FUTURE — blocked until Geppetto refreeze.",
+      "falsified_or_weakened": [],
+      "survived_or_supported": [],
+      "cannot_prove": [
+        "generalization from FIT1 alone"
+      ],
+      "target_effect": "Required for Mage deformation/breathing.",
+      "necessity_assessment": "Next major product-science module after Geppetto.",
+      "source_pointers": [
+        "models/arachne/v2/"
+      ],
+      "next_dependencies": [
+        "MAGE_IDLE_BREATHING_PRODUCT_WITNESS"
+      ]
     },
     {
-      "id":"MAGE_IDLE_BREATHING_PRODUCT_WITNESS","date":null,"time_precision":"future","started_at_utc":null,"closed_at_utc":null,"recorded_at_utc":"2026-09-07T04:35:00Z","module":"End-to-end product witness","witness":"Mage","status":"OPEN_NOT_RUN",
-      "local_question":"Can compiled Mage show convincing qualified idle/breath motion with editable rig/deformation and preserved 2D appearance?","global_purpose":"First emotionally legible RealSaS product proof.","arms":[],"mechanisms_present":["IRIS","Geppetto","Compiler","Arachne","motion proof/runtime"],"mechanisms_absent_or_not_claimed":["generalization claim"],"outcome_summary":"FUTURE.","falsified_or_weakened":[],"survived_or_supported":[],"cannot_prove":["cross-character generalization","production-scale robustness"],"target_effect":"Investor/demo-visible controlled witness.","necessity_assessment":"High-value product milestone.","source_pointers":[],"next_dependencies":["FIT_K","FIT8_LOFO","GENERALIZATION"]
+      "id": "MAGE_IDLE_BREATHING_PRODUCT_WITNESS",
+      "date": null,
+      "time_precision": "future",
+      "started_at_utc": null,
+      "closed_at_utc": null,
+      "recorded_at_utc": "2026-09-07T04:35:00Z",
+      "module": "End-to-end product witness",
+      "witness": "Mage",
+      "status": "OPEN_NOT_RUN",
+      "local_question": "Can compiled Mage show convincing qualified idle/breath motion with editable rig/deformation and preserved 2D appearance?",
+      "global_purpose": "First emotionally legible RealSaS product proof.",
+      "arms": [],
+      "mechanisms_present": [
+        "IRIS",
+        "Geppetto",
+        "Compiler",
+        "Arachne",
+        "motion proof/runtime"
+      ],
+      "mechanisms_absent_or_not_claimed": [
+        "generalization claim"
+      ],
+      "outcome_summary": "FUTURE.",
+      "falsified_or_weakened": [],
+      "survived_or_supported": [],
+      "cannot_prove": [
+        "cross-character generalization",
+        "production-scale robustness"
+      ],
+      "target_effect": "Investor/demo-visible controlled witness.",
+      "necessity_assessment": "High-value product milestone.",
+      "source_pointers": [],
+      "next_dependencies": [
+        "FIT_K",
+        "FIT8_LOFO",
+        "GENERALIZATION"
+      ]
+    },
+    {
+      "id": "GEPPETTO_RIGANYTHING_JOINT_DIFFUSION_PARITY_20261004",
+      "date": "2026-10-04",
+      "time_precision": "date_only__commit_authoritative",
+      "started_at_utc": null,
+      "closed_at_utc": null,
+      "recorded_at_utc": null,
+      "module": "Geppetto / RigAnything mechanism parity",
+      "witness": "source-level reference audit + Knight frozen checkpoint ablation",
+      "status": "COMPONENT_EVIDENCE",
+      "local_question": "Is frozen Geppetto diffusion actually mechanism-faithful to RigAnything joint diffusion, and does the historical C3/C4 challenger preserve the reference causal loop?",
+      "global_purpose": "Prevent a negative residual-refiner ablation from being widened into a verdict on reference-style joint diffusion and correct overbroad full-formulation labels.",
+      "arms": [
+        "Official RigAnything public source pinned at d03cdb21dd134fa81df6b0947522469db3f78bd2",
+        "Frozen Geppetto ReferenceStrength residual diffusion",
+        "Historical Geppetto RigAnythingMechanismChallenger at ba634955777479ee05a5b199742710b1736123b5"
+      ],
+      "mechanisms_present": [
+        "source/blob parity audit",
+        "absolute-vs-residual diffusion target comparison",
+        "sampled XYZ -> parent comparison",
+        "sampled XYZ/parent -> next AR state comparison",
+        "BFS/order and attention/stop semantic comparison"
+      ],
+      "mechanisms_absent_or_not_claimed": [
+        "no new training",
+        "no product promotion",
+        "no exact full-formulation equivalence",
+        "no generalization claim"
+      ],
+      "outcome_summary": "Frozen Geppetto is NOT RigAnything joint-diffusion parity: diffusion is a residual output refiner and recurrence stores coarse XYZ. Historical challenger preserves the key absolute-sampled joint causal loop and BFS-order augmentation, but differs materially from the released RigAnything formulation in transformer topology, diffusion implementation/sampler, stop semantics, and RealSaS authority boundaries. The Knight negative diffusion ablation therefore applies only to the current residual refiner.",
+      "falsified_or_weakened": [
+        "Claim that frozen ReferenceStrength diffusion is a faithful test of RigAnything joint diffusion.",
+        "Claim that historical C3/C4 source is an exact full RigAnything formulation reimplementation."
+      ],
+      "survived_or_supported": [
+        "Historical challenger is the correct existing source starting point for a reference-style joint-diffusion challenger.",
+        "Current residual-refiner diffusion can be evaluated independently from reference-style joint diffusion."
+      ],
+      "cannot_prove": [
+        "RigAnything-style joint diffusion helps or hurts Knight",
+        "historical challenger training outcome",
+        "generalization",
+        "Geppetto refreeze"
+      ],
+      "target_effect": "Narrows the next Geppetto question to a preregistered parity-faithful challenger decision instead of retraining or deleting diffusion based on the wrong ablation scope.",
+      "necessity_assessment": "Required semantic closure before any further diffusion architecture decision.",
+      "source_pointers": [
+        "canonical/GEPPETTO_RIGANYTHING_JOINT_DIFFUSION_PARITY_V1.json",
+        "canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md",
+        "tools/audit_geppetto_riganything_joint_diffusion_parity_v1.py",
+        "run:37187501053",
+        "external:RigAnything@d03cdb21dd134fa81df6b0947522469db3f78bd2",
+        "historical:ba634955777479ee05a5b199742710b1736123b5"
+      ],
+      "next_dependencies": [
+        "GEPPETTO_RIGANYTHING_PARITY_CHALLENGER_V2_CONTRACT"
+      ]
     }
   ],
   "scientific_flow": {
-    "current_path":["GEPPETTO_B1S_HISTORICAL_FIT1","V3P_LOSSLESS_EVIDENCE_STABILITY","V3X_FULL_SURFACE_STABILITY","GEPPETTO_CAUSAL_REPAIR_V2_R2_C1","FIT1_TRUNK_ACTUAL_UPDATE_CAP_0_005","AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE","POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION","GEPPETTO_REFREEZE_DECISION","ARACHNE_FIT1_SKINTOKENS_CLEANROOM","MAGE_IDLE_BREATHING_PRODUCT_WITNESS"],
-    "preserved_unexecuted_mechanism_lineage":["GEPPETTO_C2_CONDITIONAL_DIFFUSION_LOCUS","RIGANYTHING_FULL_FORMULATION_CHALLENGER_C3_C4"],
-    "conditional_forks":[
-      {"after":"POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION","condition":"AR0 residual stability selected","then":"NEW_PREREG_AR0_TERMINAL_STABILITY_GATE"},
-      {"after":"POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION","condition":"AR1 exposure/recovery selected","then":"NEW_PREREG_AR1_EXPOSURE_RECOVERY_GATE"},
-      {"after":"POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION","condition":"full formulation ambiguity remains material","then":"RIGANYTHING_FULL_FORMULATION_CHALLENGER_C3_C4"}
+    "current_path": [
+      "GEPPETTO_B1S_HISTORICAL_FIT1",
+      "V3P_LOSSLESS_EVIDENCE_STABILITY",
+      "V3X_FULL_SURFACE_STABILITY",
+      "GEPPETTO_CAUSAL_REPAIR_V2_R2_C1",
+      "FIT1_TRUNK_ACTUAL_UPDATE_CAP_0_005",
+      "AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE",
+      "POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION",
+      "GEPPETTO_REFREEZE_DECISION",
+      "ARACHNE_FIT1_SKINTOKENS_CLEANROOM",
+      "MAGE_IDLE_BREATHING_PRODUCT_WITNESS"
+    ],
+    "preserved_unexecuted_mechanism_lineage": [
+      "GEPPETTO_C2_CONDITIONAL_DIFFUSION_LOCUS",
+      "RIGANYTHING_FULL_FORMULATION_CHALLENGER_C3_C4"
+    ],
+    "conditional_forks": [
+      {
+        "after": "POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION",
+        "condition": "AR0 residual stability selected",
+        "then": "NEW_PREREG_AR0_TERMINAL_STABILITY_GATE"
+      },
+      {
+        "after": "POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION",
+        "condition": "AR1 exposure/recovery selected",
+        "then": "NEW_PREREG_AR1_EXPOSURE_RECOVERY_GATE"
+      },
+      {
+        "after": "POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION",
+        "condition": "full formulation ambiguity remains material",
+        "then": "RIGANYTHING_FULL_FORMULATION_CHALLENGER_C3_C4"
+      }
     ]
   }
 }

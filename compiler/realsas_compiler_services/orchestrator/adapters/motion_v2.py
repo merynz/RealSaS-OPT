@@ -9,6 +9,7 @@ from compiler.realsas_compiler_core.motion_compile_v2 import (
     build_qualified_motion_v2,
 )
 from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import (
+    DynamicMotionProofFailure,
     build_qualified_dynamic_motion_v2,
 )
 from compiler.realsas_compiler_core.motion_source_v1 import (
@@ -44,6 +45,10 @@ from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import 
     write_ir,
 )
 from compiler.realsas_compiler_core.types import QualificationError
+from compiler.realsas_compiler_services.proof.failure_signatures import (
+    derive_failure_signatures,
+    no_owner_attribution,
+)
 
 
 def _motion_assets(ctx: dict):
@@ -444,18 +449,61 @@ def prove_dynamic_motion_stage(ctx: dict) -> dict:
             "RealSaS.QualifiedObservationSetIR.v1",
         )
     )
-    proof = build_qualified_dynamic_motion_v2(
-        motion=motion,
-        constraints=constraints,
-        product_state=mechanical,
-        skeleton=skeleton,
-        mesh=mesh,
-        mesh_skin=mesh_skin,
-        presentation=presentation,
-        mesh_policy=_mesh_policy(ctx),
-        cameras=cameras.cameras,
-        source_foreground_masks=_source_foreground_masks(ctx, observation),
-    )
+    mesh_policy = _mesh_policy(ctx)
+    try:
+        proof = build_qualified_dynamic_motion_v2(
+            motion=motion,
+            constraints=constraints,
+            product_state=mechanical,
+            skeleton=skeleton,
+            mesh=mesh,
+            mesh_skin=mesh_skin,
+            presentation=presentation,
+            mesh_policy=mesh_policy,
+            cameras=cameras.cameras,
+            source_foreground_masks=_source_foreground_masks(ctx, observation),
+        )
+    except DynamicMotionProofFailure as exc:
+        measurements=dict(exc.measurements)
+        measurements.setdefault(
+            "frozen_policy_thresholds",
+            {
+                "g3_min_dynamic_area_ratio":float(mesh_policy.g3_min_dynamic_area_ratio),
+                "g3_max_dynamic_area_ratio":float(mesh_policy.g3_max_dynamic_area_ratio),
+                "g3_max_dynamic_condition_number":float(
+                    mesh_policy.g3_max_dynamic_condition_number
+                ),
+            },
+        )
+        signatures=derive_failure_signatures(
+            "MOTION",
+            measurements,
+            status="FAIL",
+        )
+        return {
+            "status":"FAIL",
+            "blockers":[exc.failure_code],
+            "diagnostics":{
+                "failure_code":exc.failure_code,
+                "proof_domain":"MOTION",
+                "stage41_exact_motion":True,
+                "measurements":measurements,
+                "failure_signatures":list(signatures),
+                "owner_attribution":list(no_owner_attribution()),
+                "causal_owner_attribution":"NOT_PERFORMED",
+                "owner_attribution_requires_controlled_counterfactual":True,
+                "repair_authorized":False,
+                "same_probe_reproof_required":True,
+                "bindings":{
+                    "mechanical_state_binding_hash":mechanical.product_state_hash,
+                    "skeleton_binding_hash":skeleton.skeleton_lineage_hash,
+                    "mesh_binding_hash":mesh.mesh_lineage_hash,
+                    "mesh_skin_binding_hash":mesh_skin.mesh_skin_lineage_hash,
+                    "qualified_motion_binding_hash":motion.motion_lineage_hash,
+                    "constraint_set_binding_hash":constraints.constraint_set_hash,
+                },
+            },
+        }
     if proof.dynamic_motion_hash != qualified_dynamic_motion_v2_hash(proof):
         raise QualificationError("MOTION_V2_DYNAMIC_HASH_DRIFT")
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]

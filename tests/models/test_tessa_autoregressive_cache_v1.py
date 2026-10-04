@@ -17,7 +17,7 @@ def test_cached_incremental_logits_match_causal_forward_inside_window():
         surface_layers=1,
         decoder_layers=2,
         mlp_ratio=2,
-        surface_latent_count=8,
+        surface_latent_count=64,
         local_attention_window=128,
         query_chunk_size=16,
         max_faces=32768,

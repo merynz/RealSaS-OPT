@@ -1,0 +1,80 @@
+name: knight-mira-carrier-projection-actual-motion-c33-v1
+
+on:
+  push:
+    branches: [impl/carrier-first-mechanical-compilation-20261004]
+    paths:
+      - tools/audit_knight_mira_carrier_projection_actual_motion_c33_v1.py
+      - compiler/realsas_compiler_core/mechanical_carrier_skin_v1.py
+      - .github/workflows/knight_mira_carrier_projection_actual_motion_c33_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  court:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "4"
+      PY: /home/monster/realsas-ml312/bin/python
+      AUTH: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
+      ARM: /home/monster/realsas_model_cache/arachne_uniform_all_projected_63e589b67946
+      ARM_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_V6_COVERAGE_SAMPLING_2X2_INDEXSPACE_FIXED_20260929/ARMS/UNIFORM_ALL_PROJECTED
+      OUT: /home/monster/realsas_research_scratch/mira_carrier_projection_c33_${{ github.run_id }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Restore checkpoint and preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          export LD_LIBRARY_PATH="$pythonLocation/lib:${LD_LIBRARY_PATH:-}"
+          test -x "$PY"
+          mkdir -p "$ARM"
+          for FILE in ARACHNE_KNIGHT_V6_RESULT.json ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt; do
+            if [ ! -f "$ARM/$FILE" ]; then
+              rclone copyto "$ARM_REMOTE/$FILE" "$ARM/$FILE.partial" --checksum
+              mv "$ARM/$FILE.partial" "$ARM/$FILE"
+            fi
+          done
+          printf '%s  %s\n' 0a73240d2278a69fe24d1b6a8ebf185dbe8556a0bd17b7d4c70731ff558be31f "$ARM/ARACHNE_KNIGHT_V6_RESULT.json" | sha256sum --check
+          printf '%s  %s\n' 63e589b679461daf7cf859eb0c10e4b5f9c285b055d18f114d0ba348f2829892 "$ARM/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt" | sha256sum --check
+          "$PY" - <<'PY'
+          import torch, numpy
+          print("C33_ENV",torch.__version__,torch.version.cuda,torch.cuda.is_available(),numpy.__version__,flush=True)
+          if not torch.cuda.is_available():
+              raise SystemExit("C33_CUDA_NOT_AVAILABLE")
+          PY
+          "$PY" -m py_compile             tools/audit_knight_mira_carrier_projection_actual_motion_c33_v1.py
+          echo "C33_PREFLIGHT_PASS"
+
+      - name: Run carrier projection exact motion court
+        shell: bash
+        run: |
+          set -euo pipefail
+          export LD_LIBRARY_PATH="$pythonLocation/lib:${LD_LIBRARY_PATH:-}"
+          rm -rf "$OUT"
+          mkdir -p "$OUT"
+          "$PY" -u tools/audit_knight_mira_carrier_projection_actual_motion_c33_v1.py             --authority-root "$AUTH"             --run-id "$RUN_ID"             --arm-dir "$ARM"             --out-dir "$OUT"             --device cuda             --seed 11             --backbone-query-chunk 256             --readout-chunk 128
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knight-mira-carrier-projection-actual-motion-c33-v1
+          path: ${{ env.OUT }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6

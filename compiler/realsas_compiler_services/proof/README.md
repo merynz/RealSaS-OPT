@@ -40,7 +40,13 @@ Controlled-intervention causal attribution. Owner credit requires same-probe, si
 
 ### `repair_loop.py`
 
-Bounded repair-directive and mandatory same-probe re-proof contract. It does not mutate `CanonicalPuppetGraph.v3`. Owner-specific executors remain separate and unpromoted until individually source-diffed and qualified.
+Bounded repair-directive and mandatory same-probe re-proof contract. It does not mutate `CanonicalPuppetGraph.v3`. Owner-specific executors remain separately qualified and must be present in the current repair authority registry.
+
+### `control_basis_repair.py`
+
+Current promoted owner-local executor for `ATLAS_CONTROL_BASIS` single-control structural prune. It cannot select a control or infer ownership. It materializes only an already-attributed, directive-authorized, one-control non-root prune through the current typed pruning operator. Carrier topology remains immutable and all skeleton-bound downstream artifacts require rederivation and same-probe reproof.
+
+Current operation authority: `CONTROL_BASIS_SINGLE_PRUNE_REQUALIFICATION_V1`.
 
 ## Runtime/export boundary
 

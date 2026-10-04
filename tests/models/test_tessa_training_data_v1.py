@@ -36,6 +36,8 @@ def test_face_charting_is_bounded_complete_and_nonoverlapping():
 
 def test_teacher_chart_builder_preserves_exact_teacher_face_set():
     vertices, faces = _strip_mesh(17)
+    # Global policy remains Knight-scale. Only the per-chart training sequence
+    # is intentionally tiny in this fixture.
     cfg = TESSAConfigV1(
         d_model=64,
         n_heads=8,
@@ -44,8 +46,8 @@ def test_teacher_chart_builder_preserves_exact_teacher_face_set():
         surface_latent_count=64,
         local_attention_window=128,
         query_chunk_size=32,
-        max_faces=128,
-        max_vertices=128,
+        max_faces=8192,
+        max_vertices=8192,
         max_faces_per_chart=5,
     )
     charts = build_teacher_charts_v1(vertices, faces, cfg=cfg)

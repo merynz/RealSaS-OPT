@@ -1258,17 +1258,23 @@ A control is not justified merely because a teacher/source skeleton contains it.
 Use two complementary directions:
 
 **Grow-to-need**
-- start from the minimal legal/current core;
-- run the best admitted skin + motion adapter and aggregate hard failure signatures into a carrier-space residual field;
-- cluster connected/local residual regions rather than reading teacher joints;
-- propose one bounded control birth per residual region from carrier geometry/evidence;
-- choose candidate locus/parent through local mechanical search under Compiler tree legality;
-- reoptimize/adapt skin for each proposed basis;
-- add only the control with the highest positive marginal proof gain per unit complexity;
-- stop as soon as the hard admissibility thresholds are met;
-- if every legal birth has marginal gain below the preregistered threshold, reattribute to carrier rather than adding arbitrary joints.
+- start from the minimal/current candidate basis;
+- Compiler runs the best admitted skin + motion adapter and emits typed hard failure signatures / carrier-space residual evidence;
+- residual evidence is routed back to **ATLAS/Geppetto**, because mechanical control existence and control locus are learned-owner semantics;
+- ATLAS proposes additional control evidence/loci/uncertainty conditioned on the same carrier + residual evidence contract;
+- Compiler may search/select only among supplied candidate evidence under exact tree legality; it must not silently invent a semantic control;
+- reoptimize/adapt skin for every admitted rig proposal;
+- accept a new control only if hard proof gain exceeds the preregistered marginal threshold and all source/editability gates remain legal;
+- stop as soon as hard admissibility thresholds are met;
+- if ATLAS cannot supply a useful legal proposal and research oracle capacity also fails, reattribute to carrier rather than adding arbitrary joints.
 
-Candidate birth is therefore failure-driven and subject-specific. A quadruped, humanoid, tail, wing, or unusual articulated object is free to require a different number and spatial arrangement of controls.
+**Research-only control-birth oracle**
+- a bounded local locus/parent search may be used only to answer the ceiling question “could one additional control in this residual region close the mechanics?”;
+- oracle controls are never product authority and never count as ATLAS success;
+- oracle PASS authorizes an ATLAS repair/training objective;
+- oracle FAIL redirects ownership toward carrier/motion assumptions.
+
+Candidate birth is therefore failure-driven and subject-specific while preserving semantic ownership. A quadruped, humanoid, tail, wing, or unusual articulated object is free to require a different number and spatial arrangement of controls.
 
 
 **Prune-to-proof**

@@ -1100,7 +1100,22 @@ Verdict:
 
 **Do not optimize for a requested joint count.**
 
-The goal is to infer the smallest control basis that is mechanically sufficient for the current carrier and admitted motion/editing envelope.
+The goal is to infer the smallest control basis that is mechanically sufficient for the current carrier and **required capability envelope**.
+
+The optimum is therefore not a function of character identity alone:
+
+\[
+R^* = R^*(M,Q_{\mathrm{required}})
+\]
+
+where \(Q_{\mathrm{required}}\) can include:
+- generic articulation probes;
+- the preset/runtime motion family the product promises to support;
+- contact constraints;
+- edit-locality/control-response probes;
+- any additional capability explicitly admitted by the product contract.
+
+The same carrier may legitimately admit a smaller optimum basis for a narrower capability envelope and a larger basis for a richer one. RealSaS must report which envelope the optimum was proven against.
 
 For a candidate control basis \(R\), define its best achievable skin state under the same carrier:
 

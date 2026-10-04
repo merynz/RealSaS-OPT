@@ -9,6 +9,7 @@ on:
       - canonical/ACTIVE_RUN_V2.json
       - compiler/realsas_compiler_core/mechanical_carrier_evidence_v1.py
       - compiler/realsas_compiler_core/control_basis_selection_v1.py
+      - compiler/realsas_compiler_core/control_basis_pruning_v1.py
       - compiler/realsas_compiler_core/carrier_query_normal_evidence_v1.py
       - tests/models/test_mira_carrier_query_v1.py
       - models/mira/carrier_query_v1.py
@@ -18,6 +19,7 @@ on:
       - models/shared/joint_mechanical_loss_v1.py
       - tests/compiler/test_mechanical_carrier_evidence_v1.py
       - tests/compiler/test_control_basis_selection_v1.py
+      - tests/compiler/test_control_basis_pruning_v1.py
       - tests/compiler/test_carrier_query_normal_evidence_v1.py
       - tests/models/test_joint_mechanical_loss_v1.py
       - tests/repository/test_mainline_execution_plan_v2.py
@@ -56,13 +58,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m py_compile             compiler/realsas_compiler_core/mechanical_carrier_evidence_v1.py             compiler/realsas_compiler_core/control_basis_selection_v1.py             compiler/realsas_compiler_core/carrier_query_normal_evidence_v1.py             compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py             compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py             models/shared/joint_mechanical_loss_v1.py
+          python -m py_compile             compiler/realsas_compiler_core/mechanical_carrier_evidence_v1.py             compiler/realsas_compiler_core/control_basis_selection_v1.py             compiler/realsas_compiler_core/control_basis_pruning_v1.py             compiler/realsas_compiler_core/carrier_query_normal_evidence_v1.py             compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py             compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py             models/shared/joint_mechanical_loss_v1.py
 
       - name: Carrier identity and DAG contracts
         shell: bash
         run: |
           set -euo pipefail
-          python -m pytest -q             tests/compiler/test_mechanical_carrier_evidence_v1.py             tests/compiler/test_control_basis_selection_v1.py             tests/compiler/test_carrier_query_normal_evidence_v1.py             tests/repository/test_mainline_execution_plan_v2.py
+          python -m pytest -q             tests/compiler/test_mechanical_carrier_evidence_v1.py             tests/compiler/test_control_basis_selection_v1.py             tests/compiler/test_control_basis_pruning_v1.py             tests/compiler/test_carrier_query_normal_evidence_v1.py             tests/repository/test_mainline_execution_plan_v2.py
 
       - name: Mechanical loss regression
         shell: bash

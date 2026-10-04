@@ -47,15 +47,15 @@ func RecordFailure(
 	}
 
 	payload := map[string]any{
-		"schema":                         "RealSaS.FailureSignature.v2",
-		"failing_stage_id":               failingStageID,
-		"error_code":                     evidence.Code,
-		"failure_class":                  evidence.Class,
-		"diagnostics":                    evidence.Diagnostics,
-		"reported_owner_stage_id_hint":   evidence.ReportedOwnerStageID,
-		"reported_owner_hint_authority":  "NON_AUTHORITATIVE",
-		"causal_owner_attribution":       "NOT_PERFORMED",
-		"repair_authorized":              false,
+		"schema":                        "RealSaS.FailureSignature.v2",
+		"failing_stage_id":              failingStageID,
+		"error_code":                    evidence.Code,
+		"failure_class":                 evidence.Class,
+		"diagnostics":                   evidence.Diagnostics,
+		"reported_owner_stage_id_hint":  evidence.ReportedOwnerStageID,
+		"reported_owner_hint_authority": "NON_AUTHORITATIVE",
+		"causal_owner_attribution":      "NOT_PERFORMED",
+		"repair_authorized":             false,
 	}
 	signatureSHA, err := semantic.JSONSHA256(payload)
 	if err != nil {
@@ -91,11 +91,11 @@ func RecordFailure(
 	}
 
 	eventPayload, err := json.Marshal(map[string]any{
-		"failure_signature_id":       failureID.String(),
-		"signature_sha256":           signatureSHA,
-		"failing_stage_id":           failingStageID,
-		"causal_owner_attribution":   "NOT_PERFORMED",
-		"repair_authorized":          false,
+		"failure_signature_id":     failureID.String(),
+		"signature_sha256":         signatureSHA,
+		"failing_stage_id":         failingStageID,
+		"causal_owner_attribution": "NOT_PERFORMED",
+		"repair_authorized":        false,
 	})
 	if err != nil {
 		return Record{}, err

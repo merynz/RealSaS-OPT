@@ -207,14 +207,25 @@ def _proposal_from_raw(model, surface, out, count: int, *, coarse_only: bool):
 def _match(pred, truth, scale):
     pred = np.asarray(pred, dtype=np.float64)
     truth = np.asarray(truth, dtype=np.float64)
-    if truth is None or pred.shape != truth.shape:
+    if truth is None:
         return None
+    if pred.ndim != 2 or truth.ndim != 2 or pred.shape[1:] != (3,) or truth.shape[1:] != (3,):
+        raise RuntimeError(
+            f"GEPPETTO_DIFFUSION_TEACHER_MATCH_SHAPE_INVALID:{pred.shape}:{truth.shape}"
+        )
+    if len(pred) == 0 or len(truth) == 0:
+        raise RuntimeError("GEPPETTO_DIFFUSION_TEACHER_MATCH_EMPTY")
     d = np.linalg.norm(
         pred[:, None, :] - truth[None, :, :], axis=-1
     ) / float(scale)
     r, c = linear_sum_assignment(d)
     dist = d[r, c]
     return {
+        "matched_count": int(len(dist)),
+        "pred_count": int(len(pred)),
+        "truth_count": int(len(truth)),
+        "unmatched_pred_count": int(len(pred) - len(dist)),
+        "unmatched_truth_count": int(len(truth) - len(dist)),
         "mae_norm": float(dist.mean()),
         "p95_norm": float(np.quantile(dist, 0.95)),
         "max_norm": float(dist.max()),
@@ -349,6 +360,10 @@ def main(args):
         if r["live_teacher"] is not None and r["coarse_teacher"] is not None
     ]
     live_better = None
+    if teacher_world is not None and not comparable:
+        raise RuntimeError(
+            "GEPPETTO_DIFFUSION_TEACHER_COMPARISON_UNAVAILABLE_DESPITE_TARGET"
+        )
     if comparable:
         live_better = {
             "mae_all_seeds": bool(all(

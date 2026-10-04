@@ -1125,6 +1125,26 @@ A_\tau(R)=
 
 where the \(G\) terms are measured on the current carrier and admitted probe/motion/editing envelope after skin is reoptimized/adapted for that rig.
 
+
+Each gate emits a **signed normalized margin**, not a raw metric. For an upper-bounded badness metric \(x\le\tau\):
+
+\[
+g(x)=\frac{\tau-x}{\max(|\tau|,\epsilon)}
+\]
+
+For a lower-bounded goodness metric \(x\ge\tau\):
+
+\[
+g(x)=\frac{x-\tau}{\max(|\tau|,\epsilon)}
+\]
+
+A multi-metric gate reports the minimum admitted normalized margin unless its contract defines a stricter composition. Therefore:
+- \(g\ge0\) has one universal meaning: gate satisfied;
+- \(g<0\) means violation;
+- metrics with unrelated physical units are never naively added;
+- the selector cannot trade a catastrophic mechanical failure for extra source fidelity or vice versa.
+
+
 Then select the minimum-sufficient basis:
 
 \[

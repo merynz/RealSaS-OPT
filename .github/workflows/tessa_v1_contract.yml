@@ -6,9 +6,12 @@ on:
     paths:
       - models/tessa/**
       - tools/training/run_tessa_supervised_fit_v1.py
+      - tools/training/run_tessa_autoregressive_reconstruction_v1.py
       - notebooks/RealSaS_TESSA_KNIGHT_T1_RUN_ALL.ipynb
+      - notebooks/RealSaS_TESSA_KNIGHT_T1B_RUN_ALL.ipynb
       - tests/models/test_tessa_v1.py
       - tests/models/test_tessa_training_data_v1.py
+      - tests/models/test_tessa_autoregressive_cache_v1.py
       - canonical/TESSA_MECHANICAL_MESH_MODEL_EXECUTION_PLAN_V1.md
       - canonical/TESSA_MESHANYTHING_V2_CLEANROOM_REFERENCE_AUDIT_V1.md
       - canonical/TESSA_CARRIER_FIRST_MECHANICAL_COHERENCE_AMENDMENT_V1.md
@@ -76,15 +79,24 @@ jobs:
             models/tessa/v1/mechanical_objective_v1.py \
             models/tessa/v1/training_data_v1.py \
             tools/training/run_tessa_supervised_fit_v1.py \
+            tools/training/run_tessa_autoregressive_reconstruction_v1.py \
             tests/models/test_tessa_v1.py \
-            tests/models/test_tessa_training_data_v1.py
+            tests/models/test_tessa_training_data_v1.py \
+            tests/models/test_tessa_autoregressive_cache_v1.py
           python - <<'PY'
           import json
           from pathlib import Path
-          payload=json.loads(Path('notebooks/RealSaS_TESSA_KNIGHT_T1_RUN_ALL.ipynb').read_text(encoding='utf-8'))
-          assert payload['nbformat']==4
-          assert payload['cells']
-          print('TESSA_NOTEBOOK_JSON_PASS', len(payload['cells']))
+          for name in (
+              'notebooks/RealSaS_TESSA_KNIGHT_T1_RUN_ALL.ipynb',
+              'notebooks/RealSaS_TESSA_KNIGHT_T1B_RUN_ALL.ipynb',
+          ):
+              p=Path(name)
+              if not p.exists():
+                  continue
+              payload=json.loads(p.read_text(encoding='utf-8'))
+              assert payload['nbformat']==4
+              assert payload['cells']
+              print('TESSA_NOTEBOOK_JSON_PASS', name, len(payload['cells']))
           PY
           echo "TESSA_COMPILE_PASS"
 
@@ -106,5 +118,6 @@ jobs:
           set -euo pipefail
           python -m pytest -q \
             tests/models/test_tessa_v1.py \
-            tests/models/test_tessa_training_data_v1.py
+            tests/models/test_tessa_training_data_v1.py \
+            tests/models/test_tessa_autoregressive_cache_v1.py
           echo "TESSA_V1_CONTRACT_PASS"

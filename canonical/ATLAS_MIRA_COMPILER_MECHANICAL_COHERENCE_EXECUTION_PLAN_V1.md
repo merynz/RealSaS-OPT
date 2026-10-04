@@ -1449,26 +1449,47 @@ Scientific consequence:
 
 This is mechanical admission only. Product prune is not yet authorized.
 
-### C5.1c — reduced-basis source/editability admission — RUNNING
+### C5.1c — reduced-basis source/editability admission — COMPLETE / EDITABILITY FAIL
 
-Workflow/code:
-- `tools/audit_knight_reduced_basis_product_admissibility_c51c_v1.py`;
-- source/editability court triggered after C5.1b.
+Workflow:
+- `37208786172`.
 
-Required gates for the 27-control candidate:
-- exact same Stage19 carrier => static source fidelity invariant;
-- exact-motion + microstress PASS from C5.1b;
-- supplied-motion tree-consistent correspondence cost non-regressive against the corrected 28-control baseline;
-- legal reduced tree / exact skin-joint accounting;
-- every exposed remaining control has a measurable carrier response under subject-free ±10° XYZ edit probes.
+27-control mechanically closed candidate:
+- exact-motion mechanical PASS;
+- Stage34 microstress PASS;
+- static source/carrier fidelity invariant;
+- supplied-motion tree-consistent correspondence non-regressive;
+- product admissibility FAIL only because **2 exposed controls are numerical no-ops** under the subject-free ±10° edit probes:
+  - `J:7d9e31e2d0bd48f88ecb`;
+  - `J:eafe286e7d84499e5257`.
 
-If C5.1c PASS:
-- 27 controls becomes the first **product-admissible search-frontier basis**, not “the optimum”;
-- continue bounded Pareto/beam prune search toward 26 and below;
-- ATLAS salience supervision may use the proven harmful/redundant control as proof-derived training evidence.
+Interpretation:
+- this is not evidence that the 27-control basis needs growth;
+- it is direct evidence that the reduced basis still contains redundant/non-editable controls;
+- the semantic owner of the failed gate is the control basis itself.
 
-If C5.1c FAIL:
-- reject the mechanical-only prune as product basis and route the failed gate to its semantic owner.
+### C5.1d — targeted prune fixed-point from the mechanically closed 27-control basis — NEXT
+
+Before any C5.2 grow/locus search:
+
+1. start from the C5.1b mechanically closed 27-control basis;
+2. target the C5.1c no-op controls first;
+3. truly remove one candidate control, reparent children, rebuild skeleton lineage;
+4. recompile tree-consistent retarget for the reduced skeleton;
+5. reoptimize skin for that exact reduced rig and exact 51-frame motion domain;
+6. rerun hard exact-motion proof;
+7. rerun fresh reduced-skeleton microstress;
+8. rerun source/motion fidelity and editability;
+9. keep only product-admissible children on the frontier;
+10. repeat until every single-control deletion from an admitted frontier basis fails at least one hard gate.
+
+Because admissibility is non-monotonic, maintain a bounded beam/Pareto frontier rather than one greedy path.
+
+Exit:
+- if an admissible locally irreducible basis is found, seal it as the Knight control-basis frontier result and use it as proof-derived ATLAS supervision;
+- if every further prune fails while no product-admissible basis exists, then and only then open C5.2 grow/locus/carrier attribution.
+
+C5.1d is still Knight-specific evidence; only the prune/grow/proof algorithm is generic.
 
 ### C5.2 — actual-motion rig ceiling
 

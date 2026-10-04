@@ -41,10 +41,9 @@ def decode_tessa_asset_sequence_v1(
     """Decode the strict V1 topology grammar into indexed geometry.
 
     Coordinate identity is welded only inside one explicit COMPONENT block.
-    This avoids the global exact-coordinate merge used by some artist-mesh
-    generators, which would be unsafe for RealSaS near-contact/disconnected
-    surfaces. Winding is intentionally not claimed by the autoregressive grammar;
-    Compiler support/normal evidence must orient and qualify faces later.
+    This avoids global exact-coordinate welding across near-contact/disconnected
+    surfaces. Winding is not claimed by the autoregressive grammar; Compiler
+    support/normal evidence must orient and qualify faces later.
     """
     cfg = cfg or TESSAConfigV1()
     cfg.scaling_policy()
@@ -55,8 +54,7 @@ def decode_tessa_asset_sequence_v1(
         eos = raw.index(cfg.EOS, 1)
     except ValueError as exc:
         raise ValueError("TESSA_DECODE_EOS_MISSING") from exc
-    trailing = raw[eos + 1 :]
-    if any(t != cfg.PAD for t in trailing):
+    if any(t != cfg.PAD for t in raw[eos + 1 :]):
         raise ValueError("TESSA_DECODE_NONPAD_AFTER_EOS")
     tokens = raw[: eos + 1]
 
@@ -75,6 +73,7 @@ def decode_tessa_asset_sequence_v1(
         component_count += 1
         i += 1
         component_vertex_map: dict[tuple[int, int, int], int] = {}
+        component_face_keys: set[tuple[int, int, int]] = set()
         component_face_count = 0
 
         def vertex_index(q: tuple[int, int, int]) -> int:
@@ -128,8 +127,9 @@ def decode_tessa_asset_sequence_v1(
                 if len(set(indices)) != 3:
                     raise ValueError("TESSA_DECODE_DEGENERATE_FACE_AFTER_COMPONENT_WELD")
                 face_key = tuple(sorted(indices))
-                if any(tuple(sorted(existing)) == face_key for existing in faces if all(vertex_components[x] == component_index for x in existing)):
+                if face_key in component_face_keys:
                     raise ValueError("TESSA_DECODE_DUPLICATE_FACE")
+                component_face_keys.add(face_key)
                 faces.append(indices)
                 face_components.append(component_index)
                 component_face_count += 1

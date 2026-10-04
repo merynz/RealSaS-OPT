@@ -142,17 +142,20 @@ def select_minimum_sufficient_control_basis_v1(
     if not admissible:
         raise ValueError("NO_MECHANICALLY_SUFFICIENT_CONTROL_BASIS")
 
-    # Correct optimization order:
+    # Minimum-sufficient optimization order:
     #   1) all hard requirements already pass,
-    #   2) minimize subject-specific complexity,
-    #   3) then minimize raw control count,
+    #   2) minimize the number of independent effective controls,
+    #   3) among equal-count bases minimize secondary structural/edit burden,
     #   4) only then prefer larger residual hard margin,
     #   5) deterministic lexical tie-break.
+    #
+    # Editability/locality is already a hard gate above; a larger rig must not
+    # win merely because an arbitrary secondary complexity scalar is lower.
     selected = min(
         admissible,
         key=lambda row: (
-            float(row.complexity_score),
             int(row.control_count),
+            float(row.complexity_score),
             -float(row.minimum_hard_margin),
             row.basis_id,
         ),

@@ -436,6 +436,20 @@ def prove_dynamic_motion_stage(ctx: dict) -> dict:
             "RealSaS.QualifiedPresentationGraphIR.v2",
         )
     )
+    source_set = motion_source_set_from_dict(
+        stage_output_payload(
+            ctx,
+            "39_MOTION_SOURCE_OR_PRESET_SEAL",
+            "RealSaS.MotionSourceSetIR.v1",
+        )
+    )
+    source_seal = qualified_motion_source_seal_from_dict(
+        stage_output_payload(
+            ctx,
+            "39_MOTION_SOURCE_OR_PRESET_SEAL",
+            "RealSaS.QualifiedMotionSourceSealIR.v1",
+        )
+    )
     constraints = motion_compile_constraint_set_v2_from_dict(
         stage_output_payload(
             ctx,
@@ -508,6 +522,8 @@ def prove_dynamic_motion_stage(ctx: dict) -> dict:
             "mechanical_carrier_topology_hash":carrier.topology_hash,
             "mechanical_carrier_geometry_hash":carrier.geometry_hash,
             "static_mesh_qualification_binding_hash":carrier.static_mesh_qualification_binding_hash,
+            "motion_source_set_binding_hash":source_set.source_set_hash,
+            "motion_source_seal_binding_hash":source_seal.motion_source_seal_hash,
         }
         attribution_context=build_stage41_failure_attribution_context_v1(
             measurements=measurements,
@@ -560,5 +576,7 @@ def prove_dynamic_motion_stage(ctx: dict) -> dict:
             "mechanical_carrier_topology_hash": carrier.topology_hash,
             "mechanical_carrier_geometry_hash": carrier.geometry_hash,
             "static_mesh_qualification_binding_hash": carrier.static_mesh_qualification_binding_hash,
+            "motion_source_set_binding_hash": source_set.source_set_hash,
+            "motion_source_seal_binding_hash": source_seal.motion_source_seal_hash,
         },
     }

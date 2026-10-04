@@ -691,8 +691,14 @@ Existing:
 - finite-gradient court.
 
 Remaining:
-- fold/orientation;
+- rigid-transform-invariant fold/self-intersection surrogate;
 - parity/order regression against hard G3 cases.
+
+Safety correction:
+- do **not** use `dot(rest_normal, posed_normal) < 0` as fold guilt;
+- do **not** use fixed-camera projected winding sign as intrinsic fold guilt;
+- `canonical/DEFORMATION_WITNESS_VALIDITY_AUDIT_V1_20260928.json` proved both can flip under valid proper rigid rotation;
+- until a differentiable neighborhood/intersection surrogate is validated, hard self-intersection/geometry-integrity evidence remains the fold authority.
 
 ## C0 — architecture contract migration — PASS
 

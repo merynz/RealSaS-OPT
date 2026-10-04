@@ -38,12 +38,15 @@ jobs:
           set -euo pipefail
           echo "DISK_BEFORE"
           df -h / /tmp || true
-          rm -rf             /tmp/knight_v9_fixed_point_resume_input_*             /tmp/knight_v9_fixed_point_resume_*             /tmp/geppetto_live_diffusion_ablation_*             /tmp/geppetto_articulation_target_capacity_*             /tmp/knight_v9_microstep_input_*             /tmp/knight_v9_microstep_flip_*
+          rm -rf /tmp/knight_v9_fixed_point_resume_input_* /tmp/knight_v9_fixed_point_resume_* /tmp/geppetto_live_diffusion_ablation_* /tmp/geppetto_articulation_target_capacity_* /tmp/knight_v9_microstep_input_* /tmp/knight_v9_microstep_flip_*
           echo "DISK_AFTER"
           df -h / /tmp || true
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
       - uses: actions/setup-python@v5
-        with: {python-version: '3.12'}
+        with:
+          python-version: '3.12'
       - uses: actions/download-artifact@v4
         with:
           name: knight-v9-mechanical-static-fixed-point-v1
@@ -61,18 +64,17 @@ jobs:
           test -f "$CACHE_ROOT/fresh/fresh_qualified_skeleton.json"
           test -f "$TEACHER_ROOT/V9_TEACHER_BANK.npz"
           inverse=""
-          for p in             /tmp/knight_v9_dynamic_compaction_input/repaired_inverse_v2.npz             /tmp/knight_v9_topology_attr_input_*/compaction/repaired_inverse_v2.npz             /tmp/knight_v9_topology_prolong_input_*/compaction/repaired_inverse_v2.npz; do
-            if test -f "$p"; then inverse="$p"; break; fi
-          done
+          for p in /tmp/knight_v9_dynamic_compaction_input/repaired_inverse_v2.npz /tmp/knight_v9_topology_attr_input_*/compaction/repaired_inverse_v2.npz /tmp/knight_v9_topology_prolong_input_*/compaction/repaired_inverse_v2.npz; do if test -f "$p"; then inverse="$p"; break; fi; done
           test -n "$inverse"
           echo "inverse=$inverse" >> "$GITHUB_OUTPUT"
           "$PY" -m py_compile tools/audit_v9_static_mechanical_microstep_v1.py
           echo "V9_MICROSTEP_INPUT_PASS inverse=$inverse"
       - name: Run flip microstep
+        shell: bash
         run: |
           set -euo pipefail
           mkdir -p "$OUT"
-          "$PY" tools/audit_v9_static_mechanical_microstep_v1.py             --authority-root "$AUTH"             --run-id "$RUN_ID"             --surface-json "$CACHE_ROOT/phase1/refined_surface.json"             --partition-json "$INPUT/prior/cycle_02/PARTITION.json"             --fresh-skeleton-json "$CACHE_ROOT/fresh/fresh_qualified_skeleton.json"             --teacher-bank "$TEACHER_ROOT/V9_TEACHER_BANK.npz"             --inverse-npz "${{ steps.inputs.outputs.inverse }}"             --operator flip             --cycle-tag CYCLE_02_FLIP             --out-dir "$OUT"
+          "$PY" tools/audit_v9_static_mechanical_microstep_v1.py --authority-root "$AUTH" --run-id "$RUN_ID" --surface-json "$CACHE_ROOT/phase1/refined_surface.json" --partition-json "$INPUT/prior/cycle_01/PARTITION.json" --candidate-json "$INPUT/prior/cycle_01/CANDIDATE.json" --fresh-skeleton-json "$CACHE_ROOT/fresh/fresh_qualified_skeleton.json" --teacher-bank "$TEACHER_ROOT/V9_TEACHER_BANK.npz" --inverse-npz "${{ steps.inputs.outputs.inverse }}" --repartition-first --repartition-iteration 2 --operator flip --cycle-tag CYCLE_01_TO_02_FLIP --out-dir "$OUT"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

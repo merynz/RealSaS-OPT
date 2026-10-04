@@ -18,6 +18,8 @@ jobs:
     env:
       PYTHONUNBUFFERED: "1"
       PYTHONPATH: .
+      SOURCE_FBX: assets/external/quaternius/knight/KnightCharacter.fbx
+      EXPECTED_FBX_SHA256: 41f2616fb4a42f9d35e242bbed1450ededc7537def4bf38cbb11b4e54ff2bf21
 
     steps:
       - uses: actions/checkout@v4
@@ -32,56 +34,46 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -s assets/external/quaternius/knight/KnightCharacter.fbx
-          printf '%s  %s\n' \
-            '41f2616fb4a42f9d35e242bbed1450ededc7537def4bf38cbb11b4e54ff2bf21' \
-            'assets/external/quaternius/knight/KnightCharacter.fbx' | sha256sum --check -
+          test -s "$SOURCE_FBX"
+          printf '%s  %s\n' "$EXPECTED_FBX_SHA256" "$SOURCE_FBX" | sha256sum --check -
           echo "TESSA_MOTION_SOURCE_FBX_PASS"
 
-      - name: Resolve Blender across WSL
+      - name: Resolve or bootstrap canonical pinned Blender
         shell: bash
         run: |
           set -euo pipefail
-          if command -v blender >/dev/null 2>&1; then
-            echo "BLENDER_FOR_MATERIALIZER=$(command -v blender)" >> "$GITHUB_ENV"
-            blender --version | head -n 2
+          if python - <<'PY'
+          from tools.motion.materialize_quaternius_preset_v1 import resolve_blender
+          print(resolve_blender(None))
+          PY
+          then
+            resolved="$(python - <<'PY'
+          from tools.motion.materialize_quaternius_preset_v1 import resolve_blender
+          print(resolve_blender(None))
+          PY
+          )"
+            echo "BLENDER_EXE=$resolved" >> "$GITHUB_ENV"
+            "$resolved" --version | head -n 2
             exit 0
           fi
 
-          win_root='/mnt/c/Program Files/Blender Foundation'
-          win_blender=''
-          if [ -d "$win_root" ]; then
-            win_blender="$(find "$win_root" -maxdepth 3 -type f -iname blender.exe -print | sort -V | tail -n 1 || true)"
-          fi
-          if [ -z "$win_blender" ]; then
-            echo "TESSA_BLENDER_SEARCH_FAIL"
-            find /usr/bin /usr/local/bin /snap/bin -maxdepth 1 -iname 'blender*' -print 2>/dev/null || true
-            if [ -d "$win_root" ]; then
-              find "$win_root" -maxdepth 3 -iname 'blender*' -print 2>/dev/null || true
-            fi
-            exit 1
-          fi
-
-          wrapper="$RUNNER_TEMP/realsas-blender-wsl-wrapper"
-          cat > "$wrapper" <<'SH'
-          #!/usr/bin/env bash
-          set -euo pipefail
-          exe="${REALSAS_WINDOWS_BLENDER_EXE:?missing REALSAS_WINDOWS_BLENDER_EXE}"
-          converted=()
-          for arg in "$@"; do
-            if [[ "$arg" == /* ]]; then
-              converted+=("$(wslpath -w "$arg")")
-            else
-              converted+=("$arg")
-            fi
-          done
-          exec "$exe" "${converted[@]}"
-          SH
-          chmod +x "$wrapper"
-          echo "REALSAS_WINDOWS_BLENDER_EXE=$win_blender" >> "$GITHUB_ENV"
-          echo "BLENDER_FOR_MATERIALIZER=$wrapper" >> "$GITHUB_ENV"
-          echo "TESSA_WINDOWS_BLENDER_FOUND=$win_blender"
-          "$win_blender" --version | head -n 2
+          version='4.5.14'
+          base="https://download.blender.org/release/Blender4.5"
+          archive="blender-${version}-linux-x64.tar.xz"
+          install_root="$RUNNER_TEMP/realsas_blender"
+          mkdir -p "$install_root"
+          curl --fail --location --retry 3 --retry-delay 2 "$base/$archive" --output "$RUNNER_TEMP/$archive"
+          curl --fail --location --retry 3 --retry-delay 2 "$base/blender-${version}.sha256" --output "$RUNNER_TEMP/blender.sha256"
+          (
+            cd "$RUNNER_TEMP"
+            grep "  $archive\$" blender.sha256 | sha256sum --check -
+          )
+          tar -xJf "$RUNNER_TEMP/$archive" -C "$install_root"
+          blender_path="$install_root/blender-${version}-linux-x64/blender"
+          test -x "$blender_path"
+          echo "BLENDER_EXE=$blender_path" >> "$GITHUB_ENV"
+          "$blender_path" --version | head -n 2
+          echo "TESSA_PINNED_BLENDER_BOOTSTRAP_PASS"
 
       - name: Materialize sealed Knight clips
         shell: bash
@@ -90,8 +82,8 @@ jobs:
           out="$RUNNER_TEMP/tessa_knight_motion_v1"
           rm -rf "$out"
           python tools/motion/materialize_quaternius_preset_v1.py \
-            --source-fbx assets/external/quaternius/knight/KnightCharacter.fbx \
-            --blender "$BLENDER_FOR_MATERIALIZER" \
+            --source-fbx "$SOURCE_FBX" \
+            --blender "$BLENDER_EXE" \
             --out-dir "$out" \
             --run-id TESSA_KNIGHT_CONTINUOUS_FIELD_WITNESS_V1
           for f in demo_idle_v1.motion.json demo_run_v1.motion.json demo_slash_v1.motion.json EXTRACTION_RECEIPT.json MATERIALIZATION_RECEIPT.json; do
@@ -102,17 +94,13 @@ jobs:
           import json, os
           from pathlib import Path
           root=Path(os.environ['RUNNER_TEMP'])/'tessa_knight_motion_v1'
+          receipt=json.loads((root/'MATERIALIZATION_RECEIPT.json').read_text())
+          assert receipt['status']=='PASS'
+          assert receipt['source_input_mode']=='EXACT_FBX_SHA'
+          assert receipt['source_fbx_sha256']==os.environ['EXPECTED_FBX_SHA256']
           for name in ('demo_idle_v1.motion.json','demo_run_v1.motion.json','demo_slash_v1.motion.json'):
-              p=root/name
-              x=json.loads(p.read_text())
-              print(
-                  'TESSA_MOTION_CLIP_PASS',
-                  name,
-                  x['schema'],
-                  x['clip_kind'],
-                  len(x.get('source_skeleton',())),
-                  len(x.get('tracks',())),
-              )
+              x=json.loads((root/name).read_text())
+              print('TESSA_MOTION_CLIP_PASS', name, x['schema'], x['clip_kind'], len(x.get('source_skeleton',())), len(x.get('tracks',())))
           PY
 
       - name: Upload motion witness source
@@ -121,4 +109,4 @@ jobs:
           name: tessa-knight-motion-source-v1
           path: ${{ env.MOTION_OUT }}
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 14

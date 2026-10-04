@@ -121,6 +121,95 @@ func TestStage42ChangeInvalidatesOnlyRuntimeDescendants(t *testing.T) {
 	t.Fatal("IRIS fit must remain reusable")
 }
 
+func TestRepairSemanticOverrideInvalidatesRestartStageAndDescendantsOnly(t *testing.T) {
+	g := resolverGraph(t)
+	catalog := newMemoryCatalog()
+	root := []domain.ArtifactInputIdentity{{
+		Role: "subject:source", Ordinal: 0, ArtifactType: "RealSaS.SourceImage", SemanticSHA256: hex64("a"),
+	}}
+	versions := resolverVersions(g, hex64("1"))
+	baseline, err := Resolve(
+		context.Background(), g, catalog, "46_PRODUCT_CLOSURE_SEAL", root, versions,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalog.admit(baseline)
+
+	restart := "28_SKELETON_QUALIFIED"
+	changed, err := ResolveWithStageSemanticParameters(
+		context.Background(),
+		g,
+		catalog,
+		"46_PRODUCT_CLOSURE_SEAL",
+		root,
+		versions,
+		map[string]map[string]any{
+			restart: {"repair_context_sha256": hex64("f")},
+		},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	descendants, err := g.DescendantsIncluding(restart)
+	if err != nil {
+		t.Fatal(err)
+	}
+	required := map[string]struct{}{}
+	for _, row := range baseline.Stages {
+		required[row.StageID] = struct{}{}
+	}
+	want := make([]string, 0, len(descendants))
+	for _, stageID := range descendants {
+		if _, ok := required[stageID]; ok {
+			want = append(want, stageID)
+		}
+	}
+	if !same(changed.ExecuteStageIDs(), want) {
+		t.Fatalf("execute=%v want=%v", changed.ExecuteStageIDs(), want)
+	}
+	for _, stageID := range changed.ReusedStageIDs() {
+		if stageID == restart {
+			t.Fatalf("restart stage %s must not be reused", restart)
+		}
+	}
+	if len(changed.ReusedStageIDs()) == 0 {
+		t.Fatal("repair resolution must preserve exact upstream reuse")
+	}
+}
+
+func TestRepairSemanticOverrideRejectsUnknownOutsideClosureAndReservedKeys(t *testing.T) {
+	g := resolverGraph(t)
+	catalog := newMemoryCatalog()
+	root := []domain.ArtifactInputIdentity{{
+		Role: "subject:source", Ordinal: 0, ArtifactType: "RealSaS.SourceImage", SemanticSHA256: hex64("a"),
+	}}
+	versions := resolverVersions(g, hex64("1"))
+
+	_, err := ResolveWithStageSemanticParameters(
+		context.Background(), g, catalog, "41_DYNAMIC_MOTION_PROOF",
+		root, versions,
+		map[string]map[string]any{
+			"46_PRODUCT_CLOSURE_SEAL": {"repair_context_sha256": hex64("f")},
+		},
+	)
+	if err == nil {
+		t.Fatal("override outside target closure must fail")
+	}
+
+	_, err = ResolveWithStageSemanticParameters(
+		context.Background(), g, catalog, "46_PRODUCT_CLOSURE_SEAL",
+		root, versions,
+		map[string]map[string]any{
+			"28_SKELETON_QUALIFIED": {"stage_id": "forbidden"},
+		},
+	)
+	if err == nil {
+		t.Fatal("reserved semantic override key must fail")
+	}
+}
+
 func same(a, b []string) bool {
 	if len(a) != len(b) {
 		return false

@@ -161,7 +161,7 @@ def joint_mechanical_loss_v1(
     edge = metrics["edge_ratio"]
 
     # Log-space condition penalty is scale-stable and mirrors a hard threshold.
-    cond_loss = F.softplus(
+    cond_excess = F.relu(
         torch.log(condition.clamp_min(cfg.eps))
         - torch.log(
             torch.as_tensor(
@@ -170,26 +170,28 @@ def joint_mechanical_loss_v1(
                 device=condition.device,
             )
         )
-    ).mean()
+    )
+    cond_loss = (cond_excess * cond_excess).mean()
 
-    area_low = F.softplus(
+    area_low = F.relu(
         torch.as_tensor(
             cfg.min_area_ratio, dtype=area.dtype, device=area.device
         ) - area
     )
-    area_high = F.softplus(
+    area_high = F.relu(
         area - torch.as_tensor(
             cfg.max_area_ratio, dtype=area.dtype, device=area.device
         )
     )
-    area_loss = (area_low + area_high).mean()
+    area_loss = (area_low.square() + area_high.square()).mean()
 
-    edge_loss = F.softplus(
+    edge_excess = F.relu(
         edge
         - torch.as_tensor(
             cfg.max_edge_ratio, dtype=edge.dtype, device=edge.device
         )
-    ).mean()
+    )
+    edge_loss = edge_excess.square().mean()
 
     total = (
         cfg.condition_weight * cond_loss

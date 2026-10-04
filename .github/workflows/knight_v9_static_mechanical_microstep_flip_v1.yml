@@ -38,9 +38,20 @@ jobs:
           set -euo pipefail
           echo "DISK_BEFORE"
           df -h / /tmp || true
+          df -i / /tmp || true
+          if command -v powershell.exe >/dev/null 2>&1; then
+            echo "WINDOWS_HOST_VOLUMES_BEFORE"
+            powershell.exe -NoProfile -Command "Get-Volume | Where-Object DriveLetter | Select-Object DriveLetter,@{N='FreeGB';E={[math]::Round($_.SizeRemaining/1GB,2)}},@{N='SizeGB';E={[math]::Round($_.Size/1GB,2)}} | Format-Table -AutoSize" || true
+          fi
           rm -rf /tmp/knight_v9_fixed_point_resume_input_* /tmp/knight_v9_fixed_point_resume_* /tmp/geppetto_live_diffusion_ablation_* /tmp/geppetto_articulation_target_capacity_* /tmp/knight_v9_microstep_input_* /tmp/knight_v9_microstep_flip_*
+          sync || true
           echo "DISK_AFTER"
           df -h / /tmp || true
+          df -i / /tmp || true
+          if command -v powershell.exe >/dev/null 2>&1; then
+            echo "WINDOWS_HOST_VOLUMES_AFTER"
+            powershell.exe -NoProfile -Command "Get-Volume | Where-Object DriveLetter | Select-Object DriveLetter,@{N='FreeGB';E={[math]::Round($_.SizeRemaining/1GB,2)}},@{N='SizeGB';E={[math]::Round($_.Size/1GB,2)}} | Format-Table -AutoSize" || true
+          fi
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}

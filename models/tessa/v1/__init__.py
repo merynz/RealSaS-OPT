@@ -38,6 +38,12 @@ from .tokenization_v1 import (
     encode_adjacent_teacher_mesh_v1,
     quantize_tessa_xyz_v1,
 )
+from .training_data_v1 import (
+    TESSATeacherChartV1,
+    build_teacher_charts_v1,
+    connected_face_components_v1,
+    deterministic_face_charts_v1,
+)
 
 __all__ = [
     "TESSAActionKindV1",
@@ -49,6 +55,7 @@ __all__ = [
     "TESSAScalingPolicyV1",
     "TESSASurfaceEncoderV1",
     "TESSA_SURFACE_FEATURE_DIM_V1",
+    "TESSATeacherChartV1",
     "TESSATeacherSequenceV1",
     "TESSATriangleMetricsV1",
     "TESSAV1",
@@ -56,9 +63,12 @@ __all__ = [
     "WindowedCausalSelfAttentionV1",
     "adjacent_sequence_token_upper_bound_v1",
     "assemble_tessa_proposal_v1",
+    "build_teacher_charts_v1",
     "build_tessa_conditioning_v1",
+    "connected_face_components_v1",
     "denormalize_tessa_xyz_v1",
     "dequantize_tessa_xyz_v1",
+    "deterministic_face_charts_v1",
     "encode_adjacent_teacher_mesh_v1",
     "mechanical_consequence_loss_v1",
     "quantize_tessa_xyz_v1",

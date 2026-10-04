@@ -244,26 +244,44 @@ Role:
 - bind to carrier attempt and skeleton;
 - define the evaluation envelope consumed by dynamic proof.
 
-## Stage35 — Joint dynamic mechanical proof
+## Current Stage35 — pre-motion local mechanical compatibility
 
-Stage35 evaluates:
+Current Stage35 is an **early fail-fast numerical/mechanical compatibility witness**, not professional motion-capability authority.
+
+It evaluates the frozen carrier + rig + skin under the subject-free local probe family:
+- G3/G3B local conditioning;
+- area/condition/edge legality;
+- topology/skin compatibility;
+- early failure evidence where causal support exists.
+
+Hard rule:
+
+> **Stage35 PASS does not imply compiled-motion PASS.**
+
+C33/C34/C5 directly proved this: local microstress can PASS while idle/run/slash exact motion fails.
+
+## Current Stage41 — authoritative exact compiled-motion proof
+
+After the motion source/preset is sealed and canonical motion is compiled, current Stage41 executes exact quaternion FK/LBS/contact on the exact carrier + rig + skin state.
+
+For an admitted supplied/preset motion envelope (Q_{motion}):
 
 [
-(M^k,R^k,W^k,Q)
+P_{motion}(M,R,W,Q_{motion})
 ]
 
-Required outputs:
-- hard G3/G3B-style consequence report;
-- failure signatures;
-- owner attribution;
-- bounded repair directive where justified;
-- no direct Stage18 mutation.
+is the authoritative dynamic mechanical consequence court.
 
-Stage35 is:
+Stage41 owns:
+- exact clip-frame deformation consequence;
+- motion-capability PASS/FAIL;
+- exact contact/conditioning evidence;
+- the primary mechanical failure evidence for owner attribution under that motion envelope.
 
-> **proof + diagnosis**
-
-not a hidden mesh builder.
+Owner attribution therefore consumes the **latest semantically relevant proof**, not a sacred stage number:
+- current Stage35 for pre-motion local incompatibility;
+- current Stage41 for exact compiled-motion mechanical failure;
+- later runtime/visual proof for runtime/presentation failures.
 
 ## Stage36 — Mechanical closure seam
 
@@ -280,37 +298,53 @@ Whether this remains Stage36 is not architecturally important.
 
 # 5. Outer Compiler loop: immutable attempt DAGs
 
-A single attempt DAG remains acyclic.
-
-The fixed-point loop lives outside a single attempt:
+A single attempt DAG remains acyclic. The fixed point lives outside one attempt and is driven by the **latest authoritative proof for the admitted capability envelope**.
 
 ```text
 Attempt k:
-  Stage18 -> Stage19 -> ATLAS -> MIRA -> Stage35
+  Stage18/19 carrier
+      -> ATLAS rig
+      -> MIRA skin
+      -> pre-motion compatibility (current 35)
+      -> puppet seal / motion source / motion compile
+      -> exact-motion dynamic proof (current 41)
+      -> runtime / visual proof
 
-Stage35 PASS:
-  seal (M^k,R^k,W^k)
+Early pre-motion FAIL:
+  owner attribution -> owner-scoped new attempt
 
-Stage35 FAIL:
-  owner attribution
-        ↓
-  bounded repair directive
-        ↓
-  create attempt k+1 with explicit parent-attempt reference
-        ↓
-  build M^(k+1) / R^(k+1) / W^(k+1) as required
-        ↓
-  re-run affected proof
+Exact-motion FAIL:
+  Stage41 failure evidence
+      -> owner attribution
+      -> ATLAS / MIRA / motion-adapter / carrier repair route
+      -> new immutable attempt k+1
+      -> re-run every stale downstream artifact
+
+PASS through required product proofs:
+  closure aggregation / export
 ```
+
+No proof may mutate the candidate it measures.
 
 Carrier mutation rule:
 
 [
-M^k 
-eq M^{k+1}
+M^k != M^{k+1}
 ]
 
-means downstream mechanics are stale unless explicitly revalidated.
+invalidates carrier-bound rig/skin/proof by default.
+
+Rig mutation rule:
+
+[
+R^k != R^{k+1}
+]
+
+invalidates skin, deformation envelope, retarget/motion compile, exact-motion proof and downstream runtime proof unless an explicit typed equivalence/revalidation contract says otherwise.
+
+Skin mutation similarly invalidates every downstream mechanical/motion proof.
+
+Stage numbers may change; these dependency semantics may not.
 
 ---
 

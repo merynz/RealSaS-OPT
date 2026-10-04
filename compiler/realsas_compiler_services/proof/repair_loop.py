@@ -10,8 +10,13 @@ same-probe re-proof.
 
 from dataclasses import asdict, dataclass, field
 from hashlib import sha256
+from fnmatch import fnmatchcase
 import json
 from typing import Any, Iterable, Mapping
+
+from compiler.realsas_compiler_core.repair_attempt import (
+    audit_repair_child_attempt_v1,
+)
 
 SERVICE_ID = "RealSaS.CompilerServices.BoundedRepairLoop.v1"
 Json = dict[str, Any]
@@ -250,12 +255,20 @@ def validate_repair_application_v1(directive: RepairDirectiveV1, application: Re
         blockers.append("repair_not_single_owner_local")
     if not bool(application.bounded_change_passed):
         blockers.append("repair_bounded_change_audit_failed")
-    allowed = set(directive.operation.allowed_change_paths)
-    changed_paths = set(str(x) for x in application.changed_paths if x)
+    allowed = tuple(str(x) for x in directive.operation.allowed_change_paths if x)
+    changed_paths = tuple(sorted(set(str(x) for x in application.changed_paths if x)))
     if not changed_paths:
         blockers.append("repair_changed_paths_empty")
-    elif not changed_paths.issubset(allowed):
-        blockers.append("repair_changed_path_outside_operation_scope")
+    else:
+        outside = tuple(
+            path
+            for path in changed_paths
+            if not any(fnmatchcase(path, pattern) for pattern in allowed)
+        )
+        if outside:
+            blockers.append(
+                "repair_changed_path_outside_operation_scope:" + ",".join(outside)
+            )
     return not blockers, tuple(blockers)
 
 
@@ -333,3 +346,67 @@ def evaluate_repair_effect_v1(
     }
     payload["report_id"] = "REPAIR_EFFECT:" + _stable_hash(payload)[:24]
     return payload
+
+
+
+def evaluate_real_repair_child_effect_v1(
+    *,
+    parent,
+    child,
+    directive: RepairDirectiveV1,
+    reproof: RepairReproofEvidenceV1,
+    visual_nonregression: V2VisualRepairNonRegressionEvidenceV1 | None = None,
+) -> Json:
+    """Bridge a real CanonicalPuppetGraph child attempt into repair-effect credit.
+
+    This is the production integration seam between core semantic-delta authority
+    and the service-level same-probe effect evaluator. A child that fails the
+    core attempt audit can never receive repair credit.
+    """
+    audit = audit_repair_child_attempt_v1(parent, child, directive)
+    application_payload = {
+        "directive_id": str(directive.directive_id),
+        "parent_product_state_hash": str(parent.product_state_hash),
+        "child_product_state_hash": str(child.product_state_hash),
+        "child_parent_state_hash": str(child.parent_state_hash or ""),
+        "applied_operation_id": str(directive.operation.operation_id),
+        "changed_owner_ids": (str(directive.selected_owner_id),),
+        "changed_paths": tuple(audit.actual_changed_paths),
+        "bounded_change_passed": bool(audit.status == "PASS"),
+        "child_attempt_audit_hash": str(audit.audit_hash),
+    }
+    application = RepairApplicationRecordV1(
+        application_id="REPAIR_APPLICATION:" + _stable_hash(application_payload)[:24],
+        directive_id=str(directive.directive_id),
+        parent_product_state_hash=str(parent.product_state_hash),
+        child_product_state_hash=str(child.product_state_hash),
+        child_parent_state_hash=str(child.parent_state_hash or ""),
+        applied_operation_id=str(directive.operation.operation_id),
+        changed_owner_ids=(str(directive.selected_owner_id),),
+        changed_paths=tuple(audit.actual_changed_paths),
+        bounded_change_passed=bool(audit.status == "PASS"),
+        mutation_summary={
+            "semantic_delta_paths": list(audit.actual_changed_paths),
+            "core_child_attempt_status": str(audit.status),
+        },
+        metadata={
+            "child_attempt_audit_hash": str(audit.audit_hash),
+            "child_attempt_blockers": list(audit.blockers),
+        },
+    )
+    effect = evaluate_repair_effect_v1(
+        directive=directive,
+        application=application,
+        reproof=reproof,
+        visual_nonregression=visual_nonregression,
+    )
+    effect["child_attempt_audit"] = audit.to_dict()
+    effect["application_record"] = application.to_dict()
+    if audit.status != "PASS":
+        effect["repair_accepted"] = False
+        if "repair_child_attempt_audit_rejected" not in effect["blockers"]:
+            effect["blockers"].append("repair_child_attempt_audit_rejected")
+    effect["report_id"] = "REPAIR_EFFECT:" + _stable_hash(
+        {k: v for k, v in effect.items() if k != "report_id"}
+    )[:24]
+    return effect

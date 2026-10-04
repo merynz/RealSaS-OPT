@@ -7,7 +7,6 @@ on:
       - tools/audit_knight_control_basis_local_irreducibility_c51e_v1.py
       - compiler/realsas_compiler_core/control_basis_frontier_v1.py
       - compiler/realsas_compiler_core/control_basis_pruning_v1.py
-      - canonical/ATLAS_MIRA_COMPILER_MECHANICAL_COHERENCE_EXECUTION_PLAN_V1.md
       - .github/workflows/knight_control_basis_local_irreducibility_c51e_v1.yml
   workflow_dispatch:
 

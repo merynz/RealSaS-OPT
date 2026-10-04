@@ -37,6 +37,8 @@ def build_stage41_failure_attribution_context_v1(
         "mechanical_carrier_topology_hash",
         "mechanical_carrier_geometry_hash",
         "static_mesh_qualification_binding_hash",
+        "motion_source_set_binding_hash",
+        "motion_source_seal_binding_hash",
     }
     missing = sorted(k for k in required if not bindings.get(k))
     if missing:
@@ -53,37 +55,22 @@ def build_stage41_failure_attribution_context_v1(
     if not evaluator_semantic_version:
         raise ValueError("STAGE41_ATTRIBUTION_EVALUATOR_VERSION_MISSING")
 
+    # IMPORTANT: causal probe identity is the immutable evaluation protocol,
+    # not the mutable product state under intervention. Product/carrier/rig/skin/
+    # compiled-motion bindings remain sealed below in the measurement identity.
+    # Otherwise a legitimate single-owner counterfactual could never be replayed
+    # under the "same probe" because changing that owner necessarily changes one
+    # or more derived lineage hashes.
     probe_specification = {
-        "schema": "RealSaS.Stage41ExactMotionProbeSpecification.v1",
+        "schema": "RealSaS.Stage41ExactMotionProbeSpecification.v2",
         "proof_domain": "MOTION",
         "evaluator_semantic_version": str(evaluator_semantic_version),
         "sampling_contract": "UNIFORM17_PLUS_KEYFRAMES_PLUS_CONTACT_ENDPOINTS",
-        "mechanical_state_binding_hash": bindings[
-            "mechanical_state_binding_hash"
+        "motion_source_set_binding_hash": bindings[
+            "motion_source_set_binding_hash"
         ],
-        "skeleton_binding_hash": bindings["skeleton_binding_hash"],
-        "mesh_binding_hash": bindings["mesh_binding_hash"],
-        "mesh_skin_binding_hash": bindings["mesh_skin_binding_hash"],
-        "qualified_motion_binding_hash": bindings[
-            "qualified_motion_binding_hash"
-        ],
-        "constraint_set_binding_hash": bindings[
-            "constraint_set_binding_hash"
-        ],
-        "presentation_binding_hash": bindings[
-            "presentation_binding_hash"
-        ],
-        "mechanical_carrier_evidence_hash": bindings[
-            "mechanical_carrier_evidence_hash"
-        ],
-        "mechanical_carrier_topology_hash": bindings[
-            "mechanical_carrier_topology_hash"
-        ],
-        "mechanical_carrier_geometry_hash": bindings[
-            "mechanical_carrier_geometry_hash"
-        ],
-        "static_mesh_qualification_binding_hash": bindings[
-            "static_mesh_qualification_binding_hash"
+        "motion_source_seal_binding_hash": bindings[
+            "motion_source_seal_binding_hash"
         ],
         "camera_binding_hashes": list(cameras),
         "observation_set_hash": str(observation_set_hash),
@@ -114,6 +101,13 @@ def build_stage41_failure_attribution_context_v1(
         "operator_policy_hashes": list(operator_policy_hashes),
         "probe_specification": probe_specification,
         "bindings": bindings,
+        "baseline_product_bindings_hash": content_sha256(
+            {
+                "schema": "RealSaS.Stage41BaselineProductBindings.v1",
+                "bindings": bindings,
+            }
+        ),
+        "probe_identity_excludes_mutable_product_bindings": True,
         "causal_owner_attribution": "NOT_PERFORMED",
         "automatic_repair_eligible": False,
         "same_probe_counterfactual_required": True,

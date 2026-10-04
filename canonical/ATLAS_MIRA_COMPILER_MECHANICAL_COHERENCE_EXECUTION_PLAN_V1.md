@@ -1585,22 +1585,98 @@ Then test:
 
 No full ATLAS retrain before this point.
 
-## C6 — Compiler repair loop
+## C6 — Compiler repair loop — IN PROGRESS
 
-Tasks:
-- Stage35 owner attribution;
-- typed repair directive;
-- parent-attempt input;
-- immutable new carrier attempt;
-- bounded repair budget;
-- repair-effect report;
-- no hidden DAG back-edge.
+The repair loop consumes the **latest semantically relevant authoritative proof**:
+- current Stage35 may fail early on local pre-motion compatibility;
+- current Stage41 owns exact compiled-motion failure for the admitted motion envelope;
+- runtime/presentation proof may own later consumer failures.
+
+A failure signature is **not** a causal owner label.
+
+### C6.0 — structured exact-motion failure evidence — IMPLEMENTED / CONTRACT PASS
+
+Stage41 exact-motion proof now preserves structured measurements for:
+- dynamic triangle area-ratio failure;
+- dynamic triangle condition failure;
+- new dynamic self-intersection;
+- worsening of rest-existing intersections;
+- declared contact drift;
+- all-clips-static failure.
+
+The orchestrator persists deterministic MOTION failure signatures with exact lineage bindings.
+
+Hard rule:
+- `failure signature != owner`;
+- Stage41 does not authorize repair from the failure label alone;
+- causal owner remains `NOT_PERFORMED` until a controlled same-probe counterfactual is evaluated.
+
+Contract gate:
+- carrier-first compilation run `37212172910` PASS.
+
+### C6.1 — controlled owner attribution
+
+For each failure signature:
+1. seal the exact parent attempt, proof policy and probe fingerprint;
+2. generate bounded child attempts changing one semantic owner at a time;
+3. rederive every downstream artifact invalidated by that owner change;
+4. rerun the **same** authoritative proof;
+5. attribute an owner only if exactly one owner-domain counterfactual materially improves/resolves the target without protected-invariant regression;
+6. abstain when no owner improves or multiple owner domains independently improve.
+
+Owner candidates may include:
+- ATLAS/control basis;
+- MIRA/skin field;
+- motion retarget/adapter;
+- mechanical carrier/topology.
+
+The candidate list is a search hypothesis set, not attribution evidence.
+
+### C6.2 — typed repair directive + immutable child attempt
+
+After causal attribution:
+- issue a bounded typed repair directive;
+- reference the exact parent attempt/product state;
+- select one promoted operation owned by the attributed domain;
+- create a distinct child attempt;
+- never mutate the parent in place;
+- invalidate/rederive every downstream artifact whose binding changed;
+- preserve unchanged upstream evidence by exact lineage.
+
+Rig-owner example:
+- pruning/changing the skeleton is one semantic owner mutation;
+- the resulting skin, deformation envelope, retarget, motion compile and exact-motion proof are **downstream rederivations**, not independent owner mutations.
+
+Carrier-owner example:
+- a new Stage18/19 carrier attempt invalidates rig, skin and every downstream mechanical/motion proof by default.
+
+### C6.3 — executable repair-operation authority
+
+The historical proof/repair framework is already fail-closed, but its production repair registry historically contained **zero executable operations**.
+
+Promotion order:
+1. control-basis structural prune/requalification, because current C5 evidence supplies a typed current operator and real child-state proof;
+2. bounded skin adaptation only after a product-authorized learned/numerical seam exists;
+3. grow/locus ATLAS repair only when C5.2 authorizes it;
+4. carrier/topology repair only after carrier ownership is causally attributed.
+
+No historical repair executor is promoted merely because source code exists.
+
+### C6.4 — repair-effect closure
+
+Every child repair must produce a repair-effect report under the same probe fingerprint.
 
 Acceptance:
-- static PASS;
+- parent/child lineage exact;
+- operation scope exact;
+- static qualification PASS where applicable;
 - source-fidelity non-regression;
-- mechanical improvement;
-- no new catastrophic class.
+- target mechanical failure materially improves or resolves;
+- no protected invariant regression;
+- no new catastrophic failure class;
+- if carrier changed, all carrier-bound learned/mechanical artifacts are rederived or explicitly revalidated.
+
+No hidden DAG back-edge is permitted; the loop is between immutable attempts.
 
 ## C7 — Knight closure-to-render
 

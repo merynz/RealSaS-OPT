@@ -1,0 +1,39 @@
+name: knight-v9-seam-support-locality-counterfactual-source-v1
+
+on:
+  push:
+    branches: [audit/canonical-caa-mechanics-geometry-lock-20261002]
+    paths:
+      - tools/audit_knight_v9_seam_support_locality_counterfactual_v1.py
+      - tools/notebooks/run_knight_v9_seam_support_locality_counterfactual_notebook_v1.py
+      - .github/workflows/knight_v9_seam_support_locality_counterfactual_source_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      CUDA_VISIBLE_DEVICES: ""
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: .
+      PY: /home/monster/realsas-ml312/bin/python
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Counterfactual source gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$PY" -m py_compile             tools/audit_knight_v9_seam_support_locality_counterfactual_v1.py             tools/notebooks/run_knight_v9_seam_support_locality_counterfactual_notebook_v1.py
+          echo "KNIGHT_V9_SEAM_SUPPORT_LOCALITY_COUNTERFACTUAL_SOURCE_PASS"

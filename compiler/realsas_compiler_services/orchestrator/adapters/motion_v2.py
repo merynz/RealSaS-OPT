@@ -9,6 +9,7 @@ from compiler.realsas_compiler_core.motion_compile_v2 import (
     build_qualified_motion_v2,
 )
 from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import (
+    DYNAMIC_EVALUATOR_SEMANTIC_VERSION_V2,
     DynamicMotionProofFailure,
     build_qualified_dynamic_motion_v2,
 )
@@ -48,6 +49,9 @@ from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.proof.failure_signatures import (
     derive_failure_signatures,
     no_owner_attribution,
+)
+from compiler.realsas_compiler_services.proof.stage41_failure_context_v1 import (
+    build_stage41_failure_attribution_context_v1,
 )
 
 
@@ -480,6 +484,23 @@ def prove_dynamic_motion_stage(ctx: dict) -> dict:
             measurements,
             status="FAIL",
         )
+        bindings={
+            "mechanical_state_binding_hash":mechanical.product_state_hash,
+            "skeleton_binding_hash":skeleton.skeleton_lineage_hash,
+            "mesh_binding_hash":mesh.mesh_lineage_hash,
+            "mesh_skin_binding_hash":mesh_skin.mesh_skin_lineage_hash,
+            "qualified_motion_binding_hash":motion.motion_lineage_hash,
+            "constraint_set_binding_hash":constraints.constraint_set_hash,
+            "presentation_binding_hash":presentation.presentation_lineage_hash,
+        }
+        attribution_context=build_stage41_failure_attribution_context_v1(
+            measurements=measurements,
+            bindings=bindings,
+            mesh_policy_hash=mesh_policy.qualification_policy_lineage_hash,
+            camera_binding_hashes=cameras.camera_binding_hashes,
+            observation_set_hash=observation.observation_set_hash,
+            evaluator_semantic_version=DYNAMIC_EVALUATOR_SEMANTIC_VERSION_V2,
+        )
         return {
             "status":"FAIL",
             "blockers":[exc.failure_code],
@@ -494,14 +515,8 @@ def prove_dynamic_motion_stage(ctx: dict) -> dict:
                 "owner_attribution_requires_controlled_counterfactual":True,
                 "repair_authorized":False,
                 "same_probe_reproof_required":True,
-                "bindings":{
-                    "mechanical_state_binding_hash":mechanical.product_state_hash,
-                    "skeleton_binding_hash":skeleton.skeleton_lineage_hash,
-                    "mesh_binding_hash":mesh.mesh_lineage_hash,
-                    "mesh_skin_binding_hash":mesh_skin.mesh_skin_lineage_hash,
-                    "qualified_motion_binding_hash":motion.motion_lineage_hash,
-                    "constraint_set_binding_hash":constraints.constraint_set_hash,
-                },
+                "bindings":bindings,
+                "owner_attribution_context":attribution_context,
             },
         }
     if proof.dynamic_motion_hash != qualified_dynamic_motion_v2_hash(proof):

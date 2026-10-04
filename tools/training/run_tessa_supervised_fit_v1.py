@@ -12,6 +12,7 @@ import numpy as np
 import torch
 
 from compiler.realsas_compiler_core.geometry_artifact_codec_v2 import rigging_surface_from_dict
+from compiler.realsas_compiler_core.preproduct_authority_v1 import normalization_domain_from_dict
 from models.tessa.v1 import (
     TESSAConfigV1,
     TESSAV1,
@@ -33,6 +34,12 @@ def sha256_file(path: Path) -> str:
 
 
 def normalize_teacher_vertices(vertices: np.ndarray, *, center: tuple[float, float, float], scale: float) -> np.ndarray:
+    """Map world-space teacher vertices into the Stage08-bound TESSA token frame.
+
+    `scale` is 2*NormalizationDomainIR.half_extent, so Stage08 normalized
+    coordinates [-1,+1] map exactly to TESSA coordinates [-0.5,+0.5]. No
+    teacher-derived refit, padding or clipping is allowed.
+    """
     v = np.asarray(vertices, dtype=np.float64)
     c = np.asarray(center, dtype=np.float64)
     if v.ndim != 2 or v.shape[1] != 3 or not np.isfinite(v).all():
@@ -41,7 +48,7 @@ def normalize_teacher_vertices(vertices: np.ndarray, *, center: tuple[float, flo
     if np.any(out < -0.5000001) or np.any(out > 0.5000001):
         lo = out.min(axis=0).tolist()
         hi = out.max(axis=0).tolist()
-        raise ValueError(f"TESSA_TEACHER_OUTSIDE_GSA_NORMALIZED_DOMAIN:{lo}:{hi}")
+        raise ValueError(f"TESSA_TEACHER_OUTSIDE_CANONICAL_NORMALIZATION:{lo}:{hi}")
     return out
 
 
@@ -80,6 +87,7 @@ def save_checkpoint(path: Path, *, model, optimizer, epoch: int, step: int, cfg:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--surface-json", required=True)
+    ap.add_argument("--normalization-json", required=True)
     ap.add_argument("--teacher-npz", required=True)
     ap.add_argument("--output-dir", required=True)
     ap.add_argument("--epochs", type=int, default=20)
@@ -102,13 +110,16 @@ def main() -> int:
         torch.cuda.manual_seed_all(args.seed)
 
     surface_path = Path(args.surface_json)
+    normalization_path = Path(args.normalization_json)
     teacher_path = Path(args.teacher_npz)
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    payload = json.loads(surface_path.read_text(encoding="utf-8"))
-    surface = rigging_surface_from_dict(payload)
-    conditioning = build_tessa_conditioning_v1(surface)
+    surface_payload = json.loads(surface_path.read_text(encoding="utf-8"))
+    normalization_payload = json.loads(normalization_path.read_text(encoding="utf-8"))
+    surface = rigging_surface_from_dict(surface_payload)
+    normalization = normalization_domain_from_dict(normalization_payload)
+    conditioning = build_tessa_conditioning_v1(surface, normalization=normalization)
     teacher_vertices, teacher_faces = load_teacher(teacher_path)
     normalized_teacher = normalize_teacher_vertices(
         teacher_vertices,
@@ -148,6 +159,10 @@ def main() -> int:
 
     manifest = {
         "surface_sha256": sha256_file(surface_path),
+        "normalization_sha256": sha256_file(normalization_path),
+        "normalization_hash": conditioning.normalization_hash,
+        "coordinate_frame": conditioning.coordinate_frame,
+        "tessa_world_scale": float(conditioning.scale),
         "teacher_sha256": sha256_file(teacher_path),
         "surface_geometry_lineage_hash": conditioning.source_geometry_lineage_hash,
         "teacher_vertex_count": int(len(teacher_vertices)),
@@ -159,6 +174,7 @@ def main() -> int:
         "target_tokens_per_window": int(args.target_tokens),
         "causal_context_tokens": int(cfg.local_attention_window),
         "artificial_topology_chart_split": False,
+        "teacher_refit_or_clip_performed": False,
         "model_parameter_count": int(parameter_count(model)),
         "device": str(device),
         "gpu_name": torch.cuda.get_device_name(0) if device.type == "cuda" else None,
@@ -177,6 +193,9 @@ def main() -> int:
         old_meta = dict(state.get("metadata") or {})
         for key in (
             "surface_sha256",
+            "normalization_sha256",
+            "normalization_hash",
+            "coordinate_frame",
             "teacher_sha256",
             "global_sequence_tokens",
             "target_tokens_per_window",

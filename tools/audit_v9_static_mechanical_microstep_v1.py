@@ -120,14 +120,17 @@ def _nonregression(before, after, policy):
 
 def main():
     ap=argparse.ArgumentParser()
-    ap.add_argument("--authority-root",type=Path,required=True)
-    ap.add_argument("--run-id",required=True)
+    ap.add_argument("--authority-root",type=Path)
+    ap.add_argument("--run-id")
     ap.add_argument("--surface-json",type=Path,required=True)
     ap.add_argument("--partition-json",type=Path,required=True)
     ap.add_argument("--candidate-json",type=Path)
     ap.add_argument("--fresh-skeleton-json",type=Path,required=True)
     ap.add_argument("--teacher-bank",type=Path,required=True)
-    ap.add_argument("--inverse-npz",type=Path,required=True)
+    ap.add_argument("--inverse-npz",type=Path)
+    ap.add_argument("--camera-set-json",type=Path)
+    ap.add_argument("--mesh-policy-json",type=Path)
+    ap.add_argument("--explicit-faces-json",type=Path)
     ap.add_argument("--operator",choices=OPS,required=True)
     ap.add_argument("--out-dir",type=Path,required=True)
     ap.add_argument("--cycle-tag",default="MICROSTEP")
@@ -137,26 +140,52 @@ def main():
 
     t0=time.perf_counter()
     a.out_dir.mkdir(parents=True,exist_ok=True)
-    ctx=_ctx(a.authority_root,a.run_id)
-    rr=ctx["run_root"]
+    portable_args=(a.camera_set_json,a.mesh_policy_json,a.explicit_faces_json)
+    portable_mode=any(x is not None for x in portable_args)
+    if portable_mode and not all(x is not None for x in portable_args):
+        raise RuntimeError("MICROSTEP_PORTABLE_HANDOFF_INCOMPLETE")
+    if not portable_mode and (
+        a.authority_root is None or a.run_id is None or a.inverse_npz is None
+    ):
+        raise RuntimeError(
+            "MICROSTEP_REQUIRES_AUTHORITY_MODE_OR_COMPLETE_PORTABLE_HANDOFF"
+        )
+
     surface=rigging_surface_from_dict(read(a.surface_json))
     partition=mechanical_partition_from_dict(read(a.partition_json))
     validate_mechanical_partition(partition,surface)
     skeleton=qualified_skeleton_from_dict(read(a.fresh_skeleton_json))
-    camera_set=qualified_camera_set_from_dict(
-        stage_output_payload(ctx,"05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1")
-    )
+
+    if portable_mode:
+        camera_set=qualified_camera_set_from_dict(read(a.camera_set_json))
+        policy=mesh_policy_from_dict(read(a.mesh_policy_json))
+        face_payload=read(a.explicit_faces_json)
+        if str(face_payload.get("surface_lineage_hash")) != str(surface.geometry_lineage_hash):
+            raise RuntimeError("MICROSTEP_EXPLICIT_FACE_SURFACE_LINEAGE_DRIFT")
+        explicit_faces=tuple(
+            tuple(str(x) for x in row)
+            for row in tuple(face_payload.get("faces") or ())
+        )
+        if not explicit_faces:
+            raise RuntimeError("MICROSTEP_EXPLICIT_FACE_SET_EMPTY")
+    else:
+        ctx=_ctx(a.authority_root,a.run_id)
+        rr=ctx["run_root"]
+        camera_set=qualified_camera_set_from_dict(
+            stage_output_payload(ctx,"05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1")
+        )
+        policy=mesh_policy_from_dict(
+            stage_output_payload(
+                ctx,"18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.MeshQualificationPolicyIR.v1"
+            )
+        )
+        rebuilt_surface,explicit_faces=build_repaired_surface(rr,a.inverse_npz)
+        if rebuilt_surface.geometry_lineage_hash!=surface.geometry_lineage_hash:
+            raise RuntimeError("MICROSTEP_REBUILT_SURFACE_LINEAGE_DRIFT")
+
     cameras=tuple(sorted(camera_set.cameras,key=lambda x:int(x.view_index)))
     _,envelope=derive_deformation_envelope_v1(skeleton=skeleton,camera_set=camera_set)
-    policy=mesh_policy_from_dict(
-        stage_output_payload(
-            ctx,"18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.MeshQualificationPolicyIR.v1"
-        )
-    )
     teacher_skin,_,valid,_,_,_=teacher_to_skin(surface,skeleton,a.teacher_bank)
-    rebuilt_surface,explicit_faces=build_repaired_surface(rr,a.inverse_npz)
-    if rebuilt_surface.geometry_lineage_hash!=surface.geometry_lineage_hash:
-        raise RuntimeError("MICROSTEP_REBUILT_SURFACE_LINEAGE_DRIFT")
 
     if a.candidate_json is not None:
         candidate=canonical_mesh_candidate_from_dict(read(a.candidate_json))
@@ -377,6 +406,7 @@ def main():
         "skin_weight_mutation":False,
         "partition_mutation":False,
         "candidate_source":candidate_source,
+        "portable_handoff_mode":bool(portable_mode),
         "repartition_first":bool(a.repartition_first),
         "repartition_report":repartition_report,
         "operator":a.operator,

@@ -53,6 +53,7 @@ from compiler.realsas_compiler_services.proof.failure_signatures import (
 )
 from compiler.realsas_compiler_services.proof.stage41_failure_context_v1 import (
     build_stage41_failure_attribution_context_v1,
+    build_stage41_probe_receipt_v1,
 )
 
 
@@ -402,6 +403,44 @@ def _source_foreground_masks(ctx: dict, observation):
     return output
 
 
+def _dynamic_proof_measurements(proof) -> dict:
+    frames = [
+        frame
+        for clip in proof.clips
+        for frame in clip.frames
+    ]
+    contacts = [
+        row
+        for clip in proof.clips
+        for row in clip.contact_proofs
+    ]
+    if not frames:
+        raise QualificationError("MOTION_V2_DYNAMIC_PASS_FRAME_SET_EMPTY")
+    return {
+        "status": "PASS",
+        "clip_count": int(len(proof.clips)),
+        "frame_count": int(len(frames)),
+        "min_triangle_area_ratio": float(
+            min(frame.min_triangle_area_ratio for frame in frames)
+        ),
+        "max_triangle_area_ratio": float(
+            max(frame.max_triangle_area_ratio for frame in frames)
+        ),
+        "max_triangle_condition_number": float(
+            max(frame.max_triangle_condition_number for frame in frames)
+        ),
+        "new_self_intersection_pair_count": int(
+            max(frame.new_self_intersection_pair_count for frame in frames)
+        ),
+        "max_contact_drift": float(
+            max((row.max_drift for row in contacts), default=0.0)
+        ),
+        "all_declared_contacts_passed": bool(
+            all(str(row.status) == "PASS" for row in contacts)
+        ),
+    }
+
+
 def prove_dynamic_motion_stage(ctx: dict) -> dict:
     mechanical = canonical_puppet_state_from_dict(
         stage_output_payload(
@@ -480,6 +519,28 @@ def prove_dynamic_motion_stage(ctx: dict) -> dict:
     )
     mesh_policy = _mesh_policy(ctx)
     carrier = _mechanical_carrier(ctx)
+    bindings={
+        "mechanical_state_binding_hash":mechanical.product_state_hash,
+        "skeleton_binding_hash":skeleton.skeleton_lineage_hash,
+        "mesh_binding_hash":mesh.mesh_lineage_hash,
+        "mesh_skin_binding_hash":mesh_skin.mesh_skin_lineage_hash,
+        "qualified_motion_binding_hash":motion.motion_lineage_hash,
+        "constraint_set_binding_hash":constraints.constraint_set_hash,
+        "presentation_binding_hash":presentation.presentation_lineage_hash,
+        "mechanical_carrier_evidence_hash":carrier.carrier_evidence_hash,
+        "mechanical_carrier_topology_hash":carrier.topology_hash,
+        "mechanical_carrier_geometry_hash":carrier.geometry_hash,
+        "static_mesh_qualification_binding_hash":carrier.static_mesh_qualification_binding_hash,
+        "motion_source_set_binding_hash":source_set.source_set_hash,
+        "motion_source_seal_binding_hash":source_seal.motion_source_seal_hash,
+    }
+    probe_receipt=build_stage41_probe_receipt_v1(
+        bindings=bindings,
+        mesh_policy_hash=mesh_policy.qualification_policy_lineage_hash,
+        camera_binding_hashes=cameras.camera_binding_hashes,
+        observation_set_hash=observation.observation_set_hash,
+        evaluator_semantic_version=DYNAMIC_EVALUATOR_SEMANTIC_VERSION_V2,
+    )
     try:
         proof = build_qualified_dynamic_motion_v2(
             motion=motion,
@@ -510,21 +571,6 @@ def prove_dynamic_motion_stage(ctx: dict) -> dict:
             measurements,
             status="FAIL",
         )
-        bindings={
-            "mechanical_state_binding_hash":mechanical.product_state_hash,
-            "skeleton_binding_hash":skeleton.skeleton_lineage_hash,
-            "mesh_binding_hash":mesh.mesh_lineage_hash,
-            "mesh_skin_binding_hash":mesh_skin.mesh_skin_lineage_hash,
-            "qualified_motion_binding_hash":motion.motion_lineage_hash,
-            "constraint_set_binding_hash":constraints.constraint_set_hash,
-            "presentation_binding_hash":presentation.presentation_lineage_hash,
-            "mechanical_carrier_evidence_hash":carrier.carrier_evidence_hash,
-            "mechanical_carrier_topology_hash":carrier.topology_hash,
-            "mechanical_carrier_geometry_hash":carrier.geometry_hash,
-            "static_mesh_qualification_binding_hash":carrier.static_mesh_qualification_binding_hash,
-            "motion_source_set_binding_hash":source_set.source_set_hash,
-            "motion_source_seal_binding_hash":source_seal.motion_source_seal_hash,
-        }
         attribution_context=build_stage41_failure_attribution_context_v1(
             measurements=measurements,
             bindings=bindings,
@@ -548,6 +594,7 @@ def prove_dynamic_motion_stage(ctx: dict) -> dict:
                 "repair_authorized":False,
                 "same_probe_reproof_required":True,
                 "bindings":bindings,
+                "owner_attribution_probe_receipt":probe_receipt,
                 "owner_attribution_context":attribution_context,
             },
         }
@@ -566,6 +613,9 @@ def prove_dynamic_motion_stage(ctx: dict) -> dict:
         "diagnostics": {
             "dynamic_motion_hash": proof.dynamic_motion_hash,
             "dynamic_proof_passed": True,
+            "dynamic_measurements": _dynamic_proof_measurements(proof),
+            "bindings": bindings,
+            "owner_attribution_probe_receipt": probe_receipt,
             "full_3d_local_quaternion_motion": True,
             "rest_unseen_exposure_gate_removed": True,
             "rest_unseen_exposed_fraction": proof.qualification_report.get(

@@ -759,6 +759,34 @@ Exit:
 - same candidate -> same evidence;
 - AC/BD -> different topology/carrier hash.
 
+
+### C1.1 — carrier-bound downstream mechanical identity — PASS
+
+The Stage19 dependency may not live only in scheduler receipts. Product mechanical
+qualification identities now bind it explicitly.
+
+Current V2 product qualification:
+- Stage28 `QualifiedSkeletonIR` lineage includes exact:
+  - mechanical-carrier evidence hash;
+  - topology hash;
+  - geometry hash;
+  - candidate-mesh lineage;
+  - static-mesh qualification lineage.
+- Stage32 legacy `QualifiedSkinIR` lineage includes the same carrier authority bindings.
+
+Consequence:
+- two carrier attempts may produce numerically identical joints or surface weights,
+  but they cannot share the same qualified product-mechanics lineage;
+- changing the canonical carrier therefore invalidates/requalifies downstream
+  mechanics instead of relying only on DAG/cache bookkeeping.
+
+Backward compatibility:
+- generic/legacy qualifier calls may omit authority bindings and remain deterministic;
+- V2 carrier-first mainline is required to supply them.
+
+Gate:
+- `37215482358` PASS.
+
 ## C2 — zero-training model compatibility — ATLAS PASS / MIRA IN PROGRESS
 
 ATLAS:
@@ -778,6 +806,15 @@ MIRA:
 Exit:
 - determine exactly which components need fit;
 - no A100.
+
+Current Stage36 compatibility note:
+- the production DAG still retains the historical `surface skin -> mesh skin`
+  transfer path as a measured compatibility/baseline path;
+- this is **not** the intended final carrier-first product seam;
+- it remains available while C4/C5 owner attribution determines the smallest
+  safe MIRA/ATLAS change;
+- promotion to direct carrier-native skin must be evidence-driven and must replace,
+  not silently coexist with, the transfer seam when authorized.
 
 ## C3 — Knight carrier-first one-shot court — SCIENTIFIC FAIL / OWNER ATTRIBUTION ACTIVE
 
@@ -840,6 +877,31 @@ Product direction:
 - Stage19 requires a deterministic oriented carrier normal/basis authority;
 - do not derive signed normals from canonical-sorted face tuples;
 - transported GSA normals are a diagnostic counterfactual, not yet the final product normal authority.
+
+
+### C3.1c — signed-query-normal product consumption guard — PASS
+
+Stage19 now emits a separate
+`RealSaS.CarrierSignedQueryNormalEvidenceIR.v1` bound to:
+- exact candidate mesh;
+- exact Stage19 mechanical-carrier evidence;
+- exact ordered carrier vertex domain;
+- exact source/GSA geometry-support lineage.
+
+MIRA carrier query contract is now fail-closed:
+- a real Stage19 `MechanicalCarrierEvidenceIR` explicitly forbids its unordered
+  face-cross normals as learned-query signed normal authority;
+- `models/mira/carrier_query_v1.py` requires the separate signed-query-normal
+  evidence in the product path;
+- the query hash binds the normal-authority hash/class;
+- historical C3 causal courts can replay the known-bad unoriented-normal arm only
+  through an explicit diagnostic escape hatch.
+
+Gate:
+- `37215673958` PASS.
+
+This closes the silent-normal-drift bug; it does **not** authorize a MIRA fit or
+claim that current frozen MIRA direct carrier inference closes product motion.
 
 ### C3.1b — normal-path factorization — COMPLETE
 

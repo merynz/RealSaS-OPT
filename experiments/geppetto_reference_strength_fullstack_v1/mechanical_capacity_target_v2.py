@@ -173,7 +173,15 @@ def build_mechanical_capacity_target_v2(
         necessary = np.asarray(necessary_control_mask, dtype=bool)
         if necessary.shape != deform_mask.shape:
             raise ValueError("necessary_control_mask shape drift")
-        selected = _select_seed_bridges(parents, deform_mask | necessary)
+        # K2 is deliberately an intermediate target between K0 and K1:
+        # start from the K0 skin-supported deform seeds, then add only controls
+        # independently proven deformation-necessary, plus structural bridges
+        # required to connect those admitted seeds. Unioning with deform_mask
+        # would collapse K2 to K1 whenever necessity is measured on deform
+        # controls, defeating the purpose of the court.
+        skin_mass = np.asarray(skin, dtype=np.float64).sum(axis=0)
+        k0_seed = deform_mask & (skin_mass > support_epsilon)
+        selected = _select_seed_bridges(parents, k0_seed | necessary)
     else:
         # K3 is intentionally only a diagnostic ceiling.
         selected = np.arange(len(parents), dtype=np.int64)

@@ -27,7 +27,8 @@ jobs:
           latest_c51f="$(jq -r '[.workflow_runs[] | select(.name=="knight-control-basis-recursive-frontier-c51f-v1") | .id] | max // 0' <<<"$runs")"
           echo "latest_c51f=$latest_c51f"
           jq -r '.workflow_runs[] | [.id,.name,.status] | @tsv' <<<"$runs" |
-          while IFS=            case "$status" in
+          while IFS=$'\t' read -r id name status; do
+            case "$status" in
               queued|in_progress|waiting|pending|requested) ;;
               *) continue ;;
             esac
@@ -43,22 +44,6 @@ jobs:
                   echo "cancel superseded frontier run=$id status=$status latest=$latest_c51f"
                   gh api --method POST "repos/$REPO/actions/runs/$id/cancel" || true
                 fi
-                ;;
-            esac
-          done
-          echo "CARRIER_RESEARCH_STALE_QUEUE_COLLAPSED"
-\t' read -r id name status; do
-            case "$status" in
-              queued|in_progress|waiting|pending|requested) ;;
-              *) continue ;;
-            esac
-            case "$name" in
-              knight-targeted-noop-prune-frontier-c51d-v1|knight-control-basis-local-irreducibility-c51e-v1)
-                echo "cancel stale run=$id name=$name status=$status"
-                gh api --method POST "repos/$REPO/actions/runs/$id/cancel" || true
-                ;;
-              knight-control-basis-recursive-frontier-c51f-v1)
-                echo "keep current frontier run=$id status=$status"
                 ;;
             esac
           done

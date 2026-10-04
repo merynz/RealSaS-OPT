@@ -8,6 +8,7 @@ on:
       - canonical/MAINLINE_EXECUTION_PLAN_V2.json
       - canonical/ACTIVE_RUN_V2.json
       - compiler/realsas_compiler_core/mechanical_carrier_evidence_v1.py
+      - compiler/realsas_compiler_core/control_basis_selection_v1.py
       - compiler/realsas_compiler_core/carrier_query_normal_evidence_v1.py
       - tests/models/test_mira_carrier_query_v1.py
       - models/mira/carrier_query_v1.py
@@ -16,6 +17,7 @@ on:
       - compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py
       - models/shared/joint_mechanical_loss_v1.py
       - tests/compiler/test_mechanical_carrier_evidence_v1.py
+      - tests/compiler/test_control_basis_selection_v1.py
       - tests/compiler/test_carrier_query_normal_evidence_v1.py
       - tests/models/test_joint_mechanical_loss_v1.py
       - tests/repository/test_mainline_execution_plan_v2.py

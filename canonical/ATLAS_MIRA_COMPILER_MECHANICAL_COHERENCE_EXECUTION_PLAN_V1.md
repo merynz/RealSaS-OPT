@@ -837,6 +837,62 @@ This measures the actual Compiler advantage.
 
 ---
 
+# 10.1 Training corpus use: reference domain vs compiled-carrier domain
+
+Coherent rigged assets are used in two distinct modes.
+
+## Reference-domain fit
+
+Input/evidence comes from the coherent asset carrier itself:
+
+[
+(M_{ref}, R_{ref}, W_{ref}, A_{ref})
+]
+
+Use this to teach:
+- articulation priors;
+- joint locus/role priors;
+- skin semantics;
+- motion/deformation priors.
+
+This is ordinary supervised/reference learning. It does **not** make reference topology product authority.
+
+## Compiled-carrier fit
+
+For the same legal reference asset:
+1. render the admitted 2D observation contract;
+2. run the RealSaS geometry path to Stage19;
+3. obtain `M_compiled`;
+4. run ATLAS/MIRA on `M_compiled`;
+5. evaluate mechanical/deformation consequence against the coherent reference behavior through admitted correspondence/evaluation.
+
+The product-side target is therefore not:
+
+[
+W_{compiled}=W_{ref}
+]
+
+on a different topology.
+
+Instead train toward:
+
+[
+D(M_{compiled},R,W,Q) approx D(M_{ref},R_{ref},W_{ref},Q)
+]
+
+where correspondence/evaluation is explicit and topology is allowed to differ.
+
+This compiled-carrier corpus is the preferred domain-bridge before FITK/LOFO/unseen.
+
+## Fit ordering
+
+- ATLAS: freeze reusable perception encoder first; fit the smallest locus/diffusion/control head proven necessary by C3/A3.
+- MIRA: freeze GSA/skeleton backbone first; fit carrier query decoder/tail or bounded residual first.
+- Full-model refit requires evidence that the frozen shared/perception representation itself is the blocker.
+- No component is retrained merely because the architecture changed around it.
+
+---
+
 # 11. Compute policy
 
 - No A100 for C0/C1/C2.

@@ -1,0 +1,128 @@
+name: tessa-knight-t1-handoff-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/tessa-mechanical-mesh-v1-20261004]
+    paths:
+      - .github/workflows/tessa_knight_t1_handoff_v1.yml
+      - tools/training/run_tessa_supervised_fit_v1.py
+      - models/tessa/v1/training_data_v1.py
+      - notebooks/RealSaS_TESSA_KNIGHT_T1_RUN_ALL.ipynb
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tessa-knight-t1-handoff-v1
+  cancel-in-progress: true
+
+jobs:
+  handoff:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      SOURCE_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V5_DEMO_HANDOFF/KNIGHT_EVALUATED_TEACHER_SOURCE.npz
+      DEST_REMOTE: gdrive:RealSaS_TESSA_KNIGHT_V1_HANDOFF
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install handoff audit dependencies
+        run: python -m pip install --no-input --progress-bar off numpy
+
+      - name: Materialize exact TESSA handoff inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$(mktemp -d)"
+          echo "$OUT" > /tmp/tessa_knight_t1_handoff_dir
+          SURFACE="$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json"
+          test -f "$SURFACE"
+          cp "$SURFACE" "$OUT/qualified_rigging_surface.json"
+          rclone copyto "$SOURCE_REMOTE" "$OUT/KNIGHT_EVALUATED_TEACHER_SOURCE.npz" --checksum
+          test -s "$OUT/KNIGHT_EVALUATED_TEACHER_SOURCE.npz"
+
+      - name: Audit shapes lineage and seal manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$(cat /tmp/tessa_knight_t1_handoff_dir)"
+          python - "$OUT" "$GITHUB_SHA" <<'PY'
+          import hashlib,json,sys
+          from pathlib import Path
+          import numpy as np
+
+          out=Path(sys.argv[1]); commit=sys.argv[2]
+          surface=out/'qualified_rigging_surface.json'
+          teacher=out/'KNIGHT_EVALUATED_TEACHER_SOURCE.npz'
+          payload=json.loads(surface.read_text(encoding='utf-8'))
+          schema=str(payload.get('schema_version') or payload.get('schema') or '')
+          assert schema=='RealSaS.RiggingSurfaceIR.v1', schema
+          assert payload.get('geometry_lineage_hash'), 'GSA_GEOMETRY_LINEAGE_MISSING'
+          assert len(payload.get('surface_nodes') or ())>0, 'GSA_SURFACE_EMPTY'
+
+          with np.load(teacher,allow_pickle=False) as z:
+              required={'vertices_source','faces','bone_heads_source','bone_tails_source','parents','skin'}
+              missing=required-set(z.files)
+              assert not missing, f'TEACHER_KEYS_MISSING:{sorted(missing)}'
+              assert tuple(z['vertices_source'].shape)==(3665,3), z['vertices_source'].shape
+              assert tuple(z['faces'].shape)==(6952,3), z['faces'].shape
+              assert tuple(z['bone_heads_source'].shape)==(41,3), z['bone_heads_source'].shape
+              assert tuple(z['bone_tails_source'].shape)==(41,3), z['bone_tails_source'].shape
+              assert tuple(z['parents'].shape)==(41,), z['parents'].shape
+              assert tuple(z['skin'].shape)==(3665,41), z['skin'].shape
+
+          def digest(p):
+              h=hashlib.sha256()
+              with p.open('rb') as f:
+                  for chunk in iter(lambda:f.read(1<<20),b''): h.update(chunk)
+              return h.hexdigest()
+          files={}
+          for p in (surface,teacher):
+              files[p.name]={'bytes':p.stat().st_size,'sha256':digest(p)}
+          manifest={
+              'schema':'RealSaS.TESSAKnightTrainingHandoff.v1',
+              'status':'PASS',
+              'source_repo_commit':commit,
+              'source_run_id':'SUBJECT2_KNIGHT_DEMO_V2_20260924',
+              'surface_geometry_lineage_hash':str(payload['geometry_lineage_hash']),
+              'roles':{
+                  'rigging_surface':'qualified_rigging_surface.json',
+                  'teacher_source_truth':'KNIGHT_EVALUATED_TEACHER_SOURCE.npz',
+              },
+              'teacher_contract':{
+                  'vertices':3665,
+                  'faces':6952,
+                  'bones':41,
+                  'skin_columns':41,
+                  'zero_skin_bone_deletion_forbidden':True,
+              },
+              'files':files,
+              'product_authority_claimed':False,
+              'generalization_claimed':False,
+              'training_rung':'T1_SUPERVISED_TOPOLOGY_FIT_INPUT',
+          }
+          (out/'TESSA_HANDOFF_MANIFEST.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          print('TESSA_KNIGHT_T1_HANDOFF_AUDIT_PASS')
+          print(json.dumps(manifest,sort_keys=True))
+          PY
+
+      - name: Publish immutable handoff payload to Drive
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$(cat /tmp/tessa_knight_t1_handoff_dir)"
+          rclone mkdir "$DEST_REMOTE"
+          rclone copy "$OUT" "$DEST_REMOTE" --checksum
+          rclone check "$OUT" "$DEST_REMOTE" --one-way --size-only
+          echo "TESSA_KNIGHT_T1_HANDOFF_DRIVE_PASS"

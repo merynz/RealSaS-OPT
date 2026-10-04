@@ -1823,9 +1823,18 @@ Remaining promotion order:
 
 No historical repair executor is promoted merely because source code exists.
 
-### C6.4 — repair-effect closure
+### C6.4 — repair-effect closure — INTEGRATED / CONTRACT PASS
 
 Every child repair must produce a repair-effect report under the same probe fingerprint.
+
+Current integration:
+- real `CanonicalPuppetGraph.v3` parent/child semantic delta is audited by current Compiler authority first;
+- the core child-attempt audit is converted into the service-level immutable application record;
+- a rejected child-attempt audit can never receive repair-effect credit;
+- wildcard-qualified semantic scopes are matched with fail-closed path-pattern semantics rather than exact-string set membership;
+- same-probe reproof remains mandatory;
+- protected-invariant regression remains fatal;
+- V2 static + dynamic visual non-regression evidence remains mandatory when required by the directive.
 
 Acceptance:
 - parent/child lineage exact;
@@ -1836,6 +1845,10 @@ Acceptance:
 - no protected invariant regression;
 - no new catastrophic failure class;
 - if carrier changed, all carrier-bound learned/mechanical artifacts are rederived or explicitly revalidated.
+
+Contract gates:
+- repair child/effect integration: `37219206782` PASS;
+- proof-service promotion boundary: `37219169404` PASS.
 
 No hidden DAG back-edge is permitted; the loop is between immutable attempts.
 

@@ -144,6 +144,76 @@ def _load_c51e_frontier(c51e_dir: Path, report: dict) -> list[ParentState]:
     return out
 
 
+def _load_resume_frontier(
+    resume_dir: Path,
+    report: dict,
+    c51e_parents: list[ParentState],
+) -> list[ParentState]:
+    if report.get("status") != "BOUNDED_DEPTH_REACHED_WITH_ADMITTED_FRONTIER":
+        raise RuntimeError("C51F_RESUME_REQUIRES_OPEN_ADMITTED_FRONTIER")
+    final_ids = tuple(map(str, report.get("final_basis_ids") or ()))
+    if not final_ids:
+        raise RuntimeError("C51F_RESUME_FINAL_BASIS_EMPTY")
+
+    base_paths = {
+        str(parent.source_basis_id): tuple(parent.removed_path)
+        for parent in c51e_parents
+    }
+    skeleton_files = {}
+    skeletons = {}
+    for skeleton_path in sorted(resume_dir.glob("d*_SKELETON.json")):
+        skeleton = qualified_skeleton_from_dict(json.loads(skeleton_path.read_text()))
+        lineage = str(skeleton.skeleton_lineage_hash)
+        skeleton_files[lineage] = skeleton_path
+        skeletons[lineage] = skeleton
+
+    memo = dict(base_paths)
+
+    def removed_path_for(lineage: str) -> tuple[str, ...]:
+        if lineage in memo:
+            return memo[lineage]
+        skeleton = skeletons.get(lineage)
+        if skeleton is None:
+            raise RuntimeError("C51F_RESUME_LINEAGE_ARTIFACT_MISSING:" + lineage)
+        q = dict(skeleton.qualification_report or {})
+        source = str(q.get("source_skeleton_hash") or "")
+        removed = str(q.get("removed_control_id") or "")
+        if not source or not removed:
+            raise RuntimeError("C51F_RESUME_PRUNE_PROVENANCE_MISSING:" + lineage)
+        path = removed_path_for(source) + (removed,)
+        memo[lineage] = path
+        return path
+
+    out = []
+    for basis_id in final_ids:
+        skeleton_path = skeleton_files.get(basis_id)
+        if skeleton_path is None:
+            raise RuntimeError("C51F_RESUME_FINAL_SKELETON_MISSING:" + basis_id)
+        weights_path = skeleton_path.with_name(
+            skeleton_path.name.replace("_SKELETON.json", "_WEIGHTS.npz")
+        )
+        if not weights_path.is_file():
+            raise RuntimeError("C51F_RESUME_FINAL_WEIGHTS_MISSING:" + basis_id)
+        skeleton = skeletons[basis_id]
+        with np.load(weights_path, allow_pickle=False) as z:
+            weights = np.asarray(z["weights"], np.float64)
+            vertex_ids = tuple(map(str, z["vertex_ids"].tolist()))
+            joint_ids = tuple(map(str, z["joint_ids"].tolist()))
+        if set(joint_ids) != {j.canonical_joint_id for j in skeleton.joints}:
+            raise RuntimeError("C51F_RESUME_JOINT_AXIS_DRIFT:" + basis_id)
+        out.append(
+            ParentState(
+                skeleton=skeleton,
+                weights=weights,
+                vertex_ids=vertex_ids,
+                joint_ids=joint_ids,
+                removed_path=removed_path_for(basis_id),
+                source_basis_id=basis_id,
+            )
+        )
+    return out
+
+
 def _evaluate_child(
     *,
     parent: ParentState,
@@ -360,7 +430,31 @@ def main(args):
     if c51e.get("status") != "PRODUCT_ADMISSIBLE_24_CONTROL_CHILD_FOUND":
         raise RuntimeError("C51F_REQUIRES_C51E_ADMITTED_24_FRONTIER")
 
-    parents = _load_c51e_frontier(args.c51e_dir, c51e)
+    c51e_parents = _load_c51e_frontier(args.c51e_dir, c51e)
+    resumed_from = None
+    depth_offset = 0
+    if args.resume_dir is not None:
+        resume_report = json.loads((args.resume_dir / "REPORT.json").read_text())
+        if resume_report.get("run_id") != args.run_id:
+            raise RuntimeError("C51F_RESUME_RUN_ID_DRIFT")
+        if resume_report.get("carrier_evidence_hash") not in (None, carrier.carrier_evidence_hash):
+            raise RuntimeError("C51F_RESUME_CARRIER_HASH_DRIFT")
+        parents = _load_resume_frontier(
+            args.resume_dir,
+            resume_report,
+            c51e_parents,
+        )
+        depth_offset = int(resume_report.get("max_depth", 0) or 0)
+        resumed_from = {
+            "path": str(args.resume_dir),
+            "status": str(resume_report.get("status")),
+            "final_control_count": int(resume_report.get("final_control_count")),
+            "final_basis_ids": list(map(str, resume_report.get("final_basis_ids") or ())),
+            "completed_depth": depth_offset,
+        }
+    else:
+        parents = c51e_parents
+
     if len(parents) > args.max_parent_count:
         raise RuntimeError(
             f"C51F_NONDOMINATED_PARENT_BOUND_EXCEEDED:{len(parents)}>{args.max_parent_count}"
@@ -381,7 +475,8 @@ def main(args):
     fixed_point = False
     seed_counter = 0
 
-    for depth in range(1, args.max_depth + 1):
+    for local_depth in range(1, args.max_depth + 1):
+        depth = depth_offset + local_depth
         child_states = {}
         child_rows = []
         frontier_rows = []
@@ -506,7 +601,10 @@ def main(args):
         "carrier_evidence_hash": carrier.carrier_evidence_hash,
         "initial_parent_count": int(len(parents)),
         "initial_parent_control_count": int(len(parents[0].joint_ids)),
-        "max_depth": int(args.max_depth),
+        "resume": resumed_from,
+        "depth_offset": int(depth_offset),
+        "max_depth": int(depth_offset + args.max_depth),
+        "new_depth_budget": int(args.max_depth),
         "max_parent_count": int(args.max_parent_count),
         "rungs": rung_reports,
         "explored_candidate_count": int(len(explored)),
@@ -524,6 +622,7 @@ def main(args):
             "Knight control count is evidence for this subject only and is never a generic target.",
             "A local fixed point is under this sealed structural-prune and optimization policy, not a global mathematical optimum.",
             "If bounded depth is reached with an admitted frontier, C5.2 remains unauthorized.",
+            "A resumed run must load only the previous report's exact final_basis_ids and preserve prune-lineage provenance.",
         ],
     }
     write(args.out_dir / "REPORT.json", report)
@@ -536,6 +635,7 @@ if __name__ == "__main__":
     ap.add_argument("--run-id", required=True)
     ap.add_argument("--c50b-dir", type=Path, required=True)
     ap.add_argument("--c51e-dir", type=Path, required=True)
+    ap.add_argument("--resume-dir", type=Path, default=None)
     ap.add_argument("--out-dir", type=Path, required=True)
     ap.add_argument("--device", choices=("cpu", "cuda"), default="cuda")
     ap.add_argument("--seed", type=int, default=20261004)

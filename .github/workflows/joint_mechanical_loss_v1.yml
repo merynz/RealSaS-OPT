@@ -1,0 +1,42 @@
+name: joint-mechanical-loss-v1
+
+on:
+  push:
+    branches: [research/rig-skin-architecture-challengers-20261003]
+    paths:
+      - models/shared/joint_mechanical_loss_v1.py
+      - tests/models/test_joint_mechanical_loss_v1.py
+      - canonical/TOPOLOGY_MECHANICAL_COHERENCE_FORENSIC_LINEAGE_20261004.md
+      - canonical/ATLAS_MIRA_COMPILER_MECHANICAL_COHERENCE_EXECUTION_PLAN_V1.md
+      - .github/workflows/joint_mechanical_loss_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  court:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      CUDA_VISIBLE_DEVICES: ""
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: .
+      PY: /home/monster/realsas-ml312/bin/python
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Diagonal flip plus differentiable mechanical loss court
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$PY" -m py_compile models/shared/joint_mechanical_loss_v1.py
+          "$PY" -m pytest -q tests/models/test_joint_mechanical_loss_v1.py
+          echo "JOINT_MECHANICAL_LOSS_V1_PASS"

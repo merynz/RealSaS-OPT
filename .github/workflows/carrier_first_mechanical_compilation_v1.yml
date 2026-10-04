@@ -24,6 +24,7 @@ on:
       - tests/compiler/test_stage41_failure_context_v1.py
       - compiler/realsas_compiler_services/proof/stage41_failure_context_v1.py
       - tests/compiler/test_control_basis_repair_v1.py
+      - tests/compiler/test_repair_child_attempt_gate_v1.py
       - compiler/realsas_compiler_services/proof/control_basis_repair.py
       - compiler/realsas_compiler_core/repair_registry.py
       - tests/compiler/test_stage41_failure_diagnostics_v1.py
@@ -78,7 +79,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m pytest -q             tests/compiler/test_mechanical_carrier_evidence_v1.py             tests/compiler/test_control_basis_selection_v1.py             tests/compiler/test_control_basis_frontier_v1.py             tests/compiler/test_control_basis_pruning_v1.py             tests/compiler/test_carrier_query_normal_evidence_v1.py             tests/compiler/test_control_basis_repair_v1.py             tests/compiler/test_stage41_failure_context_v1.py             tests/compiler/test_stage41_failure_diagnostics_v1.py             tests/repository/test_mainline_execution_plan_v2.py
+          python -m pytest -q             tests/compiler/test_mechanical_carrier_evidence_v1.py             tests/compiler/test_control_basis_selection_v1.py             tests/compiler/test_control_basis_frontier_v1.py             tests/compiler/test_control_basis_pruning_v1.py             tests/compiler/test_carrier_query_normal_evidence_v1.py             tests/compiler/test_control_basis_repair_v1.py             tests/compiler/test_repair_child_attempt_gate_v1.py             tests/compiler/test_stage41_failure_context_v1.py             tests/compiler/test_stage41_failure_diagnostics_v1.py             tests/repository/test_mainline_execution_plan_v2.py
 
       - name: Mechanical loss regression
         shell: bash

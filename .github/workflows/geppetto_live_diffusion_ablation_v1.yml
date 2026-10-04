@@ -1,7 +1,7 @@
 name: geppetto-live-diffusion-ablation-v1
 
 concurrency:
-  group: geppetto-live-diffusion-ablation-v1-\${{ github.ref }}
+  group: geppetto-live-diffusion-ablation-v1-${{ github.ref }}
   cancel-in-progress: true
 
 on:
@@ -26,9 +26,16 @@ jobs:
       AUTH: /home/monster/realsas_authority
       RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
       FIT_RUN: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
-      OUT: /tmp/geppetto_live_diffusion_ablation_\${{ github.run_id }}
+      OUT: /tmp/geppetto_live_diffusion_ablation_${{ github.run_id }}
 
     steps:
+      - name: Reclaim research scratch space
+        shell: bash
+        run: |
+          set -euo pipefail
+          df -h / /tmp || true
+          rm -rf /tmp/geppetto_live_diffusion_ablation_* /tmp/geppetto_articulation_target_capacity_*
+          df -h / /tmp || true
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
@@ -52,6 +59,6 @@ jobs:
         if: always()
         with:
           name: geppetto-live-diffusion-ablation-v1
-          path: \${{ env.OUT }}
+          path: ${{ env.OUT }}
           if-no-files-found: error
           retention-days: 30

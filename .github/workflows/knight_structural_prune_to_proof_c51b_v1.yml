@@ -1,0 +1,75 @@
+name: knight-structural-prune-to-proof-c51b-v1
+
+on:
+  push:
+    branches: [impl/carrier-first-mechanical-compilation-20261004]
+    paths:
+      - tools/audit_knight_structural_prune_to_proof_c51b_v1.py
+      - compiler/realsas_compiler_core/control_basis_pruning_v1.py
+      - canonical/ATLAS_MIRA_COMPILER_MECHANICAL_COHERENCE_EXECUTION_PLAN_V1.md
+      - .github/workflows/knight_structural_prune_to_proof_c51b_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  court:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 35
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "4"
+      PY: /home/monster/realsas-ml312/bin/python
+      AUTH: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929
+      C50B: /home/monster/realsas_research_scratch/tree_retarget_skin_c50b_37207528345
+      C51A: /home/monster/realsas_research_scratch/control_prune_c51a_37206114965
+      OUT: /home/monster/realsas_research_scratch/structural_prune_c51b_${{ github.run_id }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          export LD_LIBRARY_PATH="$pythonLocation/lib:${LD_LIBRARY_PATH:-}"
+          test -x "$PY"
+          test -f "$C50B/REPORT.json"
+          test -f "$C50B/OPTIMIZED_TREE_RETARGET_WEIGHTS.npz"
+          test -f "$C51A/REPORT.json"
+          "$PY" - <<'PY'
+          import torch, numpy
+          print("C51B_ENV", torch.__version__, torch.version.cuda, torch.cuda.is_available(), numpy.__version__, flush=True)
+          if not torch.cuda.is_available():
+              raise SystemExit("C51B_CUDA_NOT_AVAILABLE")
+          PY
+          "$PY" -m py_compile             tools/audit_knight_structural_prune_to_proof_c51b_v1.py             compiler/realsas_compiler_core/control_basis_pruning_v1.py
+          echo "C51B_PREFLIGHT_PASS"
+
+      - name: Run structural prune-to-proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          export LD_LIBRARY_PATH="$pythonLocation/lib:${LD_LIBRARY_PATH:-}"
+          rm -rf "$OUT"
+          mkdir -p "$OUT"
+          "$PY" -u tools/audit_knight_structural_prune_to_proof_c51b_v1.py             --authority-root "$AUTH"             --run-id "$RUN_ID"             --c50b-dir "$C50B"             --c51a-dir "$C51A"             --out-dir "$OUT"             --device cuda             --steps 250             --lr 0.02             --frame-batch 9             --log-every 50             --trust-weight 0.0005
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knight-structural-prune-to-proof-c51b-v1
+          path: ${{ env.OUT }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6

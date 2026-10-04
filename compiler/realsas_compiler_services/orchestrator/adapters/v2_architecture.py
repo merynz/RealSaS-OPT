@@ -21,6 +21,9 @@ from compiler.realsas_compiler_core.artifact_codec_v2 import (
     read_json,
 )
 from compiler.realsas_compiler_core.camera_geometry_v2 import project_points_xyz_v3
+from compiler.realsas_compiler_core.mechanical_carrier_evidence_v1 import (
+    build_mechanical_carrier_evidence_v1,
+)
 from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
     coverage_metrics,
     rasterize_triangles_half_integer_top_left,
@@ -679,6 +682,11 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
         },
     )
     value = replace(value, qualification_hash=static_mesh_qualification_hash(value))
+    carrier_evidence = build_mechanical_carrier_evidence_v1(
+        candidate,
+        static_qualification=value,
+        surface_addressing=addressing,
+    )
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     return {
         "status": "PASS_DEMO_ONLY" if demo_geometry_lineage else "PASS",
@@ -691,7 +699,25 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
                     if demo_geometry_lineage
                     else "STATIC_CANONICAL_MESH_QUALIFICATION"
                 ),
-            )
+            ),
+            write_ir(
+                root / "mechanical_carrier_evidence.json",
+                carrier_evidence,
+                authority_class=(
+                    "DEMO_ONLY_STATIC_MECHANICAL_CARRIER_EVIDENCE"
+                    if demo_geometry_lineage
+                    else "STATIC_QUALIFIED_MECHANICAL_CARRIER_EVIDENCE"
+                ),
+            ),
         ],
-        "diagnostics": {"qualification_hash": value.qualification_hash, **report},
+        "diagnostics": {
+            "qualification_hash": value.qualification_hash,
+            "mechanical_carrier_evidence_hash": carrier_evidence.carrier_evidence_hash,
+            "mechanical_carrier_topology_hash": carrier_evidence.topology_hash,
+            "mechanical_carrier_geometry_hash": carrier_evidence.geometry_hash,
+            "mechanical_carrier_invalid_normal_count": int(
+                sum(not flag for flag in carrier_evidence.normal_valid)
+            ),
+            **report,
+        },
     }

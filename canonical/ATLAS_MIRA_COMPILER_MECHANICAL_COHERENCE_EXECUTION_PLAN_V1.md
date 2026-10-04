@@ -694,7 +694,7 @@ Remaining:
 - fold/orientation;
 - parity/order regression against hard G3 cases.
 
-## C0 — architecture contract migration — IN PROGRESS
+## C0 — architecture contract migration — PASS
 
 Tasks:
 - Stage26/30 depend on Stage19 carrier;
@@ -706,7 +706,7 @@ Tasks:
 Exit:
 - contract tests PASS.
 
-## C1 — Stage19 carrier evidence — IN PROGRESS
+## C1 — Stage19 carrier evidence — PASS
 
 Tasks:
 - derive exact carrier positions/normals;
@@ -719,15 +719,21 @@ Exit:
 - same candidate -> same evidence;
 - AC/BD -> different topology/carrier hash.
 
-## C2 — zero-training model compatibility
+## C2 — zero-training model compatibility — ATLAS PASS / MIRA IN PROGRESS
 
 ATLAS:
-- replay current checkpoint with carrier-first evidence;
-- measure representation/proposal drift;
-- verify no illegal teacher/cardinality authority.
+- **PASS** — workflow `37200030790`, canonical result `canonical/ATLAS_CARRIER_FIRST_C2_RESULT_20261004.json`;
+- 28/28 controls reproduced; changed parent count = 0;
+- normalized archived-proposal RMSE = `3.50346e-6`;
+- carrier-provenance-outside support count = 0;
+- immediate ATLAS retrain = **NOT AUTHORIZED**;
+- explicit carrier conditioning remains blocked on A3 necessity evidence.
 
 MIRA:
-- query existing decoder at exact carrier vertices.
+- query existing decoder at exact carrier vertices;
+- use GSA backbone/field tokens plus deterministic carrier support-bound memory transport;
+- exact carrier XYZ/N + exact carrier↔joint pair geometry;
+- produce direct carrier skin, not transferred surface weights.
 
 Exit:
 - determine exactly which components need fit;

@@ -174,6 +174,7 @@ def _decode_carrier(
         carrier_evidence=carrier,
         surface_tensor=surface_tensor,
         conditioning=conditioning,
+    allow_unoriented_carrier_normals_for_diagnostic=True,
     )
     qmemory = transport_surface_memory_to_carrier_v1(memory, query)
     geom = torch.as_tensor(query.geometry7, device=device)

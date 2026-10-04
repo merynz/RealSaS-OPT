@@ -1468,28 +1468,91 @@ Interpretation:
 - it is direct evidence that the reduced basis still contains redundant/non-editable controls;
 - the semantic owner of the failed gate is the control basis itself.
 
-### C5.1d — targeted prune fixed-point from the mechanically closed 27-control basis — NEXT
+### C5.1d — targeted prune fixed-point from the mechanically closed 27-control basis — COMPLETE / 25-CONTROL PRODUCT-ADMISSIBLE DESCENDANT FOUND
 
-Before any C5.2 grow/locus search:
+Workflow:
+- `37211742416`.
 
-1. start from the C5.1b mechanically closed 27-control basis;
-2. target the C5.1c no-op controls first;
-3. truly remove one candidate control, reparent children, rebuild skeleton lineage;
-4. recompile tree-consistent retarget for the reduced skeleton;
-5. reoptimize skin for that exact reduced rig and exact 51-frame motion domain;
-6. rerun hard exact-motion proof;
-7. rerun fresh reduced-skeleton microstress;
-8. rerun source/motion fidelity and editability;
-9. keep only product-admissible children on the frontier;
-10. repeat until every single-control deletion from an admitted frontier basis fails at least one hard gate.
+Starting point:
+- 28-control source basis;
+- C5.1b mechanically closed 27-control basis after removing `J:4c9f9eace712daf31538`;
+- C5.1c identified two numerical no-op exposed controls:
+  - `J:7d9e31e2d0bd48f88ecb`;
+  - `J:eafe286e7d84499e5257`.
 
-Because admissibility is non-monotonic, maintain a bounded beam/Pareto frontier rather than one greedy path.
+Search contract:
+- true structural prune only;
+- child reparenting;
+- fresh skeleton lineage;
+- fresh tree-consistent retarget for every child;
+- fresh skin reoptimization for every child;
+- exact 51-frame idle/run/slash hard motion proof;
+- fresh reduced-skeleton microstress;
+- motion-source nonregression;
+- every remaining exposed control must produce measurable edit response;
+- bounded beam/frontier, no teacher count/weights, no model fit.
 
-Exit:
-- if an admissible locally irreducible basis is found, seal it as the Knight control-basis frontier result and use it as proof-derived ATLAS supervision;
-- if every further prune fails while no product-admissible basis exists, then and only then open C5.2 grow/locus/carrier attribution.
+Measured:
+- explored child candidate count = **4**;
+- product-admissible candidate count = **1**;
+- best admitted descendant control count = **25**;
+- removed path:
+  1. `J:4c9f9eace712daf31538`;
+  2. `J:eafe286e7d84499e5257`;
+  3. `J:7d9e31e2d0bd48f88ecb`.
 
-C5.1d is still Knight-specific evidence; only the prune/grow/proof algorithm is generic.
+25-control admitted descendant:
+- exact-motion failed frames = **0 / 51**;
+- unique bad faces = **0**;
+- max condition ≈ **15.982**;
+- min area ratio ≈ **0.07086**;
+- max area ratio ≈ **5.6175**;
+- max edge ratio ≈ **5.5223**;
+- fresh microstress PASS;
+- motion-source fidelity PASS;
+- numerical no-op exposed controls = **0**;
+- editability PASS.
+
+Non-monotonic/path-dependent evidence:
+- one 26-control child was mechanically closed but retained one no-op;
+- the alternate 26-control child failed exact motion;
+- one 25-control removal order failed exact motion;
+- the opposite 25-control removal order passed every current product-admissibility gate.
+
+Scientific consequence:
+- control-basis search is empirically path-dependent and non-monotonic;
+- 25 is the **first product-admissible basis found in this bounded prune frontier**, not a generic count and not yet the Knight optimum;
+- C5.2 grow/locus is not authorized yet because pruning has produced a valid descendant.
+
+### C5.1e — full single-prune local-irreducibility court from the admitted 25-control basis — NEXT
+
+Question:
+
+> Is the admitted 25-control Knight basis locally irreducible under the sealed single-control structural-prune neighborhood?
+
+Procedure:
+1. load the exact C5.1d admitted 25-control skeleton + skin state;
+2. enumerate every remaining non-root control exactly once;
+3. for each candidate:
+   - truly remove the control;
+   - reparent children;
+   - mint a fresh skeleton lineage;
+   - collapse the removed initial skin mass to the replacement parent only as initialization;
+   - rebuild tree-consistent retarget;
+   - independently reoptimize skin for the exact 24-control rig and exact 51-frame motion domain;
+   - replay hard exact motion;
+   - run fresh reduced-skeleton microstress when motion closes;
+   - run motion-source fidelity;
+   - run editability/locality;
+4. seal the explored candidate family and Pareto frontier.
+
+Claim policy:
+- if **no** 24-control child is product-admissible under the sealed optimization/proof policy, call the 25-control basis **locally irreducible under this preregistered single-prune neighborhood**;
+- do not call it globally optimal;
+- if one or more 24-control children pass, continue the frontier recursively from all non-dominated admitted children;
+- failure of the bounded optimizer is evidence only under its sealed policy, not a mathematical impossibility proof.
+
+Only after this prune frontier reaches an admitted local fixed point may C5.2 grow/locus be considered for unresolved capability defects.
 
 ### C5.2 — actual-motion rig ceiling
 

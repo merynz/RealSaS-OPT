@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-"""Render the exact source FBX RUN first sampled frame for retarget comparison.
+"""Render the external preset-source FBX RUN first sampled frame.
 
-The renderer uses the same canonical object basis as the motion extractor and
-shows one research presentation loadout: 1H_Sword + Round_Shield. Geometry,
-armature, skinning and authored animation all remain source-FBX exact.
+This is a motion-preset source reference, not target Knight equipment or mesh
+truth. FBX object packaging is explicitly non-authoritative: an importer may
+collapse body and equipment into one mesh object or split them differently.
+The comparison therefore renders every visible source mesh exactly as imported
+and uses only the authored source armature/action pose as motion evidence.
 """
 
 import argparse
@@ -15,16 +17,6 @@ import sys
 import bpy
 from mathutils import Matrix, Vector
 
-KEEP_EQUIPMENT = {"1H_Sword", "Round_Shield"}
-ALL_EQUIPMENT = {
-    "1H_Sword",
-    "1H_Sword_Offhand",
-    "2H_Sword",
-    "Spike_Shield",
-    "Badge_Shield",
-    "Round_Shield",
-    "Rectangle_Shield",
-}
 REQUESTED_TAKE = "HumanArmature|HumanArmature|Run"
 
 
@@ -83,7 +75,12 @@ def action_by_requested_take(requested):
     short = requested.split("|")[-1]
     matches = [a for a in bpy.data.actions if a.name == short or a.name.endswith("|" + short)]
     if len(matches) != 1:
-        raise RuntimeError("SOURCE_COMPARE_ACTION_NOT_UNIQUE:" + requested + ":" + ",".join(a.name for a in bpy.data.actions))
+        raise RuntimeError(
+            "SOURCE_COMPARE_ACTION_NOT_UNIQUE:"
+            + requested
+            + ":"
+            + ",".join(a.name for a in bpy.data.actions)
+        )
     return matches[0]
 
 
@@ -111,13 +108,11 @@ def visible_meshes():
     for obj in bpy.context.scene.objects:
         if obj.type != "MESH":
             continue
-        if obj.name in ALL_EQUIPMENT and obj.name not in KEEP_EQUIPMENT:
-            obj.hide_render = True
-            obj.hide_viewport = True
-            continue
         obj.hide_render = False
         obj.hide_viewport = False
         out.append(obj)
+    if not out:
+        raise RuntimeError("SOURCE_COMPARE_VISIBLE_MESH_EMPTY")
     return tuple(out)
 
 
@@ -219,9 +214,6 @@ def main(argv=None):
     bpy.context.view_layer.update()
 
     meshes = visible_meshes()
-    if not KEEP_EQUIPMENT.issubset({obj.name for obj in meshes}):
-        raise RuntimeError("SOURCE_COMPARE_LOADOUT_MISSING")
-
     B, C = canonical_basis(armature)
     depsgraph = bpy.context.evaluated_depsgraph_get()
     bbox_points = evaluated_bbox_world(meshes, depsgraph)
@@ -229,20 +221,31 @@ def main(argv=None):
     bpy.ops.render.render(write_still=True)
 
     payload = {
-        "schema": "RealSaS.KnightSourceRunFrame0Comparison.v1",
+        "schema": "RealSaS.ExternalPresetSourceRunFrame0Comparison.v2",
         "source_take": action.name,
         "source_frame": first,
-        "presentation_loadout": sorted(KEEP_EQUIPMENT),
-        "source_mesh_rig_skin_animation": "FBX_EXACT",
+        "source_role": "EXTERNAL_MOTION_PRESET_EVIDENCE__NOT_TARGET_TEACHER_TRUTH",
+        "source_mesh_rig_skin_animation": "FBX_EXACT_FOR_PRESET_SOURCE_ONLY",
+        "source_object_packaging_authority": False,
+        "target_equipment_semantics_inferred_from_source_object_names": False,
+        "source_render_policy": "RENDER_ALL_VISIBLE_SOURCE_MESHES_AS_IMPORTED",
         "camera_frame": "REALSAS_OBJECT_FRAME_V1_FRONT_XZ",
-        "canonical_basis_source_columns": [[float(B[r][c]) for c in range(3)] for r in range(3)],
-        "canonical_transform_source_to_realsas": [[float(C[r][c]) for c in range(3)] for r in range(3)],
+        "canonical_basis_source_columns": [
+            [float(B[r][c]) for c in range(3)] for r in range(3)
+        ],
+        "canonical_transform_source_to_realsas": [
+            [float(C[r][c]) for c in range(3)] for r in range(3)
+        ],
         "visible_mesh_objects": sorted(obj.name for obj in meshes),
+        "visible_mesh_object_count": len(meshes),
         "render_png": out_png.name,
     }
-    out_json.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    out_json.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
     print(json.dumps(payload, indent=2, sort_keys=True))
-    print("KNIGHT_SOURCE_RUN_FRAME0_COMPARE_PASS", out_png)
+    print("EXTERNAL_PRESET_SOURCE_RUN_FRAME0_COMPARE_PASS", out_png)
     return 0
 
 

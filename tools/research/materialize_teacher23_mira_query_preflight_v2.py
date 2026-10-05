@@ -3,13 +3,14 @@ from __future__ import annotations
 """MIRA v6 teacher23 preflight using exact decoder AST closure extraction.
 
 The sealed historical v6 runner imports a superseded v5 training helper at module
-import time. That training helper is not part of the current research branch and
-is not needed to instantiate or run the sealed v6 decoder. Rather than reviving
-historical training code, this adapter extracts only the exact top-level symbol
-closure required by ArachneV6RawReadout plus its cardinality constants.
+import time. That helper supplied the historical 28-joint *court guard*, but the
+sealed ArachneV6RawReadout itself has no dependency on that training module and
+no fixed joint vocabulary. We therefore extract only the exact decoder closure
+from the SHA-pinned runner and keep the historical guard as independently
+verified provenance rather than executable inference authority.
 
-All scientific checks, teacher23 qualification, checkpoint strict-load, and J=23
-smoke semantics remain owned by the v1 preflight implementation.
+All teacher23 qualification, checkpoint strict-load, and J=23 smoke semantics
+remain owned by the v1 preflight implementation.
 """
 
 import ast
@@ -31,8 +32,8 @@ from tools.research import materialize_teacher23_mira_query_preflight_v1 as base
 ROOT_SYMBOLS = (
     "ArachneV6RawReadout",
     "RELATION_DIM",
-    "EXPECTED_JOINTS",
 )
+HISTORICAL_EXPECTED_JOINTS = 28
 
 
 def _target_names(node: ast.AST) -> tuple[str, ...]:
@@ -69,6 +70,25 @@ def _loaded_names(node: ast.AST) -> set[str]:
     }
 
 
+def _base_attributes(node: ast.AST) -> set[str]:
+    return {
+        child.attr
+        for child in ast.walk(node)
+        if isinstance(child, ast.Attribute)
+        and isinstance(child.value, ast.Name)
+        and child.value.id == "base"
+    }
+
+
+def _verify_historical_guard_assignment(definitions: dict[str, ast.AST]) -> None:
+    node = definitions.get("EXPECTED_JOINTS")
+    if node is None:
+        raise RuntimeError("MIRA_V6_HISTORICAL_EXPECTED_JOINTS_ASSIGNMENT_MISSING")
+    attrs = _base_attributes(node)
+    if attrs != {"EXPECTED_JOINTS"}:
+        raise RuntimeError(f"MIRA_V6_HISTORICAL_GUARD_ASSIGNMENT_DRIFT::{sorted(attrs)}")
+
+
 def extract_exact_v6_symbol_closure(path: Path):
     source = path.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(path))
@@ -81,11 +101,13 @@ def extract_exact_v6_symbol_closure(path: Path):
     missing_roots = [name for name in ROOT_SYMBOLS if name not in definitions]
     if missing_roots:
         raise RuntimeError(f"MIRA_V6_AST_ROOT_SYMBOL_MISSING::{missing_roots}")
+    _verify_historical_guard_assignment(definitions)
 
     selected_nodes: set[int] = set()
     selected_symbols: set[str] = set()
     pending = list(ROOT_SYMBOLS)
     blocked_imports: set[str] = set()
+    selected_base_attributes: set[str] = set()
 
     while pending:
         symbol = pending.pop()
@@ -96,6 +118,7 @@ def extract_exact_v6_symbol_closure(path: Path):
         if node is None:
             continue
         selected_nodes.add(id(node))
+        selected_base_attributes.update(_base_attributes(node))
 
         for dependency in sorted(_loaded_names(node)):
             dep_node = definitions.get(dependency)
@@ -108,6 +131,11 @@ def extract_exact_v6_symbol_closure(path: Path):
                     continue
             pending.append(dependency)
 
+    if selected_base_attributes:
+        raise RuntimeError(
+            "MIRA_V6_DECODER_ITSELF_REFERENCES_HISTORICAL_BASE::"
+            + ",".join(sorted(selected_base_attributes))
+        )
     if blocked_imports:
         raise RuntimeError(
             "MIRA_V6_DECODER_SYMBOL_CLOSURE_REQUIRES_HISTORICAL_TRAINING_IMPORT::"
@@ -145,16 +173,21 @@ def extract_exact_v6_symbol_closure(path: Path):
     return types.SimpleNamespace(
         ArachneV6RawReadout=namespace["ArachneV6RawReadout"],
         RELATION_DIM=namespace["RELATION_DIM"],
-        EXPECTED_JOINTS=namespace["EXPECTED_JOINTS"],
+        # Historical closure expected 28 derived target joints. This value is a
+        # report/provenance guard only and is deliberately not part of decoder
+        # execution. The J=23 smoke below is what tests runtime cardinality.
+        EXPECTED_JOINTS=HISTORICAL_EXPECTED_JOINTS,
         _ast_selected_symbols=tuple(sorted(selected_symbols)),
         _ast_selected_node_count=int(len(selected_nodes)),
         _historical_training_module_imported=False,
+        _decoder_historical_base_attributes=tuple(),
+        _historical_guard_source="EXPECTED_JOINTS = base.EXPECTED_JOINTS",
     )
 
 
 def main(argv=None) -> int:
-    # The v1 court remains the single owner of all scientific assertions. Only
-    # its historical whole-module import is replaced with exact symbol closure
+    # The v1 court remains the single owner of scientific assertions. Only its
+    # historical whole-module import is replaced with exact inference closure
     # extraction from the already SHA-pinned runner bytes.
     base.import_exact_runner = extract_exact_v6_symbol_closure
     return base.main(argv)

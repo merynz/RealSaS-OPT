@@ -4,8 +4,15 @@ from __future__ import annotations
 
 import re
 import sys
+from pathlib import Path
 
 import bpy
+
+# Blender's embedded Python does not honor the workflow's PYTHONPATH reliably.
+# Re-add the repository root explicitly before importing the shared renderer.
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from tools.research import blender_render_knight_source_run_frame0_v1 as base
 
@@ -49,8 +56,6 @@ def visible_meshes():
             + ":inventory="
             + ",".join(sorted(inventory))
         )
-    # v1 performs a final exact-name assertion. Rebind it to the actual imported
-    # Blender object names after canonical equipment resolution.
     base.KEEP_EQUIPMENT = set(selected_actual.values())
     print("SOURCE_COMPARE_EQUIPMENT_RESOLUTION", selected_actual, flush=True)
     return tuple(out)

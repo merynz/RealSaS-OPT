@@ -1,0 +1,66 @@
+name: rigid-attachment-v1-contract
+
+on:
+  push:
+    branches:
+      - research/tessa-mechanical-mesh-v1-20261004
+    paths:
+      - compiler/realsas_compiler_core/rigid_attachment_v1.py
+      - tests/compiler/test_rigid_attachment_v1.py
+      - tools/research/apply_tessa_knight_rigid_equipment_witness_v1.py
+      - .github/workflows/rigid_attachment_v1_contract.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rigid-attachment-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: .
+      PYTHONHASHSEED: "0"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pinned contract dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: "1"
+          PIP_DEFAULT_TIMEOUT: "60"
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Compile rigid attachment contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            compiler/realsas_compiler_core/rigid_attachment_v1.py \
+            tests/compiler/test_rigid_attachment_v1.py \
+            tools/research/apply_tessa_knight_rigid_equipment_witness_v1.py
+          echo "RIGID_ATTACHMENT_V1_COMPILE_PASS"
+
+      - name: Run rigid attachment unit court
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pytest -q tests/compiler/test_rigid_attachment_v1.py
+          echo "RIGID_ATTACHMENT_V1_CONTRACT_PASS"

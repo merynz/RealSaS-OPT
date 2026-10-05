@@ -27,6 +27,8 @@ jobs:
       TEACHER_REMOTE: gdrive:RealSaS_TESSA_KNIGHT_V1_HANDOFF/KNIGHT_EVALUATED_TEACHER_SOURCE.npz
       MIRA_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V6_DEMO_HANDOFF/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt
       V6_RUNNER_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V6_DEMO_OUTPUT/run_knight_arachne_v6_demo_closure_v1.py
+      MIRA_LOCAL_CACHE: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/imports/arachne_stage31_v6/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt
+      EXPECTED_MIRA_SHA256: bfd2bd24f55bdce2dc36b0ae6a7afe01b8381c680de545c66a11a3d707fe73ed
 
     steps:
       - uses: actions/checkout@v4
@@ -52,12 +54,29 @@ jobs:
           rm -rf "$work" && mkdir -p "$work/input" "$work/output"
           rclone copyto "$SURFACE_REMOTE" "$work/input/qualified_rigging_surface.json" --checksum
           rclone copyto "$TEACHER_REMOTE" "$work/input/KNIGHT_EVALUATED_TEACHER_SOURCE.npz" --checksum
-          rclone copyto "$MIRA_REMOTE" "$work/input/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt" --checksum --progress
+
+          if [ -s "$MIRA_LOCAL_CACHE" ]; then
+            cached_sha="$(sha256sum "$MIRA_LOCAL_CACHE" | awk '{print $1}')"
+            if [ "$cached_sha" = "$EXPECTED_MIRA_SHA256" ]; then
+              cp "$MIRA_LOCAL_CACHE" "$work/input/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt"
+              echo "MIRA_INPUT_SOURCE=SEALED_LOCAL_CACHE"
+            else
+              echo "MIRA_LOCAL_CACHE_SHA_MISMATCH=$cached_sha"
+              rclone copyto "$MIRA_REMOTE" "$work/input/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt" --checksum --progress
+              echo "MIRA_INPUT_SOURCE=DRIVE_FALLBACK_AFTER_CACHE_MISMATCH"
+            fi
+          else
+            rclone copyto "$MIRA_REMOTE" "$work/input/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt" --checksum --progress
+            echo "MIRA_INPUT_SOURCE=DRIVE_FALLBACK_CACHE_MISSING"
+          fi
+
           rclone copyto "$V6_RUNNER_REMOTE" "$work/input/run_knight_arachne_v6_demo_closure_v1.py" --checksum
           test -s "$work/input/qualified_rigging_surface.json"
           test -s "$work/input/KNIGHT_EVALUATED_TEACHER_SOURCE.npz"
           test -s "$work/input/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt"
           test -s "$work/input/run_knight_arachne_v6_demo_closure_v1.py"
+          actual_mira_sha="$(sha256sum "$work/input/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt" | awk '{print $1}')"
+          test "$actual_mira_sha" = "$EXPECTED_MIRA_SHA256"
           sha256sum "$work/input/"*
           echo "WORK=$work" >> "$GITHUB_ENV"
 

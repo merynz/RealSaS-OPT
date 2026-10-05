@@ -1,0 +1,148 @@
+{
+  "schema": "RealSaS.MechanicalSubstratePromotionReceipt.v1",
+  "promotion_id": "MECHANICAL_SUBSTRATE_V1_20261006",
+  "target_branch": "main",
+  "promotion_branch": "promotion/mechanical-substrate-v1-20261005",
+  "base_main_sha": "8dfb9b3364b73ff4c275d4cfea5c237e71ed424c",
+  "research_review_cut_sha": "a58acd2d3fa74596a246e764064151739979c446",
+  "principle": "Before replacing a result with another, prove they answer the same question.",
+  "claim": {
+    "status": "BOUNDED_PROMOTION_CANDIDATE",
+    "summary": "Ratify exact mechanical-carrier identity and bind learned skeleton/skin qualification lineage to that carrier without activating later research lanes or superseding the sealed production G3 contract.",
+    "genericity_claimed": false,
+    "tessa_stage18_product_authority_claimed": false,
+    "mira_carrier_query_product_authority_claimed": false,
+    "rigid_equipment_runtime_product_authority_claimed": false,
+    "knight_render_authority_claimed": false
+  },
+  "promoted_commits": [
+    {
+      "sha": "e1acda535381d35c9afe0eeb7ae89721e09c2dd6",
+      "role": "MODEL_NAMING_AUTHORITY",
+      "claim": "IRIS/TESSA/AXIS/MIRA canonical paper-style identities only"
+    },
+    {
+      "sha": "80e12bfde33488cdacee0a3ecec5de1be32fd6fe",
+      "role": "MECHANICAL_CARRIER_IDENTITY_SUBSTRATE",
+      "claim": "Pre-query MechanicalCarrierEvidenceIR plus identity contract test"
+    },
+    {
+      "sha": "4b280d0697ac59ac45ca29acb1df3ac9b2336c84",
+      "role": "CARRIER_BOUND_LEARNED_MECHANICS_LINEAGE",
+      "claim": "Stage19 carrier producer and exact carrier evidence/topology/geometry bindings carried into qualified skeleton and skin lineage"
+    }
+  ],
+  "promoted_blob_provenance": [
+    {
+      "path": "compiler/realsas_compiler_core/mechanical_carrier_evidence_v1.py",
+      "blob_sha": "0df074364814edf0e52bd0cb4298132270d30700",
+      "source_commit": "bdb955d690b83cc7f21d2601899fc8ce54bc938a",
+      "source_commit_message": "compiler: add carrier-bound mechanical evidence IR",
+      "semantic_boundary": "BEFORE_SIGNED_CARRIER_QUERY_NORMAL_LANE"
+    },
+    {
+      "path": "tests/compiler/test_mechanical_carrier_evidence_v1.py",
+      "blob_sha": "78d117ffa067b7d375db08a3e87779edd0e1baa5",
+      "source_commit": "f3febb718910dcba7189cb6ebc5b33391433e79d",
+      "source_commit_message": "test: seal mechanical carrier evidence identity"
+    },
+    {
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py",
+      "blob_sha": "30c5f113e0ae68e8887c932e16e0fdcfa302c823",
+      "source_commit": "607b5252e1f190cec966abaa0e703579a1107515",
+      "source_commit_message": "compiler: make Stage19 exact static carrier quality court",
+      "semantic_boundary": "BEFORE_STAGE19_SIGNED_QUERY_NORMAL_EMISSION"
+    },
+    {
+      "path": "compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py",
+      "blob_sha": "4b2bcd70a8f84e389d4a1a751a5676c0368e6937",
+      "source_commit": "60779f9d2b53192bd425fb88d3933dd6dadd7361",
+      "source_commit_message": "orchestrator: carry canonical carrier into skeleton and skin lineage"
+    },
+    {
+      "path": "compiler/realsas_compiler_core/rig.py",
+      "blob_sha": "889564fe6e6be95f0ad6af726cba719d5aff567e",
+      "source_commit": "60779f9d2b53192bd425fb88d3933dd6dadd7361",
+      "claim": "authority bindings affect qualification lineage; graph optimizer semantics unchanged"
+    },
+    {
+      "path": "compiler/realsas_compiler_core/skin.py",
+      "blob_sha": "6b0bb7536c3bcb05e08c0804ca67162f562729b0",
+      "source_commit": "60779f9d2b53192bd425fb88d3933dd6dadd7361",
+      "claim": "authority bindings affect qualification lineage; skin repair policy unchanged"
+    },
+    {
+      "path": "tests/compiler/test_carrier_bound_mechanics_lineage_v1.py",
+      "blob_sha": "e23cb811c5d27c86aa03f106d53a102996c4870e",
+      "source_commit": "2eaec6068487ef2731fd9d6ccdee3b9e7244c8ee",
+      "source_commit_message": "test: require carrier-bound skeleton and skin qualification lineage"
+    }
+  ],
+  "preserved_existing_authority": {
+    "production_g3": {
+      "sealed_commit": "d6c79cf9f160d456368550dd41f1bc7469a7f968",
+      "sealed_status": "PASS__PRODUCTION_MECHANICAL_QUALIFICATION",
+      "g3_passed": true,
+      "failure_invariants": [],
+      "face_count": 28331,
+      "probe_count": 169,
+      "report_sha256": "724d2cb5fac936ee8f26c8b14c01f39d47ada14a97f1332f86170dfaea1206b7",
+      "workflow_run_id": 36602572907,
+      "motion_dynamic_proof_blob_sha_in_main": "746a0bdb5c1be3cb5829a7dda2c4eac4b6310dd4",
+      "superseded_by_this_promotion": false
+    },
+    "stage35_deformation_stress_blob_sha_in_main": "9dcbf1bcadb0e57f872a4dcc747230f5d30c34fb",
+    "stage35_skin_topology_compatibility_blob_sha_in_main": "e3286855516194972fa723924a05f115dc917987"
+  },
+  "explicitly_not_promoted": [
+    {
+      "item": "TESSA_STAGE18_PRODUCT_ACTIVATION",
+      "reason": "TESSA implementation exists, but current Stage18 product authority was not proven to be TESSA. Presence of code is not promotion authority."
+    },
+    {
+      "item": "SIGNED_CARRIER_QUERY_NORMAL_LANE",
+      "introduced_after": "a734a77a1a46b85686fd48280087179ad8202b22",
+      "stage19_emission_commit": "73856a965168bff9528085048a1e43f27e334065",
+      "reason": "Later research lane; no product promotion authority established."
+    },
+    {
+      "item": "MIRA_CARRIER_QUERY_INFERENCE",
+      "reason": "Later model-query research lane; no product promotion authority established."
+    },
+    {
+      "item": "V9_AND_LATER_TOPOLOGY_OPTIMIZER_RESEARCH",
+      "reason": "Static improvements were followed by mechanically falsified dynamic behavior; newer does not supersede sealed production G3 by chronology alone."
+    },
+    {
+      "item": "OCT4_STAGE41_STRUCTURED_FAILURE_AND_SAME_PROBE_RECEIPT_REVISION",
+      "structured_failure_commit": "b3e93892dfa54a0ca035ab8859d22528dd586819",
+      "carrier_into_stage41_commit": "44ad0d5c17203b94ba1989587e4cdfba4e4f8e74",
+      "latest_receipt_commit": "37ab514605da1afdf369e4672a9582714b518694",
+      "reason": "Carrier receipt revision depends on DynamicMotionProofFailure introduced after the sealed production G3 contract. It is not promoted until comparable proof establishes semantic supersession."
+    },
+    {
+      "item": "RIGID_EQUIPMENT_PRODUCT_RUNTIME",
+      "research_witness_path": "tools/research/apply_tessa_knight_rigid_equipment_witness_v1.py",
+      "reason": "Correct Knight mechanical witness is preserved as research evidence, but current Stage41 product evaluator does not consume the rigid-attachment lane."
+    },
+    {
+      "item": "SOURCE_FBX_RENDERERS_AS_CANONICAL_RENDER",
+      "reason": "Source-FBX renders are reference/presentation witnesses, not RealSaS canonical runtime render authority."
+    }
+  ],
+  "runtime_boundary": {
+    "stage42_code_promoted": false,
+    "main_runtime_v2_blob_sha": "4f2296db1c931929cdfd8bad402d4a392408dc6c",
+    "reason": "Main Stage42 already consumes Stage41 RealSaS.QualifiedDynamicMotionIR.v2 and fail-closes mesh, mechanical-state and presentation binding drift. Research runtime_v2 changes are appearance/runtime-tail work and are outside this promotion claim."
+  },
+  "validation": {
+    "proof_service_promotion_gate": {
+      "run_id": 37387956091,
+      "head_sha": "4b280d0697ac59ac45ca29acb1df3ac9b2336c84",
+      "conclusion": "success",
+      "scope_note": "This legacy gate does not execute the newly added carrier contract tests and is not the final promotion gate."
+    },
+    "required_final_gate": "current-mainline-self-hosted-ci on pull_request to main",
+    "merge_policy": "DO_NOT_MERGE_UNTIL_FINAL_GATE_SUCCESS"
+  }
+}

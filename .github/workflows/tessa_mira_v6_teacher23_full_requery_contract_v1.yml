@@ -1,0 +1,51 @@
+name: tessa-mira-v6-teacher23-full-requery-contract-v1
+
+on:
+  push:
+    branches:
+      - research/tessa-mechanical-mesh-v1-20261004
+    paths:
+      - tools/research/run_mira_v6_teacher23_full_requery_v1.py
+      - tools/research/materialize_teacher23_mira_query_preflight_v1.py
+      - tools/research/materialize_teacher23_mira_query_preflight_v2.py
+      - tools/research/run_tessa_knight_continuous_skin_motion_witness_v1.py
+      - .github/workflows/tessa_mira_v6_teacher23_full_requery_contract_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  apparatus:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: .
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pinned research dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Compile frozen requery apparatus
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            tools/research/run_mira_v6_teacher23_full_requery_v1.py \
+            tools/research/materialize_teacher23_mira_query_preflight_v1.py \
+            tools/research/materialize_teacher23_mira_query_preflight_v2.py \
+            tools/research/run_tessa_knight_continuous_skin_motion_witness_v1.py
+          python tools/research/run_mira_v6_teacher23_full_requery_v1.py --help >/dev/null
+          echo "MIRA_V6_TEACHER23_FULL_REQUERY_APPARATUS_PASS"

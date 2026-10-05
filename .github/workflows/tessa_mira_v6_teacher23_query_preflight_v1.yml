@@ -1,0 +1,99 @@
+name: tessa-mira-v6-teacher23-query-preflight-v1
+
+on:
+  push:
+    branches:
+      - research/tessa-mechanical-mesh-v1-20261004
+    paths:
+      - tools/research/materialize_teacher23_mira_query_preflight_v1.py
+      - .github/workflows/tessa_mira_v6_teacher23_query_preflight_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tessa-mira-v6-teacher23-query-preflight-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preflight:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: .
+      SURFACE_REMOTE: gdrive:RealSaS_TESSA_KNIGHT_V1_HANDOFF/qualified_rigging_surface.json
+      TEACHER_REMOTE: gdrive:RealSaS_TESSA_KNIGHT_V1_HANDOFF/KNIGHT_EVALUATED_TEACHER_SOURCE.npz
+      MIRA_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V6_DEMO_HANDOFF/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt
+      V6_RUNNER_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V6_DEMO_OUTPUT/run_knight_arachne_v6_demo_closure_v1.py
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pinned research dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m py_compile tools/research/materialize_teacher23_mira_query_preflight_v1.py
+
+      - name: Fetch exact court inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/mira_teacher23_preflight"
+          rm -rf "$work" && mkdir -p "$work/input" "$work/output"
+          rclone copyto "$SURFACE_REMOTE" "$work/input/qualified_rigging_surface.json" --checksum
+          rclone copyto "$TEACHER_REMOTE" "$work/input/KNIGHT_EVALUATED_TEACHER_SOURCE.npz" --checksum
+          rclone copyto "$MIRA_REMOTE" "$work/input/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt" --checksum --progress
+          rclone copyto "$V6_RUNNER_REMOTE" "$work/input/run_knight_arachne_v6_demo_closure_v1.py" --checksum
+          test -s "$work/input/qualified_rigging_surface.json"
+          test -s "$work/input/KNIGHT_EVALUATED_TEACHER_SOURCE.npz"
+          test -s "$work/input/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt"
+          test -s "$work/input/run_knight_arachne_v6_demo_closure_v1.py"
+          sha256sum "$work/input/"*
+          echo "WORK=$work" >> "$GITHUB_ENV"
+
+      - name: Qualify teacher23 and strict-load exact MIRA v6
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -u tools/research/materialize_teacher23_mira_query_preflight_v1.py \
+            --surface-json "$WORK/input/qualified_rigging_surface.json" \
+            --teacher-npz "$WORK/input/KNIGHT_EVALUATED_TEACHER_SOURCE.npz" \
+            --mira-checkpoint "$WORK/input/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt" \
+            --exact-v6-runner "$WORK/input/run_knight_arachne_v6_demo_closure_v1.py" \
+            --out-dir "$WORK/output"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=Path(os.environ['WORK'])/'output'/'MIRA_V6_TEACHER23_QUERY_PREFLIGHT_V1.json'
+          d=json.loads(p.read_text())
+          assert d['status']=='PASS'
+          assert d['conditioning']['joint_count']==23
+          assert d['qualified_teacher23']['joint_count']==23
+          assert d['mira_v6']['strict_backbone_load'] is True
+          assert d['mira_v6']['strict_decoder_load'] is True
+          assert d['mira_v6']['architecture_cardinality_dynamic_evidence']['v6_decoder_j23_smoke'] is True
+          assert d['support_binding']['uses_teacher_skin'] is False
+          assert d['authority']['fbx_object_packaging_authority'] is False
+          assert d['next']=='A100_EXACT_V6_FULL_REQUERY_ON_TEACHER23'
+          print('MIRA_V6_TEACHER23_PREFLIGHT_GATE_PASS', d['qualified_teacher23']['skeleton_lineage_hash'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mira-v6-teacher23-query-preflight-v1
+          path: |
+            ${{ env.WORK }}/output/TEACHER23_SKELETON_PROPOSAL.json
+            ${{ env.WORK }}/output/TEACHER23_QUALIFIED_SKELETON_IR.json
+            ${{ env.WORK }}/output/MIRA_V6_TEACHER23_QUERY_PREFLIGHT_V1.json
+          if-no-files-found: error
+          retention-days: 14

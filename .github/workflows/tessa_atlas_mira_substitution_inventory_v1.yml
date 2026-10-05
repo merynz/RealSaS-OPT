@@ -1,0 +1,72 @@
+name: tessa-atlas-mira-substitution-inventory-v1
+
+on:
+  push:
+    branches:
+      - research/tessa-mechanical-mesh-v1-20261004
+    paths:
+      - tools/research/inventory_atlas_mira_substitution_candidates_v1.py
+      - .github/workflows/tessa_atlas_mira_substitution_inventory_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tessa-atlas-mira-substitution-inventory-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  inventory:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: .
+      ATLAS_REMOTE: gdrive:GEPPETTO_STAGE27_MECHANICALLY_MEANINGFUL_V2_OUTPUT_20260925/GEPPETTO_KNIGHT_CHECKPOINT.pt
+      MIRA_REMOTE: gdrive:ARACHNE_STAGE31_V6_DEMO_HANDOFF_20260926/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pinned research dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Fetch exact learned candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/atlas_mira_inventory"
+          rm -rf "$work" && mkdir -p "$work"
+          rclone copyto "$ATLAS_REMOTE" "$work/atlas.pt" --checksum --progress
+          rclone copyto "$MIRA_REMOTE" "$work/mira.pt" --checksum --progress
+          echo "ATLAS_PATH=$work/atlas.pt" >> "$GITHUB_ENV"
+          echo "MIRA_PATH=$work/mira.pt" >> "$GITHUB_ENV"
+          sha256sum "$work/atlas.pt" "$work/mira.pt"
+
+      - name: Inventory checkpoint contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/ATLAS_MIRA_SUBSTITUTION_CANDIDATE_INVENTORY_V1.json"
+          python -u tools/research/inventory_atlas_mira_substitution_candidates_v1.py \
+            --atlas-checkpoint "$ATLAS_PATH" \
+            --mira-checkpoint "$MIRA_PATH" \
+            --out "$out"
+          echo "INVENTORY_OUT=$out" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: atlas-mira-substitution-candidate-inventory-v1
+          path: ${{ env.INVENTORY_OUT }}
+          if-no-files-found: error
+          retention-days: 14

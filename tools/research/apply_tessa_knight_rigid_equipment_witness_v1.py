@@ -6,6 +6,12 @@ Consumes the existing continuous-skin RUN witness and upgrades equipment
 components to explicit rigid handslot attachments. It also emits a single
 presentation loadout mask so alternative source equipment variants are not
 rendered on top of one another.
+
+Important authority rule: source object names/ranges are extraction provenance
+used only to recover human-readable variant labels for this sealed teacher
+asset. Mechanical/runtime authority is the connected component id plus its
+qualified one-hot attachment joint. Importers may merge or split mesh objects
+without changing that semantic ownership.
 """
 
 import argparse
@@ -22,7 +28,7 @@ from compiler.realsas_compiler_core.rigid_attachment_v1 import (
     rigid_attachment_edge_report_v1,
 )
 
-SCHEMA = "RealSaS.TESSAKnightRigidEquipmentWitness.v1"
+SCHEMA = "RealSaS.TESSAKnightRigidEquipmentWitness.v2"
 EQUIPMENT_GROUP = {
     "1H_Sword": "WEAPON",
     "1H_Sword_Offhand": "WEAPON",
@@ -82,7 +88,40 @@ def connected_components(vertex_count: int, faces: np.ndarray) -> tuple[np.ndarr
     )
 
 
-def component_object_map(*, audit: dict, source_faces: np.ndarray, vertex_count: int):
+def component_geometry_fingerprint(vertices: np.ndarray, faces: np.ndarray, component_vertices: np.ndarray) -> str:
+    """Stable-ish research fingerprint independent of Blender object names.
+
+    Uses rounded centered geometry plus local face incidence for provenance. It
+    is not product identity authority, but it lets the witness prove that the
+    semantic attachment is bound to geometry/component content rather than an
+    importer object label.
+    """
+    vertices = np.asarray(vertices, dtype=np.float64)
+    faces = np.asarray(faces, dtype=np.int64)
+    comp = np.asarray(component_vertices, dtype=np.int64)
+    index = {int(v): i for i, v in enumerate(comp.tolist())}
+    local_faces = []
+    for face in faces.tolist():
+        if all(int(v) in index for v in face):
+            local_faces.append(sorted(index[int(v)] for v in face))
+    centered = vertices[comp] - np.mean(vertices[comp], axis=0, keepdims=True)
+    payload = {
+        "vertex_count": int(len(comp)),
+        "face_count": int(len(local_faces)),
+        "centered_vertices_q1e6": np.rint(centered * 1.0e6).astype(np.int64).tolist(),
+        "local_faces_sorted": sorted(local_faces),
+    }
+    raw = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(raw).hexdigest()
+
+
+def component_provenance_map(*, audit: dict, source_faces: np.ndarray, vertex_count: int):
+    """Recover sealed teacher labels, then bind authority to connected components.
+
+    `mesh_objects` is allowed only as historical extraction provenance. Every
+    connected component must fall wholly inside one provenance range. The
+    returned component ids are the mechanical identity used downstream.
+    """
     owner = np.empty(int(vertex_count), dtype=object)
     owner[:] = None
     ranges = {}
@@ -91,19 +130,19 @@ def component_object_map(*, audit: dict, source_faces: np.ndarray, vertex_count:
         name = str(row["name"])
         start = int(row["vertex_start"])
         end = start + int(row["vertex_count"])
-        require(0 <= start < end <= len(owner), "RIGID_WITNESS_OBJECT_RANGE_INVALID:" + name)
-        require(all(value is None for value in owner[start:end]), "RIGID_WITNESS_OBJECT_RANGE_OVERLAP:" + name)
+        require(0 <= start < end <= len(owner), "RIGID_WITNESS_PROVENANCE_RANGE_INVALID:" + name)
+        require(all(value is None for value in owner[start:end]), "RIGID_WITNESS_PROVENANCE_RANGE_OVERLAP:" + name)
         owner[start:end] = name
         ranges[name] = (start, end)
-    require(all(value is not None for value in owner), "RIGID_WITNESS_OBJECT_ACCOUNTING_INCOMPLETE")
+    require(all(value is not None for value in owner), "RIGID_WITNESS_PROVENANCE_ACCOUNTING_INCOMPLETE")
 
     comps = connected_components(vertex_count, source_faces)
     vertex_component = np.full(vertex_count, -1, dtype=np.int64)
-    object_by_component = {}
+    label_by_component = {}
     for ci, comp in enumerate(comps):
-        names = {str(owner[int(v)]) for v in comp}
-        require(len(names) == 1, "RIGID_WITNESS_COMPONENT_CROSSES_OBJECT")
-        object_by_component[int(ci)] = next(iter(names))
+        labels = {str(owner[int(v)]) for v in comp}
+        require(len(labels) == 1, "RIGID_WITNESS_COMPONENT_CROSSES_PROVENANCE_RANGE")
+        label_by_component[int(ci)] = next(iter(labels))
         vertex_component[comp] = int(ci)
 
     source_face_component = np.asarray([
@@ -114,11 +153,11 @@ def component_object_map(*, audit: dict, source_faces: np.ndarray, vertex_count:
             len({int(vertex_component[int(v)]) for v in face}) == 1,
             "RIGID_WITNESS_FACE_CROSSES_COMPONENT:" + str(fi),
         )
-    return comps, object_by_component, ranges, source_face_component
+    return comps, label_by_component, ranges, source_face_component
 
 
-def build_equipment_bindings(*, audit, source_faces, source_skin, bone_names, tessa_vci, tessa_fci):
-    comps, object_by_component, ranges, source_face_component = component_object_map(
+def build_equipment_bindings(*, audit, source_vertices, source_faces, source_skin, bone_names, tessa_vci, tessa_fci):
+    comps, label_by_component, ranges, source_face_component = component_provenance_map(
         audit=audit,
         source_faces=source_faces,
         vertex_count=len(source_skin),
@@ -135,31 +174,40 @@ def build_equipment_bindings(*, audit, source_faces, source_skin, bone_names, te
 
     bindings = []
     joint_index = {str(name): i for i, name in enumerate(bone_names)}
-    for object_name, group in sorted(EQUIPMENT_GROUP.items()):
-        require(object_name in ranges, "RIGID_WITNESS_EQUIPMENT_OBJECT_MISSING:" + object_name)
-        start, end = ranges[object_name]
+    for provenance_label, group in sorted(EQUIPMENT_GROUP.items()):
+        require(provenance_label in ranges, "RIGID_WITNESS_EQUIPMENT_PROVENANCE_MISSING:" + provenance_label)
+        start, end = ranges[provenance_label]
         rows = np.asarray(source_skin[start:end], dtype=np.float64)
         active = np.flatnonzero(np.max(rows, axis=0) > 1.0e-8)
-        require(len(active) == 1, "RIGID_WITNESS_EQUIPMENT_NOT_RIGID:" + object_name)
+        require(len(active) == 1, "RIGID_WITNESS_EQUIPMENT_NOT_RIGID:" + provenance_label)
         bi = int(active[0])
-        require(float(np.max(np.abs(rows[:, bi] - 1.0))) <= 1.0e-8, "RIGID_WITNESS_EQUIPMENT_WEIGHT_DRIFT:" + object_name)
+        require(float(np.max(np.abs(rows[:, bi] - 1.0))) <= 1.0e-8, "RIGID_WITNESS_EQUIPMENT_WEIGHT_DRIFT:" + provenance_label)
         joint_id = str(bone_names[bi])
-        require(joint_id in ("handslot.l", "handslot.r"), "RIGID_WITNESS_SLOT_INVALID:" + object_name)
-        comp_ids = tuple(ci for ci, name in object_by_component.items() if name == object_name)
+        require(joint_id in ("handslot.l", "handslot.r"), "RIGID_WITNESS_SLOT_INVALID:" + provenance_label)
+        comp_ids = tuple(ci for ci, label in label_by_component.items() if label == provenance_label)
+        require(bool(comp_ids), "RIGID_WITNESS_EQUIPMENT_COMPONENT_MISSING:" + provenance_label)
+        fingerprints = [
+            component_geometry_fingerprint(source_vertices, source_faces, comps[int(ci)])
+            for ci in comp_ids
+        ]
         bindings.append(
             RigidAttachmentBindingV1IR(
-                attachment_id=object_name,
+                attachment_id=provenance_label,
                 joint_id=joint_id,
                 component_ids=comp_ids,
                 variant_group_id=group,
                 metadata={
                     "deformable_skin_interpolation_allowed": False,
-                    "source_teacher_object_range": [int(start), int(end)],
+                    "semantic_label_source": "SEALED_TEACHER_EXTRACTION_PROVENANCE_ONLY",
+                    "object_name_or_boundary_is_mechanical_authority": False,
+                    "mechanical_identity": "CONNECTED_COMPONENT_IDS_PLUS_QUALIFIED_ONE_HOT_JOINT",
+                    "source_teacher_provenance_range": [int(start), int(end)],
                     "source_teacher_joint_index": int(joint_index[joint_id]),
+                    "component_geometry_fingerprint_sha256": fingerprints,
                 },
             )
         )
-    return tuple(bindings), object_by_component
+    return tuple(bindings), label_by_component
 
 
 def recompute_poses(vertices: np.ndarray, weights: np.ndarray, skin_matrices: np.ndarray) -> np.ndarray:
@@ -194,6 +242,7 @@ def main(argv=None) -> int:
     require(len(bone_names) == 41, "RIGID_WITNESS_BONE_COUNT_DRIFT")
 
     with np.load(teacher_path, allow_pickle=False) as z:
+        source_vertices = np.asarray(z["vertices_source"], dtype=np.float64)
         source_faces = np.asarray(z["faces"], dtype=np.int64)
         source_skin = np.asarray(z["skin"], dtype=np.float64)
     with np.load(tessa_path, allow_pickle=False) as z:
@@ -210,6 +259,7 @@ def main(argv=None) -> int:
     require(weights_continuous.shape == (len(vertices), 23), "RIGID_WITNESS_BASE_WEIGHT_SHAPE_DRIFT")
     bindings, _ = build_equipment_bindings(
         audit=audit,
+        source_vertices=source_vertices,
         source_faces=source_faces,
         source_skin=source_skin,
         bone_names=bone_names,
@@ -278,6 +328,8 @@ def main(argv=None) -> int:
             "deformable_surface": "CONTINUOUS_SKIN_FIELD",
             "rigid_attachment": "ONE_HOT_QUALIFIED_JOINT",
             "control_only": "MOTION_EVIDENCE__NOT_SKIN_TARGET",
+            "object_packaging": "NON_AUTHORITATIVE_PROVENANCE_ONLY",
+            "attachment_identity": "CONNECTED_COMPONENT_IDS_PLUS_QUALIFIED_JOINT",
         },
         "equipment_bindings": [binding.to_dict() for binding in bindings],
         "presentation_loadout": {
@@ -291,6 +343,8 @@ def main(argv=None) -> int:
         "claims": {
             "equipment_skin_interpolation_used": False,
             "equipment_variant_multiplexing_rendered": False,
+            "fbx_or_blender_object_boundaries_required_for_runtime": False,
+            "equipment_semantics_depend_on_object_name_at_runtime": False,
             "product_authority": False,
             "generalization": False,
         },

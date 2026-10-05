@@ -1,0 +1,84 @@
+name: tessa-mira-v6-runner-source-audit-v1
+
+on:
+  push:
+    branches:
+      - research/tessa-mechanical-mesh-v1-20261004
+    paths:
+      - .github/workflows/tessa_mira_v6_runner_source_audit_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tessa-mira-v6-runner-source-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  recover-source:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      MIRA_V6_RUNNER_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V6_DEMO_OUTPUT/run_knight_arachne_v6_demo_closure_v1.py
+      EXPECTED_RUNNER_SHA256: 39ff4f7a2051f0d9c1251a5999f472b9926e83deacbedcedc8e92eea424dce01
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Recover exact sealed V6 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/mira_v6_runner_source"
+          rm -rf "$work" && mkdir -p "$work"
+          runner="$work/run_knight_arachne_v6_demo_closure_v1.py"
+          rclone copyto "$MIRA_V6_RUNNER_REMOTE" "$runner" --checksum
+          test -s "$runner"
+          actual="$(sha256sum "$runner" | awk '{print $1}')"
+          echo "MIRA_V6_RUNNER_SHA256=$actual"
+          test "$actual" = "$EXPECTED_RUNNER_SHA256"
+          python -m py_compile "$runner"
+          echo "RUNNER_PATH=$runner" >> "$GITHUB_ENV"
+          echo "MIRA_V6_EXACT_SOURCE_PASS"
+
+      - name: Emit architecture source summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - "$RUNNER_PATH" <<'PY'
+          import ast, json, sys
+          from pathlib import Path
+          p=Path(sys.argv[1]); src=p.read_text(encoding='utf-8'); tree=ast.parse(src)
+          classes=[]; functions=[]; constants={}
+          for node in tree.body:
+              if isinstance(node, ast.ClassDef): classes.append(node.name)
+              elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)): functions.append(node.name)
+              elif isinstance(node, (ast.Assign, ast.AnnAssign)):
+                  targets=node.targets if isinstance(node, ast.Assign) else [node.target]
+                  for t in targets:
+                      if isinstance(t, ast.Name):
+                          try: constants[t.id]=ast.literal_eval(node.value)
+                          except Exception: pass
+          needles=['RawSurfaceK4','joint','decoder','backbone','canonical_joint_to_target_index','field_tokens','K4','skeleton']
+          matches=[]
+          for i,line in enumerate(src.splitlines(),1):
+              if any(n.lower() in line.lower() for n in needles):
+                  matches.append({'line':i,'text':line[:500]})
+          out={'schema':'RealSaS.MIRAV6ExactSourceAudit.v1','source_sha256':'39ff4f7a2051f0d9c1251a5999f472b9926e83deacbedcedc8e92eea424dce01','classes':classes,'functions':functions,'literal_constants':constants,'relevant_lines':matches[:600]}
+          q=p.with_name('MIRA_V6_EXACT_SOURCE_AUDIT.json'); q.write_text(json.dumps(out,indent=2,sort_keys=True)+'\n')
+          print(json.dumps({'classes':classes,'functions':functions,'match_count':len(matches)},sort_keys=True))
+          print('MIRA_V6_SOURCE_SUMMARY_PASS',q)
+          PY
+          echo "AUDIT_JSON=$(dirname "$RUNNER_PATH")/MIRA_V6_EXACT_SOURCE_AUDIT.json" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mira-v6-exact-runner-source-audit-v1
+          path: |
+            ${{ env.RUNNER_PATH }}
+            ${{ env.AUDIT_JSON }}
+          if-no-files-found: error
+          retention-days: 14

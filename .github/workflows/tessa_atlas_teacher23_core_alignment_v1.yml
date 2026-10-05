@@ -1,0 +1,72 @@
+name: tessa-atlas-teacher23-core-alignment-v1
+
+on:
+  push:
+    branches:
+      - research/tessa-mechanical-mesh-v1-20261004
+    paths:
+      - tools/research/audit_atlas_teacher23_core_alignment_v1.py
+      - .github/workflows/tessa_atlas_teacher23_core_alignment_v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tessa-atlas-teacher23-core-alignment-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  alignment:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: .
+      ATLAS_SKELETON_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V6_DEMO_HANDOFF/FINAL_QUALIFIED_SKELETON_IR.json
+      TEACHER_REMOTE: gdrive:RealSaS_TESSA_KNIGHT_V1_HANDOFF/KNIGHT_EVALUATED_TEACHER_SOURCE.npz
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pinned research dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m py_compile tools/research/audit_atlas_teacher23_core_alignment_v1.py
+
+      - name: Fetch exact evaluation inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/atlas_teacher23_alignment"
+          rm -rf "$work" && mkdir -p "$work"
+          rclone copyto "$ATLAS_SKELETON_REMOTE" "$work/FINAL_QUALIFIED_SKELETON_IR.json" --checksum
+          rclone copyto "$TEACHER_REMOTE" "$work/KNIGHT_EVALUATED_TEACHER_SOURCE.npz" --checksum
+          test -s "$work/FINAL_QUALIFIED_SKELETON_IR.json"
+          test -s "$work/KNIGHT_EVALUATED_TEACHER_SOURCE.npz"
+          sha256sum "$work/"*
+          echo "WORK=$work" >> "$GITHUB_ENV"
+
+      - name: Audit ATLAS teacher23 core alignment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -u tools/research/audit_atlas_teacher23_core_alignment_v1.py \
+            --atlas-skeleton-json "$WORK/FINAL_QUALIFIED_SKELETON_IR.json" \
+            --teacher-npz "$WORK/KNIGHT_EVALUATED_TEACHER_SOURCE.npz" \
+            --out "$WORK/ATLAS_TEACHER23_CORE_ALIGNMENT_V1.json"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: atlas-teacher23-core-alignment-v1
+          path: ${{ env.WORK }}/ATLAS_TEACHER23_CORE_ALIGNMENT_V1.json
+          if-no-files-found: error
+          retention-days: 14

@@ -23,8 +23,9 @@ jobs:
     env:
       PYTHONUNBUFFERED: "1"
       PYTHONPATH: .
-      ATLAS_REMOTE: gdrive:GEPPETTO_STAGE27_MECHANICALLY_MEANINGFUL_V2_OUTPUT_20260925/GEPPETTO_KNIGHT_CHECKPOINT.pt
-      MIRA_REMOTE: gdrive:ARACHNE_STAGE31_V6_DEMO_HANDOFF_20260926/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt
+      KNIGHT_ROOT: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924
+      ATLAS_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/GEPPETTO_STAGE27_MECHANICALLY_MEANINGFUL_V2_OUTPUT_20260925/GEPPETTO_KNIGHT_CHECKPOINT.pt
+      MIRA_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V6_DEMO_HANDOFF_20260926/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt
 
     steps:
       - uses: actions/checkout@v4
@@ -40,6 +41,16 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Resolve exact Knight candidate paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "KNIGHT_ROOT=$KNIGHT_ROOT"
+          rclone lsf "$KNIGHT_ROOT" --dirs-only | grep -E 'GEPPETTO_STAGE27|ARACHNE_STAGE31_V6' || true
+          rclone lsf "$(dirname "$ATLAS_REMOTE")" | grep 'GEPPETTO_KNIGHT_CHECKPOINT.pt'
+          rclone lsf "$(dirname "$MIRA_REMOTE")" | grep 'ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt'
+          echo "ATLAS_MIRA_DRIVE_PATHS_PASS"
 
       - name: Fetch exact learned candidates
         shell: bash

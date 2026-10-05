@@ -7,6 +7,7 @@ on:
     paths:
       - compiler/realsas_compiler_core/motion_role_retarget_v1.py
       - tests/compiler/test_motion_role_retarget_v1.py
+      - tools/research/run_tessa_knight_role_aware_motion_witness_v1.py
       - .github/workflows/motion_role_retarget_v1_contract.yml
   workflow_dispatch:
 
@@ -47,13 +48,14 @@ jobs:
           set -euo pipefail
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
 
-      - name: Compile role retarget contract
+      - name: Compile role retarget contract and Knight adapter
         shell: bash
         run: |
           set -euo pipefail
           python -m py_compile \
             compiler/realsas_compiler_core/motion_role_retarget_v1.py \
-            tests/compiler/test_motion_role_retarget_v1.py
+            tests/compiler/test_motion_role_retarget_v1.py \
+            tools/research/run_tessa_knight_role_aware_motion_witness_v1.py
           echo "MOTION_ROLE_RETARGET_V1_COMPILE_PASS"
 
       - name: Run role retarget unit court

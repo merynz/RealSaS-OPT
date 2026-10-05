@@ -6,6 +6,7 @@ on:
       - research/tessa-mechanical-mesh-v1-20261004
     paths:
       - tools/research/blender_render_knight_source_run_frame0_v1.py
+      - tools/research/blender_render_knight_source_run_frame0_v2.py
       - .github/workflows/tessa_knight_source_run_frame0_compare_v1.yml
   workflow_dispatch:
 
@@ -78,7 +79,7 @@ jobs:
           out="$RUNNER_TEMP/knight_source_run_frame0_compare"
           rm -rf "$out"
           mkdir -p "$out"
-          "$BLENDER_EXE" --background --python tools/research/blender_render_knight_source_run_frame0_v1.py -- \
+          "$BLENDER_EXE" --background --python tools/research/blender_render_knight_source_run_frame0_v2.py -- \
             --source-fbx "$SOURCE_FBX" \
             --out-png "$out/SOURCE_FBX_RUN_FRAME0.png" \
             --out-json "$out/SOURCE_FBX_RUN_FRAME0.json"

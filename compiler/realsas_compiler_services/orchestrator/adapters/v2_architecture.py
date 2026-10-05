@@ -16,11 +16,15 @@ from compiler.realsas_compiler_core.geometry_substrate_v2 import (
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     canonical_mesh_candidate_from_dict,
     mechanical_partition_from_dict,
+    mesh_policy_from_dict,
     qualified_camera_set_from_dict,
     qualified_observation_set_from_dict,
     read_json,
 )
 from compiler.realsas_compiler_core.camera_geometry_v2 import project_points_xyz_v3
+from compiler.realsas_compiler_core.mechanical_carrier_evidence_v1 import (
+    build_mechanical_carrier_evidence_v1,
+)
 from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
     coverage_metrics,
     rasterize_triangles_half_integer_top_left,
@@ -52,6 +56,7 @@ from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import 
     write_ir,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2 import (
+    _relation_parent_quality_report,
     build_canonical_mesh_candidate_stage,
 )
 
@@ -92,27 +97,36 @@ def build_canonical_mesh_addressing_stage(ctx: dict) -> dict:
     fresh_candidate_lineage = candidate.candidate_lineage_hash
     repair_adopted = False
     repair_iteration = 0
-    repair_root = (
-        ctx["run_root"]
-        / "artifacts"
-        / "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
-    )
-    repair_candidate_path = repair_root / "repaired_stage18_candidate.json"
-    repair_directive_path = repair_root / "skin_topology_repair_directive.json"
-    if repair_candidate_path.is_file() or repair_directive_path.is_file():
-        if not (repair_candidate_path.is_file() and repair_directive_path.is_file()):
-            raise QualificationError("STAGE18_REPAIR_ARTIFACT_SET_INCOMPLETE")
+    attempt_cfg = dict(ctx["run_manifest"].get("mechanical_attempt") or {})
+    parent_attempt_id = None
+    if attempt_cfg:
+        allowed = {
+            "attempt_id",
+            "parent_attempt_id",
+            "repair_candidate",
+            "repair_directive",
+        }
+        unknown = set(attempt_cfg) - allowed
+        if unknown:
+            raise QualificationError(
+                "STAGE18_MECHANICAL_ATTEMPT_KEYS_UNSUPPORTED:"
+                + ",".join(sorted(map(str, unknown)))
+            )
+        if not attempt_cfg.get("parent_attempt_id"):
+            raise QualificationError("STAGE18_PARENT_ATTEMPT_ID_REQUIRED")
+        if not attempt_cfg.get("repair_candidate") or not attempt_cfg.get("repair_directive"):
+            raise QualificationError("STAGE18_PARENT_REPAIR_REF_SET_INCOMPLETE")
+        parent_attempt_id = str(attempt_cfg["parent_attempt_id"])
         repaired = canonical_mesh_candidate_from_dict(
-            read_json(repair_candidate_path)
+            load_file_ref(
+                dict(attempt_cfg["repair_candidate"]),
+                expected_schema="RealSaS.CanonicalMeshCandidateIR.v1",
+            )
         )
-        directive = read_json(repair_directive_path)
+        directive = load_file_ref(dict(attempt_cfg["repair_directive"]))
         meta = dict(repaired.metadata or {})
-        repair_iteration = int(
-            meta.get("skin_topology_repair_iteration", 0)
-        )
-        max_iterations = int(
-            meta.get("skin_topology_repair_max_iterations", 0)
-        )
+        repair_iteration = int(meta.get("skin_topology_repair_iteration", 0))
+        max_iterations = int(meta.get("skin_topology_repair_max_iterations", 0))
         repair_root_lineage = str(
             meta.get("skin_topology_repair_root_candidate_lineage_hash") or ""
         )
@@ -123,30 +137,45 @@ def build_canonical_mesh_addressing_stage(ctx: dict) -> dict:
             or repair_iteration > max_iterations
         ):
             raise QualificationError("STAGE18_REPAIR_LINEAGE_OR_BUDGET_DRIFT")
-        if str(directive.get("repaired_candidate_lineage_hash") or "") != repaired.candidate_lineage_hash:
+        if (
+            str(directive.get("repaired_candidate_lineage_hash") or "")
+            != repaired.candidate_lineage_hash
+        ):
             raise QualificationError("STAGE18_REPAIR_DIRECTIVE_CANDIDATE_DRIFT")
-        if str(directive.get("repair_root_candidate_lineage_hash") or "") != fresh_candidate_lineage:
+        if (
+            str(directive.get("repair_root_candidate_lineage_hash") or "")
+            != fresh_candidate_lineage
+        ):
             raise QualificationError("STAGE18_REPAIR_DIRECTIVE_ROOT_DRIFT")
         if int(directive.get("repair_iteration", -1)) != repair_iteration:
             raise QualificationError("STAGE18_REPAIR_DIRECTIVE_ITERATION_DRIFT")
         if (
             repaired.surface_binding_hash != candidate.surface_binding_hash
             or repaired.partition_binding_hash != candidate.partition_binding_hash
-            or repaired.carrier_policy_binding_hash != candidate.carrier_policy_binding_hash
+            or repaired.carrier_policy_binding_hash
+            != candidate.carrier_policy_binding_hash
         ):
             raise QualificationError("STAGE18_REPAIR_UPSTREAM_BINDING_DRIFT")
-        if meta.get("weight_mutation") is not False or meta.get("vertex_position_mutation") is not False:
-            raise QualificationError("STAGE18_REPAIR_ILLEGAL_WEIGHT_OR_POSITION_MUTATION")
+        if (
+            meta.get("weight_mutation") is not False
+            or meta.get("vertex_position_mutation") is not False
+        ):
+            raise QualificationError(
+                "STAGE18_REPAIR_ILLEGAL_WEIGHT_OR_POSITION_MUTATION"
+            )
         candidate = repaired
         root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
         repaired_output = write_ir(
             root / "canonical_mesh_candidate.json",
             candidate,
-            authority_class="DERIVED_STAGE35_REPAIRED_MESH_CANDIDATE",
+            authority_class="DERIVED_PARENT_ATTEMPT_REPAIRED_MESH_CANDIDATE",
         )
         base_outputs = []
         for output in base.get("outputs") or ():
-            if str(output.get("schema") or "") == "RealSaS.CanonicalMeshCandidateIR.v1":
+            if (
+                str(output.get("schema") or "")
+                == "RealSaS.CanonicalMeshCandidateIR.v1"
+            ):
                 base_outputs.append(repaired_output)
             else:
                 base_outputs.append(output)
@@ -288,8 +317,9 @@ def build_canonical_mesh_addressing_stage(ctx: dict) -> dict:
             "appearance_domain_hash": domain.domain_hash,
             "appearance_domain_face_count": domain.renderable_face_count,
             "mechanical_candidate_render_authority": False,
-            "stage35_skin_topology_repair_adopted": bool(repair_adopted),
-            "stage35_skin_topology_repair_iteration": int(repair_iteration),
+            "parent_attempt_repair_adopted": bool(repair_adopted),
+            "parent_attempt_id": parent_attempt_id,
+            "parent_attempt_repair_iteration": int(repair_iteration),
             "fresh_unrepaired_candidate_lineage_hash": fresh_candidate_lineage,
             "effective_candidate_lineage_hash": candidate.candidate_lineage_hash,
         }
@@ -544,6 +574,15 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
         )
     )
     geometry, demo_geometry_lineage = _static_geometry_evidence(ctx)
+    policy = mesh_policy_from_dict(
+        stage_output_payload(
+            ctx,
+            "18_CANONICAL_MESH_ADDRESSING_BUILD",
+            "RealSaS.MeshQualificationPolicyIR.v1",
+        )
+    )
+    static_quality = _relation_parent_quality_report(candidate, policy)
+    static_quality_passed = int(static_quality["policy_violating_face_count"]) == 0
     partition = mechanical_partition_from_dict(
         stage_output_payload(
             ctx,
@@ -594,6 +633,16 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
         raise QualificationError("STATIC_MESH_FACE_ADDRESSABILITY_INCOMPLETE")
     if not all(view.passed for view in geometry.views) and not demo_geometry_lineage:
         raise QualificationError("STATIC_MESH_GEOMETRY_SUBSTRATE_NOT_PASS")
+    if not static_quality_passed and not demo_geometry_lineage:
+        return {
+            "status": "FAIL",
+            "blockers": ["STATIC_MESH_QUALITY_POLICY_FAILED"],
+            "diagnostics": {
+                "candidate_mesh_binding_hash": candidate.candidate_lineage_hash,
+                "mesh_policy_hash": policy.qualification_policy_lineage_hash,
+                "static_quality": static_quality,
+            },
+        }
 
     source_foreground = _source_foreground_masks_v1(ctx, observation)
     source_fidelity_passed, source_fidelity_rows = _evaluate_candidate_source_fidelity_v1(
@@ -624,6 +673,15 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
         "vertex_count": len(candidate.vertices),
         "face_count": len(candidate.faces),
         "degenerate_face_count": 0,
+        "static_quality_policy_passed": bool(static_quality_passed),
+        "static_quality_min_angle_deg": float(static_quality["min_angle_deg"]),
+        "static_quality_max_aspect": float(
+            static_quality["max_aspect_longest_over_min_altitude"]
+        ),
+        "static_quality_policy_violating_face_count": int(
+            static_quality["policy_violating_face_count"]
+        ),
+        "mesh_policy_hash": policy.qualification_policy_lineage_hash,
         "surface_addressability_fraction": 1.0,
         "stage13_geometry_substrate_inherited": False,
         "stage13_policy_replayed_on_actual_candidate_mesh": True,
@@ -651,9 +709,16 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
             "repair_on_stage35_failure": "NEW_STAGE18_LINEAGE",
             "source_fidelity_policy_owner": "STAGE13_GEOMETRY_SUBSTRATE_POLICY",
             "source_fidelity_measurement_target": "ACTUAL_STAGE18_CANDIDATE_MESH",
+            "static_quality_measurement_target": "ACTUAL_STAGE18_CANDIDATE_MESH",
+            "static_quality_policy_passed": bool(static_quality_passed),
         },
     )
     value = replace(value, qualification_hash=static_mesh_qualification_hash(value))
+    carrier_evidence = build_mechanical_carrier_evidence_v1(
+        candidate,
+        static_qualification=value,
+        surface_addressing=addressing,
+    )
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     return {
         "status": "PASS_DEMO_ONLY" if demo_geometry_lineage else "PASS",
@@ -666,7 +731,25 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
                     if demo_geometry_lineage
                     else "STATIC_CANONICAL_MESH_QUALIFICATION"
                 ),
-            )
+            ),
+            write_ir(
+                root / "mechanical_carrier_evidence.json",
+                carrier_evidence,
+                authority_class=(
+                    "DEMO_ONLY_STATIC_MECHANICAL_CARRIER_EVIDENCE"
+                    if demo_geometry_lineage
+                    else "STATIC_QUALIFIED_MECHANICAL_CARRIER_EVIDENCE"
+                ),
+            ),
         ],
-        "diagnostics": {"qualification_hash": value.qualification_hash, **report},
+        "diagnostics": {
+            "qualification_hash": value.qualification_hash,
+            "mechanical_carrier_evidence_hash": carrier_evidence.carrier_evidence_hash,
+            "mechanical_carrier_topology_hash": carrier_evidence.topology_hash,
+            "mechanical_carrier_geometry_hash": carrier_evidence.geometry_hash,
+            "mechanical_carrier_invalid_normal_count": int(
+                sum(not flag for flag in carrier_evidence.normal_valid)
+            ),
+            **report,
+        },
     }

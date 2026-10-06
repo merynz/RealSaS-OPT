@@ -1,0 +1,130 @@
+name: tessa-stage35-integration-patch-v1
+
+on:
+  push:
+    branches:
+      - promotion/tessa-mechanical-substrate-20261006
+    paths:
+      - .github/workflows/tessa_stage35_integration_patch_v1.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: promotion/tessa-mechanical-substrate-20261006
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Apply exact Stage35 TESSA dispatcher patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py")
+          text = path.read_text(encoding="utf-8")
+
+          import_anchor = '''from compiler.realsas_compiler_core.tessa_stage18_v1 import (
+              build_tessa_stage18_candidate_v1,
+          )
+          '''
+          import_replacement = import_anchor + '''from compiler.realsas_compiler_core.qualified_mesh_v2 import (
+              qualify_canonical_mesh_candidate_v2,
+          )
+          from compiler.realsas_compiler_core.surface_addressing_v1 import (
+              static_mesh_qualification_from_dict,
+          )
+          from compiler.realsas_compiler_core.tessa_candidate_bridge_v1 import (
+              tessa_candidate_bridge_evidence_from_dict_v1,
+          )
+          from compiler.realsas_compiler_core.tessa_geometry_qualification_v1 import (
+              tessa_static_carrier_binding_from_dict_v1,
+          )
+          '''
+          if text.count(import_anchor) != 1:
+              raise SystemExit(f"STAGE35_PATCH_IMPORT_ANCHOR_COUNT:{text.count(import_anchor)}")
+          text = text.replace(import_anchor, import_replacement, 1)
+
+          old_call = '''    mesh=qualify_canonical_mesh_candidate(
+              candidate,
+              surface=surface,
+              partition=partition,
+              carrier_policy=carrier,
+              envelope=envelope,
+              policy=policy,
+              qualification_report=qualification_report,
+          )
+          '''
+          new_call = '''    tessa_evidence = {}
+              if candidate.producer_id == "RealSaS.TESSALearnedMechanicalCarrierProposal.v1":
+                  bridge_evidence = tessa_candidate_bridge_evidence_from_dict_v1(
+                      _stage_output_payload(
+                          ctx,
+                          "18_CANONICAL_MESH_ADDRESSING_BUILD",
+                          "RealSaS.TESSACandidateBridgeEvidenceIR.v1",
+                      )
+                  )
+                  static_mesh = static_mesh_qualification_from_dict(
+                      _stage_output_payload(
+                          ctx,
+                          "19_STATIC_CANONICAL_MESH_QUALIFIED",
+                          "RealSaS.StaticCanonicalMeshQualificationIR.v1",
+                      )
+                  )
+                  static_binding = tessa_static_carrier_binding_from_dict_v1(
+                      _stage_output_payload(
+                          ctx,
+                          "19_STATIC_CANONICAL_MESH_QUALIFIED",
+                          "RealSaS.TESSAStaticCarrierBindingIR.v1",
+                      )
+                  )
+                  tessa_evidence = {
+                      "bridge_evidence": bridge_evidence,
+                      "static_mesh": static_mesh,
+                      "static_binding": static_binding,
+                  }
+              mesh=qualify_canonical_mesh_candidate_v2(
+                  candidate,
+                  surface=surface,
+                  partition=partition,
+                  carrier_policy=carrier,
+                  envelope=envelope,
+                  policy=policy,
+                  qualification_report=qualification_report,
+                  **tessa_evidence,
+              )
+          '''
+          if text.count(old_call) != 1:
+              raise SystemExit(f"STAGE35_PATCH_MINTER_ANCHOR_COUNT:{text.count(old_call)}")
+          text = text.replace(old_call, new_call, 1)
+          path.write_text(text, encoding="utf-8")
+          PY
+
+          python -m py_compile \
+            compiler/realsas_compiler_core/qualified_mesh_v2.py \
+            compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py
+          git diff --check
+
+      - name: Commit exact integration patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo "STAGE35_PATCH_NO_DIFF"
+            exit 1
+          fi
+          git config user.name "RealSaS Promotion Bot"
+          git config user.email "140457344+merynz@users.noreply.github.com"
+          git add compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py
+          git commit -m "Wire TESSA Stage19 authority into Stage35 mesh mint"
+          git push origin HEAD:promotion/tessa-mechanical-substrate-20261006

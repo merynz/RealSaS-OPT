@@ -1,0 +1,114 @@
+name: tessa-static-survivor-contract-v1
+
+on:
+  pull_request:
+    paths:
+      - models/tessa/**
+      - compiler/realsas_compiler_core/tessa_surface_field_v1.py
+      - tests/models/test_tessa_v1.py
+      - tests/models/test_tessa_training_data_v1.py
+      - tests/compiler/test_tessa_surface_field_v1.py
+      - canonical/IRIS_GSA_TESSA_SURVIVOR_AUTHORITY_V1_20261006.md
+      - canonical/IRIS_GSA_TESSA_STATIC_SURVIVOR_PROMOTION_RECEIPT_20261006.json
+      - requirements/mainline-ci.txt
+      - requirements/torch-cpu.txt
+      - .github/workflows/tessa_static_survivor_contract_v1.yml
+  push:
+    branches: [main]
+    paths:
+      - models/tessa/**
+      - compiler/realsas_compiler_core/tessa_surface_field_v1.py
+      - tests/models/test_tessa_v1.py
+      - tests/models/test_tessa_training_data_v1.py
+      - tests/compiler/test_tessa_surface_field_v1.py
+      - canonical/IRIS_GSA_TESSA_SURVIVOR_AUTHORITY_V1_20261006.md
+      - canonical/IRIS_GSA_TESSA_STATIC_SURVIVOR_PROMOTION_RECEIPT_20261006.json
+      - requirements/mainline-ci.txt
+      - requirements/torch-cpu.txt
+      - .github/workflows/tessa_static_survivor_contract_v1.yml
+  workflow_dispatch:
+
+concurrency:
+  group: tessa-static-survivor-contract-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      CUDA_VISIBLE_DEVICES: ""
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: .
+      PYTHONHASHSEED: "0"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pinned gate dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: "1"
+          PIP_DEFAULT_TIMEOUT: "60"
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python - <<'PY'
+          import numpy, pytest, scipy, torch
+          print("TESSA_STATIC_SURVIVOR_ENV_PASS", numpy.__version__, scipy.__version__, pytest.__version__, torch.__version__)
+          PY
+
+      - name: Compile survivor sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            models/tessa/__init__.py \
+            models/tessa/v1/__init__.py \
+            models/tessa/v1/contracts_v1.py \
+            models/tessa/v1/conditioning_v1.py \
+            models/tessa/v1/model_v1.py \
+            models/tessa/v1/tokenization_v1.py \
+            models/tessa/v1/sequence_codec_v1.py \
+            models/tessa/v1/proposal_v1.py \
+            models/tessa/v1/mechanical_objective_v1.py \
+            models/tessa/v1/training_data_v1.py \
+            compiler/realsas_compiler_core/tessa_surface_field_v1.py \
+            tests/models/test_tessa_v1.py \
+            tests/models/test_tessa_training_data_v1.py \
+            tests/compiler/test_tessa_surface_field_v1.py
+          echo "TESSA_STATIC_SURVIVOR_COMPILE_PASS"
+
+      - name: Verify non-authoritative proposal boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import models.tessa.v1 as tessa
+          cfg = tessa.TESSAConfigV1()
+          assert cfg.scaling_policy().admits(vertex_count=3653, face_count=6928)
+          print("TESSA_PROPOSAL_BOUNDARY_SMOKE_PASS", cfg.max_faces, cfg.max_vertices)
+          PY
+
+      - name: Run survivor contract tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pytest -q \
+            tests/models/test_tessa_v1.py \
+            tests/models/test_tessa_training_data_v1.py \
+            tests/compiler/test_tessa_surface_field_v1.py
+          echo "TESSA_STATIC_SURVIVOR_CONTRACT_PASS"

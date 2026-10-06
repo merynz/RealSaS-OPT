@@ -1,0 +1,69 @@
+{
+  "schema": "realsas.iris_gsa_tessa_static_survivor_promotion_receipt.v1",
+  "date": "2026-10-06",
+  "base_main_commit": "d04de3e9e19b81653b1af38048fd74d730785c92",
+  "research_branch": "research/tessa-mechanical-mesh-v1-20261004",
+  "research_head_observed": "247ff75efce51ad1cb08932d4f1fc66e3b484e82",
+  "research_ahead_of_main_observed": 667,
+  "canonical_chain": [
+    "IRIS_SURFACE_EVIDENCE",
+    "GSA_SHARED_MECHANICAL_CARRIER_EVIDENCE",
+    "TESSA_TOPOLOGY_MESH_PROPOSAL",
+    "COMPILER_QUALIFICATION_REPAIR",
+    "STAGE18_ADOPTION_IF_QUALIFIED"
+  ],
+  "survivor_evidence": {
+    "tessa_t1b_autoregressive": {
+      "status": "PASS_RECONSTRUCTION_ONLY",
+      "teacher_forcing": false,
+      "tokens_exact": "35042/35042",
+      "product_authority": false
+    },
+    "tessa_static_g3_repair_v3": {
+      "status": "PASS",
+      "vertices": 3653,
+      "faces": 6928,
+      "non_manifold_edges": 0,
+      "min_angle_deg": 7.524628,
+      "max_aspect": 9.0893,
+      "residual_static_violations": 0,
+      "threshold_relaxation": false,
+      "subject_specific_exemptions": false
+    },
+    "mira_raw41_coverage_v3_refit": {
+      "status": "FIT1_KNIGHT_PASS",
+      "raw_teacher_bones_retained": 41,
+      "coverage": "12090/12090",
+      "dominant_joint_accuracy": 0.99917,
+      "row_l1_p95": 0.0371,
+      "product_or_generalization_authority": false
+    },
+    "tessa_raw41_dynamic_v4": {
+      "status": "INCONCLUSIVE__SEALED_SOURCE_MOTION_OUTSIDE_FROZEN_DYNAMIC_G3",
+      "owner": "SOURCE_MOTION_OR_RETARGET_ENVELOPE",
+      "product_authority": false
+    },
+    "native_attachment_frame0_court_v3": {
+      "status": "DIAGNOSTIC_OWNER_NATIVE_SOURCE_MOTION_OR_DYNAMIC_G3_POLICY",
+      "native_source_motion_inside_frozen_dynamic_g3": false,
+      "directive": "KEEP_TESSA_AND_MIRA_FROZEN_UNTIL_NATIVE_DYNAMIC_AUTHORITY_IS_RESOLVED"
+    }
+  },
+  "promoted": [
+    "TESSA_V1_PROPOSAL_MODEL_CONTRACT_PACKAGE",
+    "COMPILER_TESSA_MATERIAL_SUPPORT_FIELD_BRIDGE",
+    "TESSA_STATIC_PROPOSAL_CONTRACT_TESTS",
+    "TESSA_STATIC_SURVIVOR_CI",
+    "CANONICAL_SURVIVOR_AUTHORITY_RECORD"
+  ],
+  "not_promoted_or_activated": [
+    "TESSA_DEFAULT_STAGE18_PRODUCT_AUTHORITY",
+    "TESSA_DYNAMIC_SHIPPING_AUTHORITY",
+    "MIRA_RAW41_GENERIC_PRODUCT_AUTHORITY",
+    "TEACHER23_RESEARCH_SUBSTITUTION",
+    "SAME_INDEX_TEACHER_TO_PRODUCT_TRANSPORT",
+    "UNSEEN_FITK_GENERALIZATION_AUTHORITY"
+  ],
+  "next_blocker": "RECONCILE_DYNAMIC_G3_POLICY_WITH_NATIVE_SOURCE_MOTION_BEFORE_TESSA_MIRA_PRODUCT_ACTIVATION",
+  "compiler_authority_remains": true
+}

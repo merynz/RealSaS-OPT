@@ -118,8 +118,12 @@ def build_tessa_stage18_candidate_v1(
         inverse_distance_power=inverse_distance_power,
     )
 
+    geometry_boundary_policy = (
+        "TESSA_TOPOLOGICAL_BOUNDARY_ONLY__"
+        "GSA_MATERIAL_SUPPORT_NOT_GEOMETRY_AUTHORITY"
+    )
     producer_policy_hash = content_sha256({
-        "schema": "RealSaS.TESSAStage18ProducerPolicy.v2",
+        "schema": "RealSaS.TESSAStage18ProducerPolicy.v3",
         "backend": "TESSA_PROPOSAL_V1",
         "proposal_sha256": str(proposal_ref.get("sha256") or ""),
         "proposal_geometry_lineage_hash": str(proposal.source_geometry_lineage_hash),
@@ -139,8 +143,9 @@ def build_tessa_stage18_candidate_v1(
             "collapse_limit": collapse_limit,
             "relaxation_batch_size": relaxation_batch_size,
             "relaxation_limit": relaxation_limit,
-            "semantic_boundary_protection": "STAGE17_SEPARATE_OR_UNKNOWN_ONLY",
+            "geometry_boundary_policy": geometry_boundary_policy,
             "topological_boundary_protection": "OWNED_BY_RELAXATION_OPERATOR",
+            "gsa_material_boundary_ids_used_to_freeze_xyz": False,
             "threshold_relaxation": False,
         },
         "mesh_policy_hash": mesh_policy.qualification_policy_lineage_hash,
@@ -172,11 +177,12 @@ def build_tessa_stage18_candidate_v1(
 
     quality = {
         **post_repair_quality,
-        "schema": "RealSaS.TESSAStage18StaticPreflight.v2",
+        "schema": "RealSaS.TESSAStage18StaticPreflight.v3",
         "producer_semantics": "TESSA_LEARNED_GEOMETRY_PLUS_COMPILER_STATIC_REPAIR",
         "diagnostic_only": True,
         "stage19_remeasurement_required": True,
         "product_authority_claimed": False,
+        "geometry_boundary_policy": geometry_boundary_policy,
         "pre_repair": pre_repair_quality,
     }
 
@@ -236,6 +242,8 @@ def build_tessa_stage18_candidate_v1(
             "static_preflight": quality,
             "stage19_remeasurement_required": True,
             "material_support_is_geometry_authority": False,
+            "geometry_boundary_policy": geometry_boundary_policy,
+            "gsa_material_boundary_ids_used_to_freeze_xyz": False,
             "learned_xyz_preserved_exactly": False,
             "learned_proposal_is_immutable_reference": True,
             "compiler_static_repair_applied": True,

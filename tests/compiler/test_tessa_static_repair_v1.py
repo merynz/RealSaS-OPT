@@ -156,7 +156,10 @@ def test_material_support_is_never_promoted_to_tessa_geometry_authority():
 
     assert candidate.metadata["material_support_is_not_geometry_support"] is True
     assert repaired.metadata["material_support_is_not_geometry_support"] is True
-    assert repaired.metadata["geometry_position_derived_from_material_support"] is False
+    assert all(
+        vertex.metadata["geometry_position_derived_from_material_support"] is False
+        for vertex in repaired.vertices
+    )
     assert evidence.metadata["semantic_boundary_protection_count"] == 0
     assert "GSA_MATERIAL_SUPPORT_NOT_GEOMETRY_AUTHORITY" in evidence.metadata["geometry_boundary_policy"]
 

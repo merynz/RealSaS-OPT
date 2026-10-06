@@ -78,6 +78,18 @@ from compiler.realsas_compiler_core.substrate.scene_first_signed import (
 from compiler.realsas_compiler_core.tessa_stage18_v1 import (
     build_tessa_stage18_candidate_v1,
 )
+from compiler.realsas_compiler_core.qualified_mesh_v2 import (
+    qualify_canonical_mesh_candidate_v2,
+)
+from compiler.realsas_compiler_core.surface_addressing_v1 import (
+    static_mesh_qualification_from_dict,
+)
+from compiler.realsas_compiler_core.tessa_candidate_bridge_v1 import (
+    tessa_candidate_bridge_evidence_from_dict_v1,
+)
+from compiler.realsas_compiler_core.tessa_geometry_qualification_v1 import (
+    tessa_static_carrier_binding_from_dict_v1,
+)
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     stage_output_payload,
@@ -828,7 +840,35 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
         "g5_evidence_hash":g5_payload["evidence_hash"],
         "view_component_coverage":g5_rows,
     }
-    mesh=qualify_canonical_mesh_candidate(
+    tessa_evidence = {}
+    if candidate.producer_id == "RealSaS.TESSALearnedMechanicalCarrierProposal.v1":
+        bridge_evidence = tessa_candidate_bridge_evidence_from_dict_v1(
+            _stage_output_payload(
+                ctx,
+                "18_CANONICAL_MESH_ADDRESSING_BUILD",
+                "RealSaS.TESSACandidateBridgeEvidenceIR.v1",
+            )
+        )
+        static_mesh = static_mesh_qualification_from_dict(
+            _stage_output_payload(
+                ctx,
+                "19_STATIC_CANONICAL_MESH_QUALIFIED",
+                "RealSaS.StaticCanonicalMeshQualificationIR.v1",
+            )
+        )
+        static_binding = tessa_static_carrier_binding_from_dict_v1(
+            _stage_output_payload(
+                ctx,
+                "19_STATIC_CANONICAL_MESH_QUALIFIED",
+                "RealSaS.TESSAStaticCarrierBindingIR.v1",
+            )
+        )
+        tessa_evidence = {
+            "bridge_evidence": bridge_evidence,
+            "static_mesh": static_mesh,
+            "static_binding": static_binding,
+        }
+    mesh=qualify_canonical_mesh_candidate_v2(
         candidate,
         surface=surface,
         partition=partition,
@@ -836,6 +876,7 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
         envelope=envelope,
         policy=policy,
         qualification_report=qualification_report,
+        **tessa_evidence,
     )
     outputs=[
         _write_ir(root/"qualified_mesh.json",mesh,authority_class="QUALIFIED_PRODUCT_GEOMETRY"),

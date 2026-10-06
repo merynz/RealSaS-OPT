@@ -12,6 +12,9 @@ from compiler.realsas_compiler_core.artifact_codec_v2 import (
     qualified_skeleton_from_dict, qualified_skin_from_dict, rigging_surface_from_dict,
 )
 from compiler.realsas_compiler_core.rig import qualify_skeleton
+from compiler.realsas_compiler_core.mechanical_carrier_evidence_v1 import (
+    mechanical_carrier_evidence_from_dict,
+)
 from compiler.realsas_compiler_core.skin import qualify_skin
 from compiler.realsas_compiler_core.types import (
     QualificationError, SkeletonProposalEdge, SkeletonProposalIR, SkeletonProposalJoint,
@@ -71,6 +74,16 @@ def _skin_proposal(payload:dict)->SkinProposalIR:
     )
 
 
+def _load_mechanical_carrier_evidence(ctx: dict):
+    return mechanical_carrier_evidence_from_dict(
+        stage_output_payload(
+            ctx,
+            "19_STATIC_CANONICAL_MESH_QUALIFIED",
+            "RealSaS.MechanicalCarrierEvidenceIR.v1",
+        )
+    )
+
+
 def _assert_geppetto_surface_scope(ctx: dict, qualification) -> None:
     row = next(
         (
@@ -124,16 +137,22 @@ def preregister_geppetto_fit_stage(ctx:dict)->dict:
         stage_output_payload(ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceQualificationIR.v1")
     )
     _assert_geppetto_surface_scope(ctx, qualification)
+    carrier=_load_mechanical_carrier_evidence(ctx)
     prereg,out=build_fit_preregistration(
         ctx,lane="GEPPETTO",section_key="geppetto_fit",
         upstream_bindings={
             "rigging_surface":surface.geometry_lineage_hash,
             "rigging_surface_qualification":qualification.qualification_hash,
+            "mechanical_carrier_evidence":carrier.carrier_evidence_hash,
+            "mechanical_carrier_topology":carrier.topology_hash,
         },
         stage_id="26_GEPPETTO_FIT_PREREGISTERED",
     )
     return {"status":"PASS","outputs":[out],"diagnostics":{
-        "preregistration_hash":prereg.preregistration_hash,"architecture_id":prereg.architecture_id,
+        "preregistration_hash":prereg.preregistration_hash,
+        "architecture_id":prereg.architecture_id,
+        "mechanical_carrier_evidence_hash":carrier.carrier_evidence_hash,
+        "mechanical_carrier_topology_hash":carrier.topology_hash,
     }}
 
 
@@ -163,6 +182,15 @@ def qualify_skeleton_stage(ctx:dict)->dict:
     execution=model_fit_execution_from_dict(
         stage_output_payload(ctx,"27_GEPPETTO_FIT","RealSaS.ModelFitExecutionIR.v1")
     )
+    carrier=_load_mechanical_carrier_evidence(ctx)
+    execution_upstream=dict(execution.upstream_bindings)
+    if (
+        execution_upstream.get("mechanical_carrier_evidence")
+        != carrier.carrier_evidence_hash
+        or execution_upstream.get("mechanical_carrier_topology")
+        != carrier.topology_hash
+    ):
+        raise QualificationError("SKELETON_QUALIFICATION_CARRIER_BINDING_DRIFT")
     proposal=_skeleton_proposal(_execution_json(execution,expected_schema="RealSaS.SkeletonProposalIR.v1"))
     if proposal.surface_binding_hash!=surface.geometry_lineage_hash:
         raise QualificationError("SKELETON_QUALIFICATION_SURFACE_DRIFT")
@@ -170,11 +198,24 @@ def qualify_skeleton_stage(ctx:dict)->dict:
     unknown=set(policy)-{"run_ilp_shadow"}
     if unknown:
         raise QualificationError(f"GEPPETTO_QUALIFICATION_POLICY_UNSUPPORTED:{sorted(unknown)}")
-    skeleton=qualify_skeleton(surface,proposal,run_ilp_shadow=bool(policy.get("run_ilp_shadow",False)))
+    skeleton=qualify_skeleton(
+        surface,
+        proposal,
+        run_ilp_shadow=bool(policy.get("run_ilp_shadow",False)),
+        authority_bindings={
+            "mechanical_carrier_evidence":carrier.carrier_evidence_hash,
+            "mechanical_carrier_topology":carrier.topology_hash,
+            "mechanical_carrier_geometry":carrier.geometry_hash,
+            "candidate_mesh":carrier.candidate_mesh_binding_hash,
+            "static_mesh_qualification":carrier.static_mesh_qualification_binding_hash,
+        },
+    )
     root=ctx["run_root"]/"artifacts"/"28_SKELETON_QUALIFIED"
     return {"status":"PASS","outputs":[write_ir(root/"qualified_skeleton.json",skeleton,authority_class="QUALIFIED_SKELETON")],
         "diagnostics":{"skeleton_lineage_hash":skeleton.skeleton_lineage_hash,"joint_count":len(skeleton.joints),
-                       "optimizer":skeleton.qualification_report.get("solver"),"optimality_proven":skeleton.qualification_report.get("optimality_proven")}}
+                       "optimizer":skeleton.qualification_report.get("solver"),"optimality_proven":skeleton.qualification_report.get("optimality_proven"),
+                       "mechanical_carrier_evidence_hash":carrier.carrier_evidence_hash,
+                       "mechanical_carrier_topology_hash":carrier.topology_hash}}
 
 
 def seal_geppetto_checkpoint_stage(ctx:dict)->dict:
@@ -204,12 +245,15 @@ def preregister_arachne_fit_stage(ctx:dict)->dict:
     geppetto=model_checkpoint_seal_from_dict(
         stage_output_payload(ctx,"29_GEPPETTO_CHECKPOINT_SEALED","RealSaS.ModelCheckpointSealIR.v1")
     )
+    carrier=_load_mechanical_carrier_evidence(ctx)
     prereg,out=build_fit_preregistration(
         ctx,lane="ARACHNE",section_key="arachne_fit",
         upstream_bindings={
             "rigging_surface":surface.geometry_lineage_hash,
             "qualified_skeleton":skeleton.skeleton_lineage_hash,
             "geppetto_checkpoint_seal":geppetto.checkpoint_seal_hash,
+            "mechanical_carrier_evidence":carrier.carrier_evidence_hash,
+            "mechanical_carrier_topology":carrier.topology_hash,
         },
         stage_id="30_ARACHNE_FIT_PREREGISTERED",
     )
@@ -250,6 +294,15 @@ def qualify_skin_stage(ctx:dict)->dict:
     execution=model_fit_execution_from_dict(
         stage_output_payload(ctx,"31_ARACHNE_FIT","RealSaS.ModelFitExecutionIR.v1")
     )
+    carrier=_load_mechanical_carrier_evidence(ctx)
+    execution_upstream=dict(execution.upstream_bindings)
+    if (
+        execution_upstream.get("mechanical_carrier_evidence")
+        != carrier.carrier_evidence_hash
+        or execution_upstream.get("mechanical_carrier_topology")
+        != carrier.topology_hash
+    ):
+        raise QualificationError("SKIN_QUALIFICATION_CARRIER_BINDING_DRIFT")
     proposal=_skin_proposal(_execution_json(execution,expected_schema="RealSaS.SkinProposalIR.v1"))
     policy=dict(execution.qualification_policy or {})
     allowed={"max_simplex_repair_l1","max_total_correction_l1","negative_tolerance","max_influences"}
@@ -266,6 +319,13 @@ def qualify_skin_stage(ctx:dict)->dict:
         max_total_correction_l1=float(policy["max_total_correction_l1"]),
         negative_tolerance=float(policy["negative_tolerance"]),
         max_influences=None if max_influences is None else int(max_influences),
+        authority_bindings={
+            "mechanical_carrier_evidence":carrier.carrier_evidence_hash,
+            "mechanical_carrier_topology":carrier.topology_hash,
+            "mechanical_carrier_geometry":carrier.geometry_hash,
+            "candidate_mesh":carrier.candidate_mesh_binding_hash,
+            "static_mesh_qualification":carrier.static_mesh_qualification_binding_hash,
+        },
     )
     root=ctx["run_root"]/"artifacts"/"32_SKIN_QUALIFIED"
     q=dict(skin.qualification_report or {})
@@ -281,6 +341,8 @@ def qualify_skin_stage(ctx:dict)->dict:
             "row_confidence_semantics":q.get("row_confidence_semantics"),
             "uncovered_row_semantics":q.get("uncovered_row_semantics"),
             "product_skin_evidence_complete":q.get("product_skin_evidence_complete"),
+            "mechanical_carrier_evidence_hash":carrier.carrier_evidence_hash,
+            "mechanical_carrier_topology_hash":carrier.topology_hash,
         }}
 
 

@@ -2,8 +2,10 @@ name: recover-and-verify-knight-frozen-canonical
 
 on:
   push:
-    branches: [integration/knight-latest-canonical-20261002]
-    paths: ['.github/workflows/recover_and_verify_knight_frozen_canonical.yml']
+    branches:
+      - main
+      - integration/knight-latest-canonical-20261002
+      - promotion/mechanical-substrate-v1-20261005
   workflow_dispatch:
 
 permissions:

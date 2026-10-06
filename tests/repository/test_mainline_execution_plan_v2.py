@@ -57,6 +57,7 @@ def test_v2_mesh_birth_precedes_parallel_mechanics_and_caa():
         "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
         "17_MECHANICAL_PARTITION_QUALIFIED",
     ]
+    assert "mechanical_attempt" in by["18_CANONICAL_MESH_ADDRESSING_BUILD"]["manifest_keys"]
     assert plan["appearance_contract"]["visual_geometry_authority"] == (
         "SOURCE_ART_SILHOUETTE_VISUAL_MESH"
     )
@@ -65,8 +66,21 @@ def test_v2_mesh_birth_precedes_parallel_mechanics_and_caa():
         "20_CAA_BACKEND_PREREGISTERED"
     ]["depends_on"]
     assert by["26_GEPPETTO_FIT_PREREGISTERED"]["depends_on"] == [
-        "15_RIGGING_SURFACE_QUALIFIED"
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
     ]
+    assert "19_STATIC_CANONICAL_MESH_QUALIFIED" in by[
+        "28_SKELETON_QUALIFIED"
+    ]["depends_on"]
+    assert "19_STATIC_CANONICAL_MESH_QUALIFIED" in by[
+        "30_ARACHNE_FIT_PREREGISTERED"
+    ]["depends_on"]
+    assert "19_STATIC_CANONICAL_MESH_QUALIFIED" in by[
+        "32_SKIN_QUALIFIED"
+    ]["depends_on"]
+    assert "19_STATIC_CANONICAL_MESH_QUALIFIED" in by[
+        "34_DEFORMATION_CAPABILITY_ENVELOPE"
+    ]["depends_on"]
     assert by["35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"]["adapter"].endswith(
         ":qualify_canonical_mesh_stage"
     )
@@ -157,3 +171,38 @@ def test_v2_tail_manifest_fingerprint_scope_matches_current_authority_reads():
     assert by["42_RUNTIME_PROJECTION_AND_CAA_BINDING"]["manifest_keys"] == []
     assert by["44_NATIVE_PACKAGE_OPEN_PLAYBACK"]["manifest_keys"] == ["runtime"]
     assert by["45_DYNAMIC_VISUAL_INTEGRITY_PROOF"]["manifest_keys"] == ["runtime"]
+
+
+def test_carrier_first_mechanics_has_no_hidden_stage35_to_stage18_filesystem_backedge():
+    source = (
+        ROOT
+        / "compiler"
+        / "realsas_compiler_services"
+        / "orchestrator"
+        / "adapters"
+        / "v2_architecture.py"
+    ).read_text(encoding="utf-8")
+    stage18 = source.split("def build_canonical_mesh_addressing_stage", 1)[1].split(
+        "def _double_area", 1
+    )[0]
+    assert 'artifacts" / "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED' not in stage18
+    assert 'ctx["run_manifest"].get("mechanical_attempt")' in stage18
+    assert "DERIVED_PARENT_ATTEMPT_REPAIRED_MESH_CANDIDATE" in stage18
+    assert "STAGE18_PARENT_ATTEMPT_ID_REQUIRED" in stage18
+    assert "STAGE18_REPAIR_ILLEGAL_WEIGHT_OR_POSITION_MUTATION" in stage18
+
+
+def test_stage19_requalifies_exact_effective_carrier_static_quality_before_mechanics():
+    source = (
+        ROOT
+        / "compiler"
+        / "realsas_compiler_services"
+        / "orchestrator"
+        / "adapters"
+        / "v2_architecture.py"
+    ).read_text(encoding="utf-8")
+    stage19 = source.split("def qualify_static_canonical_mesh_stage", 1)[1]
+    assert "_relation_parent_quality_report(candidate, policy)" in stage19
+    assert "STATIC_MESH_QUALITY_POLICY_FAILED" in stage19
+    assert '"static_quality_policy_passed"' in stage19
+    assert "build_mechanical_carrier_evidence_v1" in stage19

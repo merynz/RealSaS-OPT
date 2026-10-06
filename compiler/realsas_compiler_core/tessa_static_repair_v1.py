@@ -21,7 +21,6 @@ from dataclasses import asdict, dataclass, field, replace
 from typing import Any, Mapping
 
 from .canonical_mesh_quality_repair_v1 import (
-    mechanical_quality_protected_surface_ids_v1,
     repair_candidate_endpoint_collapses_v1,
     repair_candidate_fixed_vertex_flips_v1,
     repair_candidate_projected_relaxation_v1,
@@ -316,7 +315,15 @@ def repair_tessa_candidate_static_v1(
     relaxation_batch_size: int = 32,
     relaxation_limit: int = 512,
 ) -> tuple[CanonicalMeshCandidateIR, TESSAStaticRepairEvidenceIR, TESSAReferenceBindingIR]:
-    """Repair one TESSA proposal under the frozen generic Compiler policy."""
+    """Repair one TESSA proposal under the frozen generic Compiler policy.
+
+    Stage17 GSA boundary decisions are intentionally not passed to the projected
+    geometry relaxation operator through ``SurfaceSupportBinding``. In the TESSA
+    lane that binding is material/mechanical support, not geometry authority.
+    TESSA's own topological boundary remains protected internally by the generic
+    relaxation operator. A future semantic geometry constraint must be represented
+    by a dedicated typed TESSA geometry constraint before it may freeze XYZ.
+    """
     _validate_initial_tessa_candidate(candidate)
     if candidate.partition_binding_hash != partition.partition_lineage_hash:
         raise QualificationError("TESSA_STATIC_REPAIR_PARTITION_BINDING_MISMATCH")
@@ -347,7 +354,7 @@ def repair_tessa_candidate_static_v1(
         if int(report["after"]["policy_violating_face_count"]) == 0 or accepted == 0:
             break
 
-    protected = mechanical_quality_protected_surface_ids_v1(partition)
+    protected = frozenset()
     relaxation_total = 0
     relaxation_reports = []
     final_report = dict(collapse_reports[-1]["after"] if collapse_reports else flip_report["after"])
@@ -388,9 +395,13 @@ def repair_tessa_candidate_static_v1(
         )
         changed_vertices.append(replace(vertex, metadata=md))
 
+    geometry_boundary_policy = (
+        "TESSA_TOPOLOGICAL_BOUNDARY_ONLY__"
+        "GSA_MATERIAL_SUPPORT_NOT_GEOMETRY_AUTHORITY"
+    )
     producer_policy_hash = content_sha256(
         {
-            "schema": "RealSaS.TESSACompilerStaticRepairPolicy.v1",
+            "schema": "RealSaS.TESSACompilerStaticRepairPolicy.v2",
             "input_candidate_lineage_hash": original.candidate_lineage_hash,
             "mesh_policy_hash": policy.qualification_policy_lineage_hash,
             "partition_binding_hash": partition.partition_lineage_hash,
@@ -404,7 +415,8 @@ def repair_tessa_candidate_static_v1(
             "collapse_limit": int(collapse_limit),
             "relaxation_batch_size": int(relaxation_batch_size),
             "relaxation_limit": int(relaxation_limit),
-            "extra_protected_surface_ids": sorted(protected),
+            "extra_protected_surface_ids": [],
+            "geometry_boundary_policy": geometry_boundary_policy,
             "topological_boundary_protection": "OWNED_BY_RELAXATION_OPERATOR",
             "threshold_relaxation": False,
             "teacher_geometry_used": False,
@@ -426,11 +438,10 @@ def repair_tessa_candidate_static_v1(
             "requires_stage19_static_qualification": True,
             "threshold_relaxation_performed": False,
             "teacher_geometry_used_to_repair": False,
+            "geometry_boundary_policy": geometry_boundary_policy,
         }
     )
 
-    # First form the repaired geometry with a temporary lineage so we can derive
-    # non-circular evidence content over stable vertex ids and provenance rows.
     temporary = replace(
         current,
         vertices=tuple(changed_vertices),
@@ -479,7 +490,8 @@ def repair_tessa_candidate_static_v1(
             "teacher_geometry_used": False,
             "same_index_skin_transport_authorized": False,
             "threshold_relaxation_performed": False,
-            "semantic_boundary_protection_count": len(protected),
+            "semantic_boundary_protection_count": 0,
+            "geometry_boundary_policy": geometry_boundary_policy,
             "collapse_batch_count": len(collapse_reports),
             "relaxation_batch_count": len(relaxation_reports),
             "output_candidate_lineage_is_reverse_link_not_hash_input": True,
@@ -490,9 +502,6 @@ def repair_tessa_candidate_static_v1(
         evidence_hash=_repair_evidence_hash(repair_unsealed),
     )
 
-    # Candidate commits to both evidence hashes. Their reverse links are filled only
-    # after this final candidate lineage exists and are deliberately excluded from
-    # the corresponding evidence content hashes.
     final_md = dict(temporary.metadata or {})
     final_md.update(
         {

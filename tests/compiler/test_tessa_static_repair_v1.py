@@ -32,6 +32,12 @@ from compiler.realsas_compiler_core.types import (
 from models.tessa.v1.contracts_v1 import TESSAMeshProposalV1, TESSAVertexProposalV1
 
 
+_GEOMETRY_BOUNDARY_POLICY = (
+    "TESSA_TOPOLOGICAL_BOUNDARY_ONLY__"
+    "GSA_MATERIAL_SUPPORT_NOT_GEOMETRY_AUTHORITY"
+)
+
+
 def _surface() -> RiggingSurfaceIR:
     nodes = (
         SurfaceNode("a", (0.0, 0.0, 0.0), (0, 1), ("pa",), ("oa",), derived_normal=(0.0, 0.0, 1.0)),
@@ -119,6 +125,7 @@ def test_static_repair_seals_non_circular_candidate_evidence_chain():
     assert repaired.metadata["material_support_is_not_geometry_support"] is True
     assert repaired.metadata["teacher_geometry_used_to_repair"] is False
     assert repaired.metadata["threshold_relaxation_performed"] is False
+    assert repaired.metadata["geometry_boundary_policy"] == _GEOMETRY_BOUNDARY_POLICY
     assert repaired.metadata["tessa_reference_binding_hash"] == reference.binding_hash
     assert repaired.metadata["tessa_static_repair_evidence_hash"] == evidence.evidence_hash
 
@@ -126,6 +133,8 @@ def test_static_repair_seals_non_circular_candidate_evidence_chain():
     assert evidence.output_candidate_lineage_hash == repaired.candidate_lineage_hash
     assert evidence.reference_binding_hash == reference.binding_hash
     assert evidence.final_policy_violating_face_count == 0
+    assert evidence.metadata["semantic_boundary_protection_count"] == 0
+    assert evidence.metadata["geometry_boundary_policy"] == _GEOMETRY_BOUNDARY_POLICY
     assert len(reference.rows) == len(repaired.vertices)
     assert all(abs(sum(weight for _, weight in row.coefficients) - 1.0) < 1e-12 for row in reference.rows)
 
@@ -135,6 +144,21 @@ def test_static_repair_seals_non_circular_candidate_evidence_chain():
         candidate=repaired,
         reference_binding=reference,
     )
+
+
+def test_material_support_is_never_promoted_to_tessa_geometry_authority():
+    candidate, partition = _candidate_context()
+    repaired, evidence, _ = repair_tessa_candidate_static_v1(
+        candidate=candidate,
+        policy=_policy(),
+        partition=partition,
+    )
+
+    assert candidate.metadata["material_support_is_not_geometry_support"] is True
+    assert repaired.metadata["material_support_is_not_geometry_support"] is True
+    assert repaired.metadata["geometry_position_derived_from_material_support"] is False
+    assert evidence.metadata["semantic_boundary_protection_count"] == 0
+    assert "GSA_MATERIAL_SUPPORT_NOT_GEOMETRY_AUTHORITY" in evidence.metadata["geometry_boundary_policy"]
 
 
 def test_static_repair_reverse_links_are_fail_closed():

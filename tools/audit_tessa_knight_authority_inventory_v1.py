@@ -4,6 +4,8 @@ from __future__ import annotations
 
 This tool never writes below --authority-root. It exists to distinguish reusable typed
 artifacts from historical/research reports before attempting any current Stage35 replay.
+An optional --out writes the inventory to a caller-owned path outside the authority root
+so CI can upload it as diagnostic evidence without mutating sealed authority.
 """
 
 import argparse
@@ -175,8 +177,22 @@ def build_inventory(root: Path) -> dict[str, Any]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--authority-root", type=Path, required=True)
+    parser.add_argument("--out", type=Path)
     args = parser.parse_args()
     report = build_inventory(args.authority_root)
+
+    if args.out is not None:
+        out = args.out.resolve()
+        authority_root = args.authority_root.resolve()
+        if out == authority_root or authority_root in out.parents:
+            raise RuntimeError("INVENTORY_OUTPUT_MUST_NOT_MUTATE_AUTHORITY_ROOT")
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        print(
+            "TESSA_KNIGHT_AUTHORITY_INVENTORY_FILE="
+            + json.dumps({"path": str(out), "sha256": _sha256(out)}, sort_keys=True),
+            flush=True,
+        )
 
     print("TESSA_KNIGHT_AUTHORITY_INVENTORY=" + json.dumps(report, sort_keys=True), flush=True)
     print(

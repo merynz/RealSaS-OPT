@@ -10,13 +10,17 @@ from compiler.realsas_compiler_core.product_authority_v1 import (
     ComponentCarrierDecisionIR,
     build_component_carrier_policy,
 )
+from compiler.realsas_compiler_core.surface_addressing_v1 import (
+    StaticCanonicalMeshQualificationIR,
+    static_mesh_qualification_hash,
+)
 from compiler.realsas_compiler_core.tessa_candidate_bridge_v1 import (
     build_tessa_candidate_bridge_v1,
 )
 from compiler.realsas_compiler_core.tessa_geometry_qualification_v1 import (
-    qualify_tessa_learned_geometry_v1,
-    tessa_learned_geometry_qualification_hash_v1,
-    validate_tessa_learned_geometry_qualification_v1,
+    bind_tessa_to_static_carrier_v1,
+    tessa_static_carrier_binding_hash_v1,
+    validate_tessa_static_carrier_binding_v1,
 )
 from compiler.realsas_compiler_core.tessa_surface_field_v1 import (
     build_tessa_material_support_field_v1,
@@ -79,102 +83,114 @@ def _context():
         carrier_policy=carrier,
         producer_policy_hash="policy-hash",
     )
-    return surface, partition, carrier, candidate, bridge
+    return candidate, bridge
 
 
-def _g5_rows(status="PASS"):
-    # G1B consumes exact G5 rows only as independent source-fidelity evidence.
-    # Detailed G5 row schema remains owned by product_coverage_v1; the hash binds
-    # the rows byte-for-byte and every row must already report PASS.
-    return (
-        {
-            "view_index": 0,
-            "component_id": "component:test",
-            "carrier_class": "MESH",
-            "recall": 1.0,
-            "precision": 1.0,
-            "largest_coherent_hole_fraction": 0.0,
-            "interior_uncovered_fraction": 0.0,
-            "status": status,
-        },
+def _stage19(candidate, *, source_pass=True, status="PASS_STATIC_CANONICAL_CARRIER"):
+    report = {
+        "status": status,
+        "static_quality_policy_passed": True,
+        "stage13_policy_replayed_on_actual_candidate_mesh": True,
+        "actual_candidate_source_fidelity_passed": bool(source_pass),
+        "source_fidelity_qualification_passed": bool(source_pass),
+        "actual_candidate_source_fidelity_views": tuple(
+            {"view_index": view_index, "passed": bool(source_pass)}
+            for view_index in range(8)
+        ),
+        "demo_geometry_lineage": False,
+        "product_authority_claimed": False,
+    }
+    provisional = StaticCanonicalMeshQualificationIR(
+        candidate_mesh_binding_hash=candidate.candidate_lineage_hash,
+        surface_addressing_binding_hash="addressing-hash",
+        appearance_domain_binding_hash="appearance-domain-hash",
+        geometry_gate_binding_hash="stage13-geometry-hash",
+        partition_binding_hash=candidate.partition_binding_hash,
+        qualification_report=report,
+        qualification_hash="",
+    )
+    return replace(
+        provisional,
+        qualification_hash=static_mesh_qualification_hash(provisional),
     )
 
 
-def test_g1b_seals_exact_candidate_only_after_independent_g5_pass():
-    surface, partition, carrier, candidate, bridge = _context()
-    rows = _g5_rows("PASS")
-    result = qualify_tessa_learned_geometry_v1(
+def test_tessa_binding_reuses_exact_stage19_authority_without_parallel_metric():
+    candidate, bridge = _context()
+    static_mesh = _stage19(candidate)
+    value = bind_tessa_to_static_carrier_v1(
         candidate=candidate,
         bridge_evidence=bridge,
-        surface=surface,
-        partition=partition,
-        carrier_policy=carrier,
-        g5_rows=rows,
+        static_mesh=static_mesh,
     )
-    assert result.candidate_lineage_hash == candidate.candidate_lineage_hash
-    assert result.bridge_evidence_hash == bridge.evidence_hash
-    assert result.material_support_field_hash == bridge.material_support_field_hash
-    assert result.metadata["status"] == "PASS_LEARNED_GEOMETRY_SOURCE_FIDELITY"
-    assert result.metadata["legacy_g1_replaced"] is False
-    assert result.metadata["material_support_is_geometry_authority"] is False
-    assert result.metadata["motion_capability_claimed"] is False
-    assert result.metadata["generalization_claimed"] is False
+    assert value.candidate_lineage_hash == candidate.candidate_lineage_hash
+    assert value.bridge_evidence_hash == bridge.evidence_hash
+    assert value.static_mesh_qualification_hash == static_mesh.qualification_hash
+    assert value.proposal_geometry_hash == bridge.proposal_geometry_hash
+    assert value.material_support_field_hash == bridge.material_support_field_hash
+    assert value.metadata["authority"] == "EXISTING_STAGE19_STATIC_CANONICAL_CARRIER"
+    assert value.metadata["parallel_source_fidelity_metric_created"] is False
+    assert value.metadata["material_support_is_geometry_authority"] is False
+    assert value.metadata["motion_capability_claimed"] is False
 
 
-def test_g1b_rejects_any_failed_g5_cell():
-    surface, partition, carrier, candidate, bridge = _context()
-    with pytest.raises(QualificationError, match="TESSA_G1B_G5_REQUIRES_ALL_CELLS_PASS"):
-        qualify_tessa_learned_geometry_v1(
+def test_tessa_binding_rejects_stage19_source_fidelity_failure():
+    candidate, bridge = _context()
+    with pytest.raises(QualificationError, match="TESSA_STATIC_BINDING_STAGE19_SOURCE_FIDELITY_NOT_PASS"):
+        bind_tessa_to_static_carrier_v1(
             candidate=candidate,
             bridge_evidence=bridge,
-            surface=surface,
-            partition=partition,
-            carrier_policy=carrier,
-            g5_rows=_g5_rows("FAIL"),
+            static_mesh=_stage19(candidate, source_pass=False),
         )
 
 
-def test_g1b_rejects_candidate_lineage_drift():
-    surface, partition, carrier, candidate, bridge = _context()
-    rows = _g5_rows("PASS")
-    result = qualify_tessa_learned_geometry_v1(
+def test_tessa_binding_rejects_demo_or_nonpass_stage19():
+    candidate, bridge = _context()
+    demo = _stage19(candidate)
+    demo_report = {**demo.qualification_report, "demo_geometry_lineage": True}
+    demo = replace(demo, qualification_report=demo_report, qualification_hash="")
+    demo = replace(demo, qualification_hash=static_mesh_qualification_hash(demo))
+    with pytest.raises(QualificationError, match="TESSA_STATIC_BINDING_DEMO_LINEAGE_FORBIDDEN"):
+        bind_tessa_to_static_carrier_v1(
+            candidate=candidate,
+            bridge_evidence=bridge,
+            static_mesh=demo,
+        )
+
+    with pytest.raises(QualificationError, match="TESSA_STATIC_BINDING_STAGE19_STATUS_NOT_PASS"):
+        bind_tessa_to_static_carrier_v1(
+            candidate=candidate,
+            bridge_evidence=bridge,
+            static_mesh=_stage19(candidate, status="DEMO_ONLY_MEASURED_STATIC_CANONICAL_CARRIER__P999_FAIL"),
+        )
+
+
+def test_tessa_binding_is_hash_and_candidate_fail_closed():
+    candidate, bridge = _context()
+    static_mesh = _stage19(candidate)
+    value = bind_tessa_to_static_carrier_v1(
         candidate=candidate,
         bridge_evidence=bridge,
-        surface=surface,
-        partition=partition,
-        carrier_policy=carrier,
-        g5_rows=rows,
+        static_mesh=static_mesh,
     )
-    bad = replace(result, candidate_lineage_hash="wrong")
-    bad = replace(bad, qualification_hash=tessa_learned_geometry_qualification_hash_v1(bad))
-    with pytest.raises(QualificationError, match="TESSA_G1B_CANDIDATE_LINEAGE_MISMATCH"):
-        validate_tessa_learned_geometry_qualification_v1(
+    bad = replace(value, proposal_geometry_hash="wrong")
+    bad = replace(bad, binding_hash=tessa_static_carrier_binding_hash_v1(bad))
+    with pytest.raises(QualificationError, match="TESSA_STATIC_BINDING_PROPOSAL_GEOMETRY_MISMATCH"):
+        validate_tessa_static_carrier_binding_v1(
             bad,
             candidate=candidate,
             bridge_evidence=bridge,
-            surface=surface,
-            partition=partition,
-            carrier_policy=carrier,
-            g5_rows=rows,
+            static_mesh=static_mesh,
         )
 
-
-def test_g1b_rejects_support_geometry_conflation():
-    surface, partition, carrier, candidate, bridge = _context()
-    vertex = candidate.vertices[0]
-    bad_vertex = replace(
-        vertex,
-        metadata={**vertex.metadata, "geometry_position_derived_from_material_support": True},
+    drifted_static = replace(static_mesh, candidate_mesh_binding_hash="wrong", qualification_hash="")
+    drifted_static = replace(
+        drifted_static,
+        qualification_hash=static_mesh_qualification_hash(drifted_static),
     )
-    bad_candidate = replace(candidate, vertices=(bad_vertex,) + candidate.vertices[1:])
-    # The candidate lineage must also change; G1B must reject on semantic authority
-    # before any attempt to mint a replacement lineage.
-    with pytest.raises(QualificationError, match="TESSA_G1B_VERTEX_GEOMETRY_SUPPORT_CONFLATION"):
-        qualify_tessa_learned_geometry_v1(
-            candidate=bad_candidate,
+    with pytest.raises(QualificationError, match="TESSA_STATIC_BINDING_STAGE19_CANDIDATE_MISMATCH"):
+        bind_tessa_to_static_carrier_v1(
+            candidate=candidate,
             bridge_evidence=bridge,
-            surface=surface,
-            partition=partition,
-            carrier_policy=carrier,
-            g5_rows=_g5_rows("PASS"),
+            static_mesh=drifted_static,
         )

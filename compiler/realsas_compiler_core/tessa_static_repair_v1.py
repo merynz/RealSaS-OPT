@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """Compiler-owned static repair transaction for TESSA learned carrier proposals.
 
-The learned proposal is evidence, not final mechanical-carrier authority.  This
+The learned proposal is evidence, not final mechanical-carrier authority. This
 module promotes the static survivor semantics proven by the Knight TESSA courts:
 
 1. preserve the decoded TESSA proposal as an immutable geometric reference,
@@ -11,8 +11,10 @@ module promotes the static survivor semantics proven by the Knight TESSA courts:
 4. preserve an explicit final-vertex -> original-TESSA reference binding, and
 5. fail closed unless the frozen static G3 policy is fully satisfied.
 
-No teacher geometry, teacher skin, same-index transport, or threshold relaxation
-is permitted here.
+The stable TESSA producer id is intentionally retained for downstream schema/
+consumer compatibility. The candidate metadata carries the explicit Compiler-
+repaired lane. No teacher geometry, teacher skin, same-index transport, or
+threshold relaxation is permitted here.
 """
 
 from dataclasses import asdict, dataclass, field, replace
@@ -35,8 +37,7 @@ from .types import QualificationError
 
 Json = dict[str, Any]
 
-_INITIAL_PRODUCER = "RealSaS.TESSALearnedMechanicalCarrierProposal.v1"
-_REPAIRED_PRODUCER = "RealSaS.TESSACompilerRepairedMechanicalCarrierProposal.v1"
+_TESSA_PRODUCER = "RealSaS.TESSALearnedMechanicalCarrierProposal.v1"
 _INITIAL_AUTHORITY_CLASS = "TESSA_LEARNED_GEOMETRY_PROPOSAL_V1"
 _REPAIRED_AUTHORITY_CLASS = "TESSA_LEARNED_GEOMETRY_COMPILER_REPAIRED_V1"
 
@@ -93,14 +94,23 @@ class TESSAStaticRepairEvidenceIR:
 
 
 def _reference_binding_hash(value: TESSAReferenceBindingIR) -> str:
+    """Content hash for the mapping itself, independent of the final candidate hash.
+
+    ``output_candidate_lineage_hash`` is a checked reverse link. Excluding only that
+    field avoids a candidate-hash <-> evidence-hash cycle while the final candidate
+    still commits to ``binding_hash`` in its own metadata.
+    """
     payload = value.to_dict()
     payload.pop("binding_hash", None)
+    payload.pop("output_candidate_lineage_hash", None)
     return content_sha256(payload)
 
 
 def _repair_evidence_hash(value: TESSAStaticRepairEvidenceIR) -> str:
+    """Hash the repair receipt without its reverse candidate-lineage link."""
     payload = value.to_dict()
     payload.pop("evidence_hash", None)
+    payload.pop("output_candidate_lineage_hash", None)
     return content_sha256(payload)
 
 
@@ -157,7 +167,7 @@ def tessa_static_repair_evidence_from_dict_v1(
 
 
 def _validate_initial_tessa_candidate(candidate: CanonicalMeshCandidateIR) -> None:
-    if candidate.producer_id != _INITIAL_PRODUCER:
+    if candidate.producer_id != _TESSA_PRODUCER:
         raise QualificationError("TESSA_STATIC_REPAIR_INPUT_PRODUCER_INVALID")
     md = dict(candidate.metadata or {})
     if md.get("geometry_authority_class") != _INITIAL_AUTHORITY_CLASS:
@@ -179,7 +189,11 @@ def _validate_initial_tessa_candidate(candidate: CanonicalMeshCandidateIR) -> No
 
 
 def _simplex(coefficients: Mapping[str, float]) -> tuple[tuple[str, float], ...]:
-    rows = [(str(key), float(value)) for key, value in coefficients.items() if float(value) > 1e-14]
+    rows = [
+        (str(key), float(value))
+        for key, value in coefficients.items()
+        if float(value) > 1e-14
+    ]
     total = sum(value for _, value in rows)
     if total <= 0.0:
         raise QualificationError("TESSA_REFERENCE_BINDING_EMPTY")
@@ -189,7 +203,7 @@ def _simplex(coefficients: Mapping[str, float]) -> tuple[tuple[str, float], ...]
     return output
 
 
-def _build_reference_binding(
+def _build_reference_binding_unsealed(
     *,
     original: CanonicalMeshCandidateIR,
     repaired: CanonicalMeshCandidateIR,
@@ -231,7 +245,7 @@ def _build_reference_binding(
     proposal_geometry_hash = str(dict(original.metadata or {}).get("proposal_geometry_hash") or "")
     provisional = TESSAReferenceBindingIR(
         input_candidate_lineage_hash=str(original.candidate_lineage_hash),
-        output_candidate_lineage_hash=str(repaired.candidate_lineage_hash),
+        output_candidate_lineage_hash="",
         proposal_geometry_hash=proposal_geometry_hash,
         rows=tuple(sorted(rows, key=lambda row: row.candidate_vertex_id)),
         binding_hash="",
@@ -240,6 +254,7 @@ def _build_reference_binding(
             "same_index_skin_transport_authorized": False,
             "material_support_is_geometry_authority": False,
             "teacher_geometry_used": False,
+            "output_candidate_lineage_is_reverse_link_not_hash_input": True,
         },
     )
     return replace(provisional, binding_hash=_reference_binding_hash(provisional))
@@ -265,6 +280,30 @@ def validate_tessa_reference_binding_v1(
             raise QualificationError("TESSA_REFERENCE_BINDING_SIMPLEX_INVALID")
     if value.binding_hash != _reference_binding_hash(value):
         raise QualificationError("TESSA_REFERENCE_BINDING_HASH_MISMATCH")
+    md = dict(candidate.metadata or {})
+    if md.get("tessa_reference_binding_hash") != value.binding_hash:
+        raise QualificationError("TESSA_REFERENCE_BINDING_CANDIDATE_COMMITMENT_MISMATCH")
+
+
+def validate_tessa_static_repair_evidence_v1(
+    value: TESSAStaticRepairEvidenceIR,
+    *,
+    candidate: CanonicalMeshCandidateIR,
+    reference_binding: TESSAReferenceBindingIR,
+) -> None:
+    if value.output_candidate_lineage_hash != candidate.candidate_lineage_hash:
+        raise QualificationError("TESSA_STATIC_REPAIR_EVIDENCE_CANDIDATE_MISMATCH")
+    if value.reference_binding_hash != reference_binding.binding_hash:
+        raise QualificationError("TESSA_STATIC_REPAIR_REFERENCE_BINDING_MISMATCH")
+    if value.output_vertex_count != len(candidate.vertices) or value.output_face_count != len(candidate.faces):
+        raise QualificationError("TESSA_STATIC_REPAIR_EVIDENCE_COUNT_MISMATCH")
+    if value.final_policy_violating_face_count != 0:
+        raise QualificationError("TESSA_STATIC_REPAIR_EVIDENCE_RESIDUAL_G3")
+    if value.evidence_hash != _repair_evidence_hash(value):
+        raise QualificationError("TESSA_STATIC_REPAIR_EVIDENCE_HASH_MISMATCH")
+    md = dict(candidate.metadata or {})
+    if md.get("tessa_static_repair_evidence_hash") != value.evidence_hash:
+        raise QualificationError("TESSA_STATIC_REPAIR_CANDIDATE_COMMITMENT_MISMATCH")
 
 
 def repair_tessa_candidate_static_v1(
@@ -378,7 +417,9 @@ def repair_tessa_candidate_static_v1(
             "compiler_static_repair_applied": True,
             "static_repair_input_candidate_lineage_hash": original.candidate_lineage_hash,
             "material_support_is_not_geometry_support": True,
-            "learned_xyz_preserved_exactly": False,
+            "learned_xyz_preserved_exactly": True,
+            "learned_xyz_preservation_scope": "POST_COMPILER_REPAIR_CANDIDATE_TO_DOWNSTREAM",
+            "learned_proposal_xyz_preserved_exactly": False,
             "learned_proposal_is_immutable_reference": True,
             "legacy_g1_convex_lift_claimed": False,
             "product_geometry_authority_claimed": False,
@@ -387,38 +428,40 @@ def repair_tessa_candidate_static_v1(
             "teacher_geometry_used_to_repair": False,
         }
     )
-    provisional = replace(
+
+    # First form the repaired geometry with a temporary lineage so we can derive
+    # non-circular evidence content over stable vertex ids and provenance rows.
+    temporary = replace(
         current,
         vertices=tuple(changed_vertices),
-        producer_id=_REPAIRED_PRODUCER,
+        producer_id=_TESSA_PRODUCER,
         producer_policy_hash=producer_policy_hash,
         candidate_lineage_hash="",
         metadata=repaired_md,
     )
-    repaired = replace(
-        provisional,
-        candidate_lineage_hash=canonical_mesh_candidate_lineage_hash(provisional),
+    temporary = replace(
+        temporary,
+        candidate_lineage_hash=canonical_mesh_candidate_lineage_hash(temporary),
     )
-
-    reference_binding = _build_reference_binding(original=original, repaired=repaired)
-    # Reference binding is hashed against the final lineage; attach the hash only as
-    # an external Stage18 evidence object to avoid a recursive candidate hash cycle.
-    validate_tessa_reference_binding_v1(reference_binding, candidate=repaired)
+    reference_unsealed = _build_reference_binding_unsealed(
+        original=original,
+        repaired=temporary,
+    )
 
     proposal_geometry_hash = str(dict(original.metadata or {}).get("proposal_geometry_hash") or "")
     material_support_field_hash = str(dict(original.metadata or {}).get("material_support_field_hash") or "")
-    provisional_evidence = TESSAStaticRepairEvidenceIR(
+    repair_unsealed = TESSAStaticRepairEvidenceIR(
         input_candidate_lineage_hash=str(original.candidate_lineage_hash),
-        output_candidate_lineage_hash=str(repaired.candidate_lineage_hash),
+        output_candidate_lineage_hash="",
         mesh_policy_hash=str(policy.qualification_policy_lineage_hash),
         partition_binding_hash=str(partition.partition_lineage_hash),
         proposal_geometry_hash=proposal_geometry_hash,
         material_support_field_hash=material_support_field_hash,
-        reference_binding_hash=reference_binding.binding_hash,
+        reference_binding_hash=reference_unsealed.binding_hash,
         input_vertex_count=len(original.vertices),
         input_face_count=len(original.faces),
-        output_vertex_count=len(repaired.vertices),
-        output_face_count=len(repaired.faces),
+        output_vertex_count=len(temporary.vertices),
+        output_face_count=len(temporary.faces),
         accepted_flip_count=int(flip_report["accepted_flip_count"]),
         accepted_collapse_count=int(collapse_total),
         accepted_relaxation_count=int(relaxation_total),
@@ -439,10 +482,46 @@ def repair_tessa_candidate_static_v1(
             "semantic_boundary_protection_count": len(protected),
             "collapse_batch_count": len(collapse_reports),
             "relaxation_batch_count": len(relaxation_reports),
+            "output_candidate_lineage_is_reverse_link_not_hash_input": True,
         },
     )
+    repair_unsealed = replace(
+        repair_unsealed,
+        evidence_hash=_repair_evidence_hash(repair_unsealed),
+    )
+
+    # Candidate commits to both evidence hashes. Their reverse links are filled only
+    # after this final candidate lineage exists and are deliberately excluded from
+    # the corresponding evidence content hashes.
+    final_md = dict(temporary.metadata or {})
+    final_md.update(
+        {
+            "tessa_reference_binding_hash": reference_unsealed.binding_hash,
+            "tessa_static_repair_evidence_hash": repair_unsealed.evidence_hash,
+        }
+    )
+    final_provisional = replace(
+        temporary,
+        candidate_lineage_hash="",
+        metadata=final_md,
+    )
+    repaired = replace(
+        final_provisional,
+        candidate_lineage_hash=canonical_mesh_candidate_lineage_hash(final_provisional),
+    )
+    reference_binding = replace(
+        reference_unsealed,
+        output_candidate_lineage_hash=repaired.candidate_lineage_hash,
+    )
     evidence = replace(
-        provisional_evidence,
-        evidence_hash=_repair_evidence_hash(provisional_evidence),
+        repair_unsealed,
+        output_candidate_lineage_hash=repaired.candidate_lineage_hash,
+    )
+
+    validate_tessa_reference_binding_v1(reference_binding, candidate=repaired)
+    validate_tessa_static_repair_evidence_v1(
+        evidence,
+        candidate=repaired,
+        reference_binding=reference_binding,
     )
     return repaired, evidence, reference_binding

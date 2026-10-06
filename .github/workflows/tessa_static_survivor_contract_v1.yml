@@ -5,9 +5,11 @@ on:
     paths:
       - models/tessa/**
       - compiler/realsas_compiler_core/tessa_surface_field_v1.py
+      - compiler/realsas_compiler_core/tessa_candidate_bridge_v1.py
       - tests/models/test_tessa_v1.py
       - tests/models/test_tessa_training_data_v1.py
       - tests/compiler/test_tessa_surface_field_v1.py
+      - tests/compiler/test_tessa_candidate_bridge_v1.py
       - canonical/IRIS_GSA_TESSA_SURVIVOR_AUTHORITY_V1_20261006.md
       - canonical/IRIS_GSA_TESSA_STATIC_SURVIVOR_PROMOTION_RECEIPT_20261006.json
       - requirements/mainline-ci.txt
@@ -18,9 +20,11 @@ on:
     paths:
       - models/tessa/**
       - compiler/realsas_compiler_core/tessa_surface_field_v1.py
+      - compiler/realsas_compiler_core/tessa_candidate_bridge_v1.py
       - tests/models/test_tessa_v1.py
       - tests/models/test_tessa_training_data_v1.py
       - tests/compiler/test_tessa_surface_field_v1.py
+      - tests/compiler/test_tessa_candidate_bridge_v1.py
       - canonical/IRIS_GSA_TESSA_SURVIVOR_AUTHORITY_V1_20261006.md
       - canonical/IRIS_GSA_TESSA_STATIC_SURVIVOR_PROMOTION_RECEIPT_20261006.json
       - requirements/mainline-ci.txt
@@ -87,9 +91,11 @@ jobs:
             models/tessa/v1/mechanical_objective_v1.py \
             models/tessa/v1/training_data_v1.py \
             compiler/realsas_compiler_core/tessa_surface_field_v1.py \
+            compiler/realsas_compiler_core/tessa_candidate_bridge_v1.py \
             tests/models/test_tessa_v1.py \
             tests/models/test_tessa_training_data_v1.py \
-            tests/compiler/test_tessa_surface_field_v1.py
+            tests/compiler/test_tessa_surface_field_v1.py \
+            tests/compiler/test_tessa_candidate_bridge_v1.py
           echo "TESSA_STATIC_SURVIVOR_COMPILE_PASS"
 
       - name: Verify non-authoritative proposal boundary
@@ -110,5 +116,6 @@ jobs:
           python -m pytest -q \
             tests/models/test_tessa_v1.py \
             tests/models/test_tessa_training_data_v1.py \
-            tests/compiler/test_tessa_surface_field_v1.py
+            tests/compiler/test_tessa_surface_field_v1.py \
+            tests/compiler/test_tessa_candidate_bridge_v1.py
           echo "TESSA_STATIC_SURVIVOR_CONTRACT_PASS"

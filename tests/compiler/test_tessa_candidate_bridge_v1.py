@@ -139,7 +139,7 @@ def test_bridge_preserves_learned_xyz_and_keeps_material_support_non_geometric()
     assert candidate.metadata["learned_xyz_preserved_exactly"] is True
     assert candidate.metadata["legacy_g1_convex_lift_claimed"] is False
     assert candidate.metadata["product_geometry_authority_claimed"] is False
-    assert evidence.metadata["requires_downstream_learned_geometry_g1b"] is True
+    assert evidence.metadata["requires_stage19_static_qualification"] is True
     assert evidence.metadata["distance_metrics_are_diagnostic_not_acceptance_thresholds"] is True
 
 

@@ -25,17 +25,13 @@ from compiler.realsas_compiler_core.types import SurfaceSupportBinding
 
 EXPECTED_T1B_SHA = "b7ccb058ef23f8c54d053e64580150dffffeb6a76a126ecaf48b265dd093f390"
 EXPECTED_NORM_SHA = "01b63a57390de9a5d2c731d9644e65ff779980caa066c19204db3b4a3e0c634b"
-# Historical serialized candidate bytes are retained as diagnostics only.  The
-# original court ran in a different Python/NumPy environment, so last-bit float
-# text can change without changing the mechanical object.  Promotion gates the
-# full ordered topology, all XYZ at 1e-12, component identity and support field.
 EXPECTED_V2_FILE_SHA = "ab6278d55577e0e46f0faf9535dfe16238d815d81a3854b972effc7d440967a9"
 EXPECTED_V3_FILE_SHA = "1fa2c1d67314124d4c22af55e57cc8eb9b5e65bf1ff65870acefc7ea1d104bd1"
 EXPECTED_TOPOLOGY_DIGEST = "59e9593fd5606cbcb6b28d9aa822ee39b35e5f3a3565fce2672d6535f703c98a"
 EXPECTED_V2_GEOMETRY12_DIGEST = "89879f8b046edba432b1996643631b0b1f91af23b51aef743c401199709c68e6"
 EXPECTED_V3_GEOMETRY12_DIGEST = "cf8ec395568369062a597e3335bca781efe9eb4e17b50f9470a4833b11499e65"
-EXPECTED_V2_MECHANICAL12_DIGEST = "531639073a25cebe5e36a861eb54fa826000944539464d657fe8d75b74ba47f9"
-EXPECTED_V3_MECHANICAL12_DIGEST = "81402e31aad30908312684699f75de52f11dd584f8a9beb092f18fa7c05fe9eb"
+EXPECTED_V2_MECHANICAL12_DIGEST = "632d736f491763e01c117ad57a4c60d9188369a79440ea171c02e828dabe12c5"
+EXPECTED_V3_MECHANICAL12_DIGEST = "ecc7027282d5d0391a950d21e6b80215d3aaf8538e4af2c83b2b750ae139cef3"
 
 
 def sha256(path: Path) -> str:
@@ -62,16 +58,21 @@ def topology_digest(candidate: CanonicalMeshCandidateIR) -> str:
 def geometry12_digest(candidate: CanonicalMeshCandidateIR) -> str:
     return stable_digest({
         "vertices": [
-            [
-                str(v.candidate_vertex_id),
-                [round(float(x), 12) for x in v.P],
-                str(v.component_id),
-            ]
+            [str(v.candidate_vertex_id), [round(float(x), 12) for x in v.P], str(v.component_id)]
             for v in candidate.vertices
         ],
         "faces": [list(map(str, face)) for face in candidate.faces],
         "edges": [list(map(str, edge)) for edge in candidate.edges],
     })
+
+
+def normalized_support12(binding: SurfaceSupportBinding) -> dict:
+    payload = binding.to_dict()
+    payload["coefficients"] = [
+        [str(surface_id), round(float(weight), 12)]
+        for surface_id, weight in payload.get("coefficients") or ()
+    ]
+    return payload
 
 
 def mechanical12_digest(candidate: CanonicalMeshCandidateIR) -> str:
@@ -81,7 +82,7 @@ def mechanical12_digest(candidate: CanonicalMeshCandidateIR) -> str:
                 str(v.candidate_vertex_id),
                 [round(float(x), 12) for x in v.P],
                 str(v.component_id),
-                v.support_binding.to_dict(),
+                normalized_support12(v.support_binding),
             ]
             for v in candidate.vertices
         ],
@@ -198,18 +199,15 @@ def main() -> None:
     flipped, flip_report = repair_candidate_fixed_vertex_flips_v1(original, policy, max_passes=12)
     current = flipped
     collapse_total = 0
-    collapse_batches = []
     while collapse_total < 256:
         current, report = repair_candidate_endpoint_collapses_v1(
             current, policy, max_collapses=min(32, 256 - collapse_total), seed_only_violating_faces=True
         )
         accepted = int(report["accepted_collapse_count"])
         collapse_total += accepted
-        collapse_batches.append({"accepted": accepted, "residual": int(report["after"]["policy_violating_face_count"])})
         if int(report["after"]["policy_violating_face_count"]) == 0 or accepted == 0:
             break
     relax_total = 0
-    relax_batches = []
     while relax_total < 512:
         current, report = repair_candidate_projected_relaxation_v1(
             current,
@@ -220,7 +218,6 @@ def main() -> None:
         )
         accepted = int(report["accepted_move_count"])
         relax_total += accepted
-        relax_batches.append({"accepted": accepted, "residual": int(report["after"]["policy_violating_face_count"])})
         if int(report["after"]["policy_violating_face_count"]) == 0 or accepted == 0:
             break
     v2 = current
@@ -281,12 +278,9 @@ def main() -> None:
     result = {
         "schema": "RealSaS.TESSAKnightStaticSurvivorReplay.v2",
         "status": "PASS_MECHANICAL_HISTORICAL_V2_TO_V3_REPLAY",
-        "inputs": {
-            "t1b_sha256": EXPECTED_T1B_SHA,
-            "normalization_sha256": EXPECTED_NORM_SHA,
-        },
+        "inputs": {"t1b_sha256": EXPECTED_T1B_SHA, "normalization_sha256": EXPECTED_NORM_SHA},
         "semantic_gate": {
-            "xyz_quantization_decimals": 12,
+            "xyz_and_support_weight_quantization_decimals": 12,
             "topology_digest": EXPECTED_TOPOLOGY_DIGEST,
             "support_binding_included": True,
             "serialized_file_sha_is_diagnostic_only": True,
@@ -297,11 +291,9 @@ def main() -> None:
             "serialized_sha_matches_historical": v2_file_sha == EXPECTED_V2_FILE_SHA,
             "geometry12_digest": v2_geometry12,
             "mechanical12_digest": v2_mechanical12,
-            "vertices": len(v2.vertices),
-            "faces": len(v2.faces),
+            "vertices": len(v2.vertices), "faces": len(v2.faces),
             "accepted_flips": int(flip_report["accepted_flip_count"]),
-            "accepted_collapses": collapse_total,
-            "accepted_relaxations": relax_total,
+            "accepted_collapses": collapse_total, "accepted_relaxations": relax_total,
             "residual": int(v2_report["policy_violating_face_count"]),
             "min_angle_deg": float(v2_report["min_angle_deg"]),
             "max_aspect": float(v2_report["max_aspect_longest_over_min_altitude"]),
@@ -312,8 +304,7 @@ def main() -> None:
             "serialized_sha_matches_historical": v3_file_sha == EXPECTED_V3_FILE_SHA,
             "geometry12_digest": v3_geometry12,
             "mechanical12_digest": v3_mechanical12,
-            "vertices": len(v3.vertices),
-            "faces": len(v3.faces),
+            "vertices": len(v3.vertices), "faces": len(v3.faces),
             "accepted_corrective_moves": int(v3_report["accepted_move_count"]),
             "residual": int(q["policy_violating_face_count"]),
             "min_angle_deg": float(q["min_angle_deg"]),

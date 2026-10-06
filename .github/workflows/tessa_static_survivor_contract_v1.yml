@@ -16,6 +16,7 @@ on:
       - tests/compiler/test_tessa_geometry_qualification_v1.py
       - tests/compiler/test_qualified_mesh_v2.py
       - tests/compiler/test_tessa_stage35_integration_v1.py
+      - tools/audit_tessa_knight_authority_inventory_v1.py
       - canonical/IRIS_GSA_TESSA_SURVIVOR_AUTHORITY_V1_20261006.md
       - canonical/IRIS_GSA_TESSA_STATIC_SURVIVOR_PROMOTION_RECEIPT_20261006.json
       - requirements/mainline-ci.txt
@@ -37,6 +38,7 @@ on:
       - tests/compiler/test_tessa_geometry_qualification_v1.py
       - tests/compiler/test_qualified_mesh_v2.py
       - tests/compiler/test_tessa_stage35_integration_v1.py
+      - tools/audit_tessa_knight_authority_inventory_v1.py
       - canonical/IRIS_GSA_TESSA_SURVIVOR_AUTHORITY_V1_20261006.md
       - canonical/IRIS_GSA_TESSA_STATIC_SURVIVOR_PROMOTION_RECEIPT_20261006.json
       - requirements/mainline-ci.txt
@@ -63,6 +65,7 @@ jobs:
       OMP_NUM_THREADS: "1"
       MKL_NUM_THREADS: "1"
       OPENBLAS_NUM_THREADS: "1"
+      REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
 
     steps:
       - uses: actions/checkout@v4
@@ -113,7 +116,8 @@ jobs:
             tests/compiler/test_tessa_candidate_bridge_v1.py \
             tests/compiler/test_tessa_geometry_qualification_v1.py \
             tests/compiler/test_qualified_mesh_v2.py \
-            tests/compiler/test_tessa_stage35_integration_v1.py
+            tests/compiler/test_tessa_stage35_integration_v1.py \
+            tools/audit_tessa_knight_authority_inventory_v1.py
           echo "TESSA_STATIC_SURVIVOR_COMPILE_PASS"
 
       - name: Verify non-authoritative proposal boundary
@@ -140,3 +144,11 @@ jobs:
             tests/compiler/test_qualified_mesh_v2.py \
             tests/compiler/test_tessa_stage35_integration_v1.py
           echo "TESSA_STATIC_SURVIVOR_CONTRACT_PASS"
+
+      - name: Inventory sealed Knight authority artifacts read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d "$REALSAS_AUTHORITY_ROOT/runs"
+          python tools/audit_tessa_knight_authority_inventory_v1.py \
+            --authority-root "$REALSAS_AUTHORITY_ROOT"

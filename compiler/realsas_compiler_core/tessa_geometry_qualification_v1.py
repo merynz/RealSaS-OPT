@@ -1,240 +1,199 @@
 from __future__ import annotations
 
-"""Fail-closed learned-geometry qualification for TESSA candidates.
+"""Bind TESSA learned geometry to the existing V2 Stage19 static authority.
 
-Legacy product G1 proves that deterministic mesh XYZ is an exact/bounded lift of
-``RiggingSurfaceIR`` support.  TESSA intentionally solves a different problem:
-it predicts a production mesh from observation-grounded GSA evidence.  Requiring
-its XYZ to equal a convex GSA lift would collapse the learned geometry model back
-into the deterministic substrate.
+This module intentionally creates no parallel geometry metric and no second G1.
+The 46-stage V2 DAG already owns static carrier admission at
+``19_STATIC_CANONICAL_MESH_QUALIFIED``: it remeasures the exact Stage18 candidate
+for rest conditioning and eight-view source fidelity under the frozen Stage13
+policy.
 
-This module defines the separate G1B evidence contract.  It does *not* replace
-legacy G1 and it does not mint a QualifiedMeshIR.  It proves only that:
-
-1. the exact learned candidate is lineage-bound to the typed TESSA bridge;
-2. material/mechanical support remains explicitly separate from geometry XYZ;
-3. independent eight-view G5 source-fidelity evidence for that exact candidate
-   is complete and PASS.
-
-Topology/rest conditioning, deformation stress, skin-topology compatibility and
-actual motion remain their existing independent gates.
+TESSA only needs a fail-closed lineage bridge proving that the Stage19 PASS is for
+the exact learned proposal/candidate and the exact material-support field.  The
+material field remains non-geometric; actual motion remains downstream.
 """
 
 from dataclasses import asdict, dataclass, field, replace
-from typing import Any, Iterable
+from typing import Any
 
 from .hashing import content_sha256
-from .mesh.product_coverage_v1 import g5_coverage_evidence_hash
-from .product_authority_v1 import (
-    CanonicalMeshCandidateIR,
-    ComponentCarrierPolicyIR,
-    MechanicalPartitionIR,
-    validate_canonical_mesh_candidate,
+from .product_authority_v1 import CanonicalMeshCandidateIR
+from .surface_addressing_v1 import (
+    StaticCanonicalMeshQualificationIR,
+    static_mesh_qualification_hash,
 )
 from .tessa_candidate_bridge_v1 import TESSACandidateBridgeEvidenceIR
-from .types import QualificationError, RiggingSurfaceIR
+from .types import QualificationError
 
 Json = dict[str, Any]
 _LEARNED_GEOMETRY_AUTHORITY_CLASS = "TESSA_LEARNED_GEOMETRY_PROPOSAL_V1"
 
 
 @dataclass(frozen=True)
-class TESSALearnedGeometryQualificationIR:
+class TESSAStaticCarrierBindingIR:
     candidate_lineage_hash: str
     bridge_evidence_hash: str
+    static_mesh_qualification_hash: str
     proposal_geometry_hash: str
     material_support_field_hash: str
-    surface_binding_hash: str
     partition_binding_hash: str
-    carrier_policy_binding_hash: str
-    g5_evidence_hash: str
-    g5_cell_count: int
-    vertex_count: int
-    face_count: int
-    qualification_hash: str
-    schema_version: str = "RealSaS.TESSALearnedGeometryQualificationIR.v1"
+    binding_hash: str
+    schema_version: str = "RealSaS.TESSAStaticCarrierBindingIR.v1"
     metadata: Json = field(default_factory=dict)
 
     def to_dict(self):
         return asdict(self)
 
 
-def tessa_learned_geometry_qualification_hash_v1(
-    value: TESSALearnedGeometryQualificationIR,
-) -> str:
+def tessa_static_carrier_binding_hash_v1(value: TESSAStaticCarrierBindingIR) -> str:
     payload = value.to_dict()
-    payload.pop("qualification_hash", None)
+    payload.pop("binding_hash", None)
     return content_sha256(payload)
 
 
-def _validate_candidate_authority_split(candidate: CanonicalMeshCandidateIR) -> None:
+def _validate_tessa_candidate_boundary(candidate: CanonicalMeshCandidateIR) -> None:
     if candidate.producer_id != "RealSaS.TESSALearnedMechanicalCarrierProposal.v1":
-        raise QualificationError("TESSA_G1B_PRODUCER_INVALID")
+        raise QualificationError("TESSA_STATIC_BINDING_PRODUCER_INVALID")
     md = dict(candidate.metadata or {})
     if md.get("geometry_authority_class") != _LEARNED_GEOMETRY_AUTHORITY_CLASS:
-        raise QualificationError("TESSA_G1B_AUTHORITY_CLASS_INVALID")
+        raise QualificationError("TESSA_STATIC_BINDING_AUTHORITY_CLASS_INVALID")
     if md.get("material_support_is_not_geometry_support") is not True:
-        raise QualificationError("TESSA_G1B_SUPPORT_SEPARATION_MISSING")
+        raise QualificationError("TESSA_STATIC_BINDING_SUPPORT_SEPARATION_MISSING")
     if md.get("learned_xyz_preserved_exactly") is not True:
-        raise QualificationError("TESSA_G1B_LEARNED_XYZ_PRESERVATION_MISSING")
+        raise QualificationError("TESSA_STATIC_BINDING_LEARNED_XYZ_PRESERVATION_MISSING")
     if md.get("legacy_g1_convex_lift_claimed") is not False:
-        raise QualificationError("TESSA_G1B_LEGACY_CONVEX_LIFT_FORBIDDEN")
+        raise QualificationError("TESSA_STATIC_BINDING_LEGACY_G1_CLAIM_FORBIDDEN")
     if md.get("product_geometry_authority_claimed") is not False:
-        raise QualificationError("TESSA_G1B_PREMATURE_PRODUCT_AUTHORITY")
-
-    evidence_hash = str(md.get("candidate_bridge_evidence_hash") or "")
-    proposal_hash = str(md.get("proposal_geometry_hash") or "")
-    support_hash = str(md.get("material_support_field_hash") or "")
-    if not evidence_hash or not proposal_hash or not support_hash:
-        raise QualificationError("TESSA_G1B_CANDIDATE_EVIDENCE_BINDING_MISSING")
-
-    for vertex in candidate.vertices:
-        vmd = dict(vertex.metadata or {})
-        if vmd.get("geometry_authority_class") != _LEARNED_GEOMETRY_AUTHORITY_CLASS:
-            raise QualificationError("TESSA_G1B_VERTEX_AUTHORITY_CLASS_INVALID")
-        if vmd.get("material_support_is_not_geometry_support") is not True:
-            raise QualificationError("TESSA_G1B_VERTEX_SUPPORT_SEPARATION_MISSING")
-        if vmd.get("geometry_position_derived_from_material_support") is not False:
-            raise QualificationError("TESSA_G1B_VERTEX_GEOMETRY_SUPPORT_CONFLATION")
-        if vmd.get("teacher_vertex_index_used") is not False:
-            raise QualificationError("TESSA_G1B_TEACHER_VERTEX_INDEX_FORBIDDEN")
-        if str(vmd.get("proposal_geometry_hash") or "") != proposal_hash:
-            raise QualificationError("TESSA_G1B_VERTEX_PROPOSAL_HASH_DRIFT")
-        if str(vmd.get("material_support_field_hash") or "") != support_hash:
-            raise QualificationError("TESSA_G1B_VERTEX_SUPPORT_FIELD_HASH_DRIFT")
-        bmd = dict(vertex.support_binding.metadata or {})
-        if bmd.get("authority_class") != "MATERIAL_SUPPORT_ONLY":
-            raise QualificationError("TESSA_G1B_VERTEX_SUPPORT_AUTHORITY_INVALID")
-        if bmd.get("geometry_position_derived_from_support") is not False:
-            raise QualificationError("TESSA_G1B_VERTEX_SUPPORT_GEOMETRY_CLAIM_FORBIDDEN")
-        if bmd.get("teacher_vertex_index_used") is not False:
-            raise QualificationError("TESSA_G1B_VERTEX_SUPPORT_TEACHER_INDEX_FORBIDDEN")
-        if vertex.refinement is not None:
-            raise QualificationError("TESSA_G1B_LEGACY_REFINEMENT_ENCODING_FORBIDDEN")
+        raise QualificationError("TESSA_STATIC_BINDING_PREMATURE_PRODUCT_AUTHORITY")
+    if not str(md.get("candidate_bridge_evidence_hash") or ""):
+        raise QualificationError("TESSA_STATIC_BINDING_BRIDGE_HASH_MISSING")
+    if not str(md.get("proposal_geometry_hash") or ""):
+        raise QualificationError("TESSA_STATIC_BINDING_PROPOSAL_HASH_MISSING")
+    if not str(md.get("material_support_field_hash") or ""):
+        raise QualificationError("TESSA_STATIC_BINDING_SUPPORT_FIELD_HASH_MISSING")
 
 
-def validate_tessa_learned_geometry_qualification_v1(
-    value: TESSALearnedGeometryQualificationIR,
+def _validate_stage19_pass(
+    static_mesh: StaticCanonicalMeshQualificationIR,
+    *,
+    candidate: CanonicalMeshCandidateIR,
+) -> None:
+    if static_mesh.qualification_hash != static_mesh_qualification_hash(static_mesh):
+        raise QualificationError("TESSA_STATIC_BINDING_STAGE19_HASH_MISMATCH")
+    if static_mesh.candidate_mesh_binding_hash != candidate.candidate_lineage_hash:
+        raise QualificationError("TESSA_STATIC_BINDING_STAGE19_CANDIDATE_MISMATCH")
+    report = dict(static_mesh.qualification_report or {})
+    if report.get("status") != "PASS_STATIC_CANONICAL_CARRIER":
+        raise QualificationError("TESSA_STATIC_BINDING_STAGE19_STATUS_NOT_PASS")
+    if report.get("static_quality_policy_passed") is not True:
+        raise QualificationError("TESSA_STATIC_BINDING_STAGE19_STATIC_QUALITY_NOT_PASS")
+    if report.get("stage13_policy_replayed_on_actual_candidate_mesh") is not True:
+        raise QualificationError("TESSA_STATIC_BINDING_STAGE19_POLICY_REPLAY_MISSING")
+    if report.get("actual_candidate_source_fidelity_passed") is not True:
+        raise QualificationError("TESSA_STATIC_BINDING_STAGE19_SOURCE_FIDELITY_NOT_PASS")
+    if report.get("source_fidelity_qualification_passed") is not True:
+        raise QualificationError("TESSA_STATIC_BINDING_STAGE19_SOURCE_QUALIFICATION_NOT_PASS")
+    if report.get("demo_geometry_lineage") is not False:
+        raise QualificationError("TESSA_STATIC_BINDING_DEMO_LINEAGE_FORBIDDEN")
+    if report.get("product_authority_claimed") is not False:
+        raise QualificationError("TESSA_STATIC_BINDING_STAGE19_PREMATURE_PRODUCT_AUTHORITY")
+    per_view = tuple(report.get("actual_candidate_source_fidelity_views") or ())
+    if len(per_view) != 8 or {int(row.get("view_index", -1)) for row in per_view} != set(range(8)):
+        raise QualificationError("TESSA_STATIC_BINDING_STAGE19_REQUIRES_EIGHT_VIEWS")
+    if any(row.get("passed") is not True for row in per_view):
+        raise QualificationError("TESSA_STATIC_BINDING_STAGE19_VIEW_NOT_PASS")
+
+
+def validate_tessa_static_carrier_binding_v1(
+    value: TESSAStaticCarrierBindingIR,
     *,
     candidate: CanonicalMeshCandidateIR,
     bridge_evidence: TESSACandidateBridgeEvidenceIR,
-    surface: RiggingSurfaceIR,
-    partition: MechanicalPartitionIR,
-    carrier_policy: ComponentCarrierPolicyIR,
-    g5_rows: Iterable[dict],
+    static_mesh: StaticCanonicalMeshQualificationIR,
 ) -> None:
-    validate_canonical_mesh_candidate(
-        candidate,
-        surface=surface,
-        partition=partition,
-        carrier_policy=carrier_policy,
-    )
-    _validate_candidate_authority_split(candidate)
-    rows = tuple(dict(row) for row in g5_rows)
-    if not rows or any(str(row.get("status") or "") != "PASS" for row in rows):
-        raise QualificationError("TESSA_G1B_G5_REQUIRES_ALL_CELLS_PASS")
-    expected_g5_hash = g5_coverage_evidence_hash(rows)
-
+    _validate_tessa_candidate_boundary(candidate)
+    _validate_stage19_pass(static_mesh, candidate=candidate)
     cmd = dict(candidate.metadata or {})
     if value.candidate_lineage_hash != candidate.candidate_lineage_hash:
-        raise QualificationError("TESSA_G1B_CANDIDATE_LINEAGE_MISMATCH")
+        raise QualificationError("TESSA_STATIC_BINDING_CANDIDATE_LINEAGE_MISMATCH")
     if value.bridge_evidence_hash != bridge_evidence.evidence_hash:
-        raise QualificationError("TESSA_G1B_BRIDGE_EVIDENCE_MISMATCH")
+        raise QualificationError("TESSA_STATIC_BINDING_BRIDGE_EVIDENCE_MISMATCH")
     if str(cmd.get("candidate_bridge_evidence_hash") or "") != bridge_evidence.evidence_hash:
-        raise QualificationError("TESSA_G1B_CANDIDATE_BRIDGE_BINDING_MISMATCH")
+        raise QualificationError("TESSA_STATIC_BINDING_CANDIDATE_BRIDGE_DRIFT")
+    if value.static_mesh_qualification_hash != static_mesh.qualification_hash:
+        raise QualificationError("TESSA_STATIC_BINDING_STAGE19_BINDING_MISMATCH")
     if value.proposal_geometry_hash != bridge_evidence.proposal_geometry_hash:
-        raise QualificationError("TESSA_G1B_PROPOSAL_GEOMETRY_MISMATCH")
+        raise QualificationError("TESSA_STATIC_BINDING_PROPOSAL_GEOMETRY_MISMATCH")
+    if str(cmd.get("proposal_geometry_hash") or "") != value.proposal_geometry_hash:
+        raise QualificationError("TESSA_STATIC_BINDING_CANDIDATE_PROPOSAL_DRIFT")
     if value.material_support_field_hash != bridge_evidence.material_support_field_hash:
-        raise QualificationError("TESSA_G1B_SUPPORT_FIELD_MISMATCH")
-    if value.surface_binding_hash != surface.geometry_lineage_hash:
-        raise QualificationError("TESSA_G1B_SURFACE_BINDING_MISMATCH")
-    if value.partition_binding_hash != partition.partition_lineage_hash:
-        raise QualificationError("TESSA_G1B_PARTITION_BINDING_MISMATCH")
-    if value.carrier_policy_binding_hash != carrier_policy.carrier_policy_lineage_hash:
-        raise QualificationError("TESSA_G1B_CARRIER_POLICY_BINDING_MISMATCH")
-    if value.g5_evidence_hash != expected_g5_hash:
-        raise QualificationError("TESSA_G1B_G5_EVIDENCE_HASH_MISMATCH")
-    if value.g5_cell_count != len(rows):
-        raise QualificationError("TESSA_G1B_G5_CELL_COUNT_MISMATCH")
-    if value.vertex_count != len(candidate.vertices) or value.face_count != len(candidate.faces):
-        raise QualificationError("TESSA_G1B_GEOMETRY_COUNT_MISMATCH")
-
+        raise QualificationError("TESSA_STATIC_BINDING_SUPPORT_FIELD_MISMATCH")
+    if str(cmd.get("material_support_field_hash") or "") != value.material_support_field_hash:
+        raise QualificationError("TESSA_STATIC_BINDING_CANDIDATE_SUPPORT_FIELD_DRIFT")
+    if value.partition_binding_hash != candidate.partition_binding_hash:
+        raise QualificationError("TESSA_STATIC_BINDING_PARTITION_MISMATCH")
+    if value.partition_binding_hash != bridge_evidence.partition_binding_hash:
+        raise QualificationError("TESSA_STATIC_BINDING_BRIDGE_PARTITION_MISMATCH")
     md = dict(value.metadata or {})
-    if md.get("status") != "PASS_LEARNED_GEOMETRY_SOURCE_FIDELITY":
-        raise QualificationError("TESSA_G1B_STATUS_NOT_PASS")
-    if md.get("legacy_g1_replaced") is not False:
-        raise QualificationError("TESSA_G1B_LEGACY_G1_REPLACEMENT_FORBIDDEN")
+    if md.get("authority") != "EXISTING_STAGE19_STATIC_CANONICAL_CARRIER":
+        raise QualificationError("TESSA_STATIC_BINDING_AUTHORITY_INVALID")
+    if md.get("parallel_source_fidelity_metric_created") is not False:
+        raise QualificationError("TESSA_STATIC_BINDING_PARALLEL_METRIC_FORBIDDEN")
     if md.get("material_support_is_geometry_authority") is not False:
-        raise QualificationError("TESSA_G1B_MATERIAL_SUPPORT_AUTHORITY_FORBIDDEN")
-    if md.get("g5_is_independent_source_fidelity_authority") is not True:
-        raise QualificationError("TESSA_G1B_G5_INDEPENDENCE_MISSING")
+        raise QualificationError("TESSA_STATIC_BINDING_SUPPORT_GEOMETRY_AUTHORITY_FORBIDDEN")
     if md.get("motion_capability_claimed") is not False:
-        raise QualificationError("TESSA_G1B_MOTION_AUTHORITY_FORBIDDEN")
+        raise QualificationError("TESSA_STATIC_BINDING_MOTION_AUTHORITY_FORBIDDEN")
     if md.get("generalization_claimed") is not False:
-        raise QualificationError("TESSA_G1B_GENERALIZATION_AUTHORITY_FORBIDDEN")
-    if value.qualification_hash != tessa_learned_geometry_qualification_hash_v1(value):
-        raise QualificationError("TESSA_G1B_QUALIFICATION_HASH_MISMATCH")
+        raise QualificationError("TESSA_STATIC_BINDING_GENERALIZATION_AUTHORITY_FORBIDDEN")
+    if value.binding_hash != tessa_static_carrier_binding_hash_v1(value):
+        raise QualificationError("TESSA_STATIC_BINDING_HASH_MISMATCH")
 
 
-def qualify_tessa_learned_geometry_v1(
+def bind_tessa_to_static_carrier_v1(
     *,
     candidate: CanonicalMeshCandidateIR,
     bridge_evidence: TESSACandidateBridgeEvidenceIR,
-    surface: RiggingSurfaceIR,
-    partition: MechanicalPartitionIR,
-    carrier_policy: ComponentCarrierPolicyIR,
-    g5_rows: Iterable[dict],
-) -> TESSALearnedGeometryQualificationIR:
-    """Seal G1B only after independent G5 passes on the exact candidate."""
-    validate_canonical_mesh_candidate(
-        candidate,
-        surface=surface,
-        partition=partition,
-        carrier_policy=carrier_policy,
-    )
-    _validate_candidate_authority_split(candidate)
-    rows = tuple(dict(row) for row in g5_rows)
-    if not rows or any(str(row.get("status") or "") != "PASS" for row in rows):
-        raise QualificationError("TESSA_G1B_G5_REQUIRES_ALL_CELLS_PASS")
+    static_mesh: StaticCanonicalMeshQualificationIR,
+) -> TESSAStaticCarrierBindingIR:
+    """Bind exact TESSA lineage to the already-qualified Stage19 carrier."""
+    _validate_tessa_candidate_boundary(candidate)
+    _validate_stage19_pass(static_mesh, candidate=candidate)
+    cmd = dict(candidate.metadata or {})
+    if str(cmd.get("candidate_bridge_evidence_hash") or "") != bridge_evidence.evidence_hash:
+        raise QualificationError("TESSA_STATIC_BINDING_CANDIDATE_BRIDGE_DRIFT")
+    if str(cmd.get("proposal_geometry_hash") or "") != bridge_evidence.proposal_geometry_hash:
+        raise QualificationError("TESSA_STATIC_BINDING_CANDIDATE_PROPOSAL_DRIFT")
+    if str(cmd.get("material_support_field_hash") or "") != bridge_evidence.material_support_field_hash:
+        raise QualificationError("TESSA_STATIC_BINDING_CANDIDATE_SUPPORT_FIELD_DRIFT")
+    if candidate.partition_binding_hash != bridge_evidence.partition_binding_hash:
+        raise QualificationError("TESSA_STATIC_BINDING_BRIDGE_PARTITION_MISMATCH")
 
-    provisional = TESSALearnedGeometryQualificationIR(
+    provisional = TESSAStaticCarrierBindingIR(
         candidate_lineage_hash=str(candidate.candidate_lineage_hash),
         bridge_evidence_hash=str(bridge_evidence.evidence_hash),
+        static_mesh_qualification_hash=str(static_mesh.qualification_hash),
         proposal_geometry_hash=str(bridge_evidence.proposal_geometry_hash),
         material_support_field_hash=str(bridge_evidence.material_support_field_hash),
-        surface_binding_hash=str(surface.geometry_lineage_hash),
-        partition_binding_hash=str(partition.partition_lineage_hash),
-        carrier_policy_binding_hash=str(carrier_policy.carrier_policy_lineage_hash),
-        g5_evidence_hash=g5_coverage_evidence_hash(rows),
-        g5_cell_count=len(rows),
-        vertex_count=len(candidate.vertices),
-        face_count=len(candidate.faces),
-        qualification_hash="",
+        partition_binding_hash=str(candidate.partition_binding_hash),
+        binding_hash="",
         metadata={
-            "status": "PASS_LEARNED_GEOMETRY_SOURCE_FIDELITY",
-            "authority_class": "TESSA_LEARNED_GEOMETRY_G1B",
-            "legacy_g1_replaced": False,
-            "legacy_g1_convex_lift_applicable": False,
+            "authority": "EXISTING_STAGE19_STATIC_CANONICAL_CARRIER",
+            "parallel_source_fidelity_metric_created": False,
             "material_support_is_geometry_authority": False,
-            "g5_is_independent_source_fidelity_authority": True,
-            "topology_rest_conditioning_owned_elsewhere": True,
-            "deformation_stress_owned_elsewhere": True,
-            "skin_topology_compatibility_owned_elsewhere": True,
+            "learned_xyz_preserved_exactly": True,
+            "stage19_static_source_fidelity_required": True,
             "motion_capability_claimed": False,
             "generalization_claimed": False,
         },
     )
     value = replace(
         provisional,
-        qualification_hash=tessa_learned_geometry_qualification_hash_v1(provisional),
+        binding_hash=tessa_static_carrier_binding_hash_v1(provisional),
     )
-    validate_tessa_learned_geometry_qualification_v1(
+    validate_tessa_static_carrier_binding_v1(
         value,
         candidate=candidate,
         bridge_evidence=bridge_evidence,
-        surface=surface,
-        partition=partition,
-        carrier_policy=carrier_policy,
-        g5_rows=rows,
+        static_mesh=static_mesh,
     )
     return value

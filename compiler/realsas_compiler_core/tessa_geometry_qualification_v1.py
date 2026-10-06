@@ -23,8 +23,7 @@ from .types import QualificationError
 Json = dict[str, Any]
 _INITIAL_AUTHORITY_CLASS = "TESSA_LEARNED_GEOMETRY_PROPOSAL_V1"
 _REPAIRED_AUTHORITY_CLASS = "TESSA_LEARNED_GEOMETRY_COMPILER_REPAIRED_V1"
-_INITIAL_PRODUCER = "RealSaS.TESSALearnedMechanicalCarrierProposal.v1"
-_REPAIRED_PRODUCER = "RealSaS.TESSACompilerRepairedMechanicalCarrierProposal.v1"
+_TESSA_PRODUCER = "RealSaS.TESSALearnedMechanicalCarrierProposal.v1"
 
 
 @dataclass(frozen=True)
@@ -67,29 +66,36 @@ def tessa_static_carrier_binding_hash_v1(value: TESSAStaticCarrierBindingIR) -> 
 
 
 def _validate_tessa_candidate_boundary(candidate: CanonicalMeshCandidateIR) -> str:
+    if candidate.producer_id != _TESSA_PRODUCER:
+        raise QualificationError("TESSA_STATIC_BINDING_PRODUCER_INVALID")
     md = dict(candidate.metadata or {})
-    if candidate.producer_id == _INITIAL_PRODUCER:
+    repaired = md.get("compiler_static_repair_applied") is True
+    if repaired:
+        if md.get("geometry_authority_class") != _REPAIRED_AUTHORITY_CLASS:
+            raise QualificationError("TESSA_STATIC_BINDING_REPAIRED_AUTHORITY_CLASS_INVALID")
+        if md.get("learned_proposal_is_immutable_reference") is not True:
+            raise QualificationError("TESSA_STATIC_BINDING_IMMUTABLE_REFERENCE_MISSING")
+        if md.get("learned_proposal_xyz_preserved_exactly") is not False:
+            raise QualificationError("TESSA_STATIC_BINDING_REPAIRED_PROPOSAL_FLAG_INVALID")
+        if md.get("learned_xyz_preserved_exactly") is not True:
+            raise QualificationError("TESSA_STATIC_BINDING_POST_REPAIR_PRESERVATION_MISSING")
+        if md.get("learned_xyz_preservation_scope") != "POST_COMPILER_REPAIR_CANDIDATE_TO_DOWNSTREAM":
+            raise QualificationError("TESSA_STATIC_BINDING_PRESERVATION_SCOPE_INVALID")
+        if md.get("threshold_relaxation_performed") is not False:
+            raise QualificationError("TESSA_STATIC_BINDING_THRESHOLD_RELAXATION_FORBIDDEN")
+        if md.get("teacher_geometry_used_to_repair") is not False:
+            raise QualificationError("TESSA_STATIC_BINDING_TEACHER_REPAIR_FORBIDDEN")
+        if not str(md.get("tessa_static_repair_evidence_hash") or ""):
+            raise QualificationError("TESSA_STATIC_BINDING_REPAIR_EVIDENCE_HASH_MISSING")
+        if not str(md.get("tessa_reference_binding_hash") or ""):
+            raise QualificationError("TESSA_STATIC_BINDING_REFERENCE_HASH_MISSING")
+        lane = "COMPILER_REPAIRED"
+    else:
         if md.get("geometry_authority_class") != _INITIAL_AUTHORITY_CLASS:
             raise QualificationError("TESSA_STATIC_BINDING_AUTHORITY_CLASS_INVALID")
         if md.get("learned_xyz_preserved_exactly") is not True:
             raise QualificationError("TESSA_STATIC_BINDING_LEARNED_XYZ_PRESERVATION_MISSING")
         lane = "LEARNED_PROPOSAL"
-    elif candidate.producer_id == _REPAIRED_PRODUCER:
-        if md.get("geometry_authority_class") != _REPAIRED_AUTHORITY_CLASS:
-            raise QualificationError("TESSA_STATIC_BINDING_REPAIRED_AUTHORITY_CLASS_INVALID")
-        if md.get("compiler_static_repair_applied") is not True:
-            raise QualificationError("TESSA_STATIC_BINDING_REPAIR_MARKER_MISSING")
-        if md.get("learned_proposal_is_immutable_reference") is not True:
-            raise QualificationError("TESSA_STATIC_BINDING_IMMUTABLE_REFERENCE_MISSING")
-        if md.get("learned_xyz_preserved_exactly") is not False:
-            raise QualificationError("TESSA_STATIC_BINDING_REPAIRED_XYZ_FLAG_INVALID")
-        if md.get("threshold_relaxation_performed") is not False:
-            raise QualificationError("TESSA_STATIC_BINDING_THRESHOLD_RELAXATION_FORBIDDEN")
-        if md.get("teacher_geometry_used_to_repair") is not False:
-            raise QualificationError("TESSA_STATIC_BINDING_TEACHER_REPAIR_FORBIDDEN")
-        lane = "COMPILER_REPAIRED"
-    else:
-        raise QualificationError("TESSA_STATIC_BINDING_PRODUCER_INVALID")
 
     if md.get("material_support_is_not_geometry_support") is not True:
         raise QualificationError("TESSA_STATIC_BINDING_SUPPORT_SEPARATION_MISSING")
@@ -181,10 +187,10 @@ def validate_tessa_static_carrier_binding_v1(
     if md.get("generalization_claimed") is not False:
         raise QualificationError("TESSA_STATIC_BINDING_GENERALIZATION_AUTHORITY_FORBIDDEN")
     if lane == "COMPILER_REPAIRED":
-        if not str(md.get("static_repair_evidence_hash") or ""):
-            raise QualificationError("TESSA_STATIC_BINDING_REPAIR_EVIDENCE_HASH_MISSING")
-        if not str(md.get("reference_binding_hash") or ""):
-            raise QualificationError("TESSA_STATIC_BINDING_REFERENCE_HASH_MISSING")
+        if md.get("static_repair_evidence_hash") != cmd.get("tessa_static_repair_evidence_hash"):
+            raise QualificationError("TESSA_STATIC_BINDING_REPAIR_EVIDENCE_DRIFT")
+        if md.get("reference_binding_hash") != cmd.get("tessa_reference_binding_hash"):
+            raise QualificationError("TESSA_STATIC_BINDING_REFERENCE_HASH_DRIFT")
     if value.binding_hash != tessa_static_carrier_binding_hash_v1(value):
         raise QualificationError("TESSA_STATIC_BINDING_HASH_MISMATCH")
 
@@ -197,7 +203,12 @@ def bind_tessa_to_static_carrier_v1(
     static_repair_evidence_hash: str | None = None,
     reference_binding_hash: str | None = None,
 ) -> TESSAStaticCarrierBindingIR:
-    """Bind exact TESSA lineage to the already-qualified Stage19 carrier."""
+    """Bind exact Stage18 TESSA lineage to the qualified Stage19 carrier.
+
+    Repaired candidates commit to their repair/reference evidence hashes directly
+    in candidate metadata, so legacy Stage19 callers need no new positional/data
+    dependency merely to preserve the cryptographic closure.
+    """
     lane = _validate_tessa_candidate_boundary(candidate)
     _validate_stage19_pass(static_mesh, candidate=candidate)
     cmd = dict(candidate.metadata or {})
@@ -209,11 +220,19 @@ def bind_tessa_to_static_carrier_v1(
         raise QualificationError("TESSA_STATIC_BINDING_CANDIDATE_SUPPORT_FIELD_DRIFT")
     if candidate.partition_binding_hash != bridge_evidence.partition_binding_hash:
         raise QualificationError("TESSA_STATIC_BINDING_BRIDGE_PARTITION_MISMATCH")
+
     if lane == "COMPILER_REPAIRED":
-        if not static_repair_evidence_hash:
-            raise QualificationError("TESSA_STATIC_BINDING_REPAIR_EVIDENCE_REQUIRED")
-        if not reference_binding_hash:
-            raise QualificationError("TESSA_STATIC_BINDING_REFERENCE_BINDING_REQUIRED")
+        committed_repair = str(cmd.get("tessa_static_repair_evidence_hash") or "")
+        committed_reference = str(cmd.get("tessa_reference_binding_hash") or "")
+        if static_repair_evidence_hash is not None and str(static_repair_evidence_hash) != committed_repair:
+            raise QualificationError("TESSA_STATIC_BINDING_EXPLICIT_REPAIR_HASH_DRIFT")
+        if reference_binding_hash is not None and str(reference_binding_hash) != committed_reference:
+            raise QualificationError("TESSA_STATIC_BINDING_EXPLICIT_REFERENCE_HASH_DRIFT")
+        static_repair_evidence_hash = committed_repair
+        reference_binding_hash = committed_reference
+    else:
+        static_repair_evidence_hash = ""
+        reference_binding_hash = ""
 
     provisional = TESSAStaticCarrierBindingIR(
         candidate_lineage_hash=str(candidate.candidate_lineage_hash),
@@ -228,16 +247,15 @@ def bind_tessa_to_static_carrier_v1(
             "candidate_lane": lane,
             "parallel_source_fidelity_metric_created": False,
             "material_support_is_geometry_authority": False,
-            "learned_xyz_preserved_exactly": bool(
-                dict(candidate.metadata or {}).get("learned_xyz_preserved_exactly") is True
+            "learned_xyz_preserved_exactly": True,
+            "learned_xyz_preservation_scope": (
+                "POST_COMPILER_REPAIR_CANDIDATE_TO_DOWNSTREAM"
+                if lane == "COMPILER_REPAIRED"
+                else "LEARNED_PROPOSAL_TO_DOWNSTREAM"
             ),
             "compiler_static_repair_applied": lane == "COMPILER_REPAIRED",
-            "static_repair_evidence_hash": (
-                str(static_repair_evidence_hash or "") if lane == "COMPILER_REPAIRED" else ""
-            ),
-            "reference_binding_hash": (
-                str(reference_binding_hash or "") if lane == "COMPILER_REPAIRED" else ""
-            ),
+            "static_repair_evidence_hash": str(static_repair_evidence_hash or ""),
+            "reference_binding_hash": str(reference_binding_hash or ""),
             "stage19_static_source_fidelity_required": True,
             "motion_capability_claimed": False,
             "generalization_claimed": False,

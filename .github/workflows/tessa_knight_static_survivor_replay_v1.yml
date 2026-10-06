@@ -42,10 +42,30 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
-      - name: Verify sealed fixture bytes
+      - name: Reconstruct and verify sealed fixture bytes
         run: |
           set -euo pipefail
-          test "$(sha256sum tests/fixtures/tessa/TESSA_T1B_DECODED_MESH.npz | awk '{print $1}')" = "b7ccb058ef23f8c54d053e64580150dffffeb6a76a126ecaf48b265dd093f390"
+          python - <<'PY'
+          from pathlib import Path
+          import base64
+          import hashlib
+
+          root = Path("tests/fixtures/tessa")
+          parts = [
+              root / f"TESSA_T1B_DECODED_MESH.npz.b64.part{i:02d}"
+              for i in range(4)
+          ]
+          encoded = "".join(path.read_text(encoding="ascii").strip() for path in parts)
+          raw = base64.b64decode(encoded, validate=True)
+          expected_sha = "b7ccb058ef23f8c54d053e64580150dffffeb6a76a126ecaf48b265dd093f390"
+          actual_sha = hashlib.sha256(raw).hexdigest()
+          if len(raw) != 36970:
+              raise SystemExit(f"T1B_FIXTURE_SIZE_MISMATCH:{len(raw)}")
+          if actual_sha != expected_sha:
+              raise SystemExit(f"T1B_FIXTURE_SHA_MISMATCH:{actual_sha}")
+          (root / "TESSA_T1B_DECODED_MESH.npz").write_bytes(raw)
+          print(f"TESSA_T1B_FIXTURE_RECONSTRUCT_PASS size={len(raw)} sha256={actual_sha}", flush=True)
+          PY
           test "$(sha256sum tests/fixtures/tessa/normalization_domain.json | awk '{print $1}')" = "01b63a57390de9a5d2c731d9644e65ff779980caa066c19204db3b4a3e0c634b"
           echo TESSA_KNIGHT_STATIC_REPLAY_FIXTURES_PASS
       - name: Replay historical V2 to V3 survivor

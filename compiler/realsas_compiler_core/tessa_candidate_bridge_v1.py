@@ -10,19 +10,23 @@ mechanical-coherence work:
   mechanical support over ``RiggingSurfaceIR``.
 - Material support is not geometric support and may not be used to pretend that
   learned XYZ is a convex lift of GSA nodes.
-- Final product geometry authority remains Compiler qualification downstream.
+- Final static carrier admission is the existing V2 Stage19 exact-candidate
+  qualification, not a new parallel geometry court.
 
 The bridge therefore creates a ``CanonicalMeshCandidateIR`` whose vertex XYZ is
 exactly the learned proposal XYZ while its ``SurfaceSupportBinding`` is explicitly
-marked material-only.  The candidate cannot become ``QualifiedMeshIR`` through
-legacy G1 unless the learned-geometry qualification lane is present downstream.
+marked material-only.  Product authority remains Compiler-owned downstream.
 """
 
 from dataclasses import asdict, dataclass, field, replace
 import math
-from typing import Any
+from typing import Any, Mapping
 
-from models.tessa.v1.contracts_v1 import TESSAMeshProposalV1, TESSAScalingPolicyV1
+from models.tessa.v1.contracts_v1 import (
+    TESSAMeshProposalV1,
+    TESSAScalingPolicyV1,
+    TESSAVertexProposalV1,
+)
 
 from .hashing import content_sha256
 from .product_authority_v1 import (
@@ -65,6 +69,66 @@ class TESSACandidateBridgeEvidenceIR:
 
     def to_dict(self):
         return asdict(self)
+
+
+def tessa_mesh_proposal_from_dict_v1(payload: Mapping[str, Any]) -> TESSAMeshProposalV1:
+    if str(payload.get("schema_version") or payload.get("schema") or "") != "RealSaS.TESSAMeshProposal.v1":
+        raise QualificationError("TESSA_PROPOSAL_SCHEMA_INVALID")
+    raw_vertices = tuple(payload.get("vertices") or ())
+    raw_faces = tuple(payload.get("faces") or ())
+    vertices = tuple(
+        TESSAVertexProposalV1(
+            proposal_vertex_id=str(row["proposal_vertex_id"]),
+            P=tuple(map(float, row["P"])),
+            primary_surface_id=str(row["primary_surface_id"]),
+            component_id=str(row["component_id"]),
+            confidence=float(row.get("confidence", 1.0)),
+            metadata=dict(row.get("metadata") or {}),
+        )
+        for row in raw_vertices
+    )
+    proposal = TESSAMeshProposalV1(
+        vertices=vertices,
+        faces=tuple(tuple(map(str, row)) for row in raw_faces),
+        source_geometry_lineage_hash=str(payload.get("source_geometry_lineage_hash") or ""),
+        model_provenance=str(payload.get("model_provenance") or ""),
+        topology_sequence_hash=str(payload.get("topology_sequence_hash") or ""),
+        metadata=dict(payload.get("metadata") or {}),
+        schema_version="RealSaS.TESSAMeshProposal.v1",
+    )
+    try:
+        proposal.validate(TESSAScalingPolicyV1())
+    except (TypeError, ValueError, KeyError) as exc:
+        raise QualificationError(f"TESSA_PROPOSAL_PAYLOAD_INVALID:{type(exc).__name__}") from exc
+    if not proposal.model_provenance:
+        raise QualificationError("TESSA_PROPOSAL_MODEL_PROVENANCE_MISSING")
+    if dict(proposal.metadata or {}).get("product_authority_claimed") is True:
+        raise QualificationError("TESSA_PROPOSAL_PREMATURE_PRODUCT_AUTHORITY")
+    return proposal
+
+
+def tessa_candidate_bridge_evidence_from_dict_v1(
+    payload: Mapping[str, Any],
+) -> TESSACandidateBridgeEvidenceIR:
+    if str(payload.get("schema_version") or payload.get("schema") or "") != "RealSaS.TESSACandidateBridgeEvidenceIR.v1":
+        raise QualificationError("TESSA_CANDIDATE_EVIDENCE_SCHEMA_INVALID")
+    return TESSACandidateBridgeEvidenceIR(
+        proposal_geometry_hash=str(payload.get("proposal_geometry_hash") or ""),
+        proposal_topology_sequence_hash=str(payload.get("proposal_topology_sequence_hash") or ""),
+        proposal_source_geometry_lineage_hash=str(payload.get("proposal_source_geometry_lineage_hash") or ""),
+        material_support_field_hash=str(payload.get("material_support_field_hash") or ""),
+        surface_binding_hash=str(payload.get("surface_binding_hash") or ""),
+        partition_binding_hash=str(payload.get("partition_binding_hash") or ""),
+        carrier_policy_binding_hash=str(payload.get("carrier_policy_binding_hash") or ""),
+        vertex_count=int(payload.get("vertex_count", 0)),
+        face_count=int(payload.get("face_count", 0)),
+        nearest_surface_distance_min=float(payload.get("nearest_surface_distance_min", float("nan"))),
+        nearest_surface_distance_median=float(payload.get("nearest_surface_distance_median", float("nan"))),
+        nearest_surface_distance_p95=float(payload.get("nearest_surface_distance_p95", float("nan"))),
+        nearest_surface_distance_max=float(payload.get("nearest_surface_distance_max", float("nan"))),
+        evidence_hash=str(payload.get("evidence_hash") or ""),
+        metadata=dict(payload.get("metadata") or {}),
+    )
 
 
 def tessa_proposal_geometry_hash_v1(proposal: TESSAMeshProposalV1) -> str:
@@ -167,13 +231,7 @@ def build_tessa_candidate_bridge_v1(
     carrier_policy: ComponentCarrierPolicyIR,
     producer_policy_hash: str,
 ) -> tuple[CanonicalMeshCandidateIR, TESSACandidateBridgeEvidenceIR]:
-    """Build a non-authoritative Compiler candidate from exact TESSA evidence.
-
-    Learned XYZ is preserved exactly.  The material support field is attached only
-    for downstream field sampling and component ownership; it is never asserted to
-    reproduce the learned XYZ.  Legacy G1 product minting must therefore fail until
-    a dedicated learned-geometry qualification lane explicitly admits this class.
-    """
+    """Build a non-authoritative Compiler candidate from exact TESSA evidence."""
     proposal.validate(TESSAScalingPolicyV1())
     if proposal.source_geometry_lineage_hash != surface.geometry_lineage_hash:
         raise QualificationError("TESSA_CANDIDATE_SOURCE_GEOMETRY_LINEAGE_MISMATCH")
@@ -194,14 +252,14 @@ def build_tessa_candidate_bridge_v1(
     if set(row_by_id) != set(proposal_ids):
         raise QualificationError("TESSA_CANDIDATE_SUPPORT_VERTEX_ACCOUNTING_MISMATCH")
 
+    proposal_geometry_hash = tessa_proposal_geometry_hash_v1(proposal)
     candidate_id = {
         proposal_id: "TCV:" + content_sha256({
-            "proposal_geometry_hash": tessa_proposal_geometry_hash_v1(proposal),
+            "proposal_geometry_hash": proposal_geometry_hash,
             "proposal_vertex_id": proposal_id,
         })[:24]
         for proposal_id in proposal_ids
     }
-    proposal_geometry_hash = tessa_proposal_geometry_hash_v1(proposal)
 
     vertices = []
     for vertex in proposal.vertices:
@@ -276,7 +334,7 @@ def build_tessa_candidate_bridge_v1(
             "product_geometry_authority_claimed": False,
             "teacher_vertex_index_used": False,
             "distance_metrics_are_diagnostic_not_acceptance_thresholds": True,
-            "requires_downstream_learned_geometry_g1b": True,
+            "requires_stage19_static_qualification": True,
             "requires_independent_multiview_source_fidelity": True,
         },
     )
@@ -313,7 +371,7 @@ def build_tessa_candidate_bridge_v1(
             "learned_xyz_preserved_exactly": True,
             "legacy_g1_convex_lift_claimed": False,
             "product_geometry_authority_claimed": False,
-            "requires_downstream_learned_geometry_g1b": True,
+            "requires_stage19_static_qualification": True,
         },
     )
     candidate = replace(

@@ -8,12 +8,13 @@
   "principle": "Before replacing a result with another, prove they answer the same question.",
   "claim": {
     "status": "BOUNDED_PROMOTION_CANDIDATE",
-    "summary": "Ratify exact mechanical-carrier identity and bind learned skeleton/skin qualification lineage to that carrier without activating later research lanes or superseding the sealed production G3 contract.",
+    "summary": "Ratify exact mechanical-carrier identity, close the declared carrier-first DAG/fingerprint dependencies around Stage19, remove the same-run Stage35-to-Stage18 filesystem back-edge, and bind learned skeleton/skin qualification lineage to the exact carrier without activating later research lanes or superseding the sealed production actual-motion G3 contract.",
     "genericity_claimed": false,
     "tessa_stage18_product_authority_claimed": false,
     "mira_carrier_query_product_authority_claimed": false,
     "rigid_equipment_runtime_product_authority_claimed": false,
-    "knight_render_authority_claimed": false
+    "knight_render_authority_claimed": false,
+    "frozen_knight_demo_render_identity_gated": true
   },
   "promoted_commits": [
     {
@@ -32,7 +33,46 @@
       "claim": "Stage19 carrier producer and exact carrier evidence/topology/geometry bindings carried into qualified skeleton and skin lineage"
     }
   ],
+  "promoted_contract_lineage": [
+    {
+      "source_commit": "3c4f28d35d479b85ccd16ce4d0f880da31cfe89d",
+      "role": "CARRIER_FIRST_DAG_CONTRACT",
+      "claim": "Declare mechanical_attempt in Stage18 fingerprint scope and declare Stage19 dependencies for carrier-consuming mechanics stages; plan-only contract change.",
+      "source_parent_plan_blob_sha": "f8459185c616545e8c6d9ac061991bc660aa1de3",
+      "promoted_plan_blob_sha": "0f2e39e2dfd8385ca88ee9733fb7fbf65641da09"
+    },
+    {
+      "source_commit": "63a595d2612e96dada1b81f35d406ac2a16636a2",
+      "role": "NO_HIDDEN_STAGE35_STAGE18_BACKEDGE",
+      "claim": "Stage18 may adopt a repair only through explicit parent-attempt candidate/directive references with lineage, iteration, upstream-binding and no-weight/no-position-mutation checks; it does not read same-run Stage35 filesystem artifacts."
+    },
+    {
+      "source_commit": "607b5252e1f190cec966abaa0e703579a1107515",
+      "role": "STAGE19_STATIC_CARRIER_ADMISSIBILITY",
+      "claim": "Re-evaluate static quality on the exact effective Stage18 carrier before emitting MechanicalCarrierEvidenceIR; this is an admissibility gate and does not replace dynamic mechanical proof."
+    }
+  ],
+  "promotion_invariants": {
+    "exact_carrier_identity": "Ordered carrier vertices, exact faces/connectivity, geometry hash and topology hash are mechanical identity and may not drift silently downstream.",
+    "declared_dag_matches_reads": "Stages 26, 28, 30 and 32 declare Stage19 as a dependency because their promoted adapters read MechanicalCarrierEvidenceIR; Stage34 explicitly depends on the Stage19 carrier seal in the promoted plan.",
+    "stage18_attempt_fingerprint": "mechanical_attempt is a declared Stage18 manifest key so parent-attempt repair inputs participate in cache/resume fingerprinting.",
+    "same_run_backedge_forbidden": true,
+    "parent_attempt_id_required_when_repair_is_present": true,
+    "attempt_id_product_authority_claimed": false,
+    "repair_candidate_and_directive_refs_hash_sealed": true,
+    "repair_weight_mutation_forbidden": true,
+    "repair_vertex_position_mutation_forbidden": true,
+    "stage19_static_quality_is_mechanical_proof": false,
+    "actual_motion_g3_remains_mechanical_authority": true
+  },
   "promoted_blob_provenance": [
+    {
+      "path": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
+      "blob_sha": "0f2e39e2dfd8385ca88ee9733fb7fbf65641da09",
+      "source_commit": "3c4f28d35d479b85ccd16ce4d0f880da31cfe89d",
+      "source_parent_blob_sha": "f8459185c616545e8c6d9ac061991bc660aa1de3",
+      "claim": "Carrier-first declared DAG and Stage18 manifest fingerprint closure only; source parent blob exactly matched the pre-promotion plan blob."
+    },
     {
       "path": "compiler/realsas_compiler_core/mechanical_carrier_evidence_v1.py",
       "blob_sha": "0df074364814edf0e52bd0cb4298132270d30700",
@@ -76,6 +116,20 @@
       "blob_sha": "e23cb811c5d27c86aa03f106d53a102996c4870e",
       "source_commit": "2eaec6068487ef2731fd9d6ccdee3b9e7244c8ee",
       "source_commit_message": "test: require carrier-bound skeleton and skin qualification lineage"
+    },
+    {
+      "path": "tests/repository/test_mainline_execution_plan_v2.py",
+      "blob_sha": "11dcf79643045b6dafd22255d04981e88e7c6a1b",
+      "source_test_lineage": [
+        "1b8291bfa39bc72378d802f43eef671ed65b2525",
+        "a68c2926a543c2dcdf703fe99d77f7274d5e15a6"
+      ],
+      "claim": "Focused subject-agnostic promotion regressions for declared carrier-first dependencies, no same-run Stage35-to-Stage18 back-edge, bounded parent-attempt adoption, and Stage19 exact static-carrier admissibility."
+    },
+    {
+      "path": ".github/workflows/recover_and_verify_knight_frozen_canonical.yml",
+      "blob_sha": "306f8077dd0c865d107cd7279268d7ed0898aac0",
+      "claim": "Run frozen Knight demo-render hash reproduction on every promotion/main push; this is a drift witness, not product visual authority."
     }
   ],
   "preserved_existing_authority": {
@@ -135,14 +189,30 @@
     "main_runtime_v2_blob_sha": "4f2296db1c931929cdfd8bad402d4a392408dc6c",
     "reason": "Main Stage42 already consumes Stage41 RealSaS.QualifiedDynamicMotionIR.v2 and fail-closes mesh, mechanical-state and presentation binding drift. Research runtime_v2 changes are appearance/runtime-tail work and are outside this promotion claim."
   },
+  "render_identity_gate": {
+    "authority_class": "CANONICAL_DEMO_RENDER_IDENTITY_WITNESS_ONLY",
+    "product_visual_authority_claimed": false,
+    "expected_gif_sha256": {
+      "IDLE": "4c64437ba1f2ecaca8302a52c598f3ba7750a923fd50b90f7cafa3f8473386c3",
+      "RUN": "64ad50eeb9ea55ce202ddc46728ffea9074419dbf855938840f69d06661806e3",
+      "SLASH": "adc8e8cd0e2272a836e50f7a73585208074703ea5f3c9a549583d7a659fa2b85"
+    },
+    "failure_semantics": "FROZEN_RENDER_HASH_MISMATCH",
+    "historical_success_run_id": 36935713888
+  },
   "validation": {
     "proof_service_promotion_gate": {
       "run_id": 37387956091,
       "head_sha": "4b280d0697ac59ac45ca29acb1df3ac9b2336c84",
       "conclusion": "success",
-      "scope_note": "This legacy gate does not execute the newly added carrier contract tests and is not the final promotion gate."
+      "scope_note": "This legacy gate does not execute the final carrier/DAG/render closure and is not the final promotion gate."
     },
-    "required_final_gate": "current-mainline-self-hosted-ci on pull_request to main",
-    "merge_policy": "DO_NOT_MERGE_UNTIL_FINAL_GATE_SUCCESS"
+    "required_final_gates": [
+      "current-mainline-self-hosted-ci on the final promotion SHA",
+      "current-runtime-self-hosted-ci on the final promotion SHA",
+      "recover-and-verify-knight-frozen-canonical on the final promotion SHA"
+    ],
+    "required_check_state": "NO_RELEVANT_FAILURE_OR_CANCELLATION_ON_FINAL_PROMOTION_SHA",
+    "merge_policy": "DO_NOT_MERGE_UNTIL_ALL_FINAL_GATES_SUCCESS"
   }
 }

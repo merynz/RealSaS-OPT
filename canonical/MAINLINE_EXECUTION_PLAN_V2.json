@@ -390,7 +390,8 @@
       },
       "manifest_keys": [
         "mesh",
-        "mesh_policy"
+        "mesh_policy",
+        "mechanical_attempt"
       ]
     },
     {
@@ -546,10 +547,11 @@
     {
       "ordinal": 26,
       "id": "26_GEPPETTO_FIT_PREREGISTERED",
-      "title": "Geppetto fit preregistration",
+      "title": "ATLAS fit preregistration bound to static canonical carrier",
       "group": "rig",
       "depends_on": [
-        "15_RIGGING_SURFACE_QUALIFIED"
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED"
       ],
       "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:preregister_geppetto_fit_stage",
       "policy": {
@@ -588,7 +590,8 @@
       "group": "rig",
       "depends_on": [
         "15_RIGGING_SURFACE_QUALIFIED",
-        "27_GEPPETTO_FIT"
+        "27_GEPPETTO_FIT",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED"
       ],
       "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:qualify_skeleton_stage",
       "policy": {
@@ -620,12 +623,13 @@
     {
       "ordinal": 30,
       "id": "30_ARACHNE_FIT_PREREGISTERED",
-      "title": "Arachne fit preregistration",
+      "title": "MIRA fit preregistration bound to static canonical carrier and skeleton",
       "group": "skin",
       "depends_on": [
         "15_RIGGING_SURFACE_QUALIFIED",
         "28_SKELETON_QUALIFIED",
-        "29_GEPPETTO_CHECKPOINT_SEALED"
+        "29_GEPPETTO_CHECKPOINT_SEALED",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED"
       ],
       "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:preregister_arachne_fit_stage",
       "policy": {
@@ -665,7 +669,8 @@
       "depends_on": [
         "15_RIGGING_SURFACE_QUALIFIED",
         "28_SKELETON_QUALIFIED",
-        "31_ARACHNE_FIT"
+        "31_ARACHNE_FIT",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED"
       ],
       "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:qualify_skin_stage",
       "policy": {
@@ -701,7 +706,8 @@
       "group": "mesh",
       "depends_on": [
         "05_CAMERA_CONTRACT_SOLVED",
-        "28_SKELETON_QUALIFIED"
+        "28_SKELETON_QUALIFIED",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED"
       ],
       "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2:seal_deformation_capability_envelope",
       "policy": {
@@ -717,7 +723,7 @@
     {
       "ordinal": 35,
       "id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
-      "title": "Dynamic mechanical qualification of frozen Stage18 mesh",
+      "title": "Joint dynamic mechanical proof of carrier + rig + skin",
       "group": "mesh",
       "depends_on": [
         "05_CAMERA_CONTRACT_SOLVED",

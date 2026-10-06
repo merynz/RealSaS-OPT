@@ -75,6 +75,9 @@ from compiler.realsas_compiler_core.product_authority_v1 import (
 from compiler.realsas_compiler_core.substrate.scene_first_signed import (
     validate_compacted_dense_face_provenance_v1,
 )
+from compiler.realsas_compiler_core.tessa_stage18_v1 import (
+    build_tessa_stage18_candidate_v1,
+)
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     stage_output_payload,
@@ -464,6 +467,20 @@ def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
     validate_mesh_qualification_policy(policy)
 
     backend=str(mesh_cfg.get("backend") or "")
+    root=_artifact_root(ctx,"26_MESH_CANDIDATE_BUILD")
+    if backend=="TESSA_PROPOSAL_V1":
+        return build_tessa_stage18_candidate_v1(
+            mesh_cfg=mesh_cfg,
+            surface=surface,
+            partition=partition,
+            carrier_policy=carrier,
+            mesh_policy=policy,
+            artifact_root=root,
+            load_file_ref=_load_file_ref,
+            write_ir=_write_ir,
+            relation_quality_report=_relation_parent_quality_report,
+        )
+
     baseline_policy_hash=content_sha256({
         "schema":"RealSaS.CanonicalRelationBaselinePolicy.v1",
         "mesh_config":mesh_cfg,
@@ -499,7 +516,6 @@ def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
             explicit_face_provenance=explicit_faces,
         )
     parent_quality=_relation_parent_quality_report(baseline,policy)
-    root=_artifact_root(ctx,"26_MESH_CANDIDATE_BUILD")
     parent_quality_artifact=_write_json(
         root/"relation_parent_quality_report.json",
         parent_quality,

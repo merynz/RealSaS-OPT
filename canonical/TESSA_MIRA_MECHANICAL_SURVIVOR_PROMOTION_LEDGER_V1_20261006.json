@@ -1,0 +1,154 @@
+{
+  "schema": "RealSaS.TESSAMIRAMechanicalSurvivorPromotionLedger.v1",
+  "date": "2026-10-06",
+  "authority": "PROMOTION_AUDIT_ONLY__NOT_PRODUCT_AUTHORITY",
+  "base": {
+    "main_sha": "c4d478e934dc5cce0d26e8b0d64ddd402b1a2102",
+    "research_merge_base_sha": "6f9674ca90452a6d1b8447f59ac984b49f090b66",
+    "research_head_sha": "247ff75efce51ad1cb08932d4f1fc66e3b484e82",
+    "research_ahead_of_merge_base": 667,
+    "promotion_candidate_parent_sha": "ec386654249768d4355751839179ad0d4c3966e9",
+    "promotion_candidate_pr": 55
+  },
+  "scientific_endpoints": [
+    {
+      "capability": "TESSA_AUTOREGRESSIVE_TOPOLOGY_RECONSTRUCTION",
+      "verdict": "SURVIVOR_RECONSTRUCTION_ONLY",
+      "facts": {
+        "teacher_bones": 41,
+        "teacher_skin_columns": 41,
+        "decoded_vertices": 3665,
+        "decoded_faces": 6952,
+        "decoded_components": 39,
+        "exact_topology_reconstruction": true,
+        "static_product_carrier_pass": false
+      },
+      "next_owner": "COMPILER_STATIC_REPAIR_AND_QUALIFICATION"
+    },
+    {
+      "capability": "MIRA_TEACHER23_WEIGHT_FIELD",
+      "verdict": "FALSIFIED__DO_NOT_PROMOTE",
+      "facts": {
+        "teacher23_column_path_authoritative": false,
+        "reason": "CANONICAL_COLUMN_REEVALUATION_STILL_FAILS_WEIGHT_FIELD_GATE"
+      }
+    },
+    {
+      "capability": "MIRA_RAW41_GSA_WEIGHT_FIELD",
+      "verdict": "SURVIVOR_FIT1_FIELD",
+      "facts": {
+        "raw_joint_columns": 41,
+        "gsa_rows": 12090,
+        "coverage_rows": 12090,
+        "dominant_accuracy_approx": 0.999173,
+        "row_l1_mean_approx": 0.007564,
+        "row_l1_p95_approx": 0.037079,
+        "product_authority": false,
+        "generalization_claimed": false,
+        "dynamic_motion_pass_claimed": false
+      }
+    },
+    {
+      "capability": "TESSA_STATIC_MECHANICAL_CARRIER",
+      "verdict": "SURVIVOR_FIT1_STATIC",
+      "facts": {
+        "input_vertices": 3665,
+        "input_faces": 6952,
+        "final_vertices": 3653,
+        "final_faces": 6928,
+        "final_policy_violating_faces": 0,
+        "final_nonmanifold_edges": 0,
+        "final_min_angle_deg_approx": 7.524628,
+        "final_max_aspect_approx": 9.0893,
+        "frozen_min_angle_deg": 7.5,
+        "frozen_max_aspect": 16.0,
+        "operator_sequence": [
+          "FIXED_VERTEX_MONOTONE_EDGE_FLIP_V1",
+          "ENDPOINT_HALFEDGE_COLLAPSE_LINK_CONDITION_V1",
+          "PROJECTED_RELAXATION_V1"
+        ],
+        "threshold_relaxation": false,
+        "product_authority": false,
+        "dynamic_motion_pass_claimed": false
+      },
+      "implementation_note": "The generic repair operators already exist on current main; the missing promotion seam is provider-aware orchestration against an immutable TESSA reference before Stage19 freezes the exact repaired carrier."
+    },
+    {
+      "capability": "GSA_RAW41_TO_REPAIRED_TESSA_CARRIER_BINDING",
+      "verdict": "SURVIVOR_FIT1_BINDING_OPERATOR",
+      "facts": {
+        "same_index_transport_used": false,
+        "rule": "GSA_BARYCENTRIC_ADJOINT_ANCHOR__COMPONENT_HARMONIC__EXACT_RIGID_FALLBACK_V1",
+        "anchor_vertices": 1925,
+        "harmonic_solved_vertices": 1576,
+        "rigid_fallback_vertices": 164,
+        "rigid_fallback_components": 5,
+        "teacher_deformable_fill_forbidden": true,
+        "teacher_oracle_diagnostic_only": true
+      },
+      "promotion_boundary": "The FIT1 witness consumes sealed historical GSA-to-source barycentric provenance and sealed exact-rigid truth. Product activation is forbidden until equivalent typed product-authoritative provenance/rigid qualification exists."
+    },
+    {
+      "capability": "KNIGHT_IDLE_RUN_SLASH_DYNAMIC_G3",
+      "verdict": "INCONCLUSIVE__SEALED_SOURCE_MOTION_OUTSIDE_FROZEN_DYNAMIC_G3",
+      "facts": {
+        "tessa_mira_worst_edge_stretch_approx": 3.206,
+        "frozen_edge_stretch_max": 4.0,
+        "source_teacher_reference_also_fails_area_or_condition": true,
+        "owner": "SOURCE_MOTION_OR_RETARGET_ENVELOPE"
+      },
+      "product_authority": false
+    },
+    {
+      "capability": "NATIVE_ATTACHMENT_MOTION_CLOSURE",
+      "verdict": "OPEN__NOT_PRODUCT_AUTHORITY",
+      "facts": {
+        "owner": "NATIVE_SOURCE_MOTION_OR_DYNAMIC_G3_POLICY"
+      }
+    }
+  ],
+  "promotion_attempts": [
+    {
+      "pr": 52,
+      "verdict": "KEEP_ARCHITECTURAL_SUBSTRATE",
+      "notes": "Carrier identity, learned-mechanics lineage binding, render identity and DAG backedge closure are useful; TESSA/MIRA research lanes were intentionally not activated."
+    },
+    {
+      "pr": 53,
+      "verdict": "KEEP_SCIENTIFIC_BOUNDARY__EXECUTION_INCOMPLETE",
+      "notes": "Correctly records TESSA static V3, RAW41 V3 and dynamic/native open boundaries, but tessa_surface_field_v1 is not sufficient to reproduce the final V4 mechanical field transport and was not a complete execution consumer on main."
+    },
+    {
+      "pr": 54,
+      "verdict": "KEEP_AUTHORITY_SPLIT_CONCEPT",
+      "notes": "Correctly falsifies learned-XYZ-equals-GSA-support-lift as geometry authority."
+    },
+    {
+      "pr": 55,
+      "head_sha": "ec386654249768d4355751839179ad0d4c3966e9",
+      "verdict": "PROMOTION_BASE__NOT_YET_MERGEABLE",
+      "notes": "Typed TESSA Stage18/Stage19 learned-geometry authority split is valuable and CI-clean, but current Stage18 emits the unrepaired 3665/6952 proposal and therefore does not replay the proven 3653/6928 static survivor. Its material-support bridge also must not be confused with the final V4 Raw41 transport operator."
+    }
+  ],
+  "required_dag_changes_before_merge": [
+    "PRESERVE_EXISTING_DETERMINISTIC_STAGE18_PATH",
+    "ADD_TESSA_IMMUTABLE_REFERENCE_AND_STATIC_REPAIR_TRANSACTION_BEFORE_STAGE19_FREEZE",
+    "KEEP_TESSA_LEARNED_XYZ_TOPOLOGY_SEPARATE_FROM_GSA_MATERIAL_SUPPORT",
+    "FREEZE_EXACT_POST_REPAIR_CARRIER_AT_STAGE19",
+    "KEEP_MIRA_RAW41_FIELD_ON_GSA_DOMAIN",
+    "ADD_TYPED_GSA_TO_CARRIER_FIELD_BINDING_SEAM_MATCHING_V4_SURVIVOR_SEMANTICS",
+    "FAIL_CLOSED_IF_PRODUCT_AUTHORITY_FOR_GSA_TO_SOURCE_BARYCENTRIC_PROVENANCE_IS_ABSENT",
+    "FAIL_CLOSED_IF_WHOLE_COMPONENT_RIGID_FALLBACK_LACKS_PRODUCT_AUTHORITATIVE_RIGID_QUALIFICATION",
+    "DO_NOT_CLAIM_ACTUAL_MOTION_PRODUCT_PASS_WHILE_SOURCE_MOTION_G3_OWNER_IS_OPEN",
+    "RETAIN_LEGACY_SCHEMA_IDS_ONLY_AS_COMPATIBILITY__CANONICAL_MODEL_ROLES_ARE_IRIS_TESSA_AXIS_MIRA"
+  ],
+  "forbidden_promotions": [
+    "TEACHER23_AS_CURRENT_MIRA_AUTHORITY",
+    "SAME_INDEX_TESSA_TO_TEACHER_SKIN_TRANSPORT",
+    "LEARNED_TESSA_XYZ_AS_GSA_CONVEX_SUPPORT_LIFT",
+    "UNREPAIRED_T1B_AS_STATIC_PRODUCT_CARRIER",
+    "HISTORICAL_KNIGHT_TEACHER_BANK_AS_GENERIC_PRODUCT_RUNTIME_DEPENDENCY",
+    "ACTUAL_MOTION_PASS_CLAIM",
+    "UNSEEN_OR_GENERALIZATION_CLAIM"
+  ]
+}

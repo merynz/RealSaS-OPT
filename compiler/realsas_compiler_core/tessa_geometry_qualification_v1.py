@@ -6,6 +6,14 @@ Stage19 remains the sole static mechanical-carrier authority. TESSA owns the
 learned proposal; Compiler may deterministically repair it under the frozen
 quality policy before Stage19. GSA material support remains non-geometric and
 motion authority remains downstream.
+
+The recovered Knight FIT1 research lineage proves a static TESSA carrier and a
+separate MIRA Raw41 field, but it does *not* prove that the generic product
+``TESSAMaterialSupportFieldIR`` transport is mechanically equivalent to the
+research court's source-topology barycentric-adjoint/harmonic binding. Therefore
+Stage19 may seal static TESSA geometry while downstream QualifiedMesh minting is
+fail-closed until a product-authoritative carrier-field binding is explicitly
+qualified.
 """
 
 from dataclasses import asdict, dataclass, field, replace
@@ -24,6 +32,11 @@ Json = dict[str, Any]
 _INITIAL_AUTHORITY_CLASS = "TESSA_LEARNED_GEOMETRY_PROPOSAL_V1"
 _REPAIRED_AUTHORITY_CLASS = "TESSA_LEARNED_GEOMETRY_COMPILER_REPAIRED_V1"
 _TESSA_PRODUCER = "RealSaS.TESSALearnedMechanicalCarrierProposal.v1"
+_RESEARCH_FIT1_BINDING_RULE = (
+    "GSA_BARYCENTRIC_ADJOINT_ANCHOR__COMPONENT_HARMONIC__"
+    "EXACT_RIGID_FALLBACK_V1"
+)
+_DYNAMIC_FIELD_BLOCKER = "TESSA_MIRA_CARRIER_FIELD_BINDING_NOT_PRODUCT_QUALIFIED"
 
 
 @dataclass(frozen=True)
@@ -149,6 +162,7 @@ def validate_tessa_static_carrier_binding_v1(
     candidate: CanonicalMeshCandidateIR,
     bridge_evidence: TESSACandidateBridgeEvidenceIR,
     static_mesh: StaticCanonicalMeshQualificationIR,
+    require_dynamic_carrier_field_binding: bool = True,
 ) -> None:
     lane = _validate_tessa_candidate_boundary(candidate)
     _validate_stage19_pass(static_mesh, candidate=candidate)
@@ -173,6 +187,7 @@ def validate_tessa_static_carrier_binding_v1(
         raise QualificationError("TESSA_STATIC_BINDING_PARTITION_MISMATCH")
     if value.partition_binding_hash != bridge_evidence.partition_binding_hash:
         raise QualificationError("TESSA_STATIC_BINDING_BRIDGE_PARTITION_MISMATCH")
+
     md = dict(value.metadata or {})
     if md.get("authority") != "EXISTING_STAGE19_STATIC_CANONICAL_CARRIER":
         raise QualificationError("TESSA_STATIC_BINDING_AUTHORITY_INVALID")
@@ -186,6 +201,16 @@ def validate_tessa_static_carrier_binding_v1(
         raise QualificationError("TESSA_STATIC_BINDING_MOTION_AUTHORITY_FORBIDDEN")
     if md.get("generalization_claimed") is not False:
         raise QualificationError("TESSA_STATIC_BINDING_GENERALIZATION_AUTHORITY_FORBIDDEN")
+    if md.get("dynamic_carrier_field_binding_required_before_qualified_mesh") is not True:
+        raise QualificationError("TESSA_STATIC_BINDING_DYNAMIC_INTERLOCK_MISSING")
+    if md.get("research_fit1_binding_rule") != _RESEARCH_FIT1_BINDING_RULE:
+        raise QualificationError("TESSA_STATIC_BINDING_RESEARCH_RULE_DRIFT")
+    if md.get("research_fit1_binding_is_product_authority") is not False:
+        raise QualificationError("TESSA_STATIC_BINDING_RESEARCH_AUTHORITY_OVERCLAIM")
+    dynamic_binding_qualified = md.get("dynamic_carrier_field_binding_product_qualified")
+    if dynamic_binding_qualified not in {False, True}:
+        raise QualificationError("TESSA_STATIC_BINDING_DYNAMIC_QUALIFICATION_FLAG_INVALID")
+
     if lane == "COMPILER_REPAIRED":
         if md.get("static_repair_evidence_hash") != cmd.get("tessa_static_repair_evidence_hash"):
             raise QualificationError("TESSA_STATIC_BINDING_REPAIR_EVIDENCE_DRIFT")
@@ -193,6 +218,13 @@ def validate_tessa_static_carrier_binding_v1(
             raise QualificationError("TESSA_STATIC_BINDING_REFERENCE_HASH_DRIFT")
     if value.binding_hash != tessa_static_carrier_binding_hash_v1(value):
         raise QualificationError("TESSA_STATIC_BINDING_HASH_MISMATCH")
+
+    # Static Stage19 qualification and dynamic carrier-field qualification are
+    # intentionally different authorities. QualifiedMesh/Stage35 callers use the
+    # default True and therefore fail closed today. Stage19's own construction
+    # validates the same receipt with this requirement explicitly disabled.
+    if require_dynamic_carrier_field_binding and dynamic_binding_qualified is not True:
+        raise QualificationError(_DYNAMIC_FIELD_BLOCKER)
 
 
 def bind_tessa_to_static_carrier_v1(
@@ -208,6 +240,10 @@ def bind_tessa_to_static_carrier_v1(
     Repaired candidates commit to their repair/reference evidence hashes directly
     in candidate metadata, so legacy Stage19 callers need no new positional/data
     dependency merely to preserve the cryptographic closure.
+
+    This receipt is *static authority only*. The historical Knight FIT1
+    GSA->source/TESSA binding remains research evidence, not product authority, so
+    this function deliberately emits the downstream dynamic interlock as closed.
     """
     lane = _validate_tessa_candidate_boundary(candidate)
     _validate_stage19_pass(static_mesh, candidate=candidate)
@@ -259,6 +295,11 @@ def bind_tessa_to_static_carrier_v1(
             "stage19_static_source_fidelity_required": True,
             "motion_capability_claimed": False,
             "generalization_claimed": False,
+            "dynamic_carrier_field_binding_required_before_qualified_mesh": True,
+            "dynamic_carrier_field_binding_product_qualified": False,
+            "research_fit1_binding_rule": _RESEARCH_FIT1_BINDING_RULE,
+            "research_fit1_binding_is_product_authority": False,
+            "dynamic_interlock_blocker": _DYNAMIC_FIELD_BLOCKER,
         },
     )
     value = replace(
@@ -270,5 +311,6 @@ def bind_tessa_to_static_carrier_v1(
         candidate=candidate,
         bridge_evidence=bridge_evidence,
         static_mesh=static_mesh,
+        require_dynamic_carrier_field_binding=False,
     )
     return value

@@ -14,7 +14,7 @@ material field remains non-geometric; actual motion remains downstream.
 """
 
 from dataclasses import asdict, dataclass, field, replace
-from typing import Any
+from typing import Any, Mapping
 
 from .hashing import content_sha256
 from .product_authority_v1 import CanonicalMeshCandidateIR
@@ -43,6 +43,23 @@ class TESSAStaticCarrierBindingIR:
 
     def to_dict(self):
         return asdict(self)
+
+
+def tessa_static_carrier_binding_from_dict_v1(
+    payload: Mapping[str, Any],
+) -> TESSAStaticCarrierBindingIR:
+    if str(payload.get("schema_version") or payload.get("schema") or "") != "RealSaS.TESSAStaticCarrierBindingIR.v1":
+        raise QualificationError("TESSA_STATIC_BINDING_SCHEMA_INVALID")
+    return TESSAStaticCarrierBindingIR(
+        candidate_lineage_hash=str(payload.get("candidate_lineage_hash") or ""),
+        bridge_evidence_hash=str(payload.get("bridge_evidence_hash") or ""),
+        static_mesh_qualification_hash=str(payload.get("static_mesh_qualification_hash") or ""),
+        proposal_geometry_hash=str(payload.get("proposal_geometry_hash") or ""),
+        material_support_field_hash=str(payload.get("material_support_field_hash") or ""),
+        partition_binding_hash=str(payload.get("partition_binding_hash") or ""),
+        binding_hash=str(payload.get("binding_hash") or ""),
+        metadata=dict(payload.get("metadata") or {}),
+    )
 
 
 def tessa_static_carrier_binding_hash_v1(value: TESSAStaticCarrierBindingIR) -> str:

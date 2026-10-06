@@ -7,11 +7,13 @@ on:
       - compiler/realsas_compiler_core/tessa_surface_field_v1.py
       - compiler/realsas_compiler_core/tessa_candidate_bridge_v1.py
       - compiler/realsas_compiler_core/tessa_geometry_qualification_v1.py
+      - compiler/realsas_compiler_core/qualified_mesh_v2.py
       - tests/models/test_tessa_v1.py
       - tests/models/test_tessa_training_data_v1.py
       - tests/compiler/test_tessa_surface_field_v1.py
       - tests/compiler/test_tessa_candidate_bridge_v1.py
       - tests/compiler/test_tessa_geometry_qualification_v1.py
+      - tests/compiler/test_qualified_mesh_v2.py
       - canonical/IRIS_GSA_TESSA_SURVIVOR_AUTHORITY_V1_20261006.md
       - canonical/IRIS_GSA_TESSA_STATIC_SURVIVOR_PROMOTION_RECEIPT_20261006.json
       - requirements/mainline-ci.txt
@@ -24,11 +26,13 @@ on:
       - compiler/realsas_compiler_core/tessa_surface_field_v1.py
       - compiler/realsas_compiler_core/tessa_candidate_bridge_v1.py
       - compiler/realsas_compiler_core/tessa_geometry_qualification_v1.py
+      - compiler/realsas_compiler_core/qualified_mesh_v2.py
       - tests/models/test_tessa_v1.py
       - tests/models/test_tessa_training_data_v1.py
       - tests/compiler/test_tessa_surface_field_v1.py
       - tests/compiler/test_tessa_candidate_bridge_v1.py
       - tests/compiler/test_tessa_geometry_qualification_v1.py
+      - tests/compiler/test_qualified_mesh_v2.py
       - canonical/IRIS_GSA_TESSA_SURVIVOR_AUTHORITY_V1_20261006.md
       - canonical/IRIS_GSA_TESSA_STATIC_SURVIVOR_PROMOTION_RECEIPT_20261006.json
       - requirements/mainline-ci.txt
@@ -97,11 +101,13 @@ jobs:
             compiler/realsas_compiler_core/tessa_surface_field_v1.py \
             compiler/realsas_compiler_core/tessa_candidate_bridge_v1.py \
             compiler/realsas_compiler_core/tessa_geometry_qualification_v1.py \
+            compiler/realsas_compiler_core/qualified_mesh_v2.py \
             tests/models/test_tessa_v1.py \
             tests/models/test_tessa_training_data_v1.py \
             tests/compiler/test_tessa_surface_field_v1.py \
             tests/compiler/test_tessa_candidate_bridge_v1.py \
-            tests/compiler/test_tessa_geometry_qualification_v1.py
+            tests/compiler/test_tessa_geometry_qualification_v1.py \
+            tests/compiler/test_qualified_mesh_v2.py
           echo "TESSA_STATIC_SURVIVOR_COMPILE_PASS"
 
       - name: Verify non-authoritative proposal boundary
@@ -124,5 +130,6 @@ jobs:
             tests/models/test_tessa_training_data_v1.py \
             tests/compiler/test_tessa_surface_field_v1.py \
             tests/compiler/test_tessa_candidate_bridge_v1.py \
-            tests/compiler/test_tessa_geometry_qualification_v1.py
+            tests/compiler/test_tessa_geometry_qualification_v1.py \
+            tests/compiler/test_qualified_mesh_v2.py
           echo "TESSA_STATIC_SURVIVOR_CONTRACT_PASS"

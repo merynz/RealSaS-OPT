@@ -1,0 +1,27 @@
+{
+  "camera_set_binding_hash": "312a9b1afe4ea1fcdc481232ac951fb6a6815fee532fbb93646e97e609b5b80a",
+  "center_xyz": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "half_extent": 0.75,
+  "metadata": {
+    "camera_refit_performed": false,
+    "normalization_policy": "EXACT_MANIFEST_OBJECT_CUBE_V1"
+  },
+  "normalization_hash": "4d1fd4943d2815156974b8967d5ba180e424dc7343f9da68549cff8146efdb41",
+  "normalized_bounds_max": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "normalized_bounds_min": [
+    -1.0,
+    -1.0,
+    -1.0
+  ],
+  "observation_set_binding_hash": "452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a",
+  "schema_version": "RealSaS.NormalizationDomainIR.v1",
+  "world_from_normalized_scale": 1.5
+}

@@ -49,7 +49,10 @@ def test_tessa_v2_dispatch_is_interlocked_before_any_qualified_mesh_mint() -> No
         tessa_geometry_qualification_v1.validate_tessa_static_carrier_binding_v1
     )
     assert "require_dynamic_carrier_field_binding: bool = True" in geometry_source
-    assert "TESSA_MIRA_CARRIER_FIELD_BINDING_NOT_PRODUCT_QUALIFIED" in geometry_source
+    assert (
+        tessa_geometry_qualification_v1._DYNAMIC_FIELD_BLOCKER
+        == "TESSA_MIRA_CARRIER_FIELD_BINDING_NOT_PRODUCT_QUALIFIED"
+    )
 
 
 def test_stage19_static_binding_explicitly_does_not_claim_dynamic_product_transport() -> None:

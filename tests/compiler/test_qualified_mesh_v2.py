@@ -21,7 +21,6 @@ from compiler.realsas_compiler_core.product_authority_v1 import (
 )
 from compiler.realsas_compiler_core.qualified_mesh_v2 import (
     qualify_canonical_mesh_candidate_v2,
-    validate_tessa_qualified_mesh_v2,
 )
 from compiler.realsas_compiler_core.surface_addressing_v1 import (
     StaticCanonicalMeshQualificationIR,
@@ -254,7 +253,7 @@ def test_v2_dispatcher_is_byte_exact_legacy_for_deterministic_candidate():
     assert v2.to_dict() == legacy.to_dict()
 
 
-def test_tessa_v2_mints_exact_learned_xyz_only_with_stage19_binding():
+def test_tessa_v2_blocks_qualified_mesh_until_product_carrier_field_transport_is_proven():
     (
         surface,
         partition,
@@ -266,29 +265,25 @@ def test_tessa_v2_mints_exact_learned_xyz_only_with_stage19_binding():
         static,
         binding,
     ) = _tessa_context()
-    report = _dynamic_report(partition, carrier, envelope)
-    mesh = qualify_canonical_mesh_candidate_v2(
-        candidate,
-        surface=surface,
-        partition=partition,
-        carrier_policy=carrier,
-        envelope=envelope,
-        policy=policy,
-        qualification_report=report,
-        bridge_evidence=bridge,
-        static_mesh=static,
-        static_binding=binding,
-    )
-    assert min(float(vertex.P[2]) for vertex in mesh.vertices) > 0.0
-    assert mesh.metadata["geometry_authority"] == "EXISTING_STAGE19_STATIC_CANONICAL_CARRIER"
-    assert mesh.metadata["material_support_is_geometry_authority"] is False
-    assert mesh.metadata["legacy_g1_convex_lift_applicable"] is False
-    assert mesh.metadata["learned_xyz_preserved_exactly"] is True
-    assert mesh.metadata["motion_capability_claimed"] is False
-    assert mesh.qualification_report["stage19_static_binding_hash"] == binding.binding_hash
+    with pytest.raises(
+        QualificationError,
+        match="TESSA_MIRA_CARRIER_FIELD_BINDING_NOT_PRODUCT_QUALIFIED",
+    ):
+        qualify_canonical_mesh_candidate_v2(
+            candidate,
+            surface=surface,
+            partition=partition,
+            carrier_policy=carrier,
+            envelope=envelope,
+            policy=policy,
+            qualification_report=_dynamic_report(partition, carrier, envelope),
+            bridge_evidence=bridge,
+            static_mesh=static,
+            static_binding=binding,
+        )
 
 
-def test_tessa_v2_rejects_missing_stage19_evidence():
+def test_tessa_v2_rejects_missing_stage19_evidence_before_any_dynamic_promotion():
     surface, partition, carrier, policy, envelope, candidate, *_ = _tessa_context()
     with pytest.raises(QualificationError, match="TESSA_QUALIFIED_MESH_STAGE19_EVIDENCE_REQUIRED"):
         qualify_canonical_mesh_candidate_v2(
@@ -302,7 +297,7 @@ def test_tessa_v2_rejects_missing_stage19_evidence():
         )
 
 
-def test_tessa_v2_rejects_failed_dynamic_gate():
+def test_forged_six_gate_report_cannot_bypass_unproven_tessa_field_transport():
     (
         surface,
         partition,
@@ -315,8 +310,11 @@ def test_tessa_v2_rejects_failed_dynamic_gate():
         binding,
     ) = _tessa_context()
     report = _dynamic_report(partition, carrier, envelope)
-    report["gates"] = {**report["gates"], "G3_DEFORMATION": "FAIL"}
-    with pytest.raises(QualificationError, match="TESSA_QUALIFIED_MESH_REQUIRES_ALL_SIX_GATES_PASS"):
+    assert all(value == "PASS" for value in report["gates"].values())
+    with pytest.raises(
+        QualificationError,
+        match="TESSA_MIRA_CARRIER_FIELD_BINDING_NOT_PRODUCT_QUALIFIED",
+    ):
         qualify_canonical_mesh_candidate_v2(
             candidate,
             surface=surface,
@@ -328,44 +326,4 @@ def test_tessa_v2_rejects_failed_dynamic_gate():
             bridge_evidence=bridge,
             static_mesh=static,
             static_binding=binding,
-        )
-
-
-def test_tessa_v2_rejects_tampered_stage19_binding():
-    (
-        surface,
-        partition,
-        carrier,
-        policy,
-        envelope,
-        candidate,
-        bridge,
-        static,
-        binding,
-    ) = _tessa_context()
-    mesh = qualify_canonical_mesh_candidate_v2(
-        candidate,
-        surface=surface,
-        partition=partition,
-        carrier_policy=carrier,
-        envelope=envelope,
-        policy=policy,
-        qualification_report=_dynamic_report(partition, carrier, envelope),
-        bridge_evidence=bridge,
-        static_mesh=static,
-        static_binding=binding,
-    )
-    bad_binding = replace(binding, static_mesh_qualification_hash="drift")
-    with pytest.raises(QualificationError, match="TESSA_STATIC_BINDING_STAGE19_BINDING_MISMATCH"):
-        validate_tessa_qualified_mesh_v2(
-            mesh,
-            candidate=candidate,
-            bridge_evidence=bridge,
-            static_mesh=static,
-            static_binding=bad_binding,
-            surface=surface,
-            partition=partition,
-            carrier_policy=carrier,
-            envelope=envelope,
-            policy=policy,
         )

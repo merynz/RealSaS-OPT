@@ -30,6 +30,7 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
+          import re
 
           path = Path("compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py")
           text = path.read_text(encoding="utf-8")
@@ -55,17 +56,18 @@ jobs:
               raise SystemExit(f"STAGE35_PATCH_IMPORT_ANCHOR_COUNT:{text.count(import_anchor)}")
           text = text.replace(import_anchor, import_replacement, 1)
 
-          old_call = '''    mesh=qualify_canonical_mesh_candidate(
-              candidate,
-              surface=surface,
-              partition=partition,
-              carrier_policy=carrier,
-              envelope=envelope,
-              policy=policy,
-              qualification_report=qualification_report,
+          pattern = re.compile(
+              r'^    mesh=qualify_canonical_mesh_candidate\(\n'
+              r'(?P<body>(?:        [^\n]*\n)+?)'
+              r'^    \)\n',
+              re.MULTILINE,
           )
-          '''
-          new_call = '''    tessa_evidence = {}
+          matches = list(pattern.finditer(text))
+          if len(matches) != 1:
+              raise SystemExit(f"STAGE35_PATCH_MINTER_MATCH_COUNT:{len(matches)}")
+
+          body = matches[0].group("body")
+          replacement = '''    tessa_evidence = {}
               if candidate.producer_id == "RealSaS.TESSALearnedMechanicalCarrierProposal.v1":
                   bridge_evidence = tessa_candidate_bridge_evidence_from_dict_v1(
                       _stage_output_payload(
@@ -94,19 +96,10 @@ jobs:
                       "static_binding": static_binding,
                   }
               mesh=qualify_canonical_mesh_candidate_v2(
-                  candidate,
-                  surface=surface,
-                  partition=partition,
-                  carrier_policy=carrier,
-                  envelope=envelope,
-                  policy=policy,
-                  qualification_report=qualification_report,
-                  **tessa_evidence,
+          ''' + body + '''        **tessa_evidence,
               )
           '''
-          if text.count(old_call) != 1:
-              raise SystemExit(f"STAGE35_PATCH_MINTER_ANCHOR_COUNT:{text.count(old_call)}")
-          text = text.replace(old_call, new_call, 1)
+          text = text[:matches[0].start()] + replacement + text[matches[0].end():]
           path.write_text(text, encoding="utf-8")
           PY
 

@@ -1,11 +1,12 @@
 {
-  "camera_set_binding_hash": "312a9b1afe4ea1fcdc481232ac951fb6a6815fee532fbb93646e97e609b5b80a",
+  "camera_set_binding_hash": "79bf4b15bd1ecd1a1ace7a978237a294dddab8ca0b9402917407d2f767bb7224",
   "center_xyz": [
-    0.0,
-    0.0,
-    0.0
+    0.042003750801086426,
+    -0.7091579437255859,
+    1.2332630157470703
   ],
-  "half_extent": 0.75,
+  "coordinate_frame": "REALSAS_OBJECT_FRAME",
+  "half_extent": 2.016295680999756,
   "metadata": {
     "camera_refit_performed": false,
     "normalization_policy": "EXACT_MANIFEST_OBJECT_CUBE_V1"
@@ -21,7 +22,6 @@
     -1.0,
     -1.0
   ],
-  "observation_set_binding_hash": "452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a",
-  "schema_version": "RealSaS.NormalizationDomainIR.v1",
-  "world_from_normalized_scale": 1.5
+  "observation_set_binding_hash": "947d8c74a611a21b02929cf9ec340f127c38500861ff5dd42ac2b27e733ae29b",
+  "schema_version": "RealSaS.NormalizationDomainIR.v1"
 }

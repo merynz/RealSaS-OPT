@@ -34,6 +34,12 @@ from compiler.realsas_compiler_core.types import (
 from models.tessa.v1.contracts_v1 import TESSAMeshProposalV1, TESSAVertexProposalV1
 
 
+_RESEARCH_RULE = (
+    "GSA_BARYCENTRIC_ADJOINT_ANCHOR__COMPONENT_HARMONIC__"
+    "EXACT_RIGID_FALLBACK_V1"
+)
+
+
 def _context():
     nodes = (
         SurfaceNode("a", (0.0, 0.0, 0.0), (0, 1), ("pa",), ("oa",), derived_normal=(0.0, 0.0, 1.0)),
@@ -132,6 +138,40 @@ def test_tessa_binding_reuses_exact_stage19_authority_without_parallel_metric():
     assert value.metadata["parallel_source_fidelity_metric_created"] is False
     assert value.metadata["material_support_is_geometry_authority"] is False
     assert value.metadata["motion_capability_claimed"] is False
+    assert value.metadata["dynamic_carrier_field_binding_required_before_qualified_mesh"] is True
+    assert value.metadata["dynamic_carrier_field_binding_product_qualified"] is False
+    assert value.metadata["research_fit1_binding_rule"] == _RESEARCH_RULE
+    assert value.metadata["research_fit1_binding_is_product_authority"] is False
+
+    # Stage19 is allowed to seal static geometry while the downstream dynamic
+    # carrier-field transport remains deliberately unresolved.
+    validate_tessa_static_carrier_binding_v1(
+        value,
+        candidate=candidate,
+        bridge_evidence=bridge,
+        static_mesh=static_mesh,
+        require_dynamic_carrier_field_binding=False,
+    )
+
+
+def test_tessa_static_binding_blocks_dynamic_use_until_product_field_transport_is_qualified():
+    candidate, bridge = _context()
+    static_mesh = _stage19(candidate)
+    value = bind_tessa_to_static_carrier_v1(
+        candidate=candidate,
+        bridge_evidence=bridge,
+        static_mesh=static_mesh,
+    )
+    with pytest.raises(
+        QualificationError,
+        match="TESSA_MIRA_CARRIER_FIELD_BINDING_NOT_PRODUCT_QUALIFIED",
+    ):
+        validate_tessa_static_carrier_binding_v1(
+            value,
+            candidate=candidate,
+            bridge_evidence=bridge,
+            static_mesh=static_mesh,
+        )
 
 
 def test_tessa_binding_rejects_stage19_source_fidelity_failure():
@@ -181,6 +221,7 @@ def test_tessa_binding_is_hash_and_candidate_fail_closed():
             candidate=candidate,
             bridge_evidence=bridge,
             static_mesh=static_mesh,
+            require_dynamic_carrier_field_binding=False,
         )
 
     drifted_static = replace(static_mesh, candidate_mesh_binding_hash="wrong", qualification_hash="")

@@ -25,8 +25,17 @@ from compiler.realsas_compiler_core.types import SurfaceSupportBinding
 
 EXPECTED_T1B_SHA = "b7ccb058ef23f8c54d053e64580150dffffeb6a76a126ecaf48b265dd093f390"
 EXPECTED_NORM_SHA = "01b63a57390de9a5d2c731d9644e65ff779980caa066c19204db3b4a3e0c634b"
-EXPECTED_V2_SHA = "ab6278d55577e0e46f0faf9535dfe16238d815d81a3854b972effc7d440967a9"
-EXPECTED_V3_SHA = "1fa2c1d67314124d4c22af55e57cc8eb9b5e65bf1ff65870acefc7ea1d104bd1"
+# Historical serialized candidate bytes are retained as diagnostics only.  The
+# original court ran in a different Python/NumPy environment, so last-bit float
+# text can change without changing the mechanical object.  Promotion gates the
+# full ordered topology, all XYZ at 1e-12, component identity and support field.
+EXPECTED_V2_FILE_SHA = "ab6278d55577e0e46f0faf9535dfe16238d815d81a3854b972effc7d440967a9"
+EXPECTED_V3_FILE_SHA = "1fa2c1d67314124d4c22af55e57cc8eb9b5e65bf1ff65870acefc7ea1d104bd1"
+EXPECTED_TOPOLOGY_DIGEST = "59e9593fd5606cbcb6b28d9aa822ee39b35e5f3a3565fce2672d6535f703c98a"
+EXPECTED_V2_GEOMETRY12_DIGEST = "89879f8b046edba432b1996643631b0b1f91af23b51aef743c401199709c68e6"
+EXPECTED_V3_GEOMETRY12_DIGEST = "cf8ec395568369062a597e3335bca781efe9eb4e17b50f9470a4833b11499e65"
+EXPECTED_V2_MECHANICAL12_DIGEST = "531639073a25cebe5e36a861eb54fa826000944539464d657fe8d75b74ba47f9"
+EXPECTED_V3_MECHANICAL12_DIGEST = "81402e31aad30908312684699f75de52f11dd584f8a9beb092f18fa7c05fe9eb"
 
 
 def sha256(path: Path) -> str:
@@ -35,6 +44,53 @@ def sha256(path: Path) -> str:
         for chunk in iter(lambda: f.read(8 << 20), b""):
             h.update(chunk)
     return h.hexdigest()
+
+
+def stable_digest(payload: object) -> str:
+    raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return hashlib.sha256(raw).hexdigest()
+
+
+def topology_digest(candidate: CanonicalMeshCandidateIR) -> str:
+    return stable_digest({
+        "vertex_ids": [str(v.candidate_vertex_id) for v in candidate.vertices],
+        "faces": [list(map(str, face)) for face in candidate.faces],
+        "edges": [list(map(str, edge)) for edge in candidate.edges],
+    })
+
+
+def geometry12_digest(candidate: CanonicalMeshCandidateIR) -> str:
+    return stable_digest({
+        "vertices": [
+            [
+                str(v.candidate_vertex_id),
+                [round(float(x), 12) for x in v.P],
+                str(v.component_id),
+            ]
+            for v in candidate.vertices
+        ],
+        "faces": [list(map(str, face)) for face in candidate.faces],
+        "edges": [list(map(str, edge)) for edge in candidate.edges],
+    })
+
+
+def mechanical12_digest(candidate: CanonicalMeshCandidateIR) -> str:
+    return stable_digest({
+        "vertices": [
+            [
+                str(v.candidate_vertex_id),
+                [round(float(x), 12) for x in v.P],
+                str(v.component_id),
+                v.support_binding.to_dict(),
+            ]
+            for v in candidate.vertices
+        ],
+        "faces": [list(map(str, face)) for face in candidate.faces],
+        "edges": [list(map(str, edge)) for edge in candidate.edges],
+        "surface_binding_hash": str(candidate.surface_binding_hash),
+        "partition_binding_hash": str(candidate.partition_binding_hash),
+        "carrier_policy_binding_hash": str(candidate.carrier_policy_binding_hash),
+    })
 
 
 def quality_policy():
@@ -139,7 +195,6 @@ def main() -> None:
     original = build_original(args.t1b, args.normalization)
     protected = boundary_support_ids(original)
 
-    # Historical V2 replay: exact notebook wiring, including the now-known overprotection bug.
     flipped, flip_report = repair_candidate_fixed_vertex_flips_v1(original, policy, max_passes=12)
     current = flipped
     collapse_total = 0
@@ -153,7 +208,6 @@ def main() -> None:
         collapse_batches.append({"accepted": accepted, "residual": int(report["after"]["policy_violating_face_count"])})
         if int(report["after"]["policy_violating_face_count"]) == 0 or accepted == 0:
             break
-    collapsed = current
     relax_total = 0
     relax_batches = []
     while relax_total < 512:
@@ -172,9 +226,11 @@ def main() -> None:
     v2 = current
     v2_report = report["after"]
     v2_path = args.out / "TESSA_STATIC_G3_REPAIRED_CANDIDATE_V2_REPLAY.json"
-    v2_sha = serialize_candidate(v2_path, v2)
+    v2_file_sha = serialize_candidate(v2_path, v2)
+    v2_topology = topology_digest(v2)
+    v2_geometry12 = geometry12_digest(v2)
+    v2_mechanical12 = mechanical12_digest(v2)
 
-    # Exact historical endpoint court.
     if (len(v2.vertices), len(v2.faces)) != (3653, 6928):
         raise RuntimeError("TESSA_REPLAY_V2_COUNT_DRIFT")
     if int(flip_report["accepted_flip_count"]) != 72 or collapse_total != 12 or relax_total != 3:
@@ -185,10 +241,13 @@ def main() -> None:
         raise RuntimeError("TESSA_REPLAY_V2_MIN_ANGLE_DRIFT")
     if abs(float(v2_report["max_aspect_longest_over_min_altitude"]) - 9.089329469223644) > 1e-12:
         raise RuntimeError("TESSA_REPLAY_V2_ASPECT_DRIFT")
-    if v2_sha != EXPECTED_V2_SHA:
-        raise RuntimeError(f"TESSA_REPLAY_V2_SHA_DRIFT:{v2_sha}")
+    if v2_topology != EXPECTED_TOPOLOGY_DIGEST:
+        raise RuntimeError(f"TESSA_REPLAY_V2_TOPOLOGY_DRIFT:{v2_topology}")
+    if v2_geometry12 != EXPECTED_V2_GEOMETRY12_DIGEST:
+        raise RuntimeError(f"TESSA_REPLAY_V2_GEOMETRY12_DRIFT:{v2_geometry12}")
+    if v2_mechanical12 != EXPECTED_V2_MECHANICAL12_DIGEST:
+        raise RuntimeError(f"TESSA_REPLAY_V2_MECHANICAL12_DRIFT:{v2_mechanical12}")
 
-    # Historical V3 correction: same exact V2 candidate, correct operator wiring only.
     v3, v3_report = repair_candidate_projected_relaxation_v1(
         v2,
         original,
@@ -198,7 +257,10 @@ def main() -> None:
     )
     q = v3_report["after"]
     v3_path = args.out / "TESSA_STATIC_G3_REPAIRED_CANDIDATE_V3_REPLAY.json"
-    v3_sha = serialize_candidate(v3_path, v3)
+    v3_file_sha = serialize_candidate(v3_path, v3)
+    v3_topology = topology_digest(v3)
+    v3_geometry12 = geometry12_digest(v3)
+    v3_mechanical12 = mechanical12_digest(v3)
     if int(v3_report["accepted_move_count"]) != 2:
         raise RuntimeError("TESSA_REPLAY_V3_MOVE_COUNT_DRIFT")
     if (len(v3.vertices), len(v3.faces)) != (3653, 6928):
@@ -209,18 +271,32 @@ def main() -> None:
         raise RuntimeError("TESSA_REPLAY_V3_MIN_ANGLE_DRIFT")
     if abs(float(q["max_aspect_longest_over_min_altitude"]) - 9.089329469223644) > 1e-12:
         raise RuntimeError("TESSA_REPLAY_V3_ASPECT_DRIFT")
-    if v3_sha != EXPECTED_V3_SHA:
-        raise RuntimeError(f"TESSA_REPLAY_V3_SHA_DRIFT:{v3_sha}")
+    if v3_topology != EXPECTED_TOPOLOGY_DIGEST:
+        raise RuntimeError(f"TESSA_REPLAY_V3_TOPOLOGY_DRIFT:{v3_topology}")
+    if v3_geometry12 != EXPECTED_V3_GEOMETRY12_DIGEST:
+        raise RuntimeError(f"TESSA_REPLAY_V3_GEOMETRY12_DRIFT:{v3_geometry12}")
+    if v3_mechanical12 != EXPECTED_V3_MECHANICAL12_DIGEST:
+        raise RuntimeError(f"TESSA_REPLAY_V3_MECHANICAL12_DRIFT:{v3_mechanical12}")
 
     result = {
-        "schema": "RealSaS.TESSAKnightStaticSurvivorReplay.v1",
-        "status": "PASS_EXACT_HISTORICAL_V2_TO_V3_REPLAY",
+        "schema": "RealSaS.TESSAKnightStaticSurvivorReplay.v2",
+        "status": "PASS_MECHANICAL_HISTORICAL_V2_TO_V3_REPLAY",
         "inputs": {
             "t1b_sha256": EXPECTED_T1B_SHA,
             "normalization_sha256": EXPECTED_NORM_SHA,
         },
+        "semantic_gate": {
+            "xyz_quantization_decimals": 12,
+            "topology_digest": EXPECTED_TOPOLOGY_DIGEST,
+            "support_binding_included": True,
+            "serialized_file_sha_is_diagnostic_only": True,
+        },
         "v2": {
-            "sha256": v2_sha,
+            "serialized_sha256": v2_file_sha,
+            "historical_serialized_sha256": EXPECTED_V2_FILE_SHA,
+            "serialized_sha_matches_historical": v2_file_sha == EXPECTED_V2_FILE_SHA,
+            "geometry12_digest": v2_geometry12,
+            "mechanical12_digest": v2_mechanical12,
             "vertices": len(v2.vertices),
             "faces": len(v2.faces),
             "accepted_flips": int(flip_report["accepted_flip_count"]),
@@ -231,7 +307,11 @@ def main() -> None:
             "max_aspect": float(v2_report["max_aspect_longest_over_min_altitude"]),
         },
         "v3": {
-            "sha256": v3_sha,
+            "serialized_sha256": v3_file_sha,
+            "historical_serialized_sha256": EXPECTED_V3_FILE_SHA,
+            "serialized_sha_matches_historical": v3_file_sha == EXPECTED_V3_FILE_SHA,
+            "geometry12_digest": v3_geometry12,
+            "mechanical12_digest": v3_mechanical12,
             "vertices": len(v3.vertices),
             "faces": len(v3.faces),
             "accepted_corrective_moves": int(v3_report["accepted_move_count"]),

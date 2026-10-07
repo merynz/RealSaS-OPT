@@ -2,15 +2,16 @@ from __future__ import annotations
 
 """Carrier-native deformation conditioning for the AXIS/MIRA line.
 
-Joint frames are derived after W_M exists so coincident controls can be handled
-from mechanical observability rather than subject labels or floating epsilon.
-This does not relax any product deformation threshold.
+Stage34 derives a subject-free pre-bind frame witness from skeleton geometry and
+camera basis only. Coincident edges may provisionally inherit the parent frame;
+that is not a mechanical acceptance decision. Stage35 must rederive and qualify
+the same frames against final carrier-native W_M before dynamic proof.
 """
 
 from dataclasses import replace
 
 from .hashing import content_sha256
-from .joint_frames_v2 import derive_joint_frames_post_bind_v2, frame_set_hash_v2
+from .joint_frames_v2 import derive_joint_frames_pre_bind_v2, frame_set_hash_pre_bind_v2
 from .mesh.deformation_stress_v1 import expected_g3_probe_plan_hash
 from .motion_3d_adapter_v1 import parse_axis_contract_v1
 from .product_authority_v1 import (
@@ -28,12 +29,12 @@ def generic_deformation_policy_hash_v2() -> str:
         {
             **dict(GENERIC_DEFORMATION_POLICY_V1),
             "schema": "RealSaS.GenericDeformationEnvelopePolicy.v2",
-            "joint_frame_semantics": "POST_BIND_MECHANICAL_OBSERVABILITY_V2",
+            "joint_frame_semantics": "PRE_BIND_PROVISIONAL__POST_BIND_STAGE35_REQUIRED",
         }
     )
 
 
-def derive_axis_contract_v2(*, skeleton, camera_set, carrier_skin):
+def derive_axis_contract_v2(*, skeleton, camera_set):
     joints = tuple(skeleton.joints)
     if not joints:
         raise QualificationError("AUTO_ENVELOPE_V2_SKELETON_EMPTY")
@@ -49,9 +50,8 @@ def derive_axis_contract_v2(*, skeleton, camera_set, carrier_skin):
                 raise QualificationError("AUTO_ENVELOPE_V2_PARENT_UNKNOWN")
             children[parent] += 1
 
-    frames, frame_report = derive_joint_frames_post_bind_v2(
+    frames, frame_report = derive_joint_frames_pre_bind_v2(
         skeleton,
-        carrier_skin=carrier_skin,
         cameras=camera_set.cameras,
     )
     rows = []
@@ -76,28 +76,25 @@ def derive_axis_contract_v2(*, skeleton, camera_set, carrier_skin):
         "schema": "RealSaS.DerivedAxisContract.v1",
         "status": "PASS_COMPATIBILITY_WITNESS_ONLY",
         "skeleton_binding_hash": skeleton.skeleton_lineage_hash,
-        "carrier_skin_binding_hash": carrier_skin.skin_lineage_hash,
         "camera_set_binding_hash": camera_set.camera_set_hash,
-        "derived_joint_frame_set_hash": frame_set_hash_v2(
-            frames, carrier_skin_lineage_hash=carrier_skin.skin_lineage_hash
-        ),
+        "derived_joint_frame_set_hash": frame_set_hash_pre_bind_v2(frames),
         "joint_frame_qualification": frame_report,
         "policy_hash": generic_deformation_policy_hash_v2(),
         "joint_axes": rows,
         "subject_specific_authoring_used": False,
         "categorical_recognition_used": False,
         "actual_motion_capability_claimed": False,
+        "post_bind_qualification_required": True,
     }
     _, axis_hash = parse_axis_contract_v1(value)
     value["axis_contract_hash"] = axis_hash
     return value
 
 
-def derive_deformation_envelope_v2(*, skeleton, camera_set, carrier_skin):
+def derive_deformation_envelope_v2(*, skeleton, camera_set):
     axis = derive_axis_contract_v2(
         skeleton=skeleton,
         camera_set=camera_set,
-        carrier_skin=carrier_skin,
     )
     _, axis_hash = parse_axis_contract_v1(axis)
     limit = float(GENERIC_DEFORMATION_POLICY_V1["rotation_limit_deg"])
@@ -110,7 +107,7 @@ def derive_deformation_envelope_v2(*, skeleton, camera_set, carrier_skin):
             1.0,
             1.0,
             metadata={
-                "derivation": "GENERIC_SUBJECT_FREE_POST_BIND_V2",
+                "derivation": "GENERIC_SUBJECT_FREE_PRE_BIND_V2",
                 "subject_authored": False,
             },
         )
@@ -137,8 +134,8 @@ def derive_deformation_envelope_v2(*, skeleton, camera_set, carrier_skin):
             "policy": dict(GENERIC_DEFORMATION_POLICY_V1),
             "policy_hash": generic_deformation_policy_hash_v2(),
             "camera_set_hash": camera_set.camera_set_hash,
-            "carrier_skin_lineage_hash": carrier_skin.skin_lineage_hash,
-            "joint_frame_semantics": "POST_BIND_MECHANICAL_OBSERVABILITY_V2",
+            "joint_frame_semantics": "PRE_BIND_PROVISIONAL__POST_BIND_STAGE35_REQUIRED",
+            "post_bind_qualification_required": True,
             "per_character_joint_range_authoring": False,
             "per_character_axis_authoring": False,
             "translation_scale_probe_support": "IDENTITY_ONLY_V1",

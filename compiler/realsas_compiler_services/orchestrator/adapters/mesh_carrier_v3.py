@@ -150,6 +150,8 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
             "bridge_evidence":tessa_candidate_bridge_evidence_from_dict_v1(stage_output_payload(ctx,"18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.TESSACandidateBridgeEvidenceIR.v1")),
             "static_mesh":static_mesh_qualification_from_dict(stage_output_payload(ctx,"19_STATIC_CANONICAL_MESH_QUALIFIED","RealSaS.StaticCanonicalMeshQualificationIR.v1")),
             "static_binding":tessa_static_carrier_binding_from_dict_v1(stage_output_payload(ctx,"19_STATIC_CANONICAL_MESH_QUALIFIED","RealSaS.TESSAStaticCarrierBindingIR.v1")),
+            "carrier_evidence":carrier_evidence,
+            "carrier_skin":skin,
         }
     mesh=qualify_canonical_mesh_candidate_v2(candidate,surface=surface,partition=partition,carrier_policy=carrier_policy,envelope=envelope,policy=policy,qualification_report=qualification_report,**tessa_evidence)
     return {"status":"PASS","outputs":[

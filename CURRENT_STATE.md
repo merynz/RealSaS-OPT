@@ -17,7 +17,7 @@ Canonical public model naming is `IRIS -> TESSA -> AXIS -> MIRA`. Legacy `GEPPET
 - AXIS V5.4.1 owns a hard causal required tree plus deterministic 256-bin XYZ; residual diffusion is not runtime position authority.
 - Compiler validates/materializes AXIS required parents; it does not reselect the tree on this path.
 - MIRA V5.5 predicts `W_M` directly on the exact Stage19 carrier basis.
-- Stage32 qualifies carrier-native `W_M`; Stage34 derives post-bind mechanical frames/envelope from that qualified skin; Stage35 proves the exact `(M,G,W_M)` carrier; Stage36 is identity re-key/seal only, not semantic skin transfer.
+- Stage32 qualifies carrier-native `W_M`; Stage34 derives a subject-free pre-bind provisional frame/envelope; Stage35 rederives and qualifies those frames against final `W_M` before proving the exact `(M,G,W_M)` carrier; Stage36 is identity re-key/seal only, not semantic skin transfer.
 - Generic coincident-frame qualification is subject-free: zero-influence subtrees may inherit parent frame; active coincident subtrees fail closed and require explicit AXIS orientation/tail evidence.
 
 Knight FIT1 mechanics are closed relative to the sealed source/teacher motion envelope. Absolute G3 is intentionally not promoted to a universal PASS because the sealed teacher itself lies outside the frozen absolute thresholds. No FIT8/FITK/unseen/product/generalization claim is made.

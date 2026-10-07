@@ -8,9 +8,11 @@ explicitly re-exported for tests/tools that import the stable adapter module.
 """
 from .mesh_legacy_v2 import *  # noqa: F401,F403
 from .mesh_legacy_v2 import (
+    _DEMO_STAGE18_FALLBACK_RULE,
     _artifact_root,
     _axis_contract,
     _component_observations,
+    _demo_stage18_fallback_prereg,
     _load_camera_set,
     _load_candidate_and_policy,
     _load_partition_and_carrier,

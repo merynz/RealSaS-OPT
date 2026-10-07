@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import importlib.util
 import json
 import os
 import re
@@ -120,6 +121,62 @@ def support_references(stage_id: str, adapter: str) -> list[str]:
     return sorted(found)
 
 
+def source_exports_callable(
+    module_name: str,
+    function_name: str,
+    *,
+    seen: set[tuple[str, str]] | None = None,
+) -> bool:
+    """Resolve local Python callable exports without importing runtime modules.
+
+    Canonical adapter modules may intentionally act as lightweight dispatch
+    surfaces and re-export implementation functions from local modules. The
+    architecture audit must mirror Python's visible module API closely enough to
+    recognize explicit and star re-exports while remaining dependency-light.
+    """
+    key = (module_name, function_name)
+    seen = set() if seen is None else seen
+    if key in seen:
+        return False
+    seen.add(key)
+
+    module_file = mainline._local_module_path(module_name)
+    if module_file is None:
+        return False
+    tree = ast.parse(module_file.read_text(encoding="utf-8"), filename=str(module_file))
+
+    for node in tree.body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == function_name:
+            return True
+
+    package = module_name.rpartition(".")[0]
+    for node in tree.body:
+        if not isinstance(node, ast.ImportFrom):
+            continue
+        if node.level:
+            relative = "." * int(node.level) + (node.module or "")
+            try:
+                imported_module = importlib.util.resolve_name(relative, package or module_name)
+            except (ImportError, ValueError):
+                continue
+        else:
+            imported_module = str(node.module or "")
+        if not imported_module:
+            continue
+
+        for alias in node.names:
+            if alias.name == "*":
+                if source_exports_callable(imported_module, function_name, seen=seen):
+                    return True
+                continue
+            exported_name = alias.asname or alias.name
+            if exported_name != function_name:
+                continue
+            if source_exports_callable(imported_module, alias.name, seen=seen):
+                return True
+    return False
+
+
 def lightweight_implementation_closure(plan: dict[str, Any]) -> dict[str, Any]:
     """Recompute the compiler implementation closure without importing adapters.
 
@@ -140,13 +197,7 @@ def lightweight_implementation_closure(plan: dict[str, Any]) -> dict[str, Any]:
         if module_file is None:
             raise RuntimeError(f"MAINLINE_V2_ADAPTER_MODULE_MISSING:{adapter}")
 
-        tree = ast.parse(module_file.read_text(encoding="utf-8"), filename=str(module_file))
-        callable_names = {
-            node.name
-            for node in tree.body
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-        }
-        if function_name not in callable_names:
+        if not source_exports_callable(module_name, function_name):
             raise RuntimeError(f"MAINLINE_V2_ADAPTER_CALLABLE_MISSING_SOURCE:{adapter}")
 
         local_closure = mainline._local_import_closure(module_name)

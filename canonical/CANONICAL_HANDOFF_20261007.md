@@ -21,7 +21,9 @@ The current mechanical line is carrier-native and atomic:
 - MIRA V5.5 consumes GSA evidence, AXIS `G`, and exact `M` query geometry, and predicts `W_M` directly on the Stage19 carrier.
 - GSA is evidence only, not semantic skin authority.
 - The normal carrier-native path has no semantic skin transfer. A changed `M` invalidates `W_M` and requires fresh MIRA inference.
-- Coincident controls are handled by generic post-bind mechanical observability: an inactive coincident subtree may inherit its parent frame; an active one fails closed and requires AXIS orientation/tail evidence. No Knight-specific role/index logic and no epsilon invention.
+- Stage34 derives a subject-free pre-bind provisional joint-frame/envelope witness without `W_M`; coincident edges may only provisionally inherit their parent frame there.
+- Stage35 rederives those frames after final `W_M` exists and owns generic post-bind mechanical-observability qualification: an inactive coincident subtree may inherit its parent frame; an active one fails closed and requires AXIS orientation/tail evidence. No Knight-specific role/index logic and no epsilon invention.
+- Stage36 is identity re-key/seal on the same exact carrier, not semantic skin transfer.
 
 The previous surface-skin/transfer adapters are byte-preserved as exact Git blobs under `*_legacy_v2.py` for historical replay. Current V2 stage entrypoint filenames dispatch only the promoted stages to the carrier-native V3 path, so the 46-stage DAG IDs and platform stage ownership stay stable.
 

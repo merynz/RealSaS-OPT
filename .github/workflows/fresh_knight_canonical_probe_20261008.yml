@@ -1,0 +1,75 @@
+name: fresh-knight-canonical-probe-20261008
+
+on:
+  push:
+    branches:
+      - validation/fresh-knight-canonical-render-20261008
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      CANONICAL_SHA: 949422678d34cf69008cffd6b4d7647c8c066b8a
+      CANONICAL_TREE: ad54a55dda4c1f4d6ece03b67129bbd61d0237f1
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANONICAL_SHA }}
+          fetch-depth: 1
+      - name: Verify exact canonical checkout
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANONICAL_SHA"
+          test "$(git rev-parse HEAD^{tree})" = "$CANONICAL_TREE"
+          printf 'CANONICAL_SHA=%s\nCANONICAL_TREE=%s\n' "$CANONICAL_SHA" "$CANONICAL_TREE" | tee /tmp/FRESH_KNIGHT_PROBE.txt
+      - name: Probe exact AXIS541 MIRA55 artifacts on runner
+        run: |
+          set -euo pipefail
+          {
+            echo '=== EXACT_FILENAMES ==='
+            for name in \
+              AXIS41_DISCRETE_XYZ_FROZEN_CAUSAL_QUALIFIED_SKELETON_V541.json \
+              AXIS41_BFS_ALIGNMENT_FROZEN_CAUSAL_V541.json \
+              AXIS41_DISCRETE_XYZ_FROZEN_CAUSAL_RESULT_V541.json \
+              MIRA_AXIS41_TESSA_M_SKIN_FIELD_V55.npz \
+              MIRA_M_DIRECT_RESULT_V55.json \
+              M_EVIDENCE_SUPPORT_V55.npz \
+              MOTION_RUN_MANIFEST_FRAGMENT.json; do
+              find /home/monster -type f -name "$name" \
+                -not -path '*/.cache/*' -not -path '*/actions-runner/_work/_tool/*' \
+                -printf '%TY-%Tm-%TdT%TH:%TM:%TSZ %s %p\n' 2>/dev/null || true
+            done
+            echo '=== HASH_REFERENCES_IN_AUTHORITY_JSON ==='
+            if [ -d "$AUTHORITY_ROOT/runs" ]; then
+              grep -RIl --include='*.json' \
+                -e 'dbac301b9c47fa7f31a024ef0612008d8315b590d7a2dd1552a75f75c7ac9ff2' \
+                -e 'c5a3c7f5675ba84233c8d7eb4ccab076e69c105462f86673dc259e30e2ca6ca5' \
+                -e '880dd73b2f3a21196c229156a3271fa95e7261def3f50a3dfe9f1c49ca2bb27b' \
+                -e '31545e7180aa770b1efc4a1876c256999bdeb38f703d9a3e46892f888a4678c1' \
+                "$AUTHORITY_ROOT/runs" 2>/dev/null | head -200 || true
+              echo '=== NEWEST_AUTHORITY_RUNS ==='
+              find "$AUTHORITY_ROOT/runs" -mindepth 1 -maxdepth 1 -type d \
+                -printf '%T@ %f\n' 2>/dev/null | sort -nr | head -80 || true
+            fi
+          } | tee -a /tmp/FRESH_KNIGHT_PROBE.txt
+      - name: Probe renderer and native runtime source
+        run: |
+          set -euo pipefail
+          {
+            echo '=== CURRENT_RENDERER_SOURCE ==='
+            sha256sum tools/demo/render_knight_motion_preview_native_v2.py
+            sha256sum runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp
+            echo '=== PROMOTION_RECEIPT ==='
+            cat canonical/KNIGHT_AXIS541_MIRA55_CARRIER_NATIVE_PROMOTION_20261007.json
+          } | tee -a /tmp/FRESH_KNIGHT_PROBE.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fresh-knight-canonical-probe
+          path: /tmp/FRESH_KNIGHT_PROBE.txt
+          if-no-files-found: error
+          retention-days: 7

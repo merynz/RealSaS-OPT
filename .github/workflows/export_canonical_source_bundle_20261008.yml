@@ -1,0 +1,40 @@
+name: export-canonical-source-bundle-20261008
+
+on:
+  push:
+    branches:
+      - validation/canonical-source-bundle-20261008
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CANONICAL_SHA: 949422678d34cf69008cffd6b4d7647c8c066b8a
+      CANONICAL_TREE: ad54a55dda4c1f4d6ece03b67129bbd61d0237f1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANONICAL_SHA }}
+          fetch-depth: 1
+      - name: Verify exact source
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANONICAL_SHA"
+          test "$(git rev-parse HEAD^{tree})" = "$CANONICAL_TREE"
+      - name: Archive exact canonical source
+        run: |
+          set -euo pipefail
+          git archive --format=tar.gz --output=/tmp/realsas_canonical_949422678d.tar.gz HEAD
+          sha256sum /tmp/realsas_canonical_949422678d.tar.gz | tee /tmp/realsas_canonical_949422678d.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: realsas-canonical-source-949422678d
+          path: |
+            /tmp/realsas_canonical_949422678d.tar.gz
+            /tmp/realsas_canonical_949422678d.sha256
+          if-no-files-found: error
+          retention-days: 7

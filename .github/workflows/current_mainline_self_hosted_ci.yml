@@ -103,7 +103,15 @@ jobs:
             tests/iris/test_iris_mainline_source_v1.py \
             tests/iris/test_iris_v2_dense_source_coverage_v2.py
       - name: Compiler regressions
-        run: python -m pytest -q tests/compiler
+        run: python -m pytest -q tests/compiler --junitxml=compiler-regressions-junit.xml
+      - name: Persist compiler regression diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiler-regressions-junit
+          path: compiler-regressions-junit.xml
+          if-no-files-found: error
+          retention-days: 7
       - name: Fast gate summary
         run: |
           echo 'CURRENT_MAINLINE_FAST_GATE_PASS'

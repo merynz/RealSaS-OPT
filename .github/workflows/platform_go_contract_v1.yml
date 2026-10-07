@@ -3,7 +3,7 @@ name: platform-go-contract-v1
 
 on:
   push:
-    branches: [platform/professional-backend-v1-20261001, integration/final-main-knight-platform-20261002, main]
+    branches: [platform/professional-backend-v1-20261001, integration/final-main-knight-platform-20261002, main, validation/platform-architecture-reexport-20261008]
     paths:
       - 'platform/**'
       - 'compiler/realsas_compiler_services/orchestrator/**'

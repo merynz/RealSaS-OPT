@@ -1,0 +1,85 @@
+{
+  "architecture": {
+    "atomic_mechanics": "EXACT_SAME_M_G_W_M",
+    "axis_diffusion_runtime_authority": false,
+    "axis_geometry_authority": "ORDERED_256_BIN_XYZ_ARGMAX",
+    "axis_parent_authority": "HARD_CAUSAL_REQUIRED_TREE",
+    "carrier_mutation_invalidates_w_m": true,
+    "compiler_parent_reselection_allowed": false,
+    "gsa_skin_field_authority_minted": false,
+    "mechanical_topology_host": "STAGE19_TESSA_COMPILER_FROZEN_M",
+    "mira_output_domain": "EXACT_STAGE19_MECHANICAL_CARRIER_M",
+    "public_model_order": ["IRIS", "TESSA", "AXIS", "MIRA"],
+    "semantic_skin_transfer_normal_path": false
+  },
+  "authority": "LATEST_DEVELOPED_CANONICAL_MECHANICAL_LINE__NOT_GENERALIZATION_OR_PRODUCT_CLAIM",
+  "base_main_sha": "bc04f9597fc5896d520227d861931d55ecf70d5c",
+  "claims": {
+    "absolute_dynamic_g3_pass": false,
+    "appearance_in_mechanical_claim": false,
+    "fit1_knight_mechanical_relative_source_envelope_closed": true,
+    "fit8_closed": false,
+    "generalization": false,
+    "product_authority": false,
+    "source_teacher_absolute_g3_pass": false,
+    "unseen_closed": false
+  },
+  "compiler": {
+    "coincident_frame_observability": {
+      "active_coincident_resolution": "FAIL_CLOSED__REQUIRE_AXIS_EXPLICIT_ORIENTATION_OR_TAIL",
+      "carrier_cardinality_dependent_threshold_forbidden": true,
+      "inactive_requires_both": [
+        "subtree_mean_weight <= policy threshold",
+        "subtree_max_vertex_weight <= policy threshold"
+      ],
+      "invented_epsilon": false,
+      "policy": "POST_BIND_SUBTREE_PER_VERTEX_MEAN_AND_MAX_INFLUENCE",
+      "subject_specific_labels_used": false
+    }
+  },
+  "date": "2026-10-07",
+  "dynamic_interpretation": {
+    "absolute_frozen_g3_thresholds": {
+      "max_area_ratio": 20.0,
+      "max_condition_number": 16.0,
+      "max_edge_ratio": 4.0,
+      "min_area_ratio": 0.05
+    },
+    "current_exact_m_g_w_m": {
+      "absolute_g3_pass": false,
+      "max_unsafe_face_count": 3,
+      "maximum_condition_number": 54.62872218168656,
+      "minimum_area_ratio": 0.018268807872026328,
+      "worst_edge_max": 2.125509334987591
+    },
+    "source_teacher_reference": {
+      "absolute_g3_pass": false,
+      "max_unsafe_face_count": 4,
+      "maximum_condition_number": 102.05410331053426,
+      "minimum_area_ratio": 0.010193369072047166,
+      "worst_edge_max": 2.121057963017944
+    },
+    "verdict": "FIT1_KNIGHT_MECHANICS_CLOSED_RELATIVE_TO_SEALED_SOURCE_MOTION_ENVELOPE__ABSOLUTE_G3_REMAINS_INCONCLUSIVE"
+  },
+  "generic_compiler_rule": {
+    "active_coincident_subtree": "FAIL_CLOSED_REQUIRES_AXIS_ORIENTATION_EXTENSION",
+    "coincident_control_policy": "POST_BIND_SUBTREE_MECHANICAL_OBSERVABILITY",
+    "inactive_coincident_subtree": "INHERIT_PARENT_FRAME",
+    "invent_epsilon": false,
+    "subject_specific_code_allowed": false
+  },
+  "schema": "RealSaS.KnightAxis541Mira55CarrierNativePromotionReceipt.v1",
+  "sealed_fit1_evidence": {
+    "axis_v541_alignment_sha256": "c75073cac6f4f8f6b012ca34d387a8dbcf771f4c65fa5812df806090bfad60c3",
+    "axis_v541_qualified_skeleton_sha256": "c5a3c7f5675ba84233c8d7eb4ccab076e69c105462f86673dc259e30e2ca6ca5",
+    "axis_v541_result_sha256": "072b52b206e622b1c1b51fe266c0e348fe3829925f8258035d23c61087abf528",
+    "axis_v541_terminal_streak": 10,
+    "carrier_basis_sha256": "dbac301b9c47fa7f31a024ef0612008d8315b590d7a2dd1552a75f75c7ac9ff2",
+    "compiler_coincident_frame_qualification_sha256": "118ac28fc8a597caec3ed28ab18af2091ce24b51642c6a2e41db417424d903a6",
+    "historical_source_dynamic_result_sha256": "13b54942ab8674b94c78edd937a32819eecb79f274a903180e4095bf332df812",
+    "mira_v55_result_sha256": "31545e7180aa770b1efc4a1876c256999bdeb38f703d9a3e46892f888a4678c1",
+    "mira_v55_terminal_streak": 10,
+    "mira_v55_w_m_sha256": "880dd73b2f3a21196c229156a3271fa95e7261def3f50a3dfe9f1c49ca2bb27b",
+    "v551_dynamic_result_sha256": "95d7095330b68fec3439da7597359ffba55d89e4de4700b21cd74adfbffb8177"
+  }
+}

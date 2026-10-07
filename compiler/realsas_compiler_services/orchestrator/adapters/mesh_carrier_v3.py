@@ -120,7 +120,7 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
         "mechanical_skin_domain":"EXACT_STAGE19_CARRIER_M","semantic_skin_transfer_performed":False,
     }
     tessa_evidence={}
-    if candidate.producer_id=="RealSaS.TESSALearnedMechanicalCarrierProposal.v1":
+    if candidate.producer_id == "RealSaS.TESSALearnedMechanicalCarrierProposal.v1":
         tessa_evidence={
             "bridge_evidence":tessa_candidate_bridge_evidence_from_dict_v1(stage_output_payload(ctx,"18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.TESSACandidateBridgeEvidenceIR.v1")),
             "static_mesh":static_mesh_qualification_from_dict(stage_output_payload(ctx,"19_STATIC_CANONICAL_MESH_QUALIFIED","RealSaS.StaticCanonicalMeshQualificationIR.v1")),

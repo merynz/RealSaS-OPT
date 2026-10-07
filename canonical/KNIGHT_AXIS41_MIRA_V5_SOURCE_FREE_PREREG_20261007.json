@@ -1,0 +1,63 @@
+{
+  "schema": "RealSaS.KnightAXIS41MIRAV5SourceFreePrereg.v1",
+  "date": "2026-10-07",
+  "status": "UNRUN_PREREGISTERED_V5_APPARATUS",
+  "authority_class": "RESEARCH_PREREGISTRATION",
+  "base_main_sha": "468bd7c31cfb42725d021540df72dc5376b99065",
+  "notebook": {
+    "filename": "RealSaS_KNIGHT_AXIS41_MIRA_V5_SOURCE_FREE_RUN_ALL.ipynb",
+    "sha256": "797cd8a6b96274ab55f704576d349266bac3ab96c5e0cc52bdf74125462f49b1",
+    "execution_mode": "COLAB_RUN_ALL__A100_REQUIRED",
+    "result_required_for_promotion": "V5_RUN_ALL_COMPLETE.json"
+  },
+  "question": "Can the recovered TESSA static Knight carrier be combined with a fresh 41-control AXIS model output and a fresh MIRA field conditioned on that AXIS output, then bound to the repaired TESSA carrier without source rig, source skin, source topology, source vertex identity, historical source-triangle barycentric projection, or teacher-rigid fallback as construction authority?",
+  "construction_chain_under_test": [
+    "TESSA_STATIC_SURVIVOR",
+    "AXIS41_MODEL_OUTPUT",
+    "MIRA41_MODEL_OUTPUT_CONDITIONED_ON_AXIS41",
+    "COMPILER_GSA_MATERIAL_SUPPORT_FIELD_EVALUATION",
+    "TESSA_REPAIR_SUPPORT_COMPOSITION"
+  ],
+  "fit_only_teacher_evidence_allowed": [
+    "source rig positions and hierarchy as supervised AXIS FIT/evaluation target",
+    "source skin as supervised MIRA FIT/evaluation target",
+    "historical teacher bank as FIT/evaluation evidence"
+  ],
+  "forbidden_construction_authorities": [
+    "SOURCE_SKELETON",
+    "SOURCE_SKIN",
+    "SOURCE_TOPOLOGY",
+    "SOURCE_VERTEX_INDEX",
+    "HISTORICAL_SOURCE_TRIANGLE_BARYCENTRIC_PROJECTION",
+    "TEACHER_RIGID_FALLBACK"
+  ],
+  "held_fixed_not_repaired_here": [
+    "IDLE_RUN_SLASH_MOTION_PRESET",
+    "V4_RETARGET_SEMANTICS",
+    "ATTACHMENT_SEMANTICS",
+    "CAA_APPEARANCE",
+    "NATIVE_RUNTIME_PRESENTATION"
+  ],
+  "pass_contract": {
+    "required_final_status": "PASS_V5_MECHANICAL_CONSTRUCTION_SOURCE_FREE",
+    "axis_joint_count": 41,
+    "axis_must_be_fresh_model_output": true,
+    "mira_must_condition_on_axis_output": true,
+    "source_construction_dependency_count": 0,
+    "tessa_static_survivor_must_remain_unchanged": true,
+    "dynamic_actual_clip_pass_required_for_scoped_mechanical_promotion": false,
+    "dynamic_failure_interpretation": "INCONCLUSIVE_IF_UNCHANGED_MOTION_RETARGET_OR_V5_MECHANICS_OWNER_NOT_ISOLATED"
+  },
+  "promotion_rule": {
+    "main_scoped_research_promotion_allowed_only_after_exact_notebook_hash_returns_required_final_status": true,
+    "product_authority_claimed": false,
+    "generalization_claimed": false,
+    "product_revision_mint_allowed": false,
+    "do_not_promote_unrun_result": true
+  },
+  "post_v5_priority_if_pass": [
+    "GO_PLATFORM_EXECUTION_ENFORCEMENT",
+    "PERFORMANCE_OPTIMIZATION",
+    "RUNTIME_PRESENTATION_DIAGNOSIS_ONLY_AFTER_PLATFORM_AND_OPTIMIZATION"
+  ]
+}

@@ -8,6 +8,13 @@ import pytest
 from PIL import Image
 
 from compiler.realsas_compiler_core.hashing import content_sha256
+from compiler.realsas_compiler_core.artifact_codec_v2 import qualified_skeleton_from_dict
+from compiler.realsas_compiler_core.carrier_skin_v1 import (
+    CarrierSkinInfluenceProposal,
+    CarrierSkinProposalIR,
+    qualify_carrier_skin_v1,
+)
+from compiler.realsas_compiler_core.mechanical_carrier_evidence_v1 import mechanical_carrier_evidence_from_dict
 from compiler.realsas_compiler_core.observation_authority_v1 import QualifiedObservationViewIR, build_qualified_observation_set
 from compiler.realsas_compiler_core.camera_authority_v1 import build_qualified_camera_set
 from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
@@ -319,6 +326,83 @@ def _install_stage_outputs(ctx,stage_id,result):
     })
 
 
+def _install_current_carrier_skin_fixture(ctx, tmp_path):
+    """Mint a real Stage32 carrier-native skin for subject-free integration tests.
+
+    This intentionally does not alias legacy QualifiedSkinIR. The proposal is
+    defined directly on the exact frozen Stage19 carrier M and is qualified by
+    the production carrier-skin qualifier, preserving the M -> W_M basis contract.
+    """
+    if not any(row["id"] == "28_SKELETON_QUALIFIED" for row in ctx["ledger"]["stages"]):
+        old = next(row for row in ctx["ledger"]["stages"] if row["id"] == "18_SKELETON_QUALIFIED")
+        ctx["ledger"]["stages"].append(
+            {"id": "28_SKELETON_QUALIFIED", "status": "PASS", "outputs": list(old["outputs"])}
+        )
+    assert not any(row["id"] == "32_SKIN_QUALIFIED" for row in ctx["ledger"]["stages"])
+
+    carrier = mechanical_carrier_evidence_from_dict(
+        read_json(
+            next(
+                out
+                for row in ctx["ledger"]["stages"]
+                if row["id"] == "19_STATIC_CANONICAL_MESH_QUALIFIED"
+                for out in row["outputs"]
+                if out["schema"] == "RealSaS.MechanicalCarrierEvidenceIR.v1"
+            )["path"]
+        )
+    )
+    skeleton = qualified_skeleton_from_dict(
+        read_json(
+            next(
+                out
+                for row in ctx["ledger"]["stages"]
+                if row["id"] == "28_SKELETON_QUALIFIED"
+                for out in row["outputs"]
+                if out["schema"] == "RealSaS.QualifiedSkeletonIR.v1"
+            )["path"]
+        )
+    )
+    root_joint_id = str(skeleton.root_id)
+    proposal = CarrierSkinProposalIR(
+        influences=tuple(
+            CarrierSkinInfluenceProposal(str(vertex_id), root_joint_id, 1.0)
+            for vertex_id in carrier.ordered_vertex_ids
+        ),
+        carrier_evidence_hash=carrier.carrier_evidence_hash,
+        carrier_topology_hash=carrier.topology_hash,
+        carrier_geometry_hash=carrier.geometry_hash,
+        skeleton_binding_hash=skeleton.skeleton_lineage_hash,
+        model_provenance="SUBJECT_FREE_TEST_FIXTURE_DIRECT_CARRIER_SIMPLEX_V1",
+        metadata={
+            "output_domain": "MECHANICAL_CARRIER_M",
+            "semantic_skin_transfer_performed": False,
+            "gsa_skin_field_authority_minted": False,
+            "direct_simplex_readout": True,
+            "source_skin_runtime_authority": False,
+            "mesh_mutation_invalidates_prediction": True,
+            "subject_free_fixture": True,
+        },
+    )
+    skin = qualify_carrier_skin_v1(
+        carrier,
+        skeleton,
+        proposal,
+        max_simplex_repair_l1=0.0,
+        max_total_correction_l1=0.0,
+        negative_tolerance=1e-12,
+        max_influences=1,
+    )
+    skin_path = _write(tmp_path / "qualified_carrier_skin_v1.json", skin)
+    ctx["ledger"]["stages"].append(
+        {
+            "id": "32_SKIN_QUALIFIED",
+            "status": "PASS",
+            "outputs": [_out(skin_path, "RealSaS.QualifiedCarrierSkinIR.v1")],
+        }
+    )
+    return skin
+
+
 def test_superseded_stage24_to27_path_fails_closed_without_g3b(tmp_path):
     """Historical product_mesh_v1 is not a current V2 qualification path.
 
@@ -409,20 +493,99 @@ def test_vf23_stage37_to46_tail_uses_unmodified_production_dynamic_policy(tmp_pa
         _install_stage_outputs(ctx, stage_id, result)
         return result
 
-    alias("18_SKELETON_QUALIFIED", "28_SKELETON_QUALIFIED")
-    alias("22_SKIN_QUALIFIED", "32_SKIN_QUALIFIED")
+    from compiler.realsas_compiler_core.geometry_substrate_v2 import (
+        GeometrySubstrateViewIR,
+        build_geometry_substrate_qualification,
+    )
+    from compiler.realsas_compiler_services.orchestrator.adapters.v2_architecture import (
+        build_canonical_mesh_addressing_stage,
+        qualify_static_canonical_mesh_stage,
+    )
 
     r17 = run(
         "17_MECHANICAL_PARTITION_QUALIFIED",
         mesh_v2.qualify_mechanical_partition_and_carriers,
     )
+    r18 = run(
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        build_canonical_mesh_addressing_stage,
+    )
+
+    cameras = qualified_camera_set_from_dict(
+        read_json(
+            next(
+                out
+                for row in ctx["ledger"]["stages"]
+                if row["id"] == "05_CAMERA_CONTRACT_SOLVED"
+                for out in row["outputs"]
+                if out["schema"] == "RealSaS.QualifiedCameraSetIR.v1"
+            )["path"]
+        )
+    )
+    observation = qualified_observation_set_from_dict(
+        read_json(
+            next(
+                out
+                for row in ctx["ledger"]["stages"]
+                if row["id"] == "07_OBSERVATION_CONTRACT_QUALIFIED"
+                for out in row["outputs"]
+                if out["schema"] == "RealSaS.QualifiedObservationSetIR.v1"
+            )["path"]
+        )
+    )
+    geometry_views = tuple(
+        GeometrySubstrateViewIR(
+            view_index=view,
+            silhouette_recall=1.0,
+            silhouette_precision=1.0,
+            largest_coherent_hole_fraction=0.0,
+            interior_uncovered_fraction=0.0,
+            source_foreground_pixel_count=1,
+            predicted_foreground_pixel_count=1,
+            component_recall=1.0,
+            silhouette_edge_p95_px=0.0,
+            passed=True,
+            metadata={"subject_free_fixture": True},
+        )
+        for view in range(8)
+    )
+    geometry = build_geometry_substrate_qualification(
+        zero_surface_binding_hash="z" * 64,
+        observation_set_binding_hash=observation.observation_set_hash,
+        camera_set_binding_hash=cameras.camera_set_hash,
+        normalization_binding_hash="n" * 64,
+        policy={
+            "fixture": True,
+            "min_recall": 1.0,
+            "min_precision": 1.0,
+            "max_largest_coherent_hole_fraction": 0.0,
+            "max_interior_uncovered_fraction": 0.0,
+            "min_component_recall": 1.0,
+            "component_min_foreground_fraction": 0.0,
+            "max_silhouette_edge_p95_px": 0.0,
+        },
+        views=geometry_views,
+        metadata={"subject_free_fixture": True},
+    )
+    geometry_path = _write(tmp_path / "geometry_substrate_v2_tail.json", geometry)
+    ctx["ledger"]["stages"].append(
+        {
+            "id": "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+            "status": "PASS",
+            "outputs": [
+                _out(geometry_path, "RealSaS.GeometrySubstrateQualificationIR.v2")
+            ],
+        }
+    )
+    run(
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        qualify_static_canonical_mesh_stage,
+    )
+    alias("18_SKELETON_QUALIFIED", "28_SKELETON_QUALIFIED")
+    _install_current_carrier_skin_fixture(ctx, tmp_path)
     r34 = run(
         "34_DEFORMATION_CAPABILITY_ENVELOPE",
         mesh_v2.seal_deformation_capability_envelope,
-    )
-    r18 = run(
-        "18_CANONICAL_MESH_ADDRESSING_BUILD",
-        mesh_v2.build_canonical_mesh_candidate_stage,
     )
     r35 = run(
         "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
@@ -1025,7 +1188,7 @@ def test_vf23_stage20_to25_uses_unmodified_production_caa_policy(tmp_path):
         )
 
     alias("18_SKELETON_QUALIFIED", "28_SKELETON_QUALIFIED")
-    alias("22_SKIN_QUALIFIED", "32_SKIN_QUALIFIED")
+    _install_current_carrier_skin_fixture(ctx, tmp_path)
 
     run(
         "34_DEFORMATION_CAPABILITY_ENVELOPE",

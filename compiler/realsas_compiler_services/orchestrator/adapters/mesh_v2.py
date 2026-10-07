@@ -16,6 +16,7 @@ from .mesh_legacy_v2 import (
     _load_partition_and_carrier,
     _load_skeleton,
     _load_surface,
+    _relation_parent_quality_report,
     _write_ir,
     _write_json,
 )

@@ -6,6 +6,9 @@ The exact Stage19 carrier M is immutable across MIRA prediction, G3/G3B proof,
 Stage35 canonical-id minting and Stage36 mesh-skin binding. Any repair that changes
 M invalidates W_M and requires a new MIRA attempt; semantic skin transfer is never
 used to hide basis drift.
+
+Stage34 is intentionally pre-bind and skin-independent. Stage35 owns post-bind
+mechanical-observability qualification of coincident controls using final W_M.
 """
 
 from compiler.realsas_compiler_core.artifact_codec_v2 import qualified_mesh_from_dict
@@ -13,6 +16,7 @@ from compiler.realsas_compiler_core.carrier_skin_v1 import qualified_carrier_ski
 from compiler.realsas_compiler_core.deformation_envelope_derivation_v2 import derive_deformation_envelope_v2
 from compiler.realsas_compiler_core.deformation_stress_carrier_v1 import run_g3_carrier_native_v1
 from compiler.realsas_compiler_core.hashing import content_sha256
+from compiler.realsas_compiler_core.joint_frames_v2 import derive_joint_frames_post_bind_v2
 from compiler.realsas_compiler_core.mechanical_carrier_evidence_v1 import mechanical_carrier_evidence_from_dict
 from compiler.realsas_compiler_core.product_mesh_skin_carrier_v1 import bind_carrier_native_mesh_skin_v1
 from compiler.realsas_compiler_core.qualified_mesh_v2 import qualify_canonical_mesh_candidate_v2
@@ -38,14 +42,12 @@ def _load_carrier_skin(ctx):
 
 
 def seal_deformation_capability_envelope(ctx:dict)->dict:
-    skeleton=_load_skeleton(ctx); skin=_load_carrier_skin(ctx); carrier=_load_carrier(ctx)
-    if skin.carrier_evidence_hash!=carrier.carrier_evidence_hash:
-        raise QualificationError("STAGE34_CARRIER_SKIN_BINDING_DRIFT")
+    skeleton=_load_skeleton(ctx); carrier=_load_carrier(ctx)
     cfg=dict(ctx["run_manifest"].get("deformation_envelope") or {})
     if cfg:
         return {"status":"BLOCKED","blockers":["PER_CHARACTER_DEFORMATION_AUTHORING_FORBIDDEN"],"diagnostics":{"unsupported_keys":sorted(cfg)}}
     camera_set=_load_camera_set(ctx)
-    axis_payload,envelope=derive_deformation_envelope_v2(skeleton=skeleton,camera_set=camera_set,carrier_skin=skin)
+    axis_payload,envelope=derive_deformation_envelope_v2(skeleton=skeleton,camera_set=camera_set)
     root=_artifact_root(ctx,"34_DEFORMATION_CAPABILITY_ENVELOPE")
     return {"status":"PASS","outputs":[
         _write_json(root/"derived_axis_contract.json",axis_payload,authority_class="QUALIFIED_DERIVED_AXIS_CONTRACT",schema="RealSaS.DerivedAxisContract.v1"),
@@ -53,8 +55,9 @@ def seal_deformation_capability_envelope(ctx:dict)->dict:
     ],"diagnostics":{
         "joint_range_count":len(envelope.joint_ranges),"camera_count":len(camera_set.cameras),
         "probe_plan_hash":envelope.probe_plan_hash,"axis_contract_hash":envelope.axis_contract_hash,
-        "carrier_skin_lineage_hash":skin.skin_lineage_hash,
-        "joint_frame_semantics":"POST_BIND_MECHANICAL_OBSERVABILITY_V2",
+        "carrier_evidence_hash":carrier.carrier_evidence_hash,
+        "joint_frame_semantics":"PRE_BIND_PROVISIONAL__POST_BIND_STAGE35_REQUIRED",
+        "post_bind_qualification_required":True,
         "subject_specific_code_used":False,
     }}
 
@@ -75,9 +78,27 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
     if candidate.candidate_lineage_hash!=carrier_evidence.candidate_mesh_binding_hash:
         raise QualificationError("STAGE35_CARRIER_CANDIDATE_BINDING_DRIFT")
 
+    # Final W_M now exists. Qualify every provisional coincident frame generically.
+    post_frames,post_bind_report=derive_joint_frames_post_bind_v2(
+        skeleton,carrier_skin=skin,cameras=cameras
+    )
+    axis_rows={str(row["canonical_joint_id"]):row for row in axis_payload.get("joint_axes",())}
+    if set(axis_rows)!=set(post_frames):
+        raise QualificationError("STAGE35_POST_BIND_FRAME_JOINT_SET_DRIFT")
+    max_axis_drift=0.0
+    for jid,frame in post_frames.items():
+        R=frame.rotation_matrix
+        post_axis=(float(R[0][0]),float(R[1][0]),float(R[2][0]))
+        pre_axis=tuple(map(float,axis_rows[jid]["axis_xyz"]))
+        max_axis_drift=max(max_axis_drift,max(abs(a-b) for a,b in zip(pre_axis,post_axis)))
+    if max_axis_drift>1e-12:
+        raise QualificationError(f"STAGE35_POST_BIND_FRAME_DRIFT:{max_axis_drift}")
+    post_bind_report_hash=content_sha256(post_bind_report)
+
     g3=run_g3_carrier_native_v1(carrier_evidence,skeleton=skeleton,skin=skin,envelope=envelope,cameras=cameras,policy=policy)
     compatibility=run_skin_topology_compatibility_carrier_v1(carrier_evidence,skeleton=skeleton,skin=skin,envelope=envelope,cameras=cameras,policy=policy)
     root=_artifact_root(ctx,"35_DYNAMIC_MECHANICAL_MESH_QUALIFIED")
+    frame_artifact=_write_json(root/"post_bind_joint_frame_qualification.json",post_bind_report,authority_class="QUALIFIED_POST_BIND_JOINT_FRAME_EVIDENCE",schema=post_bind_report["schema"])
     compatibility_artifact=_write_json(root/"skin_topology_compatibility.json",compatibility,authority_class="DIAGNOSTIC_SKIN_TOPOLOGY_COMPATIBILITY",schema=compatibility["schema"])
     _write_ir(root/"g3_deformation_stress.json",g3,authority_class="DIAGNOSTIC_G3_EVIDENCE")
     if not compatibility["passed"]:
@@ -86,6 +107,7 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
             "unsafe_face_count":compatibility["unsafe_face_count"],"weight_mutation":False,
             "repair_semantics":"NEW_MECHANICAL_CARRIER_GENERATION_INVALIDATES_W_M__RERUN_MIRA_ON_NEW_M",
             "auto_skin_transfer_allowed":False,"compatibility_artifact_sha256":compatibility_artifact["sha256"],
+            "post_bind_joint_frame_qualification_hash":post_bind_report_hash,
         }}
 
     observations,source_foreground_masks,observation_set=_component_observations(ctx,surface=surface,partition=partition,carrier=carrier_policy,cameras=cameras)
@@ -107,6 +129,7 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
             "g5_failed_cell_count":len(failed_g5),"g5_evidence_hash":g5_payload["evidence_hash"],
             "consequential_unknown_boundary_count":len(unknown_rows),"unknown_boundary_analysis_hash":unknown_hash,
             "carrier_native":True,"semantic_skin_transfer_performed":False,
+            "post_bind_joint_frame_qualification_hash":post_bind_report_hash,
         }}
 
     qualification_report={
@@ -118,6 +141,8 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
         "skin_topology_compatibility_report_hash":compatibility["report_hash"],"skin_topology_compatibility_status":"PASS","skin_topology_weight_mutation":False,
         "carrier_policy_hash":carrier_policy.carrier_policy_lineage_hash,"g5_evidence_hash":g5_payload["evidence_hash"],"view_component_coverage":g5_rows,
         "mechanical_skin_domain":"EXACT_STAGE19_CARRIER_M","semantic_skin_transfer_performed":False,
+        "post_bind_joint_frame_qualification_hash":post_bind_report_hash,
+        "post_bind_frame_max_axis_drift":max_axis_drift,
     }
     tessa_evidence={}
     if candidate.producer_id == "RealSaS.TESSALearnedMechanicalCarrierProposal.v1":
@@ -130,6 +155,7 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
     return {"status":"PASS","outputs":[
         _write_ir(root/"qualified_mesh.json",mesh,authority_class="QUALIFIED_PRODUCT_GEOMETRY"),
         _write_ir(root/"g3_deformation_stress.json",g3,authority_class="QUALIFIED_G3_EVIDENCE"),
+        frame_artifact,
         compatibility_artifact,
         _write_json(root/"g5_coverage_evidence.json",g5_payload,authority_class="QUALIFIED_G5_EVIDENCE",schema=g5_payload["schema"]),
         _write_json(root/"unknown_boundary_analysis.json",unknown_report,authority_class="QUALIFIED_G4_EVIDENCE",schema=unknown_report["schema"]),
@@ -137,7 +163,8 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
         "mesh_lineage_hash":mesh.mesh_lineage_hash,"g3_report_hash":g3.report_hash,
         "skin_topology_compatibility_report_hash":compatibility["report_hash"],"g5_evidence_hash":g5_payload["evidence_hash"],
         "coverage_cell_count":len(g5_rows),"carrier_evidence_hash":carrier_evidence.carrier_evidence_hash,
-        "semantic_skin_transfer_performed":False,
+        "semantic_skin_transfer_performed":False,"post_bind_joint_frame_qualification_hash":post_bind_report_hash,
+        "post_bind_frame_max_axis_drift":max_axis_drift,
     }}
 
 

@@ -1,73 +1,64 @@
 # RealSaS Structural System Index
 
-## 2026-10-02 canonical main
+## 2026-10-07 canonical main
 
-Current continuation details are in `CURRENT_STATE.md`. The canonical main combines the latest preserved Knight R&D lineage with the Oct-1 recovered engine/platform. The historical Stage37→42 source-owned carrier cut is closed by typed transport; the active work is the appearance/runtime data-flow audit for deformation-domain coherence, canonical-depth overlap ownership, and Stage45 proof.
+Current continuation authority is `canonical/CANONICAL_HANDOFF_20261007.md` plus `CURRENT_STATE.md`.
 
-> Navigation only. Current continuation authority is `CURRENT_STATE.md`; `canonical/V2_IMPLEMENTATION_READINESS.json` is preserved recovery/readiness history, not the active scientific pointer.
+The active engineering program is **repo currentness -> Go platform enforcement -> performance optimization**. Runtime/presentation image diagnosis is intentionally deferred until those close.
 
-| Product authority | Canonical home | V2 rule |
+> Navigation only. Historical recovery/runtime-audit documents are provenance and must not override current continuation authority.
+
+| Product authority | Canonical home | Current rule |
 |---|---|---|
-| Observation | observation/camera authority | exact source evidence; source cardinality is not output-direction authority |
-| Geometry / IRIS | `models/iris/` + geometry adapters | signed field/surface evidence; strict geometry proof; never RGB authority |
-| Geometry / GSA | `compiler/realsas_compiler_core/substrate/` | topology-local compact surface/relation producer with exact dense-face provenance |
-| Canonical mesh domain | product mesh + `surface_addressing_v1.py` | common address domain for geometry, mechanics and appearance |
-| Appearance / CAA | `appearance_authority_v2.py`, compile/bake/quality modules | total source-preserving art; source wins; holdout/seam/sampling/exposure proof |
-| Presentation | `visual_presentation_v1.py` + Stage37 product-state adapter | final qualified source-owned presentation; role-free editable grouping |
-| Mechanics / Rig | `models/geppetto/` | proposal only; Compiler owns qualified skeleton |
-| Mechanics / Skin | `models/arachne/` | proposal only; Compiler owns qualified skin |
-| Dynamic mechanics | mesh conditioning/deformation proof | stress-test frozen canonical carrier; repair mints new lineage |
-| Motion | `motion_compile_v2.py` + dynamic proof | full-3D rotations and local translations; exact source semantics are retained |
-| Visibility | V2 reference/native renderer | posed canonical geometry + camera depth |
-| Runtime | `runtime_authority_v2.py` + `runtime_visual_authority_v1.py` + `runtime_package_v2.py` + native player | typed source-owned visual consumer; no mechanical render fallback or generative correction |
-| Dynamic Visual Integrity | Stage45/native proof | native parity + provenance + exposure + intrinsic appearance conditioning |
-| Orchestration | `orchestrator/mainline.py` | 46-stage dependency DAG; ordinal is display only |
-| Closure | Stage46 | Geometry + Mechanics + Appearance + Presentation + native dynamic integrity |
+| Observation | observation/camera authority | exact source evidence; source cardinality is separate from output-direction authority |
+| Geometry / IRIS | `models/iris/` + geometry adapters | signed field/surface evidence; never RGB authority |
+| Surface evidence / GSA | `compiler/realsas_compiler_core/substrate/` | compact mechanical/evidence substrate with provenance |
+| Learned topology/geometry / TESSA | `models/tessa/` + Stage18 TESSA proposal bridge | learned proposal only; Compiler support-bind/repair/qualification required |
+| Canonical mechanical carrier | Stage18/19 + `surface_addressing_v1.py` | Compiler-owned repaired/qualified static carrier; Stage19 is static authority |
+| Rig / AXIS | current rig model path; legacy Geppetto identifiers may remain for compatibility | model proposes; Compiler owns qualified skeleton |
+| Skin / MIRA | current skin model path; legacy Arachne identifiers may remain for compatibility | model proposes; Compiler owns qualified skin; RAW41 is research evidence, not generic product authority |
+| Appearance / CAA | appearance compile/bake/quality modules | total source-preserving art; source wins; proof-bound |
+| Presentation | Stage37 qualified source-owned presentation | role-free editable presentation authority; no invented categorical identity |
+| Motion | `motion_compile_v2.py` + proof | sealed mechanics; exact authored motion semantics where admitted |
+| Runtime | C++ runtime/native renderer | package/playback/render hot path; no generative/corrective inference during ordinary render |
+| Orchestration | Go platform + Python Engine activities | Platform owns durable time/state; Engine owns scientific meaning |
+| Research state | Go `Attempt` | immutable research execution truth, not branch chronology |
+| Production state | Go `ProductRevision` | qualified production truth; promotion is platform state, not Git merge semantics |
+| Artifacts | Artifact Registry/store | immutable typed bytes + semantic dependencies |
+| Closure | proof/qualification + product promotion | promotion eligibility must be explicit and fail-closed |
 
-## Historical code
+## Canonical code-line policy
 
-V1 modules, Mage/FIT artifacts and the 2026-09-30 Stage42 fail-close handoff remain provenance. They are not current continuation authority.
+`main` is the single canonical continuation line. Long-lived research/promotion/integration branches are not authority. A temporary review branch may exist briefly for code review, but research/product separation belongs to Platform state (`Attempt`, `ProductRevision`), not Git topology.
 
-## Witness
+## Current TESSA mechanical boundary
 
-The corrected-weight/topology Knight harmonic-first mechanical-CAA witness is accepted as the current R&D/demo visual anchor. It is not product visual authority or unseen/generalization evidence. The active question is whether the recovered source-owned runtime can preserve coherent deformation and canonical physical visibility.
+The promoted TESSA lane proves a static Knight mechanical survivor and Compiler static repair. It does not prove generic dynamic carrier-field transport or TESSA actual-motion product PASS. Stage35 therefore remains deliberately interlocked for the TESSA product lane until a subject-free transport proof exists.
+
+TESSA inference itself is not yet a canonical shipping DAG stage: current Stage18 product support consumes a sealed typed learned proposal and applies Compiler support/repair/qualification. Compilerizing checkpoint -> autoregressive decode -> proposal production remains future platform/engine work and must not be silently claimed as already closed.
+
+## Fresh render baseline
+
+`recover-and-verify-knight-frozen-canonical` run `37578120472` on `main@287eabef757cb2b1e6b532a4c2d0a71eb62cd324` rebuilt Stage23, requalified Stage24 and freshly rerendered IDLE/RUN/SLASH with exact reference hashes. Models were not reinferred. This proves regression reproducibility of the sealed artifact consumer path, not source-to-product compilation.
 
 ## Platform
 
-The Go control plane is part of current main: Artifact Registry, Attempt, ProductRevision, semantic invalidation and durable workflow are first-class system infrastructure and remain independent of any single witness result.
+The accepted implementation boundary remains:
 
-## Machine-readable architecture ownership
-
-The exact current system/domain/module/stage ownership map is implemented by `platform/internal/architecture/registry.go` and can be queried with:
-
-```bash
-cd platform
-go run ./cmd/realsas-architecture
-go run ./cmd/realsas-architecture -stage 35_DYNAMIC_MECHANICAL_MESH_QUALIFIED
-go run ./cmd/realsas-architecture -module platform.product
+```text
+Go Platform  = durable product/research state, Artifact Registry metadata,
+               Attempt/ProductRevision lifecycle, promotion, scheduling/workflows
+Python Engine = compiler semantics, model inference/training, geometry/ML,
+                proof logic and typed stage failures
+C++ Runtime   = playback, deformation/render hot paths, package consumption
 ```
 
-Every canonical compiler stage must resolve to exactly one owning Engine module. Platform modules separately own durable state and orchestration; native Runtime modules own package/playback/render hot paths. This registry is validated against the canonical 46-stage plan in CI.
+The current defect is **enforcement**, not absence: legacy workflows can still bypass the Go control plane via direct authority-root scripts. Closing that bypass is the next active platform program.
 
+## Performance
 
-### Dynamic discovery — shortcuts may not hide unknowns
+The fresh regression run measured the dominant costs directly: renderer ~463.8 s, Stage21 CAA compile ~321.7 s, Stage24 qualification ~131.5 s. Optimization must attack measured dependency/rebuild and hot-path costs before additional visual-runtime research.
 
-The architecture registry is the declared ownership contract. It is intentionally paired with a **live checkout discovery pass**:
+## Machine-readable ownership
 
-```bash
-python tools/realsas_architecture.py audit
-python tools/realsas_architecture.py stage 35_DYNAMIC_MECHANICAL_MESH_QUALIFIED
-python tools/realsas_architecture.py module engine.mesh
-python tools/realsas_architecture.py search appearance
-```
-
-The discovery command recomputes the compiler adapter/import closure from the current checkout on every invocation, combines it with the Go ownership registry and Git-tracked files, and explicitly reports:
-
-- dynamically consumed source files;
-- shared dependencies consumed by multiple modules;
-- `ownership_debt` for live dependencies with no declared file-owner root yet;
-- dynamic-import sites that require extra scrutiny;
-- live code outside the current 46-stage closure;
-- missing critical files or unresolved module paths.
-
-A shortcut is therefore a query over current evidence, **not a hand-maintained whitelist**. Files outside the declared map remain visible as audit debt rather than disappearing from the answer.
+Architecture ownership remains queryable from `platform/internal/architecture/registry.go` and `tools/realsas_architecture.py`. Every canonical stage must resolve to one Engine owner; Platform separately owns durable state/orchestration and Runtime owns hot playback/render paths.

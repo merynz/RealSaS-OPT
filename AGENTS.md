@@ -1,80 +1,94 @@
 # RealSaS-OPT Agent Entry Contract
 
-## Mandatory 2026-10-01 handoff
+## Mandatory current handoff — 2026-10-07
 
-**First read:** `canonical/RECOVERY_CANONICAL_HANDOFF_20261001.md`.
+**First read:** `canonical/CANONICAL_HANDOFF_20261007.md`, then `CURRENT_STATE.md`.
 
-If the user says only “continue / devam et”, resume from current canonical `main`. The old Stage18/38 → Stage42 carrier gap is historical and closed in the recovered lineage; do not reopen it without new evidence. The current scientific/witness blocker is VF-11 R512, while professional platform/backend work may proceed independently after canonical-main recovery.
-
-## Mandatory 2026-10-04 corpus status
-
-**Corpus authority:** `canonical/TRUTH_CORPUS_V1_STATUS_20261004.md`.
-
-RealSaS now has a real external sealed raw truth corpus for initial research. Do **not** say or assume that RealSaS has no corpus. Its current status is exactly:
-
-`SEALED_RAW__STRUCTURALLY_AUDITED__ADMISSION_PENDING`
-
-The audited GLTF subset contains 139 confirmed unique rigged+animated subjects after obvious format/variant identity collapse, but this is not the final global corpus count. Representative import/render admission, FBX/Blend-only truth audit, lineage-connected split construction, and cryptographic UNSEEN sealing are still required before calling the corpus training-ready canonical truth. Pack-level LOFO is forbidden because exact skeleton lineages cross pack boundaries.
+If the user says only “continue / devam et”, resume from canonical `main` and the priority order in `CURRENT_STATE.md`. Do not resurrect an older runtime-audit, VF-11, recovery, research-branch or promotion-branch continuation merely because historical files still exist.
 
 This repository must be resumable without conversational memory.
 
-## Mandatory first read
+## Canonical code-line rule
 
-1. `canonical/RECOVERY_CANONICAL_HANDOFF_20261001.md`
-2. `canonical/TRUTH_CORPUS_V1_STATUS_20261004.md`
-3. `canonical/RECOVERY_ENGINEERING_CERTIFICATION_V1_20261001.json`
-4. `canonical/V2_IMPLEMENTATION_READINESS.json`
-5. `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
-6. `CURRENT_STATE.md`
-7. `canonical/CONTEXT_STATE_V2.json`
-8. `canonical/AUTHORITY_MAP_V1.json`
-9. `canonical/EXPERIMENT_REGISTRY_V3.json`
-10. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
-11. `canonical/ACTIVE_RUN_V2.json` — implementation governance only
-12. `canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md`
-13. `canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md`
-14. `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
-15. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
-16. Historical provenance only: `canonical/EXPERIMENT_REGISTRY_V2.json`, then `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`
+`main` is the single canonical continuation line.
 
-## Current execution rule
+Long-lived research/promotion/integration branches must not be used as scientific, product or execution authority. Temporary review branches are allowed only as short-lived source-code collaboration; they must merge promptly and must never become a second continuation state.
 
-Engineering recovery is exact-head certified, but a subject witness still may not execute unless:
-1. `V2_IMPLEMENTATION_READINESS.json` is exactly `READY_FOR_WITNESS_EXECUTION`;
-2. its implementation-closure fingerprint equals exact current `main`;
-3. the user explicitly approves Knight execution.
+**Git is source-code history, not product/research state.**
 
-VF-11 R512 remains a scientific/witness-readiness blocker. Never infer witness permission from canonical-main promotion or engineering-green CI.
+## Research / product / execution separation
 
-## Execution semantics
+The normative state model is:
 
-The mainline is a dependency DAG. `depends_on` defines readiness; `ordinal` is documentation order only. Verified independent upstream outputs survive downstream failures only under exact hash identity.
+```text
+Git/main          = code truth
+Artifact Registry = immutable typed artifacts + dependencies
+Attempt           = research truth
+ProductRevision   = production truth
+Workflow Engine   = durable execution truth
+Proof/Qualification = promotion eligibility
+```
 
-No subject-specific compiler/runtime branch. No moving aliases in authority inputs. No silent threshold relaxation after witness inspection.
+Research experiments belong in `Attempt`, not branch chronology. Product promotion belongs in `ProductRevision`, not Git merge semantics.
+
+Research execution should reuse exact qualified upstream artifacts according to dependency identity. Product compile must execute the required model/Compiler construction path for a new subject unless an exact semantic cache hit is proven. Product render/playback consumes a qualified ProductRevision and must not rerun model inference merely to render it.
+
+## Platform-first execution rule
+
+The Go control plane is the intended sole owner of durable product/research state, Artifact Registry metadata, Attempt/ProductRevision lifecycle, promotion, dependency scheduling and workflow state.
+
+Current known enforcement gap: legacy GitHub Actions and direct `$REALSAS_AUTHORITY_ROOT` scripts can still bypass Platform state. Until that gap is closed, such direct paths are allowed only for CI/reproducibility of already sealed evidence. They must not be treated as the normal way to mint new research/product authority.
+
+The active platform program is to make this rule mechanically unavoidable.
+
+## Current scientific boundary
+
+The promoted TESSA mechanical line establishes a real static Knight carrier survivor under frozen policy. It does **not** establish generic TESSA dynamic carrier-field transport, actual-motion product PASS, unseen generalization or native attachment closure.
+
+Stage19 may own a statically qualified TESSA carrier. Stage35 must remain fail-closed for the TESSA product lane until the missing subject-free carrier-field transport proof exists.
+
+Canonical public model naming is `IRIS -> TESSA -> AXIS -> MIRA`; legacy Geppetto/Arachne/ATLAS names may remain only where compatibility requires them.
+
+## Fresh render baseline
+
+Run `37578120472` on exact `main@287eabef757cb2b1e6b532a4c2d0a71eb62cd324` freshly rebuilt Stage23, requalified Stage24 and rerendered Knight IDLE/RUN/SLASH. All three GIF hashes matched the frozen reference.
+
+That run reused sealed artifacts; IRIS/TESSA/AXIS/MIRA were not reinferred. Do not describe it as a fresh source-to-puppet compile.
+
+## Active priority order
+
+1. Repository currentness closure.
+2. Go platform enforcement: stateful work must flow through Artifact/Attempt/ProductRevision/workflow authority.
+3. Performance optimization using measured telemetry and dependency-aware reuse/native hot paths.
+4. Only then return to runtime/presentation image diagnosis if the image remains wrong.
+
+Do not preempt priorities 1–3 by reopening visual/runtime forensics unless new evidence falsifies the sealed static topology/geometry/mechanical baseline.
 
 ## Product-quality rule
 
-**Geometry, Mechanics and Appearance are co-equal product authorities; Presentation is first-class editable addressing authority.**
-
-- Geometry owns surface, silhouette capacity, topology and `SurfaceAddressing`.
-- Mechanics owns rig, skin, deformation, contacts and full-3D motion.
-- Appearance owns source-faithful total 2D art, provenance, holdout/seam quality, alpha/sampling and exposure.
-- Presentation owns Stage37-qualified source-owned visual presentation and role-free grouping; categorical identity is not invented.
-
-A visually incorrect puppet is not accepted because mechanics are valid.
+Geometry, Mechanics and Appearance are co-equal product authorities; Presentation is first-class editable addressing authority. A visually incorrect puppet is not accepted merely because mechanics are valid.
 
 ## Runtime invariant
 
-Stage18 visual output is substrate, Stage37 is final presentation owner, and Stage42+ must consume typed source-owned visual presentation. Mechanical render fallback, donor search, appearance generation/correction, hidden retriangulation, skin re-solving and character relighting are forbidden.
+Runtime consumes qualified product artifacts. It may not create a second topology, silently re-solve skin, perform donor search/generative correction, or mutate scientific authority during playback/render.
 
-## Research / product separation
+## Corpus status
 
-Research work may create branches and experiments, but normal product state must not be inferred from Git chronology. The next platform program introduces immutable `Artifact`, `Attempt`, `ProductRevision`, qualification and durable workflow state.
+`canonical/TRUTH_CORPUS_V1_STATUS_20261004.md` remains corpus authority. Current status is `SEALED_RAW__STRUCTURALLY_AUDITED__ADMISSION_PENDING`. Do not overclaim it as training-ready canonical truth.
 
-## Scientific claim discipline
+## Claim discipline
 
-A FIT or witness PASS is scoped evidence for the exact subject/apparatus. It is not unseen generalization. Engineering implementation gates are not Knight performance evidence.
+A FIT/witness PASS is scoped evidence for the exact subject/apparatus. Engineering CI is not unseen/generalization evidence. Static TESSA survivor evidence is not dynamic product authority.
 
-## Repository hygiene
+## Read order
 
-Use one canonical continuation branch: `main`. Current `canonical/EXPERIMENT_REGISTRY_V3.json` and `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl` must be read before historical `canonical/EXPERIMENT_REGISTRY_V2.json` and `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`.
+1. `canonical/CANONICAL_HANDOFF_20261007.md`
+2. `CURRENT_STATE.md`
+3. `SYSTEM_INDEX.md`
+4. `canonical/TESSA_MIRA_MECHANICAL_SURVIVOR_PROMOTION_LEDGER_V1_20261006.json`
+5. `canonical/TESSA_MIRA_FINAL_DAG_PROMOTION_AUDIT_V1_20261007.json`
+6. `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
+7. `docs/platform/adr/0002-compiler-platform-boundary.md`
+8. `docs/platform/adr/0003-go-control-plane.md`
+9. `canonical/TRUTH_CORPUS_V1_STATUS_20261004.md`
+10. older recovery/scientific material only as needed for provenance

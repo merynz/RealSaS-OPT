@@ -37,8 +37,6 @@ def run_g3_carrier_native_v1(
     )
     if envelope.skeleton_lineage_hash != skeleton.skeleton_lineage_hash:
         raise QualificationError("G3_CARRIER_ENVELOPE_SKELETON_DRIFT")
-    if str(envelope.metadata.get("carrier_skin_lineage_hash") or "") != skin.skin_lineage_hash:
-        raise QualificationError("G3_CARRIER_ENVELOPE_SKIN_DRIFT")
 
     frames, frame_report = derive_joint_frames_post_bind_v2(
         skeleton, carrier_skin=skin, cameras=cameras

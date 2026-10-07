@@ -2,6 +2,8 @@
 
 ## 2026-10-07 canonical main
 
+## Current continuation details
+
 Current continuation authority is `canonical/CANONICAL_HANDOFF_20261007.md` plus `CURRENT_STATE.md`.
 
 The active engineering program is **repo currentness -> Go platform enforcement -> performance optimization**. Runtime/presentation image diagnosis is intentionally deferred until those close.
@@ -14,13 +16,13 @@ The active engineering program is **repo currentness -> Go platform enforcement 
 | Geometry / IRIS | `models/iris/` + geometry adapters | signed field/surface evidence; never RGB authority |
 | Surface evidence / GSA | `compiler/realsas_compiler_core/substrate/` | compact mechanical/evidence substrate with provenance |
 | Learned topology/geometry / TESSA | `models/tessa/` + Stage18 TESSA proposal bridge | learned proposal only; Compiler support-bind/repair/qualification required |
-| Canonical mechanical carrier | Stage18/19 + `surface_addressing_v1.py` | Compiler-owned repaired/qualified static carrier; Stage19 is static authority |
-| Rig / AXIS | current rig model path; legacy Geppetto identifiers may remain for compatibility | model proposes; Compiler owns qualified skeleton |
-| Skin / MIRA | current skin model path; legacy Arachne identifiers may remain for compatibility | model proposes; Compiler owns qualified skin; RAW41 is research evidence, not generic product authority |
-| Appearance / CAA | appearance compile/bake/quality modules | total source-preserving art; source wins; proof-bound |
+| Canonical mechanical carrier | Stage18/19 + `surface_addressing_v1.py` | Compiler-owned repaired/qualified static carrier; Stage19 is exact carrier authority |
+| Rig / AXIS | `models/axis/` + learned mechanics adapters | AXIS V5.4.1 owns hard causal required parents + deterministic discrete XYZ; Compiler validates/materializes, no tree reselection on this path |
+| Skin / MIRA | `models/mira/` + Stage32 carrier-native qualification | MIRA V5.5 predicts `W_M` directly on the exact Stage19 carrier basis |
+| Appearance / CAA | `appearance_authority_v2.py` + appearance compile/bake/quality modules | total source-preserving art; source wins; proof-bound |
 | Presentation | Stage37 qualified source-owned presentation | role-free editable presentation authority; no invented categorical identity |
 | Motion | `motion_compile_v2.py` + proof | sealed mechanics; exact authored motion semantics where admitted |
-| Runtime | C++ runtime/native renderer | package/playback/render hot path; no generative/corrective inference during ordinary render |
+| Runtime | `runtime_authority_v2.py` + C++ runtime/native renderer | package/playback/render hot path; no generative/corrective inference during ordinary render |
 | Orchestration | Go platform + Python Engine activities | Platform owns durable time/state; Engine owns scientific meaning |
 | Research state | Go `Attempt` | immutable research execution truth, not branch chronology |
 | Production state | Go `ProductRevision` | qualified production truth; promotion is platform state, not Git merge semantics |
@@ -31,11 +33,32 @@ The active engineering program is **repo currentness -> Go platform enforcement 
 
 `main` is the single canonical continuation line. Long-lived research/promotion/integration branches are not authority. A temporary review branch may exist briefly for code review, but research/product separation belongs to Platform state (`Attempt`, `ProductRevision`), not Git topology.
 
-## Current TESSA mechanical boundary
+## Current mechanics boundary
 
-The promoted TESSA lane proves a static Knight mechanical survivor and Compiler static repair. It does not prove generic dynamic carrier-field transport or TESSA actual-motion product PASS. Stage35 therefore remains deliberately interlocked for the TESSA product lane until a subject-free transport proof exists.
+The canonical mechanics chain is carrier-native:
 
-TESSA inference itself is not yet a canonical shipping DAG stage: current Stage18 product support consumes a sealed typed learned proposal and applies Compiler support/repair/qualification. Compilerizing checkpoint -> autoregressive decode -> proposal production remains future platform/engine work and must not be silently claimed as already closed.
+```text
+Stage19 M
+  -> AXIS V5.4.1 G
+  -> MIRA V5.5 W_M on the same M
+  -> Compiler post-bind qualification
+  -> Stage35 exact carrier mechanics
+  -> Stage36 identity re-key/seal
+```
+
+No semantic skin transfer to another mechanical basis is canonical. Generic coincident-frame handling is post-bind and subject-free: a subtree with zero final mechanical influence may inherit its parent frame; an active coincident subtree fails closed and requires explicit AXIS orientation/tail evidence.
+
+Knight FIT1 mechanics are closed relative to the sealed teacher/source motion envelope. Absolute universal G3, FIT8/FITK, unseen and product-generalization remain unclaimed.
+
+### Canonical mesh domain
+
+`compiler/realsas_compiler_core/surface_addressing_v1.py` provides SurfaceAddressing and the stable mechanical carrier addressing domain. Stage18/19 construct and statically qualify that domain; the mechanics path must preserve the same exact carrier basis through MIRA prediction and dynamic proof.
+
+### Appearance / CAA
+
+`compiler/realsas_compiler_core/appearance_authority_v2.py` owns complete appearance qualification. `compiler/realsas_compiler_core/runtime_authority_v2.py` governs qualified runtime consumption. Appearance remains source-preserving and may not silently become mechanical correction.
+
+The 46-stage **dependency DAG** is the executable dependency authority.
 
 ## Fresh render baseline
 

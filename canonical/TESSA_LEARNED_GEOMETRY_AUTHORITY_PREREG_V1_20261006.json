@@ -1,0 +1,76 @@
+{
+  "schema": "RealSaS.TESSALearnedGeometryAuthorityPreregistration.v1",
+  "date": "2026-10-06",
+  "status": "PREREGISTERED__NOT_YET_PRODUCT_AUTHORITY",
+  "scope": "TESSA learned mechanical geometry proposal -> Compiler static canonical carrier qualification",
+  "historical_cause": {
+    "topology_drift_hypothesis": "CONFIRMED",
+    "invariant": "Rig/skin truth and deformation consequences are valid only on the exact mechanical topology/geometry basis to which they are bound.",
+    "required_order": [
+      "IRIS_SURFACE_EVIDENCE",
+      "GSA_SHARED_EVIDENCE_DOMAIN",
+      "TESSA_LEARNED_GEOMETRY_TOPOLOGY_PROPOSAL",
+      "COMPILER_STATIC_GEOMETRY_TOPOLOGY_QUALIFICATION",
+      "SEALED_MECHANICAL_CARRIER",
+      "AXIS_RIG_PROPOSAL_AND_QUALIFICATION",
+      "MIRA_SKIN_FIELD_AND_QUALIFICATION"
+    ]
+  },
+  "authority_split": {
+    "learned_vertex_position_authority": "STAGE19_ACTUAL_CANDIDATE_SOURCE_FIDELITY_PLUS_STATIC_TOPOLOGY_QUALITY_QUALIFICATION",
+    "gsa_support_authority": "CONTINUOUS_MATERIAL_MECHANICAL_FIELD_LINEAGE_ONLY",
+    "gsa_support_is_vertex_position_reconstruction_authority": false,
+    "tessa_model_output_is_product_authority": false,
+    "compiler_is_sole_promotion_authority": true
+  },
+  "g1_non_regression": {
+    "qualified_mesh_policy_file": "canonical/QUALIFIED_MESH_PRODUCT_POLICY_V2_20260919.json",
+    "max_normal_refinement_ratio_of_local_scale": 0.125,
+    "max_tangential_to_normal_ratio": 0.25,
+    "threshold_relaxation_for_tessa_forbidden": true,
+    "deterministic_geometry_support_lift_semantics_must_remain_unchanged": true,
+    "fabricated_support_coefficients_for_learned_position_forbidden": true,
+    "moving_tessa_position_to_make_support_lift_pass_forbidden": true
+  },
+  "learned_geometry_admission": {
+    "required_candidate_producer": "TESSA_PROPOSAL",
+    "required_pre_product_state": "PROPOSAL_ONLY",
+    "required_stage19_candidate_binding_exact": true,
+    "required_stage19_static_quality_pass": true,
+    "required_stage19_source_fidelity_pass": true,
+    "required_component_safe_gsa_field_support": true,
+    "required_exact_topology_geometry_identity_for_axis": true,
+    "required_exact_topology_geometry_identity_for_mira": true,
+    "stage19_pass_without_gsa_field_lineage_is_insufficient": true,
+    "gsa_field_lineage_without_stage19_pass_is_insufficient": true
+  },
+  "knight_fit1_boundary": {
+    "artist_raw_skeleton_joint_count": 41,
+    "raw41_preservation_rule": "PRESERVE_ALL_ARTIST_AUTHORED_RAW41_CONTROLS_DURING_FIT1_LEARNING_AND_QUALIFICATION",
+    "zero_skin_mass_is_not_deletion_authority": true,
+    "raw41_is_global_optimal_joint_count_claim": false,
+    "raw41_is_unseen_generalization_claim": false,
+    "control_pruning_requires_separate_compiler_proof": true
+  },
+  "claim_boundary": {
+    "mechanical_substrate_claim_if_court_passes": "GEOMETRY_TOPOLOGY_RIG_SKIN_SUBSTRATE_COHERENT_ON_ONE_SEALED_CARRIER",
+    "actual_animation_capability_pass_claimed": false,
+    "attachment_runtime_closure_claimed": false,
+    "presentation_runtime_closure_claimed": false,
+    "unseen_generalization_claimed": false,
+    "default_tessa_stage18_product_activation_claimed": false
+  },
+  "required_court": {
+    "court_id": "TESSA_LEARNED_GEOMETRY_G1_AUTHORITY_SEPARATION_V1",
+    "purpose": "Demonstrate that current TESSAMaterialSupportField coefficients are valid field/correspondence lineage but are not a declaration that learned TESSA P equals the convex GSA support lift.",
+    "required_measurements": [
+      "TESSA_VERTEX_COUNT",
+      "COMPONENT_SAFE_SUPPORT_VALIDATION",
+      "SUPPORT_SIMPLEX_VALIDATION",
+      "LEARNED_P_TO_CURRENT_SUPPORT_LIFT_DISTANCE_DISTRIBUTION",
+      "EXACT_POSITION_EQUALITY_COUNT"
+    ],
+    "forbidden_interpretation": "A nonzero support-lift distance is not itself a TESSA geometry failure; geometry is judged by the separately preregistered Stage19 source-fidelity/static courts."
+  },
+  "promotion_rule": "NO_STAGE18_TESSA_PRODUCT_ACTIVATION_UNTIL_THE_AUTHORITY_SEPARATION_COURT_AND_TYPED_COMPILER_INTEGRATION_PASS_WITHOUT_THRESHOLD_RELAXATION_OR_KNIGHT_SPECIFIC_EXEMPTION"
+}

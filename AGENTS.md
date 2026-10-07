@@ -8,6 +8,22 @@ If the user says only “continue / devam et”, resume from canonical `main` an
 
 This repository must be resumable without conversational memory.
 
+## Current machine authority spine
+
+Read current authority before historical provenance:
+
+1. `canonical/EXPERIMENT_REGISTRY_V3.json`
+2. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
+3. `canonical/ACTIVE_RUN_V2.json`
+4. `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
+5. `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
+6. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
+
+Historical provenance only:
+
+- `canonical/EXPERIMENT_REGISTRY_V2.json`
+- `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`
+
 ## Canonical code-line rule
 
 `main` is the single canonical continuation line.
@@ -43,9 +59,11 @@ The active platform program is to make this rule mechanically unavoidable.
 
 ## Current scientific boundary
 
-The promoted TESSA mechanical line establishes a real static Knight carrier survivor under frozen policy. It does **not** establish generic TESSA dynamic carrier-field transport, actual-motion product PASS, unseen generalization or native attachment closure.
+The latest developed FIT1 mechanics line is carrier-native: Stage19 owns frozen mechanical carrier `M`; AXIS V5.4.1 owns the hard causal required tree plus deterministic 256-bin XYZ; MIRA V5.5 predicts `W_M` directly on that exact `M`; Compiler validates/materializes the required tree and exact `(M,G,W_M)` bindings without semantic skin transfer.
 
-Stage19 may own a statically qualified TESSA carrier. Stage35 must remain fail-closed for the TESSA product lane until the missing subject-free carrier-field transport proof exists.
+Coincident controls are handled subject-free after binding: a mechanically unobservable subtree may inherit its parent frame; any coincident subtree with non-zero final `W_M` influence fails closed and requires explicit AXIS orientation/tail evidence.
+
+Knight FIT1 mechanics are closed relative to the sealed source/teacher motion envelope. The absolute frozen G3 threshold remains inconclusive because the sealed teacher itself is outside that absolute threshold. This is not FIT8/FITK/unseen/product/generalization evidence.
 
 Canonical public model naming is `IRIS -> TESSA -> AXIS -> MIRA`; legacy Geppetto/Arachne/ATLAS names may remain only where compatibility requires them.
 
@@ -78,15 +96,15 @@ Runtime consumes qualified product artifacts. It may not create a second topolog
 
 ## Claim discipline
 
-A FIT/witness PASS is scoped evidence for the exact subject/apparatus. Engineering CI is not unseen/generalization evidence. Static TESSA survivor evidence is not dynamic product authority.
+A FIT/witness PASS is scoped evidence for the exact subject/apparatus. Engineering CI is not unseen/generalization evidence. Knight FIT1 teacher-relative mechanics closure is not unseen/generalization or product authority.
 
 ## Read order
 
 1. `canonical/CANONICAL_HANDOFF_20261007.md`
 2. `CURRENT_STATE.md`
 3. `SYSTEM_INDEX.md`
-4. `canonical/TESSA_MIRA_MECHANICAL_SURVIVOR_PROMOTION_LEDGER_V1_20261006.json`
-5. `canonical/TESSA_MIRA_FINAL_DAG_PROMOTION_AUDIT_V1_20261007.json`
+4. `canonical/V2_IMPLEMENTATION_READINESS.json`
+5. `canonical/KNIGHT_AXIS541_MIRA55_CARRIER_NATIVE_PROMOTION_20261007.json`
 6. `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
 7. `docs/platform/adr/0002-compiler-platform-boundary.md`
 8. `docs/platform/adr/0003-go-control-plane.md`

@@ -7,13 +7,20 @@ TESSA candidates preserve learned XYZ/topology and are admitted only when the
 exact candidate is already bound to the existing Stage19 static carrier PASS.
 Material support remains a field-sampling / mechanical-support authority; it is
 never reinterpreted as the source of learned geometry positions.
+
+The historical Stage19 TESSA receipt remains static-only. Downstream Stage35 may
+satisfy the old dynamic-field interlock only with exact carrier-native evidence:
+the same Stage19 M, a qualified W_M bound to that M and skeleton, and a qualified
+post-bind frame/skin-topology proof. No semantic skin transfer is accepted.
 """
 
 from dataclasses import replace
 import math
 from typing import Any
 
+from .carrier_skin_v1 import QualifiedCarrierSkinIR
 from .hashing import content_sha256
+from .mechanical_carrier_evidence_v1 import MechanicalCarrierEvidenceIR
 from .mesh.conditioning_v1 import triangle_rest_metric
 from .product_authority_v1 import (
     G3_NUMERICAL_MAX_ASPECT,
@@ -43,7 +50,76 @@ from .types import QualificationError
 
 Json = dict[str, Any]
 _TESSA_PRODUCER = "RealSaS.TESSALearnedMechanicalCarrierProposal.v1"
+_DYNAMIC_FIELD_BLOCKER = "TESSA_MIRA_CARRIER_FIELD_BINDING_NOT_PRODUCT_QUALIFIED"
 _TOL = 1.0e-9
+
+
+def carrier_native_dynamic_binding_hash_v1(
+    *,
+    candidate: CanonicalMeshCandidateIR,
+    carrier_evidence: MechanicalCarrierEvidenceIR,
+    carrier_skin: QualifiedCarrierSkinIR,
+    envelope,
+    qualification_report: Json,
+) -> str:
+    """Validate and hash the generic exact-M dynamic binding proof.
+
+    This proof replaces the *missing transport proof* that the old TESSA lane
+    required. It does not waive G3; QualifiedMesh minting still requires the
+    normal six-gate dynamic report separately.
+    """
+    if carrier_evidence.candidate_mesh_binding_hash != candidate.candidate_lineage_hash:
+        raise QualificationError("TESSA_CARRIER_NATIVE_CANDIDATE_BINDING_DRIFT")
+    if carrier_skin.carrier_evidence_hash != carrier_evidence.carrier_evidence_hash:
+        raise QualificationError("TESSA_CARRIER_NATIVE_SKIN_EVIDENCE_DRIFT")
+    if carrier_skin.carrier_topology_hash != carrier_evidence.topology_hash:
+        raise QualificationError("TESSA_CARRIER_NATIVE_SKIN_TOPOLOGY_DRIFT")
+    if carrier_skin.carrier_geometry_hash != carrier_evidence.geometry_hash:
+        raise QualificationError("TESSA_CARRIER_NATIVE_SKIN_GEOMETRY_DRIFT")
+    if carrier_skin.skeleton_binding_hash != envelope.skeleton_lineage_hash:
+        raise QualificationError("TESSA_CARRIER_NATIVE_SKIN_SKELETON_DRIFT")
+
+    skin_report = dict(carrier_skin.qualification_report or {})
+    if skin_report.get("status") != "PASS_DIRECT_CARRIER_SKIN":
+        raise QualificationError("TESSA_CARRIER_NATIVE_SKIN_NOT_QUALIFIED")
+    if skin_report.get("product_skin_evidence_complete") is not True:
+        raise QualificationError("TESSA_CARRIER_NATIVE_SKIN_EVIDENCE_INCOMPLETE")
+    if skin_report.get("semantic_skin_transfer_performed") is not False:
+        raise QualificationError("TESSA_CARRIER_NATIVE_SEMANTIC_SKIN_TRANSFER_FORBIDDEN")
+
+    report = dict(qualification_report or {})
+    if report.get("mechanical_skin_domain") != "EXACT_STAGE19_CARRIER_M":
+        raise QualificationError("TESSA_CARRIER_NATIVE_MECHANICAL_DOMAIN_DRIFT")
+    if report.get("semantic_skin_transfer_performed") is not False:
+        raise QualificationError("TESSA_CARRIER_NATIVE_STAGE35_TRANSFER_FORBIDDEN")
+    if report.get("skin_topology_compatibility_status") != "PASS":
+        raise QualificationError("TESSA_CARRIER_NATIVE_G3B_NOT_PASS")
+    if report.get("skin_topology_weight_mutation") is not False:
+        raise QualificationError("TESSA_CARRIER_NATIVE_WEIGHT_MUTATION_FORBIDDEN")
+
+    compatibility_hash = str(report.get("skin_topology_compatibility_report_hash") or "")
+    frame_hash = str(report.get("post_bind_joint_frame_qualification_hash") or "")
+    if len(compatibility_hash) != 64:
+        raise QualificationError("TESSA_CARRIER_NATIVE_G3B_HASH_MISSING")
+    if len(frame_hash) != 64:
+        raise QualificationError("TESSA_CARRIER_NATIVE_POST_BIND_FRAME_HASH_MISSING")
+
+    return content_sha256(
+        {
+            "schema": "RealSaS.CarrierNativeDynamicBindingProof.v1",
+            "candidate_mesh_binding_hash": candidate.candidate_lineage_hash,
+            "carrier_evidence_hash": carrier_evidence.carrier_evidence_hash,
+            "carrier_topology_hash": carrier_evidence.topology_hash,
+            "carrier_geometry_hash": carrier_evidence.geometry_hash,
+            "skeleton_binding_hash": carrier_skin.skeleton_binding_hash,
+            "carrier_skin_lineage_hash": carrier_skin.skin_lineage_hash,
+            "skin_topology_compatibility_report_hash": compatibility_hash,
+            "post_bind_joint_frame_qualification_hash": frame_hash,
+            "mechanical_skin_domain": "EXACT_STAGE19_CARRIER_M",
+            "semantic_skin_transfer_performed": False,
+            "weight_mutation_performed": False,
+        }
+    )
 
 
 def _validate_tessa_material_support(vertex, *, surface_nodes, owner) -> set[str]:
@@ -91,7 +167,7 @@ def tessa_qualified_mesh_intrinsic_audit_v1(
 ) -> Json:
     """Recompute exact-geometry G2/G4/rest checks without legacy convex-lift G1.
 
-    The omitted statement is only ``P == convex(surface support)``.  Support
+    The omitted statement is only ``P == convex(surface support)``. Support
     simplex/component provenance, topology, geometric crack checks, numerical rest
     conditioning and preserve-continuity checks remain fail-closed.
     """
@@ -325,6 +401,8 @@ def validate_tessa_qualified_mesh_v2(
     bridge_evidence: TESSACandidateBridgeEvidenceIR,
     static_mesh: StaticCanonicalMeshQualificationIR,
     static_binding: TESSAStaticCarrierBindingIR,
+    carrier_evidence: MechanicalCarrierEvidenceIR,
+    carrier_skin: QualifiedCarrierSkinIR,
     surface,
     partition,
     carrier_policy,
@@ -339,11 +417,23 @@ def validate_tessa_qualified_mesh_v2(
     )
     if candidate.producer_id != _TESSA_PRODUCER:
         raise QualificationError("TESSA_QUALIFIED_MESH_PRODUCER_INVALID")
+
+    # Stage19 receipt remains static-only. The downstream carrier-native proof is
+    # validated independently before the static receipt's dynamic requirement is
+    # deliberately disabled for this one qualified path.
+    expected_dynamic_hash = carrier_native_dynamic_binding_hash_v1(
+        candidate=candidate,
+        carrier_evidence=carrier_evidence,
+        carrier_skin=carrier_skin,
+        envelope=envelope,
+        qualification_report=dict(value.qualification_report or {}),
+    )
     validate_tessa_static_carrier_binding_v1(
         static_binding,
         candidate=candidate,
         bridge_evidence=bridge_evidence,
         static_mesh=static_mesh,
+        require_dynamic_carrier_field_binding=False,
     )
     validate_mechanical_partition(partition, surface)
     validate_component_carrier_policy(carrier_policy, partition)
@@ -378,6 +468,10 @@ def validate_tessa_qualified_mesh_v2(
         raise QualificationError("TESSA_QUALIFIED_MESH_INTRINSIC_AUDIT_HASH_MISMATCH")
     if report.get("stage19_static_binding_hash") != static_binding.binding_hash:
         raise QualificationError("TESSA_QUALIFIED_MESH_STAGE19_BINDING_HASH_MISMATCH")
+    if report.get("carrier_native_dynamic_binding_hash") != expected_dynamic_hash:
+        raise QualificationError("TESSA_QUALIFIED_MESH_DYNAMIC_BINDING_HASH_MISMATCH")
+    if report.get("dynamic_interlock_satisfied_by") != "CARRIER_NATIVE_MIRA_W_M_V1":
+        raise QualificationError("TESSA_QUALIFIED_MESH_DYNAMIC_BINDING_AUTHORITY_DRIFT")
     _validate_dynamic_qualification_report(
         value,
         partition=partition,
@@ -395,6 +489,9 @@ def validate_tessa_qualified_mesh_v2(
         "tessa_static_carrier_binding_hash": static_binding.binding_hash,
         "tessa_proposal_geometry_hash": static_binding.proposal_geometry_hash,
         "material_support_field_hash": static_binding.material_support_field_hash,
+        "carrier_native_dynamic_binding_hash": expected_dynamic_hash,
+        "carrier_evidence_hash": carrier_evidence.carrier_evidence_hash,
+        "carrier_skin_lineage_hash": carrier_skin.skin_lineage_hash,
     }
     for key, expected_value in expected.items():
         if md.get(key) != expected_value:
@@ -405,6 +502,8 @@ def validate_tessa_qualified_mesh_v2(
         raise QualificationError("TESSA_QUALIFIED_MESH_SUPPORT_GEOMETRY_AUTHORITY_FORBIDDEN")
     if md.get("learned_xyz_preserved_exactly") is not True:
         raise QualificationError("TESSA_QUALIFIED_MESH_LEARNED_XYZ_PRESERVATION_MISSING")
+    if md.get("semantic_skin_transfer_performed") is not False:
+        raise QualificationError("TESSA_QUALIFIED_MESH_SEMANTIC_SKIN_TRANSFER_FORBIDDEN")
     if md.get("motion_capability_claimed") is not False:
         raise QualificationError("TESSA_QUALIFIED_MESH_PREMATURE_MOTION_METADATA")
     if value.mesh_lineage_hash != qualified_mesh_lineage_hash(value):
@@ -417,6 +516,8 @@ def qualify_tessa_canonical_mesh_candidate_v2(
     bridge_evidence: TESSACandidateBridgeEvidenceIR,
     static_mesh: StaticCanonicalMeshQualificationIR,
     static_binding: TESSAStaticCarrierBindingIR,
+    carrier_evidence: MechanicalCarrierEvidenceIR,
+    carrier_skin: QualifiedCarrierSkinIR,
     surface,
     partition,
     carrier_policy,
@@ -432,11 +533,20 @@ def qualify_tessa_canonical_mesh_candidate_v2(
     )
     if candidate.producer_id != _TESSA_PRODUCER:
         raise QualificationError("TESSA_QUALIFIED_MESH_PRODUCER_INVALID")
+
+    dynamic_binding_hash = carrier_native_dynamic_binding_hash_v1(
+        candidate=candidate,
+        carrier_evidence=carrier_evidence,
+        carrier_skin=carrier_skin,
+        envelope=envelope,
+        qualification_report=qualification_report,
+    )
     validate_tessa_static_carrier_binding_v1(
         static_binding,
         candidate=candidate,
         bridge_evidence=bridge_evidence,
         static_mesh=static_mesh,
+        require_dynamic_carrier_field_binding=False,
     )
 
     id_map = {
@@ -464,6 +574,8 @@ def qualify_tessa_canonical_mesh_candidate_v2(
     report.pop("intrinsic_audit_hash", None)
     report.pop("intrinsic_audit_kind", None)
     report["stage19_static_binding_hash"] = static_binding.binding_hash
+    report["carrier_native_dynamic_binding_hash"] = dynamic_binding_hash
+    report["dynamic_interlock_satisfied_by"] = "CARRIER_NATIVE_MIRA_W_M_V1"
 
     mesh = QualifiedMeshIR(
         vertices=vertices,
@@ -484,9 +596,13 @@ def qualify_tessa_canonical_mesh_candidate_v2(
             "tessa_static_carrier_binding_hash": static_binding.binding_hash,
             "tessa_proposal_geometry_hash": static_binding.proposal_geometry_hash,
             "material_support_field_hash": static_binding.material_support_field_hash,
+            "carrier_native_dynamic_binding_hash": dynamic_binding_hash,
+            "carrier_evidence_hash": carrier_evidence.carrier_evidence_hash,
+            "carrier_skin_lineage_hash": carrier_skin.skin_lineage_hash,
             "legacy_g1_convex_lift_applicable": False,
             "material_support_is_geometry_authority": False,
             "learned_xyz_preserved_exactly": True,
+            "semantic_skin_transfer_performed": False,
             "motion_capability_claimed": False,
         },
     )
@@ -508,6 +624,8 @@ def qualify_tessa_canonical_mesh_candidate_v2(
         bridge_evidence=bridge_evidence,
         static_mesh=static_mesh,
         static_binding=static_binding,
+        carrier_evidence=carrier_evidence,
+        carrier_skin=carrier_skin,
         surface=surface,
         partition=partition,
         carrier_policy=carrier_policy,
@@ -529,6 +647,8 @@ def qualify_canonical_mesh_candidate_v2(
     bridge_evidence: TESSACandidateBridgeEvidenceIR | None = None,
     static_mesh: StaticCanonicalMeshQualificationIR | None = None,
     static_binding: TESSAStaticCarrierBindingIR | None = None,
+    carrier_evidence: MechanicalCarrierEvidenceIR | None = None,
+    carrier_skin: QualifiedCarrierSkinIR | None = None,
 ) -> QualifiedMeshIR:
     """V2 dispatcher; deterministic candidates remain exactly on legacy G1."""
     if candidate.producer_id != _TESSA_PRODUCER:
@@ -543,11 +663,15 @@ def qualify_canonical_mesh_candidate_v2(
         )
     if bridge_evidence is None or static_mesh is None or static_binding is None:
         raise QualificationError("TESSA_QUALIFIED_MESH_STAGE19_EVIDENCE_REQUIRED")
+    if carrier_evidence is None or carrier_skin is None:
+        raise QualificationError(_DYNAMIC_FIELD_BLOCKER)
     return qualify_tessa_canonical_mesh_candidate_v2(
         candidate,
         bridge_evidence=bridge_evidence,
         static_mesh=static_mesh,
         static_binding=static_binding,
+        carrier_evidence=carrier_evidence,
+        carrier_skin=carrier_skin,
         surface=surface,
         partition=partition,
         carrier_policy=carrier_policy,

@@ -502,6 +502,29 @@ def test_vf23_stage37_to46_tail_uses_unmodified_production_dynamic_policy(tmp_pa
         qualify_static_canonical_mesh_stage,
     )
 
+    camera_set = qualified_camera_set_from_dict(
+        read_json(
+            next(
+                out
+                for row in ctx["ledger"]["stages"]
+                if row["id"] == "05_CAMERA_CONTRACT_SOLVED"
+                for out in row["outputs"]
+                if out["schema"] == "RealSaS.QualifiedCameraSetIR.v1"
+            )["path"]
+        )
+    )
+    directions = build_output_direction_set(camera_set)
+    direction_path = _write(tmp_path / "directions.json", directions)
+    ctx["ledger"]["stages"].append(
+        {
+            "id": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+            "status": "PASS",
+            "outputs": [
+                _out(direction_path, "RealSaS.OutputPresentationDirectionSetIR.v1")
+            ],
+        }
+    )
+
     r17 = run(
         "17_MECHANICAL_PARTITION_QUALIFIED",
         mesh_v2.qualify_mechanical_partition_and_carriers,
@@ -594,29 +617,6 @@ def test_vf23_stage37_to46_tail_uses_unmodified_production_dynamic_policy(tmp_pa
     r36 = run(
         "36_QUALIFIED_MESH_SKIN_TRANSFER",
         mesh_v2.bind_qualified_mesh_skin_stage,
-    )
-
-    camera_set = qualified_camera_set_from_dict(
-        read_json(
-            next(
-                out
-                for row in ctx["ledger"]["stages"]
-                if row["id"] == "05_CAMERA_CONTRACT_SOLVED"
-                for out in row["outputs"]
-                if out["schema"] == "RealSaS.QualifiedCameraSetIR.v1"
-            )["path"]
-        )
-    )
-    directions = build_output_direction_set(camera_set)
-    direction_path = _write(tmp_path / "directions.json", directions)
-    ctx["ledger"]["stages"].append(
-        {
-            "id": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
-            "status": "PASS",
-            "outputs": [
-                _out(direction_path, "RealSaS.OutputPresentationDirectionSetIR.v1")
-            ],
-        }
     )
 
     candidate = canonical_mesh_candidate_from_dict(

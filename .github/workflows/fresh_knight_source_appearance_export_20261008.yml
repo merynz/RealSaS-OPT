@@ -22,6 +22,9 @@ jobs:
           ref: ${{ env.CANONICAL_SHA }}
           fetch-depth: 1
           path: canonical
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
       - name: Verify canonical code
         working-directory: canonical
         run: |

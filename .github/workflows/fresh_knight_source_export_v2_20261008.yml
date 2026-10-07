@@ -1,0 +1,126 @@
+name: fresh-knight-source-export-v2-20261008
+
+on:
+  push:
+    branches:
+      - validation/fresh-knight-source-export-v2-20261008
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      CANONICAL_SHA: 949422678d34cf69008cffd6b4d7647c8c066b8a
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      SOURCE_RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANONICAL_SHA }}
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify canonical code and dependencies
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANONICAL_SHA"
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Export sealed source-owned render inputs
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python - <<'PY'
+          from __future__ import annotations
+          import hashlib, json, shutil
+          from pathlib import Path
+          import numpy as np
+          from compiler.realsas_compiler_core.appearance_authority_v2 import complete_appearance_asset_from_dict
+          from compiler.realsas_compiler_core.appearance_render_v2 import load_face_page_index, load_face_uv
+          from compiler.realsas_compiler_core.artifact_codec_v2 import canonical_mesh_candidate_from_dict, qualified_camera_set_from_dict
+          from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import resolved_path, sha256_file
+          from compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2 import _load_texture_pages
+          from tools.demo.render_knight_motion_preview_v1 import _ctx
+
+          root=Path('/home/monster/realsas_authority')
+          run_id='SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671'
+          out=Path('/tmp/fresh_knight_source_bundle')
+          if out.exists(): shutil.rmtree(out)
+          out.mkdir(parents=True)
+          ctx=_ctx(root,run_id)
+
+          def sealed_payload(stage_id: str, schema: str):
+              row=next((r for r in ctx['ledger']['stages'] if r['id']==stage_id),None)
+              if row is None: raise RuntimeError('SOURCE_STAGE_MISSING:'+stage_id)
+              matches=[x for x in row.get('outputs',()) if x.get('schema')==schema]
+              if len(matches)!=1: raise RuntimeError(f'SOURCE_SCHEMA_CARDINALITY:{stage_id}:{schema}:{len(matches)}')
+              ref=matches[0]; path=resolved_path(ref['path'])
+              if not path.is_file(): raise RuntimeError('SOURCE_REF_MISSING:'+str(path))
+              actual=sha256_file(path)
+              if actual!=ref.get('sha256'): raise RuntimeError(f'SOURCE_REF_SHA_DRIFT:{stage_id}:{actual}!={ref.get("sha256")}')
+              payload=json.loads(path.read_text(encoding='utf-8'))
+              actual_schema=str(payload.get('schema') or payload.get('schema_version') or '')
+              if actual_schema!=schema: raise RuntimeError(f'SOURCE_EMBEDDED_SCHEMA_DRIFT:{actual_schema}!={schema}')
+              return payload, {'path':str(path),'sha256':actual,'ledger_status':str(row.get('status') or '')}
+
+          cand_payload,cand_ref=sealed_payload('18_CANONICAL_MESH_ADDRESSING_BUILD','RealSaS.CanonicalMeshCandidateIR.v1')
+          cam_payload,cam_ref=sealed_payload('05_CAMERA_CONTRACT_SOLVED','RealSaS.QualifiedCameraSetIR.v1')
+          app_payload,app_ref=sealed_payload('23_COMPLETE_APPEARANCE_ASSET_BAKED','RealSaS.CompleteAppearanceAssetIR.v2')
+          cand=canonical_mesh_candidate_from_dict(cand_payload)
+          cams=qualified_camera_set_from_dict(cam_payload)
+          app=complete_appearance_asset_from_dict(app_payload)
+          idx={str(v.candidate_vertex_id):i for i,v in enumerate(cand.vertices)}
+          vertices=np.asarray([v.P for v in cand.vertices],dtype=np.float64)
+          faces=np.asarray([[idx[str(x)] for x in f] for f in cand.faces],dtype=np.int64)
+          face_uv=np.asarray(load_face_uv(app))
+          face_page=np.asarray(load_face_page_index(app))
+          np.savez(out/'source_carrier_appearance_arrays.npz',vertices=vertices,faces=faces,face_uv=face_uv,face_page_index=face_page)
+          (out/'camera_set.json').write_text(json.dumps(cam_payload,indent=2,sort_keys=True)+'\n')
+          (out/'appearance.json').write_text(json.dumps(app_payload,indent=2,sort_keys=True)+'\n')
+          motion_root=ctx['run_root']/'inputs'/'motion'/'quaternius_knight_v1'
+          motion_out=out/'motion'; motion_out.mkdir()
+          for name in ('demo_idle_v1.motion.json','demo_run_v1.motion.json','demo_slash_v1.motion.json'):
+              src=motion_root/name
+              if not src.is_file(): raise RuntimeError('SOURCE_MOTION_MISSING:'+str(src))
+              shutil.copy2(src,motion_out/name)
+          textures_out=out/'textures'; textures_out.mkdir()
+          copied=[]
+          for texture in app.textures:
+              for page_index,page in enumerate(_load_texture_pages(texture)):
+                  src=Path(page.transport_png_path)
+                  if not src.is_file(): raise RuntimeError('SOURCE_TEXTURE_MISSING:'+str(src))
+                  dst=textures_out/f'view{int(texture.direction_index)}_page{page_index}.png'
+                  shutil.copy2(src,dst)
+                  copied.append({'direction_index':int(texture.direction_index),'page_index':page_index,'path':dst.name,'sha256':sha256_file(dst)})
+          prov=Path(app.provenance_npz_path)
+          if not prov.is_file(): raise RuntimeError('SOURCE_PROVENANCE_MISSING:'+str(prov))
+          shutil.copy2(prov,out/'provenance.npz')
+          manifest={
+              'schema':'RealSaS.FreshKnightSourceAppearanceBundle.v2',
+              'canonical_sha':'949422678d34cf69008cffd6b4d7647c8c066b8a',
+              'source_run_id':run_id,
+              'source_refs':{'stage05':cam_ref,'stage18':cand_ref,'stage23':app_ref},
+              'candidate_lineage_hash':cand.candidate_lineage_hash,
+              'vertex_count':int(vertices.shape[0]),
+              'face_count':int(faces.shape[0]),
+              'camera_set_hash':cams.camera_set_hash,
+              'appearance_asset_hash':app.asset_hash,
+              'arrays_sha256':sha256_file(out/'source_carrier_appearance_arrays.npz'),
+              'provenance_sha256':sha256_file(out/'provenance.npz'),
+              'texture_pages':copied,
+              'mechanics_from_source_run_authorized':False,
+              'source_owned_appearance_only':True,
+          }
+          (out/'BUNDLE_MANIFEST.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n')
+          print('FRESH_SOURCE_BUNDLE='+json.dumps(manifest,sort_keys=True))
+          PY
+      - name: Archive bundle
+        run: tar -C /tmp -czf /tmp/fresh_knight_source_bundle.tar.gz fresh_knight_source_bundle
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fresh-knight-source-appearance-bundle-v2
+          path: /tmp/fresh_knight_source_bundle.tar.gz
+          if-no-files-found: error
+          retention-days: 7

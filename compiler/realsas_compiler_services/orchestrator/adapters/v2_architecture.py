@@ -41,6 +41,12 @@ from compiler.realsas_compiler_core.surface_addressing_v1 import (
     static_mesh_qualification_hash,
     surface_addressing_from_dict,
 )
+from compiler.realsas_compiler_core.tessa_candidate_bridge_v1 import (
+    tessa_candidate_bridge_evidence_from_dict_v1,
+)
+from compiler.realsas_compiler_core.tessa_geometry_qualification_v1 import (
+    bind_tessa_to_static_carrier_v1,
+)
 from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
     VisualMeshSetIR,
     VisualMeshViewIR,
@@ -720,28 +726,52 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
         surface_addressing=addressing,
     )
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+    outputs = [
+        write_ir(
+            root / "static_canonical_mesh_qualification.json",
+            value,
+            authority_class=(
+                "DEMO_ONLY_STATIC_CANONICAL_MESH_MEASUREMENT"
+                if demo_geometry_lineage
+                else "STATIC_CANONICAL_MESH_QUALIFICATION"
+            ),
+        ),
+        write_ir(
+            root / "mechanical_carrier_evidence.json",
+            carrier_evidence,
+            authority_class=(
+                "DEMO_ONLY_STATIC_MECHANICAL_CARRIER_EVIDENCE"
+                if demo_geometry_lineage
+                else "STATIC_QUALIFIED_MECHANICAL_CARRIER_EVIDENCE"
+            ),
+        ),
+    ]
+    tessa_static_binding = None
+    if candidate.producer_id == "RealSaS.TESSALearnedMechanicalCarrierProposal.v1":
+        if demo_geometry_lineage:
+            raise QualificationError("TESSA_STAGE19_DEMO_ADMISSION_FORBIDDEN")
+        bridge_evidence = tessa_candidate_bridge_evidence_from_dict_v1(
+            stage_output_payload(
+                ctx,
+                "18_CANONICAL_MESH_ADDRESSING_BUILD",
+                "RealSaS.TESSACandidateBridgeEvidenceIR.v1",
+            )
+        )
+        tessa_static_binding = bind_tessa_to_static_carrier_v1(
+            candidate=candidate,
+            bridge_evidence=bridge_evidence,
+            static_mesh=value,
+        )
+        outputs.append(
+            write_ir(
+                root / "tessa_static_carrier_binding.json",
+                tessa_static_binding,
+                authority_class="TESSA_STAGE19_STATIC_CARRIER_BINDING",
+            )
+        )
     return {
         "status": "PASS_DEMO_ONLY" if demo_geometry_lineage else "PASS",
-        "outputs": [
-            write_ir(
-                root / "static_canonical_mesh_qualification.json",
-                value,
-                authority_class=(
-                    "DEMO_ONLY_STATIC_CANONICAL_MESH_MEASUREMENT"
-                    if demo_geometry_lineage
-                    else "STATIC_CANONICAL_MESH_QUALIFICATION"
-                ),
-            ),
-            write_ir(
-                root / "mechanical_carrier_evidence.json",
-                carrier_evidence,
-                authority_class=(
-                    "DEMO_ONLY_STATIC_MECHANICAL_CARRIER_EVIDENCE"
-                    if demo_geometry_lineage
-                    else "STATIC_QUALIFIED_MECHANICAL_CARRIER_EVIDENCE"
-                ),
-            ),
-        ],
+        "outputs": outputs,
         "diagnostics": {
             "qualification_hash": value.qualification_hash,
             "mechanical_carrier_evidence_hash": carrier_evidence.carrier_evidence_hash,
@@ -749,6 +779,9 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
             "mechanical_carrier_geometry_hash": carrier_evidence.geometry_hash,
             "mechanical_carrier_invalid_normal_count": int(
                 sum(not flag for flag in carrier_evidence.normal_valid)
+            ),
+            "tessa_static_carrier_binding_hash": (
+                None if tessa_static_binding is None else tessa_static_binding.binding_hash
             ),
             **report,
         },

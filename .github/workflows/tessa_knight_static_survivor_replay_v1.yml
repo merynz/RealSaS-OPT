@@ -1,0 +1,85 @@
+name: tessa-knight-static-survivor-replay-v1
+
+on:
+  pull_request:
+    paths:
+      - "compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py"
+      - "compiler/realsas_compiler_core/tessa_static_repair_v1.py"
+      - "tools/audit_tessa_knight_static_survivor_replay_v1.py"
+      - "tests/fixtures/tessa/**"
+      - ".github/workflows/tessa_knight_static_survivor_replay_v1.yml"
+  push:
+    branches:
+      - promotion/tessa-mira-mechanical-survivor-v2-20261006
+    paths:
+      - "compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py"
+      - "compiler/realsas_compiler_core/tessa_static_repair_v1.py"
+      - "tools/audit_tessa_knight_static_survivor_replay_v1.py"
+      - "tests/fixtures/tessa/**"
+      - ".github/workflows/tessa_knight_static_survivor_replay_v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: [self-hosted, linux]
+    timeout-minutes: 30
+    env:
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: "."
+      PYTHONHASHSEED: "0"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install pinned gate dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Reconstruct and verify sealed fixture bytes
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import base64
+          import hashlib
+
+          root = Path("tests/fixtures/tessa")
+          parts = [
+              root / f"TESSA_T1B_DECODED_MESH.npz.b64.part{i:02d}"
+              for i in range(4)
+          ]
+          encoded = "".join(path.read_text(encoding="ascii").strip() for path in parts)
+          raw = base64.b64decode(encoded, validate=True)
+          expected_sha = "b7ccb058ef23f8c54d053e64580150dffffeb6a76a126ecaf48b265dd093f390"
+          actual_sha = hashlib.sha256(raw).hexdigest()
+          if len(raw) != 36970:
+              raise SystemExit(f"T1B_FIXTURE_SIZE_MISMATCH:{len(raw)}")
+          if actual_sha != expected_sha:
+              raise SystemExit(f"T1B_FIXTURE_SHA_MISMATCH:{actual_sha}")
+          (root / "TESSA_T1B_DECODED_MESH.npz").write_bytes(raw)
+          print(f"TESSA_T1B_FIXTURE_RECONSTRUCT_PASS size={len(raw)} sha256={actual_sha}", flush=True)
+          PY
+          test "$(sha256sum tests/fixtures/tessa/normalization_domain.json | awk '{print $1}')" = "01b63a57390de9a5d2c731d9644e65ff779980caa066c19204db3b4a3e0c634b"
+          echo TESSA_KNIGHT_STATIC_REPLAY_FIXTURES_PASS
+      - name: Replay historical V2 to V3 survivor
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/tessa_knight_static_survivor_replay_v1
+          python tools/audit_tessa_knight_static_survivor_replay_v1.py \
+            --t1b tests/fixtures/tessa/TESSA_T1B_DECODED_MESH.npz \
+            --normalization tests/fixtures/tessa/normalization_domain.json \
+            --out /tmp/tessa_knight_static_survivor_replay_v1
+          test -s /tmp/tessa_knight_static_survivor_replay_v1/TESSA_KNIGHT_STATIC_SURVIVOR_REPLAY_V1.json
+      - name: Upload replay receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: tessa-knight-static-survivor-replay-v1
+          path: /tmp/tessa_knight_static_survivor_replay_v1/TESSA_KNIGHT_STATIC_SURVIVOR_REPLAY_V1.json
+          if-no-files-found: error

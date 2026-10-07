@@ -1,0 +1,132 @@
+{
+  "schema": "RealSaS.TESSAMIRAFinalDAGPromotionAudit.v1",
+  "date": "2026-10-07",
+  "status": "PASS_FOR_CONTROLLED_PROMOTION_WITH_EXPLICIT_DYNAMIC_INTERLOCK",
+  "authority_class": "CANONICAL_PROMOTION_AUDIT",
+  "base_main_sha": "c4d478e934dc5cce0d26e8b0d64ddd402b1a2102",
+  "audited_promotion_head_sha": "a7d58179a5c1c11c6dec30c02c991de3942fc239",
+  "branch_relation": {
+    "ahead_by": 67,
+    "behind_by": 0,
+    "merge_base_is_base_main": true
+  },
+  "scientific_boundary": {
+    "tessa_t1b_reconstruction": "SURVIVOR_RECONSTRUCTION_ONLY",
+    "tessa_static_compiler_repair_v3": "PASS_FIT1_KNIGHT_STATIC",
+    "mira_teacher23": "FALSIFIED__DO_NOT_PROMOTE",
+    "mira_raw41": "SURVIVOR_FIT1_GSA_FIELD__RESEARCH_AUTHORITY_ONLY",
+    "actual_idle_run_slash_dynamic": "INCONCLUSIVE__SOURCE_MOTION_OR_RETARGET_ENVELOPE",
+    "attachment_closure": "OPEN",
+    "generalization": false,
+    "product_dynamic_authority": false
+  },
+  "knight_static_replay": {
+    "workflow": "tessa-knight-static-survivor-replay-v1",
+    "run_id": 37533166727,
+    "status": "PASS_MECHANICAL_HISTORICAL_V2_TO_V3_REPLAY",
+    "t1b_sha256": "b7ccb058ef23f8c54d053e64580150dffffeb6a76a126ecaf48b265dd093f390",
+    "normalization_sha256": "01b63a57390de9a5d2c731d9644e65ff779980caa066c19204db3b4a3e0c634b",
+    "v2": {
+      "vertices": 3653,
+      "faces": 6928,
+      "accepted_flips": 72,
+      "accepted_collapses": 12,
+      "accepted_relaxations": 3,
+      "residual": 2,
+      "min_angle_deg": 7.1292146529049,
+      "max_aspect": 9.089329469223644
+    },
+    "v3": {
+      "vertices": 3653,
+      "faces": 6928,
+      "accepted_corrective_moves": 2,
+      "residual": 0,
+      "min_angle_deg": 7.524628286281861,
+      "max_aspect": 9.089329469223644
+    },
+    "serialized_file_sha_is_diagnostic_only": true,
+    "semantic_mechanical_digest_is_gate_authority": true,
+    "threshold_relaxation": false,
+    "knight_specific_exemption": false
+  },
+  "dag_audit": {
+    "stage08_normalization": "QUALIFIED_INPUT_AUTHORITY",
+    "stage15_rigging_surface": "QUALIFIED_GSA_MECHANICAL_EVIDENCE_DOMAIN",
+    "stage17_partition": "QUALIFIED_COMPONENT_DOMAIN",
+    "stage18": {
+      "tessa_role": "SEALED_LEARNED_PROPOSAL_IMPORT_PLUS_COMPILER_STATIC_REPAIR",
+      "tessa_model_checkpoint_execution_claimed": false,
+      "tessa_autoregressive_inference_in_canonical_mainline_claimed": false,
+      "proposal_source_geometry_lineage_must_match_stage15": true,
+      "gsa_material_support_is_geometry_authority": false,
+      "existing_deterministic_backend_preserved": true
+    },
+    "stage19": {
+      "role": "SOLE_STATIC_CANONICAL_MECHANICAL_CARRIER_AUTHORITY",
+      "tessa_static_binding_supported": true,
+      "actual_candidate_static_policy_remeasurement_required": true,
+      "actual_candidate_source_fidelity_replay_required": true,
+      "dynamic_motion_authority_claimed": false
+    },
+    "axis_lane": {
+      "canonical_public_name": "AXIS",
+      "legacy_schema_and_checkpoint_names_retained": ["ATLAS", "Geppetto"],
+      "static_carrier_dependency_preserved": true
+    },
+    "mira_lane": {
+      "canonical_public_name": "MIRA",
+      "legacy_schema_and_checkpoint_names_retained": ["Arachne"],
+      "gsa_domain_field_semantics_preserved": true,
+      "generic_tessa_carrier_field_transport_product_qualified": false
+    },
+    "stage35": {
+      "tessa_static_geometry_may_reach_stage35": true,
+      "qualified_mesh_mint_requires_product_qualified_dynamic_carrier_field_binding": true,
+      "current_tessa_dynamic_binding_status": "FAIL_CLOSED",
+      "historical_fit1_v4_binding_may_bypass_interlock": false,
+      "existing_deterministic_path_preserved": true
+    }
+  },
+  "canonical_name_presentation": {
+    "paper_order": ["IRIS", "TESSA", "AXIS", "MIRA"],
+    "legacy_stage_ids_are_compatibility_identifiers": true,
+    "display_mapping": {
+      "26_GEPPETTO_FIT_PREREGISTERED": "AXIS fit preregistration bound to static canonical carrier",
+      "27_GEPPETTO_FIT": "AXIS fit",
+      "29_GEPPETTO_CHECKPOINT_SEALED": "AXIS checkpoint seal",
+      "30_ARACHNE_FIT_PREREGISTERED": "MIRA fit preregistration bound to static canonical carrier and skeleton",
+      "31_ARACHNE_FIT": "MIRA fit",
+      "33_ARACHNE_CHECKPOINT_SEALED": "MIRA checkpoint seal"
+    },
+    "byte_sensitive_stage_ids_checkpoint_keys_and_schema_strings_must_not_be_cosmetically_rewritten": true
+  },
+  "ci_at_audited_head": {
+    "all_required_workflows_passed": true,
+    "workflow_count": 11,
+    "required": [
+      "architecture-v4-contract",
+      "consumer-coupling-probe-v1",
+      "consumer-interlock-v0",
+      "current-mainline-self-hosted-ci",
+      "current-runtime-self-hosted-ci",
+      "model-mainline-source-gate",
+      "mwb0-typed-seam-v1",
+      "mwb1-identity-subset-v1",
+      "proof-service-promotion-gate",
+      "tessa-knight-static-survivor-replay-v1",
+      "tessa-static-survivor-contract-v1"
+    ]
+  },
+  "merge_policy": {
+    "controlled_merge_allowed_after_this_receipt_revalidates_ci_on_final_head": true,
+    "tessa_dynamic_product_pass_must_not_be_claimed": true,
+    "fresh_post_merge_knight_render_required": true,
+    "fresh_post_merge_render_semantics": "REGRESSION_RENDER_OF_EXISTING_CANONICAL_DYNAMIC_LANE__NOT_TESSA_DYNAMIC_CERTIFICATION",
+    "future_required_work": [
+      "COMPILERIZE_AND_GATE_TESSA_CHECKPOINT_TO_AUTOREGRESSIVE_PROPOSAL_PRODUCTION_BEFORE_CLAIMING_CANONICAL_TESSA_INFERENCE",
+      "QUALIFY_SUBJECT_FREE_PRODUCT_GSA_TO_TESSA_CARRIER_FIELD_TRANSPORT",
+      "RESOLVE_SOURCE_MOTION_OR_RETARGET_DYNAMIC_G3_OWNER",
+      "CLOSE_NATIVE_ATTACHMENT_AUTHORITY"
+    ]
+  }
+}

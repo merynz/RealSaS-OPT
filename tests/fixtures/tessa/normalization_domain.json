@@ -1,0 +1,27 @@
+{
+  "camera_set_binding_hash": "79bf4b15bd1ecd1a1ace7a978237a294dddab8ca0b9402917407d2f767bb7224",
+  "center_xyz": [
+    0.042003750801086426,
+    -0.7091579437255859,
+    1.2332630157470703
+  ],
+  "coordinate_frame": "REALSAS_OBJECT_FRAME",
+  "half_extent": 2.016295680999756,
+  "metadata": {
+    "camera_refit_performed": false,
+    "normalization_policy": "EXACT_MANIFEST_OBJECT_CUBE_V1"
+  },
+  "normalization_hash": "4d1fd4943d2815156974b8967d5ba180e424dc7343f9da68549cff8146efdb41",
+  "normalized_bounds_max": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "normalized_bounds_min": [
+    -1.0,
+    -1.0,
+    -1.0
+  ],
+  "observation_set_binding_hash": "947d8c74a611a21b02929cf9ec340f127c38500861ff5dd42ac2b27e733ae29b",
+  "schema_version": "RealSaS.NormalizationDomainIR.v1"
+}

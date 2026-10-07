@@ -2,90 +2,74 @@
 
 **Date:** 2026-10-07  
 **Canonical code line:** `main` only  
-**Active program:** `REPO_CURRENTNESS__PLATFORM_ENFORCEMENT__PERFORMANCE_OPTIMIZATION`  
-**Runtime visual diagnosis:** deferred until the active program closes
+**Architecture:** RealSaS V2, 46-stage dependency DAG  
+**Implementation readiness:** `canonical/V2_IMPLEMENTATION_READINESS.json`
 
-## Current canonical state
+## Current product architecture
 
-The recovered TESSA/MIRA mechanical-survivor promotion is now on canonical `main`.
+Geometry, Mechanics and Appearance remain co-equal product authorities. `SurfaceAddressing` is the stable canonical mesh-domain/addressing authority and Complete Appearance Authority owns source-preserving visual appearance. Presentation remains first-class editable addressing authority.
 
-The exact pre-program baseline was `main@287eabef757cb2b1e6b532a4c2d0a71eb62cd324` (merge PR #56). That baseline established:
+Canonical public model naming is `IRIS -> TESSA -> AXIS -> MIRA`. Legacy `GEPPETTO` / `ARACHNE` / `ATLAS` identifiers may remain where required for schema, checkpoint, artifact or historical compatibility.
 
-- TESSA T1B as a learned topology/reconstruction proposal survivor, not final product authority;
-- Compiler-owned static repair before Stage19;
-- Knight static mechanical carrier survivor at 3653 vertices / 6928 faces, 0 frozen-policy violations, min angle 7.524628286°, max aspect 9.089329469°, with no threshold relaxation or Knight-specific exemption;
-- Stage19 as the sole static carrier authority for the TESSA lane;
-- MIRA teacher23 falsified and forbidden as promoted authority;
-- MIRA RAW41 preserved as FIT1 research evidence only;
-- TESSA Stage35 product mint fail-closed until a subject-free product-qualified carrier-field transport exists;
-- actual IDLE/RUN/SLASH dynamic certification remains unclosed; no TESSA dynamic product PASS is claimed.
+### Mechanics — latest developed FIT1 line
 
-Canonical public model naming is `IRIS -> TESSA -> AXIS -> MIRA`. Legacy `GEPPETTO` / `ARACHNE` / `ATLAS` identifiers may remain where required for schema, checkpoint, artifact or historical compatibility; they are not the preferred public architecture names.
+- Stage19 owns the exact frozen mechanical carrier `M`.
+- AXIS V5.4.1 owns a hard causal required tree plus deterministic 256-bin XYZ; residual diffusion is not runtime position authority.
+- Compiler validates/materializes AXIS required parents; it does not reselect the tree on this path.
+- MIRA V5.5 predicts `W_M` directly on the exact Stage19 carrier basis.
+- Stage32 qualifies carrier-native `W_M`; Stage34 derives a subject-free pre-bind provisional frame/envelope; Stage35 rederives and qualifies those frames against final `W_M` before proving the exact `(M,G,W_M)` carrier; Stage36 is identity re-key/seal only, not semantic skin transfer.
+- Generic coincident-frame qualification is subject-free: zero-influence subtrees may inherit parent frame; active coincident subtrees fail closed and require explicit AXIS orientation/tail evidence.
+
+Knight FIT1 mechanics are closed relative to the sealed source/teacher motion envelope. Absolute G3 is intentionally not promoted to a universal PASS because the sealed teacher itself lies outside the frozen absolute thresholds. No FIT8/FITK/unseen/product/generalization claim is made.
+
+## Canonical mesh domain
+
+`compiler/realsas_compiler_core/surface_addressing_v1.py` owns `SurfaceAddressing`; Stage18/19 own construction and static qualification of the mechanical carrier. The current mechanics chain preserves a single carrier basis across MIRA prediction, dynamic proof and runtime binding.
+
+## Complete Appearance Authority
+
+Appearance / CAA remains source-preserving and proof-bound under `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`. The mechanical mesh is not allowed to silently become a second appearance authority.
 
 ## Fresh canonical Knight regression render
 
-Run `37578120472` executed on exact `main@287eabef757cb2b1e6b532a4c2d0a71eb62cd324` and completed PASS.
+Run `37578120472` executed on exact `main@287eabef757cb2b1e6b532a4c2d0a71eb62cd324` and completed PASS. It rebuilt sealed Stage23, requalified Stage24 and freshly rerendered IDLE/RUN/SLASH with exact frozen reference hashes.
 
-It rebuilt the sealed Stage23 mechanical-CAA state, requalified Stage24, reran the renderer, and matched the frozen GIF references exactly:
-
-- IDLE `4c64437ba1f2ecaca8302a52c598f3ba7750a923fd50b90f7cafa3f8473386c3`
-- RUN `64ad50eeb9ea55ce202ddc46728ffea9074419dbf855938840f69d06661806e3`
-- SLASH `adc8e8cd0e2272a836e50f7a73585208074703ea5f3c9a549583d7a659fa2b85`
-
-Artifact: `knight-frozen-canonical-recovered`, workflow artifact id `11464461500`.
-
-This is an artifact-level reproducibility/regression render. It does **not** rerun IRIS/TESSA/AXIS/MIRA inference and it does **not** prove a fresh source-to-puppet product compile.
+This is artifact-level reproducibility. It reused sealed upstream artifacts; IRIS/TESSA/AXIS/MIRA were not reinferred and it is not a fresh source-to-puppet compile.
 
 ## Execution model
 
-The intended system separation is now normative:
-
 ```text
-Git/main          = code truth
-Attempt           = research truth
-ProductRevision   = production truth
-Workflow Engine   = durable execution truth
-Artifact Registry = immutable typed artifact identity/dependencies
+Git/main            = code truth
+Attempt             = research truth
+ProductRevision     = production truth
+Workflow Engine     = durable execution truth
+Artifact Registry   = immutable typed artifact identity/dependencies
 Proof/Qualification = promotion eligibility
 ```
 
-Long-lived research/promotion/integration branches must not be used as authority or product state. Temporary review branches are allowed only as short-lived source-code collaboration and must not become a competing continuation line.
-
-Research execution should be dependency-aware and reuse exact qualified upstream artifacts. Product compile must run all inference/Compiler work required to construct a qualified ProductRevision unless an exact semantic cache hit is proven. Product render/playback consumes an already qualified ProductRevision and must not rerun model inference merely to render it.
+Long-lived research/promotion/integration branches must not become product or scientific authority. Research Attempts may reuse exact qualified upstream artifacts by dependency identity. Product compile runs the required inference/Compiler construction path unless an exact semantic cache hit is proven. Runtime consumes qualified ProductRevision artifacts and must not silently re-solve mechanics or appearance.
 
 ## Platform enforcement gap
 
-The Go control plane is already the intended owner of durable product/research state, Artifact Registry metadata, Attempt/ProductRevision lifecycle, promotion, dependency scheduling and durable workflows. However legacy GitHub Actions and direct `$REALSAS_AUTHORITY_ROOT` scripts still allow stateful work to bypass the platform.
-
-This is the next platform blocker: the architecture exists, but normal execution is not yet forced through it.
-
-Until platform-enforcement closure is complete, direct legacy workflows are permitted only for CI/reproducibility of already sealed evidence. They must not mint new normal product/research authority.
+The Go control plane is the intended owner of durable product/research state, Artifact Registry metadata, Attempt/ProductRevision lifecycle, promotion, dependency scheduling and workflows. Legacy direct authority-root/GitHub Actions paths remain CI/reproducibility mechanisms and must not become a second authority.
 
 ## Performance baseline
 
-The fresh regression run exposed unacceptable latency even though it reused sealed upstream artifacts. Approximate measured work:
+Fresh regression telemetry remains the current optimization baseline:
 
-- Stage19 static qualification: 60.9 s
-- Stage20 CAA preregistration: 43.8 s
-- Stage21 CAA compile: 321.7 s
-  - directional donor/local completion: 177.0 s
-  - source projection/lock: 63.9 s
-  - NPZ sealing: 33.7 s
-- Stage22 seal: 3.1 s
-- Stage23 bake: 32.9 s
-- Stage24 qualification: 131.5 s
-- renderer: 463.8 s
+- Stage19 static qualification: ~60.9 s
+- Stage21 CAA compile: ~321.7 s
+- Stage24 qualification: ~131.5 s
+- renderer: ~463.8 s
 
-These measured costs, not speculative micro-optimizations, define the first optimization targets.
+These measured costs define optimization priorities after repository currentness is sealed.
 
 ## Immediate execution priorities
 
-Close in this order:
-
-1. **Repository currentness closure** — all current entry/navigation/state documents must point to the same 2026-10-07 authority and priority order; historical files remain provenance only.
-2. **Go platform enforcement** — make stateful research/product execution flow through Artifact/Attempt/ProductRevision/workflow authority instead of optional direct legacy paths.
-3. **Performance optimization** — dependency-aware reuse, removal of redundant rebuild/qualification, native/batch hot paths and measured elimination of the Stage21/Stage24/render bottlenecks.
-4. **Runtime/presentation visual diagnosis** — only after 1–3. If the Knight image still looks wrong, investigate presentation/runtime ownership then. Do not reopen already sealed static topology/geometry mechanically without new counter-evidence.
+1. Close this carrier-native mechanics promotion onto canonical `main` with CI/governance green.
+2. Keep Go platform enforcement as the next system blocker.
+3. Optimize measured rebuild/CAA/render hot paths.
+4. Return to presentation/runtime visual diagnosis only if the image remains wrong after 1–3.
 
 ## Read first
 
@@ -93,11 +77,9 @@ Close in this order:
 2. `CURRENT_STATE.md`
 3. `AGENTS.md`
 4. `SYSTEM_INDEX.md`
-5. `canonical/TESSA_MIRA_MECHANICAL_SURVIVOR_PROMOTION_LEDGER_V1_20261006.json`
-6. `canonical/TESSA_MIRA_FINAL_DAG_PROMOTION_AUDIT_V1_20261007.json`
-7. `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
-8. `docs/platform/adr/0002-compiler-platform-boundary.md`
-9. `docs/platform/adr/0003-go-control-plane.md`
-10. `canonical/TRUTH_CORPUS_V1_STATUS_20261004.md`
+5. `canonical/V2_IMPLEMENTATION_READINESS.json`
+6. `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
+7. `canonical/KNIGHT_AXIS541_MIRA55_CARRIER_NATIVE_PROMOTION_20261007.json`
+8. `canonical/TRUTH_CORPUS_V1_STATUS_20261004.md`
 
-Older recovery/runtime-audit handoffs remain historical evidence and must not override this continuation authority.
+Older recovery/runtime-audit documents remain provenance only and must not override this continuation authority.

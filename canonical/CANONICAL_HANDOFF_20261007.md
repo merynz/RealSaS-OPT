@@ -2,150 +2,55 @@
 
 ## Continuation authority
 
-This handoff supersedes older recovery/runtime-audit continuation pointers. Historical handoffs remain provenance only.
+Continue from canonical `main` only. Historical recovery/research branches and old handoffs are provenance, not competing authority.
 
-Continue from canonical `main` only.
-
-The active program is:
-
-```text
-1. repository currentness
-2. Go platform enforcement
-3. performance optimization
-4. runtime/presentation visual diagnosis only if still needed
-```
-
-Do not reorder this program merely because historical runtime-audit documents remain in the repository.
-
-## Mechanical promotion now canonical
-
-PR #56 promoted the recovered TESSA/MIRA mechanical survivor semantics to main.
-
-Promoted scope:
-
-- typed TESSA Stage18 learned-proposal consumer;
-- separation of learned TESSA geometry from GSA material/support evidence;
-- Compiler-owned TESSA static repair before Stage19;
-- immutable learned-proposal repair/reference provenance;
-- Stage19 static TESSA carrier qualification using existing frozen static/source-fidelity gates;
-- fail-closed Stage35 TESSA product interlock until subject-free carrier-field transport is qualified;
-- preservation of RAW41 as scoped FIT1 research evidence only.
-
-Not promoted as product authority:
-
-- MIRA teacher23 (falsified);
-- historical V4 source-topology/barycentric transport as a generic shipping dependency;
-- actual IDLE/RUN/SLASH TESSA dynamic product PASS;
-- unseen/generalization claims;
-- native attachment closure.
-
-Knight static mechanical survivor after Compiler repair:
-
-- 3653 vertices
-- 6928 faces
-- 0 frozen-policy violations
-- min angle 7.524628286°
-- max aspect 9.089329469°
-- no threshold relaxation
-- no Knight-specific exemption
-
-## Canonical DAG boundary
-
-Current Stage18 TESSA product role is `SEALED_LEARNED_PROPOSAL_IMPORT_PLUS_COMPILER_STATIC_REPAIR`.
-
-TESSA model/checkpoint code exists, but canonical shipping checkpoint -> autoregressive decode -> proposal production is not yet a first-class DAG stage. Do not claim otherwise.
-
-Stage19 is the static carrier authority. Stage35 remains fail-closed for TESSA until carrier-field transport is product-qualified.
-
-Canonical public model naming is:
+Canonical public model order remains:
 
 `IRIS -> TESSA -> AXIS -> MIRA`
 
-Legacy Geppetto/Arachne/ATLAS identifiers may remain for compatibility only.
+Legacy Geppetto/Arachne/ATLAS identifiers remain only where checkpoint/schema/replay compatibility requires them.
 
-## Fresh regression render seal
+## Latest mechanical architecture
 
-Workflow run `37578120472` executed on exact `main@287eabef757cb2b1e6b532a4c2d0a71eb62cd324`.
+The current mechanical line is carrier-native and atomic:
 
-The workflow rebuilt immutable Stage23 from the sealed parent, requalified Stage24 and rerendered Knight IDLE/RUN/SLASH. It PASSed exact reference hashes:
+`Stage19 frozen M + AXIS G + MIRA W_M -> Compiler proof/runtime on the exact same M`.
 
-- IDLE `4c64437ba1f2ecaca8302a52c598f3ba7750a923fd50b90f7cafa3f8473386c3`
-- RUN `64ad50eeb9ea55ce202ddc46728ffea9074419dbf855938840f69d06661806e3`
-- SLASH `adc8e8cd0e2272a836e50f7a73585208074703ea5f3c9a549583d7a659fa2b85`
+- TESSA proposes the mechanical carrier; Compiler static qualification/repair seals the exact Stage19 `M`.
+- AXIS V5.4.1 uses BFS parent-before-child hard causal parent authority and deterministic 256-bin XYZ. Compiler validates/materializes the required tree; it does not reselect parents in this path.
+- MIRA V5.5 consumes GSA evidence, AXIS `G`, and exact `M` query geometry, and predicts `W_M` directly on the Stage19 carrier.
+- GSA is evidence only, not semantic skin authority.
+- The normal carrier-native path has no semantic skin transfer. A changed `M` invalidates `W_M` and requires fresh MIRA inference.
+- Stage34 derives a subject-free pre-bind provisional joint-frame/envelope witness without `W_M`; coincident edges may only provisionally inherit their parent frame there.
+- Stage35 rederives those frames after final `W_M` exists and owns generic post-bind mechanical-observability qualification: an inactive coincident subtree may inherit its parent frame; an active one fails closed and requires AXIS orientation/tail evidence. No Knight-specific role/index logic and no epsilon invention.
+- Stage36 is identity re-key/seal on the same exact carrier, not semantic skin transfer.
 
-Artifact id `11464461500`, artifact digest `sha256:1212583da4bfa412be01d482611ea52f19c86ca3ac35b7932df87ae3411d6691`.
+The previous surface-skin/transfer adapters are byte-preserved as exact Git blobs under `*_legacy_v2.py` for historical replay. Current V2 stage entrypoint filenames dispatch only the promoted stages to the carrier-native V3 path, so the 46-stage DAG IDs and platform stage ownership stay stable.
 
-The run did **not** rerun IRIS/TESSA/AXIS/MIRA inference. It proves fresh artifact-level reconstruction/qualification/render reproducibility, not a source-to-puppet compile.
+## Knight result and exact claim
 
-## Why platform enforcement is now first-class
+Knight FIT1 mechanics is considered closed **relative to the sealed source/teacher motion envelope**.
 
-The repository already defines the intended state boundary:
+The source teacher itself fails the conservative absolute dynamic G3 thresholds. Current `(M,G,W_M)` does not introduce a worse mechanical collapse and improves the source reference on the failing area/condition metrics. Consequently:
 
-```text
-Git               = source-code history
-PostgreSQL        = durable metadata state
-Artifact Store    = immutable generated bytes
-Artifact Registry = typed artifact identity + dependencies
-Attempt           = research truth
-ProductRevision   = production truth
-Workflow Engine   = durable execution
-Proof/Qualification = promotion eligibility
-```
+- do not claim absolute dynamic G3 PASS;
+- do not relax the frozen G3 thresholds;
+- do not add a Knight-specific exemption;
+- do record the Knight mechanical research loop as closed relative to source intent;
+- proceed to FIT8/FITK/unseen rather than continuing to optimize Knight against a gate its teacher does not satisfy.
 
-However legacy GitHub Actions/direct authority-root paths can still perform stateful work without being forced through the Go control plane. That is an enforcement defect.
+Machine-readable receipt: `canonical/KNIGHT_AXIS541_MIRA55_CARRIER_NATIVE_PROMOTION_20261007.json`.
 
-The next platform program must make normal stateful operations impossible to perform outside Platform authority. Legacy direct workflows may remain only as CI/reproducibility harnesses for sealed evidence.
+## Claim boundary
 
-## Single-main rule
+Not closed by this promotion:
 
-Research/product separation must no longer be encoded as long-lived Git branches.
+- product authority;
+- FIT8/FITK/unseen generalization;
+- universal absolute G3/G3B admission;
+- appearance/presentation quality;
+- future active coincident controls without explicit orientation/tail evidence.
 
-- `main` = current code/architecture superset.
-- `Attempt` = research execution and evidence.
-- `ProductRevision` = production truth.
-- Product promotion = atomic Platform state transition, not a Git-history interpretation.
+## System program
 
-Temporary review branches may exist briefly but must not become competing continuation lines.
-
-## Compile vs render semantics
-
-Research Attempt may reuse exact upstream qualified artifacts according to semantic dependency identity.
-
-Product Compile for a new subject must execute all required inference/Compiler construction needed for a qualified ProductRevision, unless an exact semantic cache hit is proven.
-
-Product Render/Playback consumes a qualified ProductRevision. It should not rerun model inference merely to render an already compiled subject.
-
-## Performance program
-
-Fresh regression telemetry shows the current execution path is too slow even with sealed artifacts:
-
-- Stage19: ~60.9 s
-- Stage20: ~43.8 s
-- Stage21: ~321.7 s
-- Stage22: ~3.1 s
-- Stage23: ~32.9 s
-- Stage24: ~131.5 s
-- render: ~463.8 s
-
-Within Stage21 the largest measured subcost is directional donor/local completion (~177.0 s), followed by source projection/lock (~63.9 s) and NPZ sealing (~33.7 s).
-
-Optimization should therefore prioritize:
-
-1. semantic dependency reuse / no-op avoidance;
-2. preventing unnecessary Stage19–24 reconstruction for render-only requests;
-3. Stage21 algorithm/data-layout hot paths;
-4. Stage24 repeated graph/qualification work;
-5. renderer/native batch throughput;
-6. artifact serialization/sealing overhead where material.
-
-Do not spend the next cycle on speculative visual-runtime fixes before this performance/platform program closes.
-
-## Runtime visual issue policy
-
-The fresh render may still be visually unsatisfactory. That does not reopen the sealed static topology/geometry/mechanical result by default.
-
-After repo/platform/performance closure, if the image remains wrong, investigate runtime/presentation/visibility/appearance ownership with the static mechanical baseline held fixed unless new counter-evidence proves it invalid.
-
-## Corpus
-
-`canonical/TRUTH_CORPUS_V1_STATUS_20261004.md` remains authoritative. Current corpus status is `SEALED_RAW__STRUCTURALLY_AUDITED__ADMISSION_PENDING`; do not call it training-ready canonical truth yet.
+This mechanical promotion does not erase the broader program. Go platform enforcement, dependency-aware artifact reuse, performance optimization, and later presentation/runtime diagnosis remain separate system work. Research/product truth belongs to Attempt/ProductRevision state, not long-lived Git branches.

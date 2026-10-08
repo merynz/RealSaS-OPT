@@ -63,6 +63,12 @@ def run(args):
             return value
         return value
     cfg = materialize(cfg)
+    handoff = json.loads(Path(cfg["source_handoff"]["path"]).read_text())
+    for view in cfg["views"]:
+        source = view["source"]
+        receipt = handoff["files"][f"observations/V{view['view_index']}.png"]
+        if source["sha256"] != receipt["sha256"] or Path(source["path"]).stat().st_size != receipt["bytes"]:
+            raise RuntimeError("SCOPED_SOURCE_HANDOFF_BYTES_DRIFT")
     player = args.player.resolve()
     runtime = {"native_player": {"path": str(player), "sha256": hashlib.sha256(player.read_bytes()).hexdigest()},
                "native_parallel_workers": 2}

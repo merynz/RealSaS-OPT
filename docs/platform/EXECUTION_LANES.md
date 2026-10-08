@@ -74,6 +74,11 @@ Engine contract must validate and reseal them. The API rejects qualification
 fields supplied by an importer. Seal roles with `subject_id`, `bindings` and
 `created_by`; each binding contains `role` and `artifact_id`.
 
+Migration08 separates semantic identity from storage deduplication: two typed
+contracts may share one verified CAS object while retaining separate producer,
+dependency and qualification records. Downgrading to the old globally unique
+content/storage pair fails if such aliases exist; it never discards them.
+
 For a segmented `manifest:<key>` role, import the exact JSON value of that
 manifest section (with pinned file hashes), not one NPZ under a misleading section
 role. Engine verifies section equality and referenced file bytes before executing.

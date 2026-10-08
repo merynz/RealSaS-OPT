@@ -1,0 +1,54 @@
+{
+  "schema": "RealSaS.PlatformThroughputHydrationGCAmendment.v1",
+  "date": "2026-10-08",
+  "amends": "canonical/PLATFORM_THROUGHPUT_HYDRATION_GC_PREREG_20261008.json",
+  "base_main": "b2eb7148d9aeb2a797451bbd6063f4f3695ab2e2",
+  "reason": {
+    "repository_visibility_verified": "PUBLIC",
+    "active_development_visibility_policy": "PUBLIC",
+    "private_visibility_policy": "INACTIVE_PAUSE_OR_TRAVEL",
+    "consequence": "HOST_INDEPENDENT_CPU_CI_MOVES_TO_STANDARD_GITHUB_HOSTED_LINUX"
+  },
+  "execution_topology": {
+    "host_independent_cpu_ci": "GITHUB_HOSTED_UBUNTU_LATEST",
+    "research_gpu_inference_and_render_default": "NOTEBOOK_OR_COLAB",
+    "local_wsl_default": false,
+    "local_wsl_roles": [
+      "EXPLICIT_PRODUCT_NATIVE_HOST_WITNESS",
+      "SELECTED_LOCAL_GTX1660TI_INFERENCE_WHEN_USEFUL"
+    ],
+    "additional_self_hosted_cpu_runners_required": false,
+    "hosted_jobs_require_public_repository": true,
+    "hosted_jobs_skip_when_repository_private": true
+  },
+  "cache_policy_amendment": {
+    "github_hosted": "DEPENDENCY_KEYED_GITHUB_ACTIONS_CACHE_AND_EPHEMERAL_RUNNER_STATE",
+    "persistent_local": "BOUNDED_ENTRY_ATOMIC_QUOTA_AGE_LRU_GC",
+    "external_artifact_cas_gc": "DEFERRED_UNTIL_EXECUTOR_LEASE_PIN_CONTRACT"
+  },
+  "database_policy_amendment": {
+    "github_hosted_platform_ci": "EPHEMERAL_POSTGRES_SERVICE",
+    "persistent_local_postgres": "RESERVED_FOR_LOCAL_INTEGRATION_OR_PRODUCT_WITNESS",
+    "canonical_developer_database_mutation_forbidden": true
+  },
+  "hydration_evidence": {
+    "drive_locator_bytes": "PASS_12_OF_12_EXACT_SIZE_SHA256",
+    "wsl_drive_to_cas_offline_reuse_run_id": 37802717565,
+    "wsl_drive_to_cas_offline_reuse_status": "PASS_12_OF_12_CAS_HIT",
+    "recurring_wsl_hydration_workflow_required": false
+  },
+  "unchanged_authority_rules": {
+    "hydration_mints_stage_pass": false,
+    "external_import_is_stage_cache_hit": false,
+    "compiler_requalification_required": true,
+    "content_identity": "SHA256"
+  },
+  "closure_order": [
+    "HOSTED_FIRST_CPU_CI_AND_MIXED_EXECUTION_GOVERNANCE",
+    "SETUP_COST_REDUCTION_AND_BOUNDED_PERSISTENT_LOCAL_GC",
+    "KNIGHT_12_OF_12_HYDRATION_SEALED",
+    "SCOPED_RESEARCH_RENDER_CONTRACT",
+    "GENERAL_MODEL_INFERENCE_EXECUTOR_AND_ARTIFACT_LEASES",
+    "FRESH_KNIGHT_IDLE_RUN_SLASH"
+  ]
+}

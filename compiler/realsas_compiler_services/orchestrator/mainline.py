@@ -1213,6 +1213,7 @@ def _run_stage(
     run_id: str,
     stage_id: str,
     ledger_path: Path,
+    platform_execution_mode: str | None = None,
 ) -> None:
     stage = _stage_map(plan)[stage_id]
     row = _ledger_map(ledger)[stage_id]
@@ -1246,6 +1247,7 @@ def _run_stage(
         "run_manifest": manifest,
         "stage": stage,
         "ledger": ledger,
+        "platform_execution_mode": platform_execution_mode,
     }
     started = perf_counter()
     try:

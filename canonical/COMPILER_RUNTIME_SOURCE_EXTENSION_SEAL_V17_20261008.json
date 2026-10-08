@@ -1,0 +1,34 @@
+{
+  "schema": "realsas.compiler_runtime_source_extension_seal.v17",
+  "sealed_on": "2026-10-08",
+  "prior_extension": {
+    "path": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V16_20261001.json",
+    "git_blob_sha1": "04185539fd67c3e9fce9a12d00583c8ca3b6db45",
+    "role": "IMMUTABLE_PRIOR_EXTENSION_PROVENANCE"
+  },
+  "authority": {
+    "extension_scope": "SOURCE_OWNED_VISUAL_CANONICAL_DEPTH_CONSUMER",
+    "historical_base_seal_mutated": false,
+    "prior_extension_mutated": false,
+    "product_pass_claimed": false,
+    "knight_witness_used": false,
+    "runtime_role": "subordinate_deployment_consumer",
+    "subtree_closure": "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME"
+  },
+  "replacements": [
+    {
+      "path": "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp",
+      "size_bytes": 57647,
+      "git_blob_sha1": "010f3bfa4457f2c973f06a6a0dab3ab3b2e018a5",
+      "reason": "consume sealed RSVD1 camera-depth arrays; depth-sort source fragments, reject unresolved ties and fragment overflow; preserve historical depthless consumer for exact sealed replay"
+    }
+  ],
+  "additions": [],
+  "closure": {
+    "runtime_realsas_cpp_blob_count": 25,
+    "replacement_count": 1,
+    "addition_count": 0,
+    "resulting_sealed_blob_count": 25,
+    "unsealed_repository_blob_count_under_subtree": 0
+  }
+}

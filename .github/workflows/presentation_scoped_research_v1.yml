@@ -1,0 +1,121 @@
+name: scoped-presentation-research
+
+on:
+  push:
+    branches: [research/presentation-p0-closure-20261008]
+    paths:
+      - 'compiler/**'
+      - 'runtime/realsas_cpp/**'
+      - 'tools/*presentation*'
+      - 'tools/sealed_motion_witness_replay.py'
+      - 'tools/platform_private_input_transport.py'
+      - '.github/workflows/presentation_scoped_research_v1.yml'
+
+concurrency:
+  group: scoped-presentation-research-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  downstream-only:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: realsas_presentation
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d realsas_presentation"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      REALSAS_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/realsas_presentation?sslmode=disable
+      REALSAS_REPO_ROOT: ${{ github.workspace }}
+      REALSAS_AUTHORITY_ROOT: /tmp/realsas-presentation-authority
+      REALSAS_ARTIFACT_ROOT: /tmp/realsas-presentation-cas
+      REALSAS_TEMPORAL_ADDRESS: 127.0.0.1:7233
+      REALSAS_TEMPORAL_NAMESPACE: default
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+          cache-dependency-path: platform/go.sum
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: |
+            requirements/mainline-ci.txt
+            requirements/platform-worker.txt
+      - name: Prepare pinned CPU and native executors
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt -r requirements/platform-worker.txt
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libpng-dev zlib1g-dev
+          mkdir -p /tmp/realsas-presentation-bin /tmp/realsas-presentation-out
+          g++ -std=c++17 -O2 runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp -lpng -lz -o /tmp/realsas-presentation-bin/player
+          curl --fail --silent --show-error --location https://github.com/temporalio/cli/releases/download/v1.9.1/temporal_cli_1.9.1_linux_amd64.tar.gz -o /tmp/temporal.tar.gz
+          echo '09a0326a51db84d02735e53542b9ebd8c4758daf47482a9ab0abce15844e60d5  /tmp/temporal.tar.gz' | sha256sum -c -
+          tar -xzf /tmp/temporal.tar.gz -C /tmp/realsas-presentation-bin temporal
+          cd platform
+          go build -o /tmp/realsas-presentation-bin/api ./cmd/realsas-api
+          go build -o /tmp/realsas-presentation-bin/control ./cmd/realsas-control-worker
+          go build -o /tmp/realsas-presentation-bin/migrate ./cmd/realsas-migrate
+          go build -o /tmp/realsas-presentation-bin/ctl ./cmd/realsasctl
+      - name: Publish one-run public transport key
+        run: python tools/platform_private_input_transport.py generate --directory /tmp/realsas-private-input --run-id "$GITHUB_RUN_ID" --code-sha "$GITHUB_SHA"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: presentation-input-public-key
+          path: /tmp/realsas-private-input/public.json
+          retention-days: 1
+      - name: Receive encrypted locators and verify exact input bytes
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python tools/platform_private_input_transport.py receive --directory /tmp/realsas-private-input --out /tmp/realsas-presentation-inputs --repo "$GITHUB_REPOSITORY" --branch "$GITHUB_REF_NAME" --run-id "$GITHUB_RUN_ID" --code-sha "$GITHUB_SHA"
+      - name: Execute only the released Go RESEARCH closure
+        run: |
+          set -euo pipefail
+          /tmp/realsas-presentation-bin/migrate up
+          /tmp/realsas-presentation-bin/temporal server start-dev --ip 127.0.0.1 --headless --db-filename /tmp/realsas-presentation-temporal.sqlite > /tmp/realsas-presentation-out/temporal.log 2>&1 &
+          temporal_pid=$!
+          /tmp/realsas-presentation-bin/api > /tmp/realsas-presentation-out/api.log 2>&1 &
+          api_pid=$!
+          python - <<'PY'
+          import socket, time
+          for port in (7233, 8080):
+              deadline=time.monotonic()+90
+              while time.monotonic()<deadline:
+                  try:
+                      with socket.create_connection(('127.0.0.1',port), timeout=1): break
+                  except OSError: time.sleep(1)
+              else: raise RuntimeError('PLATFORM_SERVICE_NOT_READY:'+str(port))
+          PY
+          /tmp/realsas-presentation-bin/control > /tmp/realsas-presentation-out/control.log 2>&1 &
+          control_pid=$!
+          python -m compiler.realsas_compiler_services.platform_worker.worker > /tmp/realsas-presentation-out/engine.log 2>&1 &
+          engine_pid=$!
+          trap 'kill "$engine_pid" "$control_pid" "$api_pid" "$temporal_pid" 2>/dev/null || true' EXIT
+          python tools/run_scoped_presentation_attempt.py --config /tmp/realsas-presentation-inputs/presentation_config.json --input-root /tmp/realsas-presentation-inputs --ctl /tmp/realsas-presentation-bin/ctl --player /tmp/realsas-presentation-bin/player --out /tmp/realsas-presentation-out
+      - name: Preserve Attempt, proof and rendered evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: knight-presentation-research-evidence
+          path: |
+            /tmp/realsas-presentation-out
+            /tmp/realsas-presentation-authority/runs/*/diagnostics
+          retention-days: 14
+          if-no-files-found: warn

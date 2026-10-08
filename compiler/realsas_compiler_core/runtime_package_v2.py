@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections import OrderedDict
 import hashlib
 import io
+import json
 from pathlib import Path
 import struct
 import zlib
@@ -448,13 +449,21 @@ def _source_owned_visual_positions_payload(
     positions: np.ndarray,
 ) -> bytes:
     frames = np.asarray(positions, dtype="<f8")
-    if frames.ndim != 3 or frames.shape[2] != 2:
+    if frames.ndim != 3 or frames.shape[2] != 2 or not np.isfinite(frames).all():
         raise QualificationError("RSS_V2_VISUAL_POSITION_SHAPE_INVALID")
     return (
         b"RSVP1\0\0\0"
         + struct.pack("<II", int(frames.shape[0]), int(frames.shape[1]))
         + frames.tobytes(order="C")
     )
+
+
+def _source_owned_visual_depth_payload(depths: np.ndarray) -> bytes:
+    frames = np.asarray(depths, dtype="<f8")
+    if frames.ndim != 2 or not np.isfinite(frames).all() or np.any(frames <= 0):
+        raise QualificationError("RSS_V2_CANONICAL_DEPTH_INVALID")
+    return (b"RSVD1\0\0\0" + struct.pack("<II", *frames.shape)
+            + frames.tobytes(order="C"))
 
 
 def build_source_owned_visual_rss_v2_entries(
@@ -467,6 +476,8 @@ def build_source_owned_visual_rss_v2_entries(
     it never rebuilds bindings, runs ARAP, searches donors, or renders the
     mechanical relation mesh.
     """
+    if hashlib.sha256(Path(projection.projection_npz_path).read_bytes()).hexdigest() != projection.projection_npz_sha256:
+        raise QualificationError("RSS_V2_VISUAL_PROJECTION_BYTES_DRIFT")
     with np.load(projection.projection_npz_path, allow_pickle=False) as data:
         arrays = {name: np.asarray(data[name]).copy() for name in data.files}
 
@@ -477,6 +488,8 @@ def build_source_owned_visual_rss_v2_entries(
     ):
         raise QualificationError("RSS_V2_VISUAL_REQUIRES_EXACT_V0_V7")
 
+    from .visual_domain_v2 import OPERATOR_ID, DEPTH_CONTRACT, POLICY
+    canonical_depth = projection.visual_deformation_operator_id == OPERATOR_ID
     entries: OrderedDict[str, bytes] = OrderedDict()
     manifest = [
         "schema=RealSaS.RuntimePackage.v2",
@@ -506,6 +519,19 @@ def build_source_owned_visual_rss_v2_entries(
         f"visual_deformation_policy_hash={projection.visual_deformation_policy_hash}",
     ]
 
+    if canonical_depth:
+        manifest.extend([
+            f"depth_ownership_contract={DEPTH_CONTRACT}",
+            f"depth_tie_epsilon={POLICY['depth_tie_epsilon']:.17g}",
+            f"maximum_fragment_layers={POLICY['maximum_fragment_layers']}",
+        ])
+    attachments = projection.metadata.get("target_attachments")
+    if attachments:
+        entries["target_attachments.json"] = json.dumps(attachments, sort_keys=True).encode("utf-8")
+        entries["body_motion_preset.json"] = json.dumps(projection.metadata["body_motion_preset"], sort_keys=True).encode("utf-8")
+        manifest.extend(["attachment_ownership_contract=EXPLICIT_TARGET_CANONICAL_COMPONENT_OWNER_V1",
+                         "target_attachments_entry=target_attachments.json", "body_motion_preset_entry=body_motion_preset.json"])
+
     for view in views:
         vi = int(view.view_index)
         mesh_entry = f"visual_mesh_v{vi}.bin"
@@ -515,6 +541,13 @@ def build_source_owned_visual_rss_v2_entries(
             arrays,
             view_index=vi,
         )
+        if attachments:
+            owners = np.asarray(arrays[f"view_{vi}_face_attachment_owner"], dtype="<i4")
+            if owners.shape != (int(view.visual_face_count),) or np.any(owners < 0) or np.any(owners > len(attachments["attachments"])):
+                raise QualificationError("RSS_V2_ATTACHMENT_FACE_OWNERSHIP_INVALID")
+            owner_entry = f"visual_attachment_owners_v{vi}.i32"
+            entries[owner_entry] = owners.tobytes()
+            manifest.append(f"view.{vi}.attachment_owner_entry={owner_entry}")
         texture_path = Path(str(view.texture_path))
         texture_bytes = texture_path.read_bytes()
         if hashlib.sha256(texture_bytes).hexdigest() != str(view.texture_sha256):
@@ -573,6 +606,13 @@ def build_source_owned_visual_rss_v2_entries(
             entries[entry_name] = _source_owned_visual_positions_payload(
                 positions
             )
+            if canonical_depth:
+                depth_key = f"{clip.array_prefix}_view_{vi}_depths"
+                if depth_key not in arrays or np.asarray(arrays[depth_key]).shape != expected[:2]:
+                    raise QualificationError("RSS_V2_CANONICAL_DEPTH_MISSING_OR_SHAPE_INVALID")
+                depth_entry = f"clip_{clip_index}_v{vi}.depths.bin"
+                entries[depth_entry] = _source_owned_visual_depth_payload(arrays[depth_key])
+                manifest.append(f"clip.{clip_index}.view.{vi}.depths_entry={depth_entry}")
             manifest.append(
                 f"clip.{clip_index}.view.{vi}.positions_entry={entry_name}"
             )

@@ -40,8 +40,8 @@ concurrency:
 
 jobs:
   motion-v2-contract:
-    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
-    runs-on: [self-hosted, linux, x64, realsas]
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
       PYTHONPATH: .
@@ -51,9 +51,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: pip
+          cache-dependency-path: |
+            requirements/mainline-ci.txt
+            requirements/torch-cpu.txt
       - name: Install minimal pinned runtime dependencies
         run: |
-          python -m pip install --no-input --progress-bar off --only-binary=:all:             numpy scipy pytest
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
       - name: Compile current motion ownership
         run: |
           python -m py_compile             compiler/realsas_compiler_core/motion_compile_v2.py             compiler/realsas_compiler_core/motion_dynamic_proof_v2.py             compiler/realsas_compiler_core/motion_source_v1.py             compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py             tools/motion/materialize_quaternius_preset_v1.py

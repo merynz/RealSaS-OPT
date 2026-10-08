@@ -41,19 +41,23 @@ concurrency:
 
 jobs:
   geppetto-v2-source-contract:
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: [self-hosted, linux, x64, realsas]
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: pip
+          cache-dependency-path: |
+            requirements/mainline-ci.txt
+            requirements/torch-cpu.txt
       - name: Install test dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install numpy scipy pytest
-          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
       - name: Compile Geppetto V2 source
         run: |
           python -m py_compile \

@@ -52,12 +52,19 @@ The six persistent developer services are active. This is engineering proof;
 it does not establish Knight execution, full inference, rendering or product
 latency. Exact identities are recorded in `canonical/PLATFORM_MAIN_AUDIT_20261008.json`.
 
-Latest Knight import remains open: the TESSA repaired candidate and its upstream
-source references were located in Drive, but its raw-file transfer returned
-HTTP 403 before local materialization. Do not bypass that failure or substitute
-the old renderer input. A separate scoped research qualification/render contract
-is also needed: Stage35's absolute product gate must not be relabeled as a
-teacher-relative FIT1 product PASS.
+Latest Knight external hydration is sealed: stable Drive IDs and authenticated
+size/SHA256 verification cover 12/12 inventory files. Real run `37802717565`
+proved Drive -> CAS -> offline 12/12 CAS_HIT. These are transport identities,
+not scientific qualification or stage reuse authority.
+
+PR #65 sealed public hosted CPU CI, dependency caches, bounded persistent local
+GC and Knight hydration; merged at `1888d91252fdce23843772f3ec0d0e3ddd91b9ae`. The next work is presentation
+P0 only: continuous visual deformation-domain coherence, canonical depth/overlap
+ownership and Stage45 fail-closed proof, then target attachment/body preset/frame0
+qualification, followed by a downstream-only Go RESEARCH rerun and
+fresh Knight IDLE/RUN/SLASH. Reuse sealed mechanics and the existing motion
+witness; do not reopen mechanics, rig, skin, IRIS, AXIS or MIRA. A scoped research
+render must preserve the separate absolute product qualification boundary.
 
 Release discovery now scans each distinct adapter module once per snapshot,
 without a cross-release process cache. Local 46-stage comparison measured
@@ -131,11 +138,15 @@ These measured costs define optimization priorities after repository currentness
 
 ## Immediate execution priorities
 
-1. Import/reseal the latest Knight evidence into a Go research Attempt and prove a real component replacement without rebuilding independent artifacts.
-2. Close research artifact import/portability and direct-path enforcement gaps as real component-replacement execution exposes them.
-3. Optimize measured rebuild/CAA/render hot paths and produce fresh carrier-native IDLE/RUN/SLASH.
-4. Productize full input-to-output inference/compile/preset execution and connect its UI after the modular developer path is operational.
-5. Return to presentation/runtime visual diagnosis only if the image remains wrong after 1–3.
+1. #65 platform throughput/hydration/GC is sealed and merged.
+2. Complete only presentation/runtime P0 on #66: deformation-domain coherence,
+   canonical depth/overlap ownership and Stage45 fail-closed presentation proof.
+3. Complete explicit target sword/shield ownership, body-only motion preset
+   and per-clip frame0 evidence.
+4. Rerun only downstream consumers, preserving sealed mechanics and the existing
+   motion witness, then produce fresh Knight IDLE/RUN/SLASH with exact identities.
+
+General model inference and FIT8/LOFO/unseen work are outside this continuation.
 
 ## Read first
 

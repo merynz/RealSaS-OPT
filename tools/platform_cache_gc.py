@@ -19,6 +19,11 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
+if __package__:
+    from .platform_cache_lock import cache_lease
+else:
+    from platform_cache_lock import cache_lease
+
 
 @dataclass(frozen=True)
 class Entry:
@@ -54,25 +59,6 @@ def _entry_mtime(path: Path) -> float:
         return (stamp if stamp.is_file() else path).stat().st_mtime
     except FileNotFoundError:
         return 0.0
-
-
-def _lock_is_held(lock_path: Path | None) -> bool:
-    if lock_path is None or not lock_path.exists():
-        return False
-    try:
-        with lock_path.open("a+b") as handle:
-            try:
-                fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-            except BlockingIOError:
-                return True
-            finally:
-                try:
-                    fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
-                except OSError:
-                    pass
-    except OSError:
-        return True
-    return False
 
 
 def _remove_tree(path: Path) -> None:
@@ -141,6 +127,26 @@ def collect(
     dry_run: bool,
     now: float | None = None,
 ) -> dict:
+    try:
+        with cache_lease(root, exclusive=True, nonblocking=True):
+            return _collect_idle(
+                root, soft_max_bytes=soft_max_bytes, target_max_bytes=target_max_bytes,
+                max_age_seconds=max_age_seconds, min_free_bytes=min_free_bytes,
+                dry_run=dry_run, now=now,
+            )
+    except BlockingIOError:
+        return {
+            "schema": "RealSaS.PlatformCacheGC.v2", "root": str(root),
+            "dry_run": dry_run, "deleted": [], "deleted_count": 0,
+            "safe_to_execute": False, "status": "LIVE_CACHE_LEASE_HELD",
+        }
+
+
+def _collect_idle(
+    root: Path, *, soft_max_bytes: int, target_max_bytes: int,
+    max_age_seconds: int, min_free_bytes: int, dry_run: bool,
+    now: float | None,
+) -> dict:
     if target_max_bytes > soft_max_bytes:
         raise ValueError("GC_TARGET_EXCEEDS_SOFT_MAX")
     if min(soft_max_bytes, target_max_bytes, min_free_bytes) < 0:
@@ -158,18 +164,28 @@ def collect(
     venv_ages = [max(0.0, now - entry.mtime) for entry in entries if entry.kind == "venv"]
 
     def evict(entry: Entry, reason: str) -> bool:
-        if entry.path not in retained or _lock_is_held(entry.lock_path):
+        if entry.path not in retained:
             return False
-        deleted.append({
-            "path": str(entry.path),
-            "kind": entry.kind,
-            "size_bytes": entry.size,
-            "reason": reason,
-        })
-        if not dry_run:
-            _remove_tree(entry.path)
-        retained.pop(entry.path, None)
-        return True
+        handle = None
+        try:
+            if entry.lock_path is not None:
+                handle = entry.lock_path.open("a+b")
+                fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            if not dry_run:
+                _remove_tree(entry.path)
+                if entry.path.exists():
+                    raise OSError(f"CACHE_ENTRY_REMOVAL_INCOMPLETE:{entry.path}")
+            deleted.append({
+                "path": str(entry.path), "kind": entry.kind,
+                "size_bytes": entry.size, "reason": reason,
+            })
+            retained.pop(entry.path, None)
+            return True
+        except BlockingIOError:
+            return False
+        finally:
+            if handle is not None:
+                handle.close()
 
     # Incomplete bootstrap/download state is never reusable.
     for entry in sorted(entries, key=lambda item: item.mtime):
@@ -211,6 +227,8 @@ def collect(
     free_after_estimate = free_before + sum(row["size_bytes"] for row in deleted)
     safe = after_bytes_estimate <= soft_max_bytes and free_after_estimate >= min_free_bytes
     actual_after = _tree_size(root) if not dry_run else None
+    if not dry_run:
+        safe = actual_after <= soft_max_bytes and shutil.disk_usage(root).free >= min_free_bytes
 
     return {
         "schema": "RealSaS.PlatformCacheGC.v2",

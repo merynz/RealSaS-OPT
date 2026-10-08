@@ -664,6 +664,10 @@ def seal_product_closure_stage(ctx: dict) -> dict:
                 "direct_source_provenance_passed",
                 "DIRECT_SOURCE_PROVENANCE",
             ),
+            ("domain_coherence_passed", "DOMAIN_COHERENCE"),
+            ("canonical_depth_ownership_passed", "CANONICAL_DEPTH_OWNERSHIP"),
+            ("area_condition_passed", "AREA_CONDITION"),
+            ("frame_view_matrix_complete", "FRAME_MATRIX"),
             ("all_frame_views_nonempty", "NONEMPTY_FRAME_VIEW"),
             ("visual_orientation_passed", "VISUAL_ORIENTATION"),
             (

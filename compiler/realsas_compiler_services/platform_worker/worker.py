@@ -201,6 +201,7 @@ def _execute_stage_core(request: dict[str, Any]) -> dict[str, Any]:
         run_id=run_id,
         stage_id=stage_id,
         ledger_path=ledger_path,
+        platform_execution_mode=mode,
     )
     ledger = mainline.load_json(ledger_path)
     row = _ledger_row(ledger, stage_id)

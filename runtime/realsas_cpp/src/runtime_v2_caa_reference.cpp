@@ -565,18 +565,20 @@ VisualMesh2D parse_visual_mesh_2d(const std::vector<std::uint8_t>& data) {
 std::vector<Vec2> parse_visual_positions_2d(
     const std::vector<std::uint8_t>& data,
     std::uint32_t expected_vertices,
-    int frame_index
+    int expected_frames, int frame_index
 ) {
     if(data.size()<8||std::memcmp(data.data(),"RSVP1\0\0\0",8)!=0)
         throw std::runtime_error("VISUAL_POSITIONS_MAGIC_INVALID");
     std::size_t off=8;
     const auto frame_count=read_scalar<std::uint32_t>(data,off);
     const auto vertex_count=read_scalar<std::uint32_t>(data,off);
-    if(vertex_count!=expected_vertices||frame_index<0||
+    if(vertex_count!=expected_vertices||frame_count!=static_cast<std::uint32_t>(expected_frames)||frame_index<0||
        static_cast<std::uint32_t>(frame_index)>=frame_count)
         throw std::runtime_error("VISUAL_POSITIONS_HEADER_INVALID");
     const auto frame_stride=
         static_cast<std::size_t>(vertex_count)*2u*sizeof(double);
+    if(data.size()!=16+static_cast<std::size_t>(frame_count)*frame_stride)
+        throw std::runtime_error("VISUAL_POSITIONS_BYTES_INVALID");
     const auto target=off+static_cast<std::size_t>(frame_index)*frame_stride;
     if(target+frame_stride>data.size())
         throw std::runtime_error("VISUAL_POSITIONS_TRUNCATED");
@@ -587,6 +589,29 @@ std::vector<Vec2> parse_visual_positions_2d(
         p.y=read_scalar<double>(data,off);
         if(!std::isfinite(p.x)||!std::isfinite(p.y))
             throw std::runtime_error("VISUAL_POSITION_NONFINITE");
+    }
+    return out;
+}
+
+std::vector<double> parse_visual_depth(
+    const std::vector<std::uint8_t>& data, std::uint32_t expected_vertices,
+    int expected_frames, int frame_index
+) {
+    if(data.size()<16||std::memcmp(data.data(),"RSVD1\0\0\0",8)!=0)
+        throw std::runtime_error("VISUAL_CANONICAL_DEPTH_MAGIC_INVALID");
+    std::size_t off=8;
+    const auto frames=read_scalar<std::uint32_t>(data,off);
+    const auto vertices=read_scalar<std::uint32_t>(data,off);
+    const auto stride=static_cast<std::size_t>(vertices)*sizeof(double);
+    if(vertices!=expected_vertices||frames!=static_cast<std::uint32_t>(expected_frames)||
+       data.size()!=16+static_cast<std::size_t>(frames)*stride||frame_index<0||
+       static_cast<std::uint32_t>(frame_index)>=frames)
+        throw std::runtime_error("VISUAL_CANONICAL_DEPTH_HEADER_OR_BYTES_INVALID");
+    off+=static_cast<std::size_t>(frame_index)*stride;
+    std::vector<double> out(vertices);
+    for(auto& z:out) {
+        z=read_scalar<double>(data,off);
+        if(!std::isfinite(z)||z<=0) throw std::runtime_error("VISUAL_CANONICAL_DEPTH_NONFINITE_OR_BEHIND_CAMERA");
     }
     return out;
 }
@@ -706,8 +731,24 @@ int render_source_owned_visual(
     );
     const auto mesh=parse_visual_mesh_2d(entries.at(mesh_entry));
     auto positions=parse_visual_positions_2d(
-        entries.at(positions_entry),mesh.vertex_count,frame_index
+        entries.at(positions_entry),mesh.vertex_count,frame_count,frame_index
     );
+    const auto operator_it=manifest.find("visual_deformation_operator_id");
+    const bool canonical_depth=operator_it!=manifest.end()&&
+        operator_it->second=="SOURCE_CHART_HARMONIC_CANONICAL_FIELD_V2";
+    std::vector<double> depths;
+    if(canonical_depth) {
+        if(manifest.at("depth_ownership_contract")!=
+           "CANONICAL_CAMERA_DEPTH_ASCENDING__UNRESOLVED_TIES_FAIL_V1"||
+           std::stod(manifest.at("depth_tie_epsilon"))!=1e-9||
+           manifest.at("maximum_fragment_layers")!="32")
+            throw std::runtime_error("VISUAL_CANONICAL_DEPTH_CONTRACT_INVALID");
+        const auto depth_entry=manifest.at("clip."+std::to_string(clip_index)+
+            ".view."+std::to_string(view)+".depths_entry");
+        depths=parse_visual_depth(entries.at(depth_entry),mesh.vertex_count,frame_count,frame_index);
+    } else if(manifest.find("depth_ownership_contract")!=manifest.end()) {
+        throw std::runtime_error("VISUAL_CANONICAL_DEPTH_OPERATOR_MISMATCH");
+    }
     const auto texture=decode_png_rgba(
         entries.at(texture_entry),mesh.source_width,mesh.source_height
     );
@@ -729,6 +770,9 @@ int render_source_owned_visual(
     const auto pixels=static_cast<std::size_t>(resolution)*resolution;
     std::vector<Accum> accum(pixels);
     std::vector<std::int32_t> owner(pixels,-1);
+    struct VisualFragment { double depth; StraightRGBA color; std::int32_t owner; };
+    std::vector<std::vector<VisualFragment>> fragments(canonical_depth?pixels:0);
+    std::uint64_t overlap_pixels=0;
     std::uint64_t covered_samples=0;
 
     for(std::size_t fi=0;fi<mesh.faces.size();++fi) {
@@ -779,6 +823,15 @@ int render_source_owned_visual(
                 texture,mesh.source_width,mesh.source_height,u,v
             );
             const double alpha=std::clamp(sample.a,0.0,1.0);
+            const auto pixel=static_cast<std::size_t>(y)*resolution+static_cast<std::size_t>(x);
+            if(canonical_depth) {
+                if(alpha>1e-12) {
+                    auto& rows=fragments[pixel];
+                    if(rows.size()>=32) throw std::runtime_error("VISUAL_CANONICAL_DEPTH_FRAGMENT_OVERFLOW");
+                    rows.push_back({w0*depths[face[0]]+w1*depths[face[1]]+w2*depths[face[2]],
+                                    sample,static_cast<std::int32_t>(fi)});
+                }
+            } else {
             auto& dst=accum[
                 static_cast<std::size_t>(y)*resolution+
                 static_cast<std::size_t>(x)
@@ -792,7 +845,32 @@ int render_source_owned_visual(
                 static_cast<std::size_t>(y)*resolution+
                 static_cast<std::size_t>(x)
             ]=static_cast<std::int32_t>(fi);
+            }
             ++covered_samples;
+        }
+    }
+
+    if(canonical_depth) {
+        for(std::size_t i=0;i<pixels;++i) {
+            auto& rows=fragments[i];
+            if(rows.empty()) continue;
+            std::sort(rows.begin(),rows.end(),[](const VisualFragment& a,const VisualFragment& b){
+                return a.depth<b.depth;
+            });
+            if(rows.size()>1) ++overlap_pixels;
+            for(std::size_t j=1;j<rows.size();++j)
+                if(std::abs(rows[j].depth-rows[j-1].depth)<=1e-9)
+                    throw std::runtime_error("VISUAL_CANONICAL_DEPTH_UNRESOLVED_TIE");
+            owner[i]=rows.front().owner;
+            auto& dst=accum[i];
+            for(const auto& row:rows) {
+                const double transmission=1.0-dst.a;
+                const double alpha=std::clamp(row.color.a,0.0,1.0);
+                dst.r+=row.color.r*alpha*transmission;
+                dst.g+=row.color.g*alpha*transmission;
+                dst.b+=row.color.b*alpha*transmission;
+                dst.a+=alpha*transmission;
+            }
         }
     }
 
@@ -830,6 +908,8 @@ int render_source_owned_visual(
              <<" frame="<<frame_index<<" resolution="<<resolution
              <<" faces="<<mesh.face_count<<" vertices="<<mesh.vertex_count
              <<" covered_samples="<<covered_samples
+             <<" canonical_depth="<<(canonical_depth?1:0)
+             <<" overlap_pixels="<<overlap_pixels
              <<" appearance=SOURCE_RGBA8_FIXED_UV\\n";
     return 0;
 }

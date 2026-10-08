@@ -19,12 +19,12 @@ concurrency:
 
 jobs:
   mwb2-source-contract:
-    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
-    runs-on: [self-hosted, linux, x64, realsas]
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.11'}
-      - run: python -m pip install pytest
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
       - run: python -m py_compile compiler/realsas_compiler_core/mwb2.py compiler/realsas_compiler_core/mwb2_skin.py
       - run: PYTHONPATH=. python -m pytest -q compiler/test_mwb2_source_v1.py

@@ -35,7 +35,8 @@ def _player() -> Path:
     return path
 
 
-def test_source_owned_visual_rss_native_smoke(tmp_path: Path):
+@pytest.mark.parametrize("canonical_depth", [False, True])
+def test_source_owned_visual_rss_native_smoke(tmp_path: Path, canonical_depth):
     player = _player()
     source_size = 8
     render_size = 16
@@ -56,6 +57,8 @@ def test_source_owned_visual_rss_native_smoke(tmp_path: Path):
         arrays[f"view_{vi}_faces"] = faces
         arrays[f"view_{vi}_rest_positions"] = rest
         arrays[f"clip_0_view_{vi}_positions"] = rest.reshape(1, 3, 2)
+        if canonical_depth:
+            arrays[f"clip_0_view_{vi}_depths"] = np.full((1, 3), 2., dtype=np.float64)
 
         rgba = np.zeros((source_size, source_size, 4), dtype=np.uint8)
         rgba[:, :, :] = (220, 40 + vi, 20, 255)
@@ -101,7 +104,8 @@ def test_source_owned_visual_rss_native_smoke(tmp_path: Path):
         appearance_asset_binding_hash="6" * 64,
         appearance_qualification_binding_hash="7" * 64,
         camera_set_binding_hash="8" * 64,
-        visual_deformation_operator_id="REGION_LOCAL_SAFE_MECHANICAL_AFFINE_V1",
+        visual_deformation_operator_id=("SOURCE_CHART_HARMONIC_CANONICAL_FIELD_V2"
+                                        if canonical_depth else "REGION_LOCAL_SAFE_MECHANICAL_AFFINE_V1"),
         visual_deformation_policy_hash="9" * 64,
         projection_npz_path=str(projection_npz),
         projection_npz_sha256=_sha(projection_npz),

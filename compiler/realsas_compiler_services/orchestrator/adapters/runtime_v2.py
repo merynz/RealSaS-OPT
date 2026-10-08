@@ -79,6 +79,12 @@ from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
     bind_region_visual_vertices_to_mechanical_affine_v1,
     evaluate_region_visual_binding_v1,
 )
+from compiler.realsas_compiler_core.visual_domain_v2 import (
+    OPERATOR_ID, POLICY, DEPTH_CONTRACT, build_domain_binding,
+    evaluate_domain_binding, domain_binding_from_arrays,
+    presentation_condition_metrics,
+)
+from compiler.realsas_compiler_core.visual_depth_v2 import render_visual_depth
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.runtime_package_v2 import (
     build_rss_v2_entries,
@@ -232,6 +238,8 @@ def _visual_mesh_motion_metrics(
         raise QualificationError(
             "SOURCE_VISUAL_RUNTIME_MOTION_METRIC_INPUT_INVALID"
         )
+    if not np.isfinite(rest).all() or not np.isfinite(posed).all():
+        raise QualificationError("SOURCE_VISUAL_RUNTIME_NONFINITE_POSITION")
     edges = set()
     for face in tri.tolist():
         for a, b in (
@@ -384,15 +392,7 @@ def _build_source_owned_visual_runtime_projection(
             "SOURCE_VISUAL_RUNTIME_REQUIRES_EXACT_V0_V7"
         )
 
-    operator_policy = {
-        "schema": "RealSaS.VisualDeformationOperatorPolicy.v1",
-        "operator_id": "REGION_LOCAL_SAFE_MECHANICAL_AFFINE_V1",
-        "candidate_seed_count": 16,
-        "seed_distance_budget": "VIEW_DIAGONAL__MEASURE_NOT_TUNE",
-        "unclamped_barycentric_authorized": True,
-        "runtime_binding_solve_authorized": False,
-        "dynamic_quality_authority": "STAGE45",
-    }
+    operator_policy = dict(POLICY)
     operator_policy_hash = content_sha256(operator_policy)
 
     arrays = {}
@@ -411,37 +411,20 @@ def _build_source_owned_visual_runtime_projection(
             height=int(visual_row.height),
             max_layers=4,
         )
-        binding = bind_region_visual_vertices_to_mechanical_affine_v1(
-            points_source_xy=np.asarray(
-                visual_mesh.positions, dtype=np.float64
-            ),
-            vertex_region_id=np.asarray(
-                loaded["vertex_region_id"], dtype=np.int32
-            ),
-            seed_region_labels=np.asarray(
-                loaded["seed_region_labels"], dtype=np.int32
-            ),
-            owner_face_index=np.asarray(
-                visibility.owner_face_index, dtype=np.int64
-            ),
+        binding = build_domain_binding(
+            points_source_xy=np.asarray(visual_mesh.positions, dtype=np.float64),
+            visual_faces=np.asarray(visual_mesh.faces, dtype=np.int64),
+            vertex_region_id=loaded["vertex_region_id"],
+            seed_region_labels=loaded["seed_region_labels"],
+            owner_face_index=visibility.owner_face_index,
             mechanical_positions_xyz=rest_mechanical,
             mechanical_faces=mechanical_faces,
             camera=camera,
-            candidate_seed_count=int(
-                operator_policy["candidate_seed_count"]
-            ),
-            max_seed_distance_px=float(
-                math.hypot(
-                    int(visual_row.width),
-                    int(visual_row.height),
-                )
-            ),
         )
-        rest_eval = evaluate_region_visual_binding_v1(
-            binding,
-            posed_mechanical_positions_xyz=rest_mechanical,
-            camera=camera,
-        )
+        rest_eval = evaluate_domain_binding(
+            binding, visual_faces=visual_mesh.faces,
+            posed_mechanical_positions_xyz=rest_mechanical, camera=camera,
+        )[:, :2]
         rest_error = np.linalg.norm(
             np.asarray(rest_eval, dtype=np.float64)
             - np.asarray(visual_mesh.positions, dtype=np.float64),
@@ -470,18 +453,8 @@ def _build_source_owned_visual_runtime_projection(
         arrays[f"{prefix}_face_region_id"] = np.asarray(
             loaded["face_region_id"], dtype=np.int32
         )
-        arrays[f"{prefix}_mechanical_face_indices"] = np.asarray(
-            binding["mechanical_face_indices"], dtype=np.int64
-        )
-        arrays[f"{prefix}_mechanical_barycentric"] = np.asarray(
-            binding["mechanical_barycentric"], dtype=np.float64
-        )
-        arrays[f"{prefix}_nearest_safe_seed_distance_px"] = np.asarray(
-            binding["nearest_safe_seed_distance_px"], dtype=np.float64
-        )
-        arrays[f"{prefix}_extrapolation_penalty"] = np.asarray(
-            binding["extrapolation_penalty"], dtype=np.float64
-        )
+        for name, value in binding.items():
+            arrays[f"{prefix}_domain_{name}"] = np.asarray(value)
         bindings[view_index] = binding
 
         texture = texture_by_view[view_index]
@@ -532,24 +505,10 @@ def _build_source_owned_visual_runtime_projection(
             )
         )
         qa_summary[f"V{view_index}"] = {
-            "max_nearest_safe_seed_distance_px": float(
-                np.max(
-                    binding["nearest_safe_seed_distance_px"],
-                    initial=0.0,
-                )
-            ),
-            "max_extrapolation_penalty": float(
-                np.max(
-                    binding["extrapolation_penalty"],
-                    initial=0.0,
-                )
-            ),
-            "max_rest_reconstruction_error_px": float(
-                np.max(rest_error, initial=0.0)
-            ),
-            "visibility_layer_overflow_pixel_count": int(
-                np.count_nonzero(visibility.layer_overflow)
-            ),
+            "domain_count": int(len(np.unique(binding["domain_id"]))),
+            "anchor_count": int(len(binding["anchor_vertex"])),
+            "max_rest_reconstruction_error_px": float(np.max(rest_error, initial=0)),
+            "visibility_layer_overflow_pixel_count": int(np.count_nonzero(visibility.layer_overflow)),
         }
 
     clips = []
@@ -576,6 +535,7 @@ def _build_source_owned_visual_runtime_projection(
                 ),
                 dtype=np.float64,
             )
+            depths = np.empty((len(clip.frames), int(visual_row.vertex_count)), dtype=np.float64)
             metrics = []
             for frame_index, frame in enumerate(clip.frames):
                 by_id = {
@@ -590,12 +550,14 @@ def _build_source_owned_visual_runtime_projection(
                     [by_id[vertex_id] for vertex_id in vertex_ids],
                     dtype=np.float64,
                 )
-                posed_visual = evaluate_region_visual_binding_v1(
-                    bindings[view_index],
+                field = evaluate_domain_binding(
+                    bindings[view_index], visual_faces=visual_mesh.faces,
                     posed_mechanical_positions_xyz=posed_mechanical,
                     camera=camera_by_view[view_index],
                 )
+                posed_visual = field[:, :2]
                 frames[frame_index] = posed_visual
+                depths[frame_index] = field[:, 2]
                 metrics.append(
                     _visual_mesh_motion_metrics(
                         np.asarray(
@@ -610,6 +572,7 @@ def _build_source_owned_visual_runtime_projection(
             arrays[
                 f"{prefix}_view_{view_index}_positions"
             ] = frames
+            arrays[f"{prefix}_view_{view_index}_depths"] = depths
             clip_qa[f"V{view_index}"] = {
                 "maximum_flipped_triangle_count": max(
                     row["flipped_triangle_count"] for row in metrics
@@ -1333,6 +1296,16 @@ def _source_owned_visual_reference_frame(
             "RUNTIME_V2_VISUAL_REFERENCE_POSITION_SHAPE_INVALID"
         )
 
+    if projection.visual_deformation_operator_id == OPERATOR_ID:
+        key = f"{clip.array_prefix}_view_{vi}_depths"
+        if key not in arrays:
+            raise QualificationError("SOURCE_VISUAL_CANONICAL_DEPTH_MISSING")
+        return render_visual_depth(
+            positions=positions, depths=arrays[key][frame_index], faces=faces, uv=uv,
+            texture=np.asarray(Image.open(resolved_path(view.texture_path)).convert("RGBA")),
+            resolution=int(view.camera["resolution"]),
+        )
+
     texture_path = resolved_path(view.texture_path)
     texture = np.asarray(
         Image.open(texture_path).convert("RGBA"),
@@ -1713,6 +1686,83 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
     }
 
 
+def prove_visual_domain_matrix(projection, arrays, *, mesh, dynamic):
+    """Recompute every field against the upstream canonical motion witness."""
+    if (projection.visual_deformation_operator_id != OPERATOR_ID
+            or projection.visual_deformation_policy_hash != content_sha256(POLICY)
+            or projection.mechanical_mesh_binding_hash != mesh.mesh_lineage_hash
+            or projection.dynamic_motion_binding_hash != dynamic.dynamic_motion_hash):
+        raise QualificationError("SOURCE_VISUAL_PRESENTATION_AUTHORITY_REQUIRED")
+    ids = [str(v.canonical_mesh_vertex_id) for v in mesh.vertices]
+    id_index = {key: i for i, key in enumerate(ids)}
+    canonical_faces = {tuple(sorted(id_index[str(k)] for k in face)) for face in mesh.faces}
+    rest = np.asarray([v.P for v in mesh.vertices], dtype=np.float64)
+    if len(ids) != len(set(ids)) or sorted(int(v.view_index) for v in projection.views) != list(range(8)):
+        raise QualificationError("SOURCE_VISUAL_FRAME_MATRIX_VIEW_OR_VERTEX_DRIFT")
+    witness = {str(c.clip_id): c for c in dynamic.clips}
+    if set(witness) != {str(c.clip_id) for c in projection.clips}:
+        raise QualificationError("SOURCE_VISUAL_FRAME_MATRIX_CLIP_DRIFT")
+    count = area_bad = condition_bad = 0
+    residual = 0.0
+    matrix = []
+    for view in projection.views:
+        vi = int(view.view_index)
+        binding = domain_binding_from_arrays(arrays, vi)
+        if any(tuple(sorted(map(int, face))) not in canonical_faces
+               for face in binding["anchor_mechanical_vertices"]):
+            raise QualificationError("SOURCE_VISUAL_DOMAIN_ANCHOR_NOT_CANONICAL_FACE")
+        if not np.array_equal(binding.get("mechanical_rest_xyz"), rest):
+            raise QualificationError("SOURCE_VISUAL_DOMAIN_CANONICAL_REST_DRIFT")
+        faces = arrays[f"view_{vi}_faces"]
+        source_camera = dict(view.camera)
+        source_camera["resolution"] = int(view.source_width)
+        camera = qualify_camera_v3(source_camera, view_id=view.view_id, view_index=vi)
+        for clip in projection.clips:
+            source = witness[str(clip.clip_id)]
+            if len(source.frames) != int(clip.frame_count):
+                raise QualificationError("SOURCE_VISUAL_FRAME_MATRIX_FRAME_DRIFT")
+            times = np.asarray([frame.time_seconds for frame in source.frames])
+            if not np.array_equal(arrays[f"{clip.array_prefix}_times"], times):
+                raise QualificationError("SOURCE_VISUAL_FRAME_MATRIX_TIME_DRIFT")
+            depth_key = f"{clip.array_prefix}_view_{vi}_depths"
+            if depth_key not in arrays:
+                raise QualificationError("SOURCE_VISUAL_CANONICAL_DEPTH_MISSING")
+            for fi, frame in enumerate(source.frames):
+                by_id = {str(k): xyz for k, xyz in frame.posed_vertex_xyz}
+                if len(by_id) != len(ids) or set(by_id) != set(ids):
+                    raise QualificationError("SOURCE_VISUAL_DOMAIN_WITNESS_VERTEX_DRIFT")
+                expected = evaluate_domain_binding(
+                    binding, visual_faces=faces,
+                    posed_mechanical_positions_xyz=np.asarray([by_id[k] for k in ids]),
+                    camera=camera,
+                )
+                actual = np.column_stack((
+                    arrays[f"{clip.array_prefix}_view_{vi}_positions"][fi],
+                    arrays[depth_key][fi],
+                ))
+                if actual.shape != expected.shape or not np.isfinite(actual).all():
+                    raise QualificationError("SOURCE_VISUAL_DOMAIN_FRAME_INVALID")
+                delta = float(np.max(np.abs(actual - expected), initial=0))
+                residual = max(residual, delta)
+                metrics = presentation_condition_metrics(binding["rest_positions"], actual[:, :2], faces)
+                area_bad += metrics["area_collapse_count"]
+                condition_bad += metrics["condition_failure_count"]
+                matrix.append({"clip_id": clip.clip_id, "view_id": view.view_id,
+                               "frame_index": fi, "field_residual": delta, **metrics})
+                count += 1
+    expected_count = sum(int(c.frame_count) for c in projection.clips) * 8
+    if count != expected_count or count <= 0:
+        raise QualificationError("SOURCE_VISUAL_FRAME_MATRIX_INCOMPLETE")
+    return {"domain_coherence_passed": residual <= 1e-7,
+            "frame_view_matrix_complete": count == expected_count,
+            "area_condition_passed": area_bad == 0 and condition_bad == 0,
+            "area_collapse_count": area_bad, "condition_failure_count": condition_bad,
+            "maximum_field_residual": residual, "expected_frame_view_count": expected_count,
+            "minimum_signed_area_ratio_threshold": POLICY["minimum_signed_area_ratio"],
+            "maximum_jacobian_condition_threshold": POLICY["maximum_jacobian_condition"],
+            "frames": matrix}
+
+
 def _prove_source_owned_visual_dynamic_integrity(
     ctx: dict,
     *,
@@ -1749,6 +1799,12 @@ def _prove_source_owned_visual_dynamic_integrity(
     if not archive.is_file() or sha256_file(archive) != package.archive_sha256:
         raise QualificationError("SOURCE_VISUAL_DVI_PACKAGE_BYTES_DRIFT")
     arrays = _projection_arrays(projection)
+    presentation_proof = prove_visual_domain_matrix(
+        projection, arrays,
+        mesh=qualified_mesh_from_dict(stage_output_payload(ctx, "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED", "RealSaS.QualifiedMeshIR.v1")),
+        dynamic=qualified_dynamic_motion_v2_from_dict(stage_output_payload(
+            ctx, "41_MOTION_DYNAMIC_PROOF", "RealSaS.QualifiedDynamicMotionIR.v2")),
+    )
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     native_workers = _native_parallel_workers(ctx)
 
@@ -1763,6 +1819,7 @@ def _prove_source_owned_visual_dynamic_integrity(
     native_reference_mismatch_pixel_count = 0
     direct_source_provenance_mismatch_pixel_count = 0
     outputs = []
+    unresolved_depth_tie_count = fragment_overflow_count = 0
 
     for clip in projection.clips:
         views = tuple(projection.views)
@@ -1812,6 +1869,8 @@ def _prove_source_owned_visual_dynamic_integrity(
                     view=view,
                     frame_index=frame_index,
                 )
+                unresolved_depth_tie_count += int(reference.unresolved_depth_tie_count)
+                fragment_overflow_count += int(reference.fragment_overflow_count)
                 mismatch = (
                     np.any(
                         rgba != reference.straight_rgba_u8,
@@ -1906,6 +1965,11 @@ def _prove_source_owned_visual_dynamic_integrity(
         and edge_gt_4_count == 0
         and native_reference_mismatch_pixel_count == 0
         and direct_source_provenance_mismatch_pixel_count == 0
+        and presentation_proof["domain_coherence_passed"]
+        and presentation_proof["frame_view_matrix_complete"]
+        and presentation_proof["area_condition_passed"]
+        and unresolved_depth_tie_count == 0
+        and fragment_overflow_count == 0
     )
     value = SourceOwnedVisualDynamicIntegrityV1IR(
         package_binding_hash=package.package_hash,
@@ -1926,6 +1990,11 @@ def _prove_source_owned_visual_dynamic_integrity(
             direct_source_provenance_mismatch_pixel_count
         ),
         qualification_report={
+            **presentation_proof,
+            "canonical_depth_ownership_passed": unresolved_depth_tie_count == 0 and fragment_overflow_count == 0,
+            "depth_ownership_contract": DEPTH_CONTRACT,
+            "unresolved_depth_tie_count": unresolved_depth_tie_count,
+            "fragment_overflow_count": fragment_overflow_count,
             "status": (
                 "PASS_SOURCE_OWNED_VISUAL_DYNAMIC_INTEGRITY"
                 if passed

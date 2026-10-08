@@ -26,8 +26,8 @@ concurrency:
 
 jobs:
   arachne-codec-v2-source-contract:
-    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
-    runs-on: [self-hosted, linux, x64, realsas]
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
     timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4

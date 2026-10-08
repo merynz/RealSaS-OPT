@@ -1,0 +1,39 @@
+{
+  "schema": "RealSaS.PlatformThroughputHydrationGCPrereg.v1",
+  "date": "2026-10-08",
+  "base_main": "b2eb7148d9aeb2a797451bbd6063f4f3695ab2e2",
+  "execution_lanes": {
+    "cpu_light": 2,
+    "gpu_host_exclusive": 1,
+    "github_hosted_minutes_required": false
+  },
+  "cache_policy": {
+    "persistent": true,
+    "gc_required": true,
+    "gc_order": [
+      "incomplete_or_temporary",
+      "expired_by_age",
+      "lru_until_soft_watermark"
+    ],
+    "live_job_lock_protected": true,
+    "disk_safety_floor_required": true
+  },
+  "hydration_policy": {
+    "authority_may_be_remote": true,
+    "execution_is_local_cas": true,
+    "initial_remote_provider": "GOOGLE_DRIVE",
+    "size_verification_required": true,
+    "sha256_verification_required": true,
+    "atomic_install_required": true,
+    "hydration_mints_stage_pass": false,
+    "external_import_is_stage_cache_hit": false
+  },
+  "closure_order": [
+    "EXECUTION_THROUGHPUT",
+    "SETUP_ELIMINATION_WITH_BOUNDED_GC",
+    "KNIGHT_12_OF_12_HYDRATION",
+    "SCOPED_RESEARCH_RENDER_CONTRACT",
+    "GENERAL_MODEL_INFERENCE_EXECUTOR",
+    "FRESH_KNIGHT_IDLE_RUN_SLASH"
+  ]
+}

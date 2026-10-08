@@ -25,6 +25,39 @@
   "historical_renderer": "tools/demo/render_knight_motion_preview_native_v2.py reads old demo inputs; not latest carrier-native proof",
   "execution_policy": "SELF_HOSTED_LOCAL_ONLY",
   "runner": "realsas-wsl-1660ti",
+  "developer_deployment": {
+    "code_sha": "7be6ef368fcc6b432a26f87dbfac737a7cd88374",
+    "self_hosted_run_url": "https://github.com/merynz/RealSaS-OPT/actions/runs/37784700012",
+    "all_six_services_active": true,
+    "receipt_path": "/home/monster/realsas_platform/receipts/smoke-05388841-bf5a-4e9b-ae05-9c0f1f20aebc.json",
+    "terminal_failed_attempt_reconciled": "042feb69-c29e-4e66-84b5-82b080e2a6dc",
+    "smoke_receipt": {
+      "attempt_ids": [
+        "5e6ec2af-b8f7-4a70-b61e-73023d4c9ca3",
+        "05388841-bf5a-4e9b-ae05-9c0f1f20aebc"
+      ],
+      "code_sha": "7be6ef368fcc6b432a26f87dbfac737a7cd88374",
+      "exact_shared_artifact": {
+        "artifact_id": "4c7c5ec2-daaa-458f-8098-26240b4944be",
+        "content_sha256": "3d29669c16aea22b4c81d053ec69136436493cf0d83b847f58b65d1805486728",
+        "storage_key": "cas/sha256/3d/29/3d29669c16aea22b4c81d053ec69136436493cf0d83b847f58b65d1805486728"
+      },
+      "first_target_action": "EXECUTED",
+      "product_revision_minted": false,
+      "removed_stage_id": "01_SOURCE_BYTES_SEALED",
+      "schema": "RealSaS.DeveloperDeploymentSmoke.v1",
+      "scope": "ENGINEERING_ONLY__NOT_KNIGHT_OR_PRODUCT_PROOF",
+      "second_target_action": "REUSE",
+      "status": "PASS",
+      "target_stage_id": "02_SOURCE_LICENSE_PROVENANCE",
+      "wall_seconds": 3.282
+    }
+  },
+  "latest_knight_import": {
+    "tessa_repaired_candidate": "LOCATED_IN_DRIVE__RAW_TRANSFER_HTTP_403__NOT_MATERIALIZED",
+    "research_qualification_render_bridge": "NOT_IMPLEMENTED",
+    "boundary": "Preserve teacher-relative FIT1 PASS and separate absolute G3 open red gap; no product or render proof minted."
+  },
   "implementation_validation": {
     "code_head_sha": "0c39433d733609fe042ed02e57eebcf269dc391a",
     "self_hosted_mainline_run": 37741370951,

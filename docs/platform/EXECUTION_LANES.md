@@ -43,6 +43,11 @@ manifest read set. Checkpoint, receipt and proposal references therefore belong
 to the consuming stage's version identity. A changed shared helper legitimately
 invalidates every consumer of that helper.
 
+Release preparation shares each adapter module's source closure within one
+snapshot. It retains the exact transitive files and per-stage hash schema;
+the next snapshot rereads all source so an edit cannot hide behind a process
+cache. This reduces repeated discovery work, not inference or render cost.
+
 EngineReleases also seal an immutable DAG snapshot and the Compiler plan hash.
 Research can add/remove nodes and rewire dependencies; comparison uses both
 the baseline and candidate graphs. Added nodes and changed consumers rerun;

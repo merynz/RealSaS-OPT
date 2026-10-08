@@ -27,12 +27,10 @@ REQUIRED = (
     ".github/pull_request_template.md",
 )
 
-# These are the workflows that currently govern promoted source/evidence, continuity,
-# completion/architecture contracts, IRIS source integrity and the current product shell.
-# Historical/narrow workflow files may remain for provenance, but are not current
-# execution authority. If a future current change would activate one of those, it must
-# first be migrated/scoped to the canonical self-hosted runner policy.
-CURRENT_SELF_HOSTED_WORKFLOWS = (
+# Host-independent current authority/contract workflows execute on standard
+# GitHub-hosted Linux while the repository is public. Local WSL is reserved for
+# explicit native/product-host witnesses or selected local inference.
+CURRENT_HOSTED_WORKFLOWS = (
     ".github/workflows/current_mainline_self_hosted_ci.yml",
     ".github/workflows/model_mainline_source_gate.yml",
     ".github/workflows/live_authority_map.yml",
@@ -40,6 +38,8 @@ CURRENT_SELF_HOSTED_WORKFLOWS = (
     ".github/workflows/architecture_freeze_source_gate.yml",
     ".github/workflows/iris_v2_source_contract.yml",
     ".github/workflows/living_compile_v4.yml",
+    ".github/workflows/platform_go_contract_v1.yml",
+    ".github/workflows/platform_throughput_hydration_contract.yml",
 )
 
 
@@ -72,11 +72,12 @@ def test_current_ci_profiles_are_exactly_pinned() -> None:
             assert "==" in line, f"unpinned dependency in {rel}: {line}"
 
 
-def test_current_authority_workflows_are_self_hosted_only() -> None:
-    for rel in CURRENT_SELF_HOSTED_WORKFLOWS:
+def test_current_host_independent_workflows_use_hosted_linux() -> None:
+    for rel in CURRENT_HOSTED_WORKFLOWS:
         text = (ROOT / rel).read_text(encoding="utf-8")
-        assert "runs-on: [self-hosted, linux, x64, realsas]" in text, rel
-        assert "runs-on: ubuntu-latest" not in text, rel
+        assert "runs-on: ubuntu-latest" in text, rel
+        assert "runs-on: [self-hosted, linux, x64, realsas]" not in text, rel
+        assert "github.event.repository.private == false" in text, rel
 
 
 def test_current_model_ci_consumes_pinned_profiles() -> None:

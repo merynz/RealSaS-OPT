@@ -1,0 +1,52 @@
+{
+  "schema": "RealSaS.PlatformThroughputHydrationGCPrereg.v1",
+  "date": "2026-10-08",
+  "base_main": "b2eb7148d9aeb2a797451bbd6063f4f3695ab2e2",
+  "execution_lanes": {
+    "cpu_light": 2,
+    "gpu_host_exclusive": 1,
+    "github_hosted_minutes_required": false,
+    "public_fork_prs_on_self_hosted_forbidden": true
+  },
+  "cache_policy": {
+    "persistent": true,
+    "gc_required": true,
+    "scope": "PER_RUNNER_TOOL_CACHE_ONLY",
+    "gc_order": [
+      "incomplete_or_temporary",
+      "expired_complete_venv",
+      "lru_complete_venv",
+      "atomic_reconstructable_namespace_under_pressure"
+    ],
+    "arbitrary_file_pruning_forbidden": true,
+    "live_job_lock_protected": true,
+    "disk_safety_floor_required": true
+  },
+  "ci_database_policy": {
+    "persistent_postgres_server_reused": true,
+    "canonical_developer_database_mutation_forbidden": true,
+    "per_job_database_isolation_required": true,
+    "stale_gc_requires_age_and_zero_active_connections": true
+  },
+  "hydration_policy": {
+    "authority_may_be_remote": true,
+    "execution_is_local_cas": true,
+    "initial_remote_provider": "GOOGLE_DRIVE",
+    "size_verification_required": true,
+    "sha256_verification_required": true,
+    "atomic_install_required": true,
+    "non_regular_cas_object_forbidden": true,
+    "hydration_mints_stage_pass": false,
+    "external_import_is_stage_cache_hit": false,
+    "automatic_artifact_cas_gc_enabled": false,
+    "artifact_cas_gc_requires_executor_lease_contract": true
+  },
+  "closure_order": [
+    "EXECUTION_THROUGHPUT",
+    "SETUP_ELIMINATION_WITH_BOUNDED_TOOL_CACHE_AND_DB_GC",
+    "KNIGHT_12_OF_12_HYDRATION",
+    "SCOPED_RESEARCH_RENDER_CONTRACT",
+    "GENERAL_MODEL_INFERENCE_EXECUTOR_AND_ARTIFACT_LEASES",
+    "FRESH_KNIGHT_IDLE_RUN_SLASH"
+  ]
+}

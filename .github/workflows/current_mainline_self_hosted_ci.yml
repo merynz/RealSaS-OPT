@@ -1,4 +1,4 @@
-name: current-mainline-self-hosted-ci
+name: current-mainline-ci
 
 on:
   push:
@@ -42,12 +42,16 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: current-mainline-self-hosted-ci-${{ github.ref }}
+  group: current-mainline-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   fast-current-mainline:
-    runs-on: [self-hosted, linux, x64, realsas]
+    # Standard hosted compute is intentionally enabled only while this repository
+    # is public. If visibility is changed to private during a pause/trip, the job
+    # is skipped rather than consuming private-repository Actions minutes.
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
       PYTHONPATH: .
@@ -61,11 +65,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      # This repository intentionally does not enable setup-python's remote pip-cache
-      # save step on the single self-hosted runner. The runner already retains its
-      # local pip cache, while the action's post-job cache upload serializes the
-      # entire CI queue and has previously remained in the post step after every
-      # substantive regression had passed.
+          cache: pip
+          cache-dependency-path: |
+            requirements/mainline-ci.txt
+            requirements/torch-cpu.txt
       - name: Install pinned CPU regression dependencies
         env:
           PIP_DISABLE_PIP_VERSION_CHECK: '1'
@@ -73,6 +76,10 @@ jobs:
         run: |
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
           python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Ensure native CAA build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libpng-dev zlib1g-dev
       - name: Compile current Python ownership roots
         run: python -m compileall -q models compiler runtime/reference_v4 tools tests
       - name: Repository governance and readiness
@@ -110,15 +117,17 @@ jobs:
         with:
           name: compiler-regressions-junit
           path: compiler-regressions-junit.xml
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 7
       - name: Fast gate summary
         run: |
           echo 'CURRENT_MAINLINE_FAST_GATE_PASS'
           echo "commit=$GITHUB_SHA"
-          echo 'self_hosted_only=true'
+          echo 'execution_lane=github_hosted_public_standard'
+          echo 'private_repo_guard=true'
           echo 'pinned_environment=true'
           echo 'repository_governance=true'
           echo 'v2_dag=true'
           echo 'native_caa_player_built=true'
+          echo 'local_wsl_reserved_for=product_native_witness_or_requested_inference'
           echo 'witness_execution=BLOCKED_UNTIL_V2_READINESS_SEAL'

@@ -15,7 +15,8 @@ concurrency:
 
 jobs:
   validate-architecture:
-    runs-on: [self-hosted, linux, x64, realsas]
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4

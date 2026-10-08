@@ -70,14 +70,15 @@ class CurrentContinuityAuthorityV2(unittest.TestCase):
         self.assertEqual(plan["stages"][23]["id"], "24_COMPLETE_APPEARANCE_QUALIFIED")
         self.assertEqual(plan["stages"][45]["id"], "46_PRODUCT_CLOSURE_SEAL")
 
-    def test_current_self_hosted_workflows_are_main_bound(self) -> None:
+    def test_current_host_independent_workflows_are_main_bound(self) -> None:
         for rel in (
             ".github/workflows/current_mainline_self_hosted_ci.yml",
             ".github/workflows/model_mainline_source_gate.yml",
             ".github/workflows/live_authority_map.yml",
         ):
             text = (ROOT / rel).read_text(encoding="utf-8")
-            self.assertIn("self-hosted", text)
+            self.assertIn("runs-on: ubuntu-latest", text)
+            self.assertIn("github.event.repository.private == false", text)
             self.assertIn("main", text)
 
     def test_active_experiment_records_satisfy_live_map_contract(self) -> None:

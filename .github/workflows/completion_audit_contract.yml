@@ -18,14 +18,14 @@ on:
       - 'canonical/MASTER_EXECUTION_BACKLOG_V4_20260902.md'
       - '.github/workflows/completion_audit_contract.yml'
 
-
 concurrency:
   group: completion-audit-contract-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   completion-audit-contract:
-    runs-on: [self-hosted, linux, x64, realsas]
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -34,3 +34,7 @@ jobs:
           python-version: '3.11'
       - name: Validate canonical completion matrix
         run: python canonical/validate_completion_plan_v1.py
+      - name: Execution lane
+        run: |
+          echo 'execution_lane=github_hosted_public_standard'
+          echo 'private_repo_guard=true'

@@ -1,0 +1,97 @@
+name: platform-throughput-hydration-contract
+
+on:
+  push:
+    branches: [main, 'platform/throughput-hydration-gc-*']
+    paths:
+      - 'tools/platform_artifact_store.py'
+      - 'tools/platform_cache_gc.py'
+      - 'tools/platform_cache_lock.py'
+      - 'tools/platform_ci_bootstrap.py'
+      - 'tools/platform_ci_database.py'
+      - 'tools/platform_host_preflight.py'
+      - 'tests/repository/test_platform_artifact_store.py'
+      - 'tests/repository/test_platform_cache_gc.py'
+      - 'tests/repository/test_platform_ci_bootstrap.py'
+      - 'tests/repository/test_platform_ci_database.py'
+      - 'tests/repository/test_platform_host_preflight.py'
+      - 'canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json'
+      - 'canonical/PLATFORM_KNIGHT_DRIVE_LOCATOR_PROOF_20261008.json'
+      - 'canonical/PLATFORM_THROUGHPUT_HYDRATION_GC_PREREG_20261008.json'
+      - '.github/workflows/platform_throughput_hydration_contract.yml'
+  pull_request:
+    paths:
+      - 'tools/platform_artifact_store.py'
+      - 'tools/platform_cache_gc.py'
+      - 'tools/platform_cache_lock.py'
+      - 'tools/platform_ci_bootstrap.py'
+      - 'tools/platform_ci_database.py'
+      - 'tools/platform_host_preflight.py'
+      - 'tests/repository/test_platform_artifact_store.py'
+      - 'tests/repository/test_platform_cache_gc.py'
+      - 'tests/repository/test_platform_ci_bootstrap.py'
+      - 'tests/repository/test_platform_ci_database.py'
+      - 'tests/repository/test_platform_host_preflight.py'
+      - 'canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json'
+      - 'canonical/PLATFORM_KNIGHT_DRIVE_LOCATOR_PROOF_20261008.json'
+      - 'canonical/PLATFORM_THROUGHPUT_HYDRATION_GC_PREREG_20261008.json'
+      - '.github/workflows/platform_throughput_hydration_contract.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: platform-throughput-hydration-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements/mainline-ci.txt
+      - name: Contract tests
+        run: |
+          python3 -m pip install --disable-pip-version-check --no-input -r requirements/mainline-ci.txt
+          python3 -m pytest -q \
+            tests/repository/test_platform_artifact_store.py \
+            tests/repository/test_platform_cache_gc.py \
+            tests/repository/test_platform_ci_bootstrap.py \
+            tests/repository/test_platform_ci_database.py \
+            tests/repository/test_platform_host_preflight.py
+      - name: Validate Knight inventory and authenticated locator proof
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          from tools.platform_artifact_store import validate_inventory
+          inventory=json.loads(Path('canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json').read_text())
+          proof=json.loads(Path('canonical/PLATFORM_KNIGHT_DRIVE_LOCATOR_PROOF_20261008.json').read_text())
+          rows=validate_inventory(inventory)
+          assert len(rows)==12, len(rows)
+          by_name={row['name']:row for row in rows}
+          assert proof['status']=='PASS_12_OF_12_EXACT_EXTERNAL_BYTES'
+          assert proof['required_count']==proof['verified_count']==12
+          assert not proof['scientific_pass_claimed']
+          assert not proof['qualification_minted']
+          assert not proof['stage_cache_hit_minted']
+          assert {row['name'] for row in proof['files']}==set(by_name)
+          for observed in proof['files']:
+              expected=by_name[observed['name']]
+              assert observed['exact'] is True
+              assert observed['drive_file_id']==expected['source']['file_id']
+              assert observed['size_bytes']==expected['size_bytes']
+              assert observed['sha256']==expected['sha256']
+          print('KNIGHT_EXTERNAL_LOCATORS=12/12_EXACT_BYTE_PROOF')
+          PY
+      - name: Execution lane
+        run: |
+          echo 'execution_lane=github_hosted_public_standard'
+          echo 'private_repo_guard=true'

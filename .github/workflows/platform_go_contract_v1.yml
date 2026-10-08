@@ -1,5 +1,5 @@
 name: platform-go-contract-v1
-# normalized-worker-closure-20261001-final
+# hosted-control-plane-closure-20261008
 
 on:
   push:
@@ -10,11 +10,48 @@ on:
       - 'compiler/realsas_compiler_core/**'
       - 'compiler/realsas_compiler_services/platform_worker/**'
       - 'tools/platform_release_snapshot.py'
+      - 'tools/platform_artifact_store.py'
+      - 'tools/platform_cache_gc.py'
+      - 'tools/platform_ci_bootstrap.py'
+      - 'tools/platform_ci_database.py'
       - 'tests/compiler/test_platform_stage_inputs_v1.py'
       - 'tests/compiler/test_platform_released_graph_v1.py'
       - 'tools/platform_host_preflight.py'
       - 'tests/repository/test_platform_host_preflight.py'
+      - 'tests/repository/test_platform_artifact_store.py'
+      - 'tests/repository/test_platform_cache_gc.py'
+      - 'tests/repository/test_platform_ci_bootstrap.py'
+      - 'tests/repository/test_platform_ci_database.py'
       - 'canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json'
+      - 'canonical/PLATFORM_THROUGHPUT_HYDRATION_GC_PREREG_20261008.json'
+      - 'models/**'
+      - 'runtime/**'
+      - 'tools/realsas_architecture.py'
+      - 'canonical/MAINLINE_EXECUTION_PLAN_V2.json'
+      - 'docs/platform/adr/0003-go-control-plane.md'
+      - '.github/workflows/platform_go_contract_v1.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'platform/**'
+      - 'compiler/realsas_compiler_services/orchestrator/**'
+      - 'compiler/realsas_compiler_core/**'
+      - 'compiler/realsas_compiler_services/platform_worker/**'
+      - 'tools/platform_release_snapshot.py'
+      - 'tools/platform_artifact_store.py'
+      - 'tools/platform_cache_gc.py'
+      - 'tools/platform_ci_bootstrap.py'
+      - 'tools/platform_ci_database.py'
+      - 'tests/compiler/test_platform_stage_inputs_v1.py'
+      - 'tests/compiler/test_platform_released_graph_v1.py'
+      - 'tools/platform_host_preflight.py'
+      - 'tests/repository/test_platform_host_preflight.py'
+      - 'tests/repository/test_platform_artifact_store.py'
+      - 'tests/repository/test_platform_cache_gc.py'
+      - 'tests/repository/test_platform_ci_bootstrap.py'
+      - 'tests/repository/test_platform_ci_database.py'
+      - 'canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json'
+      - 'canonical/PLATFORM_THROUGHPUT_HYDRATION_GC_PREREG_20261008.json'
       - 'models/**'
       - 'runtime/**'
       - 'tools/realsas_architecture.py'
@@ -32,8 +69,26 @@ permissions:
 
 jobs:
   contract:
-    runs-on: [self-hosted, linux, x64, realsas]
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
     timeout-minutes: 25
+    env:
+      REALSAS_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/realsas_ci_main?sslmode=disable
+      REALSAS_MIGRATION_URL: postgresql://postgres:postgres@127.0.0.1:5432/realsas_ci_migrations?sslmode=disable
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: realsas_ci_main
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d realsas_ci_main"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     defaults:
       run:
         working-directory: platform
@@ -42,29 +97,25 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.27.1'
-          # The persistent runner already retains Go's local module/build cache.
-          # Avoid remote cache uploads serializing its single-job queue.
-          cache: false
+          cache: true
+          cache-dependency-path: platform/go.sum
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Python contract dependencies
+          cache: pip
+          cache-dependency-path: |
+            requirements/mainline-ci.txt
+            requirements/platform-worker.txt
+      - name: Install pinned Python contract dependencies
         run: |
-          python3 -m venv --clear "$RUNNER_TEMP/realsas-platform-contract-venv"
-          "$RUNNER_TEMP/realsas-platform-contract-venv/bin/python" -m pip install pytest temporalio Pillow==11.3.0 pgserver==0.1.4
-          echo "$RUNNER_TEMP/realsas-platform-contract-venv/bin" >> "$GITHUB_PATH"
-          echo "REALSAS_CI_PGDATA=$RUNNER_TEMP/realsas-platform-pg-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
-      - name: Start isolated PostgreSQL without Docker
+          python3 -m pip install --no-input --progress-bar off -r ../requirements/mainline-ci.txt
+          python3 -m pip install --no-input --progress-bar off -r ../requirements/platform-worker.txt
+      - name: Create isolated migration database
+        working-directory: .
         run: |
-          python3 - <<'PY'
-          import os
-          from pathlib import Path
-          from pgserver import get_server
-          server = get_server(Path(os.environ['REALSAS_CI_PGDATA']), cleanup_mode=None)
-          with open(os.environ['GITHUB_ENV'], 'a') as handle:
-              handle.write('REALSAS_DATABASE_URL=' + server.get_uri() + '\n')
-          print('Isolated PostgreSQL started; no host database service changed')
-          PY
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends postgresql-client
+          PGPASSWORD=postgres createdb -h 127.0.0.1 -U postgres realsas_ci_migrations
       - name: Download pinned modules
         run: go mod download
       - name: Format gate
@@ -96,16 +147,6 @@ jobs:
           PY
       - name: Prove migration reversibility
         run: |
-          # Expanded research DAG fixtures correctly prevent downgrade to the
-          # old 46-stage constraint. Verify reversible DDL on a separate empty DB.
-          REALSAS_MIGRATION_URL="$(python3 - <<'PY'
-          import os
-          from pathlib import Path
-          from pgserver import get_server
-          server = get_server(Path(os.environ['REALSAS_CI_PGDATA'] + '-migrations'), cleanup_mode=None)
-          print(server.get_uri())
-          PY
-          )"
           REALSAS_DATABASE_URL="$REALSAS_MIGRATION_URL" go run ./cmd/realsas-migrate up
           REALSAS_DATABASE_URL="$REALSAS_MIGRATION_URL" go run ./cmd/realsas-migrate reset
           REALSAS_DATABASE_URL="$REALSAS_MIGRATION_URL" go run ./cmd/realsas-migrate up
@@ -117,40 +158,29 @@ jobs:
           go build ./cmd/realsas-migrate
           go build ./cmd/realsas-architecture
           go build ./cmd/realsas-control-worker
-      - name: Python Engine worker and artifact reuse contracts
+      - name: Python Engine worker and platform contracts
         run: |
           python3 -m py_compile ../compiler/realsas_compiler_services/platform_worker/worker.py
           cd ..
-          python3 -m pytest -q tests/compiler/test_platform_stage_inputs_v1.py tests/compiler/test_platform_released_graph_v1.py tests/repository/test_platform_host_preflight.py tests/repository/test_source_owned_visual_runtime_wiring_v1.py tests/repository/test_self_hosted_execution_policy.py
-      - name: Read-only latest Knight input and platform host preflight
-        run: |
-          cd ..
-          python3 tools/platform_host_preflight.py \
-            --authority-root /home/monster/realsas_authority \
-            --inventory canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json \
-            --out "$RUNNER_TEMP/platform-host-preflight.json"
-      - name: Preserve host preflight (diagnostic, not a scientific PASS)
-        uses: actions/upload-artifact@v4
-        with:
-          name: platform-host-preflight
-          path: ${{ runner.temp }}/platform-host-preflight.json
-          retention-days: 7
+          python3 -m pytest -q \
+            tests/compiler/test_platform_stage_inputs_v1.py \
+            tests/compiler/test_platform_released_graph_v1.py \
+            tests/repository/test_platform_host_preflight.py \
+            tests/repository/test_platform_artifact_store.py \
+            tests/repository/test_platform_cache_gc.py \
+            tests/repository/test_platform_ci_bootstrap.py \
+            tests/repository/test_platform_ci_database.py \
+            tests/repository/test_source_owned_visual_runtime_wiring_v1.py \
+            tests/repository/test_self_hosted_execution_policy.py
       - name: Current continuation contracts
         run: |
           cd ..
           python3 tools/render_authority_map.py --write
           python3 tools/render_rehydration_packet.py --write
-      - name: Stop isolated PostgreSQL
-        if: always()
+      - name: Hosted lane summary
         run: |
-          python3 - <<'PY'
-          import os
-          from pathlib import Path
-          location = os.environ.get('REALSAS_CI_PGDATA')
-          if location:
-              from pgserver import pg_ctl
-              for suffix in ('', '-migrations'):
-                  data = Path(location + suffix)
-                  if (data / 'postmaster.pid').exists():
-                      pg_ctl(['-m', 'fast', '-w', 'stop'], pgdata=data, timeout=30)
-          PY
+          echo 'PLATFORM_GO_CONTRACT_PASS'
+          echo 'execution_lane=github_hosted_public_standard'
+          echo 'private_repo_guard=true'
+          echo 'database_transport=ephemeral_postgres_service'
+          echo 'local_wsl_mutation=false'

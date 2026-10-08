@@ -33,6 +33,10 @@ on:
       - 'tools/render_authority_map.py'
       - 'tools/render_rehydration_packet.py'
       - 'tools/audit_context_coverage.py'
+      - 'tools/platform_cache_gc.py'
+      - 'tools/platform_ci_bootstrap.py'
+      - 'tests/repository/test_platform_cache_gc.py'
+      - 'tests/repository/test_platform_ci_bootstrap.py'
       - '.github/workflows/current_mainline_self_hosted_ci.yml'
       - '.github/workflows/live_authority_map.yml'
       - '.github/workflows/subject2_knight_observation_preflight.yml'
@@ -47,6 +51,8 @@ concurrency:
 
 jobs:
   fast-current-mainline:
+    # Public fork code must never execute on the persistent self-hosted workstation.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 30
     env:
@@ -56,23 +62,38 @@ jobs:
       MKL_NUM_THREADS: '1'
       OPENBLAS_NUM_THREADS: '1'
       REALSAS_RUNTIME_V2_PLAYER: /tmp/realsas_runtime_v2_caa_reference
+      REALSAS_CI_CACHE_SOFT_GIB: '12'
+      REALSAS_CI_CACHE_TARGET_GIB: '8'
+      REALSAS_CI_CACHE_MIN_FREE_GIB: '5'
+      REALSAS_CI_CACHE_MAX_AGE_DAYS: '30'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      # This repository intentionally does not enable setup-python's remote pip-cache
-      # save step on the single self-hosted runner. The runner already retains its
-      # local pip cache, while the action's post-job cache upload serializes the
-      # entire CI queue and has previously remained in the post step after every
-      # substantive regression had passed.
-      - name: Install pinned CPU regression dependencies
-        env:
-          PIP_DISABLE_PIP_VERSION_CHECK: '1'
-          PIP_DEFAULT_TIMEOUT: '60'
+      - name: Select persistent per-runner cache namespace
         run: |
-          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
-          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          CACHE_ROOT="$HOME/.cache/realsas-ci/${RUNNER_NAME:-unnamed-runner}"
+          echo "REALSAS_CI_CACHE_ROOT=$CACHE_ROOT" >> "$GITHUB_ENV"
+          echo "PIP_CACHE_DIR=$CACHE_ROOT/pip" >> "$GITHUB_ENV"
+      - name: Bounded local cache GC
+        run: |
+          python3 tools/platform_cache_gc.py \
+            --root "$REALSAS_CI_CACHE_ROOT" \
+            --soft-max-gib "$REALSAS_CI_CACHE_SOFT_GIB" \
+            --target-max-gib "$REALSAS_CI_CACHE_TARGET_GIB" \
+            --max-age-days "$REALSAS_CI_CACHE_MAX_AGE_DAYS" \
+            --min-free-gib "$REALSAS_CI_CACHE_MIN_FREE_GIB" \
+            --out "$RUNNER_TEMP/realsas-mainline-cache-gc.json"
+      - name: Reuse exact pinned CPU regression environment
+        run: |
+          python3 tools/platform_ci_bootstrap.py \
+            --cache-root "$REALSAS_CI_CACHE_ROOT" \
+            --pip-cache "$PIP_CACHE_DIR" \
+            --requirements-file requirements/mainline-ci.txt \
+            --requirements-file requirements/torch-cpu.txt \
+            --github-path "$GITHUB_PATH" \
+            --out "$RUNNER_TEMP/realsas-mainline-bootstrap.json"
       - name: Compile current Python ownership roots
         run: python -m compileall -q models compiler runtime/reference_v4 tools tests
       - name: Repository governance and readiness
@@ -104,12 +125,27 @@ jobs:
             tests/iris/test_iris_v2_dense_source_coverage_v2.py
       - name: Compiler regressions
         run: python -m pytest -q tests/compiler --junitxml=compiler-regressions-junit.xml
-      - name: Persist compiler regression diagnostics
+      - name: Dry-run next tool-cache GC decision
+        if: always()
+        run: |
+          python3 tools/platform_cache_gc.py \
+            --root "$REALSAS_CI_CACHE_ROOT" \
+            --soft-max-gib "$REALSAS_CI_CACHE_SOFT_GIB" \
+            --target-max-gib "$REALSAS_CI_CACHE_TARGET_GIB" \
+            --max-age-days "$REALSAS_CI_CACHE_MAX_AGE_DAYS" \
+            --min-free-gib "$REALSAS_CI_CACHE_MIN_FREE_GIB" \
+            --dry-run \
+            --out "$RUNNER_TEMP/realsas-mainline-cache-gc-dry-run.json"
+      - name: Persist compiler and cache diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: compiler-regressions-junit
-          path: compiler-regressions-junit.xml
+          name: current-mainline-diagnostics
+          path: |
+            compiler-regressions-junit.xml
+            ${{ runner.temp }}/realsas-mainline-cache-gc.json
+            ${{ runner.temp }}/realsas-mainline-cache-gc-dry-run.json
+            ${{ runner.temp }}/realsas-mainline-bootstrap.json
           if-no-files-found: error
           retention-days: 7
       - name: Fast gate summary
@@ -117,6 +153,9 @@ jobs:
           echo 'CURRENT_MAINLINE_FAST_GATE_PASS'
           echo "commit=$GITHUB_SHA"
           echo 'self_hosted_only=true'
+          echo 'fork_pr_execution=false'
+          echo 'persistent_dependency_cache=true'
+          echo 'bounded_cache_gc=true'
           echo 'pinned_environment=true'
           echo 'repository_governance=true'
           echo 'v2_dag=true'

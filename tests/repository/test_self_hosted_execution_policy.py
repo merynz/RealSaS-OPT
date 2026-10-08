@@ -51,21 +51,21 @@ def test_host_independent_current_workflows_are_hosted_and_public_only():
 
 
 def test_automatic_self_hosted_pr_checks_reject_public_fork_code():
-    """Only automatic PR jobs need the same-repository firewall.
+    """Every automatic PR workflow reaching a physical runner must reject fork code.
 
-    Historical/manual stateful witnesses may retain their older self-hosted label
-    sets. The security boundary is whether untrusted pull-request code can reach a
-    physical runner, not the spelling/order of runner labels.
+    Report the complete debt set in one failure so migrations are fixed as one wave
+    instead of discovering one historical workflow per CI run.
     """
-    for path in (ROOT / ".github/workflows").glob("*.yml"):
+    missing = []
+    for path in sorted((ROOT / ".github/workflows").glob("*.yml")):
         text = path.read_text(encoding="utf-8")
         if not re.search(r"^  pull_request:", text, re.MULTILINE):
             continue
         if not any(_is_explicit_self_hosted(value) for value in _runner_values(text)):
             continue
-        assert "github.event.pull_request.head.repo.full_name == github.repository" in text, (
-            f"Self-hosted PR workflow lacks same-repository firewall: {path.name}"
-        )
+        if "github.event.pull_request.head.repo.full_name == github.repository" not in text:
+            missing.append(path.name)
+    assert not missing, "Self-hosted PR workflows lacking same-repository firewall: " + ", ".join(missing)
 
 
 def test_automatic_pr_checks_cancel_superseded_heads():

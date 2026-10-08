@@ -3,6 +3,11 @@
 The runner retains its private key locally and publishes only the public key.
 Ciphertext is bound to the run ID and exact code SHA. Locators are never logged
 or committed as plaintext; scientific bytes still require their pinned SHA256.
+
+For larger handoffs, the encrypted payload may contain one hash-pinned manifest
+locator instead of every transfer locator. The manifest is itself bound to the
+same run ID/code SHA and then resolves to the existing transfers/config shape.
+The original inline transfers format remains supported.
 """
 import argparse
 import base64
@@ -17,6 +22,14 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+
+MAX_TRANSFER_BYTES = 64 * 1024 * 1024
+MAX_MANIFEST_BYTES = 8 * 1024 * 1024
+ALLOWED_DOWNLOAD_HOST_SUFFIXES = (
+    ".blob.core.windows.net",
+    ".amazonaws.com",
+    ".oaiusercontent.com",
+)
 
 
 def rsa(data, key, *, encrypt):
@@ -57,6 +70,58 @@ def encrypt(public_path, payload_path, out):
                               "plaintext_sha256": hashlib.sha256(raw).hexdigest(), "chunks": chunks}) + "\n")
 
 
+def _require_identity(value, run_id, code_sha, error_code):
+    if value.get("run_id") != run_id or value.get("code_sha") != code_sha:
+        raise RuntimeError(error_code)
+
+
+def _download_pinned(ref, label, max_bytes):
+    if not isinstance(ref, dict):
+        raise RuntimeError("PRIVATE_INPUT_REFERENCE_INVALID:" + label)
+    uri = ref.get("download_url")
+    size = ref.get("size_bytes")
+    digest = ref.get("sha256")
+    if (not isinstance(uri, str) or not isinstance(size, int) or size < 0 or size > max_bytes
+            or not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest)):
+        raise RuntimeError("PRIVATE_INPUT_REFERENCE_INVALID:" + label)
+    parsed = urllib.parse.urlsplit(uri)
+    if (parsed.scheme != "https"
+            or not (parsed.hostname or "").endswith(ALLOWED_DOWNLOAD_HOST_SUFFIXES)):
+        raise RuntimeError("PRIVATE_INPUT_DOWNLOAD_HOST_INVALID")
+    print("::add-mask::" + uri, flush=True)
+    try:
+        # The signed-download gateway rejects urllib's default user agent.
+        request = urllib.request.Request(uri, headers={"User-Agent": "curl/8.5.0"})
+        with urllib.request.urlopen(request, timeout=60) as response:
+            data = response.read(max_bytes + 1)
+    except Exception:
+        raise RuntimeError("PRIVATE_INPUT_DOWNLOAD_FAILED:" + label) from None
+    if len(data) != size or hashlib.sha256(data).hexdigest() != digest:
+        raise RuntimeError("PRIVATE_INPUT_BYTES_DRIFT:" + label)
+    return data
+
+
+def resolve_payload(payload, *, run_id, code_sha, downloader=_download_pinned):
+    """Resolve either the legacy inline payload or one pinned manifest locator."""
+    if not isinstance(payload, dict):
+        raise RuntimeError("PRIVATE_INPUT_PAYLOAD_INVALID")
+    _require_identity(payload, run_id, code_sha, "PRIVATE_INPUT_PAYLOAD_IDENTITY_DRIFT")
+    manifest = payload.get("manifest")
+    if manifest is None:
+        return payload
+    if "transfers" in payload or "config" in payload:
+        raise RuntimeError("PRIVATE_INPUT_MANIFEST_PAYLOAD_AMBIGUOUS")
+    raw = downloader(manifest, "manifest", MAX_MANIFEST_BYTES)
+    try:
+        resolved = json.loads(raw)
+    except Exception:
+        raise RuntimeError("PRIVATE_INPUT_MANIFEST_JSON_INVALID") from None
+    if not isinstance(resolved, dict) or "manifest" in resolved:
+        raise RuntimeError("PRIVATE_INPUT_MANIFEST_SHAPE_INVALID")
+    _require_identity(resolved, run_id, code_sha, "PRIVATE_INPUT_MANIFEST_IDENTITY_DRIFT")
+    return resolved
+
+
 def receive(directory, out, *, repo, branch, run_id, code_sha, timeout):
     url = (f"https://api.github.com/repos/{repo}/contents/.github/research_transport/{run_id}.json?ref="
            + urllib.parse.quote(branch, safe=""))
@@ -82,33 +147,24 @@ def receive(directory, out, *, repo, branch, run_id, code_sha, timeout):
                    for c in envelope["chunks"])
     if hashlib.sha256(raw).hexdigest() != envelope["plaintext_sha256"]:
         raise RuntimeError("PRIVATE_INPUT_ENVELOPE_INTEGRITY_DRIFT")
-    payload = json.loads(raw)
-    if payload["run_id"] != run_id or payload["code_sha"] != code_sha:
-        raise RuntimeError("PRIVATE_INPUT_PAYLOAD_IDENTITY_DRIFT")
+    payload = resolve_payload(json.loads(raw), run_id=run_id, code_sha=code_sha)
+    transfers = payload.get("transfers")
+    config = payload.get("config")
+    if not isinstance(transfers, list) or len(transfers) > 128 or not isinstance(config, dict):
+        raise RuntimeError("PRIVATE_INPUT_PAYLOAD_SHAPE_INVALID")
     out.mkdir(parents=True, exist_ok=True)
     names = set()
-    for transfer in payload["transfers"]:
-        name, uri = transfer["name"], transfer["download_url"]
-        if not re.fullmatch(r"[A-Za-z0-9_.-]+", name) or name in names:
+    for transfer in transfers:
+        if not isinstance(transfer, dict):
+            raise RuntimeError("PRIVATE_INPUT_TRANSFER_INVALID")
+        name = transfer.get("name")
+        if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9_.-]+", name) or name in names:
             raise RuntimeError("PRIVATE_INPUT_NAME_INVALID")
         names.add(name)
-        parsed = urllib.parse.urlsplit(uri)
-        if parsed.scheme != "https" or not (parsed.hostname or "").endswith((".blob.core.windows.net", ".amazonaws.com", ".oaiusercontent.com")):
-            raise RuntimeError("PRIVATE_INPUT_DOWNLOAD_HOST_INVALID")
-        # GitHub log masking is defense in depth; never print locators.
-        print("::add-mask::" + uri, flush=True)
-        try:
-            # The signed-download gateway rejects urllib's default user agent.
-            download = urllib.request.Request(uri, headers={"User-Agent": "curl/8.5.0"})
-            with urllib.request.urlopen(download, timeout=60) as response:
-                data = response.read(64*1024*1024 + 1)
-        except Exception:
-            raise RuntimeError("PRIVATE_INPUT_DOWNLOAD_FAILED:" + name) from None
-        if len(data) != transfer["size_bytes"] or hashlib.sha256(data).hexdigest() != transfer["sha256"]:
-            raise RuntimeError("PRIVATE_INPUT_BYTES_DRIFT:" + name)
+        data = _download_pinned(transfer, name, MAX_TRANSFER_BYTES)
         (out/name).write_bytes(data)
         print("EXACT_PRIVATE_INPUT " + name + " " + transfer["sha256"], flush=True)
-    (out/"presentation_config.json").write_text(json.dumps(payload["config"], indent=2) + "\n")
+    (out/"presentation_config.json").write_text(json.dumps(config, indent=2) + "\n")
     (directory/"private.pem").unlink()
 
 

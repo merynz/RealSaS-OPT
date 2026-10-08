@@ -1,0 +1,36 @@
+{
+  "schema": "RealSaS.PlatformMainAudit.v1",
+  "date": "2026-10-08",
+  "canonical_main_sha": "949422678d34cf69008cffd6b4d7647c8c066b8a",
+  "canonical_main_tree": "ad54a55dda4c1f4d6ece03b67129bbd61d0237f1",
+  "latest_mechanics_dispatch": "Stage19 M / AXIS541 G / MIRA55 W_M; carrier-native stages32/34/35/36; no skin transfer",
+  "drive_result_hashes_verified": {
+    "AXIS41_DISCRETE_XYZ_FROZEN_CAUSAL_RESULT_V541.json": "072b52b206e622b1c1b51fe266c0e348fe3829925f8258035d23c61087abf528",
+    "MIRA_M_DIRECT_RESULT_V55.json": "31545e7180aa770b1efc4a1876c256999bdeb38f703d9a3e46892f888a4678c1"
+  },
+  "claims": {
+    "axis_fit1": "PASS",
+    "mira_fit1": "PASS",
+    "knight_mechanics_teacher_relative": "PASS",
+    "absolute_g3": "OPEN_RED_GAP__TEACHER_ALSO_OUTSIDE_THRESHOLD",
+    "product_qualified": "NOT_PROVEN",
+    "new_carrier_native_render": "NOT_PROVEN",
+    "sub_120_seconds": "NOT_MEASURED"
+  },
+  "ci_observed": {
+    "platform_go_main_37695478822": "success",
+    "live_authority_main_37695478773": "failure: stale active runtime-audit pointers",
+    "source_visual_37688817067": "failure: static test reads dispatch file instead of reexported implementation"
+  },
+  "historical_renderer": "tools/demo/render_knight_motion_preview_native_v2.py reads old demo inputs; not latest carrier-native proof",
+  "execution_policy": "SELF_HOSTED_LOCAL_ONLY",
+  "runner": "realsas-wsl-1660ti",
+  "implementation_validation": {
+    "code_head_sha": "0c39433d733609fe042ed02e57eebcf269dc391a",
+    "self_hosted_mainline_run": 37741370951,
+    "self_hosted_mainline_conclusion": "success",
+    "self_hosted_go_postgresql_run": 37741363474,
+    "self_hosted_go_postgresql_conclusion": "success",
+    "boundary": "Engineering contracts; no new scientific, product or render qualification claimed. Final scheduling/documentation changes are reviewed in PR59; verify live main ref and final checks."
+  }
+}

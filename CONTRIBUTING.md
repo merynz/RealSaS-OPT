@@ -6,12 +6,17 @@ RealSaS is a proprietary research and product repository. Access to the reposito
 
 Read, in order:
 
-1. `canonical/REHYDRATION_PACKET.md`
-2. `canonical/FIT1_EVIDENCE_INDEX_20260909.md`
-3. `CURRENT_STATE.md`
-4. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
-5. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
-6. `AGENTS.md`
+1. [CURRENT_STATE.md](CURRENT_STATE.md)
+2. [AGENTS.md](AGENTS.md)
+3. [Execution lanes](docs/platform/EXECUTION_LANES.md)
+4. [System ownership](SYSTEM_INDEX.md)
+5. [Canonical index](canonical/README.md)
+
+Use a short code PR into main. Start component experiments as Go research
+Attempts against immutable baseline/candidate EngineReleases. Select a model or
+Compiler target, inspect the affected DAG closure and retain independent
+artifacts. DAG changes belong to a new release; do not mutate prior execution
+state or accumulate research state on a long-lived branch.
 
 Do not infer authority from branch recency, workflow color, file date, or a detached report.
 
@@ -61,11 +66,14 @@ The workflows designated as **current execution authority** run only on the loca
 
 `[self-hosted, linux, x64, realsas]`
 
-Known runner: `realsas-wsl-1660ti`.
+Known runner: `realsas-wsl-1660ti`. Local execution is also permitted.
 
-The current-authority set is enumerated and regression-checked in `tests/repository/test_repository_governance_v1.py`. Historical/narrow workflow files may remain with their original runner configuration as provenance. They are not current execution authority. If a present-day change would activate such a GitHub-hosted historical workflow, migrate or scope that workflow to the canonical self-hosted runner **before** making/running the change.
+Runner policy is checked in `tests/repository/test_self_hosted_execution_policy.py`.
+All workflow definitions use self-hosted execution. Frozen historical training
+and recovery replays are manual reproducibility, not normal current development.
+Automatic PR workflows cancel superseded heads in their workflow/PR group.
 
-Do not migrate current authority/science jobs to GitHub-hosted runners without an explicit repository-policy change.
+Do not add GitHub-hosted execution.
 
 ## Local checks
 

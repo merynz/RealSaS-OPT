@@ -52,7 +52,7 @@ on:
 
 concurrency:
   group: realsas-self-hosted-runtime-${{ github.repository }}-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   verify-native-runtime:

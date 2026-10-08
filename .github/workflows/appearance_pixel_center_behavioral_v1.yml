@@ -10,9 +10,13 @@ on:
       - '.github/workflows/appearance_pixel_center_behavioral_v1.yml'
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   appearance-pixel-center-behavioral:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4

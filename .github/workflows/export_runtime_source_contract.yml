@@ -20,6 +20,10 @@ on:
       - 'runtime/reference_v4/**'
       - 'experiments/single_family_e2e_v1/test_export_runtime_source_v1.py'
       - '.github/workflows/export_runtime_source_contract.yml'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   export-runtime-source-contract:
     runs-on: [self-hosted, linux, x64, realsas]

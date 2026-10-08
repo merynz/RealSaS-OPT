@@ -3,11 +3,14 @@ name: platform-go-contract-v1
 
 on:
   push:
-    branches: [platform/professional-backend-v1-20261001, integration/final-main-knight-platform-20261002, main]
+    branches: [main, implementation/platform-execution-lanes-20261008]
     paths:
       - 'platform/**'
       - 'compiler/realsas_compiler_services/orchestrator/**'
       - 'compiler/realsas_compiler_core/**'
+      - 'compiler/realsas_compiler_services/platform_worker/**'
+      - 'tools/platform_release_snapshot.py'
+      - 'tests/compiler/test_platform_stage_inputs_v1.py'
       - 'models/**'
       - 'runtime/**'
       - 'tools/realsas_architecture.py'
@@ -16,29 +19,17 @@ on:
       - '.github/workflows/platform_go_contract_v1.yml'
   workflow_dispatch:
 
+concurrency:
+  group: platform-go-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
   contract:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 25
-    services:
-      postgres:
-        image: postgres:18.6
-        env:
-          POSTGRES_USER: realsas
-          POSTGRES_PASSWORD: realsas
-          POSTGRES_DB: realsas_platform
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U realsas -d realsas_platform"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 20
-    env:
-      REALSAS_DATABASE_URL: postgres://realsas:realsas@127.0.0.1:5432/realsas_platform?sslmode=disable
     defaults:
       run:
         working-directory: platform
@@ -47,7 +38,29 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.27.1'
-          cache-dependency-path: platform/go.sum
+          # The persistent runner already retains Go's local module/build cache.
+          # Avoid remote cache uploads serializing its single-job queue.
+          cache: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Python contract dependencies
+        run: |
+          python3 -m venv --clear "$RUNNER_TEMP/realsas-platform-contract-venv"
+          "$RUNNER_TEMP/realsas-platform-contract-venv/bin/python" -m pip install pytest temporalio pgserver==0.1.4
+          echo "$RUNNER_TEMP/realsas-platform-contract-venv/bin" >> "$GITHUB_PATH"
+          echo "REALSAS_CI_PGDATA=$RUNNER_TEMP/realsas-platform-pg-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
+      - name: Start isolated PostgreSQL without Docker
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          from pgserver import get_server
+          server = get_server(Path(os.environ['REALSAS_CI_PGDATA']), cleanup_mode=None)
+          with open(os.environ['GITHUB_ENV'], 'a') as handle:
+              handle.write('REALSAS_DATABASE_URL=' + server.get_uri() + '\n')
+          print('Isolated PostgreSQL started; no host database service changed')
+          PY
       - name: Download pinned modules
         run: go mod download
       - name: Format gate
@@ -79,14 +92,48 @@ jobs:
           PY
       - name: Prove migration reversibility
         run: |
-          go run ./cmd/realsas-migrate reset
-          go run ./cmd/realsas-migrate up
-          go test -p 1 ./internal/product -run TestAtomicPromotion -count=1
+          # Expanded research DAG fixtures correctly prevent downgrade to the
+          # old 46-stage constraint. Verify reversible DDL on a separate empty DB.
+          REALSAS_MIGRATION_URL="$(python3 - <<'PY'
+          import os
+          from pathlib import Path
+          from pgserver import get_server
+          server = get_server(Path(os.environ['REALSAS_CI_PGDATA'] + '-migrations'), cleanup_mode=None)
+          print(server.get_uri())
+          PY
+          )"
+          REALSAS_DATABASE_URL="$REALSAS_MIGRATION_URL" go run ./cmd/realsas-migrate up
+          REALSAS_DATABASE_URL="$REALSAS_MIGRATION_URL" go run ./cmd/realsas-migrate reset
+          REALSAS_DATABASE_URL="$REALSAS_MIGRATION_URL" go run ./cmd/realsas-migrate up
+          REALSAS_DATABASE_URL="$REALSAS_MIGRATION_URL" go test -p 1 ./internal/product -run TestAtomicPromotion -count=1
       - name: Build native control-plane binaries
         run: |
+          go build ./cmd/realsasctl
           go build ./cmd/realsas-api
           go build ./cmd/realsas-migrate
           go build ./cmd/realsas-architecture
           go build ./cmd/realsas-control-worker
-      - name: Python Engine worker syntax contract
-        run: python3 -m py_compile ../compiler/realsas_compiler_services/platform_worker/worker.py
+      - name: Python Engine worker and artifact reuse contracts
+        run: |
+          python3 -m py_compile ../compiler/realsas_compiler_services/platform_worker/worker.py
+          cd ..
+          python3 -m pytest -q tests/compiler/test_platform_stage_inputs_v1.py tests/repository/test_source_owned_visual_runtime_wiring_v1.py tests/repository/test_self_hosted_execution_policy.py
+      - name: Current continuation contracts
+        run: |
+          cd ..
+          python3 tools/render_authority_map.py --write
+          python3 tools/render_rehydration_packet.py --write
+      - name: Stop isolated PostgreSQL
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          location = os.environ.get('REALSAS_CI_PGDATA')
+          if location:
+              from pgserver import pg_ctl
+              for suffix in ('', '-migrations'):
+                  data = Path(location + suffix)
+                  if (data / 'postmaster.pid').exists():
+                      pg_ctl(['-m', 'fast', '-w', 'stop'], pgdata=data, timeout=30)
+          PY

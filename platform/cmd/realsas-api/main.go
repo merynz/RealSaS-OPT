@@ -1,22 +1,42 @@
 package main
 
 import (
-	"encoding/json"
+	"context"
+	"github.com/merynz/RealSaS-OPT/platform/internal/httpapi"
+	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
+	"github.com/merynz/RealSaS-OPT/platform/internal/stagegraph"
 	"log/slog"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 )
 
 func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /health/live", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
-	})
+	root := os.Getenv("REALSAS_REPO_ROOT")
+	if root == "" {
+		root = ".."
+	}
+	data, err := os.ReadFile(filepath.Join(root, "canonical", "MAINLINE_EXECUTION_PLAN_V2.json"))
+	if err != nil {
+		slog.Error("read plan", "error", err)
+		os.Exit(1)
+	}
+	graph, err := stagegraph.ParseCanonicalPlan(data)
+	if err != nil {
+		slog.Error("parse plan", "error", err)
+		os.Exit(1)
+	}
+	pool, err := persistence.Open(context.Background(), os.Getenv("REALSAS_DATABASE_URL"))
+	if err != nil {
+		slog.Error("open database", "error", err)
+		os.Exit(1)
+	}
+	defer pool.Close()
+	handler := (httpapi.API{Pool: pool, Graph: graph}).Handler()
 	server := &http.Server{
-		Addr:              ":8080",
-		Handler:           mux,
+		Addr:              "127.0.0.1:8080",
+		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      30 * time.Second,

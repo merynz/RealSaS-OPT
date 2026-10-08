@@ -13,9 +13,13 @@ on:
       - 'experiments/single_family_e2e_v1/appearance_builder_v1.py'
       - 'compiler/test_appearance_source_v1.py'
       - '.github/workflows/appearance_source_contract.yml'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   appearance-source-contract:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

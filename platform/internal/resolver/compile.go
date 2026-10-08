@@ -87,9 +87,19 @@ func Resolve(
 		if !ok {
 			return Plan{}, fmt.Errorf("missing stage version %s", stageID)
 		}
+		nodeSHA, err := stage.NodeSHA256()
+		if err != nil {
+			return Plan{}, err
+		}
+		if version.GraphNodeSHA256 != "" && version.GraphNodeSHA256 != nodeSHA {
+			return Plan{}, fmt.Errorf("released stage graph identity drift: %s", stageID)
+		}
 
 		inputs := make([]domain.ArtifactInputIdentity, 0, len(rootInputs)+len(stage.DependsOn))
 		for _, item := range rootInputs {
+			if !stage.ConsumesInput(item.Role) {
+				continue
+			}
 			inputs = append(inputs, domain.ArtifactInputIdentity{
 				Role:           item.Role,
 				Ordinal:        len(inputs),
@@ -120,6 +130,7 @@ func Resolve(
 			SemanticParameters: map[string]any{
 				"stage_id":          stageID,
 				"parameters_sha256": version.ParametersSHA256,
+				"graph_node_sha256": nodeSHA,
 			},
 		}
 		semanticSHA, err := descriptor.SemanticSHA256()

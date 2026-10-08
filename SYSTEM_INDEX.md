@@ -1,12 +1,14 @@
 # RealSaS Structural System Index
 
-## 2026-10-07 canonical main
+## 2026-10-08 canonical main
 
 ## Current continuation details
 
 Current continuation authority is `canonical/CANONICAL_HANDOFF_20261007.md` plus `CURRENT_STATE.md`.
 
-The active engineering program is **repo currentness -> Go platform enforcement -> performance optimization**. Runtime/presentation image diagnosis is intentionally deferred until those close.
+The modular Go developer path is implemented. Next prove a real Knight
+component replacement with independent reuse, then optimize and render.
+Full product input-to-output execution and UI integration remain later work.
 
 > Navigation only. Historical recovery/runtime-audit documents are provenance and must not override current continuation authority.
 
@@ -58,7 +60,9 @@ Knight FIT1 mechanics are closed relative to the sealed teacher/source motion en
 
 `compiler/realsas_compiler_core/appearance_authority_v2.py` owns complete appearance qualification. `compiler/realsas_compiler_core/runtime_authority_v2.py` governs qualified runtime consumption. Appearance remains source-preserving and may not silently become mechanical correction.
 
-The 46-stage **dependency DAG** is the executable dependency authority.
+The current Compiler compatibility plan is a 46-stage **dependency DAG**.
+Go seals the selected DAG in each EngineRelease. Research releases can evolve
+nodes/edges without rewriting old releases or invalidating independent artifacts.
 
 ## Fresh render baseline
 
@@ -85,3 +89,11 @@ The fresh regression run measured the dominant costs directly: renderer ~463.8 s
 ## Machine-readable ownership
 
 Architecture ownership remains queryable from `platform/internal/architecture/registry.go` and `tools/realsas_architecture.py`. Every canonical stage must resolve to one Engine owner; Platform separately owns durable state/orchestration and Runtime owns hot playback/render paths.
+
+## Platform execution entrypoints — 2026-10-08
+
+- `docs/platform/EXECUTION_LANES.md`: development/product operations and limits.
+- `platform/cmd/realsasctl`: Go operator commands.
+- `tools/platform_release_snapshot.py`: source-only pinned stage/version request.
+- `compiler/realsas_compiler_services/platform_worker/stage_inputs.py`: immutable CAS stage hydration.
+- `canonical/PLATFORM_MAIN_AUDIT_20261008.json`: main and current evidence audit.

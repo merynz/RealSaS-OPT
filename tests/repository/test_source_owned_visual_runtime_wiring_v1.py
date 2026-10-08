@@ -13,6 +13,8 @@ def test_source_owned_visual_runtime_cannot_silently_fall_back_to_mechanical_ren
     )
     product_state = _text(
         "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py"
+    ) + _text(
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_state_legacy_v2.py"
     )
     runtime = _text(
         "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"

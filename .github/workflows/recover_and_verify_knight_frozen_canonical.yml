@@ -1,11 +1,7 @@
 name: recover-and-verify-knight-frozen-canonical
+# Manual historical reproducibility; never current carrier-native authority.
 
 on:
-  push:
-    branches:
-      - main
-      - integration/knight-latest-canonical-20261002
-      - promotion/mechanical-substrate-v1-20261005
   workflow_dispatch:
 
 permissions:

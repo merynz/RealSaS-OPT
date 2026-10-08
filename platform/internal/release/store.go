@@ -32,10 +32,12 @@ type StageBinding struct {
 }
 
 type Manifest struct {
-	ContractVersion string         `json:"contract_version"`
-	Name            string         `json:"name"`
-	Purpose         Purpose        `json:"purpose"`
-	Stages          []StageBinding `json:"stages"`
+	ContractVersion    string               `json:"contract_version"`
+	Name               string               `json:"name"`
+	Purpose            Purpose              `json:"purpose"`
+	Stages             []StageBinding       `json:"stages"`
+	DAG                *stagegraph.Snapshot `json:"dag,omitempty"`
+	PipelinePlanSHA256 string               `json:"pipeline_plan_sha256,omitempty"`
 }
 
 type Sealed struct {
@@ -57,6 +59,7 @@ var (
 	ErrProductReleaseOnly  = errors.New("product operation requires PRODUCT engine release")
 	ErrResearchReleaseOnly = errors.New("research attempt requires RESEARCH engine release")
 	ErrReleaseNotFound     = errors.New("engine release not found")
+	ErrDAGSnapshotRequired = errors.New("sealed release DAG snapshot required; reseal legacy release explicitly")
 )
 
 func (m Manifest) normalized() Manifest {
@@ -79,7 +82,16 @@ func (m Manifest) Validate(g *stagegraph.Graph) error {
 	if m.Purpose != PurposeProduct && m.Purpose != PurposeResearch {
 		return errors.New("engine release purpose must be PRODUCT or RESEARCH")
 	}
-	stages := g.Stages()
+	selected, err := m.graph(g)
+	if err != nil {
+		return err
+	}
+	if m.PipelinePlanSHA256 != "" {
+		if err := semantic.ValidateSHA256(m.PipelinePlanSHA256); err != nil {
+			return err
+		}
+	}
+	stages := selected.Stages()
 	if len(stages) == 0 || len(m.Stages) != len(stages) {
 		return ErrGraphDrift
 	}
@@ -98,8 +110,43 @@ func (m Manifest) Validate(g *stagegraph.Graph) error {
 	return nil
 }
 
+func (m Manifest) graph(current *stagegraph.Graph) (*stagegraph.Graph, error) {
+	if m.DAG == nil {
+		return current, nil
+	}
+	if m.DAG.Schema != "RealSaS.StageGraph.v1" {
+		return nil, errors.New("release DAG schema is required")
+	}
+	raw, err := json.Marshal(m.DAG)
+	if err != nil {
+		return nil, err
+	}
+	g, err := stagegraph.ParsePlan(raw, m.Purpose == PurposeProduct)
+	if err != nil {
+		return nil, err
+	}
+	if m.Purpose == PurposeProduct {
+		want, err := current.SHA256()
+		if err != nil {
+			return nil, err
+		}
+		got, err := g.SHA256()
+		if err != nil {
+			return nil, err
+		}
+		if got != want {
+			return nil, ErrGraphDrift
+		}
+	}
+	return g, nil
+}
+
 func (m Manifest) SHA256(g *stagegraph.Graph) (string, error) {
 	m = m.normalized()
+	if m.DAG == nil {
+		snapshot := g.Snapshot()
+		m.DAG = &snapshot
+	}
 	if err := m.Validate(g); err != nil {
 		return "", err
 	}
@@ -114,6 +161,10 @@ func Seal(
 	createdBy string,
 ) (Sealed, error) {
 	manifest = manifest.normalized()
+	if manifest.DAG == nil {
+		snapshot := g.Snapshot()
+		manifest.DAG = &snapshot
+	}
 	if createdBy == "" {
 		return Sealed{}, errors.New("created_by is required")
 	}
@@ -165,6 +216,24 @@ func Seal(
 			}
 		}
 
+		selected, err := manifest.graph(g)
+		if err != nil {
+			return err
+		}
+		graphSHA, err := selected.SHA256()
+		if err != nil {
+			return err
+		}
+		snapshot, err := json.Marshal(selected.Snapshot())
+		if err != nil {
+			return err
+		}
+		if _, err := tx.Exec(ctx, `INSERT INTO engine_release_graphs
+			(release_id,graph_sha256,pipeline_plan_sha256,snapshot) VALUES ($1,$2,$3,$4)`,
+			id, graphSHA, manifest.PipelinePlanSHA256, snapshot); err != nil {
+			return err
+		}
+
 		audit, _ := json.Marshal(map[string]any{
 			"engine_release_id": id.String(),
 			"release_sha256":    releaseSHA,
@@ -213,6 +282,10 @@ func LoadVersions(
 	if requireProduct && info.Purpose != PurposeProduct {
 		return nil, ErrProductReleaseOnly
 	}
+	g, _, err := LoadGraph(ctx, pool, id)
+	if err != nil {
+		return nil, err
+	}
 
 	rows, err := pool.Query(ctx, `
 		SELECT stage_id,implementation_sha256,policy_sha256,semantic_parameters
@@ -240,7 +313,16 @@ func LoadVersions(
 		if err != nil {
 			return nil, err
 		}
+		stage, ok := g.Get(stageID)
+		if !ok {
+			return nil, ErrGraphDrift
+		}
+		nodeSHA, err := stage.NodeSHA256()
+		if err != nil {
+			return nil, err
+		}
 		out[stageID] = StageVersion{
+			GraphNodeSHA256:      nodeSHA,
 			ImplementationSHA256: impl,
 			PolicySHA256:         policy,
 			ParametersSHA256:     paramsSHA,
@@ -249,8 +331,33 @@ func LoadVersions(
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
-	if len(out) == 0 {
+	if len(out) != g.StageCount() {
 		return nil, ErrGraphDrift
 	}
 	return out, nil
+}
+
+func LoadGraph(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) (*stagegraph.Graph, string, error) {
+	var raw []byte
+	var expectedSHA, planSHA string
+	err := pool.QueryRow(ctx, `SELECT snapshot,graph_sha256,pipeline_plan_sha256
+		FROM engine_release_graphs WHERE release_id=$1`, id).Scan(&raw, &expectedSHA, &planSHA)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, "", ErrDAGSnapshotRequired
+	}
+	if err != nil {
+		return nil, "", err
+	}
+	g, err := stagegraph.ParsePlan(raw, false)
+	if err != nil {
+		return nil, "", err
+	}
+	actualSHA, err := g.SHA256()
+	if err != nil {
+		return nil, "", err
+	}
+	if actualSHA != expectedSHA {
+		return nil, "", ErrGraphDrift
+	}
+	return g, planSHA, nil
 }

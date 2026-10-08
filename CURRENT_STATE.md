@@ -1,9 +1,27 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-10-07  
+**Date:** 2026-10-08
 **Canonical code line:** `main` only  
-**Architecture:** RealSaS V2, 46-stage dependency DAG  
+**Architecture:** RealSaS V2, 46-stage Compiler compatibility DAG; versioned release DAGs
 **Implementation readiness:** `canonical/V2_IMPLEMENTATION_READINESS.json`
+
+## Active platform work
+
+Active experiment: `PLATFORM_EXECUTION_LANES`. State:
+`CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED`.
+
+The audited mechanics baseline is `949422678d34cf69008cffd6b4d7647c8c066b8a`.
+AXIS V5.4.1 and MIRA V5.5 Drive result hashes match its promotion receipt.
+Knight teacher-relative FIT1 mechanics is PASS; absolute G3 is a separate open
+red gap because the teacher also exceeds those thresholds. Neither cancels the
+other. The old frozen renderer is not the latest carrier-native execution proof.
+
+See `docs/platform/EXECUTION_LANES.md` for commands, cache identity, host
+requirements and remaining inference/portability limits. Go now exposes separate
+research target execution, product compile and qualified product render commands.
+Implementation validation and merge evidence are recorded in PR #59. Verify the
+live `main` ref rather than treating the baseline audit SHA as the latest code.
+Audit receipt: `canonical/PLATFORM_MAIN_AUDIT_20261008.json`.
 
 ## Current product architecture
 
@@ -24,7 +42,7 @@ Knight FIT1 mechanics are closed relative to the sealed source/teacher motion en
 
 ## Canonical mesh domain
 
-`compiler/realsas_compiler_core/surface_addressing_v1.py` owns `SurfaceAddressing`; Stage18/19 own construction and static qualification of the mechanical carrier. The current mechanics chain preserves a single carrier basis across MIRA prediction, dynamic proof and runtime binding.
+`compiler/realsas_compiler_core/surface_addressing_v1.py` owns `SurfaceAddressing`; Stage18/19 own construction and static qualification of the mechanical carrier. `QualifiedMeshIR` remains the qualified product mesh contract. The current mechanics chain preserves a single carrier basis across MIRA prediction, dynamic proof and runtime binding.
 
 ## Complete Appearance Authority
 
@@ -66,10 +84,11 @@ These measured costs define optimization priorities after repository currentness
 
 ## Immediate execution priorities
 
-1. Close this carrier-native mechanics promotion onto canonical `main` with CI/governance green.
-2. Keep Go platform enforcement as the next system blocker.
-3. Optimize measured rebuild/CAA/render hot paths.
-4. Return to presentation/runtime visual diagnosis only if the image remains wrong after 1–3.
+1. Import/reseal the latest Knight evidence into a Go research Attempt and prove a real component replacement without rebuilding independent artifacts.
+2. Close research artifact import/portability and direct-path enforcement gaps as real component-replacement execution exposes them.
+3. Optimize measured rebuild/CAA/render hot paths and produce fresh carrier-native IDLE/RUN/SLASH.
+4. Productize full input-to-output inference/compile/preset execution and connect its UI after the modular developer path is operational.
+5. Return to presentation/runtime visual diagnosis only if the image remains wrong after 1–3.
 
 ## Read first
 

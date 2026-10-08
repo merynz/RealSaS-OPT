@@ -1,12 +1,34 @@
 # RealSaS-OPT Agent Entry Contract
 
-## Mandatory current handoff — 2026-10-07
+## Mandatory current handoff — 2026-10-08
 
-**First read:** `canonical/CANONICAL_HANDOFF_20261007.md`, then `CURRENT_STATE.md`.
+**First read:** `CURRENT_STATE.md`, then `docs/platform/EXECUTION_LANES.md`.
+Use `canonical/CANONICAL_HANDOFF_20261007.md` for the sealed mechanics handoff.
 
 If the user says only “continue / devam et”, resume from canonical `main` and the priority order in `CURRENT_STATE.md`. Do not resurrect an older runtime-audit, VF-11, recovery, research-branch or promotion-branch continuation merely because historical files still exist.
 
 This repository must be resumable without conversational memory.
+
+## Required operating path
+
+Read `docs/platform/EXECUTION_LANES.md` before stateful development. Use Go
+`realsasctl research-start` and `research-run` for component replacement;
+explicitly select the target and inspect the resolved reuse/execute scope.
+Use `product-compile` for product construction and `product-render` only for an
+exact qualified ProductRevision. Research results, including scoped FIT PASS,
+must not silently mint product authority. Preserve independent artifacts and
+report code/artifact identities with timings. Do not drive a new result by
+searching old branch names or editing a historical execution ledger.
+
+Targets include model inference and Compiler modules, not only render. Treat
+DAG nodes/edges as versioned release data: add, remove or rewire in a new
+EngineRelease, inspect graph-aware impact, and preserve unrelated artifacts.
+Keep implementation and plan changes on canonical main through short reviewed
+PRs; research continuation belongs to the Attempt, never a long-lived branch.
+
+Use the self-hosted `realsas-wsl-1660ti` runner or local execution. Do not add
+GitHub-hosted execution. Old frozen recovery is manual provenance only.
+Absolute G3 remains an open gap without cancelling teacher-relative FIT1 PASS.
 
 ## Current machine authority spine
 
@@ -75,10 +97,11 @@ That run reused sealed artifacts; IRIS/TESSA/AXIS/MIRA were not reinferred. Do n
 
 ## Active priority order
 
-1. Repository currentness closure.
-2. Go platform enforcement: stateful work must flow through Artifact/Attempt/ProductRevision/workflow authority.
-3. Performance optimization using measured telemetry and dependency-aware reuse/native hot paths.
-4. Only then return to runtime/presentation image diagnosis if the image remains wrong.
+1. Import/reseal latest Knight evidence into a research Attempt and prove real component replacement with independent artifact reuse.
+2. Close import/portability and direct-path enforcement gaps exposed by that execution.
+3. Optimize measured costs and render the carrier-native result; preserve exact scientific scope.
+4. Productize full input-to-output execution and its UI after the modular developer path is operational.
+5. Return to runtime/presentation image diagnosis if the qualified image remains wrong.
 
 Do not preempt priorities 1–3 by reopening visual/runtime forensics unless new evidence falsifies the sealed static topology/geometry/mechanical baseline.
 
@@ -100,8 +123,8 @@ A FIT/witness PASS is scoped evidence for the exact subject/apparatus. Engineeri
 
 ## Read order
 
-1. `canonical/CANONICAL_HANDOFF_20261007.md`
-2. `CURRENT_STATE.md`
+1. `CURRENT_STATE.md`
+2. `canonical/CANONICAL_HANDOFF_20261007.md`
 3. `SYSTEM_INDEX.md`
 4. `canonical/V2_IMPLEMENTATION_READINESS.json`
 5. `canonical/KNIGHT_AXIS541_MIRA55_CARRIER_NATIVE_PROMOTION_20261007.json`

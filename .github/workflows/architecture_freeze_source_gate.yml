@@ -63,6 +63,10 @@ on:
       - 'tests/iris/**'
       - '.github/workflows/architecture_freeze_source_gate.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   architecture-freeze-source-gate:
     runs-on: [self-hosted, linux, x64, realsas]

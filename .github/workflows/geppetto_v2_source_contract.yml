@@ -35,9 +35,13 @@ on:
       - 'compiler/test_proof_engine_source_v1.py'
       - '.github/workflows/geppetto_v2_source_contract.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   geppetto-v2-source-contract:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4

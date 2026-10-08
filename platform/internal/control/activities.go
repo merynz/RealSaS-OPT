@@ -57,11 +57,12 @@ func (a Activities) ResolveCompilePlan(ctx context.Context, in orchestration.Com
 	}
 
 	var dbSubject, dbRelease uuid.UUID
+	var attemptKind string
 	if err := a.Pool.QueryRow(ctx, `
-		SELECT subject_id,engine_release_id
+		SELECT subject_id,engine_release_id,kind
 		FROM attempts
 		WHERE id=$1
-	`, attemptID).Scan(&dbSubject, &dbRelease); err != nil {
+	`, attemptID).Scan(&dbSubject, &dbRelease, &attemptKind); err != nil {
 		return orchestration.ResolvedCompilePlan{}, err
 	}
 	if dbSubject != subjectID || dbRelease != releaseID {
@@ -71,14 +72,25 @@ func (a Activities) ResolveCompilePlan(ctx context.Context, in orchestration.Com
 	if err != nil {
 		return orchestration.ResolvedCompilePlan{}, err
 	}
-	versions, err := release.LoadVersions(ctx, a.Pool, releaseID, true)
+	mode := in.ExecutionMode
+	if mode == "" {
+		mode = "PRODUCT"
+	}
+	if (mode == "RESEARCH" && attemptKind != "research") || (mode == "PRODUCT" && attemptKind != "compile_candidate") || (mode != "PRODUCT" && mode != "RESEARCH") {
+		return orchestration.ResolvedCompilePlan{}, errors.New("COMPILE_EXECUTION_LANE_DRIFT")
+	}
+	versions, err := release.LoadVersions(ctx, a.Pool, releaseID, mode == "PRODUCT")
+	if err != nil {
+		return orchestration.ResolvedCompilePlan{}, err
+	}
+	a.Graph, _, err = release.LoadGraph(ctx, a.Pool, releaseID)
 	if err != nil {
 		return orchestration.ResolvedCompilePlan{}, err
 	}
 	plan, err := resolver.Resolve(
 		ctx,
 		a.Graph,
-		registry.QualifiedCatalog{Pool: a.Pool},
+		registry.QualifiedCatalog{Pool: a.Pool, AllowDemo: mode == "RESEARCH"},
 		in.TargetStageID,
 		loaded.RootInputs,
 		versions,
@@ -123,6 +135,11 @@ func (a Activities) PrepareStageExecution(ctx context.Context, req orchestration
 	if err != nil {
 		return orchestration.EngineStageRequest{}, err
 	}
+	var releasedPlanSHA string
+	a.Graph, releasedPlanSHA, err = release.LoadGraph(ctx, a.Pool, releaseID)
+	if err != nil {
+		return orchestration.EngineStageRequest{}, err
+	}
 	if !slices.Contains(req.AllowedExecuteStageIDs, req.StageID) {
 		return orchestration.EngineStageRequest{}, errors.New("EXECUTION_STAGE_NOT_IN_ALLOWED_SCOPE")
 	}
@@ -145,6 +162,9 @@ func (a Activities) PrepareStageExecution(ctx context.Context, req orchestration
 	}
 	if dbSubject != subjectID || dbRelease != releaseID {
 		return orchestration.EngineStageRequest{}, errors.New("EXECUTION_ATTEMPT_IDENTITY_DRIFT")
+	}
+	if releasedPlanSHA != "" && releasedPlanSHA != planSHA {
+		return orchestration.EngineStageRequest{}, errors.New("EXECUTION_RELEASE_PIPELINE_PLAN_DRIFT")
 	}
 
 	executionID := uuid.NewSHA1(uuid.NameSpaceOID, []byte("realsas:execution:"+req.CommandID+":"+req.StageID))
@@ -197,7 +217,32 @@ func (a Activities) PrepareStageExecution(ctx context.Context, req orchestration
 	if err := tx.Commit(ctx); err != nil {
 		return orchestration.EngineStageRequest{}, err
 	}
+	inputs, err := a.boundStageInputs(ctx, attemptID)
+	if err != nil {
+		return orchestration.EngineStageRequest{}, err
+	}
+	var implementationSHA, policySHA, kind string
+	var parametersRaw []byte
+	if err := a.Pool.QueryRow(ctx, `SELECT ers.implementation_sha256,ers.policy_sha256,a.kind,ers.semantic_parameters FROM attempts a JOIN engine_release_stages ers ON ers.release_id=a.engine_release_id WHERE a.id=$1 AND ers.stage_id=$2`, attemptID, req.StageID).Scan(&implementationSHA, &policySHA, &kind, &parametersRaw); err != nil {
+		return orchestration.EngineStageRequest{}, err
+	}
+	var parameters map[string]any
+	if err := json.Unmarshal(parametersRaw, &parameters); err != nil {
+		return orchestration.EngineStageRequest{}, err
+	}
+	mode := "PRODUCT"
+	if kind == "research" {
+		mode = "RESEARCH"
+	}
+	stage, _ := a.Graph.Get(req.StageID)
+	nodeSHA, err := stage.NodeSHA256()
+	if err != nil {
+		return orchestration.EngineStageRequest{}, err
+	}
 	return orchestration.EngineStageRequest{
+		GraphNodeSHA256:    nodeSHA,
+		SemanticParameters: parameters,
+		ExecutionMode:      mode, ImplementationSHA256: implementationSHA, PolicySHA256: policySHA, InputStages: inputs,
 		ExecutionID:            executionID.String(),
 		CommandID:              req.CommandID,
 		AttemptID:              req.AttemptID,
@@ -225,17 +270,21 @@ func (a Activities) BindReusedStage(ctx context.Context, req orchestration.BindR
 	}
 	var semanticSHA string
 	var qualified bool
+	var kind string
+	if err := a.Pool.QueryRow(ctx, "SELECT kind FROM attempts WHERE id=$1", attemptID).Scan(&kind); err != nil {
+		return orchestration.StageCommitResult{}, err
+	}
 	if err := a.Pool.QueryRow(ctx, `
 		SELECT a.semantic_sha256,
 		       EXISTS (
 		         SELECT 1 FROM qualifications q
 		         WHERE q.artifact_id=a.id
-		           AND q.qualification_type='REUSE_ELIGIBLE'
+		           AND (q.qualification_type='REUSE_ELIGIBLE' OR ($2='research' AND q.qualification_type='DEMO_REUSE_ELIGIBLE'))
 		           AND q.result='PASS'
 		       )
 		FROM artifacts a
 		WHERE a.id=$1
-	`, artifactID).Scan(&semanticSHA, &qualified); err != nil {
+	`, artifactID, kind).Scan(&semanticSHA, &qualified); err != nil {
 		return orchestration.StageCommitResult{}, err
 	}
 	if semanticSHA != req.ExpectedSemanticSHA256 || !qualified {
@@ -291,6 +340,10 @@ func (a Activities) CommitStageResult(ctx context.Context, req orchestration.Sta
 		return orchestration.StageCommitResult{}, err
 	}
 	attemptID, err := uuid.Parse(req.AttemptID)
+	if err != nil {
+		return orchestration.StageCommitResult{}, err
+	}
+	a.Graph, err = a.attemptGraph(ctx, attemptID)
 	if err != nil {
 		return orchestration.StageCommitResult{}, err
 	}
@@ -400,6 +453,10 @@ func (a Activities) RecordStageActivityError(ctx context.Context, req orchestrat
 		return err
 	}
 	attemptID, err := uuid.Parse(req.AttemptID)
+	if err != nil {
+		return err
+	}
+	a.Graph, err = a.attemptGraph(ctx, attemptID)
 	if err != nil {
 		return err
 	}

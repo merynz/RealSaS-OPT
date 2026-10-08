@@ -1,15 +1,13 @@
 name: consumer-coupling-probe-v1
+# Historical vendor replay; current V2 contracts run in mainline CI.
 on:
-  pull_request:
-    paths:
-      - 'compiler/**'
-      - 'experiments/consumer_interlock_20260829/**'
-      - '.github/workflows/consumer_coupling_probe_v1.yml'
+  workflow_dispatch:
+
 permissions:
   contents: read
 jobs:
   coupling-probe:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4

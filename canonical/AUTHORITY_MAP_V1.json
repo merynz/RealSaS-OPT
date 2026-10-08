@@ -1,5 +1,5 @@
 {
-  "schema_version": 11,
+  "schema_version": 12,
   "repository": "merynz/RealSaS-OPT",
   "continuation_authority": "CURRENT_STATE.md",
   "context_state": "canonical/CONTEXT_STATE_V2.json",
@@ -40,14 +40,15 @@
     "canonical/APPEARANCE_RUNTIME_DATAFLOW_GRAPH_V1_20261002.json",
     "docs/audit/APPEARANCE_RUNTIME_DATAFLOW_AUDIT_20261002.md",
     "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V16_20261001.json",
-    "canonical/SOURCE_OWNED_VISUAL_FACE_ORDER_SENSITIVITY_AUDIT_V1_20261002.json"
+    "canonical/SOURCE_OWNED_VISUAL_FACE_ORDER_SENSITIVITY_AUDIT_V1_20261002.json",
+    "docs/platform/EXECUTION_LANES.md",
+    "canonical/PLATFORM_MAIN_AUDIT_20261008.json"
   ],
   "rehydration_order": [
+    "canonical/CANONICAL_HANDOFF_20261007.md",
     "CURRENT_STATE.md",
-    "canonical/CURRENT_RND_LINEAGE_V1.json",
-    "canonical/APPEARANCE_RUNTIME_DATAFLOW_GRAPH_V1_20261002.json",
-    "canonical/SOURCE_OWNED_VISUAL_FACE_ORDER_SENSITIVITY_AUDIT_V1_20261002.json",
-    "docs/audit/APPEARANCE_RUNTIME_DATAFLOW_AUDIT_20261002.md",
+    "docs/platform/EXECUTION_LANES.md",
+    "canonical/KNIGHT_AXIS541_MIRA55_CARRIER_NATIVE_PROMOTION_20261007.json",
     "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
     "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json",
     "canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json",
@@ -84,16 +85,16 @@
   },
   "active_experiments": [
     {
-      "id": "KNIGHT_APPEARANCE_RUNTIME_DATAFLOW_AUDIT",
+      "id": "PLATFORM_EXECUTION_LANES",
       "branch": "main",
-      "status": "MAIN_CANONICALIZED__FROZEN_WITNESS_VERIFIED__RUNTIME_DATAFLOW_AUDIT_ACTIVE",
-      "question": "Can corrected Knight mechanics drive source-owned 2D presentation with visual-triangle deformation-domain coherence and canonical-depth overlap ownership, and can Stage45 prove both fail-closed?",
+      "status": "CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED",
+      "question": "Can Go-owned Attempts replace changed DAG components with exact artifact reuse while product construction and render remain separate?",
       "does_not_prove": [
-        "product visual pass",
+        "absolute G3 PASS",
+        "product qualification",
         "unseen generalization",
-        "human aesthetic optimality",
-        "source-view cardinality reduction",
-        "RGB-generation necessity"
+        "sub-120-second latency",
+        "fresh carrier-native Knight render"
       ]
     }
   ],

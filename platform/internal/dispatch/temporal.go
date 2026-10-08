@@ -73,6 +73,7 @@ func workflowSpec(commandType string, payload map[string]any) (string, string, t
 			"realsas:compile:" + commandID,
 			7 * 24 * time.Hour,
 			orchestration.CompileWorkflowInput{
+				ExecutionMode:   payloadMode(payload),
 				CommandID:       commandID,
 				AttemptID:       attemptID,
 				SubjectID:       subjectID,
@@ -145,4 +146,12 @@ func requiredString(payload map[string]any, key string) (string, error) {
 		return "", fmt.Errorf("command payload missing %s", key)
 	}
 	return value, nil
+}
+
+func payloadMode(payload map[string]any) string {
+	value, _ := payload["execution_mode"].(string)
+	if value == "" {
+		return "PRODUCT"
+	}
+	return value
 }

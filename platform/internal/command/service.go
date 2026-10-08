@@ -42,26 +42,27 @@ type Receipt struct {
 }
 
 type CompileRequest struct {
-	SubjectID          uuid.UUID
-	EngineReleaseID    uuid.UUID
-	SubjectInputID     uuid.UUID
-	TargetStageID      string
-	CompilerRunID      string
-	RunManifestPath    string
-	RunLedgerPath      string
-	PipelinePlanSHA256 string
-	IdempotencyKey     string
-	RequestedBy        string
+	ResearchAttemptID  *uuid.UUID `json:"research_attempt_id,omitempty"`
+	SubjectID          uuid.UUID  `json:"subject_id"`
+	EngineReleaseID    uuid.UUID  `json:"engine_release_id"`
+	SubjectInputID     uuid.UUID  `json:"subject_input_id"`
+	TargetStageID      string     `json:"target_stage_id"`
+	CompilerRunID      string     `json:"compiler_run_id"`
+	RunManifestPath    string     `json:"run_manifest_path"`
+	RunLedgerPath      string     `json:"run_ledger_path"`
+	PipelinePlanSHA256 string     `json:"pipeline_plan_sha256"`
+	IdempotencyKey     string     `json:"idempotency_key"`
+	RequestedBy        string     `json:"requested_by"`
 }
 
 type RenderRequest struct {
-	SubjectID         uuid.UUID
-	ProductRevisionID uuid.UUID
-	MotionArtifactID  uuid.UUID
-	ViewSpec          map[string]any
-	RenderSettings    map[string]any
-	IdempotencyKey    string
-	RequestedBy       string
+	SubjectID         uuid.UUID      `json:"subject_id"`
+	ProductRevisionID uuid.UUID      `json:"product_revision_id"`
+	MotionArtifactID  uuid.UUID      `json:"motion_artifact_id"`
+	ViewSpec          map[string]any `json:"view_spec"`
+	RenderSettings    map[string]any `json:"render_settings"`
+	IdempotencyKey    string         `json:"idempotency_key"`
+	RequestedBy       string         `json:"requested_by"`
 }
 
 type commandRow struct {
@@ -74,6 +75,21 @@ type commandRow struct {
 func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Graph, req CompileRequest) (Receipt, error) {
 	if req.SubjectID == uuid.Nil || req.EngineReleaseID == uuid.Nil || req.SubjectInputID == uuid.Nil {
 		return Receipt{}, errors.New("compile subject/release/input ids are required")
+	}
+	selectedGraph, releasedPlanSHA, err := release.LoadGraph(ctx, pool, req.EngineReleaseID)
+	if err != nil {
+		return Receipt{}, err
+	}
+	graph = selectedGraph
+	if releasedPlanSHA != "" && releasedPlanSHA != req.PipelinePlanSHA256 {
+		return Receipt{}, errors.New("COMPILE_RELEASE_PIPELINE_PLAN_DRIFT")
+	}
+	if req.ResearchAttemptID != nil && req.TargetStageID == "" {
+		return Receipt{}, errors.New("research compile requires an explicit target")
+	}
+	mode := "PRODUCT"
+	if req.ResearchAttemptID != nil {
+		mode = "RESEARCH"
 	}
 	if req.TargetStageID == "" {
 		productPassStageID, ok := graph.ProductPassStageID()
@@ -96,7 +112,7 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 	}
 
 	var out Receipt
-	err := persistence.WithSerializableRetry(ctx, pool, 5, func(tx pgx.Tx) error {
+	err = persistence.WithSerializableRetry(ctx, pool, 5, func(tx pgx.Tx) error {
 		existing, found, err := findCommandByIdempotency(ctx, tx, req.IdempotencyKey)
 		if err != nil {
 			return err
@@ -109,7 +125,9 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 				payloadString(existing.Payload, "compiler_run_id") != req.CompilerRunID ||
 				payloadString(existing.Payload, "run_manifest_path") != req.RunManifestPath ||
 				payloadString(existing.Payload, "run_ledger_path") != req.RunLedgerPath ||
-				payloadString(existing.Payload, "pipeline_plan_sha256") != req.PipelinePlanSHA256 {
+				payloadString(existing.Payload, "pipeline_plan_sha256") != req.PipelinePlanSHA256 ||
+				payloadMode(existing.Payload) != mode ||
+				(req.ResearchAttemptID != nil && payloadString(existing.Payload, "attempt_id") != req.ResearchAttemptID.String()) {
 				return ErrIdempotencyConflict
 			}
 			attemptID, err := payloadUUID(existing.Payload, "attempt_id")
@@ -161,12 +179,16 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 			}
 			return err
 		}
-		if release.Purpose(purpose) != release.PurposeProduct {
+		if mode == "PRODUCT" && release.Purpose(purpose) != release.PurposeProduct {
 			return ErrProductReleaseRequired
+		}
+		if mode == "RESEARCH" && release.Purpose(purpose) != release.PurposeResearch {
+			return release.ErrResearchReleaseOnly
 		}
 
 		spec := map[string]any{
 			"schema":                        "RealSaS.CompileSubjectCommandSpec.v1",
+			"execution_mode":                mode,
 			"subject_id":                    req.SubjectID.String(),
 			"engine_release_id":             req.EngineReleaseID.String(),
 			"engine_release_sha256":         releaseSHA,
@@ -183,12 +205,24 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 
 		attemptID := uuid.New()
 		commandID := uuid.New()
-		if _, err := tx.Exec(ctx, `
-			INSERT INTO attempts
-			  (id,subject_id,engine_release_id,kind,spec_sha256,created_by,final_state)
-			VALUES ($1,$2,$3,'compile_candidate',$4,$5,'OPEN')
-		`, attemptID, req.SubjectID, req.EngineReleaseID, specSHA, req.RequestedBy); err != nil {
-			return err
+		if req.ResearchAttemptID != nil {
+			attemptID = *req.ResearchAttemptID
+			var storedSubject, storedRelease uuid.UUID
+			var kind, state string
+			if err := tx.QueryRow(ctx, "SELECT subject_id,engine_release_id,kind,final_state FROM attempts WHERE id=$1 FOR UPDATE", attemptID).Scan(&storedSubject, &storedRelease, &kind, &state); err != nil {
+				return err
+			}
+			if storedSubject != req.SubjectID || storedRelease != req.EngineReleaseID || kind != "research" || state != "OPEN" {
+				return errors.New("RESEARCH_COMPILE_ATTEMPT_DRIFT")
+			}
+		} else {
+			if _, err := tx.Exec(ctx, `
+				INSERT INTO attempts
+				  (id,subject_id,engine_release_id,kind,spec_sha256,created_by,final_state)
+				VALUES ($1,$2,$3,'compile_candidate',$4,$5,'OPEN')
+			`, attemptID, req.SubjectID, req.EngineReleaseID, specSHA, req.RequestedBy); err != nil {
+				return err
+			}
 		}
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO compiler_run_bindings(
@@ -201,6 +235,7 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 
 		payload := map[string]any{
 			"schema":               "RealSaS.CompileSubjectCommand.v1",
+			"execution_mode":       mode,
 			"command_id":           commandID.String(),
 			"attempt_id":           attemptID.String(),
 			"subject_id":           req.SubjectID.String(),
@@ -446,4 +481,13 @@ func payloadUUID(payload map[string]any, key string) (uuid.UUID, error) {
 func payloadString(payload map[string]any, key string) string {
 	raw, _ := payload[key].(string)
 	return raw
+}
+
+// Missing mode is the historical product command contract, never research.
+func payloadMode(payload map[string]any) string {
+	mode := payloadString(payload, "execution_mode")
+	if mode == "" {
+		return "PRODUCT"
+	}
+	return mode
 }

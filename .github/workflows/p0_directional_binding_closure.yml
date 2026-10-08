@@ -26,7 +26,7 @@ on:
 
 jobs:
   p0-directional-binding-closure:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4

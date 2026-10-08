@@ -11,6 +11,7 @@ import (
 
 type QualifiedCatalog struct {
 	Pool              *pgxpool.Pool
+	AllowDemo         bool
 	QualificationType string
 }
 
@@ -30,11 +31,11 @@ func (c QualifiedCatalog) FindQualified(ctx context.Context, artifactType, schem
 		  AND EXISTS (
 		    SELECT 1 FROM qualifications q
 		    WHERE q.artifact_id=a.id
-		      AND q.qualification_type=$4
+		      AND (q.qualification_type=$4 OR ($5 AND q.qualification_type='DEMO_REUSE_ELIGIBLE'))
 		      AND q.result='PASS'
 		  )
 		LIMIT 1
-	`, artifactType, schemaVersion, semanticSHA, qualificationType).Scan(&id)
+	`, artifactType, schemaVersion, semanticSHA, qualificationType, c.AllowDemo).Scan(&id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return uuid.Nil, false, nil

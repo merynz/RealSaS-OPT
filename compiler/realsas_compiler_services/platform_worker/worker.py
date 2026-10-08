@@ -21,6 +21,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from compiler.realsas_compiler_services.orchestrator import mainline
+from compiler.realsas_compiler_services.platform_worker.stage_inputs import hydrate_stage_inputs, verify_execution_version
 
 ENGINE_TASK_QUEUE = "realsas-engine-v1"
 EXECUTE_STAGE_ACTIVITY = "engine.execute_compile_stage.v1"
@@ -98,7 +99,7 @@ def _ledger_row(ledger: dict[str, Any], stage_id: str) -> dict[str, Any]:
     raise RuntimeError(f"ENGINE_STAGE_NOT_IN_LEDGER:{stage_id}")
 
 
-def _stage_result_outputs(row: dict[str, Any]) -> list[dict[str, Any]]:
+def _stage_result_outputs(row: dict[str, Any], *, run_id: str, stage_id: str) -> list[dict[str, Any]]:
     output_rows: list[dict[str, Any]] = []
     for index, output in enumerate(row.get("outputs") or ()):
         path = Path(str(output["path"])).resolve()
@@ -109,6 +110,8 @@ def _stage_result_outputs(row: dict[str, Any]) -> list[dict[str, Any]]:
             raise RuntimeError(f"ENGINE_OUTPUT_LEDGER_HASH_DRIFT:{path}")
         output_rows.append(
             {
+                "relative_path": path.relative_to(mainline.authority_root() / "runs" / run_id / "artifacts" / stage_id).as_posix(),
+                "payload_schema": str(output["schema"]),
                 "role": f"output:{index:04d}",
                 "artifact_type": "RealSaS.EngineOutput",
                 "schema_version": "v1",
@@ -135,8 +138,18 @@ def _execute_stage_core(request: dict[str, Any]) -> dict[str, Any]:
 
     ledger_path = mainline.run_ledger_path(run_id)
     manifest_path = mainline.run_manifest_path(run_id)
-    ledger = mainline.load_json(ledger_path)
     manifest = mainline.load_json(manifest_path)
+    verify_execution_version(plan, request, manifest)
+    if not ledger_path.exists():
+        # Go has already created the Attempt and execution. This ledger is only
+        # the run-local Engine view, never a second lifecycle authority.
+        ledger = mainline.build_fresh_run_ledger(
+            plan, run_id=run_id, subject_id=str(manifest["subject_id"]),
+            manifest_ref=str(manifest_path),
+            execution_class=str(manifest.get("execution_class") or "WITNESS"),
+        )
+        mainline.atomic_json(ledger_path, ledger)
+    ledger = mainline.load_json(ledger_path)
     mainline.validate_ledger(plan, ledger)
     mainline._validate_run_manifest_identity(
         manifest,
@@ -144,6 +157,15 @@ def _execute_stage_core(request: dict[str, Any]) -> dict[str, Any]:
         subject_id=str(ledger.get("subject_id") or ""),
     )
 
+    mode = str(request.get("execution_mode") or "")
+    if mode not in {"RESEARCH", "PRODUCT"}:
+        raise RuntimeError("ENGINE_EXECUTION_MODE_REQUIRED")
+    if mode == "PRODUCT" and str(ledger.get("execution_class")) == "DEMO_WITNESS":
+        raise RuntimeError("ENGINE_PRODUCT_DEMO_LEDGER_FORBIDDEN")
+    hydrate_stage_inputs(plan=plan, ledger=ledger, manifest=manifest,
+                         inputs=request.get("input_stages") or (), read_object=_read_cas_object, mode=mode)
+    mainline.atomic_json(ledger_path, ledger)
+    mainline.validate_ledger(plan, ledger)
     stage = mainline._stage_map(plan)[stage_id]
     by_id = mainline._ledger_map(ledger)
     unpassed = [
@@ -182,7 +204,7 @@ def _execute_stage_core(request: dict[str, Any]) -> dict[str, Any]:
     row = _ledger_row(ledger, stage_id)
     status = str(row.get("status") or "FAIL")
     if status in mainline.PASS_STATUSES:
-        outputs = _stage_result_outputs(row)
+        outputs = _stage_result_outputs(row, run_id=run_id, stage_id=stage_id)
         return {
             "stage_id": stage_id,
             "status": status,
@@ -211,7 +233,15 @@ def _execute_stage_core(request: dict[str, Any]) -> dict[str, Any]:
 
 @activity.defn(name=EXECUTE_STAGE_ACTIVITY)
 async def execute_compile_stage(request: dict[str, Any]) -> dict[str, Any]:
-    return await asyncio.to_thread(_execute_stage_core, request)
+    return await _with_heartbeat(_execute_stage_core, request)
+
+
+async def _with_heartbeat(function, request):
+    task = asyncio.create_task(asyncio.to_thread(function, request))
+    while not task.done():
+        activity.heartbeat({"stage_id": request.get("stage_id"), "phase": "running"})
+        await asyncio.wait({task}, timeout=10.0)
+    return await task
 
 
 @activity.defn(name=EXECUTE_CAPABILITY_ACTIVITY)
@@ -249,12 +279,18 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
         }
     ledger = mainline.load_json(mainline.run_ledger_path(run_id))
     stage_request = {
+        "graph_node_sha256": request.get("stage_graph_node_sha256"),
         "stage_id": stage_id,
         "allowed_execute_stage_ids": [stage_id],
         "compiler_run_id": run_id,
         "pipeline_plan_sha256": str(ledger["pipeline_plan_sha256"]),
+        "execution_mode": "RESEARCH",
+        "implementation_sha256": request["implementation_sha256"],
+        "policy_sha256": request["policy_sha256"],
+        "semantic_parameters": request.get("stage_semantic_parameters") or {},
+        "input_stages": [{"stage_id": ref["role"][6:], "artifact": ref} for ref in request.get("input_artifacts", ()) if str(ref.get("role", "")).startswith("stage:")],
     }
-    stage_result = await asyncio.to_thread(_execute_stage_core, stage_request)
+    stage_result = await _with_heartbeat(_execute_stage_core, stage_request)
     failure = stage_result.get("failure")
     if failure:
         failure = {
@@ -407,7 +443,7 @@ def _render_tail_sync(request: dict[str, Any]) -> dict[str, Any]:
 
 @activity.defn(name=RENDER_TAIL_ACTIVITY)
 async def render_runtime_tail(request: dict[str, Any]) -> dict[str, Any]:
-    return await asyncio.to_thread(_render_tail_sync, request)
+    return await _with_heartbeat(_render_tail_sync, request)
 
 
 async def main() -> None:

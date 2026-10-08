@@ -121,6 +121,66 @@ func TestStage42ChangeInvalidatesOnlyRuntimeDescendants(t *testing.T) {
 	t.Fatal("IRIS fit must remain reusable")
 }
 
+func TestSkinChangePreservesIndependentAppearanceAndModels(t *testing.T) {
+	g := resolverGraph(t)
+	catalog := newMemoryCatalog()
+	root := []domain.ArtifactInputIdentity{{Role: "subject:source", ArtifactType: "RealSaS.SourceImage", SemanticSHA256: hex64("a")}}
+	versions := resolverVersions(g, hex64("1"))
+	baseline, err := Resolve(context.Background(), g, catalog, "46_PRODUCT_CLOSURE_SEAL", root, versions)
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalog.admit(baseline)
+	changedVersion := versions["32_SKIN_QUALIFIED"]
+	changedVersion.ImplementationSHA256 = hex64("f")
+	versions["32_SKIN_QUALIFIED"] = changedVersion
+	changed, err := Resolve(context.Background(), g, catalog, "46_PRODUCT_CLOSURE_SEAL", root, versions)
+	if err != nil {
+		t.Fatal(err)
+	}
+	executed := map[string]bool{}
+	for _, id := range changed.ExecuteStageIDs() {
+		executed[id] = true
+	}
+	for _, id := range []string{"23_COMPLETE_APPEARANCE_ASSET_BAKED", "19_STATIC_CANONICAL_MESH_QUALIFIED", "28_SKELETON_QUALIFIED", "10_IRIS_FIT"} {
+		if executed[id] {
+			t.Fatalf("independent stage invalidated: %s", id)
+		}
+	}
+	if !executed["35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"] {
+		t.Fatal("dynamic mechanics must be requalified")
+	}
+}
+
+func TestMotionManifestChangePreservesAllModelArtifacts(t *testing.T) {
+	g := resolverGraph(t)
+	catalog := newMemoryCatalog()
+	root := []domain.ArtifactInputIdentity{
+		{Role: "subject:source", ArtifactType: "RealSaS.SourceImage", SemanticSHA256: hex64("a")},
+		{Role: "subject:manifest:motion", Ordinal: 1, ArtifactType: "RealSaS.ManifestSection", SemanticSHA256: hex64("b")},
+	}
+	versions := resolverVersions(g, hex64("1"))
+	baseline, err := Resolve(context.Background(), g, catalog, "46_PRODUCT_CLOSURE_SEAL", root, versions)
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalog.admit(baseline)
+	root[1].SemanticSHA256 = hex64("c")
+	changed, err := Resolve(context.Background(), g, catalog, "46_PRODUCT_CLOSURE_SEAL", root, versions)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(changed.ExecuteStageIDs()) == 0 {
+		t.Fatal("motion change must execute downstream stages")
+	}
+	for _, id := range changed.ExecuteStageIDs() {
+		stage, _ := g.Get(id)
+		if stage.Ordinal < 39 {
+			t.Fatalf("motion change invalidated upstream stage: %s", id)
+		}
+	}
+}
+
 func same(a, b []string) bool {
 	if len(a) != len(b) {
 		return false

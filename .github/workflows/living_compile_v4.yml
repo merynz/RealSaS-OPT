@@ -26,6 +26,7 @@ concurrency:
 
 jobs:
   product-shell:
+    if: github.event.repository.private == false
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -48,4 +49,6 @@ jobs:
             node --check "$f"
           done
       - name: Execution lane
-        run: echo 'execution_lane=github_hosted_public_standard'
+        run: |
+          echo 'execution_lane=github_hosted_public_standard'
+          echo 'private_repo_guard=true'

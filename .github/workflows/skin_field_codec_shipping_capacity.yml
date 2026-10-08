@@ -38,6 +38,7 @@ concurrency:
 
 jobs:
   shipping-codec-capacity:
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 30
     steps:

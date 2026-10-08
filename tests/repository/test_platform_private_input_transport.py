@@ -1,4 +1,7 @@
+import hashlib
+import io
 import json
+import zipfile
 
 import pytest
 
@@ -79,3 +82,42 @@ def test_manifest_and_inline_payload_cannot_be_mixed():
     with pytest.raises(RuntimeError, match="MANIFEST_PAYLOAD_AMBIGUOUS"):
         transport.resolve_payload(payload, run_id=RUN_ID, code_sha=CODE_SHA,
                                   downloader=lambda *_: b"{}")
+
+
+def _zip_bytes(files):
+    stream = io.BytesIO()
+    with zipfile.ZipFile(stream, "w", compression=zipfile.ZIP_STORED) as archive:
+        for name, data in files.items():
+            archive.writestr(name, data)
+    return stream.getvalue()
+
+
+def test_hash_pinned_bundle_rehydrates_exact_inner_files(tmp_path):
+    files = {"one.json": b"{}", "two.npz": b"npz-bytes"}
+    raw = _zip_bytes(files)
+    ref = {
+        "download_url": "https://example.oaiusercontent.com/bundle",
+        "size_bytes": len(raw),
+        "sha256": hashlib.sha256(raw).hexdigest(),
+        "files": [
+            {"name": name, "size_bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()}
+            for name, data in files.items()
+        ],
+    }
+    verified = transport._extract_bundle(ref, tmp_path, downloader=lambda *_: raw)
+    assert dict(verified) == {name: hashlib.sha256(data).hexdigest() for name, data in files.items()}
+    assert {p.name: p.read_bytes() for p in tmp_path.iterdir()} == files
+
+
+def test_bundle_rejects_nested_or_unexpected_zip_entries(tmp_path):
+    good = b"ok"
+    raw = _zip_bytes({"one.json": good, "nested/two.json": b"no"})
+    ref = {
+        "download_url": "https://example.oaiusercontent.com/bundle",
+        "size_bytes": len(raw),
+        "sha256": hashlib.sha256(raw).hexdigest(),
+        "files": [{"name": "one.json", "size_bytes": len(good),
+                   "sha256": hashlib.sha256(good).hexdigest()}],
+    }
+    with pytest.raises(RuntimeError, match="ZIP_ENTRY_INVALID"):
+        transport._extract_bundle(ref, tmp_path, downloader=lambda *_: raw)

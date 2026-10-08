@@ -6,12 +6,13 @@ or committed as plaintext; scientific bytes still require their pinned SHA256.
 
 For larger handoffs, the encrypted payload may contain one hash-pinned manifest
 locator instead of every transfer locator. The manifest is itself bound to the
-same run ID/code SHA and then resolves to the existing transfers/config shape.
-The original inline transfers format remains supported and covered by tests.
+same run ID/code SHA and then resolves to either the original transfer list or
+one hash-pinned ZIP bundle whose inner files are independently verified.
 """
 import argparse
 import base64
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
@@ -22,9 +23,14 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import zipfile
 
 MAX_TRANSFER_BYTES = 64 * 1024 * 1024
 MAX_MANIFEST_BYTES = 8 * 1024 * 1024
+MAX_BUNDLE_BYTES = 64 * 1024 * 1024
+MAX_BUNDLE_UNCOMPRESSED_BYTES = 128 * 1024 * 1024
+MAX_INPUT_FILES = 128
+SAFE_INPUT_NAME = re.compile(r"[A-Za-z0-9_.-]+")
 ALLOWED_DOWNLOAD_HOST_SUFFIXES = (
     ".blob.core.windows.net",
     ".amazonaws.com",
@@ -109,7 +115,7 @@ def resolve_payload(payload, *, run_id, code_sha, downloader=_download_pinned):
     manifest = payload.get("manifest")
     if manifest is None:
         return payload
-    if "transfers" in payload or "config" in payload:
+    if "transfers" in payload or "bundle" in payload or "config" in payload:
         raise RuntimeError("PRIVATE_INPUT_MANIFEST_PAYLOAD_AMBIGUOUS")
     raw = downloader(manifest, "manifest", MAX_MANIFEST_BYTES)
     try:
@@ -120,6 +126,74 @@ def resolve_payload(payload, *, run_id, code_sha, downloader=_download_pinned):
         raise RuntimeError("PRIVATE_INPUT_MANIFEST_SHAPE_INVALID")
     _require_identity(resolved, run_id, code_sha, "PRIVATE_INPUT_MANIFEST_IDENTITY_DRIFT")
     return resolved
+
+
+def _validate_bundle_file(row, names):
+    if not isinstance(row, dict):
+        raise RuntimeError("PRIVATE_INPUT_BUNDLE_FILE_INVALID")
+    name = row.get("name")
+    size = row.get("size_bytes")
+    digest = row.get("sha256")
+    if (not isinstance(name, str) or not SAFE_INPUT_NAME.fullmatch(name) or name in names
+            or not isinstance(size, int) or size < 0 or size > MAX_TRANSFER_BYTES
+            or not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest)):
+        raise RuntimeError("PRIVATE_INPUT_BUNDLE_FILE_INVALID")
+    names.add(name)
+    return name, size, digest
+
+
+def _extract_bundle(ref, out, *, downloader=_download_pinned):
+    """Download one pinned ZIP and verify every expected inner byte sequence."""
+    if not isinstance(ref, dict):
+        raise RuntimeError("PRIVATE_INPUT_BUNDLE_INVALID")
+    rows = ref.get("files")
+    if not isinstance(rows, list) or not rows or len(rows) > MAX_INPUT_FILES:
+        raise RuntimeError("PRIVATE_INPUT_BUNDLE_FILE_LIST_INVALID")
+    names = set()
+    expected = {}
+    total_expected = 0
+    for row in rows:
+        name, size, digest = _validate_bundle_file(row, names)
+        expected[name] = (size, digest)
+        total_expected += size
+    if total_expected > MAX_BUNDLE_UNCOMPRESSED_BYTES:
+        raise RuntimeError("PRIVATE_INPUT_BUNDLE_UNCOMPRESSED_LIMIT")
+
+    raw = downloader(ref, "bundle", MAX_BUNDLE_BYTES)
+    try:
+        archive = zipfile.ZipFile(io.BytesIO(raw), "r")
+    except (zipfile.BadZipFile, OSError):
+        raise RuntimeError("PRIVATE_INPUT_BUNDLE_ZIP_INVALID") from None
+    with archive:
+        infos = archive.infolist()
+        if not infos or len(infos) > MAX_INPUT_FILES:
+            raise RuntimeError("PRIVATE_INPUT_BUNDLE_ZIP_ENTRY_COUNT_INVALID")
+        actual = {}
+        total_actual = 0
+        for info in infos:
+            if (info.is_dir() or not SAFE_INPUT_NAME.fullmatch(info.filename)
+                    or info.filename in actual or (info.flag_bits & 0x1)):
+                raise RuntimeError("PRIVATE_INPUT_BUNDLE_ZIP_ENTRY_INVALID")
+            total_actual += int(info.file_size)
+            if total_actual > MAX_BUNDLE_UNCOMPRESSED_BYTES:
+                raise RuntimeError("PRIVATE_INPUT_BUNDLE_UNCOMPRESSED_LIMIT")
+            actual[info.filename] = info
+        if set(actual) != set(expected):
+            raise RuntimeError("PRIVATE_INPUT_BUNDLE_ZIP_FILE_SET_DRIFT")
+        out.mkdir(parents=True, exist_ok=True)
+        verified = []
+        for name in sorted(expected):
+            size, digest = expected[name]
+            info = actual[name]
+            if info.file_size != size:
+                raise RuntimeError("PRIVATE_INPUT_BUNDLE_INNER_SIZE_DRIFT:" + name)
+            with archive.open(info, "r") as source:
+                data = source.read(size + 1)
+            if len(data) != size or hashlib.sha256(data).hexdigest() != digest:
+                raise RuntimeError("PRIVATE_INPUT_BUNDLE_INNER_BYTES_DRIFT:" + name)
+            (out/name).write_bytes(data)
+            verified.append((name, digest))
+    return verified
 
 
 def receive(directory, out, *, repo, branch, run_id, code_sha, timeout):
@@ -149,21 +223,29 @@ def receive(directory, out, *, repo, branch, run_id, code_sha, timeout):
         raise RuntimeError("PRIVATE_INPUT_ENVELOPE_INTEGRITY_DRIFT")
     payload = resolve_payload(json.loads(raw), run_id=run_id, code_sha=code_sha)
     transfers = payload.get("transfers")
+    bundle = payload.get("bundle")
     config = payload.get("config")
-    if not isinstance(transfers, list) or len(transfers) > 128 or not isinstance(config, dict):
+    if ((transfers is None) == (bundle is None) or not isinstance(config, dict)):
         raise RuntimeError("PRIVATE_INPUT_PAYLOAD_SHAPE_INVALID")
     out.mkdir(parents=True, exist_ok=True)
-    names = set()
-    for transfer in transfers:
-        if not isinstance(transfer, dict):
-            raise RuntimeError("PRIVATE_INPUT_TRANSFER_INVALID")
-        name = transfer.get("name")
-        if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9_.-]+", name) or name in names:
-            raise RuntimeError("PRIVATE_INPUT_NAME_INVALID")
-        names.add(name)
-        data = _download_pinned(transfer, name, MAX_TRANSFER_BYTES)
-        (out/name).write_bytes(data)
-        print("EXACT_PRIVATE_INPUT " + name + " " + transfer["sha256"], flush=True)
+    if bundle is not None:
+        verified = _extract_bundle(bundle, out)
+        for name, digest in verified:
+            print("EXACT_PRIVATE_INPUT " + name + " " + digest, flush=True)
+    else:
+        if not isinstance(transfers, list) or len(transfers) > MAX_INPUT_FILES:
+            raise RuntimeError("PRIVATE_INPUT_PAYLOAD_SHAPE_INVALID")
+        names = set()
+        for transfer in transfers:
+            if not isinstance(transfer, dict):
+                raise RuntimeError("PRIVATE_INPUT_TRANSFER_INVALID")
+            name = transfer.get("name")
+            if not isinstance(name, str) or not SAFE_INPUT_NAME.fullmatch(name) or name in names:
+                raise RuntimeError("PRIVATE_INPUT_NAME_INVALID")
+            names.add(name)
+            data = _download_pinned(transfer, name, MAX_TRANSFER_BYTES)
+            (out/name).write_bytes(data)
+            print("EXACT_PRIVATE_INPUT " + name + " " + transfer["sha256"], flush=True)
     (out/"presentation_config.json").write_text(json.dumps(config, indent=2) + "\n")
     (directory/"private.pem").unlink()
 

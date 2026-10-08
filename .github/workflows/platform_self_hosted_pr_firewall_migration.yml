@@ -13,6 +13,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   migrate:
     if: github.repository == 'merynz/RealSaS-OPT' && (github.event_name == 'push' || (github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'platform/throughput-hydration-gc-20261008'))

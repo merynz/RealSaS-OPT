@@ -69,6 +69,7 @@ concurrency:
 
 jobs:
   architecture-freeze-source-gate:
+    if: github.event.repository.private == false
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -190,4 +191,6 @@ jobs:
             echo "PASS: family selection remains blocked while V1 freeze status is $STATUS"
           fi
       - name: Execution lane
-        run: echo 'execution_lane=github_hosted_public_standard'
+        run: |
+          echo 'execution_lane=github_hosted_public_standard'
+          echo 'private_repo_guard=true'

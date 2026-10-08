@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `b5358e8312651ae6bbea102ba672da21c734eef1dc33d6aa40e6ee2ba4fbb46c`
+> State fingerprint: `3c277f24ea62451a63cb21ff1c66deccdf26e4a0154302457ce09e8a8a0db56a`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -40,11 +40,11 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `PLATFORM_EXECUTION_LANES` | `CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_VALIDATION` | `main` | `949422678d34` | Can Go-owned Attempts replace changed DAG components with exact artifact reuse while product construction and render remain separate? | absolute G3 PASS; product qualification; unseen generalization; sub-120-second latency; fresh carrier-native Knight render |
+| `PLATFORM_EXECUTION_LANES` | `CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED` | `main` | `949422678d34` | Can Go-owned Attempts replace changed DAG components with exact artifact reuse while product construction and render remain separate? | absolute G3 PASS; product qualification; unseen generalization; sub-120-second latency; fresh carrier-native Knight render |
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 187**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 188**
 
 ### CANONICAL
 
@@ -139,6 +139,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `hardening/pre-fit-closure-v1-20260904` | `d4da94279e1f` | observed live; not explicitly registered active |
 | `ignore-this` | `91b4593d5b2a` | observed live; not explicitly registered active |
 | `impl/carrier-first-mechanical-compilation-20261004` | `98393e04f905` | observed live; not explicitly registered active |
+| `implementation/platform-execution-lanes-20261008` | `0c39433d7336` | observed live; not explicitly registered active |
 | `integration/compiler-runtime-canonical-20260828` | `e423cd462002` | observed live; not explicitly registered active |
 | `integration/compiler-runtime-heavy-promotion-20260901` | `47892ffa16b7` | observed live; not explicitly registered active |
 | `integration/final-main-knight-platform-20261002` | `30428107138f` | observed live; not explicitly registered active |

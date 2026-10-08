@@ -8,17 +8,19 @@
 ## Active platform work
 
 Active experiment: `PLATFORM_EXECUTION_LANES`. State:
-`CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_VALIDATION`.
+`CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED`.
 
-The audited canonical main is `949422678d34cf69008cffd6b4d7647c8c066b8a`.
+The audited mechanics baseline is `949422678d34cf69008cffd6b4d7647c8c066b8a`.
 AXIS V5.4.1 and MIRA V5.5 Drive result hashes match its promotion receipt.
 Knight teacher-relative FIT1 mechanics is PASS; absolute G3 is a separate open
 red gap because the teacher also exceeds those thresholds. Neither cancels the
 other. The old frozen renderer is not the latest carrier-native execution proof.
 
 See `docs/platform/EXECUTION_LANES.md` for commands, cache identity, host
-requirements and remaining inference/portability limits. These implementation
-changes require exact-head validation and merge before becoming main code.
+requirements and remaining inference/portability limits. Go now exposes separate
+research target execution, product compile and qualified product render commands.
+Implementation validation and merge evidence are recorded in PR #59. Verify the
+live `main` ref rather than treating the baseline audit SHA as the latest code.
 Audit receipt: `canonical/PLATFORM_MAIN_AUDIT_20261008.json`.
 
 ## Current product architecture
@@ -82,9 +84,10 @@ These measured costs define optimization priorities after repository currentness
 
 ## Immediate execution priorities
 
-1. Carrier-native mechanics promotion is on main; validate and promote the Go execution-lane implementation.
-2. Keep Go platform enforcement as the next system blocker.
-3. Optimize measured rebuild/CAA/render hot paths.
+1. Import/reseal the latest Knight evidence into a Go research Attempt and prove a real component replacement without rebuilding independent artifacts.
+2. Close research artifact import/portability and direct-path enforcement gaps as real component-replacement execution exposes them.
+3. Optimize measured rebuild/CAA/render hot paths and produce fresh carrier-native IDLE/RUN/SLASH.
+4. Productize full input-to-output inference/compile/preset execution and connect its UI after the modular developer path is operational.
 4. Return to presentation/runtime visual diagnosis only if the image remains wrong after 1–3.
 
 ## Read first

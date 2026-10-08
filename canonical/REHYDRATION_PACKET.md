@@ -8,13 +8,13 @@
 - Product: automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics
 - Current witness: Knight FIT1 carrier-native teacher-relative mechanics PASS; absolute G3 separately open
 - Current module: Go development/product execution separation
-- Current state: CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_VALIDATION
+- Current state: CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED
 - Active experiment: PLATFORM_EXECUTION_LANES
 - Most recent closed gate: AXIS541_MIRA55_CARRIER_NATIVE_KNIGHT_FIT1_TEACHER_RELATIVE_PASS
 - Canonical main: 949422678d34
 - Governance ledger: V2_IMPLEMENTATION_ASSEMBLY — 0/46; ready 01_SOURCE_BYTES_SEALED,05_CAMERA_CONTRACT_SOLVED
 - Plan SHA-256: cb8beed707d4e9470aed69a9ba72ed79ce8d4434986fb0382bd6d737449a9817
-- Promotion block: Absolute G3 and product/appearance qualifications remain independently open. New control-plane changes require exact-head integration validation before main promotion.
+- Promotion block: Absolute G3 and product/appearance qualifications remain independently open. Real artifact import/reseal and component-replacement execution remain required beyond the validated control-plane contracts.
 - Scope warning: Knight FIT1 teacher-relative mechanics PASS is preserved. Absolute G3 is a separate gap; product/unseen/latency/new render are not claimed.
 
 ## Current machine authority

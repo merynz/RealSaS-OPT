@@ -1,36 +1,8 @@
 name: r6-oracle-substrate-arachne-heterogeneous
 
+# Frozen September R6 training replay: explicit historical reproduction.
 on:
-  pull_request:
-    paths:
-      - 'canonical/R6_ARACHNE_ORACLE_SUBSTRATE_HETEROGENEOUS_PREREG_20260903.md'
-      - 'experiments/geppetto_arachne_r6_20260901/oracle_substrate_synthetic_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_arachne_one_family_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_arachne_heterogeneous_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/arachne_candidate_v2.py'
-      - 'experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/conditioning_v2.py'
-      - 'experiments/geppetto_arachne_r6_20260901/train_arachne_r6_a1_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/train_codec_r6_a0_v1.py'
-      - 'compiler/realsas_compiler_core/rig.py'
-      - 'compiler/realsas_compiler_core/skin.py'
-      - '.github/workflows/r6_oracle_substrate_arachne_heterogeneous.yml'
-  push:
-    branches:
-      - behavioral/geppetto-v2-integrity-v1-20260903
-    paths:
-      - 'canonical/R6_ARACHNE_ORACLE_SUBSTRATE_HETEROGENEOUS_PREREG_20260903.md'
-      - 'experiments/geppetto_arachne_r6_20260901/oracle_substrate_synthetic_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_arachne_one_family_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_arachne_heterogeneous_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/arachne_candidate_v2.py'
-      - 'experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/conditioning_v2.py'
-      - 'experiments/geppetto_arachne_r6_20260901/train_arachne_r6_a1_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/train_codec_r6_a0_v1.py'
-      - 'compiler/realsas_compiler_core/rig.py'
-      - 'compiler/realsas_compiler_core/skin.py'
-      - '.github/workflows/r6_oracle_substrate_arachne_heterogeneous.yml'
+  workflow_dispatch:
 
 jobs:
   r6-a1-heterogeneous-u1:

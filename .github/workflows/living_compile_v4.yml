@@ -21,6 +21,10 @@ on:
       - 'experiments/single_family_e2e_v1/export_bundle_v1.py'
       - '.github/workflows/living_compile_v4.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   product-shell:
     runs-on: [self-hosted, linux, x64, realsas]

@@ -87,7 +87,7 @@
     {
       "id": "PLATFORM_EXECUTION_LANES",
       "branch": "main",
-      "status": "CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_VALIDATION",
+      "status": "CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED",
       "question": "Can Go-owned Attempts replace changed DAG components with exact artifact reuse while product construction and render remain separate?",
       "does_not_prove": [
         "absolute G3 PASS",

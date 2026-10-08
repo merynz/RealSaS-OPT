@@ -11,6 +11,10 @@ on:
       - '.github/workflows/architecture_v4_contract.yml'
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   contract:
     runs-on: [self-hosted, linux, x64, realsas]

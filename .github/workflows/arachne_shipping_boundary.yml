@@ -30,6 +30,10 @@ on:
       - 'compiler/realsas_compiler_core/skin.py'
       - '.github/workflows/arachne_shipping_boundary.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   shipping-arachne-boundary:
     runs-on: [self-hosted, linux, x64, realsas]

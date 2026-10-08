@@ -25,5 +25,12 @@
   "historical_renderer": "tools/demo/render_knight_motion_preview_native_v2.py reads old demo inputs; not latest carrier-native proof",
   "execution_policy": "SELF_HOSTED_LOCAL_ONLY",
   "runner": "realsas-wsl-1660ti",
-  "implementation_validation": "See PR checks for the new implementation; this receipt does not claim its merge or scientific qualification."
+  "implementation_validation": {
+    "code_head_sha": "0c39433d733609fe042ed02e57eebcf269dc391a",
+    "self_hosted_mainline_run": 37741370951,
+    "self_hosted_mainline_conclusion": "success",
+    "self_hosted_go_postgresql_run": 37741363474,
+    "self_hosted_go_postgresql_conclusion": "success",
+    "boundary": "Engineering contracts; no new scientific, product or render qualification claimed. Final scheduling/documentation changes are reviewed in PR59; verify live main ref and final checks."
+  }
 }

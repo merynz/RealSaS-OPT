@@ -3,7 +3,7 @@
   "date": "2026-10-08",
   "continuation_branch": "main",
   "execution_branch": "main",
-  "status": "CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_VALIDATION",
+  "status": "CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED",
   "authority": {
     "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V3.json",
     "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
@@ -23,14 +23,14 @@
   "product": {
     "target": "automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics",
     "demo_witness": "Knight FIT1 carrier-native teacher-relative mechanics PASS; absolute G3 separately open",
-    "next_visible_product_milestone": "Validate Go execution lanes and import latest sealed artifacts into a research Attempt before fresh carrier-native preview"
+    "next_visible_product_milestone": "Import latest sealed artifacts into a Go research Attempt and prove scoped component replacement before fresh carrier-native preview"
   },
   "current_focus": {
     "module": "Go development/product execution separation",
-    "state": "CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_VALIDATION",
+    "state": "CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED",
     "active_experiment": "PLATFORM_EXECUTION_LANES",
     "most_recent_closed_gate": "AXIS541_MIRA55_CARRIER_NATIVE_KNIGHT_FIT1_TEACHER_RELATIVE_PASS",
-    "promotion_block": "Absolute G3 and product/appearance qualifications remain independently open. New control-plane changes require exact-head integration validation before main promotion.",
+    "promotion_block": "Absolute G3 and product/appearance qualifications remain independently open. Real artifact import/reseal and component-replacement execution remain required beyond the validated control-plane contracts.",
     "scope_warning": "Knight FIT1 teacher-relative mechanics PASS is preserved. Absolute G3 is a separate gap; product/unseen/latency/new render are not claimed.",
     "scientific_question": "Can dependency-aware immutable artifact reuse preserve independent checkpoints and appearance while only changed components and consumers rerun?"
   },

@@ -20,6 +20,10 @@ on:
       - '.github/workflows/arachne_shipping_boundary.yml'
       - '.github/workflows/skin_field_codec_shipping_capacity.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   arachne-codec-v2-source-contract:
     runs-on: [self-hosted, linux, x64, realsas]

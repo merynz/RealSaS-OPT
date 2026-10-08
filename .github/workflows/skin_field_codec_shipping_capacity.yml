@@ -32,6 +32,10 @@ on:
       - 'compiler/realsas_compiler_core/skin.py'
       - '.github/workflows/skin_field_codec_shipping_capacity.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   shipping-codec-capacity:
     runs-on: [self-hosted, linux, x64, realsas]

@@ -1,16 +1,8 @@
 name: r6-oracle-substrate-geppetto-one-family
 
+# Frozen September R6 training replay: explicit historical reproduction.
 on:
-  pull_request:
-    paths:
-      - 'canonical/R6_ORACLE_SUBSTRATE_INFORMATION_SUFFICIENCY_PREREG_20260903.md'
-      - 'experiments/geppetto_arachne_r6_20260901/oracle_substrate_synthetic_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_geppetto_one_family_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/geppetto_*_v2.py'
-      - 'compiler/realsas_compiler_core/surface.py'
-      - 'compiler/realsas_compiler_core/local_geometry.py'
-      - 'compiler/realsas_compiler_core/rig.py'
-      - '.github/workflows/r6_oracle_substrate_geppetto_one_family.yml'
+  workflow_dispatch:
 
 jobs:
   r6-g-syn-one-family:

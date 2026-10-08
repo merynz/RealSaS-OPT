@@ -14,6 +14,10 @@ on:
       - 'canonical/COMPILER_RUNTIME_DEPLOY_BAKE_PROMOTION_V1_20260903.json'
       - '.github/workflows/runtime_deploy_bake_promotion_gate.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   runtime-deploy-bake-promotion:
     runs-on: [self-hosted, linux, x64, realsas]

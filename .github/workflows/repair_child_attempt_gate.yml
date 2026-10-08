@@ -16,6 +16,10 @@ on:
       - 'canonical/REPAIR_OPERATION_SOURCE_DIFF_V1_20260903.json'
       - '.github/workflows/repair_child_attempt_gate.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   repair-child-attempt:
     runs-on: [self-hosted, linux, x64, realsas]

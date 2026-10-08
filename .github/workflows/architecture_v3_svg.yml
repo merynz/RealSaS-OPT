@@ -9,6 +9,10 @@ on:
       - '.github/workflows/architecture_v3_svg.yml'
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate-architecture:
     runs-on: [self-hosted, linux, x64, realsas]

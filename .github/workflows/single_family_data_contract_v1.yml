@@ -16,6 +16,10 @@ on:
       - 'experiments/single_family_e2e_v1/test_data_contract_v1.py'
       - '.github/workflows/single_family_data_contract_v1.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   single-family-data-contract-v1:
     runs-on: [self-hosted, linux, x64, realsas]

@@ -6,7 +6,7 @@
     {
       "id": "PLATFORM_EXECUTION_LANES",
       "branch": "main",
-      "status": "CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_VALIDATION",
+      "status": "CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED",
       "scope": "Go-owned Attempt execution, semantic stage reuse and separate ProductRevision render. Temporary review branches are code-only.",
       "current_execution_authority": true,
       "product_pass_claimed": false,

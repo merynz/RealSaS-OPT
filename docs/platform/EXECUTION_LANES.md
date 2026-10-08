@@ -5,6 +5,11 @@ outbox and Temporal workflows. Python executes the selected scientific stage;
 C++ consumes the qualified native package. Git `main` owns code, never the
 state of a research experiment.
 
+The immediate delivery is the modular developer path used by operators and
+agents: replace selected components, rerun their dependent target closure and
+preserve exact independent artifacts/checkpoints. Full input-to-output product
+execution and its UI integration are a later productization milestone.
+
 | Operation | Command | State and permitted result |
 |---|---|---|
 | List the current DAG | `realsasctl stages` | Canonical stage identities and dependencies |
@@ -87,9 +92,11 @@ gap remains open and does not cancel the scoped PASS. Absolute G3, product
 qualification and generalization remain separate claims.
 
 Old frozen IDLE/RUN/SLASH recovery and the August vendor consumer/MWB0/MWB1
-replays are manual historical reproducibility; they no longer queue on every
-current Compiler edit. Current mainline contracts remain automatic.
-It cannot prove the newest carrier-native package rendered. A fresh render
+replays, including the four frozen September R6 training replays, are manual
+historical reproducibility. They no longer queue on every current Compiler
+edit. Automatic PR checks cancel superseded heads within each workflow and PR;
+current mainline contracts remain automatic.
+Historical recovery cannot prove the newest carrier-native package rendered. A fresh render
 receipt must record exact code SHA, carrier/skeleton/weights identities,
 input artifacts, output hashes, execution mode and wall time. Measure cold
 compile and warm render separately; the target is below120seconds, ideally60.

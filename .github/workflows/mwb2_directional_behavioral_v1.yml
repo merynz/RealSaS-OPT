@@ -26,6 +26,10 @@ on:
       - 'experiments/iris_reprojection_v2_20260831/persistence_adapter_v2.py'
       - '.github/workflows/mwb2_directional_behavioral_v1.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   mwb2-directional-behavioral:
     runs-on: [self-hosted, linux, x64, realsas]

@@ -16,6 +16,10 @@ on:
       - 'experiments/family_selection_v1/**'
       - '.github/workflows/post_freeze_family_selector_v1.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   post-freeze-family-selector-v1:
     runs-on: [self-hosted, linux, x64, realsas]

@@ -13,6 +13,10 @@ on:
       - 'compiler/realsas_compiler_core/mwb2_skin.py'
       - 'compiler/test_mwb2_source_v1.py'
       - '.github/workflows/mwb2_source_contract.yml'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   mwb2-source-contract:
     runs-on: [self-hosted, linux, x64, realsas]

@@ -115,6 +115,7 @@ concurrency:
 
 jobs:
   source-ownership:
+    if: github.event.repository.private == false
     runs-on: ubuntu-latest
     env:
       PYTHONPATH: .
@@ -191,6 +192,7 @@ jobs:
           echo 'MODEL_MAINLINE_SOURCE_GATE_PASS'
           echo "commit=$GITHUB_SHA"
           echo 'execution_lane=github_hosted_public_standard'
+          echo 'private_repo_guard=true'
           echo 'current_continuity_v2_bound=true'
           echo 'model_branding_boundary=true'
           echo 'iris_scene_first_v3_promoted_witness=true'

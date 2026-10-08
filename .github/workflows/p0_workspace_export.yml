@@ -1,0 +1,34 @@
+name: p0-workspace-export
+
+on:
+  push:
+    branches: [research/presentation-p0-closure-20261008]
+    paths: ['.github/workflows/p0_workspace_export.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/presentation-p0-closure-20261008
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p0-workspace
+          path: |
+            compiler
+            runtime
+            tests
+            tools
+            canonical
+            requirements
+            models
+            experiments
+            pyproject.toml
+            pytest.ini
+          if-no-files-found: warn
+          retention-days: 1

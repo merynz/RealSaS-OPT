@@ -23,9 +23,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: pip
-          cache-dependency-path: |
-            requirements/mainline-ci.txt
-            requirements/torch-cpu.txt
       - name: Validate SVG XML, required nodes and authority labels
         run: python tools/validate_architecture_svg_v3.py

@@ -23,6 +23,15 @@ Implementation validation and merge evidence are recorded in PR #59. Verify the
 live `main` ref rather than treating the baseline audit SHA as the latest code.
 Audit receipt: `canonical/PLATFORM_MAIN_AUDIT_20261008.json`.
 
+Exact-byte external evidence import and subject-input sealing are implemented.
+The released DAG is carried into Python execution (including smaller research
+networks). Import does not mint scientific or reuse qualification.
+The latest Knight file index is
+`canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json`; bounded self-hosted preflight
+reports file hashes and default service availability. A real latest-carrier
+Knight Attempt and its fresh render remain pending; engineering tests and a
+host inventory must not be reported as that execution proof.
+
 ## Current product architecture
 
 Geometry, Mechanics and Appearance remain co-equal product authorities. `SurfaceAddressing` is the stable canonical mesh-domain/addressing authority and Complete Appearance Authority owns source-preserving visual appearance. Presentation remains first-class editable addressing authority.

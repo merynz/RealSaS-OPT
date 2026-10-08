@@ -1,0 +1,22 @@
+{
+  "schema": "RealSaS.ExternalInputInventory.v1",
+  "subject": "KNIGHT_FIT1",
+  "authority_class": "EXTERNAL_EVIDENCE_ONLY__REQUALIFICATION_REQUIRED",
+  "mechanics_receipt": "canonical/KNIGHT_AXIS541_MIRA55_CARRIER_NATIVE_PROMOTION_20261007.json",
+  "qualification_minted_by_inventory": false,
+  "product_authority": false,
+  "required_files": [
+    {"name": "M_EVIDENCE_SUPPORT_V55.npz", "sha256": "8a625d2e5373cc679dbbaa460c8045956a520b65799bca15cb6975a50e75f514", "size_bytes": 330410},
+    {"name": "MIRA_AXIS41_TESSA_M_SKIN_FIELD_V55.npz", "sha256": "880dd73b2f3a21196c229156a3271fa95e7261def3f50a3dfe9f1c49ca2bb27b", "size_bytes": 354362},
+    {"name": "MIRA_M_DIRECT_RESULT_V55.json", "sha256": "31545e7180aa770b1efc4a1876c256999bdeb38f703d9a3e46892f888a4678c1", "size_bytes": 2878},
+    {"name": "AXIS41_DISCRETE_XYZ_FROZEN_CAUSAL_RESULT_V541.json", "sha256": "072b52b206e622b1c1b51fe266c0e348fe3829925f8258035d23c61087abf528", "size_bytes": 1346},
+    {"name": "AXIS41_DISCRETE_XYZ_FROZEN_CAUSAL_QUALIFIED_SKELETON_V541.json", "sha256": "c5a3c7f5675ba84233c8d7eb4ccab076e69c105462f86673dc259e30e2ca6ca5", "size_bytes": 29852}
+  ],
+  "remaining_bindings": [
+    "Exact Stage19 qualified carrier IR and its basis",
+    "Engine execution receipts and checkpoint/proposal read sets",
+    "Source-preserving CAA, cameras and addressing qualified for this exact carrier",
+    "Motion inputs with explicit research-only FIT alignment scope",
+    "Go Registry SubjectInput and Attempt; imported bytes are not stage cache hits"
+  ]
+}

@@ -177,14 +177,14 @@ def source_exports_callable(
     return False
 
 
-def lightweight_implementation_closure(plan: dict[str, Any]) -> dict[str, Any]:
+def lightweight_implementation_closure(plan: dict[str, Any], *, require_product_pass_authority: bool = True) -> dict[str, Any]:
     """Recompute the compiler implementation closure without importing adapters.
 
     This intentionally mirrors mainline._adapter_impl_hash semantics from source
     hashes and AST import closure only, so architecture discovery never requires
     numpy/torch/blender or other runtime dependencies.
     """
-    plan_hash = mainline.validate_plan(plan)
+    plan_hash = mainline.validate_plan(plan, require_product_pass_authority=require_product_pass_authority)
     adapter_rows: list[dict[str, Any]] = []
     imported_modules: set[str] = set()
 

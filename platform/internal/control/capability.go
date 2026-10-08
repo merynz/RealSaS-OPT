@@ -15,6 +15,7 @@ import (
 	"github.com/merynz/RealSaS-OPT/platform/internal/orchestration"
 	"github.com/merynz/RealSaS-OPT/platform/internal/registry"
 	"github.com/merynz/RealSaS-OPT/platform/internal/release"
+	"github.com/merynz/RealSaS-OPT/platform/internal/stagegraph"
 )
 
 func (a Activities) ResolveCapabilityGoal(ctx context.Context, in orchestration.CapabilityWorkflowInput) (orchestration.ResolvedCapabilityGoal, error) {
@@ -143,12 +144,16 @@ func (a Activities) PrepareCapabilityExecution(ctx context.Context, req orchestr
 	executionID := uuid.NewSHA1(uuid.NameSpaceOID, []byte("realsas:capability-execution:"+goalID.String()+":"+descriptor.ID))
 	var stageParameters map[string]any
 	var stageNodeSHA string
+	var releasedGraph *stagegraph.Snapshot
+	var pipelinePlanSHA string
 	if descriptor.Kind == capability.KindStage {
 		stageID, _ := descriptor.Metadata["stage_id"].(string)
-		g, _, err := release.LoadGraph(ctx, a.Pool, releaseID)
+		g, planSHA, err := release.LoadGraph(ctx, a.Pool, releaseID)
 		if err != nil {
 			return orchestration.EngineCapabilityRequest{}, err
 		}
+		graphSnapshot := g.Snapshot()
+		releasedGraph, pipelinePlanSHA = &graphSnapshot, planSHA
 		stage, ok := g.Get(stageID)
 		if !ok {
 			return orchestration.EngineCapabilityRequest{}, errors.New("CAPABILITY_STAGE_DAG_DRIFT")
@@ -238,6 +243,8 @@ func (a Activities) PrepareCapabilityExecution(ctx context.Context, req orchestr
 		return orchestration.EngineCapabilityRequest{}, err
 	}
 	return orchestration.EngineCapabilityRequest{
+		ReleasedGraph:             releasedGraph,
+		PipelinePlanSHA256:        pipelinePlanSHA,
 		StageGraphNodeSHA256:      stageNodeSHA,
 		StageSemanticParameters:   stageParameters,
 		ExecutionID:               executionID.String(),

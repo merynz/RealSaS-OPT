@@ -9,23 +9,55 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/merynz/RealSaS-OPT/platform/internal/artifactstore"
 )
 
 func run(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("command required: stages, attempt, release, research-start, research-run, product-compile, product-render")
+		return fmt.Errorf("command required: stages, subject, artifact-put, artifact-import, input-seal, attempt, release, research-start, research-run, product-compile, product-render")
 	}
-	routes := map[string]string{"release": "/v1/releases", "research-start": "/v1/research/attempts", "research-run": "/v1/research/compile", "product-compile": "/v1/product/compile", "product-render": "/v1/product/render"}
+	routes := map[string]string{"subject": "/v1/subjects", "artifact-import": "/v1/artifacts/import", "input-seal": "/v1/subject-inputs", "release": "/v1/releases", "research-start": "/v1/research/attempts", "research-run": "/v1/research/compile", "product-compile": "/v1/product/compile", "product-render": "/v1/product/render"}
 	flags := flag.NewFlagSet(args[0], flag.ContinueOnError)
 	endpoint := flags.String("api", "http://127.0.0.1:8080", "operator API")
 	requestFile := flags.String("request", "-", "JSON request file, or - for stdin")
 	id := flags.String("id", "", "attempt UUID")
+	file := flags.String("file", "", "exact artifact bytes to upload")
+	sha := flags.String("sha256", "", "expected artifact content SHA256")
 	if err := flags.Parse(args[1:]); err != nil {
 		return err
 	}
 	method := http.MethodPost
 	path, ok := routes[args[0]]
 	var body []byte
+	if args[0] == "artifact-put" {
+		if *file == "" || len(*sha) != 64 {
+			return fmt.Errorf("artifact-put requires --file and --sha256")
+		}
+		if err := artifactstore.ValidateSHA256(*sha); err != nil {
+			return err
+		}
+		info, err := os.Stat(*file)
+		if err != nil {
+			return err
+		}
+		if !info.Mode().IsRegular() || info.Size() > 256<<20 {
+			return fmt.Errorf("artifact upload requires a regular file of at most 256 MiB")
+		}
+		method = http.MethodPut
+		path = "/v1/artifacts/bytes?sha256=" + *sha
+		ok = true
+		body, err = os.ReadFile(*file)
+		if err != nil {
+			return err
+		}
+		if len(body) > 256<<20 {
+			return fmt.Errorf("artifact upload exceeds 256 MiB")
+		}
+		if artifactstore.HashBytes(body) != *sha {
+			return fmt.Errorf("ARTIFACT_UPLOAD_HASH_MISMATCH")
+		}
+	}
 	if args[0] == "stages" {
 		method = http.MethodGet
 		path = "/v1/stages"
@@ -55,6 +87,9 @@ func run(args []string) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if method == http.MethodPut {
+		req.Header.Set("Content-Type", "application/octet-stream")
+	}
 	response, err := (&http.Client{Timeout: 30 * time.Second}).Do(req)
 	if err != nil {
 		return err

@@ -3,7 +3,7 @@ name: platform-go-contract-v1
 
 on:
   push:
-    branches: [main, implementation/platform-execution-lanes-20261008]
+    branches: [main, 'review/platform-input-dag-*']
     paths:
       - 'platform/**'
       - 'compiler/realsas_compiler_services/orchestrator/**'
@@ -11,6 +11,10 @@ on:
       - 'compiler/realsas_compiler_services/platform_worker/**'
       - 'tools/platform_release_snapshot.py'
       - 'tests/compiler/test_platform_stage_inputs_v1.py'
+      - 'tests/compiler/test_platform_released_graph_v1.py'
+      - 'tools/platform_host_preflight.py'
+      - 'tests/repository/test_platform_host_preflight.py'
+      - 'canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json'
       - 'models/**'
       - 'runtime/**'
       - 'tools/realsas_architecture.py'
@@ -47,7 +51,7 @@ jobs:
       - name: Python contract dependencies
         run: |
           python3 -m venv --clear "$RUNNER_TEMP/realsas-platform-contract-venv"
-          "$RUNNER_TEMP/realsas-platform-contract-venv/bin/python" -m pip install pytest temporalio pgserver==0.1.4
+          "$RUNNER_TEMP/realsas-platform-contract-venv/bin/python" -m pip install pytest temporalio Pillow==11.3.0 pgserver==0.1.4
           echo "$RUNNER_TEMP/realsas-platform-contract-venv/bin" >> "$GITHUB_PATH"
           echo "REALSAS_CI_PGDATA=$RUNNER_TEMP/realsas-platform-pg-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
       - name: Start isolated PostgreSQL without Docker
@@ -117,7 +121,20 @@ jobs:
         run: |
           python3 -m py_compile ../compiler/realsas_compiler_services/platform_worker/worker.py
           cd ..
-          python3 -m pytest -q tests/compiler/test_platform_stage_inputs_v1.py tests/repository/test_source_owned_visual_runtime_wiring_v1.py tests/repository/test_self_hosted_execution_policy.py
+          python3 -m pytest -q tests/compiler/test_platform_stage_inputs_v1.py tests/compiler/test_platform_released_graph_v1.py tests/repository/test_platform_host_preflight.py tests/repository/test_source_owned_visual_runtime_wiring_v1.py tests/repository/test_self_hosted_execution_policy.py
+      - name: Read-only latest Knight input and platform host preflight
+        run: |
+          cd ..
+          python3 tools/platform_host_preflight.py \
+            --authority-root /home/monster/realsas_authority \
+            --inventory canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json \
+            --out "$RUNNER_TEMP/platform-host-preflight.json"
+      - name: Preserve host preflight (diagnostic, not a scientific PASS)
+        uses: actions/upload-artifact@v4
+        with:
+          name: platform-host-preflight
+          path: ${{ runner.temp }}/platform-host-preflight.json
+          retention-days: 7
       - name: Current continuation contracts
         run: |
           cd ..

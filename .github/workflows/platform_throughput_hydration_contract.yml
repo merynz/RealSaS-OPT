@@ -1,0 +1,69 @@
+name: platform-throughput-hydration-contract
+
+on:
+  push:
+    branches: [main, 'platform/throughput-hydration-gc-*']
+    paths:
+      - 'tools/platform_artifact_store.py'
+      - 'tools/platform_cache_gc.py'
+      - 'tools/platform_ci_bootstrap.py'
+      - 'tools/platform_host_preflight.py'
+      - 'tests/repository/test_platform_artifact_store.py'
+      - 'tests/repository/test_platform_cache_gc.py'
+      - 'tests/repository/test_platform_ci_bootstrap.py'
+      - 'tests/repository/test_platform_host_preflight.py'
+      - 'canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json'
+      - 'canonical/PLATFORM_THROUGHPUT_HYDRATION_GC_PREREG_20261008.json'
+      - '.github/workflows/platform_throughput_hydration_contract.yml'
+  pull_request:
+    paths:
+      - 'tools/platform_artifact_store.py'
+      - 'tools/platform_cache_gc.py'
+      - 'tools/platform_ci_bootstrap.py'
+      - 'tools/platform_host_preflight.py'
+      - 'tests/repository/test_platform_artifact_store.py'
+      - 'tests/repository/test_platform_cache_gc.py'
+      - 'tests/repository/test_platform_ci_bootstrap.py'
+      - 'tests/repository/test_platform_host_preflight.py'
+      - 'canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json'
+      - 'canonical/PLATFORM_THROUGHPUT_HYDRATION_GC_PREREG_20261008.json'
+      - '.github/workflows/platform_throughput_hydration_contract.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: platform-throughput-hydration-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Contract tests
+        run: |
+          python3 -m pip install --disable-pip-version-check pytest
+          python3 -m pytest -q \
+            tests/repository/test_platform_artifact_store.py \
+            tests/repository/test_platform_cache_gc.py \
+            tests/repository/test_platform_ci_bootstrap.py \
+            tests/repository/test_platform_host_preflight.py
+      - name: Validate Knight inventory has stable remote locators
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          from tools.platform_artifact_store import validate_inventory
+          p=json.loads(Path('canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json').read_text())
+          rows=validate_inventory(p)
+          assert len(rows)==12, len(rows)
+          assert all(row.get('source',{}).get('provider')=='google_drive' for row in rows)
+          assert all(row.get('source',{}).get('file_id') for row in rows)
+          print('KNIGHT_EXTERNAL_LOCATORS=12/12')
+          PY

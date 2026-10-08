@@ -39,6 +39,7 @@ CURRENT_HOSTED_WORKFLOWS = (
     ".github/workflows/iris_v2_source_contract.yml",
     ".github/workflows/living_compile_v4.yml",
     ".github/workflows/platform_go_contract_v1.yml",
+    ".github/workflows/platform_throughput_hydration_contract.yml",
 )
 
 

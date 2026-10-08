@@ -121,3 +121,41 @@ def test_smoke_registry_read_is_bound_to_actual_license_stage(tmp_path, monkeypa
     assert "stage:02_SOURCE_LICENSE_PROVENANCE" in seen[0]
     with pytest.raises((ValueError, RuntimeError)):
         smoke.artifact_for_attempt(tmp_path, "invalid'", '02_SOURCE_LICENSE_PROVENANCE')
+
+
+def test_one_active_unit_cannot_report_platform_ready():
+    assert deploy.all_services_active("active\n" * len(deploy.UNITS))
+    assert not deploy.all_services_active("activating\nactive\nfailed\ninactive\ninactive\ninactive\n")
+    assert not deploy.all_services_active("active\n")
+
+
+def test_runtime_environment_has_explicit_python_libraries_not_actions_environment(tmp_path):
+    env = deploy.runtime_environment(tmp_path / 'platform', tmp_path / 'authority', '/opt/python/lib')
+    assert env['LD_LIBRARY_PATH'] == '/opt/python/lib'
+    assert env['REALSAS_TEMPORAL_ADDRESS'] == '127.0.0.1:7233'
+    assert not any('GITHUB' in key or 'RUNNER' in key for key in env)
+
+
+def test_isolated_deployed_interpreter_and_engine_import_without_inherited_environment():
+    import subprocess
+    import sys
+    root = Path(__file__).resolve().parents[2]
+    library = deploy.python_library_dir(sys.executable)
+    env = deploy.runtime_environment(root / 'test-platform', root / 'test-authority', library)
+    subprocess.run([sys.executable, '-c',
+                    'from compiler.realsas_compiler_services.orchestrator import mainline; '
+                    'from tools.platform_deployment_smoke import smoke_plans; '
+                    'assert smoke_plans()[0]["stage_count"] == 2'],
+                   cwd=root, env=env, check=True, timeout=30)
+
+
+def test_operator_python_launcher_preserves_arguments_without_actions_environment(tmp_path):
+    import subprocess
+    import sys
+    library = deploy.python_library_dir(sys.executable)
+    wrapper = tmp_path / 'realsas-python'
+    wrapper.write_text(deploy.python_launcher(sys.executable, library))
+    wrapper.chmod(0o755)
+    result = subprocess.run([str(wrapper), '-c', 'import sys; print(sys.argv[1])', 'argument with spaces'],
+                            env={}, check=True, capture_output=True, text=True, timeout=10)
+    assert result.stdout.strip() == 'argument with spaces'

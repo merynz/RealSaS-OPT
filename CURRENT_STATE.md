@@ -40,6 +40,12 @@ execution and exact independent artifact reuse after a DAG node removal. Host
 installation and this smoke must succeed before declaring the deployment live;
 they are engineering evidence, never Knight scientific or product qualification.
 
+Optimization applies to the scientific/execution system itself, not only agent
+workflow speed: measure cold end-to-end construction separately from warm
+component replacement/render. Optimize inference, Compiler, CAA and Runtime hot
+paths while preserving qualification and numerical contracts. Product latency
+target is below120seconds, ideally60; it is not yet a measured product claim.
+
 ## Current product architecture
 
 Geometry, Mechanics and Appearance remain co-equal product authorities. `SurfaceAddressing` is the stable canonical mesh-domain/addressing authority and Complete Appearance Authority owns source-preserving visual appearance. Presentation remains first-class editable addressing authority.

@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Hash-verified external evidence hydration into a bounded local content-addressed store.
+"""Hash-verified external evidence hydration into a local content-addressed store.
 
 Hydration only makes external bytes locally available. It never mints scientific
-qualification, product authority, or stage cache hits.
+qualification, product authority, or stage cache hits. Automatic CAS GC is not
+performed here; executor lease/pin semantics must exist before CAS eviction is
+safe.
 """
 from __future__ import annotations
 
@@ -12,6 +14,7 @@ import fcntl
 import hashlib
 import json
 import os
+import stat
 import subprocess
 import tempfile
 import time
@@ -68,11 +71,13 @@ def cas_path(cas_root: Path, digest: str) -> Path:
 
 def verify_exact(path: Path, row: dict) -> tuple[bool, str]:
     try:
-        size = path.stat().st_size
+        metadata = path.lstat()
     except FileNotFoundError:
         return False, "MISSING"
-    if size != row["size_bytes"]:
-        return False, f"SIZE_MISMATCH:{size}"
+    if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISREG(metadata.st_mode):
+        return False, "NOT_REGULAR_FILE"
+    if metadata.st_size != row["size_bytes"]:
+        return False, f"SIZE_MISMATCH:{metadata.st_size}"
     digest = sha256_file(path)
     if digest != row["sha256"]:
         return False, f"SHA256_MISMATCH:{digest}"
@@ -100,6 +105,7 @@ def fetch_google_drive_with_rclone(*, file_id: str, destination: Path, remote: s
     subprocess.run(
         ["rclone", "backend", "copyid", f"{remote_name}:", file_id, str(destination)],
         check=True,
+        timeout=600,
     )
 
 
@@ -116,13 +122,17 @@ def hydrate_row(
     with digest_lock(cas_root, row["sha256"]):
         exact, reason = verify_exact(destination, row)
         if exact:
-            os.utime(destination, None)
+            os.utime(destination, None, follow_symlinks=False)
             return {
                 "name": row["name"], "sha256": row["sha256"], "size_bytes": row["size_bytes"],
                 "status": "CAS_HIT", "path": str(destination),
                 "wall_seconds": round(time.monotonic() - started, 6),
             }
-        if destination.exists():
+        if destination.exists() or destination.is_symlink():
+            # Never mutate an unexpected object in place. A symlink/directory at
+            # a content address is host drift that requires operator inspection.
+            if reason == "NOT_REGULAR_FILE":
+                raise RuntimeError(f"CAS_NON_REGULAR_OBJECT:{row['name']}:{destination}")
             destination.unlink()
         if not allow_remote:
             return {

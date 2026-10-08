@@ -1,6 +1,11 @@
 name: platform-self-hosted-pr-firewall-migration
 
 on:
+  push:
+    branches:
+      - platform/throughput-hydration-gc-20261008
+    paths:
+      - '.github/workflows/platform_self_hosted_pr_firewall_migration.yml'
   pull_request:
     paths:
       - '.github/workflows/platform_self_hosted_pr_firewall_migration.yml'
@@ -10,7 +15,7 @@ permissions:
 
 jobs:
   migrate:
-    if: github.repository == 'merynz/RealSaS-OPT' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'platform/throughput-hydration-gc-20261008'
+    if: github.repository == 'merynz/RealSaS-OPT' && (github.event_name == 'push' || (github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'platform/throughput-hydration-gc-20261008'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -30,6 +35,7 @@ jobs:
           root = Path('.github/workflows')
           self_path = root / 'platform_self_hosted_pr_firewall_migration.yml'
           guard = "github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository"
+          expression = lambda body: '$' + '{{ ' + body + ' }}'
           changed = []
 
           def job_ranges(lines):
@@ -41,11 +47,10 @@ jobs:
                       continue
                   if in_jobs and re.match(r'^  [A-Za-z0-9_.-]+:\s*$', line):
                       starts.append(i)
-              out = []
-              for n, start in enumerate(starts):
-                  end = starts[n + 1] if n + 1 < len(starts) else len(lines)
-                  out.append((start, end))
-              return out
+              return [
+                  (start, starts[n + 1] if n + 1 < len(starts) else len(lines))
+                  for n, start in enumerate(starts)
+              ]
 
           for path in sorted(root.glob('*.yml')):
               if path == self_path:
@@ -58,9 +63,7 @@ jobs:
               for start, end in reversed(job_ranges(lines)):
                   block = lines[start:end]
                   run_rel = next((j for j, line in enumerate(block) if re.match(r'^    runs-on:\s*\[.*self-hosted.*\]\s*$', line)), None)
-                  if run_rel is None:
-                      continue
-                  if any(guard in line for line in block):
+                  if run_rel is None or any(guard in line for line in block):
                       continue
                   if_rels = [j for j, line in enumerate(block) if re.match(r'^    if:\s*.+$', line)]
                   if len(if_rels) > 1:
@@ -70,11 +73,11 @@ jobs:
                       raw = block[rel].split(':', 1)[1].strip()
                       if raw in ('|', '>'):
                           raise SystemExit(f'MULTILINE_JOB_IF_UNSUPPORTED:{path.name}:{start+rel+1}')
-                      if raw.startswith('${{') and raw.endswith('}}'):
+                      if raw.startswith('$' + '{{') and raw.endswith('}}'):
                           raw = raw[3:-2].strip()
-                      lines[start + rel] = f"    if: ${{{{ ({raw}) && ({guard}) }}}}\n"
+                      lines[start + rel] = '    if: ' + expression(f'({raw}) && ({guard})') + '\n'
                   else:
-                      lines.insert(start + run_rel, f"    if: ${{{{ {guard} }}}}\n")
+                      lines.insert(start + run_rel, '    if: ' + expression(guard) + '\n')
                   touched = True
               if touched:
                   path.write_text(''.join(lines), encoding='utf-8')

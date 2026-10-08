@@ -32,6 +32,14 @@ reports file hashes and default service availability. A real latest-carrier
 Knight Attempt and its fresh render remain pending; engineering tests and a
 host inventory must not be reported as that execution proof.
 
+Persistent local developer deployment is specified in
+`docs/platform/DEVELOPER_HOST.md`: dedicated PostgreSQL, persistent local Temporal,
+Go API/control worker and Python Engine, supervised by the operator's systemd
+user manager. `tools/platform_deployment_smoke.py` exercises real control-to-Engine
+execution and exact independent artifact reuse after a DAG node removal. Host
+installation and this smoke must succeed before declaring the deployment live;
+they are engineering evidence, never Knight scientific or product qualification.
+
 ## Current product architecture
 
 Geometry, Mechanics and Appearance remain co-equal product authorities. `SurfaceAddressing` is the stable canonical mesh-domain/addressing authority and Complete Appearance Authority owns source-preserving visual appearance. Presentation remains first-class editable addressing authority.

@@ -126,6 +126,10 @@ exist. The separated control paths are a prerequisite, not that proof.
 
 ## Host and migration requirements
 
+See `DEVELOPER_HOST.md` for the persistent, loopback-only WSL user-service
+installation and real API/outbox/Temporal/Engine smoke. This local developer
+deployment is not production infrastructure or Knight render readiness.
+
 Run `realsas-migrate up`, `realsas-api`, the Go control worker and the Python
 Engine worker with the same PostgreSQL database, Temporal namespace and CAS
 root. The operator API binds to loopback. Persistent Knight evidence remains on

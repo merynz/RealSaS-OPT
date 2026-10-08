@@ -1,0 +1,4 @@
+# Local developer services, not a frozen model training environment.
+-r mainline-ci.txt
+-r platform-worker.txt
+pgserver==0.1.4

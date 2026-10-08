@@ -1,0 +1,22 @@
+name: platform-host-startup-diagnostic-once
+on:
+  push:
+    branches: ['review/platform-host-diagnostics-20261008']
+    paths: ['.github/workflows/platform_host_startup_diagnostic_once.yml']
+permissions:
+  contents: read
+jobs:
+  startup-diagnostics:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 3
+    steps:
+      - name: Read only managed developer service state and journal
+        run: |
+          export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+          export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
+          for unit in postgres temporal migrate api control engine; do
+            systemctl --user show "realsas-platform-$unit.service" --property=Id,ActiveState,SubState,ExecMainCode,ExecMainStatus
+          done
+          journalctl --user -u realsas-platform-postgres.service -u realsas-platform-migrate.service -n 35 --no-pager
+          /home/monster/realsas_platform/current/venv/bin/python -V || true
+          test -r /home/monster/realsas_platform/data/postgres/PG_VERSION && head -n 1 /home/monster/realsas_platform/data/postgres/PG_VERSION

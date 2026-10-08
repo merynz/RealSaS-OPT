@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"flag"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -26,6 +27,8 @@ import (
 )
 
 func main() {
+	reconcileOnce := flag.Bool("reconcile-once", false, "close only Attempts whose bound Temporal workflow failed terminally")
+	flag.Parse()
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
@@ -51,6 +54,12 @@ func main() {
 	})
 	fatalIf(err, "connect temporal")
 	defer temporalClient.Close()
+	if *reconcileOnce {
+		count, err := dispatch.ReconcileFailedAttempts(ctx, pool, temporalClient, 32)
+		fatalIf(err, "reconcile failed workflows")
+		slog.Info("terminal workflow reconciliation", "closed_attempts", count)
+		return
+	}
 
 	activities := control.Activities{Pool: pool, Graph: graph, Store: store}
 	fatalIf(activities.Validate(), "validate control activities")
@@ -81,6 +90,7 @@ func main() {
 
 	publisher := dispatch.TemporalPublisher{Client: temporalClient}
 	go dispatchLoop(ctx, pool, publisher)
+	go reconcileLoop(ctx, pool, temporalClient)
 
 	slog.Info(
 		"realsas-control-worker ready",
@@ -90,6 +100,26 @@ func main() {
 		"artifact_root", artifactRoot,
 	)
 	<-ctx.Done()
+}
+
+func reconcileLoop(ctx context.Context, pool *pgxpool.Pool, temporalClient client.Client) {
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+	for {
+		bounded, cancel := context.WithTimeout(ctx, 8*time.Second)
+		count, err := dispatch.ReconcileFailedAttempts(bounded, pool, temporalClient, 32)
+		cancel()
+		if err != nil && ctx.Err() == nil {
+			slog.Error("terminal workflow reconciliation failed", "error", err)
+		} else if count > 0 {
+			slog.Info("terminal workflow reconciliation", "closed_attempts", count)
+		}
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+		}
+	}
 }
 
 func dispatchLoop(ctx context.Context, pool *pgxpool.Pool, publisher dispatch.TemporalPublisher) {

@@ -40,6 +40,12 @@ execution and exact independent artifact reuse after a DAG node removal. Host
 installation and this smoke must succeed before declaring the deployment live;
 they are engineering evidence, never Knight scientific or product qualification.
 
+The first real host smoke exposed an Engine heartbeat call from a worker thread
+and a failed Temporal workflow whose Attempt stayed OPEN. Heartbeat now belongs
+to the async event loop; Go reconciles only verified terminal unsuccessful
+workflows and retains their original diagnostics. A real completed execution
+plus exact reuse receipt is still required; service startup alone is insufficient.
+
 Optimization applies to the scientific/execution system itself, not only agent
 workflow speed: measure cold end-to-end construction separately from warm
 component replacement/render. Optimize inference, Compiler, CAA and Runtime hot

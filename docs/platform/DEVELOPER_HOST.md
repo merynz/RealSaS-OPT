@@ -85,7 +85,17 @@ This is not model inference, Knight mechanics, appearance or rendering proof.
 
 Upgrades preserve all data and retain the previous code-release location. They
 refuse unmanaged roots/units, occupied foreign ports and any OPEN Attempts;
-operators must drain or resolve those Attempts explicitly. Package builds and
+operators must drain genuinely active or unsubmitted Attempts explicitly.
+The Go control worker automatically reconciles an OPEN Attempt only when its
+single delivered command has a matching Temporal workflow with a terminal
+failure/cancellation/termination/timeout and recorded close time. It preserves
+failure evidence, emits `ATTEMPT_WORKFLOW_FAILED`, and grants no qualification.
+Running, unknown and successful workflows are never failed by this mechanism.
+Main deployment runs the same Go owner with `--reconcile-once` before checking
+the drain boundary; it cannot erase or force-finish an active experiment.
+Engine heartbeat calls remain on the async activity event loop, while Compiler
+and Runtime work runs in worker threads. The regression uses the real pinned SDK.
+Package builds and
 checks happen before stopping live services. Migrations are forward-only during
 installation. Do not blindly roll back code after a schema change: review migration
 compatibility first. Automatic rollback or crash-recovery of a partially switched

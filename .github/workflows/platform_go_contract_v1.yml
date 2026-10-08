@@ -3,7 +3,7 @@ name: platform-go-contract-v1
 
 on:
   push:
-    branches: [main, 'review/platform-input-dag-*']
+    branches: [main, 'review/platform-input-dag-*', 'review/platform-worker-lifecycle-*']
     paths:
       - 'platform/**'
       - 'compiler/realsas_compiler_services/orchestrator/**'

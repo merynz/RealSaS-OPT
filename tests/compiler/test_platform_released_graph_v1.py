@@ -120,10 +120,11 @@ def test_snapshot_preflight_matches_engine_for_small_research_graph():
 
 def test_real_engine_executes_rewired_network_not_canonical_dependencies(tmp_path, monkeypatch):
     pytest.importorskip("temporalio")
+    import asyncio
+    from temporalio.testing import ActivityEnvironment
     from compiler.realsas_compiler_services.platform_worker import worker
     monkeypatch.setenv("REALSAS_AUTHORITY_ROOT", str(tmp_path / "authority"))
     monkeypatch.setenv("REALSAS_ARTIFACT_ROOT", str(tmp_path / "cas"))
-    monkeypatch.setattr(worker.activity, "heartbeat", lambda *_: None)
     run_id = "SUBJECT_FREE_REWIRED_ENGINE"
     manifest = {"run_id": run_id, "subject_id": "SUBJECT_FREE_NETWORK",
                 "execution_class": "IMPLEMENTATION_AUDIT",
@@ -146,7 +147,13 @@ def test_real_engine_executes_rewired_network_not_canonical_dependencies(tmp_pat
     import json
     source = worker._put_cas_bytes(json.dumps(manifest["source_license"]).encode())
     request["source_inputs"] = [{**source, "role": "subject:manifest:source_license"}]
-    result = worker._execute_stage_core(request)
+    environment = ActivityEnvironment()
+    heartbeats = []
+    environment.on_heartbeat = lambda *details: heartbeats.append(details)
+    # Exercise the actual async activity -> worker thread boundary. Replacing
+    # heartbeat with a no-op hid the live SDK's event-loop error.
+    result = asyncio.run(environment.run(worker.execute_compile_stage, request))
+    assert heartbeats
     assert result["status"] == "PASS"
     ledger = mainline.load_json(mainline.run_ledger_path(run_id))
     assert ledger["stages"][0]["status"] == "PENDING"
@@ -156,6 +163,29 @@ def test_real_engine_executes_rewired_network_not_canonical_dependencies(tmp_pat
     wrong = dict(request, pipeline_plan_sha256=mainline.content_sha256(base))
     with pytest.raises(RuntimeError, match="PLATFORM_PLAN_SHA_DRIFT"):
         worker._execute_stage_core(wrong)
+
+
+def test_async_engine_heartbeat_stays_on_event_loop_and_propagates_failure():
+    pytest.importorskip("temporalio")
+    import asyncio
+    import threading
+    from temporalio.testing import ActivityEnvironment
+    from compiler.realsas_compiler_services.platform_worker import worker
+
+    owner_thread = threading.get_ident()
+    environment = ActivityEnvironment()
+    heartbeat_threads = []
+    environment.on_heartbeat = lambda *_: heartbeat_threads.append(threading.get_ident())
+
+    def synchronous_work(_):
+        assert threading.get_ident() != owner_thread
+        with pytest.raises(RuntimeError, match="no running event loop"):
+            asyncio.get_running_loop()
+        raise ValueError("EXACT_ENGINE_FAILURE")
+
+    with pytest.raises(ValueError, match="EXACT_ENGINE_FAILURE"):
+        asyncio.run(environment.run(worker._with_heartbeat, synchronous_work, {"stage_id": "TEST"}))
+    assert heartbeat_threads and all(thread == owner_thread for thread in heartbeat_threads)
 
 
 def test_imported_source_must_match_manifest_section_and_actual_bytes(tmp_path):

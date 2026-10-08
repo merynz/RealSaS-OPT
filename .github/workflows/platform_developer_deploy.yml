@@ -60,6 +60,19 @@ jobs:
         with:
           go-version: '1.27.1'
           cache: false
+      - name: Reconcile terminal failed Attempts through the canonical Go owner
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$GITHUB_SHA"
+          if test -f /home/monster/realsas_platform/deployment.json; then
+            export REALSAS_REPO_ROOT="$GITHUB_WORKSPACE"
+            export REALSAS_DATABASE_URL='postgresql:///postgres?host=/home/monster/realsas_platform/data/socket&port=55432'
+            export REALSAS_ARTIFACT_ROOT=/home/monster/realsas_platform/artifacts
+            export REALSAS_TEMPORAL_ADDRESS=127.0.0.1:7233
+            export REALSAS_TEMPORAL_NAMESPACE=default
+            cd platform
+            go run ./cmd/realsas-control-worker --reconcile-once
+          fi
       - name: Install persistent developer services from exact canonical main
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |

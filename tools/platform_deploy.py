@@ -133,7 +133,7 @@ def preflight(root, expected_sha):
         if (socket_dir / ".s.PGSQL.55432").exists():
             # Use the deployed interpreter to locate its pinned psql, not PATH.
             script = "from pgserver._commands import POSTGRES_BIN_PATH; print(POSTGRES_BIN_PATH/'psql')"
-            psql = command([root / "current/venv/bin/python", "-c", script], capture=True).stdout.strip()
+            psql = command([root / "current/bin/realsas-python", "-c", script], capture=True).stdout.strip()
             active = command([psql, "-h", socket_dir, "-p", "55432", "-d", "postgres", "-Atc",
                               "SELECT count(*) FROM attempts WHERE final_state='OPEN'"], capture=True).stdout.strip()
             if active != "0":

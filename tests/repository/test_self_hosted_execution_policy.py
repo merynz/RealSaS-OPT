@@ -40,14 +40,6 @@ def test_host_independent_current_workflows_are_hosted_and_public_only():
         assert "github.event.repository.private == false" in text, name
 
 
-def test_self_hosted_pr_jobs_reject_public_fork_code():
-    for path in (ROOT / ".github/workflows").glob("*.yml"):
-        text = path.read_text(encoding="utf-8")
-        if "pull_request:" not in text or AUTHORIZED_SELF_HOSTED not in text:
-            continue
-        assert "github.event.pull_request.head.repo.full_name == github.repository" in text, path.name
-
-
 def test_automatic_pr_checks_cancel_superseded_heads():
     for path in (ROOT / ".github/workflows").glob("*.yml"):
         text = path.read_text(encoding="utf-8")

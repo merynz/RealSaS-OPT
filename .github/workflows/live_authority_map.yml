@@ -14,6 +14,7 @@ concurrency:
 
 jobs:
   refresh:
+    if: github.event.repository.private == false
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -107,3 +108,4 @@ jobs:
           echo "Live authority refresh is validation-only."
           echo "Generated views are job-local diagnostics; this workflow does not mutate main."
           echo "execution_lane=github_hosted_public_standard"
+          echo "private_repo_guard=true"

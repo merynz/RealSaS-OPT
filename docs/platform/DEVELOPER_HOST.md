@@ -50,7 +50,7 @@ python tools/platform_deploy.py \
   --root /home/monster/realsas_platform \
   --authority-root /home/monster/realsas_authority \
   --expected-main-sha "$(git rev-parse HEAD)"
-/home/monster/realsas_platform/current/venv/bin/python \
+/home/monster/realsas_platform/current/bin/realsas-python \
   /home/monster/realsas_platform/current/source/tools/platform_deployment_smoke.py \
   --root /home/monster/realsas_platform
 systemctl --user status realsas-platform.target
@@ -65,6 +65,13 @@ The deployment environment is a pinned CPU adapter environment, not a substitute
 for historical model training environments or a proven complete inference service.
 Native Runtime player installation and the latest Knight qualified inputs remain
 separate readiness requirements; active services do not imply render readiness.
+Shared CPython builds require an explicit base-library path in the service
+environment. The installer discovers it from the deployed interpreter and tests
+Engine imports with no inherited Actions environment. Readiness requires every
+managed unit to be active; `systemctl is-active`'s multi-unit exit code alone is
+not an all-services health proof. Failed startup prints bounded managed journals.
+Use `current/bin/realsas-python` for operator Python utilities: it supplies the
+same base-library path outside Actions and preserves command arguments exactly.
 
 ## Scope and upgrade boundary
 

@@ -70,7 +70,7 @@ jobs:
       - name: Real API to Engine execution and exact reuse proof
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          /home/monster/realsas_platform/current/venv/bin/python \
+          /home/monster/realsas_platform/current/bin/realsas-python \
             /home/monster/realsas_platform/current/source/tools/platform_deployment_smoke.py \
             --root /home/monster/realsas_platform
       - name: Service status (no environment or credentials)
@@ -78,10 +78,15 @@ jobs:
         run: |
           python - <<'PY'
           import subprocess
-          from tools.platform_deploy import manager_environment, UNITS
+          from tools.platform_deploy import manager_environment, UNITS, all_services_active, startup_diagnostics
           manager_environment()
-          subprocess.run(['systemctl', '--user', 'is-active',
-                          *[f'realsas-platform-{name}.service' for name in UNITS]], check=True)
+          result = subprocess.run(['systemctl', '--user', 'is-active',
+                                   *[f'realsas-platform-{name}.service' for name in UNITS]],
+                                  text=True, capture_output=True, check=False)
+          print(result.stdout)
+          if not all_services_active(result.stdout):
+              startup_diagnostics()
+              raise RuntimeError('NOT_ALL_MANAGED_SERVICES_ACTIVE')
           PY
       - name: Preserve engineering execution receipts
         if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'

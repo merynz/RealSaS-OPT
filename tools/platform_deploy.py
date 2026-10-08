@@ -14,6 +14,7 @@ import json
 import os
 import platform
 import re
+import shlex
 import socket
 import subprocess
 import sys
@@ -31,9 +32,47 @@ TEMPORAL_URL = ("https://github.com/temporalio/cli/releases/download/v1.9.1/"
 UNITS = ("postgres", "temporal", "migrate", "api", "control", "engine")
 
 
-def command(args, *, cwd=None, capture=False, timeout=300):
+def command(args, *, cwd=None, capture=False, timeout=300, env=None):
     return subprocess.run(list(map(str, args)), cwd=cwd, check=True, text=True,
-                          capture_output=capture, timeout=timeout)
+                          capture_output=capture, timeout=timeout, env=env)
+
+
+def all_services_active(stdout):
+    statuses = stdout.strip().splitlines()
+    # systemctl is-active exits zero if ANY supplied unit is active, not all.
+    return len(statuses) == len(UNITS) and all(value == "active" for value in statuses)
+
+
+def python_library_dir(python):
+    # setup-python's shared build needs this even outside the Actions job.
+    base = command([python, "-c", "import sys; print(sys.base_prefix)"], capture=True).stdout.strip()
+    directory = Path(base) / "lib"
+    if not directory.is_dir():
+        raise RuntimeError("PYTHON_BASE_LIBRARY_DIRECTORY_MISSING")
+    return str(directory)
+
+
+def runtime_environment(root, authority, library_dir):
+    return {"REALSAS_DEPLOY_ROOT": str(root), "REALSAS_REPO_ROOT": str(root / "current/source"),
+            "REALSAS_AUTHORITY_ROOT": str(authority), "REALSAS_ARTIFACT_ROOT": str(root / "artifacts"),
+            "REALSAS_DATABASE_URL": f"postgresql:///postgres?host={root}/data/socket&port=55432",
+            "REALSAS_TEMPORAL_ADDRESS": "127.0.0.1:7233", "REALSAS_TEMPORAL_NAMESPACE": "default",
+            "LD_LIBRARY_PATH": library_dir, "PYTHONUNBUFFERED": "1",
+            "OMP_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1"}
+
+
+def python_launcher(python, library_dir):
+    return ("#!/bin/sh\n" + f"LD_LIBRARY_PATH={shlex.quote(library_dir)}\n"
+            + "export LD_LIBRARY_PATH\n" + f"exec {shlex.quote(str(python))} \"$@\"\n")
+
+
+def startup_diagnostics():
+    # Only our managed units; never print the service environment/credentials.
+    subprocess.run(["systemctl", "--user", "show", *[f"realsas-platform-{name}.service" for name in UNITS],
+                    "--property=Id,ActiveState,SubState,ExecMainCode,ExecMainStatus"], check=False, timeout=10)
+    subprocess.run(["journalctl", "--user", "-u", "realsas-platform-postgres.service",
+                    "-u", "realsas-platform-migrate.service", "-u", "realsas-platform-engine.service",
+                    "-u", "realsas-platform-control.service", "-n", "30", "--no-pager"], check=False, timeout=10)
 
 
 def safe_root(value):
@@ -195,9 +234,14 @@ def install(root, expected_sha, authority):
             raise RuntimeError("PARTIAL_PGDATA_REQUIRES_OPERATOR_INSPECTION")
         command([python, "-c", "import sys; from pgserver import initdb; from pathlib import Path; "
                  "initdb(['-A','trust','--encoding=UTF8','--no-locale'], pgdata=Path(sys.argv[1]))", pgdata])
-    # Verify the package imports before changing live service identities.
-    command([python, "-c", "from compiler.realsas_compiler_services.platform_worker import worker; "
-             "print('Engine imports verified')"], cwd=source)
+    # Verify imports WITHOUT any inherited Actions environment before switching.
+    library_dir = python_library_dir(python)
+    launcher = binaries / "realsas-python"
+    launcher.write_text(python_launcher(python, library_dir))
+    launcher.chmod(0o755)
+    env = runtime_environment(root, authority, library_dir)
+    command([launcher, "-c", "from compiler.realsas_compiler_services.platform_worker import worker; "
+             "print('Engine imports verified in isolated service environment')"], cwd=source, env=env)
     units = service_units(root)
     unit_dir = Path.home() / ".config/systemd/user"
     unit_dir.mkdir(parents=True, exist_ok=True)
@@ -213,11 +257,6 @@ def install(root, expected_sha, authority):
     temporary_link = root / f".current-{uuid.uuid4().hex}"
     temporary_link.symlink_to(release)
     os.replace(temporary_link, root / "current")
-    env = {"REALSAS_DEPLOY_ROOT": root, "REALSAS_REPO_ROOT": root / "current/source",
-           "REALSAS_AUTHORITY_ROOT": authority, "REALSAS_ARTIFACT_ROOT": root / "artifacts",
-           "REALSAS_DATABASE_URL": f"postgresql:///postgres?host={root}/data/socket&port=55432",
-           "REALSAS_TEMPORAL_ADDRESS": "127.0.0.1:7233", "REALSAS_TEMPORAL_NAMESPACE": "default",
-           "PYTHONUNBUFFERED": "1", "OMP_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1"}
     (root / "platform.env").write_text("".join(f"{key}={value}\n" for key, value in env.items()))
     (root / "platform.env").chmod(0o600)
     for name, text in units.items():
@@ -234,13 +273,14 @@ def install(root, expected_sha, authority):
     while time.monotonic() < deadline:
         active = subprocess.run(["systemctl", "--user", "is-active", *[f"realsas-platform-{name}.service" for name in UNITS]],
                                 text=True, capture_output=True, check=False, timeout=10)
-        if active.returncode == 0 and socket_open(8080) and socket_open(7233):
+        if all_services_active(active.stdout) and socket_open(8080) and socket_open(7233):
             receipt["state"] = "SERVICES_ACTIVE"
             marker.write_text(json.dumps(receipt, indent=2) + "\n")
             print(json.dumps(receipt, sort_keys=True))
             return
         time.sleep(1)
-    raise RuntimeError("PLATFORM_SERVICES_NOT_READY: inspect user service journals; no data was reset")
+    startup_diagnostics()
+    raise RuntimeError("PLATFORM_SERVICES_NOT_READY: startup diagnostics printed; no data was reset")
 
 
 def main():

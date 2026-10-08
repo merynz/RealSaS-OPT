@@ -98,7 +98,9 @@ def receive(directory, out, *, repo, branch, run_id, code_sha, timeout):
         # GitHub log masking is defense in depth; never print locators.
         print("::add-mask::" + uri, flush=True)
         try:
-            with urllib.request.urlopen(uri, timeout=60) as response:
+            # The signed-download gateway rejects urllib's default user agent.
+            download = urllib.request.Request(uri, headers={"User-Agent": "curl/8.5.0"})
+            with urllib.request.urlopen(download, timeout=60) as response:
                 data = response.read(64*1024*1024 + 1)
         except Exception:
             raise RuntimeError("PRIVATE_INPUT_DOWNLOAD_FAILED:" + name) from None

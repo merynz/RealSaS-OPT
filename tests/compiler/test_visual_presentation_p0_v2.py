@@ -188,3 +188,19 @@ def test_proof_fails_closed_on_incomplete_matrix(missing):
         a["clip_0_times"] = np.array([1.])
     with pytest.raises(QualificationError):
         prove_visual_domain_matrix(p, a, mesh=m, dynamic=d)
+
+
+def test_motion_blend_proof_rederives_coefficients_even_when_forgery_renders_same_rest_image():
+    from compiler.realsas_compiler_core.visual_motion_blend_v1 import OPERATOR_ID as BLEND_OPERATOR, POLICY as BLEND_POLICY
+    p,a,m,d=matrix_fixture();p.visual_deformation_operator_id=BLEND_OPERATOR
+    p.visual_deformation_policy_hash=content_sha256(BLEND_POLICY);p.metadata={'target_attachments':{'attachments':[]}}
+    xyz=np.asarray([v.P for v in m.vertices]);weights=np.tile([1.,0],(len(xyz),1))
+    witness={'vertices':xyz,'presentation_attachment_vertex_owner':np.zeros(len(xyz),dtype=int),
+        'axis_positions_source':np.zeros((2,3)),'canonical_motion_weights':weights,
+        'clip_0_canonical_xyz':xyz[None],'clip_0_skin_matrices_source':np.tile(np.eye(4),(1,2,1,1))}
+    for vi in range(8):a[f'view_{vi}_motion_blend_coefficients']=np.tile([1.,0],(9,1))
+    proof=prove_visual_domain_matrix(p,a,mesh=m,dynamic=d,attachment_witness=witness)
+    assert proof['canonical_pose_palette_passed'] and proof['domain_coherence_passed']
+    a['view_0_motion_blend_coefficients'][4]=[0,1]
+    with pytest.raises(QualificationError,match='MOTION_COEFFICIENT_DRIFT'):
+        prove_visual_domain_matrix(p,a,mesh=m,dynamic=d,attachment_witness=witness)

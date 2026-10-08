@@ -736,7 +736,8 @@ int render_source_owned_visual(
     const auto operator_it=manifest.find("visual_deformation_operator_id");
     const bool canonical_depth=operator_it!=manifest.end()&&
         (operator_it->second=="SOURCE_CHART_HARMONIC_CANONICAL_FIELD_V2" ||
-         operator_it->second=="SOURCE_CHART_HARMONIC_WITH_SLOT_RIGID_2D_V3");
+         operator_it->second=="SOURCE_CHART_HARMONIC_WITH_SLOT_RIGID_2D_V3" ||
+         operator_it->second=="SOURCE_CHART_CANONICAL_2D_MOTION_BLEND_WITH_SLOT_RIGID_V4");
     std::vector<double> depths;
     if(canonical_depth) {
         if(manifest.at("depth_ownership_contract")!=

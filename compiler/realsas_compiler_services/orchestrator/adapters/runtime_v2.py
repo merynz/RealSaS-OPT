@@ -90,6 +90,10 @@ from compiler.realsas_compiler_core.visual_attachment_motion_v1 import (
     evaluate_attachment_motion, attachment_slot_carrier_residual,
 )
 from compiler.realsas_compiler_core.presentation_attachment_v1 import visual_vertex_attachment_owners
+from compiler.realsas_compiler_core.visual_motion_blend_v1 import (
+    OPERATOR_ID as MOTION_BLEND_OPERATOR, POLICY as MOTION_BLEND_POLICY,
+    build_motion_blend_coefficients, evaluate_motion_blend, canonical_pose_palette_residual,
+)
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.runtime_package_v2 import (
     build_rss_v2_entries,
@@ -1301,7 +1305,7 @@ def _source_owned_visual_reference_frame(
             "RUNTIME_V2_VISUAL_REFERENCE_POSITION_SHAPE_INVALID"
         )
 
-    if projection.visual_deformation_operator_id in (OPERATOR_ID, ATTACHMENT_OPERATOR):
+    if projection.visual_deformation_operator_id in (OPERATOR_ID, ATTACHMENT_OPERATOR, MOTION_BLEND_OPERATOR):
         key = f"{clip.array_prefix}_view_{vi}_depths"
         if key not in arrays:
             raise QualificationError("SOURCE_VISUAL_CANONICAL_DEPTH_MISSING")
@@ -1693,9 +1697,10 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
 
 def prove_visual_domain_matrix(projection, arrays, *, mesh, dynamic, attachment_witness=None):
     """Recompute every field against the upstream canonical motion witness."""
-    attachment_mode = projection.visual_deformation_operator_id == ATTACHMENT_OPERATOR
-    policy = ATTACHMENT_POLICY if attachment_mode else POLICY
-    if (projection.visual_deformation_operator_id not in (OPERATOR_ID, ATTACHMENT_OPERATOR)
+    motion_blend_mode = projection.visual_deformation_operator_id == MOTION_BLEND_OPERATOR
+    attachment_mode = projection.visual_deformation_operator_id in (ATTACHMENT_OPERATOR, MOTION_BLEND_OPERATOR)
+    policy = MOTION_BLEND_POLICY if motion_blend_mode else ATTACHMENT_POLICY if attachment_mode else POLICY
+    if (projection.visual_deformation_operator_id not in (OPERATOR_ID, ATTACHMENT_OPERATOR, MOTION_BLEND_OPERATOR)
             or projection.visual_deformation_policy_hash != content_sha256(policy)
             or projection.mechanical_mesh_binding_hash != mesh.mesh_lineage_hash
             or projection.dynamic_motion_binding_hash != dynamic.dynamic_motion_hash):
@@ -1716,6 +1721,7 @@ def prove_visual_domain_matrix(projection, arrays, *, mesh, dynamic, attachment_
     count = area_bad = condition_bad = 0
     residual = 0.0
     slot_residual = 0.0
+    palette_residual = 0.0
     matrix = []
     for view in projection.views:
         vi = int(view.view_index)
@@ -1732,6 +1738,11 @@ def prove_visual_domain_matrix(projection, arrays, *, mesh, dynamic, attachment_
         if attachment_mode:
             vertex_owners = visual_vertex_attachment_owners(binding,
                 attachment_witness["presentation_attachment_vertex_owner"])
+        if motion_blend_mode:
+            blend = build_motion_blend_coefficients(binding, visual_faces=faces,
+                mechanical_weights=attachment_witness["canonical_motion_weights"])
+            if not np.array_equal(blend, arrays[f"view_{vi}_motion_blend_coefficients"]):
+                raise QualificationError("SOURCE_VISUAL_CANONICAL_MOTION_COEFFICIENT_DRIFT")
         for clip in projection.clips:
             source = witness[str(clip.clip_id)]
             if len(source.frames) != int(clip.frame_count):
@@ -1756,6 +1767,14 @@ def prove_visual_domain_matrix(projection, arrays, *, mesh, dynamic, attachment_
                     if not np.array_equal(attachment_witness[f"{clip.array_prefix}_canonical_xyz"][fi], posed):
                         raise QualificationError("SOURCE_VISUAL_ATTACHMENT_MOTION_WITNESS_DRIFT")
                     matrices = attachment_witness[f"{clip.array_prefix}_skin_matrices_source"][fi]
+                    if motion_blend_mode:
+                        palette_residual = max(palette_residual, canonical_pose_palette_residual(
+                            rest_xyz=rest, posed_xyz=posed, mechanical_weights=attachment_witness["canonical_motion_weights"],
+                            skin_matrices_source=matrices))
+                        expected = evaluate_motion_blend(expected,
+                            rest_source_xy=binding["rest_positions"], coefficients=blend,
+                            axis_positions_source=attachment_witness["axis_positions_source"],
+                            skin_matrices_source=matrices, camera=camera)
                     slot_residual = max(slot_residual, attachment_slot_carrier_residual(
                         projection.metadata["target_attachments"], rest_xyz=rest,
                         posed_xyz=posed, skin_matrices_source=matrices))
@@ -1782,6 +1801,8 @@ def prove_visual_domain_matrix(projection, arrays, *, mesh, dynamic, attachment_
     if count != expected_count or count <= 0:
         raise QualificationError("SOURCE_VISUAL_FRAME_MATRIX_INCOMPLETE")
     return {"domain_coherence_passed": residual <= 1e-7,
+            "canonical_pose_palette_passed": not motion_blend_mode or palette_residual <= policy["maximum_canonical_pose_palette_residual"],
+            "maximum_canonical_pose_palette_residual": palette_residual,
             "attachment_slot_motion_passed": not attachment_mode or slot_residual <= policy["maximum_carrier_slot_relative_residual"],
             "maximum_attachment_slot_carrier_relative_residual": slot_residual,
             "attachment_motion_operator_id": policy.get("attachment_motion_operator_id"),

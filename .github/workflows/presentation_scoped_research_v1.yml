@@ -12,8 +12,10 @@ on:
       - '.github/workflows/presentation_scoped_research_v1.yml'
 
 concurrency:
-  group: scoped-presentation-research-${{ github.ref }}
-  cancel-in-progress: true
+  # Different immutable releases are independent research evidence, not stale
+  # PR checks. A new candidate must not cancel the comparison already running.
+  group: scoped-presentation-research-${{ github.sha }}
+  cancel-in-progress: false
 
 permissions:
   contents: read

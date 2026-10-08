@@ -37,3 +37,19 @@ share the owning slot bone's transform. RealSaS implements its own camera-twist
 mapping and canonical proof; no Spine runtime implementation is incorporated.
 
 Reference: https://github.com/EsotericSoftware/spine-runtimes/blob/4.3/spine-libgdx/spine-libgdx/src/com/esotericsoftware/spine/attachments/VertexAttachment.java
+
+## Canonical body motion blend
+
+V4 also transports scalar motion coefficients from the sealed canonical skin
+field through the same safe barycentric samples and positive harmonic chart
+operator. Every visual vertex evaluates the shared 2D canonical pose palette
+with those coefficients. A single-anchor chart follows rotation as well as
+translation; it no longer becomes an independently translated shard. The rigid
+attachment declaration still overrides body blending for its owned vertices.
+
+The coefficient field is presentation addressing derived from exact W_M; there
+is no mechanical skin inference, fitting, dominance selection or sparsification.
+The canonical 3D skin matrices and W_M must reconstruct the exact sealed posed M
+to 1e-8. Stage45 rederives every coefficient from the upstream W_M and verifies
+every XY/Z frame. This is a versioned 2D expression of the existing 3D witness,
+not exact orthographic projection of a 3D body or a new mechanical qualification.

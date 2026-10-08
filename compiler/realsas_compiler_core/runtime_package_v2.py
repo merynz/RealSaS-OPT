@@ -490,7 +490,8 @@ def build_source_owned_visual_rss_v2_entries(
 
     from .visual_domain_v2 import OPERATOR_ID, DEPTH_CONTRACT, POLICY
     from .visual_attachment_motion_v1 import OPERATOR_ID as ATTACHMENT_OPERATOR
-    canonical_depth = projection.visual_deformation_operator_id in (OPERATOR_ID, ATTACHMENT_OPERATOR)
+    from .visual_motion_blend_v1 import OPERATOR_ID as MOTION_BLEND_OPERATOR
+    canonical_depth = projection.visual_deformation_operator_id in (OPERATOR_ID, ATTACHMENT_OPERATOR, MOTION_BLEND_OPERATOR)
     entries: OrderedDict[str, bytes] = OrderedDict()
     manifest = [
         "schema=RealSaS.RuntimePackage.v2",

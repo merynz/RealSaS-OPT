@@ -35,7 +35,7 @@ def _player() -> Path:
     return path
 
 
-@pytest.mark.parametrize("canonical_depth", [False, True, "slot_rigid"])
+@pytest.mark.parametrize("canonical_depth", [False, True, "slot_rigid", "motion_blend"])
 def test_source_owned_visual_rss_native_smoke(tmp_path: Path, canonical_depth):
     player = _player()
     source_size = 8
@@ -104,7 +104,8 @@ def test_source_owned_visual_rss_native_smoke(tmp_path: Path, canonical_depth):
         appearance_asset_binding_hash="6" * 64,
         appearance_qualification_binding_hash="7" * 64,
         camera_set_binding_hash="8" * 64,
-        visual_deformation_operator_id=("SOURCE_CHART_HARMONIC_WITH_SLOT_RIGID_2D_V3" if canonical_depth == "slot_rigid"
+        visual_deformation_operator_id=("SOURCE_CHART_CANONICAL_2D_MOTION_BLEND_WITH_SLOT_RIGID_V4" if canonical_depth == "motion_blend"
+            else "SOURCE_CHART_HARMONIC_WITH_SLOT_RIGID_2D_V3" if canonical_depth == "slot_rigid"
             else "SOURCE_CHART_HARMONIC_CANONICAL_FIELD_V2" if canonical_depth
             else "REGION_LOCAL_SAFE_MECHANICAL_AFFINE_V1"),
         visual_deformation_policy_hash="9" * 64,

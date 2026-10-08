@@ -24,7 +24,10 @@ from compiler.realsas_compiler_core.visual_domain_v2 import (
     build_domain_binding, evaluate_domain_binding,
 )
 from compiler.realsas_compiler_core.visual_attachment_motion_v1 import (
-    OPERATOR_ID, POLICY, ATTACHMENT_OPERATOR_ID, evaluate_attachment_motion,
+    ATTACHMENT_OPERATOR_ID, evaluate_attachment_motion,
+)
+from compiler.realsas_compiler_core.visual_motion_blend_v1 import (
+    OPERATOR_ID, POLICY, build_motion_blend_coefficients, evaluate_motion_blend,
 )
 from compiler.realsas_compiler_core.runtime_visual_authority_v1 import (
     SourceOwnedVisualRuntimeProjectionV1IR, SourceOwnedVisualRuntimeViewV1IR,
@@ -160,12 +163,17 @@ def compile_projection_stage(ctx):
         arrays[f"view_{vi}_face_attachment_owner"] = visual_face_attachment_owners(
             binding, source["faces"], witness["presentation_attachment_vertex_owner"])
         vertex_owners = visual_vertex_attachment_owners(binding, witness["presentation_attachment_vertex_owner"])
+        blend = build_motion_blend_coefficients(binding, visual_faces=source["faces"],
+                                                mechanical_weights=witness["canonical_motion_weights"])
+        arrays[f"view_{vi}_motion_blend_coefficients"] = blend
         for clip in topology["clips"]:
             prefix = clip["array_prefix"]
             arrays[f"{prefix}_times"] = witness[f"{prefix}_times"]
             fields = np.asarray([evaluate_attachment_motion(
-                evaluate_domain_binding(binding, visual_faces=source["faces"],
-                    posed_mechanical_positions_xyz=xyz, camera=camera),
+                evaluate_motion_blend(evaluate_domain_binding(binding, visual_faces=source["faces"],
+                    posed_mechanical_positions_xyz=xyz, camera=camera), rest_source_xy=source["positions"],
+                    coefficients=blend, axis_positions_source=witness["axis_positions_source"],
+                    skin_matrices_source=witness[f"{prefix}_skin_matrices_source"][fi], camera=camera),
                 rest_source_xy=source["positions"], vertex_attachment_owner=vertex_owners,
                 attachments=topology["attachments"], axis_positions_source=witness["axis_positions_source"],
                 skin_matrices_source=witness[f"{prefix}_skin_matrices_source"][fi], camera=camera)
@@ -329,7 +337,7 @@ def prove_presentation_stage(ctx):
                 matrix.append({"clip_id": clip.clip_id, "view_id": view.view_id, "frame_index": fi,
                     "rgba": {"path": str(rgba), "sha256": sha256_file(rgba)}, "native_reference_parity": not mismatch})
     passed = (all(proof[k] for k in ("domain_coherence_passed", "frame_view_matrix_complete", "area_condition_passed",
-                                    "attachment_slot_motion_passed"))
+                                    "attachment_slot_motion_passed", "canonical_pose_palette_passed"))
               and parity_bad == empty == ties == overflow == flipped == edge_bad == 0)
     data = {"schema": "RealSaS.ScopedPresentationProof.v1", "status": "PASS_DEMO_ONLY" if passed else "FAIL",
         **proof, "canonical_depth_ownership_passed": ties == overflow == 0,

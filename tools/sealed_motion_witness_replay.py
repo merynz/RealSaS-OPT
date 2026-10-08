@@ -167,7 +167,7 @@ def replay_witness(config, promotion):
     sealed_rows = read_ref(config["frame_metrics"])["frames"]
     sealed = {(r["clip_id"], r["frame_index"]): r for r in sealed_rows}
     arrays = {"vertices": rest_source, "faces": faces, "axis_positions_source": axis_positions,
-              "axis_parents": parents}
+              "axis_parents": parents, "canonical_motion_weights": raw_weights}
     clips, unsafe = [], set()
     C4 = np.eye(4)
     C4[:3, :3] = C

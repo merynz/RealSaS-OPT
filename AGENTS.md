@@ -19,6 +19,12 @@ must not silently mint product authority. Preserve independent artifacts and
 report code/artifact identities with timings. Do not drive a new result by
 searching old branch names or editing a historical execution ledger.
 
+Targets include model inference and Compiler modules, not only render. Treat
+DAG nodes/edges as versioned release data: add, remove or rewire in a new
+EngineRelease, inspect graph-aware impact, and preserve unrelated artifacts.
+Keep implementation and plan changes on canonical main through short reviewed
+PRs; research continuation belongs to the Attempt, never a long-lived branch.
+
 Use the self-hosted `realsas-wsl-1660ti` runner or local execution. Do not add
 GitHub-hosted execution. Old frozen recovery is manual provenance only.
 Absolute G3 remains an open gap without cancelling teacher-relative FIT1 PASS.

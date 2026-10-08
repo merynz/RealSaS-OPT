@@ -279,6 +279,7 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
         }
     ledger = mainline.load_json(mainline.run_ledger_path(run_id))
     stage_request = {
+        "graph_node_sha256": request.get("stage_graph_node_sha256"),
         "stage_id": stage_id,
         "allowed_execute_stage_ids": [stage_id],
         "compiler_run_id": run_id,

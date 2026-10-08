@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from compiler.realsas_compiler_services.orchestrator import mainline
-from compiler.realsas_compiler_services.platform_worker.stage_inputs import hydrate_stage_inputs
+from compiler.realsas_compiler_services.platform_worker.stage_inputs import hydrate_stage_inputs, graph_node_sha256
 
 
 @pytest.fixture
@@ -23,6 +23,7 @@ def portable(tmp_path, monkeypatch):
         return {"storage_key": "cas/sha256/" + digest, "content_sha256": digest, "size_bytes": len(data)}
     sealed = put(output)
     cached = {"schema":"RealSaS.StageResultManifest.v1", "stage_id": stage["id"], "compiler_status": "PASS", "implementation_sha256": "a" * 64,
+              "graph_node_sha256": graph_node_sha256(stage),
               "semantic_parameters": {"manifest": mainline._manifest_subset({},stage)},
               "policy_sha256": mainline.content_sha256(stage["policy"]), "expected_semantic_sha256": "b" * 64,
               "outputs": [{**sealed, "relative_path": "evidence.json", "payload_schema": "RealSaS.TestIR.v1", "authority_class": "TEST"}]}
@@ -87,3 +88,19 @@ def test_demo_pass_is_research_only(portable):
         hydrate("PRODUCT")
     hydrate("RESEARCH")
     assert ledger["stages"][0]["status"] == "PASS_DEMO_ONLY"
+
+
+def test_rewired_graph_cannot_reuse_stale_component(portable):
+    cached, _, _, _, hydrate = portable
+    cached["graph_node_sha256"] = "0" * 64
+    with pytest.raises(RuntimeError, match="GRAPH_DRIFT"):
+        hydrate()
+
+
+def test_graph_node_hash_matches_go_and_ignores_navigation():
+    stage = {"id": "A", "adapter": "x.py", "manifest_keys": ["motion"],
+             "policy": {"cacheable": True, "fail_closed": True}}
+    digest = graph_node_sha256(stage)
+    assert digest == "49499b357bd5bb298ddd6a254d1e7f25a8586336039aa9e01fbd163eeda61703"
+    stage.update(ordinal=99, title="navigation changed")
+    assert graph_node_sha256(stage) == digest

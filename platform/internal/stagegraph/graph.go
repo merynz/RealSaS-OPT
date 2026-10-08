@@ -1,11 +1,15 @@
 package stagegraph
 
 import (
+	"bytes"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"slices"
 	"strings"
+
+	"github.com/merynz/RealSaS-OPT/platform/internal/semantic"
 )
 
 type Policy struct {
@@ -36,7 +40,8 @@ func (s Stage) ConsumesInput(role string) bool {
 	return true
 }
 
-type planFile struct {
+type Snapshot struct {
+	Schema     string  `json:"schema,omitempty"`
 	StageCount int     `json:"stage_count"`
 	Stages     []Stage `json:"stages"`
 }
@@ -49,7 +54,7 @@ type Graph struct {
 }
 
 func ParsePlan(data []byte, requireProductPassAuthority bool) (*Graph, error) {
-	var p planFile
+	var p Snapshot
 	if err := json.Unmarshal(data, &p); err != nil {
 		return nil, err
 	}
@@ -70,7 +75,12 @@ func ParsePlan(data []byte, requireProductPassAuthority bool) (*Graph, error) {
 		if _, ok := seen[s.ID]; ok {
 			return nil, fmt.Errorf("duplicate stage id %s", s.ID)
 		}
+		parents := map[string]bool{}
 		for _, dep := range s.DependsOn {
+			if parents[dep] {
+				return nil, fmt.Errorf("duplicate dependency %s <- %s", s.ID, dep)
+			}
+			parents[dep] = true
 			if _, ok := seen[dep]; !ok {
 				return nil, fmt.Errorf("%s depends on future/unknown stage %s", s.ID, dep)
 			}
@@ -105,8 +115,43 @@ func ParseCanonicalPlan(data []byte) (*Graph, error) {
 	return ParsePlan(data, true)
 }
 
-func (g *Graph) Stages() []Stage { return append([]Stage(nil), g.stages...) }
+func cloneStage(s Stage) Stage {
+	s.DependsOn = append([]string{}, s.DependsOn...)
+	s.ManifestKeys = append([]string{}, s.ManifestKeys...)
+	return s
+}
+
+func (g *Graph) Stages() []Stage {
+	out := make([]Stage, len(g.stages))
+	for i, s := range g.stages {
+		out[i] = cloneStage(s)
+	}
+	return out
+}
 func (g *Graph) StageCount() int { return len(g.stages) }
+
+func (g *Graph) Snapshot() Snapshot {
+	return Snapshot{Schema: "RealSaS.StageGraph.v1", StageCount: len(g.stages), Stages: g.Stages()}
+}
+
+func (g *Graph) SHA256() (string, error) { return semantic.JSONSHA256(g.Snapshot()) }
+
+// Ordinal, title and group are navigation; adding an unrelated node must not
+// invalidate an existing component merely because its ordinal moved.
+func (s Stage) NodeSHA256() (string, error) {
+	value := map[string]any{
+		"id": s.ID, "depends_on": append([]string{}, s.DependsOn...),
+		"adapter": s.Adapter, "manifest_keys": append([]string{}, s.ManifestKeys...),
+		"policy": s.Policy,
+	}
+	raw, err := semantic.CanonicalJSON(value)
+	if err != nil {
+		return "", err
+	}
+	// Match the Compiler's canonical JSON content hash (without Go's newline).
+	sum := sha256.Sum256(bytes.TrimSuffix(raw, []byte("\n")))
+	return fmt.Sprintf("%x", sum), nil
+}
 
 func (g *Graph) ProductPassStageID() (string, bool) {
 	if g.productPassStageID == "" {
@@ -117,7 +162,7 @@ func (g *Graph) ProductPassStageID() (string, bool) {
 
 func (g *Graph) Get(id string) (Stage, bool) {
 	s, ok := g.byID[id]
-	return s, ok
+	return cloneStage(s), ok
 }
 
 func (g *Graph) DescendantsIncluding(roots ...string) ([]string, error) {

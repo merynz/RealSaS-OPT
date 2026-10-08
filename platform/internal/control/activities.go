@@ -83,6 +83,10 @@ func (a Activities) ResolveCompilePlan(ctx context.Context, in orchestration.Com
 	if err != nil {
 		return orchestration.ResolvedCompilePlan{}, err
 	}
+	a.Graph, _, err = release.LoadGraph(ctx, a.Pool, releaseID)
+	if err != nil {
+		return orchestration.ResolvedCompilePlan{}, err
+	}
 	plan, err := resolver.Resolve(
 		ctx,
 		a.Graph,
@@ -131,6 +135,11 @@ func (a Activities) PrepareStageExecution(ctx context.Context, req orchestration
 	if err != nil {
 		return orchestration.EngineStageRequest{}, err
 	}
+	var releasedPlanSHA string
+	a.Graph, releasedPlanSHA, err = release.LoadGraph(ctx, a.Pool, releaseID)
+	if err != nil {
+		return orchestration.EngineStageRequest{}, err
+	}
 	if !slices.Contains(req.AllowedExecuteStageIDs, req.StageID) {
 		return orchestration.EngineStageRequest{}, errors.New("EXECUTION_STAGE_NOT_IN_ALLOWED_SCOPE")
 	}
@@ -153,6 +162,9 @@ func (a Activities) PrepareStageExecution(ctx context.Context, req orchestration
 	}
 	if dbSubject != subjectID || dbRelease != releaseID {
 		return orchestration.EngineStageRequest{}, errors.New("EXECUTION_ATTEMPT_IDENTITY_DRIFT")
+	}
+	if releasedPlanSHA != "" && releasedPlanSHA != planSHA {
+		return orchestration.EngineStageRequest{}, errors.New("EXECUTION_RELEASE_PIPELINE_PLAN_DRIFT")
 	}
 
 	executionID := uuid.NewSHA1(uuid.NameSpaceOID, []byte("realsas:execution:"+req.CommandID+":"+req.StageID))
@@ -222,7 +234,13 @@ func (a Activities) PrepareStageExecution(ctx context.Context, req orchestration
 	if kind == "research" {
 		mode = "RESEARCH"
 	}
+	stage, _ := a.Graph.Get(req.StageID)
+	nodeSHA, err := stage.NodeSHA256()
+	if err != nil {
+		return orchestration.EngineStageRequest{}, err
+	}
 	return orchestration.EngineStageRequest{
+		GraphNodeSHA256:    nodeSHA,
 		SemanticParameters: parameters,
 		ExecutionMode:      mode, ImplementationSHA256: implementationSHA, PolicySHA256: policySHA, InputStages: inputs,
 		ExecutionID:            executionID.String(),
@@ -322,6 +340,10 @@ func (a Activities) CommitStageResult(ctx context.Context, req orchestration.Sta
 		return orchestration.StageCommitResult{}, err
 	}
 	attemptID, err := uuid.Parse(req.AttemptID)
+	if err != nil {
+		return orchestration.StageCommitResult{}, err
+	}
+	a.Graph, err = a.attemptGraph(ctx, attemptID)
 	if err != nil {
 		return orchestration.StageCommitResult{}, err
 	}
@@ -431,6 +453,10 @@ func (a Activities) RecordStageActivityError(ctx context.Context, req orchestrat
 		return err
 	}
 	attemptID, err := uuid.Parse(req.AttemptID)
+	if err != nil {
+		return err
+	}
+	a.Graph, err = a.attemptGraph(ctx, attemptID)
 	if err != nil {
 		return err
 	}

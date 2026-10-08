@@ -39,6 +39,16 @@ manifest read set. Checkpoint, receipt and proposal references therefore belong
 to the consuming stage's version identity. A changed shared helper legitimately
 invalidates every consumer of that helper.
 
+EngineReleases also seal an immutable DAG snapshot and the Compiler plan hash.
+Research can add/remove nodes and rewire dependencies; comparison uses both
+the baseline and candidate graphs. Added nodes and changed consumers rerun;
+removed nodes remain in the impact record. Unrelated nodes retain their exact
+artifact identities even when ordinals move. The resolver, execution input
+binding and repair attribution use the Attempt's released graph. Workers reject
+an adapter/manifest/graph-node mismatch before executing or hydrating an output.
+The executable adapters and matching plan still ship through main; sealing a
+graph does not manufacture an executor for a new node.
+
 Start a research Attempt with `subject_id`, `baseline_engine_release_id`,
 `candidate_engine_release_id`, optional `parent_attempt_id`, and `created_by`.
 Use the returned Attempt ID as `research_attempt_id` in its compile request.
@@ -77,11 +87,13 @@ root. The operator API binds to loopback. Persistent Knight evidence remains on
 the self-hosted `realsas-wsl-1660ti` host. CI uses only its self-hosted labels.
 
 Legacy Registry stage manifests without implementation, manifest read-set or
-portable output fields fail closed during hydration; re-import/reseal them
+graph-node identity or portable output fields fail closed during hydration; re-import/reseal them
 through verified execution. CAS copies preserve payload bytes, including any
 embedded file references. Those references still require the persistent source
 authority root: complete recursive portability to a different machine remains
 open. Do not silently rewrite payloads or substitute a historical package.
+Legacy EngineReleases without a DAG snapshot must be explicitly resealed; the
+platform never assigns the current graph to an old release during execution.
 
 ## Scientific and latency boundaries
 

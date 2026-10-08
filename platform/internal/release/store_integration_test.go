@@ -68,6 +68,32 @@ func TestEngineReleaseIsImmutableAndReusable(t *testing.T) {
 	if len(versions) != 46 {
 		t.Fatalf("versions=%d", len(versions))
 	}
+	sealedGraph, _, err := LoadGraph(ctx, pool, first.ReleaseID)
+	if err != nil || sealedGraph.StageCount() != g.StageCount() {
+		t.Fatalf("graph=%v error=%v", sealedGraph, err)
+	}
+	if _, err := pool.Exec(ctx, "UPDATE engine_release_graphs SET pipeline_plan_sha256=$2 WHERE release_id=$1", first.ReleaseID, repeat("3")); err == nil {
+		t.Fatal("sealed DAG mutation was accepted")
+	}
+	changed := g.Snapshot()
+	changed.Stages = append(changed.Stages, stagegraph.Stage{Ordinal: 47, ID: "47_RESEARCH_NEW_MODULE", Adapter: "new.py", DependsOn: []string{g.Stages()[0].ID}})
+	changed.StageCount++
+	m.Name = "release-store-expanded-research-ci"
+	m.Purpose = PurposeResearch
+	m.DAG = &changed
+	m.Stages = append(m.Stages, StageBinding{Ordinal: 47, StageID: "47_RESEARCH_NEW_MODULE", ImplementationSHA256: repeat("4"), PolicySHA256: repeat("5")})
+	expanded, err := Seal(ctx, pool, g, m, "ci")
+	if err != nil {
+		t.Fatal(err)
+	}
+	newVersions, err := LoadVersions(ctx, pool, expanded.ReleaseID, false)
+	if err != nil || len(newVersions) != 47 {
+		t.Fatalf("new versions=%d error=%v", len(newVersions), err)
+	}
+	oldAgain, _, err := LoadGraph(ctx, pool, first.ReleaseID)
+	if err != nil || oldAgain.StageCount() != 46 {
+		t.Fatal("old release graph changed")
+	}
 }
 
 func repeat(ch string) string {

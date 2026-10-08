@@ -76,6 +76,14 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 	if req.SubjectID == uuid.Nil || req.EngineReleaseID == uuid.Nil || req.SubjectInputID == uuid.Nil {
 		return Receipt{}, errors.New("compile subject/release/input ids are required")
 	}
+	selectedGraph, releasedPlanSHA, err := release.LoadGraph(ctx, pool, req.EngineReleaseID)
+	if err != nil {
+		return Receipt{}, err
+	}
+	graph = selectedGraph
+	if releasedPlanSHA != "" && releasedPlanSHA != req.PipelinePlanSHA256 {
+		return Receipt{}, errors.New("COMPILE_RELEASE_PIPELINE_PLAN_DRIFT")
+	}
 	if req.ResearchAttemptID != nil && req.TargetStageID == "" {
 		return Receipt{}, errors.New("research compile requires an explicit target")
 	}
@@ -104,7 +112,7 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 	}
 
 	var out Receipt
-	err := persistence.WithSerializableRetry(ctx, pool, 5, func(tx pgx.Tx) error {
+	err = persistence.WithSerializableRetry(ctx, pool, 5, func(tx pgx.Tx) error {
 		existing, found, err := findCommandByIdempotency(ctx, tx, req.IdempotencyKey)
 		if err != nil {
 			return err

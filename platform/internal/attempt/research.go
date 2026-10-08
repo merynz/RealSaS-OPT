@@ -69,7 +69,15 @@ func StartResearch(
 	if err != nil {
 		return ResearchStart{}, err
 	}
-	impact, err := release.Compare(g, baselineVersions, candidateVersions)
+	baselineGraph, _, err := release.LoadGraph(ctx, pool, req.BaselineEngineReleaseID)
+	if err != nil {
+		return ResearchStart{}, err
+	}
+	candidateGraph, _, err := release.LoadGraph(ctx, pool, req.CandidateEngineReleaseID)
+	if err != nil {
+		return ResearchStart{}, err
+	}
+	impact, err := release.CompareGraphs(baselineGraph, candidateGraph, baselineVersions, candidateVersions)
 	if err != nil {
 		return ResearchStart{}, err
 	}
@@ -134,6 +142,7 @@ func StartResearch(
 			"direct_changed_stage_ids":    directIDs,
 			"invalidated_stage_ids":       impact.InvalidatedStageIDs,
 			"unchanged_stage_ids":         impact.UnchangedStageIDs,
+			"removed_stage_ids":           impact.RemovedStageIDs,
 		})
 		if err != nil {
 			return err

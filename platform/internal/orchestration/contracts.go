@@ -87,6 +87,7 @@ type PrepareCapabilityExecutionRequest struct {
 }
 
 type EngineCapabilityRequest struct {
+	StageGraphNodeSHA256      string         `json:"stage_graph_node_sha256,omitempty"`
 	StageSemanticParameters   map[string]any `json:"stage_semantic_parameters,omitempty"`
 	ExecutionID               string         `json:"execution_id"`
 	CommandID                 string         `json:"command_id"`
@@ -183,6 +184,7 @@ type StageInput struct {
 }
 
 type EngineStageRequest struct {
+	GraphNodeSHA256        string         `json:"graph_node_sha256"`
 	SemanticParameters     map[string]any `json:"semantic_parameters"`
 	ExecutionMode          string         `json:"execution_mode"`
 	ImplementationSHA256   string         `json:"implementation_sha256"`

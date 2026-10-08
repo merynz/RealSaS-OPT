@@ -22,6 +22,13 @@ def snapshot(plan, manifest, *, name, purpose, created_by):
     implementations = {row["stage_id"]: row["implementation_hash"]
                        for row in closure["adapter_implementation_closures"]}
     return {"created_by": created_by, "manifest": {
+        "pipeline_plan_sha256": mainline.validate_plan(plan),
+        "dag": {"schema": "RealSaS.StageGraph.v1", "stage_count": len(plan["stages"]),
+                "stages": [{**{key: stage[key] for key in
+                            ("ordinal", "id", "title", "group", "depends_on", "adapter", "manifest_keys")},
+                            "policy": {key: bool(stage["policy"].get(key, False)) for key in
+                                       ("fail_closed", "cacheable", "output_hash_required", "product_pass_authority")}}
+                           for stage in plan["stages"]]},
         "contract_version": "RealSaS.EngineReleaseManifest.v1",
         "name": name, "purpose": purpose,
         "stages": [{"ordinal": stage["ordinal"], "stage_id": stage["id"],

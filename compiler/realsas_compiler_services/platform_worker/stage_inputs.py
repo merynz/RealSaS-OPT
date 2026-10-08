@@ -11,6 +11,15 @@ import tempfile
 from compiler.realsas_compiler_services.orchestrator import mainline
 
 
+def graph_node_sha256(stage):
+    return mainline.content_sha256({
+        "id": stage["id"], "depends_on": list(stage.get("depends_on") or []),
+        "adapter": stage["adapter"], "manifest_keys": list(stage.get("manifest_keys") or []),
+        "policy": {key: bool(stage.get("policy", {}).get(key, False)) for key in
+                   ("fail_closed", "cacheable", "output_hash_required", "product_pass_authority")},
+    })
+
+
 def hydrate_stage_inputs(*, plan, ledger, manifest, inputs, read_object, mode):
     stages = mainline._stage_map(plan)
     rows = mainline._ledger_map(ledger)
@@ -33,6 +42,8 @@ def hydrate_stage_inputs(*, plan, ledger, manifest, inputs, read_object, mode):
         if status != "PASS" and not (mode == "RESEARCH" and status == "PASS_DEMO_ONLY"):
             raise RuntimeError("ENGINE_STAGE_CACHE_QUALIFICATION_DRIFT:" + stage_id)
         stage = stages[stage_id]
+        if cached.get("graph_node_sha256") != graph_node_sha256(stage):
+            raise RuntimeError("ENGINE_STAGE_CACHE_GRAPH_DRIFT:" + stage_id)
         parameters = cached.get("semantic_parameters") or {}
         if "manifest" not in parameters or parameters["manifest"] != mainline._manifest_subset(manifest,stage):
             raise RuntimeError("ENGINE_STAGE_CACHE_MANIFEST_DRIFT:" + stage_id)
@@ -78,6 +89,8 @@ def hydrate_stage_inputs(*, plan, ledger, manifest, inputs, read_object, mode):
 
 def verify_execution_version(plan, request, manifest):
     stage = mainline._stage_map(plan)[str(request["stage_id"])]
+    if graph_node_sha256(stage) != request.get("graph_node_sha256"):
+        raise RuntimeError("ENGINE_RELEASE_GRAPH_DRIFT")
     if mainline._adapter_impl_hash(stage["adapter"]) != request.get("implementation_sha256"):
         raise RuntimeError("ENGINE_RELEASE_IMPLEMENTATION_DRIFT")
     if mainline.content_sha256(stage["policy"]) != request.get("policy_sha256"):

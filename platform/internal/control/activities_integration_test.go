@@ -68,6 +68,18 @@ func TestPrepareAndFailExecutionPersistsLocalizedRepair(t *testing.T) {
 	`, releaseID, "control-release-"+subjectID.String(), repeatHex("1")); err != nil {
 		t.Fatal(err)
 	}
+	graphSHA, err := g.SHA256()
+	if err != nil {
+		t.Fatal(err)
+	}
+	graphJSON, err := json.Marshal(g.Snapshot())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pool.Exec(ctx, `INSERT INTO engine_release_graphs
+		(release_id,graph_sha256,snapshot) VALUES ($1,$2,$3)`, releaseID, graphSHA, graphJSON); err != nil {
+		t.Fatal(err)
+	}
 	if _, err := pool.Exec(ctx, `
 		INSERT INTO attempts(id,subject_id,engine_release_id,kind,spec_sha256,created_by,final_state)
 		VALUES ($1,$2,$3,'compile_candidate',$4,'ci','OPEN')

@@ -19,6 +19,7 @@ import (
 )
 
 type stageResultManifest struct {
+	GraphNodeSHA256        string                       `json:"graph_node_sha256"`
 	SemanticParameters     map[string]any               `json:"semantic_parameters"`
 	ImplementationSHA256   string                       `json:"implementation_sha256"`
 	PolicySHA256           string                       `json:"policy_sha256"`
@@ -172,7 +173,16 @@ func (a Activities) prepareStageResultArtifact(
 	if err := json.Unmarshal(parametersRaw, &parameters); err != nil {
 		return nil, err
 	}
+	stage, ok := a.Graph.Get(req.StageID)
+	if !ok {
+		return nil, fmt.Errorf("unknown released stage %s", req.StageID)
+	}
+	nodeSHA, err := stage.NodeSHA256()
+	if err != nil {
+		return nil, err
+	}
 	manifest := stageResultManifest{
+		GraphNodeSHA256:      nodeSHA,
 		SemanticParameters:   parameters,
 		ImplementationSHA256: implementationSHA, PolicySHA256: policySHA,
 		Schema:                 "RealSaS.StageResultManifest.v1",

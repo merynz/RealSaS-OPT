@@ -39,9 +39,12 @@ jobs:
         with:
           go-version: '1.27.1'
           cache-dependency-path: platform/go.sum
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - name: Python contract dependencies
         run: |
-          python3 -m venv "$RUNNER_TEMP/realsas-platform-contract-venv"
+          python3 -m venv --clear "$RUNNER_TEMP/realsas-platform-contract-venv"
           "$RUNNER_TEMP/realsas-platform-contract-venv/bin/python" -m pip install pytest temporalio pgserver==0.1.4
           echo "$RUNNER_TEMP/realsas-platform-contract-venv/bin" >> "$GITHUB_PATH"
           echo "REALSAS_CI_PGDATA=$RUNNER_TEMP/realsas-platform-pg-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
@@ -113,8 +116,9 @@ jobs:
           python3 - <<'PY'
           import os
           from pathlib import Path
-          data = Path(os.environ['REALSAS_CI_PGDATA'])
-          if (data / 'postmaster.pid').exists():
+          location = os.environ.get('REALSAS_CI_PGDATA')
+          data = Path(location) if location else None
+          if data and (data / 'postmaster.pid').exists():
               from pgserver import pg_ctl
               pg_ctl(['-m', 'fast', '-w', 'stop'], pgdata=data, timeout=30)
           PY

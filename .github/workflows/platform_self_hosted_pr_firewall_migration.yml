@@ -33,7 +33,7 @@ jobs:
           from pathlib import Path
           import re, shutil
           root=Path('.github/workflows')
-          out=Path('migration_out/.github/workflows'); out.mkdir(parents=True)
+          out=Path('migration_out/workflows'); out.mkdir(parents=True)
           self_name='platform_self_hosted_pr_firewall_migration.yml'
           guard="github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository"
           expr=lambda body:'$'+'{{ '+body+' }}'

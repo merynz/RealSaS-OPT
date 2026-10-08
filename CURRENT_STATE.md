@@ -44,7 +44,25 @@ The first real host smoke exposed an Engine heartbeat call from a worker thread
 and a failed Temporal workflow whose Attempt stayed OPEN. Heartbeat now belongs
 to the async event loop; Go reconciles only verified terminal unsuccessful
 workflows and retains their original diagnostics. A real completed execution
-plus exact reuse receipt is still required; service startup alone is insufficient.
+plus exact reuse receipt has now passed on `main@7be6ef368fcc6b432a26f87dbfac737a7cd88374`
+in self-hosted run `37784700012`: first Attempt executed Stage02; second Attempt
+removed independent Stage01 and reused the exact Stage02 artifact without
+executing it. Both Attempts took 3.282 seconds, with no ProductRevision.
+The six persistent developer services are active. This is engineering proof;
+it does not establish Knight execution, full inference, rendering or product
+latency. Exact identities are recorded in `canonical/PLATFORM_MAIN_AUDIT_20261008.json`.
+
+Latest Knight import remains open: the TESSA repaired candidate and its upstream
+source references were located in Drive, but its raw-file transfer returned
+HTTP 403 before local materialization. Do not bypass that failure or substitute
+the old renderer input. A separate scoped research qualification/render contract
+is also needed: Stage35's absolute product gate must not be relabeled as a
+teacher-relative FIT1 product PASS.
+
+Release discovery now scans each distinct adapter module once per snapshot,
+without a cross-release process cache. Local 46-stage comparison measured
+7.413 seconds before and 2.166 seconds after, with the entire returned closure
+equal. This is release preparation performance, not inference/render latency.
 
 Optimization applies to the scientific/execution system itself, not only agent
 workflow speed: measure cold end-to-end construction separately from warm

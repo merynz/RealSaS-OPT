@@ -187,6 +187,10 @@ def lightweight_implementation_closure(plan: dict[str, Any], *, require_product_
     plan_hash = mainline.validate_plan(plan, require_product_pass_authority=require_product_pass_authority)
     adapter_rows: list[dict[str, Any]] = []
     imported_modules: set[str] = set()
+    # Many stages use different functions from the same adapter module. Share
+    # its immutable closure only within this snapshot, never across releases:
+    # a later call must reread source edits and changed transitive imports.
+    module_closures: dict[str, tuple[tuple[str, str], ...]] = {}
 
     for stage in sorted(plan["stages"], key=lambda row: int(row["ordinal"])):
         adapter = str(stage["adapter"])
@@ -200,7 +204,9 @@ def lightweight_implementation_closure(plan: dict[str, Any], *, require_product_
         if not source_exports_callable(module_name, function_name):
             raise RuntimeError(f"MAINLINE_V2_ADAPTER_CALLABLE_MISSING_SOURCE:{adapter}")
 
-        local_closure = mainline._local_import_closure(module_name)
+        if module_name not in module_closures:
+            module_closures[module_name] = mainline._local_import_closure(module_name)
+        local_closure = module_closures[module_name]
         if not local_closure:
             raise RuntimeError(f"MAINLINE_V2_IMPLEMENTATION_CLOSURE_EMPTY:{adapter}")
         imported_modules.update(name for name, _digest in local_closure)

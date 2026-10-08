@@ -15,21 +15,27 @@ HOSTED_FIRST = {
     "platform_go_contract_v1.yml",
     "platform_throughput_hydration_contract.yml",
 }
-AUTHORIZED_SELF_HOSTED = {
-    "[self-hosted, linux, x64, realsas]",
-    "[self-hosted, realsas, gpu]",
-}
 
 
-def test_workflow_runner_kinds_are_explicit_and_authorized():
+def _runner_values(text: str) -> list[str]:
+    return [
+        value.strip()
+        for value in re.findall(r"^\s*runs-on:\s*(.+)$", text, re.MULTILINE)
+    ]
+
+
+def _is_explicit_self_hosted(value: str) -> bool:
+    return value.startswith("[") and value.endswith("]") and "self-hosted" in value
+
+
+def test_workflow_runner_kinds_are_explicit():
     checked = 0
     for path in (ROOT / ".github/workflows").glob("*.yml"):
         text = path.read_text(encoding="utf-8")
-        for value in re.findall(r"^\s*runs-on:\s*(.+)$", text, re.MULTILINE):
+        for value in _runner_values(text):
             checked += 1
-            value = value.strip()
-            assert value == "ubuntu-latest" or value in AUTHORIZED_SELF_HOSTED, (
-                f"Implicit or unauthorized runner: {path.name}: {value}"
+            assert value == "ubuntu-latest" or _is_explicit_self_hosted(value), (
+                f"Implicit or unsupported runner expression: {path.name}: {value}"
             )
     assert checked > 0
 
@@ -38,10 +44,28 @@ def test_host_independent_current_workflows_are_hosted_and_public_only():
     for name in sorted(HOSTED_FIRST):
         path = ROOT / ".github/workflows" / name
         text = path.read_text(encoding="utf-8")
-        assert "runs-on: ubuntu-latest" in text, name
-        for authorized in AUTHORIZED_SELF_HOSTED:
-            assert authorized not in text, name
+        values = _runner_values(text)
+        assert values, name
+        assert all(value == "ubuntu-latest" for value in values), name
         assert "github.event.repository.private == false" in text, name
+
+
+def test_automatic_self_hosted_pr_checks_reject_public_fork_code():
+    """Only automatic PR jobs need the same-repository firewall.
+
+    Historical/manual stateful witnesses may retain their older self-hosted label
+    sets. The security boundary is whether untrusted pull-request code can reach a
+    physical runner, not the spelling/order of runner labels.
+    """
+    for path in (ROOT / ".github/workflows").glob("*.yml"):
+        text = path.read_text(encoding="utf-8")
+        if not re.search(r"^  pull_request:", text, re.MULTILINE):
+            continue
+        if not any(_is_explicit_self_hosted(value) for value in _runner_values(text)):
+            continue
+        assert "github.event.pull_request.head.repo.full_name == github.repository" in text, (
+            f"Self-hosted PR workflow lacks same-repository firewall: {path.name}"
+        )
 
 
 def test_automatic_pr_checks_cancel_superseded_heads():

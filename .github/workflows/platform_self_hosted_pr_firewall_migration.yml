@@ -2,16 +2,13 @@ name: platform-self-hosted-pr-firewall-migration
 
 on:
   push:
-    branches:
-      - platform/throughput-hydration-gc-20261008
-    paths:
-      - '.github/workflows/platform_self_hosted_pr_firewall_migration.yml'
+    branches: [platform/throughput-hydration-gc-20261008]
+    paths: ['.github/workflows/platform_self_hosted_pr_firewall_migration.yml']
   pull_request:
-    paths:
-      - '.github/workflows/platform_self_hosted_pr_firewall_migration.yml'
+    paths: ['.github/workflows/platform_self_hosted_pr_firewall_migration.yml']
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -30,91 +27,63 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Add same-repository firewall to automatic self-hosted PR jobs
+      - name: Build exact firewall migration
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
-
-          root = Path('.github/workflows')
-          self_path = root / 'platform_self_hosted_pr_firewall_migration.yml'
-          guard = "github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository"
-          expression = lambda body: '$' + '{{ ' + body + ' }}'
-          changed = []
-
-          def job_ranges(lines):
-              starts = []
-              in_jobs = False
-              for i, line in enumerate(lines):
-                  if line.rstrip() == 'jobs:':
-                      in_jobs = True
-                      continue
-                  if in_jobs and re.match(r'^  [A-Za-z0-9_.-]+:\s*$', line):
-                      starts.append(i)
-              return [
-                  (start, starts[n + 1] if n + 1 < len(starts) else len(lines))
-                  for n, start in enumerate(starts)
-              ]
-
+          import re, shutil
+          root=Path('.github/workflows')
+          out=Path('migration_out/.github/workflows'); out.mkdir(parents=True)
+          self_name='platform_self_hosted_pr_firewall_migration.yml'
+          guard="github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository"
+          expr=lambda body:'$'+'{{ '+body+' }}'
+          changed=[]
+          def ranges(lines):
+              starts=[]; active=False
+              for i,line in enumerate(lines):
+                  if line.rstrip()=='jobs:': active=True; continue
+                  if active and re.match(r'^  [A-Za-z0-9_.-]+:\s*$',line): starts.append(i)
+              return [(s,starts[n+1] if n+1<len(starts) else len(lines)) for n,s in enumerate(starts)]
           for path in sorted(root.glob('*.yml')):
-              if path == self_path:
-                  continue
-              text = path.read_text(encoding='utf-8')
-              if not re.search(r'^  pull_request:', text, re.MULTILINE):
-                  continue
-              lines = text.splitlines(keepends=True)
-              touched = False
-              for start, end in reversed(job_ranges(lines)):
-                  block = lines[start:end]
-                  run_rel = next((j for j, line in enumerate(block) if re.match(r'^    runs-on:\s*\[.*self-hosted.*\]\s*$', line)), None)
-                  if run_rel is None or any(guard in line for line in block):
-                      continue
-                  if_rels = [j for j, line in enumerate(block) if re.match(r'^    if:\s*.+$', line)]
-                  if len(if_rels) > 1:
-                      raise SystemExit(f'MULTIPLE_JOB_IF_LINES_UNSUPPORTED:{path.name}:{start+1}')
+              if path.name==self_name: continue
+              text=path.read_text(encoding='utf-8')
+              if not re.search(r'^  pull_request:',text,re.M): continue
+              lines=text.splitlines(keepends=True); touched=False
+              for start,end in reversed(ranges(lines)):
+                  block=lines[start:end]
+                  run_rel=next((j for j,line in enumerate(block) if re.match(r'^    runs-on:\s*\[.*self-hosted.*\]\s*$',line)),None)
+                  if run_rel is None or any(guard in line for line in block): continue
+                  if_rels=[j for j,line in enumerate(block) if re.match(r'^    if:\s*.+$',line)]
+                  if len(if_rels)>1: raise SystemExit(f'MULTIPLE_JOB_IF:{path.name}')
                   if if_rels:
-                      rel = if_rels[0]
-                      raw = block[rel].split(':', 1)[1].strip()
-                      if raw in ('|', '>'):
-                          raise SystemExit(f'MULTILINE_JOB_IF_UNSUPPORTED:{path.name}:{start+rel+1}')
-                      if raw.startswith('$' + '{{') and raw.endswith('}}'):
-                          raw = raw[3:-2].strip()
-                      lines[start + rel] = '    if: ' + expression(f'({raw}) && ({guard})') + '\n'
+                      rel=if_rels[0]; raw=block[rel].split(':',1)[1].strip()
+                      if raw in ('|','>'): raise SystemExit(f'MULTILINE_JOB_IF:{path.name}')
+                      if raw.startswith('$'+'{{') and raw.endswith('}}'): raw=raw[3:-2].strip()
+                      lines[start+rel]='    if: '+expr(f'({raw}) && ({guard})')+'\n'
                   else:
-                      lines.insert(start + run_rel, '    if: ' + expression(guard) + '\n')
-                  touched = True
+                      lines.insert(start+run_rel,'    if: '+expr(guard)+'\n')
+                  touched=True
               if touched:
-                  path.write_text(''.join(lines), encoding='utf-8')
-                  changed.append(path.name)
-
-          print('MIGRATED', len(changed), *changed, sep='\n')
-          if not changed:
-              raise SystemExit('NO_WORKFLOWS_MIGRATED')
-
-          missing = []
+                  path.write_text(''.join(lines),encoding='utf-8')
+                  shutil.copy2(path,out/path.name); changed.append(path.name)
+          Path('migration_out/changed.txt').write_text('\n'.join(changed)+'\n',encoding='utf-8')
+          print('MIGRATED',len(changed),*changed,sep='\n')
+          if len(changed)!=27: raise SystemExit(f'EXPECTED_27_GOT_{len(changed)}')
+          missing=[]
           for path in sorted(root.glob('*.yml')):
-              if path == self_path:
-                  continue
-              text = path.read_text(encoding='utf-8')
-              if not re.search(r'^  pull_request:', text, re.MULTILINE):
-                  continue
-              if not re.search(r'^\s*runs-on:\s*\[.*self-hosted.*\]\s*$', text, re.MULTILINE):
-                  continue
-              if guard not in text:
+              if path.name==self_name: continue
+              text=path.read_text(encoding='utf-8')
+              if re.search(r'^  pull_request:',text,re.M) and re.search(r'^\s*runs-on:\s*\[.*self-hosted.*\]\s*$',text,re.M) and guard not in text:
                   missing.append(path.name)
-          if missing:
-              raise SystemExit('FIREWALL_MISSING:' + ','.join(missing))
+          if missing: raise SystemExit('FIREWALL_MISSING:'+','.join(missing))
           PY
-      - name: Run execution-policy contract
+      - name: Verify execution policy
         run: |
           python3 -m pip install --disable-pip-version-check --no-input -q pytest==8.4.1
           python3 -m pytest -q tests/repository/test_self_hosted_execution_policy.py
-      - name: Commit atomic migration and remove one-shot workflow
-        run: |
-          rm .github/workflows/platform_self_hosted_pr_firewall_migration.yml
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add .github/workflows
-          git diff --cached --check
-          git commit -m 'Harden self-hosted PR workflows against fork execution'
-          git push origin HEAD:platform/throughput-hydration-gc-20261008
+      - uses: actions/upload-artifact@v4
+        with:
+          name: self-hosted-pr-firewall-migration
+          path: migration_out
+          if-no-files-found: error
+          retention-days: 1

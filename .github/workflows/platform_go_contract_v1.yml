@@ -38,7 +38,9 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.27.1'
-          cache-dependency-path: platform/go.sum
+          # The persistent runner already retains Go's local module/build cache.
+          # Avoid remote cache uploads serializing its single-job queue.
+          cache: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -90,9 +92,20 @@ jobs:
           PY
       - name: Prove migration reversibility
         run: |
-          go run ./cmd/realsas-migrate reset
-          go run ./cmd/realsas-migrate up
-          go test -p 1 ./internal/product -run TestAtomicPromotion -count=1
+          # Expanded research DAG fixtures correctly prevent downgrade to the
+          # old 46-stage constraint. Verify reversible DDL on a separate empty DB.
+          REALSAS_MIGRATION_URL="$(python3 - <<'PY'
+          import os
+          from pathlib import Path
+          from pgserver import get_server
+          server = get_server(Path(os.environ['REALSAS_CI_PGDATA'] + '-migrations'), cleanup_mode=None)
+          print(server.get_uri())
+          PY
+          )"
+          REALSAS_DATABASE_URL="$REALSAS_MIGRATION_URL" go run ./cmd/realsas-migrate up
+          REALSAS_DATABASE_URL="$REALSAS_MIGRATION_URL" go run ./cmd/realsas-migrate reset
+          REALSAS_DATABASE_URL="$REALSAS_MIGRATION_URL" go run ./cmd/realsas-migrate up
+          REALSAS_DATABASE_URL="$REALSAS_MIGRATION_URL" go test -p 1 ./internal/product -run TestAtomicPromotion -count=1
       - name: Build native control-plane binaries
         run: |
           go build ./cmd/realsasctl
@@ -117,8 +130,10 @@ jobs:
           import os
           from pathlib import Path
           location = os.environ.get('REALSAS_CI_PGDATA')
-          data = Path(location) if location else None
-          if data and (data / 'postmaster.pid').exists():
+          if location:
               from pgserver import pg_ctl
-              pg_ctl(['-m', 'fast', '-w', 'stop'], pgdata=data, timeout=30)
+              for suffix in ('', '-migrations'):
+                  data = Path(location + suffix)
+                  if (data / 'postmaster.pid').exists():
+                      pg_ctl(['-m', 'fast', '-w', 'stop'], pgdata=data, timeout=30)
           PY

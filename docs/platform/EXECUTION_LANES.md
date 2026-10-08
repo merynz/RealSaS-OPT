@@ -94,6 +94,9 @@ authority root: complete recursive portability to a different machine remains
 open. Do not silently rewrite payloads or substitute a historical package.
 Legacy EngineReleases without a DAG snapshot must be explicitly resealed; the
 platform never assigns the current graph to an old release during execution.
+Downgrading to the legacy 46-stage database constraint is incompatible with
+expanded research releases; migration rollback must fail rather than discard
+those sealed records. CI tests reversible DDL in a separate empty database.
 
 ## Scientific and latency boundaries
 

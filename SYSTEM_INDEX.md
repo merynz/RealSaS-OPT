@@ -1,12 +1,14 @@
 # RealSaS Structural System Index
 
-## 2026-10-07 canonical main
+## 2026-10-08 canonical main
 
 ## Current continuation details
 
 Current continuation authority is `canonical/CANONICAL_HANDOFF_20261007.md` plus `CURRENT_STATE.md`.
 
-The active engineering program is **repo currentness -> Go platform enforcement -> performance optimization**. Runtime/presentation image diagnosis is intentionally deferred until those close.
+The modular Go developer path is implemented. Next prove a real Knight
+component replacement with independent reuse, then optimize and render.
+Full product input-to-output execution and UI integration remain later work.
 
 > Navigation only. Historical recovery/runtime-audit documents are provenance and must not override current continuation authority.
 
@@ -58,7 +60,9 @@ Knight FIT1 mechanics are closed relative to the sealed teacher/source motion en
 
 `compiler/realsas_compiler_core/appearance_authority_v2.py` owns complete appearance qualification. `compiler/realsas_compiler_core/runtime_authority_v2.py` governs qualified runtime consumption. Appearance remains source-preserving and may not silently become mechanical correction.
 
-The 46-stage **dependency DAG** is the executable dependency authority.
+The current Compiler compatibility plan is a 46-stage **dependency DAG**.
+Go seals the selected DAG in each EngineRelease. Research releases can evolve
+nodes/edges without rewriting old releases or invalidating independent artifacts.
 
 ## Fresh render baseline
 

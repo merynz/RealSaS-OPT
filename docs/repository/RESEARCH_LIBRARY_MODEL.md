@@ -6,7 +6,7 @@ RealSaS-OPT is a research repository with a continuously upgraded executable mai
 
 ### Mainline library
 
-`models/`, `compiler/`, `runtime/`
+`platform/`, `models/`, `compiler/`, `runtime/`
 
 These directories answer: **"What implementation do we currently use?"**
 
@@ -84,7 +84,11 @@ A mainline implementation means:
 
 It does **not** mean eternally canonical, publication-final, globally generalizing, or immune to replacement.
 
-This distinction is essential for RealSaS because IRIS, Geppetto, SkinFieldCodec, Arachne, compiler numerics, proof/repair and runtime integration may all be upgraded as new experiments close.
+This distinction applies to IRIS, TESSA, AXIS, MIRA, Compiler numerics,
+proof/repair and runtime integration. Go Attempts hold experiment state;
+EngineReleases pin implementations, policies, inputs and immutable DAGs.
+Component replacement reruns its affected target closure and preserves
+independent artifacts. Nodes and edges may evolve in a new release.
 
 ## 5. Human navigation invariant
 
@@ -104,9 +108,12 @@ If any of these requires guessing from dates or searching the whole repository, 
 `models/` is organized by semantic subsystem, not by experiment date:
 
 - `models/iris/`
-- `models/geppetto/`
-- `models/skin_field_codec/`
-- `models/arachne/`
+- `models/tessa/`
+- `models/axis/`
+- `models/mira/`
+
+Legacy Geppetto/Arachne/SkinFieldCodec paths preserve compatibility or supporting
+implementations; public architecture naming is IRIS/TESSA/AXIS/MIRA.
 
 Each model eventually owns its current inference implementation plus model-local training/evaluation/test code. Dated experiment trees remain evidence and candidate development spaces.
 
@@ -150,9 +157,11 @@ Every candidate source file considered for mainline receives one of:
 
 A directory is never promoted wholesale merely because one file in it is useful.
 
-## 9. Current restoration constraint
+## 9. Historical restoration constraint
 
-During Compiler/runtime restoration, library normalization and historical promotion are coupled but not conflated:
+During the restoration-era program, these constraints governed normalization
+and historical promotion. Present continuation is in `CURRENT_STATE.md` and
+`docs/platform/EXECUTION_LANES.md`:
 
 - restore only audited mechanisms;
 - place restored mechanisms in their current semantic owner;

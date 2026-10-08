@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `3c277f24ea62451a63cb21ff1c66deccdf26e4a0154302457ce09e8a8a0db56a`
+> State fingerprint: `a91b503c9d03bfc2dbb2a9718413076105b58d0402c50d9085b3319f1455ed29`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -139,7 +139,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `hardening/pre-fit-closure-v1-20260904` | `d4da94279e1f` | observed live; not explicitly registered active |
 | `ignore-this` | `91b4593d5b2a` | observed live; not explicitly registered active |
 | `impl/carrier-first-mechanical-compilation-20261004` | `98393e04f905` | observed live; not explicitly registered active |
-| `implementation/platform-execution-lanes-20261008` | `0c39433d7336` | observed live; not explicitly registered active |
+| `implementation/platform-execution-lanes-20261008` | `20ec1bdd5b8a` | observed live; not explicitly registered active |
 | `integration/compiler-runtime-canonical-20260828` | `e423cd462002` | observed live; not explicitly registered active |
 | `integration/compiler-runtime-heavy-promotion-20260901` | `47892ffa16b7` | observed live; not explicitly registered active |
 | `integration/final-main-knight-platform-20261002` | `30428107138f` | observed live; not explicitly registered active |

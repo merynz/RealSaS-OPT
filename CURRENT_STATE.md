@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-08
 **Canonical code line:** `main` only  
-**Architecture:** RealSaS V2, 46-stage dependency DAG  
+**Architecture:** RealSaS V2, 46-stage Compiler compatibility DAG; versioned release DAGs
 **Implementation readiness:** `canonical/V2_IMPLEMENTATION_READINESS.json`
 
 ## Active platform work
@@ -88,7 +88,7 @@ These measured costs define optimization priorities after repository currentness
 2. Close research artifact import/portability and direct-path enforcement gaps as real component-replacement execution exposes them.
 3. Optimize measured rebuild/CAA/render hot paths and produce fresh carrier-native IDLE/RUN/SLASH.
 4. Productize full input-to-output inference/compile/preset execution and connect its UI after the modular developer path is operational.
-4. Return to presentation/runtime visual diagnosis only if the image remains wrong after 1–3.
+5. Return to presentation/runtime visual diagnosis only if the image remains wrong after 1–3.
 
 ## Read first
 

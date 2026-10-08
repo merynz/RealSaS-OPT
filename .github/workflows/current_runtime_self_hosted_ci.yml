@@ -100,6 +100,8 @@ jobs:
           PY
       - name: Verify native toolchain
         run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libarchive-dev libpng-dev zlib1g-dev
           cmake --version
           c++ --version
           dpkg -s libarchive-dev libpng-dev zlib1g-dev >/dev/null

@@ -79,6 +79,13 @@ Engine contract must validate and reseal them. The API rejects qualification
 fields supplied by an importer. Seal roles with `subject_id`, `bindings` and
 `created_by`; each binding contains `role` and `artifact_id`.
 
+External research bytes may remain in Google Drive while Git stores only the
+reviewable manifest/provenance contract. Execution resolves the declared remote
+locator into a local or notebook CAS and verifies exact byte size and SHA256
+before registration. Provider choice (Drive connector, notebook mount, rclone,
+or another future fetch adapter) is transport only; content identity and
+scientific authority do not depend on the transport or filesystem path.
+
 Migration08 separates semantic identity from storage deduplication: two typed
 contracts may share one verified CAS object while retaining separate producer,
 dependency and qualification records. Downgrading to the old globally unique
@@ -135,10 +142,14 @@ See `DEVELOPER_HOST.md` for the persistent, loopback-only WSL user-service
 installation and real API/outbox/Temporal/Engine smoke. This local developer
 deployment is not production infrastructure or Knight render readiness.
 
-Run `realsas-migrate up`, `realsas-api`, the Go control worker and the Python
-Engine worker with the same PostgreSQL database, Temporal namespace and CAS
-root. The operator API binds to loopback. Persistent Knight evidence remains on
-the self-hosted `realsas-wsl-1660ti` host. CI uses only its self-hosted labels.
+When an explicit local integration witness is required, run `realsas-migrate
+up`, `realsas-api`, the Go control worker and the Python Engine worker with the
+same PostgreSQL database, Temporal namespace and CAS root; the operator API
+binds to loopback. This is no longer the default CPU-CI lane. Host-independent
+current contracts run on standard GitHub-hosted Linux while the repository is
+public, and are guarded to skip when the repository is private. Notebook/Colab
+is the default research/GPU lane; local WSL/GTX execution remains available for
+native-host witnesses or selected inference where it is useful.
 
 Legacy Registry stage manifests without implementation, manifest read-set or
 graph-node identity or portable output fields fail closed during hydration; re-import/reseal them

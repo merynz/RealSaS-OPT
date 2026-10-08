@@ -1,5 +1,5 @@
 name: platform-go-contract-v1
-# normalized-worker-closure-20261001-final
+# hosted-control-plane-closure-20261008
 
 on:
   push:
@@ -39,16 +39,27 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  REALSAS_CI_CACHE_SOFT_GIB: '12'
-  REALSAS_CI_CACHE_TARGET_GIB: '8'
-  REALSAS_CI_CACHE_MIN_FREE_GIB: '5'
-  REALSAS_CI_CACHE_MAX_AGE_DAYS: '30'
-
 jobs:
   contract:
-    runs-on: [self-hosted, linux, x64, realsas]
+    runs-on: ubuntu-latest
     timeout-minutes: 25
+    env:
+      REALSAS_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/realsas_ci_main?sslmode=disable
+      REALSAS_MIGRATION_URL: postgresql://postgres:postgres@127.0.0.1:5432/realsas_ci_migrations?sslmode=disable
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: realsas_ci_main
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d realsas_ci_main"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     defaults:
       run:
         working-directory: platform
@@ -57,55 +68,25 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.27.1'
-          # Self-hosted caches stay local. Avoid remote cache uploads serializing
-          # the runner queue; GOMODCACHE/GOCACHE are persisted explicitly below.
-          cache: false
+          cache: true
+          cache-dependency-path: platform/go.sum
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Select persistent per-runner cache namespace
+          cache: pip
+          cache-dependency-path: |
+            requirements/mainline-ci.txt
+            requirements/platform-worker.txt
+      - name: Install pinned Python contract dependencies
         run: |
-          CACHE_ROOT="$HOME/.cache/realsas-ci/${RUNNER_NAME:-unnamed-runner}"
-          echo "REALSAS_CI_CACHE_ROOT=$CACHE_ROOT" >> "$GITHUB_ENV"
-          echo "PIP_CACHE_DIR=$CACHE_ROOT/pip" >> "$GITHUB_ENV"
-          echo "GOMODCACHE=$CACHE_ROOT/go-mod" >> "$GITHUB_ENV"
-          echo "GOCACHE=$CACHE_ROOT/go-build" >> "$GITHUB_ENV"
-      - name: Bounded local cache GC
+          python3 -m pip install --no-input --progress-bar off -r ../requirements/mainline-ci.txt
+          python3 -m pip install --no-input --progress-bar off -r ../requirements/platform-worker.txt
+      - name: Create isolated migration database
         working-directory: .
         run: |
-          python3 tools/platform_cache_gc.py \
-            --root "$REALSAS_CI_CACHE_ROOT" \
-            --soft-max-gib "$REALSAS_CI_CACHE_SOFT_GIB" \
-            --target-max-gib "$REALSAS_CI_CACHE_TARGET_GIB" \
-            --max-age-days "$REALSAS_CI_CACHE_MAX_AGE_DAYS" \
-            --min-free-gib "$REALSAS_CI_CACHE_MIN_FREE_GIB" \
-            --out "$RUNNER_TEMP/realsas-ci-cache-gc.json"
-      - name: Reuse exact Python contract environment
-        working-directory: .
-        run: |
-          python3 tools/platform_ci_bootstrap.py \
-            --cache-root "$REALSAS_CI_CACHE_ROOT" \
-            --pip-cache "$PIP_CACHE_DIR" \
-            --require pytest \
-            --require temporalio \
-            --require Pillow==11.3.0 \
-            --require pgserver==0.1.4 \
-            --github-path "$GITHUB_PATH" \
-            --out "$RUNNER_TEMP/realsas-ci-bootstrap.json"
-      - name: Create isolated databases on persistent PostgreSQL
-        working-directory: .
-        run: |
-          DB_EPOCH="$(date +%s)"
-          DB_PREFIX="realsas_ci_${DB_EPOCH}_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"
-          MAIN_DB="${DB_PREFIX}_main"
-          MIGRATION_DB="${DB_PREFIX}_migrations"
-          python3 tools/platform_ci_database.py gc --max-age-hours 24 > "$RUNNER_TEMP/realsas-ci-db-gc.json"
-          MAIN_URL="$(python3 tools/platform_ci_database.py create --name "$MAIN_DB")"
-          MIGRATION_URL="$(python3 tools/platform_ci_database.py create --name "$MIGRATION_DB")"
-          echo "REALSAS_DATABASE_URL=$MAIN_URL" >> "$GITHUB_ENV"
-          echo "REALSAS_MIGRATION_URL=$MIGRATION_URL" >> "$GITHUB_ENV"
-          echo "REALSAS_CI_MAIN_DB=$MAIN_DB" >> "$GITHUB_ENV"
-          echo "REALSAS_CI_MIGRATION_DB=$MIGRATION_DB" >> "$GITHUB_ENV"
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends postgresql-client
+          PGPASSWORD=postgres createdb -h 127.0.0.1 -U postgres realsas_ci_migrations
       - name: Download pinned modules
         run: go mod download
       - name: Format gate
@@ -148,7 +129,7 @@ jobs:
           go build ./cmd/realsas-migrate
           go build ./cmd/realsas-architecture
           go build ./cmd/realsas-control-worker
-      - name: Python Engine worker and artifact reuse contracts
+      - name: Python Engine worker and platform contracts
         run: |
           python3 -m py_compile ../compiler/realsas_compiler_services/platform_worker/worker.py
           cd ..
@@ -162,35 +143,14 @@ jobs:
             tests/repository/test_platform_ci_database.py \
             tests/repository/test_source_owned_visual_runtime_wiring_v1.py \
             tests/repository/test_self_hosted_execution_policy.py
-      - name: Read-only latest Knight input and platform host preflight
-        run: |
-          cd ..
-          python3 tools/platform_host_preflight.py \
-            --authority-root /home/monster/realsas_authority \
-            --inventory canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json \
-            --out "$RUNNER_TEMP/platform-host-preflight.json"
-      - name: Preserve cache and host diagnostics
-        uses: actions/upload-artifact@v4
-        with:
-          name: platform-host-cache-db-preflight
-          path: |
-            ${{ runner.temp }}/platform-host-preflight.json
-            ${{ runner.temp }}/realsas-ci-cache-gc.json
-            ${{ runner.temp }}/realsas-ci-bootstrap.json
-            ${{ runner.temp }}/realsas-ci-db-gc.json
-          retention-days: 7
       - name: Current continuation contracts
         run: |
           cd ..
           python3 tools/render_authority_map.py --write
           python3 tools/render_rehydration_packet.py --write
-      - name: Drop isolated CI databases
-        if: always()
-        working-directory: .
+      - name: Hosted lane summary
         run: |
-          if [[ -n "${REALSAS_CI_MAIN_DB:-}" ]]; then
-            python3 tools/platform_ci_database.py drop --name "$REALSAS_CI_MAIN_DB" --force
-          fi
-          if [[ -n "${REALSAS_CI_MIGRATION_DB:-}" ]]; then
-            python3 tools/platform_ci_database.py drop --name "$REALSAS_CI_MIGRATION_DB" --force
-          fi
+          echo 'PLATFORM_GO_CONTRACT_PASS'
+          echo 'execution_lane=github_hosted_public_standard'
+          echo 'database_transport=ephemeral_postgres_service'
+          echo 'local_wsl_mutation=false'

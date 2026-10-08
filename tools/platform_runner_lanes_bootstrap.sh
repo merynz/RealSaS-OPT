@@ -14,10 +14,17 @@ command -v rsync >/dev/null || fail "RSYNC_REQUIRED"
 command -v systemctl >/dev/null || fail "SYSTEMD_REQUIRED"
 systemctl --user show-environment >/dev/null 2>&1 || fail "USER_SYSTEMD_UNAVAILABLE"
 
+mkdir -p "$TARGET_ROOT" "$HOME/.config/systemd/user"
+TARGET_ROOT="$(cd "$TARGET_ROOT" && pwd)"
+
 if [[ -z "$SOURCE_DIR" ]]; then
   mapfile -t candidates < <(find "$HOME" -maxdepth 3 -type f -name config.sh -path '*runner*' -printf '%h\n' 2>/dev/null | sort -u)
   configured=()
   for candidate in "${candidates[@]}"; do
+    candidate="$(cd "$candidate" && pwd)"
+    case "$candidate/" in
+      "$TARGET_ROOT/"*) continue ;;
+    esac
     if [[ -f "$candidate/.runner" && -x "$candidate/run.sh" ]]; then
       configured+=("$candidate")
     fi
@@ -27,9 +34,10 @@ if [[ -z "$SOURCE_DIR" ]]; then
 fi
 
 SOURCE_DIR="$(cd "$SOURCE_DIR" && pwd)"
+case "$SOURCE_DIR/" in
+  "$TARGET_ROOT/"*) fail "SOURCE_RUNNER_MUST_NOT_BE_MANAGED_LANE=$SOURCE_DIR" ;;
+esac
 [[ -x "$SOURCE_DIR/config.sh" && -x "$SOURCE_DIR/run.sh" ]] || fail "SOURCE_RUNNER_INVALID=$SOURCE_DIR"
-mkdir -p "$TARGET_ROOT" "$HOME/.config/systemd/user"
-TARGET_ROOT="$(cd "$TARGET_ROOT" && pwd)"
 
 install_lane() {
   local name="$1"
@@ -75,6 +83,7 @@ Restart=always
 RestartSec=5
 KillSignal=SIGINT
 TimeoutStopSec=300
+UMask=0077
 
 [Install]
 WantedBy=default.target

@@ -15,21 +15,45 @@ import time
 import venv
 from pathlib import Path
 
-SCHEMA = "RealSaS.PlatformCIBootstrap.v1"
+SCHEMA = "RealSaS.PlatformCIBootstrap.v2"
 
 
-def fingerprint(requirements: list[str]) -> str:
+def _requirement_file_state(paths: list[Path] | tuple[Path, ...]) -> list[dict]:
+    rows: list[dict] = []
+    for raw in paths:
+        path = Path(raw).expanduser().resolve()
+        if not path.is_file():
+            raise FileNotFoundError(f"REQUIREMENTS_FILE_MISSING:{path}")
+        data = path.read_bytes()
+        rows.append({
+            "name": path.name,
+            "sha256": hashlib.sha256(data).hexdigest(),
+            "size_bytes": len(data),
+        })
+    return rows
+
+
+def fingerprint(requirements: list[str], requirement_files: list[Path] | tuple[Path, ...] = ()) -> str:
     payload = {
         "python": [sys.version_info.major, sys.version_info.minor, sys.version_info.micro],
         "requirements": requirements,
+        "requirement_files": _requirement_file_state(requirement_files),
     }
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
 
 
-def ensure_venv(cache_root: Path, requirements: list[str], *, pip_cache: Path | None = None) -> dict:
+def ensure_venv(
+    cache_root: Path,
+    requirements: list[str],
+    *,
+    requirement_files: list[Path] | tuple[Path, ...] = (),
+    pip_cache: Path | None = None,
+) -> dict:
     cache_root = cache_root.expanduser().resolve()
     cache_root.mkdir(parents=True, exist_ok=True)
-    digest = fingerprint(requirements)
+    requirement_files = tuple(Path(path).expanduser().resolve() for path in requirement_files)
+    requirement_file_state = _requirement_file_state(requirement_files)
+    digest = fingerprint(requirements, requirement_files)
     venv_root = cache_root / "venvs"
     venv_root.mkdir(parents=True, exist_ok=True)
     target = venv_root / digest
@@ -66,13 +90,32 @@ def ensure_venv(cache_root: Path, requirements: list[str], *, pip_cache: Path | 
                 pip_cache = pip_cache.expanduser().resolve()
                 pip_cache.mkdir(parents=True, exist_ok=True)
                 env["PIP_CACHE_DIR"] = str(pip_cache)
-            subprocess.run(
-                [str(tmp / "bin" / "python"), "-m", "pip", "install", "--disable-pip-version-check", *requirements],
-                check=True,
-                env=env,
-            )
+            command = [
+                str(tmp / "bin" / "python"),
+                "-m",
+                "pip",
+                "install",
+                "--disable-pip-version-check",
+                "--no-input",
+                "--progress-bar",
+                "off",
+            ]
+            for path in requirement_files:
+                command.extend(["-r", str(path)])
+            command.extend(requirements)
+            if requirement_files or requirements:
+                subprocess.run(command, check=True, env=env)
             (tmp / ".realsas-env.json").write_text(
-                json.dumps({"schema": SCHEMA, "fingerprint": digest, "requirements": requirements}, sort_keys=True) + "\n",
+                json.dumps(
+                    {
+                        "schema": SCHEMA,
+                        "fingerprint": digest,
+                        "requirements": requirements,
+                        "requirement_files": requirement_file_state,
+                    },
+                    sort_keys=True,
+                )
+                + "\n",
                 encoding="utf-8",
             )
             if backup.exists():
@@ -100,10 +143,16 @@ def main() -> None:
     parser.add_argument("--cache-root", type=Path, required=True)
     parser.add_argument("--pip-cache", type=Path)
     parser.add_argument("--require", action="append", dest="requirements", default=[])
+    parser.add_argument("--requirements-file", action="append", type=Path, dest="requirement_files", default=[])
     parser.add_argument("--github-path", type=Path)
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
-    report = ensure_venv(args.cache_root, args.requirements, pip_cache=args.pip_cache)
+    report = ensure_venv(
+        args.cache_root,
+        args.requirements,
+        requirement_files=args.requirement_files,
+        pip_cache=args.pip_cache,
+    )
     if args.github_path:
         with args.github_path.open("a", encoding="utf-8") as handle:
             handle.write(report["bin"] + "\n")

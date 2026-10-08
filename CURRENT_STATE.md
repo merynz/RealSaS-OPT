@@ -23,9 +23,9 @@ Implementation validation and merge evidence are recorded in PR #59. Verify the
 live `main` ref rather than treating the baseline audit SHA as the latest code.
 Audit receipt: `canonical/PLATFORM_MAIN_AUDIT_20261008.json`.
 
-The next increment adds exact-byte external evidence import and subject-input
-sealing, and carries the released DAG into Python execution (including smaller
-research networks). Import does not mint scientific or reuse qualification.
+Exact-byte external evidence import and subject-input sealing are implemented.
+The released DAG is carried into Python execution (including smaller research
+networks). Import does not mint scientific or reuse qualification.
 The latest Knight file index is
 `canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json`; bounded self-hosted preflight
 reports file hashes and default service availability. A real latest-carrier

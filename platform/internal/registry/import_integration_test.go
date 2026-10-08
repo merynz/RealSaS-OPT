@@ -43,16 +43,16 @@ func TestImportExactEvidenceSealsInputsWithoutMintingQualification(t *testing.T)
 	if !second.Reused || first.ArtifactID != second.ArtifactID || first.SemanticSHA256 != second.SemanticSHA256 {
 		t.Fatalf("identity drift: %+v %+v", first, second)
 	}
-    otherType := req
-    otherType.ArtifactType = "RealSaS.TestOtherEvidenceContract"
-    alias, err := Import(ctx, pool, store, otherType)
-    if err != nil || alias.ArtifactID == first.ArtifactID || alias.SemanticSHA256 == first.SemanticSHA256 {
-        t.Fatalf("distinct typed semantics could not share exact CAS bytes: %+v %v", alias, err)
-    }
-    var sharedBytes int
-    if err := pool.QueryRow(ctx, "SELECT count(*) FROM artifacts WHERE content_sha256=$1 AND storage_key=$2", obj.ContentSHA256, obj.StorageKey).Scan(&sharedBytes); err != nil || sharedBytes != 2 {
-        t.Fatalf("shared byte identities=%d err=%v", sharedBytes, err)
-    }
+	otherType := req
+	otherType.ArtifactType = "RealSaS.TestOtherEvidenceContract"
+	alias, err := Import(ctx, pool, store, otherType)
+	if err != nil || alias.ArtifactID == first.ArtifactID || alias.SemanticSHA256 == first.SemanticSHA256 {
+		t.Fatalf("distinct typed semantics could not share exact CAS bytes: %+v %v", alias, err)
+	}
+	var sharedBytes int
+	if err := pool.QueryRow(ctx, "SELECT count(*) FROM artifacts WHERE content_sha256=$1 AND storage_key=$2", obj.ContentSHA256, obj.StorageKey).Scan(&sharedBytes); err != nil || sharedBytes != 2 {
+		t.Fatalf("shared byte identities=%d err=%v", sharedBytes, err)
+	}
 	for _, demo := range []bool{false, true} {
 		_, found, err := (QualifiedCatalog{Pool: pool, AllowDemo: demo}).FindQualified(ctx, req.ArtifactType, req.SchemaVersion, first.SemanticSHA256)
 		if err != nil || found {
@@ -98,7 +98,7 @@ func TestImportExactEvidenceSealsInputsWithoutMintingQualification(t *testing.T)
 	if err := pool.QueryRow(ctx, "SELECT count(*) FROM qualifications WHERE artifact_id=$1", first.ArtifactID).Scan(&qualifications); err != nil || qualifications != 0 {
 		t.Fatalf("qualifications=%d err=%v", qualifications, err)
 	}
-    if err := pool.QueryRow(ctx, "SELECT count(*) FROM qualifications WHERE artifact_id=$1", alias.ArtifactID).Scan(&qualifications); err != nil || qualifications != 0 {
-        t.Fatalf("sharing bytes minted qualification: %d %v", qualifications, err)
-    }
+	if err := pool.QueryRow(ctx, "SELECT count(*) FROM qualifications WHERE artifact_id=$1", alias.ArtifactID).Scan(&qualifications); err != nil || qualifications != 0 {
+		t.Fatalf("sharing bytes minted qualification: %d %v", qualifications, err)
+	}
 }

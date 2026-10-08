@@ -1,5 +1,6 @@
 """Scoped presentation V2: bounded body-domain SE(2) safety repair over V1 motion."""
 from dataclasses import replace
+from pathlib import Path
 from types import SimpleNamespace
 import json
 import numpy as np
@@ -35,9 +36,9 @@ def _view_owners(binding, witness):
 def compile_projection_stage(ctx):
     """Compile V1 field first, then freeze one witness-wide body safety mask per view."""
     result = base.compile_projection_stage(ctx)
-    projection_path = next(o["path"] for o in result["outputs"]
-                           if o.get("schema") == "RealSaS.SourceOwnedVisualRuntimeProjectionIR.v1")
-    projection = base.source_owned_visual_runtime_projection_from_dict(json.loads(open(projection_path).read()))
+    projection_path = Path(next(o["path"] for o in result["outputs"]
+                                if o.get("schema") == "RealSaS.SourceOwnedVisualRuntimeProjectionIR.v1"))
+    projection = base.source_owned_visual_runtime_projection_from_dict(json.loads(projection_path.read_text()))
     topology = _topology(ctx)
     witness = base._load_npz(topology["witness"])
     arrays = base._load_npz({"path": projection.projection_npz_path,
@@ -67,7 +68,7 @@ def compile_projection_stage(ctx):
             "maximum_baseline_projection_residual_px": float(repair["maximum_baseline_projection_residual_px"]),
             "selection": repair["selection_diagnostics"],
         }
-    array_sha = base._save_npz(projection.projection_npz_path, **arrays)
+    array_sha = base._save_npz(Path(projection.projection_npz_path), **arrays)
     metadata = dict(projection.metadata or {})
     metadata.update({
         "presentation_post_operator_id": SAFETY_OPERATOR_ID,
@@ -109,7 +110,8 @@ def _repair_proof(projection, arrays, topology, witness, mesh, dynamic):
         for clip in projection.clips:
             p = clip.array_prefix
             key = f"{p}_view_{vi}_motion_safety_baseline_positions"
-            if key not in arrays: raise QualificationError("SCOPED_PRESENTATION_SAFETY_BASELINE_MISSING")
+            if key not in arrays:
+                raise QualificationError("SCOPED_PRESENTATION_SAFETY_BASELINE_MISSING")
             baseline[f"{p}_view_{vi}_positions"] = arrays[key]
             clip_fields[p] = np.dstack((arrays[key], arrays[f"{p}_view_{vi}_depths"]))
         repair = compile_motion_repair(
@@ -150,7 +152,8 @@ def prove_presentation_stage(ctx):
     package = base.stage_output_payload(ctx, S43, PACKAGE_SCHEMA)
     playback = base.stage_output_payload(ctx, S44, PLAYBACK_SCHEMA)
     witness = base._load_npz(topology["witness"])
-    mesh = base._numeric_mesh(witness); mesh.mesh_lineage_hash = topology["mechanical_mesh_binding_hash"]
+    mesh = base._numeric_mesh(witness)
+    mesh.mesh_lineage_hash = topology["mechanical_mesh_binding_hash"]
     dynamic = _dynamic(topology, witness)
     arrays = base._load_npz({"path": projection.projection_npz_path, "sha256": projection.projection_npz_sha256})
     if (projection.metadata.get("target_attachments") != topology["attachments"]
@@ -176,12 +179,16 @@ def prove_presentation_stage(ctx):
                 mismatch = (rgba.read_bytes() != ref.straight_rgba_u8.tobytes()
                     or provenance.read_bytes() != ref.provenance_code.tobytes()
                     or owner.read_bytes() != ref.owner_face_index.astype("<i4").tobytes())
-                parity_bad += int(mismatch); empty += int(not np.any(ref.straight_rgba_u8[:, :, 3]))
-                ties += int(ref.unresolved_depth_tie_count); overflow += int(ref.fragment_overflow_count)
-                vi = int(view.view_index); faces = arrays[f"view_{vi}_faces"]
+                parity_bad += int(mismatch)
+                empty += int(not np.any(ref.straight_rgba_u8[:, :, 3]))
+                ties += int(ref.unresolved_depth_tie_count)
+                overflow += int(ref.fragment_overflow_count)
+                vi = int(view.view_index)
+                faces = arrays[f"view_{vi}_faces"]
                 metrics = base._visual_mesh_motion_metrics(arrays[f"view_{vi}_rest_positions"],
                     arrays[f"{clip.array_prefix}_view_{vi}_positions"][fi], faces)
-                flipped += int(metrics["flipped_triangle_count"]); edge_bad += int(metrics["edge_gt_4_count"])
+                flipped += int(metrics["flipped_triangle_count"])
+                edge_bad += int(metrics["edge_gt_4_count"])
                 face_owners = arrays[f"view_{vi}_face_attachment_owner"]
                 visible = ref.owner_face_index[ref.owner_face_index >= 0]
                 for a in topology["attachments"]["attachments"]:
@@ -196,7 +203,8 @@ def prove_presentation_stage(ctx):
                 rendered.append({"clip_id": clip.clip_id, "view_id": view.view_id, "frame_index": fi,
                                  "rgba": {"path": str(rgba), "sha256": base.sha256_file(rgba)},
                                  "native_reference_parity": not mismatch})
-    attachment_pass = all(v["area_collapse_count"] == v["condition_failure_count"] == 0 for v in attachment.values())
+    attachment_pass = all(v["area_collapse_count"] == v["condition_failure_count"] == 0
+                          for v in attachment.values())
     passed = (all(proof[k] for k in ("domain_coherence_passed", "frame_view_matrix_complete",
         "area_condition_passed", "attachment_slot_motion_passed", "canonical_pose_palette_passed",
         "motion_safety_repair_passed")) and attachment_pass

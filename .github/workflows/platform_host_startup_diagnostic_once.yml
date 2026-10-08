@@ -10,10 +10,17 @@ jobs:
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 3
     steps:
-      - name: Stop only the confirmed failing managed PostgreSQL restart loop
+      - name: Read existing smoke Attempt and managed worker journals
         run: |
           export XDG_RUNTIME_DIR="/run/user/$(id -u)"
           export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
-          systemctl --user stop realsas-platform-postgres.service
-          systemctl --user show realsas-platform-postgres.service --property=Id,ActiveState,SubState
-          echo 'No data removed; canonical main loader fix will restart the managed service.'
+          systemctl --user show realsas-platform-postgres.service realsas-platform-temporal.service realsas-platform-api.service realsas-platform-control.service realsas-platform-engine.service --property=Id,ActiveState,SubState,ExecMainStatus
+          /home/monster/realsas_platform/current/bin/realsas-python - <<'PY'
+          import json, urllib.request
+          from pathlib import Path
+          print(json.dumps(json.loads(Path("/home/monster/realsas_platform/deployment.json").read_text())))
+          with urllib.request.urlopen("http://127.0.0.1:8080/v1/attempts/042feb69-c29e-4e66-84b5-82b080e2a6dc", timeout=10) as response:
+              print(json.dumps(json.load(response), sort_keys=True))
+          PY
+          journalctl --user --unit=realsas-platform-control.service --since='2026-10-08 12:35:00 UTC' --lines=90 --no-pager --output=cat
+          journalctl --user --unit=realsas-platform-engine.service --since='2026-10-08 12:35:00 UTC' --lines=110 --no-pager --output=cat

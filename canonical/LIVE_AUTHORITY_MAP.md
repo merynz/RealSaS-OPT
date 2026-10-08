@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `c534d42fef46877b6d6ffeb3c2ac2e229d0824d397964f50f915f529dec4feb8`
+> State fingerprint: `b5358e8312651ae6bbea102ba672da21c734eef1dc33d6aa40e6ee2ba4fbb46c`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -17,10 +17,10 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 ## Rehydration order
 
-1. `CURRENT_STATE.md`
-2. `canonical/CURRENT_RND_LINEAGE_V1.json`
-3. `canonical/APPEARANCE_RUNTIME_DATAFLOW_GRAPH_V1_20261002.json`
-4. `docs/audit/APPEARANCE_RUNTIME_DATAFLOW_AUDIT_20261002.md`
+1. `canonical/CANONICAL_HANDOFF_20261007.md`
+2. `CURRENT_STATE.md`
+3. `docs/platform/EXECUTION_LANES.md`
+4. `canonical/KNIGHT_AXIS541_MIRA55_CARRIER_NATIVE_PROMOTION_20261007.json`
 5. `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
 6. `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
 7. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
@@ -40,17 +40,17 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `KNIGHT_APPEARANCE_RUNTIME_DATAFLOW_AUDIT` | `MAIN_CANONICALIZED__FROZEN_WITNESS_VERIFIED__RUNTIME_DATAFLOW_AUDIT_ACTIVE` | `main` | `b6ad184b6b9b` | Can corrected Knight mechanics drive source-owned 2D presentation with visual-triangle deformation-domain coherence and canonical-depth overlap ownership, and can Stage45 prove both fail-closed? | product visual pass; unseen generalization; human aesthetic optimality; source-view cardinality reduction; RGB-generation necessity |
+| `PLATFORM_EXECUTION_LANES` | `CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_VALIDATION` | `main` | `949422678d34` | Can Go-owned Attempts replace changed DAG components with exact artifact reuse while product construction and render remain separate? | absolute G3 PASS; product qualification; unseen generalization; sub-120-second latency; fresh carrier-native Knight render |
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 165**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 187**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `b6ad184b6b9b` | canonical continuation branch |
+| `main` | `949422678d34` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -75,10 +75,12 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `architecture-v4-single-family-e2e-20260902` | `c84658b8b95c` | observed live; not explicitly registered active |
 | `architecture/compiler-ir-solver-canonical-20260825` | `7163fac1f333` | observed live; not explicitly registered active |
 | `architecture/v4-generic-strength-source-completion-20260902` | `7f39a846ad05` | observed live; not explicitly registered active |
+| `archive/appearance-runtime-dataflow-prepromotion-20261002` | `7e1ef272aa01` | observed live; not explicitly registered active |
 | `archive/knight-only-main-before-platform-merge-20261002` | `95eed847c40d` | observed live; not explicitly registered active |
 | `archive/main-before-knight-canonical-20261002` | `aaf215aa81ad` | observed live; not explicitly registered active |
-| `audit/appearance-runtime-dataflow-20261002` | `7e1ef272aa01` | observed live; not explicitly registered active |
+| `audit/appearance-runtime-dataflow-20261002` | `a46edbf4b5aa` | observed live; not explicitly registered active |
 | `audit/arachne-information-preservation-v1-20260910` | `94b4ef79e9b8` | observed live; not explicitly registered active |
+| `audit/canonical-caa-mechanics-geometry-lock-20261002` | `0ef66424005b` | observed live; not explicitly registered active |
 | `audit/final-completion-plan-20260902` | `00e930e788d3` | observed live; not explicitly registered active |
 | `audit/generic-main-normalization-20260930` | `2a69a9fbdd4a` | observed live; not explicitly registered active |
 | `audit/geppetto-v2-frozen-base-7f39` | `7f39a846ad05` | observed live; not explicitly registered active |
@@ -136,6 +138,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `geppetto-r6-teacher-projection-port-20260901` | `bfa51e74be02` | observed live; not explicitly registered active |
 | `hardening/pre-fit-closure-v1-20260904` | `d4da94279e1f` | observed live; not explicitly registered active |
 | `ignore-this` | `91b4593d5b2a` | observed live; not explicitly registered active |
+| `impl/carrier-first-mechanical-compilation-20261004` | `98393e04f905` | observed live; not explicitly registered active |
 | `integration/compiler-runtime-canonical-20260828` | `e423cd462002` | observed live; not explicitly registered active |
 | `integration/compiler-runtime-heavy-promotion-20260901` | `47892ffa16b7` | observed live; not explicitly registered active |
 | `integration/final-main-knight-platform-20261002` | `30428107138f` | observed live; not explicitly registered active |
@@ -176,6 +179,15 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `promote/fit1-evidence-main-20260909` | `9deccb8d051f` | observed live; not explicitly registered active |
 | `promote/iris-scene-first-signed-main-v3-20260905` | `dfb087c6a23e` | observed live; not explicitly registered active |
 | `promote/iris-scene-first-signed-v3-20260905` | `7cfb7efedbe9` | observed live; not explicitly registered active |
+| `promotion/axis541-mira55-carrier-native-20261007` | `379c38a36afa` | observed live; not explicitly registered active |
+| `promotion/axis541-mira55-carrier-native-20261007-ci-anchor` | `5e011013595f` | observed live; not explicitly registered active |
+| `promotion/axis541-mira55-carrier-native-20261007-pr` | `5e011013595f` | observed live; not explicitly registered active |
+| `promotion/axis541-mira55-carrier-native-20261007-pr-anchor` | `5e011013595f` | observed live; not explicitly registered active |
+| `promotion/iris-gsa-tessa-static-survivor-20261006` | `92d33c3a083d` | observed live; not explicitly registered active |
+| `promotion/mechanical-substrate-v1-20261005` | `2614c58c24c5` | observed live; not explicitly registered active |
+| `promotion/tessa-learned-geometry-authority-20261006` | `1c467840aa2f` | observed live; not explicitly registered active |
+| `promotion/tessa-mechanical-substrate-20261006` | `ec3866542497` | observed live; not explicitly registered active |
+| `promotion/tessa-mira-mechanical-survivor-v2-20261006` | `87c039be1a70` | observed live; not explicitly registered active |
 | `recovery/canonical-main-20261001` | `54deade8abb2` | observed live; not explicitly registered active |
 | `redteam-hardening-20260920` | `a9aeb3fb1eac` | observed live; not explicitly registered active |
 | `redteam-sync-20260920` | `1741beaff327` | observed live; not explicitly registered active |
@@ -188,11 +200,13 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `repair/stage14-mechanical-adequacy-v2-20260919` | `1972a69a6bbd` | observed live; not explicitly registered active |
 | `repair/stage14-policy-v2-20260920` | `76736ef05059` | observed live; not explicitly registered active |
 | `repair/stage14-visible-component-eligibility-v2-20260919` | `5caa591a7aa0` | observed live; not explicitly registered active |
+| `repair/visual-triangle-deformation-domain-20261002` | `a684d8b5e471` | observed live; not explicitly registered active |
 | `research/g5-coverage-v2-audit-20260919` | `aeaec75e1fe6` | observed live; not explicitly registered active |
 | `research/g5-mesh-v2-numerical-floor-20260919` | `28908a0019f6` | observed live; not explicitly registered active |
 | `research/knight-stage13-14-calibration-20260919` | `ee52ecf21689` | observed live; not explicitly registered active |
 | `research/knight-stage13-feasibility-v1-20260920` | `d5f89e4fc1c1` | observed live; not explicitly registered active |
 | `research/knight-stage13-v7-silhouette-20260920` | `27ed725309b1` | observed live; not explicitly registered active |
+| `research/rig-skin-architecture-challengers-20261003` | `545418a8664b` | observed live; not explicitly registered active |
 | `research/stage13-geometry-gate-v2-calibration-20260919` | `18017348cc1b` | observed live; not explicitly registered active |
 | `research/stage14-component-aware-compaction-20260919` | `4212a28fc057` | observed live; not explicitly registered active |
 | `research/stage14-gsa-v2-calibration-20260919` | `416bb7ef341d` | observed live; not explicitly registered active |
@@ -203,6 +217,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `research/stage14-v2-final-calibration-20260920` | `8a502d4bee42` | observed live; not explicitly registered active |
 | `research/stage14-v2-policy-calibration-20260919` | `b399a90c1c3a` | observed live; not explicitly registered active |
 | `research/stage14-v2-policy-calibration-fixed-20260919` | `f08716b32db9` | observed live; not explicitly registered active |
+| `research/tessa-mechanical-mesh-v1-20261004` | `247ff75efce5` | observed live; not explicitly registered active |
 | `research/vf11-certified-adaptive-20260921` | `a1d633a7b01a` | observed live; not explicitly registered active |
 | `research/vf11-x2-sparse-tetra-20261001` | `df2c7eddb19c` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903` | `83aa411cc06d` | observed live; not explicitly registered active |
@@ -218,6 +233,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `runtime-v4-p0-p1-20260917` | `e6654c065699` | observed live; not explicitly registered active |
 | `scratch-mistake` | `91b4593d5b2a` | observed live; not explicitly registered active |
 | `seal/geppetto-reference-strength-fit1-20260908` | `ae0af0cd39dd` | observed live; not explicitly registered active |
+| `seal/platform-architecture-reexport-20261008` | `84b8a5369ac7` | observed live; not explicitly registered active |
 | `single-family-e2e-fit-v1-20260902` | `5fa4bf788328` | observed live; not explicitly registered active |
 | `single-family-e2e-models-v1-20260902` | `362556db9b31` | observed live; not explicitly registered active |
 | `source/generic-completion-v1-20260902` | `85a25b419a47` | observed live; not explicitly registered active |
@@ -229,6 +245,12 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `tmp/runtime-v4-p0-p1-stage` | `e6654c065699` | observed live; not explicitly registered active |
 | `tmp_should_not_create` | `a5edb2b23fc4` | observed live; not explicitly registered active |
 | `tooling/export-frozen-source-7f39` | `43a1e5b2376f` | observed live; not explicitly registered active |
+| `validation/canonical-source-bundle-20261008` | `6cb9e7f2faf5` | observed live; not explicitly registered active |
+| `validation/fresh-knight-canonical-render-20261008` | `7eb960eaf0f0` | observed live; not explicitly registered active |
+| `validation/fresh-knight-source-export-v2-20261008` | `2ac5da879813` | observed live; not explicitly registered active |
+| `validation/fresh-knight-source-export-v3-20261008` | `d59b8be34ece` | observed live; not explicitly registered active |
+| `validation/platform-architecture-reexport-20261008` | `7c5064baaf28` | observed live; not explicitly registered active |
+| `wip/axis541-mira55-carrier-native-snapshot-20261007` | `c98c2de4dc41` | observed live; not explicitly registered active |
 
 ## Drift / validity
 
@@ -256,7 +278,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 - Historical donor/QualifiedAppearanceSet/Runtime-v4 documents remain evidence only and are not current V2 execution authority.
 - Presentation partition uses qualified observable evidence; categorical object identity is not minted.
 - Dynamic appearance quality gates use rigid-motion-invariant intrinsic textured-surface metrics; screen projection conditioning is diagnostic only.
-- Subject-2 Knight remains inactive until the user explicitly approves execution even when readiness is READY_FOR_WITNESS_EXECUTION.
+- The corrected Knight mechanical-CAA witness is explicitly approved as R&D/demo evidence; product visual authority remains blocked until current A/B/C appearance-runtime closure.
 
 ## Update semantics
 

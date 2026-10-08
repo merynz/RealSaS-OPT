@@ -82,4 +82,4 @@ The Go control plane is the sole live platform/control-plane implementation on t
 7. render cannot schedule fit/train/calibrate/promote;
 8. failure/repair explanation can be queried without Git archaeology.
 
-The branch remains isolated from canonical product authority until explicit promotion, but there is no longer a second live Python control plane in the repository.
+The Go control plane is on canonical main. Product authority remains an explicit qualified ProductRevision, independent of a Git merge. Operational development/product paths and outstanding executor limits are documented in `docs/platform/EXECUTION_LANES.md`.

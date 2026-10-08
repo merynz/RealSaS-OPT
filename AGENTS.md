@@ -8,6 +8,21 @@ If the user says only “continue / devam et”, resume from canonical `main` an
 
 This repository must be resumable without conversational memory.
 
+## Required operating path
+
+Read `docs/platform/EXECUTION_LANES.md` before stateful development. Use Go
+`realsasctl research-start` and `research-run` for component replacement;
+explicitly select the target and inspect the resolved reuse/execute scope.
+Use `product-compile` for product construction and `product-render` only for an
+exact qualified ProductRevision. Research results, including scoped FIT PASS,
+must not silently mint product authority. Preserve independent artifacts and
+report code/artifact identities with timings. Do not drive a new result by
+searching old branch names or editing a historical execution ledger.
+
+Use the self-hosted `realsas-wsl-1660ti` runner or local execution. Do not add
+GitHub-hosted execution. Old frozen recovery is manual provenance only.
+Absolute G3 remains an open gap without cancelling teacher-relative FIT1 PASS.
+
 ## Current machine authority spine
 
 Read current authority before historical provenance:

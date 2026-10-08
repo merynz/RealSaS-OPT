@@ -1,9 +1,9 @@
 {
   "schema": "RealSaS.ContextState.v2",
-  "date": "2026-10-01",
+  "date": "2026-10-08",
   "continuation_branch": "main",
   "execution_branch": "main",
-  "status": "RECOVERY_ENGINEERING_CERTIFIED__VF11_R512_OPEN__WITNESS_FORBIDDEN",
+  "status": "CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_VALIDATION",
   "authority": {
     "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V3.json",
     "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
@@ -22,17 +22,17 @@
   },
   "product": {
     "target": "automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics",
-    "demo_witness": "Subject-2 Knight (engineering recovery certified; witness execution still forbidden)",
-    "next_visible_product_milestone": "promote the certified recovery lineage to canonical main, begin professional platformization, and separately close VF-11 R512 before any Knight witness"
+    "demo_witness": "Knight FIT1 carrier-native teacher-relative mechanics PASS; absolute G3 separately open",
+    "next_visible_product_milestone": "Validate Go execution lanes and import latest sealed artifacts into a research Attempt before fresh carrier-native preview"
   },
   "current_focus": {
-    "module": "Knight appearance/runtime producer-consumer audit",
-    "state": "MAIN_CANONICALIZED__FROZEN_WITNESS_VERIFIED__RUNTIME_DATAFLOW_AUDIT_ACTIVE",
-    "active_experiment": "KNIGHT_APPEARANCE_RUNTIME_DATAFLOW_AUDIT",
-    "most_recent_closed_gate": "CORRECTED_WEIGHT_TOPOLOGY_HARMONIC_FIRST_FROZEN_WITNESS_BYTE_EXACT_PASS",
-    "promotion_block": "Before any new appearance architecture is selected, prove A) visual-triangle deformation-domain coherence, B) canonical-depth to visual-overlap ownership, and C) Stage45 fail-closed qualification of both.",
-    "scope_warning": "The accepted frozen smear witness is an R&D/demo mechanical-CAA witness. It is not product visual PASS or unseen/generalization evidence.",
-    "scientific_question": "Does the current source-owned 2D runtime preserve one coherent deformation domain per visual triangle and canonical physical visibility through native playback, with both properties enforced by Stage45?"
+    "module": "Go development/product execution separation",
+    "state": "CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_VALIDATION",
+    "active_experiment": "PLATFORM_EXECUTION_LANES",
+    "most_recent_closed_gate": "AXIS541_MIRA55_CARRIER_NATIVE_KNIGHT_FIT1_TEACHER_RELATIVE_PASS",
+    "promotion_block": "Absolute G3 and product/appearance qualifications remain independently open. New control-plane changes require exact-head integration validation before main promotion.",
+    "scope_warning": "Knight FIT1 teacher-relative mechanics PASS is preserved. Absolute G3 is a separate gap; product/unseen/latency/new render are not claimed.",
+    "scientific_question": "Can dependency-aware immutable artifact reuse preserve independent checkpoints and appearance while only changed components and consumers rerun?"
   },
   "execution_environment": {
     "actions": "SELF_HOSTED_LOCAL_ONLY",
@@ -161,10 +161,10 @@
     }
   ],
   "continuation_protocol": {
-    "first_action": "Read RECOVERY_CANONICAL_HANDOFF_20261001.md, V2_IMPLEMENTATION_READINESS, and verify the current implementation closure against certified recovery evidence.",
+    "first_action": "Read canonical/CANONICAL_HANDOFF_20261007.md, CURRENT_STATE.md and docs/platform/EXECUTION_LANES.md; verify exact main and current scoped evidence.",
     "assembly_completion_definition": "Engineering recovery is certified; canonical-main promotion may proceed without claiming witness readiness.",
     "witness_rule": "Do not execute Knight until V2_IMPLEMENTATION_READINESS is READY_FOR_WITNESS_EXECUTION and validate-witness-authorization confirms APPROVED_EXPLICITLY_BY_USER.",
-    "experiment_completion_definition": "VF-11 R512 scientific reclosure remains required for witness readiness; platform/system engineering may proceed after canonical-main recovery."
+    "experiment_completion_definition": "Validate component replacement and product/render separation; preserve teacher-relative FIT1 PASS and the separate absolute G3 gap."
   },
   "product_quality_axes": {
     "geometry": {

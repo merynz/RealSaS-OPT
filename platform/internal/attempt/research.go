@@ -23,11 +23,11 @@ var (
 )
 
 type ResearchRequest struct {
-	SubjectID                uuid.UUID
-	BaselineEngineReleaseID  uuid.UUID
-	CandidateEngineReleaseID uuid.UUID
-	ParentAttemptID          *uuid.UUID
-	CreatedBy                string
+	SubjectID                uuid.UUID  `json:"subject_id"`
+	BaselineEngineReleaseID  uuid.UUID  `json:"baseline_engine_release_id"`
+	CandidateEngineReleaseID uuid.UUID  `json:"candidate_engine_release_id"`
+	ParentAttemptID          *uuid.UUID `json:"parent_attempt_id"`
+	CreatedBy                string     `json:"created_by"`
 }
 
 type ResearchStart struct {

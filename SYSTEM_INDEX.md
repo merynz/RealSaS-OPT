@@ -85,3 +85,11 @@ The fresh regression run measured the dominant costs directly: renderer ~463.8 s
 ## Machine-readable ownership
 
 Architecture ownership remains queryable from `platform/internal/architecture/registry.go` and `tools/realsas_architecture.py`. Every canonical stage must resolve to one Engine owner; Platform separately owns durable state/orchestration and Runtime owns hot playback/render paths.
+
+## Platform execution entrypoints — 2026-10-08
+
+- `docs/platform/EXECUTION_LANES.md`: development/product operations and limits.
+- `platform/cmd/realsasctl`: Go operator commands.
+- `tools/platform_release_snapshot.py`: source-only pinned stage/version request.
+- `compiler/realsas_compiler_services/platform_worker/stage_inputs.py`: immutable CAS stage hydration.
+- `canonical/PLATFORM_MAIN_AUDIT_20261008.json`: main and current evidence audit.

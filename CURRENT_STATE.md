@@ -1,9 +1,25 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-10-07  
+**Date:** 2026-10-08
 **Canonical code line:** `main` only  
 **Architecture:** RealSaS V2, 46-stage dependency DAG  
 **Implementation readiness:** `canonical/V2_IMPLEMENTATION_READINESS.json`
+
+## Active platform work
+
+Active experiment: `PLATFORM_EXECUTION_LANES`. State:
+`CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_VALIDATION`.
+
+The audited canonical main is `949422678d34cf69008cffd6b4d7647c8c066b8a`.
+AXIS V5.4.1 and MIRA V5.5 Drive result hashes match its promotion receipt.
+Knight teacher-relative FIT1 mechanics is PASS; absolute G3 is a separate open
+red gap because the teacher also exceeds those thresholds. Neither cancels the
+other. The old frozen renderer is not the latest carrier-native execution proof.
+
+See `docs/platform/EXECUTION_LANES.md` for commands, cache identity, host
+requirements and remaining inference/portability limits. These implementation
+changes require exact-head validation and merge before becoming main code.
+Audit receipt: `canonical/PLATFORM_MAIN_AUDIT_20261008.json`.
 
 ## Current product architecture
 
@@ -24,7 +40,7 @@ Knight FIT1 mechanics are closed relative to the sealed source/teacher motion en
 
 ## Canonical mesh domain
 
-`compiler/realsas_compiler_core/surface_addressing_v1.py` owns `SurfaceAddressing`; Stage18/19 own construction and static qualification of the mechanical carrier. The current mechanics chain preserves a single carrier basis across MIRA prediction, dynamic proof and runtime binding.
+`compiler/realsas_compiler_core/surface_addressing_v1.py` owns `SurfaceAddressing`; Stage18/19 own construction and static qualification of the mechanical carrier. `QualifiedMeshIR` remains the qualified product mesh contract. The current mechanics chain preserves a single carrier basis across MIRA prediction, dynamic proof and runtime binding.
 
 ## Complete Appearance Authority
 
@@ -66,7 +82,7 @@ These measured costs define optimization priorities after repository currentness
 
 ## Immediate execution priorities
 
-1. Close this carrier-native mechanics promotion onto canonical `main` with CI/governance green.
+1. Carrier-native mechanics promotion is on main; validate and promote the Go execution-lane implementation.
 2. Keep Go platform enforcement as the next system blocker.
 3. Optimize measured rebuild/CAA/render hot paths.
 4. Return to presentation/runtime visual diagnosis only if the image remains wrong after 1–3.

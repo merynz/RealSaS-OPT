@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"path"
 	"sort"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -17,6 +19,9 @@ import (
 )
 
 type stageResultManifest struct {
+	SemanticParameters     map[string]any               `json:"semantic_parameters"`
+	ImplementationSHA256   string                       `json:"implementation_sha256"`
+	PolicySHA256           string                       `json:"policy_sha256"`
 	Schema                 string                       `json:"schema"`
 	StageID                string                       `json:"stage_id"`
 	CompilerStatus         string                       `json:"compiler_status"`
@@ -72,7 +77,14 @@ func (a Activities) bindStageExecutionInputs(
 		return err
 	}
 	rows.Close()
+	stage, ok := a.Graph.Get(stageID)
+	if !ok {
+		return fmt.Errorf("unknown stage %s", stageID)
+	}
 	for _, item := range subjectInputs {
+		if !stage.ConsumesInput(item.role) {
+			continue
+		}
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO execution_artifacts(execution_id,relation,role,artifact_id)
 			VALUES ($1,'input',$2,$3)
@@ -82,10 +94,6 @@ func (a Activities) bindStageExecutionInputs(
 		}
 	}
 
-	stage, ok := a.Graph.Get(stageID)
-	if !ok {
-		return fmt.Errorf("unknown stage %s", stageID)
-	}
 	for _, dependency := range stage.DependsOn {
 		var artifactID uuid.UUID
 		if err := tx.QueryRow(ctx, `
@@ -132,6 +140,9 @@ func (a Activities) prepareStageResultArtifact(
 	})
 	seenRoles := map[string]struct{}{}
 	for _, output := range outputs {
+		if output.RelativePath == "" || path.IsAbs(output.RelativePath) || path.Clean(output.RelativePath) != output.RelativePath || output.RelativePath == ".." || strings.HasPrefix(output.RelativePath, "../") || output.PayloadSchema == "" {
+			return nil, errors.New("ENGINE_STAGE_PORTABLE_OUTPUT_REQUIRED")
+		}
 		if output.Role == "" || output.ArtifactType == "" || output.SchemaVersion == "" {
 			return nil, errors.New("ENGINE_STAGE_OUTPUT_IDENTITY_INCOMPLETE")
 		}
@@ -147,7 +158,23 @@ func (a Activities) prepareStageResultArtifact(
 			return nil, fmt.Errorf("ENGINE_STAGE_OUTPUT_VERIFY:%s:%w", output.Role, err)
 		}
 	}
+	var implementationSHA, policySHA string
+	var parametersRaw []byte
+	if err := a.Pool.QueryRow(ctx, `
+		SELECT ers.implementation_sha256,ers.policy_sha256,ers.semantic_parameters
+		FROM attempts a
+		JOIN engine_release_stages ers ON ers.release_id=a.engine_release_id
+		WHERE a.id=$1 AND ers.stage_id=$2
+	`, attemptID, req.StageID).Scan(&implementationSHA, &policySHA, &parametersRaw); err != nil {
+		return nil, err
+	}
+	var parameters map[string]any
+	if err := json.Unmarshal(parametersRaw, &parameters); err != nil {
+		return nil, err
+	}
 	manifest := stageResultManifest{
+		SemanticParameters:   parameters,
+		ImplementationSHA256: implementationSHA, PolicySHA256: policySHA,
 		Schema:                 "RealSaS.StageResultManifest.v1",
 		StageID:                req.StageID,
 		CompilerStatus:         req.EngineResult.Status,
@@ -161,15 +188,6 @@ func (a Activities) prepareStageResultArtifact(
 	}
 	object, err := a.Store.PutBytes(ctx, raw)
 	if err != nil {
-		return nil, err
-	}
-	var implementationSHA, policySHA string
-	if err := a.Pool.QueryRow(ctx, `
-		SELECT ers.implementation_sha256,ers.policy_sha256
-		FROM attempts a
-		JOIN engine_release_stages ers ON ers.release_id=a.engine_release_id
-		WHERE a.id=$1 AND ers.stage_id=$2
-	`, attemptID, req.StageID).Scan(&implementationSHA, &policySHA); err != nil {
 		return nil, err
 	}
 	params, err := json.Marshal(map[string]any{

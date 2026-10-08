@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
+	"strings"
 )
 
 type Policy struct {
@@ -14,13 +16,24 @@ type Policy struct {
 }
 
 type Stage struct {
-	Ordinal   int      `json:"ordinal"`
-	ID        string   `json:"id"`
-	Title     string   `json:"title"`
-	Group     string   `json:"group"`
-	DependsOn []string `json:"depends_on"`
-	Adapter   string   `json:"adapter"`
-	Policy    Policy   `json:"policy"`
+	Ordinal      int      `json:"ordinal"`
+	ID           string   `json:"id"`
+	Title        string   `json:"title"`
+	Group        string   `json:"group"`
+	DependsOn    []string `json:"depends_on"`
+	Adapter      string   `json:"adapter"`
+	ManifestKeys []string `json:"manifest_keys,omitempty"`
+	Policy       Policy   `json:"policy"`
+}
+
+// Manifest sections follow the Compiler's declared per-stage read set. Other
+// source inputs remain conservative shared dependencies for compatibility.
+func (s Stage) ConsumesInput(role string) bool {
+	role = strings.TrimPrefix(role, "subject:")
+	if strings.HasPrefix(role, "manifest:") {
+		return slices.Contains(s.ManifestKeys, strings.TrimPrefix(role, "manifest:"))
+	}
+	return true
 }
 
 type planFile struct {

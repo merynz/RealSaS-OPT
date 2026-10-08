@@ -90,6 +90,9 @@ func Resolve(
 
 		inputs := make([]domain.ArtifactInputIdentity, 0, len(rootInputs)+len(stage.DependsOn))
 		for _, item := range rootInputs {
+			if !stage.ConsumesInput(item.Role) {
+				continue
+			}
 			inputs = append(inputs, domain.ArtifactInputIdentity{
 				Role:           item.Role,
 				Ordinal:        len(inputs),

@@ -3,11 +3,14 @@ name: platform-go-contract-v1
 
 on:
   push:
-    branches: [platform/professional-backend-v1-20261001, integration/final-main-knight-platform-20261002, main]
+    branches: [main, implementation/platform-execution-lanes-20261008]
     paths:
       - 'platform/**'
       - 'compiler/realsas_compiler_services/orchestrator/**'
       - 'compiler/realsas_compiler_core/**'
+      - 'compiler/realsas_compiler_services/platform_worker/**'
+      - 'tools/platform_release_snapshot.py'
+      - 'tests/compiler/test_platform_stage_inputs_v1.py'
       - 'models/**'
       - 'runtime/**'
       - 'tools/realsas_architecture.py'
@@ -21,7 +24,7 @@ permissions:
 
 jobs:
   contract:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 25
     services:
       postgres:
@@ -31,14 +34,14 @@ jobs:
           POSTGRES_PASSWORD: realsas
           POSTGRES_DB: realsas_platform
         ports:
-          - 5432:5432
+          - 15432:5432
         options: >-
           --health-cmd "pg_isready -U realsas -d realsas_platform"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 20
     env:
-      REALSAS_DATABASE_URL: postgres://realsas:realsas@127.0.0.1:5432/realsas_platform?sslmode=disable
+      REALSAS_DATABASE_URL: postgres://realsas:realsas@127.0.0.1:15432/realsas_platform?sslmode=disable
     defaults:
       run:
         working-directory: platform
@@ -48,6 +51,11 @@ jobs:
         with:
           go-version: '1.27.1'
           cache-dependency-path: platform/go.sum
+      - name: Python contract dependencies
+        run: |
+          python3 -m venv "$RUNNER_TEMP/realsas-platform-contract-venv"
+          "$RUNNER_TEMP/realsas-platform-contract-venv/bin/python" -m pip install pytest temporalio
+          echo "$RUNNER_TEMP/realsas-platform-contract-venv/bin" >> "$GITHUB_PATH"
       - name: Download pinned modules
         run: go mod download
       - name: Format gate
@@ -84,9 +92,18 @@ jobs:
           go test -p 1 ./internal/product -run TestAtomicPromotion -count=1
       - name: Build native control-plane binaries
         run: |
+          go build ./cmd/realsasctl
           go build ./cmd/realsas-api
           go build ./cmd/realsas-migrate
           go build ./cmd/realsas-architecture
           go build ./cmd/realsas-control-worker
-      - name: Python Engine worker syntax contract
-        run: python3 -m py_compile ../compiler/realsas_compiler_services/platform_worker/worker.py
+      - name: Python Engine worker and artifact reuse contracts
+        run: |
+          python3 -m py_compile ../compiler/realsas_compiler_services/platform_worker/worker.py
+          cd ..
+          python3 -m pytest -q tests/compiler/test_platform_stage_inputs_v1.py tests/repository/test_source_owned_visual_runtime_wiring_v1.py
+      - name: Current continuation contracts
+        run: |
+          cd ..
+          python3 tools/render_authority_map.py --write
+          python3 tools/render_rehydration_packet.py --write

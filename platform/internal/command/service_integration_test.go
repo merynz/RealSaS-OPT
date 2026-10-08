@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/merynz/RealSaS-OPT/platform/internal/attempt"
 	"github.com/merynz/RealSaS-OPT/platform/internal/input"
 	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
 	"github.com/merynz/RealSaS-OPT/platform/internal/release"
@@ -115,6 +116,42 @@ func TestCompileCommandIsTransactionalAndIdempotent(t *testing.T) {
 	}
 	if attempts != 1 || events != 1 {
 		t.Fatalf("attempts=%d outbox=%d", attempts, events)
+	}
+
+	researchManifest := commandReleaseManifest(g, "research-"+subjectID.String())
+	researchManifest.Purpose = release.PurposeResearch
+	researchRelease, err := release.Seal(ctx, pool, g, researchManifest, "ci")
+	if err != nil {
+		t.Fatal(err)
+	}
+	started, err := attempt.StartResearch(ctx, pool, g, attempt.ResearchRequest{
+		SubjectID: subjectID, BaselineEngineReleaseID: sealedRelease.ReleaseID,
+		CandidateEngineReleaseID: researchRelease.ReleaseID, CreatedBy: "ci"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	researchReq := req
+	researchReq.ResearchAttemptID = &started.AttemptID
+	researchReq.EngineReleaseID = researchRelease.ReleaseID
+	researchReq.CompilerRunID = "research-" + started.AttemptID.String()
+	researchReq.TargetStageID = "32_SKIN_QUALIFIED"
+	researchReq.IdempotencyKey = "research:" + started.AttemptID.String()
+	researchFirst, err := SubmitCompile(ctx, pool, g, researchReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	researchSecond, err := SubmitCompile(ctx, pool, g, researchReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if *researchFirst.AttemptID != started.AttemptID || researchFirst.CommandID != researchSecond.CommandID {
+		t.Fatal("research dispatch must retain the same Attempt and idempotent command")
+	}
+	productMisuse := researchReq
+	productMisuse.ResearchAttemptID = nil
+	productMisuse.IdempotencyKey += ":product"
+	if _, err := SubmitCompile(ctx, pool, g, productMisuse); !errors.Is(err, ErrProductReleaseRequired) {
+		t.Fatalf("research release accepted by product lane: %v", err)
 	}
 
 	conflict := req

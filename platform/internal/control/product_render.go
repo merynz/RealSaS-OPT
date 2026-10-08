@@ -76,6 +76,14 @@ func (a Activities) FinalizeCompile(ctx context.Context, payload map[string]any)
 		Status:          "PASS",
 		CompletedStages: append([]orchestration.StageCommitResult(nil), in.CompletedStages...),
 	}
+	var attemptKind string
+	if err := a.Pool.QueryRow(ctx, "SELECT kind FROM attempts WHERE id=$1", attemptID).Scan(&attemptKind); err != nil {
+		return orchestration.CompileWorkflowResult{}, err
+	}
+	if attemptKind == "research" {
+		_, err := a.Pool.Exec(ctx, "UPDATE attempts SET final_state='COMPLETED' WHERE id=$1 AND final_state='OPEN'", attemptID)
+		return result, err
+	}
 	if in.Plan.TargetStageID != "46_PRODUCT_CLOSURE_SEAL" {
 		_, err := a.Pool.Exec(ctx, "UPDATE attempts SET final_state='COMPLETED' WHERE id=$1 AND final_state='OPEN'", attemptID)
 		return result, err

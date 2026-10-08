@@ -28,6 +28,7 @@ const (
 )
 
 type CompileWorkflowInput struct {
+	ExecutionMode   string `json:"execution_mode,omitempty"`
 	CommandID       string `json:"command_id"`
 	AttemptID       string `json:"attempt_id"`
 	SubjectID       string `json:"subject_id"`
@@ -175,20 +176,32 @@ type PrepareStageExecutionRequest struct {
 	AllowedExecuteStageIDs []string `json:"allowed_execute_stage_ids"`
 }
 
+type StageInput struct {
+	StageID  string      `json:"stage_id"`
+	Artifact ArtifactRef `json:"artifact"`
+}
+
 type EngineStageRequest struct {
-	ExecutionID            string   `json:"execution_id"`
-	CommandID              string   `json:"command_id"`
-	AttemptID              string   `json:"attempt_id"`
-	SubjectID              string   `json:"subject_id"`
-	EngineReleaseID        string   `json:"engine_release_id"`
-	CompilerRunID          string   `json:"compiler_run_id"`
-	PipelinePlanSHA256     string   `json:"pipeline_plan_sha256"`
-	StageID                string   `json:"stage_id"`
-	ExpectedSemanticSHA256 string   `json:"expected_semantic_sha256"`
-	AllowedExecuteStageIDs []string `json:"allowed_execute_stage_ids"`
+	SemanticParameters     map[string]any `json:"semantic_parameters"`
+	ExecutionMode          string         `json:"execution_mode"`
+	ImplementationSHA256   string         `json:"implementation_sha256"`
+	PolicySHA256           string         `json:"policy_sha256"`
+	InputStages            []StageInput   `json:"input_stages"`
+	ExecutionID            string         `json:"execution_id"`
+	CommandID              string         `json:"command_id"`
+	AttemptID              string         `json:"attempt_id"`
+	SubjectID              string         `json:"subject_id"`
+	EngineReleaseID        string         `json:"engine_release_id"`
+	CompilerRunID          string         `json:"compiler_run_id"`
+	PipelinePlanSHA256     string         `json:"pipeline_plan_sha256"`
+	StageID                string         `json:"stage_id"`
+	ExpectedSemanticSHA256 string         `json:"expected_semantic_sha256"`
+	AllowedExecuteStageIDs []string       `json:"allowed_execute_stage_ids"`
 }
 
 type EngineOutput struct {
+	RelativePath   string `json:"relative_path,omitempty"`
+	PayloadSchema  string `json:"payload_schema,omitempty"`
 	Role           string `json:"role"`
 	ArtifactType   string `json:"artifact_type"`
 	SchemaVersion  string `json:"schema_version"`

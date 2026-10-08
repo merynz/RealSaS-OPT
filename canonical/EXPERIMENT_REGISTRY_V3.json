@@ -1,8 +1,18 @@
 {
   "schema": "RealSaS.ExperimentRegistry.v3",
-  "date": "2026-10-01",
+  "date": "2026-10-08",
   "active_execution_branch": "main",
   "experiments": [
+    {
+      "id": "PLATFORM_EXECUTION_LANES",
+      "branch": "main",
+      "status": "CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_VALIDATION",
+      "scope": "Go-owned Attempt execution, semantic stage reuse and separate ProductRevision render. Temporary review branches are code-only.",
+      "current_execution_authority": true,
+      "product_pass_claimed": false,
+      "unseen_claimed": false,
+      "execution_contract": "docs/platform/EXECUTION_LANES.md"
+    },
     {
       "id": "V2_IMPLEMENTATION_ASSEMBLY",
       "status": "RECOVERY_ENGINEERING_CERTIFIED__VF11_R512_OPEN__WITNESS_FORBIDDEN",
@@ -28,7 +38,8 @@
         "RT-37:CLOSED_WITH_SCOPE",
         "RT-45:CLOSED_WITH_SCOPE",
         "RT-46:CLOSED_WITH_SCOPE"
-      ]
+      ],
+      "current_execution_authority": false
     },
     {
       "id": "SUBJECT2_KNIGHT_FULL_CLOSURE",
@@ -64,7 +75,8 @@
       "id": "PLAYBACK_STACK_V1_20260916",
       "status": "HISTORICAL_IMPLEMENTATION_DONOR__NOT_EXECUTION_AUTHORITY",
       "branch": "playback-stack-v1-20260916",
-      "scope": "generic runtime/cache/render mechanisms selectively promotable after review"
+      "scope": "generic runtime/cache/render mechanisms selectively promotable after review",
+      "current_execution_authority": false
     }
   ],
   "historical_detail_registry": "canonical/EXPERIMENT_REGISTRY_V2.json"

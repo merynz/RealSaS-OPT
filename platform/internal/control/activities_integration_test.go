@@ -122,6 +122,11 @@ func TestPrepareAndFailExecutionPersistsLocalizedRepair(t *testing.T) {
 	if !ok {
 		t.Fatal("stage37 missing")
 	}
+	if _, err := pool.Exec(ctx, `INSERT INTO engine_release_stages
+		(release_id,stage_id,ordinal,implementation_sha256,policy_sha256,semantic_parameters)
+		VALUES ($1,$2,$3,$4,$5,'{}')`, releaseID, stageID, stage.Ordinal, repeatHex("b"), repeatHex("c")); err != nil {
+		t.Fatal(err)
+	}
 	for _, dependency := range stage.DependsOn {
 		if _, err := pool.Exec(ctx, `
 			INSERT INTO attempt_artifacts(attempt_id,role,artifact_id,origin)

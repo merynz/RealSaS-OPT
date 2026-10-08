@@ -21,7 +21,10 @@ from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
     visual_mesh_semantic_hash,
 )
 from compiler.realsas_compiler_core.visual_domain_v2 import (
-    OPERATOR_ID, POLICY, build_domain_binding, evaluate_domain_binding,
+    build_domain_binding, evaluate_domain_binding,
+)
+from compiler.realsas_compiler_core.visual_attachment_motion_v1 import (
+    OPERATOR_ID, POLICY, ATTACHMENT_OPERATOR_ID, evaluate_attachment_motion,
 )
 from compiler.realsas_compiler_core.runtime_visual_authority_v1 import (
     SourceOwnedVisualRuntimeProjectionV1IR, SourceOwnedVisualRuntimeViewV1IR,
@@ -40,7 +43,7 @@ from compiler.realsas_compiler_services.orchestrator.adapters.runtime_v2 import 
 from tools.sealed_motion_witness_replay import replay_witness, read_ref
 from compiler.realsas_compiler_core.presentation_attachment_v1 import (
     qualify_target_attachments, qualify_body_motion_preset,
-    visual_face_attachment_owners, attachment_frame0_report,
+    visual_face_attachment_owners, visual_vertex_attachment_owners, attachment_frame0_report,
 )
 from compiler.realsas_compiler_core.visual_domain_v2 import domain_binding_from_arrays, presentation_condition_metrics
 
@@ -156,12 +159,17 @@ def compile_projection_stage(ctx):
             arrays[f"view_{vi}_domain_{name}"] = value
         arrays[f"view_{vi}_face_attachment_owner"] = visual_face_attachment_owners(
             binding, source["faces"], witness["presentation_attachment_vertex_owner"])
+        vertex_owners = visual_vertex_attachment_owners(binding, witness["presentation_attachment_vertex_owner"])
         for clip in topology["clips"]:
             prefix = clip["array_prefix"]
             arrays[f"{prefix}_times"] = witness[f"{prefix}_times"]
-            fields = np.asarray([evaluate_domain_binding(binding, visual_faces=source["faces"],
-                posed_mechanical_positions_xyz=xyz, camera=camera)
-                for xyz in witness[f"{prefix}_canonical_xyz"]])
+            fields = np.asarray([evaluate_attachment_motion(
+                evaluate_domain_binding(binding, visual_faces=source["faces"],
+                    posed_mechanical_positions_xyz=xyz, camera=camera),
+                rest_source_xy=source["positions"], vertex_attachment_owner=vertex_owners,
+                attachments=topology["attachments"], axis_positions_source=witness["axis_positions_source"],
+                skin_matrices_source=witness[f"{prefix}_skin_matrices_source"][fi], camera=camera)
+                for fi, xyz in enumerate(witness[f"{prefix}_canonical_xyz"])])
             arrays[f"{prefix}_view_{vi}_positions"] = fields[:, :, :2]
             arrays[f"{prefix}_view_{vi}_depths"] = fields[:, :, 2]
         views.append(SourceOwnedVisualRuntimeViewV1IR(view_index=vi, view_id=f"V{vi}",
@@ -189,7 +197,8 @@ def compile_projection_stage(ctx):
         projection_hash="", metadata={"product_authority": False, "qualification_scope": "RESEARCH_FIT_ONLY",
             "mechanical_mesh_render_authority": False, "runtime_generation": False, "operator_policy": POLICY,
             "target_attachments": topology["attachments"], "body_motion_preset": topology["motion_preset"],
-            "attachment_frame0": topology["attachment_frame0"]})
+            "attachment_frame0": topology["attachment_frame0"],
+            "attachment_motion_operator_id": ATTACHMENT_OPERATOR_ID})
     value = replace(value, projection_hash=source_owned_visual_runtime_projection_hash(value))
     return {"status": "PASS_DEMO_ONLY", "outputs": [write_ir(root / "projection.json", value,
             authority_class="SCOPED_RESEARCH_PRESENTATION_PROJECTION"),
@@ -260,7 +269,10 @@ def prove_presentation_stage(ctx):
             SimpleNamespace(time_seconds=float(t), posed_vertex_xyz=[(f"v{i}", p) for i, p in enumerate(xyz)])
             for t, xyz in zip(witness[f"{prefix}_times"], witness[f"{prefix}_canonical_xyz"])]))
     arrays = _load_npz({"path": projection.projection_npz_path, "sha256": projection.projection_npz_sha256})
-    proof = prove_visual_domain_matrix(projection, arrays, mesh=mesh, dynamic=dynamic)
+    if projection.metadata.get("target_attachments") != topology["attachments"]:
+        raise QualificationError("SCOPED_PRESENTATION_ATTACHMENT_CONTRACT_DRIFT")
+    proof = prove_visual_domain_matrix(projection, arrays, mesh=mesh, dynamic=dynamic,
+                                      attachment_witness=witness)
     attachment_matrix = []
     for view in projection.views:
         vi = view.view_index
@@ -316,7 +328,8 @@ def prove_presentation_stage(ctx):
                             arrays[f"view_{vi}_faces"][selected]) if selected.any() else None})
                 matrix.append({"clip_id": clip.clip_id, "view_id": view.view_id, "frame_index": fi,
                     "rgba": {"path": str(rgba), "sha256": sha256_file(rgba)}, "native_reference_parity": not mismatch})
-    passed = (all(proof[k] for k in ("domain_coherence_passed", "frame_view_matrix_complete", "area_condition_passed"))
+    passed = (all(proof[k] for k in ("domain_coherence_passed", "frame_view_matrix_complete", "area_condition_passed",
+                                    "attachment_slot_motion_passed"))
               and parity_bad == empty == ties == overflow == flipped == edge_bad == 0)
     data = {"schema": "RealSaS.ScopedPresentationProof.v1", "status": "PASS_DEMO_ONLY" if passed else "FAIL",
         **proof, "canonical_depth_ownership_passed": ties == overflow == 0,
@@ -325,6 +338,10 @@ def prove_presentation_stage(ctx):
         "flipped_triangles": flipped, "edge_gt_4_count": edge_bad, "rendered_frames": matrix,
         "projection_hash": projection.projection_hash, "native_player_sha256": player_sha,
         "attachment_ownership_passed": True, "attachment_matrix": attachment_matrix,
+        "attachment_presentation_passed": proof["attachment_slot_motion_passed"]
+            and proof["domain_coherence_passed"] and parity_bad == ties == overflow == 0
+            and all(row["condition"] is None or (row["condition"]["area_collapse_count"] == 0
+                and row["condition"]["condition_failure_count"] == 0) for row in attachment_matrix),
         "target_attachments": topology["attachments"], "body_motion_preset": topology["motion_preset"],
         "attachment_frame0": topology["attachment_frame0"],
         "product_authority": False, "mechanics_reopened": False}

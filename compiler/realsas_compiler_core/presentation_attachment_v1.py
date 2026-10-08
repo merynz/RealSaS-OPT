@@ -5,6 +5,7 @@ from scipy.sparse.csgraph import connected_components
 
 from .hashing import content_sha256
 from .types import QualificationError
+from .visual_attachment_motion_v1 import ATTACHMENT_OPERATOR_ID
 
 
 def qualify_target_attachments(contract, *, vertices, faces, carrier_basis_sha256,
@@ -25,8 +26,10 @@ def qualify_target_attachments(contract, *, vertices, faces, carrier_basis_sha25
         name = str(item["attachment_id"])
         selected = tuple(map(int, item["component_indices"]))
         joint = str(item["target_slot_canonical_joint_id"])
+        motion_model = item.get("presentation_motion_model", "CANONICAL_SOURCE_CHART_FIELD")
         if (not name or name in names or not selected or len(set(selected)) != len(selected)
-                or any(c < 0 or c >= count for c in selected) or joint not in canonical_to_raw):
+                or any(c < 0 or c >= count for c in selected) or joint not in canonical_to_raw
+                or motion_model not in ("CANONICAL_SOURCE_CHART_FIELD", ATTACHMENT_OPERATOR_ID)):
             raise QualificationError("PRESENTATION_ATTACHMENT_SELECTOR_INVALID")
         names.add(name)
         mask = np.isin(components, selected)
@@ -38,6 +41,7 @@ def qualify_target_attachments(contract, *, vertices, faces, carrier_basis_sha25
             "component_indices": list(selected), "vertex_indices": np.flatnonzero(mask).tolist(),
             "rest_bounds_source_frame": [v[mask].min(axis=0).tolist(), v[mask].max(axis=0).tolist()],
             "local_placement_authority": "EXACT_TARGET_SOURCE_REST_FRAME",
+            "presentation_motion_model": motion_model,
             "source_motion_attachment_geometry_required": False})
     if np.any(owners[f] != owners[f[:, :1]]):
         raise QualificationError("PRESENTATION_ATTACHMENT_CROSSES_CANONICAL_FACE")
@@ -48,7 +52,7 @@ def qualify_target_attachments(contract, *, vertices, faces, carrier_basis_sha25
     return owners, result
 
 
-def visual_face_attachment_owners(binding, faces, mechanical_owners):
+def visual_vertex_attachment_owners(binding, mechanical_owners):
     anchors = np.asarray(binding["anchor_vertex"], dtype=np.int64)
     ancestry = np.asarray(binding["anchor_mechanical_vertices"], dtype=np.int64)
     domain = np.asarray(binding["domain_id"], dtype=np.int32)
@@ -61,6 +65,11 @@ def visual_face_attachment_owners(binding, faces, mechanical_owners):
         if len(owners) != 1:
             raise QualificationError("PRESENTATION_ATTACHMENT_DOMAIN_OWNERSHIP_AMBIGUOUS")
         vertex_owner[domain == chart] = owners[0]
+    return vertex_owner
+
+
+def visual_face_attachment_owners(binding, faces, mechanical_owners):
+    vertex_owner = visual_vertex_attachment_owners(binding, mechanical_owners)
     tri = np.asarray(faces, dtype=np.int64)
     if np.any(vertex_owner[tri] != vertex_owner[tri[:, :1]]):
         raise QualificationError("PRESENTATION_ATTACHMENT_VISUAL_FACE_MIXED")

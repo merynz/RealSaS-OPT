@@ -85,6 +85,11 @@ from compiler.realsas_compiler_core.visual_domain_v2 import (
     presentation_condition_metrics,
 )
 from compiler.realsas_compiler_core.visual_depth_v2 import render_visual_depth
+from compiler.realsas_compiler_core.visual_attachment_motion_v1 import (
+    OPERATOR_ID as ATTACHMENT_OPERATOR, POLICY as ATTACHMENT_POLICY,
+    evaluate_attachment_motion, attachment_slot_carrier_residual,
+)
+from compiler.realsas_compiler_core.presentation_attachment_v1 import visual_vertex_attachment_owners
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.runtime_package_v2 import (
     build_rss_v2_entries,
@@ -1296,7 +1301,7 @@ def _source_owned_visual_reference_frame(
             "RUNTIME_V2_VISUAL_REFERENCE_POSITION_SHAPE_INVALID"
         )
 
-    if projection.visual_deformation_operator_id == OPERATOR_ID:
+    if projection.visual_deformation_operator_id in (OPERATOR_ID, ATTACHMENT_OPERATOR):
         key = f"{clip.array_prefix}_view_{vi}_depths"
         if key not in arrays:
             raise QualificationError("SOURCE_VISUAL_CANONICAL_DEPTH_MISSING")
@@ -1686,10 +1691,12 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
     }
 
 
-def prove_visual_domain_matrix(projection, arrays, *, mesh, dynamic):
+def prove_visual_domain_matrix(projection, arrays, *, mesh, dynamic, attachment_witness=None):
     """Recompute every field against the upstream canonical motion witness."""
-    if (projection.visual_deformation_operator_id != OPERATOR_ID
-            or projection.visual_deformation_policy_hash != content_sha256(POLICY)
+    attachment_mode = projection.visual_deformation_operator_id == ATTACHMENT_OPERATOR
+    policy = ATTACHMENT_POLICY if attachment_mode else POLICY
+    if (projection.visual_deformation_operator_id not in (OPERATOR_ID, ATTACHMENT_OPERATOR)
+            or projection.visual_deformation_policy_hash != content_sha256(policy)
             or projection.mechanical_mesh_binding_hash != mesh.mesh_lineage_hash
             or projection.dynamic_motion_binding_hash != dynamic.dynamic_motion_hash):
         raise QualificationError("SOURCE_VISUAL_PRESENTATION_AUTHORITY_REQUIRED")
@@ -1697,6 +1704,10 @@ def prove_visual_domain_matrix(projection, arrays, *, mesh, dynamic):
     id_index = {key: i for i, key in enumerate(ids)}
     canonical_faces = {tuple(sorted(id_index[str(k)] for k in face)) for face in mesh.faces}
     rest = np.asarray([v.P for v in mesh.vertices], dtype=np.float64)
+    if attachment_mode and (attachment_witness is None
+            or not np.array_equal(attachment_witness.get("vertices"), rest)
+            or not projection.metadata.get("target_attachments")):
+        raise QualificationError("SOURCE_VISUAL_ATTACHMENT_SEALED_WITNESS_REQUIRED")
     if len(ids) != len(set(ids)) or sorted(int(v.view_index) for v in projection.views) != list(range(8)):
         raise QualificationError("SOURCE_VISUAL_FRAME_MATRIX_VIEW_OR_VERTEX_DRIFT")
     witness = {str(c.clip_id): c for c in dynamic.clips}
@@ -1704,6 +1715,7 @@ def prove_visual_domain_matrix(projection, arrays, *, mesh, dynamic):
         raise QualificationError("SOURCE_VISUAL_FRAME_MATRIX_CLIP_DRIFT")
     count = area_bad = condition_bad = 0
     residual = 0.0
+    slot_residual = 0.0
     matrix = []
     for view in projection.views:
         vi = int(view.view_index)
@@ -1717,6 +1729,9 @@ def prove_visual_domain_matrix(projection, arrays, *, mesh, dynamic):
         source_camera = dict(view.camera)
         source_camera["resolution"] = int(view.source_width)
         camera = qualify_camera_v3(source_camera, view_id=view.view_id, view_index=vi)
+        if attachment_mode:
+            vertex_owners = visual_vertex_attachment_owners(binding,
+                attachment_witness["presentation_attachment_vertex_owner"])
         for clip in projection.clips:
             source = witness[str(clip.clip_id)]
             if len(source.frames) != int(clip.frame_count):
@@ -1731,11 +1746,24 @@ def prove_visual_domain_matrix(projection, arrays, *, mesh, dynamic):
                 by_id = {str(k): xyz for k, xyz in frame.posed_vertex_xyz}
                 if len(by_id) != len(ids) or set(by_id) != set(ids):
                     raise QualificationError("SOURCE_VISUAL_DOMAIN_WITNESS_VERTEX_DRIFT")
+                posed = np.asarray([by_id[k] for k in ids])
                 expected = evaluate_domain_binding(
                     binding, visual_faces=faces,
-                    posed_mechanical_positions_xyz=np.asarray([by_id[k] for k in ids]),
+                    posed_mechanical_positions_xyz=posed,
                     camera=camera,
                 )
+                if attachment_mode:
+                    if not np.array_equal(attachment_witness[f"{clip.array_prefix}_canonical_xyz"][fi], posed):
+                        raise QualificationError("SOURCE_VISUAL_ATTACHMENT_MOTION_WITNESS_DRIFT")
+                    matrices = attachment_witness[f"{clip.array_prefix}_skin_matrices_source"][fi]
+                    slot_residual = max(slot_residual, attachment_slot_carrier_residual(
+                        projection.metadata["target_attachments"], rest_xyz=rest,
+                        posed_xyz=posed, skin_matrices_source=matrices))
+                    expected = evaluate_attachment_motion(expected,
+                        rest_source_xy=binding["rest_positions"], vertex_attachment_owner=vertex_owners,
+                        attachments=projection.metadata["target_attachments"],
+                        axis_positions_source=attachment_witness["axis_positions_source"],
+                        skin_matrices_source=matrices, camera=camera)
                 actual = np.column_stack((
                     arrays[f"{clip.array_prefix}_view_{vi}_positions"][fi],
                     arrays[depth_key][fi],
@@ -1754,6 +1782,9 @@ def prove_visual_domain_matrix(projection, arrays, *, mesh, dynamic):
     if count != expected_count or count <= 0:
         raise QualificationError("SOURCE_VISUAL_FRAME_MATRIX_INCOMPLETE")
     return {"domain_coherence_passed": residual <= 1e-7,
+            "attachment_slot_motion_passed": not attachment_mode or slot_residual <= policy["maximum_carrier_slot_relative_residual"],
+            "maximum_attachment_slot_carrier_relative_residual": slot_residual,
+            "attachment_motion_operator_id": policy.get("attachment_motion_operator_id"),
             "frame_view_matrix_complete": count == expected_count,
             "area_condition_passed": area_bad == 0 and condition_bad == 0,
             "area_collapse_count": area_bad, "condition_failure_count": condition_bad,

@@ -31,6 +31,7 @@ EXT14 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V14_20260927.json
 EXT15 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V15_20260927.json")
 EXT16 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V16_20261001.json")
 EXT17 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V17_20261008.json")
+EXT18 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V18_20261008.json")
 
 
 def _blob_sha1(payload: bytes) -> str:
@@ -60,6 +61,7 @@ def verify() -> dict:
     ext15 = json.loads(EXT15.read_text(encoding="utf-8"))
     ext16 = json.loads(EXT16.read_text(encoding="utf-8"))
     ext17 = json.loads(EXT17.read_text(encoding="utf-8"))
+    ext18 = json.loads(EXT18.read_text(encoding="utf-8"))
 
     if ext1["schema"] != "realsas.compiler_runtime_source_extension_seal.v1":
         raise RuntimeError("NATIVE_SOURCE_EXT1_SCHEMA_DRIFT")
@@ -308,6 +310,15 @@ def verify() -> dict:
     if ext17["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME":
         raise RuntimeError("NATIVE_SOURCE_EXT17_SUBTREE_CLOSURE_DRIFT")
 
+    if (ext18["schema"] != "realsas.compiler_runtime_source_extension_seal.v18"
+            or ext18["prior_extension"]["path"] != str(EXT17)
+            or _blob_sha1(EXT17.read_bytes()) != ext18["prior_extension"]["git_blob_sha1"]
+            or ext18["authority"]["historical_base_seal_mutated"] is not False
+            or ext18["authority"]["prior_extension_mutated"] is not False
+            or ext18["authority"]["runtime_role"] != "subordinate_deployment_consumer"
+            or ext18["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME"):
+        raise RuntimeError("NATIVE_SOURCE_EXT18_AUTHORITY_DRIFT")
+
     expected = {
         row["path"]: {
             "size_bytes": int(row["size_bytes"]),
@@ -355,6 +366,7 @@ def verify() -> dict:
     apply_extension(ext15, "extension_v15")
     apply_extension(ext16, "extension_v16")
     apply_extension(ext17, "extension_v17")
+    apply_extension(ext18, "extension_v18")
 
     tracked = {
         row.strip()
@@ -427,6 +439,7 @@ def verify() -> dict:
         "extension_v15_change_count": len(ext15["replacements"]) + len(ext15["additions"]),
         "extension_v16_change_count": len(ext16["replacements"]) + len(ext16["additions"]),
         "extension_v17_change_count": len(ext17["replacements"]) + len(ext17["additions"]),
+        "extension_v18_change_count": len(ext18["replacements"]) + len(ext18["additions"]),
         "subtree_blob_count": len(tracked),
         "verified_paths": verified,
     }

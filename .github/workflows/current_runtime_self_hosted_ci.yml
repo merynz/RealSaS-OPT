@@ -142,7 +142,8 @@ jobs:
             tests/compiler/test_runtime_v2_source_owned_visual_native_smoke.py \
             tests/compiler/test_visual_canonical_depth_native_v2.py \
             tests/compiler/test_visual_presentation_p0_v2.py \
-            tests/compiler/test_presentation_attachments_v1.py
+            tests/compiler/test_presentation_attachments_v1.py \
+            tests/compiler/test_visual_attachment_motion_v1.py
       - name: Runtime gate summary
         run: |
           echo 'CURRENT_RUNTIME_NATIVE_INTERLOCK_PASS'

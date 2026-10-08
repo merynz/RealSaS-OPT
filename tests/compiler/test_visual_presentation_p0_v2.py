@@ -151,6 +151,32 @@ def test_proof_recomputes_field_and_detects_forged_baked_positions():
     assert not prove_visual_domain_matrix(p, a, mesh=m, dynamic=d)["domain_coherence_passed"]
 
 
+def test_slot_attachment_proof_requires_witness_and_rejects_wrong_slot_even_with_good_shape():
+    from compiler.realsas_compiler_core.visual_attachment_motion_v1 import (
+        OPERATOR_ID as SLOT_OPERATOR, POLICY as SLOT_POLICY,
+    )
+    p, a, m, d = matrix_fixture()
+    p.visual_deformation_operator_id = SLOT_OPERATOR
+    p.visual_deformation_policy_hash = content_sha256(SLOT_POLICY)
+    p.metadata = {"target_attachments": {"attachments": [{"attachment_index": 1,
+        "presentation_motion_model": "TARGET_SLOT_LOCAL_RIGID_2D_CAMERA_TWIST_V1",
+        "target_slot_raw_index_fit_only": 0, "vertex_indices": [0,1,2,3]}]}}
+    with pytest.raises(QualificationError, match="SEALED_WITNESS_REQUIRED"):
+        prove_visual_domain_matrix(p, a, mesh=m, dynamic=d)
+    xyz = np.asarray([v.P for v in m.vertices])
+    witness = {"vertices": xyz, "presentation_attachment_vertex_owner": np.ones(len(xyz), dtype=int),
+        "axis_positions_source": np.array([[0.,0,0]]), "clip_0_canonical_xyz": xyz[None],
+        "clip_0_skin_matrices_source": np.eye(4)[None,None]}
+    assert prove_visual_domain_matrix(p,a,mesh=m,dynamic=d,attachment_witness=witness)["attachment_slot_motion_passed"]
+    # Forged slot movement, perfectly rigid baked triangles: shape alone is insufficient.
+    witness["clip_0_skin_matrices_source"][0,0,0,3] = 1
+    for vi in range(8):
+        a[f"clip_0_view_{vi}_positions"] = a[f"clip_0_view_{vi}_positions"].copy() + [1,0]
+    proof = prove_visual_domain_matrix(p,a,mesh=m,dynamic=d,attachment_witness=witness)
+    assert proof["area_condition_passed"] and proof["domain_coherence_passed"]
+    assert not proof["attachment_slot_motion_passed"]
+
+
 @pytest.mark.parametrize("missing", ["view", "depth", "time"])
 def test_proof_fails_closed_on_incomplete_matrix(missing):
     p, a, m, d = matrix_fixture()

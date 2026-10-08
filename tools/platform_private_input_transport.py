@@ -7,7 +7,7 @@ or committed as plaintext; scientific bytes still require their pinned SHA256.
 For larger handoffs, the encrypted payload may contain one hash-pinned manifest
 locator instead of every transfer locator. The manifest is itself bound to the
 same run ID/code SHA and then resolves to the existing transfers/config shape.
-The original inline transfers format remains supported.
+The original inline transfers format remains supported and covered by tests.
 """
 import argparse
 import base64

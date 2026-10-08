@@ -15,7 +15,10 @@ HOSTED_FIRST = {
     "platform_go_contract_v1.yml",
     "platform_throughput_hydration_contract.yml",
 }
-AUTHORIZED_SELF_HOSTED = "[self-hosted, linux, x64, realsas]"
+AUTHORIZED_SELF_HOSTED = {
+    "[self-hosted, linux, x64, realsas]",
+    "[self-hosted, realsas, gpu]",
+}
 
 
 def test_workflow_runner_kinds_are_explicit_and_authorized():
@@ -25,7 +28,7 @@ def test_workflow_runner_kinds_are_explicit_and_authorized():
         for value in re.findall(r"^\s*runs-on:\s*(.+)$", text, re.MULTILINE):
             checked += 1
             value = value.strip()
-            assert value == "ubuntu-latest" or AUTHORIZED_SELF_HOSTED in value, (
+            assert value == "ubuntu-latest" or value in AUTHORIZED_SELF_HOSTED, (
                 f"Implicit or unauthorized runner: {path.name}: {value}"
             )
     assert checked > 0
@@ -36,7 +39,8 @@ def test_host_independent_current_workflows_are_hosted_and_public_only():
         path = ROOT / ".github/workflows" / name
         text = path.read_text(encoding="utf-8")
         assert "runs-on: ubuntu-latest" in text, name
-        assert AUTHORIZED_SELF_HOSTED not in text, name
+        for authorized in AUTHORIZED_SELF_HOSTED:
+            assert authorized not in text, name
         assert "github.event.repository.private == false" in text, name
 
 

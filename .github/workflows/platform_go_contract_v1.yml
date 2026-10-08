@@ -30,8 +30,6 @@ jobs:
   contract:
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 25
-    env:
-      REALSAS_CI_PGDATA: ${{ runner.temp }}/realsas-platform-pg-${{ github.run_id }}-${{ github.run_attempt }}
     defaults:
       run:
         working-directory: platform
@@ -46,6 +44,7 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/realsas-platform-contract-venv"
           "$RUNNER_TEMP/realsas-platform-contract-venv/bin/python" -m pip install pytest temporalio pgserver==0.1.4
           echo "$RUNNER_TEMP/realsas-platform-contract-venv/bin" >> "$GITHUB_PATH"
+          echo "REALSAS_CI_PGDATA=$RUNNER_TEMP/realsas-platform-pg-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
       - name: Start isolated PostgreSQL without Docker
         run: |
           python3 - <<'PY'

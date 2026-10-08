@@ -27,7 +27,16 @@ def psql_binary() -> str:
 
 def run_psql(admin_url: str, sql: str, *, capture: bool = True) -> str:
     result = subprocess.run(
-        [psql_binary(), admin_url, "-X", "-v", "ON_ERROR_STOP=1", "-Atc", sql],
+        [
+            psql_binary(),
+            "-X",
+            "-v",
+            "ON_ERROR_STOP=1",
+            "-d",
+            admin_url,
+            "-Atc",
+            sql,
+        ],
         check=True,
         text=True,
         capture_output=capture,

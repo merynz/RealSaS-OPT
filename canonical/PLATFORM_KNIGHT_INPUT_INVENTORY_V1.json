@@ -6,20 +6,80 @@
   "qualification_minted_by_inventory": false,
   "product_authority": false,
   "required_files": [
-    {"name": "M_EVIDENCE_SUPPORT_V55.npz", "sha256": "8a625d2e5373cc679dbbaa460c8045956a520b65799bca15cb6975a50e75f514", "size_bytes": 330410},
-    {"name": "MIRA_AXIS41_TESSA_M_SKIN_FIELD_V55.npz", "sha256": "880dd73b2f3a21196c229156a3271fa95e7261def3f50a3dfe9f1c49ca2bb27b", "size_bytes": 354362},
-    {"name": "MIRA_M_DIRECT_RESULT_V55.json", "sha256": "31545e7180aa770b1efc4a1876c256999bdeb38f703d9a3e46892f888a4678c1", "size_bytes": 2878},
-    {"name": "AXIS41_DISCRETE_XYZ_FROZEN_CAUSAL_RESULT_V541.json", "sha256": "072b52b206e622b1c1b51fe266c0e348fe3829925f8258035d23c61087abf528", "size_bytes": 1346},
-    {"name": "AXIS41_DISCRETE_XYZ_FROZEN_CAUSAL_QUALIFIED_SKELETON_V541.json", "sha256": "c5a3c7f5675ba84233c8d7eb4ccab076e69c105462f86673dc259e30e2ca6ca5", "size_bytes": 29852},
-    {"name": "AXIS41_BFS_ALIGNMENT_FROZEN_CAUSAL_V541.json", "sha256": "c75073cac6f4f8f6b012ca34d387a8dbcf771f4c65fa5812df806090bfad60c3", "size_bytes": 3347},
-    {"name": "TESSA_STATIC_G3_REPAIRED_CANDIDATE_V3.json", "sha256": "1fa2c1d67314124d4c22af55e57cc8eb9b5e65bf1ff65870acefc7ea1d104bd1", "size_bytes": 3447112},
-    {"name": "TESSA_STATIC_G3_REPAIR_RESULT_V3.json", "sha256": "bb689bc2ffe8c6329246e65b12d35082c5d5ff006f2fe006e14225c45a381f90", "size_bytes": 4674},
-    {"name": "TESSA_T1B_DECODED_MESH.npz", "sha256": "b7ccb058ef23f8c54d053e64580150dffffeb6a76a126ecaf48b265dd093f390", "size_bytes": 36970},
-    {"name": "KNIGHT_EVALUATED_TEACHER_SOURCE.npz", "sha256": "96435646a0084a0a038040ee748cb33d3bfa0b1ed550661befd3b18539e28e6f", "size_bytes": 77503},
-    {"name": "normalization_domain.json", "sha256": "01b63a57390de9a5d2c731d9644e65ff779980caa066c19204db3b4a3e0c634b", "size_bytes": 770},
-    {"name": "qualified_rigging_surface.json", "sha256": "7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182", "size_bytes": 29296867}
+    {
+      "name": "M_EVIDENCE_SUPPORT_V55.npz",
+      "sha256": "8a625d2e5373cc679dbbaa460c8045956a520b65799bca15cb6975a50e75f514",
+      "size_bytes": 330410,
+      "source": {"provider": "google_drive", "file_id": "1_HrVSpvSSZ7abgf6kzns0_RCZBhmbu2G"}
+    },
+    {
+      "name": "MIRA_AXIS41_TESSA_M_SKIN_FIELD_V55.npz",
+      "sha256": "880dd73b2f3a21196c229156a3271fa95e7261def3f50a3dfe9f1c49ca2bb27b",
+      "size_bytes": 354362,
+      "source": {"provider": "google_drive", "file_id": "1TifJjh_9O4cjwlBS12KYGmyWAVHcBCmc"}
+    },
+    {
+      "name": "MIRA_M_DIRECT_RESULT_V55.json",
+      "sha256": "31545e7180aa770b1efc4a1876c256999bdeb38f703d9a3e46892f888a4678c1",
+      "size_bytes": 2878,
+      "source": {"provider": "google_drive", "file_id": "1Rk60gyCs6NeaaBArEz0iZ_phdtTUXRDM"}
+    },
+    {
+      "name": "AXIS41_DISCRETE_XYZ_FROZEN_CAUSAL_RESULT_V541.json",
+      "sha256": "072b52b206e622b1c1b51fe266c0e348fe3829925f8258035d23c61087abf528",
+      "size_bytes": 1346,
+      "source": {"provider": "google_drive", "file_id": "1pFaAETVqjdUBUAIlj_ZECKP1pz15GxT6"}
+    },
+    {
+      "name": "AXIS41_DISCRETE_XYZ_FROZEN_CAUSAL_QUALIFIED_SKELETON_V541.json",
+      "sha256": "c5a3c7f5675ba84233c8d7eb4ccab076e69c105462f86673dc259e30e2ca6ca5",
+      "size_bytes": 29852,
+      "source": {"provider": "google_drive", "file_id": "1H2q06o42pAiPMHnWYK4wmTXn5pHR0Jy4"}
+    },
+    {
+      "name": "AXIS41_BFS_ALIGNMENT_FROZEN_CAUSAL_V541.json",
+      "sha256": "c75073cac6f4f8f6b012ca34d387a8dbcf771f4c65fa5812df806090bfad60c3",
+      "size_bytes": 3347,
+      "source": {"provider": "google_drive", "file_id": "1ZMwKjXAgILo85jlzJYuON68xdUPjZNZT"}
+    },
+    {
+      "name": "TESSA_STATIC_G3_REPAIRED_CANDIDATE_V3.json",
+      "sha256": "1fa2c1d67314124d4c22af55e57cc8eb9b5e65bf1ff65870acefc7ea1d104bd1",
+      "size_bytes": 3447112,
+      "source": {"provider": "google_drive", "file_id": "14KbRQDvPEXD6szXtMXAT47n-hEAQzROv"}
+    },
+    {
+      "name": "TESSA_STATIC_G3_REPAIR_RESULT_V3.json",
+      "sha256": "bb689bc2ffe8c6329246e65b12d35082c5d5ff006f2fe006e14225c45a381f90",
+      "size_bytes": 4674,
+      "source": {"provider": "google_drive", "file_id": "1hunBE_rLU_H9U2OB20uwKZD0L8rvqlpf"}
+    },
+    {
+      "name": "TESSA_T1B_DECODED_MESH.npz",
+      "sha256": "b7ccb058ef23f8c54d053e64580150dffffeb6a76a126ecaf48b265dd093f390",
+      "size_bytes": 36970,
+      "source": {"provider": "google_drive", "file_id": "1m-NnSshGmHtB4oiLC95qSkh5oAK1pkHD"}
+    },
+    {
+      "name": "KNIGHT_EVALUATED_TEACHER_SOURCE.npz",
+      "sha256": "96435646a0084a0a038040ee748cb33d3bfa0b1ed550661befd3b18539e28e6f",
+      "size_bytes": 77503,
+      "source": {"provider": "google_drive", "file_id": "1A2j2bUUsn4Pft7t_dm6bHm5kSMHXvMA2"}
+    },
+    {
+      "name": "normalization_domain.json",
+      "sha256": "01b63a57390de9a5d2c731d9644e65ff779980caa066c19204db3b4a3e0c634b",
+      "size_bytes": 770,
+      "source": {"provider": "google_drive", "file_id": "1nhtaheXnTXUNWZW1hA3bLHKv8OqMgTtU"}
+    },
+    {
+      "name": "qualified_rigging_surface.json",
+      "sha256": "7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182",
+      "size_bytes": 29296867,
+      "source": {"provider": "google_drive", "file_id": "1plP42cVqN2Yc5jcbpglzB-SbksvT682d"}
+    }
   ],
-  "upstream_hash_source": "RealSaS_KNIGHT_MIRA_M_V5_5_AXIS541_FROZEN_CARRIER_RUN_ALL.ipynb EXPECTED; sizes from Drive metadata",
+  "upstream_hash_source": "RealSaS_KNIGHT_MIRA_M_V5_5_AXIS541_FROZEN_CARRIER_RUN_ALL.ipynb EXPECTED; sizes from Drive metadata; provider file IDs pinned 2026-10-08",
   "remaining_bindings": [
     "Exact Stage19 qualified carrier IR and its basis",
     "Engine execution receipts and checkpoint/proposal read sets",

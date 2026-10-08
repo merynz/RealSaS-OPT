@@ -13,6 +13,7 @@ HOSTED_FIRST = {
     "iris_v2_source_contract.yml",
     "living_compile_v4.yml",
     "platform_go_contract_v1.yml",
+    "platform_throughput_hydration_contract.yml",
 }
 AUTHORIZED_SELF_HOSTED = "[self-hosted, linux, x64, realsas]"
 

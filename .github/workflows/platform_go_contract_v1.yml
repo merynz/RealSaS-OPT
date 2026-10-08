@@ -10,11 +10,18 @@ on:
       - 'compiler/realsas_compiler_core/**'
       - 'compiler/realsas_compiler_services/platform_worker/**'
       - 'tools/platform_release_snapshot.py'
+      - 'tools/platform_artifact_store.py'
+      - 'tools/platform_cache_gc.py'
+      - 'tools/platform_ci_bootstrap.py'
       - 'tests/compiler/test_platform_stage_inputs_v1.py'
       - 'tests/compiler/test_platform_released_graph_v1.py'
       - 'tools/platform_host_preflight.py'
       - 'tests/repository/test_platform_host_preflight.py'
+      - 'tests/repository/test_platform_artifact_store.py'
+      - 'tests/repository/test_platform_cache_gc.py'
+      - 'tests/repository/test_platform_ci_bootstrap.py'
       - 'canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json'
+      - 'canonical/PLATFORM_THROUGHPUT_HYDRATION_GC_PREREG_20261008.json'
       - 'models/**'
       - 'runtime/**'
       - 'tools/realsas_architecture.py'
@@ -30,6 +37,12 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  REALSAS_CI_CACHE_SOFT_GIB: '12'
+  REALSAS_CI_CACHE_TARGET_GIB: '8'
+  REALSAS_CI_CACHE_MIN_FREE_GIB: '5'
+  REALSAS_CI_CACHE_MAX_AGE_DAYS: '30'
+
 jobs:
   contract:
     runs-on: [self-hosted, linux, x64, realsas]
@@ -42,18 +55,42 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.27.1'
-          # The persistent runner already retains Go's local module/build cache.
-          # Avoid remote cache uploads serializing its single-job queue.
+          # Self-hosted caches stay local. Avoid remote cache uploads serializing
+          # the runner queue; GOMODCACHE/GOCACHE are persisted explicitly below.
           cache: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Python contract dependencies
+      - name: Select persistent per-runner cache namespace
         run: |
-          python3 -m venv --clear "$RUNNER_TEMP/realsas-platform-contract-venv"
-          "$RUNNER_TEMP/realsas-platform-contract-venv/bin/python" -m pip install pytest temporalio Pillow==11.3.0 pgserver==0.1.4
-          echo "$RUNNER_TEMP/realsas-platform-contract-venv/bin" >> "$GITHUB_PATH"
+          CACHE_ROOT="$HOME/.cache/realsas-ci/${RUNNER_NAME:-unnamed-runner}"
+          echo "REALSAS_CI_CACHE_ROOT=$CACHE_ROOT" >> "$GITHUB_ENV"
+          echo "PIP_CACHE_DIR=$CACHE_ROOT/pip" >> "$GITHUB_ENV"
+          echo "GOMODCACHE=$CACHE_ROOT/go-mod" >> "$GITHUB_ENV"
+          echo "GOCACHE=$CACHE_ROOT/go-build" >> "$GITHUB_ENV"
           echo "REALSAS_CI_PGDATA=$RUNNER_TEMP/realsas-platform-pg-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
+      - name: Bounded local cache GC
+        working-directory: .
+        run: |
+          python3 tools/platform_cache_gc.py \
+            --root "$REALSAS_CI_CACHE_ROOT" \
+            --soft-max-gib "$REALSAS_CI_CACHE_SOFT_GIB" \
+            --target-max-gib "$REALSAS_CI_CACHE_TARGET_GIB" \
+            --max-age-days "$REALSAS_CI_CACHE_MAX_AGE_DAYS" \
+            --min-free-gib "$REALSAS_CI_CACHE_MIN_FREE_GIB" \
+            --out "$RUNNER_TEMP/realsas-ci-cache-gc.json"
+      - name: Reuse exact Python contract environment
+        working-directory: .
+        run: |
+          python3 tools/platform_ci_bootstrap.py \
+            --cache-root "$REALSAS_CI_CACHE_ROOT" \
+            --pip-cache "$PIP_CACHE_DIR" \
+            --require pytest \
+            --require temporalio \
+            --require Pillow==11.3.0 \
+            --require pgserver==0.1.4 \
+            --github-path "$GITHUB_PATH" \
+            --out "$RUNNER_TEMP/realsas-ci-bootstrap.json"
       - name: Start isolated PostgreSQL without Docker
         run: |
           python3 - <<'PY'
@@ -121,7 +158,15 @@ jobs:
         run: |
           python3 -m py_compile ../compiler/realsas_compiler_services/platform_worker/worker.py
           cd ..
-          python3 -m pytest -q tests/compiler/test_platform_stage_inputs_v1.py tests/compiler/test_platform_released_graph_v1.py tests/repository/test_platform_host_preflight.py tests/repository/test_source_owned_visual_runtime_wiring_v1.py tests/repository/test_self_hosted_execution_policy.py
+          python3 -m pytest -q \
+            tests/compiler/test_platform_stage_inputs_v1.py \
+            tests/compiler/test_platform_released_graph_v1.py \
+            tests/repository/test_platform_host_preflight.py \
+            tests/repository/test_platform_artifact_store.py \
+            tests/repository/test_platform_cache_gc.py \
+            tests/repository/test_platform_ci_bootstrap.py \
+            tests/repository/test_source_owned_visual_runtime_wiring_v1.py \
+            tests/repository/test_self_hosted_execution_policy.py
       - name: Read-only latest Knight input and platform host preflight
         run: |
           cd ..
@@ -129,11 +174,14 @@ jobs:
             --authority-root /home/monster/realsas_authority \
             --inventory canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json \
             --out "$RUNNER_TEMP/platform-host-preflight.json"
-      - name: Preserve host preflight (diagnostic, not a scientific PASS)
+      - name: Preserve cache and host diagnostics
         uses: actions/upload-artifact@v4
         with:
-          name: platform-host-preflight
-          path: ${{ runner.temp }}/platform-host-preflight.json
+          name: platform-host-and-cache-preflight
+          path: |
+            ${{ runner.temp }}/platform-host-preflight.json
+            ${{ runner.temp }}/realsas-ci-cache-gc.json
+            ${{ runner.temp }}/realsas-ci-bootstrap.json
           retention-days: 7
       - name: Current continuation contracts
         run: |

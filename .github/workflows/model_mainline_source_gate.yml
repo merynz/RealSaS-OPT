@@ -109,14 +109,13 @@ on:
       - '.github/workflows/live_authority_map.yml'
       - '.github/workflows/model_mainline_source_gate.yml'
 
-
 concurrency:
   group: model-mainline-source-gate-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   source-ownership:
-    runs-on: [self-hosted, linux, x64, realsas]
+    runs-on: ubuntu-latest
     env:
       PYTHONPATH: .
       OMP_NUM_THREADS: '1'
@@ -128,9 +127,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      # Do not enable setup-python's remote pip-cache save on the single self-hosted
-      # runner. Its local pip cache is already persistent; the action post-step can
-      # otherwise serialize the entire RealSaS CI queue after all tests have passed.
+          cache: pip
+          cache-dependency-path: |
+            requirements/mainline-ci.txt
+            requirements/torch-cpu.txt
       - name: Install pinned model source-test dependencies
         env:
           PIP_DISABLE_PIP_VERSION_CHECK: '1'
@@ -190,6 +190,7 @@ jobs:
         run: |
           echo 'MODEL_MAINLINE_SOURCE_GATE_PASS'
           echo "commit=$GITHUB_SHA"
+          echo 'execution_lane=github_hosted_public_standard'
           echo 'current_continuity_v2_bound=true'
           echo 'model_branding_boundary=true'
           echo 'iris_scene_first_v3_promoted_witness=true'

@@ -60,3 +60,19 @@ def test_inventory_requires_stable_google_drive_locator():
     bad["required_files"][0]["source"] = {"provider": "google_drive", "file_id": ""}
     with pytest.raises(ValueError, match="SOURCE_FILE_ID_INVALID"):
         validate_inventory(bad)
+
+
+def test_non_regular_cas_object_fails_closed(tmp_path):
+    manifest = inventory()
+    target = cas_path(tmp_path, manifest["required_files"][0]["sha256"])
+    target.parent.mkdir(parents=True)
+    real = tmp_path / "elsewhere.bin"
+    real.write_bytes(b"exact")
+    target.symlink_to(real)
+
+    def fetcher(**kwargs):
+        raise AssertionError("must not fetch over host drift")
+
+    with pytest.raises(RuntimeError, match="CAS_NON_REGULAR_OBJECT"):
+        hydrate_inventory(manifest, cas_root=tmp_path, fetcher=fetcher)
+    assert target.is_symlink()

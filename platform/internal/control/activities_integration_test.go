@@ -2,7 +2,9 @@ package control
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -10,6 +12,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/merynz/RealSaS-OPT/platform/internal/artifactstore"
 
 	"github.com/merynz/RealSaS-OPT/platform/internal/orchestration"
 	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
@@ -44,6 +47,10 @@ func TestPrepareAndFailExecutionPersistsLocalizedRepair(t *testing.T) {
 	defer pool.Close()
 	g := controlGraph(t)
 	a := Activities{Pool: pool, Graph: g}
+	a.Store, err = artifactstore.NewLocal(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	subjectID := uuid.New()
 	releaseID := uuid.New()
@@ -213,6 +220,39 @@ func TestPrepareAndFailExecutionPersistsLocalizedRepair(t *testing.T) {
 		t.Fatalf("invalidated=%v want=%v", invalidated.StageIDs, want)
 	}
 	_ = time.Now()
+	// Exercise the real PostgreSQL PASS commit with bound dependencies, not
+	// only failure localization. This catches connection-busy registry writes.
+	uniqueSHA := sha256.Sum256([]byte(subjectID.String()))
+	repaired, err := a.PrepareStageExecution(ctx, orchestration.PrepareStageExecutionRequest{
+		CommandID: uuid.New().String(), AttemptID: attemptID.String(), SubjectID: subjectID.String(),
+		SubjectInputID: subjectInputID.String(), EngineReleaseID: releaseID.String(), StageID: stageID,
+		ExpectedSemanticSHA256: fmt.Sprintf("%x", uniqueSHA), AllowedExecuteStageIDs: allowed,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	object, err := a.Store.PutBytes(ctx, []byte(`{"schema":"RealSaS.TestProof.v1"}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	passed, err := a.CommitStageResult(ctx, orchestration.StageCommitRequest{
+		ExecutionID: repaired.ExecutionID, CommandID: repaired.CommandID, AttemptID: attemptID.String(),
+		StageID: stageID, ExpectedSemanticSHA256: fmt.Sprintf("%x", uniqueSHA), AllowedExecuteStageIDs: allowed,
+		EngineResult: orchestration.EngineStageResult{StageID: stageID, Status: "PASS", ExecutedStageIDs: []string{stageID},
+			Outputs: []orchestration.EngineOutput{{Role: "proof", ArtifactType: "RealSaS.TestProof", SchemaVersion: "v1",
+				RelativePath: "proof.json", PayloadSchema: "RealSaS.TestProof.v1", AuthorityClass: "TEST",
+				StorageKey: object.StorageKey, ContentSHA256: object.ContentSHA256, SizeBytes: object.SizeBytes}}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var dependencyCount int
+	if err := pool.QueryRow(ctx, "SELECT count(*) FROM artifact_inputs WHERE artifact_id=$1", *passed.ArtifactID).Scan(&dependencyCount); err != nil {
+		t.Fatal(err)
+	}
+	if dependencyCount != len(stage.DependsOn)+1 {
+		t.Fatalf("dependency count=%d", dependencyCount)
+	}
 }
 
 func repeatHex(ch string) string {

@@ -281,7 +281,11 @@ func (a Activities) commitStageResultArtifact(
 		if err != nil {
 			return uuid.Nil, err
 		}
-		ordinal := 0
+		type dependency struct {
+			role string
+			id   uuid.UUID
+		}
+		var dependencies []dependency
 		for rows.Next() {
 			var role string
 			var inputID uuid.UUID
@@ -289,20 +293,21 @@ func (a Activities) commitStageResultArtifact(
 				rows.Close()
 				return uuid.Nil, err
 			}
-			if _, err := tx.Exec(ctx, `
-				INSERT INTO artifact_inputs(artifact_id,input_role,ordinal,input_artifact_id)
-				VALUES ($1,$2,$3,$4)
-			`, artifactID, role, ordinal, inputID); err != nil {
-				rows.Close()
-				return uuid.Nil, err
-			}
-			ordinal++
+			dependencies = append(dependencies, dependency{role: role, id: inputID})
 		}
 		if err := rows.Err(); err != nil {
 			rows.Close()
 			return uuid.Nil, err
 		}
 		rows.Close()
+		// pgx cannot issue INSERTs while a result set still owns the connection.
+		for ordinal, input := range dependencies {
+			if _, err := tx.Exec(ctx, `INSERT INTO artifact_inputs
+				(artifact_id,input_role,ordinal,input_artifact_id) VALUES ($1,$2,$3,$4)`,
+				artifactID, input.role, ordinal, input.id); err != nil {
+				return uuid.Nil, err
+			}
+		}
 	default:
 		return uuid.Nil, err
 	}

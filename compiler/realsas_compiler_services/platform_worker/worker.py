@@ -193,7 +193,6 @@ def _execute_stage_core(request: dict[str, Any]) -> dict[str, Any]:
             },
         }
 
-    activity.heartbeat({"stage_id": stage_id, "phase": "execute"})
     mainline._run_stage(
         plan=plan,
         ledger=ledger,
@@ -240,6 +239,8 @@ async def execute_compile_stage(request: dict[str, Any]) -> dict[str, Any]:
 
 
 async def _with_heartbeat(function, request):
+    # The async activity owns its event loop. Synchronous engine functions run
+    # in a thread and must not call Temporal's async heartbeat implementation.
     task = asyncio.create_task(asyncio.to_thread(function, request))
     while not task.done():
         activity.heartbeat({"stage_id": request.get("stage_id"), "phase": "running"})
@@ -365,15 +366,6 @@ def _render_tail_sync(request: dict[str, Any]) -> dict[str, Any]:
         package.write_bytes(runtime_bytes)
         images: list[Image.Image] = []
         for frame_index in range(frame_count):
-            activity.heartbeat(
-                {
-                    "phase": "render",
-                    "clip": clip_id,
-                    "view": view_id,
-                    "frame": frame_index,
-                    "frame_count": frame_count,
-                }
-            )
             rgba = tmp / f"{frame_index:04d}.rgba"
             provenance = tmp / f"{frame_index:04d}.prov"
             owner = tmp / f"{frame_index:04d}.owner"

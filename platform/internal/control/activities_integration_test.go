@@ -174,6 +174,9 @@ func TestPrepareAndFailExecutionPersistsLocalizedRepair(t *testing.T) {
 	if prepared.CompilerRunID != "run-"+attemptID.String() || prepared.ExecutionID == "" {
 		t.Fatalf("prepared=%+v", prepared)
 	}
+	if prepared.ReleasedGraph.Schema != "RealSaS.StageGraph.v1" || prepared.ReleasedGraph.StageCount != g.StageCount() {
+		t.Fatalf("Engine request lost the sealed DAG: %+v", prepared.ReleasedGraph)
+	}
 	result, err := a.CommitStageResult(ctx, orchestration.StageCommitRequest{
 		ExecutionID:            prepared.ExecutionID,
 		CommandID:              prepared.CommandID,

@@ -16,8 +16,8 @@ import (
 )
 
 type Binding struct {
-	Role       string
-	ArtifactID uuid.UUID
+	Role       string    `json:"role"`
+	ArtifactID uuid.UUID `json:"artifact_id"`
 }
 
 type ArtifactIdentity struct {
@@ -35,9 +35,9 @@ type Manifest struct {
 }
 
 type Sealed struct {
-	SubjectInputID uuid.UUID
-	ManifestSHA256 string
-	Reused         bool
+	SubjectInputID uuid.UUID `json:"subject_input_id"`
+	ManifestSHA256 string    `json:"manifest_sha256"`
+	Reused         bool      `json:"reused"`
 }
 
 type Loaded struct {

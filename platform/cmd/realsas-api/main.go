@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/merynz/RealSaS-OPT/platform/internal/artifactstore"
 	"github.com/merynz/RealSaS-OPT/platform/internal/httpapi"
 	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
 	"github.com/merynz/RealSaS-OPT/platform/internal/stagegraph"
@@ -33,7 +34,21 @@ func main() {
 		os.Exit(1)
 	}
 	defer pool.Close()
-	handler := (httpapi.API{Pool: pool, Graph: graph}).Handler()
+	artifactRoot := os.Getenv("REALSAS_ARTIFACT_ROOT")
+	if artifactRoot == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			slog.Error("home directory", "error", err)
+			os.Exit(1)
+		}
+		artifactRoot = filepath.Join(home, "realsas_platform_artifacts")
+	}
+	store, err := artifactstore.NewLocal(artifactRoot)
+	if err != nil {
+		slog.Error("artifact store", "error", err)
+		os.Exit(1)
+	}
+	handler := (httpapi.API{Pool: pool, Graph: graph, Store: store}).Handler()
 	server := &http.Server{
 		Addr:              "127.0.0.1:8080",
 		Handler:           handler,

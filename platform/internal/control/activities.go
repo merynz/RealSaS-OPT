@@ -240,6 +240,7 @@ func (a Activities) PrepareStageExecution(ctx context.Context, req orchestration
 		return orchestration.EngineStageRequest{}, err
 	}
 	return orchestration.EngineStageRequest{
+		ReleasedGraph:      a.Graph.Snapshot(),
 		GraphNodeSHA256:    nodeSHA,
 		SemanticParameters: parameters,
 		ExecutionMode:      mode, ImplementationSHA256: implementationSHA, PolicySHA256: policySHA, InputStages: inputs,

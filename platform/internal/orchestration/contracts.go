@@ -1,5 +1,7 @@
 package orchestration
 
+import "github.com/merynz/RealSaS-OPT/platform/internal/stagegraph"
+
 const (
 	ControlTaskQueue = "realsas-control-v1"
 	EngineTaskQueue  = "realsas-engine-v1"
@@ -87,23 +89,25 @@ type PrepareCapabilityExecutionRequest struct {
 }
 
 type EngineCapabilityRequest struct {
-	StageGraphNodeSHA256      string         `json:"stage_graph_node_sha256,omitempty"`
-	StageSemanticParameters   map[string]any `json:"stage_semantic_parameters,omitempty"`
-	ExecutionID               string         `json:"execution_id"`
-	CommandID                 string         `json:"command_id"`
-	AttemptID                 string         `json:"attempt_id"`
-	ExecutionGoalID           string         `json:"execution_goal_id"`
-	EngineReleaseID           string         `json:"engine_release_id"`
-	CapabilityID              string         `json:"capability_id"`
-	Kind                      string         `json:"kind"`
-	OwnerModuleID             string         `json:"owner_module_id"`
-	RequestedExecutorActivity string         `json:"requested_executor_activity"`
-	ImplementationSHA256      string         `json:"implementation_sha256"`
-	PolicySHA256              string         `json:"policy_sha256"`
-	ParametersSHA256          string         `json:"parameters_sha256"`
-	CapabilityMetadata        map[string]any `json:"capability_metadata,omitempty"`
-	GoalParameters            map[string]any `json:"goal_parameters"`
-	InputArtifacts            []ArtifactRef  `json:"input_artifacts"`
+	ReleasedGraph             *stagegraph.Snapshot `json:"released_graph,omitempty"`
+	PipelinePlanSHA256        string               `json:"pipeline_plan_sha256,omitempty"`
+	StageGraphNodeSHA256      string               `json:"stage_graph_node_sha256,omitempty"`
+	StageSemanticParameters   map[string]any       `json:"stage_semantic_parameters,omitempty"`
+	ExecutionID               string               `json:"execution_id"`
+	CommandID                 string               `json:"command_id"`
+	AttemptID                 string               `json:"attempt_id"`
+	ExecutionGoalID           string               `json:"execution_goal_id"`
+	EngineReleaseID           string               `json:"engine_release_id"`
+	CapabilityID              string               `json:"capability_id"`
+	Kind                      string               `json:"kind"`
+	OwnerModuleID             string               `json:"owner_module_id"`
+	RequestedExecutorActivity string               `json:"requested_executor_activity"`
+	ImplementationSHA256      string               `json:"implementation_sha256"`
+	PolicySHA256              string               `json:"policy_sha256"`
+	ParametersSHA256          string               `json:"parameters_sha256"`
+	CapabilityMetadata        map[string]any       `json:"capability_metadata,omitempty"`
+	GoalParameters            map[string]any       `json:"goal_parameters"`
+	InputArtifacts            []ArtifactRef        `json:"input_artifacts"`
 }
 
 type EngineCapabilityFailure struct {
@@ -184,22 +188,23 @@ type StageInput struct {
 }
 
 type EngineStageRequest struct {
-	GraphNodeSHA256        string         `json:"graph_node_sha256"`
-	SemanticParameters     map[string]any `json:"semantic_parameters"`
-	ExecutionMode          string         `json:"execution_mode"`
-	ImplementationSHA256   string         `json:"implementation_sha256"`
-	PolicySHA256           string         `json:"policy_sha256"`
-	InputStages            []StageInput   `json:"input_stages"`
-	ExecutionID            string         `json:"execution_id"`
-	CommandID              string         `json:"command_id"`
-	AttemptID              string         `json:"attempt_id"`
-	SubjectID              string         `json:"subject_id"`
-	EngineReleaseID        string         `json:"engine_release_id"`
-	CompilerRunID          string         `json:"compiler_run_id"`
-	PipelinePlanSHA256     string         `json:"pipeline_plan_sha256"`
-	StageID                string         `json:"stage_id"`
-	ExpectedSemanticSHA256 string         `json:"expected_semantic_sha256"`
-	AllowedExecuteStageIDs []string       `json:"allowed_execute_stage_ids"`
+	ReleasedGraph          stagegraph.Snapshot `json:"released_graph"`
+	GraphNodeSHA256        string              `json:"graph_node_sha256"`
+	SemanticParameters     map[string]any      `json:"semantic_parameters"`
+	ExecutionMode          string              `json:"execution_mode"`
+	ImplementationSHA256   string              `json:"implementation_sha256"`
+	PolicySHA256           string              `json:"policy_sha256"`
+	InputStages            []StageInput        `json:"input_stages"`
+	ExecutionID            string              `json:"execution_id"`
+	CommandID              string              `json:"command_id"`
+	AttemptID              string              `json:"attempt_id"`
+	SubjectID              string              `json:"subject_id"`
+	EngineReleaseID        string              `json:"engine_release_id"`
+	CompilerRunID          string              `json:"compiler_run_id"`
+	PipelinePlanSHA256     string              `json:"pipeline_plan_sha256"`
+	StageID                string              `json:"stage_id"`
+	ExpectedSemanticSHA256 string              `json:"expected_semantic_sha256"`
+	AllowedExecuteStageIDs []string            `json:"allowed_execute_stage_ids"`
 }
 
 type EngineOutput struct {

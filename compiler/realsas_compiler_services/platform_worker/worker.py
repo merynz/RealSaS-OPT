@@ -21,7 +21,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from compiler.realsas_compiler_services.orchestrator import mainline
-from compiler.realsas_compiler_services.platform_worker.stage_inputs import hydrate_stage_inputs, verify_execution_version
+from compiler.realsas_compiler_services.platform_worker.stage_inputs import hydrate_stage_inputs, verify_execution_version, released_execution_plan
 
 ENGINE_TASK_QUEUE = "realsas-engine-v1"
 EXECUTE_STAGE_ACTIVITY = "engine.execute_compile_stage.v1"
@@ -131,8 +131,12 @@ def _execute_stage_core(request: dict[str, Any]) -> dict[str, Any]:
         raise RuntimeError(f"ENGINE_STAGE_OUTSIDE_PLATFORM_SCOPE:{stage_id}")
 
     run_id = str(request["compiler_run_id"])
-    plan = mainline.load_json(mainline.PLAN_PATH)
-    plan_sha = mainline.validate_plan(plan)
+    canonical_plan = mainline.load_json(mainline.PLAN_PATH)
+    mainline.validate_plan(canonical_plan)
+    mode = str(request.get("execution_mode") or "")
+    plan = released_execution_plan(canonical_plan, request.get("released_graph"), mode=mode)
+    require_product = mode == "PRODUCT"
+    plan_sha = mainline.validate_plan(plan, require_product_pass_authority=require_product)
     if plan_sha != str(request["pipeline_plan_sha256"]):
         raise RuntimeError("ENGINE_PLATFORM_PLAN_SHA_DRIFT")
 
@@ -147,25 +151,23 @@ def _execute_stage_core(request: dict[str, Any]) -> dict[str, Any]:
             plan, run_id=run_id, subject_id=str(manifest["subject_id"]),
             manifest_ref=str(manifest_path),
             execution_class=str(manifest.get("execution_class") or "WITNESS"),
+            require_product_pass_authority=require_product,
         )
         mainline.atomic_json(ledger_path, ledger)
     ledger = mainline.load_json(ledger_path)
-    mainline.validate_ledger(plan, ledger)
+    mainline.validate_ledger(plan, ledger, require_product_pass_authority=require_product)
     mainline._validate_run_manifest_identity(
         manifest,
         run_id=run_id,
         subject_id=str(ledger.get("subject_id") or ""),
     )
 
-    mode = str(request.get("execution_mode") or "")
-    if mode not in {"RESEARCH", "PRODUCT"}:
-        raise RuntimeError("ENGINE_EXECUTION_MODE_REQUIRED")
     if mode == "PRODUCT" and str(ledger.get("execution_class")) == "DEMO_WITNESS":
         raise RuntimeError("ENGINE_PRODUCT_DEMO_LEDGER_FORBIDDEN")
     hydrate_stage_inputs(plan=plan, ledger=ledger, manifest=manifest,
                          inputs=request.get("input_stages") or (), read_object=_read_cas_object, mode=mode)
     mainline.atomic_json(ledger_path, ledger)
-    mainline.validate_ledger(plan, ledger)
+    mainline.validate_ledger(plan, ledger, require_product_pass_authority=require_product)
     stage = mainline._stage_map(plan)[stage_id]
     by_id = mainline._ledger_map(ledger)
     unpassed = [
@@ -277,13 +279,13 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
                 },
             },
         }
-    ledger = mainline.load_json(mainline.run_ledger_path(run_id))
     stage_request = {
+        "released_graph": request.get("released_graph"),
         "graph_node_sha256": request.get("stage_graph_node_sha256"),
         "stage_id": stage_id,
         "allowed_execute_stage_ids": [stage_id],
         "compiler_run_id": run_id,
-        "pipeline_plan_sha256": str(ledger["pipeline_plan_sha256"]),
+        "pipeline_plan_sha256": request.get("pipeline_plan_sha256"),
         "execution_mode": "RESEARCH",
         "implementation_sha256": request["implementation_sha256"],
         "policy_sha256": request["policy_sha256"],

@@ -136,7 +136,7 @@ def topological_stage_ids(plan: dict) -> tuple[str, ...]:
     return tuple(ordered)
 
 
-def validate_plan(plan: dict) -> str:
+def validate_plan(plan: dict, *, require_product_pass_authority: bool = True) -> str:
     if plan.get("schema") != "RealSaS.MainlineExecutionPlan.v2":
         raise RuntimeError("MAINLINE_V2_PLAN_SCHEMA_DRIFT")
     stages = list(plan.get("stages") or ())
@@ -187,7 +187,7 @@ def validate_plan(plan: dict) -> str:
         for stage in stages
         if dict(stage.get("policy") or {}).get("product_pass_authority") is True
     ]
-    if len(product_pass_owners) != 1:
+    if len(product_pass_owners) > 1 or (require_product_pass_authority and len(product_pass_owners) != 1):
         raise RuntimeError(
             "MAINLINE_V2_PRODUCT_PASS_AUTHORITY_DRIFT:"
             + ",".join(product_pass_owners)
@@ -470,8 +470,8 @@ def validate_demo_witness_authorization(manifest: dict, *, subject_id: str) -> s
     return content_sha256(payload)
 
 
-def validate_ledger(plan: dict, ledger: dict) -> None:
-    plan_hash = validate_plan(plan)
+def validate_ledger(plan: dict, ledger: dict, *, require_product_pass_authority: bool = True) -> None:
+    plan_hash = validate_plan(plan, require_product_pass_authority=require_product_pass_authority)
     if ledger.get("schema") != "RealSaS.ActiveRunLedger.v2":
         raise RuntimeError("ACTIVE_RUN_V2_LEDGER_SCHEMA_DRIFT")
     if ledger.get("canonical_branch") != "main":
@@ -549,8 +549,9 @@ def build_fresh_run_ledger(
     manifest_ref: str,
     architecture_scope: str = "REALSAS_V2_FRESH_WITNESS",
     execution_class: str = "WITNESS",
+    require_product_pass_authority: bool = True,
 ) -> dict:
-    plan_hash = validate_plan(plan)
+    plan_hash = validate_plan(plan, require_product_pass_authority=require_product_pass_authority)
     rows = [
         {
             "ordinal": int(stage["ordinal"]),
@@ -600,7 +601,7 @@ def build_fresh_run_ledger(
         ],
     }
     _refresh(plan, ledger)
-    validate_ledger(plan, ledger)
+    validate_ledger(plan, ledger, require_product_pass_authority=require_product_pass_authority)
     return ledger
 
 

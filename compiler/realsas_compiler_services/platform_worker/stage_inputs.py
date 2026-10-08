@@ -11,6 +11,51 @@ import tempfile
 from compiler.realsas_compiler_services.orchestrator import mainline
 
 
+def released_execution_plan(base_plan, released_graph, *, mode="PRODUCT"):
+    """Reconstruct execution metadata without losing the full Compiler policy.
+
+    The four scheduling policy fields belong to the released graph. Additional
+    scientific policy/metadata belongs to the shipped Compiler plan. The hash of
+    this complete reconstruction must match the release's pipeline_plan_sha256.
+    """
+    if not released_graph:
+        raise RuntimeError("ENGINE_RELEASE_GRAPH_REQUIRED")
+    if mode not in {"RESEARCH", "PRODUCT"}:
+        raise RuntimeError("ENGINE_EXECUTION_MODE_REQUIRED")
+    graph = dict(released_graph)
+    if graph.get("schema") != "RealSaS.StageGraph.v1":
+        raise RuntimeError("ENGINE_RELEASE_GRAPH_SCHEMA_DRIFT")
+    stages = graph.get("stages")
+    if not isinstance(stages, list) or int(graph.get("stage_count", -1)) != len(stages):
+        raise RuntimeError("ENGINE_RELEASE_GRAPH_CARDINALITY_DRIFT")
+    base_stages = mainline._stage_map(base_plan)
+    reconstructed = []
+    seen = set()
+    for ordinal, node in enumerate(stages, 1):
+        if node.get("ordinal") != ordinal or node.get("id") in seen:
+            raise RuntimeError("ENGINE_RELEASE_GRAPH_ORDER_OR_ID_DRIFT")
+        if any(dep not in seen for dep in node.get("depends_on", ())):
+            raise RuntimeError("ENGINE_RELEASE_GRAPH_FUTURE_OR_UNKNOWN_DEPENDENCY")
+        deps = node.get("depends_on", ())
+        if len(deps) != len(set(deps)):
+            raise RuntimeError("ENGINE_RELEASE_GRAPH_DUPLICATE_DEPENDENCY")
+        stage = dict(base_stages.get(node.get("id"), {}))
+        policy = dict(stage.get("policy", {}))
+        policy.update(node.get("policy", {}))
+        stage.update(node)
+        stage["manifest_keys"] = list(node.get("manifest_keys") or [])
+        stage["policy"] = policy
+        reconstructed.append(stage)
+        seen.add(node["id"])
+    plan = dict(base_plan)
+    plan["stage_count"] = len(stages)
+    plan["stages"] = reconstructed
+    mainline.validate_plan(plan, require_product_pass_authority=mode == "PRODUCT")
+    if mode == "PRODUCT" and mainline.content_sha256(plan) != mainline.content_sha256(base_plan):
+        raise RuntimeError("ENGINE_PRODUCT_RELEASE_PLAN_DRIFT")
+    return plan
+
+
 def graph_node_sha256(stage):
     return mainline.content_sha256({
         "id": stage["id"], "depends_on": list(stage.get("depends_on") or []),

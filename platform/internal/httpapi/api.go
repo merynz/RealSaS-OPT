@@ -4,12 +4,16 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/merynz/RealSaS-OPT/platform/internal/artifactstore"
 	"github.com/merynz/RealSaS-OPT/platform/internal/attempt"
 	"github.com/merynz/RealSaS-OPT/platform/internal/command"
+	"github.com/merynz/RealSaS-OPT/platform/internal/input"
+	"github.com/merynz/RealSaS-OPT/platform/internal/registry"
 	"github.com/merynz/RealSaS-OPT/platform/internal/release"
 	"github.com/merynz/RealSaS-OPT/platform/internal/stagegraph"
 )
@@ -19,6 +23,7 @@ import (
 type API struct {
 	Pool  *pgxpool.Pool
 	Graph *stagegraph.Graph
+	Store artifactstore.Store
 }
 
 func respond(w http.ResponseWriter, status int, value any) {
@@ -53,6 +58,57 @@ func (a API) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health/live", func(w http.ResponseWriter, r *http.Request) { respond(w, 200, map[string]string{"status": "ok"}) })
 	mux.HandleFunc("GET /v1/stages", func(w http.ResponseWriter, r *http.Request) { respond(w, 200, a.Graph.Stages()) })
+	mux.HandleFunc("POST /v1/subjects", func(w http.ResponseWriter, r *http.Request) {
+		var req input.SubjectRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		out, err := input.EnsureSubject(r.Context(), a.Pool, req)
+		result(w, out, err)
+	})
+	mux.HandleFunc("PUT /v1/artifacts/bytes", func(w http.ResponseWriter, r *http.Request) {
+		sha := r.URL.Query().Get("sha256")
+		if err := artifactstore.ValidateSHA256(sha); err != nil {
+			respond(w, 400, map[string]string{"error": err.Error()})
+			return
+		}
+		if a.Store == nil {
+			respond(w, 503, map[string]string{"error": "artifact store is required"})
+			return
+		}
+		data, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 256<<20))
+		if err != nil {
+			respond(w, 413, map[string]string{"error": err.Error()})
+			return
+		}
+		if artifactstore.HashBytes(data) != sha {
+			respond(w, 409, map[string]string{"error": "ARTIFACT_UPLOAD_HASH_MISMATCH"})
+			return
+		}
+		out, err := a.Store.PutBytes(r.Context(), data)
+		result(w, out, err)
+	})
+	mux.HandleFunc("POST /v1/artifacts/import", func(w http.ResponseWriter, r *http.Request) {
+		var req registry.ImportRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		out, err := registry.Import(r.Context(), a.Pool, a.Store, req)
+		result(w, out, err)
+	})
+	mux.HandleFunc("POST /v1/subject-inputs", func(w http.ResponseWriter, r *http.Request) {
+		var req struct {
+			SubjectID uuid.UUID       `json:"subject_id"`
+			Bindings  []input.Binding `json:"bindings"`
+			CreatedBy string          `json:"created_by"`
+		}
+		if !decode(w, r, &req) {
+			return
+		}
+		sort.Slice(req.Bindings, func(i, j int) bool { return req.Bindings[i].Role < req.Bindings[j].Role })
+		out, err := input.Seal(r.Context(), a.Pool, req.SubjectID, req.Bindings, req.CreatedBy)
+		result(w, out, err)
+	})
 	mux.HandleFunc("POST /v1/releases", func(w http.ResponseWriter, r *http.Request) {
 		var req struct {
 			Manifest  release.Manifest `json:"manifest"`

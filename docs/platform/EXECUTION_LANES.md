@@ -13,6 +13,10 @@ execution and its UI integration are a later productization milestone.
 | Operation | Command | State and permitted result |
 |---|---|---|
 | List the current DAG | `realsasctl stages` | Canonical stage identities and dependencies |
+| Register a subject | `realsasctl subject --request subject.json` | Idempotent slug; conflicting identity fails closed |
+| Copy exact input bytes | `realsasctl artifact-put --file input --sha256 SHA` | Verified immutable CAS bytes, no qualification |
+| Register external evidence | `realsasctl artifact-import --request import.json` | Typed external input, never a stage reuse qualification |
+| Seal subject inputs | `realsasctl input-seal --request inputs.json` | Exact role/artifact bindings for an Attempt |
 | Seal a version snapshot | `realsasctl release --request release.json` | Immutable RESEARCH or PRODUCT EngineRelease |
 | Compare changed components | `realsasctl research-start --request attempt.json` | Research Attempt and changed stages plus descendants |
 | Run a development target | `realsasctl research-run --request compile.json` | Existing research Attempt; explicit target; no ProductRevision |
@@ -48,6 +52,35 @@ binding and repair attribution use the Attempt's released graph. Workers reject
 an adapter/manifest/graph-node mismatch before executing or hydrating an output.
 The executable adapters and matching plan still ship through main; sealing a
 graph does not manufacture an executor for a new node.
+
+The Engine receives the exact released graph in both compile-stage and
+stage-capability requests. It reconstructs the full execution plan using that
+graph plus scientific policy metadata shipped in the canonical Compiler plan;
+the complete reconstructed plan hash must equal the release's bound hash.
+Thus the Go scheduler cannot seal one DAG while Python executes another.
+Research may use `platform_release_snapshot.py --plan research-plan.json` for a
+smaller network or a rewired DAG. Product still requires the exact current
+canonical plan. Unshipped metadata, unknown/future or duplicate dependencies,
+missing graphs and policy/hash drift fail before execution. A research network
+may omit product closure; this does not authorize product admission.
+
+## External evidence import boundary
+
+Upload bytes with their expected SHA256, then register the returned CAS object
+using `artifact_type`, `schema_version`, `object`, `source_uri`, and `created_by`.
+The source URI is provenance only: moving identical bytes does not change input
+identity. Import never issues `REUSE_ELIGIBLE` or `DEMO_REUSE_ELIGIBLE`; a consuming
+Engine contract must validate and reseal them. The API rejects qualification
+fields supplied by an importer. Seal roles with `subject_id`, `bindings` and
+`created_by`; each binding contains `role` and `artifact_id`.
+
+`canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json` is the narrow latest-input
+index. `tools/platform_host_preflight.py` searches only an explicit authority
+root with scan limits and verifies exact file size/hash. Its report is host
+diagnostics, not scientific PASS or a completed Knight Attempt. Raw notebook
+NPZ/JSON evidence still needs exact qualified carrier/model receipt bindings,
+matching CAA/cameras/motion and a live Go/Temporal deployment. Embedded file
+references are not silently rewritten during import.
 
 Start a research Attempt with `subject_id`, `baseline_engine_release_id`,
 `candidate_engine_release_id`, optional `parent_attempt_id`, and `created_by`.

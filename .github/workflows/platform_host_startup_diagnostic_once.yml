@@ -10,13 +10,10 @@ jobs:
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 3
     steps:
-      - name: Read only managed developer service state and journal
+      - name: Stop only the confirmed failing managed PostgreSQL restart loop
         run: |
           export XDG_RUNTIME_DIR="/run/user/$(id -u)"
           export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
-          for unit in postgres temporal migrate api control engine; do
-            systemctl --user show "realsas-platform-$unit.service" --property=Id,ActiveState,SubState,ExecMainCode,ExecMainStatus
-          done
-          journalctl --user -u realsas-platform-postgres.service -u realsas-platform-migrate.service -n 35 --no-pager
-          /home/monster/realsas_platform/current/venv/bin/python -V || true
-          test -r /home/monster/realsas_platform/data/postgres/PG_VERSION && head -n 1 /home/monster/realsas_platform/data/postgres/PG_VERSION
+          systemctl --user stop realsas-platform-postgres.service
+          systemctl --user show realsas-platform-postgres.service --property=Id,ActiveState,SubState
+          echo 'No data removed; canonical main loader fix will restart the managed service.'

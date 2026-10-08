@@ -143,6 +143,9 @@ def test_real_engine_executes_rewired_network_not_canonical_dependencies(tmp_pat
                "implementation_sha256": mainline._adapter_impl_hash(stage["adapter"]),
                "policy_sha256": mainline.content_sha256(stage["policy"]),
                "semantic_parameters": {"manifest": mainline._manifest_subset(manifest, stage)}}
+    import json
+    source = worker._put_cas_bytes(json.dumps(manifest["source_license"]).encode())
+    request["source_inputs"] = [{**source, "role": "subject:manifest:source_license"}]
     result = worker._execute_stage_core(request)
     assert result["status"] == "PASS"
     ledger = mainline.load_json(mainline.run_ledger_path(run_id))
@@ -153,3 +156,26 @@ def test_real_engine_executes_rewired_network_not_canonical_dependencies(tmp_pat
     wrong = dict(request, pipeline_plan_sha256=mainline.content_sha256(base))
     with pytest.raises(RuntimeError, match="PLATFORM_PLAN_SHA_DRIFT"):
         worker._execute_stage_core(wrong)
+
+
+def test_imported_source_must_match_manifest_section_and_actual_bytes(tmp_path):
+    import hashlib
+    import json
+    from compiler.realsas_compiler_services.platform_worker.stage_inputs import verify_source_inputs
+    data = b"sealed input"
+    digest = hashlib.sha256(data).hexdigest()
+    path = tmp_path / "proposal.npz"
+    path.write_bytes(data)
+    manifest = {"model": {"proposal_path": str(path), "proposal_sha256": digest}}
+    section = json.dumps(manifest["model"]).encode()
+    ref = {"role": "subject:manifest:model", "content_sha256": hashlib.sha256(section).hexdigest(), "size_bytes": len(section)}
+    verify_source_inputs(manifest=manifest, inputs=[ref], read_object=lambda _: section)
+    wrong = {"model": {**manifest["model"], "proposal_sha256": "0" * 64}}
+    with pytest.raises(RuntimeError, match="MANIFEST_SECTION_DRIFT"):
+        verify_source_inputs(manifest=wrong, inputs=[ref], read_object=lambda _: section)
+    path.write_bytes(b"stale source")
+    with pytest.raises(RuntimeError, match="SOURCE_INPUT_FILE_DRIFT"):
+        verify_source_inputs(manifest=manifest, inputs=[ref], read_object=lambda _: section)
+    raw = {"role": "subject:proposal", "content_sha256": digest, "size_bytes": len(data)}
+    with pytest.raises(RuntimeError, match="SOURCE_INPUT_NOT_REFERENCED"):
+        verify_source_inputs(manifest={}, inputs=[raw], read_object=lambda _: data)

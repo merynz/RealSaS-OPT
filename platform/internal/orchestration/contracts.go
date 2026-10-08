@@ -195,6 +195,7 @@ type EngineStageRequest struct {
 	ImplementationSHA256   string              `json:"implementation_sha256"`
 	PolicySHA256           string              `json:"policy_sha256"`
 	InputStages            []StageInput        `json:"input_stages"`
+	SourceInputs           []ArtifactRef       `json:"source_inputs"`
 	ExecutionID            string              `json:"execution_id"`
 	CommandID              string              `json:"command_id"`
 	AttemptID              string              `json:"attempt_id"`

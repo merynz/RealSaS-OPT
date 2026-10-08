@@ -4,6 +4,7 @@ The compiler ledger is an execution view. Registry CAS bytes remain immutable;
 only paths and run-local fingerprints in that view are reconstructed.
 """
 from pathlib import Path
+import hashlib
 import json
 import os
 import tempfile
@@ -63,6 +64,55 @@ def graph_node_sha256(stage):
         "policy": {key: bool(stage.get("policy", {}).get(key, False)) for key in
                    ("fail_closed", "cacheable", "output_hash_required", "product_pass_authority")},
     })
+
+
+def _manifest_file_refs(value):
+    if isinstance(value, list):
+        for item in value:
+            yield from _manifest_file_refs(item)
+    elif isinstance(value, dict):
+        for key, path in value.items():
+            if key == "path":
+                digest = value.get("expected_sha256") or value.get("sha256")
+            elif key.endswith("_path"):
+                digest = value.get(key[:-5] + "_sha256")
+            else:
+                digest = None
+            if isinstance(path, str) and isinstance(digest, str) and len(digest) == 64:
+                yield Path(path).expanduser().resolve(), digest
+        for item in value.values():
+            yield from _manifest_file_refs(item)
+
+
+def verify_source_inputs(*, manifest, inputs, read_object):
+    """Bind Registry raw bytes to the exact manifest/host files Engine reads.
+
+    Section roles seal the whole JSON section, not an arbitrary file with a
+    similar name. Unsegmented inputs must occur as hash-bound file references.
+    This validates identity only; scientific qualification remains the adapter.
+    """
+    seen = set()
+    for ref in inputs:
+        role = str(ref.get("role") or "")
+        if not role.startswith("subject:") or role in seen:
+            raise RuntimeError("ENGINE_SOURCE_INPUT_ROLE_INVALID")
+        seen.add(role)
+        data = read_object(ref)
+        if hashlib.sha256(data).hexdigest() != ref["content_sha256"] or len(data) != ref["size_bytes"]:
+            raise RuntimeError("ENGINE_SOURCE_INPUT_CAS_DRIFT:" + role)
+        if role.startswith("subject:manifest:"):
+            key = role[len("subject:manifest:"):]
+            if key not in manifest or json.loads(data) != manifest[key]:
+                raise RuntimeError("ENGINE_SOURCE_MANIFEST_SECTION_DRIFT:" + role)
+            refs = list(_manifest_file_refs(manifest[key]))
+        else:
+            refs = [(path, digest) for path, digest in _manifest_file_refs(manifest)
+                    if digest == ref["content_sha256"]]
+            if not refs:
+                raise RuntimeError("ENGINE_SOURCE_INPUT_NOT_REFERENCED:" + role)
+        for path, digest in refs:
+            if not path.is_file() or mainline.sha256_file(path) != digest:
+                raise RuntimeError("ENGINE_SOURCE_INPUT_FILE_DRIFT:" + role)
 
 
 def hydrate_stage_inputs(*, plan, ledger, manifest, inputs, read_object, mode):

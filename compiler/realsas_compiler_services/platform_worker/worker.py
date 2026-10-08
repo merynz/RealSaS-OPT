@@ -21,7 +21,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from compiler.realsas_compiler_services.orchestrator import mainline
-from compiler.realsas_compiler_services.platform_worker.stage_inputs import hydrate_stage_inputs, verify_execution_version, released_execution_plan
+from compiler.realsas_compiler_services.platform_worker.stage_inputs import hydrate_stage_inputs, verify_execution_version, released_execution_plan, verify_source_inputs
 
 ENGINE_TASK_QUEUE = "realsas-engine-v1"
 EXECUTE_STAGE_ACTIVITY = "engine.execute_compile_stage.v1"
@@ -144,6 +144,7 @@ def _execute_stage_core(request: dict[str, Any]) -> dict[str, Any]:
     manifest_path = mainline.run_manifest_path(run_id)
     manifest = mainline.load_json(manifest_path)
     verify_execution_version(plan, request, manifest)
+    verify_source_inputs(manifest=manifest, inputs=request.get("source_inputs") or (), read_object=_read_cas_object)
     if not ledger_path.exists():
         # Go has already created the Attempt and execution. This ledger is only
         # the run-local Engine view, never a second lifecycle authority.
@@ -291,6 +292,9 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
         "policy_sha256": request["policy_sha256"],
         "semantic_parameters": request.get("stage_semantic_parameters") or {},
         "input_stages": [{"stage_id": ref["role"][6:], "artifact": ref} for ref in request.get("input_artifacts", ()) if str(ref.get("role", "")).startswith("stage:")],
+        "source_inputs": [{**ref, "role": "subject:" + str(ref["role"]).removeprefix("subject:")}
+                          for ref in request.get("input_artifacts", ())
+                          if not str(ref.get("role", "")).startswith("stage:")],
     }
     stage_result = await _with_heartbeat(_execute_stage_core, stage_request)
     failure = stage_result.get("failure")

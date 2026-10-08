@@ -74,6 +74,13 @@ Engine contract must validate and reseal them. The API rejects qualification
 fields supplied by an importer. Seal roles with `subject_id`, `bindings` and
 `created_by`; each binding contains `role` and `artifact_id`.
 
+For a segmented `manifest:<key>` role, import the exact JSON value of that
+manifest section (with pinned file hashes), not one NPZ under a misleading section
+role. Engine verifies section equality and referenced file bytes before executing.
+Unsegmented raw inputs must be referenced by content hash in the manifest; unknown
+bytes or stale host files fail closed. The Go request carries the exact source
+artifacts bound to the execution, alongside qualified stage-result inputs.
+
 `canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json` is the narrow latest-input
 index. `tools/platform_host_preflight.py` searches only an explicit authority
 root with scan limits and verifies exact file size/hash. Its report is host

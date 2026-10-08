@@ -221,6 +221,10 @@ func (a Activities) PrepareStageExecution(ctx context.Context, req orchestration
 	if err != nil {
 		return orchestration.EngineStageRequest{}, err
 	}
+	sources, err := a.boundSourceInputs(ctx, executionID)
+	if err != nil {
+		return orchestration.EngineStageRequest{}, err
+	}
 	var implementationSHA, policySHA, kind string
 	var parametersRaw []byte
 	if err := a.Pool.QueryRow(ctx, `SELECT ers.implementation_sha256,ers.policy_sha256,a.kind,ers.semantic_parameters FROM attempts a JOIN engine_release_stages ers ON ers.release_id=a.engine_release_id WHERE a.id=$1 AND ers.stage_id=$2`, attemptID, req.StageID).Scan(&implementationSHA, &policySHA, &kind, &parametersRaw); err != nil {
@@ -241,6 +245,7 @@ func (a Activities) PrepareStageExecution(ctx context.Context, req orchestration
 	}
 	return orchestration.EngineStageRequest{
 		ReleasedGraph:      a.Graph.Snapshot(),
+		SourceInputs:       sources,
 		GraphNodeSHA256:    nodeSHA,
 		SemanticParameters: parameters,
 		ExecutionMode:      mode, ImplementationSHA256: implementationSHA, PolicySHA256: policySHA, InputStages: inputs,

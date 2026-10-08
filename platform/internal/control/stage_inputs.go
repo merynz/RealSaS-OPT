@@ -32,3 +32,26 @@ func (a Activities) boundStageInputs(ctx context.Context, attemptID uuid.UUID) (
 	}
 	return inputs, rows.Err()
 }
+
+// These are the inputs already selected and bound transactionally for this
+// exact stage. The Engine must verify them against the manifest it reads.
+func (a Activities) boundSourceInputs(ctx context.Context, executionID uuid.UUID) ([]orchestration.ArtifactRef, error) {
+	rows, err := a.Pool.Query(ctx, `SELECT ea.role,ar.id,t.name,t.schema_version,ar.semantic_sha256,
+        ar.storage_key,ar.content_sha256,ar.size_bytes
+        FROM execution_artifacts ea JOIN artifacts ar ON ar.id=ea.artifact_id
+        JOIN artifact_types t ON t.id=ar.artifact_type_id
+        WHERE ea.execution_id=$1 AND ea.relation='input' AND starts_with(ea.role,'subject:') ORDER BY ea.role`, executionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	refs := make([]orchestration.ArtifactRef, 0)
+	for rows.Next() {
+		var ref orchestration.ArtifactRef
+		if err := rows.Scan(&ref.Role, &ref.ID, &ref.ArtifactType, &ref.SchemaVersion, &ref.SemanticSHA256, &ref.StorageKey, &ref.ContentSHA256, &ref.SizeBytes); err != nil {
+			return nil, err
+		}
+		refs = append(refs, ref)
+	}
+	return refs, rows.Err()
+}

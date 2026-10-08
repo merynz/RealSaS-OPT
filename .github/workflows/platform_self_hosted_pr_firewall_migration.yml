@@ -1,0 +1,118 @@
+name: platform-self-hosted-pr-firewall-migration
+
+on:
+  push:
+    branches:
+      - platform/throughput-hydration-gc-20261008
+    paths:
+      - '.github/workflows/platform_self_hosted_pr_firewall_migration.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: github.repository == 'merynz/RealSaS-OPT' && github.ref_name == 'platform/throughput-hydration-gc-20261008'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: platform/throughput-hydration-gc-20261008
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Add same-repository firewall to automatic self-hosted PR jobs
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path('.github/workflows')
+          self_path = root / 'platform_self_hosted_pr_firewall_migration.yml'
+          guard = "github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository"
+          changed = []
+
+          def job_ranges(lines):
+              starts = []
+              in_jobs = False
+              for i, line in enumerate(lines):
+                  if line.rstrip() == 'jobs:':
+                      in_jobs = True
+                      continue
+                  if in_jobs and re.match(r'^  [A-Za-z0-9_.-]+:\s*$', line):
+                      starts.append(i)
+              out = []
+              for n, start in enumerate(starts):
+                  end = starts[n + 1] if n + 1 < len(starts) else len(lines)
+                  out.append((start, end))
+              return out
+
+          for path in sorted(root.glob('*.yml')):
+              if path == self_path:
+                  continue
+              text = path.read_text(encoding='utf-8')
+              if not re.search(r'^  pull_request:', text, re.MULTILINE):
+                  continue
+              lines = text.splitlines(keepends=True)
+              touched = False
+              # Reverse order keeps indices stable when inserting.
+              for start, end in reversed(job_ranges(lines)):
+                  block = lines[start:end]
+                  run_rel = next((j for j, line in enumerate(block) if re.match(r'^    runs-on:\s*\[.*self-hosted.*\]\s*$', line)), None)
+                  if run_rel is None:
+                      continue
+                  if any(guard in line for line in block):
+                      continue
+                  if_rels = [j for j, line in enumerate(block) if re.match(r'^    if:\s*.+$', line)]
+                  if len(if_rels) > 1:
+                      raise SystemExit(f'MULTIPLE_JOB_IF_LINES_UNSUPPORTED:{path.name}:{start+1}')
+                  if if_rels:
+                      rel = if_rels[0]
+                      raw = block[rel].split(':', 1)[1].strip()
+                      if raw in ('|', '>'):
+                          raise SystemExit(f'MULTILINE_JOB_IF_UNSUPPORTED:{path.name}:{start+rel+1}')
+                      if raw.startswith('${{') and raw.endswith('}}'):
+                          raw = raw[3:-2].strip()
+                      lines[start + rel] = f"    if: ${{{{ ({raw}) && ({guard}) }}}}\n"
+                  else:
+                      lines.insert(start + run_rel, f"    if: ${{{{ {guard} }}}}\n")
+                  touched = True
+              if touched:
+                  path.write_text(''.join(lines), encoding='utf-8')
+                  changed.append(path.name)
+
+          print('MIGRATED', len(changed), *changed, sep='\n')
+          if not changed:
+              raise SystemExit('NO_WORKFLOWS_MIGRATED')
+
+          # Independent post-condition: every pull_request workflow that reaches a
+          # physical self-hosted runner now contains the same-repository firewall.
+          missing = []
+          for path in sorted(root.glob('*.yml')):
+              if path == self_path:
+                  continue
+              text = path.read_text(encoding='utf-8')
+              if not re.search(r'^  pull_request:', text, re.MULTILINE):
+                  continue
+              if not re.search(r'^\s*runs-on:\s*\[.*self-hosted.*\]\s*$', text, re.MULTILINE):
+                  continue
+              if guard not in text:
+                  missing.append(path.name)
+          if missing:
+              raise SystemExit('FIREWALL_MISSING:' + ','.join(missing))
+          PY
+      - name: Run execution-policy contract
+        run: |
+          python3 -m pip install --disable-pip-version-check --no-input -q pytest==8.4.1
+          python3 -m pytest -q tests/repository/test_self_hosted_execution_policy.py
+      - name: Commit atomic migration and remove one-shot workflow
+        run: |
+          rm .github/workflows/platform_self_hosted_pr_firewall_migration.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows
+          git diff --cached --check
+          git commit -m 'Harden self-hosted PR workflows against fork execution'
+          git push origin HEAD:platform/throughput-hydration-gc-20261008

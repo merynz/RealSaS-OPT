@@ -15,6 +15,11 @@ import time
 import venv
 from pathlib import Path
 
+if __package__:
+    from .platform_cache_lock import shared_cache_use
+else:
+    from platform_cache_lock import shared_cache_use
+
 SCHEMA = "RealSaS.PlatformCIBootstrap.v2"
 
 
@@ -42,6 +47,7 @@ def fingerprint(requirements: list[str], requirement_files: list[Path] | tuple[P
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
 
 
+@shared_cache_use
 def ensure_venv(
     cache_root: Path,
     requirements: list[str],

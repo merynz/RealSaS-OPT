@@ -1,8 +1,12 @@
 import os
 import time
+import fcntl
+import subprocess
+import sys
 from pathlib import Path
 
 from tools.platform_cache_gc import collect
+from tools.platform_cache_lock import cache_lease
 
 
 def _venv(root, name, payload, mtime):
@@ -110,3 +114,53 @@ def test_gc_evicts_go_module_namespace_atomically_under_pressure(tmp_path, monke
     assert report["deleted_count"] == 1
     assert report["deleted"][0]["kind"] == "namespace:go-mod"
     assert report["deleted"][0]["reason"] == "LRU_OR_DISK_PRESSURE"
+
+
+def test_gc_does_not_delete_live_cache_namespaces(tmp_path, monkeypatch):
+    _high_free(monkeypatch)
+    path = tmp_path / "pip" / "active.whl"
+    path.parent.mkdir()
+    path.write_bytes(b"active")
+    with cache_lease(tmp_path):
+        report = collect(tmp_path, soft_max_bytes=0, target_max_bytes=0,
+                         max_age_seconds=0, min_free_bytes=0, dry_run=False)
+    assert report["status"] == "LIVE_CACHE_LEASE_HELD"
+    assert not report["safe_to_execute"]
+    assert path.read_bytes() == b"active"
+
+
+def test_gc_holds_venv_lock_until_deletion_finishes(tmp_path, monkeypatch):
+    _high_free(monkeypatch)
+    path = _venv(tmp_path, "old", b"payload", 0)
+    from tools import platform_cache_gc as gc
+    remove = gc._remove_tree
+
+    def remove_with_contending_process(target):
+        script = '''import fcntl, sys
+with open(sys.argv[1], 'a+b') as handle:
+    try:
+        fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        sys.exit(23)
+'''
+        result = subprocess.run([sys.executable, "-c", script, str(path)+".lock"])
+        assert result.returncode == 23
+        remove(target)
+
+    monkeypatch.setattr(gc, "_remove_tree", remove_with_contending_process)
+    report = collect(tmp_path, soft_max_bytes=100, target_max_bytes=50,
+                     max_age_seconds=1, min_free_bytes=0, dry_run=False, now=100)
+    assert report["deleted_count"] == 1
+    assert not path.exists()
+
+
+def test_gc_retains_environment_with_legacy_live_job_lock(tmp_path, monkeypatch):
+    _high_free(monkeypatch)
+    path = _venv(tmp_path, "active", b"payload", 0)
+    with Path(str(path)+".lock").open("a+b") as handle:
+        fcntl.flock(handle, fcntl.LOCK_SH)
+        report = collect(tmp_path, soft_max_bytes=0, target_max_bytes=0,
+                         max_age_seconds=0, min_free_bytes=0, dry_run=False, now=100)
+    assert path.exists()
+    assert report["deleted_count"] == 0
+    assert not report["safe_to_execute"]

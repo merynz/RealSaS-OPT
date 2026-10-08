@@ -6,6 +6,7 @@ on:
     paths:
       - 'tools/platform_artifact_store.py'
       - 'tools/platform_cache_gc.py'
+      - 'tools/platform_cache_lock.py'
       - 'tools/platform_ci_bootstrap.py'
       - 'tools/platform_ci_database.py'
       - 'tools/platform_host_preflight.py'
@@ -22,6 +23,7 @@ on:
     paths:
       - 'tools/platform_artifact_store.py'
       - 'tools/platform_cache_gc.py'
+      - 'tools/platform_cache_lock.py'
       - 'tools/platform_ci_bootstrap.py'
       - 'tools/platform_ci_database.py'
       - 'tools/platform_host_preflight.py'

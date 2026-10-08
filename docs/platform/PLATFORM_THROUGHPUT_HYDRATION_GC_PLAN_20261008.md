@@ -49,6 +49,18 @@ GC is a correctness contract, not a cleanup afterthought:
 5. never delete a venv whose live-job lock is held;
 6. fail closed if quota/free-disk safety cannot be recovered.
 
+Persistent local jobs must hold a shared root lease for their entire cache-use
+lifetime, including pip/Go processes, using:
+
+```bash
+python -m tools.platform_cache_lock --root /absolute/tool-cache -- command args
+```
+
+Bootstrap holds the same lease while building. GC takes an exclusive nonblocking
+root lease, skips a busy cache, and retains the per-venv lock through deletion.
+Without wrapping an external local cache consumer, automatic GC is unsupported.
+Hosted ephemeral jobs do not consume this persistent cache.
+
 Arbitrary files are never pruned from inside a reusable environment or module tree.
 
 ## PostgreSQL execution

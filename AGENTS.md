@@ -26,8 +26,10 @@ EngineRelease, inspect graph-aware impact, and preserve unrelated artifacts.
 Keep implementation and plan changes on canonical main through short reviewed
 PRs; research continuation belongs to the Attempt, never a long-lived branch.
 
-Use the self-hosted `realsas-wsl-1660ti` runner or local execution. Do not add
-GitHub-hosted execution. Old frozen recovery is manual provenance only.
+Use standard GitHub-hosted `ubuntu-latest` for host-independent CPU CI while
+the repository is public; private-repository jobs skip. Notebook/Colab is the
+default research/GPU lane. Local WSL/GTX remains an explicit native-host or
+selected inference option. Old frozen recovery is manual provenance only.
 Absolute G3 remains an open gap without cancelling teacher-relative FIT1 PASS.
 
 ## Current machine authority spine
@@ -97,13 +99,13 @@ That run reused sealed artifacts; IRIS/TESSA/AXIS/MIRA were not reinferred. Do n
 
 ## Active priority order
 
-1. Import/reseal latest Knight evidence into a research Attempt and prove real component replacement with independent artifact reuse.
-2. Close import/portability and direct-path enforcement gaps exposed by that execution.
-3. Optimize measured costs and render the carrier-native result; preserve exact scientific scope.
-4. Productize full input-to-output execution and its UI after the modular developer path is operational.
-5. Return to runtime/presentation image diagnosis if the qualified image remains wrong.
+1. Seal and merge PR #65 platform throughput/hydration/GC.
+2. Complete PR #66 presentation/runtime P0 only: continuous visual deformation
+   domain, explicit canonical depth/overlap ownership, Stage45 fail-closed proof.
+3. Reuse sealed mechanics and the existing motion witness for a downstream-only
+   rerun and fresh Knight IDLE/RUN/SLASH.
 
-Do not preempt priorities 1–3 by reopening visual/runtime forensics unless new evidence falsifies the sealed static topology/geometry/mechanical baseline.
+Do not reopen mechanics, rig, skin, IRIS, AXIS or MIRA in this continuation.
 
 ## Product-quality rule
 

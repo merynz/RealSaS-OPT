@@ -1,20 +1,14 @@
 name: post-freeze-family-selector-v1
 
+# Historical selector replay requires its original frozen source checkout.
+# Current platform edits must not reseal or relax that scientific fingerprint.
 on:
-  pull_request:
-    paths:
-      - 'canonical/ARCHITECTURE_FREEZE_V1.json'
-      - 'canonical/architecture_freeze_gate_v1.py'
-      - 'experiments/family_selection_v1/**'
-      - '.github/workflows/post_freeze_family_selector_v1.yml'
-  push:
-    branches:
-      - architecture/v4-generic-strength-source-completion-20260902
-    paths:
-      - 'canonical/ARCHITECTURE_FREEZE_V1.json'
-      - 'canonical/architecture_freeze_gate_v1.py'
-      - 'experiments/family_selection_v1/**'
-      - '.github/workflows/post_freeze_family_selector_v1.yml'
+  workflow_dispatch:
+    inputs:
+      frozen_ref:
+        description: 'Exact historical frozen-source commit to replay'
+        required: true
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -27,6 +21,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.frozen_ref }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'

@@ -47,9 +47,10 @@ concurrency:
 
 jobs:
   fast-current-mainline:
-    # Public repository: standard GitHub-hosted Linux is the default lane for
-    # host-independent CPU validation. The local WSL runner is reserved for
-    # explicit product/native-host witnesses or requested local inference.
+    # Standard hosted compute is intentionally enabled only while this repository
+    # is public. If visibility is changed to private during a pause/trip, the job
+    # is skipped rather than consuming private-repository Actions minutes.
+    if: github.event.repository.private == false
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -123,6 +124,7 @@ jobs:
           echo 'CURRENT_MAINLINE_FAST_GATE_PASS'
           echo "commit=$GITHUB_SHA"
           echo 'execution_lane=github_hosted_public_standard'
+          echo 'private_repo_guard=true'
           echo 'pinned_environment=true'
           echo 'repository_governance=true'
           echo 'v2_dag=true'

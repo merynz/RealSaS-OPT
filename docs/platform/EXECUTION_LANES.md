@@ -86,7 +86,9 @@ envelope. The teacher also exceeds absolute G3 thresholds; that separate red
 gap remains open and does not cancel the scoped PASS. Absolute G3, product
 qualification and generalization remain separate claims.
 
-Old frozen IDLE/RUN/SLASH recovery is manual historical reproducibility.
+Old frozen IDLE/RUN/SLASH recovery and the August vendor consumer/MWB0/MWB1
+replays are manual historical reproducibility; they no longer queue on every
+current Compiler edit. Current mainline contracts remain automatic.
 It cannot prove the newest carrier-native package rendered. A fresh render
 receipt must record exact code SHA, carrier/skeleton/weights identities,
 input artifacts, output hashes, execution mode and wall time. Measure cold

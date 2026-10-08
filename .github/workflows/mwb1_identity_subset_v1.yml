@@ -1,18 +1,13 @@
 name: mwb1-identity-subset-v1
+# Historical vendor replay; current V2 contracts run in mainline CI.
 on:
-  pull_request:
-    paths:
-      - 'compiler/**'
-      - 'experiments/mwb1_identity_subset_20260901/**'
-      - 'experiments/consumer_interlock_20260829/**'
-      - 'canonical/MWB1_IDENTITY_SUBSET_BASELINE_PREREG_20260901.md'
-      - 'canonical/MWB1_IDENTITY_SUBSET_BASELINE_PREREG_AMENDMENT_20260901.md'
-      - '.github/workflows/mwb1_identity_subset_v1.yml'
+  workflow_dispatch:
+
 permissions:
   contents: read
 jobs:
   real-witness-baseline:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4

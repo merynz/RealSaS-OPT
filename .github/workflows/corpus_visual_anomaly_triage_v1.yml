@@ -10,7 +10,7 @@ on:
 
 jobs:
   triage-unit:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
     defaults:
       run:
         working-directory: experiments/geppetto_arachne_v0_1_20260830

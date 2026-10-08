@@ -1,16 +1,13 @@
 name: mwb0-typed-seam-v1
+# Historical vendor replay; current V2 contracts run in mainline CI.
 on:
-  pull_request:
-    paths:
-      - 'compiler/**'
-      - 'canonical/MESH_WEIGHT_BINDING_CONTRACT_V1.md'
-      - 'canonical/MESH_WEIGHT_BINDING_CONTRACT_V1.json'
-      - '.github/workflows/mwb0_typed_seam_v1.yml'
+  workflow_dispatch:
+
 permissions:
   contents: read
 jobs:
   typed-seam:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4

@@ -12,7 +12,7 @@ permissions:
   contents: read
 jobs:
   appearance-pixel-center-behavioral:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4

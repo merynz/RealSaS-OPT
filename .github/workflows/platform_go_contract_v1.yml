@@ -19,6 +19,10 @@ on:
       - '.github/workflows/platform_go_contract_v1.yml'
   workflow_dispatch:
 
+concurrency:
+  group: platform-go-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -26,22 +30,8 @@ jobs:
   contract:
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 25
-    services:
-      postgres:
-        image: postgres:18.6
-        env:
-          POSTGRES_USER: realsas
-          POSTGRES_PASSWORD: realsas
-          POSTGRES_DB: realsas_platform
-        ports:
-          - 15432:5432
-        options: >-
-          --health-cmd "pg_isready -U realsas -d realsas_platform"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 20
     env:
-      REALSAS_DATABASE_URL: postgres://realsas:realsas@127.0.0.1:15432/realsas_platform?sslmode=disable
+      REALSAS_CI_PGDATA: ${{ runner.temp }}/realsas-platform-pg-${{ github.run_id }}-${{ github.run_attempt }}
     defaults:
       run:
         working-directory: platform
@@ -54,8 +44,19 @@ jobs:
       - name: Python contract dependencies
         run: |
           python3 -m venv "$RUNNER_TEMP/realsas-platform-contract-venv"
-          "$RUNNER_TEMP/realsas-platform-contract-venv/bin/python" -m pip install pytest temporalio
+          "$RUNNER_TEMP/realsas-platform-contract-venv/bin/python" -m pip install pytest temporalio pgserver==0.1.4
           echo "$RUNNER_TEMP/realsas-platform-contract-venv/bin" >> "$GITHUB_PATH"
+      - name: Start isolated PostgreSQL without Docker
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          from pgserver import get_server
+          server = get_server(Path(os.environ['REALSAS_CI_PGDATA']), cleanup_mode=None)
+          with open(os.environ['GITHUB_ENV'], 'a') as handle:
+              handle.write('REALSAS_DATABASE_URL=' + server.get_uri() + '\n')
+          print('Isolated PostgreSQL started; no host database service changed')
+          PY
       - name: Download pinned modules
         run: go mod download
       - name: Format gate
@@ -101,9 +102,20 @@ jobs:
         run: |
           python3 -m py_compile ../compiler/realsas_compiler_services/platform_worker/worker.py
           cd ..
-          python3 -m pytest -q tests/compiler/test_platform_stage_inputs_v1.py tests/repository/test_source_owned_visual_runtime_wiring_v1.py
+          python3 -m pytest -q tests/compiler/test_platform_stage_inputs_v1.py tests/repository/test_source_owned_visual_runtime_wiring_v1.py tests/repository/test_self_hosted_execution_policy.py
       - name: Current continuation contracts
         run: |
           cd ..
           python3 tools/render_authority_map.py --write
           python3 tools/render_rehydration_packet.py --write
+      - name: Stop isolated PostgreSQL
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          data = Path(os.environ['REALSAS_CI_PGDATA'])
+          if (data / 'postmaster.pid').exists():
+              from pgserver import pg_ctl
+              pg_ctl(['-m', 'fast', '-w', 'stop'], pgdata=data, timeout=30)
+          PY

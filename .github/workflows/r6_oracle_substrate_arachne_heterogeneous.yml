@@ -34,7 +34,7 @@ on:
 
 jobs:
   r6-a1-heterogeneous-u1:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4

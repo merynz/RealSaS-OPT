@@ -33,8 +33,8 @@ def portable(tmp_path, monkeypatch):
         if hashlib.sha256(data).hexdigest() != obj["content_sha256"] or len(data) != obj["size_bytes"]:
             raise RuntimeError("CAS_OBJECT_CONTENT_DRIFT")
         return data
-    def hydrate():
-        hydrate_stage_inputs(plan=plan, ledger=ledger, manifest={}, inputs=[{"stage_id": stage["id"], "artifact": ref()}], read_object=read, mode="RESEARCH")
+    def hydrate(mode="RESEARCH"):
+        hydrate_stage_inputs(plan=plan, ledger=ledger, manifest={}, inputs=[{"stage_id": stage["id"], "artifact": ref()}], read_object=read, mode=mode)
     return cached, ledger, objects, output, hydrate
 
 
@@ -70,3 +70,20 @@ def test_corrupt_immutable_payload_fails_closed(portable):
     objects[cached["outputs"][0]["content_sha256"]] = b"changed-carrier"
     with pytest.raises(RuntimeError, match="CONTENT_DRIFT"):
         hydrate()
+
+
+def test_changed_manifest_read_set_cannot_reuse_stale_output(portable):
+    cached, _, _, _, hydrate = portable
+    cached["semantic_parameters"]["manifest"] = {"source_files": ["changed"]}
+    with pytest.raises(RuntimeError, match="MANIFEST_DRIFT"):
+        hydrate()
+
+
+def test_demo_pass_is_research_only(portable):
+    cached, ledger, _, _, hydrate = portable
+    cached["compiler_status"] = "PASS_DEMO_ONLY"
+    ledger["execution_class"] = "DEMO_WITNESS"
+    with pytest.raises(RuntimeError, match="QUALIFICATION_DRIFT"):
+        hydrate("PRODUCT")
+    hydrate("RESEARCH")
+    assert ledger["stages"][0]["status"] == "PASS_DEMO_ONLY"

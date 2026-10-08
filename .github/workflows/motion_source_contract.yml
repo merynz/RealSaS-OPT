@@ -36,7 +36,7 @@ permissions:
 
 jobs:
   motion-v2-contract:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 15
     env:
       PYTHONPATH: .

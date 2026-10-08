@@ -7,7 +7,7 @@ permissions:
   contents: read
 jobs:
   seal:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 15
     env: {PYTHONPATH: .}
     steps:

@@ -87,6 +87,7 @@ type PrepareCapabilityExecutionRequest struct {
 }
 
 type EngineCapabilityRequest struct {
+	StageSemanticParameters   map[string]any `json:"stage_semantic_parameters,omitempty"`
 	ExecutionID               string         `json:"execution_id"`
 	CommandID                 string         `json:"command_id"`
 	AttemptID                 string         `json:"attempt_id"`

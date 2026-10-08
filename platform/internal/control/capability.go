@@ -140,6 +140,22 @@ func (a Activities) PrepareCapabilityExecution(ctx context.Context, req orchestr
 	}
 
 	executionID := uuid.NewSHA1(uuid.NameSpaceOID, []byte("realsas:capability-execution:"+goalID.String()+":"+descriptor.ID))
+	var stageParameters map[string]any
+	if descriptor.Kind == capability.KindStage {
+		stageID, _ := descriptor.Metadata["stage_id"].(string)
+		var impl, policy string
+		var raw []byte
+		if err := a.Pool.QueryRow(ctx, `SELECT implementation_sha256,policy_sha256,semantic_parameters
+			FROM engine_release_stages WHERE release_id=$1 AND stage_id=$2`, releaseID, stageID).Scan(&impl, &policy, &raw); err != nil {
+			return orchestration.EngineCapabilityRequest{}, err
+		}
+		if impl != version.ImplementationSHA256 || policy != version.PolicySHA256 {
+			return orchestration.EngineCapabilityRequest{}, errors.New("CAPABILITY_STAGE_RELEASE_DRIFT")
+		}
+		if err := json.Unmarshal(raw, &stageParameters); err != nil {
+			return orchestration.EngineCapabilityRequest{}, err
+		}
+	}
 	workflowID := "realsas:capability:" + req.CommandID
 
 	tx, err := a.Pool.BeginTx(ctx, pgx.TxOptions{IsoLevel: pgx.Serializable})
@@ -208,6 +224,7 @@ func (a Activities) PrepareCapabilityExecution(ctx context.Context, req orchestr
 		return orchestration.EngineCapabilityRequest{}, err
 	}
 	return orchestration.EngineCapabilityRequest{
+		StageSemanticParameters:   stageParameters,
 		ExecutionID:               executionID.String(),
 		CommandID:                 req.CommandID,
 		AttemptID:                 req.AttemptID,

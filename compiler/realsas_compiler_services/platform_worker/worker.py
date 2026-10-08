@@ -286,7 +286,7 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
         "execution_mode": "RESEARCH",
         "implementation_sha256": request["implementation_sha256"],
         "policy_sha256": request["policy_sha256"],
-        "semantic_parameters": {"manifest": mainline._manifest_subset(mainline.load_json(mainline.run_manifest_path(run_id)),mainline._stage_map(mainline.load_json(mainline.PLAN_PATH))[stage_id])},
+        "semantic_parameters": request.get("stage_semantic_parameters") or {},
         "input_stages": [{"stage_id": ref["role"][6:], "artifact": ref} for ref in request.get("input_artifacts", ()) if str(ref.get("role", "")).startswith("stage:")],
     }
     stage_result = await _with_heartbeat(_execute_stage_core, stage_request)

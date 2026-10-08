@@ -15,7 +15,7 @@ on:
       - '.github/workflows/mwb2_source_contract.yml'
 jobs:
   mwb2-source-contract:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

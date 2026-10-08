@@ -1,15 +1,13 @@
 name: consumer-interlock-v0
+# Historical vendor replay; current V2 contracts run in mainline CI.
 on:
-  pull_request:
-    paths:
-      - 'compiler/**'
-      - 'experiments/consumer_interlock_20260829/**'
-      - '.github/workflows/consumer_interlock_v0.yml'
+  workflow_dispatch:
+
 permissions:
   contents: read
 jobs:
   exact-compiler-clean:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4

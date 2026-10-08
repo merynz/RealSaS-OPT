@@ -23,6 +23,7 @@ concurrency:
 
 jobs:
   iris-v2-source-contract:
+    if: github.event.repository.private == false
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -63,4 +64,6 @@ jobs:
             tests/iris/test_iris_v2_generic_strength_v1.py \
             tests/iris/test_iris_v2_privileged_input_firewall_v1.py
       - name: Execution lane
-        run: echo 'execution_lane=github_hosted_public_standard'
+        run: |
+          echo 'execution_lane=github_hosted_public_standard'
+          echo 'private_repo_guard=true'

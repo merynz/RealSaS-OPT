@@ -29,6 +29,8 @@ MAX_TRANSFER_BYTES = 64 * 1024 * 1024
 MAX_MANIFEST_BYTES = 8 * 1024 * 1024
 MAX_BUNDLE_BYTES = 64 * 1024 * 1024
 MAX_BUNDLE_UNCOMPRESSED_BYTES = 128 * 1024 * 1024
+MAX_ENVELOPE_BYTES = 2 * 1024 * 1024
+MAX_CONTENTS_API_BYTES = 4 * 1024 * 1024
 MAX_INPUT_FILES = 128
 SAFE_INPUT_NAME = re.compile(r"[A-Za-z0-9_.-]+")
 ALLOWED_DOWNLOAD_HOST_SUFFIXES = (
@@ -196,16 +198,48 @@ def _extract_bundle(ref, out, *, downloader=_download_pinned):
     return verified
 
 
+def _decode_contents_api_envelope(body):
+    """Decode one GitHub Contents API file response into the encrypted envelope."""
+    try:
+        metadata = json.loads(body)
+    except Exception:
+        raise RuntimeError("PRIVATE_INPUT_ENVELOPE_API_JSON_INVALID") from None
+    if (not isinstance(metadata, dict) or metadata.get("type") != "file"
+            or metadata.get("encoding") != "base64"
+            or not isinstance(metadata.get("content"), str)):
+        raise RuntimeError("PRIVATE_INPUT_ENVELOPE_API_SHAPE_INVALID")
+    encoded = "".join(metadata["content"].split())
+    try:
+        raw = base64.b64decode(encoded, validate=True)
+    except Exception:
+        raise RuntimeError("PRIVATE_INPUT_ENVELOPE_API_CONTENT_INVALID") from None
+    if len(raw) > MAX_ENVELOPE_BYTES:
+        raise RuntimeError("PRIVATE_INPUT_ENVELOPE_TOO_LARGE")
+    try:
+        envelope = json.loads(raw.decode("utf-8"))
+    except Exception:
+        raise RuntimeError("PRIVATE_INPUT_ENVELOPE_JSON_INVALID") from None
+    if not isinstance(envelope, dict):
+        raise RuntimeError("PRIVATE_INPUT_ENVELOPE_SHAPE_INVALID")
+    return envelope
+
+
 def receive(directory, out, *, repo, branch, run_id, code_sha, timeout):
     url = (f"https://api.github.com/repos/{repo}/contents/.github/research_transport/{run_id}.json?ref="
            + urllib.parse.quote(branch, safe=""))
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
-        req = urllib.request.Request(url, headers={"Authorization": "Bearer " + os.environ["GITHUB_TOKEN"],
-            "Accept": "application/vnd.github.raw+json"})
+        req = urllib.request.Request(url, headers={
+            "Authorization": "Bearer " + os.environ["GITHUB_TOKEN"],
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+        })
         try:
             with urllib.request.urlopen(req, timeout=20) as response:
-                envelope = json.load(response)
+                body = response.read(MAX_CONTENTS_API_BYTES + 1)
+            if len(body) > MAX_CONTENTS_API_BYTES:
+                raise RuntimeError("PRIVATE_INPUT_ENVELOPE_API_RESPONSE_TOO_LARGE")
+            envelope = _decode_contents_api_envelope(body)
             break
         except urllib.error.HTTPError as error:
             if error.code != 404:
@@ -213,15 +247,28 @@ def receive(directory, out, *, repo, branch, run_id, code_sha, timeout):
         time.sleep(5)
     else:
         raise RuntimeError("PRIVATE_INPUT_HANDOFF_TIMEOUT")
-    if envelope["run_id"] != run_id or envelope["code_sha"] != code_sha:
+    if envelope.get("run_id") != run_id or envelope.get("code_sha") != code_sha:
         raise RuntimeError("PRIVATE_INPUT_ENVELOPE_IDENTITY_DRIFT")
-    if len(envelope["chunks"]) > 2048:
-        raise RuntimeError("PRIVATE_INPUT_ENVELOPE_TOO_LARGE")
-    raw = b"".join(rsa(base64.b64decode(c, validate=True), directory/"private.pem", encrypt=False)
-                   for c in envelope["chunks"])
-    if hashlib.sha256(raw).hexdigest() != envelope["plaintext_sha256"]:
+    chunks = envelope.get("chunks")
+    plaintext_sha256 = envelope.get("plaintext_sha256")
+    if (not isinstance(chunks, list) or len(chunks) > 2048
+            or not isinstance(plaintext_sha256, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", plaintext_sha256)):
+        raise RuntimeError("PRIVATE_INPUT_ENVELOPE_SHAPE_INVALID")
+    try:
+        raw = b"".join(rsa(base64.b64decode(c, validate=True), directory/"private.pem", encrypt=False)
+                       for c in chunks if isinstance(c, str))
+    except Exception:
+        raise RuntimeError("PRIVATE_INPUT_ENVELOPE_DECRYPT_FAILED") from None
+    if len(chunks) != sum(isinstance(c, str) for c in chunks):
+        raise RuntimeError("PRIVATE_INPUT_ENVELOPE_SHAPE_INVALID")
+    if hashlib.sha256(raw).hexdigest() != plaintext_sha256:
         raise RuntimeError("PRIVATE_INPUT_ENVELOPE_INTEGRITY_DRIFT")
-    payload = resolve_payload(json.loads(raw), run_id=run_id, code_sha=code_sha)
+    try:
+        decrypted = json.loads(raw)
+    except Exception:
+        raise RuntimeError("PRIVATE_INPUT_PAYLOAD_JSON_INVALID") from None
+    payload = resolve_payload(decrypted, run_id=run_id, code_sha=code_sha)
     transfers = payload.get("transfers")
     bundle = payload.get("bundle")
     config = payload.get("config")

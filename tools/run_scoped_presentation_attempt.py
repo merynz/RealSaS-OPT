@@ -4,6 +4,7 @@ from copy import deepcopy
 import hashlib
 import json
 import os
+import shutil
 from pathlib import Path
 import subprocess
 import sys
@@ -143,6 +144,16 @@ def run(args):
     (args.out / "attempt_state.json").write_text(json.dumps(state, indent=2) + "\n")
     ledger = mainline.load_json(mainline.run_ledger_path(run_id))
     (args.out / "execution_ledger.json").write_text(json.dumps(ledger, indent=2) + "\n")
+    # Retain independent typed stage evidence even when a later gate fails.
+    # Inputs, transport keys and private locators are outside this tree.
+    artifacts = mainline.authority_root() / "runs" / run_id / "artifacts"
+    for stage in ledger["stages"]:
+        for output in stage.get("outputs", ()):
+            path = Path(output["path"])
+            if output["schema"] == "application/x-rgba8" or not path.is_file(): continue
+            target = args.out / "stage_artifacts" / path.relative_to(artifacts)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(path, target)
     proof = mainline.authority_root() / "runs" / run_id / "artifacts" / scope["target_stage_id"] / "presentation_proof.json"
     if proof.is_file():
         from PIL import Image, ImageDraw

@@ -24,6 +24,8 @@ POLICY = {
     "anchor_grid_px": 32,
     "anchor_barycentric_extrapolation_authorized": False,
     "connected_chart_harmonic_extension": True,
+    "unseeded_island_support": "NEAREST_SAFE_SAMPLE_IN_SAME_QUALIFIED_REGION",
+    "maximum_unseeded_island_support_distance_px": 64,
     "rest_source_coordinates_preserved": True,
     "depth_ownership_contract": DEPTH_CONTRACT,
     "depth_tie_epsilon": 1e-9,
@@ -92,7 +94,15 @@ def build_domain_binding(*, points_source_xy, visual_faces, vertex_region_id,
             local_vertices = vertices[domains[vertices] == domain]
             candidates = np.flatnonzero(sample_domain == domain)
             if not len(candidates):
-                raise QualificationError("VISUAL_DOMAIN_UNANCHORED_COMPONENT:" + str(domain))
+                # A source-alpha island can share a qualified canonical region
+                # while its nearest seeds were assigned to the larger island.
+                # Transport displacement from an actual safe sample; keep the
+                # island's source rest offset and never extrapolate on M.
+                distance, nearest_sample = cKDTree(source_xy).query(p[local_vertices])
+                nearest_vertex = int(np.argmin(distance))
+                if float(distance[nearest_vertex]) > POLICY["maximum_unseeded_island_support_distance_px"]:
+                    raise QualificationError("VISUAL_DOMAIN_UNANCHORED_COMPONENT:" + str(domain))
+                candidates = np.asarray([nearest_sample[nearest_vertex]], dtype=int)
             # One canonical sample per occupied source grid cell. Resolve
             # multiple samples mapped to a vertex by spatial distance only.
             bins = np.floor(source_xy[candidates] / POLICY["anchor_grid_px"]).astype(int)

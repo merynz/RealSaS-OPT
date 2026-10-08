@@ -50,6 +50,23 @@ def test_chart_field_rejects_unanchored_components_and_extrapolation():
     b["anchor_barycentric"][0] = [-1, 1, 1]
     with pytest.raises(QualificationError, match="OPERATOR_INVALID"):
         validate_domain_binding(b, f)
+
+
+def test_small_unseeded_island_uses_bounded_same_region_support():
+    b, f, xyz, camera = domain()
+    seed = np.full((8,8), -1, dtype=int); owner=seed.copy()
+    seed[2,2]=owner[2,2]=0
+    def build(offset):
+        points=np.vstack((b["rest_positions"], np.array([[0,0],[2,0],[0,2]])+offset))
+        return build_domain_binding(points_source_xy=points,visual_faces=np.vstack((f,[9,10,11])),
+            vertex_region_id=np.zeros(12,dtype=int),seed_region_labels=seed,owner_face_index=owner,
+            mechanical_positions_xyz=xyz,mechanical_faces=[[0,1,2],[1,3,2]],camera=camera)
+    binding=build(20)
+    field=evaluate_domain_binding(binding,visual_faces=np.vstack((f,[9,10,11])),
+                                  posed_mechanical_positions_xyz=xyz+[1,0,0],camera=camera)
+    np.testing.assert_allclose(field[:,:2]-binding["rest_positions"],np.tile([1,0],(12,1)))
+    assert np.min(binding["anchor_barycentric"])>=0
+    with pytest.raises(QualificationError,match="UNANCHORED_COMPONENT"):build(100)
     b, f, xyz, camera = domain()
     b["anchor_vertex"] = np.array([], dtype=int)
     with pytest.raises(QualificationError, match="OPERATOR_INVALID"):

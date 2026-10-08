@@ -30,6 +30,34 @@ on:
       - 'canonical/MAINLINE_EXECUTION_PLAN_V2.json'
       - 'docs/platform/adr/0003-go-control-plane.md'
       - '.github/workflows/platform_go_contract_v1.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'platform/**'
+      - 'compiler/realsas_compiler_services/orchestrator/**'
+      - 'compiler/realsas_compiler_core/**'
+      - 'compiler/realsas_compiler_services/platform_worker/**'
+      - 'tools/platform_release_snapshot.py'
+      - 'tools/platform_artifact_store.py'
+      - 'tools/platform_cache_gc.py'
+      - 'tools/platform_ci_bootstrap.py'
+      - 'tools/platform_ci_database.py'
+      - 'tests/compiler/test_platform_stage_inputs_v1.py'
+      - 'tests/compiler/test_platform_released_graph_v1.py'
+      - 'tools/platform_host_preflight.py'
+      - 'tests/repository/test_platform_host_preflight.py'
+      - 'tests/repository/test_platform_artifact_store.py'
+      - 'tests/repository/test_platform_cache_gc.py'
+      - 'tests/repository/test_platform_ci_bootstrap.py'
+      - 'tests/repository/test_platform_ci_database.py'
+      - 'canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json'
+      - 'canonical/PLATFORM_THROUGHPUT_HYDRATION_GC_PREREG_20261008.json'
+      - 'models/**'
+      - 'runtime/**'
+      - 'tools/realsas_architecture.py'
+      - 'canonical/MAINLINE_EXECUTION_PLAN_V2.json'
+      - 'docs/platform/adr/0003-go-control-plane.md'
+      - '.github/workflows/platform_go_contract_v1.yml'
   workflow_dispatch:
 
 concurrency:

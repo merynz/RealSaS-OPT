@@ -41,6 +41,7 @@ permissions:
 
 jobs:
   contract:
+    if: github.event.repository.private == false
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
@@ -152,5 +153,6 @@ jobs:
         run: |
           echo 'PLATFORM_GO_CONTRACT_PASS'
           echo 'execution_lane=github_hosted_public_standard'
+          echo 'private_repo_guard=true'
           echo 'database_transport=ephemeral_postgres_service'
           echo 'local_wsl_mutation=false'

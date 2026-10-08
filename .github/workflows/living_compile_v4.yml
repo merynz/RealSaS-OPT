@@ -1,7 +1,6 @@
-# IMPORTANT: RealSaS CI uses the canonical LOCAL/SELF-HOSTED runner.
-# Do not switch this workflow back to GitHub-hosted `ubuntu-latest` unless the
-# Actions billing/quota policy is intentionally changed. Expected labels:
-# [self-hosted, linux, x64, realsas].
+# Host-independent product-shell validation runs on the standard GitHub-hosted
+# public-repository lane. Local WSL is reserved for explicit native/product-host
+# witnesses or requested local inference.
 
 name: Living Compile V4
 
@@ -27,7 +26,7 @@ concurrency:
 
 jobs:
   product-shell:
-    runs-on: [self-hosted, linux, x64, realsas]
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -48,3 +47,5 @@ jobs:
           for f in product/living_compile/static/js/*.js; do
             node --check "$f"
           done
+      - name: Execution lane
+        run: echo 'execution_lane=github_hosted_public_standard'

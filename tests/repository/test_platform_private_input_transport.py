@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import io
 import json
@@ -121,3 +122,37 @@ def test_bundle_rejects_nested_or_unexpected_zip_entries(tmp_path):
     }
     with pytest.raises(RuntimeError, match="ZIP_ENTRY_INVALID"):
         transport._extract_bundle(ref, tmp_path, downloader=lambda *_: raw)
+
+
+def _contents_response(envelope, *, encoding="base64"):
+    raw = json.dumps(envelope, separators=(",", ":")).encode("utf-8")
+    encoded = base64.b64encode(raw).decode("ascii")
+    # GitHub's Contents API may wrap base64 content across lines.
+    wrapped = "\n".join(encoded[i:i+60] for i in range(0, len(encoded), 60))
+    return json.dumps({
+        "type": "file",
+        "encoding": encoding,
+        "size": len(raw),
+        "content": wrapped,
+    }).encode("utf-8")
+
+
+def test_contents_api_envelope_decodes_wrapped_base64_exactly():
+    envelope = {
+        "run_id": RUN_ID,
+        "code_sha": CODE_SHA,
+        "plaintext_sha256": "0" * 64,
+        "chunks": ["YQ=="],
+    }
+    assert transport._decode_contents_api_envelope(_contents_response(envelope)) == envelope
+
+
+def test_contents_api_envelope_rejects_non_base64_encoding():
+    envelope = {"run_id": RUN_ID, "code_sha": CODE_SHA, "chunks": []}
+    with pytest.raises(RuntimeError, match="API_SHAPE_INVALID"):
+        transport._decode_contents_api_envelope(_contents_response(envelope, encoding="utf-8"))
+
+
+def test_contents_api_envelope_rejects_invalid_json_body():
+    with pytest.raises(RuntimeError, match="API_JSON_INVALID"):
+        transport._decode_contents_api_envelope(b"not-json")

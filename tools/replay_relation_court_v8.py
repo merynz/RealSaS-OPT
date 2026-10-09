@@ -19,7 +19,9 @@ from compiler.realsas_compiler_core.visual_contact_v1 import MATERIAL_CONTINUITY
 from compiler.realsas_compiler_core.visual_presentation_pose_v1 import (
     ConnectedPresentationPalette,
 )
-from tools import replay_relation_court_v4 as contact_safety
+from compiler.realsas_compiler_services.orchestrator.adapters import (
+    presentation_research_v4_impl as connected_pose,
+)
 from tools import replay_relation_court_v7 as v7
 
 
@@ -139,7 +141,7 @@ def _coupled_relation_compile(topology, projection, arrays):
                 palette = ConnectedPresentationPalette(
                     rotations[fi], translations[fi]
                 )
-                field = contact_safety._field(
+                field = connected_pose._field(
                     np.c_[rest, depths[fi]],
                     palette,
                     rest,

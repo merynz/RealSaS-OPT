@@ -1,21 +1,27 @@
 # RealSaS Structural System Index
 
-## 2026-10-08 canonical main
+## 2026-10-09 canonical main
 
 ## Current continuation details
 
 Current continuation authority is `canonical/CANONICAL_HANDOFF_20261007.md` plus `CURRENT_STATE.md`.
 
-The modular Go developer path is implemented. Next prove a real Knight
-component replacement with independent reuse, then optimize and render.
+The modular Go developer path and opt-in controlled component interventions are
+implemented. Platform preparation is current; appearance design is pending the
+user's decision. PR #66 is diagnostic history, not the next mandatory merge.
 Full product input-to-output execution and UI integration remain later work.
+
+- [Controlled interventions](docs/platform/CAUSAL_INTERVENTIONS.md): exact baseline
+  reuse, scope enforcement and current limits.
+- [Visual dependency map](docs/presentation/VISUAL_DEPENDENCY_MAP_20261009.md):
+  existing main, archived direct-PNG research, proposed IRIS RGB and rebuild effects.
 
 > Navigation only. Historical recovery/runtime-audit documents are provenance and must not override current continuation authority.
 
 | Product authority | Canonical home | Current rule |
 |---|---|---|
 | Observation | observation/camera authority | exact source evidence; source cardinality is separate from output-direction authority |
-| Geometry / IRIS | `models/iris/` + geometry adapters | signed field/surface evidence; never RGB authority |
+| Geometry / IRIS | `models/iris/` + geometry adapters | current signed field/surface evidence; a separate RGB head is proposed, not implemented |
 | Surface evidence / GSA | `compiler/realsas_compiler_core/substrate/` | compact mechanical/evidence substrate with provenance |
 | Learned topology/geometry / TESSA | `models/tessa/` + Stage18 TESSA proposal bridge | learned proposal only; Compiler support-bind/repair/qualification required |
 | Canonical mechanical carrier | Stage18/19 + `surface_addressing_v1.py` | Compiler-owned repaired/qualified static carrier; Stage19 is exact carrier authority |

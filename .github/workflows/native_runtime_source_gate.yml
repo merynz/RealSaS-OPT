@@ -7,22 +7,8 @@ on:
     paths:
       - 'runtime/realsas_cpp/**'
       - 'canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V1_20260917.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V2_20260917.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V3_20260918.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V4_20260918.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V5_20260921.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V6_20260921.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V7_20260921.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V8_20260921.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V9_20260921.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V10_20260921.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V11_20260921.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V12_20260927.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V13_20260927.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V14_20260927.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V15_20260927.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V16_20261001.json'
+      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V*.json'
+      - 'tests/repository/test_native_source_seal_lineage.py'
       - 'tools/verify_native_runtime_source_seal_v2.py'
       - '.github/workflows/native_runtime_source_gate.yml'
   pull_request:
@@ -31,22 +17,8 @@ on:
     paths:
       - 'runtime/realsas_cpp/**'
       - 'canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V1_20260917.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V2_20260917.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V3_20260918.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V4_20260918.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V5_20260921.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V6_20260921.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V7_20260921.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V8_20260921.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V9_20260921.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V10_20260921.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V11_20260921.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V12_20260927.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V13_20260927.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V14_20260927.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V15_20260927.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V16_20261001.json'
+      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V*.json'
+      - 'tests/repository/test_native_source_seal_lineage.py'
       - 'tools/verify_native_runtime_source_seal_v2.py'
       - '.github/workflows/native_runtime_source_gate.yml'
 
@@ -75,7 +47,7 @@ jobs:
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
 
       - name: Install native build dependencies
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq libarchive-dev libpng-dev zlib1g-dev
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq cmake g++ libarchive-dev libpng-dev zlib1g-dev
 
       - name: Verify native dependencies
         run: |
@@ -86,6 +58,9 @@ jobs:
 
       - name: Verify historical seal + append-only native runtime extension chain
         run: PYTHONPATH=. python tools/verify_native_runtime_source_seal_v2.py
+
+      - name: Historical lineage compatibility and fail-closed regressions
+        run: PYTHONPATH=. python -m pytest -q tests/repository/test_native_source_seal_lineage.py
 
       - name: Configure
         run: cmake -S runtime/realsas_cpp -B build/native-runtime -DCMAKE_BUILD_TYPE=Release -DREALSAS_BUILD_TESTS=ON

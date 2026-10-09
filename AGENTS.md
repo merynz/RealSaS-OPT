@@ -99,13 +99,19 @@ That run reused sealed artifacts; IRIS/TESSA/AXIS/MIRA were not reinferred. Do n
 
 ## Active priority order
 
-1. Seal and merge PR #65 platform throughput/hydration/GC.
-2. Complete PR #66 presentation/runtime P0 only: continuous visual deformation
-   domain, explicit canonical depth/overlap ownership, Stage45 fail-closed proof.
-3. Reuse sealed mechanics and the existing motion witness for a downstream-only
-   rerun and fresh Knight IDLE/RUN/SLASH.
+1. PR #65 is merged. Continue platform preparation and bounded source changes on main.
+2. Use the explicit controlled-intervention contract for causal component replacements;
+   see `docs/platform/CAUSAL_INTERVENTIONS.md`. Preserve exact baseline artifact IDs
+   for unchanged stages and stop before inference if reuse cannot be proven.
+3. PR #66 is parked diagnostic history, not the next required merge or execution
+   authority. Appearance design, including a separate IRIS RGB head, is pending
+   the user's decision. Do not implement a new head or reopen mechanics now.
 
-Do not reopen mechanics, rig, skin, IRIS, AXIS or MIRA in this continuation.
+Read `docs/presentation/VISUAL_DEPENDENCY_MAP_20261009.md` before changing
+appearance, visual ownership, binding or runtime. Distinguish main CAA consumption
+from the archived research path's direct PNG binding. A scoped downstream rerun
+must declare its actual release changes; do not assume motion proof IDs remain
+fixed when the product DAG routes appearance through the puppet seal.
 
 ## Product-quality rule
 

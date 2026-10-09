@@ -124,9 +124,13 @@ def run_smoke(root, timeout):
         manifest = {"run_id": run_id, "subject_id": "SUBJECT_FREE_PLATFORM_DEPLOYMENT",
                     "execution_class": "IMPLEMENTATION_AUDIT", **identity}
         mainline.atomic_json(manifest_path, manifest)
-        attempt = request("/v1/research/attempts", {"subject_id": subject,
+        attempt_request = {"subject_id": subject,
                           "baseline_engine_release_id": releases[0], "candidate_engine_release_id": release_id,
-                          "parent_attempt_id": attempts[0] if attempts else None, "created_by": ACTOR})
+                          "parent_attempt_id": attempts[0] if attempts else None, "created_by": ACTOR}
+        if index == 1:
+            attempt_request["intervention"] = {"direct_changed_stage_ids": [removed],
+                                                "preserved_stage_ids": [target]}
+        attempt = request("/v1/research/attempts", attempt_request)
         attempt_id = attempt["AttemptID"]
         attempts.append(attempt_id)
         if index == 1:
@@ -153,6 +157,17 @@ def run_smoke(root, timeout):
         raise RuntimeError("SMOKE_INDEPENDENT_ARTIFACT_WAS_REBUILT")
     if artifacts[0] != artifacts[1]:
         raise RuntimeError("SMOKE_ARTIFACT_IDENTITY_CHANGED_AFTER_UNRELATED_NODE_REMOVAL")
+    checks = [event["payload"] for event in second_events if event["type"] == "INTERVENTION_REUSE_VERIFIED"]
+    if len(checks) != 1:
+        raise RuntimeError("SMOKE_CONTROLLED_INTERVENTION_RECEIPT_MISSING")
+    control = checks[0]
+    preserved = control["receipt"]["preserved_artifacts"]
+    if (control["baseline_subject_input_id"] != inputs["subject_input_id"]
+            or control["candidate_subject_input_id"] != inputs["subject_input_id"]
+            or control["receipt"]["execute_stage_ids"]
+            or len(preserved) != 1 or preserved[0]["stage_id"] != target
+            or preserved[0]["artifact_id"] != artifacts[0]["artifact_id"]):
+        raise RuntimeError("SMOKE_CONTROLLED_INTERVENTION_IDENTITY_DRIFT")
     if registry_read(root, "SELECT count(*) FROM product_revisions WHERE subject_id='" + str(uuid.UUID(subject)) + "'") != "0":
         raise RuntimeError("SMOKE_RESEARCH_MINTED_PRODUCT_REVISION")
     receipt = {"schema": "RealSaS.DeveloperDeploymentSmoke.v1", "status": "PASS",
@@ -160,6 +175,7 @@ def run_smoke(root, timeout):
                "attempt_ids": attempts, "target_stage_id": target, "removed_stage_id": removed,
                "first_target_action": first_license_status, "second_target_action": "REUSE",
                "exact_shared_artifact": artifacts[0], "product_revision_minted": False,
+               "controlled_intervention_verified": True, "intervention_receipt": control,
                "wall_seconds": round(time.monotonic() - started, 3)}
     output = root / "receipts" / f"smoke-{attempts[1]}.json"
     output.write_text(json.dumps(receipt, indent=2) + "\n")

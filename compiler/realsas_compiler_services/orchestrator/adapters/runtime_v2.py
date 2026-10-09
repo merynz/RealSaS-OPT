@@ -1305,7 +1305,8 @@ def _source_owned_visual_reference_frame(
             "RUNTIME_V2_VISUAL_REFERENCE_POSITION_SHAPE_INVALID"
         )
 
-    if projection.visual_deformation_operator_id in (OPERATOR_ID, ATTACHMENT_OPERATOR, MOTION_BLEND_OPERATOR):
+    from compiler.realsas_compiler_core.visual_attachment_depth_v1 import OPERATOR_ID as SLOT_DEPTH_OPERATOR
+    if projection.visual_deformation_operator_id in (OPERATOR_ID, ATTACHMENT_OPERATOR, MOTION_BLEND_OPERATOR, SLOT_DEPTH_OPERATOR):
         key = f"{clip.array_prefix}_view_{vi}_depths"
         if key not in arrays:
             raise QualificationError("SOURCE_VISUAL_CANONICAL_DEPTH_MISSING")

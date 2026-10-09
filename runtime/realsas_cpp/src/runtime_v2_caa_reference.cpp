@@ -737,7 +737,29 @@ int render_source_owned_visual(
     const bool canonical_depth=operator_it!=manifest.end()&&
         (operator_it->second=="SOURCE_CHART_HARMONIC_CANONICAL_FIELD_V2" ||
          operator_it->second=="SOURCE_CHART_HARMONIC_WITH_SLOT_RIGID_2D_V3" ||
-         operator_it->second=="SOURCE_CHART_CANONICAL_2D_MOTION_BLEND_WITH_SLOT_RIGID_V4");
+         operator_it->second=="SOURCE_CHART_CANONICAL_2D_MOTION_BLEND_WITH_SLOT_RIGID_V4" ||
+         operator_it->second=="SOURCE_CHART_CANONICAL_2D_BLEND_WITH_SLOT_OWNED_DEPTH_V5");
+    if(operator_it!=manifest.end()&&operator_it->second==
+       "SOURCE_CHART_CANONICAL_2D_BLEND_WITH_SLOT_OWNED_DEPTH_V5") {
+        if(manifest.at("attachment_depth_contract")!=
+           "TARGET_SLOT_CAMERA_RIGID_2_5D_FROZEN_REST_RELIEF_V1" ||
+           manifest.at("attachment_ownership_contract")!=
+           "EXPLICIT_TARGET_CANONICAL_COMPONENT_OWNER_V1")
+            throw std::runtime_error("VISUAL_SLOT_DEPTH_OWNERSHIP_CONTRACT_INVALID");
+        const int count=parse_int_exact(manifest.at("attachment_owner_count"),"ATTACHMENT_OWNER_COUNT");
+        const auto& ownership=entries.at(manifest.at("view."+std::to_string(view)+".attachment_owner_entry"));
+        if(count<=0 || ownership.size()!=mesh.faces.size()*4u)
+            throw std::runtime_error("VISUAL_SLOT_DEPTH_FACE_OWNER_SIZE_INVALID");
+        for(std::size_t i=0;i<mesh.faces.size();++i) {
+            const auto offset=i*4u;
+            const auto owner_id=static_cast<std::uint32_t>(ownership[offset]) |
+                (static_cast<std::uint32_t>(ownership[offset+1])<<8u) |
+                (static_cast<std::uint32_t>(ownership[offset+2])<<16u) |
+                (static_cast<std::uint32_t>(ownership[offset+3])<<24u);
+            if(owner_id>static_cast<std::uint32_t>(count))
+                throw std::runtime_error("VISUAL_SLOT_DEPTH_FACE_OWNER_INVALID");
+        }
+    }
     std::vector<double> depths;
     if(canonical_depth) {
         if(manifest.at("depth_ownership_contract")!=

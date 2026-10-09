@@ -91,7 +91,11 @@ def render_visual_depth(*, positions, depths, faces, uv, texture, resolution):
             if layer == 0:
                 owner[dst] = ancestry[take]
     visible = accum[:, 3] > 1e-12
-    accum[visible, :3] /= accum[visible, 3, None]
+    # The deployment consumer evaluates straight RGB with one shared reciprocal.
+    # Division per channel has a different last bit at half-byte boundaries.
+    # Keep the exact arithmetic contract; byte parity remains fail-closed.
+    inverse_alpha = 1.0 / accum[visible, 3, None]
+    accum[visible, :3] *= inverse_alpha
     rgba = np.floor(np.clip(accum, 0, 1) * 255 + 0.5).astype(np.uint8).reshape(resolution, resolution, 4)
     provenance = np.where(visible, 0, 255).astype(np.uint8).reshape(resolution, resolution)
     return SimpleNamespace(straight_rgba_u8=rgba, provenance_code=provenance,

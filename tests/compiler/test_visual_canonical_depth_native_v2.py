@@ -14,7 +14,7 @@ from compiler.realsas_compiler_core.visual_depth_v2 import render_visual_depth
 from compiler.realsas_compiler_core.visual_domain_v2 import OPERATOR_ID, DEPTH_CONTRACT
 
 
-def render(tmp_path, depths, order=None):
+def render(tmp_path, depths, order=None, *, texture=None, tex_uv=None, slot_depth=False, bad_contract=False):
     player = os.environ.get("REALSAS_RUNTIME_V2_PLAYER")
     if not player: pytest.skip("native consumer binary required")
     layers = len(depths)
@@ -23,6 +23,8 @@ def render(tmp_path, depths, order=None):
     if order is not None: faces = faces[list(order)]
     uv = np.repeat(np.array([[0.,0.] if i==0 else [1.,1.] for i in range(layers)]),3,axis=0)
     tex = np.zeros((4,4,4),dtype=np.uint8); tex[:]=(0,0,255,255);tex[0,0]=(255,0,0,128)
+    if texture is not None: tex = texture
+    if tex_uv is not None: uv[:] = tex_uv
     png = io.BytesIO();Image.fromarray(tex).save(png,format="PNG")
     manifest = {
         "schema":"RealSaS.RuntimePackage.v2", "presentation_geometry_mode":"SOURCE_OWNED_VISUAL_PRESENTATION_V1",
@@ -45,6 +47,15 @@ def render(tmp_path, depths, order=None):
         ("depths",b"RSVD1\0\0\0"+struct.pack("<II",1,len(positions))+z.tobytes()),
         ("texture",png.getvalue()), ("manifest.txt",("\n".join(k+"="+v for k,v in manifest.items())+"\n").encode()),
     ])
+    if slot_depth:
+        from compiler.realsas_compiler_core.visual_attachment_depth_v1 import OPERATOR_ID as SLOT_OPERATOR, DEPTH_OPERATOR_ID
+        manifest.update(visual_deformation_operator_id=SLOT_OPERATOR,
+            attachment_depth_contract="WRONG" if bad_contract else DEPTH_OPERATOR_ID,
+            attachment_ownership_contract="EXPLICIT_TARGET_CANONICAL_COMPONENT_OWNER_V1",
+            attachment_owner_count="1")
+        manifest["view.0.attachment_owner_entry"] = "owners"
+        entries["owners"] = np.ones(layers,dtype="<i4").tobytes()
+        entries["manifest.txt"] = ("\n".join(k+"="+v for k,v in manifest.items())+"\n").encode()
     archive=tmp_path/"depth.rss";write_rss_v2(archive,entries)
     paths=[tmp_path/name for name in ("rgba","prov","view","owner")]
     args=[player,str(archive),"--clip","depth","--view","V0","--frame","0"]
@@ -71,3 +82,24 @@ def test_native_translucent_overlap_uses_depth_and_survives_face_permutation(tmp
 def test_native_ambiguous_or_invalid_depth_fails_closed(tmp_path,depths,reason):
     proc,_,_=render(tmp_path,depths)
     assert proc.returncode!=0 and reason in proc.stderr
+
+
+def test_native_reference_share_reciprocal_alpha_at_half_byte_boundary(tmp_path):
+    texture=np.zeros((4,4,4),dtype=np.uint8);texture[:]=(0,3,0,1);texture[:,0]=(0,2,0,1)
+    proc, paths, ref = render(tmp_path,[1.],texture=texture,tex_uv=[1/6,0])
+    assert proc.returncode == 0, proc.stderr
+    # Per-channel division rounds this value to 3; shared reciprocal rounds to 2.
+    assert ref.straight_rgba_u8[0,0,1] == 2
+    assert paths[0].read_bytes() == ref.straight_rgba_u8.tobytes()
+
+
+def test_native_slot_owned_depth_keeps_canonical_overlap_and_byte_parity(tmp_path):
+    proc, paths, ref = render(tmp_path,[1.,2.],slot_depth=True)
+    assert proc.returncode == 0, proc.stderr
+    assert paths[0].read_bytes() == ref.straight_rgba_u8.tobytes()
+    assert paths[3].read_bytes() == ref.owner_face_index.astype("<i4").tobytes()
+
+
+def test_native_slot_depth_rejects_wrong_ownership_contract(tmp_path):
+    proc, _, _ = render(tmp_path,[1.],slot_depth=True,bad_contract=True)
+    assert proc.returncode != 0 and "OWNERSHIP_CONTRACT_INVALID" in proc.stderr

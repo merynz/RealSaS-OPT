@@ -144,7 +144,9 @@ jobs:
             tests/compiler/test_visual_presentation_p0_v2.py \
             tests/compiler/test_presentation_attachments_v1.py \
             tests/compiler/test_visual_attachment_motion_v1.py \
-            tests/compiler/test_visual_motion_blend_v1.py
+            tests/compiler/test_visual_motion_blend_v1.py \
+            tests/compiler/test_visual_motion_safety_v1.py \
+            tests/compiler/test_visual_attachment_depth_v1.py
       - name: Runtime gate summary
         run: |
           echo 'CURRENT_RUNTIME_NATIVE_INTERLOCK_PASS'

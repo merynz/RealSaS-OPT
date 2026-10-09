@@ -29,7 +29,7 @@ def research_plan():
     dependencies = ([], [ids[0]], [ids[1]], [ids[1], ids[2]], ids[:4])
     for ordinal, (stage, function, deps) in enumerate(zip(stages, functions, dependencies), 1):
         stage.update(ordinal=ordinal, depends_on=deps,
-            adapter="compiler.realsas_compiler_services.orchestrator.adapters.presentation_research_v2:" + function,
+            adapter="compiler.realsas_compiler_services.orchestrator.adapters.presentation_research_v3:" + function,
             manifest_keys=["presentation_research"] + (["runtime"] if ordinal >= 4 else []))
         stage["policy"]["product_pass_authority"] = False
     plan.update(stage_count=len(stages), stages=stages)

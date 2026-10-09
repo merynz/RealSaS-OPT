@@ -16,6 +16,7 @@ on:
       - 'tools/replay_relation_court_v3.py'
       - 'tools/replay_relation_court_v4.py'
       - 'tools/replay_relation_court_v5.py'
+      - 'tools/replay_relation_court_v6.py'
       - '.github/workflows/presentation_relation_replay_v1.yml'
 
 permissions:
@@ -53,9 +54,9 @@ jobs:
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: '37933851760'
-      - name: Replay contact-aware safety and export relation witnesses
+      - name: Replay relation court and export causal witnesses
         run: |
-          python tools/replay_relation_court_v5.py \
+          python tools/replay_relation_court_v6.py \
             --evidence-root /tmp/prior-evidence \
             --player /tmp/relation-court/player \
             --out /tmp/relation-court/out
@@ -72,5 +73,6 @@ jobs:
             /tmp/relation-court/out/Knight_RUN_V6_DOMAIN_DEBUG_768.gif
             /tmp/relation-court/out/Knight_RUN_V6_FRAME0_CONTACT_DEBUG_768.png
             /tmp/relation-court/out/Knight_RUN_V6_FRAME0_CONTACT_DEBUG.json
+            /tmp/relation-court/out/Knight_RUN_V6_CAUSAL_DEBUG.json
           retention-days: 14
           if-no-files-found: warn

@@ -7,6 +7,17 @@
 
 ## Presentation audit update — 2026-10-09
 
+The [connected pose intervention](docs/presentation/CONNECTED_POSE_INTERVENTION_20261009.md)
+implements a frozen-G connected 2D palette shared by body and equipped art,
+V6 RSS/native consumption and independent Stage45 V4 relational checks.
+Exact exported Knight witness diagnostics reduce joint-origin residual from
+108.698119 source px to 3.46e-13 across 984 frame-views. This is not final chart
+contact/coverage closure or a scientific PASS. Missing qualified contact,
+dynamic material exposure and semantic drawing-order inputs remain explicit
+unavailable predicates and fail closed. The matched Go driver compares V5/V6
+under the same probes, requires exact Stage37 reuse and exports all eight views.
+Hosted comparison and final visual closure remain pending; PR #66 stays draft.
+
 The [texture seal and 2.5D bridge review](docs/presentation/TEXTURE_SEAL_AND_25D_BRIDGE_REVIEW_20261009.md)
 records the decision to reuse the existing CAA compile seal, complete appearance
 asset and qualification chain rather than add a duplicate texture stage.
@@ -16,7 +27,7 @@ canonical hidden-surface completion was consumed. Source-owned totality is
 scoped to its visual domain. Before claiming appearance closure, bind the
 consumer to the exact asset/support/qualification and prove dynamic exposure.
 The supplied 2025 2.5D paper was reviewed for the presentation boundary and prop
-identity implications. This is a source review/implementation decision only:
+identity implications. That review was a preparatory implementation decision:
 no production operator change, new Attempt, asset qualification or fresh render.
 
 The subsequent hosted run `37900739694` completed downstream Stage37/42/43/44/45
@@ -34,9 +45,9 @@ and a reproducible structural counterexample in the current Stage42 2D palette:
 identical rigid 3D motion can separate a shared 2D joint by 23.43 or 32 pixels
 at 256 px resolution while triangle area/condition and canonical 3D palette
 checks remain healthy. The fixture is synthetic, not Knight causal attribution
-or a production repair. Stage45 currently lacks independent semantic
-joint/contact/coverage predicates. Next work is connected presentation pose,
-qualified cross-chart relations and explicit overlap ownership, within the
+or causal attribution of Knight visual gaps. The new Stage45 V4 adds independent
+joint relations and reports missing contact/coverage/occlusion qualification.
+Next work is qualified cross-chart relations and explicit overlap ownership, within the
 downstream-only boundary. No new scientific Attempt was minted by this audit.
 Mechanics, rig, skin, IRIS, AXIS and MIRA remain sealed; optimize after visual
 acceptance.

@@ -110,7 +110,7 @@ jobs:
           python -m compiler.realsas_compiler_services.platform_worker.worker > /tmp/realsas-presentation-out/engine.log 2>&1 &
           engine_pid=$!
           trap 'kill "$engine_pid" "$control_pid" "$api_pid" "$temporal_pid" 2>/dev/null || true' EXIT
-          python tools/run_scoped_presentation_attempt.py --config /tmp/realsas-presentation-inputs/presentation_config.json --input-root /tmp/realsas-presentation-inputs --ctl /tmp/realsas-presentation-bin/ctl --player /tmp/realsas-presentation-bin/player --out /tmp/realsas-presentation-out
+          python tools/run_matched_presentation_attempts.py --config /tmp/realsas-presentation-inputs/presentation_config.json --input-root /tmp/realsas-presentation-inputs --ctl /tmp/realsas-presentation-bin/ctl --player /tmp/realsas-presentation-bin/player --out /tmp/realsas-presentation-out
       - name: Preserve Attempt, proof and rendered evidence
         if: always()
         uses: actions/upload-artifact@v4

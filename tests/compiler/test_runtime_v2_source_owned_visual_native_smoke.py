@@ -35,7 +35,7 @@ def _player() -> Path:
     return path
 
 
-@pytest.mark.parametrize("canonical_depth", [False, True, "slot_rigid", "motion_blend"])
+@pytest.mark.parametrize("canonical_depth", [False, True, "slot_rigid", "motion_blend", "connected"])
 def test_source_owned_visual_rss_native_smoke(tmp_path: Path, canonical_depth):
     player = _player()
     source_size = 8
@@ -59,6 +59,8 @@ def test_source_owned_visual_rss_native_smoke(tmp_path: Path, canonical_depth):
         arrays[f"clip_0_view_{vi}_positions"] = rest.reshape(1, 3, 2)
         if canonical_depth:
             arrays[f"clip_0_view_{vi}_depths"] = np.full((1, 3), 2., dtype=np.float64)
+        if canonical_depth == "connected":
+            arrays[f"view_{vi}_face_attachment_owner"] = np.zeros(1, dtype=np.int32)
 
         rgba = np.zeros((source_size, source_size, 4), dtype=np.uint8)
         rgba[:, :, :] = (220, 40 + vi, 20, 255)
@@ -104,7 +106,8 @@ def test_source_owned_visual_rss_native_smoke(tmp_path: Path, canonical_depth):
         appearance_asset_binding_hash="6" * 64,
         appearance_qualification_binding_hash="7" * 64,
         camera_set_binding_hash="8" * 64,
-        visual_deformation_operator_id=("SOURCE_CHART_CANONICAL_2D_MOTION_BLEND_WITH_SLOT_RIGID_V4" if canonical_depth == "motion_blend"
+        visual_deformation_operator_id=("SOURCE_CHART_CONNECTED_2D_POSE_WITH_SLOT_OWNED_DEPTH_V6" if canonical_depth == "connected"
+            else "SOURCE_CHART_CANONICAL_2D_MOTION_BLEND_WITH_SLOT_RIGID_V4" if canonical_depth == "motion_blend"
             else "SOURCE_CHART_HARMONIC_WITH_SLOT_RIGID_2D_V3" if canonical_depth == "slot_rigid"
             else "SOURCE_CHART_HARMONIC_CANONICAL_FIELD_V2" if canonical_depth
             else "REGION_LOCAL_SAFE_MECHANICAL_AFFINE_V1"),
@@ -122,6 +125,9 @@ def test_source_owned_visual_rss_native_smoke(tmp_path: Path, canonical_depth):
             ),
         ),
         projection_hash="",
+        metadata=({"target_attachments": {"attachments": [{"attachment_id": "prop", "attachment_index": 1}]},
+                   "body_motion_preset": {}, "attachment_depth_operator_id": "TARGET_SLOT_CAMERA_RIGID_2_5D_FROZEN_REST_RELIEF_V1"}
+                  if canonical_depth == "connected" else {}),
     )
     projection = replace(
         projection,

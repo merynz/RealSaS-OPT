@@ -1,0 +1,265 @@
+{
+  "schema": "RealSaS.ConnectedPresentationPaletteDiagnostic.v1",
+  "qualification": "UNQUALIFIED_LOCAL_DIAGNOSTIC_ONLY",
+  "baseline_projection_hash": "642ada9fba5f3a7dc51608a684082daa023140025eda73213b982ef2e20ee593",
+  "baseline_projection_json_sha256": "f4a7a90ed42f5dbb71d7d102e88a60d632e850df1cfebe1935a6b3b2eb8afde1",
+  "baseline_projection_npz_sha256": "a66e61457e4bac89ff044a03b8d7db15642a7f968fe65eaf3be3804f73de81b3",
+  "witness_npz_sha256": "c6d3d6cdee315c96cf4a8bfb7a1a78fe044a1d7500d62c7cc20fc45514271493",
+  "mechanical_mesh_binding_hash": "dbac301b9c47fa7f31a024ef0612008d8315b590d7a2dd1552a75f75c7ac9ff2",
+  "dynamic_motion_binding_hash": "16760b7660f7160f9ec2bb0eeb26ed69a061add3aba9a736d956568ffd64f981",
+  "pose_policy_hash": "ed79044fcda0c2eff2043cb0eb23ad94e809fa982c390c2818735ee9a50aa5b6",
+  "implementation_file_sha256": {
+    "compiler/realsas_compiler_core/visual_presentation_pose_v1.py": "1b746115defed6a88e3b644230b8be47a07d2815d110752d95d589c5e489bb70",
+    "compiler/realsas_compiler_core/visual_attachment_motion_v1.py": "6cf3be548977abe1bf745d7c36ecddcd86599395b8b6c6a9d5d8c0dfba8f593e",
+    "tools/probe_connected_presentation_pose_v1.py": "432e5218c692c08dbaf8270466221e129f3f4bd647667d092a5b48dc3d500184"
+  },
+  "numpy_version": "2.1.3",
+  "source_coordinate_units": "SOURCE_CAMERA_PIXELS",
+  "mechanics_modified": false,
+  "stage45_executed": false,
+  "native_render_executed": false,
+  "final_visual_chart_contacts_qualified": false,
+  "hidden_appearance_coverage_qualified": false,
+  "rows": [
+    {
+      "clip_id": "demo_idle_v1",
+      "view_id": "V0",
+      "frame_count": 81,
+      "legacy_relation_failed_frames": 81,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 2.074315531590312,
+      "connected_maximum_relation_residual_source_px": 3.2155493553843715e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "view_id": "V0",
+      "frame_count": 21,
+      "legacy_relation_failed_frames": 21,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 104.59018034216417,
+      "connected_maximum_relation_residual_source_px": 2.5421149729252077e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "view_id": "V0",
+      "frame_count": 21,
+      "legacy_relation_failed_frames": 21,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 80.74010091275994,
+      "connected_maximum_relation_residual_source_px": 2.5421149729252077e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_idle_v1",
+      "view_id": "V1",
+      "frame_count": 81,
+      "legacy_relation_failed_frames": 81,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 33.01900018402759,
+      "connected_maximum_relation_residual_source_px": 2.5421149729252077e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "view_id": "V1",
+      "frame_count": 21,
+      "legacy_relation_failed_frames": 21,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 92.4249809443162,
+      "connected_maximum_relation_residual_source_px": 3.2155493553843715e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "view_id": "V1",
+      "frame_count": 21,
+      "legacy_relation_failed_frames": 21,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 75.70105685884653,
+      "connected_maximum_relation_residual_source_px": 3.2155493553843715e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_idle_v1",
+      "view_id": "V2",
+      "frame_count": 81,
+      "legacy_relation_failed_frames": 81,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 64.85375559912508,
+      "connected_maximum_relation_residual_source_px": 2.5421149729252077e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "view_id": "V2",
+      "frame_count": 21,
+      "legacy_relation_failed_frames": 21,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 69.94628557257715,
+      "connected_maximum_relation_residual_source_px": 3.410605131648481e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "view_id": "V2",
+      "frame_count": 21,
+      "legacy_relation_failed_frames": 21,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 70.3375334754132,
+      "connected_maximum_relation_residual_source_px": 2.5421149729252077e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_idle_v1",
+      "view_id": "V3",
+      "frame_count": 81,
+      "legacy_relation_failed_frames": 81,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 32.61281275290531,
+      "connected_maximum_relation_residual_source_px": 2.5421149729252077e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "view_id": "V3",
+      "frame_count": 21,
+      "legacy_relation_failed_frames": 21,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 108.69811935391265,
+      "connected_maximum_relation_residual_source_px": 2.8421709430404007e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "view_id": "V3",
+      "frame_count": 21,
+      "legacy_relation_failed_frames": 21,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 108.69811935391265,
+      "connected_maximum_relation_residual_source_px": 2.8421709430404007e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_idle_v1",
+      "view_id": "V4",
+      "frame_count": 81,
+      "legacy_relation_failed_frames": 81,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 2.074315531590325,
+      "connected_maximum_relation_residual_source_px": 3.457650183405701e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "view_id": "V4",
+      "frame_count": 21,
+      "legacy_relation_failed_frames": 21,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 104.59018034216423,
+      "connected_maximum_relation_residual_source_px": 2.3437142008433856e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "view_id": "V4",
+      "frame_count": 21,
+      "legacy_relation_failed_frames": 21,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 80.74010091275998,
+      "connected_maximum_relation_residual_source_px": 2.5421149729252077e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_idle_v1",
+      "view_id": "V5",
+      "frame_count": 81,
+      "legacy_relation_failed_frames": 81,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 33.019000184027774,
+      "connected_maximum_relation_residual_source_px": 2.3437142008433856e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "view_id": "V5",
+      "frame_count": 21,
+      "legacy_relation_failed_frames": 21,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 92.4249809443158,
+      "connected_maximum_relation_residual_source_px": 3.410605131648481e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "view_id": "V5",
+      "frame_count": 21,
+      "legacy_relation_failed_frames": 21,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 75.70105685884643,
+      "connected_maximum_relation_residual_source_px": 2.5421149729252077e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_idle_v1",
+      "view_id": "V6",
+      "frame_count": 81,
+      "legacy_relation_failed_frames": 81,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 64.85375559912508,
+      "connected_maximum_relation_residual_source_px": 2.3437142008433856e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "view_id": "V6",
+      "frame_count": 21,
+      "legacy_relation_failed_frames": 21,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 69.94628557257703,
+      "connected_maximum_relation_residual_source_px": 2.5421149729252077e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "view_id": "V6",
+      "frame_count": 21,
+      "legacy_relation_failed_frames": 21,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 70.33753347541325,
+      "connected_maximum_relation_residual_source_px": 2.5421149729252077e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_idle_v1",
+      "view_id": "V7",
+      "frame_count": 81,
+      "legacy_relation_failed_frames": 81,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 32.612812752905214,
+      "connected_maximum_relation_residual_source_px": 2.2737367544323206e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "view_id": "V7",
+      "frame_count": 21,
+      "legacy_relation_failed_frames": 21,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 108.69811935391272,
+      "connected_maximum_relation_residual_source_px": 3.410605131648481e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "view_id": "V7",
+      "frame_count": 21,
+      "legacy_relation_failed_frames": 21,
+      "connected_relation_failed_frames": 0,
+      "legacy_maximum_relation_residual_source_px": 108.69811935391272,
+      "connected_maximum_relation_residual_source_px": 3.410605131648481e-13,
+      "connected_maximum_root_transport_residual_source_px": 0.0
+    }
+  ]
+}

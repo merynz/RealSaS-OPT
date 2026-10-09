@@ -738,9 +738,11 @@ int render_source_owned_visual(
         (operator_it->second=="SOURCE_CHART_HARMONIC_CANONICAL_FIELD_V2" ||
          operator_it->second=="SOURCE_CHART_HARMONIC_WITH_SLOT_RIGID_2D_V3" ||
          operator_it->second=="SOURCE_CHART_CANONICAL_2D_MOTION_BLEND_WITH_SLOT_RIGID_V4" ||
-         operator_it->second=="SOURCE_CHART_CANONICAL_2D_BLEND_WITH_SLOT_OWNED_DEPTH_V5");
-    if(operator_it!=manifest.end()&&operator_it->second==
-       "SOURCE_CHART_CANONICAL_2D_BLEND_WITH_SLOT_OWNED_DEPTH_V5") {
+         operator_it->second=="SOURCE_CHART_CANONICAL_2D_BLEND_WITH_SLOT_OWNED_DEPTH_V5" ||
+         operator_it->second=="SOURCE_CHART_CONNECTED_2D_POSE_WITH_SLOT_OWNED_DEPTH_V6");
+    if(operator_it!=manifest.end()&&
+       (operator_it->second=="SOURCE_CHART_CANONICAL_2D_BLEND_WITH_SLOT_OWNED_DEPTH_V5" ||
+        operator_it->second=="SOURCE_CHART_CONNECTED_2D_POSE_WITH_SLOT_OWNED_DEPTH_V6")) {
         if(manifest.at("attachment_depth_contract")!=
            "TARGET_SLOT_CAMERA_RIGID_2_5D_FROZEN_REST_RELIEF_V1" ||
            manifest.at("attachment_ownership_contract")!=

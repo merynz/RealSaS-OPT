@@ -129,8 +129,11 @@ Implement and compare downstream-only child Attempts on the same upstream
 artifacts/probes, and use the existing controlled owner-attribution service only
 where matched interventions justify attribution. Fresh native IDLE/RUN/SLASH
 across all eight views follows that proof. This review is preparatory evidence;
-the connected pose and expanded Stage45 are still unimplemented, and no fresh
-render or new scientific verdict is claimed here.
+this review did not implement the connected pose or expanded Stage45. The later
+[connected pose intervention](CONNECTED_POSE_INTERVENTION_20261009.md) implements
+the palette and independent relational gate, while final chart contact, dynamic
+coverage and semantic overlap qualification remain open. No fresh render or new
+scientific verdict is claimed by this preparatory review.
 
 PR #65 stays merged. PR #66 stays open for visual closure. Mechanics, rig, skin,
 IRIS, AXIS and MIRA stay sealed. Appearance quality and absolute product/G3

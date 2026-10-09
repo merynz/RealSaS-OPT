@@ -492,7 +492,8 @@ def build_source_owned_visual_rss_v2_entries(
     from .visual_attachment_motion_v1 import OPERATOR_ID as ATTACHMENT_OPERATOR
     from .visual_motion_blend_v1 import OPERATOR_ID as MOTION_BLEND_OPERATOR
     from .visual_attachment_depth_v1 import OPERATOR_ID as SLOT_DEPTH_OPERATOR, DEPTH_OPERATOR_ID
-    canonical_depth = projection.visual_deformation_operator_id in (OPERATOR_ID, ATTACHMENT_OPERATOR, MOTION_BLEND_OPERATOR, SLOT_DEPTH_OPERATOR)
+    from .visual_connected_motion_v1 import OPERATOR_ID as CONNECTED_OPERATOR
+    canonical_depth = projection.visual_deformation_operator_id in (OPERATOR_ID, ATTACHMENT_OPERATOR, MOTION_BLEND_OPERATOR, SLOT_DEPTH_OPERATOR, CONNECTED_OPERATOR)
     entries: OrderedDict[str, bytes] = OrderedDict()
     manifest = [
         "schema=RealSaS.RuntimePackage.v2",
@@ -529,7 +530,7 @@ def build_source_owned_visual_rss_v2_entries(
             f"maximum_fragment_layers={POLICY['maximum_fragment_layers']}",
         ])
     attachments = projection.metadata.get("target_attachments")
-    if projection.visual_deformation_operator_id == SLOT_DEPTH_OPERATOR:
+    if projection.visual_deformation_operator_id in (SLOT_DEPTH_OPERATOR, CONNECTED_OPERATOR):
         if not attachments or projection.metadata.get("attachment_depth_operator_id") != DEPTH_OPERATOR_ID:
             raise QualificationError("RSS_V2_SLOT_DEPTH_OWNERSHIP_REQUIRED")
         manifest.extend([f"attachment_depth_contract={DEPTH_OPERATOR_ID}",

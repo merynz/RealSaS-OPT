@@ -4,6 +4,13 @@ on:
   push:
     branches: [research/presentation-p0-closure-20261008]
     paths:
+      - 'compiler/realsas_compiler_core/visual_contact_v1.py'
+      - 'compiler/realsas_compiler_core/visual_contact_motion_v1.py'
+      - 'compiler/realsas_compiler_core/visual_semantic_order_v1.py'
+      - 'compiler/realsas_compiler_core/semantic_runtime_package_v1.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/presentation_research_v5.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/presentation_research_v5_impl.py'
+      - 'runtime/realsas_cpp/src/runtime_v2_presentation_semantic.cpp'
       - 'tools/replay_relation_court_v1.py'
       - 'tools/replay_relation_court_v2.py'
       - '.github/workflows/presentation_relation_replay_v1.yml'

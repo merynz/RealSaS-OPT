@@ -20,6 +20,7 @@ on:
       - 'tools/replay_relation_court_v7.py'
       - 'tools/replay_relation_court_v8.py'
       - 'tools/replay_relation_court_v9.py'
+      - 'tools/replay_dynamic_coverage_court_v1.py'
       - '.github/workflows/presentation_relation_replay_v1.yml'
 
 permissions:
@@ -47,7 +48,7 @@ jobs:
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends libpng-dev zlib1g-dev
-          mkdir -p /tmp/relation-court /tmp/prior-evidence
+          mkdir -p /tmp/relation-court /tmp/prior-evidence /tmp/dynamic-coverage
           g++ -std=c++17 -O2 runtime/realsas_cpp/src/runtime_v2_presentation_semantic.cpp -lpng -lz -o /tmp/relation-court/player
       - name: Download exact completed V6 evidence
         uses: actions/download-artifact@v4
@@ -63,11 +64,19 @@ jobs:
             --evidence-root /tmp/prior-evidence \
             --player /tmp/relation-court/player \
             --out /tmp/relation-court/out
+      - name: Measure canonical dynamic exposure
+        continue-on-error: true
+        run: |
+          python tools/replay_dynamic_coverage_court_v1.py \
+            --evidence-root /tmp/prior-evidence \
+            --view-index 6 \
+            --clip-id demo_run_v1 \
+            --out /tmp/dynamic-coverage
       - name: Preserve fast relation court
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: knight-presentation-v9-fast-relation-court
+          name: knight-presentation-v10-fast-courts
           path: |
             /tmp/relation-court/out/relation_court_receipt.json
             /tmp/relation-court/out/Knight_RUN_V6_V7_RELATION_COURT_768.gif
@@ -77,5 +86,6 @@ jobs:
             /tmp/relation-court/out/Knight_RUN_V6_FRAME0_CONTACT_DEBUG_768.png
             /tmp/relation-court/out/Knight_RUN_V6_FRAME0_CONTACT_DEBUG.json
             /tmp/relation-court/out/Knight_RUN_V6_CAUSAL_DEBUG.json
+            /tmp/dynamic-coverage/dynamic_exposure_court.json
           retention-days: 14
           if-no-files-found: warn

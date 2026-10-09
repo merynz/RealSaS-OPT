@@ -43,7 +43,7 @@ func TestControlledInterventionPersistsExactReuseAndStopsScopeDrift(t *testing.T
 	must(err)
 	snapshot := stagegraph.Snapshot{StageCount: 3, Stages: []stagegraph.Stage{
 		{Ordinal: 1, ID: "MECHANICS"}, {Ordinal: 2, ID: "RGB"},
-		{Ordinal: 3, ID: "RENDER", DependsOn: []string{"MECHANICS", "RGB"}},
+		{Ordinal: 3, ID: "RENDER", DependsOn: []string{"MECHANICS", "RGB"}, Policy: stagegraph.Policy{ProductPassAuthority: true}},
 	}}
 	raw, _ := json.Marshal(snapshot)
 	g, err := stagegraph.ParsePlan(raw, false)
@@ -138,6 +138,14 @@ func TestControlledInterventionPersistsExactReuseAndStopsScopeDrift(t *testing.T
 	if err == nil || !strings.Contains(err.Error(), "EXACT_REUSE_REQUIRED") {
 		t.Fatalf("baseline rebind: %v", err)
 	}
+	_, err = a.CommitStageResult(ctx, orchestration.StageCommitRequest{
+		AttemptID: in.AttemptID, ExecutionID: uuid.NewString(), StageID: "RGB",
+		AllowedExecuteStageIDs: []string{"RGB", "MECHANICS"},
+		EngineResult:           orchestration.EngineStageResult{StageID: "RGB", ExecutedStageIDs: []string{"RGB", "MECHANICS"}},
+	})
+	if err == nil || !strings.Contains(err.Error(), "FROZEN_STAGE_EXECUTION") {
+		t.Fatalf("wide engine execution receipt: %v", err)
+	}
 	// Qualification loss stops the experiment before an execution row can be created.
 	_, err = pool.Exec(ctx, `DELETE FROM qualifications WHERE artifact_id=$1`, mechanicalID)
 	must(err)
@@ -148,6 +156,10 @@ func TestControlledInterventionPersistsExactReuseAndStopsScopeDrift(t *testing.T
 	must(pool.QueryRow(ctx, `SELECT count(*) FROM executions WHERE attempt_id=$1`, started.AttemptID).Scan(&count))
 	if count != 0 {
 		t.Fatal("engine execution began despite intervention failure")
+	}
+	must(pool.QueryRow(ctx, `SELECT count(*) FROM attempt_events WHERE attempt_id=$1 AND event_type='INTERVENTION_REUSE_REJECTED'`, started.AttemptID).Scan(&count))
+	if count != 1 {
+		t.Fatal("rejected scope missing durable diagnostics")
 	}
 	frozen, err := attempt.LoadIntervention(ctx, pool, started.AttemptID)
 	must(err)

@@ -1,0 +1,61 @@
+name: presentation-relation-replay
+
+on:
+  push:
+    branches: [research/presentation-p0-closure-20261008]
+    paths:
+      - 'tools/replay_relation_court_v1.py'
+      - '.github/workflows/presentation_relation_replay_v1.yml'
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  run-v6-relation-court:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements/mainline-ci.txt
+      - name: Prepare relation court
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libpng-dev zlib1g-dev
+          mkdir -p /tmp/relation-court /tmp/prior-evidence
+          g++ -std=c++17 -O2 runtime/realsas_cpp/src/runtime_v2_presentation_semantic.cpp -lpng -lz -o /tmp/relation-court/player
+      - name: Download exact completed V6 evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: knight-presentation-research-evidence
+          path: /tmp/prior-evidence
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: '37933851760'
+      - name: Replay contact and semantic order only
+        run: |
+          python tools/replay_relation_court_v1.py \
+            --evidence-root /tmp/prior-evidence \
+            --player /tmp/relation-court/player \
+            --out /tmp/relation-court/out
+      - name: Preserve fast relation court
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: knight-presentation-v7-fast-relation-court
+          path: |
+            /tmp/relation-court/out/relation_court_receipt.json
+            /tmp/relation-court/out/Knight_RUN_V6_V7_RELATION_COURT_768.gif
+            /tmp/relation-court/out/projection_v7.json
+          retention-days: 14
+          if-no-files-found: warn

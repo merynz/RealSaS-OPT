@@ -14,6 +14,7 @@ on:
       - 'tools/replay_relation_court_v1.py'
       - 'tools/replay_relation_court_v2.py'
       - 'tools/replay_relation_court_v3.py'
+      - 'tools/replay_relation_court_v4.py'
       - '.github/workflows/presentation_relation_replay_v1.yml'
 
 permissions:
@@ -51,9 +52,9 @@ jobs:
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: '37933851760'
-      - name: Replay qualified exact-cut contact and semantic order only
+      - name: Replay contact-aware safety and semantic order
         run: |
-          python tools/replay_relation_court_v3.py \
+          python tools/replay_relation_court_v4.py \
             --evidence-root /tmp/prior-evidence \
             --player /tmp/relation-court/player \
             --out /tmp/relation-court/out

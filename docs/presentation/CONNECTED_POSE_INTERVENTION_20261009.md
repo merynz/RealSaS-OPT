@@ -45,6 +45,16 @@ Source images are 1024 px; these are not final raster gap sizes. This local
 diagnostic is not a scientific Attempt, Stage45 PASS or causal attribution of
 all visible gaps.
 
+An additional [support/alpha diagnostic](evidence/visual_support_alpha_knight_local_v1.json)
+compares opaque-texture triangle support with original-source artwork support
+at RUN frame10 in V0/V4/V6, using the engineering candidate fields. The candidate
+has zero covered-but-art-alpha-zero pixels in those three frames. This rules
+out source texture alpha alone as the explanation for their remaining empty
+support; it does not qualify an intended silhouette or establish that every
+enclosed empty component is erroneous. Reproduce the numerical ablation with
+`tools/probe_visual_coverage_vs_alpha_v1.py`; the receipt binds its source and
+all supplied arrays/textures. It remains an unqualified local probe.
+
 Tests exercise a broken relation with proper rigid triangles and real C++/Python
 byte-identical nonempty renders; the shared Stage45 relational gate rejects it.
 An adapter-level fixture also rejects the old palette while its old replay proof

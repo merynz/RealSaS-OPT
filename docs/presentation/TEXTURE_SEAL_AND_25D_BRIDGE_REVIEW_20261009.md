@@ -138,3 +138,49 @@ scientific verdict is claimed by this preparatory review.
 PR #65 stays merged. PR #66 stays open for visual closure. Mechanics, rig, skin,
 IRIS, AXIS and MIRA stay sealed. Appearance quality and absolute product/G3
 authority remain distinct boundaries; optimize after accepted visual results.
+
+## Follow-up: source appearance and the presentation consumer
+
+The user supplied a separate mathematical discussion on 2026-10-09. Its central
+distinction is compatible with the implemented intervention, but its suggested
+per-part projection and numerical ratings are not qualification evidence.
+
+| Question | Authority and consumer obligation |
+|---|---|
+| Which frozen motion drives the character? | Existing G and motion witness; no replacement rig or W_M. |
+| Where do connected drawing joints and equipped art move? | Stage42 derives one connected 2D pose and consumes the qualified target slot mapping. |
+| Which charts must remain in contact? | Explicit canonical or authored visual relation support, including corresponding bind addresses; source XY coincidence alone is insufficient. |
+| Which material is allowed at a drawing address? | Existing CAA compile seal, complete asset, UV/addressing, provenance and qualification, checked together at the consumer. |
+| Which artwork obscures which other artwork? | Explicit presentation overlap/order/visibility policy, potentially informed by mechanical depth, consumed by package/runtime. |
+| Do those relations hold in the final frames? | Independent Stage45 contact, coverage, semantic occlusion, setup/frame0 and temporal predicates. |
+
+Spine provides a useful reference for the second, third and fifth rows. CAA
+addresses material availability and provenance. Neither replaces the other.
+The reduced source-only Knight graph currently consumes the original eight
+PNGs, not a qualified CompleteAppearanceAssetIR. A prior CAA asset can be reused
+only after its mesh, SurfaceAddressing, direction set and qualification identities
+match this consumer. No matching completed bundle has been admitted by this
+intervention, and no unseen-material totality claim is made.
+
+The new pose policy is nearest proper camera twist plus connected origins and
+sealed explicit local translations. It is not the paper's projected-bone-angle
+retargeter or its per-limb projection-plane optimizer. Independent projection of
+a sword and its hand would require an explicit shared grip constraint: stable
+target slot identity alone does not make two independent images coincide.
+
+Equation (1) in the supplied v1 paper has a further implementation caveat. Its
+prose asks the normal to stay away from the limb great circle, whereas minimizing
+the printed positive exponential of squared cross-track distance favors zero
+distance. Under the usual definition of cross-track distance this is an apparent
+internal inconsistency. A negative exponent or another reformulation is a
+possible interpretation, not an author-verified implementation. The supplied
+discussion's principal-eigenvector alternative is likewise an independent
+proposal; sign/basis continuity, degeneracy, grip and loop constraints would
+still need proof. It is not used by the current intervention.
+
+The remaining difficulty is therefore an incomplete compiler-to-runtime visual
+contract as well as possible rendering defects. Byte-identical native/reference
+images establish implementation agreement; they do not certify the intended
+drawing. Healthy individual charts also do not establish their contact. Keep
+each failure observable instead of attributing every visible gap to texture,
+depth, or one projection formula.

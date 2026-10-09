@@ -156,3 +156,26 @@ def test_contents_api_envelope_rejects_non_base64_encoding():
 def test_contents_api_envelope_rejects_invalid_json_body():
     with pytest.raises(RuntimeError, match="API_JSON_INVALID"):
         transport._decode_contents_api_envelope(b"not-json")
+
+
+def test_rerun_waits_for_envelope_bound_to_its_new_public_key():
+    public = {"run_id": RUN_ID, "code_sha": CODE_SHA, "public_key_pem": "current-key"}
+    old = {"run_id": RUN_ID, "code_sha": CODE_SHA,
+           "public_key_sha256": hashlib.sha256(b"previous-key").hexdigest()}
+    assert transport._envelope_is_current(old, public) is False
+    old["public_key_sha256"] = hashlib.sha256(b"current-key").hexdigest()
+    assert transport._envelope_is_current(old, public) is True
+    old["code_sha"] = "b" * 40
+    with pytest.raises(RuntimeError, match="ENVELOPE_IDENTITY_DRIFT"):
+        transport._envelope_is_current(old, public)
+
+
+def test_expired_signed_locator_fails_before_network_or_logging(monkeypatch, capsys):
+    def forbidden(*args, **kwargs):
+        raise AssertionError("expired locators must not be sent")
+    monkeypatch.setattr(transport.urllib.request, "urlopen", forbidden)
+    ref = {"download_url": "https://example.blob.core.windows.net/input?se=2000-01-01T00%3A00%3A00Z&sig=private",
+           "size_bytes": 2, "sha256": "0" * 64}
+    with pytest.raises(RuntimeError, match="DOWNLOAD_LOCATOR_EXPIRED:bundle"):
+        transport._download_pinned(ref, "bundle", 100)
+    assert "private" not in capsys.readouterr().out

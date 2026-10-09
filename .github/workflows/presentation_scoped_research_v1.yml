@@ -81,6 +81,7 @@ jobs:
         with:
           name: presentation-input-public-key
           path: /tmp/realsas-private-input/public.json
+          overwrite: true
           retention-days: 1
       - name: Receive encrypted locators and verify exact input bytes
         env:

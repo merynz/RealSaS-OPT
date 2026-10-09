@@ -24,6 +24,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import zipfile
+from datetime import datetime, timezone
 
 MAX_TRANSFER_BYTES = 64 * 1024 * 1024
 MAX_MANIFEST_BYTES = 8 * 1024 * 1024
@@ -75,6 +76,7 @@ def encrypt(public_path, payload_path, out):
         chunks = [base64.b64encode(rsa(raw[i:i+190], key, encrypt=True)).decode()
                   for i in range(0, len(raw), 190)]
     out.write_text(json.dumps({"run_id": public["run_id"], "code_sha": public["code_sha"],
+                              "public_key_sha256": hashlib.sha256(public["public_key_pem"].encode()).hexdigest(),
                               "plaintext_sha256": hashlib.sha256(raw).hexdigest(), "chunks": chunks}) + "\n")
 
 
@@ -96,6 +98,14 @@ def _download_pinned(ref, label, max_bytes):
     if (parsed.scheme != "https"
             or not (parsed.hostname or "").endswith(ALLOWED_DOWNLOAD_HOST_SUFFIXES)):
         raise RuntimeError("PRIVATE_INPUT_DOWNLOAD_HOST_INVALID")
+    expiry = urllib.parse.parse_qs(parsed.query).get("se", [])
+    if expiry:
+        try:
+            deadline = datetime.fromisoformat(expiry[0].replace("Z", "+00:00"))
+        except ValueError:
+            deadline = None
+        if deadline is not None and deadline.tzinfo is not None and deadline <= datetime.now(timezone.utc):
+            raise RuntimeError("PRIVATE_INPUT_DOWNLOAD_LOCATOR_EXPIRED:" + label)
     print("::add-mask::" + uri, flush=True)
     try:
         # The signed-download gateway rejects urllib's default user agent.
@@ -224,7 +234,16 @@ def _decode_contents_api_envelope(body):
     return envelope
 
 
+def _envelope_is_current(envelope, public):
+    _require_identity(envelope, public["run_id"], public["code_sha"], "PRIVATE_INPUT_ENVELOPE_IDENTITY_DRIFT")
+    # A re-run retains its run ID and code SHA but creates a new private key.
+    # Wait for the sender's new envelope instead of trying to decrypt stale data.
+    return envelope.get("public_key_sha256") == hashlib.sha256(public["public_key_pem"].encode()).hexdigest()
+
+
 def receive(directory, out, *, repo, branch, run_id, code_sha, timeout):
+    public = json.loads((directory / "public.json").read_text())
+    _require_identity(public, run_id, code_sha, "PRIVATE_INPUT_PUBLIC_KEY_IDENTITY_DRIFT")
     url = (f"https://api.github.com/repos/{repo}/contents/.github/research_transport/{run_id}.json?ref="
            + urllib.parse.quote(branch, safe=""))
     deadline = time.monotonic() + timeout
@@ -240,7 +259,8 @@ def receive(directory, out, *, repo, branch, run_id, code_sha, timeout):
             if len(body) > MAX_CONTENTS_API_BYTES:
                 raise RuntimeError("PRIVATE_INPUT_ENVELOPE_API_RESPONSE_TOO_LARGE")
             envelope = _decode_contents_api_envelope(body)
-            break
+            if _envelope_is_current(envelope, public):
+                break
         except urllib.error.HTTPError as error:
             if error.code != 404:
                 raise RuntimeError("PRIVATE_INPUT_ENVELOPE_FETCH_FAILED") from None

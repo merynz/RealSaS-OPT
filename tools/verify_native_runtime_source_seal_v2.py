@@ -62,8 +62,8 @@ def _load_json(path: Path) -> dict:
 
 
 def _verify_chain(base: dict, extensions: list[dict]) -> None:
-    if not extensions:
-        raise RuntimeError("NATIVE_SOURCE_EXTENSION_CHAIN_EMPTY")
+    if len(extensions) != len(EXTENSION_PATHS) or not extensions:
+        raise RuntimeError("NATIVE_SOURCE_EXTENSION_CHAIN_LENGTH_DRIFT")
 
     first = extensions[0]
     if first.get("schema") != "realsas.compiler_runtime_source_extension_seal.v1":
@@ -97,8 +97,9 @@ def _verify_chain(base: dict, extensions: list[dict]) -> None:
             raise RuntimeError(f"NATIVE_SOURCE_EXT{version}_PRIOR_MUTATION_CLAIM")
         if authority.get("runtime_role") != RUNTIME_ROLE:
             raise RuntimeError(f"NATIVE_SOURCE_EXT{version}_ROLE_DRIFT")
-        # V3 introduced full-subtree closure and every later extension must retain it.
-        if version >= 3 and authority.get("subtree_closure") != SUBTREE_CLOSURE:
+        # V4 historically omitted this field; V5 still pins its immutable bytes.
+        historical_v4_omission = version == 4 and "subtree_closure" not in authority
+        if version >= 3 and not historical_v4_omission and authority.get("subtree_closure") != SUBTREE_CLOSURE:
             raise RuntimeError(f"NATIVE_SOURCE_EXT{version}_SUBTREE_CLOSURE_DRIFT")
 
 

@@ -1,27 +1,8 @@
-name: presentation-relation-replay
+name: archived-presentation-diagnostic-replay
 
+# Read-only diagnostic replay of exact completed V6 evidence; not research authority.
 on:
-  push:
-    branches: [research/presentation-p0-closure-20261008]
-    paths:
-      - 'compiler/realsas_compiler_core/visual_contact_v1.py'
-      - 'compiler/realsas_compiler_core/visual_contact_motion_v1.py'
-      - 'compiler/realsas_compiler_core/visual_semantic_order_v1.py'
-      - 'compiler/realsas_compiler_core/semantic_runtime_package_v1.py'
-      - 'compiler/realsas_compiler_services/orchestrator/adapters/presentation_research_v5.py'
-      - 'compiler/realsas_compiler_services/orchestrator/adapters/presentation_research_v5_impl.py'
-      - 'runtime/realsas_cpp/src/runtime_v2_presentation_semantic.cpp'
-      - 'tools/replay_relation_court_v1.py'
-      - 'tools/replay_relation_court_v2.py'
-      - 'tools/replay_relation_court_v3.py'
-      - 'tools/replay_relation_court_v4.py'
-      - 'tools/replay_relation_court_v5.py'
-      - 'tools/replay_relation_court_v6.py'
-      - 'tools/replay_relation_court_v7.py'
-      - 'tools/replay_relation_court_v8.py'
-      - 'tools/replay_relation_court_v9.py'
-      - 'tools/replay_dynamic_coverage_court_v1.py'
-      - '.github/workflows/presentation_relation_replay_v1.yml'
+  workflow_dispatch:
 
 permissions:
   actions: read
@@ -29,6 +10,7 @@ permissions:
 
 jobs:
   run-v6-relation-court:
+    if: github.event.repository.private == false
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -65,7 +47,6 @@ jobs:
             --player /tmp/relation-court/player \
             --out /tmp/relation-court/out
       - name: Measure canonical dynamic exposure
-        continue-on-error: true
         run: |
           python tools/replay_dynamic_coverage_court_v1.py \
             --evidence-root /tmp/prior-evidence \

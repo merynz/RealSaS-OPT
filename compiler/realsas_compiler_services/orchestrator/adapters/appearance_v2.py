@@ -11,6 +11,10 @@ from time import perf_counter
 import numpy as np
 from PIL import Image
 
+from compiler.realsas_compiler_core.visual_material_v1 import (
+    source_visual_material, load_visual_material, MATERIAL_CONTRACT,
+)
+
 from compiler.realsas_compiler_core.appearance_authority_v2 import (
     AppearanceTextureIR,
     CAACompileArtifactIR,
@@ -145,8 +149,8 @@ def _source_visual_rgba(
     out = rgba.copy()
     out[~mask, :3] = 0
     out[~mask, 3] = 0
-    inside_zero_alpha = mask & (out[..., 3] == 0)
-    out[inside_zero_alpha, 3] = 255
+    if np.any(mask & (out[..., 3] == 0)):
+        raise QualificationError("VISUAL_MATERIAL_FOREGROUND_WITHOUT_APPEARANCE")
     return out
 
 
@@ -949,6 +953,9 @@ def compile_caa_stage(ctx: dict) -> dict:
         rows = tuple(sorted(visual_set.views, key=lambda row: int(row.view_index)))
         if len(rows) != 8:
             raise QualificationError("CAA_VISUAL_COMPILE_REQUIRES_V0_V7")
+        for row in rows:
+            vi = int(row.view_index)
+            source_visual_material(rgba[vi], masks[vi], vi)
         foreground_counts = np.asarray(
             [int(np.count_nonzero(masks[int(row.view_index)])) for row in rows],
             dtype=np.int64,
@@ -1629,11 +1636,14 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
             ),
         )
         provenance_path = root / "visual_source_provenance.npz"
-        provenance_sha = _save_npz(
-            provenance_path,
-            provenance=np.zeros((8,), dtype=np.uint8),
-            source_view=np.arange(8, dtype=np.int16),
-        )
+        material_arrays = {}
+        for vi in range(8):
+            _, provenance, source_view = source_visual_material(
+                source_rgba[vi], source_masks[vi], vi
+            )
+            material_arrays[f"view_{vi}_provenance"] = provenance
+            material_arrays[f"view_{vi}_source_view"] = source_view
+        provenance_sha = _save_npz(provenance_path, **material_arrays)
 
         asset = CompleteAppearanceAssetIR(
             compile_seal_binding_hash=seal.seal_hash,
@@ -1663,6 +1673,7 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
                 "visual_geometry_authority": "SOURCE_ART_SILHOUETTE",
                 "visual_uv_authority": "STAGE18_FIXED_SOURCE_RASTER_UV",
                 "texture_authority": "SOURCE_RGBA",
+                "visual_material_contract": MATERIAL_CONTRACT,
                 "source_wins": True,
                 "runtime_generation_forbidden": True,
                 "cross_view_completion_used": False,
@@ -2117,6 +2128,15 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
                 raise QualificationError(
                     "CAA_VISUAL_SOURCE_TEXTURE_NOT_EXACT"
                 )
+            actual_provenance, actual_source_view = load_visual_material(
+                asset, view_index=view_index, rgba=actual
+            )
+            _, expected_provenance, expected_source_view = source_visual_material(
+                source_rgba[view_index], source_masks[view_index], view_index
+            )
+            if (not np.array_equal(actual_provenance, expected_provenance)
+                    or not np.array_equal(actual_source_view, expected_source_view)):
+                raise QualificationError("CAA_VISUAL_SOURCE_PROVENANCE_NOT_EXACT")
             direct_count += int(np.count_nonzero(source_masks[view_index]))
         if direct_count <= 0:
             raise QualificationError(

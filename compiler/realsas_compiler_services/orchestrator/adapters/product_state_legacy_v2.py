@@ -357,6 +357,7 @@ def _qualified_visual_presentation_stage37(
                 "dynamic_deformation_qualified": False,
                 "dynamic_deformation_owner": "STAGE42_AND_STAGE45",
                 "mechanical_mesh_render_authority": False,
+                "fixed_source_raster_uv": True,
                 "source_foreground_pixel_count": int(
                     np.count_nonzero(mask)
                 ),

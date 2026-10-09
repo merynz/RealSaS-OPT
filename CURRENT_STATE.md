@@ -58,8 +58,8 @@ proved Drive -> CAS -> offline 12/12 CAS_HIT. These are transport identities,
 not scientific qualification or stage reuse authority.
 
 PR #65 is merged at `1888d91252fdce23843772f3ec0d0e3ddd91b9ae`.
-The current priority is platform preparation on main while the user decides the
-appearance design. PR #66's presentation candidate is parked diagnostic history;
+The user has authorized visual mesh/appearance/runtime completion on main,
+preserving the exact mechanics and motion witness. Platform preparation is merged. PR #66's presentation candidate is parked diagnostic history;
 its source and evidence are retained, not promoted wholesale. Run `37933851760`
 failed both matched V6 Attempts; the later runner changes 37/42/43/45, not only 42.
 A fast relation replay's green workflow tolerated dynamic exposure failure and
@@ -77,9 +77,9 @@ implemented IRIS functionality. Current product dependencies can still renew
 motion proof artifacts after appearance changes without refitting M/G/W.
 
 Visual ownership, material, deformation, layering and rebuild boundaries are
-mapped in `docs/presentation/VISUAL_DEPENDENCY_MAP_20261009.md`. No new appearance
-head, mechanics inference, Knight witness or product promotion is authorized by
-this platform cleanup. Main has no server-side required-check protection; the
+mapped in `docs/presentation/VISUAL_DEPENDENCY_MAP_20261009.md`. The later visual completion request authorizes bounded appearance/runtime work
+and a matched downstream Knight witness. It does not establish visual acceptance,
+request a new IRIS model head, or authorize a mechanics refit. Main has no server-side required-check protection; the
 connected GitHub app lacks administration capability for that setting.
 
 Release discovery now scans each distinct adapter module once per snapshot,
@@ -154,11 +154,15 @@ These measured costs define optimization priorities after repository currentness
 
 ## Immediate execution priorities
 
-1. Seal and merge #65 platform throughput/hydration/GC.
-2. Complete only presentation/runtime P0 on #66: deformation-domain coherence,
-   canonical depth/overlap ownership and Stage45 fail-closed presentation proof.
-3. Rerun only downstream consumers, preserving sealed mechanics and the existing
-   motion witness, then produce fresh Knight IDLE/RUN/SLASH with exact identities.
+1. PR #65 and #67 are merged. Keep PR #66 archived; main remains canonical.
+2. Complete the visual work in `docs/presentation/VISUAL_MESH_IMPLEMENTATION_20261009.md`.
+   The texel material transport, PM filtering and canonical depth connection are
+   engineering changes; amodal material, inter-chart contacts and semantic art
+   order still require matched acceptance evidence.
+3. Use a controlled Go Attempt with the exact baseline M/G/W and motion inputs,
+   then produce fresh Knight IDLE/RUN/SLASH across V0–V7. The developer-host job
+   in run37986333890 was observed without a runner assignment; do not replace it with
+   a direct historical ledger execution or label CI as Knight closure.
 
 General model inference and FIT8/LOFO/unseen work are outside this continuation.
 

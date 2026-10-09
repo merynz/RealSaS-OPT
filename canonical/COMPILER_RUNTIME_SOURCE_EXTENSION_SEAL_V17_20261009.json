@@ -1,0 +1,34 @@
+{
+  "schema": "realsas.compiler_runtime_source_extension_seal.v17",
+  "sealed_on": "2026-10-09",
+  "prior_extension": {
+    "path": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V16_20261001.json",
+    "git_blob_sha1": "04185539fd67c3e9fce9a12d00583c8ca3b6db45",
+    "role": "IMMUTABLE_PRIOR_EXTENSION_PROVENANCE"
+  },
+  "authority": {
+    "extension_scope": "SEALED_VISUAL_CAA_MATERIAL_AND_CAMERA_DEPTH_CONSUMER",
+    "historical_base_seal_mutated": false,
+    "prior_extension_mutated": false,
+    "product_pass_claimed": false,
+    "knight_witness_used": false,
+    "runtime_role": "subordinate_deployment_consumer",
+    "subtree_closure": "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME"
+  },
+  "replacements": [
+    {
+      "path": "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp",
+      "size_bytes": 61010,
+      "git_blob_sha1": "7e047801723beb9df6c02e19ad8692e45409fff5",
+      "reason": "consume per-texel CAA provenance/donor identity and sealed camera depth with linear premultiplied filtering; retain frozen source-direct playback"
+    }
+  ],
+  "additions": [],
+  "closure": {
+    "runtime_realsas_cpp_blob_count": 25,
+    "replacement_count": 1,
+    "addition_count": 0,
+    "resulting_sealed_blob_count": 25,
+    "unsealed_repository_blob_count_under_subtree": 0
+  }
+}

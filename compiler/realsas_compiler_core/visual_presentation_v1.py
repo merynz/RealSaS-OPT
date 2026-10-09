@@ -310,6 +310,17 @@ def load_qualified_visual_presentation_view(
         raise QualificationError(
             "QUALIFIED_VISUAL_PRESENTATION_REGION_ID_INVALID"
         )
+    if np.any(vertex_region_id[faces] != face_region_id[:, None]):
+        raise QualificationError("QUALIFIED_VISUAL_PRESENTATION_CROSS_REGION_FACE")
+    region_ids = set(map(int, face_region_id.tolist()))
+    if (not set(map(int, vertex_region_id.tolist())).issubset(region_ids)
+            or not set(map(int, region_labels[region_labels >= 0])).issubset(region_ids)
+            or np.any((seed_region_labels >= 0) & (seed_region_labels != region_labels))):
+        raise QualificationError("QUALIFIED_VISUAL_PRESENTATION_OWNER_DOMAIN_DRIFT")
+    if value.metadata.get("fixed_source_raster_uv") is True:
+        expected_uv = positions / np.asarray((max(1, value.width - 1), max(1, value.height - 1)))
+        if not np.allclose(uv, expected_uv, atol=1e-12, rtol=0):
+            raise QualificationError("QUALIFIED_VISUAL_PRESENTATION_SOURCE_UV_DRIFT")
     if len(set(map(int, face_region_id.tolist()))) != int(value.region_count):
         raise QualificationError(
             "QUALIFIED_VISUAL_PRESENTATION_REGION_COUNT_DRIFT"

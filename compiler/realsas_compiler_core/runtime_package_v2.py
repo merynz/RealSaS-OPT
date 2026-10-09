@@ -15,6 +15,10 @@ from PIL import Image
 from .runtime_authority_v2 import RuntimeProjectionV2IR
 from .runtime_visual_authority_v1 import SourceOwnedVisualRuntimeProjectionV1IR
 from .types import QualificationError
+from .visual_material_v1 import (
+    MATERIAL_CONTRACT, SAMPLING_CONTRACT, DEPTH_CONTRACT,
+    DEPTH_TIE_EPSILON, MAXIMUM_FRAGMENT_LAYERS, validate_visual_material,
+)
 
 MAGIC = b"RSASV2R1"
 
@@ -448,7 +452,7 @@ def _source_owned_visual_positions_payload(
     positions: np.ndarray,
 ) -> bytes:
     frames = np.asarray(positions, dtype="<f8")
-    if frames.ndim != 3 or frames.shape[2] != 2:
+    if frames.ndim != 3 or frames.shape[2] != 2 or not np.isfinite(frames).all():
         raise QualificationError("RSS_V2_VISUAL_POSITION_SHAPE_INVALID")
     return (
         b"RSVP1\0\0\0"
@@ -467,6 +471,8 @@ def build_source_owned_visual_rss_v2_entries(
     it never rebuilds bindings, runs ARAP, searches donors, or renders the
     mechanical relation mesh.
     """
+    if hashlib.sha256(Path(projection.projection_npz_path).read_bytes()).hexdigest() != projection.projection_npz_sha256:
+        raise QualificationError("RSS_V2_VISUAL_PROJECTION_BYTES_DRIFT")
     with np.load(projection.projection_npz_path, allow_pickle=False) as data:
         arrays = {name: np.asarray(data[name]).copy() for name in data.files}
 
@@ -478,6 +484,11 @@ def build_source_owned_visual_rss_v2_entries(
         raise QualificationError("RSS_V2_VISUAL_REQUIRES_EXACT_V0_V7")
 
     entries: OrderedDict[str, bytes] = OrderedDict()
+    material = projection.metadata.get("visual_material_contract")
+    if material is not None and material != MATERIAL_CONTRACT:
+        raise QualificationError("RSS_V2_VISUAL_MATERIAL_CONTRACT_INVALID")
+    if material and projection.metadata.get("depth_ownership_contract") != DEPTH_CONTRACT:
+        raise QualificationError("RSS_V2_VISUAL_DEPTH_CONTRACT_REQUIRED")
     manifest = [
         "schema=RealSaS.RuntimePackage.v2",
         f"projection_hash={projection.projection_hash}",
@@ -506,6 +517,17 @@ def build_source_owned_visual_rss_v2_entries(
         f"visual_deformation_policy_hash={projection.visual_deformation_policy_hash}",
     ]
 
+    if material:
+        manifest = [row for row in manifest if not row.startswith("texture_sampling_contract=")]
+        manifest.extend([
+            f"texture_sampling_contract={SAMPLING_CONTRACT}",
+            f"visual_material_contract={MATERIAL_CONTRACT}",
+            f"appearance_qualification_hash={projection.appearance_qualification_binding_hash}",
+            f"depth_ownership_contract={DEPTH_CONTRACT}",
+            f"depth_tie_epsilon={DEPTH_TIE_EPSILON:.17g}",
+            f"maximum_fragment_layers={MAXIMUM_FRAGMENT_LAYERS}",
+        ])
+
     for view in views:
         vi = int(view.view_index)
         mesh_entry = f"visual_mesh_v{vi}.bin"
@@ -527,6 +549,16 @@ def build_source_owned_visual_rss_v2_entries(
         ):
             raise QualificationError("RSS_V2_VISUAL_TEXTURE_DIMENSION_DRIFT")
         entries[texture_entry] = texture_bytes
+        if material:
+            with Image.open(texture_path) as image:
+                rgba = np.asarray(image.convert("RGBA"), dtype=np.uint8)
+            p = np.asarray(arrays.get(f"view_{vi}_material_provenance"))
+            s = np.asarray(arrays.get(f"view_{vi}_material_source_view"))
+            validate_visual_material(p, s, view_index=vi, rgba=rgba)
+            material_entry = f"visual_material_v{vi}.bin"
+            entries[material_entry] = (b"RSVA1\0\0\0" + struct.pack("<II", width, height)
+                + p.tobytes(order="C") + s.astype("<i2").tobytes(order="C"))
+            manifest.append(f"view.{vi}.material_entry={material_entry}")
         resolution = int(dict(view.camera).get("resolution") or 0)
         if resolution <= 0:
             raise QualificationError("RSS_V2_VISUAL_OUTPUT_RESOLUTION_INVALID")
@@ -573,6 +605,14 @@ def build_source_owned_visual_rss_v2_entries(
             entries[entry_name] = _source_owned_visual_positions_payload(
                 positions
             )
+            if material:
+                depth = np.asarray(arrays.get(f"{clip.array_prefix}_view_{vi}_depths"), dtype="<f8")
+                if depth.shape != expected[:2] or not np.isfinite(depth).all() or np.any(depth <= 0):
+                    raise QualificationError("RSS_V2_VISUAL_DEPTH_ARRAY_INVALID")
+                depth_entry = f"clip_{clip_index}_v{vi}.depths.bin"
+                entries[depth_entry] = (b"RSVD1\0\0\0" + struct.pack("<II", *depth.shape)
+                    + depth.tobytes(order="C"))
+                manifest.append(f"clip.{clip_index}.view.{vi}.depths_entry={depth_entry}")
             manifest.append(
                 f"clip.{clip_index}.view.{vi}.positions_entry={entry_name}"
             )

@@ -898,7 +898,7 @@ def test_vf23_stage37_to46_tail_uses_unmodified_production_dynamic_policy(tmp_pa
     assert _sha(Path(editable["path"])) == editable["sha256"]
 
 
-def test_vf23_stage20_to25_uses_unmodified_production_caa_policy(tmp_path):
+def test_vf23_source_visual_chain_proves_transport_but_not_full_product(tmp_path):
     import os
     from dataclasses import replace
     import pytest
@@ -1244,8 +1244,8 @@ def test_vf23_stage20_to25_uses_unmodified_production_caa_policy(tmp_path):
     # Recovery closes the former Stage42 fail-closed seam. The SAME exact
     # production-policy context must now carry source-owned visual topology
     # through RSS packaging, native playback, dynamic visual integrity and
-    # Stage46 product closure without regaining the mechanical mesh as render
-    # authority.
+    # Structural transport proof without regaining the mechanical mesh as render
+    # authority. Source-only coverage cannot establish full Stage46 visual closure.
     r42 = run(
         "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
         build_runtime_projection_stage,
@@ -1295,25 +1295,13 @@ def test_vf23_stage20_to25_uses_unmodified_production_caa_policy(tmp_path):
     assert r45["diagnostics"]["evaluated_frame_view_count"] > 0
     assert r45["diagnostics"]["rendered_visible_pixel_count"] > 0
 
-    r46 = run(
-        "46_PRODUCT_CLOSURE_SEAL",
-        seal_product_closure_stage,
-    )
-    closure = read_json(
-        next(
-            out
-            for out in r46["outputs"]
-            if out["schema"] == "RealSaS.ProductClosureIR.v2"
-        )["path"]
-    )
-    assert closure["qualification_report"]["product_pass"] is True
-    assert (
-        closure["qualification_report"][
-            "source_owned_visual_dynamic_integrity_passed"
-        ]
-        is True
-    )
-    assert (
-        closure["metadata"]["presentation_geometry_mode"]
-        == "SOURCE_OWNED_VISUAL_PRESENTATION_V1"
-    )
+    integrity = read_json(next(out for out in r45["outputs"]
+        if out["schema"] == "RealSaS.SourceOwnedVisualDynamicIntegrityIR.v1")["path"])
+    report = integrity["qualification_report"]
+    assert report["material_provenance_passed"] is True
+    assert report["compiled_appearance_exposure_passed"] is True
+    assert report["hidden_layer_material_qualified"] is False
+    assert report["semantic_contact_and_order_qualified"] is False
+    ctx["stage"] = {"id": "46_PRODUCT_CLOSURE_SEAL"}
+    with pytest.raises(QualificationError, match="FULL_VISUAL_ACCEPTANCE_REQUIRED:hidden_layer_material_qualified"):
+        seal_product_closure_stage(ctx)

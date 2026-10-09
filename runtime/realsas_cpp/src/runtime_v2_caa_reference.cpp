@@ -565,18 +565,20 @@ VisualMesh2D parse_visual_mesh_2d(const std::vector<std::uint8_t>& data) {
 std::vector<Vec2> parse_visual_positions_2d(
     const std::vector<std::uint8_t>& data,
     std::uint32_t expected_vertices,
-    int frame_index
+    int expected_frames, int frame_index
 ) {
     if(data.size()<8||std::memcmp(data.data(),"RSVP1\0\0\0",8)!=0)
         throw std::runtime_error("VISUAL_POSITIONS_MAGIC_INVALID");
     std::size_t off=8;
     const auto frame_count=read_scalar<std::uint32_t>(data,off);
     const auto vertex_count=read_scalar<std::uint32_t>(data,off);
-    if(vertex_count!=expected_vertices||frame_index<0||
+    if(vertex_count!=expected_vertices||frame_count!=static_cast<std::uint32_t>(expected_frames)||frame_index<0||
        static_cast<std::uint32_t>(frame_index)>=frame_count)
         throw std::runtime_error("VISUAL_POSITIONS_HEADER_INVALID");
     const auto frame_stride=
         static_cast<std::size_t>(vertex_count)*2u*sizeof(double);
+    if(data.size()!=16+static_cast<std::size_t>(frame_count)*frame_stride)
+        throw std::runtime_error("VISUAL_POSITIONS_BYTES_INVALID");
     const auto target=off+static_cast<std::size_t>(frame_index)*frame_stride;
     if(target+frame_stride>data.size())
         throw std::runtime_error("VISUAL_POSITIONS_TRUNCATED");
@@ -587,6 +589,29 @@ std::vector<Vec2> parse_visual_positions_2d(
         p.y=read_scalar<double>(data,off);
         if(!std::isfinite(p.x)||!std::isfinite(p.y))
             throw std::runtime_error("VISUAL_POSITION_NONFINITE");
+    }
+    return out;
+}
+
+std::vector<double> parse_visual_depth(
+    const std::vector<std::uint8_t>& data, std::uint32_t expected_vertices,
+    int expected_frames, int frame_index
+) {
+    if(data.size()<16||std::memcmp(data.data(),"RSVD1\0\0\0",8)!=0)
+        throw std::runtime_error("VISUAL_CANONICAL_DEPTH_MAGIC_INVALID");
+    std::size_t off=8;
+    const auto frames=read_scalar<std::uint32_t>(data,off);
+    const auto vertices=read_scalar<std::uint32_t>(data,off);
+    const auto stride=static_cast<std::size_t>(vertices)*sizeof(double);
+    if(vertices!=expected_vertices||frames!=static_cast<std::uint32_t>(expected_frames)||
+       data.size()!=16+static_cast<std::size_t>(frames)*stride||frame_index<0||
+       static_cast<std::uint32_t>(frame_index)>=frames)
+        throw std::runtime_error("VISUAL_CANONICAL_DEPTH_HEADER_OR_BYTES_INVALID");
+    off+=static_cast<std::size_t>(frame_index)*stride;
+    std::vector<double> out(vertices);
+    for(auto& z:out) {
+        z=read_scalar<double>(data,off);
+        if(!std::isfinite(z)||z<=0) throw std::runtime_error("VISUAL_CANONICAL_DEPTH_NONFINITE_OR_BEHIND_CAMERA");
     }
     return out;
 }
@@ -669,8 +694,15 @@ int render_source_owned_visual(
        manifest.at("runtime_generation")!="0"||
        manifest.at("donor_search_at_runtime")!="0")
         throw std::runtime_error("VISUAL_RUNTIME_REBUILD_OR_GENERATION_FORBIDDEN");
-    if(manifest.at("texture_sampling_contract")!="SOURCE_RGBA8_BILINEAR_STRAIGHT_TO_PM_V1")
+    const bool material=manifest.find("visual_material_contract")!=manifest.end();
+    if(manifest.at("texture_sampling_contract")!=(material?
+       "CAA_RGBA8_LINEAR_PM_BILINEAR_VISUAL_V1":"SOURCE_RGBA8_BILINEAR_STRAIGHT_TO_PM_V1"))
         throw std::runtime_error("VISUAL_TEXTURE_SAMPLING_CONTRACT_INVALID");
+    if(material && (manifest.at("visual_material_contract")!="CAA_VISUAL_TEXEL_PROVENANCE_AND_SOURCE_VIEW_V1" ||
+       manifest.at("depth_ownership_contract")!="CANONICAL_CAMERA_DEPTH_ASCENDING__UNRESOLVED_TIES_FAIL_V1" ||
+       std::stod(manifest.at("depth_tie_epsilon"))!=1e-12 ||
+       manifest.at("maximum_fragment_layers")!="4"))
+        throw std::runtime_error("VISUAL_MATERIAL_OR_DEPTH_CONTRACT_INVALID");
     if(manifest.at("mip_generation_authorized")!="0")
         throw std::runtime_error("MIP_GENERATION_MUST_BE_FORBIDDEN");
     if(view_id.size()!=2||view_id[0]!='V')
@@ -706,11 +738,44 @@ int render_source_owned_visual(
     );
     const auto mesh=parse_visual_mesh_2d(entries.at(mesh_entry));
     auto positions=parse_visual_positions_2d(
-        entries.at(positions_entry),mesh.vertex_count,frame_index
+        entries.at(positions_entry),mesh.vertex_count,frame_count,frame_index
     );
     const auto texture=decode_png_rgba(
         entries.at(texture_entry),mesh.source_width,mesh.source_height
     );
+    std::vector<double> depths;
+    std::vector<std::uint8_t> material_codes;
+    std::vector<std::int16_t> material_donors;
+    TextureSet linear_texture;
+    if(material) {
+        const auto prefix="view."+std::to_string(view)+".";
+        const auto& bytes=entries.at(manifest.at(prefix+"material_entry"));
+        if(bytes.size()<16 || std::memcmp(bytes.data(),"RSVA1\0\0\0",8)!=0)
+            throw std::runtime_error("VISUAL_MATERIAL_MAGIC_INVALID");
+        std::size_t offset=8;
+        const auto width=read_scalar<std::uint32_t>(bytes,offset);
+        const auto height=read_scalar<std::uint32_t>(bytes,offset);
+        const auto count=static_cast<std::size_t>(width)*height;
+        if(width!=mesh.source_width || height!=mesh.source_height || bytes.size()!=16+count*3)
+            throw std::runtime_error("VISUAL_MATERIAL_SIZE_INVALID");
+        material_codes.assign(bytes.begin()+16,bytes.begin()+16+count);
+        offset=16+count;
+        for(std::size_t i=0;i<count;++i) {
+            const auto donor=read_scalar<std::int16_t>(bytes,offset);
+            const auto code=material_codes[i];
+            const bool valid=(code==0&&donor==view)||(code==1&&donor>=0&&donor<8&&donor!=view)||
+                (code==2&&donor==-2)||(code==3&&donor==-4)||(code==4&&donor==-3)||
+                (code==255&&donor==std::numeric_limits<std::int16_t>::min());
+            if(!valid) throw std::runtime_error("VISUAL_MATERIAL_PROVENANCE_SOURCE_VIEW_DRIFT");
+            if((code==3||code==255) && (texture[4*i]||texture[4*i+1]||texture[4*i+2]||texture[4*i+3]))
+                throw std::runtime_error("VISUAL_MATERIAL_UNSUPPORTED_OR_PADDING_RGBA");
+            material_donors.push_back(donor);
+        }
+        depths=parse_visual_depth(entries.at(manifest.at("clip."+std::to_string(clip_index)+
+            ".view."+std::to_string(view)+".depths_entry")),mesh.vertex_count,frame_count,frame_index);
+        linear_texture.views=1; linear_texture.pages=1;
+        linear_texture.width=width; linear_texture.height=height; linear_texture.rgba=texture;
+    }
     const int resolution=std::stoi(
         manifest.at("view."+std::to_string(view)+".resolution")
     );
@@ -729,6 +794,10 @@ int render_source_owned_visual(
     const auto pixels=static_cast<std::size_t>(resolution)*resolution;
     std::vector<Accum> accum(pixels);
     std::vector<std::int32_t> owner(pixels,-1);
+    struct Fragment { double depth; PM color; std::int32_t owner; std::uint8_t code; std::int16_t donor; };
+    std::vector<std::vector<Fragment>> fragments(material?pixels:0);
+    std::vector<std::uint8_t> compiled_provenance(pixels,255);
+    std::vector<std::int16_t> compiled_donor(pixels,std::numeric_limits<std::int16_t>::min());
     std::uint64_t covered_samples=0;
 
     for(std::size_t fi=0;fi<mesh.faces.size();++fi) {
@@ -775,6 +844,38 @@ int render_source_owned_visual(
             const auto& uc=mesh.uv[face[2]];
             const double u=w0*ua.x+w1*ub.x+w2*uc.x;
             const double v=w0*ua.y+w1*ub.y+w2*uc.y;
+            if(material) {
+                const double tx=std::clamp(u,0.0,1.0)*(mesh.source_width-1);
+                const double ty=std::clamp(v,0.0,1.0)*(mesh.source_height-1);
+                const int x0=static_cast<int>(std::floor(tx)),y0=static_cast<int>(std::floor(ty));
+                const int x1=std::min(x0+1,static_cast<int>(mesh.source_width)-1);
+                const int y1=std::min(y0+1,static_cast<int>(mesh.source_height)-1);
+                const double fx=tx-x0,fy=ty-y0;
+                const std::array<int,4> xs{x0,x1,x0,x1},ys{y0,y0,y1,y1};
+                const std::array<double,4> weights{(1-fx)*(1-fy),fx*(1-fy),(1-fx)*fy,fx*fy};
+                std::uint8_t code=255;
+                std::int16_t donor=std::numeric_limits<std::int16_t>::min();
+                bool unsupported=false;
+                for(std::size_t k=0;k<4;++k) {
+                    const auto index=static_cast<std::size_t>(ys[k])*mesh.source_width+xs[k];
+                    if(weights[k]<=1e-12) continue;
+                    const auto candidate=material_codes[index];
+                    unsupported=unsupported||candidate==3;
+                    if(candidate!=255 && (code==255||candidate>code)) {
+                        code=candidate; donor=material_donors[index];
+                    }
+                }
+                if(unsupported) { code=3; donor=-4; }
+                const auto sample=sample_pm(linear_texture,0,0,u,v);
+                if(sample.a>1e-12||code==3) {
+                    auto& rows=fragments[static_cast<std::size_t>(y)*resolution+x];
+                    if(rows.size()>=4) throw std::runtime_error("VISUAL_DEPTH_FRAGMENT_OVERFLOW");
+                    rows.push_back({w0*depths[face[0]]+w1*depths[face[1]]+w2*depths[face[2]],
+                        sample,static_cast<std::int32_t>(fi),code,donor});
+                }
+                ++covered_samples;
+                continue;
+            }
             const auto sample=visual_sample_bilinear(
                 texture,mesh.source_width,mesh.source_height,u,v
             );
@@ -796,6 +897,26 @@ int render_source_owned_visual(
         }
     }
 
+    if(material) for(std::size_t i=0;i<pixels;++i) {
+        auto& rows=fragments[i];
+        std::sort(rows.begin(),rows.end(),[](const Fragment& a,const Fragment& b){ return a.depth<b.depth; });
+        for(std::size_t k=1;k<rows.size();++k)
+            if(std::abs(rows[k].depth-rows[k-1].depth)<=1e-12)
+                throw std::runtime_error("VISUAL_DEPTH_UNRESOLVED_TIE");
+        auto& dst=accum[i];
+        if(!rows.empty()) owner[i]=rows.front().owner;
+        for(const auto& row:rows) {
+            const double transmission=1.0-dst.a;
+            if(row.code==3 && transmission>1e-12)
+                throw std::runtime_error("VISUAL_MATERIAL_UNSUPPORTED_FOOTPRINT");
+            if(row.color.a*transmission>1e-12 &&
+               (compiled_provenance[i]==255||row.code>compiled_provenance[i])) {
+                compiled_provenance[i]=row.code; compiled_donor[i]=row.donor;
+            }
+            dst.r+=row.color.r*transmission; dst.g+=row.color.g*transmission;
+            dst.b+=row.color.b*transmission; dst.a+=row.color.a*transmission;
+        }
+    }
     std::vector<std::uint8_t> rgba(pixels*4u,0);
     std::vector<std::uint8_t> provenance(pixels,255);
     std::vector<std::int16_t> source_view(
@@ -805,14 +926,14 @@ int render_source_owned_visual(
         const auto& p=accum[i];
         const double alpha=std::clamp(p.a,0.0,1.0);
         const double inv=alpha>1e-12?1.0/alpha:0.0;
-        rgba[i*4u]=q8(p.r*inv);
-        rgba[i*4u+1]=q8(p.g*inv);
-        rgba[i*4u+2]=q8(p.b*inv);
+        rgba[i*4u]=q8(material?linear_to_srgb(p.r*inv):p.r*inv);
+        rgba[i*4u+1]=q8(material?linear_to_srgb(p.g*inv):p.g*inv);
+        rgba[i*4u+2]=q8(material?linear_to_srgb(p.b*inv):p.b*inv);
         rgba[i*4u+3]=q8(alpha);
-        if(alpha>1e-12) {
-            provenance[i]=0;
-            source_view[i]=static_cast<std::int16_t>(view);
-        }
+        if(material ? rgba[i*4u+3]>0 : alpha>1e-12) {
+            provenance[i]=material?compiled_provenance[i]:0;
+            source_view[i]=material?compiled_donor[i]:static_cast<std::int16_t>(view);
+        } else if(material) owner[i]=-1;
     }
     write_file(rgba_path,rgba.data(),rgba.size());
     if(!prov_path.empty())
@@ -830,6 +951,7 @@ int render_source_owned_visual(
              <<" frame="<<frame_index<<" resolution="<<resolution
              <<" faces="<<mesh.face_count<<" vertices="<<mesh.vertex_count
              <<" covered_samples="<<covered_samples
+             <<" sealed_visual_material="<<(material?1:0)
              <<" appearance=SOURCE_RGBA8_FIXED_UV\\n";
     return 0;
 }

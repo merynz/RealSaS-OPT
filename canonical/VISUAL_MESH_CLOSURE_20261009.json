@@ -1,0 +1,146 @@
+{
+  "schema": "RealSaS.VisualMeshClosureStatus.v1",
+  "date": "2026-10-09",
+  "canonical_branch": "main",
+  "status": "SEALED_MATERIAL_CONNECTION_IMPLEMENTED__MATCHED_VISUAL_ACCEPTANCE_OPEN",
+  "baseline_code_sha": "4d3a370c0eaea0a13df6c037f0588935aa2820cf",
+  "handoff": "docs/presentation/VISUAL_MESH_IMPLEMENTATION_20261009.md",
+  "mechanical_mutation_authorized": false,
+  "mechanical_inference_or_fit_executed": false,
+  "iris_rgb_head_implemented": false,
+  "knight_visual_pass": false,
+  "product_pass_claimed": false,
+  "implemented": [
+    "PER_TEXEL_CAA_PROVENANCE_AND_DONOR_TRANSPORT",
+    "SOURCE_MASK_CANNOT_INVENT_OBSERVED_ALPHA",
+    "QUALIFIED_REGION_COHERENCE_AND_FIXED_SOURCE_UV_CHECKS",
+    "LINEAR_LIGHT_PREMULTIPLIED_VISUAL_FILTERING",
+    "COMPILED_CANONICAL_CAMERA_DEPTH_OWNERSHIP",
+    "NATIVE_REFERENCE_DONOR_PARITY",
+    "DYNAMIC_COMPILED_MATERIAL_EXPOSURE_BUDGET_GATE",
+    "PRODUCT_CLOSURE_REJECTS_MISSING_FULL_VISUAL_ACCEPTANCE"
+  ],
+  "source_closure_comparison": {
+    "not_a_research_attempt": true,
+    "direct_changed_stage_ordinals": [
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      37,
+      38,
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "mechanical_implementation_identities_preserved": [
+      19,
+      28,
+      32,
+      35,
+      36
+    ],
+    "model_implementation_identities_preserved": [
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      26,
+      27,
+      29,
+      30,
+      31,
+      33
+    ],
+    "motion_input_preservation_required": true,
+    "motion_proof_reseal_possible": [
+      39,
+      40,
+      41
+    ],
+    "direct_changed_stage_ids": [
+      "20_CAA_BACKEND_PREREGISTERED",
+      "21_CAA_COMPILE",
+      "22_CAA_COMPILE_SEALED",
+      "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+      "24_COMPLETE_APPEARANCE_QUALIFIED",
+      "25_CAA_REFERENCE_REST_RENDER_PROOF",
+      "37_QUALIFIED_PRESENTATION_STRUCTURE",
+      "38_CANONICAL_PUPPET_SEALED",
+      "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+      "43_RSS_MATERIALIZE_COMPACT",
+      "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+      "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+      "46_PRODUCT_CLOSURE_SEAL"
+    ],
+    "implementation_identity_pairs": {
+      "10_IRIS_FIT": {
+        "baseline": "8fa595852862db4d8f2ac474e0bab85d0c6d457ee3c353380a7037d540c7ad92",
+        "candidate": "8fa595852862db4d8f2ac474e0bab85d0c6d457ee3c353380a7037d540c7ad92"
+      },
+      "19_STATIC_CANONICAL_MESH_QUALIFIED": {
+        "baseline": "7e576e70041c19d3a24353cf6d69828c49260b5aad8b691031e320476564fa73",
+        "candidate": "7e576e70041c19d3a24353cf6d69828c49260b5aad8b691031e320476564fa73"
+      },
+      "27_GEPPETTO_FIT": {
+        "baseline": "0e9b68acbbc005fe184b56c38005b8f710b58a05801d622ac403699dc93b9f30",
+        "candidate": "0e9b68acbbc005fe184b56c38005b8f710b58a05801d622ac403699dc93b9f30"
+      },
+      "28_SKELETON_QUALIFIED": {
+        "baseline": "7f84a05882fbbb85354c9a47768ecb448084a573c596c204cfd83e453620b40b",
+        "candidate": "7f84a05882fbbb85354c9a47768ecb448084a573c596c204cfd83e453620b40b"
+      },
+      "31_ARACHNE_FIT": {
+        "baseline": "6816923e1c6444b16f8d3aff330bb7ac062d0c6916aac7c64ec4548de08ce56c",
+        "candidate": "6816923e1c6444b16f8d3aff330bb7ac062d0c6916aac7c64ec4548de08ce56c"
+      },
+      "32_SKIN_QUALIFIED": {
+        "baseline": "42e40edad86069b9093d74261002f1b3264221538d9924a5c94d07d578b9ccff",
+        "candidate": "42e40edad86069b9093d74261002f1b3264221538d9924a5c94d07d578b9ccff"
+      },
+      "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED": {
+        "baseline": "f4bbb1472f149ad4316b3042c38427e131e65298b65d6131e3e3ae9eef0e38a7",
+        "candidate": "f4bbb1472f149ad4316b3042c38427e131e65298b65d6131e3e3ae9eef0e38a7"
+      },
+      "36_QUALIFIED_MESH_SKIN_TRANSFER": {
+        "baseline": "3b0fefe5918deb7291a9a49b778b51cceb5a435e0d445d12ec6b1c5c802ef559",
+        "candidate": "3b0fefe5918deb7291a9a49b778b51cceb5a435e0d445d12ec6b1c5c802ef559"
+      },
+      "42_RUNTIME_PROJECTION_AND_CAA_BINDING": {
+        "baseline": "4f0f35752a5d9f69dfd23a2ae8f13547ad0f663b1a612ff4ed71394ea7de30af",
+        "candidate": "830a3bbfb1b8b33b89086914abfcb8de8ed968b6f984015ef1c398c26ea16971"
+      }
+    }
+  },
+  "open_gates": [
+    "QUALIFIED_AMODAL_VISUAL_PART_SUPPORT_AND_MATERIAL",
+    "QUALIFIED_INTER_CHART_CONTACT_AND_SEMANTIC_OVERLAP",
+    "GO_QUALIFIED_BASELINE_AND_MATCHED_LATEST_CARRIER_KNIGHT_ATTEMPT"
+  ],
+  "execution_observation": {
+    "workflow_run_id": 37986333890,
+    "job_id": 114009262640,
+    "status": "QUEUED_WITHOUT_RUNNER_ASSIGNMENT",
+    "cause_inferred": false
+  },
+  "claim_rule": "Engineering connection tests do not establish amodal appearance, semantic contacts, latest Knight render or visual closure.",
+  "engineering_validation": {
+    "compiler_regressions": {
+      "passed": 510,
+      "skipped": 5,
+      "note": "Full compiler suite before the final product-acceptance guard; targeted source chain and native regressions rerun after the guard."
+    },
+    "governance_and_material_regressions": {
+      "passed": 76,
+      "note": "75 passed together; one source-closure check rerun after concurrent source edits and passed on stable code."
+    },
+    "knight_execution": false,
+    "product_promotion": false
+  }
+}

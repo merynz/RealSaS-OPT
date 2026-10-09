@@ -9,6 +9,10 @@ contact preservation become coherent?
 import numpy as np
 
 from compiler.realsas_compiler_core.hashing import content_sha256
+from compiler.realsas_compiler_core.runtime_package_v2 import read_rss_v2, write_rss_v2
+from compiler.realsas_compiler_core.semantic_runtime_package_v1 import (
+    seal_semantic_runtime_entries,
+)
 from compiler.realsas_compiler_core.visual_contact_v1 import (
     QualifiedVisualContactSet,
     qualify_visual_contacts as _broad_qualify,
@@ -42,7 +46,18 @@ def _strict_qualify(**kwargs):
     )
 
 
+_original_build_package = court._build_package
+
+
+def _truthful_semantic_package(projection, relation_contract, out):
+    path = _original_build_package(projection, relation_contract, out)
+    entries = read_rss_v2(path)
+    write_rss_v2(path, seal_semantic_runtime_entries(entries))
+    return path
+
+
 court.qualify_visual_contacts = _strict_qualify
+court._build_package = _truthful_semantic_package
 
 if __name__ == "__main__":
     court.main()

@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-"""Verify the sealed native runtime source lineage without mutating authority.
+"""Verify the append-only native runtime source lineage without mutating authority.
 
-This is the reusable form of the historical Native runtime source gate. It verifies
-the immutable base seal and both append-only Runtime-v4 source extensions against the
-exact repository bytes.
+Historical seals are immutable provenance.  This verifier walks the complete
+ordered extension chain, reconstructs the exact sealed runtime/realsas_cpp
+subtree and compares it with Git.  New runtime consumers therefore have to be
+sealed explicitly rather than becoming an untracked second authority.
 """
 
 import hashlib
@@ -14,418 +15,154 @@ import subprocess
 
 
 BASE = Path("canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json")
-EXT1 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V1_20260917.json")
-EXT2 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V2_20260917.json")
-EXT3 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V3_20260918.json")
-EXT4 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V4_20260918.json")
-EXT5 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V5_20260921.json")
-EXT6 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V6_20260921.json")
-EXT7 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V7_20260921.json")
-EXT8 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V8_20260921.json")
-EXT9 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V9_20260921.json")
-EXT10 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V10_20260921.json")
-EXT11 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V11_20260921.json")
-EXT12 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V12_20260927.json")
-EXT13 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V13_20260927.json")
-EXT14 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V14_20260927.json")
-EXT15 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V15_20260927.json")
-EXT16 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V16_20261001.json")
-EXT17 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V17_20261008.json")
-EXT18 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V18_20261008.json")
-EXT19 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V19_20261008.json")
-EXT20 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V20_20261009.json")
-EXT21 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V21_20261009.json")
+EXTENSION_PATHS = (
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V1_20260917.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V2_20260917.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V3_20260918.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V4_20260918.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V5_20260921.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V6_20260921.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V7_20260921.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V8_20260921.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V9_20260921.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V10_20260921.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V11_20260921.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V12_20260927.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V13_20260927.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V14_20260927.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V15_20260927.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V16_20261001.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V17_20261008.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V18_20261008.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V19_20261008.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V20_20261009.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V21_20261009.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V22_20261009.json"),
+)
+SUBTREE_CLOSURE = "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME"
+RUNTIME_ROLE = "subordinate_deployment_consumer"
+
+# Compatibility aliases retained for scripts/tests that imported the old
+# explicit constants.  The verifier itself is data-driven now.
+for _index, _path in enumerate(EXTENSION_PATHS, start=1):
+    globals()[f"EXT{_index}"] = _path
 
 
 def _blob_sha1(payload: bytes) -> str:
     return subprocess.check_output(
-        ["git", "hash-object", "--stdin"],
-        input=payload,
-        text=False,
+        ["git", "hash-object", "--stdin"], input=payload, text=False
     ).decode("ascii").strip()
 
 
-def verify() -> dict:
-    base = json.loads(BASE.read_text(encoding="utf-8"))
-    ext1 = json.loads(EXT1.read_text(encoding="utf-8"))
-    ext2 = json.loads(EXT2.read_text(encoding="utf-8"))
-    ext3 = json.loads(EXT3.read_text(encoding="utf-8"))
-    ext4 = json.loads(EXT4.read_text(encoding="utf-8"))
-    ext5 = json.loads(EXT5.read_text(encoding="utf-8"))
-    ext6 = json.loads(EXT6.read_text(encoding="utf-8"))
-    ext7 = json.loads(EXT7.read_text(encoding="utf-8"))
-    ext8 = json.loads(EXT8.read_text(encoding="utf-8"))
-    ext9 = json.loads(EXT9.read_text(encoding="utf-8"))
-    ext10 = json.loads(EXT10.read_text(encoding="utf-8"))
-    ext11 = json.loads(EXT11.read_text(encoding="utf-8"))
-    ext12 = json.loads(EXT12.read_text(encoding="utf-8"))
-    ext13 = json.loads(EXT13.read_text(encoding="utf-8"))
-    ext14 = json.loads(EXT14.read_text(encoding="utf-8"))
-    ext15 = json.loads(EXT15.read_text(encoding="utf-8"))
-    ext16 = json.loads(EXT16.read_text(encoding="utf-8"))
-    ext17 = json.loads(EXT17.read_text(encoding="utf-8"))
-    ext18 = json.loads(EXT18.read_text(encoding="utf-8"))
-    ext19 = json.loads(EXT19.read_text(encoding="utf-8"))
-    ext20 = json.loads(EXT20.read_text(encoding="utf-8"))
-    ext21 = json.loads(EXT21.read_text(encoding="utf-8"))
+def _load_json(path: Path) -> dict:
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise RuntimeError(f"NATIVE_SOURCE_SEAL_NOT_OBJECT:{path}")
+    return value
 
-    if ext1["schema"] != "realsas.compiler_runtime_source_extension_seal.v1":
+
+def _verify_chain(base: dict, extensions: list[dict]) -> None:
+    if not extensions:
+        raise RuntimeError("NATIVE_SOURCE_EXTENSION_CHAIN_EMPTY")
+
+    first = extensions[0]
+    if first.get("schema") != "realsas.compiler_runtime_source_extension_seal.v1":
         raise RuntimeError("NATIVE_SOURCE_EXT1_SCHEMA_DRIFT")
-    if ext1["base_seal"]["path"] != str(BASE):
+    if first.get("base_seal", {}).get("path") != str(BASE):
         raise RuntimeError("NATIVE_SOURCE_EXT1_BASE_PATH_DRIFT")
-    if _blob_sha1(BASE.read_bytes()) != ext1["base_seal"]["git_blob_sha1"]:
+    if _blob_sha1(BASE.read_bytes()) != first.get("base_seal", {}).get("git_blob_sha1"):
         raise RuntimeError("NATIVE_SOURCE_EXT1_BASE_BLOB_DRIFT")
-    if ext1["authority"]["historical_base_seal_mutated"] is not False:
+    authority = dict(first.get("authority") or {})
+    if authority.get("historical_base_seal_mutated") is not False:
         raise RuntimeError("NATIVE_SOURCE_EXT1_BASE_MUTATION_CLAIM")
-    if ext1["authority"]["runtime_role"] != "subordinate_deployment_consumer":
+    if authority.get("runtime_role") != RUNTIME_ROLE:
         raise RuntimeError("NATIVE_SOURCE_EXT1_ROLE_DRIFT")
 
-    if ext2["schema"] != "realsas.compiler_runtime_source_extension_seal.v2":
-        raise RuntimeError("NATIVE_SOURCE_EXT2_SCHEMA_DRIFT")
-    if ext2["prior_extension"]["path"] != str(EXT1):
-        raise RuntimeError("NATIVE_SOURCE_EXT2_PRIOR_PATH_DRIFT")
-    if _blob_sha1(EXT1.read_bytes()) != ext2["prior_extension"]["git_blob_sha1"]:
-        raise RuntimeError("NATIVE_SOURCE_EXT2_PRIOR_BLOB_DRIFT")
-    if ext2["authority"]["historical_base_seal_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT2_BASE_MUTATION_CLAIM")
-    if ext2["authority"]["prior_extension_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT2_PRIOR_MUTATION_CLAIM")
-    if ext2["authority"]["runtime_role"] != "subordinate_deployment_consumer":
-        raise RuntimeError("NATIVE_SOURCE_EXT2_ROLE_DRIFT")
+    for version, (path, ext) in enumerate(
+        zip(EXTENSION_PATHS[1:], extensions[1:]), start=2
+    ):
+        expected_schema = f"realsas.compiler_runtime_source_extension_seal.v{version}"
+        if ext.get("schema") != expected_schema:
+            raise RuntimeError(f"NATIVE_SOURCE_EXT{version}_SCHEMA_DRIFT")
+        previous_path = EXTENSION_PATHS[version - 2]
+        prior = dict(ext.get("prior_extension") or {})
+        if prior.get("path") != str(previous_path):
+            raise RuntimeError(f"NATIVE_SOURCE_EXT{version}_PRIOR_PATH_DRIFT")
+        if _blob_sha1(previous_path.read_bytes()) != prior.get("git_blob_sha1"):
+            raise RuntimeError(f"NATIVE_SOURCE_EXT{version}_PRIOR_BLOB_DRIFT")
+        authority = dict(ext.get("authority") or {})
+        if authority.get("historical_base_seal_mutated") is not False:
+            raise RuntimeError(f"NATIVE_SOURCE_EXT{version}_BASE_MUTATION_CLAIM")
+        if authority.get("prior_extension_mutated") is not False:
+            raise RuntimeError(f"NATIVE_SOURCE_EXT{version}_PRIOR_MUTATION_CLAIM")
+        if authority.get("runtime_role") != RUNTIME_ROLE:
+            raise RuntimeError(f"NATIVE_SOURCE_EXT{version}_ROLE_DRIFT")
+        # V3 introduced full-subtree closure and every later extension must retain it.
+        if version >= 3 and authority.get("subtree_closure") != SUBTREE_CLOSURE:
+            raise RuntimeError(f"NATIVE_SOURCE_EXT{version}_SUBTREE_CLOSURE_DRIFT")
 
-    if ext3["schema"] != "realsas.compiler_runtime_source_extension_seal.v3":
-        raise RuntimeError("NATIVE_SOURCE_EXT3_SCHEMA_DRIFT")
-    if ext3["prior_extension"]["path"] != str(EXT2):
-        raise RuntimeError("NATIVE_SOURCE_EXT3_PRIOR_PATH_DRIFT")
-    if _blob_sha1(EXT2.read_bytes()) != ext3["prior_extension"]["git_blob_sha1"]:
-        raise RuntimeError("NATIVE_SOURCE_EXT3_PRIOR_BLOB_DRIFT")
-    if ext3["authority"]["historical_base_seal_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT3_BASE_MUTATION_CLAIM")
-    if ext3["authority"]["prior_extension_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT3_PRIOR_MUTATION_CLAIM")
-    if ext3["authority"]["runtime_role"] != "subordinate_deployment_consumer":
-        raise RuntimeError("NATIVE_SOURCE_EXT3_ROLE_DRIFT")
-    if ext3["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME":
-        raise RuntimeError("NATIVE_SOURCE_EXT3_SUBTREE_CLOSURE_DRIFT")
 
-    if ext4["schema"] != "realsas.compiler_runtime_source_extension_seal.v4":
-        raise RuntimeError("NATIVE_SOURCE_EXT4_SCHEMA_DRIFT")
-    if ext4["prior_extension"]["path"] != str(EXT3):
-        raise RuntimeError("NATIVE_SOURCE_EXT4_PRIOR_PATH_DRIFT")
-    if _blob_sha1(EXT3.read_bytes()) != ext4["prior_extension"]["git_blob_sha1"]:
-        raise RuntimeError("NATIVE_SOURCE_EXT4_PRIOR_BLOB_DRIFT")
-    if ext4["authority"]["historical_base_seal_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT4_BASE_MUTATION_CLAIM")
-    if ext4["authority"]["prior_extension_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT4_PRIOR_MUTATION_CLAIM")
-    if ext4["authority"]["runtime_role"] != "subordinate_deployment_consumer":
-        raise RuntimeError("NATIVE_SOURCE_EXT4_ROLE_DRIFT")
+def _apply_extension(expected: dict[str, dict], ext: dict, label: str) -> None:
+    for row in ext.get("replacements", []):
+        path = str(row["path"])
+        if path not in expected:
+            raise RuntimeError(f"NATIVE_SOURCE_UNKNOWN_REPLACEMENT:{label}:{path}")
+        expected[path] = {
+            "size_bytes": int(row["size_bytes"]),
+            "git_blob_sha1": str(row["git_blob_sha1"]),
+            "source": f"{label}_replacement",
+        }
+    for row in ext.get("additions", []):
+        path = str(row["path"])
+        if path in expected:
+            raise RuntimeError(f"NATIVE_SOURCE_DUPLICATE_ADDITION:{label}:{path}")
+        expected[path] = {
+            "size_bytes": int(row["size_bytes"]),
+            "git_blob_sha1": str(row["git_blob_sha1"]),
+            "source": f"{label}_addition",
+        }
 
-    if ext5["schema"] != "realsas.compiler_runtime_source_extension_seal.v5":
-        raise RuntimeError("NATIVE_SOURCE_EXT5_SCHEMA_DRIFT")
-    if ext5["prior_extension"]["path"] != str(EXT4):
-        raise RuntimeError("NATIVE_SOURCE_EXT5_PRIOR_PATH_DRIFT")
-    if _blob_sha1(EXT4.read_bytes()) != ext5["prior_extension"]["git_blob_sha1"]:
-        raise RuntimeError("NATIVE_SOURCE_EXT5_PRIOR_BLOB_DRIFT")
-    if ext5["authority"]["historical_base_seal_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT5_BASE_MUTATION_CLAIM")
-    if ext5["authority"]["prior_extension_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT5_PRIOR_MUTATION_CLAIM")
-    if ext5["authority"]["runtime_role"] != "subordinate_deployment_consumer":
-        raise RuntimeError("NATIVE_SOURCE_EXT5_ROLE_DRIFT")
-    if ext5["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME":
-        raise RuntimeError("NATIVE_SOURCE_EXT5_SUBTREE_CLOSURE_DRIFT")
 
-    if ext6["schema"] != "realsas.compiler_runtime_source_extension_seal.v6":
-        raise RuntimeError("NATIVE_SOURCE_EXT6_SCHEMA_DRIFT")
-    if ext6["prior_extension"]["path"] != str(EXT5):
-        raise RuntimeError("NATIVE_SOURCE_EXT6_PRIOR_PATH_DRIFT")
-    if _blob_sha1(EXT5.read_bytes()) != ext6["prior_extension"]["git_blob_sha1"]:
-        raise RuntimeError("NATIVE_SOURCE_EXT6_PRIOR_BLOB_DRIFT")
-    if ext6["authority"]["historical_base_seal_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT6_BASE_MUTATION_CLAIM")
-    if ext6["authority"]["prior_extension_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT6_PRIOR_MUTATION_CLAIM")
-    if ext6["authority"]["runtime_role"] != "subordinate_deployment_consumer":
-        raise RuntimeError("NATIVE_SOURCE_EXT6_ROLE_DRIFT")
-    if ext6["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME":
-        raise RuntimeError("NATIVE_SOURCE_EXT6_SUBTREE_CLOSURE_DRIFT")
-
-    if ext7["schema"] != "realsas.compiler_runtime_source_extension_seal.v7":
-        raise RuntimeError("NATIVE_SOURCE_EXT7_SCHEMA_DRIFT")
-    if ext7["prior_extension"]["path"] != str(EXT6):
-        raise RuntimeError("NATIVE_SOURCE_EXT7_PRIOR_PATH_DRIFT")
-    if _blob_sha1(EXT6.read_bytes()) != ext7["prior_extension"]["git_blob_sha1"]:
-        raise RuntimeError("NATIVE_SOURCE_EXT7_PRIOR_BLOB_DRIFT")
-    if ext7["authority"]["historical_base_seal_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT7_BASE_MUTATION_CLAIM")
-    if ext7["authority"]["prior_extension_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT7_PRIOR_MUTATION_CLAIM")
-    if ext7["authority"]["runtime_role"] != "subordinate_deployment_consumer":
-        raise RuntimeError("NATIVE_SOURCE_EXT7_ROLE_DRIFT")
-    if ext7["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME":
-        raise RuntimeError("NATIVE_SOURCE_EXT7_SUBTREE_CLOSURE_DRIFT")
-
-    if ext8["schema"] != "realsas.compiler_runtime_source_extension_seal.v8":
-        raise RuntimeError("NATIVE_SOURCE_EXT8_SCHEMA_DRIFT")
-    if ext8["prior_extension"]["path"] != str(EXT7):
-        raise RuntimeError("NATIVE_SOURCE_EXT8_PRIOR_PATH_DRIFT")
-    if _blob_sha1(EXT7.read_bytes()) != ext8["prior_extension"]["git_blob_sha1"]:
-        raise RuntimeError("NATIVE_SOURCE_EXT8_PRIOR_BLOB_DRIFT")
-    if ext8["authority"]["historical_base_seal_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT8_BASE_MUTATION_CLAIM")
-    if ext8["authority"]["prior_extension_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT8_PRIOR_MUTATION_CLAIM")
-    if ext8["authority"]["runtime_role"] != "subordinate_deployment_consumer":
-        raise RuntimeError("NATIVE_SOURCE_EXT8_ROLE_DRIFT")
-    if ext8["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME":
-        raise RuntimeError("NATIVE_SOURCE_EXT8_SUBTREE_CLOSURE_DRIFT")
-
-    if ext9["schema"] != "realsas.compiler_runtime_source_extension_seal.v9":
-        raise RuntimeError("NATIVE_SOURCE_EXT9_SCHEMA_DRIFT")
-    if ext9["prior_extension"]["path"] != str(EXT8):
-        raise RuntimeError("NATIVE_SOURCE_EXT9_PRIOR_PATH_DRIFT")
-    if _blob_sha1(EXT8.read_bytes()) != ext9["prior_extension"]["git_blob_sha1"]:
-        raise RuntimeError("NATIVE_SOURCE_EXT9_PRIOR_BLOB_DRIFT")
-    if ext9["authority"]["historical_base_seal_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT9_BASE_MUTATION_CLAIM")
-    if ext9["authority"]["prior_extension_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT9_PRIOR_MUTATION_CLAIM")
-    if ext9["authority"]["runtime_role"] != "subordinate_deployment_consumer":
-        raise RuntimeError("NATIVE_SOURCE_EXT9_ROLE_DRIFT")
-    if ext9["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME":
-        raise RuntimeError("NATIVE_SOURCE_EXT9_SUBTREE_CLOSURE_DRIFT")
-
-    if ext10["schema"] != "realsas.compiler_runtime_source_extension_seal.v10":
-        raise RuntimeError("NATIVE_SOURCE_EXT10_SCHEMA_DRIFT")
-    if ext10["prior_extension"]["path"] != str(EXT9):
-        raise RuntimeError("NATIVE_SOURCE_EXT10_PRIOR_PATH_DRIFT")
-    if _blob_sha1(EXT9.read_bytes()) != ext10["prior_extension"]["git_blob_sha1"]:
-        raise RuntimeError("NATIVE_SOURCE_EXT10_PRIOR_BLOB_DRIFT")
-    if ext10["authority"]["historical_base_seal_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT10_BASE_MUTATION_CLAIM")
-    if ext10["authority"]["prior_extension_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT10_PRIOR_MUTATION_CLAIM")
-    if ext10["authority"]["runtime_role"] != "subordinate_deployment_consumer":
-        raise RuntimeError("NATIVE_SOURCE_EXT10_ROLE_DRIFT")
-    if ext10["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME":
-        raise RuntimeError("NATIVE_SOURCE_EXT10_SUBTREE_CLOSURE_DRIFT")
-
-    if ext11["schema"] != "realsas.compiler_runtime_source_extension_seal.v11":
-        raise RuntimeError("NATIVE_SOURCE_EXT11_SCHEMA_DRIFT")
-    if ext11["prior_extension"]["path"] != str(EXT10):
-        raise RuntimeError("NATIVE_SOURCE_EXT11_PRIOR_PATH_DRIFT")
-    if _blob_sha1(EXT10.read_bytes()) != ext11["prior_extension"]["git_blob_sha1"]:
-        raise RuntimeError("NATIVE_SOURCE_EXT11_PRIOR_BLOB_DRIFT")
-    if ext11["authority"]["historical_base_seal_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT11_BASE_MUTATION_CLAIM")
-    if ext11["authority"]["prior_extension_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT11_PRIOR_MUTATION_CLAIM")
-    if ext11["authority"]["runtime_role"] != "subordinate_deployment_consumer":
-        raise RuntimeError("NATIVE_SOURCE_EXT11_ROLE_DRIFT")
-    if ext11["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME":
-        raise RuntimeError("NATIVE_SOURCE_EXT11_SUBTREE_CLOSURE_DRIFT")
-
-    if ext12["schema"] != "realsas.compiler_runtime_source_extension_seal.v12":
-        raise RuntimeError("NATIVE_SOURCE_EXT12_SCHEMA_DRIFT")
-    if ext12["prior_extension"]["path"] != str(EXT11):
-        raise RuntimeError("NATIVE_SOURCE_EXT12_PRIOR_PATH_DRIFT")
-    if _blob_sha1(EXT11.read_bytes()) != ext12["prior_extension"]["git_blob_sha1"]:
-        raise RuntimeError("NATIVE_SOURCE_EXT12_PRIOR_BLOB_DRIFT")
-    if ext12["authority"]["historical_base_seal_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT12_BASE_MUTATION_CLAIM")
-    if ext12["authority"]["prior_extension_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT12_PRIOR_MUTATION_CLAIM")
-    if ext12["authority"]["runtime_role"] != "subordinate_deployment_consumer":
-        raise RuntimeError("NATIVE_SOURCE_EXT12_ROLE_DRIFT")
-    if ext12["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME":
-        raise RuntimeError("NATIVE_SOURCE_EXT12_SUBTREE_CLOSURE_DRIFT")
-
-    if ext13["schema"] != "realsas.compiler_runtime_source_extension_seal.v13":
-        raise RuntimeError("NATIVE_SOURCE_EXT13_SCHEMA_DRIFT")
-    if ext13["prior_extension"]["path"] != str(EXT12):
-        raise RuntimeError("NATIVE_SOURCE_EXT13_PRIOR_PATH_DRIFT")
-    if _blob_sha1(EXT12.read_bytes()) != ext13["prior_extension"]["git_blob_sha1"]:
-        raise RuntimeError("NATIVE_SOURCE_EXT13_PRIOR_BLOB_DRIFT")
-    if ext13["authority"]["historical_base_seal_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT13_BASE_MUTATION_CLAIM")
-    if ext13["authority"]["prior_extension_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT13_PRIOR_MUTATION_CLAIM")
-    if ext13["authority"]["runtime_role"] != "subordinate_deployment_consumer":
-        raise RuntimeError("NATIVE_SOURCE_EXT13_ROLE_DRIFT")
-    if ext13["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME":
-        raise RuntimeError("NATIVE_SOURCE_EXT13_SUBTREE_CLOSURE_DRIFT")
-
-    if ext14["schema"] != "realsas.compiler_runtime_source_extension_seal.v14":
-        raise RuntimeError("NATIVE_SOURCE_EXT14_SCHEMA_DRIFT")
-    if ext14["prior_extension"]["path"] != str(EXT13):
-        raise RuntimeError("NATIVE_SOURCE_EXT14_PRIOR_PATH_DRIFT")
-    if _blob_sha1(EXT13.read_bytes()) != ext14["prior_extension"]["git_blob_sha1"]:
-        raise RuntimeError("NATIVE_SOURCE_EXT14_PRIOR_BLOB_DRIFT")
-    if ext14["authority"]["historical_base_seal_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT14_BASE_MUTATION_CLAIM")
-    if ext14["authority"]["prior_extension_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT14_PRIOR_MUTATION_CLAIM")
-    if ext14["authority"]["runtime_role"] != "subordinate_deployment_consumer":
-        raise RuntimeError("NATIVE_SOURCE_EXT14_ROLE_DRIFT")
-    if ext14["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME":
-        raise RuntimeError("NATIVE_SOURCE_EXT14_SUBTREE_CLOSURE_DRIFT")
-
-    if ext15["schema"] != "realsas.compiler_runtime_source_extension_seal.v15":
-        raise RuntimeError("NATIVE_SOURCE_EXT15_SCHEMA_DRIFT")
-    if ext15["prior_extension"]["path"] != str(EXT14):
-        raise RuntimeError("NATIVE_SOURCE_EXT15_PRIOR_PATH_DRIFT")
-    if _blob_sha1(EXT14.read_bytes()) != ext15["prior_extension"]["git_blob_sha1"]:
-        raise RuntimeError("NATIVE_SOURCE_EXT15_PRIOR_BLOB_DRIFT")
-    if ext15["authority"]["historical_base_seal_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT15_BASE_MUTATION_CLAIM")
-    if ext15["authority"]["prior_extension_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT15_PRIOR_MUTATION_CLAIM")
-    if ext15["authority"]["runtime_role"] != "subordinate_deployment_consumer":
-        raise RuntimeError("NATIVE_SOURCE_EXT15_ROLE_DRIFT")
-    if ext15["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME":
-        raise RuntimeError("NATIVE_SOURCE_EXT15_SUBTREE_CLOSURE_DRIFT")
-
-    if ext16["schema"] != "realsas.compiler_runtime_source_extension_seal.v16":
-        raise RuntimeError("NATIVE_SOURCE_EXT16_SCHEMA_DRIFT")
-    if ext16["prior_extension"]["path"] != str(EXT15):
-        raise RuntimeError("NATIVE_SOURCE_EXT16_PRIOR_PATH_DRIFT")
-    if _blob_sha1(EXT15.read_bytes()) != ext16["prior_extension"]["git_blob_sha1"]:
-        raise RuntimeError("NATIVE_SOURCE_EXT16_PRIOR_BLOB_DRIFT")
-    if ext16["authority"]["historical_base_seal_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT16_BASE_MUTATION_CLAIM")
-    if ext16["authority"]["prior_extension_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT16_PRIOR_MUTATION_CLAIM")
-    if ext16["authority"]["runtime_role"] != "subordinate_deployment_consumer":
-        raise RuntimeError("NATIVE_SOURCE_EXT16_ROLE_DRIFT")
-    if ext16["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME":
-        raise RuntimeError("NATIVE_SOURCE_EXT16_SUBTREE_CLOSURE_DRIFT")
-
-    if ext17["schema"] != "realsas.compiler_runtime_source_extension_seal.v17":
-        raise RuntimeError("NATIVE_SOURCE_EXT17_SCHEMA_DRIFT")
-    if ext17["prior_extension"]["path"] != str(EXT16):
-        raise RuntimeError("NATIVE_SOURCE_EXT17_PRIOR_PATH_DRIFT")
-    if _blob_sha1(EXT16.read_bytes()) != ext17["prior_extension"]["git_blob_sha1"]:
-        raise RuntimeError("NATIVE_SOURCE_EXT17_PRIOR_BLOB_DRIFT")
-    if ext17["authority"]["historical_base_seal_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT17_BASE_MUTATION_CLAIM")
-    if ext17["authority"]["prior_extension_mutated"] is not False:
-        raise RuntimeError("NATIVE_SOURCE_EXT17_PRIOR_MUTATION_CLAIM")
-    if ext17["authority"]["runtime_role"] != "subordinate_deployment_consumer":
-        raise RuntimeError("NATIVE_SOURCE_EXT17_ROLE_DRIFT")
-    if ext17["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME":
-        raise RuntimeError("NATIVE_SOURCE_EXT17_SUBTREE_CLOSURE_DRIFT")
-
-    if (ext18["schema"] != "realsas.compiler_runtime_source_extension_seal.v18"
-            or ext18["prior_extension"]["path"] != str(EXT17)
-            or _blob_sha1(EXT17.read_bytes()) != ext18["prior_extension"]["git_blob_sha1"]
-            or ext18["authority"]["historical_base_seal_mutated"] is not False
-            or ext18["authority"]["prior_extension_mutated"] is not False
-            or ext18["authority"]["runtime_role"] != "subordinate_deployment_consumer"
-            or ext18["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME"):
-        raise RuntimeError("NATIVE_SOURCE_EXT18_AUTHORITY_DRIFT")
-
-    if (ext19["schema"] != "realsas.compiler_runtime_source_extension_seal.v19"
-            or ext19["prior_extension"]["path"] != str(EXT18)
-            or _blob_sha1(EXT18.read_bytes()) != ext19["prior_extension"]["git_blob_sha1"]
-            or ext19["authority"]["historical_base_seal_mutated"] is not False
-            or ext19["authority"]["prior_extension_mutated"] is not False
-            or ext19["authority"]["runtime_role"] != "subordinate_deployment_consumer"
-            or ext19["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME"):
-        raise RuntimeError("NATIVE_SOURCE_EXT19_AUTHORITY_DRIFT")
-
-    if (ext20["schema"] != "realsas.compiler_runtime_source_extension_seal.v20"
-            or ext20["prior_extension"]["path"] != str(EXT19)
-            or _blob_sha1(EXT19.read_bytes()) != ext20["prior_extension"]["git_blob_sha1"]
-            or ext20["authority"]["historical_base_seal_mutated"] is not False
-            or ext20["authority"]["prior_extension_mutated"] is not False
-            or ext20["authority"]["runtime_role"] != "subordinate_deployment_consumer"
-            or ext20["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME"):
-        raise RuntimeError("NATIVE_SOURCE_EXT20_AUTHORITY_DRIFT")
-
-    if (ext21["schema"] != "realsas.compiler_runtime_source_extension_seal.v21"
-            or ext21["prior_extension"]["path"] != str(EXT20)
-            or _blob_sha1(EXT20.read_bytes()) != ext21["prior_extension"]["git_blob_sha1"]
-            or ext21["authority"]["historical_base_seal_mutated"] is not False
-            or ext21["authority"]["prior_extension_mutated"] is not False
-            or ext21["authority"]["runtime_role"] != "subordinate_deployment_consumer"
-            or ext21["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME"):
-        raise RuntimeError("NATIVE_SOURCE_EXT21_AUTHORITY_DRIFT")
+def verify() -> dict:
+    base = _load_json(BASE)
+    extensions = [_load_json(path) for path in EXTENSION_PATHS]
+    _verify_chain(base, extensions)
 
     expected = {
-        row["path"]: {
+        str(row["path"]): {
             "size_bytes": int(row["size_bytes"]),
-            "sha256": row["sha256"],
-            "git_blob_sha1": row["git_blob_sha1"],
+            "sha256": str(row["sha256"]),
+            "git_blob_sha1": str(row["git_blob_sha1"]),
             "source": "historical_base",
         }
         for row in base["files"]
     }
-
-    def apply_extension(ext: dict, label: str) -> None:
-        for row in ext["replacements"]:
-            path = row["path"]
-            if path not in expected:
-                raise RuntimeError(f"NATIVE_SOURCE_UNKNOWN_REPLACEMENT:{label}:{path}")
-            expected[path] = {
-                "size_bytes": int(row["size_bytes"]),
-                "git_blob_sha1": row["git_blob_sha1"],
-                "source": f"{label}_replacement",
-            }
-        for row in ext["additions"]:
-            path = row["path"]
-            if path in expected:
-                raise RuntimeError(f"NATIVE_SOURCE_DUPLICATE_ADDITION:{label}:{path}")
-            expected[path] = {
-                "size_bytes": int(row["size_bytes"]),
-                "git_blob_sha1": row["git_blob_sha1"],
-                "source": f"{label}_addition",
-            }
-
-    apply_extension(ext1, "extension_v1")
-    apply_extension(ext2, "extension_v2")
-    apply_extension(ext3, "extension_v3")
-    apply_extension(ext4, "extension_v4")
-    apply_extension(ext5, "extension_v5")
-    apply_extension(ext6, "extension_v6")
-    apply_extension(ext7, "extension_v7")
-    apply_extension(ext8, "extension_v8")
-    apply_extension(ext9, "extension_v9")
-    apply_extension(ext10, "extension_v10")
-    apply_extension(ext11, "extension_v11")
-    apply_extension(ext12, "extension_v12")
-    apply_extension(ext13, "extension_v13")
-    apply_extension(ext14, "extension_v14")
-    apply_extension(ext15, "extension_v15")
-    apply_extension(ext16, "extension_v16")
-    apply_extension(ext17, "extension_v17")
-    apply_extension(ext18, "extension_v18")
-    apply_extension(ext19, "extension_v19")
-    apply_extension(ext20, "extension_v20")
-    apply_extension(ext21, "extension_v21")
+    for version, ext in enumerate(extensions, start=1):
+        _apply_extension(expected, ext, f"extension_v{version}")
 
     tracked = {
         row.strip()
         for row in subprocess.check_output(
-            ["git", "ls-files", "runtime/realsas_cpp"],
-            text=True,
+            ["git", "ls-files", "runtime/realsas_cpp"], text=True
         ).splitlines()
         if row.strip()
     }
     if tracked != set(expected):
-        missing_from_seal = sorted(tracked - set(expected))
-        stale_in_seal = sorted(set(expected) - tracked)
         raise RuntimeError(
             "NATIVE_SOURCE_SUBTREE_SET_DRIFT:"
             + json.dumps(
                 {
-                    "unsealed_tracked_paths": missing_from_seal,
-                    "sealed_paths_missing_from_repo": stale_in_seal,
+                    "unsealed_tracked_paths": sorted(tracked - set(expected)),
+                    "sealed_paths_missing_from_repo": sorted(set(expected) - tracked),
                 },
                 sort_keys=True,
             )
         )
-    closure = dict(ext20.get("closure") or {})
+
+    # The latest extension is the only closure declaration that can describe the
+    # current reconstructed subtree.  Using an older closure here would silently
+    # make an append-only addition unverifiable.
+    closure = dict(extensions[-1].get("closure") or {})
     if int(closure.get("runtime_realsas_cpp_blob_count", -1)) != len(tracked):
         raise RuntimeError("NATIVE_SOURCE_LATEST_CLOSURE_COUNT_DRIFT")
     if int(closure.get("resulting_sealed_blob_count", -1)) != len(expected):
@@ -435,81 +172,48 @@ def verify() -> dict:
 
     verified = []
     for path_text, identity in sorted(expected.items()):
-        path = Path(path_text)
-        payload = path.read_bytes()
+        payload = Path(path_text).read_bytes()
         if len(payload) != identity["size_bytes"]:
             raise RuntimeError(
-                f"NATIVE_SOURCE_SIZE_DRIFT:{path}:{len(payload)}:{identity['size_bytes']}"
+                f"NATIVE_SOURCE_SIZE_DRIFT:{path_text}:{len(payload)}:{identity['size_bytes']}"
             )
         actual_blob = _blob_sha1(payload)
         if actual_blob != identity["git_blob_sha1"]:
             raise RuntimeError(
-                f"NATIVE_SOURCE_BLOB_DRIFT:{path}:{actual_blob}:{identity['git_blob_sha1']}"
+                f"NATIVE_SOURCE_BLOB_DRIFT:{path_text}:{actual_blob}:{identity['git_blob_sha1']}"
             )
         if identity["source"] == "historical_base":
             actual_sha = hashlib.sha256(payload).hexdigest()
             if actual_sha != identity["sha256"]:
                 raise RuntimeError(
-                    f"NATIVE_SOURCE_SHA256_DRIFT:{path}:{actual_sha}:{identity['sha256']}"
+                    f"NATIVE_SOURCE_SHA256_DRIFT:{path_text}:{actual_sha}:{identity['sha256']}"
                 )
         verified.append(path_text)
 
-    return {
+    result = {
         "status": "PASS__NATIVE_RUNTIME_SOURCE_SEAL_CHAIN",
         "file_count": len(verified),
         "base_file_count": len(base["files"]),
-        "extension_v1_change_count": len(ext1["replacements"]) + len(ext1["additions"]),
-        "extension_v2_change_count": len(ext2["replacements"]) + len(ext2["additions"]),
-        "extension_v3_change_count": len(ext3["replacements"]) + len(ext3["additions"]),
-        "extension_v4_change_count": len(ext4["replacements"]) + len(ext4["additions"]),
-        "extension_v5_change_count": len(ext5["replacements"]) + len(ext5["additions"]),
-        "extension_v6_change_count": len(ext6["replacements"]) + len(ext6["additions"]),
-        "extension_v7_change_count": len(ext7["replacements"]) + len(ext7["additions"]),
-        "extension_v8_change_count": len(ext8["replacements"]) + len(ext8["additions"]),
-        "extension_v9_change_count": len(ext9["replacements"]) + len(ext9["additions"]),
-        "extension_v10_change_count": len(ext10["replacements"]) + len(ext10["additions"]),
-        "extension_v11_change_count": len(ext11["replacements"]) + len(ext11["additions"]),
-        "extension_v12_change_count": len(ext12["replacements"]) + len(ext12["additions"]),
-        "extension_v13_change_count": len(ext13["replacements"]) + len(ext13["additions"]),
-        "extension_v14_change_count": len(ext14["replacements"]) + len(ext14["additions"]),
-        "extension_v15_change_count": len(ext15["replacements"]) + len(ext15["additions"]),
-        "extension_v16_change_count": len(ext16["replacements"]) + len(ext16["additions"]),
-        "extension_v17_change_count": len(ext17["replacements"]) + len(ext17["additions"]),
-        "extension_v18_change_count": len(ext18["replacements"]) + len(ext18["additions"]),
-        "extension_v19_change_count": len(ext19["replacements"]) + len(ext19["additions"]),
-        "extension_v20_change_count": len(ext20["replacements"]) + len(ext20["additions"]),
-        "extension_v21_change_count": len(ext21["replacements"]) + len(ext21["additions"]),
         "subtree_blob_count": len(tracked),
         "verified_paths": verified,
     }
+    for version, ext in enumerate(extensions, start=1):
+        result[f"extension_v{version}_change_count"] = len(ext.get("replacements", [])) + len(
+            ext.get("additions", [])
+        )
+    return result
 
 
 if __name__ == "__main__":
     result = verify()
+    extension_text = " ".join(
+        f"ext{version}={result[f'extension_v{version}_change_count']}"
+        for version in range(1, len(EXTENSION_PATHS) + 1)
+    )
     print(
         "NATIVE_SOURCE_SEAL_PASS "
         f"files={result['file_count']} "
         f"base={result['base_file_count']} "
-        f"ext1={result['extension_v1_change_count']} "
-        f"ext2={result['extension_v2_change_count']} "
-        f"ext3={result['extension_v3_change_count']} "
-        f"ext4={result['extension_v4_change_count']} "
-        f"ext5={result['extension_v5_change_count']} "
-        f"ext6={result['extension_v6_change_count']} "
-        f"ext7={result['extension_v7_change_count']} "
-        f"ext8={result['extension_v8_change_count']} "
-        f"ext9={result['extension_v9_change_count']} "
-        f"ext10={result['extension_v10_change_count']} "
-        f"ext11={result['extension_v11_change_count']} "
-        f"ext12={result['extension_v12_change_count']} "
-        f"ext13={result['extension_v13_change_count']} "
-        f"ext14={result['extension_v14_change_count']} "
-        f"ext15={result['extension_v15_change_count']} "
-        f"ext16={result['extension_v16_change_count']} "
-        f"ext17={result['extension_v17_change_count']} "
-        f"ext18={result['extension_v18_change_count']} "
-        f"ext19={result['extension_v19_change_count']} "
-        f"ext20={result['extension_v20_change_count']} "
-        f"ext21={result['extension_v21_change_count']} "
+        f"{extension_text} "
         f"subtree={result['subtree_blob_count']}"
     )

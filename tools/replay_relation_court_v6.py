@@ -1,11 +1,13 @@
-"""V5 debug court plus two causal presentation diagnostics.
+"""V5 debug court plus causal presentation diagnostics.
 
-1. Measure each semantic slot in isolation at RUN/V6 frame0 and compare its
-   drawable alpha support with final front-owner visibility.  This distinguishes
-   "the limb is absent" from "the limb exists but composition suppresses it".
-2. Enumerate exact coincident source-cut domain pairs before mechanical-support
-   qualification and compare them with the qualified Stage37 contact graph.
-   This exposes source seams that contact qualification filtered out.
+The court keeps the sealed V6 mechanics untouched and makes three presentation
+questions observable:
+
+1. Does each semantic slot have drawable support before composition?
+2. Which exact source-chart cuts are being rejected by Stage37 qualification,
+   and what canonical/skin evidence did those cuts actually carry?
+3. Are body motion slots absent only in the selected view or absent from the
+   multi-view visual evidence entirely?
 
 Research-only; no product authority and no M/G/W mutation.
 """
@@ -42,13 +44,36 @@ def _boundary_vertices(faces: np.ndarray, domains: np.ndarray) -> dict[int, np.n
     return out
 
 
-def _exact_source_cut_table(*, rest, faces, domains, qualified_pairs, qualified_codes):
+def _domain_support(domains, anchor_vertex, anchor_mechanical_vertices):
+    domains = np.asarray(domains, dtype=np.int32)
+    anchor_vertex = np.asarray(anchor_vertex, dtype=np.int64)
+    ancestry = np.asarray(anchor_mechanical_vertices, dtype=np.int64)
+    out = {int(domain): set() for domain in np.unique(domains)}
+    for vertex, tri in zip(anchor_vertex.tolist(), ancestry.tolist()):
+        out[int(domains[int(vertex)])].update(map(int, tri))
+    return out
+
+
+def _exact_source_cut_table(
+    *,
+    rest,
+    faces,
+    domains,
+    blend,
+    anchor_vertex,
+    anchor_mechanical_vertices,
+    qualified_pairs,
+    qualified_codes,
+):
     rest = np.asarray(rest, dtype=np.float64)
     faces = np.asarray(faces, dtype=np.int64)
     domains = np.asarray(domains, dtype=np.int32)
+    blend = np.asarray(blend, dtype=np.float64)
     qpairs = np.asarray(qualified_pairs, dtype=np.int64).reshape(-1, 2)
     qcodes = np.asarray(qualified_codes, dtype=np.int8)
     boundary = _boundary_vertices(faces, domains)
+    support = _domain_support(domains, anchor_vertex, anchor_mechanical_vertices)
+    dominant = np.argmax(blend, axis=1).astype(np.int32)
 
     qualified_domain_codes: dict[tuple[int, int], set[int]] = {}
     for (a, b), code in zip(qpairs.tolist(), qcodes.tolist()):
@@ -76,13 +101,29 @@ def _exact_source_cut_table(*, rest, faces, domains, qualified_pairs, qualified_
                     for i in exact.tolist()
                 }
             )
+            pair_array = np.asarray(pairs, dtype=np.int64)
+            l1 = np.abs(blend[pair_array[:, 0]] - blend[pair_array[:, 1]]).sum(axis=1)
+            same_dominant = dominant[pair_array[:, 0]] == dominant[pair_array[:, 1]]
+            shared_support = support[int(da)].intersection(support[int(db)])
             key = (int(da), int(db))
+            if len(shared_support) >= 2 and np.any(same_dominant & (l1 <= 0.60)):
+                hint = "MATERIAL_CANDIDATE"
+            elif len(shared_support) >= 1:
+                hint = "ARTICULATED_CANDIDATE"
+            else:
+                hint = "SOURCE_CUT_ONLY__NEEDS_MULTIVIEW_OR_ABSTAIN"
             rows.append(
                 {
                     "domain_a": int(da),
                     "domain_b": int(db),
                     "exact_source_cut_vertex_pair_count": int(len(pairs)),
                     "sample_vertex_pairs": [list(map(int, p)) for p in pairs[:8]],
+                    "same_dominant_joint_pair_count": int(np.count_nonzero(same_dominant)),
+                    "different_dominant_joint_pair_count": int(len(pairs) - np.count_nonzero(same_dominant)),
+                    "minimum_skin_l1": float(np.min(l1)),
+                    "maximum_skin_l1": float(np.max(l1)),
+                    "shared_canonical_support_vertex_count": int(len(shared_support)),
+                    "evidence_hint": hint,
                     "qualified": key in qualified_domain_codes,
                     "qualified_relation_codes": sorted(qualified_domain_codes.get(key, set())),
                 }
@@ -136,8 +177,6 @@ def _isolated_slot_metrics(*, projection, arrays, clip, view, frame_index, ref):
             }
         )
 
-    # Pairwise drawable overlap is independent of final ordering and identifies
-    # exactly which slots compete for pixels in this frame.
     overlap_rows = []
     slot_ids = sorted(isolated_masks)
     for ai, a in enumerate(slot_ids):
@@ -155,6 +194,25 @@ def _isolated_slot_metrics(*, projection, arrays, clip, view, frame_index, ref):
         overlap_rows,
         key=lambda row: (-row["drawable_overlap_pixel_count"], row["semantic_slot_a"], row["semantic_slot_b"]),
     )
+
+
+def _semantic_face_count_by_view(projection, arrays):
+    rows = []
+    for view in projection.views:
+        vi = int(view.view_index)
+        slots = np.asarray(arrays[f"view_{vi}_semantic_face_slot"], dtype=np.int32)
+        values, counts = np.unique(slots, return_counts=True)
+        rows.append(
+            {
+                "view_id": view.view_id,
+                "view_index": vi,
+                "slot_face_counts": {
+                    str(int(slot)): int(count)
+                    for slot, count in zip(values.tolist(), counts.tolist())
+                },
+            }
+        )
+    return rows
 
 
 def _render_with_causal_debug(*, projection, arrays, package: Path, player: Path, out: Path):
@@ -180,20 +238,32 @@ def _render_with_causal_debug(*, projection, arrays, package: Path, player: Path
         rest=arrays[f"view_{vi}_rest_positions"],
         faces=arrays[f"view_{vi}_faces"],
         domains=binding["domain_id"],
+        blend=arrays[f"view_{vi}_motion_blend_coefficients"],
+        anchor_vertex=binding["anchor_vertex"],
+        anchor_mechanical_vertices=binding["anchor_mechanical_vertices"],
         qualified_pairs=arrays[f"view_{vi}_qualified_contact_pairs"],
         qualified_codes=arrays[f"view_{vi}_qualified_contact_relation_codes"],
     )
     debug = {
-        "schema": "RealSaS.PresentationCausalDebugWitness.v1",
+        "schema": "RealSaS.PresentationCausalDebugWitness.v2",
         "clip_id": clip.clip_id,
         "view_id": view.view_id,
         "frame_index": 0,
         "semantic_slot_isolated_support": slot_rows,
         "semantic_slot_drawable_overlap": overlap_rows,
+        "semantic_face_count_by_view": _semantic_face_count_by_view(projection, arrays),
         "exact_source_cut_domain_pairs": exact_rows,
         "unqualified_exact_source_cut_domain_pair_count": int(
             sum(not row["qualified"] for row in exact_rows)
         ),
+        "unqualified_exact_source_cut_evidence_hint_counts": {
+            hint: int(sum((not row["qualified"]) and row["evidence_hint"] == hint for row in exact_rows))
+            for hint in (
+                "MATERIAL_CANDIDATE",
+                "ARTICULATED_CANDIDATE",
+                "SOURCE_CUT_ONLY__NEEDS_MULTIVIEW_OR_ABSTAIN",
+            )
+        },
     }
     path = out / "Knight_RUN_V6_CAUSAL_DEBUG.json"
     path.write_text(json.dumps(debug, sort_keys=True, indent=2) + "\n")
@@ -202,6 +272,9 @@ def _render_with_causal_debug(*, projection, arrays, package: Path, player: Path
         "causal_debug_json": str(path),
         "unqualified_exact_source_cut_domain_pair_count": debug[
             "unqualified_exact_source_cut_domain_pair_count"
+        ],
+        "unqualified_exact_source_cut_evidence_hint_counts": debug[
+            "unqualified_exact_source_cut_evidence_hint_counts"
         ],
     }
 

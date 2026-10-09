@@ -2,12 +2,11 @@
 
 The canonical skin field remains the motion authority. This operator only projects
 body chart motion that violates the already-sealed Stage45 geometry limits onto
-proper unit-scale SE(2) transforms. Qualified contact-linked body domains are
-repaired as one group so safety repair cannot open a certified seam. Target
+one proper unit-scale SE(2) transform per connected source-art domain. Target
 attachments are excluded because their slot-local rigid motion has separate
 ownership. Repair selection is the union over the complete sealed clip/frame
-witness and is then applied to every frame of each selected domain/group,
-avoiding frame-local mode switching.
+witness and is then applied to every frame of each selected domain, avoiding
+frame-local mode switching.
 """
 from __future__ import annotations
 
@@ -21,9 +20,8 @@ POLICY = {
     "operator_id": OPERATOR_ID,
     "repair_scope": "BODY_CONNECTED_SOURCE_DOMAIN_ONLY",
     "selection_scope": "UNION_OVER_COMPLETE_SEALED_CLIP_FRAME_WITNESS",
-    "application_scope": "ALL_FRAMES_OF_SELECTED_DOMAIN_OR_QUALIFIED_CONTACT_GROUP",
+    "application_scope": "ALL_FRAMES_OF_SELECTED_DOMAIN",
     "fit": "LEAST_SQUARES_PROPER_RIGID_SE2__UNIT_SCALE",
-    "qualified_contact_grouping": "UNION_FIND_OVER_CERTIFIED_VERTEX_PAIRS",
     "minimum_signed_area_ratio": 0.05,
     "maximum_jacobian_condition": 16.0,
     "catastrophic_edge_ratio": 4.0,
@@ -31,6 +29,7 @@ POLICY = {
     "mechanical_state_mutation_authorized": False,
     "runtime_inference_authorized": False,
 }
+
 
 
 def _as_inputs(rest_positions, visual_faces, domain_id, vertex_attachment_owner, frames_xy):
@@ -169,79 +168,12 @@ def apply_repair_domains(*, rest_positions, frame_xy, domain_id,
     return result
 
 
-def _repair_groups(domains, owners, selected, contact_pairs):
-    unique = sorted(map(int, np.unique(domains).tolist()))
-    parent = {d: d for d in unique}
-
-    def find(x):
-        while parent[x] != x:
-            parent[x] = parent[parent[x]]
-            x = parent[x]
-        return x
-
-    def union(a, b):
-        ra, rb = find(a), find(b)
-        if ra != rb:
-            if ra > rb:
-                ra, rb = rb, ra
-            parent[rb] = ra
-
-    pairs = np.asarray(contact_pairs if contact_pairs is not None else [], dtype=np.int64).reshape(-1, 2)
-    if len(pairs):
-        if np.any(pairs < 0) or np.any(pairs >= len(domains)):
-            raise QualificationError("VISUAL_MOTION_SAFETY_CONTACT_PAIR_OUT_OF_RANGE")
-        for a, b in pairs.tolist():
-            da, db = int(domains[a]), int(domains[b])
-            if da == db:
-                continue
-            if int(owners[a]) != 0 or int(owners[b]) != 0:
-                # Target attachments have independent slot ownership; their
-                # contact semantics need a separate qualified constraint.
-                continue
-            union(da, db)
-    groups = {}
-    for d in unique:
-        if np.any(owners[domains == d] != 0):
-            continue
-        groups.setdefault(find(d), []).append(d)
-    selected_set = set(map(int, np.asarray(selected, dtype=np.int32).tolist()))
-    active = [tuple(sorted(group)) for group in groups.values()
-              if selected_set.intersection(group)]
-    active.sort(key=lambda x: (x[0], len(x), x))
-    expanded = np.asarray(sorted({d for group in active for d in group}), dtype=np.int32)
-    return active, expanded
-
-
-def _apply_repair_groups(*, rest_positions, frame_xy, domain_id,
-                         vertex_attachment_owner, groups):
-    rest = np.asarray(rest_positions, dtype=np.float64)
-    frame = np.asarray(frame_xy, dtype=np.float64)
-    domains = np.asarray(domain_id, dtype=np.int32)
-    owners = np.asarray(vertex_attachment_owner, dtype=np.int32)
-    if (rest.shape != frame.shape or domains.shape != (len(rest),)
-            or owners.shape != (len(rest),) or not np.isfinite(frame).all()):
-        raise QualificationError("VISUAL_MOTION_SAFETY_GROUP_APPLY_INVALID")
-    result = frame.copy()
-    for group in groups:
-        mask = np.isin(domains, np.asarray(group, dtype=np.int32))
-        vertices = np.flatnonzero(mask)
-        if not len(vertices) or np.any(owners[vertices] != 0):
-            raise QualificationError("VISUAL_MOTION_SAFETY_CONTACT_GROUP_SCOPE_INVALID")
-        rotation, translation = _fit_proper_rigid(rest[vertices], frame[vertices])
-        result[vertices] = rest[vertices] @ rotation.T + translation
-    return result
-
-
 def compile_motion_repair(*, rest_positions, visual_faces, domain_id,
-                          vertex_attachment_owner, clip_fields,
-                          qualified_contact_pairs=None):
+                          vertex_attachment_owner, clip_fields):
     """Compile one witness-wide repair mask and apply it to all supplied clips.
 
     clip_fields maps a stable clip key to an array [frame, vertex, xyz]. Depth is
     copied exactly; only body XY for selected domains is projected to SE(2).
-    When qualified_contact_pairs are supplied, contact-linked body domains form
-    one repair group; if any member requires repair the complete group is moved
-    by one proper rigid transform in every frame.
     """
     if not clip_fields:
         raise QualificationError("VISUAL_MOTION_SAFETY_CLIPS_REQUIRED")
@@ -262,33 +194,23 @@ def compile_motion_repair(*, rest_positions, visual_faces, domain_id,
         rest_positions=rest_positions, visual_faces=visual_faces, domain_id=domain_id,
         vertex_attachment_owner=vertex_attachment_owner,
         frames_xy=np.concatenate(xy_rows, axis=0))
-    domains = np.asarray(domain_id, dtype=np.int32)
-    owners = np.asarray(vertex_attachment_owner, dtype=np.int32)
-    groups, expanded = _repair_groups(domains, owners, repair, qualified_contact_pairs)
-    if len(expanded) != len(repair) or not np.array_equal(expanded, np.sort(repair)):
-        selected_set = set(map(int, repair.tolist()))
-        for row in selection:
-            if int(row["domain_id"]) in set(map(int, expanded.tolist())) - selected_set:
-                row["selected_by_qualified_contact_group"] = True
-    repair = expanded
     repaired = {}
     max_projection_residual = 0.0
     for key in keys:
         value = fields[key].copy()
         for fi in range(len(value)):
             baseline = value[fi, :, :2].copy()
-            value[fi, :, :2] = _apply_repair_groups(
+            value[fi, :, :2] = apply_repair_domains(
                 rest_positions=rest_positions, frame_xy=baseline, domain_id=domain_id,
-                vertex_attachment_owner=vertex_attachment_owner, groups=groups)
+                vertex_attachment_owner=vertex_attachment_owner,
+                repair_domain_ids=repair)
             if len(repair):
-                mask = np.isin(domains, repair)
+                mask = np.isin(np.asarray(domain_id, dtype=np.int32), repair)
                 max_projection_residual = max(max_projection_residual,
                     float(np.max(np.linalg.norm(value[fi, mask, :2] - baseline[mask], axis=1), initial=0.0)))
         repaired[key] = value
     return {
         "repair_domain_ids": repair,
-        "repair_domain_groups": [list(map(int, group)) for group in groups],
-        "qualified_contact_pair_count": int(0 if qualified_contact_pairs is None else len(np.asarray(qualified_contact_pairs).reshape(-1, 2))),
         "selection_diagnostics": selection,
         "repaired_fields": repaired,
         "maximum_baseline_projection_residual_px": max_projection_residual,

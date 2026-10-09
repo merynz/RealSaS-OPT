@@ -7,6 +7,18 @@
 
 ## Presentation audit update — 2026-10-09
 
+The [texture seal and 2.5D bridge review](docs/presentation/TEXTURE_SEAL_AND_25D_BRIDGE_REVIEW_20261009.md)
+records the decision to reuse the existing CAA compile seal, complete appearance
+asset and qualification chain rather than add a duplicate texture stage.
+The current reduced Knight presentation consumer uses exact original source
+PNGs; its appearance binding fields are source-input identities, not proof that
+canonical hidden-surface completion was consumed. Source-owned totality is
+scoped to its visual domain. Before claiming appearance closure, bind the
+consumer to the exact asset/support/qualification and prove dynamic exposure.
+The supplied 2025 2.5D paper was reviewed for the presentation boundary and prop
+identity implications. This is a source review/implementation decision only:
+no production operator change, new Attempt, asset qualification or fresh render.
+
 The subsequent hosted run `37900739694` completed downstream Stage37/42/43/44/45
 on immutable code `b936454362a7f5dcdba53920c6aa88a936bf508b`, Attempt
 `707e3b9b-91c6-4247-97dc-02b52ba0164a`, EngineRelease

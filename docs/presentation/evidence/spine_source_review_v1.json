@@ -1,0 +1,356 @@
+{
+  "schema": "RealSaS.ExternalRuntimeSourceAudit.v1",
+  "date": "2026-10-09",
+  "qualification": "SOURCE_AUDIT_AND_LOCAL_DIAGNOSTICS_ONLY",
+  "product_authority": false,
+  "scope": "Public Spine core pose/binding/render paths and selected supporting subsystems; not every repository file or private Editor implementation.",
+  "review_levels": {
+    "CORE_IMPLEMENTATION_REVIEW": "Core implementation read and traced; not a claim about all integrations or every dependent header.",
+    "FOCUSED_FUNCTIONAL_TRACE": "Relevant functions/branches read; the full file or every solver equation was not reviewed.",
+    "SELECTED_DATA_TRACE": "Selected authoring data and hierarchy/slot/attachment relationships inspected.",
+    "FOCUSED_CROSS_VERSION_TRACE": "Hierarchy, weighted vertex or draw path compared against 4.2 implementation."
+  },
+  "spine": {
+    "repository": "EsotericSoftware/spine-runtimes",
+    "primary_snapshot": "1ad4e94bc3f16f4908a87a97d31e0de657f1788a",
+    "primary_files": [
+      {
+        "path": "spine-cpp/src/spine/VertexAttachment.cpp",
+        "git_blob_sha": "af9526b160de1b8bced8edc800ae970036161fdc",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/VertexAttachment.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/MeshAttachment.cpp",
+        "git_blob_sha": "f4a107cf6a43abc1ca6f51119531b08ed1841c1f",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/MeshAttachment.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/RegionAttachment.cpp",
+        "git_blob_sha": "0492c670f451ad3af6849e425c972214375eb346",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/RegionAttachment.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/SkeletonRenderer.cpp",
+        "git_blob_sha": "5e017c03835be6c513e39a37df1d27dbf02257ce",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/SkeletonRenderer.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/SkeletonClipping.cpp",
+        "git_blob_sha": "e9b6893d7d1c8eed551ada988206622ae13b42d7",
+        "review_level": "FOCUSED_FUNCTIONAL_TRACE",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/SkeletonClipping.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/Skeleton.cpp",
+        "git_blob_sha": "0f7a4bab6768986c5faabda4022095b0a93dec79",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/Skeleton.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/SkeletonData.cpp",
+        "git_blob_sha": "1c42b90e143ef966aad0af81f41a2d44cb9901ec",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/SkeletonData.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/Bone.cpp",
+        "git_blob_sha": "044c1b7b5bec04715e31593b97e58c327ebfd95e",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/Bone.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/BoneData.cpp",
+        "git_blob_sha": "84169d53a644a5e8caff4ebf9bdf81eb4c2e887b",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/BoneData.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/BonePose.cpp",
+        "git_blob_sha": "8e8e133fda0b74d2bfd125e88a53efc751ae7114",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/BonePose.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/BoneLocal.cpp",
+        "git_blob_sha": "5dc687b5dc89c9554e5f83b26fd7c1f1b7f37792",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/BoneLocal.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/Slot.cpp",
+        "git_blob_sha": "7d954ded9be1ff16e037f7f0dbf5ec283801b3a6",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/Slot.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/SlotData.cpp",
+        "git_blob_sha": "9d261f8ad4af656abfdb61800a2d4fdd6148edf4",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/SlotData.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/SlotPose.cpp",
+        "git_blob_sha": "c416df1782c8eaa4f3ae6d3bf38c284e5af4edae",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/SlotPose.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/Skin.cpp",
+        "git_blob_sha": "42ec9b3a4706aad3f8a7e1a34eda711147c29eb2",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/Skin.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/LinkedMesh.cpp",
+        "git_blob_sha": "68fdd4f5697b95bb08e5f0239932d2da908a0ab5",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/LinkedMesh.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/DrawOrder.cpp",
+        "git_blob_sha": "ef248cc45d27f79cf88bb768578a2b0aac8a18e6",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/DrawOrder.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/DrawOrderTimeline.cpp",
+        "git_blob_sha": "1282c15719f63cac8df70cf232de14ae32a32a7f",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/DrawOrderTimeline.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/DrawOrderFolderTimeline.cpp",
+        "git_blob_sha": "5c9e1c3c816f4c028ec2458791a3479607851730",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/DrawOrderFolderTimeline.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/DeformTimeline.cpp",
+        "git_blob_sha": "07e497bfbabe567d39e69cf7135081fd7bb2d6fb",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/DeformTimeline.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/AttachmentTimeline.cpp",
+        "git_blob_sha": "579b38d9d3cf5e5b3c6a0a381369744d8ac64c46",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/AttachmentTimeline.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/Sequence.cpp",
+        "git_blob_sha": "f42825870796ccfc9ed19b41f710040ca62aa1bf",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/Sequence.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/SequenceTimeline.cpp",
+        "git_blob_sha": "e12ef7d8d74e81ddf1f56d52dfa7b6aec8037200",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/SequenceTimeline.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/Atlas.cpp",
+        "git_blob_sha": "7eb5b5e71a5de80a195e43d55c85ed1611782e73",
+        "review_level": "FOCUSED_FUNCTIONAL_TRACE",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/Atlas.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/AtlasAttachmentLoader.cpp",
+        "git_blob_sha": "33a7cb08f18b0b1865f29e28d2ad8dbbca5c0b67",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/AtlasAttachmentLoader.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/TextureRegion.cpp",
+        "git_blob_sha": "373a4301a3ba0b75270c3180145c3c760e913380",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/TextureRegion.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/Animation.cpp",
+        "git_blob_sha": "2bfa2a06bec659510bca28446b21ac013b4a17ba",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/Animation.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/AnimationState.cpp",
+        "git_blob_sha": "05758996c5e7a597953c50888cd8c3b973e246be",
+        "review_level": "FOCUSED_FUNCTIONAL_TRACE",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/AnimationState.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/AnimationStateData.cpp",
+        "git_blob_sha": "6fe13a271f150fa20d68d215dee4048174d90992",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/AnimationStateData.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/SkeletonJson.cpp",
+        "git_blob_sha": "7244d993d6ba0761a21df36ab6790f68a6c0c31c",
+        "review_level": "FOCUSED_FUNCTIONAL_TRACE",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/SkeletonJson.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/SkeletonBinary.cpp",
+        "git_blob_sha": "3ac58945be876b920b6f3526466d8ce924998050",
+        "review_level": "FOCUSED_FUNCTIONAL_TRACE",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/SkeletonBinary.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/IkConstraint.cpp",
+        "git_blob_sha": "4a5af586812ef2d4c13cb4062197a5548150321a",
+        "review_level": "FOCUSED_FUNCTIONAL_TRACE",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/IkConstraint.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/TransformConstraint.cpp",
+        "git_blob_sha": "d6da79df8717f952bb26ca608398e2e8097f6014",
+        "review_level": "FOCUSED_FUNCTIONAL_TRACE",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/TransformConstraint.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/PathConstraint.cpp",
+        "git_blob_sha": "349c6b20825d3c2aa52d6ce47ac11ae0887d7655",
+        "review_level": "FOCUSED_FUNCTIONAL_TRACE",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/PathConstraint.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/PhysicsConstraint.cpp",
+        "git_blob_sha": "7353f36c9a3164ea3bbd412d33535cf90c52c83a",
+        "review_level": "FOCUSED_FUNCTIONAL_TRACE",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/PhysicsConstraint.cpp"
+      },
+      {
+        "path": "spine-cpp/src/spine/Triangulator.cpp",
+        "git_blob_sha": "3a38c4425913508a21b0c59f613826c92bc803b2",
+        "review_level": "FOCUSED_FUNCTIONAL_TRACE",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-cpp/src/spine/Triangulator.cpp"
+      },
+      {
+        "path": "spine-ts/spine-core/src/SkeletonRendererCore.ts",
+        "git_blob_sha": "cf79ab15e98d6aeb39d5945e3047e11825fd865e",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-ts/spine-core/src/SkeletonRendererCore.ts"
+      },
+      {
+        "path": "spine-ts/spine-webgl/src/SkeletonRenderer.ts",
+        "git_blob_sha": "238e33f967b88688acd01e44da8bc54f5b395fa7",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-ts/spine-webgl/src/SkeletonRenderer.ts"
+      },
+      {
+        "path": "spine-ts/spine-webgl/src/PolygonBatcher.ts",
+        "git_blob_sha": "17a3f19982a90070422f809ea08a91a1d2264478",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-ts/spine-webgl/src/PolygonBatcher.ts"
+      },
+      {
+        "path": "spine-ts/spine-webgl/src/GLTexture.ts",
+        "git_blob_sha": "a8a764f55f762fe4184f94f170ec9eed29528c5c",
+        "review_level": "CORE_IMPLEMENTATION_REVIEW",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-ts/spine-webgl/src/GLTexture.ts"
+      },
+      {
+        "path": "spine-ts/spine-webgl/src/Shader.ts",
+        "git_blob_sha": "d0fcb45f193736c46590f7db1e44306521ceaac2",
+        "review_level": "FOCUSED_FUNCTIONAL_TRACE",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-ts/spine-webgl/src/Shader.ts"
+      },
+      {
+        "path": "spine-ts/spine-webgl/src/Mesh.ts",
+        "git_blob_sha": "2fc7a7a34dbec4bb171eed30c2e8c04113fcd8a2",
+        "review_level": "FOCUSED_FUNCTIONAL_TRACE",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/spine-ts/spine-webgl/src/Mesh.ts"
+      },
+      {
+        "path": "examples/spineboy/export/spineboy-pro.json",
+        "git_blob_sha": "4a58fecd32a97bad83a9169056c44db3f17dba4e",
+        "review_level": "SELECTED_DATA_TRACE",
+        "source_url": "https://github.com/EsotericSoftware/spine-runtimes/blob/1ad4e94bc3f16f4908a87a97d31e0de657f1788a/examples/spineboy/export/spineboy-pro.json"
+      }
+    ],
+    "cross_version_snapshot": "e7dc1435fa4a0083ab431f1b28e083c14a1f5c68",
+    "cross_version_files": [
+      {
+        "path": "spine-cpp/spine-cpp/src/spine/Bone.cpp",
+        "git_blob_sha": "9a78078d2fafd5235dbf1227adda40e464f814ed",
+        "review_level": "FOCUSED_CROSS_VERSION_TRACE"
+      },
+      {
+        "path": "spine-cpp/spine-cpp/src/spine/VertexAttachment.cpp",
+        "git_blob_sha": "a84f9a7f4fb2637515e84b0396238b04f8f0e228",
+        "review_level": "FOCUSED_CROSS_VERSION_TRACE"
+      },
+      {
+        "path": "spine-cpp/spine-cpp/src/spine/SkeletonRenderer.cpp",
+        "git_blob_sha": "3617753a731365e60689511daf2a00f63ecb37d9",
+        "review_level": "FOCUSED_CROSS_VERSION_TRACE"
+      }
+    ]
+  },
+  "charactergen": {
+    "repository": "zjp-shadow/CharacterGen",
+    "snapshot": "f329a835dbd5003060a5653eafd83d4d8868b043",
+    "paths": [
+      "render_script/three-js/src/main.js",
+      "render_script/three-js/src/loadMixamoAnimation.js",
+      "render_script/blender/render.py",
+      "3D_Stage/lrm/models/renderers/triplane_dmtet.py",
+      "3D_Stage/lrm/utils/rasterize.py",
+      "3D_Stage/lrm/models/exporters/mesh_exporter.py",
+      "3D_Stage/refine.py"
+    ],
+    "review": "Rendering/reconstruction implementations and focused UV export/refinement trace; no weights downloaded or inference run."
+  },
+  "animateddrawings": {
+    "repository": "facebookresearch/AnimatedDrawings",
+    "snapshot": "b859684857519c7424da51a0b0862fbd1fd258f4",
+    "paths": [
+      "animated_drawings/model/animated_drawing.py",
+      "animated_drawings/model/arap.py",
+      "animated_drawings/model/retargeter.py"
+    ],
+    "review": "Focused shared deformation, pose projection and draw-index paths; not a review of every ARAP equation or complete application."
+  },
+  "papers": [
+    {
+      "url": "https://arxiv.org/html/2502.17866v1",
+      "review": "2.5D pose transfer, deformation, render order and projection-plane method/limitations."
+    },
+    {
+      "url": "https://arxiv.org/html/2402.17214v2",
+      "review": "CharacterGen method and distinction between generated 3D assets and dataset/retargeting scripts."
+    }
+  ],
+  "spine_documentation": [
+    "https://esotericsoftware.com/spine-basic-concepts",
+    "https://esotericsoftware.com/spine-runtime-architecture",
+    "https://esotericsoftware.com/spine-loading-skeleton-data",
+    "https://esotericsoftware.com/spine-runtime-skeletons",
+    "https://esotericsoftware.com/spine-weights",
+    "https://esotericsoftware.com/spine-meshes",
+    "https://esotericsoftware.com/spine-slots",
+    "https://esotericsoftware.com/spine-json-format",
+    "https://esotericsoftware.com/spine-applying-animations",
+    "https://esotericsoftware.com/spine-runtime-skins",
+    "https://esotericsoftware.com/spine-keys",
+    "https://esotericsoftware.com/spine-clipping",
+    "https://esotericsoftware.com/spine-bones",
+    "https://esotericsoftware.com/spine-attachments",
+    "https://esotericsoftware.com/blog/Mesh-weight-workflows",
+    "https://esotericsoftware.com/blog/Mesh-binding-tutorial",
+    "https://esotericsoftware.com/spine-ik-constraints"
+  ],
+  "not_performed": [
+    "Private Spine Editor code review",
+    "Every engine wrapper/platform integration/example",
+    "New Knight native render or scientific Attempt",
+    "New production deformation/draw-order operator",
+    "Mechanics/rig/skin/model mutation",
+    "ProductRevision qualification"
+  ]
+}

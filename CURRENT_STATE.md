@@ -5,6 +5,30 @@
 **Architecture:** RealSaS V2, 46-stage Compiler compatibility DAG; versioned release DAGs
 **Implementation readiness:** `canonical/V2_IMPLEMENTATION_READINESS.json`
 
+## Presentation audit update — 2026-10-09
+
+The subsequent hosted run `37900739694` completed downstream Stage37/42/43/44/45
+on immutable code `b936454362a7f5dcdba53920c6aa88a936bf508b`, Attempt
+`707e3b9b-91c6-4247-97dc-02b52ba0164a`, EngineRelease
+`a94141fa-87b8-4c82-9e18-624e71b2e628`. Stage45 is `PASS_DEMO_ONLY` across
+984 frame-views, including zero native/reference mismatch frame-views. This
+supersedes earlier pending-execution statements below; it does not close visual
+quality or product authority. PR #66 remains open: large visible separations
+must still be resolved before merge/acceptance.
+
+[Spine runtime gap audit](docs/presentation/SPINE_RUNTIME_GAP_AUDIT_20261009.md)
+records pinned public code review, two unqualified Knight frame-view ablations,
+and a reproducible structural counterexample in the current Stage42 2D palette:
+identical rigid 3D motion can separate a shared 2D joint by 23.43 or 32 pixels
+at 256 px resolution while triangle area/condition and canonical 3D palette
+checks remain healthy. The fixture is synthetic, not Knight causal attribution
+or a production repair. Stage45 currently lacks independent semantic
+joint/contact/coverage predicates. Next work is connected presentation pose,
+qualified cross-chart relations and explicit overlap ownership, within the
+downstream-only boundary. No new scientific Attempt was minted by this audit.
+Mechanics, rig, skin, IRIS, AXIS and MIRA remain sealed; optimize after visual
+acceptance.
+
 ## Active platform work
 
 Active experiment: `PLATFORM_EXECUTION_LANES`. State:

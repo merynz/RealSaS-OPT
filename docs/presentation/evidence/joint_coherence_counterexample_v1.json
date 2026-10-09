@@ -1,0 +1,141 @@
+{
+  "schema": "RealSaS.VisualPaletteJointDiagnostic.v1",
+  "qualification": "SYNTHETIC_DIAGNOSTIC_ONLY",
+  "synthetic_input_not_derived_from_knight": true,
+  "sealed_mechanics_modified": false,
+  "production_repair_implemented": false,
+  "stage45_executed_on_this_fixture": false,
+  "runtime_render_executed": false,
+  "resolution": 256,
+  "numpy_version": "2.3.5",
+  "implementation_file_sha256": {
+    "compiler/realsas_compiler_core/visual_motion_blend_v1.py": "a6bf747013e5f14abfd227afb13671237ef038e705d66caa6528086e8fb4f8fb",
+    "compiler/realsas_compiler_core/visual_attachment_motion_v1.py": "6cf3be548977abe1bf745d7c36ecddcd86599395b8b6c6a9d5d8c0dfba8f593e",
+    "compiler/realsas_compiler_core/visual_domain_v2.py": "4e8423003cd1bdbc13354d100665a4f129e10a6f842cb093f5bbf204319e030c",
+    "compiler/realsas_compiler_core/camera_geometry_v2.py": "ce1ffe35c6dbdeb959871b495e284da8428e8af716e032c2a031ddbb0132b72b"
+  },
+  "rows": [
+    {
+      "case": "identity",
+      "axis": "Y",
+      "rotation_degrees": 0.0,
+      "rest_joint_xyz": [
+        1.0,
+        0.0,
+        1.0
+      ],
+      "three_dimensional_shared_joint_residual": 0.0,
+      "canonical_pose_palette_residual": 0.0,
+      "direct_projected_shared_joint_separation_px": 0.0,
+      "parent_visual_joint_xy": [
+        192.0,
+        128.0
+      ],
+      "child_visual_joint_xy": [
+        192.0,
+        128.0
+      ],
+      "visual_shared_joint_separation_px": 0.0,
+      "parent_to_child_gap_x_px": 0.0,
+      "reanchored_diagnostic_shared_joint_separation_px": 0.0,
+      "triangle_metrics": {
+        "area_collapse_count": 0,
+        "condition_failure_count": 0,
+        "minimum_signed_area_ratio": 1.0,
+        "maximum_jacobian_condition": 1.0
+      }
+    },
+    {
+      "case": "in_plane_positive_control",
+      "axis": "Z",
+      "rotation_degrees": 60.0,
+      "rest_joint_xyz": [
+        1.0,
+        0.0,
+        1.0
+      ],
+      "three_dimensional_shared_joint_residual": 0.0,
+      "canonical_pose_palette_residual": 0.0,
+      "direct_projected_shared_joint_separation_px": 0.0,
+      "parent_visual_joint_xy": [
+        160.0,
+        72.5743741577959
+      ],
+      "child_visual_joint_xy": [
+        160.0,
+        72.5743741577959
+      ],
+      "visual_shared_joint_separation_px": 0.0,
+      "parent_to_child_gap_x_px": 0.0,
+      "reanchored_diagnostic_shared_joint_separation_px": 0.0,
+      "triangle_metrics": {
+        "area_collapse_count": 0,
+        "condition_failure_count": 0,
+        "minimum_signed_area_ratio": 0.9999999999999987,
+        "maximum_jacobian_condition": 1.0000000000000013
+      }
+    },
+    {
+      "case": "out_of_plane_flat_rest",
+      "axis": "Y",
+      "rotation_degrees": 60.0,
+      "rest_joint_xyz": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "three_dimensional_shared_joint_residual": 0.0,
+      "canonical_pose_palette_residual": 0.0,
+      "direct_projected_shared_joint_separation_px": 0.0,
+      "parent_visual_joint_xy": [
+        192.0,
+        128.0
+      ],
+      "child_visual_joint_xy": [
+        160.0,
+        128.0
+      ],
+      "visual_shared_joint_separation_px": 32.0,
+      "parent_to_child_gap_x_px": -32.0,
+      "reanchored_diagnostic_shared_joint_separation_px": 0.0,
+      "triangle_metrics": {
+        "area_collapse_count": 0,
+        "condition_failure_count": 0,
+        "minimum_signed_area_ratio": 1.0,
+        "maximum_jacobian_condition": 1.0
+      }
+    },
+    {
+      "case": "out_of_plane_depth_varying_rest",
+      "axis": "Y",
+      "rotation_degrees": 60.0,
+      "rest_joint_xyz": [
+        1.0,
+        0.0,
+        1.0
+      ],
+      "three_dimensional_shared_joint_residual": 0.0,
+      "canonical_pose_palette_residual": 0.0,
+      "direct_projected_shared_joint_separation_px": 0.0,
+      "parent_visual_joint_xy": [
+        192.0,
+        128.0
+      ],
+      "child_visual_joint_xy": [
+        215.42562584220408,
+        128.0
+      ],
+      "visual_shared_joint_separation_px": 23.425625842204084,
+      "parent_to_child_gap_x_px": 23.425625842204084,
+      "reanchored_diagnostic_shared_joint_separation_px": 0.0,
+      "triangle_metrics": {
+        "area_collapse_count": 0,
+        "condition_failure_count": 0,
+        "minimum_signed_area_ratio": 1.0,
+        "maximum_jacobian_condition": 1.0000000000000004
+      }
+    }
+  ],
+  "conclusion": "INDEPENDENT_PIVOT_CAMERA_TWIST_DOES_NOT_PRESERVE_JOINT_COINCIDENCE",
+  "comparison_limit": "CHILD_TRANSLATION_REANCHOR_ONLY__NOT_A_GENERAL_PRESENTATION_MAPPING"
+}

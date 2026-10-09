@@ -15,6 +15,7 @@ on:
       - 'tools/replay_relation_court_v2.py'
       - 'tools/replay_relation_court_v3.py'
       - 'tools/replay_relation_court_v4.py'
+      - 'tools/replay_relation_court_v5.py'
       - '.github/workflows/presentation_relation_replay_v1.yml'
 
 permissions:
@@ -52,9 +53,9 @@ jobs:
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: '37933851760'
-      - name: Replay contact-aware safety and semantic order
+      - name: Replay contact-aware safety and export relation witnesses
         run: |
-          python tools/replay_relation_court_v4.py \
+          python tools/replay_relation_court_v5.py \
             --evidence-root /tmp/prior-evidence \
             --player /tmp/relation-court/player \
             --out /tmp/relation-court/out
@@ -67,5 +68,9 @@ jobs:
             /tmp/relation-court/out/relation_court_receipt.json
             /tmp/relation-court/out/Knight_RUN_V6_V7_RELATION_COURT_768.gif
             /tmp/relation-court/out/projection_v7.json
+            /tmp/relation-court/out/Knight_RUN_V6_SEMANTIC_SLOT_DEBUG_768.gif
+            /tmp/relation-court/out/Knight_RUN_V6_DOMAIN_DEBUG_768.gif
+            /tmp/relation-court/out/Knight_RUN_V6_FRAME0_CONTACT_DEBUG_768.png
+            /tmp/relation-court/out/Knight_RUN_V6_FRAME0_CONTACT_DEBUG.json
           retention-days: 14
           if-no-files-found: warn

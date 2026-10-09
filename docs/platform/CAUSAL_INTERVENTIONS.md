@@ -9,7 +9,8 @@ fixtures, not the durable research authority.
 
 Seal baseline/candidate EngineReleases with their versioned DAGs and transitive
 implementation closures. Complete/admit the required baseline stages first.
-Pin a parent Attempt from the same subject and baseline release.
+Pin a parent Attempt from the same subject and baseline release. It must have
+one unambiguous SubjectInput identity in its Go compile commands.
 
 Add this object to the existing `realsasctl research-start` JSON request:
 
@@ -37,6 +38,15 @@ make an unexpected change pass; investigate it first.
 Go rejects undeclared direct changes and preserved IDs that are missing,
 duplicated, removed or invalidated. It captures the parent's available stage
 artifact IDs in the hashed attempt spec and `CODE_CHANGE_IMPACT_RESOLVED` event.
+The baseline input role/order/artifact IDs are also captured. By default all
+inputs stay identical. For an intended input intervention, declare the exact
+`changed_input_roles` (for example `["manifest:appearance"]`, without the
+`subject:` prefix). Go adds those consumers and their descendants to invalidation
+using the released read-set. Actual added/removed/changed/reordered input roles
+must match the declaration exactly; unrelated source or motion drift is rejected.
+An unsegmented source role conservatively affects every consumer, so it cannot
+be declared while asserting that mechanics are preserved.
+
 Every unchanged candidate stage is frozen, including stages not explicitly
 listed in `preserved_stage_ids`. `preserved_stage_ids` adds an assertion that
 particular boundaries must remain unchanged.
@@ -49,16 +59,19 @@ Engine stage starts, Go verifies that every frozen stage in that closure:
 
 1. has a captured parent artifact;
 2. resolves to qualified REUSE;
-3. reuses that exact artifact ID.
+3. reuses that exact artifact ID;
+4. receives only the declared input-role changes from the pinned baseline.
 
-An independent cache miss, qualification loss, unsegmented input drift, or
+An independent cache miss, qualification loss, undeclared input drift, or
 different artifact fails closed. It must not become an unrelated reinference.
 Guards also reject execution/commit of frozen stages and replacement of their
 bindings, even if an activity request supplies a wider allowed execution list.
 
 `INTERVENTION_REUSE_VERIFIED` is an engineering receipt with exact preserved IDs
 and semantic SHA256s, actual EXECUTE IDs, and unchanged IDs outside the target.
-Outside-target stages are not counted as measured reuse. Inspect the receipt and
+Outside-target stages are not counted as measured reuse. Input identities and
+declared consumer roots are recorded too. `INTERVENTION_REUSE_REJECTED` preserves
+scope rejection diagnostics; deterministic contract failures do not retry. Inspect the receipt and
 final diagnostics through the existing Attempt endpoint/CLI. A reused stage
 still needs its bytes in the configured persistent CAS; this does not change
 artifact-store verification or make nested external files recursively portable.

@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `c35f7515c9933ecbccc927612cc7657765abb95cae0ea5f587146fe8adcdba88`
+> State fingerprint: `f13d5132a2acd687b4342cce4fb76ed4c5f6f03fdb4d4d0f8102c77d9598f713`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -44,7 +44,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 197**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 198**
 
 ### CANONICAL
 
@@ -171,6 +171,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `ops/main-knight-render-20260930` | `0a44ef505e6e` | observed live; not explicitly registered active |
 | `ops/temp-trigger-n1d-v2-recovery-20260820` | `536b40b6a6bf` | observed live; not explicitly registered active |
 | `ops/trigger-n1d-v2-recovery-v2-verify-20260820` | `12a813a8f501` | observed live; not explicitly registered active |
+| `platform/causal-interventions-20261009` | `e204d75b83ff` | observed live; not explicitly registered active |
 | `platform/professional-backend-v1-20261001` | `989a90b45726` | observed live; not explicitly registered active |
 | `platform/throughput-hydration-gc-20261008` | `03fb5fa434fb` | observed live; not explicitly registered active |
 | `platform/worker-seam-20261001` | `c9b4798c7e6d` | observed live; not explicitly registered active |
@@ -208,7 +209,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `research/knight-stage13-14-calibration-20260919` | `ee52ecf21689` | observed live; not explicitly registered active |
 | `research/knight-stage13-feasibility-v1-20260920` | `d5f89e4fc1c1` | observed live; not explicitly registered active |
 | `research/knight-stage13-v7-silhouette-20260920` | `27ed725309b1` | observed live; not explicitly registered active |
-| `research/presentation-p0-closure-20261008` | `0868cfa6cce8` | observed live; not explicitly registered active |
+| `research/presentation-p0-closure-20261008` | `22c12caca717` | observed live; not explicitly registered active |
 | `research/rig-skin-architecture-challengers-20261003` | `545418a8664b` | observed live; not explicitly registered active |
 | `research/stage13-geometry-gate-v2-calibration-20260919` | `18017348cc1b` | observed live; not explicitly registered active |
 | `research/stage14-component-aware-compaction-20260919` | `4212a28fc057` | observed live; not explicitly registered active |

@@ -6,20 +6,70 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/merynz/RealSaS-OPT/platform/internal/input"
 	"github.com/merynz/RealSaS-OPT/platform/internal/release"
 )
 
 // FrozenIntervention is part of the immutable attempt spec and impact event.
 // Artifact IDs are captured when the attempt starts, not looked up from a moving parent later.
 type FrozenIntervention struct {
-	Contract            release.Intervention `json:"contract"`
-	ParentAttemptID     uuid.UUID            `json:"parent_attempt_id"`
-	FrozenStageIDs      []string             `json:"frozen_stage_ids"`
-	BaselineArtifactIDs map[string]uuid.UUID `json:"baseline_artifact_ids"`
+	Contract               release.Intervention `json:"contract"`
+	ParentAttemptID        uuid.UUID            `json:"parent_attempt_id"`
+	FrozenStageIDs         []string             `json:"frozen_stage_ids"`
+	BaselineArtifactIDs    map[string]uuid.UUID `json:"baseline_artifact_ids"`
+	BaselineSubjectInputID uuid.UUID            `json:"baseline_subject_input_id"`
+	BaselineInputs         []InterventionInput  `json:"baseline_inputs"`
+	InputChangedStageIDs   []string             `json:"input_changed_stage_ids"`
+}
+
+type InterventionInput struct {
+	Role       string    `json:"role"`
+	Ordinal    int       `json:"ordinal"`
+	ArtifactID uuid.UUID `json:"artifact_id"`
+}
+
+func PinInputs(loaded input.Loaded) []InterventionInput {
+	out := make([]InterventionInput, 0, len(loaded.RootInputs))
+	for i, row := range loaded.RootInputs {
+		out = append(out, InterventionInput{Role: strings.TrimPrefix(row.Role, "subject:"), Ordinal: i, ArtifactID: loaded.ArtifactIDs[i]})
+	}
+	return out
+}
+
+func (c *FrozenIntervention) CheckInputs(loaded input.Loaded) error {
+	if c == nil {
+		return nil
+	}
+	before, after := map[string]InterventionInput{}, map[string]InterventionInput{}
+	for _, row := range c.BaselineInputs {
+		before[row.Role] = row
+	}
+	for _, row := range PinInputs(loaded) {
+		after[row.Role] = row
+	}
+	changed := []string{}
+	for role, row := range before {
+		if next, ok := after[role]; !ok || next != row {
+			changed = append(changed, role)
+		}
+	}
+	for role := range after {
+		if _, ok := before[role]; !ok {
+			changed = append(changed, role)
+		}
+	}
+	declared := slices.Clone(c.Contract.ChangedInputRoles)
+	slices.Sort(changed)
+	slices.Sort(declared)
+	if !slices.Equal(changed, declared) {
+		return fmt.Errorf("INTERVENTION_INPUT_SCOPE_DRIFT: declared=%v actual=%v", declared, changed)
+	}
+	return nil
 }
 
 func LoadIntervention(ctx context.Context, pool *pgxpool.Pool, attemptID uuid.UUID) (*FrozenIntervention, error) {

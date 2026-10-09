@@ -105,7 +105,11 @@ func (a Activities) ResolveCompilePlan(ctx context.Context, in orchestration.Com
 		return orchestration.ResolvedCompilePlan{}, err
 	}
 	if frozen != nil {
+		inputErr := frozen.CheckInputs(loaded)
 		receipt, err := resolver.VerifyIntervention(plan, frozen.FrozenStageIDs, frozen.BaselineArtifactIDs)
+		if inputErr != nil {
+			err = inputErr
+		}
 		if err != nil {
 			payload, _ := json.Marshal(map[string]any{
 				"schema": "RealSaS.InterventionReuseRejection.v1", "command_id": in.CommandID,
@@ -120,7 +124,10 @@ func (a Activities) ResolveCompilePlan(ctx context.Context, in orchestration.Com
 		payload, err := json.Marshal(map[string]any{
 			"schema": "RealSaS.InterventionReuseReceipt.v1", "command_id": in.CommandID,
 			"parent_attempt_id": frozen.ParentAttemptID, "target_stage_id": plan.TargetStageID,
-			"receipt": receipt,
+			"baseline_subject_input_id": frozen.BaselineSubjectInputID, "candidate_subject_input_id": loaded.SubjectInputID,
+			"changed_input_roles":     frozen.Contract.ChangedInputRoles,
+			"input_changed_stage_ids": frozen.InputChangedStageIDs,
+			"receipt":                 receipt,
 		})
 		if err != nil {
 			return orchestration.ResolvedCompilePlan{}, err

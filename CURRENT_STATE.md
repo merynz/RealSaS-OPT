@@ -67,7 +67,9 @@ must not be interpreted as visual acceptance.
 
 Controlled component replacement now has an opt-in `research-start.intervention`
 contract: exact direct changes, a same-subject/baseline-release parent, frozen
-unchanged stages and exact qualified baseline artifact reuse before Engine work.
+unchanged stages, pinned SubjectInput roles and exact qualified baseline artifact
+reuse before Engine work. Intended input changes declare their roles and only
+invalidate their released consumers/descendants.
 Legacy requests retain ordinary cache/recompute behavior and cannot support the
 same causal claim. See `docs/platform/CAUSAL_INTERVENTIONS.md` for the receipt,
 limits and operations. The geometry/RGB identity split is a future design, not

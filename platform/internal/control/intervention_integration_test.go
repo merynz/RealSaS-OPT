@@ -42,7 +42,7 @@ func TestControlledInterventionPersistsExactReuseAndStopsScopeDrift(t *testing.T
 	_, err = pool.Exec(ctx, "INSERT INTO subjects(id,slug,display_name) VALUES ($1,$2,'Intervention')", subjectID, "intervention-"+subjectID.String())
 	must(err)
 	snapshot := stagegraph.Snapshot{StageCount: 3, Stages: []stagegraph.Stage{
-		{Ordinal: 1, ID: "MECHANICS"}, {Ordinal: 2, ID: "RGB"},
+		{Ordinal: 1, ID: "MECHANICS"}, {Ordinal: 2, ID: "RGB", ManifestKeys: []string{"appearance"}},
 		{Ordinal: 3, ID: "RENDER", DependsOn: []string{"MECHANICS", "RGB"}, Policy: stagegraph.Policy{ProductPassAuthority: true}},
 	}}
 	raw, _ := json.Marshal(snapshot)
@@ -81,6 +81,10 @@ func TestControlledInterventionPersistsExactReuseAndStopsScopeDrift(t *testing.T
 	rootSHA := fmt.Sprintf("%x", sha256.Sum256([]byte(subjectID.String())))
 	sourceID := insertArtifact("InterventionSource", rootSHA)
 	sealedInput, err := input.Seal(ctx, pool, subjectID, []input.Binding{{Role: "source", ArtifactID: sourceID}}, "ci")
+	must(err)
+	parentCommand, _ := json.Marshal(map[string]string{"attempt_id": parentID.String(), "subject_input_id": sealedInput.SubjectInputID.String()})
+	_, err = pool.Exec(ctx, `INSERT INTO commands(id,command_type,subject_id,idempotency_key,payload)
+		VALUES ($1,'COMPILE_SUBJECT',$2,$3,$4)`, uuid.New(), subjectID, "intervention-parent-"+parentID.String(), parentCommand)
 	must(err)
 	versions, err := release.LoadVersions(ctx, pool, base.ReleaseID, true)
 	must(err)
@@ -129,6 +133,25 @@ func TestControlledInterventionPersistsExactReuseAndStopsScopeDrift(t *testing.T
 	if !strings.Contains(string(payload), mechanicalID.String()) {
 		t.Fatal("receipt omitted exact baseline identity")
 	}
+	// An input change consumed only by the changed component cannot hide behind exact mechanics reuse.
+	otherInput, err := input.Seal(ctx, pool, subjectID, []input.Binding{{Role: "source", ArtifactID: sourceID}, {Role: "manifest:appearance", ArtifactID: sourceID}}, "ci")
+	must(err)
+	driftInput := in
+	driftInput.SubjectInputID = otherInput.SubjectInputID.String()
+	_, err = a.ResolveCompilePlan(ctx, driftInput)
+	if err == nil || !strings.Contains(err.Error(), "INPUT_SCOPE_DRIFT") {
+		t.Fatalf("unannounced appearance input: %v", err)
+	}
+	inputReq := req
+	inputReq.Intervention = &release.Intervention{DirectChangedStageIDs: []string{"RGB"}, PreservedStageIDs: []string{"MECHANICS"}, ChangedInputRoles: []string{"manifest:appearance"}}
+	inputStarted, err := attempt.StartResearch(ctx, pool, g, inputReq)
+	must(err)
+	driftInput.AttemptID = inputStarted.AttemptID.String()
+	inputPlan, err := a.ResolveCompilePlan(ctx, driftInput)
+	must(err)
+	if inputPlan.Stages[0].Action != "REUSE" || *inputPlan.Stages[0].ReusableArtifactID != mechanicalID.String() {
+		t.Fatal("declared appearance input invalidated mechanics")
+	}
 	// Even a forged activity scope cannot execute or rebind the frozen stage.
 	_, err = a.PrepareStageExecution(ctx, orchestration.PrepareStageExecutionRequest{AttemptID: in.AttemptID, SubjectID: in.SubjectID, EngineReleaseID: in.EngineReleaseID, StageID: "MECHANICS", AllowedExecuteStageIDs: []string{"MECHANICS"}})
 	if err == nil || !strings.Contains(err.Error(), "FROZEN_STAGE_EXECUTION") {
@@ -158,12 +181,19 @@ func TestControlledInterventionPersistsExactReuseAndStopsScopeDrift(t *testing.T
 		t.Fatal("engine execution began despite intervention failure")
 	}
 	must(pool.QueryRow(ctx, `SELECT count(*) FROM attempt_events WHERE attempt_id=$1 AND event_type='INTERVENTION_REUSE_REJECTED'`, started.AttemptID).Scan(&count))
-	if count != 1 {
+	if count != 2 {
 		t.Fatal("rejected scope missing durable diagnostics")
 	}
 	frozen, err := attempt.LoadIntervention(ctx, pool, started.AttemptID)
 	must(err)
 	if frozen.BaselineArtifactIDs["MECHANICS"] != mechanicalID {
 		t.Fatal("durable baseline pin missing")
+	}
+	ambiguousCommand, _ := json.Marshal(map[string]string{"attempt_id": parentID.String(), "subject_input_id": otherInput.SubjectInputID.String()})
+	_, err = pool.Exec(ctx, `INSERT INTO commands(id,command_type,subject_id,idempotency_key,payload)
+		VALUES ($1,'COMPILE_SUBJECT',$2,$3,$4)`, uuid.New(), subjectID, "intervention-ambiguous-"+parentID.String(), ambiguousCommand)
+	must(err)
+	if _, err := attempt.StartResearch(ctx, pool, g, req); err == nil || !strings.Contains(err.Error(), "PARENT_INPUT_AMBIGUOUS_OR_MISSING") {
+		t.Fatalf("ambiguous parent apparatus accepted: %v", err)
 	}
 }

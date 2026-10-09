@@ -180,3 +180,11 @@ Historical recovery cannot prove the newest carrier-native package rendered. A f
 receipt must record exact code SHA, carrier/skeleton/weights identities,
 input artifacts, output hashes, execution mode and wall time. Measure cold
 compile and warm render separately; the target is below120seconds, ideally60.
+
+## Controlled component replacement — 2026-10-09
+
+For a causal replacement use `research-start.intervention` with a pinned parent
+Attempt. Unchanged stages in the target must reuse exact qualified baseline
+artifact IDs; cache misses fail before Engine work. Legacy requests retain normal
+recompute behavior. See [the protocol](CAUSAL_INTERVENTIONS.md) and
+[visual dependencies](../presentation/VISUAL_DEPENDENCY_MAP_20261009.md).

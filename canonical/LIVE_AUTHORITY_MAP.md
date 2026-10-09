@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `a91b503c9d03bfc2dbb2a9718413076105b58d0402c50d9085b3319f1455ed29`
+> State fingerprint: `c35f7515c9933ecbccc927612cc7657765abb95cae0ea5f587146fe8adcdba88`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -40,17 +40,17 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `PLATFORM_EXECUTION_LANES` | `CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED` | `main` | `949422678d34` | Can Go-owned Attempts replace changed DAG components with exact artifact reuse while product construction and render remain separate? | absolute G3 PASS; product qualification; unseen generalization; sub-120-second latency; fresh carrier-native Knight render |
+| `PLATFORM_EXECUTION_LANES` | `CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED` | `main` | `1888d91252fd` | Can Go-owned Attempts replace changed DAG components with exact artifact reuse while product construction and render remain separate? | absolute G3 PASS; product qualification; unseen generalization; sub-120-second latency; fresh carrier-native Knight render |
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 188**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 197**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `949422678d34` | canonical continuation branch |
+| `main` | `1888d91252fd` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -139,7 +139,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `hardening/pre-fit-closure-v1-20260904` | `d4da94279e1f` | observed live; not explicitly registered active |
 | `ignore-this` | `91b4593d5b2a` | observed live; not explicitly registered active |
 | `impl/carrier-first-mechanical-compilation-20261004` | `98393e04f905` | observed live; not explicitly registered active |
-| `implementation/platform-execution-lanes-20261008` | `20ec1bdd5b8a` | observed live; not explicitly registered active |
+| `implementation/platform-execution-lanes-20261008` | `79dafbc39193` | observed live; not explicitly registered active |
 | `integration/compiler-runtime-canonical-20260828` | `e423cd462002` | observed live; not explicitly registered active |
 | `integration/compiler-runtime-heavy-promotion-20260901` | `47892ffa16b7` | observed live; not explicitly registered active |
 | `integration/final-main-knight-platform-20261002` | `30428107138f` | observed live; not explicitly registered active |
@@ -172,6 +172,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `ops/temp-trigger-n1d-v2-recovery-20260820` | `536b40b6a6bf` | observed live; not explicitly registered active |
 | `ops/trigger-n1d-v2-recovery-v2-verify-20260820` | `12a813a8f501` | observed live; not explicitly registered active |
 | `platform/professional-backend-v1-20261001` | `989a90b45726` | observed live; not explicitly registered active |
+| `platform/throughput-hydration-gc-20261008` | `03fb5fa434fb` | observed live; not explicitly registered active |
 | `platform/worker-seam-20261001` | `c9b4798c7e6d` | observed live; not explicitly registered active |
 | `playback-stack-v1-20260916-p0p1-staging` | `d88a5fc9aa66` | observed live; not explicitly registered active |
 | `product/mage-fit1-demo-fulfillment-20260914` | `e60ea9129f55` | observed live; not explicitly registered active |
@@ -207,6 +208,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `research/knight-stage13-14-calibration-20260919` | `ee52ecf21689` | observed live; not explicitly registered active |
 | `research/knight-stage13-feasibility-v1-20260920` | `d5f89e4fc1c1` | observed live; not explicitly registered active |
 | `research/knight-stage13-v7-silhouette-20260920` | `27ed725309b1` | observed live; not explicitly registered active |
+| `research/presentation-p0-closure-20261008` | `0868cfa6cce8` | observed live; not explicitly registered active |
 | `research/rig-skin-architecture-challengers-20261003` | `545418a8664b` | observed live; not explicitly registered active |
 | `research/stage13-geometry-gate-v2-calibration-20260919` | `18017348cc1b` | observed live; not explicitly registered active |
 | `research/stage14-component-aware-compaction-20260919` | `4212a28fc057` | observed live; not explicitly registered active |
@@ -231,6 +233,13 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `restoration/compiler-runtime-promotion-v1-20260903-stage1-backup` | `2b5d46718683` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase` | `2b5d46718683` | observed live; not explicitly registered active |
 | `restoration/iris-mainline-promotion-v1-20260903-safety` | `a965a22e7a9a` | observed live; not explicitly registered active |
+| `review/platform-deployment-20261008` | `6c7d005c7a25` | observed live; not explicitly registered active |
+| `review/platform-host-diagnostics-20261008` | `f3740c2c0414` | observed live; not explicitly registered active |
+| `review/platform-input-dag-20261008` | `0086075a4edb` | observed live; not explicitly registered active |
+| `review/platform-input-dag-closure-20261008` | `63384c60e353` | observed live; not explicitly registered active |
+| `review/platform-input-dag-hosted-proof-20261008` | `163da022fc93` | observed live; not explicitly registered active |
+| `review/platform-loader-fix-20261008` | `7869422c60a9` | observed live; not explicitly registered active |
+| `review/platform-worker-lifecycle-20261008` | `febb45b48fe9` | observed live; not explicitly registered active |
 | `runtime-v4-p0-p1-20260917` | `e6654c065699` | observed live; not explicitly registered active |
 | `scratch-mistake` | `91b4593d5b2a` | observed live; not explicitly registered active |
 | `seal/geppetto-reference-strength-fit1-20260908` | `ae0af0cd39dd` | observed live; not explicitly registered active |

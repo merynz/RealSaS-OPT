@@ -11,8 +11,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.temporal.io/sdk/temporal"
 
 	"github.com/merynz/RealSaS-OPT/platform/internal/artifactstore"
+	"github.com/merynz/RealSaS-OPT/platform/internal/attempt"
 	"github.com/merynz/RealSaS-OPT/platform/internal/diagnostic"
 	"github.com/merynz/RealSaS-OPT/platform/internal/input"
 	"github.com/merynz/RealSaS-OPT/platform/internal/orchestration"
@@ -98,6 +100,38 @@ func (a Activities) ResolveCompilePlan(ctx context.Context, in orchestration.Com
 	if err != nil {
 		return orchestration.ResolvedCompilePlan{}, err
 	}
+	frozen, err := attempt.LoadIntervention(ctx, a.Pool, attemptID)
+	if err != nil {
+		return orchestration.ResolvedCompilePlan{}, err
+	}
+	if frozen != nil {
+		receipt, err := resolver.VerifyIntervention(plan, frozen.FrozenStageIDs, frozen.BaselineArtifactIDs)
+		if err != nil {
+			payload, _ := json.Marshal(map[string]any{
+				"schema": "RealSaS.InterventionReuseRejection.v1", "command_id": in.CommandID,
+				"target_stage_id": plan.TargetStageID, "reason": err.Error(),
+			})
+			if _, recordErr := a.Pool.Exec(ctx, `INSERT INTO attempt_events(attempt_id,event_type,payload)
+				VALUES ($1,'INTERVENTION_REUSE_REJECTED',$2)`, attemptID, payload); recordErr != nil {
+				return orchestration.ResolvedCompilePlan{}, recordErr
+			}
+			return orchestration.ResolvedCompilePlan{}, temporal.NewNonRetryableApplicationError(err.Error(), "InterventionContractViolation", err)
+		}
+		payload, err := json.Marshal(map[string]any{
+			"schema": "RealSaS.InterventionReuseReceipt.v1", "command_id": in.CommandID,
+			"parent_attempt_id": frozen.ParentAttemptID, "target_stage_id": plan.TargetStageID,
+			"receipt": receipt,
+		})
+		if err != nil {
+			return orchestration.ResolvedCompilePlan{}, err
+		}
+		if _, err := a.Pool.Exec(ctx, `INSERT INTO attempt_events(attempt_id,event_type,payload)
+			SELECT $1,'INTERVENTION_REUSE_VERIFIED',$2::jsonb WHERE NOT EXISTS (
+			 SELECT 1 FROM attempt_events WHERE attempt_id=$1 AND event_type='INTERVENTION_REUSE_VERIFIED' AND payload=$2::jsonb
+			)`, attemptID, payload); err != nil {
+			return orchestration.ResolvedCompilePlan{}, err
+		}
+	}
 	out := orchestration.ResolvedCompilePlan{
 		TargetStageID: plan.TargetStageID,
 		Stages:        make([]orchestration.ResolvedStage, 0, len(plan.Stages)),
@@ -145,6 +179,13 @@ func (a Activities) PrepareStageExecution(ctx context.Context, req orchestration
 	}
 	if _, ok := a.Graph.Get(req.StageID); !ok {
 		return orchestration.EngineStageRequest{}, fmt.Errorf("unknown stage %s", req.StageID)
+	}
+	frozen, err := attempt.LoadIntervention(ctx, a.Pool, attemptID)
+	if err != nil {
+		return orchestration.EngineStageRequest{}, err
+	}
+	if err := frozen.CheckExecution(req.StageID); err != nil {
+		return orchestration.EngineStageRequest{}, temporal.NewNonRetryableApplicationError(err.Error(), "InterventionContractViolation", err)
 	}
 
 	var dbSubject, dbRelease uuid.UUID
@@ -274,6 +315,13 @@ func (a Activities) BindReusedStage(ctx context.Context, req orchestration.BindR
 	if err != nil {
 		return orchestration.StageCommitResult{}, err
 	}
+	frozen, err := attempt.LoadIntervention(ctx, a.Pool, attemptID)
+	if err != nil {
+		return orchestration.StageCommitResult{}, err
+	}
+	if err := frozen.CheckReuse(req.StageID, artifactID); err != nil {
+		return orchestration.StageCommitResult{}, temporal.NewNonRetryableApplicationError(err.Error(), "InterventionContractViolation", err)
+	}
 	var semanticSHA string
 	var qualified bool
 	var kind string
@@ -349,6 +397,13 @@ func (a Activities) CommitStageResult(ctx context.Context, req orchestration.Sta
 	if err != nil {
 		return orchestration.StageCommitResult{}, err
 	}
+	frozen, err := attempt.LoadIntervention(ctx, a.Pool, attemptID)
+	if err != nil {
+		return orchestration.StageCommitResult{}, err
+	}
+	if err := frozen.CheckExecution(req.StageID); err != nil {
+		return orchestration.StageCommitResult{}, temporal.NewNonRetryableApplicationError(err.Error(), "InterventionContractViolation", err)
+	}
 	a.Graph, err = a.attemptGraph(ctx, attemptID)
 	if err != nil {
 		return orchestration.StageCommitResult{}, err
@@ -357,6 +412,9 @@ func (a Activities) CommitStageResult(ctx context.Context, req orchestration.Sta
 		return orchestration.StageCommitResult{}, errors.New("ENGINE_STAGE_RESULT_ID_DRIFT")
 	}
 	for _, stageID := range req.EngineResult.ExecutedStageIDs {
+		if err := frozen.CheckExecution(stageID); err != nil {
+			return orchestration.StageCommitResult{}, temporal.NewNonRetryableApplicationError(err.Error(), "InterventionContractViolation", err)
+		}
 		if !slices.Contains(req.AllowedExecuteStageIDs, stageID) {
 			return orchestration.StageCommitResult{}, fmt.Errorf("COMPILER_PLATFORM_PLAN_DRIFT:%s", stageID)
 		}

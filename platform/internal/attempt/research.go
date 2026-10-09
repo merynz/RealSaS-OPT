@@ -23,11 +23,12 @@ var (
 )
 
 type ResearchRequest struct {
-	SubjectID                uuid.UUID  `json:"subject_id"`
-	BaselineEngineReleaseID  uuid.UUID  `json:"baseline_engine_release_id"`
-	CandidateEngineReleaseID uuid.UUID  `json:"candidate_engine_release_id"`
-	ParentAttemptID          *uuid.UUID `json:"parent_attempt_id"`
-	CreatedBy                string     `json:"created_by"`
+	SubjectID                uuid.UUID             `json:"subject_id"`
+	BaselineEngineReleaseID  uuid.UUID             `json:"baseline_engine_release_id"`
+	CandidateEngineReleaseID uuid.UUID             `json:"candidate_engine_release_id"`
+	ParentAttemptID          *uuid.UUID            `json:"parent_attempt_id"`
+	Intervention             *release.Intervention `json:"intervention,omitempty"`
+	CreatedBy                string                `json:"created_by"`
 }
 
 type ResearchStart struct {
@@ -82,6 +83,15 @@ func StartResearch(
 		return ResearchStart{}, err
 	}
 
+	if req.Intervention != nil {
+		if req.ParentAttemptID == nil || *req.ParentAttemptID == uuid.Nil {
+			return ResearchStart{}, errors.New("INTERVENTION_PARENT_ATTEMPT_REQUIRED")
+		}
+		if err := req.Intervention.Validate(impact); err != nil {
+			return ResearchStart{}, err
+		}
+	}
+
 	directIDs := make([]string, 0, len(impact.DirectChanges))
 	for _, change := range impact.DirectChanges {
 		directIDs = append(directIDs, change.StageID)
@@ -99,11 +109,6 @@ func StartResearch(
 	if req.ParentAttemptID != nil {
 		spec["parent_attempt_id"] = req.ParentAttemptID.String()
 	}
-	specSHA, err := semantic.JSONSHA256(spec)
-	if err != nil {
-		return ResearchStart{}, err
-	}
-
 	attemptID := uuid.New()
 	err = persistence.WithSerializableRetry(ctx, pool, 5, func(tx pgx.Tx) error {
 		var subject uuid.UUID
@@ -113,9 +118,10 @@ func StartResearch(
 			}
 			return err
 		}
+		var frozen *FrozenIntervention
 		if req.ParentAttemptID != nil {
-			var parentSubject uuid.UUID
-			if err := tx.QueryRow(ctx, "SELECT subject_id FROM attempts WHERE id=$1", *req.ParentAttemptID).Scan(&parentSubject); err != nil {
+			var parentSubject, parentRelease uuid.UUID
+			if err := tx.QueryRow(ctx, "SELECT subject_id,engine_release_id FROM attempts WHERE id=$1 FOR SHARE", *req.ParentAttemptID).Scan(&parentSubject, &parentRelease); err != nil {
 				if errors.Is(err, pgx.ErrNoRows) {
 					return ErrParentSubjectMismatch
 				}
@@ -124,6 +130,41 @@ func StartResearch(
 			if parentSubject != req.SubjectID {
 				return ErrParentSubjectMismatch
 			}
+			if req.Intervention != nil {
+				if parentRelease != req.BaselineEngineReleaseID {
+					return errors.New("INTERVENTION_PARENT_RELEASE_MISMATCH")
+				}
+				frozen = &FrozenIntervention{
+					Contract: *req.Intervention, ParentAttemptID: *req.ParentAttemptID,
+					FrozenStageIDs: impact.UnchangedStageIDs, BaselineArtifactIDs: map[string]uuid.UUID{},
+				}
+				rows, err := tx.Query(ctx, `SELECT role,artifact_id FROM attempt_artifacts WHERE attempt_id=$1`, *req.ParentAttemptID)
+				if err != nil {
+					return err
+				}
+				for rows.Next() {
+					var role string
+					var id uuid.UUID
+					if err := rows.Scan(&role, &id); err != nil {
+						rows.Close()
+						return err
+					}
+					for _, stageID := range frozen.FrozenStageIDs {
+						if role == "stage:"+stageID {
+							frozen.BaselineArtifactIDs[stageID] = id
+						}
+					}
+				}
+				rows.Close()
+				if err := rows.Err(); err != nil {
+					return err
+				}
+				spec["intervention"] = frozen
+			}
+		}
+		specSHA, err := semantic.JSONSHA256(spec)
+		if err != nil {
+			return err
 		}
 
 		if _, err := tx.Exec(ctx, `
@@ -143,6 +184,7 @@ func StartResearch(
 			"invalidated_stage_ids":       impact.InvalidatedStageIDs,
 			"unchanged_stage_ids":         impact.UnchangedStageIDs,
 			"removed_stage_ids":           impact.RemovedStageIDs,
+			"intervention":                frozen,
 		})
 		if err != nil {
 			return err

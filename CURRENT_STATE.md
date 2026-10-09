@@ -1,6 +1,6 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-10-08
+**Date:** 2026-10-09
 **Canonical code line:** `main` only  
 **Architecture:** RealSaS V2, 46-stage Compiler compatibility DAG; versioned release DAGs
 **Implementation readiness:** `canonical/V2_IMPLEMENTATION_READINESS.json`
@@ -57,13 +57,28 @@ size/SHA256 verification cover 12/12 inventory files. Real run `37802717565`
 proved Drive -> CAS -> offline 12/12 CAS_HIT. These are transport identities,
 not scientific qualification or stage reuse authority.
 
-PR #65 seals public hosted CPU CI, dependency caches, bounded persistent local
-GC and Knight hydration. Merge it before PR #66. The next work is presentation
-P0 only: continuous visual deformation-domain coherence, canonical depth/overlap
-ownership and Stage45 fail-closed proof, followed by a downstream-only rerun and
-fresh Knight IDLE/RUN/SLASH. Reuse sealed mechanics and the existing motion
-witness; do not reopen mechanics, rig, skin, IRIS, AXIS or MIRA. A scoped research
-render must preserve the separate absolute product qualification boundary.
+PR #65 is merged at `1888d91252fdce23843772f3ec0d0e3ddd91b9ae`.
+The current priority is platform preparation on main while the user decides the
+appearance design. PR #66's presentation candidate is parked diagnostic history;
+its source and evidence are retained, not promoted wholesale. Run `37933851760`
+failed both matched V6 Attempts; the later runner changes 37/42/43/45, not only 42.
+A fast relation replay's green workflow tolerated dynamic exposure failure and
+must not be interpreted as visual acceptance.
+
+Controlled component replacement now has an opt-in `research-start.intervention`
+contract: exact direct changes, a same-subject/baseline-release parent, frozen
+unchanged stages and exact qualified baseline artifact reuse before Engine work.
+Legacy requests retain ordinary cache/recompute behavior and cannot support the
+same causal claim. See `docs/platform/CAUSAL_INTERVENTIONS.md` for the receipt,
+limits and operations. The geometry/RGB identity split is a future design, not
+implemented IRIS functionality. Current product dependencies can still renew
+motion proof artifacts after appearance changes without refitting M/G/W.
+
+Visual ownership, material, deformation, layering and rebuild boundaries are
+mapped in `docs/presentation/VISUAL_DEPENDENCY_MAP_20261009.md`. No new appearance
+head, mechanics inference, Knight witness or product promotion is authorized by
+this platform cleanup. Main has no server-side required-check protection; the
+connected GitHub app lacks administration capability for that setting.
 
 Release discovery now scans each distinct adapter module once per snapshot,
 without a cross-release process cache. Local 46-stage comparison measured

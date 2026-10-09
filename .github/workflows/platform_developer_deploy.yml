@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
     paths:
+      - 'platform/**'
+      - 'compiler/realsas_compiler_services/platform_worker/**'
       - 'tools/platform_deploy.py'
       - 'tools/platform_service.py'
       - 'tools/platform_deployment_smoke.py'
@@ -12,6 +14,8 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'platform/**'
+      - 'compiler/realsas_compiler_services/platform_worker/**'
       - 'tools/platform_deploy.py'
       - 'tools/platform_service.py'
       - 'tools/platform_deployment_smoke.py'

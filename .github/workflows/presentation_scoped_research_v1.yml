@@ -6,14 +6,13 @@ on:
     paths:
       - 'compiler/**'
       - 'runtime/realsas_cpp/**'
+      - 'tests/compiler/test_presentation_relations_v5.py'
       - 'tools/*presentation*'
       - 'tools/sealed_motion_witness_replay.py'
       - 'tools/platform_private_input_transport.py'
       - '.github/workflows/presentation_scoped_research_v1.yml'
 
 concurrency:
-  # Different immutable releases are independent research evidence, not stale
-  # PR checks. A new candidate must not cancel the comparison already running.
   group: scoped-presentation-research-${{ github.sha }}
   cancel-in-progress: false
 
@@ -63,10 +62,11 @@ jobs:
       - name: Prepare pinned CPU and native executors
         run: |
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt -r requirements/platform-worker.txt
+          python -m pytest -q tests/compiler/test_presentation_relations_v5.py
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends libpng-dev zlib1g-dev
           mkdir -p /tmp/realsas-presentation-bin /tmp/realsas-presentation-out
-          g++ -std=c++17 -O2 runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp -lpng -lz -o /tmp/realsas-presentation-bin/player
+          g++ -std=c++17 -O2 runtime/realsas_cpp/src/runtime_v2_presentation_semantic.cpp -lpng -lz -o /tmp/realsas-presentation-bin/player
           curl --fail --silent --show-error --location https://github.com/temporalio/cli/releases/download/v1.9.1/temporal_cli_1.9.1_linux_amd64.tar.gz -o /tmp/temporal.tar.gz
           echo '09a0326a51db84d02735e53542b9ebd8c4758daf47482a9ab0abce15844e60d5  /tmp/temporal.tar.gz' | sha256sum -c -
           tar -xzf /tmp/temporal.tar.gz -C /tmp/realsas-presentation-bin temporal

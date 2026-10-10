@@ -5,6 +5,7 @@ on:
     branches: [ops/knight-latest-visual-probe-20261010]
     paths:
       - 'tools/ops/render_knight_latest_current_visual_v1.py'
+      - 'tools/ops/render_knight_latest_current_visual_postbind_v2.py'
       - '.github/workflows/knight_latest_current_visual_render_v1.yml'
 
 permissions:
@@ -42,7 +43,7 @@ jobs:
           mkdir -p "$OUT_DIR"
           export PYTHONPATH="$GITHUB_WORKSPACE"
           /home/monster/realsas_platform/current/bin/realsas-python \
-            tools/ops/render_knight_latest_current_visual_v1.py \
+            tools/ops/render_knight_latest_current_visual_postbind_v2.py \
             --authority-root "$AUTHORITY_ROOT" \
             --input-root "$INPUT_ROOT" \
             --out-dir "$OUT_DIR" \

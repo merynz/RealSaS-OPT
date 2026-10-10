@@ -27,7 +27,7 @@ jobs:
           set -euo pipefail
           test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_MAIN_SHA"
           test -s "$PLATFORM_ROOT/deployment.json"
-          python - <<'PY'
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
           import json, os
           from pathlib import Path
           p=json.loads((Path(os.environ['PLATFORM_ROOT'])/'deployment.json').read_text())

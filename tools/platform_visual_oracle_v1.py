@@ -52,8 +52,8 @@ def canonical_checkout(deployment):
         raise RuntimeError("ORACLE_SOURCE_OVERLAY_FORBIDDEN")
 
 
-def source_inputs(spec, root):
-    hydration = hydrate_inventory(spec["inventory"], cas_root=root / "external-cas")
+def source_inputs(spec, root, *, rclone_remote):
+    hydration = hydrate_inventory(spec["inventory"], cas_root=root / "external-cas", rclone_remote=rclone_remote)
     if not hydration["all_input_bytes_verified"]:
         raise RuntimeError("ORACLE_SOURCE_HYDRATION_FAILED")
     archive = root / "external-cas" / "assembled" / (spec["source"]["archive_sha256"] + ".zip")
@@ -77,7 +77,7 @@ def source_inputs(spec, root):
                 "variants": spec["variants"]}, "oracle_measure": spec["measurement"]}, hydration
 
 
-def run(root, timeout):
+def run(root, timeout, *, rclone_remote):
     spec = mainline.load_json(ROOT / "canonical/AUTHORED_VISUAL_ORACLE_V1_20261010.json")
     deployment = mainline.load_json(root / "deployment.json")
     canonical_checkout(deployment)
@@ -92,7 +92,7 @@ def run(root, timeout):
         print(json.dumps({"already_completed_attempt": state["attempt_id"], "export": str(export)}), flush=True)
         return
     if not state:
-        identity, hydration = source_inputs(spec, root)
+        identity, hydration = source_inputs(spec, root, rclone_remote=rclone_remote)
         subject = request("/v1/subjects", {"slug": spec["experiment_id"].lower(),
             "display_name": "Authored 2D appearance oracle; independent of mechanical Knight", "created_by": ACTOR})["subject_id"]
         state.update(subject_id=subject, identity=identity, hydration=hydration, code_sha=deployment["code_sha"])
@@ -174,5 +174,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--timeout", type=float, default=900)
+    parser.add_argument("--rclone-remote", required=True, help="Existing authenticated host Drive remote; transport only")
     args = parser.parse_args()
-    run(args.root, args.timeout)
+    run(args.root, args.timeout, rclone_remote=args.rclone_remote)

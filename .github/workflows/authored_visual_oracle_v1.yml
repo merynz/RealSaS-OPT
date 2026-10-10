@@ -36,9 +36,11 @@ jobs:
           PY
       - name: Execute or inspect the same authorized Go Attempt
         run: |
+          set -euo pipefail
+          rclone listremotes | grep -Fx 'gdrive:'
           /home/monster/realsas_platform/current/bin/realsas-python \
             tools/platform_visual_oracle_v1.py \
-            --root /home/monster/realsas_platform --timeout 1200
+            --root /home/monster/realsas_platform --timeout 1200 --rclone-remote gdrive
       - name: Preserve exact measurement and Go handoff
         if: always()
         uses: actions/upload-artifact@v4

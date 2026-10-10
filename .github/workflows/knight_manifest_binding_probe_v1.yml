@@ -1,0 +1,36 @@
+name: knight-manifest-binding-probe-v1
+
+on:
+  push:
+    branches: [ops/knight-latest-visual-probe-20261010]
+    paths: ['.github/workflows/knight_manifest_binding_probe_v1.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 1, clean: true}
+      - name: Inspect only relevant canonical Knight manifest bindings
+        shell: bash
+        run: |
+          set -euo pipefail
+          PY=/home/monster/realsas_platform/current/bin/realsas-python
+          ROOT=/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+          test -f "$ROOT/run_manifest.json"
+          "$PY" - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/run_manifest.json')
+          m=json.loads(p.read_text())
+          keep=['mesh','mesh_policy','mechanical_attempt','geppetto_fit','arachne_fit','deformation_envelope','motion','runtime','appearance','caa','observation','normalization']
+          print('MANIFEST',p)
+          print('TOP_KEYS',sorted(m))
+          for k in keep:
+              if k in m:
+                  print('SECTION',k,json.dumps(m[k],sort_keys=True)[:12000])
+          PY

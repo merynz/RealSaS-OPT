@@ -40,7 +40,7 @@ jobs:
           test "$DEPLOYED_SHA" = "$CANONICAL_MAIN_SHA"
           git fetch origin 59dc7f4e10eeb56abc4f247ec9ba045a46a6a496 --depth=1
           git show FETCH_HEAD:tools/platform_private_input_transport.py > "$RUNNER_TEMP/platform_private_input_transport.py"
-          echo '77d104405d4995a36f904d6862af03477fd148bc  '"$RUNNER_TEMP/platform_private_input_transport.py" | sha1sum -c -
+          test "$(git hash-object "$RUNNER_TEMP/platform_private_input_transport.py")" = "77d104405d4995a36f904d6862af03477fd148bc"
 
       - name: Publish one-run public transport key
         shell: bash

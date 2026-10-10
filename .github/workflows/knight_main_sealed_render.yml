@@ -2,10 +2,14 @@ name: knight-main-sealed-render
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: [platform-developer-deployment]
+    types: [completed]
   push:
     branches: [main]
     paths:
       - 'tools/ops/render_knight_sealed_v6.py'
+      - 'tools/ops/export_knight_sealed_inputs_v1.py'
       - 'tools/platform_render_checkpoint.py'
       - 'compiler/realsas_compiler_core/visual_completion_evidence_v1.py'
       - '.github/workflows/knight_main_sealed_render.yml'
@@ -13,6 +17,8 @@ on:
     branches: [main]
     paths:
       - 'tools/ops/render_knight_sealed_v6.py'
+      - 'tools/ops/export_knight_sealed_inputs_v1.py'
+      - 'tests/repository/test_knight_sealed_input_inspection_v1.py'
       - 'tools/platform_render_checkpoint.py'
       - 'compiler/realsas_compiler_core/visual_completion_evidence_v1.py'
       - 'tests/compiler/test_visual_completion_evidence_v1.py'
@@ -34,7 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -46,24 +52,40 @@ jobs:
           tests/compiler/test_visual_presentation_pose_v1.py
           tests/compiler/test_visual_completion_evidence_v1.py
           tests/repository/test_visual_pipeline_entry_contract_v1.py
+          tests/repository/test_knight_sealed_input_inspection_v1.py
   render:
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    # Read Go context only after that exact main is deployed. Waiting inside a
+    # single-runner job would prevent the deployment job from acquiring its host.
+    if: ((github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main')) && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     needs: contracts
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           clean: true
       - name: Verify exact canonical main before rendering sealed inputs
-        run: test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$GITHUB_SHA"
+        env:
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_SHA"
+      - name: Read sealed Knight input bytes and canonical Go context
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: >-
+          /home/monster/realsas_platform/current/bin/realsas-python
+          tools/ops/export_knight_sealed_inputs_v1.py
+          --expected-main-sha "${{ github.event.workflow_run.head_sha || github.sha }}"
+          --authority-root /home/monster/realsas_authority
+          --input-root /home/monster/realsas_authority/imports/knight_latest_carrier_20261010
+          --platform-root /home/monster/realsas_platform
+          --out /home/monster/realsas_authority/renders/KNIGHT_MAIN_SEALED_CAA_V6_20261010/${{ github.event.workflow_run.head_sha || github.sha }}/inspection
       - name: Inspect sealed production-consumption boundary before full visual rendering
         env:
-          EXPECTED_CODE_SHA: ${{ github.sha }}
+          EXPECTED_CODE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
           AUTHORITY_ROOT: /home/monster/realsas_authority
           INPUT_ROOT: /home/monster/realsas_authority/imports/knight_latest_carrier_20261010
-          OUT_DIR: /home/monster/realsas_authority/renders/KNIGHT_MAIN_SEALED_CAA_V6_20261010/${{ github.sha }}
+          OUT_DIR: /home/monster/realsas_authority/renders/KNIGHT_MAIN_SEALED_CAA_V6_20261010/${{ github.event.workflow_run.head_sha || github.sha }}
           VISUAL_BOUNDARY_PREFLIGHT_ONLY: '1'
           RENDER_FRAMES: '12'
           RENDER_RESOLUTION: '256'
@@ -74,6 +96,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: KNIGHT_MAIN_SEALED_CAA_V6
-          path: /home/monster/realsas_authority/renders/KNIGHT_MAIN_SEALED_CAA_V6_20261010/${{ github.sha }}
+          path: /home/monster/realsas_authority/renders/KNIGHT_MAIN_SEALED_CAA_V6_20261010/${{ github.event.workflow_run.head_sha || github.sha }}
           if-no-files-found: error
           retention-days: 7

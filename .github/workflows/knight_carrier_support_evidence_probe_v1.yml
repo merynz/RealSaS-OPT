@@ -1,0 +1,58 @@
+name: knight-carrier-support-evidence-probe-v1
+
+on:
+  push:
+    branches: [ops/knight-latest-visual-probe-20261010]
+    paths: ['.github/workflows/knight_carrier_support_evidence_probe_v1.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      STAGING_ROOT: /home/monster/realsas_authority/imports/knight_latest_carrier_20261010
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          clean: true
+      - name: Inspect exact support/evidence arrays
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os, hashlib
+          from pathlib import Path
+          import numpy as np
+          root=Path(os.environ['STAGING_ROOT'])
+          names=['M_EVIDENCE_SUPPORT_V55.npz','KNIGHT_EVALUATED_TEACHER_SOURCE.npz','MIRA_AXIS41_TESSA_M_SKIN_FIELD_V55.npz','TESSA_T1B_DECODED_MESH.npz']
+          report={'schema':'RealSaS.KnightCarrierSupportEvidenceProbe.v1','status':'READ_ONLY'}
+          for name in names:
+              p=root/name
+              row={'path':str(p),'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'arrays':{}}
+              with np.load(p,allow_pickle=False) as z:
+                  for key in z.files:
+                      a=np.asarray(z[key])
+                      item={'shape':list(a.shape),'dtype':str(a.dtype)}
+                      if a.size and np.issubdtype(a.dtype,np.number):
+                          finite=np.isfinite(a) if np.issubdtype(a.dtype,np.floating) else np.ones(a.shape,dtype=bool)
+                          if finite.all():
+                              item.update({'min':float(np.min(a)),'max':float(np.max(a))})
+                              if a.size<=1000000: item['unique_count']=int(len(np.unique(a)))
+                      if a.size<=100 and a.dtype.kind in 'iufbSU': item['values']=a.tolist()
+                      row['arrays'][key]=item
+              report[name]=row
+          out=Path('/tmp/knight-carrier-support-evidence-probe'); out.mkdir(parents=True,exist_ok=True)
+          (out/'REPORT.json').write_text(json.dumps(report,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(report,indent=2,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: knight-carrier-support-evidence-probe
+          path: /tmp/knight-carrier-support-evidence-probe/REPORT.json
+          retention-days: 7

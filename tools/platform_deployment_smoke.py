@@ -93,7 +93,9 @@ def run_smoke(root, timeout):
     started = time.monotonic()
     deployment = json.loads((root / "deployment.json").read_text())
     os.environ["REALSAS_AUTHORITY_ROOT"] = deployment["authority_root"]
-    subject = request("/v1/subjects", {"slug": "platform-deployment-smoke-v1",
+    # Each smoke is an isolated engineering subject. A repeated deployment must
+    # not reset the durable lineage of the previous smoke's completed handoff.
+    subject = request("/v1/subjects", {"slug": "platform-deployment-smoke-" + uuid.uuid4().hex,
                        "display_name": "Platform deployment engineering smoke", "created_by": ACTOR})["subject_id"]
     license_section = {"source_pack": "subject-free-service-smoke", "license_name": "engineering-fixture",
                        "license_ref": "urn:realsas:platform:smoke:no-scientific-authority"}

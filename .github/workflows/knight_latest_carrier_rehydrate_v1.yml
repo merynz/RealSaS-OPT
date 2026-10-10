@@ -19,89 +19,104 @@ env:
   AUTHORITY_ROOT: /home/monster/realsas_authority
   CANONICAL_MAIN_SHA: d3c4f39ddecf2dc73e7c532ec352fc97ad92579b
   STAGING_ROOT: /home/monster/realsas_authority/imports/knight_latest_carrier_20261010
+  CAS_ROOT: /home/monster/.cache/realsas/artifacts
+  REALSAS_RCLONE_DRIVE_REMOTE: realsas-drive
 
 jobs:
   rehydrate:
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 25
     steps:
-      - name: Checkout ops transport branch
+      - name: Checkout exact canonical main
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 1
           clean: true
 
-      - name: Verify current deployment and load sealed transport helper
+      - name: Verify exact main and deployed platform
         shell: bash
         run: |
           set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANONICAL_MAIN_SHA"
           test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$CANONICAL_MAIN_SHA"
           DEPLOYED_SHA="$("$PLATFORM_ROOT/current/bin/realsas-python" -c 'import json,os; from pathlib import Path; print(json.loads((Path(os.environ["PLATFORM_ROOT"])/"deployment.json").read_text())["code_sha"])')"
           test "$DEPLOYED_SHA" = "$CANONICAL_MAIN_SHA"
-          git fetch origin 59dc7f4e10eeb56abc4f247ec9ba045a46a6a496 --depth=1
-          git show FETCH_HEAD:tools/platform_private_input_transport.py > "$RUNNER_TEMP/platform_private_input_transport.py"
-          test "$(git hash-object "$RUNNER_TEMP/platform_private_input_transport.py")" = "77d104405d4995a36f904d6862af03477fd148bc"
+          command -v rclone
+          rclone listremotes | grep -Fx 'realsas-drive:'
 
-      - name: Publish one-run public transport key
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf "$RUNNER_TEMP/realsas-private-input"
-          "$PLATFORM_ROOT/current/bin/realsas-python" "$RUNNER_TEMP/platform_private_input_transport.py" generate \
-            --directory "$RUNNER_TEMP/realsas-private-input" \
-            --run-id "$GITHUB_RUN_ID" \
-            --code-sha "$CANONICAL_MAIN_SHA"
-          echo 'PUBLIC_TRANSPORT_KEY_BEGIN'
-          cat "$RUNNER_TEMP/realsas-private-input/public.json"
-          echo 'PUBLIC_TRANSPORT_KEY_END'
-
-      - name: Upload one-run public transport key
-        uses: actions/upload-artifact@v4
-        with:
-          name: knight-latest-carrier-public-key
-          path: ${{ runner.temp }}/realsas-private-input/public.json
-          if-no-files-found: error
-          overwrite: true
-          retention-days: 1
-
-      - name: Receive encrypted locators and verify exact bytes
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p "$STAGING_ROOT"
-          "$PLATFORM_ROOT/current/bin/realsas-python" "$RUNNER_TEMP/platform_private_input_transport.py" receive \
-            --directory "$RUNNER_TEMP/realsas-private-input" \
-            --out "$STAGING_ROOT" \
-            --repo "$GITHUB_REPOSITORY" \
-            --branch "$GITHUB_REF_NAME" \
-            --run-id "$GITHUB_RUN_ID" \
-            --code-sha "$CANONICAL_MAIN_SHA" \
-            --timeout 900
-
-      - name: Seal rehydration receipt
+      - name: Build exact Knight carrier plus motion inventory
         shell: bash
         run: |
           set -euo pipefail
           "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
-          import hashlib,json,os
+          import json
+          from pathlib import Path
+          src=Path('canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json')
+          inv=json.loads(src.read_text())
+          rows=list(inv['required_files'])
+          rows.extend([
+            {'name':'demo_idle_v1.motion.json','sha256':'18cd79dca501413b1504fa8852a06e4dd6ac01cc7fd7197348eca25af54b2310','size_bytes':673768,'source':{'provider':'google_drive','file_id':'13SkXuEn50MBzZ88E1jrYBatAou4IjLtM'}},
+            {'name':'demo_run_v1.motion.json','sha256':'465bcdf522588974dd475851f5f0ec6e7beb5b7eee3055166f99457bbb8e15c0','size_bytes':185011,'source':{'provider':'google_drive','file_id':'1-OaMn7NAbi4WMqpIQ2IF4mbI_rRJA2RG'}},
+            {'name':'demo_slash_v1.motion.json','sha256':'6422209f1291dbb3dbfdffb6b238e63214f8aeddfc31e12f1b105ecc1da85298','size_bytes':185415,'source':{'provider':'google_drive','file_id':'1Rm_fCuRPQ-Hot6MpwNnzAz7zYDi5Zepe'}},
+          ])
+          out={'schema':'RealSaS.ExternalInputInventory.v1','subject':'SUBJECT2_KNIGHT_LATEST_CARRIER_PLUS_MOTION_20261010','authority_class':'EXTERNAL_BYTES_ONLY__NO_SCIENTIFIC_QUALIFICATION','required_files':rows}
+          Path('/tmp/knight_latest_15_inventory.json').write_text(json.dumps(out,indent=2,sort_keys=True)+'\n')
+          print('required_files',len(rows))
+          PY
+
+      - name: Hydrate exact pinned Drive bytes into CAS
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$STAGING_ROOT" "$CAS_ROOT"
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/platform_artifact_store.py \
+            --inventory /tmp/knight_latest_15_inventory.json \
+            --cas-root "$CAS_ROOT" \
+            --rclone-remote "$REALSAS_RCLONE_DRIVE_REMOTE" \
+            --out "$STAGING_ROOT/HYDRATION_REPORT.json"
+
+      - name: Materialize exact staged names from verified CAS
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os,shutil
           from pathlib import Path
           root=Path(os.environ['STAGING_ROOT'])
+          report=json.loads((root/'HYDRATION_REPORT.json').read_text())
+          assert report['all_input_bytes_verified'] is True
+          assert report['verified_file_count']==15
           rows=[]
-          for p in sorted(root.iterdir()):
-              if p.is_file() and p.name!='REHYDRATION_RECEIPT.json':
-                  data=p.read_bytes(); rows.append({'name':p.name,'size_bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})
-          receipt={'schema':'RealSaS.KnightLatestCarrierRehydrationReceipt.v1','status':'EXACT_BYTES_STAGED__NO_SCIENTIFIC_QUALIFICATION','canonical_main_sha':os.environ['CANONICAL_MAIN_SHA'],'run_id':os.environ['GITHUB_RUN_ID'],'files':rows,'qualification_minted':False,'product_authority':False}
+          for row in report['files']:
+              src=Path(row['path']); dst=root/row['name']
+              shutil.copyfile(src,dst)
+              data=dst.read_bytes(); sha=hashlib.sha256(data).hexdigest()
+              assert len(data)==row['size_bytes'] and sha==row['sha256']
+              rows.append({'name':row['name'],'size_bytes':len(data),'sha256':sha,'hydrate_status':row['status']})
+          receipt={'schema':'RealSaS.KnightLatestCarrierRehydrationReceipt.v2','status':'EXACT_15_BYTES_STAGED__NO_SCIENTIFIC_QUALIFICATION','canonical_main_sha':os.environ['CANONICAL_MAIN_SHA'],'run_id':os.environ['GITHUB_RUN_ID'],'files':rows,'qualification_minted':False,'product_authority':False}
           (root/'REHYDRATION_RECEIPT.json').write_text(json.dumps(receipt,indent=2,sort_keys=True)+'\n')
           print(json.dumps(receipt,sort_keys=True))
           PY
 
-      - name: Upload bounded receipt only
+      - name: Prove offline CAS replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/platform_artifact_store.py \
+            --inventory /tmp/knight_latest_15_inventory.json \
+            --cas-root "$CAS_ROOT" \
+            --offline \
+            --out "$STAGING_ROOT/OFFLINE_CAS_REPLAY.json"
+
+      - name: Upload bounded receipts only
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: knight-latest-carrier-rehydration-receipt
-          path: /home/monster/realsas_authority/imports/knight_latest_carrier_20261010/REHYDRATION_RECEIPT.json
+          path: |
+            /home/monster/realsas_authority/imports/knight_latest_carrier_20261010/HYDRATION_REPORT.json
+            /home/monster/realsas_authority/imports/knight_latest_carrier_20261010/OFFLINE_CAS_REPLAY.json
+            /home/monster/realsas_authority/imports/knight_latest_carrier_20261010/REHYDRATION_RECEIPT.json
           if-no-files-found: warn
           retention-days: 7

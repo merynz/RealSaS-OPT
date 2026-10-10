@@ -1,0 +1,73 @@
+name: knight-main-sealed-render
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/ops/render_knight_sealed_v6.py'
+      - 'tools/platform_render_checkpoint.py'
+      - '.github/workflows/knight_main_sealed_render.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/ops/render_knight_sealed_v6.py'
+      - 'tools/platform_render_checkpoint.py'
+      - 'tests/repository/test_platform_render_checkpoint.py'
+      - '.github/workflows/knight_main_sealed_render.yml'
+
+concurrency:
+  group: knight-main-sealed-render-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements/mainline-ci.txt
+      - run: >-
+          python -m pytest -q tests/repository/test_platform_render_checkpoint.py
+          tests/compiler/test_visual_attachment_motion_v1.py
+          tests/compiler/test_visual_motion_blend_v1.py
+          tests/compiler/test_visual_presentation_pose_v1.py
+  render:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    needs: contracts
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          clean: true
+      - name: Verify exact canonical main before rendering sealed inputs
+        run: test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$GITHUB_SHA"
+      - name: Resume exact current CAA render without inference or source overlays
+        env:
+          EXPECTED_CODE_SHA: ${{ github.sha }}
+          AUTHORITY_ROOT: /home/monster/realsas_authority
+          INPUT_ROOT: /home/monster/realsas_authority/imports/knight_latest_carrier_20261010
+          OUT_DIR: /home/monster/realsas_authority/renders/KNIGHT_MAIN_SEALED_CAA_V6_20261010
+          RENDER_FRAMES: '12'
+          RENDER_RESOLUTION: '256'
+          PYTHONPATH: ${{ github.workspace }}
+        run: /home/monster/realsas_platform/current/bin/realsas-python tools/ops/render_knight_sealed_v6.py
+      - name: Preserve render frames and diagnostics even after interruption
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: KNIGHT_MAIN_SEALED_CAA_V6
+          path: /home/monster/realsas_authority/renders/KNIGHT_MAIN_SEALED_CAA_V6_20261010
+          if-no-files-found: error
+          retention-days: 7

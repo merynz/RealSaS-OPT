@@ -18,6 +18,13 @@ on:
       - 'canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json'
       - '.github/workflows/vf23_production_policy_e2e_bank.yml'
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'compiler/**'
+      - 'runtime/realsas_cpp/**'
+      - 'tests/compiler/**'
+      - '.github/workflows/vf23_production_policy_e2e_bank.yml'
 
 concurrency:
   group: vf23-production-policy-e2e-${{ github.repository }}-${{ github.ref }}
@@ -25,7 +32,8 @@ concurrency:
 
 jobs:
   production-policy-bank:
-    runs-on: [self-hosted, linux, x64, realsas]
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
       PYTHONPATH: .
@@ -56,6 +64,11 @@ jobs:
           sha256sum             canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json             canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json             canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json             > /tmp/vf23-policy-before.sha256
           cat /tmp/vf23-policy-before.sha256
 
+      - name: Install native reference build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libpng-dev zlib1g-dev
+
       - name: Build exact native V2 reference player
         run: |
           g++ -std=c++17 -O2 -Wall -Wextra -pedantic             runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp -lpng -lz -o "$REALSAS_RUNTIME_V2_PLAYER"
@@ -63,7 +76,9 @@ jobs:
 
       - name: Exact unmodified production-policy E2E wiring
         run: |
-          python -m pytest -q             tests/compiler/test_product_mesh_stage_adapters_v1.py::test_vf23_stage20_to25_uses_unmodified_production_caa_policy             tests/compiler/test_product_mesh_stage_adapters_v1.py::test_vf23_stage37_to46_tail_uses_unmodified_production_dynamic_policy
+          python -m pytest -q \
+            tests/compiler/test_product_mesh_stage_adapters_v1.py::test_vf23_source_visual_chain_proves_transport_but_not_full_product \
+            tests/compiler/test_product_mesh_stage_adapters_v1.py::test_vf23_stage37_to46_tail_uses_unmodified_production_dynamic_policy
 
       - name: Representative subject-free production semantic controls
         run: |

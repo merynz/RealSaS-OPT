@@ -45,6 +45,7 @@ jobs:
           tests/compiler/test_visual_motion_blend_v1.py
           tests/compiler/test_visual_presentation_pose_v1.py
           tests/compiler/test_visual_completion_evidence_v1.py
+          tests/repository/test_visual_pipeline_entry_contract_v1.py
   render:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     needs: contracts

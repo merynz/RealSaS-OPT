@@ -32,10 +32,11 @@ version their actual corpus, policy and metrics.
 | Boundary | Evidence and consequence | Required correction and acceptance |
 |---|---|---|
 | Agent entry/exit | Public research execution previously accepted a run without a durable scope/handoff | The accompanying Go change requires a session and mandatory parent intervention; deployment smoke must pass before calling the live path guarded |
+| Main -> deployed Engine | Deployment push filters included control/worker files but omitted most CAA/model/DAG source changes | Main deployment now has no push path filter, so exact-main entry cannot be stranded on an old source archive. Release/DAG identity still controls scientific reuse; refreshing services does not refit independent artifacts |
 | CAA field -> visual texture | `appearance_v2.bake_complete_appearance_asset_stage` binds the canonical completion NPZ but writes source-direct PNGs; `render_knight_sealed_v6.py` reports that the field is not consumed by material transport | Add qualified surface-to-part/view material transport with support/provenance; prove completed samples reach visible pixels without overwriting source or inventing hidden-layer qualification |
 | Stage18 geometry/visual output | One StageResultManifest carries mechanical candidate and visual substrate | Publish separately versioned output producers/read-sets; matched replay must preserve exact mechanical artifact identity for a visual-only change |
 | Appearance -> motion | Current CAA -> Stage38 puppet -> Stage39/40/41 dependency renews motion evidence after appearance changes | Separate mechanical motion witness from presentation/material sealing with equivalent acceptance proofs; do not just remove dependency edges |
-| Adapter/import sharing | Stage20–25 share `appearance_v2.py`; other adapters import it transitively. A file change legitimately widens implementation impact | Split producer implementations and shared pure contracts into real independently imported modules; closure comparisons and actual execution must agree. Never omit hashes to force a small scope |
+| Adapter/import sharing | Stage20–25 share `appearance_v2.py`; AXIS/MIRA Stage26–33 share learned-mechanics dispatch/import closures. Other adapters import these transitively. A file change legitimately widens implementation impact | Split producer implementations and shared pure contracts into real independently imported modules; closure comparisons and actual execution must agree. Never omit hashes to force a small scope |
 | Legacy execution surfaces | Many historical workflow/direct scripts still address authority-root files outside the normal Go path | Classify/archive diagnostic entrypoints and route new scientific/product state through Go; filesystem access still requires operational enforcement |
 | Visual acceptance | Connected palette/domain implementation is now on main, but amodal material, contact/order and full native parity remain open | Qualify matched dynamic witnesses and native end-to-end playback. A rendered GIF or green engineering CI is not product acceptance |
 
@@ -50,3 +51,13 @@ after their evidence has a canonical address and replay purpose.
 Keep one code line and one state owner. Use existing Attempts, Registry, released
 DAGs and workflow journals; no new branch ledger, alternate scheduler, universal
 M/G/W lock or per-diagnostic authority mechanism.
+
+## Live guard evidence
+
+PR71 merged into `main@46e26b3acc32cdd4fc7270b12b4e772162890081`.
+Deployment run `38045971674` passed real session -> API -> workflow/reuse ->
+handoff twice, including exact independent artifact reuse after a node removal.
+Both attempts hit the qualified cache; this run proves warm control/reuse and
+handoff, not a new Python Engine execution. The hosted current-head PostgreSQL, native build and full compiler
+regressions also passed. This validates the guard's normal Go path, not closure
+of the remaining appearance/output boundaries or scientific/product authority.

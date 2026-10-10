@@ -4,14 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths:
-      - 'platform/**'
-      - 'compiler/realsas_compiler_services/platform_worker/**'
-      - 'tools/platform_deploy.py'
-      - 'tools/platform_service.py'
-      - 'tools/platform_deployment_smoke.py'
-      - 'requirements/platform-deployment.txt'
-      - '.github/workflows/platform_developer_deploy.yml'
+    # Agent entry pins exact main, including after CAA/model/DAG or metadata
+    # updates. Path filters can leave the deployed Engine/source SHA stale.
   pull_request:
     branches: [main]
     paths:

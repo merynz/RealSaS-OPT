@@ -1,0 +1,48 @@
+name: knight-seed-run-probe-v1
+
+on:
+  push:
+    branches: [ops/knight-latest-visual-probe-20261010]
+    paths: ['.github/workflows/knight_seed_run_probe_v1.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 1, clean: true}
+      - name: Inspect complete historical Knight run for reusable independent source artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          PY=/home/monster/realsas_platform/current/bin/realsas-python
+          "$PY" - <<'PY'
+          from pathlib import Path
+          import json,hashlib
+          roots=[
+            Path('/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_RECOVERED_V1_643714DE'),
+            Path('/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924'),
+          ]
+          wanted=('05_','07_','08_','15_','16_','17_','18_','19_','20_','21_','22_','23_','24_','37_','38_','39_','40_','41_','42_','43_','44_','45_')
+          for root in roots:
+            print('ROOT',root,'EXISTS',root.is_dir())
+            if not root.is_dir(): continue
+            for ledger_name in ('ACTIVE_RUN_V2.json','run_ledger.json','ledger.json'):
+              lp=root/ledger_name
+              if not lp.is_file(): continue
+              print('LEDGER',lp)
+              try: led=json.loads(lp.read_text())
+              except Exception as e: print('LEDGER_ERR',e); continue
+              for row in led.get('stages',[]):
+                sid=str(row.get('id',''))
+                if not sid.startswith(wanted): continue
+                outs=[]
+                for o in row.get('outputs',[]) or []:
+                  p=Path(str(o.get('path') or ''))
+                  outs.append((o.get('schema'),o.get('sha256'),str(p),p.is_file()))
+                print('STAGE',sid,row.get('status'),'OUTS',json.dumps(outs))
+          PY

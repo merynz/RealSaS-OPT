@@ -1,0 +1,46 @@
+name: knight-current-registry-probe-v1
+
+on:
+  push:
+    branches: [ops/knight-latest-visual-probe-20261010]
+    paths: ['.github/workflows/knight_current_registry_probe_v1.yml']
+
+permissions:
+  contents: read
+
+env:
+  PLATFORM_ROOT: /home/monster/realsas_platform
+  CANONICAL_MAIN_SHA: d3c4f39ddecf2dc73e7c532ec352fc97ad92579b
+  REALSAS_DATABASE_URL: postgresql:///postgres?host=/home/monster/realsas_platform/data/socket&port=55432
+
+jobs:
+  probe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 1, clean: true}
+      - name: Read current Registry only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANONICAL_MAIN_SHA"
+          test "$(/home/monster/realsas_platform/current/bin/realsas-python -c 'import json; from pathlib import Path; print(json.loads(Path("/home/monster/realsas_platform/deployment.json").read_text())["code_sha"])')" = "$CANONICAL_MAIN_SHA"
+          curl --fail --silent http://127.0.0.1:8080/health/live
+          echo
+          command -v psql
+          export PGHOST=/home/monster/realsas_platform/data/socket PGPORT=55432 PGDATABASE=postgres
+          for table in subjects engine_releases subject_inputs attempts artifacts attempt_artifacts commands; do
+            printf '%s=' "$table"
+            psql -X -qAt -c "select count(*) from $table" || true
+          done
+          echo '--- SUBJECTS ---'
+          psql -X -qAt -F '|' -c "select id,slug,created_at from subjects order by created_at desc limit 10" || true
+          echo '--- RELEASES ---'
+          psql -X -qAt -F '|' -c "select id,purpose,release_sha256,created_at from engine_releases order by created_at desc limit 10" || true
+          echo '--- INPUTS ---'
+          psql -X -qAt -F '|' -c "select id,subject_id,input_sha256,created_at from subject_inputs order by created_at desc limit 10" || true
+          echo '--- ATTEMPTS ---'
+          psql -X -qAt -F '|' -c "select id,subject_id,engine_release_id,kind,final_state,created_at from attempts order by created_at desc limit 10" || true
+          echo '--- STAGES ---'
+          /home/monster/realsas_platform/current/bin/realsasctl stages | /home/monster/realsas_platform/current/bin/realsas-python -c 'import json,sys; x=json.load(sys.stdin); print("stage_count",len(x)); print("last",x[-1] if x else None)'

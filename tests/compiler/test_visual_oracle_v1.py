@@ -130,3 +130,34 @@ def test_native_rotated_mirrored_translucent_layer_matches_independent_sampler(t
     subprocess.run([player, str(package), "--clip", "oracle", "--view", "V0", "--frame", "0", "--out-rgba", str(rgba)], check=True, capture_output=True)
     actual = np.fromfile(rgba, np.uint8).reshape(64, 64, 4)
     assert np.max(np.abs(expected.astype(int)-actual.astype(int))) <= 1
+
+
+def test_full_research_adapters_publish_measurements_not_product_qualification(tmp_path):
+    """Engineering fixture: exercises the actual three-adapter output chain."""
+    player = os.environ.get("REALSAS_RUNTIME_V2_PLAYER")
+    if not player:
+        pytest.skip("native player required by mainline CI")
+    import json
+    from compiler.realsas_compiler_services.orchestrator.adapters.visual_oracle_reference_v1 import produce_reference
+    from compiler.realsas_compiler_services.orchestrator.adapters.visual_oracle_native_v1 import render_reference
+    from compiler.realsas_compiler_services.orchestrator.adapters.visual_oracle_measure_v1 import measure_reference
+    manifest = {"oracle_source": fixture(tmp_path), "oracle_render": {
+        "player_path": player, "player_sha256": sha(Path(player).read_bytes()),
+        "variants": ["baseline", "wrong_order", "missing_layer", "wrong_owner", "wrong_pose"]},
+        "oracle_measure": {"budgets": {**BUDGETS, "maximum_pose_origin_px": 1e-4,
+            "maximum_pose_angle_degrees": 1e-4, "maximum_pose_scale_error": 1e-5,
+            "maximum_hidden_sample_pm_error": 2/255}}}
+    ctx = {"run_root": tmp_path / "run", "run_manifest": manifest, "ledger": {"stages": []}}
+    for stage, adapter in zip(oracle_plan()["stages"], (produce_reference, render_reference, measure_reference)):
+        result = adapter(ctx)
+        assert result["status"] == "PASS"
+        assert all(Path(ref["path"]).is_file() and sha(Path(ref["path"]).read_bytes()) == ref["sha256"] for ref in result["outputs"])
+        ctx["ledger"]["stages"].append({"id": stage["id"], "status": result["status"], "outputs": result["outputs"]})
+    measurement = json.loads(next(Path(r["path"]).read_text() for r in result["outputs"] if r["schema"] == "RealSaS.AuthoredVisualOracleMeasurement.v1"))
+    assert measurement["baseline_raster_fit_passed"]
+    assert measurement["hidden_sprite_material"]["passed"]
+    assert measurement["hidden_sprite_material"]["per_sample_PM_colour_checked"]
+    assert all(measurement["negative_controls_detected"].values())
+    assert measurement["required_contact_cardinality"] is None
+    assert measurement["required_grip_cardinality"] is None
+    assert not measurement["full_visual_qualification"] and not measurement["Knight_3D_bind_proven"]

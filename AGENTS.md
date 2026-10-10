@@ -1,6 +1,6 @@
 # RealSaS-OPT Agent Entry Contract
 
-## Mandatory current handoff — 2026-10-09
+## Mandatory current handoff — 2026-10-10
 
 **First read:** `CURRENT_STATE.md`, then `docs/platform/EXECUTION_LANES.md`.
 Use `canonical/CANONICAL_HANDOFF_20261007.md` for the sealed mechanics handoff.
@@ -8,6 +8,15 @@ Use `canonical/CANONICAL_HANDOFF_20261007.md` for the sealed mechanics handoff.
 If the user says only “continue / devam et”, resume from canonical `main` and the priority order in `CURRENT_STATE.md`. Do not resurrect an older runtime-audit, VF-11, recovery, research-branch or promotion-branch continuation merely because historical files still exist.
 
 This repository must be resumable without conversational memory.
+
+Before research execution, read `realsasctl agent-context --id <subject UUID>`
+and enter with `agent-enter`: exact deployed main SHA, Attempt, released DAG,
+immutable SubjectInput and explicit target. A live session must be explicitly
+resumed; never resubmit a timed-out run blindly. `research-run` requires that
+session ID. Exit with `agent-exit`, its exact scope hash, and the next action;
+the Go owner seals current state/artifact bindings and returns a handoff hash.
+The next entry must acknowledge that hash and stay on the same Attempt or an
+explicit child. Read `docs/platform/AGENT_HANDOFF.md` for the command contract.
 
 ## Required operating path
 
@@ -25,6 +34,12 @@ DAG nodes/edges as versioned release data: add, remove or rewire in a new
 EngineRelease, inspect graph-aware impact, and preserve unrelated artifacts.
 Keep implementation and plan changes on canonical main through short reviewed
 PRs; research continuation belongs to the Attempt, never a long-lived branch.
+
+M/G/W preservation is a boundary of the current Knight witness, not a global
+architecture rule. Models, heads, datasets and evaluations may change under a
+declared intervention. Only their actual DAG consumers invalidate; independent
+artifacts retain identity. A shared trunk change legitimately affects its heads.
+Never hide a dependency hash to make a requested scope appear smaller.
 
 Use standard GitHub-hosted `ubuntu-latest` for host-independent CPU CI while
 the repository is public; private-repository jobs skip. Notebook/Colab is the

@@ -76,13 +76,22 @@ final diagnostics through the existing Attempt endpoint/CLI. A reused stage
 still needs its bytes in the configured persistent CAS; this does not change
 artifact-store verification or make nested external files recursively portable.
 
-Legacy requests without `intervention` keep normal cache/recompute behavior for
-compatibility. **A causal “only component X changed” claim requires this contract**
+Every request with a parent Attempt now requires `intervention`; continuation
+cannot silently fall back to ordinary cache/recompute behavior. A first bootstrap
+Attempt without a parent still uses normal construction. Public research execution
+also requires an active [agent session](AGENT_HANDOFF.md). **A causal “only component X changed” claim requires this contract**
 and a matched measurement apparatus: source bytes, camera/direction, motion,
 probe policy, metrics and renderer identities. A scope receipt is not a visual,
 mechanical, product or generalization PASS.
 
 ## Geometry and RGB must have distinct dependency identities
+
+M, G and W are ordinary versioned outputs. They stay fixed for the current Knight
+witness because that experiment preserves them. A future geometry, tree or skin
+model change declares its own direct stage/input changes and rebuilds affected
+consumers. A new head or 10k+ unseen evaluation has its own producer, read-set,
+dataset/policy identity and output qualification; it does not freeze all models
+or replace an earlier witness's scoped claim.
 
 The current IRIS stage produces geometry authority. A future appearance head
 must publish an independently versioned producer/output contract and read-set.

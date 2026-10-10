@@ -114,7 +114,7 @@ def run_smoke(root, timeout):
                 for index, plan in enumerate((baseline, candidate))]
     target = baseline["stages"][1]["id"]
     removed = baseline["stages"][0]["id"]
-    attempts, states, artifacts = [], [], []
+    attempts, states, artifacts, handoffs = [], [], [], []
     first_license_status = None
     for index, (plan, release_id) in enumerate(zip((baseline, candidate), releases)):
         run_id = "PLATFORM_SERVICE_SMOKE_" + uuid.uuid4().hex.upper()
@@ -137,7 +137,16 @@ def run_smoke(root, timeout):
             impact = attempt["Impact"]
             if removed not in (impact.get("RemovedStageIDs") or ()) or target not in (impact.get("UnchangedStageIDs") or ()):
                 raise RuntimeError("SMOKE_GRAPH_REMOVAL_IMPACT_DRIFT")
+        context = request(f"/v1/agents/context/{subject}")
+        if context["active_session"] is not None:
+            raise RuntimeError("SMOKE_UNEXPECTED_ACTIVE_SESSION")
+        ticket = request("/v1/agents/enter", {
+            "attempt_id": attempt_id, "subject_input_id": inputs["subject_input_id"],
+            "target_stage_id": target, "canonical_code_sha": deployment["code_sha"],
+            "expected_handoff_sha256": (context["last_handoff"] or {}).get("handoff_sha256", ""),
+            "created_by": ACTOR})
         request("/v1/research/compile", {"research_attempt_id": attempt_id, "subject_id": subject,
+                "agent_session_id": ticket["scope"]["session_id"],
                 "engine_release_id": release_id, "subject_input_id": inputs["subject_input_id"],
                 "target_stage_id": target, "compiler_run_id": run_id,
                 "run_manifest_path": str(manifest_path), "run_ledger_path": str(mainline.run_ledger_path(run_id)),
@@ -146,6 +155,14 @@ def run_smoke(root, timeout):
         state = wait_attempt(attempt_id, timeout)
         states.append(state)
         artifacts.append(artifact_for_attempt(root, attempt_id, target))
+        handoff = request("/v1/agents/exit", {
+            "session_id": ticket["scope"]["session_id"], "attempt_id": attempt_id,
+            "scope_sha256": ticket["scope_sha256"], "created_by": ACTOR,
+            "next_action": "Compare independent graph removal reuse" if index == 0 else "Inspect engineering smoke receipt",
+            "summary": "SourceLicense artifact " + artifacts[-1]["artifact_id"]})
+        if handoff["artifact_bindings"].get("stage:" + target) != artifacts[-1]["artifact_id"]:
+            raise RuntimeError("SMOKE_HANDOFF_ARTIFACT_BINDING_DRIFT")
+        handoffs.append(handoff)
         if index == 0:
             first_license_status = "EXECUTED" if any(event["type"] == "STAGE_EXECUTION_PASSED" for event in state["events"]) else "REUSED"
             if first_license_status == "EXECUTED":
@@ -176,6 +193,7 @@ def run_smoke(root, timeout):
                "first_target_action": first_license_status, "second_target_action": "REUSE",
                "exact_shared_artifact": artifacts[0], "product_revision_minted": False,
                "controlled_intervention_verified": True, "intervention_receipt": control,
+               "agent_handoffs": handoffs,
                "wall_seconds": round(time.monotonic() - started, 3)}
     output = root / "receipts" / f"smoke-{attempts[1]}.json"
     output.write_text(json.dumps(receipt, indent=2) + "\n")

@@ -1,6 +1,6 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-10-09
+**Date:** 2026-10-10
 **Canonical code line:** `main` only  
 **Architecture:** RealSaS V2, 46-stage Compiler compatibility DAG; versioned release DAGs
 **Implementation readiness:** `canonical/V2_IMPLEMENTATION_READINESS.json`
@@ -65,16 +65,24 @@ failed both matched V6 Attempts; the later runner changes 37/42/43/45, not only 
 A fast relation replay's green workflow tolerated dynamic exposure failure and
 must not be interpreted as visual acceptance.
 
-Controlled component replacement now has an opt-in `research-start.intervention`
-contract: exact direct changes, a same-subject/baseline-release parent, frozen
+Controlled component replacement now requires `research-start.intervention` for
+every continuation with a parent Attempt. The
+contract requires exact direct changes, a same-subject/baseline-release parent, frozen
 unchanged stages, pinned SubjectInput roles and exact qualified baseline artifact
 reuse before Engine work. Intended input changes declare their roles and only
 invalidate their released consumers/descendants.
-Legacy requests retain ordinary cache/recompute behavior and cannot support the
-same causal claim. See `docs/platform/CAUSAL_INTERVENTIONS.md` for the receipt,
+First bootstrap Attempts retain ordinary construction behavior. Public research
+execution now requires a Go-owned agent entry scope and exact handoff; see
+`docs/platform/AGENT_HANDOFF.md`. See `docs/platform/CAUSAL_INTERVENTIONS.md` for the receipt,
 limits and operations. The geometry/RGB identity split is a future design, not
 implemented IRIS functionality. Current product dependencies can still renew
 motion proof artifacts after appearance changes without refitting M/G/W.
+
+M/G/W are fixed only for the present Knight witness. Future model/head/evaluation
+changes use ordinary DAG invalidation and independent artifact identity. The
+current boundary debt and closure gates are recorded in
+`docs/platform/MODULARITY_AUDIT_20261010.md`; the architecture is not yet fully
+isolated at every output/implementation boundary.
 
 Visual ownership, material, deformation, layering and rebuild boundaries are
 mapped in `docs/presentation/VISUAL_DEPENDENCY_MAP_20261009.md`. The later visual completion request authorizes bounded appearance/runtime work
@@ -119,6 +127,15 @@ Knight FIT1 mechanics are closed relative to the sealed source/teacher motion en
 Appearance / CAA remains source-preserving and proof-bound under `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`. The mechanical mesh is not allowed to silently become a second appearance authority.
 
 ## Fresh canonical Knight regression render
+
+Current carrier/CAA replay `38044123895` ran on exact
+`main@cc89978e0378086086a788b0c67911cd7058ad35` (PR70), without source overlay or
+model inference. All eight IDLE views completed as 12-frame GIFs; RUN and SLASH
+completed only V4 as full GIFs. Other motion/view frames failed
+`VISUAL_DEPTH_TIE_OR_FRAGMENT_OVERFLOW`. The job failed and preserved valid
+frames/GIFs/checkpoint/report in artifact `11666802329`. This is diagnostic render
+evidence, not Go ProductRevision or visual/product acceptance. The report also
+records that canonical CAA completion is not consumed by visual material transport.
 
 Run `37578120472` executed on exact `main@287eabef757cb2b1e6b532a4c2d0a71eb62cd324` and completed PASS. It rebuilt sealed Stage23, requalified Stage24 and freshly rerendered IDLE/RUN/SLASH with exact frozen reference hashes.
 

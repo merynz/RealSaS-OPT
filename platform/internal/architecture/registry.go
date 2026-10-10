@@ -101,15 +101,15 @@ func staticDomains() []Domain {
 				{
 					ID: "platform.research", ParentDomain: "platform", Authority: AuthorityPlatform,
 					Purpose:         "Research Attempt lineage, code-change impact and repair continuation.",
-					CodeRoots:       []string{"platform/internal/attempt", "platform/internal/diagnostic"},
+					CodeRoots:       []string{"platform/internal/attempt", "platform/internal/diagnostic", "platform/internal/agentsession"},
 					StateTables:     []string{"attempts", "attempt_events", "attempt_artifacts", "failure_signatures", "owner_attributions", "repair_directives"},
-					FailurePrefixes: []string{"RESEARCH_", "ILLEGAL_FAILURE_OWNER", "REPAIR_"},
+					FailurePrefixes: []string{"RESEARCH_", "AGENT_", "ILLEGAL_FAILURE_OWNER", "REPAIR_"},
 					UpstreamModules: []string{"platform.release", "platform.workflow"},
 				},
 				{
 					ID: "platform.workflow", ParentDomain: "platform", Authority: AuthorityPlatform,
 					Purpose:         "Commands, outbox delivery, Temporal workflows, stage execution state and crash-safe resume.",
-					CodeRoots:       []string{"platform/internal/command", "platform/internal/outbox", "platform/internal/dispatch", "platform/internal/orchestration", "platform/internal/control"},
+					CodeRoots:       []string{"platform/internal/command", "platform/internal/httpapi", "platform/internal/outbox", "platform/internal/dispatch", "platform/internal/orchestration", "platform/internal/control", "platform/internal/capability", "platform/internal/resolver"},
 					StateTables:     []string{"commands", "outbox_events", "executions", "execution_artifacts", "compiler_run_bindings"},
 					FailurePrefixes: []string{"WORKFLOW_", "EXECUTION_", "COMPILER_PLATFORM_PLAN_DRIFT"},
 					UpstreamModules: []string{"platform.artifact", "platform.release"},

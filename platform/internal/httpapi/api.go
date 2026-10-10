@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/merynz/RealSaS-OPT/platform/internal/agentsession"
 	"github.com/merynz/RealSaS-OPT/platform/internal/artifactstore"
 	"github.com/merynz/RealSaS-OPT/platform/internal/attempt"
 	"github.com/merynz/RealSaS-OPT/platform/internal/command"
@@ -21,9 +22,10 @@ import (
 // Local operator API. Commands use the transactional outbox; handlers never
 // call a compiler script or rewrite a product revision themselves.
 type API struct {
-	Pool  *pgxpool.Pool
-	Graph *stagegraph.Graph
-	Store artifactstore.Store
+	CodeSHA string
+	Pool    *pgxpool.Pool
+	Graph   *stagegraph.Graph
+	Store   artifactstore.Store
 }
 
 func respond(w http.ResponseWriter, status int, value any) {
@@ -128,6 +130,31 @@ func (a API) Handler() http.Handler {
 		out, err := attempt.StartResearch(r.Context(), a.Pool, a.Graph, req)
 		result(w, out, err)
 	})
+	mux.HandleFunc("POST /v1/agents/enter", func(w http.ResponseWriter, r *http.Request) {
+		var req agentsession.OpenRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		out, err := agentsession.Open(r.Context(), a.Pool, a.CodeSHA, req)
+		result(w, out, err)
+	})
+	mux.HandleFunc("POST /v1/agents/exit", func(w http.ResponseWriter, r *http.Request) {
+		var req agentsession.CloseRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		out, err := agentsession.Close(r.Context(), a.Pool, req)
+		result(w, out, err)
+	})
+	mux.HandleFunc("GET /v1/agents/context/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id, err := uuid.Parse(r.PathValue("id"))
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "subject UUID required"})
+			return
+		}
+		out, err := agentsession.Context(r.Context(), a.Pool, id, a.CodeSHA)
+		result(w, out, err)
+	})
 	compile := func(research bool) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			var req command.CompileRequest
@@ -138,6 +165,11 @@ func (a API) Handler() http.Handler {
 				respond(w, 400, map[string]string{"error": "EXECUTION_LANE_REQUEST_MISMATCH"})
 				return
 			}
+			if research && req.AgentSessionID == nil {
+				respond(w, 409, map[string]string{"error": "RESEARCH_EXECUTION_REQUIRES_AGENT_SESSION"})
+				return
+			}
+			req.DeployedCodeSHA = a.CodeSHA
 			out, err := command.SubmitCompile(r.Context(), a.Pool, a.Graph, req)
 			result(w, out, err)
 		}

@@ -23,6 +23,14 @@ func TestLaneMismatchRejectedBeforeAnyDatabaseMutation(t *testing.T) {
 	}
 }
 
+func TestPublicResearchExecutionCannotBypassAgentEntry(t *testing.T) {
+	response := httptest.NewRecorder()
+	(API{}).Handler().ServeHTTP(response, httptest.NewRequest("POST", "/v1/research/compile", strings.NewReader(`{"research_attempt_id":"4e5af44d-7b74-4a24-a720-de1a4eb99844"}`)))
+	if response.Code != 409 || !strings.Contains(response.Body.String(), "REQUIRES_AGENT_SESSION") {
+		t.Fatalf("%d %s", response.Code, response.Body.String())
+	}
+}
+
 func TestArtifactUploadRejectsDriftAndImportCannotSupplyQualification(t *testing.T) {
 	store, err := artifactstore.NewLocal(t.TempDir())
 	if err != nil {

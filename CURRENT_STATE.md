@@ -78,6 +78,14 @@ limits and operations. The geometry/RGB identity split is a future design, not
 implemented IRIS functionality. Current product dependencies can still renew
 motion proof artifacts after appearance changes without refitting M/G/W.
 
+The canonical Go guard is live: deployment run `38045971674` on
+`main@46e26b3acc32cdd4fc7270b12b4e772162890081` passed real entry -> API -> workflow/reuse
+-> handoff and exact independent artifact reuse. Both attempts reused the qualified
+cache; no new Engine stage execution is claimed for this smoke. Main deployment now
+tracks every main push; narrow control-only path filters must not leave CAA/model
+source changes in an undeployed checkout. Service refresh is not model inference
+or a change to independent scientific artifact identity.
+
 M/G/W are fixed only for the present Knight witness. Future model/head/evaluation
 changes use ordinary DAG invalidation and independent artifact identity. The
 current boundary debt and closure gates are recorded in

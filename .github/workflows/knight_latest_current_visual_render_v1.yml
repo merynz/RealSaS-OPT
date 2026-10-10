@@ -35,9 +35,9 @@ jobs:
           test "$DEPLOYED" = "$CANONICAL_MAIN_SHA"
           test -f "$AUTHORITY_ROOT/runs/KNIGHT_LATEST_CARRIER_MATERIALIZATION_20261010/RECEIPT.json"
           test -f "$AUTHORITY_ROOT/runs/KNIGHT_LATEST_CURRENT_CAA_VISUAL_20261010/CAA_RECEIPT.json"
-          git fetch --depth=1 origin research/presentation-p0-closure-20261008
+          git fetch --depth=1 origin "$RESEARCH_V6_SHA"
           test "$(git rev-parse FETCH_HEAD)" = "$RESEARCH_V6_SHA"
-          git checkout FETCH_HEAD -- \
+          git checkout "$RESEARCH_V6_SHA" -- \
             compiler/realsas_compiler_core/visual_domain_v2.py \
             compiler/realsas_compiler_core/visual_attachment_motion_v1.py \
             compiler/realsas_compiler_core/visual_motion_blend_v1.py \

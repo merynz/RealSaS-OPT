@@ -1,0 +1,98 @@
+name: knight-latest-carrier-rehydrate-v1
+
+on:
+  push:
+    branches:
+      - ops/knight-latest-visual-probe-20261010
+    paths:
+      - '.github/workflows/knight_latest_carrier_rehydrate_v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: knight-latest-carrier-rehydrate-v1
+  cancel-in-progress: true
+
+env:
+  PLATFORM_ROOT: /home/monster/realsas_platform
+  AUTHORITY_ROOT: /home/monster/realsas_authority
+  CANONICAL_MAIN_SHA: d3c4f39ddecf2dc73e7c532ec352fc97ad92579b
+  STAGING_ROOT: /home/monster/realsas_authority/imports/knight_latest_carrier_20261010
+
+jobs:
+  rehydrate:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 25
+    steps:
+      - name: Checkout ops transport branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          clean: true
+
+      - name: Verify current deployment and load sealed transport helper
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$CANONICAL_MAIN_SHA"
+          DEPLOYED_SHA="$("$PLATFORM_ROOT/current/bin/realsas-python" -c 'import json,os; from pathlib import Path; print(json.loads((Path(os.environ["PLATFORM_ROOT"])/"deployment.json").read_text())["code_sha"])')"
+          test "$DEPLOYED_SHA" = "$CANONICAL_MAIN_SHA"
+          git fetch origin 59dc7f4e10eeb56abc4f247ec9ba045a46a6a496 --depth=1
+          git show FETCH_HEAD:tools/platform_private_input_transport.py > "$RUNNER_TEMP/platform_private_input_transport.py"
+          echo '77d104405d4995a36f904d6862af03477fd148bc  '"$RUNNER_TEMP/platform_private_input_transport.py" | sha1sum -c -
+
+      - name: Publish one-run public transport key
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$RUNNER_TEMP/realsas-private-input"
+          "$PLATFORM_ROOT/current/bin/realsas-python" "$RUNNER_TEMP/platform_private_input_transport.py" generate \
+            --directory "$RUNNER_TEMP/realsas-private-input" \
+            --run-id "$GITHUB_RUN_ID" \
+            --code-sha "$CANONICAL_MAIN_SHA"
+          echo 'PUBLIC_TRANSPORT_KEY_BEGIN'
+          cat "$RUNNER_TEMP/realsas-private-input/public.json"
+          echo 'PUBLIC_TRANSPORT_KEY_END'
+
+      - name: Receive encrypted locators and verify exact bytes
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$STAGING_ROOT"
+          "$PLATFORM_ROOT/current/bin/realsas-python" "$RUNNER_TEMP/platform_private_input_transport.py" receive \
+            --directory "$RUNNER_TEMP/realsas-private-input" \
+            --out "$STAGING_ROOT" \
+            --repo "$GITHUB_REPOSITORY" \
+            --branch "$GITHUB_REF_NAME" \
+            --run-id "$GITHUB_RUN_ID" \
+            --code-sha "$CANONICAL_MAIN_SHA" \
+            --timeout 900
+
+      - name: Seal rehydration receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ['STAGING_ROOT'])
+          rows=[]
+          for p in sorted(root.iterdir()):
+              if p.is_file() and p.name!='REHYDRATION_RECEIPT.json':
+                  data=p.read_bytes(); rows.append({'name':p.name,'size_bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})
+          receipt={'schema':'RealSaS.KnightLatestCarrierRehydrationReceipt.v1','status':'EXACT_BYTES_STAGED__NO_SCIENTIFIC_QUALIFICATION','canonical_main_sha':os.environ['CANONICAL_MAIN_SHA'],'run_id':os.environ['GITHUB_RUN_ID'],'files':rows,'qualification_minted':False,'product_authority':False}
+          (root/'REHYDRATION_RECEIPT.json').write_text(json.dumps(receipt,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(receipt,sort_keys=True))
+          PY
+
+      - name: Upload bounded receipt only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: knight-latest-carrier-rehydration-receipt
+          path: /home/monster/realsas_authority/imports/knight_latest_carrier_20261010/REHYDRATION_RECEIPT.json
+          if-no-files-found: warn
+          retention-days: 7

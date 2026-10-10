@@ -73,7 +73,10 @@ def measure_reference(ctx):
                 cohort = (frame["clip"], *key)
                 revealed_addresses.setdefault(cohort, set()).update(hidden)
                 mask = robust & (expected_owner == owners.index(key[0])) & np.isin(address, list(hidden))
-                accepted = mask & (expected_owner == actual_owner) & (actual[..., 3] >= 252)
+                e_pm, a_pm = expected.astype(float)/255, actual.astype(float)/255
+                e_pm[..., :3] *= e_pm[..., 3, None]; a_pm[..., :3] *= a_pm[..., 3, None]
+                material_matches = np.abs(e_pm-a_pm).max(axis=-1) <= settings["budgets"]["maximum_hidden_sample_pm_error"]
+                accepted = mask & (expected_owner == actual_owner) & (actual[..., 3] >= 252) & material_matches
                 observed_addresses.setdefault(cohort, set()).update(map(int, address[accepted]))
         # Composite onto a fixed checkerboard solely for viewing; metrics above
         # use raw RGBA, never the GIF's palette or presentation background.
@@ -115,7 +118,8 @@ def measure_reference(ctx):
                  "maximum_scale_residual": max_scale, "passed": pose_pass},
         "hidden_sprite_material": {"initially_occluded_then_revealed_authored_texels": required,
             "native_visible_with_correct_owner_texels": accepted, "coverage": accepted/required if required else None,
-            "passed": required > 0 and accepted == required, "full_anatomy_or_CAA_completion_proven": False},
+            "passed": required > 0 and accepted == required, "per_sample_PM_colour_checked": True,
+            "full_anatomy_or_CAA_completion_proven": False},
         "negative_controls_detected": {v: not s["all_frames_passed"] for v, s in summaries.items() if v != "baseline"},
         "baseline_raster_fit_passed": summaries["baseline"]["all_frames_passed"] and pose_pass,
         "required_contact_cardinality": None, "required_grip_cardinality": None,

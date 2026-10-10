@@ -34,7 +34,8 @@
       "maximum_robust_owner_mismatch_pixels": 0,
       "maximum_pose_origin_px": 0.0001,
       "maximum_pose_angle_degrees": 0.0001,
-      "maximum_pose_scale_error": 1e-05
+      "maximum_pose_scale_error": 1e-05,
+      "maximum_hidden_sample_pm_error": 0.00784313725490196
     },
     "budgets_set_before_reference_execution": true
   },

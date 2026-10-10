@@ -10,7 +10,9 @@ The 46-node product graph and Knight M/G/W/motion are unchanged.
 Can the existing native source-owned visual consumer reproduce genuine
 authored layered 2D evidence when given explicit owner addresses, source sprite
 support, local motion and per-frame authored order? This oracle evaluates one
-different 2D character in its own Idle/run/basic attack1 mainline keys. It does
+different 2D character in its own Idle/run/jump/walk/hit back/basic attack1 mainline keys.
+These 52 keys cover all four authored owner/order configurations found in the
+source, including actual order changes inside jump and walk. It does
 not retarget this character onto Quaternius Knight or use Knight 3D material
 as appearance truth. One V0 in a research RSS is one actual authored view,
 never eight copies presented as multiview evidence.

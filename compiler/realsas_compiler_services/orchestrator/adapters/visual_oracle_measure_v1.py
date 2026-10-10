@@ -67,15 +67,15 @@ def measure_reference(ctx):
         report.update({"variant": variant, "frame_index": index, "clip": frame["clip"], "time_ms": frame["time_ms"]})
         reports.append(report)
         if variant == "baseline":
+            e_pm, a_pm = expected.astype(float)/255, actual.astype(float)/255
+            e_pm[..., :3] *= e_pm[..., 3, None]; a_pm[..., :3] *= a_pm[..., 3, None]
+            material_matches = np.abs(e_pm-a_pm).max(axis=-1) <= settings["budgets"]["maximum_hidden_sample_pm_error"]
             visible = canonical_visible(frame, owners, expected_owner, address, robust)
             for key, values in visible.items():
                 hidden = values & initial_hidden[frame["clip"]].get(key, set())
                 cohort = (frame["clip"], *key)
                 revealed_addresses.setdefault(cohort, set()).update(hidden)
                 mask = robust & (expected_owner == owners.index(key[0])) & np.isin(address, list(hidden))
-                e_pm, a_pm = expected.astype(float)/255, actual.astype(float)/255
-                e_pm[..., :3] *= e_pm[..., 3, None]; a_pm[..., :3] *= a_pm[..., 3, None]
-                material_matches = np.abs(e_pm-a_pm).max(axis=-1) <= settings["budgets"]["maximum_hidden_sample_pm_error"]
                 accepted = mask & (expected_owner == actual_owner) & (actual[..., 3] >= 252) & material_matches
                 observed_addresses.setdefault(cohort, set()).update(map(int, address[accepted]))
         # Composite onto a fixed checkerboard solely for viewing; metrics above
@@ -114,6 +114,9 @@ def measure_reference(ctx):
     payload = {"schema": "RealSaS.AuthoredVisualOracleMeasurement.v1", "experiment_completed": True,
         "scope": evidence["scope"], "source": ctx["run_manifest"]["oracle_source"],
         "preregistered_measurement": settings, "variant_summaries": summaries, "frames": reports,
+        "domain": {"authored_owner_count": len(owners), "source_mainline_key_count": len(reference_frames),
+            "distinct_authored_order_configurations": len({tuple(o["owner"] for o in f["objects"]) for f in reference_frames}),
+            "per_clip_order_configurations": {clip: len({tuple(o["owner"] for o in f["objects"]) for f in reference_frames if f["clip"] == clip}) for clip in ctx["run_manifest"]["oracle_source"]["clips"]}},
         "pose": {"maximum_origin_residual_source_pixels": max_origin, "maximum_angle_residual_degrees": max_angle,
                  "maximum_scale_residual": max_scale, "passed": pose_pass},
         "hidden_sprite_material": {"initially_occluded_then_revealed_authored_texels": required,

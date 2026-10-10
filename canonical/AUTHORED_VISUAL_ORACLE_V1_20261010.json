@@ -13,6 +13,9 @@
     "clips": [
       "Idle",
       "run",
+      "jump",
+      "walk",
+      "hit back",
       "basic attack 1"
     ],
     "resolution": 768,

@@ -1,0 +1,166 @@
+name: temp-knight-platform-readiness-audit
+
+on:
+  push:
+    branches:
+      - audit/knight-platform-readiness-20261010
+    paths:
+      - '.github/workflows/temp_knight_platform_readiness_audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      EXPECTED_MAIN_SHA: d3c4f39ddecf2dc73e7c532ec352fc97ad92579b
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      KNIGHT_RUN: SUBJECT2_KNIGHT_DEMO_V2_20260924
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify persistent platform is exact new canonical main
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_MAIN_SHA"
+          test -s "$PLATFORM_ROOT/deployment.json"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=json.loads((Path(os.environ['PLATFORM_ROOT'])/'deployment.json').read_text())
+          print(json.dumps(p, sort_keys=True))
+          assert p['code_sha'] == os.environ['EXPECTED_MAIN_SHA'], p
+          PY
+      - name: Read-only Knight bytes, run authority and Registry audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/knight-platform-readiness.json"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - "$out" <<'PY'
+          import hashlib, json, os, subprocess, sys
+          from pathlib import Path
+          from pgserver._commands import POSTGRES_BIN_PATH
+
+          out=Path(sys.argv[1])
+          root=Path(os.environ['PLATFORM_ROOT'])
+          authority=Path(os.environ['AUTHORITY_ROOT'])
+          run_root=authority/'runs'/os.environ['KNIGHT_RUN']
+          deployment=json.loads((root/'deployment.json').read_text())
+          inventory_path=root/'current/source/canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json'
+          inventory=json.loads(inventory_path.read_text())
+          sys.path.insert(0, str(root/'current/source'))
+          from tools.platform_host_preflight import inventory_report
+
+          preflight=inventory_report(authority, inventory, deadline_seconds=30, max_files=120000)
+
+          def sha(path):
+              p=Path(path)
+              h=hashlib.sha256()
+              with p.open('rb') as f:
+                  for b in iter(lambda:f.read(1<<20), b''): h.update(b)
+              return h.hexdigest()
+
+          manifest_path=run_root/'run_manifest.json'
+          ledger_path=run_root/'ACTIVE_RUN_V2.json'
+          run_info={
+              'run_root_exists': run_root.is_dir(),
+              'manifest_exists': manifest_path.is_file(),
+              'ledger_exists': ledger_path.is_file(),
+          }
+          if manifest_path.is_file():
+              manifest=json.loads(manifest_path.read_text())
+              run_info['manifest_sha256']=sha(manifest_path)
+              run_info['manifest_subject_id']=manifest.get('subject_id')
+              observation=dict(manifest.get('observation') or {})
+              run_info['source_rasters']=[{
+                  'view_index': int(row.get('view_index',-1)),
+                  'path': str((row.get('image') or {}).get('path') or ''),
+                  'sha256': str((row.get('image') or {}).get('sha256') or ''),
+                  'exists': Path(str((row.get('image') or {}).get('path') or '')).is_file(),
+              } for row in observation.get('source_rasters') or []]
+              run_info['source_masks']=[{
+                  'view_index': int(row.get('view_index',-1)),
+                  'path': str((row.get('mask') or {}).get('path') or ''),
+                  'sha256': str((row.get('mask') or {}).get('sha256') or ''),
+                  'exists': Path(str((row.get('mask') or {}).get('path') or '')).is_file(),
+              } for row in observation.get('source_foreground_masks') or []]
+              cam=dict(observation.get('camera_bundle') or {})
+              run_info['camera_bundle']={
+                  'path': str(cam.get('path') or ''), 'sha256': str(cam.get('sha256') or ''),
+                  'exists': Path(str(cam.get('path') or '')).is_file(),
+              }
+          if ledger_path.is_file():
+              ledger=json.loads(ledger_path.read_text())
+              run_info['ledger_sha256']=sha(ledger_path)
+              run_info['stage_status']={str(r['id']):str(r['status']) for r in ledger.get('stages') or []}
+
+          important=['19_STATIC_CANONICAL_MESH_QUALIFIED','28_SKELETON_GRAPH_VALIDATED','32_SKIN_FIELD_QUALIFIED','35_DYNAMIC_PROBE_PROOF','36_DYNAMIC_REPAIR_EFFECT_PROOF','37_VISUAL_PRESENTATION_QUALIFIED','42_RUNTIME_PROJECTION','45_DYNAMIC_VISUAL_INTEGRITY']
+          local_stage_dirs={}
+          for sid in important:
+              d=run_root/'artifacts'/sid
+              rows=[]
+              if d.is_dir():
+                  for p in sorted(d.rglob('*')):
+                      if p.is_file() and p.stat().st_size <= 32*1024*1024:
+                          rows.append({'path':str(p),'size_bytes':p.stat().st_size,'sha256':sha(p)})
+              local_stage_dirs[sid]=rows
+
+          def psql(sql):
+              cmd=[str(POSTGRES_BIN_PATH/'psql'),'-h',str(root/'data/socket'),'-p','55432','-d','postgres','-At','-F','\t','-c',sql]
+              r=subprocess.run(cmd,text=True,capture_output=True,check=True,timeout=20)
+              return [line.split('\t') for line in r.stdout.splitlines() if line.strip()]
+
+          tables=psql("SELECT table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY table_name")
+          registry={'tables':[r[0] for r in tables]}
+          if 'subjects' in registry['tables']:
+              registry['knight_subjects']=psql("SELECT id::text,slug,display_name FROM subjects WHERE lower(slug) LIKE '%knight%' OR lower(display_name) LIKE '%knight%' ORDER BY created_at")
+          else:
+              registry['knight_subjects']=[]
+          subject_ids=[row[0] for row in registry['knight_subjects']]
+          if subject_ids and 'attempts' in registry['tables']:
+              quoted=','.join("'"+s.replace("'","''")+"'" for s in subject_ids)
+              registry['attempts']=psql(f"SELECT id::text,subject_id::text,engine_release_id::text,COALESCE(parent_attempt_id::text,''),final_state FROM attempts WHERE subject_id::text IN ({quoted}) ORDER BY created_at")
+          else:
+              registry['attempts']=[]
+          attempt_ids=[row[0] for row in registry['attempts']]
+          if attempt_ids and 'attempt_artifacts' in registry['tables'] and 'artifacts' in registry['tables']:
+              quoted=','.join("'"+s.replace("'","''")+"'" for s in attempt_ids)
+              stage_roles=','.join("'stage:"+s+"'" for s in important)
+              registry['important_stage_artifacts']=psql(f"SELECT aa.attempt_id::text,aa.role,a.id::text,a.content_sha256,a.storage_key FROM attempt_artifacts aa JOIN artifacts a ON a.id=aa.artifact_id WHERE aa.attempt_id::text IN ({quoted}) AND aa.role IN ({stage_roles}) ORDER BY aa.attempt_id,aa.role")
+          else:
+              registry['important_stage_artifacts']=[]
+
+          report={
+              'schema':'RealSaS.KnightPlatformReadinessAudit.v1',
+              'status':'MEASURED_READ_ONLY',
+              'deployed_code_sha':deployment.get('code_sha'),
+              'external_preflight':preflight,
+              'historical_run':run_info,
+              'historical_stage_files':local_stage_dirs,
+              'registry':registry,
+              'scientific_pass_claimed':False,
+              'qualification_minted':False,
+          }
+          out.write_text(json.dumps(report,indent=2,sort_keys=True)+'\n')
+          print(json.dumps({
+              'deployed_code_sha':report['deployed_code_sha'],
+              'input_bytes_available':preflight['input_bytes_available'],
+              'remaining_bindings':preflight['remaining_bindings'],
+              'run_info':run_info,
+              'knight_subject_count':len(registry['knight_subjects']),
+              'knight_attempt_count':len(registry['attempts']),
+              'important_registry_artifact_count':len(registry['important_stage_artifacts']),
+              'local_stage_file_counts':{k:len(v) for k,v in local_stage_dirs.items()},
+          },sort_keys=True))
+          PY
+          echo "AUDIT_OUT=$out" >> "$GITHUB_ENV"
+      - name: Upload read-only readiness audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: knight-platform-readiness-audit
+          path: ${{ env.AUDIT_OUT }}
+          if-no-files-found: error
+          retention-days: 3

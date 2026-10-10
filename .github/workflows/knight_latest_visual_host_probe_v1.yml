@@ -14,6 +14,11 @@ concurrency:
   group: knight-latest-visual-host-probe-v1
   cancel-in-progress: true
 
+env:
+  PLATFORM_ROOT: /home/monster/realsas_platform
+  AUTHORITY_ROOT: /home/monster/realsas_authority
+  KNIGHT_RUN: SUBJECT2_KNIGHT_DEMO_V2_20260924
+
 jobs:
   probe:
     runs-on: [self-hosted, linux, x64, realsas]
@@ -31,51 +36,75 @@ jobs:
         run: |
           set -euo pipefail
           git fetch origin main --depth=1
-          HEAD_SHA="$(git rev-parse HEAD)"
-          MAIN_SHA="$(git rev-parse origin/main)"
-          test "$HEAD_SHA" = "$MAIN_SHA"
-          echo "CANONICAL_MAIN_SHA=$MAIN_SHA"
-          python - <<'PY'
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
+          test "$(git rev-parse HEAD)" = "$("$PLATFORM_ROOT/current/bin/realsas-python" -c 'import json,os; from pathlib import Path; print(json.loads((Path(os.environ["PLATFORM_ROOT"])/"deployment.json").read_text())["code_sha"])')"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
           from __future__ import annotations
           import hashlib, json, os
           from pathlib import Path
-          repo = Path.cwd()
-          roots = [Path('/home/monster/realsas_authority'), Path('/home/monster/realsas_platform')]
-          inv = json.loads((repo/'canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json').read_text())
-          expected = {row['sha256']: row['name'] for row in inv['required_files']}
-          expected.update({
-              '5149ce8062020fcee49249d51b06d87d3e119333efd8fcca8b509434a76ca78c':'V0.png','541bb053cc01972eafda6b2774e12cbe0b56bfa8df51fecff1d823df229099da':'V1.png','431ba1e25de5862f0da77b7e494dbbc2a170f775ff626e64ef481f5e41a2df8a':'V2.png','deebf678569c18ae4d7e809b4d335942d7678ed8b7d2aa259283f4ee8dbba9ee':'V3.png','d3a83c2c3f6615e625e1ae192e6543237a0236ad3e43bc06e95368ad19f95504':'V4.png','c3be5a6468a6e767967d1e3ac4e0b67f0d7c5ad0e2f11ef830aa529e4f081b66':'V5.png','9f3b33457ae01c4cccf390a56fb9c4234a64d69f0a846a57e3fd1c8292c65a56':'V6.png','91c5930051f3ff72965b101aa89d7b24caac90ce2f27e00c2f13f53d821e53b0':'V7.png','18cd79dca501413b1504fa8852a06e4dd6ac01cc7fd7197348eca25af54b2310':'demo_idle_v1.motion.json','465bcdf522588974dd475851f5f0ec6e7beb5b7eee3055166f99457bbb8e15c0':'demo_run_v1.motion.json','6422209f1291dbb3dbfdffb6b238e63214f8aeddfc31e12f1b105ecc1da85298':'demo_slash_v1.motion.json','e11ab0fe32378eb1cd06fbebd8d1827e71eaa7b3fbe31b78248f7f3f9ab91920':'qualified_camera_set.json','118ac28fc8a597caec3ed28ab18af2091ce24b51642c6a2e41db417424d903a6':'COMPILER_POST_BIND_COINCIDENT_FRAME_QUALIFICATION_V551.json','e4944ec1da3ed0a3dad65c7596e2ee65d6f806a9c44873f6588db95706526855':'V551_DYNAMIC_FRAME_METRICS.json','7996bf007d41a2c2eaff30011730d68f9a6258790f72e27a60831b0bf6aec890':'HANDOFF_MANIFEST.json'})
-          by_name={}
-          for sha,name in expected.items(): by_name.setdefault(name,set()).add(sha)
-          matches={sha:[] for sha in expected}; manifests=[]; scanned=0; max_files=50000
+          repo=Path.cwd(); platform=Path(os.environ['PLATFORM_ROOT']); authority=Path(os.environ['AUTHORITY_ROOT'])
+          sysroot=platform/'current/source'
+          import sys; sys.path.insert(0,str(sysroot))
+          from tools.platform_host_preflight import inventory_report
+          inv=json.loads((repo/'canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json').read_text())
+          preflight=inventory_report(authority,inv,deadline_seconds=60,max_files=150000)
+          run_root=authority/'runs'/os.environ['KNIGHT_RUN']; manifest_path=run_root/'run_manifest.json'
+          manifest=json.loads(manifest_path.read_text()) if manifest_path.is_file() else {}
+          def file_ref(row,key):
+              value=dict(row.get(key) or {}); p=Path(str(value.get('path') or ''))
+              return {'path':str(p),'sha256':str(value.get('sha256') or ''),'exists':p.is_file()}
+          obs=dict(manifest.get('observation') or {})
+          source=[{'view_index':int(r['view_index']),**file_ref(r,'image')} for r in obs.get('source_rasters') or []]
+          masks=[{'view_index':int(r['view_index']),**file_ref(r,'mask')} for r in obs.get('source_foreground_masks') or []]
+          motion=dict(manifest.get('motion') or {})
+          def refs(v,out):
+              if isinstance(v,dict):
+                  if isinstance(v.get('path'),str) and isinstance(v.get('sha256'),str):
+                      p=Path(v['path']); out.append({'path':str(p),'sha256':v['sha256'],'exists':p.is_file(),'name':p.name})
+                  for x in v.values(): refs(x,out)
+              elif isinstance(v,list):
+                  for x in v: refs(x,out)
+          motion_refs=[]; refs(motion,motion_refs)
+          exact_extra={
+              '18cd79dca501413b1504fa8852a06e4dd6ac01cc7fd7197348eca25af54b2310':'demo_idle_v1.motion.json',
+              '465bcdf522588974dd475851f5f0ec6e7beb5b7eee3055166f99457bbb8e15c0':'demo_run_v1.motion.json',
+              '6422209f1291dbb3dbfdffb6b238e63214f8aeddfc31e12f1b105ecc1da85298':'demo_slash_v1.motion.json',
+              'e11ab0fe32378eb1cd06fbebd8d1827e71eaa7b3fbe31b78248f7f3f9ab91920':'qualified_camera_set.json',
+              '118ac28fc8a597caec3ed28ab18af2091ce24b51642c6a2e41db417424d903a6':'COMPILER_POST_BIND_COINCIDENT_FRAME_QUALIFICATION_V551.json',
+              'e4944ec1da3ed0a3dad65c7596e2ee65d6f806a9c44873f6588db95706526855':'V551_DYNAMIC_FRAME_METRICS.json'}
+          hits={sha:[] for sha in exact_extra}; scanned=0
+          roots=[run_root,authority,platform/'artifacts']
           for root in roots:
               if not root.is_dir(): continue
-              for path in root.rglob('*'):
-                  if scanned>=max_files: break
-                  if not path.is_file(): continue
-                  scanned+=1; name=path.name
-                  if name in by_name:
-                      try: digest=hashlib.sha256(path.read_bytes()).hexdigest()
-                      except OSError: continue
-                      if digest in expected: matches[digest].append(str(path))
-                  if name=='run_manifest.json' or name.endswith('_manifest.json'):
-                      try: data=json.loads(path.read_text())
-                      except Exception: continue
-                      text=json.dumps(data,sort_keys=True); score=sum(token in text for token in ('KNIGHT','appearance','observation','motion','runtime','AXIS','MIRA','SOURCE_OWNED_VISUAL_MESH'))
-                      if score>=4: manifests.append({'path':str(path),'run_id':data.get('run_id'),'subject_id':data.get('subject_id'),'execution_class':data.get('execution_class'),'sections':sorted(data.keys()),'score':score})
-              if scanned>=max_files: break
-          exact_rows=[{'name':name,'sha256':sha,'paths':sorted(matches[sha])[:8]} for sha,name in expected.items()]
-          manifests.sort(key=lambda row:(row['score'],row['path']),reverse=True)
-          report={'schema':'RealSaS.LatestKnightVisualHostProbe.v1','status':'HOST_IDENTITY_PROBE_ONLY__NO_SCIENTIFIC_AUTHORITY','canonical_main_sha':os.popen('git rev-parse HEAD').read().strip(),'scanned_file_count':scanned,'scan_limit':max_files,'exact_inputs':exact_rows,'exact_input_found_count':sum(bool(row['paths']) for row in exact_rows),'exact_input_required_count':len(exact_rows),'candidate_manifests':manifests[:40],'platform_api_expected':'http://127.0.0.1:8080'}
-          out=Path('/tmp/knight-latest-visual-host-probe'); out.mkdir(parents=True,exist_ok=True); (out/'REPORT.json').write_text(json.dumps(report,indent=2)+'\n'); print(json.dumps(report,indent=2))
+              for p in root.rglob('*'):
+                  if scanned>=120000: break
+                  if not p.is_file(): continue
+                  scanned+=1
+                  expected=[sha for sha,name in exact_extra.items() if p.name==name or sha in p.name]
+                  if not expected: continue
+                  try:
+                      h=hashlib.sha256(p.read_bytes()).hexdigest()
+                  except OSError: continue
+                  if h in hits: hits[h].append(str(p))
+              if scanned>=120000: break
+          report={
+              'schema':'RealSaS.LatestKnightVisualHostProbe.v2','status':'MEASURED_READ_ONLY__NO_QUALIFICATION_MINTED',
+              'canonical_main_sha':os.popen('git rev-parse HEAD').read().strip(),'external_inventory':preflight,
+              'historical_manifest':{'path':str(manifest_path),'exists':manifest_path.is_file(),'sections':sorted(manifest.keys()),'source_rasters':source,'source_masks':masks,'motion_refs':motion_refs,'camera_bundle':dict(obs.get('camera_bundle') or {})},
+              'extra_exact_hits':[{'name':name,'sha256':sha,'paths':hits[sha]} for sha,name in exact_extra.items()],
+              'platform_deployment':json.loads((platform/'deployment.json').read_text()),
+          }
+          out=Path('/tmp/knight-latest-visual-host-probe'); out.mkdir(parents=True,exist_ok=True)
+          (out/'REPORT.json').write_text(json.dumps(report,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(report,sort_keys=True))
           PY
           curl --fail --silent --show-error http://127.0.0.1:8080/v1/stages > /tmp/knight-latest-visual-host-probe/platform_stages.json
-          systemctl --user --no-pager --plain status realsas-api.service realsas-control-worker.service realsas-engine.service || true
 
       - name: Upload bounded probe report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: knight-latest-visual-host-probe
           path: /tmp/knight-latest-visual-host-probe
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 7

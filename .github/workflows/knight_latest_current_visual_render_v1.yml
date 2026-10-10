@@ -1,0 +1,63 @@
+name: knight-latest-current-visual-render-v1
+
+on:
+  push:
+    branches: [ops/knight-latest-visual-probe-20261010]
+    paths:
+      - 'tools/ops/render_knight_latest_current_visual_v1.py'
+      - '.github/workflows/knight_latest_current_visual_render_v1.yml'
+
+permissions:
+  contents: read
+
+env:
+  CANONICAL_MAIN_SHA: d3c4f39ddecf2dc73e7c532ec352fc97ad92579b
+  AUTHORITY_ROOT: /home/monster/realsas_authority
+  INPUT_ROOT: /home/monster/realsas_authority/imports/knight_latest_carrier_20261010
+  OUT_DIR: /home/monster/realsas_authority/renders/KNIGHT_LATEST_CURRENT_VISUAL_20261010
+
+jobs:
+  render:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ops/knight-latest-visual-probe-20261010
+          fetch-depth: 1
+          clean: true
+      - name: Verify exact deployed canonical main
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEPLOYED=$(/home/monster/realsas_platform/current/bin/realsas-python -c 'import json; from pathlib import Path; print(json.loads(Path("/home/monster/realsas_platform/deployment.json").read_text())["code_sha"])')
+          test "$DEPLOYED" = "$CANONICAL_MAIN_SHA"
+          test -f "$AUTHORITY_ROOT/runs/KNIGHT_LATEST_CARRIER_MATERIALIZATION_20261010/RECEIPT.json"
+          test -f "$AUTHORITY_ROOT/runs/KNIGHT_LATEST_CURRENT_CAA_VISUAL_20261010/CAA_RECEIPT.json"
+      - name: Fresh render exact latest Knight M G W_M plus current CAA
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$OUT_DIR"
+          mkdir -p "$OUT_DIR"
+          export PYTHONPATH="$GITHUB_WORKSPACE"
+          /home/monster/realsas_platform/current/bin/realsas-python \
+            tools/ops/render_knight_latest_current_visual_v1.py \
+            --authority-root "$AUTHORITY_ROOT" \
+            --input-root "$INPUT_ROOT" \
+            --out-dir "$OUT_DIR" \
+            --resolution 320 \
+            --frames 10
+          test -s "$OUT_DIR/REPORT.json"
+          for clip in IDLE RUN SLASH; do
+            test -s "$OUT_DIR/KNIGHT_${clip}_LATEST_CURRENT_VISUAL_ALL_VIEWS.gif"
+            test -s "$OUT_DIR/KNIGHT_${clip}_LATEST_CURRENT_VISUAL_V0.gif"
+            test -s "$OUT_DIR/KNIGHT_${clip}_LATEST_CURRENT_VISUAL_ALL_VIEWS_FRAME0.png"
+          done
+      - name: Publish fresh render artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: KNIGHT_LATEST_CURRENT_VISUAL_20261010
+          path: /home/monster/realsas_authority/renders/KNIGHT_LATEST_CURRENT_VISUAL_20261010
+          if-no-files-found: error
+          retention-days: 7

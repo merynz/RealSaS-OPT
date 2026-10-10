@@ -1,6 +1,7 @@
 name: platform-developer-deployment
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
@@ -49,7 +50,9 @@ jobs:
           python -m pytest -q tests/repository/test_platform_deployment.py tests/repository/test_self_hosted_execution_policy.py
 
   developer-host:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      github.event_name == 'workflow_dispatch'
     needs: developer-contract
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 20
@@ -74,18 +77,18 @@ jobs:
               print('USER_MANAGER_AVAILABLE')
           except RuntimeError as error:
               # PR validates the package even if the operator needs to enable
-              # its user manager. The actual main install fails closed.
+              # its user manager. The actual canonical deployment fails closed.
               print('::warning::' + str(error))
           PY
       - uses: actions/setup-go@v5
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           go-version: '1.27.1'
           cache: false
-      - name: Reconcile terminal failed Attempts through the canonical Go owner
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - name: Verify exact canonical main deployment target
         run: |
           test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$GITHUB_SHA"
+      - name: Reconcile terminal failed Attempts through the canonical Go owner
+        run: |
           if test -f /home/monster/realsas_platform/deployment.json; then
             export REALSAS_REPO_ROOT="$GITHUB_WORKSPACE"
             export REALSAS_DATABASE_URL='postgresql:///postgres?host=/home/monster/realsas_platform/data/socket&port=55432'
@@ -96,20 +99,18 @@ jobs:
             go run ./cmd/realsas-control-worker --reconcile-once
           fi
       - name: Install persistent developer services from exact canonical main
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           python tools/platform_deploy.py \
             --root /home/monster/realsas_platform \
             --authority-root /home/monster/realsas_authority \
             --expected-main-sha "$GITHUB_SHA"
       - name: Real API to Engine execution and exact reuse proof
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           /home/monster/realsas_platform/current/bin/realsas-python \
             /home/monster/realsas_platform/current/source/tools/platform_deployment_smoke.py \
             --root /home/monster/realsas_platform
       - name: Service status (no environment or credentials)
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: always()
         run: |
           python - <<'PY'
           import subprocess
@@ -124,7 +125,7 @@ jobs:
               raise RuntimeError('NOT_ALL_MANAGED_SERVICES_ACTIVE')
           PY
       - name: Preserve engineering execution receipts
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: platform-developer-deployment

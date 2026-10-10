@@ -1287,6 +1287,17 @@ def test_vf23_source_visual_chain_proves_transport_but_not_full_product(tmp_path
     )
     assert r42["diagnostics"]["mechanical_mesh_render_authority"] is False
     assert r42["diagnostics"]["runtime_generation"] is False
+    # Actual CAA -> projection -> RSS -> native/DVI chain. Reading the sidecar
+    # verifies its bytes; it must not be counted as hidden material transport.
+    from compiler.realsas_compiler_core.runtime_package_v2 import read_rss_v2
+    projection = read_json(next(out for out in r42["outputs"]
+        if out["schema"] == "RealSaS.SourceOwnedVisualRuntimeProjectionIR.v1")["path"])
+    boundary = projection["metadata"]["visual_boundary_evidence"]
+    field = boundary["relationships"][2]["canonical_completion_field"]
+    assert field["field_sha256"] == compile_artifact.compile_npz_sha256
+    assert field["validation_read"] is True
+    assert field["transport_sample_count"] == 0
+    assert r42["diagnostics"]["full_visual_acceptance_passed"] is False
 
     r43 = run(
         "43_RSS_MATERIALIZE_COMPACT",
@@ -1333,6 +1344,12 @@ def test_vf23_source_visual_chain_proves_transport_but_not_full_product(tmp_path
     assert report["compiled_appearance_exposure_passed"] is True
     assert report["hidden_layer_material_qualified"] is False
     assert report["semantic_contact_and_order_qualified"] is False
+    assert report["full_visual_acceptance_passed"] is False
+    assert report["visual_boundary_evidence"] == boundary
+    package_path = read_json(next(out for out in r43["outputs"]
+        if out["schema"] == "RealSaS.RuntimePackageSealIR.v2")["path"])["archive_path"]
+    assert json.loads(read_rss_v2(Path(package_path))[
+        "authority/source_visual_boundary_evidence_v1.json"]) == boundary
     ctx["stage"] = {"id": "46_PRODUCT_CLOSURE_SEAL"}
     with pytest.raises(QualificationError, match="FULL_VISUAL_ACCEPTANCE_REQUIRED:hidden_layer_material_qualified"):
         seal_product_closure_stage(ctx)

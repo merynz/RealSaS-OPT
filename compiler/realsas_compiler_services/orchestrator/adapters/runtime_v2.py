@@ -5,6 +5,7 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, replace
 import hashlib
+import json
 import math
 from pathlib import Path
 import subprocess
@@ -17,6 +18,10 @@ from compiler.realsas_compiler_core.visual_material_v1 import (
     load_visual_material, MATERIAL_CONTRACT, DEPTH_CONTRACT, SAMPLING_CONTRACT,
 )
 from compiler.realsas_compiler_core.visual_material_render_v1 import render_visual_material
+from compiler.realsas_compiler_core.visual_completion_evidence_v1 import (
+    inspect_visual_completion_field, source_visual_boundary_evidence,
+    validate_source_visual_boundary_evidence,
+)
 
 from compiler.realsas_compiler_core.appearance_authority_v2 import (
     CAA_PROVENANCE,
@@ -346,6 +351,9 @@ def _build_source_owned_visual_runtime_projection(
         raise QualificationError("SOURCE_VISUAL_RUNTIME_APPEARANCE_UV_BYTES_DRIFT")
     if asset.metadata.get("visual_material_contract") != MATERIAL_CONTRACT:
         raise QualificationError("SOURCE_VISUAL_RUNTIME_PER_TEXEL_MATERIAL_REQUIRED")
+    completion = inspect_visual_completion_field(asset)
+    boundary = source_visual_boundary_evidence(asset=asset, appearance=appearance,
+        presentation=qualified_visual, completion=completion)
     if (
         dynamic.mechanical_state_binding_hash
         != complete.mechanical_state_binding_hash
@@ -722,6 +730,8 @@ def _build_source_owned_visual_runtime_projection(
             "operator_policy": operator_policy,
             "rest_binding_qa": qa_summary,
             "dynamic_motion_qa": dynamic_qa,
+            "visual_boundary_evidence": boundary,
+            "full_visual_acceptance_passed": False,
         },
     )
     projection = replace(
@@ -767,6 +777,8 @@ def _build_source_owned_visual_runtime_projection(
             ),
             "mechanical_mesh_render_authority": False,
             "runtime_generation": False,
+            "visual_boundary_evidence_hash": boundary["evidence_hash"],
+            "full_visual_acceptance_passed": False,
         },
     }
 
@@ -1801,6 +1813,20 @@ def _prove_source_owned_visual_dynamic_integrity(
     archive = resolved_path(package.archive_path)
     if not archive.is_file() or sha256_file(archive) != package.archive_sha256:
         raise QualificationError("SOURCE_VISUAL_DVI_PACKAGE_BYTES_DRIFT")
+    boundary = projection.metadata.get("visual_boundary_evidence")
+    if boundary is not None:
+        validate_source_visual_boundary_evidence(boundary)
+        entries = read_rss_v2(archive)
+        raw = entries.get("authority/source_visual_boundary_evidence_v1.json")
+        if raw is None or json.loads(raw) != boundary:
+            raise QualificationError("SOURCE_VISUAL_DVI_BOUNDARY_EVIDENCE_PACKAGE_DRIFT")
+        for label, actual, expected in (
+            ("APPEARANCE", boundary.get("appearance_asset_hash"), projection.appearance_asset_binding_hash),
+            ("APPEARANCE_QUALIFICATION", boundary.get("appearance_qualification_hash"), projection.appearance_qualification_binding_hash),
+            ("PRESENTATION", boundary.get("qualified_visual_presentation_hash"), projection.qualified_visual_presentation_binding_hash),
+        ):
+            if actual != expected:
+                raise QualificationError("SOURCE_VISUAL_DVI_BOUNDARY_BINDING_DRIFT:" + label)
     arrays = _projection_arrays(projection)
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     native_workers = _native_parallel_workers(ctx)
@@ -2030,6 +2056,8 @@ def _prove_source_owned_visual_dynamic_integrity(
             "appearance_totality_domain": projection.metadata.get("appearance_totality_domain"),
             "hidden_layer_material_qualified": False,
             "semantic_contact_and_order_qualified": False,
+            "full_visual_acceptance_passed": False,
+            "visual_boundary_evidence": boundary,
             "all_frame_views_nonempty": empty_frame_view_count == 0,
             "visual_orientation_passed": flipped_triangle_count == 0,
             "catastrophic_edge_stretch_passed": edge_gt_4_count == 0,
@@ -2090,6 +2118,8 @@ def _prove_source_owned_visual_dynamic_integrity(
             "direct_source_provenance_mismatch_pixel_count": (
                 direct_source_provenance_mismatch_pixel_count
             ),
+            "full_visual_acceptance_passed": False,
+            "visual_boundary_evidence_hash": boundary["evidence_hash"] if boundary else None,
         },
     }
 

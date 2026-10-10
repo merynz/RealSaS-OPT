@@ -7,12 +7,15 @@ on:
     paths:
       - 'tools/ops/render_knight_sealed_v6.py'
       - 'tools/platform_render_checkpoint.py'
+      - 'compiler/realsas_compiler_core/visual_completion_evidence_v1.py'
       - '.github/workflows/knight_main_sealed_render.yml'
   pull_request:
     branches: [main]
     paths:
       - 'tools/ops/render_knight_sealed_v6.py'
       - 'tools/platform_render_checkpoint.py'
+      - 'compiler/realsas_compiler_core/visual_completion_evidence_v1.py'
+      - 'tests/compiler/test_visual_completion_evidence_v1.py'
       - 'tests/repository/test_platform_render_checkpoint.py'
       - '.github/workflows/knight_main_sealed_render.yml'
 
@@ -41,6 +44,7 @@ jobs:
           tests/compiler/test_visual_attachment_motion_v1.py
           tests/compiler/test_visual_motion_blend_v1.py
           tests/compiler/test_visual_presentation_pose_v1.py
+          tests/compiler/test_visual_completion_evidence_v1.py
   render:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     needs: contracts
@@ -53,12 +57,13 @@ jobs:
           clean: true
       - name: Verify exact canonical main before rendering sealed inputs
         run: test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$GITHUB_SHA"
-      - name: Resume exact current CAA render without inference or source overlays
+      - name: Inspect sealed production-consumption boundary before full visual rendering
         env:
           EXPECTED_CODE_SHA: ${{ github.sha }}
           AUTHORITY_ROOT: /home/monster/realsas_authority
           INPUT_ROOT: /home/monster/realsas_authority/imports/knight_latest_carrier_20261010
-          OUT_DIR: /home/monster/realsas_authority/renders/KNIGHT_MAIN_SEALED_CAA_V6_20261010
+          OUT_DIR: /home/monster/realsas_authority/renders/KNIGHT_MAIN_SEALED_CAA_V6_20261010/${{ github.sha }}
+          VISUAL_BOUNDARY_PREFLIGHT_ONLY: '1'
           RENDER_FRAMES: '12'
           RENDER_RESOLUTION: '256'
           PYTHONPATH: ${{ github.workspace }}
@@ -68,6 +73,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: KNIGHT_MAIN_SEALED_CAA_V6
-          path: /home/monster/realsas_authority/renders/KNIGHT_MAIN_SEALED_CAA_V6_20261010
+          path: /home/monster/realsas_authority/renders/KNIGHT_MAIN_SEALED_CAA_V6_20261010/${{ github.sha }}
           if-no-files-found: error
           retention-days: 7

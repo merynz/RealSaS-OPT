@@ -55,6 +55,15 @@ jobs:
           cat "$RUNNER_TEMP/realsas-private-input/public.json"
           echo 'PUBLIC_TRANSPORT_KEY_END'
 
+      - name: Upload one-run public transport key
+        uses: actions/upload-artifact@v4
+        with:
+          name: knight-latest-carrier-public-key
+          path: ${{ runner.temp }}/realsas-private-input/public.json
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 1
+
       - name: Receive encrypted locators and verify exact bytes
         env:
           GITHUB_TOKEN: ${{ github.token }}

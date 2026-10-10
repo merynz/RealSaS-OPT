@@ -18,6 +18,7 @@ from compiler.realsas_compiler_core.appearance_authority_v2 import complete_appe
 from compiler.realsas_compiler_core.carrier_skin_v1 import qualified_carrier_skin_from_dict
 from compiler.realsas_compiler_core.deformation_envelope_derivation_v2 import derive_deformation_envelope_v2
 from compiler.realsas_compiler_core.joint_frames_v2 import derive_joint_frames_post_bind_v2
+from compiler.realsas_compiler_core.mechanical_carrier_evidence_v1 import mechanical_carrier_evidence_from_dict
 from compiler.realsas_compiler_core import motion_dynamic_proof_v2 as motion_proof
 from compiler.realsas_compiler_core import visual_material_render_v1 as visual_render
 from compiler.realsas_compiler_core.skin_topology_compatibility_carrier_v1 import run_skin_topology_compatibility_carrier_v1
@@ -111,41 +112,6 @@ def _classify_depth(kwargs: dict) -> dict:
     }
 
 
-def _region_affine(rest: np.ndarray, target: np.ndarray, region: np.ndarray) -> tuple[np.ndarray, list[dict]]:
-    out = np.empty_like(target)
-    rows = []
-    for rid in sorted(set(map(int, region.tolist()))):
-        ids = np.flatnonzero(region == rid)
-        x = np.asarray(rest[ids], dtype=np.float64)
-        y = np.asarray(target[ids], dtype=np.float64)
-        X = np.column_stack((x, np.ones(len(x), dtype=np.float64)))
-        rank = int(np.linalg.matrix_rank(X))
-        if len(ids) >= 3 and rank == 3:
-            B, *_ = np.linalg.lstsq(X, y, rcond=None)
-            pred = X @ B
-            linear = B[:2, :]
-        else:
-            delta = np.mean(y - x, axis=0)
-            pred = x + delta
-            linear = np.eye(2, dtype=np.float64)
-        det = float(np.linalg.det(linear))
-        if det <= 1.0e-9:
-            # Deterministic orientation-preserving fallback: similarity fit.
-            pred, sim_row = _fit_similarity(x, y)
-            linear = np.asarray(sim_row.pop("linear"), dtype=np.float64)
-            det = float(np.linalg.det(linear))
-        residual = np.linalg.norm(pred - y, axis=1)
-        out[ids] = pred
-        rows.append({
-            "region_id": rid,
-            "vertex_count": int(len(ids)),
-            "determinant": det,
-            "target_rms_residual_px": float(np.sqrt(np.mean(residual * residual))),
-            "target_max_residual_px": float(np.max(residual, initial=0.0)),
-        })
-    return out, rows
-
-
 def _fit_similarity(x: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, dict]:
     if len(x) == 0:
         raise RuntimeError("SIMILARITY_EMPTY_REGION")
@@ -175,6 +141,40 @@ def _fit_similarity(x: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, dict]:
         "target_rms_residual_px": float(np.sqrt(np.mean(residual * residual))),
         "target_max_residual_px": float(np.max(residual, initial=0.0)),
     }
+
+
+def _region_affine(rest: np.ndarray, target: np.ndarray, region: np.ndarray) -> tuple[np.ndarray, list[dict]]:
+    out = np.empty_like(target)
+    rows = []
+    for rid in sorted(set(map(int, region.tolist()))):
+        ids = np.flatnonzero(region == rid)
+        x = np.asarray(rest[ids], dtype=np.float64)
+        y = np.asarray(target[ids], dtype=np.float64)
+        X = np.column_stack((x, np.ones(len(x), dtype=np.float64)))
+        rank = int(np.linalg.matrix_rank(X))
+        if len(ids) >= 3 and rank == 3:
+            B, *_ = np.linalg.lstsq(X, y, rcond=None)
+            pred = X @ B
+            linear = B[:2, :]
+        else:
+            delta = np.mean(y - x, axis=0)
+            pred = x + delta
+            linear = np.eye(2, dtype=np.float64)
+        det = float(np.linalg.det(linear))
+        if det <= 1.0e-9:
+            pred, sim_row = _fit_similarity(x, y)
+            linear = np.asarray(sim_row.pop("linear"), dtype=np.float64)
+            det = float(np.linalg.det(linear))
+        residual = np.linalg.norm(pred - y, axis=1)
+        out[ids] = pred
+        rows.append({
+            "region_id": rid,
+            "vertex_count": int(len(ids)),
+            "determinant": det,
+            "target_rms_residual_px": float(np.sqrt(np.mean(residual * residual))),
+            "target_max_residual_px": float(np.max(residual, initial=0.0)),
+        })
+    return out, rows
 
 
 def _region_similarity(rest: np.ndarray, target: np.ndarray, region: np.ndarray) -> tuple[np.ndarray, list[dict]]:
@@ -220,6 +220,7 @@ def main() -> None:
     ledger = json.loads((caa / "ACTIVE_RUN_V2.json").read_text())
     manifest = json.loads((caa / "run_manifest.json").read_text())
     candidate = canonical_mesh_candidate_from_dict(json.loads((mat / "rebound_candidate.json").read_text()))
+    carrier = mechanical_carrier_evidence_from_dict(json.loads((mat / "mechanical_carrier_evidence.json").read_text()))
     skin = qualified_carrier_skin_from_dict(json.loads((mat / "qualified_carrier_skin.json").read_text()))
     skeleton = qualified_skeleton_from_dict(json.loads((input_root / SKELETON_NAME).read_text()))
     cam_raw = _load_stage_payload(ledger, "05_CAMERA_CONTRACT_SOLVED", "RealSaS.QualifiedCameraSetIR.v1")
@@ -235,7 +236,7 @@ def main() -> None:
     rest = np.asarray([v.P for v in candidate.vertices], dtype=np.float64)
     mech_faces = base.mechanical_faces(candidate)
     _axis_payload, envelope = derive_deformation_envelope_v2(skeleton=skeleton, camera_set=camera_set)
-    compatibility = run_skin_topology_compatibility_carrier_v1(candidate, skeleton=skeleton, skin=skin, envelope=envelope, cameras=cameras, policy=policy)
+    compatibility = run_skin_topology_compatibility_carrier_v1(carrier, skeleton=skeleton, skin=skin, envelope=envelope, cameras=cameras, policy=policy)
     unsafe = set(map(int, compatibility.get("unsafe_face_indices") or ()))
 
     ctx = {"repo_root": Path(".").resolve(), "authority_root": auth, "run_root": caa, "run_id": CAA_RUN, "run_manifest_path": caa / "run_manifest.json", "run_manifest": manifest, "ledger": ledger, "stage": {"id": "F6_MICRO"}}

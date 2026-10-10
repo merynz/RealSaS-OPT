@@ -5,6 +5,14 @@
 **Architecture:** RealSaS V2, 46-stage Compiler compatibility DAG; versioned release DAGs
 **Implementation readiness:** `canonical/V2_IMPLEMENTATION_READINESS.json`
 
+Authored 2D oracle V1 is user-authorized and implemented; Go execution/results
+are pending. See `docs/research/AUTHORED_VISUAL_ORACLE_V1_20261010.md` and its
+sealed protocol/research DAG. This is the different 2D reference's own sampled
+motion, not Knight 3D binding or full visual qualification. Exact runtime pixels,
+owners, source absolute poses, hidden sprite texels and negative controls are
+measured separately from experiment completion. Inspect Go Attempt/handoff
+before continuing; never infer visual PASS from a green workflow.
+
 ## Active platform work
 
 Active experiment: `PLATFORM_EXECUTION_LANES`. State:

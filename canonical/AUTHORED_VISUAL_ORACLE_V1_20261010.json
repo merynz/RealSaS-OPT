@@ -1,0 +1,79 @@
+{
+  "schema": "RealSaS.AuthoredVisualOracleProtocol.v1",
+  "experiment_id": "AUTHORED_VISUAL_ORACLE_V1_20261010",
+  "user_authorized": true,
+  "canonical_branch": "main",
+  "status": "IMPLEMENTED__GO_EXECUTION_PENDING",
+  "archive_size_bytes": 219256413,
+  "source": {
+    "archive_sha256": "935f7737c123b988ffd0989ed13d673095ff255794bb9bfc17d5bc1dcf3e753e",
+    "scml_member": "RealSaS_ArtistIntent_M4_GOLD_SOURCE_20260731_183353/projects/P0074_4081c29a/Knights.scml",
+    "scml_sha256": "662ae40d79ec85a527b655944755e95708f7abd6eb9fadf4e4f7014fa31ca630",
+    "entity_id": 0,
+    "clips": [
+      "Idle",
+      "run",
+      "basic attack 1"
+    ],
+    "resolution": 768,
+    "margin_pixels": 24
+  },
+  "variants": [
+    "baseline",
+    "wrong_order",
+    "missing_layer",
+    "wrong_owner",
+    "wrong_pose"
+  ],
+  "measurement": {
+    "reference": "RAW_SCML_CACHED_ABSOLUTE_POSE__INVERSE_AFFINE_SPRITE_COMPOSITE",
+    "budgets": {
+      "minimum_alpha_iou": 0.999,
+      "maximum_pm_mean": 0.00392156862745098,
+      "maximum_pm_p99": 0.00784313725490196,
+      "maximum_robust_owner_mismatch_pixels": 0,
+      "maximum_pose_origin_px": 0.0001,
+      "maximum_pose_angle_degrees": 0.0001,
+      "maximum_pose_scale_error": 1e-05
+    },
+    "budgets_set_before_reference_execution": true
+  },
+  "inventory": {
+    "schema": "RealSaS.ExternalInputInventory.v1",
+    "subject": "AUTHORED_2D_REFERENCE",
+    "authority_class": "RAW_SOURCE__NOT_QUALIFIED",
+    "required_files": [
+      {
+        "name": "RealSaS_ArtistIntent_M4_GOLD_SOURCE_20260731_183353.zip.part_000.bin",
+        "sha256": "eac823e9e3845d271c0a09b9ecf8438153177976097588c61ac648b324ba8120",
+        "size_bytes": 94371840,
+        "source": {
+          "provider": "google_drive",
+          "file_id": "1y4I7k-ZAlvDAk3WkBF7lGryFOVm_u7Ib"
+        }
+      },
+      {
+        "name": "RealSaS_ArtistIntent_M4_GOLD_SOURCE_20260731_183353.zip.part_001.bin",
+        "sha256": "9613683a584e6ea8f028614d60d903564c0a90d85b963e45cdfddb383a0e3e58",
+        "size_bytes": 94371840,
+        "source": {
+          "provider": "google_drive",
+          "file_id": "11oBkPt_JqXl_Bn6T9pLYeKhky3vyb0LJ"
+        }
+      },
+      {
+        "name": "RealSaS_ArtistIntent_M4_GOLD_SOURCE_20260731_183353.zip.part_002.bin",
+        "sha256": "b753bc30b8b2779287634de1e59c0d4726ed4c3031b26e717cfa5697b2aaeb4f",
+        "size_bytes": 30512733,
+        "source": {
+          "provider": "google_drive",
+          "file_id": "1QcTvzsOqODRUxhYyUgtu4aBMFtgoCp7P"
+        }
+      }
+    ]
+  },
+  "same_character_as_mechanical_Knight": false,
+  "full_visual_qualification": false,
+  "required_contact_cardinality": null,
+  "required_grip_cardinality": null
+}

@@ -1,0 +1,109 @@
+{
+  "schema": "RealSaS.MainlineExecutionPlan.v2",
+  "date": "2026-09-20",
+  "canonical_branch": "main",
+  "architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__MECHANICAL_AND_SOURCE_VISUAL_SUBSTRATE_SPLIT_STAGE18__QUALIFIED_VISUAL_PRESENTATION_STAGE37__CAA",
+  "subject_specific_code_forbidden": true,
+  "stage_count": 3,
+  "resume_contract": {
+    "rule": "PASS_OR_CACHE_HIT_REUSE_REQUIRES_INPUT_FINGERPRINT_AND_OUTPUT_SHA",
+    "failure_semantics": "PRESERVE_VERIFIED_INDEPENDENT_UPSTREAM_OUTPUTS",
+    "repair_semantics": "STAGE35_GEOMETRY_REPAIR_CREATES_NEW_STAGE18_LINEAGE_NO_IN_PLACE_FROZEN_MESH_MUTATION",
+    "latest_alias_forbidden": true
+  },
+  "appearance_contract": {
+    "backend_axis": [
+      "DETERMINISTIC_V1",
+      "LEARNED_V2",
+      "IM2SURFTEX_RESEARCH_ONLY"
+    ],
+    "first_knight_backend": "DETERMINISTIC_V1",
+    "source_wins": true,
+    "presentation_warp_v1_forbidden": true,
+    "runtime_generation_forbidden": true,
+    "canonical_internal_alpha": "PREMULTIPLIED",
+    "compiled_unobserved_exposure": "FROZEN_BUDGET_GATE",
+    "visual_geometry_authority": "SOURCE_ART_SILHOUETTE_VISUAL_MESH",
+    "mechanical_mesh_render_authority": false,
+    "visual_mesh_uv_contract": "FIXED_SOURCE_RASTER_UV",
+    "visual_deformation_contract": "BARYCENTRIC_MECHANICAL_BINDING_PLUS_ARAP_2D"
+  },
+  "first_knight_v2_contract": {
+    "source_view_count": 8,
+    "output_direction_count": 8,
+    "source_view_cardinality_generalization_deferred_until_first_v2_e2e": true,
+    "controlled_render_ablation_is_optimistic_for_artist_cross_view_inconsistency": true
+  },
+  "stages": [
+    {
+      "ordinal": 1,
+      "id": "47_AUTHORED_VISUAL_ORACLE",
+      "title": "47_AUTHORED_VISUAL_ORACLE",
+      "group": "research_visual_oracle",
+      "depends_on": [],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.visual_oracle_reference_v1:produce_reference",
+      "manifest_keys": [
+        "oracle_source"
+      ],
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 2,
+      "id": "48_NATIVE_VISUAL_ORACLE",
+      "title": "48_NATIVE_VISUAL_ORACLE",
+      "group": "research_visual_oracle",
+      "depends_on": [
+        "47_AUTHORED_VISUAL_ORACLE"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.visual_oracle_native_v1:render_reference",
+      "manifest_keys": [
+        "oracle_render"
+      ],
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 3,
+      "id": "49_VISUAL_ORACLE_MEASURE",
+      "title": "49_VISUAL_ORACLE_MEASURE",
+      "group": "research_visual_oracle",
+      "depends_on": [
+        "47_AUTHORED_VISUAL_ORACLE",
+        "48_NATIVE_VISUAL_ORACLE"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.visual_oracle_measure_v1:measure_reference",
+      "manifest_keys": [
+        "oracle_source",
+        "oracle_measure"
+      ],
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    }
+  ],
+  "geometry_contract": {
+    "iris_role": "SIGNED_GEOMETRY_AND_SURFACE_EVIDENCE_ONLY",
+    "stage13_role": "GEOMETRY_CARRIER_COMPATIBILITY__NOT_RGB_OR_FINAL_VISUAL_FIDELITY",
+    "silhouette_is_geometry_authority": true,
+    "appearance_may_not_rescue_geometry_failure": true,
+    "producer_gate_feasibility_required": true
+  },
+  "product_quality_axes": {
+    "geometry": "FIRST_CLASS",
+    "mechanics": "FIRST_CLASS",
+    "appearance": "FIRST_CLASS",
+    "rule": "FAIL_ON_ANY_AXIS__NO_SILENT_CROSS_LAYER_COMPENSATION"
+  }
+}

@@ -15,12 +15,12 @@ env:
   CANONICAL_MAIN_SHA: d3c4f39ddecf2dc73e7c532ec352fc97ad92579b
   AUTHORITY_ROOT: /home/monster/realsas_authority
   INPUT_ROOT: /home/monster/realsas_authority/imports/knight_latest_carrier_20261010
-  OUT_DIR: /home/monster/realsas_authority/renders/KNIGHT_LATEST_CURRENT_VISUAL_20261010
+  OUT_DIR: /home/monster/realsas_authority/renders/KNIGHT_LATEST_CURRENT_VISUAL_F6_MICRO_20261010
 
 jobs:
   render:
     runs-on: [self-hosted, linux, x64, realsas]
-    timeout-minutes: 30
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,7 +35,7 @@ jobs:
           test "$DEPLOYED" = "$CANONICAL_MAIN_SHA"
           test -f "$AUTHORITY_ROOT/runs/KNIGHT_LATEST_CARRIER_MATERIALIZATION_20261010/RECEIPT.json"
           test -f "$AUTHORITY_ROOT/runs/KNIGHT_LATEST_CURRENT_CAA_VISUAL_20261010/CAA_RECEIPT.json"
-      - name: Fresh render exact latest Knight M G W_M plus current CAA
+      - name: F6 single-frame single-view micro court
         shell: bash
         run: |
           set -euo pipefail
@@ -48,17 +48,13 @@ jobs:
             --input-root "$INPUT_ROOT" \
             --out-dir "$OUT_DIR" \
             --resolution 320 \
-            --frames 10
+            --frames 1
           test -s "$OUT_DIR/REPORT.json"
-          for clip in IDLE RUN SLASH; do
-            test -s "$OUT_DIR/KNIGHT_${clip}_LATEST_CURRENT_VISUAL_ALL_VIEWS.gif"
-            test -s "$OUT_DIR/KNIGHT_${clip}_LATEST_CURRENT_VISUAL_V0.gif"
-            test -s "$OUT_DIR/KNIGHT_${clip}_LATEST_CURRENT_VISUAL_ALL_VIEWS_FRAME0.png"
-          done
-      - name: Publish fresh render artifact
+          /home/monster/realsas_platform/current/bin/realsas-python -c 'import json,os; from pathlib import Path; p=json.loads((Path(os.environ["OUT_DIR"])/"REPORT.json").read_text()); assert p["status"]=="PASS_F6_MICRO_COURT"; assert p["selected_operator"] in {"REGION_AFFINE","REGION_SIMILARITY"}'
+      - name: Publish F6 micro-court artifact
         uses: actions/upload-artifact@v4
         with:
-          name: KNIGHT_LATEST_CURRENT_VISUAL_20261010
-          path: /home/monster/realsas_authority/renders/KNIGHT_LATEST_CURRENT_VISUAL_20261010
+          name: KNIGHT_LATEST_CURRENT_VISUAL_F6_MICRO_20261010
+          path: /home/monster/realsas_authority/renders/KNIGHT_LATEST_CURRENT_VISUAL_F6_MICRO_20261010
           if-no-files-found: error
           retention-days: 7

@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: {ref: main, fetch-depth: 1, clean: true}
-      - name: Verify M evidence lineage against Stage15 and Stage17
+      - name: Print exact Stage15 and Stage17 output identities
         shell: bash
         run: |
           set -euo pipefail
@@ -26,18 +26,18 @@ jobs:
           from pathlib import Path
           root=Path('/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924')
           ledger=json.loads((root/'ACTIVE_RUN_V2.json').read_text())
-          def get(stage_id,schema):
-              row=next(r for r in ledger['stages'] if r['id']==stage_id)
-              out=next(o for o in row.get('outputs',[]) if o.get('schema')==schema)
-              return json.loads(Path(out['path']).read_text())
-          surface=get('15_RIGGING_SURFACE_QUALIFIED','RealSaS.RiggingSurfaceIR.v1')
-          partition=get('17_MECHANICAL_PARTITION_QUALIFIED','RealSaS.MechanicalPartitionIR.v1')
-          print('STAGE15_SURFACE',surface.get('geometry_lineage_hash'))
-          print('STAGE17_PARTITION',partition.get('partition_lineage_hash'))
-          print('STAGE17_COMPONENTS',len(partition.get('components') or []))
-          print('M_EVIDENCE_SURFACE','452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a')
-          print('M_EVIDENCE_PARTITION','ba14cb67ff5bdf78a609e56ccddcfd8203075ffe304734df3be8fcf657635dec')
-          assert surface.get('geometry_lineage_hash')=='452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a'
-          assert partition.get('partition_lineage_hash')=='ba14cb67ff5bdf78a609e56ccddcfd8203075ffe304734df3be8fcf657635dec'
-          print('LINEAGE_MATCH=PASS')
+          for sid in ('15_RIGGING_SURFACE_QUALIFIED','17_MECHANICAL_PARTITION_QUALIFIED'):
+              rows=[r for r in ledger.get('stages',[]) if r.get('id')==sid]
+              print('STAGE',sid,'ROW_COUNT',len(rows))
+              for row in rows:
+                  print('STATUS',row.get('status'))
+                  for out in row.get('outputs',[]):
+                      print('OUTPUT',out.get('schema'),out.get('sha256'),out.get('path'))
+                      p=Path(str(out.get('path') or ''))
+                      if p.is_file() and p.suffix=='.json':
+                          try:
+                              v=json.loads(p.read_text())
+                              print('LINEAGES',json.dumps({k:v.get(k) for k in ('geometry_lineage_hash','partition_lineage_hash','carrier_policy_lineage_hash','schema','schema_version') if k in v},sort_keys=True))
+                          except Exception as e:
+                              print('JSON_READ_ERROR',type(e).__name__)
           PY

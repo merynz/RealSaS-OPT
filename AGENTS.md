@@ -123,7 +123,10 @@ That run reused sealed artifacts; IRIS/TESSA/AXIS/MIRA were not reinferred. Do n
    its appearance/runtime connections on main. Use
    `docs/presentation/VISUAL_MESH_IMPLEMENTATION_20261009.md` and
    `canonical/VISUAL_MESH_CLOSURE_20261009.json` for implemented scope and open
-   acceptance gates. A new IRIS head is not this source change; preserve M/G/W.
+   acceptance gates. The subsequent 2026-10-10 instruction authorizes separate
+   IRIS appearance research; read
+   `docs/research/IRIS_APPEARANCE_RESEARCH_V1_20261010.md`. Preserve M/G/W in
+   the current Knight witness. Knight 3D materials are not 2D visual truth.
 
 Read `docs/presentation/VISUAL_DEPENDENCY_MAP_20261009.md` before changing
 appearance, visual ownership, binding or runtime. Distinguish main CAA consumption

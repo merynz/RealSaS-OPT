@@ -130,3 +130,13 @@ bağlantısı artık source-visual runtime'a taşınır; yeni paketler linear-li
 premultiplied filtreleme ve derinlik sırası kullanır. Örtü altı part desteği ve
 malzemesi bu transport düzeltmesiyle üretilmiş olmaz. Görsel temas ve semantik
 örtüşme doğrulaması ile eşlenmiş Knight renderı açık kalır.
+
+## IRIS appearance araştırması — 2026-10-10
+
+Kullanıcı gerçek katmanlı 2D kaynak/prior ile referans deneyini ve IRIS appearance
+araştırmasını yetkilendirdi. Knight'ın 3D kaynağı mekanik truth'tur; görünüm truth'u
+yerine geçirilemez. ArtistIntent arşivinde gerçek parça PNG'leri, authored sahiplik,
+draw order ve iki PSD doğrulandı. Bu ham kaynak incelemesi, canonical bind veya
+çalıştırılmış Go Attempt değildir. [Araştırma protokolü](../research/IRIS_APPEARANCE_RESEARCH_V1_20261010.md)
+eksik bağ/temas/grip/örtülü destek kanıtlarını ve bağımsız tüketim ölçümlerini
+kaydeder. Bu bölüm önerilen DAG'yi mevcut ürün DAG'si olarak ilan etmez.

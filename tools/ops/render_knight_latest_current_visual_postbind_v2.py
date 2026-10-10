@@ -102,9 +102,8 @@ def main() -> None:
     motion_proof.derive_joint_frames_from_skeleton = _canonical_target_frames
 
     # Capture the eight exact rest-space visual binding evaluations performed
-    # during renderer setup.  This lets a later posed depth overflow be compared
-    # against the identical visual mesh/material in source/rest geometry without
-    # changing any authority or threshold.
+    # during renderer setup. This also gives us the exact per-visual-vertex
+    # mechanical affine domains consumed later by Stage42.
     original_eval = renderer.evaluate_region_visual_binding_v1
     eval_call_index = 0
     rest_eval_by_view: dict[int, dict] = {}
@@ -127,7 +126,7 @@ def main() -> None:
 
     renderer.evaluate_region_visual_binding_v1 = _capture_eval
 
-    # Keep the sealed visual-depth policy unchanged.  Diagnostic replays vary one
+    # Keep the sealed visual-depth policy unchanged. Diagnostic replays vary one
     # guard at a time only to classify the already-failing call; the production
     # call still fails under the canonical epsilon and four-fragment limit.
     original_render = renderer.render_visual_material
@@ -195,6 +194,16 @@ def main() -> None:
             rest_tie = None
             rest_overflow = None
             rest_min_layers = None
+            single_domain_tie = None
+            single_domain_overflow = None
+            single_domain_min_layers = None
+            mixed_domain_tie = None
+            mixed_domain_overflow = None
+            mixed_domain_min_layers = None
+            mixed_domain_face_count = None
+            total_visual_face_count = None
+            max_domains_per_visual_face = None
+
             rest = rest_eval_by_view.get(view_index)
             if rest is not None:
                 projected = np.asarray(
@@ -221,13 +230,60 @@ def main() -> None:
                     rest_kwargs
                 )
 
+                # F6 counterfactual: preserve positions/depths/material exactly,
+                # changing only whether visual triangles whose three vertices are
+                # bound to different mechanical affine faces participate. If the
+                # overflow disappears for single-domain triangles, the dynamic
+                # failure is owned by deformation-domain coherence rather than by
+                # the four-layer policy itself.
+                visual_faces = np.asarray(kwargs["faces"], dtype=np.int64)
+                vertex_domains = np.sort(face_indices, axis=1)
+                tri_domains = vertex_domains[visual_faces]
+                domain_counts = np.asarray(
+                    [
+                        len({tuple(row.tolist()) for row in rows})
+                        for rows in tri_domains
+                    ],
+                    dtype=np.int32,
+                )
+                single_mask = domain_counts == 1
+                mixed_mask = ~single_mask
+                total_visual_face_count = int(len(visual_faces))
+                mixed_domain_face_count = int(np.count_nonzero(mixed_mask))
+                max_domains_per_visual_face = int(domain_counts.max(initial=0))
+
+                single_kwargs = dict(kwargs)
+                single_kwargs["faces"] = visual_faces[single_mask]
+                (
+                    single_domain_tie,
+                    single_domain_overflow,
+                    single_domain_min_layers,
+                ) = _classify_depth_call(single_kwargs)
+
+                mixed_kwargs = dict(kwargs)
+                mixed_kwargs["faces"] = visual_faces[mixed_mask]
+                (
+                    mixed_domain_tie,
+                    mixed_domain_overflow,
+                    mixed_domain_min_layers,
+                ) = _classify_depth_call(mixed_kwargs)
+
             raise RuntimeError(
                 "SEALED_VISUAL_DEPTH_FAIL::"
                 f"clip={clip_id}::frame={frame_index}::view={view_index}::"
                 f"posed_tie={posed_tie}::posed_overflow={posed_overflow}::"
                 f"posed_minimum_fragment_layers={posed_min_layers}::"
                 f"rest_tie={rest_tie}::rest_overflow={rest_overflow}::"
-                f"rest_minimum_fragment_layers={rest_min_layers}"
+                f"rest_minimum_fragment_layers={rest_min_layers}::"
+                f"total_visual_faces={total_visual_face_count}::"
+                f"mixed_domain_faces={mixed_domain_face_count}::"
+                f"max_domains_per_visual_face={max_domains_per_visual_face}::"
+                f"single_domain_only_tie={single_domain_tie}::"
+                f"single_domain_only_overflow={single_domain_overflow}::"
+                f"single_domain_only_minimum_fragment_layers={single_domain_min_layers}::"
+                f"mixed_domain_only_tie={mixed_domain_tie}::"
+                f"mixed_domain_only_overflow={mixed_domain_overflow}::"
+                f"mixed_domain_only_minimum_fragment_layers={mixed_domain_min_layers}"
             ) from exc
 
     renderer.render_visual_material = _diagnostic_render

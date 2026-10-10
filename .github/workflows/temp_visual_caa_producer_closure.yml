@@ -1,0 +1,163 @@
+name: temp-visual-caa-producer-closure
+
+on:
+  push:
+    branches:
+      - visual/sealed-material-20261009
+    paths:
+      - '.github/workflows/temp_visual_caa_producer_closure.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  validate-commit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: visual/sealed-material-20261009
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt pyyaml
+      - name: Apply complete producer field and explicit non-shipping qualification
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess, yaml
+
+          # Start from the producer patch: Stage21 now emits real CAA provenance
+          # instead of declaring every source foreground pixel the entire domain.
+          data = yaml.safe_load(Path('.github/workflows/temp_visual_caa_final_apply.yml').read_text())
+          script = next(step['run'] for step in data['jobs']['finalize']['steps'] if step.get('name') == 'Apply producer patch and strengthen accounting regression')
+          subprocess.run(['bash','-lc',script],check=True)
+
+          appearance = Path('compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py')
+          text = appearance.read_text(encoding='utf-8')
+          marker = 'def qualify_complete_appearance_stage(ctx: dict) -> dict:\n'
+          start = text.index(marker)
+          end = text.index('\ndef prove_caa_reference_rest_stage(', start)
+          section = text[start:end]
+
+          # The visible source-owned visual asset remains independently exact.
+          # A canonical completion field is now produced and byte-bound, but it
+          # does not acquire hidden-layer/shipping authority merely by existing.
+          old_cond = '''    if (\n        source_owned_visual_mode\n        and compile_array_schema == "RealSaS.VisualAppearanceCompileArrays.v1"\n    ):\n'''
+          new_cond = '''    if source_owned_visual_mode:\n'''
+          if section.count(old_cond) != 1:
+              raise RuntimeError(f'SOURCE_QUAL_CONDITION_MATCH:{section.count(old_cond)}')
+          section = section.replace(old_cond, new_cond, 1)
+
+          old_direct = '''        if direct_count <= 0:\n            raise QualificationError(\n                "CAA_VISUAL_QUALIFICATION_EMPTY_FOREGROUND"\n            )\n\n        value = CompleteAppearanceQualificationIR(\n'''
+          new_direct = '''        if direct_count <= 0:\n            raise QualificationError(\n                "CAA_VISUAL_QUALIFICATION_EMPTY_FOREGROUND"\n            )\n\n        canonical_completion_field_produced = (\n            compile_array_schema == "RealSaS.CAACompileArrays.v3"\n        )\n        compile_metadata = dict(artifact.metadata or {})\n        canonical_global_count = int(\n            compile_metadata.get("canonical_global_completion_sample_count", 0)\n        )\n        unsupported_count = int(\n            compile_metadata.get("unsupported_abstain_sample_count", 0)\n        )\n        if canonical_completion_field_produced:\n            accounted = (\n                artifact.direct_source_sample_count\n                + artifact.other_view_source_sample_count\n                + artifact.compiled_local_harmonic_sample_count\n                + canonical_global_count\n                + unsupported_count\n            )\n            if accounted != artifact.total_sample_count:\n                raise QualificationError(\n                    "CAA_VISUAL_COMPLETION_FIELD_ACCOUNTING_DRIFT"\n                )\n            if dict(asset.metadata or {}).get(\n                "canonical_completion_field_bound"\n            ) is not True:\n                raise QualificationError(\n                    "CAA_VISUAL_COMPLETION_FIELD_NOT_BOUND"\n                )\n        compiled_global_surface_forbidden = bool(\n            dict(prereg.completion_quality_policy or {}).get(\n                "compiled_global_surface_forbidden", False\n            )\n        )\n        completion_field_shipping_qualified = bool(\n            canonical_completion_field_produced\n            and unsupported_count == 0\n            and not (\n                compiled_global_surface_forbidden\n                and canonical_global_count > 0\n            )\n            and dict(asset.metadata or {}).get(\n                "hidden_layer_support_qualified"\n            ) is True\n        )\n\n        value = CompleteAppearanceQualificationIR(\n'''
+          if section.count(old_direct) != 1:
+              raise RuntimeError(f'SOURCE_QUAL_DIRECT_MATCH:{section.count(old_direct)}')
+          section = section.replace(old_direct, new_direct, 1)
+
+          section = section.replace(
+              '                "totality_domain": "SOURCE_OWNED_VISUAL_MESH_ONLY",\n',
+              '                "totality_domain": "VISIBLE_SOURCE_OWNED_VISUAL_MESH_ONLY",\n'
+              '                "full_visual_totality_qualified": False,\n'
+              '                "canonical_completion_field_produced": bool(\n'
+              '                    canonical_completion_field_produced\n'
+              '                ),\n'
+              '                "canonical_completion_field_accounted": bool(\n'
+              '                    canonical_completion_field_produced\n'
+              '                ),\n'
+              '                "canonical_completion_field_shipping_qualified": bool(\n'
+              '                    completion_field_shipping_qualified\n'
+              '                ),\n'
+              '                "canonical_global_completion_sample_count": int(\n'
+              '                    canonical_global_count\n'
+              '                ),\n'
+              '                "unsupported_abstain_sample_count": int(\n'
+              '                    unsupported_count\n'
+              '                ),\n'
+              '                "compiled_global_surface_forbidden": bool(\n'
+              '                    compiled_global_surface_forbidden\n'
+              '                ),\n'
+              '                "hidden_layer_support_qualified": False,\n',
+              1,
+          )
+          section = section.replace(
+              '                "generated_appearance_used": False,\n                "cross_view_completion_used": False,\n',
+              '                "generated_appearance_used": bool(\n'
+              '                    dict(asset.metadata or {}).get(\n'
+              '                        "generated_appearance_used", False\n'
+              '                    )\n'
+              '                ),\n'
+              '                "cross_view_completion_used": bool(\n'
+              '                    dict(asset.metadata or {}).get(\n'
+              '                        "cross_view_completion_used", False\n'
+              '                    )\n'
+              '                ),\n',
+              1,
+          )
+          metadata_anchor = '                "source_owned_visual_mesh_mode": True,\n                "policy": dict(prereg.completion_quality_policy),\n'
+          metadata_new = '                "source_owned_visual_mesh_mode": True,\n                "canonical_completion_field_produced": bool(canonical_completion_field_produced),\n                "canonical_completion_field_shipping_qualified": bool(completion_field_shipping_qualified),\n                "canonical_global_completion_sample_count": int(canonical_global_count),\n                "unsupported_abstain_sample_count": int(unsupported_count),\n                "hidden_layer_support_qualified": False,\n                "policy": dict(prereg.completion_quality_policy),\n'
+          if section.count(metadata_anchor) != 1:
+              raise RuntimeError(f'SOURCE_QUAL_METADATA_MATCH:{section.count(metadata_anchor)}')
+          section = section.replace(metadata_anchor, metadata_new, 1)
+          diag_anchor = '                "generated_appearance_used": False,\n                "mechanical_mesh_render_authority": False,\n'
+          diag_new = '                "generated_appearance_used": bool(dict(asset.metadata or {}).get("generated_appearance_used", False)),\n                "canonical_completion_field_produced": bool(canonical_completion_field_produced),\n                "canonical_completion_field_shipping_qualified": bool(completion_field_shipping_qualified),\n                "canonical_global_completion_sample_count": int(canonical_global_count),\n                "unsupported_abstain_sample_count": int(unsupported_count),\n                "full_visual_totality_qualified": False,\n                "mechanical_mesh_render_authority": False,\n'
+          if section.count(diag_anchor) != 1:
+              raise RuntimeError(f'SOURCE_QUAL_DIAG_MATCH:{section.count(diag_anchor)}')
+          section = section.replace(diag_anchor, diag_new, 1)
+          appearance.write_text(text[:start] + section + text[end:], encoding='utf-8')
+
+          # Update the integration test from the generic field-quality expectation
+          # to the actual authority split: producer/accounting closed, hidden and
+          # shipping authority intentionally open.
+          test_path = Path('tests/compiler/test_product_mesh_stage_adapters_v1.py')
+          test = test_path.read_text(encoding='utf-8')
+          old = '''    assert (\n        qualification.qualification_report["totality_domain"]\n        == "CANONICAL_SURFACE_APPEARANCE_FIELD__VISUAL_PRESENTATION_SUPPORT_SEPARATE"\n    )\n    assert qualification.qualification_report["source_owned_visual_mesh_mode"] is True\n    assert qualification.qualification_report["canonical_completion_field_qualified"] is True\n    assert qualification.qualification_report["hidden_layer_support_qualified"] is False\n'''
+          new = '''    assert (\n        qualification.qualification_report["totality_domain"]\n        == "VISIBLE_SOURCE_OWNED_VISUAL_MESH_ONLY"\n    )\n    assert qualification.qualification_report["source_owned_visual_mesh_mode"] is True\n    assert qualification.qualification_report["canonical_completion_field_produced"] is True\n    assert qualification.qualification_report["canonical_completion_field_accounted"] is True\n    assert qualification.qualification_report["canonical_completion_field_shipping_qualified"] is False\n    assert qualification.qualification_report["full_visual_totality_qualified"] is False\n    assert qualification.qualification_report["hidden_layer_support_qualified"] is False\n    assert qualification.qualification_report["canonical_global_completion_sample_count"] > 0\n    assert qualification.qualification_report["unsupported_abstain_sample_count"] == 0\n'''
+          if test.count(old) != 1:
+              raise RuntimeError(f'TEST_QUAL_EXPECTATION_MATCH:{test.count(old)}')
+          test_path.write_text(test.replace(old, new, 1), encoding='utf-8')
+          PY
+          python -m compileall -q compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py tests/compiler/test_product_mesh_stage_adapters_v1.py
+      - name: Exact Stage20-46 source-visual chain
+        env:
+          REALSAS_RUNTIME_V2_PLAYER: /tmp/realsas_runtime_v2_caa_reference_producer_closure
+        run: |
+          c++ -std=c++17 -O2 -Wall -Wextra -pedantic runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp -lpng -lz -o "$REALSAS_RUNTIME_V2_PLAYER"
+          python -m pytest -q tests/compiler/test_product_mesh_stage_adapters_v1.py::test_vf23_source_visual_chain_proves_transport_but_not_full_product
+      - name: CAA and material regression bank
+        env:
+          REALSAS_RUNTIME_V2_PLAYER: /tmp/realsas_runtime_v2_caa_reference_producer_closure
+        run: |
+          python -m pytest -q \
+            tests/compiler/test_caa_canonical_completion_v1.py \
+            tests/compiler/test_caa_variational_completion_v1.py \
+            tests/compiler/test_caa_v2_subject_free_policy.py \
+            tests/compiler/test_visibility_and_caa_v2.py \
+            tests/compiler/test_visual_material_native_v1.py \
+            tests/compiler/test_runtime_v2_source_owned_visual_native_smoke.py
+      - name: Wider affected regressions
+        run: |
+          python -m pytest -q \
+            tests/compiler/test_caa_abstention_contract_v1.py \
+            tests/compiler/test_caa_adaptive_paging_v2.py \
+            tests/compiler/test_caa_demo_static_mesh_admission_v2.py \
+            tests/compiler/test_dynamic_appearance_conditioning_v2.py \
+            tests/compiler/test_playback_appearance_authority_v2.py \
+            tests/compiler/test_visual_mesh_arap_v1.py
+      - name: Commit producer closure
+        run: |
+          git diff --check
+          git config user.name 'RealSaS - OPT'
+          git config user.email '140457344+merynz@users.noreply.github.com'
+          git add compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py tests/compiler/test_product_mesh_stage_adapters_v1.py
+          git commit -m 'Restore complete CAA production accounting for source visuals'
+          git push origin HEAD:visual/sealed-material-20261009

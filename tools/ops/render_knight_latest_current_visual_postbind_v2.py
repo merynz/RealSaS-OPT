@@ -4,6 +4,8 @@ import json
 import os
 from pathlib import Path
 
+import numpy as np
+
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     qualified_camera_set_from_dict,
     qualified_skeleton_from_dict,
@@ -99,12 +101,74 @@ def main() -> None:
     motion_preview.derive_joint_frames_from_skeleton = _canonical_target_frames
     motion_proof.derive_joint_frames_from_skeleton = _canonical_target_frames
 
-    # Keep the sealed visual-depth policy unchanged.  If it fails, replay only
-    # the failing raster call under isolated diagnostic counterfactuals so the
-    # log distinguishes unresolved equal-depth ownership from >4 fragments.
+    # Capture the eight exact rest-space visual binding evaluations performed
+    # during renderer setup.  This lets a later posed depth overflow be compared
+    # against the identical visual mesh/material in source/rest geometry without
+    # changing any authority or threshold.
+    original_eval = renderer.evaluate_region_visual_binding_v1
+    eval_call_index = 0
+    rest_eval_by_view: dict[int, dict] = {}
+
+    def _capture_eval(*args, **kwargs):
+        nonlocal eval_call_index
+        result = original_eval(*args, **kwargs)
+        if eval_call_index < 8:
+            binding = args[0] if args else kwargs["binding"]
+            rest_eval_by_view[eval_call_index] = {
+                "positions": np.asarray(result, dtype=np.float64).copy(),
+                "binding": binding,
+                "mechanical": np.asarray(
+                    kwargs["posed_mechanical_positions_xyz"], dtype=np.float64
+                ).copy(),
+                "camera": kwargs["camera"],
+            }
+        eval_call_index += 1
+        return result
+
+    renderer.evaluate_region_visual_binding_v1 = _capture_eval
+
+    # Keep the sealed visual-depth policy unchanged.  Diagnostic replays vary one
+    # guard at a time only to classify the already-failing call; the production
+    # call still fails under the canonical epsilon and four-fragment limit.
     original_render = renderer.render_visual_material
     call_index = 0
     clip_ids = ("demo_idle_v1", "demo_run_v1", "demo_slash_v1")
+
+    def _classify_depth_call(kwargs):
+        old_eps = visual_render.DEPTH_TIE_EPSILON
+        old_layers = visual_render.MAXIMUM_FRAGMENT_LAYERS
+        tie_present = False
+        overflow_present = False
+        minimum_layers = None
+        try:
+            visual_render.MAXIMUM_FRAGMENT_LAYERS = 1_000_000
+            try:
+                original_render(**kwargs)
+            except QualificationError as diag:
+                tie_present = str(diag) == "VISUAL_DEPTH_TIE_OR_FRAGMENT_OVERFLOW"
+
+            visual_render.DEPTH_TIE_EPSILON = -1.0
+            visual_render.MAXIMUM_FRAGMENT_LAYERS = old_layers
+            try:
+                original_render(**kwargs)
+            except QualificationError as diag:
+                overflow_present = str(diag) == "VISUAL_DEPTH_TIE_OR_FRAGMENT_OVERFLOW"
+
+            if overflow_present:
+                for layers in range(int(old_layers) + 1, 33):
+                    visual_render.MAXIMUM_FRAGMENT_LAYERS = layers
+                    try:
+                        original_render(**kwargs)
+                    except QualificationError as diag:
+                        if str(diag) == "VISUAL_DEPTH_TIE_OR_FRAGMENT_OVERFLOW":
+                            continue
+                        raise
+                    minimum_layers = layers
+                    break
+        finally:
+            visual_render.DEPTH_TIE_EPSILON = old_eps
+            visual_render.MAXIMUM_FRAGMENT_LAYERS = old_layers
+        return tie_present, overflow_present, minimum_layers
 
     def _diagnostic_render(**kwargs):
         nonlocal call_index
@@ -120,47 +184,50 @@ def main() -> None:
             within_clip = current % 80
             frame_index = within_clip // 8
             view_index = within_clip % 8
-            clip_id = clip_ids[clip_index] if clip_index < len(clip_ids) else f"clip_{clip_index}"
+            clip_id = (
+                clip_ids[clip_index]
+                if clip_index < len(clip_ids)
+                else f"clip_{clip_index}"
+            )
 
-            old_eps = visual_render.DEPTH_TIE_EPSILON
-            old_layers = visual_render.MAXIMUM_FRAGMENT_LAYERS
-            tie_present = False
-            overflow_present = False
-            minimum_layers = None
-            try:
-                visual_render.MAXIMUM_FRAGMENT_LAYERS = 1_000_000
-                try:
-                    original_render(**kwargs)
-                except QualificationError as diag:
-                    tie_present = str(diag) == "VISUAL_DEPTH_TIE_OR_FRAGMENT_OVERFLOW"
+            posed_tie, posed_overflow, posed_min_layers = _classify_depth_call(kwargs)
 
-                visual_render.DEPTH_TIE_EPSILON = -1.0
-                visual_render.MAXIMUM_FRAGMENT_LAYERS = old_layers
-                try:
-                    original_render(**kwargs)
-                except QualificationError as diag:
-                    overflow_present = str(diag) == "VISUAL_DEPTH_TIE_OR_FRAGMENT_OVERFLOW"
-
-                if overflow_present:
-                    for layers in range(int(old_layers) + 1, 33):
-                        visual_render.MAXIMUM_FRAGMENT_LAYERS = layers
-                        try:
-                            original_render(**kwargs)
-                        except QualificationError as diag:
-                            if str(diag) == "VISUAL_DEPTH_TIE_OR_FRAGMENT_OVERFLOW":
-                                continue
-                            raise
-                        minimum_layers = layers
-                        break
-            finally:
-                visual_render.DEPTH_TIE_EPSILON = old_eps
-                visual_render.MAXIMUM_FRAGMENT_LAYERS = old_layers
+            rest_tie = None
+            rest_overflow = None
+            rest_min_layers = None
+            rest = rest_eval_by_view.get(view_index)
+            if rest is not None:
+                projected = np.asarray(
+                    renderer.project_points_xyz_v3(
+                        rest["mechanical"], rest["camera"]
+                    ),
+                    dtype=np.float64,
+                )
+                binding = rest["binding"]
+                face_indices = np.asarray(
+                    binding["mechanical_face_indices"], dtype=np.int64
+                )
+                bary = np.asarray(
+                    binding["mechanical_barycentric"], dtype=np.float64
+                )
+                rest_depths = np.sum(
+                    projected[face_indices, 2] * bary,
+                    axis=1,
+                )
+                rest_kwargs = dict(kwargs)
+                rest_kwargs["positions"] = rest["positions"]
+                rest_kwargs["depths"] = rest_depths
+                rest_tie, rest_overflow, rest_min_layers = _classify_depth_call(
+                    rest_kwargs
+                )
 
             raise RuntimeError(
                 "SEALED_VISUAL_DEPTH_FAIL::"
                 f"clip={clip_id}::frame={frame_index}::view={view_index}::"
-                f"tie_present={tie_present}::overflow_present={overflow_present}::"
-                f"minimum_fragment_layers={minimum_layers}"
+                f"posed_tie={posed_tie}::posed_overflow={posed_overflow}::"
+                f"posed_minimum_fragment_layers={posed_min_layers}::"
+                f"rest_tie={rest_tie}::rest_overflow={rest_overflow}::"
+                f"rest_minimum_fragment_layers={rest_min_layers}"
             ) from exc
 
     renderer.render_visual_material = _diagnostic_render

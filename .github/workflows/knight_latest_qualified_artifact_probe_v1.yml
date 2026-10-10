@@ -1,0 +1,58 @@
+name: knight-latest-qualified-artifact-probe-v1
+
+on:
+  push:
+    branches: [ops/knight-latest-visual-probe-20261010]
+    paths: ['.github/workflows/knight_latest_qualified_artifact_probe_v1.yml']
+
+permissions:
+  contents: read
+
+env:
+  PLATFORM_ROOT: /home/monster/realsas_platform
+  AUTHORITY_ROOT: /home/monster/realsas_authority
+  CANONICAL_MAIN_SHA: d3c4f39ddecf2dc73e7c532ec352fc97ad92579b
+
+jobs:
+  probe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 1, clean: true}
+      - name: Locate qualified schemas without mutating authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANONICAL_MAIN_SHA"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os,time
+          root=Path(os.environ['AUTHORITY_ROOT'])
+          schemas={
+            'RealSaS.MechanicalCarrierEvidenceIR.v1',
+            'RealSaS.QualifiedSkeletonIR.v1',
+            'RealSaS.QualifiedCarrierSkinIR.v1',
+            'RealSaS.QualifiedMeshIR.v2',
+            'RealSaS.QualifiedMeshIR.v1',
+            'RealSaS.QualifiedMeshSkinIR.v1',
+          }
+          hits=[]; started=time.monotonic(); scanned=0
+          for p in root.rglob('*.json'):
+            if scanned>=20000 or time.monotonic()-started>90: break
+            scanned+=1
+            try:
+              raw=p.read_bytes()
+              if len(raw)>80_000_000: continue
+              v=json.loads(raw)
+            except Exception: continue
+            schema=str(v.get('schema_version') or v.get('schema') or '') if isinstance(v,dict) else ''
+            if schema not in schemas: continue
+            summary={k:v.get(k) for k in (
+              'carrier_evidence_hash','topology_hash','geometry_hash','candidate_mesh_binding_hash',
+              'skeleton_lineage_hash','skin_lineage_hash','mesh_lineage_hash','mesh_skin_lineage_hash',
+              'carrier_topology_hash','carrier_geometry_hash','skeleton_binding_hash','skin_binding_hash','mesh_binding_hash'
+            ) if isinstance(v,dict) and k in v}
+            hits.append({'schema':schema,'path':str(p),'sha256':hashlib.sha256(raw).hexdigest(),'size_bytes':len(raw),'summary':summary})
+          print(json.dumps({'scanned_json':scanned,'hits':hits},sort_keys=True))
+          PY

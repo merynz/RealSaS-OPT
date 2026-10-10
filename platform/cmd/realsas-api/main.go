@@ -13,6 +13,8 @@ import (
 	"time"
 )
 
+var sourceCodeSHA string
+
 func main() {
 	root := os.Getenv("REALSAS_REPO_ROOT")
 	if root == "" {
@@ -48,7 +50,7 @@ func main() {
 		slog.Error("artifact store", "error", err)
 		os.Exit(1)
 	}
-	handler := (httpapi.API{Pool: pool, Graph: graph, Store: store}).Handler()
+	handler := (httpapi.API{Pool: pool, Graph: graph, Store: store, CodeSHA: sourceCodeSHA}).Handler()
 	server := &http.Server{
 		Addr:              "127.0.0.1:8080",
 		Handler:           handler,

@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/merynz/RealSaS-OPT/platform/internal/agentsession"
 	"github.com/merynz/RealSaS-OPT/platform/internal/domain"
 	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
 	"github.com/merynz/RealSaS-OPT/platform/internal/release"
@@ -42,6 +43,8 @@ type Receipt struct {
 }
 
 type CompileRequest struct {
+	DeployedCodeSHA    string     `json:"-"`
+	AgentSessionID     *uuid.UUID `json:"agent_session_id,omitempty"`
 	ResearchAttemptID  *uuid.UUID `json:"research_attempt_id,omitempty"`
 	SubjectID          uuid.UUID  `json:"subject_id"`
 	EngineReleaseID    uuid.UUID  `json:"engine_release_id"`
@@ -127,6 +130,7 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 				payloadString(existing.Payload, "run_ledger_path") != req.RunLedgerPath ||
 				payloadString(existing.Payload, "pipeline_plan_sha256") != req.PipelinePlanSHA256 ||
 				payloadMode(existing.Payload) != mode ||
+				payloadString(existing.Payload, "agent_session_id") != optionalUUID(req.AgentSessionID) ||
 				(req.ResearchAttemptID != nil && payloadString(existing.Payload, "attempt_id") != req.ResearchAttemptID.String()) {
 				return ErrIdempotencyConflict
 			}
@@ -142,6 +146,14 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 				AttemptID:            &attemptID,
 			}
 			return nil
+		}
+		if req.AgentSessionID != nil {
+			if req.ResearchAttemptID == nil {
+				return errors.New("AGENT_SESSION_REQUIRES_RESEARCH_ATTEMPT")
+			}
+			if err := agentsession.CheckCompile(ctx, tx, *req.AgentSessionID, *req.ResearchAttemptID, req.SubjectID, req.EngineReleaseID, req.SubjectInputID, req.TargetStageID, req.DeployedCodeSHA); err != nil {
+				return err
+			}
 		}
 
 		var subject uuid.UUID
@@ -247,6 +259,9 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 			"run_ledger_path":      req.RunLedgerPath,
 			"pipeline_plan_sha256": req.PipelinePlanSHA256,
 		}
+		if req.AgentSessionID != nil {
+			payload["agent_session_id"] = req.AgentSessionID.String()
+		}
 		if err := insertCommand(ctx, tx, commandID, CompileSubject, req.SubjectID, req.IdempotencyKey, payload); err != nil {
 			return err
 		}
@@ -273,6 +288,13 @@ func SubmitCompile(ctx context.Context, pool *pgxpool.Pool, graph *stagegraph.Gr
 		return nil
 	})
 	return out, err
+}
+
+func optionalUUID(id *uuid.UUID) string {
+	if id == nil {
+		return ""
+	}
+	return id.String()
 }
 
 func SubmitRender(ctx context.Context, pool *pgxpool.Pool, req RenderRequest) (Receipt, error) {

@@ -221,7 +221,8 @@ def install(root, expected_sha, authority):
     command([python, "-m", "pip", "install", "--no-input", "--progress-bar", "off",
              "-r", source / "requirements/platform-deployment.txt"], timeout=600)
     for name in ("realsas-api", "realsas-control-worker", "realsas-migrate", "realsasctl"):
-        command(["go", "build", "-o", binaries / name, f"./cmd/{name}"], cwd=source / "platform", timeout=300)
+        flags = ["-ldflags", f"-X main.sourceCodeSHA={expected_sha}"] if name == "realsas-api" else []
+        command(["go", "build", *flags, "-o", binaries / name, f"./cmd/{name}"], cwd=source / "platform", timeout=300)
     # A pinned, checksum-verified official binary, never curl|sh/latest.
     with urllib.request.urlopen(TEMPORAL_URL, timeout=60) as response:
         temporal = response.read(64 * 1024 * 1024 + 1)

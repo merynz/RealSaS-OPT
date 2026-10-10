@@ -45,6 +45,9 @@ func StartResearch(
 	g *stagegraph.Graph,
 	req ResearchRequest,
 ) (ResearchStart, error) {
+	if req.ParentAttemptID != nil && req.Intervention == nil {
+		return ResearchStart{}, errors.New("RESEARCH_CONTINUATION_REQUIRES_INTERVENTION")
+	}
 	if req.SubjectID == uuid.Nil || req.BaselineEngineReleaseID == uuid.Nil || req.CandidateEngineReleaseID == uuid.Nil {
 		return ResearchStart{}, errors.New("subject/baseline/candidate release ids are required")
 	}

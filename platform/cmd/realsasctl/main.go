@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -10,18 +12,21 @@ import (
 	"strings"
 	"time"
 
+	"github.com/merynz/RealSaS-OPT/platform/internal/agentsession"
 	"github.com/merynz/RealSaS-OPT/platform/internal/artifactstore"
 )
 
 func run(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("command required: stages, subject, artifact-put, artifact-import, input-seal, attempt, release, research-start, research-run, product-compile, product-render")
+		return fmt.Errorf("command required: stages, subject, artifact-put, artifact-import, input-seal, attempt, release, agent-context, agent-enter, agent-exit, research-start, research-run, product-compile, product-render")
 	}
 	routes := map[string]string{"subject": "/v1/subjects", "artifact-import": "/v1/artifacts/import", "input-seal": "/v1/subject-inputs", "release": "/v1/releases", "research-start": "/v1/research/attempts", "research-run": "/v1/research/compile", "product-compile": "/v1/product/compile", "product-render": "/v1/product/render"}
+	routes["agent-enter"], routes["agent-exit"] = "/v1/agents/enter", "/v1/agents/exit"
 	flags := flag.NewFlagSet(args[0], flag.ContinueOnError)
 	endpoint := flags.String("api", "http://127.0.0.1:8080", "operator API")
 	requestFile := flags.String("request", "-", "JSON request file, or - for stdin")
 	id := flags.String("id", "", "attempt UUID")
+	repo := flags.String("repo", ".", "canonical source checkout for execution commands")
 	file := flags.String("file", "", "exact artifact bytes to upload")
 	sha := flags.String("sha256", "", "expected artifact content SHA256")
 	if err := flags.Parse(args[1:]); err != nil {
@@ -68,6 +73,9 @@ func run(args []string) error {
 		path = "/v1/attempts/" + *id
 		ok = *id != ""
 	}
+	if args[0] == "agent-context" {
+		method, path, ok = http.MethodGet, "/v1/agents/context/"+*id, *id != ""
+	}
 	if !ok {
 		return fmt.Errorf("unknown command or missing --id: %s", args[0])
 	}
@@ -80,6 +88,27 @@ func run(args []string) error {
 		}
 		if err != nil {
 			return err
+		}
+	}
+	switch args[0] {
+	case "agent-enter", "release", "research-start", "research-run", "product-compile", "product-render":
+		codeSHA, err := agentsession.CanonicalCheckout(context.Background(), *repo)
+		if err != nil {
+			return err
+		}
+		if args[0] == "agent-enter" {
+			var entry agentsession.OpenRequest
+			decoder := json.NewDecoder(bytes.NewReader(body))
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&entry); err != nil {
+				return err
+			}
+			if err := decoder.Decode(&struct{}{}); err != io.EOF {
+				return fmt.Errorf("exactly one entry JSON required")
+			}
+			if err := agentsession.ValidateCode(entry.CanonicalCodeSHA, codeSHA); err != nil {
+				return err
+			}
 		}
 	}
 	req, err := http.NewRequest(method, strings.TrimRight(*endpoint, "/")+path, bytes.NewReader(body))

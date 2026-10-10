@@ -20,7 +20,6 @@ env:
   CANONICAL_MAIN_SHA: d3c4f39ddecf2dc73e7c532ec352fc97ad92579b
   STAGING_ROOT: /home/monster/realsas_authority/imports/knight_latest_carrier_20261010
   CAS_ROOT: /home/monster/.cache/realsas/artifacts
-  REALSAS_RCLONE_DRIVE_REMOTE: realsas-drive
 
 jobs:
   rehydrate:
@@ -34,7 +33,7 @@ jobs:
           fetch-depth: 1
           clean: true
 
-      - name: Verify exact main and deployed platform
+      - name: Verify exact main, deployed platform and resolve Drive remote
         shell: bash
         run: |
           set -euo pipefail
@@ -43,7 +42,18 @@ jobs:
           DEPLOYED_SHA="$("$PLATFORM_ROOT/current/bin/realsas-python" -c 'import json,os; from pathlib import Path; print(json.loads((Path(os.environ["PLATFORM_ROOT"])/"deployment.json").read_text())["code_sha"])')"
           test "$DEPLOYED_SHA" = "$CANONICAL_MAIN_SHA"
           command -v rclone
-          rclone listremotes | grep -Fx 'realsas-drive:'
+          mapfile -t REMOTES < <(rclone listremotes)
+          printf 'RCLONE_REMOTE %s\n' "${REMOTES[@]}"
+          if printf '%s\n' "${REMOTES[@]}" | grep -Fxq 'realsas-drive:'; then
+            SELECTED='realsas-drive'
+          elif [ "${#REMOTES[@]}" -eq 1 ]; then
+            SELECTED="${REMOTES[0]%:}"
+          else
+            echo "RCLONE_REMOTE_AMBIGUOUS count=${#REMOTES[@]}" >&2
+            exit 2
+          fi
+          echo "REALSAS_RCLONE_DRIVE_REMOTE=$SELECTED" >> "$GITHUB_ENV"
+          echo "SELECTED_RCLONE_REMOTE=$SELECTED"
 
       - name: Build exact Knight carrier plus motion inventory
         shell: bash
@@ -52,8 +62,7 @@ jobs:
           "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
           import json
           from pathlib import Path
-          src=Path('canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json')
-          inv=json.loads(src.read_text())
+          inv=json.loads(Path('canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json').read_text())
           rows=list(inv['required_files'])
           rows.extend([
             {'name':'demo_idle_v1.motion.json','sha256':'18cd79dca501413b1504fa8852a06e4dd6ac01cc7fd7197348eca25af54b2310','size_bytes':673768,'source':{'provider':'google_drive','file_id':'13SkXuEn50MBzZ88E1jrYBatAou4IjLtM'}},

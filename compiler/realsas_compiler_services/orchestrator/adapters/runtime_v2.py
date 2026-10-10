@@ -13,6 +13,11 @@ from types import SimpleNamespace
 import numpy as np
 from PIL import Image
 
+from compiler.realsas_compiler_core.visual_material_v1 import (
+    load_visual_material, MATERIAL_CONTRACT, DEPTH_CONTRACT, SAMPLING_CONTRACT,
+)
+from compiler.realsas_compiler_core.visual_material_render_v1 import render_visual_material
+
 from compiler.realsas_compiler_core.appearance_authority_v2 import (
     CAA_PROVENANCE,
     complete_appearance_asset_from_dict,
@@ -336,6 +341,11 @@ def _build_source_owned_visual_runtime_projection(
         raise QualificationError(
             "SOURCE_VISUAL_RUNTIME_APPEARANCE_BINDING_DRIFT"
         )
+    uv_path = resolved_path(asset.uv_npz_path)
+    if not uv_path.is_file() or sha256_file(uv_path) != asset.uv_npz_sha256:
+        raise QualificationError("SOURCE_VISUAL_RUNTIME_APPEARANCE_UV_BYTES_DRIFT")
+    if asset.metadata.get("visual_material_contract") != MATERIAL_CONTRACT:
+        raise QualificationError("SOURCE_VISUAL_RUNTIME_PER_TEXEL_MATERIAL_REQUIRED")
     if (
         dynamic.mechanical_state_binding_hash
         != complete.mechanical_state_binding_hash
@@ -505,6 +515,12 @@ def _build_source_owned_visual_runtime_projection(
             raise QualificationError(
                 "SOURCE_VISUAL_RUNTIME_TEXTURE_SOURCE_BINDING_DRIFT"
             )
+        texture_rgba = np.asarray(Image.open(texture_path).convert("RGBA"), dtype=np.uint8)
+        provenance, source_view = load_visual_material(
+            asset, view_index=view_index, rgba=texture_rgba
+        )
+        arrays[f"{prefix}_material_provenance"] = provenance
+        arrays[f"{prefix}_material_source_view"] = source_view
         runtime_views.append(
             SourceOwnedVisualRuntimeViewV1IR(
                 view_index=view_index,
@@ -576,6 +592,7 @@ def _build_source_owned_visual_runtime_projection(
                 ),
                 dtype=np.float64,
             )
+            depths = np.empty((len(clip.frames), int(visual_row.vertex_count)), dtype=np.float64)
             metrics = []
             for frame_index, frame in enumerate(clip.frames):
                 by_id = {
@@ -596,6 +613,14 @@ def _build_source_owned_visual_runtime_projection(
                     camera=camera_by_view[view_index],
                 )
                 frames[frame_index] = posed_visual
+                binding = bindings[view_index]
+                projected_xyz = project_points_xyz_v3(posed_mechanical, camera_by_view[view_index])
+                depths[frame_index] = np.sum(
+                    projected_xyz[binding["mechanical_face_indices"], 2]
+                    * binding["mechanical_barycentric"], axis=1
+                )
+                if not np.isfinite(depths[frame_index]).all() or np.any(depths[frame_index] <= 0):
+                    raise QualificationError("SOURCE_VISUAL_RUNTIME_CANONICAL_DEPTH_INVALID")
                 metrics.append(
                     _visual_mesh_motion_metrics(
                         np.asarray(
@@ -610,6 +635,7 @@ def _build_source_owned_visual_runtime_projection(
             arrays[
                 f"{prefix}_view_{view_index}_positions"
             ] = frames
+            arrays[f"{prefix}_view_{view_index}_depths"] = depths
             clip_qa[f"V{view_index}"] = {
                 "maximum_flipped_triangle_count": max(
                     row["flipped_triangle_count"] for row in metrics
@@ -685,6 +711,13 @@ def _build_source_owned_visual_runtime_projection(
             "runtime_binding_solve": False,
             "runtime_generation": False,
             "donor_search_at_runtime": False,
+            "visual_material_contract": MATERIAL_CONTRACT,
+            "depth_ownership_contract": DEPTH_CONTRACT,
+            "texture_sampling_contract": SAMPLING_CONTRACT,
+            "appearance_provenance_npz_sha256": asset.provenance_npz_sha256,
+            "appearance_uv_npz_sha256": asset.uv_npz_sha256,
+            "appearance_quality_policy": dict(appearance.metadata.get("policy") or {}),
+            "appearance_totality_domain": appearance.qualification_report.get("totality_domain"),
             "dynamic_quality_authority": "STAGE45",
             "operator_policy": operator_policy,
             "rest_binding_qa": qa_summary,
@@ -1140,6 +1173,7 @@ def _run_native(
     rgba = root / f"{stem}.rgba"
     provenance = root / f"{stem}.prov"
     owner = root / f"{stem}.owner"
+    source_view = root / f"{stem}.source_view"
     completed = subprocess.run(
         [
             str(player),
@@ -1156,6 +1190,8 @@ def _run_native(
             str(provenance),
             "--out-owner",
             str(owner),
+            "--out-source-view",
+            str(source_view),
         ],
         check=False,
         capture_output=True,
@@ -1350,6 +1386,16 @@ def _source_owned_visual_reference_frame(
     if resolution <= 0:
         raise QualificationError(
             "RUNTIME_V2_VISUAL_REFERENCE_RESOLUTION_INVALID"
+        )
+
+    if projection.metadata.get("visual_material_contract") == MATERIAL_CONTRACT:
+        return render_visual_material(
+            positions=positions,
+            depths=arrays[f"{clip.array_prefix}_view_{vi}_depths"][frame_index],
+            faces=faces, uv=uv, texture=texture,
+            provenance=arrays[f"view_{vi}_material_provenance"],
+            source_view=arrays[f"view_{vi}_material_source_view"],
+            view_index=vi, resolution=resolution,
         )
 
     posed = np.asarray(positions, dtype=np.float64).copy()
@@ -1582,6 +1628,9 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
                 raise QualificationError(
                     "RUNTIME_V2_NATIVE_RENDERER_CONTRACT_DRIFT"
                 )
+            if (source_owned_visual and projection.metadata.get("visual_material_contract") == MATERIAL_CONTRACT
+                    and "sealed_visual_material=1" not in stdout):
+                raise QualificationError("RUNTIME_V2_NATIVE_VISUAL_MATERIAL_CONTRACT_DRIFT")
 
             native_rgba = np.frombuffer(
                 rgba.read_bytes(), dtype=np.uint8
@@ -1616,6 +1665,10 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
                 | (native_owner != reference.owner_face_index)
             )
             mismatch = int(np.count_nonzero(mismatch_mask))
+            if source_owned_visual and projection.metadata.get("visual_material_contract") == MATERIAL_CONTRACT:
+                donor_path = rgba.with_suffix(".source_view")
+                native_donor = np.frombuffer(donor_path.read_bytes(), dtype="<i2").reshape(resolution, resolution)
+                mismatch += int(np.count_nonzero(native_donor != reference.source_view_index))
             if mismatch:
                 raise QualificationError(
                     "RUNTIME_V2_NATIVE_REFERENCE_PARITY_FAIL:"
@@ -1762,6 +1815,9 @@ def _prove_source_owned_visual_dynamic_integrity(
     maximum_edge_ratio = 1.0
     native_reference_mismatch_pixel_count = 0
     direct_source_provenance_mismatch_pixel_count = 0
+    compiled_visible_pixel_count = 0
+    maximum_frame_compiled_fraction = 0.0
+    maximum_connected_compiled_fraction = 0.0
     outputs = []
 
     for clip in projection.clips:
@@ -1795,6 +1851,9 @@ def _prove_source_owned_visual_dynamic_integrity(
                         "SOURCE_VISUAL_DVI_RENDERER_CONTRACT_DRIFT"
                     )
                 resolution = int(view.camera["resolution"])
+                if (projection.metadata.get("visual_material_contract") == MATERIAL_CONTRACT
+                        and "sealed_visual_material=1" not in stdout):
+                    raise QualificationError("SOURCE_VISUAL_DVI_MATERIAL_CONTRACT_DRIFT")
                 rgba = np.frombuffer(
                     rgba_path.read_bytes(), dtype=np.uint8
                 ).reshape(resolution, resolution, 4)
@@ -1823,16 +1882,29 @@ def _prove_source_owned_visual_dynamic_integrity(
                 native_reference_mismatch_pixel_count += int(
                     np.count_nonzero(mismatch)
                 )
+                if projection.metadata.get("visual_material_contract") == MATERIAL_CONTRACT:
+                    donor_path = rgba_path.with_suffix(".source_view")
+                    native_donor = np.frombuffer(donor_path.read_bytes(), dtype="<i2").reshape(resolution, resolution)
+                    native_reference_mismatch_pixel_count += int(np.count_nonzero(
+                        native_donor != reference.source_view_index))
+                    outputs.append({"path": str(donor_path), "sha256": sha256_file(donor_path),
+                        "authority_class": "SOURCE_VISUAL_DVI_NATIVE_SOURCE_VIEW",
+                        "schema": "application/x-i16-source-view"})
 
                 visible = rgba[:, :, 3] > 0
                 visible_count = int(np.count_nonzero(visible))
                 rendered_visible_pixel_count += visible_count
                 if visible_count <= 0:
                     empty_frame_view_count += 1
-                provenance_bad = (
-                    (visible & (provenance != 0))
-                    | ((~visible) & (provenance != 255))
-                )
+                provenance_bad = ((visible & ~np.isin(provenance, (0, 1, 2, 4)))
+                                  | ((~visible) & (provenance != 255)))
+                compiled = visible & np.isin(provenance, (2, 4))
+                compiled_count = int(np.count_nonzero(compiled))
+                compiled_visible_pixel_count += compiled_count
+                maximum_frame_compiled_fraction = max(maximum_frame_compiled_fraction,
+                    compiled_count / max(1, visible_count))
+                maximum_connected_compiled_fraction = max(maximum_connected_compiled_fraction,
+                    _largest_connected_fraction(compiled, denominator=visible_count))
                 direct_source_provenance_mismatch_pixel_count += int(
                     np.count_nonzero(provenance_bad)
                 )
@@ -1898,6 +1970,17 @@ def _prove_source_owned_visual_dynamic_integrity(
                         }
                     )
 
+    quality_policy = dict(projection.metadata.get("appearance_quality_policy") or {})
+    compiled_fraction = compiled_visible_pixel_count / max(1, rendered_visible_pixel_count)
+    completion_budget_passed = (compiled_visible_pixel_count == 0 or (
+        all(key in quality_policy for key in (
+            "dynamic_max_compiled_unobserved_visible_fraction",
+            "dynamic_max_frame_compiled_unobserved_visible_fraction",
+            "dynamic_max_connected_compiled_unobserved_visible_fraction"))
+        and compiled_fraction <= quality_policy["dynamic_max_compiled_unobserved_visible_fraction"]
+        and maximum_frame_compiled_fraction <= quality_policy["dynamic_max_frame_compiled_unobserved_visible_fraction"]
+        and maximum_connected_compiled_fraction <= quality_policy["dynamic_max_connected_compiled_unobserved_visible_fraction"]
+    ))
     passed = (
         evaluated_frame_view_count > 0
         and rendered_visible_pixel_count > 0
@@ -1906,6 +1989,7 @@ def _prove_source_owned_visual_dynamic_integrity(
         and edge_gt_4_count == 0
         and native_reference_mismatch_pixel_count == 0
         and direct_source_provenance_mismatch_pixel_count == 0
+        and completion_budget_passed
     )
     value = SourceOwnedVisualDynamicIntegrityV1IR(
         package_binding_hash=package.package_hash,
@@ -1937,6 +2021,15 @@ def _prove_source_owned_visual_dynamic_integrity(
             "direct_source_provenance_passed": (
                 direct_source_provenance_mismatch_pixel_count == 0
             ),
+            "material_provenance_passed": direct_source_provenance_mismatch_pixel_count == 0,
+            "compiled_appearance_exposure_passed": completion_budget_passed,
+            "compiled_appearance_visible_pixel_count": compiled_visible_pixel_count,
+            "compiled_appearance_visible_fraction": compiled_fraction,
+            "maximum_frame_compiled_appearance_fraction": maximum_frame_compiled_fraction,
+            "maximum_connected_compiled_appearance_fraction": maximum_connected_compiled_fraction,
+            "appearance_totality_domain": projection.metadata.get("appearance_totality_domain"),
+            "hidden_layer_material_qualified": False,
+            "semantic_contact_and_order_qualified": False,
             "all_frame_views_nonempty": empty_frame_view_count == 0,
             "visual_orientation_passed": flipped_triangle_count == 0,
             "catastrophic_edge_stretch_passed": edge_gt_4_count == 0,

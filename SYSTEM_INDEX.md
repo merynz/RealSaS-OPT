@@ -7,12 +7,13 @@
 Current continuation authority is `canonical/CANONICAL_HANDOFF_20261007.md` plus `CURRENT_STATE.md`.
 
 The modular Go developer path and opt-in controlled component interventions are
-implemented. Platform preparation is current; appearance design is pending the
-user's decision. PR #66 is diagnostic history, not the next mandatory merge.
+implemented. The user has authorized bounded visual mesh/appearance/runtime
+completion while preserving M/G/W and the motion witness. PR #66 is diagnostic history, not the next mandatory merge.
 Full product input-to-output execution and UI integration remain later work.
 
 - [Controlled interventions](docs/platform/CAUSAL_INTERVENTIONS.md): exact baseline
   reuse, scope enforcement and current limits.
+- [Visual implementation and open gates](docs/presentation/VISUAL_MESH_IMPLEMENTATION_20261009.md).
 - [Visual dependency map](docs/presentation/VISUAL_DEPENDENCY_MAP_20261009.md):
   existing main, archived direct-PNG research, proposed IRIS RGB and rebuild effects.
 

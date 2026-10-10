@@ -7,13 +7,14 @@
       "id": "PLATFORM_EXECUTION_LANES",
       "branch": "main",
       "status": "CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED",
-      "scope": "Go-owned Attempt execution, explicit controlled interventions with pinned independent artifact IDs, and separate ProductRevision render. Main is canonical; PR #66 is parked diagnostic history. Appearance-head design remains pending.",
+      "scope": "Go-owned controlled interventions plus authorized bounded visual mesh/CAA/runtime completion on main, preserving exact M/G/W and motion inputs. PR #66 remains archived diagnostic history; matched visual acceptance is open.",
       "current_execution_authority": true,
       "product_pass_claimed": false,
       "unseen_claimed": false,
       "execution_contract": "docs/platform/EXECUTION_LANES.md",
       "intervention_contract": "docs/platform/CAUSAL_INTERVENTIONS.md",
-      "visual_dependency_map": "docs/presentation/VISUAL_DEPENDENCY_MAP_20261009.md"
+      "visual_dependency_map": "docs/presentation/VISUAL_DEPENDENCY_MAP_20261009.md",
+      "visual_closure_status": "canonical/VISUAL_MESH_CLOSURE_20261009.json"
     },
     {
       "id": "V2_IMPLEMENTATION_ASSEMBLY",

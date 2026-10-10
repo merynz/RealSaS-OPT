@@ -121,3 +121,12 @@ RGB head malzemeyi erken üretebilir; deformasyon, contact veya draw order'ın y
 Yeni `research-start.intervention` contract'ı direct stage değişikliklerini önceden ilan eder. Parent Attempt aynı subject ve baseline release'e ait olmalı, tek bir SubjectInput kimliğiyle çalışmış olmalıdır. Girdi role/order/artifact kimlikleri de pinlenir; değişen roller ayrıca `changed_input_roles` ile ilan edilir ve yalnız gerçek tüketicileri/descendants invalidate edilir. Bütün unchanged stage'ler dondurulur; target closure içinde olanlar, başlangıçta kaydedilmiş **aynı qualified artifact ID** ile REUSE edilmelidir. Cache kaybı veya gizli input değişimi yeni inference'a dönüşmez; çalışmadan önce durur.
 
 `INTERVENTION_REUSE_VERIFIED` receipt'i exact artifact ID + semantic SHA, çalışacak stage'ler ve target dışındaki stage'leri ayrı kaydeder. Target dışında kalan bir stage, çalışmadığı için “exact reuse ölçüldü” sayılmaz. Bu kontrol release/read-set sözleşmesinin doğruluğunu veya görsel kaliteyi tek başına kanıtlamaz; [deney protokolü](../platform/CAUSAL_INTERVENTIONS.md) kapsamı ve sınırları açıklar.
+
+## Görsel bağlantı düzeltmesi — 2026-10-09
+
+[Uygulama ve açık kabul kapıları](VISUAL_MESH_IMPLEMENTATION_20261009.md) güncel
+ilerlemeyi kaydeder. CAA'nın piksel provenance/kaynak yönü, UV ve texture
+bağlantısı artık source-visual runtime'a taşınır; yeni paketler linear-light
+premultiplied filtreleme ve derinlik sırası kullanır. Örtü altı part desteği ve
+malzemesi bu transport düzeltmesiyle üretilmiş olmaz. Görsel temas ve semantik
+örtüşme doğrulaması ile eşlenmiş Knight renderı açık kalır.

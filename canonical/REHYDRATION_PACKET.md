@@ -11,7 +11,7 @@
 - Current state: CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED
 - Active experiment: PLATFORM_EXECUTION_LANES
 - Most recent closed gate: AXIS541_MIRA55_CARRIER_NATIVE_KNIGHT_FIT1_TEACHER_RELATIVE_PASS
-- Canonical main: 1888d91252fd
+- Canonical main: 4d3a370c0eae
 - Governance ledger: V2_IMPLEMENTATION_ASSEMBLY — 0/46; ready 01_SOURCE_BYTES_SEALED,05_CAMERA_CONTRACT_SOLVED
 - Plan SHA-256: cb8beed707d4e9470aed69a9ba72ed79ce8d4434986fb0382bd6d737449a9817
 - Promotion block: Absolute G3 and product/appearance qualifications remain independently open. Real artifact import/reseal and component-replacement execution remain required beyond the validated control-plane contracts.

@@ -648,6 +648,13 @@ def seal_product_closure_stage(ctx: dict) -> dict:
             raise QualificationError(f"V2_PRODUCT_CLOSURE_BINDING_DRIFT:{label}")
     if source_owned_visual:
         report = dict(visual.qualification_report or {})
+        if projection.metadata.get("visual_material_contract"):
+            for key in ("material_provenance_passed", "compiled_appearance_exposure_passed"):
+                if report.get(key) is not True:
+                    raise QualificationError("V2_PRODUCT_CLOSURE_VISUAL_MATERIAL_GATE_NOT_PASS:" + key)
+            for key in ("hidden_layer_material_qualified", "semantic_contact_and_order_qualified"):
+                if report.get(key) is not True:
+                    raise QualificationError("V2_PRODUCT_CLOSURE_FULL_VISUAL_ACCEPTANCE_REQUIRED:" + key)
         if (
             report.get("status")
             != "PASS_SOURCE_OWNED_VISUAL_DYNAMIC_INTEGRITY"

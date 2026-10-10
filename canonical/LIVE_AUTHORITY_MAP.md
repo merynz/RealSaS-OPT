@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `f13d5132a2acd687b4342cce4fb76ed4c5f6f03fdb4d4d0f8102c77d9598f713`
+> State fingerprint: `973c72da04b22f0f35d2abb026136b66a8c6ac28f82f4a64210684bbd674e8ed`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -40,7 +40,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `PLATFORM_EXECUTION_LANES` | `CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED` | `main` | `1888d91252fd` | Can Go-owned Attempts replace changed DAG components with exact artifact reuse while product construction and render remain separate? | absolute G3 PASS; product qualification; unseen generalization; sub-120-second latency; fresh carrier-native Knight render |
+| `PLATFORM_EXECUTION_LANES` | `CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED` | `main` | `4d3a370c0eae` | Can Go-owned Attempts replace changed DAG components with exact artifact reuse while product construction and render remain separate? | absolute G3 PASS; product qualification; unseen generalization; sub-120-second latency; fresh carrier-native Knight render |
 
 ## Branch inventory — observed live
 
@@ -50,7 +50,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `1888d91252fd` | canonical continuation branch |
+| `main` | `4d3a370c0eae` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -171,7 +171,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `ops/main-knight-render-20260930` | `0a44ef505e6e` | observed live; not explicitly registered active |
 | `ops/temp-trigger-n1d-v2-recovery-20260820` | `536b40b6a6bf` | observed live; not explicitly registered active |
 | `ops/trigger-n1d-v2-recovery-v2-verify-20260820` | `12a813a8f501` | observed live; not explicitly registered active |
-| `platform/causal-interventions-20261009` | `e204d75b83ff` | observed live; not explicitly registered active |
+| `platform/causal-interventions-20261009` | `543f27c6b0a2` | observed live; not explicitly registered active |
 | `platform/professional-backend-v1-20261001` | `989a90b45726` | observed live; not explicitly registered active |
 | `platform/throughput-hydration-gc-20261008` | `03fb5fa434fb` | observed live; not explicitly registered active |
 | `platform/worker-seam-20261001` | `c9b4798c7e6d` | observed live; not explicitly registered active |

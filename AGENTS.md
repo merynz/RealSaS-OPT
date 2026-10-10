@@ -1,6 +1,6 @@
 # RealSaS-OPT Agent Entry Contract
 
-## Mandatory current handoff — 2026-10-08
+## Mandatory current handoff — 2026-10-09
 
 **First read:** `CURRENT_STATE.md`, then `docs/platform/EXECUTION_LANES.md`.
 Use `canonical/CANONICAL_HANDOFF_20261007.md` for the sealed mechanics handoff.
@@ -104,8 +104,11 @@ That run reused sealed artifacts; IRIS/TESSA/AXIS/MIRA were not reinferred. Do n
    see `docs/platform/CAUSAL_INTERVENTIONS.md`. Preserve exact baseline artifact IDs
    for unchanged stages and stop before inference if reuse cannot be proven.
 3. PR #66 is parked diagnostic history, not the next required merge or execution
-   authority. Appearance design, including a separate IRIS RGB head, is pending
-   the user's decision. Do not implement a new head or reopen mechanics now.
+   authority. The user has now authorized completion of the visual mesh and
+   its appearance/runtime connections on main. Use
+   `docs/presentation/VISUAL_MESH_IMPLEMENTATION_20261009.md` and
+   `canonical/VISUAL_MESH_CLOSURE_20261009.json` for implemented scope and open
+   acceptance gates. A new IRIS head is not this source change; preserve M/G/W.
 
 Read `docs/presentation/VISUAL_DEPENDENCY_MAP_20261009.md` before changing
 appearance, visual ownership, binding or runtime. Distinguish main CAA consumption

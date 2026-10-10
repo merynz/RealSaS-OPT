@@ -75,7 +75,7 @@ func active(ctx context.Context, tx pgx.Tx, subject uuid.UUID) (*Scope, error) {
 	var raw []byte
 	err := tx.QueryRow(ctx, `SELECT e.payload FROM attempt_events e JOIN attempts a ON a.id=e.attempt_id
 		WHERE a.subject_id=$1 AND e.event_type='AGENT_SESSION_OPENED' AND NOT EXISTS (
-		SELECT 1 FROM attempt_events c WHERE c.event_type='AGENT_HANDOFF_SEALED'
+		SELECT 1 FROM attempt_events c WHERE c.attempt_id=e.attempt_id AND c.event_type='AGENT_HANDOFF_SEALED'
 		AND c.payload->'scope'->>'session_id'=e.payload->>'session_id') ORDER BY e.id DESC LIMIT 1`, subject).Scan(&raw)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
@@ -193,9 +193,12 @@ func Open(ctx context.Context, pool *pgxpool.Pool, deployedCode string, req Open
 	return out, err
 }
 
-func Load(ctx context.Context, tx pgx.Tx, id uuid.UUID) (Scope, error) {
+func Load(ctx context.Context, tx pgx.Tx, id, attemptID uuid.UUID) (Scope, error) {
 	var raw []byte
-	err := tx.QueryRow(ctx, "SELECT payload FROM attempt_events WHERE event_type='AGENT_SESSION_OPENED' AND payload->>'session_id'=$1 ORDER BY id LIMIT 1", id.String()).Scan(&raw)
+	err := tx.QueryRow(ctx, "SELECT payload FROM attempt_events WHERE attempt_id=$2 AND event_type='AGENT_SESSION_OPENED' AND payload->>'session_id'=$1 ORDER BY id LIMIT 1", id.String(), attemptID).Scan(&raw)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return Scope{}, errors.New("AGENT_SESSION_NOT_IN_ATTEMPT")
+	}
 	if err != nil {
 		return Scope{}, err
 	}
@@ -213,7 +216,7 @@ func (s Scope) CheckCompile(attemptID, subject, engineRelease, subjectInput uuid
 }
 
 func CheckCompile(ctx context.Context, tx pgx.Tx, id, attemptID, subject, engineRelease, subjectInput uuid.UUID, target, deployedCode string) error {
-	scope, err := Load(ctx, tx, id)
+	scope, err := Load(ctx, tx, id, attemptID)
 	if err != nil {
 		return err
 	}
@@ -242,7 +245,7 @@ func Close(ctx context.Context, pool *pgxpool.Pool, req CloseRequest) (map[strin
 	}
 	var out map[string]any
 	err := persistence.WithSerializableRetry(ctx, pool, 5, func(tx pgx.Tx) error {
-		scope, err := Load(ctx, tx, req.SessionID)
+		scope, err := Load(ctx, tx, req.SessionID, req.AttemptID)
 		if err != nil {
 			return err
 		}
@@ -257,7 +260,7 @@ func Close(ctx context.Context, pool *pgxpool.Pool, req CloseRequest) (map[strin
 			return errors.New("AGENT_EXIT_SCOPE_DRIFT")
 		}
 		var sealed []byte
-		err = tx.QueryRow(ctx, `SELECT payload FROM attempt_events WHERE event_type='AGENT_HANDOFF_SEALED' AND payload->'scope'->>'session_id'=$1`, req.SessionID.String()).Scan(&sealed)
+		err = tx.QueryRow(ctx, `SELECT payload FROM attempt_events WHERE attempt_id=$2 AND event_type='AGENT_HANDOFF_SEALED' AND payload->'scope'->>'session_id'=$1`, req.SessionID.String(), req.AttemptID).Scan(&sealed)
 		if err == nil {
 			if err := json.Unmarshal(sealed, &out); err != nil {
 				return err
@@ -278,7 +281,7 @@ func Close(ctx context.Context, pool *pgxpool.Pool, req CloseRequest) (map[strin
 			return errors.New("AGENT_SESSION_CLOSED_OR_SUPERSEDED")
 		}
 		var pending int
-		if err := tx.QueryRow(ctx, `SELECT count(*) FROM commands c JOIN attempts a ON a.id=(c.payload->>'attempt_id')::uuid WHERE c.payload->>'agent_session_id'=$1 AND a.final_state='OPEN'`, req.SessionID.String()).Scan(&pending); err != nil {
+		if err := tx.QueryRow(ctx, `SELECT count(*) FROM commands c JOIN attempts a ON a.subject_id=c.subject_id AND a.id=$2 WHERE c.subject_id=$3 AND c.payload->>'attempt_id'=$2::text AND c.payload->>'agent_session_id'=$1 AND a.final_state='OPEN'`, req.SessionID.String(), req.AttemptID, scope.SubjectID).Scan(&pending); err != nil {
 			return err
 		}
 		if pending != 0 {

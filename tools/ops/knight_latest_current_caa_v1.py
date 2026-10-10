@@ -5,16 +5,12 @@ from dataclasses import replace
 from pathlib import Path
 
 from compiler.realsas_compiler_core.appearance_authority_v2 import complete_appearance_asset_from_dict
-from compiler.realsas_compiler_core.artifact_codec_v2 import (
-    canonical_mesh_candidate_from_dict,
-    output_direction_set_from_dict,
-    read_json,
-)
+from compiler.realsas_compiler_core.artifact_codec_v2 import canonical_mesh_candidate_from_dict, read_json
+from compiler.realsas_compiler_core.output_presentation_v1 import output_direction_set_from_dict
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.mechanical_carrier_evidence_v1 import build_mechanical_carrier_evidence_v1
 from compiler.realsas_compiler_core.surface_addressing_v1 import (
     StaticCanonicalMeshQualificationIR,
-    appearance_domain_from_dict,
     build_appearance_domain,
     static_mesh_qualification_hash,
     surface_addressing_from_dict,

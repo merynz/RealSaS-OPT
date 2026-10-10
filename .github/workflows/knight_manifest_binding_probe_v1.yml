@@ -15,22 +15,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: {ref: main, fetch-depth: 1, clean: true}
-      - name: Inspect only relevant canonical Knight manifest bindings
+      - name: Verify M evidence lineage against Stage15 and Stage17
         shell: bash
         run: |
           set -euo pipefail
           PY=/home/monster/realsas_platform/current/bin/realsas-python
           ROOT=/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
-          test -f "$ROOT/run_manifest.json"
           "$PY" - <<'PY'
           import json
           from pathlib import Path
-          p=Path('/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/run_manifest.json')
-          m=json.loads(p.read_text())
-          keep=['mesh','mesh_policy','mechanical_attempt','geppetto_fit','arachne_fit','deformation_envelope','motion','runtime','appearance','caa','observation','normalization']
-          print('MANIFEST',p)
-          print('TOP_KEYS',sorted(m))
-          for k in keep:
-              if k in m:
-                  print('SECTION',k,json.dumps(m[k],sort_keys=True)[:12000])
+          root=Path('/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924')
+          ledger=json.loads((root/'ACTIVE_RUN_V2.json').read_text())
+          def get(stage_id,schema):
+              row=next(r for r in ledger['stages'] if r['id']==stage_id)
+              out=next(o for o in row.get('outputs',[]) if o.get('schema')==schema)
+              return json.loads(Path(out['path']).read_text())
+          surface=get('15_RIGGING_SURFACE_QUALIFIED','RealSaS.RiggingSurfaceIR.v1')
+          partition=get('17_MECHANICAL_PARTITION_QUALIFIED','RealSaS.MechanicalPartitionIR.v1')
+          print('STAGE15_SURFACE',surface.get('geometry_lineage_hash'))
+          print('STAGE17_PARTITION',partition.get('partition_lineage_hash'))
+          print('STAGE17_COMPONENTS',len(partition.get('components') or []))
+          print('M_EVIDENCE_SURFACE','452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a')
+          print('M_EVIDENCE_PARTITION','ba14cb67ff5bdf78a609e56ccddcfd8203075ffe304734df3be8fcf657635dec')
+          assert surface.get('geometry_lineage_hash')=='452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a'
+          assert partition.get('partition_lineage_hash')=='ba14cb67ff5bdf78a609e56ccddcfd8203075ffe304734df3be8fcf657635dec'
+          print('LINEAGE_MATCH=PASS')
           PY

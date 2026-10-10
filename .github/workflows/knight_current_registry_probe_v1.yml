@@ -28,19 +28,30 @@ jobs:
           test "$(/home/monster/realsas_platform/current/bin/realsas-python -c 'import json; from pathlib import Path; print(json.loads(Path("/home/monster/realsas_platform/deployment.json").read_text())["code_sha"])')" = "$CANONICAL_MAIN_SHA"
           curl --fail --silent http://127.0.0.1:8080/health/live
           echo
-          command -v psql
-          export PGHOST=/home/monster/realsas_platform/data/socket PGPORT=55432 PGDATABASE=postgres
-          for table in subjects engine_releases subject_inputs attempts artifacts attempt_artifacts commands; do
-            printf '%s=' "$table"
-            psql -X -qAt -c "select count(*) from $table" || true
-          done
-          echo '--- SUBJECTS ---'
-          psql -X -qAt -F '|' -c "select id,slug,created_at from subjects order by created_at desc limit 10" || true
-          echo '--- RELEASES ---'
-          psql -X -qAt -F '|' -c "select id,purpose,release_sha256,created_at from engine_releases order by created_at desc limit 10" || true
-          echo '--- INPUTS ---'
-          psql -X -qAt -F '|' -c "select id,subject_id,input_sha256,created_at from subject_inputs order by created_at desc limit 10" || true
-          echo '--- ATTEMPTS ---'
-          psql -X -qAt -F '|' -c "select id,subject_id,engine_release_id,kind,final_state,created_at from attempts order by created_at desc limit 10" || true
+          mkdir -p platform/cmd/registry-probe-tmp
+          cat > platform/cmd/registry-probe-tmp/main.go <<'GO'
+          package main
+          import (
+            "context"
+            "fmt"
+            "os"
+            "github.com/jackc/pgx/v5/pgxpool"
+          )
+          func main() {
+            ctx:=context.Background()
+            pool,err:=pgxpool.New(ctx,os.Getenv("REALSAS_DATABASE_URL")); if err!=nil { panic(err) }; defer pool.Close()
+            tables:=[]string{"subjects","engine_releases","subject_inputs","attempts","artifacts","attempt_artifacts","commands"}
+            for _,t:=range tables { var n int; if err:=pool.QueryRow(ctx,"select count(*) from "+t).Scan(&n); err!=nil { fmt.Printf("%s=ERR:%v\n",t,err) } else { fmt.Printf("%s=%d\n",t,n) } }
+            queries:=[]struct{name,q string}{
+              {"SUBJECTS",`select coalesce(json_agg(x),'[]'::json) from (select id,slug,created_at from subjects order by created_at desc limit 10) x`},
+              {"RELEASES",`select coalesce(json_agg(x),'[]'::json) from (select id,purpose,release_sha256,created_at from engine_releases order by created_at desc limit 10) x`},
+              {"INPUTS",`select coalesce(json_agg(x),'[]'::json) from (select id,subject_id,input_sha256,created_at from subject_inputs order by created_at desc limit 10) x`},
+              {"ATTEMPTS",`select coalesce(json_agg(x),'[]'::json) from (select id,subject_id,engine_release_id,kind,final_state,created_at from attempts order by created_at desc limit 10) x`},
+            }
+            for _,x:=range queries { var raw []byte; if err:=pool.QueryRow(ctx,x.q).Scan(&raw); err!=nil { fmt.Printf("%s=ERR:%v\n",x.name,err) } else { fmt.Printf("%s=%s\n",x.name,string(raw)) } }
+          }
+          GO
+          (cd platform && go run ./cmd/registry-probe-tmp)
+          rm -rf platform/cmd/registry-probe-tmp
           echo '--- STAGES ---'
           /home/monster/realsas_platform/current/bin/realsasctl stages | /home/monster/realsas_platform/current/bin/realsas-python -c 'import json,sys; x=json.load(sys.stdin); print("stage_count",len(x)); print("last",x[-1] if x else None)'

@@ -1,13 +1,18 @@
 name: knight-latest-current-visual-render-v1
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ops/knight-latest-visual-probe-20261010]
+    paths:
+      - 'tools/ops/render_knight_latest_current_visual_postbind_v2.py'
+      - '.github/workflows/knight_latest_current_visual_render_v1.yml'
 
 permissions:
   contents: read
 
 env:
   CANONICAL_MAIN_SHA: d3c4f39ddecf2dc73e7c532ec352fc97ad92579b
+  RESEARCH_V6_SHA: 59dc7f4e10eeb56abc4f247ec9ba045a46a6a496
   AUTHORITY_ROOT: /home/monster/realsas_authority
   INPUT_ROOT: /home/monster/realsas_authority/imports/knight_latest_carrier_20261010
   OUT_DIR: /home/monster/realsas_authority/renders/KNIGHT_LATEST_CURRENT_VISUAL_V6_MICRO_20261010
@@ -22,8 +27,36 @@ jobs:
           ref: ops/knight-latest-visual-probe-20261010
           fetch-depth: 1
           clean: true
-      - name: V6 current-Knight micro court
+      - name: Verify canonical inputs and overlay exact research V6 operators
         shell: bash
         run: |
           set -euo pipefail
-          echo "V6 current-Knight micro court is invoked explicitly after adapter seal"
+          DEPLOYED=$(/home/monster/realsas_platform/current/bin/realsas-python -c 'import json; from pathlib import Path; print(json.loads(Path("/home/monster/realsas_platform/deployment.json").read_text())["code_sha"])')
+          test "$DEPLOYED" = "$CANONICAL_MAIN_SHA"
+          test -f "$AUTHORITY_ROOT/runs/KNIGHT_LATEST_CARRIER_MATERIALIZATION_20261010/RECEIPT.json"
+          test -f "$AUTHORITY_ROOT/runs/KNIGHT_LATEST_CURRENT_CAA_VISUAL_20261010/CAA_RECEIPT.json"
+          git fetch --depth=1 origin research/presentation-p0-closure-20261008
+          test "$(git rev-parse FETCH_HEAD)" = "$RESEARCH_V6_SHA"
+          git checkout FETCH_HEAD -- \
+            compiler/realsas_compiler_core/visual_domain_v2.py \
+            compiler/realsas_compiler_core/visual_attachment_motion_v1.py \
+            compiler/realsas_compiler_core/visual_motion_blend_v1.py \
+            compiler/realsas_compiler_core/visual_presentation_pose_v1.py
+      - name: Current Knight V6 failing-witness micro court
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$OUT_DIR"
+          mkdir -p "$OUT_DIR"
+          export PYTHONPATH="$GITHUB_WORKSPACE"
+          /home/monster/realsas_platform/current/bin/realsas-python \
+            tools/ops/render_knight_latest_current_visual_postbind_v2.py
+          test -s "$OUT_DIR/REPORT.json"
+          /home/monster/realsas_platform/current/bin/realsas-python -c 'import json,os; from pathlib import Path; p=json.loads((Path(os.environ["OUT_DIR"])/"REPORT.json").read_text()); assert p["status"]=="PASS_V6_CURRENT_MICRO"; assert p["research_v6_source_sha"]==os.environ["RESEARCH_V6_SHA"]; assert p["mechanics_mutated"] is False; assert p["appearance_mutated"] is False'
+      - name: Publish V6 micro court
+        uses: actions/upload-artifact@v4
+        with:
+          name: KNIGHT_LATEST_CURRENT_VISUAL_V6_MICRO_20261010
+          path: /home/monster/realsas_authority/renders/KNIGHT_LATEST_CURRENT_VISUAL_V6_MICRO_20261010
+          if-no-files-found: error
+          retention-days: 7

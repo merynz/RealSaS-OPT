@@ -1,6 +1,7 @@
 name: platform-developer-deployment
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
@@ -128,6 +129,84 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: platform-developer-deployment
+          path: |
+            /home/monster/realsas_platform/deployment.json
+            /home/monster/realsas_platform/receipts/smoke-*.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  developer-host-manual:
+    if: github.event_name == 'workflow_dispatch'
+    needs: developer-contract
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Refuse non-main manual deployment
+        run: test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$GITHUB_SHA"
+      - name: Isolated deployment contract dependencies
+        run: |
+          python -m venv "$RUNNER_TEMP/platform-deploy-contract-$GITHUB_RUN_ID"
+          "$RUNNER_TEMP/platform-deploy-contract-$GITHUB_RUN_ID/bin/python" -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          echo "$RUNNER_TEMP/platform-deploy-contract-$GITHUB_RUN_ID/bin" >> "$GITHUB_PATH"
+      - name: Deployment and authorized runner contracts
+        run: python -m pytest -q tests/repository/test_platform_deployment.py tests/repository/test_self_hosted_execution_policy.py
+      - name: Read-only user service manager readiness
+        run: |
+          python - <<'PY'
+          from tools.platform_deploy import manager_environment
+          manager_environment()
+          print('USER_MANAGER_AVAILABLE')
+          PY
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+          cache: false
+      - name: Reconcile terminal failed Attempts through the canonical Go owner
+        run: |
+          if test -f /home/monster/realsas_platform/deployment.json; then
+            export REALSAS_REPO_ROOT="$GITHUB_WORKSPACE"
+            export REALSAS_DATABASE_URL='postgresql:///postgres?host=/home/monster/realsas_platform/data/socket&port=55432'
+            export REALSAS_ARTIFACT_ROOT=/home/monster/realsas_platform/artifacts
+            export REALSAS_TEMPORAL_ADDRESS=127.0.0.1:7233
+            export REALSAS_TEMPORAL_NAMESPACE=default
+            cd platform
+            go run ./cmd/realsas-control-worker --reconcile-once
+          fi
+      - name: Install persistent developer services from exact canonical main
+        run: |
+          python tools/platform_deploy.py \
+            --root /home/monster/realsas_platform \
+            --authority-root /home/monster/realsas_authority \
+            --expected-main-sha "$GITHUB_SHA"
+      - name: Real API to Engine execution and exact reuse proof
+        run: |
+          /home/monster/realsas_platform/current/bin/realsas-python \
+            /home/monster/realsas_platform/current/source/tools/platform_deployment_smoke.py \
+            --root /home/monster/realsas_platform
+      - name: Service status (no environment or credentials)
+        if: always()
+        run: |
+          python - <<'PY'
+          import subprocess
+          from tools.platform_deploy import manager_environment, UNITS, all_services_active, startup_diagnostics
+          manager_environment()
+          result = subprocess.run(['systemctl', '--user', 'is-active',
+                                   *[f'realsas-platform-{name}.service' for name in UNITS]],
+                                  text=True, capture_output=True, check=False)
+          print(result.stdout)
+          if not all_services_active(result.stdout):
+              startup_diagnostics()
+              raise RuntimeError('NOT_ALL_MANAGED_SERVICES_ACTIVE')
+          PY
+      - name: Preserve engineering execution receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: platform-developer-deployment-manual
           path: |
             /home/monster/realsas_platform/deployment.json
             /home/monster/realsas_platform/receipts/smoke-*.json

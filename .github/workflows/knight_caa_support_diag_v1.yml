@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: {ref: ops/knight-latest-visual-probe-20261010, fetch-depth: 1, clean: true}
-      - name: Count unsupported source topology IDs and coefficient mass
+      - name: Prove exact-face-supported component authority after orphan exclusion
         shell: bash
         run: |
           set -euo pipefail
@@ -24,40 +24,52 @@ jobs:
           "$PY" - <<'PY'
           import json
           from pathlib import Path
-          from collections import Counter,defaultdict
-          from compiler.realsas_compiler_core.artifact_codec_v2 import canonical_mesh_candidate_from_dict,rigging_surface_from_dict
-          root=Path('/home/monster/realsas_authority/runs/KNIGHT_LATEST_CURRENT_CAA_VISUAL_20261010')
-          seed=Path('/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_RECOVERED_V1_643714DE')
-          cand=canonical_mesh_candidate_from_dict(json.loads((root/'artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/../../../KNIGHT_LATEST_CARRIER_MATERIALIZATION_20261010/rebound_candidate.json').resolve().read_text())) if False else canonical_mesh_candidate_from_dict(json.loads(Path('/home/monster/realsas_authority/runs/KNIGHT_LATEST_CARRIER_MATERIALIZATION_20261010/rebound_candidate.json').read_text()))
-          surface=rigging_surface_from_dict(json.loads(Path('/home/monster/realsas_authority/imports/knight_latest_carrier_20261010/qualified_rigging_surface.json').read_text()))
-          prov_path=Path('/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/15_RIGGING_SURFACE_QUALIFIED/compacted_dense_face_provenance.json')
-          prov=json.loads(prov_path.read_text())
-          face_ids={str(x) for f in prov.get('compact_faces') or () for x in f}
-          surface_ids={str(n.surface_id) for n in surface.surface_nodes}
-          all_support=set(); unknown=Counter(); unknown_mass=defaultdict(float); affected=0; max_missing_mass=0.0; total_missing_mass=0.0
-          examples=[]
+          from compiler.realsas_compiler_core.artifact_codec_v2 import canonical_mesh_candidate_from_dict
+          cand=canonical_mesh_candidate_from_dict(json.loads(Path('/home/monster/realsas_authority/runs/KNIGHT_LATEST_CARRIER_MATERIALIZATION_20261010/rebound_candidate.json').read_text()))
+          prov=json.loads(Path('/home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_SOLVED_LINEAGE_V1_20260929/artifacts/15_RIGGING_SURFACE_QUALIFIED/compacted_dense_face_provenance.json').read_text())
+          faces=[tuple(map(str,f)) for f in prov.get('compact_faces') or ()]
+          ids=sorted({x for f in faces for x in f})
+          parent={x:x for x in ids}
+          def find(x):
+            while parent[x]!=x:
+              parent[x]=parent[parent[x]]; x=parent[x]
+            return x
+          def union(a,b):
+            ra,rb=find(a),find(b)
+            if ra==rb:return
+            if ra<rb: parent[rb]=ra
+            else: parent[ra]=rb
+          for a,b,c in faces: union(a,b); union(b,c); union(c,a)
+          roots=sorted({find(x) for x in ids}); ri={r:i for i,r in enumerate(roots)}; comp={x:ri[find(x)] for x in ids}
+          vertex_comp={}; orphan_vertices=[]; orphan_ids=set(); no_face_support=[]; multi=[]
           for v in cand.vertices:
-            miss=[]; mass=0.0
+            admitted=[]; orphan=[]
             for sid,w in v.support_binding.coefficients:
-              sid=str(sid); w=float(w); all_support.add(sid)
-              if sid not in face_ids and w>0:
-                unknown[sid]+=1; unknown_mass[sid]+=w; miss.append((sid,w)); mass+=w
-            if miss:
-              affected+=1; total_missing_mass+=mass; max_missing_mass=max(max_missing_mass,mass)
-              if len(examples)<12: examples.append({'vertex':str(v.candidate_vertex_id),'component':str(v.component_id),'missing':miss,'all':list(v.support_binding.coefficients)})
-          print('SURFACE_NODE_COUNT',len(surface_ids))
-          print('COMPACT_FACE_COUNT',len(prov.get('compact_faces') or ()))
-          print('FACE_REFERENCED_SURFACE_ID_COUNT',len(face_ids))
-          print('SURFACE_NODES_NOT_IN_FACES',len(surface_ids-face_ids))
-          print('SUPPORT_ID_COUNT',len(all_support))
-          print('SUPPORT_IDS_NOT_IN_FACES',len(all_support-face_ids))
-          print('SUPPORT_IDS_NOT_IN_SURFACE',len(all_support-surface_ids))
-          print('AFFECTED_CARRIER_VERTICES',affected,'OF',len(cand.vertices))
-          print('TOTAL_MISSING_COEFF_MASS',total_missing_mass)
-          print('MAX_VERTEX_MISSING_MASS',max_missing_mass)
-          print('TOP_UNKNOWN',json.dumps([{'sid':sid,'rows':n,'mass':unknown_mass[sid]} for sid,n in unknown.most_common(20)],sort_keys=True))
-          print('EXAMPLES',json.dumps(examples,sort_keys=True))
-          # degree in exact compact-face edge graph for absent ids is necessarily zero;
-          # report whether all missing ids are legitimate Stage15 nodes.
-          print('ALL_MISSING_ARE_STAGE15_NODES',set(unknown).issubset(surface_ids))
+              sid=str(sid); w=float(w)
+              if w<=0: continue
+              if sid in comp: admitted.append((sid,w,comp[sid]))
+              else: orphan.append((sid,w)); orphan_ids.add(sid)
+            cs={x[2] for x in admitted}
+            if not admitted: no_face_support.append(str(v.candidate_vertex_id))
+            if len(cs)>1: multi.append({'vertex':str(v.candidate_vertex_id),'components':sorted(cs),'admitted':admitted,'orphan':orphan})
+            if orphan: orphan_vertices.append({'vertex':str(v.candidate_vertex_id),'components':sorted(cs),'admitted':admitted,'orphan':orphan})
+            if len(cs)==1: vertex_comp[str(v.candidate_vertex_id)]=next(iter(cs))
+          face_cross=[]
+          for i,f in enumerate(cand.faces):
+            cs={vertex_comp.get(str(v)) for v in f}
+            if None in cs or len(cs)!=1:
+              face_cross.append({'face':i,'ids':list(map(str,f)),'components':sorted(str(x) for x in cs)})
+          print('SOURCE_COMPONENT_COUNT',len(roots))
+          print('ORPHAN_ID_COUNT',len(orphan_ids),sorted(orphan_ids))
+          print('ORPHAN_VERTEX_COUNT',len(orphan_vertices))
+          print('NO_EXACT_FACE_SUPPORT_VERTEX_COUNT',len(no_face_support))
+          print('MULTI_EXACT_COMPONENT_VERTEX_COUNT',len(multi))
+          print('FACE_CROSS_COMPONENT_COUNT_AFTER_ORPHAN_EXCLUSION',len(face_cross))
+          print('ORPHAN_VERTICES',json.dumps(orphan_vertices,sort_keys=True))
+          print('MULTI',json.dumps(multi[:20],sort_keys=True))
+          print('FACE_CROSS_SAMPLE',json.dumps(face_cross[:20],sort_keys=True))
+          assert len(no_face_support)==0
+          assert len(multi)==0
+          assert len(face_cross)==0
+          print('ORPHAN_EXCLUSION_TOPOLOGY_PROOF=PASS')
           PY

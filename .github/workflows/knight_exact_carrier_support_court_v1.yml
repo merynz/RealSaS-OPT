@@ -1,0 +1,153 @@
+name: knight-exact-carrier-support-court-v1
+
+on:
+  push:
+    branches: [ops/knight-latest-visual-probe-20261010]
+    paths: ['.github/workflows/knight_exact_carrier_support_court_v1.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  court:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      STAGING_ROOT: /home/monster/realsas_authority/imports/knight_latest_carrier_20261010
+      SURFACE_PATH: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json
+      SURFACE_SHA: 7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182
+      CANDIDATE_SHA: 1fa2c1d67314124d4c22af55e57cc8eb9b5e65bf1ff65870acefc7ea1d104bd1
+      SUPPORT_SHA: 8a625d2e5373cc679dbbaa460c8045956a520b65799bca15cb6975a50e75f514
+      WEIGHTS_SHA: 880dd73b2f3a21196c229156a3271fa95e7261def3f50a3dfe9f1c49ca2bb27b
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          clean: true
+      - name: Court sealed CSR support against current Stage15/17
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          from __future__ import annotations
+          import hashlib, json, os
+          from pathlib import Path
+          import numpy as np
+          from compiler.realsas_compiler_core.artifact_codec_v2 import canonical_mesh_candidate_from_dict, rigging_surface_from_dict
+          from compiler.realsas_compiler_core.mechanical_partition_v1 import build_structural_partition
+          from compiler.realsas_compiler_core.hashing import content_sha256
+
+          def sha(p: Path) -> str:
+              return hashlib.sha256(p.read_bytes()).hexdigest()
+
+          root = Path(os.environ['STAGING_ROOT'])
+          surface_path = Path(os.environ['SURFACE_PATH'])
+          candidate_path = root/'TESSA_STATIC_G3_REPAIRED_CANDIDATE_V3.json'
+          support_path = root/'M_EVIDENCE_SUPPORT_V55.npz'
+          weights_path = root/'MIRA_AXIS41_TESSA_M_SKIN_FIELD_V55.npz'
+          expected = [(surface_path,os.environ['SURFACE_SHA'],'SURFACE'),(candidate_path,os.environ['CANDIDATE_SHA'],'CANDIDATE'),(support_path,os.environ['SUPPORT_SHA'],'SUPPORT'),(weights_path,os.environ['WEIGHTS_SHA'],'WEIGHTS')]
+          for p,h,label in expected:
+              if not p.is_file() or sha(p)!=h:
+                  raise SystemExit(f'{label}_SHA_DRIFT')
+
+          surface = rigging_surface_from_dict(json.loads(surface_path.read_text()))
+          candidate = canonical_mesh_candidate_from_dict(json.loads(candidate_path.read_text()))
+          partition = build_structural_partition(surface,boundary_overrides=())
+          surface_nodes = {str(n.surface_id): n for n in surface.surface_nodes}
+          owner = {str(sid): str(comp.component_id) for comp in partition.components for sid in comp.surface_ids}
+          if set(owner) != set(surface_nodes):
+              raise SystemExit('PARTITION_SURFACE_ACCOUNTING_DRIFT')
+
+          with np.load(support_path,allow_pickle=False) as z:
+              ev_positions=np.asarray(z['candidate_vertices_world'],dtype=np.float64)
+              ev_faces=np.asarray(z['candidate_faces'],dtype=np.int64)
+              gsa_ids=np.asarray(z['gsa_surface_ids']).astype(str)
+              indptr=np.asarray(z['indptr'],dtype=np.int64)
+              indices=np.asarray(z['indices'],dtype=np.int64)
+              coeff=np.asarray(z['coefficients'],dtype=np.float64)
+          with np.load(weights_path,allow_pickle=False) as z:
+              w_positions=np.asarray(z['vertices_rest_source_frame'],dtype=np.float64)
+              w_faces=np.asarray(z['faces'],dtype=np.int64)
+              weights=np.asarray(z['weights_axis41_canonical'],dtype=np.float64)
+
+          cand_positions=np.asarray([v.P for v in candidate.vertices],dtype=np.float64)
+          id_to_index={str(v.candidate_vertex_id):i for i,v in enumerate(candidate.vertices)}
+          cand_faces=np.asarray([[id_to_index[str(x)] for x in face] for face in candidate.faces],dtype=np.int64)
+          n=len(candidate.vertices)
+          if ev_positions.shape!=(n,3) or w_positions.shape!=(n,3): raise SystemExit('CARRIER_POSITION_SHAPE_DRIFT')
+          if ev_faces.shape!=cand_faces.shape or w_faces.shape!=cand_faces.shape: raise SystemExit('CARRIER_FACE_SHAPE_DRIFT')
+          geometry_max=max(float(np.max(np.abs(ev_positions-cand_positions))),float(np.max(np.abs(w_positions-cand_positions))))
+          faces_exact=bool(np.array_equal(ev_faces,cand_faces) and np.array_equal(w_faces,cand_faces))
+          if geometry_max>0.0 or not faces_exact: raise SystemExit('FROZEN_CARRIER_IDENTITY_DRIFT')
+          if indptr.shape!=(n+1,) or indptr[0]!=0 or indptr[-1]!=len(indices) or len(indices)!=len(coeff): raise SystemExit('CSR_SHAPE_DRIFT')
+          if len(gsa_ids)!=len(set(gsa_ids.tolist())): raise SystemExit('GSA_ID_DUPLICATE')
+          referenced_ids=set(gsa_ids[indices].tolist())
+          unknown=sorted(referenced_ids-set(surface_nodes))
+          if unknown: raise SystemExit('SUPPORT_REFERENCES_UNKNOWN_STAGE15_IDS:'+str(unknown[:8]))
+          if np.any(indices<0) or np.any(indices>=len(gsa_ids)): raise SystemExit('SUPPORT_INDEX_RANGE_DRIFT')
+          if not np.isfinite(coeff).all() or np.any(coeff<0): raise SystemExit('SUPPORT_COEFFICIENT_INVALID')
+
+          row_component=[]; row_widths=[]; row_sum_residual=[]; cross_rows=[]; zero_rows=[]
+          support_rows=[]
+          component_vertex_counts={}
+          for i in range(n):
+              a,b=int(indptr[i]),int(indptr[i+1])
+              ids=gsa_ids[indices[a:b]].tolist(); ws=coeff[a:b].tolist()
+              row_widths.append(b-a)
+              if b<=a:
+                  zero_rows.append(i); row_component.append(None); continue
+              total=float(np.sum(coeff[a:b])); row_sum_residual.append(abs(total-1.0))
+              comps=sorted({owner[str(sid)] for sid in ids})
+              if len(comps)!=1:
+                  cross_rows.append({'vertex_index':i,'vertex_id':str(candidate.vertices[i].candidate_vertex_id),'components':comps,'surface_ids':ids})
+                  row_component.append(None)
+              else:
+                  cid=comps[0]; row_component.append(cid); component_vertex_counts[cid]=component_vertex_counts.get(cid,0)+1
+              support_rows.append({'carrier_vertex_id':str(candidate.vertices[i].candidate_vertex_id),'component_id':None if len(comps)!=1 else comps[0],'coefficients':[[str(s),float(w)] for s,w in zip(ids,ws)]})
+
+          crossing=[]; component_face_counts={}
+          if not cross_rows and not zero_rows:
+              for fi,tri in enumerate(cand_faces.tolist()):
+                  comps={row_component[int(v)] for v in tri}
+                  if None in comps or len(comps)!=1:
+                      crossing.append({'face_index':fi,'vertex_indices':tri,'components':sorted(str(x) for x in comps)})
+                  else:
+                      cid=next(iter(comps)); component_face_counts[cid]=component_face_counts.get(cid,0)+1
+
+          partition_ids=sorted(str(c.component_id) for c in partition.components)
+          carrier_components=sorted(component_face_counts)
+          missing_components=sorted(set(partition_ids)-set(carrier_components))
+          row_max=max(row_sum_residual) if row_sum_residual else float('inf')
+          weight_simplex=float(np.max(np.abs(weights.sum(axis=1)-1.0)))
+          report={
+              'schema':'RealSaS.KnightExactCarrierSupportCourt.v1',
+              'status':'PASS' if (not unknown and not cross_rows and not zero_rows and not crossing and row_max<=1e-6 and not missing_components and geometry_max==0.0 and faces_exact and weight_simplex<=1e-6) else 'FAIL',
+              'candidate_lineage_hash':candidate.candidate_lineage_hash,
+              'candidate_file_sha256':sha(candidate_path),'support_evidence_sha256':sha(support_path),'weights_sha256':sha(weights_path),'surface_sha256':sha(surface_path),
+              'carrier_vertex_count':n,'carrier_face_count':len(cand_faces),'carrier_geometry_max_abs_drift':geometry_max,'carrier_faces_exact':faces_exact,
+              'support_csr_nnz':len(indices),'support_row_width_min':min(row_widths),'support_row_width_max':max(row_widths),'support_row_width_histogram':{str(k):int(sum(1 for x in row_widths if x==k)) for k in sorted(set(row_widths))},
+              'support_simplex_max_abs_residual':row_max,'support_cross_component_row_count':len(cross_rows),'support_zero_row_count':len(zero_rows),
+              'stage15_surface_node_count':len(surface_nodes),'support_gsa_id_count':len(gsa_ids),'support_referenced_surface_id_count':len(referenced_ids),'support_unknown_surface_id_count':len(unknown),
+              'stage17_partition_component_count':len(partition_ids),'carrier_component_count':len(carrier_components),'carrier_component_vertex_counts':dict(sorted(component_vertex_counts.items())),'carrier_component_face_counts':dict(sorted(component_face_counts.items())),'missing_stage17_components':missing_components,
+              'cross_component_face_count':len(crossing),'cross_component_faces':crossing[:20],
+              'mira_weight_shape':list(weights.shape),'mira_weight_simplex_max_abs_residual':weight_simplex,
+              'mechanical_candidate_mutated':False,'support_authority_source':'SEALED_M_EVIDENCE_SUPPORT_V55_CSR','product_authority_minted':False,
+              'support_binding_hash':content_sha256({'candidate':candidate.candidate_lineage_hash,'surface':surface.geometry_lineage_hash,'partition':partition.partition_lineage_hash,'evidence_sha256':sha(support_path),'rows':support_rows}),
+          }
+          out=Path('/tmp/knight-exact-carrier-support-court'); out.mkdir(parents=True,exist_ok=True)
+          (out/'REPORT.json').write_text(json.dumps(report,indent=2,sort_keys=True)+'\n')
+          if report['status']=='PASS':
+              (out/'SUPPORT_ROWS.json').write_text(json.dumps({'rows':support_rows},separators=(',',':'))+'\n')
+          print(json.dumps(report,indent=2,sort_keys=True))
+          if report['status']!='PASS': raise SystemExit(2)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knight-exact-carrier-support-court
+          path: /tmp/knight-exact-carrier-support-court
+          if-no-files-found: warn
+          retention-days: 7

@@ -1,0 +1,59 @@
+{
+  "schema": "RealSaS.IRISAppearanceResearchProposal.v1",
+  "date": "2026-10-10",
+  "status": "SOURCE_INSPECTED__REFERENCE_PRODUCER_AND_BIND_PENDING",
+  "canonical_branch": "main",
+  "user_authorized": true,
+  "executed_engine_attempt_id": null,
+  "released_reference_dag": false,
+  "trained_appearance_head": false,
+  "full_visual_qualification": false,
+  "truth_boundary": {
+    "Knight_3D_source": "MECHANICAL_ONLY",
+    "appearance_reference": "GENUINE_AUTHORED_2D_WITH_EXPLICIT_SCOPE",
+    "prior_output": "PREDICTION_NOT_TRUTH",
+    "authored_metadata": "TEACHER_ONLY_WHEN_UNAVAILABLE_AT_INFERENCE"
+  },
+  "source": {
+    "name": "RealSaS_ArtistIntent_M4_GOLD_SOURCE_20260731_183353.zip",
+    "size_bytes": 219256413,
+    "sha256": "935f7737c123b988ffd0989ed13d673095ff255794bb9bfc17d5bc1dcf3e753e",
+    "part_sha256": [
+      "eac823e9e3845d271c0a09b9ecf8438153177976097588c61ac648b324ba8120",
+      "9613683a584e6ea8f028614d60d903564c0a90d85b963e45cdfddb383a0e3e58",
+      "b753bc30b8b2779287634de1e59c0d4726ed4c3031b26e717cfa5697b2aaeb4f"
+    ],
+    "new_training_admission": "PENDING",
+    "selected_reference": {
+      "project_id": "P0074_4081c29a",
+      "structural_file": "Knights.scml",
+      "sha256": "662ae40d79ec85a527b655944755e95708f7abd6eb9fadf4e4f7014fa31ca630",
+      "same_character_as_mechanical_Knight": false,
+      "manifest_entries_verified": 526,
+      "sprite_png_assets": 53,
+      "animations": 11,
+      "mainline_keys": 90,
+      "object_references": 1538,
+      "authored_sprite_owners": 18,
+      "distinct_owner_order_configurations": 4,
+      "missing_sprite_references": 0,
+      "ambiguous_z_indices": 0,
+      "declared_image_dimension_mismatches": 0
+    }
+  },
+  "remaining_obligations": [
+    "reference_producer_and_independent_consumer_implementation_and_release",
+    "source_admission_for_appearance_learning",
+    "qualified_visual_to_mechanical_bind_addresses",
+    "persistent_multi_direction_identity",
+    "required_contact_domain_and_both_endpoint_addresses",
+    "required_grip_domain_and_hand_prop_addresses",
+    "amodal_material_and_support_sufficiency_for_target_motion",
+    "independent_actual_runtime_consumption_measurements"
+  ],
+  "required_contact_cardinality": null,
+  "required_grip_cardinality": null,
+  "current_witness_preservation": ["M", "G", "W_M", "SEALED_MOTION"],
+  "future_model_head_evaluation_changes": "DECLARED_DAG_DEPENDENCIES_ONLY",
+  "next_action": "Review and release an authored-2D reference producer and independent visibility/order measurement consumer; then admit explicit bind and required relation data before executing a Knight intervention."
+}

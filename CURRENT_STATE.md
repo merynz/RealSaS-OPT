@@ -94,8 +94,13 @@ isolated at every output/implementation boundary.
 
 Visual ownership, material, deformation, layering and rebuild boundaries are
 mapped in `docs/presentation/VISUAL_DEPENDENCY_MAP_20261009.md`. The later visual completion request authorizes bounded appearance/runtime work
-and a matched downstream Knight witness. It does not establish visual acceptance,
-request a new IRIS model head, or authorize a mechanics refit. Main has no server-side required-check protection; the
+and a matched downstream Knight witness. The subsequent 2026-10-10 instruction
+also authorizes IRIS appearance research from genuine layered 2D references/prior
+outputs. Knight's 3D source is mechanical truth, not visual truth. The initial
+source inspection and unexecuted research protocol are recorded in
+`docs/research/IRIS_APPEARANCE_RESEARCH_V1_20261010.md`. This does not establish
+visual acceptance, a trained head, a released reference consumer, or a mechanics refit.
+Main has no server-side required-check protection; the
 connected GitHub app lacks administration capability for that setting.
 
 Release discovery now scans each distinct adapter module once per snapshot,
@@ -200,7 +205,9 @@ These measured costs define optimization priorities after repository currentness
    in run37986333890 was observed without a runner assignment; do not replace it with
    a direct historical ledger execution or label CI as Knight closure.
 
-General model inference and FIT8/LOFO/unseen work are outside this continuation.
+IRIS appearance research is now authorized under the separate protocol above.
+General mechanics refitting and FIT8/LOFO/unseen claims remain outside the
+present Knight witness; future declared research scopes may change them.
 
 ## Read first
 

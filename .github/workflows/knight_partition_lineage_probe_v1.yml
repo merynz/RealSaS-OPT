@@ -1,0 +1,77 @@
+name: knight-partition-lineage-probe-v1
+
+on:
+  push:
+    branches: [ops/knight-latest-visual-probe-20261010]
+    paths: ['.github/workflows/knight_partition_lineage_probe_v1.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      PROMOTION_BASE: bc04f9597fc5896d520227d861931d55ecf70d5c
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          clean: true
+      - name: Inspect historical and promotion-base Stage17 partition
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT=/tmp/knight-partition-lineage-probe
+          rm -rf "$OUT" && mkdir -p "$OUT"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ['AUTHORITY_ROOT'])/'runs'/os.environ['RUN_ID']/'artifacts'
+          stage17=root/'17_MECHANICAL_PARTITION_QUALIFIED'
+          files=[]
+          if stage17.is_dir():
+              for p in sorted(stage17.rglob('*')):
+                  if p.is_file():
+                      row={'path':str(p),'name':p.name,'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'size':p.stat().st_size}
+                      if p.suffix=='.json':
+                          try:
+                              d=json.loads(p.read_text()); row['schema']=d.get('schema_version') or d.get('schema'); row['keys']=sorted(d.keys())
+                              row['partition_lineage_hash']=d.get('partition_lineage_hash')
+                              comps=d.get('components') or []
+                              if isinstance(comps,list): row['component_count']=len(comps); row['component_sizes']=[len(x.get('surface_ids') or []) for x in comps if isinstance(x,dict)]
+                          except Exception as e: row['json_error']=str(e)
+                      files.append(row)
+          out={'schema':'RealSaS.KnightPartitionLineageProbe.v1','historical_stage17':files}
+          Path('/tmp/knight-partition-lineage-probe/HISTORICAL.json').write_text(json.dumps(out,indent=2)+'\n')
+          print(json.dumps(out,indent=2))
+          PY
+
+          git fetch origin "$PROMOTION_BASE" --depth=1
+          git worktree add --detach "$RUNNER_TEMP/realsas-promotion-base" FETCH_HEAD
+          cd "$RUNNER_TEMP/realsas-promotion-base"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os,sys
+          from pathlib import Path
+          repo=Path.cwd(); sys.path.insert(0,str(repo))
+          from compiler.realsas_compiler_core.artifact_codec_v2 import rigging_surface_from_dict
+          from compiler.realsas_compiler_core.mechanical_partition_v1 import build_structural_partition
+          surface_path=Path(os.environ['AUTHORITY_ROOT'])/'runs'/os.environ['RUN_ID']/'artifacts'/'15_RIGGING_SURFACE_QUALIFIED'/'qualified_rigging_surface.json'
+          surface=rigging_surface_from_dict(json.loads(surface_path.read_text()))
+          partition=build_structural_partition(surface,boundary_overrides=())
+          out={'schema':'RealSaS.PromotionBasePartitionReplay.v1','code_sha':os.popen('git rev-parse HEAD').read().strip(),'surface_sha256':hashlib.sha256(surface_path.read_bytes()).hexdigest(),'partition_lineage_hash':partition.partition_lineage_hash,'component_count':len(partition.components),'components':[{'component_id':c.component_id,'surface_count':len(c.surface_ids)} for c in partition.components]}
+          Path('/tmp/knight-partition-lineage-probe/PROMOTION_BASE.json').write_text(json.dumps(out,indent=2)+'\n')
+          print(json.dumps(out,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knight-partition-lineage-probe
+          path: /tmp/knight-partition-lineage-probe
+          if-no-files-found: warn
+          retention-days: 7

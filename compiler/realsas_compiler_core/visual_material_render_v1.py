@@ -9,6 +9,12 @@ from .appearance_color_v2 import (straight_srgb_rgba_u8_to_premultiplied_linear,
     premultiplied_linear_to_straight_srgb_u8)
 
 
+class VisualRasterQualificationError(QualificationError):
+    def __init__(self, message, diagnostics):
+        super().__init__(message)
+        self.diagnostics = diagnostics
+
+
 def render_visual_material(*, positions, depths, faces, uv, texture, provenance, source_view, view_index, resolution):
     p, z, f, uv = (np.asarray(positions, dtype=float), np.asarray(depths, dtype=float),
                    np.asarray(faces, dtype=np.int64), np.asarray(uv, dtype=float))
@@ -86,7 +92,8 @@ def render_visual_material(*, positions, depths, faces, uv, texture, provenance,
         order = np.lexsort((depth, pixel))
         pixel, depth, color, ancestry, pc, ps = (x[order] for x in (pixel, depth, color, ancestry, pc, ps))
         same = pixel[1:] == pixel[:-1]
-        ties = int(np.count_nonzero(same & (np.abs(depth[1:] - depth[:-1]) <= DEPTH_TIE_EPSILON)))
+        tie_mask = same & (np.abs(depth[1:] - depth[:-1]) <= DEPTH_TIE_EPSILON)
+        ties = int(np.count_nonzero(tie_mask))
         starts = np.r_[True, ~same]
         rank = np.arange(len(pixel)) - np.maximum.accumulate(np.where(starts, np.arange(len(pixel)), 0))
         overflow = int(np.count_nonzero(rank >= MAXIMUM_FRAGMENT_LAYERS))
@@ -110,7 +117,19 @@ def render_visual_material(*, positions, depths, faces, uv, texture, provenance,
             if layer == 0:
                 owner[dst] = ancestry[take]
     if ties or overflow:
-        raise QualificationError("VISUAL_DEPTH_TIE_OR_FRAGMENT_OVERFLOW")
+        tie_indices = np.flatnonzero(tie_mask)[:16]
+        overflow_indices = np.flatnonzero(rank >= MAXIMUM_FRAGMENT_LAYERS)[:16]
+        raise VisualRasterQualificationError("VISUAL_DEPTH_TIE_OR_FRAGMENT_OVERFLOW", {
+            "unresolved_depth_tie_count": ties, "fragment_overflow_count": overflow,
+            "depth_tie_epsilon": DEPTH_TIE_EPSILON,
+            "maximum_fragment_layers": MAXIMUM_FRAGMENT_LAYERS,
+            "depth_tie_examples": [{"pixel_xy": [int(pixel[i] % resolution), int(pixel[i] // resolution)],
+                                    "face_indices": [int(ancestry[i]), int(ancestry[i+1])],
+                                    "depths": [float(depth[i]), float(depth[i+1])]} for i in tie_indices],
+            "fragment_overflow_examples": [{"pixel_xy": [int(pixel[i] % resolution), int(pixel[i] // resolution)],
+                                            "face_index": int(ancestry[i]), "rank": int(rank[i])}
+                                           for i in overflow_indices],
+        })
     rgba = premultiplied_linear_to_straight_srgb_u8(accum).reshape(resolution, resolution, 4)
     visible = rgba[..., 3].ravel() > 0
     material_code[~visible], material_donor[~visible] = 255, PADDING_SOURCE_VIEW

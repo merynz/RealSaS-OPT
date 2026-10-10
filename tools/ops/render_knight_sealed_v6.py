@@ -28,6 +28,10 @@ from compiler.realsas_compiler_core.visibility_v2 import rasterize_visible_owner
 from compiler.realsas_compiler_core.visual_domain_v2 import build_domain_binding, evaluate_domain_binding
 from compiler.realsas_compiler_core.visual_material_render_v1 import render_visual_material
 from compiler.realsas_compiler_core.visual_material_v1 import load_visual_material
+from compiler.realsas_compiler_core.visual_completion_evidence_v1 import (
+    inspect_visual_completion_field, source_visual_boundary_evidence,
+)
+from compiler.realsas_compiler_core.appearance_authority_v2 import complete_appearance_qualification_from_dict
 from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
     build_visual_mesh_from_region_labels_v1, partition_source_mask_by_safe_face_adjacency_v1,
 )
@@ -103,6 +107,20 @@ def main():
     observation = qualified_observation_set_from_dict(stage("07_OBSERVATION_CONTRACT_QUALIFIED", "RealSaS.QualifiedObservationSetIR.v1"))
     policy = mesh_policy_from_dict(stage("18_CANONICAL_MESH_ADDRESSING_BUILD", "RealSaS.MeshQualificationPolicyIR.v1"))
     asset = complete_appearance_asset_from_dict(stage("23_COMPLETE_APPEARANCE_ASSET_BAKED", "RealSaS.CompleteAppearanceAssetIR.v2"))
+    appearance = complete_appearance_qualification_from_dict(stage(
+        "24_COMPLETE_APPEARANCE_ASSET_QUALIFIED", "RealSaS.CompleteAppearanceQualificationIR.v2"))
+    if appearance.asset_binding_hash != asset.asset_hash:
+        raise RuntimeError("CAA_QUALIFICATION_ASSET_BINDING_DRIFT")
+    completion = inspect_visual_completion_field(asset)
+    if completion["field_present"]:
+        paths.append(Path(asset.metadata["canonical_completion_field_path"]))
+    boundary = source_visual_boundary_evidence(asset=asset, appearance=appearance,
+        presentation=None, completion=completion)
+    out.mkdir(parents=True, exist_ok=True)
+    atomic_json(out / "VISUAL_BOUNDARY_EVIDENCE.json", {"code_sha": code_sha, "evidence": boundary})
+    if os.environ.get("VISUAL_BOUNDARY_PREFLIGHT_ONLY") == "1":
+        print("VISUAL_BOUNDARY_BLOCKED", boundary["evidence_hash"], json.dumps(boundary), flush=True)
+        raise RuntimeError("FULL_VISUAL_PRODUCTION_CONSUMPTION_BOUNDARY_NOT_CLOSED__SEE_EVIDENCE")
     if len(cameras) != 8 or tuple(int(c.view_index) for c in cameras) != tuple(range(8)):
         raise RuntimeError("RENDER_CAMERA_SET_DRIFT")
     if asset.candidate_mesh_binding_hash != candidate.candidate_lineage_hash:
@@ -166,7 +184,9 @@ def main():
               "renderer": "PYTHON_SEALED_VISUAL_MATERIAL_REFERENCE",
               "caa_completion_field_consumed_by_visual_material_transport": False,
               "open_acceptance": ["AMODAL_SUPPORT_AND_MATERIAL", "INTER_CHART_CONTACT_AND_SEMANTIC_ORDER", "NATIVE_END_TO_END_PARITY"],
-              "clips": {}, "outputs": [], "failures": [], "views": []}
+              "full_visual_acceptance_passed": False,
+              "visual_boundary_evidence": boundary,
+              "clips": {}, "outputs": [], "failures": [], "structural_failures": [], "views": []}
     atomic_json(out / "REPORT.json", report)
     print("RENDER_CONTRACT", checkpoint.sha, "SOURCE", code_sha, flush=True)
     _, envelope = derive_deformation_envelope_v2(skeleton=skeleton, camera_set=camera_set)
@@ -226,8 +246,11 @@ def main():
                             faces=np.asarray(vm.faces), uv=np.asarray(vm.uv), texture=rgba,
                             provenance=provenance, source_view=donor, view_index=vi, resolution=resolution)
                         im = Image.fromarray(np.asarray(rr.straight_rgba_u8, dtype=np.uint8))
+                        geometry = base.visual_metrics(vm.positions, pos[:, :2], vm.faces)
                         measurement = {"frame_hash": frame_hash, "time_seconds": float(t), "palette_proof": proof,
-                            "geometry": base.visual_metrics(vm.positions, pos[:, :2], vm.faces),
+                            "geometry": geometry,
+                            "structural_geometry_passed": geometry["flipped_triangles"] == 0 and geometry["max_edge_ratio"] <= 4.0,
+                            "full_visual_acceptance_passed": False,
                             "overlap_pixels": int(rr.overlap_pixel_count), "unresolved_depth_ties": int(rr.unresolved_depth_tie_count),
                             "fragment_overflow": int(rr.fragment_overflow_count)}
                         p = out / f"{key}.png"
@@ -235,12 +258,15 @@ def main():
                         checkpoint.commit(key, p, measurement)
                         print("FRAME_RENDERED", key, "seconds", round(time.monotonic() - started, 2), flush=True)
                     except QualificationError as error:
-                        report["failures"].append({"key": key, "error": str(error)})
+                        report["failures"].append({"key": key, "error": str(error),
+                            "diagnostics": getattr(error, "diagnostics", {})})
                         atomic_json(out / "REPORT.json", report)
                         print("FRAME_FAILED", key, str(error), flush=True)
                         continue
                 images[vi].append(im)
                 measurements[vi].append(measurement)
+                if measurement.get("structural_geometry_passed") is not True:
+                    report["structural_failures"].append({"key": key, "geometry": measurement["geometry"]})
         duration = max(40, round(float(payload["duration_seconds"]) * 1000 /
                        (frame_count if payload.get("loop") else frame_count - 1)))
         for vi in views:
@@ -258,12 +284,12 @@ def main():
         report["clips"][clip_id] = {"motion_sha256": digest(path), "mapping": mapping,
                                     "measurements": measurements, "frame_count": frame_count}
         atomic_json(out / "REPORT.json", report)
-    report["status"] = "RENDER_FAILURES_MEASURED" if report["failures"] else "COMPLETE_DIAGNOSTIC_RENDER"
+    report["status"] = "RENDER_FAILURES_MEASURED" if report["failures"] or report["structural_failures"] else "COMPLETE_DIAGNOSTIC_RENDER"
     report["duration_seconds"] = time.monotonic() - started
     if any(digest(Path(p)) != sha for p, sha in contract["files"].items()):
         raise RuntimeError("RENDER_INPUTS_MUTATED_DURING_EXECUTION")
     atomic_json(out / "REPORT.json", report)
-    if report["failures"]:
+    if report["failures"] or report["structural_failures"]:
         raise RuntimeError("RENDER_FRAME_CONTRACT_FAILED__SEE_REPORT")
 
 

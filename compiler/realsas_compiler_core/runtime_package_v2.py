@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections import OrderedDict
 import hashlib
 import io
+import json
 from pathlib import Path
 import struct
 import zlib
@@ -15,6 +16,7 @@ from PIL import Image
 from .runtime_authority_v2 import RuntimeProjectionV2IR
 from .runtime_visual_authority_v1 import SourceOwnedVisualRuntimeProjectionV1IR
 from .types import QualificationError
+from .visual_completion_evidence_v1 import validate_source_visual_boundary_evidence
 from .visual_material_v1 import (
     MATERIAL_CONTRACT, SAMPLING_CONTRACT, DEPTH_CONTRACT,
     DEPTH_TIE_EPSILON, MAXIMUM_FRAGMENT_LAYERS, validate_visual_material,
@@ -527,6 +529,14 @@ def build_source_owned_visual_rss_v2_entries(
             f"depth_tie_epsilon={DEPTH_TIE_EPSILON:.17g}",
             f"maximum_fragment_layers={MAXIMUM_FRAGMENT_LAYERS}",
         ])
+
+    boundary = projection.metadata.get("visual_boundary_evidence")
+    if boundary is not None:
+        validate_source_visual_boundary_evidence(boundary)
+        entries["authority/source_visual_boundary_evidence_v1.json"] = json.dumps(
+            boundary, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+        manifest.append("source_visual_boundary_evidence_hash=" + boundary["evidence_hash"])
+        manifest.append("full_visual_acceptance_passed=0")
 
     for view in views:
         vi = int(view.view_index)

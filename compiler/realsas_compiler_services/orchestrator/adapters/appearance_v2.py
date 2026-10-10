@@ -1603,6 +1603,8 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
                 "visual_geometry_authority": "SOURCE_ART_SILHOUETTE",
                 "visual_uv_authority": "STAGE18_FIXED_SOURCE_RASTER_UV",
                 "texture_authority": "SOURCE_RGBA",
+                "visual_completion_transport_sample_count": 0,
+                "canonical_completion_field_is_visual_transport": False,
                 "visual_material_contract": MATERIAL_CONTRACT,
                 "source_wins": True,
                 "runtime_generation_forbidden": True,

@@ -403,6 +403,13 @@ def _qualified_visual_presentation_stage37(
             "region_partition_contract": (
                 "SOURCE_RASTER_4N_X_STAGE35_SAFE_SHARED_EDGE_V1"
             ),
+            "required_visual_contact_relation_count": None,
+            "qualified_visual_contact_relation_count": 0,
+            "visual_contact_domain_qualified": False,
+            "target_equipment_grip_qualified": False,
+            "semantic_visual_order_qualified": False,
+            "hidden_visual_layer_support_qualified": False,
+            "full_visual_acceptance_passed": False,
             "minimum_seed_pixels": 1,
             "subject_specific_code_used": False,
         },

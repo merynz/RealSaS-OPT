@@ -136,6 +136,17 @@ Appearance / CAA remains source-preserving and proof-bound under `canonical/COMP
 
 ## Fresh canonical Knight regression render
 
+The user's acceptance target now requires every visual producer, sealed output,
+consumer and independent relation measurement. See
+`docs/presentation/VISUAL_RELATION_CLOSURE_20261010.md`. The current source-owned
+path lacks required visual-contact, equipment-grip, hidden-support/addressing and
+semantic-order contracts. A new bound boundary report distinguishes canonical
+CAA field validation from actual visual material transport (zero samples on the
+present path). Its propagation through Stage42/RSS/Stage45 is engineering
+enforcement, not closure of those missing relationships. The read-only main host
+preflight must retain its exact data counts; an incomplete boundary blocks another
+full render. Do not convert that blocked result or a diagnostic GIF into acceptance.
+
 Current carrier/CAA replay `38044123895` ran on exact
 `main@cc89978e0378086086a788b0c67911cd7058ad35` (PR70), without source overlay or
 model inference. All eight IDLE views completed as 12-frame GIFs; RUN and SLASH

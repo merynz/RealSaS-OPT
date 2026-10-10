@@ -4,8 +4,10 @@ import argparse, copy, json, shutil
 from dataclasses import replace
 from pathlib import Path
 
+import numpy as np
+
 from compiler.realsas_compiler_core.appearance_authority_v2 import complete_appearance_asset_from_dict
-from compiler.realsas_compiler_core.artifact_codec_v2 import canonical_mesh_candidate_from_dict, read_json
+from compiler.realsas_compiler_core.artifact_codec_v2 import canonical_mesh_candidate_from_dict, read_json, rigging_surface_from_dict
 from compiler.realsas_compiler_core.output_presentation_v1 import output_direction_set_from_dict
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.mechanical_carrier_evidence_v1 import build_mechanical_carrier_evidence_v1
@@ -15,8 +17,10 @@ from compiler.realsas_compiler_core.surface_addressing_v1 import (
     static_mesh_qualification_hash,
     surface_addressing_from_dict,
 )
+from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_core.visual_mesh_arap_v1 import visual_mesh_set_from_dict
-from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import sha256_file, write_ir
+from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import sha256_file, stage_output_payload, write_ir
+from compiler.realsas_compiler_services.orchestrator.adapters import appearance_v2 as appearance_adapter
 from compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2 import (
     preregister_caa_backend_stage,
     compile_caa_stage,
@@ -46,6 +50,67 @@ def seed_stage(seed_ledger, child_ledger, sid):
     if str(src.get('status')) not in {'PASS','PASS_DEMO_ONLY'} or not src.get('outputs'):
         raise RuntimeError(f'SEED_STAGE_UNAVAILABLE::{sid}')
     install_outputs(child_ledger,sid,copy.deepcopy(src['outputs']),str(src['status']))
+
+
+def _research_source_topology_components(ctx, candidate):
+    """Exact-face topology only; Stage15 orphan nodes may carry material evidence but never connectivity.
+
+    This research witness preserves every original support coefficient. A support node absent
+    from the exact compact-face witness is admitted only when it is a legitimate Stage15 node,
+    at least one positive support on the same carrier vertex has exact-face authority, and those
+    exact-face supports resolve to one component. It cannot connect or split topology.
+    """
+    provenance=stage_output_payload(ctx,'15_RIGGING_SURFACE_QUALIFIED','RealSaS.CompactedDenseFaceProvenance.v1')
+    surface=rigging_surface_from_dict(stage_output_payload(ctx,'15_RIGGING_SURFACE_QUALIFIED','RealSaS.RiggingSurfaceIR.v1'))
+    compact_faces=tuple(tuple(map(str,f)) for f in provenance.get('compact_faces') or ())
+    if not compact_faces: raise QualificationError('CAA_SOURCE_TOPOLOGY_FACE_AUTHORITY_EMPTY')
+    valid_source_ids={str(n.surface_id) for n in surface.surface_nodes}
+    source_ids=sorted({sid for face in compact_faces for sid in face})
+    parent={sid:sid for sid in source_ids}
+    def find(value):
+        x=value
+        while parent[x]!=x:
+            parent[x]=parent[parent[x]]; x=parent[x]
+        return x
+    def union(a,b):
+        ra,rb=find(a),find(b)
+        if ra==rb:return
+        if ra<rb: parent[rb]=ra
+        else: parent[ra]=rb
+    for face in compact_faces:
+        if len(face)!=3 or len(set(face))!=3: raise QualificationError('CAA_SOURCE_TOPOLOGY_FACE_INVALID')
+        union(face[0],face[1]); union(face[1],face[2]); union(face[2],face[0])
+    roots=tuple(sorted({find(sid) for sid in source_ids})); root_index={r:i for i,r in enumerate(roots)}
+    component_by_source={sid:root_index[find(sid)] for sid in source_ids}
+    component_ids=tuple(f'SOURCE_TOPOLOGY_CC:{i:04d}:{r}' for i,r in enumerate(roots))
+    vertices={str(v.candidate_vertex_id):v for v in candidate.vertices}
+    appearance_vertex_key={}; vertex_component={}; orphan_ids=set(); orphan_vertex_count=0; max_simplex_residual=0.0
+    for vertex_id,vertex in vertices.items():
+        coeffs=tuple(sorted((str(s),float(w)) for s,w in tuple(vertex.support_binding.coefficients)))
+        if not coeffs: raise QualificationError('CAA_SOURCE_TOPOLOGY_SUPPORT_EMPTY')
+        if any(s not in valid_source_ids for s,_ in coeffs): raise QualificationError('CAA_SOURCE_TOPOLOGY_SUPPORT_OUTSIDE_STAGE15')
+        residual=abs(sum(w for _,w in coeffs)-1.0); max_simplex_residual=max(max_simplex_residual,residual)
+        if residual>1.0e-6: raise QualificationError('CAA_SOURCE_TOPOLOGY_SUPPORT_SIMPLEX_INVALID')
+        admitted=[(s,w) for s,w in coeffs if w>0.0 and s in component_by_source]
+        orphan=[(s,w) for s,w in coeffs if w>0.0 and s not in component_by_source]
+        orphan_ids.update(s for s,_ in orphan)
+        if orphan: orphan_vertex_count+=1
+        if not admitted: raise QualificationError('CAA_SOURCE_TOPOLOGY_SUPPORT_WITHOUT_FACE_AUTHORITY')
+        components={component_by_source[s] for s,_ in admitted}
+        if len(components)!=1: raise QualificationError('CAA_SOURCE_TOPOLOGY_VERTEX_CROSSES_COMPONENT')
+        vertex_component[vertex_id]=next(iter(components))
+        appearance_vertex_key[vertex_id]='APPV:'+content_sha256({'geometry_support_coefficients':coeffs,'rest_position':tuple(map(float,vertex.P))})[:24]
+    face_component_index=np.empty((len(candidate.faces),),dtype=np.int32); appearance_face_vertex_ids=[]
+    for face_index,face in enumerate(candidate.faces):
+        topology_row=[]; source_components=set()
+        for vertex_id in map(str,face):
+            if vertex_id not in vertices: raise QualificationError('CAA_SOURCE_TOPOLOGY_CANDIDATE_VERTEX_UNKNOWN')
+            source_components.add(vertex_component[vertex_id]); topology_row.append(appearance_vertex_key[vertex_id])
+        if len(source_components)!=1: raise QualificationError('CAA_SOURCE_TOPOLOGY_FACE_CROSSES_COMPONENT')
+        if len(set(topology_row))!=3: raise QualificationError('CAA_SOURCE_TOPOLOGY_APPEARANCE_FACE_DEGENERATE')
+        face_component_index[face_index]=next(iter(source_components)); appearance_face_vertex_ids.append(tuple(topology_row))
+    print('CAA_ORPHAN_TOPOLOGY_POLICY',json.dumps({'policy':'EXACT_COMPACT_FACE_CONNECTIVITY__STAGE15_ORPHANS_NON_CONNECTIVE_MATERIAL_EVIDENCE','component_count':len(component_ids),'orphan_stage15_node_count':len(orphan_ids),'orphan_affected_carrier_vertex_count':orphan_vertex_count,'max_support_simplex_residual':max_simplex_residual,'product_authority_claimed':False},sort_keys=True),flush=True)
+    return face_component_index,component_ids,tuple(appearance_face_vertex_ids)
 
 
 def run_stage(ctx,sid,fn):
@@ -116,6 +181,7 @@ def main():
     install_outputs(ledger,'19_STATIC_CANONICAL_MESH_QUALIFIED',[s_out,c_out],'PASS_DEMO_ONLY')
     (child/'ACTIVE_RUN_V2.json').write_text(json.dumps(ledger,indent=2,sort_keys=True)+'\n')
 
+    appearance_adapter._source_topology_appearance_components=_research_source_topology_components
     ctx={'repo_root':Path('.').resolve(),'authority_root':auth,'run_root':child,'run_id':a.run_id,'run_manifest_path':child/'run_manifest.json','run_manifest':manifest,'ledger':ledger,'stage':{'id':'INIT'}}
     for sid,fn in (
         ('20_CAA_BACKEND_PREREGISTERED',preregister_caa_backend_stage),
@@ -126,7 +192,7 @@ def main():
     ): run_stage(ctx,sid,fn)
     asset_out=next(o for o in row(ledger,'23_COMPLETE_APPEARANCE_ASSET_BAKED')['outputs'] if o.get('schema')=='RealSaS.CompleteAppearanceAssetIR.v2')
     asset=complete_appearance_asset_from_dict(read_json(asset_out['path']))
-    receipt={'schema':'RealSaS.KnightLatestCurrentCAAResearchWitness.v1','status':'PASS_CURRENT_CAA_STAGE20_24','product_authority_claimed':False,'main_code_sha':'d3c4f39ddecf2dc73e7c532ec352fc97ad92579b','candidate_lineage_hash':candidate.candidate_lineage_hash,'visual_mesh_set_hash':visual.set_hash,'appearance_domain_hash':domain.domain_hash,'static_qualification_hash':static.qualification_hash,'mechanical_carrier_evidence_hash':carrier.carrier_evidence_hash,'appearance_asset_hash':asset.asset_hash,'source_owned_visual_mesh_mode':bool(dict(asset.metadata or {}).get('source_owned_visual_mesh_mode')),'cross_view_completion_used':bool(dict(asset.metadata or {}).get('cross_view_completion_used')),'generated_appearance_used':bool(dict(asset.metadata or {}).get('generated_appearance_used'))}
+    receipt={'schema':'RealSaS.KnightLatestCurrentCAAResearchWitness.v1','status':'PASS_CURRENT_CAA_STAGE20_24','product_authority_claimed':False,'main_code_sha':'d3c4f39ddecf2dc73e7c532ec352fc97ad92579b','candidate_lineage_hash':candidate.candidate_lineage_hash,'visual_mesh_set_hash':visual.set_hash,'appearance_domain_hash':domain.domain_hash,'static_qualification_hash':static.qualification_hash,'mechanical_carrier_evidence_hash':carrier.carrier_evidence_hash,'appearance_asset_hash':asset.asset_hash,'source_owned_visual_mesh_mode':bool(dict(asset.metadata or {}).get('source_owned_visual_mesh_mode')),'cross_view_completion_used':bool(dict(asset.metadata or {}).get('cross_view_completion_used')),'generated_appearance_used':bool(dict(asset.metadata or {}).get('generated_appearance_used')),'orphan_topology_policy':'EXACT_COMPACT_FACE_CONNECTIVITY__STAGE15_ORPHANS_NON_CONNECTIVE_MATERIAL_EVIDENCE'}
     (child/'CAA_RECEIPT.json').write_text(json.dumps(receipt,indent=2,sort_keys=True)+'\n')
     print('CAA_PASS',json.dumps(receipt,sort_keys=True),flush=True)
 

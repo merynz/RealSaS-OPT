@@ -13,11 +13,22 @@ from compiler.realsas_compiler_core.visual_oracle_reference_v1 import compose, p
 from compiler.realsas_compiler_core.visual_oracle_package_v1 import package_frame
 from compiler.realsas_compiler_core.visual_oracle_io_v1 import sha
 from compiler.realsas_compiler_core.visual_oracle_measure_v1 import cached_source, independent_reference, metrics, initially_occluded, canonical_visible
-from tools.platform_visual_oracle_v1 import oracle_plan
+from tools.platform_visual_oracle_v1 import oracle_plan, source_inputs
 from tools.platform_release_snapshot import snapshot
 
 BUDGETS = {"minimum_alpha_iou": .999, "maximum_pm_mean": 1/255, "maximum_pm_p99": 2/255,
            "maximum_robust_owner_mismatch_pixels": 0}
+
+
+def test_oracle_hydration_uses_explicit_host_remote(tmp_path, monkeypatch):
+    received = {}
+    def hydrate(inventory, **kwargs):
+        received.update(inventory=inventory, **kwargs)
+        raise RuntimeError("STOP_BEFORE_SOURCE_REGISTRATION")
+    monkeypatch.setattr("tools.platform_visual_oracle_v1.hydrate_inventory", hydrate)
+    with pytest.raises(RuntimeError, match="STOP_BEFORE_SOURCE_REGISTRATION"):
+        source_inputs({"inventory": {"required_files": []}}, tmp_path, rclone_remote="gdrive")
+    assert received == {"inventory": {"required_files": []}, "cas_root": tmp_path / "external-cas", "rclone_remote": "gdrive"}
 
 
 def fixture(tmp_path):

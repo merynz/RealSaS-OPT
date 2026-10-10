@@ -13,10 +13,14 @@ def sha256(path: Path) -> str:
     return h.hexdigest()
 
 def stage_row(ledger,sid):
-    return next(r for r in ledger['stages'] if r['id']==sid)
+    rows=[r for r in ledger['stages'] if r['id']==sid]
+    if len(rows)!=1: raise RuntimeError(f'STAGE_ID_CARDINALITY::{sid}::{len(rows)}')
+    return rows[0]
 
 def stage_payload(ledger,sid,schema):
-    out=next(o for o in stage_row(ledger,sid).get('outputs',[]) if o.get('schema')==schema)
+    outputs=[o for o in stage_row(ledger,sid).get('outputs',[]) if o.get('schema')==schema]
+    if len(outputs)!=1: raise RuntimeError(f'STAGE_SCHEMA_CARDINALITY::{sid}::{schema}::{len(outputs)}')
+    out=outputs[0]
     p=Path(out['path'])
     if not p.is_file() or sha256(p)!=str(out['sha256']): raise RuntimeError(f'STAGE_BYTES_DRIFT::{sid}::{schema}')
     return json.loads(p.read_text()),p

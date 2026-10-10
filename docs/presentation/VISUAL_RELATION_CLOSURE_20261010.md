@@ -74,3 +74,17 @@ M/G/W identities through Go's Attempt/intervention/agent-handoff contract.
 This change exposes and binds the missing evidence. It does **not** close these
 four visual relationships or claim that the entire visual production-consumption
 chain is already complete.
+
+## Entry-link enforcement
+
+The first exact-main host inspection exposed a wrong Stage24 ID in the new
+diagnostic caller. The entry reference is corrected to the canonical plan's
+`24_COMPLETE_APPEARANCE_QUALIFIED`; a cross-file test now checks every literal
+render stage reference against that plan. Missing/duplicate stages and output
+schemas have explicit cardinality errors, and entry failures preserve a report.
+
+The main-only VF23 workflow also referenced a test that no longer existed and
+ran zero tests. It now selects the actual Stage20–46 source-visual test, checks
+on PRs as well as main, and uses the public hosted CPU lane for its synthetic
+native bank. A cross-file test verifies every selected test function exists.
+Neither correction adds scientific qualification or changes canonical policies.

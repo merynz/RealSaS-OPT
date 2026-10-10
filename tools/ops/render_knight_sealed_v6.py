@@ -108,7 +108,7 @@ def main():
     policy = mesh_policy_from_dict(stage("18_CANONICAL_MESH_ADDRESSING_BUILD", "RealSaS.MeshQualificationPolicyIR.v1"))
     asset = complete_appearance_asset_from_dict(stage("23_COMPLETE_APPEARANCE_ASSET_BAKED", "RealSaS.CompleteAppearanceAssetIR.v2"))
     appearance = complete_appearance_qualification_from_dict(stage(
-        "24_COMPLETE_APPEARANCE_ASSET_QUALIFIED", "RealSaS.CompleteAppearanceQualificationIR.v2"))
+        "24_COMPLETE_APPEARANCE_QUALIFIED", "RealSaS.CompleteAppearanceQualificationIR.v2"))
     if appearance.asset_binding_hash != asset.asset_hash:
         raise RuntimeError("CAA_QUALIFICATION_ASSET_BINDING_DRIFT")
     completion = inspect_visual_completion_field(asset)
@@ -294,4 +294,18 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as error:
+        # Input/entry failures happen before frame checkpoints exist. Preserve
+        # their actual cause too; an absent report must not hide a missing edge.
+        failed_out = Path(os.environ["OUT_DIR"]).resolve()
+        failed_out.mkdir(parents=True, exist_ok=True)
+        atomic_json(failed_out / "ENTRY_FAILURE.json", {
+            "schema": "RealSaS.SealedRenderEntryFailure.v1",
+            "expected_code_sha": os.environ.get("EXPECTED_CODE_SHA"),
+            "error_type": type(error).__name__, "error": str(error),
+            "full_visual_acceptance_passed": False,
+            "product_authority_claimed": False,
+        })
+        raise

@@ -1,0 +1,31 @@
+name: knight-latest-current-caa-v1
+
+on:
+  push:
+    branches: [ops/knight-latest-visual-probe-20261010]
+    paths:
+      - 'tools/ops/knight_latest_current_caa_v1.py'
+      - '.github/workflows/knight_latest_current_caa_v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  caa:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ops/knight-latest-visual-probe-20261010
+          fetch-depth: 1
+          clean: true
+      - name: Execute latest carrier current CAA Stage20-24
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(/home/monster/realsas_platform/current/bin/realsas-python -c 'import json; from pathlib import Path; print(json.loads(Path("/home/monster/realsas_platform/deployment.json").read_text())["code_sha"])')" = d3c4f39ddecf2dc73e7c532ec352fc97ad92579b
+          export PYTHONPATH="$GITHUB_WORKSPACE"
+          /home/monster/realsas_platform/current/bin/realsas-python tools/ops/knight_latest_current_caa_v1.py \
+            --authority-root /home/monster/realsas_authority \
+            --run-id KNIGHT_LATEST_CURRENT_CAA_VISUAL_20261010

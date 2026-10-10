@@ -1107,12 +1107,27 @@ def test_vf23_source_visual_chain_proves_transport_but_not_full_product(tmp_path
         )
     )
     assert compile_artifact.total_sample_count > 0
+    compile_metadata = dict(compile_artifact.metadata or {})
+    canonical_global_count = int(
+        compile_metadata.get("canonical_global_completion_sample_count", 0)
+    )
+    unsupported_count = int(
+        compile_metadata.get("unsupported_abstain_sample_count", 0)
+    )
     assert (
         compile_artifact.direct_source_sample_count
         + compile_artifact.other_view_source_sample_count
         + compile_artifact.compiled_local_harmonic_sample_count
+        + canonical_global_count
+        + unsupported_count
         == compile_artifact.total_sample_count
     )
+    assert compile_metadata["compile_array_schema"] == "RealSaS.CAACompileArrays.v3"
+    assert compile_metadata["source_owned_visual_mesh_mode"] is True
+    assert compile_metadata["canonical_surface_completion_produced"] is True
+    assert compile_artifact.direct_source_sample_count < compile_artifact.total_sample_count
+    assert canonical_global_count > 0
+    assert unsupported_count == 0
 
     r22 = run("22_CAA_COMPILE_SEALED", seal_caa_compile_stage)
     seal = caa_compile_seal_from_dict(
@@ -1142,6 +1157,10 @@ def test_vf23_source_visual_chain_proves_transport_but_not_full_product(tmp_path
     )
     assert len(asset.textures) == 8
     assert asset.metadata["runtime_generation_forbidden"] is True
+    assert asset.metadata["canonical_completion_field_bound"] is True
+    assert asset.metadata["canonical_completion_field_compile_hash"] == compile_artifact.compile_hash
+    assert asset.metadata["canonical_completion_field_sha256"] == compile_artifact.compile_npz_sha256
+    assert asset.metadata["hidden_layer_support_qualified"] is False
     assert asset.atlas_layout["width"] <= production_policy["compile_policy"]["max_atlas_resolution"]
     assert asset.atlas_layout["height"] <= production_policy["compile_policy"]["max_atlas_resolution"]
 
@@ -1158,6 +1177,18 @@ def test_vf23_source_visual_chain_proves_transport_but_not_full_product(tmp_path
     assert qualification.qualification_report["status"] == "PASS_COMPLETE_APPEARANCE"
     assert qualification.source_lock_exact_fraction == 1.0
     assert qualification.total_defined_fraction == 1.0
+    assert (
+        qualification.qualification_report["totality_domain"]
+        == "VISIBLE_SOURCE_OWNED_VISUAL_MESH_ONLY"
+    )
+    assert qualification.qualification_report["source_owned_visual_mesh_mode"] is True
+    assert qualification.qualification_report["canonical_completion_field_produced"] is True
+    assert qualification.qualification_report["canonical_completion_field_accounted"] is True
+    assert qualification.qualification_report["canonical_completion_field_shipping_qualified"] is False
+    assert qualification.qualification_report["full_visual_totality_qualified"] is False
+    assert qualification.qualification_report["hidden_layer_support_qualified"] is False
+    assert qualification.qualification_report["canonical_global_completion_sample_count"] > 0
+    assert qualification.qualification_report["unsupported_abstain_sample_count"] == 0
 
     r25 = run("25_CAA_REFERENCE_REST_RENDER_PROOF", prove_caa_reference_rest_stage)
     assert float(r25["performance"]["setup_seconds"]) >= 0.0

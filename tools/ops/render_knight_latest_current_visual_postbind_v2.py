@@ -14,6 +14,7 @@ from compiler.realsas_compiler_core.joint_frames_v2 import (
     derive_joint_frames_post_bind_v2,
     frame_set_hash_v2,
 )
+from compiler.realsas_compiler_core import motion_dynamic_proof_v2 as motion_proof
 from tools.demo import render_knight_motion_preview_v1 as motion_preview
 from tools.ops import render_knight_latest_current_visual_v1 as renderer
 
@@ -91,11 +92,12 @@ def main() -> None:
             raise RuntimeError("POST_BIND_FRAME_SKELETON_DRIFT")
         return frames
 
-    # Legacy demo retargeting helper is reused only for motion-channel mapping.
-    # Its target-frame provider is replaced by the current compiler's post-bind
-    # frame qualification, so coincident joints follow Stage35 authority rather
-    # than the obsolete V1 bone-vector derivation.
+    # Reuse the legacy demo motion-channel mapper, but force every target-frame
+    # consumer to the exact compiler-qualified Stage35 post-bind frame set.
+    # There are two legacy call sites: the retarget helper and _joint_pose_v2's
+    # module-global provider. Both must consume the same sealed authority.
     motion_preview.derive_joint_frames_from_skeleton = _canonical_target_frames
+    motion_proof.derive_joint_frames_from_skeleton = _canonical_target_frames
     renderer.main()
 
 

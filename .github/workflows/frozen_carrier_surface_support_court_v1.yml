@@ -16,7 +16,8 @@ jobs:
       PLATFORM_ROOT: /home/monster/realsas_platform
       AUTHORITY_ROOT: /home/monster/realsas_authority
       STAGING_ROOT: /home/monster/realsas_authority/imports/knight_latest_carrier_20261010
-      SURFACE_SHA: 7b71969edc3233dc166f2d16a7907ece158496f33f4649f1134d6dff77f79182
+      SURFACE_PATH: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/artifacts/15_RIGGING_SURFACE_QUALIFIED/qualified_rigging_surface.json
+      SURFACE_SHA: 7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182
       CANDIDATE_SHA: 1fa2c1d67314124d4c22af55e57cc8eb9b5e65bf1ff65870acefc7ea1d104bd1
       T1B_SHA: b7ccb058ef23f8c54d053e64580150dffffeb6a76a126ecaf48b265dd093f390
     steps:
@@ -41,18 +42,13 @@ jobs:
           from compiler.realsas_compiler_core.hashing import content_sha256
 
           def sha(p:Path): return hashlib.sha256(p.read_bytes()).hexdigest()
-          authority=Path(os.environ['AUTHORITY_ROOT']); staging=Path(os.environ['STAGING_ROOT'])
+          staging=Path(os.environ['STAGING_ROOT'])
           candidate_path=staging/'TESSA_STATIC_G3_REPAIRED_CANDIDATE_V3.json'
           t1b_path=staging/'TESSA_T1B_DECODED_MESH.npz'
+          surface_path=Path(os.environ['SURFACE_PATH'])
           if sha(candidate_path)!=os.environ['CANDIDATE_SHA']: raise SystemExit('CANDIDATE_SHA_DRIFT')
           if sha(t1b_path)!=os.environ['T1B_SHA']: raise SystemExit('T1B_SHA_DRIFT')
-          surface_matches=[]
-          for p in authority.rglob('qualified_rigging_surface.json'):
-              try:
-                  if sha(p)==os.environ['SURFACE_SHA']: surface_matches.append(p)
-              except OSError: pass
-          if not surface_matches: raise SystemExit('QUALIFIED_SURFACE_NOT_FOUND')
-          surface_path=sorted(surface_matches,key=str)[0]
+          if not surface_path.is_file() or sha(surface_path)!=os.environ['SURFACE_SHA']: raise SystemExit('QUALIFIED_SURFACE_SHA_DRIFT')
           surface=rigging_surface_from_dict(json.loads(surface_path.read_text()))
           candidate=canonical_mesh_candidate_from_dict(json.loads(candidate_path.read_text()))
           partition=build_structural_partition(surface,boundary_overrides=())
@@ -82,10 +78,7 @@ jobs:
               comps={str(by_id[str(vid)].mechanical_component_id) for vid in face}
               if len(comps)!=1: crossing.append({'face_index':fi,'components':sorted(comps),'face':list(map(str,face))})
           all_surface={str(n.surface_id) for n in surface.surface_nodes}
-          invalid_support=[]
-          simplex_max=0.0
-          support_counts=[]
-          nearest=[]
+          invalid_support=[]; simplex_max=0.0; support_counts=[]; nearest=[]
           for r in field.rows:
               total=sum(float(w) for _,w in r.coefficients); simplex_max=max(simplex_max,abs(total-1.0)); support_counts.append(len(r.coefficients)); nearest.append(float(r.nearest_surface_distance))
               bad=[sid for sid,_ in r.coefficients if str(sid) not in all_surface]
@@ -101,24 +94,15 @@ jobs:
               'candidate_file_sha256':sha(candidate_path),
               'candidate_vertex_count':len(candidate.vertices),'candidate_face_count':len(candidate.faces),
               'geometry_mutated':False,'topology_mutated':False,'candidate_identity_mutated':False,
-              'geometry_digest':content_sha256(original_positions.tolist()),
-              'topology_digest':content_sha256(original_faces),
-              'surface_geometry_lineage_hash':surface.geometry_lineage_hash,
-              'partition_lineage_hash':partition.partition_lineage_hash,
-              'partition_component_count':len(partition.components),
-              'decoded_component_count':len(set(decoded_indices)),
-              'sidecar_field_lineage_hash':field.field_lineage_hash,
-              'sidecar_row_count':len(field.rows),
-              'sidecar_component_count':len(component_counts),
-              'sidecar_component_vertex_counts':dict(sorted(component_counts.items())),
-              'cross_component_face_count':len(crossing),'cross_component_faces':crossing[:20],
-              'invalid_support_row_count':len(invalid_support),
-              'simplex_max_abs_residual':simplex_max,
-              'support_count_min':min(support_counts),'support_count_max':max(support_counts),
+              'geometry_digest':content_sha256(original_positions.tolist()),'topology_digest':content_sha256(original_faces),
+              'surface_geometry_lineage_hash':surface.geometry_lineage_hash,'surface_file_sha256':sha(surface_path),
+              'partition_lineage_hash':partition.partition_lineage_hash,'partition_component_count':len(partition.components),
+              'decoded_component_count':len(set(decoded_indices)),'sidecar_field_lineage_hash':field.field_lineage_hash,
+              'sidecar_row_count':len(field.rows),'sidecar_component_count':len(component_counts),'sidecar_component_vertex_counts':dict(sorted(component_counts.items())),
+              'cross_component_face_count':len(crossing),'cross_component_faces':crossing[:20],'invalid_support_row_count':len(invalid_support),
+              'simplex_max_abs_residual':simplex_max,'support_count_min':min(support_counts),'support_count_max':max(support_counts),
               'nearest_surface_distance_max':max(nearest),'nearest_surface_distance_p95':float(np.quantile(nearest,0.95)),
-              'mechanical_carrier_candidate_remains_exact':True,
-              'support_authority_is_sidecar_only':True,
-              'product_authority_minted':False,
+              'mechanical_carrier_candidate_remains_exact':True,'support_authority_is_sidecar_only':True,'product_authority_minted':False,
           }
           out=Path('/tmp/frozen-carrier-support-court'); out.mkdir(parents=True,exist_ok=True)
           (out/'REPORT.json').write_text(json.dumps(report,indent=2,sort_keys=True)+'\n')

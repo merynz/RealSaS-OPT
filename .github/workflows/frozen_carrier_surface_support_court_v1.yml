@@ -1,0 +1,135 @@
+name: frozen-carrier-surface-support-court-v1
+
+on:
+  push:
+    branches: [ops/knight-latest-visual-probe-20261010]
+    paths: ['.github/workflows/frozen_carrier_surface_support_court_v1.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  court:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      STAGING_ROOT: /home/monster/realsas_authority/imports/knight_latest_carrier_20261010
+      SURFACE_SHA: 7b71969edc3233dc166f2d16a7907ece158496f33f4649f1134d6dff77f79182
+      CANDIDATE_SHA: 1fa2c1d67314124d4c22af55e57cc8eb9b5e65bf1ff65870acefc7ea1d104bd1
+      T1B_SHA: b7ccb058ef23f8c54d053e64580150dffffeb6a76a126ecaf48b265dd093f390
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          clean: true
+      - name: Build support sidecar court
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          from __future__ import annotations
+          import hashlib,json,os
+          from pathlib import Path
+          import numpy as np
+          from compiler.realsas_compiler_core.artifact_codec_v2 import canonical_mesh_candidate_from_dict, rigging_surface_from_dict
+          from compiler.realsas_compiler_core.mechanical_partition_v1 import build_structural_partition
+          from compiler.realsas_compiler_core.tessa_surface_field_v1 import build_tessa_material_support_field_v1, validate_tessa_material_support_field_v1
+          from compiler.realsas_compiler_core.hashing import content_sha256
+
+          def sha(p:Path): return hashlib.sha256(p.read_bytes()).hexdigest()
+          authority=Path(os.environ['AUTHORITY_ROOT']); staging=Path(os.environ['STAGING_ROOT'])
+          candidate_path=staging/'TESSA_STATIC_G3_REPAIRED_CANDIDATE_V3.json'
+          t1b_path=staging/'TESSA_T1B_DECODED_MESH.npz'
+          if sha(candidate_path)!=os.environ['CANDIDATE_SHA']: raise SystemExit('CANDIDATE_SHA_DRIFT')
+          if sha(t1b_path)!=os.environ['T1B_SHA']: raise SystemExit('T1B_SHA_DRIFT')
+          surface_matches=[]
+          for p in authority.rglob('qualified_rigging_surface.json'):
+              try:
+                  if sha(p)==os.environ['SURFACE_SHA']: surface_matches.append(p)
+              except OSError: pass
+          if not surface_matches: raise SystemExit('QUALIFIED_SURFACE_NOT_FOUND')
+          surface_path=sorted(surface_matches,key=str)[0]
+          surface=rigging_surface_from_dict(json.loads(surface_path.read_text()))
+          candidate=canonical_mesh_candidate_from_dict(json.loads(candidate_path.read_text()))
+          partition=build_structural_partition(surface,boundary_overrides=())
+          with np.load(t1b_path,allow_pickle=False) as z:
+              decoded_components=np.asarray(z['vertex_component_indices'],dtype=np.int64)
+          decoded_indices=[]
+          for v in candidate.vertices:
+              idx=int(dict(v.metadata or {}).get('decoded_tessa_vertex_index',-1))
+              if idx<0 or idx>=len(decoded_components): raise SystemExit('CANDIDATE_DECODED_INDEX_INVALID')
+              decoded_indices.append(int(decoded_components[idx]))
+          topology_sequence_hash=content_sha256({'schema':'RealSaS.FrozenCarrierTopologySequence.v1','candidate_lineage_hash':candidate.candidate_lineage_hash,'faces':[list(map(str,f)) for f in candidate.faces]})
+          field=build_tessa_material_support_field_v1(
+              vertices_world=np.asarray([v.P for v in candidate.vertices],dtype=np.float64),
+              decoded_component_indices=np.asarray(decoded_indices,dtype=np.int64),
+              surface=surface,
+              partition=partition,
+              topology_sequence_hash=topology_sequence_hash,
+              proposal_vertex_ids=tuple(str(v.candidate_vertex_id) for v in candidate.vertices),
+              max_support_nodes=4,
+              max_graph_hops=2,
+              inverse_distance_power=2.0,
+          )
+          validate_tessa_material_support_field_v1(field,surface=surface,partition=partition,expected_vertex_ids=tuple(str(v.candidate_vertex_id) for v in candidate.vertices))
+          by_id={str(r.proposal_vertex_id):r for r in field.rows}
+          crossing=[]
+          for fi,face in enumerate(candidate.faces):
+              comps={str(by_id[str(vid)].mechanical_component_id) for vid in face}
+              if len(comps)!=1: crossing.append({'face_index':fi,'components':sorted(comps),'face':list(map(str,face))})
+          all_surface={str(n.surface_id) for n in surface.surface_nodes}
+          invalid_support=[]
+          simplex_max=0.0
+          support_counts=[]
+          nearest=[]
+          for r in field.rows:
+              total=sum(float(w) for _,w in r.coefficients); simplex_max=max(simplex_max,abs(total-1.0)); support_counts.append(len(r.coefficients)); nearest.append(float(r.nearest_surface_distance))
+              bad=[sid for sid,_ in r.coefficients if str(sid) not in all_surface]
+              if bad: invalid_support.append({'vertex_id':r.proposal_vertex_id,'bad':bad})
+          component_counts={}
+          for r in field.rows: component_counts[r.mechanical_component_id]=component_counts.get(r.mechanical_component_id,0)+1
+          original_positions=np.asarray([v.P for v in candidate.vertices],dtype=np.float64)
+          original_faces=tuple(tuple(map(str,f)) for f in candidate.faces)
+          report={
+              'schema':'RealSaS.FrozenCarrierSurfaceSupportCourt.v1',
+              'status':'PASS' if not crossing and not invalid_support and simplex_max<=1e-9 else 'FAIL',
+              'candidate_lineage_hash':candidate.candidate_lineage_hash,
+              'candidate_file_sha256':sha(candidate_path),
+              'candidate_vertex_count':len(candidate.vertices),'candidate_face_count':len(candidate.faces),
+              'geometry_mutated':False,'topology_mutated':False,'candidate_identity_mutated':False,
+              'geometry_digest':content_sha256(original_positions.tolist()),
+              'topology_digest':content_sha256(original_faces),
+              'surface_geometry_lineage_hash':surface.geometry_lineage_hash,
+              'partition_lineage_hash':partition.partition_lineage_hash,
+              'partition_component_count':len(partition.components),
+              'decoded_component_count':len(set(decoded_indices)),
+              'sidecar_field_lineage_hash':field.field_lineage_hash,
+              'sidecar_row_count':len(field.rows),
+              'sidecar_component_count':len(component_counts),
+              'sidecar_component_vertex_counts':dict(sorted(component_counts.items())),
+              'cross_component_face_count':len(crossing),'cross_component_faces':crossing[:20],
+              'invalid_support_row_count':len(invalid_support),
+              'simplex_max_abs_residual':simplex_max,
+              'support_count_min':min(support_counts),'support_count_max':max(support_counts),
+              'nearest_surface_distance_max':max(nearest),'nearest_surface_distance_p95':float(np.quantile(nearest,0.95)),
+              'mechanical_carrier_candidate_remains_exact':True,
+              'support_authority_is_sidecar_only':True,
+              'product_authority_minted':False,
+          }
+          out=Path('/tmp/frozen-carrier-support-court'); out.mkdir(parents=True,exist_ok=True)
+          (out/'REPORT.json').write_text(json.dumps(report,indent=2,sort_keys=True)+'\n')
+          (out/'material_support_field.json').write_text(json.dumps(field.to_dict(),indent=2,sort_keys=True)+'\n')
+          print(json.dumps(report,indent=2,sort_keys=True))
+          if report['status']!='PASS': raise SystemExit(2)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frozen-carrier-surface-support-court
+          path: /tmp/frozen-carrier-support-court
+          if-no-files-found: warn
+          retention-days: 7

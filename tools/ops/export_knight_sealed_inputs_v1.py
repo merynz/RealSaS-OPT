@@ -21,7 +21,8 @@ MAT_RUN = "KNIGHT_LATEST_CARRIER_MATERIALIZATION_20261010"
 
 
 class SealedInputCatalogue:
-    def __init__(self, roots, *, byte_budget=200 << 20, collect_reference_failures=False):
+    def __init__(self, roots, *, byte_budget=200 << 20, collect_reference_failures=False,
+                 defer_reference_walk=False):
         self.roots = tuple(Path(root).resolve() for root in roots)
         self.byte_budget = byte_budget
         self.rows = {}
@@ -29,6 +30,8 @@ class SealedInputCatalogue:
         self.total_bytes = 0
         self.collect_reference_failures = collect_reference_failures
         self.reference_failures = []
+        self.defer_reference_walk = defer_reference_walk
+        self.pending_references = []
 
     def inspect(self, raw_path, *, expected=None, origin):
         try:
@@ -46,24 +49,35 @@ class SealedInputCatalogue:
             raise RuntimeError("KNIGHT_INSPECTION_PATH_OUTSIDE_DECLARED_ROOTS:" + str(path))
         if not path.is_file():
             raise RuntimeError("KNIGHT_INSPECTION_REFERENCED_FILE_MISSING:" + str(path))
+        key = str(path)
+        size = path.stat().st_size
+        if key not in self.rows and self.total_bytes + size > self.byte_budget:
+            raise RuntimeError("KNIGHT_INSPECTION_BYTE_BUDGET_EXCEEDED")
         actual = digest(path)
         if expected is not None and actual != expected:
             error = RuntimeError("KNIGHT_INSPECTION_REFERENCED_BYTES_DRIFT:" + str(path))
             error.actual_sha256 = actual
             raise error
-        key = str(path)
         if key in self.rows:
             if self.rows[key]["sha256"] != actual:
                 raise RuntimeError("KNIGHT_INSPECTION_SOURCE_CHANGED_DURING_READ:" + key)
             return
-        size = path.stat().st_size
-        if self.total_bytes + size > self.byte_budget:
-            raise RuntimeError("KNIGHT_INSPECTION_BYTE_BUDGET_EXCEEDED")
         self.total_bytes += size
         self.rows[key] = {"path": key, "sha256": actual, "size_bytes": size,
                           "origin": origin, "expected_hash_present": expected is not None}
         if path.suffix.lower() == ".json":
-            self.references(json.loads(path.read_text()), origin=key)
+            value = json.loads(path.read_text())
+            if self.defer_reference_walk:
+                self.pending_references.append((value, key))
+            else:
+                self.references(value, origin=key)
+
+    def walk_references(self):
+        # Explicit seeds get the bounded budget before their dependency/history
+        # walk. Every queued reference is still checked and failures remain red.
+        while self.pending_references:
+            value, origin = self.pending_references.pop(0)
+            self.references(value, origin=origin)
 
     def references(self, value, *, origin):
         if isinstance(value, list):
@@ -84,6 +98,7 @@ class SealedInputCatalogue:
                     self.references(item, origin=origin)
 
     def write(self, out, *, context):
+        self.walk_references()
         out.mkdir(parents=True, exist_ok=True)
         report = {"schema": "RealSaS.SealedInputInspection.v1", "context": context,
                   "files": list(self.rows.values()), "total_bytes": self.total_bytes,
@@ -143,7 +158,8 @@ def main(args):
         raise RuntimeError("KNIGHT_INSPECTION_REQUIRES_EXACT_DEPLOYED_LIVE_MAIN")
     context = {"code_sha": code_sha, "go": go_context(args.platform_root),
                "source": "SEALED_KNIGHT_BYTES_AND_GO_READ_ONLY_STATE"}
-    catalogue = SealedInputCatalogue((args.authority_root, repo), collect_reference_failures=True)
+    catalogue = SealedInputCatalogue((args.authority_root, repo), collect_reference_failures=True,
+                                     defer_reference_walk=True)
     caa, material = [args.authority_root / "runs" / name for name in (CAA_RUN, MAT_RUN)]
     for path in (caa / "ACTIVE_RUN_V2.json", caa / "run_manifest.json", caa / "CAA_RECEIPT.json",
                  material / "RECEIPT.json", material / "rebound_candidate.json",

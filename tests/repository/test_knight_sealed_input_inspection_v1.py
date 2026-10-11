@@ -102,3 +102,22 @@ def test_partial_diagnostics_retain_root_and_budget_guards(tmp_path):
     assert len(catalogue.reference_failures) == 2
     assert "BYTE_BUDGET_EXCEEDED" in catalogue.reference_failures[0]["error"]
     assert "OUTSIDE_DECLARED_ROOTS" in catalogue.reference_failures[1]["error"]
+
+
+def test_explicit_seeds_get_budget_before_reference_walk(tmp_path):
+    history, current = tmp_path / "history.bin", tmp_path / "current.bin"
+    history.write_bytes(b"h" * 100)
+    current.write_bytes(b"current")
+    manifest = tmp_path / "ledger.json"
+    manifest.write_text(json.dumps({"path": str(history),
+                                   "sha256": hashlib.sha256(history.read_bytes()).hexdigest()}))
+    catalogue = SealedInputCatalogue([tmp_path], byte_budget=manifest.stat().st_size + 7,
+                                    collect_reference_failures=True, defer_reference_walk=True)
+    catalogue.inspect(manifest, origin="EXPLICIT_LEDGER")
+    catalogue.inspect(current, origin="PINNED_CURRENT_INPUT")
+    report = catalogue.write(tmp_path / "out", context={})
+    assert str(current) in catalogue.rows
+    assert str(history) not in catalogue.rows
+    assert not catalogue.pending_references
+    assert report["inspection_complete"] is False
+    assert "BYTE_BUDGET_EXCEEDED" in report["reference_failures"][0]["error"]

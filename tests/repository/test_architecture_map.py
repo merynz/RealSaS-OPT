@@ -28,6 +28,21 @@ def test_head_edit_preserves_independent_branch_but_shared_source_widens_scope()
     assert arch.impact_query(d, [], ["appearance"])["affected_stage_ids"] == ["colour"]
 
 
+def test_native_include_is_visible_without_claiming_binary_reuse(tmp_path, monkeypatch):
+    root=tmp_path/'runtime';root.mkdir()
+    (root/'player.cpp').write_text('#include "material.hpp"\n')
+    (root/'material.hpp').write_text('int material;\n')
+    monkeypatch.setattr(arch,'ROOT',tmp_path)
+    assert arch.native_source_closure('runtime/player.cpp')==['runtime/material.hpp','runtime/player.cpp']
+    d=fixture();d['dependency_files'].append({'path':'runtime/material.hpp','consumer_stages':['colour']})
+    impact=arch.impact_query(d,['runtime/material.hpp'],[])
+    assert impact['affected_stage_ids']==['colour']
+    assert impact['paths'][0]['classification']=='NATIVE_SOURCE_INSPECTION__SEALED_BINARY_REF_REQUIRED'
+    (root/'material.hpp').unlink()
+    with pytest.raises(RuntimeError,match='NATIVE_SOURCE_FILE_MISSING'):
+        arch.native_source_closure('runtime/player.cpp')
+
+
 def test_unknown_native_control_and_manifest_edits_never_claim_safe_reuse():
     d = fixture()
     for paths, keys in [(["runtime/player.cpp"], []), ([], ["typo"])]:

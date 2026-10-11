@@ -151,7 +151,7 @@ func staticDomains() []Domain {
 				engineModule("presentation_domain", "Output presentation direction authority.", "compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py"),
 				engineModule("components", "Mechanical partition/component carrier authority.", "compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py"),
 				engineModule("mesh", "Canonical mesh addressing, deformation envelope and mechanical mesh.", "compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py"),
-				engineModule("appearance", "CAA compile, source-owned appearance baking and appearance proof.", "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"),
+				engineModule("appearance", "CAA compile and source-wins material baking/proof on canonical M.", "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"),
 				engineModule("skin", "Arachne and skin qualification.", "compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py"),
 				engineModule("presentation", "Final qualified presentation structure authority.", "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py"),
 				engineModule("product_state", "Canonical puppet seal inside compiler semantics.", "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py"),
@@ -180,7 +180,7 @@ func staticDomains() []Domain {
 				},
 				{
 					ID: "runtime.render", ParentDomain: "runtime", Authority: AuthorityRuntime,
-					Purpose:         "Native source-owned visual rendering and frame output.",
+					Purpose:         "Native canonical M rendering with sealed source-wins RGB and CAA fallback.",
 					CodeRoots:       []string{"runtime/realsas_cpp"},
 					FailurePrefixes: []string{"RENDER_", "VISUAL_INTEGRITY_"},
 					UpstreamModules: []string{"runtime.package", "runtime.deformation"},

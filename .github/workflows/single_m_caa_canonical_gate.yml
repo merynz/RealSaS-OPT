@@ -1,0 +1,67 @@
+name: single-m-caa-canonical-gate
+on:
+  pull_request:
+    paths:
+      - 'compiler/**'
+      - 'runtime/**'
+      - 'canonical/MAINLINE_EXECUTION_PLAN_V2.json'
+      - 'canonical/ACTIVE_RUN_V2.json'
+      - 'tests/compiler/**'
+      - 'tests/fixtures/single_m_caa_knight_v1/**'
+      - 'tools/demo/render_knight_m_caa_v1.py'
+      - '.github/workflows/single_m_caa_canonical_gate.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'compiler/**'
+      - 'runtime/**'
+      - 'canonical/MAINLINE_EXECUTION_PLAN_V2.json'
+      - 'canonical/ACTIVE_RUN_V2.json'
+      - 'tests/compiler/**'
+      - 'tests/fixtures/single_m_caa_knight_v1/**'
+      - 'tools/demo/render_knight_m_caa_v1.py'
+      - '.github/workflows/single_m_caa_canonical_gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: .
+      REALSAS_RUNTIME_V2_PLAYER: /tmp/realsas_single_m_player
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+          cache-dependency-path: platform/go.sum
+      - name: Install pinned dependencies
+        run: |
+          python -m pip install -r requirements/mainline-ci.txt -r requirements/torch-cpu.txt
+          sudo apt-get update -qq
+          sudo apt-get install -y libpng-dev zlib1g-dev
+      - name: Build native M consumer
+        run: c++ -std=c++17 -O2 -Wall -Wextra -pedantic runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp -lpng -lz -o "$REALSAS_RUNTIME_V2_PLAYER"
+      - name: Compiler and architecture regression
+        run: |
+          python -m pytest -q tests/compiler tests/repository/test_architecture_map.py tests/repository/test_mainline_execution_plan_v2.py tests/repository/test_mainline_v2_dag_scheduler.py tests/repository/test_mainline_implementation_closure_v1.py
+          python -m compiler.realsas_compiler_services.orchestrator.mainline validate-plan
+      - name: Fresh main map and approved eight-view pixels
+        run: |
+          mkdir -p evidence
+          python tools/realsas_architecture.py --json-out evidence/main_map.json map --html-out evidence/main_map.html > evidence/map_stdout.json
+          python tools/demo/render_knight_m_caa_v1.py --output evidence/render
+          echo 'CPU approved baseline pixel regression only. Grip, overlap/depth ties, native exact parity and linear-light product qualification remain OPEN.' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: single-m-caa-main-evidence
+          path: evidence/

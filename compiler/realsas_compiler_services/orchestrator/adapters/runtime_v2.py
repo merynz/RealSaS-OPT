@@ -14,14 +14,6 @@ from types import SimpleNamespace
 import numpy as np
 from PIL import Image
 
-from compiler.realsas_compiler_core.visual_material_v1 import (
-    load_visual_material, MATERIAL_CONTRACT, DEPTH_CONTRACT, SAMPLING_CONTRACT,
-)
-from compiler.realsas_compiler_core.visual_material_render_v1 import render_visual_material
-from compiler.realsas_compiler_core.visual_completion_evidence_v1 import (
-    inspect_visual_completion_field, source_visual_boundary_evidence,
-    validate_source_visual_boundary_evidence,
-)
 
 from compiler.realsas_compiler_core.appearance_authority_v2 import (
     CAA_PROVENANCE,
@@ -72,27 +64,9 @@ from compiler.realsas_compiler_core.runtime_authority_v2 import (
     runtime_projection_from_dict,
     runtime_projection_hash,
 )
-from compiler.realsas_compiler_core.runtime_visual_authority_v1 import (
-    SourceOwnedVisualDynamicIntegrityV1IR,
-    SourceOwnedVisualRuntimeClipV1IR,
-    SourceOwnedVisualRuntimeProjectionV1IR,
-    SourceOwnedVisualRuntimeViewV1IR,
-    source_owned_visual_dynamic_integrity_hash,
-    source_owned_visual_runtime_projection_hash,
-    source_owned_visual_runtime_projection_from_dict,
-)
-from compiler.realsas_compiler_core.visual_presentation_v1 import (
-    load_qualified_visual_presentation_view,
-    qualified_visual_presentation_set_from_dict,
-)
-from compiler.realsas_compiler_core.visual_mesh_arap_v1 import (
-    bind_region_visual_vertices_to_mechanical_affine_v1,
-    evaluate_region_visual_binding_v1,
-)
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.runtime_package_v2 import (
     build_rss_v2_entries,
-    build_source_owned_visual_rss_v2_entries,
     read_rss_v2,
     write_rss_v2,
 )
@@ -107,6 +81,9 @@ from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import 
     write_ir,
 )
 from compiler.realsas_compiler_core.types import QualificationError
+from compiler.realsas_compiler_core.single_m_caa_v1 import (
+    MATERIAL_CONTRACT, load_material_bundle, render_single_m_caa,
+)
 
 
 def _save_npz(path: Path, **arrays) -> str:
@@ -222,565 +199,8 @@ def _pixel_face_counts(
 
 
 
-def _visual_mesh_motion_metrics(
-    rest_positions: np.ndarray,
-    posed_positions: np.ndarray,
-    faces: np.ndarray,
-) -> dict:
-    rest = np.asarray(rest_positions, dtype=np.float64)
-    posed = np.asarray(posed_positions, dtype=np.float64)
-    tri = np.asarray(faces, dtype=np.int64)
-    if (
-        rest.ndim != 2
-        or rest.shape[1] != 2
-        or posed.shape != rest.shape
-        or tri.ndim != 2
-        or tri.shape[1] != 3
-        or np.any(tri < 0)
-        or np.any(tri >= len(rest))
-    ):
-        raise QualificationError(
-            "SOURCE_VISUAL_RUNTIME_MOTION_METRIC_INPUT_INVALID"
-        )
-    edges = set()
-    for face in tri.tolist():
-        for a, b in (
-            (face[0], face[1]),
-            (face[1], face[2]),
-            (face[2], face[0]),
-        ):
-            edges.add(tuple(sorted((int(a), int(b)))))
-    if not edges:
-        raise QualificationError(
-            "SOURCE_VISUAL_RUNTIME_MOTION_METRIC_EDGE_EMPTY"
-        )
-    edge_rows = np.asarray(sorted(edges), dtype=np.int64)
-    rest_len = np.linalg.norm(
-        rest[edge_rows[:, 1]] - rest[edge_rows[:, 0]], axis=1
-    )
-    posed_len = np.linalg.norm(
-        posed[edge_rows[:, 1]] - posed[edge_rows[:, 0]], axis=1
-    )
-    valid = (rest_len > 1.0e-12) & (posed_len > 1.0e-12)
-    ratio = np.ones_like(rest_len)
-    ratio[valid] = np.maximum(
-        posed_len[valid] / rest_len[valid],
-        rest_len[valid] / posed_len[valid],
-    )
-    ratio[~valid & (rest_len > 1.0e-12)] = np.inf
-
-    def signed_double_area(points):
-        a = points[tri[:, 0]]
-        b = points[tri[:, 1]]
-        c = points[tri[:, 2]]
-        return (
-            (b[:, 0] - a[:, 0]) * (c[:, 1] - a[:, 1])
-            - (b[:, 1] - a[:, 1]) * (c[:, 0] - a[:, 0])
-        )
-
-    rest_area = signed_double_area(rest)
-    posed_area = signed_double_area(posed)
-    measurable = np.abs(rest_area) > 1.0e-12
-    flipped = measurable & (
-        np.sign(rest_area) != np.sign(posed_area)
-    )
-    finite_ratio = ratio[np.isfinite(ratio)]
-    return {
-        "edge_count": int(len(edge_rows)),
-        "flipped_triangle_count": int(np.count_nonzero(flipped)),
-        "edge_gt_4_count": int(np.count_nonzero(ratio > 4.0)),
-        "edge_gt_10_count": int(np.count_nonzero(ratio > 10.0)),
-        "p95_edge_ratio": (
-            float(np.percentile(finite_ratio, 95.0))
-            if len(finite_ratio)
-            else float("inf")
-        ),
-        "max_edge_ratio": (
-            float(np.max(finite_ratio))
-            if len(finite_ratio)
-            else float("inf")
-        ),
-    }
 
 
-def _build_source_owned_visual_runtime_projection(
-    ctx: dict,
-    *,
-    complete,
-    mesh,
-    dynamic,
-    asset,
-    appearance,
-    cameras,
-) -> dict:
-    qualified_visual = qualified_visual_presentation_set_from_dict(
-        stage_output_payload(
-            ctx,
-            "37_QUALIFIED_PRESENTATION_STRUCTURE",
-            "RealSaS.QualifiedVisualPresentationSetIR.v1",
-        )
-    )
-    complete_visual_hash = str(
-        dict(complete.metadata or {}).get(
-            "visual_mesh_set_binding_hash"
-        )
-        or ""
-    )
-    if complete_visual_hash != qualified_visual.set_hash:
-        raise QualificationError(
-            "SOURCE_VISUAL_RUNTIME_COMPLETE_PUPPET_BINDING_DRIFT"
-        )
-    if (
-        qualified_visual.mechanical_mesh_binding_hash
-        != mesh.mesh_lineage_hash
-    ):
-        raise QualificationError(
-            "SOURCE_VISUAL_RUNTIME_MECHANICAL_MESH_DRIFT"
-        )
-    if (
-        qualified_visual.appearance_asset_binding_hash
-        != asset.asset_hash
-        or qualified_visual.appearance_qualification_binding_hash
-        != appearance.qualification_hash
-    ):
-        raise QualificationError(
-            "SOURCE_VISUAL_RUNTIME_APPEARANCE_BINDING_DRIFT"
-        )
-    uv_path = resolved_path(asset.uv_npz_path)
-    if not uv_path.is_file() or sha256_file(uv_path) != asset.uv_npz_sha256:
-        raise QualificationError("SOURCE_VISUAL_RUNTIME_APPEARANCE_UV_BYTES_DRIFT")
-    if asset.metadata.get("visual_material_contract") != MATERIAL_CONTRACT:
-        raise QualificationError("SOURCE_VISUAL_RUNTIME_PER_TEXEL_MATERIAL_REQUIRED")
-    completion = inspect_visual_completion_field(asset)
-    boundary = source_visual_boundary_evidence(asset=asset, appearance=appearance,
-        presentation=qualified_visual, completion=completion)
-    if (
-        dynamic.mechanical_state_binding_hash
-        != complete.mechanical_state_binding_hash
-        or dynamic.presentation_binding_hash
-        != complete.presentation_graph_binding_hash
-    ):
-        raise QualificationError(
-            "SOURCE_VISUAL_RUNTIME_DYNAMIC_BINDING_DRIFT"
-        )
-
-    vertex_ids = [
-        str(vertex.canonical_mesh_vertex_id) for vertex in mesh.vertices
-    ]
-    vertex_index = {
-        vertex_id: index for index, vertex_id in enumerate(vertex_ids)
-    }
-    if len(vertex_index) != len(vertex_ids):
-        raise QualificationError(
-            "SOURCE_VISUAL_RUNTIME_DUPLICATE_MECHANICAL_VERTEX_ID"
-        )
-    rest_mechanical = np.asarray(
-        [vertex.P for vertex in mesh.vertices], dtype=np.float64
-    )
-    mechanical_faces = np.asarray(
-        [
-            [vertex_index[str(vertex_id)] for vertex_id in face]
-            for face in mesh.faces
-        ],
-        dtype=np.int64,
-    )
-    camera_by_view = {
-        int(row.view_index): row for row in cameras.cameras
-    }
-    texture_by_view = {
-        int(row.direction_index): row for row in asset.textures
-    }
-    visual_by_view = {
-        int(row.view_index): row for row in qualified_visual.views
-    }
-    if (
-        set(camera_by_view) != set(range(8))
-        or set(texture_by_view) != set(range(8))
-        or set(visual_by_view) != set(range(8))
-    ):
-        raise QualificationError(
-            "SOURCE_VISUAL_RUNTIME_REQUIRES_EXACT_V0_V7"
-        )
-
-    operator_policy = {
-        "schema": "RealSaS.VisualDeformationOperatorPolicy.v1",
-        "operator_id": "REGION_LOCAL_SAFE_MECHANICAL_AFFINE_V1",
-        "candidate_seed_count": 16,
-        "seed_distance_budget": "VIEW_DIAGONAL__MEASURE_NOT_TUNE",
-        "unclamped_barycentric_authorized": True,
-        "runtime_binding_solve_authorized": False,
-        "dynamic_quality_authority": "STAGE45",
-    }
-    operator_policy_hash = content_sha256(operator_policy)
-
-    arrays = {}
-    runtime_views = []
-    bindings = {}
-    qa_summary = {}
-    for view_index in range(8):
-        camera = camera_by_view[view_index]
-        visual_row = visual_by_view[view_index]
-        loaded = load_qualified_visual_presentation_view(visual_row)
-        visual_mesh = loaded["mesh"]
-        visibility = rasterize_visible_owner(
-            mesh,
-            camera,
-            width=int(visual_row.width),
-            height=int(visual_row.height),
-            max_layers=4,
-        )
-        binding = bind_region_visual_vertices_to_mechanical_affine_v1(
-            points_source_xy=np.asarray(
-                visual_mesh.positions, dtype=np.float64
-            ),
-            vertex_region_id=np.asarray(
-                loaded["vertex_region_id"], dtype=np.int32
-            ),
-            seed_region_labels=np.asarray(
-                loaded["seed_region_labels"], dtype=np.int32
-            ),
-            owner_face_index=np.asarray(
-                visibility.owner_face_index, dtype=np.int64
-            ),
-            mechanical_positions_xyz=rest_mechanical,
-            mechanical_faces=mechanical_faces,
-            camera=camera,
-            candidate_seed_count=int(
-                operator_policy["candidate_seed_count"]
-            ),
-            max_seed_distance_px=float(
-                math.hypot(
-                    int(visual_row.width),
-                    int(visual_row.height),
-                )
-            ),
-        )
-        rest_eval = evaluate_region_visual_binding_v1(
-            binding,
-            posed_mechanical_positions_xyz=rest_mechanical,
-            camera=camera,
-        )
-        rest_error = np.linalg.norm(
-            np.asarray(rest_eval, dtype=np.float64)
-            - np.asarray(visual_mesh.positions, dtype=np.float64),
-            axis=1,
-        )
-        if (
-            not np.isfinite(rest_error).all()
-            or float(np.max(rest_error, initial=0.0)) > 1.0e-7
-        ):
-            raise QualificationError(
-                "SOURCE_VISUAL_RUNTIME_REST_BINDING_DRIFT"
-            )
-        prefix = f"view_{view_index}"
-        arrays[f"{prefix}_faces"] = np.asarray(
-            visual_mesh.faces, dtype=np.uint32
-        )
-        arrays[f"{prefix}_uv"] = np.asarray(
-            visual_mesh.uv, dtype=np.float64
-        )
-        arrays[f"{prefix}_rest_positions"] = np.asarray(
-            visual_mesh.positions, dtype=np.float64
-        )
-        arrays[f"{prefix}_vertex_region_id"] = np.asarray(
-            loaded["vertex_region_id"], dtype=np.int32
-        )
-        arrays[f"{prefix}_face_region_id"] = np.asarray(
-            loaded["face_region_id"], dtype=np.int32
-        )
-        arrays[f"{prefix}_mechanical_face_indices"] = np.asarray(
-            binding["mechanical_face_indices"], dtype=np.int64
-        )
-        arrays[f"{prefix}_mechanical_barycentric"] = np.asarray(
-            binding["mechanical_barycentric"], dtype=np.float64
-        )
-        arrays[f"{prefix}_nearest_safe_seed_distance_px"] = np.asarray(
-            binding["nearest_safe_seed_distance_px"], dtype=np.float64
-        )
-        arrays[f"{prefix}_extrapolation_penalty"] = np.asarray(
-            binding["extrapolation_penalty"], dtype=np.float64
-        )
-        bindings[view_index] = binding
-
-        texture = texture_by_view[view_index]
-        texture_path = resolved_path(texture.transport_png_path)
-        if (
-            not texture_path.is_file()
-            or sha256_file(texture_path)
-            != texture.transport_png_sha256
-        ):
-            raise QualificationError(
-                "SOURCE_VISUAL_RUNTIME_TEXTURE_BYTES_DRIFT"
-            )
-        texture_meta = dict(texture.metadata or {})
-        if (
-            str(
-                texture_meta.get("visual_mesh_set_binding_hash")
-                or ""
-            )
-            != qualified_visual.source_visual_mesh_set_binding_hash
-        ):
-            raise QualificationError(
-                "SOURCE_VISUAL_RUNTIME_TEXTURE_SOURCE_BINDING_DRIFT"
-            )
-        texture_rgba = np.asarray(Image.open(texture_path).convert("RGBA"), dtype=np.uint8)
-        provenance, source_view = load_visual_material(
-            asset, view_index=view_index, rgba=texture_rgba
-        )
-        arrays[f"{prefix}_material_provenance"] = provenance
-        arrays[f"{prefix}_material_source_view"] = source_view
-        runtime_views.append(
-            SourceOwnedVisualRuntimeViewV1IR(
-                view_index=view_index,
-                view_id=f"V{view_index}",
-                camera=asdict(camera),
-                source_width=int(visual_row.width),
-                source_height=int(visual_row.height),
-                texture_path=str(texture_path),
-                texture_sha256=str(texture.transport_png_sha256),
-                visual_mesh_npz_path=str(visual_row.mesh_npz_path),
-                visual_mesh_npz_sha256=str(
-                    visual_row.mesh_npz_sha256
-                ),
-                visual_mesh_hash=str(visual_row.visual_mesh_hash),
-                visual_vertex_count=int(visual_row.vertex_count),
-                visual_face_count=int(visual_row.face_count),
-                metadata={
-                    "source_owned_visual_mesh_mode": True,
-                    "mechanical_mesh_render_authority": False,
-                    "fixed_source_raster_uv": True,
-                    "source_visual_mesh_hash": (
-                        visual_row.source_visual_mesh_hash
-                    ),
-                },
-            )
-        )
-        qa_summary[f"V{view_index}"] = {
-            "max_nearest_safe_seed_distance_px": float(
-                np.max(
-                    binding["nearest_safe_seed_distance_px"],
-                    initial=0.0,
-                )
-            ),
-            "max_extrapolation_penalty": float(
-                np.max(
-                    binding["extrapolation_penalty"],
-                    initial=0.0,
-                )
-            ),
-            "max_rest_reconstruction_error_px": float(
-                np.max(rest_error, initial=0.0)
-            ),
-            "visibility_layer_overflow_pixel_count": int(
-                np.count_nonzero(visibility.layer_overflow)
-            ),
-        }
-
-    clips = []
-    dynamic_qa = {}
-    for clip_index, clip in enumerate(dynamic.clips):
-        prefix = f"clip_{clip_index}"
-        times = np.asarray(
-            [frame.time_seconds for frame in clip.frames],
-            dtype=np.float64,
-        )
-        arrays[f"{prefix}_times"] = times
-        clip_qa = {}
-        for view_index in range(8):
-            visual_row = visual_by_view[view_index]
-            loaded = load_qualified_visual_presentation_view(
-                visual_row
-            )
-            visual_mesh = loaded["mesh"]
-            frames = np.empty(
-                (
-                    len(clip.frames),
-                    int(visual_row.vertex_count),
-                    2,
-                ),
-                dtype=np.float64,
-            )
-            depths = np.empty((len(clip.frames), int(visual_row.vertex_count)), dtype=np.float64)
-            metrics = []
-            for frame_index, frame in enumerate(clip.frames):
-                by_id = {
-                    str(vertex_id): tuple(map(float, xyz))
-                    for vertex_id, xyz in frame.posed_vertex_xyz
-                }
-                if set(by_id) != set(vertex_ids):
-                    raise QualificationError(
-                        "SOURCE_VISUAL_RUNTIME_DYNAMIC_VERTEX_SET_DRIFT"
-                    )
-                posed_mechanical = np.asarray(
-                    [by_id[vertex_id] for vertex_id in vertex_ids],
-                    dtype=np.float64,
-                )
-                posed_visual = evaluate_region_visual_binding_v1(
-                    bindings[view_index],
-                    posed_mechanical_positions_xyz=posed_mechanical,
-                    camera=camera_by_view[view_index],
-                )
-                frames[frame_index] = posed_visual
-                binding = bindings[view_index]
-                projected_xyz = project_points_xyz_v3(posed_mechanical, camera_by_view[view_index])
-                depths[frame_index] = np.sum(
-                    projected_xyz[binding["mechanical_face_indices"], 2]
-                    * binding["mechanical_barycentric"], axis=1
-                )
-                if not np.isfinite(depths[frame_index]).all() or np.any(depths[frame_index] <= 0):
-                    raise QualificationError("SOURCE_VISUAL_RUNTIME_CANONICAL_DEPTH_INVALID")
-                metrics.append(
-                    _visual_mesh_motion_metrics(
-                        np.asarray(
-                            visual_mesh.positions, dtype=np.float64
-                        ),
-                        np.asarray(posed_visual, dtype=np.float64),
-                        np.asarray(
-                            visual_mesh.faces, dtype=np.int64
-                        ),
-                    )
-                )
-            arrays[
-                f"{prefix}_view_{view_index}_positions"
-            ] = frames
-            arrays[f"{prefix}_view_{view_index}_depths"] = depths
-            clip_qa[f"V{view_index}"] = {
-                "maximum_flipped_triangle_count": max(
-                    row["flipped_triangle_count"] for row in metrics
-                ),
-                "maximum_edge_gt_4_count": max(
-                    row["edge_gt_4_count"] for row in metrics
-                ),
-                "maximum_edge_gt_10_count": max(
-                    row["edge_gt_10_count"] for row in metrics
-                ),
-                "maximum_p95_edge_ratio": max(
-                    row["p95_edge_ratio"] for row in metrics
-                ),
-                "maximum_edge_ratio": max(
-                    row["max_edge_ratio"] for row in metrics
-                ),
-                "frames": metrics,
-            }
-        dynamic_qa[str(clip.clip_id)] = clip_qa
-        clips.append(
-            SourceOwnedVisualRuntimeClipV1IR(
-                clip_id=str(clip.clip_id),
-                duration_seconds=float(clip.duration_seconds),
-                loop=bool(clip.loop),
-                frame_count=len(clip.frames),
-                array_prefix=prefix,
-                metadata={
-                    "classification": str(clip.classification),
-                    "source_dynamic_clip_proof_hash": str(
-                        clip.clip_proof_hash
-                    ),
-                    "playback_sampling_contract": (
-                        "SEALED_FRAME_INDEX_ONLY"
-                    ),
-                    "host_interpolation_authorized": False,
-                },
-            )
-        )
-
-    root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
-    array_path = root / "source_owned_visual_projection_arrays_v1.npz"
-    array_sha = _save_npz(array_path, **arrays)
-    projection = SourceOwnedVisualRuntimeProjectionV1IR(
-        complete_puppet_binding_hash=str(complete.complete_puppet_hash),
-        mechanical_state_binding_hash=str(
-            complete.mechanical_state_binding_hash
-        ),
-        mechanical_mesh_binding_hash=str(mesh.mesh_lineage_hash),
-        qualified_visual_presentation_binding_hash=str(
-            qualified_visual.set_hash
-        ),
-        dynamic_motion_binding_hash=str(dynamic.dynamic_motion_hash),
-        appearance_asset_binding_hash=str(asset.asset_hash),
-        appearance_qualification_binding_hash=str(
-            appearance.qualification_hash
-        ),
-        camera_set_binding_hash=str(cameras.camera_set_hash),
-        visual_deformation_operator_id=str(
-            operator_policy["operator_id"]
-        ),
-        visual_deformation_policy_hash=operator_policy_hash,
-        projection_npz_path=str(array_path),
-        projection_npz_sha256=array_sha,
-        views=tuple(runtime_views),
-        clips=tuple(clips),
-        projection_hash="",
-        metadata={
-            "presentation_geometry_mode": (
-                "SOURCE_OWNED_VISUAL_PRESENTATION_V1"
-            ),
-            "mechanical_mesh_render_authority": False,
-            "runtime_visual_mesh_rebuild": False,
-            "runtime_binding_solve": False,
-            "runtime_generation": False,
-            "donor_search_at_runtime": False,
-            "visual_material_contract": MATERIAL_CONTRACT,
-            "depth_ownership_contract": DEPTH_CONTRACT,
-            "texture_sampling_contract": SAMPLING_CONTRACT,
-            "appearance_provenance_npz_sha256": asset.provenance_npz_sha256,
-            "appearance_uv_npz_sha256": asset.uv_npz_sha256,
-            "appearance_quality_policy": dict(appearance.metadata.get("policy") or {}),
-            "appearance_totality_domain": appearance.qualification_report.get("totality_domain"),
-            "dynamic_quality_authority": "STAGE45",
-            "operator_policy": operator_policy,
-            "rest_binding_qa": qa_summary,
-            "dynamic_motion_qa": dynamic_qa,
-            "visual_boundary_evidence": boundary,
-            "full_visual_acceptance_passed": False,
-        },
-    )
-    projection = replace(
-        projection,
-        projection_hash=source_owned_visual_runtime_projection_hash(
-            projection
-        ),
-    )
-    root.mkdir(parents=True, exist_ok=True)
-    return {
-        "status": "PASS",
-        "outputs": [
-            write_ir(
-                root / "source_owned_visual_runtime_projection_v1.json",
-                projection,
-                authority_class=(
-                    "SOURCE_OWNED_VISUAL_RUNTIME_PROJECTION_V1"
-                ),
-            ),
-            {
-                "path": str(array_path),
-                "sha256": array_sha,
-                "authority_class": (
-                    "SOURCE_OWNED_VISUAL_RUNTIME_ARRAYS_V1"
-                ),
-                "schema": (
-                    "RealSaS.SourceOwnedVisualRuntimeProjectionArrays.v1"
-                ),
-            },
-        ],
-        "diagnostics": {
-            "projection_hash": projection.projection_hash,
-            "qualified_visual_presentation_binding_hash": (
-                qualified_visual.set_hash
-            ),
-            "clip_count": len(clips),
-            "view_count": len(runtime_views),
-            "presentation_geometry_mode": (
-                "SOURCE_OWNED_VISUAL_PRESENTATION_V1"
-            ),
-            "visual_deformation_operator_id": (
-                projection.visual_deformation_operator_id
-            ),
-            "mechanical_mesh_render_authority": False,
-            "runtime_generation": False,
-            "visual_boundary_evidence_hash": boundary["evidence_hash"],
-            "full_visual_acceptance_passed": False,
-        },
-    }
 
 
 def build_runtime_projection_stage(ctx: dict) -> dict:
@@ -840,16 +260,9 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
         raise QualificationError("RUNTIME_V2_DYNAMIC_MESH_DRIFT")
 
     asset_meta = dict(asset.metadata or {})
-    if asset_meta.get("source_owned_visual_mesh_mode") is True:
-        return _build_source_owned_visual_runtime_projection(
-            ctx,
-            complete=complete,
-            mesh=mesh,
-            dynamic=dynamic,
-            asset=asset,
-            appearance=appearance,
-            cameras=cameras,
-        )
+    material_ref = dict(asset_meta.get("single_m_caa_material") or {})
+    if material_ref.get("contract") != MATERIAL_CONTRACT:
+        raise QualificationError("RUNTIME_SINGLE_M_CAA_MATERIAL_REQUIRED__LEGACY_VISUAL_ASSET_RETIRED")
     if (
         dynamic.mechanical_state_binding_hash
         != complete.mechanical_state_binding_hash
@@ -870,6 +283,8 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
         [[vertex_index[str(vertex_id)] for vertex_id in face] for face in mesh.faces],
         dtype=np.uint32,
     )
+    load_material_bundle(resolved_path(material_ref["path"]),
+                         expected_sha256=material_ref["sha256"], rest=vertices, faces=faces)
     uv_path = resolved_path(asset.uv_npz_path)
     if not uv_path.is_file() or sha256_file(uv_path) != asset.uv_npz_sha256:
         raise QualificationError("RUNTIME_V2_CAA_UV_BYTES_DRIFT")
@@ -1009,6 +424,8 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
         projection_hash="",
         metadata={
             "single_mesh_truth": True,
+            "single_m_caa_material": material_ref,
+            "appearance_sampling_contract": MATERIAL_CONTRACT,
             "posed_xyz_from_stage41_exact": True,
             "skin_resolve_at_runtime": False,
             "donor_search_at_runtime": False,
@@ -1058,55 +475,28 @@ def materialize_runtime_package_stage(ctx: dict) -> dict:
             "RealSaS.CompleteAppearanceAssetIR.v2",
         )
     )
-    source_owned_visual = bool(
-        dict(asset.metadata or {}).get("source_owned_visual_mesh_mode")
+    source_owned_visual = False
+    projection = runtime_projection_from_dict(
+        stage_output_payload(
+            ctx,
+            "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+            "RealSaS.RuntimeProjectionIR.v2",
+        )
     )
-    if source_owned_visual:
-        projection = source_owned_visual_runtime_projection_from_dict(
-            stage_output_payload(
-                ctx,
-                "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
-                "RealSaS.SourceOwnedVisualRuntimeProjectionIR.v1",
-            )
+    arrays = resolved_path(projection.projection_npz_path)
+    provenance = resolved_path(projection.provenance_npz_path)
+    if sha256_file(arrays) != projection.projection_npz_sha256:
+        raise QualificationError(
+            "RUNTIME_V2_PACKAGE_PROJECTION_BYTES_DRIFT"
         )
-        arrays = resolved_path(projection.projection_npz_path)
-        if sha256_file(arrays) != projection.projection_npz_sha256:
-            raise QualificationError(
-                "RUNTIME_V2_VISUAL_PACKAGE_PROJECTION_BYTES_DRIFT"
-            )
-        for view in projection.views:
-            texture = resolved_path(view.texture_path)
-            if (
-                not texture.is_file()
-                or sha256_file(texture) != view.texture_sha256
-            ):
-                raise QualificationError(
-                    "RUNTIME_V2_VISUAL_PACKAGE_TEXTURE_BYTES_DRIFT"
-                )
-        entries = build_source_owned_visual_rss_v2_entries(projection)
-        presentation_mode = "SOURCE_OWNED_VISUAL_PRESENTATION_V1"
-    else:
-        projection = runtime_projection_from_dict(
-            stage_output_payload(
-                ctx,
-                "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
-                "RealSaS.RuntimeProjectionIR.v2",
-            )
+    if sha256_file(provenance) != projection.provenance_npz_sha256:
+        raise QualificationError(
+            "RUNTIME_V2_PACKAGE_PROVENANCE_BYTES_DRIFT"
         )
-        arrays = resolved_path(projection.projection_npz_path)
-        provenance = resolved_path(projection.provenance_npz_path)
-        if sha256_file(arrays) != projection.projection_npz_sha256:
-            raise QualificationError(
-                "RUNTIME_V2_PACKAGE_PROJECTION_BYTES_DRIFT"
-            )
-        if sha256_file(provenance) != projection.provenance_npz_sha256:
-            raise QualificationError(
-                "RUNTIME_V2_PACKAGE_PROVENANCE_BYTES_DRIFT"
-            )
-        for view in projection.views:
-            _load_runtime_view_texture(view)
-        entries = build_rss_v2_entries(projection)
-        presentation_mode = "MECHANICAL_CANONICAL_DEPTH_V2"
+    for view in projection.views:
+        _load_runtime_view_texture(view)
+    entries = build_rss_v2_entries(projection)
+    presentation_mode = MATERIAL_CONTRACT
 
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     archive = root / "product_runtime_v2.rss"
@@ -1128,7 +518,7 @@ def materialize_runtime_package_stage(ctx: dict) -> dict:
             "contains_only_sealed_runtime_authorities": True,
             "source_owned_visual_mesh_mode": source_owned_visual,
             "mechanical_mesh_render_authority": (
-                False if source_owned_visual else True
+                True
             ),
         },
     )
@@ -1155,7 +545,7 @@ def materialize_runtime_package_stage(ctx: dict) -> dict:
             "entry_count": len(seal.entry_names),
             "presentation_geometry_mode": presentation_mode,
             "mechanical_mesh_render_authority": (
-                False if source_owned_visual else True
+                True
             ),
         },
     }
@@ -1215,7 +605,7 @@ def _run_native(
         )
     renderer_tokens = (
         "renderer=REALSAS_V2_CAA_CANONICAL_DEPTH",
-        "renderer=REALSAS_V2_SOURCE_OWNED_VISUAL_2D",
+        "renderer=REALSAS_V2_SINGLE_M_SOURCE_WINS_CAA",
     )
     if not any(token in completed.stdout for token in renderer_tokens):
         raise QualificationError("RUNTIME_V2_NATIVE_RENDERER_CONTRACT_DRIFT")
@@ -1288,6 +678,11 @@ def _build_reference_render_context(projection, arrays):
     Keeping them resident avoids repeated PNG/NPZ decode and object reconstruction
     without changing any rendered bytes or qualification semantics.
     """
+    ref = dict(projection.metadata.get("single_m_caa_material") or {})
+    if ref:
+        material = load_material_bundle(resolved_path(ref["path"]),
+            expected_sha256=ref["sha256"], rest=arrays["vertices"], faces=arrays["faces"])
+        return {"single_m_caa": material}
     mesh = _numeric_mesh(arrays)
     provenance_path = resolved_path(projection.provenance_npz_path)
     if (
@@ -1342,6 +737,11 @@ def _reference_frame(
         arrays[f"{clip.array_prefix}_positions"][frame_index],
         dtype=np.float64,
     )
+    if "single_m_caa" in context:
+        material = context["single_m_caa"]
+        return render_single_m_caa(**{k: material[k] for k in ("rest", "faces", "source", "maps", "cameras", "caa")},
+                                  posed=positions, view=view.view_index,
+                                  resolution=int(view.camera["resolution"]))
     return render_caa_reference(
         mesh=context["mesh"],
         camera=context["camera_by_view_id"][view.view_id],
@@ -1357,187 +757,6 @@ def _reference_frame(
 
 
 
-def _source_owned_visual_reference_frame(
-    projection,
-    arrays,
-    *,
-    clip,
-    view,
-    frame_index: int,
-):
-    vi = int(view.view_index)
-    uv = np.asarray(arrays[f"view_{vi}_uv"], dtype=np.float64)
-    faces = np.asarray(arrays[f"view_{vi}_faces"], dtype=np.int64)
-    positions = np.asarray(
-        arrays[f"{clip.array_prefix}_view_{vi}_positions"][frame_index],
-        dtype=np.float64,
-    )
-    if uv.shape != (int(view.visual_vertex_count), 2):
-        raise QualificationError("RUNTIME_V2_VISUAL_REFERENCE_UV_SHAPE_INVALID")
-    if faces.shape != (int(view.visual_face_count), 3):
-        raise QualificationError("RUNTIME_V2_VISUAL_REFERENCE_FACE_SHAPE_INVALID")
-    if positions.shape != (int(view.visual_vertex_count), 2):
-        raise QualificationError(
-            "RUNTIME_V2_VISUAL_REFERENCE_POSITION_SHAPE_INVALID"
-        )
-
-    texture_path = resolved_path(view.texture_path)
-    texture = np.asarray(
-        Image.open(texture_path).convert("RGBA"),
-        dtype=np.uint8,
-    )
-    if texture.shape != (
-        int(view.source_height),
-        int(view.source_width),
-        4,
-    ):
-        raise QualificationError(
-            "RUNTIME_V2_VISUAL_REFERENCE_TEXTURE_SHAPE_INVALID"
-        )
-    resolution = int(dict(view.camera).get("resolution") or 0)
-    if resolution <= 0:
-        raise QualificationError(
-            "RUNTIME_V2_VISUAL_REFERENCE_RESOLUTION_INVALID"
-        )
-
-    if projection.metadata.get("visual_material_contract") == MATERIAL_CONTRACT:
-        return render_visual_material(
-            positions=positions,
-            depths=arrays[f"{clip.array_prefix}_view_{vi}_depths"][frame_index],
-            faces=faces, uv=uv, texture=texture,
-            provenance=arrays[f"view_{vi}_material_provenance"],
-            source_view=arrays[f"view_{vi}_material_source_view"],
-            view_index=vi, resolution=resolution,
-        )
-
-    posed = np.asarray(positions, dtype=np.float64).copy()
-    posed[:, 0] = (
-        posed[:, 0] + 0.5
-    ) * float(resolution) / float(view.source_width)
-    posed[:, 1] = (
-        posed[:, 1] + 0.5
-    ) * float(resolution) / float(view.source_height)
-
-    accum = np.zeros((resolution, resolution, 4), dtype=np.float64)
-    owner = np.full((resolution, resolution), -1, dtype=np.int32)
-
-    def orient(a, b, x, y):
-        return (b[0] - a[0]) * (y - a[1]) - (
-            b[1] - a[1]
-        ) * (x - a[0])
-
-    def top_left(a, b):
-        dy = float(b[1] - a[1])
-        dx = float(b[0] - a[0])
-        return dy < 0.0 or (abs(dy) <= 1.0e-12 and dx > 0.0)
-
-    def sample_bilinear(u, v):
-        u = float(np.clip(u, 0.0, 1.0))
-        v = float(np.clip(v, 0.0, 1.0))
-        x = u * float(view.source_width - 1)
-        y = v * float(view.source_height - 1)
-        x0 = int(np.floor(x))
-        y0 = int(np.floor(y))
-        x1 = min(x0 + 1, int(view.source_width) - 1)
-        y1 = min(y0 + 1, int(view.source_height) - 1)
-        tx = float(x - x0)
-        ty = float(y - y0)
-        p00 = texture[y0, x0].astype(np.float64) / 255.0
-        p10 = texture[y0, x1].astype(np.float64) / 255.0
-        p01 = texture[y1, x0].astype(np.float64) / 255.0
-        p11 = texture[y1, x1].astype(np.float64) / 255.0
-        a = p00 * (1.0 - tx) + p10 * tx
-        b = p01 * (1.0 - tx) + p11 * tx
-        return a * (1.0 - ty) + b * ty
-
-    for face_index, face in enumerate(faces):
-        a, b, c = posed[face]
-        area = float(orient(a, b, c[0], c[1]))
-        if abs(area) <= 1.0e-12:
-            continue
-        sign = 1.0 if area > 0.0 else -1.0
-        positive = area > 0.0
-        min_x = max(
-            0,
-            int(np.floor(float(np.min((a[0], b[0], c[0]))) - 0.5)),
-        )
-        max_x = min(
-            resolution - 1,
-            int(np.ceil(float(np.max((a[0], b[0], c[0]))) - 0.5)),
-        )
-        min_y = max(
-            0,
-            int(np.floor(float(np.min((a[1], b[1], c[1]))) - 0.5)),
-        )
-        max_y = min(
-            resolution - 1,
-            int(np.ceil(float(np.max((a[1], b[1], c[1]))) - 0.5)),
-        )
-        if min_x > max_x or min_y > max_y:
-            continue
-        tl0 = top_left(b, c) if positive else top_left(c, b)
-        tl1 = top_left(c, a) if positive else top_left(a, c)
-        tl2 = top_left(a, b) if positive else top_left(b, a)
-        for y in range(min_y, max_y + 1):
-            for x in range(min_x, max_x + 1):
-                px = float(x) + 0.5
-                py = float(y) + 0.5
-                q0 = sign * orient(b, c, px, py)
-                q1 = sign * orient(c, a, px, py)
-                q2 = sign * orient(a, b, px, py)
-                accept0 = q0 > 1.0e-12 or (
-                    abs(q0) <= 1.0e-12 and tl0
-                )
-                accept1 = q1 > 1.0e-12 or (
-                    abs(q1) <= 1.0e-12 and tl1
-                )
-                accept2 = q2 > 1.0e-12 or (
-                    abs(q2) <= 1.0e-12 and tl2
-                )
-                if not (accept0 and accept1 and accept2):
-                    continue
-                w0 = orient(b, c, px, py) / area
-                w1 = orient(c, a, px, py) / area
-                w2 = 1.0 - w0 - w1
-                u = w0 * uv[face[0], 0] + w1 * uv[face[1], 0] + w2 * uv[
-                    face[2], 0
-                ]
-                v = w0 * uv[face[0], 1] + w1 * uv[face[1], 1] + w2 * uv[
-                    face[2], 1
-                ]
-                sample = sample_bilinear(u, v)
-                alpha = float(np.clip(sample[3], 0.0, 1.0))
-                transmission = 1.0 - alpha
-                accum[y, x, 0] = (
-                    sample[0] * alpha + accum[y, x, 0] * transmission
-                )
-                accum[y, x, 1] = (
-                    sample[1] * alpha + accum[y, x, 1] * transmission
-                )
-                accum[y, x, 2] = (
-                    sample[2] * alpha + accum[y, x, 2] * transmission
-                )
-                accum[y, x, 3] = alpha + accum[y, x, 3] * transmission
-                if alpha > 1.0e-12:
-                    owner[y, x] = int(face_index)
-
-    alpha = np.clip(accum[:, :, 3], 0.0, 1.0)
-    inv = np.zeros_like(alpha)
-    visible = alpha > 1.0e-12
-    inv[visible] = 1.0 / alpha[visible]
-    straight = np.zeros_like(accum)
-    straight[:, :, :3] = accum[:, :, :3] * inv[:, :, None]
-    straight[:, :, 3] = alpha
-    rgba = np.floor(
-        np.clip(straight, 0.0, 1.0) * 255.0 + 0.5
-    ).astype(np.uint8)
-    provenance = np.full((resolution, resolution), 255, dtype=np.uint8)
-    provenance[visible] = 0
-    return SimpleNamespace(
-        straight_rgba_u8=rgba,
-        provenance_code=provenance,
-        owner_face_index=owner,
-    )
 
 
 def prove_native_package_playback_stage(ctx: dict) -> dict:
@@ -1548,27 +767,17 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
             "RealSaS.CompleteAppearanceAssetIR.v2",
         )
     )
-    source_owned_visual = bool(
-        dict(asset.metadata or {}).get("source_owned_visual_mesh_mode")
+    source_owned_visual = False
+    projection = runtime_projection_from_dict(
+        stage_output_payload(
+            ctx,
+            "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+            "RealSaS.RuntimeProjectionIR.v2",
+        )
     )
-    if source_owned_visual:
-        projection = source_owned_visual_runtime_projection_from_dict(
-            stage_output_payload(
-                ctx,
-                "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
-                "RealSaS.SourceOwnedVisualRuntimeProjectionIR.v1",
-            )
-        )
-        renderer_id = "REALSAS_V2_SOURCE_OWNED_VISUAL_2D"
-    else:
-        projection = runtime_projection_from_dict(
-            stage_output_payload(
-                ctx,
-                "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
-                "RealSaS.RuntimeProjectionIR.v2",
-            )
-        )
-        renderer_id = "REALSAS_V2_CAA_CANONICAL_DEPTH"
+    renderer_id = ("REALSAS_V2_SINGLE_M_SOURCE_WINS_CAA"
+                   if projection.metadata.get("single_m_caa_material")
+                   else "REALSAS_V2_CAA_CANONICAL_DEPTH")
 
     package = runtime_package_seal_from_dict(
         stage_output_payload(
@@ -1582,11 +791,7 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
     package_mode = str(
         dict(package.metadata or {}).get("presentation_geometry_mode") or ""
     )
-    expected_mode = (
-        "SOURCE_OWNED_VISUAL_PRESENTATION_V1"
-        if source_owned_visual
-        else "MECHANICAL_CANONICAL_DEPTH_V2"
-    )
+    expected_mode = MATERIAL_CONTRACT if projection.metadata.get("single_m_caa_material") else "MECHANICAL_CANONICAL_DEPTH_V2"
     if package_mode != expected_mode:
         raise QualificationError(
             "RUNTIME_V2_NATIVE_PACKAGE_PRESENTATION_MODE_DRIFT"
@@ -1597,9 +802,7 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
     player, player_sha = _native_player(ctx)
     arrays = _projection_arrays(projection)
     reference_context = (
-        None
-        if source_owned_visual
-        else _build_reference_render_context(projection, arrays)
+        _build_reference_render_context(projection, arrays)
     )
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
 
@@ -1640,9 +843,6 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
                 raise QualificationError(
                     "RUNTIME_V2_NATIVE_RENDERER_CONTRACT_DRIFT"
                 )
-            if (source_owned_visual and projection.metadata.get("visual_material_contract") == MATERIAL_CONTRACT
-                    and "sealed_visual_material=1" not in stdout):
-                raise QualificationError("RUNTIME_V2_NATIVE_VISUAL_MATERIAL_CONTRACT_DRIFT")
 
             native_rgba = np.frombuffer(
                 rgba.read_bytes(), dtype=np.uint8
@@ -1654,33 +854,20 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
                 owner.read_bytes(), dtype="<i4"
             ).reshape(resolution, resolution)
 
-            if source_owned_visual:
-                reference = _source_owned_visual_reference_frame(
-                    projection,
-                    arrays,
-                    clip=clip,
-                    view=view_by_id[view.view_id],
-                    frame_index=frame_index,
-                )
-            else:
-                reference = _reference_frame(
-                    projection,
-                    arrays,
-                    clip=clip,
-                    view=view_by_id[view.view_id],
-                    frame_index=frame_index,
-                    reference_context=reference_context,
-                )
+            reference = _reference_frame(
+                projection,
+                arrays,
+                clip=clip,
+                view=view_by_id[view.view_id],
+                frame_index=frame_index,
+                reference_context=reference_context,
+            )
             mismatch_mask = (
                 np.any(native_rgba != reference.straight_rgba_u8, axis=2)
                 | (native_provenance != reference.provenance_code)
                 | (native_owner != reference.owner_face_index)
             )
             mismatch = int(np.count_nonzero(mismatch_mask))
-            if source_owned_visual and projection.metadata.get("visual_material_contract") == MATERIAL_CONTRACT:
-                donor_path = rgba.with_suffix(".source_view")
-                native_donor = np.frombuffer(donor_path.read_bytes(), dtype="<i2").reshape(resolution, resolution)
-                mismatch += int(np.count_nonzero(native_donor != reference.source_view_index))
             if mismatch:
                 raise QualificationError(
                     "RUNTIME_V2_NATIVE_REFERENCE_PARITY_FAIL:"
@@ -1706,7 +893,7 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
                     "renderer": renderer_id,
                     "presentation_geometry_mode": expected_mode,
                     "mechanical_mesh_render_authority": (
-                        False if source_owned_visual else True
+                        True
                     ),
                 },
             )
@@ -1747,7 +934,7 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
             "renderer": renderer_id,
             "presentation_geometry_mode": expected_mode,
             "mechanical_mesh_render_authority": (
-                False if source_owned_visual else True
+                True
             ),
         },
     )
@@ -1778,350 +965,6 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
     }
 
 
-def _prove_source_owned_visual_dynamic_integrity(
-    ctx: dict,
-    *,
-    projection,
-    package,
-    playback,
-) -> dict:
-    if playback.package_binding_hash != package.package_hash:
-        raise QualificationError(
-            "SOURCE_VISUAL_DVI_PLAYBACK_PACKAGE_DRIFT"
-        )
-    if playback.projection_binding_hash != projection.projection_hash:
-        raise QualificationError(
-            "SOURCE_VISUAL_DVI_PLAYBACK_PROJECTION_DRIFT"
-        )
-    if (
-        str(dict(package.metadata or {}).get("presentation_geometry_mode") or "")
-        != "SOURCE_OWNED_VISUAL_PRESENTATION_V1"
-    ):
-        raise QualificationError(
-            "SOURCE_VISUAL_DVI_PACKAGE_PRESENTATION_MODE_DRIFT"
-        )
-    if bool(
-        dict(package.metadata or {}).get("mechanical_mesh_render_authority", True)
-    ):
-        raise QualificationError(
-            "SOURCE_VISUAL_DVI_MECHANICAL_RENDER_AUTHORITY_FORBIDDEN"
-        )
-
-    player, player_sha = _native_player(ctx)
-    if player_sha != playback.native_player_sha256:
-        raise QualificationError("SOURCE_VISUAL_DVI_NATIVE_PLAYER_DRIFT")
-    archive = resolved_path(package.archive_path)
-    if not archive.is_file() or sha256_file(archive) != package.archive_sha256:
-        raise QualificationError("SOURCE_VISUAL_DVI_PACKAGE_BYTES_DRIFT")
-    boundary = projection.metadata.get("visual_boundary_evidence")
-    if boundary is not None:
-        validate_source_visual_boundary_evidence(boundary)
-        entries = read_rss_v2(archive)
-        raw = entries.get("authority/source_visual_boundary_evidence_v1.json")
-        if raw is None or json.loads(raw) != boundary:
-            raise QualificationError("SOURCE_VISUAL_DVI_BOUNDARY_EVIDENCE_PACKAGE_DRIFT")
-        for label, actual, expected in (
-            ("APPEARANCE", boundary.get("appearance_asset_hash"), projection.appearance_asset_binding_hash),
-            ("APPEARANCE_QUALIFICATION", boundary.get("appearance_qualification_hash"), projection.appearance_qualification_binding_hash),
-            ("PRESENTATION", boundary.get("qualified_visual_presentation_hash"), projection.qualified_visual_presentation_binding_hash),
-        ):
-            if actual != expected:
-                raise QualificationError("SOURCE_VISUAL_DVI_BOUNDARY_BINDING_DRIFT:" + label)
-    arrays = _projection_arrays(projection)
-    root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
-    native_workers = _native_parallel_workers(ctx)
-
-    evaluated_frame_view_count = 0
-    rendered_visible_pixel_count = 0
-    empty_frame_view_count = 0
-    flipped_triangle_count = 0
-    edge_gt_4_count = 0
-    edge_gt_10_count = 0
-    maximum_p95_edge_ratio = 1.0
-    maximum_edge_ratio = 1.0
-    native_reference_mismatch_pixel_count = 0
-    direct_source_provenance_mismatch_pixel_count = 0
-    compiled_visible_pixel_count = 0
-    maximum_frame_compiled_fraction = 0.0
-    maximum_connected_compiled_fraction = 0.0
-    outputs = []
-
-    for clip in projection.clips:
-        views = tuple(projection.views)
-        for frame_index in range(int(clip.frame_count)):
-            native_rows = _run_native_many(
-                player=player,
-                package=archive,
-                requests=(
-                    {
-                        "clip_id": clip.clip_id,
-                        "view_id": view.view_id,
-                        "frame_index": frame_index,
-                    }
-                    for view in views
-                ),
-                root=root / "frames",
-                max_workers=native_workers,
-            )
-            for view, (
-                rgba_path,
-                prov_path,
-                owner_path,
-                stdout,
-            ) in zip(views, native_rows):
-                if (
-                    "renderer=REALSAS_V2_SOURCE_OWNED_VISUAL_2D"
-                    not in stdout
-                ):
-                    raise QualificationError(
-                        "SOURCE_VISUAL_DVI_RENDERER_CONTRACT_DRIFT"
-                    )
-                resolution = int(view.camera["resolution"])
-                if (projection.metadata.get("visual_material_contract") == MATERIAL_CONTRACT
-                        and "sealed_visual_material=1" not in stdout):
-                    raise QualificationError("SOURCE_VISUAL_DVI_MATERIAL_CONTRACT_DRIFT")
-                rgba = np.frombuffer(
-                    rgba_path.read_bytes(), dtype=np.uint8
-                ).reshape(resolution, resolution, 4)
-                provenance = np.frombuffer(
-                    prov_path.read_bytes(), dtype=np.uint8
-                ).reshape(resolution, resolution)
-                owner = np.frombuffer(
-                    owner_path.read_bytes(), dtype="<i4"
-                ).reshape(resolution, resolution)
-
-                reference = _source_owned_visual_reference_frame(
-                    projection,
-                    arrays,
-                    clip=clip,
-                    view=view,
-                    frame_index=frame_index,
-                )
-                mismatch = (
-                    np.any(
-                        rgba != reference.straight_rgba_u8,
-                        axis=2,
-                    )
-                    | (provenance != reference.provenance_code)
-                    | (owner != reference.owner_face_index)
-                )
-                native_reference_mismatch_pixel_count += int(
-                    np.count_nonzero(mismatch)
-                )
-                if projection.metadata.get("visual_material_contract") == MATERIAL_CONTRACT:
-                    donor_path = rgba_path.with_suffix(".source_view")
-                    native_donor = np.frombuffer(donor_path.read_bytes(), dtype="<i2").reshape(resolution, resolution)
-                    native_reference_mismatch_pixel_count += int(np.count_nonzero(
-                        native_donor != reference.source_view_index))
-                    outputs.append({"path": str(donor_path), "sha256": sha256_file(donor_path),
-                        "authority_class": "SOURCE_VISUAL_DVI_NATIVE_SOURCE_VIEW",
-                        "schema": "application/x-i16-source-view"})
-
-                visible = rgba[:, :, 3] > 0
-                visible_count = int(np.count_nonzero(visible))
-                rendered_visible_pixel_count += visible_count
-                if visible_count <= 0:
-                    empty_frame_view_count += 1
-                provenance_bad = ((visible & ~np.isin(provenance, (0, 1, 2, 4)))
-                                  | ((~visible) & (provenance != 255)))
-                compiled = visible & np.isin(provenance, (2, 4))
-                compiled_count = int(np.count_nonzero(compiled))
-                compiled_visible_pixel_count += compiled_count
-                maximum_frame_compiled_fraction = max(maximum_frame_compiled_fraction,
-                    compiled_count / max(1, visible_count))
-                maximum_connected_compiled_fraction = max(maximum_connected_compiled_fraction,
-                    _largest_connected_fraction(compiled, denominator=visible_count))
-                direct_source_provenance_mismatch_pixel_count += int(
-                    np.count_nonzero(provenance_bad)
-                )
-
-                vi = int(view.view_index)
-                rest = np.asarray(
-                    arrays[f"view_{vi}_rest_positions"],
-                    dtype=np.float64,
-                )
-                faces = np.asarray(
-                    arrays[f"view_{vi}_faces"],
-                    dtype=np.int64,
-                )
-                posed = np.asarray(
-                    arrays[
-                        f"{clip.array_prefix}_view_{vi}_positions"
-                    ][frame_index],
-                    dtype=np.float64,
-                )
-                metrics = _visual_mesh_motion_metrics(
-                    rest,
-                    posed,
-                    faces,
-                )
-                flipped_triangle_count += int(
-                    metrics["flipped_triangle_count"]
-                )
-                edge_gt_4_count += int(metrics["edge_gt_4_count"])
-                edge_gt_10_count += int(metrics["edge_gt_10_count"])
-                maximum_p95_edge_ratio = max(
-                    maximum_p95_edge_ratio,
-                    float(metrics["p95_edge_ratio"]),
-                )
-                maximum_edge_ratio = max(
-                    maximum_edge_ratio,
-                    float(metrics["max_edge_ratio"]),
-                )
-                evaluated_frame_view_count += 1
-
-                for output_path, authority, schema in (
-                    (
-                        rgba_path,
-                        "SOURCE_VISUAL_DVI_NATIVE_RGBA",
-                        "application/x-rgba8",
-                    ),
-                    (
-                        prov_path,
-                        "SOURCE_VISUAL_DVI_NATIVE_PROVENANCE",
-                        "application/x-u8-mask",
-                    ),
-                    (
-                        owner_path,
-                        "SOURCE_VISUAL_DVI_NATIVE_OWNER",
-                        "application/x-i32-owner",
-                    ),
-                ):
-                    outputs.append(
-                        {
-                            "path": str(output_path),
-                            "sha256": sha256_file(output_path),
-                            "authority_class": authority,
-                            "schema": schema,
-                        }
-                    )
-
-    quality_policy = dict(projection.metadata.get("appearance_quality_policy") or {})
-    compiled_fraction = compiled_visible_pixel_count / max(1, rendered_visible_pixel_count)
-    completion_budget_passed = (compiled_visible_pixel_count == 0 or (
-        all(key in quality_policy for key in (
-            "dynamic_max_compiled_unobserved_visible_fraction",
-            "dynamic_max_frame_compiled_unobserved_visible_fraction",
-            "dynamic_max_connected_compiled_unobserved_visible_fraction"))
-        and compiled_fraction <= quality_policy["dynamic_max_compiled_unobserved_visible_fraction"]
-        and maximum_frame_compiled_fraction <= quality_policy["dynamic_max_frame_compiled_unobserved_visible_fraction"]
-        and maximum_connected_compiled_fraction <= quality_policy["dynamic_max_connected_compiled_unobserved_visible_fraction"]
-    ))
-    passed = (
-        evaluated_frame_view_count > 0
-        and rendered_visible_pixel_count > 0
-        and empty_frame_view_count == 0
-        and flipped_triangle_count == 0
-        and edge_gt_4_count == 0
-        and native_reference_mismatch_pixel_count == 0
-        and direct_source_provenance_mismatch_pixel_count == 0
-        and completion_budget_passed
-    )
-    value = SourceOwnedVisualDynamicIntegrityV1IR(
-        package_binding_hash=package.package_hash,
-        projection_binding_hash=projection.projection_hash,
-        native_playback_binding_hash=playback.playback_hash,
-        evaluated_frame_view_count=evaluated_frame_view_count,
-        rendered_visible_pixel_count=rendered_visible_pixel_count,
-        empty_frame_view_count=empty_frame_view_count,
-        flipped_triangle_count=flipped_triangle_count,
-        edge_gt_4_count=edge_gt_4_count,
-        edge_gt_10_count=edge_gt_10_count,
-        maximum_p95_edge_ratio=maximum_p95_edge_ratio,
-        maximum_edge_ratio=maximum_edge_ratio,
-        native_reference_mismatch_pixel_count=(
-            native_reference_mismatch_pixel_count
-        ),
-        direct_source_provenance_mismatch_pixel_count=(
-            direct_source_provenance_mismatch_pixel_count
-        ),
-        qualification_report={
-            "status": (
-                "PASS_SOURCE_OWNED_VISUAL_DYNAMIC_INTEGRITY"
-                if passed
-                else "FAIL_SOURCE_OWNED_VISUAL_DYNAMIC_INTEGRITY"
-            ),
-            "native_reference_byte_parity_passed": (
-                native_reference_mismatch_pixel_count == 0
-            ),
-            "direct_source_provenance_passed": (
-                direct_source_provenance_mismatch_pixel_count == 0
-            ),
-            "material_provenance_passed": direct_source_provenance_mismatch_pixel_count == 0,
-            "compiled_appearance_exposure_passed": completion_budget_passed,
-            "compiled_appearance_visible_pixel_count": compiled_visible_pixel_count,
-            "compiled_appearance_visible_fraction": compiled_fraction,
-            "maximum_frame_compiled_appearance_fraction": maximum_frame_compiled_fraction,
-            "maximum_connected_compiled_appearance_fraction": maximum_connected_compiled_fraction,
-            "appearance_totality_domain": projection.metadata.get("appearance_totality_domain"),
-            "hidden_layer_material_qualified": False,
-            "semantic_contact_and_order_qualified": False,
-            "full_visual_acceptance_passed": False,
-            "visual_boundary_evidence": boundary,
-            "all_frame_views_nonempty": empty_frame_view_count == 0,
-            "visual_orientation_passed": flipped_triangle_count == 0,
-            "catastrophic_edge_stretch_passed": edge_gt_4_count == 0,
-            "catastrophic_edge_ratio_threshold": 4.0,
-            "p95_edge_ratio_is_diagnostic": True,
-            "maximum_edge_ratio_is_diagnostic_below_catastrophic_threshold": True,
-            "perceptual_optimality_claimed": False,
-            "subject_identity_used_for_thresholds": False,
-        },
-        integrity_hash="",
-        metadata={
-            "presentation_geometry_mode": (
-                "SOURCE_OWNED_VISUAL_PRESENTATION_V1"
-            ),
-            "renderer": "REALSAS_V2_SOURCE_OWNED_VISUAL_2D",
-            "mechanical_mesh_render_authority": False,
-            "runtime_generation": False,
-            "dynamic_quality_scope": (
-                "STRUCTURAL_RUNTIME_INTEGRITY__NOT_PERCEPTUAL_OPTIMALITY"
-            ),
-            "native_parallel_workers": native_workers,
-        },
-    )
-    value = replace(
-        value,
-        integrity_hash=source_owned_visual_dynamic_integrity_hash(value),
-    )
-    if not passed:
-        return {
-            "status": "FAIL",
-            "blockers": ["SOURCE_OWNED_VISUAL_DYNAMIC_INTEGRITY_FAILED"],
-            "diagnostics": value.to_dict(),
-        }
-    outputs.insert(
-        0,
-        write_ir(
-            root / "source_owned_visual_dynamic_integrity_v1.json",
-            value,
-            authority_class=(
-                "QUALIFIED_SOURCE_OWNED_VISUAL_DYNAMIC_INTEGRITY_V1"
-            ),
-        ),
-    )
-    return {
-        "status": "PASS",
-        "outputs": outputs,
-        "diagnostics": {
-            "integrity_hash": value.integrity_hash,
-            "evaluated_frame_view_count": evaluated_frame_view_count,
-            "rendered_visible_pixel_count": rendered_visible_pixel_count,
-            "flipped_triangle_count": flipped_triangle_count,
-            "edge_gt_4_count": edge_gt_4_count,
-            "maximum_p95_edge_ratio": maximum_p95_edge_ratio,
-            "maximum_edge_ratio": maximum_edge_ratio,
-            "native_reference_mismatch_pixel_count": (
-                native_reference_mismatch_pixel_count
-            ),
-            "direct_source_provenance_mismatch_pixel_count": (
-                direct_source_provenance_mismatch_pixel_count
-            ),
-            "full_visual_acceptance_passed": False,
-            "visual_boundary_evidence_hash": boundary["evidence_hash"] if boundary else None,
-        },
-    }
 
 
 def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
@@ -2132,34 +975,6 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             "RealSaS.CompleteAppearanceAssetIR.v2",
         )
     )
-    if bool(dict(asset.metadata or {}).get("source_owned_visual_mesh_mode")):
-        projection = source_owned_visual_runtime_projection_from_dict(
-            stage_output_payload(
-                ctx,
-                "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
-                "RealSaS.SourceOwnedVisualRuntimeProjectionIR.v1",
-            )
-        )
-        package = runtime_package_seal_from_dict(
-            stage_output_payload(
-                ctx,
-                "43_RSS_MATERIALIZE_COMPACT",
-                "RealSaS.RuntimePackageSealIR.v2",
-            )
-        )
-        playback = native_playback_from_dict(
-            stage_output_payload(
-                ctx,
-                "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
-                "RealSaS.NativePlaybackIR.v2",
-            )
-        )
-        return _prove_source_owned_visual_dynamic_integrity(
-            ctx,
-            projection=projection,
-            package=package,
-            playback=playback,
-        )
 
     projection = runtime_projection_from_dict(
         stage_output_payload(

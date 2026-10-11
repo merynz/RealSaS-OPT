@@ -82,6 +82,26 @@ def stage_owner_map(registry: dict[str, Any]) -> dict[str, str]:
     return {str(row["stage_id"]): str(row["owner_module_id"]) for row in registry.get("stages", [])}
 
 
+def native_source_closure(entry: str) -> list[str]:
+    """Inspect local C++ includes; sealed binary identity still owns reuse."""
+    seen: set[str] = set()
+    pending = [entry]
+    while pending:
+        relative = pending.pop()
+        if relative in seen:
+            continue
+        path = ROOT / relative
+        if not path.is_file():
+            raise RuntimeError("NATIVE_SOURCE_FILE_MISSING:" + relative)
+        seen.add(relative)
+        for include in re.findall(r'^\s*#\s*include\s*"([^"]+)"', path.read_text(), re.MULTILINE):
+            target = (path.parent / include).resolve()
+            if not target.is_relative_to(ROOT.resolve()):
+                raise RuntimeError("NATIVE_SOURCE_INCLUDE_OUTSIDE_CHECKOUT")
+            pending.append(target.relative_to(ROOT.resolve()).as_posix())
+    return sorted(seen)
+
+
 def descendants(plan: dict[str, Any], root_stage: str) -> list[str]:
     children: dict[str, set[str]] = defaultdict(set)
     order: dict[str, int] = {}
@@ -314,6 +334,20 @@ def build_discovery() -> dict[str, Any]:
                                        if module_path(item["module"]) is not None},
         }
 
+    # Stage44/45 invoke a sealed native binary. Keep its source read-set visible
+    # in discovery/impact without pretending Python's implementation hash seals
+    # the compiled binary or grants scientific reuse.
+    native_files = native_source_closure("runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp")
+    for stage_id in ("44_NATIVE_PACKAGE_OPEN_PLAYBACK", "45_DYNAMIC_VISUAL_INTEGRITY_PROOF"):
+        row = closure_by_stage[stage_id]
+        row["native_source_inspection_files"] = native_files
+        row["native_binary_identity_authority"] = "SEALED_RUNTIME_MANIFEST_PLAYER_SHA256"
+        for path in native_files:
+            file_consumers[path].add(stage_id)
+            row["dependency_files"].append(path)
+            row["dependency_file_hashes"][path] = mainline.sha256_file(ROOT / path)
+        row["dependency_files"] = sorted(set(row["dependency_files"]))
+
     dependency_rows: list[dict[str, Any]] = []
     ownership_debt: list[dict[str, Any]] = []
     shared_dependencies: list[dict[str, Any]] = []
@@ -479,6 +513,8 @@ def impact_query(discovery: dict[str, Any], paths: list[str], manifest_keys: lis
         path = candidate.as_posix()
         found = set(files.get(path, {}).get("consumer_stages", []))
         status = "ADAPTER_IMPLEMENTATION_CLOSURE" if found else "UNCLASSIFIED__INSPECT_BEFORE_REUSE"
+        if found and path.startswith("runtime/") and path.endswith((".cpp", ".h", ".hpp")):
+            status = "NATIVE_SOURCE_INSPECTION__SEALED_BINARY_REF_REQUIRED"
         if path == "canonical/MAINLINE_EXECUTION_PLAN_V2.json":
             found, status = stages, "PLAN_EDIT__COMPARE_SEALED_GRAPHS"
         elif path in critical:

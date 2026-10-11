@@ -18,8 +18,6 @@ from compiler.realsas_compiler_core.mechanical_carrier_evidence_v1 import mechan
 from compiler.realsas_compiler_core.output_presentation_v1 import output_direction_set_from_dict
 from compiler.realsas_compiler_core.presentation_partition_v2 import presentation_partition_evidence_from_dict
 from compiler.realsas_compiler_core.product_state_v2 import build_caa_bound_presentation_graph,build_complete_puppet_state_v2,presentation_structure_v2_from_dict
-from compiler.realsas_compiler_core.visual_mesh_arap_v1 import visual_mesh_set_from_dict
-from compiler.realsas_compiler_core.visual_presentation_v1 import qualified_visual_presentation_set_from_dict
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import stage_output_payload,write_ir
 from compiler.realsas_compiler_services.orchestrator.adapters.product_state_legacy_v2 import _require_caa_final_mesh_candidate_binding
 
@@ -50,22 +48,8 @@ def seal_complete_puppet_stage(ctx:dict)->dict:
     if str(appearance.qualification_report.get("status") or "")!="PASS_COMPLETE_APPEARANCE": raise ValueError("COMPLETE_PUPPET_CAA_QUALIFICATION_NOT_PASS")
     if float(appearance.total_defined_fraction)!=1.0 or not bool(appearance.qualification_report.get("totality_passed",False)): raise ValueError("COMPLETE_PUPPET_CAA_TOTALITY_NOT_PROVEN")
 
-    source_owned_visual_mode=bool(dict(asset.metadata or {}).get("source_owned_visual_mesh_mode"))
+    source_owned_visual_mode = False
     visual_mesh_set_hash=""; source_visual_mesh_set_hash=""
-    if source_owned_visual_mode:
-        source_visual_set=visual_mesh_set_from_dict(stage_output_payload(ctx,"18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.VisualMeshSetIR.v1"))
-        qualified_visual=qualified_visual_presentation_set_from_dict(stage_output_payload(ctx,"37_QUALIFIED_PRESENTATION_STRUCTURE","RealSaS.QualifiedVisualPresentationSetIR.v1"))
-        source_visual_mesh_set_hash=str(source_visual_set.set_hash); visual_mesh_set_hash=str(qualified_visual.set_hash)
-        if qualified_visual.source_visual_mesh_set_binding_hash!=source_visual_mesh_set_hash: raise ValueError("COMPLETE_PUPPET_SOURCE_VISUAL_SUBSTRATE_BINDING_DRIFT")
-        if qualified_visual.mechanical_mesh_binding_hash!=mesh.mesh_lineage_hash: raise ValueError("COMPLETE_PUPPET_QUALIFIED_VISUAL_MESH_BINDING_DRIFT")
-        if qualified_visual.appearance_asset_binding_hash!=asset.asset_hash or qualified_visual.appearance_qualification_binding_hash!=appearance.qualification_hash: raise ValueError("COMPLETE_PUPPET_QUALIFIED_VISUAL_APPEARANCE_DRIFT")
-        if str(dict(asset.metadata or {}).get("visual_mesh_set_binding_hash") or "")!=source_visual_mesh_set_hash: raise ValueError("COMPLETE_PUPPET_SOURCE_VISUAL_ASSET_BINDING_DRIFT")
-        for label,value in (("STRUCTURE",dict(structure.metadata or {}).get("qualified_visual_presentation_set_binding_hash")),("PARTITION_EVIDENCE",dict(partition_evidence.metadata or {}).get("qualified_visual_presentation_set_binding_hash"))):
-            if str(value or "")!=visual_mesh_set_hash: raise ValueError("COMPLETE_PUPPET_QUALIFIED_VISUAL_BINDING_DRIFT:"+label)
-        for label,value in (("STRUCTURE",dict(structure.metadata or {}).get("source_visual_mesh_set_binding_hash")),("PARTITION_EVIDENCE",dict(partition_evidence.metadata or {}).get("source_visual_mesh_set_binding_hash"))):
-            if str(value or "")!=source_visual_mesh_set_hash: raise ValueError("COMPLETE_PUPPET_SOURCE_VISUAL_BINDING_DRIFT:"+label)
-        if dict(asset.metadata or {}).get("mechanical_mesh_render_authority") is not False or dict(structure.metadata or {}).get("mechanical_mesh_render_authority") is not False:
-            raise ValueError("COMPLETE_PUPPET_MECHANICAL_RENDER_AUTHORITY_DRIFT")
 
     mechanical=build_canonical_puppet_state_carrier_v2(
         surface=surface,skeleton=skeleton,carrier_skin=carrier_skin,carrier=carrier_evidence,
@@ -83,7 +67,7 @@ def seal_complete_puppet_stage(ctx:dict)->dict:
         "mechanical_state_hash":mechanical.product_state_hash,"presentation_lineage_hash":graph.presentation_lineage_hash,"complete_puppet_hash":complete.complete_puppet_hash,
         "complete_appearance_qualification_hash":appearance.qualification_hash,"geometry_mechanics_appearance_coequal":True,
         "source_owned_visual_mesh_mode":source_owned_visual_mode,"visual_mesh_set_binding_hash":visual_mesh_set_hash,"source_visual_mesh_set_binding_hash":source_visual_mesh_set_hash,
-        "mechanical_mesh_render_authority":False if source_owned_visual_mode else True,"dynamic_visual_composition_authority_claimed":False,
+        "mechanical_mesh_render_authority":True,"dynamic_visual_composition_authority_claimed":False,
         "skin_authority":"CARRIER_NATIVE_W_M","semantic_skin_transfer_performed":False,
     }}
 

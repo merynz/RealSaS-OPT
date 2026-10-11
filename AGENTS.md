@@ -114,13 +114,19 @@ That run reused sealed artifacts; IRIS/TESSA/AXIS/MIRA were not reinferred. Do n
 
 ## Active priority order
 
-The latest user decision takes execution precedence: first prove and close the
-existing canonical Knight visual producer-consumer path, preserving this
-witness's M/G/W and motion inputs. Attempt reliable derivation and consumption
-of contact, layer/material, grip and order before proposing new IRIS heads.
-Prior appearance/oracle authorization is retained, but is not an instruction
-to launch that separate research on every main deployment. Inspect existing
-Go context/Attempt/handoff; never substitute a different reference for Knight.
+The latest 2026-10-11 user request is platform/source cleanup: update current
+state, repair demonstrated platform defects, make the DAG and change impact
+inspectable, and keep agent entry/exit on canonical main. Do not select a new
+scientific experiment as a side effect of this cleanup or a deployment.
+
+The shared IRIS geometry + RGB + semantic/appearance plan is a proposal awaiting
+user approval, **not an approved next step**. See
+`docs/research/IRIS_GEOMETRY_APPEARANCE_PROPOSAL_20261011.md`.
+Do not turn its proposed heads, phases or conceptual graph into an executable
+release, training task or mandatory continuation. Prior bounded appearance/oracle
+authorization remains history; inspect its exact Go context before continuation.
+The existing Knight visual contracts remain open, with explicit evidence and
+abstention. They are not closed by engineering CI or by this proposal.
 
 1. PR #65 is merged. Continue platform preparation and bounded source changes on main.
 2. Use the explicit controlled-intervention contract for causal component replacements;
@@ -131,16 +137,25 @@ Go context/Attempt/handoff; never substitute a different reference for Knight.
    its appearance/runtime connections on main. Use
    `docs/presentation/VISUAL_MESH_IMPLEMENTATION_20261009.md` and
    `canonical/VISUAL_MESH_CLOSURE_20261009.json` for implemented scope and open
-   acceptance gates. The subsequent 2026-10-10 instruction authorizes separate
-   IRIS appearance research; read
+   acceptance gates. The historical 2026-10-10 instruction covered separate
+   appearance research; read
    `docs/research/IRIS_APPEARANCE_RESEARCH_V1_20261010.md`. Preserve M/G/W in
    the current Knight witness. Knight 3D materials are not 2D visual truth.
+   The 2026-10-11 shared-head proposal remains unapproved; it is not selected by
+   this cleanup. After cleanup, the latest requested diagnosis is the exact-point
+   neck/foot lineage autopsy described in `CURRENT_STATE.md`.
 
 Read `docs/presentation/VISUAL_DEPENDENCY_MAP_20261009.md` before changing
 appearance, visual ownership, binding or runtime. Distinguish main CAA consumption
 from the archived research path's direct PNG binding. A scoped downstream rerun
 must declare its actual release changes; do not assume motion proof IDs remain
 fixed when the product DAG routes appearance through the puppet seal.
+
+For source work, generate the current map and inspect edited files with
+`tools/realsas_architecture.py map` and `impact`; see
+`docs/platform/DYNAMIC_ARCHITECTURE.md`. This is discovery, not reuse authority.
+An unknown impact must be investigated; it never means zero consumers. At exit,
+record exact source/Attempt/artifacts and the pending decision in the handoff.
 
 ## Product-quality rule
 

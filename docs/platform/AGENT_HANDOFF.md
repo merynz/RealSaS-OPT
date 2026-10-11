@@ -95,3 +95,29 @@ bypass surface restricted by `AGENTS.md` to sealed replay/CI. This API guard
 does not claim filesystem/administrator isolation or complete removal of those
 paths. See [architecture audit](MODULARITY_AUDIT_20261010.md) for the remaining
 producer/consumer boundaries.
+
+## Failed oracle operator recovery
+
+The authored oracle operator now observes terminal failure, exports exact Go
+diagnostics and every available hash-verified stage output, then exits its
+original immutable scope. Export errors remain explicit and the operator still
+fails; a closed handoff is not scientific PASS. OPEN/unknown states cannot be
+finalized. Timeout never starts a new Attempt.
+
+After main advances, an operator can export/finalize the existing checkpoint
+without entering, compiling or rebuilding anything:
+
+```bash
+/home/monster/realsas_platform/current/bin/realsas-python \
+  /home/monster/realsas_platform/current/source/tools/platform_visual_oracle_v1.py \
+  --root /home/monster/realsas_platform --finalize-existing
+```
+
+This is an explicit recovery action, never selected automatically by deployment.
+It requires the original API ticket to agree with current Go context. Exact exit
+request bytes are checkpointed before submission for an idempotent lost-reply
+retry. Registry/session state, including pending-command rejection, remains Go-owned.
+Partial outputs live under `outputs/<stage_id>/` to avoid basename collisions;
+`measurement.json` is exported at the root only if actually produced and verified.
+
+For source entry/change inspection, see [dynamic architecture](DYNAMIC_ARCHITECTURE.md).

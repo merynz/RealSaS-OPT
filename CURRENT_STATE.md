@@ -20,6 +20,28 @@ the sealed Knight host inspection. This transports inputs and records source
 identity; it is not an Attempt, scientific reuse qualification or visual closure.
 Read the returned context/handoff before selecting any research execution.
 
+Read-only inspection on `main@d4b1f0820e702c53584bf8940e6b475501d3fca7`
+(host run `38117258928`, artifact `11694670316`) verified 119 transported
+paths/117 objects, with 63 explicit reference failures; no qualification was
+minted. Current CAA sample positions match current M barycentric addresses to
+4.965e-16 in mesh coordinates. An independent static-point audit found 18,093
+all-view non-direct samples with front-depth/source-mask support in a view;
+14,367 involve another face on the same canonical edge/vertex. These are
+eligibility candidates, not admitted colour or hidden material. Three depth
+tolerances gave identical counts; four analytic intersection controls passed.
+Source foreground pixel-face support is still absent for 2.066–3.094% by view.
+Stage24 explicitly leaves completion-field shipping/full-visual qualification
+false. The current CAA ledger has 28/32/35/36/37 PENDING; Stage35 has no typed
+compatibility output for Stage37. V6's connected-palette diagnostic is not an
+executed canonical Stage42 affine witness. Consumer closure and a real Go Knight
+scope remain open before any new-head necessity can be claimed.
+
+The bounded inspector now gives all eight raw sources/masks and current visual
+producer sidecars priority over historical model references. Failed refs remain
+observable/red. Read-only Go discovery uses Knight names plus exact directly
+bound input artifact bytes and reports truncation; it cannot establish matching
+transitive section payloads or silently select a qualified baseline.
+
 Authored 2D oracle V1 remains a separately authorized reference experiment,
 not the current Knight intervention. Its workflow is manual on main; service
 deployment must not automatically select or resume a research experiment.

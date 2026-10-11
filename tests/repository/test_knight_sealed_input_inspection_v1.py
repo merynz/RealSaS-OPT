@@ -64,3 +64,60 @@ def test_bounded_inspection_cannot_truncate_an_oversized_input(tmp_path):
     source.write_bytes(b"12345")
     with pytest.raises(RuntimeError, match="BYTE_BUDGET_EXCEEDED"):
         SealedInputCatalogue([tmp_path], byte_budget=4).add(source, origin="SEALED_ROOT")
+
+
+def test_failed_reference_preserves_other_verified_bytes_without_admitting_drift(tmp_path):
+    bad, good = tmp_path / "old_failure.json", tmp_path / "current_input.bin"
+    bad.write_text('{"changed":true}')
+    good.write_bytes(b"sealed current input")
+    sha = hashlib.sha256(good.read_bytes()).hexdigest()
+    manifest = tmp_path / "ledger.json"
+    manifest.write_text(json.dumps({"history": {"path": str(bad), "sha256": "a" * 64},
+                                   "current": {"path": str(good), "sha256": sha}}))
+    catalogue = SealedInputCatalogue([tmp_path], collect_reference_failures=True)
+    catalogue.inspect(manifest, origin="EXPLICIT_ROOT")
+    report = catalogue.write(tmp_path / "out", context={"go": "read-only"})
+    assert report["inspection_complete"] is False
+    assert report["all_bound_references_verified"] is False
+    assert report["reference_failures"][0]["expected_sha256"] == "a" * 64
+    assert report["reference_failures"][0]["actual_sha256"] == hashlib.sha256(bad.read_bytes()).hexdigest()
+    assert report["reference_failures"][0]["file_transported_as_verified_input"] is False
+    assert str(bad) not in catalogue.rows
+    assert report["qualification_minted"] is False
+    with zipfile.ZipFile(tmp_path / "out/SEALED_INPUTS.zip") as archive:
+        assert archive.read("objects/" + sha) == good.read_bytes()
+        assert json.loads(archive.read("SEALED_INPUT_INSPECTION.json"))["inspection_complete"] is False
+
+
+def test_partial_diagnostics_retain_root_and_budget_guards(tmp_path):
+    root = tmp_path / "allowed"
+    root.mkdir()
+    source = root / "large.bin"
+    source.write_bytes(b"12345")
+    catalogue = SealedInputCatalogue([root], byte_budget=4, collect_reference_failures=True)
+    catalogue.inspect(source, origin="EXPLICIT_ROOT")
+    catalogue.inspect(tmp_path / "outside", origin="EXPLICIT_ROOT")
+    assert not catalogue.rows
+    assert catalogue.total_bytes == 0
+    assert len(catalogue.reference_failures) == 2
+    assert "BYTE_BUDGET_EXCEEDED" in catalogue.reference_failures[0]["error"]
+    assert "OUTSIDE_DECLARED_ROOTS" in catalogue.reference_failures[1]["error"]
+
+
+def test_explicit_seeds_get_budget_before_reference_walk(tmp_path):
+    history, current = tmp_path / "history.bin", tmp_path / "current.bin"
+    history.write_bytes(b"h" * 100)
+    current.write_bytes(b"current")
+    manifest = tmp_path / "ledger.json"
+    manifest.write_text(json.dumps({"path": str(history),
+                                   "sha256": hashlib.sha256(history.read_bytes()).hexdigest()}))
+    catalogue = SealedInputCatalogue([tmp_path], byte_budget=manifest.stat().st_size + 7,
+                                    collect_reference_failures=True, defer_reference_walk=True)
+    catalogue.inspect(manifest, origin="EXPLICIT_LEDGER")
+    catalogue.inspect(current, origin="PINNED_CURRENT_INPUT")
+    report = catalogue.write(tmp_path / "out", context={})
+    assert str(current) in catalogue.rows
+    assert str(history) not in catalogue.rows
+    assert not catalogue.pending_references
+    assert report["inspection_complete"] is False
+    assert "BYTE_BUDGET_EXCEEDED" in report["reference_failures"][0]["error"]

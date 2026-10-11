@@ -128,3 +128,14 @@ def test_historical_family_selector_preserves_frozen_checkout_boundary():
     assert "  workflow_dispatch:" in text
     assert "ref: ${{ inputs.frozen_ref }}" in text
     assert not re.search(r"^  (pull_request|push):", text, re.MULTILINE)
+
+
+def test_authored_oracle_research_is_explicit_and_canonical_main_only():
+    text = (ROOT / ".github/workflows/authored_visual_oracle_v1.yml").read_text()
+    events = text.split("\non:\n", 1)[1].split("\nconcurrency:", 1)[0]
+    assert re.findall(r"^  (\w+):", events, re.MULTILINE) == ["workflow_dispatch"]
+    assert "github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'" in text
+    assert "ref: ${{ github.sha }}" in text
+    assert "EXPECTED_SHA: ${{ github.sha }}" in text
+    assert "github.event.workflow_run" not in text
+    assert "cancel-in-progress: false" in text

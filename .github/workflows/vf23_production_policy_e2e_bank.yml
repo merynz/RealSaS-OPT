@@ -77,7 +77,6 @@ jobs:
       - name: Exact unmodified production-policy E2E wiring
         run: |
           python -m pytest -q \
-            tests/compiler/test_product_mesh_stage_adapters_v1.py::test_vf23_source_visual_chain_proves_transport_but_not_full_product \
             tests/compiler/test_product_mesh_stage_adapters_v1.py::test_vf23_stage37_to46_tail_uses_unmodified_production_dynamic_policy
 
       - name: Representative subject-free production semantic controls

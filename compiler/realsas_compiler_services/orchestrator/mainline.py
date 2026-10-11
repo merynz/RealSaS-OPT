@@ -218,6 +218,8 @@ CURRENT_V2_FORBIDDEN_IMPORT_MODULES = {
 
 IMPLEMENTATION_CLOSURE_STATIC_PATHS = (
     "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp",
+    "runtime/realsas_cpp/src/single_m_caa_v1.hpp",
+    ".github/workflows/single_m_caa_canonical_gate.yml",
     ".github/workflows/current_mainline_self_hosted_ci.yml",
     ".github/workflows/current_runtime_self_hosted_ci.yml",
     ".github/workflows/model_mainline_source_gate.yml",

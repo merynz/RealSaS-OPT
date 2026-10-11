@@ -7,67 +7,41 @@
 
 ## Immediate user-authorized priority
 
-The current request is to update repository state and repair concrete platform
-defects on canonical main, make producer/consumer connections and change impact
-visible, and keep agent entry/exit efficient and explicit. It does not select a
-new research run, training task or render.
+The canonical development/render baseline is **one M for geometry, topology and
+motion; source-wins RGB plus the already compiled CAA on M-face/barycentric
+addresses**. The user explicitly approved this cutover after the sealed eight-view
+RUN replay. Independent per-view visual triangulation, visual rebinding and their
+production consumers are retired from main. The complete previous main is
+accessible at `archive/visual-v-before-m-caa-20261011`; it is historical provenance,
+not an alternate execution line.
 
-**IRIS shared geometry + RGB + semantic/appearance heads are an unapproved
-proposal, not the next execution step.** The user's 2026-10-11 clarification
-explicitly withholds that approval. The design is retained in
-`docs/research/IRIS_GEOMETRY_APPEARANCE_PROPOSAL_20261011.md`; none of its heads,
-new artifacts or conceptual DAG nodes are shipped. Do not resurrect the older
-mandatory “close everything before proposing heads” ordering either: the
-scientific choice is pending. Existing visual gaps remain real and measurable.
-Missing or unsafe data retain explicit abstention and evidence, never an empty
-required domain or optimistic PASS.
+Use `tools/demo/render_knight_m_caa_v1.py --output <directory>` for the sealed
+Knight regression. Its immutable inputs and 21 exact RUN poses live in
+`tests/fixtures/single_m_caa_knight_v1/baseline.json`. All eight views are freshly
+rendered; the command checks 42 original raw RGBA goldens and the full approved
+8-view GIF. It executes no inference, retarget or skinning. The old demo-retarget
+trial is not the approved motion baseline.
 
-Latest verified pre-cleanup main is `66b8b4baf565a187d9841a723b8035754a4ec746`.
-Deployment run `38119841090` passed developer-host engineering smoke with all
-six persistent services active. Read-only input run `38119991975`, artifact
-`11695575078`, exported 122 verified paths/120 objects, with 51 explicit reference
-failures (7 byte drift, 8 byte budget, 36 outside roots). All eight current raw
-sources/masks and current sidecars were prioritized. This is a partial transport
-capsule, not a new Knight Attempt, render or qualification. Always verify live
-main and deployment rather than treating this recorded SHA as perpetually current.
+Stage18 produces M and its addressing domain. Stage23 seals the full source-wins
+plus CAA material; Stage25 measures that same renderer, Stage42 checks the exact
+M rest/topology and transports Stage41 poses, Stage43 packages the same sealed
+material, and the CPU/native consumers sample that M. Uniform and adaptive CAA
+lattices retain their existing samples and abstention codes. No independent V
+mesh is constructed. Legacy single-M atlas packages remain explicitly readable;
+new canonical compiles require the source-wins material and cannot silently fall
+back to that older appearance behavior.
 
-PR #78 added bounded exact-byte input export and read-only Go agent-context to
-the sealed Knight host inspection. This transports inputs and records source
-identity; it is not an Attempt, scientific reuse qualification or visual closure.
-Read the returned context/handoff before selecting any research execution.
+Next focus is **grip/weapon relation and semantic overlap/draw order**. Raw depth
+and depth ties remain observable limitations; this baseline is not a completed
+ProductRevision. Native exact pixel/owner parity in diagonal depth ties and
+linear-light shipping composition remain open, separate qualification gates.
+No green engineering run may close those gates. The repository implementation
+ledger remains disabled, subject NONE and 0/46 PENDING.
 
-Read-only inspection on `main@d4b1f0820e702c53584bf8940e6b475501d3fca7`
-(host run `38117258928`, artifact `11694670316`) verified 119 transported
-paths/117 objects, with 63 explicit reference failures; no qualification was
-minted. Current CAA sample positions match current M barycentric addresses to
-4.965e-16 in mesh coordinates. An independent static-point audit found 18,093
-all-view non-direct samples with front-depth/source-mask support in a view;
-14,367 involve another face on the same canonical edge/vertex. These are
-eligibility candidates, not admitted colour or hidden material. Three depth
-tolerances gave identical counts; four analytic intersection controls passed.
-Source foreground pixel-face support is still absent for 2.066–3.094% by view.
-Stage24 explicitly leaves completion-field shipping/full-visual qualification
-false. The current CAA ledger has 28/32/35/36/37 PENDING; Stage35 has no typed
-compatibility output for Stage37. V6's connected-palette diagnostic is not an
-executed canonical Stage42 affine witness. Consumer closure and a real Go Knight
-scope remain open; these observations do not prove new heads necessary or sufficient.
-
-The bounded inspector now gives all eight raw sources/masks and current visual
-producer sidecars priority over historical model references. Failed refs remain
-observable/red. Read-only Go discovery uses Knight names plus exact directly
-bound input artifact bytes and reports truncation; it cannot establish matching
-transitive section payloads or silently select a qualified baseline.
-
-Authored 2D oracle V1 remains a separately authorized reference experiment,
-not the current Knight intervention. Its workflow is manual on main; service
-deployment must not automatically select or resume a research experiment.
-Inspect its existing Go state rather than creating another Attempt. See
-`docs/research/AUTHORED_VISUAL_ORACLE_V1_20261010.md` and its
-sealed protocol/research DAG. This is the different 2D reference's own sampled
-motion, not Knight 3D binding or full visual qualification. Exact runtime pixels,
-owners, source absolute poses, hidden sprite texels and negative controls are
-measured separately from experiment completion. Inspect Go Attempt/handoff
-before continuing; never infer visual PASS from a green workflow.
+The shared IRIS geometry/RGB/semantic head proposal remains unapproved. This
+cutover changes geometry/appearance transport, not CAA completion, model heads,
+M/G/W or the sealed Knight mechanics witness. Any new scientific execution still
+requires the existing Go Attempt/context contract.
 
 ## Active platform work
 
@@ -166,9 +140,9 @@ current boundary debt and closure gates are recorded in
 `docs/platform/MODULARITY_AUDIT_20261010.md`; the architecture is not yet fully
 isolated at every output/implementation boundary.
 
-Visual ownership, material, deformation, layering and rebuild boundaries are
-mapped in `docs/presentation/VISUAL_DEPENDENCY_MAP_20261009.md`. The later visual completion request authorizes bounded appearance/runtime work
-and a matched downstream Knight witness. The subsequent 2026-10-10 instruction
+The retired visual ownership/material/rebind boundary map is historical
+provenance on `archive/visual-v-before-m-caa-20261011`. Current geometry and
+appearance share M; use the canonical replay and generated main architecture map. The subsequent 2026-10-10 instruction
 also authorizes IRIS appearance research from genuine layered 2D references/prior
 outputs. Knight's 3D source is mechanical truth, not visual truth. The initial
 source inspection and unexecuted research protocol are recorded in

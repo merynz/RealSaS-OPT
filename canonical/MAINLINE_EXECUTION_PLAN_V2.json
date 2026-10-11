@@ -1,8 +1,8 @@
 {
   "schema": "RealSaS.MainlineExecutionPlan.v2",
-  "date": "2026-09-20",
+  "date": "2026-10-11",
   "canonical_branch": "main",
-  "architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__MECHANICAL_AND_SOURCE_VISUAL_SUBSTRATE_SPLIT_STAGE18__QUALIFIED_VISUAL_PRESENTATION_STAGE37__CAA",
+  "architecture_scope": "SUBJECT_AGNOSTIC__DAG__SINGLE_M_GEOMETRY_AND_MOTION__SOURCE_WINS_PLUS_CAA__PRESENTATION_GRIP_AND_OVERLAP_OPEN",
   "subject_specific_code_forbidden": true,
   "stage_count": 46,
   "resume_contract": {
@@ -23,10 +23,10 @@
     "runtime_generation_forbidden": true,
     "canonical_internal_alpha": "PREMULTIPLIED",
     "compiled_unobserved_exposure": "FROZEN_BUDGET_GATE",
-    "visual_geometry_authority": "SOURCE_ART_SILHOUETTE_VISUAL_MESH",
-    "mechanical_mesh_render_authority": false,
-    "visual_mesh_uv_contract": "FIXED_SOURCE_RASTER_UV",
-    "visual_deformation_contract": "BARYCENTRIC_MECHANICAL_BINDING_PLUS_ARAP_2D"
+    "visual_geometry_authority": "FROZEN_CANONICAL_MECHANICAL_M",
+    "mechanical_mesh_render_authority": true,
+    "visual_deformation_contract": "EXACT_SEALED_M_POSES__NO_VISUAL_REBIND",
+    "appearance_address_contract": "M_FACE_INDEX_AND_BARYCENTRIC_COORDINATES"
   },
   "first_knight_v2_contract": {
     "source_view_count": 8,
@@ -373,7 +373,7 @@
     {
       "ordinal": 18,
       "id": "18_CANONICAL_MESH_ADDRESSING_BUILD",
-      "title": "Canonical mechanical mesh plus source-owned visual substrate, stable addressing and appearance domain",
+      "title": "Single canonical M candidate, stable addressing and M-face appearance domain",
       "group": "mesh",
       "depends_on": [
         "07_OBSERVATION_CONTRACT_QUALIFIED",
@@ -479,9 +479,11 @@
     {
       "ordinal": 23,
       "id": "23_COMPLETE_APPEARANCE_ASSET_BAKED",
-      "title": "Bake sealed premultiplied complete appearance asset",
+      "title": "Seal source-wins plus compiled CAA material on the exact M domain",
       "group": "appearance",
       "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
         "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
         "18_CANONICAL_MESH_ADDRESSING_BUILD",
         "22_CAA_COMPILE_SEALED"
@@ -494,7 +496,8 @@
         "product_pass_authority": false
       },
       "manifest_keys": [
-        "appearance"
+        "appearance",
+        "observation"
       ]
     },
     {
@@ -774,7 +777,7 @@
     {
       "ordinal": 37,
       "id": "37_QUALIFIED_PRESENTATION_STRUCTURE",
-      "title": "Qualified role-free presentation structure plus source-owned visual presentation topology; runtime keyability not claimed",
+      "title": "Qualified role-free presentation structure on canonical M; grip and overlap closure remain open",
       "group": "presentation",
       "depends_on": [
         "05_CAMERA_CONTRACT_SOLVED",

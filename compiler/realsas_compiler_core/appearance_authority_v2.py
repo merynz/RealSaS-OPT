@@ -101,26 +101,7 @@ def validate_caa_preregistration(value: CAACompilePreregistrationIR) -> None:
         or "UNIFORM_FACE_LATTICE_V1"
     )
     if strategy == "SOURCE_VISUAL_MESH_V1":
-        visual_hash = str(
-            compile_policy.get("visual_mesh_set_binding_hash") or ""
-        )
-        if len(visual_hash) != 64:
-            raise QualificationError(
-                "CAA_VISUAL_MESH_SET_BINDING_HASH_INVALID"
-            )
-        if str(
-            compile_policy.get("visual_geometry_authority") or ""
-        ) != "SOURCE_ART_SILHOUETTE":
-            raise QualificationError(
-                "CAA_VISUAL_GEOMETRY_AUTHORITY_INVALID"
-            )
-        if (
-            compile_policy.get("mechanical_mesh_render_authority")
-            is not False
-        ):
-            raise QualificationError(
-                "CAA_VISUAL_MODE_MECHANICAL_RENDER_AUTHORITY_FORBIDDEN"
-            )
+        raise QualificationError("INDEPENDENT_VISUAL_MESH_RETIRED__USE_CANONICAL_M")
     elif strategy == "PER_FACE_ADAPTIVE_V1":
         resolutions = tuple(
             int(item) for item in (compile_policy.get("face_tile_resolutions") or ())
@@ -190,16 +171,8 @@ def build_caa_preregistration(
             "internal_filtering": "PREMULTIPLIED_ALPHA",
             "transport_png_may_be_straight_alpha": True,
             "appearance_is_coequal_product_authority": True,
-            "source_owned_visual_mesh_mode": (
-                str(dict(compile_policy).get("tile_resolution_strategy") or "")
-                == "SOURCE_VISUAL_MESH_V1"
-            ),
-            "mechanical_mesh_render_authority": (
-                False
-                if str(dict(compile_policy).get("tile_resolution_strategy") or "")
-                == "SOURCE_VISUAL_MESH_V1"
-                else True
-            ),
+            "source_owned_visual_mesh_mode": False,
+            "mechanical_mesh_render_authority": True,
         },
     )
     value = replace(value, preregistration_hash=caa_preregistration_hash(value))

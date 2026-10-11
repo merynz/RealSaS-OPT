@@ -34,7 +34,8 @@ model runtime, performs no inference and acquires no agent execution session.
 | Manifest role | Stage's sealed manifest read set; changing a role reaches its declared consumers and descendants |
 | Source edit impact | Import-closure consumers plus DAG descendants; source-only inspection, not a reuse receipt |
 | Governance edit | Global closure validation must be rerun; it need not change a per-adapter artifact identity |
-| Native/control/unmapped edit | Explicitly unclassified if no Python adapter closure maps it; inspect the corresponding subsystem before reuse |
+| Native render source/header edit | Local C++ include closure reaches Stage44/45 and descendants for inspection; reuse still requires the exact sealed native binary SHA |
+| Other native/control/unmapped edit | Explicitly unclassified when no observed consumer maps it; inspect before reuse |
 | Shared helper or dynamic import | Real breadth/debt is visible; it is not hidden to claim modular isolation |
 | Stage PASS | Separate scoped qualification from a real execution; the map never produces it |
 

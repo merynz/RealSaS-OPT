@@ -3,10 +3,10 @@
   "run_id": "V2_IMPLEMENTATION_ASSEMBLY",
   "subject_id": "NONE",
   "canonical_branch": "main",
-  "architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__MECHANICAL_AND_SOURCE_VISUAL_SUBSTRATE_SPLIT_STAGE18__QUALIFIED_VISUAL_PRESENTATION_STAGE37__CAA",
+  "architecture_scope": "SUBJECT_AGNOSTIC__DAG__SINGLE_M_GEOMETRY_AND_MOTION__SOURCE_WINS_PLUS_CAA__PRESENTATION_GRIP_AND_OVERLAP_OPEN",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
-  "pipeline_plan_sha256": "cb8beed707d4e9470aed69a9ba72ed79ce8d4434986fb0382bd6d737449a9817",
-  "status": "RECOVERY_ENGINEERING_CERTIFIED__VF11_R512_OPEN__WITNESS_FORBIDDEN",
+  "pipeline_plan_sha256": "d372d29faba84c023aa98cefaf6cf4eec73d19698e2fe15a07222dbeb781cad8",
+  "status": "CANONICAL_SINGLE_M_CAA_DEVELOPMENT_BASELINE__PRODUCT_GATES_OPEN",
   "execution_enabled": false,
   "completed_count": 0,
   "failed_count": 0,
@@ -616,10 +616,14 @@
     {
       "event": "RECOVERY_SOURCE_OWNED_VISUAL_PLAN_REBIND_20261001",
       "note": "Repository implementation-governance ledger rebound from be0067d78d5c1ecf51f5a0df2ee14e7a87ff0c44800ca66bbb5d5f8d5ad183cf to exact recovery plan cb97e4c68f8012f39d95f721284a85f300e5c695d7dd6362dad56a893c1965c0; Stage37 now explicitly depends on Stage05 camera, Stage07 observation and Stage18 source visual substrate because the adapter consumes them directly. No subject witness state or stage PASS was minted."
+    },
+    {
+      "event": "SINGLE_M_CAA_CANONICAL_CUTOVER_20261011",
+      "note": "User approved the sealed M poses plus source-wins and existing CAA baseline. Old independent visual topology is retained only on archive/visual-v-before-m-caa-20261011. Repository engineering ledger remains 0/46 PENDING and disabled; no subject or product PASS is minted."
     }
   ],
   "metadata": {
-    "implementation_readiness": "RECOVERY_ENGINEERING_CERTIFIED__VF11_R512_OPEN__WITNESS_FORBIDDEN",
+    "implementation_readiness": "CANONICAL_SINGLE_M_CAA_DEVELOPMENT_BASELINE__PRODUCT_GATES_OPEN",
     "implementation_head": "af0cd4fe4aac2a4025a23bcc2d9bad35d696d3cd",
     "implementation_closure_sha256": "b9367c5a609a3dc599323a5d2cbd1e66892691049b9a489d098e25386dbf5b6d",
     "stage_redteam": "PASS_46_STAGE_SECOND_PASS_HARDENED_SUBJECT_FREE",
@@ -628,8 +632,8 @@
     "redteam_authority": "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json",
     "latest_green_mainline_run_id": 36724501505,
     "latest_green_postdocs_seal_run_id": 36726078211,
-    "current_p0": "VF11_R512_SCIENTIFIC_RECLOSURE_REQUIRED",
-    "source_owned_visual_runtime_carrier": "CLOSED_TYPED_STAGE37_TO46",
+    "current_p0": "GRIP_AND_OVERLAP_DEPTH_OWNERSHIP_OPEN",
+    "source_owned_visual_runtime_carrier": "RETIRED_TO_ARCHIVE_BRANCH",
     "quaternius_motion_source": "PASS_REPO_PINNED_CC0_SOURCE",
     "latest_green_recovery_engineering_run_id": 36871088319,
     "latest_green_recovery_engineering_head": "af0cd4fe4aac2a4025a23bcc2d9bad35d696d3cd",

@@ -1,0 +1,43 @@
+{
+  "schema": "realsas.compiler_runtime_source_extension_seal.v18",
+  "sealed_on": "2026-10-11",
+  "prior_extension": {
+    "path": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V17_20261009.json",
+    "git_blob_sha1": "89d047b98bd58a8ad79443c30aa74a1996e3885e",
+    "role": "IMMUTABLE_PRIOR_EXTENSION_PROVENANCE"
+  },
+  "authority": {
+    "extension_scope": "CANONICAL_SINGLE_M_SOURCE_WINS_AND_EXISTING_CAA_CONSUMER__INDEPENDENT_V_RETIRED",
+    "historical_base_seal_mutated": false,
+    "prior_extension_mutated": false,
+    "product_pass_claimed": false,
+    "scientific_pass_claimed": false,
+    "native_exact_parity_passed": false,
+    "knight_witness_used": true,
+    "runtime_role": "subordinate_deployment_consumer",
+    "subtree_closure": "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME"
+  },
+  "replacements": [
+    {
+      "path": "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp",
+      "size_bytes": 40609,
+      "git_blob_sha1": "8e5eb4b8fccf420826674282a11431eb24f151cc",
+      "reason": "Retire the independent visual mesh consumer and dispatch sealed single-M material with the recorded M topology/poses."
+    }
+  ],
+  "additions": [
+    {
+      "path": "runtime/realsas_cpp/src/single_m_caa_v1.hpp",
+      "size_bytes": 13756,
+      "git_blob_sha1": "2074930b27d013c824e472d0000271143565ce5d",
+      "reason": "Consume source-wins RGB and existing CAA on the same M face/barycentric addresses. Engineering source seal only; native exact pixel/owner parity remains OPEN."
+    }
+  ],
+  "closure": {
+    "runtime_realsas_cpp_blob_count": 26,
+    "replacement_count": 1,
+    "addition_count": 1,
+    "resulting_sealed_blob_count": 26,
+    "unsealed_repository_blob_count_under_subtree": 0
+  }
+}

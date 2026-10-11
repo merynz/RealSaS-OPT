@@ -1,0 +1,295 @@
+{
+  "schema": "RealSaS.SingleMCAABaseline.v1",
+  "canonical_geometry": "M",
+  "canonical_motion": "EXACT_SEALED_M_POSES",
+  "material_contract": "CANONICAL_M_SOURCE_WINS_PLUS_SEALED_CAA_V1",
+  "product_qualification_claimed": false,
+  "archive_branch": "archive/visual-v-before-m-caa-20261011",
+  "historical_run_id": 37859732443,
+  "parent_witness_sha256": "bb8cfb075b5ec3df93cc1fac306d65c88c27f5a6a7fc1bbf74c05ec79bcdba35",
+  "pose_sha256": "614a4657f6d1f175a5d3ecbc057a4ab5c3700a5d22c745fdbf6260cca1e3f04a",
+  "cameras": [
+    {
+      "forward": [
+        -0.0,
+        1.0,
+        -0.0
+      ],
+      "half_extent": 2.016295680999756,
+      "origin": [
+        0.042003750801086426,
+        -8.774340629577637,
+        1.2332630157470703
+      ],
+      "resolution": 1024,
+      "right": [
+        1.0,
+        0.0,
+        -0.0
+      ],
+      "schema_version": "RealSaS.FullSurfaceCameraProjection.v3",
+      "screen_up": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "view_id": "V0",
+      "view_index": 0
+    },
+    {
+      "forward": [
+        -0.7071067811865475,
+        0.7071067811865475,
+        -0.0
+      ],
+      "half_extent": 2.016295680999756,
+      "origin": [
+        5.744948863983154,
+        -6.412103176116943,
+        1.2332630157470703
+      ],
+      "resolution": 1024,
+      "right": [
+        0.7071067811865475,
+        0.7071067811865475,
+        -0.0
+      ],
+      "schema_version": "RealSaS.FullSurfaceCameraProjection.v3",
+      "screen_up": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "view_id": "V1",
+      "view_index": 1
+    },
+    {
+      "forward": [
+        -1.0,
+        6.123234262925839e-17,
+        -0.0
+      ],
+      "half_extent": 2.016295680999756,
+      "origin": [
+        8.107186317443848,
+        -0.7091579437255859,
+        1.2332630157470703
+      ],
+      "resolution": 1024,
+      "right": [
+        6.123234262925839e-17,
+        1.0,
+        -0.0
+      ],
+      "schema_version": "RealSaS.FullSurfaceCameraProjection.v3",
+      "screen_up": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "view_id": "V2",
+      "view_index": 2
+    },
+    {
+      "forward": [
+        -0.7071067811865475,
+        -0.7071067811865475,
+        -0.0
+      ],
+      "half_extent": 2.016295680999756,
+      "origin": [
+        5.744948863983154,
+        4.9937872886657715,
+        1.2332630157470703
+      ],
+      "resolution": 1024,
+      "right": [
+        -0.7071067811865475,
+        0.7071067811865475,
+        0.0
+      ],
+      "schema_version": "RealSaS.FullSurfaceCameraProjection.v3",
+      "screen_up": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "view_id": "V3",
+      "view_index": 3
+    },
+    {
+      "forward": [
+        -1.2246468525851679e-16,
+        -1.0,
+        -0.0
+      ],
+      "half_extent": 2.016295680999756,
+      "origin": [
+        0.042003750801086426,
+        7.356024742126465,
+        1.2332630157470703
+      ],
+      "resolution": 1024,
+      "right": [
+        -1.0,
+        1.2246468525851679e-16,
+        0.0
+      ],
+      "schema_version": "RealSaS.FullSurfaceCameraProjection.v3",
+      "screen_up": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "view_id": "V4",
+      "view_index": 4
+    },
+    {
+      "forward": [
+        0.7071067811865475,
+        -0.7071067811865475,
+        -0.0
+      ],
+      "half_extent": 2.016295680999756,
+      "origin": [
+        -5.6609416007995605,
+        4.9937872886657715,
+        1.2332630157470703
+      ],
+      "resolution": 1024,
+      "right": [
+        -0.7071067811865475,
+        -0.7071067811865475,
+        0.0
+      ],
+      "schema_version": "RealSaS.FullSurfaceCameraProjection.v3",
+      "screen_up": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "view_id": "V5",
+      "view_index": 5
+    },
+    {
+      "forward": [
+        1.0,
+        -1.8369701465288538e-16,
+        -0.0
+      ],
+      "half_extent": 2.016295680999756,
+      "origin": [
+        -8.023179054260254,
+        -0.7091579437255859,
+        1.2332630157470703
+      ],
+      "resolution": 1024,
+      "right": [
+        -1.8369701465288538e-16,
+        -1.0,
+        0.0
+      ],
+      "schema_version": "RealSaS.FullSurfaceCameraProjection.v3",
+      "screen_up": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "view_id": "V6",
+      "view_index": 6
+    },
+    {
+      "forward": [
+        0.7071067811865475,
+        0.7071067811865475,
+        -0.0
+      ],
+      "half_extent": 2.016295680999756,
+      "origin": [
+        -5.6609416007995605,
+        -6.412103176116943,
+        1.2332630157470703
+      ],
+      "resolution": 1024,
+      "right": [
+        0.7071067811865475,
+        -0.7071067811865475,
+        0.0
+      ],
+      "schema_version": "RealSaS.FullSurfaceCameraProjection.v3",
+      "screen_up": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "view_id": "V7",
+      "view_index": 7
+    }
+  ],
+  "source_png_sha256": {
+    "0": "5149ce8062020fcee49249d51b06d87d3e119333efd8fcca8b509434a76ca78c",
+    "1": "541bb053cc01972eafda6b2774e12cbe0b56bfa8df51fecff1d823df229099da",
+    "2": "431ba1e25de5862f0da77b7e494dbbc2a170f775ff626e64ef481f5e41a2df8a",
+    "3": "deebf678569c18ae4d7e809b4d335942d7678ed8b7d2aa259283f4ee8dbba9ee",
+    "4": "d3a83c2c3f6615e625e1ae192e6543237a0236ad3e43bc06e95368ad19f95504",
+    "5": "c3be5a6468a6e767967d1e3ac4e0b67f0d7c5ad0e2f11ef830aa529e4f081b66",
+    "6": "9f3b33457ae01c4cccf390a56fb9c4234a64d69f0a846a57e3fd1c8292c65a56",
+    "7": "91c5930051f3ff72965b101aa89d7b24caac90ce2f27e00c2f13f53d821e53b0"
+  },
+  "inputs": {
+    "run_poses.npz": "ab0b951ae04564bf9448d2f4b91bdb5168ce4291c4d58f9859f6dbc68592690a",
+    "source_rgba.zip": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "compiled_caa.npz": "cf9634a56a0843df3bb43405625130b88996d030a6d464a65d9a4c9fc3e4336c"
+  },
+  "golden_rgba": {
+    "V0/0": "9015b6073bc78411bff5098dd35ac272261d4a8794ee72c7758ce91925bda55b",
+    "V0/1": "c85b9985ef3dbdd8bb956c0284e6a38f974d75f8dcdb751309b7ee51282bfc59",
+    "V0/2": "174289dbac836dedb93a5de58c722468d408f6e36e97b72f33dddfe0975262da",
+    "V0/3": "073f4faad37265a954c7478f31f0bd2c64841c4d9c8f907e91c74042c40fc937",
+    "V0/4": "641e5a31fd2f0ea911cd45a8f2ab5b2699577af7211a6139cd2574e06e1b5622",
+    "V0/5": "e17c89680d4321bedf3d7fcfc7ee0d7921e07578e9cda2e4d8aee563baf17dba",
+    "V0/6": "ddbe246f06c6e8296f5ccf1f0d991d30dba686c671b7ee3b100cdc1987d59223",
+    "V0/7": "3878317c23f168c1550ae755332b6a5c33d6644041bd746dd479b67992e45fbc",
+    "V0/8": "4d408f472daa6257cf4e7e3462a5e855d30c23e936d8be1448551e291859b044",
+    "V0/9": "15839bc9311ae2067de696e76ecfad7c2669794435d9b1227029be61188f4c95",
+    "V0/10": "d922e8fc9dd20824ddd6c8abe92eccc698716e44e100dec221d8dfcf64581ddd",
+    "V0/11": "9d7be9277da1349b891bcc37e0b39e31391bc0f5baa24648b8c83692ca59433b",
+    "V0/12": "dc6689e322ed5a2ecd3349ff53171ec79e52018165e9a0d0c04dc5a61512af01",
+    "V0/13": "d493a0590aa43a057b6efe77798d0a6b273e533bca447a34318c808dac477045",
+    "V0/14": "804b551253ba9067d667bbe1bfb815439b184e8d003164e23cd9926bbef0c2ce",
+    "V0/15": "58c5a85a2b7f88c87906d6be324bfa23a7631f8d3a2b4fd6f59e881a66a818e5",
+    "V0/16": "ce5d1fa382fd41b85f18d03902a5658e9167f78e5f9cd9cc5ea1e06125a28fd3",
+    "V0/17": "db7a69077eb4ee0e267de7b7f143e8a86b439ea7d4f423591facbac244c815b1",
+    "V0/18": "11ab3c1319a81c36b357099988ab8f7b28c000909ceed87a29252d593995ef15",
+    "V0/19": "b78e00234c2253b7d2718940b691604ec2bde7715e3a273aafc2bc68ec2da025",
+    "V0/20": "9015b6073bc78411bff5098dd35ac272261d4a8794ee72c7758ce91925bda55b",
+    "V6/0": "36e3e40abc71bd6a35de974958e975013065e201d28fa8f44b6505d638e48a6d",
+    "V6/1": "9ec7638734505a175398c048b27f6a0f8f72d440b7ab75668d2aa6baca6e0c20",
+    "V6/2": "aa26887f05714d678fe2b33dbb61df59077ccf561358ef32cd1a3e1ed994c122",
+    "V6/3": "e8cbb825e05e12a6a6dafbabd05c8cee595791ffe41247c9eec990cb595314e8",
+    "V6/4": "fef0b86b88bc69ef833112792880bd40ea2b9a1bd3bbdf045cd6fba8d2132527",
+    "V6/5": "1a608a287e04d60a8e7b220d4ed8498c865fab9b39dfc7357c55c76b47288b85",
+    "V6/6": "27fa2729e9deaec1674b5e02e0d9221fc3a087ea06e30a7d589d1b9110de0791",
+    "V6/7": "8b0a146d6c785cb50a695f9ba616184129c4ea8e0086d0e5e07b488c91dcce0c",
+    "V6/8": "ad329f34d85df5636a3d1bb5ba8c40963bd71921eb7b91566ed091c36ff517c5",
+    "V6/9": "6ed514b07f84c53aaf46afc8a42ed612ff93c9f5593d96e567eadb64694ce81f",
+    "V6/10": "d43cc66d01e647a87940b2800b520d85c54045d44ce2e02d0c0d468a0100f47a",
+    "V6/11": "53e895419c27356715d52436ab89324b0c55bc8e3cd0f7cc2d0f84fa7b7430aa",
+    "V6/12": "1667fcbe823cbf942e8842e3a5f05f84efa757cc749b9379ed755becaa6daf36",
+    "V6/13": "138cdbb6820e8c1db30f0ef7c9279c0abe1cd372b41f169cc0f6a901ce720c04",
+    "V6/14": "4ada012565f93025d859b96b1eba6bae677061942dc2a70415b4b6706e0d8e28",
+    "V6/15": "19245b3658d2543f46c74520ace0f2c9de198394a90bbf50e3062aa4a46d012e",
+    "V6/16": "5691bbbe37b46a05f0ae8e37d5faf5cb73dba258e41df16a3444372f92fe0aed",
+    "V6/17": "b0f13d1398ca96143e0b12dd98fea804e5b773b970bcf24717787a50e217d466",
+    "V6/18": "c88579b1f68293f4e05516d401cefba529e15a8a33282c10bbd07a4e5127026f",
+    "V6/19": "b2e3136edf55964727624d305643d3068e93d181a87226f2443a30e6acb3901f",
+    "V6/20": "36e3e40abc71bd6a35de974958e975013065e201d28fa8f44b6505d638e48a6d"
+  },
+  "open_gates": [
+    "grip_and_weapon_relation",
+    "semantic_overlap_and_depth_ties",
+    "native_source_wins_material_parity",
+    "linear_light_composition_shipping_qualification"
+  ],
+  "approved_gif_sha256": "84dbdbc5a68b37680b2df4fe531fc1a21c6ec65bc13ac8a6631088cbccbfe34d"
+}

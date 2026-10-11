@@ -571,75 +571,45 @@ def build_caa_bound_presentation_graph(
     directions,
     appearance_asset_hash: str,
     appearance_qualification_hash: str,
-    visual_mesh_set_hash: str = "",
+    visual_mesh_set_hash: str = ""
 ):
-    visual_mode = bool(str(visual_mesh_set_hash))
-    if visual_mode and len(str(visual_mesh_set_hash)) != 64:
-        raise QualificationError(
-            "PRESENTATION_GRAPH_VISUAL_MESH_SET_HASH_INVALID"
-        )
+    if visual_mesh_set_hash:
+        raise QualificationError("INDEPENDENT_VISUAL_MESH_RETIRED__USE_CANONICAL_M")
+    visual_mode = False
     composition_policy = {
         "schema": "RealSaS.CompositionPolicy.v2",
         "setup_order_is_physical_depth": False,
         "texture_alpha_selects_front_surface": False,
         "source_owned_visual_mesh_mode": visual_mode,
-        "visual_mesh_set_binding_hash": (
-            str(visual_mesh_set_hash) if visual_mode else ""
-        ),
+        "visual_mesh_set_binding_hash": "",
     }
-    if visual_mode:
-        composition_policy.update(
-            {
-                "visibility_contract_hash": "",
-                "visibility_authority": (
-                    "DYNAMIC_VISUAL_COMPOSITION_DEFERRED_TO_STAGE42"
-                ),
-                "equal_depth_tie": "NOT_APPLICABLE_AT_STAGE38",
-                "mechanical_zbuffer_is_visual_authority": False,
-            }
-        )
-    else:
-        composition_policy.update(
-            {
-                "visibility_contract_hash": VISIBILITY_CONTRACT_V2_HASH,
-                "visibility_authority": VISIBILITY_CONTRACT_V2["authority"],
-                "equal_depth_tie": VISIBILITY_CONTRACT_V2["exact_depth_tie"],
-                "mechanical_zbuffer_is_visual_authority": True,
-            }
-        )
+    composition_policy.update(
+        {
+            "visibility_contract_hash": VISIBILITY_CONTRACT_V2_HASH,
+            "visibility_authority": VISIBILITY_CONTRACT_V2["authority"],
+            "equal_depth_tie": VISIBILITY_CONTRACT_V2["exact_depth_tie"],
+            "mechanical_zbuffer_is_visual_authority": True,
+        }
+    )
     composition_hash = content_sha256(composition_policy)
     overlays = tuple(
-        PresentationViewOverlayIR(
-            view_index=int(direction.direction_index),
-            camera_binding_hash=str(direction.camera_binding_hash),
-            appearance_binding_hash=str(appearance_asset_hash),
-            composition_binding_hash=composition_hash,
-            metadata={
-                "appearance_authority": (
-                    "SOURCE_RGBA_FIXED_VISUAL_UV"
-                    if visual_mode
-                    else "CAA_V2"
-                ),
-                "visual_geometry_authority": (
-                    "SOURCE_OWNED_VISUAL_MESH_SET"
-                    if visual_mode
-                    else "CANONICAL_MECHANICAL_MESH"
-                ),
-                "visual_mesh_set_binding_hash": (
-                    str(visual_mesh_set_hash) if visual_mode else ""
-                ),
-                "visibility_authority": (
-                    "DEFERRED_TO_STAGE42"
-                    if visual_mode
-                    else "CANONICAL_ZBUFFER_V2"
-                ),
-                "mechanical_mesh_render_authority": (
-                    False if visual_mode else True
-                ),
-            },
-        )
-        for direction in sorted(
-            directions.directions, key=lambda row: row.direction_index
+        (
+            PresentationViewOverlayIR(
+                view_index=int(direction.direction_index),
+                camera_binding_hash=str(direction.camera_binding_hash),
+                appearance_binding_hash=str(appearance_asset_hash),
+                composition_binding_hash=composition_hash,
+                metadata={
+                    "appearance_authority": "CAA_V2",
+                    "visual_geometry_authority": "CANONICAL_MECHANICAL_MESH",
+                    "visual_mesh_set_binding_hash": "",
+                    "visibility_authority": "CANONICAL_ZBUFFER_V2",
+                    "mechanical_mesh_render_authority": True,
+                },
+            )
+            for direction in sorted(
+                directions.directions, key=lambda row: row.direction_index
+            )
         )
     )
     graph = QualifiedPresentationGraphV2IR(
@@ -662,28 +632,14 @@ def build_caa_bound_presentation_graph(
             "status": "PASS_CAA_BOUND_PRESENTATION_V2",
             "role_free": True,
             "categorical_recognition_used": False,
-            "appearance_authority": (
-                "SOURCE_RGBA_FIXED_VISUAL_UV"
-                if visual_mode
-                else "COMPLETE_APPEARANCE_AUTHORITY_V2"
-            ),
+            "appearance_authority": "COMPLETE_APPEARANCE_AUTHORITY_V2",
             "appearance_total": True,
-            "visibility_authority": (
-                "DYNAMIC_VISUAL_COMPOSITION_DEFERRED_TO_STAGE42"
-                if visual_mode
-                else VISIBILITY_CONTRACT_V2["authority"]
-            ),
-            "visibility_contract_hash": (
-                "" if visual_mode else VISIBILITY_CONTRACT_V2_HASH
-            ),
+            "visibility_authority": VISIBILITY_CONTRACT_V2["authority"],
+            "visibility_contract_hash": VISIBILITY_CONTRACT_V2_HASH,
             "runtime_donor_search_forbidden": True,
             "source_owned_visual_mesh_mode": visual_mode,
-            "visual_mesh_set_binding_hash": (
-                str(visual_mesh_set_hash) if visual_mode else ""
-            ),
-            "mechanical_mesh_render_authority": (
-                False if visual_mode else True
-            ),
+            "visual_mesh_set_binding_hash": "",
+            "mechanical_mesh_render_authority": True,
             "dynamic_visual_composition_authority_claimed": False,
         },
         presentation_lineage_hash="",
@@ -691,18 +647,11 @@ def build_caa_bound_presentation_graph(
             "setup_order_not_depth_authority": True,
             "legacy_appearance_set_semantics_used": False,
             "source_owned_visual_mesh_mode": visual_mode,
-            "visual_mesh_set_binding_hash": (
-                str(visual_mesh_set_hash) if visual_mode else ""
-            ),
-            "mechanical_mesh_render_authority": (
-                False if visual_mode else True
-            ),
+            "visual_mesh_set_binding_hash": "",
+            "mechanical_mesh_render_authority": True,
         },
     )
-    return replace(
-        graph,
-        presentation_lineage_hash=presentation_graph_v2_hash(graph),
-    )
+    return replace(graph, presentation_lineage_hash=presentation_graph_v2_hash(graph))
 
 
 def build_complete_puppet_state_v2(
@@ -716,29 +665,28 @@ def build_complete_puppet_state_v2(
     appearance_asset_hash: str,
     appearance_qualification_hash: str,
     output_direction_set_hash: str,
-    visual_mesh_set_hash: str = "",
+    visual_mesh_set_hash: str = ""
 ) -> CompletePuppetStateV2IR:
-    visual_mode = bool(str(visual_mesh_set_hash))
-    if visual_mode and len(str(visual_mesh_set_hash)) != 64:
-        raise QualificationError("COMPLETE_PUPPET_VISUAL_MESH_HASH_INVALID")
+    if visual_mesh_set_hash:
+        raise QualificationError("INDEPENDENT_VISUAL_MESH_RETIRED__USE_CANONICAL_M")
+    visual_mode = False
     ledger_rows = [
         {"authority": "MECHANICAL_STATE", "hash": mechanical_state.product_state_hash},
         {"authority": "SKELETON", "hash": skeleton.skeleton_lineage_hash},
         {"authority": "MESH", "hash": mesh.mesh_lineage_hash},
         {"authority": "MESH_SKIN", "hash": mesh_skin.mesh_skin_lineage_hash},
         {"authority": "PRESENTATION_STRUCTURE", "hash": structure.structure_hash},
-        {"authority": "PRESENTATION_GRAPH", "hash": presentation_graph.presentation_lineage_hash},
+        {
+            "authority": "PRESENTATION_GRAPH",
+            "hash": presentation_graph.presentation_lineage_hash,
+        },
         {"authority": "COMPLETE_APPEARANCE_ASSET", "hash": appearance_asset_hash},
-        {"authority": "COMPLETE_APPEARANCE_QUALIFICATION", "hash": appearance_qualification_hash},
+        {
+            "authority": "COMPLETE_APPEARANCE_QUALIFICATION",
+            "hash": appearance_qualification_hash,
+        },
         {"authority": "OUTPUT_DIRECTIONS", "hash": output_direction_set_hash},
     ]
-    if visual_mode:
-        ledger_rows.append(
-            {
-                "authority": "SOURCE_OWNED_VISUAL_MESH_SET",
-                "hash": str(visual_mesh_set_hash),
-            }
-        )
     value = CompletePuppetStateV2IR(
         mechanical_state_binding_hash=mechanical_state.product_state_hash,
         skeleton_binding_hash=skeleton.skeleton_lineage_hash,
@@ -747,7 +695,9 @@ def build_complete_puppet_state_v2(
         presentation_structure_binding_hash=structure.structure_hash,
         presentation_graph_binding_hash=presentation_graph.presentation_lineage_hash,
         complete_appearance_asset_binding_hash=str(appearance_asset_hash),
-        complete_appearance_qualification_binding_hash=str(appearance_qualification_hash),
+        complete_appearance_qualification_binding_hash=str(
+            appearance_qualification_hash
+        ),
         output_direction_set_binding_hash=str(output_direction_set_hash),
         qualification_ledger=tuple(ledger_rows),
         complete_puppet_hash="",
@@ -756,12 +706,8 @@ def build_complete_puppet_state_v2(
             "runtime_generation_forbidden": True,
             "single_canonical_mesh_authority": not visual_mode,
             "mechanical_and_visual_mesh_authorities_split": visual_mode,
-            "visual_mesh_set_binding_hash": (
-                str(visual_mesh_set_hash) if visual_mode else ""
-            ),
-            "mechanical_mesh_render_authority": (
-                False if visual_mode else True
-            ),
+            "visual_mesh_set_binding_hash": "",
+            "mechanical_mesh_render_authority": True,
             "dynamic_visual_composition_authority_claimed": False,
         },
     )

@@ -88,9 +88,9 @@ def test_research_graph_is_reconstructable_and_never_product():
 
 
 def test_actual_native_consumer_reference_mutations_and_reveal(tmp_path):
-    player = os.environ.get("REALSAS_RUNTIME_V2_PLAYER")
+    player = os.environ.get("REALSAS_ARCHIVED_VISUAL_ORACLE_PLAYER")
     if not player:
-        pytest.skip("native player required by mainline CI")
+        pytest.skip("archived visual oracle consumer required; canonical M player is a different contract")
     section = fixture(tmp_path)
     evidence = produce(section, tmp_path / "evidence")
     images, frames, owners = cached_source(section)
@@ -117,9 +117,9 @@ def test_actual_native_consumer_reference_mutations_and_reveal(tmp_path):
 
 
 def test_native_rotated_mirrored_translucent_layer_matches_independent_sampler(tmp_path):
-    player = os.environ.get("REALSAS_RUNTIME_V2_PLAYER")
+    player = os.environ.get("REALSAS_ARCHIVED_VISUAL_ORACLE_PLAYER")
     if not player:
-        pytest.skip("native player required by mainline CI")
+        pytest.skip("archived visual oracle consumer required; canonical M player is a different contract")
     section = fixture(tmp_path)
     with zipfile.ZipFile(section["archive_path"]) as z:
         data = {n: z.read(n) for n in z.namelist()}
@@ -145,9 +145,9 @@ def test_native_rotated_mirrored_translucent_layer_matches_independent_sampler(t
 
 def test_full_research_adapters_publish_measurements_not_product_qualification(tmp_path):
     """Engineering fixture: exercises the actual three-adapter output chain."""
-    player = os.environ.get("REALSAS_RUNTIME_V2_PLAYER")
+    player = os.environ.get("REALSAS_ARCHIVED_VISUAL_ORACLE_PLAYER")
     if not player:
-        pytest.skip("native player required by mainline CI")
+        pytest.skip("archived visual oracle consumer required; canonical M player is a different contract")
     import json
     from compiler.realsas_compiler_services.orchestrator.adapters.visual_oracle_reference_v1 import produce_reference
     from compiler.realsas_compiler_services.orchestrator.adapters.visual_oracle_native_v1 import render_reference

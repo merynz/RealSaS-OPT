@@ -6,20 +6,13 @@
 
 Current continuation authority is `canonical/CANONICAL_HANDOFF_20261007.md` plus `CURRENT_STATE.md`.
 
-The modular Go developer path and opt-in controlled component interventions are
-implemented. The user has authorized bounded visual mesh/appearance/runtime
-completion while preserving M/G/W and the motion witness. PR #66 is diagnostic history, not the next mandatory merge.
-Full product input-to-output execution and UI integration remain later work.
-
-Current work is platform/state cleanup. The shared IRIS geometry + RGB + semantic
-design is **awaiting user approval**, not a committed next execution step.
-See [the proposal](docs/research/IRIS_GEOMETRY_APPEARANCE_PROPOSAL_20261011.md).
-
-- [Controlled interventions](docs/platform/CAUSAL_INTERVENTIONS.md): exact baseline
-  reuse, scope enforcement and current limits.
-- [Visual implementation and open gates](docs/presentation/VISUAL_MESH_IMPLEMENTATION_20261009.md).
-- [Visual dependency map](docs/presentation/VISUAL_DEPENDENCY_MAP_20261009.md):
-  existing main, archived direct-PNG research, proposed IRIS RGB and rebuild effects.
+The current render baseline uses the same M for mechanics and appearance:
+source-wins RGB with sealed CAA fallback at M-face/barycentric addresses.
+See `CURRENT_STATE.md`, `compiler/realsas_compiler_core/single_m_caa_v1.py`
+and `tests/fixtures/single_m_caa_knight_v1/baseline.json`.
+The old independent visual pipeline is accessible only on
+`archive/visual-v-before-m-caa-20261011`. Grip, overlap/depth ordering and native
+exact parity remain explicit open gates. Shared IRIS heads remain unapproved.
 
 > Navigation only. Historical recovery/runtime-audit documents are provenance and must not override current continuation authority.
 
@@ -33,7 +26,7 @@ See [the proposal](docs/research/IRIS_GEOMETRY_APPEARANCE_PROPOSAL_20261011.md).
 | Rig / AXIS | `models/axis/` + learned mechanics adapters | AXIS V5.4.1 owns hard causal required parents + deterministic discrete XYZ; Compiler validates/materializes, no tree reselection on this path |
 | Skin / MIRA | `models/mira/` + Stage32 carrier-native qualification | MIRA V5.5 predicts `W_M` directly on the exact Stage19 carrier basis |
 | Appearance / CAA | `appearance_authority_v2.py` + appearance compile/bake/quality modules | total source-preserving art; source wins; proof-bound |
-| Presentation | Stage37 qualified source-owned presentation | role-free editable presentation authority; no invented categorical identity |
+| Presentation | Stage37 qualified presentation on M | role-free editable presentation authority; no invented categorical identity |
 | Motion | `motion_compile_v2.py` + proof | sealed mechanics; exact authored motion semantics where admitted |
 | Runtime | `runtime_authority_v2.py` + C++ runtime/native renderer | package/playback/render hot path; no generative/corrective inference during ordinary render |
 | Orchestration | Go platform + Python Engine activities | Platform owns durable time/state; Engine owns scientific meaning |

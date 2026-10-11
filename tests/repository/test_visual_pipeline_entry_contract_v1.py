@@ -11,14 +11,21 @@ from tools.ops.knight_render_inputs_v1 import stage_payload, stage_row
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_sealed_render_stage_references_exist_in_the_canonical_dag():
-    plan = json.loads((ROOT / "canonical/MAINLINE_EXECUTION_PLAN_V2.json").read_text())
-    stages = {row["id"] for row in plan["stages"]}
-    tree = ast.parse((ROOT / "tools/ops/render_knight_sealed_v6.py").read_text())
-    references = {call.args[0].value for call in ast.walk(tree)
-        if isinstance(call, ast.Call) and isinstance(call.func, ast.Name)
-        and call.func.id == "stage" and call.args and isinstance(call.args[0], ast.Constant)}
-    assert references and not references - stages, sorted(references - stages)
+def test_canonical_render_entry_uses_the_sealed_single_m_consumer():
+    entry = "tools/demo/render_knight_m_caa_v1.py"
+    workflow = (ROOT / ".github/workflows/single_m_caa_canonical_gate.yml").read_text()
+    assert f"python {entry} --output" in workflow
+    tree = ast.parse((ROOT / entry).read_text())
+    imports = {name.name for node in ast.walk(tree)
+        if isinstance(node, ast.ImportFrom)
+        and node.module == "compiler.realsas_compiler_core.single_m_caa_v1"
+        for name in node.names}
+    assert {"render_single_m_caa", "load_material_bundle"} <= imports
+    fixture = ROOT / "tests/fixtures/single_m_caa_knight_v1"
+    baseline = json.loads((fixture / "baseline.json").read_text())
+    assert baseline["inputs"]
+    for filename in baseline["inputs"]:
+        assert (fixture / filename).is_file(), filename
 
 
 def test_visual_policy_workflow_test_selectors_exist():

@@ -59,9 +59,9 @@ def test_v2_mesh_birth_precedes_parallel_mechanics_and_caa():
     ]
     assert "mechanical_attempt" in by["18_CANONICAL_MESH_ADDRESSING_BUILD"]["manifest_keys"]
     assert plan["appearance_contract"]["visual_geometry_authority"] == (
-        "SOURCE_ART_SILHOUETTE_VISUAL_MESH"
+        "FROZEN_CANONICAL_MECHANICAL_M"
     )
-    assert plan["appearance_contract"]["mechanical_mesh_render_authority"] is False
+    assert plan["appearance_contract"]["mechanical_mesh_render_authority"] is True
     assert "18_CANONICAL_MESH_ADDRESSING_BUILD" in by[
         "20_CAA_BACKEND_PREREGISTERED"
     ]["depends_on"]
@@ -130,7 +130,7 @@ def test_stage37_consumes_qualified_caa_for_role_free_visual_partition():
         "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
         "36_QUALIFIED_MESH_SKIN_TRANSFER",
     ]
-    assert "source-owned visual presentation topology" in stage37["title"]
+    assert "canonical M" in stage37["title"]
     assert "observation" in stage37["manifest_keys"]
     assert by["06_OBSERVATION_RENDER_8VIEW"]["title"].startswith("Materialize")
     assert by["39_MOTION_SOURCE_OR_PRESET_SEAL"]["title"] == (

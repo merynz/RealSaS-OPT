@@ -44,7 +44,7 @@ Use [Execution lanes](docs/platform/EXECUTION_LANES.md) for prerequisites, comma
 
 The mechanics audit is [PLATFORM_MAIN_AUDIT_20261008.json](canonical/PLATFORM_MAIN_AUDIT_20261008.json). Verify the live main ref for current code; its audited baseline SHA is historical evidence.
 
-Next: import/reseal the latest Knight evidence into a research Attempt, prove real component replacement, then optimize and render the carrier-native result. The old frozen GIF recovery proves only its sealed consumer path.
+Current render baseline: one M for geometry and recorded motion, source-wins RGB plus existing CAA. Reproduce it with `python tools/demo/render_knight_m_caa_v1.py --output <directory>`. See [current state](CURRENT_STATE.md). Grip and overlap/draw order are next; product qualification remains open. The previous visual pipeline is retained on `archive/visual-v-before-m-caa-20261011`.
 
 Measured legacy costs include Stage21 CAA compile ~321.7 s, Stage24 qualification ~131.5 s and render ~463.8 s. A sub-two-minute result is a target requiring new measurement.
 

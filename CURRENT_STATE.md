@@ -1,6 +1,6 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-10-11
+**Date:** 2026-10-12
 **Canonical code line:** `main` only
 **Architecture:** RealSaS V2, 43-stage Compiler dependency DAG; versioned release DAGs
 **Implementation readiness:** `canonical/V2_IMPLEMENTATION_READINESS.json`
@@ -34,6 +34,12 @@ modules replace star-import proxies in the plan. Previous source is retained at
 `archive/architecture-before-simplify-20261012` (main94da501).
 Historical EngineReleases and Attempt ledgers retain their own graphs and identities.
 The implementation ledger remains disabled, subject NONE and 0/43 PENDING.
+
+Development intentionally reuses sealed FIT outputs and checkpoints. Refit or
+fresh inference is selected only by an explicit intervention; unseen experiments
+have not started. A complete product input → model inference → Compiler → Runtime
+executor is a later user goal, while modular development remains the immediate
+working lane.
 
 Next focus is **grip/weapon relation and semantic overlap/draw order**. Raw depth
 and depth ties are known limitations. Native exact pixel/owner parity for diagonal

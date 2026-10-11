@@ -9,8 +9,9 @@ Generated JSON/HTML is a view, never a second registry or execution plan.
 Two execution lanes share these modules: development selects a model/Compiler
 target with `research-start`/`research-run`; product construction uses
 `product-compile`, then `product-render` consumes an exact qualified revision.
-The current compatibility DAG consumes external FIT receipts for some model
-steps. Full pretrained input-to-output inference remains an explicit executor
+Development intentionally reuses sealed FIT outputs/checkpoints instead of
+refitting or requesting fresh inference on every iteration. The current
+compatibility DAG consumes external FIT receipts for some model steps. Full pretrained input-to-output inference remains an explicit executor
 gap; two command lanes do not prove that end-to-end service exists.
 Python and the Go toolchain declared by `platform/go.mod` are required for discovery.
 

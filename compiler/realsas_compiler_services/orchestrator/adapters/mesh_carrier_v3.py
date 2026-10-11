@@ -154,8 +154,10 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
             "carrier_skin":skin,
         }
     mesh=qualify_canonical_mesh_candidate_v2(candidate,surface=surface,partition=partition,carrier_policy=carrier_policy,envelope=envelope,policy=policy,qualification_report=qualification_report,**tessa_evidence)
+    bound=bind_carrier_native_mesh_skin_v1(carrier=carrier_evidence,skeleton=skeleton,carrier_skin=skin,mesh=mesh,surface=surface,partition=partition,carrier_policy=carrier_policy,envelope=envelope,policy=policy)
     return {"status":"PASS","outputs":[
         _write_ir(root/"qualified_mesh.json",mesh,authority_class="QUALIFIED_PRODUCT_GEOMETRY"),
+        _write_ir(root/"qualified_mesh_skin.json",bound,authority_class="QUALIFIED_PRODUCT_MESH_SKIN"),
         _write_ir(root/"g3_deformation_stress.json",g3,authority_class="QUALIFIED_G3_EVIDENCE"),
         frame_artifact,
         compatibility_artifact,
@@ -163,6 +165,7 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
         _write_json(root/"unknown_boundary_analysis.json",unknown_report,authority_class="QUALIFIED_G4_EVIDENCE",schema=unknown_report["schema"]),
     ],"diagnostics":{
         "mesh_lineage_hash":mesh.mesh_lineage_hash,"g3_report_hash":g3.report_hash,
+        "mesh_skin_lineage_hash":bound.mesh_skin_lineage_hash,"transfer_method":bound.transfer_method,
         "skin_topology_compatibility_report_hash":compatibility["report_hash"],"g5_evidence_hash":g5_payload["evidence_hash"],
         "coverage_cell_count":len(g5_rows),"carrier_evidence_hash":carrier_evidence.carrier_evidence_hash,
         "semantic_skin_transfer_performed":False,"post_bind_joint_frame_qualification_hash":post_bind_report_hash,
@@ -170,18 +173,4 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
     }}
 
 
-def bind_qualified_mesh_skin_stage(ctx:dict)->dict:
-    surface=_load_surface(ctx); skeleton=_load_skeleton(ctx); skin=_load_carrier_skin(ctx); carrier_evidence=_load_carrier(ctx)
-    partition,carrier_policy=_load_partition_and_carrier(ctx)
-    from compiler.realsas_compiler_core.artifact_codec_v2 import deformation_envelope_from_dict
-    envelope=deformation_envelope_from_dict(stage_output_payload(ctx,"34_DEFORMATION_CAPABILITY_ENVELOPE","RealSaS.DeformationCapabilityEnvelopeIR.v1"))
-    _,policy=_load_candidate_and_policy(ctx)
-    mesh=qualified_mesh_from_dict(stage_output_payload(ctx,"35_DYNAMIC_MECHANICAL_MESH_QUALIFIED","RealSaS.QualifiedMeshIR.v1"))
-    bound=bind_carrier_native_mesh_skin_v1(carrier=carrier_evidence,skeleton=skeleton,carrier_skin=skin,mesh=mesh,surface=surface,partition=partition,carrier_policy=carrier_policy,envelope=envelope,policy=policy)
-    root=_artifact_root(ctx,"36_QUALIFIED_MESH_SKIN_TRANSFER")
-    return {"status":"PASS","outputs":[_write_ir(root/"qualified_mesh_skin.json",bound,authority_class="QUALIFIED_PRODUCT_MESH_SKIN")],"diagnostics":{
-        "mesh_skin_lineage_hash":bound.mesh_skin_lineage_hash,"mesh_binding_hash":bound.mesh_binding_hash,"skin_binding_hash":bound.skin_binding_hash,
-        "row_count":len(bound.rows),"transfer_method":bound.transfer_method,"semantic_skin_transfer_performed":False,
-    }}
-
-__all__=["seal_deformation_capability_envelope","qualify_canonical_mesh_stage","bind_qualified_mesh_skin_stage"]
+__all__=["seal_deformation_capability_envelope","qualify_canonical_mesh_stage"]

@@ -173,9 +173,13 @@ func TestMotionManifestChangePreservesAllModelArtifacts(t *testing.T) {
 	if len(changed.ExecuteStageIDs()) == 0 {
 		t.Fatal("motion change must execute downstream stages")
 	}
+	motion, ok := g.Get("39_MOTION_SOURCE_OR_PRESET_SEAL")
+	if !ok {
+		t.Fatal("motion source stage missing")
+	}
 	for _, id := range changed.ExecuteStageIDs() {
 		stage, _ := g.Get(id)
-		if stage.Ordinal < 39 {
+		if stage.Ordinal < motion.Ordinal {
 			t.Fatalf("motion change invalidated upstream stage: %s", id)
 		}
 	}

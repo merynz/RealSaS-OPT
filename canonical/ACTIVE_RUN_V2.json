@@ -5,12 +5,12 @@
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__DAG__SINGLE_M_GEOMETRY_AND_MOTION__SOURCE_WINS_PLUS_CAA__PRESENTATION_GRIP_AND_OVERLAP_OPEN",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
-  "pipeline_plan_sha256": "d372d29faba84c023aa98cefaf6cf4eec73d19698e2fe15a07222dbeb781cad8",
+  "pipeline_plan_sha256": "9c0e9ea68220964ce811c971b6f0c0ca7791a451ca348a41ec0fdcf4c6d56e59",
   "status": "CANONICAL_SINGLE_M_CAA_DEVELOPMENT_BASELINE__PRODUCT_GATES_OPEN",
   "execution_enabled": false,
   "completed_count": 0,
   "failed_count": 0,
-  "total_count": 46,
+  "total_count": 43,
   "ready_stage_ids": [
     "01_SOURCE_BYTES_SEALED",
     "05_CAMERA_CONTRACT_SOLVED"
@@ -357,18 +357,6 @@
     },
     {
       "ordinal": 29,
-      "id": "29_GEPPETTO_CHECKPOINT_SEALED",
-      "status": "PENDING",
-      "attempts": 0,
-      "input_fingerprint": "",
-      "implementation_hash": "",
-      "policy_hash": "",
-      "outputs": [],
-      "diagnostics_hash": "",
-      "blockers": []
-    },
-    {
-      "ordinal": 30,
       "id": "30_ARACHNE_FIT_PREREGISTERED",
       "status": "PENDING",
       "attempts": 0,
@@ -380,7 +368,7 @@
       "blockers": []
     },
     {
-      "ordinal": 31,
+      "ordinal": 30,
       "id": "31_ARACHNE_FIT",
       "status": "PENDING",
       "attempts": 0,
@@ -392,7 +380,7 @@
       "blockers": []
     },
     {
-      "ordinal": 32,
+      "ordinal": 31,
       "id": "32_SKIN_QUALIFIED",
       "status": "PENDING",
       "attempts": 0,
@@ -404,19 +392,7 @@
       "blockers": []
     },
     {
-      "ordinal": 33,
-      "id": "33_ARACHNE_CHECKPOINT_SEALED",
-      "status": "PENDING",
-      "attempts": 0,
-      "input_fingerprint": "",
-      "implementation_hash": "",
-      "policy_hash": "",
-      "outputs": [],
-      "diagnostics_hash": "",
-      "blockers": []
-    },
-    {
-      "ordinal": 34,
+      "ordinal": 32,
       "id": "34_DEFORMATION_CAPABILITY_ENVELOPE",
       "status": "PENDING",
       "attempts": 0,
@@ -428,7 +404,7 @@
       "blockers": []
     },
     {
-      "ordinal": 35,
+      "ordinal": 33,
       "id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
       "status": "PENDING",
       "attempts": 0,
@@ -440,19 +416,7 @@
       "blockers": []
     },
     {
-      "ordinal": 36,
-      "id": "36_QUALIFIED_MESH_SKIN_TRANSFER",
-      "status": "PENDING",
-      "attempts": 0,
-      "input_fingerprint": "",
-      "implementation_hash": "",
-      "policy_hash": "",
-      "outputs": [],
-      "diagnostics_hash": "",
-      "blockers": []
-    },
-    {
-      "ordinal": 37,
+      "ordinal": 34,
       "id": "37_QUALIFIED_PRESENTATION_STRUCTURE",
       "status": "PENDING",
       "attempts": 0,
@@ -464,7 +428,7 @@
       "blockers": []
     },
     {
-      "ordinal": 38,
+      "ordinal": 35,
       "id": "38_CANONICAL_PUPPET_SEALED",
       "status": "PENDING",
       "attempts": 0,
@@ -476,7 +440,7 @@
       "blockers": []
     },
     {
-      "ordinal": 39,
+      "ordinal": 36,
       "id": "39_MOTION_SOURCE_OR_PRESET_SEAL",
       "status": "PENDING",
       "attempts": 0,
@@ -488,7 +452,7 @@
       "blockers": []
     },
     {
-      "ordinal": 40,
+      "ordinal": 37,
       "id": "40_MOTION_COMPILE_RUN",
       "status": "PENDING",
       "attempts": 0,
@@ -500,7 +464,7 @@
       "blockers": []
     },
     {
-      "ordinal": 41,
+      "ordinal": 38,
       "id": "41_MOTION_DYNAMIC_PROOF",
       "status": "PENDING",
       "attempts": 0,
@@ -512,7 +476,7 @@
       "blockers": []
     },
     {
-      "ordinal": 42,
+      "ordinal": 39,
       "id": "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
       "status": "PENDING",
       "attempts": 0,
@@ -524,7 +488,7 @@
       "blockers": []
     },
     {
-      "ordinal": 43,
+      "ordinal": 40,
       "id": "43_RSS_MATERIALIZE_COMPACT",
       "status": "PENDING",
       "attempts": 0,
@@ -536,7 +500,7 @@
       "blockers": []
     },
     {
-      "ordinal": 44,
+      "ordinal": 41,
       "id": "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
       "status": "PENDING",
       "attempts": 0,
@@ -548,7 +512,7 @@
       "blockers": []
     },
     {
-      "ordinal": 45,
+      "ordinal": 42,
       "id": "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
       "status": "PENDING",
       "attempts": 0,
@@ -560,7 +524,7 @@
       "blockers": []
     },
     {
-      "ordinal": 46,
+      "ordinal": 43,
       "id": "46_PRODUCT_CLOSURE_SEAL",
       "status": "PENDING",
       "attempts": 0,

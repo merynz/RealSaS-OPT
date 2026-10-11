@@ -130,7 +130,7 @@ does not create a ProductRevision, including when its target is Stage46.
 Product revision sealing still requires the existing scientific qualifications.
 Render cache identity includes revision, qualified motion, view and settings.
 
-The 46-stage compatibility DAG currently validates external FIT execution
+The 43-stage compatibility DAG currently validates external FIT execution
 receipts and their pinned results. It does **not** itself launch a complete
 pretrained source-to-puppet inference service. Do not advertise that service or
 a two-minute product latency until its executor and measured end-to-end proof

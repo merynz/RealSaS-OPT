@@ -406,7 +406,7 @@ def _install_current_carrier_skin_fixture(ctx, tmp_path):
 def test_superseded_stage24_to27_path_fails_closed_without_g3b(tmp_path):
     """Historical product_mesh_v1 is not a current V2 qualification path.
 
-    The current 46-stage DAG computes G3B at Stage35 after qualified skin.
+    The current 43-stage DAG computes G3B at Stage35 after qualified skin.
     This compatibility path predates that authority and must therefore fail
     closed rather than mint a five-gate QualifiedMeshIR.
     """
@@ -614,10 +614,26 @@ def test_vf23_stage37_to46_tail_uses_unmodified_production_dynamic_policy(tmp_pa
         "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
         mesh_v2.qualify_canonical_mesh_stage,
     )
-    r36 = run(
-        "36_QUALIFIED_MESH_SKIN_TRANSFER",
-        mesh_v2.bind_qualified_mesh_skin_stage,
+    # Both payloads now come from the same qualified producer.
+    schemas = {out["schema"] for out in r35["outputs"]}
+    assert {"RealSaS.QualifiedMeshIR.v1", "RealSaS.QualifiedMeshSkinIR.v1"} <= schemas
+    from compiler.realsas_compiler_services.orchestrator.adapters import mesh_carrier_v3 as current_mesh
+    from compiler.realsas_compiler_core.artifact_codec_v2 import deformation_envelope_from_dict
+    from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import stage_output_payload
+    from compiler.realsas_compiler_core.product_mesh_skin_carrier_v1 import bind_carrier_native_mesh_skin_v1
+    surface = current_mesh._load_surface(ctx)
+    partition, carrier_policy = current_mesh._load_partition_and_carrier(ctx)
+    _, policy = current_mesh._load_candidate_and_policy(ctx)
+    expected = bind_carrier_native_mesh_skin_v1(
+        carrier=current_mesh._load_carrier(ctx), skeleton=current_mesh._load_skeleton(ctx),
+        carrier_skin=current_mesh._load_carrier_skin(ctx),
+        mesh=qualified_mesh_from_dict(stage_output_payload(ctx, "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED", "RealSaS.QualifiedMeshIR.v1")),
+        surface=surface, partition=partition, carrier_policy=carrier_policy, policy=policy,
+        envelope=deformation_envelope_from_dict(stage_output_payload(ctx, "34_DEFORMATION_CAPABILITY_ENVELOPE", "RealSaS.DeformationCapabilityEnvelopeIR.v1")),
     )
+    bound = qualified_mesh_skin_from_dict(stage_output_payload(ctx, "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED", "RealSaS.QualifiedMeshSkinIR.v1"))
+    assert bound == expected
+    assert bound.mesh_skin_lineage_hash == expected.mesh_skin_lineage_hash
 
     candidate = canonical_mesh_candidate_from_dict(
         read_json(

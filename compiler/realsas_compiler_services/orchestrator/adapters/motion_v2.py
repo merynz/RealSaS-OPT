@@ -405,7 +405,7 @@ def prove_dynamic_motion_stage(ctx: dict) -> dict:
     mesh_skin = qualified_mesh_skin_from_dict(
         stage_output_payload(
             ctx,
-            "36_QUALIFIED_MESH_SKIN_TRANSFER",
+            "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
             "RealSaS.QualifiedMeshSkinIR.v1",
         )
     )

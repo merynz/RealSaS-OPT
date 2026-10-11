@@ -4,7 +4,7 @@
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__DAG__SINGLE_M_GEOMETRY_AND_MOTION__SOURCE_WINS_PLUS_CAA__PRESENTATION_GRIP_AND_OVERLAP_OPEN",
   "subject_specific_code_forbidden": true,
-  "stage_count": 46,
+  "stage_count": 43,
   "resume_contract": {
     "rule": "PASS_OR_CACHE_HIT_REUSE_REQUIRES_INPUT_FINGERPRINT_AND_OUTPUT_SHA",
     "failure_semantics": "PRESERVE_VERIFIED_INDEPENDENT_UPSTREAM_OUTPUTS",
@@ -358,7 +358,7 @@
       "depends_on": [
         "15_RIGGING_SURFACE_QUALIFIED"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2:qualify_mechanical_partition_and_carriers",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_legacy_v2:qualify_mechanical_partition_and_carriers",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -556,7 +556,7 @@
         "15_RIGGING_SURFACE_QUALIFIED",
         "19_STATIC_CANONICAL_MESH_QUALIFIED"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:preregister_geppetto_fit_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_legacy_v2:preregister_geppetto_fit_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -575,7 +575,7 @@
       "depends_on": [
         "26_GEPPETTO_FIT_PREREGISTERED"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:execute_geppetto_fit_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_legacy_v2:execute_geppetto_fit_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -589,14 +589,14 @@
     {
       "ordinal": 28,
       "id": "28_SKELETON_QUALIFIED",
-      "title": "Compiler skeleton qualification",
+      "title": "Qualify exact-carrier skeleton and seal AXIS checkpoint",
       "group": "rig",
       "depends_on": [
         "15_RIGGING_SURFACE_QUALIFIED",
         "27_GEPPETTO_FIT",
         "19_STATIC_CANONICAL_MESH_QUALIFIED"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:qualify_skeleton_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v3:qualify_skeleton_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -607,34 +607,34 @@
     },
     {
       "ordinal": 29,
-      "id": "29_GEPPETTO_CHECKPOINT_SEALED",
-      "title": "Geppetto checkpoint seal",
-      "group": "rig",
-      "depends_on": [
-        "27_GEPPETTO_FIT",
-        "28_SKELETON_QUALIFIED"
-      ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:seal_geppetto_checkpoint_stage",
-      "policy": {
-        "fail_closed": true,
-        "cacheable": true,
-        "output_hash_required": true,
-        "product_pass_authority": false
-      },
-      "manifest_keys": []
-    },
-    {
-      "ordinal": 30,
       "id": "30_ARACHNE_FIT_PREREGISTERED",
       "title": "MIRA fit preregistration bound to static canonical carrier and skeleton",
       "group": "skin",
       "depends_on": [
         "15_RIGGING_SURFACE_QUALIFIED",
         "28_SKELETON_QUALIFIED",
-        "29_GEPPETTO_CHECKPOINT_SEALED",
         "19_STATIC_CANONICAL_MESH_QUALIFIED"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:preregister_arachne_fit_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v3:preregister_arachne_fit_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "arachne_fit"
+      ]
+    },
+    {
+      "ordinal": 30,
+      "id": "31_ARACHNE_FIT",
+      "title": "Arachne fit",
+      "group": "skin",
+      "depends_on": [
+        "30_ARACHNE_FIT_PREREGISTERED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v3:execute_arachne_fit_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -647,27 +647,8 @@
     },
     {
       "ordinal": 31,
-      "id": "31_ARACHNE_FIT",
-      "title": "Arachne fit",
-      "group": "skin",
-      "depends_on": [
-        "30_ARACHNE_FIT_PREREGISTERED"
-      ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:execute_arachne_fit_stage",
-      "policy": {
-        "fail_closed": true,
-        "cacheable": true,
-        "output_hash_required": true,
-        "product_pass_authority": false
-      },
-      "manifest_keys": [
-        "arachne_fit"
-      ]
-    },
-    {
-      "ordinal": 32,
       "id": "32_SKIN_QUALIFIED",
-      "title": "Compiler skin qualification",
+      "title": "Qualify exact-carrier skin and seal MIRA checkpoint",
       "group": "skin",
       "depends_on": [
         "15_RIGGING_SURFACE_QUALIFIED",
@@ -675,7 +656,7 @@
         "31_ARACHNE_FIT",
         "19_STATIC_CANONICAL_MESH_QUALIFIED"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:qualify_skin_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v3:qualify_skin_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -685,25 +666,7 @@
       "manifest_keys": []
     },
     {
-      "ordinal": 33,
-      "id": "33_ARACHNE_CHECKPOINT_SEALED",
-      "title": "Arachne checkpoint seal",
-      "group": "skin",
-      "depends_on": [
-        "31_ARACHNE_FIT",
-        "32_SKIN_QUALIFIED"
-      ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:seal_arachne_checkpoint_stage",
-      "policy": {
-        "fail_closed": true,
-        "cacheable": true,
-        "output_hash_required": true,
-        "product_pass_authority": false
-      },
-      "manifest_keys": []
-    },
-    {
-      "ordinal": 34,
+      "ordinal": 32,
       "id": "34_DEFORMATION_CAPABILITY_ENVELOPE",
       "title": "Subject-free 3D conditioning lineage and derived joint-frame witness",
       "group": "mesh",
@@ -712,7 +675,7 @@
         "28_SKELETON_QUALIFIED",
         "19_STATIC_CANONICAL_MESH_QUALIFIED"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2:seal_deformation_capability_envelope",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_carrier_v3:seal_deformation_capability_envelope",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -724,9 +687,9 @@
       ]
     },
     {
-      "ordinal": 35,
+      "ordinal": 33,
       "id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
-      "title": "Joint dynamic mechanical proof of carrier + rig + skin",
+      "title": "Qualify mechanical M and seal exact M–skin binding",
       "group": "mesh",
       "depends_on": [
         "05_CAMERA_CONTRACT_SOLVED",
@@ -739,7 +702,7 @@
         "32_SKIN_QUALIFIED",
         "34_DEFORMATION_CAPABILITY_ENVELOPE"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2:qualify_canonical_mesh_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_carrier_v3:qualify_canonical_mesh_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -751,31 +714,7 @@
       ]
     },
     {
-      "ordinal": 36,
-      "id": "36_QUALIFIED_MESH_SKIN_TRANSFER",
-      "title": "Deterministic skin transfer to dynamically qualified frozen mesh",
-      "group": "mesh",
-      "depends_on": [
-        "15_RIGGING_SURFACE_QUALIFIED",
-        "17_MECHANICAL_PARTITION_QUALIFIED",
-        "18_CANONICAL_MESH_ADDRESSING_BUILD",
-        "19_STATIC_CANONICAL_MESH_QUALIFIED",
-        "28_SKELETON_QUALIFIED",
-        "32_SKIN_QUALIFIED",
-        "34_DEFORMATION_CAPABILITY_ENVELOPE",
-        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
-      ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2:bind_qualified_mesh_skin_stage",
-      "policy": {
-        "fail_closed": true,
-        "cacheable": true,
-        "output_hash_required": true,
-        "product_pass_authority": false
-      },
-      "manifest_keys": []
-    },
-    {
-      "ordinal": 37,
+      "ordinal": 34,
       "id": "37_QUALIFIED_PRESENTATION_STRUCTURE",
       "title": "Qualified role-free presentation structure on canonical M; grip and overlap closure remain open",
       "group": "presentation",
@@ -787,10 +726,9 @@
         "23_COMPLETE_APPEARANCE_ASSET_BAKED",
         "24_COMPLETE_APPEARANCE_QUALIFIED",
         "28_SKELETON_QUALIFIED",
-        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
-        "36_QUALIFIED_MESH_SKIN_TRANSFER"
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_state_v2:qualify_presentation_structure_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_state_legacy_v2:qualify_presentation_structure_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -807,7 +745,7 @@
       ]
     },
     {
-      "ordinal": 38,
+      "ordinal": 35,
       "id": "38_CANONICAL_PUPPET_SEALED",
       "title": "Full canonical puppet seal: Mesh Rig Skin Complete Appearance Presentation",
       "group": "product_state",
@@ -822,10 +760,9 @@
         "32_SKIN_QUALIFIED",
         "34_DEFORMATION_CAPABILITY_ENVELOPE",
         "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
-        "36_QUALIFIED_MESH_SKIN_TRANSFER",
         "37_QUALIFIED_PRESENTATION_STRUCTURE"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_state_v2:seal_complete_puppet_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_state_v3:seal_complete_puppet_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -835,7 +772,7 @@
       "manifest_keys": []
     },
     {
-      "ordinal": 39,
+      "ordinal": 36,
       "id": "39_MOTION_SOURCE_OR_PRESET_SEAL",
       "title": "Professional external motion source seal",
       "group": "motion",
@@ -855,7 +792,7 @@
       ]
     },
     {
-      "ordinal": 40,
+      "ordinal": 37,
       "id": "40_MOTION_COMPILE_RUN",
       "title": "Full-3D canonical motion compilation",
       "group": "motion",
@@ -877,7 +814,7 @@
       ]
     },
     {
-      "ordinal": 41,
+      "ordinal": 38,
       "id": "41_MOTION_DYNAMIC_PROOF",
       "title": "Canonical FK/LBS/contact/conditioning proof; rest-unseen exposure diagnostic only",
       "group": "motion",
@@ -887,7 +824,6 @@
         "18_CANONICAL_MESH_ADDRESSING_BUILD",
         "28_SKELETON_QUALIFIED",
         "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
-        "36_QUALIFIED_MESH_SKIN_TRANSFER",
         "38_CANONICAL_PUPPET_SEALED",
         "40_MOTION_COMPILE_RUN"
       ],
@@ -903,7 +839,7 @@
       ]
     },
     {
-      "ordinal": 42,
+      "ordinal": 39,
       "id": "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
       "title": "Runtime projection using sealed baked CAA only",
       "group": "runtime",
@@ -925,7 +861,7 @@
       "manifest_keys": []
     },
     {
-      "ordinal": 43,
+      "ordinal": 40,
       "id": "43_RSS_MATERIALIZE_COMPACT",
       "title": "Compact self-contained .rss materialization",
       "group": "runtime",
@@ -942,7 +878,7 @@
       "manifest_keys": []
     },
     {
-      "ordinal": 44,
+      "ordinal": 41,
       "id": "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
       "title": "Native package load playback and CAA binding re-verification",
       "group": "runtime",
@@ -962,7 +898,7 @@
       ]
     },
     {
-      "ordinal": 45,
+      "ordinal": 42,
       "id": "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
       "title": "Native dynamic visual integrity plus compiled-unobserved appearance exposure gate",
       "group": "runtime",
@@ -984,7 +920,7 @@
       ]
     },
     {
-      "ordinal": 46,
+      "ordinal": 43,
       "id": "46_PRODUCT_CLOSURE_SEAL",
       "title": "Product closure plus editable canonical authoring export",
       "group": "closure",
@@ -993,7 +929,6 @@
         "24_COMPLETE_APPEARANCE_QUALIFIED",
         "28_SKELETON_QUALIFIED",
         "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
-        "36_QUALIFIED_MESH_SKIN_TRANSFER",
         "37_QUALIFIED_PRESENTATION_STRUCTURE",
         "38_CANONICAL_PUPPET_SEALED",
         "40_MOTION_COMPILE_RUN",
@@ -1025,5 +960,14 @@
     "mechanics": "FIRST_CLASS",
     "appearance": "FIRST_CLASS",
     "rule": "FAIL_ON_ANY_AXIS__NO_SILENT_CROSS_LAYER_COMPENSATION"
+  },
+  "stage_contractions": {
+    "scope": "CURRENT_RELEASE_PLAN_ONLY__HISTORICAL_RELEASES_IMMUTABLE",
+    "folded_into": {
+      "29_GEPPETTO_CHECKPOINT_SEALED": "28_SKELETON_QUALIFIED",
+      "33_ARACHNE_CHECKPOINT_SEALED": "32_SKIN_QUALIFIED",
+      "36_QUALIFIED_MESH_SKIN_TRANSFER": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+    },
+    "preserved": "Existing qualification gates, checkpoint byte checks and exact M/skin binding; only standalone seal scheduling boundaries are removed."
   }
 }

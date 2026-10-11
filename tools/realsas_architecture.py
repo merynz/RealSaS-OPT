@@ -19,6 +19,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from compiler.realsas_compiler_services.orchestrator import mainline  # noqa: E402
+from tools.architecture_contracts import payload_contracts, compare_maps  # noqa: E402
 
 
 LIVE_CODE_PREFIXES = ("compiler/", "models/", "runtime/", "platform/")
@@ -448,6 +449,7 @@ def source_snapshot(discovery: dict[str, Any]) -> dict[str, Any]:
         "platform/", "runtime/")) and path.endswith(LIVE_CODE_SUFFIXES))
     paths.update(("canonical/MAINLINE_EXECUTION_PLAN_V2.json",
                   "tools/realsas_architecture.py", "tools/architecture_map.html"))
+    paths.update(p for p in ("tools/architecture_contracts.py", "tools/serve_architecture.py") if (ROOT / p).is_file())
     rows = [{"path": path, "sha256": mainline.sha256_file(ROOT / path)}
             for path in sorted(paths)]
     observed = {row["path"]: row["sha256"] for row in rows}
@@ -470,6 +472,7 @@ def source_snapshot(discovery: dict[str, Any]) -> dict[str, Any]:
 def architecture_map(discovery: dict[str, Any]) -> dict[str, Any]:
     """Expose released-plan wiring, not invented payload/visual qualification."""
     plan = discovery["plan"]
+    contracts = payload_contracts(plan, ROOT)
     owners = stage_owner_map(discovery["registry"])
     consumers: dict[str, list[str]] = defaultdict(list)
     for stage in plan["stages"]:
@@ -483,12 +486,14 @@ def architecture_map(discovery: dict[str, Any]) -> dict[str, Any]:
                       "direct_consumers": consumers[sid],
                       "downstream_stage_ids": [s for s in descendants(plan, sid) if s != sid],
                       "input_roles": ["manifest:" + key for key in stage["manifest_keys"]],
+                      "payload_contracts": contracts[sid],
                       **discovery["stage_closures"][sid]})
     return {"schema": "RealSaS.ArchitectureMap.v1", "source": source_snapshot(discovery),
             "pipeline_plan_sha256": discovery["pipeline_plan_sha256"],
             "authority_note": "Generated checkout view, not an EngineRelease, Attempt or qualification. Execution uses its sealed release DAG.",
             "evidence_boundary": "Edges prove declared DAG artifact binding. Inner payload sufficiency and actual visual consumption require independent consumer measurements; neither is inferred here. Dynamic import sites remain explicit audit debt.",
             "nodes": nodes,
+            "payload_reads": [{"consumer": sid, **read} for sid, contract in contracts.items() for read in contract["reads"]],
             "edges": [{"producer": dep, "consumer": s["id"],
                        "artifact_type": "RealSaS.StageResultManifest", "evidence": "DECLARED_RELEASE_DAG_BINDING"}
                       for s in plan["stages"] for dep in s["depends_on"]],
@@ -673,12 +678,20 @@ def main() -> int:
     search.add_argument("term")
     view = sub.add_parser("map", help="source-derived producer/consumer DAG and standalone interactive map")
     view.add_argument("--html-out")
+    diff = sub.add_parser("diff", help="compare a saved map with this checkout; inspection only")
+    diff.add_argument("--before", required=True)
+    live = sub.add_parser("serve", help="loopback live architecture map; never runs models")
+    live.add_argument("--port", type=int, default=8765)
     impact = sub.add_parser("impact", help="inspect changed source/manifest scopes; does not authorize reuse")
     impact.add_argument("--path", action="append", default=[])
     impact.add_argument("--manifest-key", action="append", default=[])
     impact.add_argument("--base", help="include changed files against a Git ref/commit")
 
     args = parser.parse_args()
+    if args.command == "serve":
+        from tools.serve_architecture import serve
+        serve(ROOT, args.port)
+        return 0
     discovery = build_discovery()
     if args.command == "audit":
         value = audit_summary(discovery)
@@ -692,6 +705,8 @@ def main() -> int:
         value = architecture_map(discovery)
         if args.html_out:
             write_map_html(value, args.html_out)
+    elif args.command == "diff":
+        value = compare_maps(json.loads(Path(args.before).read_text()), architecture_map(discovery))
     else:
         paths = list(args.path)
         if args.base:

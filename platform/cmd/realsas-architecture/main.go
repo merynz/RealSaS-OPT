@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	planPath := flag.String("plan", "../canonical/MAINLINE_EXECUTION_PLAN_V2.json", "path to canonical 46-stage plan")
+	planPath := flag.String("plan", "../canonical/MAINLINE_EXECUTION_PLAN_V2.json", "path to canonical current DAG plan")
 	stageID := flag.String("stage", "", "optional exact stage id")
 	moduleID := flag.String("module", "", "optional exact module id")
 	flag.Parse()

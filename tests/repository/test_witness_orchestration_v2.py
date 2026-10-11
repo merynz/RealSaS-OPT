@@ -31,7 +31,7 @@ def test_fresh_run_ledger_is_run_scoped_and_preserves_dag_ready_set():
     assert ledger["execution_class"] == "WITNESS"
     assert ledger["completed_count"] == 0
     assert ledger["failed_count"] == 0
-    assert ledger["total_count"] == 46
+    assert ledger["total_count"] == 43
     assert ledger["ready_stage_ids"] == [
         "01_SOURCE_BYTES_SEALED",
         "05_CAMERA_CONTRACT_SOLVED",
@@ -319,7 +319,7 @@ def test_implementation_closure_covers_all_current_stages_and_excludes_donor_era
     plan = _plan()
     manifest = mainline.implementation_closure_manifest(plan)
     assert manifest["schema"] == "RealSaS.V2ImplementationClosure.v1"
-    assert len(manifest["adapter_implementation_closures"]) == 46
+    assert len(manifest["adapter_implementation_closures"]) == 43
     imported = {
         row["module"]
         for stage in manifest["adapter_implementation_closures"]
@@ -367,7 +367,7 @@ def test_engineer_facing_navigation_describes_current_v2_not_historical_repair_b
     system_index = (ROOT / "SYSTEM_INDEX.md").read_text(encoding="utf-8")
 
     assert "Current product architecture — RealSaS V2" in readme
-    assert "46-stage" in readme
+    assert "43-stage" in readme
     assert "repair/mage-full-subject-reclosure-20260912" not in readme
     assert "V2_IMPLEMENTATION_READINESS.json" in canonical_index
     assert "Current continuation details" in system_index

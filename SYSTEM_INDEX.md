@@ -1,6 +1,6 @@
 # RealSaS Structural System Index
 
-## 2026-10-09 canonical main
+## 2026-10-11 canonical main
 
 ## Current continuation details
 
@@ -10,6 +10,10 @@ The modular Go developer path and opt-in controlled component interventions are
 implemented. The user has authorized bounded visual mesh/appearance/runtime
 completion while preserving M/G/W and the motion witness. PR #66 is diagnostic history, not the next mandatory merge.
 Full product input-to-output execution and UI integration remain later work.
+
+Current work is platform/state cleanup. The shared IRIS geometry + RGB + semantic
+design is **awaiting user approval**, not a committed next execution step.
+See [the proposal](docs/research/IRIS_GEOMETRY_APPEARANCE_PROPOSAL_20261011.md).
 
 - [Controlled interventions](docs/platform/CAUSAL_INTERVENTIONS.md): exact baseline
   reuse, scope enforcement and current limits.
@@ -96,6 +100,10 @@ The fresh regression run measured the dominant costs directly: renderer ~463.8 s
 ## Machine-readable ownership
 
 Architecture ownership remains queryable from `platform/internal/architecture/registry.go` and `tools/realsas_architecture.py`. Every canonical stage must resolve to one Engine owner; Platform separately owns durable state/orchestration and Runtime owns hot playback/render paths.
+
+[Dynamic architecture](docs/platform/DYNAMIC_ARCHITECTURE.md) documents the
+source-derived JSON/interactive HTML map and source/manifest impact commands.
+CI regenerates these views; they never replace Go's sealed release/Registry.
 
 ## Platform execution entrypoints — 2026-10-08
 

@@ -272,6 +272,13 @@ def build_discovery() -> dict[str, Any]:
     registry = architecture_registry()
     plan = mainline.load_json(mainline.PLAN_PATH)
     mainline.validate_plan(plan)
+    registry_nodes = {row["stage_id"]: row for row in registry["stages"]}
+    if set(registry_nodes) != {row["id"] for row in plan["stages"]}:
+        raise RuntimeError("ARCHITECTURE_REGISTRY_PLAN_DRIFT")
+    for stage in plan["stages"]:
+        row = registry_nodes[stage["id"]]
+        if row["adapter"] != stage["adapter"] or list(row.get("depends_on") or []) != stage["depends_on"]:
+            raise RuntimeError("ARCHITECTURE_REGISTRY_PLAN_DRIFT:" + stage["id"])
     closure = lightweight_implementation_closure(plan)
     tracked = git_files()
     tracked_set = set(tracked)
@@ -302,6 +309,9 @@ def build_discovery() -> dict[str, Any]:
             "adapter": adapter,
             "implementation_hash": str(row["implementation_hash"]),
             "dependency_files": sorted(set(files)),
+            "dependency_file_hashes": {module_path(item["module"]): item["sha256"]
+                                       for item in row["local_python_import_closure"]
+                                       if module_path(item["module"]) is not None},
         }
 
     dependency_rows: list[dict[str, Any]] = []
@@ -391,7 +401,111 @@ def build_discovery() -> dict[str, Any]:
         "missing_critical_files": missing_critical_files,
         "missing_module_paths": missing_module_paths,
         "registry": registry,
+        "plan": plan,
+        "critical_file_hashes": closure["critical_files"],
     }
+
+
+def source_snapshot(discovery: dict[str, Any]) -> dict[str, Any]:
+    """Identify bytes, including dirty source; HEAD alone is not a fingerprint."""
+    paths = {row["path"] for row in discovery["dependency_files"]}
+    paths.update(row["path"] for row in discovery["critical_file_hashes"])
+    paths.update(path for path in git_files() if path.startswith((
+        "platform/", "runtime/")) and path.endswith(LIVE_CODE_SUFFIXES))
+    paths.update(("canonical/MAINLINE_EXECUTION_PLAN_V2.json",
+                  "tools/realsas_architecture.py", "tools/architecture_map.html"))
+    rows = [{"path": path, "sha256": mainline.sha256_file(ROOT / path)}
+            for path in sorted(paths)]
+    observed = {row["path"]: row["sha256"] for row in rows}
+    expected = {row["path"]: row["sha256"] for row in discovery["critical_file_hashes"]}
+    for stage in discovery["stage_closures"].values():
+        expected.update(stage["dependency_file_hashes"])
+    if any(observed.get(path) != digest for path, digest in expected.items()):
+        raise RuntimeError("ARCHITECTURE_SOURCE_CHANGED_DURING_DISCOVERY__REGENERATE")
+    if mainline.content_sha256(mainline.load_json(mainline.PLAN_PATH)) != discovery["pipeline_plan_sha256"]:
+        raise RuntimeError("ARCHITECTURE_PLAN_CHANGED_DURING_DISCOVERY__REGENERATE")
+    return {"head_sha": _run(["git", "rev-parse", "HEAD"]).stdout.strip(),
+            "working_tree_status": _run(["git", "status", "--porcelain", "--untracked-files=all"]).stdout.splitlines(),
+            "source_fingerprint_sha256": mainline.content_sha256(rows),
+            "fingerprinted_files": rows}
+
+
+def architecture_map(discovery: dict[str, Any]) -> dict[str, Any]:
+    """Expose released-plan wiring, not invented payload/visual qualification."""
+    plan = discovery["plan"]
+    owners = stage_owner_map(discovery["registry"])
+    consumers: dict[str, list[str]] = defaultdict(list)
+    for stage in plan["stages"]:
+        for upstream in stage["depends_on"]:
+            consumers[upstream].append(stage["id"])
+    nodes = []
+    for stage in sorted(plan["stages"], key=lambda row: row["ordinal"]):
+        sid = stage["id"]
+        nodes.append({**stage, "owner_module_id": owners[sid],
+                      "produces": {"artifact_type": "RealSaS.StageResultManifest", "schema_version": "v1"},
+                      "direct_consumers": consumers[sid],
+                      "downstream_stage_ids": [s for s in descendants(plan, sid) if s != sid],
+                      "input_roles": ["manifest:" + key for key in stage["manifest_keys"]],
+                      **discovery["stage_closures"][sid]})
+    return {"schema": "RealSaS.ArchitectureMap.v1", "source": source_snapshot(discovery),
+            "pipeline_plan_sha256": discovery["pipeline_plan_sha256"],
+            "authority_note": "Generated checkout view, not an EngineRelease, Attempt or qualification. Execution uses its sealed release DAG.",
+            "evidence_boundary": "Edges prove declared DAG artifact binding. Inner payload sufficiency and actual visual consumption require independent consumer measurements; neither is inferred here. Dynamic import sites remain explicit audit debt.",
+            "nodes": nodes,
+            "edges": [{"producer": dep, "consumer": s["id"],
+                       "artifact_type": "RealSaS.StageResultManifest", "evidence": "DECLARED_RELEASE_DAG_BINDING"}
+                      for s in plan["stages"] for dep in s["depends_on"]],
+            "modules": discovery["registry"]["domains"],
+            "audit": audit_summary(discovery)}
+
+
+def impact_query(discovery: dict[str, Any], paths: list[str], manifest_keys: list[str]) -> dict[str, Any]:
+    """Conservative source/read-set scope; only Go can approve actual reuse."""
+    plan = discovery["plan"]
+    stages = {row["id"] for row in plan["stages"]}
+    files = {row["path"]: row for row in discovery["dependency_files"]}
+    critical = set(discovery["critical_files"])
+    direct: set[str] = set()
+    rows = []
+    for path in sorted(set(paths)):
+        candidate = Path(path)
+        if candidate.is_absolute():
+            candidate = candidate.resolve().relative_to(ROOT)
+        if ".." in candidate.parts:
+            raise ValueError("IMPACT_PATH_OUTSIDE_CHECKOUT")
+        path = candidate.as_posix()
+        found = set(files.get(path, {}).get("consumer_stages", []))
+        status = "ADAPTER_IMPLEMENTATION_CLOSURE" if found else "UNCLASSIFIED__INSPECT_BEFORE_REUSE"
+        if path == "canonical/MAINLINE_EXECUTION_PLAN_V2.json":
+            found, status = stages, "PLAN_EDIT__COMPARE_SEALED_GRAPHS"
+        elif path in critical:
+            # Critical governance affects global closure validation even when it
+            # does not change a per-adapter semantic identity.
+            status = "GLOBAL_CLOSURE_VALIDATION__RESOLVER_DECIDES_REUSE"
+        direct.update(found)
+        rows.append({"path": path, "classification": status, "direct_stage_ids": sorted(found)})
+    role_rows = []
+    for key in sorted(set(manifest_keys)):
+        found = {s["id"] for s in plan["stages"] if key in s["manifest_keys"]}
+        direct.update(found)
+        role_rows.append({"role": "manifest:" + key, "direct_stage_ids": sorted(found),
+                          "classification": "DECLARED_MANIFEST_READ_SET" if found else "UNCLASSIFIED__INSPECT_BEFORE_REUSE"})
+    affected = set().union(*(set(descendants(plan, sid)) for sid in direct)) if direct else set()
+    order = {s["id"]: s["ordinal"] for s in plan["stages"]}
+    ordered = lambda values: sorted(values, key=lambda sid: (order[sid], sid))
+    return {"schema": "RealSaS.ArchitectureImpact.v1",
+            "pipeline_plan_sha256": discovery["pipeline_plan_sha256"],
+            "paths": rows, "manifest_roles": role_rows, "direct_stage_ids": ordered(direct),
+            "affected_stage_ids": ordered(affected),
+            "outside_declared_impact_stage_ids": ordered(stages - affected),
+            "unclassified_inputs": [r for r in rows + role_rows if r["classification"].startswith("UNCLASSIFIED")],
+            "authority_note": "Inspection scope only, not reuse eligibility. Compare actual released graphs, implementation/policy/input identities and qualified Registry artifacts through Go. Unclassified changes are never proof of no effect."}
+
+
+def write_map_html(value: dict[str, Any], path: str) -> None:
+    template = (ROOT / "tools/architecture_map.html").read_text(encoding="utf-8")
+    data = json.dumps(value, ensure_ascii=False).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+    Path(path).write_text(template.replace("__ARCHITECTURE_DATA__", data), encoding="utf-8")
 
 
 def stage_query(discovery: dict[str, Any], stage_id: str) -> dict[str, Any]:
@@ -408,7 +522,7 @@ def stage_query(discovery: dict[str, Any], stage_id: str) -> dict[str, Any]:
     closure = discovery["stage_closures"][stage_id]
     dep_paths = set(closure["dependency_files"])
     dynamic_rows = [row for row in discovery["dependency_files"] if row["path"] in dep_paths]
-    plan = mainline.load_json(mainline.PLAN_PATH)
+    plan = discovery["plan"]
     return {
         "schema": "RealSaS.ArchitectureStageQuery.v1",
         "stage": stage,
@@ -518,6 +632,12 @@ def main() -> int:
     module.add_argument("module_id")
     search = sub.add_parser("search")
     search.add_argument("term")
+    view = sub.add_parser("map", help="source-derived producer/consumer DAG and standalone interactive map")
+    view.add_argument("--html-out")
+    impact = sub.add_parser("impact", help="inspect changed source/manifest scopes; does not authorize reuse")
+    impact.add_argument("--path", action="append", default=[])
+    impact.add_argument("--manifest-key", action="append", default=[])
+    impact.add_argument("--base", help="include changed files against a Git ref/commit")
 
     args = parser.parse_args()
     discovery = build_discovery()
@@ -527,8 +647,21 @@ def main() -> int:
         value = stage_query(discovery, args.stage_id)
     elif args.command == "module":
         value = module_query(discovery, args.module_id)
-    else:
+    elif args.command == "search":
         value = search_query(discovery, args.term)
+    elif args.command == "map":
+        value = architecture_map(discovery)
+        if args.html_out:
+            write_map_html(value, args.html_out)
+    else:
+        paths = list(args.path)
+        if args.base:
+            base = _run(["git", "rev-parse", "--verify", args.base + "^{commit}"]).stdout.strip()
+            paths.extend(_run(["git", "diff", "--name-only", "-z", base, "--"]).stdout.split("\0"))
+            paths = [p for p in paths if p]
+        if not paths and not args.manifest_key:
+            parser.error("impact requires --path, --base or --manifest-key")
+        value = impact_query(discovery, paths, args.manifest_key)
 
     write_output(value, args.json_out)
 

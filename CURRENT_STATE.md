@@ -7,13 +7,29 @@
 
 ## Immediate user-authorized priority
 
-First close and measure the existing Knight visual producer-consumer chain on
-canonical main, before changing IRIS heads. Try to derive reliable contact,
-layer support/material, grip and order evidence from the existing sealed inputs;
-connect actual consumers and independently measure the same Knight M/G/W and
-motion witness. Missing or unsafe data must retain explicit abstention and its
-evidence, never become an empty required domain or an optimistic PASS. Only the
-remaining measured deficit may justify new appearance/semantic research.
+The current request is to update repository state and repair concrete platform
+defects on canonical main, make producer/consumer connections and change impact
+visible, and keep agent entry/exit efficient and explicit. It does not select a
+new research run, training task or render.
+
+**IRIS shared geometry + RGB + semantic/appearance heads are an unapproved
+proposal, not the next execution step.** The user's 2026-10-11 clarification
+explicitly withholds that approval. The design is retained in
+`docs/research/IRIS_GEOMETRY_APPEARANCE_PROPOSAL_20261011.md`; none of its heads,
+new artifacts or conceptual DAG nodes are shipped. Do not resurrect the older
+mandatory “close everything before proposing heads” ordering either: the
+scientific choice is pending. Existing visual gaps remain real and measurable.
+Missing or unsafe data retain explicit abstention and evidence, never an empty
+required domain or optimistic PASS.
+
+Latest verified pre-cleanup main is `66b8b4baf565a187d9841a723b8035754a4ec746`.
+Deployment run `38119841090` passed developer-host engineering smoke with all
+six persistent services active. Read-only input run `38119991975`, artifact
+`11695575078`, exported 122 verified paths/120 objects, with 51 explicit reference
+failures (7 byte drift, 8 byte budget, 36 outside roots). All eight current raw
+sources/masks and current sidecars were prioritized. This is a partial transport
+capsule, not a new Knight Attempt, render or qualification. Always verify live
+main and deployment rather than treating this recorded SHA as perpetually current.
 
 PR #78 added bounded exact-byte input export and read-only Go agent-context to
 the sealed Knight host inspection. This transports inputs and records source
@@ -34,7 +50,7 @@ Stage24 explicitly leaves completion-field shipping/full-visual qualification
 false. The current CAA ledger has 28/32/35/36/37 PENDING; Stage35 has no typed
 compatibility output for Stage37. V6's connected-palette diagnostic is not an
 executed canonical Stage42 affine witness. Consumer closure and a real Go Knight
-scope remain open before any new-head necessity can be claimed.
+scope remain open; these observations do not prove new heads necessary or sufficient.
 
 The bounded inspector now gives all eight raw sources/masks and current visual
 producer sidecars priority over historical model references. Failed refs remain
@@ -241,21 +257,25 @@ Fresh regression telemetry remains the current optimization baseline:
 
 These measured costs define optimization priorities after repository currentness is sealed.
 
-## Immediate execution priorities
+## Current continuation
 
-1. PR #65 and #67 are merged. Keep PR #66 archived; main remains canonical.
-2. Complete the visual work in `docs/presentation/VISUAL_MESH_IMPLEMENTATION_20261009.md`.
-   The texel material transport, PM filtering and canonical depth connection are
-   engineering changes; amodal material, inter-chart contacts and semantic art
-   order still require matched acceptance evidence.
-3. Use a controlled Go Attempt with the exact baseline M/G/W and motion inputs,
-   then produce fresh Knight IDLE/RUN/SLASH across V0–V7. The developer-host job
-   in run37986333890 was observed without a runner assignment; do not replace it with
-   a direct historical ledger execution or label CI as Knight closure.
+1. Complete platform/state cleanup and verify exact-head CI plus deployment on
+   main. Keep PR #66 archived and preserve scientific scope boundaries.
+2. Inspect producer/consumer wiring and edited source impact through
+   `docs/platform/DYNAMIC_ARCHITECTURE.md`. Unknown mappings and broad shared
+   closures remain visible; engineering PASS does not close appearance contracts.
+3. The user's next requested diagnosis is one exact neck-gap point and one
+   missing-foot point in the previously examined GIFs. Pin each original code,
+   renderer, artifacts, frame/view and coordinate, then trace source → GSA →
+   TESSA/M address → Stage18 → Stage37 → Stage42 → CAA → runtime. At each boundary
+   record DEFINED / PRODUCED / SERIALIZED / CONSUMED / BEHAVIORALLY USED.
+   A boundary not executed in that render is not silently filled from another
+   run. Unknown evidence stays unknown; report the first proven break.
 
-IRIS appearance research is now authorized under the separate protocol above.
-General mechanics refitting and FIT8/LOFO/unseen claims remain outside the
-present Knight witness; future declared research scopes may change them.
+The shared IRIS proposal remains unapproved. No new head training, refit or
+scientific execution is implied by cleanup or this read-only lineage diagnosis.
+General mechanics refitting and FIT8/LOFO/unseen claims remain outside the current
+Knight witness; future explicitly declared scopes may change them.
 
 ## Read first
 

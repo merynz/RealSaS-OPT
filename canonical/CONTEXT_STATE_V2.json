@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.ContextState.v2",
-  "date": "2026-10-08",
+  "date": "2026-10-11",
   "continuation_branch": "main",
   "execution_branch": "main",
   "status": "CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED",
@@ -26,16 +26,24 @@
     "next_visible_product_milestone": "Import latest sealed artifacts into a Go research Attempt and prove scoped component replacement before fresh carrier-native preview"
   },
   "current_focus": {
-    "module": "Go development/product execution separation",
+    "module": "Canonical main platform cleanup and source-derived DAG visibility",
     "state": "CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED",
     "active_experiment": "PLATFORM_EXECUTION_LANES",
     "most_recent_closed_gate": "AXIS541_MIRA55_CARRIER_NATIVE_KNIGHT_FIT1_TEACHER_RELATIVE_PASS",
     "promotion_block": "Absolute G3 and product/appearance qualifications remain independently open. Real artifact import/reseal and component-replacement execution remain required beyond the validated control-plane contracts.",
     "scope_warning": "Knight FIT1 teacher-relative mechanics PASS is preserved. Absolute G3 is a separate gap; product/unseen/latency/new render are not claimed.",
-    "scientific_question": "Can dependency-aware immutable artifact reuse preserve independent checkpoints and appearance while only changed components and consumers rerun?"
+    "scientific_question": "Can dependency-aware immutable artifact reuse preserve independent checkpoints and appearance while only changed components and consumers rerun?",
+    "next_execution_selection": "No new scientific execution selected by this cleanup; inspect existing Go context and obtain explicit scope",
+    "iris_geometry_appearance_proposal": {
+      "status": "PROPOSED__USER_APPROVAL_PENDING",
+      "document": "docs/research/IRIS_GEOMETRY_APPEARANCE_PROPOSAL_20261011.md",
+      "implemented": false,
+      "approved_next_step": false
+    },
+    "next_read_only_diagnosis": "After cleanup: exact-point neck/foot source-to-raster lineage; no new model execution implied"
   },
   "execution_environment": {
-    "actions": "SELF_HOSTED_LOCAL_ONLY",
+    "actions": "GITHUB_HOSTED_PUBLIC_CPU_CI__SELF_HOSTED_SELECTED_NATIVE_HOST",
     "labels": [
       "self-hosted",
       "linux",
@@ -44,7 +52,7 @@
     ],
     "runner": "realsas-wsl-1660ti",
     "operator_path": "$HOME/realsas_authority",
-    "reason": "large artifacts/checkpoints and exact cache reuse stay on the persistent self-hosted authority root"
+    "reason": "Public host-independent CPU checks use standard GitHub-hosted Linux; persistent artifact/native witnesses use the selected self-hosted root; research GPU defaults to notebook/Colab"
   },
   "fit_science": {
     "principle": "A FIT pass is scoped capability evidence on one exact witness and exact apparatus.",

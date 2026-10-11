@@ -52,16 +52,24 @@ def smoke_plans():
     return baseline, candidate
 
 
-def wait_attempt(attempt_id, timeout):
+def wait_attempt_terminal(attempt_id, timeout):
+    """Observe terminal failure too, so operators can export and hand off it."""
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         state = request(f"/v1/attempts/{attempt_id}")
-        if state["state"] == "COMPLETED":
+        if state["state"] in {"COMPLETED", "FAILED", "PASS", "FAIL", "ABSTAIN", "CANCELED", "CANCELLED", "ABORTED"}:
             return state
         if state["state"] != "OPEN":
-            raise RuntimeError(f"SMOKE_ATTEMPT_FAILED:{json.dumps(state)}")
+            raise RuntimeError(f"PLATFORM_UNKNOWN_ATTEMPT_STATE:{state['state']}")
         time.sleep(1)
     raise RuntimeError(f"SMOKE_ATTEMPT_TIMEOUT:{attempt_id}; inspect stored events, do not resubmit blindly")
+
+
+def wait_attempt(attempt_id, timeout):
+    state = wait_attempt_terminal(attempt_id, timeout)
+    if state["state"] != "COMPLETED":
+        raise RuntimeError(f"SMOKE_ATTEMPT_FAILED:{json.dumps(state)}")
+    return state
 
 
 def registry_read(root, sql):

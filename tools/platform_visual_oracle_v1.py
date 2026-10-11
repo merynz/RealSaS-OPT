@@ -22,10 +22,92 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from compiler.realsas_compiler_services.orchestrator import mainline
 from tools.platform_artifact_store import hydrate_inventory, cas_path
-from tools.platform_deployment_smoke import request, wait_attempt, registry_read
+from tools.platform_deployment_smoke import request, wait_attempt_terminal, registry_read
 from tools.platform_release_snapshot import snapshot
 
 ACTOR = "alfred-authored-visual-oracle-v1"
+
+
+def finalize_terminal(root, export, checkpoint, state, terminal):
+    """Export partial evidence and close only the original Go-owned scope.
+
+    May run after main advances. Never constructs inputs, enters a session or
+    submits execution. Go revalidates scope and refuses pending commands.
+    """
+    if terminal["attempt_id"] != state["attempt_id"] or terminal["state"] not in {
+            "COMPLETED", "FAILED", "PASS", "FAIL", "ABSTAIN", "CANCELED", "CANCELLED", "ABORTED"}:
+        raise RuntimeError("ORACLE_FINALIZE_REQUIRES_ORIGINAL_TERMINAL_ATTEMPT")
+    ticket = state["ticket"]
+    scope = ticket["scope"]
+    expected = {"attempt_id": state["attempt_id"], "subject_id": state["subject_id"],
+                "subject_input_id": state["subject_input_id"], "engine_release_id": state["release_id"],
+                "canonical_code_sha": state["code_sha"], "target_stage_id": "49_VISUAL_ORACLE_MEASURE"}
+    if any(scope.get(k) != v for k, v in expected.items()):
+        raise RuntimeError("ORACLE_CHECKPOINT_SCOPE_DRIFT")
+    context = request("/v1/agents/context/" + state["subject_id"])
+    prior = context.get("last_handoff") or {}
+    if context.get("active_session") != scope and not (
+            prior.get("scope") == scope and prior.get("scope_sha256") == ticket["scope_sha256"]):
+        raise RuntimeError("ORACLE_GO_CONTEXT_SCOPE_DRIFT")
+    state["terminal_state"] = terminal
+    mainline.atomic_json(export / "terminal-attempt.json", terminal)
+    errors, verified = [], []
+    ledger_path = mainline.run_ledger_path(state["run_id"])
+    try:
+        ledger = mainline.load_json(ledger_path) if ledger_path.is_file() else None
+    except (OSError, ValueError) as error:
+        ledger = None
+        errors.append({"error": "ENGINE_LEDGER_UNREADABLE", "detail": str(error)})
+    if ledger is None:
+        errors.append({"error": "ENGINE_LEDGER_MISSING"})
+    else:
+        mainline.atomic_json(export / "engine-ledger.json", ledger)
+        for stage in ledger["stages"]:
+            for output in stage.get("outputs", []):
+                try:
+                    path = Path(output["path"])
+                    if mainline.sha256_file(path) != output["sha256"]:
+                        raise RuntimeError("ORACLE_EXPORT_OUTPUT_DRIFT")
+                    # Stage directories prevent partial outputs with equal
+                    # basenames from silently overwriting each other.
+                    destination = export / "outputs" / stage["id"] / path.name
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(path, destination)
+                    verified.append({"stage_id": stage["id"], "path": str(destination), "sha256": output["sha256"]})
+                except (OSError, RuntimeError) as error:
+                    errors.append({"stage_id": stage["id"], "path": output["path"], "error": str(error)})
+    measurement = next((row for row in verified if row["stage_id"] == "49_VISUAL_ORACLE_MEASURE"
+                        and Path(row["path"]).name == "measurement.json"), None)
+    if measurement:
+        shutil.copyfile(measurement["path"], export / "measurement.json")
+    elif terminal["state"] == "COMPLETED":
+        errors.append({"error": "COMPLETED_ATTEMPT_MEASUREMENT_MISSING"})
+    manifest_path = mainline.run_manifest_path(state["run_id"])
+    if manifest_path.is_file():
+        mainline.atomic_json(export / "run-manifest.json", mainline.load_json(manifest_path))
+    mainline.atomic_json(export / "hydration.json", state.get("hydration", {}))
+    receipt = {"attempt_state": terminal["state"], "verified_outputs": verified, "export_errors": errors,
+               "scientific_pass_inferred": False}
+    mainline.atomic_json(export / "export-receipt.json", receipt)
+    state["export_receipt"] = receipt
+    # Persist the exact retry body before sending. A lost HTTP reply cannot
+    # change an exit summary on retry and cause idempotency drift.
+    if not state.get("exit_request"):
+        state["exit_request"] = {"session_id": scope["session_id"], "attempt_id": state["attempt_id"],
+            "scope_sha256": ticket["scope_sha256"], "created_by": ACTOR,
+            "next_action": "Review this exact oracle's terminal diagnostics and measurements; any new execution needs a separately declared scope",
+            "summary": json.dumps({"attempt_state": terminal["state"], "verified_output_count": len(verified),
+                                   "export_error_count": len(errors), "scientific_pass_inferred": False}, sort_keys=True)}
+    mainline.atomic_json(checkpoint, state)
+    if not state.get("handoff"):
+        state["handoff"] = request("/v1/agents/exit", state["exit_request"])
+        mainline.atomic_json(checkpoint, state)
+    product_count = registry_read(root, "SELECT count(*) FROM product_revisions WHERE subject_id='"+str(uuid.UUID(state["subject_id"]))+"'")
+    if product_count != "0":
+        raise RuntimeError("ORACLE_RESEARCH_MINTED_PRODUCT_REVISION")
+    if terminal["state"] != "COMPLETED" or errors:
+        raise RuntimeError("ORACLE_TERMINAL_FAILURE_OR_EXPORT_GAP__DIAGNOSTICS_AND_HANDOFF_PRESERVED")
+    return receipt
 
 
 def oracle_plan():
@@ -77,10 +159,9 @@ def source_inputs(spec, root, *, rclone_remote):
                 "variants": spec["variants"]}, "oracle_measure": spec["measurement"]}, hydration
 
 
-def run(root, timeout, *, rclone_remote):
+def run(root, timeout, *, rclone_remote=None, finalize_existing=False):
     spec = mainline.load_json(ROOT / "canonical/AUTHORED_VISUAL_ORACLE_V1_20261010.json")
     deployment = mainline.load_json(root / "deployment.json")
-    canonical_checkout(deployment)
     os.environ["REALSAS_AUTHORITY_ROOT"] = deployment["authority_root"]
     export = root / "oracle-results" / spec["experiment_id"]
     export.mkdir(parents=True, exist_ok=True)
@@ -88,10 +169,21 @@ def run(root, timeout, *, rclone_remote):
     state = mainline.load_json(checkpoint) if checkpoint.exists() else {}
     def save():
         mainline.atomic_json(checkpoint, state)
+    if finalize_existing:
+        if not state.get("ticket"):
+            raise RuntimeError("ORACLE_FINALIZE_REQUIRES_EXISTING_CHECKPOINT_AND_TICKET")
+        terminal = request("/v1/attempts/" + state["attempt_id"])
+        finalize_terminal(root, export, checkpoint, state, terminal)
+        return
+    canonical_checkout(deployment)
     if state.get("handoff"):
-        print(json.dumps({"already_completed_attempt": state["attempt_id"], "export": str(export)}), flush=True)
+        print(json.dumps({"already_finalized_attempt": state["attempt_id"], "export": str(export)}), flush=True)
+        if state.get("terminal_state", {}).get("state") != "COMPLETED" or state.get("export_receipt", {}).get("export_errors"):
+            raise RuntimeError("ORACLE_TERMINAL_FAILURE_OR_EXPORT_GAP__DIAGNOSTICS_AND_HANDOFF_PRESERVED")
         return
     if not state:
+        if not rclone_remote:
+            raise RuntimeError("ORACLE_NEW_EXECUTION_REQUIRES_RCLONE_REMOTE")
         identity, hydration = source_inputs(spec, root, rclone_remote=rclone_remote)
         subject = request("/v1/subjects", {"slug": spec["experiment_id"].lower(),
             "display_name": "Authored 2D appearance oracle; independent of mechanical Knight", "created_by": ACTOR})["subject_id"]
@@ -147,33 +239,15 @@ def run(root, timeout, *, rclone_remote):
         "pipeline_plan_sha256": mainline.content_sha256(plan), "idempotency_key": spec["experiment_id"]+":"+state["run_id"], "requested_by": ACTOR})
     save()
     print(json.dumps({"attempt_id": state["attempt_id"], "run_id": state["run_id"], "code_sha": state["code_sha"]}), flush=True)
-    terminal = wait_attempt(state["attempt_id"], timeout)
-    state["terminal_state"] = terminal; save()
-    ledger = mainline.load_json(mainline.run_ledger_path(state["run_id"]))
-    target = ledger["stages"][-1]
-    for output in target["outputs"]:
-        path = Path(output["path"])
-        if mainline.sha256_file(path) != output["sha256"]:
-            raise RuntimeError("ORACLE_EXPORT_OUTPUT_DRIFT")
-        shutil.copyfile(path, export / path.name)
-    for name, value in (("engine-ledger.json", ledger), ("run-manifest.json", manifest), ("hydration.json", state["hydration"])):
-        mainline.atomic_json(export / name, value)
-    measurement = mainline.load_json(export / "measurement.json")
-    summary = json.dumps({k: measurement[k] for k in ("baseline_raster_fit_passed", "hidden_sprite_material", "negative_controls_detected")}, sort_keys=True)
-    state["handoff"] = request("/v1/agents/exit", {"session_id": ticket["scope"]["session_id"],
-        "attempt_id": state["attempt_id"], "scope_sha256": ticket["scope_sha256"], "created_by": ACTOR,
-        "next_action": "Review authored-2D oracle measurements; qualify missing 3D bind and contact/grip domains before Knight intervention", "summary": summary})
-    save()
-    product_count = registry_read(root, "SELECT count(*) FROM product_revisions WHERE subject_id='"+str(uuid.UUID(state["subject_id"]))+"'")
-    if product_count != "0":
-        raise RuntimeError("ORACLE_RESEARCH_MINTED_PRODUCT_REVISION")
-    print(summary, flush=True)
+    terminal = wait_attempt_terminal(state["attempt_id"], timeout)
+    print(json.dumps(finalize_terminal(root, export, checkpoint, state, terminal)), flush=True)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--timeout", type=float, default=900)
-    parser.add_argument("--rclone-remote", required=True, help="Existing authenticated host Drive remote; transport only")
+    parser.add_argument("--rclone-remote", help="Existing authenticated host Drive remote; required for new execution")
+    parser.add_argument("--finalize-existing", action="store_true", help="Only export and exit the original terminal scope, including after main advances; no execution")
     args = parser.parse_args()
-    run(args.root, args.timeout, rclone_remote=args.rclone_remote)
+    run(args.root, args.timeout, rclone_remote=args.rclone_remote, finalize_existing=args.finalize_existing)

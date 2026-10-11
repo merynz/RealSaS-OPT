@@ -1,0 +1,41 @@
+name: iris-semantic-evidence-v1
+on:
+  pull_request:
+    paths:
+      - 'models/iris/semantic_evidence_v1.py'
+      - 'compiler/realsas_compiler_core/semantic_relation_evidence_v1.py'
+      - 'tools/research/run_frozen_semantic_evidence_v1.py'
+      - 'tools/research/compile_knight_semantic_relations_v1.py'
+      - 'tests/iris/test_semantic_relation_evidence_v1.py'
+      - 'requirements/semantic-research.txt'
+      - 'docs/research/IRIS_FROZEN_SEMANTIC_EVIDENCE_DECISION_20261012.md'
+      - '.github/workflows/iris_semantic_evidence_v1.yml'
+  push:
+    branches: [research/iris-semantic-behavior-v1-20261012]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  semantic-contract:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Canonical IRIS geometry source must remain unchanged in PR
+        if: github.event_name == 'pull_request'
+        run: git diff --exit-code "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" -- models/iris/v4/scene_first_signed_v4.py
+      - name: Compile semantic research modules
+        run: >-
+          python -m py_compile
+          models/iris/semantic_evidence_v1.py
+          compiler/realsas_compiler_core/semantic_relation_evidence_v1.py
+          tools/research/run_frozen_semantic_evidence_v1.py
+          tools/research/compile_knight_semantic_relations_v1.py
+      - name: Run semantic relation evidence tests
+        run: PYTHONPATH=. python -m pytest -q tests/iris/test_semantic_relation_evidence_v1.py

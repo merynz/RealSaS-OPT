@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import re
 import subprocess
 import uuid
 import zipfile
@@ -132,19 +133,92 @@ class SealedInputCatalogue:
         return report
 
 
-def go_context(platform_root):
+def pin_current_visual_inputs(catalogue, ledger, manifest):
+    """Give current typed visual inputs budget before unrelated history.
+
+    These are transport priorities, not cache hits or stage qualifications.
+    The complete reference walk still runs and retains its failures.
+    """
+    for key, member in (("source_rasters", "image"), ("source_foreground_masks", "mask")):
+        rows = manifest["observation"][key]
+        if len(rows) != 8 or sorted(int(row["view_index"]) for row in rows) != list(range(8)):
+            raise RuntimeError("KNIGHT_INSPECTION_SOURCE_VIEW_MATRIX_INVALID:" + key)
+        for row in sorted(rows, key=lambda item: int(item["view_index"])):
+            ref = row[member]
+            catalogue.inspect(ref["path"], expected=ref["sha256"],
+                              origin="CURRENT_VISUAL_SOURCE:" + key + ":V" + str(row["view_index"]))
+    selected = {"05_CAMERA_CONTRACT_SOLVED", "07_OBSERVATION_CONTRACT_QUALIFIED",
+                "18_CANONICAL_MESH_ADDRESSING_BUILD", "21_CAA_COMPILE",
+                "23_COMPLETE_APPEARANCE_ASSET_BAKED", "24_COMPLETE_APPEARANCE_QUALIFIED"}
+    for sid in sorted(selected):
+        stages = [stage for stage in ledger["stages"] if stage["id"] == sid]
+        if len(stages) != 1:
+            raise RuntimeError("KNIGHT_INSPECTION_CURRENT_STAGE_CARDINALITY:" + sid)
+        for row in stages[0].get("outputs", []):
+            catalogue.inspect(row["path"], expected=row["sha256"], origin="CURRENT_VISUAL_OUTPUT:" + sid)
+            path = Path(row["path"])
+            # Only already verified producer bytes may contribute priorities.
+            verified = catalogue.rows.get(str(path.resolve()))
+            if (verified is None or verified["sha256"] != row["sha256"]
+                    or path.suffix.lower() != ".json"):
+                continue
+            payload = json.loads(path.read_text())
+            groups = [payload, *payload.get("views", [])]
+            metadata = payload.get("metadata", {})
+            if "canonical_completion_field_path" in metadata:
+                groups.append({key: metadata[key] for key in
+                    ("canonical_completion_field_path", "canonical_completion_field_sha256")
+                    if key in metadata})
+            # Typed top-level sidecars and per-view mesh sidecars; metadata's
+            # historical checkpoints/old execution logs are not current seeds.
+            for group in groups:
+                for key, value in group.items():
+                    if key.endswith("_path") and isinstance(value, str):
+                        expected = group.get(key[:-5] + "_sha256")
+                        if isinstance(expected, str) and re.fullmatch(r"[0-9a-f]{64}", expected):
+                            catalogue.inspect(value, expected=expected,
+                                origin="CURRENT_VISUAL_SIDECAR:" + sid + "#" + key)
+
+
+def go_selection_sql(input_hashes):
+    input_hashes = list(input_hashes)
+    if any(not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None for value in input_hashes):
+        raise RuntimeError("KNIGHT_INSPECTION_GO_INPUT_HASH_INVALID")
+    values = sorted(set(input_hashes))
+    if len(values) > 256:
+        raise RuntimeError("KNIGHT_INSPECTION_GO_INPUT_QUERY_LIMIT_EXCEEDED")
+    by_bytes = ""
+    if values:
+        hashes = ",".join("'" + value + "'" for value in values)
+        by_bytes = (" OR EXISTS (SELECT 1 FROM subject_inputs si "
+            "JOIN subject_input_artifacts sia ON sia.subject_input_id=si.id "
+            "JOIN artifacts a ON a.id=sia.artifact_id "
+            "WHERE si.subject_id=s.id AND a.content_sha256 IN (" + hashes + "))"
+            " OR EXISTS (SELECT 1 FROM attempts at "
+            "JOIN attempt_artifacts aa ON aa.attempt_id=at.id "
+            "JOIN artifacts a ON a.id=aa.artifact_id "
+            "WHERE at.subject_id=s.id AND a.content_sha256 IN (" + hashes + "))")
+    return ("SELECT s.id::text||'|'||s.slug FROM subjects s "
+        "WHERE lower(s.slug) LIKE '%knight%' OR lower(s.display_name) LIKE '%knight%'" + by_bytes +
+        " ORDER BY s.slug LIMIT 21;")
+
+
+def go_context(platform_root, *, input_hashes=()):
     from tools.platform_deployment_smoke import registry_read, request
-    rows = registry_read(platform_root,
-        "SELECT id::text||'|'||slug FROM subjects "
-        "WHERE lower(slug) LIKE '%knight%' ORDER BY slug LIMIT 20;")
+    rows = registry_read(platform_root, go_selection_sql(input_hashes))
+    selected = rows.splitlines()
     subjects = []
-    for line in rows.splitlines():
+    for line in selected[:20]:
         subject_id, slug = line.split("|", 1)
         subject_id = str(uuid.UUID(subject_id))
         subjects.append({"subject_id": subject_id, "slug": slug,
                          "agent_context": request("/v1/agents/context/" + subject_id)})
     return {"operation": "READ_ONLY_GO_AGENT_CONTEXT", "subjects": subjects,
             "subject_query_limit": 20, "subject_selection_is_execution_authority": False,
+            "subject_query_truncated": len(selected) > 20,
+            "subject_selection": "KNIGHT_SLUG_OR_DISPLAY_NAME_OR_EXACT_DIRECT_INPUT_ARTIFACT_BYTES",
+            "input_content_sha256": sorted(set(input_hashes)),
+            "transitive_section_payload_identity_match_proven": False,
             "no_matching_subject_is_qualified_baseline": False}
 
 
@@ -156,7 +230,9 @@ def main(args):
     deployment = json.loads((args.platform_root / "deployment.json").read_text())
     if remote != code_sha or deployment["code_sha"] != code_sha:
         raise RuntimeError("KNIGHT_INSPECTION_REQUIRES_EXACT_DEPLOYED_LIVE_MAIN")
-    context = {"code_sha": code_sha, "go": go_context(args.platform_root),
+    inventory = json.loads((repo / "canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json").read_text())
+    context = {"code_sha": code_sha, "go": go_context(args.platform_root,
+        input_hashes=[row["sha256"] for row in inventory["required_files"]]),
                "source": "SEALED_KNIGHT_BYTES_AND_GO_READ_ONLY_STATE"}
     catalogue = SealedInputCatalogue((args.authority_root, repo), collect_reference_failures=True,
                                      defer_reference_walk=True)
@@ -165,11 +241,12 @@ def main(args):
                  material / "RECEIPT.json", material / "rebound_candidate.json",
                  material / "mechanical_carrier_evidence.json", material / "qualified_carrier_skin.json"):
         catalogue.inspect(path, origin="EXPLICIT_SEALED_KNIGHT_ROOT")
-    inventory = json.loads((repo / "canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json").read_text())
     for row in inventory["required_files"]:
         catalogue.inspect(args.input_root / row["name"], expected=row["sha256"], origin="PINNED_EXTERNAL_INVENTORY")
     for name in ("demo_idle_v1.motion.json", "demo_run_v1.motion.json", "demo_slash_v1.motion.json"):
         catalogue.inspect(args.input_root / name, origin="EXPLICIT_MOTION_INPUT__NOT_REUSE_QUALIFICATION")
+    pin_current_visual_inputs(catalogue, json.loads((caa / "ACTIVE_RUN_V2.json").read_text()),
+                              json.loads((caa / "run_manifest.json").read_text()))
     report = catalogue.write(args.out, context=context)
     print(json.dumps({"code_sha": code_sha, "file_count": len(report["files"]),
                       "byte_count": report["total_bytes"],

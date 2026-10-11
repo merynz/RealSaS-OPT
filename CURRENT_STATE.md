@@ -27,7 +27,7 @@ shared closures and ownership debt remain visible; the map cannot authorize reus
 
 The current plan contracts three pure transport/seal boundaries: Stage29 into28,
 Stage33 into32, and Stage36 into35. Stage28/32 produce checkpoint seals alongside
-their qualified skeleton/skin; Stage35 produces qualified M and its exact skin
+their qualified skeleton/skin; Stage35 produces `QualifiedMeshIR` and its exact `QualifiedMeshSkinIR`
 binding. Existing checkpoint byte checks, binding algorithms and qualification
 gates still run. IDs stay stable; ordinals are contiguous. Actual implementation
 modules replace star-import proxies in the plan. Previous source is retained at

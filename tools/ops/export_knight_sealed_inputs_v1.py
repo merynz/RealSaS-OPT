@@ -21,12 +21,24 @@ MAT_RUN = "KNIGHT_LATEST_CARRIER_MATERIALIZATION_20261010"
 
 
 class SealedInputCatalogue:
-    def __init__(self, roots, *, byte_budget=200 << 20):
+    def __init__(self, roots, *, byte_budget=200 << 20, collect_reference_failures=False):
         self.roots = tuple(Path(root).resolve() for root in roots)
         self.byte_budget = byte_budget
         self.rows = {}
         self.unbound_references = []
         self.total_bytes = 0
+        self.collect_reference_failures = collect_reference_failures
+        self.reference_failures = []
+
+    def inspect(self, raw_path, *, expected=None, origin):
+        try:
+            self.add(raw_path, expected=expected, origin=origin)
+        except RuntimeError as error:
+            if not self.collect_reference_failures:
+                raise
+            self.reference_failures.append({"path": str(raw_path), "origin": origin,
+                "expected_sha256": expected, "actual_sha256": getattr(error, "actual_sha256", None),
+                "error": str(error), "file_transported_as_verified_input": False})
 
     def add(self, raw_path, *, expected=None, origin):
         path = Path(raw_path).resolve()
@@ -36,7 +48,9 @@ class SealedInputCatalogue:
             raise RuntimeError("KNIGHT_INSPECTION_REFERENCED_FILE_MISSING:" + str(path))
         actual = digest(path)
         if expected is not None and actual != expected:
-            raise RuntimeError("KNIGHT_INSPECTION_REFERENCED_BYTES_DRIFT:" + str(path))
+            error = RuntimeError("KNIGHT_INSPECTION_REFERENCED_BYTES_DRIFT:" + str(path))
+            error.actual_sha256 = actual
+            raise error
         key = str(path)
         if key in self.rows:
             if self.rows[key]["sha256"] != actual:
@@ -63,7 +77,7 @@ class SealedInputCatalogue:
                     hash_key = "sha256" if key == "path" else key[:-5] + "_sha256"
                     expected = value.get(hash_key)
                     if isinstance(expected, str) and len(expected) == 64:
-                        self.add(item, expected=expected, origin=origin + "#" + key)
+                        self.inspect(item, expected=expected, origin=origin + "#" + key)
                     else:
                         self.unbound_references.append({"origin": origin, "key": key, "path": item})
                 elif isinstance(item, (dict, list)):
@@ -74,6 +88,9 @@ class SealedInputCatalogue:
         report = {"schema": "RealSaS.SealedInputInspection.v1", "context": context,
                   "files": list(self.rows.values()), "total_bytes": self.total_bytes,
                   "unbound_references": self.unbound_references,
+                  "reference_failures": self.reference_failures,
+                  "all_bound_references_verified": not self.reference_failures,
+                  "inspection_complete": not self.reference_failures,
                   "qualification_minted": False, "model_inference_executed": False,
                   "input_payloads_rewritten": False, "full_visual_acceptance_passed": False}
         atomic_json(out / "SEALED_INPUT_INSPECTION.json", report)
@@ -124,24 +141,28 @@ def main(args):
     deployment = json.loads((args.platform_root / "deployment.json").read_text())
     if remote != code_sha or deployment["code_sha"] != code_sha:
         raise RuntimeError("KNIGHT_INSPECTION_REQUIRES_EXACT_DEPLOYED_LIVE_MAIN")
-    catalogue = SealedInputCatalogue((args.authority_root, repo))
+    context = {"code_sha": code_sha, "go": go_context(args.platform_root),
+               "source": "SEALED_KNIGHT_BYTES_AND_GO_READ_ONLY_STATE"}
+    catalogue = SealedInputCatalogue((args.authority_root, repo), collect_reference_failures=True)
     caa, material = [args.authority_root / "runs" / name for name in (CAA_RUN, MAT_RUN)]
     for path in (caa / "ACTIVE_RUN_V2.json", caa / "run_manifest.json", caa / "CAA_RECEIPT.json",
                  material / "RECEIPT.json", material / "rebound_candidate.json",
                  material / "mechanical_carrier_evidence.json", material / "qualified_carrier_skin.json"):
-        catalogue.add(path, origin="EXPLICIT_SEALED_KNIGHT_ROOT")
+        catalogue.inspect(path, origin="EXPLICIT_SEALED_KNIGHT_ROOT")
     inventory = json.loads((repo / "canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json").read_text())
     for row in inventory["required_files"]:
-        catalogue.add(args.input_root / row["name"], expected=row["sha256"], origin="PINNED_EXTERNAL_INVENTORY")
+        catalogue.inspect(args.input_root / row["name"], expected=row["sha256"], origin="PINNED_EXTERNAL_INVENTORY")
     for name in ("demo_idle_v1.motion.json", "demo_run_v1.motion.json", "demo_slash_v1.motion.json"):
-        catalogue.add(args.input_root / name, origin="EXPLICIT_MOTION_INPUT__NOT_REUSE_QUALIFICATION")
-    context = {"code_sha": code_sha, "go": go_context(args.platform_root),
-               "source": "SEALED_KNIGHT_BYTES_AND_GO_READ_ONLY_STATE"}
+        catalogue.inspect(args.input_root / name, origin="EXPLICIT_MOTION_INPUT__NOT_REUSE_QUALIFICATION")
     report = catalogue.write(args.out, context=context)
     print(json.dumps({"code_sha": code_sha, "file_count": len(report["files"]),
                       "byte_count": report["total_bytes"],
                       "go_subject_count": len(context["go"]["subjects"]),
-                      "unbound_reference_count": len(report["unbound_references"])}), flush=True)
+                      "unbound_reference_count": len(report["unbound_references"]),
+                      "reference_failure_count": len(report["reference_failures"]),
+                      "inspection_complete": report["inspection_complete"]}), flush=True)
+    if not report["inspection_complete"]:
+        raise RuntimeError("KNIGHT_INSPECTION_REFERENCE_FAILURES__VERIFIED_PARTIAL_CAPSULE_PRESERVED")
 
 
 if __name__ == "__main__":

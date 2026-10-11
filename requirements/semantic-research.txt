@@ -1,0 +1,4 @@
+# Research-only frozen semantic evidence provider environment.
+# Install alongside the already-qualified torch environment; do not use this file
+# to rewrite sealed historical experiment dependencies.
+transformers==5.19.0

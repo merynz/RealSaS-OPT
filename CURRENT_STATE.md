@@ -71,6 +71,16 @@ before continuing; never infer visual PASS from a green workflow.
 
 ## Active platform work
 
+The architecture CLI now generates the canonical producer/consumer JSON and
+interactive HTML view plus conservative source/manifest impact. Its source
+fingerprint rejects edits during discovery; CI regenerates the view without
+committing a second authority. See `docs/platform/DYNAMIC_ARCHITECTURE.md`.
+Failed authored-oracle terminal states can export verified partial outputs and
+exit the original scope; explicit finalize-only recovery can do this after main
+advances, without new execution. Lost-reply retries preserve their exact exit
+body. This source repair is not evidence that every historic session is closed;
+inspect Go context before recovery. See `docs/platform/AGENT_HANDOFF.md`.
+
 Active experiment: `PLATFORM_EXECUTION_LANES`. State:
 `CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED`.
 

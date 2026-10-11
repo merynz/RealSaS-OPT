@@ -419,7 +419,10 @@ def source_snapshot(discovery: dict[str, Any]) -> dict[str, Any]:
     observed = {row["path"]: row["sha256"] for row in rows}
     expected = {row["path"]: row["sha256"] for row in discovery["critical_file_hashes"]}
     for stage in discovery["stage_closures"].values():
-        expected.update(stage["dependency_file_hashes"])
+        for path, digest in stage["dependency_file_hashes"].items():
+            if path in expected and expected[path] != digest:
+                raise RuntimeError("ARCHITECTURE_SOURCE_CHANGED_DURING_DISCOVERY__REGENERATE")
+            expected[path] = digest
     if any(observed.get(path) != digest for path, digest in expected.items()):
         raise RuntimeError("ARCHITECTURE_SOURCE_CHANGED_DURING_DISCOVERY__REGENERATE")
     if mainline.content_sha256(mainline.load_json(mainline.PLAN_PATH)) != discovery["pipeline_plan_sha256"]:
@@ -658,6 +661,7 @@ def main() -> int:
         if args.base:
             base = _run(["git", "rev-parse", "--verify", args.base + "^{commit}"]).stdout.strip()
             paths.extend(_run(["git", "diff", "--name-only", "-z", base, "--"]).stdout.split("\0"))
+            paths.extend(_run(["git", "ls-files", "--others", "--exclude-standard", "-z"]).stdout.split("\0"))
             paths = [p for p in paths if p]
         if not paths and not args.manifest_key:
             parser.error("impact requires --path, --base or --manifest-key")

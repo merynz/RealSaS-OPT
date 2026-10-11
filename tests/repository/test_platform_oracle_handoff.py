@@ -86,7 +86,11 @@ def test_lost_exit_reply_retries_exact_body_even_if_export_changes(tmp_path, mon
         oracle.finalize_terminal(tmp_path, export, checkpoint, state, terminal)
     first_body = calls[-1][1]
     partial.write_text('changed')
-    monkeypatch.setattr(oracle, "request", original)
+    def advanced_context(path, value=None, **kwargs):
+        if path.startswith("/v1/agents/context/"):
+            return {"active_session": {"session_id": "another-session"}, "last_handoff": {"scope": {"session_id": "another-scope"}}}
+        return original(path, value, **kwargs)
+    monkeypatch.setattr(oracle, "request", advanced_context)
     recovered = json.loads(checkpoint.read_text())
     with pytest.raises(RuntimeError, match="DIAGNOSTICS_AND_HANDOFF_PRESERVED"):
         oracle.finalize_terminal(tmp_path, export, checkpoint, recovered, terminal)

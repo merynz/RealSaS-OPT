@@ -84,3 +84,8 @@ def test_map_rejects_source_edit_during_discovery(tmp_path, monkeypatch):
     with pytest.raises(RuntimeError, match="SOURCE_CHANGED_DURING_DISCOVERY"):
         arch.source_snapshot(d)
     assert len(first["source_fingerprint_sha256"]) == 64
+    # A shared file changed between two adapter scans must not be masked by
+    # the last adapter's current digest.
+    d["stage_closures"]["later"] = {"dependency_file_hashes": {paths[0]: arch.mainline.sha256_file(source)}}
+    with pytest.raises(RuntimeError, match="SOURCE_CHANGED_DURING_DISCOVERY"):
+        arch.source_snapshot(d)

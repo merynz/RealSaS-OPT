@@ -46,8 +46,12 @@ def finalize_terminal(root, export, checkpoint, state, terminal):
         raise RuntimeError("ORACLE_CHECKPOINT_SCOPE_DRIFT")
     context = request("/v1/agents/context/" + state["subject_id"])
     prior = context.get("last_handoff") or {}
+    retry = state.get("exit_request") or {}
+    exact_saved_retry = all(retry.get(k) == v for k, v in {
+        "session_id": scope["session_id"], "attempt_id": state["attempt_id"],
+        "scope_sha256": ticket["scope_sha256"], "created_by": ACTOR}.items())
     if context.get("active_session") != scope and not (
-            prior.get("scope") == scope and prior.get("scope_sha256") == ticket["scope_sha256"]):
+            prior.get("scope") == scope and prior.get("scope_sha256") == ticket["scope_sha256"]) and not exact_saved_retry:
         raise RuntimeError("ORACLE_GO_CONTEXT_SCOPE_DRIFT")
     state["terminal_state"] = terminal
     mainline.atomic_json(export / "terminal-attempt.json", terminal)

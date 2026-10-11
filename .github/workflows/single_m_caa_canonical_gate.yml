@@ -24,6 +24,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: single-m-caa-canonical-gate-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   regression:
     if: github.event.repository.private == false

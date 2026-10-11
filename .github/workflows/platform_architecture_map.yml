@@ -32,7 +32,7 @@ jobs:
       - name: Install bounded operator-test dependencies
         run: python -m pip install --no-input --progress-bar off pytest==8.4.1
       - name: Map and failed-run handoff contracts
-        run: python -m pytest -q tests/repository/test_architecture_map.py tests/repository/test_platform_oracle_handoff.py tests/compiler/test_platform_snapshot_closure_v1.py
+        run: python -m pytest -q tests/repository/test_architecture_map.py tests/repository/test_live_architecture.py tests/repository/test_platform_oracle_handoff.py tests/compiler/test_platform_snapshot_closure_v1.py
       - name: Generate current source map without model execution
         run: |
           mkdir -p architecture-view

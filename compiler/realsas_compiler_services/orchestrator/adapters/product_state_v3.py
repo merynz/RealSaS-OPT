@@ -3,7 +3,7 @@ from __future__ import annotations
 """Carrier-native Stage38 mechanical/complete puppet seal.
 
 Stage37 remains presentation-only and consumes QualifiedMeshSkinIR. Stage38 uses
-QualifiedCarrierSkinIR as the semantic W_M authority and the Stage36 artifact only
+QualifiedCarrierSkinIR as the semantic W_M authority and the Stage35 mesh-skin output only
 as an identity re-key onto the exact same M.
 """
 
@@ -32,7 +32,7 @@ def seal_complete_puppet_stage(ctx:dict)->dict:
     envelope=deformation_envelope_from_dict(stage_output_payload(ctx,"34_DEFORMATION_CAPABILITY_ENVELOPE","RealSaS.DeformationCapabilityEnvelopeIR.v1"))
     policy=mesh_policy_from_dict(stage_output_payload(ctx,"18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.MeshQualificationPolicyIR.v1"))
     mesh=qualified_mesh_from_dict(stage_output_payload(ctx,"35_DYNAMIC_MECHANICAL_MESH_QUALIFIED","RealSaS.QualifiedMeshIR.v1"))
-    mesh_skin=qualified_mesh_skin_from_dict(stage_output_payload(ctx,"36_QUALIFIED_MESH_SKIN_TRANSFER","RealSaS.QualifiedMeshSkinIR.v1"))
+    mesh_skin=qualified_mesh_skin_from_dict(stage_output_payload(ctx,"35_DYNAMIC_MECHANICAL_MESH_QUALIFIED","RealSaS.QualifiedMeshSkinIR.v1"))
     structure=presentation_structure_v2_from_dict(stage_output_payload(ctx,"37_QUALIFIED_PRESENTATION_STRUCTURE","RealSaS.QualifiedPresentationStructureIR.v2"))
     partition_evidence=presentation_partition_evidence_from_dict(stage_output_payload(ctx,"37_QUALIFIED_PRESENTATION_STRUCTURE","RealSaS.PresentationPartitionEvidenceIR.v2"))
     asset=complete_appearance_asset_from_dict(stage_output_payload(ctx,"23_COMPLETE_APPEARANCE_ASSET_BAKED","RealSaS.CompleteAppearanceAssetIR.v2"))

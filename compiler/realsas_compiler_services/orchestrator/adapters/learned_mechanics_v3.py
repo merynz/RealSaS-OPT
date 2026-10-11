@@ -43,7 +43,6 @@ from compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_
     _skeleton_proposal,
     execute_geppetto_fit_stage,
     preregister_geppetto_fit_stage,
-    seal_geppetto_checkpoint_stage,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.model_execution_common_v2 import (
     build_fit_execution,
@@ -135,6 +134,10 @@ def qualify_skeleton_stage(ctx: dict) -> dict:
 
     root = ctx["run_root"] / "artifacts" / "28_SKELETON_QUALIFIED"
     q = dict(skeleton.qualification_report or {})
+    checkpoint, checkpoint_output = seal_model_checkpoint(
+        ctx, execution=execution, qualified_output_binding_hash=skeleton.skeleton_lineage_hash,
+        stage_id="28_SKELETON_QUALIFIED",
+    )
     return {
         "status": "PASS",
         "outputs": [
@@ -142,9 +145,11 @@ def qualify_skeleton_stage(ctx: dict) -> dict:
                 root / "qualified_skeleton.json",
                 skeleton,
                 authority_class="QUALIFIED_SKELETON",
-            )
+            ),
+            checkpoint_output,
         ],
         "diagnostics": {
+            "checkpoint_seal_hash": checkpoint.checkpoint_seal_hash,
             "skeleton_lineage_hash": skeleton.skeleton_lineage_hash,
             "joint_count": len(skeleton.joints),
             "optimizer": q.get("solver"),
@@ -174,7 +179,7 @@ def preregister_arachne_fit_stage(ctx: dict) -> dict:
     axis = model_checkpoint_seal_from_dict(
         stage_output_payload(
             ctx,
-            "29_GEPPETTO_CHECKPOINT_SEALED",
+            "28_SKELETON_QUALIFIED",
             "RealSaS.ModelCheckpointSealIR.v1",
         )
     )
@@ -323,6 +328,10 @@ def qualify_skin_stage(ctx: dict) -> dict:
     )
     root = ctx["run_root"] / "artifacts" / "32_SKIN_QUALIFIED"
     q = dict(skin.qualification_report or {})
+    checkpoint, checkpoint_output = seal_model_checkpoint(
+        ctx, execution=execution, qualified_output_binding_hash=skin.skin_lineage_hash,
+        stage_id="32_SKIN_QUALIFIED",
+    )
     return {
         "status": "PASS",
         "outputs": [
@@ -330,9 +339,11 @@ def qualify_skin_stage(ctx: dict) -> dict:
                 root / "qualified_carrier_skin.json",
                 skin,
                 authority_class="QUALIFIED_CARRIER_NATIVE_SKIN",
-            )
+            ),
+            checkpoint_output,
         ],
         "diagnostics": {
+            "checkpoint_seal_hash": checkpoint.checkpoint_seal_hash,
             "skin_lineage_hash": skin.skin_lineage_hash,
             "row_count": len(skin.rows),
             "output_domain": "MECHANICAL_CARRIER_M",
@@ -347,43 +358,12 @@ def qualify_skin_stage(ctx: dict) -> dict:
     }
 
 
-def seal_arachne_checkpoint_stage(ctx: dict) -> dict:
-    execution = model_fit_execution_from_dict(
-        stage_output_payload(
-            ctx, "31_ARACHNE_FIT", "RealSaS.ModelFitExecutionIR.v1"
-        )
-    )
-    skin = qualified_carrier_skin_from_dict(
-        stage_output_payload(
-            ctx,
-            "32_SKIN_QUALIFIED",
-            "RealSaS.QualifiedCarrierSkinIR.v1",
-        )
-    )
-    value, out = seal_model_checkpoint(
-        ctx,
-        execution=execution,
-        qualified_output_binding_hash=skin.skin_lineage_hash,
-        stage_id="33_ARACHNE_CHECKPOINT_SEALED",
-    )
-    return {
-        "status": "PASS",
-        "outputs": [out],
-        "diagnostics": {
-            "checkpoint_seal_hash": value.checkpoint_seal_hash,
-            "qualified_skin_binding_hash": skin.skin_lineage_hash,
-            "output_domain": "MECHANICAL_CARRIER_M",
-        },
-    }
-
 
 __all__ = [
     "preregister_geppetto_fit_stage",
     "execute_geppetto_fit_stage",
     "qualify_skeleton_stage",
-    "seal_geppetto_checkpoint_stage",
     "preregister_arachne_fit_stage",
     "execute_arachne_fit_stage",
     "qualify_skin_stage",
-    "seal_arachne_checkpoint_stage",
 ]

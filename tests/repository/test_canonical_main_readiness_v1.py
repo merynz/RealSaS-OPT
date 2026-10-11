@@ -175,7 +175,7 @@ class CanonicalMainReadinessV1(unittest.TestCase):
         self.assertIn("SUPERSEDED FOR CONTINUATION", restoration)
         self.assertIn("SurfaceAddressing", state)
         self.assertIn("Complete Appearance Authority", state)
-        self.assertIn("46-stage", state)
+        self.assertIn("43-stage", state)
         self.assertIn("Canonical mesh domain", index)
         self.assertIn("Appearance / CAA", index)
         self.assertIn("surface_addressing_v1.py", index)

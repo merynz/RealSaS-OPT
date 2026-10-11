@@ -8,7 +8,7 @@ from tools import realsas_architecture as arch
 
 
 def fixture():
-    stages = [{"id": sid, "ordinal": i, "depends_on": deps, "manifest_keys": keys}
+    stages = [{"id": sid, "ordinal": i, "depends_on": deps, "manifest_keys": keys, "adapter": "missing:adapter"}
               for i, (sid, deps, keys) in enumerate([
                   ("scene", [], ["images"]), ("geometry", ["scene"], []),
                   ("colour", ["scene"], ["appearance"]), ("rig", ["geometry"], [])], 1)]

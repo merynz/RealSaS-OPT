@@ -95,7 +95,7 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
     mesh_skin = qualified_mesh_skin_from_dict(
         stage_output_payload(
             ctx,
-            "36_QUALIFIED_MESH_SKIN_TRANSFER",
+            "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
             "RealSaS.QualifiedMeshSkinIR.v1",
         )
     )
@@ -405,7 +405,7 @@ def seal_complete_puppet_stage(ctx: dict) -> dict:
     mesh_skin = qualified_mesh_skin_from_dict(
         stage_output_payload(
             ctx,
-            "36_QUALIFIED_MESH_SKIN_TRANSFER",
+            "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
             "RealSaS.QualifiedMeshSkinIR.v1",
         )
     )

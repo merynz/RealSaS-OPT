@@ -85,9 +85,9 @@ def test_added_research_node_is_reconstructed_without_invalidating_independent_n
     base = mainline.load_json(mainline.PLAN_PATH)
     graph = go_graph(base)
     node = deepcopy(graph["stages"][0])
-    node.update(id="47_RESEARCH_PROBE", ordinal=47, depends_on=[node["id"]])
+    node.update(id="47_RESEARCH_PROBE", ordinal=len(graph["stages"])+1, depends_on=[node["id"]])
     graph["stages"].append(node)
-    graph["stage_count"] = 47
+    graph["stage_count"] = len(graph["stages"])
     plan = released_execution_plan(base, graph, mode="RESEARCH")
     assert plan["stages"][-1]["id"] == "47_RESEARCH_PROBE"
     assert graph_node_sha256(plan["stages"][0]) == graph_node_sha256(base["stages"][0])

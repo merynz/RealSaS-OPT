@@ -65,10 +65,10 @@ class CurrentContinuityAuthorityV2(unittest.TestCase):
         plan = json.loads((ROOT / PIPELINE_PLAN).read_text(encoding="utf-8"))
         ledger = json.loads((ROOT / ACTIVE_RUN).read_text(encoding="utf-8"))
         validate_ledger(plan, ledger)
-        self.assertEqual(plan["stage_count"], 46)
+        self.assertEqual(plan["stage_count"], 43)
         self.assertEqual(plan["stages"][17]["id"], "18_CANONICAL_MESH_ADDRESSING_BUILD")
         self.assertEqual(plan["stages"][23]["id"], "24_COMPLETE_APPEARANCE_QUALIFIED")
-        self.assertEqual(plan["stages"][45]["id"], "46_PRODUCT_CLOSURE_SEAL")
+        self.assertEqual(plan["stages"][-1]["id"], "46_PRODUCT_CLOSURE_SEAL")
 
     def test_current_host_independent_workflows_are_main_bound(self) -> None:
         for rel in (

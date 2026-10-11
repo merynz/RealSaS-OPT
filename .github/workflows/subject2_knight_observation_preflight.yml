@@ -240,8 +240,9 @@ jobs:
           assert all(by[stage]["status"]=="PASS" for stage in expected), p
           assert p["completed_count"]==8, p
           assert by["09_IRIS_FIT_PREREGISTERED"]["status"]=="PENDING", p
-          assert p["total_count"]==46, p
-          print("SUBJECT2_V2_PREFIT_GATE_PASS progress=8/46 next_allowed=09_IRIS_FIT_PREREGISTERED")
+          plan=json.load(open("canonical/MAINLINE_EXECUTION_PLAN_V2.json"))
+          assert p["total_count"]==plan["stage_count"], p
+          print(f"SUBJECT2_V2_PREFIT_GATE_PASS progress=8/{plan['stage_count']} next_allowed=09_IRIS_FIT_PREREGISTERED")
           PY
 
       - name: Bundle prefit evidence

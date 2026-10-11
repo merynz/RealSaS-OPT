@@ -18,9 +18,7 @@ from .learned_mechanics_v3 import (
     preregister_geppetto_fit_stage,
     execute_geppetto_fit_stage,
     qualify_skeleton_stage,
-    seal_geppetto_checkpoint_stage,
     preregister_arachne_fit_stage,
     execute_arachne_fit_stage,
     qualify_skin_stage,
-    seal_arachne_checkpoint_stage,
 )

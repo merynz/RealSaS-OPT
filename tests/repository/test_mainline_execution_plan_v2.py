@@ -17,16 +17,16 @@ def load(rel: str):
     return json.loads((ROOT / rel).read_text(encoding="utf-8"))
 
 
-def test_v2_plan_is_clean_46_stage_subject_agnostic_dag():
+def test_v2_plan_is_clean_43_stage_subject_agnostic_dag():
     plan = load("canonical/MAINLINE_EXECUTION_PLAN_V2.json")
     assert len(validate_plan(plan)) == 64
-    assert plan["stage_count"] == 46
+    assert plan["stage_count"] == 43
     assert plan["subject_specific_code_forbidden"] is True
     assert plan["stages"][12]["id"] == "13_GEOMETRY_SUBSTRATE_QUALIFIED"
     assert plan["stages"][17]["id"] == "18_CANONICAL_MESH_ADDRESSING_BUILD"
     assert plan["stages"][23]["id"] == "24_COMPLETE_APPEARANCE_QUALIFIED"
-    assert plan["stages"][44]["id"] == "45_DYNAMIC_VISUAL_INTEGRITY_PROOF"
-    assert plan["stages"][45]["id"] == "46_PRODUCT_CLOSURE_SEAL"
+    assert plan["stages"][-2]["id"] == "45_DYNAMIC_VISUAL_INTEGRITY_PROOF"
+    assert plan["stages"][-1]["id"] == "46_PRODUCT_CLOSURE_SEAL"
     assert plan["appearance_contract"]["first_knight_backend"] == "DETERMINISTIC_V1"
     assert all(stage["adapter"] != "UNBOUND" for stage in plan["stages"])
     assert not any(
@@ -43,7 +43,7 @@ def test_v2_active_ledger_is_implementation_assembly_not_premature_witness():
     assert ledger["run_id"] == "V2_IMPLEMENTATION_ASSEMBLY"
     assert ledger["subject_id"] == "NONE"
     assert ledger["execution_enabled"] is False
-    assert "progress=0/46" in text
+    assert "progress=0/43" in text
     assert "01_SOURCE_BYTES_SEALED" in text
     assert "05_CAMERA_CONTRACT_SOLVED" in text
 
@@ -128,7 +128,6 @@ def test_stage37_consumes_qualified_caa_for_role_free_visual_partition():
         "24_COMPLETE_APPEARANCE_QUALIFIED",
         "28_SKELETON_QUALIFIED",
         "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
-        "36_QUALIFIED_MESH_SKIN_TRANSFER",
     ]
     assert "canonical M" in stage37["title"]
     assert "observation" in stage37["manifest_keys"]
@@ -206,3 +205,18 @@ def test_stage19_requalifies_exact_effective_carrier_static_quality_before_mecha
     assert "STATIC_MESH_QUALITY_POLICY_FAILED" in stage19
     assert '"static_quality_policy_passed"' in stage19
     assert "build_mechanical_carrier_evidence_v1" in stage19
+
+
+def test_current_seal_contractions_preserve_qualified_boundaries():
+    from tools.architecture_contracts import payload_contracts
+    plan = load("canonical/MAINLINE_EXECUTION_PLAN_V2.json")
+    by = {s["id"]:s for s in plan["stages"]}
+    folded = plan["stage_contractions"]["folded_into"]
+    assert set(folded)=={"29_GEPPETTO_CHECKPOINT_SEALED","33_ARACHNE_CHECKPOINT_SEALED","36_QUALIFIED_MESH_SKIN_TRANSFER"}
+    assert not (set(by)&set(folded))
+    assert set(folded.values()) <= set(by)
+    assert [s["ordinal"] for s in plan["stages"]]==list(range(1,44))
+    reads = payload_contracts(plan,ROOT)
+    assert not [r for value in reads.values() for r in value["reads"] if r["binding"]=="UNBOUND"]
+    assert any(r["producer"]=="28_SKELETON_QUALIFIED" and r["schema"]=="RealSaS.ModelCheckpointSealIR.v1" for r in reads["30_ARACHNE_FIT_PREREGISTERED"]["reads"])
+    assert any(r["producer"]=="35_DYNAMIC_MECHANICAL_MESH_QUALIFIED" and r["schema"]=="RealSaS.QualifiedMeshSkinIR.v1" for r in reads["38_CANONICAL_PUPPET_SEALED"]["reads"])

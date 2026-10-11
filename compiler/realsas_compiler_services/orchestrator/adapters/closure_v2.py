@@ -147,7 +147,7 @@ def _build_editable_bundle(ctx: dict, root: Path) -> tuple[Path, str, dict]:
     )
     mesh_skin_payload, mesh_skin_path = _stage_json(
         ctx,
-        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
         "RealSaS.QualifiedMeshSkinIR.v1",
     )
     appearance_asset_payload, appearance_asset_path = _stage_json(

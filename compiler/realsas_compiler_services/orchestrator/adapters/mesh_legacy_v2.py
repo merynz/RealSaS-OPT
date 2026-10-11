@@ -942,7 +942,7 @@ def seal_canonical_puppet_state_stage(ctx:dict)->dict:
         _stage_output_payload(ctx,"35_DYNAMIC_MECHANICAL_MESH_QUALIFIED","RealSaS.QualifiedMeshIR.v1")
     )
     mesh_skin=qualified_mesh_skin_from_dict(
-        _stage_output_payload(ctx,"36_QUALIFIED_MESH_SKIN_TRANSFER","RealSaS.QualifiedMeshSkinIR.v1")
+        _stage_output_payload(ctx,"35_DYNAMIC_MECHANICAL_MESH_QUALIFIED","RealSaS.QualifiedMeshSkinIR.v1")
     )
     state=build_canonical_puppet_state(
         surface=surface,

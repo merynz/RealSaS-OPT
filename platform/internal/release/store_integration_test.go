@@ -39,7 +39,7 @@ func TestEngineReleaseIsImmutableAndReusable(t *testing.T) {
 	defer pool.Close()
 	g := loadGraph(t)
 
-	rows := make([]StageBinding, 0, 46)
+	rows := make([]StageBinding, 0, g.StageCount())
 	for _, s := range g.Stages() {
 		rows = append(rows, StageBinding{
 			Ordinal:              s.Ordinal,
@@ -65,7 +65,7 @@ func TestEngineReleaseIsImmutableAndReusable(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(versions) != 46 {
+	if len(versions) != g.StageCount() {
 		t.Fatalf("versions=%d", len(versions))
 	}
 	sealedGraph, _, err := LoadGraph(ctx, pool, first.ReleaseID)
@@ -76,22 +76,22 @@ func TestEngineReleaseIsImmutableAndReusable(t *testing.T) {
 		t.Fatal("sealed DAG mutation was accepted")
 	}
 	changed := g.Snapshot()
-	changed.Stages = append(changed.Stages, stagegraph.Stage{Ordinal: 47, ID: "47_RESEARCH_NEW_MODULE", Adapter: "new.py", DependsOn: []string{g.Stages()[0].ID}})
+	changed.Stages = append(changed.Stages, stagegraph.Stage{Ordinal: g.StageCount() + 1, ID: "47_RESEARCH_NEW_MODULE", Adapter: "new.py", DependsOn: []string{g.Stages()[0].ID}})
 	changed.StageCount++
 	m.Name = "release-store-expanded-research-ci"
 	m.Purpose = PurposeResearch
 	m.DAG = &changed
-	m.Stages = append(m.Stages, StageBinding{Ordinal: 47, StageID: "47_RESEARCH_NEW_MODULE", ImplementationSHA256: repeat("4"), PolicySHA256: repeat("5")})
+	m.Stages = append(m.Stages, StageBinding{Ordinal: g.StageCount() + 1, StageID: "47_RESEARCH_NEW_MODULE", ImplementationSHA256: repeat("4"), PolicySHA256: repeat("5")})
 	expanded, err := Seal(ctx, pool, g, m, "ci")
 	if err != nil {
 		t.Fatal(err)
 	}
 	newVersions, err := LoadVersions(ctx, pool, expanded.ReleaseID, false)
-	if err != nil || len(newVersions) != 47 {
+	if err != nil || len(newVersions) != g.StageCount()+1 {
 		t.Fatalf("new versions=%d error=%v", len(newVersions), err)
 	}
 	oldAgain, _, err := LoadGraph(ctx, pool, first.ReleaseID)
-	if err != nil || oldAgain.StageCount() != 46 {
+	if err != nil || oldAgain.StageCount() != g.StageCount() {
 		t.Fatal("old release graph changed")
 	}
 }

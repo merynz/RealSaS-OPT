@@ -56,7 +56,7 @@ research=sys.argv[1]; baseline=sys.argv[2]; out=sys.argv[3]
 plan_path="canonical/MAINLINE_EXECUTION_PLAN_V2.json"
 mainline_path="compiler/realsas_compiler_services/orchestrator/mainline.py"
 plan=json.loads(show(research,plan_path)); src=show(research,mainline_path)
-assert int(plan["stage_count"])==46 and len(plan["stages"])==46
+assert int(plan["stage_count"])==len(plan["stages"])
 assert plan["canonical_branch"]=="main"
 assert plan["subject_specific_code_forbidden"] is True
 allp=set(paths(research))

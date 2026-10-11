@@ -1,6 +1,6 @@
 # RealSaS-OPT Agent Entry Contract
 
-## Mandatory current handoff — 2026-10-10
+## Mandatory current handoff — 2026-10-11
 
 **First read:** `CURRENT_STATE.md`, then `docs/platform/EXECUTION_LANES.md`.
 Use `canonical/CANONICAL_HANDOFF_20261007.md` for the sealed mechanics handoff.
@@ -113,6 +113,14 @@ Run `37578120472` on exact `main@287eabef757cb2b1e6b532a4c2d0a71eb62cd324` fresh
 That run reused sealed artifacts; IRIS/TESSA/AXIS/MIRA were not reinferred. Do not describe it as a fresh source-to-puppet compile.
 
 ## Active priority order
+
+The latest user decision takes execution precedence: first prove and close the
+existing canonical Knight visual producer-consumer path, preserving this
+witness's M/G/W and motion inputs. Attempt reliable derivation and consumption
+of contact, layer/material, grip and order before proposing new IRIS heads.
+Prior appearance/oracle authorization is retained, but is not an instruction
+to launch that separate research on every main deployment. Inspect existing
+Go context/Attempt/handoff; never substitute a different reference for Knight.
 
 1. PR #65 is merged. Continue platform preparation and bounded source changes on main.
 2. Use the explicit controlled-intervention contract for causal component replacements;

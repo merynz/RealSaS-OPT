@@ -1,12 +1,30 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-10-10
+**Date:** 2026-10-11
 **Canonical code line:** `main` only  
 **Architecture:** RealSaS V2, 46-stage Compiler compatibility DAG; versioned release DAGs
 **Implementation readiness:** `canonical/V2_IMPLEMENTATION_READINESS.json`
 
-Authored 2D oracle V1 is user-authorized and implemented; Go execution/results
-are pending. See `docs/research/AUTHORED_VISUAL_ORACLE_V1_20261010.md` and its
+## Immediate user-authorized priority
+
+First close and measure the existing Knight visual producer-consumer chain on
+canonical main, before changing IRIS heads. Try to derive reliable contact,
+layer support/material, grip and order evidence from the existing sealed inputs;
+connect actual consumers and independently measure the same Knight M/G/W and
+motion witness. Missing or unsafe data must retain explicit abstention and its
+evidence, never become an empty required domain or an optimistic PASS. Only the
+remaining measured deficit may justify new appearance/semantic research.
+
+PR #78 added bounded exact-byte input export and read-only Go agent-context to
+the sealed Knight host inspection. This transports inputs and records source
+identity; it is not an Attempt, scientific reuse qualification or visual closure.
+Read the returned context/handoff before selecting any research execution.
+
+Authored 2D oracle V1 remains a separately authorized reference experiment,
+not the current Knight intervention. Its workflow is manual on main; service
+deployment must not automatically select or resume a research experiment.
+Inspect its existing Go state rather than creating another Attempt. See
+`docs/research/AUTHORED_VISUAL_ORACLE_V1_20261010.md` and its
 sealed protocol/research DAG. This is the different 2D reference's own sampled
 motion, not Knight 3D binding or full visual qualification. Exact runtime pixels,
 owners, source absolute poses, hidden sprite texels and negative controls are

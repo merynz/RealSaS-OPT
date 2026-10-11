@@ -1,9 +1,7 @@
 name: authored-visual-oracle-v1
 
 on:
-  workflow_run:
-    workflows: [platform-developer-deployment]
-    types: [completed]
+  workflow_dispatch:
 
 concurrency:
   group: authored-visual-oracle-v1-canonical-main
@@ -14,18 +12,18 @@ permissions:
 
 jobs:
   native-go-attempt:
-    # Explicit native-host research witness. Actions only submits to Go; it does
-    # not execute Compiler stages or write Registry/Attempt state directly.
-    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main'
+    # Research scope is selected explicitly, never by a service deployment.
+    # Actions only submits to Go; Attempt/session/intervention remain authority.
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.sha }}
       - name: Require exact deployed live canonical main
         env:
-          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+          EXPECTED_SHA: ${{ github.sha }}
         run: |
           test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_SHA"
           /home/monster/realsas_platform/current/bin/realsas-python - <<'PY'

@@ -1,0 +1,23 @@
+{
+  "schema": "RealSaS.R21AttachmentProofSummary.v1",
+  "sample_count": 168,
+  "maximum_anchor_transport_residual_px": 1.8165351372588318e-13,
+  "maximum_rigidity_residual_px": 2.8421709430404007e-13,
+  "anchor_fail_count": 0,
+  "rigidity_fail_count": 0,
+  "depth_mutation_count": 0,
+  "all_anchor_pass": true,
+  "all_rigidity_pass": true,
+  "all_depth_unchanged": true,
+  "setup_surface_gap_world": {
+    "SWORD": 0.0,
+    "SHIELD": 0.0
+  },
+  "gif_sha256": {
+    "RUN_V6": "246d8c2b14f2999fbe5d7fe9c88d1faa2135100d8f68e5d76ae4f9c4a5d7bb80",
+    "RUN_V5": "f5ee830785a377b7bfc68c03d6740e6a253af7d965e92f3d1c20b482fd4dbad0",
+    "SLASH_V6": "b522dae8041a2bd14df8d642b1dd6437139277fdd3717d856f0e24eda01cd111",
+    "SLASH_V5": "1821953bfb81e6395123e096b13e4af3c24db4560fc808426d3b18e893342827"
+  },
+  "product_qualification_claimed": false
+}

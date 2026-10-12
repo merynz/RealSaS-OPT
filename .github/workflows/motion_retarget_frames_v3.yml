@@ -10,6 +10,9 @@ on:
       - '.github/workflows/motion_retarget_frames_v3.yml'
       - 'tools/motion/blender_extract_motion_source_v2.py'
       - 'canonical/MOTION_PRESET_SOURCE_QUATERNIUS_KNIGHT_NATIVE_V1.json'
+      - 'compiler/realsas_compiler_core/presentation_part_order_v1.py'
+      - 'compiler/realsas_compiler_core/rigid_attachment_surface_anchor_v1.py'
+      - 'tests/compiler/test_presentation_attachment_order_v1.py'
   push:
     branches: [main]
     paths:
@@ -19,6 +22,9 @@ on:
       - '.github/workflows/motion_retarget_frames_v3.yml'
       - 'tools/motion/blender_extract_motion_source_v2.py'
       - 'canonical/MOTION_PRESET_SOURCE_QUATERNIUS_KNIGHT_NATIVE_V1.json'
+      - 'compiler/realsas_compiler_core/presentation_part_order_v1.py'
+      - 'compiler/realsas_compiler_core/rigid_attachment_surface_anchor_v1.py'
+      - 'tests/compiler/test_presentation_attachment_order_v1.py'
 
 permissions:
   contents: read
@@ -40,7 +46,7 @@ jobs:
           cache: pip
           cache-dependency-path: requirements/mainline-ci.txt
       - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
-      - run: python -m unittest tests.compiler.test_motion_retarget_frames_v3 -v
+      - run: python -m unittest tests.compiler.test_motion_retarget_frames_v3 tests.compiler.test_presentation_attachment_order_v1 -v
       - run: python -m py_compile compiler/realsas_compiler_core/motion_retarget_frames_v3.py tools/demo/render_knight_source_motion_v3.py
 
   extract-knight-native-source:
@@ -65,3 +71,22 @@ jobs:
           path: native-motion-source
           if-no-files-found: error
           retention-days: 30
+
+  offline-browser-check-apparatus:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare pinned headless browser for offline artifact QA
+        run: |
+          npm install playwright@1.62.1
+          npx playwright install chromium --only-shell
+          tar -C "$HOME/.cache/ms-playwright" -czf headless-browser.tar.gz chromium_headless_shell-*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: offline-inspector-browser-apparatus
+          path: headless-browser.tar.gz
+          retention-days: 3

@@ -11,6 +11,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import hashlib
 import json
 import multiprocessing
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -18,7 +19,7 @@ from types import SimpleNamespace
 
 import numpy as np
 from PIL import Image, ImageDraw
-from scipy.spatial.transform import Rotation
+from scipy.spatial.transform import Rotation, Slerp
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -27,8 +28,49 @@ from compiler.realsas_compiler_core.joint_frames_v2 import derive_joint_frames_p
 from compiler.realsas_compiler_core.motion_retarget_frames_v3 import compile_retargeted_keys
 from compiler.realsas_compiler_core.single_m_caa_v1 import array_hash, load_material_bundle, render_single_m_caa, write_material_bundle
 from tools.demo.render_knight_m_caa_v1 import load_inputs, tile
+from compiler.realsas_compiler_core.rigid_attachment_surface_anchor_v1 import compile_skin_holder_bindings, apply_surface_rigid_3d
+from compiler.realsas_compiler_core.presentation_part_order_v1 import compile_part_ids, part_depth_order
 
 CONTEXT = {}
+
+
+def save_png_checked(image, path):
+    path=Path(path)
+    temporary=path.with_name(path.name+".writing.png")
+    for attempt in range(3):
+        with temporary.open("wb") as stream:
+            image.save(stream,format="PNG")
+            stream.flush();os.fsync(stream.fileno())
+        try:
+            with Image.open(temporary) as decoded:decoded.verify()
+            temporary.replace(path)
+            return
+        except (OSError,SyntaxError):
+            if attempt==2:raise
+
+
+def preview_samples(duration, *, loop, minimum_duration=4., fps=30):
+    if not np.isfinite(duration) or duration <= 0 or minimum_duration < 4 or fps < 1:
+        raise ValueError("PREVIEW_DURATION_OR_FPS_INVALID")
+    count = int(np.ceil(max(float(duration), float(minimum_duration)) * fps))
+    playback = np.arange(count, dtype=float) / fps
+    requested = np.mod(playback, duration) if loop else np.minimum(playback, duration)
+    if loop:
+        requested[np.isclose(requested,duration,rtol=0,atol=1e-10)]=0.
+    unique, indices = np.unique(np.round(requested, 12), return_inverse=True)
+    unique = np.clip(unique, 0., duration)
+    return playback, unique, indices
+
+
+def sampled_keys(raw, times, translation_scale=1.):
+    result = {}
+    for jid, keys in raw.items():
+        ts = np.asarray([k["time_seconds"] for k in keys], float)
+        rots = Slerp(ts, Rotation.from_quat([k["local_rotation_quat_xyzw"] for k in keys]))(times).as_quat()
+        tr = np.asarray([k.get("local_translation_xyz", [0, 0, 0]) for k in keys])
+        translations = np.column_stack([np.interp(times, ts, tr[:, i]) for i in range(3)]) * translation_scale
+        result[jid] = [dict(time_seconds=float(t), local_rotation_quat_xyzw=q.tolist(), local_translation_xyz=v.tolist(), local_scale_xyz=[1., 1., 1.]) for t, q, v in zip(times, rots, translations)]
+    return result
 
 
 def digest(p):
@@ -117,8 +159,10 @@ def render_view(view):
     prefix = CONTEXT["prefix"]
     results = []
     for fi, posed in enumerate(poses):
-        r = render_single_m_caa(**{k: m[k] for k in ("rest", "faces", "source", "maps", "cameras", "caa")}, posed=posed, view=view, resolution=256)
-        Image.fromarray(r.straight_rgba_u8).save(out / f"{prefix}_v{view}_{fi:03d}.png")
+        ranks=(CONTEXT["part_orders"][view][fi][CONTEXT["face_part"]]
+               if CONTEXT["overlap_policy"]=="kinematic" else None)
+        r = render_single_m_caa(**{k: m[k] for k in ("rest", "faces", "source", "maps", "cameras", "caa")}, posed=posed, view=view, resolution=CONTEXT["resolution"],face_draw_rank=ranks)
+        save_png_checked(Image.fromarray(r.straight_rgba_u8),out / f"{prefix}_v{view}_{fi:03d}.png")
         results.append(dict(frame=fi, rgba_sha256=array_hash(r.straight_rgba_u8), depth_ties=r.unresolved_depth_tie_count, fragment_overflow=r.fragment_overflow_count))
     return view, results
 
@@ -131,6 +175,12 @@ def main():
     ap.add_argument("--material", type=Path, help="Existing compiled M+CAA material to reuse")
     ap.add_argument("--output", type=Path, required=True)
     ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--fps", type=int, default=30)
+    ap.add_argument("--duration", type=float, default=4.)
+    ap.add_argument("--resolution", type=int, default=512)
+    ap.add_argument("--compile-only", action="store_true")
+    ap.add_argument("--attachment-policy", choices=["mechanical","slot_anchor"], default="slot_anchor")
+    ap.add_argument("--overlap-policy", choices=["geometric","kinematic"], default="geometric")
     args = ap.parse_args()
     source = json.loads(args.source.read_text())
     native = json.loads((ROOT / "canonical/MOTION_PRESET_SOURCE_QUATERNIUS_KNIGHT_NATIVE_V1.json").read_text())
@@ -167,12 +217,12 @@ def main():
     sf = derive_joint_frames_from_rows(source["source_skeleton"], joint_id_key="source_joint_id", parent_id_key="parent_source_joint_id", position_key="rest_position")
     source_root = mapping["0"]
     C = np.asarray(tf["0"].rotation_matrix) @ np.asarray(sf[source_root].rotation_matrix).T
-    keys = compile_retargeted_keys(source, target_frames=tf, target_to_source=mapping, object_rotation=C, target_body_scale=target_scale)
-    times = np.array([k["time_seconds"] for k in keys["0"]])
+    playback_times, times, frame_indices = preview_samples(float(source["duration_seconds"]), loop=bool(source["loop"]), minimum_duration=args.duration, fps=args.fps)
+    keys = compile_retargeted_keys(source, target_frames=tf, target_to_source=mapping, object_rotation=C, target_body_scale=target_scale, sample_times=times)
     target_palettes = palette(tf, keys, times)
     matrices = np.array([[p[str(i)] for i in range(len(axis))] for p in target_palettes])
     # Independent source FK gives an orientation proof against artist motion.
-    skeys = {t["source_joint_id"]: [dict(k, local_translation_xyz=(np.array(k["local_translation_xyz"]) * source["metadata"]["source_body_scale"]).tolist()) for k in t["keyframes"]] for t in source["tracks"]}
+    skeys = sampled_keys({t["source_joint_id"]: t["keyframes"] for t in source["tracks"]}, times, source["metadata"]["source_body_scale"])
     source_palettes = palette(sf, skeys, times)
     orientation_errors = {tid: max(float(np.max(np.abs(target_palettes[f][tid][:3, :3] - C @ source_palettes[f][sid][:3, :3] @ C.T))) for f in range(len(times))) for tid, sid in mapping.items()}
     if max(orientation_errors.values()) > 1e-9:
@@ -181,50 +231,92 @@ def main():
     W = witness["canonical_motion_weights"]
     hom = np.c_[rest, np.ones(len(rest))]
     posed = np.einsum("vj,fjkl,vl->fvk", W, matrices[:, :, :3], hom, optimize=True)
+    mechanical_poses=posed.copy()
+    owners=witness["presentation_attachment_vertex_owner"]
+    bindings=compile_skin_holder_bindings(rest=rest,faces=faces,weights=W,parents=parents,owners=owners)
+    attachment_matrices=np.zeros((len(times),len(bindings),4,4))
+    attachment_proofs=[]
+    for fi in range(len(times)):
+        frame_proofs=[]
+        for bi,row in enumerate(bindings):
+            b=row["binding"]
+            if args.attachment_policy=="slot_anchor":
+                posed[fi],proof=apply_surface_rigid_3d(posed[fi],rest=rest,faces=faces,binding=b,rotation=matrices[fi,row["slot"],:3,:3])
+                attachment_matrices[fi,bi]=np.eye(4)
+                attachment_matrices[fi,bi,:3,:3]=proof["rotation"]
+                attachment_matrices[fi,bi,:3,3]=proof["translation"]
+                frame_proofs.append(dict(owner=row["owner"],slot=row["slot"],**proof))
+            else:attachment_matrices[fi,bi]=matrices[fi,row["slot"]]
+        attachment_proofs.append(frame_proofs)
+    vertex_part,face_part,part_keys=compile_part_ids(len(rest),faces,owners,W)
+    part_orders=np.array([part_depth_order(posed,vertex_part,camera) for camera in cameras])
     out = args.output.resolve()
     out.mkdir(parents=True, exist_ok=True)
-    np.savez_compressed(out / f"compiled_{prefix}_m_poses.npz", poses=posed, times=times, skin_matrices=matrices, rest=rest, faces=faces, weights=W, axis=axis, parents=parents)
+    np.savez_compressed(out / f"compiled_{prefix}_m_poses.npz", poses=posed, mechanical_poses=mechanical_poses,times=times, skin_matrices=matrices,attachment_matrices=attachment_matrices,attachment_owners=owners,vertex_part=vertex_part,face_part=face_part,part_orders=part_orders,playback_times=playback_times, playback_frame_indices=frame_indices, rest=rest, faces=faces, weights=W, axis=axis, parents=parents)
     (out / f"compiled_{prefix}_tracks.json").write_text(json.dumps(dict(source_sha256=digest(args.source), object_rotation=C.tolist(), target_to_source=mapping, tracks=keys), indent=2) + "\n")
     report = dict(schema="RealSaS.KnightSourceMotionFrameFix.v3", product_qualification_claimed=False, source_code_sha=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(), source_take=source["metadata"]["source_take"], source_clip_sha256=digest(args.source), old_witness_sha256=digest(args.witness), source_tracks_compiled=True, old_poses_used_as_new_animation=False, mesh_sha256=array_hash(rest), topology_sha256=array_hash(faces), weights_sha256=array_hash(W), hierarchy_sha256=array_hash(parents), axis_sha256=array_hash(axis), correspondence=fingerprint, source_object_to_target_rotation=C.tolist(), max_orientation_residual=max(orientation_errors.values()), orientation_residual_by_joint=orientation_errors, frame_count=len(times), duration_seconds=float(times[-1]), source_loop=source["loop"], views={}, attachment_qualification_claimed=False, depth_order_fixed=False)
-    report.update(clip_id=source["clip_id"], clip_kind=clip_kind, motion_provenance="KNIGHT_NATIVE", bind_source_sha256=digest(bind_path), source_rest_reference_max_residual=rest_residual)
+    report.update(clip_id=source["clip_id"], clip_kind=clip_kind, motion_provenance="KNIGHT_NATIVE", bind_source_sha256=digest(bind_path), source_rest_reference_max_residual=rest_residual, source_duration_seconds=float(source["duration_seconds"]), preview_fps=args.fps, preview_duration_seconds=len(playback_times)/args.fps, preview_frame_count=len(playback_times), unique_source_sample_count=len(times), per_view_resolution=args.resolution, preview_repeat_policy="SOURCE_LOOP" if source["loop"] else "HOLD_TERMINAL_POSE", source_motion_speed_changed=False)
+    report.update(attachment_policy=args.attachment_policy,overlap_policy=args.overlap_policy,
+                  attachment_proofs=attachment_proofs,part_keys=part_keys,
+                  semantic_overlap_qualified=False,
+                  attachment_bindings=[dict(owner=r["owner"],slot=r["slot"],holder_joint_indices=r["holder_joint_indices"],held_face=r["binding"].held.face_index,held_barycentric=r["binding"].held.barycentric,holder_face=r["binding"].holder.face_index,holder_barycentric=r["binding"].holder.barycentric,setup_surface_gap_world=r["binding"].setup_surface_gap) for r in bindings])
     (out / "source_motion_evidence.json").write_text(json.dumps(report, indent=2) + "\n")
+    if args.compile_only:
+        print(json.dumps(dict(clip=clip_kind, samples=len(times), preview_frames=len(playback_times), source_orientation_residual=report["max_orientation_residual"])), flush=True)
+        return
     if args.material:
         ref = dict(path=str(args.material.resolve()), sha256=digest(args.material))
     else:
         ref = write_material_bundle(out / "single_m_caa_material.npz", rest=rest, faces=faces, source=rgba, cameras=cameras, caa_arrays=caa, input_identities=manifest["inputs"])
     material = load_material_bundle(ref["path"], expected_sha256=ref["sha256"], rest=rest, faces=faces)
-    CONTEXT.update(material=material, poses=posed, out=out, prefix=prefix)
+    CONTEXT.update(material=material, poses=posed, out=out, prefix=prefix, resolution=args.resolution,part_orders=part_orders,face_part=face_part,overlap_policy=args.overlap_policy)
     with ProcessPoolExecutor(max_workers=min(8, max(1, args.workers)), mp_context=multiprocessing.get_context("fork")) as pool:
         jobs = [pool.submit(render_view, v) for v in range(8)]
         for job in as_completed(jobs):
             view, frames = job.result()
             report["views"][f"V{view}"] = frames
             print(f"V{view}: {len(frames)} fresh source-compiled frames", flush=True)
-    # GIF has a centisecond clock; round cumulative times to avoid a 25fps
-    # animation when the authored source uses 24fps.
-    boundaries = np.r_[times - times[0], times[-1] - times[0] + times[-1] - times[-2]]
-    durations = (np.diff(np.rint(boundaries * 100)).astype(int) * 10).tolist()
-    sheets, individual = [], [[] for _ in range(8)]
+    # Render each exact pose once. Repeat/terminal-hold frames reuse identical
+    # pixels without changing the source trajectory or inventing motion.
+    res = args.resolution
     for fi in range(len(times)):
-        sheet = Image.new("RGB", (1024, 576), (23, 28, 37))
+        sheet = Image.new("RGB", (res * 4, (res + 32) * 2), (23, 28, 37))
         for v in range(8):
             image = tile(np.asarray(Image.open(out / f"{prefix}_v{v}_{fi:03d}.png").convert("RGBA")), f"{clip_kind} V{v}")
-            individual[v].append(image.resize((512, 576), Image.Resampling.NEAREST))
-            sheet.paste(image, ((v % 4) * 256, (v // 4) * 288))
-        sheets.append(sheet)
-        sheet.save(out / f"{prefix}_grid_{fi:03d}.png")
+            save_png_checked(image,out / f"{prefix}_tile_v{v}_{fi:03d}.png")
+            sheet.paste(image, ((v % 4) * res, (v // 4) * (res + 32)))
+        save_png_checked(sheet,out / f"{prefix}_unique_grid_{fi:03d}.png")
+    for pi, fi in enumerate(frame_indices):
+        pairs = [(out / f"{prefix}_unique_grid_{fi:03d}.png", out / f"{prefix}_grid_{pi:03d}.png")]
+        pairs += [(out / f"{prefix}_tile_v{v}_{fi:03d}.png", out / f"{prefix}_preview_v{v}_{pi:03d}.png") for v in range(8)]
+        for original, replay in pairs:
+            if replay.exists():
+                replay.unlink()
+            os.link(original, replay)
     gif = out / f"Knight_{clip_kind}_V0-V7.gif"
-    sheets[0].save(gif, save_all=True, append_images=sheets[1:], duration=durations, loop=0, optimize=False)
-    for v, frames in enumerate(individual):
-        frames[0].save(out / f"Knight_{clip_kind}_V{v}.gif", save_all=True, append_images=frames[1:], duration=durations, loop=0, optimize=False)
+    video = out / f"Knight_{clip_kind}_V0-V7.mp4"
+    fps = str(args.fps)
+    grid_pattern = str(out / f"{prefix}_grid_%03d.png")
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-framerate", fps, "-i", grid_pattern, "-c:v", "libx264", "-crf", "17", "-pix_fmt", "yuv420p", "-threads", "2", str(video)], check=True)
+    def encode_gif(pattern, destination):
+        pal = destination.with_suffix(".palette.png")
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-framerate", fps, "-i", str(pattern), "-vf", "palettegen=stats_mode=diff", "-frames:v", "1", "-threads", "1", str(pal)], check=True)
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-framerate", fps, "-i", str(pattern), "-i", str(pal), "-filter_complex", "[0:v][1:v]paletteuse=dither=bayer:bayer_scale=3", "-loop", "0", "-threads", "1", str(destination)], check=True)
+        pal.unlink()
+    encode_gif(grid_pattern, gif)
+    for v in range(8):
+        encode_gif(out / f"{prefix}_preview_v{v}_%03d.png", out / f"Knight_{clip_kind}_V{v}.gif")
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-framerate", fps, "-i", str(out / f"{prefix}_preview_v{v}_%03d.png"), "-c:v", "libx264", "-crf", "17", "-pix_fmt", "yuv420p", "-threads", "1", str(out / f"Knight_{clip_kind}_V{v}.mp4")], check=True)
     from PIL import ImageSequence
     for path in [gif, *(out / f"Knight_{clip_kind}_V{v}.gif" for v in range(8))]:
         with Image.open(path) as decoded:
-            if decoded.n_frames != len(times):
-                raise RuntimeError("GIF_FRAME_COUNT_DRIFT:" + path.name)
-            if sum(f.info.get("duration", 0) for f in ImageSequence.Iterator(decoded)) != sum(durations):
+            ms = sum(f.info.get("duration", 0) for f in ImageSequence.Iterator(decoded))
+            if abs(ms - len(playback_times) / args.fps * 1000) > 20:
                 raise RuntimeError("GIF_TIMING_DRIFT:" + path.name)
-    subprocess.run(["ffmpeg", "-y", "-v", "error", "-framerate", "24", "-i", str(out / f"{prefix}_grid_%03d.png"), "-c:v", "libx264", "-pix_fmt", "yuv420p", str(out / f"Knight_{clip_kind}_V0-V7.mp4")], check=True)
+    ffprobe = json.loads(subprocess.check_output(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height,r_frame_rate,nb_frames,duration", "-of", "json", str(video)], text=True))["streams"][0]
+    if ffprobe["r_frame_rate"] != f"{args.fps}/1" or int(ffprobe["nb_frames"]) != len(playback_times) or float(ffprobe["duration"]) < args.duration:
+        raise RuntimeError("MP4_FPS_DURATION_OR_FRAME_COUNT_DRIFT")
+    report["mp4_stream"] = ffprobe
     report["gif_sha256"] = digest(gif)
     report["fresh_render_frames"] = len(times) * 8
     (out / "source_motion_evidence.json").write_text(json.dumps(report, indent=2) + "\n")

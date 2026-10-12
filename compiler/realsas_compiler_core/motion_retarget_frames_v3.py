@@ -13,7 +13,7 @@ from .types import QualificationError
 
 
 def compile_retargeted_keys(payload, *, target_frames, target_to_source,
-                            object_rotation, target_body_scale):
+                            object_rotation, target_body_scale, sample_times=None):
     C = np.asarray(object_rotation, dtype=float)
     if C.shape != (3, 3) or not np.isfinite(C).all() or not np.allclose(
         C.T @ C, np.eye(3), atol=1e-10
@@ -33,7 +33,10 @@ def compile_retargeted_keys(payload, *, target_frames, target_to_source,
     raw_tracks = {t["source_joint_id"]: t["keyframes"] for t in payload["tracks"]}
     if set(raw_tracks) != set(sf):
         raise QualificationError("MOTION_RETARGET_SOURCE_TRACK_ACCOUNTING")
-    times = sorted({float(k["time_seconds"]) for ks in raw_tracks.values() for k in ks})
+    times = (sorted({float(k["time_seconds"]) for ks in raw_tracks.values() for k in ks})
+             if sample_times is None else np.asarray(sample_times, float).tolist())
+    if not times or not np.isfinite(times).all() or np.any(np.diff(times) <= 0):
+        raise QualificationError("MOTION_RETARGET_SAMPLE_TIMES_INVALID")
     order = []
     pending = set(sf)
     while pending:

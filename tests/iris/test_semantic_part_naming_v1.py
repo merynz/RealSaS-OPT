@@ -40,8 +40,8 @@ def test_part_naming_accepts_localized_dominant_part():
 def test_part_naming_abstains_when_two_parts_are_ambiguous():
     h, w, fg, mask = _fixture()
     fields = np.full((3, h, w), 0.20, dtype=np.float32)
-    fields[0, mask] = 0.78
-    fields[1, mask] = 0.77
+    fields[0, mask] = 0.780
+    fields[1, mask] = 0.779
     background = np.full((h, w), 0.05, dtype=np.float32)
 
     out = classify_part_region_v1(

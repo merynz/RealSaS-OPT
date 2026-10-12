@@ -37,6 +37,8 @@ function assert(value, message){if(!value)throw Error(message);}
   await page.waitForFunction(()=>REALSAS_DEMO.clips[demo.state.clip].images[6]?.naturalWidth>0);
   await page.screenshot({path:path.join(root,'verification',`inspector_${ci}.png`)});
  }
+ await page.evaluate(()=>demo.setState({mode:'rig',bone:0,playing:false}));
+ assert(await page.evaluate(()=>demo.selectedBoneSegments().length===1),'Knight root must display only its active Body child; passive zero-weight root branches must not become bone glyphs');
  const run=await page.evaluate(()=>REALSAS_DEMO.clips.findIndex(c=>c.kind==='RUN'));
  await page.evaluate(run=>demo.setState({clip:run,frame:0,mode:'artwork',playing:true}),run);
  await page.click('[data-mode="rig"]');
@@ -59,7 +61,7 @@ function assert(value, message){if(!value)throw Error(message);}
  await page.click('#play');assert(await page.evaluate(()=>demo.state.playing),'Play must restart a finished take');
  assert(errors.length===0,'Page errors: '+errors.join(';'));
  assert(external.length===0,'Offline demo made an external request');
- const report={schema:'RealSaS.OfflineInspectorBrowserCheck.v1',counts,checkedDirections:8,checkedModes:6,poseComparisons:samples,maxBrowserPoseResidual:maximum,externalRequests:external.length,pageErrors:errors,modeSwitchPreservesPlayback:true,revealPreservesPlayback:true,boneSelection:true,nonloopTerminalStop:true,finishedTakeRestarts:true};
+ const report={schema:'RealSaS.OfflineInspectorBrowserCheck.v1',counts,checkedDirections:8,checkedModes:6,poseComparisons:samples,maxBrowserPoseResidual:maximum,externalRequests:external.length,pageErrors:errors,modeSwitchPreservesPlayback:true,revealPreservesPlayback:true,boneSelection:true,inactiveRootBranchesHidden:true,nonloopTerminalStop:true,finishedTakeRestarts:true};
  fs.writeFileSync(path.join(root,'verification','browser_check.json'),JSON.stringify(report,null,2)+'\n');
  console.log(JSON.stringify(report));await browser.close();
 })().catch(e=>{console.error(e);process.exit(1);});

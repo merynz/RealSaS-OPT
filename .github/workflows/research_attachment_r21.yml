@@ -29,7 +29,7 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m pip install -r requirements/mainline-ci.txt
-      - name: Inspect canonical RUN fixture without mutating it
+      - name: Inspect canonical RUN fixture and current M components
         run: |
           mkdir -p evidence
           python - <<'PY' > evidence/fixture_probe.txt
@@ -37,15 +37,37 @@ jobs:
           from pathlib import Path
           root=Path('tests/fixtures/single_m_caa_knight_v1')
           with np.load(root/'run_poses.npz',allow_pickle=False) as z:
-              for k in z.files:
-                  a=z[k]
-                  print(k, a.shape, a.dtype)
+              arrays={k:z[k] for k in z.files}
+              for k,a in arrays.items(): print(k,a.shape,a.dtype)
+          rest,faces=arrays['rest'],arrays['faces']
+          parent=np.arange(len(rest))
+          def find(x):
+              while parent[x]!=x:
+                  parent[x]=parent[parent[x]]; x=parent[x]
+              return x
+          def union(a,b):
+              a,b=find(int(a)),find(int(b))
+              if a!=b: parent[b]=a
+          for a,b,c in faces:
+              union(a,b); union(b,c)
+          groups={}
+          for i in range(len(rest)): groups.setdefault(find(i),[]).append(i)
+          comps=sorted(groups.values(),key=lambda x:min(x))
+          print('--- COMPONENTS',len(comps),'---')
+          for ci,ids in enumerate(comps):
+              p=rest[np.asarray(ids)]
+              print('COMP',ci,'n',len(ids),'first',min(ids),'last',max(ids),
+                    'lo',np.round(p.min(0),6).tolist(),'hi',np.round(p.max(0),6).tolist(),
+                    'centroid',np.round(p.mean(0),6).tolist())
           print('--- baseline keys ---')
           b=json.loads((root/'baseline.json').read_text())
           print(sorted(b))
           PY
           cat evidence/fixture_probe.txt
+      - name: Run R21 unit theorem
+        run: python -m pytest -q tests/compiler/test_rigid_attachment_surface_anchor_v1.py
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: attachment-r21-fixture-probe
           path: evidence/
@@ -59,93 +81,21 @@ jobs:
         with:
           ref: ${{ github.sha }}
           clean: true
-      - name: Inspect sealed Knight inputs and attachment presentation evidence
+      - name: Inspect sealed Knight inputs and locate earlier attachment witness
         env:
           AUTHORITY_ROOT: /home/monster/realsas_authority
           INPUT_ROOT: /home/monster/realsas_authority/imports/knight_latest_carrier_20261010
-          CAA_RUN: KNIGHT_LATEST_CURRENT_CAA_VISUAL_20261010
-          MAT_RUN: KNIGHT_LATEST_CARRIER_MATERIALIZATION_20261010
         run: |
           mkdir -p evidence
-          /home/monster/realsas_platform/current/bin/realsas-python - <<'PY' > evidence/sealed_probe.txt
-          import json, os
-          from pathlib import Path
-          import numpy as np
-          root=Path(os.environ['INPUT_ROOT'])
-          auth=Path(os.environ['AUTHORITY_ROOT'])
-          print('INPUT_ROOT',root,'exists',root.exists())
-          for p in sorted(root.iterdir()):
-              if p.is_file() and p.suffix.lower() in {'.npz','.json','.rss'}:
-                  print('FILE',p.name,p.stat().st_size)
-                  if p.suffix.lower()=='.npz':
-                      try:
-                          with np.load(p,allow_pickle=False) as z:
-                              print(' KEYS',[(k,z[k].shape,str(z[k].dtype)) for k in z.files])
-                      except Exception as exc:
-                          print(' NPZ_ERROR',type(exc).__name__,str(exc)[:200])
-          print('--- SEARCH AUTHORITY ATTACHMENT EVIDENCE ---')
-          roots=[auth/'runs'/os.environ['CAA_RUN'], auth/'runs'/os.environ['MAT_RUN'], root]
-          needles=('attachment','presentation_attachment','target_attachments','vertex_attachment_owner','target_slot_raw_index')
-          hits=[]
-          for base in roots:
-              if not base.exists():
-                  print('MISSING_ROOT',base); continue
-              print('ROOT',base)
-              for p in base.rglob('*'):
-                  if not p.is_file(): continue
-                  lname=p.name.lower()
-                  if any(n in lname for n in ('attach','present','projection')):
-                      hits.append(('NAME',str(p),p.stat().st_size))
-                  if p.suffix.lower() in {'.json','.rss'} and p.stat().st_size <= 20_000_000:
-                      try: text=p.read_text(errors='ignore')
-                      except Exception: continue
-                      low=text.lower()
-                      found=[n for n in needles if n in low]
-                      if found:
-                          hits.append(('TEXT',str(p),found))
-                          try:
-                              data=json.loads(text)
-                              # print only compact paths/values for relevant keys
-                              def walk(x,path=''):
-                                  if isinstance(x,dict):
-                                      for k,v in x.items():
-                                          q=f'{path}.{k}' if path else k
-                                          if any(n in k.lower() for n in needles):
-                                              if isinstance(v,(str,int,float,bool)) or v is None:
-                                                  print(' FIELD',q,repr(v))
-                                              elif isinstance(v,list):
-                                                  print(' FIELD',q,'LIST',len(v),repr(v[:3])[:1500])
-                                              elif isinstance(v,dict):
-                                                  print(' FIELD',q,'DICT_KEYS',list(v)[:30])
-                                          walk(v,q)
-                                  elif isinstance(x,list):
-                                      for i,v in enumerate(x[:200]): walk(v,f'{path}[{i}]')
-                              walk(data)
-                          except Exception as exc:
-                              print(' JSON_PARSE',p,type(exc).__name__)
-                  if p.suffix.lower()=='.npz' and p.stat().st_size <= 300_000_000:
-                      try:
-                          with np.load(p,allow_pickle=False) as z:
-                              keys=[k for k in z.files if any(n in k.lower() for n in needles)]
-                              if keys:
-                                  print(' NPZ',p)
-                                  for k in keys:
-                                      a=z[k]
-                                      print('  ARRAY',k,a.shape,a.dtype,'minmax', (float(np.min(a)),float(np.max(a))) if a.size and a.dtype.kind in 'iuf' else '')
-                      except Exception:
-                          pass
-          for row in hits[:300]: print('HIT',row)
-          print('hit_count',len(hits))
-          print('--- MOTION SUMMARIES ---')
-          for name in ('demo_run_v1.motion.json','demo_slash_v1.motion.json'):
-              p=root/name
-              data=json.loads(p.read_text())
-              print(name,'keys',sorted(data.keys()),'duration',data.get('duration_seconds'),'loop',data.get('loop'))
-              for key in ('tracks','joints','channels','frames'):
-                  if key in data:
-                      v=data[key]
-                      print(' ',key,type(v).__name__,len(v) if hasattr(v,'__len__') else '')
-          PY
+          {
+            echo '--- presentation config ---'
+            cat "$INPUT_ROOT/presentation_config.json" || true
+            echo
+            echo '--- attachment tokens in large rigging surface ---'
+            grep -aoE '.{0,120}(target_attachments|attachment_id|target_slot_raw_index_fit_only|presentation_attachment_vertex_owner).{0,500}' "$INPUT_ROOT/qualified_rigging_surface.json" | head -80 || true
+            echo '--- prior scratch/witness candidates under authority ---'
+            find "$AUTHORITY_ROOT" -type f \( -name 'sealed_witness_replay.npz' -o -name 'projection.json' -o -iname '*attachment*' -o -iname '*presentation*projection*' \) -printf '%p %s\n' 2>/dev/null | head -300
+          } > evidence/sealed_probe.txt
           cat evidence/sealed_probe.txt
       - uses: actions/upload-artifact@v4
         if: always()

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>RealSaS — KNIGHT Interactive Demo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">REALSAS / INTERACTIVE CHARACTER COMPILATION</div>
+        <h1 id="title">KNIGHT</h1>
+        <div id="subtitle" class="subtitle">Compiled Character Structure</div>
+      </div>
+      <div class="authority-badges" aria-label="Canonical authorities">
+        <span>CANONICAL M</span><span>QUALIFIED G</span><span>QUALIFIED W</span><span>SOURCE + CAA</span>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="panel panel-left">
+        <section>
+          <div class="section-label">View</div>
+          <select id="viewSelect" class="select"></select>
+        </section>
+
+        <section>
+          <div class="section-label">Presentation</div>
+          <div class="preset-grid">
+            <button class="preset active" data-preset="final">Final</button>
+            <button class="preset" data-preset="rig">Rig</button>
+            <button class="preset" data-preset="mesh">Mesh</button>
+            <button class="preset" data-preset="weights">Weights</button>
+            <button class="preset preset-wide" data-preset="xray">X-Ray</button>
+          </div>
+        </section>
+
+        <section class="control-stack">
+          <label class="toggle-row"><input id="artworkToggle" type="checkbox" checked><span>Artwork / CAA</span></label>
+          <label class="range-row"><span>Artwork opacity</span><input id="artworkOpacity" type="range" min="0" max="1" step="0.01" value="1"></label>
+          <label class="toggle-row"><input id="rigToggle" type="checkbox"><span>Rig</span></label>
+          <label class="range-row"><span>Rig opacity</span><input id="rigOpacity" type="range" min="0" max="1" step="0.01" value="0.92"></label>
+          <label class="toggle-row"><input id="meshToggle" type="checkbox"><span>Canonical topology</span></label>
+          <label class="range-row"><span>Mesh opacity</span><input id="meshOpacity" type="range" min="0" max="1" step="0.01" value="0.75"></label>
+          <label class="toggle-row"><input id="weightToggle" type="checkbox"><span>Skin weights</span></label>
+          <label class="range-row"><span>Weight opacity</span><input id="weightOpacity" type="range" min="0" max="1" step="0.01" value="0.92"></label>
+        </section>
+
+        <section>
+          <div class="section-label">Weight field</div>
+          <select id="jointSelect" class="select"></select>
+          <div class="heat-legend"><span>0</span><i></i><span>1</span></div>
+          <div class="microcopy">Canonical per-vertex weights, linearly interpolated across the currently posed M triangles.</div>
+        </section>
+      </aside>
+
+      <section class="viewer-column">
+        <div id="stage" class="stage">
+          <div class="stage-grid"></div>
+          <img id="artwork" class="artwork" alt="Canonical Knight CAA render">
+          <canvas id="fieldCanvas" class="render-layer"></canvas>
+          <canvas id="overlayCanvas" class="render-layer"></canvas>
+          <div class="stage-vignette"></div>
+          <div class="frame-chip"><span id="modeLabel">FINAL CHARACTER</span><b id="frameLabel">REST</b></div>
+          <div id="selectedBoneLabel" class="bone-chip"></div>
+          <div id="missingData" class="missing-data hidden">
+            <strong>Demo data has not been exported yet.</strong>
+            <span>Run the Knight investor-demo exporter against the sealed authority run.</span>
+          </div>
+        </div>
+
+        <div class="transport">
+          <button id="playButton" class="play-button" aria-label="Play or pause">▶</button>
+          <div class="timeline-wrap">
+            <input id="timeline" type="range" min="0" max="0" step="1" value="0">
+            <div class="timeline-meta"><span id="clipName">Rest inspection</span><span id="timeLabel">0.000 s</span></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel panel-right">
+        <section>
+          <div class="section-label">Live structure</div>
+          <div class="metric"><span>Vertices</span><b id="vertexCount">—</b></div>
+          <div class="metric"><span>Triangles</span><b id="faceCount">—</b></div>
+          <div class="metric"><span>Joints</span><b id="jointCount">—</b></div>
+          <div class="metric"><span>View</span><b id="viewLabel">—</b></div>
+        </section>
+
+        <section>
+          <div class="section-label">Selected bone</div>
+          <div id="boneName" class="hero-metric">—</div>
+          <div class="metric"><span>Parent</span><b id="boneParent">—</b></div>
+          <div class="metric"><span>Weighted vertices</span><b id="weightedVertexCount">—</b></div>
+          <div class="metric"><span>Peak influence</span><b id="peakWeight">—</b></div>
+        </section>
+
+        <section>
+          <div class="section-label">Authority</div>
+          <div class="authority-copy">One canonical mechanical mesh drives the topology view. The rig and skin field come from the qualified G/W bound to that same M. Artwork is rendered by the source-wins + sealed CAA line.</div>
+          <div id="sourceSha" class="sha-chip"></div>
+        </section>
+
+        <section id="motionStatusBox" class="motion-status">
+          <div class="status-dot"></div>
+          <div><strong id="motionStatus">Motion pending selection</strong><span>Exact clips will be plugged into this same viewer without replacing M/G/W/CAA.</span></div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script src="data/demo-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

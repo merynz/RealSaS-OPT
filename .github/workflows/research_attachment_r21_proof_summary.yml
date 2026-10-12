@@ -1,0 +1,65 @@
+name: research-attachment-r21-proof-summary
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/research_attachment_r21_proof_summary.yml'
+      - 'research/evidence/r21_attachment_court/R21_ATTACHMENT_PROOF.json'
+
+permissions:
+  contents: write
+
+jobs:
+  summarize:
+    if: github.event.repository.private == false && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/anchored-surface-attachment-r21-20261012
+          persist-credentials: true
+      - name: Summarize every attachment/frame/view proof row
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          p=Path('research/evidence/r21_attachment_court/R21_ATTACHMENT_PROOF.json')
+          d=json.loads(p.read_text())
+          rows=[]
+          for clip,c in d['clips'].items():
+              for view,v in c['views'].items():
+                  for frame in v['frames']:
+                      for name,a in frame['attachments'].items():
+                          rows.append((clip,view,frame['frame_index'],name,a))
+          anchors=[a['anchor_transport_residual_px'] for *_,a in rows]
+          rigid=[a['rigidity_residual_px'] for *_,a in rows]
+          failed_anchor=[r[:-1] for r in rows if not r[-1]['anchor_transport_pass']]
+          failed_rigid=[r[:-1] for r in rows if not r[-1]['rigidity_pass']]
+          depth_failed=[r[:-1] for r in rows if not r[-1]['depth_unchanged']]
+          out={
+            'schema':'RealSaS.R21AttachmentProofSummary.v1',
+            'sample_count':len(rows),
+            'maximum_anchor_transport_residual_px':max(anchors,default=0.0),
+            'maximum_rigidity_residual_px':max(rigid,default=0.0),
+            'anchor_fail_count':len(failed_anchor),
+            'rigidity_fail_count':len(failed_rigid),
+            'depth_mutation_count':len(depth_failed),
+            'all_anchor_pass':not failed_anchor,
+            'all_rigidity_pass':not failed_rigid,
+            'all_depth_unchanged':not depth_failed,
+            'setup_surface_gap_world':{k:v['setup_surface_gap_world'] for k,v in d['attachments'].items()},
+            'gif_sha256':{f'{clip}_{view}':v['sha256'] for clip,c in d['clips'].items() for view,v in c['views'].items()},
+            'product_qualification_claimed':False,
+          }
+          q=p.with_name('R21_PROOF_SUMMARY.json')
+          q.write_text(json.dumps(out,indent=2)+'\n')
+          print(json.dumps(out,indent=2))
+          PY
+          git config user.name 'RealSaS - OPT'
+          git config user.email '140457344+merynz@users.noreply.github.com'
+          git add research/evidence/r21_attachment_court/R21_PROOF_SUMMARY.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'research: summarize R21 attachment proof [skip ci]'
+          git push origin HEAD:research/anchored-surface-attachment-r21-20261012

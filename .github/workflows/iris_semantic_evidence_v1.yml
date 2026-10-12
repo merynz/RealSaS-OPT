@@ -11,12 +11,14 @@ on:
       - 'tools/research/run_frozen_semantic_evidence_v2.py'
       - 'tools/research/run_frozen_semantic_evidence_v3.py'
       - 'tools/research/run_multiview_semantic_oracle_v4.py'
+      - 'tools/research/run_multiview_semantic_oracle_v4_r2.py'
       - 'tools/research/partclipseg_dense_fields_worker_v1.py'
       - 'tools/research/compile_knight_semantic_relations_v1.py'
       - 'tests/iris/test_semantic_relation_evidence_v1.py'
       - 'tests/iris/test_semantic_provider_quality_v1.py'
       - 'tests/iris/test_semantic_part_naming_v1.py'
       - 'tests/iris/test_semantic_mask_court_v1.py'
+      - 'tests/iris/test_multiview_semantic_oracle_v4_r2.py'
       - 'requirements/semantic-research.txt'
       - 'requirements/partclipseg-worker.txt'
       - 'docs/research/IRIS_FROZEN_SEMANTIC_EVIDENCE_DECISION_20261012.md'
@@ -54,6 +56,7 @@ jobs:
           tools/research/run_frozen_semantic_evidence_v2.py
           tools/research/run_frozen_semantic_evidence_v3.py
           tools/research/run_multiview_semantic_oracle_v4.py
+          tools/research/run_multiview_semantic_oracle_v4_r2.py
           tools/research/partclipseg_dense_fields_worker_v1.py
           tools/research/compile_knight_semantic_relations_v1.py
       - name: Run semantic evidence contract tests
@@ -63,3 +66,4 @@ jobs:
           tests/iris/test_semantic_provider_quality_v1.py
           tests/iris/test_semantic_part_naming_v1.py
           tests/iris/test_semantic_mask_court_v1.py
+          tests/iris/test_multiview_semantic_oracle_v4_r2.py

@@ -24,6 +24,7 @@ def build(renders,out,allow_partial=False):
    if allow_partial:continue
    raise RuntimeError('MOTION_RENDER_MISSING:'+cid)
   report=json.loads(report_path.read_text());prefix=report['clip_kind'].lower();pose_path=folder/f'compiled_{prefix}_m_poses.npz'
+  if not allow_partial and (not report.get('mp4_stream') or len(report.get('views',{}))!=8):raise RuntimeError('MOTION_RENDER_NOT_FINAL:'+cid)
   if not pose_path.exists():raise RuntimeError('FRAME_WITNESS_MISSING:'+cid)
   with np.load(pose_path,allow_pickle=False) as z:data={k:z[k] for k in z.files}
   expected={k:hashlib.sha256(data[k].tobytes()).hexdigest() for k in ['rest','faces','weights','axis','parents']}
@@ -43,7 +44,9 @@ def build(renders,out,allow_partial=False):
   if 'mapping' not in locals():mapping=tracks['target_to_source']
   result.append(dict(id=cid,title=title,cameras=report['output_cameras'],kind=report['clip_kind'],loop=report['source_loop'],fps=30,previewCount=len(data['playback_times']),sampleCount=n,columns=columns,sprites=sprites,matrices=packed(data['skin_matrices'],'<f8'),attach=packed(data['attachment_matrices'],'<f8'),indices=packed(data['playback_frame_indices'],'<u4'),ranks=packed(data['part_orders'],'<f4'),overlap=report['overlap_policy'],referenceFrames=refs,reference=packed(data['poses'][refs],'<f8')))
   reports.append(report)
-  for video in ([] if allow_partial else sorted(p for p in folder.glob('Knight_*.mp4') if '.writing.' not in p.name)):
+  expected_videos=[folder/f'Knight_{report["clip_kind"]}_{suffix}.mp4' for suffix in ['V0-V7']+[f'V{v}' for v in range(8)]]
+  if not allow_partial and not all(p.exists() for p in expected_videos):raise RuntimeError('NINE_MP4_EXPORTS_REQUIRED:'+cid)
+  for video in ([] if allow_partial else expected_videos):
    probe=json.loads(subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-show_entries','stream=r_frame_rate,nb_frames,duration','-of','json',str(video)],text=True))['streams'][0]
    if probe['r_frame_rate']!='30/1' or float(probe['duration'])<4 or int(probe['nb_frames'])<120:raise RuntimeError('MP4_DELIVERY_CONTRACT:'+video.name)
    dest=movies/video.name;shutil.copy2(video,dest);integrity[str(dest.relative_to(out))]=digest(dest)

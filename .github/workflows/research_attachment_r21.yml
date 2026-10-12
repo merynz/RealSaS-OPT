@@ -1,0 +1,89 @@
+name: research-attachment-r21
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'compiler/realsas_compiler_core/rigid_attachment_surface_anchor_v1.py'
+      - 'compiler/realsas_compiler_core/visual_attachment_motion_v1.py'
+      - 'tests/compiler/test_rigid_attachment_surface_anchor_v1.py'
+      - 'tests/compiler/test_visual_attachment_motion_v1.py'
+      - 'tools/research/render_knight_attachment_r21.py'
+      - '.github/workflows/research_attachment_r21.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONPATH: .
+
+jobs:
+  fixture-probe:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements/mainline-ci.txt
+      - name: Inspect canonical RUN fixture without mutating it
+        run: |
+          mkdir -p evidence
+          python - <<'PY' > evidence/fixture_probe.txt
+          import json, numpy as np
+          from pathlib import Path
+          root=Path('tests/fixtures/single_m_caa_knight_v1')
+          with np.load(root/'run_poses.npz',allow_pickle=False) as z:
+              for k in z.files:
+                  a=z[k]
+                  print(k, a.shape, a.dtype)
+          print('--- baseline keys ---')
+          b=json.loads((root/'baseline.json').read_text())
+          print(sorted(b))
+          PY
+          cat evidence/fixture_probe.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: attachment-r21-fixture-probe
+          path: evidence/
+
+  sealed-input-probe:
+    if: github.event.repository.private == false && github.event_name == 'pull_request'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          clean: true
+      - name: Inspect sealed Knight input inventory only
+        env:
+          INPUT_ROOT: /home/monster/realsas_authority/imports/knight_latest_carrier_20261010
+        run: |
+          mkdir -p evidence
+          /home/monster/realsas_platform/current/bin/realsas-python - <<'PY' > evidence/sealed_probe.txt
+          import hashlib, json, os
+          from pathlib import Path
+          import numpy as np
+          root=Path(os.environ['INPUT_ROOT'])
+          print('root_exists',root.exists())
+          if root.exists():
+              for p in sorted(root.iterdir()):
+                  if p.is_file() and p.suffix.lower() in {'.npz','.json','.rss'}:
+                      print('FILE',p.name,p.stat().st_size)
+                      if p.suffix.lower()=='.npz':
+                          try:
+                              with np.load(p,allow_pickle=False) as z:
+                                  print(' KEYS',[(k,z[k].shape,str(z[k].dtype)) for k in z.files])
+                          except Exception as exc:
+                              print(' NPZ_ERROR',type(exc).__name__,str(exc)[:200])
+          PY
+          cat evidence/sealed_probe.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: attachment-r21-sealed-probe
+          path: evidence/

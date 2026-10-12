@@ -39,15 +39,26 @@ Provider V1 is retained as a negative witness after the Knight run showed cross-
 - `model.safetensors` SHA-256: `0a4067b11ce1e23d5229203f11c718a823060d15a4b23fa2372a7d4b77cbbc60`;
 - declared upstream model/checkpoint license: Apache License 2.0;
 - V1 role: box-prompted modal segmentation;
-- V2 role: label-independent segment-everything candidate masks.
+- V2/V3 role: label-independent segment-everything candidate masks.
 
-### CLIPSeg RD64 refined — research semantic field producer
+### CLIPSeg RD64 refined — V2 semantic field producer
 
 - model repository: `CIDAS/clipseg-rd64-refined`;
 - runtime-resolved immutable Hugging Face commit is recorded in each provider audit;
 - `model.safetensors` SHA-256 required by V2: `d00ca85d6b859f9d07b7cfb8ef26fe9771cb275b34c9368f2ecf603139307f55`;
 - declared upstream model-card license: Apache License 2.0;
-- role: frozen text-conditioned dense semantic fields used only to classify label-independent SAM2 candidate masks.
+- historical role: frozen text-conditioned dense semantic fields used to classify label-independent SAM2 candidate masks.
+
+### PartCLIPSeg — V3 part-specialized semantic field producer
+
+- upstream repository: `kaist-cvml/part-clipseg`;
+- pinned source revision: `8abceefff960920019096982688e3e8209ed39de`;
+- upstream repository code license: MIT;
+- official zero-shot Pascal-Part-116 checkpoint source: Google Drive file id `1ytZpfutk__67GLwB-4jMClehJlnAzYFS` as linked by the upstream README;
+- the checkpoint SHA-256 is computed and recorded by each V3 run before evidence is consumed; the checkpoint is not redistributed by RealSaS;
+- role: frozen part-specialized dense semantic evidence used to name label-independent SAM2 local masks.
+
+The official PartCLIPSeg repository ships a legacy Transformers fork. RealSaS V3 executes that code only in an isolated research worker environment and passes dense probabilities back to the current SAM2 provider through a typed `.npz` boundary. It is not imported into canonical IRIS or the main runtime environment.
 
 These dependencies are **not promoted product authority** by their presence on a research branch. Promotion requires an explicit dependency review, retained notices, exact reproducibility evidence, and successful RealSaS qualification. External model outputs remain proposals/evidence; Compiler qualification remains authoritative.
 
@@ -55,7 +66,7 @@ These dependencies are **not promoted product authority** by their presence on a
 
 RealSaS also uses ordinary third-party software libraries such as PyTorch, torchvision, NumPy, SciPy, Pillow, pytest and repository-development tooling. They remain subject to their own licenses. Current developer/CI pins live under `requirements/` and do not replace those upstream licenses.
 
-The semantic-evidence research runner additionally uses Hugging Face Transformers and Hugging Face Hub. The research environment is pinned separately and does not rewrite current mainline dependency pins.
+The semantic-evidence research runner additionally uses Hugging Face Transformers, Hugging Face Hub and `gdown`. The V3 PartCLIPSeg worker uses a separate compatibility environment described by `requirements/partclipseg-worker.txt`; that environment does not rewrite current mainline or SAM2 dependency pins.
 
 ## External research references are not dependencies by default
 

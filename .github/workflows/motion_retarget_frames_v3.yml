@@ -1,0 +1,40 @@
+name: motion-retarget-frames-v3
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'compiler/realsas_compiler_core/motion_retarget_frames_v3.py'
+      - 'tests/compiler/test_motion_retarget_frames_v3.py'
+      - 'tools/demo/render_knight_source_motion_v3.py'
+      - '.github/workflows/motion_retarget_frames_v3.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'compiler/realsas_compiler_core/motion_retarget_frames_v3.py'
+      - 'tests/compiler/test_motion_retarget_frames_v3.py'
+      - 'tools/demo/render_knight_source_motion_v3.py'
+      - '.github/workflows/motion_retarget_frames_v3.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frame-and-ancestry-contract:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements/mainline-ci.txt
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - run: python -m unittest tests.compiler.test_motion_retarget_frames_v3 -v
+      - run: python -m py_compile compiler/realsas_compiler_core/motion_retarget_frames_v3.py tools/demo/render_knight_source_motion_v3.py

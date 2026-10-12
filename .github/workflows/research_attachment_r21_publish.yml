@@ -1,0 +1,74 @@
+name: research-attachment-r21-publish
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/research_attachment_r21_publish.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    if: github.event.repository.private == false && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/anchored-surface-attachment-r21-20261012
+          persist-credentials: true
+      - name: Download successful R21 court
+        uses: actions/download-artifact@v4
+        with:
+          name: knight-attachment-r21-artifact-court
+          path: /tmp/r21-court
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: '38277250890'
+      - name: Publish diagnostic evidence on research branch only
+        run: |
+          dest=research/evidence/r21_attachment_court
+          mkdir -p "$dest"
+          cp /tmp/r21-court/KNIGHT_RUN_V5_BASE_vs_R21.gif "$dest/"
+          cp /tmp/r21-court/KNIGHT_RUN_V6_BASE_vs_R21.gif "$dest/"
+          cp /tmp/r21-court/KNIGHT_SLASH_V5_BASE_vs_R21.gif "$dest/"
+          cp /tmp/r21-court/KNIGHT_SLASH_V6_BASE_vs_R21.gif "$dest/"
+          cp /tmp/r21-court/R21_ATTACHMENT_PROOF.json "$dest/"
+          cp /tmp/r21-court/PARENT_NPZ_INVENTORY.json "$dest/"
+          cat > "$dest/README.md" <<'EOF'
+          # R21 Knight attachment court
+
+          Research diagnostic only; no product qualification claim. Left pane is BASE, right pane is R21 surface-anchored attachment presentation.
+
+          ## SLASH
+
+          **V6 side**
+
+          ![SLASH V6](KNIGHT_SLASH_V6_BASE_vs_R21.gif)
+
+          **V5 diagonal**
+
+          ![SLASH V5](KNIGHT_SLASH_V5_BASE_vs_R21.gif)
+
+          ## RUN
+
+          **V6 side**
+
+          ![RUN V6](KNIGHT_RUN_V6_BASE_vs_R21.gif)
+
+          **V5 diagonal**
+
+          ![RUN V5](KNIGHT_RUN_V5_BASE_vs_R21.gif)
+          EOF
+          git config user.name 'RealSaS - OPT'
+          git config user.email '140457344+merynz@users.noreply.github.com'
+          git add "$dest"
+          if git diff --cached --quiet; then
+            echo 'No evidence changes to publish.'
+            exit 0
+          fi
+          git commit -m 'research: publish R21 attachment court evidence [skip ci]'
+          git push origin HEAD:research/anchored-surface-attachment-r21-20261012

@@ -1,0 +1,72 @@
+name: research-attachment-r21-artifact-court
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/research_attachment_r21_artifact_court.yml'
+      - 'tools/research/render_knight_attachment_r21.py'
+      - 'compiler/realsas_compiler_core/rigid_attachment_surface_anchor_v1.py'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  court:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements/mainline-ci.txt
+      - name: Download exact historical parent evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: knight-presentation-research-evidence
+          path: /tmp/r21-parent
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: '37859732443'
+      - name: Discover exact sealed witness
+        run: |
+          mkdir -p /tmp/r21-output
+          python - <<'PY'
+          from pathlib import Path
+          import numpy as np, json
+          root=Path('/tmp/r21-parent')
+          files=[p for p in root.rglob('*') if p.is_file()]
+          rows=[]; candidates=[]
+          for p in files:
+              if p.suffix.lower()=='.npz':
+                  try:
+                      with np.load(p,allow_pickle=False) as z:
+                          keys=set(z.files)
+                          rows.append((str(p),p.stat().st_size,sorted(keys)))
+                          needed={'vertices','faces','axis_positions_source','clip_1_canonical_xyz','clip_1_skin_matrices_source','clip_2_canonical_xyz','clip_2_skin_matrices_source'}
+                          if needed<=keys: candidates.append(p)
+                  except Exception as exc:
+                      rows.append((str(p),p.stat().st_size,['ERROR:'+repr(exc)]))
+          Path('/tmp/r21-output/PARENT_NPZ_INVENTORY.json').write_text(json.dumps(rows,indent=2)+'\n')
+          print('NPZ_COUNT',len(rows),'WITNESS_CANDIDATES',[str(p) for p in candidates])
+          if len(candidates)!=1:
+              raise RuntimeError('R21_PARENT_WITNESS_DISCOVERY_AMBIGUOUS:'+repr([str(p) for p in candidates]))
+          Path('/tmp/r21-output/WITNESS_PATH.txt').write_text(str(candidates[0])+'\n')
+          PY
+      - name: Render exact side and diagonal comparison GIFs
+        run: |
+          witness="$(cat /tmp/r21-output/WITNESS_PATH.txt)"
+          python tools/research/render_knight_attachment_r21.py --witness "$witness" --output /tmp/r21-output --views 6,5 --resolution 256
+          ls -lh /tmp/r21-output
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knight-attachment-r21-artifact-court
+          path: /tmp/r21-output
+          if-no-files-found: warn
+          retention-days: 7

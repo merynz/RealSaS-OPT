@@ -1,0 +1,15 @@
+# Isolated research worker for official PartCLIPSeg code at
+# kaist-cvml/part-clipseg@8abceefff960920019096982688e3e8209ed39de.
+# Install inside a venv created with --system-site-packages so the qualified
+# Colab PyTorch/CUDA stack is reused while the legacy Transformers fork gets
+# compatible tokenizer/hub versions without downgrading the SAM2 environment.
+huggingface-hub==0.36.0
+tokenizers==0.13.3
+safetensors>=0.2.1
+ftfy==6.3.1
+regex
+requests
+packaging>=20.0
+filelock
+pyyaml>=5.1
+tqdm>=4.27

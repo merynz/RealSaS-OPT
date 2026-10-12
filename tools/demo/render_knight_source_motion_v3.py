@@ -114,10 +114,11 @@ def recover_correspondence(witness, source, target_frames, index):
 
 def render_view(view):
     m, poses, out = CONTEXT["material"], CONTEXT["poses"], CONTEXT["out"]
+    prefix = CONTEXT["prefix"]
     results = []
     for fi, posed in enumerate(poses):
         r = render_single_m_caa(**{k: m[k] for k in ("rest", "faces", "source", "maps", "cameras", "caa")}, posed=posed, view=view, resolution=256)
-        Image.fromarray(r.straight_rgba_u8).save(out / f"slash_v{view}_{fi:03d}.png")
+        Image.fromarray(r.straight_rgba_u8).save(out / f"{prefix}_v{view}_{fi:03d}.png")
         results.append(dict(frame=fi, rgba_sha256=array_hash(r.straight_rgba_u8), depth_ties=r.unresolved_depth_tie_count, fragment_overflow=r.fragment_overflow_count))
     return view, results
 
@@ -126,12 +127,31 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--source", type=Path, required=True)
     ap.add_argument("--witness", type=Path, required=True)
+    ap.add_argument("--bind-source", type=Path, help="Exact previously sealed SLASH source used only to identify correspondence")
+    ap.add_argument("--material", type=Path, help="Existing compiled M+CAA material to reuse")
     ap.add_argument("--output", type=Path, required=True)
     ap.add_argument("--workers", type=int, default=4)
     args = ap.parse_args()
     source = json.loads(args.source.read_text())
-    if source["clip_id"] != "demo_slash_v1" or source["clip_kind"] != "SLASH" or not source["metadata"]["source_take"].endswith("|Run_swordAttack"):
-        raise RuntimeError("EXACT_ATTACK_SOURCE_REQUIRED")
+    native = json.loads((ROOT / "canonical/MOTION_PRESET_SOURCE_QUATERNIUS_KNIGHT_NATIVE_V1.json").read_text())
+    expected = {r["clip_id"]: r for r in native["clips"]}.get(source["clip_id"])
+    if expected is None or source["clip_kind"] != expected["clip_kind"] or not source["metadata"]["source_take"].endswith("|" + expected["source_take"].split("|")[-1]):
+        raise RuntimeError("EXACT_KNIGHT_NATIVE_SOURCE_REQUIRED")
+    if source["metadata"]["source_fbx_sha256"] != native["source"]["fbx_sha256"]:
+        raise RuntimeError("KNIGHT_SOURCE_FBX_IDENTITY_DRIFT")
+    clip_kind = expected["clip_kind"]
+    prefix = clip_kind.lower()
+    bind_path = args.bind_source or args.source
+    reference = json.loads(bind_path.read_text())
+    if digest(bind_path) != "6422209f1291dbb3dbfdffb6b238e63214f8aeddfc31e12f1b105ecc1da85298":
+        raise RuntimeError("SEALED_SLASH_CORRESPONDENCE_SOURCE_REQUIRED")
+    source_rows = {r["source_joint_id"]: r for r in source["source_skeleton"]}
+    reference_rows = {r["source_joint_id"]: r for r in reference["source_skeleton"]}
+    if set(source_rows) != set(reference_rows):
+        raise RuntimeError("NATIVE_SOURCE_SKELETON_IDS_DRIFT")
+    rest_residual = max(float(np.max(np.abs(np.asarray(source_rows[j]["rest_position"]) - reference_rows[j]["rest_position"]))) for j in source_rows)
+    if rest_residual > 1e-5 or any(source_rows[j]["parent_source_joint_id"] != reference_rows[j]["parent_source_joint_id"] for j in source_rows):
+        raise RuntimeError("NATIVE_SOURCE_SKELETON_REST_OR_TOPOLOGY_DRIFT")
     fixture = ROOT / "tests/fixtures/single_m_caa_knight_v1/baseline.json"
     manifest, baseline, rgba, cameras, caa = load_inputs(fixture)
     if digest(args.witness) != manifest["parent_witness_sha256"]:
@@ -143,7 +163,7 @@ def main():
     axis, parents = witness["axis_positions_source"], witness["axis_parents"]
     skeleton = SimpleNamespace(root_id="0", joints=tuple(SimpleNamespace(canonical_joint_id=str(i), parent_canonical_id=None if parents[i] < 0 else str(parents[i]), position=p) for i, p in enumerate(axis)))
     tf, frame_report = derive_joint_frames_pre_bind_v2(skeleton, cameras=cameras)
-    mapping, fingerprint, target_scale = recover_correspondence(witness, source, tf, 2)
+    mapping, fingerprint, target_scale = recover_correspondence(witness, reference, tf, 2)
     sf = derive_joint_frames_from_rows(source["source_skeleton"], joint_id_key="source_joint_id", parent_id_key="parent_source_joint_id", position_key="rest_position")
     source_root = mapping["0"]
     C = np.asarray(tf["0"].rotation_matrix) @ np.asarray(sf[source_root].rotation_matrix).T
@@ -163,13 +183,17 @@ def main():
     posed = np.einsum("vj,fjkl,vl->fvk", W, matrices[:, :, :3], hom, optimize=True)
     out = args.output.resolve()
     out.mkdir(parents=True, exist_ok=True)
-    np.savez_compressed(out / "compiled_slash_m_poses.npz", poses=posed, times=times, skin_matrices=matrices, rest=rest, faces=faces, weights=W, axis=axis, parents=parents)
-    (out / "compiled_slash_tracks.json").write_text(json.dumps(dict(source_sha256=digest(args.source), object_rotation=C.tolist(), target_to_source=mapping, tracks=keys), indent=2) + "\n")
+    np.savez_compressed(out / f"compiled_{prefix}_m_poses.npz", poses=posed, times=times, skin_matrices=matrices, rest=rest, faces=faces, weights=W, axis=axis, parents=parents)
+    (out / f"compiled_{prefix}_tracks.json").write_text(json.dumps(dict(source_sha256=digest(args.source), object_rotation=C.tolist(), target_to_source=mapping, tracks=keys), indent=2) + "\n")
     report = dict(schema="RealSaS.KnightSourceMotionFrameFix.v3", product_qualification_claimed=False, source_code_sha=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(), source_take=source["metadata"]["source_take"], source_clip_sha256=digest(args.source), old_witness_sha256=digest(args.witness), source_tracks_compiled=True, old_poses_used_as_new_animation=False, mesh_sha256=array_hash(rest), topology_sha256=array_hash(faces), weights_sha256=array_hash(W), hierarchy_sha256=array_hash(parents), axis_sha256=array_hash(axis), correspondence=fingerprint, source_object_to_target_rotation=C.tolist(), max_orientation_residual=max(orientation_errors.values()), orientation_residual_by_joint=orientation_errors, frame_count=len(times), duration_seconds=float(times[-1]), source_loop=source["loop"], views={}, attachment_qualification_claimed=False, depth_order_fixed=False)
+    report.update(clip_id=source["clip_id"], clip_kind=clip_kind, motion_provenance="KNIGHT_NATIVE", bind_source_sha256=digest(bind_path), source_rest_reference_max_residual=rest_residual)
     (out / "source_motion_evidence.json").write_text(json.dumps(report, indent=2) + "\n")
-    ref = write_material_bundle(out / "single_m_caa_material.npz", rest=rest, faces=faces, source=rgba, cameras=cameras, caa_arrays=caa, input_identities=manifest["inputs"])
+    if args.material:
+        ref = dict(path=str(args.material.resolve()), sha256=digest(args.material))
+    else:
+        ref = write_material_bundle(out / "single_m_caa_material.npz", rest=rest, faces=faces, source=rgba, cameras=cameras, caa_arrays=caa, input_identities=manifest["inputs"])
     material = load_material_bundle(ref["path"], expected_sha256=ref["sha256"], rest=rest, faces=faces)
-    CONTEXT.update(material=material, poses=posed, out=out)
+    CONTEXT.update(material=material, poses=posed, out=out, prefix=prefix)
     with ProcessPoolExecutor(max_workers=min(8, max(1, args.workers)), mp_context=multiprocessing.get_context("fork")) as pool:
         jobs = [pool.submit(render_view, v) for v in range(8)]
         for job in as_completed(jobs):
@@ -184,23 +208,23 @@ def main():
     for fi in range(len(times)):
         sheet = Image.new("RGB", (1024, 576), (23, 28, 37))
         for v in range(8):
-            image = tile(np.asarray(Image.open(out / f"slash_v{v}_{fi:03d}.png").convert("RGBA")), f"SLASH V{v}")
+            image = tile(np.asarray(Image.open(out / f"{prefix}_v{v}_{fi:03d}.png").convert("RGBA")), f"{clip_kind} V{v}")
             individual[v].append(image.resize((512, 576), Image.Resampling.NEAREST))
             sheet.paste(image, ((v % 4) * 256, (v // 4) * 288))
         sheets.append(sheet)
-        sheet.save(out / f"slash_grid_{fi:03d}.png")
-    gif = out / "Knight_SLASH_V0-V7.gif"
-    sheets[0].save(gif, save_all=True, append_images=sheets[1:], duration=durations, loop=0)
+        sheet.save(out / f"{prefix}_grid_{fi:03d}.png")
+    gif = out / f"Knight_{clip_kind}_V0-V7.gif"
+    sheets[0].save(gif, save_all=True, append_images=sheets[1:], duration=durations, loop=0, optimize=False)
     for v, frames in enumerate(individual):
-        frames[0].save(out / f"Knight_SLASH_V{v}.gif", save_all=True, append_images=frames[1:], duration=durations, loop=0)
+        frames[0].save(out / f"Knight_{clip_kind}_V{v}.gif", save_all=True, append_images=frames[1:], duration=durations, loop=0, optimize=False)
     from PIL import ImageSequence
-    for path in [gif, *(out / f"Knight_SLASH_V{v}.gif" for v in range(8))]:
+    for path in [gif, *(out / f"Knight_{clip_kind}_V{v}.gif" for v in range(8))]:
         with Image.open(path) as decoded:
             if decoded.n_frames != len(times):
                 raise RuntimeError("GIF_FRAME_COUNT_DRIFT:" + path.name)
             if sum(f.info.get("duration", 0) for f in ImageSequence.Iterator(decoded)) != sum(durations):
                 raise RuntimeError("GIF_TIMING_DRIFT:" + path.name)
-    subprocess.run(["ffmpeg", "-y", "-v", "error", "-framerate", "24", "-i", str(out / "slash_grid_%03d.png"), "-c:v", "libx264", "-pix_fmt", "yuv420p", str(out / "Knight_SLASH_V0-V7.mp4")], check=True)
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-framerate", "24", "-i", str(out / f"{prefix}_grid_%03d.png"), "-c:v", "libx264", "-pix_fmt", "yuv420p", str(out / f"Knight_{clip_kind}_V0-V7.mp4")], check=True)
     report["gif_sha256"] = digest(gif)
     report["fresh_render_frames"] = len(times) * 8
     (out / "source_motion_evidence.json").write_text(json.dumps(report, indent=2) + "\n")

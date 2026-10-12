@@ -8,6 +8,8 @@ on:
       - 'tests/compiler/test_motion_retarget_frames_v3.py'
       - 'tools/demo/render_knight_source_motion_v3.py'
       - '.github/workflows/motion_retarget_frames_v3.yml'
+      - 'tools/motion/blender_extract_motion_source_v2.py'
+      - 'canonical/MOTION_PRESET_SOURCE_QUATERNIUS_KNIGHT_NATIVE_V1.json'
   push:
     branches: [main]
     paths:
@@ -15,6 +17,8 @@ on:
       - 'tests/compiler/test_motion_retarget_frames_v3.py'
       - 'tools/demo/render_knight_source_motion_v3.py'
       - '.github/workflows/motion_retarget_frames_v3.yml'
+      - 'tools/motion/blender_extract_motion_source_v2.py'
+      - 'canonical/MOTION_PRESET_SOURCE_QUATERNIUS_KNIGHT_NATIVE_V1.json'
 
 permissions:
   contents: read
@@ -38,3 +42,26 @@ jobs:
       - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
       - run: python -m unittest tests.compiler.test_motion_retarget_frames_v3 -v
       - run: python -m py_compile compiler/realsas_compiler_core/motion_retarget_frames_v3.py tools/demo/render_knight_source_motion_v3.py
+
+  extract-knight-native-source:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install distro Blender for exact FBX extraction
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends blender python3-numpy
+      - name: Extract Knight native takes and full action inventory
+        run: |
+          blender --background --python tools/motion/blender_extract_motion_source_v2.py -- \
+            --source-fbx assets/external/quaternius/knight/KnightCharacter.fbx \
+            --spec canonical/MOTION_PRESET_SOURCE_QUATERNIUS_KNIGHT_NATIVE_V1.json \
+            --out-dir native-motion-source
+      - uses: actions/upload-artifact@v4
+        with:
+          name: knight-native-motion-source-${{ github.sha }}
+          path: native-motion-source
+          if-no-files-found: error
+          retention-days: 30

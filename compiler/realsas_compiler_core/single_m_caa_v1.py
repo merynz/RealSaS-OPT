@@ -119,14 +119,14 @@ def compile_rest_visibility(rest, faces, cameras):
 
 def render_single_m_caa(
     *, rest, posed, faces, source, maps, cameras, caa, view, resolution=256,
-    face_draw_rank=None,
+    face_draw_rank=None, output_camera=None,
 ):
     if (
         np.asarray(posed).shape != np.asarray(rest).shape
         or not np.isfinite(posed).all()
     ):
         raise QualificationError("M_CAA_POSED_DOMAIN_DRIFT")
-    projected = project_points_xyz_v3(posed, cameras[view])
+    projected = project_points_xyz_v3(posed, cameras[view] if output_camera is None else output_camera)
     sampler, counts = material_sampler(
         rest, faces, source, maps, cameras, caa, view, True
     )
@@ -139,6 +139,7 @@ def render_single_m_caa(
         resolution=resolution,
         sample_material=sampler,
         face_draw_rank=face_draw_rank,
+        position_resolution=None if output_camera is None else (output_camera.resolution, output_camera.resolution),
     )
     result.material_fragments = counts
     return result
@@ -475,7 +476,7 @@ def material_sampler(rest, faces, source, maps, cameras, caa, view, use_caa):
 
 def render_m_depth(
     *, positions, depths, faces, uv, texture, resolution, sample_material,
-    face_draw_rank=None,
+    face_draw_rank=None, position_resolution=None,
 ):
     p, z, f, uv = (
         np.asarray(positions, dtype=float),
@@ -505,7 +506,9 @@ def render_m_depth(
         or resolution <= 0
     ):
         raise QualificationError("VISUAL_CANONICAL_DEPTH_INPUT_INVALID")
-    height, width = tex.shape[:2]
+    height, width = tex.shape[:2] if position_resolution is None else position_resolution[::-1]
+    if width <= 0 or height <= 0:
+        raise QualificationError("VISUAL_CANONICAL_POSITION_RESOLUTION_INVALID")
     p = (p + 0.5) * np.array([resolution / width, resolution / height])
     pixels, values, colors, owners = [], [], [], []
 

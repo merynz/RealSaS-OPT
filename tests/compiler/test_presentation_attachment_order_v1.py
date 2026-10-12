@@ -4,7 +4,8 @@ from compiler.realsas_compiler_core.rigid_attachment_surface_anchor_v1 import (
  derive_surface_binding,apply_surface_rigid_3d,SurfaceAddressV1,AttachmentSurfaceBindingV1)
 from compiler.realsas_compiler_core.single_m_caa_v1 import render_m_depth
 from compiler.realsas_compiler_core.presentation_part_order_v1 import compile_part_ids
-from tools.demo.render_knight_source_motion_v3 import preview_samples
+from tools.demo.render_knight_source_motion_v3 import preview_samples, frame_motion_cameras
+from types import SimpleNamespace
 
 class PresentationTests(unittest.TestCase):
  def test_contact_address_and_3d_rigidity_survive_wrong_initial_offset(self):
@@ -36,5 +37,17 @@ class PresentationTests(unittest.TestCase):
  def test_30fps_four_second_playback_holds_nonloop_terminal_without_slowdown(self):
   playback,times,indices=preview_samples(1.2,loop=False);self.assertEqual(len(playback),120);self.assertAlmostEqual(playback[30],1.);self.assertAlmostEqual(times[indices[-1]],1.2)
   playback,times,indices=preview_samples(5/6,loop=True);self.assertAlmostEqual(times[indices[25]],0.);self.assertEqual(len(times),25)
+ def test_full_motion_output_viewport_keeps_source_camera_fixed(self):
+  camera=SimpleNamespace(origin=[0,0,-10],right=[1,0,0],screen_up=[0,1,0],forward=[0,0,1],half_extent=1.,resolution=1024)
+  poses=np.array([[[-3,-5,0],[4,2,1]],[[2,8,1],[-2,-7,0]]],float)
+  output=frame_motion_cameras(poses,[camera],512)[0]
+  self.assertEqual(camera.resolution,1024);self.assertEqual(camera.half_extent,1.)
+  self.assertEqual(output.resolution,512)
+  q=poses-np.array(output.origin);self.assertTrue(np.all(np.abs(q[:,:,:2])<output.half_extent))
+ def test_output_pixel_coordinates_do_not_inherit_source_texture_scale(self):
+  pos=np.array([[2,2],[12,2],[2,12]],float);faces=np.array([[0,1,2]])
+  result=render_m_depth(positions=pos,depths=np.ones(3),faces=faces,uv=np.zeros((3,2)),texture=np.zeros((32,32,4),np.uint8),resolution=16,position_resolution=(16,16),sample_material=lambda fi,b:np.ones((len(fi),4)))
+  self.assertGreater(result.straight_rgba_u8[3,8,3],0)
+  self.assertEqual(result.straight_rgba_u8[12,12,3],0)
 
 if __name__=='__main__':unittest.main()

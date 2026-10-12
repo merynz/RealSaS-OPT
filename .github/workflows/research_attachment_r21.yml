@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 env:
   PYTHONPATH: .
@@ -101,4 +102,69 @@ jobs:
         if: always()
         with:
           name: attachment-r21-sealed-probe
+          path: evidence/
+
+  parent-witness-probe:
+    if: github.event.repository.private == false && github.event_name == 'pull_request'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          clean: true
+      - name: Recover historical parent presentation evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: knight-presentation-research-evidence
+          path: /tmp/r21-parent-evidence
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: '37859732443'
+      - name: Locate exact witness and inspect only relevant arrays
+        run: |
+          mkdir -p evidence
+          /home/monster/realsas_platform/current/bin/realsas-python - <<'PY' > evidence/parent_witness_probe.txt
+          from pathlib import Path
+          import json, hashlib, numpy as np
+          root=Path('/tmp/r21-parent-evidence')
+          print('root',root,'exists',root.exists())
+          files=[p for p in root.rglob('*') if p.is_file()]
+          print('file_count',len(files))
+          for p in files:
+              n=p.name.lower()
+              if p.suffix.lower() in {'.npz','.json'} and any(k in n for k in ('witness','projection','stage42','runtime','pose','motion','presentation')):
+                  print('CANDIDATE',p,p.stat().st_size)
+                  if p.suffix.lower()=='.npz' and p.stat().st_size < 500_000_000:
+                      try:
+                          with np.load(p,allow_pickle=False) as z:
+                              keys=z.files
+                              relevant=[k for k in keys if any(s in k.lower() for s in ('vertices','faces','axis','skin_matrices','canonical_xyz','attachment','times','weights'))]
+                              print(' KEYS',[(k,z[k].shape,str(z[k].dtype)) for k in relevant])
+                      except Exception as exc:
+                          print(' NPZ_ERROR',type(exc).__name__,str(exc)[:300])
+                  elif p.suffix.lower()=='.json' and p.stat().st_size < 50_000_000:
+                      try:
+                          text=p.read_text(errors='ignore')
+                          if 'target_attachments' in text or 'presentation_attachment_vertex_owner' in text or 'target_slot_raw_index_fit_only' in text:
+                              print(' ATTACHMENT_JSON',p)
+                              data=json.loads(text)
+                              def walk(x,path=''):
+                                  if isinstance(x,dict):
+                                      for k,v in x.items():
+                                          q=f'{path}.{k}' if path else k
+                                          if k in {'target_attachments','target_slot_raw_index_fit_only','attachment_id','attachment_index'}:
+                                              print('  FIELD',q,repr(v)[:3000])
+                                          walk(v,q)
+                                  elif isinstance(x,list):
+                                      for i,v in enumerate(x[:100]): walk(v,f'{path}[{i}]')
+                              walk(data)
+                      except Exception as exc:
+                          print(' JSON_ERROR',type(exc).__name__,str(exc)[:300])
+          PY
+          cat evidence/parent_witness_probe.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: attachment-r21-parent-witness-probe
           path: evidence/

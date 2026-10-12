@@ -46,6 +46,17 @@ and depth ties are known limitations. Native exact pixel/owner parity for diagon
 witnesses and linear-light shipping composition remain open qualification gates.
 A green engineering regression must not close those scientific/product gates.
 
+The offline Knight investor inspector is a **source-review/demo consumer** with
+seven exact Knight-native FBX takes (Idle, Run, Run_swordAttack, Jump, Death,
+Roll_sword and swordAttackJump). It transports source FK through explicit rest
+frames, retains the existing M/G/W, and exposes synchronized artwork, selectable
+rig, topology and actual skin weights. Its surface-anchored rigid equipment and
+kinematic-region ordering are presentation candidates; contact/rigidity and
+source-rotation checks do not close artistic grip, clearance or semantic overlap.
+Stage40 and product authority are not silently replaced. Reproduction and the
+next canonical intervention are in
+`docs/motion/KNIGHT_SLASH_SOURCE_FRAME_FIX_20261012.md`.
+
 ## Current product architecture
 
 Public model order is IRIS → TESSA → AXIS → MIRA → Compiler → Runtime.

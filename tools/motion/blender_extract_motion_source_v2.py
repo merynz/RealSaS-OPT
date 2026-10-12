@@ -151,6 +151,32 @@ def angular_scale(M):
     return [float(scale.x),float(scale.y),float(scale.z)]
 
 
+def select_action_slot(armature, action):
+    """Blender <=4.3 has no slot API; 4.4+ must resolve the exact object slot."""
+    data=armature.animation_data
+    if not hasattr(data,"action_suitable_slots"):
+        return {
+            "identifier":"LEGACY_ACTION_NO_SLOT_API",
+            "name":str(armature.name),
+            "target_id_type":"OBJECT",
+        }
+    suitable=list(data.action_suitable_slots)
+    by_user=[slot for slot in suitable if armature in tuple(slot.users())]
+    by_name=[slot for slot in suitable if str(slot.name_display)==str(armature.name)]
+    if len(by_user)==1:
+        slot=by_user[0]
+    elif len(by_name)==1:
+        slot=by_name[0]
+    elif len(suitable)==1:
+        slot=suitable[0]
+    else:
+        detail=",".join(f"{s.identifier}:{s.name_display}:{s.target_id_type}" for s in suitable)
+        raise RuntimeError("MOTION_EXTRACTOR_ARMATURE_SLOT_NOT_UNIQUE:"+action.name+":armature="+armature.name+":slots="+detail)
+    data.action_slot=slot
+    return {"identifier":str(slot.identifier),"name":str(slot.name_display),
+            "target_id_type":str(slot.target_id_type)}
+
+
 def extract_clip(*,armature,action,source_path,source_sha,license_sha,spec,C):
     bones=selected_bones(armature)
     names={b.name for b in bones}
@@ -194,31 +220,7 @@ def extract_clip(*,armature,action,source_path,source_sha,license_sha,spec,C):
     # may leave the previous/first slot active, which can make distinct FBX
     # takes evaluate through the same channel bag. Resolve the exact armature
     # slot explicitly and fail closed if the imported action is ambiguous.
-    suitable=list(armature.animation_data.action_suitable_slots)
-    by_user=[
-        slot for slot in suitable
-        if armature in tuple(slot.users())
-    ]
-    by_name=[
-        slot for slot in suitable
-        if str(slot.name_display)==str(armature.name)
-    ]
-    if len(by_user)==1:
-        action_slot=by_user[0]
-    elif len(by_name)==1:
-        action_slot=by_name[0]
-    elif len(suitable)==1:
-        action_slot=suitable[0]
-    else:
-        detail=",".join(
-            f"{slot.identifier}:{slot.name_display}:{slot.target_id_type}"
-            for slot in suitable
-        )
-        raise RuntimeError(
-            "MOTION_EXTRACTOR_ARMATURE_SLOT_NOT_UNIQUE:"
-            +action.name+":armature="+armature.name+":slots="+detail
-        )
-    armature.animation_data.action_slot=action_slot
+    action_slot=select_action_slot(armature,action)
     start,end=(float(action.frame_range[0]),float(action.frame_range[1]))
     scene=bpy.context.scene
     fps=float(scene.render.fps)/float(scene.render.fps_base or 1.0)
@@ -316,9 +318,9 @@ def extract_clip(*,armature,action,source_path,source_sha,license_sha,spec,C):
             "source_fbx_sha256":source_sha,
             "license_evidence_sha256":license_sha,
             "source_take":action.name,
-            "source_action_slot_identifier":str(action_slot.identifier),
-            "source_action_slot_name":str(action_slot.name_display),
-            "source_action_slot_target_id_type":str(action_slot.target_id_type),
+            "source_action_slot_identifier":action_slot["identifier"],
+            "source_action_slot_name":action_slot["name"],
+            "source_action_slot_target_id_type":action_slot["target_id_type"],
             "source_fps":fps,
             "sample_frame_first":sample_frames[0],
             "sample_frame_last":sample_frames[-1],
@@ -410,6 +412,8 @@ def main():
         "source_fbx_sha256":source_sha,
         "spec_sha256":sha256(spec_path),
         "extractor_schema":EXTRACTOR_SCHEMA,
+        "available_source_actions":sorted(action.name for action in bpy.data.actions),
+        "blender_version":str(bpy.app.version_string),
         "outputs":outputs,
         "source_mesh_skin_appearance_product_authority":False,
     }

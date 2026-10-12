@@ -1,0 +1,84 @@
+{
+  "schema": "RealSaS.MotionPresetSourceManifest.v1",
+  "status": "SOURCE_REVIEW__NO_PRODUCT_AUTHORITY",
+  "library_id": "QUATERNIUS_KNIGHT_CC0_NATIVE_EXPANSION_V1",
+  "source": {
+    "archive_filename": "Knight by @Quaternius-20260919T105040Z-1-001.zip",
+    "archive_sha256": "9c104b557b32a360dc08d0343b38e81c98710c5bb550a1a0d95630f50fe25af4",
+    "fbx_member": "Knight by @Quaternius/FBX/KnightCharacter.fbx",
+    "fbx_sha256": "41f2616fb4a42f9d35e242bbed1450ededc7537def4bf38cbb11b4e54ff2bf21",
+    "license_member": "Knight by @Quaternius/License.docx",
+    "license_evidence_sha256": "66967dc30f553af438851273eab91a66ca6ed5870778b393c4fb9f031cf62f1f",
+    "license_id": "CC0-1.0",
+    "license_text_fact": "License document states CC0 1.0 Universal / Public Domain Dedication",
+    "source_mesh_skin_material_texture_as_product_authority": false,
+    "source_skeleton_as_final_target_authority": false,
+    "allowed_use": "MOTION_SEMANTICS_SOURCE_ONLY",
+    "repo_fbx_path": "assets/external/quaternius/knight/KnightCharacter.fbx"
+  },
+  "clips": [
+    {
+      "clip_id": "demo_idle_v1",
+      "clip_kind": "IDLE",
+      "source_take": "HumanArmature|Idle",
+      "loop": true,
+      "output_filename": "demo_idle_v1.motion.json"
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "clip_kind": "RUN",
+      "source_take": "HumanArmature|Run",
+      "loop": true,
+      "output_filename": "demo_run_v1.motion.json"
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "clip_kind": "SLASH",
+      "source_take": "HumanArmature|Run_swordAttack",
+      "loop": false,
+      "output_filename": "demo_slash_v1.motion.json"
+    },
+    {
+      "clip_id": "demo_jump_v1",
+      "clip_kind": "JUMP",
+      "source_take": "HumanArmature|Jump",
+      "loop": false,
+      "output_filename": "demo_jump_v1.motion.json"
+    },
+    {
+      "clip_id": "demo_death_v1",
+      "clip_kind": "DEATH",
+      "source_take": "HumanArmature|Death",
+      "loop": false,
+      "output_filename": "demo_death_v1.motion.json"
+    },
+    {
+      "clip_id": "demo_roll_sword_v1",
+      "clip_kind": "ROLL_SWORD",
+      "source_take": "HumanArmature|Roll_sword",
+      "loop": false,
+      "output_filename": "demo_roll_sword_v1.motion.json"
+    },
+    {
+      "clip_id": "demo_jump_attack_v1",
+      "clip_kind": "JUMP_ATTACK",
+      "source_take": "HumanArmature|swordAttackJump",
+      "loop": false,
+      "output_filename": "demo_jump_attack_v1.motion.json"
+    }
+  ],
+  "extraction": {
+    "tool": "tools/motion/blender_extract_motion_source_v2.py",
+    "output_schema": "RealSaS.MotionSourceClip.v2",
+    "coordinate_frame": "REALSAS_OBJECT_FRAME_V1",
+    "joint_frame_semantics": "REALSAS_DERIVED_JOINT_FRAME_V1",
+    "curve_sampling": "SOURCE_FPS_BAKED",
+    "scale_animation": "FORBIDDEN",
+    "nonroot_translation": "SUPPORTED",
+    "generated_appearance": false,
+    "root_translation_semantics": "LOCAL_DERIVED_JOINT_FRAME_NORMALIZED_BY_SOURCE_BODY_SCALE",
+    "nonroot_translation_semantics": "LOCAL_DERIVED_JOINT_FRAME_DELTA_NORMALIZED_BY_SOURCE_BODY_SCALE",
+    "nonroot_translation_units": "SOURCE_BODY_SCALE_NORMALIZED__RETARGET_TO_TARGET_BODY_SCALE"
+  },
+  "product_qualification_claimed": false
+}

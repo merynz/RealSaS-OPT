@@ -118,14 +118,15 @@ def compile_rest_visibility(rest, faces, cameras):
 
 
 def render_single_m_caa(
-    *, rest, posed, faces, source, maps, cameras, caa, view, resolution=256
+    *, rest, posed, faces, source, maps, cameras, caa, view, resolution=256,
+    face_draw_rank=None, output_camera=None,
 ):
     if (
         np.asarray(posed).shape != np.asarray(rest).shape
         or not np.isfinite(posed).all()
     ):
         raise QualificationError("M_CAA_POSED_DOMAIN_DRIFT")
-    projected = project_points_xyz_v3(posed, cameras[view])
+    projected = project_points_xyz_v3(posed, cameras[view] if output_camera is None else output_camera)
     sampler, counts = material_sampler(
         rest, faces, source, maps, cameras, caa, view, True
     )
@@ -137,6 +138,8 @@ def render_single_m_caa(
         texture=source[view],
         resolution=resolution,
         sample_material=sampler,
+        face_draw_rank=face_draw_rank,
+        position_resolution=None if output_camera is None else (output_camera.resolution, output_camera.resolution),
     )
     result.material_fragments = counts
     return result
@@ -472,7 +475,8 @@ def material_sampler(rest, faces, source, maps, cameras, caa, view, use_caa):
 
 
 def render_m_depth(
-    *, positions, depths, faces, uv, texture, resolution, sample_material
+    *, positions, depths, faces, uv, texture, resolution, sample_material,
+    face_draw_rank=None, position_resolution=None,
 ):
     p, z, f, uv = (
         np.asarray(positions, dtype=float),
@@ -481,6 +485,9 @@ def render_m_depth(
         np.asarray(uv, dtype=float),
     )
     tex = np.asarray(texture, dtype=np.uint8)
+    ranks=None if face_draw_rank is None else np.asarray(face_draw_rank,dtype=np.int32)
+    if ranks is not None and (ranks.shape!=(len(f),) or np.any(ranks<0)):
+        raise QualificationError("PRESENTATION_FACE_DRAW_RANK_INVALID")
     if (
         p.ndim != 2
         or p.shape[1] != 2
@@ -499,7 +506,9 @@ def render_m_depth(
         or resolution <= 0
     ):
         raise QualificationError("VISUAL_CANONICAL_DEPTH_INPUT_INVALID")
-    height, width = tex.shape[:2]
+    height, width = tex.shape[:2] if position_resolution is None else position_resolution[::-1]
+    if width <= 0 or height <= 0:
+        raise QualificationError("VISUAL_CANONICAL_POSITION_RESOLUTION_INVALID")
     p = (p + 0.5) * np.array([resolution / width, resolution / height])
     pixels, values, colors, owners = [], [], [], []
 
@@ -568,7 +577,8 @@ def render_m_depth(
                 np.zeros(len(color), dtype=np.uint8),
             )
         )
-        all_order = np.lexsort((depth, pixel))
+        all_order = (np.lexsort((depth, pixel)) if ranks is None else
+                     np.lexsort((depth,ranks[ancestry],pixel)))
         ordered_pixel = pixel[all_order]
         first = np.r_[True, ordered_pixel[1:] != ordered_pixel[:-1]]
         output_provenance[ordered_pixel[first]] = fragment_provenance[all_order[first]]
@@ -594,22 +604,17 @@ def render_m_depth(
                 layer_owners.reshape(1, resolution, resolution),
                 contributions.reshape(1, resolution, resolution),
             )
-        order = np.lexsort((depth, pixel))
+        raw_order = np.lexsort((depth, pixel))
+        raw_pixel,raw_depth=pixel[raw_order],depth[raw_order]
+        raw_tied=(raw_pixel[1:]==raw_pixel[:-1]) & (np.abs(raw_depth[1:]-raw_depth[:-1])<=POLICY["depth_tie_epsilon"])
+        order = raw_order if ranks is None else np.lexsort((depth,ranks[ancestry],pixel))
         fragment_provenance = fragment_provenance[order]
         pixel, depth, color, ancestry = (
             x[order] for x in (pixel, depth, color, ancestry)
         )
         same = pixel[1:] == pixel[:-1]
-        ties = int(
-            np.count_nonzero(
-                same & (np.abs(depth[1:] - depth[:-1]) <= POLICY["depth_tie_epsilon"])
-            )
-        )
-        ambiguity[
-            pixel[1:][
-                same & (np.abs(depth[1:] - depth[:-1]) <= POLICY["depth_tie_epsilon"])
-            ]
-        ] = True
+        ties = int(np.count_nonzero(raw_tied))
+        ambiguity[raw_pixel[1:][raw_tied]] = True
         starts = np.r_[True, ~same]
         rank = np.arange(len(pixel)) - np.maximum.accumulate(
             np.where(starts, np.arange(len(pixel)), 0)

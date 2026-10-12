@@ -7,6 +7,7 @@ on:
       - 'models/iris/semantic_part_naming_v1.py'
       - 'models/iris/semantic_mask_court_v1.py'
       - 'compiler/realsas_compiler_core/semantic_relation_evidence_v1.py'
+      - 'compiler/realsas_compiler_core/semantic_relation_evidence_v2.py'
       - 'tools/research/run_frozen_semantic_evidence_v1.py'
       - 'tools/research/run_frozen_semantic_evidence_v2.py'
       - 'tools/research/run_frozen_semantic_evidence_v3.py'
@@ -20,7 +21,9 @@ on:
       - 'tools/research/run_multiview_semantic_oracle_v4_r8.py'
       - 'tools/research/partclipseg_dense_fields_worker_v1.py'
       - 'tools/research/compile_knight_semantic_relations_v1.py'
+      - 'tools/research/compile_knight_semantic_relations_v2.py'
       - 'tests/iris/test_semantic_relation_evidence_v1.py'
+      - 'tests/iris/test_semantic_relation_evidence_v2.py'
       - 'tests/iris/test_semantic_provider_quality_v1.py'
       - 'tests/iris/test_semantic_part_naming_v1.py'
       - 'tests/iris/test_semantic_mask_court_v1.py'
@@ -63,6 +66,7 @@ jobs:
           models/iris/semantic_part_naming_v1.py
           models/iris/semantic_mask_court_v1.py
           compiler/realsas_compiler_core/semantic_relation_evidence_v1.py
+          compiler/realsas_compiler_core/semantic_relation_evidence_v2.py
           tools/research/run_frozen_semantic_evidence_v1.py
           tools/research/run_frozen_semantic_evidence_v2.py
           tools/research/run_frozen_semantic_evidence_v3.py
@@ -76,10 +80,12 @@ jobs:
           tools/research/run_multiview_semantic_oracle_v4_r8.py
           tools/research/partclipseg_dense_fields_worker_v1.py
           tools/research/compile_knight_semantic_relations_v1.py
+          tools/research/compile_knight_semantic_relations_v2.py
       - name: Run semantic evidence contract tests
         run: >-
           PYTHONPATH=. python -m pytest -q
           tests/iris/test_semantic_relation_evidence_v1.py
+          tests/iris/test_semantic_relation_evidence_v2.py
           tests/iris/test_semantic_provider_quality_v1.py
           tests/iris/test_semantic_part_naming_v1.py
           tests/iris/test_semantic_mask_court_v1.py

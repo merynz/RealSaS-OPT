@@ -39,7 +39,8 @@ Provider V1 is retained as a negative witness after the Knight run showed cross-
 - `model.safetensors` SHA-256: `0a4067b11ce1e23d5229203f11c718a823060d15a4b23fa2372a7d4b77cbbc60`;
 - declared upstream model/checkpoint license: Apache License 2.0;
 - V1 role: box-prompted modal segmentation;
-- V2/V3 role: label-independent segment-everything candidate masks.
+- V2/V3 role: label-independent segment-everything candidate masks;
+- V4 role: box+point prompted pixel segmentation after multiview semantic localization.
 
 ### CLIPSeg RD64 refined — V2 semantic field producer
 
@@ -60,13 +61,23 @@ Provider V1 is retained as a negative witness after the Knight run showed cross-
 
 The official PartCLIPSeg repository ships a legacy Transformers fork. RealSaS V3 executes that code only in an isolated research worker environment and passes dense probabilities back to the current SAM2 provider through a typed `.npz` boundary. It is not imported into canonical IRIS or the main runtime environment.
 
+### Qwen3-VL 4B Instruct — V4 multiview semantic oracle
+
+- model repository: `Qwen/Qwen3-VL-4B-Instruct`;
+- declared upstream model-card license: Apache License 2.0;
+- each V4 run resolves and records the immutable Hugging Face revision actually consumed;
+- role: frozen, non-authoritative multiview semantic localization and post-segmentation mask adjudication;
+- it does not create canonical geometry and does not directly authorize runtime behavior.
+
+V4 intentionally uses the multimodal model for contextual reasoning rather than pixel authority. It proposes cross-view semantic instances and box/point prompts, SAM2 performs the pixel segmentation, deterministic mask-shape gates run next, and the multimodal model finally judges the resulting overlay across the eight views. Only evidence surviving both courts may reach canonical-M fusion.
+
 These dependencies are **not promoted product authority** by their presence on a research branch. Promotion requires an explicit dependency review, retained notices, exact reproducibility evidence, and successful RealSaS qualification. External model outputs remain proposals/evidence; Compiler qualification remains authoritative.
 
 ## Software/runtime dependencies
 
 RealSaS also uses ordinary third-party software libraries such as PyTorch, torchvision, NumPy, SciPy, Pillow, pytest and repository-development tooling. They remain subject to their own licenses. Current developer/CI pins live under `requirements/` and do not replace those upstream licenses.
 
-The semantic-evidence research runner additionally uses Hugging Face Transformers, Hugging Face Hub and `gdown`. The V3 PartCLIPSeg worker uses a separate compatibility environment described by `requirements/partclipseg-worker.txt`; that environment does not rewrite current mainline or SAM2 dependency pins.
+The semantic-evidence research runner additionally uses Hugging Face Transformers, Hugging Face Hub, `accelerate`, `gdown` and `uv`. The V3 PartCLIPSeg worker uses a separate compatibility environment described by `requirements/partclipseg-worker.txt`; that environment does not rewrite current mainline or SAM2 dependency pins.
 
 ## External research references are not dependencies by default
 

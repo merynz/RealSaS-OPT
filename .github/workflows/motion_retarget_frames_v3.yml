@@ -84,7 +84,7 @@ jobs:
         run: |
           npm install playwright@1.62.1
           npx playwright install chromium --only-shell
-          tar -C "$HOME/.cache/ms-playwright" -czf headless-browser.tar.gz chromium_headless_shell-*
+          tar -C "$HOME/.cache/ms-playwright" -czf "$PWD/headless-browser.tar.gz" .
       - uses: actions/upload-artifact@v4
         with:
           name: offline-inspector-browser-apparatus

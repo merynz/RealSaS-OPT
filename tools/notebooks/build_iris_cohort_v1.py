@@ -46,6 +46,21 @@ def source_closure(entries):
                     pending.append(candidate)
     return sorted(seen)
 
+def collect_source_files(entries):
+    source={p:(ROOT/p).read_bytes() for p in source_closure(entries)}
+    for p in source_closure(["compiler/vendor/realsas_synthesis/canonical_graph_optimizer.py",
+                             "compiler/vendor/realsas_synthesis/__init__.py"]):
+        source[p]=(ROOT/p).read_bytes()
+    vendor=ROOT/"compiler/vendor/realsas_v05_current_execution_closure.b64"
+    manifest=json.loads((vendor/"manifest.json").read_text())
+    source[(vendor/"manifest.json").relative_to(ROOT).as_posix()]=(vendor/"manifest.json").read_bytes()
+    for row in manifest["part_records"]:
+        path=vendor/row["name"]
+        if hashlib.sha256(path.read_bytes()).hexdigest()!=row["sha256"]:
+            raise ValueError("NOTEBOOK_COMPILER_VENDOR_PART_DRIFT")
+        source[path.relative_to(ROOT).as_posix()]=path.read_bytes()
+    return source
+
 def capsule(files):
     buffer=io.BytesIO()
     with zipfile.ZipFile(buffer,"w",compression=zipfile.ZIP_DEFLATED,compresslevel=9) as z:
@@ -67,9 +82,25 @@ def markdown(text):
 
 def build(input_root,dino_source,output,source_revision,drive_input_relative_path=None):
     roster=json.loads((ROOT/"canonical/FIT8_DIVERSITY_SELECTION_V1.json").read_text())
+    input_root=Path(input_root).resolve()
+    index_path=input_root/"INPUT_PACKETS.json"
+    packet_index=None
+    if index_path.exists():
+        packet_index=json.loads(index_path.read_text())
+        if packet_index["schema"]!="RealSaS.PreparedIrisInputPackets.v1":
+            raise ValueError("NOTEBOOK_INPUT_PACKET_INDEX_SCHEMA")
+        packet_index={r["subject_id"]:r for r in packet_index["subjects"]}
+        if set(packet_index)!={r["subject_key"] for r in roster["selected"]}:
+            raise ValueError("NOTEBOOK_INPUT_PACKET_COHORT_DRIFT")
     inputs={}
     for row in roster["selected"]:
-        folder,proof,binding=verify_observations(input_root,row)
+        packet_root=input_root
+        if packet_index:
+            packet_path=Path(packet_index[row["subject_key"]]["packet_path"]).resolve()
+            if not packet_path.is_relative_to(input_root):
+                raise ValueError("NOTEBOOK_INPUT_PACKET_PATH_ESCAPE")
+            packet_root=packet_path.parent
+        folder,proof,binding=verify_observations(packet_root,row)
         names=["IRIS_OBSERVATION_ADMISSION.json","SOURCE_REST_RENDER_CANDIDATE.json",
                "SOURCE_SCENE_SNAPSHOT.json","camera_bundle.json"]
         names += [f"V{i}{suffix}" for i in range(8) for suffix in (".png",".mask.bin")]
@@ -80,7 +111,7 @@ def build(input_root,dino_source,output,source_revision,drive_input_relative_pat
              "tools/training/export_iris_cohort_surfaces_v1.py",
              "tools/corpus/prepare_iris_observations_v1.py",
              "tools/observation/blender_source_parity_export_v1.py"]
-    source={p:(ROOT/p).read_bytes() for p in source_closure(entries)}
+    source=collect_source_files(entries)
     for p in ("canonical/FIT8_DIVERSITY_SELECTION_V1.json","canonical/FIT8_IRIS_OBSERVATION_POLICY_V1.json",
               "canonical/FIT8_IRIS_SHARED_TRAINING_POLICY_V1.json"):
         source[p]=(ROOT/p).read_bytes()

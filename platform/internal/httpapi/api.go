@@ -12,6 +12,7 @@ import (
 	"github.com/merynz/RealSaS-OPT/platform/internal/agentsession"
 	"github.com/merynz/RealSaS-OPT/platform/internal/artifactstore"
 	"github.com/merynz/RealSaS-OPT/platform/internal/attempt"
+	"github.com/merynz/RealSaS-OPT/platform/internal/campaign"
 	"github.com/merynz/RealSaS-OPT/platform/internal/command"
 	"github.com/merynz/RealSaS-OPT/platform/internal/input"
 	"github.com/merynz/RealSaS-OPT/platform/internal/registry"
@@ -129,6 +130,35 @@ func (a API) Handler() http.Handler {
 		}
 		out, err := attempt.StartResearch(r.Context(), a.Pool, a.Graph, req)
 		result(w, out, err)
+	})
+	mux.HandleFunc("POST /v1/research/campaigns", func(w http.ResponseWriter, r *http.Request) {
+		var req campaign.StartRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		out, err := campaign.Start(r.Context(), a.Pool, a.Graph, a.CodeSHA, req)
+		result(w, out, err)
+	})
+	mux.HandleFunc("POST /v1/research/campaigns/run", func(w http.ResponseWriter, r *http.Request) {
+		var req campaign.RunRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		out, err := campaign.Run(r.Context(), a.Pool, a.Graph, a.CodeSHA, req)
+		result(w, out, err)
+	})
+	mux.HandleFunc("GET /v1/research/campaigns/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id, err := uuid.Parse(r.PathValue("id"))
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid campaign id"})
+			return
+		}
+		out, err := campaign.Get(r.Context(), a.Pool, id)
+		if err != nil {
+			respond(w, 404, map[string]string{"error": err.Error()})
+			return
+		}
+		respond(w, 200, out)
 	})
 	mux.HandleFunc("POST /v1/agents/enter", func(w http.ResponseWriter, r *http.Request) {
 		var req agentsession.OpenRequest

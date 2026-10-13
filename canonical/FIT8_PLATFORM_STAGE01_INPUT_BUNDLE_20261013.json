@@ -4,6 +4,10 @@
   "status": "EXACT_BYTES_PERSISTED_AND_ROUNDTRIP_VERIFIED__NO_STAGE_PASS_MINTED",
   "scope": "FIT8_SOURCE_PROVENANCE_AND_SOURCE_SCENE_OBSERVATION_TRANSPORT",
   "subject_count": 8,
+  "selection": {
+    "path": "canonical/FIT8_DIVERSITY_SELECTION_V1.json",
+    "sha256": "a90c4d198615a50593aa59691e1bd9812a9be26c9b6a5c9abf91c6e3bd98422e"
+  },
   "drive": {
     "folder_id": "1wSjaFg0YD7oQ1K9B98yXuwHB_rjdeeQp",
     "file_id": "1PcxT2rfb9jCHfP75gaqMAo90OU7JRypH",

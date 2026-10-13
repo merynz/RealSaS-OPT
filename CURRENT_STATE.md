@@ -207,6 +207,8 @@ containment and unchanged per-view P999. The Knight mechanical PASS notebook
 is not an IRIS training PASS. The explicit fresh joint-fit differences are in
 `canonical/FIT8_IRIS_KNIGHT_RECIPE_REFERENCE_V1.json`. Source engineering proof:
 `canonical/FIT8_IRIS_RECIPE_REVISION2_PREFLIGHT_20261013.json`. The old delivery
-recipe is superseded; replacement capsule packaging/readiness remains pending
-until the exact merged source and artifact identities are recorded. No new
+recipe is superseded; replacement capsule is delivered at exact merged source `c22e11e06e57adc100b2fc5ffc2bdf4ad19c633a`,
+notebook SHA `509c4477edfc14bf46da7655d773e2acc7458a80bcbc015b2ee63cd7d54c1380`. The canonical readiness record
+binds the same Drive/Library file identities to revision 2. Physical A100 Run All,
+full native truth and live Go qualification remain pending. No new
 scientific Attempt, Fit8 PASS, native-truth admission or product state is minted.

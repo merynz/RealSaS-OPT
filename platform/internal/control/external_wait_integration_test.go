@@ -77,12 +77,12 @@ func TestExternalEvidenceWaitIsResumableAndDoesNotMintFailure(t *testing.T) {
 		AttemptID:   attemptID.String(),
 		StageID:     stageID,
 		EngineResult: orchestration.EngineStageResult{
-			StageID:         stageID,
-			Status:          "WAITING_EXTERNAL_EVIDENCE",
+			StageID:          stageID,
+			Status:           "WAITING_EXTERNAL_EVIDENCE",
 			ExecutedStageIDs: []string{},
-			Outputs:         []orchestration.EngineOutput{},
-			DiagnosticsHash: diagnosticsHash,
-			Failure:         nil,
+			Outputs:          []orchestration.EngineOutput{},
+			DiagnosticsHash:  diagnosticsHash,
+			Failure:          nil,
 		},
 	})
 	if err != nil {

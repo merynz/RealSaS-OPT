@@ -62,18 +62,15 @@ RealSaS implementation names must describe RealSaS responsibilities and mechanis
 
 ## CI / runner policy
 
-The workflows designated as **current execution authority** run only on the local self-hosted runner:
-
-`[self-hosted, linux, x64, realsas]`
-
-Known runner: `realsas-wsl-1660ti`. Local execution is also permitted.
+Host-independent CPU contracts use standard GitHub-hosted `ubuntu-latest` while
+the repository is public, guarded to skip when private. Notebook/Colab is the
+default research/GPU lane. Local `realsas-wsl-1660ti` or explicitly selected local
+execution remains available for native-host witnesses or inference. New scientific
+and product state still follows the Go execution contract.
 
 Runner policy is checked in `tests/repository/test_self_hosted_execution_policy.py`.
-All workflow definitions use self-hosted execution. Frozen historical training
-and recovery replays are manual reproducibility, not normal current development.
+Frozen historical training and recovery replays are manual reproducibility.
 Automatic PR workflows cancel superseded heads in their workflow/PR group.
-
-Do not add GitHub-hosted execution.
 
 ## Local checks
 

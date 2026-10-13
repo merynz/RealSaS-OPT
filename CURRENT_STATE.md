@@ -1,9 +1,37 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-10-12
+**Date:** 2026-10-13
 **Canonical code line:** `main` only
 **Architecture:** RealSaS V2, 43-stage Compiler dependency DAG; versioned release DAGs
 **Implementation readiness:** `canonical/V2_IMPLEMENTATION_READINESS.json`
+
+## Fit8 diversity and product evolution — user-authorized next program
+
+The next research phase is a heterogeneous Fit8, with Knight kept separately as
+the fixed regression witness. Exact selected raw sources are Snake, Bat, T-Rex,
+Horse, Spider, GreenBlob, Shark and textured George. All eight retrieved source
+files matched the sealed October 4 corpus ledger. Selection:
+`canonical/FIT8_DIVERSITY_SELECTION_V1.json`; reproducible source identity receipt:
+`canonical/FIT8_SOURCE_IDENTITY_AUDIT_20261013.json`.
+
+Admission is pending. Start at source/import/rest pose, scene axes/units/root and
+attachment transforms, then the first eight matched source/import renders and
+normalization. Compare the first compiled puppet render against those admitted
+references before broad motion testing. A failed family remains visible and its
+defect gets a general owner-routed fix; no silent easier replacement or per-subject
+production patch. See `docs/corpus/FIT8_ADMISSION.md`.
+
+Same architecture, shared model parameter sets and Compiler contracts must serve
+all eight. No new optimizer, Go Attempt, FIT8 PASS or ProductRevision was created
+by source selection. Seal truth/pose/render and lineage admission before fitting.
+Older September Fit8/KayKit records remain historical evidence and require an
+exact past-use audit before claiming creator-level unseen.
+
+The repo should evolve toward a generic product/system through verified common
+implementations and the existing Go/Python/C++ boundaries, rather than another
+execution line. Ordered milestones and repository discipline are in
+`docs/platform/PRODUCTIZATION.md`. The current Knight evidence and open product
+executor/qualification gaps below retain their scopes.
 
 ## Immediate user-authorized priority
 

@@ -1,0 +1,366 @@
+{
+  "schema": "RealSaS.FIT8DiversitySelection.v1",
+  "date": "2026-10-13",
+  "status": "SOURCE_IDENTITIES_VERIFIED__IMPORT_RENDER_ADMISSION_PENDING",
+  "authority_class": "CORPUS_SELECTION__NOT_ATTEMPT_OR_PRODUCT",
+  "source_code_baseline": "e2a3be0057b36e5767401584b1e688b02a5d6baf",
+  "raw_corpus": {
+    "corpus_id": "realsas-truth-corpus-v1-kaykit-quaternius",
+    "root_sha256": "2f15bf84694417cee3862c39a89e04bfa131f51331d6da5880739d40b7eab5ab",
+    "manifest_sha256": "3799b170d4138dbc0447d2d3456cc9ad5ba7e185fddace6d6ce2de0d0a2adc00",
+    "file_ledger_sha256": "1524edeb99e2383e2d7516bf9680275289976d57efa3fac3a4b01f78426979b4",
+    "audit_package_name": "RealSaS_Truth_Corpus_AUDIT_UPLOAD.zip",
+    "audit_package_sha256": "1857b4c2ba3f43982cdd261f80d76e3df923fe293ba6eaf04de048823e4a6747"
+  },
+  "selection_policy": {
+    "basis": "USER_REQUESTED_MORPHOLOGY_AND_MOTION_DIVERSITY__NO_FIT_SCORE_RANKING",
+    "count": 8,
+    "same_architecture": true,
+    "shared_model_parameters_across_subjects": true,
+    "same_compiler_contracts": true,
+    "subject_specific_production_code_forbidden": true,
+    "cosmetic_variants_count_as_diversity": false,
+    "automatic_replacement_after_failure": false,
+    "coverage_labels_are_evaluation_metadata_only": true,
+    "previous_fit8_prereg": "canonical/FIT8_SOURCE_TEXTURED_AUTHORITY_PREREG_V1.json",
+    "previous_prereg_relation": "DISTINCT_CORPUS_AND_COURT__PRESERVE_HISTORICAL_BYTES"
+  },
+  "knight_regression": {
+    "included_in_fit8_count": false,
+    "fixture": "tests/fixtures/single_m_caa_knight_v1/baseline.json",
+    "role": "MATCHED_ENGINEERING_REGRESSION__NOT_9TH_FIT_SUBJECT",
+    "fresh_joint_training_inclusion": "SEPARATE_DECLARED_DECISION"
+  },
+  "split_policy": {
+    "lofo_split_unit": "LEAKAGE_CONNECTED_SKELETON_TOPOLOGY_MATERIAL_LINEAGE",
+    "pack_split_sufficient": false,
+    "kaykit_reserved_pool_requires_past_use_audit": true,
+    "historical_kaykit_fit_selections": [
+      "kaykit_02_Skeleton_Mage",
+      "kaykit_03_Skeleton_Warrior"
+    ],
+    "cross_source_unseen_seal_status": "PENDING"
+  },
+  "admission_contract": "docs/corpus/FIT8_ADMISSION.md",
+  "product_transition_contract": "docs/platform/PRODUCTIZATION.md",
+  "execution_ready": false,
+  "fit8_pass_claimed": false,
+  "unseen_claimed": false,
+  "product_pass_claimed": false,
+  "selected": [
+    {
+      "ordinal": 1,
+      "subject_key": "fit8_snake_v1",
+      "display_name": "Snake",
+      "coverage_class": "serpentine",
+      "creator": "quaternius",
+      "pack_id": "quaternius-easy-enemy",
+      "source": {
+        "corpus_relative_path": "raw/quaternius/quaternius-easy-enemy/FBX/Snake.fbx",
+        "sha256": "553092a2e1c68ab4e49ce5c139942228a77a911b25c78635aca7901db0a8d53d",
+        "byte_size": 422252,
+        "format": "FBX",
+        "official_page": "https://quaternius.com/packs/easyenemy.html",
+        "source_page_sha256": "ed4aec1275f3b8feb872dce740e3ea440dc32a62ce11be4301cf01b0f277b2aa",
+        "license": "CC0-1.0",
+        "locator": {
+          "provider": "GOOGLE_DRIVE",
+          "pack_folder_id": "1VbJIslXPWK-1KybQN6yezZrfJcw608qe",
+          "file_id": "1fMDtB1Kf1anwGPbKq8672bkfdBXjE4Ke"
+        }
+      },
+      "stress_targets": [
+        "continuous body bend",
+        "ground contact",
+        "self occlusion"
+      ],
+      "source_identity": "EXACT_BYTES_VERIFIED",
+      "import_render_admission": "PENDING",
+      "lineage_component_id": null
+    },
+    {
+      "ordinal": 2,
+      "subject_key": "fit8_bat_v1",
+      "display_name": "Bat",
+      "coverage_class": "flying",
+      "creator": "quaternius",
+      "pack_id": "quaternius-cute-animated-monsters",
+      "source": {
+        "corpus_relative_path": "raw/quaternius/quaternius-cute-animated-monsters/glTF/Bat.gltf",
+        "sha256": "47574f68f8c9e1c953a09f79e4b5f5fb1c07e240130d208fbd63bd91d0ecb63c",
+        "byte_size": 515943,
+        "format": "GLTF",
+        "official_page": "https://quaternius.com/packs/cutemonsters.html",
+        "source_page_sha256": "559fab5d37aa48eb3342ded673651ec975a9e8af7515b9629af9e49e598e8207",
+        "license": "CC0-1.0",
+        "locator": {
+          "provider": "GOOGLE_DRIVE",
+          "pack_folder_id": "1zLLO_7ZoWgUsS4uooYnVSErQYRu1VdS0"
+        }
+      },
+      "stress_targets": [
+        "wing span and folding",
+        "thin surfaces",
+        "body/wing overlap"
+      ],
+      "source_identity": "EXACT_BYTES_VERIFIED",
+      "import_render_admission": "PENDING",
+      "lineage_component_id": null,
+      "observed_gltf_structure": {
+        "skin_count": 1,
+        "joint_counts": [
+          15
+        ],
+        "native_clip_names": [
+          "Bite_Front",
+          "Death",
+          "Flying",
+          "HitRecieve"
+        ]
+      }
+    },
+    {
+      "ordinal": 3,
+      "subject_key": "fit8_trex_v1",
+      "display_name": "T-Rex",
+      "coverage_class": "dinosaur",
+      "creator": "quaternius",
+      "pack_id": "quaternius-animated-dinosaurs",
+      "source": {
+        "corpus_relative_path": "raw/quaternius/quaternius-animated-dinosaurs/FBX/Trex.fbx",
+        "sha256": "db4ae6f657f32ce2253851c3eeca70602be2572b7f5e7fdda3c4c6e7132dea8c",
+        "byte_size": 1074060,
+        "format": "FBX",
+        "official_page": "https://quaternius.com/packs/animateddinosaurs.html",
+        "source_page_sha256": "b62d9b069b8789eaf3402171a751635d88467e027c31fec922854ecf427a5286",
+        "license": "CC0-1.0",
+        "locator": {
+          "provider": "GOOGLE_DRIVE",
+          "pack_folder_id": "1u5Fhu3ziuRlGonW6bUI7uClqBGoSNeF6",
+          "file_id": "1JvVm-GNg4nD4MMWRxhsYu1AaxprOIUmy"
+        }
+      },
+      "stress_targets": [
+        "long tail",
+        "nonhuman biped balance",
+        "head/jaw and short forelimbs"
+      ],
+      "source_identity": "EXACT_BYTES_VERIFIED",
+      "import_render_admission": "PENDING",
+      "lineage_component_id": null
+    },
+    {
+      "ordinal": 4,
+      "subject_key": "fit8_horse_v1",
+      "display_name": "Horse",
+      "coverage_class": "quadruped",
+      "creator": "quaternius",
+      "pack_id": "quaternius-ultimate-animated-animals",
+      "source": {
+        "corpus_relative_path": "raw/quaternius/quaternius-ultimate-animated-animals/glTF/Horse.gltf",
+        "sha256": "3deb61550dff1d2786d04b6e8559d63ad3907d6ab606ba28ce0af074ed96341b",
+        "byte_size": 3610082,
+        "format": "GLTF",
+        "official_page": "https://quaternius.com/packs/ultimateanimatedanimals.html",
+        "source_page_sha256": "cff83a95676549b244a26626a77e630d9ac8d95b0348f5e2e2c53ca821af4391",
+        "license": "CC0-1.0",
+        "locator": {
+          "provider": "GOOGLE_DRIVE",
+          "pack_folder_id": "1uJ3N5HfB7jKTseJUNQr3N4YaN0UuEtHk"
+        }
+      },
+      "stress_targets": [
+        "four foot contacts",
+        "gait crossings",
+        "neck/tail chains"
+      ],
+      "source_identity": "EXACT_BYTES_VERIFIED",
+      "import_render_admission": "PENDING",
+      "lineage_component_id": null,
+      "observed_gltf_structure": {
+        "skin_count": 1,
+        "joint_counts": [
+          50
+        ],
+        "native_clip_names": [
+          "Attack_Headbutt",
+          "Attack_Kick",
+          "Death",
+          "Eating",
+          "Gallop",
+          "Gallop_Jump",
+          "Idle",
+          "Idle_2",
+          "Idle_Headlow",
+          "Idle_HitReact1",
+          "Idle_HitReact2",
+          "Jump_toIdle",
+          "Walk"
+        ]
+      }
+    },
+    {
+      "ordinal": 5,
+      "subject_key": "fit8_spider_v1",
+      "display_name": "Spider",
+      "coverage_class": "arthropod",
+      "creator": "quaternius",
+      "pack_id": "quaternius-easy-enemy",
+      "source": {
+        "corpus_relative_path": "raw/quaternius/quaternius-easy-enemy/FBX/Spider.fbx",
+        "sha256": "01e2289dcc20cb1636b8339be79b9981990bc7e3bb6bda066aa7824caab33946",
+        "byte_size": 1233484,
+        "format": "FBX",
+        "official_page": "https://quaternius.com/packs/easyenemy.html",
+        "source_page_sha256": "ed4aec1275f3b8feb872dce740e3ea440dc32a62ce11be4301cf01b0f277b2aa",
+        "license": "CC0-1.0",
+        "locator": {
+          "provider": "GOOGLE_DRIVE",
+          "pack_folder_id": "1VbJIslXPWK-1KybQN6yezZrfJcw608qe",
+          "file_id": "1nuyuBP8OeMQpEmLdG4dJ2lpe49AqEeN-"
+        }
+      },
+      "stress_targets": [
+        "many limb chains",
+        "crossing limbs",
+        "ground clearance"
+      ],
+      "source_identity": "EXACT_BYTES_VERIFIED",
+      "import_render_admission": "PENDING",
+      "lineage_component_id": null
+    },
+    {
+      "ordinal": 6,
+      "subject_key": "fit8_greenblob_v1",
+      "display_name": "GreenBlob",
+      "coverage_class": "amorphous",
+      "creator": "quaternius",
+      "pack_id": "quaternius-ultimate-monsters",
+      "source": {
+        "corpus_relative_path": "raw/quaternius/quaternius-ultimate-monsters/Blob/glTF/GreenBlob.gltf",
+        "sha256": "e2d2049ebe8d243bd0f60a3f48a7e174444f641ebc40cbea2f6c23cb97a82519",
+        "byte_size": 148007,
+        "format": "GLTF",
+        "official_page": "https://quaternius.com/packs/ultimatemonsters.html",
+        "source_page_sha256": "9e5d63dc1e1c37ff4f6fdb001bfa234947601d919a4658d944f669e9bb0fad9f",
+        "license": "CC0-1.0",
+        "locator": {
+          "provider": "GOOGLE_DRIVE",
+          "pack_folder_id": "18m4KpzpEzhC9wl7jzr6dUc0N8Jozr79C"
+        }
+      },
+      "stress_targets": [
+        "few controls",
+        "squash/stretch",
+        "contact without humanoid anatomy"
+      ],
+      "source_identity": "EXACT_BYTES_VERIFIED",
+      "import_render_admission": "PENDING",
+      "lineage_component_id": null,
+      "observed_gltf_structure": {
+        "skin_count": 1,
+        "joint_counts": [
+          4
+        ],
+        "native_clip_names": [
+          "Bite_Front",
+          "Dance",
+          "Death",
+          "HitRecieve",
+          "Idle",
+          "Jump",
+          "No",
+          "Walk",
+          "Yes"
+        ]
+      }
+    },
+    {
+      "ordinal": 7,
+      "subject_key": "fit8_shark_v1",
+      "display_name": "Shark",
+      "coverage_class": "aquatic",
+      "creator": "quaternius",
+      "pack_id": "quaternius-animated-fish",
+      "source": {
+        "corpus_relative_path": "raw/quaternius/quaternius-animated-fish/FBX/Shark.fbx",
+        "sha256": "fee1cfe578643cefb06457332b5d323f4883eba2515eb255ae0f2abb497a75c9",
+        "byte_size": 101788,
+        "format": "FBX",
+        "official_page": "https://quaternius.com/packs/animatedfish.html",
+        "source_page_sha256": "9d074a71c0d0c64772f08cddedd8dcfefb968dcfbdbb0e1c8e815760ddff0244",
+        "license": "CC0-1.0",
+        "locator": {
+          "provider": "GOOGLE_DRIVE",
+          "pack_folder_id": "1SvlOveJJjmhSn-FgCRyojc1T5QHjjGkF",
+          "file_id": "1KDMkQoY97oRGvAt1BEV5bLJ3hfm1aHiW"
+        }
+      },
+      "stress_targets": [
+        "axial swimming",
+        "fins",
+        "no ground-contact assumption"
+      ],
+      "source_identity": "EXACT_BYTES_VERIFIED",
+      "import_render_admission": "PENDING",
+      "lineage_component_id": null
+    },
+    {
+      "ordinal": 8,
+      "subject_key": "fit8_george_v1",
+      "display_name": "George",
+      "coverage_class": "mechanical",
+      "creator": "quaternius",
+      "pack_id": "quaternius-animated-mech",
+      "source": {
+        "corpus_relative_path": "raw/quaternius/quaternius-animated-mech/Textured/glTF/George.gltf",
+        "sha256": "eccc45d82701f32d67b4480346757b1656c649d9d40e4a1484f57d660596285e",
+        "byte_size": 5152038,
+        "format": "GLTF",
+        "official_page": "https://quaternius.com/packs/animatedmech.html",
+        "source_page_sha256": "774888399dec8a31562d5fe936b1fa5de941d7709217d893902b584977524ebf",
+        "license": "CC0-1.0",
+        "locator": {
+          "provider": "GOOGLE_DRIVE",
+          "pack_folder_id": "1sueV_4CGMpZC8y30mWfgKK9UaT3mkHBX"
+        }
+      },
+      "stress_targets": [
+        "rigid articulated parts",
+        "equipment/rest-frame relationships",
+        "material preservation"
+      ],
+      "source_identity": "EXACT_BYTES_VERIFIED",
+      "import_render_admission": "PENDING",
+      "lineage_component_id": null,
+      "observed_gltf_structure": {
+        "skin_count": 1,
+        "joint_counts": [
+          47
+        ],
+        "native_clip_names": [
+          "Dance",
+          "Death",
+          "Hello",
+          "HitRecieve_1",
+          "HitRecieve_2",
+          "Idle",
+          "Jump",
+          "Kick",
+          "No",
+          "Pickup",
+          "Punch",
+          "Run",
+          "Run_Holding",
+          "Run_Tall",
+          "Shoot",
+          "SwordSlash",
+          "Walk",
+          "Walk_Holding",
+          "Walk_Tall",
+          "Yes"
+        ]
+      }
+    }
+  ]
+}

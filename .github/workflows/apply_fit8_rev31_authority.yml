@@ -1,0 +1,39 @@
+name: apply-fit8-rev31-authority
+
+on:
+  push:
+    branches:
+      - fit8/rev3-1-policy-authority-20261013
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Apply exact Rev3.1 authority patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/rev31_authority
+          mkdir -p /tmp/rev31_authority
+          unzip -q .bootstrap/FIT8_REV31_MAIN_AUTHORITY_PATCH.zip -d /tmp/rev31_authority
+          cp -a /tmp/rev31_authority/. .
+          rm -f .bootstrap/FIT8_REV31_MAIN_AUTHORITY_PATCH.zip
+          rmdir .bootstrap 2>/dev/null || true
+          rm -f .github/workflows/apply_fit8_rev31_authority.yml
+          git diff --check
+          python -m compileall -q models/iris/training tools/training tools/notebooks tests/iris
+          git config user.name 'realsas-ci'
+          git config user.email 'realsas-ci@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'REV31_AUTHORITY_ALREADY_APPLIED'
+            exit 0
+          fi
+          git commit -m 'Align Fit8 IRIS authority with Rev3.1 joint training'
+          git push origin HEAD:fit8/rev3-1-policy-authority-20261013

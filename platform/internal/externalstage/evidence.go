@@ -22,10 +22,10 @@ type Binding struct {
 }
 
 type BindRequest struct {
-    AttemptID  uuid.UUID `json:"attempt_id"`
-    StageID    string    `json:"stage_id"`
-    Bindings   []Binding `json:"bindings"`
-    BoundBy    string    `json:"bound_by"`
+    AttemptID uuid.UUID `json:"attempt_id"`
+    StageID   string    `json:"stage_id"`
+    Bindings  []Binding `json:"bindings"`
+    BoundBy   string    `json:"bound_by"`
 }
 
 type Bound struct {
@@ -83,10 +83,11 @@ func Bind(ctx context.Context, pool *pgxpool.Pool, req BindRequest) (Bound, erro
     if err!=nil{return Bound{},err}
     reused:=true
     err=persistence.WithSerializableRetry(ctx,pool,5,func(tx pgx.Tx)error{
-        var state string
+        var state,kind string
         var releaseID uuid.UUID
-        if err:=tx.QueryRow(ctx,"SELECT final_state,engine_release_id FROM attempts WHERE id=$1 FOR UPDATE",req.AttemptID).Scan(&state,&releaseID);err!=nil{return err}
+        if err:=tx.QueryRow(ctx,"SELECT final_state,engine_release_id,kind FROM attempts WHERE id=$1 FOR UPDATE",req.AttemptID).Scan(&state,&releaseID,&kind);err!=nil{return err}
         if state!="OPEN"{return errors.New("EXTERNAL_STAGE_ATTEMPT_NOT_OPEN")}
+        if kind!="research"{return errors.New("EXTERNAL_STAGE_RESEARCH_ATTEMPT_REQUIRED")}
         var exists bool
         if err:=tx.QueryRow(ctx,"SELECT EXISTS(SELECT 1 FROM engine_release_stages WHERE release_id=$1 AND stage_id=$2)",releaseID,req.StageID).Scan(&exists);err!=nil{return err}
         if !exists{return errors.New("EXTERNAL_STAGE_NOT_IN_RELEASE")}

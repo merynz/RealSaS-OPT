@@ -4,6 +4,8 @@ import hashlib
 import json
 from pathlib import Path
 
+import pytest
+
 from tools.platform.prepare_fit8_source_fragments_v1 import prepare
 
 
@@ -24,6 +26,7 @@ def test_builder_rehashes_bundle_and_emits_portable_strong_stage01_08_fragments(
     corpus = put(root, "manifest/CORPUS_SEAL.json", b'{"schema":"corpus"}')
     rows.append(corpus)
     subjects = []
+    selected = []
     for index in range(8):
         sid = f"fit8_fixture_{index}"
         raw = put(root, f"raw/{sid}/subject.bin", f"raw-{index}".encode())
@@ -46,7 +49,7 @@ def test_builder_rehashes_bundle_and_emits_portable_strong_stage01_08_fragments(
         for view in range(8):
             rows.append(put(root, f"observations/{sid}/V{view}.png", f"png-{index}-{view}".encode()))
             rows.append(put(root, f"observations/{sid}/V{view}.mask.bin", bytes([view + 1])))
-        subjects.append({
+        subject = {
             "subject_id": sid,
             "pack_id": f"pack-{index}",
             "raw_source": raw,
@@ -57,6 +60,18 @@ def test_builder_rehashes_bundle_and_emits_portable_strong_stage01_08_fragments(
                 "source_scene_snapshot": snapshot,
                 "iris_observation_admission": proof,
                 "camera_bundle": camera,
+            },
+        }
+        subjects.append(subject)
+        selected.append({
+            "subject_key": sid,
+            "pack_id": subject["pack_id"],
+            "source": {
+                "corpus_relative_path": raw["path"],
+                "sha256": raw["sha256"],
+                "byte_size": raw["size_bytes"],
+                "source_page_sha256": page["sha256"],
+                "license": "CC0-1.0",
             },
         })
 
@@ -74,17 +89,23 @@ def test_builder_rehashes_bundle_and_emits_portable_strong_stage01_08_fragments(
     }
     receipt_path = root / "BUNDLE_RECEIPT.json"
     receipt_path.write_text(json.dumps(receipt, sort_keys=True) + "\n", encoding="utf-8")
+    selection = {"schema": "RealSaS.FIT8DiversitySelection.v1", "selected": selected}
+    selection_path = tmp_path / "selection.json"
+    selection_path.write_text(json.dumps(selection, sort_keys=True) + "\n", encoding="utf-8")
     locator = {
         "schema": "RealSaS.Fit8PlatformStage01InputBundleLocator.v1",
         "subject_count": 8,
+        "selection": {"path": "canonical/FIT8_DIVERSITY_SELECTION_V1.json",
+                      "sha256": sha(selection_path)},
         "drive": {"sha256": "a" * 64, "file_id": "drive-fixture"},
         "bundle": {"manifest_sha256": sha(manifest_path), "receipt_sha256": sha(receipt_path)},
     }
     locator_path = tmp_path / "locator.json"
     locator_path.write_text(json.dumps(locator, sort_keys=True) + "\n", encoding="utf-8")
 
-    result = prepare(root, locator_path, tmp_path / "out")
+    result = prepare(root, locator_path, selection_path, tmp_path / "out")
     assert result["subject_count"] == 8
+    assert result["selection_sha256"] == sha(selection_path)
     assert result["later_stage_manifest_sections_included"] is False
     assert result["fit8_pass_claimed"] is False
     for row in result["subjects"]:
@@ -102,3 +123,11 @@ def test_builder_rehashes_bundle_and_emits_portable_strong_stage01_08_fragments(
         assert all(item["path"].startswith("${REALSAS_FIT8_INPUT_ROOT}/")
                    for item in fragment["source_files"])
         assert all("fit8_fixture_0" not in item["role"] for item in fragment["source_files"])
+
+    drifted = json.loads(selection_path.read_text())
+    drifted["selected"][0]["source"]["source_page_sha256"] = "f" * 64
+    selection_path.write_text(json.dumps(drifted, sort_keys=True) + "\n", encoding="utf-8")
+    locator["selection"]["sha256"] = sha(selection_path)
+    locator_path.write_text(json.dumps(locator, sort_keys=True) + "\n", encoding="utf-8")
+    with pytest.raises(RuntimeError, match="FIT8_SELECTION_SOURCE_PAGE_DRIFT"):
+        prepare(root, locator_path, selection_path, tmp_path / "drifted")

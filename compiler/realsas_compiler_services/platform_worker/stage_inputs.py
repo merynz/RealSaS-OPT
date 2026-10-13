@@ -13,12 +13,7 @@ from compiler.realsas_compiler_services.orchestrator import mainline
 
 
 def released_execution_plan(base_plan, released_graph, *, mode="PRODUCT"):
-    """Reconstruct execution metadata without losing the full Compiler policy.
-
-    The four scheduling policy fields belong to the released graph. Additional
-    scientific policy/metadata belongs to the shipped Compiler plan. The hash of
-    this complete reconstruction must match the release's pipeline_plan_sha256.
-    """
+    """Reconstruct execution metadata without losing the full Compiler policy."""
     if not released_graph:
         raise RuntimeError("ENGINE_RELEASE_GRAPH_REQUIRED")
     if mode not in {"RESEARCH", "PRODUCT"}:
@@ -84,22 +79,55 @@ def _manifest_file_refs(value):
             yield from _manifest_file_refs(item)
 
 
-def verify_source_inputs(*, manifest, inputs, read_object):
-    """Bind Registry raw bytes to the exact manifest/host files Engine reads.
+def _materialize_external_input(manifest, role, ref, data):
+    run_id = str(manifest.get("run_id") or "")
+    if not run_id:
+        raise RuntimeError("ENGINE_EXTERNAL_INPUT_RUN_ID_REQUIRED")
+    clean_role = role.removeprefix("external:")
+    if not clean_role or any(ch not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-" for ch in clean_role):
+        raise RuntimeError("ENGINE_EXTERNAL_INPUT_ROLE_INVALID:" + role)
+    root = (mainline.authority_root() / "runs" / run_id / "external_inputs").resolve()
+    root.mkdir(parents=True, exist_ok=True)
+    path = (root / f"{clean_role}.{ref['content_sha256']}").resolve()
+    if root not in path.parents:
+        raise RuntimeError("ENGINE_EXTERNAL_INPUT_PATH_ESCAPE")
+    if path.exists():
+        current = path.read_bytes()
+        if current != data:
+            raise RuntimeError("ENGINE_EXTERNAL_INPUT_EXISTING_BYTES_DRIFT:" + role)
+    else:
+        with tempfile.NamedTemporaryFile(dir=root, delete=False) as handle:
+            handle.write(data)
+            temporary = handle.name
+        os.replace(temporary, path)
+    return {
+        "path": str(path),
+        "sha256": str(ref["content_sha256"]),
+        "artifact_id": str(ref["id"]),
+        "semantic_sha256": str(ref["semantic_sha256"]),
+    }
 
-    Section roles seal the whole JSON section, not an arbitrary file with a
-    similar name. Unsegmented inputs must occur as hash-bound file references.
-    This validates identity only; scientific qualification remains the adapter.
+
+def verify_source_inputs(*, manifest, inputs, read_object):
+    """Verify subject bytes and materialize external stage evidence.
+
+    `manifest` is the Engine's in-memory copy. External refs are injected under
+    `_platform_external_inputs`; the persisted run-manifest bytes are untouched.
     """
     seen = set()
+    external = {}
     for ref in inputs:
         role = str(ref.get("role") or "")
-        if not role.startswith("subject:") or role in seen:
+        if role in seen or not (role.startswith("subject:") or role.startswith("external:")):
             raise RuntimeError("ENGINE_SOURCE_INPUT_ROLE_INVALID")
         seen.add(role)
         data = read_object(ref)
         if hashlib.sha256(data).hexdigest() != ref["content_sha256"] or len(data) != ref["size_bytes"]:
             raise RuntimeError("ENGINE_SOURCE_INPUT_CAS_DRIFT:" + role)
+        if role.startswith("external:"):
+            clean = role.removeprefix("external:")
+            external[clean] = _materialize_external_input(manifest, role, ref, data)
+            continue
         if role.startswith("subject:manifest:"):
             key = role[len("subject:manifest:"):]
             if key not in manifest or json.loads(data) != manifest[key]:
@@ -113,6 +141,8 @@ def verify_source_inputs(*, manifest, inputs, read_object):
         for path, digest in refs:
             if not path.is_file() or mainline.sha256_file(path) != digest:
                 raise RuntimeError("ENGINE_SOURCE_INPUT_FILE_DRIFT:" + role)
+    manifest["_platform_external_inputs"] = external
+    return external
 
 
 def hydrate_stage_inputs(*, plan, ledger, manifest, inputs, read_object, mode):
@@ -160,7 +190,6 @@ def hydrate_stage_inputs(*, plan, ledger, manifest, inputs, read_object, mode):
                 raise RuntimeError("ENGINE_CACHE_OUTPUT_PATH_DRIFT:" + stage_id)
             destinations.add(path)
             data = read_object(output)
-            # No payload rewriting: mechanical/art/weight identities stay exact.
             path.parent.mkdir(parents=True, exist_ok=True)
             if not path.exists() or path.read_bytes() != data:
                 with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as handle:

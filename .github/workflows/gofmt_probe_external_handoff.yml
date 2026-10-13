@@ -1,0 +1,29 @@
+name: gofmt-probe-external-handoff
+
+on:
+  push:
+    branches:
+      - platform/external-stage-handoff-v1-mainline-20261013
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: platform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+          cache: false
+      - name: List unformatted Go files
+        run: |
+          files="$(gofmt -l .)"
+          printf '%s\n' "$files"
+          if [ -n "$files" ]; then
+            exit 1
+          fi

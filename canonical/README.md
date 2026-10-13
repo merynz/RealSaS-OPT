@@ -18,6 +18,7 @@ The October 7 mechanics handoff remains [CANONICAL_HANDOFF_20261007.md](CANONICA
 | Carrier-native Knight FIT1 | [KNIGHT_AXIS541_MIRA55_CARRIER_NATIVE_PROMOTION_20261007.json](KNIGHT_AXIS541_MIRA55_CARRIER_NATIVE_PROMOTION_20261007.json), [PLATFORM_MAIN_AUDIT_20261008.json](PLATFORM_MAIN_AUDIT_20261008.json) |
 | Corpus admission | [TRUTH_CORPUS_V1_STATUS_20261004.md](TRUTH_CORPUS_V1_STATUS_20261004.md) |
 | Diverse Fit8 selection, pending admission | [FIT8_DIVERSITY_SELECTION_V1.json](FIT8_DIVERSITY_SELECTION_V1.json), [source identity receipt](FIT8_SOURCE_IDENTITY_AUDIT_20261013.json), [admission gates](../docs/corpus/FIT8_ADMISSION.md) |
+| Fit8 source engineering and blocked A100 readiness | [source/rest engineering smoke](FIT8_SOURCE_REST_ENGINEERING_SMOKE_20261013.json), [training readiness](FIT8_TRAINING_READINESS_V1.json) |
 
 The current Compiler compatibility DAG has 43 stages, retaining stable stage IDs. Each new Go release seals its own DAG; research evolution does not rewrite an earlier release.
 

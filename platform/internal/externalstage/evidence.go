@@ -67,6 +67,33 @@ func LoadIdentities(ctx context.Context, pool *pgxpool.Pool, attemptID uuid.UUID
 	return out, rows.Err()
 }
 
+func declaredExternalRoles(raw []byte) (map[string]struct{}, error) {
+	var parameters map[string]any
+	if err := json.Unmarshal(raw, &parameters); err != nil {
+		return nil, err
+	}
+	value, ok := parameters["external_evidence_roles"]
+	if !ok {
+		return nil, errors.New("EXTERNAL_STAGE_ROLE_CONTRACT_REQUIRED")
+	}
+	rows, ok := value.([]any)
+	if !ok || len(rows) == 0 {
+		return nil, errors.New("EXTERNAL_STAGE_ROLE_CONTRACT_INVALID")
+	}
+	roles := make(map[string]struct{}, len(rows))
+	for _, item := range rows {
+		role, ok := item.(string)
+		if !ok || role == "" || role != strings.TrimSpace(role) {
+			return nil, errors.New("EXTERNAL_STAGE_ROLE_CONTRACT_INVALID")
+		}
+		if _, exists := roles[role]; exists {
+			return nil, errors.New("EXTERNAL_STAGE_ROLE_CONTRACT_INVALID")
+		}
+		roles[role] = struct{}{}
+	}
+	return roles, nil
+}
+
 func Bind(ctx context.Context, pool *pgxpool.Pool, req BindRequest) (Bound, error) {
 	req.StageID = strings.TrimSpace(req.StageID)
 	req.BoundBy = strings.TrimSpace(req.BoundBy)
@@ -107,14 +134,21 @@ func Bind(ctx context.Context, pool *pgxpool.Pool, req BindRequest) (Bound, erro
 		if kind != "research" {
 			return errors.New("EXTERNAL_STAGE_RESEARCH_ATTEMPT_REQUIRED")
 		}
-		var exists bool
-		if err := tx.QueryRow(ctx, "SELECT EXISTS(SELECT 1 FROM engine_release_stages WHERE release_id=$1 AND stage_id=$2)", releaseID, req.StageID).Scan(&exists); err != nil {
+		var parametersRaw []byte
+		if err := tx.QueryRow(ctx, "SELECT semantic_parameters FROM engine_release_stages WHERE release_id=$1 AND stage_id=$2", releaseID, req.StageID).Scan(&parametersRaw); err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return errors.New("EXTERNAL_STAGE_NOT_IN_RELEASE")
+			}
 			return err
 		}
-		if !exists {
-			return errors.New("EXTERNAL_STAGE_NOT_IN_RELEASE")
+		allowedRoles, err := declaredExternalRoles(parametersRaw)
+		if err != nil {
+			return err
 		}
 		for _, b := range bindings {
+			if _, ok := allowedRoles[b.Role]; !ok {
+				return errors.New("EXTERNAL_STAGE_ROLE_NOT_RELEASE_AUTHORIZED")
+			}
 			var producer string
 			if err := tx.QueryRow(ctx, "SELECT producer_contract FROM artifacts WHERE id=$1", b.ArtifactID).Scan(&producer); err != nil {
 				return err
@@ -139,7 +173,7 @@ func Bind(ctx context.Context, pool *pgxpool.Pool, req BindRequest) (Bound, erro
 			}
 		}
 		raw, _ := json.Marshal(map[string]any{"schema": "RealSaS.ExternalStageEvidenceBinding.v1", "stage_id": req.StageID, "evidence_sha256": evidenceSHA, "roles": material})
-		_, err := tx.Exec(ctx, `INSERT INTO attempt_events(attempt_id,event_type,payload) SELECT $1,'EXTERNAL_STAGE_EVIDENCE_BOUND',$2::jsonb WHERE NOT EXISTS (SELECT 1 FROM attempt_events WHERE attempt_id=$1 AND event_type='EXTERNAL_STAGE_EVIDENCE_BOUND' AND payload=$2::jsonb)`, req.AttemptID, raw)
+		_, err = tx.Exec(ctx, `INSERT INTO attempt_events(attempt_id,event_type,payload) SELECT $1,'EXTERNAL_STAGE_EVIDENCE_BOUND',$2::jsonb WHERE NOT EXISTS (SELECT 1 FROM attempt_events WHERE attempt_id=$1 AND event_type='EXTERNAL_STAGE_EVIDENCE_BOUND' AND payload=$2::jsonb)`, req.AttemptID, raw)
 		return err
 	})
 	if err != nil {

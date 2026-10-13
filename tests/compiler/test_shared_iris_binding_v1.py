@@ -1,9 +1,30 @@
 import copy
 import pytest
 import numpy as np
+from types import SimpleNamespace
+import json,hashlib
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.orchestrator.adapters.shared_iris_execution_v1 import validate_shared_iris_payload,value_hash
 from tools.training.export_iris_cohort_surfaces_v1 import per_view_court
+
+def test_shared_profile_is_explicit_and_policy_bound(tmp_path):
+    from compiler.realsas_compiler_services.orchestrator.adapters.shared_iris_execution_v1 import shared_profile_policy,SHARED_PROFILE
+    policy={"schema":"RealSaS.SharedIrisTrainingPolicy.v1","subject_count":8,
+            "teacher_inputs_in_forward":False,
+            "sampling":"ROUND_ROBIN__HALF_FRESH_UNIFORM_HALF_FROZEN_NEAR_ZERO",
+            "fit8_pass_from_training_loss_allowed":False}
+    path=tmp_path/"policy.json";path.write_text(json.dumps(policy))
+    digest=hashlib.sha256(path.read_bytes()).hexdigest()
+    ctx={"run_manifest":{"iris_fit":{"training_profile":SHARED_PROFILE,
+          "shared_training_policy":{"path":str(path),"sha256":digest}}}}
+    prereg=SimpleNamespace(qualification_policy={"shared_cohort_required":True,
+             "shared_training_policy_sha256":digest,"training_profile":SHARED_PROFILE})
+    assert shared_profile_policy(ctx,prereg)["shared_cohort_required"]
+    prereg.qualification_policy["shared_training_policy_sha256"]="0"*64
+    with pytest.raises(QualificationError,match="PREREG_BINDING"):shared_profile_policy(ctx,prereg)
+    ctx["run_manifest"]["iris_fit"]["training_profile"]="UNKNOWN"
+    with pytest.raises(QualificationError,match="PROFILE_UNKNOWN"):shared_profile_policy(ctx)
+    assert shared_profile_policy({"run_manifest":{"iris_fit":{}}}) is None
 
 def data():
     ids=["subject_a","subject_b"]

@@ -55,7 +55,7 @@
       "model": "IRIS",
       "current_source": "models/iris/v4/scene_first_signed_v4.py",
       "objective_source": "models/iris/v5/direct_fstar_fit_v5.py",
-      "required_work": "Bind a real shared eight-subject training loop and admitted observations/teachers. The F-star objective is not a complete trainer. Shared-head architecture changes remain unapproved."
+      "required_work": "Shared trainer and explicit image-derived F-star Stage09/10 profile implemented; physical A100 and live Go qualification remain pending."
     },
     {
       "model": "TESSA",

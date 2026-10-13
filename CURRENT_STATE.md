@@ -71,6 +71,12 @@ remain distinct pending gates; the full READY flag is still false.
 
 ## Immediate user-authorized priority
 
+Active research continuation is the shared IRIS Fit8 A100 capsule and its
+per-subject results, followed by TESSA, AXIS and MIRA as their truth gates close.
+Knight E2E is the fixed regression reference. Research contracts/preflight are
+operator tools; the future product lane must accept input and return qualified
+output without exposing those operator steps to customers.
+
 The canonical development/render baseline is **one M for geometry, topology and
 motion; source-wins RGB plus the already compiled CAA on M-face/barycentric
 addresses**. The user approved the sealed eight-view RUN replay. Independent
@@ -105,7 +111,7 @@ have not started. A complete product input → model inference → Compiler → 
 executor is a later user goal, while modular development remains the immediate
 working lane.
 
-Next focus is **grip/weapon relation and semantic overlap/draw order**. Raw depth
+The retained Knight render focus is **grip/weapon relation and semantic overlap/draw order**. Raw depth
 and depth ties are known limitations. Native exact pixel/owner parity for diagonal
 witnesses and linear-light shipping composition remain open qualification gates.
 A green engineering regression must not close those scientific/product gates.
@@ -176,9 +182,10 @@ at its sealed paths and archive commits; no ledger is edited to manufacture PASS
 
 Keep the live map and simplified plan coherent on main. Verify exact-head tests,
 typed bindings and the fresh eight-view approved regression after source changes.
-Then address grip/weapon relation and semantic draw order with independently
-measured behavior. No model head training, refit or new scientific Attempt is
-implied by this architecture cleanup.
+Continue the user-authorized shared Fit8 research capsule while preserving this
+Knight regression. New model heads remain a separate intervention; the frozen
+shared IRIS fitting policy is already authorized. The product executor and
+qualification lane must keep their independent scopes.
 
 Read this file, `AGENTS.md`, `docs/platform/EXECUTION_LANES.md`, then
 `canonical/CANONICAL_HANDOFF_20261007.md` and the current plan. Older recovery or

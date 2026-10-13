@@ -2,8 +2,8 @@
   "a100_executed": false,
   "actual_optimizer_steps": 16,
   "all_eight_evaluated": true,
-  "binding_sha256": "4cc7962d3a420595d08b10c8ddd336e10042304780cf34419ef7bc3162eb5d70",
-  "checkpoint_payload_sha256": "6b34e6f4e868ae8dc93006d30fcd6c0b114364ea84b952c6dcc606044e707fe9",
+  "binding_sha256": "e31b908d6fcb581b46b0afdb0b30f19a203ccd75354ab70d0ad1b75056902e18",
+  "checkpoint_payload_sha256": "3c521e8ba1db742a918bb556a420c5e592ef806b651a49312ecfc6eddb11c746",
   "cpu_exact_resume_test": "tests/iris/test_shared_cohort_v1.py",
   "device": "cpu",
   "fit8_pass_claimed": false,
@@ -40,7 +40,7 @@
   "date": "2026-10-13",
   "authority_class": "SOURCE_ENGINEERING_PREFLIGHT__NOT_ATTEMPT_OR_QUALIFICATION",
   "source": {
-    "models/iris/training/cohort_v1.py": "cd32a431603b818c715feb546d4016f1a3c6fba8a68c9f1e53dcc003d3e29b5d",
+    "models/iris/training/cohort_v1.py": "0ff1855f8dab96f30fb74d63459a530845a5d286f3b79dc31357ed2955f909e5",
     "models/iris/v4/scene_first_signed_v4.py": "e9c2432ead4b6fa13ecad5a32837ea9cbb9c9cd38bd523cc70adef9ed8d48a1c",
     "models/iris/v5/source_signed_field_v5.py": "ae109ec57c9e0b74ff1e11fccc573a944449b67ecd635e3a105878f8b5115c10",
     "models/iris/v5/direct_fstar_fit_v5.py": "1e9370bd97b3dcf7263764e2c6711ce7ee51e2195a941243f0adf1030c8c811e",
@@ -51,10 +51,5 @@
   "input_manifest_sha256": "3e4218240a2ac13af5482a5bfb246152533b6771e2ff4a5d17d987938875396d",
   "shared_fit_policy_sha256": "329c3e7966a9974695f6988d03c9838a33d0c24076c94c37dde67e6fb8931ece",
   "physical_a100_validation": "RUN_ALL_REQUIRED",
-  "source_engineering_tests": {
-    "exact_cpu_resume": "PASS",
-    "code_input_policy_drift_rejection": "PASS",
-    "out_of_range_prediction_gradient": "PASS",
-    "orphan_and_corrupted_checkpoint": "PASS"
-  }
+  "local_checkpoint_serialization_before_drive_copy": true
 }

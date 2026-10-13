@@ -86,6 +86,14 @@ an exact iris_fit.shared_cohort import bundle. The common execution consumer
 validates checkpoint, cohort/policy hashes, balanced exposures, completion and
 all subject metrics. Existing execution/qualification gates remain active.
 
+Set iris_fit.training_profile to SHARED_IRIS_IMAGE_DERIVED_FSTAR_V1, bind
+shared_training_policy and shared_cohort_manifest file references, and include
+training_profile/shared_training_policy_sha256/shared_cohort_required in the
+preregistration qualification policy. Stage09/10 use this explicit F* profile
+instead of the older V2 dense-depth objective, verify the subject's Stage03
+observation binding and retain the existing Stage11/12/13 contracts and courts.
+The default legacy dense-depth and sealed Knight demo profiles are unchanged.
+
 Notebook outputs are external research bytes. Import them and use existing Go
 entry/released-Attempt/target/exit on deployed main; the capsule invents no IDs or
 ProductRevision. CPU engineering preflight is separate from physical A100 runtime

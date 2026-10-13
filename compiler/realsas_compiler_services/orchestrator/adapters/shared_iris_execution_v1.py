@@ -5,6 +5,50 @@ import json
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import load_file_ref
 
+SHARED_PROFILE="SHARED_IRIS_IMAGE_DERIVED_FSTAR_V1"
+
+def shared_profile_policy(ctx,prereg=None):
+    cfg=ctx["run_manifest"].get("iris_fit") or {}
+    profile=cfg.get("training_profile")
+    if profile is None:
+        if prereg is not None and prereg.qualification_policy.get("shared_cohort_required"):
+            raise QualificationError("SHARED_IRIS_PROFILE_REQUIRED")
+        return None
+    if profile!=SHARED_PROFILE:
+        raise QualificationError("SHARED_IRIS_PROFILE_UNKNOWN")
+    reference=cfg.get("shared_training_policy") or {}
+    policy=load_file_ref(reference,expected_schema="RealSaS.SharedIrisTrainingPolicy.v1")
+    if (policy.get("teacher_inputs_in_forward") is not False or policy.get("subject_count",0)<1
+            or policy.get("sampling")!="ROUND_ROBIN__HALF_FRESH_UNIFORM_HALF_FROZEN_NEAR_ZERO"
+            or policy.get("fit8_pass_from_training_loss_allowed") is not False):
+        raise QualificationError("SHARED_IRIS_PROFILE_POLICY_INVALID")
+    if prereg is not None:
+        q=prereg.qualification_policy
+        if (q.get("shared_cohort_required") is not True
+                or q.get("shared_training_policy_sha256")!=reference["sha256"]
+                or q.get("training_profile")!=profile):
+            raise QualificationError("SHARED_IRIS_PROFILE_PREREG_BINDING")
+    return {"training_profile":profile,"shared_training_policy_sha256":reference["sha256"],
+            "shared_cohort_required":True,"geometry_role":"SIGNED_SURFACE_EVIDENCE_NOT_APPEARANCE_AUTHORITY"}
+
+def validate_shared_subject_input(ctx):
+    from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import stage_output_payload
+    audit=stage_output_payload(ctx,"03_SOURCE_MECHANICAL_AUDIT","RealSaS.SourceMechanicalAuditIR.v1")
+    binding=(audit.get("metadata") or {}).get("iris_observation_binding")
+    if not binding or not binding.get("observation_binding"):
+        raise QualificationError("SHARED_IRIS_QUALIFIED_OBSERVATION_BINDING_REQUIRED")
+    cfg=ctx["run_manifest"]["iris_fit"]
+    manifest=load_file_ref(cfg.get("shared_cohort_manifest") or {},expected_schema="RealSaS.SharedIrisCohortShards.v1")
+    policy=load_file_ref(cfg.get("shared_training_policy") or {},expected_schema="RealSaS.SharedIrisTrainingPolicy.v1")
+    ids=[r["subject_id"] for r in manifest["subjects"]]
+    if (len(ids)!=policy["subject_count"] or len(set(ids))!=len(ids)
+            or manifest.get("policy_sha256")!=value_hash(policy)):
+        raise QualificationError("SHARED_IRIS_MANIFEST_POLICY_BINDING")
+    rows=[row for row in manifest["subjects"] if row["subject_id"]==binding["subject_key"]]
+    if len(rows)!=1 or rows[0]["observation_binding"]!=binding["observation_binding"]:
+        raise QualificationError("SHARED_IRIS_SUBJECT_OBSERVATION_DRIFT")
+    return manifest
+
 def value_hash(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(",",":"),allow_nan=False).encode()).hexdigest()
 
@@ -48,6 +92,8 @@ def shared_execution_binding(cfg, prereg, lane, checkpoint_sha256):
     if lane!="IRIS" or not required:
         raise QualificationError("SHARED_IRIS_UNDECLARED_SCOPE")
     bundle=load_file_ref(reference,expected_schema="RealSaS.SharedIrisExecutionImportBundle.v1")
+    if bundle["training_policy"]["sha256"]!=prereg.qualification_policy.get("shared_training_policy_sha256"):
+        raise QualificationError("SHARED_IRIS_EXECUTION_POLICY_DRIFT")
     payload=load_file_ref(bundle["execution"],expected_schema="RealSaS.SharedIrisFitExecutionPayload.v1")
     manifest=load_file_ref(bundle["cohort_manifest"],expected_schema="RealSaS.SharedIrisCohortShards.v1")
     policy=load_file_ref(bundle["training_policy"],expected_schema="RealSaS.SharedIrisTrainingPolicy.v1")

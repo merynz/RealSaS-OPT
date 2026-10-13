@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import random
 import shutil
+import tempfile
 import time
 import uuid
 import numpy as np
@@ -59,12 +60,18 @@ class AtomicCheckpointStore:
         step = payload["step"]
         name = f"step_{step:08d}_{uuid.uuid4().hex}.pt"
         staged = self.root/(name+".staged")
-        with staged.open("wb") as f:
-            torch.save(payload, f)
-            f.flush()
-            os.fsync(f.fileno())
-        digest = file_hash(staged)
-        torch.load(staged, map_location="cpu", weights_only=True)
+        # Serialize/validate locally; Drive receives one large sequential copy.
+        local_root = Path("/content") if Path("/content").is_dir() else Path(tempfile.gettempdir())
+        with tempfile.NamedTemporaryFile(dir=local_root,prefix="realsas_cp_",suffix=".pt") as local:
+            torch.save(payload,local)
+            local.flush();os.fsync(local.fileno())
+            digest = file_hash(local.name)
+            torch.load(local.name,map_location="cpu",weights_only=True)
+            with open(local.name,"rb") as source,staged.open("wb") as target:
+                shutil.copyfileobj(source,target,length=1024*1024)
+                target.flush();os.fsync(target.fileno())
+            if file_hash(staged)!=digest:
+                raise RuntimeError("CHECKPOINT_COPY_CORRUPTED")
         target = self.root/name
         os.replace(staged, target)
         if file_hash(target) != digest:

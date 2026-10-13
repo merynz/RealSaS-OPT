@@ -33,6 +33,11 @@ def iris_observation_binding(ctx,source_hashes,rasters,masks):
                 or view["mask_sha256"]!=masks[i][0]["mask"]["sha256"]
                 or view["maximum_mask_gap_px"]>2. or view["border_margin_px"]<8):
             raise QualificationError("IRIS_OBSERVATION_RASTER_OR_MASK_BINDING")
+    import hashlib,json
+    binding={"proof_sha256":ref["sha256"],"source_sha256":proof["source_sha256"],
+             "camera_sha256":proof["camera_sha256"],"views":proof["views"]}
+    identity=hashlib.sha256(json.dumps(binding,sort_keys=True,separators=(",",":")).encode()).hexdigest()
     return {"proof_sha256":ref["sha256"],"source_sha256":proof["source_sha256"],
+            "observation_binding":identity,
             "camera_sha256":proof["camera_sha256"],"subject_key":proof["subject_id"],
             "scope":"IRIS_BIND_OBSERVATIONS_ONLY","full_native_motion_truth_admitted":False}

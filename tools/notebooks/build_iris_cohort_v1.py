@@ -215,10 +215,18 @@ atomic_json(PERSIST / "CAPSULE_BINDING.json", {
 print(f"[STAGE] 8 admitted IRIS observation sets -> DINO/F* shards; seconds={time.monotonic()-started:.1f}")
 '''
     preflight = '''import unittest
+import contextlib, io
 from tests.iris.test_shared_cohort_v1 import SharedCohortTests
 suite = unittest.defaultTestLoader.loadTestsFromTestCase(SharedCohortTests)
-tested = unittest.TextTestRunner(verbosity=1).run(suite)
+contract_log = io.StringIO()
+with contextlib.redirect_stdout(contract_log), contextlib.redirect_stderr(contract_log):
+    tested = unittest.TextTestRunner(stream=contract_log, verbosity=1).run(suite)
+if not tested.wasSuccessful():
+    print(contract_log.getvalue())
 assert tested.wasSuccessful(), "Shared trainer contract tests failed"
+print(f"[CONTRACT_TESTS] tests={tested.testsRun} PASS | exact CPU resume + drift/corruption checks")
+from tools.training.export_iris_cohort_surfaces_v1 import export as verified_surface_export
+print("[IMPORT_SMOKE] actual Compiler/decoder dependency closure imported")
 from tools.training.iris_cohort_preflight_v1 import preflight
 PREFLIGHT = preflight(SHARDS, POLICY, PERSIST / "runtime_preflight_checkpoints",
                       PERSIST / "runtime_preflight_results", device="cuda")

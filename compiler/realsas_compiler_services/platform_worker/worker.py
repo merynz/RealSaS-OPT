@@ -124,6 +124,26 @@ def _stage_result_outputs(row: dict[str, Any], *, run_id: str, stage_id: str) ->
     return output_rows
 
 
+def _external_wait_result(stage_id: str, required: tuple[str, ...], available: set[str]) -> dict[str, Any]:
+    missing = [role for role in required if role not in available]
+    diagnostics = {
+        "schema": "RealSaS.ExternalEvidenceWait.v1",
+        "stage_id": stage_id,
+        "required_roles": list(required),
+        "available_roles": sorted(available),
+        "missing_roles": missing,
+        "qualification_minted": False,
+    }
+    return {
+        "stage_id": stage_id,
+        "status": "WAITING_EXTERNAL_EVIDENCE",
+        "executed_stage_ids": [],
+        "outputs": [],
+        "diagnostics_hash": hashlib.sha256(json.dumps(diagnostics, sort_keys=True, separators=(",", ":")).encode()).hexdigest(),
+        "failure": None,
+    }
+
+
 def _execute_stage_core(request: dict[str, Any]) -> dict[str, Any]:
     stage_id = str(request["stage_id"])
     allowed = tuple(map(str, request.get("allowed_execute_stage_ids") or ()))
@@ -144,10 +164,15 @@ def _execute_stage_core(request: dict[str, Any]) -> dict[str, Any]:
     manifest_path = mainline.run_manifest_path(run_id)
     manifest = mainline.load_json(manifest_path)
     verify_execution_version(plan, request, manifest)
-    verify_source_inputs(manifest=manifest, inputs=request.get("source_inputs") or (), read_object=_read_cas_object)
+    external = verify_source_inputs(manifest=manifest, inputs=request.get("source_inputs") or (), read_object=_read_cas_object)
+    semantic_parameters = dict(request.get("semantic_parameters") or {})
+    required_external = tuple(map(str, semantic_parameters.get("external_evidence_roles") or ()))
+    if len(required_external) != len(set(required_external)) or any(not role for role in required_external):
+        raise RuntimeError("ENGINE_EXTERNAL_EVIDENCE_ROLE_CONTRACT_INVALID")
+    if required_external and any(role not in external for role in required_external):
+        return _external_wait_result(stage_id, required_external, set(external))
+
     if not ledger_path.exists():
-        # Go has already created the Attempt and execution. This ledger is only
-        # the run-local Engine view, never a second lifecycle authority.
         ledger = mainline.build_fresh_run_ledger(
             plan, run_id=run_id, subject_id=str(manifest["subject_id"]),
             manifest_ref=str(manifest_path),
@@ -239,8 +264,6 @@ async def execute_compile_stage(request: dict[str, Any]) -> dict[str, Any]:
 
 
 async def _with_heartbeat(function, request):
-    # The async activity owns its event loop. Synchronous engine functions run
-    # in a thread and must not call Temporal's async heartbeat implementation.
     task = asyncio.create_task(asyncio.to_thread(function, request))
     while not task.done():
         activity.heartbeat({"stage_id": request.get("stage_id"), "phase": "running"})
@@ -275,12 +298,14 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
                 "code": "STAGE_CAPABILITY_RUN_BINDING_REQUIRED",
                 "class": "CAPABILITY",
                 "reported_owner_module_id": str(request.get("owner_module_id") or ""),
-                "diagnostics": {
-                    "stage_id": stage_id,
-                    "compiler_run_id": run_id,
-                },
+                "diagnostics": {"stage_id": stage_id, "compiler_run_id": run_id},
             },
         }
+    def root_ref(ref):
+        role = str(ref.get("role", ""))
+        if role.startswith("subject:") or role.startswith("external:"):
+            return dict(ref)
+        return {**ref, "role": "subject:" + role}
     stage_request = {
         "released_graph": request.get("released_graph"),
         "graph_node_sha256": request.get("stage_graph_node_sha256"),
@@ -293,9 +318,7 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
         "policy_sha256": request["policy_sha256"],
         "semantic_parameters": request.get("stage_semantic_parameters") or {},
         "input_stages": [{"stage_id": ref["role"][6:], "artifact": ref} for ref in request.get("input_artifacts", ()) if str(ref.get("role", "")).startswith("stage:")],
-        "source_inputs": [{**ref, "role": "subject:" + str(ref["role"]).removeprefix("subject:")}
-                          for ref in request.get("input_artifacts", ())
-                          if not str(ref.get("role", "")).startswith("stage:")],
+        "source_inputs": [root_ref(ref) for ref in request.get("input_artifacts", ()) if not str(ref.get("role", "")).startswith("stage:")],
     }
     stage_result = await _with_heartbeat(_execute_stage_core, stage_request)
     failure = stage_result.get("failure")
@@ -310,11 +333,7 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
         "capability_id": str(request["capability_id"]),
         "status": "PASS" if stage_result["status"] in mainline.PASS_STATUSES else "FAIL",
         "outputs": stage_result.get("outputs") or [],
-        "diagnostics": {
-            "compiler_run_id": run_id,
-            "stage_id": stage_id,
-            "stage_status": stage_result["status"],
-        },
+        "diagnostics": {"compiler_run_id": run_id, "stage_id": stage_id, "stage_status": stage_result["status"]},
         "failure": failure,
     }
 
@@ -322,11 +341,7 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
 def _select_motion_clip(motion: dict[str, Any], requested: str) -> dict[str, Any]:
     clips = list(motion.get("clips") or ())
     for clip in clips:
-        aliases = {
-            str(clip.get("clip_id") or ""),
-            str(clip.get("intent") or ""),
-            str(clip.get("display_name") or ""),
-        }
+        aliases = {str(clip.get("clip_id") or ""), str(clip.get("intent") or ""), str(clip.get("display_name") or "")}
         if requested in aliases:
             return dict(clip)
     raise RuntimeError(f"RENDER_CLIP_NOT_FOUND:{requested}")
@@ -370,54 +385,22 @@ def _render_tail_sync(request: dict[str, Any]) -> dict[str, Any]:
             provenance = tmp / f"{frame_index:04d}.prov"
             owner = tmp / f"{frame_index:04d}.owner"
             completed = subprocess.run(
-                [
-                    str(player),
-                    str(package),
-                    "--clip",
-                    clip_id,
-                    "--view",
-                    view_id,
-                    "--frame",
-                    str(frame_index),
-                    "--out-rgba",
-                    str(rgba),
-                    "--out-provenance",
-                    str(provenance),
-                    "--out-owner",
-                    str(owner),
-                ],
-                check=False,
-                capture_output=True,
-                text=True,
+                [str(player), str(package), "--clip", clip_id, "--view", view_id,
+                 "--frame", str(frame_index), "--out-rgba", str(rgba),
+                 "--out-provenance", str(provenance), "--out-owner", str(owner)],
+                check=False, capture_output=True, text=True,
             )
             if completed.returncode != 0:
-                raise RuntimeError(
-                    "RUNTIME_RENDER_FAILED:"
-                    + completed.stderr.strip()
-                    + ":"
-                    + completed.stdout.strip()
-                )
+                raise RuntimeError("RUNTIME_RENDER_FAILED:" + completed.stderr.strip() + ":" + completed.stdout.strip())
             raw = rgba.read_bytes()
             expected_bytes = resolution * resolution * 4
             if len(raw) != expected_bytes:
-                raise RuntimeError(
-                    f"RUNTIME_RENDER_RGBA_SIZE_DRIFT:{len(raw)}!={expected_bytes}"
-                )
-            images.append(
-                Image.frombytes("RGBA", (resolution, resolution), raw).copy()
-            )
+                raise RuntimeError(f"RUNTIME_RENDER_RGBA_SIZE_DRIFT:{len(raw)}!={expected_bytes}")
+            images.append(Image.frombytes("RGBA", (resolution, resolution), raw).copy())
 
         gif_path = tmp / f"{clip_id}__{view_id}.gif"
         duration_ms = max(1, round(1000.0 / fps))
-        images[0].save(
-            gif_path,
-            format="GIF",
-            save_all=True,
-            append_images=images[1:],
-            duration=duration_ms,
-            loop=0,
-            disposal=2,
-        )
+        images[0].save(gif_path, format="GIF", save_all=True, append_images=images[1:], duration=duration_ms, loop=0, disposal=2)
         sealed = _put_cas_file(gif_path)
 
     return {
@@ -427,13 +410,9 @@ def _render_tail_sync(request: dict[str, Any]) -> dict[str, Any]:
         "content_sha256": sealed["content_sha256"],
         "size_bytes": sealed["size_bytes"],
         "diagnostics": {
-            "runtime_only": True,
-            "upstream_compile_stage_count": 0,
-            "clip_id": clip_id,
-            "view_id": view_id,
-            "frame_count": frame_count,
-            "fps": fps,
-            "resolution": resolution,
+            "runtime_only": True, "upstream_compile_stage_count": 0,
+            "clip_id": clip_id, "view_id": view_id, "frame_count": frame_count,
+            "fps": fps, "resolution": resolution,
             "native_player_sha256": mainline.sha256_file(player),
         },
     }
@@ -451,11 +430,7 @@ async def main() -> None:
     worker = Worker(
         client,
         task_queue=ENGINE_TASK_QUEUE,
-        activities=[
-            execute_compile_stage,
-            execute_capability,
-            render_runtime_tail,
-        ],
+        activities=[execute_compile_stage, execute_capability, render_runtime_tail],
     )
     await worker.run()
 

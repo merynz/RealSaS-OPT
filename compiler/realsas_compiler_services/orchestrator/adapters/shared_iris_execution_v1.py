@@ -115,15 +115,27 @@ def validate_shared_iris_payload(payload, manifest, policy, *, checkpoint_sha256
 
 
 def shared_execution_binding(cfg, prereg, lane, checkpoint_sha256):
-    reference=cfg.get("shared_cohort")
     required=bool(prereg.qualification_policy.get("shared_cohort_required",False))
-    if not reference:
+    direct=cfg.get("shared_execution_payload")
+    legacy=cfg.get("shared_cohort")
+    if not direct and not legacy:
         if required:
             raise QualificationError("SHARED_IRIS_EXECUTION_BINDING_REQUIRED")
         return None
     if lane!="IRIS" or not required:
         raise QualificationError("SHARED_IRIS_UNDECLARED_SCOPE")
-    bundle=load_file_ref(reference,expected_schema="RealSaS.SharedIrisExecutionImportBundle.v1")
+
+    if direct:
+        payload=load_file_ref(direct,expected_schema="RealSaS.SharedIrisFitExecutionPayload.v1")
+        manifest_ref=cfg.get("shared_cohort_manifest") or {}
+        policy_ref=cfg.get("shared_training_policy") or {}
+        manifest=load_file_ref(manifest_ref,expected_schema="RealSaS.SharedIrisCohortShards.v1")
+        policy=load_file_ref(policy_ref,expected_schema="RealSaS.SharedIrisTrainingPolicy.v1")
+        if policy_ref.get("sha256")!=prereg.qualification_policy.get("shared_training_policy_sha256"):
+            raise QualificationError("SHARED_IRIS_EXECUTION_POLICY_DRIFT")
+        return validate_shared_iris_payload(payload,manifest,policy,checkpoint_sha256=checkpoint_sha256)
+
+    bundle=load_file_ref(legacy,expected_schema="RealSaS.SharedIrisExecutionImportBundle.v1")
     if bundle["training_policy"]["sha256"]!=prereg.qualification_policy.get("shared_training_policy_sha256"):
         raise QualificationError("SHARED_IRIS_EXECUTION_POLICY_DRIFT")
     payload=load_file_ref(bundle["execution"],expected_schema="RealSaS.SharedIrisFitExecutionPayload.v1")

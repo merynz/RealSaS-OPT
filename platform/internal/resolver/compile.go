@@ -68,6 +68,22 @@ func Resolve(
 	rootInputs []domain.ArtifactInputIdentity,
 	versions map[string]release.StageVersion,
 ) (Plan, error) {
+	return ResolveWithExternal(ctx, g, catalog, targetStageID, rootInputs, versions, nil)
+}
+
+// ResolveWithExternal adds immutable, stage-scoped raw external evidence to the
+// semantic descriptor of exactly the consuming stage. Descendants inherit the
+// change through the parent stage semantic hash. External inputs do not create
+// qualification; the consuming stage must still execute and PASS.
+func ResolveWithExternal(
+	ctx context.Context,
+	g *stagegraph.Graph,
+	catalog Catalog,
+	targetStageID string,
+	rootInputs []domain.ArtifactInputIdentity,
+	versions map[string]release.StageVersion,
+	external map[string][]domain.ArtifactInputIdentity,
+) (Plan, error) {
 	if len(rootInputs) == 0 {
 		return Plan{}, fmt.Errorf("compile resolver requires immutable subject root inputs")
 	}
@@ -95,13 +111,24 @@ func Resolve(
 			return Plan{}, fmt.Errorf("released stage graph identity drift: %s", stageID)
 		}
 
-		inputs := make([]domain.ArtifactInputIdentity, 0, len(rootInputs)+len(stage.DependsOn))
+		inputs := make([]domain.ArtifactInputIdentity, 0, len(rootInputs)+len(stage.DependsOn)+len(external[stageID]))
 		for _, item := range rootInputs {
 			if !stage.ConsumesInput(item.Role) {
 				continue
 			}
 			inputs = append(inputs, domain.ArtifactInputIdentity{
 				Role:           item.Role,
+				Ordinal:        len(inputs),
+				ArtifactType:   item.ArtifactType,
+				SemanticSHA256: item.SemanticSHA256,
+			})
+		}
+		for _, item := range external[stageID] {
+			if item.Role == "" || item.ArtifactType == "" || item.SemanticSHA256 == "" {
+				return Plan{}, fmt.Errorf("external stage input identity incomplete: %s", stageID)
+			}
+			inputs = append(inputs, domain.ArtifactInputIdentity{
+				Role:           "external:" + item.Role,
 				Ordinal:        len(inputs),
 				ArtifactType:   item.ArtifactType,
 				SemanticSHA256: item.SemanticSHA256,

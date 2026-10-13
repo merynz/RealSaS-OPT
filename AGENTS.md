@@ -29,6 +29,17 @@ must not silently mint product authority. Preserve independent artifacts and
 report code/artifact identities with timings. Do not drive a new result by
 searching old branch names or editing a historical execution ledger.
 
+For Fit8 or later multi-subject genericization campaigns, do **not** create a
+notebook-owned authority or eight ad-hoc agent continuations. Read
+`canonical/FIT8_PLATFORM_CAMPAIGN_V1.json` and
+`docs/platform/FIT8_PLATFORM_CAMPAIGN.md`; use `realsasctl campaign-start`,
+`campaign-run` and `campaign --id`. Every Fit8 subject enters the released DAG
+at Stage01 and targets the same final product-closure stage. Knight is a separate
+regression member. Colab/A100 may execute preregistered learned work, but it is a
+compute worker only; imported receipts/checkpoints remain non-authoritative until
+the subject-bound Compiler stages validate them. A campaign failure is a signal
+to fix the owning generic module, never permission for a subject-specific branch.
+
 Targets include model inference and Compiler modules, not only render. Treat
 DAG nodes/edges as versioned release data: add, remove or rewire in a new
 EngineRelease, inspect graph-aware impact, and preserve unrelated artifacts.
@@ -140,13 +151,14 @@ Runtime consumes qualified product artifacts. It may not create a second topolog
 `canonical/TRUTH_CORPUS_V1_STATUS_20261004.md` remains corpus authority. Current status is `SEALED_RAW__STRUCTURALLY_AUDITED__ADMISSION_PENDING`. Do not overclaim it as training-ready canonical truth.
 
 The user authorized diverse Fit8 as the next program. Read
-`canonical/FIT8_DIVERSITY_SELECTION_V1.json`, `docs/corpus/FIT8_ADMISSION.md` and
-`docs/platform/PRODUCTIZATION.md`. Eight source identities are verified; source
-import, pose/scene, attachment, first render and lineage admission are pending.
-Knight stays the separate regression witness. Shared model parameters and common
-contracts are required; no per-character production fix or silent substitution.
-Do not start optimizer work from raw hash verification or claim generic/unseen
-success from the roster. Stateful execution still requires the existing Go path.
+`canonical/FIT8_DIVERSITY_SELECTION_V1.json`, `canonical/FIT8_PLATFORM_CAMPAIGN_V1.json`,
+`docs/corpus/FIT8_ADMISSION.md`, `docs/platform/FIT8_PLATFORM_CAMPAIGN.md` and
+`docs/platform/PRODUCTIZATION.md`. Eight source identities are verified; every
+subject must independently close source/import/rest pose, camera, observation and
+normalization before learned-stage evidence is consumed. Knight stays the separate
+regression witness. Shared model parameters and common contracts are required; no
+per-character production fix or silent substitution. New Fit8 scientific state is
+owned by the platform campaign/Attempts, never by notebook completion alone.
 
 ## Claim discipline
 

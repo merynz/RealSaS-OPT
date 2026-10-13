@@ -15,6 +15,7 @@ from models.iris.v5.contained_sparse_tetra_decoder_v5 import decode_indexed_spar
 from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
     coverage_metrics,rasterize_triangles_half_integer_top_left,source_connected_component_recall_metrics)
 from compiler.realsas_compiler_core.silhouette_metrics_v2 import silhouette_distance_metrics
+from tools.training.iris_exterior_audit_v1 import exterior_scan
 
 ROOT=Path(__file__).resolve().parents[2]
 COURT={"min_recall":.999,"min_precision":.999,"max_largest_coherent_hole_fraction":.00025,
@@ -42,7 +43,7 @@ def per_view_court(vertices,faces,camera,source_mask):
         and component_recall>=COURT["min_component_recall"] and p95<=COURT["max_silhouette_edge_p95_px"])
     return metrics,pred,actual
 
-def export(checkpoint,data_root,input_root,output_root,persist_root,device="cuda",decoder_policy=None):
+def export(checkpoint,data_root,input_root,output_root,persist_root,device="cuda",decoder_policy=None,audit_resolution=512):
     checkpoint=Path(checkpoint);data_root=Path(data_root);input_root=Path(input_root)
     output_root=Path(output_root);persist_root=Path(persist_root)
     manifest=json.loads((data_root/"COHORT_MANIFEST.json").read_text())
@@ -56,6 +57,7 @@ def export(checkpoint,data_root,input_root,output_root,persist_root,device="cuda
     source={p:file_hash(ROOT/p) for p in (
         "models/iris/v5/indexed_sparse_tetra_decoder_v5.py",
         "models/iris/v5/contained_sparse_tetra_decoder_v5.py",
+        "models/iris/v4/source_hull_lattice_v4_3.py","tools/training/iris_exterior_audit_v1.py",
         "tools/training/export_iris_cohort_surfaces_v1.py")}
     checkpoint_hash=file_hash(checkpoint)
     reports=[]
@@ -63,7 +65,8 @@ def export(checkpoint,data_root,input_root,output_root,persist_root,device="cuda
         key=row["subject_id"];folder=output_root/key;folder.mkdir(parents=True,exist_ok=True)
         persisted=persist_root/key;persisted.mkdir(parents=True,exist_ok=True)
         binding={"checkpoint_sha256":checkpoint_hash,"observation_binding":row["observation_binding"],
-                 "decoder_sources":source,"decoder_policy":asdict(policy),"court_policy":COURT}
+                 "decoder_sources":source,"decoder_policy":asdict(policy),"court_policy":COURT,
+                 "exterior_audit_resolution":audit_resolution,"required_exterior_nonpositive_count":0}
         binding_hash=value_hash(binding)
         old=persisted/"SURFACE_COURT.json"
         if old.exists():
@@ -75,7 +78,7 @@ def export(checkpoint,data_root,input_root,output_root,persist_root,device="cuda
         started=time.monotonic()
         try:
             subject=cache.get(index)
-            with torch.no_grad(),torch.autocast(str(device).split(":")[0],dtype=torch.bfloat16,enabled=str(device).startswith("cuda")):
+            with torch.no_grad():
                 planes=model.encode_scene(subject["image_tokens"],subject["token_xy"],subject["camera_features"])
             queried=0;last=time.monotonic()
             def query(points):
@@ -86,6 +89,12 @@ def export(checkpoint,data_root,input_root,output_root,persist_root,device="cuda
                 if time.monotonic()-last>15:
                     print(f"[DECODE] {key} actual_field_queries={queried} elapsed_s={time.monotonic()-started:.1f}",flush=True);last=time.monotonic()
                 return values.detach().float().cpu().numpy().reshape(-1)
+            census=subject.get('source_exterior_census',{})
+            if census.get('resolution')!=audit_resolution or census.get('source_only_census') is not True:
+                raise ValueError('R512_PREFIT_SOURCE_CENSUS_REQUIRED')
+            audit=exterior_scan(subject,query,resolution=audit_resolution,device=device,
+                                expected_count=census['certified_exterior_count'])
+            atomic_json(folder/'SOURCE_EXTERIOR_SIGN_AUDIT.json',audit)
             mesh=decode_indexed_sparse_tetra_mt_contained_v5(query,policy=policy,work_dir=folder/"scratch")
             npz=write_stage12_npz_v5(mesh,folder/"zero_surface.npz")
             cameras=json.loads((input_root/key/"camera_bundle.json").read_text())["cameras"]
@@ -100,9 +109,9 @@ def export(checkpoint,data_root,input_root,output_root,persist_root,device="cuda
                 views.append({"view_index":view,**metrics})
                 print(f"[COURT] {key} V{view} pass={metrics['pass']} recall={metrics['recall']:.6f} "
                       f"precision={metrics['precision']:.6f} edge_p95={metrics['silhouette_edge_p95_px']:.2f}",flush=True)
-            report={"status":"PASS_RAW_COURT" if all(v["pass"] for v in views) else "FAIL",
+            report={"status":"PASS_RAW_COURT" if all(v["pass"] for v in views) and audit['sign_pass'] and audit['production_r512'] else "FAIL",
                     "npz_sha256":file_hash(npz),"vertex_count":len(mesh.vertices_normalized),"face_count":len(mesh.faces),
-                    "views":views,"decoder_diagnostics":mesh.diagnostics}
+                    "views":views,"decoder_diagnostics":mesh.diagnostics,'exterior_sign_audit':audit}
         except Exception as exc:
             report={"status":"FAIL","error_type":type(exc).__name__,"error":str(exc),"views":[]}
             print(f"[COURT_FAIL] {key} {type(exc).__name__}: {exc}",flush=True)

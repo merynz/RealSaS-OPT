@@ -99,3 +99,41 @@ entry/released-Attempt/target/exit on deployed main; the capsule invents no IDs 
 ProductRevision. CPU engineering preflight is separate from physical A100 runtime
 preflight. A notebook build or CPU test proves no live Go qualification,
 FIT8 success, unseen/generalization or product readiness.
+# Revision 2: Knight core and training apparatus
+
+The geometry model, DINO adapter, F* target and V5 loss implementations retain
+the exact bytes from the Knight C lineage. The executable reference is
+`canonical/FIT8_IRIS_KNIGHT_RECIPE_REFERENCE_V1.json`; preparation and the trainer
+reject core/config/loss/optimizer-control drift before optimizer state is created.
+Knight's final carrier-native notebook closes teacher-relative mechanics and
+does not run an IRIS optimizer. The historical C checkpoint is a demo fallback,
+not a scientific IRIS P999 PASS. Neither fact is promoted into Fit8 evidence.
+
+Revision 2 removes weight decay, restores the cold direct/C learning-rate floor,
+initial SDF bias and seed, and restores the 16384/8192/4096/4096 global/near/straddle/
+fixed-initial-residual-replay distribution. Training and heldout pools are disjoint;
+heldout includes global, near-zero and straddle evidence and cannot enter replay.
+Every update uses 256 source rays balanced over all 8 views and all four original
+strata. Each frozen pixel/phase pair is admitted only after the same 128-sample,
+tau=1/512 renderer gives the source-mask label the correct sign under F*.
+F* certifies the apparatus; the source mask remains the silhouette label.
+
+The explicit cohort intervention is a fresh joint C fit with one model and
+optimizer, 48000 shared steps/6000 subject exposures, subject-specific immutable
+input pools, and worst-subject aggregation on the original heldout selection axes.
+It is not a replay of Knight's 4800 direct + 4800 C + 9600 continuation history.
+The difference record is embedded and bound to the checkpoint policy.
+
+The complete R512 source exterior census is sealed in every production input
+shard before optimizer step 1. After checkpoint selection, the same source-only
+certificate must reproduce the count and the learned field must have zero
+nonpositive certified exterior points. Exact contained T512/T1024 decoding and
+unchanged P999 on every view/subject remain required. An engineering lattice
+smaller than R512 cannot produce `PASS_RAW_COURT` even if its sign check passes.
+No exterior audit coordinates or Stage13 feedback enter training or selection.
+
+This changes capsule/checkpoint identity. Prior checkpoints remain intact and
+cannot resume under the new policy or source. The physical A100 Run All preflight
+still must execute before the production fit. CPU engineering checks may reduce
+pool/batch counts, retain the full production model and exact ray depth/tau, and
+must report their reduced scope; they do not certify A100 execution or Fit8 PASS.

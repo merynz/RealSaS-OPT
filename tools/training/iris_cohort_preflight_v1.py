@@ -17,7 +17,7 @@ def preflight(data_root, policy, checkpoint_root, output_root, device="cuda"):
     p.update(steps=16, log_interval=1, evaluation_interval=8,
              checkpoint_interval=4, scope="RUNTIME_PREFLIGHT__NOT_PRODUCTION_FIT")
     if str(device)=="cpu":
-        p.update(queries_per_step=512,silhouette_rays_per_step=32,silhouette_depth_samples=32)
+        p.update(queries_per_step=512,silhouette_rays_per_step=32,engineering_eval_query_limit=2048)
     source=source_identity(ROOT)
     trainer=SharedIrisTrainer(data_root,manifest,p,source,checkpoint_root,output_root,device)
     if trainer.step == 16:

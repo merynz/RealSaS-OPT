@@ -15,9 +15,9 @@ import numpy as np
 import torch
 from models.iris.v4.scene_first_signed_v4 import SceneFirstSignedGeometryV4, SceneFirstSignedGeometryConfigV4
 from models.iris.v5.source_signed_field_v5 import source_signed_field_torch_v5, SourceSignedFieldPolicyV5
-from models.iris.v5.direct_fstar_fit_v5 import direct_fstar_metrics_v5
-from models.iris.v5.objective_tail_repair_v5 import (near_zero_wrong_sign_loss_v5,
-    orthographic_source_rays_normalized_v5, stratified_ray_samples_v5, source_silhouette_wrong_sign_loss_v5)
+from models.iris.v5.direct_fstar_fit_v5 import direct_fstar_metrics_v5, direct_fstar_loss_v5, DirectFStarFitPolicyV5
+from models.iris.training.apparatus_v1 import training_queries, training_rays
+from models.iris.v5.objective_tail_repair_v5 import near_zero_wrong_sign_loss_v5,source_silhouette_wrong_sign_loss_v5
 
 def file_hash(path):
     h = hashlib.sha256()
@@ -40,13 +40,33 @@ def atomic_json(path, value):
         os.fsync(f.fileno())
     os.replace(tmp, path)
 
+def validate_knight_recipe(policy, source):
+    """Reject silent core/config drift before creating optimizer/checkpoint state."""
+    if "knight_recipe_reference" not in policy:
+        return
+    root=Path(__file__).resolve().parents[3]
+    reference=json.loads((root/policy["knight_recipe_reference"]).read_text())
+    for path,digest in reference["core_source_sha256"].items():
+        if file_hash(root/path)!=digest or (source and source.get(path)!=digest):
+            raise ValueError("KNIGHT_RECIPE_CORE_SOURCE_DRIFT:"+path)
+    for name,expected in reference["frozen_controls"].items():
+        if policy.get(name)!=expected:
+            raise ValueError("KNIGHT_RECIPE_POLICY_DRIFT:"+name)
+    if policy["model_config"]!=reference["model_config"]:
+        raise ValueError("KNIGHT_RECIPE_MODEL_CONFIG_DRIFT")
+    if "engineering_eval_query_limit" in policy and not policy.get("scope","").startswith("RUNTIME_PREFLIGHT"):
+        raise ValueError("PRODUCTION_HELDOUT_SUBSET_FORBIDDEN")
+
 def source_identity(root):
     root = Path(root)
     paths = ["models/iris/training/cohort_v1.py",
              "models/iris/v4/scene_first_signed_v4.py",
+             "models/iris/v2/dinov2_foundation_v2.py",
              "models/iris/v5/source_signed_field_v5.py",
              "models/iris/v5/direct_fstar_fit_v5.py",
-             "models/iris/v5/objective_tail_repair_v5.py"]
+             "models/iris/v5/objective_tail_repair_v5.py",
+             "models/iris/training/apparatus_v1.py",
+             "canonical/FIT8_IRIS_KNIGHT_RECIPE_REFERENCE_V1.json"]
     return {p: file_hash(root/p) for p in paths}
 
 class AtomicCheckpointStore:
@@ -158,6 +178,7 @@ class SharedIrisTrainer:
                  persistent_result_root=None):
         self.device = torch.device(device)
         self.manifest, self.policy = manifest, policy
+        validate_knight_recipe(policy, source)
         ids = [r["subject_id"] for r in manifest["subjects"]]
         if len(ids) != policy["subject_count"] or len(set(ids)) != len(ids) or not ids:
             raise ValueError("COHORT_CARDINALITY_OR_DUPLICATE")
@@ -171,10 +192,14 @@ class SharedIrisTrainer:
         random.seed(seed); np.random.seed(seed); torch.manual_seed(seed)
         if self.device.type == "cuda":
             torch.cuda.manual_seed_all(seed)
+            torch.set_float32_matmul_precision('highest')
             torch.backends.cuda.matmul.allow_tf32 = False
             torch.backends.cudnn.allow_tf32 = False
         self.generator = torch.Generator().manual_seed(seed+1)
         self.model = SceneFirstSignedGeometryV4(SceneFirstSignedGeometryConfigV4(**policy["model_config"])).to(self.device)
+        if "initial_sdf_bias" in policy:
+            with torch.no_grad():
+                self.model.surface_field.sdf_head.bias.fill_(policy["initial_sdf_bias"])
         self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=policy["learning_rate"],
                                            weight_decay=policy["weight_decay"])
         self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, policy["steps"],
@@ -197,9 +222,32 @@ class SharedIrisTrainer:
             self.best_score, self.best_state = previous["best_score"], previous["best_state"]
             self.elapsed_before = previous["elapsed_seconds"]
             restore_rng(previous["rng"], self.generator)
+            self.replay_banks = previous["replay_banks"]
             print(f"[RESUME] verified_step={self.step} shared_models=1 optimizer_states=1", flush=True)
         else:
+            self.replay_banks = self.initial_replay_banks()
             self.save()
+
+    @torch.no_grad()
+    def initial_replay_banks(self):
+        banks=[]
+        self.model.eval()
+        for index in range(len(self.counts)):
+            s=self.cache.get(index)
+            if s.get("ray_court",{}).get("status")!="PASS" or s["ray_court"]["depth_samples"]!=self.policy["silhouette_depth_samples"]:
+                raise ValueError("TRAINING_SOURCE_RAY_APPARATUS_UNCERTIFIED")
+            if self.policy.get('knight_recipe_reference') and not self.policy.get('scope','').startswith('RUNTIME_PREFLIGHT'):
+                census=s.get('source_exterior_census',{})
+                if census.get('resolution')!=512 or census.get('source_only_census') is not True or census.get('certified_exterior_count',0)<=0:
+                    raise ValueError('PREFIT_R512_SOURCE_CENSUS_REQUIRED')
+            planes=self.model.encode_scene(s["image_tokens"],s["token_xy"],s["camera_features"])
+            pred=torch.cat([self.model.query(planes.float(),q[None])["sdf"].reshape(-1)
+                            for q in s["replay_points"].split(2048)])
+            err=(pred-s["replay_targets"]).abs()
+            ids=torch.argsort(err,descending=True,stable=True)[:min(self.policy["hard_replay_bank_size"],len(err))].cpu()
+            banks.append(ids)
+            print(f"[REPLAY] {s['subject_id']} fixed_initial_bank={len(ids)} heldout_used=False",flush=True)
+        return banks
 
     def payload(self):
         return {"schema": "RealSaS.SharedIrisTrainingCheckpoint.v1", "binding": self.binding,
@@ -207,6 +255,7 @@ class SharedIrisTrainer:
                 "optimizer": self.optimizer.state_dict(), "scheduler": self.scheduler.state_dict(),
                 "amp": self.scaler.state_dict(), "rng": rng_state(self.generator),
                 "step": self.step, "counts": self.counts, "trace": self.trace, "evaluations": self.evaluations,
+                "replay_banks":self.replay_banks,
                 "best_score": self.best_score, "best_state": self.best_state,
                 "elapsed_seconds": self.elapsed_before + time.monotonic()-self.started}
 
@@ -217,10 +266,9 @@ class SharedIrisTrainer:
     def one_step(self):
         index = self.step % len(self.counts)
         subject = self.cache.get(index)
-        count = self.policy["queries_per_step"]
-        uniform = torch.rand((count//2, 3), generator=self.generator)*2.-1.
-        picks = torch.randint(len(subject["near_points"]), (count-count//2,), generator=self.generator)
-        points = torch.cat([uniform.to(self.device), subject["near_points"][picks.to(self.device)]])
+        cycle=self.step//len(self.counts)
+        points=training_queries(subject,self.policy,self.policy.get("query_schedule_seed",self.policy["seed"])+index*1000000,
+                                cycle,self.replay_banks[index],self.device)
         with torch.no_grad():
             target = field_targets(subject, points)
         self.model.train()
@@ -228,28 +276,15 @@ class SharedIrisTrainer:
         with torch.autocast(self.device.type, dtype=torch.bfloat16, enabled=self.device.type=="cuda"):
             planes = self.model.encode_scene(subject["image_tokens"], subject["token_xy"], subject["camera_features"])
             # FP32 sampling preserves grid_sample semantics on both CPU and CUDA.
-        prediction = self.model.query(planes.float(), points[None])["sdf"].float().reshape(-1)
-        huber = torch.nn.functional.smooth_l1_loss(prediction, target, beta=self.policy["huber_beta"])
+            prediction = self.model.query(planes.float(), points[None])["sdf"].float().reshape(-1)
+        huber = direct_fstar_loss_v5(prediction,target,policy=DirectFStarFitPolicyV5(huber_beta=self.policy["huber_beta"]))["total"]
         sign = near_zero_wrong_sign_loss_v5(prediction, target, band=self.policy["near_zero_band"])["total"]
         silhouette = huber*0.
-        view = (self.step//len(self.counts)) % 8
         if self.policy.get("silhouette_loss_weight", 0.) > 0.:
-            pixels = subject["boundary_pixels"][view]
             ray_count = self.policy["silhouette_rays_per_step"]
-            selected = torch.randint(len(pixels), (ray_count,), generator=self.generator)
-            xy = pixels[selected].to(self.device)
-            vi = torch.full((ray_count,),view,device=self.device,dtype=torch.long)
-            base,direction,enter,exit = orthographic_source_rays_normalized_v5(xy,vi,
-                resolution=subject["resolution"],center_xyz=subject["center_xyz"],
-                normalization_half_extent=subject["normalization_half_extent"],
-                camera_origins=subject["camera_origins"],camera_right=subject["camera_right"],
-                camera_screen_up=subject["camera_screen_up"],camera_forward=subject["camera_forward"],
-                camera_half_extent=subject["camera_half_extent"])
-            phase = torch.rand(ray_count,generator=self.generator).to(self.device)
-            ray_q = stratified_ray_samples_v5(base,direction,enter,exit,phase,
-                       depth_samples=self.policy["silhouette_depth_samples"])
-            ray_f = self.model.query(planes.float(),ray_q.reshape(1,-1,3))["sdf"].reshape(ray_count,-1)
-            foreground = subject["signed_2d"][view,xy[:,1].long(),xy[:,0].long()] < 0
+            ray_q,foreground=training_rays(subject,self.policy,self.policy.get("ray_schedule_seed",self.policy["seed"])+index*1000000,cycle,self.device)
+            with torch.autocast(self.device.type,dtype=torch.bfloat16,enabled=self.device.type=="cuda"):
+                ray_f = self.model.query(planes.float(),ray_q.reshape(1,-1,3))["sdf"].reshape(ray_count,-1)
             silhouette = source_silhouette_wrong_sign_loss_v5(ray_f,foreground,
                                 tau=self.policy["silhouette_softmin_tau"])["total"]
         loss = huber + self.policy["sign_loss_weight"]*sign + self.policy.get("silhouette_loss_weight",0.)*silhouette
@@ -264,7 +299,8 @@ class SharedIrisTrainer:
             raise RuntimeError("COHORT_EXPOSURE_DRIFT")
         row = {"step": self.step, "subject_id": subject["subject_id"], "loss": float(loss.detach()),
                "huber": float(huber.detach()), "sign": float(sign.detach()),
-               "source_silhouette": float(silhouette.detach()), "view_index": view,
+               "source_silhouette": float(silhouette.detach()), "view_index": "ALL_EIGHT_BALANCED",
+               "query_mix":[len(points)//2,len(points)//4,len(points)//8,len(points)//8],
                "mae": float((prediction.detach()-target).abs().mean()),
                "gradient_norm": float(grad), "learning_rate": self.optimizer.param_groups[0]["lr"]}
         self.trace.append(row)
@@ -276,16 +312,18 @@ class SharedIrisTrainer:
         rows = []
         for index in range(len(self.counts)):
             s = self.cache.get(index)
-            with torch.autocast(self.device.type, dtype=torch.bfloat16, enabled=self.device.type=="cuda"):
-                planes = self.model.encode_scene(s["image_tokens"], s["token_xy"], s["camera_features"])
+            planes = self.model.encode_scene(s["image_tokens"], s["token_xy"], s["camera_features"])
+            limit=self.policy.get("engineering_eval_query_limit",len(s["heldout_points"]))
             pred = torch.cat([self.model.query(planes.float(), q[None])["sdf"].reshape(-1)
-                              for q in s["heldout_points"].split(2048)])
-            m = direct_fstar_metrics_v5(pred, s["heldout_targets"], near_zero_band=self.policy["near_zero_band"])
+                              for q in s["heldout_points"][:limit].split(2048)])
+            m = direct_fstar_metrics_v5(pred, s["heldout_targets"][:limit], near_zero_band=self.policy["near_zero_band"])
             rows.append({"subject_id": s["subject_id"], **m})
             print(f"[EVAL] step={self.step} {s['subject_id']} mae={m['mae']:.5f} "
                   f"wrong_sign={m['sign_disagreement_fraction']:.5f} near_mae={m['near_zero_mae']:.5f}",flush=True)
-        score = [max(r["sign_disagreement_fraction"] for r in rows),
-                 max(r["mae"] for r in rows), sum(r["sign_disagreement_count"] for r in rows)]
+        score = [float(any(r["sign_disagreement_count"] for r in rows)),
+                 max(r["sign_disagreement_fraction"] for r in rows),max(r["mae"] for r in rows),
+                 max(r["near_zero_mae"] for r in rows),max(r["p95_abs"] for r in rows),
+                 max(r["rmse"] for r in rows),float(self.step)]
         evaluation = {"step": self.step, "subjects": rows, "selection_score_worst_first": score}
         self.evaluations.append(evaluation)
         if self.best_score is None or tuple(score) < tuple(self.best_score):
@@ -336,7 +374,8 @@ class SharedIrisTrainer:
                     eta = elapsed/max(self.step,1)*(self.policy["steps"]-self.step)
                     memory = torch.cuda.max_memory_allocated()/2**30 if self.device.type=="cuda" else 0.
                     print(f"[STEP] {self.step}/{self.policy['steps']} {row['subject_id']} loss={row['loss']:.6f} "
-                          f"mae={row['mae']:.6f} elapsed_s={elapsed:.1f} eta_s={eta:.0f} gpu_GiB={memory:.2f}",flush=True)
+                          f"huber={row['huber']:.6f} silhouette={row['source_silhouette']:.6f} "
+                          f"mae={row['mae']:.6f} lr={row['learning_rate']:.2g} elapsed_s={elapsed:.1f} eta_s={eta:.0f} gpu_GiB={memory:.2f}",flush=True)
                 if self.step % self.policy["evaluation_interval"] == 0 or self.step == end:
                     self.evaluate()
                 if self.step % self.policy["checkpoint_interval"] == 0 or self.step == end:

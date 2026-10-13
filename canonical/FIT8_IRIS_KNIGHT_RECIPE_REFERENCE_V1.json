@@ -1,0 +1,111 @@
+{
+  "schema": "RealSaS.KnightIrisRecipeReference.v1",
+  "date": "2026-10-13",
+  "status": "CORE_EXACT_MATCH__C_APPARATUS_RESTORED__COHORT_INTERVENTION_EXPLICIT",
+  "core_source_commit": "54a18d5353c6d39f383b823c019c25336fbadaef",
+  "core_source_sha256": {
+    "models/iris/v4/scene_first_signed_v4.py": "e9c2432ead4b6fa13ecad5a32837ea9cbb9c9cd38bd523cc70adef9ed8d48a1c",
+    "models/iris/v2/dinov2_foundation_v2.py": "9c5ca29a74b8b3fb2d6e546c19d6756e4383c5fa042d08caea9e2237ac032d36",
+    "models/iris/v5/source_signed_field_v5.py": "ae109ec57c9e0b74ff1e11fccc573a944449b67ecd635e3a105878f8b5115c10",
+    "models/iris/v5/direct_fstar_fit_v5.py": "1e9370bd97b3dcf7263764e2c6711ce7ee51e2195a941243f0adf1030c8c811e",
+    "models/iris/v5/objective_tail_repair_v5.py": "e37173c6aacac3c93b8d6255659bc5280fbd53368c589d8932edc658be2f4168"
+  },
+  "model_config": {
+    "image_token_dim": 384,
+    "camera_feature_dim": 13,
+    "scene_dim": 256,
+    "camera_embed_dim": 96,
+    "plane_size": 32,
+    "plane_channels": 64,
+    "field_hidden_dim": 192,
+    "field_residual_blocks": 4,
+    "attention_heads": 8,
+    "scene_layers": 4,
+    "feedforward_multiplier": 3,
+    "dropout": 0.0
+  },
+  "frozen_controls": {
+    "learning_rate": 8e-05,
+    "minimum_learning_rate": 4e-06,
+    "weight_decay": 0.0,
+    "gradient_clip": 1.0,
+    "huber_beta": 0.01,
+    "near_zero_band": 0.03,
+    "sign_loss_weight": 0.0,
+    "silhouette_loss_weight": 1.0,
+    "silhouette_depth_samples": 128,
+    "silhouette_softmin_tau": 0.001953125,
+    "source_boundary_band_px": 8.0,
+    "source_background_support_px": 32.0,
+    "initial_sdf_bias": 0.05,
+    "straddle_delta": 0.001953125,
+    "straddle_base_band": 0.006
+  },
+  "knight_iris_notebook": {
+    "library_name": "RealSaS_V5_LONG_HORIZON_RUN_ALL.ipynb",
+    "sha256": "ef2dde3de7b97af5d7da7d1782ebac72b3e9a83f07daf0fafe8c04c27bc1cc4d",
+    "library_file_id": "libfile_5531380db2f881918c2704dce1545329",
+    "role": "HISTORICAL_IRIS_C_LINEAGE_AND_APPARATUS__NOT_SCIENTIFIC_PASS"
+  },
+  "knight_mechanical_notebook": {
+    "name": "RealSaS_KNIGHT_MIRA_M_V5_5_AXIS541_FROZEN_CARRIER_RUN_ALL.ipynb",
+    "sha256": "0995c1f23bb25cf1fa50ae073e534dfd761c4ecbcbf73e6c33ade3eaf19da1dc",
+    "library_file_id": "libfile_31d69455c02c819189f71605974483f4",
+    "iris_optimizer_executed": false,
+    "scope": "KNIGHT_TEACHER_RELATIVE_MECHANICS__NOT_IRIS_OR_PRODUCT_PASS",
+    "receipt": "canonical/KNIGHT_AXIS541_MIRA55_CARRIER_NATIVE_PROMOTION_20261007.json"
+  },
+  "recipe_sources": [
+    "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json",
+    "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json",
+    "canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_PREREG_20260924.json"
+  ],
+  "objective": "DIRECT_FSTAR_HUBER_PLUS_SOURCE_SILHOUETTE__C",
+  "optimizer_reference": "FRESH_DIRECT_FSTAR_AND_C_OPTIMIZER_8E_MINUS_5__NOT_2E_MINUS_5_KNIGHT_CONTINUATION",
+  "query_mixture": [
+    16384,
+    8192,
+    4096,
+    4096
+  ],
+  "ray_strata": [
+    "FG_BOUNDARY",
+    "BG_BOUNDARY",
+    "FG_GLOBAL",
+    "BG_SUPPORT"
+  ],
+  "cohort_changes": [
+    {
+      "change": "Eight observation sets, one parameter set and one optimizer",
+      "reason": "The requested shared Fit8 experiment cannot be eight independent Knight fits."
+    },
+    {
+      "change": "Fresh common initialization; C objective from step 1; no Knight checkpoint or optimizer continuation",
+      "reason": "This is an explicitly new joint fit, not a byte-identical replay of Knight’s multi-stage 19200-step optimization history. The initial bias/seed/optimizer settings match the cold direct-Fstar reference."
+    },
+    {
+      "change": "48000 shared steps, 6000 exposures per subject",
+      "reason": "Retain the declared initial shared-cohort research budget; this is not the historical Knight effective-step budget or a promise of equivalent convergence."
+    },
+    {
+      "change": "Fixed residual replay banks ranked once on the common initial model, separately per observation set",
+      "reason": "C freezes replay; Knight’s literal coordinates and residual ranking belong to Knight and cannot be substituted for new subjects."
+    },
+    {
+      "change": "Worst-subject aggregation on the same heldout sign/MAE/near-MAE/p95/RMSE axes",
+      "reason": "A joint checkpoint must expose every failing subject; no mean may hide one."
+    },
+    {
+      "change": "Resume/checkpoint/evaluation cadence shared over all subjects",
+      "reason": "Durable cohort execution changes orchestration, not the geometry model or loss."
+    }
+  ],
+  "claims": {
+    "exact_core_code_match": true,
+    "identical_knight_training_history": false,
+    "historical_c_scientific_pass": false,
+    "fit8_pass": false,
+    "unseen": false,
+    "product": false
+  }
+}

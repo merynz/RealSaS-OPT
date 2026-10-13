@@ -9,7 +9,9 @@ import time
 import numpy as np
 from PIL import Image
 import torch
-from models.iris.training.cohort_v1 import file_hash, value_hash, atomic_json
+from models.iris.training.cohort_v1 import file_hash, value_hash, atomic_json,validate_knight_recipe,source_identity
+from models.iris.training.apparatus_v1 import query_pools, certified_ray_pools
+from tools.training.iris_exterior_audit_v1 import exterior_scan
 from models.iris.v2.dinov2_foundation_v2 import load_exact_dinov2_s_v2, extract_dinov2_s_patch_map_flat_v2
 from models.iris.v5.source_signed_field_v5 import source_signed_distance_fields_v5, source_signed_field_numpy_v5, source_signed_field_torch_v5
 
@@ -56,6 +58,7 @@ def verify_observations(input_root, row):
                                      "views":proof["views"]})
 
 def prepare(input_root, output_root, source_dir, weight_path, policy, device="cuda", persist_root=None):
+    validate_knight_recipe(policy,source_identity(ROOT))
     output_root = Path(output_root); output_root.mkdir(parents=True, exist_ok=True)
     roster = json.loads((ROOT/"canonical/FIT8_DIVERSITY_SELECTION_V1.json").read_text())
     # All proofs are checked before loading the backbone or creating any shards.
@@ -68,7 +71,9 @@ def prepare(input_root, output_root, source_dir, weight_path, policy, device="cu
         path = output_root/name
         identity = value_hash({"observation_binding":binding, "policy":policy,
                                "foundation":authority.authority.authority_hash,
-                               "preparation_source_sha256":file_hash(__file__)})
+                               "preparation_source_sha256":file_hash(__file__),
+                               "apparatus_source_sha256":file_hash(ROOT/"models/iris/training/apparatus_v1.py"),
+                               "exterior_source_sha256":file_hash(ROOT/"tools/training/iris_exterior_audit_v1.py")})
         meta_path = path.with_suffix(".json")
         persisted = Path(persist_root)/name if persist_root else None
         persisted_meta = persisted.with_suffix(".json") if persisted else None
@@ -113,26 +118,6 @@ def prepare(input_root, output_root, source_dir, weight_path, policy, device="cu
             raise ValueError("PREPARE_EMPTY_BOUNDARY_RAY_POOL")
         kwargs = dict(signed_2d=signed, center_xyz=center, normalization_half_extent=half,
                       camera_origins=origins, camera_right=right, camera_screen_up=up, camera_half_extent=cam_half)
-        rng = np.random.default_rng(policy["seed"]+index*2+1000)
-        near, near_count, rounds = [], 0, 0
-        while near_count < policy["near_pool_count"]:
-            query = rng.uniform(-1.,1.,(131072,3)).astype(np.float32)
-            target = source_signed_field_numpy_v5(query,**kwargs)
-            chosen = query[np.abs(target)<=policy["near_zero_band"]]
-            near.append(chosen);near_count += len(chosen);rounds+=1
-            if rounds > 512:
-                raise RuntimeError("PREPARE_NEAR_ZERO_POOL_EXHAUSTED")
-        near = np.concatenate(near)[:policy["near_pool_count"]]
-        heldout_rng = np.random.default_rng(policy["seed"]+index*2+1001)
-        heldout = heldout_rng.uniform(-1.,1.,(policy["heldout_count"],3)).astype(np.float32)
-        heldout_targets = source_signed_field_numpy_v5(heldout,**kwargs)
-        parity = source_signed_field_torch_v5(torch.from_numpy(heldout[:4096]), **kwargs).cpu().numpy()
-        parity_error = float(np.max(np.abs(parity-heldout_targets[:4096])))
-        if parity_error > 2e-6:
-            raise ValueError("PREPARE_NUMPY_TORCH_FSTAR_PARITY")
-        # Exact duplicate checks use byte addresses, independent of rounded display.
-        if set(map(bytes,near)).intersection(map(bytes,heldout)):
-            raise ValueError("PREPARE_HELDOUT_QUERY_LEAKAGE")
         shard = {"subject_id":row["subject_key"],"observation_binding":binding,
                  "image_tokens":image_tokens,"token_xy":token_xy,
                  "camera_features":torch.from_numpy(features)[None],
@@ -141,9 +126,15 @@ def prepare(input_root, output_root, source_dir, weight_path, policy, device="cu
                  "camera_right":torch.from_numpy(right),"camera_screen_up":torch.from_numpy(up),
                  "camera_forward":torch.from_numpy(np.asarray([r["forward"] for r in rows],np.float32)),
                  "boundary_pixels":boundary_pixels,
-                 "camera_half_extent":torch.from_numpy(cam_half),"resolution":1024,
-                 "near_points":torch.from_numpy(near),"heldout_points":torch.from_numpy(heldout),
-                 "heldout_targets":torch.from_numpy(heldout_targets)}
+                 "camera_half_extent":torch.from_numpy(cam_half),"resolution":1024}
+        shard.update(query_pools(shard,policy,policy["seed"]+index*1000000,device))
+        shard.update(certified_ray_pools(shard,policy,policy["ray_schedule_seed"]+index*1000000,device))
+        shard['source_exterior_census']=exterior_scan(shard,resolution=512,device=device)
+        heldout=shard["heldout_points"].numpy();heldout_targets=shard["heldout_targets"].numpy()
+        parity=source_signed_field_torch_v5(torch.from_numpy(heldout[:4096]),**kwargs).cpu().numpy()
+        parity_error=float(np.max(np.abs(parity-heldout_targets[:4096])))
+        if parity_error>2e-6:
+            raise ValueError("PREPARE_NUMPY_TORCH_FSTAR_PARITY")
         temp = path.with_suffix(".staged")
         torch.save(shard,temp);os.replace(temp,path)
         meta = {"subject_id":row["subject_key"],"shard_file":name,"shard_sha256":file_hash(path),
@@ -151,6 +142,8 @@ def prepare(input_root, output_root, source_dir, weight_path, policy, device="cu
                 "fstar_cpu_parity_maximum_abs":parity_error,
                 "source_sha256":row["source"]["sha256"],
                 "foundation_authority_sha256":authority.authority.authority_hash}
+        meta["ray_court"]=shard["ray_court"]
+        meta['source_exterior_census']=shard['source_exterior_census']
         atomic_json(meta_path,meta)
         if persisted:
             persisted.parent.mkdir(parents=True,exist_ok=True)
@@ -160,7 +153,7 @@ def prepare(input_root, output_root, source_dir, weight_path, policy, device="cu
                 raise ValueError("PREPARE_DRIVE_SHARD_COPY_HASH")
             os.replace(staged,persisted);atomic_json(persisted_meta,meta)
         subjects.append(meta)
-        print(f"[PREPARE] {row['subject_key']} views=8 tokens=1369x384 near={len(near)} "
+        print(f"[PREPARE] {row['subject_key']} views=8 tokens=1369x384 near={len(shard['near_points'])} "
               f"heldout={len(heldout)} Fstar_parity={parity_error:.2g} seconds={time.monotonic()-start:.1f}",flush=True)
     del model
     if torch.cuda.is_available():
@@ -168,6 +161,7 @@ def prepare(input_root, output_root, source_dir, weight_path, policy, device="cu
     manifest = {"schema":"RealSaS.SharedIrisCohortShards.v1","subjects":subjects,
                 "teacher_inputs_in_forward":False,"policy_sha256":value_hash(policy),
                 "preparation_source_sha256":file_hash(__file__),
+                "apparatus_source_sha256":file_hash(ROOT/"models/iris/training/apparatus_v1.py"),
                 "observation_scope":"IRIS_BIND_IMAGE_DERIVED_FSTAR",
                 "full_mechanical_truth_admitted":False,"go_qualification_required":True}
     atomic_json(output_root/"COHORT_MANIFEST.json",manifest)

@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.FIT8TrainingReadiness.v1",
   "date": "2026-10-13",
-  "status": "IRIS_A100_RESEARCH_CAPSULE_DELIVERED__FULL_READY_PENDING",
+  "status": "IRIS_RECIPE_REVISION2_IMPLEMENTED__REPLACEMENT_CAPSULE_PENDING",
   "authority_class": "NOTEBOOK_DELIVERY_READINESS__NOT_LIVE_ATTEMPT_STATE",
   "source_inspection_base_sha": "96e449ac045b17b24f9946b575031e38c694183b",
   "selection": "canonical/FIT8_DIVERSITY_SELECTION_V1.json",
@@ -44,7 +44,7 @@
     "eight_subject_training_truth_and_lineage_admission": "PENDING",
     "released_go_cohort_attempt_and_shared_checkpoint_binding": "PENDING",
     "common_eight_subject_iris_training_entrypoint": "IMPLEMENTED__REAL_CPU_OPTIMIZER_PREFLIGHT_PASS",
-    "frozen_shared_training_and_evaluation_policy": "FROZEN_SHARED_C_POLICY",
+    "frozen_shared_training_and_evaluation_policy": "REVISION2_KNIGHT_CORE_AND_C_APPARATUS_RESTORED__FRESH_COHORT_INTERVENTION_EXPLICIT",
     "hash_bound_embedded_notebook_source_and_inputs": "PASS_EXACT_MERGED_SOURCE_CAPSULE__SEALED_DRIVE_INPUT_PACKET",
     "clean_runtime_a100_run_all_preflight": "PASS_COLD_CPU_CAPSULE_ENGINEERING__ACTUAL_A100_RUN_ALL_REQUIRED",
     "real_training_log_and_atomic_resume_preflight": "PASS_CPU_ENGINEERING__ACTUAL_A100_REQUIRED",
@@ -115,7 +115,8 @@
     "source_capsule_sha256": "c165f50072ed27c8298006fb6877a1097e4b2dfe8fa6a1edf18b4c5f64dc0321",
     "input_archive_sha256": "fadc465b169f47cb62226dfe9aefa74326c9193ce09205ff30f82e0fdf13743b",
     "physical_a100_executed_before_delivery": false,
-    "actual_a100_preflight_runs_before_training": true
+    "actual_a100_preflight_runs_before_training": true,
+    "superseded": true
   },
   "a100_fit_notebook_ready": false,
   "training_started": false,
@@ -130,5 +131,9 @@
   "cpu_engineering_optimizer_steps": 16,
   "delivery_scope": "EXECUTABLE_SHARED_IRIS_FSTAR_RESEARCH_CAPSULE__NOT_FULL_QUALIFIED_READY",
   "full_native_truth_admitted": false,
-  "live_go_cohort_qualification_completed": false
+  "live_go_cohort_qualification_completed": false,
+  "shared_iris_recipe_reference": "canonical/FIT8_IRIS_KNIGHT_RECIPE_REFERENCE_V1.json",
+  "recipe_revision": 2,
+  "revision2_engineering_preflight": "canonical/FIT8_IRIS_RECIPE_REVISION2_PREFLIGHT_20261013.json",
+  "prior_delivery_superseded": true
 }

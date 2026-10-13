@@ -196,3 +196,17 @@ qualification lane must keep their independent scopes.
 Read this file, `AGENTS.md`, `docs/platform/EXECUTION_LANES.md`, then
 `canonical/CANONICAL_HANDOFF_20261007.md` and the current plan. Older recovery or
 runtime-audit documents must not override this continuation.
+
+### IRIS Fit8 recipe correction — 2026-10-13
+
+Revision 2 preserves the exact Knight TP64/DINO/F-star/loss code, removes weight
+decay and restores the four query groups, independent heldout strata, fixed
+residual replay and F-star-certified balanced source rays. A prefit source-only
+R512 census and post-selection zero-nonpositive exterior audit join exact
+containment and unchanged per-view P999. The Knight mechanical PASS notebook
+is not an IRIS training PASS. The explicit fresh joint-fit differences are in
+`canonical/FIT8_IRIS_KNIGHT_RECIPE_REFERENCE_V1.json`. Source engineering proof:
+`canonical/FIT8_IRIS_RECIPE_REVISION2_PREFLIGHT_20261013.json`. The old delivery
+recipe is superseded; replacement capsule packaging/readiness remains pending
+until the exact merged source and artifact identities are recorded. No new
+scientific Attempt, Fit8 PASS, native-truth admission or product state is minted.

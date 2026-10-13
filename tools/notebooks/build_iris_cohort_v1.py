@@ -113,7 +113,8 @@ def build(input_root,dino_source,output,source_revision,drive_input_relative_pat
              "tools/observation/blender_source_parity_export_v1.py"]
     source=collect_source_files(entries)
     for p in ("canonical/FIT8_DIVERSITY_SELECTION_V1.json","canonical/FIT8_IRIS_OBSERVATION_POLICY_V1.json",
-              "canonical/FIT8_IRIS_SHARED_TRAINING_POLICY_V1.json"):
+              "canonical/FIT8_IRIS_SHARED_TRAINING_POLICY_V1.json",
+              "canonical/FIT8_IRIS_KNIGHT_RECIPE_REFERENCE_V1.json"):
         source[p]=(ROOT/p).read_bytes()
     dino_source=Path(dino_source)
     # Genuine pinned source repository, including its Git authority and license.
@@ -133,7 +134,7 @@ from google.colab import drive
 drive.mount("/content/drive")
 WORK = Path("/content/realsas_iris_fit8")
 WORK.mkdir(parents=True, exist_ok=True)
-print("[BEGIN] IRIS Fit8 | 8 subjects | one shared model + optimizer | A100")
+print("[BEGIN] IRIS Fit8 revision 2 | Knight core/loss hash guard | one shared model + optimizer | A100")
 print("[STAGE] Drive mounted; active work/cache=/content")
 '''
     install = '''subprocess.run([sys.executable, "-m", "pip", "install", "--quiet",
@@ -181,7 +182,7 @@ PERSIST.mkdir(parents=True, exist_ok=True)
 print(f"[SNAPSHOT] source_revision={SOURCE_REVISION} capsule={CAPSULE_ID[:16]} verified_files={sum(len(v['file_sha256']) for v in CAPSULES.values())}")
 print(f"[PERSIST] {PERSIST}")
 '''
-    weight = '''from models.iris.training.cohort_v1 import file_hash, atomic_json
+    weight = '''from models.iris.training.cohort_v1 import file_hash, atomic_json, validate_knight_recipe, source_identity
 import shutil, urllib.request
 WEIGHT_SHA = "b938bf1bc15cd2ec0feacfe3a1bb553fe8ea9ca46a7e1d8d00217f29aef60cd9"
 WEIGHTS = WORK / "dinov2_vits14_pretrain.pth"
@@ -204,6 +205,11 @@ print("[FOUNDATION] exact DINOv2-S source + weights verified; backbone frozen")
 '''
     prepare = '''from tools.training.prepare_iris_cohort_v1 import prepare
 POLICY = json.loads((REPO / "canonical/FIT8_IRIS_SHARED_TRAINING_POLICY_V1.json").read_text())
+validate_knight_recipe(POLICY, source_identity(REPO))
+REFERENCE = json.loads((REPO / POLICY["knight_recipe_reference"]).read_text())
+assert POLICY["recipe_revision"] == 2, "Old Fit8 recipe must not be reused."
+print("[RECIPE] Knight TP64 + DINO + F* + C losses exact hash match | weight_decay=0")
+print("[RECIPE] cold shared fit | 48000 steps / 6000 exposures each | not a replay of Knight checkpoint history")
 SHARDS = WORK / "input_shards"
 started = time.monotonic()
 MANIFEST = prepare(INPUTS, SHARDS, DINO, WEIGHTS, POLICY, device="cuda",
@@ -212,7 +218,7 @@ atomic_json(PERSIST / "TRAINING_POLICY.json", POLICY)
 atomic_json(PERSIST / "CAPSULE_BINDING.json", {
     "source_revision": SOURCE_REVISION, "capsule_id": CAPSULE_ID,
     "capsule_sha256": {k:v["sha256"] for k,v in CAPSULES.items()}})
-print(f"[STAGE] 8 admitted IRIS observation sets -> DINO/F* shards; seconds={time.monotonic()-started:.1f}")
+print(f"[STAGE] 8 scoped IRIS observation sets -> DINO/F* + disjoint query pools + certified balanced source rays; seconds={time.monotonic()-started:.1f}")
 '''
     preflight = '''import unittest
 import contextlib, io
@@ -256,7 +262,7 @@ assert set(RESULT["subject_exposures"].values()) == {POLICY["steps"] // 8}
 print("[TRAINING_COMPLETE] 48000 real shared optimizer steps; each subject 6000 updates")
 '''
     surfaces = '''from tools.training.export_iris_cohort_surfaces_v1 import export
-print("[STAGE] selected shared checkpoint -> existing T512/T1024 contained decoder -> every subject/view court")
+print("[STAGE] selected shared checkpoint -> blind R512 exterior sign audit -> T512/T1024 exact contained decoder -> every subject/view P999 court")
 SURFACE_COURT = export(RESULTS/"IRIS_SHARED_SELECTED.pt", SHARDS, INPUTS,
     RESULTS/"surfaces", PERSIST/"results/surfaces", device="cuda")
 print(f"[COURT_SUMMARY] all_subjects_raw_court_pass={SURFACE_COURT['all_subjects_raw_court_pass']} Go qualification remains separate")
@@ -294,16 +300,25 @@ print("[NEXT] exact shared checkpoint + all subject metrics -> existing Go/Compi
         "metadata":{"kernelspec":{"display_name":"Python 3","language":"python","name":"python3"},
                     "colab":{"name":Path(output).name,"provenance":[]},"accelerator":"GPU",
                     "realsas":{"capsule_id":identity,"source_revision":source_revision,
-                               "scope":"IRIS_SHARED_FSTAR_RESEARCH_FIT","a100_execution_preflight":"RUN_ALL_REQUIRED"}},
-        "cells":[markdown("# RealSaS · IRIS Fit8 · A100\n\nA100 GPU seçin ve **Run All** çalıştırın. Drive mount dışında hücre düzenleme gerektirmez. "
+                               "scope":"IRIS_SHARED_FSTAR_RESEARCH_FIT","recipe_revision":2,
+                               "a100_execution_preflight":"RUN_ALL_REQUIRED"}},
+        "cells":[markdown("# RealSaS · IRIS Fit8 · A100 · Reçete 2\n\nA100 GPU seçin ve **Run All** çalıştırın. Drive mount dışında hücre düzenleme gerektirmez. "
                  "Snake, Bat, T-Rex, Horse, Spider, GreenBlob, Shark ve George; tek IRIS ve tek optimizer. "
                  "48.000 ortak adım; her subject 6.000 güncelleme.\n\n"
+                 "Knight TP64 model, DINO, F* ve loss dosyaları aynı hash’lerle korunur. "
+                 "AdamW weight decay sıfır; Huber + C silüet loss’u sabit. Dört query grubu ve "
+                 "F* ile doğrulanmış, tüm view’ları dengeli kullanan silüet ışınları geri bağlanmıştır. "
+                 "Bu sıfırdan ortak Fit8 eğitimidir; Knight’ın checkpoint devamı veya geçmiş eğitim adımlarının birebir tekrarı değildir. "
+                 "Yeni reçete ayrı kapsül/checkpoint kimliği kullanır; eski checkpoint bu reçeteye yüklenmez.\n\n"
                  "Kaynak kodu ve sabit girdi kimlikleri notebook içindedir. 64 doğrulanmış bind gözlemi, kamera ve kanıtlar "
                  "SHA bağlı Drive paketinden otomatik yüklenir. "
                  "Önce tam mimariyle gerçek A100 preflight çalışır. Kesilirse aynı notebook’u Run All ile tekrar açın; "
                  "son atomik checkpoint’ten devam eder. Drive çıktıları aynı kapsül kimliğinde kalır.\n\n"
                  "Eğitim sonunda seçilen ortak checkpoint, Knight hattındaki mevcut contained T512/T1024 decoder’a verilir; "
                  "sekiz subject’in mesh’leri ve her view’ın kaynak karşılaştırması ayrı ayrı saklanır.\n\n"
+                 "Sıkı IRIS kabulü: eğitim öncesi kaynak R512 dış bölge sayımı, seçim sonrası aynı sayımla "
+                 "sıfır/negatif dış bölge hatası bulunmaması, exact containment ve her subject’in bütün view’larında "
+                 "değişmemiş P999 eşikleri. Eğitim loss’u veya cohort ortalaması PASS kanıtı değildir.\n\n"
                  "Kapsam: görüntüden türetilmiş F* ortak eğitim deneyi. Native mekanik truth, IRIS Stage12/13, "
                  "Fit8 ve ürün PASS ayrı doğrulama kapılarıdır; bu notebook eğitim kaybından PASS üretmez."),
                  code(first),code(install),code(unpack),code(weight),code(prepare),

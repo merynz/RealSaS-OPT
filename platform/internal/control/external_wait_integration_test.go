@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/google/uuid"
@@ -31,6 +32,10 @@ func TestExternalEvidenceWaitIsResumableAndDoesNotMintFailure(t *testing.T) {
 	attemptID := uuid.New()
 	executionID := uuid.New()
 	stageID := "10_IRIS_FIT"
+	releaseHex := strings.ReplaceAll(subjectID.String(), "-", "")
+	releaseSHA := releaseHex + releaseHex
+	specHex := strings.ReplaceAll(attemptID.String(), "-", "")
+	specSHA := specHex + specHex
 
 	if _, err := pool.Exec(ctx, "INSERT INTO subjects(id,slug,display_name) VALUES ($1,$2,$3)", subjectID, "external-wait-"+subjectID.String(), "External wait"); err != nil {
 		t.Fatal(err)
@@ -38,7 +43,7 @@ func TestExternalEvidenceWaitIsResumableAndDoesNotMintFailure(t *testing.T) {
 	if _, err := pool.Exec(ctx, `
 		INSERT INTO engine_releases(id,name,release_sha256,purpose,created_by,sealed_at)
 		VALUES ($1,$2,$3,'RESEARCH','ci',now())
-	`, releaseID, "external-wait-release-"+subjectID.String(), repeatHex("1")); err != nil {
+	`, releaseID, "external-wait-release-"+subjectID.String(), releaseSHA); err != nil {
 		t.Fatal(err)
 	}
 	graphSHA, err := g.SHA256()
@@ -56,7 +61,7 @@ func TestExternalEvidenceWaitIsResumableAndDoesNotMintFailure(t *testing.T) {
 	if _, err := pool.Exec(ctx, `
 		INSERT INTO attempts(id,subject_id,engine_release_id,kind,spec_sha256,created_by,final_state)
 		VALUES ($1,$2,$3,'research',$4,'ci','OPEN')
-	`, attemptID, subjectID, releaseID, repeatHex("2")); err != nil {
+	`, attemptID, subjectID, releaseID, specSHA); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := pool.Exec(ctx, `

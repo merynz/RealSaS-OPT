@@ -2,8 +2,9 @@
 """Prepare portable Stage01-08 manifest fragments from the exact Fit8 input bundle.
 
 The tool does not register platform state or mint qualification. It verifies the
-sealed bundle locator/receipt, rehashes every referenced byte and emits one
-subject-neutral manifest fragment plus an external-artifact inventory per member.
+canonical roster, sealed bundle locator/receipt, rehashes every referenced byte
+and emits one subject-neutral manifest fragment plus an external-artifact
+inventory per member.
 """
 from __future__ import annotations
 
@@ -64,6 +65,32 @@ def source_row(role: str, value: dict) -> dict:
         "expected_sha256": value["sha256"],
         "expected_size_bytes": value["size_bytes"],
     }
+
+
+def validate_selection(bundle_subjects: list[dict], selection: dict) -> None:
+    require(selection.get("schema") == "RealSaS.FIT8DiversitySelection.v1", "FIT8_SELECTION_SCHEMA")
+    selected = list(selection.get("selected") or ())
+    require(len(selected) == len(bundle_subjects) == 8, "FIT8_SELECTION_CARDINALITY")
+    by_key = {str(row.get("subject_key")): row for row in selected}
+    require(len(by_key) == 8 and "" not in by_key, "FIT8_SELECTION_SUBJECT_IDENTITY")
+    for subject in bundle_subjects:
+        subject_id = str(subject.get("subject_id") or "")
+        require(subject_id in by_key, f"FIT8_SELECTION_SUBJECT_MISSING:{subject_id}")
+        selected_row = by_key[subject_id]
+        source = dict(selected_row.get("source") or {})
+        require(subject.get("pack_id") == selected_row.get("pack_id"),
+                f"FIT8_SELECTION_PACK_DRIFT:{subject_id}")
+        raw = dict(subject.get("raw_source") or {})
+        require(raw.get("path") == source.get("corpus_relative_path"),
+                f"FIT8_SELECTION_SOURCE_PATH_DRIFT:{subject_id}")
+        require(raw.get("sha256") == source.get("sha256"),
+                f"FIT8_SELECTION_SOURCE_SHA_DRIFT:{subject_id}")
+        require(int(raw.get("size_bytes", -1)) == int(source.get("byte_size", -2)),
+                f"FIT8_SELECTION_SOURCE_SIZE_DRIFT:{subject_id}")
+        page = dict(subject.get("source_page_snapshot") or {})
+        require(page.get("sha256") == source.get("source_page_sha256"),
+                f"FIT8_SELECTION_SOURCE_PAGE_DRIFT:{subject_id}")
+        require(source.get("license") == "CC0-1.0", f"FIT8_SELECTION_LICENSE_DRIFT:{subject_id}")
 
 
 def build_subject(root: Path, subject: dict, receipt: dict[str, dict], corpus_ref: dict) -> tuple[dict, dict]:
@@ -177,10 +204,14 @@ def build_subject(root: Path, subject: dict, receipt: dict[str, dict], corpus_re
     return fragment, artifact_inventory
 
 
-def prepare(bundle_root: Path, locator_path: Path, out_root: Path) -> dict:
+def prepare(bundle_root: Path, locator_path: Path, selection_path: Path, out_root: Path) -> dict:
     bundle_root = bundle_root.expanduser().resolve()
     locator = load_json(locator_path)
     require(locator.get("schema") == "RealSaS.Fit8PlatformStage01InputBundleLocator.v1", "LOCATOR_SCHEMA")
+    selection_path = selection_path.expanduser().resolve()
+    require(selection_path.is_file(), "FIT8_SELECTION_FILE_MISSING")
+    require(sha256(selection_path) == locator["selection"]["sha256"], "FIT8_SELECTION_SHA_DRIFT")
+    selection = load_json(selection_path)
     manifest_path = bundle_root / "BOOTSTRAP_MANIFEST.json"
     receipt_path = bundle_root / "BUNDLE_RECEIPT.json"
     require(sha256(manifest_path) == locator["bundle"]["manifest_sha256"], "BOOTSTRAP_MANIFEST_SHA")
@@ -192,9 +223,10 @@ def prepare(bundle_root: Path, locator_path: Path, out_root: Path) -> dict:
     receipt = {row["path"]: row for row in receipt_payload.get("files") or ()}
     require(len(receipt) == int(receipt_payload["file_count"]), "BUNDLE_RECEIPT_CARDINALITY")
     subjects = list(manifest.get("subjects") or ())
-    require(len(subjects) == int(manifest.get("subject_count", -1)) == int(locator.get("subject_count", -2)),
+    require(len(subjects) == int(manifest.get("subject_count", -1)) == int(locator.get("subject_count", -2)) == 8,
             "FIT8_SUBJECT_COUNT")
     require(len({row["subject_id"] for row in subjects}) == len(subjects), "FIT8_SUBJECT_DUPLICATE")
+    validate_selection(subjects, selection)
     corpus_ref = ref(bundle_root, "manifest/CORPUS_SEAL.json", receipt)
 
     out_root.mkdir(parents=True, exist_ok=True)
@@ -215,6 +247,7 @@ def prepare(bundle_root: Path, locator_path: Path, out_root: Path) -> dict:
         })
     output = {
         "schema": "RealSaS.Fit8Stage01To08BootstrapIndex.v1",
+        "selection_sha256": locator["selection"]["sha256"],
         "bundle_sha256": locator["drive"]["sha256"],
         "bundle_drive_file_id": locator["drive"]["file_id"],
         "subject_count": len(index_rows),
@@ -235,9 +268,11 @@ def main() -> None:
                         help="Extracted FIT8_PLATFORM_STAGE01_INPUT_BUNDLE_20261013.zip root")
     parser.add_argument("--locator", type=Path,
                         default=Path("canonical/FIT8_PLATFORM_STAGE01_INPUT_BUNDLE_20261013.json"))
+    parser.add_argument("--selection", type=Path,
+                        default=Path("canonical/FIT8_DIVERSITY_SELECTION_V1.json"))
     parser.add_argument("--out-root", type=Path, required=True)
     args = parser.parse_args()
-    result = prepare(args.bundle_root, args.locator, args.out_root)
+    result = prepare(args.bundle_root, args.locator, args.selection, args.out_root)
     print(json.dumps(result, indent=2, sort_keys=True))
 
 

@@ -60,22 +60,22 @@ def fixture(tmp_path: Path):
                 "view_id": f"V{i}", "view_index": i,
                 "origin": [0.0, 0.0, -2.0], "right": [1.0, 0.0, 0.0],
                 "screen_up": [0.0, 1.0, 0.0], "forward": [0.0, 0.0, 1.0],
-                "half_extent": 1.0, "resolution": 8,
+                "half_extent": 1.0, "resolution": 32,
             }
             for i in range(8)
         ],
     }
     camera = dump(tmp_path / "camera.json", camera_payload)
 
-    rasters, masks, candidate_views = [], [], []
+    rasters, masks, candidate_views, proof_views = [], [], [], []
     evidence_files = [("RAW_SOURCE", raw), ("CAMERA_BUNDLE", camera)]
     for i in range(8):
-        rgba = np.zeros((8, 8, 4), dtype=np.uint8)
-        rgba[2:6, 2:6] = (60 + i, 90, 120, 255)
+        rgba = np.zeros((32, 32, 4), dtype=np.uint8)
+        rgba[8:24, 8:24] = (60 + i, 90, 120, 255)
         raster = tmp_path / f"V{i}.png"
         Image.fromarray(rgba, "RGBA").save(raster)
-        mask_array = np.zeros((8, 8), dtype=np.uint8)
-        mask_array[2:6, 2:6] = 1
+        mask_array = np.zeros((32, 32), dtype=np.uint8)
+        mask_array[8:24, 8:24] = 1
         mask = tmp_path / f"V{i}.mask.bin"
         mask.write_bytes(mask_array.tobytes())
         rasters.append({"view_index": i, "image": ref(raster)})
@@ -84,7 +84,15 @@ def fixture(tmp_path: Path):
             "view_index": i,
             "raster": {"sha256": sha(raster)},
             "foreground_mask": {"sha256": sha(mask)},
-            "border_margin_px": 2,
+            "border_margin_px": 8,
+        })
+        proof_views.append({
+            "view_index": i,
+            "maximum_mask_gap_px": 1.0,
+            "raster_sha256": sha(raster),
+            "mask_sha256": sha(mask),
+            "reference_sha256": hashlib.sha256(f"reference-{i}".encode()).hexdigest(),
+            "border_margin_px": 8,
         })
         evidence_files.extend(((f"SOURCE_RASTER_V{i}", raster), (f"SOURCE_MASK_V{i}", mask)))
 
@@ -114,6 +122,7 @@ def fixture(tmp_path: Path):
         "status": "ENGINEERING_MATERIALIZED__SOURCE_ADMISSION_PENDING",
         "subject_id": "fit8_fixture",
         "source_sha256": source_sha,
+        "resolution": 1024,
         "import": {"raw_source_mutated": False},
         "pose_address": "SOURCE_BIND_REST",
         "native_frame0_is_rest_assumed": False,
@@ -125,22 +134,46 @@ def fixture(tmp_path: Path):
         "product_pass_claimed": False,
     }
     candidate = dump(tmp_path / "candidate.json", candidate_payload)
-    court_payload = {
-        "schema": "RealSaS.SourceBindObservationCourt.v1",
-        "status": "PASS",
+    proof_payload = {
+        "schema": "RealSaS.IrisBindObservationAdmission.v1",
+        "status": "PASS_IRIS_BIND_OBSERVATIONS",
         "subject_id": "fit8_fixture",
         "source_sha256": source_sha,
-        "candidate_receipt_sha256": sha(candidate),
-        "scene_snapshot_sha256": sha(snapshot),
-        "independent_raw_parser": True,
-        "source_bind_parity": True,
+        "candidate_sha256": sha(candidate),
+        "imported_geometry_sha256": hashlib.sha256(b"independent imported geometry").hexdigest(),
+        "camera_sha256": sha(camera),
         "relative_vertex_error": 1e-7,
-        "maximum_mask_gap_px": 1.0,
-        "product_pass_claimed": False,
+        "raw_vertex_count": 100,
+        "imported_vertex_count": 100,
+        "bone_count": 1,
+        "native_motion_inventory": ["Idle"],
+        "source_material_metadata": [],
+        "views": proof_views,
+        "scope": "IMAGE_DERIVED_FSTAR_BIND_OBSERVATIONS__NOT_FULL_MECHANICAL_TRUTH",
+        "policy": {
+            "schema": "RealSaS.IrisObservationPreparationPolicy.v1",
+            "scope": "IMAGE_DERIVED_FSTAR_BIND_OBSERVATIONS__NOT_FULL_MECHANICAL_TRUTH",
+            "resolution": 1024,
+            "view_count": 8,
+            "minimum_border_margin_px": 8,
+            "maximum_relative_vertex_error": 1e-5,
+            "maximum_mask_gap_px": 2.0,
+            "reference_coverage": "TRIANGLE_UNIT_PIXEL_SQUARE_INTERSECTION",
+            "raster_filter": "BOX_1PX",
+            "pose": "SOURCE_BIND_REST",
+            "native_frame0_is_bind_assumed": False,
+            "native_lit_material_parity_claimed": False,
+            "full_native_motion_truth_admitted": False,
+            "go_stage_qualification_claimed": False,
+        },
+        "full_native_motion_truth_admitted": False,
+        "native_lit_parity_claimed": False,
+        "go_stage_qualification_claimed": False,
+        "fit8_pass_claimed": False,
     }
-    court = dump(tmp_path / "court.json", court_payload)
+    proof = dump(tmp_path / "IRIS_OBSERVATION_ADMISSION.json", proof_payload)
     evidence_files.extend((("SOURCE_SCENE_SNAPSHOT", snapshot), ("SOURCE_REST_CANDIDATE", candidate),
-                           ("SOURCE_BIND_COURT", court)))
+                           ("IRIS_OBSERVATION_ADMISSION", proof)))
 
     source_payload = {
         "schema": "RealSaS.SourceByteSeal.v1",
@@ -155,21 +188,21 @@ def fixture(tmp_path: Path):
         ],
         "source_audit": {
             "profile": PROFILE,
+            "subject_key": "fit8_fixture",
             "primary_source_role": "RAW_SOURCE",
-            "minimum_border_margin_px": 1,
+            "minimum_border_margin_px": 8,
             "source_rest_candidate": ref(candidate),
             "source_scene_snapshot": ref(snapshot),
-            "source_bind_court": ref(court),
+            "iris_observation_admission": ref(proof),
+            "iris_observation_admission_required": True,
             "matrix_tolerance": 1e-6,
-            "max_relative_vertex_error": 1e-5,
-            "max_mask_gap_px": 2.0,
         },
         "admission": {"mode": ADMISSION_MODE},
         "observation": {"camera_bundle": ref(camera), "source_rasters": rasters,
                         "source_foreground_masks": masks},
     }
     return source_payload, manifest, {"raw": raw, "camera": camera, "snapshot": snapshot,
-                                      "candidate": candidate, "court": court}
+                                      "candidate": candidate, "proof": proof}
 
 
 def test_source_scene_bind_admission_happy_path(tmp_path):
@@ -179,13 +212,16 @@ def test_source_scene_bind_admission_happy_path(tmp_path):
     assert result["profile"] == PROFILE
     assert result["node_count"] == 2
     assert result["bone_count"] == 1
-    assert result["attachment_relation_count"] == 1
+    assert result["parent_relation_count"] == 1
+    assert result["bone_parent_relation_count"] == 1
+    assert result["relative_vertex_error"] == 1e-7
+    assert result["maximum_mask_gap_px"] == 1.0
     assert result["native_motion_qualified"] is False
     assert result["appearance_qualified"] is False
     assert result["product_pass_claimed"] is False
 
 
-def test_scene_transform_camera_view_and_independent_court_drift_fail(tmp_path):
+def test_scene_transform_camera_view_and_exact_proof_drift_fail(tmp_path):
     source_payload, manifest, paths = fixture(tmp_path)
     ctx = {"run_manifest": manifest}
 
@@ -193,19 +229,17 @@ def test_scene_transform_camera_view_and_independent_court_drift_fail(tmp_path):
     snapshot["nodes"][1]["node_to_source_world"][0][3] += 0.25
     dump(paths["snapshot"], snapshot)
     manifest["source_audit"]["source_scene_snapshot"]["sha256"] = sha(paths["snapshot"])
-    source_payload["files"] = [
-        {**row, "sha256": sha(paths["snapshot"])} if row["role"] == "SOURCE_SCENE_SNAPSHOT" else row
-        for row in source_payload["files"]
-    ]
-    with pytest.raises(QualificationError, match="SNAPSHOT_BINDING_DRIFT|COURT_SNAPSHOT_DRIFT|PARENT_WORLD_DRIFT"):
+    for row in source_payload["files"]:
+        if row["role"] == "SOURCE_SCENE_SNAPSHOT": row["sha256"] = sha(paths["snapshot"])
+    with pytest.raises(QualificationError, match="SNAPSHOT_BINDING_DRIFT|PARENT_WORLD_DRIFT"):
         validate_source_scene_admission(ctx, source_payload)
 
-    source_payload, manifest, paths = fixture(tmp_path / "court")
-    court = json.loads(paths["court"].read_text()); court["maximum_mask_gap_px"] = 3.0
-    dump(paths["court"], court)
-    manifest["source_audit"]["source_bind_court"]["sha256"] = sha(paths["court"])
+    source_payload, manifest, paths = fixture(tmp_path / "proof")
+    proof = json.loads(paths["proof"].read_text()); proof["views"][0]["maximum_mask_gap_px"] = 3.0
+    dump(paths["proof"], proof)
+    manifest["source_audit"]["iris_observation_admission"]["sha256"] = sha(paths["proof"])
     for row in source_payload["files"]:
-        if row["role"] == "SOURCE_BIND_COURT": row["sha256"] = sha(paths["court"])
+        if row["role"] == "IRIS_OBSERVATION_ADMISSION": row["sha256"] = sha(paths["proof"])
     with pytest.raises(QualificationError, match="MASK_PARITY_FAIL"):
         validate_source_scene_admission({"run_manifest": manifest}, source_payload)
 
@@ -215,7 +249,7 @@ def test_scene_transform_camera_view_and_independent_court_drift_fail(tmp_path):
     manifest["observation"]["camera_bundle"]["sha256"] = sha(paths["camera"])
     for row in source_payload["files"]:
         if row["role"] == "CAMERA_BUNDLE": row["sha256"] = sha(paths["camera"])
-    with pytest.raises(QualificationError, match="CAMERA_BINDING_DRIFT|PER_VIEW_CAMERA"):
+    with pytest.raises(QualificationError, match="CAMERA_BINDING_DRIFT|PROOF_CAMERA_DRIFT|PER_VIEW_CAMERA"):
         validate_source_scene_admission({"run_manifest": manifest}, source_payload)
 
 
@@ -231,6 +265,8 @@ def test_stage03_04_require_strong_profile_pair_and_stage1_sealed_evidence(tmp_p
     stage3 = audit_source_mechanics_stage(ctx)
     assert stage3["status"] == "PASS"
     assert stage3["diagnostics"]["source_scene_bind_admission"] is True
+    assert stage3["diagnostics"]["source_scene_parent_relations"] == 1
+    assert stage3["diagnostics"]["source_scene_bone_parent_relations"] == 1
     ctx["ledger"]["stages"].append({"id": "03_SOURCE_MECHANICAL_AUDIT", "status": "PASS",
                                       "outputs": stage3["outputs"]})
     ctx["stage"] = {"id": "04_FULL_SUBJECT_ADMISSION"}
@@ -244,3 +280,11 @@ def test_stage03_04_require_strong_profile_pair_and_stage1_sealed_evidence(tmp_p
     result = admit_full_subject_stage(mismatch)
     assert result["status"] == "BLOCKED"
     assert result["blockers"] == ["FULL_SUBJECT_ADMISSION_MODE_PROFILE_MISMATCH"]
+
+
+def test_proof_must_be_stage1_sealed(tmp_path):
+    source_payload, manifest, _ = fixture(tmp_path)
+    source_payload["files"] = [row for row in source_payload["files"]
+                               if row["role"] != "IRIS_OBSERVATION_ADMISSION"]
+    with pytest.raises(QualificationError, match="EVIDENCE_NOT_STAGE1_SEALED"):
+        validate_source_scene_admission({"run_manifest": manifest}, source_payload)

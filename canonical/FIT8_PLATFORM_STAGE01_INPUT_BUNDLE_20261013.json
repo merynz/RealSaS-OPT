@@ -1,0 +1,37 @@
+{
+  "schema": "RealSaS.Fit8PlatformStage01InputBundleLocator.v1",
+  "date": "2026-10-13",
+  "status": "EXACT_BYTES_PERSISTED_AND_ROUNDTRIP_VERIFIED__NO_STAGE_PASS_MINTED",
+  "scope": "FIT8_SOURCE_PROVENANCE_AND_SOURCE_SCENE_OBSERVATION_TRANSPORT",
+  "subject_count": 8,
+  "drive": {
+    "folder_id": "1wSjaFg0YD7oQ1K9B98yXuwHB_rjdeeQp",
+    "file_id": "1PcxT2rfb9jCHfP75gaqMAo90OU7JRypH",
+    "file_name": "FIT8_PLATFORM_STAGE01_INPUT_BUNDLE_20261013.zip",
+    "size_bytes": 42325747,
+    "sha256": "9d9c9cbf63c979326cd2f39f5435006b81dddb201028a34ebb4cf10e1b434936",
+    "upload_roundtrip_sha256_verified": true
+  },
+  "bundle": {
+    "manifest_path": "BOOTSTRAP_MANIFEST.json",
+    "manifest_sha256": "cf79623854a91bc5cb9c9e768dac75ce8779b8d5ff5550c49dcff48c90d4d92e",
+    "receipt_path": "BUNDLE_RECEIPT.json",
+    "receipt_sha256": "b9a1c00ad3c32544f692bec89c2a20a8cdd73caae77f56e8cde941d0b1a7c504",
+    "file_count": 188
+  },
+  "source_inputs": {
+    "truth_corpus_audit_upload_sha256": "1857b4c2ba3f43982cdd261f80d76e3df923fe293ba6eaf04de048823e4a6747",
+    "iris_fit8_observations_sha256": "fadc465b169f47cb62226dfe9aefa74326c9193ce09205ff30f82e0fdf13743b",
+    "raw_source_count": 8,
+    "observation_subject_count": 8,
+    "observation_file_count": 160
+  },
+  "authority": {
+    "transport_is_not_scientific_qualification": true,
+    "stage01_must_rehash_every_referenced_byte": true,
+    "stage02_must_validate_exact_provenance": true,
+    "stage03_must_validate_source_scene_bind": true,
+    "fit8_pass_claimed": false,
+    "product_pass_claimed": false
+  }
+}

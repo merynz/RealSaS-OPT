@@ -18,14 +18,14 @@ import (
 
 func run(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("command required: stages, subject, artifact-put, artifact-import, input-seal, attempt, release, agent-context, agent-enter, agent-exit, research-start, research-run, product-compile, product-render")
+		return fmt.Errorf("command required: stages, subject, artifact-put, artifact-import, input-seal, attempt, campaign, release, agent-context, agent-enter, agent-exit, research-start, research-run, campaign-start, campaign-run, product-compile, product-render")
 	}
-	routes := map[string]string{"subject": "/v1/subjects", "artifact-import": "/v1/artifacts/import", "input-seal": "/v1/subject-inputs", "release": "/v1/releases", "research-start": "/v1/research/attempts", "research-run": "/v1/research/compile", "product-compile": "/v1/product/compile", "product-render": "/v1/product/render"}
+	routes := map[string]string{"subject": "/v1/subjects", "artifact-import": "/v1/artifacts/import", "input-seal": "/v1/subject-inputs", "release": "/v1/releases", "research-start": "/v1/research/attempts", "research-run": "/v1/research/compile", "campaign-start": "/v1/research/campaigns", "campaign-run": "/v1/research/campaigns/run", "product-compile": "/v1/product/compile", "product-render": "/v1/product/render"}
 	routes["agent-enter"], routes["agent-exit"] = "/v1/agents/enter", "/v1/agents/exit"
 	flags := flag.NewFlagSet(args[0], flag.ContinueOnError)
 	endpoint := flags.String("api", "http://127.0.0.1:8080", "operator API")
 	requestFile := flags.String("request", "-", "JSON request file, or - for stdin")
-	id := flags.String("id", "", "attempt UUID")
+	id := flags.String("id", "", "attempt or campaign UUID")
 	repo := flags.String("repo", ".", "canonical source checkout for execution commands")
 	file := flags.String("file", "", "exact artifact bytes to upload")
 	sha := flags.String("sha256", "", "expected artifact content SHA256")
@@ -73,6 +73,11 @@ func run(args []string) error {
 		path = "/v1/attempts/" + *id
 		ok = *id != ""
 	}
+	if args[0] == "campaign" {
+		method = http.MethodGet
+		path = "/v1/research/campaigns/" + *id
+		ok = *id != ""
+	}
 	if args[0] == "agent-context" {
 		method, path, ok = http.MethodGet, "/v1/agents/context/"+*id, *id != ""
 	}
@@ -91,7 +96,7 @@ func run(args []string) error {
 		}
 	}
 	switch args[0] {
-	case "agent-enter", "release", "research-start", "research-run", "product-compile", "product-render":
+	case "agent-enter", "release", "research-start", "research-run", "campaign-start", "campaign-run", "product-compile", "product-render":
 		codeSHA, err := agentsession.CanonicalCheckout(context.Background(), *repo)
 		if err != nil {
 			return err

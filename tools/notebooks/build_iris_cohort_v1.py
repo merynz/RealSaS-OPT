@@ -143,6 +143,7 @@ print("[STAGE] Drive mounted; active work/cache=/content")
 subprocess.run([sys.executable, "-m", "pip", "install", "--quiet",
     "numpy==2.1.3", "scipy==1.14.1", "Pillow==11.3.0"], check=True)
 import torch
+assert torch.__version__.split("+")[0] == "2.8.0", "Restart with a clean runtime: an older torch module is still loaded."
 assert torch.cuda.is_available(), "A100 GPU runtime seçin; CUDA bulunamadı."
 GPU = torch.cuda.get_device_properties(0)
 assert "A100" in GPU.name, f"A100 gerekli; bulunan GPU: {GPU.name}"
@@ -150,7 +151,13 @@ assert GPU.total_memory >= 30 * 2**30, "A100 GPU belleği yetersiz."
 assert torch.cuda.is_bf16_supported(), "BF16 desteği gerekli."
 print(f"[RUNTIME] torch={torch.__version__} CUDA={torch.version.cuda} GPU={GPU.name} GiB={GPU.total_memory/2**30:.1f}")
 '''
-    unpack = "CAPSULES = "+repr(packs)+"\nCAPSULE_ID = "+repr(identity)+"\nSOURCE_REVISION = "+repr(source_revision)+"\n"+'''import base64, io, zipfile
+    unpack = "CAPSULES = "+repr(packs)+"\nCAPSULE_ID = "+repr(identity)+"\nSOURCE_REVISION = "+repr(source_revision)+"\n"+'''import base64, io, zipfile, shutil, importlib
+# Run All can follow another capsule in the same Colab process. Drop only this
+# capsule's Python namespaces; source-byte checks must never certify old objects.
+for name in tuple(sys.modules):
+    if name.split(".")[0] in {"models", "compiler", "tools", "tests"}:
+        del sys.modules[name]
+importlib.invalidate_caches()
 def unpack_verified(pack, destination):
     if "base64" in pack:
         data = base64.b64decode(pack["base64"], validate=True)
@@ -159,6 +166,9 @@ def unpack_verified(pack, destination):
         assert source_archive.is_file(), f"Exact input packet missing: {source_archive}"
         data = source_archive.read_bytes()
     assert hashlib.sha256(data).hexdigest() == pack["sha256"], "Embedded capsule hash drift"
+    # These are notebook-owned snapshots. Preserve Drive state and local shards.
+    if destination.exists():
+        shutil.rmtree(destination)
     destination.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
         assert set(archive.namelist()) == set(pack["file_sha256"]), "Capsule inventory drift"

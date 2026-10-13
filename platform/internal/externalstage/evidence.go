@@ -29,18 +29,18 @@ type BindRequest struct {
 }
 
 type Bound struct {
-    AttemptID       uuid.UUID `json:"attempt_id"`
-    StageID         string    `json:"stage_id"`
-    EvidenceSHA256  string    `json:"evidence_sha256"`
-    WorkflowSignaled bool     `json:"workflow_signaled"`
-    Reused          bool      `json:"reused"`
+    AttemptID        uuid.UUID `json:"attempt_id"`
+    StageID          string    `json:"stage_id"`
+    EvidenceSHA256   string    `json:"evidence_sha256"`
+    WorkflowSignaled bool      `json:"workflow_signaled"`
+    Reused           bool      `json:"reused"`
 }
 
 type Identity struct {
-    Role                   string
-    ArtifactID             uuid.UUID
-    ArtifactType           string
-    SemanticSHA256         string
+    Role           string
+    ArtifactID     uuid.UUID
+    ArtifactType   string
+    SemanticSHA256 string
 }
 
 func LoadIdentities(ctx context.Context, pool *pgxpool.Pool, attemptID uuid.UUID) (map[string][]Identity, error) {
@@ -69,11 +69,11 @@ func Bind(ctx context.Context, pool *pgxpool.Pool, req BindRequest) (Bound, erro
         return Bound{}, errors.New("external evidence binding identity is incomplete")
     }
     bindings:=append([]Binding(nil),req.Bindings...)
+    for i:=range bindings { bindings[i].Role=strings.TrimSpace(bindings[i].Role) }
     sort.Slice(bindings,func(i,j int)bool{return bindings[i].Role<bindings[j].Role})
     seen:=map[string]struct{}{}
     material:=make([]map[string]string,0,len(bindings))
     for _,b:=range bindings {
-        b.Role=strings.TrimSpace(b.Role)
         if b.Role=="" || b.ArtifactID==uuid.Nil { return Bound{},errors.New("external evidence role and artifact are required") }
         if _,ok:=seen[b.Role];ok { return Bound{},errors.New("EXTERNAL_STAGE_EVIDENCE_ROLE_DUPLICATE") }
         seen[b.Role]=struct{}{}

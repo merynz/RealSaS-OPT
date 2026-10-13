@@ -33,14 +33,30 @@ func (a Activities) boundStageInputs(ctx context.Context, attemptID uuid.UUID) (
 	return inputs, rows.Err()
 }
 
-// These are the inputs already selected and bound transactionally for this
-// exact stage. The Engine must verify them against the manifest it reads.
+// These are the root inputs selected for this exact execution. Subject inputs
+// were sealed before the Attempt. External inputs are immutable raw imported
+// evidence bound to exactly (attempt, stage, role); they are copied into
+// execution_artifacts so the produced stage artifact records them as semantic
+// provenance inputs.
 func (a Activities) boundSourceInputs(ctx context.Context, executionID uuid.UUID) ([]orchestration.ArtifactRef, error) {
+	if _, err := a.Pool.Exec(ctx, `
+        INSERT INTO execution_artifacts(execution_id,relation,role,artifact_id)
+        SELECT e.id,'input','external:' || x.role,x.artifact_id
+        FROM executions e
+        JOIN external_stage_evidence x
+          ON x.attempt_id=e.attempt_id AND x.stage_id=e.stage_contract
+        WHERE e.id=$1
+        ON CONFLICT DO NOTHING
+    `, executionID); err != nil {
+		return nil, err
+	}
 	rows, err := a.Pool.Query(ctx, `SELECT ea.role,ar.id,t.name,t.schema_version,ar.semantic_sha256,
         ar.storage_key,ar.content_sha256,ar.size_bytes
         FROM execution_artifacts ea JOIN artifacts ar ON ar.id=ea.artifact_id
         JOIN artifact_types t ON t.id=ar.artifact_type_id
-        WHERE ea.execution_id=$1 AND ea.relation='input' AND starts_with(ea.role,'subject:') ORDER BY ea.role`, executionID)
+        WHERE ea.execution_id=$1 AND ea.relation='input'
+          AND (starts_with(ea.role,'subject:') OR starts_with(ea.role,'external:'))
+        ORDER BY ea.role`, executionID)
 	if err != nil {
 		return nil, err
 	}

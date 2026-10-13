@@ -22,6 +22,27 @@ func (p TemporalPublisher) Publish(ctx context.Context, commandType string, payl
 	if p.Client == nil {
 		return errors.New("temporal client is required")
 	}
+	if commandType == command.ExternalStageReady {
+		workflowID, err := requiredString(payload, "workflow_id")
+		if err != nil {
+			return err
+		}
+		attemptID, err := requiredString(payload, "attempt_id")
+		if err != nil {
+			return err
+		}
+		stageID, err := requiredString(payload, "stage_id")
+		if err != nil {
+			return err
+		}
+		evidenceSHA, err := requiredString(payload, "evidence_sha256")
+		if err != nil {
+			return err
+		}
+		return p.Client.SignalWorkflow(ctx, workflowID, "", orchestration.ExternalStageReadySignalName, orchestration.ExternalStageReadySignal{
+			AttemptID: attemptID, StageID: stageID, EvidenceSHA256: evidenceSHA,
+		})
+	}
 	workflowName, workflowID, timeout, input, err := workflowSpec(commandType, payload)
 	if err != nil {
 		return err
@@ -102,11 +123,8 @@ func workflowSpec(commandType string, payload map[string]any) (string, string, t
 			"realsas:capability:" + commandID,
 			7 * 24 * time.Hour,
 			orchestration.CapabilityWorkflowInput{
-				CommandID:       commandID,
-				AttemptID:       attemptID,
-				ExecutionGoalID: goalID,
-				EngineReleaseID: releaseID,
-				GoalSpecSHA256:  specSHA,
+				CommandID: commandID, AttemptID: attemptID, ExecutionGoalID: goalID,
+				EngineReleaseID: releaseID, GoalSpecSHA256: specSHA,
 			}, nil
 	case command.RenderProduct:
 		subjectID, err := requiredString(payload, "subject_id")
@@ -129,11 +147,8 @@ func workflowSpec(commandType string, payload map[string]any) (string, string, t
 			"realsas:render:" + commandID,
 			6 * time.Hour,
 			orchestration.RenderWorkflowInput{
-				CommandID:                   commandID,
-				SubjectID:                   subjectID,
-				ProductRevisionID:           revisionID,
-				RenderRequestID:             renderID,
-				RenderRequestSemanticSHA256: semanticSHA,
+				CommandID: commandID, SubjectID: subjectID, ProductRevisionID: revisionID,
+				RenderRequestID: renderID, RenderRequestSemanticSHA256: semanticSHA,
 			}, nil
 	default:
 		return "", "", 0, nil, fmt.Errorf("unsupported command type %q", commandType)

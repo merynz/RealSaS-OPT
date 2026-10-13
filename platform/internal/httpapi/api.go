@@ -14,6 +14,7 @@ import (
 	"github.com/merynz/RealSaS-OPT/platform/internal/attempt"
 	"github.com/merynz/RealSaS-OPT/platform/internal/campaign"
 	"github.com/merynz/RealSaS-OPT/platform/internal/command"
+	"github.com/merynz/RealSaS-OPT/platform/internal/externalstage"
 	"github.com/merynz/RealSaS-OPT/platform/internal/input"
 	"github.com/merynz/RealSaS-OPT/platform/internal/registry"
 	"github.com/merynz/RealSaS-OPT/platform/internal/release"
@@ -131,6 +132,24 @@ func (a API) Handler() http.Handler {
 		out, err := attempt.StartResearch(r.Context(), a.Pool, a.Graph, req)
 		result(w, out, err)
 	})
+	mux.HandleFunc("POST /v1/research/attempts/{id}/stages/{stage}/external-evidence", func(w http.ResponseWriter, r *http.Request) {
+		attemptID, err := uuid.Parse(r.PathValue("id"))
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid attempt id"})
+			return
+		}
+		var req struct {
+			Bindings []externalstage.Binding `json:"bindings"`
+			BoundBy  string                  `json:"bound_by"`
+		}
+		if !decode(w, r, &req) {
+			return
+		}
+		out, err := externalstage.Bind(r.Context(), a.Pool, externalstage.BindRequest{
+			AttemptID: attemptID, StageID: r.PathValue("stage"), Bindings: req.Bindings, BoundBy: req.BoundBy,
+		})
+		result(w, out, err)
+	})
 	mux.HandleFunc("POST /v1/research/campaigns", func(w http.ResponseWriter, r *http.Request) {
 		var req campaign.StartRequest
 		if !decode(w, r, &req) {
@@ -243,7 +262,6 @@ func (a API) Handler() http.Handler {
 				result(w, nil, err)
 				return
 			}
-			// Preserve the stored diagnostic payload without deriving authority.
 			events = append(events, event)
 		}
 		if err := rows.Err(); err != nil {

@@ -31,6 +31,24 @@ def _json_ref(ref: dict, expected_schema: str):
     return path, expected, payload
 
 
+def _effective_execution_cfg(ctx: dict, cfg: dict, *, proposal_required: bool) -> dict:
+    external = dict(ctx["run_manifest"].get("_platform_external_inputs") or {})
+    if not external:
+        return cfg
+    out = dict(cfg)
+    required = ("execution_receipt", "checkpoint", "result") + (("proposal",) if proposal_required else ())
+    missing = [role for role in required if role not in external]
+    if missing:
+        # The Engine worker should have intercepted the released role contract
+        # before invoking the adapter. Reaching here means platform/engine drift.
+        raise QualificationError("MODEL_EXTERNAL_EVIDENCE_ROLE_DRIFT:" + ",".join(missing))
+    for role in required:
+        out[role] = dict(external[role])
+    if "shared_execution_payload" in external:
+        out["shared_execution_payload"] = dict(external["shared_execution_payload"])
+    return out
+
+
 def build_fit_preregistration(
     ctx: dict,
     *,
@@ -41,9 +59,7 @@ def build_fit_preregistration(
 ):
     cfg = dict(ctx["run_manifest"].get(section_key) or {})
     ref = dict(cfg.get("preregistration") or {})
-    path, digest, spec = _json_ref(
-        ref, "RealSaS.ModelFitPreregistrationSpec.v1"
-    )
+    path, digest, spec = _json_ref(ref, "RealSaS.ModelFitPreregistrationSpec.v1")
     if str(spec.get("lane") or "") != lane:
         raise QualificationError("MODEL_PREREG_LANE_DRIFT")
     architecture = str(spec.get("architecture_id") or "")
@@ -64,18 +80,9 @@ def build_fit_preregistration(
         raise QualificationError("MODEL_PREREG_OUTPUT_CONTRACT_EMPTY")
 
     value = ModelFitPreregistrationIR(
-        lane,
-        architecture,
-        executor,
-        int(spec.get("random_seed", 0)),
-        str(source_path),
-        source_sha,
-        str(path),
-        digest,
-        tuple(sorted(actual.items())),
-        expected,
-        dict(spec.get("qualification_policy") or {}),
-        "",
+        lane, architecture, executor, int(spec.get("random_seed", 0)), str(source_path), source_sha,
+        str(path), digest, tuple(sorted(actual.items())), expected,
+        dict(spec.get("qualification_policy") or {}), "",
         metadata={
             "teacher_inference_inputs_allowed": False,
             "external_execution_is_not_product_authority": True,
@@ -83,16 +90,9 @@ def build_fit_preregistration(
             "v2_orchestration": True,
         },
     )
-    value = replace(
-        value,
-        preregistration_hash=model_fit_preregistration_hash(value),
-    )
+    value = replace(value, preregistration_hash=model_fit_preregistration_hash(value))
     root = ctx["run_root"] / "artifacts" / stage_id
-    return value, write_ir(
-        root / "model_fit_preregistration.json",
-        value,
-        authority_class=f"{lane}_FIT_PREREGISTRATION",
-    )
+    return value, write_ir(root / "model_fit_preregistration.json", value, authority_class=f"{lane}_FIT_PREREGISTRATION")
 
 
 def build_fit_execution(
@@ -104,41 +104,25 @@ def build_fit_execution(
     stage_id: str,
     proposal_required: bool,
 ):
-    cfg = dict(ctx["run_manifest"].get(section_key) or {})
+    cfg = _effective_execution_cfg(ctx, dict(ctx["run_manifest"].get(section_key) or {}), proposal_required=proposal_required)
     receipt_path, receipt_sha, receipt = _json_ref(
-        dict(cfg.get("execution_receipt") or {}),
-        "RealSaS.ModelFitExecutionReceipt.v1",
+        dict(cfg.get("execution_receipt") or {}), "RealSaS.ModelFitExecutionReceipt.v1",
     )
-    checkpoint = load_file_ref(
-        dict(cfg.get("checkpoint") or {}),
-        json_required=False,
-    )
-    result = load_file_ref(
-        dict(cfg.get("result") or {}),
-        json_required=False,
-    )
+    checkpoint = load_file_ref(dict(cfg.get("checkpoint") or {}), json_required=False)
+    result = load_file_ref(dict(cfg.get("result") or {}), json_required=False)
     checkpoint_sha = sha256_file(checkpoint)
     result_sha = sha256_file(result)
     proposal_path = None
     proposal_sha = None
     if proposal_required:
-        proposal_path = load_file_ref(
-            dict(cfg.get("proposal") or {}),
-            json_required=False,
-        )
+        proposal_path = load_file_ref(dict(cfg.get("proposal") or {}), json_required=False)
         proposal_sha = sha256_file(proposal_path)
 
-    if (
-        str(receipt.get("lane") or "") != lane
-        or str(receipt.get("status") or "") != "PASS"
-    ):
+    if str(receipt.get("lane") or "") != lane or str(receipt.get("status") or "") != "PASS":
         raise QualificationError("MODEL_EXECUTION_RECEIPT_STATUS_OR_LANE_INVALID")
     if str(receipt.get("architecture_id") or "") != prereg.architecture_id:
         raise QualificationError("MODEL_EXECUTION_ARCHITECTURE_DRIFT")
-    if (
-        str(receipt.get("preregistration_binding_hash") or "")
-        != prereg.preregistration_hash
-    ):
+    if str(receipt.get("preregistration_binding_hash") or "") != prereg.preregistration_hash:
         raise QualificationError("MODEL_EXECUTION_PREREG_BINDING_DRIFT")
     if str(receipt.get("model_source_sha256") or "") != prereg.model_source_sha256:
         raise QualificationError("MODEL_EXECUTION_SOURCE_DRIFT")
@@ -146,10 +130,7 @@ def build_fit_execution(
         raise QualificationError("MODEL_EXECUTION_CHECKPOINT_DRIFT")
     if str(receipt.get("result_sha256") or "") != result_sha:
         raise QualificationError("MODEL_EXECUTION_RESULT_DRIFT")
-    if (
-        proposal_required
-        and str(receipt.get("proposal_sha256") or "") != proposal_sha
-    ):
+    if proposal_required and str(receipt.get("proposal_sha256") or "") != proposal_sha:
         raise QualificationError("MODEL_EXECUTION_PROPOSAL_DRIFT")
     if bool(receipt.get("teacher_inference_inputs_used", False)):
         raise QualificationError("MODEL_EXECUTION_TEACHER_INFERENCE_INPUTS_USED")
@@ -160,23 +141,12 @@ def build_fit_execution(
 
     shared_binding = shared_execution_binding(cfg, prereg, lane, checkpoint_sha)
     execution = ModelFitExecutionIR(
-        lane,
-        prereg.architecture_id,
-        prereg.preregistration_hash,
-        prereg.model_source_sha256,
-        prereg.upstream_bindings,
-        str(receipt_path),
-        receipt_sha,
-        str(checkpoint),
-        checkpoint_sha,
-        str(result),
-        result_sha,
-        None if proposal_path is None else str(proposal_path),
-        proposal_sha,
+        lane, prereg.architecture_id, prereg.preregistration_hash, prereg.model_source_sha256,
+        prereg.upstream_bindings, str(receipt_path), receipt_sha, str(checkpoint), checkpoint_sha,
+        str(result), result_sha, None if proposal_path is None else str(proposal_path), proposal_sha,
         dict(prereg.qualification_policy),
         {
-            "status": "PASS",
-            "executor_kind": prereg.executor_kind,
+            "status": "PASS", "executor_kind": prereg.executor_kind,
             "teacher_inference_inputs_used": False,
             "receipt_payload_sha256": receipt_sha,
             "external_fit_executed": True,
@@ -188,19 +158,13 @@ def build_fit_execution(
         metadata={
             "receipt_metadata": dict(receipt.get("metadata") or {}),
             "v2_orchestration": True,
+            "platform_external_evidence": bool(ctx["run_manifest"].get("_platform_external_inputs")),
             **({"shared_cohort_binding": shared_binding} if shared_binding is not None else {}),
         },
     )
-    execution = replace(
-        execution,
-        execution_hash=model_fit_execution_hash(execution),
-    )
+    execution = replace(execution, execution_hash=model_fit_execution_hash(execution))
     root = ctx["run_root"] / "artifacts" / stage_id
-    return execution, write_ir(
-        root / "model_fit_execution.json",
-        execution,
-        authority_class=f"{lane}_FIT_EXECUTION_RECEIPT",
-    )
+    return execution, write_ir(root / "model_fit_execution.json", execution, authority_class=f"{lane}_FIT_EXECUTION_RECEIPT")
 
 
 def seal_model_checkpoint(
@@ -218,13 +182,8 @@ def seal_model_checkpoint(
         raise QualificationError("MODEL_CHECKPOINT_RESULT_BYTES_DRIFT")
 
     value = ModelCheckpointSealIR(
-        execution.lane,
-        execution.execution_hash,
-        str(path),
-        execution.checkpoint_sha256,
-        execution.result_sha256,
-        qualified_output_binding_hash,
-        "",
+        execution.lane, execution.execution_hash, str(path), execution.checkpoint_sha256,
+        execution.result_sha256, qualified_output_binding_hash, "",
         metadata={
             "architecture_id": execution.architecture_id,
             "external_fit_execution_binding_hash": execution.execution_hash,
@@ -232,13 +191,6 @@ def seal_model_checkpoint(
             "v2_orchestration": True,
         },
     )
-    value = replace(
-        value,
-        checkpoint_seal_hash=model_checkpoint_seal_hash(value),
-    )
+    value = replace(value, checkpoint_seal_hash=model_checkpoint_seal_hash(value))
     root = ctx["run_root"] / "artifacts" / stage_id
-    return value, write_ir(
-        root / "model_checkpoint_seal.json",
-        value,
-        authority_class=f"{execution.lane}_CHECKPOINT_SEAL",
-    )
+    return value, write_ir(root / "model_checkpoint_seal.json", value, authority_class=f"{execution.lane}_CHECKPOINT_SEAL")

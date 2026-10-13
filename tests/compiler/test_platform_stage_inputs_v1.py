@@ -5,7 +5,11 @@ from pathlib import Path
 import pytest
 
 from compiler.realsas_compiler_services.orchestrator import mainline
-from compiler.realsas_compiler_services.platform_worker.stage_inputs import hydrate_stage_inputs, graph_node_sha256
+from compiler.realsas_compiler_services.platform_worker.stage_inputs import (
+    graph_node_sha256,
+    hydrate_stage_inputs,
+    verify_source_inputs,
+)
 
 
 @pytest.fixture
@@ -104,3 +108,60 @@ def test_graph_node_hash_matches_go_and_ignores_navigation():
     assert digest == "49499b357bd5bb298ddd6a254d1e7f25a8586336039aa9e01fbd163eeda61703"
     stage.update(ordinal=99, title="navigation changed")
     assert graph_node_sha256(stage) == digest
+
+
+def test_external_cas_input_materializes_without_mutating_disk_manifest(tmp_path, monkeypatch):
+    monkeypatch.setenv("REALSAS_AUTHORITY_ROOT", str(tmp_path))
+    manifest = {"run_id": "EXTERNAL_INPUT_RUN", "subject_id": "S"}
+    disk_manifest = tmp_path / "sealed_run_manifest.json"
+    before = json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode()
+    disk_manifest.write_bytes(before)
+
+    data = b"immutable-external-checkpoint-bytes"
+    digest = hashlib.sha256(data).hexdigest()
+    ref = {
+        "id": "external-raw-import",
+        "role": "external:checkpoint",
+        "artifact_type": "RealSaS.ExternalCheckpoint",
+        "schema_version": "v1",
+        "semantic_sha256": "e" * 64,
+        "storage_key": "cas/sha256/" + digest,
+        "content_sha256": digest,
+        "size_bytes": len(data),
+    }
+
+    verify_source_inputs(
+        manifest=manifest,
+        inputs=[ref],
+        read_object=lambda _: data,
+    )
+
+    bound = manifest["_platform_external_inputs"]["checkpoint"]
+    materialized = Path(bound["path"])
+    assert materialized.read_bytes() == data
+    assert bound["sha256"] == digest
+    assert materialized.parent.name == "external_inputs"
+    assert disk_manifest.read_bytes() == before
+
+
+def test_duplicate_external_role_fails_closed(tmp_path, monkeypatch):
+    monkeypatch.setenv("REALSAS_AUTHORITY_ROOT", str(tmp_path))
+    data = b"same-role"
+    digest = hashlib.sha256(data).hexdigest()
+    ref = {
+        "id": "external-a",
+        "role": "external:checkpoint",
+        "artifact_type": "RealSaS.ExternalCheckpoint",
+        "schema_version": "v1",
+        "semantic_sha256": "a" * 64,
+        "storage_key": "cas/sha256/" + digest,
+        "content_sha256": digest,
+        "size_bytes": len(data),
+    }
+    duplicate = {**ref, "id": "external-b", "semantic_sha256": "b" * 64}
+    with pytest.raises(RuntimeError, match="ENGINE_SOURCE_INPUT_ROLE_INVALID"):
+        verify_source_inputs(
+            manifest={"run_id": "EXTERNAL_DUPLICATE_RUN"},
+            inputs=[ref, duplicate],
+            read_object=lambda _: data,
+        )

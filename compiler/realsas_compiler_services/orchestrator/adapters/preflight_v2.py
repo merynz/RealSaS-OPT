@@ -123,7 +123,8 @@ def audit_source_mechanics_stage(ctx:dict)->dict:
     if scene_binding is not None:
         diagnostics.update({"source_scene_nodes":scene_binding["node_count"],
                             "source_scene_bones":scene_binding["bone_count"],
-                            "source_scene_attachment_relations":scene_binding["attachment_relation_count"]})
+                            "source_scene_parent_relations":scene_binding["parent_relation_count"],
+                            "source_scene_bone_parent_relations":scene_binding["bone_parent_relation_count"]})
     return {"status":"PASS","outputs":[write_ir(root/"source_mechanical_audit.json",audit,authority_class="SOURCE_MECHANICAL_AUDIT")],
         "diagnostics":diagnostics}
 
@@ -244,7 +245,6 @@ def qualify_observation_contract_stage(ctx:dict)->dict:
         "full_subject_admission_hash":admission.admission_hash,
         "camera_set_hash":cameras.camera_set_hash,
         "unknown_cannot_veto_positive":True,
-        "source_scene_bind_admitted":bool((admission.metadata or {}).get("source_scene_admission")),
     })
     root=ctx["run_root"]/"artifacts"/ctx["stage"]["id"]
     return {"status":"PASS","outputs":[write_ir(root/"qualified_observation_set.json",value,authority_class="QUALIFIED_OBSERVATION_SET")],
@@ -267,8 +267,7 @@ def qualify_normalization_domain_stage(ctx:dict)->dict:
     value=NormalizationDomainIR(
         str(observation_payload["observation_set_hash"]),cameras.camera_set_hash,center,half,
         (-1.0,-1.0,-1.0),(1.0,1.0,1.0),frame,"",
-        metadata={"normalization_policy":"EXACT_MANIFEST_OBJECT_CUBE_V1","camera_refit_performed":False,
-                  "source_scene_bind_admitted":bool(observation_payload.get("metadata",{}).get("source_scene_bind_admitted"))},
+        metadata={"normalization_policy":"EXACT_MANIFEST_OBJECT_CUBE_V1","camera_refit_performed":False},
     )
     value=replace(value,normalization_hash=normalization_domain_hash(value))
     root=ctx["run_root"]/"artifacts"/ctx["stage"]["id"]

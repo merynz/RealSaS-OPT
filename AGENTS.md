@@ -139,6 +139,15 @@ Runtime consumes qualified product artifacts. It may not create a second topolog
 
 `canonical/TRUTH_CORPUS_V1_STATUS_20261004.md` remains corpus authority. Current status is `SEALED_RAW__STRUCTURALLY_AUDITED__ADMISSION_PENDING`. Do not overclaim it as training-ready canonical truth.
 
+The user authorized diverse Fit8 as the next program. Read
+`canonical/FIT8_DIVERSITY_SELECTION_V1.json`, `docs/corpus/FIT8_ADMISSION.md` and
+`docs/platform/PRODUCTIZATION.md`. Eight source identities are verified; source
+import, pose/scene, attachment, first render and lineage admission are pending.
+Knight stays the separate regression witness. Shared model parameters and common
+contracts are required; no per-character production fix or silent substitution.
+Do not start optimizer work from raw hash verification or claim generic/unseen
+success from the roster. Stateful execution still requires the existing Go path.
+
 ## Claim discipline
 
 A FIT/witness PASS is scoped evidence for the exact subject/apparatus. Engineering CI is not unseen/generalization evidence. Knight FIT1 teacher-relative mechanics closure is not unseen/generalization or product authority.

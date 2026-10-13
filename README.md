@@ -9,6 +9,8 @@ RealSaS compiles qualified multi-view 2D artwork into an editable 2D/2.5D puppet
 | Need | Entry |
 |---|---|
 | Current status and next work | [CURRENT_STATE.md](CURRENT_STATE.md) |
+| Diverse Fit8 and first-render admission | [Fit8 admission](docs/corpus/FIT8_ADMISSION.md) |
+| Generic product and system evolution | [Product transition](docs/platform/PRODUCTIZATION.md) |
 | Operator commands and component replacement | [Execution lanes](docs/platform/EXECUTION_LANES.md) |
 | Agent operating rules | [AGENTS.md](AGENTS.md) |
 | Live architecture and typed dataflow | [Live map](docs/platform/DYNAMIC_ARCHITECTURE.md) — `python tools/realsas_architecture.py serve` |

@@ -6,6 +6,8 @@
 |---|---|
 | Resume development | [Current state](../CURRENT_STATE.md), then [Agent contract](../AGENTS.md) |
 | Replace a model/Compiler component or evolve its DAG | [Execution lanes](platform/EXECUTION_LANES.md) |
+| Admit the diverse Fit8 sources and first renders | [Fit8 admission](corpus/FIT8_ADMISSION.md) |
+| Evolve the repo into a generic product/system | [Product transition](platform/PRODUCTIZATION.md) |
 | Find an implementation | [Repository map](../REPOSITORY_MAP.md) and [System ownership](../SYSTEM_INDEX.md) |
 | Change architecture | [Compiler/Platform boundary](platform/adr/0002-compiler-platform-boundary.md), [Go control plane](platform/adr/0003-go-control-plane.md) |
 | Contribute safely | [Contribution rules](../CONTRIBUTING.md) and [Structure policy](repository/STRUCTURE_POLICY.md) |

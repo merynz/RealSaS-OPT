@@ -1,0 +1,60 @@
+{
+  "a100_executed": false,
+  "actual_optimizer_steps": 16,
+  "all_eight_evaluated": true,
+  "binding_sha256": "4cc7962d3a420595d08b10c8ddd336e10042304780cf34419ef7bc3162eb5d70",
+  "checkpoint_payload_sha256": "6b34e6f4e868ae8dc93006d30fcd6c0b114364ea84b952c6dcc606044e707fe9",
+  "cpu_exact_resume_test": "tests/iris/test_shared_cohort_v1.py",
+  "device": "cpu",
+  "fit8_pass_claimed": false,
+  "go_qualification_claimed": false,
+  "gpu_name": null,
+  "production_architecture": {
+    "attention_heads": 8,
+    "camera_embed_dim": 96,
+    "camera_feature_dim": 13,
+    "dropout": 0.0,
+    "feedforward_multiplier": 3,
+    "field_hidden_dim": 192,
+    "field_residual_blocks": 4,
+    "image_token_dim": 384,
+    "plane_channels": 64,
+    "plane_size": 32,
+    "scene_dim": 256,
+    "scene_layers": 4
+  },
+  "schema": "RealSaS.SharedIrisRuntimePreflight.v1",
+  "status": "PASS",
+  "subject_exposures": {
+    "fit8_bat_v1": 2,
+    "fit8_george_v1": 2,
+    "fit8_greenblob_v1": 2,
+    "fit8_horse_v1": 2,
+    "fit8_shark_v1": 2,
+    "fit8_snake_v1": 2,
+    "fit8_spider_v1": 2,
+    "fit8_trex_v1": 2
+  },
+  "trainable_parameters": 5094882,
+  "weights_exactly_restored": true,
+  "date": "2026-10-13",
+  "authority_class": "SOURCE_ENGINEERING_PREFLIGHT__NOT_ATTEMPT_OR_QUALIFICATION",
+  "source": {
+    "models/iris/training/cohort_v1.py": "cd32a431603b818c715feb546d4016f1a3c6fba8a68c9f1e53dcc003d3e29b5d",
+    "models/iris/v4/scene_first_signed_v4.py": "e9c2432ead4b6fa13ecad5a32837ea9cbb9c9cd38bd523cc70adef9ed8d48a1c",
+    "models/iris/v5/source_signed_field_v5.py": "ae109ec57c9e0b74ff1e11fccc573a944449b67ecd635e3a105878f8b5115c10",
+    "models/iris/v5/direct_fstar_fit_v5.py": "1e9370bd97b3dcf7263764e2c6711ce7ee51e2195a941243f0adf1030c8c811e",
+    "models/iris/v5/objective_tail_repair_v5.py": "e37173c6aacac3c93b8d6255659bc5280fbd53368c589d8932edc658be2f4168"
+  },
+  "all_step_losses_finite": true,
+  "all_step_gradients_nonzero": true,
+  "input_manifest_sha256": "3e4218240a2ac13af5482a5bfb246152533b6771e2ff4a5d17d987938875396d",
+  "shared_fit_policy_sha256": "329c3e7966a9974695f6988d03c9838a33d0c24076c94c37dde67e6fb8931ece",
+  "physical_a100_validation": "RUN_ALL_REQUIRED",
+  "source_engineering_tests": {
+    "exact_cpu_resume": "PASS",
+    "code_input_policy_drift_rejection": "PASS",
+    "out_of_range_prediction_gradient": "PASS",
+    "orphan_and_corrupted_checkpoint": "PASS"
+  }
+}

@@ -67,6 +67,8 @@ def audit_source_mechanics_stage(ctx:dict)->dict:
 
     rasters=_observation_rows(ctx,"source_rasters","image")
     masks=_observation_rows(ctx,"source_foreground_masks","mask")
+    from compiler.realsas_compiler_services.orchestrator.adapters.iris_observation_binding_v1 import iris_observation_binding
+    iris_binding=iris_observation_binding(ctx,source_hashes,rasters,masks)
     views=[]
     for vi in range(8):
         _rrow,raster_path=rasters[vi]
@@ -94,7 +96,8 @@ def audit_source_mechanics_stage(ctx:dict)->dict:
             "all_views_meet_nonzero_safety_margin":passed,
             "teacher_truth_used":False,
         },"",
-        metadata={"controlled_full_subject_audit":True,"unknown_out_of_frame_is_not_negative":True},
+        metadata={"controlled_full_subject_audit":True,"unknown_out_of_frame_is_not_negative":True,
+                  **({"iris_observation_binding":iris_binding} if iris_binding is not None else {})},
     )
     audit=replace(audit,audit_hash=source_mechanical_audit_hash(audit))
     if not passed:

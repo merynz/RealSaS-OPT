@@ -21,6 +21,8 @@ from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import 
 
 _ALLOWED_EXECUTORS = {"EXTERNAL_GPU_JOB_V1", "LOCAL_PINNED_GPU_JOB_V1"}
 
+from compiler.realsas_compiler_services.orchestrator.adapters.shared_iris_execution_v1 import shared_execution_binding
+
 
 def _json_ref(ref: dict, expected_schema: str):
     path = resolved_path(str(ref.get("path") or ""))
@@ -156,6 +158,7 @@ def build_fit_execution(
     if declared and declared != actual:
         raise QualificationError("MODEL_EXECUTION_UPSTREAM_BINDING_DRIFT")
 
+    shared_binding = shared_execution_binding(cfg, prereg, lane, checkpoint_sha)
     execution = ModelFitExecutionIR(
         lane,
         prereg.architecture_id,
@@ -185,6 +188,7 @@ def build_fit_execution(
         metadata={
             "receipt_metadata": dict(receipt.get("metadata") or {}),
             "v2_orchestration": True,
+            **({"shared_cohort_binding": shared_binding} if shared_binding is not None else {}),
         },
     )
     execution = replace(

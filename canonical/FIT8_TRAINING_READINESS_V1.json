@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.FIT8TrainingReadiness.v1",
   "date": "2026-10-13",
-  "status": "BLOCKED__SOURCE_ADMISSION_AND_SHARED_TRAINER_PENDING",
+  "status": "SHARED_IRIS_IMPLEMENTED__A100_AND_GO_QUALIFICATION_PENDING",
   "authority_class": "NOTEBOOK_DELIVERY_READINESS__NOT_LIVE_ATTEMPT_STATE",
   "source_inspection_base_sha": "74929cb7ea5d7a7a3ad5917e60ee8e9093f23e78",
   "selection": "canonical/FIT8_DIVERSITY_SELECTION_V1.json",
@@ -9,7 +9,12 @@
   "source_rest_engineering_evidence": "canonical/FIT8_SOURCE_REST_ENGINEERING_SMOKE_20261013.json",
   "admission_contract": "docs/corpus/FIT8_ADMISSION.md",
   "subject_count": 8,
-  "model_order": ["IRIS", "TESSA", "AXIS", "MIRA"],
+  "model_order": [
+    "IRIS",
+    "TESSA",
+    "AXIS",
+    "MIRA"
+  ],
   "fit_contract": {
     "same_architecture_across_subjects": true,
     "shared_parameter_set_per_model": true,
@@ -28,18 +33,22 @@
     "qualified_subject_count": 0,
     "qualified_training_truth_count": 0,
     "source_native_render_parity_claimed": false,
-    "typed_stage_admission_binding_status": "PENDING"
+    "typed_stage_admission_binding_status": "IMPLEMENTED__LIVE_GO_CONSUMPTION_PENDING",
+    "iris_bind_observation_prepared_subject_count": 8,
+    "iris_bind_observation_view_count": 64,
+    "iris_bind_observation_resolution": 1024,
+    "iris_bind_observation_court": "canonical/FIT8_IRIS_BIND_OBSERVATION_COURT_20261013.json"
   },
   "required_delivery_gates": {
-    "eight_subject_import_pose_scene_first_render_admission": "PENDING_INDEPENDENT_PARITY_AND_TYPED_BINDINGS",
+    "eight_subject_import_pose_scene_first_render_admission": "PASS_SCOPED_IRIS_BIND_OBSERVATIONS__FULL_NATIVE_TRUTH_PENDING",
     "eight_subject_training_truth_and_lineage_admission": "PENDING",
     "released_go_cohort_attempt_and_shared_checkpoint_binding": "PENDING",
-    "common_eight_subject_iris_training_entrypoint": "PENDING",
-    "frozen_shared_training_and_evaluation_policy": "PENDING",
-    "hash_bound_embedded_notebook_source_and_inputs": "PENDING",
+    "common_eight_subject_iris_training_entrypoint": "IMPLEMENTED__REAL_CPU_OPTIMIZER_PREFLIGHT_PASS",
+    "frozen_shared_training_and_evaluation_policy": "FROZEN_SHARED_C_POLICY",
+    "hash_bound_embedded_notebook_source_and_inputs": "BUILDER_IMPLEMENTED__DELIVERED_FILE_PENDING",
     "clean_runtime_a100_run_all_preflight": "PENDING",
-    "real_training_log_and_atomic_resume_preflight": "PENDING",
-    "persistent_result_output_preflight": "PENDING"
+    "real_training_log_and_atomic_resume_preflight": "PASS_CPU_ENGINEERING__ACTUAL_A100_REQUIRED",
+    "persistent_result_output_preflight": "HASH_VERIFIED_COPY_IMPLEMENTED__DRIVE_A100_RUNTIME_REQUIRED"
   },
   "model_source_findings": [
     {
@@ -73,12 +82,29 @@
     "embedded_frozen_hash_bound_source": true,
     "live_github_checkout_or_token_required": false,
     "active_work_and_cache_root": "/content",
-    "drive_persists": ["input_shards", "atomic_checkpoints", "results"],
-    "logs": ["real_training_steps_and_losses", "per_subject_metrics", "stage", "elapsed_and_eta", "gpu_memory"],
-    "checkpoint_contains": ["model", "optimizer", "amp", "rng", "progress", "exact_code_input_policy_bindings"],
+    "drive_persists": [
+      "input_shards",
+      "atomic_checkpoints",
+      "results"
+    ],
+    "logs": [
+      "real_training_steps_and_losses",
+      "per_subject_metrics",
+      "stage",
+      "elapsed_and_eta",
+      "gpu_memory"
+    ],
+    "checkpoint_contains": [
+      "model",
+      "optimizer",
+      "amp",
+      "rng",
+      "progress",
+      "exact_code_input_policy_bindings"
+    ],
     "atomic_checkpoint_and_resume": true,
     "compact_persistent_result_archive": true,
-    "preflight_evidence": null,
+    "preflight_evidence": "canonical/FIT8_IRIS_CPU_RUNTIME_PREFLIGHT_20261013.json",
     "path": null,
     "sha256": null,
     "download_url": null
@@ -87,5 +113,11 @@
   "training_started": false,
   "fit8_pass_claimed": false,
   "unseen_claimed": false,
-  "product_pass_claimed": false
+  "product_pass_claimed": false,
+  "shared_iris_entrypoint": "models/iris/training/cohort_v1.py",
+  "shared_iris_training_policy": "canonical/FIT8_IRIS_SHARED_TRAINING_POLICY_V1.json",
+  "notebook_builder": "tools/notebooks/build_iris_cohort_v1.py",
+  "implementation_contract": "docs/corpus/IRIS_SHARED_COHORT_RUNNER_V1.md",
+  "scientific_fit_started": false,
+  "cpu_engineering_optimizer_steps": 16
 }

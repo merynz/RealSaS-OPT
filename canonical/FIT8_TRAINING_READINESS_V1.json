@@ -1,9 +1,9 @@
 {
   "schema": "RealSaS.FIT8TrainingReadiness.v1",
   "date": "2026-10-13",
-  "status": "SHARED_IRIS_IMPLEMENTED__A100_AND_GO_QUALIFICATION_PENDING",
+  "status": "IRIS_A100_RESEARCH_CAPSULE_DELIVERED__FULL_READY_PENDING",
   "authority_class": "NOTEBOOK_DELIVERY_READINESS__NOT_LIVE_ATTEMPT_STATE",
-  "source_inspection_base_sha": "74929cb7ea5d7a7a3ad5917e60ee8e9093f23e78",
+  "source_inspection_base_sha": "96e449ac045b17b24f9946b575031e38c694183b",
   "selection": "canonical/FIT8_DIVERSITY_SELECTION_V1.json",
   "source_identity_evidence": "canonical/FIT8_SOURCE_IDENTITY_AUDIT_20261013.json",
   "source_rest_engineering_evidence": "canonical/FIT8_SOURCE_REST_ENGINEERING_SMOKE_20261013.json",
@@ -45,8 +45,8 @@
     "released_go_cohort_attempt_and_shared_checkpoint_binding": "PENDING",
     "common_eight_subject_iris_training_entrypoint": "IMPLEMENTED__REAL_CPU_OPTIMIZER_PREFLIGHT_PASS",
     "frozen_shared_training_and_evaluation_policy": "FROZEN_SHARED_C_POLICY",
-    "hash_bound_embedded_notebook_source_and_inputs": "BUILDER_IMPLEMENTED__DELIVERED_FILE_PENDING",
-    "clean_runtime_a100_run_all_preflight": "PENDING",
+    "hash_bound_embedded_notebook_source_and_inputs": "PASS_EXACT_MERGED_SOURCE_CAPSULE__SEALED_DRIVE_INPUT_PACKET",
+    "clean_runtime_a100_run_all_preflight": "PASS_COLD_CPU_CAPSULE_ENGINEERING__ACTUAL_A100_RUN_ALL_REQUIRED",
     "real_training_log_and_atomic_resume_preflight": "PASS_CPU_ENGINEERING__ACTUAL_A100_REQUIRED",
     "persistent_result_output_preflight": "HASH_VERIFIED_COPY_IMPLEMENTED__DRIVE_A100_RUNTIME_REQUIRED"
   },
@@ -104,10 +104,18 @@
     ],
     "atomic_checkpoint_and_resume": true,
     "compact_persistent_result_archive": true,
-    "preflight_evidence": "canonical/FIT8_IRIS_CPU_RUNTIME_PREFLIGHT_20261013.json",
-    "path": null,
-    "sha256": null,
-    "download_url": null
+    "preflight_evidence": "canonical/FIT8_IRIS_NOTEBOOK_PREFLIGHT_20261013.json",
+    "path": "RealSaS_IRIS_Fit8_A100_Run_All.ipynb",
+    "sha256": "02bc1b62ffbfcb9f4619c7c7a4b527d87bbaba17295e58c81a92fdcf2e5df488",
+    "download_url": "https://drive.google.com/file/d/1cv-u3odtgnIfAgG_8nq1Qjn0UPfYbxGf/view?usp=drivesdk",
+    "source_commit": "96e449ac045b17b24f9946b575031e38c694183b",
+    "drive_file_id": "1cv-u3odtgnIfAgG_8nq1Qjn0UPfYbxGf",
+    "library_file_id": "libfile_819c58977a148191aac97a3056b54e13",
+    "capsule_id": "0308126c5eaef67f1a49a0a0b3785906e0b4c37c88e2c3a524ccdc978893336a",
+    "source_capsule_sha256": "c165f50072ed27c8298006fb6877a1097e4b2dfe8fa6a1edf18b4c5f64dc0321",
+    "input_archive_sha256": "fadc465b169f47cb62226dfe9aefa74326c9193ce09205ff30f82e0fdf13743b",
+    "physical_a100_executed_before_delivery": false,
+    "actual_a100_preflight_runs_before_training": true
   },
   "a100_fit_notebook_ready": false,
   "training_started": false,
@@ -119,5 +127,8 @@
   "notebook_builder": "tools/notebooks/build_iris_cohort_v1.py",
   "implementation_contract": "docs/corpus/IRIS_SHARED_COHORT_RUNNER_V1.md",
   "scientific_fit_started": false,
-  "cpu_engineering_optimizer_steps": 16
+  "cpu_engineering_optimizer_steps": 16,
+  "delivery_scope": "EXECUTABLE_SHARED_IRIS_FSTAR_RESEARCH_CAPSULE__NOT_FULL_QUALIFIED_READY",
+  "full_native_truth_admitted": false,
+  "live_go_cohort_qualification_completed": false
 }

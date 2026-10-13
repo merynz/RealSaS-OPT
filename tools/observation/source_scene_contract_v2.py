@@ -107,6 +107,66 @@ def prepare_animation_free_gltf(source: Path, destination: Path) -> dict:
     }
 
 
+def prepare_bind_rest_gltf(source: Path, destination: Path) -> dict:
+    """Declare a hierarchy anchor for importers; retain authored inverse binds.
+
+    An absent optional skin.skeleton is legal glTF. Some importers otherwise
+    discard the common root's inverse-bind translation. The hint below locates
+    an existing ancestor; no node, joint, buffer, weight or transform is repaired.
+    """
+    receipt = prepare_animation_free_gltf(source, destination)
+    document, chunks = _json_and_chunks(destination)
+    nodes = document.get("nodes", [])
+    parents = {}
+    for index, node in enumerate(nodes):
+        for child in node.get("children", []):
+            _require(0 <= child < len(nodes) and child not in parents,
+                     "SOURCE_GLTF_INVALID_PARENT_GRAPH")
+            parents[child] = index
+
+    def chain(index):
+        result = []
+        while True:
+            _require(index not in result, "SOURCE_GLTF_PARENT_CYCLE")
+            result.append(index)
+            if index not in parents:
+                return result
+            index = parents[index]
+
+    for index in range(len(nodes)):
+        chain(index)
+    hints = []
+    for index, skin in enumerate(document.get("skins", [])):
+        joints = skin["joints"]
+        _require(bool(joints) and all(0 <= j < len(nodes) for j in joints),
+                 "SOURCE_GLTF_SKIN_JOINTS")
+        paths = [chain(j) for j in joints]
+        if "skeleton" in skin:
+            anchor = skin["skeleton"]
+            _require(all(anchor in p for p in paths), "SOURCE_GLTF_SKELETON_NOT_ANCESTOR")
+            operation = "AUTHORED_ANCHOR_RETAINED"
+        else:
+            common = [j for j in paths[0] if all(j in p for p in paths)]
+            _require(bool(common), "SOURCE_GLTF_SKIN_HAS_NO_COMMON_ANCESTOR")
+            anchor = common[0]
+            if anchor in joints and anchor in parents:
+                anchor = parents[anchor]
+            skin["skeleton"] = anchor
+            operation = "EXISTING_ANCESTOR_HINT_DECLARED"
+        hints.append({"skin_index": index, "skeleton_node": anchor, "operation": operation})
+    encoded = json.dumps(document, separators=(",", ":"), ensure_ascii=False).encode()
+    if destination.suffix.lower() == ".gltf":
+        destination.write_bytes(encoded)
+    else:
+        encoded += b" " * (-len(encoded) % 4)
+        body = struct.pack("<II", len(encoded), 0x4E4F534A) + encoded
+        body += b"".join(struct.pack("<II", len(c), k) + c for k, c in chunks)
+        destination.write_bytes(struct.pack("<III", 0x46546C67, 2, len(body) + 12) + body)
+    receipt.update(operation="ANIMATION_FREE_BIND_IMPORT__EXISTING_ANCESTOR_HINT",
+                   skeleton_hints=hints, derivative_sha256=sha256(destination))
+    return receipt
+
+
 def _matrix(value: list, label: str) -> np.ndarray:
     matrix = np.asarray(value, dtype=np.float64)
     _require(matrix.shape == (4, 4) and bool(np.isfinite(matrix).all()), f"SCENE_MATRIX:{label}")

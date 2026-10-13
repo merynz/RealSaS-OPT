@@ -71,6 +71,9 @@ from compiler.realsas_compiler_services.orchestrator.adapters.model_execution_co
     build_fit_preregistration,
     seal_model_checkpoint,
 )
+from compiler.realsas_compiler_services.orchestrator.adapters.shared_iris_execution_v1 import (
+    shared_profile_policy,validate_shared_subject_input,value_hash as shared_value_hash,
+)
 
 
 def _array_hash(array: np.ndarray) -> str:
@@ -330,7 +333,9 @@ def preregister_iris_fit_stage(ctx: dict) -> dict:
             },
         }
 
-    _dense_ref, dense_policy_sha, dense_policy = _iris_dense_coverage_policy(ctx)
+    shared_profile=shared_profile_policy(ctx)
+    if shared_profile is None:
+        _dense_ref, dense_policy_sha, dense_policy = _iris_dense_coverage_policy(ctx)
     prereg, output = build_fit_preregistration(
         ctx,
         lane="IRIS",
@@ -341,6 +346,12 @@ def preregister_iris_fit_stage(ctx: dict) -> dict:
         },
         stage_id="09_IRIS_FIT_PREREGISTERED",
     )
+    if shared_profile is not None:
+        shared_profile_policy(ctx,prereg)
+        validate_shared_subject_input(ctx)
+        return {"status":"PASS","outputs":[output],"diagnostics":{
+            "preregistration_hash":prereg.preregistration_hash,
+            "architecture_id":prereg.architecture_id,**shared_profile}}
     _validate_dense_coverage_prereg(
         prereg,
         policy_sha256=dense_policy_sha,
@@ -454,7 +465,9 @@ def execute_iris_fit_stage(ctx: dict) -> dict:
             },
         }
 
-    _dense_ref, dense_policy_sha, dense_policy = _iris_dense_coverage_policy(ctx)
+    shared_profile=shared_profile_policy(ctx)
+    if shared_profile is None:
+        _dense_ref, dense_policy_sha, dense_policy = _iris_dense_coverage_policy(ctx)
     prereg = model_fit_preregistration_from_dict(
         stage_output_payload(
             ctx,
@@ -462,6 +475,19 @@ def execute_iris_fit_stage(ctx: dict) -> dict:
             "RealSaS.ModelFitPreregistrationIR.v1",
         )
     )
+    if shared_profile is not None:
+        shared_profile_policy(ctx,prereg)
+        manifest=validate_shared_subject_input(ctx)
+        execution,output=build_fit_execution(ctx,lane="IRIS",section_key="iris_fit",
+            prereg=prereg,stage_id="10_IRIS_FIT",proposal_required=False)
+        bundle=load_file_ref(ctx["run_manifest"]["iris_fit"]["shared_cohort"],
+                            expected_schema="RealSaS.SharedIrisExecutionImportBundle.v1")
+        actual=load_file_ref(bundle["cohort_manifest"],expected_schema="RealSaS.SharedIrisCohortShards.v1")
+        if shared_value_hash(actual)!=shared_value_hash(manifest):
+            raise QualificationError("SHARED_IRIS_EXECUTION_MANIFEST_DRIFT")
+        return {"status":"PASS","outputs":[output],"diagnostics":{
+            "execution_hash":execution.execution_hash,"checkpoint_sha256":execution.checkpoint_sha256,
+            "product_authority_minted":False,**shared_profile}}
     _validate_dense_coverage_prereg(
         prereg,
         policy_sha256=dense_policy_sha,

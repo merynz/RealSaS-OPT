@@ -179,6 +179,14 @@ for those gates or mark the first compiled puppet render accepted.
 
 ## Four-model notebook preparation
 
+The common source fixes, scoped IRIS bind court, shared runner, notebook builder
+and Go evidence consumers are now described in
+[IRIS_SHARED_COHORT_RUNNER_V1.md](IRIS_SHARED_COHORT_RUNNER_V1.md).
+The eight controlled bind observations pass the independent IRIS preparation
+court. This does not close the full native-motion/material/lineage truth courts
+above. A real 16-step CPU prefix and exact resume tests validate engineering;
+physical A100 and live Go qualification retain their separate gates.
+
 [FIT8_TRAINING_READINESS_V1.json](../../canonical/FIT8_TRAINING_READINESS_V1.json)
 is the delivery checklist, not a second Attempt/workflow ledger. Its initial
 status is blocked. Public fit order remains IRIS → TESSA → AXIS → MIRA, with one

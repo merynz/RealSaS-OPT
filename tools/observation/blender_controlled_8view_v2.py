@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from tools.observation import blender_controlled_8view_v1 as orbit  # noqa: E402
 from tools.observation.source_scene_contract_v2 import (  # noqa: E402
-    prepare_animation_free_gltf, sha256, validate_imported_scene_snapshot,
+    prepare_bind_rest_gltf, sha256, validate_imported_scene_snapshot,
 )
 
 
@@ -56,9 +56,10 @@ def import_rest(source: Path, output: Path) -> dict:
                    "native_animation_inventory_status": "PENDING_SEPARATE_ANIMATED_IMPORT"}
     elif source.suffix.lower() in (".gltf", ".glb"):
         derivative = output / "rest_import_source" / source.name
-        receipt = prepare_animation_free_gltf(source, derivative)
-        bpy.ops.import_scene.gltf(filepath=str(derivative))
-        receipt["importer_options"] = {"filepath_role": "EXPLICIT_ANIMATION_FREE_DERIVATIVE"}
+        receipt = prepare_bind_rest_gltf(source, derivative)
+        bpy.ops.import_scene.gltf(filepath=str(derivative), guess_original_bind_pose=True)
+        receipt["importer_options"] = {"filepath_role": "EXPLICIT_BIND_REST_DERIVATIVE",
+                                       "guess_original_bind_pose": True}
     else:
         raise RuntimeError("SOURCE_REST_IMPORT_UNSUPPORTED_FORMAT")
     # No frame0/action evaluation is permitted in this default/rest import.
@@ -68,8 +69,14 @@ def import_rest(source: Path, output: Path) -> dict:
         if obj.type == "ARMATURE":
             obj.data.pose_position = "REST"
     bpy.context.view_layer.update()
+    helpers = {bone.custom_shape for obj in bpy.context.scene.objects if obj.type == "ARMATURE"
+               for bone in obj.pose.bones if bone.custom_shape is not None}
+    for helper in helpers:
+        helper.hide_render = True
+        helper["realsas_import_helper_role"] = "ARMATURE_CUSTOM_SHAPE"
+    receipt["excluded_import_controls"] = sorted(obj.name for obj in helpers)
     receipt["raw_source_mutated"] = False
-    receipt["pose_policy"] = "SOURCE_DEFAULT_TRANSFORMS__ARMATURE_REST__NO_ANIMATION"
+    receipt["pose_policy"] = "SOURCE_BIND_REST__NO_ANIMATION"
     receipt["source_bind_parity_claimed"] = False
     return receipt
 
@@ -90,6 +97,7 @@ def scene_snapshot(source_sha: str, normalization: Matrix) -> dict:
             "matrix_parent_inverse": matrix_rows(obj.matrix_parent_inverse),
             "node_to_canonical": matrix_rows(normalization @ world),
             "hide_render": bool(obj.hide_render),
+            "import_helper_role": obj.get("realsas_import_helper_role"),
             "animation_capture_scope": "OBJECT_DATA_AND_SHAPE_KEYS",
             **animation_counts(obj),
         })
@@ -188,6 +196,8 @@ def configure(resolution):
     scene.cycles.samples = 16
     scene.cycles.seed = 0
     scene.cycles.use_denoising = False
+    scene.cycles.pixel_filter_type = "BOX"
+    scene.cycles.filter_width = 1.0
     scene.render.resolution_x = scene.render.resolution_y = resolution
     scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = "PNG"
@@ -309,7 +319,7 @@ def main():
         "materializer_sha256": sha256(Path(__file__)),
         "scene_contract_sha256": sha256(Path(__file__).with_name("source_scene_contract_v2.py")),
         "shared_orbit_materializer_sha256": sha256(Path(orbit.__file__)),
-        "pose_address": "SOURCE_DEFAULT_REST", "native_frame0_is_rest_assumed": False,
+        "pose_address": "SOURCE_BIND_REST", "native_frame0_is_rest_assumed": False,
         "source_scene_snapshot": {"sha256": sha256(snapshot_path), "file": snapshot_path.name},
         "internal_consistency": internal, "frame_report": frame, "resolution": args.resolution,
         "mesh_objects": orbit.mesh_rows(meshes, by_object),

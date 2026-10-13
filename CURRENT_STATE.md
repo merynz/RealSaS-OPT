@@ -43,15 +43,39 @@ root/rigid attachment and shader-alpha checks run in CI. The v1 Knight producer
 and released Compiler DAG are unchanged. Candidates are not independently
 source/native-pose/material matched or admitted through Stage03–08.
 
-Four-model notebook delivery is tracked in
-`canonical/FIT8_TRAINING_READINESS_V1.json`, explicitly blocked on source/truth
-admission, released cohort bindings and the real shared trainers/preflight.
-The first requested notebook is IRIS A100: clean Run All, Drive mount, embedded
-frozen hash-bound source, real compact logs, atomic checkpoint/resume and
-persistent results. No placeholder or CPU preparation notebook is a fit delivery;
-no optimizer or live Attempt has been started.
+The common importer now handles absent glTF skin-root hints and armature
+custom-shape helper geometry. Independent raw glTF/ufbx bind geometry and
+pixel-square reference courts pass all eight 1024 px observation sets (64 views);
+maximum relative vertex error is 2.79e-6 and maximum mask gap is 1.42 px.
+Evidence: `canonical/FIT8_IRIS_BIND_OBSERVATION_COURT_20261013.json`.
+This is scoped IRIS image-derived F* preparation, not full native-motion/lit
+material truth admission or live Go Stage03–08 qualification.
+
+Shared IRIS trainer, input preparation, notebook builder and existing contained
+decoder/per-view Compiler court export are implemented. One V4/TP64 model and
+optimizer use the Knight-selected C objective across all eight; a real CPU
+engineering prefix ran 16 steps with exact checkpoint restoration. Deterministic
+CPU resumed/uninterrupted training, drift rejection and corruption tests pass.
+The policy freezes 48,000 shared steps, 6,000 per subject. See
+`docs/corpus/IRIS_SHARED_COHORT_RUNNER_V1.md`. No scientific Fit8 Attempt or
+product qualification was created by engineering tests.
+
+Four-model delivery remains tracked in `canonical/FIT8_TRAINING_READINESS_V1.json`.
+The first requested IRIS A100 capsule mounts Drive, embeds exact source and input
+identities, loads one verified Drive input ZIP, logs actual training and persists
+atomic checkpoints/results. Physical A100 preflight runs before production fit
+at Run All; CPU evidence does not satisfy it. Go consumers now bind scoped
+observation and shared checkpoint evidence while preserving legacy Knight
+payloads. Full native truth, live Go cohort binding and physical A100 execution
+remain distinct pending gates; the full READY flag is still false.
 
 ## Immediate user-authorized priority
+
+Active research continuation is the shared IRIS Fit8 A100 capsule and its
+per-subject results, followed by TESSA, AXIS and MIRA as their truth gates close.
+Knight E2E is the fixed regression reference. Research contracts/preflight are
+operator tools; the future product lane must accept input and return qualified
+output without exposing those operator steps to customers.
 
 The canonical development/render baseline is **one M for geometry, topology and
 motion; source-wins RGB plus the already compiled CAA on M-face/barycentric
@@ -87,7 +111,7 @@ have not started. A complete product input → model inference → Compiler → 
 executor is a later user goal, while modular development remains the immediate
 working lane.
 
-Next focus is **grip/weapon relation and semantic overlap/draw order**. Raw depth
+The retained Knight render focus is **grip/weapon relation and semantic overlap/draw order**. Raw depth
 and depth ties are known limitations. Native exact pixel/owner parity for diagonal
 witnesses and linear-light shipping composition remain open qualification gates.
 A green engineering regression must not close those scientific/product gates.
@@ -158,9 +182,10 @@ at its sealed paths and archive commits; no ledger is edited to manufacture PASS
 
 Keep the live map and simplified plan coherent on main. Verify exact-head tests,
 typed bindings and the fresh eight-view approved regression after source changes.
-Then address grip/weapon relation and semantic draw order with independently
-measured behavior. No model head training, refit or new scientific Attempt is
-implied by this architecture cleanup.
+Continue the user-authorized shared Fit8 research capsule while preserving this
+Knight regression. New model heads remain a separate intervention; the frozen
+shared IRIS fitting policy is already authorized. The product executor and
+qualification lane must keep their independent scopes.
 
 Read this file, `AGENTS.md`, `docs/platform/EXECUTION_LANES.md`, then
 `canonical/CANONICAL_HANDOFF_20261007.md` and the current plan. Older recovery or

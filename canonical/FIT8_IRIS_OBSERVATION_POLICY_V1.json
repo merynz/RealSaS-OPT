@@ -1,0 +1,16 @@
+{
+  "schema": "RealSaS.IrisObservationPreparationPolicy.v1",
+  "scope": "IMAGE_DERIVED_FSTAR_BIND_OBSERVATIONS__NOT_FULL_MECHANICAL_TRUTH",
+  "resolution": 1024,
+  "view_count": 8,
+  "minimum_border_margin_px": 8,
+  "maximum_relative_vertex_error": 0.00001,
+  "maximum_mask_gap_px": 2.0,
+  "reference_coverage": "TRIANGLE_UNIT_PIXEL_SQUARE_INTERSECTION",
+  "raster_filter": "BOX_1PX",
+  "pose": "SOURCE_BIND_REST",
+  "native_frame0_is_bind_assumed": false,
+  "native_lit_material_parity_claimed": false,
+  "full_native_motion_truth_admitted": false,
+  "go_stage_qualification_claimed": false
+}

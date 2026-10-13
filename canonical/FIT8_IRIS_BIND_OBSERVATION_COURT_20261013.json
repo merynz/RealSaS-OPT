@@ -1,0 +1,80 @@
+{
+  "schema": "RealSaS.Fit8IrisBindObservationCourt.v1",
+  "date": "2026-10-13",
+  "subject_count": 8,
+  "resolution": 1024,
+  "view_count": 64,
+  "status": "PASS_IRIS_BIND_OBSERVATIONS",
+  "subjects": [
+    {
+      "subject_id": "fit8_snake_v1",
+      "proof_sha256": "b98bb8a093b8493f4a404a7f7f26bce81493ee530b3d4189cb0dd553aacbc7bf",
+      "vertices": 815,
+      "bones": 20,
+      "relative_vertex_error": 1.6511555453139716e-07,
+      "maximum_mask_gap_px": 1.0
+    },
+    {
+      "subject_id": "fit8_bat_v1",
+      "proof_sha256": "4aedc1448ea2730eb7cdccbf4a0473bca8ac0e1a51b5d35b525c61970606e0da",
+      "vertices": 1008,
+      "bones": 15,
+      "relative_vertex_error": 1.0998736372509777e-07,
+      "maximum_mask_gap_px": 1.0
+    },
+    {
+      "subject_id": "fit8_trex_v1",
+      "proof_sha256": "7f038efa8938384edbc922432aafe743321b46cb33da4e75697a6876dab27532",
+      "vertices": 912,
+      "bones": 37,
+      "relative_vertex_error": 7.467898094506226e-08,
+      "maximum_mask_gap_px": 1.0
+    },
+    {
+      "subject_id": "fit8_horse_v1",
+      "proof_sha256": "6b3c18ffb4efe3dcdfd694c9dea532b05b305451658e04690ea99ec72d4faab7",
+      "vertices": 4400,
+      "bones": 50,
+      "relative_vertex_error": 2.78495996242684e-06,
+      "maximum_mask_gap_px": 1.0
+    },
+    {
+      "subject_id": "fit8_spider_v1",
+      "proof_sha256": "c91036926ff4de79c35b86c6a60bbe6c827fdd550d3039676a04d6fc8728a854",
+      "vertices": 1386,
+      "bones": 59,
+      "relative_vertex_error": 7.122069117720665e-08,
+      "maximum_mask_gap_px": 1.0
+    },
+    {
+      "subject_id": "fit8_greenblob_v1",
+      "proof_sha256": "446dc26827cad612d6c67432868070084cbc94828bfed080a8d8533e5704df11",
+      "vertices": 878,
+      "bones": 4,
+      "relative_vertex_error": 3.2674864190737145e-08,
+      "maximum_mask_gap_px": 1.0
+    },
+    {
+      "subject_id": "fit8_shark_v1",
+      "proof_sha256": "9e828604ca26b2eecee4f0ed62a3a255cd462f27620e07ccd37b363bc6eecea3",
+      "vertices": 324,
+      "bones": 12,
+      "relative_vertex_error": 8.654459551351751e-08,
+      "maximum_mask_gap_px": 1.0
+    },
+    {
+      "subject_id": "fit8_george_v1",
+      "proof_sha256": "a1db5b171722a9154ab0d447c666028e8fa50085d9e2d804bcdb9ffe96fcf664",
+      "vertices": 7755,
+      "bones": 47,
+      "relative_vertex_error": 2.90627523878115e-07,
+      "maximum_mask_gap_px": 1.4142135623730951
+    }
+  ],
+  "ufbx_revision": "5955c5c0b042ac2dc6f32955ab206aaec0620cfc",
+  "scope": "INDEPENDENT_RAW_BIND_GEOMETRY_AND_CONTROLLED_UNLIT_SILHOUETTES",
+  "full_mechanical_truth_admitted": false,
+  "native_lit_material_parity_claimed": false,
+  "go_stage_qualification_claimed": false,
+  "fit8_pass_claimed": false
+}

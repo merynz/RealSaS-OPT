@@ -16,6 +16,7 @@ import (
 	"github.com/merynz/RealSaS-OPT/platform/internal/artifactstore"
 	"github.com/merynz/RealSaS-OPT/platform/internal/attempt"
 	"github.com/merynz/RealSaS-OPT/platform/internal/diagnostic"
+	"github.com/merynz/RealSaS-OPT/platform/internal/externalstage"
 	"github.com/merynz/RealSaS-OPT/platform/internal/input"
 	"github.com/merynz/RealSaS-OPT/platform/internal/orchestration"
 	"github.com/merynz/RealSaS-OPT/platform/internal/registry"
@@ -89,13 +90,18 @@ func (a Activities) ResolveCompilePlan(ctx context.Context, in orchestration.Com
 	if err != nil {
 		return orchestration.ResolvedCompilePlan{}, err
 	}
-	plan, err := resolver.Resolve(
+	externalInputs, err := externalstage.ResolverInputs(ctx, a.Pool, attemptID)
+	if err != nil {
+		return orchestration.ResolvedCompilePlan{}, err
+	}
+	plan, err := resolver.ResolveWithExternal(
 		ctx,
 		a.Graph,
 		registry.QualifiedCatalog{Pool: a.Pool, AllowDemo: mode == "RESEARCH"},
 		in.TargetStageID,
 		loaded.RootInputs,
 		versions,
+		externalInputs,
 	)
 	if err != nil {
 		return orchestration.ResolvedCompilePlan{}, err

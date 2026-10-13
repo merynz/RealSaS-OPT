@@ -10,7 +10,12 @@ import pytest
 from PIL import Image
 
 from compiler.realsas_compiler_core.types import QualificationError
-from compiler.realsas_compiler_services.orchestrator.adapters.source import seal_source_bytes
+from compiler.realsas_compiler_services.orchestrator.adapters.source import (
+    LICENSE_PROVENANCE_PROFILE,
+    SOURCE_CLOSURE_PROFILE,
+    seal_source_bytes,
+    seal_source_license_provenance,
+)
 from compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2 import (
     audit_source_mechanics_stage,
     admit_full_subject_stage,
@@ -46,6 +51,10 @@ def fixture(tmp_path: Path):
     raw = tmp_path / "subject.raw"
     raw.write_bytes(b"exact raw subject bytes")
     source_sha = sha(raw)
+    license_file = tmp_path / "License.txt"
+    license_file.write_text("exact license bytes\n", encoding="utf-8")
+    source_page = tmp_path / "source-page.html"
+    source_page.write_text("<html>exact source page snapshot</html>\n", encoding="utf-8")
 
     camera_payload = {
         "schema": "RealSaS.CameraProjectionBundle.v1",
@@ -68,7 +77,10 @@ def fixture(tmp_path: Path):
     camera = dump(tmp_path / "camera.json", camera_payload)
 
     rasters, masks, candidate_views, proof_views = [], [], [], []
-    evidence_files = [("RAW_SOURCE", raw), ("CAMERA_BUNDLE", camera)]
+    evidence_files = [("RAW_SOURCE", raw), ("LICENSE_BYTES", license_file),
+                      ("SOURCE_PAGE_SNAPSHOT", source_page), ("CAMERA_BUNDLE", camera)]
+    source_kinds = {"RAW_SOURCE": "PRIMARY", "LICENSE_BYTES": "LICENSE",
+                    "SOURCE_PAGE_SNAPSHOT": "PROVENANCE"}
     for i in range(8):
         rgba = np.zeros((32, 32, 4), dtype=np.uint8)
         rgba[8:24, 8:24] = (60 + i, 90, 120, 255)
@@ -177,15 +189,26 @@ def fixture(tmp_path: Path):
 
     source_payload = {
         "schema": "RealSaS.SourceByteSeal.v1",
+        "source_closure_profile": SOURCE_CLOSURE_PROFILE,
+        "primary_source_role": "RAW_SOURCE",
         "files": [{"role": role, "sha256": sha(path)} for role, path in evidence_files],
     }
     manifest = {
         "subject_id": "fit8_fixture",
         "source_files": [
             {"role": role, "path": str(path), "expected_sha256": sha(path),
-             "expected_size_bytes": path.stat().st_size}
+             "expected_size_bytes": path.stat().st_size,
+             **({"source_kind": source_kinds[role]} if role in source_kinds else {"source_kind": "EVIDENCE"})}
             for role, path in evidence_files
         ],
+        "source_license": {
+            "profile": LICENSE_PROVENANCE_PROFILE,
+            "source_pack": "fit8-fixture-pack",
+            "license_name": "TEST_ONLY",
+            "license_ref": "fixture-license",
+            "license_file_role": "LICENSE_BYTES",
+            "source_page_role": "SOURCE_PAGE_SNAPSHOT",
+        },
         "source_audit": {
             "profile": PROFILE,
             "subject_key": "fit8_fixture",
@@ -253,14 +276,21 @@ def test_scene_transform_camera_view_and_exact_proof_drift_fail(tmp_path):
         validate_source_scene_admission({"run_manifest": manifest}, source_payload)
 
 
-def test_stage03_04_require_strong_profile_pair_and_stage1_sealed_evidence(tmp_path):
+def test_stage03_04_require_strong_profile_pair_and_stage1_stage2_sealed_evidence(tmp_path):
     _, manifest, _ = fixture(tmp_path)
     ctx = {"run_id": "SOURCE_SCENE_V2_TEST", "run_root": tmp_path / "run",
            "run_manifest": manifest, "ledger": {"stages": []}, "stage": {"id": "01_SOURCE_BYTES_SEALED"}}
     stage1 = seal_source_bytes(ctx)
     assert stage1["status"] == "PASS"
+    assert stage1["diagnostics"]["source_closure_profile"] == SOURCE_CLOSURE_PROFILE
     ctx["ledger"]["stages"].append({"id": "01_SOURCE_BYTES_SEALED", "status": "PASS",
                                       "outputs": stage1["outputs"]})
+    ctx["stage"] = {"id": "02_SOURCE_LICENSE_PROVENANCE"}
+    stage2 = seal_source_license_provenance(ctx)
+    assert stage2["status"] == "PASS"
+    assert stage2["diagnostics"]["provenance_profile"] == LICENSE_PROVENANCE_PROFILE
+    ctx["ledger"]["stages"].append({"id": "02_SOURCE_LICENSE_PROVENANCE", "status": "PASS",
+                                      "outputs": stage2["outputs"]})
     ctx["stage"] = {"id": "03_SOURCE_MECHANICAL_AUDIT"}
     stage3 = audit_source_mechanics_stage(ctx)
     assert stage3["status"] == "PASS"
@@ -280,6 +310,34 @@ def test_stage03_04_require_strong_profile_pair_and_stage1_sealed_evidence(tmp_p
     result = admit_full_subject_stage(mismatch)
     assert result["status"] == "BLOCKED"
     assert result["blockers"] == ["FULL_SUBJECT_ADMISSION_MODE_PROFILE_MISMATCH"]
+
+
+def test_strong_scene_rejects_legacy_stage1_or_stage2_authority(tmp_path):
+    _, manifest, _ = fixture(tmp_path)
+    manifest["source_files"][0].pop("source_kind")
+    ctx = {"run_id": "LEGACY_STAGE1_REJECT", "run_root": tmp_path / "legacy1",
+           "run_manifest": manifest, "ledger": {"stages": []}, "stage": {"id": "01_SOURCE_BYTES_SEALED"}}
+    stage1 = seal_source_bytes(ctx); assert stage1["status"] == "PASS"
+    ctx["ledger"]["stages"].append({"id":"01_SOURCE_BYTES_SEALED","status":"PASS","outputs":stage1["outputs"]})
+    ctx["stage"]={"id":"02_SOURCE_LICENSE_PROVENANCE"}
+    stage2=seal_source_license_provenance(ctx); assert stage2["status"]=="PASS"
+    ctx["ledger"]["stages"].append({"id":"02_SOURCE_LICENSE_PROVENANCE","status":"PASS","outputs":stage2["outputs"]})
+    ctx["stage"]={"id":"03_SOURCE_MECHANICAL_AUDIT"}
+    with pytest.raises(QualificationError, match="EXACT_SOURCE_CLOSURE_REQUIRED"):
+        audit_source_mechanics_stage(ctx)
+
+    _, manifest, _ = fixture(tmp_path / "legacy2")
+    manifest["source_license"].pop("profile")
+    ctx = {"run_id": "LEGACY_STAGE2_REJECT", "run_root": tmp_path / "legacy2run",
+           "run_manifest": manifest, "ledger": {"stages": []}, "stage": {"id": "01_SOURCE_BYTES_SEALED"}}
+    stage1=seal_source_bytes(ctx); assert stage1["status"]=="PASS"
+    ctx["ledger"]["stages"].append({"id":"01_SOURCE_BYTES_SEALED","status":"PASS","outputs":stage1["outputs"]})
+    ctx["stage"]={"id":"02_SOURCE_LICENSE_PROVENANCE"}
+    stage2=seal_source_license_provenance(ctx); assert stage2["status"]=="PASS"
+    ctx["ledger"]["stages"].append({"id":"02_SOURCE_LICENSE_PROVENANCE","status":"PASS","outputs":stage2["outputs"]})
+    ctx["stage"]={"id":"03_SOURCE_MECHANICAL_AUDIT"}
+    with pytest.raises(QualificationError, match="EXACT_LICENSE_PROVENANCE_REQUIRED"):
+        audit_source_mechanics_stage(ctx)
 
 
 def test_proof_must_be_stage1_sealed(tmp_path):

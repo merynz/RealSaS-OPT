@@ -24,13 +24,21 @@ func (p TemporalPublisher) Publish(ctx context.Context, commandType string, payl
 	}
 	if commandType == command.ExternalStageReady {
 		workflowID, err := requiredString(payload, "workflow_id")
-		if err != nil { return err }
+		if err != nil {
+			return err
+		}
 		attemptID, err := requiredString(payload, "attempt_id")
-		if err != nil { return err }
+		if err != nil {
+			return err
+		}
 		stageID, err := requiredString(payload, "stage_id")
-		if err != nil { return err }
+		if err != nil {
+			return err
+		}
 		evidenceSHA, err := requiredString(payload, "evidence_sha256")
-		if err != nil { return err }
+		if err != nil {
+			return err
+		}
 		return p.Client.SignalWorkflow(ctx, workflowID, "", orchestration.ExternalStageReadySignalName, orchestration.ExternalStageReadySignal{
 			AttemptID: attemptID, StageID: stageID, EvidenceSHA256: evidenceSHA,
 		})
@@ -63,15 +71,25 @@ func workflowSpec(commandType string, payload map[string]any) (string, string, t
 	switch commandType {
 	case command.CompileSubject:
 		attemptID, err := requiredString(payload, "attempt_id")
-		if err != nil { return "", "", 0, nil, err }
+		if err != nil {
+			return "", "", 0, nil, err
+		}
 		subjectID, err := requiredString(payload, "subject_id")
-		if err != nil { return "", "", 0, nil, err }
+		if err != nil {
+			return "", "", 0, nil, err
+		}
 		releaseID, err := requiredString(payload, "engine_release_id")
-		if err != nil { return "", "", 0, nil, err }
+		if err != nil {
+			return "", "", 0, nil, err
+		}
 		inputID, err := requiredString(payload, "subject_input_id")
-		if err != nil { return "", "", 0, nil, err }
+		if err != nil {
+			return "", "", 0, nil, err
+		}
 		target, err := requiredString(payload, "target_stage_id")
-		if err != nil { return "", "", 0, nil, err }
+		if err != nil {
+			return "", "", 0, nil, err
+		}
 		return orchestration.CompileWorkflowName,
 			"realsas:compile:" + commandID,
 			7 * 24 * time.Hour,
@@ -86,13 +104,21 @@ func workflowSpec(commandType string, payload map[string]any) (string, string, t
 			}, nil
 	case command.RunCapability:
 		attemptID, err := requiredString(payload, "attempt_id")
-		if err != nil { return "", "", 0, nil, err }
+		if err != nil {
+			return "", "", 0, nil, err
+		}
 		goalID, err := requiredString(payload, "execution_goal_id")
-		if err != nil { return "", "", 0, nil, err }
+		if err != nil {
+			return "", "", 0, nil, err
+		}
 		releaseID, err := requiredString(payload, "engine_release_id")
-		if err != nil { return "", "", 0, nil, err }
+		if err != nil {
+			return "", "", 0, nil, err
+		}
 		specSHA, err := requiredString(payload, "spec_sha256")
-		if err != nil { return "", "", 0, nil, err }
+		if err != nil {
+			return "", "", 0, nil, err
+		}
 		return orchestration.CapabilityWorkflowName,
 			"realsas:capability:" + commandID,
 			7 * 24 * time.Hour,
@@ -102,13 +128,21 @@ func workflowSpec(commandType string, payload map[string]any) (string, string, t
 			}, nil
 	case command.RenderProduct:
 		subjectID, err := requiredString(payload, "subject_id")
-		if err != nil { return "", "", 0, nil, err }
+		if err != nil {
+			return "", "", 0, nil, err
+		}
 		revisionID, err := requiredString(payload, "product_revision_id")
-		if err != nil { return "", "", 0, nil, err }
+		if err != nil {
+			return "", "", 0, nil, err
+		}
 		renderID, err := requiredString(payload, "render_request_id")
-		if err != nil { return "", "", 0, nil, err }
+		if err != nil {
+			return "", "", 0, nil, err
+		}
 		semanticSHA, err := requiredString(payload, "render_request_semantic_sha256")
-		if err != nil { return "", "", 0, nil, err }
+		if err != nil {
+			return "", "", 0, nil, err
+		}
 		return orchestration.RenderWorkflowName,
 			"realsas:render:" + commandID,
 			6 * time.Hour,
@@ -131,6 +165,8 @@ func requiredString(payload map[string]any, key string) (string, error) {
 
 func payloadMode(payload map[string]any) string {
 	value, _ := payload["execution_mode"].(string)
-	if value == "" { return "PRODUCT" }
+	if value == "" {
+		return "PRODUCT"
+	}
 	return value
 }

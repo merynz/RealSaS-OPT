@@ -64,29 +64,39 @@ func (a API) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/stages", func(w http.ResponseWriter, r *http.Request) { respond(w, 200, a.Graph.Stages()) })
 	mux.HandleFunc("POST /v1/subjects", func(w http.ResponseWriter, r *http.Request) {
 		var req input.SubjectRequest
-		if !decode(w, r, &req) { return }
+		if !decode(w, r, &req) {
+			return
+		}
 		out, err := input.EnsureSubject(r.Context(), a.Pool, req)
 		result(w, out, err)
 	})
 	mux.HandleFunc("PUT /v1/artifacts/bytes", func(w http.ResponseWriter, r *http.Request) {
 		sha := r.URL.Query().Get("sha256")
 		if err := artifactstore.ValidateSHA256(sha); err != nil {
-			respond(w, 400, map[string]string{"error": err.Error()}); return
+			respond(w, 400, map[string]string{"error": err.Error()})
+			return
 		}
 		if a.Store == nil {
-			respond(w, 503, map[string]string{"error": "artifact store is required"}); return
+			respond(w, 503, map[string]string{"error": "artifact store is required"})
+			return
 		}
 		data, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 256<<20))
-		if err != nil { respond(w, 413, map[string]string{"error": err.Error()}); return }
+		if err != nil {
+			respond(w, 413, map[string]string{"error": err.Error()})
+			return
+		}
 		if artifactstore.HashBytes(data) != sha {
-			respond(w, 409, map[string]string{"error": "ARTIFACT_UPLOAD_HASH_MISMATCH"}); return
+			respond(w, 409, map[string]string{"error": "ARTIFACT_UPLOAD_HASH_MISMATCH"})
+			return
 		}
 		out, err := a.Store.PutBytes(r.Context(), data)
 		result(w, out, err)
 	})
 	mux.HandleFunc("POST /v1/artifacts/import", func(w http.ResponseWriter, r *http.Request) {
 		var req registry.ImportRequest
-		if !decode(w, r, &req) { return }
+		if !decode(w, r, &req) {
+			return
+		}
 		out, err := registry.Import(r.Context(), a.Pool, a.Store, req)
 		result(w, out, err)
 	})
@@ -96,7 +106,9 @@ func (a API) Handler() http.Handler {
 			Bindings  []input.Binding `json:"bindings"`
 			CreatedBy string          `json:"created_by"`
 		}
-		if !decode(w, r, &req) { return }
+		if !decode(w, r, &req) {
+			return
+		}
 		sort.Slice(req.Bindings, func(i, j int) bool { return req.Bindings[i].Role < req.Bindings[j].Role })
 		out, err := input.Seal(r.Context(), a.Pool, req.SubjectID, req.Bindings, req.CreatedBy)
 		result(w, out, err)
@@ -106,24 +118,33 @@ func (a API) Handler() http.Handler {
 			Manifest  release.Manifest `json:"manifest"`
 			CreatedBy string           `json:"created_by"`
 		}
-		if !decode(w, r, &req) { return }
+		if !decode(w, r, &req) {
+			return
+		}
 		out, err := release.Seal(r.Context(), a.Pool, a.Graph, req.Manifest, req.CreatedBy)
 		result(w, out, err)
 	})
 	mux.HandleFunc("POST /v1/research/attempts", func(w http.ResponseWriter, r *http.Request) {
 		var req attempt.ResearchRequest
-		if !decode(w, r, &req) { return }
+		if !decode(w, r, &req) {
+			return
+		}
 		out, err := attempt.StartResearch(r.Context(), a.Pool, a.Graph, req)
 		result(w, out, err)
 	})
 	mux.HandleFunc("POST /v1/research/attempts/{id}/stages/{stage}/external-evidence", func(w http.ResponseWriter, r *http.Request) {
 		attemptID, err := uuid.Parse(r.PathValue("id"))
-		if err != nil { respond(w, 400, map[string]string{"error": "invalid attempt id"}); return }
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid attempt id"})
+			return
+		}
 		var req struct {
 			Bindings []externalstage.Binding `json:"bindings"`
 			BoundBy  string                  `json:"bound_by"`
 		}
-		if !decode(w, r, &req) { return }
+		if !decode(w, r, &req) {
+			return
+		}
 		out, err := externalstage.Bind(r.Context(), a.Pool, externalstage.BindRequest{
 			AttemptID: attemptID, StageID: r.PathValue("stage"), Bindings: req.Bindings, BoundBy: req.BoundBy,
 		})
@@ -131,50 +152,71 @@ func (a API) Handler() http.Handler {
 	})
 	mux.HandleFunc("POST /v1/research/campaigns", func(w http.ResponseWriter, r *http.Request) {
 		var req campaign.StartRequest
-		if !decode(w, r, &req) { return }
+		if !decode(w, r, &req) {
+			return
+		}
 		out, err := campaign.Start(r.Context(), a.Pool, a.Graph, a.CodeSHA, req)
 		result(w, out, err)
 	})
 	mux.HandleFunc("POST /v1/research/campaigns/run", func(w http.ResponseWriter, r *http.Request) {
 		var req campaign.RunRequest
-		if !decode(w, r, &req) { return }
+		if !decode(w, r, &req) {
+			return
+		}
 		out, err := campaign.Run(r.Context(), a.Pool, a.Graph, a.CodeSHA, req)
 		result(w, out, err)
 	})
 	mux.HandleFunc("GET /v1/research/campaigns/{id}", func(w http.ResponseWriter, r *http.Request) {
 		id, err := uuid.Parse(r.PathValue("id"))
-		if err != nil { respond(w, 400, map[string]string{"error": "invalid campaign id"}); return }
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid campaign id"})
+			return
+		}
 		out, err := campaign.Get(r.Context(), a.Pool, id)
-		if err != nil { respond(w, 404, map[string]string{"error": err.Error()}); return }
+		if err != nil {
+			respond(w, 404, map[string]string{"error": err.Error()})
+			return
+		}
 		respond(w, 200, out)
 	})
 	mux.HandleFunc("POST /v1/agents/enter", func(w http.ResponseWriter, r *http.Request) {
 		var req agentsession.OpenRequest
-		if !decode(w, r, &req) { return }
+		if !decode(w, r, &req) {
+			return
+		}
 		out, err := agentsession.Open(r.Context(), a.Pool, a.CodeSHA, req)
 		result(w, out, err)
 	})
 	mux.HandleFunc("POST /v1/agents/exit", func(w http.ResponseWriter, r *http.Request) {
 		var req agentsession.CloseRequest
-		if !decode(w, r, &req) { return }
+		if !decode(w, r, &req) {
+			return
+		}
 		out, err := agentsession.Close(r.Context(), a.Pool, req)
 		result(w, out, err)
 	})
 	mux.HandleFunc("GET /v1/agents/context/{id}", func(w http.ResponseWriter, r *http.Request) {
 		id, err := uuid.Parse(r.PathValue("id"))
-		if err != nil { respond(w, 400, map[string]string{"error": "subject UUID required"}); return }
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "subject UUID required"})
+			return
+		}
 		out, err := agentsession.Context(r.Context(), a.Pool, id, a.CodeSHA)
 		result(w, out, err)
 	})
 	compile := func(research bool) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			var req command.CompileRequest
-			if !decode(w, r, &req) { return }
+			if !decode(w, r, &req) {
+				return
+			}
 			if research != (req.ResearchAttemptID != nil) {
-				respond(w, 400, map[string]string{"error": "EXECUTION_LANE_REQUEST_MISMATCH"}); return
+				respond(w, 400, map[string]string{"error": "EXECUTION_LANE_REQUEST_MISMATCH"})
+				return
 			}
 			if research && req.AgentSessionID == nil {
-				respond(w, 409, map[string]string{"error": "RESEARCH_EXECUTION_REQUIRES_AGENT_SESSION"}); return
+				respond(w, 409, map[string]string{"error": "RESEARCH_EXECUTION_REQUIRES_AGENT_SESSION"})
+				return
 			}
 			req.DeployedCodeSHA = a.CodeSHA
 			out, err := command.SubmitCompile(r.Context(), a.Pool, a.Graph, req)
@@ -185,19 +227,28 @@ func (a API) Handler() http.Handler {
 	mux.HandleFunc("POST /v1/product/compile", compile(false))
 	mux.HandleFunc("POST /v1/product/render", func(w http.ResponseWriter, r *http.Request) {
 		var req command.RenderRequest
-		if !decode(w, r, &req) { return }
+		if !decode(w, r, &req) {
+			return
+		}
 		out, err := command.SubmitRender(r.Context(), a.Pool, req)
 		result(w, out, err)
 	})
 	mux.HandleFunc("GET /v1/attempts/{id}", func(w http.ResponseWriter, r *http.Request) {
 		id, err := uuid.Parse(r.PathValue("id"))
-		if err != nil { respond(w, 400, map[string]string{"error": "invalid attempt id"}); return }
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid attempt id"})
+			return
+		}
 		var state, kind string
 		if err := a.Pool.QueryRow(r.Context(), "SELECT final_state,kind FROM attempts WHERE id=$1", id).Scan(&state, &kind); err != nil {
-			respond(w, 404, map[string]string{"error": "attempt not found"}); return
+			respond(w, 404, map[string]string{"error": "attempt not found"})
+			return
 		}
 		rows, err := a.Pool.Query(r.Context(), `SELECT event_type,payload,created_at FROM attempt_events WHERE attempt_id=$1 ORDER BY id`, id)
-		if err != nil { result(w, nil, err); return }
+		if err != nil {
+			result(w, nil, err)
+			return
+		}
 		defer rows.Close()
 		type eventRecord struct {
 			Type      string          `json:"type"`
@@ -207,10 +258,16 @@ func (a API) Handler() http.Handler {
 		events := make([]eventRecord, 0)
 		for rows.Next() {
 			var event eventRecord
-			if err := rows.Scan(&event.Type, &event.Payload, &event.CreatedAt); err != nil { result(w, nil, err); return }
+			if err := rows.Scan(&event.Type, &event.Payload, &event.CreatedAt); err != nil {
+				result(w, nil, err)
+				return
+			}
 			events = append(events, event)
 		}
-		if err := rows.Err(); err != nil { result(w, nil, err); return }
+		if err := rows.Err(); err != nil {
+			result(w, nil, err)
+			return
+		}
 		respond(w, 200, map[string]any{"attempt_id": id, "kind": kind, "state": state, "events": events})
 	})
 	return mux

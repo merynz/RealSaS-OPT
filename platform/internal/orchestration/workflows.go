@@ -74,7 +74,7 @@ func CompileWorkflow(ctx workflow.Context, input CompileWorkflowInput) (CompileW
 			request := BindReusedStageRequest{
 				AttemptID: input.AttemptID, StageID: stage.StageID,
 				ExpectedSemanticSHA256: stage.ExpectedSemanticSHA256,
-				ArtifactID: *stage.ReusableArtifactID,
+				ArtifactID:             *stage.ReusableArtifactID,
 			}
 			if err := workflow.ExecuteActivity(platformCtx, BindReusedStageActivityName, request).Get(ctx, &committed); err != nil {
 				return CompileWorkflowResult{}, err
@@ -118,7 +118,9 @@ func CompileWorkflow(ctx workflow.Context, input CompileWorkflowInput) (CompileW
 				// that race the binder intentionally sends no signal. Semantic SHA
 				// change is the durable lost-wakeup guard.
 				refreshed, err := refreshAt(index, stage.StageID)
-				if err != nil { return CompileWorkflowResult{}, err }
+				if err != nil {
+					return CompileWorkflowResult{}, err
+				}
 				if refreshed.Stages[index].ExpectedSemanticSHA256 == stage.ExpectedSemanticSHA256 {
 					var signal ExternalStageReadySignal
 					signalChannel.Receive(ctx, &signal)
@@ -128,7 +130,9 @@ func CompileWorkflow(ctx workflow.Context, input CompileWorkflowInput) (CompileW
 						)
 					}
 					refreshed, err = refreshAt(index, stage.StageID)
-					if err != nil { return CompileWorkflowResult{}, err }
+					if err != nil {
+						return CompileWorkflowResult{}, err
+					}
 				}
 				plan = refreshed
 				allowed = executeStageIDs(plan)
@@ -138,7 +142,9 @@ func CompileWorkflow(ctx workflow.Context, input CompileWorkflowInput) (CompileW
 			completed = append(completed, committed)
 			if engineResult.Status != "PASS" && engineResult.Status != "PASS_DEMO_ONLY" {
 				code := "COMPILER_STAGE_FAILED"
-				if engineResult.Failure != nil && engineResult.Failure.Code != "" { code = engineResult.Failure.Code }
+				if engineResult.Failure != nil && engineResult.Failure.Code != "" {
+					code = engineResult.Failure.Code
+				}
 				return CompileWorkflowResult{}, temporal.NewNonRetryableApplicationError(
 					fmt.Sprintf("%s:%s", stage.StageID, code), "CompilerStageFailure", nil,
 				)
@@ -210,7 +216,9 @@ func RenderHasForbiddenCapability() bool {
 	for _, name := range RenderActivityNames() {
 		lower := strings.ToLower(name)
 		for _, forbidden := range []string{"fit", "train", "calibrat", "promot", "compile_stage"} {
-			if strings.Contains(lower, forbidden) { return true }
+			if strings.Contains(lower, forbidden) {
+				return true
+			}
 		}
 	}
 	return false

@@ -14,6 +14,11 @@ def iris_observation_binding(ctx,source_hashes,rasters,masks):
     strong_scene=cfg.get("profile")==SOURCE_SCENE_PROFILE
     if iris_cfg.get("training_profile")==SHARED_PROFILE and not strong_scene:
         raise QualificationError("IRIS_SHARED_COHORT_SOURCE_SCENE_PROFILE_REQUIRED")
+    ref=cfg.get("iris_observation_admission")
+    if not ref:
+        if cfg.get("iris_observation_admission_required"):
+            raise QualificationError("IRIS_OBSERVATION_ADMISSION_REQUIRED")
+        return None
     if strong_scene:
         source=stage_output_payload(ctx,"01_SOURCE_BYTES_SEALED","RealSaS.SourceByteSeal.v1")
         license_seal=stage_output_payload(ctx,"02_SOURCE_LICENSE_PROVENANCE","RealSaS.SourceLicenseSeal.v1")
@@ -21,11 +26,6 @@ def iris_observation_binding(ctx,source_hashes,rasters,masks):
             raise QualificationError("SOURCE_SCENE_EXACT_SOURCE_CLOSURE_REQUIRED")
         if license_seal.get("provenance_profile")!=LICENSE_PROVENANCE_PROFILE:
             raise QualificationError("SOURCE_SCENE_EXACT_LICENSE_PROVENANCE_REQUIRED")
-    ref=cfg.get("iris_observation_admission")
-    if not ref:
-        if cfg.get("iris_observation_admission_required"):
-            raise QualificationError("IRIS_OBSERVATION_ADMISSION_REQUIRED")
-        return None
     proof=load_file_ref(ref,expected_schema="RealSaS.IrisBindObservationAdmission.v1")
     if proof.get("status")!="PASS_IRIS_BIND_OBSERVATIONS":
         raise QualificationError("IRIS_OBSERVATION_ADMISSION_STATUS")

@@ -79,7 +79,11 @@ jobs:
       - name: Ensure native CAA build dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends libpng-dev zlib1g-dev
+          sudo apt-get install -y --no-install-recommends libpng-dev zlib1g-dev blender python3-numpy
+      - name: Synthetic Blender source scene and alpha engineering smoke
+        env:
+          PYTHONPATH: .:/usr/lib/python3/dist-packages
+        run: blender --background --factory-startup --threads 2 --python-exit-code 1 --python tests/fixtures/source_scene_v2/blender_smoke.py
       - name: Compile current Python ownership roots
         run: python -m compileall -q models compiler runtime/reference_v4 tools tests
       - name: Repository governance and readiness
@@ -87,6 +91,7 @@ jobs:
           python -m pytest -q \
             tests/repository/test_repository_governance_v1.py \
             tests/repository/test_fit8_source_identity_v1.py \
+            tests/repository/test_source_scene_contract_v2.py \
             tests/repository/test_model_branding_boundary_v1.py \
             tests/repository/test_current_continuity_authority_v2.py \
             tests/repository/test_canonical_main_readiness_v1.py \

@@ -1,0 +1,91 @@
+{
+  "schema": "RealSaS.FIT8TrainingReadiness.v1",
+  "date": "2026-10-13",
+  "status": "BLOCKED__SOURCE_ADMISSION_AND_SHARED_TRAINER_PENDING",
+  "authority_class": "NOTEBOOK_DELIVERY_READINESS__NOT_LIVE_ATTEMPT_STATE",
+  "source_inspection_base_sha": "74929cb7ea5d7a7a3ad5917e60ee8e9093f23e78",
+  "selection": "canonical/FIT8_DIVERSITY_SELECTION_V1.json",
+  "source_identity_evidence": "canonical/FIT8_SOURCE_IDENTITY_AUDIT_20261013.json",
+  "source_rest_engineering_evidence": "canonical/FIT8_SOURCE_REST_ENGINEERING_SMOKE_20261013.json",
+  "admission_contract": "docs/corpus/FIT8_ADMISSION.md",
+  "subject_count": 8,
+  "model_order": ["IRIS", "TESSA", "AXIS", "MIRA"],
+  "fit_contract": {
+    "same_architecture_across_subjects": true,
+    "shared_parameter_set_per_model": true,
+    "shared_optimizer_state_per_model": true,
+    "same_compiler_contracts": true,
+    "subject_specific_production_code_forbidden": true,
+    "independent_eight_subject_fits_are_shared_fit8": false,
+    "knight_is_separate_regression_witness": true
+  },
+  "source_preparation": {
+    "common_rest_producer": "tools/observation/blender_controlled_8view_v2.py",
+    "scene_contract": "tools/observation/source_scene_contract_v2.py",
+    "engineering_materialized_subject_count": 8,
+    "engineering_materialized_view_count": 64,
+    "engineering_resolution": 256,
+    "qualified_subject_count": 0,
+    "qualified_training_truth_count": 0,
+    "source_native_render_parity_claimed": false,
+    "typed_stage_admission_binding_status": "PENDING"
+  },
+  "required_delivery_gates": {
+    "eight_subject_import_pose_scene_first_render_admission": "PENDING_INDEPENDENT_PARITY_AND_TYPED_BINDINGS",
+    "eight_subject_training_truth_and_lineage_admission": "PENDING",
+    "released_go_cohort_attempt_and_shared_checkpoint_binding": "PENDING",
+    "common_eight_subject_iris_training_entrypoint": "PENDING",
+    "frozen_shared_training_and_evaluation_policy": "PENDING",
+    "hash_bound_embedded_notebook_source_and_inputs": "PENDING",
+    "clean_runtime_a100_run_all_preflight": "PENDING",
+    "real_training_log_and_atomic_resume_preflight": "PENDING",
+    "persistent_result_output_preflight": "PENDING"
+  },
+  "model_source_findings": [
+    {
+      "model": "IRIS",
+      "current_source": "models/iris/v4/scene_first_signed_v4.py",
+      "objective_source": "models/iris/v5/direct_fstar_fit_v5.py",
+      "required_work": "Bind a real shared eight-subject training loop and admitted observations/teachers. The F-star objective is not a complete trainer. Shared-head architecture changes remain unapproved."
+    },
+    {
+      "model": "TESSA",
+      "current_source": "models/tessa/v1/model_v1.py",
+      "training_data_source": "models/tessa/v1/training_data_v1.py",
+      "required_work": "Bind admitted per-subject teacher geometry to the shared runner and its explicit coordinate domain; preserve variable components and cardinality."
+    },
+    {
+      "model": "AXIS",
+      "current_source": "models/axis/axis_bfs_discrete_xyz_v541.py",
+      "required_work": "Declare a common fresh-tree/causal training scope. Existing configure_v541_training_authority freezes the solved tree and trains coordinate deltas from the historical checkpoint; it cannot silently serve as joint fresh-tree Fit8 training."
+    },
+    {
+      "model": "MIRA",
+      "current_source": "models/mira/carrier_native_v55.py",
+      "required_work": "Provide the shared learned trainer and exact per-subject Stage19 carrier/tree/weight bindings. The current carrier-native proposal boundary is not a complete trainer."
+    }
+  ],
+  "notebook_contract": {
+    "first_notebook_model": "IRIS",
+    "accelerator": "A100",
+    "clean_runtime_run_all": true,
+    "drive_mount": true,
+    "embedded_frozen_hash_bound_source": true,
+    "live_github_checkout_or_token_required": false,
+    "active_work_and_cache_root": "/content",
+    "drive_persists": ["input_shards", "atomic_checkpoints", "results"],
+    "logs": ["real_training_steps_and_losses", "per_subject_metrics", "stage", "elapsed_and_eta", "gpu_memory"],
+    "checkpoint_contains": ["model", "optimizer", "amp", "rng", "progress", "exact_code_input_policy_bindings"],
+    "atomic_checkpoint_and_resume": true,
+    "compact_persistent_result_archive": true,
+    "preflight_evidence": null,
+    "path": null,
+    "sha256": null,
+    "download_url": null
+  },
+  "a100_fit_notebook_ready": false,
+  "training_started": false,
+  "fit8_pass_claimed": false,
+  "unseen_claimed": false,
+  "product_pass_claimed": false
+}

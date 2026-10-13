@@ -119,6 +119,84 @@ real sources and seal an admission court before optimizer work. Do not change a
 source pose, conceal missing material, or convert format silently just to obtain
 a picture. The source identity verifier below cannot close these gaps.
 
+## Common source/rest engineering producer
+
+`tools/observation/blender_controlled_8view_v2.py` imports FBX with animation
+disabled and GLTF/GLB through an explicit animation-free derivative outside raw
+source directories. Nodes, default morph state, skins, materials and binary
+buffers remain unchanged in that derivative. The producer records imported
+node/bone frames, effective parent/world transforms and a common invertible
+normalization, then renders a fixed eight-view orbit with explicit clip planes.
+The existing v1 Knight producer is unchanged.
+
+```bash
+blender --background --factory-startup --python-exit-code 1 \
+  --python tools/observation/blender_controlled_8view_v2.py -- \
+  --source /absolute/path/exact-roster-source.gltf \
+  --expected-source-sha256 <exact-roster-sha256> \
+  --subject-id <roster-subject-key> \
+  --out-dir /absolute/path/fresh-candidate-directory
+```
+
+Defaults are 1024 px, shared frame scale 1.12, minimum border margin 8 px and
+Cycles CPU with seed 0 / 16 samples / no denoising / Standard view transform.
+NumPy must be available to Blender's own Python, not only the external training
+interpreter. Hosted Ubuntu CI installs `python3-numpy` for this boundary.
+Each receipt binds the source, producer/helper bytes, Blender binary, camera,
+scene snapshot and pixels. Output must be fresh; a failed/partial directory is
+retained for diagnosis and cannot carry a stale success receipt into a retry.
+
+Unlit conversion retains active upstream color/alpha and downstream shader
+graphs. An explicit imported legacy `OPAQUE` mode keeps its dormant BSDF alpha
+inactive across the CPU backend. The first common run exposed this distinction
+on the FBX sources: transporting the inactive alpha value as transparency made
+three subjects lose views and Spider nearly disappear. A common mode transport
+fix corrected that engineering failure; no source names or anatomy labels enter
+the implementation. Native FBX opacity semantics still require independent
+source/material parity before admission. Unknown/new material conventions must
+be qualified with their exact importer and renderer; an engineering picture is
+not authority to infer a source opacity repair.
+
+The [October 13 engineering receipt](../../canonical/FIT8_SOURCE_REST_ENGINEERING_SMOKE_20261013.json)
+records all eight exact sources producing 64 nonempty 256 px candidate views,
+minimum margins of 12–13 px and no raw mutation in Blender 4.0.2. Synthetic
+Blender tests separately exercise nested root/rigid attachment transforms,
+active linked alpha with a downstream shader and dormant opaque alpha. Run:
+
+```bash
+python -m unittest tests.repository.test_source_scene_contract_v2 -v
+blender --background --factory-startup --python-exit-code 1 \
+  --python tests/fixtures/source_scene_v2/blender_smoke.py
+```
+
+This is source engineering, not a new Go Attempt or source/truth admission.
+Snapshot consistency checks bindings inside the imported scene; effective local
+matrices are reconstructed from imported world matrices. They do not prove raw
+node correspondence, authored axes/units, inverse-bind reconstruction or correct
+grip. Independent rest/frame0/native motion/material references and typed
+Stage03–08 consumers remain pending. The engineering receipt must not substitute
+for those gates or mark the first compiled puppet render accepted.
+
+## Four-model notebook preparation
+
+[FIT8_TRAINING_READINESS_V1.json](../../canonical/FIT8_TRAINING_READINESS_V1.json)
+is the delivery checklist, not a second Attempt/workflow ledger. Its initial
+status is blocked. Public fit order remains IRIS → TESSA → AXIS → MIRA, with one
+shared parameter/optimizer state per model over all eight admitted subjects.
+Existing single-subject runners and solved-tree checkpoints are not a common
+Fit8 entrypoint. The record names the concrete source gaps for each model.
+
+The first deliverable is the actual IRIS A100 fit notebook, after admission,
+released Go cohort bindings and frozen fit/evaluation policy. It must embed
+frozen hash-bound source, run all in a clean runtime, mount Drive, use `/content`
+for active work/cache, print short true step/loss/per-subject/time/GPU logs and
+persist compact results. Checkpoints bind code/inputs/policy and model,
+optimizer, AMP, RNG and progress; atomic save and interruption/resume must be
+preflighted. No live GitHub token/checkout is required. A selection preview or
+CPU source-preparation notebook cannot be presented as this A100 fit notebook.
+Notebook path, hash, observed download URL and preflight evidence stay null until
+the exact delivered file and its required evidence exist.
+
 ## Source identity reproduction
 
 ```bash

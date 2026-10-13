@@ -33,6 +33,24 @@ execution line. Ordered milestones and repository discipline are in
 `docs/platform/PRODUCTIZATION.md`. The current Knight evidence and open product
 executor/qualification gaps below retain their scopes.
 
+Common source/rest engineering preparation now exists in
+`tools/observation/blender_controlled_8view_v2.py` and
+`tools/observation/source_scene_contract_v2.py`. Exact eight-source smoke in
+Blender 4.0.2 produced 64 nonempty 256 px candidate views after a common imported
+opaque-mode/CPU-alpha transport fix; evidence is
+`canonical/FIT8_SOURCE_REST_ENGINEERING_SMOKE_20261013.json`. Synthetic Blender
+root/rigid attachment and shader-alpha checks run in CI. The v1 Knight producer
+and released Compiler DAG are unchanged. Candidates are not independently
+source/native-pose/material matched or admitted through Stage03–08.
+
+Four-model notebook delivery is tracked in
+`canonical/FIT8_TRAINING_READINESS_V1.json`, explicitly blocked on source/truth
+admission, released cohort bindings and the real shared trainers/preflight.
+The first requested notebook is IRIS A100: clean Run All, Drive mount, embedded
+frozen hash-bound source, real compact logs, atomic checkpoint/resume and
+persistent results. No placeholder or CPU preparation notebook is a fit delivery;
+no optimizer or live Attempt has been started.
+
 ## Immediate user-authorized priority
 
 The canonical development/render baseline is **one M for geometry, topology and

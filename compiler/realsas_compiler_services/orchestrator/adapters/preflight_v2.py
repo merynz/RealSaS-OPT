@@ -25,6 +25,11 @@ from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     load_file_ref, stage_output_payload, write_ir,
 )
+from compiler.realsas_compiler_services.orchestrator.adapters.source_scene_admission_v2 import (
+    ADMISSION_MODE as SOURCE_SCENE_ADMISSION_MODE,
+    PROFILE as SOURCE_SCENE_PROFILE,
+    validate_source_scene_admission,
+)
 
 
 def _observation_rows(ctx:dict,key:str,ref_key:str):
@@ -67,6 +72,7 @@ def audit_source_mechanics_stage(ctx:dict)->dict:
 
     rasters=_observation_rows(ctx,"source_rasters","image")
     masks=_observation_rows(ctx,"source_foreground_masks","mask")
+    scene_binding=validate_source_scene_admission(ctx,source)
     from compiler.realsas_compiler_services.orchestrator.adapters.iris_observation_binding_v1 import iris_observation_binding
     iris_binding=iris_observation_binding(ctx,source_hashes,rasters,masks)
     views=[]
@@ -77,6 +83,8 @@ def audit_source_mechanics_stage(ctx:dict)->dict:
         mask_sha=str(_mrow["mask"]["sha256"])
         if raster_sha not in source_hashes:
             raise QualificationError("SOURCE_AUDIT_RASTER_NOT_BOUND_BY_STAGE1_SOURCE_BYTES")
+        if scene_binding is not None and mask_sha not in source_hashes:
+            raise QualificationError("SOURCE_AUDIT_MASK_NOT_BOUND_BY_STAGE1_SOURCE_BYTES")
         with Image.open(raster_path) as image:
             width,height=map(int,image.size)
             image.verify()
@@ -87,6 +95,10 @@ def audit_source_mechanics_stage(ctx:dict)->dict:
             metadata={"foreground_authority":"EXACT_STAGE07_RAW_BINARY_MASK","source_file_role_bound":True},
         ))
     passed=all(v.border_margin_px>=required_margin and not v.touches_border for v in views)
+    metadata={"controlled_full_subject_audit":True,"unknown_out_of_frame_is_not_negative":True,
+              **({"iris_observation_binding":iris_binding} if iris_binding is not None else {})}
+    if scene_binding is not None:
+        metadata["source_scene_admission"] = scene_binding
     audit=SourceMechanicalAuditIR(
         content_sha256(source),tuple(views),required_margin,
         {
@@ -94,10 +106,10 @@ def audit_source_mechanics_stage(ctx:dict)->dict:
             "exact_view_count":len(views),
             "all_foreground_nonempty":all(v.foreground_pixel_count>0 for v in views),
             "all_views_meet_nonzero_safety_margin":passed,
+            "source_scene_bind_admission":scene_binding is not None,
             "teacher_truth_used":False,
         },"",
-        metadata={"controlled_full_subject_audit":True,"unknown_out_of_frame_is_not_negative":True,
-                  **({"iris_observation_binding":iris_binding} if iris_binding is not None else {})},
+        metadata=metadata,
     )
     audit=replace(audit,audit_hash=source_mechanical_audit_hash(audit))
     if not passed:
@@ -106,8 +118,15 @@ def audit_source_mechanics_stage(ctx:dict)->dict:
             "required_margin_px":required_margin,
         }}
     root=ctx["run_root"]/"artifacts"/ctx["stage"]["id"]
+    diagnostics={"audit_hash":audit.audit_hash,"border_margins_px":[v.border_margin_px for v in views],
+                 "source_scene_bind_admission":scene_binding is not None}
+    if scene_binding is not None:
+        diagnostics.update({"source_scene_nodes":scene_binding["node_count"],
+                            "source_scene_bones":scene_binding["bone_count"],
+                            "source_scene_parent_relations":scene_binding["parent_relation_count"],
+                            "source_scene_bone_parent_relations":scene_binding["bone_parent_relation_count"]})
     return {"status":"PASS","outputs":[write_ir(root/"source_mechanical_audit.json",audit,authority_class="SOURCE_MECHANICAL_AUDIT")],
-        "diagnostics":{"audit_hash":audit.audit_hash,"border_margins_px":[v.border_margin_px for v in views]}}
+        "diagnostics":diagnostics}
 
 
 def admit_full_subject_stage(ctx:dict)->dict:
@@ -116,28 +135,41 @@ def admit_full_subject_stage(ctx:dict)->dict:
     )
     cfg=dict(ctx["run_manifest"].get("admission") or {})
     mode=str(cfg.get("mode") or "")
-    if mode!="CONTROLLED_FULL_SUBJECT_8VIEW_V1":
+    if mode not in ("CONTROLLED_FULL_SUBJECT_8VIEW_V1", SOURCE_SCENE_ADMISSION_MODE):
         return {"status":"BLOCKED","blockers":["FULL_SUBJECT_ADMISSION_MODE_REQUIRED"],"diagnostics":{"mode":mode}}
+    scene_binding=(audit.metadata or {}).get("source_scene_admission")
+    source_profile=str((ctx["run_manifest"].get("source_audit") or {}).get("profile") or "")
+    if mode==SOURCE_SCENE_ADMISSION_MODE:
+        if source_profile!=SOURCE_SCENE_PROFILE or not scene_binding:
+            return {"status":"BLOCKED","blockers":["FULL_SUBJECT_SOURCE_SCENE_BINDING_REQUIRED"],
+                    "diagnostics":{"mode":mode,"source_profile":source_profile}}
+    elif source_profile:
+        return {"status":"BLOCKED","blockers":["FULL_SUBJECT_ADMISSION_MODE_PROFILE_MISMATCH"],
+                "diagnostics":{"mode":mode,"source_profile":source_profile}}
     if audit.audit_report.get("status")!="PASS" or len(audit.views)!=8:
         raise QualificationError("FULL_SUBJECT_ADMISSION_REQUIRES_STAGE3_PASS")
     admitted=tuple(v.view_index for v in audit.views if v.border_margin_px>=audit.minimum_required_border_margin_px)
     if admitted!=tuple(range(8)):
         raise QualificationError("FULL_SUBJECT_ADMISSION_VIEW_SET_INCOMPLETE")
+    report={
+        "status":"PASS",
+        "full_subject_present_in_all_views":True,
+        "nonzero_safety_margin_all_views":True,
+        "out_of_frame_policy":"UNKNOWN_NEVER_NEGATIVE",
+        "view_count":8,
+        "source_scene_bind_admitted":bool(scene_binding),
+    }
+    metadata={"subject_specific_logic":False}
+    if scene_binding:
+        metadata["source_scene_admission"] = scene_binding
     value=FullSubjectAdmissionIR(
-        audit.audit_hash,admitted,mode,
-        {
-            "status":"PASS",
-            "full_subject_present_in_all_views":True,
-            "nonzero_safety_margin_all_views":True,
-            "out_of_frame_policy":"UNKNOWN_NEVER_NEGATIVE",
-            "view_count":8,
-        },"",
-        metadata={"subject_specific_logic":False},
+        audit.audit_hash,admitted,mode,report,"",metadata=metadata,
     )
     value=replace(value,admission_hash=full_subject_admission_hash(value))
     root=ctx["run_root"]/"artifacts"/ctx["stage"]["id"]
     return {"status":"PASS","outputs":[write_ir(root/"full_subject_admission.json",value,authority_class="FULL_SUBJECT_ADMISSION")],
-        "diagnostics":{"admission_hash":value.admission_hash,"view_count":8}}
+        "diagnostics":{"admission_hash":value.admission_hash,"view_count":8,
+                       "source_scene_bind_admitted":bool(scene_binding)}}
 
 
 def materialize_observation_render_stage(ctx:dict)->dict:

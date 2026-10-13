@@ -1,0 +1,34 @@
+{
+  "schema": "RealSaS.IRIS.Fit8.Rev3_1DeliveryReceipt.v1",
+  "status": "LOCAL_CAPSULE_VALIDATED__PHYSICAL_A100_REQUIRED",
+  "notebook": "RealSaS_IRIS_Fit8_A100_Run_All_REV3_1_POOL_GUARD_FINAL.ipynb",
+  "notebook_sha256": "d12456e1b6ca316203d85048fe893d87ead371f7a0b516b91e21f24281bf5f75",
+  "source_capsule_sha256": "d81d8ba4926014ff573231cfdc332ae6bcf50defbba72782c410628c3e04306b",
+  "source_file_count": 92,
+  "input_archive_sha256": "fadc465b169f47cb62226dfe9aefa74326c9193ce09205ff30f82e0fdf13743b",
+  "capsule_id": "53680bb7ea43ef48d697e9c5dd5f2b7f1a0845ee17f784554bf972f0c64bfe1d",
+  "source_revision": "REV3_1_POOL_GUARD_d81d8ba4926014ff",
+  "recipe_revision": 3,
+  "apparatus_revision": "3.1_POOL_REJECTION_GUARD_ONLY",
+  "pool_guard": {
+    "knight_local_max_draw": 32000000,
+    "fit8_max_draw": 536870912,
+    "progress_every_draws": 8388608,
+    "proposal_distribution_changed": false,
+    "straddle_acceptance_semantics_changed": false,
+    "rng_stream_changed": false,
+    "training_or_eval_schedule_changed": false
+  },
+  "local_contract_tests_expected": 10,
+  "supersedes_notebook_sha256": "59ccb27f2b6115dc829130e37422ec7237dec18260d18bbaed1097a6b4b34e8c",
+  "reason": "T-Rex exhausted Knight-local 32M rejection-sampling engineering guard before optimizer step 1.",
+  "validation": {
+    "notebook_all_code_cells_ast_valid": true,
+    "embedded_source_inventory_and_hashes_valid": true,
+    "embedded_source_contract_tests": {
+      "ran": 10,
+      "status": "PASS"
+    },
+    "physical_a100_trex_pool_guard_verified": false
+  }
+}

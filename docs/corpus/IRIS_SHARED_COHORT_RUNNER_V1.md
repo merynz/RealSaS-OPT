@@ -1,139 +1,150 @@
 # Shared IRIS cohort runner
 
-The Knight E2E line is the regression reference. Mage/FIT1 and historical Knight
-notebooks retain their original scopes. Research preparation is operator-selected;
-product execution must eventually accept input and construct qualified output
-without asking the customer for preregistration or teacher data. Go owns both
-lane lifecycles. These producers create no second Python Attempt, Registry,
-qualification database or workflow ledger.
+The historical Knight post-SDF-head IRIS line is an apparatus and chronology reference,
+not the generic authority for Fit8. Generic Fit8 evaluation is cohort-owned: all eight
+subjects are equal witnesses under one shared formulation and no subject name may select
+a production algorithm or qualification rule. Knight remains a separate regression witness.
 
-The trainer uses one model and optimizer over a variable cohort, a bounded
-two-subject shard cache and every subject's evaluation. Selection metadata pins
-the current eight inputs; subject names, morphology and joint indices never
-select production algorithms. 10,000 subjects are not a measured result.
+The shared runner is a research execution boundary: it uses one image-only IRIS model,
+one active optimizer state, and one deterministic cohort contract. It does not create
+Product PASS, Fit8 PASS, unseen claims, or a second workflow/qualification authority.
 
-## Reusable input preparation
+## Inputs and forward contract
 
-Build tools/corpus/ufbx_bind_scene_probe_v1.c against official ufbx revision
-5955c5c0b042ac2dc6f32955ab206aaec0620cfc. Run the module
-tools.corpus.prepare_iris_observations_v1 with --source-root, --output-root,
---blender and --probe absolute paths. The Blender launcher must supply Blender
-4.0.2's Python/NumPy and background arguments.
+`tools/training/prepare_iris_cohort_v1.py` admits the eight controlled bind
+observations, validates source/camera/raster/mask proofs, loads exact frozen
+DINOv2-S, and materializes subject shards. Only RGB-derived DINO tokens, token
+positions, and qualified cameras enter IRIS forward. Masks, source geometry, rigs,
+weights, depth, R512 audit coordinates, and Stage13 outcomes are never forward
+inputs.
 
-Packets are addressed by source, producer, launcher, probe and policy bytes.
-Changing one source regenerates only its packet. Reuse checks the proof,
-camera, snapshot and every raster/mask hash. Failures retain diagnostics and use
-fresh producer directories. This is immutable input transport, not workflow state.
+Each subject owns immutable F* query pools and source-ray pools. Training and
+heldout points are disjoint. The source mask labels silhouette rays; F* certifies
+that the finite-depth renderer/sampler gives those frozen ray labels the correct
+sign before training.
 
-The common importer declares an existing glTF skin ancestor when the optional
-skeleton locator is absent, enables original bind recovery and excludes actual
-armature custom-shape objects. It changes no node transform, inverse bind, weight
-or raw file. Native default/frame0 is not assumed to be bind rest.
+## Revision 3 — post-SDF Knight chronology
 
-Independent raw glTF/ufbx geometry and triangle/pixel-square reference checks
-qualify controlled bind observations for image-derived F* preparation. Current
-eight inputs pass relative vertex error <= 1e-5, matching bone cardinality and
-all 64 mask gaps <= 2 px. This does not admit full native-motion mechanical
-truth, native lit parity or product attachments. Those courts remain required
-for corresponding TESSA/AXIS/MIRA/product boundaries. The older 256 px candidate
-receipt is unchanged.
+Revision 3 supersedes the earlier 48,000 sequential-update design. A subject
+exposure is no longer treated as an Adam update. One **global optimizer step** means:
 
-## Training and notebook generation
+1. zero the shared gradients;
+2. compute one subject loss for every cohort member;
+3. backpropagate each loss with equal `1 / subject_count` weight;
+4. clip the resulting shared gradient once;
+5. call `optimizer.step()` once and `scheduler.step()` once.
 
-tools/training/prepare_iris_cohort_v1.py checks all proofs before loading exact
-frozen DINOv2-S. Only RGB enters the backbone. IRIS forward takes patch tokens,
-positions and cameras; masks, source geometry, rig, weights and depth never enter
-forward. The existing image-derived F* is the teacher. Heldout and near-zero pools
-have independent seeds/no exact duplicates; NumPy/Torch parity is measured.
+With eight subjects, 19,200 global updates therefore contain 153,600 subject
+exposures. Every subject is exposed exactly once per global update.
 
-FIT8_IRIS_SHARED_TRAINING_POLICY_V1.json freezes one fresh V4/TP64 model, the
-Knight-selected C direct F* plus source silhouette objective, balanced subject/view
-schedules and worst-subject checkpoint selection, blind to Stage13. The current
-budget is 48,000 shared steps: 6,000 per subject, never eight independent fits.
+The stage schedule reproduces the preserved post-SDF Knight C lineage rather than
+using the unrelated later 6,000-step demo intervention:
 
-Run tools.notebooks.build_iris_cohort_v1 with --input-root, --dino-source,
---source-revision EXACT_MERGED_COMMIT and --output. It embeds the transitive repo
-source closure, genuine pinned DINO Git snapshot/license and exact input hashes.
-With --drive-input-relative-path, large observation/camera/proof bytes are one
-SHA-bound Drive ZIP loaded automatically after mount; the builder emits that ZIP.
-Public weights are SHA/size checked and cached in Drive.
-Run All needs no GitHub checkout/token or broad Drive scan.
+| Stage | Global steps | Objective | LR → eta-min | Heldout eval | Replay |
+|---|---:|---|---|---:|---|
+| `DIRECT_FSTAR_COLD` | 4,800 | direct F* Huber | `8e-5 → 4e-6` | 200 | rank at init, refresh every eval |
+| `C_OBJECTIVE` | 4,800 | direct F* + source silhouette | `8e-5 → 4e-6` | 200 | rank once from selected direct start, then freeze |
+| `C_LONG_HORIZON` | 9,600 | direct F* + source silhouette | `2e-5 → 1e-6` | 400 | keep the same fixed C replay bank |
 
-The capsule mounts Drive, checks A100/CUDA/BF16, prepares local shards with verified
-Drive persistence, runs actual production-model optimizer preflight and starts or
-resumes shared fitting. Checkpoints contain model/optimizer/scheduler/AMP/RNG/query
-state and exact code/input/policy bindings. Verified immutable payload precedes
-the latest pointer. Interrupted partial optimizer state is never saved; the
-uncommitted prefix repeats. Best model state is inside the resume checkpoint.
-Results are copied with hash verification.
+Each stage starts a fresh AdamW/cosine optimizer, matching the historical Knight
+experiments. Weight decay remains zero. The 32,768-point query mixture remains
+16,384 global + 8,192 near-zero + 4,096 sign-straddle + 4,096 replay. The C ray
+apparatus remains 256 rays/update, balanced across 8 views × 4 strata, with 128
+depth samples and `tau = 1/512`. The historical C schedule seeds are restored:
+query `260924101`, ray schedule `260924202`, ray-pool construction `260924203`.
 
-The exact shared checkpoint then feeds the existing contained T512/T1024 decoder
-for every subject. Existing Compiler raster/coverage/component/silhouette metrics
-produce raw per-view court data, masks and comparisons. Failure stays visible,
-others still receive their reports and no failed surface is replaced analytically.
-Outputs resume by checkpoint/observation/decoder identity. Compact archive,
-logs and import payload persist in Drive.
+The shared-cohort intervention is only the cohort dimension itself: subject pools
+are independent and deterministic, all eight contribute equally to each global
+update, and checkpoint selection uses a **worst-subject envelope** over the Knight
+heldout F* axes. Cohort means are telemetry and cannot hide a failed subject.
 
-## Platform consumption and scope
+## Revision 3.1 — rejection-pool engineering guard
 
-Stage03 may require source_audit.iris_observation_admission plus subject_key.
-It checks the proof's raw source against Stage01 and camera/raster/mask hashes
-against actual Stage05/07 inputs; its scoped binding is retained. Legacy Knight
-inputs keep their existing payload shape.
+Revision 3.1 changes no proposal distribution, F* acceptance semantics, pool size,
+training objective, optimizer schedule, heldout selection rule, or subject weighting.
+It only replaces the historical Knight-local 32,000,000-point rejection-sampler draw
+ceiling with a Fit8 engineering ceiling of 536,870,912 points and emits progress every
+8,388,608 draws. The wider ceiling is activated by the Fit8 policy; the pool helper's
+historical default remains 32,000,000.
 
-A shared IRIS preregistration declares shared_cohort_required: true, requiring
-an exact iris_fit.shared_cohort import bundle. The common execution consumer
-validates checkpoint, cohort/policy hashes, balanced exposures, completion and
-all subject metrics. Existing execution/qualification gates remain active.
+This guard exists because rejection rate is geometry-dependent. A subject exhausting a
+Knight-sized compute ceiling before optimizer step 1 is an apparatus-capacity signal, not
+a scientific reason to exclude that geometry. The same seed and acceptance rule must
+produce byte-identical accepted straddle points whenever both ceilings are large enough;
+that sequence parity is covered by contract test. A 512M exhaustion remains fail-closed
+and must trigger apparatus redesign rather than another casual ceiling increase.
 
-Set iris_fit.training_profile to SHARED_IRIS_IMAGE_DERIVED_FSTAR_V1, bind
-shared_training_policy and shared_cohort_manifest file references, and include
-training_profile/shared_training_policy_sha256/shared_cohort_required in the
-preregistration qualification policy. Stage09/10 use this explicit F* profile
-instead of the older V2 dense-depth objective, verify the subject's Stage03
-observation binding and retain the existing Stage11/12/13 contracts and courts.
-The default legacy dense-depth and sealed Knight demo profiles are unchanged.
+## Logging, evaluation, and checkpointing
 
-Notebook outputs are external research bytes. Import them and use existing Go
-entry/released-Attempt/target/exit on deployed main; the capsule invents no IDs or
-ProductRevision. CPU engineering preflight is separate from physical A100 runtime
-preflight. A notebook build or CPU test proves no live Go qualification,
-FIT8 success, unseen/generalization or product readiness.
-# Revision 2: Knight core and training apparatus
+`[TRAIN100]` is emitted every 100 global updates with shared mean/worst training
+loss/MAE, silhouette telemetry, training wrong-sign/ray fractions, LR, elapsed/ETA,
+and GPU memory. The persisted trace also contains per-subject window means.
 
-The geometry model, DINO adapter, F* target and V5 loss implementations retain
-the exact bytes from the Knight C lineage. The executable reference is
-`canonical/FIT8_IRIS_KNIGHT_RECIPE_REFERENCE_V1.json`; preparation and the trainer
-reject core/config/loss/optimizer-control drift before optimizer state is created.
-Knight's final carrier-native notebook closes teacher-relative mechanics and
-does not run an IRIS optimizer. The historical C checkpoint is a demo fallback,
-not a scientific IRIS P999 PASS. Neither fact is promoted into Fit8 evidence.
+At stage-specific evaluation intervals, every subject is evaluated on its complete
+frozen heldout set. `[EVAL_SUBJECT]` reports sign disagreement, MAE, near-zero MAE,
+p95 and RMSE. `[EVAL_SHARED]` reports cohort means plus the worst subject/metric
+owners. Only these heldout F* metrics select checkpoints. R512 and Stage13 remain
+strictly selection-blind.
 
-Revision 2 removes weight decay, restores the cold direct/C learning-rate floor,
-initial SDF bias and seed, and restores the 16384/8192/4096/4096 global/near/straddle/
-fixed-initial-residual-replay distribution. Training and heldout pools are disjoint;
-heldout includes global, near-zero and straddle evidence and cannot enter replay.
-Every update uses 256 source rays balanced over all 8 views and all four original
-strata. Each frozen pixel/phase pair is admitted only after the same 128-sample,
-tau=1/512 renderer gives the source-mask label the correct sign under F*.
-F* certifies the apparatus; the source mask remains the silhouette label.
+Checkpoints contain the exact model, optimizer, scheduler, RNGs (including the
+stateful direct-stage per-subject query RNGs), replay banks, stage state, partial
+100-step log window, progress, and code/input/policy binding. Atomic payload write
+precedes the latest pointer. Interrupted and uninterrupted training are tested to
+produce byte-equal model state under the same inputs.
 
-The explicit cohort intervention is a fresh joint C fit with one model and
-optimizer, 48000 shared steps/6000 subject exposures, subject-specific immutable
-input pools, and worst-subject aggregation on the original heldout selection axes.
-It is not a replay of Knight's 4800 direct + 4800 C + 9600 continuation history.
-The difference record is embedded and bound to the checkpoint policy.
+## Final surface court
 
-The complete R512 source exterior census is sealed in every production input
-shard before optimizer step 1. After checkpoint selection, the same source-only
-certificate must reproduce the count and the learned field must have zero
-nonpositive certified exterior points. Exact contained T512/T1024 decoding and
-unchanged P999 on every view/subject remain required. An engineering lattice
-smaller than R512 cannot produce `PASS_RAW_COURT` even if its sign check passes.
-No exterior audit coordinates or Stage13 feedback enter training or selection.
+After all optimizer stages close, the selected shared checkpoint is decoded for
+every subject independently:
 
-This changes capsule/checkpoint identity. Prior checkpoints remain intact and
-cannot resume under the new policy or source. The physical A100 Run All preflight
-still must execute before the production fit. CPU engineering checks may reduce
-pool/batch counts, retain the full production model and exact ray depth/tau, and
-must report their reduced scope; they do not certify A100 execution or Fit8 PASS.
+1. reproduce the prefit source-only R512 exterior census and require zero learned
+   nonpositive certified exterior points;
+2. materialize the learned zero level set with the existing exact-contained
+   T512/sparse-T1024 decoder;
+3. emit the downstream `SignedZeroSurface` (`zero_surface.npz`);
+4. run unchanged P999 source-mask courts on all eight views of every subject.
+
+The notebook prints `[R512]`, `[SIGNED_ZERO_SURFACE]`, `[P999]`, and
+`[SUBJECT_COURT]` records so the pass-relevant quantities are visible in the run
+log. Training loss or cohort-average metrics can never mint `PASS_RAW_COURT`.
+
+Historical note: the preserved Knight C checkpoint `222350d1...` is the frozen
+C/demo lineage used by later Knight work, but it was not itself a strict learned
+IRIS R512+P999 scientific PASS. Fit8's all-subject raw court intentionally keeps
+the stricter R512 + exact containment + P999 requirement rather than weakening it
+to reproduce the historical fallback status.
+
+## Notebook transport
+
+`tools/notebooks/build_iris_cohort_v1.py` embeds the hash-bound RealSaS source
+closure and input identities. It no longer embeds the multi-megabyte DINO Git tree
+as base64 in a Colab code cell. The notebook shallow-checks out exact DINO revision
+`7764ea0f912e53c92e82eb78a2a1631e92725fc8`, verifies the public weight SHA, and
+keeps all active work/cache under `/content`. This removes the prior Colab editor
+lag without relaxing source authority.
+
+Contract tests are loaded by verified file path instead of importing the generic
+`tests` top-level package, avoiding Colab package-shadowing. A physical A100
+preflight exercises all three training stages, all eight subjects, atomic
+checkpoint restore and continuation before the production fit starts.
+
+## Platform consumption
+
+`shared_iris_execution_v1.py` validates the same joint-update semantics. For a
+completed run it requires:
+
+- one shared model and one shared optimizer authority;
+- `actual_optimizer_steps == policy.steps`;
+- every subject exposure count equals that global-step count;
+- total subject exposures equal `subject_count * global_steps`;
+- the three stage receipts are present in order;
+- the final heldout evaluation contains every subject;
+- no Fit8/product/unseen claim was minted by the trainer.
+
+The platform owns the ResearchAttempt and canonical compiler run. At an external learned
+stage boundary the same run may enter `WAITING_EXTERNAL_EVIDENCE`; A100/Colab is only a
+compute worker. Exact checkpoint/result/receipt bytes are CAS-bound back to that stage and
+the same run resumes. Import itself never mints qualification.
+
+The imported checkpoint then continues through the existing Go/Compiler qualification
+lane. The notebook is research execution bytes, not qualification state.

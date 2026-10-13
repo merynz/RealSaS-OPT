@@ -67,6 +67,7 @@ def prepare(input_root, output_root, source_dir, weight_path, policy, device="cu
     subjects = []
     for index, (row, (folder, proof, binding)) in enumerate(zip(roster["selected"], verified)):
         start = time.monotonic()
+        print(f"[PREPARE_BEGIN] {index+1}/{len(verified)} {row['subject_key']} verified_observation={binding[:12]}",flush=True)
         name = row["subject_key"]+".pt"
         path = output_root/name
         identity = value_hash({"observation_binding":binding, "policy":policy,
@@ -101,6 +102,7 @@ def prepare(input_root, output_root, source_dir, weight_path, policy, device="cu
             tokens.append(patches.flatten(2).transpose(1,2).cpu())
             masks.append(np.frombuffer((folder/f"V{i}.mask.bin").read_bytes(), np.uint8).reshape(1024,1024)>0)
         image_tokens = torch.stack(tokens,dim=1).float()
+        print(f"[PREPARE_DINO] {row['subject_key']} views=8 tokens=1369x384 seconds={time.monotonic()-start:.1f}",flush=True)
         axis = (torch.arange(37,dtype=torch.float32)+.5)*(2./37)-1.
         yy,xx = torch.meshgrid(axis,axis,indexing="ij")
         token_xy = torch.stack([xx,yy],dim=-1).reshape(1,1,1369,2).expand(1,8,-1,-1).clone()
@@ -128,8 +130,12 @@ def prepare(input_root, output_root, source_dir, weight_path, policy, device="cu
                  "boundary_pixels":boundary_pixels,
                  "camera_half_extent":torch.from_numpy(cam_half),"resolution":1024}
         shard.update(query_pools(shard,policy,policy["seed"]+index*1000000,device))
-        shard.update(certified_ray_pools(shard,policy,policy["ray_schedule_seed"]+index*1000000,device))
+        print(f"[PREPARE_QUERIES] {row['subject_key']} near={len(shard['near_points'])} straddle={len(shard['straddle_points'])} heldout={len(shard['heldout_points'])} seconds={time.monotonic()-start:.1f}",flush=True)
+        shard.update(certified_ray_pools(shard,policy,policy["silhouette_pool_seed"]+index*1000000,device))
+        print(f"[PREPARE_RAYS] {row['subject_key']} certified_rays={len(shard['ray_xy'])} strata=32 seconds={time.monotonic()-start:.1f}",flush=True)
+        print(f"[PREPARE_R512_BEGIN] {row['subject_key']} source-only census",flush=True)
         shard['source_exterior_census']=exterior_scan(shard,resolution=512,device=device)
+        print(f"[PREPARE_R512_DONE] {row['subject_key']} certified={shard['source_exterior_census']['certified_exterior_count']} seconds={time.monotonic()-start:.1f}",flush=True)
         heldout=shard["heldout_points"].numpy();heldout_targets=shard["heldout_targets"].numpy()
         parity=source_signed_field_torch_v5(torch.from_numpy(heldout[:4096]),**kwargs).cpu().numpy()
         parity_error=float(np.max(np.abs(parity-heldout_targets[:4096])))

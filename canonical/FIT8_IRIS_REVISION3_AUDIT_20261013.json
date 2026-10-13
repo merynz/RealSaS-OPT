@@ -1,0 +1,158 @@
+{
+  "schema": "RealSaS.Fit8IrisRevision3Audit.v1",
+  "date": "2026-10-13",
+  "status": "SOURCE_AUDIT_CLOSED__PHYSICAL_A100_RUN_PENDING",
+  "scope": "POST_SDF_HEAD_KNIGHT_IRIS_LINEAGE_TO_SHARED_FIT8",
+  "historical_cutoff": "SceneFirstSignedGeometryV4 / TP64 signed-field lineage; retired pre-V5 objective ideas are not recipe authority",
+  "knight_chronology": [
+    {
+      "stage": "DIRECT_FSTAR_COLD",
+      "optimizer_steps": 4800,
+      "evaluation_interval": 200,
+      "learning_rate": 8e-05,
+      "eta_min": 4e-06,
+      "replay": "hard residual bank initialized at step 0 and refreshed every heldout evaluation"
+    },
+    {
+      "stage": "C_OBJECTIVE",
+      "optimizer_steps": 4800,
+      "evaluation_interval": 200,
+      "learning_rate": 8e-05,
+      "eta_min": 4e-06,
+      "objective": "direct F* Huber + source silhouette",
+      "replay": "fixed residual bank ranked from selected direct-F* start"
+    },
+    {
+      "stage": "C_LONG_HORIZON",
+      "optimizer_steps": 9600,
+      "evaluation_interval": 400,
+      "learning_rate": 2e-05,
+      "eta_min": 1e-06,
+      "historical_selected_absolute_effective_step": 19200,
+      "historical_selected_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0"
+    }
+  ],
+  "excluded_from_recipe": {
+    "later_6000_step_spatial_risk_replay_demo": {
+      "reason": "separate demo-only replay intervention after the preserved C checkpoint; the new candidate was not promoted over frozen C",
+      "not_a_training_budget_authority": true
+    },
+    "incomplete_32000_step_bc_endpoint_continuation": {
+      "reason": "The later B/C endpoint-closure continuation was operator-stopped/incomplete. Canonical IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_20260924 explicitly excludes it from scientific evidence and starts from the completed long-horizon selected states.",
+      "scientific_evidence_consumed": false,
+      "not_a_training_budget_authority": true,
+      "canonical_evidence_boundary": "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_20260924.json"
+    }
+  },
+  "revision2_findings": [
+    {
+      "code": "OPTIMIZER_HORIZON_MULTIPLIED_BY_SUBJECT_COUNT",
+      "finding": "48000 sequential one-subject Adam updates conflated subject exposure count with global optimizer-step count",
+      "disposition": "FIXED"
+    },
+    {
+      "code": "ARBITRARY_6000_EXPOSURES_PER_SUBJECT",
+      "finding": "6000 was a declared cohort budget, not the preserved Knight C optimizer history",
+      "disposition": "FIXED"
+    },
+    {
+      "code": "COLD_C_FROM_STEP_1",
+      "finding": "Revision 2 skipped the historical 4800-step direct-F* stage before C",
+      "disposition": "FIXED"
+    },
+    {
+      "code": "REPLAY_LIFECYCLE_DRIFT",
+      "finding": "Revision 2 froze initial-model replay instead of direct-stage refresh then C-stage freeze from selected direct checkpoint",
+      "disposition": "FIXED"
+    },
+    {
+      "code": "SILHOUETTE_POOL_SEED_DRIFT",
+      "finding": "ray pool construction reused the ray schedule seed instead of Knight silhouette pool seed 260924203",
+      "disposition": "FIXED"
+    },
+    {
+      "code": "PLATFORM_CONSUMER_REV1_DRIFT",
+      "finding": "shared_iris_execution_v1 still required the superseded Revision-1 sampling string and one-subject-per-optimizer-step exposure invariant",
+      "disposition": "FIXED_IN_REVISION3_BRANCH"
+    },
+    {
+      "code": "COLAB_NOTEBOOK_TRANSPORT_BLOAT",
+      "finding": "multi-megabyte DINO Git snapshot embedded as base64 caused editor lag",
+      "disposition": "FIXED_BY_EXACT_SHALLOW_CHECKOUT"
+    },
+    {
+      "code": "COLAB_TEST_PACKAGE_SHADOWING",
+      "finding": "from tests.iris import could resolve an unrelated installed tests package",
+      "disposition": "FIXED_BY_HASH_BOUND_PATH_IMPORT"
+    },
+    {
+      "code": "REPLAY_POOL_RNG_STREAM_DRIFT",
+      "finding": "Revision-3 draft initially split Knight replay global and replay near-zero draws across seed+103 and seed+104; Knight uses one advanced seed+103 stream for both.",
+      "disposition": "FIXED"
+    },
+    {
+      "code": "RAY_CERTIFICATION_DRAW_GRANULARITY_DRIFT",
+      "finding": "Revision-3 draft initially used adaptive 32..256 ray certification batches; Knight C uses fixed 512 candidate tuples per iteration.",
+      "disposition": "FIXED"
+    },
+    {
+      "code": "CUDA_DETERMINISM_CONTROL_DRIFT",
+      "finding": "Revision-3 draft initially omitted cudnn.deterministic=True and cudnn.benchmark=False from the Knight runtime controls.",
+      "disposition": "FIXED"
+    },
+    {
+      "code": "TRAINING_AUTOCAST_QUERY_DTYPE_DRIFT",
+      "finding": "Revision-3 draft initially cast scene planes to FP32 before model.query during training; historical Direct/C training queries use the autocast-produced planes directly.",
+      "disposition": "FIXED"
+    }
+  ],
+  "revision3_training_contract": {
+    "global_optimizer_steps": 19200,
+    "subject_count": 8,
+    "subject_exposures_per_global_step": 8,
+    "total_subject_exposures": 153600,
+    "gradient_rule": "equal 1/8 contribution from every subject; one clip and one optimizer.step per global step",
+    "shared_model_count": 1,
+    "shared_optimizer_count_active_at_once": 1,
+    "training_log_interval": 100,
+    "heldout_evaluation_intervals_by_stage": [
+      200,
+      200,
+      400
+    ],
+    "checkpoint_selection": "worst-subject envelope over Knight heldout F* axes; cohort means are telemetry only",
+    "r512_or_stage13_feedback_to_training": false
+  },
+  "post_selection_court": {
+    "r512": "zero nonpositive source-certified exterior points, full production R512 only",
+    "surface": "deterministic contained T512/T1024 SignedZeroSurface decode with exact containment",
+    "p999": "unchanged per-view recall/precision/component/hole/interior-uncovered/silhouette-edge gates on every subject and every view",
+    "fit8_pass_from_training_loss_allowed": false
+  },
+  "historical_truth_boundary": {
+    "historical_frozen_c_is_strict_scientific_p999_pass": false,
+    "historical_frozen_c_role": "preserved Knight C/demo fallback lineage",
+    "fit8_all_subject_raw_court_is_intentionally_stricter": true
+  },
+  "verification": {
+    "shared_trainer_contract_tests": "8/8 PASS after joint staged rewrite",
+    "compiler_shared_binding_tests": "4/4 PASS against revised exposure/sampling semantics",
+    "physical_a100_execution": "PENDING",
+    "fit8_pass": false,
+    "unseen_claim": false,
+    "product_pass": false,
+    "exact_knight_runtime_controls": "cudnn deterministic=true, benchmark=false, TF32=false, highest FP32 matmul",
+    "exact_replay_rng_stream": "seed+103 advanced across replay global then replay near-zero",
+    "exact_ray_certification_candidate_batch": 512
+  },
+  "mage_cross_check": {
+    "role": "AUXILIARY_DISCIPLINE_CHECK__NOT_RECIPE_AUTHORITY",
+    "finding": "Older Mage signed-field FIT persisted visible metric/checkpoint telemetry with optimizer state and kept inference teacher-free, but used an earlier architecture/objective and therefore contributes no Fit8 LR/step authority.",
+    "retained_lessons": [
+      "fail-closed preregistration",
+      "durable optimizer checkpoint state",
+      "visible periodic metrics",
+      "final geometry court separate from training telemetry"
+    ]
+  }
+}

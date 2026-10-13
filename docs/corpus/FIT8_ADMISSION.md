@@ -140,6 +140,8 @@ blender --background --factory-startup --python-exit-code 1 \
 
 Defaults are 1024 px, shared frame scale 1.12, minimum border margin 8 px and
 Cycles CPU with seed 0 / 16 samples / no denoising / Standard view transform.
+NumPy must be available to Blender's own Python, not only the external training
+interpreter. Hosted Ubuntu CI installs `python3-numpy` for this boundary.
 Each receipt binds the source, producer/helper bytes, Blender binary, camera,
 scene snapshot and pixels. Output must be fresh; a failed/partial directory is
 retained for diagnosis and cannot carry a stale success receipt into a retry.

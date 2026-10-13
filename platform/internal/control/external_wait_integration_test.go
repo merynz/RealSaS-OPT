@@ -71,20 +71,18 @@ func TestExternalEvidenceWaitIsResumableAndDoesNotMintFailure(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	diagnosticsHash := strings.Repeat("a", 64)
 	result, err := a.CommitStageResult(ctx, orchestration.StageCommitRequest{
 		ExecutionID: executionID.String(),
 		AttemptID:   attemptID.String(),
 		StageID:     stageID,
 		EngineResult: orchestration.EngineStageResult{
-			StageID: stageID,
-			Status:  "WAITING_EXTERNAL_EVIDENCE",
-			Failure: &orchestration.EngineFailureEvidence{
-				Code:  "EXTERNAL_STAGE_EVIDENCE_REQUIRED",
-				Class: "EXTERNAL_EVIDENCE",
-				Diagnostics: map[string]any{
-					"missing_roles": []string{"checkpoint", "result"},
-				},
-			},
+			StageID:         stageID,
+			Status:          "WAITING_EXTERNAL_EVIDENCE",
+			ExecutedStageIDs: []string{},
+			Outputs:         []orchestration.EngineOutput{},
+			DiagnosticsHash: diagnosticsHash,
+			Failure:         nil,
 		},
 	})
 	if err != nil {
@@ -117,7 +115,7 @@ func TestExternalEvidenceWaitIsResumableAndDoesNotMintFailure(t *testing.T) {
 		t.Fatalf("wait finalized attempt: %s", state)
 	}
 	var events int
-	if err := pool.QueryRow(ctx, `SELECT count(*) FROM attempt_events WHERE attempt_id=$1 AND event_type='STAGE_WAITING_EXTERNAL_EVIDENCE'`, attemptID).Scan(&events); err != nil {
+	if err := pool.QueryRow(ctx, `SELECT count(*) FROM attempt_events WHERE attempt_id=$1 AND event_type='STAGE_WAITING_EXTERNAL_EVIDENCE' AND payload->>'diagnostics_hash'=$2`, attemptID, diagnosticsHash).Scan(&events); err != nil {
 		t.Fatal(err)
 	}
 	if events != 1 {

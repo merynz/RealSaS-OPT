@@ -48,6 +48,19 @@ func CompileWorkflow(ctx workflow.Context, input CompileWorkflowInput) (CompileW
 	completed := make([]StageCommitResult, 0, len(plan.Stages))
 	signalChannel := workflow.GetSignalChannel(ctx, ExternalStageReadySignalName)
 
+	refreshAt := func(index int, expectedStageID string) (ResolvedCompilePlan, error) {
+		var refreshed ResolvedCompilePlan
+		if err := workflow.ExecuteActivity(platformCtx, ResolveCompilePlanActivityName, input).Get(ctx, &refreshed); err != nil {
+			return ResolvedCompilePlan{}, err
+		}
+		if refreshed.TargetStageID != plan.TargetStageID || len(refreshed.Stages) != len(plan.Stages) || index >= len(refreshed.Stages) || refreshed.Stages[index].StageID != expectedStageID {
+			return ResolvedCompilePlan{}, temporal.NewNonRetryableApplicationError(
+				"external evidence changed compile graph identity", "ExternalEvidencePlanDrift", nil,
+			)
+		}
+		return refreshed, nil
+	}
+
 	for index := 0; index < len(plan.Stages); {
 		stage := plan.Stages[index]
 		switch stage.Action {
@@ -100,21 +113,22 @@ func CompileWorkflow(ctx workflow.Context, input CompileWorkflowInput) (CompileW
 			}
 
 			if engineResult.Status == "WAITING_EXTERNAL_EVIDENCE" {
-				var signal ExternalStageReadySignal
-				signalChannel.Receive(ctx, &signal)
-				if signal.AttemptID != input.AttemptID || signal.StageID != stage.StageID || signal.EvidenceSHA256 == "" {
-					return CompileWorkflowResult{}, temporal.NewNonRetryableApplicationError(
-						"external evidence signal identity drift", "ExternalEvidenceSignalViolation", nil,
-					)
-				}
-				var refreshed ResolvedCompilePlan
-				if err := workflow.ExecuteActivity(platformCtx, ResolveCompilePlanActivityName, input).Get(ctx, &refreshed); err != nil {
-					return CompileWorkflowResult{}, err
-				}
-				if refreshed.TargetStageID != plan.TargetStageID || len(refreshed.Stages) != len(plan.Stages) || index >= len(refreshed.Stages) || refreshed.Stages[index].StageID != stage.StageID {
-					return CompileWorkflowResult{}, temporal.NewNonRetryableApplicationError(
-						"external evidence changed compile graph identity", "ExternalEvidencePlanDrift", nil,
-					)
+				// Re-resolve before blocking. Evidence can arrive after the Engine
+				// observed it missing but before the WAITING DB status commits; in
+				// that race the binder intentionally sends no signal. Semantic SHA
+				// change is the durable lost-wakeup guard.
+				refreshed, err := refreshAt(index, stage.StageID)
+				if err != nil { return CompileWorkflowResult{}, err }
+				if refreshed.Stages[index].ExpectedSemanticSHA256 == stage.ExpectedSemanticSHA256 {
+					var signal ExternalStageReadySignal
+					signalChannel.Receive(ctx, &signal)
+					if signal.AttemptID != input.AttemptID || signal.StageID != stage.StageID || signal.EvidenceSHA256 == "" {
+						return CompileWorkflowResult{}, temporal.NewNonRetryableApplicationError(
+							"external evidence signal identity drift", "ExternalEvidenceSignalViolation", nil,
+						)
+					}
+					refreshed, err = refreshAt(index, stage.StageID)
+					if err != nil { return CompileWorkflowResult{}, err }
 				}
 				plan = refreshed
 				allowed = executeStageIDs(plan)
@@ -124,9 +138,7 @@ func CompileWorkflow(ctx workflow.Context, input CompileWorkflowInput) (CompileW
 			completed = append(completed, committed)
 			if engineResult.Status != "PASS" && engineResult.Status != "PASS_DEMO_ONLY" {
 				code := "COMPILER_STAGE_FAILED"
-				if engineResult.Failure != nil && engineResult.Failure.Code != "" {
-					code = engineResult.Failure.Code
-				}
+				if engineResult.Failure != nil && engineResult.Failure.Code != "" { code = engineResult.Failure.Code }
 				return CompileWorkflowResult{}, temporal.NewNonRetryableApplicationError(
 					fmt.Sprintf("%s:%s", stage.StageID, code), "CompilerStageFailure", nil,
 				)

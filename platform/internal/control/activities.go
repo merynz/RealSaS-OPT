@@ -256,9 +256,10 @@ func (a Activities) PrepareStageExecution(ctx context.Context, req orchestration
 	} else {
 		var existingAttempt uuid.UUID
 		var existingStage, status string
+		var retryNumber int
 		if err := tx.QueryRow(ctx, `
-			SELECT attempt_id,stage_contract,status FROM executions WHERE id=$1
-		`, executionID).Scan(&existingAttempt, &existingStage, &status); err != nil {
+			SELECT attempt_id,stage_contract,status,retry_number FROM executions WHERE id=$1 FOR UPDATE
+		`, executionID).Scan(&existingAttempt, &existingStage, &status, &retryNumber); err != nil {
 			return orchestration.EngineStageRequest{}, err
 		}
 		if existingAttempt != attemptID || existingStage != req.StageID {
@@ -266,6 +267,23 @@ func (a Activities) PrepareStageExecution(ctx context.Context, req orchestration
 		}
 		if status == "PASS" {
 			return orchestration.EngineStageRequest{}, errors.New("EXECUTION_ALREADY_PASSED")
+		}
+		if status == "WAITING_EXTERNAL_EVIDENCE" {
+			retryNumber++
+			if _, err := tx.Exec(ctx, `
+				UPDATE executions
+				SET status='RUNNING',retry_number=$2,started_at=now(),finished_at=NULL,error_code=NULL,error_payload=NULL
+				WHERE id=$1
+			`, executionID, retryNumber); err != nil {
+				return orchestration.EngineStageRequest{}, err
+			}
+			payload, _ := json.Marshal(map[string]any{
+				"execution_id": executionID.String(), "stage_id": req.StageID, "retry_number": retryNumber,
+			})
+			if _, err := tx.Exec(ctx, `INSERT INTO attempt_events(attempt_id,event_type,payload)
+				VALUES ($1,'STAGE_EXECUTION_RESUMED',$2)`, attemptID, payload); err != nil {
+				return orchestration.EngineStageRequest{}, err
+			}
 		}
 	}
 	if err := tx.Commit(ctx); err != nil {
@@ -456,6 +474,31 @@ func (a Activities) CommitStageResult(ctx context.Context, req orchestration.Sta
 	}
 	if dbAttempt != attemptID || dbStage != req.StageID {
 		return orchestration.StageCommitResult{}, errors.New("EXECUTION_RESULT_IDENTITY_DRIFT")
+	}
+
+	if req.EngineResult.Status == "WAITING_EXTERNAL_EVIDENCE" {
+		if len(req.EngineResult.ExecutedStageIDs) != 0 || len(req.EngineResult.Outputs) != 0 || req.EngineResult.Failure != nil {
+			return orchestration.StageCommitResult{}, errors.New("EXTERNAL_EVIDENCE_WAIT_CONTRACT_DRIFT")
+		}
+		if _, err := tx.Exec(ctx, `
+			UPDATE executions
+			SET status='WAITING_EXTERNAL_EVIDENCE',finished_at=NULL,error_code=NULL,error_payload=NULL
+			WHERE id=$1
+		`, executionID); err != nil {
+			return orchestration.StageCommitResult{}, err
+		}
+		payload, _ := json.Marshal(map[string]any{
+			"execution_id": executionID.String(), "stage_id": req.StageID,
+			"diagnostics_hash": req.EngineResult.DiagnosticsHash, "qualification_minted": false,
+		})
+		if _, err := tx.Exec(ctx, `INSERT INTO attempt_events(attempt_id,event_type,payload)
+			VALUES ($1,'STAGE_WAITING_EXTERNAL_EVIDENCE',$2)`, attemptID, payload); err != nil {
+			return orchestration.StageCommitResult{}, err
+		}
+		if err := tx.Commit(ctx); err != nil {
+			return orchestration.StageCommitResult{}, err
+		}
+		return orchestration.StageCommitResult{StageID: req.StageID, Status: "WAITING_EXTERNAL_EVIDENCE"}, nil
 	}
 
 	if !success {

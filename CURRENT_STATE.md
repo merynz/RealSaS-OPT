@@ -69,8 +69,8 @@ observation and shared checkpoint evidence while preserving legacy Knight
 payloads. Full native truth, live Go cohort binding and physical A100 execution
 remain distinct pending gates; the full READY flag is still false.
 
-The exact-main IRIS research capsule has been delivered: notebook SHA
-02bc1b62ffbfcb9f4619c7c7a4b527d87bbaba17295e58c81a92fdcf2e5df488.
+The exact-main IRIS research capsule revision 2 has been delivered: notebook SHA
+509c4477edfc14bf46da7655d773e2acc7458a80bcbc015b2ee63cd7d54c1380.
 Its observed Drive link and cold capsule preflight are recorded in the readiness
 file and canonical/FIT8_IRIS_NOTEBOOK_PREFLIGHT_20261013.json. It is executable
 research delivery; the full qualified READY gates above remain open.

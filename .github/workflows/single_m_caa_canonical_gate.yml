@@ -1,3 +1,4 @@
+# Model-authority changes may trigger this gate explicitly to preserve the Knight presentation regression witness.
 name: single-m-caa-canonical-gate
 on:
   pull_request:

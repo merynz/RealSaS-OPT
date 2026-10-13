@@ -2,8 +2,14 @@
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import load_file_ref
 
+SHARED_PROFILE="SHARED_IRIS_IMAGE_DERIVED_FSTAR_V1"
+SOURCE_SCENE_PROFILE="SOURCE_SCENE_BIND_V2"
+
 def iris_observation_binding(ctx,source_hashes,rasters,masks):
     cfg=dict(ctx["run_manifest"].get("source_audit") or {})
+    iris_cfg=dict(ctx["run_manifest"].get("iris_fit") or {})
+    if iris_cfg.get("training_profile")==SHARED_PROFILE and cfg.get("profile")!=SOURCE_SCENE_PROFILE:
+        raise QualificationError("IRIS_SHARED_COHORT_SOURCE_SCENE_PROFILE_REQUIRED")
     ref=cfg.get("iris_observation_admission")
     if not ref:
         if cfg.get("iris_observation_admission_required"):

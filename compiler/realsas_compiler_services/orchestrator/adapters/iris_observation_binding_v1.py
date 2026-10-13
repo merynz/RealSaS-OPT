@@ -1,6 +1,9 @@
-"""Bind independent IRIS observation proof to actual Stage01/03/05/07 inputs."""
+"""Bind independent IRIS observation proof to actual Stage01/02/03/05/07 inputs."""
 from compiler.realsas_compiler_core.types import QualificationError
-from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import load_file_ref
+from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import load_file_ref,stage_output_payload
+from compiler.realsas_compiler_services.orchestrator.adapters.source import (
+    SOURCE_CLOSURE_PROFILE,LICENSE_PROVENANCE_PROFILE,
+)
 
 SHARED_PROFILE="SHARED_IRIS_IMAGE_DERIVED_FSTAR_V1"
 SOURCE_SCENE_PROFILE="SOURCE_SCENE_BIND_V2"
@@ -8,8 +11,16 @@ SOURCE_SCENE_PROFILE="SOURCE_SCENE_BIND_V2"
 def iris_observation_binding(ctx,source_hashes,rasters,masks):
     cfg=dict(ctx["run_manifest"].get("source_audit") or {})
     iris_cfg=dict(ctx["run_manifest"].get("iris_fit") or {})
-    if iris_cfg.get("training_profile")==SHARED_PROFILE and cfg.get("profile")!=SOURCE_SCENE_PROFILE:
+    strong_scene=cfg.get("profile")==SOURCE_SCENE_PROFILE
+    if iris_cfg.get("training_profile")==SHARED_PROFILE and not strong_scene:
         raise QualificationError("IRIS_SHARED_COHORT_SOURCE_SCENE_PROFILE_REQUIRED")
+    if strong_scene:
+        source=stage_output_payload(ctx,"01_SOURCE_BYTES_SEALED","RealSaS.SourceByteSeal.v1")
+        license_seal=stage_output_payload(ctx,"02_SOURCE_LICENSE_PROVENANCE","RealSaS.SourceLicenseSeal.v1")
+        if source.get("source_closure_profile")!=SOURCE_CLOSURE_PROFILE:
+            raise QualificationError("SOURCE_SCENE_EXACT_SOURCE_CLOSURE_REQUIRED")
+        if license_seal.get("provenance_profile")!=LICENSE_PROVENANCE_PROFILE:
+            raise QualificationError("SOURCE_SCENE_EXACT_LICENSE_PROVENANCE_REQUIRED")
     ref=cfg.get("iris_observation_admission")
     if not ref:
         if cfg.get("iris_observation_admission_required"):

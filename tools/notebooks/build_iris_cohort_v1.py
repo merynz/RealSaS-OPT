@@ -107,6 +107,7 @@ def build(input_root,dino_source,output,source_revision,drive_input_relative_pat
         for name in names:
             inputs[row["subject_key"]+"/"+name]=(folder/name).read_bytes()
     entries=["models/iris/training/cohort_v1.py","tools/training/prepare_iris_cohort_v1.py",
+             "tools/notebooks/build_iris_cohort_v1.py",
              "tools/training/iris_cohort_preflight_v1.py","tests/iris/test_shared_cohort_v1.py",
              "tools/training/export_iris_cohort_surfaces_v1.py",
              "tools/corpus/prepare_iris_observations_v1.py",

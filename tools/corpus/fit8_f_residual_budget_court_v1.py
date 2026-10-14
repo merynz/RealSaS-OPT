@@ -19,6 +19,8 @@ class FResidualBudgetReportV1:
     face_count: int
     topology_residual_faces: int
     canonicalization_faces: int
+    teacher_face_strands: int
+    residual_face_strands: int
 
     @property
     def edge_residual_cell_fraction(self) -> float:
@@ -31,6 +33,16 @@ class FResidualBudgetReportV1:
     @property
     def topology_residual_face_fraction(self) -> float:
         return self.topology_residual_faces / max(1, self.face_count)
+
+    @property
+    def face_residual_strand_fraction(self) -> float:
+        return self.residual_face_strands / max(1, self.teacher_face_strands)
+
+    @property
+    def explicit_topology_record_fraction(self) -> float:
+        numerator = self.edge_extra_crossings + self.residual_face_strands
+        denominator = self.teacher_patch_edge_crossings + self.teacher_face_strands
+        return numerator / max(1, denominator)
 
     @property
     def canonicalization_face_fraction(self) -> float:
@@ -47,6 +59,8 @@ class FResidualBudgetReportV1:
             "face_count",
             "topology_residual_faces",
             "canonicalization_faces",
+            "teacher_face_strands",
+            "residual_face_strands",
         ):
             if getattr(self, name) < 0:
                 raise ValueError(f"F_RESIDUAL_BUDGET_NEGATIVE:{name}")
@@ -56,13 +70,20 @@ class FResidualBudgetReportV1:
             raise ValueError("F_RESIDUAL_BUDGET_TOPOLOGY_FACE_OVERCLAIM")
         if self.canonicalization_faces > self.face_count:
             raise ValueError("F_RESIDUAL_BUDGET_CANONICALIZATION_FACE_OVERCLAIM")
+        if self.residual_face_strands > self.teacher_face_strands:
+            raise ValueError("F_RESIDUAL_BUDGET_STRAND_OVERCLAIM")
 
 
 def evaluate_f_residual_budget_v1(
     edge_capacity: FRepresentationCapacityReportV1,
     face_reports: Iterable[FTopologyResidualReportV1],
 ) -> FResidualBudgetReportV1:
-    """Keep model-capacity residuals separate from teacher canonicalization work."""
+    """Keep model-capacity residuals separate from teacher canonicalization work.
+
+    `explicit_topology_record_fraction` is only a representation-count diagnostic:
+    one edge-crossing record and one face-strand record are counted equally. It is
+    not a byte-accurate memory or runtime estimate.
+    """
     edge_capacity.validate()
     faces = list(face_reports)
     for face in faces:
@@ -76,6 +97,10 @@ def evaluate_f_residual_budget_v1(
         face_count=len(faces),
         topology_residual_faces=sum(face.topology_residual_required for face in faces),
         canonicalization_faces=sum(face.canonicalization_required for face in faces),
+        teacher_face_strands=sum(face.strand_count for face in faces),
+        residual_face_strands=sum(
+            face.strand_count for face in faces if face.topology_residual_required
+        ),
     )
     result.validate()
     return result

@@ -1,8 +1,10 @@
+import json
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW = ROOT / ".github" / "workflows" / "platform_cohort_operator.yml"
+TRIGGER = ROOT / "canonical" / "COHORT_OPERATOR_TRIGGER_V1.json"
 
 
 def workflow_text() -> str:
@@ -12,8 +14,9 @@ def workflow_text() -> str:
 def test_cohort_operator_uses_generic_executor_and_self_hosted_canonical_main():
     text = workflow_text()
     assert "workflow_dispatch:" in text
+    assert "workflow_run:" in text
+    assert "workflows: [platform-developer-deployment]" in text
     assert "runs-on: [self-hosted, linux, x64, realsas]" in text
-    assert "github.ref == 'refs/heads/main'" in text
     assert "deployment['code_sha'] == os.environ['EXPECTED_SHA']" in text
     assert "tools/platform_cohort_bootstrap_v1.py" in text
     assert '--descriptor "$DESCRIPTOR"' in text
@@ -27,6 +30,26 @@ def test_cohort_operator_defaults_to_preflight_and_requires_explicit_submit():
     assert "args+=(--no-submit)" in text
     assert "COHORT_OPERATOR_PREFLIGHT_SUBMITTED_EXECUTION" in text
     assert "COHORT_OPERATOR_SUBMIT_RECEIPT_MISSING" in text
+
+
+def test_deployment_completion_only_activates_changed_enabled_trigger():
+    text = workflow_text()
+    assert "canonical/COHORT_OPERATOR_TRIGGER_V1.json" in text
+    assert "WORKFLOW_RUN_CONCLUSION" in text
+    assert "WORKFLOW_RUN_HEAD_BRANCH" in text
+    assert "git', 'diff-tree'" in text
+    assert "trigger_path in changed" in text
+    assert "trigger['enabled']" in text
+    assert "needs.activation.outputs.should_run == 'true'" in text
+
+
+def test_trigger_is_generic_data_and_unarmed_by_default():
+    trigger = json.loads(TRIGGER.read_text(encoding="utf-8"))
+    assert trigger["schema"] == "RealSaS.CohortOperatorTrigger.v1"
+    assert trigger["enabled"] is False
+    assert trigger["submit"] is False
+    assert isinstance(trigger["descriptor"], str) and trigger["descriptor"]
+    assert isinstance(trigger["nonce"], str) and trigger["nonce"]
 
 
 def test_cohort_operator_contains_no_subject_specific_execution_branch():

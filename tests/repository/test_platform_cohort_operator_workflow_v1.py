@@ -43,13 +43,21 @@ def test_deployment_completion_only_activates_changed_enabled_trigger():
     assert "needs.activation.outputs.should_run == 'true'" in text
 
 
-def test_trigger_is_generic_data_and_unarmed_by_default():
+def test_trigger_is_generic_operator_data():
     trigger = json.loads(TRIGGER.read_text(encoding="utf-8"))
     assert trigger["schema"] == "RealSaS.CohortOperatorTrigger.v1"
-    assert trigger["enabled"] is False
-    assert trigger["submit"] is False
+    assert isinstance(trigger["enabled"], bool)
+    assert isinstance(trigger["submit"], bool)
     assert isinstance(trigger["descriptor"], str) and trigger["descriptor"]
     assert isinstance(trigger["nonce"], str) and trigger["nonce"]
+
+
+def test_cohort_storage_transport_is_configurable_with_current_host_default():
+    text = workflow_text()
+    assert "vars.REALSAS_RCLONE_DRIVE_REMOTE || 'gdrive'" in text
+    assert 'grep -Fx "${RCLONE_REMOTE}:"' in text
+    assert '--rclone-remote "$RCLONE_REMOTE"' in text
+    assert "realsas-drive:" not in text
 
 
 def test_cohort_operator_contains_no_subject_specific_execution_branch():

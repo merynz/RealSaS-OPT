@@ -25,6 +25,21 @@ def _v3(value: Sequence[float]) -> np.ndarray:
 
 
 @dataclass(frozen=True)
+class CrossingCanonicalizationPolicyV1:
+    distance_tolerance: float
+    provenance: str
+    preserve_identity_sets: bool = True
+
+    def validate(self) -> None:
+        if not np.isfinite(self.distance_tolerance) or self.distance_tolerance <= 0.0:
+            raise ValueError("FIT8_LOCAL_PATCH_CROSSING_DISTANCE_TOLERANCE_INVALID")
+        if not self.provenance:
+            raise ValueError("FIT8_LOCAL_PATCH_CROSSING_POLICY_PROVENANCE_MISSING")
+        if not self.preserve_identity_sets:
+            raise ValueError("FIT8_LOCAL_PATCH_CROSSING_IDENTITY_PRESERVATION_REQUIRED")
+
+
+@dataclass(frozen=True)
 class ExtractionCellV1:
     center_xyz: tuple[float, float, float]
     half_extent: float
@@ -108,11 +123,13 @@ class ExtractionCellTeacherV1:
     edge_crossings: tuple[EdgeCrossingV1, ...]
     coplanar_edge_support: tuple[tuple[int, tuple[int, ...]], ...]
     max_distinct_crossings_per_edge: int
+    crossing_canonicalization: CrossingCanonicalizationPolicyV1
 
     def validate(self) -> None:
         if self.schema_version != SCHEMA_VERSION:
             raise ValueError("FIT8_LOCAL_PATCH_SCHEMA_VERSION_INVALID")
         self.cell.validate()
+        self.crossing_canonicalization.validate()
         if self.active != bool(self.intersecting_triangle_ids):
             raise ValueError("FIT8_LOCAL_PATCH_ACTIVE_MISMATCH")
         if tuple(sorted(set(self.intersecting_triangle_ids))) != self.intersecting_triangle_ids:
@@ -175,27 +192,25 @@ def _segment_triangle_crossing(p0: np.ndarray, p1: np.ndarray, tri: np.ndarray,
             dist0 = abs(float(np.dot(n, p0 - tri[0]))) / nlen
             dist1 = abs(float(np.dot(n, p1 - tri[0]))) / nlen
             if dist0 <= eps and dist1 <= eps:
-                # Exact interval clipping is intentionally deferred. Mark edge
-                # support as coplanar so no arbitrary single crossing is invented.
                 tri_min, tri_max = tri.min(axis=0), tri.max(axis=0)
                 seg_min, seg_max = np.minimum(p0, p1), np.maximum(p0, p1)
                 if np.all(tri_max + eps >= seg_min) and np.all(seg_max + eps >= tri_min):
                     return "COPLANAR", None, None
         return "NONE", None, None
-    f = 1.0 / a
-    s = p0 - tri[0]
-    u = f * float(np.dot(s, h))
+    inv = 1.0 / a
+    ss = p0 - tri[0]
+    u = inv * float(np.dot(ss, h))
     if u < -eps or u > 1.0 + eps:
         return "NONE", None, None
-    q = np.cross(s, e1)
-    vv = f * float(np.dot(d, q))
-    if vv < -eps or u + vv > 1.0 + eps:
+    q = np.cross(ss, e1)
+    v = inv * float(np.dot(d, q))
+    if v < -eps or u + v > 1.0 + eps:
         return "NONE", None, None
-    t = f * float(np.dot(e2, q))
+    t = inv * float(np.dot(e2, q))
     if t < -eps or t > 1.0 + eps:
         return "NONE", None, None
     t = min(1.0, max(0.0, t))
-    return "CROSSING", t, p0 + t*d
+    return "CROSSING", t, p0 + t * d
 
 
 def _canonical_optional_ids(values: Iterable[int | None]) -> tuple[int, ...]:
@@ -239,17 +254,20 @@ def _patch_lower_bound(intersecting_ids: Sequence[int], triangles: Mapping[int, 
 def extract_cell_teacher_v1(cell: ExtractionCellV1,
                             triangles: Sequence[SourceTriangleV1],
                             triangle_adjacency: Mapping[int, Sequence[int]] | None = None,
-                            eps: float = 1e-9,
-                            crossing_merge_tolerance: float = 1e-7) -> ExtractionCellTeacherV1:
+                            *,
+                            crossing_canonicalization: CrossingCanonicalizationPolicyV1,
+                            eps: float = 1e-9) -> ExtractionCellTeacherV1:
     """Build representation-neutral local support/patch/crossing teacher evidence.
 
     No fixed local-patch cardinality is imposed. No global SDF/sign assumption is
     made. Coplanar edge support is retained explicitly instead of fabricating a
-    crossing.
+    crossing. Crossing deduplication is performed in spatial coordinates under an
+    explicit provenance-carrying policy; merged rows preserve all source identities.
     """
     cell.validate()
-    if eps <= 0.0 or crossing_merge_tolerance <= 0.0:
-        raise ValueError("FIT8_LOCAL_PATCH_TOLERANCE_INVALID")
+    if eps <= 0.0:
+        raise ValueError("FIT8_LOCAL_PATCH_INTERSECTION_EPS_INVALID")
+    crossing_canonicalization.validate()
     tri_map: dict[int, SourceTriangleV1] = {}
     for tri in triangles:
         if tri.triangle_id in tri_map:
@@ -284,10 +302,14 @@ def extract_cell_teacher_v1(cell: ExtractionCellV1,
         raw.sort(key=lambda row: row[0])
         groups: list[list[tuple[float, np.ndarray, SourceTriangleV1, np.ndarray | None]]] = []
         for row in raw:
-            if not groups or abs(row[0] - groups[-1][0][0]) > crossing_merge_tolerance:
+            if not groups:
                 groups.append([row])
             else:
-                groups[-1].append(row)
+                ref_xyz = np.mean([g[1] for g in groups[-1]], axis=0)
+                if float(np.linalg.norm(row[1] - ref_xyz)) > crossing_canonicalization.distance_tolerance:
+                    groups.append([row])
+                else:
+                    groups[-1].append(row)
         for group in groups:
             t = float(sum(r[0] for r in group) / len(group))
             xyz = p0 + t * (p1 - p0)
@@ -333,6 +355,7 @@ def extract_cell_teacher_v1(cell: ExtractionCellV1,
         edge_crossings=tuple(crossings),
         coplanar_edge_support=tuple(coplanar_rows),
         max_distinct_crossings_per_edge=max(by_edge.values(), default=0),
+        crossing_canonicalization=crossing_canonicalization,
     )
     result.validate()
     return result

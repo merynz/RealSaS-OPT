@@ -115,3 +115,19 @@ def test_snapshot_accepts_release_scoped_external_stage_contract():
     )
     binding = next(row for row in request["manifest"]["stages"] if row["stage_id"] == stage_id)
     assert binding["semantic_parameters"]["external_evidence_roles"] == ["receipt", "checkpoint", "result"]
+
+
+def test_optional_external_stage_roles_are_authorized_without_becoming_wait_requirements():
+    plan = mainline.load_json(mainline.PLAN_PATH)
+    stage = plan["stages"][9]
+    parameters = subject_agnostic_release_parameters(stage, {
+        "external_evidence_roles": ["execution_receipt", "checkpoint", "result"],
+        "optional_external_evidence_roles": ["shared_execution_payload"],
+    })
+    assert parameters["external_evidence_roles"] == ["execution_receipt", "checkpoint", "result"]
+    assert parameters["optional_external_evidence_roles"] == ["shared_execution_payload"]
+    with pytest.raises(RuntimeError, match="EXTERNAL_EVIDENCE_ROLE_CONTRACT_INVALID"):
+        subject_agnostic_release_parameters(stage, {
+            "external_evidence_roles": ["checkpoint"],
+            "optional_external_evidence_roles": ["checkpoint"],
+        })

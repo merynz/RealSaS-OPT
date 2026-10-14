@@ -167,7 +167,11 @@ def _execute_stage_core(request: dict[str, Any]) -> dict[str, Any]:
     external = verify_source_inputs(manifest=manifest, inputs=request.get("source_inputs") or (), read_object=_read_cas_object)
     semantic_parameters = dict(request.get("semantic_parameters") or {})
     required_external = tuple(map(str, semantic_parameters.get("external_evidence_roles") or ()))
-    if len(required_external) != len(set(required_external)) or any(not role for role in required_external):
+    optional_external = tuple(map(str, semantic_parameters.get("optional_external_evidence_roles") or ()))
+    for roles in (required_external, optional_external):
+        if len(roles) != len(set(roles)) or any(not role or role != role.strip() for role in roles):
+            raise RuntimeError("ENGINE_EXTERNAL_EVIDENCE_ROLE_CONTRACT_INVALID")
+    if set(required_external).intersection(optional_external):
         raise RuntimeError("ENGINE_EXTERNAL_EVIDENCE_ROLE_CONTRACT_INVALID")
     if required_external and any(role not in external for role in required_external):
         return _external_wait_result(stage_id, required_external, set(external))

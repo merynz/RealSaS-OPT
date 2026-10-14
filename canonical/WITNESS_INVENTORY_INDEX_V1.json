@@ -1,0 +1,27 @@
+{
+  "schema": "RealSaS.WitnessInventoryIndex.v1",
+  "date": "2026-10-14",
+  "purpose": "ONE_MACHINE_READABLE_ENTRYPOINT_FOR_ACCEPTED_REFERENCE_LINEAGES",
+  "rules": {
+    "inventory_never_mints_qualification": true,
+    "historical_receipts_are_immutable": true,
+    "current_reference_may_explicitly_supersede_an_older_reference": true,
+    "witness_is_not_generalization_authority": true,
+    "agent_should_read_index_before_historical_search": true
+  },
+  "entries": [
+    {
+      "key": "knight_product_nearest",
+      "subject_scope": "FIXED_REGRESSION_WITNESS",
+      "inventory": "canonical/PRODUCT_NEAREST_KNIGHT_WITNESS_V1.json",
+      "status": "PRODUCT_NEAREST_ENGINEERING_WITNESS__NOT_PRODUCT_PASS"
+    },
+    {
+      "key": "fit8_platform_campaign",
+      "subject_scope": "EIGHT_SUBJECT_GENERICIZATION_COHORT",
+      "campaign_contract": "canonical/FIT8_PLATFORM_CAMPAIGN_V1.json",
+      "bootstrap_descriptor": "canonical/FIT8_PLATFORM_BOOTSTRAP_V1.json",
+      "status": "PREPARED_FOR_PLATFORM_EXECUTION__NO_FIT8_PASS_CLAIMED"
+    }
+  ]
+}

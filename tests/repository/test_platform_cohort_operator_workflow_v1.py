@@ -60,6 +60,12 @@ def test_cohort_storage_transport_is_configurable_with_current_host_default():
     assert "realsas-drive:" not in text
 
 
+def test_cohort_operator_exposes_repo_root_for_python_imports():
+    text = workflow_text()
+    assert "PYTHONPATH: ${{ github.workspace }}" in text
+    assert '"$PLATFORM_ROOT/current/bin/realsas-python" "${args[@]}"' in text
+
+
 def test_cohort_operator_contains_no_subject_specific_execution_branch():
     text = workflow_text().lower()
     for forbidden in (

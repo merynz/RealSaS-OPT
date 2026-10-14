@@ -114,6 +114,7 @@ jobs:
       DESCRIPTOR: ${{ needs.activation.outputs.descriptor }}
       SUBMIT: ${{ needs.activation.outputs.submit }}
       EXPECTED_SHA: ${{ needs.activation.outputs.expected_sha }}
+      RCLONE_REMOTE: ${{ vars.REALSAS_RCLONE_DRIVE_REMOTE || 'gdrive' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -158,7 +159,8 @@ jobs:
       - name: Require cohort storage access
         run: |
           set -euo pipefail
-          rclone listremotes | grep -Fx 'realsas-drive:'
+          test -n "$RCLONE_REMOTE"
+          rclone listremotes | grep -Fx "${RCLONE_REMOTE}:"
 
       - name: Execute generic cohort bootstrap
         env:
@@ -172,7 +174,7 @@ jobs:
             --repo "$GITHUB_WORKSPACE"
             --platform-root "$PLATFORM_ROOT"
             --authority-root "$AUTHORITY_ROOT"
-            --rclone-remote realsas-drive
+            --rclone-remote "$RCLONE_REMOTE"
             --out "$OUTPUT_PATH"
           )
           if [ "$SUBMIT" != 'true' ]; then

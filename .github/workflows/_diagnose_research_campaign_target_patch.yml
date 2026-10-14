@@ -1,0 +1,48 @@
+name: diagnose-research-campaign-target-patch
+
+on:
+  push:
+    branches: [platform/research-campaign-target-20261014]
+    paths: ['.github/workflows/_diagnose_research_campaign_target_patch.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: platform/research-campaign-target-20261014
+      - name: Apply patch and capture exact failure
+        shell: bash
+        run: |
+          set -o pipefail
+          {
+            python - <<'PY'
+            from pathlib import Path
+            import textwrap
+            workflow=Path('.github/workflows/_apply_research_campaign_target_patch.yml').read_text()
+            marker="          python - <<'PY'\n"
+            start=workflow.index(marker)+len(marker)
+            end=workflow.index("\n          PY\n",start)
+            exec(compile(textwrap.dedent(workflow[start:end]),'campaign-target-patch','exec'),{})
+            PY
+            echo PATCH_DONE
+            gofmt -w platform/internal/campaign/campaign.go platform/internal/campaign/campaign_integration_test.go
+            echo GOFMT_DONE
+            (cd platform && go test ./internal/campaign)
+            echo GOTEST_DONE
+            git diff --check
+            git diff > campaign-target.patch
+          } 2>&1 | tee campaign-target.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: research-campaign-target-diagnostic
+          path: |
+            campaign-target.log
+            campaign-target.patch
+          if-no-files-found: warn

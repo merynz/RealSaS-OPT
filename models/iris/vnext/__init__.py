@@ -14,6 +14,11 @@ from .semantic_equivalent_v1 import (
     semantic_equivalent_sdf_v1,
     union_refinement_evidence_v1,
 )
+from .topology_head_v1 import (
+    UnifiedTopologyHeadConfigV1,
+    UnifiedTopologyHeadOutputV1,
+    UnifiedTopologyHeadV1,
+)
 
 __all__ = [
     "CANONICAL_VIEW_COUNT_V1",
@@ -26,4 +31,7 @@ __all__ = [
     "coarse_to_fine_active_mask_v1",
     "semantic_equivalent_sdf_v1",
     "union_refinement_evidence_v1",
+    "UnifiedTopologyHeadConfigV1",
+    "UnifiedTopologyHeadOutputV1",
+    "UnifiedTopologyHeadV1",
 ]

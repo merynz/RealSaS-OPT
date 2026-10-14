@@ -6,43 +6,40 @@ on:
     paths: ['.github/workflows/_diagnose_research_campaign_target_patch.yml']
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   diagnose:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
           ref: platform/research-campaign-target-20261014
-      - name: Apply patch and capture exact failure
+          fetch-depth: 0
+      - name: Count patch anchors
         shell: bash
         run: |
-          set -o pipefail
-          {
-            python - <<'PY'
-            from pathlib import Path
-            import textwrap
-            workflow=Path('.github/workflows/_apply_research_campaign_target_patch.yml').read_text()
-            marker="          python - <<'PY'\n"
-            start=workflow.index(marker)+len(marker)
-            end=workflow.index("\n          PY\n",start)
-            exec(compile(textwrap.dedent(workflow[start:end]),'campaign-target-patch','exec'),{})
-            PY
-            echo PATCH_DONE
-            gofmt -w platform/internal/campaign/campaign.go platform/internal/campaign/campaign_integration_test.go
-            echo GOFMT_DONE
-            (cd platform && go test ./internal/campaign)
-            echo GOTEST_DONE
-            git diff --check
-            git diff > campaign-target.patch
-          } 2>&1 | tee campaign-target.log
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: research-campaign-target-diagnostic
-          path: |
-            campaign-target.log
-            campaign-target.patch
-          if-no-files-found: warn
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          text=Path('platform/internal/campaign/campaign.go').read_text()
+          checks={
+            'start_request': '\tCandidateEngineReleaseID uuid.UUID   `json:"candidate_engine_release_id"`\n\tCohortSubjectIDs         []uuid.UUID `json:"cohort_subject_ids"`\n',
+            'status': '\tCohortComplete           bool      `json:"cohort_complete"`\n\tRegressionComplete       bool      `json:"regression_complete"`\n\tFullClosureComplete      bool      `json:"full_closure_complete"`\n',
+            'start_anchor': 'func Start(ctx context.Context, pool *pgxpool.Pool, apiGraph *stagegraph.Graph, deployedCodeSHA string, req StartRequest) (Status, error) {\n',
+            'execution_scope': '\t\t"execution_scope":             "FULL_DAG_FROM_SOURCE_ENTRY_TO_PRODUCT_CLOSURE",\n',
+            'closure_rollup': '\tout.CohortComplete = cohortTotal > 0 && cohortComplete == cohortTotal\n\tout.RegressionComplete = regressionComplete == regressionTotal\n\tout.FullClosureComplete = out.CohortComplete && out.RegressionComplete && !out.AnyFailed\n\treturn out, nil\n',
+          }
+          lines=[]
+          for name,value in checks.items(): lines.append(f'{name}={text.count(value)}')
+          pattern=r'\tcandidateGraph, _, err := release\.LoadGraph\(ctx, pool, req\.CandidateEngineReleaseID\)\n.*?\tif len\(closure\) != candidateGraph\.StageCount\(\) \{\n\t\treturn Status\{\}, errors\.New\("RESEARCH_CAMPAIGN_PRODUCT_TARGET_MUST_CLOSE_FULL_DAG"\)\n\t\}\n'
+          lines.append(f'target_block={len(list(re.finditer(pattern,text,re.S)))}')
+          Path('campaign-target-diagnostic.txt').write_text('\n'.join(lines)+'\n')
+          PY
+          cat campaign-target-diagnostic.txt
+          git config user.name realsas-ci
+          git config user.email ci@realsas.local
+          git add campaign-target-diagnostic.txt
+          git commit -m 'ops: record campaign target patch anchors'
+          git push origin HEAD:platform/research-campaign-target-20261014

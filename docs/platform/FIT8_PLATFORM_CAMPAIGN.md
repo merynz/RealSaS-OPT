@@ -43,6 +43,14 @@ Before campaign mutation the executor verifies the external bundle receipt, exac
 
 `--no-submit` performs the same fail-closed input/release/campaign preparation and writes the exact run bindings without submitting execution. It is an operator preflight, not scientific PASS.
 
+### GitHub cohort operator
+
+For remote research operation, `.github/workflows/platform_cohort_operator.yml` is the generic self-hosted entrypoint. It accepts a repo-relative bootstrap descriptor and an explicit `submit` boolean. The default is preflight (`submit=false`); campaign execution is never started merely because canonical main was deployed.
+
+The workflow requires `refs/heads/main`, verifies that the self-hosted platform deployment is the exact selected main SHA, rejects absolute/parent-traversing descriptor paths, verifies the cohort storage remote, invokes the same generic bootstrap executor, and preserves the exact bootstrap receipt as a workflow artifact. It contains no subject-name execution branch. Fit40/LOFO must use the same workflow with a different sealed descriptor.
+
+This GitHub surface is only a remote operator for the Platform API. GitHub Actions does not own Attempts, stage qualification, campaign state, or model authority.
+
 ### Lower-level campaign API/CLI
 
 The durable coordinator remains available directly when the Subject/Input/Release bindings already exist:

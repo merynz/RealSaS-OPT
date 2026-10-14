@@ -1,0 +1,132 @@
+name: platform-cohort-operator
+
+on:
+  workflow_dispatch:
+    inputs:
+      descriptor:
+        description: Repo-relative sealed cohort bootstrap descriptor
+        required: true
+        type: string
+        default: canonical/FIT8_PLATFORM_BOOTSTRAP_V1.json
+      submit:
+        description: Submit campaign execution after fail-closed preparation
+        required: true
+        type: boolean
+        default: false
+
+concurrency:
+  group: platform-cohort-operator
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  cohort-operator:
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      DESCRIPTOR: ${{ inputs.descriptor }}
+      SUBMIT: ${{ inputs.submit }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Require exact deployed canonical main
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_SHA"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os
+          from pathlib import Path
+
+          deployment = json.loads(Path('/home/monster/realsas_platform/deployment.json').read_text())
+          assert deployment['code_sha'] == os.environ['EXPECTED_SHA'], 'DEPLOYED_MAIN_DRIFT'
+          PY
+
+      - name: Validate generic descriptor selection
+        id: descriptor
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY' >> "$GITHUB_OUTPUT"
+          import hashlib
+          import os
+          from pathlib import Path
+
+          repo = Path.cwd().resolve()
+          raw = os.environ['DESCRIPTOR'].strip()
+          descriptor = Path(raw)
+          assert raw, 'COHORT_OPERATOR_DESCRIPTOR_REQUIRED'
+          assert not descriptor.is_absolute(), 'COHORT_OPERATOR_DESCRIPTOR_MUST_BE_REPO_RELATIVE'
+          assert '..' not in descriptor.parts, 'COHORT_OPERATOR_DESCRIPTOR_PATH_ESCAPE'
+          resolved = (repo / descriptor).resolve()
+          resolved.relative_to(repo)
+          assert resolved.is_file(), 'COHORT_OPERATOR_DESCRIPTOR_MISSING'
+          assert resolved.suffix == '.json', 'COHORT_OPERATOR_DESCRIPTOR_JSON_REQUIRED'
+          digest = hashlib.sha256(resolved.read_bytes()).hexdigest()
+          print(f'descriptor_sha256={digest}')
+          print(f'output_path=/home/monster/realsas_authority/campaign_bootstrap/actions/{digest}/{os.environ["GITHUB_RUN_ID"]}/BOOTSTRAP_RESULT.json')
+          PY
+
+      - name: Require cohort storage access
+        run: |
+          set -euo pipefail
+          rclone listremotes | grep -Fx 'realsas-drive:'
+
+      - name: Execute generic cohort bootstrap
+        env:
+          OUTPUT_PATH: ${{ steps.descriptor.outputs.output_path }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$OUTPUT_PATH")"
+          args=(
+            tools/platform_cohort_bootstrap_v1.py
+            --descriptor "$DESCRIPTOR"
+            --repo "$GITHUB_WORKSPACE"
+            --platform-root "$PLATFORM_ROOT"
+            --authority-root "$AUTHORITY_ROOT"
+            --rclone-remote realsas-drive
+            --out "$OUTPUT_PATH"
+          )
+          if [ "$SUBMIT" != 'true' ]; then
+            args+=(--no-submit)
+          fi
+          "$PLATFORM_ROOT/current/bin/realsas-python" "${args[@]}"
+
+      - name: Verify operator receipt
+        env:
+          OUTPUT_PATH: ${{ steps.descriptor.outputs.output_path }}
+          DESCRIPTOR_SHA256: ${{ steps.descriptor.outputs.descriptor_sha256 }}
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path(os.environ['OUTPUT_PATH'])
+          assert path.is_file(), 'COHORT_OPERATOR_RECEIPT_MISSING'
+          receipt = json.loads(path.read_text())
+          assert receipt['schema'] == 'RealSaS.PlatformCohortBootstrapPreflight.v1', 'COHORT_OPERATOR_RECEIPT_SCHEMA'
+          assert receipt['qualification_minted'] is False, 'COHORT_OPERATOR_RAW_BOOTSTRAP_MINTED_QUALIFICATION'
+          assert receipt['all_observation_bindings_verified'] is True, 'COHORT_OPERATOR_OBSERVATION_BINDING_UNVERIFIED'
+          if os.environ['SUBMIT'] == 'true':
+              assert 'campaign_run' in receipt, 'COHORT_OPERATOR_SUBMIT_RECEIPT_MISSING'
+          else:
+              assert 'campaign_run' not in receipt, 'COHORT_OPERATOR_PREFLIGHT_SUBMITTED_EXECUTION'
+          PY
+
+      - name: Preserve exact cohort operator receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: platform-cohort-operator-${{ github.run_id }}
+          path: ${{ steps.descriptor.outputs.output_path }}
+          if-no-files-found: error
+          retention-days: 30

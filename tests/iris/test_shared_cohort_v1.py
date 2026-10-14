@@ -3,10 +3,11 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 import numpy as np
 import torch
 from models.iris.training.cohort_v1 import SharedIrisTrainer, AtomicCheckpointStore, file_hash, value_hash
-from models.iris.training.apparatus_v1 import certified_ray_pools,training_rays,training_queries,straddle_pool,targets
+from models.iris.training.apparatus_v1 import certified_ray_pools,training_rays,training_queries,straddle_pool,query_pools,targets
 from models.iris.v5.source_signed_field_v5 import source_signed_distance_fields_v5, SourceSignedFieldPolicyV5
 from tools.corpus.iris_observation_admission_v1 import project_mask
 from tools.observation.source_scene_contract_v2 import prepare_bind_rest_gltf
@@ -14,14 +15,31 @@ from tools.observation.source_scene_contract_v2 import prepare_bind_rest_gltf
 torch.set_num_threads(2)
 
 def fixture(root):
-    policy = {"subject_count":8,"seed":31,"steps":16,"queries_per_step":32,
+    stages = [
+        {"id":"DIRECT_FSTAR_COLD","steps":2,"objective":"DIRECT_FSTAR_HUBER",
+         "learning_rate":.0001,"minimum_learning_rate":.00001,"silhouette_loss_weight":0.,
+         "query_schedule":"STATEFUL_DIRECT_V5","replay_mode":"REFRESH_EVERY_EVAL",
+         "evaluation_interval":1,"checkpoint_interval":1,"start_checkpoint_is_candidate":False},
+        {"id":"C_OBJECTIVE","steps":2,"objective":"DIRECT_FSTAR_HUBER_PLUS_SOURCE_SILHOUETTE__C",
+         "learning_rate":.0001,"minimum_learning_rate":.00001,"silhouette_loss_weight":1.,
+         "query_schedule":"STATELESS_C_V5","replay_mode":"FIXED_FROM_STAGE_START",
+         "evaluation_interval":1,"checkpoint_interval":1,"start_checkpoint_is_candidate":True},
+        {"id":"C_LONG_HORIZON","steps":4,"objective":"DIRECT_FSTAR_HUBER_PLUS_SOURCE_SILHOUETTE__C",
+         "learning_rate":.00005,"minimum_learning_rate":.000005,"silhouette_loss_weight":1.,
+         "query_schedule":"STATELESS_C_V5","replay_mode":"FIXED_FROM_STAGE_START",
+         "evaluation_interval":2,"checkpoint_interval":2,"start_checkpoint_is_candidate":True},
+    ]
+    policy = {"subject_count":8,"seed":31,"steps":8,"queries_per_step":32,
+              "optimizer_update_semantics":"MEAN_GRADIENT_OVER_ALL_SUBJECTS_PER_GLOBAL_STEP",
+              "subject_exposures_per_global_step":8,
               "learning_rate":.0001,"minimum_learning_rate":.00001,"weight_decay":0.,
               "gradient_clip":1.,"huber_beta":.01,"near_zero_band":.03,"sign_loss_weight":0.,
               "hard_replay_bank_size":16,"silhouette_pool_per_stratum":2,
               "source_boundary_band_px":8.,"source_background_support_px":32.,
               "silhouette_loss_weight":1.,"silhouette_rays_per_step":32,
               "silhouette_depth_samples":4,"silhouette_softmin_tau":.001953125,
-              "log_interval":8,"checkpoint_interval":4,"evaluation_interval":8,
+              "log_interval":2,"query_schedule_seed":101,"ray_schedule_seed":202,
+              "silhouette_pool_seed":203,"training_stages":stages,
               "model_config":{"image_token_dim":8,"scene_dim":16,"camera_embed_dim":8,
                               "plane_size":2,"plane_channels":4,"field_hidden_dim":8,
                               "field_residual_blocks":1,"attention_heads":2,"scene_layers":1}}
@@ -52,7 +70,7 @@ def fixture(root):
         from models.iris.training.cohort_v1 import field_targets
         data["heldout_targets"] = field_targets(data,data["heldout_points"])
         data["replay_targets"] = field_targets(data,data["replay_points"])
-        data.update(certified_ray_pools(data,policy,seed=19))
+        data.update(certified_ray_pools(data,policy,seed=19+i*1000000))
         path = root/(key+".pt");torch.save(data,path)
         subjects.append({"subject_id":key,"observation_binding":key,
                          "shard_file":path.name,"shard_sha256":file_hash(path)})
@@ -99,10 +117,40 @@ class SharedCohortTests(unittest.TestCase):
             self.assertEqual(int(foreground.sum()),16)
             self.assertEqual(len(s['ray_court']['strata']),32)
             self.assertEqual({r['view'] for r in s['ray_court']['strata']},set(range(8)))
+            self.assertTrue(all(r['drawn'] % 512 == 0 for r in s['ray_court']['strata']))
             pairs=straddle_pool(s,64,np.random.default_rng(7),1/512,.006)
             f=targets(s,pairs).reshape(-1,2)
             self.assertTrue(bool(np.all((f[:,0]>=0)!=(f[:,1]>=0))))
             self.assertTrue(bool(np.all(np.abs(pairs)<=1.)))
+
+    def test_widened_fit8_pool_guard_preserves_knight_straddle_sequence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);manifest,policy=fixture(root)
+            s=torch.load(root/manifest['subjects'][0]['shard_file'],weights_only=True)
+            a=straddle_pool(s,64,np.random.default_rng(707),1/512,.006,max_draw=32_000_000)
+            b=straddle_pool(s,64,np.random.default_rng(707),1/512,.006,max_draw=536_870_912)
+            self.assertTrue(np.array_equal(a,b))
+            fa=targets(s,a).reshape(-1,2)
+            self.assertTrue(bool(np.all((fa[:,0]>=0)!=(fa[:,1]>=0))))
+
+    def test_replay_pool_uses_one_advanced_seed_plus_103_rng_stream(self):
+        policy={"near_pool_count":2,"straddle_pool_count":2,"straddle_delta":1/512,
+                "straddle_base_band":.006,"near_zero_band":.03,"replay_global_count":3,
+                "replay_near_count":2,"heldout_count":2,"heldout_near_count":2,
+                "heldout_straddle_count":2}
+        def fake_near(subject,count,rng,band,device="cpu",**kwargs):
+            return rng.uniform(-1,1,(count,3)).astype(np.float32)
+        def fake_straddle(subject,count,rng,delta,base_band,device="cpu",**kwargs):
+            return rng.uniform(-1,1,(count,3)).astype(np.float32)
+        with mock.patch("models.iris.training.apparatus_v1.near_pool",side_effect=fake_near), \
+             mock.patch("models.iris.training.apparatus_v1.straddle_pool",side_effect=fake_straddle), \
+             mock.patch("models.iris.training.apparatus_v1.targets",side_effect=lambda subject,q,device="cpu",**kw:np.zeros(len(q),np.float32)):
+            got=query_pools({},policy,100,device="cpu")["replay_points"].numpy()
+        rng=np.random.default_rng(203)
+        expected=np.concatenate([rng.uniform(-1,1,(3,3)).astype(np.float32),
+                                 rng.uniform(-1,1,(2,3)).astype(np.float32)])
+        self.assertTrue(np.array_equal(got,expected))
+
     def test_prediction_outside_teacher_range_still_receives_gradient(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);manifest,policy=fixture(root)
@@ -112,8 +160,10 @@ class SharedCohortTests(unittest.TestCase):
                 trainer.model.surface_field.sdf_head.bias.fill_(2.)
             before=trainer.model.surface_field.sdf_head.bias.detach().clone()
             row=trainer.one_step()
-            self.assertGreater(row["loss"],1.)
-            self.assertGreater(row["gradient_norm"],0.)
+            self.assertGreater(row["aggregate"]["mean_loss"],1.)
+            self.assertGreater(row["aggregate"]["gradient_norm"],0.)
+            self.assertEqual(trainer.step,1)
+            self.assertEqual(trainer.counts,[1]*8)
             self.assertFalse(torch.equal(before,trainer.model.surface_field.sdf_head.bias))
 
     def test_real_optimizer_resume_matches_uninterrupted_all_eight(self):
@@ -124,10 +174,13 @@ class SharedCohortTests(unittest.TestCase):
             continuous.run()
             expected={k:v.clone() for k,v in continuous.model.state_dict().items()}
             interrupted=SharedIrisTrainer(root,manifest,policy,source,root/"resume",root/"out_resume","cpu")
-            interrupted.run(stop_after=8)
+            interrupted.run(stop_after=3)
             resumed=SharedIrisTrainer(root,manifest,policy,source,root/"resume",root/"out_resume","cpu")
             result=resumed.run()
-            self.assertEqual(result["subject_exposures"],{f"fixture_{i}":2 for i in range(8)})
+            self.assertEqual(result["actual_optimizer_steps"],8)
+            self.assertEqual(result["subject_exposures"],{f"fixture_{i}":8 for i in range(8)})
+            self.assertEqual(result["total_subject_exposures"],64)
+            self.assertEqual(len(result["training_stage_receipts"]),3)
             self.assertEqual(result["shared_model_count"],1)
             self.assertFalse(result["fit8_pass_claimed"])
             self.assertEqual(continuous.trace,resumed.trace)

@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.KnightIrisRecipeReference.v1",
   "date": "2026-10-13",
-  "status": "CORE_EXACT_MATCH__C_APPARATUS_RESTORED__COHORT_INTERVENTION_EXPLICIT",
+  "status": "CORE_EXACT_MATCH__POST_SDF_C_LINEAGE_STAGED__JOINT_COHORT_UPDATE",
   "core_source_commit": "54a18d5353c6d39f383b823c019c25336fbadaef",
   "core_source_sha256": {
     "models/iris/v4/scene_first_signed_v4.py": "e9c2432ead4b6fa13ecad5a32837ea9cbb9c9cd38bd523cc70adef9ed8d48a1c",
@@ -39,7 +39,10 @@
     "source_background_support_px": 32.0,
     "initial_sdf_bias": 0.05,
     "straddle_delta": 0.001953125,
-    "straddle_base_band": 0.006
+    "straddle_base_band": 0.006,
+    "query_schedule_seed": 260924101,
+    "ray_schedule_seed": 260924202,
+    "silhouette_pool_seed": 260924203
   },
   "knight_iris_notebook": {
     "library_name": "RealSaS_V5_LONG_HORIZON_RUN_ALL.ipynb",
@@ -58,10 +61,12 @@
   "recipe_sources": [
     "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json",
     "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json",
-    "canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_PREREG_20260924.json"
+    "canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_PREREG_20260924.json",
+    "canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_CLOSURE_20260924.json",
+    "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_20260924.json"
   ],
   "objective": "DIRECT_FSTAR_HUBER_PLUS_SOURCE_SILHOUETTE__C",
-  "optimizer_reference": "FRESH_DIRECT_FSTAR_AND_C_OPTIMIZER_8E_MINUS_5__NOT_2E_MINUS_5_KNIGHT_CONTINUATION",
+  "optimizer_reference": "KNIGHT_POST_SDF_STAGED_DIRECT_THEN_C_THEN_LOW_LR_C__FRESH_OPTIMIZER_PER_STAGE",
   "query_mixture": [
     16384,
     8192,
@@ -76,28 +81,28 @@
   ],
   "cohort_changes": [
     {
-      "change": "Eight observation sets, one parameter set and one optimizer",
-      "reason": "The requested shared Fit8 experiment cannot be eight independent Knight fits."
+      "change": "Every global optimizer step accumulates equally weighted gradients from all eight subjects, then calls optimizer.step exactly once.",
+      "reason": "This is the standard shared-cohort analogue of one-subject Knight training; subject count must not multiply Adam update count."
     },
     {
-      "change": "Fresh common initialization; C objective from step 1; no Knight checkpoint or optimizer continuation",
-      "reason": "This is an explicitly new joint fit, not a byte-identical replay of Knight’s multi-stage 19200-step optimization history. The initial bias/seed/optimizer settings match the cold direct-Fstar reference."
+      "change": "Knight post-SDF training chronology is preserved as 4800 direct-F* + 4800 C + 9600 low-LR C global steps.",
+      "reason": "The prior 6000-exposure cohort budget was not derived from the preserved Knight C lineage and confounded optimizer horizon."
     },
     {
-      "change": "48000 shared steps, 6000 exposures per subject",
-      "reason": "Retain the declared initial shared-cohort research budget; this is not the historical Knight effective-step budget or a promise of equivalent convergence."
+      "change": "Subject-specific immutable query/ray pools use deterministic subject offsets while preserving Knight pool sizes, distributions, C query/ray schedules and heldout separation.",
+      "reason": "Literal Knight coordinates cannot be reused for new subjects, but the sampling apparatus can be preserved."
     },
     {
-      "change": "Fixed residual replay banks ranked once on the common initial model, separately per observation set",
-      "reason": "C freezes replay; Knight’s literal coordinates and residual ranking belong to Knight and cannot be substituted for new subjects."
+      "change": "Checkpoint selection uses a worst-subject envelope on the frozen Knight heldout axes; means are telemetry only.",
+      "reason": "No subject failure may be hidden by cohort averaging."
     },
     {
-      "change": "Worst-subject aggregation on the same heldout sign/MAE/near-MAE/p95/RMSE axes",
-      "reason": "A joint checkpoint must expose every failing subject; no mean may hide one."
+      "change": "Training telemetry is aggregated across all subjects every 100 global steps; heldout evaluation follows Knight stage cadences.",
+      "reason": "Operator visibility is not a training objective and does not weaken selection blindness."
     },
     {
-      "change": "Resume/checkpoint/evaluation cadence shared over all subjects",
-      "reason": "Durable cohort execution changes orchestration, not the geometry model or loss."
+      "change": "Fit8 raises only the rejection-sampling apparatus draw ceiling from the Knight-local 32M guard to 512M points and logs progress; proposal distribution, F* bands, delta, random-direction draw and sign-flip acceptance are unchanged.",
+      "reason": "The Knight 32M ceiling was an engineering budget for one geometry, not a scientific control. T-Rex exhausted it before any optimizer step while Snake/Bat passed; subject diversity must not turn a compute guard into a geometry-dependent exclusion rule."
     }
   ],
   "claims": {
@@ -106,6 +111,108 @@
     "historical_c_scientific_pass": false,
     "fit8_pass": false,
     "unseen": false,
-    "product": false
+    "product": false,
+    "optimizer_horizon_matches_preserved_knight_c_lineage": true,
+    "subject_batching_is_new_cohort_intervention": true
+  },
+  "shared_stage_schedule": [
+    {
+      "id": "DIRECT_FSTAR_COLD",
+      "steps": 4800,
+      "objective": "DIRECT_FSTAR_HUBER",
+      "learning_rate": 8e-05,
+      "minimum_learning_rate": 4e-06,
+      "silhouette_loss_weight": 0.0,
+      "query_schedule": "STATEFUL_DIRECT_V5",
+      "replay_mode": "REFRESH_EVERY_EVAL",
+      "evaluation_interval": 200,
+      "checkpoint_interval": 200,
+      "start_checkpoint_is_candidate": false
+    },
+    {
+      "id": "C_OBJECTIVE",
+      "steps": 4800,
+      "objective": "DIRECT_FSTAR_HUBER_PLUS_SOURCE_SILHOUETTE__C",
+      "learning_rate": 8e-05,
+      "minimum_learning_rate": 4e-06,
+      "silhouette_loss_weight": 1.0,
+      "query_schedule": "STATELESS_C_V5",
+      "replay_mode": "FIXED_FROM_STAGE_START",
+      "evaluation_interval": 200,
+      "checkpoint_interval": 200,
+      "start_checkpoint_is_candidate": true
+    },
+    {
+      "id": "C_LONG_HORIZON",
+      "steps": 9600,
+      "objective": "DIRECT_FSTAR_HUBER_PLUS_SOURCE_SILHOUETTE__C",
+      "learning_rate": 2e-05,
+      "minimum_learning_rate": 1e-06,
+      "silhouette_loss_weight": 1.0,
+      "query_schedule": "STATELESS_C_V5",
+      "replay_mode": "FIXED_FROM_STAGE_START",
+      "evaluation_interval": 400,
+      "checkpoint_interval": 400,
+      "start_checkpoint_is_candidate": true
+    }
+  ],
+  "historical_knight_lineage": {
+    "direct_fstar": {
+      "steps": 4800,
+      "learning_rate": 8e-05,
+      "eta_min": 4e-06,
+      "evaluation_every": 200,
+      "replay": "HARD_RESIDUAL_REFRESH_EVERY_EVAL",
+      "source": "RealSaS_IRIS_KNIGHT_V5_TP64_DIRECT_FSTAR_FIT_RUN_ALL_AUDITED_V2.ipynb"
+    },
+    "c_objective": {
+      "start_absolute_effective_step": 4800,
+      "continuation_steps": 4800,
+      "learning_rate": 8e-05,
+      "eta_min": 4e-06,
+      "evaluation_every": 200,
+      "replay": "FIXED_RANKED_FROM_SELECTED_DIRECT_START",
+      "source": "RealSaS_IRIS_KNIGHT_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_RUN_ALL.ipynb"
+    },
+    "c_long_horizon": {
+      "start_absolute_effective_step": 9600,
+      "continuation_steps": 9600,
+      "learning_rate": 2e-05,
+      "eta_min": 1e-06,
+      "evaluation_every": 400,
+      "selected_absolute_effective_step": 19200,
+      "selected_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
+      "source": "RealSaS_V5_LONG_HORIZON_RUN_ALL.ipynb"
+    },
+    "later_6000_step_demo": {
+      "role": "EXCLUDED_FROM_CANONICAL_FIT8_RECIPE",
+      "reason": "Separate spatial-risk replay demo intervention; selected new checkpoint was not promoted and frozen C fallback remained.",
+      "continuation_steps": 6000,
+      "learning_rate": 1e-05
+    },
+    "incomplete_bc_endpoint_continuation": {
+      "role": "EXCLUDED_FROM_CANONICAL_FIT8_RECIPE",
+      "planned_additional_steps": 32000,
+      "reason": "Operator-stopped/incomplete; later canonical diagnostic explicitly excludes it from scientific evidence."
+    }
+  },
+  "recipe_revision": 3,
+  "runtime_controls": {
+    "seed": 26092357,
+    "cudnn_deterministic": true,
+    "cudnn_benchmark": false,
+    "cuda_tf32": false,
+    "float32_matmul_precision": "highest",
+    "amp_dtype": "bfloat16"
+  },
+  "replay_pool_rng": "ONE_SEED_PLUS_103_STREAM_ADVANCED_ACROSS_GLOBAL_THEN_NEAR_ZERO",
+  "silhouette_certification_candidate_batch": 512,
+  "pool_guard": {
+    "knight_local_max_draw": 32000000,
+    "fit8_max_draw": 536870912,
+    "progress_every_draws": 8388608,
+    "sampling_distribution_changed": false,
+    "acceptance_semantics_changed": false,
+    "training_recipe_revision_changed": false
   }
 }

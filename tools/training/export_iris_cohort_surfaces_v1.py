@@ -95,8 +95,14 @@ def export(checkpoint,data_root,input_root,output_root,persist_root,device="cuda
             audit=exterior_scan(subject,query,resolution=audit_resolution,device=device,
                                 expected_count=census['certified_exterior_count'])
             atomic_json(folder/'SOURCE_EXTERIOR_SIGN_AUDIT.json',audit)
+            print(f"[R512] {key} certified={audit['certified_exterior_count']} "
+                  f"nonpositive={audit['nonpositive_certified_exterior_count']} "
+                  f"sign_pass={audit['sign_pass']} production_r512={audit['production_r512']}",flush=True)
             mesh=decode_indexed_sparse_tetra_mt_contained_v5(query,policy=policy,work_dir=folder/"scratch")
             npz=write_stage12_npz_v5(mesh,folder/"zero_surface.npz")
+            containment=bool((mesh.diagnostics or {}).get("passed",False))
+            print(f"[SIGNED_ZERO_SURFACE] {key} vertices={len(mesh.vertices_normalized)} "
+                  f"faces={len(mesh.faces)} exact_containment={containment}",flush=True)
             cameras=json.loads((input_root/key/"camera_bundle.json").read_text())["cameras"]
             world=np.asarray(mesh.vertices_normalized)*subject["normalization_half_extent"]+subject["center_xyz"].cpu().numpy()
             views=[]
@@ -107,11 +113,20 @@ def export(checkpoint,data_root,input_root,output_root,persist_root,device="cuda
                 overlay=np.stack([actual*255,pred*255,np.zeros_like(pred)],axis=-1).astype(np.uint8)
                 Image.fromarray(overlay).save(folder/f"V{view}.comparison.png")
                 views.append({"view_index":view,**metrics})
-                print(f"[COURT] {key} V{view} pass={metrics['pass']} recall={metrics['recall']:.6f} "
-                      f"precision={metrics['precision']:.6f} edge_p95={metrics['silhouette_edge_p95_px']:.2f}",flush=True)
-            report={"status":"PASS_RAW_COURT" if all(v["pass"] for v in views) and audit['sign_pass'] and audit['production_r512'] else "FAIL",
+                print(f"[P999] {key} V{view} pass={metrics['pass']} "
+                      f"recall={metrics['recall']:.6f} precision={metrics['precision']:.6f} "
+                      f"component_recall={metrics['components']['minimum_eligible_component_recall']:.6f} "
+                      f"hole={metrics['largest_coherent_hole_fraction']:.6f} "
+                      f"uncovered={metrics['interior_uncovered_fraction']:.6f} "
+                      f"edge_p95={metrics['silhouette_edge_p95_px']:.3f}",flush=True)
+            report={"status":"PASS_RAW_COURT" if all(v["pass"] for v in views) and audit['sign_pass'] and audit['production_r512'] and containment else "FAIL",
                     "npz_sha256":file_hash(npz),"vertex_count":len(mesh.vertices_normalized),"face_count":len(mesh.faces),
                     "views":views,"decoder_diagnostics":mesh.diagnostics,'exterior_sign_audit':audit}
+            print(f"[SUBJECT_COURT] {key} status={report['status']} "
+                  f"r512_nonpositive={audit['nonpositive_certified_exterior_count']} "
+                  f"min_recall={min(v['recall'] for v in views):.6f} "
+                  f"min_precision={min(v['precision'] for v in views):.6f} "
+                  f"max_edge_p95={max(v['silhouette_edge_p95_px'] for v in views):.3f}",flush=True)
         except Exception as exc:
             report={"status":"FAIL","error_type":type(exc).__name__,"error":str(exc),"views":[]}
             print(f"[COURT_FAIL] {key} {type(exc).__name__}: {exc}",flush=True)

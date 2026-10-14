@@ -480,10 +480,11 @@ def execute_iris_fit_stage(ctx: dict) -> dict:
         manifest=validate_shared_subject_input(ctx)
         execution,output=build_fit_execution(ctx,lane="IRIS",section_key="iris_fit",
             prereg=prereg,stage_id="10_IRIS_FIT",proposal_required=False)
-        bundle=load_file_ref(ctx["run_manifest"]["iris_fit"]["shared_cohort"],
-                            expected_schema="RealSaS.SharedIrisExecutionImportBundle.v1")
-        actual=load_file_ref(bundle["cohort_manifest"],expected_schema="RealSaS.SharedIrisCohortShards.v1")
-        if shared_value_hash(actual)!=shared_value_hash(manifest):
+        binding=dict(execution.metadata.get("shared_cohort_binding") or {})
+        expected_ids=[str(row["subject_id"]) for row in manifest["subjects"]]
+        if not binding:
+            raise QualificationError("SHARED_IRIS_EXECUTION_BINDING_MISSING")
+        if list(binding.get("subject_ids") or ())!=expected_ids:
             raise QualificationError("SHARED_IRIS_EXECUTION_MANIFEST_DRIFT")
         return {"status":"PASS","outputs":[output],"diagnostics":{
             "execution_hash":execution.execution_hash,"checkpoint_sha256":execution.checkpoint_sha256,

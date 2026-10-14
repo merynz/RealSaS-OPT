@@ -67,14 +67,10 @@ func LoadIdentities(ctx context.Context, pool *pgxpool.Pool, attemptID uuid.UUID
 	return out, rows.Err()
 }
 
-func declaredExternalRoles(raw []byte) (map[string]struct{}, error) {
-	var parameters map[string]any
-	if err := json.Unmarshal(raw, &parameters); err != nil {
-		return nil, err
-	}
-	value, ok := parameters["external_evidence_roles"]
+func externalRoleSet(parameters map[string]any, key string) (map[string]struct{}, error) {
+	value, ok := parameters[key]
 	if !ok {
-		return nil, errors.New("EXTERNAL_STAGE_ROLE_CONTRACT_REQUIRED")
+		return map[string]struct{}{}, nil
 	}
 	rows, ok := value.([]any)
 	if !ok || len(rows) == 0 {
@@ -92,6 +88,31 @@ func declaredExternalRoles(raw []byte) (map[string]struct{}, error) {
 		roles[role] = struct{}{}
 	}
 	return roles, nil
+}
+
+func declaredExternalRoles(raw []byte) (map[string]struct{}, error) {
+	var parameters map[string]any
+	if err := json.Unmarshal(raw, &parameters); err != nil {
+		return nil, err
+	}
+	required, err := externalRoleSet(parameters, "external_evidence_roles")
+	if err != nil {
+		return nil, err
+	}
+	optional, err := externalRoleSet(parameters, "optional_external_evidence_roles")
+	if err != nil {
+		return nil, err
+	}
+	if len(required) == 0 && len(optional) == 0 {
+		return nil, errors.New("EXTERNAL_STAGE_ROLE_CONTRACT_REQUIRED")
+	}
+	for role := range optional {
+		if _, exists := required[role]; exists {
+			return nil, errors.New("EXTERNAL_STAGE_ROLE_CONTRACT_INVALID")
+		}
+		required[role] = struct{}{}
+	}
+	return required, nil
 }
 
 func Bind(ctx context.Context, pool *pgxpool.Pool, req BindRequest) (Bound, error) {

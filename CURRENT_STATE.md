@@ -1,214 +1,294 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-10-13
+**Date:** 2026-10-14
 **Canonical code line:** `main` only
-**Architecture:** RealSaS V2, 43-stage Compiler dependency DAG; versioned release DAGs
-**Implementation readiness:** `canonical/V2_IMPLEMENTATION_READINESS.json`
+**Active architecture program:** Unified IRIS reconstruction redesign
+**Current plan authority:** `CURRENT_PLAN.md`
 
-## Fit8 diversity and product evolution — user-authorized next program
+## Immediate state
 
-The next research phase is a heterogeneous Fit8, with Knight kept separately as
-the fixed regression witness. Exact selected raw sources are Snake, Bat, T-Rex,
-Horse, Spider, GreenBlob, Shark and textured George. All eight retrieved source
-files matched the sealed October 4 corpus ledger. Selection:
-`canonical/FIT8_DIVERSITY_SELECTION_V1.json`; reproducible source identity receipt:
-`canonical/FIT8_SOURCE_IDENTITY_AUDIT_20261013.json`.
+The previously started shared IRIS Fit8 A100 training continuation has been **stopped by user decision** before completion because the current IRIS/TESSA representation is no longer accepted as the intended final architecture.
 
-Admission is pending. Start at source/import/rest pose, scene axes/units/root and
-attachment transforms, then the first eight matched source/import renders and
-normalization. Compare the first compiled puppet render against those admitted
-references before broad motion testing. A failed family remains visible and its
-defect gets a general owner-routed fix; no silent easier replacement or per-subject
-production patch. See `docs/corpus/FIT8_ADMISSION.md`.
+The latest sealed stopped-run checkpoint was approximately global step **4400**. Preserve that run, checkpoint, result and trace as an **IRIS-vCurrent Fit8 control/baseline**. It did not mint Fit8 scientific PASS, unseen/generalization evidence or product authority. Do **not** resume it merely to reach the old 19,200-step schedule.
 
-Same architecture, shared model parameter sets and Compiler contracts must serve
-all eight. No new optimizer, Go Attempt, FIT8 PASS or ProductRevision was created
-by source selection. Seal truth/pose/render and lineage admission before fitting.
-Older September Fit8/KayKit records remain historical evidence and require an
-exact past-use audit before claiming creator-level unseen.
+The active program is now a fresh redesign of the geometry front end:
 
-The repo should evolve toward a generic product/system through verified common
-implementations and the existing Go/Python/C++ boundaries, rather than another
-execution line. Ordered milestones and repository discipline are in
-`docs/platform/PRODUCTIZATION.md`. The current Knight evidence and open product
-executor/qualification gaps below retain their scopes.
+```text
+one image
+   ↓
+Unified IRIS
+   ├─ internally synthesizes canonical 8-view evidence
+   ├─ shared high-capacity scene representation
+   ├─ geometry / SDF / uncertainty head
+   ├─ RGB/RGBA appearance head
+   ├─ generic semantic/ownership head
+   ├─ bounded extraction Δxyz + configuration head
+   └─ integrated topology head (TESSA role folded into IRIS)
+   ↓
+Compiler qualification / canonical M
+   ↓
+AXIS G
+   ↓
+MIRA W_M on exact M
+   ↓
+Compiler dynamic / appearance / presentation proof
+   ↓
+Runtime
+```
 
-Common source/rest engineering preparation now exists in
-`tools/observation/blender_controlled_8view_v2.py` and
-`tools/observation/source_scene_contract_v2.py`. Exact eight-source smoke in
-Blender 4.0.2 produced 64 nonempty 256 px candidate views after a common imported
-opaque-mode/CPU-alpha transport fix; evidence is
-`canonical/FIT8_SOURCE_REST_ENGINEERING_SMOKE_20261013.json`. Synthetic Blender
-root/rigid attachment and shader-alpha checks run in CI. The v1 Knight producer
-and released Compiler DAG are unchanged. Candidates are not independently
-source/native-pose/material matched or admitted through Stage03–08.
+Read `CURRENT_PLAN.md` for the normative design program, open questions, dataset plan, DAG proposal and implementation order.
 
-The common importer now handles absent glTF skin-root hints and armature
-custom-shape helper geometry. Independent raw glTF/ufbx bind geometry and
-pixel-square reference courts pass all eight 1024 px observation sets (64 views);
-maximum relative vertex error is 2.79e-6 and maximum mask gap is 1.42 px.
-Evidence: `canonical/FIT8_IRIS_BIND_OBSERVATION_COURT_20261013.json`.
-This is scoped IRIS image-derived F* preparation, not full native-motion/lit
-material truth admission or live Go Stage03–08 qualification.
+## User-authorized architecture decisions
 
-Shared IRIS trainer, input preparation, notebook builder and existing contained
-decoder/per-view Compiler court export are implemented. One V4/TP64 model and
-optimizer use the Knight-selected C objective across all eight; a real CPU
-engineering prefix ran 16 steps with exact checkpoint restoration. Deterministic
-CPU resumed/uninterrupted training, drift rejection and corruption tests pass.
-The policy freezes 48,000 shared steps, 6,000 per subject. See
-`docs/corpus/IRIS_SHARED_COHORT_RUNNER_V1.md`. No scientific Fit8 Attempt or
-product qualification was created by engineering tests.
+The following are active decisions, not pending proposals:
 
-Four-model delivery remains tracked in `canonical/FIT8_TRAINING_READINESS_V1.json`.
-The first requested IRIS A100 capsule mounts Drive, embeds exact source and input
-identities, loads one verified Drive input ZIP, logs actual training and persists
-atomic checkpoints/results. Physical A100 preflight runs before production fit
-at Run All; CPU evidence does not satisfy it. Go consumers now bind scoped
-observation and shared checkpoint evidence while preserving legacy Knight
-payloads. Full native truth, live Go cohort binding and physical A100 execution
-remain distinct pending gates; the full READY flag is still false.
+1. **Final customer input is one PNG / one image.** IRIS may internally construct eight canonical 45-degree views.
+2. **The new IRIS starts at StdGEN-class representation capacity.** Do not spend a scientific run on a deliberately undersized model whose only purpose is later capacity escalation.
+3. **IRIS and TESSA are being partially unified.** The useful explicit topology-generation role survives as an IRIS topology head/module; the separate GSA→17-D→TESSA scene-understanding bottleneck is not the target architecture.
+4. **RGB/appearance and semantic/ownership heads are required.** They share the scene representation with geometry.
+5. **A bounded surface-extraction deformation/configuration head is required** if implemented safely; this is extraction-carrier deformation, not MIRA skeletal skinning.
+6. **Compiler boundaries are kept only where they are genuinely better:** immutable authority, provenance, independent courts, qualification, bounded generic repair, canonical addressing, mechanics/presentation proof and runtime sealing.
+7. **The deterministic contained tetra path remains valuable as an independent geometry witness/court**, not as a mandatory lossy neural bottleneck.
+8. **AXIS and MIRA remain separate downstream mechanics models for this intervention.** IRIS does not output a finished animated puppet.
+9. **The same eight diverse Fit8 subject identities remain the first architecture cohort.** Difficult subjects are not replaced to make the redesign easier.
 
-The exact-main IRIS research capsule revision 2 has been delivered: notebook SHA
-509c4477edfc14bf46da7655d773e2acc7458a80bcbc015b2ee63cd7d54c1380.
-Its observed Drive link and cold capsule preflight are recorded in the readiness
-file and canonical/FIT8_IRIS_NOTEBOOK_PREFLIGHT_20261013.json. It is executable
-research delivery; the full qualified READY gates above remain open.
+## Why the old geometry chain is being replaced
 
-## Immediate user-authorized priority
+The current shipped/research path is scientifically modular but throws away rich scene information between models:
 
-Active research continuation is the shared IRIS Fit8 A100 capsule and its
-per-subject results, followed by TESSA, AXIS and MIRA as their truth gates close.
-Knight E2E is the fixed regression reference. Research contracts/preflight are
-operator tools; the future product lane must accept input and return qualified
-output without exposing those operator steps to customers.
+```text
+IRIS image tokens / triplane
+   ↓
+SDF
+   ↓
+tetra zero surface
+   ↓
+GSA / RiggingSurface
+   ↓
+17-D TESSA conditioning
+   ↓
+second learned surface encoder
+   ↓
+TESSA topology / XYZ proposal
+```
 
-The canonical development/render baseline is **one M for geometry, topology and
-motion; source-wins RGB plus the already compiled CAA on M-face/barycentric
-addresses**. The user approved the sealed eight-view RUN replay. Independent
-per-view visual triangulation and its production consumers are retired from main.
-Earlier source remains on `archive/visual-v-before-m-caa-20261011`.
+The new target keeps one shared scene representation alive through geometry, appearance, semantic ownership and topology prediction. Compiler stages may derive compact evidence for qualification/mechanics, but they should not force the neural system to discard scene knowledge and relearn it in a second model.
 
-Use `python tools/demo/render_knight_m_caa_v1.py --output <directory>` for the
-sealed Knight regression. Immutable inputs and 21 exact RUN poses are pinned in
-`tests/fixtures/single_m_caa_knight_v1/baseline.json`. All eight views are freshly
-rendered. This executes no inference, retarget or skinning; it is not a fresh
-source-to-puppet compile or a Go ProductRevision.
+## Current implementation versus target
 
-The live architecture entry is `python tools/realsas_architecture.py serve` then
-`http://127.0.0.1:8765`. It refreshes from source, shows typed producer/consumer
-schema reads and compares successful snapshots. Static JSON/HTML and CLI impact
-remain available. See `docs/platform/DYNAMIC_ARCHITECTURE.md`. Unknown reads,
-shared closures and ownership debt remain visible; the map cannot authorize reuse.
+The repository implementation still contains the existing public model split:
 
-The current plan contracts three pure transport/seal boundaries: Stage29 into28,
-Stage33 into32, and Stage36 into35. Stage28/32 produce checkpoint seals alongside
-their qualified skeleton/skin; Stage35 produces `QualifiedMeshIR` and its exact `QualifiedMeshSkinIR`
-binding. Existing checkpoint byte checks, binding algorithms and qualification
-gates still run. IDs stay stable; ordinals are contiguous. Actual implementation
-modules replace star-import proxies in the plan. Previous source is retained at
-`archive/architecture-before-simplify-20261012` (main94da501).
-Historical EngineReleases and Attempt ledgers retain their own graphs and identities.
-The implementation ledger remains disabled, subject NONE and 0/43 PENDING.
+```text
+IRIS → TESSA → AXIS → MIRA → Compiler → Runtime
+```
 
-Development intentionally reuses sealed FIT outputs and checkpoints. Refit or
-fresh inference is selected only by an explicit intervention; unseen experiments
-have not started. A complete product input → model inference → Compiler → Runtime
-executor is a later user goal, while modular development remains the immediate
-working lane.
+Current `SYSTEM_INDEX.md` describes that shipped implementation and remains useful for code ownership/navigation. It must not be mistaken for the newly approved target architecture before implementation lands.
 
-The retained Knight render focus is **grip/weapon relation and semantic overlap/draw order**. Raw depth
-and depth ties are known limitations. Native exact pixel/owner parity for diagonal
-witnesses and linear-light shipping composition remain open qualification gates.
-A green engineering regression must not close those scientific/product gates.
+The target under `CURRENT_PLAN.md` is:
 
-The offline Knight investor inspector is a **source-review/demo consumer** with
-seven exact Knight-native FBX takes (Idle, Run, Run_swordAttack, Jump, Death,
-Roll_sword and swordAttackJump). It transports source FK through explicit rest
-frames, retains the existing M/G/W, and exposes synchronized artwork, selectable
-rig, topology and actual skin weights. Its surface-anchored rigid equipment and
-kinematic-region ordering are presentation candidates; contact/rigidity and
-source-rotation checks do not close artistic grip, clearance or semantic overlap.
-Stage40 and product authority are not silently replaced. Reproduction and the
-next canonical intervention are in
-`docs/motion/KNIGHT_SLASH_SOURCE_FRAME_FIX_20261012.md`.
+```text
+Unified IRIS (including topology/TESSA role)
+        ↓
+Compiler canonical M
+        ↓
+AXIS
+        ↓
+MIRA
+        ↓
+Compiler / Runtime
+```
 
-## Current product architecture
+Do not silently relabel the current code as if this target already existed.
 
-Public model order is IRIS → TESSA → AXIS → MIRA → Compiler → Runtime.
-Geometry, Mechanics and Appearance remain co-equal product authorities.
-`SurfaceAddressing` is the stable canonical mesh-domain/addressing contract;
-Complete Appearance Authority owns source-preserving appearance. Presentation
-provides editable addressing; Runtime consumes sealed qualified packages.
+## Research-state consequence
 
-Stage18/19 construct and statically qualify the exact mechanical carrier M.
-AXIS V5.4.1 owns hard required parents and deterministic 256-bin XYZ; Compiler
-validates/materializes them without parent reselection. MIRA V5.5 predicts W_M on
-that same M. Stage34 derives provisional frames; Stage35 validates final frames
-against W_M and proves the exact (M,G,W_M) carrier. No semantic skin transfer runs.
-Inactive coincident subtrees may inherit parent frames; active coincident subtrees
-fail closed and require explicit AXIS orientation/tail evidence.
+This intervention changes together:
 
-Stage23 seals source-wins plus CAA material. Stage25 measures that same renderer;
-Stage42 verifies exact M rest/topology and transports Stage41 poses; Stage43
-packages that material. CPU/native consumers sample M. Existing uniform/adaptive
-CAA samples and abstention codes remain. Legacy single-M atlas packages are
-explicitly readable; new canonical compiles require source-wins material.
+- input cardinality and canonical-view synthesis;
+- IRIS model capacity;
+- shared scene representation;
+- geometry extraction;
+- RGB/appearance outputs;
+- semantic/ownership outputs;
+- topology/TESSA boundary;
+- compiler data flow;
+- teacher dataset;
+- released DAG.
 
-## Scientific and platform boundaries
+Therefore the next scientific execution requires a **new EngineRelease and fresh/explicit child Attempt**. It is not a resume of the old Fit8 IRIS run.
 
-Active experiment: `PLATFORM_EXECUTION_LANES`.
-State: `CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED`.
-Knight teacher-relative AXIS/MIRA FIT1 mechanics is PASS in the sealed scope;
-absolute G3 remains separately open because the teacher also exceeds its thresholds.
-FIT8/FITK/unseen/generalization, full pretrained source-to-puppet execution,
-product qualification and sub-two-minute latency are not established.
-The shared IRIS geometry/RGB/semantic head proposal remains unapproved.
+Any existing platform campaign/Attempt rows from the old Fit8 path may still be technically OPEN/RUNNING until operator cleanup is performed. Treat them as **superseded scientific state**, not permission to continue old learned work. Close/exit them through the Go control plane before starting the new attempt; do not edit old ledgers to manufacture a terminal result.
 
-Go owns Registry, Attempts, immutable release DAGs, ProductRevisions and durable
-workflows. Python owns scientific stage semantics; C++ consumes qualified packages.
-New scientific execution requires `agent-context` → exact deployed-main
-`agent-enter` → explicit released-DAG target execution → terminal inspection →
-exact-scope `agent-exit`. Research state belongs to Attempts, source to main.
-See `docs/platform/EXECUTION_LANES.md` and `docs/platform/AGENT_HANDOFF.md`.
+Immutable raw source identities may be reused where exact dependency identity still holds. Observation/model artifacts whose contracts change must be regenerated under the new release.
 
-Platform host/reuse/agent-session engineering evidence is indexed in
-`canonical/PLATFORM_MAIN_AUDIT_20261008.json`; its SHAs are historical witnesses,
-not the latest main ref. Verified partial-output recovery and finalize-only exits
-remain available; inspect original Go context before retrying an interrupted run.
-Exact-byte evidence import does not mint scientific qualification. The Knight
-input inventory is `canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json`.
+## New Fit8 meaning
 
-Old source-owned visual boundary reports, zero-CAA-consumption findings and failed
-per-view renders describe the retired pipeline. They are provenance, not a blocker
-or acceptance claim for the approved M+CAA regression. Historical evidence remains
-at its sealed paths and archive commits; no ledger is edited to manufacture PASS.
+Fit8 remains the heterogeneous architecture cohort:
 
-## Current continuation
+- Snake
+- Bat
+- T-Rex
+- Horse
+- Spider
+- GreenBlob
+- Shark
+- George
 
-Keep the live map and simplified plan coherent on main. Verify exact-head tests,
-typed bindings and the fresh eight-view approved regression after source changes.
-Continue the user-authorized shared Fit8 research capsule while preserving this
-Knight regression. New model heads remain a separate intervention; the frozen
-shared IRIS fitting policy is already authorized. The product executor and
-qualification lane must keep their independent scopes.
+The next experiment is no longer "finish IRIS-vCurrent 19.2k". It is:
 
-Read this file, `AGENTS.md`, `docs/platform/EXECUTION_LANES.md`, then
-`canonical/CANONICAL_HANDOFF_20261007.md` and the current plan. Older recovery or
-runtime-audit documents must not override this continuation.
+> **Fit8 Unified IRIS Reconstruction + Canonical M Architecture Acceptance.**
 
-### IRIS Fit8 recipe correction — 2026-10-13
+The model must remain shared across the cohort; compiler fixes must remain subject-free. Knight remains a separate fixed regression witness.
 
-Revision 2 preserves the exact Knight TP64/DINO/F-star/loss code, removes weight
-decay and restores the four query groups, independent heldout strata, fixed
-residual replay and F-star-certified balanced source rays. A prefit source-only
-R512 census and post-selection zero-nonpositive exterior audit join exact
-containment and unchanged per-view P999. The Knight mechanical PASS notebook
-is not an IRIS training PASS. The explicit fresh joint-fit differences are in
-`canonical/FIT8_IRIS_KNIGHT_RECIPE_REFERENCE_V1.json`. Source engineering proof:
-`canonical/FIT8_IRIS_RECIPE_REVISION2_PREFLIGHT_20261013.json`. The old delivery
-recipe is superseded; replacement capsule is delivered at exact merged source `c22e11e06e57adc100b2fc5ffc2bdf4ad19c633a`,
-notebook SHA `509c4477edfc14bf46da7655d773e2acc7458a80bcbc015b2ee63cd7d54c1380`. The canonical readiness record
-binds the same Drive/Library file identities to revision 2. Physical A100 Run All,
-full native truth and live Go qualification remain pending. No new
-scientific Attempt, Fit8 PASS, native-truth admission or product state is minted.
+Fit8 still establishes architecture/system closure, not learned unseen generalization. LOFO/unseen come after the redesigned architecture closes and is frozen.
+
+## New dataset program
+
+The existing Fit8 authored 3D sources are retained and expanded into a deterministic teacher corpus rather than replaced.
+
+For each asset, the new teacher pipeline should extract source-authored:
+
+```text
+object / mesh identity
+material slots
+geometry / topology
+armature / bone hierarchy
+skin weights
+parent / constraint relations
+rigid accessories
+available motion
+```
+
+and render canonical teacher evidence:
+
+```text
+RGB
+alpha
+depth
+normal
+instance/material IDs
+mechanical-owner evidence
+amodal component masks
+occlusion graph
+attachment graph
+```
+
+Primary semantics are category-agnostic instance/ownership/boundary/attachment/deformation-mode evidence. Human-only `body / cloth / hair` taxonomy is not the generic foundation.
+
+The same extractor should later scale to the larger audited authored corpus after Fit8 validation.
+
+## Canonical M target
+
+The intervention is judged by the final qualified `M`, not by a pretty static neural render.
+
+Desired `M` properties:
+
+- strong static geometry and source/canonical-view silhouette fidelity;
+- valid/manifold animation-friendly topology;
+- no unexplained holes/gaps or pathological slivers;
+- coherent owner/material addressing;
+- exact provenance back to shared IRIS evidence;
+- stable motion stretch/area/Jacobian/condition behavior;
+- low projected flip/self-intersection rates;
+- suitable basis for AXIS and exact-carrier MIRA;
+- 2D-oriented projection quality across eight directions;
+- later mobile/LOD reduction without changing the mechanical basis silently.
+
+The deterministic tetra surface remains an independent witness of the implicit field. A learned FlexiCubes-like explicit surface may improve reconstruction/training, while the integrated topology head remains responsible for an animation-oriented mesh proposal until dynamic evidence proves a simpler replacement.
+
+## Compiler policy during redesign
+
+Keep compiler work that is demonstrably valuable:
+
+- source/generated provenance;
+- independent geometry courts;
+- static mesh qualification;
+- bounded generic repair;
+- canonical M promotion;
+- SurfaceAddressing;
+- owner/fragment resolution;
+- source-wins appearance qualification;
+- AXIS/MIRA binding;
+- dynamic motion proof;
+- contact/grip/order/presentation proof;
+- runtime package/native parity.
+
+Retire or redesign work that exists only because separate models forgot each other's information, including the GSA→17-D→second-scene-encoder bottleneck and support reconstruction that can be replaced by direct shared-field bindings.
+
+Compiler repair is not permission for a weak model. If large repairs become routine, fix the model/head.
+
+## AXIS / MIRA boundary
+
+Current mechanics principle remains carrier-native:
+
+```text
+canonical M
+  → AXIS G
+  → MIRA W_M on exact M
+  → Compiler exact (M,G,W_M) proof
+```
+
+The AXIS input adapter should be redesigned to consume M-anchored rich surface evidence rather than depending on a pre-M lossy surface summary if that can be done cleanly. Exact adapter design remains open in `CURRENT_PLAN.md`.
+
+MIRA continues to predict on exact final M. No semantic skin transfer to another topology becomes canonical.
+
+## Current Knight baseline
+
+The approved Knight presentation/mechanics regression remains useful and unchanged in scope:
+
+- one canonical M for geometry/topology/motion;
+- source-wins RGB + existing CAA on M-face/barycentric addresses;
+- exact sealed regression artifacts remain historical/product-near witnesses;
+- grip/weapon relation and semantic overlap/draw-order remain known visual concerns;
+- Knight is not part of the Fit8 cohort and must not block it.
+
+Do not reinterpret the old Knight witness as proof of the new Unified IRIS architecture.
+
+## Platform / execution rules
+
+Canonical source remains on `main`.
+Research state belongs to Go `Attempt`; production state to `ProductRevision`.
+Do not create a long-lived research branch as architecture authority.
+
+Before new execution:
+
+1. finalize/exit superseded old Fit8 sessions through the Go control plane;
+2. land the new schemas/model/compiler/DAG implementation on main;
+3. mint a new EngineRelease;
+4. start a fresh/explicit child campaign/Attempt from source identity;
+5. run the new one-image Unified IRIS path;
+6. qualify canonical M, then AXIS/MIRA/mechanics/presentation.
+
+External Colab/A100 remains compute only; its checkpoint/result does not mint scientific qualification by itself.
+
+## Immediate priority
+
+Do **not** spend compute resuming IRIS-vCurrent.
+
+The current work order is:
+
+```text
+1. teacher-corpus schemas + deterministic extractor/normalizer
+2. Unified IRIS architecture/spec + code layout
+3. new model/compiler artifact schemas
+4. new dependency DAG / EngineRelease design
+5. full-capacity implementation
+6. CPU/GPU preflight and exact one-image-forward guards
+7. new Fit8 Unified attempt
+8. canonical M qualification
+9. AXIS/MIRA + dynamic proof
+10. LOFO/unseen only after architecture freeze
+```
+
+## Required read order for agents
+
+1. `CURRENT_STATE.md`
+2. `CURRENT_PLAN.md`
+3. `AGENTS.md`
+4. `docs/platform/EXECUTION_LANES.md`
+5. `docs/platform/AGENT_HANDOFF.md`
+6. `SYSTEM_INDEX.md` for current implementation ownership
+7. `canonical/CANONICAL_HANDOFF_20261007.md` for sealed mechanics provenance only
+8. older recovery/scientific material only when needed for provenance
+
+When the user says only `continue / devam et`, continue the Unified IRIS redesign program in `CURRENT_PLAN.md`. **Do not resume the stopped old Fit8 A100 training.**

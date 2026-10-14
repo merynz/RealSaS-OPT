@@ -1,7 +1,13 @@
 from tools.corpus.fit8_f_representation_capacity_court_v1 import evaluate_f_representation_capacity_v1
-from tools.corpus.fit8_local_patch_teacher_v1 import ExtractionCellV1, SourceTriangleV1, extract_cell_teacher_v1
+from tools.corpus.fit8_local_patch_teacher_v1 import (
+    CrossingCanonicalizationPolicyV1,
+    ExtractionCellV1,
+    SourceTriangleV1,
+    extract_cell_teacher_v1,
+)
 
 CELL = ExtractionCellV1((0.0, 0.0, 0.0), 1.0, 2.0)
+POLICY = CrossingCanonicalizationPolicyV1(1e-6, "SYNTHETIC_TEST_POLICY")
 
 
 def _plane(tid, x, component):
@@ -9,7 +15,11 @@ def _plane(tid, x, component):
 
 
 def test_fa_fails_parallel_distinct_patches_but_fb_represents_them():
-    cell = extract_cell_teacher_v1(CELL, [_plane(0, -0.25, 0), _plane(1, 0.25, 1)])
+    cell = extract_cell_teacher_v1(
+        CELL,
+        [_plane(0, -0.25, 0), _plane(1, 0.25, 1)],
+        crossing_canonicalization=POLICY,
+    )
     report = evaluate_f_representation_capacity_v1([cell])
     assert report.teacher_crossing_count > 0
     assert report.f_a_recall_ceiling < 1.0
@@ -24,6 +34,7 @@ def test_fb_fails_when_one_local_patch_crosses_same_edge_twice():
         CELL,
         triangles,
         triangle_adjacency={0: [1], 1: [0]},
+        crossing_canonicalization=POLICY,
     )
     report = evaluate_f_representation_capacity_v1([cell])
     assert report.f_b_recall_ceiling < 1.0
@@ -33,7 +44,7 @@ def test_fb_fails_when_one_local_patch_crosses_same_edge_twice():
 
 
 def test_ordinary_single_sheet_cell_is_representable_by_all_families():
-    cell = extract_cell_teacher_v1(CELL, [_plane(0, 0.0, 0)])
+    cell = extract_cell_teacher_v1(CELL, [_plane(0, 0.0, 0)], crossing_canonicalization=POLICY)
     report = evaluate_f_representation_capacity_v1([cell])
     assert report.f_a_recall_ceiling == 1.0
     assert report.f_b_recall_ceiling == 1.0
@@ -46,6 +57,7 @@ def test_empty_cell_does_not_create_fake_capacity_failures():
     cell = extract_cell_teacher_v1(
         CELL,
         [SourceTriangleV1(0, ((5, 5, 5), (6, 5, 5), (5, 6, 5)), 0)],
+        crossing_canonicalization=POLICY,
     )
     report = evaluate_f_representation_capacity_v1([cell])
     assert report.active_cell_count == 0

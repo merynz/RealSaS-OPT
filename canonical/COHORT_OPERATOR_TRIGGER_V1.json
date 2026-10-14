@@ -1,0 +1,7 @@
+{
+  "schema": "RealSaS.CohortOperatorTrigger.v1",
+  "enabled": false,
+  "descriptor": "canonical/FIT8_PLATFORM_BOOTSTRAP_V1.json",
+  "submit": false,
+  "nonce": "UNARMED"
+}

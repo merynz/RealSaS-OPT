@@ -69,6 +69,72 @@ def semantic_equivalent_sdf_v1(
     return torch.maximum(sdf, semantic_margin)
 
 
+def semantic_equivalent_nerf_weights_v1(
+    density_raw: torch.Tensor,
+    deltas: torch.Tensor,
+    preserve_probability: torch.Tensor,
+    *,
+    density_bias: float = 0.0,
+) -> torch.Tensor:
+    """Volume-rendering weights for one arbitrary preserved region set.
+
+    Clean-room implementation of the semantic-equivalent NeRF formulation in
+    StdGEN++. The preserved semantic mass gates opacity. The API intentionally
+    accepts an arbitrary `preserve_probability` rather than fixed human class
+    IDs, so RealSaS can later supply probabilities from subject-local,
+    permutation-invariant semantic regions.
+
+    This is training evidence only. NeRF density is not canonical geometry
+    authority; the signed field plus compiler-qualified explicit carrier remain
+    the geometry authority path.
+    """
+
+    if density_raw.shape != deltas.shape or density_raw.shape != preserve_probability.shape:
+        raise ValueError("UNIFIED_IRIS_EQUIVALENT_NERF_SHAPE_INVALID")
+    if not torch.isfinite(density_raw).all() or not torch.isfinite(deltas).all():
+        raise ValueError("UNIFIED_IRIS_EQUIVALENT_NERF_NONFINITE")
+    if torch.any(deltas < 0):
+        raise ValueError("UNIFIED_IRIS_EQUIVALENT_NERF_NEGATIVE_DELTA")
+    if torch.any(preserve_probability < 0.0) or torch.any(preserve_probability > 1.0):
+        raise ValueError("UNIFIED_IRIS_EQUIVALENT_NERF_PROBABILITY_OUT_OF_RANGE")
+
+    sigma = F.softplus(density_raw + float(density_bias))
+    alpha = 1.0 - torch.exp(-sigma * deltas)
+    equivalent_alpha = alpha * preserve_probability
+    shifted = torch.cat(
+        [torch.ones_like(equivalent_alpha[..., :1]), 1.0 - equivalent_alpha + 1e-10],
+        dim=-1,
+    )
+    transmittance = torch.cumprod(shifted, dim=-1)[..., :-1]
+    return equivalent_alpha * transmittance
+
+
+def semantic_equivalent_nerf_render_v1(
+    density_raw: torch.Tensor,
+    rgb: torch.Tensor,
+    deltas: torch.Tensor,
+    preserve_probability: torch.Tensor,
+    *,
+    white_background: bool = False,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Render RGB and accumulated opacity for a generic semantic region set."""
+
+    if rgb.shape[:-1] != density_raw.shape or rgb.shape[-1] not in (3, 4):
+        raise ValueError("UNIFIED_IRIS_EQUIVALENT_NERF_RGB_SHAPE_INVALID")
+    if not torch.isfinite(rgb).all():
+        raise ValueError("UNIFIED_IRIS_EQUIVALENT_NERF_RGB_NONFINITE")
+    weights = semantic_equivalent_nerf_weights_v1(
+        density_raw,
+        deltas,
+        preserve_probability,
+    )
+    color = torch.sum(weights.unsqueeze(-1) * rgb, dim=-2)
+    opacity = weights.sum(dim=-1)
+    if white_background:
+        color = color + (1.0 - opacity).unsqueeze(-1)
+    return color, opacity
+
+
 def coarse_to_fine_active_mask_v1(
     coarse_sdf: torch.Tensor,
     high_resolution_shape: tuple[int, int, int],
@@ -146,6 +212,8 @@ def union_refinement_evidence_v1(
 
 __all__ = [
     "coarse_to_fine_active_mask_v1",
+    "semantic_equivalent_nerf_render_v1",
+    "semantic_equivalent_nerf_weights_v1",
     "semantic_equivalent_sdf_v1",
     "union_refinement_evidence_v1",
 ]

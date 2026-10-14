@@ -1,0 +1,57 @@
+{
+  "schema": "RealSaS.PlatformCohortBootstrapDescriptor.v1",
+  "date": "2026-10-14",
+  "campaign_name": "FIT8_PLATFORM_CAMPAIGN_V1",
+  "campaign_contract": "canonical/FIT8_PLATFORM_CAMPAIGN_V1.json",
+  "purpose": "RESEARCH",
+  "actor": "fit8-platform-bootstrap",
+  "cohort_bundle": {
+    "provider": "google_drive",
+    "file_id": "1PcxT2rfb9jCHfP75gaqMAo90OU7JRypH",
+    "name": "FIT8_PLATFORM_STAGE01_INPUT_BUNDLE_20261013.zip",
+    "sha256": "9d9c9cbf63c979326cd2f39f5435006b81dddb201028a34ebb4cf10e1b434936",
+    "size_bytes": 42325747,
+    "bootstrap_manifest_member": "BOOTSTRAP_MANIFEST.json",
+    "bundle_receipt_member": "BUNDLE_RECEIPT.json"
+  },
+  "shared_iris": {
+    "cohort_manifest": {
+      "provider": "google_drive",
+      "file_id": "1PJ-SxGVS6F6pHUFgB8Kws69X9wS5aywa",
+      "name": "COHORT_MANIFEST.json",
+      "sha256": "088283fbca5ac6c95dc8d9fedadaafbf9bf82603cc6bee28948af995945e5053",
+      "size_bytes": 60330,
+      "schema": "RealSaS.SharedIrisCohortShards.v1"
+    },
+    "training_policy": {
+      "repo_path": "canonical/FIT8_IRIS_SHARED_TRAINING_POLICY_V1.json",
+      "schema": "RealSaS.SharedIrisTrainingPolicy.v1"
+    },
+    "training_profile": "SHARED_IRIS_IMAGE_DERIVED_FSTAR_V1",
+    "stage_id": "10_IRIS_FIT",
+    "required_external_roles": [
+      "execution_receipt",
+      "checkpoint",
+      "result"
+    ],
+    "optional_external_roles": [
+      "shared_execution_payload"
+    ]
+  },
+  "rules": {
+    "descriptor_is_data_not_subject_specific_code": true,
+    "all_bundle_members_verified_against_bundle_receipt": true,
+    "subject_specific_code_forbidden": true,
+    "subject_count_must_match_campaign_contract": true,
+    "observation_binding_must_match_shared_cohort_manifest": true,
+    "raw_external_import_mints_no_qualification": true,
+    "campaign_coordinator_mints_no_fit8_pass": true,
+    "future_cohort_reuses_same_bootstrap_tool_with_different_descriptor": true
+  },
+  "claims": {
+    "fit8_pass": false,
+    "product_pass": false,
+    "unseen": false,
+    "generalization": false
+  }
+}

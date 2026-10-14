@@ -14,6 +14,10 @@
     "bootstrap_manifest_member": "BOOTSTRAP_MANIFEST.json",
     "bundle_receipt_member": "BUNDLE_RECEIPT.json"
   },
+  "source_license_defaults": {
+    "license_name": "CC0 1.0 Universal",
+    "license_ref": "https://creativecommons.org/publicdomain/zero/1.0/"
+  },
   "shared_iris": {
     "cohort_manifest": {
       "provider": "google_drive",
@@ -28,6 +32,15 @@
       "schema": "RealSaS.SharedIrisTrainingPolicy.v1"
     },
     "training_profile": "SHARED_IRIS_IMAGE_DERIVED_FSTAR_V1",
+    "preregistration": {
+      "architecture_id": "RealSaS.IRIS.SceneFirstSignedGeometry.v4.tp64",
+      "model_source_repo_path": "models/iris/training/cohort_v1.py",
+      "executor_kind": "EXTERNAL_GPU_JOB_V1",
+      "random_seed": 26092357,
+      "expected_output_contract": [
+        "SIGNED_SURFACE_EVIDENCE_NOT_APPEARANCE_AUTHORITY"
+      ]
+    },
     "stage_id": "10_IRIS_FIT",
     "required_external_roles": [
       "execution_receipt",
@@ -37,6 +50,13 @@
     "optional_external_roles": [
       "shared_execution_payload"
     ]
+  },
+  "regression_witnesses": {
+    "knight": {
+      "display_name": "Knight product-nearest regression witness",
+      "inventory": "canonical/PRODUCT_NEAREST_KNIGHT_WITNESS_V1.json",
+      "manifest_source": "current_host_lineage_names.caa_run"
+    }
   },
   "rules": {
     "descriptor_is_data_not_subject_specific_code": true,

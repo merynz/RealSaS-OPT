@@ -28,12 +28,12 @@ def _edge_report():
     )
 
 
-def _face_report(reasons=(), canonicalization=()):
+def _face_report(reasons=(), canonicalization=(), strands=1):
     return FTopologyResidualReportV1(
         FACE_SCHEMA_VERSION,
         1,
-        1,
-        ((0, 1),),
+        strands,
+        ((0, strands),),
         tuple(reasons),
         tuple(canonicalization),
     )
@@ -43,12 +43,16 @@ def test_budget_keeps_edge_face_and_canonicalization_separate():
     report = evaluate_f_residual_budget_v1(
         _edge_report(),
         [
-            _face_report(),
-            _face_report(("CLOSED_LOOP",)),
-            _face_report((), ("POINT_DEGENERACY",)),
+            _face_report(strands=2),
+            _face_report(("CLOSED_LOOP",), strands=3),
+            _face_report((), ("POINT_DEGENERACY",), strands=1),
         ],
     )
     assert report.edge_residual_cell_fraction == 1 / 8
     assert report.edge_extra_crossing_fraction == 3 / 100
     assert report.topology_residual_face_fraction == 1 / 3
     assert report.canonicalization_face_fraction == 1 / 3
+    assert report.teacher_face_strands == 6
+    assert report.residual_face_strands == 3
+    assert report.face_residual_strand_fraction == 1 / 2
+    assert report.explicit_topology_record_fraction == (3 + 3) / (100 + 6)

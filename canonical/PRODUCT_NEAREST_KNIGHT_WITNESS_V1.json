@@ -1,0 +1,100 @@
+{
+  "schema": "RealSaS.ProductNearestWitnessInventory.v1",
+  "date": "2026-10-14",
+  "subject_key": "knight",
+  "subject_scope": "KNIGHT_FIT1_FIXED_REGRESSION_WITNESS",
+  "status": "PRODUCT_NEAREST_ENGINEERING_WITNESS__NOT_PRODUCT_PASS",
+  "purpose": "SINGLE_ENTRYPOINT_FOR_CURRENT_KNIGHT_REFERENCE_LINEAGE",
+  "qualification_minted_by_inventory": false,
+  "product_authority_claimed": false,
+  "generalization_claimed": false,
+  "fit8_claimed": false,
+  "unseen_claimed": false,
+  "canonical_main_at_index_creation": "2ba27636257b7c479a038daae6d2c2830a63f2ed",
+  "canonical_compiler_reference": {
+    "plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
+    "stage_count": 43,
+    "entry_stage_id": "01_SOURCE_BYTES_SEALED",
+    "target_stage_id": "46_PRODUCT_CLOSURE_SEAL",
+    "subject_specific_code_forbidden": true,
+    "important_scope_note": "No single current 43-stage ProductRevision is claimed to have produced the investor demo recording. The accepted Knight reference is currently a composition of sealed historical/scoped model evidence, the current single-M+CAA regression, and source-review motion/presentation consumers. A future live current-DAG Knight ProductRevision should replace this composition as the compiler_reference without rewriting historical evidence."
+  },
+  "sealed_mechanics": {
+    "input_inventory": "canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json",
+    "promotion_receipt": "canonical/KNIGHT_AXIS541_MIRA55_CARRIER_NATIVE_PROMOTION_20261007.json",
+    "authority_scope": "LATEST_DEVELOPED_CANONICAL_MECHANICAL_LINE__NOT_GENERALIZATION_OR_PRODUCT_CLAIM",
+    "mechanical_contract": "EXACT_SAME_M_G_W_M",
+    "axis_version": "V5.4.1",
+    "mira_version": "V5.5"
+  },
+  "approved_render_regression": {
+    "baseline": "tests/fixtures/single_m_caa_knight_v1/baseline.json",
+    "renderer": "tools/demo/render_knight_m_caa_v1.py",
+    "historical_source_run_id": 37859732443,
+    "canonical_geometry": "M",
+    "canonical_motion": "EXACT_SEALED_M_POSES",
+    "material_contract": "CANONICAL_M_SOURCE_WINS_PLUS_SEALED_CAA_V1",
+    "parent_witness_sha256": "bb8cfb075b5ec3df93cc1fac306d65c88c27f5a6a7fc1bbf74c05ec79bcdba35",
+    "pose_sha256": "614a4657f6d1f175a5d3ecbc057a4ab5c3700a5d22c745fdbf6260cca1e3f04a",
+    "input_sha256": {
+      "run_poses.npz": "ab0b951ae04564bf9448d2f4b91bdb5168ce4291c4d58f9859f6dbc68592690a",
+      "source_rgba.zip": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+      "compiled_caa.npz": "cf9634a56a0843df3bb43405625130b88996d030a6d464a65d9a4c9fc3e4336c"
+    },
+    "product_qualification_claimed": false
+  },
+  "current_host_lineage_names": {
+    "caa_run": "KNIGHT_LATEST_CURRENT_CAA_VISUAL_20261010",
+    "carrier_materialization_run": "KNIGHT_LATEST_CARRIER_MATERIALIZATION_20261010",
+    "exporter": "tools/ops/export_knight_sealed_inputs_v1.py",
+    "note": "These names identify the current sealed-input inspection roots used by the existing exporter. They are not independently promoted ProductRevisions."
+  },
+  "native_motion_and_presentation_derivative": {
+    "authority_document": "docs/motion/KNIGHT_SLASH_SOURCE_FRAME_FIX_20261012.md",
+    "source_spec": "canonical/MOTION_PRESET_SOURCE_QUATERNIUS_KNIGHT_NATIVE_V1.json",
+    "source_fbx_sha256": "41f2616fb4a42f9d35e242bbed1450ededc7537def4bf38cbb11b4e54ff2bf21",
+    "bind_source_sha256": "6422209f1291dbb3dbfdffb6b238e63214f8aeddfc31e12f1b105ecc1da85298",
+    "sealed_witness_sha256": "bb8cfb075b5ec3df93cc1fac306d65c88c27f5a6a7fc1bbf74c05ec79bcdba35",
+    "renderer": "tools/demo/render_knight_source_motion_v3.py",
+    "investor_package_builder": "tools/demo/build_knight_investor_package_v1.py",
+    "selected_native_clips": [
+      "Idle",
+      "Run",
+      "Run_swordAttack",
+      "Jump",
+      "Death",
+      "Roll_sword",
+      "swordAttackJump"
+    ],
+    "scope": "SOURCE_REVIEW_AND_ENGINEERING_PRESENTATION__NOT_NATIVE_PRODUCT_RUNTIME_AUTHORITY"
+  },
+  "reference_media": {
+    "role": "USER_SUPPLIED_INVESTOR_DEMO_RECORDING__REFERENCE_ONLY",
+    "filename": "RealSaS_Demo(2).mp4",
+    "sha256": "63d69a24e64ca0d20f472a93d7f7614387bfcfc0106d79afbcfcd933738d1f9e",
+    "size_bytes": 7589337,
+    "video": {
+      "codec": "h264",
+      "width": 1920,
+      "height": 1080,
+      "fps": 30,
+      "duration_seconds": 50.533333,
+      "frame_count": 1516
+    },
+    "scientific_or_product_authority": false
+  },
+  "known_open_product_gates": [
+    "Fresh current-43-stage source-to-product Knight execution under the platform has not been established by this inventory",
+    "Grip orientation and body/equipment clearance remain open artistic qualification",
+    "Semantic overlap/draw-order ownership remains open beyond engineering heuristics",
+    "Native exact pixel/owner parity for diagonal depth ties remains open",
+    "Linear-light shipping composition remains open",
+    "Absolute G3 remains inconclusive where the sealed source teacher itself violates the frozen threshold",
+    "FIT8, unseen and generalization are not implied by the Knight witness"
+  ],
+  "agent_usage": {
+    "rule": "Read this index before searching historical Knight branches or receipts. Follow referenced sealed authorities rather than reconstructing lineage from filenames.",
+    "regression_command": "python tools/demo/render_knight_m_caa_v1.py --output <directory>",
+    "promotion_rule": "When a newer Knight witness is accepted, create a new immutable inventory revision or update this current index only with explicit supersession evidence; never rewrite historical receipts."
+  }
+}

@@ -31,15 +31,21 @@ def subject_agnostic_release_parameters(stage, overrides=None):
         "manifest_keys": list(stage.get("manifest_keys") or []),
     }
     out.update(extra)
-    roles = out.get("external_evidence_roles")
-    if roles is not None:
+    for key in ("external_evidence_roles", "optional_external_evidence_roles"):
+        roles = out.get(key)
+        if roles is None:
+            continue
         if not isinstance(roles, (list, tuple)) or not roles:
             raise RuntimeError("RELEASE_EXTERNAL_EVIDENCE_ROLE_CONTRACT_INVALID")
         normalized = [str(role) for role in roles]
         if (len(normalized) != len(set(normalized))
                 or any(not role or role != role.strip() for role in normalized)):
             raise RuntimeError("RELEASE_EXTERNAL_EVIDENCE_ROLE_CONTRACT_INVALID")
-        out["external_evidence_roles"] = normalized
+        out[key] = normalized
+    required = set(out.get("external_evidence_roles") or ())
+    optional = set(out.get("optional_external_evidence_roles") or ())
+    if required.intersection(optional):
+        raise RuntimeError("RELEASE_EXTERNAL_EVIDENCE_ROLE_CONTRACT_INVALID")
     return out
 
 
@@ -55,13 +61,20 @@ def _verify_release_parameters(stage, parameters, manifest):
         raise RuntimeError("ENGINE_RELEASE_SUBJECT_AGNOSTIC_CONTRACT_REQUIRED")
     if list(parameters.get("manifest_keys") or []) != list(stage.get("manifest_keys") or []):
         raise RuntimeError("ENGINE_RELEASE_MANIFEST_READ_SET_DRIFT")
-    roles = parameters.get("external_evidence_roles")
-    if roles is not None:
+    normalized = {}
+    for key in ("external_evidence_roles", "optional_external_evidence_roles"):
+        roles = parameters.get(key)
+        if roles is None:
+            normalized[key] = []
+            continue
         if not isinstance(roles, list) or not roles:
             raise RuntimeError("ENGINE_EXTERNAL_EVIDENCE_ROLE_CONTRACT_INVALID")
         if (len(roles) != len(set(roles))
                 or any(not isinstance(role, str) or not role or role != role.strip() for role in roles)):
             raise RuntimeError("ENGINE_EXTERNAL_EVIDENCE_ROLE_CONTRACT_INVALID")
+        normalized[key] = roles
+    if set(normalized["external_evidence_roles"]).intersection(normalized["optional_external_evidence_roles"]):
+        raise RuntimeError("ENGINE_EXTERNAL_EVIDENCE_ROLE_CONTRACT_INVALID")
 
 
 def released_execution_plan(base_plan, released_graph, *, mode="PRODUCT"):

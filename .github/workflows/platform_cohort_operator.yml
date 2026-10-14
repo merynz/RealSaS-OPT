@@ -115,6 +115,7 @@ jobs:
       SUBMIT: ${{ needs.activation.outputs.submit }}
       EXPECTED_SHA: ${{ needs.activation.outputs.expected_sha }}
       RCLONE_REMOTE: ${{ vars.REALSAS_RCLONE_DRIVE_REMOTE || 'gdrive' }}
+      PYTHONPATH: ${{ github.workspace }}
     steps:
       - uses: actions/checkout@v4
         with:

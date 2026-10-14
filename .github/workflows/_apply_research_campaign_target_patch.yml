@@ -1,0 +1,73 @@
+name: apply-research-campaign-target-patch
+
+on:
+  push:
+    branches: [platform/research-campaign-target-20261014]
+    paths: ['.github/workflows/_apply_research_campaign_target_patch.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: platform/research-campaign-target-20261014
+          fetch-depth: 0
+      - name: Apply generic phased research target support
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('platform/internal/campaign/campaign.go')
+          text=p.read_text()
+
+          def one(old,new):
+              global text
+              if text.count(old)!=1:
+                  raise SystemExit(f'CAMPAIGN_PATCH_CARDINALITY:{text.count(old)}:{old[:80]}')
+              text=text.replace(old,new)
+
+          one('''\tCandidateEngineReleaseID uuid.UUID   `json:"candidate_engine_release_id"`\n\tCohortSubjectIDs         []uuid.UUID `json:"cohort_subject_ids"`\n''','''\tCandidateEngineReleaseID uuid.UUID   `json:"candidate_engine_release_id"`\n\tTargetStageID            string      `json:"target_stage_id,omitempty"`\n\tCohortSubjectIDs         []uuid.UUID `json:"cohort_subject_ids"`\n''')
+          one('''\tCohortComplete           bool      `json:"cohort_complete"`\n\tRegressionComplete       bool      `json:"regression_complete"`\n\tFullClosureComplete      bool      `json:"full_closure_complete"`\n''','''\tCohortComplete           bool      `json:"cohort_complete"`\n\tRegressionComplete       bool      `json:"regression_complete"`\n\tTargetComplete           bool      `json:"target_complete"`\n\tFullClosureComplete      bool      `json:"full_closure_complete"`\n''')
+
+          anchor='''func Start(ctx context.Context, pool *pgxpool.Pool, apiGraph *stagegraph.Graph, deployedCodeSHA string, req StartRequest) (Status, error) {\n'''
+          if text.count(anchor)!=1:
+              raise SystemExit('CAMPAIGN_START_ANCHOR')
+          helper='''func resolveTarget(g *stagegraph.Graph, requested string) (string, string, error) {\n\trequested = strings.TrimSpace(requested)\n\tproductTarget, hasProductTarget := g.ProductPassStageID()\n\tif requested == "" {\n\t\tif !hasProductTarget {\n\t\t\treturn "", "", errors.New("RESEARCH_CAMPAIGN_PRODUCT_CLOSURE_STAGE_REQUIRED")\n\t\t}\n\t\tclosure, err := g.AncestorsIncluding(productTarget)\n\t\tif err != nil {\n\t\t\treturn "", "", err\n\t\t}\n\t\tif len(closure) != g.StageCount() {\n\t\t\treturn "", "", errors.New("RESEARCH_CAMPAIGN_PRODUCT_TARGET_MUST_CLOSE_FULL_DAG")\n\t\t}\n\t\treturn productTarget, "FULL_DAG_FROM_SOURCE_ENTRY_TO_PRODUCT_CLOSURE", nil\n\t}\n\tif _, ok := g.Get(requested); !ok {\n\t\treturn "", "", errors.New("RESEARCH_CAMPAIGN_TARGET_STAGE_UNKNOWN")\n\t}\n\tclosure, err := g.AncestorsIncluding(requested)\n\tif err != nil {\n\t\treturn "", "", err\n\t}\n\tstages := g.Stages()\n\tif len(stages) == 0 {\n\t\treturn "", "", errors.New("RESEARCH_CAMPAIGN_RELEASE_GRAPH_EMPTY")\n\t}\n\tentry := stages[0].ID\n\thasEntry := false\n\tfor _, stageID := range closure {\n\t\tif stageID == entry {\n\t\t\thasEntry = true\n\t\t\tbreak\n\t\t}\n\t}\n\tif !hasEntry {\n\t\treturn "", "", errors.New("RESEARCH_CAMPAIGN_TARGET_MUST_INCLUDE_RELEASE_ENTRY")\n\t}\n\tif hasProductTarget && requested == productTarget {\n\t\tif len(closure) != g.StageCount() {\n\t\t\treturn "", "", errors.New("RESEARCH_CAMPAIGN_PRODUCT_TARGET_MUST_CLOSE_FULL_DAG")\n\t\t}\n\t\treturn requested, "FULL_DAG_FROM_SOURCE_ENTRY_TO_PRODUCT_CLOSURE", nil\n\t}\n\treturn requested, "RESEARCH_ANCESTOR_CLOSURE_FROM_RELEASE_ENTRY_TO_TARGET", nil\n}\n\n'''
+          text=text.replace(anchor,helper+anchor)
+
+          pattern=r'''\tcandidateGraph, _, err := release\.LoadGraph\(ctx, pool, req\.CandidateEngineReleaseID\)\n\tif err != nil \{\n\t\treturn Status\{\}, err\n\t\}\n\ttarget, ok := candidateGraph\.ProductPassStageID\(\)\n\tif !ok \{\n\t\treturn Status\{\}, errors\.New\("RESEARCH_CAMPAIGN_PRODUCT_CLOSURE_STAGE_REQUIRED"\)\n\t\}\n\tclosure, err := candidateGraph\.AncestorsIncluding\(target\)\n\tif err != nil \{\n\t\treturn Status\{\}, err\n\t\}\n\tif len\(closure\) != candidateGraph\.StageCount\(\) \{\n\t\treturn Status\{\}, errors\.New\("RESEARCH_CAMPAIGN_PRODUCT_TARGET_MUST_CLOSE_FULL_DAG"\)\n\t\}\n'''
+          repl='''\tcandidateGraph, _, err := release.LoadGraph(ctx, pool, req.CandidateEngineReleaseID)\n\tif err != nil {\n\t\treturn Status{}, err\n\t}\n\ttarget, executionScope, err := resolveTarget(candidateGraph, req.TargetStageID)\n\tif err != nil {\n\t\treturn Status{}, err\n\t}\n'''
+          text,n=re.subn(pattern,repl,text,count=1)
+          if n!=1: raise SystemExit(f'CAMPAIGN_TARGET_BLOCK:{n}')
+          one('''\t\t"execution_scope":             "FULL_DAG_FROM_SOURCE_ENTRY_TO_PRODUCT_CLOSURE",\n''','''\t\t"execution_scope":             executionScope,\n''')
+          one('''\tout.CohortComplete = cohortTotal > 0 && cohortComplete == cohortTotal\n\tout.RegressionComplete = regressionComplete == regressionTotal\n\tout.FullClosureComplete = out.CohortComplete && out.RegressionComplete && !out.AnyFailed\n\treturn out, nil\n''','''\tout.CohortComplete = cohortTotal > 0 && cohortComplete == cohortTotal\n\tout.RegressionComplete = regressionComplete == regressionTotal\n\tout.TargetComplete = out.CohortComplete && out.RegressionComplete && !out.AnyFailed\n\tcandidateGraph, _, err := release.LoadGraph(ctx, pool, c.CandidateEngineReleaseID)\n\tif err != nil {\n\t\treturn Status{}, err\n\t}\n\tproductTarget, hasProductTarget := candidateGraph.ProductPassStageID()\n\tout.FullClosureComplete = out.TargetComplete && hasProductTarget && c.TargetStageID == productTarget\n\treturn out, nil\n''')
+          p.write_text(text)
+
+          t=Path('platform/internal/campaign/campaign_integration_test.go')
+          tests=t.read_text()
+          if 'TestResolveTargetSupportsResearchPrefix' in tests:
+              raise SystemExit('CAMPAIGN_TEST_ALREADY_PRESENT')
+          tests += r'''\n\nfunc TestResolveTargetSupportsResearchPrefix(t *testing.T) {\n\tg := campaignGraph(t)\n\ttarget, scope, err := resolveTarget(g, "10_IRIS_FIT")\n\tif err != nil { t.Fatal(err) }\n\tif target != "10_IRIS_FIT" || scope != "RESEARCH_ANCESTOR_CLOSURE_FROM_RELEASE_ENTRY_TO_TARGET" {\n\t\tt.Fatalf("research target=%s scope=%s", target, scope)\n\t}\n\tproduct, productScope, err := resolveTarget(g, "")\n\tif err != nil { t.Fatal(err) }\n\tif product != "46_PRODUCT_CLOSURE_SEAL" || productScope != "FULL_DAG_FROM_SOURCE_ENTRY_TO_PRODUCT_CLOSURE" {\n\t\tt.Fatalf("product target=%s scope=%s", product, productScope)\n\t}\n\tif _, _, err := resolveTarget(g, "05_CAMERA_CONTRACT_SOLVED"); err == nil {\n\t\tt.Fatal("independent target that excludes release entry must fail")\n\t}\n\tif _, _, err := resolveTarget(g, "NOT_A_STAGE"); err == nil {\n\t\tt.Fatal("unknown research target must fail")\n\t}\n}\n\nfunc TestCampaignResearchTargetCompletesWithoutClaimingProductClosure(t *testing.T) {\n\tdsn := os.Getenv("REALSAS_DATABASE_URL")\n\tif dsn == "" { t.Skip("REALSAS_DATABASE_URL not set") }\n\tctx := context.Background()\n\tpool, err := persistence.Open(ctx, dsn)\n\tif err != nil { t.Fatal(err) }\n\tdefer pool.Close()\n\tg := campaignGraph(t)\n\tbaseline, err := release.Seal(ctx, pool, g, campaignManifest(g, "phase-base-"+uuid.New().String(), release.PurposeProduct), "ci")\n\tif err != nil { t.Fatal(err) }\n\tcandidate, err := release.Seal(ctx, pool, g, campaignManifest(g, "phase-candidate-"+uuid.New().String(), release.PurposeResearch), "ci")\n\tif err != nil { t.Fatal(err) }\n\tsubject := uuid.New()\n\tif _, err := pool.Exec(ctx, "INSERT INTO subjects(id,slug,display_name) VALUES ($1,$2,$3)", subject, "campaign-phase-"+subject.String(), "Campaign phase subject"); err != nil { t.Fatal(err) }\n\tstatus, err := Start(ctx, pool, g, "0123456789abcdef0123456789abcdef01234567", StartRequest{\n\t\tName: "research-phase-test", BaselineEngineReleaseID: baseline.ReleaseID, CandidateEngineReleaseID: candidate.ReleaseID,\n\t\tTargetStageID: "10_IRIS_FIT", CohortSubjectIDs: []uuid.UUID{subject}, CreatedBy: "ci",\n\t})\n\tif err != nil { t.Fatal(err) }\n\tif status.TargetStageID != "10_IRIS_FIT" || status.TargetComplete || status.FullClosureComplete {\n\t\tt.Fatalf("initial phase status=%+v", status)\n\t}\n\tif _, err := pool.Exec(ctx, "UPDATE attempts SET final_state='COMPLETED' WHERE id=$1", status.Members[0].AttemptID); err != nil { t.Fatal(err) }\n\tstatus, err = Get(ctx, pool, status.CampaignID)\n\tif err != nil { t.Fatal(err) }\n\tif !status.TargetComplete || status.FullClosureComplete || status.Fit8PassClaimed {\n\t\tt.Fatalf("phase completion rollup=%+v", status)\n\t}\n}\n'''
+          t.write_text(tests)
+          PY
+          gofmt -w platform/internal/campaign/campaign.go platform/internal/campaign/campaign_integration_test.go
+          (cd platform && go test ./internal/campaign)
+          git diff --check
+      - name: Commit source and remove bootstrap workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/_apply_research_campaign_target_patch.yml
+          git config user.name realsas-ci
+          git config user.email ci@realsas.local
+          git add -A
+          git diff --cached --check
+          git commit -m 'platform: allow phased research campaign targets'
+          git push origin HEAD:platform/research-campaign-target-20261014

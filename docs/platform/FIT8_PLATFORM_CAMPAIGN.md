@@ -24,11 +24,32 @@ A change that fixes one subject but breaks another has not closed the generic in
 
 ## Operator surface
 
-After migrations and API deployment:
+### Preferred cohort entrypoint
+
+Do not hand-author per-subject `campaign-start` / `campaign-run` bindings for a sealed cohort. The generic bootstrap executor is the operator entrypoint:
 
 ```bash
-realsasctl campaign-start --repo /path/to/canonical/main --request fit8_campaign_start.json
-realsasctl campaign-run   --repo /path/to/canonical/main --request fit8_campaign_run.json
+python tools/platform_cohort_bootstrap_v1.py \
+  --descriptor canonical/FIT8_PLATFORM_BOOTSTRAP_V1.json \
+  --repo /path/to/canonical/main \
+  --platform-root /home/monster/realsas_platform \
+  --authority-root /home/monster/realsas_authority \
+  --out /home/monster/realsas_authority/campaign_bootstrap/FIT8_BOOTSTRAP_RESULT.json
+```
+
+The descriptor is data. The executor contains no Fit8 subject names and no fixed cohort cardinality. A later Fit40/LOFO cohort must reuse the same executable with a different sealed descriptor rather than adding a new subject-specific bootstrap script.
+
+Before campaign mutation the executor verifies the external bundle receipt, exact member bytes, path safety, roster identity, the shared IRIS cohort/policy binding and every subject's observation-binding identity. It then uses the public Platform API to ensure Subjects, import raw manifest-section bytes, seal SubjectInputs, create one subject-agnostic RESEARCH EngineRelease, start the campaign, write campaign-bound run manifests and submit the campaign. Raw hydration/import never mints qualification.
+
+`--no-submit` performs the same fail-closed input/release/campaign preparation and writes the exact run bindings without submitting execution. It is an operator preflight, not scientific PASS.
+
+### Lower-level campaign API/CLI
+
+The durable coordinator remains available directly when the Subject/Input/Release bindings already exist:
+
+```bash
+realsasctl campaign-start --repo /path/to/canonical/main --request campaign_start.json
+realsasctl campaign-run   --repo /path/to/canonical/main --request campaign_run.json
 realsasctl campaign --id <CAMPAIGN_UUID>
 ```
 
@@ -38,6 +59,8 @@ realsasctl campaign --id <CAMPAIGN_UUID>
 
 ## Learned-stage handoff
 
-For shared Fit8 models, the common checkpoint is a shared immutable artifact but each subject's consuming stage remains subject-bound and must validate its own upstream bindings and downstream courts. IRIS Rev3 uses one shared model/optimizer, one global optimizer update after averaging all eight subject gradients, and one exposure per subject per global update. The Compiler validator rejects the superseded round-robin exposure contract.
+For shared cohort models, the common checkpoint is a shared immutable artifact but each subject's consuming stage remains subject-bound and must validate its own upstream bindings and downstream courts. IRIS Rev3 uses one shared model/optimizer, one global optimizer update after averaging all eight subject gradients, and one exposure per subject per global update. The Compiler validator rejects the superseded round-robin exposure contract.
 
-The same platform pattern should be used for TESSA, AXIS and MIRA as their Fit8 training contracts are sealed. Shared learned parameters do not make downstream Compiler qualification shared.
+The EngineRelease declares required and optional external-evidence roles. Missing required learned-stage evidence produces `WAITING_EXTERNAL_EVIDENCE` without minting a failure or qualification; an authorized optional shared payload may be bound where the experiment requires it without forcing the same payload onto an independent regression member.
+
+The same platform pattern should be used for TESSA, AXIS and MIRA as their cohort training contracts are sealed. Shared learned parameters do not make downstream Compiler qualification shared.

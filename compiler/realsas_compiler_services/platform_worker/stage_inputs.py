@@ -12,6 +12,58 @@ import tempfile
 from compiler.realsas_compiler_services.orchestrator import mainline
 
 
+SUBJECT_AGNOSTIC_RELEASE_CONTRACT = "RealSaS.SubjectAgnosticStageRelease.v1"
+
+
+def subject_agnostic_release_parameters(stage, overrides=None):
+    """Build release-owned parameters without embedding subject values.
+
+    Manifest values are owned by SubjectInput/CAS. Release parameters may add
+    stage-level execution contracts (for example external evidence role names),
+    but they may not replace the declared manifest read-set contract.
+    """
+    extra = dict(overrides or {})
+    forbidden = {"contract", "manifest", "manifest_keys"}.intersection(extra)
+    if forbidden:
+        raise RuntimeError("RELEASE_SUBJECT_AUTHORITY_OVERRIDE_FORBIDDEN:" + ",".join(sorted(forbidden)))
+    out = {
+        "contract": SUBJECT_AGNOSTIC_RELEASE_CONTRACT,
+        "manifest_keys": list(stage.get("manifest_keys") or []),
+    }
+    out.update(extra)
+    roles = out.get("external_evidence_roles")
+    if roles is not None:
+        if not isinstance(roles, (list, tuple)) or not roles:
+            raise RuntimeError("RELEASE_EXTERNAL_EVIDENCE_ROLE_CONTRACT_INVALID")
+        normalized = [str(role) for role in roles]
+        if (len(normalized) != len(set(normalized))
+                or any(not role or role != role.strip() for role in normalized)):
+            raise RuntimeError("RELEASE_EXTERNAL_EVIDENCE_ROLE_CONTRACT_INVALID")
+        out["external_evidence_roles"] = normalized
+    return out
+
+
+def _verify_release_parameters(stage, parameters, manifest):
+    """Accept legacy subject-bound releases, prefer subject-agnostic releases."""
+    parameters = dict(parameters or {})
+    if "manifest" in parameters:
+        # Backward compatibility for already-sealed Knight/dev releases only.
+        if parameters["manifest"] != mainline._manifest_subset(manifest, stage):
+            raise RuntimeError("ENGINE_RELEASE_MANIFEST_DRIFT")
+        return
+    if parameters.get("contract") != SUBJECT_AGNOSTIC_RELEASE_CONTRACT:
+        raise RuntimeError("ENGINE_RELEASE_SUBJECT_AGNOSTIC_CONTRACT_REQUIRED")
+    if list(parameters.get("manifest_keys") or []) != list(stage.get("manifest_keys") or []):
+        raise RuntimeError("ENGINE_RELEASE_MANIFEST_READ_SET_DRIFT")
+    roles = parameters.get("external_evidence_roles")
+    if roles is not None:
+        if not isinstance(roles, list) or not roles:
+            raise RuntimeError("ENGINE_EXTERNAL_EVIDENCE_ROLE_CONTRACT_INVALID")
+        if (len(roles) != len(set(roles))
+                or any(not isinstance(role, str) or not role or role != role.strip() for role in roles)):
+            raise RuntimeError("ENGINE_EXTERNAL_EVIDENCE_ROLE_CONTRACT_INVALID")
+
+
 def released_execution_plan(base_plan, released_graph, *, mode="PRODUCT"):
     """Reconstruct execution metadata without losing the full Compiler policy."""
     if not released_graph:
@@ -169,9 +221,7 @@ def hydrate_stage_inputs(*, plan, ledger, manifest, inputs, read_object, mode):
         stage = stages[stage_id]
         if cached.get("graph_node_sha256") != graph_node_sha256(stage):
             raise RuntimeError("ENGINE_STAGE_CACHE_GRAPH_DRIFT:" + stage_id)
-        parameters = cached.get("semantic_parameters") or {}
-        if "manifest" not in parameters or parameters["manifest"] != mainline._manifest_subset(manifest,stage):
-            raise RuntimeError("ENGINE_STAGE_CACHE_MANIFEST_DRIFT:" + stage_id)
+        _verify_release_parameters(stage, cached.get("semantic_parameters") or {}, manifest)
         impl = mainline._adapter_impl_hash(stage["adapter"])
         if cached.get("implementation_sha256") != impl:
             raise RuntimeError("ENGINE_STAGE_CACHE_IMPLEMENTATION_DRIFT:" + stage_id)
@@ -219,8 +269,4 @@ def verify_execution_version(plan, request, manifest):
         raise RuntimeError("ENGINE_RELEASE_IMPLEMENTATION_DRIFT")
     if mainline.content_sha256(stage["policy"]) != request.get("policy_sha256"):
         raise RuntimeError("ENGINE_RELEASE_POLICY_DRIFT")
-    parameters = request.get("semantic_parameters") or {}
-    if "manifest" not in parameters:
-        raise RuntimeError("ENGINE_RELEASE_MANIFEST_BINDING_REQUIRED")
-    if parameters["manifest"] != mainline._manifest_subset(manifest, stage):
-        raise RuntimeError("ENGINE_RELEASE_MANIFEST_DRIFT")
+    _verify_release_parameters(stage, request.get("semantic_parameters") or {}, manifest)

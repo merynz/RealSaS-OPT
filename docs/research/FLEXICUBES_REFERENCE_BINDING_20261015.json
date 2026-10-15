@@ -1,0 +1,42 @@
+{
+  "schema": "RealSaS.ExternalGeometryReferenceBinding.v1",
+  "date": "2026-10-15",
+  "status": "RESEARCH_REFERENCE_ONLY_NOT_PRODUCT_AUTHORITY",
+  "purpose": "Matched FIT8 F-A/F-B/F-R geometry oracle and implementation comparator",
+  "upstream": {
+    "repository": "nv-tlabs/FlexiCubes",
+    "commit_sha": "4cc7d6c3d0cee83c011ce36721b81adff0dd7db6",
+    "tree_sha": "63b1141a21bb07e72c97470123d61b807a207d9a",
+    "license": "Apache-2.0",
+    "files": {
+      "flexicubes.py": {
+        "git_blob_sha": "e799870beb7896e88c19bdcfd3171c439dbbdb13"
+      },
+      "tables.py": {
+        "git_blob_sha": "659bca7ba1f2f22a0955e99c17c76f740954967a"
+      },
+      "LICENSE.txt": {
+        "git_blob_sha": "7a4a3ea2424c09fbe48d455aed1eaa94d9124835"
+      }
+    }
+  },
+  "role_contract": {
+    "candidate_backend_reference": true,
+    "canonical_product_implementation": false,
+    "vendored_into_realsas": false,
+    "architecture_freeze_by_reference": false,
+    "upstream_main_branch_is_authority": false,
+    "execution_must_checkout_exact_commit": true,
+    "execution_must_record_local_file_sha256": true
+  },
+  "known_interface_constraint": {
+    "scalar_field": "SIGNED_SCALAR_WITH_NEGATIVE_INSIDE",
+    "topology_source": "CUBE_CORNER_OCCUPANCY_PLUS_DMC_TABLES",
+    "implication": "Vanilla F-A is admitted only where metric/global sign authority exists. Open-surface F-B/F-R requires a qualified chart-local orientation gauge rather than fabricated global inside/outside."
+  },
+  "witness_separation": {
+    "historical_realsas_tetra_role": "WITNESS_ONLY",
+    "flexicubes_reference_role": "CANDIDATE_BACKEND_REFERENCE",
+    "winner_selection_requires_matched_realsas_courts": true
+  }
+}

@@ -5,7 +5,10 @@ import hashlib
 import json
 from typing import Mapping, Sequence
 
-STATIC_RAY_SCHEMA = "RealSaS.FIT8StaticRayCensus.v1"
+STATIC_RAY_SCHEMAS = {
+    "RealSaS.FIT8StaticRayCensus.v1",
+    "RealSaS.FIT8StaticRayCensus.v2",
+}
 SCHEMA_VERSION = "RealSaS.FIT8StaticDrawOrderCapacityCourt.v1"
 
 COMPONENT_TOTAL_ORDER_FALSIFIED = "COMPONENT_TOTAL_ORDER_FALSIFIED"
@@ -80,7 +83,7 @@ class CohortDrawOrderCapacityV1:
 
 
 def evaluate_subject_static_draw_order_capacity_v1(summary: Mapping) -> SubjectDrawOrderCapacityV1:
-    if summary.get("schema") != STATIC_RAY_SCHEMA:
+    if summary.get("schema") not in STATIC_RAY_SCHEMAS:
         raise ValueError("FIT8_DRAW_ORDER_STATIC_RAY_SCHEMA_INVALID")
     subject_key = str(summary.get("subject_key") or "")
     policy = summary.get("policy") or {}
@@ -145,6 +148,7 @@ __all__ = [
     "COMPONENT_TOTAL_ORDER_NOT_FALSIFIED",
     "CohortDrawOrderCapacityV1",
     "SCHEMA_VERSION",
+    "STATIC_RAY_SCHEMAS",
     "SubjectDrawOrderCapacityV1",
     "evaluate_cohort_static_draw_order_capacity_v1",
     "evaluate_subject_static_draw_order_capacity_v1",

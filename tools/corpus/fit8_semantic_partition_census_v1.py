@@ -6,6 +6,7 @@ from typing import Any, Mapping, Sequence
 
 
 SCHEMA_VERSION = "RealSaS.Fit8SemanticPartitionCensus.v1"
+EXPECTED_TEACHER_BUNDLE_SCHEMA_VERSION = "RealSaS.FIT8FullTruthTeacherBundle.v1"
 AUTHORITY_SCOPE = "FIT8_ARCHITECTURE_ACCEPTANCE_ONLY"
 FIT8_SUBJECTS = (
     "Snake",
@@ -151,6 +152,18 @@ def _abstained(total: int | None, reason: str) -> AxisCensusV1:
     )
 
 
+def _authority_guard(
+    record: SemanticPartitionSubjectTruthV1,
+    *,
+    total: int | None,
+) -> AxisCensusV1 | None:
+    if record.teacher_bundle_schema_version != EXPECTED_TEACHER_BUNDLE_SCHEMA_VERSION:
+        return _abstained(total, "TEACHER_BUNDLE_SCHEMA_VERSION_INVALID")
+    if record.qualification_state != QUALIFIED:
+        return _abstained(total, "TEACHER_BUNDLE_NOT_QUALIFIED")
+    return None
+
+
 def _plain_axis(
     values: Sequence[Any] | None,
     *,
@@ -170,13 +183,27 @@ def _plain_axis(
     )
 
 
+def _qualified_plain_axis(
+    record: SemanticPartitionSubjectTruthV1,
+    values: Sequence[Any] | None,
+    *,
+    total: int | None,
+    missing_reason: str,
+) -> AxisCensusV1:
+    guarded = _authority_guard(record, total=total)
+    if guarded is not None:
+        return guarded
+    return _plain_axis(values, total=total, missing_reason=missing_reason)
+
+
 def _owner_axis(
     record: SemanticPartitionSubjectTruthV1,
     *,
     total: int | None,
 ) -> AxisCensusV1:
-    if record.qualification_state != QUALIFIED:
-        return _abstained(total, "TEACHER_BUNDLE_NOT_QUALIFIED")
+    guarded = _authority_guard(record, total=total)
+    if guarded is not None:
+        return guarded
     if record.owner_partition_manifest is None:
         return _abstained(total, "QUALIFIED_OWNER_PARTITION_MANIFEST_MISSING")
     if record.surface_owner_region_id is None:
@@ -187,6 +214,8 @@ def _owner_axis(
     manifest_ids = _manifest_region_ids(record.owner_partition_manifest)
     if manifest_ids is None:
         return _abstained(total, "OWNER_PARTITION_MANIFEST_INVALID")
+    if not manifest_ids:
+        return _abstained(total, "OWNER_PARTITION_MANIFEST_EMPTY")
 
     values = [int(value) for value in record.surface_owner_region_id]
     if any(value < 0 for value in values):
@@ -194,13 +223,14 @@ def _owner_axis(
     observed_ids = set(values)
     if not observed_ids.issubset(manifest_ids):
         return _abstained(total, "OWNER_REGION_ID_NOT_IN_MANIFEST")
-    if manifest_ids != observed_ids:
-        return _abstained(total, "OWNER_MANIFEST_REGION_WITHOUT_SURFACE_SUPPORT")
 
     resolved_total = len(values) if total is None else total
     return AxisCensusV1(
         status=QUALIFIED,
-        distinct_count=len(observed_ids),
+        # The qualified partition manifest is authoritative for subject-level
+        # owner cardinality. Surface samples are a consistency witness and may
+        # legitimately miss a region under finite sampling.
+        distinct_count=len(manifest_ids),
         assigned_sample_count=len(values),
         total_sample_count=resolved_total,
     )
@@ -211,6 +241,9 @@ def _material_region_axis(
     *,
     total: int | None,
 ) -> AxisCensusV1:
+    guarded = _authority_guard(record, total=total)
+    if guarded is not None:
+        return guarded
     values = record.surface_material_region_id
     validity = record.surface_material_region_valid
     if values is None:
@@ -246,17 +279,20 @@ def census_subject_semantic_partition_v1(
         teacher_bundle_manifest_sha256=record.teacher_bundle_manifest_sha256,
         owner=_owner_axis(record, total=total),
         material_region=_material_region_axis(record, total=total),
+        # Authored material identity remains a separate diagnostic evidence axis.
         material_identity=_plain_axis(
             record.surface_material_id,
             total=total,
             missing_reason="AUTHORED_MATERIAL_IDENTITY_CHANNEL_MISSING",
         ),
-        geometric_component=_plain_axis(
+        geometric_component=_qualified_plain_axis(
+            record,
             record.surface_geometric_component_id,
             total=total,
             missing_reason="GEOMETRIC_COMPONENT_CHANNEL_MISSING",
         ),
-        mechanical_owner_joint=_plain_axis(
+        mechanical_owner_joint=_qualified_plain_axis(
+            record,
             record.surface_mechanical_owner_joint_id,
             total=total,
             missing_reason="MECHANICAL_OWNER_JOINT_CHANNEL_MISSING",
@@ -316,7 +352,7 @@ def census_fit8_semantic_partitions_v1(
         capacity_state = CAPACITY_COVERED
 
     notes = (
-        "Semantic owner count is measured only from qualified owner-partition truth.",
+        "Semantic owner cardinality is measured from the qualified subject-local owner-partition manifest; sampled surface owner IDs are a consistency witness and need only be a subset of manifest IDs.",
         "Material region, material identity, geometric component and mechanical joint owner are separate evidence axes and never substitute for semantic owner.",
         "A complete Fit8 census establishes only the minimum capacity needed for the observed Fit8 teacher truth; it does not freeze a global query cap or establish unseen/generalization authority.",
     )
@@ -349,6 +385,7 @@ __all__ = [
     "CAPACITY_FAIL_CLOSED",
     "CAPACITY_INCOMPLETE",
     "CAPACITY_NOT_EVALUATED",
+    "EXPECTED_TEACHER_BUNDLE_SCHEMA_VERSION",
     "FIT8_SUBJECTS",
     "QUALIFIED",
     "SCHEMA_VERSION",

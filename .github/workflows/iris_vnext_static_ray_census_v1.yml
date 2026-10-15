@@ -6,8 +6,11 @@ on:
       - agent/unified-iris-stdgenpp-foundation
     paths:
       - 'tools/corpus/fit8_static_ray_census_v1.py'
+      - 'tools/corpus/fit8_static_draw_order_capacity_court_v1.py'
       - 'tools/corpus/fit8_gltf_static_carrier_v1.py'
       - 'tools/corpus/fit8_fbx_static_carrier_v1.py'
+      - 'tools/corpus/fit8_fbx_static_carrier_v2.py'
+      - 'tools/corpus/build_ufbx_static_census_probe_v3.py'
       - 'tools/corpus/ufbx_static_census_probe_v3.c'
       - 'tools/corpus/gltf_bind_scene_v1.py'
       - 'tools/corpus/fit8_render_vertex_equivalence_v1.py'
@@ -15,14 +18,18 @@ on:
       - 'tools/corpus/fit8_surface_topology_invariants_v1.py'
       - 'tools/corpus/fit8_rendered_mechanical_census_contract_v1.py'
       - 'tests/corpus/test_fit8_static_ray_census_v1.py'
+      - 'tests/corpus/test_fit8_static_draw_order_capacity_court_v1.py'
       - 'tests/corpus/test_fit8_gltf_static_carrier_v1.py'
       - 'tests/corpus/test_fit8_fbx_static_carrier_v1.py'
       - '.github/workflows/iris_vnext_static_ray_census_v1.yml'
   pull_request:
     paths:
       - 'tools/corpus/fit8_static_ray_census_v1.py'
+      - 'tools/corpus/fit8_static_draw_order_capacity_court_v1.py'
       - 'tools/corpus/fit8_gltf_static_carrier_v1.py'
       - 'tools/corpus/fit8_fbx_static_carrier_v1.py'
+      - 'tools/corpus/fit8_fbx_static_carrier_v2.py'
+      - 'tools/corpus/build_ufbx_static_census_probe_v3.py'
       - 'tools/corpus/ufbx_static_census_probe_v3.c'
       - 'tools/corpus/gltf_bind_scene_v1.py'
       - 'tools/corpus/fit8_render_vertex_equivalence_v1.py'
@@ -30,6 +37,7 @@ on:
       - 'tools/corpus/fit8_surface_topology_invariants_v1.py'
       - 'tools/corpus/fit8_rendered_mechanical_census_contract_v1.py'
       - 'tests/corpus/test_fit8_static_ray_census_v1.py'
+      - 'tests/corpus/test_fit8_static_draw_order_capacity_court_v1.py'
       - 'tests/corpus/test_fit8_gltf_static_carrier_v1.py'
       - 'tests/corpus/test_fit8_fbx_static_carrier_v1.py'
       - '.github/workflows/iris_vnext_static_ray_census_v1.yml'
@@ -59,9 +67,13 @@ jobs:
         run: |
           python -m compileall -q \
             tools/corpus/fit8_static_ray_census_v1.py \
+            tools/corpus/fit8_static_draw_order_capacity_court_v1.py \
             tools/corpus/fit8_gltf_static_carrier_v1.py \
             tools/corpus/fit8_fbx_static_carrier_v1.py \
+            tools/corpus/fit8_fbx_static_carrier_v2.py \
+            tools/corpus/build_ufbx_static_census_probe_v3.py \
             tests/corpus/test_fit8_static_ray_census_v1.py \
+            tests/corpus/test_fit8_static_draw_order_capacity_court_v1.py \
             tests/corpus/test_fit8_gltf_static_carrier_v1.py \
             tests/corpus/test_fit8_fbx_static_carrier_v1.py
       - name: Run static carrier and ray census guards
@@ -69,4 +81,5 @@ jobs:
           python -m pytest -q \
             tests/corpus/test_fit8_gltf_static_carrier_v1.py \
             tests/corpus/test_fit8_fbx_static_carrier_v1.py \
-            tests/corpus/test_fit8_static_ray_census_v1.py
+            tests/corpus/test_fit8_static_ray_census_v1.py \
+            tests/corpus/test_fit8_static_draw_order_capacity_court_v1.py

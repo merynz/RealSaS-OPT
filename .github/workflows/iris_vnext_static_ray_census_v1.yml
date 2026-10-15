@@ -83,3 +83,21 @@ jobs:
             tests/corpus/test_fit8_fbx_static_carrier_v1.py \
             tests/corpus/test_fit8_static_ray_census_v1.py \
             tests/corpus/test_fit8_static_draw_order_capacity_court_v1.py
+      - name: Package exact producer source snapshot
+        run: |
+          mkdir -p /tmp/static-ray-producer/tools/corpus
+          cp tools/corpus/fit8_static_ray_census_v1.py /tmp/static-ray-producer/tools/corpus/
+          cp tools/corpus/fit8_rendered_mechanical_census_contract_v1.py /tmp/static-ray-producer/tools/corpus/
+          cp tools/corpus/fit8_static_draw_order_capacity_court_v1.py /tmp/static-ray-producer/tools/corpus/
+          printf '%s\n' "$GITHUB_SHA" > /tmp/static-ray-producer/commit.txt
+          sha256sum \
+            /tmp/static-ray-producer/tools/corpus/fit8_static_ray_census_v1.py \
+            /tmp/static-ray-producer/tools/corpus/fit8_rendered_mechanical_census_contract_v1.py \
+            /tmp/static-ray-producer/tools/corpus/fit8_static_draw_order_capacity_court_v1.py \
+            > /tmp/static-ray-producer/file_sha256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: static-ray-producer-source
+          path: /tmp/static-ray-producer
+          if-no-files-found: error
+          retention-days: 7

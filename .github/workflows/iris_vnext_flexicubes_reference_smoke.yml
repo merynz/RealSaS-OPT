@@ -85,6 +85,15 @@ jobs:
             --candidate-npz .artifacts/flexicubes-smoke/candidate.npz \
             --run-manifest .artifacts/flexicubes-smoke/run.json
 
+      - name: Preserve exact upstream execution bytes
+        run: |
+          mkdir -p .artifacts/flexicubes-smoke/upstream
+          cp external/flexicubes/flexicubes.py .artifacts/flexicubes-smoke/upstream/flexicubes.py
+          cp external/flexicubes/tables.py .artifacts/flexicubes-smoke/upstream/tables.py
+          git -C external/flexicubes rev-parse HEAD > .artifacts/flexicubes-smoke/upstream/commit.txt
+          git -C external/flexicubes hash-object flexicubes.py tables.py > .artifacts/flexicubes-smoke/upstream/blob_shas.txt
+          sha256sum external/flexicubes/flexicubes.py external/flexicubes/tables.py > .artifacts/flexicubes-smoke/upstream/file_sha256.txt
+
       - name: Upload smoke evidence
         uses: actions/upload-artifact@v4
         with:

@@ -5,6 +5,7 @@ from tools.corpus.fit8_semantic_partition_census_v1 import (
     CAPACITY_COVERED,
     CAPACITY_FAIL_CLOSED,
     CAPACITY_INCOMPLETE,
+    EXPECTED_TEACHER_BUNDLE_SCHEMA_VERSION,
     FIT8_SUBJECTS,
     QUALIFIED,
     SemanticPartitionSubjectTruthV1,
@@ -33,11 +34,13 @@ def _record(
     material_ids=(7, 7, 7, 7),
     components=(0, 1, 2, 3),
     joints=(3, 3, 4, 4),
+    qualification_state=QUALIFIED,
+    teacher_bundle_schema_version=EXPECTED_TEACHER_BUNDLE_SCHEMA_VERSION,
 ):
     return SemanticPartitionSubjectTruthV1(
         subject_key=subject,
         source_ref=f"synthetic://{subject}",
-        teacher_bundle_schema_version="RealSaS.Fit8FullTruthTeacherBundle.v1",
+        teacher_bundle_schema_version=teacher_bundle_schema_version,
         teacher_bundle_manifest_sha256="0" * 64,
         owner_partition_manifest=_manifest(owner_count),
         surface_owner_region_id=owner_ids,
@@ -47,6 +50,7 @@ def _record(
         surface_geometric_component_id=components,
         surface_mechanical_owner_joint_id=joints,
         expected_surface_sample_count=len(owner_ids),
+        qualification_state=qualification_state,
     )
 
 
@@ -105,12 +109,13 @@ def test_owner_id_not_present_in_manifest_abstains():
     assert result.owner.reason == "OWNER_REGION_ID_NOT_IN_MANIFEST"
 
 
-def test_manifest_region_without_surface_support_abstains():
+def test_manifest_cardinality_is_authoritative_even_when_sampling_misses_a_region():
     result = census_subject_semantic_partition_v1(
         _record("Spider", owner_ids=(0, 0, 1, 1), owner_count=3)
     )
-    assert result.owner.status == ABSTAINED
-    assert result.owner.reason == "OWNER_MANIFEST_REGION_WITHOUT_SURFACE_SUPPORT"
+    assert result.owner.status == QUALIFIED
+    assert result.owner.distinct_count == 3
+    assert result.owner.assigned_sample_count == 4
 
 
 def test_material_region_requires_explicit_validity():
@@ -120,6 +125,27 @@ def test_material_region_requires_explicit_validity():
     assert result.material_region.status == ABSTAINED
     assert result.material_region.reason == "MATERIAL_REGION_VALIDITY_MISSING"
     assert result.owner.status == QUALIFIED
+
+
+def test_unqualified_bundle_abstains_qualified_derived_axes_without_relabeling_material_identity():
+    result = census_subject_semantic_partition_v1(
+        _record("Shark", qualification_state="ABSTAINED")
+    )
+    assert result.owner.status == ABSTAINED
+    assert result.owner.reason == "TEACHER_BUNDLE_NOT_QUALIFIED"
+    assert result.material_region.status == ABSTAINED
+    assert result.geometric_component.status == ABSTAINED
+    assert result.mechanical_owner_joint.status == ABSTAINED
+    assert result.material_identity.status == QUALIFIED
+
+
+def test_wrong_teacher_schema_abstains_owner_authority():
+    result = census_subject_semantic_partition_v1(
+        _record("George", teacher_bundle_schema_version="wrong-schema")
+    )
+    assert result.owner.status == ABSTAINED
+    assert result.owner.reason == "TEACHER_BUNDLE_SCHEMA_VERSION_INVALID"
+    assert result.material_region.status == ABSTAINED
 
 
 def test_incomplete_fit8_cannot_mint_full_cohort_capacity_or_freeze_query_cap():
@@ -149,18 +175,21 @@ def test_complete_fit8_reports_observed_minimum_without_generalization_authority
     records = []
     for subject in FIT8_SUBJECTS:
         count = owner_counts[subject]
-        owner_ids = tuple(range(count))
+        # Deliberately sample only one owner when possible. Query-cap evidence
+        # must come from the qualified partition manifest, not sampling coverage.
+        sampled_count = 1 if count > 1 else count
+        owner_ids = tuple(range(sampled_count))
         records.append(
             SemanticPartitionSubjectTruthV1(
                 subject_key=subject,
                 source_ref=f"synthetic://{subject}",
-                teacher_bundle_schema_version="RealSaS.Fit8FullTruthTeacherBundle.v1",
+                teacher_bundle_schema_version=EXPECTED_TEACHER_BUNDLE_SCHEMA_VERSION,
                 teacher_bundle_manifest_sha256="0" * 64,
                 owner_partition_manifest=_manifest(count),
                 surface_owner_region_id=owner_ids,
                 surface_material_region_id=owner_ids,
-                surface_material_region_valid=(True,) * count,
-                expected_surface_sample_count=count,
+                surface_material_region_valid=(True,) * sampled_count,
+                expected_surface_sample_count=sampled_count,
             )
         )
 
@@ -176,7 +205,7 @@ def test_complete_fit8_reports_observed_minimum_without_generalization_authority
 
 def test_query_capacity_below_any_observed_qualified_owner_count_fails_closed():
     result = census_fit8_semantic_partitions_v1(
-        [_record("Snake", owner_ids=(0, 1, 2, 3), owner_count=4)],
+        [_record("Snake", owner_ids=(0,), owner_count=4)],
         supplied_query_capacity=3,
     )
     assert result.observed_owner_count_max == 4

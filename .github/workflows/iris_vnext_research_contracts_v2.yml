@@ -17,6 +17,7 @@ on:
       - 'tools/corpus/fit8_f_flexicubes_reference_adapter_v1.py'
       - 'tools/corpus/fit8_f_reference_input_bundle_contract_v1.py'
       - 'tools/corpus/fit8_f_reference_dense_grid_authority_v1.py'
+      - 'tools/corpus/fit8_f_qualified_fa_bundle_v1.py'
       - 'tools/corpus/run_fit8_f_flexicubes_reference_v2.py'
       - 'tools/corpus/run_fit8_f_flexicubes_reference_v3.py'
       - 'tools/corpus/fit8_mesh_field_teacher_v1.py'
@@ -37,6 +38,7 @@ on:
       - 'tests/corpus/test_fit8_f_flexicubes_reference_adapter_v1.py'
       - 'tests/corpus/test_fit8_f_reference_input_bundle_contract_v1.py'
       - 'tests/corpus/test_fit8_f_reference_dense_grid_authority_v1.py'
+      - 'tests/corpus/test_fit8_f_qualified_fa_bundle_v1.py'
       - 'tests/corpus/test_run_fit8_f_flexicubes_reference_v3.py'
       - 'tests/corpus/test_fit8_mesh_field_teacher_v2.py'
       - 'tests/corpus/test_fit8_static_self_intersection_qualification_v1.py'
@@ -56,6 +58,7 @@ on:
       - 'tools/corpus/fit8_f_flexicubes_reference_adapter_v1.py'
       - 'tools/corpus/fit8_f_reference_input_bundle_contract_v1.py'
       - 'tools/corpus/fit8_f_reference_dense_grid_authority_v1.py'
+      - 'tools/corpus/fit8_f_qualified_fa_bundle_v1.py'
       - 'tools/corpus/run_fit8_f_flexicubes_reference_v2.py'
       - 'tools/corpus/run_fit8_f_flexicubes_reference_v3.py'
       - 'tools/corpus/fit8_mesh_field_teacher_v1.py'
@@ -76,6 +79,7 @@ on:
       - 'tests/corpus/test_fit8_f_flexicubes_reference_adapter_v1.py'
       - 'tests/corpus/test_fit8_f_reference_input_bundle_contract_v1.py'
       - 'tests/corpus/test_fit8_f_reference_dense_grid_authority_v1.py'
+      - 'tests/corpus/test_fit8_f_qualified_fa_bundle_v1.py'
       - 'tests/corpus/test_run_fit8_f_flexicubes_reference_v3.py'
       - 'tests/corpus/test_fit8_mesh_field_teacher_v2.py'
       - 'tests/corpus/test_fit8_static_self_intersection_qualification_v1.py'
@@ -124,6 +128,7 @@ jobs:
             tools/corpus/fit8_f_flexicubes_reference_adapter_v1.py \
             tools/corpus/fit8_f_reference_input_bundle_contract_v1.py \
             tools/corpus/fit8_f_reference_dense_grid_authority_v1.py \
+            tools/corpus/fit8_f_qualified_fa_bundle_v1.py \
             tools/corpus/run_fit8_f_flexicubes_reference_v2.py \
             tools/corpus/run_fit8_f_flexicubes_reference_v3.py \
             tools/corpus/fit8_mesh_field_teacher_v1.py \
@@ -144,6 +149,7 @@ jobs:
             tests/corpus/test_fit8_f_flexicubes_reference_adapter_v1.py \
             tests/corpus/test_fit8_f_reference_input_bundle_contract_v1.py \
             tests/corpus/test_fit8_f_reference_dense_grid_authority_v1.py \
+            tests/corpus/test_fit8_f_qualified_fa_bundle_v1.py \
             tests/corpus/test_run_fit8_f_flexicubes_reference_v3.py \
             tests/corpus/test_fit8_mesh_field_teacher_v2.py \
             tests/corpus/test_fit8_static_self_intersection_qualification_v1.py \
@@ -165,6 +171,7 @@ jobs:
             tests/corpus/test_fit8_f_flexicubes_reference_adapter_v1.py \
             tests/corpus/test_fit8_f_reference_input_bundle_contract_v1.py \
             tests/corpus/test_fit8_f_reference_dense_grid_authority_v1.py \
+            tests/corpus/test_fit8_f_qualified_fa_bundle_v1.py \
             tests/corpus/test_run_fit8_f_flexicubes_reference_v3.py \
             tests/corpus/test_fit8_mesh_field_teacher_v2.py \
             tests/corpus/test_fit8_static_self_intersection_qualification_v1.py \

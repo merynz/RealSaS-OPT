@@ -1,0 +1,75 @@
+name: iris-vnext-ufbx-probe-build-v1
+
+on:
+  push:
+    branches:
+      - agent/unified-iris-stdgenpp-foundation
+    paths:
+      - 'tools/corpus/ufbx_static_census_probe_v3.c'
+      - 'tools/corpus/build_ufbx_static_census_probe_v3.py'
+      - 'tools/corpus/fit8_fbx_static_carrier_v2.py'
+      - '.github/workflows/iris_vnext_ufbx_probe_build_v1.yml'
+  pull_request:
+    paths:
+      - 'tools/corpus/ufbx_static_census_probe_v3.c'
+      - 'tools/corpus/build_ufbx_static_census_probe_v3.py'
+      - 'tools/corpus/fit8_fbx_static_carrier_v2.py'
+      - '.github/workflows/iris_vnext_ufbx_probe_build_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pinned-ufbx-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Fetch exact official ufbx revision
+        run: |
+          git init /tmp/ufbx
+          git -C /tmp/ufbx remote add origin https://github.com/ufbx/ufbx.git
+          git -C /tmp/ufbx fetch --depth 1 origin 5955c5c0b042ac2dc6f32955ab206aaec0620cfc
+          git -C /tmp/ufbx checkout --detach FETCH_HEAD
+          test "$(git -C /tmp/ufbx rev-parse HEAD)" = "5955c5c0b042ac2dc6f32955ab206aaec0620cfc"
+      - name: Build v3 probe and issue receipt
+        run: |
+          python tools/corpus/build_ufbx_static_census_probe_v3.py \
+            --ufbx-repo /tmp/ufbx \
+            --output-binary /tmp/ufbx_static_census_probe_v3 \
+            --output-receipt /tmp/ufbx_static_census_probe_v3.build.json
+          /tmp/ufbx_static_census_probe_v3 >/tmp/probe_usage.out 2>/tmp/probe_usage.err || test "$?" = "2"
+          cat /tmp/ufbx_static_census_probe_v3.build.json
+      - name: Revalidate receipt against repository probe source and binary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import hashlib
+          from tools.corpus.build_ufbx_static_census_probe_v3 import validate_build_receipt_v1
+          probe_source = Path('tools/corpus/ufbx_static_census_probe_v3.c')
+          receipt_path = Path('/tmp/ufbx_static_census_probe_v3.build.json')
+          binary = Path('/tmp/ufbx_static_census_probe_v3')
+          h = hashlib.sha256(probe_source.read_bytes()).hexdigest()
+          receipt = json.loads(receipt_path.read_text())
+          validate_build_receipt_v1(receipt, expected_probe_source_sha256=h, binary_path=binary)
+          print(json.dumps({
+              'receipt_sha256': receipt['receipt_sha256'],
+              'binary_sha256': receipt['binary_sha256'],
+              'ufbx_c_sha256': receipt['ufbx_c_sha256'],
+              'ufbx_h_sha256': receipt['ufbx_h_sha256'],
+              'observed_ufbx_revision': receipt['observed_ufbx_revision'],
+          }, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ufbx-static-census-probe-v3-build
+          path: |
+            /tmp/ufbx_static_census_probe_v3
+            /tmp/ufbx_static_census_probe_v3.build.json
+          if-no-files-found: error
+          retention-days: 30

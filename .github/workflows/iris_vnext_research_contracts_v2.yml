@@ -21,6 +21,7 @@ on:
       - 'tools/corpus/run_fit8_f_flexicubes_reference_v3.py'
       - 'tools/corpus/fit8_mesh_field_teacher_v1.py'
       - 'tools/corpus/fit8_mesh_field_teacher_v2.py'
+      - 'tools/corpus/fit8_static_self_intersection_qualification_v1.py'
       - 'tests/iris/test_unified_iris_contracts_v2.py'
       - 'tests/iris/test_unified_iris_field_heads_v2.py'
       - 'tests/iris/test_retopology_contract_v2.py'
@@ -37,6 +38,7 @@ on:
       - 'tests/corpus/test_fit8_f_reference_dense_grid_authority_v1.py'
       - 'tests/corpus/test_run_fit8_f_flexicubes_reference_v3.py'
       - 'tests/corpus/test_fit8_mesh_field_teacher_v2.py'
+      - 'tests/corpus/test_fit8_static_self_intersection_qualification_v1.py'
       - '.github/workflows/iris_vnext_research_contracts_v2.yml'
   pull_request:
     paths:
@@ -56,6 +58,7 @@ on:
       - 'tools/corpus/run_fit8_f_flexicubes_reference_v3.py'
       - 'tools/corpus/fit8_mesh_field_teacher_v1.py'
       - 'tools/corpus/fit8_mesh_field_teacher_v2.py'
+      - 'tools/corpus/fit8_static_self_intersection_qualification_v1.py'
       - 'tests/iris/test_unified_iris_contracts_v2.py'
       - 'tests/iris/test_unified_iris_field_heads_v2.py'
       - 'tests/iris/test_retopology_contract_v2.py'
@@ -72,6 +75,7 @@ on:
       - 'tests/corpus/test_fit8_f_reference_dense_grid_authority_v1.py'
       - 'tests/corpus/test_run_fit8_f_flexicubes_reference_v3.py'
       - 'tests/corpus/test_fit8_mesh_field_teacher_v2.py'
+      - 'tests/corpus/test_fit8_static_self_intersection_qualification_v1.py'
       - '.github/workflows/iris_vnext_research_contracts_v2.yml'
   workflow_dispatch:
 
@@ -120,6 +124,7 @@ jobs:
             tools/corpus/run_fit8_f_flexicubes_reference_v3.py \
             tools/corpus/fit8_mesh_field_teacher_v1.py \
             tools/corpus/fit8_mesh_field_teacher_v2.py \
+            tools/corpus/fit8_static_self_intersection_qualification_v1.py \
             tests/iris/test_unified_iris_contracts_v2.py \
             tests/iris/test_unified_iris_field_heads_v2.py \
             tests/iris/test_retopology_contract_v2.py \
@@ -135,7 +140,8 @@ jobs:
             tests/corpus/test_fit8_f_reference_input_bundle_contract_v1.py \
             tests/corpus/test_fit8_f_reference_dense_grid_authority_v1.py \
             tests/corpus/test_run_fit8_f_flexicubes_reference_v3.py \
-            tests/corpus/test_fit8_mesh_field_teacher_v2.py
+            tests/corpus/test_fit8_mesh_field_teacher_v2.py \
+            tests/corpus/test_fit8_static_self_intersection_qualification_v1.py
       - name: Run vNext research contract tests
         run: |
           python -m pytest -q \
@@ -154,4 +160,5 @@ jobs:
             tests/corpus/test_fit8_f_reference_input_bundle_contract_v1.py \
             tests/corpus/test_fit8_f_reference_dense_grid_authority_v1.py \
             tests/corpus/test_run_fit8_f_flexicubes_reference_v3.py \
-            tests/corpus/test_fit8_mesh_field_teacher_v2.py
+            tests/corpus/test_fit8_mesh_field_teacher_v2.py \
+            tests/corpus/test_fit8_static_self_intersection_qualification_v1.py

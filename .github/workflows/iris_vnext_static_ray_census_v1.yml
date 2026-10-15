@@ -6,14 +6,22 @@ on:
       - agent/unified-iris-stdgenpp-foundation
     paths:
       - 'tools/corpus/fit8_static_ray_census_v1.py'
+      - 'tools/corpus/fit8_gltf_static_carrier_v1.py'
+      - 'tools/corpus/gltf_bind_scene_v1.py'
+      - 'tools/corpus/fit8_render_vertex_equivalence_v1.py'
       - 'tools/corpus/fit8_rendered_mechanical_census_contract_v1.py'
       - 'tests/corpus/test_fit8_static_ray_census_v1.py'
+      - 'tests/corpus/test_fit8_gltf_static_carrier_v1.py'
       - '.github/workflows/iris_vnext_static_ray_census_v1.yml'
   pull_request:
     paths:
       - 'tools/corpus/fit8_static_ray_census_v1.py'
+      - 'tools/corpus/fit8_gltf_static_carrier_v1.py'
+      - 'tools/corpus/gltf_bind_scene_v1.py'
+      - 'tools/corpus/fit8_render_vertex_equivalence_v1.py'
       - 'tools/corpus/fit8_rendered_mechanical_census_contract_v1.py'
       - 'tests/corpus/test_fit8_static_ray_census_v1.py'
+      - 'tests/corpus/test_fit8_gltf_static_carrier_v1.py'
       - '.github/workflows/iris_vnext_static_ray_census_v1.yml'
   workflow_dispatch:
 
@@ -41,6 +49,11 @@ jobs:
         run: |
           python -m compileall -q \
             tools/corpus/fit8_static_ray_census_v1.py \
+            tools/corpus/fit8_gltf_static_carrier_v1.py \
+            tests/corpus/test_fit8_static_ray_census_v1.py \
+            tests/corpus/test_fit8_gltf_static_carrier_v1.py
+      - name: Run static carrier and ray census guards
+        run: |
+          python -m pytest -q \
+            tests/corpus/test_fit8_gltf_static_carrier_v1.py \
             tests/corpus/test_fit8_static_ray_census_v1.py
-      - name: Run static ray census guards
-        run: python -m pytest -q tests/corpus/test_fit8_static_ray_census_v1.py

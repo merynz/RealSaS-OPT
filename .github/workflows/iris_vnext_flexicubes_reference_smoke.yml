@@ -64,14 +64,14 @@ jobs:
       - name: Build analytic closed-surface input bundle
         run: |
           mkdir -p .artifacts/flexicubes-smoke
-          python tools/corpus/make_flexicubes_reference_smoke_bundle_v1.py \
+          python -m tools.corpus.make_flexicubes_reference_smoke_bundle_v1 \
             --resolution 16 \
             --output-npz .artifacts/flexicubes-smoke/input.npz \
             --output-manifest .artifacts/flexicubes-smoke/input.json
 
       - name: Execute exact upstream FlexiCubes
         run: |
-          python tools/corpus/run_fit8_f_flexicubes_reference_v1.py \
+          python -m tools.corpus.run_fit8_f_flexicubes_reference_v1 \
             --bundle-npz .artifacts/flexicubes-smoke/input.npz \
             --bundle-manifest .artifacts/flexicubes-smoke/input.json \
             --upstream-root external/flexicubes \
@@ -81,7 +81,7 @@ jobs:
 
       - name: Verify physical sphere topology
         run: |
-          python tools/corpus/verify_flexicubes_reference_smoke_v1.py \
+          python -m tools.corpus.verify_flexicubes_reference_smoke_v1 \
             --candidate-npz .artifacts/flexicubes-smoke/candidate.npz \
             --run-manifest .artifacts/flexicubes-smoke/run.json
 

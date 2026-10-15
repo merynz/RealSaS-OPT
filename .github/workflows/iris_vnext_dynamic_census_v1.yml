@@ -8,24 +8,36 @@ on:
       - 'tools/corpus/fit8_dynamic_rendered_mechanical_census_contract_v1.py'
       - 'tools/corpus/fit8_dynamic_mechanics_metrics_v1.py'
       - 'tools/corpus/fit8_gltf_dynamic_pose_v1.py'
+      - 'tools/corpus/fit8_gltf_dynamic_census_v1.py'
       - 'tools/corpus/fit8_gltf_static_carrier_v1.py'
       - 'tools/corpus/gltf_bind_scene_v1.py'
       - 'tools/corpus/fit8_render_vertex_equivalence_v1.py'
+      - 'tools/corpus/fit8_static_ray_census_v1.py'
+      - 'tools/corpus/fit8_static_ray_census_v2.py'
+      - 'tools/corpus/fit8_static_ray_census_v3.py'
+      - 'tools/corpus/fit8_static_draw_order_capacity_court_v2.py'
       - 'tests/corpus/test_fit8_dynamic_rendered_mechanical_census_contract_v1.py'
       - 'tests/corpus/test_fit8_dynamic_mechanics_metrics_v1.py'
       - 'tests/corpus/test_fit8_gltf_dynamic_pose_v1.py'
+      - 'tests/corpus/test_fit8_gltf_dynamic_census_v1.py'
       - '.github/workflows/iris_vnext_dynamic_census_v1.yml'
   pull_request:
     paths:
       - 'tools/corpus/fit8_dynamic_rendered_mechanical_census_contract_v1.py'
       - 'tools/corpus/fit8_dynamic_mechanics_metrics_v1.py'
       - 'tools/corpus/fit8_gltf_dynamic_pose_v1.py'
+      - 'tools/corpus/fit8_gltf_dynamic_census_v1.py'
       - 'tools/corpus/fit8_gltf_static_carrier_v1.py'
       - 'tools/corpus/gltf_bind_scene_v1.py'
       - 'tools/corpus/fit8_render_vertex_equivalence_v1.py'
+      - 'tools/corpus/fit8_static_ray_census_v1.py'
+      - 'tools/corpus/fit8_static_ray_census_v2.py'
+      - 'tools/corpus/fit8_static_ray_census_v3.py'
+      - 'tools/corpus/fit8_static_draw_order_capacity_court_v2.py'
       - 'tests/corpus/test_fit8_dynamic_rendered_mechanical_census_contract_v1.py'
       - 'tests/corpus/test_fit8_dynamic_mechanics_metrics_v1.py'
       - 'tests/corpus/test_fit8_gltf_dynamic_pose_v1.py'
+      - 'tests/corpus/test_fit8_gltf_dynamic_census_v1.py'
       - '.github/workflows/iris_vnext_dynamic_census_v1.yml'
   workflow_dispatch:
 
@@ -55,12 +67,15 @@ jobs:
             tools/corpus/fit8_dynamic_rendered_mechanical_census_contract_v1.py \
             tools/corpus/fit8_dynamic_mechanics_metrics_v1.py \
             tools/corpus/fit8_gltf_dynamic_pose_v1.py \
+            tools/corpus/fit8_gltf_dynamic_census_v1.py \
             tests/corpus/test_fit8_dynamic_rendered_mechanical_census_contract_v1.py \
             tests/corpus/test_fit8_dynamic_mechanics_metrics_v1.py \
-            tests/corpus/test_fit8_gltf_dynamic_pose_v1.py
+            tests/corpus/test_fit8_gltf_dynamic_pose_v1.py \
+            tests/corpus/test_fit8_gltf_dynamic_census_v1.py
       - name: Run dynamic census guards
         run: |
           python -m pytest -q \
             tests/corpus/test_fit8_dynamic_rendered_mechanical_census_contract_v1.py \
             tests/corpus/test_fit8_dynamic_mechanics_metrics_v1.py \
-            tests/corpus/test_fit8_gltf_dynamic_pose_v1.py
+            tests/corpus/test_fit8_gltf_dynamic_pose_v1.py \
+            tests/corpus/test_fit8_gltf_dynamic_census_v1.py

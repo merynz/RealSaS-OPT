@@ -7,15 +7,19 @@ on:
     paths:
       - 'tools/corpus/fit8_f_qualified_fa_bundle_v1.py'
       - 'tools/corpus/fit8_f_qualified_fa_bundle_v2.py'
+      - 'tools/corpus/fit8_f_geometry_teacher_slice_v1.py'
       - 'tests/corpus/test_fit8_f_qualified_fa_bundle_v1.py'
       - 'tests/corpus/test_fit8_f_qualified_fa_bundle_v2.py'
+      - 'tests/corpus/test_fit8_f_geometry_teacher_slice_v1.py'
       - '.github/workflows/iris_vnext_qualified_fa_bundle_v2.yml'
   pull_request:
     paths:
       - 'tools/corpus/fit8_f_qualified_fa_bundle_v1.py'
       - 'tools/corpus/fit8_f_qualified_fa_bundle_v2.py'
+      - 'tools/corpus/fit8_f_geometry_teacher_slice_v1.py'
       - 'tests/corpus/test_fit8_f_qualified_fa_bundle_v1.py'
       - 'tests/corpus/test_fit8_f_qualified_fa_bundle_v2.py'
+      - 'tests/corpus/test_fit8_f_geometry_teacher_slice_v1.py'
       - '.github/workflows/iris_vnext_qualified_fa_bundle_v2.yml'
   workflow_dispatch:
 
@@ -44,10 +48,13 @@ jobs:
           python -m compileall -q \
             tools/corpus/fit8_f_qualified_fa_bundle_v1.py \
             tools/corpus/fit8_f_qualified_fa_bundle_v2.py \
+            tools/corpus/fit8_f_geometry_teacher_slice_v1.py \
             tests/corpus/test_fit8_f_qualified_fa_bundle_v1.py \
-            tests/corpus/test_fit8_f_qualified_fa_bundle_v2.py
+            tests/corpus/test_fit8_f_qualified_fa_bundle_v2.py \
+            tests/corpus/test_fit8_f_geometry_teacher_slice_v1.py
       - name: Run qualified F_A bundle guards
         run: |
           python -m pytest -q \
             tests/corpus/test_fit8_f_qualified_fa_bundle_v1.py \
-            tests/corpus/test_fit8_f_qualified_fa_bundle_v2.py
+            tests/corpus/test_fit8_f_qualified_fa_bundle_v2.py \
+            tests/corpus/test_fit8_f_geometry_teacher_slice_v1.py

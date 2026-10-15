@@ -6,6 +6,7 @@ on:
       - agent/unified-iris-stdgenpp-foundation
     paths:
       - 'tools/corpus/fit8_static_ray_census_v1.py'
+      - 'tools/corpus/fit8_static_ray_census_v2.py'
       - 'tools/corpus/fit8_static_draw_order_capacity_court_v1.py'
       - 'tools/corpus/fit8_gltf_static_carrier_v1.py'
       - 'tools/corpus/fit8_fbx_static_carrier_v1.py'
@@ -18,13 +19,16 @@ on:
       - 'tools/corpus/fit8_surface_topology_invariants_v1.py'
       - 'tools/corpus/fit8_rendered_mechanical_census_contract_v1.py'
       - 'tests/corpus/test_fit8_static_ray_census_v1.py'
+      - 'tests/corpus/test_fit8_static_ray_census_v2.py'
       - 'tests/corpus/test_fit8_static_draw_order_capacity_court_v1.py'
+      - 'tests/corpus/test_fit8_static_draw_order_accepts_v2.py'
       - 'tests/corpus/test_fit8_gltf_static_carrier_v1.py'
       - 'tests/corpus/test_fit8_fbx_static_carrier_v1.py'
       - '.github/workflows/iris_vnext_static_ray_census_v1.yml'
   pull_request:
     paths:
       - 'tools/corpus/fit8_static_ray_census_v1.py'
+      - 'tools/corpus/fit8_static_ray_census_v2.py'
       - 'tools/corpus/fit8_static_draw_order_capacity_court_v1.py'
       - 'tools/corpus/fit8_gltf_static_carrier_v1.py'
       - 'tools/corpus/fit8_fbx_static_carrier_v1.py'
@@ -37,7 +41,9 @@ on:
       - 'tools/corpus/fit8_surface_topology_invariants_v1.py'
       - 'tools/corpus/fit8_rendered_mechanical_census_contract_v1.py'
       - 'tests/corpus/test_fit8_static_ray_census_v1.py'
+      - 'tests/corpus/test_fit8_static_ray_census_v2.py'
       - 'tests/corpus/test_fit8_static_draw_order_capacity_court_v1.py'
+      - 'tests/corpus/test_fit8_static_draw_order_accepts_v2.py'
       - 'tests/corpus/test_fit8_gltf_static_carrier_v1.py'
       - 'tests/corpus/test_fit8_fbx_static_carrier_v1.py'
       - '.github/workflows/iris_vnext_static_ray_census_v1.yml'
@@ -67,13 +73,16 @@ jobs:
         run: |
           python -m compileall -q \
             tools/corpus/fit8_static_ray_census_v1.py \
+            tools/corpus/fit8_static_ray_census_v2.py \
             tools/corpus/fit8_static_draw_order_capacity_court_v1.py \
             tools/corpus/fit8_gltf_static_carrier_v1.py \
             tools/corpus/fit8_fbx_static_carrier_v1.py \
             tools/corpus/fit8_fbx_static_carrier_v2.py \
             tools/corpus/build_ufbx_static_census_probe_v3.py \
             tests/corpus/test_fit8_static_ray_census_v1.py \
+            tests/corpus/test_fit8_static_ray_census_v2.py \
             tests/corpus/test_fit8_static_draw_order_capacity_court_v1.py \
+            tests/corpus/test_fit8_static_draw_order_accepts_v2.py \
             tests/corpus/test_fit8_gltf_static_carrier_v1.py \
             tests/corpus/test_fit8_fbx_static_carrier_v1.py
       - name: Run static carrier and ray census guards
@@ -82,19 +91,20 @@ jobs:
             tests/corpus/test_fit8_gltf_static_carrier_v1.py \
             tests/corpus/test_fit8_fbx_static_carrier_v1.py \
             tests/corpus/test_fit8_static_ray_census_v1.py \
-            tests/corpus/test_fit8_static_draw_order_capacity_court_v1.py
+            tests/corpus/test_fit8_static_ray_census_v2.py \
+            tests/corpus/test_fit8_static_draw_order_capacity_court_v1.py \
+            tests/corpus/test_fit8_static_draw_order_accepts_v2.py
       - name: Package exact producer source snapshot
         run: |
           mkdir -p /tmp/static-ray-producer/tools/corpus
           cp tools/corpus/fit8_static_ray_census_v1.py /tmp/static-ray-producer/tools/corpus/
+          cp tools/corpus/fit8_static_ray_census_v2.py /tmp/static-ray-producer/tools/corpus/
           cp tools/corpus/fit8_rendered_mechanical_census_contract_v1.py /tmp/static-ray-producer/tools/corpus/
           cp tools/corpus/fit8_static_draw_order_capacity_court_v1.py /tmp/static-ray-producer/tools/corpus/
+          cp tools/corpus/fit8_polygon_triangulation_qualification_v1.py /tmp/static-ray-producer/tools/corpus/
+          cp tools/corpus/fit8_surface_topology_invariants_v1.py /tmp/static-ray-producer/tools/corpus/
           printf '%s\n' "$GITHUB_SHA" > /tmp/static-ray-producer/commit.txt
-          sha256sum \
-            /tmp/static-ray-producer/tools/corpus/fit8_static_ray_census_v1.py \
-            /tmp/static-ray-producer/tools/corpus/fit8_rendered_mechanical_census_contract_v1.py \
-            /tmp/static-ray-producer/tools/corpus/fit8_static_draw_order_capacity_court_v1.py \
-            > /tmp/static-ray-producer/file_sha256.txt
+          sha256sum /tmp/static-ray-producer/tools/corpus/*.py > /tmp/static-ray-producer/file_sha256.txt
       - uses: actions/upload-artifact@v4
         with:
           name: static-ray-producer-source

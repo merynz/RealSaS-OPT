@@ -28,6 +28,10 @@ jobs:
         run: python -m pytest -q tests/iris/test_iris_vnext_v1.py tests/iris/test_graphics_truth_v1.py
       - name: Single-carrier mechanics and Graphics contracts
         run: python -m pytest -q tests/compiler/test_vnext_single_carrier_graphics_v1.py tests/repository/test_vnext_architecture_contract_v1.py
+      - name: Native Graphics content consumption
+        run: |
+          g++ -std=c++17 -O2 runtime/realsas_cpp/tests/graphics_v1_contract_test.cpp -o /tmp/realsas_graphics_v1_test
+          /tmp/realsas_graphics_v1_test
       - name: Preserve decoder regressions
         run: python -m pytest -q tests/iris/test_iris_scene_topology_head_v1.py tests/models/test_tessa_v1.py
       - name: Summary
@@ -37,5 +41,6 @@ jobs:
           echo 'canonical_M_G_W_count=1'
           echo 'independent_visual_mesh=false'
           echo 'graphics_runtime_hash_only_binding=false'
+          echo 'native_graphics_content_consumed=true'
           echo 'semantic_taxonomy=false'
           echo 'fit8_scientific_pass_claimed=false'

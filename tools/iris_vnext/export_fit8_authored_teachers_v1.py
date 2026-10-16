@@ -88,6 +88,12 @@ def main():
             raise ValueError(f"VNEXT_TEACHER_RECEIPT_SOURCE_DRIFT:{legacy_id}")
         if teacher.get("observation_admission_sha256") != row["observation_admission_sha256"]:
             raise ValueError(f"VNEXT_TEACHER_RECEIPT_ADMISSION_DRIFT:{legacy_id}")
+        if int(teacher.get("rest_vertex_count", -1)) != int(row["raw_vertex_count"]):
+            raise ValueError(f"VNEXT_TEACHER_REST_VERTEX_CENSUS_DRIFT:{legacy_id}")
+        if tuple(map(str, teacher.get("native_motion_inventory_exported") or ())) != tuple(
+            map(str, row["native_motion_inventory"])
+        ):
+            raise ValueError(f"VNEXT_TEACHER_NATIVE_MOTION_INVENTORY_DRIFT:{legacy_id}")
         if teacher.get("teacher_rig_skin_motion_allowed_as_inference_input") is not False:
             raise ValueError(f"VNEXT_TEACHER_INFERENCE_LEAK:{legacy_id}")
         if teacher.get("canonical_M_G_W_minted") is not False:
@@ -103,6 +109,8 @@ def main():
                 "receipt_file": teacher_receipt_path.name,
                 "receipt_sha256": sha256_file(teacher_receipt_path),
                 "sampled_frame_count": int(teacher["sampled_frame_count"]),
+                "rest_vertex_count": int(teacher["rest_vertex_count"]),
+                "native_motion_count": len(teacher["native_motion_inventory_exported"]),
             }
         )
 

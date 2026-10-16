@@ -6,8 +6,16 @@ on:
       - research/iris-vnext-single-carrier-graphics
     paths:
       - 'canonical/VNEXT_FIT8_PREPARE_TRIGGER_V1.json'
+      - 'canonical/VNEXT_FIT8_INPUT_BINDING_V1.json'
       - 'tools/iris_vnext/**'
+      - 'models/iris/vnext/cohort_v1.py'
+      - 'models/iris/vnext/contracts_v1.py'
       - 'models/iris/vnext/topology_teacher_v1.py'
+      - 'models/iris/vnext/teacher_truth_v1.py'
+      - 'models/tessa/v1/model_v1.py'
+      - 'models/tessa/v1/training_data_v1.py'
+      - 'tests/repository/test_vnext_fit8_preparation_contract_v1.py'
+      - 'tests/repository/test_vnext_fit8_active_preparation_provenance_v1.py'
       - '.github/workflows/iris_vnext_fit8_prepare_self_hosted_v1.yml'
   workflow_dispatch:
 
@@ -52,13 +60,22 @@ jobs:
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
           python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
           python -m py_compile \
+            models/iris/vnext/contracts_v1.py \
+            models/iris/vnext/topology_teacher_v1.py \
+            models/iris/vnext/teacher_truth_v1.py \
+            models/tessa/v1/model_v1.py \
+            models/tessa/v1/training_data_v1.py \
             tools/iris_vnext/input_binding_v1.py \
             tools/iris_vnext/blender_authored_teacher_export_v1.py \
             tools/iris_vnext/blender_authored_teacher_export_v2.py \
             tools/iris_vnext/blender_authored_teacher_export_v3.py \
             tools/iris_vnext/export_fit8_authored_teachers_v1.py \
+            tools/iris_vnext/build_fit8_vnext_shards_v1.py \
             tools/iris_vnext/build_fit8_vnext_shards_v2.py \
             tools/iris_vnext/prepare_fit8_vnext_cohort_v1.py
+          python -m pytest -q \
+            tests/repository/test_vnext_fit8_preparation_contract_v1.py \
+            tests/repository/test_vnext_fit8_active_preparation_provenance_v1.py
           command -v rclone >/dev/null
           command -v unzip >/dev/null
 
@@ -244,6 +261,12 @@ jobs:
           assert manifest['schema']=='RealSaS.IRISVNextFit8Manifest.v4'
           assert receipt['scientific_fit_started'] is False
           assert receipt['scientific_fit_pass_claimed'] is False
+          assert receipt['source_commit_bound'] is True
+          assert receipt['source_commit_sha']==os.environ['GITHUB_SHA'].lower()
+          provenance=receipt['active_preparation_source_provenance']
+          assert len(provenance)==15
+          assert 'models/iris/vnext/teacher_truth_v1.py' in provenance
+          assert 'tools/iris_vnext/blender_authored_teacher_export_v3.py' in provenance
           rows=manifest.get('subjects') or []
           assert len(rows)==8
           for row in rows:
@@ -252,17 +275,52 @@ jobs:
               assert int(census['collision_group_count'])==0, (row['subject_id'],census)
               assert int(census['colliding_vertex_count'])==0, (row['subject_id'],census)
           assert 'source_provenance' in manifest and manifest['source_provenance']
-          print('VNEXT_FIT8_PREPARATION_SEAL_PASS',manifest['manifest_value_sha256'])
+          print('VNEXT_FIT8_PREPARATION_SEAL_PASS',manifest['manifest_value_sha256'],receipt['source_commit_sha'])
           PY
 
-      - name: Persist sealed preparation to Drive
+      - name: Persist sealed preparation to Drive and verify round-trip SHA256
         shell: bash
         run: |
           set -euo pipefail
           rclone copy "$RUN_ROOT/teachers" "$OUTPUT_REMOTE/teachers" --checksum
           rclone copy "$RUN_ROOT/prepared" "$OUTPUT_REMOTE/prepared" --checksum
           rclone copy "$RUN_ROOT/legacy_bound/HYDRATION_RECEIPT.json" "$OUTPUT_REMOTE/receipts" --checksum
-          echo 'VNEXT_FIT8_PREPARATION_DRIVE_PERSIST_PASS'
+
+          verify="$RUN_ROOT/drive_roundtrip"
+          rm -rf "$verify"
+          mkdir -p "$verify/teachers" "$verify/prepared" "$verify/receipts"
+          rclone copy "$OUTPUT_REMOTE/teachers" "$verify/teachers"
+          rclone copy "$OUTPUT_REMOTE/prepared" "$verify/prepared"
+          rclone copy "$OUTPUT_REMOTE/receipts/HYDRATION_RECEIPT.json" "$verify/receipts"
+
+          python - <<'PY'
+          import hashlib,os
+          from pathlib import Path
+          root=Path(os.environ['RUN_ROOT'])
+          remote=root/'drive_roundtrip'
+          def sha(path):
+              h=hashlib.sha256()
+              with path.open('rb') as f:
+                  for chunk in iter(lambda:f.read(4*1024*1024),b''):
+                      h.update(chunk)
+              return h.hexdigest()
+          pairs=[]
+          for family in ('teachers','prepared'):
+              local=root/family
+              mirrored=remote/family
+              for path in sorted(p for p in local.rglob('*') if p.is_file()):
+                  rel=path.relative_to(local)
+                  other=mirrored/rel
+                  if not other.is_file():
+                      raise RuntimeError(f'VNEXT_DRIVE_ROUNDTRIP_MISSING:{family}/{rel}')
+                  pairs.append((path,other,f'{family}/{rel}'))
+          pairs.append((root/'legacy_bound'/'HYDRATION_RECEIPT.json',remote/'receipts'/'HYDRATION_RECEIPT.json','receipts/HYDRATION_RECEIPT.json'))
+          for local,other,label in pairs:
+              left,right=sha(local),sha(other)
+              if left!=right:
+                  raise RuntimeError(f'VNEXT_DRIVE_ROUNDTRIP_SHA256_DRIFT:{label}:{left}:{right}')
+          print('VNEXT_FIT8_PREPARATION_DRIVE_ROUNDTRIP_SHA256_PASS',len(pairs))
+          PY
 
       - name: Upload compact preparation evidence
         if: always()

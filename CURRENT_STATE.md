@@ -13,7 +13,11 @@ The central invariant is now:
 
 > Candidate meshes are proposal evidence only. After candidate selection, RealSaS has exactly one canonical `M/G/W_M`. Graphics, Motion and Runtime bind only to that carrier. A second deformable visual mesh is forbidden.
 
-The legacy shared IRIS Fit8 run was resumed past the earlier ~4400 checkpoint and reached approximately **5400 global steps**. It is preserved as a control artifact. It is not continued as the vNext scientific checkpoint because both the model architecture and trainer semantics are changing.
+The legacy shared IRIS Fit8 run resumed from committed step 4400, committed checkpoints through **5400**, executed through step **5563**, and was then interrupted; the exact resume point remains 5400. It is preserved as a control artifact. It is not continued as the vNext scientific checkpoint because both the model architecture and trainer semantics are changing.
+
+### Current-main continuity while vNext is reviewed
+
+This review branch does not erase or silently replace the current product authority chain before merge. `canonical/V2_IMPLEMENTATION_READINESS.json` remains the current-main readiness record, and the existing `SurfaceAddressing`/canonical carrier contracts remain historical/current-main regression authorities until the vNext migration is reviewed and merged. vNext changes the future canonicalization timing and Graphics consumption contract; it does not reinterpret sealed historical PASS records.
 
 ## Why the architecture changed
 
@@ -43,7 +47,7 @@ Geometry       Graphics        Structure
 H(x)           evidence        memory
 field          appearance      mech demand
 uncertainty    relations       TESSA grammar
-Flexi-style extraction freedom  
+Flexi-style extraction freedom
    └──────────────┬──────────────┘
                   ↓
              K x candidate M*
@@ -174,7 +178,7 @@ The checkpoint binding includes exact source files, manifest, policy, model conf
 
 ## Current implementation evidence
 
-The dedicated `iris-vnext-single-carrier-v1` CI gate has already passed the first model/teacher/single-carrier/Graphics contract set and legacy TESSA regressions. The gate is being expanded to cover the new B=8 trainer, vNext DAG and native Graphics parser/ordering consumer.
+The dedicated `iris-vnext-single-carrier-v1` CI gate has passed the model/teacher/single-carrier/Graphics contract set, the new B=8 trainer/DAG tests, native Graphics parser/ordering tests, and legacy TESSA regressions. The remaining repository-wide failures are migration bookkeeping/source-seal work, not failures of the vNext model contracts.
 
 The review branch intentionally does not claim Fit8 scientific PASS.
 
@@ -209,7 +213,7 @@ Large topology repair, large hole closure, semantic skin transfer hiding carrier
 
 ## Fit8 re-entry gate
 
-The next scientific IRIS Fit8 run is fresh vNext training, not a continuation of the ~5400 legacy optimizer state.
+The next scientific IRIS Fit8 run is fresh vNext training, not a continuation of the committed step-5400 legacy optimizer state.
 
 Before starting it, all of the following must be true:
 

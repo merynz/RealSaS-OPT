@@ -33,13 +33,19 @@ def test_teacher_and_cohort_materialization_are_behind_fail_closed_binding():
     common = _text("tools/iris_vnext/input_binding_v1.py")
     teacher = _text("tools/iris_vnext/export_fit8_authored_teachers_v1.py")
     prepare = _text("tools/iris_vnext/prepare_fit8_vnext_cohort_v1.py")
-    builder = _text("tools/iris_vnext/build_fit8_vnext_shards_v1.py")
+    builder = _text("tools/iris_vnext/build_fit8_vnext_shards_v2.py")
+    topology = _text("models/iris/vnext/topology_teacher_v1.py")
     assert "VNEXT_STAGE01_BUNDLE" in common
     assert "VNEXT_LEGACY_SHARD" in common
     assert "build_input_receipt_v1" in teacher
     assert "build_input_receipt_v1" in prepare
     assert "TEACHER_BATCH_RECEIPT.json" in prepare
     assert "PREPARATION_RECEIPT.json" in prepare
+    assert "build_fit8_vnext_shards_v2.py" in prepare
+    assert "canonicalize_vnext_topology_teacher_v1" in builder
+    assert "VNEXT_TESSA_UNRESOLVED_POSITION_COLLISION" in builder
+    assert "MOTION_EQUIVALENT_EXACT_SEAM_WELD_THEN_ZERO_RESIDUAL_QUANTIZED_COLLISIONS_REQUIRED" in builder
+    assert "product_geometry_authority" in topology
     assert '"legacy_optimizer_state_reused": False' in builder
     assert '"legacy_5400_checkpoint_reused": False' in builder
 
@@ -57,9 +63,14 @@ def test_windowed_v2_is_the_single_active_fit8_trainer_contract():
 
 def test_a100_preflight_cannot_claim_or_seed_scientific_fit():
     source = _text("tools/iris_vnext/a100_preflight_v1.py")
+    scientific = _text("tools/iris_vnext/run_fit8_vnext_scientific_v1.py")
     assert "VNEXT_A100_DEVICE_REQUIRED" in source
     assert '"preflight_checkpoint_reusable": False' in source
     assert '"scientific_fit_started": False' in source
     assert '"scientific_fit_pass_claimed": False' in source
     assert "TemporaryDirectory" in source
     assert "ANALYTIC_ENGINEERING_COURT_ONLY" in source
+    assert "RealSaS.IRISVNextFit8Manifest.v4" in source
+    assert "RealSaS.IRISVNextFit8PreparationReceipt.v2" in source
+    assert "VNEXT_FIT8_PREFLIGHT_TOPOLOGY_GRAMMAR_DRIFT" in scientific
+    assert "scientific_fit_pass_claimed" in scientific

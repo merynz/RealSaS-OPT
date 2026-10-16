@@ -47,7 +47,10 @@ def main():
     root = args.stage01_root.resolve()
     output = args.output_dir.resolve()
     output.mkdir(parents=True, exist_ok=True)
-    exporter = Path(__file__).with_name("blender_authored_teacher_export_v1.py").resolve()
+    # V2 changes only Blender action-name/slot transport.  Scientific teacher
+    # semantics and the v1 receipt schema remain unchanged and are revalidated
+    # below against the immutable native-motion inventory.
+    exporter = Path(__file__).with_name("blender_authored_teacher_export_v2.py").resolve()
 
     version = subprocess.run(
         [args.blender, "--version"], capture_output=True, text=True, check=True
@@ -111,12 +114,14 @@ def main():
                 "sampled_frame_count": int(teacher["sampled_frame_count"]),
                 "rest_vertex_count": int(teacher["rest_vertex_count"]),
                 "native_motion_count": len(teacher["native_motion_inventory_exported"]),
+                "teacher_transport_revision": int(teacher.get("transport_revision", 1)),
             }
         )
 
     final = {
         "schema": "RealSaS.IRISVNextFit8TeacherBatch.v1",
         "blender_version": version,
+        "blender_teacher_exporter": exporter.name,
         "verified_input_receipt": receipt,
         "subjects": exported,
         "teacher_inputs_in_inference_forward": False,

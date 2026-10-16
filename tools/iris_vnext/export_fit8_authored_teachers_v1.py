@@ -47,10 +47,10 @@ def main():
     root = args.stage01_root.resolve()
     output = args.output_dir.resolve()
     output.mkdir(parents=True, exist_ok=True)
-    # V2 changes only Blender action-name/slot transport.  Scientific teacher
-    # semantics and the v1 receipt schema remain unchanged and are revalidated
-    # below against the immutable native-motion inventory.
-    exporter = Path(__file__).with_name("blender_authored_teacher_export_v2.py").resolve()
+    # V3 preserves V2's exact action-name/slot transport and freezes the rest
+    # triangulation while verifying pose-time vertex indexing plus source polygon
+    # connectivity/materials. Pose-dependent Blender tessellation is not topology.
+    exporter = Path(__file__).with_name("blender_authored_teacher_export_v3.py").resolve()
 
     version = subprocess.run(
         [args.blender, "--version"], capture_output=True, text=True, check=True

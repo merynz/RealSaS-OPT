@@ -5,8 +5,13 @@ on:
     branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: iris-tessa-scene-memory-v1-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   scene-memory-contract:
+    if: github.event.repository.private == false
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:

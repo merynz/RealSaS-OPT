@@ -7,6 +7,7 @@ import torch.nn.functional as F
 from torch import nn
 
 from .contracts_v1 import IRISVNextConfigV1
+from .flexicubes_v1 import FLEXICUBES_PARAMETER_SEMANTICS, split_flexicubes_parameters_v1
 
 
 def _plane_coordinates(size: int, *, device, dtype) -> torch.Tensor:
@@ -115,21 +116,43 @@ class LocalEvidenceFieldV1(nn.Module):
         for block in self.blocks:
             h = block(h)
         h = self.final_norm(self.feature_projection(h))
-        return {"H": h, "field": self.field_head(h).squeeze(-1), "log_uncertainty": self.uncertainty_head(h).squeeze(-1).clamp(-8.0, 4.0), "extraction_delta": torch.tanh(self.delta_head(h)) * float(self.cfg.maximum_extraction_delta)}
+        return {
+            "H": h,
+            "field": self.field_head(h).squeeze(-1),
+            "log_uncertainty": self.uncertainty_head(h).squeeze(-1).clamp(-8.0, 4.0),
+            "extraction_delta": torch.tanh(self.delta_head(h)) * float(self.cfg.maximum_extraction_delta),
+        }
 
 
 class CubeExtractionHeadV1(nn.Module):
-    """FlexiCubes-style 21-D extraction freedom; never MIRA skin weights."""
+    """Raw FlexiCubes beta12/alpha8/gamma1 degrees of freedom.
+
+    These outputs are not supervised labels and are never MIRA skin weights.
+    They receive gradients through the pinned differentiable extractor.
+    """
     output_dim = 21
+    parameter_semantics = FLEXICUBES_PARAMETER_SEMANTICS
+
     def __init__(self, cfg: IRISVNextConfigV1):
         super().__init__()
         self.local_feature_dim = cfg.local_feature_dim
-        self.net = nn.Sequential(nn.LayerNorm(8 * cfg.local_feature_dim), nn.Linear(8 * cfg.local_feature_dim, cfg.topology_width), nn.GELU(), nn.Linear(cfg.topology_width, self.output_dim))
+        self.weight_scale = float(cfg.flexicubes_weight_scale)
+        self.net = nn.Sequential(
+            nn.LayerNorm(8 * cfg.local_feature_dim),
+            nn.Linear(8 * cfg.local_feature_dim, cfg.topology_width),
+            nn.GELU(),
+            nn.Linear(cfg.topology_width, self.output_dim),
+        )
 
     def forward(self, corner_features: torch.Tensor) -> torch.Tensor:
         if corner_features.ndim != 4 or corner_features.shape[-2:] != (8, self.local_feature_dim):
             raise ValueError("IRIS_VNEXT_CUBE_CORNER_FEATURE_SHAPE_INVALID")
         return self.net(corner_features.flatten(-2))
+
+    def interpreted(self, corner_features: torch.Tensor):
+        return split_flexicubes_parameters_v1(
+            self.forward(corner_features), weight_scale=self.weight_scale
+        )
 
 
 class IRISVNextSceneCoreV1(nn.Module):

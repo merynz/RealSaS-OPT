@@ -1,0 +1,207 @@
+name: iris-vnext-fit8-prepare-self-hosted-v1
+
+on:
+  push:
+    branches:
+      - research/iris-vnext-single-carrier-graphics
+    paths:
+      - 'canonical/VNEXT_FIT8_PREPARE_TRIGGER_V1.json'
+      - 'tools/iris_vnext/**'
+      - 'models/iris/vnext/topology_teacher_v1.py'
+      - '.github/workflows/iris_vnext_fit8_prepare_self_hosted_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: iris-vnext-fit8-prepare-self-hosted-v1
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    if: github.repository == 'merynz/RealSaS-OPT'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 120
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      RUN_ROOT: /home/monster/realsas_authority/runs/FIT8_IRIS_VNEXT_20261016
+      STAGE01_FILE_ID: 1PcxT2rfb9jCHfP75gaqMAo90OU7JRypH
+      STAGE01_SHA256: 9d9c9cbf63c979326cd2f39f5435006b81dddb201028a34ebb4cf10e1b434936
+      LEGACY_REMOTE: 'gdrive:RealSaS_Fit8_IRIS_Inputs_20261013'
+      OUTPUT_REMOTE: 'gdrive:RealSaS_Fit8_IRIS_vNext_20261016'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install preparation dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python -m py_compile \
+            tools/iris_vnext/input_binding_v1.py \
+            tools/iris_vnext/blender_authored_teacher_export_v1.py \
+            tools/iris_vnext/export_fit8_authored_teachers_v1.py \
+            tools/iris_vnext/build_fit8_vnext_shards_v2.py \
+            tools/iris_vnext/prepare_fit8_vnext_cohort_v1.py
+          command -v rclone >/dev/null
+          command -v unzip >/dev/null
+
+      - name: Resolve pinned Blender
+        shell: bash
+        run: |
+          set -euo pipefail
+          version='4.5.14'
+          cache_root="$HOME/.cache/realsas/blender"
+          install_root="$cache_root/blender-${version}-linux-x64"
+          blender_path="$install_root/blender"
+          if test -x "$blender_path"; then
+            echo "BLENDER_EXE=$blender_path" >> "$GITHUB_ENV"
+            "$blender_path" --version | head -n 2
+            exit 0
+          fi
+          if system_blender="$(command -v blender 2>/dev/null)" && test -x "$system_blender"; then
+            echo "BLENDER_EXE=$system_blender" >> "$GITHUB_ENV"
+            "$system_blender" --version | head -n 2
+            exit 0
+          fi
+          base="https://download.blender.org/release/Blender4.5"
+          archive="blender-${version}-linux-x64.tar.xz"
+          download_root="$HOME/.cache/realsas/downloads"
+          archive_path="$download_root/$archive"
+          checksum_path="$download_root/blender-${version}.sha256"
+          mkdir -p "$cache_root" "$download_root"
+          if ! test -s "$archive_path" || ! test -s "$checksum_path"; then
+            curl --fail --location --retry 3 --retry-delay 2 "$base/$archive" --output "$archive_path"
+            curl --fail --location --retry 3 --retry-delay 2 "$base/blender-${version}.sha256" --output "$checksum_path"
+          fi
+          (
+            cd "$download_root"
+            grep "  $archive\$" "$(basename "$checksum_path")" | sha256sum --check -
+          )
+          rm -rf "$install_root"
+          tar -xJf "$archive_path" -C "$cache_root"
+          test -x "$blender_path"
+          echo "BLENDER_EXE=$blender_path" >> "$GITHUB_ENV"
+          "$blender_path" --version | head -n 2
+
+      - name: Hydrate exact Stage01 and frozen legacy IRIS inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$RUN_ROOT/stage01" "$RUN_ROOT/legacy_download" "$RUN_ROOT/legacy_bound" "$RUN_ROOT/teachers" "$RUN_ROOT/prepared"
+          mkdir -p "$RUN_ROOT/stage01" "$RUN_ROOT/legacy_download" "$RUN_ROOT/legacy_bound" "$RUN_ROOT/teachers" "$RUN_ROOT/prepared"
+          stage_zip="$RUN_ROOT/FIT8_PLATFORM_STAGE01_INPUT_BUNDLE_20261013.zip"
+          rclone backend copyid gdrive: "$STAGE01_FILE_ID" "$stage_zip"
+          printf '%s  %s\n' "$STAGE01_SHA256" "$stage_zip" | sha256sum --check -
+          unzip -q "$stage_zip" -d "$RUN_ROOT/stage01"
+          rclone copy "$LEGACY_REMOTE" "$RUN_ROOT/legacy_download" --checksum
+          python - <<'PY'
+          import hashlib,json,os,shutil
+          from pathlib import Path
+          root=Path(os.environ['RUN_ROOT'])
+          binding=json.loads(Path('canonical/VNEXT_FIT8_INPUT_BINDING_V1.json').read_text())
+          def sha(p):
+              h=hashlib.sha256()
+              with p.open('rb') as f:
+                  for b in iter(lambda:f.read(4*1024*1024),b''): h.update(b)
+              return h.hexdigest()
+          def exact_named(name,digest):
+              rows=[p for p in (root/'legacy_download').rglob(name) if p.is_file() and sha(p)==digest]
+              if len(rows)!=1: raise RuntimeError(f'VNEXT_LEGACY_EXACT_FILE_RESOLUTION_FAILED:{name}:{len(rows)}')
+              return rows[0]
+          out=root/'legacy_bound'; out.mkdir(parents=True,exist_ok=True)
+          manifest=binding['legacy_iris_cohort_manifest']
+          src=exact_named(manifest['file'],manifest['sha256'])
+          shutil.copy2(src,out/manifest['file'])
+          receipt=[]
+          for row in binding['subjects']:
+              src=exact_named(row['legacy_shard_file'],row['legacy_shard_sha256'])
+              dst=out/row['legacy_shard_file']; shutil.copy2(src,dst)
+              receipt.append({'subject_id':row['subject_id'],'file':dst.name,'sha256':sha(dst)})
+          (out/'HYDRATION_RECEIPT.json').write_text(json.dumps({'schema':'RealSaS.VNextFit8LegacyHydration.v1','subjects':receipt,'cohort_manifest_sha256':sha(out/manifest['file']),'legacy_optimizer_state_reused':False},sort_keys=True,indent=2))
+          boots=list((root/'stage01').rglob('BOOTSTRAP_MANIFEST.json'))
+          if len(boots)!=1: raise RuntimeError(f'VNEXT_STAGE01_ROOT_RESOLUTION_FAILED:{len(boots)}')
+          with Path(os.environ['GITHUB_ENV']).open('a') as f:
+              f.write(f"STAGE01_ROOT={boots[0].parent.resolve()}\n")
+              f.write(f"STAGE01_ZIP={(root/'FIT8_PLATFORM_STAGE01_INPUT_BUNDLE_20261013.zip').resolve()}\n")
+              f.write(f"LEGACY_BOUND={out.resolve()}\n")
+          print('VNEXT_FIT8_INPUT_HYDRATION_PASS',len(receipt))
+          PY
+
+      - name: Export exact authored-motion teacher batch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/iris_vnext/export_fit8_authored_teachers_v1.py \
+            --blender "$BLENDER_EXE" \
+            --binding canonical/VNEXT_FIT8_INPUT_BINDING_V1.json \
+            --stage01-bundle "$STAGE01_ZIP" \
+            --stage01-root "$STAGE01_ROOT" \
+            --legacy-shard-dir "$LEGACY_BOUND" \
+            --legacy-cohort-manifest "$LEGACY_BOUND/COHORT_MANIFEST.json" \
+            --output-dir "$RUN_ROOT/teachers" \
+            --max-frames-per-clip 16
+          test -s "$RUN_ROOT/teachers/TEACHER_BATCH_RECEIPT.json"
+
+      - name: Build and seal topology-safe vNext cohort
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/iris_vnext/prepare_fit8_vnext_cohort_v1.py \
+            --binding canonical/VNEXT_FIT8_INPUT_BINDING_V1.json \
+            --stage01-bundle "$STAGE01_ZIP" \
+            --stage01-root "$STAGE01_ROOT" \
+            --legacy-shard-dir "$LEGACY_BOUND" \
+            --legacy-cohort-manifest "$LEGACY_BOUND/COHORT_MANIFEST.json" \
+            --teacher-dir "$RUN_ROOT/teachers" \
+            --output-dir "$RUN_ROOT/prepared"
+          test -s "$RUN_ROOT/prepared/COHORT_MANIFEST.json"
+          test -s "$RUN_ROOT/prepared/PREPARATION_RECEIPT.json"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ['RUN_ROOT'])/'prepared'
+          manifest=json.loads((root/'COHORT_MANIFEST.json').read_text())
+          receipt=json.loads((root/'PREPARATION_RECEIPT.json').read_text())
+          assert manifest['schema']=='RealSaS.IRISVNextFit8Manifest.v4'
+          assert receipt['scientific_fit_started'] is False
+          assert receipt['scientific_fit_pass_claimed'] is False
+          rows=manifest.get('subjects') or []
+          assert len(rows)==8
+          for row in rows:
+              topo=row.get('topology_teacher_metadata') or {}
+              assert topo.get('residual_quantized_collision_count',0)==0, (row['subject_id'],topo)
+          print('VNEXT_FIT8_PREPARATION_SEAL_PASS',manifest['manifest_value_sha256'])
+          PY
+
+      - name: Persist sealed preparation to Drive
+        shell: bash
+        run: |
+          set -euo pipefail
+          rclone copy "$RUN_ROOT/teachers" "$OUTPUT_REMOTE/teachers" --checksum
+          rclone copy "$RUN_ROOT/prepared" "$OUTPUT_REMOTE/prepared" --checksum
+          rclone copy "$RUN_ROOT/legacy_bound/HYDRATION_RECEIPT.json" "$OUTPUT_REMOTE/receipts" --checksum
+          echo 'VNEXT_FIT8_PREPARATION_DRIVE_PERSIST_PASS'
+
+      - name: Upload compact preparation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-vnext-fit8-preparation-${{ github.run_id }}
+          path: |
+            ${{ env.RUN_ROOT }}/legacy_bound/HYDRATION_RECEIPT.json
+            ${{ env.RUN_ROOT }}/teachers/*.json
+            ${{ env.RUN_ROOT }}/prepared/COHORT_MANIFEST.json
+            ${{ env.RUN_ROOT }}/prepared/PREPARATION_RECEIPT.json
+          if-no-files-found: warn
+          retention-days: 14

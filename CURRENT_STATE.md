@@ -1,243 +1,241 @@
 # RealSaS-OPT — Current State
 
 **Date:** 2026-10-16
-**Canonical code line:** `main` only
-**Active program:** return to the proven Knight-derived architecture, remove only the IRIS→TESSA representation bottleneck, then resume/restart Fit8
-**Deferred research:** broad Unified-IRIS / StdGEN++-inspired redesign, semantic-owner corpus/census, one-image synthesis, appearance/semantic/extraction expansion
+**Canonical production line:** `main` until reviewed vNext is merged
+**Active review line:** `research/iris-vnext-single-carrier-graphics` / draft PR #116
+**Active program:** IRIS vNext + post-selection single-carrier mechanics + behaviorally consumed Graphics, then fresh Fit8
 
 ## Executive state
 
-The broad Unified IRIS redesign authorized on 2026-10-14 is now **DEFERRED by user decision**. It remains valuable research and must be preserved for later, but it is no longer the active architecture authority or a prerequisite for Fit8.
+The earlier narrow `IRIS scene_planes -> TESSA decoder-only` bridge was a useful intermediate result, but it is no longer the complete target. The user has authorized the broader vNext architecture after reviewing the remaining Knight demo failures and the risks of another visual/mechanical authority split.
 
-Draft PRs `#113` and `#114` are explicitly marked deferred and must not be merged into `main` during the current Fit8 restart program.
+The central invariant is now:
 
-The project returns to the architecture that already produced the Knight animated demo:
+> Candidate meshes are proposal evidence only. After candidate selection, RealSaS has exactly one canonical `M/G/W_M`. Graphics, Motion and Runtime bind only to that carrier. A second deformable visual mesh is forbidden.
 
-```text
-8-view source evidence
-    ↓
-IRIS
-    ↓
-TESSA learned topology proposal
-    ↓
-Compiler qualification / canonical M
-    ↓
-AXIS → canonical G
-    ↓
-MIRA → W_M on exact M
-    ↓
-Compiler mechanics / appearance / presentation / dynamic proof
-    ↓
-Runtime
-```
+The legacy shared IRIS Fit8 run was resumed past the earlier ~4400 checkpoint and reached approximately **5400 global steps**. It is preserved as a control artifact. It is not continued as the vNext scientific checkpoint because both the model architecture and trainer semantics are changing.
 
-AXIS, MIRA, CAA, presentation and runtime are **not reopened** by the current intervention.
+## Why the architecture changed
 
-## Preserved canonical continuity
+Current main already has strong post-fit dynamic courts. Stage35 consumes final `W_M` and performs carrier-native deformation/topology compatibility evidence; Stage41 separately proves compiled production motion. The missing idea was not another post-hoc dynamic test. It was to teach the topology-producing model, during training, what mechanical demand a surface is expected to experience.
 
-This narrow refocus does **not** erase or replace the existing V2 control-plane/product authority records. The current machine-readable governance remains anchored by `canonical/V2_IMPLEMENTATION_READINESS.json`, the existing **43-stage** dependency DAG, `canonical/ACTIVE_RUN_V2.json`, and `canonical/AUTHORITY_MAP_V1.json`. The registered governance gate id `PLATFORM_EXECUTION_LANES` remains a control-plane continuity record on `main`; it is not a competing scientific architecture program.
+Authored teacher M/G/W/native motion may therefore produce training-only `MechanicalDemandTruth` such as stretch, principal deformation direction, bend demand, area change, condition ratio, rigidity and optional persistent-contact evidence. None of these teacher mechanics are inference inputs.
 
-The exact pre-existing governance context state token is `CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED`. It remains a continuity anchor for the V2 control plane; it does not override the narrower current scientific work order below.
+Research anchors:
 
-The proven product concerns also remain first-class and explicit: **Geometry**, **Mechanics**, and **Appearance** are separate quality authorities; **QualifiedMeshIR** remains the typed qualified mesh authority entering the canonical carrier boundary; **SurfaceAddressing** remains the stable canonical-M addressing boundary; and **Complete Appearance Authority** / CAA remains the source-preserving appearance authority downstream of canonical M. Nothing in the IRIS→TESSA simplification weakens those contracts.
+- StdGEN++: high-resolution sparse extraction, learnable extraction freedom, connectivity supervision at source;
+- Animation-Aware Quadrangulation / animated FlexiCubes experiments: topology should be designed with expected deformation in mind;
+- Paperman: final 2D drawing support need not be identical to the 3D surface, but it must remain owned by the correct 3D mechanical carrier.
 
-## The one pre-Fit8 architecture issue being fixed
+## IRIS vNext model
 
-The current IRIS→TESSA interface throws away rich learned scene information:
+The active implementation is under `models/iris/vnext/`.
 
 ```text
-IRIS image tokens / scene triplane
-    ↓
-continuous signed field
-    ↓
-deterministic tetra zero surface
-    ↓
-GSA / RiggingSurface
-    ↓
-17-D per-node TESSA conditioning
-    ↓
-second learned TESSA surface encoder
-    ↓
-TESSA topology token decoder
+8 x RGBA + cameras
+        ↓
+frozen DINOv2-S
+        ↓
+shared scene core Z
+   ┌──────────────┼──────────────┐
+   ↓              ↓              ↓
+Geometry       Graphics        Structure
+H(x)           evidence        memory
+field          appearance      mech demand
+uncertainty    relations       TESSA grammar
+Flexi-style extraction freedom  
+   └──────────────┬──────────────┘
+                  ↓
+             K x candidate M*
 ```
 
-The 17-D row is exactly:
+Baseline dimensions are scene width 512, six scene layers, eight heads, 96-channel 64x64 triplanes, 384-D local evidence field, and a 512-wide / 8-head / 8-layer TESSA structure decoder with 256 memory tokens.
+
+`H(x)` is a learned substrate, not product authority. The network may emit geometry, extraction, mechanical-demand, appearance and relation evidence, but Compiler remains the product authority boundary.
+
+No named body-part semantic taxonomy is used.
+
+## Mechanical-demand supervision
+
+`models/iris/vnext/teacher_truth_v1.py` derives training-only mechanical labels from authored animation. The inference model predicts:
 
 ```text
-XYZ(3)
-normal XYZ + valid(4)
-8 support-view bits
-normalized graph degree
-persistence bit
-= 17
+stretch_major
+stretch_minor
+tangent_direction_2theta
+bend_demand
+rigidity_probability
+uncertainty
 ```
 
-TESSA then projects this compressed representation back to a 768-D model and reconstructs a scene/surface memory with a separate learned encoder.
+Teacher G/W/motion bytes are explicitly forbidden from the inference forward path.
 
-This is the active simplification target.
+## Candidate meshes and canonicalization
 
-## Approved narrow target
+The previous timing `static M -> canonical M -> AXIS/MIRA -> dynamic test` is retired in vNext.
 
-Do **not** redesign the rest of RealSaS. Keep the proven IRIS signed-geometry model and the useful TESSA topology-token decoder, but remove TESSA as a second scene-understanding model.
-
-Target logical model boundary:
+The new logical mechanics path is:
 
 ```text
-8 RGB
-  ↓
-existing IRIS scene encoder / triplane Z
-  ├─ signed field → deterministic geometry witness/courts
-  │
-  └─ rich scene memory → bounded topology-memory adapter
-                         ↓
-                  existing TESSA topology decoder role
-                         ↓
-                 learned mesh proposal M*
+IRIS vNext / Structure
+        ↓
+MeshCandidateSet {M*0..K}
+        ↓
+Compiler static admission only
+        ↓
+candidate AXIS G
+        ↓
+candidate MIRA W_M
+        ↓
+bounded topology-selection mechanical probes
+        ↓
+Compiler deterministic survivor selection
+        ↓
+SOLE canonical M/G/W_M
 ```
 
-The first implementation should consume the **existing IRIS scene planes directly** rather than modifying the core IRIS source merely to expose a new latent. This preserves compatibility with the existing Fit8 IRIS checkpoint lineage where possible.
+`compiler/realsas_compiler_core/mechanical_candidate_v1.py` implements the authority boundary. A candidate that claims canonical authority before selection fails closed.
 
-The legacy `17-D → TESSASurfaceEncoderV1` path remains only as compatibility/reproduction code; it is not the intended Fit8 topology path after this intervention.
+The candidate-selection probe is not Stage41 production motion proof. The two courts remain distinct: one selects a viable carrier; the later one validates actual compiled motion on the selected canonical puppet.
 
-## Compiler authority around the simplified model
+## Graphics replaces CAA as active product vocabulary
 
-Model fusion does **not** mean Compiler authority moves into the network.
+`CAA` remains only as historical compatibility terminology for existing artifacts/codecs. The active vNext product domain is **Graphics**.
 
-The learned topology proposal may be produced from IRIS scene memory before the geometry courts finish, but it remains non-authoritative evidence until the existing Compiler courts consume it.
-
-Keep the current independent geometry/evidence chain:
+The learned relation interface is role-free:
 
 ```text
-Stage08 normalization authority
-        ↓
-IRIS signed field
-        ↓
-Stage12 deterministic zero-surface witness
-        ↓
-Stage13 geometry substrate qualification
-        ↓
-Stage14/15 GSA build + qualification
-        ↓
-Stage17 mechanical/component partition evidence
+same_drawable_affinity
+cut_probability
+fragment_embedding
+visibility_probability
+front_probability
+occlusion_probability
+rigidity_probability
+attachment_affinity
+alpha_boundary_probability
+appearance_boundary_probability
+uncertainty
 ```
 
-In parallel, from the **same IRIS scene representation**:
+No `arm`, `leg`, `cape`, `sword`, `hair`, etc. labels exist in the production contract.
+
+Compiler combines learned evidence with source RGBA/alpha, physical depth, canonical M/G/W motion and persistent contact to produce:
 
 ```text
-IRIS scene planes
-        ↓
-scene→topology memory adapter
-        ↓
-TESSA topology decoder role
-        ↓
-immutable learned proposal M*
+GraphicsFragment ownership on canonical M
+per-view visibility
+per-view partial order
+attachment anchors
+fragment motion fields
+bounded 2D silhouette support
 ```
 
-Then the two paths meet at the existing Compiler carrier boundary:
+Observed source pixels remain source-wins.
+
+## Runtime consumption
+
+A key current-main defect is now explicit: the historical PresentationGraph can be binding-checked without its contents being behaviorally consumed by the RSS/native render path. vNext forbids this state.
+
+The new implementation includes:
+
+- `compiler/realsas_compiler_core/graphics_v1.py` — role-free global Graphics compile on canonical M;
+- `compiler/realsas_compiler_core/graphics_runtime_v1.py` — exact face-to-fragment ownership, visibility, per-view order and attachments;
+- `compiler/realsas_compiler_core/runtime_graphics_binary_v1.py` — `graphics.bin` RSS payload and manifest contract;
+- `runtime/realsas_cpp/src/graphics_v1.hpp` — native parser and relation-aware layer comparator.
+
+Graphics precedence overrides pseudo-3D depth only for fragment pairs with explicit compiled precedence. Unrelated pairs retain physical depth and deterministic tie-breaking. Triangle array index is forbidden as presentation authority.
+
+The Paperman-style support band is 2D-only and bounded; it never creates a second mesh or changes canonical mechanical geometry.
+
+## Trainer
+
+The old subject-serial shared trainer is retired for vNext.
+
+`models/iris/vnext/cohort_v1.py` implements the new Fit8 contract:
 
 ```text
-M* + qualified geometry/GSA/partition evidence
+all 8 exact subjects
         ↓
-Stage18 proposal binding + generic static repair + cross-evidence checks
+one resident batched cohort
         ↓
-Stage19 exact canonical M
+B=8 scene encode
         ↓
-AXIS → G
+batched geometry / teacher-surface queries
         ↓
-MIRA → W_M
+one loss
+        ↓
+one backward
+        ↓
+one optimizer step
 ```
 
-Important consequences:
+The checkpoint binding includes exact source files, manifest, policy, model config and optimizer semantics. Resume fails closed on binding or payload drift. CUDA training is BF16/tensor-core oriented; fixed FP32 evaluation courts provide scientific comparability rather than forcing bitwise training kernels.
 
-- GSA remains valuable Compiler/mechanics evidence.
-- Stage17 partition remains available for post-proposal support/binding.
-- GSA/partition are no longer the sole learned information channel into topology prediction.
-- `TESSAMaterialSupportFieldIR` remains a **post-proposal** material/mechanical support binding, not geometry authority and not the topology network input.
-- Compiler static repair, Stage19 remeasurement, source-fidelity courts and exact carrier authority remain unchanged in principle.
+## Current implementation evidence
 
-This preserves the Knight authority chain while removing the neural information bottleneck.
+The dedicated `iris-vnext-single-carrier-v1` CI gate has already passed the first model/teacher/single-carrier/Graphics contract set and legacy TESSA regressions. The gate is being expanded to cover the new B=8 trainer, vNext DAG and native Graphics parser/ordering consumer.
 
-## Model integration policy
+The review branch intentionally does not claim Fit8 scientific PASS.
 
-The preferred first implementation is **logical IRIS+TESSA fusion with checkpoint-safe training**, not a broad end-to-end rewrite.
+## vNext execution graph
 
-1. Keep `SceneFirstSignedGeometryV4` source/checkpoint semantics unchanged if possible.
-2. Add a new topology-memory adapter that reads its existing `scene_planes` (`[B,3,64,64,64]` in the current Knight/Fit8 configuration).
-3. Convert those rich plane features plus explicit plane/coordinate position into a bounded fixed topology memory.
-4. Reuse the existing TESSA topology token grammar/decoder role.
-5. Do not feed the topology head the 17-D GSA summary as its scene representation.
-6. Preserve the old TESSA path for historical reproduction only.
-
-A single wrapper/checkpoint may later contain IRIS + topology head, but the first Fit8 restart should preserve causal isolation:
-
-- finish/resume IRIS geometry only if the stored checkpoint passes exact binding checks;
-- train the shared topology adapter/decoder across all eight subjects from the sealed IRIS representation;
-- keep IRIS frozen during the first topology-head fit unless a separately preregistered joint fine-tune is justified.
-
-This removes the bottleneck without simultaneously changing the geometry learner that already reached the Fit8 run.
-
-## Fit8 state
-
-The previously stopped shared IRIS Fit8 run reached approximately global step **4400**. Preserve it and its exact code/input/policy bindings.
-
-Because the active intervention now leaves the IRIS geometry model itself intact, that checkpoint is no longer rejected merely because of the deferred broad redesign. It may be resumed **only if** the existing resume guards prove exact dependency compatibility. Do not bypass or weaken those guards.
-
-Fit8 remains:
-
-- Snake
-- Bat
-- T-Rex
-- Horse
-- Spider
-- GreenBlob
-- Shark
-- George
-
-Knight remains a separate regression witness.
-
-Fit8 proves shared-architecture/system closure, not unseen generalization.
-
-## Explicitly deferred work
-
-Do not put the following on the Fit8 critical path now:
-
-- one-image → internally generated eight views;
-- new appearance/RGBA head;
-- generic semantic/ownership head;
-- semantic owner cardinality census;
-- amodal/occlusion teacher-corpus expansion;
-- FlexiCubes-like extraction deformation/configuration head;
-- large StdGEN-class capacity replacement;
-- broad Unified IRIS teacher-corpus redesign;
-- AXIS or MIRA redesign;
-- new CAA/presentation architecture.
-
-These remain research topics to revisit after Fit8 or when a specific measured failure requires them.
-
-## Immediate work order
+`canonical/VNEXT_EXECUTION_GRAPH_V1.json` is the machine-readable intended DAG. It contains exactly one canonical mechanics stage:
 
 ```text
-1. keep deferred research PRs frozen
-2. implement checkpoint-safe IRIS-scene → topology-memory adapter
-3. reuse/refactor the existing TESSA token decoder without its 17-D scene encoder
-4. add tests proving topology memory depends on rich IRIS scene planes and not GSA 17-D
-5. preserve Stage12–19 Compiler authority/courts and adapt only the proposal import/binding contract where required
-6. run CPU/self-hosted engineering tests
-7. verify exact old Fit8 IRIS checkpoint compatibility
-8. resume/restart shared Fit8 IRIS as allowed by the binding
-9. train shared topology head across the same Fit8 cohort
-10. continue to AXIS and MIRA only after canonical M closes
+05 candidate set
+06 static admission
+07 candidate AXIS
+08 candidate MIRA
+09 candidate mechanical probes
+10 SOLE canonical M/G/W
+11 source-wins Graphics appearance compile
+12 Graphics relation compile
+13-15 production motion + proof
+16 bounded 2D Graphics motion sidecars
+17-19 runtime package + native Graphics consumption
+20 closure
 ```
 
-## Required read order for agents
+Appearance/Graphics compile is downstream of canonical selection; candidate Graphics cannot become a parallel product carrier.
+
+## Compiler law
+
+> Compiler may enforce truth; Compiler may not compensate for model incapacity.
+
+Allowed: validation, IDs/hashes/addressing, very small numerical sanitation, global relation/constraint solving, candidate selection, exact contact/barycentric solve, fail closed.
+
+Large topology repair, large hole closure, semantic skin transfer hiding carrier drift, or an independent visual mesh are model/architecture failures and cannot be silently repaired into a PASS.
+
+## Fit8 re-entry gate
+
+The next scientific IRIS Fit8 run is fresh vNext training, not a continuation of the ~5400 legacy optimizer state.
+
+Before starting it, all of the following must be true:
+
+1. vNext model/teacher/single-carrier/Graphics/native-runtime contracts PASS;
+2. exact eight-subject vNext cohort shards exist and are hash-bound;
+3. training-only MechanicalDemand truth exists for all eight admitted subjects;
+4. the B=8 A100 engineering preflight proves real batched execution, memory use and stable numerics;
+5. source/model/policy/manifest binding is sealed;
+6. no subject-specific architecture or Compiler branch exists.
+
+At that point the program returns to IRIS Fit8.
+
+## Deferred, not deleted
+
+One-image synthesis, named semantic taxonomies and broad semantic-owner census work are not on the active path. Historical PRs #113/#114 remain deferred and non-authoritative. Their useful research provenance is preserved.
+
+## Required read order
 
 1. `CURRENT_STATE.md`
 2. `CURRENT_PLAN.md`
-3. `AGENTS.md`
-4. `SYSTEM_INDEX.md`
-5. `docs/corpus/FIT8_ADMISSION.md`
-6. `docs/platform/FIT8_PLATFORM_CAMPAIGN.md`
-7. `canonical/CANONICAL_HANDOFF_20261007.md` for proven Knight mechanics provenance
-8. deferred Unified-IRIS PRs/research only when explicitly revisiting that program
+3. `canonical/VNEXT_SINGLE_CARRIER_CONTRACT_V1.json`
+4. `canonical/VNEXT_EXECUTION_GRAPH_V1.json`
+5. `docs/research/IRIS_VNEXT_SINGLE_CARRIER_GRAPHICS_V1.md`
+6. `AGENTS.md`
+7. `SYSTEM_INDEX.md`
+8. `docs/corpus/FIT8_ADMISSION.md`
+9. historical Knight/V2 records only as regression/provenance
 
-When the user says only `continue / devam et`, continue the narrow IRIS→TESSA bottleneck removal and Fit8 restart program. Do **not** silently reactivate the broad Unified-IRIS redesign.
+When the user says `continue / devam et`, continue closing this vNext review line toward the fresh IRIS Fit8 re-entry gate. Do not reactivate the old subject-serial trainer or an independent visual-mesh architecture.

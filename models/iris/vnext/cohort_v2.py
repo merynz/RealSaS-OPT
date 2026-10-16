@@ -2,11 +2,11 @@ from __future__ import annotations
 
 """Active IRIS vNext Fit8 trainer.
 
-V2 keeps the V1 whole-cohort optimizer/curriculum semantics and adds one missing
-scientific contract: authored TESSA sequences may have different lengths.  Each
-subject therefore owns a padded window bank.  One valid window per subject is
-selected deterministically, including its global position offset, and all eight
-windows are decoded in one B=8 forward.
+V2 is the sole vNext Fit8 training authority. V1 remains a shared compatibility
+base for non-window tensor banks and historical regression only. Authored TESSA
+sequences may have different lengths, so every subject owns a padded topology
+window bank. One valid window per subject is selected deterministically with its
+global position offset, and all eight windows are decoded in one B=8 forward.
 """
 
 from dataclasses import asdict
@@ -89,8 +89,7 @@ class VNextFit8CohortV2(VNextFit8CohortV1):
         subject = torch.arange(8, device=self.device, dtype=torch.long)
         # Different coprime phase per subject; deterministic and checkpoint-free.
         window = (int(step) + subject * 17) % counts
-        row = subject
-        return ids[row, window], labels[row, window], offsets[row, window]
+        return ids[subject, window], labels[subject, window], offsets[subject, window]
 
 
 def _source_identity_v2(root: Path):

@@ -2,9 +2,9 @@ from __future__ import annotations
 
 """Authorized preparation entrypoint for the fresh IRIS vNext Fit8 cohort.
 
-The lower-level shard builder remains deterministic machinery. This wrapper is
-the authority boundary: exact Stage01/legacy inputs and the authored teacher batch
-must all be hash-bound before shard materialization is allowed.
+The lower-level builders remain deterministic machinery. This wrapper is the
+authority boundary: exact Stage01/legacy inputs and the authored teacher batch
+must all be hash-bound before V2 shard materialization is allowed.
 """
 
 import argparse
@@ -34,6 +34,7 @@ def _args():
     p.add_argument("--appearance-points-per-view", type=int, default=4096)
     p.add_argument("--relation-pairs-per-view", type=int, default=2048)
     p.add_argument("--topology-target-tokens", type=int, default=512)
+    p.add_argument("--topology-trajectory-tolerance", type=float, default=1.0e-7)
     p.add_argument("--ray-chunk", type=int, default=64)
     return p.parse_args()
 
@@ -98,7 +99,7 @@ def main():
     teacher_receipt = _verify_teacher_batch(binding, args.teacher_dir.resolve())
     output = args.output_dir.resolve()
     output.mkdir(parents=True, exist_ok=True)
-    builder = Path(__file__).with_name("build_fit8_vnext_shards_v1.py").resolve()
+    builder = Path(__file__).with_name("build_fit8_vnext_shards_v2.py").resolve()
     cmd = [
         sys.executable,
         str(builder),
@@ -120,6 +121,8 @@ def main():
         str(args.relation_pairs_per_view),
         "--topology-target-tokens",
         str(args.topology_target_tokens),
+        "--topology-trajectory-tolerance",
+        str(args.topology_trajectory_tolerance),
         "--ray-chunk",
         str(args.ray_chunk),
     ]
@@ -128,8 +131,10 @@ def main():
     if not manifest_path.is_file():
         raise RuntimeError("VNEXT_COHORT_MANIFEST_MISSING_AFTER_BUILD")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if manifest.get("schema") != "RealSaS.IRISVNextFit8Manifest.v3":
+    if manifest.get("schema") != "RealSaS.IRISVNextFit8Manifest.v4":
         raise ValueError("VNEXT_COHORT_MANIFEST_SCHEMA_DRIFT")
+    if manifest.get("builder") != "tools/iris_vnext/build_fit8_vnext_shards_v2.py":
+        raise ValueError("VNEXT_COHORT_BUILDER_AUTHORITY_DRIFT")
     if tuple(row["subject_id"] for row in manifest.get("subjects") or ()) != tuple(
         row["subject_id"] for row in binding["subjects"]
     ):
@@ -139,13 +144,16 @@ def main():
     if manifest.get("legacy_5400_checkpoint_reused") is not False:
         raise ValueError("VNEXT_COHORT_LEGACY_CHECKPOINT_REUSE_FORBIDDEN")
     final = {
-        "schema": "RealSaS.IRISVNextFit8PreparationReceipt.v1",
+        "schema": "RealSaS.IRISVNextFit8PreparationReceipt.v2",
         "verified_inputs": input_receipt,
         "verified_teacher_batch": teacher_receipt,
+        "builder": "tools/iris_vnext/build_fit8_vnext_shards_v2.py",
         "builder_sha256": sha256_file(builder),
         "cohort_manifest_file": manifest_path.name,
         "cohort_manifest_sha256": sha256_file(manifest_path),
         "cohort_manifest_value_sha256": manifest["manifest_value_sha256"],
+        "topology_coordinate_bins": int(manifest["topology_coordinate_bins"]),
+        "topology_teacher_collision_policy": manifest["topology_teacher_collision_policy"],
         "subject_count": 8,
         "teacher_inputs_in_inference_forward": False,
         "legacy_optimizer_state_reused": False,
@@ -156,8 +164,9 @@ def main():
     receipt_path = output / "PREPARATION_RECEIPT.json"
     receipt_path.write_text(json.dumps(final, sort_keys=True, indent=2), encoding="utf-8")
     print(
-        "VNEXT_FIT8_PREPARATION_PASS",
+        "VNEXT_FIT8_PREPARATION_V2_PASS",
         "subjects=8",
+        f"coordinate_bins={manifest['topology_coordinate_bins']}",
         f"manifest={manifest['manifest_value_sha256']}",
         f"receipt_sha256={sha256_file(receipt_path)}",
         flush=True,

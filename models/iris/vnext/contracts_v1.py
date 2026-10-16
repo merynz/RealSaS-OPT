@@ -38,6 +38,13 @@ class IRISVNextConfigV1:
     relation_embedding_dim: int = 64
     maximum_extraction_delta: float = 0.03
 
+    # Training uses a bounded dense FlexiCubes court.  Product inference may use
+    # a separately sealed coarse-to-fine resolution policy; this value is not a
+    # runtime/mobile mesh-density promise.
+    extraction_training_resolution: int = 24
+    surface_witness_count: int = 1024
+    flexicubes_weight_scale: float = 0.99
+
     def validate(self) -> None:
         positive = (
             self.image_token_dim,
@@ -59,6 +66,8 @@ class IRISVNextConfigV1:
             self.topology_source_width,
             self.appearance_descriptor_dim,
             self.relation_embedding_dim,
+            self.extraction_training_resolution,
+            self.surface_witness_count,
         )
         if min(positive) <= 0:
             raise ValueError("IRIS_VNEXT_CONFIG_DIMENSION_INVALID")
@@ -72,6 +81,10 @@ class IRISVNextConfigV1:
             raise ValueError("IRIS_VNEXT_DROPOUT_INVALID")
         if not (0.0 < float(self.maximum_extraction_delta) <= 0.25):
             raise ValueError("IRIS_VNEXT_EXTRACTION_DELTA_INVALID")
+        if self.extraction_training_resolution < 2:
+            raise ValueError("IRIS_VNEXT_EXTRACTION_RESOLUTION_INVALID")
+        if not (0.0 < float(self.flexicubes_weight_scale) < 1.0):
+            raise ValueError("IRIS_VNEXT_FLEXICUBES_WEIGHT_SCALE_INVALID")
 
     def tessa_decoder_config(self) -> TESSAConfigV1:
         self.validate()

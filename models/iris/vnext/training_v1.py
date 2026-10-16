@@ -34,11 +34,51 @@ def mechanical_demand_loss_v1(predicted:Mapping[str,torch.Tensor],truth:Mapping[
     stretch=F.smooth_l1_loss(predicted["stretch_major"],truth["stretch_major"],reduction="none")+F.smooth_l1_loss(predicted["stretch_minor"],truth["stretch_minor"],reduction="none"); p=F.normalize(predicted["tangent_direction_2theta"],dim=-1,eps=1e-6); t=F.normalize(truth["tangent_direction_2theta"],dim=-1,eps=1e-6); tangent=1.-(p*t).sum(-1); bend=F.smooth_l1_loss(predicted["bend_demand"],truth["bend_demand"],reduction="none"); rigid=F.binary_cross_entropy(predicted["rigidity_probability"].clamp(1e-6,1-1e-6),truth["rigidity_probability"],reduction="none"); return reduce(stretch)+reduce(tangent)+reduce(bend)+reduce(rigid)
 
 def graphics_relation_loss_v1(predicted,truth):
-    keys=("same_drawable_affinity","cut_probability","attachment_affinity","alpha_boundary_probability","appearance_boundary_probability","front_probability","occlusion_probability","visibility_probability_a","visibility_probability_b"); terms=[]
+    """Conservative weak-supervision loss for role-free Graphics relations.
+
+    The authored/source teacher does not claim a complete PresentationGraph.  In
+    the current shard contract, a fallback row uses front_probability==0.5 to
+    mean "front/occlusion unknown" rather than a soft 50/50 label.  Absence of
+    an explicit parent relation is likewise not treated as evidence that two
+    different drawables cannot attach.  Unknown evidence contributes zero loss;
+    Compiler-owned global relation solving remains downstream.
+    """
+    keys=("same_drawable_affinity","cut_probability","attachment_affinity","alpha_boundary_probability","appearance_boundary_probability","front_probability","occlusion_probability","visibility_probability_a","visibility_probability_b")
+    if any(k not in truth for k in keys):
+        missing=[k for k in keys if k not in truth]
+        raise ValueError("IRIS_VNEXT_RELATION_TRUTH_INCOMPLETE:"+",".join(missing))
+    fallback=torch.isclose(truth["front_probability"],torch.full_like(truth["front_probability"],0.5),atol=1e-6,rtol=0.0)
+    observed=~fallback
+    always=torch.ones_like(fallback,dtype=torch.bool)
+    validity={
+        "same_drawable_affinity":always,
+        "cut_probability":always,
+        # Explicit authored parent is a positive. Same-drawable pairs provide a
+        # safe negative. Different-owner/no-parent pairs are unknown, not false.
+        "attachment_affinity":(truth["attachment_affinity"]>0.5)|(truth["same_drawable_affinity"]>0.5),
+        # Alpha boundary is measured at an actual raster sample only on two-hit
+        # rows. Fallback rows are geometry adjacency, not raster observations.
+        "alpha_boundary_probability":observed,
+        # Appearance/material boundary remains useful weak static evidence on
+        # both two-hit and adjacency fallback rows.
+        "appearance_boundary_probability":always,
+        "front_probability":observed,
+        "occlusion_probability":observed,
+        # A is selected from a source-visible face in both row types.
+        "visibility_probability_a":always,
+        # On fallback rows, positive B visibility is observed somewhere in the
+        # sampled view, while zero means merely "not observed" and is masked.
+        "visibility_probability_b":observed|(truth["visibility_probability_b"]>0.5),
+    }
+    terms=[]
     for k in keys:
-        if k in truth:
-            if k not in predicted: raise ValueError("IRIS_VNEXT_RELATION_PREDICTION_MISSING:"+k)
-            terms.append(F.binary_cross_entropy(predicted[k].clamp(1e-6,1-1e-6),truth[k]))
+        if k not in predicted: raise ValueError("IRIS_VNEXT_RELATION_PREDICTION_MISSING:"+k)
+        mask=validity[k]
+        if not bool(mask.any()):
+            continue
+        raw=F.binary_cross_entropy(predicted[k].clamp(1e-6,1-1e-6),truth[k],reduction="none")
+        m=mask.to(dtype=raw.dtype)
+        terms.append((raw*m).sum()/m.sum().clamp_min(1.0))
     if not terms: raise ValueError("IRIS_VNEXT_RELATION_TRUTH_EMPTY")
     return sum(terms)/len(terms)
 

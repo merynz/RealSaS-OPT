@@ -92,4 +92,40 @@ inline int compare_layers(const State& s,std::uint32_t view,std::uint32_t face_a
     if(!std::isfinite(depth_a)||!std::isfinite(depth_b)||epsilon<0)throw std::runtime_error("GRAPHICS_V1_COMPARE_INPUT_INVALID");if(explicit_precedence(s,view,face_a,face_b))return -1;if(explicit_precedence(s,view,face_b,face_a))return 1;if(depth_a<depth_b-epsilon)return -1;if(depth_b<depth_a-epsilon)return 1;return face_a<face_b?-1:(face_b<face_a?1:0);
 }
 
+inline std::vector<std::size_t> order_pixel_layers(
+    const State& s,
+    std::uint32_t view,
+    const std::vector<std::uint32_t>& faces,
+    const std::vector<double>& depths,
+    double epsilon
+){
+    if(faces.size()!=depths.size()||epsilon<0)throw std::runtime_error("GRAPHICS_V1_PIXEL_LAYER_INPUT_INVALID");
+    const std::size_t n=faces.size();
+    std::vector<std::size_t> indegree(n,0);
+    std::vector<std::vector<std::size_t>> outgoing(n);
+    for(std::size_t a=0;a<n;++a){
+        if(!std::isfinite(depths[a]))throw std::runtime_error("GRAPHICS_V1_PIXEL_LAYER_DEPTH_NONFINITE");
+        for(std::size_t b=0;b<n;++b){
+            if(a==b)continue;
+            if(explicit_precedence(s,view,faces[a],faces[b])){outgoing[a].push_back(b);++indegree[b];}
+        }
+    }
+    std::vector<std::size_t> result;result.reserve(n);
+    std::vector<std::uint8_t> used(n,0);
+    while(result.size()<n){
+        std::size_t best=n;
+        for(std::size_t i=0;i<n;++i){
+            if(used[i]||indegree[i]!=0)continue;
+            if(best==n){best=i;continue;}
+            if(depths[i]<depths[best]-epsilon ||
+               (std::abs(depths[i]-depths[best])<=epsilon &&
+                (faces[i]<faces[best] || (faces[i]==faces[best]&&i<best)))) best=i;
+        }
+        if(best==n)throw std::runtime_error("GRAPHICS_V1_PIXEL_ORDER_CYCLE");
+        used[best]=1;result.push_back(best);
+        for(const auto next:outgoing[best]){if(indegree[next]==0)throw std::runtime_error("GRAPHICS_V1_PIXEL_INDEGREE_UNDERFLOW");--indegree[next];}
+    }
+    return result;
+}
+
 } // namespace realsas::graphics_v1

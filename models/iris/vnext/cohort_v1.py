@@ -217,7 +217,11 @@ _REQUIRED_RELATION = (
     "relation_visibility_probability_a",
     "relation_visibility_probability_b",
 )
-_REQUIRED_TOPOLOGY = ("topology_input_ids", "topology_labels")
+_REQUIRED_TOPOLOGY = (
+    "topology_input_ids",
+    "topology_labels",
+    "topology_position_offsets",
+)
 _REQUIRED_ALL = (
     _REQUIRED_SOURCE
     + _REQUIRED_GEOMETRY
@@ -318,8 +322,16 @@ class VNextFit8CohortV1:
         for key in _REQUIRED_RELATION[2:]:
             if t[key].shape != rshape:
                 raise ValueError("VNEXT_FIT8_RELATION_TARGET_SHAPE:" + key)
+        if t["topology_input_ids"].ndim != 3:
+            raise ValueError("VNEXT_FIT8_TOPOLOGY_WINDOW_BANK_RANK")
         if t["topology_input_ids"].shape != t["topology_labels"].shape:
             raise ValueError("VNEXT_FIT8_TOPOLOGY_TOKEN_SHAPE")
+        if t["topology_input_ids"].shape[0] != 8 or min(t["topology_input_ids"].shape[1:]) <= 0:
+            raise ValueError("VNEXT_FIT8_TOPOLOGY_WINDOW_BANK_EMPTY")
+        if t["topology_position_offsets"].shape != t["topology_input_ids"].shape[:2]:
+            raise ValueError("VNEXT_FIT8_TOPOLOGY_POSITION_OFFSET_SHAPE")
+        if t["topology_position_offsets"].numel() and int(t["topology_position_offsets"].min()) < 0:
+            raise ValueError("VNEXT_FIT8_TOPOLOGY_POSITION_OFFSET_NEGATIVE")
 
     @staticmethod
     def _indices(bank_count, sample_count, seed, step, device):
@@ -385,6 +397,23 @@ class VNextFit8CohortV1:
             for key in _REQUIRED_RELATION
         }
 
+    def topology_batch(self, policy, step):
+        ids = self.tensors["topology_input_ids"]
+        labels = self.tensors["topology_labels"]
+        offsets = self.tensors["topology_position_offsets"]
+        window_count = int(ids.shape[1])
+        generator = torch.Generator(device="cpu").manual_seed(
+            int(policy.seed) + 67 + int(step) * 1000003
+        )
+        selected = torch.randint(0, window_count, (8,), generator=generator).to(self.device)
+        subject = torch.arange(8, device=self.device)
+        return {
+            "input_ids": ids[subject, selected],
+            "labels": labels[subject, selected],
+            "position_offsets": offsets[subject, selected],
+            "window_indices": selected,
+        }
+
 
 class VNextCheckpointStoreV1:
     def __init__(self, root, binding_hash):
@@ -402,7 +431,7 @@ class VNextCheckpointStoreV1:
         target = self.root / name
         os.replace(tmp, target)
         pointer = {
-            "schema": "RealSaS.IRISVNextFit8CheckpointPointer.v2",
+            "schema": "RealSaS.IRISVNextFit8CheckpointPointer.v3",
             "file": name,
             "sha256": digest,
             "step": step,
@@ -467,7 +496,7 @@ class IRISVNextFit8TrainerV1:
             flexi_identity = self.extractor.identity
 
         self.binding = {
-            "schema": "RealSaS.IRISVNextFit8Binding.v3",
+            "schema": "RealSaS.IRISVNextFit8Binding.v4",
             "source": _source_identity(self.repo_root),
             "manifest_sha256": _vh(manifest),
             "policy": asdict(policy),
@@ -475,6 +504,7 @@ class IRISVNextFit8TrainerV1:
             "flexicubes": flexi_identity,
             "optimizer_semantics": "ONE_BATCH8_SCENE_ENCODE__NO_SUBJECT_SERIAL_MODEL_FORWARD__ONE_BACKWARD__ONE_STEP",
             "surface_witness_semantics": "MODEL_FIELD_TO_PINNED_FLEXICUBES_TO_TESSA_CANONICAL_XYZ",
+            "topology_supervision_semantics": "FIXED_SHAPE_WINDOW_BANK__ONE_WINDOW_PER_SUBJECT_PER_BATCH8_STEP__PER_SUBJECT_POSITION_OFFSET",
             "curriculum_semantics": "G1__G2_FLEXICUBES__M1__A1__R1__T1__J1",
             "teacher_inputs_in_inference_forward": False,
             "direct_flexicubes_parameter_teacher_targets": False,
@@ -532,7 +562,7 @@ class IRISVNextFit8TrainerV1:
 
     def _payload(self):
         return {
-            "schema": "RealSaS.IRISVNextFit8Checkpoint.v3",
+            "schema": "RealSaS.IRISVNextFit8Checkpoint.v4",
             "binding": self.binding,
             "binding_sha256": self.binding_hash,
             "model": self.model.state_dict(),
@@ -686,9 +716,11 @@ class IRISVNextFit8TrainerV1:
                 }
                 losses["relations"] = graphics_relation_loss_v1(predicted, truth)
 
+            topology_batch = None
             if stage.topology_weight > 0:
                 if extracted is None:
                     raise RuntimeError("VNEXT_FIT8_MODEL_SURFACE_WITNESS_MISSING")
+                topology_batch = self.cohort.topology_batch(self.policy, next_step)
                 witness = self.model.query_evidence(planes, extracted.witness_xyz_iris)
                 output = self.model.decode_topology(
                     scene_planes=planes,
@@ -697,8 +729,9 @@ class IRISVNextFit8TrainerV1:
                     witness_h=witness["H"],
                     witness_log_uncertainty=witness["log_uncertainty"],
                     witness_mechanical=witness["mechanical_demand"],
-                    input_ids=source["topology_input_ids"].long(),
-                    labels=source["topology_labels"].long(),
+                    input_ids=topology_batch["input_ids"].long(),
+                    labels=topology_batch["labels"].long(),
+                    sequence_position_offset=topology_batch["position_offsets"].long(),
                 )
                 if output.loss is None:
                     raise RuntimeError("VNEXT_FIT8_TOPOLOGY_LOSS_MISSING")
@@ -734,6 +767,10 @@ class IRISVNextFit8TrainerV1:
             "optimizer_steps": 1,
             "elapsed_seconds": time.monotonic() - self.started,
         }
+        if topology_batch is not None:
+            result["topology_window_indices"] = tuple(
+                int(value) for value in topology_batch["window_indices"].detach().cpu().tolist()
+            )
         if extracted is not None:
             result["extracted_vertex_counts"] = extracted.extracted_vertex_counts
             result["extracted_face_counts"] = extracted.extracted_face_counts

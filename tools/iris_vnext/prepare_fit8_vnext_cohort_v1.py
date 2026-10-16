@@ -40,6 +40,13 @@ ACTIVE_PREPARATION_SOURCE_PATHS = (
     "models/tessa/v1/training_data_v1.py",
 )
 
+TEACHER_SOURCE_PATHS = (
+    "tools/iris_vnext/export_fit8_authored_teachers_v1.py",
+    "tools/iris_vnext/blender_authored_teacher_export_v1.py",
+    "tools/iris_vnext/blender_authored_teacher_export_v2.py",
+    "tools/iris_vnext/blender_authored_teacher_export_v3.py",
+)
+
 
 def _args():
     p = argparse.ArgumentParser(description=__doc__)
@@ -104,6 +111,15 @@ def _verify_teacher_batch(binding, teacher_dir: Path, source_provenance: dict[st
     if receipt.get("blender_teacher_exporter_sha256") != source_provenance[exporter_path]:
         raise ValueError("VNEXT_TEACHER_BATCH_EXPORTER_SOURCE_HASH_DRIFT")
 
+    if receipt.get("teacher_source_provenance_schema") != "RealSaS.IRISVNextFit8TeacherSourceProvenance.v1":
+        raise ValueError("VNEXT_TEACHER_BATCH_SOURCE_PROVENANCE_SCHEMA_INVALID")
+    teacher_sources = receipt.get("teacher_source_provenance")
+    if not isinstance(teacher_sources, dict) or set(teacher_sources) != set(TEACHER_SOURCE_PATHS):
+        raise ValueError("VNEXT_TEACHER_BATCH_SOURCE_PROVENANCE_SET_DRIFT")
+    for relative in TEACHER_SOURCE_PATHS:
+        if teacher_sources.get(relative) != source_provenance[relative]:
+            raise ValueError("VNEXT_TEACHER_BATCH_SOURCE_PROVENANCE_HASH_DRIFT:" + relative)
+
     rows = {str(row["legacy_subject_id"]): row for row in receipt.get("subjects") or ()}
     if len(rows) != 8:
         raise ValueError("VNEXT_TEACHER_BATCH_SUBJECT_COUNT_DRIFT")
@@ -138,6 +154,9 @@ def _verify_teacher_batch(binding, teacher_dir: Path, source_provenance: dict[st
         "blender_version": receipt.get("blender_version"),
         "blender_teacher_exporter": expected_exporter,
         "blender_teacher_exporter_sha256": source_provenance[exporter_path],
+        "teacher_source_provenance": {
+            relative: source_provenance[relative] for relative in TEACHER_SOURCE_PATHS
+        },
         "subjects": verified,
     }
 

@@ -37,7 +37,9 @@ AXIS, MIRA, CAA, presentation and runtime are **not reopened** by the current in
 
 This narrow refocus does **not** erase or replace the existing V2 control-plane/product authority records. The current machine-readable governance remains anchored by `canonical/V2_IMPLEMENTATION_READINESS.json`, the existing **43-stage** dependency DAG, `canonical/ACTIVE_RUN_V2.json`, and `canonical/AUTHORITY_MAP_V1.json`. The registered governance gate id `PLATFORM_EXECUTION_LANES` remains a control-plane continuity record on `main`; it is not a competing scientific architecture program.
 
-The proven product concerns also remain first-class and explicit: **Geometry**, **Mechanics**, and **Appearance** are separate quality authorities; **SurfaceAddressing** remains the stable canonical-M addressing boundary; and **Complete Appearance Authority** / CAA remains the source-preserving appearance authority downstream of canonical M. Nothing in the IRIS→TESSA simplification weakens those contracts.
+The exact pre-existing governance context state token is `CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED`. It remains a continuity anchor for the V2 control plane; it does not override the narrower current scientific work order below.
+
+The proven product concerns also remain first-class and explicit: **Geometry**, **Mechanics**, and **Appearance** are separate quality authorities; **QualifiedMeshIR** remains the typed qualified mesh authority entering the canonical carrier boundary; **SurfaceAddressing** remains the stable canonical-M addressing boundary; and **Complete Appearance Authority** / CAA remains the source-preserving appearance authority downstream of canonical M. Nothing in the IRIS→TESSA simplification weakens those contracts.
 
 ## The one pre-Fit8 architecture issue being fixed
 

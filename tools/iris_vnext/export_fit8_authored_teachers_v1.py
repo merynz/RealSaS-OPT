@@ -122,6 +122,7 @@ def main():
         "schema": "RealSaS.IRISVNextFit8TeacherBatch.v1",
         "blender_version": version,
         "blender_teacher_exporter": exporter.name,
+        "blender_teacher_exporter_sha256": sha256_file(exporter),
         "verified_input_receipt": receipt,
         "subjects": exported,
         "teacher_inputs_in_inference_forward": False,

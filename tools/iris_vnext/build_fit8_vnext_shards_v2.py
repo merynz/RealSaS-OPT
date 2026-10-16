@@ -5,7 +5,7 @@ from __future__ import annotations
 V2 reuses the proven V1 source-ray/mechanical bank machinery, but topology
 supervision has one additional authority court: mechanically equivalent authored
 seam duplicates are training-only welded before TESSA serialization, and any
-remaining coordinate collision fails closed.  Raw authored faces/owners/materials
+remaining coordinate collision fails closed. Raw authored faces/owners/materials
 remain unchanged for appearance, relations and mechanical-demand truth.
 """
 
@@ -19,9 +19,7 @@ import torch
 
 from models.iris.vnext.cohort_v1 import SUBJECT_IDS
 from models.iris.vnext.contracts_v1 import IRISVNextConfigV1
-from models.iris.vnext.topology_teacher_v1 import (
-    canonicalize_vnext_topology_teacher_v1,
-)
+from models.iris.vnext.topology_teacher_v1 import canonicalize_vnext_topology_teacher_v1
 from models.tessa.v1.training_data_v1 import (
     build_teacher_asset_sequence_v1,
     build_truncated_teacher_windows_v1,
@@ -77,6 +75,21 @@ def _topology_windows_v2(rest_iris, posed_iris, faces, target_tokens: int, traje
         sequence, cfg=cfg, target_tokens=target_tokens
     )
     return sequence, windows, cfg, teacher.metadata
+
+
+def _source_provenance_v2() -> dict:
+    repo = Path(__file__).resolve().parents[2]
+    paths = (
+        Path(__file__).resolve(),
+        repo / "models/iris/vnext/contracts_v1.py",
+        repo / "models/iris/vnext/topology_teacher_v1.py",
+        repo / "models/tessa/v1/training_data_v1.py",
+        repo / "tools/iris_vnext/build_fit8_vnext_shards_v1.py",
+    )
+    return {
+        str(path.relative_to(repo)): _sha(path)
+        for path in paths
+    }
 
 
 def main():
@@ -265,6 +278,7 @@ def main():
     manifest = {
         "schema": "RealSaS.IRISVNextFit8Manifest.v4",
         "builder": "tools/iris_vnext/build_fit8_vnext_shards_v2.py",
+        "source_provenance": _source_provenance_v2(),
         "subjects": manifest_rows,
         "subject_order": list(SUBJECT_IDS),
         "teacher_inputs_in_inference_forward": False,

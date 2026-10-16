@@ -54,6 +54,8 @@ jobs:
           python -m py_compile \
             tools/iris_vnext/input_binding_v1.py \
             tools/iris_vnext/blender_authored_teacher_export_v1.py \
+            tools/iris_vnext/blender_authored_teacher_export_v2.py \
+            tools/iris_vnext/blender_authored_teacher_export_v3.py \
             tools/iris_vnext/export_fit8_authored_teachers_v1.py \
             tools/iris_vnext/build_fit8_vnext_shards_v2.py \
             tools/iris_vnext/prepare_fit8_vnext_cohort_v1.py
@@ -102,21 +104,53 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf "$RUN_ROOT/stage01" "$RUN_ROOT/legacy_download" "$RUN_ROOT/legacy_bound" "$RUN_ROOT/teachers" "$RUN_ROOT/prepared"
-          mkdir -p "$RUN_ROOT/stage01" "$RUN_ROOT/legacy_download" "$RUN_ROOT/legacy_bound" "$RUN_ROOT/teachers" "$RUN_ROOT/prepared"
+          mkdir -p "$RUN_ROOT/stage01" "$RUN_ROOT/legacy_download" "$RUN_ROOT/legacy_bound"
+          rm -rf "$RUN_ROOT/teachers" "$RUN_ROOT/prepared"
+          mkdir -p "$RUN_ROOT/teachers" "$RUN_ROOT/prepared"
+
           stage_zip="$RUN_ROOT/FIT8_PLATFORM_STAGE01_INPUT_BUNDLE_20261013.zip"
-          rclone backend copyid gdrive: "$STAGE01_FILE_ID" "$stage_zip"
+          if ! test -s "$stage_zip" || ! printf '%s  %s\n' "$STAGE01_SHA256" "$stage_zip" | sha256sum --check --status -; then
+            rm -f "$stage_zip"
+            rclone backend copyid gdrive: "$STAGE01_FILE_ID" "$stage_zip"
+          fi
           printf '%s  %s\n' "$STAGE01_SHA256" "$stage_zip" | sha256sum --check -
-          unzip -q "$stage_zip" -d "$RUN_ROOT/stage01"
-          for spec in "A:$SHARD_ROOT_A" "B:$SHARD_ROOT_B" "C:$SHARD_ROOT_C"; do
-            label="${spec%%:*}"
-            folder_id="${spec#*:}"
-            mkdir -p "$RUN_ROOT/legacy_download/$label"
-            rclone copy gdrive: "$RUN_ROOT/legacy_download/$label" --drive-root-folder-id "$folder_id" --checksum
-          done
-          rclone backend copyid gdrive: "$LEGACY_MANIFEST_FILE_ID" "$RUN_ROOT/legacy_download/COHORT_MANIFEST.json"
-          printf '%s  %s\n' "$LEGACY_MANIFEST_SHA256" "$RUN_ROOT/legacy_download/COHORT_MANIFEST.json" | sha256sum --check -
-          python - <<'PY'
+          bootstrap_count="$(find "$RUN_ROOT/stage01" -name BOOTSTRAP_MANIFEST.json -type f | wc -l)"
+          if test "$bootstrap_count" -ne 1; then
+            rm -rf "$RUN_ROOT/stage01"
+            mkdir -p "$RUN_ROOT/stage01"
+            unzip -q "$stage_zip" -d "$RUN_ROOT/stage01"
+          fi
+
+          if python - <<'PY'
+          import hashlib,json,os,sys
+          from pathlib import Path
+          root=Path(os.environ['RUN_ROOT'])/'legacy_bound'
+          binding=json.loads(Path('canonical/VNEXT_FIT8_INPUT_BINDING_V1.json').read_text())
+          def sha(p):
+              if not p.is_file(): return None
+              h=hashlib.sha256()
+              with p.open('rb') as f:
+                  for b in iter(lambda:f.read(4*1024*1024),b''): h.update(b)
+              return h.hexdigest()
+          manifest=binding['legacy_iris_cohort_manifest']
+          ok=sha(root/manifest['file'])==manifest['sha256']
+          ok=ok and all(sha(root/r['legacy_shard_file'])==r['legacy_shard_sha256'] for r in binding['subjects'])
+          sys.exit(0 if ok else 1)
+          PY
+          then
+            echo 'VNEXT_FIT8_LEGACY_CACHE_SHA_PASS'
+          else
+            rm -rf "$RUN_ROOT/legacy_download" "$RUN_ROOT/legacy_bound"
+            mkdir -p "$RUN_ROOT/legacy_download" "$RUN_ROOT/legacy_bound"
+            for spec in "A:$SHARD_ROOT_A" "B:$SHARD_ROOT_B" "C:$SHARD_ROOT_C"; do
+              label="${spec%%:*}"
+              folder_id="${spec#*:}"
+              mkdir -p "$RUN_ROOT/legacy_download/$label"
+              rclone copy gdrive: "$RUN_ROOT/legacy_download/$label" --drive-root-folder-id "$folder_id" --checksum
+            done
+            rclone backend copyid gdrive: "$LEGACY_MANIFEST_FILE_ID" "$RUN_ROOT/legacy_download/COHORT_MANIFEST.json"
+            printf '%s  %s\n' "$LEGACY_MANIFEST_SHA256" "$RUN_ROOT/legacy_download/COHORT_MANIFEST.json" | sha256sum --check -
+            python - <<'PY'
           import hashlib,json,os,shutil
           from pathlib import Path
           root=Path(os.environ['RUN_ROOT'])
@@ -140,6 +174,29 @@ jobs:
               dst=out/row['legacy_shard_file']; shutil.copy2(src,dst)
               receipt.append({'subject_id':row['subject_id'],'file':dst.name,'sha256':sha(dst),'exact_copy_count':copies})
           (out/'HYDRATION_RECEIPT.json').write_text(json.dumps({'schema':'RealSaS.VNextFit8LegacyHydration.v1','subjects':receipt,'cohort_manifest_sha256':sha(out/manifest['file']),'cohort_manifest_exact_copy_count':manifest_copies,'legacy_optimizer_state_reused':False},sort_keys=True,indent=2))
+          PY
+          fi
+
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ['RUN_ROOT'])
+          binding=json.loads(Path('canonical/VNEXT_FIT8_INPUT_BINDING_V1.json').read_text())
+          def sha(p):
+              h=hashlib.sha256()
+              with p.open('rb') as f:
+                  for b in iter(lambda:f.read(4*1024*1024),b''): h.update(b)
+              return h.hexdigest()
+          out=root/'legacy_bound'
+          manifest=binding['legacy_iris_cohort_manifest']
+          if sha(out/manifest['file']) != manifest['sha256']: raise RuntimeError('VNEXT_LEGACY_MANIFEST_CACHE_DRIFT')
+          receipt=[]
+          for row in binding['subjects']:
+              p=out/row['legacy_shard_file']
+              digest=sha(p)
+              if digest != row['legacy_shard_sha256']: raise RuntimeError('VNEXT_LEGACY_SHARD_CACHE_DRIFT:'+row['subject_id'])
+              receipt.append({'subject_id':row['subject_id'],'file':p.name,'sha256':digest})
+          (out/'HYDRATION_RECEIPT.json').write_text(json.dumps({'schema':'RealSaS.VNextFit8LegacyHydration.v1','subjects':receipt,'cohort_manifest_sha256':sha(out/manifest['file']),'cache_revalidated':True,'legacy_optimizer_state_reused':False},sort_keys=True,indent=2))
           boots=list((root/'stage01').rglob('BOOTSTRAP_MANIFEST.json'))
           if len(boots)!=1: raise RuntimeError(f'VNEXT_STAGE01_ROOT_RESOLUTION_FAILED:{len(boots)}')
           with Path(os.environ['GITHUB_ENV']).open('a') as f:
@@ -190,8 +247,11 @@ jobs:
           rows=manifest.get('subjects') or []
           assert len(rows)==8
           for row in rows:
-              topo=row.get('topology_teacher_metadata') or {}
-              assert topo.get('residual_quantized_collision_count',0)==0, (row['subject_id'],topo)
+              topo=row['metadata']['topology_teacher']
+              census=topo['canonicalization']['quantized_collision_census']
+              assert int(census['collision_group_count'])==0, (row['subject_id'],census)
+              assert int(census['colliding_vertex_count'])==0, (row['subject_id'],census)
+          assert 'source_provenance' in manifest and manifest['source_provenance']
           print('VNEXT_FIT8_PREPARATION_SEAL_PASS',manifest['manifest_value_sha256'])
           PY
 

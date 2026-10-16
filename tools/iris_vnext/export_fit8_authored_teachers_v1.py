@@ -19,6 +19,14 @@ from tools.iris_vnext.input_binding_v1 import (
 )
 
 
+TEACHER_SOURCE_PATHS = (
+    "tools/iris_vnext/export_fit8_authored_teachers_v1.py",
+    "tools/iris_vnext/blender_authored_teacher_export_v1.py",
+    "tools/iris_vnext/blender_authored_teacher_export_v2.py",
+    "tools/iris_vnext/blender_authored_teacher_export_v3.py",
+)
+
+
 def _args():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--blender", required=True)
@@ -30,6 +38,17 @@ def _args():
     p.add_argument("--output-dir", type=Path, required=True)
     p.add_argument("--max-frames-per-clip", type=int, default=16)
     return p.parse_args()
+
+
+def _teacher_source_provenance() -> dict[str, str]:
+    repo = Path(__file__).resolve().parents[2]
+    out = {}
+    for relative in TEACHER_SOURCE_PATHS:
+        path = repo / relative
+        if not path.is_file():
+            raise FileNotFoundError("VNEXT_TEACHER_SOURCE_MISSING:" + relative)
+        out[relative] = sha256_file(path)
+    return out
 
 
 def main():
@@ -47,6 +66,7 @@ def main():
     root = args.stage01_root.resolve()
     output = args.output_dir.resolve()
     output.mkdir(parents=True, exist_ok=True)
+    teacher_source_provenance = _teacher_source_provenance()
     # V3 preserves V2's exact action-name/slot transport and freezes the rest
     # triangulation while verifying pose-time vertex indexing plus source polygon
     # connectivity/materials. Pose-dependent Blender tessellation is not topology.
@@ -123,6 +143,8 @@ def main():
         "blender_version": version,
         "blender_teacher_exporter": exporter.name,
         "blender_teacher_exporter_sha256": sha256_file(exporter),
+        "teacher_source_provenance_schema": "RealSaS.IRISVNextFit8TeacherSourceProvenance.v1",
+        "teacher_source_provenance": teacher_source_provenance,
         "verified_input_receipt": receipt,
         "subjects": exported,
         "teacher_inputs_in_inference_forward": False,
@@ -133,6 +155,7 @@ def main():
     print(
         "VNEXT_FIT8_TEACHER_BATCH_PASS",
         "subjects=8",
+        f"teacher_sources={len(teacher_source_provenance)}",
         f"receipt_sha256={sha256_file(path)}",
         flush=True,
     )

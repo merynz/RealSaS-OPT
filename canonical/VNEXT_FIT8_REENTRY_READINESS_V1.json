@@ -1,0 +1,54 @@
+{
+  "active_review_branch": "research/iris-vnext-single-carrier-graphics",
+  "active_trainer": "RealSaS.IRISVNextFit8Trainer.v2",
+  "canonical_production_line_until_merge": "main",
+  "date": "2026-10-16",
+  "engineering_contract_evidence": {
+    "dedicated_vnext_gate_last_full_pass_commit": "feef089bf099d2e2d5977ca245078170492527d8",
+    "dedicated_vnext_gate_status": "PASS",
+    "graphics_native_rss_behavior_e2e": "PASS",
+    "pinned_flexicubes_contract": "PASS",
+    "single_canonical_carrier_contract": "PASS",
+    "windowed_batch8_topology_contract": "PASS"
+  },
+  "exact_input_binding": {
+    "binding_file": "canonical/VNEXT_FIT8_INPUT_BINDING_V1.json",
+    "legacy_iris_cohort_manifest_sha256": "088283fbca5ac6c95dc8d9fedadaafbf9bf82603cc6bee28948af995945e5053",
+    "legacy_optimizer_state_reused": false,
+    "stage01_bundle_file": "FIT8_PLATFORM_STAGE01_INPUT_BUNDLE_20261013.zip",
+    "stage01_bundle_sha256": "9d9c9cbf63c979326cd2f39f5435006b81dddb201028a34ebb4cf10e1b434936",
+    "subject_count": 8
+  },
+  "implemented_reentry_tools": {
+    "a100_engineering_preflight": "tools/iris_vnext/a100_preflight_v1.py",
+    "authored_teacher_batch_export": "tools/iris_vnext/export_fit8_authored_teachers_v1.py",
+    "bound_cohort_preparation": "tools/iris_vnext/prepare_fit8_vnext_cohort_v1.py",
+    "exact_input_verifier": "tools/iris_vnext/input_binding_v1.py",
+    "low_level_shard_builder": "tools/iris_vnext/build_fit8_vnext_shards_v1.py",
+    "scientific_runner_after_gate_only": "tools/iris_vnext/run_fit8_vnext_scientific_v1.py"
+  },
+  "legacy_control": {
+    "committed_resume_point": 5400,
+    "executed_through_step": 5563,
+    "role": "CONTROL_ARTIFACT_ONLY",
+    "vnext_checkpoint_initializer": false
+  },
+  "pending_before_scientific_fit": [
+    "Run exact-bound Blender authored teacher export for all eight subjects and seal TEACHER_BATCH_RECEIPT.json",
+    "Run exact-bound cohort preparation and seal PREPARATION_RECEIPT.json plus vNext COHORT_MANIFEST.json",
+    "Run tools/iris_vnext/a100_preflight_v1.py on a real A100 and seal PASS report",
+    "Verify the latest dedicated vNext CI gate remains PASS at the preparation source commit"
+  ],
+  "prohibitions": {
+    "independent_visual_mesh": true,
+    "legacy_5400_checkpoint_reuse_for_vnext": true,
+    "legacy_optimizer_state_reuse_for_vnext": true,
+    "preflight_checkpoint_reuse_for_scientific_fit": true,
+    "scientific_pass_claim_from_training_completion": true,
+    "subject_specific_model_or_compiler_branch": true
+  },
+  "schema": "RealSaS.VNextFit8ReentryReadiness.v1",
+  "scientific_fit_pass_claimed": false,
+  "scientific_fit_started": false,
+  "status": "ENGINEERING_CONTRACT_CLOSED__EXACT_INPUT_PREPARATION_IMPLEMENTED__REAL_TEACHER_BATCH_AND_A100_PREFLIGHT_PENDING"
+}

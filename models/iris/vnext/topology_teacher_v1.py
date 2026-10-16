@@ -47,13 +47,12 @@ def _validated_inputs(rest_iris, posed_iris, faces):
         raise ValueError("VNEXT_TOPOLOGY_TEACHER_FACES_INVALID")
     if np.any(f < 0) or np.any(f >= len(rest)):
         raise ValueError("VNEXT_TOPOLOGY_TEACHER_FACE_INDEX_INVALID")
-    if float(np.max(np.abs(rest))) > 1.000001 or float(np.max(np.abs(posed))) > 4.0:
-        raise ValueError("VNEXT_TOPOLOGY_TEACHER_NORMALIZED_DOMAIN_INVALID")
+    if float(np.max(np.abs(rest))) > 1.000001:
+        raise ValueError("VNEXT_TOPOLOGY_TEACHER_REST_DOMAIN_INVALID")
     return rest, posed, f
 
 
 def _rest_key(row: np.ndarray) -> tuple[float, float, float]:
-    # Normalize signed zero so +0.0/-0.0 are the same geometric coordinate.
     return tuple(0.0 if float(x) == 0.0 else float(x) for x in row)
 
 
@@ -91,9 +90,6 @@ def _canonicalize_component(
         for vi in group:
             placed = False
             for cluster in clusters:
-                # Require agreement with every already admitted cluster member;
-                # this prevents tolerance-chain transitivity from merging a pair
-                # that is not itself mechanically equivalent.
                 if all(
                     _trajectory_agrees(posed, vi, other, trajectory_tolerance)
                     for other in cluster
@@ -115,9 +111,6 @@ def _canonicalize_component(
             for vi in cluster:
                 representative[vi] = rep
 
-    # This topology teacher is intentionally component-local, matching TESSA's
-    # COMPONENT blocks. Vertex-only contacts between edge-disconnected components
-    # therefore do not become a new mechanical connection through canonicalization.
     mapped_faces = [tuple(representative[int(v)] for v in row) for row in source_faces]
     kept_faces: list[tuple[int, int, int]] = []
     seen_face_keys: set[tuple[int, int, int]] = set()
@@ -195,12 +188,7 @@ def canonicalize_vnext_topology_teacher_v1(
     coordinate_bins: int,
     trajectory_tolerance: float = 1.0e-7,
 ) -> VNextTopologyTeacherMeshV1:
-    """Return a training-only mechanically canonical topology teacher.
-
-    The output is a concatenation of edge-connected COMPONENT-local meshes. This
-    deliberately mirrors TESSA's global COMPONENT sequence and prevents a weld
-    from inventing connectivity across a vertex-only contact.
-    """
+    """Return a training-only mechanically canonical topology teacher."""
     if int(coordinate_bins) < 2:
         raise ValueError("VNEXT_TOPOLOGY_TEACHER_COORDINATE_BINS_INVALID")
     if not (0.0 <= float(trajectory_tolerance) <= 1.0e-3):

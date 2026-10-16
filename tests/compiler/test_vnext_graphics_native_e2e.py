@@ -15,9 +15,7 @@ from compiler.realsas_compiler_core.graphics_runtime_v1 import (
     RuntimeGraphicsViewV1,
     runtime_graphics_hash_v1,
 )
-from compiler.realsas_compiler_core.runtime_graphics_binary_v1 import (
-    encode_runtime_graphics_v1,
-)
+from compiler.realsas_compiler_core.runtime_graphics_binary_v1 import encode_runtime_graphics_v1
 from compiler.realsas_compiler_core.runtime_package_v2 import (
     _camera_payload,
     _clip_payload,
@@ -151,11 +149,16 @@ def _write_package(root: Path, *, visible: bool) -> tuple[Path, str]:
 )
 def test_graphics_bin_changes_real_native_raster_behavior(tmp_path: Path) -> None:
     player = os.environ["REALSAS_GRAPHICS_V1_PLAYER"]
-    visible_package, binding = _write_package(tmp_path, visible=True)
-    hidden_package, _ = _write_package(tmp_path, visible=False)
+    visible_package, visible_binding = _write_package(tmp_path, visible=True)
+    hidden_package, hidden_binding = _write_package(tmp_path, visible=False)
+    assert visible_binding != hidden_binding
 
     outputs = []
-    for label, package in (("visible", visible_package), ("hidden", hidden_package)):
+    cases = (
+        ("visible", visible_package, visible_binding),
+        ("hidden", hidden_package, hidden_binding),
+    )
+    for label, package, binding in cases:
         rgba = tmp_path / f"{label}.rgba"
         proc = subprocess.run(
             [

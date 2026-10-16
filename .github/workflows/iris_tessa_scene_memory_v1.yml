@@ -1,0 +1,76 @@
+name: iris-tessa-scene-memory-v1
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  scene-memory-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements/torch-cpu.txt
+
+      - name: Prove step-4400 IRIS source and policy resume compatibility
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+
+          expected = {
+              'models/iris/training/cohort_v1.py': '0789b29da0cf489da5b4d5d09d5447f40651aa5fe3c5e84e2a9b4df57f4cd8b5',
+              'models/iris/v4/scene_first_signed_v4.py': 'e9c2432ead4b6fa13ecad5a32837ea9cbb9c9cd38bd523cc70adef9ed8d48a1c',
+              'models/iris/v2/dinov2_foundation_v2.py': '9c5ca29a74b8b3fb2d6e546c19d6756e4383c5fa042d08caea9e2237ac032d36',
+              'models/iris/v5/source_signed_field_v5.py': 'ae109ec57c9e0b74ff1e11fccc573a944449b67ecd635e3a105878f8b5115c10',
+              'models/iris/v5/direct_fstar_fit_v5.py': '1e9370bd97b3dcf7263764e2c6711ce7ee51e2195a941243f0adf1030c8c811e',
+              'models/iris/v5/objective_tail_repair_v5.py': 'e37173c6aacac3c93b8d6255659bc5280fbd53368c589d8932edc658be2f4168',
+              'models/iris/training/apparatus_v1.py': '1c890b9624a1f1030393719efe628c5820a6e434770b84c1562510849accd4ae',
+              'canonical/FIT8_IRIS_KNIGHT_RECIPE_REFERENCE_V1.json': 'a740741511cd08b82af4f66cbd077751224dd57a905750cd4c7e54720407cd2f',
+          }
+          for path, wanted in expected.items():
+              got = hashlib.sha256(Path(path).read_bytes()).hexdigest()
+              if got != wanted:
+                  raise SystemExit(f'STEP4400_SOURCE_DRIFT:{path}:{got}:{wanted}')
+
+          policy = json.loads(Path('canonical/FIT8_IRIS_SHARED_TRAINING_POLICY_V1.json').read_text())
+          policy_hash = hashlib.sha256(
+              json.dumps(policy, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()
+          ).hexdigest()
+          expected_policy = '85ee3516364781686bf2ae296ebc0542c9ae828cb6d6bc0f955c07dd66359176'
+          if policy_hash != expected_policy:
+              raise SystemExit(f'STEP4400_POLICY_DRIFT:{policy_hash}:{expected_policy}')
+
+          print('STEP4400_IRIS_SOURCE_8_OF_8_EXACT')
+          print('STEP4400_IRIS_POLICY_EXACT')
+          print('NOTE: Drive cohort-manifest value-hash is checked separately against the sealed checkpoint.')
+          PY
+
+      - name: Install topology-head test dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off pytest
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+
+      - name: Scene-native topology-head contracts
+        run: python -m pytest -q tests/iris/test_iris_scene_topology_head_v1.py
+
+      - name: Legacy TESSA regression
+        run: python -m pytest -q tests/models/test_tessa_v1.py
+
+      - name: Contract summary
+        run: |
+          echo 'IRIS_TESSA_SCENE_MEMORY_V1_ENGINEERING_PASS'
+          echo 'legacy_gsa_17d_topology_input=false'
+          echo 'compiler_canonical_m_authority_unchanged=true'
+          echo 'fit8_scientific_pass_claimed=false'

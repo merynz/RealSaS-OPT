@@ -24,14 +24,23 @@ jobs:
         run: |
           python -m pip install --no-input --progress-bar off pytest
           python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libpng-dev zlib1g-dev
       - name: IRIS vNext model, teacher and batched Fit8 contracts
         run: python -m pytest -q tests/iris/test_iris_vnext_v1.py tests/iris/test_graphics_truth_v1.py tests/iris/test_iris_vnext_fit8_cohort_v1.py
       - name: Single-carrier mechanics, Graphics and DAG contracts
         run: python -m pytest -q tests/compiler/test_vnext_single_carrier_graphics_v1.py tests/repository/test_vnext_architecture_contract_v1.py tests/repository/test_vnext_execution_graph_v1.py
-      - name: Native Graphics content consumption
+      - name: Native Graphics ordering contract
         run: |
           g++ -std=c++17 -O2 runtime/realsas_cpp/tests/graphics_v1_contract_test.cpp -o /tmp/realsas_graphics_v1_test
           /tmp/realsas_graphics_v1_test
+      - name: Build Graphics-authorized native player
+        run: |
+          g++ -std=c++17 -O2 runtime/realsas_cpp/src/runtime_v2_graphics_reference.cpp -lpng -lz -o /tmp/realsas_graphics_v1_player
+      - name: RSS to native Graphics behavior E2E
+        env:
+          REALSAS_GRAPHICS_V1_PLAYER: /tmp/realsas_graphics_v1_player
+        run: python -m pytest -q tests/compiler/test_vnext_graphics_native_e2e.py
       - name: Preserve decoder regressions
         run: python -m pytest -q tests/iris/test_iris_scene_topology_head_v1.py tests/models/test_tessa_v1.py
       - name: Summary
@@ -41,7 +50,7 @@ jobs:
           echo 'canonical_M_G_W_count=1'
           echo 'independent_visual_mesh=false'
           echo 'graphics_runtime_hash_only_binding=false'
-          echo 'native_graphics_content_consumed=true'
+          echo 'native_graphics_rss_behavior_consumed=true'
           echo 'semantic_taxonomy=false'
           echo 'fit8_batch_subjects=8'
           echo 'fit8_model_forwards_per_optimizer_step=1'

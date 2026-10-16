@@ -6,12 +6,8 @@ from pathlib import Path
 import torch
 import torch.nn.functional as F
 
-from models.iris.vnext.cohort_v1 import (
-    IRISVNextFit8TrainerV1,
-    SUBJECT_IDS,
-    VNextFit8PolicyV1,
-    VNextStageV1,
-)
+from models.iris.vnext.cohort_v1 import SUBJECT_IDS, VNextFit8PolicyV1, VNextStageV1
+from models.iris.vnext.cohort_v2 import IRISVNextFit8TrainerV2
 from models.iris.vnext.contracts_v1 import IRISVNextConfigV1
 
 
@@ -46,7 +42,7 @@ def _cfg():
     )
 
 
-def _payload(subject: str, seed: int):
+def _payload(subject: str, seed: int, subject_index: int):
     generator = torch.Generator().manual_seed(seed)
     source_generator = torch.Generator().manual_seed(314159)
     relation_shape = (8, 5)
@@ -56,11 +52,16 @@ def _payload(subject: str, seed: int):
         (0.45 * torch.cos(theta), 0.45 * torch.sin(theta), torch.zeros_like(theta)),
         dim=-1,
     )
+    pad = _cfg().tessa_decoder_config().PAD
+    topology_input = torch.tensor([[1, 2, 3, 4], [4, 3, 2, 1]], dtype=torch.long)
+    topology_labels = torch.tensor([[2, 3, 4, 1], [3, 2, 1, 4]], dtype=torch.long)
+    count = 1 if subject_index % 3 == 0 else 2
+    if count == 1:
+        topology_input[1].fill_(pad)
+        topology_labels[1].fill_(pad)
     return {
         "subject_id": subject,
         "teacher_inputs_in_inference_forward": False,
-        # Identical synthetic source evidence keeps the extraction sign-court
-        # deterministic across all eight subjects in this tiny CPU contract.
         "image_tokens": torch.randn(8, 2, 16, generator=source_generator),
         "token_xy": torch.rand(8, 2, 2, generator=source_generator) * 2 - 1,
         "camera_features": torch.randn(8, 5, generator=source_generator),
@@ -89,13 +90,14 @@ def _payload(subject: str, seed: int):
         "relation_occlusion_probability": torch.randint(0, 2, relation_shape, generator=generator).float(),
         "relation_visibility_probability_a": torch.randint(0, 2, relation_shape, generator=generator).float(),
         "relation_visibility_probability_b": torch.randint(0, 2, relation_shape, generator=generator).float(),
-        "topology_input_ids": torch.tensor([1, 2, 3, 4], dtype=torch.long),
-        "topology_labels": torch.tensor([2, 3, 4, 1], dtype=torch.long),
+        "topology_input_ids": topology_input,
+        "topology_labels": topology_labels,
+        "topology_window_offsets": torch.tensor([0, 19 + subject_index], dtype=torch.long),
+        "topology_window_count": torch.tensor(count, dtype=torch.long),
     }
 
 
-def _center_test_field_on_zero(trainer: IRISVNextFit8TrainerV1) -> None:
-    """Test-only: guarantee a sign change for the tiny random synthetic model."""
+def _center_test_field_on_zero(trainer: IRISVNextFit8TrainerV2) -> None:
     with torch.no_grad():
         source = trainer.cohort.tensors
         planes = trainer.model.encode_scene(
@@ -115,14 +117,14 @@ def _center_test_field_on_zero(trainer: IRISVNextFit8TrainerV1) -> None:
 def test_vnext_fit8_trainer_executes_complete_curriculum_as_real_batch8(tmp_path):
     manifest_rows = []
     for index, subject in enumerate(SUBJECT_IDS):
-        payload = _payload(subject, 100 + index)
+        payload = _payload(subject, 100 + index, index)
         path = tmp_path / f"{index}.pt"
         torch.save(payload, path)
         manifest_rows.append(
             {"subject_id": subject, "shard_file": path.name, "shard_sha256": _sha(path)}
         )
     manifest = {
-        "schema": "RealSaS.IRISVNextFit8Manifest.v2",
+        "schema": "RealSaS.IRISVNextFit8Manifest.v3",
         "teacher_inputs_in_inference_forward": False,
         "subjects": manifest_rows,
     }
@@ -154,7 +156,7 @@ def test_vnext_fit8_trainer_executes_complete_curriculum_as_real_batch8(tmp_path
         eval_interval=100,
         stages=stages,
     )
-    trainer = IRISVNextFit8TrainerV1(
+    trainer = IRISVNextFit8TrainerV2(
         data_root=tmp_path,
         manifest=manifest,
         checkpoint_root=tmp_path / "cp",
@@ -182,3 +184,5 @@ def test_vnext_fit8_trainer_executes_complete_curriculum_as_real_batch8(tmp_path
     assert rows[3]["appearance_loss"] > 0
     assert rows[4]["relations_loss"] > 0
     assert rows[5]["topology_loss"] > 0
+    assert len(rows[5]["topology_position_offsets"]) == 8
+    assert len(set(rows[5]["topology_position_offsets"])) > 1

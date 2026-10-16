@@ -1,14 +1,152 @@
 from __future__ import annotations
+
 import hashlib
 from pathlib import Path
+
 import torch
-from models.iris.vnext.cohort_v1 import IRISVNextFit8TrainerV1,SUBJECT_IDS,VNextFit8PolicyV1,VNextStageV1
+import torch.nn.functional as F
+
+from models.iris.vnext.cohort_v1 import (
+    IRISVNextFit8TrainerV1,
+    SUBJECT_IDS,
+    VNextFit8PolicyV1,
+    VNextStageV1,
+)
 from models.iris.vnext.contracts_v1 import IRISVNextConfigV1
 
-def _sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
-def _cfg():return IRISVNextConfigV1(image_token_dim=16,camera_feature_dim=5,scene_dim=32,camera_embed_dim=16,plane_size=2,plane_channels=8,field_hidden_dim=32,field_residual_blocks=1,local_feature_dim=32,attention_heads=4,scene_layers=1,feedforward_multiplier=2,topology_width=32,topology_heads=4,topology_decoder_layers=1,topology_memory_tokens=64,topology_refinement_layers=1,topology_source_width=16,appearance_descriptor_dim=8,relation_embedding_dim=8)
-def test_vnext_fit8_trainer_executes_one_real_batch8_forward_and_step(tmp_path):
-    rows=[]
-    for si,subject in enumerate(SUBJECT_IDS):
-        g=torch.Generator().manual_seed(100+si);payload={"subject_id":subject,"teacher_inputs_in_inference_forward":False,"image_tokens":torch.randn(8,2,16,generator=g),"token_xy":torch.rand(8,2,2,generator=g)*2-1,"camera_features":torch.randn(8,5,generator=g),"geometry_points":torch.rand(6,3,generator=g)*2-1,"geometry_targets":torch.zeros(6),"mechanical_points":torch.rand(5,3,generator=g)*2-1,"mechanical_normals":torch.nn.functional.normalize(torch.randn(5,3,generator=g),dim=-1),"mechanical_stretch_major":torch.full((5,),.1),"mechanical_stretch_minor":torch.full((5,),.05),"mechanical_tangent_direction_2theta":torch.tensor([[1.,0.]]).repeat(5,1),"mechanical_bend_demand":torch.full((5,),.02),"mechanical_rigidity_probability":torch.full((5,),.8)};path=tmp_path/f"{si}.pt";torch.save(payload,path);rows.append({"subject_id":subject,"shard_file":path.name,"shard_sha256":_sha(path)})
-    manifest={"schema":"RealSaS.IRISVNextFit8Manifest.v1","teacher_inputs_in_inference_forward":False,"subjects":rows};policy=VNextFit8PolicyV1(geometry_samples_per_subject=3,mechanical_samples_per_subject=2,checkpoint_interval=10,eval_interval=10,stages=(VNextStageV1("G1_TEST",1,scene_lr_scale=1.,evidence_lr_scale=1.,structure_lr_scale=0.,field_weight=1.,mechanical_weight=1.),));trainer=IRISVNextFit8TrainerV1(data_root=tmp_path,manifest=manifest,checkpoint_root=tmp_path/"cp",device="cpu",model_config=_cfg(),policy=policy);row=trainer.one_step();assert row["batch_subjects"]==8;assert row["optimizer_steps"]==1;assert row["global_step"]==1;assert row["stage"]=="G1_TEST";assert torch.isfinite(torch.tensor(row["loss"]))
+
+def _sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def _cfg():
+    return IRISVNextConfigV1(
+        image_token_dim=16,
+        camera_feature_dim=5,
+        scene_dim=32,
+        camera_embed_dim=16,
+        plane_size=2,
+        plane_channels=8,
+        field_hidden_dim=32,
+        field_residual_blocks=1,
+        local_feature_dim=32,
+        attention_heads=4,
+        scene_layers=1,
+        feedforward_multiplier=2,
+        topology_width=32,
+        topology_heads=4,
+        topology_decoder_layers=1,
+        topology_memory_tokens=64,
+        topology_refinement_layers=1,
+        topology_source_width=16,
+        appearance_descriptor_dim=8,
+        relation_embedding_dim=8,
+    )
+
+
+def _payload(subject: str, seed: int):
+    generator = torch.Generator().manual_seed(seed)
+    relation_shape = (8, 5)
+    appearance_shape = (8, 6)
+    return {
+        "subject_id": subject,
+        "teacher_inputs_in_inference_forward": False,
+        "image_tokens": torch.randn(8, 2, 16, generator=generator),
+        "token_xy": torch.rand(8, 2, 2, generator=generator) * 2 - 1,
+        "camera_features": torch.randn(8, 5, generator=generator),
+        "geometry_points": torch.rand(7, 3, generator=generator) * 2 - 1,
+        "geometry_targets": torch.zeros(7),
+        "mechanical_points": torch.rand(6, 3, generator=generator) * 2 - 1,
+        "mechanical_normals": F.normalize(torch.randn(6, 3, generator=generator), dim=-1),
+        "mechanical_stretch_major": torch.full((6,), 0.1),
+        "mechanical_stretch_minor": torch.full((6,), 0.05),
+        "mechanical_tangent_direction_2theta": torch.tensor([[1.0, 0.0]]).repeat(6, 1),
+        "mechanical_bend_demand": torch.full((6,), 0.02),
+        "mechanical_rigidity_probability": torch.full((6,), 0.8),
+        "cube_corner_points": torch.rand(5, 8, 3, generator=generator) * 2 - 1,
+        "cube_extraction_targets": torch.zeros(5, 21),
+        "appearance_points": torch.rand(*appearance_shape, 3, generator=generator) * 2 - 1,
+        "appearance_rgba": torch.rand(*appearance_shape, 4, generator=generator),
+        "appearance_alpha_boundary": torch.randint(0, 2, appearance_shape, generator=generator).float(),
+        "appearance_boundary": torch.randint(0, 2, appearance_shape, generator=generator).float(),
+        "relation_point_a": torch.rand(*relation_shape, 3, generator=generator) * 2 - 1,
+        "relation_point_b": torch.rand(*relation_shape, 3, generator=generator) * 2 - 1,
+        "relation_same_drawable_affinity": torch.randint(0, 2, relation_shape, generator=generator).float(),
+        "relation_cut_probability": torch.randint(0, 2, relation_shape, generator=generator).float(),
+        "relation_attachment_affinity": torch.randint(0, 2, relation_shape, generator=generator).float(),
+        "relation_alpha_boundary_probability": torch.randint(0, 2, relation_shape, generator=generator).float(),
+        "relation_appearance_boundary_probability": torch.randint(0, 2, relation_shape, generator=generator).float(),
+        "relation_front_probability": torch.randint(0, 2, relation_shape, generator=generator).float(),
+        "relation_occlusion_probability": torch.randint(0, 2, relation_shape, generator=generator).float(),
+        "relation_visibility_probability_a": torch.randint(0, 2, relation_shape, generator=generator).float(),
+        "relation_visibility_probability_b": torch.randint(0, 2, relation_shape, generator=generator).float(),
+        "topology_witness_xyz": torch.rand(6, 3, generator=generator) * 2 - 1,
+        "topology_witness_normal": F.normalize(torch.randn(6, 3, generator=generator), dim=-1),
+        "topology_input_ids": torch.tensor([1, 2, 3, 4], dtype=torch.long),
+        "topology_labels": torch.tensor([2, 3, 4, 1], dtype=torch.long),
+    }
+
+
+def test_vnext_fit8_trainer_executes_complete_curriculum_as_real_batch8(tmp_path):
+    manifest_rows = []
+    for index, subject in enumerate(SUBJECT_IDS):
+        payload = _payload(subject, 100 + index)
+        path = tmp_path / f"{index}.pt"
+        torch.save(payload, path)
+        manifest_rows.append(
+            {"subject_id": subject, "shard_file": path.name, "shard_sha256": _sha(path)}
+        )
+    manifest = {
+        "schema": "RealSaS.IRISVNextFit8Manifest.v1",
+        "teacher_inputs_in_inference_forward": False,
+        "subjects": manifest_rows,
+    }
+    stages = (
+        VNextStageV1("G1_TEST", 1, field_weight=1.0),
+        VNextStageV1("G2_TEST", 1, extraction_weight=1.0),
+        VNextStageV1("M1_TEST", 1, mechanical_weight=1.0),
+        VNextStageV1("A1_TEST", 1, appearance_weight=1.0),
+        VNextStageV1("R1_TEST", 1, relation_weight=1.0),
+        VNextStageV1("T1_TEST", 1, structure_lr_scale=1.0, topology_weight=1.0),
+        VNextStageV1(
+            "J1_TEST",
+            1,
+            structure_lr_scale=0.5,
+            field_weight=0.25,
+            extraction_weight=0.25,
+            mechanical_weight=0.25,
+            appearance_weight=0.25,
+            relation_weight=0.25,
+            topology_weight=0.25,
+        ),
+    )
+    policy = VNextFit8PolicyV1(
+        geometry_samples_per_subject=3,
+        mechanical_samples_per_subject=2,
+        extraction_cubes_per_subject=2,
+        appearance_samples_per_subject=3,
+        relation_pairs_per_subject=3,
+        checkpoint_interval=100,
+        eval_interval=100,
+        stages=stages,
+    )
+    trainer = IRISVNextFit8TrainerV1(
+        data_root=tmp_path,
+        manifest=manifest,
+        checkpoint_root=tmp_path / "cp",
+        device="cpu",
+        model_config=_cfg(),
+        policy=policy,
+    )
+
+    rows = [trainer.one_step() for _ in stages]
+    assert [row["stage"] for row in rows] == [stage.stage_id for stage in stages]
+    assert all(row["batch_subjects"] == 8 for row in rows)
+    assert all(row["scene_forwards"] == 1 for row in rows)
+    assert all(row["optimizer_steps"] == 1 for row in rows)
+    assert rows[-1]["global_step"] == len(stages)
+    assert all(torch.isfinite(torch.tensor(row["loss"])) for row in rows)
+    assert rows[1]["extraction_loss"] > 0
+    assert rows[3]["appearance_loss"] > 0
+    assert rows[4]["relations_loss"] > 0
+    assert rows[5]["topology_loss"] > 0

@@ -31,7 +31,9 @@ jobs:
       STAGE01_SHA256: 9d9c9cbf63c979326cd2f39f5435006b81dddb201028a34ebb4cf10e1b434936
       LEGACY_MANIFEST_FILE_ID: 1PJ-SxGVS6F6pHUFgB8Kws69X9wS5aywa
       LEGACY_MANIFEST_SHA256: 088283fbca5ac6c95dc8d9fedadaafbf9bf82603cc6bee28948af995945e5053
-      LEGACY_REMOTE: 'gdrive:RealSaS_Fit8_IRIS_Inputs_20261013'
+      SHARD_ROOT_A: 177ZjtvXH0mwtrpfow53hwo-QiE49KXOV
+      SHARD_ROOT_B: 19S7ec8gLSa6SfyVcLXmpkLwpIHDuk7BR
+      SHARD_ROOT_C: 1ibJMCIO1DCpQ8CPBd2XhgRfNNlYqVN2L
       OUTPUT_REMOTE: 'gdrive:RealSaS_Fit8_IRIS_vNext_20261016'
 
     steps:
@@ -106,7 +108,12 @@ jobs:
           rclone backend copyid gdrive: "$STAGE01_FILE_ID" "$stage_zip"
           printf '%s  %s\n' "$STAGE01_SHA256" "$stage_zip" | sha256sum --check -
           unzip -q "$stage_zip" -d "$RUN_ROOT/stage01"
-          rclone copy "$LEGACY_REMOTE" "$RUN_ROOT/legacy_download" --checksum
+          for spec in "A:$SHARD_ROOT_A" "B:$SHARD_ROOT_B" "C:$SHARD_ROOT_C"; do
+            label="${spec%%:*}"
+            folder_id="${spec#*:}"
+            mkdir -p "$RUN_ROOT/legacy_download/$label"
+            rclone copy gdrive: "$RUN_ROOT/legacy_download/$label" --drive-root-folder-id "$folder_id" --checksum
+          done
           rclone backend copyid gdrive: "$LEGACY_MANIFEST_FILE_ID" "$RUN_ROOT/legacy_download/COHORT_MANIFEST.json"
           printf '%s  %s\n' "$LEGACY_MANIFEST_SHA256" "$RUN_ROOT/legacy_download/COHORT_MANIFEST.json" | sha256sum --check -
           python - <<'PY'
@@ -120,19 +127,19 @@ jobs:
                   for b in iter(lambda:f.read(4*1024*1024),b''): h.update(b)
               return h.hexdigest()
           def exact_named(name,digest):
-              rows=[p for p in (root/'legacy_download').rglob(name) if p.is_file() and sha(p)==digest]
-              if len(rows)!=1: raise RuntimeError(f'VNEXT_LEGACY_EXACT_FILE_RESOLUTION_FAILED:{name}:{len(rows)}')
-              return rows[0]
+              rows=sorted(p for p in (root/'legacy_download').rglob(name) if p.is_file() and sha(p)==digest)
+              if not rows: raise RuntimeError(f'VNEXT_LEGACY_EXACT_FILE_RESOLUTION_FAILED:{name}:0')
+              return rows[0],len(rows)
           out=root/'legacy_bound'; out.mkdir(parents=True,exist_ok=True)
           manifest=binding['legacy_iris_cohort_manifest']
-          src=exact_named(manifest['file'],manifest['sha256'])
+          src,manifest_copies=exact_named(manifest['file'],manifest['sha256'])
           shutil.copy2(src,out/manifest['file'])
           receipt=[]
           for row in binding['subjects']:
-              src=exact_named(row['legacy_shard_file'],row['legacy_shard_sha256'])
+              src,copies=exact_named(row['legacy_shard_file'],row['legacy_shard_sha256'])
               dst=out/row['legacy_shard_file']; shutil.copy2(src,dst)
-              receipt.append({'subject_id':row['subject_id'],'file':dst.name,'sha256':sha(dst)})
-          (out/'HYDRATION_RECEIPT.json').write_text(json.dumps({'schema':'RealSaS.VNextFit8LegacyHydration.v1','subjects':receipt,'cohort_manifest_sha256':sha(out/manifest['file']),'legacy_optimizer_state_reused':False},sort_keys=True,indent=2))
+              receipt.append({'subject_id':row['subject_id'],'file':dst.name,'sha256':sha(dst),'exact_copy_count':copies})
+          (out/'HYDRATION_RECEIPT.json').write_text(json.dumps({'schema':'RealSaS.VNextFit8LegacyHydration.v1','subjects':receipt,'cohort_manifest_sha256':sha(out/manifest['file']),'cohort_manifest_exact_copy_count':manifest_copies,'legacy_optimizer_state_reused':False},sort_keys=True,indent=2))
           boots=list((root/'stage01').rglob('BOOTSTRAP_MANIFEST.json'))
           if len(boots)!=1: raise RuntimeError(f'VNEXT_STAGE01_ROOT_RESOLUTION_FAILED:{len(boots)}')
           with Path(os.environ['GITHUB_ENV']).open('a') as f:

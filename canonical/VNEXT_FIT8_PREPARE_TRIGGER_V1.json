@@ -1,1 +1,1 @@
-{"schema":"RealSaS.VNextFit8PrepareTrigger.v1","reason":"seal_vnext_preparation_provenance_and_reuse_exact_caches","trigger_commit":"bc78064c3f2e5341089287199817e40894222c4a"}
+{"schema":"RealSaS.VNextFit8PrepareTrigger.v1","reason":"rerun_after_rank_deficient_pose_truth_fix","trigger_commit":"97def32e929919e0be4210cc1bf267fd334a4b05"}

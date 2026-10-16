@@ -34,6 +34,23 @@ jobs:
           git clone --filter=blob:none https://github.com/nv-tlabs/FlexiCubes.git "$REALSAS_FLEXICUBES_ROOT"
           git -C "$REALSAS_FLEXICUBES_ROOT" checkout --detach 4cc7d6c3d0cee83c011ce36721b81adff0dd7db6
           test "$(git -C "$REALSAS_FLEXICUBES_ROOT" rev-parse HEAD)" = "4cc7d6c3d0cee83c011ce36721b81adff0dd7db6"
+      - name: Compile preparation, preflight and scientific entrypoints
+        run: |
+          python -m py_compile \
+            tools/iris_vnext/input_binding_v1.py \
+            tools/iris_vnext/blender_authored_teacher_export_v1.py \
+            tools/iris_vnext/export_fit8_authored_teachers_v1.py \
+            tools/iris_vnext/build_fit8_vnext_shards_v1.py \
+            tools/iris_vnext/prepare_fit8_vnext_cohort_v1.py \
+            tools/iris_vnext/a100_preflight_v1.py \
+            tools/iris_vnext/run_fit8_vnext_scientific_v1.py
+          python - <<'PY'
+          from tools.iris_vnext.input_binding_v1 import load_binding_v1
+          value = load_binding_v1('canonical/VNEXT_FIT8_INPUT_BINDING_V1.json')
+          assert len(value['subjects']) == 8
+          assert value['legacy_optimizer_state_reused'] is False
+          print('VNEXT_FIT8_INPUT_BINDING_PARSE_PASS')
+          PY
       - name: IRIS vNext model, teacher and batched Fit8 contracts
         run: python -m pytest -q tests/iris/test_iris_vnext_v1.py tests/iris/test_graphics_truth_v1.py tests/iris/test_iris_vnext_fit8_cohort_v1.py
       - name: Single-carrier mechanics, Graphics and DAG contracts

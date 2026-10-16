@@ -14,7 +14,9 @@ import torch
 import torch.nn.functional as F
 
 from .contracts_v1 import IRISVNextConfigV1
+from .flexicubes_v1 import PinnedFlexiCubesV1, flexicubes_root_from_environment_v1
 from .model_v1 import IRISVNextV1
+from .surface_extraction_v1 import extract_surface_batch_v1, extracted_surface_loss_v1
 from .training_v1 import (
     IRISVNextOptimizationPolicyV1,
     build_vnext_optimizer_v1,
@@ -43,6 +45,8 @@ def _source_identity(root: Path):
     paths = (
         "models/iris/vnext/contracts_v1.py",
         "models/iris/vnext/scene_core_v1.py",
+        "models/iris/vnext/flexicubes_v1.py",
+        "models/iris/vnext/surface_extraction_v1.py",
         "models/iris/vnext/heads_v1.py",
         "models/iris/vnext/structure_v1.py",
         "models/iris/vnext/model_v1.py",
@@ -95,9 +99,10 @@ class VNextFit8PolicyV1:
     seed: int = 8162026
     geometry_samples_per_subject: int = 4096
     mechanical_samples_per_subject: int = 2048
-    extraction_cubes_per_subject: int = 512
     appearance_samples_per_subject: int = 2048
     relation_pairs_per_subject: int = 1024
+    extraction_l_dev_weight: float = 0.01
+    extraction_flexible_weight_l1: float = 1.0e-4
     weight_decay: float = 0.01
     scene_learning_rate: float = 3e-5
     evidence_learning_rate: float = 1e-4
@@ -108,7 +113,7 @@ class VNextFit8PolicyV1:
     stages: tuple[VNextStageV1, ...] = (
         VNextStageV1("G1_GEOMETRY", 1600, field_weight=1.0),
         VNextStageV1(
-            "G2_EXTRACTION_CONNECTIVITY",
+            "G2_FLEXICUBES_SURFACE",
             1200,
             scene_lr_scale=0.75,
             evidence_lr_scale=0.5,
@@ -164,7 +169,6 @@ class VNextFit8PolicyV1:
         counts = (
             self.geometry_samples_per_subject,
             self.mechanical_samples_per_subject,
-            self.extraction_cubes_per_subject,
             self.appearance_samples_per_subject,
             self.relation_pairs_per_subject,
             self.checkpoint_interval,
@@ -172,6 +176,8 @@ class VNextFit8PolicyV1:
         )
         if tuple(self.expected_subjects) != SUBJECT_IDS or min(counts) <= 0:
             raise ValueError("VNEXT_FIT8_POLICY_INVALID")
+        if min(self.extraction_l_dev_weight, self.extraction_flexible_weight_l1) < 0:
+            raise ValueError("VNEXT_FIT8_EXTRACTION_REGULARIZER_INVALID")
         for stage in self.stages:
             stage.validate()
 
@@ -191,7 +197,7 @@ _REQUIRED_MECH = (
     "mechanical_bend_demand",
     "mechanical_rigidity_probability",
 )
-_REQUIRED_EXTRACTION = ("cube_corner_points", "cube_extraction_targets")
+_REQUIRED_EXTRACTION = ("teacher_surface_points_iris",)
 _REQUIRED_APPEARANCE = (
     "appearance_points",
     "appearance_rgba",
@@ -211,12 +217,7 @@ _REQUIRED_RELATION = (
     "relation_visibility_probability_a",
     "relation_visibility_probability_b",
 )
-_REQUIRED_TOPOLOGY = (
-    "topology_witness_xyz",
-    "topology_witness_normal",
-    "topology_input_ids",
-    "topology_labels",
-)
+_REQUIRED_TOPOLOGY = ("topology_input_ids", "topology_labels")
 _REQUIRED_ALL = (
     _REQUIRED_SOURCE
     + _REQUIRED_GEOMETRY
@@ -229,7 +230,7 @@ _REQUIRED_ALL = (
 
 
 class VNextFit8CohortV1:
-    """Eight immutable shards resident as one cohort; no model-forward subject loop."""
+    """Eight immutable shards resident as one cohort; no subject-serial model forward."""
 
     def __init__(self, data_root, manifest, device):
         self.root = Path(data_root).resolve()
@@ -252,6 +253,8 @@ class VNextFit8CohortV1:
                 raise ValueError("VNEXT_FIT8_SHARD_SUBJECT_DRIFT")
             if value.get("teacher_inputs_in_inference_forward") is not False:
                 raise ValueError("VNEXT_FIT8_SHARD_TEACHER_FORWARD_FORBIDDEN")
+            if "cube_extraction_targets" in value or "topology_witness_xyz" in value:
+                raise ValueError("VNEXT_FIT8_FORBIDDEN_TEACHER_INTERNAL_TARGET")
             for key in _REQUIRED_ALL:
                 if key not in value or not isinstance(value[key], torch.Tensor):
                     raise ValueError("VNEXT_FIT8_SHARD_FIELD_MISSING:" + key)
@@ -282,6 +285,10 @@ class VNextFit8CohortV1:
             raise AssertionError("VNEXT_FIT8_NOT_BATCH8")
         if t["geometry_targets"].shape != t["geometry_points"].shape[:2]:
             raise ValueError("VNEXT_FIT8_GEOMETRY_TARGET_SHAPE")
+        if t["teacher_surface_points_iris"].ndim != 3 or t["teacher_surface_points_iris"].shape[-1] != 3:
+            raise ValueError("VNEXT_FIT8_TEACHER_SURFACE_SHAPE")
+        if float(t["teacher_surface_points_iris"].abs().max()) > 1.000001:
+            raise ValueError("VNEXT_FIT8_TEACHER_SURFACE_DOMAIN_DRIFT")
         if t["mechanical_normals"].shape != t["mechanical_points"].shape:
             raise ValueError("VNEXT_FIT8_MECHANICAL_NORMAL_SHAPE")
         mshape = t["mechanical_points"].shape[:2]
@@ -295,10 +302,6 @@ class VNextFit8CohortV1:
                 raise ValueError("VNEXT_FIT8_MECHANICAL_TARGET_SHAPE:" + key)
         if t["mechanical_tangent_direction_2theta"].shape != mshape + (2,):
             raise ValueError("VNEXT_FIT8_MECHANICAL_DIRECTION_SHAPE")
-        if t["cube_corner_points"].ndim != 4 or t["cube_corner_points"].shape[-2:] != (8, 3):
-            raise ValueError("VNEXT_FIT8_CUBE_CORNER_SHAPE")
-        if t["cube_extraction_targets"].shape != t["cube_corner_points"].shape[:2] + (21,):
-            raise ValueError("VNEXT_FIT8_CUBE_TARGET_SHAPE")
         if t["appearance_points"].ndim != 4 or t["appearance_points"].shape[1] != 8:
             raise ValueError("VNEXT_FIT8_APPEARANCE_VIEW_SHAPE")
         ashape = t["appearance_points"].shape[:3]
@@ -315,8 +318,6 @@ class VNextFit8CohortV1:
         for key in _REQUIRED_RELATION[2:]:
             if t[key].shape != rshape:
                 raise ValueError("VNEXT_FIT8_RELATION_TARGET_SHAPE:" + key)
-        if t["topology_witness_xyz"].shape != t["topology_witness_normal"].shape:
-            raise ValueError("VNEXT_FIT8_TOPOLOGY_WITNESS_SHAPE")
         if t["topology_input_ids"].shape != t["topology_labels"].shape:
             raise ValueError("VNEXT_FIT8_TOPOLOGY_TOKEN_SHAPE")
 
@@ -364,19 +365,6 @@ class VNextFit8CohortV1:
         )
         return {key: self._gather(self.tensors[key], index) for key in _REQUIRED_MECH}
 
-    def extraction_batch(self, policy, step):
-        index = self._indices(
-            self.tensors["cube_corner_points"].shape[1],
-            policy.extraction_cubes_per_subject,
-            policy.seed + 31,
-            step,
-            self.device,
-        )
-        return (
-            self._gather(self.tensors["cube_corner_points"], index),
-            self._gather(self.tensors["cube_extraction_targets"], index),
-        )
-
     def appearance_batch(self, policy, step, view_index):
         bank = self.tensors["appearance_points"].shape[2]
         index = self._indices(
@@ -414,7 +402,7 @@ class VNextCheckpointStoreV1:
         target = self.root / name
         os.replace(tmp, target)
         pointer = {
-            "schema": "RealSaS.IRISVNextFit8CheckpointPointer.v1",
+            "schema": "RealSaS.IRISVNextFit8CheckpointPointer.v2",
             "file": name,
             "sha256": digest,
             "step": step,
@@ -442,7 +430,7 @@ class VNextCheckpointStoreV1:
 
 
 class IRISVNextFit8TrainerV1:
-    """One step is one vectorized B=8 scene encode, one backward and one optimizer update."""
+    """One optimizer step has one B=8 scene encode and no subject-serial model loop."""
 
     def __init__(
         self,
@@ -454,6 +442,7 @@ class IRISVNextFit8TrainerV1:
         model_config=IRISVNextConfigV1(),
         policy=VNextFit8PolicyV1(),
         repo_root=None,
+        flexicubes_root=None,
     ):
         policy.validate()
         model_config.validate()
@@ -461,15 +450,35 @@ class IRISVNextFit8TrainerV1:
         self.policy = policy
         self.cohort = VNextFit8CohortV1(data_root, manifest, self.device)
         self.repo_root = Path(repo_root or Path(__file__).resolve().parents[3])
+
+        needs_surface = any(
+            stage.extraction_weight > 0 or stage.topology_weight > 0
+            for stage in policy.stages
+        )
+        self.extractor = None
+        flexi_identity = None
+        if needs_surface:
+            root = flexicubes_root or flexicubes_root_from_environment_v1()
+            self.extractor = PinnedFlexiCubesV1(
+                root,
+                device=self.device,
+                weight_scale=model_config.flexicubes_weight_scale,
+            )
+            flexi_identity = self.extractor.identity
+
         self.binding = {
-            "schema": "RealSaS.IRISVNextFit8Binding.v2",
+            "schema": "RealSaS.IRISVNextFit8Binding.v3",
             "source": _source_identity(self.repo_root),
             "manifest_sha256": _vh(manifest),
             "policy": asdict(policy),
             "model_config": asdict(model_config),
-            "optimizer_semantics": "ONE_BATCH8_SCENE_FORWARD__ONE_BACKWARD__ONE_STEP",
-            "curriculum_semantics": "G1__G2_EXTRACTION__M1__A1__R1__T1__J1",
+            "flexicubes": flexi_identity,
+            "optimizer_semantics": "ONE_BATCH8_SCENE_ENCODE__NO_SUBJECT_SERIAL_MODEL_FORWARD__ONE_BACKWARD__ONE_STEP",
+            "surface_witness_semantics": "MODEL_FIELD_TO_PINNED_FLEXICUBES_TO_TESSA_CANONICAL_XYZ",
+            "curriculum_semantics": "G1__G2_FLEXICUBES__M1__A1__R1__T1__J1",
             "teacher_inputs_in_inference_forward": False,
+            "direct_flexicubes_parameter_teacher_targets": False,
+            "teacher_surface_as_topology_witness": False,
         }
         self.binding_hash = _vh(self.binding)
         random.seed(policy.seed)
@@ -523,7 +532,7 @@ class IRISVNextFit8TrainerV1:
 
     def _payload(self):
         return {
-            "schema": "RealSaS.IRISVNextFit8Checkpoint.v2",
+            "schema": "RealSaS.IRISVNextFit8Checkpoint.v3",
             "binding": self.binding,
             "binding_sha256": self.binding_hash,
             "model": self.model.state_dict(),
@@ -591,6 +600,8 @@ class IRISVNextFit8TrainerV1:
             losses = {
                 "field": zero,
                 "extraction": zero,
+                "extraction_chamfer": zero,
+                "extraction_l_dev": zero,
                 "mechanical": zero,
                 "appearance": zero,
                 "relations": zero,
@@ -604,17 +615,29 @@ class IRISVNextFit8TrainerV1:
                     predicted["field"].float(), target.float()
                 )
 
-            if stage.extraction_weight > 0:
-                corners, target = self.cohort.extraction_batch(self.policy, next_step)
-                batch, cubes, _, _ = corners.shape
-                local = self.model.query_evidence(planes, corners.reshape(batch, cubes * 8, 3))
-                corner_h = local["H"].reshape(
-                    batch, cubes, 8, self.model.config.local_feature_dim
+            extracted = None
+            if stage.extraction_weight > 0 or stage.topology_weight > 0:
+                if self.extractor is None:
+                    raise RuntimeError("VNEXT_FIT8_EXTRACTOR_MISSING")
+                extracted = extract_surface_batch_v1(
+                    self.model,
+                    planes,
+                    self.extractor,
+                    resolution=self.model.config.extraction_training_resolution,
+                    witness_count=self.model.config.surface_witness_count,
+                    training=True,
                 )
-                predicted = self.model.scene_core.cube_extraction(corner_h)
-                losses["extraction"] = F.smooth_l1_loss(predicted.float(), target.float())
+                if stage.extraction_weight > 0:
+                    extraction_losses = extracted_surface_loss_v1(
+                        extracted,
+                        source["teacher_surface_points_iris"],
+                        l_dev_weight=self.policy.extraction_l_dev_weight,
+                        flexible_weight_l1=self.policy.extraction_flexible_weight_l1,
+                    )
+                    losses["extraction"] = extraction_losses["total"]
+                    losses["extraction_chamfer"] = extraction_losses["surface_chamfer"]
+                    losses["extraction_l_dev"] = extraction_losses["l_dev"]
 
-            mechanical_batch = None
             if stage.mechanical_weight > 0:
                 mechanical_batch = self.cohort.mechanical_batch(self.policy, next_step)
                 predicted = self.model.query_evidence(
@@ -664,11 +687,13 @@ class IRISVNextFit8TrainerV1:
                 losses["relations"] = graphics_relation_loss_v1(predicted, truth)
 
             if stage.topology_weight > 0:
-                witness = self.model.query_evidence(planes, source["topology_witness_xyz"])
+                if extracted is None:
+                    raise RuntimeError("VNEXT_FIT8_MODEL_SURFACE_WITNESS_MISSING")
+                witness = self.model.query_evidence(planes, extracted.witness_xyz_iris)
                 output = self.model.decode_topology(
                     scene_planes=planes,
-                    witness_xyz=source["topology_witness_xyz"],
-                    witness_normal=source["topology_witness_normal"],
+                    witness_xyz=extracted.witness_xyz_tessa,
+                    witness_normal=extracted.witness_normal,
                     witness_h=witness["H"],
                     witness_log_uncertainty=witness["log_uncertainty"],
                     witness_mechanical=witness["mechanical_demand"],
@@ -696,7 +721,7 @@ class IRISVNextFit8TrainerV1:
         self.stage_step += 1
         if self.step % self.policy.checkpoint_interval == 0:
             self.save()
-        return {
+        result = {
             "global_step": self.step,
             "stage": stage.stage_id,
             "stage_step": self.stage_step,
@@ -704,7 +729,12 @@ class IRISVNextFit8TrainerV1:
             **{f"{key}_loss": float(value.detach()) for key, value in losses.items()},
             "view_index": view_index,
             "batch_subjects": 8,
-            "scene_forwards": 1,
+            "shared_scene_encodes": 1,
+            "subject_serial_model_forward": False,
             "optimizer_steps": 1,
             "elapsed_seconds": time.monotonic() - self.started,
         }
+        if extracted is not None:
+            result["extracted_vertex_counts"] = extracted.extracted_vertex_counts
+            result["extracted_face_counts"] = extracted.extracted_face_counts
+        return result

@@ -1,129 +1,180 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-10-14
+**Date:** 2026-10-16
 **Canonical code line:** `main` only
-**Active architecture program:** Unified IRIS reconstruction redesign
-**Current plan authority:** `CURRENT_PLAN.md`
+**Active program:** return to the proven Knight-derived architecture, remove only the IRIS→TESSA representation bottleneck, then resume/restart Fit8
+**Deferred research:** broad Unified-IRIS / StdGEN++-inspired redesign, semantic-owner corpus/census, one-image synthesis, appearance/semantic/extraction expansion
 
-## Immediate state
+## Executive state
 
-The previously started shared IRIS Fit8 A100 training continuation has been **stopped by user decision** before completion because the current IRIS/TESSA representation is no longer accepted as the intended final architecture.
+The broad Unified IRIS redesign authorized on 2026-10-14 is now **DEFERRED by user decision**. It remains valuable research and must be preserved for later, but it is no longer the active architecture authority or a prerequisite for Fit8.
 
-The latest sealed stopped-run checkpoint was approximately global step **4400**. Preserve that run, checkpoint, result and trace as an **IRIS-vCurrent Fit8 control/baseline**. It did not mint Fit8 scientific PASS, unseen/generalization evidence or product authority. Do **not** resume it merely to reach the old 19,200-step schedule.
+Draft PRs `#113` and `#114` are explicitly marked deferred and must not be merged into `main` during the current Fit8 restart program.
 
-The active program is now a fresh redesign of the geometry front end:
+The project returns to the architecture that already produced the Knight animated demo:
 
 ```text
-one image
-   ↓
-Unified IRIS
-   ├─ internally synthesizes canonical 8-view evidence
-   ├─ shared high-capacity scene representation
-   ├─ geometry / SDF / uncertainty head
-   ├─ RGB/RGBA appearance head
-   ├─ generic semantic/ownership head
-   ├─ bounded extraction Δxyz + configuration head
-   └─ integrated topology head (TESSA role folded into IRIS)
-   ↓
+8-view source evidence
+    ↓
+IRIS
+    ↓
+TESSA learned topology proposal
+    ↓
 Compiler qualification / canonical M
-   ↓
-AXIS G
-   ↓
-MIRA W_M on exact M
-   ↓
-Compiler dynamic / appearance / presentation proof
-   ↓
+    ↓
+AXIS → canonical G
+    ↓
+MIRA → W_M on exact M
+    ↓
+Compiler mechanics / appearance / presentation / dynamic proof
+    ↓
 Runtime
 ```
 
-Read `CURRENT_PLAN.md` for the normative design program, open questions, dataset plan, DAG proposal and implementation order.
+AXIS, MIRA, CAA, presentation and runtime are **not reopened** by the current intervention.
 
-## User-authorized architecture decisions
+## The one pre-Fit8 architecture issue being fixed
 
-The following are active decisions, not pending proposals:
-
-1. **Final customer input is one PNG / one image.** IRIS may internally construct eight canonical 45-degree views.
-2. **The new IRIS starts at StdGEN-class representation capacity.** Do not spend a scientific run on a deliberately undersized model whose only purpose is later capacity escalation.
-3. **IRIS and TESSA are being partially unified.** The useful explicit topology-generation role survives as an IRIS topology head/module; the separate GSA→17-D→TESSA scene-understanding bottleneck is not the target architecture.
-4. **RGB/appearance and semantic/ownership heads are required.** They share the scene representation with geometry.
-5. **A bounded surface-extraction deformation/configuration head is required** if implemented safely; this is extraction-carrier deformation, not MIRA skeletal skinning.
-6. **Compiler boundaries are kept only where they are genuinely better:** immutable authority, provenance, independent courts, qualification, bounded generic repair, canonical addressing, mechanics/presentation proof and runtime sealing.
-7. **The deterministic contained tetra path remains valuable as an independent geometry witness/court**, not as a mandatory lossy neural bottleneck.
-8. **AXIS and MIRA remain separate downstream mechanics models for this intervention.** IRIS does not output a finished animated puppet.
-9. **The same eight diverse Fit8 subject identities remain the first architecture cohort.** Difficult subjects are not replaced to make the redesign easier.
-
-## Why the old geometry chain is being replaced
-
-The current shipped/research path is scientifically modular but throws away rich scene information between models:
+The current IRIS→TESSA interface throws away rich learned scene information:
 
 ```text
-IRIS image tokens / triplane
-   ↓
-SDF
-   ↓
-tetra zero surface
-   ↓
+IRIS image tokens / scene triplane
+    ↓
+continuous signed field
+    ↓
+deterministic tetra zero surface
+    ↓
 GSA / RiggingSurface
-   ↓
-17-D TESSA conditioning
-   ↓
-second learned surface encoder
-   ↓
-TESSA topology / XYZ proposal
+    ↓
+17-D per-node TESSA conditioning
+    ↓
+second learned TESSA surface encoder
+    ↓
+TESSA topology token decoder
 ```
 
-The new target keeps one shared scene representation alive through geometry, appearance, semantic ownership and topology prediction. Compiler stages may derive compact evidence for qualification/mechanics, but they should not force the neural system to discard scene knowledge and relearn it in a second model.
-
-## Current implementation versus target
-
-The repository implementation still contains the existing public model split:
+The 17-D row is exactly:
 
 ```text
-IRIS → TESSA → AXIS → MIRA → Compiler → Runtime
+XYZ(3)
+normal XYZ + valid(4)
+8 support-view bits
+normalized graph degree
+persistence bit
+= 17
 ```
 
-Current `SYSTEM_INDEX.md` describes that shipped implementation and remains useful for code ownership/navigation. It must not be mistaken for the newly approved target architecture before implementation lands.
+TESSA then projects this compressed representation back to a 768-D model and reconstructs a scene/surface memory with a separate learned encoder.
 
-The target under `CURRENT_PLAN.md` is:
+This is the active simplification target.
+
+## Approved narrow target
+
+Do **not** redesign the rest of RealSaS. Keep the proven IRIS signed-geometry model and the useful TESSA topology-token decoder, but remove TESSA as a second scene-understanding model.
+
+Target logical model boundary:
 
 ```text
-Unified IRIS (including topology/TESSA role)
-        ↓
-Compiler canonical M
-        ↓
-AXIS
-        ↓
-MIRA
-        ↓
-Compiler / Runtime
+8 RGB
+  ↓
+existing IRIS scene encoder / triplane Z
+  ├─ signed field → deterministic geometry witness/courts
+  │
+  └─ rich scene memory → bounded topology-memory adapter
+                         ↓
+                  existing TESSA topology decoder role
+                         ↓
+                 learned mesh proposal M*
 ```
 
-Do not silently relabel the current code as if this target already existed.
+The first implementation should consume the **existing IRIS scene planes directly** rather than modifying the core IRIS source merely to expose a new latent. This preserves compatibility with the existing Fit8 IRIS checkpoint lineage where possible.
 
-## Research-state consequence
+The legacy `17-D → TESSASurfaceEncoderV1` path remains only as compatibility/reproduction code; it is not the intended Fit8 topology path after this intervention.
 
-This intervention changes together:
+## Compiler authority around the simplified model
 
-- input cardinality and canonical-view synthesis;
-- IRIS model capacity;
-- shared scene representation;
-- geometry extraction;
-- RGB/appearance outputs;
-- semantic/ownership outputs;
-- topology/TESSA boundary;
-- compiler data flow;
-- teacher dataset;
-- released DAG.
+Model fusion does **not** mean Compiler authority moves into the network.
 
-Therefore the next scientific execution requires a **new EngineRelease and fresh/explicit child Attempt**. It is not a resume of the old Fit8 IRIS run.
+The learned topology proposal may be produced from IRIS scene memory before the geometry courts finish, but it remains non-authoritative evidence until the existing Compiler courts consume it.
 
-Any existing platform campaign/Attempt rows from the old Fit8 path may still be technically OPEN/RUNNING until operator cleanup is performed. Treat them as **superseded scientific state**, not permission to continue old learned work. Close/exit them through the Go control plane before starting the new attempt; do not edit old ledgers to manufacture a terminal result.
+Keep the current independent geometry/evidence chain:
 
-Immutable raw source identities may be reused where exact dependency identity still holds. Observation/model artifacts whose contracts change must be regenerated under the new release.
+```text
+Stage08 normalization authority
+        ↓
+IRIS signed field
+        ↓
+Stage12 deterministic zero-surface witness
+        ↓
+Stage13 geometry substrate qualification
+        ↓
+Stage14/15 GSA build + qualification
+        ↓
+Stage17 mechanical/component partition evidence
+```
 
-## New Fit8 meaning
+In parallel, from the **same IRIS scene representation**:
 
-Fit8 remains the heterogeneous architecture cohort:
+```text
+IRIS scene planes
+        ↓
+scene→topology memory adapter
+        ↓
+TESSA topology decoder role
+        ↓
+immutable learned proposal M*
+```
+
+Then the two paths meet at the existing Compiler carrier boundary:
+
+```text
+M* + qualified geometry/GSA/partition evidence
+        ↓
+Stage18 proposal binding + generic static repair + cross-evidence checks
+        ↓
+Stage19 exact canonical M
+        ↓
+AXIS → G
+        ↓
+MIRA → W_M
+```
+
+Important consequences:
+
+- GSA remains valuable Compiler/mechanics evidence.
+- Stage17 partition remains available for post-proposal support/binding.
+- GSA/partition are no longer the sole learned information channel into topology prediction.
+- `TESSAMaterialSupportFieldIR` remains a **post-proposal** material/mechanical support binding, not geometry authority and not the topology network input.
+- Compiler static repair, Stage19 remeasurement, source-fidelity courts and exact carrier authority remain unchanged in principle.
+
+This preserves the Knight authority chain while removing the neural information bottleneck.
+
+## Model integration policy
+
+The preferred first implementation is **logical IRIS+TESSA fusion with checkpoint-safe training**, not a broad end-to-end rewrite.
+
+1. Keep `SceneFirstSignedGeometryV4` source/checkpoint semantics unchanged if possible.
+2. Add a new topology-memory adapter that reads its existing `scene_planes` (`[B,3,64,64,64]` in the current Knight/Fit8 configuration).
+3. Convert those rich plane features plus explicit plane/coordinate position into a bounded fixed topology memory.
+4. Reuse the existing TESSA topology token grammar/decoder role.
+5. Do not feed the topology head the 17-D GSA summary as its scene representation.
+6. Preserve the old TESSA path for historical reproduction only.
+
+A single wrapper/checkpoint may later contain IRIS + topology head, but the first Fit8 restart should preserve causal isolation:
+
+- finish/resume IRIS geometry only if the stored checkpoint passes exact binding checks;
+- train the shared topology adapter/decoder across all eight subjects from the sealed IRIS representation;
+- keep IRIS frozen during the first topology-head fit unless a separately preregistered joint fine-tune is justified.
+
+This removes the bottleneck without simultaneously changing the geometry learner that already reached the Fit8 run.
+
+## Fit8 state
+
+The previously stopped shared IRIS Fit8 run reached approximately global step **4400**. Preserve it and its exact code/input/policy bindings.
+
+Because the active intervention now leaves the IRIS geometry model itself intact, that checkpoint is no longer rejected merely because of the deferred broad redesign. It may be resumed **only if** the existing resume guards prove exact dependency compatibility. Do not bypass or weaken those guards.
+
+Fit8 remains:
 
 - Snake
 - Bat
@@ -134,150 +185,40 @@ Fit8 remains the heterogeneous architecture cohort:
 - Shark
 - George
 
-The next experiment is no longer "finish IRIS-vCurrent 19.2k". It is:
+Knight remains a separate regression witness.
 
-> **Fit8 Unified IRIS Reconstruction + Canonical M Architecture Acceptance.**
+Fit8 proves shared-architecture/system closure, not unseen generalization.
 
-The model must remain shared across the cohort; compiler fixes must remain subject-free. Knight remains a separate fixed regression witness.
+## Explicitly deferred work
 
-Fit8 still establishes architecture/system closure, not learned unseen generalization. LOFO/unseen come after the redesigned architecture closes and is frozen.
+Do not put the following on the Fit8 critical path now:
 
-## New dataset program
+- one-image → internally generated eight views;
+- new appearance/RGBA head;
+- generic semantic/ownership head;
+- semantic owner cardinality census;
+- amodal/occlusion teacher-corpus expansion;
+- FlexiCubes-like extraction deformation/configuration head;
+- large StdGEN-class capacity replacement;
+- broad Unified IRIS teacher-corpus redesign;
+- AXIS or MIRA redesign;
+- new CAA/presentation architecture.
 
-The existing Fit8 authored 3D sources are retained and expanded into a deterministic teacher corpus rather than replaced.
+These remain research topics to revisit after Fit8 or when a specific measured failure requires them.
 
-For each asset, the new teacher pipeline should extract source-authored:
-
-```text
-object / mesh identity
-material slots
-geometry / topology
-armature / bone hierarchy
-skin weights
-parent / constraint relations
-rigid accessories
-available motion
-```
-
-and render canonical teacher evidence:
+## Immediate work order
 
 ```text
-RGB
-alpha
-depth
-normal
-instance/material IDs
-mechanical-owner evidence
-amodal component masks
-occlusion graph
-attachment graph
-```
-
-Primary semantics are category-agnostic instance/ownership/boundary/attachment/deformation-mode evidence. Human-only `body / cloth / hair` taxonomy is not the generic foundation.
-
-The same extractor should later scale to the larger audited authored corpus after Fit8 validation.
-
-## Canonical M target
-
-The intervention is judged by the final qualified `M`, not by a pretty static neural render.
-
-Desired `M` properties:
-
-- strong static geometry and source/canonical-view silhouette fidelity;
-- valid/manifold animation-friendly topology;
-- no unexplained holes/gaps or pathological slivers;
-- coherent owner/material addressing;
-- exact provenance back to shared IRIS evidence;
-- stable motion stretch/area/Jacobian/condition behavior;
-- low projected flip/self-intersection rates;
-- suitable basis for AXIS and exact-carrier MIRA;
-- 2D-oriented projection quality across eight directions;
-- later mobile/LOD reduction without changing the mechanical basis silently.
-
-The deterministic tetra surface remains an independent witness of the implicit field. A learned FlexiCubes-like explicit surface may improve reconstruction/training, while the integrated topology head remains responsible for an animation-oriented mesh proposal until dynamic evidence proves a simpler replacement.
-
-## Compiler policy during redesign
-
-Keep compiler work that is demonstrably valuable:
-
-- source/generated provenance;
-- independent geometry courts;
-- static mesh qualification;
-- bounded generic repair;
-- canonical M promotion;
-- SurfaceAddressing;
-- owner/fragment resolution;
-- source-wins appearance qualification;
-- AXIS/MIRA binding;
-- dynamic motion proof;
-- contact/grip/order/presentation proof;
-- runtime package/native parity.
-
-Retire or redesign work that exists only because separate models forgot each other's information, including the GSA→17-D→second-scene-encoder bottleneck and support reconstruction that can be replaced by direct shared-field bindings.
-
-Compiler repair is not permission for a weak model. If large repairs become routine, fix the model/head.
-
-## AXIS / MIRA boundary
-
-Current mechanics principle remains carrier-native:
-
-```text
-canonical M
-  → AXIS G
-  → MIRA W_M on exact M
-  → Compiler exact (M,G,W_M) proof
-```
-
-The AXIS input adapter should be redesigned to consume M-anchored rich surface evidence rather than depending on a pre-M lossy surface summary if that can be done cleanly. Exact adapter design remains open in `CURRENT_PLAN.md`.
-
-MIRA continues to predict on exact final M. No semantic skin transfer to another topology becomes canonical.
-
-## Current Knight baseline
-
-The approved Knight presentation/mechanics regression remains useful and unchanged in scope:
-
-- one canonical M for geometry/topology/motion;
-- source-wins RGB + existing CAA on M-face/barycentric addresses;
-- exact sealed regression artifacts remain historical/product-near witnesses;
-- grip/weapon relation and semantic overlap/draw-order remain known visual concerns;
-- Knight is not part of the Fit8 cohort and must not block it.
-
-Do not reinterpret the old Knight witness as proof of the new Unified IRIS architecture.
-
-## Platform / execution rules
-
-Canonical source remains on `main`.
-Research state belongs to Go `Attempt`; production state to `ProductRevision`.
-Do not create a long-lived research branch as architecture authority.
-
-Before new execution:
-
-1. finalize/exit superseded old Fit8 sessions through the Go control plane;
-2. land the new schemas/model/compiler/DAG implementation on main;
-3. mint a new EngineRelease;
-4. start a fresh/explicit child campaign/Attempt from source identity;
-5. run the new one-image Unified IRIS path;
-6. qualify canonical M, then AXIS/MIRA/mechanics/presentation.
-
-External Colab/A100 remains compute only; its checkpoint/result does not mint scientific qualification by itself.
-
-## Immediate priority
-
-Do **not** spend compute resuming IRIS-vCurrent.
-
-The current work order is:
-
-```text
-1. teacher-corpus schemas + deterministic extractor/normalizer
-2. Unified IRIS architecture/spec + code layout
-3. new model/compiler artifact schemas
-4. new dependency DAG / EngineRelease design
-5. full-capacity implementation
-6. CPU/GPU preflight and exact one-image-forward guards
-7. new Fit8 Unified attempt
-8. canonical M qualification
-9. AXIS/MIRA + dynamic proof
-10. LOFO/unseen only after architecture freeze
+1. keep deferred research PRs frozen
+2. implement checkpoint-safe IRIS-scene → topology-memory adapter
+3. reuse/refactor the existing TESSA token decoder without its 17-D scene encoder
+4. add tests proving topology memory depends on rich IRIS scene planes and not GSA 17-D
+5. preserve Stage12–19 Compiler authority/courts and adapt only the proposal import/binding contract where required
+6. run CPU/self-hosted engineering tests
+7. verify exact old Fit8 IRIS checkpoint compatibility
+8. resume/restart shared Fit8 IRIS as allowed by the binding
+9. train shared topology head across the same Fit8 cohort
+10. continue to AXIS and MIRA only after canonical M closes
 ```
 
 ## Required read order for agents
@@ -285,10 +226,10 @@ The current work order is:
 1. `CURRENT_STATE.md`
 2. `CURRENT_PLAN.md`
 3. `AGENTS.md`
-4. `docs/platform/EXECUTION_LANES.md`
-5. `docs/platform/AGENT_HANDOFF.md`
-6. `SYSTEM_INDEX.md` for current implementation ownership
-7. `canonical/CANONICAL_HANDOFF_20261007.md` for sealed mechanics provenance only
-8. older recovery/scientific material only when needed for provenance
+4. `SYSTEM_INDEX.md`
+5. `docs/corpus/FIT8_ADMISSION.md`
+6. `docs/platform/FIT8_PLATFORM_CAMPAIGN.md`
+7. `canonical/CANONICAL_HANDOFF_20261007.md` for proven Knight mechanics provenance
+8. deferred Unified-IRIS PRs/research only when explicitly revisiting that program
 
-When the user says only `continue / devam et`, continue the Unified IRIS redesign program in `CURRENT_PLAN.md`. **Do not resume the stopped old Fit8 A100 training.**
+When the user says only `continue / devam et`, continue the narrow IRIS→TESSA bottleneck removal and Fit8 restart program. Do **not** silently reactivate the broad Unified-IRIS redesign.

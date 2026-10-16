@@ -41,12 +41,14 @@ def _require_prepared_cohort(root: Path):
         raise FileNotFoundError("VNEXT_A100_PREPARED_COHORT_RECEIPT_REQUIRED")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
-    if receipt.get("schema") != "RealSaS.IRISVNextFit8PreparationReceipt.v1":
+    if receipt.get("schema") != "RealSaS.IRISVNextFit8PreparationReceipt.v2":
         raise ValueError("VNEXT_A100_PREPARATION_RECEIPT_SCHEMA_INVALID")
     if receipt.get("cohort_manifest_sha256") != sha256_file(manifest_path):
         raise ValueError("VNEXT_A100_COHORT_MANIFEST_HASH_DRIFT")
-    if manifest.get("schema") != "RealSaS.IRISVNextFit8Manifest.v3":
+    if manifest.get("schema") != "RealSaS.IRISVNextFit8Manifest.v4":
         raise ValueError("VNEXT_A100_COHORT_MANIFEST_SCHEMA_INVALID")
+    if manifest.get("builder") != "tools/iris_vnext/build_fit8_vnext_shards_v2.py":
+        raise ValueError("VNEXT_A100_COHORT_BUILDER_AUTHORITY_DRIFT")
     if manifest.get("legacy_optimizer_state_reused") is not False:
         raise ValueError("VNEXT_A100_LEGACY_OPTIMIZER_REUSE_FORBIDDEN")
     if receipt.get("scientific_fit_started") is not False:
@@ -122,6 +124,10 @@ def main():
     cohort_root = args.cohort_dir.resolve()
     manifest, preparation, manifest_path = _require_prepared_cohort(cohort_root)
     cfg = IRISVNextConfigV1()
+    if int(manifest["topology_coordinate_bins"]) != int(cfg.tessa_decoder_config().coordinate_bins):
+        raise ValueError("VNEXT_A100_TOPOLOGY_GRAMMAR_BIN_DRIFT")
+    if preparation.get("topology_teacher_collision_policy") != manifest.get("topology_teacher_collision_policy"):
+        raise ValueError("VNEXT_A100_TOPOLOGY_COLLISION_POLICY_DRIFT")
     policy = replace(
         VNextFit8PolicyV1(),
         checkpoint_interval=max(1000, args.geometry_steps + 1),
@@ -167,9 +173,6 @@ def main():
                     "memory": _cuda_snapshot(),
                 }
             )
-        # The temporary checkpoint directory is destroyed on exit and is forbidden
-        # as a scientific initializer.  FlexiCubes is probed separately because a
-        # random field is not expected to contain a valid learned object surface.
         flexi = _analytic_flexicubes_probe(args.flexicubes_root.resolve(), cfg)
 
     report = {
@@ -190,6 +193,7 @@ def main():
             "manifest_value_sha256": manifest["manifest_value_sha256"],
             "preparation_receipt_sha256": sha256_file(cohort_root / "PREPARATION_RECEIPT.json"),
             "subject_count": 8,
+            "topology_coordinate_bins": int(manifest["topology_coordinate_bins"]),
         },
         "geometry_optimizer_probe": {
             "steps": step_rows,

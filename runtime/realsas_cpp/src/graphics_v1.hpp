@@ -23,7 +23,7 @@ struct View {
     std::uint32_t view_index{};
     std::vector<std::uint8_t> visible_fragment;
     std::vector<std::uint32_t> topological_order;
-    std::vector<std::uint8_t> precedes; // transitive NxN matrix
+    std::vector<std::uint8_t> precedes;
 };
 
 struct Attachment {
@@ -82,7 +82,11 @@ inline bool face_visible(const State& s,std::uint32_t view,std::uint32_t face){
     if(view>=s.views.size()||face>=s.face_fragment_index.size())throw std::runtime_error("GRAPHICS_V1_VISIBILITY_INDEX_INVALID");return s.views[view].visible_fragment[s.face_fragment_index[face]]!=0;
 }
 inline bool explicit_precedence(const State& s,std::uint32_t view,std::uint32_t front_face,std::uint32_t back_face){
-    if(view>=s.views.size()||front_face>=s.face_fragment_index.size()||back_face>=s.face_fragment_index.size())throw std::runtime_error("GRAPHICS_V1_PRECEDENCE_INDEX_INVALID");const auto n=s.fragment_ids.size(),a=s.face_fragment_index[front_face],b=s.face_fragment_index[back_face];return a!=b&&s.views[view].precedes[static_cast<std::size_t>(a)*n+b]!=0;
+    if(view>=s.views.size()||front_face>=s.face_fragment_index.size()||back_face>=s.face_fragment_index.size())throw std::runtime_error("GRAPHICS_V1_PRECEDENCE_INDEX_INVALID");
+    const std::size_t n=s.fragment_ids.size();
+    const std::uint32_t a=s.face_fragment_index[front_face];
+    const std::uint32_t b=s.face_fragment_index[back_face];
+    return a!=b&&s.views[view].precedes[static_cast<std::size_t>(a)*n+b]!=0;
 }
 inline int compare_layers(const State& s,std::uint32_t view,std::uint32_t face_a,double depth_a,std::uint32_t face_b,double depth_b,double epsilon){
     if(!std::isfinite(depth_a)||!std::isfinite(depth_b)||epsilon<0)throw std::runtime_error("GRAPHICS_V1_COMPARE_INPUT_INVALID");if(explicit_precedence(s,view,face_a,face_b))return -1;if(explicit_precedence(s,view,face_b,face_a))return 1;if(depth_a<depth_b-epsilon)return -1;if(depth_b<depth_a-epsilon)return 1;return face_a<face_b?-1:(face_b<face_a?1:0);

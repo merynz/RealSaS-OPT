@@ -41,21 +41,32 @@ def _cfg():
         topology_source_width=16,
         appearance_descriptor_dim=8,
         relation_embedding_dim=8,
+        extraction_training_resolution=3,
+        surface_witness_count=12,
     )
 
 
 def _payload(subject: str, seed: int):
     generator = torch.Generator().manual_seed(seed)
+    source_generator = torch.Generator().manual_seed(314159)
     relation_shape = (8, 5)
     appearance_shape = (8, 6)
+    theta = torch.linspace(0.0, 2.0 * torch.pi, 12)
+    teacher_surface = torch.stack(
+        (0.45 * torch.cos(theta), 0.45 * torch.sin(theta), torch.zeros_like(theta)),
+        dim=-1,
+    )
     return {
         "subject_id": subject,
         "teacher_inputs_in_inference_forward": False,
-        "image_tokens": torch.randn(8, 2, 16, generator=generator),
-        "token_xy": torch.rand(8, 2, 2, generator=generator) * 2 - 1,
-        "camera_features": torch.randn(8, 5, generator=generator),
+        # Identical synthetic source evidence keeps the extraction sign-court
+        # deterministic across all eight subjects in this tiny CPU contract.
+        "image_tokens": torch.randn(8, 2, 16, generator=source_generator),
+        "token_xy": torch.rand(8, 2, 2, generator=source_generator) * 2 - 1,
+        "camera_features": torch.randn(8, 5, generator=source_generator),
         "geometry_points": torch.rand(7, 3, generator=generator) * 2 - 1,
         "geometry_targets": torch.zeros(7),
+        "teacher_surface_points_iris": teacher_surface,
         "mechanical_points": torch.rand(6, 3, generator=generator) * 2 - 1,
         "mechanical_normals": F.normalize(torch.randn(6, 3, generator=generator), dim=-1),
         "mechanical_stretch_major": torch.full((6,), 0.1),
@@ -63,8 +74,6 @@ def _payload(subject: str, seed: int):
         "mechanical_tangent_direction_2theta": torch.tensor([[1.0, 0.0]]).repeat(6, 1),
         "mechanical_bend_demand": torch.full((6,), 0.02),
         "mechanical_rigidity_probability": torch.full((6,), 0.8),
-        "cube_corner_points": torch.rand(5, 8, 3, generator=generator) * 2 - 1,
-        "cube_extraction_targets": torch.zeros(5, 21),
         "appearance_points": torch.rand(*appearance_shape, 3, generator=generator) * 2 - 1,
         "appearance_rgba": torch.rand(*appearance_shape, 4, generator=generator),
         "appearance_alpha_boundary": torch.randint(0, 2, appearance_shape, generator=generator).float(),
@@ -80,11 +89,27 @@ def _payload(subject: str, seed: int):
         "relation_occlusion_probability": torch.randint(0, 2, relation_shape, generator=generator).float(),
         "relation_visibility_probability_a": torch.randint(0, 2, relation_shape, generator=generator).float(),
         "relation_visibility_probability_b": torch.randint(0, 2, relation_shape, generator=generator).float(),
-        "topology_witness_xyz": torch.rand(6, 3, generator=generator) * 2 - 1,
-        "topology_witness_normal": F.normalize(torch.randn(6, 3, generator=generator), dim=-1),
         "topology_input_ids": torch.tensor([1, 2, 3, 4], dtype=torch.long),
         "topology_labels": torch.tensor([2, 3, 4, 1], dtype=torch.long),
     }
+
+
+def _center_test_field_on_zero(trainer: IRISVNextFit8TrainerV1) -> None:
+    """Test-only: guarantee a sign change for the tiny random synthetic model."""
+    with torch.no_grad():
+        source = trainer.cohort.tensors
+        planes = trainer.model.encode_scene(
+            source["image_tokens"], source["token_xy"], source["camera_features"]
+        )
+        grid, _ = trainer.extractor.construct_iris_grid(
+            trainer.model.config.extraction_training_resolution
+        )
+        grid = grid.to(trainer.device).unsqueeze(0).expand(8, -1, -1)
+        field = trainer.model.query_evidence(planes, grid)["field"]
+        low = field[0].min()
+        high = field[0].max()
+        assert float(high - low) > 1.0e-6
+        trainer.model.scene_core.field.field_head.bias.add_(-(low + high) * 0.5)
 
 
 def test_vnext_fit8_trainer_executes_complete_curriculum_as_real_batch8(tmp_path):
@@ -97,7 +122,7 @@ def test_vnext_fit8_trainer_executes_complete_curriculum_as_real_batch8(tmp_path
             {"subject_id": subject, "shard_file": path.name, "shard_sha256": _sha(path)}
         )
     manifest = {
-        "schema": "RealSaS.IRISVNextFit8Manifest.v1",
+        "schema": "RealSaS.IRISVNextFit8Manifest.v2",
         "teacher_inputs_in_inference_forward": False,
         "subjects": manifest_rows,
     }
@@ -123,7 +148,6 @@ def test_vnext_fit8_trainer_executes_complete_curriculum_as_real_batch8(tmp_path
     policy = VNextFit8PolicyV1(
         geometry_samples_per_subject=3,
         mechanical_samples_per_subject=2,
-        extraction_cubes_per_subject=2,
         appearance_samples_per_subject=3,
         relation_pairs_per_subject=3,
         checkpoint_interval=100,
@@ -139,14 +163,22 @@ def test_vnext_fit8_trainer_executes_complete_curriculum_as_real_batch8(tmp_path
         policy=policy,
     )
 
-    rows = [trainer.one_step() for _ in stages]
+    rows = []
+    for stage in stages:
+        if stage.extraction_weight > 0 or stage.topology_weight > 0:
+            _center_test_field_on_zero(trainer)
+        rows.append(trainer.one_step())
+
     assert [row["stage"] for row in rows] == [stage.stage_id for stage in stages]
     assert all(row["batch_subjects"] == 8 for row in rows)
-    assert all(row["scene_forwards"] == 1 for row in rows)
+    assert all(row["shared_scene_encodes"] == 1 for row in rows)
+    assert all(row["subject_serial_model_forward"] is False for row in rows)
     assert all(row["optimizer_steps"] == 1 for row in rows)
     assert rows[-1]["global_step"] == len(stages)
     assert all(torch.isfinite(torch.tensor(row["loss"])) for row in rows)
     assert rows[1]["extraction_loss"] > 0
+    assert rows[1]["extraction_chamfer_loss"] > 0
+    assert all(count > 0 for count in rows[1]["extracted_vertex_counts"])
     assert rows[3]["appearance_loss"] > 0
     assert rows[4]["relations_loss"] > 0
     assert rows[5]["topology_loss"] > 0

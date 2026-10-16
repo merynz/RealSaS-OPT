@@ -32,9 +32,27 @@ def test_vnext_fit8_final_preparation_receipt_binds_active_source_chain():
         assert f'"{path}"' in source
     assert "VNEXT_TEACHER_BATCH_EXPORTER_AUTHORITY_DRIFT" in source
     assert "VNEXT_TEACHER_BATCH_EXPORTER_SOURCE_HASH_DRIFT" in source
+    assert "VNEXT_TEACHER_BATCH_SOURCE_PROVENANCE_SCHEMA_INVALID" in source
+    assert "VNEXT_TEACHER_BATCH_SOURCE_PROVENANCE_SET_DRIFT" in source
+    assert "VNEXT_TEACHER_BATCH_SOURCE_PROVENANCE_HASH_DRIFT" in source
     assert '"active_preparation_source_provenance": source_provenance' in source
     assert '"source_commit_sha": source_commit_sha' in source
     assert '"source_commit_bound": source_commit_sha is not None' in source
+
+
+def test_teacher_batch_receipt_binds_full_v1_v2_v3_transport_chain():
+    source = _text("tools/iris_vnext/export_fit8_authored_teachers_v1.py")
+    required = (
+        "tools/iris_vnext/export_fit8_authored_teachers_v1.py",
+        "tools/iris_vnext/blender_authored_teacher_export_v1.py",
+        "tools/iris_vnext/blender_authored_teacher_export_v2.py",
+        "tools/iris_vnext/blender_authored_teacher_export_v3.py",
+    )
+    for path in required:
+        assert f'"{path}"' in source
+    assert '"teacher_source_provenance_schema": "RealSaS.IRISVNextFit8TeacherSourceProvenance.v1"' in source
+    assert '"teacher_source_provenance": teacher_source_provenance' in source
+    assert "teacher_sources={len(teacher_source_provenance)}" in source
 
 
 def test_rank_deficient_mechanical_truth_is_bound_into_preparation_seal():

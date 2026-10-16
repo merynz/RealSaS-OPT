@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-16",
+  "diagnostic_scope": "RAW_STAGE01_GLTF_SOURCE_ONLY__PRE_BLENDER__NOT_SCIENTIFIC_TRUTH",
+  "interpretation": "Exact-position duplicate vertices inside one edge-connected face component are sufficient to collide under the coordinate-only TESSA teacher grammar at every coordinate-bin resolution. They are candidates for training-only weld only after authored-motion trajectory equivalence is proven by the Blender teacher export. This census does not authorize a weld by itself.",
+  "method": {
+    "component_connectivity": "TRIANGLE_FACE_EDGE_CONNECTIVITY",
+    "duplicate_test": "EXACT_SOURCE_POSITION_EQUALITY_WITHIN_COMPONENT",
+    "fbx_subjects_measured": false,
+    "gltf_subjects_measured": true,
+    "material_or_semantic_labels_used": false
+  },
+  "rows": [
+    {
+      "edge_connected_component_count": 63,
+      "exact_duplicate_vertex_excess_count_within_component": 61,
+      "source_subject_id": "fit8_bat_v1",
+      "subject_id": "Bat"
+    },
+    {
+      "edge_connected_component_count": 1109,
+      "exact_duplicate_vertex_excess_count_within_component": 0,
+      "source_subject_id": "fit8_horse_v1",
+      "subject_id": "Horse"
+    },
+    {
+      "edge_connected_component_count": 4,
+      "exact_duplicate_vertex_excess_count_within_component": 95,
+      "source_subject_id": "fit8_greenblob_v1",
+      "subject_id": "GreenBlob"
+    },
+    {
+      "edge_connected_component_count": 598,
+      "exact_duplicate_vertex_excess_count_within_component": 215,
+      "source_subject_id": "fit8_george_v1",
+      "subject_id": "George"
+    }
+  ],
+  "schema": "RealSaS.VNextTopologyTeacherSourceCensus.v1",
+  "weld_authority_granted": false
+}

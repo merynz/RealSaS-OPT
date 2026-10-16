@@ -38,8 +38,12 @@ def _load_gate(cohort_dir: Path, preflight_path: Path):
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     preparation = json.loads(preparation_path.read_text(encoding="utf-8"))
     preflight = json.loads(preflight_path.read_text(encoding="utf-8"))
-    if preparation.get("schema") != "RealSaS.IRISVNextFit8PreparationReceipt.v1":
+    if preparation.get("schema") != "RealSaS.IRISVNextFit8PreparationReceipt.v2":
         raise ValueError("VNEXT_FIT8_PREPARATION_SCHEMA_INVALID")
+    if manifest.get("schema") != "RealSaS.IRISVNextFit8Manifest.v4":
+        raise ValueError("VNEXT_FIT8_COHORT_MANIFEST_SCHEMA_INVALID")
+    if manifest.get("builder") != "tools/iris_vnext/build_fit8_vnext_shards_v2.py":
+        raise ValueError("VNEXT_FIT8_COHORT_BUILDER_AUTHORITY_DRIFT")
     if preparation.get("cohort_manifest_sha256") != sha256_file(manifest_path):
         raise ValueError("VNEXT_FIT8_PREPARATION_MANIFEST_HASH_DRIFT")
     if preflight.get("schema") != "RealSaS.IRISVNextA100EngineeringPreflight.v1":
@@ -54,6 +58,10 @@ def _load_gate(cohort_dir: Path, preflight_path: Path):
         raise ValueError("VNEXT_FIT8_PREFLIGHT_COHORT_HASH_DRIFT")
     if preflight.get("cohort", {}).get("preparation_receipt_sha256") != sha256_file(preparation_path):
         raise ValueError("VNEXT_FIT8_PREFLIGHT_PREPARATION_HASH_DRIFT")
+    if int(preflight.get("cohort", {}).get("topology_coordinate_bins", -1)) != int(
+        manifest.get("topology_coordinate_bins", -2)
+    ):
+        raise ValueError("VNEXT_FIT8_PREFLIGHT_TOPOLOGY_GRAMMAR_DRIFT")
     if manifest.get("legacy_optimizer_state_reused") is not False:
         raise ValueError("VNEXT_FIT8_LEGACY_OPTIMIZER_REUSE_FORBIDDEN")
     if manifest.get("legacy_5400_checkpoint_reused") is not False:
@@ -84,12 +92,18 @@ def main():
     bound_manifest, manifest_path, preparation_path = _load_gate(
         cohort_dir, args.a100_preflight.resolve()
     )
+    cfg = IRISVNextConfigV1()
+    if int(bound_manifest["topology_coordinate_bins"]) != int(
+        cfg.tessa_decoder_config().coordinate_bins
+    ):
+        raise ValueError("VNEXT_FIT8_MODEL_TOPOLOGY_GRAMMAR_BIN_DRIFT")
     args.checkpoint_dir.mkdir(parents=True, exist_ok=True)
     start_receipt = {
-        "schema": "RealSaS.IRISVNextFit8ScientificStart.v1",
+        "schema": "RealSaS.IRISVNextFit8ScientificStart.v2",
         "cohort_manifest_sha256": sha256_file(manifest_path),
         "preparation_receipt_sha256": sha256_file(preparation_path),
         "a100_preflight_sha256": sha256_file(args.a100_preflight.resolve()),
+        "topology_coordinate_bins": int(bound_manifest["topology_coordinate_bins"]),
         "legacy_5400_checkpoint_reused": False,
         "legacy_optimizer_state_reused": False,
         "device": device_name,
@@ -109,7 +123,7 @@ def main():
         manifest=bound_manifest,
         checkpoint_root=args.checkpoint_dir,
         device="cuda",
-        model_config=IRISVNextConfigV1(),
+        model_config=cfg,
         policy=VNextFit8PolicyV1(),
         flexicubes_root=args.flexicubes_root.resolve(),
     )
@@ -119,7 +133,7 @@ def main():
         except StopIteration:
             trainer.save()
             complete = {
-                "schema": "RealSaS.IRISVNextFit8TrainingComplete.v1",
+                "schema": "RealSaS.IRISVNextFit8TrainingComplete.v2",
                 "global_step": int(trainer.step),
                 "binding_sha256": trainer.binding_hash,
                 "training_complete": True,

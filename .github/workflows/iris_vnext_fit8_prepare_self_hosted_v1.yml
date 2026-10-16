@@ -29,6 +29,8 @@ jobs:
       RUN_ROOT: /home/monster/realsas_authority/runs/FIT8_IRIS_VNEXT_20261016
       STAGE01_FILE_ID: 1PcxT2rfb9jCHfP75gaqMAo90OU7JRypH
       STAGE01_SHA256: 9d9c9cbf63c979326cd2f39f5435006b81dddb201028a34ebb4cf10e1b434936
+      LEGACY_MANIFEST_FILE_ID: 1PJ-SxGVS6F6pHUFgB8Kws69X9wS5aywa
+      LEGACY_MANIFEST_SHA256: 088283fbca5ac6c95dc8d9fedadaafbf9bf82603cc6bee28948af995945e5053
       LEGACY_REMOTE: 'gdrive:RealSaS_Fit8_IRIS_Inputs_20261013'
       OUTPUT_REMOTE: 'gdrive:RealSaS_Fit8_IRIS_vNext_20261016'
 
@@ -105,6 +107,8 @@ jobs:
           printf '%s  %s\n' "$STAGE01_SHA256" "$stage_zip" | sha256sum --check -
           unzip -q "$stage_zip" -d "$RUN_ROOT/stage01"
           rclone copy "$LEGACY_REMOTE" "$RUN_ROOT/legacy_download" --checksum
+          rclone backend copyid gdrive: "$LEGACY_MANIFEST_FILE_ID" "$RUN_ROOT/legacy_download/COHORT_MANIFEST.json"
+          printf '%s  %s\n' "$LEGACY_MANIFEST_SHA256" "$RUN_ROOT/legacy_download/COHORT_MANIFEST.json" | sha256sum --check -
           python - <<'PY'
           import hashlib,json,os,shutil
           from pathlib import Path

@@ -44,7 +44,8 @@ def test_teacher_and_cohort_materialization_are_behind_fail_closed_binding():
     assert "build_fit8_vnext_shards_v2.py" in prepare
     assert "canonicalize_vnext_topology_teacher_v1" in builder
     assert "VNEXT_TESSA_UNRESOLVED_POSITION_COLLISION" in builder
-    assert "MOTION_EQUIVALENT_EXACT_SEAM_WELD_THEN_ZERO_RESIDUAL_QUANTIZED_COLLISIONS_REQUIRED" in builder
+    assert "MOTION_EQUIVALENT_EXACT_SEAM_WELD_THEN_BOUNDED_TRAINING_ONLY_QUANTIZED_IDENTITY_LIFT_THEN_ZERO_RESIDUAL_COLLISIONS_REQUIRED" in builder
+    assert "quantized_identity_lift" in topology
     assert "product_geometry_authority" in topology
     assert '"legacy_optimizer_state_reused": False' in builder
     assert '"legacy_5400_checkpoint_reused": False' in builder

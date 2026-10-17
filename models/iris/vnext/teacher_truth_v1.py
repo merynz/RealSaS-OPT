@@ -154,25 +154,76 @@ def _adjacency(faces):
     return tuple(tuple(value) for value in edges.values() if len(value) == 2)
 
 
-def _bend(rest_normals, posed_normals, faces, degenerate_mask):
-    """Compute conservative bend demand for rank-deficient posed faces."""
+def _bend_precompute(rest_normals, faces):
+    """Build immutable adjacent-face pairs and rest angles once per subject."""
+
+    pairs = np.asarray(_adjacency(faces), dtype=np.int64)
+    if pairs.size == 0:
+        return (
+            np.empty((0,), dtype=np.int64),
+            np.empty((0,), dtype=np.int64),
+            np.empty((0,), dtype=np.float64),
+        )
+    pairs = pairs.reshape(-1, 2)
+    edge_a, edge_b = pairs[:, 0], pairs[:, 1]
+    rest_dot = np.clip(
+        np.einsum("ij,ij->i", rest_normals[edge_a], rest_normals[edge_b]),
+        -1.0,
+        1.0,
+    )
+    return edge_a, edge_b, np.arccos(rest_dot)
+
+
+def _bend_precomputed(
+    posed_normals,
+    degenerate_mask,
+    face_count,
+    edge_a,
+    edge_b,
+    rest_angles,
+):
+    """Vectorized conservative bend demand with precomputed adjacency."""
 
     degenerate = np.asarray(degenerate_mask, dtype=bool)
-    if degenerate.shape != (len(faces),):
+    if degenerate.shape != (int(face_count),):
         raise ValueError("MECHANICAL_TRUTH_DEGENERATE_MASK_SHAPE_INVALID")
-    out = np.zeros(len(faces), dtype=np.float64)
+    out = np.zeros(int(face_count), dtype=np.float64)
     out[degenerate] = math.pi
-    for a, b in _adjacency(faces):
-        if degenerate[a] or degenerate[b]:
-            out[a] = max(out[a], math.pi)
-            out[b] = max(out[b], math.pi)
-            continue
-        rest_dot = float(np.clip(np.dot(rest_normals[a], rest_normals[b]), -1, 1))
-        posed_dot = float(np.clip(np.dot(posed_normals[a], posed_normals[b]), -1, 1))
-        delta = abs(math.acos(posed_dot) - math.acos(rest_dot))
-        out[a] = max(out[a], delta)
-        out[b] = max(out[b], delta)
+    if len(edge_a) == 0:
+        return out
+
+    pair_degenerate = degenerate[edge_a] | degenerate[edge_b]
+    if np.any(pair_degenerate):
+        out[edge_a[pair_degenerate]] = math.pi
+        out[edge_b[pair_degenerate]] = math.pi
+
+    regular = ~pair_degenerate
+    if np.any(regular):
+        a = edge_a[regular]
+        b = edge_b[regular]
+        posed_dot = np.clip(
+            np.einsum("ij,ij->i", posed_normals[a], posed_normals[b]),
+            -1.0,
+            1.0,
+        )
+        delta = np.abs(np.arccos(posed_dot) - rest_angles[regular])
+        np.maximum.at(out, a, delta)
+        np.maximum.at(out, b, delta)
     return out
+
+
+def _bend(rest_normals, posed_normals, faces, degenerate_mask):
+    """Compatibility wrapper for the original bend helper contract."""
+
+    edge_a, edge_b, rest_angles = _bend_precompute(rest_normals, faces)
+    return _bend_precomputed(
+        posed_normals,
+        degenerate_mask,
+        len(faces),
+        edge_a,
+        edge_b,
+        rest_angles,
+    )
 
 
 def _edge_strain(rest, posed, faces, eps):
@@ -206,6 +257,7 @@ def build_mechanical_demand_truth_v1(
     policy.validate()
     rest, tri, posed = _validate(rest_vertices, faces, posed_vertices)
     inv_dm, rest_area, rest_normals = _basis(rest, tri, policy.epsilon)
+    bend_edge_a, bend_edge_b, bend_rest_angles = _bend_precompute(rest_normals, tri)
 
     major_rows = []
     minor_rows = []
@@ -234,7 +286,16 @@ def build_mechanical_demand_truth_v1(
         direction_valid_rows.append(direction_valid)
         area_rows.append(np.abs(area_ratio - 1))
         condition_rows.append(condition)
-        bend_rows.append(_bend(rest_normals, normals, tri, degenerate))
+        bend_rows.append(
+            _bend_precomputed(
+                normals,
+                degenerate,
+                len(tri),
+                bend_edge_a,
+                bend_edge_b,
+                bend_rest_angles,
+            )
+        )
         edge_rows.append(_edge_strain(rest, frame, tri, policy.epsilon))
         degenerate_rows.append(degenerate)
 
@@ -301,6 +362,7 @@ def build_mechanical_demand_truth_v1(
                 "VALID_DEFORMATION_EVIDENCE__3X2_DEFORMATION_GRADIENT__"
                 "DEGENERATE_BEND_CONSERVATIVE_PI"
             ),
+            "bend_execution_policy": "PRECOMPUTED_ADJACENCY__VECTORIZED_EDGE_REDUCTION",
             "pose_degenerate_face_samples": int(degenerate.sum()),
             "pose_degenerate_face_count": int(degenerate_face_any.sum()),
             "pose_degenerate_frame_count": int(degenerate_frame_any.sum()),

@@ -3,17 +3,15 @@ from __future__ import annotations
 """Training-only canonicalization for authored topology supervision.
 
 TESSA V1 identifies vertices by quantized XYZ. Authored assets frequently split a
-mechanically identical vertex for UV/material seams.  IRIS vNext may collapse a
-seam split for topology supervision only when all three facts are proven:
+mechanically identical vertex for UV/material seams. IRIS vNext first collapses
+only motion-equivalent exact seam duplicates. Any remaining within-component
+TESSA coordinate collision is then resolved by a deterministic, bounded,
+training-only identity lift into a nearby free quantization cell.
 
-1. the vertices occur in the same face-connected source component;
-2. their rest positions are exactly identical in normalized IRIS coordinates;
-3. their complete sampled authored trajectories agree within a tight tolerance.
-
-This does not alter appearance truth, source ownership, authored mechanical truth,
-or product geometry authority.  A coincident pair that separates under motion is
-never welded.  After the safe weld we explicitly census residual TESSA coordinate
-collisions and fail the cohort builder rather than weakening the tokenizer guard.
+The lift preserves vertex count and face connectivity, applies the same tiny
+translation to the complete sampled authored trajectory for a moved vertex, and
+never changes appearance truth, source ownership, authored mechanical truth, or
+product geometry authority. Residual coordinate collisions still fail closed.
 """
 
 from dataclasses import dataclass
@@ -180,6 +178,189 @@ def _quantized_collision_census(vertices_iris: np.ndarray, faces: np.ndarray, bi
     }
 
 
+def _project_iris_point_into_quantized_cell(
+    point_iris: np.ndarray,
+    qxyz: tuple[int, int, int],
+    bins: int,
+) -> np.ndarray:
+    """Return the smallest coordinate move whose TESSA quantization is qxyz."""
+    p = np.asarray(point_iris, dtype=np.float64) * 0.5
+    q = np.asarray(qxyz, dtype=np.int64)
+    lo = q.astype(np.float64) / float(bins) - 0.5
+    hi = (q.astype(np.float64) + 1.0) / float(bins) - 0.5
+    hi = np.nextafter(hi, lo)
+    projected = np.minimum(np.maximum(p, lo), hi)
+    out = projected * 2.0
+    check = quantize_tessa_xyz_v1(out.reshape(1, 3) * 0.5, int(bins))[0]
+    if tuple(map(int, check.tolist())) != tuple(map(int, qxyz)):
+        raise AssertionError("VNEXT_TOPOLOGY_TEACHER_IDENTITY_LIFT_QUANTIZATION_DRIFT")
+    return out
+
+
+def _candidate_quantized_cells(
+    base: tuple[int, int, int],
+    bins: int,
+    max_radius_bins: int,
+):
+    bx, by, bz = map(int, base)
+    for radius in range(1, int(max_radius_bins) + 1):
+        shell = []
+        for dx in range(-radius, radius + 1):
+            for dy in range(-radius, radius + 1):
+                for dz in range(-radius, radius + 1):
+                    if max(abs(dx), abs(dy), abs(dz)) != radius:
+                        continue
+                    q = (bx + dx, by + dy, bz + dz)
+                    if min(q) < 0 or max(q) >= int(bins):
+                        continue
+                    shell.append((dx, dy, dz, q))
+        shell.sort(
+            key=lambda row: (
+                row[0] * row[0] + row[1] * row[1] + row[2] * row[2],
+                abs(row[0]) + abs(row[1]) + abs(row[2]),
+                row[3],
+            )
+        )
+        for row in shell:
+            yield radius, row[3]
+
+
+def _injective_quantized_identity_lift(
+    vertices_iris: np.ndarray,
+    posed_vertices_iris: np.ndarray,
+    faces: np.ndarray,
+    *,
+    bins: int,
+    max_radius_bins: int = 2,
+):
+    """Make quantized vertex identity injective per face-connected component.
+
+    Original quantized cells are reserved. Within each colliding group one anchor
+    remains untouched; every additional vertex is translated by the minimum
+    amount needed to enter a nearby unused cell. The same translation is applied
+    to every sampled pose of that vertex so authored displacement trajectories
+    remain unchanged.
+    """
+    if int(max_radius_bins) < 1:
+        raise ValueError("VNEXT_TOPOLOGY_TEACHER_IDENTITY_LIFT_RADIUS_INVALID")
+    rest = np.asarray(vertices_iris, dtype=np.float64).copy()
+    posed = np.asarray(posed_vertices_iris, dtype=np.float64).copy()
+    source_rest = rest.copy()
+    source_q = quantize_tessa_xyz_v1(source_rest * 0.5, int(bins))
+    components = connected_face_components_v1(faces)
+
+    moved = []
+    component_rows = []
+    for component_index, face_ids in enumerate(components):
+        vertex_ids = sorted(
+            set(map(int, faces[np.asarray(face_ids, dtype=np.int64)].reshape(-1).tolist()))
+        )
+        by_q: dict[tuple[int, int, int], list[int]] = {}
+        for vi in vertex_ids:
+            by_q.setdefault(tuple(map(int, source_q[vi].tolist())), []).append(vi)
+        collision_groups = [
+            (key, sorted(ids)) for key, ids in sorted(by_q.items()) if len(ids) > 1
+        ]
+        used = set(by_q.keys())
+        component_moved = 0
+        component_radius = 0
+
+        for base_key, ids in collision_groups:
+            center_tessa = (np.asarray(base_key, dtype=np.float64) + 0.5) / float(bins) - 0.5
+            center_iris = center_tessa * 2.0
+            anchor = min(
+                ids,
+                key=lambda vi: (
+                    float(np.max(np.abs(source_rest[vi] - center_iris))),
+                    float(np.linalg.norm(source_rest[vi] - center_iris)),
+                    int(vi),
+                ),
+            )
+            for vi in ids:
+                if vi == anchor:
+                    continue
+                best = None
+                for radius, qxyz in _candidate_quantized_cells(
+                    base_key, int(bins), int(max_radius_bins)
+                ):
+                    if qxyz in used:
+                        continue
+                    projected = _project_iris_point_into_quantized_cell(
+                        source_rest[vi], qxyz, int(bins)
+                    )
+                    delta = projected - source_rest[vi]
+                    score = (
+                        float(np.max(np.abs(delta))),
+                        float(np.linalg.norm(delta)),
+                        int(radius),
+                        tuple(map(int, qxyz)),
+                    )
+                    if best is None or score < best[0]:
+                        best = (score, projected, delta, qxyz, radius)
+                if best is None:
+                    raise ValueError(
+                        "VNEXT_TOPOLOGY_TEACHER_IDENTITY_LIFT_EXHAUSTED:"
+                        f"component={component_index}:vertex={vi}:base={base_key}:"
+                        f"radius={int(max_radius_bins)}"
+                    )
+                _, projected, delta, qxyz, radius = best
+                rest[vi] = projected
+                posed[:, vi] = posed[:, vi] + delta
+                used.add(tuple(map(int, qxyz)))
+                component_moved += 1
+                component_radius = max(component_radius, int(radius))
+                moved.append(
+                    {
+                        "component_index": int(component_index),
+                        "vertex_index": int(vi),
+                        "source_quantized_xyz": list(map(int, base_key)),
+                        "lifted_quantized_xyz": list(map(int, qxyz)),
+                        "max_abs_displacement_iris": float(np.max(np.abs(delta))),
+                        "l2_displacement_iris": float(np.linalg.norm(delta)),
+                    }
+                )
+
+        component_rows.append(
+            {
+                "component_index": int(component_index),
+                "source_collision_group_count": int(len(collision_groups)),
+                "moved_vertex_count": int(component_moved),
+                "max_search_radius_bins_used": int(component_radius),
+            }
+        )
+
+    final_q = quantize_tessa_xyz_v1(rest * 0.5, int(bins))
+    for component_index, face_ids in enumerate(components):
+        vertex_ids = sorted(
+            set(map(int, faces[np.asarray(face_ids, dtype=np.int64)].reshape(-1).tolist()))
+        )
+        keys = [tuple(map(int, final_q[vi].tolist())) for vi in vertex_ids]
+        if len(keys) != len(set(keys)):
+            raise ValueError(
+                "VNEXT_TOPOLOGY_TEACHER_IDENTITY_LIFT_RESIDUAL_COLLISION:"
+                f"component={component_index}"
+            )
+
+    return rest, posed, {
+        "schema": "RealSaS.IRISVNextTopologyTeacherQuantizedIdentityLift.v1",
+        "training_only": True,
+        "product_geometry_authority": False,
+        "face_connectivity_changed": False,
+        "vertex_count_changed": False,
+        "coordinate_bins": int(bins),
+        "max_search_radius_bins": int(max_radius_bins),
+        "moved_vertex_count": int(len(moved)),
+        "max_abs_displacement_iris": float(
+            max((row["max_abs_displacement_iris"] for row in moved), default=0.0)
+        ),
+        "max_l2_displacement_iris": float(
+            max((row["l2_displacement_iris"] for row in moved), default=0.0)
+        ),
+        "components": component_rows,
+        "examples": moved[:16],
+    }
+
+
 def canonicalize_vnext_topology_teacher_v1(
     rest_iris,
     posed_iris,
@@ -232,28 +413,46 @@ def canonicalize_vnext_topology_teacher_v1(
     canonical_rest = np.concatenate(vertices_out, axis=0)
     canonical_posed = np.concatenate(posed_out, axis=1)
     canonical_faces = np.concatenate(faces_out, axis=0)
-    collision = _quantized_collision_census(
+
+    collision_before_lift = _quantized_collision_census(
         canonical_rest, canonical_faces, int(coordinate_bins)
     )
+    lifted_rest, lifted_posed, lift_metadata = _injective_quantized_identity_lift(
+        canonical_rest,
+        canonical_posed,
+        canonical_faces,
+        bins=int(coordinate_bins),
+    )
+    collision = _quantized_collision_census(
+        lifted_rest, canonical_faces, int(coordinate_bins)
+    )
+    if int(collision["collision_group_count"]) != 0:
+        raise ValueError(
+            "VNEXT_TOPOLOGY_TEACHER_RESIDUAL_QUANTIZED_COLLISION_AFTER_IDENTITY_LIFT"
+        )
+
     metadata = {
-        "schema": "RealSaS.IRISVNextTopologyTeacherCanonicalization.v1",
+        "schema": "RealSaS.IRISVNextTopologyTeacherCanonicalization.v2",
         "training_only": True,
         "product_geometry_authority": False,
         "appearance_or_material_identity_used_for_weld": False,
         "weld_rule": "SAME_EDGE_CONNECTED_COMPONENT__EXACT_REST_XYZ__ALL_SAMPLED_AUTHORED_TRAJECTORIES_WITHIN_TOLERANCE",
+        "quantized_identity_lift_rule": "PER_COMPONENT__RESERVE_SOURCE_CELLS__MINIMUM_DISPLACEMENT_TO_NEARBY_FREE_TESSA_CELL__PRESERVE_FACES_AND_VERTEX_COUNT",
         "trajectory_tolerance_iris": float(trajectory_tolerance),
         "source_vertex_count": int(len(rest)),
         "source_face_count": int(len(source_faces)),
-        "output_vertex_count": int(len(canonical_rest)),
+        "output_vertex_count": int(len(lifted_rest)),
         "output_face_count": int(len(canonical_faces)),
         "component_count": int(len(components)),
         **{key: int(value) for key, value in totals.items()},
+        "quantized_collision_census_before_identity_lift": collision_before_lift,
+        "quantized_identity_lift": lift_metadata,
         "quantized_collision_census": collision,
         "components": component_rows,
     }
     return VNextTopologyTeacherMeshV1(
-        vertices_iris=canonical_rest,
-        posed_vertices_iris=canonical_posed,
+        vertices_iris=lifted_rest,
+        posed_vertices_iris=lifted_posed,
         faces=canonical_faces,
         metadata=metadata,
     )

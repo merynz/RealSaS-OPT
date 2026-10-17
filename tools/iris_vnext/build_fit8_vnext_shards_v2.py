@@ -2,11 +2,13 @@ from __future__ import annotations
 
 """Active IRIS vNext Fit8 cohort builder.
 
-V2 reuses the proven V1 source-ray/mechanical bank machinery, but topology
-supervision has one additional authority court: mechanically equivalent authored
-seam duplicates are training-only welded before TESSA serialization, and any
-remaining coordinate collision fails closed. Raw authored faces/owners/materials
-remain unchanged for appearance, relations and mechanical-demand truth.
+V2 reuses the proven V1 source-ray/mechanical bank machinery. Topology
+supervision has an additional training-only authority court: mechanically
+equivalent authored seam duplicates are safely welded, remaining TESSA
+quantization identity collisions receive a bounded deterministic identity lift,
+and serialization still requires zero residual coordinate collisions. Raw
+authored faces/owners/materials remain unchanged for appearance, relations and
+mechanical-demand truth.
 """
 
 import argparse
@@ -275,6 +277,9 @@ def main():
             }
         )
 
+    if topology_cfg is None:
+        raise RuntimeError("VNEXT_SHARD_TOPOLOGY_CONFIG_MISSING")
+
     manifest = {
         "schema": "RealSaS.IRISVNextFit8Manifest.v4",
         "builder": "tools/iris_vnext/build_fit8_vnext_shards_v2.py",
@@ -288,7 +293,7 @@ def main():
         "topology_window_shape": [max_windows, max_length],
         "topology_pad_token": int(topology_cfg.PAD),
         "topology_coordinate_bins": int(topology_cfg.coordinate_bins),
-        "topology_teacher_collision_policy": "MOTION_EQUIVALENT_EXACT_SEAM_WELD_THEN_ZERO_RESIDUAL_QUANTIZED_COLLISIONS_REQUIRED",
+        "topology_teacher_collision_policy": "MOTION_EQUIVALENT_EXACT_SEAM_WELD_THEN_BOUNDED_TRAINING_ONLY_QUANTIZED_IDENTITY_LIFT_THEN_ZERO_RESIDUAL_COLLISIONS_REQUIRED",
         "policy": {
             "surface_points": int(args.surface_points),
             "mechanical_points": int(args.mechanical_points),

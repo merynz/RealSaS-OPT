@@ -21,7 +21,7 @@ on:
 
 concurrency:
   group: iris-vnext-fit8-prepare-self-hosted-v1
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -259,6 +259,7 @@ jobs:
           manifest=json.loads((root/'COHORT_MANIFEST.json').read_text())
           receipt=json.loads((root/'PREPARATION_RECEIPT.json').read_text())
           assert manifest['schema']=='RealSaS.IRISVNextFit8Manifest.v4'
+          assert manifest['topology_teacher_collision_policy']=='MOTION_EQUIVALENT_EXACT_SEAM_WELD_THEN_BOUNDED_TRAINING_ONLY_QUANTIZED_IDENTITY_LIFT_THEN_ZERO_RESIDUAL_COLLISIONS_REQUIRED'
           assert receipt['scientific_fit_started'] is False
           assert receipt['scientific_fit_pass_claimed'] is False
           assert receipt['source_commit_bound'] is True
@@ -271,9 +272,13 @@ jobs:
           assert len(rows)==8
           for row in rows:
               topo=row['metadata']['topology_teacher']
-              census=topo['canonicalization']['quantized_collision_census']
+              canonicalization=topo['canonicalization']
+              lift=canonicalization['quantized_identity_lift']
+              census=canonicalization['quantized_collision_census']
+              assert lift['training_only'] is True, row['subject_id']
+              assert lift['product_geometry_authority'] is False, row['subject_id']
               assert int(census['collision_group_count'])==0, (row['subject_id'],census)
-              assert int(census['colliding_vertex_count'])==0, (row['subject_id'],census)
+              assert int(census['colliding_vertex_excess_count'])==0, (row['subject_id'],census)
           assert 'source_provenance' in manifest and manifest['source_provenance']
           print('VNEXT_FIT8_PREPARATION_SEAL_PASS',manifest['manifest_value_sha256'],receipt['source_commit_sha'])
           PY

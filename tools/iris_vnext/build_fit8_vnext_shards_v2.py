@@ -2,17 +2,18 @@ from __future__ import annotations
 
 """Active IRIS vNext Fit8 cohort builder.
 
-V2 reuses the proven V1 source-ray/mechanical bank machinery. Topology
-supervision has an additional training-only authority court: mechanically
-equivalent authored seam duplicates are safely welded, remaining TESSA
-quantization identity collisions receive a bounded deterministic identity lift,
-and serialization still requires zero residual coordinate collisions. Raw
-authored faces/owners/materials remain unchanged for appearance, relations and
-mechanical-demand truth.
+V2 reuses the proven V1 source/mechanical bank machinery. Topology supervision
+has an additional training-only authority court: mechanically equivalent authored
+seam duplicates are safely welded, remaining TESSA quantization identity
+collisions receive a bounded deterministic identity lift, and serialization still
+requires zero residual coordinate collisions. Raw authored faces/owners/materials
+remain unchanged for appearance, relations and mechanical-demand truth.
 
-The eight source views of one subject are independent deterministic courts. They
-are materialized concurrently to keep the sealed preparation practical without
-changing samples, seeds, ordering, or any scientific target semantics.
+The eight source views of one subject are independent deterministic courts. Their
+orthographic rays are intersected with an exact-equivalent projected triangle
+uniform grid rather than an O(rays*faces) brute-force sweep. First/second face tie
+ordering and Moller-Trumbore tolerances remain preserved. Views are materialized
+concurrently while output ordering remains V0..V7.
 """
 
 import argparse
@@ -20,6 +21,7 @@ from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
 from pathlib import Path
+import time
 
 import numpy as np
 import torch
@@ -31,6 +33,7 @@ from models.tessa.v1.training_data_v1 import (
     build_teacher_asset_sequence_v1,
     build_truncated_teacher_windows_v1,
 )
+import tools.iris_vnext.build_fit8_vnext_shards_v1 as shard_v1
 from tools.iris_vnext.build_fit8_vnext_shards_v1 import (
     SUBJECT_SOURCE_IDS,
     _build_view_banks,
@@ -42,6 +45,9 @@ from tools.iris_vnext.build_fit8_vnext_shards_v1 import (
     _sha,
     _tensor,
 )
+
+_RAY_GRID_SIZE = 32
+_RAY_BACKEND = "PARALLEL_ORTHOGRAPHIC_PROJECTED_GRID_EXACT_EQUIVALENT_V1"
 
 
 def _args():
@@ -91,12 +97,214 @@ def _source_provenance_v2() -> dict:
         Path(__file__).resolve(),
         repo / "models/iris/vnext/contracts_v1.py",
         repo / "models/iris/vnext/topology_teacher_v1.py",
+        repo / "models/iris/vnext/teacher_truth_v1.py",
         repo / "models/tessa/v1/training_data_v1.py",
         repo / "tools/iris_vnext/build_fit8_vnext_shards_v1.py",
     )
+    return {str(path.relative_to(repo)): _sha(path) for path in paths}
+
+
+def _parallel_projection_basis(direction: np.ndarray):
+    d = np.asarray(direction, dtype=np.float64).reshape(3)
+    norm = float(np.linalg.norm(d))
+    if not np.isfinite(norm) or norm <= 0.0:
+        raise ValueError("VNEXT_RAY_ACCEL_DIRECTION_INVALID")
+    unit = d / norm
+    helper = np.zeros(3, dtype=np.float64)
+    helper[int(np.argmin(np.abs(unit)))] = 1.0
+    axis_u = np.cross(unit, helper)
+    axis_u_norm = float(np.linalg.norm(axis_u))
+    if axis_u_norm <= 1.0e-15:
+        raise ValueError("VNEXT_RAY_ACCEL_SCREEN_BASIS_INVALID")
+    axis_u /= axis_u_norm
+    axis_v = np.cross(unit, axis_u)
+    return unit, norm, axis_u, axis_v
+
+
+def _ray_triangle_first_two_parallel_grid(
+    origins,
+    directions,
+    vertices,
+    faces,
+    *,
+    chunk=64,
+):
+    """Exact-equivalent first-two intersections for the parallel prep ray court.
+
+    Orthographic rays share one direction. Quotienting 3-D space along that
+    direction gives an exact 2-D triangle containment problem. A uniform grid
+    rejects triangles whose projected AABBs cannot contain a ray before applying
+    the same barycentric and positive-depth tolerances as the legacy
+    Moller-Trumbore implementation. ``chunk`` is retained only for CLI/source
+    compatibility with the V1 preparation contract.
+    """
+
+    del chunk
+    o = np.asarray(origins, dtype=np.float64)
+    d = np.asarray(directions, dtype=np.float64)
+    v = np.asarray(vertices, dtype=np.float64)
+    f = np.asarray(faces, dtype=np.int64)
+    if o.ndim != 2 or o.shape[1] != 3 or d.shape != o.shape or len(o) == 0:
+        raise ValueError("VNEXT_RAY_ACCEL_RAY_SHAPE_INVALID")
+    if v.ndim != 2 or v.shape[1] != 3 or f.ndim != 2 or f.shape[1] != 3:
+        raise ValueError("VNEXT_RAY_ACCEL_MESH_SHAPE_INVALID")
+    if not np.isfinite(o).all() or not np.isfinite(d).all() or not np.isfinite(v).all():
+        raise ValueError("VNEXT_RAY_ACCEL_NONFINITE")
+    if not np.allclose(d, d[0][None, :], rtol=1.0e-12, atol=1.0e-12):
+        raise ValueError("VNEXT_RAY_ACCEL_REQUIRES_PARALLEL_RAYS")
+
+    unit_d, direction_norm, axis_u, axis_v = _parallel_projection_basis(d[0])
+    ray_u = o @ axis_u
+    ray_v = o @ axis_v
+    ray_w = o @ unit_d
+    vertex_u = v @ axis_u
+    vertex_v = v @ axis_v
+    vertex_w = v @ unit_d
+
+    tri_u = vertex_u[f]
+    tri_v = vertex_v[f]
+    tri_w = vertex_w[f]
+    u0, u1, u2 = tri_u[:, 0], tri_u[:, 1], tri_u[:, 2]
+    v0, v1, v2 = tri_v[:, 0], tri_v[:, 1], tri_v[:, 2]
+    denominator = (v1 - v2) * (u0 - u2) + (u2 - u1) * (v0 - v2)
+    face_valid = np.abs(denominator) * direction_norm > 1.0e-10
+
+    min_u = np.min(tri_u, axis=1)
+    max_u = np.max(tri_u, axis=1)
+    min_v = np.min(tri_v, axis=1)
+    max_v = np.max(tri_v, axis=1)
+    projected_scale = max(
+        1.0,
+        float(np.max(np.abs(tri_u))),
+        float(np.max(np.abs(tri_v))),
+        float(np.max(np.abs(ray_u))),
+        float(np.max(np.abs(ray_v))),
+    )
+    bbox_eps = 1.0e-8 * projected_scale
+
+    grid_size = int(_RAY_GRID_SIZE)
+    lo_u = float(np.min(ray_u) - bbox_eps)
+    hi_u = float(np.max(ray_u) + bbox_eps)
+    lo_v = float(np.min(ray_v) - bbox_eps)
+    hi_v = float(np.max(ray_v) + bbox_eps)
+    if hi_u <= lo_u:
+        lo_u -= 1.0e-9
+        hi_u += 1.0e-9
+    if hi_v <= lo_v:
+        lo_v -= 1.0e-9
+        hi_v += 1.0e-9
+    scale_u = grid_size / (hi_u - lo_u)
+    scale_v = grid_size / (hi_v - lo_v)
+
+    cells: list[list[int]] = [[] for _ in range(grid_size * grid_size)]
+    relevant = np.flatnonzero(
+        face_valid
+        & (max_u >= lo_u)
+        & (min_u <= hi_u)
+        & (max_v >= lo_v)
+        & (min_v <= hi_v)
+    )
+    for face_index in relevant.tolist():
+        gx0 = int(np.floor((min_u[face_index] - bbox_eps - lo_u) * scale_u))
+        gx1 = int(np.floor((max_u[face_index] + bbox_eps - lo_u) * scale_u))
+        gy0 = int(np.floor((min_v[face_index] - bbox_eps - lo_v) * scale_v))
+        gy1 = int(np.floor((max_v[face_index] + bbox_eps - lo_v) * scale_v))
+        gx0 = max(0, min(grid_size - 1, gx0))
+        gx1 = max(0, min(grid_size - 1, gx1))
+        gy0 = max(0, min(grid_size - 1, gy0))
+        gy1 = max(0, min(grid_size - 1, gy1))
+        for gy in range(gy0, gy1 + 1):
+            base = gy * grid_size
+            for gx in range(gx0, gx1 + 1):
+                cells[base + gx].append(int(face_index))
+    cell_arrays = tuple(np.asarray(cell, dtype=np.int64) for cell in cells)
+
+    ray_gx = np.floor((ray_u - lo_u) * scale_u).astype(np.int64)
+    ray_gy = np.floor((ray_v - lo_v) * scale_v).astype(np.int64)
+    ray_gx = np.clip(ray_gx, 0, grid_size - 1)
+    ray_gy = np.clip(ray_gy, 0, grid_size - 1)
+
+    ray_count = len(o)
+    first_face = np.full(ray_count, -1, dtype=np.int64)
+    second_face = np.full(ray_count, -1, dtype=np.int64)
+    first_point = np.zeros((ray_count, 3), dtype=np.float64)
+    second_point = np.zeros((ray_count, 3), dtype=np.float64)
+    first_depth = np.full(ray_count, np.inf, dtype=np.float64)
+    second_depth = np.full(ray_count, np.inf, dtype=np.float64)
+
+    for ray_index in range(ray_count):
+        candidates = cell_arrays[int(ray_gy[ray_index]) * grid_size + int(ray_gx[ray_index])]
+        if not len(candidates):
+            continue
+        pu = float(ray_u[ray_index])
+        pv = float(ray_v[ray_index])
+        candidates = candidates[
+            (pu >= min_u[candidates] - bbox_eps)
+            & (pu <= max_u[candidates] + bbox_eps)
+            & (pv >= min_v[candidates] - bbox_eps)
+            & (pv <= max_v[candidates] + bbox_eps)
+        ]
+        if not len(candidates):
+            continue
+
+        den = denominator[candidates]
+        weight0 = (
+            (v1[candidates] - v2[candidates]) * (pu - u2[candidates])
+            + (u2[candidates] - u1[candidates]) * (pv - v2[candidates])
+        ) / den
+        weight1 = (
+            (v2[candidates] - v0[candidates]) * (pu - u2[candidates])
+            + (u0[candidates] - u2[candidates]) * (pv - v2[candidates])
+        ) / den
+        weight2 = 1.0 - weight0 - weight1
+        inside = (
+            (weight0 >= -1.0e-9)
+            & (weight1 >= -1.0e-9)
+            & (weight2 >= -1.0e-9)
+        )
+        candidates = candidates[inside]
+        weight0 = weight0[inside]
+        weight1 = weight1[inside]
+        weight2 = weight2[inside]
+        if not len(candidates):
+            continue
+
+        distance_along_unit = (
+            weight0 * tri_w[candidates, 0]
+            + weight1 * tri_w[candidates, 1]
+            + weight2 * tri_w[candidates, 2]
+            - ray_w[ray_index]
+        )
+        depth = distance_along_unit / direction_norm
+        positive = depth > 1.0e-8
+        candidates = candidates[positive]
+        depth = depth[positive]
+        if not len(candidates):
+            continue
+
+        # Legacy finite-face enumeration is ascending face index and uses stable
+        # depth sorting. Lexsort reproduces that exact tie rule.
+        order = np.lexsort((candidates, depth))
+        candidates = candidates[order]
+        depth = depth[order]
+
+        face0 = int(candidates[0])
+        first_face[ray_index] = face0
+        first_depth[ray_index] = float(depth[0])
+        first_point[ray_index] = o[ray_index] + first_depth[ray_index] * d[ray_index]
+        if len(candidates) > 1:
+            face1 = int(candidates[1])
+            second_face[ray_index] = face1
+            second_depth[ray_index] = float(depth[1])
+            second_point[ray_index] = o[ray_index] + second_depth[ray_index] * d[ray_index]
+
     return {
-        str(path.relative_to(repo)): _sha(path)
-        for path in paths
+        "first_face": first_face,
+        "second_face": second_face,
+        "first_point": first_point,
+        "second_point": second_point,
+        "first_depth": first_depth,
+        "second_depth": second_depth,
     }
 
 
@@ -140,12 +348,19 @@ def _build_subject_view_banks(
             ray_chunk=ray_chunk,
         )
 
-    workers = min(int(view_workers), len(cameras))
-    if workers == 1:
-        return [one(view_index) for view_index in range(len(cameras))]
-    with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="vnext-view") as pool:
-        # executor.map preserves input order, so the serialized bank remains V0..V7.
-        return list(pool.map(one, range(len(cameras))))
+    legacy_raycast = shard_v1._ray_triangle_first_two
+    if getattr(legacy_raycast, "__name__", "") != "_ray_triangle_first_two":
+        raise RuntimeError("VNEXT_RAY_ACCEL_LEGACY_BACKEND_DRIFT")
+    shard_v1._ray_triangle_first_two = _ray_triangle_first_two_parallel_grid
+    try:
+        workers = min(int(view_workers), len(cameras))
+        if workers == 1:
+            return [one(view_index) for view_index in range(len(cameras))]
+        with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="vnext-view") as pool:
+            # executor.map preserves input order, so the serialized bank remains V0..V7.
+            return list(pool.map(one, range(len(cameras))))
+    finally:
+        shard_v1._ray_triangle_first_two = legacy_raycast
 
 
 def main():
@@ -179,6 +394,7 @@ def main():
     topology_cfg = None
 
     for display in SUBJECT_IDS:
+        subject_started = time.perf_counter()
         source_id = SUBJECT_SOURCE_IDS[display]
         legacy_path = legacy_dir / f"{source_id}.pt"
         teacher_path = teacher_dir / f"{source_id}.teacher.npz"
@@ -212,9 +428,14 @@ def main():
 
         rng = np.random.default_rng(_seed(display))
         surface_points, _, _ = _sample_surface(rest_iris, faces, args.surface_points, rng)
+
+        mechanical_started = time.perf_counter()
         mechanical = _mechanical_bank(
             rest_iris, posed_iris, faces, args.mechanical_points, rng
         )
+        mechanical_seconds = time.perf_counter() - mechanical_started
+
+        topology_started = time.perf_counter()
         sequence, windows, cfg, topology_canonicalization = _topology_windows_v2(
             rest_iris,
             posed_iris,
@@ -222,6 +443,7 @@ def main():
             args.topology_target_tokens,
             args.topology_trajectory_tolerance,
         )
+        topology_seconds = time.perf_counter() - topology_started
         if topology_cfg is None:
             topology_cfg = cfg
         elif topology_cfg != cfg:
@@ -232,6 +454,8 @@ def main():
         cameras = list(camera_bundle["cameras"])
         if len(cameras) != 8:
             raise ValueError("VNEXT_SHARD_CAMERA_COUNT_DRIFT")
+
+        views_started = time.perf_counter()
         view_banks = _build_subject_view_banks(
             source_id=source_id,
             cameras=cameras,
@@ -247,6 +471,20 @@ def main():
             relation_count=args.relation_pairs_per_view,
             ray_chunk=args.ray_chunk,
             view_workers=args.view_workers,
+        )
+        views_seconds = time.perf_counter() - views_started
+        subject_seconds = time.perf_counter() - subject_started
+        print(
+            "VNEXT_FIT8_SUBJECT_PREP_TIMING",
+            f"subject={display}",
+            f"faces={len(faces)}",
+            f"frames={len(posed_iris)}",
+            f"mechanical_s={mechanical_seconds:.3f}",
+            f"topology_s={topology_seconds:.3f}",
+            f"views_s={views_seconds:.3f}",
+            f"total_s={subject_seconds:.3f}",
+            f"ray_backend={_RAY_BACKEND}",
+            flush=True,
         )
 
         row = {
@@ -265,16 +503,16 @@ def main():
                 if key != "mechanical_truth_metadata"
             },
             "appearance_points": _tensor(
-                np.stack([v["appearance_points"] for v in view_banks]), torch.float32
+                np.stack([view["appearance_points"] for view in view_banks]), torch.float32
             ),
             "appearance_rgba": _tensor(
-                np.stack([v["appearance_rgba"] for v in view_banks]), torch.float32
+                np.stack([view["appearance_rgba"] for view in view_banks]), torch.float32
             ),
             "appearance_alpha_boundary": _tensor(
-                np.stack([v["appearance_alpha_boundary"] for v in view_banks]), torch.float32
+                np.stack([view["appearance_alpha_boundary"] for view in view_banks]), torch.float32
             ),
             "appearance_boundary": _tensor(
-                np.stack([v["appearance_boundary"] for v in view_banks]), torch.float32
+                np.stack([view["appearance_boundary"] for view in view_banks]), torch.float32
             ),
             "_windows": windows,
             "_window_count": len(windows),
@@ -303,7 +541,7 @@ def main():
         relation_keys = [key for key in view_banks[0] if key.startswith("relation_")]
         for key in relation_keys:
             row[key] = _tensor(
-                np.stack([v[key] for v in view_banks]), torch.float32
+                np.stack([view[key] for view in view_banks]), torch.float32
             )
         subject_rows.append(row)
 
@@ -351,6 +589,9 @@ def main():
             "topology_target_tokens": int(args.topology_target_tokens),
             "topology_trajectory_tolerance": float(args.topology_trajectory_tolerance),
             "ray_chunk": int(args.ray_chunk),
+            "ray_chunk_legacy_compatibility_only": True,
+            "ray_intersection_backend": _RAY_BACKEND,
+            "ray_grid_size": int(_RAY_GRID_SIZE),
             "view_workers": int(args.view_workers),
         },
     }
@@ -367,6 +608,7 @@ def main():
         f"topology_length={max_length}",
         f"coordinate_bins={topology_cfg.coordinate_bins}",
         f"view_workers={args.view_workers}",
+        f"ray_backend={_RAY_BACKEND}",
         f"manifest={manifest['manifest_value_sha256']}",
         flush=True,
     )

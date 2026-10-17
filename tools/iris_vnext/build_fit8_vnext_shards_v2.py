@@ -47,7 +47,7 @@ from tools.iris_vnext.build_fit8_vnext_shards_v1 import (
 )
 
 _RAY_GRID_SIZE = 32
-_RAY_BACKEND = "PARALLEL_ORTHOGRAPHIC_PROJECTED_GRID_EXACT_EQUIVALENT_V1"
+_RAY_BACKEND = "PARALLEL_ORTHOGRAPHIC_PROJECTED_GRID_BATCHED_EXACT_EQUIVALENT_V2"
 
 
 def _args():
@@ -63,7 +63,7 @@ def _args():
     p.add_argument("--topology-target-tokens", type=int, default=512)
     p.add_argument("--topology-trajectory-tolerance", type=float, default=1.0e-7)
     p.add_argument("--ray-chunk", type=int, default=64)
-    p.add_argument("--view-workers", type=int, default=8)
+    p.add_argument("--view-workers", type=int, default=1)
     return p.parse_args()
 
 
@@ -121,192 +121,57 @@ def _parallel_projection_basis(direction: np.ndarray):
     return unit, norm, axis_u, axis_v
 
 
-def _ray_triangle_first_two_parallel_grid(
-    origins,
-    directions,
-    vertices,
-    faces,
-    *,
-    chunk=64,
-):
-    """Exact-equivalent first-two intersections for the parallel prep ray court.
-
-    Orthographic rays share one direction. Quotienting 3-D space along that
-    direction gives an exact 2-D triangle containment problem. A uniform grid
-    rejects triangles whose projected AABBs cannot contain a ray before applying
-    the same barycentric and positive-depth tolerances as the legacy
-    Moller-Trumbore implementation. ``chunk`` is retained only for CLI/source
-    compatibility with the V1 preparation contract.
-    """
-
+def _ray_triangle_first_two_parallel_grid(origins, directions, vertices, faces, *, chunk=64):
+    """Exact-equivalent cell-batched first/second intersections for parallel rays."""
     del chunk
-    o = np.asarray(origins, dtype=np.float64)
-    d = np.asarray(directions, dtype=np.float64)
-    v = np.asarray(vertices, dtype=np.float64)
-    f = np.asarray(faces, dtype=np.int64)
-    if o.ndim != 2 or o.shape[1] != 3 or d.shape != o.shape or len(o) == 0:
-        raise ValueError("VNEXT_RAY_ACCEL_RAY_SHAPE_INVALID")
-    if v.ndim != 2 or v.shape[1] != 3 or f.ndim != 2 or f.shape[1] != 3:
-        raise ValueError("VNEXT_RAY_ACCEL_MESH_SHAPE_INVALID")
-    if not np.isfinite(o).all() or not np.isfinite(d).all() or not np.isfinite(v).all():
-        raise ValueError("VNEXT_RAY_ACCEL_NONFINITE")
-    if not np.allclose(d, d[0][None, :], rtol=1.0e-12, atol=1.0e-12):
-        raise ValueError("VNEXT_RAY_ACCEL_REQUIRES_PARALLEL_RAYS")
-
-    unit_d, direction_norm, axis_u, axis_v = _parallel_projection_basis(d[0])
-    ray_u = o @ axis_u
-    ray_v = o @ axis_v
-    ray_w = o @ unit_d
-    vertex_u = v @ axis_u
-    vertex_v = v @ axis_v
-    vertex_w = v @ unit_d
-
-    tri_u = vertex_u[f]
-    tri_v = vertex_v[f]
-    tri_w = vertex_w[f]
-    u0, u1, u2 = tri_u[:, 0], tri_u[:, 1], tri_u[:, 2]
-    v0, v1, v2 = tri_v[:, 0], tri_v[:, 1], tri_v[:, 2]
-    denominator = (v1 - v2) * (u0 - u2) + (u2 - u1) * (v0 - v2)
-    face_valid = np.abs(denominator) * direction_norm > 1.0e-10
-
-    min_u = np.min(tri_u, axis=1)
-    max_u = np.max(tri_u, axis=1)
-    min_v = np.min(tri_v, axis=1)
-    max_v = np.max(tri_v, axis=1)
-    projected_scale = max(
-        1.0,
-        float(np.max(np.abs(tri_u))),
-        float(np.max(np.abs(tri_v))),
-        float(np.max(np.abs(ray_u))),
-        float(np.max(np.abs(ray_v))),
-    )
-    bbox_eps = 1.0e-8 * projected_scale
-
-    grid_size = int(_RAY_GRID_SIZE)
-    lo_u = float(np.min(ray_u) - bbox_eps)
-    hi_u = float(np.max(ray_u) + bbox_eps)
-    lo_v = float(np.min(ray_v) - bbox_eps)
-    hi_v = float(np.max(ray_v) + bbox_eps)
-    if hi_u <= lo_u:
-        lo_u -= 1.0e-9
-        hi_u += 1.0e-9
-    if hi_v <= lo_v:
-        lo_v -= 1.0e-9
-        hi_v += 1.0e-9
-    scale_u = grid_size / (hi_u - lo_u)
-    scale_v = grid_size / (hi_v - lo_v)
-
-    cells: list[list[int]] = [[] for _ in range(grid_size * grid_size)]
-    relevant = np.flatnonzero(
-        face_valid
-        & (max_u >= lo_u)
-        & (min_u <= hi_u)
-        & (max_v >= lo_v)
-        & (min_v <= hi_v)
-    )
-    for face_index in relevant.tolist():
-        gx0 = int(np.floor((min_u[face_index] - bbox_eps - lo_u) * scale_u))
-        gx1 = int(np.floor((max_u[face_index] + bbox_eps - lo_u) * scale_u))
-        gy0 = int(np.floor((min_v[face_index] - bbox_eps - lo_v) * scale_v))
-        gy1 = int(np.floor((max_v[face_index] + bbox_eps - lo_v) * scale_v))
-        gx0 = max(0, min(grid_size - 1, gx0))
-        gx1 = max(0, min(grid_size - 1, gx1))
-        gy0 = max(0, min(grid_size - 1, gy0))
-        gy1 = max(0, min(grid_size - 1, gy1))
-        for gy in range(gy0, gy1 + 1):
-            base = gy * grid_size
-            for gx in range(gx0, gx1 + 1):
-                cells[base + gx].append(int(face_index))
-    cell_arrays = tuple(np.asarray(cell, dtype=np.int64) for cell in cells)
-
-    ray_gx = np.floor((ray_u - lo_u) * scale_u).astype(np.int64)
-    ray_gy = np.floor((ray_v - lo_v) * scale_v).astype(np.int64)
-    ray_gx = np.clip(ray_gx, 0, grid_size - 1)
-    ray_gy = np.clip(ray_gy, 0, grid_size - 1)
-
-    ray_count = len(o)
-    first_face = np.full(ray_count, -1, dtype=np.int64)
-    second_face = np.full(ray_count, -1, dtype=np.int64)
-    first_point = np.zeros((ray_count, 3), dtype=np.float64)
-    second_point = np.zeros((ray_count, 3), dtype=np.float64)
-    first_depth = np.full(ray_count, np.inf, dtype=np.float64)
-    second_depth = np.full(ray_count, np.inf, dtype=np.float64)
-
-    for ray_index in range(ray_count):
-        candidates = cell_arrays[int(ray_gy[ray_index]) * grid_size + int(ray_gx[ray_index])]
-        if not len(candidates):
-            continue
-        pu = float(ray_u[ray_index])
-        pv = float(ray_v[ray_index])
-        candidates = candidates[
-            (pu >= min_u[candidates] - bbox_eps)
-            & (pu <= max_u[candidates] + bbox_eps)
-            & (pv >= min_v[candidates] - bbox_eps)
-            & (pv <= max_v[candidates] + bbox_eps)
-        ]
-        if not len(candidates):
-            continue
-
-        den = denominator[candidates]
-        weight0 = (
-            (v1[candidates] - v2[candidates]) * (pu - u2[candidates])
-            + (u2[candidates] - u1[candidates]) * (pv - v2[candidates])
-        ) / den
-        weight1 = (
-            (v2[candidates] - v0[candidates]) * (pu - u2[candidates])
-            + (u0[candidates] - u2[candidates]) * (pv - v2[candidates])
-        ) / den
-        weight2 = 1.0 - weight0 - weight1
-        inside = (
-            (weight0 >= -1.0e-9)
-            & (weight1 >= -1.0e-9)
-            & (weight2 >= -1.0e-9)
-        )
-        candidates = candidates[inside]
-        weight0 = weight0[inside]
-        weight1 = weight1[inside]
-        weight2 = weight2[inside]
-        if not len(candidates):
-            continue
-
-        distance_along_unit = (
-            weight0 * tri_w[candidates, 0]
-            + weight1 * tri_w[candidates, 1]
-            + weight2 * tri_w[candidates, 2]
-            - ray_w[ray_index]
-        )
-        depth = distance_along_unit / direction_norm
-        positive = depth > 1.0e-8
-        candidates = candidates[positive]
-        depth = depth[positive]
-        if not len(candidates):
-            continue
-
-        # Legacy finite-face enumeration is ascending face index and uses stable
-        # depth sorting. Lexsort reproduces that exact tie rule.
-        order = np.lexsort((candidates, depth))
-        candidates = candidates[order]
-        depth = depth[order]
-
-        face0 = int(candidates[0])
-        first_face[ray_index] = face0
-        first_depth[ray_index] = float(depth[0])
-        first_point[ray_index] = o[ray_index] + first_depth[ray_index] * d[ray_index]
-        if len(candidates) > 1:
-            face1 = int(candidates[1])
-            second_face[ray_index] = face1
-            second_depth[ray_index] = float(depth[1])
-            second_point[ray_index] = o[ray_index] + second_depth[ray_index] * d[ray_index]
-
-    return {
-        "first_face": first_face,
-        "second_face": second_face,
-        "first_point": first_point,
-        "second_point": second_point,
-        "first_depth": first_depth,
-        "second_depth": second_depth,
-    }
-
+    o=np.asarray(origins,dtype=np.float64); d=np.asarray(directions,dtype=np.float64)
+    v=np.asarray(vertices,dtype=np.float64); f=np.asarray(faces,dtype=np.int64)
+    if o.ndim!=2 or o.shape[1]!=3 or d.shape!=o.shape or len(o)==0: raise ValueError("VNEXT_RAY_ACCEL_RAY_SHAPE_INVALID")
+    if v.ndim!=2 or v.shape[1]!=3 or f.ndim!=2 or f.shape[1]!=3: raise ValueError("VNEXT_RAY_ACCEL_MESH_SHAPE_INVALID")
+    if not np.isfinite(o).all() or not np.isfinite(d).all() or not np.isfinite(v).all(): raise ValueError("VNEXT_RAY_ACCEL_NONFINITE")
+    if not np.allclose(d,d[0][None,:],rtol=1e-12,atol=1e-12): raise ValueError("VNEXT_RAY_ACCEL_REQUIRES_PARALLEL_RAYS")
+    unit_d,direction_norm,axis_u,axis_v=_parallel_projection_basis(d[0])
+    ray_u=o@axis_u; ray_v=o@axis_v; ray_w=o@unit_d
+    vertex_u=v@axis_u; vertex_v=v@axis_v; vertex_w=v@unit_d
+    tri_u=vertex_u[f]; tri_v=vertex_v[f]; tri_w=vertex_w[f]
+    u0,u1,u2=tri_u[:,0],tri_u[:,1],tri_u[:,2]; v0,v1,v2=tri_v[:,0],tri_v[:,1],tri_v[:,2]
+    den=(v1-v2)*(u0-u2)+(u2-u1)*(v0-v2); face_valid=np.abs(den)*direction_norm>1e-10
+    min_u,max_u=np.min(tri_u,1),np.max(tri_u,1); min_v,max_v=np.min(tri_v,1),np.max(tri_v,1)
+    ps=max(1.0,float(np.max(np.abs(tri_u))),float(np.max(np.abs(tri_v))),float(np.max(np.abs(ray_u))),float(np.max(np.abs(ray_v))))
+    eps=1e-8*ps; gs=int(_RAY_GRID_SIZE)
+    lo_u,hi_u=float(np.min(ray_u)-eps),float(np.max(ray_u)+eps); lo_v,hi_v=float(np.min(ray_v)-eps),float(np.max(ray_v)+eps)
+    if hi_u<=lo_u: lo_u-=1e-9; hi_u+=1e-9
+    if hi_v<=lo_v: lo_v-=1e-9; hi_v+=1e-9
+    su=gs/(hi_u-lo_u); sv=gs/(hi_v-lo_v)
+    cells=[[] for _ in range(gs*gs)]
+    relevant=np.flatnonzero(face_valid&(max_u>=lo_u)&(min_u<=hi_u)&(max_v>=lo_v)&(min_v<=hi_v))
+    for fi in relevant.tolist():
+        gx0=max(0,min(gs-1,int(np.floor((min_u[fi]-eps-lo_u)*su)))); gx1=max(0,min(gs-1,int(np.floor((max_u[fi]+eps-lo_u)*su))))
+        gy0=max(0,min(gs-1,int(np.floor((min_v[fi]-eps-lo_v)*sv)))); gy1=max(0,min(gs-1,int(np.floor((max_v[fi]+eps-lo_v)*sv))))
+        for gy in range(gy0,gy1+1):
+            for gx in range(gx0,gx1+1): cells[gy*gs+gx].append(int(fi))
+    cells=tuple(np.asarray(c,dtype=np.int64) for c in cells)
+    gx=np.clip(np.floor((ray_u-lo_u)*su).astype(np.int64),0,gs-1); gy=np.clip(np.floor((ray_v-lo_v)*sv).astype(np.int64),0,gs-1); rc=gy*gs+gx
+    n=len(o); ff=np.full(n,-1,np.int64); sf=np.full(n,-1,np.int64); fp=np.zeros((n,3)); sp=np.zeros((n,3)); fd=np.full(n,np.inf); sd=np.full(n,np.inf)
+    order=np.argsort(rc,kind="stable"); sc=rc[order]; starts=np.r_[0,np.flatnonzero(sc[1:]!=sc[:-1])+1,len(sc)]
+    for gi in range(len(starts)-1):
+        s,e=int(starts[gi]),int(starts[gi+1]); rays=order[s:e]; cand=cells[int(sc[s])]
+        if not len(cand): continue
+        pu=ray_u[rays][:,None]; pv=ray_v[rays][:,None]
+        bbox=(pu>=min_u[cand][None,:]-eps)&(pu<=max_u[cand][None,:]+eps)&(pv>=min_v[cand][None,:]-eps)&(pv<=max_v[cand][None,:]+eps)
+        dd=den[cand][None,:]
+        w0=((v1[cand]-v2[cand])[None,:]*(pu-u2[cand][None,:])+(u2[cand]-u1[cand])[None,:]*(pv-v2[cand][None,:]))/dd
+        w1=((v2[cand]-v0[cand])[None,:]*(pu-u2[cand][None,:])+(u0[cand]-u2[cand])[None,:]*(pv-v2[cand][None,:]))/dd; w2=1-w0-w1
+        inside=bbox&(w0>=-1e-9)&(w1>=-1e-9)&(w2>=-1e-9)
+        dep=(w0*tri_w[cand,0][None,:]+w1*tri_w[cand,1][None,:]+w2*tri_w[cand,2][None,:]-ray_w[rays][:,None])/direction_norm
+        dep=np.where(inside&(dep>1e-8),dep,np.inf)
+        j0=np.argmin(dep,1); d0=dep[np.arange(len(rays)),j0]; ok=np.isfinite(d0)
+        if not np.any(ok): continue
+        rr=np.flatnonzero(ok); vr=rays[ok]; vc=j0[ok]; ff[vr]=cand[vc]; fd[vr]=d0[ok]; fp[vr]=o[vr]+fd[vr,None]*d[vr]
+        dep[rr,vc]=np.inf; rem=dep[ok]; j1=np.argmin(rem,1); d1=rem[np.arange(len(vr)),j1]; ok1=np.isfinite(d1)
+        if np.any(ok1):
+            vr2=vr[ok1]; sf[vr2]=cand[j1[ok1]]; sd[vr2]=d1[ok1]; sp[vr2]=o[vr2]+sd[vr2,None]*d[vr2]
+    return {"first_face":ff,"second_face":sf,"first_point":fp,"second_point":sp,"first_depth":fd,"second_depth":sd}
 
 def _build_subject_view_banks(
     *,

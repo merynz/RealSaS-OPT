@@ -49,6 +49,7 @@ jobs:
             tools/iris_vnext/build_fit8_vnext_shards_v2.py \
             tools/iris_vnext/prepare_fit8_vnext_cohort_v1.py \
             tools/iris_vnext/a100_preflight_v1.py \
+            tools/iris_vnext/a100_preflight_v2.py \
             tools/iris_vnext/run_fit8_vnext_scientific_v1.py
           python - <<'PY'
           from tools.iris_vnext.input_binding_v1 import load_binding_v1
@@ -58,7 +59,7 @@ jobs:
           print('VNEXT_FIT8_INPUT_BINDING_PARSE_PASS')
           PY
       - name: IRIS vNext model, teacher and batched Fit8 contracts
-        run: python -m pytest -q tests/iris/test_iris_vnext_v1.py tests/iris/test_graphics_truth_v1.py tests/iris/test_iris_vnext_fit8_cohort_v1.py tests/iris/test_vnext_topology_teacher_v1.py tests/iris/test_vnext_mechanical_truth_rank_deficiency_v1.py tests/iris/test_vnext_preparation_acceleration_v1.py
+        run: python -m pytest -q tests/iris/test_iris_vnext_v1.py tests/iris/test_graphics_truth_v1.py tests/iris/test_iris_vnext_fit8_cohort_v1.py tests/iris/test_vnext_topology_teacher_v1.py tests/iris/test_vnext_mechanical_truth_rank_deficiency_v1.py tests/iris/test_vnext_preparation_acceleration_v1.py tests/iris/test_a100_preflight_v2.py
       - name: Single-carrier mechanics, Graphics, DAG and preparation provenance contracts
         run: python -m pytest -q tests/compiler/test_vnext_single_carrier_graphics_v1.py tests/repository/test_vnext_architecture_contract_v1.py tests/repository/test_vnext_execution_graph_v1.py tests/repository/test_vnext_fit8_preparation_contract_v1.py tests/repository/test_vnext_fit8_active_preparation_provenance_v1.py
       - name: Native Graphics ordering contract
@@ -97,5 +98,6 @@ jobs:
           echo 'topology_teacher_motion_safe_seam_weld=true'
           echo 'topology_teacher_residual_coordinate_collision_required=0'
           echo 'a100_preflight_scientific_fit=false'
+          echo 'a100_preflight_analytic_gradients=independent_vertex_field_parameter_v2'
           echo 'flexicubes_commit=4cc7d6c3d0cee83c011ce36721b81adff0dd7db6'
           echo 'fit8_scientific_pass_claimed=false'

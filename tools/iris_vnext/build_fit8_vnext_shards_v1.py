@@ -169,21 +169,48 @@ def _ray_triangle_first_two(origins, directions, vertices, faces, *, chunk=64):
     }
 
 
-def _boundary_flags(rgba: np.ndarray, xy: np.ndarray):
+_BOUNDARY_CACHE_RGBA = None
+_BOUNDARY_CACHE_ALPHA = None
+_BOUNDARY_CACHE_APPEARANCE = None
+
+
+def _boundary_maps_v2(rgba: np.ndarray):
     h, w, _ = rgba.shape
     alpha = rgba[..., 3].astype(np.float32) / 255.0
     rgb = rgba[..., :3].astype(np.float32) / 255.0
-    alpha_out = np.zeros(len(xy), dtype=np.float32)
-    appearance_out = np.zeros(len(xy), dtype=np.float32)
-    for i, (x, y) in enumerate(xy.tolist()):
-        x0, x1 = max(0, x - 1), min(w, x + 2)
-        y0, y1 = max(0, y - 1), min(h, y + 2)
-        local_a = alpha[y0:y1, x0:x1]
-        local_rgb = rgb[y0:y1, x0:x1]
-        alpha_out[i] = float(local_a.max() - local_a.min() > 0.20)
-        appearance_out[i] = float(np.max(np.linalg.norm(local_rgb - rgb[y, x], axis=-1)) > 0.20)
-    return alpha_out, appearance_out
+    pa = np.pad(alpha, ((1, 1), (1, 1)), mode="edge")
+    pr = np.pad(rgb, ((1, 1), (1, 1), (0, 0)), mode="edge")
+    amin = np.full((h, w), np.inf, dtype=np.float32)
+    amax = np.full((h, w), -np.inf, dtype=np.float32)
+    dmax = np.zeros((h, w), dtype=np.float32)
+    for dy in range(3):
+        for dx in range(3):
+            aa = pa[dy : dy + h, dx : dx + w]
+            rr = pr[dy : dy + h, dx : dx + w]
+            amin = np.minimum(amin, aa)
+            amax = np.maximum(amax, aa)
+            dist = np.linalg.norm(rr - rgb, axis=-1)
+            dmax = np.maximum(dmax, dist.astype(np.float32, copy=False))
+    return (amax - amin > 0.20).astype(np.float32), (dmax > 0.20).astype(np.float32)
 
+
+def _boundary_flags(rgba: np.ndarray, xy: np.ndarray):
+    global _BOUNDARY_CACHE_RGBA, _BOUNDARY_CACHE_ALPHA, _BOUNDARY_CACHE_APPEARANCE
+    if _BOUNDARY_CACHE_RGBA is not rgba:
+        alpha_map, appearance_map = _boundary_maps_v2(rgba)
+        _BOUNDARY_CACHE_RGBA = rgba
+        _BOUNDARY_CACHE_ALPHA = alpha_map
+        _BOUNDARY_CACHE_APPEARANCE = appearance_map
+    q = np.asarray(xy, dtype=np.int64)
+    if q.ndim != 2 or q.shape[1] != 2:
+        raise ValueError("VNEXT_BOUNDARY_XY_SHAPE_INVALID")
+    if len(q) == 0:
+        return np.zeros(0, dtype=np.float32), np.zeros(0, dtype=np.float32)
+    x, y = q[:, 0], q[:, 1]
+    h, w, _ = rgba.shape
+    if np.any(x < 0) or np.any(x >= w) or np.any(y < 0) or np.any(y >= h):
+        raise IndexError("VNEXT_BOUNDARY_XY_OUT_OF_RANGE")
+    return _BOUNDARY_CACHE_ALPHA[y, x].copy(), _BOUNDARY_CACHE_APPEARANCE[y, x].copy()
 
 def _adjacency(faces: np.ndarray) -> tuple[tuple[int, ...], ...]:
     edge_faces: dict[tuple[int, int], list[int]] = {}

@@ -9,9 +9,14 @@ quantization identity collisions receive a bounded deterministic identity lift,
 and serialization still requires zero residual coordinate collisions. Raw
 authored faces/owners/materials remain unchanged for appearance, relations and
 mechanical-demand truth.
+
+The eight source views of one subject are independent deterministic courts. They
+are materialized concurrently to keep the sealed preparation practical without
+changing samples, seeds, ordering, or any scientific target semantics.
 """
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
 from pathlib import Path
@@ -52,6 +57,7 @@ def _args():
     p.add_argument("--topology-target-tokens", type=int, default=512)
     p.add_argument("--topology-trajectory-tolerance", type=float, default=1.0e-7)
     p.add_argument("--ray-chunk", type=int, default=64)
+    p.add_argument("--view-workers", type=int, default=8)
     return p.parse_args()
 
 
@@ -94,6 +100,54 @@ def _source_provenance_v2() -> dict:
     }
 
 
+def _build_subject_view_banks(
+    *,
+    source_id: str,
+    cameras: list[dict],
+    stage01: Path,
+    rest_source: np.ndarray,
+    faces: np.ndarray,
+    face_owner: np.ndarray,
+    face_material: np.ndarray,
+    owner_rows,
+    center: np.ndarray,
+    half: float,
+    appearance_count: int,
+    relation_count: int,
+    ray_chunk: int,
+    view_workers: int,
+):
+    """Build V0..V7 independently while preserving deterministic output order."""
+    base = stage01 / "observations" / source_id
+
+    def one(view_index: int):
+        camera = cameras[view_index]
+        return _build_view_banks(
+            subject_id=source_id,
+            view_index=view_index,
+            camera=camera,
+            png_path=base / f"V{view_index}.png",
+            mask_path=base / f"V{view_index}.mask.bin",
+            vertices_source=rest_source,
+            faces=faces,
+            face_owner=face_owner,
+            face_material=face_material,
+            owner_rows=owner_rows,
+            center=center,
+            half=half,
+            appearance_count=appearance_count,
+            relation_count=relation_count,
+            ray_chunk=ray_chunk,
+        )
+
+    workers = min(int(view_workers), len(cameras))
+    if workers == 1:
+        return [one(view_index) for view_index in range(len(cameras))]
+    with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="vnext-view") as pool:
+        # executor.map preserves input order, so the serialized bank remains V0..V7.
+        return list(pool.map(one, range(len(cameras))))
+
+
 def main():
     args = _args()
     for count in (
@@ -103,9 +157,12 @@ def main():
         args.relation_pairs_per_view,
         args.topology_target_tokens,
         args.ray_chunk,
+        args.view_workers,
     ):
         if int(count) <= 0:
             raise ValueError("VNEXT_SHARD_POLICY_NONPOSITIVE")
+    if int(args.view_workers) > 8:
+        raise ValueError("VNEXT_SHARD_VIEW_WORKERS_EXCEED_VIEW_COUNT")
     if not (0.0 <= args.topology_trajectory_tolerance <= 1.0e-3):
         raise ValueError("VNEXT_SHARD_TOPOLOGY_TRAJECTORY_TOLERANCE_INVALID")
 
@@ -172,30 +229,25 @@ def main():
 
         camera_bundle_path = stage01 / boot["source_scene_evidence"]["camera_bundle"]["path"]
         camera_bundle = json.loads(camera_bundle_path.read_text(encoding="utf-8"))
-        if len(camera_bundle["cameras"]) != 8:
+        cameras = list(camera_bundle["cameras"])
+        if len(cameras) != 8:
             raise ValueError("VNEXT_SHARD_CAMERA_COUNT_DRIFT")
-        view_banks = []
-        for view_index, camera in enumerate(camera_bundle["cameras"]):
-            base = stage01 / "observations" / source_id
-            view_banks.append(
-                _build_view_banks(
-                    subject_id=source_id,
-                    view_index=view_index,
-                    camera=camera,
-                    png_path=base / f"V{view_index}.png",
-                    mask_path=base / f"V{view_index}.mask.bin",
-                    vertices_source=rest_source,
-                    faces=faces,
-                    face_owner=face_owner,
-                    face_material=face_material,
-                    owner_rows=teacher_receipt["owners"],
-                    center=center,
-                    half=half,
-                    appearance_count=args.appearance_points_per_view,
-                    relation_count=args.relation_pairs_per_view,
-                    ray_chunk=args.ray_chunk,
-                )
-            )
+        view_banks = _build_subject_view_banks(
+            source_id=source_id,
+            cameras=cameras,
+            stage01=stage01,
+            rest_source=rest_source,
+            faces=faces,
+            face_owner=face_owner,
+            face_material=face_material,
+            owner_rows=teacher_receipt["owners"],
+            center=center,
+            half=half,
+            appearance_count=args.appearance_points_per_view,
+            relation_count=args.relation_pairs_per_view,
+            ray_chunk=args.ray_chunk,
+            view_workers=args.view_workers,
+        )
 
         row = {
             "subject_id": display,
@@ -277,9 +329,6 @@ def main():
             }
         )
 
-    if topology_cfg is None:
-        raise RuntimeError("VNEXT_SHARD_TOPOLOGY_CONFIG_MISSING")
-
     manifest = {
         "schema": "RealSaS.IRISVNextFit8Manifest.v4",
         "builder": "tools/iris_vnext/build_fit8_vnext_shards_v2.py",
@@ -302,6 +351,7 @@ def main():
             "topology_target_tokens": int(args.topology_target_tokens),
             "topology_trajectory_tolerance": float(args.topology_trajectory_tolerance),
             "ray_chunk": int(args.ray_chunk),
+            "view_workers": int(args.view_workers),
         },
     }
     manifest["manifest_value_sha256"] = hashlib.sha256(
@@ -316,6 +366,7 @@ def main():
         f"topology_windows={max_windows}",
         f"topology_length={max_length}",
         f"coordinate_bins={topology_cfg.coordinate_bins}",
+        f"view_workers={args.view_workers}",
         f"manifest={manifest['manifest_value_sha256']}",
         flush=True,
     )

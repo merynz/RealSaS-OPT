@@ -183,14 +183,22 @@ def _project_iris_point_into_quantized_cell(
     qxyz: tuple[int, int, int],
     bins: int,
 ) -> np.ndarray:
-    """Return the smallest coordinate move whose TESSA quantization is qxyz."""
-    p = np.asarray(point_iris, dtype=np.float64) * 0.5
+    """Return the minimum robust IRIS-space move into one TESSA cell.
+
+    Bounds are constructed directly in IRIS space and inset by a tiny floating
+    margin. Doing ``nextafter`` in TESSA space before the IRIS x2 conversion can
+    lose the one-ULP inset when the value is scaled back for quantization.
+    """
+    point = np.asarray(point_iris, dtype=np.float64)
     q = np.asarray(qxyz, dtype=np.int64)
-    lo = q.astype(np.float64) / float(bins) - 0.5
-    hi = (q.astype(np.float64) + 1.0) / float(bins) - 0.5
-    hi = np.nextafter(hi, lo)
-    projected = np.minimum(np.maximum(p, lo), hi)
-    out = projected * 2.0
+    lo = 2.0 * (q.astype(np.float64) / float(bins) - 0.5)
+    hi = 2.0 * ((q.astype(np.float64) + 1.0) / float(bins) - 0.5)
+    margin = np.finfo(np.float64).eps * 32.0
+    inner_lo = lo + margin
+    inner_hi = hi - margin
+    if np.any(inner_lo >= inner_hi):
+        raise AssertionError("VNEXT_TOPOLOGY_TEACHER_IDENTITY_LIFT_CELL_COLLAPSED")
+    out = np.minimum(np.maximum(point, inner_lo), inner_hi)
     check = quantize_tessa_xyz_v1(out.reshape(1, 3) * 0.5, int(bins))[0]
     if tuple(map(int, check.tolist())) != tuple(map(int, qxyz)):
         raise AssertionError("VNEXT_TOPOLOGY_TEACHER_IDENTITY_LIFT_QUANTIZATION_DRIFT")

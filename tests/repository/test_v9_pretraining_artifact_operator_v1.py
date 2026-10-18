@@ -32,14 +32,16 @@ def test_v9_request_is_exact_source_and_pretraining_only():
     )
 
 
-def test_research_trigger_is_typed_and_cannot_train():
+def test_research_trigger_is_static_capability_and_cannot_train():
     value = json.loads(TRIGGER.read_text(encoding="utf-8"))
     assert value["schema"] == "RealSaS.ResearchOperatorTrigger.v1"
     assert value["enabled"] is True
     assert value["request"] == "canonical/V9_PRETRAINING_ARTIFACT_REQUEST_V1.json"
     assert value["operation"] == "IRIS_VNEXT_V9_PRETRAINING_ARTIFACT_BUILD"
-    assert value["target_source_sha"] == TARGET
     assert value["training_allowed"] is False
+    # Exact scientific authority comes from the typed request, not a duplicated
+    # trigger SHA. Historical/stale trigger target fields therefore cannot mint
+    # or override execution authority.
 
 
 def test_operator_never_crosses_remote_roundtrip_or_training_boundary():
@@ -67,15 +69,30 @@ def test_operator_never_crosses_remote_roundtrip_or_training_boundary():
 def test_registered_main_operator_has_automatic_typed_research_lane():
     text = WORKFLOW.read_text(encoding="utf-8")
     assert "workflow_run:" in text
-    assert "workflows: [platform-developer-deployment]" in text
+    assert "workflows: [platform-developer-deployment, current-mainline-ci]" in text
     assert "research-activation:" in text
-    assert "v9-pretraining-artifact:" in text
+    assert "github.event.workflow_run.name == 'current-mainline-ci'" in text
+    assert "canonical/V9_PRETRAINING_ARTIFACT_REQUEST_V1.json" in text
     assert "canonical/RESEARCH_OPERATOR_TRIGGER_V1.json" in text
     assert "IRIS_VNEXT_V9_PRETRAINING_ARTIFACT_BUILD" in text
+    assert "RESEARCH_OPERATOR_TARGET_BRANCH_SHA_DRIFT" in text
+    assert "v9-pretraining-artifact:" in text
     assert "runs-on: [self-hosted, linux, x64, realsas]" in text
     assert "actions/upload-artifact@v4" in text
     assert "compression-level: 0" in text
     assert "external_storage_write_allowed') is False" in text
+
+    research = text.split("  research-activation:", 1)[1]
+    assert "Require current deployed canonical main" not in research
+    assert "RESEARCH_OPERATOR_DEPLOYED_MAIN_DRIFT" not in research
+    assert "/home/monster/realsas_platform/deployment.json" not in research
+
+    # Generic cohort execution still retains the live deployment authority guard;
+    # only the research artifact lane is decoupled from Platform service state.
+    generic = text.split("  cohort-operator:", 1)[1].split("  research-activation:", 1)[0]
+    assert "Require exact deployed canonical main" in generic
+    assert "/home/monster/realsas_platform/deployment.json" in generic
+
     # No candidate-remote persistence belongs to this workflow; persistence and
     # true round-trip are performed later by the connector-owned authority step.
     assert "RealSaS_Fit8_IRIS_vNext_candidates" not in text

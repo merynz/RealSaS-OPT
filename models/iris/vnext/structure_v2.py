@@ -15,6 +15,10 @@ TESSA cube. Larger excursions remain fail-closed.
 Sequence-position semantics remain backward compatible with StructureHeadV1:
 omitting `sequence_position_offset` means scalar offset 0. Batched per-subject
 offsets remain supported when an explicit tensor is supplied.
+
+Typed-failure compatibility is also preserved: all witness coordinate violations
+remain members of the established `IRIS_VNEXT_WITNESS_COORDINATE_DOMAIN_DRIFT`
+family, with a more specific suffix where applicable.
 """
 
 import torch
@@ -55,7 +59,8 @@ class IRISVNextStructureHeadV2(IRISVNextStructureHeadV1):
             authorized_max = 0.5 * (1.0 + float(self.cfg.maximum_extraction_delta))
             if observed_max > authorized_max + 1.0e-6:
                 raise ValueError(
-                    "IRIS_VNEXT_WITNESS_COORDINATE_EXCEEDS_AUTHORIZED_EXTRACTION_DELTA:"
+                    "IRIS_VNEXT_WITNESS_COORDINATE_DOMAIN_DRIFT:"
+                    "EXCEEDS_AUTHORIZED_EXTRACTION_DELTA:"
                     f"observed={observed_max}:authorized={authorized_max}"
                 )
             witness_xyz = witness_xyz.clamp(-0.5, 0.5)

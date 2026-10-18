@@ -1,13 +1,17 @@
 from __future__ import annotations
 
-"""Validity-aware role-free Graphics truth.
+"""Validity-aware role-free Graphics truth with explicit conditioning semantics.
 
-V1-era supervision mixes several useful but differently authoritative proxies:
-`graphics_truth_v1.py` can derive cut as the complement of anonymous owner
-identity, while the active Fit8 shard builder writes a broader owner-or-material
-boundary proxy into `relation_cut_probability`.  V2 does not reinterpret either
-as causal cut truth.  Every scalar target carries explicit authority, provenance
-and trainability; unavailable truth abstains.
+Historical V1-era supervision mixes useful but differently authoritative proxies
+and also mixes view-invariant pair relations with raster-view boundary evidence.
+V2 makes both distinctions explicit:
+
+- static truth contains only relations that are intended to be view-invariant;
+- projected alpha/appearance boundaries live in the view-conditioned truth row;
+- every scalar target carries authority, provenance and trainability;
+- unavailable truth abstains instead of becoming an implicit negative.
+
+Historical V8 shards are not reinterpreted by this schema.
 """
 
 from dataclasses import dataclass
@@ -23,6 +27,23 @@ _AUTHORITATIVE = frozenset(
         EvidenceAuthority.QUALIFIED_DERIVED,
     }
 )
+
+STATIC_RELATION_KEYS_V2 = (
+    "same_drawable_affinity",
+    "cut_probability",
+    "attachment_affinity",
+)
+
+VIEW_RELATION_KEYS_V2 = (
+    "front_probability",
+    "occlusion_probability",
+    "visibility_probability_a",
+    "visibility_probability_b",
+    "projected_alpha_boundary_probability",
+    "projected_appearance_boundary_probability",
+)
+
+ALL_RELATION_KEYS_V2 = STATIC_RELATION_KEYS_V2 + VIEW_RELATION_KEYS_V2
 
 
 @dataclass(frozen=True)
@@ -53,13 +74,13 @@ class QualifiedProbabilityTargetV2:
 
 @dataclass(frozen=True)
 class GraphicsStaticTruthRowV2:
+    """View-invariant structural relation truth only."""
+
     face_a: int
     face_b: int
     same_drawable_affinity: QualifiedProbabilityTargetV2
     cut_probability: QualifiedProbabilityTargetV2
     attachment_affinity: QualifiedProbabilityTargetV2
-    alpha_boundary_probability: QualifiedProbabilityTargetV2
-    appearance_boundary_probability: QualifiedProbabilityTargetV2
     schema_version: str = "RealSaS.GraphicsStaticTruthRow.v2"
 
     def __post_init__(self) -> None:
@@ -69,6 +90,13 @@ class GraphicsStaticTruthRowV2:
 
 @dataclass(frozen=True)
 class GraphicsViewTruthRowV2:
+    """View-conditioned projected relation truth.
+
+    Projected alpha/appearance boundaries belong here because their historical
+    producer is a raster-view neighborhood measurement. They must not be routed
+    to a camera-free static prediction branch.
+    """
+
     view_index: int
     face_a: int
     face_b: int
@@ -76,6 +104,8 @@ class GraphicsViewTruthRowV2:
     occlusion_probability: QualifiedProbabilityTargetV2
     visibility_probability_a: QualifiedProbabilityTargetV2
     visibility_probability_b: QualifiedProbabilityTargetV2
+    projected_alpha_boundary_probability: QualifiedProbabilityTargetV2
+    projected_appearance_boundary_probability: QualifiedProbabilityTargetV2
     schema_version: str = "RealSaS.GraphicsViewTruthRow.v2"
 
     def __post_init__(self) -> None:
@@ -83,16 +113,7 @@ class GraphicsViewTruthRowV2:
             raise ValueError("GRAPHICS_TRUTH_V2_VIEW_ROW_INVALID")
 
 
-def static_row_to_training_maps_v2(
-    row: GraphicsStaticTruthRowV2,
-) -> tuple[dict[str, float], dict[str, bool]]:
-    names = (
-        "same_drawable_affinity",
-        "cut_probability",
-        "attachment_affinity",
-        "alpha_boundary_probability",
-        "appearance_boundary_probability",
-    )
+def _row_to_training_maps_v2(row, names: tuple[str, ...]) -> tuple[dict[str, float], dict[str, bool]]:
     values: dict[str, float] = {}
     validity: dict[str, bool] = {}
     for name in names:
@@ -100,24 +121,18 @@ def static_row_to_training_maps_v2(
         values[name] = float(target.value)
         validity[name] = bool(target.valid_for_training)
     return values, validity
+
+
+def static_row_to_training_maps_v2(
+    row: GraphicsStaticTruthRowV2,
+) -> tuple[dict[str, float], dict[str, bool]]:
+    return _row_to_training_maps_v2(row, STATIC_RELATION_KEYS_V2)
 
 
 def view_row_to_training_maps_v2(
     row: GraphicsViewTruthRowV2,
 ) -> tuple[dict[str, float], dict[str, bool]]:
-    names = (
-        "front_probability",
-        "occlusion_probability",
-        "visibility_probability_a",
-        "visibility_probability_b",
-    )
-    values: dict[str, float] = {}
-    validity: dict[str, bool] = {}
-    for name in names:
-        target = getattr(row, name)
-        values[name] = float(target.value)
-        validity[name] = bool(target.valid_for_training)
-    return values, validity
+    return _row_to_training_maps_v2(row, VIEW_RELATION_KEYS_V2)
 
 
 def assert_required_validity_keys_v2(

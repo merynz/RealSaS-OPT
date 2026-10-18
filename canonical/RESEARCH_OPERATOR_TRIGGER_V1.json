@@ -1,0 +1,9 @@
+{
+  "schema": "RealSaS.ResearchOperatorTrigger.v1",
+  "enabled": true,
+  "request": "canonical/V9_PRETRAINING_ARTIFACT_REQUEST_V1.json",
+  "operation": "IRIS_VNEXT_V9_PRETRAINING_ARTIFACT_BUILD",
+  "target_source_sha": "920a20ba273469ef596cd7219923c9c0a7f5c3d8",
+  "training_allowed": false,
+  "nonce": "V9_PRETRAINING_ARTIFACT_20261018T1600Z"
+}

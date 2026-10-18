@@ -214,3 +214,141 @@ jobs:
           path: ${{ steps.descriptor.outputs.output_path }}
           if-no-files-found: error
           retention-days: 30
+
+  research-activation:
+    if: github.event_name == 'workflow_run'
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.resolve.outputs.should_run }}
+      request: ${{ steps.resolve.outputs.request }}
+      target_sha: ${{ steps.resolve.outputs.target_sha }}
+      main_sha: ${{ steps.resolve.outputs.main_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 2
+
+      - name: Resolve typed research operation trigger
+        id: resolve
+        env:
+          WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          WORKFLOW_RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os, re, subprocess
+          from pathlib import Path
+          should = False
+          request_path = ''
+          target_sha = ''
+          main_sha = os.environ.get('WORKFLOW_RUN_HEAD_SHA', '').strip().lower()
+          if os.environ.get('WORKFLOW_RUN_CONCLUSION') == 'success' and os.environ.get('WORKFLOW_RUN_HEAD_BRANCH') == 'main':
+              changed = subprocess.check_output(
+                  ['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', 'HEAD^1', 'HEAD'],
+                  text=True,
+              ).splitlines()
+              trigger_path = Path('canonical/RESEARCH_OPERATOR_TRIGGER_V1.json')
+              if trigger_path.as_posix() in changed:
+                  trigger = json.loads(trigger_path.read_text(encoding='utf-8'))
+                  assert trigger.get('schema') == 'RealSaS.ResearchOperatorTrigger.v1', 'RESEARCH_OPERATOR_TRIGGER_SCHEMA'
+                  assert trigger.get('enabled') is True, 'RESEARCH_OPERATOR_TRIGGER_NOT_ENABLED'
+                  assert trigger.get('operation') == 'IRIS_VNEXT_V9_PRETRAINING_ARTIFACT_BUILD', 'RESEARCH_OPERATOR_OPERATION_NOT_ALLOWLISTED'
+                  assert trigger.get('training_allowed') is False, 'RESEARCH_OPERATOR_TRAINING_FORBIDDEN'
+                  request_path = str(trigger.get('request') or '')
+                  request = Path(request_path)
+                  assert request_path and not request.is_absolute() and '..' not in request.parts, 'RESEARCH_OPERATOR_REQUEST_PATH_INVALID'
+                  assert request_path.startswith('canonical/'), 'RESEARCH_OPERATOR_REQUEST_MUST_BE_CANONICAL'
+                  value = json.loads(request.read_text(encoding='utf-8'))
+                  assert value.get('schema') == 'RealSaS.IRISVNextV9PretrainingArtifactRequest.v1', 'RESEARCH_OPERATOR_REQUEST_SCHEMA_INVALID'
+                  assert value.get('operation') == trigger['operation'], 'RESEARCH_OPERATOR_REQUEST_OPERATION_DRIFT'
+                  target_sha = str(value.get('target_source_sha') or '').lower()
+                  assert target_sha == str(trigger.get('target_source_sha') or '').lower(), 'RESEARCH_OPERATOR_TRIGGER_SHA_DRIFT'
+                  assert re.fullmatch(r'[0-9a-f]{40}', target_sha), 'RESEARCH_OPERATOR_TARGET_SHA_INVALID'
+                  assert value.get('training_allowed') is False, 'RESEARCH_OPERATOR_REQUEST_TRAINING_FORBIDDEN'
+                  assert value.get('external_storage_write_allowed') is False, 'RESEARCH_OPERATOR_EXTERNAL_WRITE_FORBIDDEN'
+                  should = True
+          print(f"should_run={'true' if should else 'false'}")
+          print(f'request={request_path}')
+          print(f'target_sha={target_sha}')
+          print(f'main_sha={main_sha}')
+          PY
+
+  v9-pretraining-artifact:
+    needs: research-activation
+    if: needs.research-activation.outputs.should_run == 'true'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 180
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      REQUEST: ${{ needs.research-activation.outputs.request }}
+      TARGET_SHA: ${{ needs.research-activation.outputs.target_sha }}
+      EXPECTED_MAIN_SHA: ${{ needs.research-activation.outputs.main_sha }}
+      OUTPUT_ROOT: /home/monster/realsas_authority/research_operator/actions/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXPECTED_MAIN_SHA }}
+          fetch-depth: 2
+
+      - name: Require current deployed canonical main
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_MAIN_SHA"
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_MAIN_SHA"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          deployment=json.loads(Path('/home/monster/realsas_platform/deployment.json').read_text())
+          assert deployment['code_sha']==os.environ['EXPECTED_MAIN_SHA'], 'RESEARCH_OPERATOR_DEPLOYED_MAIN_DRIFT'
+          PY
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install reviewed preparation dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python -m py_compile tools/iris_vnext/v9_pretraining_artifact_operator_v1.py
+          command -v rclone >/dev/null
+          test -x "$HOME/.cache/realsas/blender/blender-4.5.14-linux-x64/blender"
+
+      - name: Build exact V9 pretraining candidate locally
+        run: |
+          set -euo pipefail
+          rm -rf "$OUTPUT_ROOT"
+          mkdir -p "$OUTPUT_ROOT"
+          python tools/iris_vnext/v9_pretraining_artifact_operator_v1.py \
+            --request "$REQUEST" \
+            --repo "$GITHUB_WORKSPACE" \
+            --authority-root "$AUTHORITY_ROOT" \
+            --out-dir "$OUTPUT_ROOT"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ['OUTPUT_ROOT'])
+          result=json.loads((root/'OPERATOR_RESULT.json').read_text())
+          assert result['status']=='LOCAL_CANDIDATE_ARTIFACT_READY__DRIVE_PERSISTENCE_PENDING'
+          assert result['target_source_sha']==os.environ['TARGET_SHA']
+          assert result['external_storage_written'] is False
+          assert result['remote_roundtrip_verified'] is False
+          assert result['training_steps_executed']==0
+          assert result['scientific_fit_started'] is False
+          assert result['training_authorized'] is False
+          PY
+
+      - name: Preserve local candidate for connector persistence
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-vnext-v9-local-candidate-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT_ROOT }}/OPERATOR_RESULT.json
+            ${{ env.OUTPUT_ROOT }}/evidence/**
+            ${{ env.OUTPUT_ROOT }}/candidate/**
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0

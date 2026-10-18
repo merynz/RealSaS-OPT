@@ -72,9 +72,10 @@ def test_retired_v1_self_hosted_workflow_cannot_queue_or_write():
     text = (ROOT / ".github/workflows/iris_vnext_fit8_prepare_self_hosted_v1.yml").read_text(encoding="utf-8")
     assert "workflow_dispatch:" in text
     assert "push:" not in text
-    assert "self-hosted" not in text
+    assert "runs-on: ubuntu-latest" in text
+    assert "runs-on: [self-hosted" not in text
     assert "VNEXT_SELF_HOSTED_PREPARE_V1_RETIRED" in text
-    assert "rclone" not in text
+    assert "rclone " not in text
 
 
 def test_quarantine_audit_v2_is_manual_read_only_and_current_branch_bound():

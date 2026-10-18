@@ -13,9 +13,10 @@ from pathlib import Path
 import subprocess
 from typing import Any
 
-from models.iris.vnext.cohort_v9_fp32 import (
-    IRISVNextFocusedRelationTrainerV9FP32,
+from models.iris.vnext.cohort_v9_balanced_fp32 import (
+    IRISVNextFocusedRelationTrainerV9BalancedFP32,
     V9_NUMERIC_POLICY,
+    V9_SUPERVISION_POLICY,
 )
 
 
@@ -36,13 +37,13 @@ def _write_json(path: Path, value: dict[str, Any]) -> None:
     )
 
 
-def _trainer(args: argparse.Namespace) -> IRISVNextFocusedRelationTrainerV9FP32:
+def _trainer(args: argparse.Namespace) -> IRISVNextFocusedRelationTrainerV9BalancedFP32:
     repo_root = Path(args.repo_root).resolve()
     expected = args.expected_source_sha.lower()
     actual = _git_head(repo_root)
     if actual != expected:
         raise RuntimeError(f"VNEXT_V9_CHECKOUT_SHA_DRIFT:{actual}:{expected}")
-    return IRISVNextFocusedRelationTrainerV9FP32(
+    return IRISVNextFocusedRelationTrainerV9BalancedFP32(
         prepared_root=Path(args.prepared_root),
         prepared_manifest_path=Path(args.prepared_manifest),
         relation_root=Path(args.relation_root),
@@ -68,10 +69,11 @@ def preflight(args: argparse.Namespace) -> int:
     if trainer.step != 0:
         raise RuntimeError("VNEXT_V9_PREFLIGHT_EXECUTED_OPTIMIZER_STEP")
     result = {
-        "schema": "RealSaS.IRISVNextFocusedRelationZeroStepPreflight.v1",
+        "schema": "RealSaS.IRISVNextFocusedRelationZeroStepPreflight.v2",
         "status": "PASS__ZERO_STEP_ONLY__TRAINING_NOT_STARTED",
         "source_commit_sha": args.expected_source_sha.lower(),
         "numeric_policy": V9_NUMERIC_POLICY,
+        "supervision_policy": V9_SUPERVISION_POLICY,
         "binding_sha256": trainer.binding_hash,
         "heldout": heldout,
         "training_steps_executed": 0,
@@ -106,10 +108,11 @@ def train(args: argparse.Namespace) -> int:
             )
     trainer.save()
     final = {
-        "schema": "RealSaS.IRISVNextFocusedRelationRunState.v1",
+        "schema": "RealSaS.IRISVNextFocusedRelationRunState.v2",
         "status": "SCHEDULE_STOP_REACHED",
         "source_commit_sha": args.expected_source_sha.lower(),
         "numeric_policy": V9_NUMERIC_POLICY,
+        "supervision_policy": V9_SUPERVISION_POLICY,
         "binding_sha256": trainer.binding_hash,
         "training_steps_executed": trainer.step,
         "scientific_fit_pass_claimed": False,

@@ -1,0 +1,107 @@
+{
+  "schema": "RealSaS.IRISVNextV9FocusedRelationResult.v1",
+  "date": "2026-10-19",
+  "status": "SCOPED_SCIENTIFIC_PASS__FULL_RELATION_NOT_PROVEN",
+  "source_commit_sha": "7029ee3f48787aa9f7e27eecef89155eb9368a96",
+  "attempt_id": "ATTEMPT_001",
+  "training_steps_executed": 1600,
+  "run_state": "SCHEDULE_STOP_REACHED",
+  "formal_scientific_court": {
+    "status": "SCIENTIFIC_PASS",
+    "scientific_court_sha256": "59ac743fc72ce421cb152b324a74039061b605cab15424b1c9932ba954794871",
+    "final_heldout_sha256": "6c26bba5f037c8e48995fd48bb05439d18aa266da530b25698ae0b9808cac06e",
+    "preregistration_sha256": "e11f57bad96936236a43a823903e13f45ee4780cff50c4c515bd19994b142d37",
+    "readiness_sha256": "bd7a2bef6110704ce60bc8b37636bf434bd46359c3d9a07ae19d31ce1b901d57",
+    "blockers": []
+  },
+  "heldout_step_1600": {
+    "projected_alpha_boundary_probability": {
+      "balanced_accuracy": 0.7599126696586609,
+      "balanced_bce_mean": 0.5106152445077896,
+      "minimum_per_view_balanced_accuracy": 0.7362911105155945,
+      "court_result": "PASS"
+    },
+    "projected_appearance_boundary_probability": {
+      "balanced_accuracy": 0.8208722770214081,
+      "balanced_bce_mean": 0.42430220544338226,
+      "minimum_per_view_balanced_accuracy": 0.7912296056747437,
+      "court_result": "PASS"
+    },
+    "front_probability": {
+      "balanced_accuracy": 0.5587652325630188,
+      "interpretation": "WEAK__NON_REGRESSION_GATE_ONLY"
+    },
+    "visibility_probability_a": {
+      "balanced_accuracy": 0.5658917725086212,
+      "interpretation": "WEAK__NON_REGRESSION_GATE_ONLY"
+    },
+    "visibility_probability_b": {
+      "balanced_accuracy": 0.5533536672592163,
+      "interpretation": "WEAK__NON_REGRESSION_GATE_ONLY"
+    },
+    "occlusion_probability": {
+      "authority": "POSITIVE_ONLY__METRIC_ONLY__NO_GRADIENT__NO_BINARY_COURT",
+      "positive_support_accuracy": 0.4809832274913788,
+      "positive_support_bce_mean": 0.8720730543136597,
+      "interpretation": "REGRESSED_FROM_STEP0__NOT_CAUGHT_BY_V9_FORMAL_COURT"
+    }
+  },
+  "step0_reference": {
+    "projected_alpha_boundary_probability_balanced_accuracy": 0.5,
+    "projected_alpha_boundary_probability_balanced_bce_mean": 0.6931473314762115,
+    "projected_appearance_boundary_probability_balanced_accuracy": 0.5,
+    "projected_appearance_boundary_probability_balanced_bce_mean": 0.6931472718715668,
+    "front_probability_balanced_accuracy": 0.5,
+    "visibility_probability_a_balanced_accuracy": 0.5,
+    "visibility_probability_b_balanced_accuracy": 0.5,
+    "occlusion_positive_support_accuracy": 1.0,
+    "occlusion_positive_support_bce_mean": 0.00011075627844547853
+  },
+  "earned_claims": [
+    "CLEANED_CAMERA_CONDITIONED_PROJECTED_BOUNDARY_SUPERVISION_IS_DECODABLE_FROM_SEALED_V8_H",
+    "ALPHA_BOUNDARY_LOCKED_HELDOUT_GATES_PASS",
+    "APPEARANCE_BOUNDARY_LOCKED_HELDOUT_GATES_PASS",
+    "FROZEN_PARAMETER_DOMAINS_PRESERVED_EXACTLY",
+    "STATIC_SAME_CUT_ATTACHMENT_ABSTENTION_PRESERVED"
+  ],
+  "forbidden_stronger_claims": [
+    "FULL_RELATION_SOLVED",
+    "ORDERING_SOLVED",
+    "VISIBILITY_SOLVED",
+    "OCCLUSION_BINARY_DISCRIMINATION_PROVEN",
+    "WORKSTREAM_C_RICHER_TEACHER_EVIDENCE_CONSUMED",
+    "IRIS_FIT8_GLOBAL_SCIENTIFIC_PASS",
+    "TESSA_TOPOLOGY_PASS"
+  ],
+  "sequencing_finding": {
+    "classification": "POST_V8_PLAN_WORKSTREAM_C_INCOMPLETE_BEFORE_V9_OPTIMIZATION",
+    "workstream_b_truth_cleanup": "SUBSTANTIALLY_COMPLETED_FOR_V9_SCOPE",
+    "workstream_c_source_audit": "COMPLETED",
+    "workstream_c_actual_richer_relation_evidence_consumption": "NOT_COMPLETED_BEFORE_V9",
+    "consequence": "V9_RETAINED_AS_SCOPED_BOUNDARY_EXPERIMENT__NOT_FINAL_RELATION_EXPERIMENT"
+  },
+  "trainer_efficiency_debt": {
+    "classification": "IMPLEMENTATION_DEBT__NOT_MODEL_CAPACITY_EVIDENCE",
+    "observed_v9_step_seconds_approx": 1.0,
+    "historical_v8_relation_step_seconds_median_approx": 0.204,
+    "cause": "FULL_FROZEN_MODULE_HASH_NON_REGRESSION_EXECUTED_ON_EVERY_OPTIMIZER_STEP",
+    "required_fix": "MOVE_FULL_FROZEN_HASH_COURT_TO_STEP0_CHECKPOINT_AND_FINAL_ONLY",
+    "gpu_footprint_note": "V8_USED_HIGHER_ACTIVE_TRAINING_OPTIMIZER_GPU_FOOTPRINT_THAN_NARROW_V9_SPECIALIST"
+  },
+  "required_before_next_relation_training": [
+    "MATERIALIZE_AUTHORED_MOTION_RELATION_CONDITIONING_COURT",
+    "MATERIALIZE_STATIC_COMPLETE_ALL_HIT_RELATION_EVIDENCE",
+    "DESIGN_TRUTH_V3_FROM_MEASURED_SUPPORT_WITH_FRONT_VISIBILITY_DECOUPLED",
+    "KEEP_PROJECTED_BOUNDARY_AUTHORITY_SEPARATE_FOR_VISIBLE_CURRENT_VIEW_ROWS",
+    "DO_NOT_FABRICATE_OCCLUSION_NEGATIVES",
+    "ADD_OCCLUSION_POSITIVE_SUPPORT_PRESERVATION_GATE",
+    "LOCK_NEW_SUPPORT_SPLIT_AND_HELDOUT_COURTS_BEFORE_OPTIMIZATION",
+    "PREREGISTER_ANY_V9_RELATION_STATE_INITIALIZATION"
+  ],
+  "v9_final_relation_checkpoint": {
+    "file": "step_00001600_45e3995f70a9489882650312acfdd147.pt",
+    "sha256": "393b113f0ca3b7a2c23da61022692d15bd0ca8d37167426f546266702df5da05",
+    "step": 1600,
+    "disposition": "ELIGIBLE_AS_CANDIDATE_INITIALIZATION_ONLY_AFTER_EXPLICIT_V10_PREREGISTRATION_AND_ZERO_STEP_NON_REGRESSION"
+  }
+}

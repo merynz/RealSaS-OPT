@@ -22,7 +22,7 @@ This file exists to prevent conversational or branch-history drift. Every major 
 | V2/V3 long G2 surface continuation | FALSIFIED | Fit8 G2 runs from step1601 lineage | non-empty surface telemetry alone is insufficient | long G2 preserved quality; pre-optimizer telemetry was adequate | surgical migration + post-optimizer gates + bounded G2 |
 | V5 single-objective downstream training on shared H | FALSIFIED | A1→R1 V5 run | appearance head can learn while shared H changes | later task optimization safely preserves mechanics/geometry | V6 cumulative retention experiment, then V8 structural isolation |
 | V6 cumulative retention | PARTIALLY_SUPPORTED | V6 A1/R1/T1 run | cumulative prior objectives can preserve mechanics | loss balancing alone preserves geometry/extraction | V8 scene-core seal; no return to loss-only carrier protection |
-| V8 post-M1 scene-core seal | SUPPORTED_BASELINE | completed 12k V8 run | geometry/extraction can remain invariant while specialist heads keep learning | downstream carrier rewriting is necessary for current heads | make seal fail-closed in runtime policy; reopening requires falsification court |
+| V8 post-M1 scene-core seal | SUPPORTED_BASELINE | completed 12k V8 run | geometry/extraction can remain invariant while specialist heads keep learning | downstream carrier rewriting is necessary for current heads | fail-closed runtime policy; reopening requires falsification court |
 | V8 completion as scientific Fit8 PASS | FALSIFIED | completed V8 receipt | training completed and architecture experiment is interpretable | scientific quality thresholds/topology courts existed | retain as measurement baseline only |
 | Frozen H lacks graphics information | FALSIFIED under current teacher definitions | V8 A/R/T learning after M1 seal | current appearance/relation/topology targets remain decodable from sealed H | generic adapters are immediately required | no capacity expansion before clean truth + optimization courts |
 | Near-zero relation loss means real-world graphics solved | FALSIFIED as claim | V8 relation metrics + teacher audit | current teacher targets are decodable | teacher semantics, held-out balance, runtime behavior are automatically correct | teacher authority audit + compiler/runtime lineage court |
@@ -30,7 +30,9 @@ This file exists to prevent conversational or branch-history drift. Every major 
 | Foundation branch measurable 3D census/provenance tools | PARTIALLY_SUPPORTED | `agent/unified-iris-stdgenpp-foundation` | ray/depth/visibility/material/rig evidence can be measured | whole branch should become current authority | port source-bound tools selectively with provenance |
 | Named semantic taxonomy required by IRIS | NOT SUPPORTED | comparison with StdGEN/StdGEN++ | no evidence currently requires body/hair/cloth labels | role-free evidence is inadequate | keep ontology-free model; capacity/teacher courts may revisit functions, not names |
 | Boundary Causality Teacher V1 | PENDING_COURT | post-V8 truth cleanup | contract can abstain and separate provable boundary causes | it is already a populated authoritative corpus | wire measurable producers; report support/class statistics; held-out court |
-| `cut_probability = 1 - same_drawable` in `graphics_truth_v1.py` | TRUTH_DEBT | historical role-free relation teacher | deterministic proxy is learnable | cut is an independent causal boundary target | preserve V8 provenance; replace with validity-aware/abstaining cut truth |
+| `graphics_truth_v1.py` cut helper | TRUTH_DEBT / HISTORICAL | V1 helper | anonymous owner-equivalence proxy is deterministic | cut is independently identified | preserve provenance only; do not use as new authority |
+| V8 Fit8 shard `relation_cut_probability` | TRUTH_DEBT | active shard builder inherited by V8 | owner-or-material boundary proxy is decodable from sealed H | metric proves authoritative drawable-cut learning | replace with explicit-validity/provenance relation truth V2 |
+| Graphics Truth V2 explicit validity | PENDING PRODUCER | `graphics_truth_v2.py` + `training_v2.py` | training can abstain per family/sample instead of inventing negatives | corpus producer already supplies authoritative V2 rows | wire identifiable producers and support statistics before training |
 | Appearance boundary target | OPTIMIZATION_DEBT + TRUTH_DEBT | V8 A/R diagnostics | current head can receive signal | boundary causality is cleanly identified or quality is adequate | Boundary Causality corpus first, then head-specific optimizer court |
 | `~0.05` p95 as global PASS threshold | FALSIFIED as global rule | historical engineering expectations | useful planning reference for comparable normalized residuals | heterogeneous metrics share one scientific threshold | preregister metric-specific held-out gates |
 | TESSA low training loss = topology PASS | FALSIFIED as claim | V8 T1/J1 loss | topology objective is optimizable from sealed H | actual connectivity/hole/manifold/surface quality passed | independent TESSA topology court |
@@ -43,6 +45,22 @@ This file exists to prevent conversational or branch-history drift. Every major 
 | Runtime attachment consumption | CONSUMPTION_DEBT | graphics compile/runtime serialization | attachment records survive into binary | native reference renderer uses them behaviorally | identify owning runtime/animation consumer or leave explicitly non-behavioral |
 | Runtime support-band consumption | CONSUMPTION_DEBT | fragment support-band serialization | support-band value survives transport | native reference renderer currently uses it | either wire an authorized 2D support consumer or remove from behavioral claims |
 
+## Relation truth correction
+
+Do not conflate the two historical producers:
+
+```text
+graphics_truth_v1.py helper:
+    cut = 1 - anonymous-owner-equivalence
+
+active Fit8 shard builder used by V8:
+    cut target = (owner differs) OR (material id differs)
+```
+
+The V8 metric is therefore evidence about the **owner-or-material boundary proxy**, not the pure `1-same` helper and not authoritative drawable-cut truth.
+
+See `docs/research/IRIS_VNEXT_RELATION_TRUTH_AUDIT_20261018.md`.
+
 ## Current replacement chain
 
 ```text
@@ -52,6 +70,7 @@ V8 M1 carrier seal
         ↓ supported architecture baseline
 post-V8 quality program
         ├─ truth cleanup / abstention
+        ├─ relation truth V2 validity masks
         ├─ head-specific convergence courts
         ├─ compiler/runtime consumption audit
         ├─ independent topology court
@@ -62,7 +81,7 @@ post-V8 quality program
 
 - `main`: canonical merged source-code continuation line; currently behind the active review work.
 - V8 completed artifact: historical scientific/measurement baseline bound to exact V8 source and external receipts/checkpoints; not rewritten by later source hardening.
-- active review source: post-V8 research branch/PR until reviewed and merged.
+- active review source: post-V8 review branch/PR until reviewed and merged.
 - `Attempt` / Artifact Registry / ProductRevision: durable research/product authority; Git branch chronology must not substitute for them.
 
 ## Update rule

@@ -55,6 +55,8 @@ jobs:
             models/iris/vnext/teacher_truth_v1.py \
             models/iris/vnext/quality_policy_v1.py \
             models/iris/vnext/boundary_causality_v1.py \
+            models/iris/vnext/graphics_truth_v2.py \
+            models/iris/vnext/training_v2.py \
             models/iris/vnext/cohort_v8.py \
             tools/iris_vnext/input_binding_v1.py \
             tools/iris_vnext/blender_authored_teacher_export_v1.py \
@@ -76,8 +78,8 @@ jobs:
           PY
       - name: IRIS vNext model, teacher and batched Fit8 contracts
         run: python -m pytest -q tests/iris/test_iris_vnext_v1.py tests/iris/test_graphics_truth_v1.py tests/iris/test_iris_vnext_fit8_cohort_v1.py tests/iris/test_vnext_topology_teacher_v1.py tests/iris/test_vnext_mechanical_truth_rank_deficiency_v1.py tests/iris/test_vnext_preparation_acceleration_v1.py tests/iris/test_a100_preflight_v2.py
-      - name: Post-V8 quality, carrier seal and boundary causality contracts
-        run: python -m pytest -q tests/iris/test_quality_policy_v1.py tests/iris/test_boundary_causality_v1.py
+      - name: Post-V8 quality, carrier seal and truth contracts
+        run: python -m pytest -q tests/iris/test_quality_policy_v1.py tests/iris/test_boundary_causality_v1.py tests/iris/test_graphics_truth_v2.py
       - name: Single-carrier mechanics, Graphics, DAG and preparation provenance contracts
         run: python -m pytest -q tests/compiler/test_vnext_single_carrier_graphics_v1.py tests/repository/test_vnext_architecture_contract_v1.py tests/repository/test_vnext_execution_graph_v1.py tests/repository/test_vnext_fit8_preparation_contract_v1.py tests/repository/test_vnext_fit8_active_preparation_provenance_v1.py
       - name: Native Graphics ordering contract
@@ -109,6 +111,7 @@ jobs:
           echo 'post_m1_scene_core=sealed_fail_closed'
           echo 'post_v8_scientific_fit_pass=false'
           echo 'boundary_unknown=abstain_no_training_target'
+          echo 'graphics_truth_v2=explicit_validity_required'
           echo 'official_numeric_quality_thresholds=false'
           echo 'fit8_active_builder=build_fit8_vnext_shards_v2.py'
           echo 'fit8_exact_input_binding_required=true'

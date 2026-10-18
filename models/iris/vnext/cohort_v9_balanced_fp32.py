@@ -16,12 +16,14 @@ The official objective is grouped by independent semantic content:
 ``alpha_boundary`` = class-balanced projected-alpha BCE
 ``appearance_boundary`` = class-balanced projected-appearance BCE
 
-The three group losses are averaged equally.  Class weights are computed only
-from the immutable TRAIN split for the current view.  Occlusion is metric-only
-until negative authority exists.  Static same/cut/attachment remain abstentions.
+The three group losses are averaged equally. Class weights are computed only
+from the immutable TRAIN split for the current view. Occlusion is metric-only
+until negative authority exists. Static same/cut/attachment remain abstentions.
 """
 
 import math
+from pathlib import Path
+import shutil
 import time
 from typing import Any
 
@@ -32,6 +34,8 @@ from .cohort_v9 import (
     STATIC_RELATION_KEYS_V2,
     VIEW_RELATION_KEYS_V2,
     _family_metrics,
+    _load_json,
+    _sha,
     _value_hash,
 )
 from .cohort_v9_fp32 import (
@@ -45,6 +49,7 @@ V9_SUPERVISION_POLICY = (
     "TRAIN_SPLIT_PER_VIEW_CLASS_BALANCED_GROUPED_BCE__"
     "OCCLUSION_METRIC_ONLY__STATIC_ABSTAIN_V1"
 )
+V9_SUPPORT_RECEIPT_SCHEMA = "RealSaS.IRISVNextV9RelationSplitSupport.v1"
 V9_ORDERING_FAMILIES = (
     "front_probability",
     "visibility_probability_a",
@@ -166,14 +171,74 @@ class IRISVNextFocusedRelationTrainerV9BalancedFP32(IRISVNextFocusedRelationTrai
 
     supervision_policy = V9_SUPERVISION_POLICY
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        if self.step != 0:
-            # Existing checkpoints minted under an older supervision policy are
-            # not compatible with this authority.
-            raise RuntimeError("VNEXT_V9_BALANCED_POLICY_REQUIRES_FRESH_STEP_ZERO")
+    def __init__(
+        self,
+        *args: Any,
+        checkpoint_root: Path,
+        support_receipt_path: Path,
+        **kwargs: Any,
+    ) -> None:
+        final_root = Path(checkpoint_root).resolve()
+        support_path = Path(support_receipt_path).resolve()
+        prereg_path = Path(kwargs["preregistration_path"]).resolve()
+        relation_manifest_path = Path(kwargs["relation_manifest_path"]).resolve()
+
+        # The parent FP32 layer is authority for numeric setup but must never mint
+        # an intermediate checkpoint into the final V9 directory. Build it in a
+        # disposable root, then mint only the final supervision binding below.
+        bootstrap_root = final_root.parent / (final_root.name + ".balanced_bootstrap")
+        if bootstrap_root.exists():
+            shutil.rmtree(bootstrap_root)
+        try:
+            super().__init__(*args, checkpoint_root=bootstrap_root, **kwargs)
+            if self.step != 0:
+                raise RuntimeError("VNEXT_V9_BALANCED_BOOTSTRAP_STEP_DRIFT")
+        finally:
+            if bootstrap_root.exists():
+                shutil.rmtree(bootstrap_root)
 
         self.training_support = _collect_train_support(self.corpus)
+        support = _load_json(support_path)
+        if support.get("schema") != V9_SUPPORT_RECEIPT_SCHEMA:
+            raise ValueError("VNEXT_V9_SUPPORT_RECEIPT_SCHEMA_INVALID")
+        if support.get("status") != "PASS__SPLIT_SUPPORT_QUALIFIED__NO_TRAINING":
+            raise ValueError("VNEXT_V9_SUPPORT_RECEIPT_NOT_PASS")
+        if support.get("source_commit_sha") != self.expected_source_sha:
+            raise ValueError("VNEXT_V9_SUPPORT_RECEIPT_SOURCE_DRIFT")
+        if support.get("relation_truth_v2_manifest_sha256") != _sha(relation_manifest_path):
+            raise ValueError("VNEXT_V9_SUPPORT_RECEIPT_RELATION_MANIFEST_DRIFT")
+        if support.get("supervision_policy") != V9_SUPERVISION_POLICY:
+            raise ValueError("VNEXT_V9_SUPPORT_RECEIPT_SUPERVISION_POLICY_DRIFT")
+        split = support.get("split") or {}
+        binding_split = self.binding.get("split") or {}
+        if (
+            split.get("policy") != binding_split.get("policy")
+            or int(split.get("seed", -1)) != int(binding_split.get("seed", -2))
+            or abs(float(split.get("holdout_fraction", -1.0)) - float(binding_split.get("holdout_fraction", -2.0))) > 1.0e-12
+            or split.get("orientation_grouped") is not True
+        ):
+            raise ValueError("VNEXT_V9_SUPPORT_RECEIPT_SPLIT_DRIFT")
+        if support.get("blockers") not in ([], None):
+            raise ValueError("VNEXT_V9_SUPPORT_RECEIPT_HAS_BLOCKERS")
+
+        support_train = ((support.get("global") or {}).get("train") or {})
+        for family in V9_OPTIMIZED_FAMILIES + V9_METRIC_ONLY_FAMILIES:
+            receipt_counts = support_train.get(family) or {}
+            local_counts = self.training_support[family]
+            for key in ("valid", "positive", "negative"):
+                if int(receipt_counts.get(key, -1)) != int(local_counts[key]):
+                    raise ValueError(
+                        f"VNEXT_V9_SUPPORT_RECEIPT_TRAIN_COUNT_DRIFT:{family}:{key}"
+                    )
+
+        support_sha = _sha(support_path)
+        prereg = _load_json(prereg_path)
+        exact = prereg.get("exact_artifact_bindings") or {}
+        if str(exact.get("relation_split_support_receipt_sha256") or "").lower() != support_sha:
+            raise ValueError("VNEXT_V9_PREREGISTRATION_SUPPORT_RECEIPT_BINDING_DRIFT")
+        if prereg.get("supervision_policy") != V9_SUPERVISION_POLICY:
+            raise ValueError("VNEXT_V9_PREREGISTRATION_SUPERVISION_POLICY_DRIFT")
+
         self.binding = dict(self.binding)
         self.binding["supervision_execution"] = {
             "policy": V9_SUPERVISION_POLICY,
@@ -187,16 +252,18 @@ class IRISVNextFocusedRelationTrainerV9BalancedFP32(IRISVNextFocusedRelationTrai
             "optimized_families": list(V9_OPTIMIZED_FAMILIES),
             "metric_only_families": list(V9_METRIC_ONLY_FAMILIES),
             "static_families": "ABSTAIN__NO_GRADIENT",
+            "relation_split_support_receipt_sha256": support_sha,
             "train_support": self.training_support,
         }
         self.binding_hash = _value_hash(self.binding)
-        final_root = self.store.root
         self.store = VNextCheckpointStoreV1(final_root, self.binding_hash)
         previous = self.store.load()
         if previous is not None:
-            raise RuntimeError("VNEXT_V9_BALANCED_POLICY_CHECKPOINT_ROOT_MUST_BE_FRESH")
-        self.step = 0
-        self.save()
+            self._restore(previous)
+        else:
+            self.step = 0
+            self.save()
+        self._assert_numeric_policy()
 
     def _official_loss(
         self,

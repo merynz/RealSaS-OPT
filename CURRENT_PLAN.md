@@ -85,9 +85,9 @@ Focused CI found that `structure_v2.py` defaulted `sequence_position_offset` to 
 
 The focused vNext workflow runs on relevant pushes to the active branch and gates post-V8 quality, boundary, relation-truth-v2, trainer and existing native regressions.
 
-### A5. Review-line consolidation — PENDING FINAL FAST-FORWARD
+### A5. Review-line consolidation — PERSISTENT GATE
 
-The historical vNext draft PR #116 is a direct ancestor of the post-V8 branch. Fast-forward its head only after the final source head for this tranche is green.
+Draft PR #116 is the canonical vNext review vehicle. Before review or merge, verify its head exactly equals the final green active source head. If the active source advances after synchronization, the PR is out of date by definition and must be fast-forwarded again. This is a gate, not a one-time milestone.
 
 ---
 
@@ -338,7 +338,7 @@ Future experiments must be narrow and preregistered and must state:
 6. root navigation/state/agent docs                                      [DONE; maintain]
 7. relation producer semantics + Graphics Truth V2                       [DONE contract]
 8. relation boundary conditioning mismatch audit                          [DONE]
-9. consolidate draft PR #116 onto final green source head                [NEXT]
+9. verify/sync draft PR #116 to the final green source head              [REVIEW GATE]
 10. salvage identifiable foundation evidence producers                   [NEXT]
 11. wire Truth V2 producer + view-conditioned relation schema + stats    [NEXT]
 12. close attachment/support behavioral ownership audit                   [NEXT]

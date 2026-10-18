@@ -24,7 +24,7 @@ The post-V8 IRIS program does not replace current V2 product/control-plane autho
 
 - `canonical/V2_IMPLEMENTATION_READINESS.json` remains the implementation-readiness pointer.
 - The 43-stage dependency DAG and `PLATFORM_EXECUTION_LANES` remain existing control-plane continuity.
-- `QualifiedMeshIR`, `SurfaceAddressing`, and Complete Appearance Authority retain their scoped product meanings.
+- `QualifiedMeshIR`, `SurfaceAddressing`, Geometry, Mechanics, and Complete Appearance Authority retain their scoped product meanings.
 - Existing `CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED` continuity is not a new IRIS/Fit8 PASS.
 
 ## Training lineage and invariant

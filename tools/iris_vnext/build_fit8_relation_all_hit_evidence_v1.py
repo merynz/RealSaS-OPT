@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """Build source-defensible all-hit relation evidence for Fit8.
 
-This producer is deliberately upstream of any V10 training corpus.  For each
+This producer is deliberately upstream of any V10 training corpus. For each
 admitted Stage01 orthographic camera it samples deterministic foreground rays,
 recovers the complete ordered rest-mesh hit stack, and emits every unordered hit
 pair in both orientations.
@@ -14,11 +14,16 @@ The evidence separates two concepts that Relation Truth V2 coupled together:
   that ray.
 
 For a deep pair B/C behind A, B can be in front of C while both B and C are not
-visible.  Those rows are the principal new evidence family this producer exists
+visible. Those rows are the principal new evidence family this producer exists
 to expose.
 
-No static owner/cut/attachment truth is inferred.  No projected RGB/alpha
-boundary label is assigned to hidden pairs.  Occlusion evidence here is positive
+Pair points are normalized with the exact legacy IRIS ``center_xyz`` and
+``normalization_half_extent`` used by the prepared cohort. Teacher-bbox
+normalization is forbidden because it would put correct source evidence into the
+wrong frozen-H query coordinate system.
+
+No static owner/cut/attachment truth is inferred. No projected RGB/alpha
+boundary label is assigned to hidden pairs. Occlusion evidence here is positive
 same-ray overlap support only; this file does not manufacture negative examples
 or authorize a binary occlusion court.
 
@@ -32,6 +37,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+import torch
 
 from models.iris.vnext.cohort_v1 import SUBJECT_IDS
 from tools.iris_vnext.build_fit8_vnext_shards_v1 import (
@@ -51,6 +57,7 @@ _GRID_SIZE = 32
 
 def _args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--legacy-shard-dir", type=Path, required=True)
     parser.add_argument("--teacher-dir", type=Path, required=True)
     parser.add_argument("--stage01-root", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -271,7 +278,11 @@ def _ray_triangle_all_parallel_grid(
     faces_flat = np.concatenate(hit_faces_by_ray) if offsets[-1] else np.zeros(0, dtype=np.int64)
     depth_flat = np.concatenate(hit_depths_by_ray) if offsets[-1] else np.zeros(0, dtype=np.float64)
     ray_ids = np.repeat(np.arange(len(o), dtype=np.int64), np.diff(offsets))
-    points_flat = o[ray_ids] + depth_flat[:, None] * d[ray_ids] if len(depth_flat) else np.zeros((0, 3), dtype=np.float64)
+    points_flat = (
+        o[ray_ids] + depth_flat[:, None] * d[ray_ids]
+        if len(depth_flat)
+        else np.zeros((0, 3), dtype=np.float64)
+    )
     return {
         "offsets": offsets,
         "face": faces_flat,
@@ -412,6 +423,7 @@ def main() -> None:
     args = _args()
     if int(args.candidate_rays_per_view) <= 0:
         raise ValueError("VNEXT_ALL_HIT_POLICY_NONPOSITIVE")
+    legacy_dir = args.legacy_shard_dir.expanduser().resolve()
     teacher_dir = args.teacher_dir.expanduser().resolve()
     stage01 = args.stage01_root.expanduser().resolve()
     output = args.output_dir.expanduser().resolve()
@@ -424,16 +436,26 @@ def main() -> None:
 
     for display_id in SUBJECT_IDS:
         source_id = SUBJECT_SOURCE_IDS[display_id]
+        legacy_path = legacy_dir / f"{source_id}.pt"
         teacher_path = teacher_dir / f"{source_id}.teacher.npz"
         receipt_path = teacher_path.with_suffix(teacher_path.suffix + ".json")
-        if not teacher_path.is_file() or not receipt_path.is_file():
-            raise FileNotFoundError("VNEXT_ALL_HIT_TEACHER_MISSING:" + display_id)
+        if not legacy_path.is_file() or not teacher_path.is_file() or not receipt_path.is_file():
+            raise FileNotFoundError("VNEXT_ALL_HIT_INPUT_MISSING:" + display_id)
         boot = bootstrap_rows[source_id]
         receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
         if receipt.get("subject_id") != source_id:
             raise ValueError("VNEXT_ALL_HIT_TEACHER_SUBJECT_DRIFT:" + display_id)
         if receipt.get("source", {}).get("sha256") != boot["raw_source"]["sha256"]:
             raise ValueError("VNEXT_ALL_HIT_TEACHER_SOURCE_HASH_DRIFT:" + display_id)
+
+        legacy = torch.load(legacy_path, map_location="cpu", weights_only=True)
+        if str(legacy.get("subject_id")) != source_id:
+            raise ValueError("VNEXT_ALL_HIT_LEGACY_SUBJECT_DRIFT:" + display_id)
+        center = np.asarray(legacy["center_xyz"], dtype=np.float64).reshape(3)
+        half = float(torch.as_tensor(legacy["normalization_half_extent"]).item())
+        if not np.isfinite(center).all() or not np.isfinite(half) or half <= 0.0:
+            raise ValueError("VNEXT_ALL_HIT_LEGACY_NORMALIZATION_INVALID:" + display_id)
+
         with np.load(teacher_path, allow_pickle=False) as data:
             rest = np.asarray(data["rest_vertices_source_world"], dtype=np.float64)
             faces = np.asarray(data["faces"], dtype=np.int64)
@@ -447,10 +469,6 @@ def main() -> None:
         cameras = list(json.loads(camera_bundle_path.read_text(encoding="utf-8"))["cameras"])
         if len(cameras) != 8:
             raise ValueError("VNEXT_ALL_HIT_CAMERA_COUNT_DRIFT:" + display_id)
-        center = (rest.min(axis=0) + rest.max(axis=0)) * 0.5
-        half = float(np.max(np.abs(rest - center[None, :])))
-        if not np.isfinite(half) or half <= 0.0:
-            raise ValueError("VNEXT_ALL_HIT_NORMALIZATION_INVALID:" + display_id)
 
         arrays: dict[str, np.ndarray] = {}
         views: list[dict[str, Any]] = []
@@ -496,8 +514,14 @@ def main() -> None:
                 "bytes": out_path.stat().st_size,
                 "teacher_export_sha256": _sha(teacher_path),
                 "teacher_receipt_sha256": _sha(receipt_path),
+                "legacy_shard_sha256": _sha(legacy_path),
                 "source_asset_sha256": boot["raw_source"]["sha256"],
                 "camera_bundle_sha256": _sha(camera_bundle_path),
+                "normalization": {
+                    "authority": "EXACT_LEGACY_IRIS_SHARD",
+                    "center_xyz": [float(x) for x in center],
+                    "half_extent": half,
+                },
                 "views": views,
             }
         )
@@ -512,6 +536,7 @@ def main() -> None:
             "grid_size": int(_GRID_SIZE),
             "same_component_same_depth_duplicates_merged": True,
             "all_unordered_stack_pairs_emitted_both_orientations": True,
+            "pair_point_coordinate_domain": "EXACT_LEGACY_IRIS_NORMALIZED_SOURCE_WORLD",
         },
         "authority": {
             "front": "DETERMINISTIC_DERIVED__FULL_RAY_STACK_DEPTH_ORDER",

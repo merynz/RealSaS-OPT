@@ -2,41 +2,30 @@
 
 **Date:** 2026-10-18  
 **Canonical production line:** `main` until reviewed vNext is merged  
-**Active source line:** `research/iris-vnext-post-v8-quality-plan-20261018`  
-**Verified pre-docs code head:** `b38feee7f8fafa2308b8e3c9cecdc22f248e28a7`  
-**Verified workflow:** `39126288809` = `completed/success`  
-**Review vehicle:** draft PR #116; currently stale relative to the active source line  
+**Active review source:** `research/iris-vnext-post-v8-quality-plan-20261018`  
+**Latest verified code parent before this docs sync:** `b6d77d1805d17ffb59e19d6a8b8626d8d8e6cb69`  
+**Verified focused workflow:** `39130204378` = `completed/success`  
+**Review vehicle:** draft PR #116; synchronize only after this docs head is green  
 **Active program:** **POST-V8 QUALITY / TRUTH / CONSUMPTION QUALIFICATION**  
 **Scientific status:** **NO IRIS FIT8 SCIENTIFIC PASS**
 
 ## Authority separation
 
-Do not collapse these into one notion of “current”:
+Do not collapse these into one notion of current:
 
 1. `main` is merged production-code authority.
-2. The completed V8 Fit8 run is the architectural/measurement baseline, bound to source commit `5083c9915533ec8ec6530c7d229c635887abfea7` plus exact external checkpoint/receipt lineage.
-3. The active post-V8 branch contains future-source hardening and audits. It does not retroactively mutate V8.
-4. Artifact Registry / Attempt / ProductRevision remain durable research/product authority. Git chronology is not a substitute.
+2. Completed V8 is an immutable architecture/measurement baseline bound to source `5083c9915533ec8ec6530c7d229c635887abfea7` plus exact checkpoint/receipt lineage.
+3. The active post-V8 branch is review source only; it does not retroactively mutate V8.
+4. Artifact Registry / Attempt / ProductRevision remain durable research/product authority. Git chronology and green CI are not scientific authority by themselves.
 
-## Training lineage
+## Training lineage and current invariant
 
-### V5 — downstream single-objective rewriting falsified
+- V5 falsified unsafe single-objective downstream rewriting of shared H.
+- V6 showed cumulative retention can preserve mechanics while geometry/extraction still drift because post-M1 `scene_core` remained trainable.
+- V7 repaired TESSA coordinate compatibility only; V6 optimizer/curriculum policy remained.
+- V8 migrated exact V6 M1-end, sealed `scene_core`, completed step12000, and held geometry/extraction invariant while downstream appearance/relation/topology objectives remained learnable.
 
-A1 improved appearance while mechanics/surface authority collapsed. A downstream objective can improve its own metric while rewriting useful shared representation.
-
-### V6 — cumulative retention only partially worked
-
-Prior-objective retention preserved mechanics better but geometry/extraction still drifted because post-M1 `scene_core` stayed trainable (`scene_lr_scale=0.25`). Loss balancing alone was insufficient carrier protection.
-
-### V7 — repair only
-
-V7 repaired the TESSA witness-coordinate contract. It did not change V6 curriculum weights, optimizer policy or carrier-update policy.
-
-### V8 — post-M1 carrier isolation supported
-
-V8 migrated from the exact V6 M1-end state, sealed `scene_core`, reached step12000, and held geometry/extraction invariant while appearance/relation/topology objectives continued learning.
-
-Current default invariant:
+Current default:
 
 ```text
 G / M establish shared carrier H
@@ -48,88 +37,52 @@ A / R / T / J specialist learning
 scene_core remains sealed
 ```
 
-Historical V8 already had the carrier seal and stage-level specialist isolation. Its physical AdamW groups were `scene_core`, combined `evidence_heads` (mechanical + appearance + relations), and `structure`. Post-V8 `optimization_v2.py` does **not** invent the seal; it separates future specialist experiments into `mechanical_head`, `appearance_head`, `relation_head`, and `structure` groups so LR, gradient and update telemetry are independently attributable while `scene_core` remains LR=0 fail-closed.
+Historical V8 already had this carrier seal and stage-level specialist isolation. Its physical optimizer groups were `scene_core`, combined `evidence_heads` (mechanical + appearance + relations), and `structure`. Post-V8 `optimization_v2.py` does not invent the seal; it separates future `mechanical_head`, `appearance_head`, `relation_head`, and `structure` groups so LR, gradients and updates are independently attributable while `scene_core` stays LR=0 fail-closed.
 
-V8 is a **measurement baseline**, not a scientific Fit8 PASS: metric-specific preregistered thresholds and an independent topology court were absent.
+V8 remains a **measurement baseline**, not a scientific Fit8 PASS.
 
-## Executable carrier hardening
+## Verified post-V8 source stack
 
-`models/iris/vnext/quality_policy_v1.py` uses exact canonical post-M1 stage IDs:
+The focused source contract is green at `b6d77d...`, run `39130204378`. The green run covers:
 
-```text
-A1_APPEARANCE_EVIDENCE
-R1_ROLE_FREE_RELATIONS
-T1_MECHANICAL_STRUCTURE
-J1_JOINT_FINETUNE
-```
+- exact canonical post-M1 stage IDs and fail-closed carrier guard;
+- Truth V2 authority/provenance/validity contract and validity-aware loss;
+- Relation Truth V2 producer source;
+- relation support/class-balance eligibility;
+- `GraphicsRelationHeadV2` conditioning and deterministic V1→V2 migration semantics;
+- head-separated post-V8 specialist optimizer/telemetry;
+- self-hosted workflow safety contract;
+- single-carrier Compiler/runtime contracts;
+- native Graphics ordering + RSS→native behavioral E2E;
+- TESSA/decoder regression protection.
 
-Unknown A/R/T/J aliases fail closed. Future V8-line trainer execution checks both configured `scene_lr_scale` and the actual optimizer `scene_core` group LR.
-
-`models/iris/vnext/optimization_v2.py` is for future focused post-V8 experiments only:
-
-```text
-scene_core       LR = 0, fail closed
-mechanical_head  independent LR / telemetry
-appearance_head  independent LR / telemetry
-relation_head    independent LR / telemetry
-structure        independent LR / telemetry
-```
-
-No specialist LR defaults are silently invented. Historical V8 optimizer provenance remains unchanged.
-
-## Current architecture
-
-```text
-observations + cameras
-        ↓
-      IRIS
- shared scene carrier H
-   ┌────┼──────────────┐
-   ↓    ↓              ↓
-Geometry Mechanics  specialist evidence
- field   demand      appearance / relations / structure
-   └────┬──────────────┘
-        ↓
-  Evidence Package
-        ↓
-     Compiler
-   ┌────┼─────────┐
-   ↓    ↓         ↓
-fragments order contact/attachment
-        ↓
- one canonical M/G/W_M
-        ↓
-     Runtime
-```
-
-No mandatory named body-part taxonomy exists in the inference contract. No independent deformable visual mesh is allowed.
+No specialist LR defaults are silently invented. Historical V8 optimizer/checkpoint provenance remains unchanged.
 
 ## Relation truth / conditioning state
 
-The V8 audit found projected alpha/appearance targets derived from render views while `GraphicsRelationHeadV1.static_relations(Ha,Hb)` predicted them without camera conditioning. This is a supervision/conditioning mismatch, not merely an LR problem.
+V8 relation-boundary audit found projected alpha/appearance targets derived from a render view while `GraphicsRelationHeadV1.static_relations(Ha,Hb)` predicted them without camera conditioning. This is a supervision/conditioning mismatch, not merely an LR problem.
 
-Replacement source is implemented and green:
+Implemented replacement source:
 
-- `models/iris/vnext/graphics_truth_v2.py` — authority/provenance/validity;
-- `models/iris/vnext/training_v2.py` — validity-mask loss;
-- `tools/iris_vnext/build_fit8_relation_truth_v2.py` — versioned sidecar/manifest producer;
+- `models/iris/vnext/graphics_truth_v2.py` — explicit authority/provenance/validity;
+- `models/iris/vnext/training_v2.py` — explicit validity-mask loss;
+- `tools/iris_vnext/build_fit8_relation_truth_v2.py` — versioned Relation Truth V2 sidecar/manifest producer;
 - `models/iris/vnext/relation_support_v2.py` — support/class-balance court eligibility;
-- `models/iris/vnext/heads_v2.py` — projected boundaries moved to the camera-conditioned branch with deterministic V1→V2 migration semantics;
-- `models/iris/vnext/optimization_v2.py` — head-separated focused optimizer and convergence telemetry;
-- focused CI is green at `b38feee7...`, run `39126288809`.
+- `models/iris/vnext/heads_v2.py` — projected boundaries moved to camera-conditioned view branch;
+- `models/iris/vnext/optimization_v2.py` — head-separated focused optimizer and convergence telemetry.
 
-What is **not** established:
+Still **not established**:
 
-- no repository evidence seals a materialized Fit8 Relation Truth V2 corpus/manifest as experiment authority;
+- no actual Fit8 Relation Truth V2 corpus/manifest is sealed as experiment authority;
 - no real V8 checkpoint→RelationHeadV2 migrated checkpoint/receipt is sealed;
-- no focused post-V8 relation/boundary optimization has run;
+- no focused post-V8 relation/boundary optimization experiment has run;
 - no new scientific relation PASS exists.
 
-Static `same_drawable`, `cut`, and `attachment` abstain in Truth V2 when independent authority is absent. Current deterministic `occlusion_probability` support is single-class on its valid two-hit rows; it may be training/measurement evidence but is not eligible for a binary held-out PASS court until authoritative negative support exists. Do not fabricate negatives.
+Static `same_drawable`, `cut`, and `attachment` abstain when independent authority is absent. Current deterministic valid `occlusion_probability` rows are single-class positive support; this may remain training/measurement evidence but is not eligible for a binary held-out PASS court until authoritative negative support exists. Do not fabricate negatives.
 
-## Boundary causality
+## Boundary and foundation evidence
 
-`BoundaryCausalityTeacherV1` admits only source-defensible causes:
+`BoundaryCausalityTeacherV1` allows only source-defensible causes:
 
 ```text
 GEOMETRIC_TERMINATION
@@ -140,58 +93,56 @@ SOURCE_PRIMITIVE_COMPONENT_SEAM
 RESIDUAL_UNKNOWN
 ```
 
-`RESIDUAL_UNKNOWN` is abstention and cannot become positive training evidence.
+`RESIDUAL_UNKNOWN` is abstention.
 
-## Foundation branch disposition and salvage map
-
-Research provenance branch:
+Foundation research provenance remains:
 
 `agent/unified-iris-stdgenpp-foundation@d90c82e24ccbf43081ca19f105bc4e4c7dfe9531`
 
-Source-defensible tools to inspect/port selectively:
-
-- geometry/topology: `tools/corpus/qualify_f_geometry_carrier_v1.py`, `fit8_surface_topology_invariants_v1.py`;
-- render↔geometric + glTF material/skin provenance: `fit8_render_vertex_equivalence_v1.py`, `fit8_gltf_static_carrier_v1.py`;
-- FBX exact-source census: `ufbx_static_census_probe_v2.c`, `ufbx_static_census_probe_v3.c`, `fit8_fbx_static_carrier_v1.py`, `fit8_fbx_static_carrier_v2.py`;
-- static all-hit evidence: `fit8_static_ray_census_v1.py`, `fit8_static_ray_census_v2.py`, `fit8_static_ray_census_v3.py`;
-- authored-motion fixed-frame evidence: `fit8_gltf_dynamic_pose_v1.py`, `fit8_dynamic_fixed_frame_presentation_v1.py`, `fit8_dynamic_mechanics_metrics_v1.py`, `fit8_gltf_dynamic_census_v2.py`;
-- residual boundary: `fit8_f_residual_boundary_graph_v1.py`, `fit8_f_residual_signature_v1.py`, `fit8_face_strand_boundary_incidence_v1.py`;
-- local continuation: `fit8_local_patch_teacher_v1.py`, `fit8_patch_face_support_v1.py`, `fit8_f_patch_continuation_court_v1.py`, `fit8_f_face_qualified_continuation_court_v1.py`.
-
-Do not promote authoritative drawable ownership, hidden/amodal support, intended 2D presentation override, global semantic ontology, or inferred hidden continuation from generic FIT8 3D alone.
+Selective salvage is limited to source-defensible geometry/topology provenance, material/skin provenance, static all-hit rays, fixed-frame authored-motion evidence, residual-boundary diagnostics and local-continuation courts. Exact paths are recorded in `CURRENT_PLAN.md` and the decision ledger. Authoritative drawable ownership, hidden/amodal support, intended 2D presentation override, global named semantic ontology, and inferred hidden continuation are not generic FIT8 truth.
 
 ## Compiler/runtime consumption
 
-Machine-readable audit: `docs/research/IRIS_VNEXT_GRAPHICS_CONSUMPTION_LINEAGE_V1.json`.
+Audit: `docs/research/IRIS_VNEXT_GRAPHICS_CONSUMPTION_LINEAGE_V1.json`.
 
-Current source evidence supports fragment clustering from same/cut/boundary, directed order from front+occlusion, explicit native precedence overriding contradictory physical depth, and visibility changing final native RGBA. Attachment records survive into `graphics.bin` but the current native reference raster does not behaviorally use them. `support_band_pixels` survive serialization/validation but are not applied by the reference renderer.
+Current source evidence supports:
 
-Serialized is not the same as behaviorally used.
+- same/cut/boundary can affect Compiler fragment clustering;
+- front+occlusion can create directed order edges;
+- native explicit precedence can override contradictory physical depth;
+- visibility changes final native RGBA behavior.
+
+Consumption debt remains:
+
+- attachment is serialized into `graphics.bin` but not behaviorally used by the current native reference raster;
+- `support_band_pixels` are serialized/validated but not applied by the reference renderer.
+
+Serialization is not behavioral use.
 
 ## TESSA/topology state
 
-V8 showed topology-objective learnability from sealed H but did not seal an independent topology PASS. Required held-out court must measure actual topology/surface outcomes: valid/degenerate faces, component error, boundary loops/holes, non-manifold behavior where meaningful, canonical-surface deviation, source support and held-out stability.
+V8 showed topology-objective learnability from sealed H but did not establish an independent topology PASS. A held-out court must measure actual surface/topology outcomes: valid/degenerate faces, component error, boundary loops/holes, meaningful manifold diagnostics, canonical-surface deviation, source support and held-out stability.
 
 Training loss is not topology qualification.
 
 ## StdGEN++ re-audit
 
-Detailed dossier: `docs/research/IRIS_VNEXT_STDGENPP_REAUDIT_20261018.md`.
-
 Pinned public code inspected:
 
-- StdGEN `hyz317/StdGEN@f1b0c822689dc2539c774bb73090a67c66e2e766`;
-- InstantMesh `TencentARC/InstantMesh@08822c5200a4bcc0e2c1a4573409ac10b9f6692c`.
+- `hyz317/StdGEN@f1b0c822689dc2539c774bb73090a67c66e2e766`
+- `TencentARC/InstantMesh@08822c5200a4bcc0e2c1a4573409ac10b9f6692c`
 
-The public StdGEN repository does not expose the full training loop, so paper-only optimizer/curriculum details remain `PAPER_EXACT`, not `CODE_EXACT`.
+The inspected public StdGEN repository does not expose the exact full training loop. Paper-only optimizer/curriculum details remain `PAPER_EXACT`, not `CODE_EXACT`.
 
 Transferable discipline: protect a useful carrier, constrain specialization, preserve earned supervision, require special data for hidden/internal truth, and consider coarse-to-fine extraction/topology regularization only after a held-out court identifies the relevant failure. Generic LoRA/adapters remain unauthorized until a clean-target capacity court fails.
 
-## Self-hosted stale-run incident — 2026-10-18
+## Self-hosted stale-run incident and safety hardening
 
-Self-hosted run `39121291171` / `iris-vnext-fit8-prepare-self-hosted-v1 #22` was queued on stale PR #116 head `research/iris-vnext-single-carrier-graphics@90c9c2f35ffc77aeea10cd99391bbe9a4d4a31c6` and started when `realsas-wsl-1660ti` came online.
+Stale run `39121291171` / `iris-vnext-fit8-prepare-self-hosted-v1 #22` was queued on PR #116 head `research/iris-vnext-single-carrier-graphics@90c9c2f35ffc77aeea10cd99391bbe9a4d4a31c6`. When `realsas-wsl-1660ti` came online it locally sealed stale-source preparation and entered persistence to:
 
-The stale run locally produced:
+`gdrive:RealSaS_Fit8_IRIS_vNext_20261016`
+
+The run was cancelled during Drive persistence before round-trip SHA verification. Forensic values from that stale run:
 
 ```text
 TEACHER_BATCH_RECEIPT sha256 = 7ac1c66cc5f749e0f6f8cac43a9b79a135c8c45ed1138303d42c102f04c15d27
@@ -200,18 +151,21 @@ PREPARATION_RECEIPT sha256 = fdd72430a9e6573b51b98eddf181d159cca08079654ceed08de
 source_commit = 90c9c2f35ffc77aeea10cd99391bbe9a4d4a31c6
 ```
 
-It then entered Drive persistence to `gdrive:RealSaS_Fit8_IRIS_vNext_20261016`. The run was cancelled during that step before round-trip SHA verification completed. GitHub reports run conclusion `cancelled`; a compact forensic artifact was retained as `iris-vnext-fit8-preparation-39121291171` (artifact id `12137271848`).
+Forensic GitHub artifact: `iris-vnext-fit8-preparation-39121291171`, artifact id `12137271848`.
 
-Therefore:
+The affected Drive path remains **QUARANTINED / UNVERIFIED**. Do not consume it based on file presence.
 
-- the stale run is **not** current preparation authority;
-- the remote Drive preparation path is **QUARANTINED / UNVERIFIED** until re-audited against exact expected SHA/provenance;
-- no current training may consume that remote path merely because files exist;
-- runner remains offline until the current branch owns a safe verification/preparation workflow.
+Safety hardening is now source-implemented and CI-green:
+
+- legacy `.github/workflows/iris_vnext_fit8_prepare_self_hosted_v1.yml` is retired: manual dispatch only, `ubuntu-latest`, no self-hosted runner, no `rclone`, typed failure;
+- new `.github/workflows/iris_vnext_fit8_quarantine_audit_self_hosted_v2.yml` is manual-dispatch only and read-only;
+- it is bound to the active review branch and an exact operator-supplied SHA equal to checked-out `GITHUB_SHA`;
+- it only copies remote→local and uploads forensic evidence;
+- `tools/iris_vnext/audit_fit8_preparation_snapshot_v1.py` classifies the snapshot but **never authorizes remote consumption**; even a current-source match remains non-authoritative until regeneration/full round-trip qualification.
+
+The self-hosted runner remains offline until we deliberately dispatch that read-only audit. No self-hosted preparation writer is currently authorized.
 
 ## Quality / PASS discipline
-
-`0.1–0.2` residuals are not normalized into success because training finished. `~0.05` is only historical planning context for genuinely comparable normalized residual families, not a global threshold.
 
 ```text
 MEASUREMENT_ONLY
@@ -220,17 +174,30 @@ ELIGIBLE_FOR_COURT
 COURT_PASS
 ```
 
-`COURT_PASS` requires authoritative target + held-out metric + preregistered metric-specific threshold + required non-regression.
+`COURT_PASS` requires authoritative target + held-out metric + preregistered metric-specific threshold + required non-regression. Historical `~0.05` is only planning context for genuinely comparable normalized metrics; `0.1–0.2` is not auto-success.
 
 ## Immediate next execution tranche
 
-1. keep stale Drive preparation quarantined and verify its exact file hashes/provenance before reuse or replacement;
-2. materialize Relation Truth V2 sidecars/manifest against exact admitted Fit8 inputs and seal provenance;
-3. run per-family support/class/abstention audit;
-4. create a real V8 relation-head state → `GraphicsRelationHeadV2` migration checkpoint/receipt;
-5. preregister and run focused relation/boundary optimization with `scene_core` frozen and head-specific telemetry;
-6. build the independent TESSA topology court;
-7. close remaining evidence→Compiler→runtime `DEFINED → PRODUCED → SERIALIZED → CONSUMED → BEHAVIORALLY_USED` gaps;
-8. synchronize PR #116 only after the final green review head is coherent.
+1. finish this docs sync and keep its head green;
+2. fast-forward PR #116 review branch to the final green active head without force;
+3. deliberately run the read-only self-hosted quarantine audit and inspect its forensic artifact;
+4. only after that, design a SHA-scoped candidate preparation writer; do not write the quarantined shared remote automatically;
+5. materialize Relation Truth V2 sidecars/manifest on exact admitted Fit8 inputs and audit per-family support/class/abstention;
+6. seal a real V8 relation-head state → `GraphicsRelationHeadV2` migration checkpoint/receipt;
+7. preregister and run focused relation/boundary optimization with `scene_core` frozen and head-specific telemetry;
+8. build the independent TESSA topology court;
+9. close remaining evidence→Compiler→runtime behavioral-consumption gaps.
 
 No broad 12k/A100 rerun is authorized merely because source hardening is green.
+
+## Required read order
+
+1. `CURRENT_STATE.md`
+2. `CURRENT_PLAN.md`
+3. `docs/research/IRIS_VNEXT_DECISION_LEDGER_20261018.md`
+4. `docs/research/IRIS_VNEXT_RELATION_TRUTH_AUDIT_20261018.md`
+5. `docs/research/IRIS_VNEXT_POST_V8_QUALITY_PLAN_20261018.md`
+6. `docs/research/IRIS_VNEXT_STDGENPP_REAUDIT_20261018.md`
+7. `docs/research/IRIS_VNEXT_GRAPHICS_CONSUMPTION_LINEAGE_V1.json`
+8. `AGENTS.md`
+9. `SYSTEM_INDEX.md`

@@ -55,7 +55,7 @@ def test_compare_hits_rejects_shape_drift():
         raise AssertionError("shape drift must fail closed")
 
 
-def test_motion_audit_is_diagnostic_only_no_training_entry():
+def test_motion_audit_is_diagnostic_only_and_source_bound():
     from pathlib import Path
 
     source = Path('tools/iris_vnext/audit_authored_motion_relation_conditioning_v1.py').read_text(encoding='utf-8')
@@ -68,3 +68,10 @@ def test_motion_audit_is_diagnostic_only_no_training_entry():
     assert all(token not in source for token in forbidden)
     assert 'training_authorized": False' in source
     assert 'COURT_ONLY__CURRENT_HEAD_HAS_NO_EXPLICIT_POSE_CONDITIONING' in source
+    for path in (
+        'models/iris/vnext/cohort_v1.py',
+        'tools/iris_vnext/build_fit8_vnext_shards_v1.py',
+        'tools/iris_vnext/build_fit8_vnext_shards_v2.py',
+    ):
+        assert path in source
+    assert '"source_provenance": _source_provenance()' in source

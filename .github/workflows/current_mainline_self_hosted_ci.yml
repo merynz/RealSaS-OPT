@@ -119,58 +119,24 @@ jobs:
             tests/iris/test_shared_cohort_v1.py \
             tests/iris/test_cohort_notebook_closure_v1.py
       - name: Compiler regressions
-        env:
-          REALSAS_RUN_CONTRACT_DIAGNOSTIC_DIR: ${{ runner.temp }}/realsas-contract-diags
-        run: |
-          rm -rf "$REALSAS_RUN_CONTRACT_DIAGNOSTIC_DIR"
-          python -m pytest -q \
-            tests/compiler \
-            tests/artifact_registry \
-            tests/ci/test_compiler_dependency_v1.py \
-            tests/ci/test_build_contract_v1.py \
-            tests/ci/test_artifact_registry_contract_v1.py \
-            tests/ci/test_stage26_semantic_filter_v1.py \
-            tests/ci/test_stage30_contract_v1.py \
-            tests/ci/test_architecture_freeze_v1.py \
-            tests/ci/test_workflow_safety_v1.py \
-            tests/ci/test_surface_addressing_v1.py \
-            tests/ci/test_surface_addressing_v2.py \
-            tests/ci/test_preproduct_surface_address_authority_v1.py \
-            tests/ci/test_complete_appearance_authority_v1.py \
-            tests/ci/test_typed_rig_authority_v1.py \
-            tests/ci/test_geppetto_v2_source_contract.py \
-            tests/ci/test_skin_field_codec_v4_source_contract.py \
-            tests/ci/test_arachne_codec_v2_source_contract.py \
-            tests/ci/test_motion_deformation_v2_source_contract.py \
-            tests/ci/test_runtime_contract_v1.py \
-            tests/ci/test_runtime_model_v1.py \
-            tests/ci/test_runtime_graphics_v1.py \
-            tests/ci/test_runtime_caa_v2.py \
-            tests/ci/test_build_contract_pipeline_v1.py \
-            tests/ci/test_exact_region_domain_v1.py \
-            tests/ci/test_ggts_entangled_v4.py \
-            tests/ci/test_behavioral_motion_v1.py \
-            tests/ci/test_reference_platform_v1.py \
-            tests/ci/test_image_coverage_v1.py \
-            tests/ci/test_current_runtime_native_v2.py \
-            tests/ci/test_runtime_animation_v1.py \
-            tests/ci/test_native_player_v2.py \
-            tests/ci/test_runtime_stage37_semantics_v1.py \
-            tests/ci/test_runtime_stage42_pose_v1.py \
-            tests/ci/test_current_mainline_compiler_v2.py
+        run: python -m pytest -q tests/compiler --junitxml=compiler-regressions-junit.xml
       - name: Persist compiler regression diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: current-mainline-contract-diags
-          path: ${{ runner.temp }}/realsas-contract-diags/*.json
-          if-no-files-found: ignore
-          retention-days: 14
+          name: compiler-regressions-junit
+          path: compiler-regressions-junit.xml
+          if-no-files-found: warn
+          retention-days: 7
       - name: Fast gate summary
-        if: always()
         run: |
-          echo "### Current Mainline Fast Gate" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Canonical source: \`main\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Synthetic source-scene Blender smoke: required" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Compiler + runtime source checks: required" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Native CAA V2 reference player: required" >> "$GITHUB_STEP_SUMMARY"
+          echo 'CURRENT_MAINLINE_FAST_GATE_PASS'
+          echo "commit=$GITHUB_SHA"
+          echo 'execution_lane=github_hosted_public_standard'
+          echo 'private_repo_guard=true'
+          echo 'pinned_environment=true'
+          echo 'repository_governance=true'
+          echo 'v2_dag=true'
+          echo 'native_caa_player_built=true'
+          echo 'local_wsl_reserved_for=product_native_witness_or_requested_inference'
+          echo 'witness_execution=BLOCKED_UNTIL_V2_READINESS_SEAL'

@@ -3,9 +3,9 @@
 **Date:** 2026-10-18  
 **Canonical production line:** `main` until reviewed vNext is merged  
 **Active review source:** `research/iris-vnext-post-v8-quality-plan-20261018`  
-**Latest verified code parent before this docs sync:** `b6d77d1805d17ffb59e19d6a8b8626d8d8e6cb69`  
-**Verified focused workflow:** `39130204378` = `completed/success`  
-**Review vehicle:** draft PR #116; synchronize only after this docs head is green  
+**Latest verified focused source before this continuity repair:** `3d732df81939c30c7ebf0f501515a8bd66529869`  
+**Verified focused workflow:** `39132203602` = `completed/success`  
+**Review vehicle:** draft PR #116; keep it fast-forward synchronized only to green active-review heads  
 **Active program:** **POST-V8 QUALITY / TRUTH / CONSUMPTION QUALIFICATION**  
 **Scientific status:** **NO IRIS FIT8 SCIENTIFIC PASS**
 
@@ -21,7 +21,10 @@ Do not collapse these into one notion of current:
 ## Platform execution continuity
 
 - **Execution/runtime/spec gate id:** `PLATFORM_EXECUTION_LANES`
-- This active platform gate governs durable execution-lane / Attempt / ProductRevision / workflow ownership. It is orthogonal to the IRIS post-V8 scientific qualification program and does **not** grant an IRIS scientific PASS.
+- **Pre-existing control-plane continuity state token:** `CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED`
+- `QualifiedMeshIR` remains the single product geometry authority after its own mesh qualification. Naming it here preserves current product-authority continuity; it does not claim that the post-V8 IRIS review line has newly qualified a product mesh.
+- **Complete Appearance Authority** remains the current product appearance authority boundary. It is separate from the post-V8 learned Graphics evidence work and does not upgrade Relation Truth V2 or boundary evidence to product authority.
+- These platform/product continuity anchors are orthogonal to the IRIS post-V8 scientific qualification program and do **not** grant an IRIS Fit8 scientific PASS, absolute G3 PASS, unseen generalization, or product qualification.
 
 ## Training lineage and current invariant
 
@@ -48,7 +51,7 @@ V8 remains a **measurement baseline**, not a scientific Fit8 PASS.
 
 ## Verified post-V8 source stack
 
-The focused source contract is green at `b6d77d...`, run `39130204378`. The green run covers:
+The focused source contract is green at `3d732df...`, run `39132203602`. The green run covers:
 
 - exact canonical post-M1 stage IDs and fail-closed carrier guard;
 - Truth V2 authority/provenance/validity contract and validity-aware loss;
@@ -59,7 +62,8 @@ The focused source contract is green at `b6d77d...`, run `39130204378`. The gree
 - self-hosted workflow safety contract;
 - single-carrier Compiler/runtime contracts;
 - native Graphics ordering + RSS→native behavioral E2E;
-- TESSA/decoder regression protection.
+- TESSA/decoder regression protection;
+- current/historical continuity pointers in the agent handoff.
 
 No specialist LR defaults are silently invented. Historical V8 optimizer/checkpoint provenance remains unchanged.
 
@@ -160,7 +164,7 @@ Forensic GitHub artifact: `iris-vnext-fit8-preparation-39121291171`, artifact id
 
 The affected Drive path remains **QUARANTINED / UNVERIFIED**. Do not consume it based on file presence.
 
-Safety hardening is now source-implemented and CI-green:
+Safety hardening is source-implemented and focused-CI green:
 
 - legacy `.github/workflows/iris_vnext_fit8_prepare_self_hosted_v1.yml` is retired: manual dispatch only, `ubuntu-latest`, no self-hosted runner, no `rclone`, typed failure;
 - new `.github/workflows/iris_vnext_fit8_quarantine_audit_self_hosted_v2.yml` is manual-dispatch only and read-only;
@@ -183,8 +187,8 @@ COURT_PASS
 
 ## Immediate next execution tranche
 
-1. finish this docs sync and keep its head green;
-2. fast-forward PR #116 review branch to the final green active head without force;
+1. keep this continuity repair green and fast-forward PR #116 to it without force;
+2. require the broad PR gate set to be green on that exact head;
 3. deliberately run the read-only self-hosted quarantine audit and inspect its forensic artifact;
 4. only after that, design a SHA-scoped candidate preparation writer; do not write the quarantined shared remote automatically;
 5. materialize Relation Truth V2 sidecars/manifest on exact admitted Fit8 inputs and audit per-family support/class/abstention;

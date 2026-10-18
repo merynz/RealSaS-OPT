@@ -20,7 +20,7 @@ def _function_source(path: Path, name: str) -> str:
     text = path.read_text(encoding="utf-8")
     tree = ast.parse(text)
     lines = text.splitlines()
-    for node in tree.body:
+    for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name:
             return "\n".join(lines[node.lineno - 1 : node.end_lineno])
     raise AssertionError(f"missing function {name} in {path}")
@@ -101,6 +101,8 @@ class V9FocusedRelationTrainingContractTests(unittest.TestCase):
         self.assertIn("PREREGISTRATION_BETAS_INVALID", text)
         self.assertIn("PREREGISTRATION_SCHEDULE_INCOMPLETE", text)
         self.assertIn("PREREGISTRATION_HELDOUT_PEEK_FORBIDDEN__EVAL_ONLY_AT_FINAL_STEP", text)
+        self.assertIn("BOUNDARY_MANIFEST_REQUIRED", text)
+        self.assertIn("SPLIT_SUPPORT_RECEIPT_REQUIRED", text)
 
     def test_scientific_court_uses_locked_thresholds_and_zero_step_baseline(self) -> None:
         text = COURT.read_text(encoding="utf-8")

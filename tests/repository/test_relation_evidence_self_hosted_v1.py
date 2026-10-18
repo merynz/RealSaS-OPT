@@ -21,18 +21,21 @@ def test_relation_evidence_lane_is_self_hosted_and_artifact_only():
 
 def test_relation_evidence_lane_cannot_start_training_or_write_remote():
     source = _source()
+    # The workflow intentionally contains a fail-closed grep for optimizer tokens,
+    # so those literals are expected in the guard itself. Ban executable training
+    # entrypoints and remote mutation verbs instead.
     forbidden = (
         'run_v9_focused_relation.py',
         'IRISVNextFocusedRelationTrainer',
-        'optimizer.step',
-        'torch.optim',
-        'AUTHORIZE_IRIS_V9_FOCUSED_RELATION_OPTIMIZER_STEPS',
+        "'train',",
+        '"train",',
         'rclone sync',
         'rclone move',
         'rclone delete',
         'rclone purge',
     )
     assert all(token not in source for token in forbidden)
+    assert "grep -R -nE 'optimizer\\.step|torch\\.optim|AUTHORIZE_IRIS_V9_FOCUSED_RELATION_OPTIMIZER_STEPS'" in source
 
 
 def test_relation_evidence_lane_uses_remote_only_as_read_source():

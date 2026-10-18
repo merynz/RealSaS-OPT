@@ -69,7 +69,7 @@ Do not rerun or reinterpret V8 merely to produce a prettier final number. Preser
 
 **Status: IMPLEMENTED**
 
-The quality contract now uses canonical V8 stage IDs and fails on unknown A/R/T/J aliases.
+The quality contract uses canonical V8 stage IDs and fails on unknown A/R/T/J aliases.
 
 ### A2. Runtime optimizer guard
 
@@ -81,15 +81,15 @@ Future V8-line execution validates both configured `scene_lr_scale` and actual `
 
 **Status: IMPLEMENTED / GREEN REQUIRED**
 
-The focused vNext workflow now runs on relevant pushes to the active post-V8 branch and includes post-V8 quality/boundary/trainer gates.
+The focused vNext workflow runs on relevant pushes to the active post-V8 branch and gates post-V8 quality, boundary, relation-truth-v2 and trainer contracts plus existing native regressions.
 
-No commit is promoted merely because files compile locally; GitHub Actions must be green.
+No commit is promoted merely because source exists; GitHub Actions must be green.
 
 ### A4. Review-line consolidation
 
 **Status: PENDING FINAL FAST-FORWARD**
 
-The historical vNext draft PR #116 is a direct ancestor of the post-V8 branch. Fast-forward the PR head to the active source head after this tranche, so repo navigation has one visible vNext review vehicle rather than diverging review narratives.
+The historical vNext draft PR #116 is a direct ancestor of the post-V8 branch. Fast-forward the PR head to the active source head after this tranche so repo navigation has one visible vNext review vehicle.
 
 ---
 
@@ -112,21 +112,46 @@ RESIDUAL_UNKNOWN
 
 `RESIDUAL_UNKNOWN` is abstention and emits no training target.
 
-### B2. Deprecate proxy cut truth
+### B2. Historical relation-truth audit
 
-**Status: REQUIRED NEXT SCHEMA**
+**Status: AUDITED / CORRECTED**
 
-Historical `graphics_truth_v1.py` defines adjacent-pair `cut = 1 - same_drawable`. This must remain readable for V8 provenance but may not remain the authoritative future cut target.
+Two V1-era producer paths are distinct:
 
-Next truth schema must provide:
+```text
+graphics_truth_v1.py helper:
+    cut = 1 - anonymous-owner-equivalence
 
-- explicit target-validity mask / abstention;
-- source/provenance for every positive cut/boundary target;
-- no automatic `cut = 1 - owner` promotion;
-- per-family support/class-balance statistics;
-- compatibility migration that leaves historical V8 shards immutable.
+active Fit8 shard builder used by V8:
+    relation_cut_probability = (owner differs) OR (material id differs)
+```
 
-### B3. Salvage measurable foundation producers
+Therefore V8 cut metrics are about an **owner-or-material boundary proxy**, not pure `1 - same_drawable`, and not authoritative drawable-cut truth.
+
+Audit: `docs/research/IRIS_VNEXT_RELATION_TRUTH_AUDIT_20261018.md`.
+
+### B3. Graphics Truth V2
+
+**Status: CONTRACT + LOSS + TESTS IMPLEMENTED / PRODUCER WIRING PENDING**
+
+New files:
+
+- `models/iris/vnext/graphics_truth_v2.py`
+- `models/iris/vnext/training_v2.py`
+- `tests/iris/test_graphics_truth_v2.py`
+
+Every scalar relation target now has an explicit future contract for:
+
+- value;
+- authority;
+- provenance;
+- `valid_for_training`.
+
+The V2 loss requires one validity mask per family/sample. Missing truth abstains and cannot silently become a negative target.
+
+Historical V8 shards stay immutable; V2 is a replacement path for new focused work, not a reinterpretation of old bytes.
+
+### B4. Salvage measurable foundation producers
 
 **Status: NEXT IMPLEMENTATION TRANCHE**
 
@@ -142,7 +167,7 @@ Port from `agent/unified-iris-stdgenpp-foundation` only source-defensible produc
 
 Do not import owner/amodal/presentation labels that the source cannot identify.
 
-Exit criterion: boundary/visibility corpus rows carry explicit authority class and provenance; support counts are auditable.
+Exit criterion: every new truth row carries authority/provenance and every family reports support/class-balance/abstention statistics.
 
 ---
 
@@ -172,7 +197,7 @@ Required actions:
 3. either implement an authorized bounded 2D support consumer or remove any claim that support-band data currently affects output;
 4. add a fragment-clustering behavioral court showing changed same/cut/boundary evidence changes compiled/runtime fragmentation as expected.
 
-Exit criterion: every learned Graphics signal is classified as `BEHAVIORALLY_USED`, `TRANSPORT_ONLY`, or `UNCONSUMED`; no ambiguous “consumed” status remains.
+Exit criterion: every learned Graphics signal is classified as `BEHAVIORALLY_USED`, `TRANSPORT_ONLY`, or `UNCONSUMED`.
 
 ---
 
@@ -245,7 +270,7 @@ Re-audit source:
 ### Adopt now as design discipline
 
 - stable shared carrier / constrained specialization;
-- preserve relevant geometric/raster supervision through representation transitions;
+- preserve relevant geometric/raster supervision through mesh refinement;
 - treat decomposition truth as a data-identifiability problem;
 - explicit thin-structure/topology courts;
 - specialist branches only where scale/task demands them.
@@ -265,7 +290,7 @@ Re-audit source:
 - anatomical branch names as RealSaS architecture;
 - hidden/amodal truth that current source assets cannot identify.
 
-Exact StdGEN++ training source is not publicly available in the StdGEN repository as of this state. Paper claims and public-code facts must remain separately labeled.
+Exact StdGEN++ training source is not publicly available in the StdGEN repository as of this state. Paper claims and public-code facts remain separately labeled.
 
 ---
 
@@ -286,17 +311,17 @@ If the bottleneck is head capacity, change the specialist first. Shared-carrier 
 
 ---
 
-## 9. Workstream H — future focused training
+## 9. Future focused training
 
 There is no authorization for another blind 12k curriculum run.
 
 Future experiments should be narrow and preregistered, for example:
 
-- boundary truth V2 + boundary-head optimization;
+- relation truth V2 producer + boundary-head optimization;
 - relation sampling/class-balance repair;
 - topology court-driven regularization;
 - coarse-to-fine extraction ablation;
-- specialist adapter ablation if capacity court becomes eligible.
+- specialist adapter ablation if a capacity court becomes eligible.
 
 Each experiment must state before running:
 
@@ -309,28 +334,29 @@ Each experiment must state before running:
 - pass/fail gate;
 - non-regression gates;
 - exact parent checkpoint;
-- what result would falsify the intervention.
+- result that would falsify the intervention.
 
 ---
 
 ## 10. Execution order
 
 ```text
-1. carrier policy / canonical stage IDs / runtime optimizer guard      [DONE]
-2. focused post-V8 branch CI                                           [DONE; GREEN REQUIRED]
-3. StdGEN++ / StdGEN / InstantMesh re-audit                            [DONE; dossier maintained]
-4. decision/falsification ledger                                       [DONE; maintain continuously]
-5. Graphics source-consumption lineage                                 [DONE initial audit]
-6. update root navigation/state/agent docs                              [IN PROGRESS]
-7. consolidate draft PR #116 onto current source head                   [NEXT]
-8. salvage identifiable foundation evidence producers                  [NEXT]
-9. replace proxy cut truth with validity-aware/abstaining truth V2     [NEXT]
-10. complete attachment/support behavioral ownership audit              [NEXT]
-11. independent TESSA topology court                                   [NEXT]
-12. convergence telemetry + best-held-out checkpoint machinery         [NEXT]
-13. preregister metric-specific gates                                  [AFTER 8–12]
-14. focused optimization experiments                                   [AFTER COURTS]
-15. capacity/extraction changes only from court evidence                [CONDITIONAL]
+1. carrier policy / canonical stage IDs / runtime optimizer guard       [DONE]
+2. focused post-V8 branch CI                                            [DONE; GREEN REQUIRED]
+3. StdGEN++ / StdGEN / InstantMesh re-audit                             [DONE; dossier maintained]
+4. decision/falsification ledger                                        [DONE; maintain continuously]
+5. Graphics source-consumption lineage                                  [DONE initial audit]
+6. root navigation/state/agent docs                                     [DONE; maintain]
+7. relation producer semantics correction + truth V2 contract           [DONE]
+8. consolidate draft PR #116 onto current source head                    [NEXT]
+9. salvage identifiable foundation evidence producers                   [NEXT]
+10. wire relation truth V2 producer + corpus statistics                  [NEXT]
+11. complete attachment/support behavioral ownership audit               [NEXT]
+12. independent TESSA topology court                                    [NEXT]
+13. convergence telemetry + best-held-out checkpoint machinery          [NEXT]
+14. preregister metric-specific gates                                   [AFTER 9–13]
+15. focused optimization experiments                                    [AFTER COURTS]
+16. capacity/extraction changes only from court evidence                 [CONDITIONAL]
 ```
 
 No merge to `main` until CI is green, PR state matches these files, and the decision ledger has no unresolved contradiction with code behavior.

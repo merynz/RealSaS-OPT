@@ -2,7 +2,7 @@
 
 Status: **CURRENT CORRECTION / REPLACEMENT AUTHORITY FOR RELATION-TRUTH INTERPRETATION**
 
-This note corrects an over-broad shorthand that appeared during the first post-V8 audit. There are **two distinct historical relation-truth producer paths** and they must not be conflated.
+This note records both historical producer semantics and a newly confirmed conditioning mismatch in the V1 relation-boundary path.
 
 ## 1. `models/iris/vnext/graphics_truth_v1.py`
 
@@ -13,45 +13,91 @@ same_drawable_affinity = 1 iff anonymous_drawable_id[a] == anonymous_drawable_id
 cut_probability        = 1 - same_drawable_affinity
 ```
 
-Within this helper, `cut` is therefore a tautological complement of the anonymous owner-equivalence proxy. It is not independent causal cut truth.
+Within this helper, `cut` is a tautological complement of anonymous owner-equivalence. It is not independent causal cut truth.
 
-## 2. Active Fit8 shard builder used by the V8 lineage
+## 2. Fit8 shard builder used by the V8 lineage
 
 `tools/iris_vnext/build_fit8_vnext_shards_v1.py::_build_view_banks`, inherited by the active v2 builder for relation rows, uses a different target construction.
 
-For two-hit rows it computes:
+For two-hit rows:
 
 ```text
 same = owner_a == owner_b
-material_boundary = (owner_a != owner_b) OR (material_id_a != material_id_b)
-relation_cut_probability = material_boundary
+cut proxy = (owner_a != owner_b) OR (material_id_a != material_id_b)
 ```
 
-For adjacency fallback rows it similarly uses:
-
-```text
-boundary = (owner_a != owner_b) OR (material_id_a != material_id_b)
-relation_cut_probability = boundary
-```
+For adjacency fallback rows it uses the same owner-or-material boundary proxy.
 
 Therefore **V8 cut supervision must not be described as simply `1 - same_drawable`**.
 
-However the active target is still not clean causal cut truth. It mixes at least:
+The active target is still not clean causal drawable-cut truth because it mixes:
 
 - anonymous source-object ownership change;
 - authored material-region change.
 
-A material boundary is not necessarily a drawable cut, and a source object boundary is not automatically presentation ownership.
+A material boundary is not necessarily a drawable cut; a source-object boundary is not automatically presentation ownership.
 
-## 3. Correct interpretation of V8 relation results
+## 3. Newly confirmed conditioning mismatch in V1 relation boundaries
 
-The V8 `cut` metric demonstrates decodability of the historical **owner-or-material boundary proxy** from sealed H. It does not establish that IRIS learned authoritative drawable cuts.
+The V8 shard builder also derives relation boundary targets from the selected **render view**.
 
-Likewise `same_drawable` under the current teacher should be interpreted only within the authority of the anonymous owner proxy that produced it.
+`_boundary_maps_v2()` computes local 3×3 raster evidence:
 
-This strengthens—not weakens—the case for a validity-aware truth replacement.
+```text
+alpha boundary      = local alpha range > 0.20
+appearance boundary = max local RGB distance > 0.20
+```
 
-## 4. Replacement contract
+For two-hit relation rows, `_build_view_banks()` samples these flags at the current view pixel and writes them into:
+
+```text
+relation_alpha_boundary_probability
+relation_appearance_boundary_probability
+```
+
+Material boundary is also OR-ed into relation appearance-boundary truth.
+
+However `GraphicsRelationHeadV1.static_relations(feature_a, feature_b)` predicts:
+
+```text
+same_drawable_affinity
+cut_probability
+attachment_affinity
+alpha_boundary_probability
+appearance_boundary_probability
+```
+
+without any camera/view input.
+
+Only `GraphicsRelationHeadV1.view_relations(...)` receives camera features, and that branch predicts front/occlusion/visibility.
+
+`IRISVNextFit8TrainerV1.one_step()` confirms the mismatch: static boundary predictions are merged with camera-conditioned view predictions, then compared against relation targets sampled from one specific current render view.
+
+### Consequence
+
+A projected alpha or RGB-neighborhood boundary is not generally a view-invariant function of `(H_a, H_b)` alone. The same local 3D relation can project differently under another camera because silhouette, alpha and nearby image structure change.
+
+Therefore relation-boundary residuals cannot be treated purely as an LR/capacity problem until this target/conditioning mismatch is removed.
+
+This is particularly relevant to V8's pattern:
+
+- front / occlusion / visibility: very low residuals;
+- cut / alpha boundary / appearance boundary: materially worse.
+
+This does **not** fully explain appearance-head boundary debt, because `AppearanceEvidenceHeadV1` is already camera-conditioned. It does, however, invalidate the assumption that the V1 relation static-boundary branch was correctly conditioned for its raster-derived targets.
+
+## 4. Correct interpretation of V8 relation results
+
+V8 `cut` demonstrates decodability of the historical owner-or-material boundary proxy from sealed H.
+
+V8 relation alpha/appearance-boundary residuals combine at least two debts:
+
+1. target causality/authority debt;
+2. for raster-derived components, view-conditioning mismatch in the V1 relation architecture.
+
+`same_drawable` remains interpretable only within the anonymous-owner proxy authority of the historical source.
+
+## 5. Replacement contracts already landed
 
 New source:
 
@@ -61,18 +107,18 @@ New source:
 
 V2 requires every scalar relation target to carry:
 
-- probability value;
+- value;
 - evidence authority;
 - provenance;
 - `valid_for_training`.
 
-Unavailable targets abstain. Diagnostic-only evidence cannot be marked trainable. The V2 relation loss requires an explicit validity mask per family and refuses to turn missing truth into negative supervision.
+Unavailable targets abstain. Diagnostic-only evidence cannot be trainable. The V2 relation loss consumes an explicit validity mask per family/sample and never converts missing truth into a negative target.
 
-Historical V1/V8 shards remain immutable provenance. No migration rewrites their meaning.
+Historical V1/V8 shards remain immutable provenance.
 
-## 5. Boundary Causality relationship
+## 6. Boundary Causality relationship
 
-`BoundaryCausalityTeacherV1` supplies provable boundary **causes** such as:
+`BoundaryCausalityTeacherV1` supplies provable boundary **causes**:
 
 - material boundary;
 - alpha boundary;
@@ -81,14 +127,40 @@ Historical V1/V8 shards remain immutable provenance. No migration rewrites their
 - source primitive/component seam;
 - residual unknown.
 
-These causes do not automatically imply `drawable cut`.
+These causes do not automatically imply drawable cut.
 
-Future cut truth is valid only when an independent source contract actually identifies the structural relation being trained. Otherwise `cut` must abstain even if another kind of boundary is known.
+Future target design must also separate **view-invariant structural causes** from **view-conditioned projected evidence**.
 
-## 6. Current decision
+Recommended decomposition for the next relation/graphics contract:
 
-- preserve historical targets exactly for V8 interpretation;
-- stop describing the active V8 cut target as pure `1 - same`;
-- classify both historical producers as proxy truth with different semantics;
-- use Graphics Truth V2 for all new relation-target work;
-- do not connect V2 to a new training run until its concrete producer supplies explicit provenance/validity statistics and held-out courts.
+```text
+static / structural pair evidence
+    same-component / qualified ownership when identifiable
+    structural cut when identifiable
+    authored attachment/contact
+    material/geometric boundary causes
+
+view-conditioned pair evidence
+    front
+    occlusion
+    visibility
+    projected alpha boundary
+    projected appearance boundary
+```
+
+The existing view-conditioned `AppearanceEvidenceHeadV1` remains a separate per-point graphics evidence path and should be evaluated independently.
+
+## 7. Next implementation rule
+
+Do **not** modify historical `GraphicsRelationHeadV1` in place; it is part of V8 provenance.
+
+Before focused relation retraining:
+
+1. populate Graphics Truth V2 with explicit authority/provenance/validity;
+2. split static structural boundary truth from view-conditioned projected boundary truth;
+3. create a versioned relation-head/trainer path whose view-conditioned outputs receive camera features;
+4. publish support/class-balance/abstention statistics;
+5. preregister held-out courts;
+6. only then tune LR/schedule/capacity.
+
+This ordering prevents an optimization experiment from compensating for a supervision-contract error.

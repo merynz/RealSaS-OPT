@@ -4,6 +4,12 @@
   "status": "SOURCE_AUDITED_NOT_SCIENTIFIC_PASS",
   "scope": "post-V8 role-free graphics evidence from IRIS heads through Compiler, RSS and native reference runtime",
   "authority_note": "This is a source-lineage audit. It proves implemented consumption paths and cited behavioral tests, not teacher correctness or Fit8 scientific quality.",
+  "relation_truth_note": {
+    "graphics_truth_v1_helper": "adjacent helper uses cut = 1 - anonymous-owner-equivalence",
+    "v8_fit8_shard_builder": "relation_cut_probability uses (owner differs) OR (material id differs)",
+    "interpretation": "V8 cut residual measures decodability of an owner-or-material boundary proxy, not authoritative drawable-cut truth",
+    "replacement": "Graphics Truth V2 requires explicit authority/provenance/validity and can abstain"
+  },
   "signals": {
     "same_drawable_affinity": {
       "defined": true,
@@ -16,8 +22,8 @@
       "runtime_materialization": "face_fragment_index and fragment_ids in RuntimeGraphicsV1 -> graphics.bin",
       "behavioral_path": "fragment ownership changes visibility domain and explicit precedence domain used by native graphics runtime",
       "limitations": [
-        "current training target depends on anonymous drawable ids whose authority is under audit",
-        "low V8 loss is not proof of correct real-world drawable ownership"
+        "historical Fit8 target uses anonymous source-object ownership as the same-drawable proxy",
+        "low V8 loss is decodability evidence, not proof of correct real-world drawable ownership"
       ]
     },
     "cut_probability": {
@@ -32,8 +38,9 @@
       "behavioral_path": "fragment ownership changes visibility/order behavior",
       "truth_status": "TRUTH_DEBT",
       "limitations": [
-        "graphics_truth_v1 currently creates cut_probability as 1 - same_drawable_affinity for adjacent faces",
-        "this is not independent causal cut truth and must be replaced by validity-aware/abstaining supervision"
+        "the helper graphics_truth_v1 path uses cut=1-same, but the Fit8 builder used by V8 instead writes owner-difference OR material-difference",
+        "neither historical target is independently identified causal drawable-cut truth",
+        "new work must use explicit validity/provenance or abstain"
       ]
     },
     "alpha_boundary_probability": {
@@ -135,7 +142,7 @@
     }
   ],
   "next_actions": [
-    "replace cut=1-same proxy supervision with validity-aware authoritative/abstaining truth",
+    "wire Graphics Truth V2 producers with authority/provenance/validity and corpus statistics",
     "add behavior court for fragment changes caused by same/cut/boundary decisions",
     "resolve attachment runtime ownership",
     "resolve or remove support-band behavioral claims",
